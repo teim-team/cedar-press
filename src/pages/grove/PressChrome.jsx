@@ -11,6 +11,9 @@ import { Link, NavLink } from "react-router";
  * The reader's initials, from the address. Two letters where the address
  * has a separator to take them from, one otherwise.
  */
+/** The brand mark, served from public/. One constant so both lockups agree. */
+const MARK = "/brand/lumecon-logo-mark-transparent.png";
+
 function initialsOf(email) {
   const local = String(email ?? "").split("@")[0];
   const parts = local.split(/[._-]+/).filter(Boolean);
@@ -54,13 +57,24 @@ export function PressMast({ user, onSignOut, section = null }) {
     <a className="cp-skip" href="#cp-main">Skip to content</a>
     <header className="cp-mast">
       <div className="cp-mast__top">
-        {/* The wordmark alone until the real Cedar Press logo lands: the
-            ripple in public/ is one element of the Lumecon logo, not the
-            service's mark, and half a logo is worse than none. */}
+        {/* The mark and the wordmark as one lockup. Cedar Press is built by
+            Lumecon and carries Lumecon's mark, the same way the platform
+            does — there is no separate Cedar Press mark, and inventing one
+            would put a second identity on a product that has one.
+
+            aria-hidden with the wordmark beside it: the words are the
+            accessible name, and a screen reader announcing an image and then
+            the same words is a stutter. */}
         {home ? (
-          <span className="cp-mast__word">CEDAR PRESS</span>
+          <span className="cp-mast__lockup">
+            <img className="cp-mast__mark" src={MARK} alt="" aria-hidden="true" />
+            <span className="cp-mast__word">CEDAR PRESS</span>
+          </span>
         ) : (
-          <Link className="cp-mast__word" to={PRESS_PATH}>CEDAR PRESS</Link>
+          <Link className="cp-mast__lockup" to={PRESS_PATH}>
+            <img className="cp-mast__mark" src={MARK} alt="" aria-hidden="true" />
+            <span className="cp-mast__word">CEDAR PRESS</span>
+          </Link>
         )}
         {/* Who made it and who sells it, said plainly. "A × partnership"
             left both questions open. */}

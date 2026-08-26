@@ -19,6 +19,12 @@ import { readFileSync, writeFileSync } from "node:fs";
 const root = new URL("..", import.meta.url);
 const out = fileURLToPath(new URL("public/cedar-press-og-1200x630.png", root));
 const font = readFileSync(fileURLToPath(new URL("public/fonts/inter-800.woff2", root)));
+// The mark itself, byte-identical to the one lumecon.ai ships. Drawing an
+// approximation of it was the earlier mistake: the rings are asymmetric and
+// the gold arc and dot are part of the logo, not decoration around it.
+const mark = readFileSync(
+  fileURLToPath(new URL("public/brand/lumecon-logo-mark-transparent.png", root)),
+);
 
 // Sampled from lumecon.ai's own card rather than guessed, so the two sit
 // beside each other in a thread without one looking like a copy of the other.
@@ -35,11 +41,17 @@ const html = `<!doctype html><meta charset="utf-8"><style>
     position: relative; width: 1200px; height: 630px; overflow: hidden;
     background: linear-gradient(135deg, ${FROM} 0%, ${TO} 100%);
   }
-  /* Topographic rings off the top-right corner, the same motif the site draws
-     behind its teal bands. Stroke only and barely there: it is depth behind a
-     flat field of colour, not a picture of anything. */
-  .rings { position: absolute; inset: 0; }
-  .rings path { fill: none; stroke: #fff; stroke-opacity: 0.17; stroke-width: 7; }
+  /* The real mark, off the top-right corner. Rendered white rather than in
+     its own dark green and gold, which disappear against teal — the same
+     choice lumecon.ai's card makes, and the reason its rings are white there
+     too. brightness(0) invert(1) repaints every opaque pixel white and leaves
+     the alpha channel alone, so the geometry is the logo's own. */
+  .mark {
+    position: absolute; top: -392px; right: -404px;
+    width: 880px; height: 880px;
+    filter: brightness(0) invert(1);
+    opacity: 0.17;
+  }
   .word {
     position: absolute; left: 158px; top: 50%; transform: translateY(-50%);
     font-family: Inter, sans-serif; font-weight: 800; font-size: 116px;
@@ -48,12 +60,7 @@ const html = `<!doctype html><meta charset="utf-8"><style>
   }
 </style>
 <div class="card">
-  <svg class="rings" viewBox="0 0 1200 630" preserveAspectRatio="none">
-    <path d="M1247 -40 C 1120 20, 1006 96, 964 210 C 922 324, 986 404, 1104 430 C 1198 451, 1268 430, 1310 384"/>
-    <path d="M1305 -96 C 1130 -30, 960 78, 902 226 C 844 374, 936 484, 1096 512 C 1216 533, 1312 502, 1366 448"/>
-    <path d="M1360 -150 C 1140 -78, 918 60, 842 244 C 766 428, 884 566, 1088 596 C 1236 618, 1358 578, 1424 512"/>
-    <path d="M1196 12 C 1104 62, 1030 128, 1004 214 C 978 300, 1030 358, 1122 374"/>
-  </svg>
+  <img class="mark" src="data:image/png;base64,${mark.toString("base64")}" alt="">
   <div class="word">CEDAR PRESS</div>
 </div>`;
 
