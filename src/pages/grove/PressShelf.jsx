@@ -39,6 +39,11 @@
 
 import { useEffect, useRef, useState } from "react";
 
+// Whether this device points with a finger: no hover means the point-to-read
+// affordance below becomes tap-to-read, and a tile's download moves one tap
+// further so nobody takes a file before reading what it is.
+const COARSE = typeof window !== "undefined" && !!window.matchMedia?.("(hover: none)").matches;
+
 import { appUrl } from "../../features/grove/appLink.js";
 import { canOpenDataset, historyFor } from "../../features/grove/pressAccess";
 import { downloadAll, downloadCsv, hasReleaseFile } from "../../features/grove/pressDownload";
@@ -91,14 +96,18 @@ function useReveal() {
   return [ref, seen];
 }
 
-function Badge({ entry, open, onEnter, onLeave, active, index, onLocked }) {
+function Badge({ entry, open, onEnter, onLeave, active, index, onLocked, onOpen }) {
   const className = `cp-badge${active ? " is-on" : ""}${open ? " cp-badge--act" : " cp-badge--locked"}`;
-  const watch = {
-    onMouseEnter: onEnter,
-    onMouseLeave: onLeave,
-    onFocus: onEnter,
-    onBlur: onLeave,
-  };
+  // On touch the selection is sticky: clearing on blur would unmount the
+  // read panel's download button under the very tap that aims for it.
+  const watch = COARSE
+    ? { onFocus: onEnter }
+    : {
+        onMouseEnter: onEnter,
+        onMouseLeave: onLeave,
+        onFocus: onEnter,
+        onBlur: onLeave,
+      };
   const inner = (
     <>
       <span className="cp-badge__mark" aria-hidden="true">{COLLECTION_ICONS[entry.id]}</span>
@@ -130,7 +139,7 @@ function Badge({ entry, open, onEnter, onLeave, active, index, onLocked }) {
   const released = hasReleaseFile(entry);
   return (
     <li style={style}>
-      <button type="button" className={className} onClick={() => downloadCsv(entry)} {...watch}>
+      <button type="button" className={className} onClick={() => onOpen(entry)} {...watch}>
         {inner}
         <span className="cp-badge__cue" aria-hidden="true">&#8595;</span>
         <span className="cp-badge__sr">
@@ -182,10 +191,18 @@ function Detail({ entry, user, owned }) {
         {freshnessLine(entry.id) ||
           (owned
             ? hasReleaseFile(entry)
-              ? "Click to download"
-              : "Release pending; click for the collection description"
+              ? COARSE ? "Tap to download" : "Click to download"
+              : `Release pending; ${COARSE ? "tap" : "click"} for the collection description`
             : "Locked")}
       </p>
+      {/* On touch the tile's first tap lands here, so the panel carries the
+          action itself rather than sending the finger back to the grid. */}
+      {COARSE && owned ? (
+        <button type="button" className="cp-read__act" onClick={() => downloadCsv(entry)}>
+          <span aria-hidden="true">&#8595;</span>{" "}
+          {hasReleaseFile(entry) ? `Download ${entry.short || entry.name}` : "Download the description"}
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -216,6 +233,22 @@ function Band({ tier, user, index }) {
     readRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     setPulse(true);
     window.setTimeout(() => setPulse(false), 900);
+  };
+
+  // On a coarse pointer the first tap reads, the second (or the panel's own
+  // button) downloads: hover cannot introduce the collection first, so the
+  // tap that would have done both walks the reader to the panel instead.
+  const [armed, setArmed] = useState(null);
+  const openTile = (entry) => {
+    if (COARSE && armed !== entry.id) {
+      setArmed(entry.id);
+      setHovered(entry.id);
+      readRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      setPulse(true);
+      window.setTimeout(() => setPulse(false), 900);
+      return;
+    }
+    downloadCsv(entry);
   };
 
   return (
@@ -260,7 +293,7 @@ function Band({ tier, user, index }) {
         <ul
           className="cp-band__grid"
           style={{ "--cols": Math.ceil(Math.sqrt(entries.length)) }}
-          onMouseLeave={() => setHovered(null)}
+          onMouseLeave={COARSE ? undefined : () => setHovered(null)}
         >
           {entries.map((entry, position) => (
             <Badge
@@ -272,6 +305,7 @@ function Band({ tier, user, index }) {
               onEnter={() => setHovered(entry.id)}
               onLeave={() => setHovered(null)}
               onLocked={pointAtUpgrade}
+              onOpen={openTile}
             />
           ))}
         </ul>
@@ -295,8 +329,14 @@ function Band({ tier, user, index }) {
                 {owned ? "Your collections" : <>Inside <TierName name={tier.name} /></>}
               </span>
               <p className="cp-read__hint">
-                Point at a collection to see what it holds.
-                {owned ? " Open it to explore the data and take the release." : ""}
+                {COARSE
+                  ? "Tap a collection to see what it holds."
+                  : "Point at a collection to see what it holds."}
+                {owned
+                  ? COARSE
+                    ? " Its download is then one tap away."
+                    : " Open it to explore the data and take the release."
+                  : ""}
               </p>
             </div>
           )}

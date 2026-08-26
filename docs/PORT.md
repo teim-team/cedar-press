@@ -29,6 +29,23 @@ seams below — when the app's press surface moves, re-port and re-apply these.
   signed-in address (the preview account is shared; the app's rail owns this
   there).
 
+## Mobile-specific behavior (standalone additions)
+
+Phones are a first-class surface here, not a shrunk desktop; these diverge
+from the app's press branch on purpose and live in `press.css` +
+`PressShelf.jsx`:
+
+- The gate flows and scrolls under 880px (the app's viewport-fixed split
+  clipped the press hero), opens on the sign-in panel with its own wordmark,
+  and renders the proof pillars as compact rows instead of stacked squares.
+- The shelf is tap-native on coarse pointers: the first tap on a tile opens
+  the read panel (scrolled into view) instead of downloading, the panel
+  carries its own Download button, selection is sticky, and the hint copy
+  says "Tap" instead of "Point".
+- Justified body copy reads ragged-right under 640px (justification tears
+  into rivers at phone measures) and the Ask Cedar launcher travels light
+  there (no context line, tighter pad).
+
 ## Not ported
 
 The rest of the app: the grove workbench, python package, server, and every

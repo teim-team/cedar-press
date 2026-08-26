@@ -149,6 +149,13 @@
  * the marketing site use. A floating chat control is a bug, not a style. */
 .teim-rd .cedar-widget { position: fixed; right: 2rem; bottom: env(safe-area-inset-bottom, 0px); z-index: 120; }
 .teim-rd .cedar-widget__launcher { display: inline-flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1.25rem; border: 1px solid var(--teal-line); border-bottom: none; border-radius: 12px 12px 0 0; background: var(--bg); color: var(--ink); box-shadow: 0 8px 24px rgba(10,15,38,0.1); cursor: pointer; text-decoration: none; transition: border-color 0.2s cubic-bezier(0.2, 0, 0, 1), background 0.2s cubic-bezier(0.2, 0, 0, 1); }
+/* On phones the launcher floats over reading space, so it travels light:
+ * no context line, tighter pad, tucked into the corner. */
+@media (max-width: 640px) {
+  .teim-rd .cedar-widget { right: 0.9rem; }
+  .teim-rd .cedar-widget__launcher { padding: 0.55rem 0.9rem; gap: 0.5rem; }
+  .teim-rd .cedar-widget__launcher-context { display: none; }
+}
 .teim-rd .cedar-widget__launcher:hover { border-color: var(--teal); background: var(--teal-tint); }
 .teim-rd .cedar-widget__launcher-copy { display: flex; flex-direction: column; text-align: left; }
 .teim-rd .cedar-widget__launcher-label { font-family: var(--sans); font-size: 0.95rem; font-weight: 600; line-height: 1.2; color: var(--ink); }
@@ -711,6 +718,10 @@
 .teim-rd .cp-band--fill .cp-band__hint { color: #fff; }
 .teim-rd .cp-band__all { grid-column: 1; grid-row: 3; margin: 1.1rem 0 0; }
 .teim-rd .cp-band__allbtn { display: inline-flex; align-items: center; gap: 0.45rem; min-height: 44px; padding: 0.55rem 1.1rem; border: 1px solid var(--teal); border-radius: 0; background: var(--teal-tint); color: var(--dteal); font: inherit; font-size: 0.92rem; font-weight: 700; cursor: pointer; }
+/* The read panel's own download, for touch: the first tap on a tile lands
+ * the reader here, and this button is the second tap. Same clothes as the
+ * download-all button so the shelf keeps one action language. */
+.teim-rd .cp-read__act { display: inline-flex; align-items: center; gap: 0.45rem; min-height: 44px; margin-top: 0.9rem; padding: 0.55rem 1.1rem; border: 1px solid var(--teal); border-radius: 0; background: var(--teal-tint); color: var(--dteal); font: inherit; font-size: 0.92rem; font-weight: 700; cursor: pointer; }
 .teim-rd .cp-band__allbtn:hover { background: var(--dteal); border-color: var(--dteal); color: #fff; }
 .teim-rd .cp-band--fill .cp-band__allbtn { background: transparent; border-color: #fff; color: #fff; }
 .teim-rd .cp-band--fill .cp-band__allbtn:hover { background: #fff; border-color: #fff; color: var(--dteal); }
@@ -1137,6 +1148,20 @@
  * and both are set to be read as an aside rather than as body. */
 .teim-rd .cp-ar__body .cp-ar__pull,
 .teim-rd .cp-ar__body .cp-ar__figsrc { text-align: left; hyphens: manual; }
+/* Justification needs a wide measure; on a phone it tears the lines into
+ * rivers, so narrow screens read ragged-right like every phone page. The
+ * hyphens stay: they help a ragged edge too. */
+@media (max-width: 640px) {
+  .teim-rd .cp-ar__body p,
+  .teim-rd .cp-hero p,
+  .teim-rd .cp-link__body,
+  .teim-rd .cp-msec__lede,
+  .teim-rd .cp-mh__sub,
+  .teim-rd .cp-nh__sub,
+  .teim-rd .cp-gt__body,
+  .teim-rd .cp-close__body,
+  .teim-rd .cp-ar__dek { text-align: left; }
+}
 
 /* ── A hosted article ─────────────────────────────────────────────────────
  * Text at a reading measure with a rail beside it. The rail is the reason to
