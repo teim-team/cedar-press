@@ -18,20 +18,28 @@
  * already activated should not be asked for a code they have spent.
  */
 
+import { isConnected } from "../../config.js";
+
 const SEEN_KEY = "lumecon.press.hasAccount";
 
 /**
  * Whether the activation flow may be offered at all.
  *
- * The client contract (POST /auth/press/validate, POST /auth/press/activate)
- * has no server handlers yet, so a reachable activation form would walk every
- * subscriber to a 404 after they typed their code. Until the routes exist the
- * gate offers sign-in only, and provisioning stays where it is today: accounts
- * are created for subscribers (scripts/invite-account.js and the seed
- * scripts), with Tribal Business News owning issuance. Flip this to true in
- * the commit that lands the server routes, and nowhere else.
+ * The routes exist now (POST /press/activation/validate, POST
+ * /press/activation), so this is no longer a constant somebody has to
+ * remember to flip. It is whether this deployment can reach them.
+ *
+ * That distinction matters because the two deployments are real. A connected
+ * build talks to the API and can validate a code; the standalone build —
+ * which is what cedarpress.ai serves today, a static site with no backend —
+ * cannot. Offering a code field there would take a subscriber's code, fail
+ * every call, and tell them their membership does not work. Sign-in only is
+ * the honest surface for a build with nothing behind it.
+ *
+ * Deliberately not a check that "the API said activation is on". A deployment
+ * that cannot make the call cannot ask either.
  */
-export const PRESS_ACTIVATION_AVAILABLE = false;
+export const PRESS_ACTIVATION_AVAILABLE = isConnected();
 
 export const PRESS_STEP = Object.freeze({
   /** Step one of activation: the access code and an email address. */

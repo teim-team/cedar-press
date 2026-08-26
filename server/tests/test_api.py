@@ -18,9 +18,24 @@ os.environ["CEDAR_PRESS_ACCOUNTS"] = json.dumps(
         "pro@example.org": {"password": "correct-horse", "tier": "press_pro"},
     }
 )
+os.environ["CEDAR_PRESS_CODES"] = json.dumps(
+    {
+        "TBN4-9K2M-X7QD": {"email": "new@example.org", "tier": "press"},
+        "TBN4-9K2M-X7QE": {"email": "upgrade@example.org", "tier": "press_pro"},
+        "TBN4-0000-EXPD": {
+            "email": "late@example.org",
+            "tier": "press",
+            "expires": "2020-01-01",
+        },
+        # Issued to an address that already has an account.
+        "TBN4-0000-DUPE": {"email": "reader@example.org", "tier": "press"},
+    }
+)
 
 from fastapi.testclient import TestClient  # noqa: E402
 
+from cedar_press import codes  # noqa: E402
+from cedar_press import session as session_module  # noqa: E402
 from cedar_press.app import app  # noqa: E402
 
 client = TestClient(app)
@@ -45,7 +60,11 @@ class TestSession(unittest.TestCase):
     def test_a_wrong_password_is_refused(self) -> None:
         response = sign_in(password="wrong")
         self.assertEqual(response.status_code, 401)
-        self.assertEqual(response.json()["detail"]["code"], "INVALID_CREDENTIALS")
+        # Flat, not nested under `detail`. This asserted the nested shape and
+        # so pinned the bug in place: the client reads `code` off the top
+        # level, so every worded refusal was reaching the reader as
+        # "Request failed (401)." and the test called that correct.
+        self.assertEqual(response.json()["code"], "INVALID_CREDENTIALS")
 
     def test_an_unknown_address_is_refused(self) -> None:
         self.assertEqual(sign_in(email="nobody@example.org").status_code, 401)
@@ -107,6 +126,168 @@ class TestEntitlement(unittest.TestCase):
     def test_a_download_is_refused_without_a_session(self) -> None:
         client.cookies.clear()
         self.assertEqual(client.get("/press/collections/deals/download").status_code, 401)
+
+
+class TestErrorShape(unittest.TestCase):
+    """`{code, message}` at the top level, which is what `src/api.js` reads.
+
+    FastAPI wraps `detail`, so without the handler every worded refusal
+    arrives at the reader as "Request failed (401)."
+    """
+
+    def test_a_refusal_carries_its_code_at_the_top_level(self) -> None:
+        response = client.post(
+            "/auth/login", json={"email": "reader@example.org", "password": "wrong"}
+        )
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json()["code"], "INVALID_CREDENTIALS")
+        self.assertIn("Cedar Press confirmation", response.json()["message"])
+
+    def test_an_ordinary_404_is_left_alone(self) -> None:
+        # Only dict details with a code are flattened; everything else keeps
+        # FastAPI's shape so nothing else in the stack has to care.
+        response = client.get("/press/articles/nope")
+        self.assertEqual(response.status_code, 404)
+
+
+class TestActivation(unittest.TestCase):
+    """The way in: a code from Tribal Business News, then an account."""
+
+    def setUp(self) -> None:
+        client.cookies.clear()
+        codes.reset_for_tests()
+        session_module.forget_activated_for_tests()
+
+    def test_a_good_code_validates_without_creating_anything(self) -> None:
+        response = client.post(
+            "/press/activation/validate",
+            json={"code": "TBN4-9K2M-X7QD", "email": "new@example.org"},
+        )
+        self.assertEqual(response.status_code, 204)
+        # Nothing was created, so the code is still spendable and the address
+        # still has no account.
+        self.assertFalse(session_module.account_exists("new@example.org"))
+
+    def test_hyphens_and_case_are_the_readers_problem_not_theirs(self) -> None:
+        response = client.post(
+            "/press/activation/validate",
+            json={"code": "  tbn49k2m x7qd ", "email": "New@Example.org"},
+        )
+        self.assertEqual(response.status_code, 204)
+
+    def test_an_unissued_code_is_refused(self) -> None:
+        response = client.post(
+            "/press/activation/validate",
+            json={"code": "TBN4-0000-0000", "email": "new@example.org"},
+        )
+        self.assertEqual(response.json()["code"], "PRESS_CODE_INVALID")
+
+    def test_a_code_issued_to_another_address_is_refused(self) -> None:
+        response = client.post(
+            "/press/activation/validate",
+            json={"code": "TBN4-9K2M-X7QD", "email": "someone@example.org"},
+        )
+        self.assertEqual(response.json()["code"], "PRESS_CODE_EMAIL_MISMATCH")
+
+    def test_an_expired_code_says_so(self) -> None:
+        response = client.post(
+            "/press/activation/validate",
+            json={"code": "TBN4-0000-EXPD", "email": "late@example.org"},
+        )
+        self.assertEqual(response.json()["code"], "PRESS_CODE_EXPIRED")
+
+    def test_an_address_that_already_has_an_account_is_sent_to_sign_in(self) -> None:
+        response = client.post(
+            "/press/activation/validate",
+            json={"code": "TBN4-0000-DUPE", "email": "reader@example.org"},
+        )
+        self.assertEqual(response.json()["code"], "EMAIL_IN_USE")
+
+    def test_activation_creates_the_account_and_signs_them_in(self) -> None:
+        response = client.post(
+            "/press/activation",
+            json={
+                "code": "TBN4-9K2M-X7QD",
+                "email": "new@example.org",
+                "password": "a-long-enough-password",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["email"], "new@example.org")
+        # Signed in already: the client calls refreshSession() straight after.
+        self.assertEqual(client.get("/me").status_code, 200)
+
+    def test_the_tier_comes_off_the_code_not_the_request(self) -> None:
+        client.post(
+            "/press/activation",
+            json={
+                "code": "TBN4-9K2M-X7QE",
+                "email": "upgrade@example.org",
+                "password": "a-long-enough-password",
+            },
+        )
+        self.assertEqual(client.get("/me").json()["workspace_tier"], "press_pro")
+
+    def test_a_code_activates_once(self) -> None:
+        first = client.post(
+            "/press/activation",
+            json={
+                "code": "TBN4-9K2M-X7QD",
+                "email": "new@example.org",
+                "password": "a-long-enough-password",
+            },
+        )
+        self.assertEqual(first.status_code, 200)
+        second = client.post(
+            "/press/activation",
+            json={
+                "code": "TBN4-9K2M-X7QD",
+                "email": "new@example.org",
+                "password": "another-long-password",
+            },
+        )
+        self.assertEqual(second.json()["code"], "PRESS_CODE_USED")
+
+    def test_the_new_account_can_sign_in_afterwards(self) -> None:
+        client.post(
+            "/press/activation",
+            json={
+                "code": "TBN4-9K2M-X7QD",
+                "email": "new@example.org",
+                "password": "a-long-enough-password",
+            },
+        )
+        client.cookies.clear()
+        response = sign_in("new@example.org", "a-long-enough-password")
+        self.assertEqual(response.status_code, 200)
+
+    def test_a_short_password_is_refused_and_the_code_survives(self) -> None:
+        response = client.post(
+            "/press/activation",
+            json={"code": "TBN4-9K2M-X7QD", "email": "new@example.org", "password": "short"},
+        )
+        self.assertEqual(response.json()["code"], "PASSWORD_TOO_SHORT")
+        # The code must not be spent by a failed attempt: a subscriber who
+        # typed a weak password has not lost their membership.
+        again = client.post(
+            "/press/activation/validate",
+            json={"code": "TBN4-9K2M-X7QD", "email": "new@example.org"},
+        )
+        self.assertEqual(again.status_code, 204)
+
+    def test_activation_is_re_checked_rather_than_trusted_from_step_one(self) -> None:
+        # Step one sets no state, so step two must stand on its own. Calling
+        # it with a code that was never validated is the same as calling it
+        # with one that was: both are checked here.
+        response = client.post(
+            "/press/activation",
+            json={
+                "code": "TBN4-0000-0000",
+                "email": "new@example.org",
+                "password": "a-long-enough-password",
+            },
+        )
+        self.assertEqual(response.json()["code"], "PRESS_CODE_INVALID")
 
 
 if __name__ == "__main__":

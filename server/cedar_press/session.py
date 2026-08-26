@@ -79,19 +79,51 @@ def _accounts() -> dict[str, tuple[str, str]]:
     return accounts
 
 
+#: Accounts created by activation in this process, layered over the ones the
+#: environment provisions. In-memory, so they are forgotten on restart — the
+#: one behaviour here that must not survive into production, where this is
+#: the subscriber table and a row is written in the same transaction that
+#: spends the access code.
+_activated: dict[str, tuple[str, str]] = {}
+
+
+def account_exists(email: str) -> bool:
+    """Whether an address already has an account, provisioned or activated."""
+    key = email.strip().lower()
+    return key in _accounts() or key in _activated
+
+
+def create_account(email: str, password: str, tier: str) -> Session:
+    """Create a subscriber. The caller has already verified the access code.
+
+    No entitlement decision is made here: the code carried the tier, and this
+    records it. Doing it the other way round — letting a caller name a tier —
+    is how an activation route becomes an escalation route.
+    """
+    key = email.strip().lower()
+    _activated[key] = (password, tier)
+    return Session(email=key, tier=tier)
+
+
+def forget_activated_for_tests() -> None:
+    """Drop accounts created by activation. Tests only."""
+    _activated.clear()
+
+
 def _lookup(email: str, password: str) -> Session | None:
     """Verify a subscriber. The seam the subscriber table replaces.
 
     Compared with ``compare_digest`` so the answer does not leak through how
     long it took.
     """
-    record = _accounts().get(email.strip().lower())
+    key = email.strip().lower()
+    record = _activated.get(key) or _accounts().get(key)
     if record is None:
         return None
     expected, tier = record
     if not hmac.compare_digest(expected, password):
         return None
-    return Session(email=email.strip().lower(), tier=tier)
+    return Session(email=key, tier=tier)
 
 
 def _sign(payload: bytes) -> str:
@@ -133,10 +165,26 @@ def current_session(cedar_press_session: str | None = Cookie(default=None)) -> S
     return _decode(cedar_press_session) if cedar_press_session else None
 
 
+def issue(session: Session, response: Response) -> Session:
+    """Put a signed session on the response. The activation route's way in.
+
+    Split out of ``sign_in`` so activation does not have to re-verify a
+    password it has just set, and so both paths set one cookie with one set
+    of flags rather than two that can drift.
+    """
+    _set_cookie(session, response)
+    return session
+
+
 def sign_in(email: str, password: str, response: Response) -> Session | None:
     session = _lookup(email, password)
     if session is None:
         return None
+    _set_cookie(session, response)
+    return session
+
+
+def _set_cookie(session: Session, response: Response) -> None:
     response.set_cookie(
         COOKIE,
         _encode(session),
@@ -146,7 +194,6 @@ def sign_in(email: str, password: str, response: Response) -> Session | None:
         samesite="none" if os.environ.get("CEDAR_PRESS_INSECURE_COOKIE") != "1" else "lax",
         path="/",
     )
-    return session
 
 
 def sign_out(response: Response) -> None:
