@@ -94,12 +94,18 @@ export function PressCedarFab() {
         aria-label="Ask Cedar"
         onClick={() => setOpen((current) => !current)}
       >
-        <span className="cedar-widget__status-dot" aria-hidden="true" />
-        <span className="cedar-widget__launcher-copy">
+        {/* The mark inside the circle: a spoken line and its answer, which is
+            what Cedar is, rather than a sparkle meaning "AI". */}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
+             strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M20.2 11.3a7.7 7.7 0 0 1-10.6 7.15L4.4 19.6l1.16-5.16A7.7 7.7 0 1 1 20.2 11.3z" />
+          <path d="M8.9 10.4h6.2M8.9 13.6h3.8" />
+        </svg>
+        {/* aria-hidden because the button already carries the same words as
+            its label; read out twice it is a stutter, not a clarification. */}
+        <span className="cedar-widget__launcher-copy" aria-hidden="true">
           <span className="cedar-widget__launcher-label">Ask Cedar</span>
-          <span className="cedar-widget__launcher-context">
-            {"Cedar Press"}
-          </span>
+          <span className="cedar-widget__launcher-context">Cedar Press</span>
         </span>
       </button>
     </div>

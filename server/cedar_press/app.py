@@ -107,7 +107,10 @@ def login(credentials: Credentials, response: Response) -> dict[str, object]:
             status_code=401,
             detail={
                 "code": "INVALID_CREDENTIALS",
-                "message": "That sign-in did not work. Check the address and password on your Cedar Press confirmation.",
+                "message": (
+                    "That sign-in did not work. Check the address and password on "
+                    "your Cedar Press confirmation."
+                ),
             },
         )
     return session.as_payload()

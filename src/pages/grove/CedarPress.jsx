@@ -57,7 +57,7 @@ export default function CedarPress() {
 
   return (
     <div className="teim-rd teim-rd--paper">
-      <main id="cp-main" className="cp cp-page">
+      <main id="cp-main" className="cp cp-page cp--screens">
         <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="home" />
 
         {loading ? null : (
@@ -65,7 +65,7 @@ export default function CedarPress() {
         {/* The headline is deliberately not the tier lines: it says what the
             product is for and lets the pages behind the doors explain the
             ladder themselves. The mission line lives at the close. */}
-        <section className="cp-hero">
+        <section className="cp-hero cp-screen">
           <h1>Know what&rsquo;s shaping Indian Country.</h1>
           <p>
             Original intelligence collections, data-driven insights, transparent research and
@@ -81,7 +81,7 @@ export default function CedarPress() {
         {/* The ending. One closing statement and three quiet actions rather
             than two equal boxes: a page that has just argued for a maintained
             research product should end on the maintenance. */}
-        <section className="cp-surf cp-surf--deep cp-close" id="more" aria-label="What happens next">
+        <section className="cp-surf cp-surf--deep cp-close cp-screen" id="more" aria-label="What happens next">
           <Contours strength={1.2} />
           <div className="cp-close__in">
             <div className="cp-close__say">
