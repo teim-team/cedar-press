@@ -89,7 +89,14 @@ const TBN_PLANS_URL = `${TBN_URL}/cedar-press`;
 const PREVIEW_ACCOUNT = DEMO_ACCOUNTS[0];
 
 function browserStorage() {
-  return typeof window === "undefined" ? null : window.localStorage;
+  // Reading window.localStorage itself throws under a storage-denying policy
+  // (sandboxed iframe, blocked site data); the callers' fallbacks only help
+  // if this helper survives to hand them null.
+  try {
+    return typeof window === "undefined" ? null : window.localStorage;
+  } catch {
+    return null;
+  }
 }
 
 export default function PressGate({ user }) {

@@ -29,6 +29,7 @@
  */
 
 import { CLAIM_CLASS } from "./claims.js";
+import { releaseFor } from "./pressReleases.js";
 
 /**
  * The three pilot datasets, in the order the Overview shows them.
@@ -274,9 +275,20 @@ export function collectionCitation(datasetId, accessedOn = null) {
   if (!dataset) return null;
   const accessed = accessedOn ? ` Accessed ${accessedOn}.` : "";
   return (
-    `Lumecon, "${dataset.name}" (${dataset.version}, vintage ${dataset.vintage}), ` +
-    `Cedar Press collection, lumecon.ai/press.${accessed}`
+    `Lumecon, "${dataset.name}" (${currentVersion(dataset)}, vintage ${dataset.vintage}), ` +
+    `Cedar Press collection, cedarpress.ai.${accessed}`
   );
+}
+
+/**
+ * The version a download should carry: the release feed's current version
+ * when the changelog tracks this dataset, else the descriptor's own. The
+ * shelf's freshness line reads from the feed, and a file that names an
+ * older release than the tile it came from cannot be matched back to the
+ * changelog.
+ */
+function currentVersion(dataset) {
+  return releaseFor(dataset.id)?.version ?? dataset.version;
 }
 
 // One CSV cell, quoted only when the value needs it, so ordinary cells stay
@@ -306,7 +318,7 @@ export function collectionCsv(datasetId) {
   // compare together, and a file that cannot reproduce the comparison line
   // is not the figure's own points.
   const hasCompare = figure.points.some((point) => point.compare != null);
-  const release = `${dataset.name} ${dataset.version} (demonstration data)`;
+  const release = `${dataset.name} ${currentVersion(dataset)} (demonstration data)`;
   const header = hasCompare
     ? ["period", "value", "compare", release]
     : ["period", "value", release];

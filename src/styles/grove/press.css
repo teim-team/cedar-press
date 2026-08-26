@@ -28,6 +28,12 @@
  * The bottom padding clears the floating Cedar launcher. On the reader's
  * Everything view the navy footer carries that clearance instead, so the
  * colour reaches the bottom of the page: see .cp--deepfoot. */
+/* Full-bleed bands (.cp-band, .cp-surf, .cp-foot--deep) stretch with
+ * width: 100vw, and on platforms with a classic scrollbar 100vw includes
+ * the bar the layout viewport does not — a few pixels of permanent sideways
+ * scroll. Clip, not hidden: clip creates no scroll container, so the sticky
+ * view bar keeps sticking to the page scroll. */
+.teim-rd { overflow-x: clip; }
 .teim-rd .cp { max-width: 1320px; min-width: 0; width: 100%; margin: 0 auto; padding: 0 2.4rem 7.5rem; }
 
 /* The publication keeps its designed palette in either app theme. The app

@@ -36,7 +36,7 @@ export function csvFor(entry) {
   // bookkeeping yet and cites by name.
   const citation =
     collectionCitation(entry.id) ||
-    `Lumecon, "${entry.name}", Cedar Press collection, lumecon.ai/press.`;
+    `Lumecon, "${entry.name}", Cedar Press collection, cedarpress.ai.`;
   const rows = [
     ["field", "value"],
     ["collection", entry.name],
