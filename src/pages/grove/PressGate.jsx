@@ -179,12 +179,10 @@ export default function PressGate({ user }) {
             mark's own asymmetric rings are the ripple now, breathing on a
             slow cycle so the panel is alive without anything sliding around.
 
-            The asset is the mark lumecon.ai ships, byte for byte. The copy
-            that used to be here had the gold arc and dot recoloured to teal,
-            which is most of what makes it a logo rather than three rings. */}
+            The all-teal mark, which is the current one. */}
         <img
           className="auth-hero__mark cp-hero2__ripple"
-          src="/brand/lumecon-logo-mark-transparent.png"
+          src="/brand/lumecon-logo-mark-teal.png"
           alt=""
           aria-hidden="true"
         />

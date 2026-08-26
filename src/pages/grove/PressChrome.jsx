@@ -11,8 +11,13 @@ import { Link, NavLink } from "react-router";
  * The reader's initials, from the address. Two letters where the address
  * has a separator to take them from, one otherwise.
  */
-/** The brand mark, served from public/. One constant so both lockups agree. */
-const MARK = "/brand/lumecon-logo-mark-transparent.png";
+/** The brand mark, served from public/. One constant so both lockups agree.
+ *
+ * The all-teal mark is the current one. There is an older cut with a gold arc
+ * and dot still sitting in lumecon-website's brand folder; it is superseded,
+ * and the two are otherwise the same drawing, so it is easy to reach for the
+ * wrong file and hard to see that you have. */
+const MARK = "/brand/lumecon-logo-mark-teal.png";
 
 function initialsOf(email) {
   const local = String(email ?? "").split("@")[0];

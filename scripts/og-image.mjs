@@ -19,11 +19,11 @@ import { readFileSync, writeFileSync } from "node:fs";
 const root = new URL("..", import.meta.url);
 const out = fileURLToPath(new URL("public/cedar-press-og-1200x630.png", root));
 const font = readFileSync(fileURLToPath(new URL("public/fonts/inter-800.woff2", root)));
-// The mark itself, byte-identical to the one lumecon.ai ships. Drawing an
-// approximation of it was the earlier mistake: the rings are asymmetric and
-// the gold arc and dot are part of the logo, not decoration around it.
+// The mark itself, byte-identical to the all-teal one lumecon.ai ships.
+// Drawing an approximation of it was the earlier mistake: the rings are
+// asymmetric and an even set of circles does not read as this logo.
 const mark = readFileSync(
-  fileURLToPath(new URL("public/brand/lumecon-logo-mark-transparent.png", root)),
+  fileURLToPath(new URL("public/brand/lumecon-logo-mark-teal.png", root)),
 );
 
 // Sampled from lumecon.ai's own card rather than guessed, so the two sit
@@ -42,10 +42,10 @@ const html = `<!doctype html><meta charset="utf-8"><style>
     background: linear-gradient(135deg, ${FROM} 0%, ${TO} 100%);
   }
   /* The real mark, off the top-right corner. Rendered white rather than in
-     its own dark green and gold, which disappear against teal — the same
-     choice lumecon.ai's card makes, and the reason its rings are white there
-     too. brightness(0) invert(1) repaints every opaque pixel white and leaves
-     the alpha channel alone, so the geometry is the logo's own. */
+     its own teal, which would vanish against a teal field — the same choice
+     lumecon.ai's card makes, and the reason its rings are white there too.
+     brightness(0) invert(1) repaints every opaque pixel white and leaves the
+     alpha channel alone, so the geometry is the logo's own. */
   .mark {
     position: absolute; top: -392px; right: -404px;
     width: 880px; height: 880px;
