@@ -353,6 +353,12 @@
  * and nothing is cut off mid-tile. */
 @media (max-width: 880px) {
   .teim-rd .cp-split.auth-split { position: static; min-height: 100dvh; overflow: visible; }
+  /* Stacked, access leads: the person on a phone came to get in, so the
+   * form panel opens the page under its own wordmark and the teal case for
+   * the product reads below it. Desktop keeps the split: case left, form
+   * right. The editorial's desktop gutters come from its centered column,
+   * so the stacked panel draws its own. */
+  .teim-rd .cp-split .auth-editorial { order: -1; padding: 1.6rem 1.15rem 2rem; }
 }
 /* The platform's .auth-hero paints a teal gradient whose upper stops carry
  * white text at under 3:1, and a gradient inside one surface breaks the flat
@@ -365,6 +371,11 @@
 .teim-rd .cp-hero2__contours { opacity: 0.1; }
 .teim-rd .cp-hero2__inner { max-width: 40rem; }
 .teim-rd .cp-split__brand { display: block; font-family: var(--mono); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #fff; margin-bottom: 0.5rem; }
+/* The form panel's wordmark exists for the stacked order (the 880px block
+ * above): on phones the form leads the page, so it opens under the name.
+ * Beside the hero it would say the name twice, so it shows only stacked. */
+.teim-rd .cp-split__brand--form { display: none; color: var(--dteal); margin-bottom: 1.1rem; }
+@media (max-width: 880px) { .teim-rd .cp-split__brand--form { display: block; } }
 .teim-rd .cp-hero2__tagline { font-size: 1rem; font-weight: 600; color: #fff; margin: 0 0 1.6rem; }
 .teim-rd .cp-hero2__headline { font-size: clamp(2.1rem, 3.2vw, 3.1rem); margin-bottom: 1rem; }
 .teim-rd .cp-hero2__lede { font-size: clamp(1rem, 1.2vw, 1.12rem); max-width: 34rem; margin-bottom: 2.2rem; }
