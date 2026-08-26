@@ -33,11 +33,7 @@ import { canReadCedarPress } from "../../features/grove/pressAccess";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog";
 import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
-import {
-  PRESS_DATA_PATH,
-  PRESS_METHODS_PATH,
-  PRESS_WHATS_NEW_PATH,
-} from "../../features/grove/pressRoutes";
+import { PRESS_WHATS_NEW_PATH } from "../../features/grove/pressRoutes";
 import { Contours } from "./pressAtmosphere";
 import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
@@ -62,7 +58,7 @@ export default function CedarPress() {
 
   return (
     <div className="teim-rd teim-rd--paper">
-      <main className="cp cp--deepfoot">
+      <main id="cp-main" className="cp cp--deepfoot cp-page">
         <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="home" />
 
         {loading ? null : (
@@ -80,32 +76,6 @@ export default function CedarPress() {
           </p>
         </section>
 
-        {/* The trust claim, near the top where it does its work. Each line is
-            a link rather than a promise: a reader can check all three from
-            here, which is the whole point of making the claim. */}
-        <section className="cp-trace" aria-label="Every figure is traceable">
-          <h2 className="cp-trace__claim">Every figure is traceable.</h2>
-          <ul className="cp-trace__list">
-            <li>
-              <Link to={PRESS_DATA_PATH}>
-                <span className="cp-trace__tick" aria-hidden="true">&#10003;</span>
-                Download the data
-              </Link>
-            </li>
-            <li>
-              <Link to={PRESS_METHODS_PATH}>
-                <span className="cp-trace__tick" aria-hidden="true">&#10003;</span>
-                View the methodology
-              </Link>
-            </li>
-            <li>
-              <Link to={PRESS_METHODS_PATH}>
-                <span className="cp-trace__tick" aria-hidden="true">&#10003;</span>
-                See every source
-              </Link>
-            </li>
-          </ul>
-        </section>
 
         <PressHub />
 

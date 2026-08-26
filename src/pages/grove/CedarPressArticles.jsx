@@ -77,7 +77,7 @@ export default function CedarPressArticles() {
   }
   return (
     <div className="teim-rd teim-rd--paper">
-      <main className="cp">
+      <main id="cp-main" className="cp cp-page">
         <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="articles" />
 
         {/* The page says what it is: standing alone, it cannot borrow the

@@ -131,7 +131,7 @@
 @media (max-width: 760px) {
 }
 
-.teim-rd .cp-foot { margin-top: 2.2rem; border-top: 1px solid var(--line); padding-top: 1rem; display: flex; justify-content: space-between; gap: 1rem; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); flex-wrap: wrap; }
+.teim-rd .cp-foot { margin-top: 2.2rem; border-top: 1px solid var(--line); padding-top: 0.8rem; display: flex; justify-content: space-between; gap: 1rem; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); flex-wrap: wrap; }
 /* The map, then who publishes it, then the promise. Every page used to
  * carry its own two-link footer, so where the footer took you depended on
  * where you already were; it carries every page now, in one column so the
@@ -146,15 +146,15 @@
   .teim-rd .cp-foot__meta a { display: inline-flex; align-items: center; }
 }
 .teim-rd .cp-foot__nav a:hover { color: var(--dteal); border-bottom-color: currentColor; }
-.teim-rd .cp-foot__meta { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem 1.4rem; padding-top: 0.9rem; border-top: 1px solid var(--line-soft); }
+.teim-rd .cp-foot__meta { display: flex; flex-wrap: wrap; gap: 0.4rem 1.4rem; }
 .teim-rd .cp-foot--deep .cp-foot__nav a { color: rgba(255, 255, 255, 0.82); }
 .teim-rd .cp-foot--deep .cp-foot__nav a:hover { color: #fff; }
 .teim-rd .cp-foot--deep .cp-foot__meta { border-top-color: rgba(255, 255, 255, 0.14); }
 /* On the reader the close is navy, so the footer continues it rather than
  * cutting back to white for six lines of chrome. */
 .teim-rd .cp--deepfoot { padding-bottom: 0; }
-.teim-rd .cp-foot--deep { margin-inline: calc(50% - 50vw); width: 100vw; margin-top: 0; padding: 1.5rem 0 5.5rem; border-top: 0; background: var(--ink); color: rgba(255, 255, 255, 0.7); }
-.teim-rd .cp-foot__in { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 0.9rem; }
+.teim-rd .cp-foot--deep { margin-inline: calc(50% - 50vw); width: 100vw; margin-top: 0; padding: 1.2rem 0 3rem; border-top: 0; background: var(--ink); color: rgba(255, 255, 255, 0.7); }
+.teim-rd .cp-foot__in { flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.3rem 2rem; }
 .teim-rd .cp-foot--deep .cp-foot__in { max-width: 1560px; margin: 0 auto; padding-inline: 2.4rem; }
 @media (max-width: 720px) { .teim-rd .cp-foot--deep .cp-foot__in { padding-inline: 1.15rem; } }
 
@@ -248,7 +248,11 @@
 .teim-rd .cp-gate__path a:hover { text-decoration: underline; }
 
 /* Subscriber chrome: who is signed in, and what admission the page carries. */
-.teim-rd .cp-mast__user { margin-left: auto; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.08em; color: var(--muted); }
+.teim-rd .cp-mast__user { margin-left: auto; display: inline-flex; align-items: center; gap: 0.7rem; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.08em; color: var(--muted); }
+.teim-rd .cp-avatar { position: relative; display: inline-grid; place-items: center; width: 2.3rem; height: 2.3rem; border-radius: 50%; border: 1px solid var(--teal-line); background: var(--teal-tint); color: var(--dteal); font-family: var(--sans); font-size: 0.8rem; font-weight: 800; letter-spacing: 0.02em; text-decoration: none; transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease; }
+.teim-rd .cp-avatar:hover { background: var(--dteal); border-color: var(--dteal); color: #fff; transform: translateY(-1px); }
+.teim-rd .cp-avatar__sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+@media (prefers-reduced-motion: reduce) { .teim-rd .cp-avatar { transition: none; } .teim-rd .cp-avatar:hover { transform: none; } }
 .teim-rd .cp-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.5rem 1.5rem; }
 .teim-rd .cp-head .cp-sec__band { margin-bottom: 0; }
 /* The label, top right. Solid block, not an outline: an outlined chip beside
@@ -642,6 +646,60 @@
 .teim-rd .cp-band__price { font-family: var(--sans); font-size: 1.18rem; font-weight: 800; letter-spacing: -0.015em; color: var(--dteal); margin: 0.55rem 0 0; }
 .teim-rd .cp-band--fill .cp-band__price { color: #fff; }
 .teim-rd .cp-gt__pricehead { font-family: var(--sans); font-size: 1.12rem; font-weight: 800; letter-spacing: -0.015em; color: var(--ink); margin: 0.9rem 0 0; }
+/* ── Accessibility ───────────────────────────────────────────────────────
+ * The parts that are not a rule to satisfy but the difference between
+ * reading a page and traversing it. */
+
+/* The skip link: off-screen until it takes focus, then the first thing on
+ * the page. Every page's nav and masthead are identical, and a keyboard
+ * reader should not walk them again on each one. */
+.teim-rd .cp-skip { position: absolute; left: -9999px; top: 0; z-index: 200; padding: 0.75rem 1.1rem; background: var(--dteal); color: #fff; font-family: var(--mono); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; }
+.teim-rd .cp-skip:focus { left: 0.6rem; top: 0.6rem; }
+
+/* One visible focus ring, on everything, in a colour that clears AA against
+ * both the paper and the teal panels. The browser default disappears
+ * against a dark surface and is easy to lose on a light one. */
+.teim-rd a:focus-visible,
+.teim-rd button:focus-visible,
+.teim-rd select:focus-visible,
+.teim-rd input:focus-visible,
+.teim-rd textarea:focus-visible,
+.teim-rd [tabindex]:focus-visible { outline: 3px solid var(--dteal); outline-offset: 2px; border-radius: 2px; }
+/* On the teal panels the ring inverts, because dark teal on mid teal is a
+ * ring nobody can see. */
+.teim-rd .cp-hero2 a:focus-visible,
+.teim-rd .cp-hero2 button:focus-visible,
+.teim-rd .cp-band--fill a:focus-visible,
+.teim-rd .cp-band--fill button:focus-visible,
+.teim-rd .cp-close a:focus-visible,
+.teim-rd .cp-gt a:focus-visible { outline-color: #fff; }
+
+/* A reader who has asked their system for less motion gets none of the
+ * page's own: transitions collapse rather than shorten, because a 1ms
+ * animation is still an animation to a vestibular system. */
+@media (prefers-reduced-motion: reduce) {
+  .teim-rd .cp-hub__tile,
+  .teim-rd .cp-hub__tile::after,
+  .teim-rd .cp-hub__mark,
+  .teim-rd .cp-hub__name,
+  .teim-rd .cp-page { transition: none !important; animation: none !important; }
+  .teim-rd .cp-hub__tile:hover { transform: none; }
+  .teim-rd .cp-hub__tile:hover .cp-hub__mark { transform: none; }
+}
+
+/* ── Page arrival ────────────────────────────────────────────────────────
+ * A short, single rise on each page, so moving between sections reads as
+ * one service rather than as separate documents slamming into place.
+ * Content-visibility is untouched: the animation is opacity and transform
+ * only, so nothing here delays what a screen reader can read. */
+@keyframes cp-page-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .teim-rd .cp-page { animation: cp-page-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) both; }
+}
+
 /* ── The section nav ─────────────────────────────────────────────────────
  * On every page, not handed out once by the front page: a reader who
  * arrived from a citation or a shared brief can cross the service without
@@ -667,14 +725,25 @@
  * front page and the shelf read as one system. Each square states what the
  * section is and what it currently holds; the ? in its corner puts the
  * section's purpose in the line under the grid. */
-.teim-rd .cp-hub__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr)); gap: 0.7rem; }
+/* Explicit counts rather than auto-fit: six tiles into an auto-fit track
+ * lands five across and one alone on a second row, which reads as a
+ * mistake. Six, three, then two — every arrangement fills its rows. */
+.teim-rd .cp-hub__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.9rem; }
+@media (max-width: 1280px) { .teim-rd .cp-hub__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .teim-rd .cp-hub__grid > li { position: relative; display: block; }
-.teim-rd .cp-hub__tile { box-sizing: border-box; width: 100%; aspect-ratio: 1 / 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.85rem; padding: 0.7rem 0.6rem; border: 1px solid var(--line); background: var(--bg); text-align: center; color: var(--ink); text-decoration: none; transition: border-color 0.18s ease, box-shadow 0.18s ease; }
-.teim-rd .cp-hub__tile:hover { border-color: var(--teal); box-shadow: 0 10px 26px rgba(10, 15, 38, 0.1); }
-.teim-rd .cp-hub__mark { display: grid; place-items: center; color: var(--dteal); }
-.teim-rd .cp-hub__mark svg { width: 54px; height: 54px; }
+.teim-rd .cp-hub__tile { position: relative; box-sizing: border-box; width: 100%; aspect-ratio: 1 / 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; padding: 1rem 0.8rem; border: 1px solid var(--line); background: var(--bg); text-align: center; color: var(--ink); text-decoration: none; overflow: hidden; transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease; }
+/* The teal rises from the floor of the tile on hover rather than washing
+ * over it: the mark and the name stay on paper, which keeps their contrast
+ * where it was measured. */
+.teim-rd .cp-hub__tile::after { content: ''; position: absolute; inset: auto 0 0 0; height: 3px; background: var(--teal); transform: scaleX(0); transform-origin: left; transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1); }
+.teim-rd .cp-hub__tile:hover::after, .teim-rd .cp-hub__tile:focus-visible::after { transform: scaleX(1); }
+.teim-rd .cp-hub__tile:hover { border-color: var(--teal); box-shadow: 0 14px 34px rgba(10, 15, 38, 0.13); transform: translateY(-4px); }
+.teim-rd .cp-hub__tile:hover .cp-hub__mark { transform: translateY(-2px) scale(1.06); }
+.teim-rd .cp-hub__tile:hover .cp-hub__name { color: var(--dteal); }
+.teim-rd .cp-hub__mark { display: grid; place-items: center; color: var(--dteal); transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1); }
+.teim-rd .cp-hub__mark svg { width: 68px; height: 68px; }
 .teim-rd .cp-hub__id { display: flex; flex-direction: column; gap: 0.22rem; min-width: 0; }
-.teim-rd .cp-hub__name { font-family: var(--sans); font-size: 1rem; font-weight: 800; letter-spacing: -0.01em; line-height: 1.2; }
+.teim-rd .cp-hub__name { font-family: var(--sans); font-size: 1.12rem; font-weight: 800; letter-spacing: -0.012em; line-height: 1.2; transition: color 0.18s ease; }
 /* What the section holds right now, read from the catalog: a label alone
  * says where a tap goes, this says whether it is worth taking. */
 .teim-rd .cp-hub__meta { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
@@ -688,7 +757,9 @@
 /* Phones: a strict 2x3, the squares scaling with the screen rather than
  * wrapping to a single column. */
 @media (max-width: 640px) {
-  .teim-rd .cp-hub__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 22.5rem; }
+  .teim-rd .cp-hub__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: none; gap: 0.7rem; }
+  .teim-rd .cp-hub__mark svg { width: 52px; height: 52px; }
+  .teim-rd .cp-hub__name { font-size: 1rem; }
   .teim-rd .cp-hub__tile { width: 100%; height: auto; aspect-ratio: 1 / 1; }
 }
 

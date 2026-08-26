@@ -85,7 +85,7 @@ export default function CedarPressWhatsNew() {
 
   return (
     <div className="teim-rd teim-rd--paper">
-      <main className="cp">
+      <main id="cp-main" className="cp cp-page">
         <PressMast section="whats-new" />
 
         {/* Title across the page rather than down a 62ch column: this is the

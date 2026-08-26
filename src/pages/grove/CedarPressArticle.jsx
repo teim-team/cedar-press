@@ -215,7 +215,7 @@ export default function CedarPressArticle() {
   if (!article || !article.hosted) {
     return (
       <div className="teim-rd teim-rd--paper">
-        <main className="cp">
+        <main id="cp-main" className="cp cp-page">
           <PressMast section="articles" />
           <PressBack />
           <section className="cp-nh">
@@ -243,7 +243,7 @@ export default function CedarPressArticle() {
 
   return (
     <div className="teim-rd teim-rd--paper">
-      <main className="cp">
+      <main id="cp-main" className="cp cp-page">
         <PressMast user={user} onSignOut={() => logout()} section="articles" />
 
         {/* Back goes to the briefs, not the hub: a piece belongs to the

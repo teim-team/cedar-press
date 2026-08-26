@@ -7,6 +7,17 @@
 // took you depended on where you already were.
 import { Link, NavLink } from "react-router";
 
+/**
+ * The reader's initials, from the address. Two letters where the address
+ * has a separator to take them from, one otherwise.
+ */
+function initialsOf(email) {
+  const local = String(email ?? "").split("@")[0];
+  const parts = local.split(/[._-]+/).filter(Boolean);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return (local.slice(0, 2) || "?").toUpperCase();
+}
+
 import { LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
 import {
   PRESS_ARTICLES_PATH,
@@ -36,6 +47,11 @@ const NAV = [
 export function PressMast({ user, onSignOut, section = null }) {
   const home = section === "home";
   return (
+    <>
+    {/* The first stop for a keyboard or a screen reader: the nav and the
+        masthead are the same on every page, and skipping them is the
+        difference between reading a page and traversing it. */}
+    <a className="cp-skip" href="#cp-main">Skip to content</a>
     <header className="cp-mast">
       <div className="cp-mast__top">
         {/* The wordmark alone until the real Cedar Press logo lands: the
@@ -55,8 +71,10 @@ export function PressMast({ user, onSignOut, section = null }) {
         </span>
         {user ? (
           <span className="cp-mast__user">
-            <Link className="cp-split__linkbtn" to={PRESS_SETTINGS_PATH}>{user.email}</Link>
-            {" · "}
+            <Link className="cp-avatar" to={PRESS_SETTINGS_PATH} title={user.email}>
+              <span aria-hidden="true">{initialsOf(user.email)}</span>
+              <span className="cp-avatar__sr">Account and settings for {user.email}</span>
+            </Link>
             <button type="button" className="cp-split__linkbtn" onClick={onSignOut}>
               Sign out
             </button>
@@ -79,6 +97,7 @@ export function PressMast({ user, onSignOut, section = null }) {
         ))}
       </nav>
     </header>
+    </>
   );
 }
 
@@ -118,7 +137,6 @@ export function PressFoot({ deep = false }) {
             {" · "}
             <a href={LUMECON_URL} target="_blank" rel="noreferrer">lumecon.ai</a>
           </span>
-          <span>Every collection carries its method · corrections reach every release they touch</span>
         </div>
       </div>
     </footer>

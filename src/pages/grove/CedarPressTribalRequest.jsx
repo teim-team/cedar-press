@@ -74,7 +74,7 @@ export default function CedarPressTribalRequest() {
   useScrollToTop();
   return (
     <div className="teim-rd teim-rd--paper">
-      <main className="cp">
+      <main id="cp-main" className="cp cp-page">
         <PressMast />
 
         <section className="cp-trh">
