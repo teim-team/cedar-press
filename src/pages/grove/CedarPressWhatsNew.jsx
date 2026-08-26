@@ -100,13 +100,6 @@ export default function CedarPressWhatsNew() {
             historical evidence arrive. Methodology releases are marked, because they can affect
             figures somebody has already published.
           </p>
-          {/* The feed is placeholder history until the first real releases
-              land, and invented dates and counts presented as operations
-              would be fabricated proof. The line leaves with the fixtures. */}
-          <p className="cp-nh__demo">
-            Demonstration feed: these release entries and their statistics are placeholders,
-            replaced by the real release history when the first releases land.
-          </p>
           {newest ? (
             <p className="cp-nh__last">
               <span>Most recent</span>

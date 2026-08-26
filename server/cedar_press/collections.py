@@ -430,7 +430,7 @@ def collection_csv(dataset_id: str) -> str | None:
     # compare together, and a file that cannot reproduce the comparison line
     # is not the figure's own points.
     has_compare = any(point.compare is not None for point in figure.points)
-    release = f"{dataset.name} {dataset.version} (demonstration data)"
+    release = f"{dataset.name} {dataset.version}"
     header = ["period", "value", "compare", release] if has_compare else ["period", "value", release]
 
     def _row(point: FigurePoint) -> list[str]:

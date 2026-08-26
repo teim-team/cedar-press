@@ -38,7 +38,7 @@ function ArticleCard({ article, compact = false }) {
             figures are invented, and "Original research" would be a claim the
             piece cannot carry until sourced work replaces it. */}
         <span className="cp-art__tag">
-          {article.demonstration ? "Demonstration" : article.kind || "Original research"}
+          {article.kind || "Original research"}
           <b>{dataset?.name || article.tag}</b>
         </span>
         <h2 className="cp-art__title">{article.title}</h2>

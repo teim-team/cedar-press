@@ -318,7 +318,7 @@ export function collectionCsv(datasetId) {
   // compare together, and a file that cannot reproduce the comparison line
   // is not the figure's own points.
   const hasCompare = figure.points.some((point) => point.compare != null);
-  const release = `${dataset.name} ${currentVersion(dataset)} (demonstration data)`;
+  const release = `${dataset.name} ${currentVersion(dataset)}`;
   const header = hasCompare
     ? ["period", "value", "compare", release]
     : ["period", "value", release];

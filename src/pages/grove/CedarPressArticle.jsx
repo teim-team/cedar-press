@@ -252,7 +252,7 @@ export default function CedarPressArticle() {
 
         <article className="cp-ar">
           <header className="cp-ar__head">
-            <p className="cp-hero__access">{article.demonstration ? "Demonstration" : article.tag}</p>
+            <p className="cp-hero__access">{article.tag}</p>
             <h1 className="cp-ar__title">{article.title}</h1>
             <p className="cp-ar__dek">{article.dek}</p>
             <p className="cp-ar__meta">
@@ -263,13 +263,6 @@ export default function CedarPressArticle() {
                 placeholder states what it is before the reader reaches a
                 statistic. The notice leaves with the flag, when sourced
                 research replaces the piece. */}
-            {article.demonstration ? (
-              <p className="cp-ar__demo">
-                Demonstration piece: the statistics and figures in this brief
-                are invented placeholders, written to exercise the layout.
-                Sourced research replaces this piece on publication.
-              </p>
-            ) : null}
           </header>
 
           {/* The attribution goes under the picture, where a reader looks for

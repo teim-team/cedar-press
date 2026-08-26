@@ -706,6 +706,10 @@
 .teim-rd .cp-set__rows dd a { color: var(--dteal); }
 .teim-rd .cp-set__acts { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.2rem; }
 .teim-rd .cp-set__fine { font-size: 0.86rem; line-height: 1.5; color: var(--muted); margin: 0.9rem 0 0; }
+.teim-rd .cp-set__form { display: flex; flex-direction: column; gap: 0.35rem; }
+.teim-rd .cp-set__form select { font: inherit; font-size: 0.95rem; min-height: 44px; padding: 0.5rem 0.7rem; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); }
+.teim-rd .cp-set__form select:focus { outline: 2px solid var(--teal); outline-offset: 1px; border-color: var(--teal); }
+.teim-rd .cp-who__label { font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); }
 .teim-rd .cp-set__body { font-size: 0.97rem; line-height: 1.6; color: var(--ink-2); margin: 0 0 1.1rem; }
 .teim-rd .cp-set__links { list-style: none; margin: 0; padding: 0; }
 .teim-rd .cp-set__links li { border-top: 1px solid var(--line-soft); }

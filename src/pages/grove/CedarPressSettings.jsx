@@ -1,21 +1,22 @@
-// Settings: the account, and the pages that were crowding the footer.
+// Settings: the account, the errands, and one optional question.
 //
 // The footer had grown to eight links because every page it could reach was
 // listed in it. The three that are errands rather than reading — the tribal
 // data request, research access, and contact — live here now, with the
 // account, so the footer can go back to being a footer.
 //
-// Nothing on this page asks the subscriber to describe themselves. The
-// account exists because a subscription does; what the service knows about
-// a reader is what the subscription already carries.
+// Nothing here is required to read anything. The one question this page
+// asks is asked plainly: more detail means better-curated collections, and
+// a reader who does not want to answer never sees it again.
 import "../../index.css";
 import "../../styles/redesign.css";
 import "../../styles/grove/press.css";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
-import { isConnected } from "../../config.js";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
+import { WORK_KINDS, loadWork, saveWork } from "../../features/grove/readerWork.js";
 import { LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_TIERS } from "../../features/grove/pressCatalog";
 import { PRESS_REQUEST_PATH, PRESS_RESEARCH_PATH } from "../../features/grove/pressRoutes";
@@ -26,6 +27,73 @@ import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
 import PressGate from "./PressGate";
 import { TierName } from "./TierName";
+
+/**
+ * The one question. Optional, remembered, and stated as the trade it is:
+ * telling the desk what you work on is how the collections get built for
+ * the people reading them.
+ */
+function WorkCard() {
+  const [work, setWork] = useState("");
+  const [saved, setSaved] = useState(null);
+  const [busy, setBusy] = useState(false);
+
+  const apply = useCallback((value) => {
+    setSaved(value);
+    setWork(value ?? "");
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let live = true;
+    (async () => {
+      const value = await loadWork({ signal: controller.signal }).catch(() => null);
+      if (live) apply(value);
+    })();
+    return () => {
+      live = false;
+      controller.abort();
+    };
+  }, [apply]);
+
+  const submit = async (event) => {
+    event.preventDefault();
+    setBusy(true);
+    try {
+      apply(await saveWork(work));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className="cp-set__card" aria-label="What you work on">
+      <span className="cp-set__cap">What you work on</span>
+      <p className="cp-set__body">
+        Give us more detail and we curate the collections better: what you work on decides
+        which get extended, which get a brief, and whose requests carry weight.
+      </p>
+      <form className="cp-set__form" onSubmit={submit}>
+        <label className="cp-who__label" htmlFor="cp-work">
+          Your work
+        </label>
+        <select id="cp-work" value={work} onChange={(event) => setWork(event.target.value)}>
+          <option value="">Rather not say</option>
+          {WORK_KINDS.map((kind) => (
+            <option key={kind.id} value={kind.id}>
+              {kind.label}
+            </option>
+          ))}
+        </select>
+        <div className="cp-set__acts">
+          <button type="submit" className="gv-btn gv-btn--quiet" disabled={busy || work === (saved ?? "")}>
+            {busy ? "Saving" : saved ? "Update" : "Save"}
+          </button>
+        </div>
+      </form>
+    </section>
+  );
+}
 
 export default function CedarPressSettings() {
   useDocumentTitle("Settings");
@@ -91,13 +159,9 @@ export default function CedarPressSettings() {
                 Sign out
               </button>
             </div>
-            {isConnected() ? null : (
-              <p className="cp-set__fine">
-                This deployment is not connected to the platform, so the session is local to this
-                browser.
-              </p>
-            )}
           </section>
+
+          <WorkCard />
 
           <section className="cp-set__card" aria-label="Requests">
             <span className="cp-set__cap">Requests</span>

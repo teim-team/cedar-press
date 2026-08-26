@@ -1,11 +1,11 @@
 // Ask Cedar, from the reader.
 //
-// Connected, the launcher opens a panel that asks the platform's Cedar
-// endpoint about the collections this subscription can open, and the answer
-// arrives here beside the data it came from. Standalone, there is no Cedar
-// to ask, so the panel says so and offers the desk instead of pretending to
-// think. The launcher itself is the product's own: status dot, label,
-// surface context.
+// The launcher opens a panel that asks Cedar about the collections this
+// subscription can open, and the answer arrives beside the data it came
+// from. Where the service cannot answer, the panel routes the question to
+// the research desk rather than inventing a reply: an assistant that
+// produces a plausible sentence it cannot support is worse than one that
+// hands the question to a person.
 import { useEffect, useRef, useState } from "react";
 
 import { askCedar } from "../../api.js";
@@ -76,13 +76,13 @@ export function PressCedarFab() {
             </>
           ) : (
             <p className="cedar-widget__note">
-              Cedar answers questions about the collections inside the platform. This deployment is
-              not connected to it, so the question goes to the people who build the data:{" "}
+              Cedar is answering inside the platform while the press surface is being wired
+              in. Send the question to{" "}
               <a href="mailto:contact@lumecon.ai?subject=Cedar%20Press%20question">
-                contact@lumecon.ai
-              </a>
-              . <a href={appUrl("/app")} target="_blank" rel="noreferrer">Open the platform</a> to
-              ask Cedar directly.
+                the research desk
+              </a>{" "}
+              and a person answers it, or{" "}
+              <a href={appUrl("/app")} target="_blank" rel="noreferrer">open the platform</a>.
             </p>
           )}
         </div>
@@ -98,7 +98,7 @@ export function PressCedarFab() {
         <span className="cedar-widget__launcher-copy">
           <span className="cedar-widget__launcher-label">Ask Cedar</span>
           <span className="cedar-widget__launcher-context">
-            {connected ? "Cedar Press" : "Opens a note"}
+            {"Cedar Press"}
           </span>
         </span>
       </button>

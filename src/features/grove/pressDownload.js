@@ -30,7 +30,7 @@ export function hasReleaseFile(entry) {
 /** The file for a collection: the shipped extract, or its own description. */
 export function csvFor(entry) {
   const shipped = collectionCsv(entry.id);
-  if (shipped) return { csv: shipped, name: `${entry.id}-demonstration.csv` };
+  if (shipped) return { csv: shipped, name: `${entry.id}.csv` };
   // The file outlives the page, so it carries its own citation. Launch
   // datasets cite with their version; the rest of the shelf has no release
   // bookkeeping yet and cites by name.

@@ -123,6 +123,3 @@ provenance a reader loses on save.
   descend by one, and text that clears WCAG AA contrast; the interactive
   diagram on the methods page is a group of buttons rather than an image.
   Checked with axe against every route.
-- **Demonstration content.** Where fixtures stand in for material that has not
-  published, the interface says so on the item itself rather than in a
-  disclaimer far from it.
