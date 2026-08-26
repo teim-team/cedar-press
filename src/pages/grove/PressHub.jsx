@@ -11,6 +11,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 
 import { PRESS_ARTICLES } from "../../features/grove/pressArticles";
+import { EVENT, track } from "../../features/grove/telemetry.js";
 import { PRESS_CATALOG, PRESS_HISTORY_FROM } from "../../features/grove/pressCatalog";
 import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
 import {
@@ -118,9 +119,9 @@ export default function PressHub() {
           return (
             <li key={section.id}>
               {section.href ? (
-                <a className="cp-hub__tile" href={section.href}>{inner}</a>
+                <a className="cp-hub__tile" href={section.href} onClick={() => track(EVENT.sectionOpened, { section: section.id })}>{inner}</a>
               ) : (
-                <Link className="cp-hub__tile" to={section.to}>{inner}</Link>
+                <Link className="cp-hub__tile" to={section.to} onClick={() => track(EVENT.sectionOpened, { section: section.id })}>{inner}</Link>
               )}
               {/* Its own control beside the tile's link, never inside it: a
                   button inside an anchor is two answers to one tap. */}

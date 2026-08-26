@@ -39,10 +39,18 @@ export function PressMast({ user, onSignOut, section = null }) {
   return (
     <header className="cp-mast">
       <div className="cp-mast__top">
+        {/* The mark, at a size that reads as a mark rather than as the
+            watermark it had been reduced to on the gate. */}
         {home ? (
-          <span className="cp-mast__word">CEDAR PRESS</span>
+          <span className="cp-mast__lockup">
+            <img className="cp-mast__mark" src="/lumecon-mark.png" alt="" aria-hidden="true" />
+            <span className="cp-mast__word">CEDAR PRESS</span>
+          </span>
         ) : (
-          <Link className="cp-mast__word" to={PRESS_PATH}>CEDAR PRESS</Link>
+          <Link className="cp-mast__lockup" to={PRESS_PATH}>
+            <img className="cp-mast__mark" src="/lumecon-mark.png" alt="" aria-hidden="true" />
+            <span className="cp-mast__word">CEDAR PRESS</span>
+          </Link>
         )}
         {/* Who made it and who sells it, said plainly. "A × partnership"
             left both questions open. */}

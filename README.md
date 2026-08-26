@@ -42,8 +42,20 @@ npm run test     # unit tests (node --test)
 npm run build    # production build into dist/
 ```
 
-Configuration is limited to `VITE_APP_URL`, the origin used for links into
-the Lumecon platform; it defaults to `lumecon.ai`.
+### Configuration
+
+The client runs in two modes, and knows which one it is in rather than
+inferring it from a failed request:
+
+| Mode | When | Behavior |
+| --- | --- | --- |
+| Connected | `VITE_API_URL` is set | Sessions, catalog, releases, downloads, subscriber datasets and Cedar come from the platform API; the database behind it is the source of truth. |
+| Standalone | No API configured | The bundled catalog is served so the service can be demonstrated and reviewed on its own. Anything that would write to the database stays in the browser, and the interface says so. |
+
+Datadog RUM reports errors, performance and a small set of product events
+when `VITE_DATADOG_APPLICATION_ID` and `VITE_DATADOG_CLIENT_TOKEN` are both
+set; nothing is sent otherwise. See [`.env.example`](.env.example) for every
+value.
 
 ## Deployment
 

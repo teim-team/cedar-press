@@ -26,6 +26,7 @@
 // chart: a figure is its caption, its source and its provenance, because a
 // chart nobody can interrogate is the fake dashboard this product avoids.
 
+import { useEffect } from "react";
 import { Link, useParams } from "react-router";
 
 import "../../index.css";
@@ -34,6 +35,7 @@ import "../../styles/grove/press.css";
 
 import { useAuth } from "../../context/useAuth";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
+import { EVENT, track } from "../../features/grove/telemetry.js";
 import { PressBack, PressFoot, PressMast } from "./PressChrome";
 import { PRESS_FIGURES } from "../../components/grove/pressFigures";
 import { AD_SLOT } from "../../features/grove/pressAds";
@@ -182,6 +184,9 @@ export default function CedarPressArticle() {
   const { user, loading, logout } = useAuth();
   const article = BY_ID[articleId];
   useDocumentTitle(article?.title ?? "Article not found");
+  useEffect(() => {
+    if (article?.id) track(EVENT.articleOpened, { article: article.id, dataset: article.datasetId });
+  }, [article?.id, article?.datasetId]);
   // A piece opens at its headline, wherever the click came from.
   useScrollToTop(articleId);
 

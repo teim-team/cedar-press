@@ -44,14 +44,61 @@ content sections; `What's new`, `Methods`, `Tribal data request` and
 `PressChrome.jsx` owns the masthead, its section nav and the footer, so the
 pages cannot drift apart.
 
+## Connected and standalone
+
+`config.js` decides which deployment this is: with `VITE_API_URL` set the
+client is connected to the platform API and its database; without it the
+client serves the bundled catalog, so the service can be demonstrated and
+reviewed on its own. Modules ask `isConnected()` rather than inferring the
+answer from a failed request, so a network error never silently reads as
+"standalone" and shows fixtures in production.
+
+The seam is deliberately narrow. Pages read `user`, `loading`, `login`,
+`logout` and `refreshSession` from the session provider and never learn which
+mode they are in; `features/grove/datasets.js` presents one descriptor shape
+whether a dataset lives in the database or in this browser, with a
+`published` flag that says which. Connecting a deployment is configuration,
+not a rewrite.
+
+## The API
+
+`api.js` is the only module that knows the platform's endpoints. Sessions
+ride in cookies (`credentials: "include"`) rather than browser storage,
+because a token in storage is a token any script on the page can read.
+Errors come back as `{ code, message }` and are rethrown as an `ApiError`
+carrying `code` — the shape `pressSignup.pressSignupError` already reads.
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /me`, `POST /auth/login`, `POST /auth/logout` | The session |
+| `POST /press/activation`, `/press/activation/validate` | Subscription activation |
+| `GET /press/collections` | The catalog this subscription can see |
+| `GET /press/releases` | Release history |
+| `GET /press/articles` | Published briefs |
+| `GET /press/collections/:id/download` | A release file, served as a blob |
+| `GET`/`POST` `/press/datasets`, `DELETE /press/datasets/:id` | Subscriber datasets |
+| `POST /cedar/ask` | Cedar, scoped to this surface |
+
 ## Access
 
 `features/grove/pressAccess.js` resolves a session's tier to what the client
-renders — which shelves open, which collections download. The session
-provider in `src/context/` is the integration point for the platform's
-authentication; `api.js` holds the client for the subscriber endpoints.
-Entitlement is authoritative on the server, and the client model is written
-to answer identically.
+renders — which shelves open, which collections download. Entitlement is
+authoritative on the server, and the client model is written to answer
+identically. The preview accounts in `context/authContext.js` are a
+standalone-only path: a connected deployment authenticates against the API
+and rejects them.
+
+## Telemetry
+
+`features/grove/telemetry.js` starts Datadog RUM only when an application id
+and client token are both configured, and imports the SDK dynamically so a
+deployment without telemetry never downloads it. It reports errors and
+performance plus a small set of named product events — signed in, section
+opened, collection viewed and downloaded, locked collection tapped, article
+opened, dataset uploaded, Cedar asked. There is deliberately no page-wide
+click or scroll capture: behavioural exhaust nobody reads is a privacy cost
+with no product return. Subscribers are identified by tier and an opaque id;
+email addresses are never sent.
 
 ## Data and downloads
 

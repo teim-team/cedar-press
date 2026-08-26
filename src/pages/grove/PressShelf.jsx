@@ -45,6 +45,7 @@ import { useEffect, useRef, useState } from "react";
 const COARSE = typeof window !== "undefined" && !!window.matchMedia?.("(hover: none)").matches;
 
 import { appUrl } from "../../features/grove/appLink.js";
+import { EVENT, track } from "../../features/grove/telemetry.js";
 import { canOpenDataset, historyFor } from "../../features/grove/pressAccess";
 import { downloadAll, downloadCsv, hasReleaseFile } from "../../features/grove/pressDownload";
 import {
@@ -230,6 +231,7 @@ function Band({ tier, user, index }) {
   const readRef = useRef(null);
   const [pulse, setPulse] = useState(false);
   const pointAtUpgrade = () => {
+    track(EVENT.lockedCollectionTapped, { shelf: tier.shelf });
     readRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     setPulse(true);
     window.setTimeout(() => setPulse(false), 900);
@@ -240,6 +242,7 @@ function Band({ tier, user, index }) {
   // tap that would have done both walks the reader to the panel instead.
   const [armed, setArmed] = useState(null);
   const openTile = (entry) => {
+    track(EVENT.collectionViewed, { collection: entry.id, shelf: tier.shelf });
     if (COARSE && armed !== entry.id) {
       setArmed(entry.id);
       setHovered(entry.id);
@@ -248,6 +251,7 @@ function Band({ tier, user, index }) {
       window.setTimeout(() => setPulse(false), 900);
       return;
     }
+    track(EVENT.collectionDownloaded, { collection: entry.id, shelf: tier.shelf });
     downloadCsv(entry);
   };
 
@@ -312,7 +316,7 @@ function Band({ tier, user, index }) {
 
         {owned ? (
           <p className="cp-band__all">
-            <button type="button" className="cp-band__allbtn" onClick={() => downloadAll(entries)}>
+            <button type="button" className="cp-band__allbtn" onClick={() => { track(EVENT.shelfDownloadedAll, { shelf: tier.shelf, count: entries.length }); downloadAll(entries); }}>
               <span aria-hidden="true">&#8595;</span> Download all {entries.length}
             </button>
           </p>

@@ -45,3 +45,20 @@ export function readSession() {
     return null;
   }
 }
+
+/** Persist a preview session. Standalone only: connected, the cookie is it. */
+export function storeSession(session) {
+  try {
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  } catch {
+    // Private windows still get a session for this page load.
+  }
+}
+
+export function clearStoredSession() {
+  try {
+    localStorage.removeItem(SESSION_KEY);
+  } catch {
+    // Nothing to clear.
+  }
+}

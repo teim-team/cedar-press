@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 
 import { AuthProvider } from "./context/AuthProvider.jsx";
+import { startTelemetry } from "./features/grove/telemetry.js";
 import CedarPress from "./pages/grove/CedarPress.jsx";
 import CedarPressArticles from "./pages/grove/CedarPressArticles.jsx";
 import CedarPressData from "./pages/grove/CedarPressData.jsx";
@@ -21,6 +22,10 @@ import {
   PRESS_RESEARCH_PATH,
   PRESS_WHATS_NEW_PATH,
 } from "./features/grove/pressRoutes.js";
+
+// Errors and performance go to Datadog when a deployment configures it;
+// nothing is sent otherwise.
+startTelemetry();
 
 // The route table the app's App.jsx owns lives here in the standalone site:
 // the reader at the root, the satellite pages on their own paths, and
