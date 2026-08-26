@@ -42,7 +42,7 @@ export default function CedarPressMethods() {
   useScrollToTop();
   return (
     <div className="teim-rd teim-rd--paper">
-      <div className="cp">
+      <main className="cp">
         <PressMast section="methods" />
 
         {/* The opening argument, given room. The claim under it is the one
@@ -131,7 +131,7 @@ export default function CedarPressMethods() {
 
         <PressFoot />
         <PressCedarFab />
-      </div>
+      </main>
     </div>
   );
 }

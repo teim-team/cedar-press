@@ -51,7 +51,7 @@ export default function CedarPressData() {
   }
   return (
     <div className="teim-rd teim-rd--paper">
-      <div className="cp">
+      <main className="cp">
         <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="data" />
 
         <section className="cp-mh">
@@ -97,7 +97,7 @@ export default function CedarPressData() {
 
         <PressCedarFab />
         <PressFoot />
-      </div>
+      </main>
     </div>
   );
 }

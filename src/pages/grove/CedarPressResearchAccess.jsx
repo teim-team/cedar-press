@@ -39,7 +39,7 @@ export default function CedarPressResearchAccess() {
   useScrollToTop();
   return (
     <div className="teim-rd teim-rd--paper">
-      <div className="cp">
+      <main className="cp">
         <PressMast />
 
         <section className="cp-trh">
@@ -98,7 +98,7 @@ export default function CedarPressResearchAccess() {
 
         <PressFoot />
         <PressCedarFab />
-      </div>
+      </main>
     </div>
   );
 }

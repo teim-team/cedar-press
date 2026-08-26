@@ -438,9 +438,9 @@
  * further down. */
 .teim-rd .cp-proof__item { display: flex; flex-direction: column; align-items: center; gap: 0.45rem; min-width: 0; aspect-ratio: 1 / 1;
   padding: 0.95rem 1rem; border-radius: 16px; overflow: hidden; text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.28); background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.34); background: rgba(0, 0, 0, 0.08);
   transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; }
-.teim-rd .cp-proof__item:hover { background: rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.46); transform: translateY(-3px); box-shadow: 0 14px 32px rgba(6, 70, 63, 0.28); }
+.teim-rd .cp-proof__item:hover { background: rgba(0, 0, 0, 0.16); border-color: rgba(255, 255, 255, 0.6); transform: translateY(-3px); box-shadow: 0 14px 32px rgba(6, 70, 63, 0.28); }
 .teim-rd .cp-proof__swap { flex: 1 1 auto; min-height: 0; width: 100%; display: grid; place-items: center; }
 .teim-rd .cp-proof__swap > * { grid-area: 1 / 1; }
 .teim-rd .cp-proof__ic { display: grid; place-items: center; color: #fff; opacity: 1; transition: opacity 0.2s ease, transform 0.2s ease; }
@@ -520,7 +520,7 @@
 /* The plans-or-log-in switch. Same segmented shape the app's workspace
  * views use, in the press register: mono, uppercase, teal when chosen. */
 .teim-rd .cp-tabs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 0.25rem; margin: 1.4rem 0 0; padding: 0.25rem; background: var(--line-soft); border-radius: 12px; }
-.teim-rd .cp-tab { appearance: none; border: 0; background: transparent; cursor: pointer; min-height: 40px; padding: 0.5rem 0.9rem; border-radius: 9px; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); transition: background 0.14s ease, color 0.14s ease; }
+.teim-rd .cp-tab { appearance: none; border: 0; background: transparent; cursor: pointer; min-height: 40px; padding: 0.5rem 0.9rem; border-radius: 9px; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-2); transition: background 0.14s ease, color 0.14s ease; }
 .teim-rd .cp-tab[aria-selected="true"] { background: var(--bg); color: var(--dteal, #0A7F74); box-shadow: 0 1px 3px rgba(10, 15, 38, 0.08); }
 .teim-rd .cp-tab:focus-visible { outline: 2px solid var(--teal); outline-offset: 1px; }
 .teim-rd .cp-tabpanel { margin-top: 0.5rem; }
@@ -568,7 +568,7 @@
 .teim-rd .cp-cred__ic { display: grid; place-items: center; flex: none; color: #fff; }
 .teim-rd .cp-cred__ic svg { width: 18px; height: 18px; }
 .teim-rd .cp-cred__names { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; line-height: 1.7; color: #fff; overflow-wrap: anywhere; }
-.teim-rd .cp-cred__note { margin: 0.5rem 0 0; font-size: 0.66rem; line-height: 1.45; color: rgba(255, 255, 255, 0.72); max-width: 52ch; }
+.teim-rd .cp-cred__note { margin: 0.5rem 0 0; font-size: 0.66rem; line-height: 1.45; color: #fff; max-width: 52ch; }
 
 /* A capped dataset keeps its figure and loses its controls. The reader can
  * see the shape of what they do not have, and the way to open it sits where

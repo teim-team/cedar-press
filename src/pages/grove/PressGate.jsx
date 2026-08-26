@@ -170,7 +170,7 @@ export default function PressGate({ user }) {
   };
 
   return (
-    <div className="empty-state auth-split cp-split">
+    <main className="empty-state auth-split cp-split">
       <aside className="auth-hero cp-hero2">
         <span className="auth-hero__glow auth-hero__glow--a" aria-hidden="true" />
         <span className="auth-hero__glow auth-hero__glow--b" aria-hidden="true" />
@@ -452,6 +452,6 @@ export default function PressGate({ user }) {
           )}
         </div>
       </div>
-    </div>
+    </main>
   );
 }

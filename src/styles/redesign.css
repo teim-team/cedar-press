@@ -4406,8 +4406,11 @@ body.rd-wizard .teim-rd .cedar-widget--fullscreen { bottom: 0; right: 0; }
  * first (01/10) and every Grove surface after it draws them too; all of
  * them import redesign.css. */
 .teim-rd .gv-btn { display: inline-flex; align-items: center; justify-content: center; font-family: var(--sans); font-weight: 600; font-size: 0.9rem; border-radius: 10px; padding: 0.55rem 0.95rem; border: 1px solid var(--line); }
-.teim-rd .gv-btn--primary { background: var(--teal); border-color: var(--teal); color: #fff; }
-.teim-rd .gv-btn--primary:hover { background: var(--teal-dark); border-color: var(--teal-dark); }
+/* White on --teal is 2.56:1 — below AA, and below even the 3:1 large-text
+   floor. --dteal is the token the palette already reserves for teal that
+   has to carry text; white on it clears 4.5:1. */
+.teim-rd .gv-btn--primary { background: var(--dteal); border-color: var(--dteal); color: #fff; }
+.teim-rd .gv-btn--primary:hover { background: var(--ink); border-color: var(--ink); }
 .teim-rd .gv-btn--quiet { color: var(--dteal); border-color: var(--teal-line); background: var(--bg); }
 .teim-rd .gv-btn--quiet:hover { background: var(--teal-tint); }
 

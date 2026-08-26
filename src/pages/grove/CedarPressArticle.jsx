@@ -210,7 +210,7 @@ export default function CedarPressArticle() {
   if (!article || !article.hosted) {
     return (
       <div className="teim-rd teim-rd--paper">
-        <div className="cp">
+        <main className="cp">
           <PressMast section="articles" />
           <PressBack />
           <section className="cp-nh">
@@ -225,7 +225,7 @@ export default function CedarPressArticle() {
               Back home <span aria-hidden="true">&#8594;</span>
             </Link>
           </p>
-        </div>
+        </main>
       </div>
     );
   }
@@ -238,7 +238,7 @@ export default function CedarPressArticle() {
 
   return (
     <div className="teim-rd teim-rd--paper">
-      <div className="cp">
+      <main className="cp">
         <PressMast user={user} onSignOut={() => logout()} section="articles" />
 
         {/* Back goes to the briefs, not the hub: a piece belongs to the
@@ -343,7 +343,7 @@ export default function CedarPressArticle() {
 
         <PressFoot />
         <PressCedarFab />
-      </div>
+      </main>
     </div>
   );
 }

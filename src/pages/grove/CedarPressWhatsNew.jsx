@@ -85,7 +85,7 @@ export default function CedarPressWhatsNew() {
 
   return (
     <div className="teim-rd teim-rd--paper">
-      <div className="cp">
+      <main className="cp">
         <PressMast section="whats-new" />
 
         {/* Title across the page rather than down a 62ch column: this is the
@@ -205,7 +205,7 @@ export default function CedarPressWhatsNew() {
 
         <PressFoot />
         <PressCedarFab />
-      </div>
+      </main>
     </div>
   );
 }

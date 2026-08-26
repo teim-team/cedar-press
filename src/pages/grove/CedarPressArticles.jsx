@@ -41,7 +41,7 @@ function ArticleCard({ article, compact = false }) {
           {article.demonstration ? "Demonstration" : article.kind || "Original research"}
           <b>{dataset?.name || article.tag}</b>
         </span>
-        <h3 className="cp-art__title">{article.title}</h3>
+        <h2 className="cp-art__title">{article.title}</h2>
         <p className="cp-art__dek">{article.dek}</p>
         <span className="cp-art__meta">
           {article.date} · from {dataset?.name}
@@ -77,7 +77,7 @@ export default function CedarPressArticles() {
   }
   return (
     <div className="teim-rd teim-rd--paper">
-      <div className="cp">
+      <main className="cp">
         <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="articles" />
 
         {/* The page says what it is: standing alone, it cannot borrow the
@@ -112,7 +112,7 @@ export default function CedarPressArticles() {
 
         <PressCedarFab />
         <PressFoot />
-      </div>
+      </main>
     </div>
   );
 }
