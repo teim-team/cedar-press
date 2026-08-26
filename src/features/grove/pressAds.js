@@ -27,12 +27,23 @@
  * 6. Always labelled, in the page's own chrome register, above the unit
  *    rather than under it.
  *
- * UNSOLD IS INVISIBLE
- * `creativeFor` returns null today because there is no inventory, and a slot
- * with no creative renders no DOM at all. Not an empty box, not a reserved
- * height, not a margin. A page with nothing sold has to look like a page that
- * was never designed to sell anything, which is also the state to check first
- * whenever this changes.
+ * UNSOLD IS AN INVITATION, ON THE SLOTS THAT CARRY ONE
+ * `creativeFor` returns null because there is no inventory. A slot with no
+ * creative used to render no DOM at all, on the reasoning that a page with
+ * nothing sold should look like a page that was never designed to sell
+ * anything. That was the wrong trade for a product still finding its
+ * advertisers: the people reading these collections are tribal enterprises
+ * and the firms working with them, which is to say they are the buyers, and
+ * an invisible slot cannot tell them the space exists.
+ *
+ * So an unsold slot marked `house` renders the invitation instead. The rest
+ * still render nothing, and that distinction is the whole point: a hosted
+ * article carries four slots, and four "advertise here" panels down one piece
+ * reads as a publication nobody buys. One per page, never more.
+ *
+ * Rules 1 through 3 below are unchanged and apply to the invitation exactly
+ * as they apply to a booked unit. A house panel is a sponsorship unit; it
+ * just has not been sold yet.
  *
  * SEEING THE LAYOUT
  * Append `?ads=demo` to any Cedar Press URL to draw every slot as a dashed
@@ -42,6 +53,7 @@
 
 /** The slots, by id. A unit may only appear in one of these. */
 export const AD_SLOT = Object.freeze({
+  OVERVIEW: "overview",
   BRIEFS: "briefs",
   FEED: "feed",
   ARTICLE_RAIL: "article-rail",
@@ -79,12 +91,23 @@ export const AD_SLOT = Object.freeze({
  */
 export const AD_SLOTS = Object.freeze([
   Object.freeze({
+    id: AD_SLOT.OVERVIEW,
+    name: "Overview strip",
+    where: "Cedar Press overview, under the section index",
+    size: "728 × 90",
+    shape: "strip",
+    height: "5.6rem",
+    house: true,
+    note: "The first page a subscriber lands on, under the six sections and inside that region rather than on the seam below it. Never beside a figure: the overview names no numbers.",
+  }),
+  Object.freeze({
     id: AD_SLOT.BRIEFS,
     name: "Briefs strip",
     where: "Cedar Press reader, under the articles and inside their section",
     size: "728 × 90",
     shape: "strip",
     height: "5.6rem",
+    house: true,
     note: "The only unit on the reader, and it sits in the editorial region rather than on the seam between two of them.",
   }),
   Object.freeze({
@@ -94,6 +117,7 @@ export const AD_SLOTS = Object.freeze([
     size: "728 × 90",
     shape: "strip",
     height: "5.6rem",
+    house: true,
     note: "Inside the feed, at the point a reader chooses to keep going.",
   }),
   Object.freeze({
@@ -103,6 +127,7 @@ export const AD_SLOTS = Object.freeze([
     size: "300 × 250",
     shape: "box",
     ratio: "300 / 250",
+    house: true,
     note: "Sticks with the reader down the piece. Contextual: the article names its subject and its collections.",
   }),
   Object.freeze({
@@ -152,6 +177,32 @@ export function slotSpec(id) {
  */
 export function creativeFor() {
   return null;
+}
+
+/** Where an advertising enquiry goes. */
+export const AD_ENQUIRY_HREF =
+  "mailto:contact@lumecon.ai?subject=Cedar%20Press%20advertising";
+
+/**
+ * The invitation an unsold `house` slot renders.
+ *
+ * It describes the readership rather than counting it. Cedar Press does not
+ * publish a circulation figure, and a number invented for a house panel would
+ * be the one fabricated claim on a product whose argument is that every figure
+ * is traceable — sold to the people most likely to check.
+ */
+export const AD_HOUSE = Object.freeze({
+  cap: "Sponsorship",
+  title: "Advertise on Cedar Press",
+  body:
+    "This space reaches the tribal governments, enterprises and the firms and analysts " +
+    "working with them. Display and sponsored content are sold through Tribal Business News.",
+  action: "Enquire about this space",
+});
+
+/** Whether an unsold slot invites a buyer rather than rendering nothing. */
+export function invitesBuyers(id) {
+  return slotSpec(id)?.house === true;
 }
 
 /**

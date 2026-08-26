@@ -30,12 +30,14 @@ import { Link } from "react-router";
 import { useAuth } from "../../context/useAuth";
 import { appUrl } from "../../features/grove/appLink.js";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
+import { AD_SLOT } from "../../features/grove/pressAds";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog";
 import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
 import { Contours } from "./pressAtmosphere";
 import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
+import PressAd from "./PressAd";
 import PressGate from "./PressGate";
 import PressHub from "./PressHub";
 
@@ -81,6 +83,10 @@ export default function CedarPress() {
             </p>
           </section>
           <PressHub />
+          {/* Under the sections, inside their region rather than on the seam
+              below it — rule 4. The overview names no figures, so this is the
+              one page where a unit is nowhere near a number. */}
+          <PressAd slot={AD_SLOT.OVERVIEW} />
         </div>
 
         {/* Screen two: the close and the footer, as one ending. The ending is

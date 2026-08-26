@@ -1570,6 +1570,38 @@
 .teim-rd .cp-ad--empty .cp-ad__slot b { font-weight: 700; letter-spacing: 0.14em; color: var(--ink-2); }
 .teim-rd .cp-ad--empty .cp-ad__slot { max-width: 46rem; }
 
+/* The unsold slot, inviting a buyer. --teal-tint is the palette's lightest
+ * green and is already what the page uses for a surface that is present but
+ * not shouting; the hairline is the same teal at the weight the tiles use.
+ * Deliberately not white: the point of the panel is that the space reads as
+ * space, and against a white page a white panel is nothing at all.
+ *
+ * A strip lays out across the row and a box stacks, because the two shapes
+ * are a 728x90 band under a section and a 300x250 in an article rail, and
+ * one arrangement cannot serve both. */
+.teim-rd .cp-ad--house .cp-ad__house { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 2rem; padding: 1.15rem 1.4rem; border: 1px solid var(--teal-line); border-radius: 12px; background: var(--teal-tint); }
+.teim-rd .cp-ad__housetitle { flex: 0 0 auto; margin: 0; font-family: var(--sans); font-size: 1.02rem; font-weight: 800; letter-spacing: -0.01em; color: var(--ink); }
+.teim-rd .cp-ad__housebody { flex: 1 1 22rem; min-width: 0; margin: 0; font-size: 0.92rem; line-height: 1.5; color: var(--ink-2); }
+.teim-rd .cp-ad__houseact { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 0.45rem; min-height: 44px; font-family: var(--sans); font-size: 0.94rem; font-weight: 700; color: var(--dteal); text-decoration: none; border-bottom: 2px solid transparent; transition: border-color 0.18s ease, gap 0.18s ease; }
+.teim-rd .cp-ad__houseact:hover { border-bottom-color: var(--dteal); gap: 0.75rem; }
+@media (prefers-reduced-motion: reduce) {
+  .teim-rd .cp-ad__houseact { transition: none; }
+  .teim-rd .cp-ad__houseact:hover { gap: 0.45rem; }
+}
+/* In a rail, and on a phone, the panel is a column: 300px wide has no room to
+ * put a title, a paragraph and a link beside each other.
+ *
+ * The flex bases have to be reset with the direction. `flex: 1 1 22rem` on
+ * the body is a width while the panel is a row and a *height* the moment it
+ * is a column, which gave the rail panel 22rem of empty green under two
+ * lines of text. Anything with a basis needs to lose it here. */
+.teim-rd .cp-ad--box.cp-ad--house .cp-ad__house { flex-direction: column; flex-wrap: nowrap; align-items: flex-start; gap: 0.55rem; }
+.teim-rd .cp-ad--box.cp-ad--house .cp-ad__housebody { flex: 0 0 auto; }
+@media (max-width: 720px) {
+  .teim-rd .cp-ad--house .cp-ad__house { flex-direction: column; flex-wrap: nowrap; align-items: flex-start; gap: 0.55rem; padding: 1.05rem 1.15rem; }
+  .teim-rd .cp-ad--house .cp-ad__housebody { flex: 0 0 auto; }
+}
+
 /* ── What's new: one feed, not a changelog per dataset ───────────────────── */
 .teim-rd .cp-new { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.6rem 1.6rem; }
 .teim-rd .cp-new__item { font-size: 0.92rem; color: var(--ink-2); }

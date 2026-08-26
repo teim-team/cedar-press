@@ -181,6 +181,35 @@ test.describe("Ask Cedar", () => {
   });
 });
 
+test.describe("sponsorship", () => {
+  // Nothing is booked, so every house slot shows the invitation to buy it.
+  // One per page and never more, and never on a trust surface — Methods
+  // exists to be believed and carries no inventory at any price.
+  for (const { name, path, expected } of [
+    { name: "the overview", path: "/", expected: 1 },
+    { name: "Articles", path: "/articles", expected: 1 },
+    { name: "an article", path: "/articles/brief-deals", expected: 1 },
+    { name: "What's new", path: "/whats-new", expected: 1 },
+    { name: "Methods", path: "/methods", expected: 0 },
+  ]) {
+    test(`${name} carries ${expected} invitation(s)`, async ({ page }) => {
+      await signIn(page);
+      await page.goto(path);
+      await expect(page.locator(".cp-ad--house")).toHaveCount(expected);
+      if (!expected) return;
+      // Labelled above itself, so nobody reads a house panel as editorial.
+      await expect(page.locator(".cp-ad--house .cp-ad__cap")).toHaveText("Sponsorship");
+      // Laid out, not collapsed: the panel switches to a column in a rail and
+      // on a phone, and the flex bases have to switch with it. Left unreset,
+      // the body's 22rem basis becomes a height and the panel grows a screen
+      // of empty green under two lines of text.
+      const box = await page.locator(".cp-ad--house").first().boundingBox();
+      expect(box.height).toBeLessThan(360);
+      expect(box.height).toBeGreaterThan(60);
+    });
+  }
+});
+
 test.describe("the stylesheet", () => {
   // press.css was once truncated mid-file by a bad edit and the build was
   // perfectly happy: CSS has no compile step to fail, the browser drops the
