@@ -28,8 +28,12 @@ sign-in), everything behind it works, and nothing touches a server yet.
   session shape (`workspace_tier`) already matches what `workspaceTier.js`
   reads. Access-code activation stays gated off by
   `pressSignup.PRESS_ACTIVATION_AVAILABLE`, exactly as in the app.
-- **The reader** — briefs, the collections shelf with per-tier reach and
-  downloads, the citation register, the Grove teaser, the close.
+- **The hub** — the front page states what the product is and opens four
+  square doors (Articles, Data, What's new, Methods), the same tiles on
+  desktop and phone; each carries a ? that says what is behind it.
+- **Behind the doors** — `/articles` (the briefs' front page) and `/data`
+  (the shelves with per-tier reach, downloads and the Grove boundary),
+  gated like the front page.
 - **Satellite pages** — `/methods`, `/tribal-data-request`,
   `/research-access`, `/whats-new`, and hosted articles at `/articles/:id`.
 - **Theme** — the press pages pin the paper look in dark mode by design

@@ -29,6 +29,15 @@ seams below — when the app's press surface moves, re-port and re-apply these.
   signed-in address (the preview account is shared; the app's rail owns this
   there).
 
+## The hub (standalone divergence)
+
+The app's one-page reader is split here: the front page keeps the hero,
+the traceability claim and the close, and opens four square nav tiles
+(`PressHub.jsx`) onto `/articles` (`CedarPressArticles.jsx`) and `/data`
+(`CedarPressData.jsx`), with the masthead/footer shared via
+`PressChrome.jsx`. When re-porting from the app, its reader sections map
+onto those two pages rather than back onto the front page.
+
 ## Mobile-specific behavior (standalone additions)
 
 Phones are a first-class surface here, not a shrunk desktop; these diverge
