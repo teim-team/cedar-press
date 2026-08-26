@@ -30,12 +30,14 @@ import { Link } from "react-router";
 import { useAuth } from "../../context/useAuth";
 import { appUrl } from "../../features/grove/appLink.js";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
+import { AD_SLOT } from "../../features/grove/pressAds";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog";
 import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
 import { Contours } from "./pressAtmosphere";
 import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
+import PressAd from "./PressAd";
 import PressGate from "./PressGate";
 import PressHub from "./PressHub";
 
@@ -57,30 +59,42 @@ export default function CedarPress() {
 
   return (
     <div className="teim-rd teim-rd--paper">
-      <main id="cp-main" className="cp cp-page">
+      <main id="cp-main" className="cp cp-page cp--screens cp--deepfoot">
         <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="home" />
 
         {loading ? null : (
           <>
-        {/* The headline is deliberately not the tier lines: it says what the
+        {/* Screen one: what this is, and where to go, together. Apart they
+            were two thin bands of content floating in white; the statement is
+            what the six sections are an answer to, so it sits above them and
+            the pair fills a screen between them.
+
+            The headline is deliberately not the tier lines: it says what the
             product is for and lets the pages behind the doors explain the
             ladder themselves. The mission line lives at the close. */}
-        <section className="cp-hero">
-          <h1>Know what&rsquo;s shaping Indian Country.</h1>
-          <p>
-            Original intelligence collections, data-driven insights, transparent research and
-            Cedar, your AI economic analyst, built to make Indian Country easier to understand.
-            Every collection begins with public records, is enhanced through original research
-            and entity resolution and stays current as new information becomes available.
-          </p>
-        </section>
+        <div className="cp-screen cp-open">
+          <section className="cp-hero">
+            <h1>Know what&rsquo;s shaping Indian Country.</h1>
+            <p>
+              Original intelligence collections, data-driven insights, transparent research and
+              Cedar, your AI economic analyst, built to make Indian Country easier to understand.
+              Every collection begins with public records, is enhanced through original research
+              and entity resolution and stays current as new information becomes available.
+            </p>
+          </section>
+          <PressHub />
+          {/* Under the sections, inside their region rather than on the seam
+              below it — rule 4. The overview names no figures, so this is the
+              one page where a unit is nowhere near a number. */}
+          <PressAd slot={AD_SLOT.OVERVIEW} />
+        </div>
 
-
-        <PressHub />
-
-        {/* The ending. One closing statement and three quiet actions rather
-            than two equal boxes: a page that has just argued for a maintained
-            research product should end on the maintenance. */}
+        {/* Screen two: the close and the footer, as one ending. The ending is
+            one closing statement and two quiet actions rather than two equal
+            boxes — a page that has just argued for a maintained research
+            product should end on the maintenance — and the footer is the last
+            of it rather than a separate strip below the last of it. */}
+        <div className="cp-screen cp-end">
         <section className="cp-surf cp-surf--deep cp-close" id="more" aria-label="What happens next">
           <Contours strength={1.2} />
           <div className="cp-close__in">
@@ -100,6 +114,8 @@ export default function CedarPress() {
                 </li>
               ))}
             </ul>
+            {/* Under the statement, in its column, rather than on a rule of
+                their own across the page. Two links are not a section. */}
             <div className="cp-close__acts">
               <a
                 className="cp-close__act"
@@ -111,21 +127,14 @@ export default function CedarPress() {
                 Explore Cedar Grove <span aria-hidden="true">&#8594;</span>
               </a>
             </div>
-            {/* The mission line, kept as a mission line. It is the reason the
-                product exists rather than a description of it, so it closes
-                the page instead of opening it. */}
-            <p className="cp-close__mission">
-              <span>Why we build this</span>
-              Making Indian Country impossible to overlook.
-            </p>
           </div>
         </section>
+          <PressFoot deep />
+        </div>
 
         <PressCedarFab />
           </>
         )}
-
-        <PressFoot />
       </main>
     </div>
   );

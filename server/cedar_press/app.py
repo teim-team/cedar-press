@@ -33,13 +33,22 @@ from __future__ import annotations
 import io
 import os
 
-from fastapi import Depends, FastAPI, HTTPException, Response
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi.exception_handlers import http_exception_handler
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 
-from cedar_press import repository
-from cedar_press.session import Session, current_session, sign_in, sign_out
+from cedar_press import codes, repository
+from cedar_press.session import (
+    Session,
+    account_exists,
+    create_account,
+    current_session,
+    issue,
+    sign_in,
+    sign_out,
+)
 
 app = FastAPI(
     title="Cedar Press",
@@ -94,6 +103,27 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
+@app.exception_handler(HTTPException)
+async def _flatten_error(request: Request, exc: HTTPException):
+    """Errors as `{code, message}`, which is the shape the client reads.
+
+    FastAPI wraps `detail` in `{"detail": ...}`. The client reads
+    `payload.code` and `payload.message` off the top level (see
+    `src/api.js`), so every carefully worded refusal the routes raise was
+    arriving as "Request failed (401)." — the wording was written, sent, and
+    then thrown away one level down. Raising the flat shape in each route
+    instead would work and would also mean every future route has to
+    remember; doing it here means none of them do.
+    """
+    if isinstance(exc.detail, dict) and "code" in exc.detail:
+        return JSONResponse(
+            status_code=exc.status_code,
+            content=exc.detail,
+            headers=getattr(exc, "headers", None),
+        )
+    return await http_exception_handler(request, exc)
+
+
 @app.get("/me")
 def me(session: Session = Depends(require_session)) -> dict[str, object]:
     return session.as_payload()
@@ -107,7 +137,10 @@ def login(credentials: Credentials, response: Response) -> dict[str, object]:
             status_code=401,
             detail={
                 "code": "INVALID_CREDENTIALS",
-                "message": "That sign-in did not work. Check the address and password on your Cedar Press confirmation.",
+                "message": (
+                    "That sign-in did not work. Check the address and password on "
+                    "your Cedar Press confirmation."
+                ),
             },
         )
     return session.as_payload()
@@ -116,6 +149,80 @@ def login(credentials: Credentials, response: Response) -> dict[str, object]:
 @app.post("/auth/logout", status_code=204)
 def logout(response: Response) -> None:
     sign_out(response)
+
+
+class CodeCheck(BaseModel):
+    code: str
+    email: str
+
+
+class Activation(BaseModel):
+    code: str
+    email: str
+    password: str
+
+
+def _refuse(error_code: str) -> HTTPException:
+    """A refusal the client already has copy for.
+
+    The message is a fallback: ``pressSignupError`` renders its own wording
+    per code, and this is what a caller that is not the client sees.
+    """
+    return HTTPException(
+        status_code=400,
+        detail={"code": error_code, "message": "That code could not be activated."},
+    )
+
+
+@app.post("/press/activation/validate", status_code=204)
+def validate_code(check: CodeCheck) -> None:
+    """Step one: is this code real, unspent, unexpired, and theirs?
+
+    Creates nothing. The client asks this before showing the password field
+    so a wrong code costs a message rather than a half-made account, and so
+    the first screen a subscriber sees is two fields rather than four.
+    """
+    issued, error = codes.check(check.code, check.email)
+    if error:
+        raise _refuse(error)
+    # Checked here as well as at activation: a reader who already has an
+    # account should be sent to sign-in now, not after choosing a password.
+    if account_exists(issued.email):
+        raise _refuse(codes.EMAIL_IN_USE)
+
+
+@app.post("/press/activation")
+def activate(activation: Activation, response: Response) -> dict[str, object]:
+    """Step two: create the account and sign them in.
+
+    The code is re-checked rather than trusted from step one. Step one set no
+    state, so nothing carries between the two calls, and an activation route
+    that believed a client's word about a code it validated a moment ago
+    would not need the code at all.
+
+    The tier comes off the issued code, never off the request. Letting a
+    caller name their own tier is how an activation route becomes an
+    escalation route.
+    """
+    issued, error = codes.check(activation.code, activation.email)
+    if error:
+        raise _refuse(error)
+    if account_exists(issued.email):
+        raise _refuse(codes.EMAIL_IN_USE)
+    if len(activation.password) < 10:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "PASSWORD_TOO_SHORT",
+                "message": "Choose a password of at least 10 characters.",
+            },
+        )
+
+    session = create_account(issued.email, activation.password, issued.tier)
+    # Spent only once the account exists. The other order loses a subscriber
+    # their code if account creation fails.
+    codes.spend(issued.code)
+    return issue(session, response).as_payload()
 
 
 @app.get("/press/collections")

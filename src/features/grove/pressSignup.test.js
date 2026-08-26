@@ -56,13 +56,15 @@ test("display grouping never changes what the code is", () => {
   assert.equal(normalizePressCode(formatPressCode(typed)), normalizePressCode(typed));
 });
 
-// Activation has no server routes yet (PRESS_ACTIVATION_AVAILABLE), so the
-// gate must open on sign-in for every browser: a code screen that ends at a
-// 404 is a broken promise. The activation-first behaviors return with the
-// flag, and the second assertion here starts failing on the commit that
-// flips it, which is the reminder to restore them.
-test("with activation unavailable, every browser opens on sign-in", () => {
-  assert.equal(PRESS_ACTIVATION_AVAILABLE, false);
+// Activation follows connectivity, because only a connected build can reach
+// the routes that validate a code. A standalone build — which is what
+// cedarpress.ai serves, a static site with no backend — must open on
+// sign-in for every browser: a code screen with nothing behind it takes a
+// subscriber's code and tells them their membership does not work.
+//
+// This suite runs with no VITE_API_URL, so it is the standalone case.
+test("standalone, every browser opens on sign-in", () => {
+  assert.equal(PRESS_ACTIVATION_AVAILABLE, false, "standalone must not offer activation");
   assert.equal(initialPressStep(fakeStorage()), PRESS_STEP.SIGN_IN);
 });
 

@@ -35,3 +35,17 @@ target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
+# B008 forbids a call in an argument default, which is how FastAPI declares a
+# dependency: `session = Depends(current_session)` is the framework's own
+# spelling, and rewriting it inside every handler is what the rule is warning
+# against, not what it is asking for.
+ignore = ["B008"]
+
+[tool.ruff.lint.per-file-ignores]
+# Carried over from Cedar Grove's package as-is, and kept that way: these hold
+# the inclusion rules and the claim-linting phrase tables, and every line this
+# repository rewraps is a line that has to be reconciled by hand the next time
+# the copy still maintained there changes. Line length is the only rule
+# relaxed; the ones that catch bugs stay on.
+"**/claims.py" = ["E501"]
+"**/collections.py" = ["E501"]

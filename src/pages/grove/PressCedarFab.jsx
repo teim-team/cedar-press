@@ -94,12 +94,14 @@ export function PressCedarFab() {
         aria-label="Ask Cedar"
         onClick={() => setOpen((current) => !current)}
       >
+        {/* The platform's launcher, to the mark: status dot, then the name
+            with the surface it is being asked about under it. Same markup as
+            teim-app's CedarWidget so the control a subscriber meets here is
+            the control they meet inside Cedar Grove. */}
         <span className="cedar-widget__status-dot" aria-hidden="true" />
         <span className="cedar-widget__launcher-copy">
           <span className="cedar-widget__launcher-label">Ask Cedar</span>
-          <span className="cedar-widget__launcher-context">
-            {"Cedar Press"}
-          </span>
+          <span className="cedar-widget__launcher-context">Cedar Press</span>
         </span>
       </button>
     </div>

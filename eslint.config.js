@@ -35,4 +35,11 @@ export default defineConfig([
     files: ["**/*.test.js"],
     languageOptions: { globals: globals.node },
   },
+  {
+    // Playwright's config and the smoke suite are node too. The spec's
+    // page.evaluate callbacks run in the browser, so both sets of globals
+    // are in scope in the same file and both have to be declared.
+    files: ["playwright.config.js", "tests/**/*.spec.js"],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+  },
 ]);
