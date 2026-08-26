@@ -19,7 +19,7 @@ import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import { Contours } from "./pressAtmosphere";
 import PressAd from "./PressAd";
 import { PressCedarFab } from "./PressCedarFab";
-import { PressBack, PressFoot, PressMast } from "./PressChrome";
+import { PressFoot, PressMast } from "./PressChrome";
 import PressGate from "./PressGate";
 
 function ArticleCard({ article, compact = false }) {
@@ -76,8 +76,7 @@ export default function CedarPressArticles() {
   return (
     <div className="teim-rd teim-rd--paper">
       <div className="cp">
-        <PressMast user={entitled ? user : null} onSignOut={() => logout()} page="Articles" />
-        <PressBack />
+        <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="articles" />
 
         {/* The page says what it is: standing alone, it cannot borrow the
             reader's hero for context the way it did as a section. */}

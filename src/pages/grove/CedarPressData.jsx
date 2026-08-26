@@ -18,7 +18,7 @@ import { PRESS_METHODS_PATH } from "../../features/grove/pressRoutes";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import { Halo } from "./pressAtmosphere";
 import { PressCedarFab } from "./PressCedarFab";
-import { PressBack, PressFoot, PressMast } from "./PressChrome";
+import { PressFoot, PressMast } from "./PressChrome";
 import PressGate from "./PressGate";
 import PressShelf from "./PressShelf";
 
@@ -50,8 +50,7 @@ export default function CedarPressData() {
   return (
     <div className="teim-rd teim-rd--paper">
       <div className="cp">
-        <PressMast user={entitled ? user : null} onSignOut={() => logout()} page="Data" />
-        <PressBack />
+        <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="data" />
 
         <section className="cp-mh">
           <p className="cp-hero__access">The collections</p>

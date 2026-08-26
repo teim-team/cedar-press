@@ -36,7 +36,7 @@ import {
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import { AD_SLOT } from "../../features/grove/pressAds";
 import PressAd from "./PressAd";
-import { PressBack, PressFoot, PressMast } from "./PressChrome";
+import { PressFoot, PressMast } from "./PressChrome";
 import { PressCedarFab } from "./PressCedarFab";
 
 /** One screen's worth. More arrives a page at a time, on request. */
@@ -84,8 +84,7 @@ export default function CedarPressWhatsNew() {
   return (
     <div className="teim-rd teim-rd--paper">
       <div className="cp">
-        <PressMast page="What’s new" />
-        <PressBack />
+        <PressMast section="whats-new" />
 
         {/* Title across the page rather than down a 62ch column: this is the
             widest thing on the page and it was using half of it. The standing

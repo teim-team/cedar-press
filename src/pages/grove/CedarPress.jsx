@@ -61,7 +61,7 @@ export default function CedarPress() {
   return (
     <div className="teim-rd teim-rd--paper">
       <div className="cp cp--deepfoot">
-        <PressMast user={entitled ? user : null} onSignOut={() => logout()} home />
+        <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="home" />
 
         {loading ? null : (
           <>

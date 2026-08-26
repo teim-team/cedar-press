@@ -15,7 +15,7 @@ import { Link } from "react-router";
 import { LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_METHODS_PATH, PRESS_PATH } from "../../features/grove/pressRoutes";
 import { PressCedarFab } from "./PressCedarFab";
-import { PressBack, PressFoot, PressMast } from "./PressChrome";
+import { PressFoot, PressMast } from "./PressChrome";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 
 const REQUEST_HREF =
@@ -38,8 +38,7 @@ export default function CedarPressResearchAccess() {
   return (
     <div className="teim-rd teim-rd--paper">
       <div className="cp">
-        <PressMast page="Limited research access" />
-        <PressBack />
+        <PressMast />
 
         <section className="cp-trh">
           <div>

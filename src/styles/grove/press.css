@@ -133,7 +133,7 @@
  * where you already were; it carries every page now, in one column so the
  * nav reads as a list of places rather than a sentence of links. */
 .teim-rd .cp-foot__nav { display: flex; flex-wrap: wrap; gap: 0.5rem 1.4rem; }
-.teim-rd .cp-foot__nav a { display: inline-flex; align-items: center; color: var(--ink-2); text-decoration: none; border-bottom: 1px solid transparent; padding-bottom: 2px; }
+.teim-rd .cp-foot__nav a { display: inline-flex; align-items: center; min-height: 34px; color: var(--ink-2); text-decoration: none; border-bottom: 1px solid transparent; padding-bottom: 2px; }
 /* A finger needs more than a line of 0.66rem mono: on touch every footer
  * link gets a full-height target without the row growing taller. */
 @media (hover: none) {
@@ -331,7 +331,7 @@
   .teim-rd .cp { padding-left: 1.15rem; padding-right: 1.15rem; }
   /* The band's inner gutter changes on the container's breakpoint, not its
      own, or band content steps off the masthead's left edge between them. */
-  .teim-rd .cp-mast { flex-wrap: wrap; row-gap: 0.35rem; }
+  .teim-rd .cp-mast__top { row-gap: 0.35rem; }
   .teim-rd .cp-mast__user { margin-left: 0; flex: 1 1 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
 
@@ -623,32 +623,43 @@
 .teim-rd .cp-band__price { font-family: var(--sans); font-size: 1.18rem; font-weight: 800; letter-spacing: -0.015em; color: var(--dteal); margin: 0.55rem 0 0; }
 .teim-rd .cp-band--fill .cp-band__price { color: #fff; }
 .teim-rd .cp-gt__pricehead { font-family: var(--sans); font-size: 1.12rem; font-weight: 800; letter-spacing: -0.015em; color: var(--ink); margin: 0.9rem 0 0; }
-/* ── The hub ─────────────────────────────────────────────────────────────
- * The whole reader behind four squares, sized like the collection tiles
- * because those squares already proved the size on both pointers. The same
- * grid renders on desktop and phone — one row of four where it fits, 2x2
- * where it does not — so the two navigations stay symmetric. Each tile
- * carries a ? in its corner; the line under the grid answers it. */
-.teim-rd .cp-hub__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, 10.5rem); justify-content: start; gap: 0.7rem; }
-.teim-rd .cp-hub__grid > li { position: relative; display: block; }
-.teim-rd .cp-hub__tile { box-sizing: border-box; width: 10.5rem; height: 10.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.7rem; padding: 0.6rem; border: 1px solid var(--line); background: var(--bg); text-align: center; color: var(--ink); text-decoration: none; transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease; }
-.teim-rd .cp-hub__tile:hover { border-color: var(--teal); transform: translateY(-3px); box-shadow: 0 12px 28px rgba(10, 15, 38, 0.12); }
-.teim-rd .cp-hub__mark { display: grid; place-items: center; color: var(--dteal); }
-.teim-rd .cp-hub__mark svg { width: 64px; height: 64px; }
-.teim-rd .cp-hub__name { font-family: var(--sans); font-size: 1.02rem; font-weight: 800; letter-spacing: -0.01em; }
-/* The ?: its own control beside the tile's link, never inside it, because a
- * button inside an anchor is two answers to one tap. */
-.teim-rd .cp-hub__help { position: absolute; top: 0.55rem; right: 0.55rem; z-index: 1; width: 2rem; height: 2rem; border-radius: 50%; border: 1px solid var(--teal-line); background: var(--bg); color: var(--dteal); font-family: var(--mono); font-size: 0.82rem; font-weight: 700; line-height: 1; cursor: help; }
-/* The circle stays small enough to read as a footnote, but the finger gets
- * a 48px target: the pseudo-element is part of the button's hit area. */
-.teim-rd .cp-hub__help::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; }
-.teim-rd .cp-hub__help:hover, .teim-rd .cp-hub__help[aria-expanded="true"] { background: var(--teal-tint); border-color: var(--teal); }
-.teim-rd .cp-hub__note { max-width: 62ch; min-height: 2.6em; margin: 1rem 0 0; font-size: 0.95rem; line-height: 1.55; color: var(--ink-2); }
-/* Phones: a strict 2x2, Windows-phone style — the squares scale with the
- * screen instead of wrapping to a single column. */
+/* ── The section nav ─────────────────────────────────────────────────────
+ * On every page, not handed out once by the front page: a reader who
+ * arrived from a citation or a shared brief can cross the service without
+ * going home first. Text, not icons — this is a professional intelligence
+ * service, and a row of glyphs reads as a phone launcher. */
+.teim-rd .cp-mast { display: block; padding: 1.4rem 0 0; }
+.teim-rd .cp-mast__top { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; padding-bottom: 1rem; }
+.teim-rd .cp-nav { display: flex; flex-wrap: wrap; gap: 0 1.8rem; border-top: 1px solid var(--line-soft); }
+.teim-rd .cp-nav__item { display: inline-flex; align-items: center; min-height: 44px; font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s ease, border-color 0.15s ease; }
+.teim-rd .cp-nav__item:hover { color: var(--ink); }
+.teim-rd .cp-nav__item[aria-current="page"] { color: var(--dteal); border-bottom-color: var(--teal); }
+/* Phones: the row scrolls rather than wrapping into a block of chrome
+ * taller than the headline under it. */
 @media (max-width: 640px) {
-  .teim-rd .cp-hub__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 22.5rem; }
-  .teim-rd .cp-hub__tile { width: 100%; height: auto; aspect-ratio: 1 / 1; }
+  .teim-rd .cp-nav { flex-wrap: nowrap; overflow-x: auto; gap: 0 1.3rem; scrollbar-width: none; }
+  .teim-rd .cp-nav::-webkit-scrollbar { display: none; }
+  .teim-rd .cp-nav__item { white-space: nowrap; }
+}
+
+/* ── The section index ───────────────────────────────────────────────────
+ * The front page's directory. Each row states what the section holds and
+ * where it stands, so the page reports rather than decorates: no icon to
+ * decode, no question mark to poke. */
+.teim-rd .cp-idx__list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.teim-rd .cp-idx__list > li { border-bottom: 1px solid var(--line); }
+.teim-rd .cp-idx__row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 0.4rem 1.6rem; padding: 1.15rem 0.6rem 1.15rem 0; color: var(--ink); text-decoration: none; transition: background 0.14s ease, padding-left 0.14s ease; }
+.teim-rd .cp-idx__row:hover { background: var(--teal-tint); padding-left: 0.7rem; }
+.teim-rd .cp-idx__id { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
+.teim-rd .cp-idx__name { font-family: var(--sans); font-size: 1.24rem; font-weight: 800; letter-spacing: -0.015em; color: var(--ink); }
+.teim-rd .cp-idx__what { font-size: 0.95rem; line-height: 1.5; color: var(--ink-2); max-width: 68ch; }
+.teim-rd .cp-idx__meta { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-align: right; white-space: nowrap; }
+.teim-rd .cp-idx__go { font-size: 1.05rem; color: var(--dteal); }
+@media (max-width: 780px) {
+  .teim-rd .cp-idx__row { grid-template-columns: minmax(0, 1fr) auto; padding: 1rem 0.4rem 1rem 0; }
+  .teim-rd .cp-idx__meta { grid-column: 1; grid-row: 2; text-align: left; white-space: normal; }
+  .teim-rd .cp-idx__go { grid-column: 2; grid-row: 1 / span 2; }
+  .teim-rd .cp-idx__name { font-size: 1.12rem; }
 }
 
 /* ── The badges ───────────────────────────────────────────────────────────

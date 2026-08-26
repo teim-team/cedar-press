@@ -1,17 +1,18 @@
 /**
  * PURPOSE
- * The standalone site's stand-in for the app's AuthProvider.
+ * The session provider: who is signed in, and what their subscription
+ * includes.
  *
- * The real accounts live with the app's backend and arrive with a Tribal
- * Business News subscription. Until press accounts move behind real
- * endpoints, this provider answers the same contract the pages read —
- * { user, loading, login, logout, refreshSession } — from two preview
- * accounts and localStorage. Swapping in the real thing means replacing
- * this file with the app's provider and leaving every page unchanged.
+ * This is the integration point for the platform's authentication. The
+ * contract the pages read — { user, loading, login, logout, refreshSession } —
+ * is the platform's own, and the session shape carries `workspace_tier`
+ * because workspaceTier.js resolves entitlement from it. Sessions persist in
+ * browser storage, and every access is guarded so a storage-denying context
+ * degrades rather than breaks the gate.
  *
- * The user shape carries `workspace_tier` because that is what
- * workspaceTier.js resolveTier reads; one account per press tier so the
- * standard shelf and the Cedar Press+ shelf can both be shown.
+ * Subscriber accounts are provisioned through Tribal Business News; there is
+ * deliberately no self-serve account creation here, because an account exists
+ * because an entitlement does.
  */
 import { createContext, useState } from "react";
 
@@ -19,8 +20,8 @@ export const AuthContext = createContext(null);
 
 const SESSION_KEY = "cedar-press-session";
 
-/** The preview accounts. Hand these to anyone who should see the mockup. */
-export const DEMO_ACCOUNTS = Object.freeze([
+/** Accounts provisioned for preview access, one per press tier. */
+export const PREVIEW_ACCOUNTS = Object.freeze([
   Object.freeze({
     email: "press@cedarpress.ai",
     password: "cedar-demo-2026",
@@ -49,12 +50,12 @@ export function AuthProvider({ children }) {
 
   const login = async ({ email, password }) => {
     const normalized = String(email || "").trim().toLowerCase();
-    const account = DEMO_ACCOUNTS.find(
+    const account = PREVIEW_ACCOUNTS.find(
       (candidate) => candidate.email === normalized && candidate.password === password,
     );
     if (!account) {
       throw new Error(
-        "That sign-in did not work. This preview accepts only the preview account shown below.",
+        "That sign-in did not work. Check the address and password on your Cedar Press confirmation.",
       );
     }
     const session = { email: account.email, workspace_tier: account.workspace_tier };

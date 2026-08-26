@@ -209,7 +209,7 @@ export default function CedarPressArticle() {
     return (
       <div className="teim-rd teim-rd--paper">
         <div className="cp">
-          <PressMast page="Not found" />
+          <PressMast section="articles" />
           <PressBack />
           <section className="cp-nh">
             <h1 className="cp-nh__title">That piece is not here.</h1>
@@ -237,15 +237,11 @@ export default function CedarPressArticle() {
   return (
     <div className="teim-rd teim-rd--paper">
       <div className="cp">
-        <PressMast
-          user={user}
-          onSignOut={() => logout()}
-          page={article.demonstration ? "Demonstration" : article.tag}
-        />
+        <PressMast user={user} onSignOut={() => logout()} section="articles" />
 
         {/* Back goes to the briefs, not the hub: a piece belongs to the
             articles page, and the footer carries the rest of the map. */}
-        <PressBack label="All Data Briefs" />
+        <PressBack label="All Data Briefs" to={PRESS_ARTICLES_PATH} />
 
         <article className="cp-ar">
           <header className="cp-ar__head">

@@ -1,123 +1,94 @@
-// The hub: the whole reader behind four squares.
+// The front page's index of the service.
 //
-// One page held everything and curated it well on a wide screen, but on a
-// phone the same page was a quarter hour of thumb. The hub gives every kind
-// of thing its own page and puts four doors on the front — articles, data,
-// what's new, methods, want more, feedback — as literal squares, sized like the collection tiles
-// because those squares already proved the size on both pointers. The same
-// grid renders on desktop and phone (one row where it fits, 2x2 where it
-// does not), so the two experiences stay symmetric instead of diverging.
-//
-// Every tile carries a ? in its corner: point at it (or tap it) and the
-// line below the grid says what is behind the door. The ? is its own
-// control beside the tile's link, never inside it, because a button inside
-// an anchor is two answers to one tap.
-import { useState } from "react";
+// This was a grid of icon tiles with a ? on each — a phone launcher, which
+// is the wrong register for an intelligence product, and it made the reader
+// poke at a question mark to learn what a section was. It is a directory
+// now: every section states its name, what it holds and where it currently
+// stands, so the front page reports rather than decorates. The counts are
+// read from the catalog rather than written here, so the index cannot claim
+// a section holds something it does not.
 import { Link } from "react-router";
 
+import { PRESS_ARTICLES } from "../../features/grove/pressArticles";
+import { PRESS_CATALOG, PRESS_HISTORY_FROM } from "../../features/grove/pressCatalog";
+import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
 import {
   PRESS_ARTICLES_PATH,
   PRESS_DATA_PATH,
   PRESS_METHODS_PATH,
   PRESS_WHATS_NEW_PATH,
 } from "../../features/grove/pressRoutes";
-import {
-  ArticlesIcon,
-  DataIcon,
-  FeedbackIcon,
-  MethodsIcon,
-  WantMoreIcon,
-  WhatsNewIcon,
-} from "./pressHubIcons";
 
-const DOORS = [
-  {
-    id: "articles",
-    label: "Articles",
-    to: PRESS_ARTICLES_PATH,
-    icon: ArticlesIcon,
-    what: "The Data Briefs: original research built from the collections, newest first.",
-  },
-  {
-    id: "data",
-    label: "Data",
-    to: PRESS_DATA_PATH,
-    icon: DataIcon,
-    what: "The collections themselves: what each one holds, and the release a click or tap away.",
-  },
-  {
-    id: "whats-new",
-    label: "What’s new",
-    to: PRESS_WHATS_NEW_PATH,
-    icon: WhatsNewIcon,
-    what: "Every release, dated and versioned, so anything you downloaded or cited can be traced.",
-  },
-  {
-    id: "methods",
-    label: "Methods",
-    to: PRESS_METHODS_PATH,
-    icon: MethodsIcon,
-    what: "How the collections are built, sourced and kept current — the reference for citing a number.",
-  },
-  // The upgrade path earns a door: the shelves a plan does not include yet
-  // live on the data page, under the locked band and the Grove boundary.
-  {
-    id: "more",
-    label: "Want more",
-    to: `${PRESS_DATA_PATH}#grove`,
-    icon: WantMoreIcon,
-    what: "What your plan does not include yet — Cedar Press+ and Cedar Grove — and the way to get each.",
-  },
-  // Feedback is surfaced, not buried in the footer: it goes to the team
-  // that builds the datasets and shapes what gets built next.
-  {
-    id: "feedback",
-    label: "Send feedback",
-    href: "mailto:contact@lumecon.ai?subject=Cedar%20Press%20feedback",
-    icon: FeedbackIcon,
-    what: "Tell the team what the data should do next, or what a page gets wrong. A person reads it.",
-  },
-];
+/** What sits on a Cedar Press shelf: the Grove-only collections are not it. */
+function pressCollections() {
+  return PRESS_CATALOG.filter((entry) => entry.shelf !== "grove");
+}
 
-const IDLE_NOTE =
-  "The whole reader, six doors. The ? on a tile says what is behind it.";
+function sections() {
+  const collections = pressCollections();
+  const earliest = collections
+    .map((entry) => entry.standardFrom ?? entry.historyFrom)
+    .filter(Boolean);
+  const newest = recentlyUpdated(1)[0];
+  return [
+    {
+      id: "articles",
+      label: "Articles",
+      to: PRESS_ARTICLES_PATH,
+      what: "Original research built from the collections, written for people who work in Indian Country's economy.",
+      meta: `${PRESS_ARTICLES.length} briefs · newest ${PRESS_ARTICLES[0].date}`,
+    },
+    {
+      id: "data",
+      label: "Data",
+      to: PRESS_DATA_PATH,
+      what: "The collections themselves: coverage, method and the release, downloadable with your subscription.",
+      meta: `${collections.length} collections · records from ${
+        earliest.length ? Math.min(...earliest) : PRESS_HISTORY_FROM
+      }`,
+    },
+    {
+      id: "whats-new",
+      label: "What’s new",
+      to: PRESS_WHATS_NEW_PATH,
+      what: "Every release, dated and versioned, so a figure you downloaded or cited can be traced to what changed.",
+      meta: newest ? `Last release ${formatUpdated(newest.updated)}` : "Release history",
+    },
+    {
+      id: "methods",
+      label: "Methods",
+      to: PRESS_METHODS_PATH,
+      what: "How collections are sourced, resolved to Native entities and kept current — the reference for citing a number.",
+      meta: "Sources · entity resolution · release policy",
+    },
+    {
+      id: "access",
+      label: "Plans and access",
+      to: `${PRESS_DATA_PATH}#grove`,
+      what: "What your subscription includes, what Cedar Press+ adds, and where Cedar Grove takes the same collections.",
+      meta: "Cedar Press · Cedar Press+ · Cedar Grove",
+    },
+  ];
+}
 
 export default function PressHub() {
-  const [help, setHelp] = useState(null);
-  const note = DOORS.find((door) => door.id === help)?.what;
   return (
-    <section className="cp-sec cp-hub" aria-label="Inside Cedar Press">
-      <span className="cp-sec__band">Inside Cedar Press</span>
-      <ul className="cp-hub__grid">
-        {DOORS.map((door) => (
-          <li key={door.id}>
-            {door.href ? (
-              <a className="cp-hub__tile" href={door.href}>
-                <span className="cp-hub__mark" aria-hidden="true">{door.icon}</span>
-                <span className="cp-hub__name">{door.label}</span>
-              </a>
-            ) : (
-              <Link className="cp-hub__tile" to={door.to}>
-                <span className="cp-hub__mark" aria-hidden="true">{door.icon}</span>
-                <span className="cp-hub__name">{door.label}</span>
-              </Link>
-            )}
-            <button
-              type="button"
-              className="cp-hub__help"
-              aria-label={`What is behind ${door.label}?`}
-              aria-expanded={help === door.id}
-              onClick={() => setHelp(door.id)}
-              onMouseEnter={() => setHelp(door.id)}
-              onFocus={() => setHelp(door.id)}
-            >
-              ?
-            </button>
+    <section className="cp-sec cp-idx" aria-label="Sections">
+      <span className="cp-sec__band">Sections</span>
+      <ul className="cp-idx__list">
+        {sections().map((section) => (
+          <li key={section.id}>
+            <Link className="cp-idx__row" to={section.to}>
+              <span className="cp-idx__id">
+                <span className="cp-idx__name">{section.label}</span>
+                <span className="cp-idx__what">{section.what}</span>
+              </span>
+              <span className="cp-idx__meta">{section.meta}</span>
+              <span className="cp-idx__go" aria-hidden="true">&#8594;</span>
+            </Link>
           </li>
         ))}
       </ul>
-      {/* aria-live, so a screen reader hears the answer the ? paints. */}
-      <p className="cp-hub__note" aria-live="polite">{note || IDLE_NOTE}</p>
     </section>
   );
 }

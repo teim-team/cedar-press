@@ -25,7 +25,7 @@ import {
 } from "../../features/grove/pressMethod";
 import { EcosystemDiagram, ProcessRail, EntityTimeline } from "./pressMethodSections";
 import { PressCedarFab } from "./PressCedarFab";
-import { PressBack, PressFoot, PressMast } from "./PressChrome";
+import { PressFoot, PressMast } from "./PressChrome";
 
 
 const TRUST_ROW = [
@@ -41,8 +41,7 @@ export default function CedarPressMethods() {
   return (
     <div className="teim-rd teim-rd--paper">
       <div className="cp">
-        <PressMast page="Methods" />
-        <PressBack />
+        <PressMast section="methods" />
 
         {/* The opening argument, given room. The claim under it is the one
             sentence this page exists to earn, so it stands alone rather than
