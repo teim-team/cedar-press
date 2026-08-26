@@ -643,23 +643,34 @@
 }
 
 /* ── The section index ───────────────────────────────────────────────────
- * The front page's directory. Each row states what the section holds and
- * where it stands, so the page reports rather than decorates: no icon to
- * decode, no question mark to poke. */
-.teim-rd .cp-idx__list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
-.teim-rd .cp-idx__list > li { border-bottom: 1px solid var(--line); }
-.teim-rd .cp-idx__row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 0.4rem 1.6rem; padding: 1.15rem 0.6rem 1.15rem 0; color: var(--ink); text-decoration: none; transition: background 0.14s ease, padding-left 0.14s ease; }
-.teim-rd .cp-idx__row:hover { background: var(--teal-tint); padding-left: 0.7rem; }
-.teim-rd .cp-idx__id { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
-.teim-rd .cp-idx__name { font-family: var(--sans); font-size: 1.24rem; font-weight: 800; letter-spacing: -0.015em; color: var(--ink); }
-.teim-rd .cp-idx__what { font-size: 0.95rem; line-height: 1.5; color: var(--ink-2); max-width: 68ch; }
-.teim-rd .cp-idx__meta { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-align: right; white-space: nowrap; }
-.teim-rd .cp-idx__go { font-size: 1.05rem; color: var(--dteal); }
-@media (max-width: 780px) {
-  .teim-rd .cp-idx__row { grid-template-columns: minmax(0, 1fr) auto; padding: 1rem 0.4rem 1rem 0; }
-  .teim-rd .cp-idx__meta { grid-column: 1; grid-row: 2; text-align: left; white-space: normal; }
-  .teim-rd .cp-idx__go { grid-column: 2; grid-row: 1 / span 2; }
-  .teim-rd .cp-idx__name { font-size: 1.12rem; }
+ * Squares in the collection tiles' own size, because those already proved
+ * the size on both pointers: one row where it fits, 2x3 on a phone, so the
+ * front page and the shelf read as one system. Each square states what the
+ * section is and what it currently holds; the ? in its corner puts the
+ * section's purpose in the line under the grid. */
+.teim-rd .cp-hub__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, 10.5rem); justify-content: start; gap: 0.7rem; }
+.teim-rd .cp-hub__grid > li { position: relative; display: block; }
+.teim-rd .cp-hub__tile { box-sizing: border-box; width: 10.5rem; height: 10.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.85rem; padding: 0.7rem 0.6rem; border: 1px solid var(--line); background: var(--bg); text-align: center; color: var(--ink); text-decoration: none; transition: border-color 0.18s ease, box-shadow 0.18s ease; }
+.teim-rd .cp-hub__tile:hover { border-color: var(--teal); box-shadow: 0 10px 26px rgba(10, 15, 38, 0.1); }
+.teim-rd .cp-hub__mark { display: grid; place-items: center; color: var(--dteal); }
+.teim-rd .cp-hub__mark svg { width: 54px; height: 54px; }
+.teim-rd .cp-hub__id { display: flex; flex-direction: column; gap: 0.22rem; min-width: 0; }
+.teim-rd .cp-hub__name { font-family: var(--sans); font-size: 1rem; font-weight: 800; letter-spacing: -0.01em; line-height: 1.2; }
+/* What the section holds right now, read from the catalog: a label alone
+ * says where a tap goes, this says whether it is worth taking. */
+.teim-rd .cp-hub__meta { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+/* The ?: its own control beside the tile's link, never inside it, because a
+ * button inside an anchor is two answers to one tap. Footnote-sized, with a
+ * 48px target under it. */
+.teim-rd .cp-hub__help { position: absolute; top: 0.5rem; right: 0.5rem; z-index: 1; width: 2rem; height: 2rem; border-radius: 50%; border: 1px solid var(--teal-line); background: var(--bg); color: var(--dteal); font-family: var(--mono); font-size: 0.82rem; font-weight: 700; line-height: 1; cursor: help; }
+.teim-rd .cp-hub__help::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; }
+.teim-rd .cp-hub__help:hover, .teim-rd .cp-hub__help[aria-expanded="true"] { background: var(--teal-tint); border-color: var(--teal); }
+.teim-rd .cp-hub__note { max-width: 68ch; min-height: 2.6em; margin: 1rem 0 0; font-size: 0.95rem; line-height: 1.55; color: var(--ink-2); }
+/* Phones: a strict 2x3, the squares scaling with the screen rather than
+ * wrapping to a single column. */
+@media (max-width: 640px) {
+  .teim-rd .cp-hub__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 22.5rem; }
+  .teim-rd .cp-hub__tile { width: 100%; height: auto; aspect-ratio: 1 / 1; }
 }
 
 /* ── The badges ───────────────────────────────────────────────────────────
