@@ -19,6 +19,7 @@
  * default input masking stays on.
  */
 import { DATADOG, datadogConfigured } from "../../config.js";
+import { profileSegments } from "./subscriberProfile.js";
 
 let rum = null;
 let started = false;
@@ -53,14 +54,19 @@ export async function startTelemetry() {
   }
 }
 
-/** Attach the subscription to the session, without the person's identity. */
-export function identify(user) {
+/**
+ * Attach the subscription to the session as segments a dashboard can group
+ * by — tier, organization kind, role, and the class of the email's domain —
+ * and never the person. No address and no organization name: a small
+ * newsroom's name in an analytics tool identifies the reader on its own.
+ */
+export function identify(user, profile = null) {
   if (!rum) return;
   if (!user) {
     rum.clearUser();
     return;
   }
-  rum.setUser({ id: user.subscriber_id ?? undefined, tier: user.workspace_tier ?? "unknown" });
+  rum.setUser({ id: user.subscriber_id ?? undefined, ...profileSegments(user, profile) });
 }
 
 /**
@@ -92,4 +98,6 @@ export const EVENT = Object.freeze({
   datasetUploaded: "press.dataset_uploaded",
   datasetUploadFailed: "press.dataset_upload_failed",
   cedarAsked: "press.cedar_asked",
+  profileSaved: "press.profile_saved",
+  profileDismissed: "press.profile_dismissed",
 });

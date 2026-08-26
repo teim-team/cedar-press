@@ -97,6 +97,18 @@ export async function activatePressAccount({ code, email, password }) {
   return request("/press/activation", { method: "POST", body: { code, email, password } });
 }
 
+/* ── The subscriber ──────────────────────────────────────────────────── */
+
+/** The subscriber's declared organization and role. */
+export async function fetchProfile({ signal } = {}) {
+  return request("/press/profile", { signal });
+}
+
+/** Save what the subscriber declared. Partial: only what they answered. */
+export async function saveProfile(profile) {
+  return request("/press/profile", { method: "PATCH", body: profile });
+}
+
 /* ── The catalog ─────────────────────────────────────────────────────── */
 
 /** Collections the signed-in subscription can see, with their shelf and reach. */

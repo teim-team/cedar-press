@@ -697,6 +697,26 @@
   .teim-rd .cp-hub__tile { width: 100%; height: auto; aspect-ratio: 1 / 1; }
 }
 
+/* ── Who is reading ──────────────────────────────────────────────────────
+ * Two questions on the overview, not a modal over it: nothing here is
+ * urgent enough to block a page a subscriber came to read, and a wall in
+ * front of the product is how surveys get answered carelessly. */
+.teim-rd .cp-who__in { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 2.2rem; align-items: start; }
+@media (max-width: 900px) { .teim-rd .cp-who__in { grid-template-columns: minmax(0, 1fr); gap: 1.3rem; } }
+.teim-rd .cp-who__lede { font-size: 1.02rem; line-height: 1.6; color: var(--ink-2); margin: 0 0 0.8rem; }
+.teim-rd .cp-who__fine { font-size: 0.88rem; line-height: 1.55; color: var(--muted); margin: 0; }
+.teim-rd .cp-who__form { display: flex; flex-direction: column; gap: 0.35rem; border: 1px solid var(--line); border-radius: var(--radius-card, 14px); padding: 1.2rem 1.3rem; background: var(--bg); }
+.teim-rd .cp-who__label { font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); margin-top: 0.7rem; }
+.teim-rd .cp-who__label:first-child { margin-top: 0; }
+.teim-rd .cp-who__opt { color: var(--muted); font-weight: 400; }
+.teim-rd .cp-who__form select, .teim-rd .cp-who__form input { font: inherit; font-size: 0.95rem; min-height: 44px; padding: 0.5rem 0.7rem; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); }
+.teim-rd .cp-who__form select:focus, .teim-rd .cp-who__form input:focus { outline: 2px solid var(--teal); outline-offset: 1px; border-color: var(--teal); }
+.teim-rd .cp-who__acts { display: flex; align-items: center; gap: 1rem; margin-top: 1.1rem; }
+/* Answered: one quiet line with the way to change it. A card that keeps
+ * asking after it has been answered is a nag. */
+.teim-rd .cp-who__done { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem; margin: 2.2rem 0 0; padding-top: 1rem; border-top: 1px solid var(--line-soft); font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-who__done b { color: var(--ink-2); font-weight: 700; }
+
 /* ── Your data ───────────────────────────────────────────────────────────
  * The subscriber's own upload, dressed as the shelf so a dataset they
  * brought and a collection we published read as the same kind of object. */

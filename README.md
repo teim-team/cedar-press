@@ -64,6 +64,14 @@ Pushes to `main` build and deploy to GitHub Pages via
 domain is set in `public/CNAME`, and the build emits `404.html` alongside
 `index.html` so client-side routes resolve.
 
+## Subscribers
+
+Accounts arrive from a Tribal Business News subscription, so the service is
+told an address and nothing else. Subscribers state their organization and
+role once, and the roadmap is built from those segments — see
+[`docs/SUBSCRIBERS.md`](docs/SUBSCRIBERS.md), which also records why
+third-party email enrichment is deliberately not wired in.
+
 ## Security
 
 Please report vulnerabilities as described in [SECURITY.md](SECURITY.md).
