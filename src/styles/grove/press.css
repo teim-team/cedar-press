@@ -345,6 +345,15 @@
  * single link, and no Cedar Grove pitch: the person is trying to get into
  * Cedar Press, and Grove has its own conversations to have once they are. */
 .teim-rd .cp-split { min-height: 100vh; }
+/* The platform's split is fixed to the viewport (auth-split: fixed, inset 0)
+ * and centers each panel, clipping what overflows — fine for the platform's
+ * short hero, but the press hero carries the pillars and the credibility
+ * strip and runs far taller than a phone. On small screens the gate flows
+ * and scrolls as a page instead, so the brand and headline sit at the top
+ * and nothing is cut off mid-tile. */
+@media (max-width: 880px) {
+  .teim-rd .cp-split.auth-split { position: static; min-height: 100dvh; overflow: visible; }
+}
 /* The platform's .auth-hero paints a teal gradient whose upper stops carry
  * white text at under 3:1, and a gradient inside one surface breaks the flat
  * colour rule besides. Override to the one teal that holds 4.5:1 under white,
@@ -401,7 +410,22 @@
   .teim-rd .cp-proof__ic svg { width: 34px; height: 34px; }
   .teim-rd .cp-proof__body { order: 2; opacity: 1; }
 }
-@media (max-width: 1180px) { .teim-rd .cp-proof { grid-template-columns: minmax(0, 1fr); gap: 1.1rem; } }
+/* Narrow panels: the 2x2 of squares becomes a list of compact rows — the
+ * icon beside the words, title over its sentence — so the four pillars read
+ * in one screen instead of four screens of stacked card. The grid placement
+ * overrides the (hover: none) ordering above, and both states show, so the
+ * hover swap stands down. */
+@media (max-width: 1180px) {
+  .teim-rd .cp-proof { grid-template-columns: minmax(0, 1fr); gap: 0.7rem; max-width: 30rem; }
+  .teim-rd .cp-proof__item { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 0.95rem; row-gap: 0.3rem; align-items: center; aspect-ratio: auto; text-align: left; padding: 0.85rem 1rem; }
+  .teim-rd .cp-proof__item:hover { transform: none; box-shadow: none; }
+  .teim-rd .cp-proof__swap { display: contents; }
+  .teim-rd .cp-proof__ic { grid-column: 1; grid-row: 1 / span 2; opacity: 1; transform: none; }
+  .teim-rd .cp-proof__item:hover .cp-proof__ic { opacity: 1; transform: none; }
+  .teim-rd .cp-proof__ic svg { width: 30px; height: 30px; }
+  .teim-rd .cp-proof__label { grid-column: 2; grid-row: 1; }
+  .teim-rd .cp-proof__body { grid-column: 2; grid-row: 2; opacity: 1; }
+}
 
 .teim-rd .cp-split__method { display: inline-block; margin-top: 2rem; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #fff; text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, 0.6); padding-bottom: 3px; transition: border-color 0.18s ease; }
 .teim-rd .cp-split__method:hover { border-color: #fff; }
