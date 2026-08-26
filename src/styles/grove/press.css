@@ -146,7 +146,10 @@
   .teim-rd .cp-foot__meta a { display: inline-flex; align-items: center; }
 }
 .teim-rd .cp-foot__nav a:hover { color: var(--dteal); border-bottom-color: currentColor; }
-.teim-rd .cp-foot__meta { display: flex; flex-wrap: wrap; gap: 0.4rem 1.4rem; }
+/* The floating launcher sits over the bottom-right corner of the window, and
+ * the footer's right-hand meta is the one line that runs into it. It ends
+ * before the circle rather than under it. */
+.teim-rd .cp-foot__meta { display: flex; flex-wrap: wrap; gap: 0.4rem 1.4rem; padding-right: 4.4rem; }
 .teim-rd .cp-foot--deep .cp-foot__nav a { color: rgba(255, 255, 255, 0.82); }
 .teim-rd .cp-foot--deep .cp-foot__nav a:hover { color: #fff; }
 .teim-rd .cp-foot--deep .cp-foot__meta { border-top-color: rgba(255, 255, 255, 0.14); }
@@ -750,12 +753,14 @@
 .teim-rd .cp-nav__item { display: inline-flex; align-items: center; min-height: 44px; font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s ease, border-color 0.15s ease; }
 .teim-rd .cp-nav__item:hover { color: var(--ink); }
 .teim-rd .cp-nav__item[aria-current="page"] { color: var(--dteal); border-bottom-color: var(--teal); }
-/* Phones: the row scrolls rather than wrapping into a block of chrome
- * taller than the headline under it. */
+/* Phones: the row wraps onto a second line. It used to scroll sideways with
+ * its scrollbar hidden, which saved a line and cost the reader the last
+ * section — "METHODS" arrived as "MET" against the edge of the screen, with
+ * nothing on it to say it could be dragged. Five short labels on two lines is
+ * the whole nav, visible, which is what a nav is for. */
 @media (max-width: 640px) {
-  .teim-rd .cp-nav { flex-wrap: nowrap; overflow-x: auto; gap: 0 1.3rem; scrollbar-width: none; }
-  .teim-rd .cp-nav::-webkit-scrollbar { display: none; }
-  .teim-rd .cp-nav__item { white-space: nowrap; }
+  .teim-rd .cp-nav { gap: 0 1.3rem; }
+  .teim-rd .cp-nav__item { white-space: nowrap; min-height: 40px; }
 }
 
 /* ── The section index ───────────────────────────────────────────────────
@@ -1658,9 +1663,13 @@
 .teim-rd .cp-close .cp-new { grid-column: 2; margin: 0; border-top: 0; padding-top: 0; flex-direction: column; align-items: flex-start; gap: 0.9rem; }
 .teim-rd .cp-close .cp-new__item { display: block; }
 .teim-rd .cp-close__acts { grid-column: 1 / -1; }
+/* One column: the release list stops being the right-hand column and becomes
+ * the next thing down, so it needs back the separation the two-column layout
+ * was giving it for free. Without this the first release name butts straight
+ * onto the last line of the paragraph and reads as part of the sentence. */
 @media (max-width: 900px) {
   .teim-rd .cp-close__in { grid-template-columns: 1fr; }
-  .teim-rd .cp-close .cp-new { grid-column: 1; }
+  .teim-rd .cp-close .cp-new { grid-column: 1; margin-top: 1.6rem; padding-top: 1.2rem; border-top: 1px solid rgba(255, 255, 255, 0.28); }
 }
 
 /* Hover on the trust pages' lists and cases: the row answers with ink and
@@ -1705,21 +1714,27 @@
     align-content: center;
     scroll-snap-align: center;
   }
-  /* A screen to itself is a licence to set the headline at the size it was
-     written for. */
-  .teim-rd .cp--screens > .cp-hero { padding-block: 0; }
-  .teim-rd .cp--screens > .cp-hero h1 { font-size: clamp(2.6rem, 4.4vw, 4rem); }
-  .teim-rd .cp--screens > .cp-hero p { font-size: 1.12rem; }
+  /* Screen one: the statement, then the board it introduces. The statement
+     gets the size it was written for, and the tiles grow into whatever height
+     is left rather than to a figure picked in advance — a screen shared with
+     a headline has less to give than one that was empty. */
+  .teim-rd .cp-open .cp-hero { padding-block: 0 2.4rem; }
+  .teim-rd .cp-open .cp-hero h1 { font-size: clamp(2.4rem, 3.8vw, 3.4rem); }
+  .teim-rd .cp-open .cp-hero p { font-size: 1.08rem; }
+  .teim-rd .cp-open .cp-hub__tile { min-height: clamp(10.5rem, 22vh, 15rem); gap: 1.1rem; }
+  .teim-rd .cp-open .cp-hub__mark svg { width: 84px; height: 84px; }
+  .teim-rd .cp-open .cp-hub__name { font-size: 1.3rem; }
 
-  /* Given a screen, the section index takes it. Tiles sized for a stacked
-     page left a 900px window as a thin strip floating in white, which is the
-     emptiness this was meant to fix rather than cause — so the board grows
-     with the window, and its icons and names grow with the board. Still six
-     across: the row is the symmetry, and a taller tile does not break it. */
-  .teim-rd .cp--screens > .cp-hub .cp-hub__tile { min-height: clamp(10.5rem, 32vh, 20rem); gap: 1.4rem; }
-  .teim-rd .cp--screens > .cp-hub .cp-hub__mark svg { width: 96px; height: 96px; }
-  .teim-rd .cp--screens > .cp-hub .cp-hub__name { font-size: 1.4rem; }
-  .teim-rd .cp--screens > .cp-hub .cp-hub__meta { font-size: 0.72rem; }
+  /* Screen two: the close and the footer are one ending, so the teal takes
+     whatever height is left and the footer sits on the bottom edge under it.
+     Centring this one would float the band with white above and below it,
+     and a full-bleed colour with a margin above it reads as a mistake. */
+  .teim-rd .cp--screens > .cp-end {
+    align-content: normal;
+    display: grid;
+    grid-template-rows: 1fr auto;
+  }
+  .teim-rd .cp--screens > .cp-end > .cp-close { align-content: center; }
 }
 /* A reader who asked for less motion gets the ordinary page: snapping moves
  * the viewport out from under them, which is the thing that setting is for. */

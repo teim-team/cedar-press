@@ -62,26 +62,34 @@ export default function CedarPress() {
 
         {loading ? null : (
           <>
-        {/* The headline is deliberately not the tier lines: it says what the
+        {/* Screen one: what this is, and where to go, together. Apart they
+            were two thin bands of content floating in white; the statement is
+            what the six sections are an answer to, so it sits above them and
+            the pair fills a screen between them.
+
+            The headline is deliberately not the tier lines: it says what the
             product is for and lets the pages behind the doors explain the
             ladder themselves. The mission line lives at the close. */}
-        <section className="cp-hero cp-screen">
-          <h1>Know what&rsquo;s shaping Indian Country.</h1>
-          <p>
-            Original intelligence collections, data-driven insights, transparent research and
-            Cedar, your AI economic analyst, built to make Indian Country easier to understand.
-            Every collection begins with public records, is enhanced through original research
-            and entity resolution and stays current as new information becomes available.
-          </p>
-        </section>
+        <div className="cp-screen cp-open">
+          <section className="cp-hero">
+            <h1>Know what&rsquo;s shaping Indian Country.</h1>
+            <p>
+              Original intelligence collections, data-driven insights, transparent research and
+              Cedar, your AI economic analyst, built to make Indian Country easier to understand.
+              Every collection begins with public records, is enhanced through original research
+              and entity resolution and stays current as new information becomes available.
+            </p>
+          </section>
+          <PressHub />
+        </div>
 
-
-        <PressHub />
-
-        {/* The ending. One closing statement and three quiet actions rather
-            than two equal boxes: a page that has just argued for a maintained
-            research product should end on the maintenance. */}
-        <section className="cp-surf cp-surf--deep cp-close cp-screen" id="more" aria-label="What happens next">
+        {/* Screen two: the close and the footer, as one ending. The ending is
+            one closing statement and two quiet actions rather than two equal
+            boxes — a page that has just argued for a maintained research
+            product should end on the maintenance — and the footer is the last
+            of it rather than a separate strip below the last of it. */}
+        <div className="cp-screen cp-end">
+        <section className="cp-surf cp-surf--deep cp-close" id="more" aria-label="What happens next">
           <Contours strength={1.2} />
           <div className="cp-close__in">
             <div className="cp-close__say">
@@ -120,12 +128,12 @@ export default function CedarPress() {
             </p>
           </div>
         </section>
+          <PressFoot />
+        </div>
 
         <PressCedarFab />
           </>
         )}
-
-        <PressFoot />
       </main>
     </div>
   );
