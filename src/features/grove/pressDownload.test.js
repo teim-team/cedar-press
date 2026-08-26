@@ -35,5 +35,5 @@ test("a shelf collection without release bookkeeping cites by name", () => {
   const citeLine = lines.at(-1);
   assert.ok(citeLine.startsWith('"cite_as"'), citeLine);
   assert.ok(citeLine.includes("Example Shelf Collection"));
-  assert.ok(citeLine.includes("lumecon.ai/press"));
+  assert.ok(citeLine.includes("cedarpress.ai"));
 });

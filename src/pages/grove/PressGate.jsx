@@ -89,7 +89,14 @@ const TBN_PLANS_URL = `${TBN_URL}/cedar-press`;
 const PREVIEW_ACCOUNT = DEMO_ACCOUNTS[0];
 
 function browserStorage() {
-  return typeof window === "undefined" ? null : window.localStorage;
+  // Reading window.localStorage itself throws under a storage-denying policy
+  // (sandboxed iframe, blocked site data); the callers' fallbacks only help
+  // if this helper survives to hand them null.
+  try {
+    return typeof window === "undefined" ? null : window.localStorage;
+  } catch {
+    return null;
+  }
 }
 
 export default function PressGate({ user }) {
@@ -227,6 +234,12 @@ export default function PressGate({ user }) {
 
       <div className="auth-editorial">
         <div className="cp-split__form">
+          {/* On phones the form panel leads the page (the hero follows), so
+              the wordmark opens it; on desktop the hero carries the brand and
+              this stays hidden. */}
+          <span className="cp-split__brand cp-split__brand--form" aria-hidden="true">
+            Cedar Press
+          </span>
           <p className="cp-split__partner">
             Built by <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a>. Available
             exclusively through{" "}

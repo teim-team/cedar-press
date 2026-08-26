@@ -28,6 +28,12 @@
  * The bottom padding clears the floating Cedar launcher. On the reader's
  * Everything view the navy footer carries that clearance instead, so the
  * colour reaches the bottom of the page: see .cp--deepfoot. */
+/* Full-bleed bands (.cp-band, .cp-surf, .cp-foot--deep) stretch with
+ * width: 100vw, and on platforms with a classic scrollbar 100vw includes
+ * the bar the layout viewport does not — a few pixels of permanent sideways
+ * scroll. Clip, not hidden: clip creates no scroll container, so the sticky
+ * view bar keeps sticking to the page scroll. */
+.teim-rd { overflow-x: clip; }
 .teim-rd .cp { max-width: 1320px; min-width: 0; width: 100%; margin: 0 auto; padding: 0 2.4rem 7.5rem; }
 
 /* The publication keeps its designed palette in either app theme. The app
@@ -149,6 +155,13 @@
  * the marketing site use. A floating chat control is a bug, not a style. */
 .teim-rd .cedar-widget { position: fixed; right: 2rem; bottom: env(safe-area-inset-bottom, 0px); z-index: 120; }
 .teim-rd .cedar-widget__launcher { display: inline-flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1.25rem; border: 1px solid var(--teal-line); border-bottom: none; border-radius: 12px 12px 0 0; background: var(--bg); color: var(--ink); box-shadow: 0 8px 24px rgba(10,15,38,0.1); cursor: pointer; text-decoration: none; transition: border-color 0.2s cubic-bezier(0.2, 0, 0, 1), background 0.2s cubic-bezier(0.2, 0, 0, 1); }
+/* On phones the launcher floats over reading space, so it travels light:
+ * no context line, tighter pad, tucked into the corner. */
+@media (max-width: 640px) {
+  .teim-rd .cedar-widget { right: 0.9rem; }
+  .teim-rd .cedar-widget__launcher { padding: 0.55rem 0.9rem; gap: 0.5rem; }
+  .teim-rd .cedar-widget__launcher-context { display: none; }
+}
 .teim-rd .cedar-widget__launcher:hover { border-color: var(--teal); background: var(--teal-tint); }
 .teim-rd .cedar-widget__launcher-copy { display: flex; flex-direction: column; text-align: left; }
 .teim-rd .cedar-widget__launcher-label { font-family: var(--sans); font-size: 0.95rem; font-weight: 600; line-height: 1.2; color: var(--ink); }
@@ -345,6 +358,21 @@
  * single link, and no Cedar Grove pitch: the person is trying to get into
  * Cedar Press, and Grove has its own conversations to have once they are. */
 .teim-rd .cp-split { min-height: 100vh; }
+/* The platform's split is fixed to the viewport (auth-split: fixed, inset 0)
+ * and centers each panel, clipping what overflows — fine for the platform's
+ * short hero, but the press hero carries the pillars and the credibility
+ * strip and runs far taller than a phone. On small screens the gate flows
+ * and scrolls as a page instead, so the brand and headline sit at the top
+ * and nothing is cut off mid-tile. */
+@media (max-width: 880px) {
+  .teim-rd .cp-split.auth-split { position: static; min-height: 100dvh; overflow: visible; }
+  /* Stacked, access leads: the person on a phone came to get in, so the
+   * form panel opens the page under its own wordmark and the teal case for
+   * the product reads below it. Desktop keeps the split: case left, form
+   * right. The editorial's desktop gutters come from its centered column,
+   * so the stacked panel draws its own. */
+  .teim-rd .cp-split .auth-editorial { order: -1; padding: 1.6rem 1.15rem 2rem; }
+}
 /* The platform's .auth-hero paints a teal gradient whose upper stops carry
  * white text at under 3:1, and a gradient inside one surface breaks the flat
  * colour rule besides. Override to the one teal that holds 4.5:1 under white,
@@ -356,6 +384,11 @@
 .teim-rd .cp-hero2__contours { opacity: 0.1; }
 .teim-rd .cp-hero2__inner { max-width: 40rem; }
 .teim-rd .cp-split__brand { display: block; font-family: var(--mono); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #fff; margin-bottom: 0.5rem; }
+/* The form panel's wordmark exists for the stacked order (the 880px block
+ * above): on phones the form leads the page, so it opens under the name.
+ * Beside the hero it would say the name twice, so it shows only stacked. */
+.teim-rd .cp-split__brand--form { display: none; color: var(--dteal); margin-bottom: 1.1rem; }
+@media (max-width: 880px) { .teim-rd .cp-split__brand--form { display: block; } }
 .teim-rd .cp-hero2__tagline { font-size: 1rem; font-weight: 600; color: #fff; margin: 0 0 1.6rem; }
 .teim-rd .cp-hero2__headline { font-size: clamp(2.1rem, 3.2vw, 3.1rem); margin-bottom: 1rem; }
 .teim-rd .cp-hero2__lede { font-size: clamp(1rem, 1.2vw, 1.12rem); max-width: 34rem; margin-bottom: 2.2rem; }
@@ -401,7 +434,22 @@
   .teim-rd .cp-proof__ic svg { width: 34px; height: 34px; }
   .teim-rd .cp-proof__body { order: 2; opacity: 1; }
 }
-@media (max-width: 1180px) { .teim-rd .cp-proof { grid-template-columns: minmax(0, 1fr); gap: 1.1rem; } }
+/* Narrow panels: the 2x2 of squares becomes a list of compact rows — the
+ * icon beside the words, title over its sentence — so the four pillars read
+ * in one screen instead of four screens of stacked card. The grid placement
+ * overrides the (hover: none) ordering above, and both states show, so the
+ * hover swap stands down. */
+@media (max-width: 1180px) {
+  .teim-rd .cp-proof { grid-template-columns: minmax(0, 1fr); gap: 0.7rem; max-width: 30rem; }
+  .teim-rd .cp-proof__item { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 0.95rem; row-gap: 0.3rem; align-items: center; aspect-ratio: auto; text-align: left; padding: 0.85rem 1rem; }
+  .teim-rd .cp-proof__item:hover { transform: none; box-shadow: none; }
+  .teim-rd .cp-proof__swap { display: contents; }
+  .teim-rd .cp-proof__ic { grid-column: 1; grid-row: 1 / span 2; opacity: 1; transform: none; }
+  .teim-rd .cp-proof__item:hover .cp-proof__ic { opacity: 1; transform: none; }
+  .teim-rd .cp-proof__ic svg { width: 30px; height: 30px; }
+  .teim-rd .cp-proof__label { grid-column: 2; grid-row: 1; }
+  .teim-rd .cp-proof__body { grid-column: 2; grid-row: 2; opacity: 1; }
+}
 
 .teim-rd .cp-split__method { display: inline-block; margin-top: 2rem; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #fff; text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, 0.6); padding-bottom: 3px; transition: border-color 0.18s ease; }
 .teim-rd .cp-split__method:hover { border-color: #fff; }
@@ -676,6 +724,10 @@
 .teim-rd .cp-band--fill .cp-band__hint { color: #fff; }
 .teim-rd .cp-band__all { grid-column: 1; grid-row: 3; margin: 1.1rem 0 0; }
 .teim-rd .cp-band__allbtn { display: inline-flex; align-items: center; gap: 0.45rem; min-height: 44px; padding: 0.55rem 1.1rem; border: 1px solid var(--teal); border-radius: 0; background: var(--teal-tint); color: var(--dteal); font: inherit; font-size: 0.92rem; font-weight: 700; cursor: pointer; }
+/* The read panel's own download, for touch: the first tap on a tile lands
+ * the reader here, and this button is the second tap. Same clothes as the
+ * download-all button so the shelf keeps one action language. */
+.teim-rd .cp-read__act { display: inline-flex; align-items: center; gap: 0.45rem; min-height: 44px; margin-top: 0.9rem; padding: 0.55rem 1.1rem; border: 1px solid var(--teal); border-radius: 0; background: var(--teal-tint); color: var(--dteal); font: inherit; font-size: 0.92rem; font-weight: 700; cursor: pointer; }
 .teim-rd .cp-band__allbtn:hover { background: var(--dteal); border-color: var(--dteal); color: #fff; }
 .teim-rd .cp-band--fill .cp-band__allbtn { background: transparent; border-color: #fff; color: #fff; }
 .teim-rd .cp-band--fill .cp-band__allbtn:hover { background: #fff; border-color: #fff; color: var(--dteal); }
@@ -1102,6 +1154,20 @@
  * and both are set to be read as an aside rather than as body. */
 .teim-rd .cp-ar__body .cp-ar__pull,
 .teim-rd .cp-ar__body .cp-ar__figsrc { text-align: left; hyphens: manual; }
+/* Justification needs a wide measure; on a phone it tears the lines into
+ * rivers, so narrow screens read ragged-right like every phone page. The
+ * hyphens stay: they help a ragged edge too. */
+@media (max-width: 640px) {
+  .teim-rd .cp-ar__body p,
+  .teim-rd .cp-hero p,
+  .teim-rd .cp-link__body,
+  .teim-rd .cp-msec__lede,
+  .teim-rd .cp-mh__sub,
+  .teim-rd .cp-nh__sub,
+  .teim-rd .cp-gt__body,
+  .teim-rd .cp-close__body,
+  .teim-rd .cp-ar__dek { text-align: left; }
+}
 
 /* ── A hosted article ─────────────────────────────────────────────────────
  * Text at a reading measure with a rail beside it. The rail is the reason to

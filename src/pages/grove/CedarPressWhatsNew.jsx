@@ -170,6 +170,10 @@ export default function CedarPressWhatsNew() {
                       anyone to. */}
                   <h2 className="cp-feed__name">
                     <span>{PRESS_CATALOG_BY_ID[entry.id]?.name ?? entry.id}</span>
+                    {/* The version, because citations and downloads name one:
+                        this feed is where a reader maps "v4.1" to what
+                        changed, which it cannot do from a date alone. */}
+                    <span className="cp-feed__ver">{entry.version}</span>
                     {entry.kind === RELEASE_KIND.METHOD ? (
                       <span className="cp-feed__tag">Methodology</span>
                     ) : null}
