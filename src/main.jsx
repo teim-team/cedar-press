@@ -4,13 +4,17 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 
 import { AuthProvider } from "./context/authContext.jsx";
 import CedarPress from "./pages/grove/CedarPress.jsx";
+import CedarPressArticles from "./pages/grove/CedarPressArticles.jsx";
+import CedarPressData from "./pages/grove/CedarPressData.jsx";
 import CedarPressArticle from "./pages/grove/CedarPressArticle.jsx";
 import CedarPressMethods from "./pages/grove/CedarPressMethods.jsx";
 import CedarPressResearchAccess from "./pages/grove/CedarPressResearchAccess.jsx";
 import CedarPressTribalRequest from "./pages/grove/CedarPressTribalRequest.jsx";
 import CedarPressWhatsNew from "./pages/grove/CedarPressWhatsNew.jsx";
 import {
+  PRESS_ARTICLES_PATH,
   PRESS_ARTICLE_PATH,
+  PRESS_DATA_PATH,
   PRESS_METHODS_PATH,
   PRESS_PATH,
   PRESS_REQUEST_PATH,
@@ -27,6 +31,8 @@ createRoot(document.getElementById("root")).render(
       <BrowserRouter>
         <Routes>
           <Route path={PRESS_PATH} element={<CedarPress />} />
+          <Route path={PRESS_ARTICLES_PATH} element={<CedarPressArticles />} />
+          <Route path={PRESS_DATA_PATH} element={<CedarPressData />} />
           <Route path={PRESS_METHODS_PATH} element={<CedarPressMethods />} />
           <Route path={PRESS_REQUEST_PATH} element={<CedarPressTribalRequest />} />
           <Route path={PRESS_RESEARCH_PATH} element={<CedarPressResearchAccess />} />

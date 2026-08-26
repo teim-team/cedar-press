@@ -55,6 +55,8 @@
 
 .teim-rd .cp-mast { display: flex; align-items: baseline; gap: 1rem; padding: 1.6rem 0 1.2rem; border-bottom: 1px solid var(--line); }
 .teim-rd .cp-mast__word { font-weight: 800; font-size: 1.25rem; letter-spacing: 0.14em; color: var(--ink); }
+.teim-rd a.cp-mast__word { text-decoration: none; }
+.teim-rd a.cp-mast__word:hover { color: var(--dteal); }
 .teim-rd .cp-mast__of { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 .teim-rd .cp-mast__cta { margin-left: auto; }
 
@@ -593,6 +595,34 @@
 .teim-rd .cp-band__price { font-family: var(--sans); font-size: 1.18rem; font-weight: 800; letter-spacing: -0.015em; color: var(--dteal); margin: 0.55rem 0 0; }
 .teim-rd .cp-band--fill .cp-band__price { color: #fff; }
 .teim-rd .cp-gt__pricehead { font-family: var(--sans); font-size: 1.12rem; font-weight: 800; letter-spacing: -0.015em; color: var(--ink); margin: 0.9rem 0 0; }
+/* ── The hub ─────────────────────────────────────────────────────────────
+ * The whole reader behind four squares, sized like the collection tiles
+ * because those squares already proved the size on both pointers. The same
+ * grid renders on desktop and phone — one row of four where it fits, 2x2
+ * where it does not — so the two navigations stay symmetric. Each tile
+ * carries a ? in its corner; the line under the grid answers it. */
+.teim-rd .cp-hub__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, 10.5rem); justify-content: start; gap: 0.7rem; }
+.teim-rd .cp-hub__grid > li { position: relative; display: block; }
+.teim-rd .cp-hub__tile { box-sizing: border-box; width: 10.5rem; height: 10.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.7rem; padding: 0.6rem; border: 1px solid var(--line); background: var(--bg); text-align: center; color: var(--ink); text-decoration: none; transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease; }
+.teim-rd .cp-hub__tile:hover { border-color: var(--teal); transform: translateY(-3px); box-shadow: 0 12px 28px rgba(10, 15, 38, 0.12); }
+.teim-rd .cp-hub__mark { display: grid; place-items: center; color: var(--dteal); }
+.teim-rd .cp-hub__mark svg { width: 64px; height: 64px; }
+.teim-rd .cp-hub__name { font-family: var(--sans); font-size: 1.02rem; font-weight: 800; letter-spacing: -0.01em; }
+/* The ?: its own control beside the tile's link, never inside it, because a
+ * button inside an anchor is two answers to one tap. */
+.teim-rd .cp-hub__help { position: absolute; top: 0.55rem; right: 0.55rem; z-index: 1; width: 2rem; height: 2rem; border-radius: 50%; border: 1px solid var(--teal-line); background: var(--bg); color: var(--dteal); font-family: var(--mono); font-size: 0.82rem; font-weight: 700; line-height: 1; cursor: help; }
+/* The circle stays small enough to read as a footnote, but the finger gets
+ * a 48px target: the pseudo-element is part of the button's hit area. */
+.teim-rd .cp-hub__help::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; }
+.teim-rd .cp-hub__help:hover, .teim-rd .cp-hub__help[aria-expanded="true"] { background: var(--teal-tint); border-color: var(--teal); }
+.teim-rd .cp-hub__note { max-width: 62ch; min-height: 2.6em; margin: 1rem 0 0; font-size: 0.95rem; line-height: 1.55; color: var(--ink-2); }
+/* Phones: a strict 2x2, Windows-phone style — the squares scale with the
+ * screen instead of wrapping to a single column. */
+@media (max-width: 640px) {
+  .teim-rd .cp-hub__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 22.5rem; }
+  .teim-rd .cp-hub__tile { width: 100%; height: auto; aspect-ratio: 1 / 1; }
+}
+
 /* ── The badges ───────────────────────────────────────────────────────────
  * Literal squares. The width is fixed and the height is set from it, so a
  * two-line name can never stretch one into a rectangle beside its

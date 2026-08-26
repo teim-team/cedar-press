@@ -41,7 +41,7 @@ import PressGate from "./PressGate";
 import { downloadCsv, hasReleaseFile } from "../../features/grove/pressDownload";
 import { PRESS_CATALOG_BY_ID, groupOf } from "../../features/grove/pressCatalog";
 import { formatUpdated, releaseFor } from "../../features/grove/pressReleases";
-import { PRESS_METHODS_PATH, PRESS_PATH } from "../../features/grove/pressRoutes";
+import { PRESS_DATA_PATH, PRESS_METHODS_PATH, PRESS_PATH } from "../../features/grove/pressRoutes";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import PressAd from "./PressAd";
 import { PressCedarFab } from "./PressCedarFab";
@@ -92,7 +92,7 @@ function Figure({ block }) {
         {/* To the Grove section on the reader, not /app/grove: a Press
             reader clicking this has no Grove entitlement, and the app route
             answers with a sign-in wall instead of the argument. */}
-        <Link to={`${PRESS_PATH}#grove`}>Make your own &#8594;</Link>
+        <Link to={`${PRESS_DATA_PATH}#grove`}>Make your own &#8594;</Link>
       </p>
     </figure>
   );
@@ -161,7 +161,7 @@ function DrawnFrom({ id, user }) {
           {/* A Grove upgrade goes to the Grove section on the reader, same
               reasoning as the figure attribution: the app route is a
               sign-in wall for exactly the reader seeing this prompt. */}
-          <Link className="cp-m__more" to={upgrade.sameProduct ? PRESS_PATH : `${PRESS_PATH}#grove`}>
+          <Link className="cp-m__more" to={upgrade.sameProduct ? PRESS_DATA_PATH : `${PRESS_DATA_PATH}#grove`}>
             See what it opens <span aria-hidden="true">&#8594;</span>
           </Link>
         </p>
