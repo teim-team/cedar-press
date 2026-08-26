@@ -33,6 +33,7 @@ import {
   PRESS_METHODS_PATH,
   PRESS_PATH,
 } from "../../features/grove/pressRoutes";
+import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import { AD_SLOT } from "../../features/grove/pressAds";
 import PressAd from "./PressAd";
@@ -50,6 +51,7 @@ function buildFeed() {
 }
 
 export default function CedarPressWhatsNew() {
+  useDocumentTitle("What\u2019s new");
   useScrollToTop();
   const all = useMemo(() => buildFeed(), []);
   const [collection, setCollection] = useState("all");

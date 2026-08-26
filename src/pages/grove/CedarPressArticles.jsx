@@ -15,6 +15,7 @@ import { canReadCedarPress } from "../../features/grove/pressAccess";
 import { AD_SLOT } from "../../features/grove/pressAds";
 import { LUMECON_URL, PRESS_ARTICLES, TBN_URL } from "../../features/grove/pressArticles";
 import { pressArticlePath } from "../../features/grove/pressRoutes";
+import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import { Contours } from "./pressAtmosphere";
 import PressAd from "./PressAd";
@@ -63,6 +64,7 @@ function ArticleCard({ article, compact = false }) {
 }
 
 export default function CedarPressArticles() {
+  useDocumentTitle("Articles");
   const { user, loading, logout } = useAuth();
   const entitled = canReadCedarPress(user);
   useScrollToTop("articles");

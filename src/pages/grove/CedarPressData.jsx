@@ -15,6 +15,7 @@ import { useAuth } from "../../context/useAuth";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
 import { NATIVE_LINKAGE } from "../../features/grove/pressCatalog";
 import { PRESS_METHODS_PATH } from "../../features/grove/pressRoutes";
+import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import { Halo } from "./pressAtmosphere";
 import { PressCedarFab } from "./PressCedarFab";
@@ -23,6 +24,7 @@ import PressGate from "./PressGate";
 import PressShelf from "./PressShelf";
 
 export default function CedarPressData() {
+  useDocumentTitle("Data");
   const { user, loading, logout } = useAuth();
   const { hash } = useLocation();
   const entitled = canReadCedarPress(user);

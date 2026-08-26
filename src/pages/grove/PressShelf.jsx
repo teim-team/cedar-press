@@ -438,12 +438,9 @@ function GroveTeaser({ tier }) {
  * the ones they can open, and answering with an upsell is answering a
  * different question.
  */
-export default function PressShelf({ user, view = "all" }) {
-  const onlyOwned = view === "data";
-  const shelves = PRESS_TIERS.filter(
-    (tier) => tier.shelf !== "grove" && (!onlyOwned || canOpenDataset(user, { shelf: tier.shelf })),
-  );
-  const grove = onlyOwned ? null : PRESS_TIERS.find((tier) => tier.shelf === "grove");
+export default function PressShelf({ user }) {
+  const shelves = PRESS_TIERS.filter((tier) => tier.shelf !== "grove");
+  const grove = PRESS_TIERS.find((tier) => tier.shelf === "grove");
   return (
     <div id="catalog" className="cp-bands">
       {shelves.map((tier, index) => (

@@ -21,6 +21,7 @@ import { LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_METHODS_PATH, PRESS_PATH } from "../../features/grove/pressRoutes";
 import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
+import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 
 const REQUEST_HREF =
@@ -67,6 +68,7 @@ const EXCLUDED = [
 ];
 
 export default function CedarPressTribalRequest() {
+  useDocumentTitle("Tribal data request");
   // Links here sit at the bottom of long pages; without the reset the
   // destination opens mid-scroll, past its headline.
   useScrollToTop();

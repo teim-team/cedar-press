@@ -18,6 +18,7 @@ import { Link } from "react-router";
 
 import { LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_PATH, PRESS_REQUEST_PATH } from "../../features/grove/pressRoutes";
+import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import {
   CREDIBILITY_DISCLAIMER,
@@ -37,6 +38,7 @@ const TRUST_ROW = [
 ];
 
 export default function CedarPressMethods() {
+  useDocumentTitle("Methods");
   useScrollToTop();
   return (
     <div className="teim-rd teim-rd--paper">

@@ -30,6 +30,7 @@ import { Link } from "react-router";
 import { useAuth } from "../../context/useAuth";
 import { appUrl } from "../../features/grove/appLink.js";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
+import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog";
 import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
 import {
@@ -44,6 +45,7 @@ import PressGate from "./PressGate";
 import PressHub from "./PressHub";
 
 export default function CedarPress() {
+  useDocumentTitle();
   const { user, loading, logout } = useAuth();
   const entitled = canReadCedarPress(user);
 

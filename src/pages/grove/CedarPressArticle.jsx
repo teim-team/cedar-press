@@ -33,6 +33,7 @@ import "../../styles/redesign.css";
 import "../../styles/grove/press.css";
 
 import { useAuth } from "../../context/useAuth";
+import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { PressBack, PressFoot, PressMast } from "./PressChrome";
 import { PRESS_FIGURES } from "../../components/grove/pressFigures";
 import { AD_SLOT } from "../../features/grove/pressAds";
@@ -180,6 +181,7 @@ export default function CedarPressArticle() {
   const { articleId } = useParams();
   const { user, loading, logout } = useAuth();
   const article = BY_ID[articleId];
+  useDocumentTitle(article?.title ?? "Article not found");
   // A piece opens at its headline, wherever the click came from.
   useScrollToTop(articleId);
 

@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 
-import { AuthProvider } from "./context/authContext.jsx";
+import { AuthProvider } from "./context/AuthProvider.jsx";
 import CedarPress from "./pages/grove/CedarPress.jsx";
 import CedarPressArticles from "./pages/grove/CedarPressArticles.jsx";
 import CedarPressData from "./pages/grove/CedarPressData.jsx";
