@@ -111,7 +111,10 @@ export function EcosystemDiagram() {
   return (
     <div className={`cp-eco${focus ? " is-lit" : ""}`}>
       <div className="cp-eco__figure">
-        <svg viewBox={`0 0 ${w} ${h}`} className="cp-eco__svg" role="img"
+        {/* A group, not an image: every collection in here is a button a
+              keyboard can reach, and role="img" told a screen reader the
+              whole diagram was one flat picture. */}
+        <svg viewBox={`0 0 ${w} ${h}`} className="cp-eco__svg" role="group"
           aria-label="Ten Cedar collections around the Cedar and human identification layer, with the sources each is built from">
           {/* Anywhere that is not a label unpins. */}
           <rect x="0" y="0" width={w} height={h} fill="transparent" onClick={() => setPinned(null)} />

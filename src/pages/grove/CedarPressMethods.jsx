@@ -18,6 +18,7 @@ import { Link } from "react-router";
 
 import { LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_PATH, PRESS_REQUEST_PATH } from "../../features/grove/pressRoutes";
+import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import {
   CREDIBILITY_DISCLAIMER,
@@ -25,6 +26,7 @@ import {
 } from "../../features/grove/pressMethod";
 import { EcosystemDiagram, ProcessRail, EntityTimeline } from "./pressMethodSections";
 import { PressCedarFab } from "./PressCedarFab";
+import { PressFoot, PressMast } from "./PressChrome";
 
 
 const TRUST_ROW = [
@@ -36,16 +38,12 @@ const TRUST_ROW = [
 ];
 
 export default function CedarPressMethods() {
+  useDocumentTitle("Methods");
   useScrollToTop();
   return (
     <div className="teim-rd teim-rd--paper">
-      <div className="cp">
-        <header className="cp-mast">
-          <Link className="cp-mast__word" to={PRESS_PATH}>
-            CEDAR PRESS
-          </Link>
-          <span className="cp-mast__of">Methods</span>
-        </header>
+      <main id="cp-main" className="cp cp-page">
+        <PressMast section="methods" />
 
         {/* The opening argument, given room. The claim under it is the one
             sentence this page exists to earn, so it stands alone rather than
@@ -131,21 +129,9 @@ export default function CedarPressMethods() {
           </p>
         </section>
 
-        <footer className="cp-foot">
-          <span>
-            <Link to={PRESS_PATH}>Cedar Press</Link>
-            {" · "}
-            <Link to={PRESS_REQUEST_PATH}>Tribal data request</Link>
-          </span>
-          <span>
-            <a href={TBN_URL} target="_blank" rel="noreferrer">tribalbusinessnews.com</a>
-            {" · "}
-            <a href={LUMECON_URL} target="_blank" rel="noreferrer">lumecon.ai</a>
-          </span>
-          <span>Every collection carries its method · corrections reach every release they touch</span>
-        </footer>
+        <PressFoot />
         <PressCedarFab />
-      </div>
+      </main>
     </div>
   );
 }

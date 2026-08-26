@@ -26,6 +26,7 @@
 // chart: a figure is its caption, its source and its provenance, because a
 // chart nobody can interrogate is the fake dashboard this product avoids.
 
+import { useEffect } from "react";
 import { Link, useParams } from "react-router";
 
 import "../../index.css";
@@ -33,6 +34,9 @@ import "../../styles/redesign.css";
 import "../../styles/grove/press.css";
 
 import { useAuth } from "../../context/useAuth";
+import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
+import { EVENT, track } from "../../features/grove/telemetry.js";
+import { PressBack, PressFoot, PressMast } from "./PressChrome";
 import { PRESS_FIGURES } from "../../components/grove/pressFigures";
 import { AD_SLOT } from "../../features/grove/pressAds";
 import { BLOCK, LUMECON_URL, PRESS_ARTICLES, TBN_URL } from "../../features/grove/pressArticles";
@@ -41,7 +45,12 @@ import PressGate from "./PressGate";
 import { downloadCsv, hasReleaseFile } from "../../features/grove/pressDownload";
 import { PRESS_CATALOG_BY_ID, groupOf } from "../../features/grove/pressCatalog";
 import { formatUpdated, releaseFor } from "../../features/grove/pressReleases";
-import { PRESS_METHODS_PATH, PRESS_PATH } from "../../features/grove/pressRoutes";
+import {
+  PRESS_ARTICLES_PATH,
+  PRESS_DATA_PATH,
+  PRESS_METHODS_PATH,
+  PRESS_PATH,
+} from "../../features/grove/pressRoutes";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import PressAd from "./PressAd";
 import { PressCedarFab } from "./PressCedarFab";
@@ -92,7 +101,7 @@ function Figure({ block }) {
         {/* To the Grove section on the reader, not /app/grove: a Press
             reader clicking this has no Grove entitlement, and the app route
             answers with a sign-in wall instead of the argument. */}
-        <Link to={`${PRESS_PATH}#grove`}>Make your own &#8594;</Link>
+        <Link to={`${PRESS_DATA_PATH}#grove`}>Make your own &#8594;</Link>
       </p>
     </figure>
   );
@@ -161,7 +170,7 @@ function DrawnFrom({ id, user }) {
           {/* A Grove upgrade goes to the Grove section on the reader, same
               reasoning as the figure attribution: the app route is a
               sign-in wall for exactly the reader seeing this prompt. */}
-          <Link className="cp-m__more" to={upgrade.sameProduct ? PRESS_PATH : `${PRESS_PATH}#grove`}>
+          <Link className="cp-m__more" to={upgrade.sameProduct ? PRESS_DATA_PATH : `${PRESS_DATA_PATH}#grove`}>
             See what it opens <span aria-hidden="true">&#8594;</span>
           </Link>
         </p>
@@ -172,8 +181,12 @@ function DrawnFrom({ id, user }) {
 
 export default function CedarPressArticle() {
   const { articleId } = useParams();
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
   const article = BY_ID[articleId];
+  useDocumentTitle(article?.title ?? "Article not found");
+  useEffect(() => {
+    if (article?.id) track(EVENT.articleOpened, { article: article.id, dataset: article.datasetId });
+  }, [article?.id, article?.datasetId]);
   // A piece opens at its headline, wherever the click came from.
   useScrollToTop(articleId);
 
@@ -202,10 +215,9 @@ export default function CedarPressArticle() {
   if (!article || !article.hosted) {
     return (
       <div className="teim-rd teim-rd--paper">
-        <div className="cp">
-          <header className="cp-mast">
-            <Link className="cp-mast__word" to={PRESS_PATH}>CEDAR PRESS</Link>
-          </header>
+        <main id="cp-main" className="cp cp-page">
+          <PressMast section="articles" />
+          <PressBack />
           <section className="cp-nh">
             <h1 className="cp-nh__title">That piece is not here.</h1>
             <p className="cp-nh__sub">
@@ -218,7 +230,7 @@ export default function CedarPressArticle() {
               Back home <span aria-hidden="true">&#8594;</span>
             </Link>
           </p>
-        </div>
+        </main>
       </div>
     );
   }
@@ -231,20 +243,16 @@ export default function CedarPressArticle() {
 
   return (
     <div className="teim-rd teim-rd--paper">
-      <div className="cp">
-        <header className="cp-mast">
-          <Link className="cp-mast__word" to={PRESS_PATH}>CEDAR PRESS</Link>
-          <span className="cp-mast__of">{article.demonstration ? "Demonstration" : article.tag}</span>
-          {user?.email ? <span className="cp-mast__user">{user.email}</span> : null}
-        </header>
+      <main id="cp-main" className="cp cp-page">
+        <PressMast user={user} onSignOut={() => logout()} section="articles" />
 
-        <Link className="cp-ar__back" to={PRESS_PATH}>
-          <span aria-hidden="true">&#8592;</span> Back home
-        </Link>
+        {/* Back goes to the briefs, not the hub: a piece belongs to the
+            articles page, and the footer carries the rest of the map. */}
+        <PressBack label="All Data Briefs" to={PRESS_ARTICLES_PATH} />
 
         <article className="cp-ar">
           <header className="cp-ar__head">
-            <p className="cp-hero__access">{article.demonstration ? "Demonstration" : article.tag}</p>
+            <p className="cp-hero__access">{article.tag}</p>
             <h1 className="cp-ar__title">{article.title}</h1>
             <p className="cp-ar__dek">{article.dek}</p>
             <p className="cp-ar__meta">
@@ -255,13 +263,6 @@ export default function CedarPressArticle() {
                 placeholder states what it is before the reader reaches a
                 statistic. The notice leaves with the flag, when sourced
                 research replaces the piece. */}
-            {article.demonstration ? (
-              <p className="cp-ar__demo">
-                Demonstration piece: the statistics and figures in this brief
-                are invented placeholders, written to exercise the layout.
-                Sourced research replaces this piece on publication.
-              </p>
-            ) : null}
           </header>
 
           {/* The attribution goes under the picture, where a reader looks for
@@ -333,26 +334,14 @@ export default function CedarPressArticle() {
         </section>
 
         <p className="cp-ar__end">
-          <Link className="cp-ar__back" to={PRESS_PATH}>
+          <Link className="cp-ar__back" to={PRESS_ARTICLES_PATH}>
             <span aria-hidden="true">&#8592;</span> Back home
           </Link>
         </p>
 
-        <footer className="cp-foot">
-          <span>
-            <Link to={PRESS_PATH}>Cedar Press</Link>
-            {" · "}
-            <Link to={PRESS_METHODS_PATH}>Methods</Link>
-          </span>
-          <span>
-            <a href={TBN_URL} target="_blank" rel="noreferrer">tribalbusinessnews.com</a>
-            {" · "}
-            <a href={LUMECON_URL} target="_blank" rel="noreferrer">lumecon.ai</a>
-          </span>
-          <span>Every collection carries its method · corrections reach every release they touch</span>
-        </footer>
+        <PressFoot />
         <PressCedarFab />
-      </div>
+      </main>
     </div>
   );
 }

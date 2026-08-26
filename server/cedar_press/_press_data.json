@@ -1,0 +1,330 @@
+{
+  "tbnUrl": "https://tribalbusinessnews.com",
+  "lumeconUrl": "https://lumecon.ai",
+  "articles": [
+    {
+      "id": "brief-deals",
+      "hosted": true,
+      "image": "/pitch/lanes/professional-wide.webp",
+      "imageAlt": "A negotiation around a conference table",
+      "caption": "Announced capital in energy and project finance is concentrated in a small number of large transactions, which makes the annual figure sensitive to a single closing.",
+      "datasetId": "deals",
+      "draws": [
+        "deals",
+        "funding"
+      ],
+      "tag": "Original Research",
+      "demonstration": true,
+      "title": "Announced deals in Indian Country are running ahead of any year in the series",
+      "dek": "Energy and project finance lead 2026's announced transactions, the Deals database shows, with closings confirmed against primary sources before they enter totals.",
+      "date": "July 2026",
+      "byline": "Cedar Press research desk",
+      "minutes": 4,
+      "body": [
+        {
+          "kind": "p",
+          "text": "Announced transactions in Indian Country are running ahead of any comparable period in the series, and the composition has moved as much as the count. Energy and project finance carry most of the increase, with tribal governments and tribal enterprises appearing as principals rather than as counterparties. That is a change in kind as much as in volume: a nation financing its own generation capacity is a different economic actor from one leasing land to somebody else's project."
+        },
+        {
+          "kind": "p",
+          "text": "The distinction matters for anyone reading a total. Announced and closed are labeled separately in the Deals collection, and a transaction enters totals only once its status is confirmed against a primary source. A year that looks strong on announcements can settle differently, and the gap between the two lines is itself worth watching. In 2023 roughly a fifth of announced capital had not closed twelve months later, most of it in a single sector."
+        },
+        {
+          "kind": "figure",
+          "chart": "line",
+          "caption": "Announced against confirmed transactions, by quarter",
+          "source": "deals",
+          "series": [
+            "announced",
+            "confirmed"
+          ],
+          "points": [
+            {
+              "label": "Q2'25",
+              "announced": 31,
+              "confirmed": 24
+            },
+            {
+              "label": "Q3'25",
+              "announced": 38,
+              "confirmed": 29
+            },
+            {
+              "label": "Q4'25",
+              "announced": 34,
+              "confirmed": 28
+            },
+            {
+              "label": "Q1'26",
+              "announced": 47,
+              "confirmed": 33
+            },
+            {
+              "label": "Q2'26",
+              "announced": 52,
+              "confirmed": 35
+            }
+          ],
+          "notes": [
+            "Announced counts a transaction at first public report. Confirmed counts it once its status is verified against a primary source, which is usually one to three quarters later.",
+            "The most recent quarter is therefore always understated on the confirmed line.",
+            "Undisclosed values are counted as transactions and excluded from any dollar total."
+          ]
+        },
+        {
+          "kind": "h2",
+          "text": "Who is on the other side"
+        },
+        {
+          "kind": "p",
+          "text": "Resolving counterparties is where a transaction record becomes readable. A financing that names a subsidiary tells you very little until the subsidiary is joined to its parent nation or corporation, and the same acquisition can appear three times under three names across a decade of filings. Announcements name the entity as it was styled that week, which is rarely the entity a researcher is looking for."
+        },
+        {
+          "kind": "p",
+          "text": "The work is unglamorous and it is most of the value. A tribal enterprise formed in 1998, renamed in 2006, reorganized under a holding company in 2014 and acquired in 2021 leaves four record trails that no public source connects. Cedar maintains those relationships over time, which is why an ownership change recorded here also corrects rows in Contracting and Gaming. Corrections travel to every release they touch, and a figure cited last quarter stays reproducible."
+        },
+        {
+          "kind": "pull",
+          "text": "The records are public. Knowing that four names over twelve years are one enterprise is the work."
+        },
+        {
+          "kind": "p",
+          "text": "The practical effect shows up in concentration. Read at face value, the transaction record looks more distributed than it is, because one buyer appears as several. Resolved to parents, the top ten acquirers account for a meaningfully larger share of announced capital than the unresolved list suggests, and the direction of that error is consistent across every year in the series."
+        },
+        {
+          "kind": "pair",
+          "images": [
+            {
+              "src": "/pitch/lanes/publicadmin-wide.webp",
+              "alt": "The United States Capitol",
+              "caption": "Federal programs remain the counterparty on a large share of project financings."
+            },
+            {
+              "src": "/pitch/lanes/construction-wide.webp",
+              "alt": "Crews working a large construction site",
+              "caption": "Construction starts trail announcements by two to four quarters in most of the series."
+            }
+          ]
+        },
+        {
+          "kind": "h2",
+          "text": "What to watch"
+        },
+        {
+          "kind": "p",
+          "text": "Project finance in energy is the line to follow into next year. Announced capital is concentrated in a small number of large projects, so a single delay moves the annual figure more than the underlying rate of activity would suggest. Two of the largest announcements in the current period are at the permitting stage, where timelines are least predictable, and either one slipping would take the year below the prior period on announced capital while activity itself was flat."
+        },
+        {
+          "kind": "p",
+          "text": "Property and hospitality are the quieter half of the increase and the steadier one. Transactions there are smaller, more numerous and less exposed to a single closing, which makes them a better read on whether the underlying rate of activity has moved. They are also where tribal enterprises most often appear as buyers of operating businesses rather than as developers, which is a different capability and a different balance sheet."
+        },
+        {
+          "kind": "p",
+          "text": "Bond issuance is the third thread and the one most sensitive to conditions outside Indian Country. Issuance held up through the rate environment of the last two years, which was not the expectation, and the reasons are worth a separate piece. The collection carries issuance alongside the acquisitions and financings so the three can be read against each other rather than separately."
+        },
+        {
+          "kind": "h2",
+          "text": "How to read the totals"
+        },
+        {
+          "kind": "p",
+          "text": "Inclusion rules travel with every release, so a transaction missing from the collection is a documented gap rather than a silent one. Where a deal is reported but unconfirmed it sits as announced and is visible as such, which is the difference between a figure that can be cited and one that cannot. Where a value is not disclosed, the transaction is counted and the value is not, rather than being estimated into the total."
+        },
+        {
+          "kind": "p",
+          "text": "Anyone reproducing the numbers here should note the as-of date beside each figure. The collections update continuously, every correction is logged on the What’s New page, and a change that moves a total says so there. A figure cited with its date stays explainable: the log shows what has moved since and why."
+        },
+        {
+          "kind": "p",
+          "text": "One caution on comparison. Transaction counts across Indian Country cannot be read against a national deal index without adjusting for what each includes, and most published indices exclude the tribal enterprise structures that account for a large share of the activity here. The comparison people usually want is between periods within this series, which is why the reconstructed history matters more for this collection than a benchmark against somebody else's."
+        }
+      ]
+    },
+    {
+      "id": "brief-contractors",
+      "hosted": true,
+      "image": "/pitch/lanes/construction-wide.webp",
+      "imageAlt": "Crews working a large construction site",
+      "caption": "Construction carries most of the obligation volume and almost none of the recent increase, which is in professional and technical services.",
+      "datasetId": "contractors",
+      "draws": [
+        "contractors",
+        "subcontracting"
+      ],
+      "tag": "Original Research",
+      "demonstration": true,
+      "title": "Federal contracting to Native entities rises for a fourth straight quarter",
+      "dek": "Award histories rolled up to parent tribes, ANCs and NHOs show broad growth, led by 8(a) participants.",
+      "date": "June 2026",
+      "byline": "Cedar Press research desk",
+      "minutes": 4,
+      "body": [
+        {
+          "kind": "p",
+          "text": "Obligations to Native-owned firms rose for a fourth consecutive quarter, and the growth is broader than the headline suggests. Rolled up to parent tribes, ANCs and NHOs, the increase reaches more entities than in any quarter of the prior year rather than concentrating in the largest holders. The number of distinct parents winning at least one award is the highest in the series."
+        },
+        {
+          "kind": "p",
+          "text": "8(a) participants lead, which is the expected result and also the one most often misread. Participation is a status with a start and an end, so a firm that held it in 2019 and does not hold it now should not be counted as an 8(a) award today. Reading the program as a permanent attribute of a company overstates its current share and understates how many firms have graduated out of it and kept winning work."
+        },
+        {
+          "kind": "figure",
+          "chart": "stacked",
+          "caption": "Obligations by parent entity type, by quarter",
+          "source": "contractors",
+          "series": [
+            "Tribal enterprise",
+            "ANC subsidiary",
+            "NHO subsidiary"
+          ],
+          "points": [
+            {
+              "label": "Q3'25",
+              "Tribal enterprise": 41,
+              "ANC subsidiary": 33,
+              "NHO subsidiary": 9
+            },
+            {
+              "label": "Q4'25",
+              "Tribal enterprise": 44,
+              "ANC subsidiary": 34,
+              "NHO subsidiary": 10
+            },
+            {
+              "label": "Q1'26",
+              "Tribal enterprise": 49,
+              "ANC subsidiary": 35,
+              "NHO subsidiary": 11
+            },
+            {
+              "label": "Q2'26",
+              "Tribal enterprise": 56,
+              "ANC subsidiary": 36,
+              "NHO subsidiary": 13
+            }
+          ],
+          "notes": [
+            "These are obligations rather than receipts. An obligation is the government committing funds; the work and the payment can fall in later periods.",
+            "Each award is attributed to the parent the firm had at the date of award rather than the parent it has now.",
+            "Band order is fixed across every quarter, so only the bottom band and the total share a baseline."
+          ]
+        },
+        {
+          "kind": "p",
+          "text": "Resolving the vendor list to parents is what turns a procurement record into an industry picture. Federal reporting names the awardee, and the awardee is frequently a subsidiary two or three levels below the nation or corporation that owns it. A single ANC can appear under a dozen names across agencies, none of which reference each other, and none of which are wrong."
+        },
+        {
+          "kind": "h2",
+          "text": "The subaward layer"
+        },
+        {
+          "kind": "p",
+          "text": "Prime awards are the visible half. Matching subaward activity to the same resolved entities shows work moving between Native firms that neither record describes on its own, and it is where the growth in the smaller tiers actually appears. A prime award to one tribal enterprise that subcontracts to three others is four firms working, and the prime record shows one."
+        },
+        {
+          "kind": "p",
+          "text": "The pattern is not uniform. In construction, subaward activity to other Native firms is a small share of the prime value. In professional and technical services it is substantially higher, which is consistent with how those contracts are staffed and is worth knowing before drawing conclusions about the depth of the sector from prime awards alone."
+        },
+        {
+          "kind": "pull",
+          "text": "The industry only appears once the vendors are joined to who owns them."
+        },
+        {
+          "kind": "p",
+          "text": "Both collections are maintained against the same entity layer, so a parent renaming or a subsidiary being acquired reaches every historical award at once rather than leaving two records that disagree. That is also why a correction filed in the Deals collection can move a figure here: the entity is the same entity, and the relationship is maintained in one place."
+        },
+        {
+          "kind": "image",
+          "src": "/pitch/lanes/professional-wide.webp",
+          "alt": "A meeting around a conference table",
+          "caption": "Professional and technical services carry the quarters that moved, on smaller awards spread across more firms."
+        },
+        {
+          "kind": "h2",
+          "text": "Where the growth is not"
+        },
+        {
+          "kind": "p",
+          "text": "Construction and facilities services carry most of the volume and almost none of the increase. The quarters that moved are professional services and information technology, where the average award is smaller and the number of distinct entities winning work is higher. Read only in dollars, the sector looks flat; read in entities and awards, it does not."
+        },
+        {
+          "kind": "p",
+          "text": "That composition is worth watching for a reason beyond the totals. A base of many small awards across many firms is a different kind of exposure from a base of few large ones, and it responds differently when an agency changes how it buys. Consolidation of small contracts into larger vehicles has been the direction of federal procurement for a decade, and the firms most exposed to it are the ones the headline number is least sensitive to."
+        },
+        {
+          "kind": "figure",
+          "chart": "sankey",
+          "caption": "Prime obligations reaching subcontracted work, by sector",
+          "source": "subcontracting",
+          "flows": [
+            {
+              "from": "Construction",
+              "to": "Native subcontractors",
+              "value": 12
+            },
+            {
+              "from": "Construction",
+              "to": "Other subcontractors",
+              "value": 46
+            },
+            {
+              "from": "Professional services",
+              "to": "Native subcontractors",
+              "value": 27
+            },
+            {
+              "from": "Professional services",
+              "to": "Other subcontractors",
+              "value": 19
+            },
+            {
+              "from": "Information technology",
+              "to": "Native subcontractors",
+              "value": 16
+            },
+            {
+              "from": "Information technology",
+              "to": "Other subcontractors",
+              "value": 14
+            }
+          ],
+          "notes": [
+            "Ribbon width is the only quantity. Vertical position carries no meaning.",
+            "Covers reported subawards only. Work performed in-house by the prime does not appear.",
+            "A subcontractor is counted as Native where ownership is established from filings or primary-source confirmation."
+          ]
+        },
+        {
+          "kind": "h2",
+          "text": "What the collection does and does not claim"
+        },
+        {
+          "kind": "p",
+          "text": "The collection publishes obligations as reported, with the entity resolution applied on top and documented. Where a firm's parent changed during the period covered, the award is attributed to the parent it had at the time of award rather than the one it has now. Both attributions are defensible and they answer different questions; the one used here is stated with the release so a figure can be reproduced or deliberately recomputed the other way."
+        },
+        {
+          "kind": "p",
+          "text": "Obligations are not receipts. An obligation is the government committing funds, and the timing of the work and the payment can sit in later periods or, on a terminated contract, never arrive. For questions about revenue rather than about award activity, the obligation series is the wrong instrument, and the methodology note says so rather than leaving a reader to find out from a discrepancy."
+        },
+        {
+          "kind": "p",
+          "text": "Nor does the collection assert that every Native-owned firm appears. Ownership is established from filings, registrations and primary-source confirmation, and a firm that is Native-owned but has never had to declare it in a record Cedar reads will be missing. That gap is documented with the release, it is smaller at the top of the award distribution than at the bottom, and it is the honest limit on any statement about the total size of the sector rather than about the awards themselves."
+        }
+      ]
+    },
+    {
+      "id": "brief-funding",
+      "href": "https://tribalbusinessnews.com",
+      "image": "/pitch/lanes/publicadmin-wide.webp",
+      "imageAlt": "The United States Capitol",
+      "datasetId": "funding",
+      "tag": "Original Research",
+      "demonstration": true,
+      "title": "Where federal dollars reached Indian Country in FY2025",
+      "dek": "Assistance awards by program and recipient, from the Funding collection's first full-year release.",
+      "date": "May 2026"
+    }
+  ],
+  "citations": [],
+  "reportCitationHref": "mailto:contact@lumecon.ai?subject=Cedar%20Press%20citation"
+}

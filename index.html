@@ -3,17 +3,44 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- The press pages pin the paper look in both themes (press.css:
-         .teim-rd--paper re-pins the light tokens over the dark remap), so
-         the document declares light rather than inviting a dark canvas it
-         would immediately paint over. -->
+    <!-- The press pages hold the paper palette in both themes (press.css:
+         .teim-rd--paper re-pins the light tokens over the dark remap), so the
+         document declares light rather than inviting a dark canvas it would
+         immediately paint over. -->
     <meta name="color-scheme" content="light" />
+    <title>Cedar Press</title>
     <meta
       name="description"
-      content="Cedar Press: original intelligence collections, data-driven insights and transparent research for Indian Country. Built by Lumecon, available exclusively through Tribal Business News."
+      content="Trusted intelligence for Indian Country: original economic collections, data-driven research and transparent method. Built by Lumecon, available exclusively through Tribal Business News."
     />
+    <link rel="canonical" href="https://cedarpress.ai/" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>Cedar Press</title>
+
+    <!-- How the service appears when a subscriber sends a link to a colleague,
+         which is how a citation travels. Absolute URLs, because the crawlers
+         that read these do not resolve relative ones. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Cedar Press" />
+    <meta property="og:title" content="Cedar Press" />
+    <meta
+      property="og:description"
+      content="Trusted intelligence for Indian Country: original economic collections, data-driven research and transparent method."
+    />
+    <meta property="og:url" content="https://cedarpress.ai/" />
+    <meta property="og:image" content="https://cedarpress.ai/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Cedar Press — Know what’s shaping Indian Country."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Cedar Press" />
+    <meta
+      name="twitter:description"
+      content="Trusted intelligence for Indian Country: original economic collections, data-driven research and transparent method."
+    />
+    <meta name="twitter:image" content="https://cedarpress.ai/og.png" />
   </head>
   <body>
     <div id="root"></div>

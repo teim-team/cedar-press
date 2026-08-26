@@ -25,7 +25,6 @@ import { useState } from "react";
 import { Link } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
-import { DEMO_ACCOUNTS } from "../../context/authContext.jsx";
 import { activatePressAccount, validatePressCode } from "../../api";
 import { LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_METHODS_PATH } from "../../features/grove/pressRoutes";
@@ -85,8 +84,6 @@ const PROOF_POINTS = [
 ];
 
 const TBN_PLANS_URL = `${TBN_URL}/cedar-press`;
-
-const PREVIEW_ACCOUNT = DEMO_ACCOUNTS[0];
 
 function browserStorage() {
   // Reading window.localStorage itself throws under a storage-denying policy
@@ -173,7 +170,7 @@ export default function PressGate({ user }) {
   };
 
   return (
-    <div className="empty-state auth-split cp-split">
+    <main className="empty-state auth-split cp-split">
       <aside className="auth-hero cp-hero2">
         <span className="auth-hero__glow auth-hero__glow--a" aria-hidden="true" />
         <span className="auth-hero__glow auth-hero__glow--b" aria-hidden="true" />
@@ -366,12 +363,7 @@ export default function PressGate({ user }) {
                   subscription, and your login details arrive by email.
                 </p>
               )}
-              {/* The preview account, printed on the gate while accounts are
-                  provisioned: a mockup people cannot get into demonstrates
-                  nothing. This paragraph leaves with the real auth. */}
-              <p className="cp-gate__fine">
-                Preview build — log in with {PREVIEW_ACCOUNT.email} / {PREVIEW_ACCOUNT.password}.
-              </p>
+
             </>
           ) : step === PRESS_STEP.SET_PASSWORD ? (
             <>
@@ -460,6 +452,6 @@ export default function PressGate({ user }) {
           )}
         </div>
       </div>
-    </div>
+    </main>
   );
 }

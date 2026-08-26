@@ -9,7 +9,7 @@ import { csvFor, hasReleaseFile } from "./pressDownload.js";
 
 test("a launch dataset downloads its extract, citation row included", () => {
   const { csv, name } = csvFor({ id: "deals", name: "Indian Country Deals" });
-  assert.equal(name, "deals-demonstration.csv");
+  assert.equal(name, "deals.csv");
   const last = csv.split("\n").at(-1);
   assert.ok(last.startsWith('cite_as,"Lumecon, ""'), last);
   assert.ok(last.includes("v9"));

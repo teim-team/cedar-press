@@ -20,6 +20,8 @@ import { Link } from "react-router";
 import { LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_METHODS_PATH, PRESS_PATH } from "../../features/grove/pressRoutes";
 import { PressCedarFab } from "./PressCedarFab";
+import { PressFoot, PressMast } from "./PressChrome";
+import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 
 const REQUEST_HREF =
@@ -66,18 +68,14 @@ const EXCLUDED = [
 ];
 
 export default function CedarPressTribalRequest() {
+  useDocumentTitle("Tribal data request");
   // Links here sit at the bottom of long pages; without the reset the
   // destination opens mid-scroll, past its headline.
   useScrollToTop();
   return (
     <div className="teim-rd teim-rd--paper">
-      <div className="cp">
-        <header className="cp-mast">
-          <Link className="cp-mast__word" to={PRESS_PATH}>
-            CEDAR PRESS
-          </Link>
-          <span className="cp-mast__of">Tribal data request</span>
-        </header>
+      <main id="cp-main" className="cp cp-page">
+        <PressMast />
 
         <section className="cp-trh">
           <div>
@@ -181,21 +179,9 @@ export default function CedarPressTribalRequest() {
           </div>
         </section>
 
-        <footer className="cp-foot">
-          <span>
-            <Link to={PRESS_PATH}>Cedar Press</Link>
-            {" · "}
-            <Link to={PRESS_METHODS_PATH}>Methods</Link>
-          </span>
-          <span>
-            <a href={TBN_URL} target="_blank" rel="noreferrer">tribalbusinessnews.com</a>
-            {" · "}
-            <a href={LUMECON_URL} target="_blank" rel="noreferrer">lumecon.ai</a>
-          </span>
-          <span>Requests are verified with the tribal government before any records are released</span>
-        </footer>
+        <PressFoot />
         <PressCedarFab />
-      </div>
+      </main>
     </div>
   );
 }
