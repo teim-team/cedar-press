@@ -1,13 +1,40 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 
-import App from "./App.jsx";
-import "./styles/fonts.css";
-import "./styles/base.css";
-import "./styles/press.css";
+import { AuthProvider } from "./context/authContext.jsx";
+import CedarPress from "./pages/grove/CedarPress.jsx";
+import CedarPressArticle from "./pages/grove/CedarPressArticle.jsx";
+import CedarPressMethods from "./pages/grove/CedarPressMethods.jsx";
+import CedarPressResearchAccess from "./pages/grove/CedarPressResearchAccess.jsx";
+import CedarPressTribalRequest from "./pages/grove/CedarPressTribalRequest.jsx";
+import CedarPressWhatsNew from "./pages/grove/CedarPressWhatsNew.jsx";
+import {
+  PRESS_ARTICLE_PATH,
+  PRESS_METHODS_PATH,
+  PRESS_PATH,
+  PRESS_REQUEST_PATH,
+  PRESS_RESEARCH_PATH,
+  PRESS_WHATS_NEW_PATH,
+} from "./features/grove/pressRoutes.js";
 
+// The route table the app's App.jsx owns lives here in the standalone site:
+// the reader at the root, the satellite pages on their own paths, and
+// anything unknown back to the reader (whose gate is the front door).
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <App />
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path={PRESS_PATH} element={<CedarPress />} />
+          <Route path={PRESS_METHODS_PATH} element={<CedarPressMethods />} />
+          <Route path={PRESS_REQUEST_PATH} element={<CedarPressTribalRequest />} />
+          <Route path={PRESS_RESEARCH_PATH} element={<CedarPressResearchAccess />} />
+          <Route path={PRESS_WHATS_NEW_PATH} element={<CedarPressWhatsNew />} />
+          <Route path={PRESS_ARTICLE_PATH} element={<CedarPressArticle />} />
+          <Route path="*" element={<Navigate to={PRESS_PATH} replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   </StrictMode>,
 );

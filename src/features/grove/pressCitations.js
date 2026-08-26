@@ -1,4 +1,6 @@
 /**
+ * REVIEW OWNER: Havala
+ *
  * PURPOSE
  * The citation register: every known public use of a Cedar Press dataset.
  *
@@ -14,6 +16,9 @@
  * fabricated proof, exactly what the datasets exist to replace; the page
  * renders an honest counting-begins state until the first real citation
  * lands.
+ *
+ * OUTPUTS
+ * `CITATIONS` (newest first), `citationCountFor()`, `REPORT_CITATION_HREF`.
  */
 
 /** Where a reader reports a citation the register missed. */

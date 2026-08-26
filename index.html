@@ -3,28 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="light dark" />
+    <!-- The press pages pin the paper look in both themes (press.css:
+         .teim-rd--paper re-pins the light tokens over the dark remap), so
+         the document declares light rather than inviting a dark canvas it
+         would immediately paint over. -->
+    <meta name="color-scheme" content="light" />
     <meta
       name="description"
-      content="Cedar Press: original economic datasets, rigorous journalism and transparent method for Indian Country. A Tribal Business News × Lumecon partnership."
+      content="Cedar Press: original intelligence collections, data-driven insights and transparent research for Indian Country. Built by Lumecon, available exclusively through Tribal Business News."
     />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>Cedar Press</title>
-    <script>
-      // Set the theme before first paint so neither mode flashes. Saved
-      // choice wins; otherwise the system preference decides.
-      (function () {
-        try {
-          var saved = localStorage.getItem("cedar-press-theme");
-          var dark = saved
-            ? saved === "dark"
-            : window.matchMedia("(prefers-color-scheme: dark)").matches;
-          if (dark) document.documentElement.dataset.theme = "dark";
-        } catch (e) {
-          /* storage unavailable: light default */
-        }
-      })();
-    </script>
   </head>
   <body>
     <div id="root"></div>
