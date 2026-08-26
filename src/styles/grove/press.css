@@ -731,7 +731,7 @@
 .teim-rd .cp-hub__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.9rem; }
 @media (max-width: 1280px) { .teim-rd .cp-hub__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .teim-rd .cp-hub__grid > li { position: relative; display: block; }
-.teim-rd .cp-hub__tile { position: relative; box-sizing: border-box; width: 100%; aspect-ratio: 1 / 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; padding: 1rem 0.8rem; border: 1px solid var(--line); background: var(--bg); text-align: center; color: var(--ink); text-decoration: none; overflow: hidden; transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease; }
+.teim-rd .cp-hub__tile { position: relative; box-sizing: border-box; width: 100%; min-height: 10.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; padding: 1.1rem 0.7rem; border: 1px solid var(--line); background: var(--bg); text-align: center; color: var(--ink); text-decoration: none; overflow: hidden; transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease; }
 /* The teal rises from the floor of the tile on hover rather than washing
  * over it: the mark and the name stay on paper, which keeps their contrast
  * where it was measured. */
@@ -741,12 +741,12 @@
 .teim-rd .cp-hub__tile:hover .cp-hub__mark { transform: translateY(-2px) scale(1.06); }
 .teim-rd .cp-hub__tile:hover .cp-hub__name { color: var(--dteal); }
 .teim-rd .cp-hub__mark { display: grid; place-items: center; color: var(--dteal); transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1); }
-.teim-rd .cp-hub__mark svg { width: 68px; height: 68px; }
+.teim-rd .cp-hub__mark svg { width: 76px; height: 76px; }
 .teim-rd .cp-hub__id { display: flex; flex-direction: column; gap: 0.22rem; min-width: 0; }
-.teim-rd .cp-hub__name { font-family: var(--sans); font-size: 1.12rem; font-weight: 800; letter-spacing: -0.012em; line-height: 1.2; transition: color 0.18s ease; }
+.teim-rd .cp-hub__name { font-family: var(--sans); font-size: 1.2rem; font-weight: 800; letter-spacing: -0.015em; line-height: 1.18; transition: color 0.18s ease; }
 /* What the section holds right now, read from the catalog: a label alone
  * says where a tap goes, this says whether it is worth taking. */
-.teim-rd .cp-hub__meta { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-hub__meta { font-family: var(--mono); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 /* The ?: its own control beside the tile's link, never inside it, because a
  * button inside an anchor is two answers to one tap. Footnote-sized, with a
  * 48px target under it. */
@@ -758,8 +758,9 @@
  * wrapping to a single column. */
 @media (max-width: 640px) {
   .teim-rd .cp-hub__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: none; gap: 0.7rem; }
-  .teim-rd .cp-hub__mark svg { width: 52px; height: 52px; }
-  .teim-rd .cp-hub__name { font-size: 1rem; }
+  .teim-rd .cp-hub__tile { min-height: 9.5rem; }
+  .teim-rd .cp-hub__mark svg { width: 60px; height: 60px; }
+  .teim-rd .cp-hub__name { font-size: 1.05rem; }
   .teim-rd .cp-hub__tile { width: 100%; height: auto; aspect-ratio: 1 / 1; }
 }
 
@@ -1312,17 +1313,21 @@
  * boxes. A page that has just argued for a maintained research product
  * should end on the maintenance, not on a pair of rectangles. */
 .teim-rd .cp-close { position: relative; }
-.teim-rd .cp-close__in { max-width: 1560px; margin: 0 auto; padding: 4.5rem 2.4rem 4rem; }
+/* The band's own padding is all of it: .cp-surf adds 3.6rem block padding
+ * for the paper surfaces, which on top of this left a hand's width of empty
+ * navy under the mission line and made the close read as a second page. */
+.teim-rd .cp-surf.cp-close { padding-block: 0; }
+.teim-rd .cp-close__in { max-width: 1560px; margin: 0 auto; padding: 2.6rem 2.4rem 2.4rem; }
 /* A wrapper now, not the headline: .cp-close__head carries the type. Leaving
  * the display rules here set the paragraph inside it in 800 weight. */
 .teim-rd .cp-close__say { min-width: 0; }
-.teim-rd .cp-close__body { font-size: 1.02rem; line-height: 1.62; margin: 1.1rem 0 0; max-width: 56ch; opacity: 0.88; }
-.teim-rd .cp-close__acts { display: flex; flex-wrap: wrap; gap: 0 2.5rem; margin-top: 2.2rem; padding-top: 1.4rem; border-top: 1px solid currentColor; }
+.teim-rd .cp-close__body { font-size: 1.02rem; line-height: 1.62; margin: 0.8rem 0 0; max-width: 56ch; opacity: 0.88; }
+.teim-rd .cp-close__acts { display: flex; flex-wrap: wrap; gap: 0 2.5rem; margin-top: 1.4rem; padding-top: 1.1rem; border-top: 1px solid currentColor; }
 .teim-rd .cp-close__act { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 48px; font-family: var(--sans); font-size: 1rem; font-weight: 700; color: inherit; text-decoration: none; border-bottom: 2px solid transparent; transition: border-color 0.2s ease, gap 0.2s ease; }
 .teim-rd .cp-close__act:hover { border-bottom-color: currentColor; gap: 0.8rem; }
 .teim-rd .cp-close__acts { border-top-color: rgba(255, 255, 255, 0.3); }
 @media (prefers-reduced-motion: reduce) { .teim-rd .cp-close__act { transition: none; } .teim-rd .cp-close__act:hover { gap: 0.5rem; } }
-@media (max-width: 720px) { .teim-rd .cp-close__in { padding: 3rem 1.15rem; } .teim-rd .cp-close__acts { flex-direction: column; gap: 0; } }
+@media (max-width: 720px) { .teim-rd .cp-close__in { padding: 2rem 1.15rem; } .teim-rd .cp-close__acts { flex-direction: column; gap: 0; } }
 
 /* ── Justified prose ──────────────────────────────────────────────────────
  * Straight edges on both sides, wherever a paragraph runs long enough to have
@@ -1569,7 +1574,7 @@
 .teim-rd .cp-feed__none { font-size: 1rem; line-height: 1.6; color: var(--ink-2); margin: 3rem 0 0; padding: 1.6rem 0; border-top: 1px solid var(--line); }
 /* The mission line, quiet and last. It is why the product exists, so it sits
  * under the actions rather than competing with the page's own headline. */
-.teim-rd .cp-close__mission { grid-column: 1 / -1; margin: 2.4rem 0 0; padding-top: 1.4rem; border-top: 1px solid rgba(255, 255, 255, 0.16); font-family: var(--sans); font-size: 1.05rem; font-weight: 600; letter-spacing: -0.01em; color: rgba(255, 255, 255, 0.86); }
+.teim-rd .cp-close__mission { grid-column: 1 / -1; margin: 1.4rem 0 0; padding-top: 1.1rem; border-top: 1px solid rgba(255, 255, 255, 0.16); font-family: var(--sans); font-size: 1.05rem; font-weight: 600; letter-spacing: -0.01em; color: rgba(255, 255, 255, 0.86); }
 .teim-rd .cp-close__mission span { display: block; margin-bottom: 0.45rem; font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); }
 
 /* The deep surface inverts too. Anything left on a default ink value is
@@ -1597,7 +1602,7 @@
 .teim-rd .cp-limits.cp-two .cp-limits__scope { max-width: none; }
 
 /* The close: statement left, what is moving and where to go on the right. */
-.teim-rd .cp-close__in { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 1.6rem 4.5rem; align-items: start; }
+.teim-rd .cp-close__in { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 0 4.5rem; align-items: start; }
 .teim-rd .cp-close__head { font-family: var(--sans); font-size: clamp(1.7rem, 3.4vw, 2.7rem); font-weight: 800; letter-spacing: -0.025em; line-height: 1.1; margin: 0; }
 .teim-rd .cp-close__body { max-width: none; }
 .teim-rd .cp-close .cp-new { grid-column: 2; margin: 0; border-top: 0; padding-top: 0; flex-direction: column; align-items: flex-start; gap: 0.9rem; }

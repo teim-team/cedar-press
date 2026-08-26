@@ -33,7 +33,6 @@ import { canReadCedarPress } from "../../features/grove/pressAccess";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog";
 import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
-import { PRESS_WHATS_NEW_PATH } from "../../features/grove/pressRoutes";
 import { Contours } from "./pressAtmosphere";
 import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
@@ -58,7 +57,7 @@ export default function CedarPress() {
 
   return (
     <div className="teim-rd teim-rd--paper">
-      <main id="cp-main" className="cp cp--deepfoot cp-page">
+      <main id="cp-main" className="cp cp-page">
         <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="home" />
 
         {loading ? null : (
@@ -86,12 +85,11 @@ export default function CedarPress() {
           <Contours strength={1.2} />
           <div className="cp-close__in">
             <div className="cp-close__say">
-              <h2 className="cp-close__head">The records change. Cedar changes with them.</h2>
+              <h2 className="cp-close__head">Nothing here is a snapshot.</h2>
               <p className="cp-close__body">
-                New records, ownership changes, corrections and historical evidence arrive
-                continuously, and every collection here is maintained against them. What you
-                cited last quarter is still reproducible; what you cite next quarter will be
-                better.
+                Records are added, ownership changes and corrections come in every week, and
+                the collections are kept current against them. A figure you cited last quarter
+                still reproduces.
               </p>
             </div>
             <ul className="cp-new">
@@ -103,9 +101,6 @@ export default function CedarPress() {
               ))}
             </ul>
             <div className="cp-close__acts">
-              <Link className="cp-close__act" to={PRESS_WHATS_NEW_PATH}>
-                See what&rsquo;s new <span aria-hidden="true">&#8594;</span>
-              </Link>
               <a
                 className="cp-close__act"
                 href="mailto:contact@lumecon.ai?subject=Cedar%20Press%20feedback"
@@ -130,7 +125,7 @@ export default function CedarPress() {
           </>
         )}
 
-        <PressFoot deep />
+        <PressFoot />
       </main>
     </div>
   );
