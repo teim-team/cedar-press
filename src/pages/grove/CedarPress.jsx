@@ -57,7 +57,7 @@ export default function CedarPress() {
 
   return (
     <div className="teim-rd teim-rd--paper">
-      <main id="cp-main" className="cp cp-page cp--screens">
+      <main id="cp-main" className="cp cp-page cp--screens cp--deepfoot">
         <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="home" />
 
         {loading ? null : (
@@ -128,7 +128,7 @@ export default function CedarPress() {
             </p>
           </div>
         </section>
-          <PressFoot />
+          <PressFoot deep />
         </div>
 
         <PressCedarFab />
