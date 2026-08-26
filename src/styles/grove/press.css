@@ -1380,10 +1380,9 @@
 /* No opacity here. Faded white cleared 4.5:1 on navy; on teal it lands
  * around 4.1:1, and the fix is the text, not the band. */
 .teim-rd .cp-close__body { font-size: 1.02rem; line-height: 1.62; margin: 0.8rem 0 0; max-width: 56ch; }
-.teim-rd .cp-close__acts { display: flex; flex-wrap: wrap; gap: 0 2.5rem; margin-top: 1.4rem; padding-top: 1.1rem; border-top: 1px solid currentColor; }
+.teim-rd .cp-close__acts { display: flex; flex-wrap: wrap; gap: 0 2.5rem; margin-top: 1.4rem; }
 .teim-rd .cp-close__act { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 48px; font-family: var(--sans); font-size: 1rem; font-weight: 700; color: inherit; text-decoration: none; border-bottom: 2px solid transparent; transition: border-color 0.2s ease, gap 0.2s ease; }
 .teim-rd .cp-close__act:hover { border-bottom-color: currentColor; gap: 0.8rem; }
-.teim-rd .cp-close__acts { border-top-color: rgba(255, 255, 255, 0.4); }
 @media (prefers-reduced-motion: reduce) { .teim-rd .cp-close__act { transition: none; } .teim-rd .cp-close__act:hover { gap: 0.5rem; } }
 @media (max-width: 720px) { .teim-rd .cp-close__in { padding: 2rem 1.15rem; } .teim-rd .cp-close__acts { flex-direction: column; gap: 0; } }
 
@@ -1630,11 +1629,6 @@
 .teim-rd .cp-feed__more { display: flex; flex-wrap: wrap; align-items: center; gap: 0.9rem 1.2rem; margin: 0; padding: 1.6rem 0 0; border-top: 1px solid var(--line); }
 .teim-rd .cp-feed__left { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 .teim-rd .cp-feed__none { font-size: 1rem; line-height: 1.6; color: var(--ink-2); margin: 3rem 0 0; padding: 1.6rem 0; border-top: 1px solid var(--line); }
-/* The mission line, quiet and last. It is why the product exists, so it sits
- * under the actions rather than competing with the page's own headline. */
-.teim-rd .cp-close__mission { grid-column: 1 / -1; margin: 1.4rem 0 0; padding-top: 1.1rem; border-top: 1px solid rgba(255, 255, 255, 0.22); font-family: var(--sans); font-size: 1.05rem; font-weight: 600; letter-spacing: -0.01em; color: #fff; }
-.teim-rd .cp-close__mission span { display: block; margin-bottom: 0.45rem; font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255, 255, 255, 0.82); }
-
 /* The deep surface inverts too. Anything left on a default ink value is
  * invisible on a solid fill, and the default is what a new element gets:
  * the recently-updated names were painting ink on ink. Full white on the
@@ -1667,7 +1661,10 @@
 .teim-rd .cp-close__body { max-width: none; }
 .teim-rd .cp-close .cp-new { grid-column: 2; margin: 0; border-top: 0; padding-top: 0; flex-direction: column; align-items: flex-start; gap: 0.9rem; }
 .teim-rd .cp-close .cp-new__item { display: block; }
-.teim-rd .cp-close__acts { grid-column: 1 / -1; }
+/* Under the statement, in its column. Spanning both and taking a rule of its
+ * own made two links read as a third section of the close and cost a band of
+ * height to say so. */
+.teim-rd .cp-close__acts { grid-column: 1; margin-top: 1.6rem; padding-top: 0; border-top: 0; }
 /* One column: the release list stops being the right-hand column and becomes
  * the next thing down, so it needs back the separation the two-column layout
  * was giving it for free. Without this the first release name butts straight
@@ -1739,7 +1736,12 @@
     display: grid;
     grid-template-rows: 1fr auto;
   }
-  .teim-rd .cp--screens > .cp-end > .cp-close { align-content: center; }
+  /* The close sits at the top of its band, not in the middle of it. Centred,
+     the statement floated with teal above and below and read as though it had
+     been dropped there; against the top edge it reads as the start of the
+     ending, and the teal below it is the page running out. */
+  .teim-rd .cp--screens > .cp-end > .cp-close { align-content: start; }
+  .teim-rd .cp--screens > .cp-end > .cp-close .cp-close__in { padding-top: 4.2rem; }
 }
 /* A reader who asked for less motion gets the ordinary page: snapping moves
  * the viewport out from under them, which is the thing that setting is for. */

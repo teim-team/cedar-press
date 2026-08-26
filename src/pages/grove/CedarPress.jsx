@@ -108,6 +108,8 @@ export default function CedarPress() {
                 </li>
               ))}
             </ul>
+            {/* Under the statement, in its column, rather than on a rule of
+                their own across the page. Two links are not a section. */}
             <div className="cp-close__acts">
               <a
                 className="cp-close__act"
@@ -119,13 +121,6 @@ export default function CedarPress() {
                 Explore Cedar Grove <span aria-hidden="true">&#8594;</span>
               </a>
             </div>
-            {/* The mission line, kept as a mission line. It is the reason the
-                product exists rather than a description of it, so it closes
-                the page instead of opening it. */}
-            <p className="cp-close__mission">
-              <span>Why we build this</span>
-              Making Indian Country impossible to overlook.
-            </p>
           </div>
         </section>
           <PressFoot deep />
