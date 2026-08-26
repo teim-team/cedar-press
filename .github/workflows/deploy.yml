@@ -27,6 +27,11 @@ jobs:
       - run: npm run lint
       - run: npm run test
       - run: npm run build
+      # Smoke tests run a browser over the built site. Chromium only: these
+      # are the critical paths, not a compatibility matrix, and the phone
+      # project runs the mobile profile on the same engine.
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:smoke
       # The API ships with the client, so its checks gate the same pipeline.
       - uses: actions/setup-python@v5
         with:
