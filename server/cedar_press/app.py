@@ -39,7 +39,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 
-from cedar_press import codes, repository
+from cedar_press import codes, ratelimit, repository
 from cedar_press.session import (
     Session,
     account_exists,
@@ -130,7 +130,10 @@ def me(session: Session = Depends(require_session)) -> dict[str, object]:
 
 
 @app.post("/auth/login")
-def login(credentials: Credentials, response: Response) -> dict[str, object]:
+def login(
+    credentials: Credentials, request: Request, response: Response
+) -> dict[str, object]:
+    _guard(request, "login", ratelimit.LOGIN_ATTEMPTS)
     session = sign_in(credentials.email, credentials.password, response)
     if session is None:
         raise HTTPException(
@@ -162,6 +165,26 @@ class Activation(BaseModel):
     password: str
 
 
+def _guard(request: Request, bucket: str, attempts: int) -> None:
+    """Refuse a caller who has spent their attempts.
+
+    Keyed by bucket as well as by client, so exhausting the sign-in allowance
+    does not also lock the same person out of activation — those are different
+    tasks and a subscriber may legitimately be doing the second after failing
+    the first.
+    """
+    key = f"{bucket}:{ratelimit.client_key(request)}"
+    if not ratelimit.allow(key, attempts=attempts):
+        raise HTTPException(
+            status_code=429,
+            detail={
+                "code": "TOO_MANY_ATTEMPTS",
+                "message": "Too many attempts. Wait a few minutes and try again.",
+            },
+            headers={"Retry-After": str(ratelimit.retry_after(key))},
+        )
+
+
 def _refuse(error_code: str) -> HTTPException:
     """A refusal the client already has copy for.
 
@@ -175,13 +198,14 @@ def _refuse(error_code: str) -> HTTPException:
 
 
 @app.post("/press/activation/validate", status_code=204)
-def validate_code(check: CodeCheck) -> None:
+def validate_code(check: CodeCheck, request: Request) -> None:
     """Step one: is this code real, unspent, unexpired, and theirs?
 
     Creates nothing. The client asks this before showing the password field
     so a wrong code costs a message rather than a half-made account, and so
     the first screen a subscriber sees is two fields rather than four.
     """
+    _guard(request, "activation", ratelimit.ACTIVATION_ATTEMPTS)
     issued, error = codes.check(check.code, check.email)
     if error:
         raise _refuse(error)
@@ -192,7 +216,9 @@ def validate_code(check: CodeCheck) -> None:
 
 
 @app.post("/press/activation")
-def activate(activation: Activation, response: Response) -> dict[str, object]:
+def activate(
+    activation: Activation, request: Request, response: Response
+) -> dict[str, object]:
     """Step two: create the account and sign them in.
 
     The code is re-checked rather than trusted from step one. Step one set no
@@ -204,6 +230,7 @@ def activate(activation: Activation, response: Response) -> dict[str, object]:
     caller name their own tier is how an activation route becomes an
     escalation route.
     """
+    _guard(request, "activation", ratelimit.ACTIVATION_ATTEMPTS)
     issued, error = codes.check(activation.code, activation.email)
     if error:
         raise _refuse(error)

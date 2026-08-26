@@ -1,0 +1,22 @@
+# Cedar Press — cedarpress.ai
+#
+# The front page is the service's public face and should be found. Everything
+# behind the sign-in should not: those routes are a login wall to a crawler,
+# and a search result that lands a reader on one is a worse answer than no
+# result at all. The two policy pages are deliberately public — they exist to
+# be sent to a council office or a researcher directly.
+#
+# This governs indexing, not access. Entitlement is enforced by the service;
+# a crawler that ignores this file still gets the gate.
+
+User-agent: *
+Allow: /$
+Allow: /tribal-data-request
+Allow: /research-access
+Disallow: /articles
+Disallow: /data
+Disallow: /whats-new
+Disallow: /methods
+Disallow: /settings
+
+Sitemap: https://cedarpress.ai/sitemap.xml

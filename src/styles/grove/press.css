@@ -403,7 +403,7 @@
 /* The lockup: the mark beside the wordmark, so the service has a logo in
  * the chrome rather than only a faint ripple behind the gate. */
 .teim-rd .cp-mast__lockup { display: inline-flex; align-items: center; gap: 0.6rem; text-decoration: none; }
-.teim-rd .cp-mast__mark { width: 1.9rem; height: 1.9rem; object-fit: contain; flex: none; }
+.teim-rd .cp-mast__mark { width: 2.5rem; height: 2.5rem; object-fit: contain; flex: none; }
 .teim-rd a.cp-mast__lockup:hover .cp-mast__word { color: var(--dteal); }
 /* The page's own name where the partnership line sits on the hub, so the
  * header answers "where am I" before the page does. */

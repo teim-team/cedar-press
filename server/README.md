@@ -22,6 +22,7 @@ pip install -e .[dev]
 CEDAR_PRESS_SECRET=dev-secret \
 CEDAR_PRESS_INSECURE_COOKIE=1 \
 CEDAR_PRESS_ACCOUNTS='{"reader@example.org":{"password":"...","tier":"press"}}' \
+CEDAR_PRESS_CODES='{"TBN4-9K2M-X7QD":{"email":"reader@example.org","tier":"press"}}' \
 uvicorn cedar_press.app:app --reload --port 8000
 ```
 
@@ -29,6 +30,7 @@ uvicorn cedar_press.app:app --reload --port 8000
 | --- | --- |
 | `CEDAR_PRESS_SECRET` | Signs the session cookie. Without one, a restart invalidates every session rather than accepting forgeable cookies. |
 | `CEDAR_PRESS_ACCOUNTS` | Provisioned subscribers as JSON. Empty by default, so a service started without accounts authenticates nobody. |
+| `CEDAR_PRESS_CODES` | Access codes as issued, keyed by code: `{"CODE": {"email": ..., "tier": ..., "expires": "YYYY-MM-DD"}}`. `expires` is optional. Empty by default, so a service started without a register activates nobody. |
 | `CEDAR_PRESS_ORIGINS` | Comma-separated origins allowed to send credentialed requests. |
 | `CEDAR_PRESS_INSECURE_COOKIE` | `1` in local development only: drops `Secure` so the cookie works over http. |
 
@@ -38,6 +40,12 @@ Every route reads through `repository.py`, which answers from the ported
 modules today. When the collections move into Postgres it answers from there
 and `app.py` does not change — routes hold HTTP concerns and no data access
 of their own, which is what keeps that swap to one module.
+
+Two other seams are marked and both are in-memory today, which means they are
+forgotten on restart: `codes.py` holds which access codes have been spent, and
+`session.py` holds accounts created by activation. In production both are rows
+written in the same transaction — the account created, the code spent — and
+neither belongs in process memory.
 
 `session.py` is the same shape: `_lookup` is the seam the subscriber table
 replaces, and the cookie, its flags and the payload the client reads all stay.

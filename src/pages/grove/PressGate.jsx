@@ -177,8 +177,15 @@ export default function PressGate({ user }) {
         {/* One ripple, and it is ours. The panel used to carry two nested
             contour rises that read as generic circles beside the mark; the
             mark's own asymmetric rings are the ripple now, breathing on a
-            slow cycle so the panel is alive without anything sliding around. */}
-        <img className="auth-hero__mark cp-hero2__ripple" src="/lumecon-mark.png" alt="" aria-hidden="true" />
+            slow cycle so the panel is alive without anything sliding around.
+
+            The all-teal mark, which is the current one. */}
+        <img
+          className="auth-hero__mark cp-hero2__ripple"
+          src="/brand/lumecon-logo-mark-teal.png"
+          alt=""
+          aria-hidden="true"
+        />
         <div className="auth-hero__inner cp-hero2__inner">
           <span className="cp-split__brand">Cedar Press</span>
           <p className="cp-hero2__tagline">Trusted intelligence for Indian Country.</p>

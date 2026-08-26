@@ -23,67 +23,36 @@ Alongside these, `/tribal-data-request` carries the tribal data request
 policy and `/research-access` the limited research access path — each on its
 own URL, so either can be sent to a council office or a researcher directly.
 
-Access follows the subscription: the Cedar Press tier arrives with a Tribal
-Business News membership, Cedar Press+ adds the deeper shelf, and Cedar Grove
-carries the same collections into the full analysis environment.
+Every collection begins with public records, is extended through original
+research and entity resolution, and stays current as new information arrives.
+Every download carries its own citation, so a figure can be traced back to the
+release it came from.
 
-## This repository
+## Access
 
-The subscriber-facing web client: a [Vite](https://vite.dev) + React
-application, deployed as a static build. It shares its design tokens, figure
-specs and collection models with the Lumecon platform, so what a subscriber
-reads here cannot drift from what the platform renders. See
-[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for how the code is organized.
+Access follows the subscription. An eligible Tribal Business News membership
+issues an access code, the code establishes the entitlement, and the account
+follows: Cedar Press arrives with a membership, Cedar Press+ adds the deeper
+shelf, and [Cedar Grove](https://lumecon.ai) carries the same collections into
+the full analysis environment. Tribal Business News owns payment, renewals and
+issuance.
 
-The client:
+## Working on it
+
+The subscriber-facing web client is a [Vite](https://vite.dev) + React
+application deployed as a static build, with a Python API alongside it.
 
 ```sh
 npm install
-npm run dev      # development server
-npm run test     # unit tests (node --test)
-npm run build    # production build into dist/
+npm run dev        # development server
+npm run test       # unit tests
+npm run test:smoke # end-to-end checks against a build
+npm run build      # production build
 ```
 
-The API, a FastAPI service in `server/` that carries Cedar Grove's own Python
-collection modules rather than reimplementing them:
-
-```sh
-pip install -e server[dev]
-uvicorn cedar_press.app:app --reload --port 8000
-cd server && python -m unittest discover -s tests -t .
-```
-
-Point the client at it with `VITE_API_URL=http://localhost:8000 npm run dev`.
-
-### Configuration
-
-The client runs in two modes, and knows which one it is in rather than
-inferring it from a failed request:
-
-| Mode | When | Behavior |
-| --- | --- | --- |
-| Connected | `VITE_API_URL` is set | Sessions, catalog, releases, downloads, subscriber datasets and Cedar come from the platform API; the database behind it is the source of truth. |
-| Standalone | No API configured | The bundled catalog is served so the service can be demonstrated and reviewed on its own. Anything that would write to the database stays in the browser, and the interface says so. |
-
-Datadog RUM reports errors, performance and a small set of product events
-when `VITE_DATADOG_APPLICATION_ID` and `VITE_DATADOG_CLIENT_TOKEN` are both
-set; nothing is sent otherwise. See [`.env.example`](.env.example) for every
-value.
-
-## Deployment
-
-Pushes to `main` build and deploy to GitHub Pages via
-[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml). The custom
-domain is set in `public/CNAME`, and the build emits `404.html` alongside
-`index.html` so client-side routes resolve.
-
-## Subscribers
-
-Accounts arrive from a Tribal Business News subscription, so the service is
-told an address and nothing else. Subscribers state their organization and
-role once, and the roadmap is built from those segments — see
-[`docs/SUBSCRIBERS.md`](docs/SUBSCRIBERS.md), which also records why
-third-party email enrichment is deliberately not wired in.
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) covers how the code is
+organized, how the client and the API fit together, and how to run the API.
+[`.env.example`](.env.example) lists every configuration value.
 
 ## Security
 

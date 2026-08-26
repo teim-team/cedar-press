@@ -34,7 +34,10 @@ os.environ["CEDAR_PRESS_CODES"] = json.dumps(
 
 from fastapi.testclient import TestClient  # noqa: E402
 
-from cedar_press import codes  # noqa: E402
+from cedar_press import (
+    codes,  # noqa: E402
+    ratelimit,  # noqa: E402
+)
 from cedar_press import session as session_module  # noqa: E402
 from cedar_press.app import app  # noqa: E402
 
@@ -48,6 +51,7 @@ def sign_in(email: str = "reader@example.org", password: str = "correct-horse"):
 class TestSession(unittest.TestCase):
     def setUp(self) -> None:
         client.cookies.clear()
+        ratelimit.reset_for_tests()
 
     def test_health_needs_no_session(self) -> None:
         self.assertEqual(client.get("/health").status_code, 200)
@@ -156,6 +160,7 @@ class TestActivation(unittest.TestCase):
     def setUp(self) -> None:
         client.cookies.clear()
         codes.reset_for_tests()
+        ratelimit.reset_for_tests()
         session_module.forget_activated_for_tests()
 
     def test_a_good_code_validates_without_creating_anything(self) -> None:
@@ -288,6 +293,82 @@ class TestActivation(unittest.TestCase):
             },
         )
         self.assertEqual(response.json()["code"], "PRESS_CODE_INVALID")
+
+
+class TestRateLimiting(unittest.TestCase):
+    """The control that turns "guessable given enough attempts" into "not".
+
+    An access code is 8 to 32 alphanumeric characters and the activation
+    routes say plainly whether one is real. Unlimited, that is an oracle.
+    """
+
+    def setUp(self) -> None:
+        client.cookies.clear()
+        ratelimit.reset_for_tests()
+        codes.reset_for_tests()
+
+    def tearDown(self) -> None:
+        ratelimit.reset_for_tests()
+
+    def test_guessing_codes_runs_out_of_attempts(self) -> None:
+        seen = set()
+        for _ in range(ratelimit.ACTIVATION_ATTEMPTS + 4):
+            response = client.post(
+                "/press/activation/validate",
+                json={"code": "TBN4-0000-0000", "email": "guess@example.org"},
+            )
+            seen.add(response.status_code)
+        self.assertIn(429, seen)
+
+    def test_the_refusal_says_when_to_come_back(self) -> None:
+        for _ in range(ratelimit.ACTIVATION_ATTEMPTS + 1):
+            response = client.post(
+                "/press/activation/validate",
+                json={"code": "TBN4-0000-0000", "email": "guess@example.org"},
+            )
+        self.assertEqual(response.status_code, 429)
+        self.assertEqual(response.json()["code"], "TOO_MANY_ATTEMPTS")
+        self.assertGreater(int(response.headers["retry-after"]), 0)
+
+    def test_guessing_passwords_runs_out_of_attempts(self) -> None:
+        seen = set()
+        for _ in range(ratelimit.LOGIN_ATTEMPTS + 4):
+            seen.add(sign_in(password="wrong").status_code)
+        self.assertIn(429, seen)
+
+    def test_the_two_surfaces_have_separate_allowances(self) -> None:
+        # Failing sign-in must not lock a subscriber out of activation: those
+        # are different tasks and doing the second after failing the first is
+        # exactly what someone with a new code would do.
+        for _ in range(ratelimit.LOGIN_ATTEMPTS + 2):
+            sign_in(password="wrong")
+        response = client.post(
+            "/press/activation/validate",
+            json={"code": "TBN4-9K2M-X7QD", "email": "new@example.org"},
+        )
+        self.assertEqual(response.status_code, 204)
+
+    def test_a_forwarded_header_is_ignored_unless_the_deployment_trusts_it(self) -> None:
+        # Otherwise a header the caller controls becomes the identity they are
+        # limited by, which is a free reset on every request.
+        self.assertNotEqual(os.environ.get("CEDAR_PRESS_TRUST_PROXY"), "1")
+        seen = set()
+        for i in range(ratelimit.LOGIN_ATTEMPTS + 4):
+            seen.add(
+                client.post(
+                    "/auth/login",
+                    json={"email": "reader@example.org", "password": "wrong"},
+                    headers={"X-Forwarded-For": f"10.0.0.{i}"},
+                ).status_code
+            )
+        self.assertIn(429, seen)
+
+    def test_reading_is_not_rate_limited(self) -> None:
+        # The limit is on guessing a secret, not on using the service.
+        ratelimit.reset_for_tests()
+        self.assertEqual(sign_in().status_code, 200)
+        for _ in range(30):
+            self.assertEqual(client.get("/press/collections").status_code, 200)
 
 
 if __name__ == "__main__":
