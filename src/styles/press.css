@@ -1,0 +1,199 @@
+/* Cedar Press: the page for the joint data brand, standalone.
+ *
+ * Ported from the app (teim-app, src/styles/press.css); reads from the same
+ * tokens (base.css must be imported first). The page is deliberately spare:
+ * masthead, the articles, the data, the upload panel, one upsell band, a
+ * footer. Anything more belongs in the app, not here. */
+
+/* The bottom padding clears the Cedar launcher: at rest and at the end of a
+ * scroll it floats in this empty band, never over the footer or a card.
+ * min-width: 0 because .teim-rd is a column flex container: without it the
+ * collection strip's card minimums (3 x 360px) propagate up as this page's
+ * minimum width and the whole page scrolls sideways on narrow windows,
+ * instead of the strip scrolling inside its own box. */
+.teim-rd .cp { max-width: 1320px; min-width: 0; width: 100%; margin: 0 auto; padding: 0 2.4rem 7.5rem; }
+
+.teim-rd .cp-mast { display: flex; align-items: baseline; gap: 1rem; padding: 1.6rem 0 1.2rem; border-bottom: 1px solid var(--line); }
+.teim-rd .cp-mast__word { font-weight: 800; font-size: 1.25rem; letter-spacing: 0.14em; color: var(--ink); }
+.teim-rd .cp-mast__of { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+
+.teim-rd .cp-hero { padding: 2.4rem 0 1.3rem; }
+.teim-rd .cp-hero h1 { font-size: clamp(2rem, 4.5vw, 3.4rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.06; color: var(--ink); margin: 0 0 0.9rem; max-width: none; }
+/* The intro runs the title's full measure on purpose: fewer lines, and the
+ * head reads as one block instead of a wide title over a narrow column. */
+.teim-rd .cp-hero p { font-size: 1.16rem; line-height: 1.6; color: var(--ink-2); margin: 0; max-width: none; }
+
+.teim-rd .cp-sec { margin-top: 2.6rem; }
+/* Sections divide the way the Lumecon site divides them: a short hairline,
+ * never a full-width line. The feedback band draws its own card border, so
+ * it goes without. */
+.teim-rd .cp-sec:not(.cp-feedback)::before,
+.teim-rd .cp-more::before { content: ''; display: block; grid-column: 1 / -1; width: clamp(120px, 18vw, 220px); height: 1px; background: var(--rule-strong); margin-bottom: 1.1rem; }
+.teim-rd .cp-sec__band { display: block; font-family: var(--mono); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); margin-bottom: 0.9rem; }
+
+/* Articles: a horizontal strip the way news sites carry their latest. New
+ * pieces append; the strip scrolls; nothing reflows. */
+.teim-rd .cp-strip { display: flex; gap: 1.1rem; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 0.6rem; }
+.teim-rd .cp-art { flex: 1 1 320px; min-width: 300px; scroll-snap-align: start; border: 1px solid var(--line-soft); border-radius: var(--radius-card); overflow: hidden; background: var(--bg); display: flex; flex-direction: column; transition: box-shadow 0.18s ease, border-color 0.18s ease; }
+.teim-rd .cp-art:hover { border-color: var(--line); box-shadow: 0 10px 30px rgba(10,15,38,0.07); }
+.teim-rd .cp-art__body { padding: 0.9rem 1.1rem 1.1rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.teim-rd .cp-art__tag { font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dteal); }
+.teim-rd .cp-art__title { font-size: 1.08rem; font-weight: 700; letter-spacing: -0.01em; line-height: 1.3; color: var(--ink); margin: 0; }
+.teim-rd .cp-art__dek { font-size: 0.92rem; line-height: 1.5; color: var(--ink-2); margin: 0; }
+.teim-rd .cp-art__meta { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em; color: var(--muted); margin-top: auto; padding-top: 0.4rem; }
+
+/* The data: same figure cards as Grove, with the rows one click below. */
+.teim-rd .cp-figs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.1rem; }
+@media (max-width: 1000px) { .teim-rd .cp-figs { grid-template-columns: 1fr; } }
+.teim-rd .cp-rows { margin-top: 0.5rem; border-top: 1px solid var(--line-soft); padding-top: 0.45rem; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.04em; color: var(--ink-2); line-height: 1.7; }
+.teim-rd .cp-figmeta { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.04em; color: var(--muted); margin: 0.45rem 0 0; }
+
+/* One upsell band, quiet on purpose. */
+.teim-rd .cp-more { margin-top: 2.6rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
+@media (max-width: 900px) { .teim-rd .cp-more { grid-template-columns: 1fr; } }
+/* The two cards stretch to the same height in the grid, so each is a column
+ * with its button pinned to the bottom edge: the leftover height sits between
+ * text and button on both cards and reads as composed, never as a hole under
+ * the shorter one. */
+.teim-rd .cp-more__card { border: 1px solid var(--line-soft); border-radius: var(--radius-card); padding: 1.2rem 1.4rem; background: var(--teal-tint); display: flex; flex-direction: column; align-items: flex-start; }
+.teim-rd .cp-more__card h3 { font-size: 1.12rem; font-weight: 700; color: var(--ink); margin: 0 0 0.35rem; }
+.teim-rd .cp-more__card p { font-size: 0.95rem; line-height: 1.55; color: var(--ink-2); margin: 0 0 0.8rem; }
+.teim-rd .cp-more__card > .gv-btn, .teim-rd .cp-more__acts { margin-top: auto; }
+.teim-rd .cp-more__acts { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+
+.teim-rd .cp-foot { margin-top: 2.2rem; border-top: 1px solid var(--line); padding-top: 1rem; display: flex; justify-content: space-between; gap: 1rem; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); flex-wrap: wrap; }
+
+/* Links: quiet teal, underline on hover; article cards are links that keep
+ * their card presentation. */
+.teim-rd .cp-mast__of a, .teim-rd .cp-foot a { color: var(--dteal); text-decoration: none; }
+.teim-rd .cp-mast__of a:hover, .teim-rd .cp-foot a:hover { text-decoration: underline; }
+.teim-rd a.cp-art { text-decoration: none; color: inherit; }
+
+/* The citation register: counts per dataset, the entries once they exist,
+ * and the report action. Quiet like everything else on the page. */
+.teim-rd .cp-cite__lede { font-size: 1.02rem; line-height: 1.6; color: var(--ink-2); margin: 0 0 0.9rem; }
+.teim-rd .cp-cite__list { list-style: none; margin: 0 0 0.9rem; padding: 0; }
+.teim-rd .cp-cite__list li { border-top: 1px solid var(--line-soft); padding: 0.5rem 0; display: flex; justify-content: space-between; gap: 1rem; font-size: 0.88rem; }
+.teim-rd .cp-cite__list a { color: var(--ink); text-decoration: none; }
+.teim-rd .cp-cite__list a:hover { color: var(--dteal); }
+.teim-rd .cp-cite__meta { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.05em; color: var(--muted); white-space: nowrap; }
+
+/* Article art: 16:9 editorial images, edge to edge on the card. */
+.teim-rd .cp-art__art { padding: 0; border-bottom: 1px solid var(--line-soft); background: var(--teal-tint); }
+.teim-rd .cp-art__img { display: block; width: 100%; height: auto; }
+
+.teim-rd .cp-cedar__title { font-size: 1.55rem; font-weight: 800; letter-spacing: -0.015em; color: var(--ink); margin: 0 0 0.6rem; }
+
+/* Rotation: arrows appear only when the shelf outgrows the row. */
+.teim-rd .cp-stripwrap { position: relative; }
+.teim-rd .cp-strip { flex-wrap: nowrap; }
+.teim-rd .cp-strip .gvc-fig { flex: 1 1 360px; min-width: 360px; }
+@media (max-width: 640px) { .teim-rd .cp-strip .gvc-fig { flex-basis: 300px; min-width: 300px; } }
+.teim-rd .cp-strip__arrow { position: absolute; top: 40%; left: -1.1rem; z-index: 2; width: 2.2rem; height: 2.2rem; border-radius: 50%; border: 1px solid var(--line); background: var(--bg); color: var(--dteal); font-size: 1rem; cursor: pointer; box-shadow: 0 6px 18px rgba(10,15,38,0.12); }
+.teim-rd .cp-strip__arrow + .cp-strip + .cp-strip__arrow, .teim-rd .cp-strip__arrow:last-child { left: auto; right: -1.1rem; }
+
+/* Cedar's floating button, the way the product carries it. */
+.teim-rd .cedar-widget { position: fixed; right: 2rem; bottom: 1rem; z-index: 120; }
+.teim-rd .cedar-widget__launcher { display: inline-flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1.25rem; border: 1px solid var(--teal-line); border-radius: 12px; background: var(--bg); color: var(--ink); box-shadow: 0 8px 24px rgba(10,15,38,0.1); cursor: pointer; text-decoration: none; transition: all 0.2s cubic-bezier(0.2, 0, 0, 1); }
+.teim-rd .cedar-widget__launcher:hover { border-color: var(--teal); background: var(--teal-tint); }
+.teim-rd .cedar-widget__launcher-copy { display: flex; flex-direction: column; text-align: left; }
+.teim-rd .cedar-widget__launcher-label { font-family: var(--sans); font-size: 0.95rem; font-weight: 600; line-height: 1.2; color: var(--ink); }
+.teim-rd .cedar-widget__launcher-context { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.06em; color: var(--muted); line-height: 1.2; margin-top: 0.1rem; text-transform: uppercase; }
+.teim-rd .cedar-widget__status-dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--teal); flex: 0 0 auto; }
+/* The launcher's honest note while the public chat surface is server work. */
+.teim-rd .cedar-widget__note { position: absolute; bottom: calc(100% + 0.6rem); right: 0; width: min(320px, calc(100vw - 3rem)); background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-card); padding: 0.9rem 1rem; box-shadow: 0 12px 34px rgba(10,15,38,0.18); }
+.teim-rd .cedar-widget__note p { margin: 0; font-size: 0.88rem; line-height: 1.5; color: var(--ink-2); }
+.teim-rd .cedar-widget__note a { color: var(--dteal); font-weight: 600; text-decoration: none; }
+.teim-rd .cedar-widget__note a:hover { text-decoration: underline; }
+
+/* The register, given the same weight as Cedar's band. */
+.teim-rd .cp-citeband { display: grid; grid-template-columns: 1.1fr 1fr; gap: 2rem; align-items: start; }
+@media (max-width: 980px) { .teim-rd .cp-citeband { grid-template-columns: 1fr; } }
+.teim-rd .cp-citecard { background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-card); padding: 1.2rem 1.4rem; box-shadow: 0 10px 30px rgba(10,15,38,0.06); }
+.teim-rd .cp-citecard__cap { display: block; font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); margin-bottom: 0.5rem; }
+.teim-rd .cp-citecard__row { display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid var(--line-soft); padding: 0.6rem 0; font-size: 0.98rem; color: var(--ink); }
+.teim-rd .cp-citecard__row b { font-size: 1.3rem; font-weight: 800; color: var(--dteal); }
+.teim-rd .cp-citecard__cta { width: 100%; margin-top: 0.8rem; }
+
+/* The front page: the newest brief leads, the rest stack beside it. */
+.teim-rd .cp-artgrid { display: grid; grid-template-columns: 1.7fr 1fr; gap: 1.4rem; align-items: stretch; }
+@media (max-width: 980px) { .teim-rd .cp-artgrid { grid-template-columns: 1fr; } }
+.teim-rd .cp-art--lead .cp-art__title { font-size: 1.62rem; line-height: 1.18; }
+.teim-rd .cp-art--lead .cp-art__dek { font-size: 1rem; }
+.teim-rd .cp-artstack { display: flex; flex-direction: column; gap: 1.2rem; }
+.teim-rd .cp-art--compact { flex-direction: row; min-width: 0; flex: 1; }
+.teim-rd .cp-art--compact .cp-art__art { flex: 0 0 176px; border-bottom: none; border-right: 1px solid var(--line-soft); }
+.teim-rd .cp-art--compact .cp-art__img { height: 100%; object-fit: cover; }
+.teim-rd .cp-art--compact .cp-art__title { font-size: 1.05rem; }
+.teim-rd .cp-art--compact .cp-art__dek { display: none; }
+/* On phones the compact cards' side-by-side split gets cramped; stack them
+ * like the lead card. */
+@media (max-width: 560px) {
+  .teim-rd .cp-art--compact { flex-direction: column; }
+  .teim-rd .cp-art--compact .cp-art__art { flex: none; border-right: none; border-bottom: 1px solid var(--line-soft); }
+  .teim-rd .cp-art--compact .cp-art__img { height: auto; }
+}
+.teim-rd .cp-artmore { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dteal); text-decoration: none; margin-top: auto; }
+.teim-rd .cp-artmore:hover { text-decoration: underline; }
+
+/* Feedback: one quiet band above the footer. */
+.teim-rd .cp-feedback { display: flex; align-items: center; justify-content: space-between; gap: 2rem; border: 1px solid var(--line-soft); border-radius: var(--radius-card); padding: 1.2rem 1.6rem; margin-top: 2.2rem; }
+@media (max-width: 780px) { .teim-rd .cp-feedback { flex-direction: column; align-items: flex-start; } }
+.teim-rd .cp-feedback__text { font-size: 0.98rem; line-height: 1.55; color: var(--ink-2); margin: 0; max-width: 72ch; }
+
+/* The gate: the standalone site's home page. States its price of admission
+ * before it shows anything; the preview credentials are printed on it. */
+.teim-rd .cp-gatepage { max-width: 1320px; width: 100%; min-width: 0; margin: 0 auto; padding: 0 2.4rem 2rem; display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
+.teim-rd .cp-mast--gate { flex-wrap: wrap; }
+.teim-rd .cp-foot--gate { margin-top: auto; padding-bottom: 1.4rem; }
+.teim-rd .cp-gate { max-width: 560px; margin: 3.5rem auto 3rem; width: 100%; }
+.teim-rd .cp-gate h1 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800; letter-spacing: -0.018em; line-height: 1.15; color: var(--ink); margin: 0 0 0.8rem; }
+.teim-rd .cp-gate__text { font-size: 1rem; line-height: 1.6; color: var(--ink-2); margin: 0 0 1.4rem; }
+.teim-rd .cp-gate__text a { color: var(--dteal); text-decoration: none; font-weight: 600; }
+.teim-rd .cp-gate__text a:hover { text-decoration: underline; }
+.teim-rd .cp-gate__form { display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 1.6rem; }
+.teim-rd .cp-gate__form input { font: inherit; font-size: 0.95rem; padding: 0.65rem 0.85rem; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); }
+.teim-rd .cp-gate__form input:focus { outline: 2px solid var(--teal); outline-offset: 1px; border-color: var(--teal); }
+.teim-rd .cp-gate__form .gv-btn { align-self: flex-start; }
+.teim-rd .cp-gate__error { font-size: 0.88rem; color: var(--error); margin: 0; }
+.teim-rd .cp-gate__paths { border-top: 1px solid var(--line-soft); margin-top: 1.6rem; padding-top: 1.2rem; display: flex; flex-direction: column; gap: 0.55rem; }
+.teim-rd .cp-gate__path { font-size: 0.95rem; line-height: 1.55; color: var(--ink-2); margin: 0; }
+.teim-rd .cp-gate__path a { color: var(--dteal); text-decoration: none; font-weight: 600; }
+.teim-rd .cp-gate__path a:hover { text-decoration: underline; }
+
+/* The preview account, printed on the gate: a mockup people cannot get into
+ * demonstrates nothing. */
+.teim-rd .cp-gate__demo { border: 1px solid var(--teal-line); border-radius: var(--radius-card); background: var(--teal-tint); padding: 0.9rem 1.1rem; }
+.teim-rd .cp-gate__demo-cap { display: block; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); margin-bottom: 0.4rem; }
+.teim-rd .cp-gate__demo p { margin: 0; font-size: 0.92rem; line-height: 1.55; color: var(--ink-2); }
+.teim-rd .cp-gate__demo code { font-family: var(--mono); font-size: 0.82rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line-soft); border-radius: 6px; padding: 0.08rem 0.35rem; white-space: nowrap; }
+
+/* Subscriber chrome: who is signed in, plus the theme and sign-out controls. */
+.teim-rd .cp-mast__user { margin-left: auto; display: inline-flex; align-items: center; gap: 0.55rem; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.08em; color: var(--muted); }
+.teim-rd .cp-mast__chromebtn { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dteal); background: none; border: 1px solid var(--teal-line); border-radius: var(--radius-pill); padding: 0.28rem 0.65rem; cursor: pointer; }
+.teim-rd .cp-mast__chromebtn:hover { background: var(--teal-tint); }
+.teim-rd .cp-hero__access { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dteal); margin: 0 0 0.8rem; }
+
+/* Add your data: the intro beside the drop zone, then the shelf below. */
+.teim-rd .cp-upload { display: grid; grid-template-columns: 1.1fr 1fr; gap: 2rem; align-items: stretch; }
+@media (max-width: 980px) { .teim-rd .cp-upload { grid-template-columns: 1fr; } }
+.teim-rd .cp-upload__lede { font-size: 1.02rem; line-height: 1.6; color: var(--ink-2); margin: 0; }
+.teim-rd .cp-drop { border: 1.5px dashed var(--teal-line); border-radius: var(--radius-card); background: var(--teal-tint); padding: 1.6rem 1.4rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.6rem; text-align: center; transition: border-color 0.18s ease, background 0.18s ease; }
+.teim-rd .cp-drop--over { border-color: var(--teal); background: var(--bg); }
+.teim-rd .cp-drop__text { margin: 0; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-drop__input { display: none; }
+.teim-rd .cp-upgrid { margin-top: 1.1rem; }
+.teim-rd .cp-upcard__shape { margin: 0; font-size: 0.92rem; line-height: 1.6; color: var(--ink-2); }
+.teim-rd .cp-upcard__cols { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.04em; color: var(--muted); overflow-wrap: anywhere; }
+
+/* Phones: tighter gutters, the masthead wraps, the chrome drops to its own
+ * line, and fixed chrome stays clear of the thumb zone. */
+@media (max-width: 720px) {
+  .teim-rd .cp, .teim-rd .cp-gatepage { padding-left: 1.1rem; padding-right: 1.1rem; }
+  .teim-rd .cp-mast { flex-wrap: wrap; row-gap: 0.4rem; }
+  .teim-rd .cp-mast__user { margin-left: 0; flex-basis: 100%; }
+  .teim-rd .cp-gate { margin-top: 2rem; }
+  .teim-rd .cedar-widget { right: 1rem; }
+  .teim-rd .cp-strip__arrow { display: none; }
+  .teim-rd .cp-citeband, .teim-rd .cp-upload { gap: 1.2rem; }
+}

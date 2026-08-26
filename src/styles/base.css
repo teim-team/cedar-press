@@ -1,0 +1,73 @@
+/* Base: the app's design tokens and the shared classes the press page reads
+   (.gv-btn, .gvc-fig), carried over from teim-app's redesign.css so the
+   standalone page is styled by exactly the rules that styled it inside the
+   product. The wrapper class stays .teim-rd for the same reason: the ported
+   markup keeps its class names, so the page cannot drift from the app's. */
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+.teim-rd {
+  --ink: #0A0F26; --ink-2: #353B5C; --muted: #6B6F8A;
+  --teal: #0FB5A5; --teal-dark: #0A8A7E; --teal-tint: #f2faf8; --teal-line: rgba(15,181,165,0.35);
+  --dteal: #0A7F74;
+  --gold: #F0A91A; --amber: #C77A18; --bg: #ffffff;
+  --line: rgba(10,15,38,0.12); --line-soft: rgba(10,15,38,0.07);
+  --rule-strong: rgba(10,15,38,0.24);
+  --error: #b42318;
+  --sans: 'Inter', 'Segoe UI', sans-serif; --body: 'Inter', 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --radius-card: 14px;
+  --radius-pill: 999px;
+  --focus-ring: 0 0 0 4px rgba(15,181,165,0.08);
+}
+
+.teim-rd {
+  font-size: 17px;
+  background: var(--bg); color: var(--ink); font-family: var(--body);
+  min-height: 100vh; min-height: 100dvh;
+  display: flex; flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Dark: the elevation ladder from the app's approved dark theme. The canvas
+   is the deepest navy, raised surfaces (--bg) a step lighter, and teal marks
+   activity. Teal text uses the brighter --dteal so it clears AA on the dark
+   surface. */
+:root[data-theme="dark"] .teim-rd {
+  --ink: #EAECF4; --ink-2: #AEB6CC; --muted: #7C85A2;
+  --teal: #17C3B2; --teal-dark: #0FB5A5;
+  --teal-tint: rgba(23, 195, 178, 0.10); --teal-line: rgba(23, 195, 178, 0.32);
+  --dteal: #3AD9C6; --amber: #E7AC4E; --gold: #F0A91A;
+  --bg: #131A35; --bg-2: #1B2344;
+  --line: rgba(255, 255, 255, 0.10); --line-soft: rgba(255, 255, 255, 0.05);
+  --rule-strong: rgba(255, 255, 255, 0.24);
+  --error: #e6795f;
+  --focus-ring: 0 0 0 4px rgba(23, 195, 178, 0.22);
+  background: #080B22;
+}
+:root { background: #ffffff; }
+:root[data-theme="dark"] { background: #080B22; }
+
+/* Buttons, as the app draws them. */
+.teim-rd .gv-btn { display: inline-flex; align-items: center; justify-content: center; font-family: var(--sans); font-weight: 600; font-size: 0.9rem; border-radius: 10px; padding: 0.55rem 0.95rem; border: 1px solid var(--line); cursor: pointer; text-decoration: none; }
+.teim-rd .gv-btn--primary { background: var(--teal); border-color: var(--teal); color: #fff; }
+.teim-rd .gv-btn--primary:hover { background: var(--teal-dark); border-color: var(--teal-dark); }
+.teim-rd .gv-btn--quiet { color: var(--dteal); border-color: var(--teal-line); background: var(--bg); }
+.teim-rd .gv-btn--quiet:hover { background: var(--teal-tint); }
+.teim-rd .gv-btn:disabled { opacity: 0.6; cursor: default; }
+
+/* Figure cards, as Grove draws them. */
+.teim-rd .gvc-fig { border: 1px solid var(--line-soft); border-radius: var(--radius-card); padding: 0.85rem 1rem 0.7rem; background: var(--bg); }
+.teim-rd .gvc-fig__cap { display: block; font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+.teim-rd .gvc-fig__svg { width: 100%; height: auto; display: block; }
+.teim-rd .gvc-fig__axis { stroke: var(--line); stroke-width: 1; }
+.teim-rd .gvc-fig__bar { fill: var(--dteal); }
+.teim-rd .gvc-fig__bar--rest { fill: var(--line); }
+.teim-rd .gvc-fig__ylab { font-family: var(--sans); font-size: 10px; fill: var(--ink-2); }
+.teim-rd .gvc-fig__tick { font-family: var(--mono); font-size: 9px; fill: var(--muted); }
+.teim-rd .gvc-fig__line { fill: none; stroke: var(--dteal); stroke-width: 2.5; }
+.teim-rd .gvc-fig__compare { fill: none; stroke: var(--line); stroke-width: 2; stroke-dasharray: 5 5; }
+.teim-rd .gvc-fig__dot { fill: var(--dteal); }
+.teim-rd .gvc-fig__acts { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.9rem; padding-top: 0.8rem; border-top: 1px solid var(--line-soft); flex-wrap: wrap; }
+.teim-rd .gvc-fig__acts .gv-btn { font-size: 0.78rem; padding: 0.38rem 0.7rem; }

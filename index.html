@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="description"
+      content="Cedar Press: original economic datasets, rigorous journalism and transparent method for Indian Country. A Tribal Business News × Lumecon partnership."
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Cedar Press</title>
+    <script>
+      // Set the theme before first paint so neither mode flashes. Saved
+      // choice wins; otherwise the system preference decides.
+      (function () {
+        try {
+          var saved = localStorage.getItem("cedar-press-theme");
+          var dark = saved
+            ? saved === "dark"
+            : window.matchMedia("(prefers-color-scheme: dark)").matches;
+          if (dark) document.documentElement.dataset.theme = "dark";
+        } catch (e) {
+          /* storage unavailable: light default */
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
