@@ -210,6 +210,44 @@ test.describe("sponsorship", () => {
   }
 });
 
+test.describe("crawlers", () => {
+  // These live in public/ and are only correct if the build copies them. A
+  // missing robots.txt is not a 404 a person ever sees, so nothing else here
+  // would notice it.
+  test("robots.txt is served and keeps crawlers out of the subscriber pages", async ({ request }) => {
+    const response = await request.get("/robots.txt");
+    expect(response.status()).toBe(200);
+    const body = await response.text();
+    expect(body).toContain("Sitemap: https://cedarpress.ai/sitemap.xml");
+    for (const path of ["/articles", "/data", "/whats-new", "/methods", "/settings"]) {
+      expect(body).toContain(`Disallow: ${path}`);
+    }
+  });
+
+  test("the sitemap lists only what a visitor can reach", async ({ request }) => {
+    const response = await request.get("/sitemap.xml");
+    expect(response.status()).toBe(200);
+    const body = await response.text();
+    expect(body).toContain("http://www.sitemaps.org/schemas/sitemap/0.9");
+    expect(body).toContain("<loc>https://cedarpress.ai/</loc>");
+    // A sitemap that lists a page answering with a sign-in asks a search
+    // engine to rank a login wall.
+    for (const path of ["/articles", "/data", "/whats-new", "/settings"]) {
+      expect(body).not.toContain(`<loc>https://cedarpress.ai${path}</loc>`);
+    }
+  });
+
+  test("the page carries a policy and describes itself", async ({ page }) => {
+    await page.goto("/");
+    await expect(page).toHaveTitle(/Cedar Press/);
+    const csp = await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute("content");
+    expect(csp).toContain("object-src 'none'");
+    expect(csp).toContain("script-src 'self'");
+    const ld = await page.locator('script[type="application/ld+json"]').textContent();
+    expect(() => JSON.parse(ld)).not.toThrow();
+  });
+});
+
 test.describe("the stylesheet", () => {
   // press.css was once truncated mid-file by a bad edit and the build was
   // perfectly happy: CSS has no compile step to fail, the browser drops the

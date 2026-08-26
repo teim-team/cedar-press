@@ -8,7 +8,7 @@
          document declares light rather than inviting a dark canvas it would
          immediately paint over. -->
     <meta name="color-scheme" content="light" />
-    <title>Cedar Press</title>
+    <title>Cedar Press — Trusted intelligence for Indian Country</title>
     <meta
       name="description"
       content="Trusted intelligence for Indian Country: original economic collections, data-driven research and transparent method. Built by Lumecon, available exclusively through Tribal Business News."
@@ -21,7 +21,7 @@
          that read these do not resolve relative ones. -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Cedar Press" />
-    <meta property="og:title" content="Cedar Press" />
+    <meta property="og:title" content="Cedar Press — Trusted intelligence for Indian Country" />
     <meta
       property="og:description"
       content="Trusted intelligence for Indian Country: original economic collections, data-driven research and transparent method."
@@ -35,12 +35,76 @@
       content="Cedar Press — Know what’s shaping Indian Country."
     />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Cedar Press" />
+    <meta name="twitter:title" content="Cedar Press — Trusted intelligence for Indian Country" />
     <meta
       name="twitter:description"
       content="Trusted intelligence for Indian Country: original economic collections, data-driven research and transparent method."
     />
     <meta name="twitter:image" content="https://cedarpress.ai/og.png" />
+
+    <!-- Sent by crawlers and by browsers on every outbound request. Strict
+         origin when cross-site: a colleague following a shared citation should
+         not hand the destination the path a subscriber was reading. -->
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+    <!-- GitHub Pages serves static files and sets no response headers of its
+         own, so the policy has to ride in the document. Two consequences worth
+         knowing: `frame-ancestors` is ignored in a meta policy and can only be
+         set as a header, so clickjacking protection has to come from a proxy
+         or a host that can set one; and this cannot be report-only.
+
+         `connect-src` allows the API origin and Datadog's intake. Both are
+         configured at build time and neither is known here, so the wildcards
+         are on the subdomain rather than the scheme — https: alone would allow
+         every host on the web to be called. -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self';
+               base-uri 'self';
+               object-src 'none';
+               form-action 'self';
+               img-src 'self' data:;
+               font-src 'self';
+               style-src 'self' 'unsafe-inline';
+               script-src 'self';
+               connect-src 'self' https://*.lumecon.ai https://*.datadoghq.com https://*.datadoghq.eu;
+               frame-src 'none'"
+    />
+
+    <!-- What the service is, in the form a search engine reads directly rather
+         than inferring from the page. Kept to what is verifiable elsewhere on
+         the site: no ratings, no counts, no claims the product does not make. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://cedarpress.ai/#website",
+            "url": "https://cedarpress.ai/",
+            "name": "Cedar Press",
+            "description": "Trusted intelligence for Indian Country: original economic collections, data-driven research and transparent method.",
+            "inLanguage": "en",
+            "publisher": { "@id": "https://lumecon.ai/#organization" }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://lumecon.ai/#organization",
+            "name": "Lumecon",
+            "url": "https://lumecon.ai",
+            "email": "contact@lumecon.ai"
+          },
+          {
+            "@type": "Product",
+            "name": "Cedar Press",
+            "url": "https://cedarpress.ai/",
+            "brand": { "@id": "https://lumecon.ai/#organization" },
+            "description": "A subscriber intelligence service covering the money, policy, transactions, institutions and public actions that shape Indian Country's economy. Every collection begins with public records and carries its own citation.",
+            "category": "Economic data and research"
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
