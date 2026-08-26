@@ -19,7 +19,7 @@ import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import { Contours } from "./pressAtmosphere";
 import PressAd from "./PressAd";
 import { PressCedarFab } from "./PressCedarFab";
-import { PressFoot, PressMast } from "./PressChrome";
+import { PressBack, PressFoot, PressMast } from "./PressChrome";
 import PressGate from "./PressGate";
 
 function ArticleCard({ article, compact = false }) {
@@ -76,15 +76,24 @@ export default function CedarPressArticles() {
   return (
     <div className="teim-rd teim-rd--paper">
       <div className="cp">
-        <PressMast user={entitled ? user : null} onSignOut={() => logout()} />
+        <PressMast user={entitled ? user : null} onSignOut={() => logout()} page="Articles" />
+        <PressBack />
+
+        {/* The page says what it is: standing alone, it cannot borrow the
+            reader's hero for context the way it did as a section. */}
+        <section className="cp-mh">
+          <p className="cp-hero__access">Original research</p>
+          <h1 className="cp-mh__title">The Data Briefs.</h1>
+          <p className="cp-mh__sub">
+            Original research built from the collections and written for people who work in
+            Indian Country&rsquo;s economy. Every brief names the collection behind it, and the
+            data it draws on is downloadable from the same subscription.
+          </p>
+        </section>
 
         <section className="cp-surf cp-surf--paper" id="briefs" aria-label="Latest research">
           <Contours strength={1} />
           <div className="cp-surf__in">
-            <div className="cp-head">
-              <span className="cp-sec__band">Latest research</span>
-              <span className="cp-kind cp-kind--art">Articles</span>
-            </div>
             <div className="cp-artgrid">
               <ArticleCard article={PRESS_ARTICLES[0]} />
               <div className="cp-artstack">

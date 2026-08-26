@@ -33,6 +33,7 @@ import "../../styles/redesign.css";
 import "../../styles/grove/press.css";
 
 import { useAuth } from "../../context/useAuth";
+import { PressBack, PressFoot, PressMast } from "./PressChrome";
 import { PRESS_FIGURES } from "../../components/grove/pressFigures";
 import { AD_SLOT } from "../../features/grove/pressAds";
 import { BLOCK, LUMECON_URL, PRESS_ARTICLES, TBN_URL } from "../../features/grove/pressArticles";
@@ -41,7 +42,12 @@ import PressGate from "./PressGate";
 import { downloadCsv, hasReleaseFile } from "../../features/grove/pressDownload";
 import { PRESS_CATALOG_BY_ID, groupOf } from "../../features/grove/pressCatalog";
 import { formatUpdated, releaseFor } from "../../features/grove/pressReleases";
-import { PRESS_DATA_PATH, PRESS_METHODS_PATH, PRESS_PATH } from "../../features/grove/pressRoutes";
+import {
+  PRESS_ARTICLES_PATH,
+  PRESS_DATA_PATH,
+  PRESS_METHODS_PATH,
+  PRESS_PATH,
+} from "../../features/grove/pressRoutes";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import PressAd from "./PressAd";
 import { PressCedarFab } from "./PressCedarFab";
@@ -172,7 +178,7 @@ function DrawnFrom({ id, user }) {
 
 export default function CedarPressArticle() {
   const { articleId } = useParams();
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
   const article = BY_ID[articleId];
   // A piece opens at its headline, wherever the click came from.
   useScrollToTop(articleId);
@@ -203,9 +209,8 @@ export default function CedarPressArticle() {
     return (
       <div className="teim-rd teim-rd--paper">
         <div className="cp">
-          <header className="cp-mast">
-            <Link className="cp-mast__word" to={PRESS_PATH}>CEDAR PRESS</Link>
-          </header>
+          <PressMast page="Not found" />
+          <PressBack />
           <section className="cp-nh">
             <h1 className="cp-nh__title">That piece is not here.</h1>
             <p className="cp-nh__sub">
@@ -232,15 +237,15 @@ export default function CedarPressArticle() {
   return (
     <div className="teim-rd teim-rd--paper">
       <div className="cp">
-        <header className="cp-mast">
-          <Link className="cp-mast__word" to={PRESS_PATH}>CEDAR PRESS</Link>
-          <span className="cp-mast__of">{article.demonstration ? "Demonstration" : article.tag}</span>
-          {user?.email ? <span className="cp-mast__user">{user.email}</span> : null}
-        </header>
+        <PressMast
+          user={user}
+          onSignOut={() => logout()}
+          page={article.demonstration ? "Demonstration" : article.tag}
+        />
 
-        <Link className="cp-ar__back" to={PRESS_PATH}>
-          <span aria-hidden="true">&#8592;</span> Back home
-        </Link>
+        {/* Back goes to the briefs, not the hub: a piece belongs to the
+            articles page, and the footer carries the rest of the map. */}
+        <PressBack label="All Data Briefs" />
 
         <article className="cp-ar">
           <header className="cp-ar__head">
@@ -333,24 +338,12 @@ export default function CedarPressArticle() {
         </section>
 
         <p className="cp-ar__end">
-          <Link className="cp-ar__back" to={PRESS_PATH}>
+          <Link className="cp-ar__back" to={PRESS_ARTICLES_PATH}>
             <span aria-hidden="true">&#8592;</span> Back home
           </Link>
         </p>
 
-        <footer className="cp-foot">
-          <span>
-            <Link to={PRESS_PATH}>Cedar Press</Link>
-            {" · "}
-            <Link to={PRESS_METHODS_PATH}>Methods</Link>
-          </span>
-          <span>
-            <a href={TBN_URL} target="_blank" rel="noreferrer">tribalbusinessnews.com</a>
-            {" · "}
-            <a href={LUMECON_URL} target="_blank" rel="noreferrer">lumecon.ai</a>
-          </span>
-          <span>Every collection carries its method · corrections reach every release they touch</span>
-        </footer>
+        <PressFoot />
         <PressCedarFab />
       </div>
     </div>

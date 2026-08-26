@@ -18,7 +18,7 @@ import { PRESS_METHODS_PATH } from "../../features/grove/pressRoutes";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import { Halo } from "./pressAtmosphere";
 import { PressCedarFab } from "./PressCedarFab";
-import { PressFoot, PressMast } from "./PressChrome";
+import { PressBack, PressFoot, PressMast } from "./PressChrome";
 import PressGate from "./PressGate";
 import PressShelf from "./PressShelf";
 
@@ -50,7 +50,19 @@ export default function CedarPressData() {
   return (
     <div className="teim-rd teim-rd--paper">
       <div className="cp">
-        <PressMast user={entitled ? user : null} onSignOut={() => logout()} />
+        <PressMast user={entitled ? user : null} onSignOut={() => logout()} page="Data" />
+        <PressBack />
+
+        <section className="cp-mh">
+          <p className="cp-hero__access">The collections</p>
+          <h1 className="cp-mh__title">Every collection, and what it holds.</h1>
+          <p className="cp-mh__sub">
+            Each collection is assembled from records that were never designed to work
+            together, resolved to the Native entities behind them and maintained as new
+            material arrives. Open one to see its coverage and method; the release comes
+            down with it.
+          </p>
+        </section>
 
         {/* The differentiator, said once and up front. The tiers are listed
             because "Native" covers several distinct relationships and

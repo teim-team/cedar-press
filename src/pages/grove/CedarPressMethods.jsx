@@ -25,6 +25,7 @@ import {
 } from "../../features/grove/pressMethod";
 import { EcosystemDiagram, ProcessRail, EntityTimeline } from "./pressMethodSections";
 import { PressCedarFab } from "./PressCedarFab";
+import { PressBack, PressFoot, PressMast } from "./PressChrome";
 
 
 const TRUST_ROW = [
@@ -40,12 +41,8 @@ export default function CedarPressMethods() {
   return (
     <div className="teim-rd teim-rd--paper">
       <div className="cp">
-        <header className="cp-mast">
-          <Link className="cp-mast__word" to={PRESS_PATH}>
-            CEDAR PRESS
-          </Link>
-          <span className="cp-mast__of">Methods</span>
-        </header>
+        <PressMast page="Methods" />
+        <PressBack />
 
         {/* The opening argument, given room. The claim under it is the one
             sentence this page exists to earn, so it stands alone rather than
@@ -131,19 +128,7 @@ export default function CedarPressMethods() {
           </p>
         </section>
 
-        <footer className="cp-foot">
-          <span>
-            <Link to={PRESS_PATH}>Cedar Press</Link>
-            {" · "}
-            <Link to={PRESS_REQUEST_PATH}>Tribal data request</Link>
-          </span>
-          <span>
-            <a href={TBN_URL} target="_blank" rel="noreferrer">tribalbusinessnews.com</a>
-            {" · "}
-            <a href={LUMECON_URL} target="_blank" rel="noreferrer">lumecon.ai</a>
-          </span>
-          <span>Every collection carries its method · corrections reach every release they touch</span>
-        </footer>
+        <PressFoot />
         <PressCedarFab />
       </div>
     </div>

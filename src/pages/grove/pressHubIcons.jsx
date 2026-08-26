@@ -25,12 +25,22 @@ export const ArticlesIcon = (
   </svg>
 );
 
-/** The shelves themselves: records, stacked. */
+/**
+ * Sources becoming a collection: a table and a series on the left, joined
+ * into one stack on the right. The shelves are not a folder of files — the
+ * assembly is the product — so the glyph draws the assembly.
+ */
 export const DataIcon = (
   <svg {...glyph}>
-    <ellipse cx="12" cy="5.3" rx="6.5" ry="2.4" />
-    <path d="M5.5 5.3v6.2c0 1.33 2.91 2.4 6.5 2.4s6.5-1.07 6.5-2.4V5.3" />
-    <path d="M5.5 11.5v6.2c0 1.33 2.91 2.4 6.5 2.4s6.5-1.07 6.5-2.4v-6.2" />
+    {/* A spreadsheet and a series: two shapes a source arrives in. */}
+    <rect x="1.4" y="2.6" width="7.2" height="5.8" rx="1.1" />
+    <path d="M1.4 4.9h7.2M5 4.9v3.5" />
+    <rect x="1.4" y="13.2" width="7.2" height="5.8" rx="1.1" />
+    <path d="M3.1 17.2l1.8-2.2 1.3 1.1 1.7-2.3" />
+    {/* Both joined into one collection. */}
+    <path d="M8.6 5.5c2.9 0 2.9 6.1 5.2 6.1M8.6 16.1c2.9 0 2.9-6.1 5.2-6.1" />
+    <ellipse cx="18" cy="7.6" rx="3.8" ry="1.7" />
+    <path d="M14.2 7.6v7.8c0 .94 1.7 1.7 3.8 1.7s3.8-.76 3.8-1.7V7.6" />
   </svg>
 );
 

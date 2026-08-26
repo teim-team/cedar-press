@@ -36,6 +36,7 @@ import {
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import { AD_SLOT } from "../../features/grove/pressAds";
 import PressAd from "./PressAd";
+import { PressBack, PressFoot, PressMast } from "./PressChrome";
 import { PressCedarFab } from "./PressCedarFab";
 
 /** One screen's worth. More arrives a page at a time, on request. */
@@ -83,10 +84,8 @@ export default function CedarPressWhatsNew() {
   return (
     <div className="teim-rd teim-rd--paper">
       <div className="cp">
-        <header className="cp-mast">
-          <Link className="cp-mast__word" to={PRESS_PATH}>CEDAR PRESS</Link>
-          <span className="cp-mast__of">What&rsquo;s new</span>
-        </header>
+        <PressMast page="What’s new" />
+        <PressBack />
 
         {/* Title across the page rather than down a 62ch column: this is the
             widest thing on the page and it was using half of it. The standing
@@ -203,19 +202,7 @@ export default function CedarPressWhatsNew() {
           </p>
         ) : null}
 
-        <footer className="cp-foot">
-          <span>
-            <Link to={PRESS_PATH}>Cedar Press</Link>
-            {" · "}
-            <Link to={PRESS_METHODS_PATH}>Methods</Link>
-          </span>
-          <span>
-            <a href={TBN_URL} target="_blank" rel="noreferrer">tribalbusinessnews.com</a>
-            {" · "}
-            <a href={LUMECON_URL} target="_blank" rel="noreferrer">lumecon.ai</a>
-          </span>
-          <span>Every collection carries its method · corrections reach every release they touch</span>
-        </footer>
+        <PressFoot />
         <PressCedarFab />
       </div>
     </div>

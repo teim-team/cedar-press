@@ -57,6 +57,11 @@
 .teim-rd .cp-mast__word { font-weight: 800; font-size: 1.25rem; letter-spacing: 0.14em; color: var(--ink); }
 .teim-rd a.cp-mast__word { text-decoration: none; }
 .teim-rd a.cp-mast__word:hover { color: var(--dteal); }
+/* The page's own name where the partnership line sits on the hub, so the
+ * header answers "where am I" before the page does. */
+.teim-rd .cp-mast__page { color: var(--ink-2); font-weight: 700; letter-spacing: 0.14em; }
+/* The way back, stated rather than implied by a linked wordmark. */
+.teim-rd .cp-back { margin-top: 1.1rem; }
 .teim-rd .cp-mast__of { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 .teim-rd .cp-mast__cta { margin-left: auto; }
 
@@ -123,11 +128,29 @@
 }
 
 .teim-rd .cp-foot { margin-top: 2.2rem; border-top: 1px solid var(--line); padding-top: 1rem; display: flex; justify-content: space-between; gap: 1rem; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); flex-wrap: wrap; }
+/* The map, then who publishes it, then the promise. Every page used to
+ * carry its own two-link footer, so where the footer took you depended on
+ * where you already were; it carries every page now, in one column so the
+ * nav reads as a list of places rather than a sentence of links. */
+.teim-rd .cp-foot__nav { display: flex; flex-wrap: wrap; gap: 0.5rem 1.4rem; }
+.teim-rd .cp-foot__nav a { display: inline-flex; align-items: center; color: var(--ink-2); text-decoration: none; border-bottom: 1px solid transparent; padding-bottom: 2px; }
+/* A finger needs more than a line of 0.66rem mono: on touch every footer
+ * link gets a full-height target without the row growing taller. */
+@media (hover: none) {
+  .teim-rd .cp-foot__nav { gap: 0.1rem 1.4rem; }
+  .teim-rd .cp-foot__nav a, .teim-rd .cp-foot__meta a { min-height: 40px; }
+  .teim-rd .cp-foot__meta a { display: inline-flex; align-items: center; }
+}
+.teim-rd .cp-foot__nav a:hover { color: var(--dteal); border-bottom-color: currentColor; }
+.teim-rd .cp-foot__meta { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem 1.4rem; padding-top: 0.9rem; border-top: 1px solid var(--line-soft); }
+.teim-rd .cp-foot--deep .cp-foot__nav a { color: rgba(255, 255, 255, 0.82); }
+.teim-rd .cp-foot--deep .cp-foot__nav a:hover { color: #fff; }
+.teim-rd .cp-foot--deep .cp-foot__meta { border-top-color: rgba(255, 255, 255, 0.14); }
 /* On the reader the close is navy, so the footer continues it rather than
  * cutting back to white for six lines of chrome. */
 .teim-rd .cp--deepfoot { padding-bottom: 0; }
 .teim-rd .cp-foot--deep { margin-inline: calc(50% - 50vw); width: 100vw; margin-top: 0; padding: 1.5rem 0 5.5rem; border-top: 0; background: var(--ink); color: rgba(255, 255, 255, 0.7); }
-.teim-rd .cp-foot__in { flex: 1 1 auto; display: flex; justify-content: space-between; gap: 0.6rem 1rem; flex-wrap: wrap; }
+.teim-rd .cp-foot__in { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 0.9rem; }
 .teim-rd .cp-foot--deep .cp-foot__in { max-width: 1320px; margin: 0 auto; padding-inline: 2.4rem; }
 @media (max-width: 720px) { .teim-rd .cp-foot--deep .cp-foot__in { padding-inline: 1.15rem; } }
 
@@ -319,6 +342,11 @@
 /* The masthead word is a link on the secondary pages, back to the reader's page. */
 .teim-rd a.cp-mast__word { text-decoration: none; }
 .teim-rd a.cp-mast__word:hover { color: var(--dteal); }
+/* The page's own name where the partnership line sits on the hub, so the
+ * header answers "where am I" before the page does. */
+.teim-rd .cp-mast__page { color: var(--ink-2); font-weight: 700; letter-spacing: 0.14em; }
+/* The way back, stated rather than implied by a linked wordmark. */
+.teim-rd .cp-back { margin-top: 1.1rem; }
 
 /* ── Desktop width ────────────────────────────────────────────────────────
  * The method pages were set to a reading measure (40ch headlines, 62ch body)
