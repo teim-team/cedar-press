@@ -151,31 +151,6 @@ export async function downloadCollection(id) {
   };
 }
 
-/* ── Subscriber datasets ─────────────────────────────────────────────── */
-
-/** Datasets this subscriber has uploaded. */
-export async function fetchDatasets({ signal } = {}) {
-  return request("/press/datasets", { signal });
-}
-
-/**
- * Upload a dataset. Multipart rather than a JSON blob because the file is
- * the payload and the platform validates it as one; `onProgress` is not
- * wired here because fetch cannot report upload progress — when that
- * matters, this becomes an XHR and the signature does not change.
- */
-export async function uploadDataset({ file, name, notes }) {
-  const form = new FormData();
-  form.append("file", file);
-  if (name) form.append("name", name);
-  if (notes) form.append("notes", notes);
-  return request("/press/datasets", { method: "POST", body: form });
-}
-
-export async function deleteDataset(id) {
-  return request(`/press/datasets/${encodeURIComponent(id)}`, { method: "DELETE" });
-}
-
 /* ── Cedar ───────────────────────────────────────────────────────────── */
 
 /**

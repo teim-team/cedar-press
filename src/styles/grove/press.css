@@ -61,11 +61,6 @@
 .teim-rd .cp-mast__word { font-weight: 800; font-size: 1.25rem; letter-spacing: 0.14em; color: var(--ink); }
 .teim-rd a.cp-mast__word { text-decoration: none; }
 .teim-rd a.cp-mast__word:hover { color: var(--dteal); }
-/* The lockup: the mark beside the wordmark, so the service has a logo in
- * the chrome rather than only a faint ripple behind the gate. */
-.teim-rd .cp-mast__lockup { display: inline-flex; align-items: center; gap: 0.6rem; text-decoration: none; }
-.teim-rd .cp-mast__mark { width: 1.9rem; height: 1.9rem; object-fit: contain; flex: none; }
-.teim-rd a.cp-mast__lockup:hover .cp-mast__word { color: var(--dteal); }
 /* The page's own name where the partnership line sits on the hub, so the
  * header answers "where am I" before the page does. */
 .teim-rd .cp-mast__page { color: var(--ink-2); font-weight: 700; letter-spacing: 0.14em; }
@@ -697,39 +692,28 @@
   .teim-rd .cp-hub__tile { width: 100%; height: auto; aspect-ratio: 1 / 1; }
 }
 
-/* ── Who is reading ──────────────────────────────────────────────────────
- * Two questions on the overview, not a modal over it: nothing here is
- * urgent enough to block a page a subscriber came to read, and a wall in
- * front of the product is how surveys get answered carelessly. */
-.teim-rd .cp-who__in { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 2.2rem; align-items: start; }
-@media (max-width: 900px) { .teim-rd .cp-who__in { grid-template-columns: minmax(0, 1fr); gap: 1.3rem; } }
-.teim-rd .cp-who__lede { font-size: 1.02rem; line-height: 1.6; color: var(--ink-2); margin: 0 0 0.8rem; }
-.teim-rd .cp-who__fine { font-size: 0.88rem; line-height: 1.55; color: var(--muted); margin: 0; }
-.teim-rd .cp-who__form { display: flex; flex-direction: column; gap: 0.35rem; border: 1px solid var(--line); border-radius: var(--radius-card, 14px); padding: 1.2rem 1.3rem; background: var(--bg); }
-.teim-rd .cp-who__label { font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); margin-top: 0.7rem; }
-.teim-rd .cp-who__label:first-child { margin-top: 0; }
-.teim-rd .cp-who__opt { color: var(--muted); font-weight: 400; }
-.teim-rd .cp-who__form select, .teim-rd .cp-who__form input { font: inherit; font-size: 0.95rem; min-height: 44px; padding: 0.5rem 0.7rem; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); }
-.teim-rd .cp-who__form select:focus, .teim-rd .cp-who__form input:focus { outline: 2px solid var(--teal); outline-offset: 1px; border-color: var(--teal); }
-.teim-rd .cp-who__acts { display: flex; align-items: center; gap: 1rem; margin-top: 1.1rem; }
-/* Answered: one quiet line with the way to change it. A card that keeps
- * asking after it has been answered is a nag. */
-.teim-rd .cp-who__done { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem; margin: 2.2rem 0 0; padding-top: 1rem; border-top: 1px solid var(--line-soft); font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-.teim-rd .cp-who__done b { color: var(--ink-2); font-weight: 700; }
-
-/* ── Your data ───────────────────────────────────────────────────────────
- * The subscriber's own upload, dressed as the shelf so a dataset they
- * brought and a collection we published read as the same kind of object. */
-.teim-rd .cp-up__in { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 2rem; align-items: stretch; }
-@media (max-width: 900px) { .teim-rd .cp-up__in { grid-template-columns: minmax(0, 1fr); gap: 1.2rem; } }
-.teim-rd .cp-up__lede { font-size: 1.02rem; line-height: 1.6; color: var(--ink-2); margin: 0; }
-.teim-rd .cp-drop { border: 1.5px dashed var(--teal-line); border-radius: var(--radius-card, 14px); background: var(--teal-tint); padding: 1.6rem 1.4rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.6rem; text-align: center; transition: border-color 0.18s ease, background 0.18s ease; }
-.teim-rd .cp-drop--over { border-color: var(--teal); background: var(--bg); }
-.teim-rd .cp-drop__text { margin: 0; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-.teim-rd .cp-drop__input { display: none; }
-.teim-rd .cp-up__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 1.1rem; margin-top: 1.2rem; }
-.teim-rd .cp-up__shape { margin: 0; font-size: 0.92rem; line-height: 1.6; color: var(--ink-2); }
-.teim-rd .cp-up__cols { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.04em; color: var(--muted); overflow-wrap: anywhere; }
+/* ── Settings ────────────────────────────────────────────────────────────
+ * The account and the errands, in cards across the measure rather than a
+ * column down the left. */
+.teim-rd .cp-set { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: 1.1rem; margin-top: 2rem; align-items: start; }
+.teim-rd .cp-set__card { border: 1px solid var(--line); border-radius: var(--radius-card, 14px); padding: 1.3rem 1.4rem; background: var(--bg); display: flex; flex-direction: column; }
+.teim-rd .cp-set__cap { display: block; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); margin-bottom: 0.9rem; }
+.teim-rd .cp-set__rows { margin: 0; display: flex; flex-direction: column; gap: 0.7rem; }
+.teim-rd .cp-set__rows > div { display: flex; flex-direction: column; gap: 0.15rem; border-top: 1px solid var(--line-soft); padding-top: 0.7rem; }
+.teim-rd .cp-set__rows > div:first-child { border-top: 0; padding-top: 0; }
+.teim-rd .cp-set__rows dt { font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-set__rows dd { margin: 0; font-size: 1rem; color: var(--ink); }
+.teim-rd .cp-set__rows dd a { color: var(--dteal); }
+.teim-rd .cp-set__acts { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.2rem; }
+.teim-rd .cp-set__fine { font-size: 0.86rem; line-height: 1.5; color: var(--muted); margin: 0.9rem 0 0; }
+.teim-rd .cp-set__body { font-size: 0.97rem; line-height: 1.6; color: var(--ink-2); margin: 0 0 1.1rem; }
+.teim-rd .cp-set__links { list-style: none; margin: 0; padding: 0; }
+.teim-rd .cp-set__links li { border-top: 1px solid var(--line-soft); }
+.teim-rd .cp-set__links li:first-child { border-top: 0; }
+.teim-rd .cp-set__links a { display: flex; flex-direction: column; gap: 0.2rem; padding: 0.85rem 0; text-decoration: none; }
+.teim-rd .cp-set__links b { font-size: 1rem; font-weight: 700; color: var(--ink); }
+.teim-rd .cp-set__links span { font-size: 0.92rem; line-height: 1.5; color: var(--ink-2); }
+.teim-rd .cp-set__links a:hover b { color: var(--dteal); }
 
 /* ── The badges ───────────────────────────────────────────────────────────
  * Literal squares. The width is fixed and the height is set from it, so a
@@ -896,7 +880,7 @@
 /* ── Cedar Grove, teased ───────────────────────────────────────────────── */
 /* A hairline between the last Cedar Press shelf and Cedar Grove, which is a
  * different product rather than a further rung. */
-.teim-rd .cp-gt { max-width: 1320px; margin: 3.2rem auto 0; padding: 3rem 2.4rem 0; border-top: 1px solid var(--line); }
+.teim-rd .cp-gt { max-width: 1560px; margin: 3.2rem auto 0; padding: 3rem 2.4rem 0; border-top: 1px solid var(--line); }
 .teim-rd .cp-gt__head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 1rem 3rem; align-items: end; padding-bottom: 1.6rem; border-bottom: 1px solid var(--line); }
 .teim-rd .cp-gt__title { font-family: var(--sans); font-size: clamp(1.6rem, 3vw, 2.3rem); font-weight: 800; letter-spacing: -0.022em; line-height: 1.1; color: var(--ink); margin: 0.3rem 0 0; }
 .teim-rd .cp-gt__q { font-size: 1.06rem; font-weight: 700; color: var(--dteal); margin: 0.3rem 0 0; }
@@ -1207,7 +1191,7 @@
 .teim-rd .cp-surf--deep { background: var(--ink); color: #fff; }
 /* A hairline that spans a boundary, so two surfaces read as one page. */
 .teim-rd .cp-seam { position: relative; height: 0; }
-.teim-rd .cp-seam::before { content: ''; position: absolute; left: 50%; top: -1px; width: min(1320px, calc(100vw - 4.8rem)); height: 1px; transform: translateX(-50%); background: currentColor; opacity: 0.16; }
+.teim-rd .cp-seam::before { content: ''; position: absolute; left: 50%; top: -1px; width: min(1560px, calc(100vw - 4.8rem)); height: 1px; transform: translateX(-50%); background: currentColor; opacity: 0.16; }
 @media (max-width: 720px) {
   .teim-rd .cp-surf { padding-block: 2.4rem; }
   .teim-rd .cp-surf__in { padding-inline: 1.15rem; }
@@ -1253,7 +1237,7 @@
  * boxes. A page that has just argued for a maintained research product
  * should end on the maintenance, not on a pair of rectangles. */
 .teim-rd .cp-close { position: relative; }
-.teim-rd .cp-close__in { max-width: 1320px; margin: 0 auto; padding: 4.5rem 2.4rem 4rem; }
+.teim-rd .cp-close__in { max-width: 1560px; margin: 0 auto; padding: 4.5rem 2.4rem 4rem; }
 /* A wrapper now, not the headline: .cp-close__head carries the type. Leaving
  * the display rules here set the paragraph inside it in 800 weight. */
 .teim-rd .cp-close__say { min-width: 0; }

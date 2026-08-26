@@ -27,6 +27,14 @@ jobs:
       - run: npm run lint
       - run: npm run test
       - run: npm run build
+      # The API ships with the client, so its checks gate the same pipeline.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e server[dev] httpx
+      - run: ruff check server
+      - working-directory: server
+        run: python -m unittest discover -s tests -t .
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist

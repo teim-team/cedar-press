@@ -56,17 +56,18 @@ export async function startTelemetry() {
 
 /**
  * Attach the subscription to the session as segments a dashboard can group
- * by — tier, organization kind, role, and the class of the email's domain —
- * and never the person. No address and no organization name: a small
- * newsroom's name in an analytics tool identifies the reader on its own.
+ * by — the tier, and the class of organization the address implies — and
+ * never the person. The reader is asked for none of it. No address and no
+ * domain: a single tribe's domain in an analytics tool identifies the
+ * reader on its own.
  */
-export function identify(user, profile = null) {
+export function identify(user) {
   if (!rum) return;
   if (!user) {
     rum.clearUser();
     return;
   }
-  rum.setUser({ id: user.subscriber_id ?? undefined, ...profileSegments(user, profile) });
+  rum.setUser({ id: user.subscriber_id ?? undefined, ...profileSegments(user) });
 }
 
 /**
@@ -95,9 +96,5 @@ export const EVENT = Object.freeze({
   lockedCollectionTapped: "press.locked_collection_tapped",
   upgradeOpened: "press.upgrade_opened",
   articleOpened: "press.article_opened",
-  datasetUploaded: "press.dataset_uploaded",
-  datasetUploadFailed: "press.dataset_upload_failed",
   cedarAsked: "press.cedar_asked",
-  profileSaved: "press.profile_saved",
-  profileDismissed: "press.profile_dismissed",
 });

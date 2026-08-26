@@ -29,6 +29,8 @@ export const PRESS_PATH = "/";
 export const PRESS_ARTICLES_PATH = "/articles";
 /** The shelves: what each collection holds, and the release downloads. */
 export const PRESS_DATA_PATH = "/data";
+/** The account, and the errands that were crowding the footer. */
+export const PRESS_SETTINGS_PATH = "/settings";
 export const PRESS_METHODS_PATH = "/methods";
 export const PRESS_REQUEST_PATH = "/tribal-data-request";
 /**

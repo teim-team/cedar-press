@@ -35,12 +35,25 @@ specs and collection models with the Lumecon platform, so what a subscriber
 reads here cannot drift from what the platform renders. See
 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for how the code is organized.
 
+The client:
+
 ```sh
 npm install
 npm run dev      # development server
 npm run test     # unit tests (node --test)
 npm run build    # production build into dist/
 ```
+
+The API, a FastAPI service in `server/` that carries Cedar Grove's own Python
+collection modules rather than reimplementing them:
+
+```sh
+pip install -e server[dev]
+uvicorn cedar_press.app:app --reload --port 8000
+cd server && python -m unittest discover -s tests -t .
+```
+
+Point the client at it with `VITE_API_URL=http://localhost:8000 npm run dev`.
 
 ### Configuration
 

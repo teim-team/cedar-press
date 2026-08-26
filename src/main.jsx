@@ -10,6 +10,7 @@ import CedarPressData from "./pages/grove/CedarPressData.jsx";
 import CedarPressArticle from "./pages/grove/CedarPressArticle.jsx";
 import CedarPressMethods from "./pages/grove/CedarPressMethods.jsx";
 import CedarPressResearchAccess from "./pages/grove/CedarPressResearchAccess.jsx";
+import CedarPressSettings from "./pages/grove/CedarPressSettings.jsx";
 import CedarPressTribalRequest from "./pages/grove/CedarPressTribalRequest.jsx";
 import CedarPressWhatsNew from "./pages/grove/CedarPressWhatsNew.jsx";
 import {
@@ -20,6 +21,7 @@ import {
   PRESS_PATH,
   PRESS_REQUEST_PATH,
   PRESS_RESEARCH_PATH,
+  PRESS_SETTINGS_PATH,
   PRESS_WHATS_NEW_PATH,
 } from "./features/grove/pressRoutes.js";
 
@@ -42,6 +44,7 @@ createRoot(document.getElementById("root")).render(
           <Route path={PRESS_REQUEST_PATH} element={<CedarPressTribalRequest />} />
           <Route path={PRESS_RESEARCH_PATH} element={<CedarPressResearchAccess />} />
           <Route path={PRESS_WHATS_NEW_PATH} element={<CedarPressWhatsNew />} />
+          <Route path={PRESS_SETTINGS_PATH} element={<CedarPressSettings />} />
           <Route path={PRESS_ARTICLE_PATH} element={<CedarPressArticle />} />
           <Route path="*" element={<Navigate to={PRESS_PATH} replace />} />
         </Routes>

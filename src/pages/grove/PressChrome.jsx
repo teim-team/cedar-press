@@ -13,8 +13,7 @@ import {
   PRESS_DATA_PATH,
   PRESS_METHODS_PATH,
   PRESS_PATH,
-  PRESS_REQUEST_PATH,
-  PRESS_RESEARCH_PATH,
+  PRESS_SETTINGS_PATH,
   PRESS_WHATS_NEW_PATH,
 } from "../../features/grove/pressRoutes";
 
@@ -39,18 +38,13 @@ export function PressMast({ user, onSignOut, section = null }) {
   return (
     <header className="cp-mast">
       <div className="cp-mast__top">
-        {/* The mark, at a size that reads as a mark rather than as the
-            watermark it had been reduced to on the gate. */}
+        {/* The wordmark alone until the real Cedar Press logo lands: the
+            ripple in public/ is one element of the Lumecon logo, not the
+            service's mark, and half a logo is worse than none. */}
         {home ? (
-          <span className="cp-mast__lockup">
-            <img className="cp-mast__mark" src="/lumecon-mark.png" alt="" aria-hidden="true" />
-            <span className="cp-mast__word">CEDAR PRESS</span>
-          </span>
+          <span className="cp-mast__word">CEDAR PRESS</span>
         ) : (
-          <Link className="cp-mast__lockup" to={PRESS_PATH}>
-            <img className="cp-mast__mark" src="/lumecon-mark.png" alt="" aria-hidden="true" />
-            <span className="cp-mast__word">CEDAR PRESS</span>
-          </Link>
+          <Link className="cp-mast__word" to={PRESS_PATH}>CEDAR PRESS</Link>
         )}
         {/* Who made it and who sells it, said plainly. "A × partnership"
             left both questions open. */}
@@ -61,7 +55,7 @@ export function PressMast({ user, onSignOut, section = null }) {
         </span>
         {user ? (
           <span className="cp-mast__user">
-            {user.email}
+            <Link className="cp-split__linkbtn" to={PRESS_SETTINGS_PATH}>{user.email}</Link>
             {" · "}
             <button type="button" className="cp-split__linkbtn" onClick={onSignOut}>
               Sign out
@@ -116,9 +110,7 @@ export function PressFoot({ deep = false }) {
           <Link to={PRESS_DATA_PATH}>Data</Link>
           <Link to={PRESS_WHATS_NEW_PATH}>What&rsquo;s new</Link>
           <Link to={PRESS_METHODS_PATH}>Methods</Link>
-          <Link to={PRESS_REQUEST_PATH}>Tribal data request</Link>
-          <Link to={PRESS_RESEARCH_PATH}>Research access</Link>
-          <a href="mailto:contact@lumecon.ai?subject=Cedar%20Press%20feedback">Contact</a>
+          <Link to={PRESS_SETTINGS_PATH}>Settings</Link>
         </nav>
         <div className="cp-foot__meta">
           <span>

@@ -43,7 +43,6 @@ import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
 import PressGate from "./PressGate";
 import PressHub from "./PressHub";
-import PressProfileCard from "./PressProfileCard";
 
 export default function CedarPress() {
   useDocumentTitle();
@@ -109,8 +108,6 @@ export default function CedarPress() {
         </section>
 
         <PressHub />
-
-        <PressProfileCard />
 
         {/* The ending. One closing statement and three quiet actions rather
             than two equal boxes: a page that has just argued for a maintained

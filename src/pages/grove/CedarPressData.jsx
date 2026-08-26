@@ -21,7 +21,6 @@ import { Halo } from "./pressAtmosphere";
 import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
 import PressGate from "./PressGate";
-import PressDatasets from "./PressDatasets";
 import PressShelf from "./PressShelf";
 
 export default function CedarPressData() {
@@ -95,8 +94,6 @@ export default function CedarPressData() {
         </section>
 
         <PressShelf user={user} />
-
-        <PressDatasets />
 
         <PressCedarFab />
         <PressFoot />
