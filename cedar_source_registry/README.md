@@ -29,6 +29,30 @@ Keys are snake_cased from the xlsx headers (`Nation / Source` → `nation_source
 every file. ID gaps (59–62, 84–94, 110–111) are intentional — removed non-U.S.
 entries from earlier waves — not corruption.
 
+## Nation crosswalk (Phase 0 stub)
+
+`nations.jsonl` gives every nation the registry references one stable id, and
+every `sources.jsonl` row carries `nation_ids: []` plus
+`nation_scope: single_nation | multi_nation | regional | national | unknown`.
+Regenerate with `tools/phase0_build_nations.py`; `tools/check_integrity.py`
+enforces id resolution and name-variant uniqueness.
+
+- `bia:<slug>` ids are entities on the BIA list of federally recognized tribes
+  (2026-01-30 Federal Register notice, 575 entities). `bia_name` values are
+  flagged `name_verified_against_list: false` until the list itself can be
+  fetched and diffed (network egress is blocked in the build environment); the
+  full-list import of unreferenced entities is pending for the same reason.
+- `bia:minnesota-chippewa-tribe--<band>` rows key the six MCT component
+  reservations separately (sources cite bands; the BIA list has one entity);
+  `parent_nation_id` points at the parent.
+- `nonbia:<slug>` marks referenced nations not on the BIA list (Patawomeck —
+  Virginia state-recognized; Chappaquiddick Wampanoag — unrecognized), with
+  `recognition` saying which.
+- ANCSA corporations are not nations: ANC sources map to `nation_ids: []`,
+  `nation_scope: regional`.
+- `nation_ids` on a source row means "the nation(s) this source program is
+  scoped to" — never an ownership assertion about any listed business.
+
 ## Evidence hierarchy (never flatten this)
 
 `source_priority_class` encodes what a record from that source can *assert*:

@@ -29,6 +29,10 @@ Keys are snake_cased from the xlsx headers (`Nation / Source` → `nation_source
 every file. ID gaps (59–62, 84–94, 110–111) are intentional — removed non-U.S.
 entries from earlier waves — not corruption.
 
+Phase 0 (post-wave-5): `nations.jsonl` is the nation crosswalk stub and every
+`sources.jsonl` row carries `nation_ids` + `nation_scope` — see README "Nation
+crosswalk". Use `nation_id`s, never free-text nation names, in new work.
+
 ## Evidence hierarchy (never flatten this)
 
 `source_priority_class` encodes what a record from that source can *assert*:
