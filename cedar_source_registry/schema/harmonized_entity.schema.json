@@ -3,6 +3,58 @@
  "$id": "https://cedar.press/schema/harmonized_entity.schema.json",
  "title": "Cedar harmonized entity (Layer 2: one resolved business, a view over Layer-1 records)",
  "type": "object",
+ "allOf": [
+  {
+   "description": "A merged entity must name the surviving entity.",
+   "if": {
+    "properties": {
+     "entity_status": {
+      "const": "merged"
+     }
+    },
+    "required": [
+     "entity_status"
+    ]
+   },
+   "then": {
+    "properties": {
+     "merged_into": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "merged_into"
+    ]
+   }
+  },
+  {
+   "description": "An asserted or relationship-derived ownership status must be traceable to its controlling assertion.",
+   "if": {
+    "properties": {
+     "native_ownership_status": {
+      "enum": [
+       "tribal_primary_asserted",
+       "tribal_secondary_asserted",
+       "relationship_not_ownership"
+      ]
+     }
+    },
+    "required": [
+     "native_ownership_status"
+    ]
+   },
+   "then": {
+    "properties": {
+     "controlling_assertion_id": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "controlling_assertion_id"
+    ]
+   }
+  }
+ ],
  "required": [
   "entity_id",
   "entity_status",
@@ -340,10 +392,14 @@
   },
   "field_provenance": {
    "type": "object",
+   "minProperties": 1,
+   "required": [
+    "canonical_name"
+   ],
    "additionalProperties": {
     "type": "string"
    },
-   "description": "Map of populated canonical field -> business_source_id that supplied it. A value without provenance is invalid."
+   "description": "Map of populated canonical field -> business_source_id that supplied it. A value without provenance is invalid; canonical_name always exists, so its provenance is always required."
   },
   "source_record_ids": {
    "type": "array",

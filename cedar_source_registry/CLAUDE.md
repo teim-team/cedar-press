@@ -1,9 +1,11 @@
 # Cedar Press — U.S. Tribal & Native Business Source Registry (Wave 5)
 
-Machine-readable export of the source registry, generated 2026-08-27 from
-`cedar_press_tribal_business_source_registry_us_wave5.xlsx`. The xlsx remains the
-human-facing canonical artifact; these files are its faithful projection for
-terminal and pipeline work. If they disagree, the xlsx of the same wave wins.
+Machine-readable source registry, originally exported 2026-08-27 from
+`cedar_press_tribal_business_source_registry_us_wave5.xlsx`. **Authority:** the
+xlsx is the frozen wave-5 snapshot; from wave 5.1 onward these versioned files
+are canonical and the xlsx is not updated. For wave-5 content only, a
+disagreement means the export was unfaithful — resolve against the xlsx and log
+the correction.
 
 ## Files
 

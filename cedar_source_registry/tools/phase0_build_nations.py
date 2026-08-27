@@ -29,6 +29,7 @@ Conventions:
     scoped to" — never an ownership assertion about any listed business.
 """
 import json
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -370,10 +371,27 @@ def main() -> None:
 
     known = {n["nation_id"] for n in nations}
     src_path = ROOT / "sources.jsonl"
+
+    # First pass: a tribal nation_source with neither a map entry nor an
+    # explicit scope override means the map is out of date (new or renamed
+    # source row). Fail before writing rather than silently downgrading an
+    # existing mapping to nation_ids: [] / nation_scope: unknown.
+    src_rows = [json.loads(line) for line in src_path.read_text().splitlines()]
+    unmapped_tribal = [
+        (s["source_id"], s["nation_source"])
+        for s in src_rows
+        if s["nation_source"] not in NATION_SOURCE_MAP
+        and s["source_id"] not in SCOPE_OVERRIDES
+    ]
+    if unmapped_tribal:
+        print("FAIL: unmapped nation_source rows (add to NATION_SOURCE_MAP or "
+              "SCOPE_OVERRIDES before regenerating):", file=sys.stderr)
+        for sid, ns in unmapped_tribal:
+            print(f"  {sid}: {ns}", file=sys.stderr)
+        raise SystemExit(1)
+
     out_lines = []
-    unmapped_tribal = []
-    for line in src_path.read_text().splitlines():
-        s = json.loads(line)
+    for s in src_rows:
         ids = NATION_SOURCE_MAP.get(s["nation_source"])
         override = SCOPE_OVERRIDES.get(s["source_id"])
         if ids:
@@ -381,9 +399,7 @@ def main() -> None:
             scope = override or ("multi_nation" if len(ids) > 1 else "single_nation")
         else:
             ids = []
-            scope = override or "unknown"
-            if override is None:
-                unmapped_tribal.append((s["source_id"], s["nation_source"]))
+            scope = override
         rebuilt = {}
         for k, v in s.items():
             rebuilt[k] = v
@@ -397,10 +413,6 @@ def main() -> None:
     src_path.write_text("\n".join(out_lines) + "\n")
 
     print(f"nations.jsonl: {len(nations)} rows")
-    if unmapped_tribal:
-        print("UNMAPPED (left nation_scope=unknown, nation_ids=[]):")
-        for sid, ns in unmapped_tribal:
-            print(f"  {sid}: {ns}")
 
 
 if __name__ == "__main__":

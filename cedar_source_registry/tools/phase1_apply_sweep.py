@@ -63,6 +63,43 @@ def main(paths: list[str]) -> int:
             results[row["source_id"]] = row
 
     src_path = ROOT / "sources.jsonl"
+
+    # Fail before writing anything if a result targets an unknown source_id —
+    # a misspelled id must not let the batch report success while a requested
+    # verification silently goes unapplied.
+    known_ids = {
+        json.loads(line)["source_id"]
+        for line in src_path.read_text().splitlines()
+        if line.strip()
+    }
+    unknown = sorted(set(results) - known_ids)
+    if unknown:
+        print(f"FAIL: results for ids not in sources.jsonl: {unknown}",
+              file=sys.stderr)
+        return 1
+
+    # Idempotency: a retried batch must not append duplicate log events.
+    # A result is "already applied" if the log holds a line with the same
+    # source_id, checked date, channel, and result.
+    log_path = ROOT / "verification_log.jsonl"
+    already = set()
+    for line in log_path.read_text().splitlines():
+        if not line.strip():
+            continue
+        row = json.loads(line)
+        already.add(
+            (row.get("source_id"), row.get("checked"), row.get("channel"),
+             row.get("result"))
+        )
+    skipped = [
+        sid for sid, r in list(results.items())
+        if (sid, CHECK_DATE, "web_search_only", RESULT[r["outcome"]]) in already
+    ]
+    for sid in skipped:
+        del results[sid]
+    if skipped:
+        print(f"skipping {len(skipped)} already-applied results: {skipped}",
+              file=sys.stderr)
     out, log_lines, review = [], [], []
     for line in src_path.read_text().splitlines():
         s = json.loads(line)
@@ -101,11 +138,8 @@ def main(paths: list[str]) -> int:
         if outcome in ("moved", "login_gated", "program_defunct", "not_found", "unresolved"):
             review.append((s["source_id"], outcome, r["basis"], r.get("notes")))
 
-    if results:
-        print(f"WARNING: results for ids not in sources.jsonl: {sorted(results)}",
-              file=sys.stderr)
     src_path.write_text("\n".join(out) + "\n")
-    with (ROOT / "verification_log.jsonl").open("a") as f:
+    with log_path.open("a") as f:
         for line in log_lines:
             f.write(line + "\n")
     print(f"applied {len(log_lines)} results", file=sys.stderr)

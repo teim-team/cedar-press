@@ -3,6 +3,28 @@
  "$id": "https://cedar.press/schema/source_record.schema.json",
  "title": "Cedar source record (Layer 1: one business appearance in one source)",
  "type": "object",
+ "allOf": [
+  {
+   "description": "Matching rule 4 enforced structurally: a cross-reference record can never originate a tribal-ownership assertion.",
+   "if": {
+    "properties": {
+     "source_priority_class": {
+      "const": "cross_reference"
+     }
+    },
+    "required": [
+     "source_priority_class"
+    ]
+   },
+   "then": {
+    "properties": {
+     "cross_reference_only": {
+      "const": true
+     }
+    }
+   }
+  }
+ ],
  "required": [
   "business_source_id",
   "source_id",

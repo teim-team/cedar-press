@@ -42,7 +42,7 @@
  "native_ownership_status": "tribal_primary_asserted",
  "nations": [
   {
-   "nation_id": "NATION-TULALIP",
+   "nation_id": "bia:tulalip-tribes",
    "nation_name": "Tulalip Tribes",
    "relationship": "citizen",
    "evidence_business_source_ids": [

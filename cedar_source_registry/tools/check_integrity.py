@@ -57,7 +57,8 @@ def main() -> int:
         ("cross_reference.jsonl", "source_id"),
         ("verification_log.jsonl", "source_id"),
     ]:
-        for row in load_jsonl(name):
+        rows = load_jsonl(name)
+        for row in rows:
             sid = row.get(key)
             if sid in (None, "", "—"):
                 if name != "verification_log.jsonl":
@@ -65,8 +66,16 @@ def main() -> int:
                 continue
             if sid not in source_ids:
                 err(f"{name}: {key} {sid} not in sources.jsonl")
+        # Projections carry one operational row per source; only the
+        # verification log is a history and may repeat ids.
+        if name != "verification_log.jsonl":
+            for sid, n in Counter(
+                r.get(key) for r in rows if r.get(key) not in (None, "", "—")
+            ).items():
+                if n > 1:
+                    err(f"{name}: duplicate {key} {sid} ({n} rows)")
 
-    # summary.json counts must be computed
+    # summary.json counts must be computed — every computed block is checked.
     summary = json.loads((ROOT / "summary.json").read_text())
     if summary["total_source_programs"] != len(sources):
         err(
@@ -76,15 +85,28 @@ def main() -> int:
     for field, block in [
         ("source_priority_class", "by_priority_class"),
         ("status_group", "by_status_group"),
+        ("last_checked", "by_last_checked"),
+        ("nation_scope", "by_nation_scope"),
     ]:
-        actual = Counter(s[field] for s in sources)
+        actual = Counter(s[field] for s in sources if s.get(field))
         if dict(actual) != dict(summary.get(block, {})):
             err(f"summary.json {block} {summary.get(block)} != computed {dict(actual)}")
+    if "sources_with_nation_ids" in summary:
+        actual_n = sum(1 for s in sources if s.get("nation_ids"))
+        if summary["sources_with_nation_ids"] != actual_n:
+            err(
+                f"summary.json sources_with_nation_ids "
+                f"{summary['sources_with_nation_ids']} != computed {actual_n}"
+            )
 
-    # Schema validation of templates
+    # Schema validation of templates — a required check, so a missing
+    # validator is a failure, not a skip ("integrity OK" must mean validated).
     try:
         import jsonschema
-
+    except ImportError:
+        err("jsonschema not installed — run `pip install jsonschema`; "
+            "schema validation is a required check")
+    else:
         sr_schema = json.loads((ROOT / "schema/source_record.schema.json").read_text())
         he_schema = json.loads(
             (ROOT / "schema/harmonized_entity.schema.json").read_text()
@@ -97,8 +119,6 @@ def main() -> int:
         )
         for e in jsonschema.Draft202012Validator(he_schema).iter_errors(entity):
             err(f"templates/harmonized_entity.example.json: {e.message}")
-    except ImportError:
-        WARNINGS.append("jsonschema not installed; schema validation skipped")
 
     # Nation crosswalk consistency (once Phase 0 has landed)
     nations_path = ROOT / "nations.jsonl"
@@ -126,20 +146,42 @@ def main() -> int:
             scope = s.get("nation_scope")
             if scope is not None and scope not in NATION_SCOPES:
                 err(f"sources.jsonl {s['source_id']}: bad nation_scope {scope!r}")
+        # Worked templates must reference real crosswalk ids too.
+        template_nids = [
+            rec.get("nation_id")
+            for rec in load_jsonl("templates/source_record.example.jsonl")
+        ] + [
+            n.get("nation_id")
+            for n in json.loads(
+                (ROOT / "templates/harmonized_entity.example.json").read_text()
+            ).get("nations", [])
+        ]
+        for nid in template_nids:
+            if nid is not None and nid not in known:
+                err(f"templates: nation_id {nid} not in nations.jsonl")
 
-    # verification_log append-only vs HEAD
-    try:
-        head = subprocess.run(
-            ["git", "show", "HEAD:cedar_source_registry/verification_log.jsonl"],
-            capture_output=True,
-            text=True,
-            cwd=ROOT,
+    # verification_log append-only. Two baselines: HEAD catches uncommitted
+    # local edits, and the merge-base with origin/main catches committed edits
+    # when the checker runs in CI on a checkout (where worktree == HEAD and the
+    # HEAD comparison alone is vacuous).
+    def git(*args: str) -> subprocess.CompletedProcess:
+        return subprocess.run(
+            ["git", *args], capture_output=True, text=True, cwd=ROOT
         )
-        if head.returncode == 0:
-            old = head.stdout.splitlines()
-            new = (ROOT / "verification_log.jsonl").read_text().splitlines()
+
+    try:
+        baselines = ["HEAD"]
+        mb = git("merge-base", "HEAD", "origin/main")
+        if mb.returncode == 0 and mb.stdout.strip():
+            baselines.append(mb.stdout.strip())
+        new = (ROOT / "verification_log.jsonl").read_text().splitlines()
+        for ref in baselines:
+            shown = git("show", f"{ref}:cedar_source_registry/verification_log.jsonl")
+            if shown.returncode != 0:
+                continue  # file absent at this baseline (e.g. pre-registry main)
+            old = shown.stdout.splitlines()
             if new[: len(old)] != old:
-                err("verification_log.jsonl is not append-only vs HEAD")
+                err(f"verification_log.jsonl is not append-only vs {ref}")
     except OSError:
         WARNINGS.append("git unavailable; append-only check skipped")
 
