@@ -20,6 +20,7 @@ the correction.
 | `outreach/requests.md` | — | outreach queue for request-only sources (roster generated from partnership_leads.jsonl) |
 | `PHASE_REPORT.md` | — | phase close-out: what was verified, changed, excluded, and the needs-human list |
 | `research/newsletter_survey_2026-08-27.{md,jsonl}` | 42 outlets | tribal newsletter/media reconnaissance: dataset potential, business lists/awards coverage, Phase-3 candidates |
+| `pipeline.py` + `PIPELINE.md` | — | the one-file dataset pipeline exemplar: registry-driven, staleness-aware, SQLite mock of the production database |
 | `taxonomy.json` | — | identity taxonomy and grading rubric definitions |
 | `record_schema.json` | — | recommended schema for *business* records ingested from these sources |
 | `summary.json` | — | counts (computed from `sources.jsonl`, not transcribed) + matching rules |

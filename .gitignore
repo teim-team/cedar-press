@@ -12,3 +12,6 @@ __pycache__/
 *.py[cod]
 .venv/
 *.egg-info/
+
+# Cedar dataset pipeline local state
+cedar_source_registry/data/
