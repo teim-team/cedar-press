@@ -1,0 +1,164 @@
+[
+ {
+  "section": "Identity taxonomy",
+  "term": "Citizen/member-owned",
+  "definition_rule": "Business is asserted by the source to be owned by a citizen/member of the named nation. The threshold may be explicit or unstated.",
+  "cedar_press_treatment": "Store source text and ownership threshold separately."
+ },
+ {
+  "section": "Identity taxonomy",
+  "term": "Descendant-owned",
+  "definition_rule": "Source permits descendants who are not necessarily enrolled citizens.",
+  "cedar_press_treatment": "Distinct identity_scope value; never relabel as citizen-owned."
+ },
+ {
+  "section": "Identity taxonomy",
+  "term": "Any Native-owned",
+  "definition_rule": "Source accepts members of other tribes or broad Indigenous ownership.",
+  "cedar_press_treatment": "Store tribal affiliation and certifying source."
+ },
+ {
+  "section": "Identity taxonomy",
+  "term": "Tribally owned",
+  "definition_rule": "Government or tribal corporate enterprise, not an individual member-owned firm.",
+  "cedar_press_treatment": "Separate ownership universe; join to NEED/USET rather than blend."
+ },
+ {
+  "section": "Identity taxonomy",
+  "term": "TERO-certified",
+  "definition_rule": "Business has been certified under a tribal preference regime, often with ownership/control and recertification requirements.",
+  "cedar_press_treatment": "Preserve certification number, tier, start and expiration."
+ },
+ {
+  "section": "Identity taxonomy",
+  "term": "Mixed local directory",
+  "definition_rule": "Directory includes local, chamber, tourism or non-Native businesses alongside member-owned firms.",
+  "cedar_press_treatment": "Require record-level identity_basis; do not inherit page-level labels."
+ },
+ {
+  "section": "Identity taxonomy",
+  "term": "Artist directory",
+  "definition_rule": "Artist-specific roster with citizenship or program eligibility.",
+  "cedar_press_treatment": "Separate Cedar artist vertical or subtype."
+ },
+ {
+  "section": "Scrape grade",
+  "term": "A+",
+  "definition_rule": "Official CSV, TXT, XLSX or API export with stable keys and no authentication.",
+  "cedar_press_treatment": "Automate first; weekly or monthly diff."
+ },
+ {
+  "section": "Scrape grade",
+  "term": "A",
+  "definition_rule": "Stable public HTML/table/cards with straightforward pagination.",
+  "cedar_press_treatment": "Automate with DOM parser and raw snapshots."
+ },
+ {
+  "section": "Scrape grade",
+  "term": "B",
+  "definition_rule": "Structured PDF/DOCX or stable landing page with current document links.",
+  "cedar_press_treatment": "Poll landing page, hash files and parse by edition."
+ },
+ {
+  "section": "Scrape grade",
+  "term": "C",
+  "definition_rule": "Dynamic portal, protected page, image-only source or integrity concern.",
+  "cedar_press_treatment": "Browser-assisted extraction or direct feed; stronger monitoring."
+ },
+ {
+  "section": "Scrape grade",
+  "term": "D",
+  "definition_rule": "Intake-only, request-only, internal or historical list with no public records.",
+  "cedar_press_treatment": "Partnership outreach; do not represent as scraped coverage."
+ },
+ {
+  "section": "Validation",
+  "term": "Date plausibility",
+  "definition_rule": "Certification dates should fall within a plausible range and expiration should not precede certification.",
+  "cedar_press_treatment": "Flag but retain raw source value."
+ },
+ {
+  "section": "Validation",
+  "term": "Identity provenance",
+  "definition_rule": "A business may appear in multiple lists with different scopes or certification periods.",
+  "cedar_press_treatment": "Use one source assertion per appearance; deduplicate only at the entity layer."
+ },
+ {
+  "section": "Validation",
+  "term": "Staleness",
+  "definition_rule": "A page can remain public after certifications expire or programs go dormant.",
+  "cedar_press_treatment": "Track source edition, first_seen, last_seen and current/expired status."
+ },
+ {
+  "section": "Validation",
+  "term": "Contact data",
+  "definition_rule": "Directories often publish owner names, phones and emails.",
+  "cedar_press_treatment": "Publish only public business contact data with source attribution; avoid inferring personal details."
+ },
+ {
+  "section": "Operations",
+  "term": "Pre-production check",
+  "definition_rule": "Review robots.txt, site terms, rate limits and source contact preferences.",
+  "cedar_press_treatment": "Use respectful polling and prefer official exports when available."
+ },
+ {
+  "section": "Identity taxonomy",
+  "term": "ANCSA shareholder-owned",
+  "definition_rule": "Business is associated with an Alaska Native corporation shareholder, descendant or spouse. This is a corporate shareholder relationship, not tribal citizenship.",
+  "cedar_press_treatment": "Use a separate directory_type and relationship basis; never relabel as citizen/member-owned."
+ },
+ {
+  "section": "Source structure",
+  "term": "Certification notice series",
+  "definition_rule": "Dated notices may document an application, hearing, approval, denial, renewal or expiration rather than a current master roster.",
+  "cedar_press_treatment": "Store each notice as an event and derive current status only from a complete event sequence."
+ },
+ {
+  "section": "Source hierarchy",
+  "term": "Tribal Primary",
+  "definition_rule": "Official tribal-government, TERO, Indian-preference, citizen/member-owned or tribe-maintained list with a reasonably direct identity assertion.",
+  "cedar_press_treatment": "Highest evidentiary priority. Preserve as the controlling source assertion unless the tribe updates or withdraws it."
+ },
+ {
+  "section": "Source hierarchy",
+  "term": "Tribal Secondary",
+  "definition_rule": "Tribal or tribe-linked directory that is mixed, editorial, self-submitted, historical or not a formal certification roster.",
+  "cedar_press_treatment": "Retain high visibility, but preserve its limitation and do not upgrade identity beyond the source wording."
+ },
+ {
+  "section": "Source hierarchy",
+  "term": "Tribal Partnership",
+  "definition_rule": "A tribal program, certification system, intake form or legally required roster is confirmed, but current records are not publicly downloadable.",
+  "cedar_press_treatment": "Request a direct periodic export and do not represent the source as scraped coverage until records are received."
+ },
+ {
+  "section": "Source hierarchy",
+  "term": "Cross-Reference",
+  "definition_rule": "State, chamber, nonprofit, CDFI or regional directory that may identify Native businesses but is not the relevant tribe's own assertion.",
+  "cedar_press_treatment": "Use for discovery, matching, affiliation leads and gap checks. Never overwrite a tribal-source assertion."
+ },
+ {
+  "section": "Source hierarchy",
+  "term": "Discovery Only",
+  "definition_rule": "Business-license, contractor, local-commerce or similar source where inclusion does not imply Native ownership.",
+  "cedar_press_treatment": "Generate candidates only. Ownership must be independently verified."
+ },
+ {
+  "section": "Source hierarchy",
+  "term": "Coverage Frame",
+  "definition_rule": "Reference identifying tribes, TERO offices, programs, contacts or documents rather than individual businesses.",
+  "cedar_press_treatment": "Use to measure source coverage and generate research tasks, not business records."
+ },
+ {
+  "section": "Matching",
+  "term": "Evidence precedence",
+  "definition_rule": "Tribal Primary > Tribal Secondary > Tribal Partnership metadata > Cross-Reference > Discovery Only.",
+  "cedar_press_treatment": "The entity matcher may propose links across levels, but source assertions remain separate and ranked."
+ },
+ {
+  "section": "Matching",
+  "term": "Conflict handling",
+  "definition_rule": "Sources may disagree on ownership, affiliation, certification status, business name or whether a record remains active.",
+  "cedar_press_treatment": "Retain parallel assertions, flag the conflict and resolve through the highest-authority current source rather than silently overwriting."
+ }
+]

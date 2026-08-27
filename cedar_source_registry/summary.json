@@ -1,0 +1,33 @@
+{
+ "registry": "Cedar Press U.S. Tribal & Native Business Source Registry",
+ "wave": 5,
+ "generated": "2026-08-27",
+ "scope": "United States only. Tribal-government, TERO and tribal member/citizen lists are the primary evidence layer; state, chamber, nonprofit and regional directories are cross-reference only.",
+ "total_source_programs": 148,
+ "by_priority_class": {
+  "Tribal Primary": 45,
+  "Tribal Secondary": 11,
+  "Tribal Partnership": 52,
+  "Cross-Reference": 32,
+  "Discovery Only": 2,
+  "Coverage Frame": 6
+ },
+ "by_status_group": {
+  "Live": 53,
+  "Stale": 8,
+  "Historical": 3,
+  "Lead": 55,
+  "Complementary": 29
+ },
+ "by_last_checked": {
+  "2026-08-26": 97,
+  "2026-08-27": 51
+ },
+ "matching_rules": [
+  "A Tribal Primary assertion controls over every secondary source.",
+  "Tribal Secondary sources may add records or fields, but must retain their mixed or non-certification caveat.",
+  "Tribal Partnership sources represent confirmed programs or rosters that Cedar should obtain directly.",
+  "Cross-reference sources may propose matches and affiliations, but cannot create a tribal ownership assertion on their own.",
+  "Conflicts remain as parallel source assertions until resolved, rather than being silently overwritten."
+ ]
+}

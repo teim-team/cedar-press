@@ -1,0 +1,423 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://cedar.press/schema/source_record.schema.json",
+ "title": "Cedar source record (Layer 1: one business appearance in one source)",
+ "type": "object",
+ "required": [
+  "business_source_id",
+  "source_id",
+  "business_name_raw",
+  "directory_type",
+  "identity_scope",
+  "identity_claim_text",
+  "verification_basis",
+  "source_url",
+  "first_seen",
+  "last_seen",
+  "record_hash",
+  "ingestion_method",
+  "raw_snapshot_uri",
+  "refresh_run_id",
+  "source_priority_class",
+  "cross_reference_only"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "business_source_id": {
+   "type": "string",
+   "description": "Stable Cedar ID for one business appearance in one source. Never reused."
+  },
+  "source_id": {
+   "type": "string",
+   "pattern": "^TBD-\\d{3}$",
+   "description": "FK to Source Registry (sources.jsonl)."
+  },
+  "source_business_key": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "description": "Source-provided certification number or deterministic source key."
+  },
+  "business_entity_id": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "description": "Canonical entity FK, set only after matching."
+  },
+  "nation_id": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "description": "Canonical nation crosswalk id (ideally BIA-linked), when known."
+  },
+  "business_name_raw": {
+   "type": "string",
+   "description": "Exact source text."
+  },
+  "business_name_normalized": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "description": "Derived; never replaces raw."
+  },
+  "dba_name": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "owner_name_raw": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "directory_type": {
+   "type": "string",
+   "enum": [
+    "member_owned",
+    "artist",
+    "tero",
+    "certification_notice",
+    "mixed_local",
+    "tribal_enterprise",
+    "anc_shareholder",
+    "chamber",
+    "state_certified",
+    "vendor_registration",
+    "coverage_frame",
+    "other"
+   ]
+  },
+  "identity_scope": {
+   "type": "string",
+   "enum": [
+    "citizen",
+    "descendant",
+    "any_native",
+    "tribal_government",
+    "family_owned",
+    "shareholder",
+    "shareholder_descendant",
+    "shareholder_spouse_descendant",
+    "mixed",
+    "unknown"
+   ]
+  },
+  "identity_claim_text": {
+   "type": "string",
+   "description": "Source-specific wording supporting the assertion."
+  },
+  "ownership_percent": {
+   "type": [
+    "number",
+    "null"
+   ],
+   "minimum": 0,
+   "maximum": 100,
+   "description": "Listed percentage, if public. NB Tulalip's 'Tulalip Owned %' measures Tulalip-member ownership only."
+  },
+  "ownership_threshold_min": {
+   "type": [
+    "number",
+    "null"
+   ],
+   "minimum": 0,
+   "maximum": 1,
+   "description": "Rule threshold as fraction, e.g. 0.51."
+  },
+  "control_requirement": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "tribal_affiliation_raw": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "description": "Affiliation as printed; may differ from the certifying tribe."
+  },
+  "verification_basis": {
+   "type": "string",
+   "enum": [
+    "title_only",
+    "enrollment",
+    "CDIB",
+    "TERO_review",
+    "tribal_certification",
+    "state_certification",
+    "chamber_membership",
+    "self_submitted",
+    "shareholder_records",
+    "unknown"
+   ]
+  },
+  "certification_number": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "certification_tier": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "description": "e.g. Navajo Priority 1, EBCI P1/P2."
+  },
+  "certification_start": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "format": "date"
+  },
+  "certification_expiration": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "format": "date"
+  },
+  "business_license_number": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "service_category_raw": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "naics": {
+   "type": [
+    "array",
+    "null"
+   ],
+   "items": {
+    "type": "string"
+   },
+   "description": "Source-provided or Cedar-mapped; flag mapped values in validation_flags."
+  },
+  "description_raw": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "address_raw": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "city": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "state_province": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "postal_code": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "phone": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "email": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "website": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "source_url": {
+   "type": "string",
+   "format": "uri"
+  },
+  "source_edition": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "description": "Directory issue date or file edition (e.g. '2026-03 bimonthly PDF')."
+  },
+  "first_seen": {
+   "type": "string",
+   "format": "date-time"
+  },
+  "last_seen": {
+   "type": "string",
+   "format": "date-time"
+  },
+  "source_last_updated": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "format": "date"
+  },
+  "record_hash": {
+   "type": "string",
+   "description": "Content hash for change detection."
+  },
+  "is_current": {
+   "type": [
+    "boolean",
+    "null"
+   ],
+   "description": "Derived from latest snapshot + certification dates."
+  },
+  "validation_flags": {
+   "type": [
+    "array",
+    "null"
+   ],
+   "items": {
+    "type": "string"
+   }
+  },
+  "ingestion_method": {
+   "type": "string",
+   "enum": [
+    "csv",
+    "html",
+    "pdf",
+    "docx",
+    "xlsx",
+    "json_api",
+    "portal",
+    "manual_feed"
+   ]
+  },
+  "raw_snapshot_uri": {
+   "type": "string",
+   "description": "Immutable raw snapshot for auditability."
+  },
+  "refresh_run_id": {
+   "type": "string"
+  },
+  "relationship_basis_raw": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "description": "Exact source wording; parse into relationship_basis."
+  },
+  "relationship_basis": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "enum": [
+    "citizen",
+    "member",
+    "descendant",
+    "shareholder",
+    "spouse",
+    "family",
+    "operated_by",
+    "other",
+    "unspecified",
+    null
+   ],
+   "description": "Parsed relationship. spouse/operated_by never imply ownership."
+  },
+  "certification_event_status": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "enum": [
+    "application",
+    "hearing",
+    "approved",
+    "denied",
+    "renewed",
+    "suspended",
+    "expired",
+    "unknown",
+    null
+   ]
+  },
+  "source_priority_class": {
+   "type": "string",
+   "enum": [
+    "tribal_primary",
+    "tribal_secondary",
+    "tribal_partnership",
+    "cross_reference",
+    "discovery_only",
+    "coverage_frame"
+   ]
+  },
+  "cross_reference_only": {
+   "type": "boolean",
+   "description": "True: may support matching/discovery; can NEVER establish tribal ownership."
+  },
+  "matched_primary_source_ids": {
+   "type": [
+    "array",
+    "null"
+   ],
+   "items": {
+    "type": "string"
+   }
+  },
+  "match_method": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "enum": [
+    "certification_number",
+    "exact_name_address",
+    "exact_website",
+    "phone_email",
+    "fuzzy_name_location",
+    "manual",
+    null
+   ]
+  },
+  "match_confidence": {
+   "type": [
+    "number",
+    "null"
+   ],
+   "minimum": 0,
+   "maximum": 1,
+   "description": "Record-linkage confidence, NOT ownership confidence."
+  },
+  "assertion_precedence_rank": {
+   "type": [
+    "integer",
+    "null"
+   ],
+   "description": "Derived from source hierarchy; orders conflict review, never deletes."
+  }
+ }
+}
