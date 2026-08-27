@@ -146,6 +146,12 @@ def main() -> int:
             scope = s.get("nation_scope")
             if scope is not None and scope not in NATION_SCOPES:
                 err(f"sources.jsonl {s['source_id']}: bad nation_scope {scope!r}")
+        # negative_findings.jsonl (Phase 3) keys on nation_id.
+        if (ROOT / "negative_findings.jsonl").exists():
+            for row in load_jsonl("negative_findings.jsonl"):
+                if row.get("nation_id") not in known:
+                    err(f"negative_findings.jsonl: nation_id {row.get('nation_id')} "
+                        "not in nations.jsonl")
         # Worked templates must reference real crosswalk ids too.
         template_nids = [
             rec.get("nation_id")

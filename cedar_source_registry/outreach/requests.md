@@ -18,8 +18,9 @@ wave-5 re-checks (verification_log.jsonl, 2026-08-27) found each is one direct
 request away from current coverage.
 
 ### TBD-031 — Lummi Nation, NAOB Registry
-- **Contact point:** Lummi TERO office via the TERO site (registry row
-  `rules_intake_url`); site is actively maintained.
+- **Contact point:** TERO@lummi-nsn.gov · (360) 312-2287 · Teresa Bumatay,
+  TERO Director (contacts surfaced literally in lummi-nsn.gov page snippets,
+  2026-08-27). **Gmail draft created 2026-08-27 — awaiting owner send.**
 - **Ask:** the current Native American Owned Business registry, and whether
   Cedar may receive refreshed copies on a schedule.
 - **Cited basis:** the TERO site itself states an up-to-date registry is
@@ -28,18 +29,39 @@ request away from current coverage.
   (wave-5 log line, 2026-08-27).
 
 ### TBD-044 — Coeur d'Alene Tribe, TERO certification program
-- **Contact point:** Coeur d'Alene TERO office (registry row URL).
+- **Contact point:** jnilson@cdatribe-nsn.gov · (208) 686-6107 · Jim Nilson,
+  TERO Compliance Officer (contacts from Idaho Transportation Dept TERO
+  contacts page snippet, 2026-08-27; tribal page cdatribe-nsn.gov/tero/).
+  **Gmail draft created 2026-08-27 — awaiting owner send.**
 - **Ask:** the current certified-business list.
 - **Cited basis:** certification program active with business-license and
   financial-verification requirements (ordinance Chapter 41); no published
   roster (wave-5 log line, 2026-08-27).
 
 ### TBD-077 — Sisseton Wahpeton Oyate, TERO
-- **Contact point:** TERO under the Department of Commerce (registry row URL).
+- **Contact point:** DelRay German, TERO Director · 605-698-3549 (from the
+  SDDOT TERO office list, updated July 2025) · contact page
+  swo-nsn.gov/departments/department-of-commerce/tero/. **No email address
+  surfaced in search results — phone or contact-form outreach needed; no
+  draft created (addresses are never guessed).**
 - **Ask:** the current certified Indian-owned business list.
 - **Cited basis:** live TERO page is the monitoring point; SDDOT confirms a
   2025 compliance plan; ordinance Chapter 59 on NARF (wave-5 log line,
   2026-08-27).
+
+### TBD-026 — Little Traverse Bay Bands, Tribal Citizen-Owned Business List
+- **Contact point:** DOC@ltbbodawa-nsn.gov · (231) 242-1584 (both from LTBB's
+  own PDFs on ltbbodawa-nsn.gov, 2026-08-27).
+- **Ask:** the Tribal Citizen-Owned Business List the Department of Commerce
+  maintains and shares by request. **Gmail draft created 2026-08-27 —
+  awaiting owner send.**
+
+### TBD-095 — Northern Cheyenne Tribe, TERO certified contractor list
+- **Contact point:** Stephanie Fisher, TERO Director · 406-477-6505 · page
+  cheyennenation.com/Tero.html (2026-08-27).
+- **Ask:** the certified contractor list the TERO office provides on request
+  (per wave-5.1 search evidence). **No email address surfaced — phone
+  outreach needed; no draft created (addresses are never guessed).**
 
 ## Partnership-lead roster (generated from partnership_leads.jsonl)
 
@@ -103,6 +125,7 @@ Regenerate with `tools/build_outreach.py` after any partnership_leads edit.
 | TBD-158 | Pascua Yaqui Tribe | TERO Indian Enterprise Qualification Records | TERO program page and business-license application public; qualified-enterprise roster not located | Request a quarterly CSV/XLSX export, data dictionary and permission to publish source-attributed records. |
 | TBD-159 | Turtle Mountain Band of Chippewa Indians | TERO Indian-Owned Business Certifications | TERO code public in tribal law libraries; certified-business roster not located | Request a quarterly CSV/XLSX export, data dictionary and permission to publish source-attributed records. |
 | TBD-160 | Osage Nation | Tax Commission Registered Vendor Records | Registration requirement and application packet public; vendor list not published | Request a quarterly CSV/XLSX export, data dictionary and permission to publish source-attributed records. |
+| TBD-167 | Nisqually Indian Tribe | Nisqually NAOB Registry (TERO certified businesses) | TERO orientation PDF references an attached certified NAOB list and a certification application; Title 42 TERO on the tribal site | Request the current certified NAOB list from Nisqually TERO, plus a data dictionary and permission terms. |
 <!-- END GENERATED ROSTER -->
 
 ## Protocol notes

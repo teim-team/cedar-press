@@ -3,33 +3,33 @@
  "wave": 5,
  "generated": "2026-08-27",
  "scope": "United States only. Tribal-government, TERO and tribal member/citizen lists are the primary evidence layer; state, chamber, nonprofit and regional directories are cross-reference only.",
- "total_source_programs": 148,
+ "total_source_programs": 155,
  "by_priority_class": {
-  "Tribal Primary": 45,
-  "Tribal Secondary": 11,
-  "Tribal Partnership": 52,
+  "Tribal Primary": 46,
+  "Tribal Secondary": 15,
+  "Tribal Partnership": 53,
   "Cross-Reference": 32,
-  "Discovery Only": 2,
+  "Discovery Only": 3,
   "Coverage Frame": 6
  },
  "by_status_group": {
-  "Live": 53,
-  "Stale": 8,
+  "Live": 58,
+  "Stale": 9,
   "Historical": 3,
-  "Lead": 55,
+  "Lead": 56,
   "Complementary": 29
  },
  "by_nation_scope": {
-  "single_nation": 110,
+  "single_nation": 117,
   "multi_nation": 2,
   "regional": 29,
   "national": 7
  },
- "sources_with_nation_ids": 112,
+ "sources_with_nation_ids": 119,
  "by_last_checked": {
-  "2026-08-27": 148
+  "2026-08-27": 155
  },
- "nations_in_crosswalk": 109,
+ "nations_in_crosswalk": 182,
  "matching_rules": [
   "A Tribal Primary assertion controls over every secondary source.",
   "Tribal Secondary sources may add records or fields, but must retain their mixed or non-certification caveat.",
