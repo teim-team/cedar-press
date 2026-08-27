@@ -111,6 +111,14 @@ search-only from wave 5.1. The distinguishers are (a) the dated
   boundary was crossed.
 - **Full BIA list import** — blocked (egress); stub covers all referenced
   nations instead, flagged unverified.
+- **`verification_basis` vocabulary reconciliation** — the workbook-derived
+  `record_schema.json` lists `directory_tag`/`self_attested`/`license` while
+  the formal `schema/source_record.schema.json` enum has
+  `self_submitted`/`shareholder_records` (pre-existing wave-5 tension, flagged
+  by PR review). Deferred to Phase 4, where `taxonomy_v2.json` and the schema
+  enums change in the same PR so schema and taxonomy cannot drift; the survey
+  finding that newsletter records need a `press_reported`-style value lands in
+  the same decision.
 
 ## Needs human
 
