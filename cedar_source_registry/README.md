@@ -13,7 +13,10 @@ terminal and pipeline work. If they disagree, the xlsx of the same wave wins.
 | `scrape_queue.jsonl` | 83 | live source ranked for immediate ingestion |
 | `partnership_leads.jsonl` | 55 | confirmed-but-unpublished roster to request directly |
 | `cross_reference.jsonl` | 40 | secondary directory with `do_not_infer` guardrails |
-| `verification_log.jsonl` | 31 | Wave 5 fact-check and inspection results (18 verified, 5 researched-and-excluded, 4 URL corrections, 2 edits reverted) |
+| `verification_log.jsonl` | 128 | append-only fact-check log: 31 wave-5 lines (18 verified, 5 researched-and-excluded, 4 URL corrections, 2 edits reverted) + 97 wave-5.1 search-only re-checks (`channel: web_search_only`) |
+| `nations.jsonl` | 109 | nation crosswalk stub (Phase 0) — see "Nation crosswalk" below |
+| `outreach/requests.md` | — | outreach queue for request-only sources (roster generated from partnership_leads.jsonl) |
+| `PHASE_REPORT.md` | — | phase close-out: what was verified, changed, excluded, and the needs-human list |
 | `taxonomy.json` | — | identity taxonomy and grading rubric definitions |
 | `record_schema.json` | — | recommended schema for *business* records ingested from these sources |
 | `summary.json` | — | counts (computed from `sources.jsonl`, not transcribed) + matching rules |
