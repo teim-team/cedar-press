@@ -99,10 +99,24 @@ Natives" products).
 
 ## Needs human
 
-1. SBA FOIA request for the DSBS extract; 2. Minneapolis Fed inquiry on NEED
-business-level access; 3. MN SOS non-commercial bulk-data request; 4.
-OpenCorporates public-benefit application (+ ODbL legal review); 5. NM TRD
-records request for the Native American resident business certificate list;
-6. paid-tier decisions (WI $5/mo, OK SOS, NC/SD/ND); 7. SC CMA — ask whether
-a post-2019 directory edition exists; 8. NNASC — ask whether a certified-
-supplier roster will be public.
+1. MN SOS non-commercial bulk-data request; 2. OpenCorporates public-benefit
+application (+ ODbL legal review); 3. paid-tier decisions (WI $5/mo, OK SOS,
+NC/SD/ND); 4. SC CMA — ask whether a post-2019 directory edition exists;
+5. NNASC — ask whether a certified-supplier roster will be public; 6. NM TRD
+certificate-list request (a state records request, not FOIA — needs owner
+sign-off given the no-FOIA direction below).
+
+## Owner decisions (2026-08-27, post-round-1)
+
+- **NEED: access refused.** The owner reports the Minneapolis Fed will not
+  grant access to NEED business-level data. NEED (TBD-065) is therefore
+  aggregate/statistical context only; drop the access inquiry and never
+  treat NEED-derived figures as record-level evidence.
+- **No FOIA requests.** The SBA DSBS FOIA bulk route (and any similar FOIA
+  path) is dropped per owner direction. DSBS remains a searchable-only
+  cross-reference; Buy Indian awardees stay reachable through the ordinary
+  FPDS/USAspending public downloads, which involve no FOIA.
+- **Outreach emails to tribes whose rosters are stated available on request
+  are approved** — worked through `outreach/requests.md`, starting with the
+  documented on-request offices (Lummi, Coeur d'Alene, Sisseton, LTBB,
+  Northern Cheyenne).
