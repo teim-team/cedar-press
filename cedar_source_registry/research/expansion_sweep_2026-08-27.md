@@ -135,6 +135,52 @@ consortia (`research/ak_consortia_survey_2026-08-28.jsonl`).
   (a "TERO CERTIFIED BUSINESSES" PDF at pci-nsn.gov is Poarch, not
   Pinoleville).
 
+## Round 4 (2026-08-28)
+
+80 more entities across five batches — the first systematic Alaska-village
+sweep using the consortia enumeration frames from round 3 (North Slope/NW
+Arctic, Y-K Delta, Interior/TCC region, Bristol Bay/Aleutians/Kodiak) plus
+the Oklahoma small-tribe and north-coast-California stragglers. Raw evidence
+appended to the same JSONL with `r4-*` batch labels.
+
+- **Zero new source rows — and that is the round's finding.** All 64 Alaska
+  villages came back negative: village tribal governments publish
+  council/program/contact pages, not business registries. The practical
+  Alaska acquisition paths remain the regional layer already in the
+  registry (ANC shareholder directories, Kawerak's beringstrait.biz
+  TBD-176) plus **TCC's consortium-level TERO**, which per the Tanana check
+  maintains an Indian-owned vendor listing region-wide for all 42 member
+  villages (tananachiefs.org/services/job-training/tero/) — logged as a
+  future promotion candidate rather than a per-village source.
+- **Enterprise-page inventory grew by 7** (Kaw KNBS, Ottawa OK, Modoc
+  Nation, Seneca-Cayuga, Delaware Tribe of Indians/Bartlesville — kept
+  distinct from Delaware Nation/Anadarko already in the registry — Bear
+  River Rohnerville (page lives on the casino domain), Blue Lake Rancheria
+  Economy page). Same hold-for-Phase-4 treatment; URLs preserved in the
+  negatives' notes.
+- **Fast-recheck unresolveds (2026-11-28):** McGrath Native Village —
+  search summaries twice claimed a business directory on mcgrathnvc.com
+  but no literal URL surfaced (and the *City* of McGrath's municipal
+  directory is a nearby trap); Wiyot Tribe — wiyot.us runs a CivicEngage
+  `BusinessDirectoryII` module titled "Resource Directory" whose category
+  scope (tribal businesses vs. community resources) was not visible.
+- **Single-enterprise-in-prose pattern:** several villages evidence exactly
+  one tribally owned enterprise with no listing page (Igiugig's Iliamna
+  Lake Contractors 8(a), Nulato Hills Enterprises LLC, Port Lions Farm,
+  Elk Valley Tribal Fuel Mart) — recorded in the negatives' notes, not
+  registrable as directories.
+- **ANCSA-corp separations held:** Ouzinkie Native Corporation's
+  business directory (ouzinkie.com/business-directory), Old Harbor Native
+  Corp, Iliamna Natives Ltd, Gwichyaa Zhee Corp, Deloy Ges, and Mendas
+  Cha-ag were all surfaced and excluded from tribal-government findings
+  per scope (noted for the separate corporation track).
+- Wrong-tribe traps caught: fortsillapache-nsn.gov enterprises page ≠
+  Apache Tribe of Oklahoma; Canadian Odawa results ≠ Ottawa Tribe of OK;
+  Oregon Modoc history pages ≠ Modoc Nation (Miami, OK).
+- Ledger after integration: **405 of ~575 BIA entities checked** (117 with
+  source rows, 288 negatives-only), ~178 unchecked — mostly Chugach-region
+  and remaining small villages, small CA/NV bands, and misc stragglers.
+
 ## Follow-ups
 
 1. Fetch-verify the 7 new rows at page level (egress unblock or local run).
