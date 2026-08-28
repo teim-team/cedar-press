@@ -3,32 +3,32 @@
  "wave": 5,
  "generated": "2026-08-28",
  "scope": "United States only. Tribal-government, TERO and tribal member/citizen lists are the primary evidence layer; state, chamber, nonprofit and regional directories are cross-reference only.",
- "total_source_programs": 162,
+ "total_source_programs": 163,
  "by_priority_class": {
   "Tribal Primary": 47,
   "Tribal Secondary": 19,
   "Tribal Partnership": 54,
   "Cross-Reference": 32,
-  "Discovery Only": 4,
+  "Discovery Only": 5,
   "Coverage Frame": 6
  },
  "by_status_group": {
-  "Live": 63,
+  "Live": 64,
   "Stale": 10,
   "Historical": 3,
   "Lead": 57,
   "Complementary": 29
  },
  "by_nation_scope": {
-  "single_nation": 122,
+  "single_nation": 123,
   "multi_nation": 2,
   "regional": 31,
   "national": 7
  },
- "sources_with_nation_ids": 124,
+ "sources_with_nation_ids": 125,
  "by_last_checked": {
-  "2026-08-27": 155,
-  "2026-08-28": 7
+  "2026-08-27": 154,
+  "2026-08-28": 9
  },
  "nations_in_crosswalk": 584,
  "coverage": {
