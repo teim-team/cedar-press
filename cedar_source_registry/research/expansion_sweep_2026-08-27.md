@@ -226,6 +226,56 @@ Raw evidence appended with `r5-*` batch labels.
   corridor…), the rest of the NANA/North Slope stragglers, and scattered
   small lower-48 bands.
 
+## Round 6 (2026-08-28, third batch)
+
+69 entities across five batches — the Alaska closeout (Arctic Slope regional
+tribe + Seward Peninsula + lower-Yukon "paper villages", middle Kuskokwim,
+Yukon-Koyukuk/upper Tanana, Copper River/SE/Bristol Bay leftovers) plus the
+lower-48 finals the fixed candidate filter surfaced (Crow, Fort Peck,
+Shakopee, Upper/Lower Sioux had genuinely never been checked). Raw evidence
+appended with `r6-*` batch labels.
+
+- **The round's two real conversions are wave-5 Leads coming true:**
+  - **Fort Peck (TBD-096)** — the public roster the Lead said was "not
+    located" exists: a literal page *TERO Certified Indian Owned Business
+    M-R* on fortpecktero.org surfaced, evidencing an alphabet-paginated
+    public certified list. Logged as conversion evidence (Lead retained per
+    the no-upgrade-from-snippets rule); top page-level inspection target.
+  - **Tlingit & Haida (TBD-122)** — the anticipated Native-owned business
+    directory now has a literal public page
+    (thbusinessresourcecenter.com/browse-businesses/). Caveat: results
+    describe it as covering "indigenous AND minority owned businesses," so
+    a listing alone is never a Native-ownership assertion. Same
+    log-don't-upgrade treatment.
+- **One new row: TBD-179, the Tlingit & Haida Certified Tribal Artist
+  Program** (Tribal Primary, Live) — tribal-enrollment-gated artist
+  certification (2014 Tribal Assembly resolution) with a public artists
+  page on shoptlingithaida.com. Person-adjacent records: publication
+  boundary review required before anything ships.
+- **Crow (TBD-117) re-check:** still no public list — TERO office page
+  under construction, regulations PDF public, FEMA solicitations reference
+  "TERO approved contractors." Outreach remains the path.
+- **The 62 Alaska checks were uniformly negative**, completing the pattern
+  from rounds 4-5: village governments publish council/program pages, not
+  registries. Notables in the negatives' notes: ICAS's new economic arm
+  "Iñupiat Tribal Business Solutions" (CEDS 2025-30; watch for a page),
+  King Island unresolved (claimed business-directory reference, no literal
+  URL — fast recheck 2026-11-28; ivory-carver community makes an artist
+  list plausible), Red Devil's council only recently reestablished after a
+  decade dormant, and Cheesh-Na's Chistochina Enterprises (single Section
+  17 corp — enterprise-page hold along with Upper Sioux and Shakopee).
+- **Process note:** two more duplicate-check near-misses (Crow, Fort Peck)
+  slipped past even the fixed name-variant filter because agent name forms
+  ("Crow Nation") differ from BIA list forms ("Crow Tribe of Montana");
+  both were caught by the integrity checker's crosswalk-uniqueness gates
+  before anything landed, and folded into their existing rows. The
+  integrity gate, not the filter, is the real guard.
+- Ledger after integration: **548 of ~575 BIA entities checked** (117 with
+  source rows, 431 negatives-only), **~35 unchecked** — at this point the
+  remainder can't be reliably enumerated from memory; finishing requires
+  fetching the actual BIA list and diffing against the crosswalk (the
+  standing needs-human egress item).
+
 ## Follow-ups
 
 1. Fetch-verify the 7 new rows at page level (egress unblock or local run).
