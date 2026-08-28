@@ -1194,7 +1194,9 @@
 .teim-rd .cp-eco__node { fill: var(--teal); transition: fill 0.2s ease, r 0.2s ease; }
 .teim-rd .cp-eco__hit { cursor: pointer; outline: none; }
 .teim-rd .cp-eco__hit.is-on .cp-eco__node, .teim-rd .cp-eco__hit.is-pinned .cp-eco__node { fill: var(--dteal); }
-.teim-rd .cp-eco__hit.is-dim { opacity: 0.28; }
+/* Dimmed, not gone: the unselected collections stay readable as the set the
+ * selected one belongs to. Nearly invisible read as unfinished. */
+.teim-rd .cp-eco__hit.is-dim { opacity: 0.35; }
 .teim-rd .cp-eco__hit:focus-visible .cp-eco__label { fill: var(--dteal); }
 .teim-rd .cp-eco__core { fill: var(--teal-tint); stroke: var(--teal); stroke-width: 1.5; }
 .teim-rd .cp-eco__float { filter: drop-shadow(0 22px 26px rgba(10, 15, 38, 0.16)); }
@@ -1222,7 +1224,7 @@
 .teim-rd .cp-eco__spoke line, .teim-rd .cp-eco__spoke .cp-eco__dot { transition: stroke 0.2s ease, fill 0.2s ease, opacity 0.2s ease; }
 .teim-rd .cp-eco__spoke.is-on line { stroke: var(--dteal); stroke-width: 1.6; }
 .teim-rd .cp-eco__spoke.is-on .cp-eco__dot { fill: var(--dteal); }
-.teim-rd .cp-eco__spoke.is-dim, .teim-rd .cp-eco__label.is-dim { opacity: 0.28; }
+.teim-rd .cp-eco__spoke.is-dim, .teim-rd .cp-eco__label.is-dim { opacity: 0.35; }
 .teim-rd .cp-eco__label.is-on { fill: var(--dteal); }
 .teim-rd .cp-eco__label:focus-visible { fill: var(--dteal); }
 /* Dimmer than the fan on purpose: provenance is the point, the
@@ -1242,6 +1244,24 @@
 .teim-rd .cp-eco__keyitem svg:first-child { flex: none; }
 .teim-rd .cp-eco__keydash { stroke: var(--dteal); stroke-width: 1.2; stroke-dasharray: 3 3; }
 .teim-rd .cp-eco__keydot { fill: var(--dteal); }
+/* On a phone the ring becomes a list: same facts, one disclosure per
+ * collection, instead of a diagram shrunk past legibility. The stylesheet
+ * decides which form shows, so the component carries no breakpoint logic. */
+.teim-rd .cp-eco__cards { display: none; }
+@media (max-width: 720px) {
+  .teim-rd .cp-eco__figure { display: none; }
+  .teim-rd .cp-eco__cards { display: block; border-top: 1px solid var(--ink); }
+  .teim-rd .cp-eco__card { border-bottom: 1px solid var(--line); }
+  .teim-rd .cp-eco__card summary { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 0.2rem; font-family: var(--sans); font-size: 1rem; font-weight: 700; color: var(--ink); cursor: pointer; list-style: none; min-height: 44px; }
+  .teim-rd .cp-eco__card summary::-webkit-details-marker { display: none; }
+  .teim-rd .cp-eco__card summary::after { content: '+'; font-family: var(--mono); font-size: 1rem; color: var(--dteal); }
+  .teim-rd .cp-eco__card[open] summary::after { content: '\2212'; }
+  .teim-rd .cp-eco__card[open] summary { color: var(--dteal); }
+  .teim-rd .cp-eco__card p { margin: 0 0 0.7rem; padding: 0 0.2rem; font-size: 0.9rem; line-height: 1.55; color: var(--ink-2); }
+  .teim-rd .cp-eco__cardcap { display: block; font-family: var(--mono); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.15rem; }
+  .teim-rd .cp-eco__cardline { color: var(--muted); font-style: italic; }
+  .teim-rd .cp-eco__cardfoot { margin: 0.9rem 0 0; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; color: var(--dteal); }
+}
 @media (prefers-reduced-motion: reduce) {
   .teim-rd .cp-eco__label, .teim-rd .cp-eco__spoke line, .teim-rd .cp-eco__spoke .cp-eco__dot { transition: none; }
 }
@@ -1250,7 +1270,10 @@
 @media (max-width: 900px) { .teim-rd .cp-eco { grid-template-columns: 1fr; } }
 
 /* ── An entity's life ──────────────────────────────────────────────────── */
-.teim-rd .cp-tl { list-style: none; margin: 1.8rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); position: relative; }
+/* The sequence is an example of what the identity layer tracks, and the
+ * label says so before anyone reads it as a particular enterprise. */
+.teim-rd .cp-tl__cap { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: 1.6rem 0 0; }
+.teim-rd .cp-tl { list-style: none; margin: 0.6rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); position: relative; }
 .teim-rd .cp-tl::before { content: ''; position: absolute; top: 6px; left: 0; right: 0; height: 1px; background: var(--line); }
 .teim-rd .cp-tl__point { position: relative; padding: 1.5rem 1rem 0 0; }
 .teim-rd .cp-tl__point::before { content: ''; position: absolute; top: 0; left: 0; width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--teal); background: var(--bg); }
@@ -1259,6 +1282,32 @@
 @media (max-width: 900px) { .teim-rd .cp-tl { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.4rem 0; } .teim-rd .cp-tl::before { display: none; } }
 
 /* ── Expertise ─────────────────────────────────────────────────────────── */
+/* ── Methods by collection ──────────────────────────────────────────────
+ * The drilldown a researcher asks for after the philosophy: one disclosure
+ * row per catalog collection, assembled from the product's own declarations
+ * so a row cannot claim what the collection does not. */
+.teim-rd .cp-mbc { margin-top: 1.4rem; border-top: 1px solid var(--ink); }
+.teim-rd .cp-mbc__row { border-bottom: 1px solid var(--line); }
+.teim-rd .cp-mbc__row summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem 1.2rem; padding: 0.9rem 0.2rem; cursor: pointer; list-style: none; min-height: 44px; }
+.teim-rd .cp-mbc__row summary::-webkit-details-marker { display: none; }
+.teim-rd .cp-mbc__row summary::after { content: '+'; font-family: var(--mono); font-size: 1rem; color: var(--dteal); margin-left: auto; }
+.teim-rd .cp-mbc__row[open] summary::after { content: '\2212'; }
+.teim-rd .cp-mbc__row[open] .cp-mbc__name, .teim-rd .cp-mbc__row summary:hover .cp-mbc__name { color: var(--dteal); }
+.teim-rd .cp-mbc__name { font-family: var(--sans); font-size: 1.05rem; font-weight: 800; letter-spacing: -0.015em; color: var(--ink); transition: color 0.15s ease; }
+.teim-rd .cp-mbc__meta { font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-mbc__body { padding: 0 0.2rem 1.1rem; max-width: 74ch; }
+.teim-rd .cp-mbc__body p { font-size: 0.95rem; line-height: 1.6; color: var(--ink-2); margin: 0 0 0.7rem; }
+.teim-rd .cp-mbc__cap { display: block; font-family: var(--mono); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.15rem; }
+.teim-rd .cp-mbc__facts { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); line-height: 1.8; }
+.teim-rd .cp-mbc .cp-read__cedar { margin-top: 0.1rem; }
+
+/* ── What Cedar will not do ─────────────────────────────────────────────
+ * Four commitments, each on its own rule: restraint set like the promises
+ * it is, not folded into a paragraph. */
+.teim-rd .cp-wont { list-style: none; margin: 1.4rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.4rem 3rem; }
+.teim-rd .cp-wont li { font-size: 1rem; line-height: 1.6; color: var(--ink); border-top: 2px solid var(--teal); padding-top: 0.7rem; }
+@media (max-width: 720px) { .teim-rd .cp-wont { grid-template-columns: 1fr; gap: 1rem; } }
+
 .teim-rd .cp-exp { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 3rem; align-items: start; }
 .teim-rd .cp-exp__body { font-size: 0.98rem; line-height: 1.62; color: var(--ink-2); margin: 1rem 0 0; }
 .teim-rd .cp-exp__strip { display: flex; flex-direction: column; gap: 1rem; border-left: 1px solid var(--line); padding-left: 1.6rem; }

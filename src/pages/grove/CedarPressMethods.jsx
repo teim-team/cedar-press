@@ -23,7 +23,11 @@ import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import {
   CREDIBILITY_DISCLAIMER,
   CREDIBILITY_STRIP,
+  METHOD_COMMITMENTS,
 } from "../../features/grove/pressMethod";
+import { PRESS_CATALOG } from "../../features/grove/pressCatalog";
+import { LAUNCH_COLLECTION } from "../../features/grove/collection";
+import { releaseFor } from "../../features/grove/pressReleases";
 import { EcosystemDiagram, ProcessRail, EntityTimeline } from "./pressMethodSections";
 import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
@@ -64,6 +68,10 @@ export default function CedarPressMethods() {
           <span className="cp-sec__band">The process</span>
           <h2 className="cp-msec__title">From scattered records to maintained intelligence.</h2>
           <ProcessRail />
+          <p className="cp-msec__close">
+            Every Cedar collection follows this pipeline, with collection-specific sources and
+            resolution rules documented below.
+          </p>
         </section>
 
         <section className="cp-msec" aria-label="One connected system">
@@ -87,6 +95,87 @@ export default function CedarPressMethods() {
             Cedar preserves both current identity and the lineage needed to read older records
             correctly.
           </p>
+        </section>
+
+        {/* The philosophy above; the specifics here. A researcher's next
+            question after "how does Cedar work" is "how was THIS collection
+            built", and the answer is assembled from the same declarations the
+            product runs on — the catalog, the launch descriptors and the
+            release log — so a row cannot say something the collection does
+            not. Ask Cedar sits on each row because the profile behind the row
+            is exactly what Cedar answers from. */}
+        <section className="cp-msec" aria-label="Methods by collection">
+          <span className="cp-sec__band">Methods by collection</span>
+          <h2 className="cp-msec__title">The specifics, collection by collection.</h2>
+          <div className="cp-mbc">
+            {PRESS_CATALOG.map((entry) => {
+              const launch = LAUNCH_COLLECTION.find((dataset) => dataset.id === entry.id);
+              const release = releaseFor(entry.id);
+              return (
+                <details className="cp-mbc__row" key={entry.id}>
+                  <summary>
+                    <span className="cp-mbc__name">{entry.name}</span>
+                    <span className="cp-mbc__meta">
+                      {release ? `${release.version} · ` : ""}
+                      {entry.standardFrom === entry.historyFrom
+                        ? `${entry.standardFrom} to present`
+                        : `archive from ${entry.historyFrom}`}
+                    </span>
+                  </summary>
+                  <div className="cp-mbc__body">
+                    <p>{entry.blurb}</p>
+                    <p>
+                      <span className="cp-mbc__cap">Entity resolution</span>
+                      {entry.linkage}
+                    </p>
+                    {launch ? (
+                      <p>
+                        <span className="cp-mbc__cap">Method</span>
+                        {launch.method}
+                      </p>
+                    ) : null}
+                    <p className="cp-mbc__facts">
+                      {launch ? <>Sources: {launch.sources} &middot; </> : null}
+                      Coverage from {entry.standardFrom} on Cedar Press
+                      {entry.historyFrom !== entry.standardFrom
+                        ? `; full archive from ${entry.historyFrom} on Cedar Press+`
+                        : ""}
+                      {release ? (
+                        <>
+                          {" "}&middot; {release.cadence} &middot; current release {release.version}
+                        </>
+                      ) : null}
+                    </p>
+                    <button
+                      type="button"
+                      className="cp-read__cedar"
+                      onClick={() =>
+                        window.dispatchEvent(
+                          new CustomEvent("cedar:ask-collection", {
+                            detail: { id: entry.id, name: entry.name },
+                          }),
+                        )
+                      }
+                    >
+                      Ask Cedar about this collection <span aria-hidden="true">&#8594;</span>
+                    </button>
+                  </div>
+                </details>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Restraint, stated as commitments rather than left implicit: the
+            things Cedar could do to look more complete and does not. */}
+        <section className="cp-msec" aria-label="What Cedar will not do">
+          <span className="cp-sec__band">Commitments</span>
+          <h2 className="cp-msec__title">What Cedar will not do.</h2>
+          <ul className="cp-wont">
+            {METHOD_COMMITMENTS.map((item) => (
+              <li key={item.id}>{item.text}</li>
+            ))}
+          </ul>
         </section>
 
         <section className="cp-msec" aria-label="Expertise and accountability">
