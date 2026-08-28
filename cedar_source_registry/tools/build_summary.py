@@ -78,6 +78,45 @@ def main() -> int:
         ]
         summary["nations_in_crosswalk"] = len(nations)
 
+        # Coverage ledger: knowing which tribes were checked and found NOTHING
+        # is as load-bearing as the sources themselves — it is what keeps the
+        # dataset maintainable (negatives carry recheck dates so the same
+        # tribes are not re-researched forever).
+        sourced = set()
+        for s in sources:
+            sourced.update(s.get("nation_ids") or [])
+        neg_path = ROOT / "negative_findings.jsonl"
+        neg_rows = []
+        if neg_path.exists():
+            neg_rows = [
+                json.loads(line)
+                for line in neg_path.read_text().splitlines()
+                if line.strip()
+            ]
+        negative_ids = {r["nation_id"] for r in neg_rows}
+        bia_entities = sum(1 for n in nations if n.get("on_bia_list"))
+        checked = sourced | negative_ids
+        bia_checked = sum(
+            1 for n in nations
+            if n.get("on_bia_list") and (n["nation_id"] in checked)
+        )
+        by_result = Counter(r["result"] for r in neg_rows)
+        by_recheck = Counter(r["recheck_after"] for r in neg_rows)
+        summary["coverage"] = {
+            "bia_list_total_reported": 575,
+            "bia_list_total_note": "per the 2026-01-30 Federal Register notice; "
+                                   "unverified until the list itself is fetched",
+            "bia_entities_in_crosswalk": bia_entities,
+            "nations_with_source_rows": len(sourced),
+            "nations_negative_findings_only": len(negative_ids - sourced),
+            "nations_checked": len(checked),
+            "bia_entities_unchecked_estimate": max(0, 575 - bia_checked),
+            "negative_findings_by_result": {
+                k: by_result[k] for k in sorted(by_result)
+            },
+            "rechecks_due_by": {k: by_recheck[k] for k in sorted(by_recheck)},
+        }
+
     summary["matching_rules"] = existing["matching_rules"]
 
     out = json.dumps(summary, indent=1, ensure_ascii=False) + "\n"
