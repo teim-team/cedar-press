@@ -96,9 +96,9 @@ export default function CedarPressMethods() {
             <div>
               <p className="cp-msec__lede">
                 Cedar is built by Indigenous researchers and a team with experience at the Federal
-                Reserve Board and Federal Reserve Bank of Minneapolis, academic backgrounds
-                spanning MIT, Oxford, Cornell, Brown, Dartmouth and Yale, and decades of combined
-                work in Indian Country.
+                Reserve Board and the Federal Reserve Banks of Minneapolis and Philadelphia,
+                academic backgrounds spanning MIT, Oxford, Cornell, Brown, Dartmouth and Yale, and
+                decades of combined work in Indian Country.
               </p>
               <p className="cp-exp__body">
                 Federal funding, contracting, gaming, natural resources, policy and Native

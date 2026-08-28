@@ -8,11 +8,12 @@ shows), and the construction facts the methods page documents. A number
 Cedar quotes is a number the collection itself carries, so it goes stale
 with the release, never with a prompt.
 
-Three levels, mirroring how a reader trusts a dataset:
+Four levels, mirroring how a reader trusts a dataset:
 
 1. what is in it        — tracks, unit of observation, coverage, sources
 2. how it was built     — entity resolution, inclusion rules, limitations
 3. what the data says   — the headline figures, from the figure specs
+4. what changed         — the release notes, from the What's New history
 
 ``demonstration`` is carried per profile and every statistics answer for a
 demonstration collection says so: the three launch collections' numbers are
@@ -26,6 +27,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from cedar_press import press_catalog
 from cedar_press.collections import (
     COLLECTION_FIGURES,
     LAUNCH_COLLECTION,
@@ -143,11 +145,54 @@ def _figure_for(dataset_id: str):
     return next((f for f in COLLECTION_FIGURES if f.id == dataset_id), None)
 
 
+def _catalog_profile(dataset_id: str) -> dict[str, Any] | None:
+    """A profile for a collection the catalog carries but the pilot does not.
+
+    The wider ladder (``pressCatalog.js``, dumped into ``_press_data.json``)
+    describes collections whose first release is still in preparation. Cedar
+    can honestly answer what such a collection is designed to hold and how its
+    records connect to Native entities — that is the catalog's own copy — but
+    it has no release, so every release-shaped field is ``None`` and the
+    limitations say so. No number is invented for a collection with no data.
+    """
+    entry = next((c for c in press_catalog.CATALOG if c["id"] == dataset_id), None)
+    if entry is None:
+        return None
+    return {
+        "collection_name": entry["name"],
+        "collection_id": entry["id"],
+        "shelf": entry["shelf"],
+        "description": entry["blurb"],
+        "coverage_standard_from": str(entry["standardFrom"]),
+        "coverage_full_from": str(entry["historyFrom"]),
+        "coverage_end": None,
+        "update_frequency": None,
+        "record_count_label": None,
+        "primary_sources": None,
+        "unit_of_observation": None,
+        "entity_resolution_method": entry.get("linkage"),
+        "inclusion_rules": None,
+        "known_limitations": (
+            "This collection's first release is in preparation: the catalog "
+            "entry describes its design, and no records or figures are "
+            "published through Cedar yet."
+        ),
+        "method": None,
+        "version": None,
+        "vintage": None,
+        "last_updated": None,
+        "demonstration": False,
+        "headline_statistics": None,
+    }
+
+
 def profile_for(dataset_id: str) -> dict[str, Any] | None:
     """The standardized profile, or ``None`` for an unknown collection."""
     dataset = next((d for d in LAUNCH_COLLECTION if d.id == dataset_id), None)
     if dataset is None:
-        return None
+        # The pilot's four datasets carry releases; the rest of the ladder
+        # answers from its catalog entry.
+        return _catalog_profile(dataset_id)
     construction = _CONSTRUCTION.get(dataset_id, {})
     figure = _figure_for(dataset_id)
     headline = (
@@ -220,6 +265,11 @@ def _stats_sentence(profile: dict[str, Any]) -> str | None:
     )
 
 
+# Change words are checked first: "what changed in v4.2" is a question about
+# a release, and the What's New page hands Cedar exactly that phrasing.
+_CHANGE_WORDS = (
+    "changed", "change", "release", "updated", "update", "latest", "what's new", "whats new",
+)
 # Statistics words are checked before construction words: "how many records"
 # is a quantity question, and a bare "how " here once swallowed it into the
 # entity-resolution answer.
@@ -233,20 +283,56 @@ _STATS_WORDS = (
 )
 
 
+def _changes_sentence(profile: dict[str, Any], asked: str) -> str:
+    """What a release changed, from the release log itself.
+
+    If the question names a version that the log carries, that release
+    answers; otherwise the latest one does. Every answer says which release
+    it describes, and — like the launch figures — says the notes are
+    demonstration content until the first real releases, because a change
+    note is a claim about records nobody has shipped yet.
+    """
+    name = profile["collection_name"]
+    release = press_catalog.RELEASES.get(profile["collection_id"])
+    if not release or not release.get("history"):
+        return (
+            f"{name} has no release notes published yet; its release history "
+            "starts with the first shipped release."
+        )
+    history = release["history"]
+    entry = next(
+        (item for item in history if item["version"].lower() in asked),
+        history[0],
+    )
+    kind = "methodology release" if entry.get("kind") == "methodology" else "data release"
+    note = f" Note: {entry['note']}" if entry.get("note") else ""
+    changes = " ".join(entry["changed"])
+    return (
+        f"{name} {entry['version']} ({entry['date']}, {kind}): {changes}{note} "
+        "These release notes are demonstration content, standing in until the "
+        "first real releases."
+    )
+
+
 def _coverage_sentence(profile: dict[str, Any]) -> str | None:
     """Coverage stated per tier, because the tiers buy different depths."""
     std = profile.get("coverage_standard_from")
     full = profile.get("coverage_full_from")
     if not std:
         return None
-    tail = f"current vintage {profile['vintage']}, last updated {profile['last_updated']}."
+    # A catalog-only profile has no release, so no vintage to date it by.
+    dated = profile.get("vintage") and profile.get("last_updated")
+    tail = (
+        f" Current vintage {profile['vintage']}, last updated {profile['last_updated']}."
+        if dated
+        else ""
+    )
     if full and full != std:
         return (
             f"Coverage from {std} on Cedar Press; Cedar Press+ opens the full "
-            f"archive back to {full}. Current vintage {profile['vintage']}, "
-            f"last updated {profile['last_updated']}."
+            f"archive back to {full}.{tail}"
         )
-    return f"Coverage from {std}, {tail}"
+    return f"Coverage from {std} to present.{tail}"
 
 
 def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None:
@@ -260,12 +346,31 @@ def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None
     if profile is None:
         return None
     asked = question.lower()
-    basis = f"{profile['collection_name']} {profile['version']}, vintage {profile['vintage']}"
+    # A released collection is cited by version and vintage; a catalog-only
+    # one has neither, and its basis says what it actually is.
+    basis = (
+        f"{profile['collection_name']} {profile['version']}, vintage {profile['vintage']}"
+        if profile.get("version")
+        else f"{profile['collection_name']}, Cedar Press catalog entry"
+    )
 
+    if any(word in asked for word in _CHANGE_WORDS):
+        return {"answer": _changes_sentence(profile, asked), "basis": basis}
     if any(word in asked for word in _STATS_WORDS):
         sentence = _stats_sentence(profile)
         if sentence:
             return {"answer": sentence, "basis": basis}
+        # No figures is an answer, not a routing miss: a reader who asked a
+        # quantity question about an unreleased collection should hear that
+        # the numbers do not exist yet, not a generic refusal.
+        return {
+            "answer": (
+                f"{profile['collection_name']} has no published figures yet: its "
+                "first release is in preparation. Ask what it covers or how it "
+                "is being constructed."
+            ),
+            "basis": basis,
+        }
     if any(word in asked for word in _CONSTRUCT_WORDS):
         parts = [
             profile.get("entity_resolution_method"),
@@ -274,7 +379,9 @@ def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None
             if profile.get("known_limitations")
             else None,
         ]
-        return {"answer": " ".join(p for p in parts if p), "basis": basis}
+        answer = " ".join(p for p in parts if p)
+        if answer:
+            return {"answer": answer, "basis": basis}
     if any(word in asked for word in _CONTENT_WORDS):
         parts = [
             profile["description"],
@@ -282,7 +389,7 @@ def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None
             if profile.get("unit_of_observation")
             else None,
             _coverage_sentence(profile),
-            f"Sources: {profile['primary_sources']}.",
+            f"Sources: {profile['primary_sources']}." if profile.get("primary_sources") else None,
         ]
         return {"answer": " ".join(p for p in parts if p), "basis": basis}
     return None

@@ -98,15 +98,17 @@ def download_name(collection_id: str) -> str:
 
 
 def releases() -> list[dict[str, Any]]:
-    """Release history, newest first.
+    """Release history per collection, most recently updated first.
 
-    The history lives in the JavaScript catalogue today
-    (``features/grove/pressReleases.js``) and is not part of the ported
-    Python. Returning an empty list is the honest answer until it moves:
-    an invented history would be exactly the fabricated provenance the
-    citation register exists to prevent.
+    Served from the dumped snapshot of ``pressReleases.js`` — the same
+    change notes the What's New feed renders — so the service and the page
+    describe one history rather than two.
     """
-    return []
+    rows = [
+        {"id": collection_id, **_thaw(release)}
+        for collection_id, release in press_catalog.RELEASES.items()
+    ]
+    return sorted(rows, key=lambda row: row.get("updated", ""), reverse=True)
 
 
 def _thaw(value: Any) -> Any:

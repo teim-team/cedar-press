@@ -7,12 +7,21 @@
 // rather than a changelog per collection: a subscriber wants to know what moved
 // since they last looked, not to audit ten separate histories.
 //
-// Two things keep it from being an endless page. A filter, because "what
-// changed in Lobbying" is the question people actually arrive with, and a
-// page-at-a-time reveal, because a feed that dumps every release it has ever
-// had is a wall nobody scrolls to the bottom of.
+// Three things keep it from being an endless page. Filters, because "what
+// changed in Lobbying" is the question people actually arrive with — sticky,
+// because the feed will eventually hold hundreds of releases. A search box,
+// for the reader who remembers "an ownership correction involving
+// contracting" but not when it landed. And a page-at-a-time reveal, because a
+// feed that dumps every release it has ever had is a wall nobody scrolls to
+// the bottom of.
+//
+// THIS PAGE IS THE PROVENANCE LAYER
+// Every release keeps a stable anchor (#funding-v4-2) so a methodology change
+// can be cited, and the change notes stay specific — "resolved four
+// registrants to the tribes that retained them" is checkable, "improved our
+// data" is not.
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 
 // The Press routes code-split separately, so a direct visit or refresh loads
@@ -22,17 +31,14 @@ import "../../index.css";
 import "../../styles/redesign.css";
 import "../../styles/grove/press.css";
 
-import { LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_CATALOG, PRESS_CATALOG_BY_ID } from "../../features/grove/pressCatalog";
 import {
   PRESS_RELEASES,
   RELEASE_KIND,
   formatUpdated,
+  recentActivity,
 } from "../../features/grove/pressReleases";
-import {
-  PRESS_METHODS_PATH,
-  PRESS_PATH,
-} from "../../features/grove/pressRoutes";
+import { PRESS_DATA_PATH } from "../../features/grove/pressRoutes";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import { AD_SLOT } from "../../features/grove/pressAds";
@@ -50,23 +56,40 @@ function buildFeed() {
     .sort((a, b) => (a.date < b.date ? 1 : -1));
 }
 
+/** The release's stable anchor: cite `#funding-v4-2` and it stays citable. */
+function anchorOf(entry) {
+  return `${entry.id}-${entry.version.replace(/\./g, "-")}`;
+}
+
 export default function CedarPressWhatsNew() {
-  useDocumentTitle("What\u2019s new");
+  useDocumentTitle("What’s new");
   useScrollToTop();
   const all = useMemo(() => buildFeed(), []);
   const [collection, setCollection] = useState("all");
   const [kind, setKind] = useState("all");
-  const [shown, setShown] = useState(PAGE);
+  const [query, setQuery] = useState("");
+  // A permalink arrival (#funding-v4-2) must find its release even when the
+  // page-at-a-time reveal would have kept it below the fold, so the reveal
+  // starts fully open when the address names a release.
+  const [shown, setShown] = useState(() => {
+    const hash = typeof window === "undefined" ? "" : window.location.hash.slice(1);
+    const linked = hash && buildFeed().some((entry) => anchorOf(entry) === hash);
+    return linked ? Number.POSITIVE_INFINITY : PAGE;
+  });
 
-  const entries = useMemo(
-    () =>
-      all.filter(
-        (entry) =>
-          (collection === "all" || entry.id === collection) &&
-          (kind === "all" || entry.kind === kind),
-      ),
-    [all, collection, kind],
-  );
+  const entries = useMemo(() => {
+    const asked = query.trim().toLowerCase();
+    return all.filter((entry) => {
+      if (collection !== "all" && entry.id !== collection) return false;
+      if (kind !== "all" && entry.kind !== kind) return false;
+      if (!asked) return true;
+      const name = PRESS_CATALOG_BY_ID[entry.id]?.name ?? entry.id;
+      return [name, entry.version, entry.note ?? "", ...entry.changed]
+        .join(" ")
+        .toLowerCase()
+        .includes(asked);
+    });
+  }, [all, collection, kind, query]);
 
   // Changing a filter resets the reveal: leaving it at twenty after narrowing
   // to one collection would show the whole filtered list at once and make the
@@ -76,10 +99,30 @@ export default function CedarPressWhatsNew() {
     setShown(PAGE);
   };
 
+  // Land on the linked release once it has rendered; the router's own
+  // scroll-to-top has already run by then. The hashchange listener covers a
+  // permalink pasted while already on the page, where only the fragment
+  // changes and the initializer above never re-runs.
+  useEffect(() => {
+    const land = () => {
+      const hash = window.location.hash.slice(1);
+      if (!hash || !all.some((entry) => anchorOf(entry) === hash)) return;
+      setShown(Number.POSITIVE_INFINITY);
+      requestAnimationFrame(() => document.getElementById(hash)?.scrollIntoView());
+    };
+    const hash = window.location.hash.slice(1);
+    if (hash) requestAnimationFrame(() => document.getElementById(hash)?.scrollIntoView());
+    window.addEventListener("hashchange", land);
+    return () => window.removeEventListener("hashchange", land);
+  }, [all]);
+
   // Only collections that actually have releases, so the filter never offers
   // a choice that returns nothing.
   const options = PRESS_CATALOG.filter((entry) => PRESS_RELEASES[entry.id]);
-  const newest = all[0] ?? null;
+  // The trailing month, computed from the log itself: the maintenance is the
+  // product, and these four lines are it made tangible.
+  const activity = useMemo(() => recentActivity(30), []);
+  const filtered = collection !== "all" || kind !== "all" || query.trim() !== "";
   const visible = entries.slice(0, shown);
   const rest = entries.length - visible.length;
 
@@ -90,27 +133,50 @@ export default function CedarPressWhatsNew() {
 
         {/* Title across the page rather than down a 62ch column: this is the
             widest thing on the page and it was using half of it. The standing
-            explanation and the newest release sit under it on one line, so the
-            opening reaches both edges instead of trailing off. */}
+            explanation sits under it, and the activity summary holds the
+            second column — the newest release is already the first row of the
+            feed, so repeating it here said nothing. */}
         <section className="cp-nh">
           <p className="cp-hero__access">Collection updates</p>
           <h1 className="cp-nh__title">Everything that changed, newest first.</h1>
-          <p className="cp-nh__sub">
-            Cedar collections are maintained as new records, ownership changes, corrections and
-            historical evidence arrive. Methodology releases are marked, because they can affect
-            figures somebody has already published.
-          </p>
-          {newest ? (
-            <p className="cp-nh__last">
-              <span>Most recent</span>
-              <b>{PRESS_CATALOG_BY_ID[newest.id]?.name ?? newest.id}</b>
-              <span>{formatUpdated(newest.date)}</span>
+          <div>
+            <p className="cp-nh__sub">
+              Cedar collections are maintained as new records, ownership changes, corrections and
+              historical evidence arrive. Methodology releases are marked, because they can affect
+              figures somebody has already published.
             </p>
-          ) : null}
+            {/* The principle this page exists for, said where it applies: the
+                changelog is the provenance layer. */}
+            <p className="cp-nh__why">
+              Release history is preserved so a figure can be traced to the exact version of the
+              collection it was published from.
+            </p>
+          </div>
+          <dl className="cp-nh__pulse">
+            <dt>Last {activity.days} days</dt>
+            <dd className="cp-nh__pulselead">
+              {activity.releases} {activity.releases === 1 ? "release" : "releases"}
+            </dd>
+            {activity.releases ? (
+              <>
+                <dd>
+                  {activity.collections}{" "}
+                  {activity.collections === 1 ? "collection" : "collections"} updated
+                </dd>
+                <dd>
+                  {activity.methodology} methodology{" "}
+                  {activity.methodology === 1 ? "release" : "releases"}
+                </dd>
+              </>
+            ) : null}
+            {activity.latest ? <dd>Latest: {formatUpdated(activity.latest)}</dd> : null}
+          </dl>
         </section>
 
-        <div className="cp-filter">
-          <div className="cp-filter__set" role="group" aria-label="Filter by collection">
+        {/* Sticky: the feed will eventually hold hundreds of releases, and
+            the way through them should not scroll away with the hero. */}
+        <div className="cp-filter cp-filter--stick">
+          <div className="cp-filter__set cp-filter__set--scroll" role="group" aria-label="Filter by collection">
             <span className="cp-filter__cap">Collection</span>
             <button
               type="button"
@@ -147,37 +213,77 @@ export default function CedarPressWhatsNew() {
               </button>
             ))}
           </div>
+          <input
+            className="cp-filter__search"
+            type="search"
+            value={query}
+            onChange={(event) => choose(setQuery)(event.target.value)}
+            placeholder="Search releases…"
+            aria-label="Search releases"
+          />
           <p className="cp-filter__count" aria-live="polite">
             {entries.length} {entries.length === 1 ? "release" : "releases"}
+            {filtered ? " matching" : ""}
           </p>
         </div>
 
         {visible.length ? (
           <ol className="cp-feed">
-            {visible.map((entry) => (
-              <li className="cp-feed__item" key={`${entry.id}-${entry.version}`}>
-                <span className="cp-feed__when">{formatUpdated(entry.date)}</span>
-                <div className="cp-feed__what">
-                  {/* The name is text: this feed is the one page that tracks
-                      changes, so there is no per-collection page to send
-                      anyone to. */}
-                  <h2 className="cp-feed__name">
-                    <span>{PRESS_CATALOG_BY_ID[entry.id]?.name ?? entry.id}</span>
-                    {/* The version, because citations and downloads name one:
-                        this feed is where a reader maps "v4.1" to what
-                        changed, which it cannot do from a date alone. */}
-                    <span className="cp-feed__ver">{entry.version}</span>
-                    {entry.kind === RELEASE_KIND.METHOD ? (
-                      <span className="cp-feed__tag">Methodology</span>
-                    ) : null}
-                  </h2>
-                  {entry.note ? <p className="cp-feed__note">{entry.note}</p> : null}
-                  <ul className="cp-feed__list">
-                    {entry.changed.map((line) => <li key={line}>{line}</li>)}
-                  </ul>
-                </div>
-              </li>
-            ))}
+            {visible.map((entry) => {
+              const name = PRESS_CATALOG_BY_ID[entry.id]?.name ?? entry.id;
+              const anchor = anchorOf(entry);
+              const method = entry.kind === RELEASE_KIND.METHOD;
+              return (
+                <li className="cp-feed__item" id={anchor} key={anchor}>
+                  <span className="cp-feed__when">{formatUpdated(entry.date)}</span>
+                  <div className="cp-feed__what">
+                    {/* The kind on every entry, not only in the filter: a
+                        methodology release read cold must announce itself. */}
+                    <span className={`cp-feed__kind${method ? " cp-feed__kind--method" : ""}`}>
+                      {method ? "Methodology" : "Data update"}
+                    </span>
+                    <h2 className="cp-feed__name">
+                      <span>{name}</span>
+                      {/* The version is the release's permalink: a citation
+                          names one, and #funding-v4-2 gives the name a stable
+                          address to point at. */}
+                      <a className="cp-feed__ver" href={`#${anchor}`} title="Link to this release">
+                        {entry.version}
+                      </a>
+                    </h2>
+                    {entry.note ? <p className="cp-feed__note">{entry.note}</p> : null}
+                    <ul className="cp-feed__list">
+                      {entry.changed.map((line) => <li key={line}>{line}</li>)}
+                    </ul>
+                    <p className="cp-feed__acts">
+                      <Link className="cp-feed__act" to={PRESS_DATA_PATH}>
+                        View collection <span aria-hidden="true">&#8594;</span>
+                      </Link>
+                      {/* Cedar, scoped to the collection with the question
+                          already phrased: the release log behind this feed is
+                          exactly what the profile layer answers from. */}
+                      <button
+                        type="button"
+                        className="cp-feed__act"
+                        onClick={() =>
+                          window.dispatchEvent(
+                            new CustomEvent("cedar:ask-collection", {
+                              detail: {
+                                id: entry.id,
+                                name,
+                                q: `What changed in ${name} ${entry.version}?`,
+                              },
+                            }),
+                          )
+                        }
+                      >
+                        Ask Cedar about this update <span aria-hidden="true">&#8594;</span>
+                      </button>
+                    </p>
+                  </div>
+                </li>
+              );
+            })}
           </ol>
         ) : (
           <p className="cp-feed__none">No releases match that combination yet.</p>
@@ -185,7 +291,7 @@ export default function CedarPressWhatsNew() {
 
         {/* Sponsorship rule 5: never in a filtered view. The slot rides the
             full feed only, and never an empty result. */}
-        {collection === "all" && kind === "all" ? <PressAd slot={AD_SLOT.FEED} /> : null}
+        {filtered ? null : <PressAd slot={AD_SLOT.FEED} />}
 
         {rest > 0 ? (
           <p className="cp-feed__more">

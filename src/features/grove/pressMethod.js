@@ -280,7 +280,13 @@ export const CREDIBILITY_STRIP = Object.freeze([
     id: "federal-reserve",
     kind: "institution",
     label: "Federal Reserve experience",
-    names: Object.freeze(["Federal Reserve Board", "Minneapolis Fed"]),
+    // Full institutional names, consistently: "Minneapolis Fed" beside
+    // "Federal Reserve Board" read as two registers for one system.
+    names: Object.freeze([
+      "Federal Reserve Board",
+      "Federal Reserve Bank of Minneapolis",
+      "Federal Reserve Bank of Philadelphia",
+    ]),
   }),
   Object.freeze({
     id: "universities",

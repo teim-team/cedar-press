@@ -98,18 +98,14 @@ function useReveal() {
   return [ref, seen];
 }
 
-function Badge({ entry, open, onEnter, onLeave, active, index, onLocked, onOpen }) {
+function Badge({ entry, open, onEnter, active, index, onLocked, onOpen }) {
   const className = `cp-badge${active ? " is-on" : ""}${open ? " cp-badge--act" : " cp-badge--locked"}`;
-  // On touch the selection is sticky: clearing on blur would unmount the
-  // read panel's download button under the very tap that aims for it.
-  const watch = COARSE
-    ? { onFocus: onEnter }
-    : {
-        onMouseEnter: onEnter,
-        onMouseLeave: onLeave,
-        onFocus: onEnter,
-        onBlur: onLeave,
-      };
+  // The selection is sticky on every pointer, not only touch: the read panel
+  // carries its own actions (Ask Cedar, the touch download), and clearing on
+  // mouse-leave or blur unmounted those buttons under the very pointer
+  // traveling to click them. The panel changes when another tile is pointed
+  // at, never back to the idle hint.
+  const watch = { onMouseEnter: onEnter, onFocus: onEnter };
   const inner = (
     <>
       <span className="cp-badge__mark" aria-hidden="true">{COLLECTION_ICONS[entry.id]}</span>
@@ -172,11 +168,13 @@ function coverageLine(entry, user, owned) {
   return `${standard} to present`;
 }
 
-/** Whether Cedar has a profile to answer from for this collection: the
- *  launch collections carry profiles (collection_profiles.py); the wider
- *  catalog does not yet. */
+/** Whether Cedar has a profile to answer from for this collection. Every
+ *  catalog collection has one now: the launch four answer from their releases
+ *  and the rest from their catalog entries (collection_profiles.py), so only
+ *  an entry outside the catalog — the harmonized public data — goes without
+ *  the button. */
 function hasCedarProfile(id) {
-  return LAUNCH_COLLECTION.some((dataset) => dataset.id === id);
+  return Boolean(PRESS_CATALOG_BY_ID[id]) || LAUNCH_COLLECTION.some((d) => d.id === id);
 }
 
 /** What the reader says about the collection under the cursor. */
@@ -215,9 +213,7 @@ function Detail({ entry, user, owned }) {
       {/* Cedar, already scoped: the reader looking at this description is
           one click from asking how the collection was built or what its
           headline figures are, without restating which collection. The
-          event reaches the floating control without a prop path. Only for
-          collections with a profile behind them — an ask that can only
-          return an error is not an affordance. */}
+          event reaches the floating control without a prop path. */}
       {hasCedarProfile(entry.id) ? (
         <button
           type="button"
@@ -326,7 +322,6 @@ function Band({ tier, user, index }) {
         <ul
           className="cp-band__grid"
           style={{ "--cols": Math.ceil(Math.sqrt(entries.length)) }}
-          onMouseLeave={COARSE ? undefined : () => setHovered(null)}
         >
           {entries.map((entry, position) => (
             <Badge
@@ -336,7 +331,6 @@ function Band({ tier, user, index }) {
               open={owned}
               active={active?.id === entry.id}
               onEnter={() => setHovered(entry.id)}
-              onLeave={() => setHovered(null)}
               onLocked={pointAtUpgrade}
               onOpen={openTile}
             />

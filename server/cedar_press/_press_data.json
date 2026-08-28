@@ -380,5 +380,405 @@
     }
   ],
   "citations": [],
-  "reportCitationHref": "mailto:contact@lumecon.ai?subject=Cedar%20Press%20citation"
+  "reportCitationHref": "mailto:contact@lumecon.ai?subject=Cedar%20Press%20citation",
+  "catalog": [
+    {
+      "id": "funding",
+      "short": "Federal Funding",
+      "name": "Federal Funding to Indian Country",
+      "shelf": "standard",
+      "standardFrom": 2010,
+      "historyFrom": 2001,
+      "blurb": "Every award the federal government reports sending into Indian Country: grants, loans, direct payments and insurance. Trace a program's reach, a recipient's funding history or a year's totals, award by award.",
+      "linkage": "Recipients resolved to the Native entity behind them, so an award to a subsidiary, a housing authority or a consortium is attributed to the nation or organization it belongs to."
+    },
+    {
+      "id": "federal-register",
+      "short": "Federal Register",
+      "name": "Federal Register",
+      "shelf": "standard",
+      "standardFrom": 2010,
+      "historyFrom": 1994,
+      "blurb": "The Federal Register is the government's daily record of proposed and final agency action. Catch every notice, rule and comment window touching tribes, lands, water or recognition while there is still time to respond.",
+      "linkage": "Notices matched to the tribes, lands and organizations they name, including entities that appear under former or variant names."
+    },
+    {
+      "id": "legislation",
+      "short": "Legislation",
+      "name": "Congressional Votes and Proposed Legislation",
+      "shelf": "standard",
+      "standardFrom": 2010,
+      "historyFrom": 1989,
+      "blurb": "Bills, resolutions and roll-call votes from both chambers of Congress, the House and the Senate. Follow a measure from introduction to the floor and see who sponsored it, who voted and how.",
+      "linkage": "Bills and votes tied to the tribes and Native organizations they affect, not only to the sponsors who filed them."
+    },
+    {
+      "id": "deals",
+      "short": "Deals",
+      "name": "Indian Country Deals",
+      "shelf": "standard",
+      "standardFrom": 2010,
+      "historyFrom": 2010,
+      "blurb": "Announced transactions across Indian Country: acquisitions, property purchases, project financings, bond issuances and capital projects. See who bought, who financed, what closed and how a quarter compares with the last.",
+      "linkage": "Buyers, sellers, borrowers and issuers resolved to tribal governments, tribally owned enterprises, ANCs and NHOs."
+    },
+    {
+      "id": "nagpra",
+      "short": "NAGPRA",
+      "name": "NAGPRA",
+      "shelf": "standard",
+      "standardFrom": 2010,
+      "historyFrom": 1990,
+      "blurb": "Activity under the Native American Graves Protection and Repatriation Act: notices, inventories and completed repatriations. Track an institution's progress or a nation's outstanding claims, item by item.",
+      "linkage": "Notices matched to the tribes and Native Hawaiian organizations named in them, across the naming changes of three decades."
+    },
+    {
+      "id": "lobbying",
+      "short": "Lobbying",
+      "name": "Lobbying",
+      "shelf": "standard",
+      "standardFrom": 2010,
+      "historyFrom": 1998,
+      "blurb": "Federal lobbying registrations and the quarterly filings behind them. See who hired which firm, what they paid and which issues and bills the money is working.",
+      "linkage": "Registrants and clients resolved to the tribes and Native organizations behind them, including firms retained on their behalf."
+    },
+    {
+      "id": "contractors",
+      "short": "Prime Contracting",
+      "name": "Federal Prime Contracting",
+      "shelf": "pro",
+      "standardFrom": 2010,
+      "historyFrom": 2000,
+      "blurb": "A prime contract is an award the government makes directly to a vendor, whether a firm, a tribal enterprise or a tribal government itself. Every prime award here names the agency, the dollars, the industry and the set-aside path it came through.",
+      "linkage": "Vendors resolved to tribally owned firms, ANC and NHO subsidiaries and 8(a) participants, then rolled up to the parent nation or corporation."
+    },
+    {
+      "id": "subcontracting",
+      "short": "Subcontracting",
+      "name": "Federal Subcontracting",
+      "shelf": "pro",
+      "standardFrom": 2010,
+      "historyFrom": 2010,
+      "blurb": "A subaward is work a prime vendor passes down to another. Follow the dollars below the prime layer to see which vendors do the work, under whom and in which sectors.",
+      "linkage": "Subawards matched to the same resolved entities as the prime contracts above them."
+    },
+    {
+      "id": "natural-resources",
+      "short": "Natural Resources",
+      "name": "Natural Resource Revenues",
+      "shelf": "pro",
+      "standardFrom": 2010,
+      "historyFrom": 2003,
+      "blurb": "Energy and mineral activity on trust and restricted lands: production volumes, the royalties it owes and the disbursements that follow. See what a commodity produced, what it paid and where the money went.",
+      "linkage": "Production and disbursements matched to the nations and allottees they belong to."
+    },
+    {
+      "id": "owned",
+      "short": "Native-Owned Businesses",
+      "name": "Individually Owned Native Businesses",
+      "shelf": "pro",
+      "standardFrom": 2026,
+      "historyFrom": 2026,
+      "blurb": "Individually owned Native businesses, certified by their own nations' TERO and commerce offices and shared with the project office by office. The businesses no federal register counts: who they are, what trades they work and what preference status their nation certifies.",
+      "linkage": "Every listing carries the nation whose office certified it, appears only under that nation's stated terms, and is credited to the issuing TERO or commerce office."
+    },
+    {
+      "id": "nonprofits",
+      "short": "Native Nonprofits",
+      "name": "Native Nonprofits",
+      "shelf": "pro",
+      "standardFrom": 2010,
+      "historyFrom": 2001,
+      "blurb": "Native-led and Native-serving nonprofits with their annual federal filings. Compare budgets, revenue mixes, program spending and how an institution's finances move year over year.",
+      "linkage": "Filers classified as Native-led, Native-serving or Native-focused, which are three different things and are labeled separately."
+    },
+    {
+      "id": "gaming",
+      "short": "Gaming",
+      "name": "Gaming Intelligence",
+      "shelf": "grove",
+      "standardFrom": 1988,
+      "historyFrom": 1988,
+      "blurb": "Facilities, ownership and affiliation over time, declination letters, environmental reviews, expansions, employment estimates and transaction history, cross-validated against Deals.",
+      "preview": {
+        "shows": [
+          "What it contains",
+          "Historical coverage",
+          "Selected aggregate findings",
+          "Related Cedar Press articles",
+          "A methodology summary"
+        ],
+        "withholds": [
+          "Record-level exploration",
+          "Downloads",
+          "Entity filters",
+          "Full historical records",
+          "Advanced queries"
+        ]
+      },
+      "linkage": "Facilities matched to their operators and their owners. This is the one collection where the counterparties are not all Native: management companies and outside operators are resolved and labeled as such."
+    }
+  ],
+  "releases": {
+    "funding": {
+      "version": "v4.2",
+      "updated": "2026-08-06",
+      "cadence": "Updated monthly",
+      "summary": "July awards added, with fourteen recipients resolved to existing tribal enterprises.",
+      "history": [
+        {
+          "version": "v4.2",
+          "date": "2026-08-06",
+          "kind": "data",
+          "changed": [
+            "Added 386 newly reported awards through July 2026.",
+            "Resolved 14 recipients to existing tribal enterprises.",
+            "Added two newly identified subsidiaries.",
+            "Corrected the historical affiliation of one recipient."
+          ]
+        },
+        {
+          "version": "v4.1",
+          "date": "2026-07-08",
+          "kind": "data",
+          "changed": [
+            "Added 412 awards through June 2026.",
+            "Entity updates from the maintained identity layer affected 28 historical records."
+          ]
+        },
+        {
+          "version": "v4.0",
+          "date": "2026-06-04",
+          "kind": "data",
+          "changed": [
+            "Extended the reconstructed archive back to 2001 using additional federal and archival sources."
+          ]
+        },
+        {
+          "version": "v3.8",
+          "date": "2026-05-07",
+          "kind": "data",
+          "changed": [
+            "Routine monthly update."
+          ]
+        }
+      ]
+    },
+    "federal-register": {
+      "version": "v6.1",
+      "updated": "2026-08-04",
+      "cadence": "Updated as records arrive",
+      "summary": "Notices through early August, with three entities matched under former names.",
+      "history": [
+        {
+          "version": "v6.1",
+          "date": "2026-08-04",
+          "kind": "data",
+          "changed": [
+            "Added notices published through 1 August 2026.",
+            "Matched three notices to entities appearing under former names."
+          ]
+        },
+        {
+          "version": "v6.0",
+          "date": "2026-07-02",
+          "kind": "methodology",
+          "note": "Notices naming a parent and a subsidiary are now attributed to both rather than to the parent alone.",
+          "changed": [
+            "Revised attribution for notices naming more than one related entity.",
+            "Reprocessed the full archive under the revised rule."
+          ]
+        }
+      ]
+    },
+    "legislation": {
+      "version": "v3.4",
+      "updated": "2026-08-01",
+      "cadence": "Updated monthly",
+      "summary": "July roll-call votes and newly introduced bills.",
+      "history": [
+        {
+          "version": "v3.4",
+          "date": "2026-08-01",
+          "kind": "data",
+          "changed": [
+            "Added July roll-call votes and newly introduced bills.",
+            "Linked nine bills to the organizations they name."
+          ]
+        },
+        {
+          "version": "v3.3",
+          "date": "2026-07-01",
+          "kind": "data",
+          "changed": [
+            "Routine monthly update."
+          ]
+        }
+      ]
+    },
+    "deals": {
+      "version": "v9.0",
+      "updated": "2026-07-28",
+      "cadence": "Updated continuously",
+      "summary": "Twelve transactions added and three ownership relationships updated.",
+      "history": [
+        {
+          "version": "v9.0",
+          "date": "2026-07-28",
+          "kind": "data",
+          "changed": [
+            "Added 12 transactions confirmed against primary sources.",
+            "Updated three ownership relationships, which corrected records in Contracting and Gaming."
+          ]
+        },
+        {
+          "version": "v8.6",
+          "date": "2026-06-30",
+          "kind": "data",
+          "changed": [
+            "Added 9 transactions and one new subsidiary."
+          ]
+        }
+      ]
+    },
+    "nagpra": {
+      "version": "v2.7",
+      "updated": "2026-07-22",
+      "cadence": "Updated as records arrive",
+      "summary": "New notices and inventories, matched across three decades of naming changes.",
+      "history": [
+        {
+          "version": "v2.7",
+          "date": "2026-07-22",
+          "kind": "data",
+          "changed": [
+            "Added notices and inventories published since the last release.",
+            "Reconciled six historical notices to their current tribal names."
+          ]
+        }
+      ]
+    },
+    "lobbying": {
+      "version": "v5.2",
+      "updated": "2026-07-31",
+      "cadence": "Updated quarterly",
+      "summary": "Second-quarter filings added.",
+      "history": [
+        {
+          "version": "v5.2",
+          "date": "2026-07-31",
+          "kind": "data",
+          "changed": [
+            "Added Q2 2026 registrations and filings.",
+            "Resolved four registrants to the tribes that retained them."
+          ]
+        },
+        {
+          "version": "v5.1",
+          "date": "2026-04-30",
+          "kind": "data",
+          "changed": [
+            "Added Q1 2026 filings."
+          ]
+        }
+      ]
+    },
+    "contractors": {
+      "version": "v6.0",
+      "updated": "2026-08-05",
+      "cadence": "Updated monthly",
+      "summary": "July obligations added and 22 vendors rolled up to parent entities.",
+      "history": [
+        {
+          "version": "v6.0",
+          "date": "2026-08-05",
+          "kind": "data",
+          "changed": [
+            "Added obligations reported through July 2026.",
+            "Rolled 22 vendors up to their parent nation or corporation.",
+            "Entity updates from the maintained identity layer affected 41 historical records."
+          ]
+        },
+        {
+          "version": "v5.4",
+          "date": "2026-07-06",
+          "kind": "methodology",
+          "note": "8(a) participation is now recorded as a status with dates rather than a fixed flag.",
+          "changed": [
+            "Revised 8(a) participation to carry start and end dates.",
+            "Reprocessed the archive so historical awards reflect status at the time of award."
+          ]
+        }
+      ]
+    },
+    "subcontracting": {
+      "version": "v3.1",
+      "updated": "2026-08-05",
+      "cadence": "Updated monthly",
+      "summary": "Subaward activity matched to the same entities as the prime awards.",
+      "history": [
+        {
+          "version": "v3.1",
+          "date": "2026-08-05",
+          "kind": "data",
+          "changed": [
+            "Added July subaward activity and matched it to the prime awards above it."
+          ]
+        }
+      ]
+    },
+    "natural-resources": {
+      "version": "v4.0",
+      "updated": "2026-07-15",
+      "cadence": "Updated quarterly",
+      "summary": "Second-quarter production and disbursements.",
+      "history": [
+        {
+          "version": "v4.0",
+          "date": "2026-07-15",
+          "kind": "data",
+          "changed": [
+            "Added Q2 production, royalties and disbursements."
+          ]
+        }
+      ]
+    },
+    "nonprofits": {
+      "version": "v3.0",
+      "updated": "2026-06-25",
+      "cadence": "Updated annually",
+      "summary": "Native-serving classification rules revised. Read the note before reusing prior figures.",
+      "history": [
+        {
+          "version": "v3.0",
+          "date": "2026-06-25",
+          "kind": "methodology",
+          "note": "Native-serving nonprofit classification rules were revised, so counts in this release are not directly comparable with v2.x.",
+          "changed": [
+            "Separated Native-led from Native-serving where governance could be established from filings.",
+            "Reclassified 63 organizations under the revised rules.",
+            "Added the most recent filing year."
+          ]
+        }
+      ]
+    },
+    "gaming": {
+      "version": "v7.3",
+      "updated": "2026-08-02",
+      "cadence": "Updated continuously",
+      "summary": "Facility, operator and expansion activity reconciled against Deals.",
+      "history": [
+        {
+          "version": "v7.3",
+          "date": "2026-08-02",
+          "kind": "data",
+          "changed": [
+            "Added recent expansion filings and environmental review activity.",
+            "Reconciled two operator changes against Indian Country Deals.",
+            "Updated employment estimates for eleven facilities."
+          ]
+        }
+      ]
+    }
+  }
 }
