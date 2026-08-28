@@ -1,0 +1,576 @@
+nation_id,bia_name,states,review_outcome,programs_found,documented_negative_checks,last_negative_check
+bia:absentee-shawnee,Absentee-Shawnee Tribe of Indians of Oklahoma,OK,"checked, no list found",0,1,2026-08-27
+bia:agdaagux,Agdaagux Tribe of King Cove,AK,"checked, no list found",0,1,2026-08-28
+bia:agua-caliente,"Agua Caliente Band of Cahuilla Indians of the Agua Caliente Indian Reservation, California",CA,"checked, no list found",0,1,2026-08-27
+bia:ak-chin,Ak-Chin Indian Community,AZ,"checked, no list found",0,1,2026-08-27
+bia:akiachak,Akiachak Native Community,AK,"checked, no list found",0,1,2026-08-28
+bia:akiak,Akiak Native Community,AK,"checked, no list found",0,1,2026-08-28
+bia:alabama-coushatta,Alabama-Coushatta Tribe of Texas,TX,"checked, no list found",0,1,2026-08-27
+bia:alabama-quassarte,Alabama-Quassarte Tribal Town,OK,"checked, no list found",0,1,2026-08-28
+bia:alatna,Alatna Village,AK,"checked, no list found",0,1,2026-08-28
+bia:saint-paul,Aleut Community of St. Paul Island,AK,"checked, no list found",0,1,2026-08-28
+bia:algaaciq,Algaaciq Native Village (St. Mary’s),AK,"checked, no list found",0,2,2026-08-28
+bia:allakaket,Allakaket Village,AK,"checked, no list found",0,1,2026-08-28
+bia:alturas,"Alturas Indian Rancheria, California",CA,"checked, no list found",0,1,2026-08-28
+bia:old-harbor,Alutiiq Tribe of Old Harbor,AK,"checked, no list found",0,1,2026-08-28
+bia:angoon,Angoon Community Association,AK,"checked, no list found",0,1,2026-08-28
+bia:anvik,Anvik Village,AK,"checked, no list found",0,1,2026-08-28
+bia:apache-tribe-oklahoma,Apache Tribe of Oklahoma,OK,"checked, no list found",0,1,2026-08-28
+bia:asacarsarmiut,Asa’carsarmiut Tribe,AK,"checked, no list found",0,2,2026-08-28
+bia:fort-peck,"Assiniboine and Sioux Tribes of the Fort Peck Indian Reservation, Montana",MT,list program(s) found,1,0,
+bia:augustine,"Augustine Band of Cahuilla Indians, California",CA,"checked, no list found",0,1,2026-08-28
+bia:bad-river-chippewa,"Bad River Band of the Lake Superior Tribe of Chippewa Indians of the Bad River Reservation, Wisconsin",WI,list program(s) found,1,0,
+bia:bay-mills,"Bay Mills Indian Community, Michigan",MI,"checked, no list found",0,1,2026-08-27
+bia:bear-river-rohnerville,"Bear River Band of the Rohnerville Rancheria, California",CA,"checked, no list found",0,1,2026-08-28
+bia:beaver,Beaver Village,AK,"checked, no list found",0,1,2026-08-28
+bia:berry-creek,Berry Creek Rancheria of Maidu Indians of California,CA,"checked, no list found",0,1,2026-08-28
+bia:big-lagoon,"Big Lagoon Rancheria, California",CA,"checked, no list found",0,1,2026-08-28
+bia:big-pine-paiute,Big Pine Paiute Tribe of the Owens Valley,CA,"checked, no list found",0,1,2026-08-28
+bia:big-sandy,Big Sandy Rancheria of Western Mono Indians of California,CA,"checked, no list found",0,1,2026-08-28
+bia:big-valley-pomo,"Big Valley Band of Pomo Indians of the Big Valley Rancheria, California",CA,"checked, no list found",0,1,2026-08-27
+bia:birch-creek,Birch Creek Tribe,AK,"checked, no list found",0,1,2026-08-28
+bia:bishop-paiute,Bishop Paiute Tribe,CA,list program(s) found,1,0,
+bia:blackfeet,Blackfeet Tribe of the Blackfeet Indian Reservation of Montana,MT,list program(s) found,1,0,
+bia:blue-lake-rancheria,"Blue Lake Rancheria, California",CA,"checked, no list found",0,1,2026-08-28
+bia:bridgeport-colony,Bridgeport Indian Colony,CA,"checked, no list found",0,1,2026-08-28
+bia:buena-vista,Buena Vista Rancheria of Me-Wuk Indians of California,CA,"checked, no list found",0,1,2026-08-28
+bia:burns-paiute,Burns Paiute Tribe,OR,"checked, no list found",0,1,2026-08-27
+bia:cabazon,Cabazon Band of Cahuilla Indians,CA,"checked, no list found",0,1,2026-08-27
+bia:cachil-dehe,"Cachil DeHe Band of Wintun Indians of the Colusa Indian Community of the Colusa Rancheria, California",CA,"checked, no list found",0,2,2026-08-28
+bia:caddo,Caddo Nation of Oklahoma,OK,"checked, no list found",0,1,2026-08-27
+bia:cahto,Cahto Tribe of the Laytonville Rancheria,CA,"checked, no list found",0,1,2026-08-28
+bia:cahuilla-band,Cahuilla Band of Indians,CA,"checked, no list found",0,1,2026-08-28
+bia:california-valley-miwok,"California Valley Miwok Tribe, California",CA,"checked, no list found",0,1,2026-08-28
+bia:campo,"Campo Band of Diegueno Mission Indians of the Campo Indian Reservation, California",CA,"checked, no list found",0,2,2026-08-28
+bia:barona,"Capitan Grande Band of Diegueno Mission Indians of California (Barona Group of Capitan Grande Band of Mission Indians of the Barona Reservation, California; Viejas (Baron Long) Group of Capitan Grande Band of Mission Indians of the Viejas Reservation, California)",CA,"checked, no list found",0,1,2026-08-27
+bia:catawba,Catawba Indian Nation,SC,list program(s) found,1,0,
+bia:cayuga,Cayuga Nation,NY,"checked, no list found",0,1,2026-08-27
+bia:cedarville,"Cedarville Rancheria, California",CA,"checked, no list found",0,1,2026-08-28
+bia:tlingit-haida,Central Council of the Tlingit & Haida Indian Tribes,AK,list program(s) found,2,0,
+bia:chalkyitsik,Chalkyitsik Village,AK,"checked, no list found",0,1,2026-08-28
+bia:cheesh-na,Cheesh-Na Tribe,AK,"checked, no list found",0,1,2026-08-28
+bia:chemehuevi,"Chemehuevi Indian Tribe of the Chemehuevi Reservation, California",CA,"checked, no list found",0,1,2026-08-27
+bia:cher-ae-heights,"Cher-Ae Heights Indian Community of the Trinidad Rancheria, California",CA,"checked, no list found",0,1,2026-08-28
+bia:cherokee-nation,Cherokee Nation,OK,list program(s) found,1,0,
+bia:chevak,Chevak Native Village,AK,"checked, no list found",0,1,2026-08-28
+bia:cheyenne-river-sioux,"Cheyenne River Sioux Tribe of the Cheyenne River Reservation, South Dakota",SD,list program(s) found,1,0,
+bia:cheyenne-and-arapaho,"Cheyenne and Arapaho Tribes, Oklahoma",OK,list program(s) found,1,0,
+bia:chickahominy,Chickahominy Indian Tribe,VA,"checked, no list found",0,1,2026-08-28
+bia:chickahominy-eastern,Chickahominy Indian Tribe—Eastern Division,VA,"checked, no list found",0,1,2026-08-28
+bia:chickaloon,Chickaloon Native Village,AK,"checked, no list found",0,1,2026-08-27
+bia:chicken-ranch,Chicken Ranch Rancheria of Me-Wuk Indians of California,CA,"checked, no list found",0,1,2026-08-28
+bia:chignik-bay,Chignik Bay Tribal Council,AK,"checked, no list found",0,1,2026-08-28
+bia:chignik-lake,Chignik Lake Village,AK,"checked, no list found",0,1,2026-08-28
+bia:chilkat-klukwan,Chilkat Indian Village (Klukwan),AK,"checked, no list found",0,2,2026-08-28
+bia:chilkoot-haines,Chilkoot Indian Association (Haines),AK,"checked, no list found",0,1,2026-08-28
+bia:chinik,Chinik Eskimo Community (Golovin),AK,"checked, no list found",0,1,2026-08-28
+bia:chippewa-cree,"Chippewa Cree Indians of the Rocky Boy’s Reservation, Montana",MT,list program(s) found,1,0,
+bia:chitimacha,Chitimacha Tribe of Louisiana,LA,"checked, no list found",0,1,2026-08-27
+bia:chuloonawick,Chuloonawick Native Village,AK,"checked, no list found",0,1,2026-08-28
+bia:circle,Circle Native Community,AK,"checked, no list found",0,1,2026-08-28
+bia:citizen-potawatomi,"Citizen Potawatomi Nation, Oklahoma",OK,list program(s) found,1,0,
+bia:cloverdale,Cloverdale Rancheria of Pomo Indians of California,CA,"checked, no list found",0,1,2026-08-28
+bia:cocopah,Cocopah Tribe of Arizona,AZ,"checked, no list found",0,1,2026-08-27
+bia:coeur-dalene,Coeur D’Alene Tribe,ID,list program(s) found,1,0,
+bia:cold-springs,Cold Springs Rancheria of Mono Indians of California,CA,"checked, no list found",0,1,2026-08-28
+bia:colorado-river-indian-tribes,"Colorado River Indian Tribes of the Colorado River Indian Reservation, Arizona and California",AZ; CA,list program(s) found,1,0,
+bia:comanche,"Comanche Nation, Oklahoma",OK,list program(s) found,1,0,
+bia:salish-kootenai,Confederated Salish and Kootenai Tribes of the Flathead Reservation,MT,list program(s) found,1,0,
+bia:yakama,Confederated Tribes and Bands of the Yakama Nation,WA,list program(s) found,1,0,
+bia:siletz,Confederated Tribes of Siletz Indians of Oregon,OR,list program(s) found,1,0,
+bia:chehalis,Confederated Tribes of the Chehalis Reservation,WA,list program(s) found,2,0,
+bia:colville,Confederated Tribes of the Colville Reservation,WA,list program(s) found,1,0,
+bia:coos-lower-umpqua-siuslaw,"Confederated Tribes of the Coos, Lower Umpqua and Siuslaw Indians",OR,"checked, no list found",0,1,2026-08-27
+bia:goshute,"Confederated Tribes of the Goshute Reservation, Nevada and Utah",NV; UT,"checked, no list found",0,1,2026-08-27
+bia:grand-ronde,Confederated Tribes of the Grand Ronde Community of Oregon,OR,list program(s) found,1,0,
+bia:umatilla,Confederated Tribes of the Umatilla Indian Reservation,OR,list program(s) found,1,0,
+bia:warm-springs,Confederated Tribes of the Warm Springs Reservation of Oregon,OR,list program(s) found,1,0,
+bia:coquille,Coquille Indian Tribe,OR,"checked, no list found",0,1,2026-08-27
+bia:coushatta-louisiana,Coushatta Tribe of Louisiana,LA,"checked, no list found",0,1,2026-08-27
+bia:cow-creek,Cow Creek Band of Umpqua Tribe of Indians,OR,"checked, no list found",0,1,2026-08-27
+bia:cowlitz,Cowlitz Indian Tribe,WA,list program(s) found,1,0,
+bia:coyote-valley,Coyote Valley Band of Pomo Indians of California,CA,"checked, no list found",0,1,2026-08-28
+bia:craig-tribal-association,Craig Tribal Association,AK,"checked, no list found",0,1,2026-08-27
+bia:crow-creek-sioux,"Crow Creek Sioux Tribe of the Crow Creek Reservation, South Dakota",SD,"checked, no list found",0,1,2026-08-27
+bia:crow-tribe,Crow Tribe of Montana,MT,list program(s) found,1,0,
+bia:curyung,Curyung Tribal Council,AK,"checked, no list found",0,1,2026-08-28
+bia:delaware-nation,"Delaware Nation, Oklahoma",OK,"checked, no list found",0,1,2026-08-27
+bia:delaware-tribe,Delaware Tribe of Indians,OK,"checked, no list found",0,1,2026-08-28
+bia:douglas-indian-association,Douglas Indian Association,AK,"checked, no list found",0,1,2026-08-28
+bia:dry-creek,"Dry Creek Rancheria Band of Pomo Indians, California",CA,"checked, no list found",0,1,2026-08-28
+bia:duckwater,Duckwater Shoshone Tribe,NV,"checked, no list found",0,1,2026-08-27
+bia:eastern-band-cherokee,Eastern Band of Cherokee Indians,NC,list program(s) found,1,0,
+bia:eastern-shawnee,Eastern Shawnee Tribe of Oklahoma,OK,"checked, no list found",0,1,2026-08-27
+bia:eastern-shoshone,"Eastern Shoshone Tribe of the Wind River Reservation, Wyoming",WY,list program(s) found,1,0,
+bia:egegik,Egegik Village,AK,"checked, no list found",0,1,2026-08-28
+bia:eklutna,Eklutna Native Village,AK,"checked, no list found",0,1,2026-08-28
+bia:elem,"Elem Indian Colony of Pomo Indians of the Sulphur Bank Rancheria, California",CA,"checked, no list found",0,1,2026-08-28
+bia:elk-valley,"Elk Valley Rancheria, California",CA,"checked, no list found",0,1,2026-08-28
+bia:ely-shoshone,Ely Shoshone Tribe of Nevada,NV,"checked, no list found",0,1,2026-08-27
+bia:emmonak,Emmonak Village,AK,"checked, no list found",0,1,2026-08-28
+bia:enterprise-rancheria,Enterprise Rancheria of Maidu Indians of California,CA,"checked, no list found",0,1,2026-08-28
+bia:evansville,Evansville Village (aka Bettles Field),AK,"checked, no list found",0,1,2026-08-28
+bia:ewiiaapaayp,Ewiiaapaayp Band of Kumeyaay Indians,CA,"checked, no list found",0,1,2026-08-28
+bia:graton,"Federated Indians of Graton Rancheria, California",CA,"checked, no list found",0,1,2026-08-28
+bia:flandreau-santee-sioux,Flandreau Santee Sioux Tribe of South Dakota,SD,"checked, no list found",0,1,2026-08-27
+bia:forest-county-potawatomi,"Forest County Potawatomi Community, Wisconsin",WI,list program(s) found,1,0,
+bia:fort-belknap,Fort Belknap Indian Community of the Fort Belknap Reservation of Montana,MT,list program(s) found,1,0,
+bia:fort-bidwell,Fort Bidwell Indian Community of the Fort Bidwell Reservation of California,CA,"checked, no list found",0,1,2026-08-28
+bia:fort-independence,"Fort Independence Indian Community of Paiute Indians of the Fort Independence Reservation, California",CA,"checked, no list found",0,1,2026-08-28
+bia:fort-mcdermitt,"Fort McDermitt Paiute and Shoshone Tribes of the Fort McDermitt Indian Reservation, Nevada and Oregon",NV; OR,"checked, no list found",0,1,2026-08-27
+bia:fort-mcdowell-yavapai,"Fort McDowell Yavapai Nation, Arizona",AZ,"checked, no list found",0,1,2026-08-27
+bia:fort-mojave,"Fort Mojave Indian Tribe of Arizona, California & Nevada",AZ; CA; NV,"checked, no list found",0,1,2026-08-27
+bia:fort-sill-apache,Fort Sill—Chiricahua—Warm Springs—Apache Tribe,OK,"checked, no list found",0,1,2026-08-27
+bia:gila-river,"Gila River Indian Community of the Gila River Indian Reservation, Arizona",AZ,list program(s) found,1,0,
+bia:grand-traverse-band,"Grand Traverse Band of Ottawa and Chippewa Indians, Michigan",MI,list program(s) found,1,0,
+bia:greenville,Greenville Rancheria,CA,"checked, no list found",0,1,2026-08-28
+bia:grindstone,Grindstone Indian Rancheria of Wintun-Wailaki Indians of California,CA,"checked, no list found",0,1,2026-08-28
+bia:guidiville,Guidiville Rancheria of California,CA,"checked, no list found",0,1,2026-08-28
+bia:gulkana,Gulkana Village Council,AK,"checked, no list found",0,1,2026-08-28
+bia:habematolel,"Habematolel Pomo of Upper Lake, California",CA,"checked, no list found",0,1,2026-08-28
+bia:hannahville,"Hannahville Indian Community, Michigan",MI,"checked, no list found",0,1,2026-08-27
+bia:havasupai,"Havasupai Tribe of the Havasupai Reservation, Arizona",AZ,"checked, no list found",0,1,2026-08-27
+bia:healy-lake,Healy Lake Village,AK,"checked, no list found",0,1,2026-08-28
+bia:ho-chunk,Ho-Chunk Nation of Wisconsin,WI,list program(s) found,1,0,
+bia:hoh,Hoh Indian Tribe,WA,"checked, no list found",0,1,2026-08-27
+bia:holy-cross,Holy Cross Tribe,AK,"checked, no list found",0,1,2026-08-28
+bia:hoonah,Hoonah Indian Association,AK,list program(s) found,1,0,
+bia:hoopa-valley,"Hoopa Valley Tribe, California",CA,list program(s) found,2,0,
+bia:hopi,Hopi Tribe of Arizona,AZ,"checked, no list found",0,1,2026-08-27
+bia:hopland,"Hopland Band of Pomo Indians, California",CA,"checked, no list found",0,1,2026-08-28
+bia:houlton-maliseet,Houlton Band of Maliseet Indians,ME,list program(s) found,1,0,
+bia:hualapai,"Hualapai Indian Tribe of the Hualapai Indian Reservation, Arizona",AZ,"checked, no list found",0,1,2026-08-27
+bia:hughes,Hughes Village,AK,"checked, no list found",0,1,2026-08-28
+bia:huslia,Huslia Village,AK,"checked, no list found",0,1,2026-08-28
+bia:hydaburg,Hydaburg Cooperative Association,AK,"checked, no list found",0,1,2026-08-28
+bia:igiugig,Igiugig Village,AK,"checked, no list found",0,1,2026-08-28
+bia:santa-ysabel,"Iipay Nation of Santa Ysabel, California",CA,"checked, no list found",0,1,2026-08-28
+bia:inaja,"Inaja Band of Diegueno Mission Indians of the Inaja and Cosmit Reservation, California",CA,"checked, no list found",0,1,2026-08-28
+bia:inupiat-arctic-slope,Inupiat Community of the Arctic Slope,AK,"checked, no list found",0,1,2026-08-28
+bia:ione,Ione Band of Miwok Indians of California,CA,"checked, no list found",0,1,2026-08-28
+bia:iowa-kansas-nebraska,Iowa Tribe of Kansas and Nebraska,KS; NE,"checked, no list found",0,1,2026-08-27
+bia:iowa-tribe-oklahoma,Iowa Tribe of Oklahoma,OK,"checked, no list found",0,1,2026-08-27
+bia:iqurmiut,Iqugmiut Traditional Council,AK,"checked, no list found",0,1,2026-08-28
+bia:ivanof-bay,Ivanof Bay Tribe,AK,"checked, no list found",0,1,2026-08-28
+bia:jackson-rancheria,Jackson Band of Miwuk Indians,CA,"checked, no list found",0,1,2026-08-28
+bia:jamestown-sklallam,Jamestown S’Klallam Tribe,WA,"checked, no list found",0,1,2026-08-27
+bia:jamul,Jamul Indian Village of California,CA,"checked, no list found",0,1,2026-08-28
+bia:jena-choctaw,Jena Band of Choctaw Indians,LA,"checked, no list found",0,1,2026-08-27
+bia:jicarilla-apache,"Jicarilla Apache Nation, New Mexico",NM,"checked, no list found",0,1,2026-08-27
+bia:kaguyak,Kaguyak Village,AK,"checked, no list found",0,1,2026-08-28
+bia:kaibab-paiute,"Kaibab Band of Paiute Indians of the Kaibab Indian Reservation, Arizona",AZ,"checked, no list found",0,1,2026-08-27
+bia:kaktovik,Kaktovik Village (aka Barter Island),AK,"checked, no list found",0,1,2026-08-28
+bia:kalispel,Kalispel Indian Community of the Kalispel Reservation,WA,"checked, no list found",0,1,2026-08-27
+bia:karuk,Karuk Tribe,CA,list program(s) found,1,0,
+bia:kashia,"Kashia Band of Pomo Indians of the Stewarts Point Rancheria, California",CA,"checked, no list found",0,1,2026-08-28
+bia:kasigluk,Kasigluk Traditional Elders Council,AK,"checked, no list found",0,1,2026-08-28
+bia:kaw-nation,"Kaw Nation, Oklahoma",OK,"checked, no list found",0,1,2026-08-28
+bia:kenaitze,Kenaitze Indian Tribe,AK,list program(s) found,1,0,
+bia:ketchikan-indian-community,Ketchikan Indian Community,AK,"checked, no list found",0,1,2026-08-27
+bia:keweenaw-bay,"Keweenaw Bay Indian Community, Michigan",MI,list program(s) found,1,0,
+bia:kialegee,Kialegee Tribal Town,OK,"checked, no list found",0,1,2026-08-28
+bia:kickapoo-texas,Kickapoo Traditional Tribe of Texas,TX,"checked, no list found",0,1,2026-08-28
+bia:kickapoo-kansas,Kickapoo Tribe of Indians of the Kickapoo Reservation in Kansas,KS,"checked, no list found",0,1,2026-08-27
+bia:kickapoo-oklahoma,Kickapoo Tribe of Oklahoma,OK,"checked, no list found",0,1,2026-08-27
+bia:king-island,King Island Native Community,AK,"checked, no list found",0,2,2026-08-28
+bia:king-salmon,King Salmon Tribe,AK,"checked, no list found",0,1,2026-08-28
+bia:kiowa,Kiowa Tribe,OK,list program(s) found,1,0,
+bia:klamath,Klamath Tribes,OR,list program(s) found,1,0,
+bia:klawock,Klawock Cooperative Association,AK,"checked, no list found",0,1,2026-08-28
+bia:kletsel-dehe,Kletsel Dehe Wintun Nation of the Cortina Rancheria,CA,"checked, no list found",0,1,2026-08-28
+bia:knik,Knik Tribe,AK,"checked, no list found",0,1,2026-08-27
+bia:koi-nation,Koi Nation of Northern California,CA,"checked, no list found",0,1,2026-08-28
+bia:kokhanok,Kokhanok Village,AK,"checked, no list found",0,1,2026-08-28
+bia:kootenai-idaho,Kootenai Tribe of Idaho,ID,"checked, no list found",0,1,2026-08-27
+bia:koyukuk,Koyukuk Native Village,AK,"checked, no list found",0,1,2026-08-28
+bia:la-jolla,"La Jolla Band of Luiseno Indians, California",CA,"checked, no list found",0,1,2026-08-28
+bia:la-posta,"La Posta Band of Diegueno Mission Indians of the La Posta Indian Reservation, California",CA,"checked, no list found",0,1,2026-08-28
+bia:lac-courte-oreilles,Lac Courte Oreilles Band of Lake Superior Chippewa Indians of Wisconsin,WI,"checked, no list found",0,1,2026-08-27
+bia:lac-vieux-desert,Lac Vieux Desert Band of Lake Superior Chippewa Indians of Michigan,MI,"checked, no list found",0,1,2026-08-27
+bia:lac-du-flambeau,Lac du Flambeau Band of Lake Superior Chippewa Indians of the Lac du Flambeau Reservation of Wisconsin,WI,"checked, no list found",0,1,2026-08-27
+bia:las-vegas-paiute,"Las Vegas Tribe of Paiute Indians of the Las Vegas Indian Colony, Nevada",NV,"checked, no list found",0,1,2026-08-27
+bia:levelock,Levelock Village,AK,"checked, no list found",0,1,2026-08-28
+bia:lime-village,Lime Village,AK,"checked, no list found",0,1,2026-08-28
+bia:little-river-ottawa,"Little River Band of Ottawa Indians, Michigan",MI,"checked, no list found",0,1,2026-08-28
+bia:little-shell,Little Shell Tribe of Chippewa Indians of Montana,MT,"checked, no list found",0,1,2026-08-27
+bia:little-traverse-bay-bands,"Little Traverse Bay Bands of Odawa Indians, Michigan",MI,list program(s) found,1,0,
+bia:lone-pine,Lone Pine Paiute-Shoshone Tribe,CA,"checked, no list found",0,1,2026-08-28
+bia:los-coyotes,"Los Coyotes Band of Cahuilla and Cupeno Indians, California",CA,"checked, no list found",0,1,2026-08-28
+bia:louden,Louden Tribe,AK,"checked, no list found",0,1,2026-08-28
+bia:lovelock,"Lovelock Paiute Tribe of the Lovelock Indian Colony, Nevada",NV,"checked, no list found",0,1,2026-08-28
+bia:lower-brule,"Lower Brule Sioux Tribe of the Lower Brule Reservation, South Dakota",SD,"checked, no list found",0,1,2026-08-27
+bia:lower-elwha,Lower Elwha Tribal Community,WA,"checked, no list found",0,1,2026-08-27
+bia:lower-sioux,Lower Sioux Indian Community in the State of Minnesota,MN,"checked, no list found",0,1,2026-08-28
+bia:lumbee,Lumbee Tribe of North Carolina,NC,list program(s) found,1,0,
+bia:lummi,Lummi Tribe of the Lummi Reservation,WA,list program(s) found,1,0,
+bia:lytton,Lytton Rancheria of California,CA,"checked, no list found",0,1,2026-08-28
+bia:makah,Makah Indian Tribe of the Makah Indian Reservation,WA,"checked, no list found",0,1,2026-08-27
+bia:manchester-point-arena,"Manchester Band of Pomo Indians of the Manchester Rancheria, California",CA,"checked, no list found",0,1,2026-08-28
+bia:manley-hot-springs,Manley Hot Springs Village,AK,"checked, no list found",0,1,2026-08-28
+bia:manokotak,Manokotak Village,AK,"checked, no list found",0,1,2026-08-28
+bia:manzanita,"Manzanita Band of Diegueno Mission Indians of the Manzanita Reservation, California",CA,"checked, no list found",0,1,2026-08-28
+bia:mashantucket-pequot,Mashantucket Pequot Indian Tribe,CT,list program(s) found,1,0,
+bia:mashpee-wampanoag,Mashpee Wampanoag Tribe,MA,list program(s) found,1,0,
+bia:gun-lake,Match-E-Be-Nash-She-Wish Band of Pottawatomi,MI,"checked, no list found",0,1,2026-08-27
+bia:mcgrath,McGrath Native Village,AK,"checked, no list found",0,2,2026-08-28
+bia:mechoopda,"Mechoopda Indian Tribe of Chico Rancheria, California",CA,list program(s) found,1,0,
+bia:menominee,Menominee Indian Tribe of Wisconsin,WI,list program(s) found,2,0,
+bia:mentasta,Mentasta Traditional Council,AK,"checked, no list found",0,1,2026-08-28
+bia:mesa-grande,"Mesa Grande Band of Diegueno Mission Indians of the Mesa Grande Reservation, California",CA,"checked, no list found",0,1,2026-08-28
+bia:mescalero-apache,"Mescalero Apache Tribe of the Mescalero Reservation, New Mexico",NM,"checked, no list found",0,1,2026-08-27
+bia:metlakatla,"Metlakatla Indian Community, Annette Island Reserve",AK,list program(s) found,1,2,2026-08-28
+bia:miami-oklahoma,Miami Tribe of Oklahoma,OK,"checked, no list found",0,1,2026-08-27
+bia:miccosukee,Miccosukee Tribe of Indians,FL,"checked, no list found",0,1,2026-08-27
+bia:middletown-rancheria,Middletown Rancheria of Pomo Indians of California,CA,"checked, no list found",0,1,2026-08-28
+bia:minnesota-chippewa-tribe,"Minnesota Chippewa Tribe, Minnesota (Six component reservations: Bois Forte Band (Nett Lake); Fond du Lac Band; Grand Portage Band; Leech Lake Band; Mille Lacs Band; White Earth Band)",MN,covered via component bands,0,0,
+bia:mississippi-choctaw,Mississippi Band of Choctaw Indians,MS,list program(s) found,1,0,
+bia:mikmaq,Mi’kmaq Nation,ME,"checked, no list found",0,1,2026-08-27
+bia:moapa,"Moapa Band of Paiute Indians of the Moapa River Indian Reservation, Nevada",NV,"checked, no list found",0,1,2026-08-27
+bia:modoc-nation,Modoc Nation,OK,"checked, no list found",0,1,2026-08-28
+bia:mohegan,Mohegan Tribe of Indians of Connecticut,CT,"checked, no list found",0,1,2026-08-27
+bia:monacan,Monacan Indian Nation,VA,"checked, no list found",0,1,2026-08-28
+bia:mooretown,Mooretown Rancheria of Maidu Indians of California,CA,"checked, no list found",0,1,2026-08-28
+bia:morongo,"Morongo Band of Mission Indians, California",CA,"checked, no list found",0,1,2026-08-27
+bia:muckleshoot,Muckleshoot Indian Tribe,WA,list program(s) found,1,0,
+bia:naknek,Naknek Native Village,AK,"checked, no list found",0,1,2026-08-28
+bia:nansemond,Nansemond Indian Nation,VA,"checked, no list found",0,1,2026-08-28
+bia:narragansett,Narragansett Indian Tribe,RI,"checked, no list found",0,1,2026-08-27
+bia:afognak,Native Village of Afognak,AK,"checked, no list found",0,1,2026-08-28
+bia:akhiok,Native Village of Akhiok,AK,"checked, no list found",0,1,2026-08-28
+bia:akutan,Native Village of Akutan,AK,"checked, no list found",0,1,2026-08-28
+bia:aleknagik,Native Village of Aleknagik,AK,"checked, no list found",0,1,2026-08-28
+bia:ambler,Native Village of Ambler,AK,"checked, no list found",0,1,2026-08-28
+bia:atka,Native Village of Atka,AK,"checked, no list found",0,1,2026-08-28
+bia:atqasuk,Native Village of Atqasuk,AK,"checked, no list found",0,1,2026-08-28
+bia:native-village-of-barrow,Native Village of Barrow Inupiat Traditional Government,AK,"checked, no list found",0,1,2026-08-27
+bia:belkofski,Native Village of Belkofski,AK,"checked, no list found",0,1,2026-08-28
+bia:brevig-mission,Native Village of Brevig Mission,AK,"checked, no list found",0,1,2026-08-28
+bia:buckland,Native Village of Buckland,AK,"checked, no list found",0,1,2026-08-28
+bia:cantwell,Native Village of Cantwell,AK,"checked, no list found",0,1,2026-08-28
+bia:chenega,Native Village of Chenega,AK,"checked, no list found",0,1,2026-08-28
+bia:chignik-lagoon,Native Village of Chignik Lagoon,AK,"checked, no list found",0,1,2026-08-28
+bia:chitina,Native Village of Chitina,AK,"checked, no list found",0,1,2026-08-28
+bia:chuathbaluk,"Native Village of Chuathbaluk (Russian Mission, Kuskokwim)",AK,"checked, no list found",0,1,2026-08-28
+bia:council,Native Village of Council,AK,"checked, no list found",0,1,2026-08-28
+bia:deering,Native Village of Deering,AK,"checked, no list found",0,1,2026-08-28
+bia:diomede,Native Village of Diomede (aka Inalik),AK,"checked, no list found",0,1,2026-08-28
+bia:eagle,Native Village of Eagle,AK,"checked, no list found",0,1,2026-08-28
+bia:eek,Native Village of Eek,AK,"checked, no list found",0,1,2026-08-28
+bia:ekuk,Native Village of Ekuk,AK,"checked, no list found",0,1,2026-08-28
+bia:ekwok,Native Village of Ekwok,AK,"checked, no list found",0,1,2026-08-28
+bia:elim,Native Village of Elim,AK,"checked, no list found",0,1,2026-08-28
+bia:native-village-of-eyak,Native Village of Eyak (Cordova),AK,list program(s) found,1,0,
+bia:false-pass,Native Village of False Pass,AK,"checked, no list found",0,1,2026-08-28
+bia:fort-yukon,Native Village of Fort Yukon,AK,"checked, no list found",0,1,2026-08-28
+bia:gakona,Native Village of Gakona,AK,"checked, no list found",0,1,2026-08-28
+bia:gambell,Native Village of Gambell,AK,"checked, no list found",0,1,2026-08-28
+bia:georgetown-ak,Native Village of Georgetown,AK,"checked, no list found",0,1,2026-08-28
+bia:goodnews-bay,Native Village of Goodnews Bay,AK,"checked, no list found",0,1,2026-08-28
+bia:hamilton,Native Village of Hamilton,AK,"checked, no list found",0,1,2026-08-28
+bia:hooper-bay,Native Village of Hooper Bay,AK,"checked, no list found",0,1,2026-08-28
+bia:kanatak,Native Village of Kanatak,AK,"checked, no list found",0,1,2026-08-28
+bia:karluk,Native Village of Karluk,AK,"checked, no list found",0,1,2026-08-28
+bia:kiana,Native Village of Kiana,AK,"checked, no list found",0,1,2026-08-28
+bia:kipnuk,Native Village of Kipnuk,AK,"checked, no list found",0,1,2026-08-28
+bia:kivalina,Native Village of Kivalina,AK,"checked, no list found",0,1,2026-08-28
+bia:kluti-kaah,Native Village of Kluti Kaah (aka Copper Center),AK,"checked, no list found",0,1,2026-08-28
+bia:kobuk,Native Village of Kobuk,AK,"checked, no list found",0,1,2026-08-28
+bia:kongiganak,Native Village of Kongiganak,AK,"checked, no list found",0,1,2026-08-28
+bia:kotzebue,Native Village of Kotzebue,AK,"checked, no list found",0,1,2026-08-27
+bia:koyuk,Native Village of Koyuk,AK,"checked, no list found",0,1,2026-08-28
+bia:kwigillingok,Native Village of Kwigillingok,AK,"checked, no list found",0,1,2026-08-28
+bia:kwinhagak,Native Village of Kwinhagak (aka Quinhagak),AK,"checked, no list found",0,2,2026-08-28
+bia:larsen-bay,Native Village of Larsen Bay,AK,"checked, no list found",0,1,2026-08-28
+bia:marshall,Native Village of Marshall (aka Fortuna Ledge),AK,"checked, no list found",0,1,2026-08-28
+bia:marys-igloo,Native Village of Mary’s Igloo,AK,"checked, no list found",0,1,2026-08-28
+bia:mekoryuk,Native Village of Mekoryuk,AK,"checked, no list found",0,1,2026-08-28
+bia:minto,Native Village of Minto,AK,"checked, no list found",0,1,2026-08-28
+bia:nanwalek,Native Village of Nanwalek (aka English Bay),AK,"checked, no list found",0,1,2026-08-28
+bia:napaimute,Native Village of Napaimute,AK,"checked, no list found",0,1,2026-08-28
+bia:napakiak,Native Village of Napakiak,AK,"checked, no list found",0,1,2026-08-28
+bia:napaskiak,Native Village of Napaskiak,AK,"checked, no list found",0,1,2026-08-28
+bia:nelson-lagoon,Native Village of Nelson Lagoon,AK,"checked, no list found",0,1,2026-08-28
+bia:nightmute,Native Village of Nightmute,AK,"checked, no list found",0,1,2026-08-28
+bia:nikolski,Native Village of Nikolski,AK,"checked, no list found",0,1,2026-08-28
+bia:noatak,Native Village of Noatak,AK,"checked, no list found",0,1,2026-08-28
+bia:nuiqsut,Native Village of Nuiqsut (aka Nooiksut),AK,"checked, no list found",0,1,2026-08-28
+bia:nunam-iqua,Native Village of Nunam Iqua,AK,"checked, no list found",0,1,2026-08-28
+bia:nunapitchuk,Native Village of Nunapitchuk,AK,"checked, no list found",0,1,2026-08-28
+bia:ouzinkie,Native Village of Ouzinkie,AK,"checked, no list found",0,1,2026-08-28
+bia:paimiut,Native Village of Paimiut,AK,"checked, no list found",0,1,2026-08-28
+bia:perryville,Native Village of Perryville,AK,"checked, no list found",0,1,2026-08-28
+bia:pilot-point,Native Village of Pilot Point,AK,"checked, no list found",0,1,2026-08-28
+bia:point-hope,Native Village of Point Hope,AK,"checked, no list found",0,1,2026-08-28
+bia:point-lay,Native Village of Point Lay,AK,"checked, no list found",0,1,2026-08-28
+bia:port-graham,Native Village of Port Graham,AK,"checked, no list found",0,1,2026-08-28
+bia:port-heiden,Native Village of Port Heiden,AK,"checked, no list found",0,1,2026-08-28
+bia:port-lions,Native Village of Port Lions,AK,"checked, no list found",0,1,2026-08-28
+bia:ruby,Native Village of Ruby,AK,"checked, no list found",0,1,2026-08-28
+bia:saint-michael,Native Village of Saint Michael,AK,"checked, no list found",0,1,2026-08-28
+bia:savoonga,Native Village of Savoonga,AK,"checked, no list found",0,1,2026-08-28
+bia:scammon-bay,Native Village of Scammon Bay,AK,"checked, no list found",0,1,2026-08-28
+bia:selawik,Native Village of Selawik,AK,"checked, no list found",0,1,2026-08-28
+bia:shaktoolik,Native Village of Shaktoolik,AK,"checked, no list found",0,1,2026-08-28
+bia:shishmaref,Native Village of Shishmaref,AK,"checked, no list found",0,1,2026-08-28
+bia:shungnak,Native Village of Shungnak,AK,"checked, no list found",0,1,2026-08-28
+bia:south-naknek,Native Village of South Naknek,AK,"checked, no list found",0,1,2026-08-28
+bia:stevens-village,Native Village of Stevens,AK,"checked, no list found",0,1,2026-08-28
+bia:tanacross,Native Village of Tanacross,AK,"checked, no list found",0,1,2026-08-28
+bia:tanana,Native Village of Tanana,AK,"checked, no list found",0,1,2026-08-28
+bia:tatitlek,Native Village of Tatitlek,AK,"checked, no list found",0,1,2026-08-28
+bia:tazlina,Native Village of Tazlina,AK,"checked, no list found",0,1,2026-08-28
+bia:teller,Native Village of Teller,AK,"checked, no list found",0,1,2026-08-28
+bia:tetlin,Native Village of Tetlin,AK,"checked, no list found",0,1,2026-08-28
+bia:tuntutuliak,Native Village of Tuntutuliak,AK,"checked, no list found",0,1,2026-08-28
+bia:tununak,Native Village of Tununak,AK,"checked, no list found",0,1,2026-08-28
+bia:tyonek,Native Village of Tyonek,AK,"checked, no list found",0,1,2026-08-28
+bia:unalakleet,Native Village of Unalakleet,AK,"checked, no list found",0,1,2026-08-28
+bia:unga,Native Village of Unga,AK,"checked, no list found",0,1,2026-08-28
+bia:venetie,Native Village of Venetie Tribal Government (Arctic Village and Village of Venetie),AK,"checked, no list found",0,1,2026-08-28
+bia:wales,Native Village of Wales,AK,"checked, no list found",0,1,2026-08-28
+bia:white-mountain-ak,Native Village of White Mountain,AK,"checked, no list found",0,1,2026-08-28
+bia:navajo-nation,"Navajo Nation, Arizona, New Mexico, & Utah",AZ; NM; UT,list program(s) found,1,0,
+bia:nenana,Nenana Native Association,AK,"checked, no list found",0,1,2026-08-28
+bia:new-koliganek,New Koliganek Village Council,AK,"checked, no list found",0,1,2026-08-28
+bia:new-stuyahok,New Stuyahok Village,AK,"checked, no list found",0,1,2026-08-28
+bia:newhalen,Newhalen Village,AK,"checked, no list found",0,1,2026-08-28
+bia:newtok,Newtok Village,AK,"checked, no list found",0,1,2026-08-28
+bia:nez-perce,Nez Perce Tribe,ID,list program(s) found,2,0,
+bia:nikolai,Nikolai Village,AK,"checked, no list found",0,1,2026-08-28
+bia:ninilchik,Ninilchik Village,AK,"checked, no list found",0,1,2026-08-28
+bia:nisqually,Nisqually Indian Tribe,WA,list program(s) found,2,0,
+bia:nome-eskimo,Nome Eskimo Community,AK,"checked, no list found",0,1,2026-08-27
+bia:nondalton,Nondalton Tribe,AK,"checked, no list found",0,1,2026-08-28
+bia:nooksack,Nooksack Indian Tribe,WA,"checked, no list found",0,1,2026-08-27
+bia:noorvik,Noorvik Native Community,AK,"checked, no list found",0,1,2026-08-28
+bia:northern-arapaho,"Northern Arapaho Tribe of the Wind River Reservation, Wyoming",WY,list program(s) found,1,0,
+bia:northern-cheyenne,"Northern Cheyenne Tribe of the Northern Cheyenne Indian Reservation, Montana",MT,list program(s) found,1,0,
+bia:northfork,Northfork Rancheria of Mono Indians of California,CA,"checked, no list found",0,1,2026-08-28
+bia:northway,Northway Village,AK,"checked, no list found",0,1,2026-08-28
+bia:nw-shoshone,Northwestern Band of the Shoshone Nation,UT; ID,"checked, no list found",0,1,2026-08-27
+bia:nottawaseppi-huron,"Nottawaseppi Huron Band of the Potawatomi, Michigan",MI,"checked, no list found",0,1,2026-08-27
+bia:nulato,Nulato Village,AK,"checked, no list found",0,1,2026-08-28
+bia:nunakauyarmiut,Nunakauyarmiut Tribe,AK,"checked, no list found",0,1,2026-08-28
+bia:oglala-sioux,Oglala Sioux Tribe,SD,list program(s) found,1,0,
+bia:ohkay-owingeh,"Ohkay Owingeh, New Mexico",NM,"checked, no list found",0,2,2026-08-28
+bia:omaha-tribe,Omaha Tribe of Nebraska,NE,list program(s) found,1,0,
+bia:oneida-indian-nation,Oneida Indian Nation,NY,"checked, no list found",0,1,2026-08-27
+bia:oneida-nation-wi,Oneida Nation,WI,list program(s) found,2,0,
+bia:onondaga,Onondaga Nation,NY,"checked, no list found",0,1,2026-08-27
+bia:grayling,Organized Village of Grayling (aka Holikachuk),AK,"checked, no list found",0,1,2026-08-28
+bia:kake,Organized Village of Kake,AK,"checked, no list found",0,1,2026-08-28
+bia:kasaan,Organized Village of Kasaan,AK,"checked, no list found",0,1,2026-08-28
+bia:kwethluk,Organized Village of Kwethluk,AK,"checked, no list found",0,1,2026-08-28
+bia:saxman,Organized Village of Saxman,AK,"checked, no list found",0,1,2026-08-28
+bia:orutsararmiut,Orutsararmiut Traditional Native Council,AK,"checked, no list found",0,1,2026-08-28
+bia:oscarville,Oscarville Traditional Village,AK,"checked, no list found",0,1,2026-08-28
+bia:otoe-missouria,"Otoe-Missouria Tribe of Indians, Oklahoma",OK,list program(s) found,1,0,
+bia:ottawa-tribe-oklahoma,Ottawa Tribe of Oklahoma,OK,"checked, no list found",0,1,2026-08-28
+bia:paiute-utah,"Paiute Indian Tribe of Utah (Cedar Band of Paiutes, Kanosh Band of Paiutes, Koosharem Band of Paiutes, Indian Peaks Band of Paiutes, and Shivwits Band of Paiutes)",UT,"checked, no list found",0,1,2026-08-27
+bia:fallon-paiute-shoshone,"Paiute-Shoshone Tribe of the Fallon Reservation and Colony, Nevada",NV,list program(s) found,1,0,
+bia:pala,Pala Band of Mission Indians,CA,"checked, no list found",0,1,2026-08-27
+bia:pamunkey,Pamunkey Indian Tribe,VA,list program(s) found,1,0,
+bia:pascua-yaqui,Pascua Yaqui Tribe of Arizona,AZ,list program(s) found,1,0,
+bia:paskenta,Paskenta Band of Nomlaki Indians of California,CA,"checked, no list found",0,1,2026-08-28
+bia:passamaquoddy,Passamaquoddy Tribe,ME,"checked, no list found",0,1,2026-08-27
+bia:pauloff-harbor,Pauloff Harbor Village,AK,"checked, no list found",0,1,2026-08-28
+bia:pauma,"Pauma Band of Luiseno Mission Indians of the Pauma & Yuima Reservation, California",CA,"checked, no list found",0,1,2026-08-28
+bia:pawnee-nation,Pawnee Nation of Oklahoma,OK,list program(s) found,1,0,
+bia:pechanga,Pechanga Band of Indians,CA,"checked, no list found",0,1,2026-08-27
+bia:pedro-bay,Pedro Bay Village,AK,"checked, no list found",0,1,2026-08-28
+bia:penobscot,Penobscot Nation,ME,list program(s) found,1,0,
+bia:peoria,Peoria Tribe of Indians of Oklahoma,OK,"checked, no list found",0,1,2026-08-28
+bia:petersburg-indian-association,Petersburg Indian Association,AK,"checked, no list found",0,1,2026-08-28
+bia:picayune,Picayune Rancheria of Chukchansi Indians of California,CA,"checked, no list found",0,1,2026-08-28
+bia:pilot-station,Pilot Station Traditional Village,AK,"checked, no list found",0,1,2026-08-28
+bia:pinoleville,"Pinoleville Pomo Nation, California",CA,"checked, no list found",0,1,2026-08-28
+bia:pit-river,"Pit River Tribe, California (includes XL Ranch, Big Bend, Likely, Lookout, Montgomery Creek, and Roaring Creek Rancherias)",CA,"checked, no list found",0,1,2026-08-28
+bia:pitkas-point,Pitka’s Point Traditional Council,AK,"checked, no list found",0,1,2026-08-28
+bia:platinum,Platinum Traditional Village,AK,"checked, no list found",0,1,2026-08-28
+bia:poarch-band,Poarch Band of Creek Indians,AL,list program(s) found,1,0,
+bia:pokagon-band,"Pokagon Band of Potawatomi Indians, Michigan and Indiana",MI; IN,list program(s) found,1,0,
+bia:ponca-oklahoma,Ponca Tribe of Indians of Oklahoma,OK,"checked, no list found",0,1,2026-08-27
+bia:ponca-nebraska,Ponca Tribe of Nebraska,NE,"checked, no list found",0,1,2026-08-27
+bia:port-gamble-sklallam,Port Gamble S’Klallam Tribe,WA,"checked, no list found",0,1,2026-08-27
+bia:portage-creek,Portage Creek Village (aka Ohgsenakale),AK,"checked, no list found",0,1,2026-08-28
+bia:potter-valley,"Potter Valley Tribe, California",CA,"checked, no list found",0,1,2026-08-28
+bia:prairie-band-potawatomi,Prairie Band Potawatomi Nation,KS,"checked, no list found",0,1,2026-08-27
+bia:prairie-island,Prairie Island Indian Community in the State of Minnesota,MN,list program(s) found,1,0,
+bia:acoma,"Pueblo of Acoma, New Mexico",NM,"checked, no list found",0,1,2026-08-27
+bia:cochiti,"Pueblo of Cochiti, New Mexico",NM,"checked, no list found",0,1,2026-08-27
+bia:isleta,"Pueblo of Isleta, New Mexico",NM,"checked, no list found",0,1,2026-08-27
+bia:jemez,"Pueblo of Jemez, New Mexico",NM,list program(s) found,1,0,
+bia:pueblo-of-laguna,"Pueblo of Laguna, New Mexico",NM,list program(s) found,1,0,
+bia:nambe,"Pueblo of Nambe, New Mexico",NM,"checked, no list found",0,1,2026-08-27
+bia:picuris,"Pueblo of Picuris, New Mexico",NM,"checked, no list found",0,1,2026-08-27
+bia:pojoaque,"Pueblo of Pojoaque, New Mexico",NM,list program(s) found,1,0,
+bia:san-felipe,"Pueblo of San Felipe, New Mexico",NM,list program(s) found,1,0,
+bia:san-ildefonso,"Pueblo of San Ildefonso, New Mexico",NM,list program(s) found,1,2,2026-08-28
+bia:sandia,"Pueblo of Sandia, New Mexico",NM,"checked, no list found",0,1,2026-08-27
+bia:santa-ana-pueblo,"Pueblo of Santa Ana, New Mexico",NM,"checked, no list found",0,1,2026-08-27
+bia:santa-clara-pueblo,"Pueblo of Santa Clara, New Mexico",NM,"checked, no list found",0,1,2026-08-27
+bia:taos-pueblo,"Pueblo of Taos, New Mexico",NM,"checked, no list found",0,2,2026-08-28
+bia:tesuque,"Pueblo of Tesuque, New Mexico",NM,"checked, no list found",0,1,2026-08-27
+bia:zia,"Pueblo of Zia, New Mexico",NM,"checked, no list found",0,1,2026-08-27
+bia:pulikla,Pulikla Tribe of Yurok People,CA,"checked, no list found",0,1,2026-08-28
+bia:puyallup,Puyallup Tribe of the Puyallup Reservation,WA,list program(s) found,1,0,
+bia:pyramid-lake-paiute,"Pyramid Lake Paiute Tribe of the Pyramid Lake Reservation, Nevada",NV,list program(s) found,3,0,
+bia:qagan-tayagungin,Qagan Tayagungin Tribe of Sand Point,AK,"checked, no list found",0,1,2026-08-28
+bia:qawalangin,Qawalangin Tribe of Unalaska,AK,"checked, no list found",0,1,2026-08-28
+bia:quapaw,Quapaw Nation,OK,list program(s) found,1,0,
+bia:quartz-valley,Quartz Valley Indian Community of the Quartz Valley Reservation of California,CA,"checked, no list found",0,1,2026-08-28
+bia:quechan,"Quechan Tribe of the Fort Yuma Indian Reservation, California & Arizona",CA; AZ,"checked, no list found",0,1,2026-08-27
+bia:quileute,Quileute Tribe of the Quileute Reservation,WA,"checked, no list found",0,1,2026-08-27
+bia:quinault,Quinault Indian Nation,WA,list program(s) found,1,0,
+bia:ramona,"Ramona Band of Cahuilla, California",CA,"checked, no list found",0,1,2026-08-28
+bia:rampart,Rampart Village,AK,"checked, no list found",0,1,2026-08-28
+bia:rappahannock,"Rappahannock Tribe, Inc.",VA,"checked, no list found",0,1,2026-08-28
+bia:red-cliff-chippewa,Red Cliff Band of Lake Superior Chippewa Indians of Wisconsin,WI,list program(s) found,1,0,
+bia:red-lake,"Red Lake Band of Chippewa Indians, Minnesota",MN,list program(s) found,1,0,
+bia:redding-rancheria,"Redding Rancheria, California",CA,"checked, no list found",0,1,2026-08-27
+bia:redwood-valley,Redwood Valley or Little River Band of Pomo Indians of the Redwood Valley Rancheria California,CA,"checked, no list found",0,1,2026-08-28
+bia:reno-sparks,"Reno-Sparks Indian Colony, Nevada",NV,"checked, no list found",0,1,2026-08-27
+bia:rincon,Rincon Band of Luiseno Indians,CA,"checked, no list found",0,1,2026-08-27
+bia:robinson-rancheria,Robinson Rancheria,CA,"checked, no list found",0,1,2026-08-28
+bia:rosebud-sioux,"Rosebud Sioux Tribe of the Rosebud Indian Reservation, South Dakota",SD,list program(s) found,1,0,
+bia:round-valley,"Round Valley Indian Tribes, Round Valley Reservation, California",CA,"checked, no list found",0,1,2026-08-27
+bia:sac-fox-missouri,Sac & Fox Nation of Missouri in Kansas and Nebraska,KS; NE,"checked, no list found",0,1,2026-08-27
+bia:sac-and-fox-nation,"Sac & Fox Nation, Oklahoma",OK,"checked, no list found",0,2,2026-08-28
+bia:meskwaki,Sac & Fox Tribe of the Mississippi in Iowa,IA,"checked, no list found",0,1,2026-08-28
+bia:saginaw-chippewa,Saginaw Chippewa Indian Tribe of Michigan,MI,"checked, no list found",0,1,2026-08-28
+bia:saint-regis-mohawk,Saint Regis Mohawk Tribe,NY,list program(s) found,1,0,
+bia:salamatoff,Salamatof Tribe,AK,"checked, no list found",0,1,2026-08-28
+bia:salt-river-pima-maricopa,"Salt River Pima-Maricopa Indian Community of the Salt River Reservation, Arizona",AZ,list program(s) found,1,0,
+bia:samish,Samish Indian Nation,WA,"checked, no list found",0,1,2026-08-28
+bia:san-carlos-apache,"San Carlos Apache Tribe of the San Carlos Reservation, Arizona",AZ,list program(s) found,1,0,
+bia:san-juan-southern-paiute,San Juan Southern Paiute Tribe of Arizona,AZ,"checked, no list found",0,1,2026-08-28
+bia:san-pasqual,San Pasqual Band of Diegueno Mission Indians of California,CA,"checked, no list found",0,1,2026-08-28
+bia:santa-rosa-cahuilla,"Santa Rosa Band of Cahuilla Indians, California",CA,"checked, no list found",0,2,2026-08-28
+bia:santa-rosa-rancheria,"Santa Rosa Indian Community of the Santa Rosa Rancheria, California",CA,"checked, no list found",0,1,2026-08-28
+bia:santa-ynez-chumash,"Santa Ynez Band of Chumash Mission Indians of the Santa Ynez Reservation, California",CA,"checked, no list found",0,1,2026-08-27
+bia:santee-sioux,"Santee Sioux Nation, Nebraska",NE,"checked, no list found",0,2,2026-08-28
+bia:santo-domingo,Santo Domingo Pueblo,NM,"checked, no list found",0,1,2026-08-27
+bia:sauk-suiattle,Sauk-Suiattle Indian Tribe,WA,"checked, no list found",0,1,2026-08-28
+bia:sault-ste-marie,"Sault Ste. Marie Tribe of Chippewa Indians, Michigan",MI,list program(s) found,2,0,
+bia:scotts-valley,Scotts Valley Band of Pomo Indians of California,CA,"checked, no list found",0,1,2026-08-28
+bia:seldovia,Seldovia Village Tribe,AK,"checked, no list found",0,1,2026-08-27
+bia:seminole-florida,Seminole Tribe of Florida,FL,"checked, no list found",0,1,2026-08-27
+bia:seneca-nation,Seneca Nation of Indians,NY,"checked, no list found",0,1,2026-08-27
+bia:seneca-cayuga,Seneca–Cayuga Nation,OK,"checked, no list found",0,1,2026-08-28
+bia:shageluk,Shageluk Native Village,AK,"checked, no list found",0,1,2026-08-28
+bia:shakopee,Shakopee Mdewakanton Sioux Community of Minnesota,MN,"checked, no list found",0,1,2026-08-28
+bia:shawnee-tribe,Shawnee Tribe,OK,"checked, no list found",0,1,2026-08-27
+bia:sherwood-valley,Sherwood Valley Rancheria of Pomo Indians of California,CA,"checked, no list found",0,1,2026-08-28
+bia:shingle-springs,"Shingle Springs Band of Miwok Indians, Shingle Springs Rancheria (Verona Tract), California",CA,"checked, no list found",0,1,2026-08-28
+bia:shinnecock,Shinnecock Indian Nation,NY,"checked, no list found",0,1,2026-08-27
+bia:shoalwater-bay,Shoalwater Bay Indian Tribe of the Shoalwater Bay Indian Reservation,WA,list program(s) found,1,1,2026-08-27
+bia:shoshone-bannock,Shoshone-Bannock Tribes of the Fort Hall Reservation,ID,list program(s) found,1,0,
+bia:duck-valley,"Shoshone-Paiute Tribes of the Duck Valley Reservation, Nevada",NV; ID,list program(s) found,1,0,
+bia:sisseton-wahpeton-oyate,"Sisseton-Wahpeton Oyate of the Lake Traverse Reservation, South Dakota",SD,list program(s) found,1,0,
+bia:sitka-tribe,Sitka Tribe of Alaska,AK,"checked, no list found",0,1,2026-08-27
+bia:skagway,Skagway Village,AK,"checked, no list found",0,1,2026-08-28
+bia:skokomish,Skokomish Indian Tribe,WA,list program(s) found,1,1,2026-08-27
+bia:skull-valley-goshute,Skull Valley Band of Goshute Indians of Utah,UT,"checked, no list found",0,1,2026-08-28
+bia:snoqualmie,Snoqualmie Indian Tribe,WA,list program(s) found,1,0,
+bia:soboba,"Soboba Band of Luiseno Indians, California",CA,"checked, no list found",0,1,2026-08-27
+bia:sokaogon,"Sokaogon Chippewa Community, Wisconsin",WI,"checked, no list found",0,1,2026-08-27
+bia:southern-ute,"Southern Ute Indian Tribe of the Southern Ute Reservation, Colorado",CO,list program(s) found,1,0,
+bia:spirit-lake,"Spirit Lake Tribe, North Dakota",ND,list program(s) found,1,0,
+bia:spokane,Spokane Tribe of the Spokane Reservation,WA,list program(s) found,1,0,
+bia:squaxin-island,Squaxin Island Tribe of the Squaxin Island Reservation,WA,list program(s) found,2,0,
+bia:st-croix-chippewa,St. Croix Chippewa Indians of Wisconsin,WI,"checked, no list found",0,1,2026-08-27
+bia:saint-george,St. George Island,AK,"checked, no list found",0,1,2026-08-28
+bia:standing-rock-sioux,Standing Rock Sioux Tribe of North & South Dakota,ND; SD,list program(s) found,1,0,
+bia:stebbins,Stebbins Community Association,AK,"checked, no list found",0,1,2026-08-28
+bia:stillaguamish,Stillaguamish Tribe of Indians of Washington,WA,"checked, no list found",0,1,2026-08-27
+bia:stockbridge-munsee,"Stockbridge Munsee Community, Wisconsin",WI,"checked, no list found",0,1,2026-08-27
+bia:summit-lake,Summit Lake Paiute Tribe of Nevada,NV,"checked, no list found",0,1,2026-08-28
+bia:sunaq,Sun’aq Tribe of Kodiak,AK,"checked, no list found",0,1,2026-08-28
+bia:suquamish,Suquamish Indian Tribe of the Port Madison Reservation,WA,"checked, no list found",0,1,2026-08-27
+bia:susanville,"Susanville Indian Rancheria, California",CA,"checked, no list found",0,1,2026-08-27
+bia:swinomish,Swinomish Indian Tribal Community,WA,list program(s) found,2,0,
+bia:sycuan,Sycuan Band of the Kumeyaay Nation,CA,"checked, no list found",0,1,2026-08-27
+bia:table-mountain,Table Mountain Rancheria,CA,"checked, no list found",0,1,2026-08-27
+bia:takotna,Takotna Village,AK,"checked, no list found",0,1,2026-08-28
+bia:tangirnaq,Tangirnaq Native Village,AK,"checked, no list found",0,1,2026-08-28
+bia:te-moak,Te-Moak Tribe of Western Shoshone Indians of Nevada (Four constituent bands: Battle Mountain Band; Elko Band; South Fork Band; and Wells Band),NV,"checked, no list found",0,1,2026-08-27
+bia:tejon,Tejon Indian Tribe,CA,"checked, no list found",0,1,2026-08-28
+bia:telida,Telida Village,AK,"checked, no list found",0,1,2026-08-28
+bia:chickasaw-nation,The Chickasaw Nation,OK,list program(s) found,1,0,
+bia:choctaw-nation-oklahoma,The Choctaw Nation of Oklahoma,OK,list program(s) found,1,0,
+bia:muscogee-creek-nation,The Muscogee (Creek) Nation,OK,list program(s) found,1,0,
+bia:osage-nation,The Osage Nation,OK,list program(s) found,2,0,
+bia:seminole-nation-oklahoma,The Seminole Nation of Oklahoma,OK,list program(s) found,1,0,
+bia:thlopthlocco,Thlopthlocco Tribal Town,OK,"checked, no list found",0,1,2026-08-28
+bia:three-affiliated-tribes,"Three Affiliated Tribes of the Fort Berthold Reservation, North Dakota",ND,list program(s) found,1,0,
+bia:timbisha,Timbisha Shoshone Tribe,CA; NV,"checked, no list found",0,1,2026-08-28
+bia:tohono-oodham,Tohono O’odham Nation of Arizona,AZ,list program(s) found,1,0,
+bia:tolowa-dee-ni,Tolowa Dee-ni’ Nation,CA,list program(s) found,1,0,
+bia:tonawanda-seneca,Tonawanda Band of Seneca,NY,"checked, no list found",0,1,2026-08-27
+bia:tonkawa,Tonkawa Tribe of Indians of Oklahoma,OK,"checked, no list found",0,1,2026-08-27
+bia:tonto-apache,Tonto Apache Tribe of Arizona,AZ,"checked, no list found",0,1,2026-08-27
+bia:torres-martinez,"Torres Martinez Desert Cahuilla Indians, California",CA,"checked, no list found",0,1,2026-08-27
+bia:togiak,Traditional Village of Togiak,AK,"checked, no list found",0,1,2026-08-28
+bia:tulalip-tribes,Tulalip Tribes of Washington,WA,list program(s) found,1,0,
+bia:tule-river,"Tule River Indian Tribe of the Tule River Reservation, California",CA,"checked, no list found",0,1,2026-08-27
+bia:tuluksak,Tuluksak Native Community,AK,"checked, no list found",0,1,2026-08-28
+bia:tunica-biloxi,Tunica-Biloxi Indian Tribe,LA,"checked, no list found",0,1,2026-08-27
+bia:tuolumne,Tuolumne Band of Me-Wuk Indians of the Tuolumne Rancheria of California,CA,"checked, no list found",0,1,2026-08-28
+bia:turtle-mountain-chippewa,Turtle Mountain Band of Chippewa Indians of North Dakota,ND,list program(s) found,1,0,
+bia:tuscarora,Tuscarora Nation,NY,"checked, no list found",0,1,2026-08-27
+bia:twenty-nine-palms,Twenty-Nine Palms Band of Mission Indians of California,CA,"checked, no list found",0,1,2026-08-27
+bia:twin-hills,Twin Hills Village,AK,"checked, no list found",0,1,2026-08-28
+bia:ugashik,Ugashik Village,AK,"checked, no list found",0,1,2026-08-28
+bia:umkumiute,Umkumiut Native Village,AK,"checked, no list found",0,1,2026-08-28
+bia:united-auburn,United Auburn Indian Community of the Auburn Rancheria of California,CA,"checked, no list found",0,1,2026-08-28
+bia:united-keetoowah,United Keetoowah Band of Cherokee Indians in Oklahoma,OK,"checked, no list found",0,1,2026-08-27
+bia:upper-mattaponi,Upper Mattaponi Tribe,VA,"checked, no list found",0,1,2026-08-28
+bia:upper-sioux,"Upper Sioux Community, Minnesota",MN,"checked, no list found",0,1,2026-08-28
+bia:upper-skagit,Upper Skagit Indian Tribe,WA,"checked, no list found",0,1,2026-08-27
+bia:ute-indian-tribe,"Ute Indian Tribe of the Uintah & Ouray Reservation, Utah",UT,list program(s) found,1,0,
+bia:ute-mountain-ute,Ute Mountain Ute Tribe,CO; NM; UT,list program(s) found,1,0,
+bia:utu-utu-gwaitu,"Utu Utu Gwaitu Paiute Tribe of the Benton Paiute Reservation, California",CA,"checked, no list found",0,1,2026-08-28
+bia:viejas,"Viejas (Baron Long) Group of Capitan Grande Band of Mission Indians of the Viejas Reservation, California",CA,"checked, no list found",0,1,2026-08-27
+bia:alakanuk,Village of Alakanuk,AK,"checked, no list found",0,1,2026-08-28
+bia:anaktuvuk-pass,Village of Anaktuvuk Pass,AK,"checked, no list found",0,1,2026-08-28
+bia:aniak,Village of Aniak,AK,"checked, no list found",0,1,2026-08-28
+bia:atmautluak,Village of Atmautluak,AK,"checked, no list found",0,1,2026-08-28
+bia:bill-moores-slough,Village of Bill Moore’s Slough,AK,"checked, no list found",0,1,2026-08-28
+bia:chefornak,Village of Chefornak,AK,"checked, no list found",0,1,2026-08-28
+bia:clarks-point,Village of Clarks Point,AK,"checked, no list found",0,1,2026-08-28
+bia:crooked-creek,Village of Crooked Creek,AK,"checked, no list found",0,1,2026-08-28
+bia:dot-lake,Village of Dot Lake,AK,"checked, no list found",0,1,2026-08-28
+bia:iliamna,Village of Iliamna,AK,"checked, no list found",0,1,2026-08-28
+bia:kalskag,Village of Kalskag,AK,"checked, no list found",0,1,2026-08-28
+bia:kaltag,Village of Kaltag,AK,"checked, no list found",0,1,2026-08-28
+bia:kotlik,Village of Kotlik,AK,"checked, no list found",0,1,2026-08-28
+bia:lower-kalskag,Village of Lower Kalskag,AK,"checked, no list found",0,1,2026-08-28
+bia:ohogamiut,Village of Ohogamiut,AK,"checked, no list found",0,1,2026-08-28
+bia:red-devil,Village of Red Devil,AK,"checked, no list found",0,1,2026-08-28
+bia:sleetmute,Village of Sleetmute,AK,"checked, no list found",0,1,2026-08-28
+bia:solomon,Village of Solomon,AK,"checked, no list found",0,1,2026-08-28
+bia:stony-river,Village of Stony River,AK,"checked, no list found",0,1,2026-08-28
+bia:wainwright,Village of Wainwright,AK,"checked, no list found",0,1,2026-08-28
+bia:walker-river,"Walker River Paiute Tribe of the Walker River Reservation, Nevada",NV,"checked, no list found",0,1,2026-08-27
+bia:wampanoag-aquinnah,Wampanoag Tribe of Gay Head (Aquinnah),MA,list program(s) found,1,0,
+bia:washoe,"Washoe Tribe of Nevada & California (Carson Colony, Dresslerville Colony, Woodfords Community, Stewart Community, & Washoe Ranches)",NV; CA,"checked, no list found",0,1,2026-08-27
+bia:white-mountain-apache,"White Mountain Apache Tribe of the Fort Apache Reservation, Arizona",AZ,"checked, no list found",0,1,2026-08-27
+bia:wichita-affiliated,"Wichita and Affiliated Tribes (Wichita, Keechi, Waco, & Tawakonie), Oklahoma",OK,list program(s) found,1,0,
+bia:wilton,"Wilton Rancheria, California",CA,"checked, no list found",0,1,2026-08-28
+bia:winnebago-nebraska,Winnebago Tribe of Nebraska,NE,"checked, no list found",0,1,2026-08-27
+bia:winnemucca-colony,Winnemucca Indian Colony of Nevada,NV,"checked, no list found",0,1,2026-08-28
+bia:wiyot,"Wiyot Tribe, California",CA,"checked, no list found",0,2,2026-08-28
+bia:wrangell,Wrangell Cooperative Association,AK,"checked, no list found",0,1,2026-08-28
+bia:wyandotte,Wyandotte Nation,OK,"checked, no list found",0,1,2026-08-27
+bia:yakutat,Yakutat Tlingit Tribe,AK,"checked, no list found",0,1,2026-08-28
+bia:yankton-sioux,Yankton Sioux Tribe of South Dakota,SD,"checked, no list found",0,1,2026-08-27
+bia:yavapai-apache,"Yavapai-Apache Nation of the Camp Verde Indian Reservation, Arizona",AZ,list program(s) found,1,0,
+bia:yavapai-prescott,Yavapai-Prescott Indian Tribe,AZ,"checked, no list found",0,1,2026-08-27
+bia:yerington,"Yerington Paiute Tribe of the Yerington Colony & Campbell Ranch, Nevada",NV,"checked, no list found",0,1,2026-08-27
+bia:yocha-dehe,"Yocha Dehe Wintun Nation, California",CA,"checked, no list found",0,1,2026-08-28
+bia:yomba,"Yomba Shoshone Tribe of the Yomba Reservation, Nevada",NV,"checked, no list found",0,1,2026-08-28
+bia:ysleta-del-sur,Ysleta del Sur Pueblo,TX,"checked, no list found",0,1,2026-08-27
+bia:san-manuel,Yuhaaviatam of San Manuel Nation,CA,"checked, no list found",0,1,2026-08-27
+bia:yupiit-andreafski,Yupiit of Andreafski,AK,"checked, no list found",0,1,2026-08-28
+bia:yurok,"Yurok Tribe of the Yurok Reservation, California",CA,list program(s) found,1,0,
+bia:zuni,"Zuni Tribe of the Zuni Reservation, New Mexico",NM,"checked, no list found",0,1,2026-08-27
