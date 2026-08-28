@@ -15,3 +15,13 @@ __pycache__/
 
 # Cedar dataset pipeline local state
 cedar_source_registry/data/
+
+# Restricted source material — NEVER commit to this repo.
+# github.com/teim-team/cedar-press is PUBLIC. Obtained rosters carry named
+# individuals with personal contact details and are held under unconfirmed
+# publication rights. They live outside the repo, under
+# "Cedar Press/data/restricted/". Referenced by registry rows, never contained
+# in them.
+cedar_source_registry/source_records/
+cedar_source_registry/research/white_earth_*/
+*.bak_*

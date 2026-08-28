@@ -81,12 +81,12 @@ class PipelineError(Exception):
 # ---------------------------------------------------------------- registry --
 def load_registry() -> dict[str, dict]:
     rows = {}
-    for line in (ROOT / "sources.jsonl").read_text().splitlines():
+    for line in (ROOT / "sources.jsonl").read_text(encoding="utf-8").splitlines():
         if line.strip():
             row = json.loads(line)
             rows[row["source_id"]] = row
     ranks = {}
-    for line in (ROOT / "scrape_queue.jsonl").read_text().splitlines():
+    for line in (ROOT / "scrape_queue.jsonl").read_text(encoding="utf-8").splitlines():
         if line.strip():
             q = json.loads(line)
             ranks[q["source_id"]] = q["queue_rank"]
@@ -154,7 +154,7 @@ class SnapshotStore:
         (d / "body").write_bytes(body)
         meta = dict(meta, content_sha256=hashlib.sha256(body).hexdigest(),
                     saved_at=iso(now()))
-        (d / "meta.json").write_text(json.dumps(meta, indent=1))
+        (d / "meta.json").write_text(json.dumps(meta, indent=1), encoding="utf-8")
         return d
 
     def latest(self, source_id: str) -> dict | None:
@@ -164,7 +164,7 @@ class SnapshotStore:
         runs = sorted(p for p in d.iterdir() if (p / "meta.json").exists())
         if not runs:
             return None
-        meta = json.loads((runs[-1] / "meta.json").read_text())
+        meta = json.loads((runs[-1] / "meta.json").read_text(encoding="utf-8"))
         meta["path"] = str(runs[-1])
         return meta
 
@@ -391,7 +391,7 @@ def envelope(source: dict, partial: dict, run_id: str, snapshot_uri: str,
 def validate(records: list[dict]) -> None:
     """Schema validation failure fails the run — nothing partial is loaded."""
     import jsonschema
-    schema = json.loads((ROOT / "schema/source_record.schema.json").read_text())
+    schema = json.loads((ROOT / "schema/source_record.schema.json").read_text(encoding="utf-8"))
     v = jsonschema.Draft202012Validator(schema)
     problems = [f"{r.get('business_source_id')}: {e.message}"
                 for r in records for e in v.iter_errors(r)]
