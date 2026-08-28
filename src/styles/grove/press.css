@@ -240,11 +240,13 @@
 /* The shelves by name, on the gate: quiet mono names between the proof
  * grid and the credibility strip, with Cedar as the way to ask about any
  * of them. */
-.teim-rd .cp-cats { margin: 1.6rem auto 0; max-width: 30rem; text-align: center; }
+/* Full width of the proof row above: the names run rail to rail between
+ * the outer cards' edges instead of sitting in a narrower island. */
+.teim-rd .cp-cats { margin: 1.6rem auto 0; max-width: none; text-align: center; }
 .teim-rd .cp-cats__head { font-family: var(--mono); font-weight: 700; font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255, 255, 255, 0.75); margin: 0 0 0.5rem; }
 .teim-rd .cp-cats__names { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.9; color: #fff; margin: 0 0 0.7rem; }
 .teim-rd .cp-cats__dot { color: rgba(255, 255, 255, 0.55); }
-.teim-rd .cp-cats__how { font-family: var(--sans); font-size: 0.82rem; line-height: 1.5; color: rgba(255, 255, 255, 0.92); margin: 0 auto 0.8rem; max-width: 27rem; }
+.teim-rd .cp-cats__how { font-family: var(--sans); font-size: 0.82rem; line-height: 1.5; color: rgba(255, 255, 255, 0.92); margin: 0 auto 0.8rem; max-width: none; }
 .teim-rd .cp-cats__cedar { border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 999px; background: rgba(0, 0, 0, 0.14); padding: 0.5rem 1rem; font-family: var(--sans); font-size: 0.85rem; font-weight: 600; color: #fff; cursor: pointer; transition: background 0.16s ease, border-color 0.16s ease; }
 .teim-rd .cp-cats__cedar:hover { background: rgba(0, 0, 0, 0.28); border-color: #fff; }
 
@@ -616,8 +618,18 @@
 .teim-rd .cp-split__method { display: inline-block; margin-top: 2rem; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #fff; text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, 0.6); padding-bottom: 3px; transition: border-color 0.18s ease; }
 .teim-rd .cp-split__method:hover { border-color: #fff; }
 
-/* Access, and nothing else. */
-.teim-rd .cp-split__form { width: min(100%, 25rem); margin-inline: auto; }
+/* The column was one 25rem straitjacket and everything in it — headline,
+ * pathways, fine print — inherited the login box's width. Now the column
+ * breathes at 36rem and only the access controls themselves keep the
+ * tight measure a form wants; the copy above and the pathway cards below
+ * span the wider column. */
+.teim-rd .cp-split.auth-split .auth-editorial { width: min(100%, 38rem); }
+.teim-rd .cp-split__form { width: 100%; margin-inline: auto; }
+.teim-rd .cp-split__form .cp-tabs,
+.teim-rd .cp-split__form .cp-tabpanel,
+.teim-rd .cp-split__form .cp-gate__signedin,
+.teim-rd .cp-split__form > .cp-split__upgrade,
+.teim-rd .cp-split__form > .gv-btn { max-width: 25rem; }
 /* The form column top-aligns with the hero's "CEDAR PRESS" brand line
  * instead of floating at the panel's vertical center (the platform's
  * .auth-editorial margin: auto): the sign-in block is short, and centering
@@ -649,14 +661,19 @@
 .teim-rd .cp-split__form .cp-gate__form { margin-top: 0; }
 .teim-rd .cp-split__form .gv-btn--primary { width: 100%; padding: 0.8rem 1.5rem; font-size: 1rem; }
 .teim-rd .cp-gate__fine { margin: 0.7rem 0 0; font-size: 0.82rem; line-height: 1.45; color: var(--muted); }
-/* The two non-subscription pathways, under the access box: quiet rows, not
- * competing calls to action — the subscription remains the primary door. */
-.teim-rd .cp-gate__other { margin-top: 2rem; border-top: 1px solid var(--line); padding-top: 1rem; display: flex; flex-direction: column; gap: 0.9rem; }
-.teim-rd .cp-gate__othercap { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
-.teim-rd .cp-gate__otherlink { display: block; text-decoration: none; }
+/* The two non-subscription pathways, under the access box: side by side
+ * across the wider column — governance on the left, research on the
+ * right — as quiet cards, not competing calls to action; the
+ * subscription remains the primary door. */
+.teim-rd .cp-gate__other { margin-top: 2rem; border-top: 1px solid var(--line); padding-top: 1rem; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.9rem; }
+.teim-rd .cp-gate__othercap { grid-column: 1 / -1; font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-gate__otherlink { display: block; text-decoration: none; border: 1px solid var(--line); border-radius: 12px; padding: 0.9rem 1rem; transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease; }
+.teim-rd .cp-gate__otherlink:hover { border-color: var(--teal); background: var(--teal-tint); transform: translateY(-2px); box-shadow: 0 10px 24px rgba(10, 15, 38, 0.08); }
+@media (prefers-reduced-motion: reduce) { .teim-rd .cp-gate__otherlink:hover { transform: none; box-shadow: none; } }
 .teim-rd .cp-gate__otherlink b { display: block; font-size: 0.94rem; font-weight: 700; color: var(--dteal); margin-bottom: 0.15rem; }
-.teim-rd .cp-gate__otherlink:hover b { text-decoration: underline; text-underline-offset: 3px; }
 .teim-rd .cp-gate__otherdesc { display: block; font-size: 0.84rem; line-height: 1.5; color: var(--muted); }
+/* One under the other again where two cards would be two ribbons. */
+@media (max-width: 560px) { .teim-rd .cp-gate__other { grid-template-columns: 1fr; } }
 .teim-rd .cp-gate__aside { margin: 0.8rem 0 0; font-size: 0.9rem; color: var(--muted); }
 .teim-rd .cp-gate__aside a { color: var(--dteal); }
 /* The code came back good, so say so before asking for one more thing. */
