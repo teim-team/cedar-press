@@ -629,7 +629,7 @@
 .teim-rd .cp-split__form .cp-tabpanel,
 .teim-rd .cp-split__form .cp-gate__signedin,
 .teim-rd .cp-split__form > .cp-split__upgrade,
-.teim-rd .cp-split__form > .gv-btn { max-width: 25rem; }
+.teim-rd .cp-split__form > .gv-btn { max-width: 25rem; margin-inline: auto; }
 /* The form column top-aligns with the hero's "CEDAR PRESS" brand line
  * instead of floating at the panel's vertical center (the platform's
  * .auth-editorial margin: auto): the sign-in block is short, and centering
