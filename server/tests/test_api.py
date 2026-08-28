@@ -98,6 +98,10 @@ class TestSession(unittest.TestCase):
 class TestCatalog(unittest.TestCase):
     def setUp(self) -> None:
         client.cookies.clear()
+        # Every test here signs in; without a reset the class's own logins
+        # exhaust the per-client allowance partway through and later tests
+        # fail with 429s that have nothing to do with the catalog.
+        ratelimit.reset_for_tests()
         sign_in()
 
     def test_collections_carry_what_the_shelf_reads(self) -> None:
@@ -138,6 +142,32 @@ class TestCatalog(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("demonstration", response.json()["answer"])
+
+    def test_cedar_labels_real_statistics_with_their_source(self) -> None:
+        response = client.post(
+            "/cedar/ask",
+            json={"question": "What are the headline figures?", "collectionId": "owned"},
+        )
+        self.assertEqual(response.status_code, 200)
+        answer = response.json()["answer"]
+        self.assertNotIn("demonstration", answer)
+        self.assertIn("Source:", answer)
+
+    def test_how_many_routes_to_statistics_not_construction(self) -> None:
+        response = client.post(
+            "/cedar/ask",
+            json={"question": "How many records are in this collection?", "collectionId": "deals"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("currently holds", response.json()["answer"])
+
+    def test_a_two_series_figure_answers_with_both_series(self) -> None:
+        response = client.post(
+            "/cedar/ask",
+            json={"question": "What are the headline figures?", "collectionId": "funding"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("comparison", response.json()["answer"])
 
     def test_cedar_still_refuses_what_it_cannot_support(self) -> None:
         response = client.post("/cedar/ask", json={"question": "what?"})

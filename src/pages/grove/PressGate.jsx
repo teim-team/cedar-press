@@ -471,10 +471,11 @@ export default function PressGate({ user }) {
           )}
         </div>
       </div>
-      {/* Cedar meets the visitor at the door. Signed out, it explains the
-          product and hands a real data question to the gate instead of
-          answering past the paywall. */}
-      <PressCedarFab signedOut={!user} examples={GATE_CEDAR_EXAMPLES} />
+      {/* Cedar meets the visitor at the door. Everyone here is outside the
+          product — signed out, or signed in on a membership without Cedar
+          Press — so Cedar explains and converts rather than answering past
+          the paywall, and the notice names the reader's actual next step. */}
+      <PressCedarFab gated={user ? "unentitled" : "signedout"} examples={GATE_CEDAR_EXAMPLES} />
     </main>
   );
 }

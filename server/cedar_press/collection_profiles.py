@@ -182,19 +182,28 @@ def profile_for(dataset_id: str) -> dict[str, Any] | None:
     }
 
 
+def _fmt(value: Any) -> str:
+    return str(int(value)) if float(value).is_integer() else str(value)
+
+
 def _stats_sentence(profile: dict[str, Any]) -> str | None:
     headline = profile.get("headline_statistics")
     if not headline:
         return None
+    # A two-series figure answers with both series: the card draws value and
+    # comparison together, and an answer that silently drops the gray line is
+    # not the figure's own numbers.
     points = ", ".join(
-        f"{p['label']}: "
-        f"{int(p['value']) if float(p['value']).is_integer() else p['value']}"
+        f"{p['label']}: {_fmt(p['value'])}"
+        + (f" (comparison {_fmt(p['compare'])})" if p.get("compare") is not None else "")
         for p in headline["points"]
     )
+    # Every statistics answer carries its standing: demonstration figures say
+    # so, and real figures say where they came from.
     caveat = (
         " These figures are demonstration data, standing in until the first real release."
         if profile["demonstration"]
-        else ""
+        else f" Source: {profile['primary_sources']}."
     )
     return (
         f"{profile['collection_name']} currently holds {profile['record_count_label']}. "
@@ -202,7 +211,13 @@ def _stats_sentence(profile: dict[str, Any]) -> str | None:
     )
 
 
-_CONSTRUCT_WORDS = ("construct", "built", "build", "method", "resolve", "resolution", "how ")
+# Statistics words are checked before construction words: "how many records"
+# is a quantity question, and a bare "how " here once swallowed it into the
+# entity-resolution answer.
+_CONSTRUCT_WORDS = (
+    "construct", "built", "build", "method", "resolve", "resolution",
+    "how was", "how is", "how are", "how does",
+)
 _CONTENT_WORDS = ("cover", "contain", "what is", "what does", "include", "track", "field", "source")
 _STATS_WORDS = (
     "headline", "figure", "statistic", "largest", "how many", "count", "record", "number",
@@ -222,6 +237,10 @@ def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None
     asked = question.lower()
     basis = f"{profile['collection_name']} {profile['version']}, vintage {profile['vintage']}"
 
+    if any(word in asked for word in _STATS_WORDS):
+        sentence = _stats_sentence(profile)
+        if sentence:
+            return {"answer": sentence, "basis": basis}
     if any(word in asked for word in _CONSTRUCT_WORDS):
         parts = [
             profile.get("entity_resolution_method"),
@@ -231,10 +250,6 @@ def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None
             else None,
         ]
         return {"answer": " ".join(p for p in parts if p), "basis": basis}
-    if any(word in asked for word in _STATS_WORDS):
-        sentence = _stats_sentence(profile)
-        if sentence:
-            return {"answer": sentence, "basis": basis}
     if any(word in asked for word in _CONTENT_WORDS):
         parts = [
             profile["description"],

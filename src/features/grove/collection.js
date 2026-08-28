@@ -22,10 +22,14 @@
  * live so they cannot drift silently.
  *
  * PROTOTYPE LIMITATIONS
- * Every number in this file is demonstration data, exactly like
+ * The three launch collections' numbers are demonstration data, exactly like
  * prototypeData.js: plausible values for the demo workspace, never real
  * published figures. The real pilot datasets arrive as manifest + data files
- * and replace the inline series here.
+ * and replace the inline series here. The one exception is the Owned
+ * collection: its aggregates are real, from the roster White Earth Nation's
+ * TERO supplied on 2026-08-28, and Cedar's statistics answers label the
+ * demonstration series as demonstration and the real series with its source
+ * (see server/cedar_press/collection_profiles.py).
  */
 
 import { CLAIM_CLASS } from "./claims.js";

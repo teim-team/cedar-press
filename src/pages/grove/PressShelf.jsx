@@ -56,6 +56,7 @@ import {
 } from "../../features/grove/pressCatalog";
 import { freshnessLine } from "../../features/grove/pressReleases";
 import { TBN_URL } from "../../features/grove/pressArticles";
+import { LAUNCH_COLLECTION } from "../../features/grove/collection";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
 import { TierName } from "./TierName";
 
@@ -171,6 +172,13 @@ function coverageLine(entry, user, owned) {
   return `${standard} to present`;
 }
 
+/** Whether Cedar has a profile to answer from for this collection: the
+ *  launch collections carry profiles (collection_profiles.py); the wider
+ *  catalog does not yet. */
+function hasCedarProfile(id) {
+  return LAUNCH_COLLECTION.some((dataset) => dataset.id === id);
+}
+
 /** What the reader says about the collection under the cursor. */
 function Detail({ entry, user, owned }) {
   return (
@@ -207,20 +215,24 @@ function Detail({ entry, user, owned }) {
       {/* Cedar, already scoped: the reader looking at this description is
           one click from asking how the collection was built or what its
           headline figures are, without restating which collection. The
-          event reaches the floating control without a prop path. */}
-      <button
-        type="button"
-        className="cp-read__cedar"
-        onClick={() =>
-          window.dispatchEvent(
-            new CustomEvent("cedar:ask-collection", {
-              detail: { id: entry.id, name: entry.name },
-            }),
-          )
-        }
-      >
-        Ask Cedar about this collection <span aria-hidden="true">&#8594;</span>
-      </button>
+          event reaches the floating control without a prop path. Only for
+          collections with a profile behind them — an ask that can only
+          return an error is not an affordance. */}
+      {hasCedarProfile(entry.id) ? (
+        <button
+          type="button"
+          className="cp-read__cedar"
+          onClick={() =>
+            window.dispatchEvent(
+              new CustomEvent("cedar:ask-collection", {
+                detail: { id: entry.id, name: entry.name },
+              }),
+            )
+          }
+        >
+          Ask Cedar about this collection <span aria-hidden="true">&#8594;</span>
+        </button>
+      ) : null}
     </div>
   );
 }

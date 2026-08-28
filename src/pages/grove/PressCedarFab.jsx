@@ -21,7 +21,11 @@ const SCOPED_EXAMPLES = [
   "What are its headline figures?",
 ];
 
-export function PressCedarFab({ signedOut = false, examples = [] }) {
+// `gated` names why Cedar will not query the collections for this reader:
+// "signedout" (no session) or "unentitled" (a membership without Cedar
+// Press). Falsy means fully entitled.
+export function PressCedarFab({ gated = null, examples = [] }) {
+  const signedOut = Boolean(gated);
   const [open, setOpen] = useState(false);
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState(null);
@@ -34,6 +38,7 @@ export function PressCedarFab({ signedOut = false, examples = [] }) {
   // the reader.
   const [scope, setScope] = useState(null);
   const inputRef = useRef(null);
+  const abortRef = useRef(null);
   const connected = isConnected();
 
   useEffect(() => {
@@ -44,9 +49,11 @@ export function PressCedarFab({ signedOut = false, examples = [] }) {
     const onScope = (event) => {
       const next = event?.detail;
       if (!next?.id || !next?.name) return;
+      abortRef.current?.abort();
       setScope({ id: next.id, name: next.name });
       setAnswer(null);
       setError(null);
+      setPending(false);
       setOpen(true);
     };
     window.addEventListener("cedar:ask-collection", onScope);
@@ -67,15 +74,31 @@ export function PressCedarFab({ signedOut = false, examples = [] }) {
       track(EVENT.cedarAsked, { length: asked.length, gated: true });
       return;
     }
+    // Unscoped, Cedar has nothing to answer from yet; say so here rather
+    // than spending a request on a refusal the client can word better.
+    if (!scope) {
+      setAnswer(null);
+      setError(
+        "Cedar answers per collection for now. Open Data and choose \u201cAsk Cedar about this collection\u201d, and the question lands already scoped.",
+      );
+      return;
+    }
+    // A reader can re-scope mid-flight; the late answer must not land under
+    // the new collection's name.
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
     setPending(true);
     setError(null);
     setAnswer(null);
     setGateNotice(false);
     try {
-      const result = await askCedar({ question: asked, collectionId: scope?.id });
-      setAnswer(result?.answer ?? result?.text ?? "");
-      track(EVENT.cedarAsked, { length: asked.length, collectionId: scope?.id });
+      const result = await askCedar({ question: asked, collectionId: scope.id, signal: controller.signal });
+      if (controller.signal.aborted) return;
+      setAnswer({ text: result?.answer ?? result?.text ?? "", basis: result?.basis ?? null });
+      track(EVENT.cedarAsked, { length: asked.length, collectionId: scope.id });
     } catch (err) {
+      if (controller.signal.aborted) return;
       trackError(err, { at: "cedarAsk" });
       setError(
         err?.code === "NETWORK"
@@ -83,7 +106,7 @@ export function PressCedarFab({ signedOut = false, examples = [] }) {
           : err?.message || "Cedar could not answer that.",
       );
     } finally {
-      setPending(false);
+      if (!controller.signal.aborted) setPending(false);
     }
   };
 
@@ -107,7 +130,11 @@ export function PressCedarFab({ signedOut = false, examples = [] }) {
                     <button
                       type="button"
                       className="cedar-widget__scopeclear"
-                      onClick={() => setScope(null)}
+                      onClick={() => {
+                        abortRef.current?.abort();
+                        setScope(null);
+                        setPending(false);
+                      }}
                     >
                       All collections
                     </button>
@@ -145,14 +172,22 @@ export function PressCedarFab({ signedOut = false, examples = [] }) {
               {gateNotice ? (
                 <p className="cedar-widget__note" role="status">
                   Cedar answers questions like this from the Cedar Press collections once
-                  you&rsquo;re signed in. Log in above, or get Cedar Press through a{" "}
+                  your membership includes Cedar Press.{" "}
+                  {gated === "unentitled"
+                    ? "Upgrade through your"
+                    : "Log in above, or get Cedar Press through a"}{" "}
                   <a href="https://tribalbusinessnews.com/subscribe" target="_blank" rel="noreferrer">
                     Tribal Business News membership
                   </a>.
                 </p>
               ) : null}
               {error ? <p className="cp-gate__error" role="alert">{error}</p> : null}
-              {answer ? <p className="cedar-widget__answer">{answer}</p> : null}
+              {answer ? (
+                <div className="cedar-widget__answer">
+                  <p>{answer.text}</p>
+                  {answer.basis ? <p className="cedar-widget__basis">{answer.basis}</p> : null}
+                </div>
+              ) : null}
             </>
           ) : (
             <p className="cedar-widget__note">
