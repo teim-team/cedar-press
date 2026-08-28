@@ -27,7 +27,11 @@ import { Link } from "react-router";
 import { useAuth } from "../../context/useAuth";
 import { activatePressAccount, validatePressCode } from "../../api";
 import { LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
-import { PRESS_METHODS_PATH } from "../../features/grove/pressRoutes";
+import {
+  PRESS_METHODS_PATH,
+  PRESS_REQUEST_PATH,
+  PRESS_RESEARCH_PATH,
+} from "../../features/grove/pressRoutes";
 import {
   PRESS_ACTIVATION_AVAILABLE,
   PRESS_STEP,
@@ -504,6 +508,29 @@ export default function PressGate({ user }) {
               )}
             </>
           )}
+          {/* The gate is the public front door, not only a paywall. Three
+              relationships with Cedar Press exist — subscribing through TBN,
+              project-scoped research access, and a tribal government's right
+              to its own records — and the second two require no subscription,
+              so they are named here where a non-subscriber actually arrives.
+              Both pages are public. */}
+          <div className="cp-gate__other">
+            <span className="cp-gate__othercap">Other ways to work with Cedar Press</span>
+            <Link className="cp-gate__otherlink" to={PRESS_RESEARCH_PATH}>
+              <b>Research access <span aria-hidden="true">&#8594;</span></b>
+              <span className="cp-gate__otherdesc">
+                For researchers, journalists, students, nonprofits and public-interest projects
+                needing one or two collections for a defined project.
+              </span>
+            </Link>
+            <Link className="cp-gate__otherlink" to={PRESS_REQUEST_PATH}>
+              <b>Tribal government data requests <span aria-hidden="true">&#8594;</span></b>
+              <span className="cp-gate__otherdesc">
+                Federally recognized tribal governments can request and review the Cedar records
+                associated with their nation. No subscription required.
+              </span>
+            </Link>
+          </div>
         </div>
       </div>
       {/* Cedar meets the visitor at the door. Everyone here is outside the

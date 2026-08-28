@@ -121,9 +121,9 @@ export default function CedarPressSettings() {
           <p className="cp-hero__access">Settings</p>
           <h1 className="cp-mh__title">Your account.</h1>
           <p className="cp-mh__sub">
-            Cedar Press accounts come with a Tribal Business News subscription. Membership,
-            billing and renewals are handled there; what this page holds is what the account
-            reaches from here.
+            Cedar Press access is provided through a Tribal Business News subscription.
+            Membership, billing and renewals are managed there. This page shows your Cedar
+            Press access and preferences.
           </p>
         </section>
 
@@ -153,7 +153,7 @@ export default function CedarPressSettings() {
                 target="_blank"
                 rel="noreferrer"
               >
-                Manage membership <span aria-hidden="true">&#8594;</span>
+                Manage TBN membership <span aria-hidden="true">&#8594;</span>
               </a>
               <button type="button" className="gv-btn gv-btn--quiet" onClick={() => logout()}>
                 Sign out
@@ -163,8 +163,12 @@ export default function CedarPressSettings() {
 
           <WorkCard />
 
-          <section className="cp-set__card" aria-label="Requests">
-            <span className="cp-set__cap">Requests</span>
+          {/* Links out to public programs, not features of the account: both
+              pages work with or without a subscription, and the gate and
+              footer name them to non-subscribers too. This card is the
+              signed-in convenience. */}
+          <section className="cp-set__card" aria-label="Requests and support">
+            <span className="cp-set__cap">Requests &amp; support</span>
             <ul className="cp-set__links">
               <li>
                 <Link to={PRESS_REQUEST_PATH}>

@@ -147,6 +147,9 @@
 }
 .teim-rd .cp-foot__nav a:hover { color: var(--dteal); border-bottom-color: currentColor; }
 .teim-rd .cp-foot__meta { display: flex; flex-wrap: wrap; gap: 0.4rem 1.4rem; }
+/* The governance pathway, discoverable from every page's ending without
+ * becoming a marketing element. */
+.teim-rd .cp-foot__gov a { color: var(--teal); }
 .teim-rd .cp-foot--deep .cp-foot__nav a { color: rgba(255, 255, 255, 0.82); }
 .teim-rd .cp-foot--deep .cp-foot__nav a:hover { color: #fff; }
 .teim-rd .cp-foot--deep .cp-foot__meta { border-top-color: rgba(255, 255, 255, 0.14); }
@@ -164,7 +167,11 @@
 .teim-rd .cp-foot--deep { margin-inline: calc(50% - 50vw); width: 100vw; margin-top: 2.6rem; padding: 1.2rem 0 7rem; border-top: 3px solid var(--teal); background: var(--ink); color: rgba(255, 255, 255, 0.7); }
 /* Continuing a navy band: no edge, no gap — the band and the footer are one
  * surface. */
-.teim-rd .cp-foot--flush { margin-top: 0; border-top: 0; }
+/* Flush removes the gap, never the seam: the footer owns its teal rule on
+ * every page, and --teal is bright enough to read against the dark-teal
+ * bands as well as white, so the same component means the same ending
+ * everywhere. */
+.teim-rd .cp-foot--flush { margin-top: 0; }
 @media (max-width: 640px) { .teim-rd .cp-foot--deep { padding-bottom: 5rem; } }
 .teim-rd .cp-foot__in { flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.3rem 2rem; }
 .teim-rd .cp-foot--deep .cp-foot__in { max-width: 1560px; margin: 0 auto; padding-inline: 2.4rem; }
@@ -612,6 +619,14 @@
 .teim-rd .cp-split__form .cp-gate__form { margin-top: 0; }
 .teim-rd .cp-split__form .gv-btn--primary { width: 100%; padding: 0.8rem 1.5rem; font-size: 1rem; }
 .teim-rd .cp-gate__fine { margin: 0.7rem 0 0; font-size: 0.82rem; line-height: 1.45; color: var(--muted); }
+/* The two non-subscription pathways, under the access box: quiet rows, not
+ * competing calls to action — the subscription remains the primary door. */
+.teim-rd .cp-gate__other { margin-top: 2rem; border-top: 1px solid var(--line); padding-top: 1rem; display: flex; flex-direction: column; gap: 0.9rem; }
+.teim-rd .cp-gate__othercap { font-family: var(--mono); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cp-gate__otherlink { display: block; text-decoration: none; }
+.teim-rd .cp-gate__otherlink b { display: block; font-size: 0.94rem; font-weight: 700; color: var(--dteal); margin-bottom: 0.15rem; }
+.teim-rd .cp-gate__otherlink:hover b { text-decoration: underline; text-underline-offset: 3px; }
+.teim-rd .cp-gate__otherdesc { display: block; font-size: 0.84rem; line-height: 1.5; color: var(--muted); }
 .teim-rd .cp-gate__aside { margin: 0.8rem 0 0; font-size: 0.9rem; color: var(--muted); }
 .teim-rd .cp-gate__aside a { color: var(--dteal); }
 /* The code came back good, so say so before asking for one more thing. */
