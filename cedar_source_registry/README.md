@@ -11,13 +11,13 @@ the correction.
 
 | File | Records | One line per |
 |---|---|---|
-| `sources.jsonl` | 155 | source program (the master registry; 148 wave-5 + TBD-166..172 from the 2026-08-27 expansion) |
-| `scrape_queue.jsonl` | 88 | live source ranked for immediate ingestion |
+| `sources.jsonl` | 158 | source program (the master registry; 148 wave-5 + TBD-166..175 from the 2026-08-27 expansion rounds) |
+| `scrape_queue.jsonl` | 90 | live source ranked for immediate ingestion |
 | `partnership_leads.jsonl` | 56 | confirmed-but-unpublished roster to request directly |
-| `negative_findings.jsonl` | 69 | Phase 3 formal negatives: tribes checked with no public registry found, with recheck dates |
+| `negative_findings.jsonl` | 144 | Phase 3 formal negatives: tribes checked with no public registry found, with recheck dates |
 | `cross_reference.jsonl` | 40 | secondary directory with `do_not_infer` guardrails |
-| `verification_log.jsonl` | 135 | append-only fact-check log: 31 wave-5 lines (18 verified, 5 researched-and-excluded, 4 URL corrections, 2 edits reverted) + 97 wave-5.1 search-only re-checks (`channel: web_search_only`) |
-| `nations.jsonl` | 182 | nation crosswalk stub (Phase 0) — see "Nation crosswalk" below |
+| `verification_log.jsonl` | 138 | append-only fact-check log: 31 wave-5 lines (18 verified, 5 researched-and-excluded, 4 URL corrections, 2 edits reverted) + 97 wave-5.1 search-only re-checks (`channel: web_search_only`) |
+| `nations.jsonl` | 259 | nation crosswalk stub (Phase 0) — see "Nation crosswalk" below |
 | `outreach/requests.md` | — | outreach queue for request-only sources (roster generated from partnership_leads.jsonl) |
 | `PHASE_REPORT.md` | — | phase close-out: what was verified, changed, excluded, and the needs-human list |
 | `research/newsletter_survey_2026-08-27.{md,jsonl}` | 42 outlets | tribal newsletter/media reconnaissance: dataset potential, business lists/awards coverage, Phase-3 candidates |

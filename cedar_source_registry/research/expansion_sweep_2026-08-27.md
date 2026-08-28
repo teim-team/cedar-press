@@ -60,6 +60,43 @@ results; raw per-tribe evidence with batch labels is in
   (non-tribal, Makah-adjacent), Cow Creek's UIDC "BUY LOCAL" directory
   trademark with no live page yet.
 
+## Round 2 (same day)
+
+77 more tribes checked across five batches (remaining NM pueblos + Arizona,
+Great Basin/Rockies, Southern/Central California, Northeast + Plains, PNW
+leftovers + Alaska tribal governments — kept distinct from ANCSA corps). Raw
+evidence appended to the same JSONL with batch labels.
+
+- **3 new rows (TBD-173..175):** Fort Belknap **Program and Enterprise
+  Directory** (a recurring dated-PDF series — 2017-18 edition on legmt.gov,
+  2023 edition on the tribe's CDN; entered Stale); Houlton Band of Maliseet
+  **Directory with an "Our Businesses" section** (weakest positive of the
+  round — flagged for early inspection); Duck Valley **Community Directory**
+  (community-wide incl. local businesses; Discovery Only).
+- **The round's defining pattern: enterprise pages everywhere.** ~25 tribes
+  publish official pages naming their tribally owned enterprises (Turning
+  Stone/Oneida NY, Cayuga, Onondaga, Santa Ana, Ysleta del Sur, Ak-Chin,
+  Fort McDowell, Viejas, Pala, Rincon/REDCO, Soboba, Chemehuevi, Tule
+  River/TREDC, Table Mountain, Redding/RREDCO, Susanville/SIRCO, Iowa
+  KS-NE/Grey Snow, Flandreau, Goshute/GFC, Kalispel, Shoalwater Bay/WBE,
+  Sitka, Ketchikan/KTBC, Craig, Seldovia, Nambe, Picuris, Cocopah). Per the
+  round-1 decision these are **held as an inventory** (URLs preserved in the
+  negatives' notes and the raw JSONL) rather than registered — whether
+  enterprise pages become a registry class is the Phase 4 taxonomy call,
+  with the three Pueblo pilots (TBD-169..171) as test cases. If Phase 4
+  says yes, this inventory converts to ~25 rows mechanically.
+- **New unresolveds (6-month recheck):** San Ildefonso's official **Artists
+  page** (the Taos pattern) and Metlakatla's community **Directory** (people
+  AND organizations — flagged with a publication-boundary warning: person
+  entries are never ingestible).
+- **TERO-without-roster candidates for future outreach:** Torres Martinez
+  (offices on both domains), Fort Mojave, Quechan (application PDF), Walker
+  River, Kootenai of Idaho (ITD-listed director), Crow Creek (director on
+  LinkedIn), Round Valley (TERO organizing — first public meeting).
+- Wrong-tribe traps caught and excluded: oneida-nsn.gov (WI ≠ Oneida Indian
+  Nation NY), crow-nsn.gov (MT ≠ Crow Creek SD), kickapootexas.org (TX ≠
+  KS), metlakatla.ca (BC, Canada ≠ Annette Island).
+
 ## Follow-ups
 
 1. Fetch-verify the 7 new rows at page level (egress unblock or local run).
