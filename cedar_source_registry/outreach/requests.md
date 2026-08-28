@@ -126,6 +126,7 @@ Regenerate with `tools/build_outreach.py` after any partnership_leads edit.
 | TBD-159 | Turtle Mountain Band of Chippewa Indians | TERO Indian-Owned Business Certifications | TERO code public in tribal law libraries; certified-business roster not located | Request a quarterly CSV/XLSX export, data dictionary and permission to publish source-attributed records. |
 | TBD-160 | Osage Nation | Tax Commission Registered Vendor Records | Registration requirement and application packet public; vendor list not published | Request a quarterly CSV/XLSX export, data dictionary and permission to publish source-attributed records. |
 | TBD-167 | Nisqually Indian Tribe | Nisqually NAOB Registry (TERO certified businesses) | TERO orientation PDF references an attached certified NAOB list and a certification application; Title 42 TERO on the tribal site | Request the current certified NAOB list from Nisqually TERO, plus a data dictionary and permission terms. |
+| TBD-178 | Tanana Chiefs Conference (Interior Alaska regional consortium) | TCC TERO Indian-owned vendor listing | TCC TERO program page (tananachiefs.org/services/job-training/tero/) described in search results as maintaining an Indian-owned vendor listing region-wide for the 42 member villages | Request the current Indian-owned vendor listing from TCC TERO, plus certification criteria, a data dictionary, and permission terms. |
 <!-- END GENERATED ROSTER -->
 
 ## Protocol notes

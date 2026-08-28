@@ -635,6 +635,7 @@ SCOPE_OVERRIDES = {
     "TBD-164": "regional",  # Oklahoma Department of Commerce TERO enumeration
     "TBD-165": "regional",  # ANVCA
     "TBD-176": "regional",  # Kawerak Bering Strait Business Directory (20-tribe consortium region)
+    "TBD-178": "regional",  # TCC TERO vendor listing (42-village Interior Alaska consortium region)
 }
 
 

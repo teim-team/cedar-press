@@ -150,8 +150,9 @@ appended to the same JSONL with `r4-*` batch labels.
   registry (ANC shareholder directories, Kawerak's beringstrait.biz
   TBD-176) plus **TCC's consortium-level TERO**, which per the Tanana check
   maintains an Indian-owned vendor listing region-wide for all 42 member
-  villages (tananachiefs.org/services/job-training/tero/) — logged as a
-  future promotion candidate rather than a per-village source.
+  villages (tananachiefs.org/services/job-training/tero/) — promoted
+  same-day as **TBD-178** (Tribal Partnership, Lead): one request to TCC
+  TERO covers 42 villages that individually publish nothing.
 - **Enterprise-page inventory grew by 7** (Kaw KNBS, Ottawa OK, Modoc
   Nation, Seneca-Cayuga, Delaware Tribe of Indians/Bartlesville — kept
   distinct from Delaware Nation/Anadarko already in the registry — Bear
