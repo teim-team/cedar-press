@@ -24,7 +24,7 @@ import PressGate from "./PressGate";
 import PressShelf from "./PressShelf";
 
 export default function CedarPressData() {
-  useDocumentTitle("Data");
+  useDocumentTitle("Collections");
   const { user, loading, logout } = useAuth();
   const { hash } = useLocation();
   const entitled = canReadCedarPress(user);

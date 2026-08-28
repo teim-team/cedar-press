@@ -38,7 +38,7 @@ import {
 
 const NAV = [
   { id: "articles", label: "Articles", to: PRESS_ARTICLES_PATH },
-  { id: "data", label: "Data", to: PRESS_DATA_PATH },
+  { id: "data", label: "Collections", to: PRESS_DATA_PATH },
   { id: "whats-new", label: "What’s new", to: PRESS_WHATS_NEW_PATH },
   { id: "methods", label: "Methods", to: PRESS_METHODS_PATH },
 ];
@@ -145,7 +145,7 @@ export function PressFoot({ deep = false }) {
         <nav className="cp-foot__nav" aria-label="Cedar Press">
           <Link to={PRESS_PATH}>Cedar Press</Link>
           <Link to={PRESS_ARTICLES_PATH}>Articles</Link>
-          <Link to={PRESS_DATA_PATH}>Data</Link>
+          <Link to={PRESS_DATA_PATH}>Collections</Link>
           <Link to={PRESS_WHATS_NEW_PATH}>What&rsquo;s new</Link>
           <Link to={PRESS_METHODS_PATH}>Methods</Link>
           <Link to={PRESS_SETTINGS_PATH}>Settings</Link>

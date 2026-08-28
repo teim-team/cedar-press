@@ -87,7 +87,7 @@ export function PressCedarFab({ gated = null, examples = [] }) {
     if (!scope) {
       setAnswer(null);
       setError(
-        "Cedar answers per collection for now. Open Data and choose \u201cAsk Cedar about this collection\u201d, and the question lands already scoped.",
+        "Cedar answers per collection for now. Open Collections and choose \u201cAsk Cedar about this collection\u201d, and the question lands already scoped.",
       );
       return;
     }
@@ -158,19 +158,32 @@ export function PressCedarFab({ gated = null, examples = [] }) {
                 />
                 {(scope ? SCOPED_EXAMPLES : examples).length ? (
                   <div className="cedar-widget__examples">
-                    {(scope ? SCOPED_EXAMPLES : examples).map((example) => (
-                      <button
-                        key={example}
-                        type="button"
-                        className="cedar-widget__example"
-                        onClick={() => {
-                          setQuestion(example);
-                          inputRef.current?.focus();
-                        }}
-                      >
-                        {example}
-                      </button>
-                    ))}
+                    {(scope ? SCOPED_EXAMPLES : examples).map((example) => {
+                      const label = typeof example === "string" ? example : example.q;
+                      return (
+                        <button
+                          key={label}
+                          type="button"
+                          className="cedar-widget__example"
+                          onClick={() => {
+                            // A suggestion that names a collection scopes to
+                            // it in the same tap, so every suggestion shown
+                            // is answerable as shown.
+                            if (typeof example !== "string" && example.scope) {
+                              abortRef.current?.abort();
+                              setScope(example.scope);
+                              setAnswer(null);
+                              setError(null);
+                              setPending(false);
+                            }
+                            setQuestion(label);
+                            inputRef.current?.focus();
+                          }}
+                        >
+                          {typeof example === "string" ? label : `${label} (${example.scope.name})`}
+                        </button>
+                      );
+                    })}
                   </div>
                 ) : null}
                 <button type="submit" className="gv-btn gv-btn--primary" disabled={pending}>
