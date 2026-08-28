@@ -182,6 +182,50 @@ appended to the same JSONL with `r4-*` batch labels.
   source rows, 288 negatives-only), ~178 unchecked — mostly Chugach-region
   and remaining small villages, small CA/NV bands, and misc stragglers.
 
+## Round 5 (2026-08-28, second batch)
+
+80 more entities across five batches; 77 integrated (three — Mi'kmaq
+Nation, Kickapoo in Kansas, Sac and Fox of Missouri — turned out to be
+round-1 re-checks caused by a candidate-filter bug that only compared
+`bia_name`, not `names` variants; their fresh evidence stayed in the
+research JSONL, the duplicate negative rows were dropped, and the filter
+lesson is recorded here so future rounds compare all name variants).
+Raw evidence appended with `r5-*` batch labels.
+
+- **Alaska village pattern held at scale.** Bering Strait (16), Y-K Delta
+  second sweep (16), Chugach/Cook Inlet/Kodiak (16), and
+  Aleutians/Pribilofs/Peninsula (18) produced zero registries. Most
+  villages' entire web presence is a BIA/NARF/consortium profile page;
+  the ANCSA-corp-vs-tribe trap recurred constantly (afognak.org tribe vs
+  afognak.com corp — whose *Shareholder Businesses* directory is
+  corp-track material; tatitlek.com, chenega.com, salamatof.com all
+  corps, not tribes).
+- **Enterprise-page inventory grew by 5:** Kongiganak (official Google
+  Sites with pages for Puvurnaq Power Co. and village businesses — the
+  round's most interesting weak-form positive), **Aleut Community of St.
+  Paul Island** (aleut.com/enterprise, ~5 enterprises incl. Awalix LLC),
+  **Port Heiden** (four named Meshik/Aniakchak enterprise pages on the
+  tribal site), **Upper Mattaponi** (umitribe.org/business-enterprises/),
+  and **Sac and Fox of Missouri** (sacandfoxks.com /entities/ child
+  pages). Same hold-for-Phase-4 treatment; URLs in the negatives' notes.
+- **Fast-recheck unresolved (2026-11-28):** Colusa Indian Community —
+  colusa-nsn.gov/government/economic-development/ ("CICC Operations")
+  literally exists but search could not confirm it enumerates the
+  tribe's enterprises (casino, energy, utility authority).
+- **Virginia's 2018 cohort is nearly all negative** (Rappahannock,
+  Chickahominy ×2, Nansemond, Monacan) — Upper Mattaponi is the
+  exception via its enterprise page.
+- Single-enterprise-in-prose leads for the corroboration file: Kipnuk
+  Light Plant (DOE-documented tribally owned utility), Tununak Native
+  Store, Karluk's Mary's Creek Cabin, Larsen Bay's tribally owned farm,
+  Gambell/Savoonga Native Stores (ANCSA opt-outs, no corp trap).
+- Ledger after integration: **482 of ~575 BIA entities checked** (117
+  with source rows, 365 negatives-only), ~101 unchecked — the remainder
+  is mostly middle-Kuskokwim/upper-Yukon villages (Georgetown, Stony
+  River, Lime Village, Portage Creek, Tuluksak, the Kalskags, Aniak
+  corridor…), the rest of the NANA/North Slope stragglers, and scattered
+  small lower-48 bands.
+
 ## Follow-ups
 
 1. Fetch-verify the 7 new rows at page level (egress unblock or local run).
