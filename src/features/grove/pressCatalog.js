@@ -61,10 +61,12 @@ export const PRESS_TIERS = Object.freeze([
     price: 1000,
     question: "Understand the systems behind it.",
     // Both axes, said here rather than left to the question. "Systems"
-    // describes the four specialized collections and says nothing about the
-    // archive, and the archive is half of what this tier sells.
+    // describes the five specialized collections and says nothing about the
+    // archive, and the archive is half of what this tier sells. The list
+    // names every pro-shelf collection: the Owned dataset joined the shelf,
+    // and a promise that omits a collection undersells the tier.
     promise:
-      "Federal contracting, subcontracting, resource revenue and the nonprofit sector, plus the full reconstructed archive behind every Cedar Press collection.",
+      "Federal contracting, subcontracting, resource revenue, individually owned Native businesses and the nonprofit sector, plus the full reconstructed archive behind every Cedar Press collection.",
     historyNote: "Full reconstructed series wherever one exists.",
   }),
   Object.freeze({
@@ -450,9 +452,9 @@ export const GROVE_INCLUDES = Object.freeze([
     name: "Everything in Cedar Press+",
     kind: "rollup",
     shelf: "pro",
-    blurb: "The four specialized collections and the reconstructed archive behind every Cedar Press collection.",
+    blurb: "The five specialized collections and the reconstructed archive behind every Cedar Press collection.",
     linkage:
-      "Contracting, subcontracting, resources and nonprofits, all rolled up to the parent nation or corporation.",
+      "Contracting, subcontracting, resources, individually owned Native businesses and nonprofits: awards roll up to the parent nation or corporation, and each owned business carries its certifying nation.",
   }),
 ]);
 
