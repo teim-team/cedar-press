@@ -19,7 +19,7 @@ const ACCOUNT = { email: "press@cedarpress.ai", password: "cedar-demo-2026" };
 /** The pages behind the gate, by the route a reader reaches them at. */
 const SECTIONS = [
   { name: "Articles", path: "/articles" },
-  { name: "Data", path: "/data" },
+  { name: "Collections", path: "/data" },
   { name: "What's new", path: "/whats-new" },
   { name: "Methods", path: "/methods" },
   { name: "Settings", path: "/settings" },

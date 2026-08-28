@@ -335,6 +335,13 @@ export const NATIVE_LINKAGE = Object.freeze({
   // are not Native at all, and a claim the data cannot keep is worse than a
   // duller one it can.
   claim: "Every record gets the right context.",
+  // The door-sized version, for the gate's collection-name strip: the one
+  // sentence that keeps eleven federal-sounding names from reading as
+  // keyword filters over open data. Same discipline as `claim`: connected
+  // to the Native entities each record touches, never "every record is
+  // Native", which the counterparties would break.
+  door:
+    "Not keyword filters: every collection is connected to the tribal governments, tribal enterprises, ANCs, NHOs and Native organizations it touches, with names, ownership and affiliations maintained over time.",
   body:
     "Cedar connects changing names, ownership, affiliations, subsidiaries, governments, organizations, transactions and policy activity over time. Tribal governments, tribal enterprises, ANCs, NHOs, Native-owned businesses, Native-led organizations, Native-serving organizations and relevant counterparties remain distinct rather than being collapsed into one broad category.",
   hard: "The records may be public. The maintained relationships are Cedar's work.",

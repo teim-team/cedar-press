@@ -53,7 +53,7 @@ function sections() {
     },
     {
       id: "data",
-      label: "Data",
+      label: "Collections",
       to: PRESS_DATA_PATH,
       icon: DataIcon,
       meta: `${collections.length} collections`,

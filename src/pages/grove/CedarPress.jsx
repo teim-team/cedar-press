@@ -38,6 +38,13 @@ import { Contours } from "./pressAtmosphere";
 import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
 import PressAd from "./PressAd";
+import { LAUNCH_COLLECTION } from "../../features/grove/collection";
+import { PRESS_ARTICLES } from "../../features/grove/pressArticles";
+import {
+  PRESS_DATA_PATH,
+  PRESS_WHATS_NEW_PATH,
+  pressArticlePath,
+} from "../../features/grove/pressRoutes";
 import PressGate from "./PressGate";
 import PressHub from "./PressHub";
 
@@ -57,6 +64,16 @@ export default function CedarPress() {
     );
   }
 
+  // Newest hosted brief: the strip is newest-first, and an external piece
+  // opens on TBN, which is not "read it here".
+  const latestBrief = PRESS_ARTICLES.find((article) => article.hosted);
+  // Cedar's suggestions on the overview: one real question per level, each
+  // already scoped to a collection so every suggestion is answerable today.
+  const cedarExamples = [
+    { q: "How was this collection constructed?", scope: LAUNCH_COLLECTION[1] },
+    { q: "What are its headline figures?", scope: LAUNCH_COLLECTION[2] },
+    { q: "What does this collection cover?", scope: LAUNCH_COLLECTION[3] },
+  ].map((item) => ({ q: item.q, scope: { id: item.scope.id, name: item.scope.name } }));
   return (
     <div className="teim-rd teim-rd--paper">
       <main id="cp-main" className="cp cp-page cp--screens cp--deepfoot">
@@ -82,11 +99,32 @@ export default function CedarPress() {
               and entity resolution and stays current as new information becomes available.
             </p>
           </section>
+          {/* The first question a signed-in reader has is "what do I do
+              now?", and six doors answer "what exists" without answering
+              that. Four verbs, each real: the newest hosted brief is looked
+              up, not hardcoded, and Ask Cedar opens the assistant that can
+              answer the other three. */}
+          <nav className="cp-start" aria-label="Start here">
+            <button
+              type="button"
+              className="cp-start__act"
+              onClick={() => window.dispatchEvent(new CustomEvent("cedar:open"))}
+            >
+              Ask Cedar <span aria-hidden="true">&#8594;</span>
+            </button>
+            <Link className="cp-start__act" to={PRESS_DATA_PATH}>
+              Explore the collections <span aria-hidden="true">&#8594;</span>
+            </Link>
+            {latestBrief ? (
+              <Link className="cp-start__act" to={pressArticlePath(latestBrief.id)}>
+                Read the latest brief <span aria-hidden="true">&#8594;</span>
+              </Link>
+            ) : null}
+            <Link className="cp-start__act" to={PRESS_WHATS_NEW_PATH}>
+              See what changed <span aria-hidden="true">&#8594;</span>
+            </Link>
+          </nav>
           <PressHub />
-          {/* Under the sections, inside their region rather than on the seam
-              below it — rule 4. The overview names no figures, so this is the
-              one page where a unit is nowhere near a number. */}
-          <PressAd slot={AD_SLOT.OVERVIEW} />
         </div>
 
         {/* Screen two: the close and the footer, as one ending. The ending is
@@ -95,6 +133,12 @@ export default function CedarPress() {
             product should end on the maintenance — and the footer is the last
             of it rather than a separate strip below the last of it. */}
         <div className="cp-screen cp-end">
+        {/* Sponsorship rides the ending, not the arrival: a signed-in
+            reader's first screen is for using the product, and the close is
+            where a page pauses anyway. Still inside a region rather than on
+            a seam — rule 4 — and the overview names no figures, so a unit
+            is nowhere near a number. */}
+        <PressAd slot={AD_SLOT.OVERVIEW} />
         <section className="cp-surf cp-surf--deep cp-close" id="more" aria-label="What happens next">
           <Contours strength={1.2} />
           <div className="cp-close__in">
@@ -132,7 +176,7 @@ export default function CedarPress() {
           <PressFoot deep />
         </div>
 
-        <PressCedarFab />
+        <PressCedarFab examples={cedarExamples} />
           </>
         )}
       </main>
