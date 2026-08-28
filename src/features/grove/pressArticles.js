@@ -84,6 +84,61 @@ export const LUMECON_URL = "https://lumecon.ai";
 
 export const PRESS_ARTICLES = Object.freeze([
   Object.freeze({
+    id: "brief-owned",
+    hosted: true,
+    image: "/pitch/lanes/construction-wide.webp",
+    imageAlt: "Crews working a large construction site",
+    caption:
+      "White Earth Nation's certified list runs heavily to the building trades: construction, drywall, tile and site services, most of it first-preference certified.",
+    datasetId: "owned",
+    draws: Object.freeze(["owned"]),
+    tag: "Original Research",
+    title: "The first nation-shared roster of individually owned Native businesses is in",
+    dek: "White Earth Nation's TERO shared its certified Indian-owned business list directly with the project, the first roster in a consent-first dataset of the businesses no federal register counts.",
+    date: "August 2026",
+    byline: "Elijah S. Moreno",
+    minutes: 3,
+    body: Object.freeze([
+      Object.freeze({
+        kind: BLOCK.P,
+        text:
+          "Federal datasets count Native entity-owned enterprises well: tribally owned firms, ANC and NHO subsidiaries, 8(a) participants. What they do not count is the individually owned side of Indian Country's economy, the businesses certified not by a federal registry but by their own nations' TERO and commerce offices. Those certification lists exist, office by office, and no public source collates them.",
+      }),
+      Object.freeze({
+        kind: BLOCK.P,
+        text:
+          "The Owned collection is built to close that gap the only defensible way: by asking. Each nation's office is approached directly, each decides whether and how its list may be used, and a roster enters the dataset only under the terms its office states. White Earth Nation's TERO answered first, sharing its current Certified Indian Owned Businesses list the morning after the request went out.",
+      }),
+      Object.freeze({
+        kind: BLOCK.PULL,
+        text: "Nothing overrides what a nation says about its own certified businesses.",
+      }),
+      Object.freeze({ kind: BLOCK.H2, text: "What one roster shows" }),
+      Object.freeze({
+        kind: BLOCK.P,
+        text:
+          "White Earth's list certifies 22 individually owned businesses, 17 of them at first preference, concentrated in the building trades: construction, drywall, tile, tree and site services. That is one nation's certified economy in a single sheet, and it is exactly the layer the federal registers miss, because none of these firms needs a federal registration to work tribal preference contracts at home.",
+      }),
+      Object.freeze({
+        kind: BLOCK.IMAGE,
+        src: "/pitch/lanes/professional-wide.webp",
+        alt: "A meeting around a conference table",
+        caption:
+          "Each nation's office decides the terms: publication, aggregates only, or a process of its own design.",
+      }),
+      Object.freeze({
+        kind: BLOCK.P,
+        text:
+          "One roster is a beginning, not a finding. The outreach wave behind it spans TERO and commerce offices across the country, and the early responses already sketch the range of governance the dataset has to respect: one office is taking the request to its commission for formal review, and another keeps its list confidential but is forwarding the invitation to its businesses so each can opt in itself. Both of those are good outcomes. A dataset assembled on those terms is slower, and it is the only version of this dataset worth building.",
+      }),
+      Object.freeze({
+        kind: BLOCK.P,
+        text:
+          "Until each nation confirms how its listings may appear, its businesses show up here in aggregates only, credited to the office that certified them. As terms land, the entity rows follow.",
+      }),
+    ]),
+  }),
+  Object.freeze({
     id: "brief-deals",
     hosted: true,
     image: "/pitch/lanes/professional-wide.webp",

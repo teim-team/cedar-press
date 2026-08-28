@@ -208,6 +208,18 @@ export const PRESS_CATALOG = Object.freeze([
       "Production and disbursements matched to the nations and allottees they belong to.",
   }),
   Object.freeze({
+    id: "owned",
+    short: "Owned Businesses",
+    name: "Individually Owned Native Businesses",
+    shelf: "pro",
+    standardFrom: 2026,
+    historyFrom: 2026,
+    blurb:
+      "Individually owned Native businesses, certified by their own nations' TERO and commerce offices and shared with the project office by office. The businesses no federal register counts: who they are, what trades they work and what preference status their nation certifies.",
+    linkage:
+      "Every listing carries the nation whose office certified it, appears only under that nation's stated terms, and is credited to the issuing TERO or commerce office.",
+  }),
+  Object.freeze({
     id: "nonprofits",
     short: "Native Nonprofits",
     name: "Native Nonprofits",

@@ -31,11 +31,24 @@ SHELF_BY_TIER: dict[str, str] = {
     "tree": "grove",
 }
 
+#: Shelves nest upward: a plan that reaches "pro" also reaches "standard",
+#: mirroring SHELF_ORDER in ``features/grove/pressAccess.js``.
+SHELF_ORDER: tuple[str, ...] = ("standard", "pro", "grove")
+
+
+def _reaches(tier: str, dataset_shelf: str) -> bool:
+    """Whether this plan's shelf includes a dataset placed on ``dataset_shelf``."""
+    shelf = SHELF_BY_TIER.get(tier)
+    if shelf is None or dataset_shelf not in SHELF_ORDER:
+        return False
+    return SHELF_ORDER.index(dataset_shelf) <= SHELF_ORDER.index(shelf)
+
 
 def _dataset_payload(dataset: Any) -> dict[str, Any]:
     """One collection, in the shape the shelf reads."""
     return {
         "id": dataset.id,
+        "shelf": dataset.shelf,
         "name": dataset.name,
         "shortName": dataset.short_name,
         "tracks": dataset.tracks,
@@ -52,22 +65,23 @@ def _dataset_payload(dataset: Any) -> dict[str, Any]:
 def collections_for(tier: str) -> list[dict[str, Any]]:
     """The collections a plan may open.
 
-    Today the launch collection is the whole catalog and every press tier
-    reaches all of it; when the shelves diverge this filters on the tier's
-    shelf rather than returning everything and letting the client hide the
-    rest, because hiding is not withholding.
+    The shelves diverged with the Owned dataset (pro and above), so this
+    filters on the tier's reach rather than returning everything and letting
+    the client hide the rest, because hiding is not withholding.
     """
-    shelf = SHELF_BY_TIER.get(tier)
-    if shelf is None:
-        return []
-    return [_dataset_payload(dataset) for dataset in launch.LAUNCH_COLLECTION]
+    return [
+        _dataset_payload(dataset)
+        for dataset in launch.LAUNCH_COLLECTION
+        if _reaches(tier, dataset.shelf)
+    ]
 
 
 def may_open(tier: str, collection_id: str) -> bool:
     """Whether this plan includes this collection."""
-    if SHELF_BY_TIER.get(tier) is None:
-        return False
-    return any(dataset.id == collection_id for dataset in launch.LAUNCH_COLLECTION)
+    return any(
+        dataset.id == collection_id and _reaches(tier, dataset.shelf)
+        for dataset in launch.LAUNCH_COLLECTION
+    )
 
 
 def collection_csv(collection_id: str) -> str | None:
