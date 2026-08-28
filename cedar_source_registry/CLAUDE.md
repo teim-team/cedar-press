@@ -55,7 +55,14 @@ status is never evidence of citizenship in a particular tribe.
 ## Field semantics worth knowing
 
 - `status_group`: `Live` (scrapeable now) / `Stale` / `Historical` / `Lead`
-  (partnership evidence only) / `Complementary` (cross-reference).
+  (partnership evidence only) / `Complementary` (cross-reference) / `Obtained`
+  (roster in hand but **not** published at a pollable URL — supplied by the
+  Nation or by the owner, so it refreshes by re-asking, never by crawling).
+  `Obtained` is deliberately not `Live`: conflating them would put a scraper on
+  a URL that does not serve the roster.
+- **Publication rights are separate from possession.** Holding a roster does not
+  license republishing it. An `Obtained` source stays unpublished until the
+  Nation confirms; the `caveats` field carries that state.
 - `scrape_grade` (A+–D) and `automation_score` (5–1) grade the *acquisition*, not
   the evidentiary weight — a D-grade Tribal Partnership lead still outranks an
   A+ chamber directory as evidence.
@@ -100,9 +107,32 @@ jq '{source_id, nation_source, recommended_next_step, source_url}' partnership_l
 jq '{source_id, source, result}' verification_log.jsonl
 ```
 
+## Cross-platform: always declare an encoding
+
+This repo is written on Linux runners (UTF-8 default) and also run on the
+owner's Windows machine (cp1252 default). **Every text-mode file operation must
+name its encoding**, including `subprocess.run(..., text=True)`, which decodes
+with the locale unless told otherwise.
+
+Fixed 2026-08-28 (30 call sites + one subprocess): before that, on Windows,
+`check_integrity.py` reported 10 false join failures — it read `—` (the
+deliberate "not tied to one source" marker in `verification_log.jsonl`) as
+`â€"` — and the append-only guard could **never** pass, because the working file
+was read as UTF-8 while the git baseline came back as cp1252. Both are safety
+properties that were silently off on one host and on on the other. Worse, three
+tools *wrote* without an encoding, so the mangling was persisted into the data
+(see the `â€"` still embedded in a Lumbee row).
+
+**A check that fails for an environmental reason trains people to ignore the
+gate.** Ten permanent FAILs are indistinguishable from noise.
+
 ## Do not
 
 - Do not treat `directory_url` liveness as re-verified unless `last_checked` says 2026-08-27.
+- Do not project a Counter onto a hardcoded display vocabulary with
+  `{k: c[k] for k in ORDER if c[k]}` — that silently drops any new value.
+  `build_summary.ordered()` appends unknown keys instead. Vocabulary drift must
+  surface as a new key, never as a missing count.
 - Do not promote a Lead to coverage without obtaining the roster.
 - Do not merge records across sources on name alone; `schema/source_record.schema.json` is the binding contract for
   the per-source assertion layer (one row per business *appearance in one source*),

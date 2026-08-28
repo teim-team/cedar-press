@@ -34,7 +34,7 @@ def err(msg: str) -> None:
 
 def load_jsonl(name: str) -> list[dict]:
     rows = []
-    for i, line in enumerate((ROOT / name).read_text().splitlines(), 1):
+    for i, line in enumerate((ROOT / name).read_text(encoding="utf-8").splitlines(), 1):
         if not line.strip():
             continue
         try:
@@ -76,7 +76,7 @@ def main() -> int:
                     err(f"{name}: duplicate {key} {sid} ({n} rows)")
 
     # summary.json counts must be computed — every computed block is checked.
-    summary = json.loads((ROOT / "summary.json").read_text())
+    summary = json.loads((ROOT / "summary.json").read_text(encoding="utf-8"))
     if summary["total_source_programs"] != len(sources):
         err(
             f"summary.json total_source_programs {summary['total_source_programs']}"
@@ -107,15 +107,15 @@ def main() -> int:
         err("jsonschema not installed — run `pip install jsonschema`; "
             "schema validation is a required check")
     else:
-        sr_schema = json.loads((ROOT / "schema/source_record.schema.json").read_text())
+        sr_schema = json.loads((ROOT / "schema/source_record.schema.json").read_text(encoding="utf-8"))
         he_schema = json.loads(
-            (ROOT / "schema/harmonized_entity.schema.json").read_text()
+            (ROOT / "schema/harmonized_entity.schema.json").read_text(encoding="utf-8")
         )
         for i, rec in enumerate(load_jsonl("templates/source_record.example.jsonl"), 1):
             for e in jsonschema.Draft202012Validator(sr_schema).iter_errors(rec):
                 err(f"templates/source_record.example.jsonl:{i}: {e.message}")
         entity = json.loads(
-            (ROOT / "templates/harmonized_entity.example.json").read_text()
+            (ROOT / "templates/harmonized_entity.example.json").read_text(encoding="utf-8")
         )
         for e in jsonschema.Draft202012Validator(he_schema).iter_errors(entity):
             err(f"templates/harmonized_entity.example.json: {e.message}")
@@ -159,7 +159,7 @@ def main() -> int:
         ] + [
             n.get("nation_id")
             for n in json.loads(
-                (ROOT / "templates/harmonized_entity.example.json").read_text()
+                (ROOT / "templates/harmonized_entity.example.json").read_text(encoding="utf-8")
             ).get("nations", [])
         ]
         for nid in template_nids:
@@ -172,7 +172,17 @@ def main() -> int:
     # HEAD comparison alone is vacuous).
     def git(*args: str) -> subprocess.CompletedProcess:
         return subprocess.run(
-            ["git", *args], capture_output=True, text=True, cwd=ROOT
+            ["git", *args],
+            capture_output=True,
+            text=True,
+            # Without an explicit encoding, text=True decodes git's stdout with
+            # the locale encoding (cp1252 on Windows). The working file is read
+            # as UTF-8, so every baseline line containing a non-ASCII byte would
+            # differ and the append-only guard would fail permanently on Windows
+            # while passing on the Linux runners.
+            encoding="utf-8",
+            errors="replace",
+            cwd=ROOT,
         )
 
     try:
@@ -180,7 +190,7 @@ def main() -> int:
         mb = git("merge-base", "HEAD", "origin/main")
         if mb.returncode == 0 and mb.stdout.strip():
             baselines.append(mb.stdout.strip())
-        new = (ROOT / "verification_log.jsonl").read_text().splitlines()
+        new = (ROOT / "verification_log.jsonl").read_text(encoding="utf-8").splitlines()
         for ref in baselines:
             shown = git("show", f"{ref}:cedar_source_registry/verification_log.jsonl")
             if shown.returncode != 0:

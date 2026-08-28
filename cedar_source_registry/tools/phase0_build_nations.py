@@ -699,7 +699,7 @@ def _norm_name(x: str) -> str:
 
 def load_official():
     data = json.loads(
-        (ROOT / "research" / "bia_list_2026-01-30" / "entities.json").read_text()
+        (ROOT / "research" / "bia_list_2026-01-30" / "entities.json").read_text(encoding="utf-8")
     )
     entries = data["entries"]
     index = {}
@@ -1073,7 +1073,7 @@ def nation_rows() -> list[dict]:
 
 def main() -> None:
     nations = nation_rows()
-    with (ROOT / "nations.jsonl").open("w") as f:
+    with (ROOT / "nations.jsonl").open("w", encoding="utf-8") as f:
         for row in nations:
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
@@ -1084,7 +1084,7 @@ def main() -> None:
     # explicit scope override means the map is out of date (new or renamed
     # source row). Fail before writing rather than silently downgrading an
     # existing mapping to nation_ids: [] / nation_scope: unknown.
-    src_rows = [json.loads(line) for line in src_path.read_text().splitlines()]
+    src_rows = [json.loads(line) for line in src_path.read_text(encoding="utf-8").splitlines()]
     unmapped_tribal = [
         (s["source_id"], s["nation_source"])
         for s in src_rows
@@ -1118,7 +1118,7 @@ def main() -> None:
         rebuilt["nation_ids"] = ids
         rebuilt["nation_scope"] = scope
         out_lines.append(json.dumps(rebuilt, ensure_ascii=False))
-    src_path.write_text("\n".join(out_lines) + "\n")
+    src_path.write_text("\n".join(out_lines) + "\n", encoding="utf-8")
 
     print(f"nations.jsonl: {len(nations)} rows")
 
