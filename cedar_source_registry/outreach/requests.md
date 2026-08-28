@@ -196,3 +196,14 @@ Reply check scheduled ~2026-09-11 alongside wave 1.
   conversion in verification_log.jsonl.
 - If a nation declines or sets terms, record the terms in the registry row's
   caveats and honor them; declining is a valid permanent outcome.
+
+## Sending mechanics (lesson log)
+
+- **Paragraph spacing in HTML email (2026-08-28):** Outlook strips/zeroes
+  default `<p>` margins when rendering, so bare `<p>` paragraphs collapse
+  together with no blank line between them (this happened on the 8/28
+  follow-ups to White Earth and Kiowa). The 8/27 outreach batch rendered
+  correctly because every paragraph carried explicit inline margins. Rule for
+  all future sends through the mail connector: write each paragraph as
+  `<p style="margin-top:1em;margin-bottom:1em">...</p>` (or separate blocks
+  with explicit `<br>` pairs); never rely on default paragraph spacing.
