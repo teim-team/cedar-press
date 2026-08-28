@@ -55,7 +55,7 @@ import {
   collectionsOnShelf,
 } from "../../features/grove/pressCatalog";
 import { freshnessLine } from "../../features/grove/pressReleases";
-import { TBN_URL } from "../../features/grove/pressArticles";
+import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection";
 import { COLLECTION_ICONS } from "./pressCollectionIcons";
 import { TierName } from "./TierName";
@@ -374,8 +374,9 @@ function Band({ tier, user, index }) {
             </a>
           ) : (
             // Press tiers are sold by Tribal Business News; /app cannot
-            // perform this upgrade, so the click goes where the action lives.
-            <a className="cp-band__cta" href={TBN_URL} target="_blank" rel="noreferrer">
+            // perform this upgrade, so the click goes to the plans page
+            // where the action actually lives.
+            <a className="cp-band__cta" href={TBN_PLANS_URL} target="_blank" rel="noreferrer">
               Get <TierName name={tier.name} /> at Tribal Business News{" "}
               <span aria-hidden="true">&#8594;</span>
             </a>

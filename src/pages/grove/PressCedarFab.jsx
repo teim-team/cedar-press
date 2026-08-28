@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { askCedar } from "../../api.js";
 import { appUrl } from "../../features/grove/appLink.js";
+import { TBN_PLANS_URL } from "../../features/grove/pressArticles.js";
 import { isConnected } from "../../config.js";
 import { EVENT, track, trackError } from "../../features/grove/telemetry.js";
 
@@ -201,7 +202,7 @@ export function PressCedarFab({ gated = null, examples = [] }) {
                   {gated === "unentitled"
                     ? "Upgrade through your"
                     : "Log in above, or get Cedar Press through a"}{" "}
-                  <a href="https://tribalbusinessnews.com/subscribe" target="_blank" rel="noreferrer">
+                  <a href={TBN_PLANS_URL} target="_blank" rel="noreferrer">
                     Tribal Business News membership
                   </a>.
                 </p>

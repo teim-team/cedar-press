@@ -26,7 +26,7 @@ import { Link } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
 import { activatePressAccount, validatePressCode } from "../../api";
-import { LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
+import { LUMECON_URL, TBN_PLANS_URL, TBN_URL } from "../../features/grove/pressArticles";
 import {
   PRESS_METHODS_PATH,
   PRESS_REQUEST_PATH,
@@ -96,8 +96,6 @@ const PROOF_POINTS = [
     icon: CedarIcon,
   },
 ];
-
-const TBN_PLANS_URL = `${TBN_URL}/subscribe`;
 
 // Questions the gate suggests to Cedar: enough to show what the product
 // answers, none requiring data the visitor is not yet entitled to see.
@@ -211,17 +209,17 @@ export default function PressGate({ user }) {
         <div className="auth-hero__inner cp-hero2__inner">
           <span className="cp-split__brand">Cedar Press</span>
           <p className="cp-hero2__tagline">Trusted intelligence for Indian Country.</p>
-          {/* Brand line above, product line below, and the same headline the
-              reader carries. It deliberately does not repeat the tier lines:
-              the shelves explain the ladder, and a hero that encodes the
-              pricing model has to be rewritten every time the pricing model
-              moves. */}
+          {/* Two messages, on purpose: the door sells the asset ("this is
+              the data you should want access to"), the signed-in overview
+              keeps the editorial "Know what's shaping Indian Country."
+              ("here's what you can do with it"). Neither repeats the tier
+              lines: the shelves explain the ladder. */}
           <h1 className="auth-hero__headline cp-hero2__headline">
-            Know what&rsquo;s shaping Indian Country.
+            The data behind Indian Country.
           </h1>
           <p className="auth-hero__lede cp-hero2__lede">
-            Original intelligence collections, data-driven insights, transparent research and
-            Cedar, your AI economic analyst, built to make Indian Country easier to understand.
+            Original collections built from fragmented records, connected through original
+            research, and maintained as Indian Country changes.
           </p>
           <ul className="cp-proof">
             {PROOF_POINTS.map((point) => (
@@ -516,18 +514,20 @@ export default function PressGate({ user }) {
               Both pages are public. */}
           <div className="cp-gate__other">
             <span className="cp-gate__othercap">Other ways to work with Cedar Press</span>
-            <Link className="cp-gate__otherlink" to={PRESS_RESEARCH_PATH}>
-              <b>Research access <span aria-hidden="true">&#8594;</span></b>
-              <span className="cp-gate__otherdesc">
-                For researchers, journalists, students, nonprofits and public-interest projects
-                needing one or two collections for a defined project.
-              </span>
-            </Link>
+            {/* Governance before commerce: a nation's right to its own
+                records leads, and the project pathway follows. */}
             <Link className="cp-gate__otherlink" to={PRESS_REQUEST_PATH}>
               <b>Tribal government data requests <span aria-hidden="true">&#8594;</span></b>
               <span className="cp-gate__otherdesc">
                 Federally recognized tribal governments can request and review the Cedar records
                 associated with their nation. No subscription required.
+              </span>
+            </Link>
+            <Link className="cp-gate__otherlink" to={PRESS_RESEARCH_PATH}>
+              <b>Research access <span aria-hidden="true">&#8594;</span></b>
+              <span className="cp-gate__otherdesc">
+                For researchers, journalists, students, nonprofits and public-interest projects
+                needing one or two collections for a defined project.
               </span>
             </Link>
           </div>

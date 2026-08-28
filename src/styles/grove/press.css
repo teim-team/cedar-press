@@ -600,22 +600,41 @@
   .teim-rd .cp-proof__label { grid-column: 2; grid-row: 1; }
   .teim-rd .cp-proof__body { grid-column: 2; grid-row: 2; opacity: 1; }
 }
+/* On a wide desktop the four proofs run as one row, so the hero spends one
+ * card-height on them instead of two and everything below sits a screen
+ * higher. Narrower splits keep their layouts above: four across there
+ * crushes the hover text. The cards drop the square ratio for a shared
+ * fixed height, and the icons scale to the narrower column. After every
+ * other proof rule, so these overrides win the cascade. */
+@media (min-width: 1251px) {
+  .teim-rd .cp-proof { grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: none; }
+  .teim-rd .cp-proof__item { aspect-ratio: auto; min-height: 11.5rem; padding: 0.85rem 0.7rem; }
+  .teim-rd .cp-proof__ic svg { width: 58px; height: 58px; }
+  .teim-rd .cp-proof__body { font-size: 0.74rem; line-height: 1.4; }
+}
 
 .teim-rd .cp-split__method { display: inline-block; margin-top: 2rem; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #fff; text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, 0.6); padding-bottom: 3px; transition: border-color 0.18s ease; }
 .teim-rd .cp-split__method:hover { border-color: #fff; }
 
 /* Access, and nothing else. */
 .teim-rd .cp-split__form { width: min(100%, 25rem); margin-inline: auto; }
-/* The form column top-aligns with the hero's headline instead of floating
- * at the panel's vertical center (the platform's .auth-editorial margin:
- * auto): the sign-in block is short, and centering it pushed the
- * non-subscription pathways below the fold. The padding mirrors the hero's
- * own top padding plus its brand-and-tagline block (~4.7rem), so "Cedar
- * Press is available..." sits level with "Know what's shaping Indian
- * Country." across widths. Desktop only: on phones the form leads the page
- * and keeps its own padding. */
-@media (min-width: 881px) {
-  .teim-rd .cp-split.auth-split .auth-editorial { margin: 0 auto; padding-top: calc(clamp(2.5rem, 5.5vw, 5.5rem) + 4.7rem); }
+/* The form column top-aligns with the hero's "CEDAR PRESS" brand line
+ * instead of floating at the panel's vertical center (the platform's
+ * .auth-editorial margin: auto): the sign-in block is short, and centering
+ * it pushed the non-subscription pathways below the fold. The mono partner
+ * line is the element that lands level with the mono brand line — the two
+ * eyebrows pair, and the big title pairs with the headline below them. The
+ * padding mirrors the hero's own top padding. Only on the actual
+ * two-column layout (the split stacks at 1050px, and the stacked form
+ * panel leads the page with its own compact padding — Codex caught this
+ * rule bleeding into that range and re-inflating it). */
+@media (min-width: 1051px) {
+  /* The narrowed split (to 1250px) shrinks the hero's padding, so the
+   * mirror shrinks with it. */
+  .teim-rd .cp-split.auth-split .auth-editorial { margin: 0 auto; padding-top: clamp(1.6rem, 3.2vw, 3rem); }
+}
+@media (min-width: 1251px) {
+  .teim-rd .cp-split.auth-split .auth-editorial { padding-top: clamp(2.5rem, 5.5vw, 5.5rem); }
 }
 /* The title states the entitlement rule in a full sentence, so it sets
  * tighter than a two-word heading would. */
@@ -872,12 +891,9 @@
 /* What the section holds right now, read from the catalog: a label alone
  * says where a tap goes, this says whether it is worth taking. */
 .teim-rd .cp-hub__meta { font-family: var(--mono); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-/* The ?: its own control beside the tile's link, never inside it, because a
- * button inside an anchor is two answers to one tap. Footnote-sized, with a
- * 48px target under it. */
-.teim-rd .cp-hub__help { position: absolute; top: 0.5rem; right: 0.5rem; z-index: 1; width: 2rem; height: 2rem; border-radius: 50%; border: 1px solid var(--teal-line); background: var(--bg); color: var(--dteal); font-family: var(--mono); font-size: 0.82rem; font-weight: 700; line-height: 1; cursor: help; }
-.teim-rd .cp-hub__help::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; }
-.teim-rd .cp-hub__help:hover, .teim-rd .cp-hub__help[aria-expanded="true"] { background: var(--teal-tint); border-color: var(--teal); }
+/* The line under the grid, painted by pointing at a tile — the same
+ * point-to-read language as the shelves, with no second control on the
+ * tile. min-height holds two lines so the page never jumps. */
 .teim-rd .cp-hub__note { max-width: 68ch; min-height: 2.6em; margin: 1rem 0 0; font-size: 0.95rem; line-height: 1.55; color: var(--ink-2); }
 /* Phones: a strict 2x3, the squares scaling with the screen rather than
  * wrapping to a single column. */

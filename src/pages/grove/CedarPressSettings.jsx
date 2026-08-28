@@ -17,7 +17,7 @@ import { Link } from "react-router";
 import { useAuth } from "../../context/useAuth";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
 import { WORK_KINDS, loadWork, saveWork } from "../../features/grove/readerWork.js";
-import { LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
+import { LUMECON_URL, TBN_PLANS_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_TIERS } from "../../features/grove/pressCatalog";
 import { PRESS_REQUEST_PATH, PRESS_RESEARCH_PATH } from "../../features/grove/pressRoutes";
 import { resolveTier } from "../../workspaceTier.js";
@@ -149,7 +149,7 @@ export default function CedarPressSettings() {
             <div className="cp-set__acts">
               <a
                 className="gv-btn gv-btn--primary"
-                href={`${TBN_URL}/cedar-press`}
+                href={TBN_PLANS_URL}
                 target="_blank"
                 rel="noreferrer"
               >

@@ -80,6 +80,11 @@ export const BLOCK = Object.freeze({
 import { CHART } from "./pressCharts.js";
 
 export const TBN_URL = "https://tribalbusinessnews.com";
+/** The one page where Cedar Press plans are bought, upgraded and managed.
+ * Every "view plans" / "upgrade" / "manage membership" action points here:
+ * TBN owns billing, and a guessed deeper path (a /cedar-press page that does
+ * not exist) strands the one reader who is trying to pay. */
+export const TBN_PLANS_URL = `${TBN_URL}/subscribe`;
 export const LUMECON_URL = "https://lumecon.ai";
 
 export const PRESS_ARTICLES = Object.freeze([
