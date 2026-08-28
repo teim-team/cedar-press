@@ -97,6 +97,44 @@ evidence appended to the same JSONL with batch labels.
   Nation NY), crow-nsn.gov (MT ≠ Crow Creek SD), kickapootexas.org (TX ≠
   KS), metlakatla.ca (BC, Canada ≠ Annette Island).
 
+## Round 3 (2026-08-28)
+
+67 more tribes (Southern CA + Eastern Sierra, Northern CA Pomo country,
+Central CA + NV/UT/AZ stragglers, Southeast/Southcentral Alaska tribal
+governments) plus an org-level survey of the Alaska regional nonprofit
+consortia (`research/ak_consortia_survey_2026-08-28.jsonl`).
+
+- **2 new rows (TBD-176/177):** **Kawerak's Bering Strait Business
+  Directory** (beringstrait.biz — browsable regional directory with
+  individual business pages; covers local businesses generally, so
+  discovery/corroboration grade, never an ownership assertion) and the
+  **Hoonah Indian Association Business Directory List** (official-site
+  directory page; scope unknown, early inspection flagged).
+- **Fast-recheck unresolveds (2026-11-28):** Campo Kumeyaay — search
+  summaries twice referenced a "Campo Business Directory" on campo-nsn.gov
+  but no literal URL surfaced; Chilkat Indian Village (Klukwan) — site
+  snippets twice state a list of Klukwan weavers exists in an "Artist
+  Gallery" but the artist-list page never surfaced. Both likely exist.
+- **Enterprise-page inventory grew by ~10** (La Jolla's five named
+  enterprises, Sun'aq, Ione, Tuolumne/TEDA properties map, Mooretown,
+  Middletown, Robinson, Scotts Valley, Habematolel/Habemco, Coyote
+  Valley/CEDCO) — same hold-for-Phase-4 treatment.
+- **Alaska consortia as enumeration frames:** TCC (42 members; the FY23-28
+  477 Plan PDF enumerates villages), AVCP (56 tribes; CEDS PDF), APIA
+  (tribes page names all 13), BBNA (31; Regional Reference Guide PDF),
+  KANA (10), Chugachmiut (7), CRNA (6) — these are the practical frames
+  for sweeping Alaska's ~200 villages in future rounds; promoting the
+  strongest to Coverage Frame rows is a cheap follow-up if wanted. AFN's
+  convention Customary Art Fair (~170-180 Native artist vendors) has no
+  public roster (app-only per results); CITC's Indigenous Set Up Shop is a
+  Native-exclusive entrepreneur program with no published cohort. Maniilaq:
+  clean negative.
+- Small-band pattern held: most CA rancherias and SE Alaska villages have
+  government/service sites with no business registry — 62 more clean
+  negatives with recheck dates, including a caught false-positive trap
+  (a "TERO CERTIFIED BUSINESSES" PDF at pci-nsn.gov is Poarch, not
+  Pinoleville).
+
 ## Follow-ups
 
 1. Fetch-verify the 7 new rows at page level (egress unblock or local run).

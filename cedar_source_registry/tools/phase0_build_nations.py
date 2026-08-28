@@ -290,6 +290,74 @@ BIA = [
     ("craig-tribal-association", "Craig Tribal Association", ["Craig Community Association"], ["AK"]),
     ("native-village-of-barrow", "Native Village of Barrow Inupiat Traditional Government", ["Native Village of Barrow", "Utqiagvik"], ["AK"]),
     ("seldovia", "Seldovia Village Tribe", [], ["AK"]),
+    # Phase 3 round 3 (2026-08-28)
+    ("cahuilla-band", "Cahuilla Band of Indians", [], ["CA"]),
+    ("san-pasqual", "San Pasqual Band of Diegueno Mission Indians of California", ["San Pasqual Band of Mission Indians"], ["CA"]),
+    ("mesa-grande", "Mesa Grande Band of Diegueno Mission Indians of the Mesa Grande Reservation, California", ["Mesa Grande Band of Mission Indians"], ["CA"]),
+    ("santa-ysabel", "Iipay Nation of Santa Ysabel, California", ["Iipay Nation of Santa Ysabel"], ["CA"]),
+    ("jamul", "Jamul Indian Village of California", ["Jamul Indian Village"], ["CA"]),
+    ("la-jolla", "La Jolla Band of Luiseno Indians, California", ["La Jolla Band of Luiseno Indians"], ["CA"]),
+    ("pauma", "Pauma Band of Luiseno Mission Indians of the Pauma & Yuima Reservation, California", ["Pauma Band of Luiseno Indians"], ["CA"]),
+    ("campo", "Campo Band of Diegueno Mission Indians of the Campo Indian Reservation, California", ["Campo Kumeyaay Nation", "Campo Band of Mission Indians"], ["CA"]),
+    ("manzanita", "Manzanita Band of Diegueno Mission Indians of the Manzanita Reservation, California", ["Manzanita Band of Kumeyaay Nation"], ["CA"]),
+    ("los-coyotes", "Los Coyotes Band of Cahuilla and Cupeno Indians, California", ["Los Coyotes Band of Cahuilla and Cupeno Indians"], ["CA"]),
+    ("fort-independence", "Fort Independence Indian Community of Paiute Indians of the Fort Independence Reservation, California", ["Fort Independence Indian Community"], ["CA"]),
+    ("big-pine-paiute", "Big Pine Paiute Tribe of the Owens Valley", [], ["CA"]),
+    ("lone-pine", "Lone Pine Paiute-Shoshone Tribe", [], ["CA"]),
+    ("bridgeport-colony", "Bridgeport Indian Colony", [], ["CA"]),
+    ("utu-utu-gwaitu", "Utu Utu Gwaitu Paiute Tribe of the Benton Paiute Reservation, California", ["Utu Utu Gwaitu Paiute Tribe", "Benton Paiute"], ["CA"]),
+    ("timbisha", "Timbisha Shoshone Tribe", ["Death Valley Timbisha Shoshone"], ["CA", "NV"]),
+    ("graton", "Federated Indians of Graton Rancheria, California", ["Federated Indians of Graton Rancheria"], ["CA"]),
+    ("lytton", "Lytton Rancheria of California", [], ["CA"]),
+    ("dry-creek", "Dry Creek Rancheria Band of Pomo Indians, California", ["Dry Creek Rancheria Band of Pomo Indians"], ["CA"]),
+    ("cloverdale", "Cloverdale Rancheria of Pomo Indians of California", ["Cloverdale Rancheria of Pomo Indians"], ["CA"]),
+    ("kashia", "Kashia Band of Pomo Indians of the Stewarts Point Rancheria, California", ["Kashia Band of Pomo Indians"], ["CA"]),
+    ("manchester-point-arena", "Manchester Band of Pomo Indians of the Manchester Rancheria, California", ["Manchester-Point Arena Band of Pomo Indians"], ["CA"]),
+    ("hopland", "Hopland Band of Pomo Indians, California", ["Hopland Band of Pomo Indians"], ["CA"]),
+    ("middletown-rancheria", "Middletown Rancheria of Pomo Indians of California", ["Middletown Rancheria of Pomo Indians"], ["CA"]),
+    ("robinson-rancheria", "Robinson Rancheria of Pomo Indians of California", ["Robinson Rancheria"], ["CA"]),
+    ("scotts-valley", "Scotts Valley Band of Pomo Indians of California", ["Scotts Valley Band of Pomo Indians"], ["CA"]),
+    ("elem", "Elem Indian Colony of Pomo Indians of the Sulphur Bank Rancheria, California", ["Elem Indian Colony"], ["CA"]),
+    ("habematolel", "Habematolel Pomo of Upper Lake, California", ["Habematolel Pomo of Upper Lake"], ["CA"]),
+    ("koi-nation", "Koi Nation of Northern California", [], ["CA"]),
+    ("guidiville", "Guidiville Rancheria of California", ["Guidiville Rancheria"], ["CA"]),
+    ("pinoleville", "Pinoleville Pomo Nation, California", ["Pinoleville Pomo Nation"], ["CA"]),
+    ("coyote-valley", "Coyote Valley Band of Pomo Indians of California", ["Coyote Valley Band of Pomo Indians"], ["CA"]),
+    ("sherwood-valley", "Sherwood Valley Rancheria of Pomo Indians of California", ["Sherwood Valley Rancheria"], ["CA"]),
+    ("cahto", "Cahto Tribe of the Laytonville Rancheria", [], ["CA"]),
+    ("united-auburn", "United Auburn Indian Community of the Auburn Rancheria of California", ["United Auburn Indian Community"], ["CA"]),
+    ("wilton", "Wilton Rancheria, California", ["Wilton Rancheria"], ["CA"]),
+    ("shingle-springs", "Shingle Springs Band of Miwok Indians, Shingle Springs Rancheria, California", ["Shingle Springs Band of Miwok Indians"], ["CA"]),
+    ("ione", "Ione Band of Miwok Indians of California", ["Ione Band of Miwok Indians"], ["CA"]),
+    ("jackson-rancheria", "Jackson Band of Miwuk Indians", ["Jackson Rancheria Band of Miwuk Indians"], ["CA"]),
+    ("buena-vista", "Buena Vista Rancheria of Me-Wuk Indians of California", ["Buena Vista Rancheria of Me-Wuk Indians"], ["CA"]),
+    ("chicken-ranch", "Chicken Ranch Rancheria of Me-Wuk Indians of California", ["Chicken Ranch Rancheria of Me-Wuk Indians"], ["CA"]),
+    ("tuolumne", "Tuolumne Band of Me-Wuk Indians of the Tuolumne Rancheria of California", ["Tuolumne Band of Me-Wuk Indians"], ["CA"]),
+    ("mooretown", "Mooretown Rancheria of Maidu Indians of California", ["Mooretown Rancheria of Maidu Indians"], ["CA"]),
+    ("berry-creek", "Berry Creek Rancheria of Maidu Indians of California", ["Berry Creek Rancheria of Maidu Indians"], ["CA"]),
+    ("enterprise-rancheria", "Enterprise Rancheria of Maidu Indians of California", ["Enterprise Rancheria", "Estom Yumeka Maidu"], ["CA"]),
+    ("greenville", "Greenville Rancheria", [], ["CA"]),
+    ("lovelock", "Lovelock Paiute Tribe of the Lovelock Indian Colony, Nevada", ["Lovelock Paiute Tribe"], ["NV"]),
+    ("winnemucca-colony", "Winnemucca Indian Colony of Nevada", ["Winnemucca Indian Colony"], ["NV"]),
+    ("summit-lake", "Summit Lake Paiute Tribe of Nevada", ["Summit Lake Paiute Tribe"], ["NV"]),
+    ("skull-valley-goshute", "Skull Valley Band of Goshute Indians of Utah", ["Skull Valley Band of Goshute Indians"], ["UT"]),
+    ("san-juan-southern-paiute", "San Juan Southern Paiute Tribe of Arizona", ["San Juan Southern Paiute Tribe"], ["AZ"]),
+    ("yakutat", "Yakutat Tlingit Tribe", [], ["AK"]),
+    ("hoonah", "Hoonah Indian Association", [], ["AK"]),
+    ("wrangell", "Wrangell Cooperative Association", [], ["AK"]),
+    ("petersburg-indian-association", "Petersburg Indian Association", [], ["AK"]),
+    ("douglas-indian-association", "Douglas Indian Association", [], ["AK"]),
+    ("hydaburg", "Hydaburg Cooperative Association", [], ["AK"]),
+    ("kasaan", "Organized Village of Kasaan", [], ["AK"]),
+    ("kake", "Organized Village of Kake", [], ["AK"]),
+    ("angoon", "Angoon Community Association", [], ["AK"]),
+    ("chilkoot-haines", "Chilkoot Indian Association (Haines)", ["Chilkoot Indian Association"], ["AK"]),
+    ("chilkat-klukwan", "Chilkat Indian Village (Klukwan)", ["Chilkat Indian Village"], ["AK"]),
+    ("skagway", "Skagway Village", ["Skagway Traditional Council"], ["AK"]),
+    ("sunaq", "Sun'aq Tribe of Kodiak", ["Shoonaq' Tribe of Kodiak"], ["AK"]),
+    ("eklutna", "Native Village of Eklutna", [], ["AK"]),
+    ("ninilchik", "Ninilchik Village", ["Ninilchik Traditional Council"], ["AK"]),
+    ("curyung", "Curyung Tribal Council", ["Native Village of Dillingham"], ["AK"]),
 ]
 
 # Component reservations of the Minnesota Chippewa Tribe (one BIA entity).
@@ -436,6 +504,8 @@ NATION_SOURCE_MAP = {
     "Fort Belknap Indian Community": ["bia:fort-belknap"],
     "Houlton Band of Maliseet Indians": ["bia:houlton-maliseet"],
     "Shoshone-Paiute Tribes of the Duck Valley Reservation": ["bia:duck-valley"],
+    # Phase 3 round 3 sources
+    "Hoonah Indian Association": ["bia:hoonah"],
 }
 
 # source_id -> nation_scope for rows whose scope is not implied by the map
@@ -479,6 +549,7 @@ SCOPE_OVERRIDES = {
     "TBD-162": "regional",  # Washington OMWBE
     "TBD-164": "regional",  # Oklahoma Department of Commerce TERO enumeration
     "TBD-165": "regional",  # ANVCA
+    "TBD-176": "regional",  # Kawerak Bering Strait Business Directory (20-tribe consortium region)
 }
 
 
