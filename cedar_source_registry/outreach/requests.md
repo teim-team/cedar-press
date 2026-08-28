@@ -75,6 +75,20 @@ surfaces or the office is called.
 
 ### Send-ready (verified email)
 
+**REPLIES (as of 2026-08-28 ~14:45 UTC; snapshot in replies_2026-08-28.md):**
+- **White Earth — CONVERTED**: 22-record certified roster + TERO Ordinance
+  received from Liz Andersen after Sandra StClair's internal forward (~16h
+  turnaround). Roster held privately (personal contact details — never in
+  this repo); thank-you + terms confirmation drafted.
+- **Kiowa — wary question** from the TERO Director (what is the list for /
+  'who the competition is' / office hasn't released it before). Personal
+  research-purpose reply drafted for owner review; do not send without
+  owner approval.
+- **Nisqually — original send bounced** (both stale WSDOT personal
+  addresses); the resend to tero@nisqually-nsn.gov (2026-08-28 ~03:07 UTC)
+  has NOT bounced.
+- No other replies or bounces across the 19 recipients yet.
+
 **WAVE 2 SENT 2026-08-28** from esm247@cornell.edu (owner-approved): all 16
 below. Delivery notes: the two WSDOT-sourced Nisqually personal addresses
 hard-bounced (550 5.4.1 — staff turnover; a TERO Officer opening is posted);
