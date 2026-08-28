@@ -56,8 +56,16 @@ export function PressCedarFab({ gated = null, examples = [] }) {
       setPending(false);
       setOpen(true);
     };
+    // A plain open, for surfaces that want to hand the reader to Cedar
+    // without scoping it (the gate's "Ask Cedar what Cedar Press can
+    // answer").
+    const onOpen = () => setOpen(true);
     window.addEventListener("cedar:ask-collection", onScope);
-    return () => window.removeEventListener("cedar:ask-collection", onScope);
+    window.addEventListener("cedar:open", onOpen);
+    return () => {
+      window.removeEventListener("cedar:ask-collection", onScope);
+      window.removeEventListener("cedar:open", onOpen);
+    };
   }, []);
 
   const ask = async (event) => {

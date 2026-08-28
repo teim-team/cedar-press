@@ -51,7 +51,16 @@ import {
   CREDIBILITY_DISCLAIMER,
   CREDIBILITY_STRIP,
 } from "../../features/grove/pressMethod";
+import { PRESS_CATALOG } from "../../features/grove/pressCatalog";
 import { PressCedarFab } from "./PressCedarFab";
+
+// The Cedar Press shelves by name, for the door. Names only, from the
+// catalog itself so a new collection appears here the day it ships; the
+// Grove-exclusive shelf stays inside, since it is a different product's
+// pitch. What the names mean is Cedar's job, one click away.
+const CATALOG_NAMES = PRESS_CATALOG.filter((entry) => entry.shelf !== "grove").map(
+  (entry) => entry.short,
+);
 
 const STRIP_ICONS = { institution: InstitutionIcon, academic: AcademicIcon };
 
@@ -226,6 +235,28 @@ export default function PressGate({ user }) {
               </li>
             ))}
           </ul>
+          {/* The shelves, by name: a prospect who heard "Cedar Press" at a
+              conference should learn what is actually inside from the door,
+              and eleven specific collection names say more than any
+              adjective. Cedar is the way to ask what any of them means. */}
+          <div className="cp-cats">
+            <p className="cp-cats__head">The intelligence inside</p>
+            <p className="cp-cats__names">
+              {CATALOG_NAMES.map((name, index) => (
+                <span key={name}>
+                  {index > 0 ? <span className="cp-cats__dot" aria-hidden="true"> · </span> : null}
+                  {name}
+                </span>
+              ))}
+            </p>
+            <button
+              type="button"
+              className="cp-cats__cedar"
+              onClick={() => window.dispatchEvent(new CustomEvent("cedar:open"))}
+            >
+              Ask Cedar what Cedar Press can answer <span aria-hidden="true">&#8594;</span>
+            </button>
+          </div>
           {/* The cards state the idea; the strip is what proves it. Text
               only: a row of institutional logos reads as sponsorship, which
               none of these have given, so the disclaimer travels with it. */}
