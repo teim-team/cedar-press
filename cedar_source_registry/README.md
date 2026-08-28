@@ -72,11 +72,11 @@ enforces id resolution and name-variant uniqueness.
 
 `source_priority_class` encodes what a record from that source can *assert*:
 
-1. **Tribal Primary** (45) — official tribal certification/member lists. Controls over everything.
-2. **Tribal Secondary** (11) — tribal or tribe-linked, but mixed or non-certifying. May add records/fields; caveat travels with the data.
-3. **Tribal Partnership** (52) — roster confirmed to exist, not public. Request directly; do not scrape thin evidence pages as if they were the roster.
+1. **Tribal Primary** (47) — official tribal certification/member lists. Controls over everything.
+2. **Tribal Secondary** (19) — tribal or tribe-linked, but mixed or non-certifying. May add records/fields; caveat travels with the data.
+3. **Tribal Partnership** (54) — roster confirmed to exist, not public. Request directly; do not scrape thin evidence pages as if they were the roster. As of 2026-08-28 every lead has been adversarially fact-checked (rosters confirmed unpublished) and outreach waves 1-2 (19 emails) are out.
 4. **Cross-Reference** (32) — state/chamber/ANC/nonprofit directories. May propose matches and affiliations only; can never create a tribal-ownership assertion. Each row carries a `do_not_infer` field in `cross_reference.jsonl` — treat it as binding.
-5. **Discovery Only** (2) / **Coverage Frame** (6) — candidate generation and TERO-universe enumeration only.
+5. **Discovery Only** (5) / **Coverage Frame** (6) — candidate generation and TERO-universe enumeration only.
 
 Conflicts persist as parallel source assertions; nothing silently overwrites a
 tribal assertion. Chamber membership, state certification, or ANC shareholder

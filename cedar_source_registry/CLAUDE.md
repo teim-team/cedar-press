@@ -9,22 +9,25 @@ the correction.
 
 ## Files
 
+Counts as of 2026-08-28 (wave 5.1 + expansion rounds; README.md's table is the
+authoritative current copy):
+
 | File | Records | One line per |
 |---|---|---|
-| `sources.jsonl` | 148 | source program (the master registry) |
-| `scrape_queue.jsonl` | 83 | live source ranked for immediate ingestion |
-| `partnership_leads.jsonl` | 55 | confirmed-but-unpublished roster to request directly |
+| `sources.jsonl` | 163 | source program (148 wave-5 + TBD-166..180) |
+| `scrape_queue.jsonl` | 94 | live source ranked for immediate ingestion |
+| `partnership_leads.jsonl` | 57 | confirmed-but-unpublished roster to request directly |
+| `negative_findings.jsonl` | 469 | Phase 3 formal negatives with recheck dates — with sources.jsonl this covers every entity on the 2026 BIA list |
 | `cross_reference.jsonl` | 40 | secondary directory with `do_not_infer` guardrails |
-| `verification_log.jsonl` | 31 | Wave 5 fact-check and inspection results (18 verified, 5 researched-and-excluded, 4 URL corrections, 2 edits reverted) |
-| `taxonomy.json` | — | identity taxonomy and grading rubric definitions |
-| `record_schema.json` | — | recommended schema for *business* records ingested from these sources |
-| `summary.json` | — | counts (computed from `sources.jsonl`, not transcribed) + matching rules |
-| `HARMONIZED_SCHEMA.md` | — | two-layer harmonized dataset design: assertion layer + entity layer |
-| `schema/source_record.schema.json` | — | JSON Schema (2020-12) for Layer-1 records; formalizes the workbook's Recommended Schema sheet |
-| `schema/harmonized_entity.schema.json` | — | JSON Schema for Layer-2 resolved entities (identity as assertions, field provenance, persistent conflicts) |
-| `templates/source_record.example.jsonl` | 2 | worked Layer-1 examples: a real Tulalip NAOB record + a clearly-marked illustrative cross-reference |
-| `templates/harmonized_entity.example.json` | 1 | worked Layer-2 entity merging those two, validated against the schema |
-| `templates/source_record.header.csv` | — | empty CSV header for Layer-1 exports |
+| `verification_log.jsonl` | 151 | append-only fact-check log |
+| `nations.jsonl` | 584 | nation crosswalk — every `bia_name` verified against the FR 2026-01-30 list (`research/bia_list_2026-01-30/`) |
+| `summary.json` | — | counts computed from sources.jsonl (never transcribed) + coverage ledger |
+| `pipeline.py` + `PIPELINE.md` | — | one-file dataset pipeline exemplar |
+| `outreach/requests.md` | — | outreach tracker (waves 1-2 sent 2026-08-28 from the owner's Cornell address) |
+
+Regenerate: `tools/phase0_build_nations.py` (crosswalk, verifies against the
+official list and fails on mismatch), `tools/build_summary.py`,
+`tools/build_outreach.py`; gate everything with `tools/check_integrity.py`.
 
 Keys are snake_cased from the xlsx headers (`Nation / Source` → `nation_source`,
 `Directory URL` → `directory_url`). `source_id` (`TBD-NNN`) is the join key across
@@ -39,11 +42,11 @@ crosswalk". Use `nation_id`s, never free-text nation names, in new work.
 
 `source_priority_class` encodes what a record from that source can *assert*:
 
-1. **Tribal Primary** (45) — official tribal certification/member lists. Controls over everything.
-2. **Tribal Secondary** (11) — tribal or tribe-linked, but mixed or non-certifying. May add records/fields; caveat travels with the data.
-3. **Tribal Partnership** (52) — roster confirmed to exist, not public. Request directly; do not scrape thin evidence pages as if they were the roster.
+1. **Tribal Primary** (47) — official tribal certification/member lists. Controls over everything.
+2. **Tribal Secondary** (19) — tribal or tribe-linked, but mixed or non-certifying. May add records/fields; caveat travels with the data.
+3. **Tribal Partnership** (54) — roster confirmed to exist, not public. Request directly; do not scrape thin evidence pages as if they were the roster.
 4. **Cross-Reference** (32) — state/chamber/ANC/nonprofit directories. May propose matches and affiliations only; can never create a tribal-ownership assertion. Each row carries a `do_not_infer` field in `cross_reference.jsonl` — treat it as binding.
-5. **Discovery Only** (2) / **Coverage Frame** (6) — candidate generation and TERO-universe enumeration only.
+5. **Discovery Only** (5) / **Coverage Frame** (6) — candidate generation and TERO-universe enumeration only.
 
 Conflicts persist as parallel source assertions; nothing silently overwrites a
 tribal assertion. Chamber membership, state certification, or ANC shareholder
