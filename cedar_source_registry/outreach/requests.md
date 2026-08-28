@@ -75,6 +75,14 @@ surfaces or the office is called.
 
 ### Send-ready (verified email)
 
+**WAVE 2 SENT 2026-08-28** from esm247@cornell.edu (owner-approved): all 16
+below. Delivery notes: the two WSDOT-sourced Nisqually personal addresses
+hard-bounced (550 5.4.1 — staff turnover; a TERO Officer opening is posted);
+resent successfully to tero@nisqually-nsn.gov, which appears literally in the
+tribe's own 2026 construction RFP PDFs. No other bounces as of send time.
+Reply check scheduled ~2026-09-11 alongside wave 1.
+
+
 - **Bishop Paiute Tribe TERO** — kayla.stone@bishoppaiute.org (Kayla Stone, TERO Office Coordinator, Bishop Paiute Tribe); 760-873-7893 · evidence: https://bishoptero.com/contact/
 - **Cheyenne and Arapaho Tribes TERO (OK)** — tero@cheyenneandarapaho-nsn.gov (TERO office (departmental inbox), Cheyenne and Arapaho Tribes Dept. of Labor); (405) 422-7564 · evidence: https://www.cheyenneandarapaho-nsn.gov/labor/tero
 - **Hoopa Valley Tribe TERO** — hvtero@pcweb.net (Hoopa Valley Tribe TERO Department (Executive Director: Juliet Maestas, ext. 108)); 530-625-4227 · evidence: https://www.hoopa-nsn.gov/departments/1490-2/tero-department/
