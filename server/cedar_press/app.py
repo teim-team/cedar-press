@@ -297,21 +297,55 @@ def download(
     )
 
 
+@app.get("/press/collections/{collection_id}/profile")
+def collection_profile(
+    collection_id: str, session: Session = Depends(require_session)
+) -> dict[str, object]:
+    """The collection's machine-readable profile: the living data dictionary.
+
+    Served to any signed-in reader regardless of shelf: the profile is the
+    description of a collection, not its records, and describing what a
+    higher shelf holds is the honest version of an upgrade prompt.
+    """
+    profile = repository.collection_profile(collection_id)
+    if profile is None:
+        raise HTTPException(status_code=404, detail="No such collection.")
+    return profile
+
+
 @app.post("/cedar/ask")
 def ask_cedar(
     question: Question, session: Session = Depends(require_session)
 ) -> dict[str, object]:
     """Cedar, scoped to what this subscription can open.
 
-    Not implemented against the model yet, and it answers 501 rather than a
-    plausible sentence: a stubbed assistant that invents an answer is worse
-    than one that admits it is not wired, because only the second is
-    obviously not the product.
+    First real increment: profile-grounded answers. Scoped to a collection,
+    Cedar answers what the collection contains, how it was constructed, and
+    its headline figures — from the collection's own profile
+    (``collection_profiles.py``), never from a prompt's memory of it.
+
+    Everything beyond the profile still refuses rather than improvising: a
+    plausible sentence Cedar cannot support is worse than an honest refusal,
+    because only the refusal is obviously not the product.
     """
+    if question.collectionId:
+        answered = repository.cedar_answer(question.question, question.collectionId)
+        if answered:
+            return {
+                "answer": answered["answer"],
+                "basis": answered["basis"],
+                "collectionId": question.collectionId,
+            }
     raise HTTPException(
         status_code=501,
         detail={
-            "code": "NOT_IMPLEMENTED",
-            "message": "Cedar is not yet answering from this service.",
+            "code": "NOT_ANSWERABLE",
+            "message": (
+                "Cedar can answer what a collection contains, how it was "
+                "constructed, and its headline figures — open a collection and "
+                "ask from there. Analysis of the records themselves is not "
+                "wired yet; the research desk (contact@lumecon.ai) answers "
+                "those in person."
+            ),
         },
     )

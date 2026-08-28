@@ -224,6 +224,18 @@
  * inherited from that box, which is how the sheet ended up 358px wide inside
  * a 390px window (its `max-width: calc(100vw - 2rem)`) and 36rem tall
  * whatever it held (its `height`). Silence is not a default. */
+/* Ask Cedar from a collection's description panel. */
+.teim-rd .cp-read__cedar { display: inline-block; margin-top: 0.6rem; border: 0; background: none; padding: 0; font-family: var(--sans); font-size: 0.84rem; font-weight: 600; color: var(--dteal); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.teim-rd .cp-read__cedar:hover { color: var(--ink); }
+/* The scope line inside the Cedar panel: which collection is being asked
+ * about, and the way back out. */
+.teim-rd .cedar-widget__scope { margin: 0.3rem 0 0.4rem; font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cedar-widget__scopeclear { border: 0; background: none; padding: 0; font: inherit; color: var(--dteal); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+/* Example questions as quiet chips: they demonstrate what Cedar answers
+ * without pretending to be conversation history. */
+.teim-rd .cedar-widget__examples { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.55rem 0 0.7rem; }
+.teim-rd .cedar-widget__example { border: 1px solid var(--line); border-radius: 999px; background: var(--teal-tint); padding: 0.32rem 0.7rem; font-family: var(--sans); font-size: 0.78rem; line-height: 1.3; color: var(--dteal); cursor: pointer; text-align: left; transition: background 0.16s ease, border-color 0.16s ease; }
+.teim-rd .cedar-widget__example:hover { background: var(--bg); border-color: var(--dteal); }
 .teim-rd .cedar-widget__panel { position: fixed; right: 2rem; bottom: 6.4rem; width: min(24rem, calc(100vw - 4rem)); min-width: 0; max-width: none; height: auto; min-height: 0; max-height: min(30rem, calc(100vh - 10rem)); resize: none; display: block; overflow: hidden auto; background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 1.1rem 1.2rem; box-shadow: 0 20px 52px rgba(10, 15, 38, 0.26); }
 @media (prefers-reduced-motion: no-preference) {
   .teim-rd .cedar-widget__panel { animation: cedar-rise 0.26s cubic-bezier(0.22, 1, 0.36, 1) both; }
@@ -454,17 +466,28 @@
 /* The platform's split is fixed to the viewport (auth-split: fixed, inset 0)
  * and centers each panel, clipping what overflows — fine for the platform's
  * short hero, but the press hero carries the pillars and the credibility
- * strip and runs far taller than a phone. On small screens the gate flows
- * and scrolls as a page instead, so the brand and headline sit at the top
- * and nothing is cut off mid-tile. */
-@media (max-width: 880px) {
-  .teim-rd .cp-split.auth-split { position: static; min-height: 100dvh; overflow: visible; }
-  /* Stacked, access leads: the person on a phone came to get in, so the
-   * form panel opens the page under its own wordmark and the teal case for
-   * the product reads below it. Desktop keeps the split: case left, form
-   * right. The editorial's desktop gutters come from its centered column,
-   * so the stacked panel draws its own. */
+ * strip and runs far taller than most viewports. Fixed meant the bottom of
+ * the hero was simply unreachable on shorter screens. The gate flows and
+ * scrolls as a document at every width instead: the split survives, the
+ * page scrolls, nothing is cut off mid-tile. */
+.teim-rd .cp-split.auth-split { position: static; inset: auto; height: auto; min-height: 100dvh; overflow: visible; }
+/* Middle desktop widths: the hero gives ground before the access panel is
+ * pushed offscreen — the left content scales down, the split narrows toward
+ * the form. */
+@media (max-width: 1250px) {
+  .teim-rd .cp-split.auth-split { grid-template-columns: 1.02fr 0.98fr; }
+  .teim-rd .cp-hero2.auth-hero { padding: clamp(1.6rem, 3.2vw, 3rem); }
+  .teim-rd .cp-hero2__inner { max-width: 34rem; }
+}
+/* Below the stack point the split gives way entirely. Access leads: the
+ * person came to get in, so the form panel opens the page under its own
+ * wordmark and the teal case for the product reads below it. The
+ * editorial's desktop gutters come from its centered column, so the
+ * stacked panel draws its own. */
+@media (max-width: 1050px) {
+  .teim-rd .cp-split.auth-split { grid-template-columns: 1fr; }
   .teim-rd .cp-split .auth-editorial { order: -1; padding: 1.6rem 1.15rem 2rem; }
+  .teim-rd .cp-split__brand--form { display: block; }
 }
 /* The platform's .auth-hero paints a teal gradient whose upper stops carry
  * white text at under 3:1, and a gradient inside one surface breaks the flat
@@ -507,8 +530,12 @@
 .teim-rd .cp-proof__swap { flex: 1 1 auto; min-height: 0; width: 100%; display: grid; place-items: center; }
 .teim-rd .cp-proof__swap > * { grid-area: 1 / 1; }
 .teim-rd .cp-proof__ic { display: grid; place-items: center; color: #fff; opacity: 1; transition: opacity 0.2s ease, transform 0.2s ease; }
-.teim-rd .cp-proof__ic svg { width: 92px; height: 92px; }
-.teim-rd .cp-proof__item:hover .cp-proof__ic { opacity: 0; transform: scale(0.92); }
+.teim-rd .cp-proof__ic svg { width: 92px; height: 92px; transition: width 0.2s ease, height 0.2s ease; }
+/* Hover keeps the icon, small, above the paragraph: replacing it wholesale
+ * made the two states read as different objects. Title → small icon → body
+ * preserves the tile's identity through the reveal. */
+.teim-rd .cp-proof__item:hover .cp-proof__swap { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; }
+.teim-rd .cp-proof__item:hover .cp-proof__ic svg { width: 30px; height: 30px; }
 .teim-rd .cp-proof__body { font-size: 0.78rem; line-height: 1.45; color: #fff; min-width: 0; opacity: 0; transition: opacity 0.2s ease; }
 .teim-rd .cp-proof__item:hover .cp-proof__body { opacity: 1; }
 .teim-rd .cp-proof__label { flex: 0 0 auto; font-family: var(--sans); font-size: 0.92rem; font-weight: 800; letter-spacing: -0.015em; line-height: 1.24; color: #fff; }

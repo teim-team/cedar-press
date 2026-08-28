@@ -13,12 +13,26 @@ import { appUrl } from "../../features/grove/appLink.js";
 import { isConnected } from "../../config.js";
 import { EVENT, track, trackError } from "../../features/grove/telemetry.js";
 
-export function PressCedarFab() {
+// Questions every collection profile can answer; shown whenever Cedar is
+// scoped to a collection.
+const SCOPED_EXAMPLES = [
+  "What does this collection cover?",
+  "How was this collection constructed?",
+  "What are its headline figures?",
+];
+
+export function PressCedarFab({ signedOut = false, examples = [] }) {
   const [open, setOpen] = useState(false);
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(null);
+  const [gateNotice, setGateNotice] = useState(false);
+  // Which collection Cedar is currently asked about. Set by the shelf's
+  // "Ask Cedar about this collection" (a window event, so the shelf does
+  // not need a prop path to a control that floats outside it), cleared by
+  // the reader.
+  const [scope, setScope] = useState(null);
   const inputRef = useRef(null);
   const connected = isConnected();
 
@@ -26,17 +40,41 @@ export function PressCedarFab() {
     if (open && connected) inputRef.current?.focus();
   }, [open, connected]);
 
+  useEffect(() => {
+    const onScope = (event) => {
+      const next = event?.detail;
+      if (!next?.id || !next?.name) return;
+      setScope({ id: next.id, name: next.name });
+      setAnswer(null);
+      setError(null);
+      setOpen(true);
+    };
+    window.addEventListener("cedar:ask-collection", onScope);
+    return () => window.removeEventListener("cedar:ask-collection", onScope);
+  }, []);
+
   const ask = async (event) => {
     event.preventDefault();
     const asked = question.trim();
     if (!asked) return;
+    // On the gate, Cedar is a doorbell, not a side door: a visitor without
+    // a session gets told what would answer their question and how to get
+    // in, rather than a reply that leaks the collections past the paywall.
+    if (signedOut) {
+      setAnswer(null);
+      setError(null);
+      setGateNotice(true);
+      track(EVENT.cedarAsked, { length: asked.length, gated: true });
+      return;
+    }
     setPending(true);
     setError(null);
     setAnswer(null);
+    setGateNotice(false);
     try {
-      const result = await askCedar({ question: asked });
+      const result = await askCedar({ question: asked, collectionId: scope?.id });
       setAnswer(result?.answer ?? result?.text ?? "");
-      track(EVENT.cedarAsked, { length: asked.length });
+      track(EVENT.cedarAsked, { length: asked.length, collectionId: scope?.id });
     } catch (err) {
       trackError(err, { at: "cedarAsk" });
       setError(
@@ -57,8 +95,24 @@ export function PressCedarFab() {
             <>
               <form className="cedar-widget__ask" onSubmit={ask}>
                 <label className="cedar-widget__label" htmlFor="cedar-question">
-                  Ask about the collections
+                  {scope
+                    ? `Ask about ${scope.name}`
+                    : signedOut
+                      ? "Ask Cedar about Cedar Press"
+                      : "Ask about the collections"}
                 </label>
+                {scope ? (
+                  <p className="cedar-widget__scope">
+                    Scoped to {scope.name}{" "}
+                    <button
+                      type="button"
+                      className="cedar-widget__scopeclear"
+                      onClick={() => setScope(null)}
+                    >
+                      All collections
+                    </button>
+                  </p>
+                ) : null}
                 <textarea
                   id="cedar-question"
                   ref={inputRef}
@@ -67,10 +121,36 @@ export function PressCedarFab() {
                   onChange={(event) => setQuestion(event.target.value)}
                   placeholder="Which collections cover federal contracting?"
                 />
+                {(scope ? SCOPED_EXAMPLES : examples).length ? (
+                  <div className="cedar-widget__examples">
+                    {(scope ? SCOPED_EXAMPLES : examples).map((example) => (
+                      <button
+                        key={example}
+                        type="button"
+                        className="cedar-widget__example"
+                        onClick={() => {
+                          setQuestion(example);
+                          inputRef.current?.focus();
+                        }}
+                      >
+                        {example}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
                 <button type="submit" className="gv-btn gv-btn--primary" disabled={pending}>
                   {pending ? "Asking Cedar" : "Ask Cedar"}
                 </button>
               </form>
+              {gateNotice ? (
+                <p className="cedar-widget__note" role="status">
+                  Cedar answers questions like this from the Cedar Press collections once
+                  you&rsquo;re signed in. Log in above, or get Cedar Press through a{" "}
+                  <a href="https://tribalbusinessnews.com/subscribe" target="_blank" rel="noreferrer">
+                    Tribal Business News membership
+                  </a>.
+                </p>
+              ) : null}
               {error ? <p className="cp-gate__error" role="alert">{error}</p> : null}
               {answer ? <p className="cedar-widget__answer">{answer}</p> : null}
             </>

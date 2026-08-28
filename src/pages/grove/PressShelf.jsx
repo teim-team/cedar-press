@@ -204,6 +204,23 @@ function Detail({ entry, user, owned }) {
           {hasReleaseFile(entry) ? `Download ${entry.short || entry.name}` : "Download the description"}
         </button>
       ) : null}
+      {/* Cedar, already scoped: the reader looking at this description is
+          one click from asking how the collection was built or what its
+          headline figures are, without restating which collection. The
+          event reaches the floating control without a prop path. */}
+      <button
+        type="button"
+        className="cp-read__cedar"
+        onClick={() =>
+          window.dispatchEvent(
+            new CustomEvent("cedar:ask-collection", {
+              detail: { id: entry.id, name: entry.name },
+            }),
+          )
+        }
+      >
+        Ask Cedar about this collection <span aria-hidden="true">&#8594;</span>
+      </button>
     </div>
   );
 }

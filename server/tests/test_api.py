@@ -121,9 +121,40 @@ class TestCatalog(unittest.TestCase):
     def test_an_unknown_collection_is_not_found(self) -> None:
         self.assertEqual(client.get("/press/collections/nope/download").status_code, 403)
 
-    def test_cedar_admits_it_is_not_wired(self) -> None:
+    def test_cedar_answers_from_a_collection_profile(self) -> None:
+        response = client.post(
+            "/cedar/ask",
+            json={"question": "How was this collection constructed?", "collectionId": "deals"},
+        )
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertIn("resolved", payload["answer"])
+        self.assertIn("Deals", payload["basis"])
+
+    def test_cedar_flags_demonstration_statistics(self) -> None:
+        response = client.post(
+            "/cedar/ask",
+            json={"question": "What are the headline figures?", "collectionId": "deals"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("demonstration", response.json()["answer"])
+
+    def test_cedar_still_refuses_what_it_cannot_support(self) -> None:
         response = client.post("/cedar/ask", json={"question": "what?"})
         self.assertEqual(response.status_code, 501)
+        response = client.post(
+            "/cedar/ask",
+            json={"question": "List every contract Cherokee Nation received.", "collectionId": "contractors"},
+        )
+        self.assertEqual(response.status_code, 501)
+
+    def test_a_collection_profile_is_served(self) -> None:
+        response = client.get("/press/collections/owned/profile")
+        self.assertEqual(response.status_code, 200)
+        profile = response.json()
+        self.assertEqual(profile["collection_id"], "owned")
+        self.assertFalse(profile["demonstration"])
+        self.assertEqual(client.get("/press/collections/nope/profile").status_code, 404)
 
 
 class TestEntitlement(unittest.TestCase):
