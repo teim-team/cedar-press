@@ -110,6 +110,9 @@ LAUNCH_COLLECTION: tuple[CollectionDataset, ...] = (
         level="entity",
         name="Native Federal Contractors",
         short_name="Contractors",
+        # The client catalog places Contractors on the pro shelf
+        # (pressCatalog.js); the server must enforce the same boundary.
+        shelf="pro",
         tracks=(
             "Tribally owned firms, ANC and NHO subsidiaries and 8(a) participants, "
             "matched to parent entities, with award histories."

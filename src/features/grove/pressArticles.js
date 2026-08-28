@@ -86,6 +86,9 @@ export const PRESS_ARTICLES = Object.freeze([
   Object.freeze({
     id: "brief-owned",
     hosted: true,
+    // Not a placeholder: the aggregates cited are from the roster White Earth
+    // Nation's TERO actually supplied on 2026-08-28.
+    demonstration: false,
     image: "/pitch/lanes/construction-wide.webp",
     imageAlt: "Crews working a large construction site",
     caption:
@@ -141,6 +144,7 @@ export const PRESS_ARTICLES = Object.freeze([
   Object.freeze({
     id: "brief-deals",
     hosted: true,
+    demonstration: true,
     image: "/pitch/lanes/professional-wide.webp",
     imageAlt: "A negotiation around a conference table",
     caption:
@@ -255,6 +259,7 @@ export const PRESS_ARTICLES = Object.freeze([
   Object.freeze({
     id: "brief-contractors",
     hosted: true,
+    demonstration: true,
     image: "/pitch/lanes/construction-wide.webp",
     imageAlt: "Crews working a large construction site",
     caption:
@@ -378,6 +383,7 @@ export const PRESS_ARTICLES = Object.freeze([
   }),
   Object.freeze({
     id: "brief-funding",
+    demonstration: true,
     // Published on Tribal Business News rather than here: the mix is the
     // point, and a piece that runs on TBN is the one doing the work of
     // bringing somebody to the product in the first place.
