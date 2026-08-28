@@ -231,6 +231,8 @@
  * about, and the way back out. */
 .teim-rd .cedar-widget__scope { margin: 0.3rem 0 0.4rem; font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .teim-rd .cedar-widget__scopeclear { border: 0; background: none; padding: 0; font: inherit; color: var(--dteal); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+/* The basis line under an answer: which release the answer came from. */
+.teim-rd .cedar-widget__basis { margin-top: 0.35rem; font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 /* Example questions as quiet chips: they demonstrate what Cedar answers
  * without pretending to be conversation history. */
 .teim-rd .cedar-widget__examples { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.55rem 0 0.7rem; }
@@ -533,9 +535,13 @@
 .teim-rd .cp-proof__ic svg { width: 92px; height: 92px; transition: width 0.2s ease, height 0.2s ease; }
 /* Hover keeps the icon, small, above the paragraph: replacing it wholesale
  * made the two states read as different objects. Title → small icon → body
- * preserves the tile's identity through the reveal. */
-.teim-rd .cp-proof__item:hover .cp-proof__swap { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; }
-.teim-rd .cp-proof__item:hover .cp-proof__ic svg { width: 30px; height: 30px; }
+ * preserves the tile's identity through the reveal. Hover-capable devices
+ * only: on touch, tap-triggered :hover would override the hover:none
+ * layout's display:contents and collapse the tiles. */
+@media (hover: hover) {
+  .teim-rd .cp-proof__item:hover .cp-proof__swap { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; }
+  .teim-rd .cp-proof__item:hover .cp-proof__ic svg { width: 30px; height: 30px; }
+}
 .teim-rd .cp-proof__body { font-size: 0.78rem; line-height: 1.45; color: #fff; min-width: 0; opacity: 0; transition: opacity 0.2s ease; }
 .teim-rd .cp-proof__item:hover .cp-proof__body { opacity: 1; }
 .teim-rd .cp-proof__label { flex: 0 0 auto; font-family: var(--sans); font-size: 0.92rem; font-weight: 800; letter-spacing: -0.015em; line-height: 1.24; color: #fff; }
