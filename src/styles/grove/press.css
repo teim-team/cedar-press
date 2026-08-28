@@ -231,6 +231,7 @@
 .teim-rd .cp-cats__head { font-family: var(--mono); font-weight: 700; font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255, 255, 255, 0.75); margin: 0 0 0.5rem; }
 .teim-rd .cp-cats__names { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.9; color: #fff; margin: 0 0 0.7rem; }
 .teim-rd .cp-cats__dot { color: rgba(255, 255, 255, 0.55); }
+.teim-rd .cp-cats__how { font-family: var(--sans); font-size: 0.82rem; line-height: 1.5; color: rgba(255, 255, 255, 0.92); margin: 0 auto 0.8rem; max-width: 27rem; }
 .teim-rd .cp-cats__cedar { border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 999px; background: rgba(0, 0, 0, 0.14); padding: 0.5rem 1rem; font-family: var(--sans); font-size: 0.85rem; font-weight: 600; color: #fff; cursor: pointer; transition: background 0.16s ease, border-color 0.16s ease; }
 .teim-rd .cp-cats__cedar:hover { background: rgba(0, 0, 0, 0.28); border-color: #fff; }
 

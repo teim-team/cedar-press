@@ -51,7 +51,7 @@ import {
   CREDIBILITY_DISCLAIMER,
   CREDIBILITY_STRIP,
 } from "../../features/grove/pressMethod";
-import { PRESS_CATALOG } from "../../features/grove/pressCatalog";
+import { NATIVE_LINKAGE, PRESS_CATALOG } from "../../features/grove/pressCatalog";
 import { PressCedarFab } from "./PressCedarFab";
 
 // The Cedar Press shelves by name, for the door. Names only, from the
@@ -249,6 +249,10 @@ export default function PressGate({ user }) {
                 </span>
               ))}
             </p>
+            {/* The sentence that separates these from open-data keyword
+                filters. One source of truth with the Data page's linkage
+                copy, so the door never promises what the shelf retracts. */}
+            <p className="cp-cats__how">{NATIVE_LINKAGE.door}</p>
             <button
               type="button"
               className="cp-cats__cedar"
