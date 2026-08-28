@@ -148,6 +148,16 @@ const EconomyIcon = (
   </svg>
 );
 
+/** A storefront under an awning: a business someone owns and runs. */
+const OwnedIcon = (
+  <svg {...glyph}>
+    <path d="M5.5 10.5 7 4.5h14l1.5 6" />
+    <path d="M6 13v10.5h16V13" />
+    <path d="M5.5 10.5c0 1.6 1.3 2.8 2.8 2.8s2.7-1.2 2.7-2.8c0 1.6 1.2 2.8 2.7 2.8h.6c1.5 0 2.7-1.2 2.7-2.8 0 1.6 1.2 2.8 2.7 2.8s2.8-1.2 2.8-2.8" />
+    <path d="M11.5 23.5v-6.5h5v6.5" />
+  </svg>
+);
+
 /** A square with a plus: what has not been built yet. */
 const NewIcon = (
   <svg {...glyph}>
@@ -177,6 +187,7 @@ export const COLLECTION_ICONS = {
   contractors: ContractorsIcon,
   subcontracting: SubcontractingIcon,
   "natural-resources": ResourcesIcon,
+  owned: OwnedIcon,
   nonprofits: NonprofitsIcon,
   gaming: GamingIcon,
   census: CensusIcon,

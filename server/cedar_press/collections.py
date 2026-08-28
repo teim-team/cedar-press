@@ -73,6 +73,10 @@ class CollectionDataset:
     updated: str
     sources: str
     method: str
+    #: Which shelf carries this dataset ("standard", "pro", "grove"). The
+    #: client's catalog declares the same placement; this one is the control
+    #: the routes enforce. Defaults to "standard" for the launch three.
+    shelf: str = "standard"
 
 
 LAUNCH_COLLECTION: tuple[CollectionDataset, ...] = (
@@ -106,6 +110,9 @@ LAUNCH_COLLECTION: tuple[CollectionDataset, ...] = (
         level="entity",
         name="Native Federal Contractors",
         short_name="Contractors",
+        # The client catalog places Contractors on the pro shelf
+        # (pressCatalog.js); the server must enforce the same boundary.
+        shelf="pro",
         tracks=(
             "Tribally owned firms, ANC and NHO subsidiaries and 8(a) participants, "
             "matched to parent entities, with award histories."
@@ -144,6 +151,33 @@ LAUNCH_COLLECTION: tuple[CollectionDataset, ...] = (
             "dataset's entity matching. Figures for the current fiscal year are "
             "partial until the quarterly release lands, and the page says so "
             "wherever they appear."
+        ),
+    ),
+    CollectionDataset(
+        id="owned",
+        origin="tribal-primary",
+        level="entity",
+        name="Individually Owned Native Businesses",
+        short_name="Owned",
+        shelf="pro",
+        tracks=(
+            "Individually owned Native businesses certified by their nations' "
+            "TERO and commerce offices: trade, preference tier and certification "
+            "status, collected office by office with each nation's consent."
+        ),
+        rows_label="22 businesses · 1 nation",
+        downloads=0,
+        vintage="2026 Q3",
+        version="v0.1",
+        updated="Aug 28",
+        sources="Tribal TERO offices · White Earth Nation",
+        method=(
+            "Consent-first: each nation's TERO or commerce office shares its "
+            "certified list directly, and rows appear only under that nation's "
+            "stated terms. Until an office confirms publication terms, its "
+            "businesses appear in aggregates only, and every listing is credited "
+            "to the issuing office. White Earth Nation is the first roster in; "
+            "the remaining outreach wave is in progress."
         ),
     ),
 )
@@ -254,6 +288,14 @@ def collection_findings() -> CollectionFindings:
                 "re-registration (Contractors v6, entity resolution queue)."
             ),
         ),
+        CollectionNeed(
+            id="col-need-owned-terms",
+            text=(
+                "White Earth listings enter entity rows once the nation confirms "
+                "publication terms; aggregates only until then (Owned v0.1, "
+                "consent pending)."
+            ),
+        ),
     )
 
     narratives = (
@@ -334,6 +376,17 @@ COLLECTION_FIGURES: tuple[CollectionFigure, ...] = (
             FigurePoint(label="Parent entity B", value=78),
             FigurePoint(label="Parent entity C", value=65),
             FigurePoint(label="Parent entity D", value=48),
+        ),
+    ),
+    CollectionFigure(
+        id="owned",
+        title="White Earth certified businesses by preference tier",
+        basis="Owned v0.1",
+        kind="leader",
+        points=(
+            FigurePoint(label="1st preference", value=17),
+            FigurePoint(label="2nd preference", value=4),
+            FigurePoint(label="4th preference", value=1),
         ),
     ),
     CollectionFigure(

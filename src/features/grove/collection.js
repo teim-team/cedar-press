@@ -99,6 +99,23 @@ export const LAUNCH_COLLECTION = Object.freeze([
     method:
       "USAspending assistance records in v1, sharing the contractor dataset's entity matching. Figures for the current fiscal year are partial until the quarterly release lands, and the page says so wherever they appear.",
   }),
+  Object.freeze({
+    id: "owned",
+    origin: "tribal-primary",
+    level: "entity",
+    name: "Individually Owned Native Businesses",
+    shortName: "Owned",
+    tracks:
+      "Individually owned Native businesses certified by their nations' TERO and commerce offices: trade, preference tier and certification status, collected office by office with each nation's consent.",
+    rowsLabel: "22 businesses · 1 nation",
+    downloads: 0,
+    vintage: "2026 Q3",
+    version: "v0.1",
+    updated: "Aug 28",
+    sources: "Tribal TERO offices · White Earth Nation",
+    method:
+      "Consent-first: each nation's TERO or commerce office shares its certified list directly, and rows appear only under that nation's stated terms. Until an office confirms publication terms, its businesses appear in aggregates only, and every listing is credited to the issuing office. White Earth Nation is the first roster in; the remaining outreach wave is in progress.",
+  }),
 ]);
 
 /** One line for the context strip: versions and the latest refresh date. */
@@ -161,6 +178,10 @@ export function collectionFindings() {
     {
       id: "col-need-matches",
       text: "Two parent-entity matches are provisional pending SAM re-registration (Contractors v6, entity resolution queue).",
+    },
+    {
+      id: "col-need-owned-terms",
+      text: "White Earth listings enter entity rows once the nation confirms publication terms; aggregates only until then (Owned v0.1, consent pending).",
     },
   ];
 
@@ -226,6 +247,17 @@ export const COLLECTION_FIGURES = Object.freeze([
       Object.freeze({ label: "Parent entity B", value: 78 }),
       Object.freeze({ label: "Parent entity C", value: 65 }),
       Object.freeze({ label: "Parent entity D", value: 48 }),
+    ]),
+  }),
+  Object.freeze({
+    id: "owned",
+    title: "White Earth certified businesses by preference tier",
+    basis: "Owned v0.1",
+    kind: "leader",
+    points: Object.freeze([
+      Object.freeze({ label: "1st preference", value: 17 }),
+      Object.freeze({ label: "2nd preference", value: 4 }),
+      Object.freeze({ label: "4th preference", value: 1 }),
     ]),
   }),
   Object.freeze({

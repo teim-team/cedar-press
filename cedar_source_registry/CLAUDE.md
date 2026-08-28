@@ -19,7 +19,7 @@ authoritative current copy):
 | `partnership_leads.jsonl` | 57 | confirmed-but-unpublished roster to request directly |
 | `negative_findings.jsonl` | 484 | Phase 3 formal negatives with recheck dates — with sources.jsonl this covers every entity on the 2026 BIA list |
 | `cross_reference.jsonl` | 48 | secondary directory with `do_not_infer` guardrails |
-| `verification_log.jsonl` | 164 | append-only fact-check log |
+| `verification_log.jsonl` | 166 | append-only fact-check log |
 | `nations.jsonl` | 584 | nation crosswalk — every `bia_name` verified against the FR 2026-01-30 list (`research/bia_list_2026-01-30/`) |
 | `summary.json` | — | counts computed from sources.jsonl (never transcribed) + coverage ledger |
 | `pipeline.py` + `PIPELINE.md` | — | one-file dataset pipeline exemplar |
