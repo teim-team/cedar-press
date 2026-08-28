@@ -314,8 +314,13 @@ def _changes_sentence(profile: dict[str, Any], asked: str) -> str:
     )
 
 
-def _coverage_sentence(profile: dict[str, Any]) -> str | None:
-    """Coverage stated per tier, because the tiers buy different depths."""
+def _coverage_sentence(profile: dict[str, Any], full_archive: bool = False) -> str | None:
+    """Coverage stated per tier, because the tiers buy different depths.
+
+    ``full_archive`` is whether the asking subscription already opens the
+    reconstructed archive: telling a Cedar Press+ reader that "Cedar Press+
+    opens the full archive" sells them the plan they are asking from.
+    """
     std = profile.get("coverage_standard_from")
     full = profile.get("coverage_full_from")
     if not std:
@@ -328,6 +333,11 @@ def _coverage_sentence(profile: dict[str, Any]) -> str | None:
         else ""
     )
     if full and full != std:
+        if full_archive:
+            return (
+                f"Coverage from {full}, the full reconstructed archive, "
+                f"which your plan opens.{tail}"
+            )
         return (
             f"Coverage from {std} on Cedar Press; Cedar Press+ opens the full "
             f"archive back to {full}.{tail}"
@@ -335,12 +345,17 @@ def _coverage_sentence(profile: dict[str, Any]) -> str | None:
     return f"Coverage from {std} to present.{tail}"
 
 
-def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None:
+def answer_from_profile(
+    question: str, dataset_id: str, full_archive: bool = False
+) -> dict[str, str] | None:
     """A profile-grounded answer, or ``None`` when the question needs more.
 
     Deliberately narrow: this answers from the profile's own fields and never
     composes beyond them. A question about the records themselves is not
     answerable here and returns ``None`` so the route can refuse honestly.
+    ``full_archive`` says whether the asking subscription already opens the
+    reconstructed archive; the coverage sentence is phrased for the reader
+    it is answering.
     """
     profile = profile_for(dataset_id)
     if profile is None:
@@ -388,7 +403,7 @@ def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None
             f"Unit of observation: {profile['unit_of_observation']}"
             if profile.get("unit_of_observation")
             else None,
-            _coverage_sentence(profile),
+            _coverage_sentence(profile, full_archive),
             f"Sources: {profile['primary_sources']}." if profile.get("primary_sources") else None,
         ]
         return {"answer": " ".join(p for p in parts if p), "basis": basis}

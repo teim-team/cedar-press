@@ -132,9 +132,16 @@ def collection_profile(collection_id: str) -> dict[str, Any] | None:
     return collection_profiles.profile_for(collection_id)
 
 
-def cedar_answer(question: str, collection_id: str) -> dict[str, str] | None:
-    """A profile-grounded answer, or ``None`` when the question needs more."""
-    return collection_profiles.answer_from_profile(question, collection_id)
+def cedar_answer(question: str, collection_id: str, tier: str) -> dict[str, str] | None:
+    """A profile-grounded answer, or ``None`` when the question needs more.
+
+    The tier travels with the question so coverage is phrased for the
+    reader: a plan that already opens the full archive is not told what
+    Cedar Press+ would open.
+    """
+    return collection_profiles.answer_from_profile(
+        question, collection_id, full_archive=_reaches(tier, "pro")
+    )
 
 
 def articles() -> list[dict[str, Any]]:
