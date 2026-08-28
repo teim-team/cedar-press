@@ -267,6 +267,34 @@ export const TRIBAL_REQUEST = Object.freeze({
 });
 
 /**
+ * Methodological restraint, stated as commitments.
+ *
+ * Not legal boilerplate: each of these is a thing Cedar could do to look more
+ * complete and chooses not to, because the product's claim is trustworthy
+ * intelligence and every one of these is where that claim would quietly die.
+ * The first is also a sovereignty position, not only a data-quality one:
+ * who and what is Native is each nation's to say.
+ */
+export const METHOD_COMMITMENTS = Object.freeze([
+  Object.freeze({
+    id: "no-inferred-identity",
+    text: "Cedar does not infer tribal citizenship or Native identity. A business or organization carries the status its nation or certifying office states, and nothing overrides what a nation says about its own.",
+  }),
+  Object.freeze({
+    id: "unresolved-stays-unresolved",
+    text: "Unresolved entity relationships remain unresolved. A provisional match is labeled provisional rather than guessed into the graph.",
+  }),
+  Object.freeze({
+    id: "conflicts-preserved",
+    text: "Source conflicts are preserved and reviewed, never silently overwritten by the newer or more convenient record.",
+  }),
+  Object.freeze({
+    id: "lineage-kept",
+    text: "Historical records keep the lineage needed to reproduce earlier results. A correction adds to the history; it does not erase it.",
+  }),
+]);
+
+/**
  * Where the team's institutional experience comes from. Named rather than
  * gestured at ("Ivy League researchers"), because the specifics are stronger
  * than the euphemism and a reader can check them.

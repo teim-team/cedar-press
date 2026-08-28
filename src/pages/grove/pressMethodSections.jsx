@@ -87,13 +87,15 @@ export function ProcessRail() {
  * ray or name crosses a label.
  */
 export function EcosystemDiagram() {
-  // Point at a collection and the whole answer appears at once: the
+  // Select a collection and the whole answer appears at once: the
   // records it is built from fan outward (Gaming starts at NIGC and state
   // compacts, Contracting at SAM.gov and FPDS), and the collections that
   // reinforce it light up on the ring. A click pins the same view for
   // touch and for reading at leisure. The middle is Cedar working with
-  // human reviewers on the proprietary Native identification layer,
-  // floated above the page, and the picture says so.
+  // human reviewers on the entity resolution layer, floated above the
+  // page, and the picture says so. "Entity resolution", deliberately:
+  // Cedar resolves organizations and their lineage, and never infers who
+  // or what is Native — that is each nation's to say, not an algorithm's.
   const [lit, setLit] = useState(null);
   const [pinned, setPinned] = useState(null);
   const { w, h, cx, cy, coreR, nodes, fans } = LAYOUT;
@@ -105,8 +107,8 @@ export function EcosystemDiagram() {
   const PROPER = /^(Grants|Congress|USASpending|Federal|National|Office|Senate|House|IRS|SEC|SAM|FPDS|SBA|ONRR|BLM|EIA|NIGC)/;
   const inSentence = (t) => (PROPER.test(t) ? t : t[0].toLowerCase() + t.slice(1));
   const sentence = focus
-    ? `${focus} is built from ${say((SOURCES[focus] ?? []).map(inSentence))}, resolved against the identification layer in the middle and reinforced by ${say(feeds?.feeds ?? [])}.`
-    : "Point at a collection to see the records it is built from and what reinforces it.";
+    ? `${focus} is built from ${say((SOURCES[focus] ?? []).map(inSentence))}, resolved in the entity resolution layer in the middle and reinforced by ${say(feeds?.feeds ?? [])}.`
+    : "Select a collection to see the records it is built from and what reinforces it.";
 
   return (
     <div className={`cp-eco${focus ? " is-lit" : ""}`}>
@@ -115,7 +117,7 @@ export function EcosystemDiagram() {
               keyboard can reach, and role="img" told a screen reader the
               whole diagram was one flat picture. */}
         <svg viewBox={`0 0 ${w} ${h}`} className="cp-eco__svg" role="group"
-          aria-label="Ten Cedar collections around the Cedar and human identification layer, with the sources each is built from">
+          aria-label="Ten Cedar collections around the Cedar entity resolution layer, with the sources each is built from">
           {/* Anywhere that is not a label unpins. */}
           <rect x="0" y="0" width={w} height={h} fill="transparent" onClick={() => setPinned(null)} />
           {nodes.map((node) => {
@@ -132,9 +134,9 @@ export function EcosystemDiagram() {
           })}
 
           {/* The middle, which is the method: Cedar and human reviewers on
-              the proprietary Native identification layer. It carries the
-              only shadow in the figure, so it reads as the one solid
-              object everything else connects to. */}
+              the entity resolution layer. It carries the only shadow in
+              the figure, so it reads as the one solid object everything
+              else connects to. */}
           <g className="cp-eco__float">
             <circle cx={cx} cy={cy} r={coreR} className="cp-eco__core" />
             <circle cx={cx} cy={cy} r={coreR * 0.65} className="cp-eco__core2" />
@@ -144,7 +146,7 @@ export function EcosystemDiagram() {
             </defs>
             <text className="cp-eco__ringcap">
               <textPath href="#cp-eco-ringpath" startOffset="25%" textAnchor="middle">
-                PROPRIETARY NATIVE IDENTIFICATION
+                CEDAR ENTITY RESOLUTION
               </textPath>
             </text>
             <text x={cx} y={cy - 7} className="cp-eco__corecap" textAnchor="middle">
@@ -234,6 +236,29 @@ export function EcosystemDiagram() {
           </span>
         </p>
       </div>
+      {/* On a phone the ring is not shrunk into an unreadable postage
+          stamp: the same facts render as a selectable list, one disclosure
+          per collection, and the stylesheet decides which of the two forms
+          shows. Native details/summary, so tap works with no state. */}
+      <div className="cp-eco__cards">
+        {RING.map((name) => (
+          <details className="cp-eco__card" key={name}>
+            <summary>{name}</summary>
+            <p>
+              <span className="cp-eco__cardcap">Built from</span>
+              {(SOURCES[name] ?? []).join(" · ")}
+            </p>
+            <p>
+              <span className="cp-eco__cardcap">Reinforced by</span>
+              {(FEEDS[name]?.feeds ?? []).join(" · ")}
+            </p>
+            {FEEDS[name]?.line ? <p className="cp-eco__cardline">{FEEDS[name].line}</p> : null}
+          </details>
+        ))}
+        <p className="cp-eco__cardfoot">
+          Every collection resolves in the same layer: Cedar entity resolution, with human review.
+        </p>
+      </div>
     </div>
   );
 }
@@ -247,16 +272,22 @@ const HISTORY = [
   { year: "2026", event: "Historical records reconciled" },
 ];
 
-/** One entity's life, which is the thing that has to be maintained. */
+/** One entity's life, which is the thing that has to be maintained. The
+ *  label says the sequence is an example: these are the kinds of events the
+ *  identity layer tracks, not the record of a particular enterprise, and a
+ *  reader should not have to guess that. */
 export function EntityTimeline() {
   return (
-    <ol className="cp-tl">
-      {HISTORY.map((point) => (
-        <li className="cp-tl__point" key={point.year}>
-          <span className="cp-tl__year">{point.year}</span>
-          <span className="cp-tl__event">{point.event}</span>
-        </li>
-      ))}
-    </ol>
+    <>
+      <p className="cp-tl__cap">Illustrative entity history</p>
+      <ol className="cp-tl">
+        {HISTORY.map((point) => (
+          <li className="cp-tl__point" key={point.year}>
+            <span className="cp-tl__year">{point.year}</span>
+            <span className="cp-tl__event">{point.event}</span>
+          </li>
+        ))}
+      </ol>
+    </>
   );
 }

@@ -32,6 +32,7 @@ import {
   PRESS_DATA_PATH,
   PRESS_METHODS_PATH,
   PRESS_PATH,
+  PRESS_REQUEST_PATH,
   PRESS_SETTINGS_PATH,
   PRESS_WHATS_NEW_PATH,
 } from "../../features/grove/pressRoutes";
@@ -137,10 +138,15 @@ export function PressBack({ label = "All of Cedar Press", to = PRESS_PATH }) {
  * The footer: the whole map, then who publishes it, then the promise.
  *
  * One footer, navy, on every page — pages that ended in white dissolved
- * rather than finished. `flush` is for a page whose last section is already
- * navy (the reader's close): the footer continues that band with no edge of
- * its own. Everywhere else the thin teal edge marks where the page ends and
- * the chrome begins.
+ * rather than finished. The thin teal edge is the footer's own seam and
+ * renders everywhere, even against a teal band above it: the component owns
+ * the line, so the same footer means the same ending on every page. `flush`
+ * is for a page whose last section is already navy (the reader's close): it
+ * removes the gap, never the seam.
+ *
+ * The tribal-governments line makes the governance pathway discoverable
+ * from every page without turning it into a marketing element: a council
+ * office should not need a subscription to find out how to ask.
  */
 export function PressFoot({ flush = false }) {
   return (
@@ -155,6 +161,11 @@ export function PressFoot({ flush = false }) {
           <Link to={PRESS_SETTINGS_PATH}>Settings</Link>
         </nav>
         <div className="cp-foot__meta">
+          <span className="cp-foot__gov">
+            <Link to={PRESS_REQUEST_PATH}>
+              For tribal governments: request your records <span aria-hidden="true">&#8594;</span>
+            </Link>
+          </span>
           <span>
             <a href={TBN_URL} target="_blank" rel="noreferrer">tribalbusinessnews.com</a>
             {" · "}
