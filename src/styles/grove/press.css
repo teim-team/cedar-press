@@ -793,6 +793,11 @@
  * from inflating the line it sits on. */
 .teim-rd .cp-plus { display: inline-block; font-size: 0.58em; line-height: 0; position: relative; top: -0.55em; letter-spacing: 0; margin-left: 0.05em; }
 .teim-rd .cp-band__facts { font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); margin: 0.9rem 0 0; }
+/* The asterisk's footnote: each collection's own start date lives in the
+ * read panel, and this line says so instead of letting one year speak for
+ * the shelf. */
+.teim-rd .cp-band__vary { font-family: var(--mono); font-size: 0.58rem; font-weight: 600; letter-spacing: 0.08em; color: var(--muted); margin: 0.3rem 0 0; }
+.teim-rd .cp-band--fill .cp-band__vary { color: rgba(255, 255, 255, 0.8); }
 
 /* The price stands with the tier's name, in the band's own ink. */
 .teim-rd .cp-band__price { font-family: var(--sans); font-size: 1.18rem; font-weight: 800; letter-spacing: -0.015em; color: var(--dteal); margin: 0.55rem 0 0; }

@@ -306,15 +306,22 @@ function Band({ tier, user, index }) {
             <p className="cp-band__price">${tier.price.toLocaleString("en-US")} a year</p>
           )}
           <p className="cp-band__promise">{tier.promise}</p>
-          {/* "Records back to" rather than "X to present": the shelf's
-              collections reach back different distances, and the panel
-              beside the tiles gives each one its own dates. This line only
-              promises the deepest reach. */}
+          {/* "As far back as" with an asterisk, not "back to": the year is
+              the deepest single collection, the shelf's collections reach
+              back different distances, and a line that promises the whole
+              shelf at that depth promises data the other collections do
+              not hold. The footnote sends the reader to the panel, which
+              gives each collection its own dates. */}
           <p className="cp-band__facts">
             {entries.length} collections
-            {from ? ` · records back to ${from}` : ""}
+            {from ? ` · records as far back as ${from}*` : ""}
             {owned ? " · yours to download" : ""}
           </p>
+          {from ? (
+            <p className="cp-band__vary">
+              * Coverage varies by collection; {COARSE ? "tap" : "point at"} a tile for its dates.
+            </p>
+          ) : null}
         </div>
         <span className="cp-kind cp-kind--data">Collections you download</span>
         </div>
