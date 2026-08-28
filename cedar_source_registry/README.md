@@ -16,7 +16,7 @@ the correction.
 | `partnership_leads.jsonl` | 57 | confirmed-but-unpublished roster to request directly |
 | `negative_findings.jsonl` | 469 | Phase 3 formal negatives: tribes checked with no public registry found, with recheck dates — with sources.jsonl, this covers every entity on the 2026 BIA list |
 | `cross_reference.jsonl` | 40 | secondary directory with `do_not_infer` guardrails |
-| `verification_log.jsonl` | 148 | append-only fact-check log: 31 wave-5 lines (18 verified, 5 researched-and-excluded, 4 URL corrections, 2 edits reverted) + 97 wave-5.1 search-only re-checks (`channel: web_search_only`) + 20 expansion-round additions and re-checks |
+| `verification_log.jsonl` | 151 | append-only fact-check log: 31 wave-5 lines (18 verified, 5 researched-and-excluded, 4 URL corrections, 2 edits reverted) + 97 wave-5.1 search-only re-checks (`channel: web_search_only`) + 23 expansion-round additions and re-checks |
 | `nations.jsonl` | 584 | nation crosswalk (Phase 0, name-verified) — see "Nation crosswalk" below |
 | `research/bia_list_2026-01-30/` | 577 entries | the FR 2026-01-30 notice (immutable PDF + parsed entities.json) — the official list the crosswalk is verified against |
 | `outreach/requests.md` | — | outreach queue for request-only sources (roster generated from partnership_leads.jsonl) |
