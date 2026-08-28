@@ -41,7 +41,8 @@ _CONSTRUCTION: dict[str, dict[str, Any]] = {
             "One documented transaction (acquisition, property purchase, "
             "project financing, bond issuance or major capital project)."
         ),
-        "coverage_start": "2010",
+        "coverage_standard_from": "2010",
+        "coverage_full_from": "2010",
         "entity_resolution_method": (
             "Buyers, sellers, borrowers and issuers are resolved to tribal "
             "governments, tribally owned enterprises, ANCs and NHOs, with "
@@ -65,7 +66,8 @@ _CONSTRUCTION: dict[str, dict[str, Any]] = {
         "unit_of_observation": (
             "One Native-owned contracting entity, with its federal award history."
         ),
-        "coverage_start": "2000",
+        "coverage_standard_from": "2010",
+        "coverage_full_from": "2000",
         "entity_resolution_method": (
             "Vendors are matched to parent entities so awards roll up to the "
             "owning tribe, ANC or NHO; provisional matches are labeled until "
@@ -87,7 +89,8 @@ _CONSTRUCTION: dict[str, dict[str, Any]] = {
             "One federal assistance award (grant, loan, direct payment or "
             "insurance) to a tribe or Native organization."
         ),
-        "coverage_start": "2001",
+        "coverage_standard_from": "2010",
+        "coverage_full_from": "2001",
         "entity_resolution_method": (
             "Recipients are resolved to the Native entity behind them, so an "
             "award to a subsidiary, a housing authority or a consortium is "
@@ -108,7 +111,8 @@ _CONSTRUCTION: dict[str, dict[str, Any]] = {
             "One individually owned Native business, certified by its nation's "
             "TERO or commerce office."
         ),
-        "coverage_start": "2026",
+        "coverage_standard_from": "2026",
+        "coverage_full_from": "2026",
         "entity_resolution_method": (
             "No inference: each business is exactly what its nation's office "
             "certifies it to be. Listings carry the certifying nation, and "
@@ -163,7 +167,12 @@ def profile_for(dataset_id: str) -> dict[str, Any] | None:
         "collection_id": dataset.id,
         "shelf": dataset.shelf,
         "description": dataset.tracks,
-        "coverage_start": construction.get("coverage_start"),
+        # Two depths, deliberately: the standard shelf opens the collection
+        # from coverage_standard_from; Cedar Press+ opens the full archive
+        # back to coverage_full_from. One number here flattened the tier
+        # ladder and told a standard reader they had years they do not.
+        "coverage_standard_from": construction.get("coverage_standard_from"),
+        "coverage_full_from": construction.get("coverage_full_from"),
         "coverage_end": dataset.vintage,
         # Honest until a cadence is a commitment, not a plan.
         "update_frequency": None,
@@ -224,6 +233,22 @@ _STATS_WORDS = (
 )
 
 
+def _coverage_sentence(profile: dict[str, Any]) -> str | None:
+    """Coverage stated per tier, because the tiers buy different depths."""
+    std = profile.get("coverage_standard_from")
+    full = profile.get("coverage_full_from")
+    if not std:
+        return None
+    tail = f"current vintage {profile['vintage']}, last updated {profile['last_updated']}."
+    if full and full != std:
+        return (
+            f"Coverage from {std} on Cedar Press; Cedar Press+ opens the full "
+            f"archive back to {full}. Current vintage {profile['vintage']}, "
+            f"last updated {profile['last_updated']}."
+        )
+    return f"Coverage from {std}, {tail}"
+
+
 def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None:
     """A profile-grounded answer, or ``None`` when the question needs more.
 
@@ -256,10 +281,7 @@ def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None
             f"Unit of observation: {profile['unit_of_observation']}"
             if profile.get("unit_of_observation")
             else None,
-            f"Coverage from {profile['coverage_start']}, current vintage "
-            f"{profile['vintage']}, last updated {profile['last_updated']}."
-            if profile.get("coverage_start")
-            else None,
+            _coverage_sentence(profile),
             f"Sources: {profile['primary_sources']}.",
         ]
         return {"answer": " ".join(p for p in parts if p), "basis": basis}

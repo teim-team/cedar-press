@@ -173,7 +173,7 @@ export default function CedarPress() {
             </div>
           </div>
         </section>
-          <PressFoot deep />
+          <PressFoot flush />
         </div>
 
         <PressCedarFab examples={cedarExamples} />

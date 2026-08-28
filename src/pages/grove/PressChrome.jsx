@@ -135,12 +135,16 @@ export function PressBack({ label = "All of Cedar Press", to = PRESS_PATH }) {
 
 /**
  * The footer: the whole map, then who publishes it, then the promise.
- * `deep` continues the close band's navy instead of cutting back to paper
- * for six lines of chrome.
+ *
+ * One footer, navy, on every page — pages that ended in white dissolved
+ * rather than finished. `flush` is for a page whose last section is already
+ * navy (the reader's close): the footer continues that band with no edge of
+ * its own. Everywhere else the thin teal edge marks where the page ends and
+ * the chrome begins.
  */
-export function PressFoot({ deep = false }) {
+export function PressFoot({ flush = false }) {
   return (
-    <footer className={`cp-foot${deep ? " cp-foot--deep" : ""}`}>
+    <footer className={`cp-foot cp-foot--deep${flush ? " cp-foot--flush" : ""}`}>
       <div className="cp-foot__in">
         <nav className="cp-foot__nav" aria-label="Cedar Press">
           <Link to={PRESS_PATH}>Cedar Press</Link>

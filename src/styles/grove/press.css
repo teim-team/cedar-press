@@ -152,13 +152,19 @@
 .teim-rd .cp-foot--deep .cp-foot__meta { border-top-color: rgba(255, 255, 255, 0.14); }
 /* On the reader the close is navy, so the footer continues it rather than
  * cutting back to white for six lines of chrome. */
+/* Every page now ends in the navy footer, which carries its own clearance
+ * for the floating launcher, so no page keeps white padding below it. */
+.teim-rd .cp { padding-bottom: 0; }
 .teim-rd .cp--deepfoot { padding-bottom: 0; }
 /* The bottom padding clears the floating launcher. The footer is the last
  * thing on the page, so its final line lands exactly where the pill sits;
  * giving it room below is what keeps the two apart. Squeezing the meta line
  * sideways instead was the other option, and on a phone it wraps the
  * publisher line to make room for a control that is already labelled. */
-.teim-rd .cp-foot--deep { margin-inline: calc(50% - 50vw); width: 100vw; margin-top: 0; padding: 1.2rem 0 7rem; border-top: 0; background: var(--ink); color: rgba(255, 255, 255, 0.7); }
+.teim-rd .cp-foot--deep { margin-inline: calc(50% - 50vw); width: 100vw; margin-top: 2.6rem; padding: 1.2rem 0 7rem; border-top: 3px solid var(--teal); background: var(--ink); color: rgba(255, 255, 255, 0.7); }
+/* Continuing a navy band: no edge, no gap — the band and the footer are one
+ * surface. */
+.teim-rd .cp-foot--flush { margin-top: 0; border-top: 0; }
 @media (max-width: 640px) { .teim-rd .cp-foot--deep { padding-bottom: 5rem; } }
 .teim-rd .cp-foot__in { flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.3rem 2rem; }
 .teim-rd .cp-foot--deep .cp-foot__in { max-width: 1560px; margin: 0 auto; padding-inline: 2.4rem; }
