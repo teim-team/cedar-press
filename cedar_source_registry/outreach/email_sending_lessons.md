@@ -4,11 +4,17 @@
 ## 1. Formatting: never trust default spacing
 
 - **Outlook strips/zeroes default `<p>` margins.** Bare `<p>` paragraphs collapse
-  into a wall of text in the received copy. Write every paragraph as
-  `<p style="margin-top:1em;margin-bottom:1em">…</p>` or separate blocks with
-  explicit `<br><br>`. We learned this the hard way: the 8/27 batch (explicit
-  margins) rendered fine; two 8/28 follow-ups (bare `<p>`) arrived with no
-  paragraph spacing.
+  into a wall of text in the received copy. We learned this the hard way: the
+  8/27 batch (explicit inline margins) rendered fine; two 8/28 follow-ups
+  (bare `<p>`) arrived with no paragraph spacing.
+- **Root cause found (8/28, second pass): the two connector paths differ.**
+  `outlook_send_mail` *sanitizes* HTML and preserves `style=` attributes, so
+  `<p style="margin-top:1em;margin-bottom:1em">` works there. The
+  draft-creation path (`outlook_create_draft` / reply drafts) *rejects* any
+  `style=` attribute outright (strict allowlist, the call errors). So: for
+  direct sends, use inline-margin `<p>` tags; for anything going through
+  Drafts, separate paragraphs with explicit `<br><br>` instead — that renders
+  correctly everywhere and passes both paths.
 - **Gmail has its own version of this.** Test with the same rule (inline styles
   on every element), plus:
   - Emails over **~102KB get clipped** ("[Message clipped] View entire message") —
