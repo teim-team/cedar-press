@@ -50,7 +50,7 @@ export default function PressAd({ slot }) {
         <div className="cp-ad__house">
           <p className="cp-ad__housetitle">{AD_HOUSE.title}</p>
           <p className="cp-ad__housebody">{AD_HOUSE.body}</p>
-          <a className="cp-ad__houseact" href={AD_ENQUIRY_HREF}>
+          <a className="cp-ad__houseact" href={AD_ENQUIRY_HREF} target="_blank" rel="noreferrer">
             {AD_HOUSE.action} <span aria-hidden="true">&#8594;</span>
           </a>
         </div>

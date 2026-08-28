@@ -179,9 +179,10 @@ export function creativeFor() {
   return null;
 }
 
-/** Where an advertising enquiry goes. */
-export const AD_ENQUIRY_HREF =
-  "mailto:contact@lumecon.ai?subject=Cedar%20Press%20advertising";
+/** Where an advertising enquiry goes: TBN's media kit and rate request,
+ * since display and sponsored content are sold through Tribal Business
+ * News, not through the research desk's inbox. */
+export const AD_ENQUIRY_HREF = "https://tribalbusinessnews.com/media-kit-request-rates";
 
 /**
  * The invitation an unsold `house` slot renders.
