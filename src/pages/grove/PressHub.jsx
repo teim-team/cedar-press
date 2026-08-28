@@ -49,6 +49,10 @@ function sections(user) {
   const earliest = collections
     .map((entry) => historyFor(user, entry).from)
     .filter(Boolean);
+  // What the plans tile can honestly offer this reader: Cedar Press+ is an
+  // upgrade only to someone who does not already have it; above that, the
+  // next rung is Cedar Grove.
+  const hasPro = canOpenDataset(user, { shelf: "pro" });
   const newest = recentlyUpdated(1)[0];
   return [
     {
@@ -94,7 +98,9 @@ function sections(user) {
       external: true,
       icon: WantMoreIcon,
       meta: "Subscription",
-      what: "What your subscription includes and what Cedar Press+ adds, managed and upgraded through Tribal Business News.",
+      what: hasPro
+        ? "Your membership, managed through Tribal Business News. The step beyond this shelf is Cedar Grove, where the same collections open for analysis."
+        : "What your subscription includes and what Cedar Press+ adds, managed and upgraded through Tribal Business News.",
     },
     {
       id: "contact",

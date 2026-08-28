@@ -197,6 +197,24 @@ class TestCatalog(unittest.TestCase):
         self.assertIn("lobbying", payload["answer"].lower())
         self.assertIn("catalog entry", payload["basis"])
 
+    def test_coverage_is_phrased_for_the_asking_tier(self) -> None:
+        # A Cedar Press+ reader already opens the archive; Cedar must not
+        # sell them the plan they are asking from. Lobbying's archive (1998)
+        # is deeper than its Press window (2010), so the two phrasings differ.
+        ratelimit.reset_for_tests()
+        sign_in("pro@example.org")
+        response = client.post(
+            "/cedar/ask",
+            json={"question": "What does this collection cover?", "collectionId": "lobbying"},
+        )
+        self.assertEqual(response.status_code, 200)
+        answer = response.json()["answer"]
+        self.assertNotIn("Cedar Press+ opens", answer)
+        self.assertIn("your plan opens", answer)
+        # Back to the standard reader for the rest of the class.
+        ratelimit.reset_for_tests()
+        sign_in()
+
     def test_a_catalog_collection_says_it_has_no_figures(self) -> None:
         # A quantity question about an unreleased collection is answered with
         # the honest state of the numbers, never a routing miss or a made-up

@@ -329,7 +329,9 @@ def ask_cedar(
     because only the refusal is obviously not the product.
     """
     if question.collectionId:
-        answered = repository.cedar_answer(question.question, question.collectionId)
+        answered = repository.cedar_answer(
+            question.question, question.collectionId, session.tier
+        )
         if answered:
             return {
                 "answer": answered["answer"],
