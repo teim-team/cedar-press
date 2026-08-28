@@ -606,6 +606,17 @@
 
 /* Access, and nothing else. */
 .teim-rd .cp-split__form { width: min(100%, 25rem); margin-inline: auto; }
+/* The form column top-aligns with the hero's headline instead of floating
+ * at the panel's vertical center (the platform's .auth-editorial margin:
+ * auto): the sign-in block is short, and centering it pushed the
+ * non-subscription pathways below the fold. The padding mirrors the hero's
+ * own top padding plus its brand-and-tagline block (~4.7rem), so "Cedar
+ * Press is available..." sits level with "Know what's shaping Indian
+ * Country." across widths. Desktop only: on phones the form leads the page
+ * and keeps its own padding. */
+@media (min-width: 881px) {
+  .teim-rd .cp-split.auth-split .auth-editorial { margin: 0 auto; padding-top: calc(clamp(2.5rem, 5.5vw, 5.5rem) + 4.7rem); }
+}
 /* The title states the entitlement rule in a full sentence, so it sets
  * tighter than a two-word heading would. */
 .teim-rd .cp-split__form .auth-editorial__title { font-size: clamp(1.4rem, 2.4vw, 1.75rem); line-height: 1.2; letter-spacing: -0.02em; }
