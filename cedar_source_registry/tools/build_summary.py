@@ -32,13 +32,28 @@ NATION_SCOPE_ORDER = [
 ]
 
 
+def ordered(counter, order):
+    """
+    Project a Counter onto a display order WITHOUT dropping unknown keys.
+
+    The previous form -- {k: c[k] for k in ORDER if c[k]} -- silently discarded
+    any value not already in the hardcoded list, so a new status_group vanished
+    from summary.json while check_integrity (which recomputes from the full
+    Counter) failed forever with no indication of the cause. Vocabulary drift
+    must surface as a new key, never as a missing count.
+    """
+    known = [k for k in order if counter.get(k)]
+    extra = sorted(k for k in counter if k not in order and counter[k])
+    return {k: counter[k] for k in known + extra}
+
+
 def main() -> int:
     sources = [
         json.loads(line)
-        for line in (ROOT / "sources.jsonl").read_text().splitlines()
+        for line in (ROOT / "sources.jsonl").read_text(encoding="utf-8").splitlines()
         if line.strip()
     ]
-    existing = json.loads((ROOT / "summary.json").read_text())
+    existing = json.loads((ROOT / "summary.json").read_text(encoding="utf-8"))
 
     by_priority = Counter(s["source_priority_class"] for s in sources)
     by_status = Counter(s["status_group"] for s in sources)
@@ -49,10 +64,8 @@ def main() -> int:
         "generated": date.today().isoformat(),
         "scope": existing["scope"],
         "total_source_programs": len(sources),
-        "by_priority_class": {
-            k: by_priority[k] for k in PRIORITY_ORDER if by_priority[k]
-        },
-        "by_status_group": {k: by_status[k] for k in STATUS_ORDER if by_status[k]},
+        "by_priority_class": ordered(by_priority, PRIORITY_ORDER),
+        "by_status_group": ordered(by_status, STATUS_ORDER),
     }
 
     # Optional blocks that exist only once the corresponding registry columns do.
@@ -60,9 +73,7 @@ def main() -> int:
         s["nation_scope"] for s in sources if s.get("nation_scope")
     )
     if by_scope:
-        summary["by_nation_scope"] = {
-            k: by_scope[k] for k in NATION_SCOPE_ORDER if by_scope[k]
-        }
+        summary["by_nation_scope"] = ordered(by_scope, NATION_SCOPE_ORDER)
         summary["sources_with_nation_ids"] = sum(
             1 for s in sources if s.get("nation_ids")
         )
@@ -73,7 +84,7 @@ def main() -> int:
     if nations_path.exists():
         nations = [
             json.loads(line)
-            for line in nations_path.read_text().splitlines()
+            for line in nations_path.read_text(encoding="utf-8").splitlines()
             if line.strip()
         ]
         summary["nations_in_crosswalk"] = len(nations)
@@ -90,7 +101,7 @@ def main() -> int:
         if neg_path.exists():
             neg_rows = [
                 json.loads(line)
-                for line in neg_path.read_text().splitlines()
+                for line in neg_path.read_text(encoding="utf-8").splitlines()
                 if line.strip()
             ]
         negative_ids = {r["nation_id"] for r in neg_rows}
@@ -124,7 +135,7 @@ def main() -> int:
     summary["matching_rules"] = existing["matching_rules"]
 
     out = json.dumps(summary, indent=1, ensure_ascii=False) + "\n"
-    (ROOT / "summary.json").write_text(out)
+    (ROOT / "summary.json").write_text(out, encoding="utf-8")
     print(f"summary.json regenerated: {len(sources)} sources", file=sys.stderr)
     return 0
 

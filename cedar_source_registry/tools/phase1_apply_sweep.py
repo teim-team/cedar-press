@@ -56,7 +56,7 @@ RESULT = {
 def main(paths: list[str]) -> int:
     results: dict[str, dict] = {}
     for p in paths:
-        for line in Path(p).read_text().splitlines():
+        for line in Path(p).read_text(encoding="utf-8").splitlines():
             if not line.strip():
                 continue
             row = json.loads(line)
@@ -69,7 +69,7 @@ def main(paths: list[str]) -> int:
     # verification silently goes unapplied.
     known_ids = {
         json.loads(line)["source_id"]
-        for line in src_path.read_text().splitlines()
+        for line in src_path.read_text(encoding="utf-8").splitlines()
         if line.strip()
     }
     unknown = sorted(set(results) - known_ids)
@@ -83,7 +83,7 @@ def main(paths: list[str]) -> int:
     # source_id, checked date, channel, and result.
     log_path = ROOT / "verification_log.jsonl"
     already = set()
-    for line in log_path.read_text().splitlines():
+    for line in log_path.read_text(encoding="utf-8").splitlines():
         if not line.strip():
             continue
         row = json.loads(line)
@@ -101,7 +101,7 @@ def main(paths: list[str]) -> int:
         print(f"skipping {len(skipped)} already-applied results: {skipped}",
               file=sys.stderr)
     out, log_lines, review = [], [], []
-    for line in src_path.read_text().splitlines():
+    for line in src_path.read_text(encoding="utf-8").splitlines():
         s = json.loads(line)
         r = results.pop(s["source_id"], None)
         if r is None:
@@ -138,8 +138,8 @@ def main(paths: list[str]) -> int:
         if outcome in ("moved", "login_gated", "program_defunct", "not_found", "unresolved"):
             review.append((s["source_id"], outcome, r["basis"], r.get("notes")))
 
-    src_path.write_text("\n".join(out) + "\n")
-    with log_path.open("a") as f:
+    src_path.write_text("\n".join(out) + "\n", encoding="utf-8")
+    with log_path.open("a", encoding="utf-8") as f:
         for line in log_lines:
             f.write(line + "\n")
     print(f"applied {len(log_lines)} results", file=sys.stderr)

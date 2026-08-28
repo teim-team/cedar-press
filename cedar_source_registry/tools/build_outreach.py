@@ -15,7 +15,7 @@ END = "<!-- END GENERATED ROSTER -->"
 def main() -> None:
     leads = [
         json.loads(line)
-        for line in (ROOT / "partnership_leads.jsonl").read_text().splitlines()
+        for line in (ROOT / "partnership_leads.jsonl").read_text(encoding="utf-8").splitlines()
         if line.strip()
     ]
     rows = [
@@ -35,10 +35,10 @@ def main() -> None:
     table = "\n".join(rows)
 
     path = ROOT / "outreach" / "requests.md"
-    text = path.read_text()
+    text = path.read_text(encoding="utf-8")
     pre, rest = text.split(BEGIN, 1)
     _, post = rest.split(END, 1)
-    path.write_text(f"{pre}{BEGIN}\n{table}\n{END}{post}")
+    path.write_text(f"{pre}{BEGIN}\n{table}\n{END}{post}", encoding="utf-8")
     print(f"outreach/requests.md roster regenerated: {len(leads)} leads")
 
 
