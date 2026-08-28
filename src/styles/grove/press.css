@@ -224,6 +224,16 @@
  * inherited from that box, which is how the sheet ended up 358px wide inside
  * a 390px window (its `max-width: calc(100vw - 2rem)`) and 36rem tall
  * whatever it held (its `height`). Silence is not a default. */
+/* The shelves by name, on the gate: quiet mono names between the proof
+ * grid and the credibility strip, with Cedar as the way to ask about any
+ * of them. */
+.teim-rd .cp-cats { margin: 1.6rem auto 0; max-width: 30rem; text-align: center; }
+.teim-rd .cp-cats__head { font-family: var(--mono); font-weight: 700; font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255, 255, 255, 0.75); margin: 0 0 0.5rem; }
+.teim-rd .cp-cats__names { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.9; color: #fff; margin: 0 0 0.7rem; }
+.teim-rd .cp-cats__dot { color: rgba(255, 255, 255, 0.55); }
+.teim-rd .cp-cats__cedar { border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 999px; background: rgba(0, 0, 0, 0.14); padding: 0.5rem 1rem; font-family: var(--sans); font-size: 0.85rem; font-weight: 600; color: #fff; cursor: pointer; transition: background 0.16s ease, border-color 0.16s ease; }
+.teim-rd .cp-cats__cedar:hover { background: rgba(0, 0, 0, 0.28); border-color: #fff; }
+
 /* Ask Cedar from a collection's description panel. */
 .teim-rd .cp-read__cedar { display: inline-block; margin-top: 0.6rem; border: 0; background: none; padding: 0; font-family: var(--sans); font-size: 0.84rem; font-weight: 600; color: var(--dteal); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .teim-rd .cp-read__cedar:hover { color: var(--ink); }
