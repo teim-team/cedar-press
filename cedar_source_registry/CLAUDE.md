@@ -14,12 +14,12 @@ authoritative current copy):
 
 | File | Records | One line per |
 |---|---|---|
-| `sources.jsonl` | 163 | source program (148 wave-5 + TBD-166..180) |
-| `scrape_queue.jsonl` | 94 | live source ranked for immediate ingestion |
+| `sources.jsonl` | 174 | source program (148 wave-5 + TBD-166..191, incl. Native Hawaiian block TBD-184..191) |
+| `scrape_queue.jsonl` | 105 | live source ranked for immediate ingestion |
 | `partnership_leads.jsonl` | 57 | confirmed-but-unpublished roster to request directly |
-| `negative_findings.jsonl` | 469 | Phase 3 formal negatives with recheck dates — with sources.jsonl this covers every entity on the 2026 BIA list |
-| `cross_reference.jsonl` | 40 | secondary directory with `do_not_infer` guardrails |
-| `verification_log.jsonl` | 151 | append-only fact-check log |
+| `negative_findings.jsonl` | 484 | Phase 3 formal negatives with recheck dates — with sources.jsonl this covers every entity on the 2026 BIA list |
+| `cross_reference.jsonl` | 48 | secondary directory with `do_not_infer` guardrails |
+| `verification_log.jsonl` | 164 | append-only fact-check log |
 | `nations.jsonl` | 584 | nation crosswalk — every `bia_name` verified against the FR 2026-01-30 list (`research/bia_list_2026-01-30/`) |
 | `summary.json` | — | counts computed from sources.jsonl (never transcribed) + coverage ledger |
 | `pipeline.py` + `PIPELINE.md` | — | one-file dataset pipeline exemplar |
@@ -43,10 +43,10 @@ crosswalk". Use `nation_id`s, never free-text nation names, in new work.
 `source_priority_class` encodes what a record from that source can *assert*:
 
 1. **Tribal Primary** (47) — official tribal certification/member lists. Controls over everything.
-2. **Tribal Secondary** (19) — tribal or tribe-linked, but mixed or non-certifying. May add records/fields; caveat travels with the data.
+2. **Tribal Secondary** (21) — tribal or tribe-linked, but mixed or non-certifying. May add records/fields; caveat travels with the data.
 3. **Tribal Partnership** (54) — roster confirmed to exist, not public. Request directly; do not scrape thin evidence pages as if they were the roster.
-4. **Cross-Reference** (32) — state/chamber/ANC/nonprofit directories. May propose matches and affiliations only; can never create a tribal-ownership assertion. Each row carries a `do_not_infer` field in `cross_reference.jsonl` — treat it as binding.
-5. **Discovery Only** (5) / **Coverage Frame** (6) — candidate generation and TERO-universe enumeration only.
+4. **Cross-Reference** (40) — state/chamber/ANC/nonprofit directories. May propose matches and affiliations only; can never create a tribal-ownership assertion. Each row carries a `do_not_infer` field in `cross_reference.jsonl` — treat it as binding.
+5. **Discovery Only** (6) / **Coverage Frame** (6) — candidate generation and TERO-universe enumeration only.
 
 Conflicts persist as parallel source assertions; nothing silently overwrites a
 tribal assertion. Chamber membership, state certification, or ANC shareholder

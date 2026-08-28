@@ -3,52 +3,52 @@
  "wave": 5,
  "generated": "2026-08-28",
  "scope": "United States only. Tribal-government, TERO and tribal member/citizen lists are the primary evidence layer; state, chamber, nonprofit and regional directories are cross-reference only.",
- "total_source_programs": 163,
+ "total_source_programs": 174,
  "by_priority_class": {
   "Tribal Primary": 47,
-  "Tribal Secondary": 19,
+  "Tribal Secondary": 21,
   "Tribal Partnership": 54,
-  "Cross-Reference": 32,
-  "Discovery Only": 5,
+  "Cross-Reference": 40,
+  "Discovery Only": 6,
   "Coverage Frame": 6
  },
  "by_status_group": {
-  "Live": 64,
+  "Live": 75,
   "Stale": 10,
   "Historical": 3,
   "Lead": 57,
   "Complementary": 29
  },
  "by_nation_scope": {
-  "single_nation": 123,
+  "single_nation": 126,
   "multi_nation": 2,
-  "regional": 31,
-  "national": 7
+  "regional": 36,
+  "national": 10
  },
- "sources_with_nation_ids": 125,
+ "sources_with_nation_ids": 128,
  "by_last_checked": {
-  "2026-08-27": 139,
-  "2026-08-28": 24
+  "2026-08-27": 138,
+  "2026-08-28": 36
  },
  "nations_in_crosswalk": 584,
  "coverage": {
   "bia_list_total_reported": 575,
   "bia_list_total_note": "verified 2026-08-28 against the FR 2026-01-30 notice itself (91 FR 4102, owner-supplied PDF; research/bia_list_2026-01-30/). Crosswalk rows can exceed 575 because the combined Capitan Grande and Pribilof Islands entries are represented by their member rows",
   "bia_entities_in_crosswalk": 575,
-  "nations_with_source_rows": 117,
-  "nations_negative_findings_only": 466,
+  "nations_with_source_rows": 119,
+  "nations_negative_findings_only": 464,
   "nations_checked": 583,
   "bia_entities_unchecked_estimate": 1,
   "negative_findings_by_result": {
-   "no_public_registry_found": 453,
+   "no_public_registry_found": 464,
    "procurement_platform_only": 3,
-   "unresolved": 13
+   "unresolved": 17
   },
   "rechecks_due_by": {
-   "2026-11-28": 8,
-   "2027-02-27": 5,
+   "2026-11-28": 11,
+   "2027-02-27": 6,
    "2027-08-27": 141,
-   "2027-08-28": 315
+   "2027-08-28": 326
   }
  },
  "matching_rules": [
