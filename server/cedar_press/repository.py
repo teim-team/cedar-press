@@ -18,6 +18,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
+from cedar_press import collection_profiles
 from cedar_press import collections as launch
 from cedar_press import press_catalog
 
@@ -123,6 +124,16 @@ def _thaw(value: Any) -> Any:
     if isinstance(value, (list, tuple)):
         return [_thaw(item) for item in value]
     return value
+
+
+def collection_profile(collection_id: str) -> dict[str, Any] | None:
+    """The machine-readable profile Cedar answers from, or ``None``."""
+    return collection_profiles.profile_for(collection_id)
+
+
+def cedar_answer(question: str, collection_id: str) -> dict[str, str] | None:
+    """A profile-grounded answer, or ``None`` when the question needs more."""
+    return collection_profiles.answer_from_profile(question, collection_id)
 
 
 def articles() -> list[dict[str, Any]]:

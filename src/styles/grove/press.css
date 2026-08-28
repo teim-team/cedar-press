@@ -224,6 +224,13 @@
  * inherited from that box, which is how the sheet ended up 358px wide inside
  * a 390px window (its `max-width: calc(100vw - 2rem)`) and 36rem tall
  * whatever it held (its `height`). Silence is not a default. */
+/* Ask Cedar from a collection's description panel. */
+.teim-rd .cp-read__cedar { display: inline-block; margin-top: 0.6rem; border: 0; background: none; padding: 0; font-family: var(--sans); font-size: 0.84rem; font-weight: 600; color: var(--dteal); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.teim-rd .cp-read__cedar:hover { color: var(--ink); }
+/* The scope line inside the Cedar panel: which collection is being asked
+ * about, and the way back out. */
+.teim-rd .cedar-widget__scope { margin: 0.3rem 0 0.4rem; font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.teim-rd .cedar-widget__scopeclear { border: 0; background: none; padding: 0; font: inherit; color: var(--dteal); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
 /* Example questions as quiet chips: they demonstrate what Cedar answers
  * without pretending to be conversation history. */
 .teim-rd .cedar-widget__examples { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.55rem 0 0.7rem; }

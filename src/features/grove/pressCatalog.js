@@ -209,7 +209,7 @@ export const PRESS_CATALOG = Object.freeze([
   }),
   Object.freeze({
     id: "owned",
-    short: "Owned Businesses",
+    short: "Native-Owned Businesses",
     name: "Individually Owned Native Businesses",
     shelf: "pro",
     standardFrom: 2026,

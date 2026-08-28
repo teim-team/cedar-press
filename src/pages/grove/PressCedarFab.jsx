@@ -13,6 +13,14 @@ import { appUrl } from "../../features/grove/appLink.js";
 import { isConnected } from "../../config.js";
 import { EVENT, track, trackError } from "../../features/grove/telemetry.js";
 
+// Questions every collection profile can answer; shown whenever Cedar is
+// scoped to a collection.
+const SCOPED_EXAMPLES = [
+  "What does this collection cover?",
+  "How was this collection constructed?",
+  "What are its headline figures?",
+];
+
 export function PressCedarFab({ signedOut = false, examples = [] }) {
   const [open, setOpen] = useState(false);
   const [question, setQuestion] = useState("");
@@ -20,12 +28,30 @@ export function PressCedarFab({ signedOut = false, examples = [] }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(null);
   const [gateNotice, setGateNotice] = useState(false);
+  // Which collection Cedar is currently asked about. Set by the shelf's
+  // "Ask Cedar about this collection" (a window event, so the shelf does
+  // not need a prop path to a control that floats outside it), cleared by
+  // the reader.
+  const [scope, setScope] = useState(null);
   const inputRef = useRef(null);
   const connected = isConnected();
 
   useEffect(() => {
     if (open && connected) inputRef.current?.focus();
   }, [open, connected]);
+
+  useEffect(() => {
+    const onScope = (event) => {
+      const next = event?.detail;
+      if (!next?.id || !next?.name) return;
+      setScope({ id: next.id, name: next.name });
+      setAnswer(null);
+      setError(null);
+      setOpen(true);
+    };
+    window.addEventListener("cedar:ask-collection", onScope);
+    return () => window.removeEventListener("cedar:ask-collection", onScope);
+  }, []);
 
   const ask = async (event) => {
     event.preventDefault();
@@ -46,9 +72,9 @@ export function PressCedarFab({ signedOut = false, examples = [] }) {
     setAnswer(null);
     setGateNotice(false);
     try {
-      const result = await askCedar({ question: asked });
+      const result = await askCedar({ question: asked, collectionId: scope?.id });
       setAnswer(result?.answer ?? result?.text ?? "");
-      track(EVENT.cedarAsked, { length: asked.length });
+      track(EVENT.cedarAsked, { length: asked.length, collectionId: scope?.id });
     } catch (err) {
       trackError(err, { at: "cedarAsk" });
       setError(
@@ -69,8 +95,24 @@ export function PressCedarFab({ signedOut = false, examples = [] }) {
             <>
               <form className="cedar-widget__ask" onSubmit={ask}>
                 <label className="cedar-widget__label" htmlFor="cedar-question">
-                  {signedOut ? "Ask Cedar about Cedar Press" : "Ask about the collections"}
+                  {scope
+                    ? `Ask about ${scope.name}`
+                    : signedOut
+                      ? "Ask Cedar about Cedar Press"
+                      : "Ask about the collections"}
                 </label>
+                {scope ? (
+                  <p className="cedar-widget__scope">
+                    Scoped to {scope.name}{" "}
+                    <button
+                      type="button"
+                      className="cedar-widget__scopeclear"
+                      onClick={() => setScope(null)}
+                    >
+                      All collections
+                    </button>
+                  </p>
+                ) : null}
                 <textarea
                   id="cedar-question"
                   ref={inputRef}
@@ -79,9 +121,9 @@ export function PressCedarFab({ signedOut = false, examples = [] }) {
                   onChange={(event) => setQuestion(event.target.value)}
                   placeholder="Which collections cover federal contracting?"
                 />
-                {examples.length ? (
+                {(scope ? SCOPED_EXAMPLES : examples).length ? (
                   <div className="cedar-widget__examples">
-                    {examples.map((example) => (
+                    {(scope ? SCOPED_EXAMPLES : examples).map((example) => (
                       <button
                         key={example}
                         type="button"
