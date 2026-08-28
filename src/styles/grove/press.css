@@ -609,10 +609,21 @@
  * fixed height, and the icons scale to the narrower column. After every
  * other proof rule, so these overrides win the cascade. */
 @media (min-width: 1251px) {
+  /* The hero gives back some gutter so the row has real width to spend,
+   * and the lede runs the inner measure instead of a 27rem island. */
+  .teim-rd .cp-hero2.auth-hero { padding-inline: clamp(2rem, 3vw, 3.4rem); }
+  .teim-rd .cp-hero2__inner { max-width: 44rem; }
+  .teim-rd .cp-hero2__lede { max-width: none; }
   .teim-rd .cp-proof { grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: none; }
-  .teim-rd .cp-proof__item { aspect-ratio: auto; min-height: 11.5rem; padding: 0.85rem 0.7rem; }
-  .teim-rd .cp-proof__ic svg { width: 58px; height: 58px; }
-  .teim-rd .cp-proof__body { font-size: 0.74rem; line-height: 1.4; }
+  /* Actually square: the ratio rules and the height follows the column.
+   * On hover the swap gives the whole zone to the paragraph — the kept
+   * small icon was the height a square cannot spare. */
+  .teim-rd .cp-proof__item { aspect-ratio: 1 / 1; min-height: 0; padding: 0.85rem 0.7rem; }
+  .teim-rd .cp-proof__ic svg { width: 64px; height: 64px; }
+  .teim-rd .cp-proof__item:hover .cp-proof__swap { display: grid; }
+  .teim-rd .cp-proof__item:hover .cp-proof__ic { opacity: 0; }
+  .teim-rd .cp-proof__body { font-size: 0.69rem; line-height: 1.32; }
+  .teim-rd .cp-proof__item:hover .cp-proof__label { font-size: 0.84rem; }
 }
 
 .teim-rd .cp-split__method { display: inline-block; margin-top: 2rem; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #fff; text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, 0.6); padding-bottom: 3px; transition: border-color 0.18s ease; }
