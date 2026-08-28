@@ -1,0 +1,308 @@
+[
+ {
+  "field": "business_source_id",
+  "type": "string",
+  "required": "Yes",
+  "purpose_notes": "Stable Cedar ID for one business appearance in one source."
+ },
+ {
+  "field": "source_id",
+  "type": "string",
+  "required": "Yes",
+  "purpose_notes": "Foreign key to Source Registry."
+ },
+ {
+  "field": "source_business_key",
+  "type": "string",
+  "required": "Preferred",
+  "purpose_notes": "Source-provided certification number or deterministic source key."
+ },
+ {
+  "field": "business_entity_id",
+  "type": "string",
+  "required": "After matching",
+  "purpose_notes": "Canonical Cedar business entity; separate from source assertion."
+ },
+ {
+  "field": "nation_id",
+  "type": "string",
+  "required": "When known",
+  "purpose_notes": "Canonical nation crosswalk, ideally linked to BIA code for federally recognized U.S. tribes."
+ },
+ {
+  "field": "business_name_raw",
+  "type": "string",
+  "required": "Yes",
+  "purpose_notes": "Exact source text."
+ },
+ {
+  "field": "business_name_normalized",
+  "type": "string",
+  "required": "Derived",
+  "purpose_notes": "Normalization for matching; never replace raw text."
+ },
+ {
+  "field": "dba_name",
+  "type": "string",
+  "required": "Optional",
+  "purpose_notes": "Doing-business-as name."
+ },
+ {
+  "field": "owner_name_raw",
+  "type": "string",
+  "required": "Optional",
+  "purpose_notes": "Public owner/contact text as listed."
+ },
+ {
+  "field": "directory_type",
+  "type": "enum",
+  "required": "Yes",
+  "purpose_notes": "member_owned, artist, tero, certification_notice, mixed_local, tribal_enterprise, anc_shareholder, state_certified, chamber, regional_directory, coverage_frame."
+ },
+ {
+  "field": "identity_scope",
+  "type": "enum",
+  "required": "Yes",
+  "purpose_notes": "citizen, descendant, any_native, tribal_government, family_owned, shareholder, shareholder_descendant, shareholder_spouse, operated_by, mixed, unknown."
+ },
+ {
+  "field": "identity_claim_text",
+  "type": "string",
+  "required": "Yes",
+  "purpose_notes": "Source-specific wording supporting the assertion."
+ },
+ {
+  "field": "ownership_percent",
+  "type": "decimal",
+  "required": "Optional",
+  "purpose_notes": "Actual listed percentage, if public."
+ },
+ {
+  "field": "ownership_threshold_min",
+  "type": "decimal",
+  "required": "Optional",
+  "purpose_notes": "Rule threshold such as 0.51 or 0.60."
+ },
+ {
+  "field": "control_requirement",
+  "type": "string",
+  "required": "Optional",
+  "purpose_notes": "Management, voting-control or day-to-day-operation requirement."
+ },
+ {
+  "field": "tribal_affiliation_raw",
+  "type": "string",
+  "required": "Optional",
+  "purpose_notes": "Affiliation as printed by source."
+ },
+ {
+  "field": "verification_basis",
+  "type": "enum/string",
+  "required": "Yes",
+  "purpose_notes": "title_only, enrollment, CDIB, TERO_review, tribal_certification, state_certification, chamber_membership, directory_tag, self_attested, license, unknown."
+ },
+ {
+  "field": "certification_number",
+  "type": "string",
+  "required": "Optional",
+  "purpose_notes": "TERO/vendor certification identifier."
+ },
+ {
+  "field": "certification_tier",
+  "type": "string",
+  "required": "Optional",
+  "purpose_notes": "Priority/category such as Navajo Priority 1 or Colville Tier 2."
+ },
+ {
+  "field": "certification_start",
+  "type": "date",
+  "required": "Optional",
+  "purpose_notes": "Start/certification date."
+ },
+ {
+  "field": "certification_expiration",
+  "type": "date",
+  "required": "Optional",
+  "purpose_notes": "Expiration/recertification date."
+ },
+ {
+  "field": "business_license_number",
+  "type": "string",
+  "required": "Optional",
+  "purpose_notes": "Tribal, city, state or professional license number."
+ },
+ {
+  "field": "service_category_raw",
+  "type": "string",
+  "required": "Optional",
+  "purpose_notes": "Source category/trade text."
+ },
+ {
+  "field": "naics",
+  "type": "string",
+  "required": "Optional",
+  "purpose_notes": "Source-provided or Cedar-mapped NAICS; flag mapped values."
+ },
+ {
+  "field": "description_raw",
+  "type": "string",
+  "required": "Optional",
+  "purpose_notes": "Business description as published."
+ },
+ {
+  "field": "address_raw",
+  "type": "string",
+  "required": "Optional",
+  "purpose_notes": "Exact public address text."
+ },
+ {
+  "field": "city",
+  "type": "string",
+  "required": "Optional",
+  "purpose_notes": "Parsed city."
+ },
+ {
+  "field": "state_province",
+  "type": "string",
+  "required": "Optional",
+  "purpose_notes": "Parsed state/province."
+ },
+ {
+  "field": "postal_code",
+  "type": "string",
+  "required": "Optional",
+  "purpose_notes": "Parsed postal code."
+ },
+ {
+  "field": "phone",
+  "type": "string",
+  "required": "Optional",
+  "purpose_notes": "Public business phone."
+ },
+ {
+  "field": "email",
+  "type": "string",
+  "required": "Optional",
+  "purpose_notes": "Public business email."
+ },
+ {
+  "field": "website",
+  "type": "string",
+  "required": "Optional",
+  "purpose_notes": "Published website."
+ },
+ {
+  "field": "source_url",
+  "type": "string",
+  "required": "Yes",
+  "purpose_notes": "Record or directory source URL."
+ },
+ {
+  "field": "source_edition",
+  "type": "string/date",
+  "required": "Optional",
+  "purpose_notes": "Directory issue date or file edition."
+ },
+ {
+  "field": "first_seen",
+  "type": "datetime",
+  "required": "Yes",
+  "purpose_notes": "First Cedar observation."
+ },
+ {
+  "field": "last_seen",
+  "type": "datetime",
+  "required": "Yes",
+  "purpose_notes": "Most recent Cedar observation."
+ },
+ {
+  "field": "source_last_updated",
+  "type": "date",
+  "required": "Optional",
+  "purpose_notes": "Date stated by source."
+ },
+ {
+  "field": "record_hash",
+  "type": "string",
+  "required": "Yes",
+  "purpose_notes": "Change detection and reproducibility."
+ },
+ {
+  "field": "is_current",
+  "type": "boolean",
+  "required": "Derived",
+  "purpose_notes": "Current according to latest source snapshot and certification dates."
+ },
+ {
+  "field": "validation_flags",
+  "type": "array/string",
+  "required": "Optional",
+  "purpose_notes": "Bad date, missing affiliation, expired cert, duplicate, mixed identity, and similar flags."
+ },
+ {
+  "field": "ingestion_method",
+  "type": "enum",
+  "required": "Yes",
+  "purpose_notes": "csv, html, pdf, docx, portal, manual_feed."
+ },
+ {
+  "field": "raw_snapshot_uri",
+  "type": "string",
+  "required": "Yes",
+  "purpose_notes": "Immutable raw source snapshot for auditability."
+ },
+ {
+  "field": "refresh_run_id",
+  "type": "string",
+  "required": "Yes",
+  "purpose_notes": "Links record to ingestion run and parser version."
+ },
+ {
+  "field": "relationship_basis_raw",
+  "type": "string",
+  "required": "Optional",
+  "purpose_notes": "Exact source wording for citizen, shareholder, descendant, spouse, family, operated-by or other relationship."
+ },
+ {
+  "field": "certification_event_status",
+  "type": "enum",
+  "required": "Optional",
+  "purpose_notes": "application, hearing, approved, denied, renewed, suspended, expired or unknown for event-based sources."
+ },
+ {
+  "field": "source_priority_class",
+  "type": "enum",
+  "required": "Yes",
+  "purpose_notes": "tribal_primary, tribal_secondary, tribal_partnership, cross_reference, discovery_only or coverage_frame."
+ },
+ {
+  "field": "cross_reference_only",
+  "type": "boolean",
+  "required": "Yes",
+  "purpose_notes": "True when the record may support matching or discovery but cannot independently establish tribal ownership or certification."
+ },
+ {
+  "field": "matched_primary_source_ids",
+  "type": "array/string",
+  "required": "Optional",
+  "purpose_notes": "Tribal Primary source assertions linked to this cross-reference record after entity resolution."
+ },
+ {
+  "field": "match_method",
+  "type": "enum/string",
+  "required": "Optional",
+  "purpose_notes": "certification_number, exact_name_address, exact_website, phone_email, fuzzy_name_location, manual or other documented method."
+ },
+ {
+  "field": "match_confidence",
+  "type": "decimal",
+  "required": "Optional",
+  "purpose_notes": "Entity-resolution confidence score. This measures record linkage, not confidence that the business is Native-owned."
+ },
+ {
+  "field": "assertion_precedence_rank",
+  "type": "integer",
+  "required": "Derived",
+  "purpose_notes": "Numeric implementation of the source hierarchy used for conflict review, never for deleting lower-ranked assertions."
+ }
+]
