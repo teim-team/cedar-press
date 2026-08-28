@@ -144,7 +144,10 @@ class TestCatalog(unittest.TestCase):
         self.assertEqual(response.status_code, 501)
         response = client.post(
             "/cedar/ask",
-            json={"question": "List every contract Cherokee Nation received.", "collectionId": "contractors"},
+            json={
+                "question": "List every contract Cherokee Nation received.",
+                "collectionId": "contractors",
+            },
         )
         self.assertEqual(response.status_code, 501)
 

@@ -18,9 +18,8 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-from cedar_press import collection_profiles
+from cedar_press import collection_profiles, press_catalog
 from cedar_press import collections as launch
-from cedar_press import press_catalog
 
 #: Which shelf each plan reaches. Mirrors ``features/grove/pressAccess.js``;
 #: the client decides what renders and this decides what is served, and the

@@ -37,7 +37,10 @@ from cedar_press.collections import (
 #: a change there is a change here.
 _CONSTRUCTION: dict[str, dict[str, Any]] = {
     "deals": {
-        "unit_of_observation": "One documented transaction (acquisition, property purchase, project financing, bond issuance or major capital project).",
+        "unit_of_observation": (
+            "One documented transaction (acquisition, property purchase, "
+            "project financing, bond issuance or major capital project)."
+        ),
         "coverage_start": "2010",
         "entity_resolution_method": (
             "Buyers, sellers, borrowers and issuers are resolved to tribal "
@@ -59,7 +62,9 @@ _CONSTRUCTION: dict[str, dict[str, Any]] = {
         ),
     },
     "contractors": {
-        "unit_of_observation": "One Native-owned contracting entity, with its federal award history.",
+        "unit_of_observation": (
+            "One Native-owned contracting entity, with its federal award history."
+        ),
         "coverage_start": "2000",
         "entity_resolution_method": (
             "Vendors are matched to parent entities so awards roll up to the "
@@ -78,7 +83,10 @@ _CONSTRUCTION: dict[str, dict[str, Any]] = {
         ),
     },
     "funding": {
-        "unit_of_observation": "One federal assistance award (grant, loan, direct payment or insurance) to a tribe or Native organization.",
+        "unit_of_observation": (
+            "One federal assistance award (grant, loan, direct payment or "
+            "insurance) to a tribe or Native organization."
+        ),
         "coverage_start": "2001",
         "entity_resolution_method": (
             "Recipients are resolved to the Native entity behind them, so an "
@@ -86,11 +94,20 @@ _CONSTRUCTION: dict[str, dict[str, Any]] = {
             "attributed to the nation or organization it belongs to, using "
             "the same entity matching as the contractor collection."
         ),
-        "inclusion_rules": "USAspending assistance records; the current fiscal year is partial until the quarterly release lands and is labeled so wherever it appears.",
-        "known_limitations": "USAspending publication lag makes current-year figures partial; the pages say so where the figures appear.",
+        "inclusion_rules": (
+            "USAspending assistance records; the current fiscal year is partial "
+            "until the quarterly release lands and is labeled so wherever it appears."
+        ),
+        "known_limitations": (
+            "USAspending publication lag makes current-year figures partial; "
+            "the pages say so where the figures appear."
+        ),
     },
     "owned": {
-        "unit_of_observation": "One individually owned Native business, certified by its nation's TERO or commerce office.",
+        "unit_of_observation": (
+            "One individually owned Native business, certified by its nation's "
+            "TERO or commerce office."
+        ),
         "coverage_start": "2026",
         "entity_resolution_method": (
             "No inference: each business is exactly what its nation's office "
@@ -148,7 +165,8 @@ def profile_for(dataset_id: str) -> dict[str, Any] | None:
         "description": dataset.tracks,
         "coverage_start": construction.get("coverage_start"),
         "coverage_end": dataset.vintage,
-        "update_frequency": None,  # honest until a cadence is a commitment, not a plan
+        # Honest until a cadence is a commitment, not a plan.
+        "update_frequency": None,
         "record_count_label": dataset.rows_label,
         "primary_sources": dataset.sources,
         "unit_of_observation": construction.get("unit_of_observation"),
@@ -169,7 +187,8 @@ def _stats_sentence(profile: dict[str, Any]) -> str | None:
     if not headline:
         return None
     points = ", ".join(
-        f"{p['label']}: {int(p['value']) if float(p['value']).is_integer() else p['value']}"
+        f"{p['label']}: "
+        f"{int(p['value']) if float(p['value']).is_integer() else p['value']}"
         for p in headline["points"]
     )
     caveat = (
@@ -185,7 +204,9 @@ def _stats_sentence(profile: dict[str, Any]) -> str | None:
 
 _CONSTRUCT_WORDS = ("construct", "built", "build", "method", "resolve", "resolution", "how ")
 _CONTENT_WORDS = ("cover", "contain", "what is", "what does", "include", "track", "field", "source")
-_STATS_WORDS = ("headline", "figure", "statistic", "largest", "how many", "count", "record", "number")
+_STATS_WORDS = (
+    "headline", "figure", "statistic", "largest", "how many", "count", "record", "number",
+)
 
 
 def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None:
@@ -205,7 +226,9 @@ def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None
         parts = [
             profile.get("entity_resolution_method"),
             profile.get("inclusion_rules"),
-            f"Known limitations: {profile['known_limitations']}" if profile.get("known_limitations") else None,
+            f"Known limitations: {profile['known_limitations']}"
+            if profile.get("known_limitations")
+            else None,
         ]
         return {"answer": " ".join(p for p in parts if p), "basis": basis}
     if any(word in asked for word in _STATS_WORDS):
@@ -215,8 +238,11 @@ def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None
     if any(word in asked for word in _CONTENT_WORDS):
         parts = [
             profile["description"],
-            f"Unit of observation: {profile['unit_of_observation']}" if profile.get("unit_of_observation") else None,
-            f"Coverage from {profile['coverage_start']}, current vintage {profile['vintage']}, last updated {profile['last_updated']}."
+            f"Unit of observation: {profile['unit_of_observation']}"
+            if profile.get("unit_of_observation")
+            else None,
+            f"Coverage from {profile['coverage_start']}, current vintage "
+            f"{profile['vintage']}, last updated {profile['last_updated']}."
             if profile.get("coverage_start")
             else None,
             f"Sources: {profile['primary_sources']}.",
