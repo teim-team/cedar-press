@@ -51,6 +51,7 @@ import {
   CREDIBILITY_DISCLAIMER,
   CREDIBILITY_STRIP,
 } from "../../features/grove/pressMethod";
+import { PressCedarFab } from "./PressCedarFab";
 
 const STRIP_ICONS = { institution: InstitutionIcon, academic: AcademicIcon };
 
@@ -83,7 +84,15 @@ const PROOF_POINTS = [
   },
 ];
 
-const TBN_PLANS_URL = `${TBN_URL}/cedar-press`;
+const TBN_PLANS_URL = `${TBN_URL}/subscribe`;
+
+// Questions the gate suggests to Cedar: enough to show what the product
+// answers, none requiring data the visitor is not yet entitled to see.
+const GATE_CEDAR_EXAMPLES = [
+  "What does Cedar Press cover?",
+  "Which collections track federal contracting?",
+  "What is in the Individually Owned Native Businesses collection?",
+];
 
 function browserStorage() {
   // Reading window.localStorage itself throws under a storage-denying policy
@@ -249,8 +258,11 @@ export default function PressGate({ user }) {
             exclusively through{" "}
             <a href={TBN_URL} target="_blank" rel="noreferrer">Tribal Business News</a>.
           </p>
+          {/* "Through", not "to subscribers": the first sounds like every
+              subscriber gets Cedar Press, and the upgrade line right below
+              says otherwise. The distribution relationship is the claim. */}
           <h2 className="auth-editorial__title">
-            Cedar Press is available exclusively to Tribal Business News subscribers.
+            Cedar Press is available exclusively through Tribal Business News.
           </h2>
           {user ? (
             <>
@@ -459,6 +471,10 @@ export default function PressGate({ user }) {
           )}
         </div>
       </div>
+      {/* Cedar meets the visitor at the door. Signed out, it explains the
+          product and hands a real data question to the gate instead of
+          answering past the paywall. */}
+      <PressCedarFab signedOut={!user} examples={GATE_CEDAR_EXAMPLES} />
     </main>
   );
 }

@@ -13,12 +13,13 @@ import { appUrl } from "../../features/grove/appLink.js";
 import { isConnected } from "../../config.js";
 import { EVENT, track, trackError } from "../../features/grove/telemetry.js";
 
-export function PressCedarFab() {
+export function PressCedarFab({ signedOut = false, examples = [] }) {
   const [open, setOpen] = useState(false);
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(null);
+  const [gateNotice, setGateNotice] = useState(false);
   const inputRef = useRef(null);
   const connected = isConnected();
 
@@ -30,9 +31,20 @@ export function PressCedarFab() {
     event.preventDefault();
     const asked = question.trim();
     if (!asked) return;
+    // On the gate, Cedar is a doorbell, not a side door: a visitor without
+    // a session gets told what would answer their question and how to get
+    // in, rather than a reply that leaks the collections past the paywall.
+    if (signedOut) {
+      setAnswer(null);
+      setError(null);
+      setGateNotice(true);
+      track(EVENT.cedarAsked, { length: asked.length, gated: true });
+      return;
+    }
     setPending(true);
     setError(null);
     setAnswer(null);
+    setGateNotice(false);
     try {
       const result = await askCedar({ question: asked });
       setAnswer(result?.answer ?? result?.text ?? "");
@@ -57,7 +69,7 @@ export function PressCedarFab() {
             <>
               <form className="cedar-widget__ask" onSubmit={ask}>
                 <label className="cedar-widget__label" htmlFor="cedar-question">
-                  Ask about the collections
+                  {signedOut ? "Ask Cedar about Cedar Press" : "Ask about the collections"}
                 </label>
                 <textarea
                   id="cedar-question"
@@ -67,10 +79,36 @@ export function PressCedarFab() {
                   onChange={(event) => setQuestion(event.target.value)}
                   placeholder="Which collections cover federal contracting?"
                 />
+                {examples.length ? (
+                  <div className="cedar-widget__examples">
+                    {examples.map((example) => (
+                      <button
+                        key={example}
+                        type="button"
+                        className="cedar-widget__example"
+                        onClick={() => {
+                          setQuestion(example);
+                          inputRef.current?.focus();
+                        }}
+                      >
+                        {example}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
                 <button type="submit" className="gv-btn gv-btn--primary" disabled={pending}>
                   {pending ? "Asking Cedar" : "Ask Cedar"}
                 </button>
               </form>
+              {gateNotice ? (
+                <p className="cedar-widget__note" role="status">
+                  Cedar answers questions like this from the Cedar Press collections once
+                  you&rsquo;re signed in. Log in above, or get Cedar Press through a{" "}
+                  <a href="https://tribalbusinessnews.com/subscribe" target="_blank" rel="noreferrer">
+                    Tribal Business News membership
+                  </a>.
+                </p>
+              ) : null}
               {error ? <p className="cp-gate__error" role="alert">{error}</p> : null}
               {answer ? <p className="cedar-widget__answer">{answer}</p> : null}
             </>
