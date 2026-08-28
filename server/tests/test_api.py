@@ -113,9 +113,6 @@ class TestCatalog(unittest.TestCase):
     def test_articles_are_served(self) -> None:
         self.assertTrue(client.get("/press/articles").json()["articles"])
 
-    def test_releases_are_empty_rather_than_invented(self) -> None:
-        self.assertEqual(client.get("/press/releases").json()["releases"], [])
-
     def test_a_download_carries_its_citation(self) -> None:
         response = client.get("/press/collections/deals/download")
         self.assertEqual(response.status_code, 200)
@@ -188,6 +185,70 @@ class TestCatalog(unittest.TestCase):
         self.assertEqual(profile["collection_id"], "owned")
         self.assertFalse(profile["demonstration"])
         self.assertEqual(client.get("/press/collections/nope/profile").status_code, 404)
+
+    def test_a_catalog_collection_answers_from_its_catalog_entry(self) -> None:
+        # Lobbying has no release yet; its profile comes from the catalog.
+        response = client.post(
+            "/cedar/ask",
+            json={"question": "What does this collection cover?", "collectionId": "lobbying"},
+        )
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertIn("lobbying", payload["answer"].lower())
+        self.assertIn("catalog entry", payload["basis"])
+
+    def test_a_catalog_collection_says_it_has_no_figures(self) -> None:
+        # A quantity question about an unreleased collection is answered with
+        # the honest state of the numbers, never a routing miss or a made-up
+        # figure.
+        response = client.post(
+            "/cedar/ask",
+            json={"question": "How many records are in it?", "collectionId": "lobbying"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("no published figures", response.json()["answer"])
+
+    def test_cedar_answers_what_a_release_changed(self) -> None:
+        response = client.post(
+            "/cedar/ask",
+            json={
+                "question": "What changed in Federal Funding v4.1?",
+                "collectionId": "funding",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        answer = response.json()["answer"]
+        # The named release, not the latest one, and flagged as the
+        # demonstration content it is.
+        self.assertIn("v4.1", answer)
+        self.assertIn("412", answer)
+        self.assertIn("demonstration", answer)
+
+    def test_a_change_question_without_a_version_gets_the_latest(self) -> None:
+        response = client.post(
+            "/cedar/ask",
+            json={"question": "What changed in the latest release?", "collectionId": "deals"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("v9.0", response.json()["answer"])
+
+    def test_releases_are_served_from_the_dumped_history(self) -> None:
+        response = client.get("/press/releases")
+        self.assertEqual(response.status_code, 200)
+        rows = response.json()["releases"]
+        self.assertTrue(rows)
+        # Most recently updated first, and each row names its collection.
+        dates = [row["updated"] for row in rows]
+        self.assertEqual(dates, sorted(dates, reverse=True))
+        self.assertIn("funding", {row["id"] for row in rows})
+
+    def test_a_catalog_collection_profile_is_served(self) -> None:
+        response = client.get("/press/collections/lobbying/profile")
+        self.assertEqual(response.status_code, 200)
+        profile = response.json()
+        self.assertEqual(profile["collection_id"], "lobbying")
+        self.assertIsNone(profile["version"])
+        self.assertIsNone(profile["headline_statistics"])
 
 
 class TestEntitlement(unittest.TestCase):

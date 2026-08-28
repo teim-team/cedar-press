@@ -1013,6 +1013,10 @@
 .teim-rd .cp-band--fill .cp-read__name { color: #fff; }
 .teim-rd .cp-band--fill .cp-read__blurb, .teim-rd .cp-band--fill .cp-read__hint { color: #fff; }
 .teim-rd .cp-band--fill .cp-read__foot { color: #fff; }
+/* The Ask Cedar link inherits the page's dark teal, which disappears into
+ * the filled band's tinted panel; on that band it wears the panel's white. */
+.teim-rd .cp-band--fill .cp-read__cedar { color: #fff; }
+.teim-rd .cp-band--fill .cp-read__cedar:hover { color: rgba(255, 255, 255, 0.72); }
 .teim-rd .cp-band--fill .cp-band__cta { background: #fff; color: var(--dteal); }
 .teim-rd .cp-band--fill .cp-band__cta:hover { background: var(--ink); color: #fff; }
 
@@ -1661,17 +1665,25 @@
  * column like the other secondary pages. This is the widest, plainest page
  * in the set and a half-width title on it just looks like a column that ran
  * out. Title on the left, the standing explanation on the right. */
-.teim-rd .cp-nh { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 18rem); align-items: end; gap: 1.4rem 4rem; padding: 3.4rem 0 1.6rem; }
+.teim-rd .cp-nh { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 18rem); align-items: end; gap: 1.2rem 4rem; padding: 2.2rem 0 1.4rem; }
 .teim-rd .cp-nh .cp-hero__access,
 .teim-rd .cp-nh__title { grid-column: 1 / -1; }
 /* No max-width: the headline is the one element on this page that should run
- * the whole measure, and vw sizing keeps it to two lines at any width. */
-.teim-rd .cp-nh__title { font-family: var(--sans); font-size: clamp(2.1rem, 5.6vw, 4.4rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; color: var(--ink); margin: 0.3rem 0 0; }
+ * the whole measure, and vw sizing keeps it to two lines at any width. Capped
+ * lower than the other openings so the first release still shows above the
+ * fold on a laptop — this page's job is the feed, not the greeting. */
+.teim-rd .cp-nh__title { font-family: var(--sans); font-size: clamp(2rem, 4.6vw, 3.5rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; color: var(--ink); margin: 0.3rem 0 0; }
 .teim-rd .cp-nh__sub { font-size: 1rem; line-height: 1.62; color: var(--ink-2); margin: 0; max-width: 74ch; }
-/* The newest release, on the right of the same line, so the opening reaches
- * both edges and the freshness claim is answered before the feed starts. */
-.teim-rd .cp-nh__last { display: flex; flex-direction: column; gap: 0.2rem; margin: 0; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); border-left: 2px solid var(--teal); padding-left: 0.9rem; }
-.teim-rd .cp-nh__last b { font-family: var(--sans); font-size: 0.98rem; font-weight: 700; letter-spacing: -0.01em; text-transform: none; color: var(--ink); }
+/* The provenance principle, small and under the explanation: this page is
+ * where "a figure you cited still reproduces" is actually kept. */
+.teim-rd .cp-nh__why { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.7; color: var(--muted); margin: 0.7rem 0 0; max-width: 74ch; }
+/* The trailing month, on the right of the same line: a compact reading of
+ * the log itself, so the maintenance effort is a set of checkable numbers
+ * rather than a repeat of the feed's first row. */
+.teim-rd .cp-nh__pulse { display: flex; flex-direction: column; gap: 0.24rem; margin: 0; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); border-left: 2px solid var(--teal); padding-left: 0.9rem; }
+.teim-rd .cp-nh__pulse dt { font-size: 0.6rem; letter-spacing: 0.14em; }
+.teim-rd .cp-nh__pulse dd { margin: 0; }
+.teim-rd .cp-nh__pulselead { font-family: var(--sans); font-size: 1.05rem; font-weight: 800; letter-spacing: -0.01em; text-transform: none; color: var(--ink); }
 @media (max-width: 860px) { .teim-rd .cp-nh { grid-template-columns: 1fr; align-items: start; gap: 1.1rem; } }
 
 /* The filter. Two independent sets on one rule: which collection, and whether
@@ -1685,7 +1697,23 @@
 .teim-rd .cp-chip:hover { border-color: var(--teal); color: var(--dteal); }
 .teim-rd .cp-chip.is-on { background: var(--dteal); border-color: var(--dteal); color: #fff; }
 .teim-rd .cp-chip:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
-@media (max-width: 720px) { .teim-rd .cp-filter__count { margin-left: 0; } }
+/* Sticky once the hero scrolls past: the feed will eventually hold hundreds
+ * of releases, and the way through them stays in reach. Opaque, because the
+ * feed scrolls underneath it. */
+.teim-rd .cp-filter--stick { position: sticky; top: 0; z-index: 6; background: var(--bg); }
+/* The search: one quiet field in the filter rule, matching the chips'
+ * height and voice rather than opening a search experience. */
+.teim-rd .cp-filter__search { font-family: var(--sans); font-size: 0.88rem; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 0; padding: 0.42rem 0.7rem; min-height: 32px; width: 13rem; }
+.teim-rd .cp-filter__search:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.teim-rd .cp-filter__search::placeholder { color: var(--muted); }
+@media (max-width: 720px) {
+  .teim-rd .cp-filter__count { margin-left: 0; }
+  .teim-rd .cp-filter__search { width: 100%; }
+  /* On a phone the collection chips run as one scrollable row instead of
+   * wrapping into a block taller than the feed's first release. */
+  .teim-rd .cp-filter__set--scroll { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; padding-bottom: 0.3rem; -webkit-overflow-scrolling: touch; }
+  .teim-rd .cp-filter__set--scroll > * { flex: none; }
+}
 
 /* One feed. Dates run down the left as a spine so a reader can scan by time,
  * which is the only axis this page has. */
@@ -1693,17 +1721,32 @@
 /* Under the filter the feed is the answer to it, so it sits close rather than
  * across the standing section gap. */
 .teim-rd .cp-filter + .cp-feed { margin-top: 1.4rem; }
-.teim-rd .cp-feed__item { display: grid; grid-template-columns: minmax(0, 9rem) minmax(0, 1fr); gap: 0.4rem 2.5rem; padding: 1.4rem 0; border-top: 1px solid var(--line); }
+.teim-rd .cp-feed__item { display: grid; grid-template-columns: minmax(0, 9rem) minmax(0, 1fr); gap: 0.4rem 2.5rem; padding: 1.4rem 0; border-top: 1px solid var(--line); scroll-margin-top: 4.6rem; }
+/* A permalink arrival lands mid-page; the tint says which release the link
+ * meant. scroll-margin keeps it clear of the sticky filter. */
+.teim-rd .cp-feed__item:target { background: var(--teal-tint); }
 .teim-rd .cp-feed__when { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding-top: 0.25rem; }
 .teim-rd .cp-feed__name { font-family: var(--sans); font-size: 1.12rem; font-weight: 800; letter-spacing: -0.015em; margin: 0 0 0.5rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.6rem; }
 .teim-rd .cp-feed__name a { color: var(--ink); text-decoration: none; }
 .teim-rd .cp-feed__name a:hover { color: var(--dteal); text-decoration: underline; }
-.teim-rd .cp-feed__ver { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; color: var(--muted); }
-.teim-rd .cp-feed__tag { font-family: var(--mono); font-size: 0.56rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); background: var(--teal-tint); padding: 0.18rem 0.45rem; }
+/* The version doubles as the release's permalink, so it stays quiet until
+ * pointed at. The later .cp-feed__name a rules would paint it ink; this is
+ * more specific and keeps the metadata voice. */
+.teim-rd .cp-feed__name a.cp-feed__ver { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; color: var(--muted); text-decoration: none; }
+.teim-rd .cp-feed__name a.cp-feed__ver:hover { color: var(--dteal); text-decoration: underline; text-underline-offset: 3px; }
+/* The kind, on every entry: the filter knows the difference between a data
+ * update and a methodology release, and the entries themselves must too. */
+.teim-rd .cp-feed__kind { display: inline-block; font-family: var(--mono); font-size: 0.56rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.3rem; }
+.teim-rd .cp-feed__kind--method { color: var(--dteal); background: var(--teal-tint); padding: 0.18rem 0.45rem; }
 .teim-rd .cp-feed__note { font-size: 0.94rem; line-height: 1.55; color: var(--ink); border-top: 1px solid var(--line); padding: 0.6rem 0 0; margin: 0 0 0.7rem; max-width: 70ch; }
 .teim-rd .cp-feed__list { list-style: none; margin: 0; padding: 0; max-width: 70ch; }
 .teim-rd .cp-feed__list li { font-size: 0.96rem; line-height: 1.55; color: var(--ink-2); padding: 0.22rem 0 0.22rem 1.1rem; position: relative; }
 .teim-rd .cp-feed__list li::before { content: ''; position: absolute; left: 0; top: 0.92em; width: 7px; height: 1px; background: var(--teal); }
+/* The release's own actions: the collection it describes, and Cedar with the
+ * question already phrased. Same underlined voice as the shelf's Ask Cedar. */
+.teim-rd .cp-feed__acts { display: flex; flex-wrap: wrap; gap: 0.3rem 1.4rem; margin: 0.7rem 0 0; }
+.teim-rd .cp-feed__act { display: inline-block; border: 0; background: none; padding: 0; font-family: var(--sans); font-size: 0.84rem; font-weight: 600; color: var(--dteal); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.teim-rd .cp-feed__act:hover { color: var(--ink); }
 @media (max-width: 720px) { .teim-rd .cp-feed__item { grid-template-columns: 1fr; gap: 0.3rem; } }
 /* A page at a time. The feed only grows on request, so the page has a bottom
  * a reader can actually reach. The count sits beside the control so pressing

@@ -50,7 +50,9 @@ from typing import Any
 
 __all__ = [
     "ARTICLES",
+    "CATALOG",
     "CITATIONS",
+    "RELEASES",
     "LUMECON_URL",
     "PRESS_TIERS",
     "REPORT_CITATION_HREF",
@@ -99,6 +101,19 @@ ARTICLES = _frozen(_DATA["articles"])
 #: Every known public use of a Cedar Press dataset, newest first. Empty until
 #: the first real citation lands; see the module docstring.
 CITATIONS = _frozen(_DATA["citations"])
+
+#: The full collection ladder (``pressCatalog.js``): every collection the
+#: product is designed around, including ones whose first release is still in
+#: preparation. Cedar's profile layer reads this for the collections that do
+#: not yet ship figures, so a catalog entry can describe itself without a
+#: second hand-typed copy of its blurb.
+CATALOG = _frozen(_DATA["catalog"])
+
+#: Release history per collection (``pressReleases.js``): version, cadence and
+#: the change notes behind the What's New feed. Dumped rather than retyped for
+#: the same reason as the articles — a paraphrased change note misdescribes a
+#: release. Keyed by collection id.
+RELEASES = _deep_freeze(_DATA["releases"])
 
 #: Where a reader reports a citation the register missed.
 REPORT_CITATION_HREF: str = _DATA["reportCitationHref"]

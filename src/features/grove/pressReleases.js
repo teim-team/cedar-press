@@ -331,6 +331,32 @@ export function freshnessLine(id) {
 }
 
 /**
+ * The feed's activity over a trailing window: how many releases landed, how
+ * many collections they touched, how many changed methodology, and the date
+ * of the newest release overall.
+ *
+ * Computed from the release log itself, never typed into copy, so the number
+ * always carries its denominator — a bare "16 releases" reads as all-time,
+ * this month or the current filter, and each of those is a different claim.
+ * `today` is injectable so tests do not depend on the wall clock.
+ */
+export function recentActivity(days = 30, today = new Date()) {
+  const cutoff = today.getTime() - days * 86400000;
+  const releases = Object.entries(PRESS_RELEASES).flatMap(([id, release]) =>
+    release.history.map((entry) => ({ id, ...entry })),
+  );
+  const inWindow = releases.filter((entry) => new Date(entry.date).getTime() >= cutoff);
+  const dates = releases.map((entry) => entry.date).sort();
+  return {
+    days,
+    releases: inWindow.length,
+    collections: new Set(inWindow.map((entry) => entry.id)).size,
+    methodology: inWindow.filter((entry) => entry.kind === RELEASE_KIND.METHOD).length,
+    latest: dates[dates.length - 1] ?? null,
+  };
+}
+
+/**
  * The collections that changed most recently, newest first. Drives the
  * "recently updated" rail on the reader, which is a reason to come back.
  */

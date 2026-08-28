@@ -51,6 +51,10 @@ export function PressCedarFab({ gated = null, examples = [] }) {
       if (!next?.id || !next?.name) return;
       abortRef.current?.abort();
       setScope({ id: next.id, name: next.name });
+      // A caller can hand the question over with the scope (the What's New
+      // feed asks about a specific release), so the reader arrives with the
+      // ask already phrased and only has to send it.
+      if (next.q) setQuestion(next.q);
       setAnswer(null);
       setError(null);
       setPending(false);
