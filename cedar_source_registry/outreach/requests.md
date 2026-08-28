@@ -20,7 +20,7 @@ request away from current coverage.
 ### TBD-031 — Lummi Nation, NAOB Registry
 - **Contact point:** TERO@lummi-nsn.gov · (360) 312-2287 · Teresa Bumatay,
   TERO Director (contacts surfaced literally in lummi-nsn.gov page snippets,
-  2026-08-27). **Gmail draft created 2026-08-27 — awaiting owner send.**
+  2026-08-27). **SENT 2026-08-28** from esm247@cornell.edu (owner-approved; researcher framing — Coastal Band of the Chumash Nation enrollment, Cornell PhD, CICD/NEED background). Awaiting reply; check back ~2026-09-11.
 - **Ask:** the current Native American Owned Business registry, and whether
   Cedar may receive refreshed copies on a schedule.
 - **Cited basis:** the TERO site itself states an up-to-date registry is
@@ -32,7 +32,7 @@ request away from current coverage.
 - **Contact point:** jnilson@cdatribe-nsn.gov · (208) 686-6107 · Jim Nilson,
   TERO Compliance Officer (contacts from Idaho Transportation Dept TERO
   contacts page snippet, 2026-08-27; tribal page cdatribe-nsn.gov/tero/).
-  **Gmail draft created 2026-08-27 — awaiting owner send.**
+  **SENT 2026-08-28** from esm247@cornell.edu (owner-approved; researcher framing — Coastal Band of the Chumash Nation enrollment, Cornell PhD, CICD/NEED background). Awaiting reply; check back ~2026-09-11.
 - **Ask:** the current certified-business list.
 - **Cited basis:** certification program active with business-license and
   financial-verification requirements (ordinance Chapter 41); no published
@@ -53,8 +53,7 @@ request away from current coverage.
 - **Contact point:** DOC@ltbbodawa-nsn.gov · (231) 242-1584 (both from LTBB's
   own PDFs on ltbbodawa-nsn.gov, 2026-08-27).
 - **Ask:** the Tribal Citizen-Owned Business List the Department of Commerce
-  maintains and shares by request. **Gmail draft created 2026-08-27 —
-  awaiting owner send.**
+  maintains and shares by request. **SENT 2026-08-28** from esm247@cornell.edu (owner-approved; researcher framing — Coastal Band of the Chumash Nation enrollment, Cornell PhD, CICD/NEED background). Awaiting reply; check back ~2026-09-11.
 
 ### TBD-095 — Northern Cheyenne Tribe, TERO certified contractor list
 - **Contact point:** Stephanie Fisher, TERO Director · 406-477-6505 · page
@@ -66,6 +65,51 @@ request away from current coverage.
 ## Partnership-lead roster (generated from partnership_leads.jsonl)
 
 Regenerate with `tools/build_outreach.py` after any partnership_leads edit.
+
+
+## Verified contacts — outreach wave 2 (researched 2026-08-28)
+
+Contact emails below LITERALLY appeared at the evidence URL (never
+pattern-inferred). Emails not found stay phone/mail-only until one
+surfaces or the office is called.
+
+### Send-ready (verified email)
+
+**WAVE 2 SENT 2026-08-28** from esm247@cornell.edu (owner-approved): all 16
+below. Delivery notes: the two WSDOT-sourced Nisqually personal addresses
+hard-bounced (550 5.4.1 — staff turnover; a TERO Officer opening is posted);
+resent successfully to tero@nisqually-nsn.gov, which appears literally in the
+tribe's own 2026 construction RFP PDFs. No other bounces as of send time.
+Reply check scheduled ~2026-09-11 alongside wave 1.
+
+
+- **Bishop Paiute Tribe TERO** — kayla.stone@bishoppaiute.org (Kayla Stone, TERO Office Coordinator, Bishop Paiute Tribe); 760-873-7893 · evidence: https://bishoptero.com/contact/
+- **Cheyenne and Arapaho Tribes TERO (OK)** — tero@cheyenneandarapaho-nsn.gov (TERO office (departmental inbox), Cheyenne and Arapaho Tribes Dept. of Labor); (405) 422-7564 · evidence: https://www.cheyenneandarapaho-nsn.gov/labor/tero
+- **Hoopa Valley Tribe TERO** — hvtero@pcweb.net (Hoopa Valley Tribe TERO Department (Executive Director: Juliet Maestas, ext. 108)); 530-625-4227 · evidence: https://www.hoopa-nsn.gov/departments/1490-2/tero-department/
+- **Karuk Tribe TERO** — dwood@karuk.us (Dion Wood, TERO Director, Karuk Tribe); 1-800-505-2785 ext. 2030 · evidence: https://www.karuk.us/departments/tribal-employment-rights-ordinance-office-tero/contact
+- **Kiowa Tribe TERO (OK)** — john.simmons@kiowatribe.org (John E. Simmons, TERO Director, Kiowa Tribe); (580) 425-0970 · evidence: https://www.kiowatribe.org/sites/default/files/2026-06/TERO_Vendor_Certification_Application_Ver_2.pdf
+- **Mashantucket Pequot Tribal Nation (CT)** — SDCC@mptn-nsn.gov (Vendor Administrator, MPTN procurement department (per MERO's Tribal Member-Owned Business Certification page)); 860-396-6508 · evidence: https://mero.mptn-nsn.gov/contracting-programs/mptn-member-owned-business-certification-program/
+- **Mashpee Wampanoag TERO (MA)** — Ellen.Sharpe@mwtribe-nsn.gov (Ellen Sharpe, TERO Officer, Mashpee Wampanoag Tribe); 508-477-0208 ext. 175 · evidence: https://mashpeewampanoagtribe-nsn.gov/tero
+- **Nisqually Indian Tribe TERO** — Iyall.Cynthia@nisqually-nsn.gov (Cynthia Iyall, TERO (Nisqually Indian Tribe)); 360-456-5221 ext. 1253 · evidence: https://wsdot.wa.gov/about/contacts/tribal-contacts
+- **Oglala Sioux Tribe TERO (Pine Ridge, SD)** — philip@oglala.org (Philip Good Crow, TERO Director, Oglala Sioux Tribe TERO); 605-867-5167 · evidence: https://dot.sd.gov/media/3atlwe3o/teroofficelist.pdf
+- **Quinault Indian Nation TERO** — TERO@quinault.org (Quinault Indian Nation TERO office (Manager: Evelyne Kalama)); 360-276-8211 ext. 4800 · evidence: https://projects.constructconnect.com/details/6433283-queets-head-start-and-elder-center&find_loc=washington-98331
+- **Red Lake Nation (MN)** — eugene.standingcloud@redlakenation.org (Eugene Standing Cloud, Assistant Director/Training Coordinator, Red Lake Nation TERO); (218) 679-3350 ext. 2670 · evidence: https://rlntero.com/tero-staff
+- **Swinomish TERO** — BPorter@swinomish.nsn.us (Brian Porter, TERO (Swinomish Indian Tribal Community)); (360) 466-7232 · evidence: https://wsdot.wa.gov/about/contacts/tribal-contacts
+- **Tolowa Dee-ni' Nation TERO** — cynthia.ford@tolowa.com (TERO contact (Cynthia Ford), Tolowa Dee-ni' Nation); (707) 487-9255 x1701 · evidence: https://tolowa-nsn.gov/180/Tribal-Employment-Rights-Office-TERO
+- **White Earth Nation TERO (MN)** — Sandra.StClair@whiteearth-nsn.gov (Sandra St. Clair, Workforce Center (division housing TERO); title not shown); (218) 935-3688 · evidence: https://www.whiteearth.com/divisions/human-services/workforce-center
+- **Wind River TERO (Eastern Shoshone & Northern Arapaho)** — inquiries@windriver-tero.com (Wind River TERO office (general inquiries)); (307) 332-7618 · evidence: https://www.windriver-tero.com/contact/
+- **Yakama Nation TERO** — Dailene_Sampson@yakama.com (Dailene Sampson, Yakama Nation TERO contact (per WSDOT tribal contacts)); 509-314-6707 · evidence: https://wsdot.wa.gov/about/contacts/tribal-contacts
+
+### No literal email (phone/mail fallback)
+
+- **Tanana Chiefs Conference TERO** — 907-452-8251 ext. 5890 · TERO is under TCC Job Training dept, Chief Peter John Tribal Building, 122 1st Ave, Fairbanks. Only org-wide info@tananachiefs.org appeared (not TERO-specific, so not reported as t · evidence: https://www.tananachiefs.org/services/job-training/
+- **Pit River Tribe TERO** — (541) 977-1003 · TERO page names Josiah Jacobs, TERO Director, and shows his email, but search snippets masked it ('[email protected]') so it cannot be reported literally — fetch pitrivertribe.gov/ · evidence: https://pitrivertribe.gov/tero/
+- **Ute Mountain Ute TERO** — 970-564-5717 · No email surfaced in any snippet. Direct lines from tribe's TERO PDFs: Director 970-564-5717, Compliance Officer 970-564-5716, Office Admin 970-564-5715; main line (970) 565-3751 e · evidence: https://www.utemountainutetribe.com/tero.html
+- **Citizen Potawatomi Nation (OK)** — (405) 878-4697 · No program-specific email surfaced. sgeorge@potawatomi.org appeared in results but belongs to Scott George, CPN Housing Director (wrong office) — excluded. Phone shown is CPCDC (bu · evidence: https://www.potawatomi.org/services/community-and-business-development/
+- **Comanche Nation TERO (OK)** — 580-360-5404 · TERO Vendor Licensing is administered by the Comanche Nation Tax Commission; phone shown is Tax Administrator Nadia Tenequer. Main tribe line (580) 492-3240; Tax Commission mail: P · evidence: https://www.comanchenation.com/bc-tax
+- **Seminole Nation of Oklahoma TERO** — 405-666-0857 · TERO Director position listed as vacant; no literal email surfaced. Mail: Seminole Nation of Oklahoma, Attn: TERO, P.O. Box 1498, Wewoka, OK 74884; main tribal line (405) 257-7200. · evidence: https://www.sno-nsn.org/getpage.php?name=Tribal_Employment_Rights_Office_-_APPLICATION_ONLINE
+- **Saginaw Chippewa TERO (MI)** — (989) 775-0052 · No literal TERO email surfaced (email-format scraper sites excluded per rules). Ordinance 42 (Nov 2025) directs bidders to the Department Director of the entity letting the contrac · evidence: https://www.sagchip.org/tribalcourt/ordinance/2025/Ordinance%2042%20Tribal%20Employment%20Rights%20Ordinance%20111925.pdf
+- **Crow Nation TERO (MT)** — 406-638-2601 x131 · No literal email surfaced. Phone/ext from RMTLC's Crow Tribal Council listing (P.O. Box 159, Crow Agency, MT 59022; fax 406-638-3885). An alternate TERO number (406) 679-0402 appea · evidence: https://www.rmtlc.org/crow-tribal-council/
 
 <!-- BEGIN GENERATED ROSTER -->
 | Source | Nation / org | Roster to request | Cited basis (evidence of existence) | Recommended ask |

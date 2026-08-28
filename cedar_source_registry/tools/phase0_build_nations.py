@@ -946,6 +946,8 @@ NATION_SOURCE_MAP = {
     # Wave 5.1 Phase 3 expansion sources
     "Confederated Tribes of Siletz Indians": ["bia:siletz"],
     "Nisqually Indian Tribe": ["bia:nisqually"],
+    "Pueblo of San Ildefonso": ["bia:san-ildefonso"],
+    "Metlakatla Indian Community": ["bia:metlakatla"],
     "Pokagon Band of Potawatomi Indians": ["bia:pokagon-band"],
     "Pueblo of Jemez": ["bia:jemez"],
     "Pueblo of Pojoaque": ["bia:pojoaque"],
@@ -1002,6 +1004,17 @@ SCOPE_OVERRIDES = {
     "TBD-165": "regional",  # ANVCA
     "TBD-176": "regional",  # Kawerak Bering Strait Business Directory (20-tribe consortium region)
     "TBD-178": "regional",  # TCC TERO vendor listing (42-village Interior Alaska consortium region)
+    # Native Hawaiian sources (2026-08-28): NH identity is a people, not a
+    # nation on the BIA list — nation_ids stay [] and identity travels on the
+    # source rows' scopes/caveats. Phase 4 owns any dedicated NH class.
+    "TBD-184": "national",  # KEDA NHBD (operates in and outside Hawaii)
+    "TBD-185": "regional",  # Kuhikuhi (Hawaii)
+    "TBD-186": "regional",  # OHA borrower showcase (Hawaii)
+    "TBD-187": "regional",  # Pop-Up Makeke (Hawaii)
+    "TBD-188": "regional",  # NHCC member directory (Hawaii)
+    "TBD-189": "regional",  # Hui 'Oihana (Hawaii Island)
+    "TBD-190": "national",  # DOI/SBA NHO 8(a) list
+    "TBD-191": "national",  # NHOA member list
 }
 
 

@@ -346,6 +346,38 @@ dated negatives with recheck dates.
   Enterprises LLC news posts, no listing page); Kaguyak, New Koliganek,
   Pitka's Point, and Yupiit of Andreafski have no web presence at all.
 
+## Deep-dives + Native Hawaiian expansion (2026-08-28, owner-directed)
+
+Maximum-depth passes on 20 maybe-public pages plus an NH discovery sweep
+(raw evidence: `research/deepdive_nh_2026-08-28.jsonl`).
+
+- **Three tribal promotions:** Pyramid Lake's public Business Directory
+  (TBD-181 — enterprises AND a tribal-member-owned section), San Ildefonso's
+  artist pages (TBD-182 — named individuals; publication boundary), and
+  Metlakatla's community directory (TBD-183 — Discovery Only; people AND
+  organizations).
+- **A trap defused:** the unattributed "Certified Contractors List for
+  TERO" belongs to Warm Springs (official copy at Oregon DOT) — and its
+  visible contractors include large non-Native firms, so TBD-034 is a TERO
+  COMPLIANCE list, never an ownership assertion (identity_mix flipped).
+- **Resolutions:** Wiyot's module is a social-services directory; Colusa's
+  CICC page is a utilities narrative; Lumbee's spotlights are nomination
+  forms; King Island, Santee, Kwinhagak, Algaaciq, Asa'carsarmiut resolve
+  clean-negative. Enterprise-page holds grew: Colusa Indian Energy, Santa
+  Rosa Pit Stop/Toro Peak, Tsay subsidiaries (tsayfcg.net), Campo's Muht
+  Hei. Still open with rechecks: Penobscot (form visible, listings
+  unconfirmed), Taos, Campo directory, Chilkat gallery, McGrath, Picayune
+  (better candidate found: chukchansi-nsn.gov/cse/).
+- **Native Hawaiian block (TBD-184..191), owner-directed scope add** —
+  individually owned AND NHO-entity, labeled: KEDA's certified NHBD (the
+  only stated rule: >=50% NH owned/controlled, ancestry verified),
+  Kuhikuhi, OHA's borrower showcase, Pop-Up Makeke (+The Makeke),
+  both NH chambers, DOI/SBA 8(a) NHO list, NHOA members. All Cross-
+  Reference with do_not_infer rows pending the Phase-4 NH-class decision.
+  Adjacent notes kept in the research file: Mana Up cohorts (NH flagged
+  ad hoc), DOI's NHOL (different NHO definition — consultation, not
+  commerce), editorial one-off lists for cross-validation.
+
 ## Follow-ups
 
 1. Fetch-verify the 7 new rows at page level (egress unblock or local run).

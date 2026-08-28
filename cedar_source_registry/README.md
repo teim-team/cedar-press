@@ -11,14 +11,15 @@ the correction.
 
 | File | Records | One line per |
 |---|---|---|
-| `sources.jsonl` | 162 | source program (the master registry; 148 wave-5 + TBD-166..179 from the 2026-08 expansion rounds) |
-| `scrape_queue.jsonl` | 93 | live source ranked for immediate ingestion |
+| `sources.jsonl` | 174 | source program (the master registry; 148 wave-5 + TBD-166..191 from the 2026-08 expansion rounds, incl. the Native Hawaiian block TBD-184..191) |
+| `scrape_queue.jsonl` | 105 | live source ranked for immediate ingestion |
 | `partnership_leads.jsonl` | 57 | confirmed-but-unpublished roster to request directly |
-| `negative_findings.jsonl` | 469 | Phase 3 formal negatives: tribes checked with no public registry found, with recheck dates — with sources.jsonl, this covers every entity on the 2026 BIA list |
-| `cross_reference.jsonl` | 40 | secondary directory with `do_not_infer` guardrails |
-| `verification_log.jsonl` | 145 | append-only fact-check log: 31 wave-5 lines (18 verified, 5 researched-and-excluded, 4 URL corrections, 2 edits reverted) + 97 wave-5.1 search-only re-checks (`channel: web_search_only`) + 17 expansion-round additions and re-checks |
+| `negative_findings.jsonl` | 484 | Phase 3 formal negatives: tribes checked with no public registry found, with recheck dates — with sources.jsonl, this covers every entity on the 2026 BIA list |
+| `cross_reference.jsonl` | 48 | secondary directory with `do_not_infer` guardrails |
+| `verification_log.jsonl` | 164 | append-only fact-check log: 31 wave-5 lines (18 verified, 5 researched-and-excluded, 4 URL corrections, 2 edits reverted) + 97 wave-5.1 search-only re-checks (`channel: web_search_only`) + 36 expansion-round additions and re-checks |
 | `nations.jsonl` | 584 | nation crosswalk (Phase 0, name-verified) — see "Nation crosswalk" below |
 | `research/bia_list_2026-01-30/` | 577 entries | the FR 2026-01-30 notice (immutable PDF + parsed entities.json) — the official list the crosswalk is verified against |
+| `research/deepdive_nh_2026-08-28.jsonl` | 32 | raw evidence: maybe-public deep-dives + the Native Hawaiian discovery sweep |
 | `outreach/requests.md` | — | outreach queue for request-only sources (roster generated from partnership_leads.jsonl) |
 | `PHASE_REPORT.md` | — | phase close-out: what was verified, changed, excluded, and the needs-human list |
 | `research/newsletter_survey_2026-08-27.{md,jsonl}` | 42 outlets | tribal newsletter/media reconnaissance: dataset potential, business lists/awards coverage, Phase-3 candidates |
@@ -68,15 +69,30 @@ enforces id resolution and name-variant uniqueness.
 - `nation_ids` on a source row means "the nation(s) this source program is
   scoped to" — never an ownership assertion about any listed business.
 
+## Native Hawaiian scope (added 2026-08-28)
+
+The registry now covers Native Hawaiian-owned businesses (TBD-184..191):
+individually owned sources (KEDA's certified NH Business Directory — the only
+one with a stated rule, >=50% NH owned/controlled with verified ancestry;
+Kuhikuhi; OHA's borrower showcase; marketplaces and the two NH chambers) and
+NHO-entity sources (DOI/SBA 8(a) list, NHOA members), labeled by
+`ownership_class` in caveats. Ground rules: Native Hawaiian identity is a
+people, not a BIA-list nation — `nation_ids` stay `[]`; ancestry verification
+(OHA Hawaiian Registry) is never tribal citizenship; Hawaii-based marketplace
+or chamber presence is never an NH-ownership assertion (each row carries
+`do_not_infer` in `cross_reference.jsonl`). All entered as Cross-Reference
+pending a Phase-4 decision on a dedicated NH community-certification class —
+KEDA's verified rule is materially stronger than a chamber listing.
+
 ## Evidence hierarchy (never flatten this)
 
 `source_priority_class` encodes what a record from that source can *assert*:
 
-1. **Tribal Primary** (45) — official tribal certification/member lists. Controls over everything.
-2. **Tribal Secondary** (11) — tribal or tribe-linked, but mixed or non-certifying. May add records/fields; caveat travels with the data.
-3. **Tribal Partnership** (52) — roster confirmed to exist, not public. Request directly; do not scrape thin evidence pages as if they were the roster.
-4. **Cross-Reference** (32) — state/chamber/ANC/nonprofit directories. May propose matches and affiliations only; can never create a tribal-ownership assertion. Each row carries a `do_not_infer` field in `cross_reference.jsonl` — treat it as binding.
-5. **Discovery Only** (2) / **Coverage Frame** (6) — candidate generation and TERO-universe enumeration only.
+1. **Tribal Primary** (47) — official tribal certification/member lists. Controls over everything.
+2. **Tribal Secondary** (21) — tribal or tribe-linked, but mixed or non-certifying. May add records/fields; caveat travels with the data.
+3. **Tribal Partnership** (54) — roster confirmed to exist, not public. Request directly; do not scrape thin evidence pages as if they were the roster. As of 2026-08-28 every lead has been adversarially fact-checked (rosters confirmed unpublished) and outreach waves 1-2 (19 emails) are out.
+4. **Cross-Reference** (40) — state/chamber/ANC/nonprofit directories. May propose matches and affiliations only; can never create a tribal-ownership assertion. Each row carries a `do_not_infer` field in `cross_reference.jsonl` — treat it as binding.
+5. **Discovery Only** (6) / **Coverage Frame** (6) — candidate generation and TERO-universe enumeration only.
 
 Conflicts persist as parallel source assertions; nothing silently overwrites a
 tribal assertion. Chamber membership, state certification, or ANC shareholder
