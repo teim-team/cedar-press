@@ -182,6 +182,170 @@ appended to the same JSONL with `r4-*` batch labels.
   source rows, 288 negatives-only), ~178 unchecked — mostly Chugach-region
   and remaining small villages, small CA/NV bands, and misc stragglers.
 
+## Round 5 (2026-08-28, second batch)
+
+80 more entities across five batches; 77 integrated (three — Mi'kmaq
+Nation, Kickapoo in Kansas, Sac and Fox of Missouri — turned out to be
+round-1 re-checks caused by a candidate-filter bug that only compared
+`bia_name`, not `names` variants; their fresh evidence stayed in the
+research JSONL, the duplicate negative rows were dropped, and the filter
+lesson is recorded here so future rounds compare all name variants).
+Raw evidence appended with `r5-*` batch labels.
+
+- **Alaska village pattern held at scale.** Bering Strait (16), Y-K Delta
+  second sweep (16), Chugach/Cook Inlet/Kodiak (16), and
+  Aleutians/Pribilofs/Peninsula (18) produced zero registries. Most
+  villages' entire web presence is a BIA/NARF/consortium profile page;
+  the ANCSA-corp-vs-tribe trap recurred constantly (afognak.org tribe vs
+  afognak.com corp — whose *Shareholder Businesses* directory is
+  corp-track material; tatitlek.com, chenega.com, salamatof.com all
+  corps, not tribes).
+- **Enterprise-page inventory grew by 5:** Kongiganak (official Google
+  Sites with pages for Puvurnaq Power Co. and village businesses — the
+  round's most interesting weak-form positive), **Aleut Community of St.
+  Paul Island** (aleut.com/enterprise, ~5 enterprises incl. Awalix LLC),
+  **Port Heiden** (four named Meshik/Aniakchak enterprise pages on the
+  tribal site), **Upper Mattaponi** (umitribe.org/business-enterprises/),
+  and **Sac and Fox of Missouri** (sacandfoxks.com /entities/ child
+  pages). Same hold-for-Phase-4 treatment; URLs in the negatives' notes.
+- **Fast-recheck unresolved (2026-11-28):** Colusa Indian Community —
+  colusa-nsn.gov/government/economic-development/ ("CICC Operations")
+  literally exists but search could not confirm it enumerates the
+  tribe's enterprises (casino, energy, utility authority).
+- **Virginia's 2018 cohort is nearly all negative** (Rappahannock,
+  Chickahominy ×2, Nansemond, Monacan) — Upper Mattaponi is the
+  exception via its enterprise page.
+- Single-enterprise-in-prose leads for the corroboration file: Kipnuk
+  Light Plant (DOE-documented tribally owned utility), Tununak Native
+  Store, Karluk's Mary's Creek Cabin, Larsen Bay's tribally owned farm,
+  Gambell/Savoonga Native Stores (ANCSA opt-outs, no corp trap).
+- Ledger after integration: **482 of ~575 BIA entities checked** (117
+  with source rows, 365 negatives-only), ~101 unchecked — the remainder
+  is mostly middle-Kuskokwim/upper-Yukon villages (Georgetown, Stony
+  River, Lime Village, Portage Creek, Tuluksak, the Kalskags, Aniak
+  corridor…), the rest of the NANA/North Slope stragglers, and scattered
+  small lower-48 bands.
+
+## Round 6 (2026-08-28, third batch)
+
+69 entities across five batches — the Alaska closeout (Arctic Slope regional
+tribe + Seward Peninsula + lower-Yukon "paper villages", middle Kuskokwim,
+Yukon-Koyukuk/upper Tanana, Copper River/SE/Bristol Bay leftovers) plus the
+lower-48 finals the fixed candidate filter surfaced (Crow, Fort Peck,
+Shakopee, Upper/Lower Sioux had genuinely never been checked). Raw evidence
+appended with `r6-*` batch labels.
+
+- **The round's two real conversions are wave-5 Leads coming true:**
+  - **Fort Peck (TBD-096)** — the public roster the Lead said was "not
+    located" exists: a literal page *TERO Certified Indian Owned Business
+    M-R* on fortpecktero.org surfaced, evidencing an alphabet-paginated
+    public certified list. Logged as conversion evidence (Lead retained per
+    the no-upgrade-from-snippets rule); top page-level inspection target.
+  - **Tlingit & Haida (TBD-122)** — the anticipated Native-owned business
+    directory now has a literal public page
+    (thbusinessresourcecenter.com/browse-businesses/). Caveat: results
+    describe it as covering "indigenous AND minority owned businesses," so
+    a listing alone is never a Native-ownership assertion. Same
+    log-don't-upgrade treatment.
+- **One new row: TBD-179, the Tlingit & Haida Certified Tribal Artist
+  Program** (Tribal Primary, Live) — tribal-enrollment-gated artist
+  certification (2014 Tribal Assembly resolution) with a public artists
+  page on shoptlingithaida.com. Person-adjacent records: publication
+  boundary review required before anything ships.
+- **Crow (TBD-117) re-check:** still no public list — TERO office page
+  under construction, regulations PDF public, FEMA solicitations reference
+  "TERO approved contractors." Outreach remains the path.
+- **The 62 Alaska checks were uniformly negative**, completing the pattern
+  from rounds 4-5: village governments publish council/program pages, not
+  registries. Notables in the negatives' notes: ICAS's new economic arm
+  "Iñupiat Tribal Business Solutions" (CEDS 2025-30; watch for a page),
+  King Island unresolved (claimed business-directory reference, no literal
+  URL — fast recheck 2026-11-28; ivory-carver community makes an artist
+  list plausible), Red Devil's council only recently reestablished after a
+  decade dormant, and Cheesh-Na's Chistochina Enterprises (single Section
+  17 corp — enterprise-page hold along with Upper Sioux and Shakopee).
+- **Process note:** two more duplicate-check near-misses (Crow, Fort Peck)
+  slipped past even the fixed name-variant filter because agent name forms
+  ("Crow Nation") differ from BIA list forms ("Crow Tribe of Montana");
+  both were caught by the integrity checker's crosswalk-uniqueness gates
+  before anything landed, and folded into their existing rows. The
+  integrity gate, not the filter, is the real guard.
+- Ledger after integration: **548 of ~575 BIA entities checked** (117 with
+  source rows, 431 negatives-only), **~35 unchecked** — at this point the
+  remainder can't be reliably enumerated from memory; finishing requires
+  fetching the actual BIA list and diffing against the crosswalk (the
+  standing needs-human egress item).
+
+## BIA list verified (2026-08-28)
+
+The owner supplied the FR 2026-01-30 notice as a PDF (now the immutable raw
+artifact in `research/bia_list_2026-01-30/` with a parsed `entities.json`),
+closing the biggest needs-human item without waiting for egress. Outcomes:
+
+- **Every crosswalk `bia_name` is now the official printed string and
+  `name_verified_against_list: true`** — enforced by a bijection check in
+  `tools/phase0_build_nations.py` that fails the build unless every BIA row
+  maps to exactly one printed entry and every printed entry is represented.
+  ~17 name-form fixes landed (e.g. "Pueblo of Nambe" not "Nambe Pueblo";
+  "Chickahominy Indian Tribe—Eastern Division"; "Iqugmiut" not "Iqurmiut";
+  official former names from 16 "previously listed as" annotations captured
+  as variants).
+- **575 confirmed from the primary source**; the "587" search-snippet figure
+  is dead. 577 printed name-entries reconcile to 575 via the Venetie and
+  Pribilof combined listings (their "(See ...)" pointers and groupings are
+  documented in entities.json's count_note). The Capitan Grande combined
+  entry covers both the Barona and Viejas rows.
+- **Lumbee Tribe of North Carolina is on the list** (recognized by Pub. L.
+  119-60, Dec 2025, with service-eligibility conditions noted in the FR
+  text) — already crosswalked via a wave-5 source reference.
+- **Corrections:** Valdez Native Tribe is not on the list → reclassified
+  `nonbia:` (its round-5 negative row remapped); the round-5
+  `bia:sac-and-fox-nation-oklahoma` row was a duplicate of the existing
+  Sac & Fox Nation row (filter miss) → removed, negative row remapped.
+  Seminole Tribe of Florida and White Mountain Apache — researched and
+  excluded in wave 5 but never crosswalked — got rows plus formal negative
+  rows citing the wave-5 log evidence.
+- **The full list is imported**, so the unchecked remainder is no longer an
+  estimate: **35 entities have never been checked** (excluding the MCT
+  umbrella entity, which is represented by its six band rows) — 21 small CA
+  rancherias/bands, Kickapoo TX, Meskwaki (IA), Saginaw Chippewa and Little
+  River Ottawa (MI), Samish and Sauk-Suiattle (WA), and 7 AK villages
+  (Ivanof Bay, Kaguyak, Napaimute, New Koliganek, Pedro Bay, Pitka's Point,
+  Yupiit of Andreafski). These are the round-7 target list.
+
+## Round 7 (2026-08-28) — sweep complete
+
+The final 34 entities from the verified-list remainder. **With this round,
+every entity on the 2026 BIA list has been checked** (the sole "unchecked"
+crosswalk row is the Minnesota Chippewa Tribe umbrella entity, represented
+by its six band rows): 117 nations carry source rows, 466 carry only
+dated negatives with recheck dates.
+
+- **Enterprise-page inventory grew by 11** — the biggest single-round haul,
+  confirming that mid-size gaming tribes publish enterprise pages, not
+  member registries: Saginaw Chippewa (sagchip.org/business/ — plus a
+  Nov-2025 TERO ordinance stating TERO maintains an Indian-owned business
+  listing: a top outreach candidate), Meskwaki Inc. "Our Companies",
+  Yocha Dehe (/enterprises/ per-property pages), Paskenta, Tachi Yokut,
+  Kickapoo Traditional Tribe of Texas, Northfork (which also runs a
+  vendor Business Registration form — worth inspecting), Big Sandy,
+  Augustine, Samish, and California Valley Miwok (MIWOK Global — caveat:
+  CVMT has a long-running leadership dispute with rival web presences;
+  verify the publishing faction before any registry use).
+- **TERO-office-without-published-list outreach candidates:** Pit River
+  (office page + director, no list) and Saginaw Chippewa (ordinance-backed
+  listing, no list URL); Crow remains from round 6.
+- **Fast-recheck unresolveds (2026-11-28):** Picayune (chukchansi-nsn.gov
+  economic-development page — URL literally exists, content never surfaced;
+  note the misspelled path 'economicdevlopment' is verbatim) and Santa
+  Rosa Band of Cahuilla (economic-development page + TERO Commission on
+  the boards page).
+- Cedarville's agent-reported positive was demoted at integration (single
+  enterprise in site text, no listing page — the Igiugig pattern).
+  Napaimute is the most web-active of the final AK villages (Napaimute
+  Enterprises LLC news posts, no listing page); Kaguyak, New Koliganek,
+  Pitka's Point, and Yupiit of Andreafski have no web presence at all.
+
 ## Follow-ups
 
 1. Fetch-verify the 7 new rows at page level (egress unblock or local run).

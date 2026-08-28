@@ -3,9 +3,9 @@
  "wave": 5,
  "generated": "2026-08-28",
  "scope": "United States only. Tribal-government, TERO and tribal member/citizen lists are the primary evidence layer; state, chamber, nonprofit and regional directories are cross-reference only.",
- "total_source_programs": 161,
+ "total_source_programs": 162,
  "by_priority_class": {
-  "Tribal Primary": 46,
+  "Tribal Primary": 47,
   "Tribal Secondary": 19,
   "Tribal Partnership": 54,
   "Cross-Reference": 32,
@@ -13,42 +13,42 @@
   "Coverage Frame": 6
  },
  "by_status_group": {
-  "Live": 62,
+  "Live": 63,
   "Stale": 10,
   "Historical": 3,
   "Lead": 57,
   "Complementary": 29
  },
  "by_nation_scope": {
-  "single_nation": 121,
+  "single_nation": 122,
   "multi_nation": 2,
   "regional": 31,
   "national": 7
  },
- "sources_with_nation_ids": 123,
+ "sources_with_nation_ids": 124,
  "by_last_checked": {
-  "2026-08-27": 158,
-  "2026-08-28": 3
+  "2026-08-27": 155,
+  "2026-08-28": 7
  },
- "nations_in_crosswalk": 406,
+ "nations_in_crosswalk": 584,
  "coverage": {
   "bia_list_total_reported": 575,
-  "bia_list_total_note": "per the 2026-01-30 Federal Register notice; unverified until the list itself is fetched",
-  "bia_entities_in_crosswalk": 398,
+  "bia_list_total_note": "verified 2026-08-28 against the FR 2026-01-30 notice itself (91 FR 4102, owner-supplied PDF; research/bia_list_2026-01-30/). Crosswalk rows can exceed 575 because the combined Capitan Grande and Pribilof Islands entries are represented by their member rows",
+  "bia_entities_in_crosswalk": 575,
   "nations_with_source_rows": 117,
-  "nations_negative_findings_only": 288,
-  "nations_checked": 405,
-  "bia_entities_unchecked_estimate": 178,
+  "nations_negative_findings_only": 466,
+  "nations_checked": 583,
+  "bia_entities_unchecked_estimate": 1,
   "negative_findings_by_result": {
-   "no_public_registry_found": 279,
-   "procurement_platform_only": 2,
-   "unresolved": 9
+   "no_public_registry_found": 453,
+   "procurement_platform_only": 3,
+   "unresolved": 13
   },
   "rechecks_due_by": {
-   "2026-11-28": 4,
+   "2026-11-28": 8,
    "2027-02-27": 5,
-   "2027-08-27": 139,
-   "2027-08-28": 142
+   "2027-08-27": 141,
+   "2027-08-28": 315
   }
  },
  "matching_rules": [

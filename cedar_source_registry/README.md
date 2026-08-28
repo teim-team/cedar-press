@@ -11,13 +11,14 @@ the correction.
 
 | File | Records | One line per |
 |---|---|---|
-| `sources.jsonl` | 161 | source program (the master registry; 148 wave-5 + TBD-166..178 from the 2026-08 expansion rounds) |
-| `scrape_queue.jsonl` | 92 | live source ranked for immediate ingestion |
+| `sources.jsonl` | 162 | source program (the master registry; 148 wave-5 + TBD-166..179 from the 2026-08 expansion rounds) |
+| `scrape_queue.jsonl` | 93 | live source ranked for immediate ingestion |
 | `partnership_leads.jsonl` | 57 | confirmed-but-unpublished roster to request directly |
-| `negative_findings.jsonl` | 290 | Phase 3 formal negatives: tribes checked with no public registry found, with recheck dates |
+| `negative_findings.jsonl` | 469 | Phase 3 formal negatives: tribes checked with no public registry found, with recheck dates — with sources.jsonl, this covers every entity on the 2026 BIA list |
 | `cross_reference.jsonl` | 40 | secondary directory with `do_not_infer` guardrails |
-| `verification_log.jsonl` | 141 | append-only fact-check log: 31 wave-5 lines (18 verified, 5 researched-and-excluded, 4 URL corrections, 2 edits reverted) + 97 wave-5.1 search-only re-checks (`channel: web_search_only`) + 13 expansion-round additions |
-| `nations.jsonl` | 406 | nation crosswalk stub (Phase 0) — see "Nation crosswalk" below |
+| `verification_log.jsonl` | 145 | append-only fact-check log: 31 wave-5 lines (18 verified, 5 researched-and-excluded, 4 URL corrections, 2 edits reverted) + 97 wave-5.1 search-only re-checks (`channel: web_search_only`) + 17 expansion-round additions and re-checks |
+| `nations.jsonl` | 584 | nation crosswalk (Phase 0, name-verified) — see "Nation crosswalk" below |
+| `research/bia_list_2026-01-30/` | 577 entries | the FR 2026-01-30 notice (immutable PDF + parsed entities.json) — the official list the crosswalk is verified against |
 | `outreach/requests.md` | — | outreach queue for request-only sources (roster generated from partnership_leads.jsonl) |
 | `PHASE_REPORT.md` | — | phase close-out: what was verified, changed, excluded, and the needs-human list |
 | `research/newsletter_survey_2026-08-27.{md,jsonl}` | 42 outlets | tribal newsletter/media reconnaissance: dataset potential, business lists/awards coverage, Phase-3 candidates |
@@ -46,10 +47,16 @@ Regenerate with `tools/phase0_build_nations.py`; `tools/check_integrity.py`
 enforces id resolution and name-variant uniqueness.
 
 - `bia:<slug>` ids are entities on the BIA list of federally recognized tribes
-  (2026-01-30 Federal Register notice, 575 entities). `bia_name` values are
-  flagged `name_verified_against_list: false` until the list itself can be
-  fetched and diffed (network egress is blocked in the build environment); the
-  full-list import of unreferenced entities is pending for the same reason.
+  (91 FR 4102, 2026-01-30, 575 entities). As of 2026-08-28 every `bia_name` is
+  the official printed string, `name_verified_against_list: true`, verified by
+  the builder against `research/bia_list_2026-01-30/entities.json` (parsed from
+  the owner-supplied FR PDF) — the build fails on any crosswalk↔list mismatch,
+  and the full list is imported (crosswalk rows can exceed 575 because the
+  combined Capitan Grande and Pribilof Islands entries are represented by
+  their member rows; "(See ...)" pointer entries become variants). The earlier
+  "587" figure from a search snippet was wrong; the primary source says 575.
+  One correction from verification: the Valdez Native Tribe is NOT on the
+  list — reclassified `nonbia:` (tribal organization).
 - `bia:minnesota-chippewa-tribe--<band>` rows key the six MCT component
   reservations separately (sources cite bands; the BIA list has one entity);
   `parent_nation_id` points at the parent.
