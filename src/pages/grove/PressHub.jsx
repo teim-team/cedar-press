@@ -5,12 +5,15 @@
 // two navigations stay symmetric. Each square carries what the section is
 // and what it currently holds — counts read from the catalog rather than
 // written here, so the index cannot claim a section holds something it does
-// not — with a ? that states the section's purpose in the line under the
-// grid, for a reader who wants more than the label before committing a tap.
+// not. Pointing at a tile states the section's purpose in the line under
+// the grid — the same point-to-read language as the shelves, with the same
+// sticky selection — so a reader gets more than the label before
+// committing a tap, without a second control on every tile.
 import { useState } from "react";
 import { Link } from "react-router";
 
-import { PRESS_ARTICLES } from "../../features/grove/pressArticles";
+import { PRESS_ARTICLES, TBN_PLANS_URL } from "../../features/grove/pressArticles";
+import { canOpenDataset, historyFor } from "../../features/grove/pressAccess";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { PRESS_CATALOG, PRESS_HISTORY_FROM } from "../../features/grove/pressCatalog";
 import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
@@ -31,15 +34,20 @@ import {
 
 const CONTACT_HREF = "mailto:contact@lumecon.ai?subject=Cedar%20Press";
 
-/** What sits on a Cedar Press shelf: the Grove-only collections are not it. */
-function pressCollections() {
-  return PRESS_CATALOG.filter((entry) => entry.shelf !== "grove");
+/** The collections THIS reader's plan opens: a Cedar Press subscriber has
+ *  six, not the catalog's eleven, and a tile that counts the higher shelf
+ *  describes a product they did not buy. */
+function pressCollections(user) {
+  return PRESS_CATALOG.filter(
+    (entry) => entry.shelf !== "grove" && canOpenDataset(user, entry),
+  );
 }
 
-function sections() {
-  const collections = pressCollections();
+function sections(user) {
+  const collections = pressCollections(user);
+  // The reader's own reach, not the archive's: historyFor answers per plan.
   const earliest = collections
-    .map((entry) => entry.standardFrom ?? entry.historyFrom)
+    .map((entry) => historyFor(user, entry).from)
     .filter(Boolean);
   const newest = recentlyUpdated(1)[0];
   return [
@@ -78,12 +86,15 @@ function sections() {
       what: "How collections are sourced, resolved to Native entities and kept current — the reference for citing a number.",
     },
     {
+      // Upgrades are bought at Tribal Business News, so the tile goes to
+      // the plans page rather than a section that only describes them.
       id: "access",
       label: "Plans and access",
-      to: `${PRESS_DATA_PATH}#grove`,
+      href: TBN_PLANS_URL,
+      external: true,
       icon: WantMoreIcon,
       meta: "Subscription",
-      what: "What your subscription includes, what Cedar Press+ adds, and where Cedar Grove takes the same collections.",
+      what: "What your subscription includes and what Cedar Press+ adds, managed and upgraded through Tribal Business News.",
     },
     {
       id: "contact",
@@ -96,11 +107,11 @@ function sections() {
   ];
 }
 
-const IDLE_NOTE = "Select ? on a section for what it holds.";
+const IDLE_NOTE = "Point at a section for what it holds.";
 
-export default function PressHub() {
+export default function PressHub({ user }) {
   const [help, setHelp] = useState(null);
-  const all = sections();
+  const all = sections(user);
   const note = all.find((section) => section.id === help)?.what;
   return (
     <section className="cp-sec cp-hub" aria-label="Sections">
@@ -116,31 +127,33 @@ export default function PressHub() {
               </span>
             </>
           );
+          // The selection is sticky, like the shelves: it changes when
+          // another tile is pointed at, never back to the idle hint, so the
+          // line below is readable at leisure.
+          const watch = {
+            onMouseEnter: () => setHelp(section.id),
+            onFocus: () => setHelp(section.id),
+            onClick: () => track(EVENT.sectionOpened, { section: section.id }),
+          };
           return (
             <li key={section.id}>
               {section.href ? (
-                <a className="cp-hub__tile" href={section.href} onClick={() => track(EVENT.sectionOpened, { section: section.id })}>{inner}</a>
+                <a
+                  className="cp-hub__tile"
+                  href={section.href}
+                  {...(section.external ? { target: "_blank", rel: "noreferrer" } : {})}
+                  {...watch}
+                >
+                  {inner}
+                </a>
               ) : (
-                <Link className="cp-hub__tile" to={section.to} onClick={() => track(EVENT.sectionOpened, { section: section.id })}>{inner}</Link>
+                <Link className="cp-hub__tile" to={section.to} {...watch}>{inner}</Link>
               )}
-              {/* Its own control beside the tile's link, never inside it: a
-                  button inside an anchor is two answers to one tap. */}
-              <button
-                type="button"
-                className="cp-hub__help"
-                aria-label={`What ${section.label} holds`}
-                aria-expanded={help === section.id}
-                onClick={() => setHelp(section.id)}
-                onMouseEnter={() => setHelp(section.id)}
-                onFocus={() => setHelp(section.id)}
-              >
-                ?
-              </button>
             </li>
           );
         })}
       </ul>
-      {/* aria-live, so a screen reader hears the answer the ? paints. */}
+      {/* aria-live, so a screen reader hears the answer the pointer paints. */}
       <p className="cp-hub__note" aria-live="polite">{note || IDLE_NOTE}</p>
     </section>
   );

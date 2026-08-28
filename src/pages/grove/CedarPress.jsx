@@ -124,7 +124,7 @@ export default function CedarPress() {
               See what changed <span aria-hidden="true">&#8594;</span>
             </Link>
           </nav>
-          <PressHub />
+          <PressHub user={entitled ? user : null} />
         </div>
 
         {/* Screen two: the close and the footer, as one ending. The ending is
