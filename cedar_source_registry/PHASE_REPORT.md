@@ -39,11 +39,14 @@ search-only from wave 5.1. The distinguishers are (a) the dated
   multi-mapping cases. ANC sources map to `[]` + regional: ANCSA corporations
   are not nations. `nation_ids` on a source row is scope, never an ownership
   assertion.
-- **Deliberately not done:** the full 575-entity BIA-list import
-  (list unfetchable — see needs-human). `bia_name` values are transcribed from
-  model knowledge of the list and flagged `name_verified_against_list: false`
-  on every row; verify-and-diff against the fetched list is a standing TODO
-  before Phase 4 promotes the crosswalk to governed form.
+- ~~**Deliberately not done:** the full 575-entity BIA-list import~~
+  **RESOLVED 2026-08-28:** the owner supplied the FR 2026-01-30 notice as a
+  PDF (`research/bia_list_2026-01-30/`); the full list is imported, every
+  `bia_name` is the official printed string with
+  `name_verified_against_list: true`, and the builder enforces a
+  crosswalk↔list bijection at build time. See the expansion memo's
+  "BIA list verified" section for corrections (Valdez reclassified nonbia,
+  one duplicate row removed, Seminole FL / White Mountain Apache formalized).
 - No verification-log entries were written for Phase 0 (it alters no source
   evidence).
 
@@ -109,8 +112,9 @@ search-only from wave 5.1. The distinguishers are (a) the dated
 - **FIELD_CLASSIFICATION.md** — required "before Phase 5"; deferred with
   Phase 5. Nothing in this pass ingested Layer-1 records, so no publication
   boundary was crossed.
-- **Full BIA list import** — blocked (egress); stub covers all referenced
-  nations instead, flagged unverified.
+- **Full BIA list import** — RESOLVED 2026-08-28 via owner-supplied FR PDF
+  (`research/bia_list_2026-01-30/`); crosswalk fully imported and
+  name-verified with a build-time bijection check.
 - **`verification_basis` vocabulary reconciliation** — the workbook-derived
   `record_schema.json` lists `directory_tag`/`self_attested`/`license` while
   the formal `schema/source_record.schema.json` enum has
@@ -130,10 +134,11 @@ search-only from wave 5.1. The distinguishers are (a) the dated
    `outreach/requests.md` (Lummi, Coeur d'Alene, Sisseton) and work the
    partnership-lead roster; each received roster needs a human decision on
    storage terms and publication permission.
-3. **BIA list count discrepancy**: the Jan-30-2026 Federal Register notice
-   reports 575 entities, while BIA Tribal Leaders Directory search results
-   claim "all 587 federally recognized tribes". Resolve against the primary
-   sources when fetchable before the crosswalk is promoted (Phase 4).
+3. **BIA list count discrepancy** — RESOLVED 2026-08-28: the primary source
+   (91 FR 4102, owner-supplied) states 575; the "587" search-snippet figure
+   was wrong. 577 printed name-entries reconcile to 575 via the Venetie and
+   Pribilof combined listings (documented in
+   `research/bia_list_2026-01-30/entities.json`).
 4. **WNACC domain (TBD-071)**: registered wnacc.org appears to be a typo for
    wanacc.org (and the member directory may be login-gated). One fetch
    settles it; correcting the URL is a registry edit with a log line.

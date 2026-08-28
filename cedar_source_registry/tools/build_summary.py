@@ -104,8 +104,12 @@ def main() -> int:
         by_recheck = Counter(r["recheck_after"] for r in neg_rows)
         summary["coverage"] = {
             "bia_list_total_reported": 575,
-            "bia_list_total_note": "per the 2026-01-30 Federal Register notice; "
-                                   "unverified until the list itself is fetched",
+            "bia_list_total_note": "verified 2026-08-28 against the FR 2026-01-30 "
+                                   "notice itself (91 FR 4102, owner-supplied PDF; "
+                                   "research/bia_list_2026-01-30/). Crosswalk rows "
+                                   "can exceed 575 because the combined Capitan "
+                                   "Grande and Pribilof Islands entries are "
+                                   "represented by their member rows",
             "bia_entities_in_crosswalk": bia_entities,
             "nations_with_source_rows": len(sourced),
             "nations_negative_findings_only": len(negative_ids - sourced),

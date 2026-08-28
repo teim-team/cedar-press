@@ -482,7 +482,7 @@ BIA = [
     ("chenega", "Native Village of Chenega", ["Chenega IRA Council"], ["AK"]),
     ("port-graham", "Native Village of Port Graham", [], ["AK"]),
     ("nanwalek", "Native Village of Nanwalek", [], ["AK"]),
-    ("valdez-native-tribe", "Valdez Native Tribe", [], ["AK"]),
+    # ("valdez-native-tribe", ...) moved to NONBIA 2026-08-28: not on the FR list.
     ("tyonek", "Native Village of Tyonek", [], ["AK"]),
     ("salamatoff", "Village of Salamatoff", ["Salamatof Tribe"], ["AK"]),
     ("kanatak", "Native Village of Kanatak", [], ["AK"]),
@@ -514,7 +514,8 @@ BIA = [
     ("ugashik", "Ugashik Village", [], ["AK"]),
     ("twin-hills", "Twin Hills Village", [], ["AK"]),
     # Round 5 expansion (2026-08-28): lower-48 stragglers (VA 2018 cohort, ME, KS, CA, NV, OK)
-    ("sac-and-fox-nation-oklahoma", "Sac and Fox Nation, Oklahoma", [], ["OK"]),
+    # ("sac-and-fox-nation-oklahoma", ...) removed 2026-08-28: duplicate of the
+    # existing bia:sac-and-fox-nation row (round-5 filter miss; negative row remapped).
     ("rappahannock", "Rappahannock Tribe", [], ["VA"]),
     ("upper-mattaponi", "Upper Mattaponi Indian Tribe", [], ["VA"]),
     ("chickahominy", "Chickahominy Indian Tribe", [], ["VA"]),
@@ -597,7 +598,212 @@ BIA = [
     ("upper-sioux", "Upper Sioux Community, Minnesota", ["Upper Sioux Community", "Pezihutazizi Oyate"], ["MN"]),
     ("lower-sioux", "Lower Sioux Indian Community in the State of Minnesota", ["Lower Sioux Indian Community"], ["MN"]),
     ("shakopee", "Shakopee Mdewakanton Sioux Community of Minnesota", ["Shakopee Mdewakanton Sioux Community"], ["MN"]),
+    # Full-list import (2026-08-28): entities on the FR 2026-01-30 list never
+    # referenced by any source or sweep until the list itself became available
+    # (research/bia_list_2026-01-30/). Names are the official printed strings.
+    ("alturas", "Alturas Indian Rancheria, California", [], ["CA"]),
+    ("augustine", "Augustine Band of Cahuilla Indians, California", [], ["CA"]),
+    ("big-lagoon", "Big Lagoon Rancheria, California", [], ["CA"]),
+    ("big-sandy", "Big Sandy Rancheria of Western Mono Indians of California", [], ["CA"]),
+    ("california-valley-miwok", "California Valley Miwok Tribe, California", [], ["CA"]),
+    ("cedarville", "Cedarville Rancheria, California", [], ["CA"]),
+    ("cold-springs", "Cold Springs Rancheria of Mono Indians of California", [], ["CA"]),
+    ("ewiiaapaayp", "Ewiiaapaayp Band of Kumeyaay Indians", [], ["CA"]),
+    ("fort-bidwell", "Fort Bidwell Indian Community of the Fort Bidwell Reservation of California", [], ["CA"]),
+    ("inaja", "Inaja Band of Diegueno Mission Indians of the Inaja and Cosmit Reservation, California", [], ["CA"]),
+    ("kickapoo-texas", "Kickapoo Traditional Tribe of Texas", [], ["TX"]),
+    ("la-posta", "La Posta Band of Diegueno Mission Indians of the La Posta Indian Reservation, California", [], ["CA"]),
+    ("little-river-ottawa", "Little River Band of Ottawa Indians, Michigan", [], ["MI"]),
+    ("northfork", "Northfork Rancheria of Mono Indians of California", [], ["CA"]),
+    ("paskenta", "Paskenta Band of Nomlaki Indians of California", [], ["CA"]),
+    ("picayune", "Picayune Rancheria of Chukchansi Indians of California", [], ["CA"]),
+    ("pit-river", "Pit River Tribe, California (includes XL Ranch, Big Bend, Likely, Lookout, Montgomery Creek, and Roaring Creek Rancherias)", [], ["CA"]),
+    ("pulikla", "Pulikla Tribe of Yurok People", [], ["CA"]),
+    ("ramona", "Ramona Band of Cahuilla, California", [], ["CA"]),
+    ("meskwaki", "Sac & Fox Tribe of the Mississippi in Iowa", ["Meskwaki Nation"], ["IA"]),
+    ("saginaw-chippewa", "Saginaw Chippewa Indian Tribe of Michigan", [], ["MI"]),
+    ("samish", "Samish Indian Nation", [], ["WA"]),
+    ("santa-rosa-cahuilla", "Santa Rosa Band of Cahuilla Indians, California", [], ["CA"]),
+    ("santa-rosa-rancheria", "Santa Rosa Indian Community of the Santa Rosa Rancheria, California", ["Tachi Yokut Tribe"], ["CA"]),
+    ("sauk-suiattle", "Sauk-Suiattle Indian Tribe", [], ["WA"]),
+    ("seminole-florida", "Seminole Tribe of Florida", [], ["FL"]),
+    ("white-mountain-apache", "White Mountain Apache Tribe of the Fort Apache Reservation, Arizona", [], ["AZ"]),
+    ("yocha-dehe", "Yocha Dehe Wintun Nation, California", [], ["CA"]),
+    ("tejon", "Tejon Indian Tribe", [], ["CA"]),
+    ("ivanof-bay", "Ivanof Bay Tribe", [], ["AK"]),
+    ("kaguyak", "Kaguyak Village", [], ["AK"]),
+    ("napaimute", "Native Village of Napaimute", [], ["AK"]),
+    ("new-koliganek", "New Koliganek Village Council", [], ["AK"]),
+    ("pedro-bay", "Pedro Bay Village", [], ["AK"]),
+    ("pitkas-point", "Pitka's Point Traditional Council", [], ["AK"]),
+    ("yupiit-andreafski", "Yupiit of Andreafski", [], ["AK"]),
 ]
+
+# ---------------------------------------------------------------------------
+# Official-list verification (2026-08-28). The FR 2026-01-30 notice (91 FR
+# 4102, FR Doc. 2026-01899) was supplied by the owner as a PDF and parsed to
+# research/bia_list_2026-01-30/entities.json (the PDF alongside it is the
+# immutable raw artifact). Every BIA tuple must resolve to exactly one printed
+# entry; every printed entry must be consumed by exactly one tuple, be a
+# "(See ...)" pointer, or be an explicitly-excluded combined listing. The
+# build fails on any violation, so name_verified_against_list: true is a
+# checked invariant, not an assertion.
+
+# Tuples whose stored name-forms differ from the official printed string.
+OFFICIAL_NAME_OVERRIDES = {
+    "santa-clara-pueblo": "Pueblo of Santa Clara, New Mexico",
+    "nambe": "Pueblo of Nambe, New Mexico",
+    "picuris": "Pueblo of Picuris, New Mexico",
+    "shingle-springs": "Shingle Springs Band of Miwok Indians, Shingle Springs Rancheria (Verona Tract), California",
+    "eklutna": "Eklutna Native Village",
+    "atqasuk": "Native Village of Atqasuk",
+    "orutsararmiut": "Orutsararmiut Traditional Native Council",
+    "venetie": "Native Village of Venetie Tribal Government (Arctic Village and Village of Venetie)",
+    "ekwok": "Native Village of Ekwok",
+    "newtok": "Newtok Village",
+    "iqurmiut": "Iqugmiut Traditional Council",
+    "upper-mattaponi": "Upper Mattaponi Tribe",
+    "chickahominy-eastern": "Chickahominy Indian Tribe—Eastern Division",
+    "umkumiute": "Umkumiut Native Village",
+    "stevens-village": "Native Village of Stevens",
+    "chalkyitsik": "Chalkyitsik Village",
+    "chitina": "Native Village of Chitina",
+    "saint-george": "St. George Island",
+    "fallon-paiute-shoshone": "Paiute-Shoshone Tribe of the Fallon Reservation and Colony, Nevada",
+    "barona": "Capitan Grande Band of Diegueno Mission Indians of California (Barona Group of Capitan Grande Band of Mission Indians of the Barona Reservation, California; Viejas (Baron Long) Group of Capitan Grande Band of Mission Indians of the Viejas Reservation, California)",
+}
+
+# Rows verified against a printed entry another row already consumes: the
+# Capitan Grande combined entry names both the Barona and Viejas groups.
+SECONDARY_OF = {
+    "viejas": "Capitan Grande Band of Diegueno Mission Indians of California (Barona Group of Capitan Grande Band of Mission Indians of the Barona Reservation, California; Viejas (Baron Long) Group of Capitan Grande Band of Mission Indians of the Viejas Reservation, California)",
+}
+
+# Printed entries represented by other rows rather than their own row.
+OFFICIAL_EXCLUDED = {
+    # Combined listing; represented by bia:saint-paul and bia:saint-george
+    # (its two "(See ...)" pointer entries are those rows' printed names).
+    "Pribilof Islands Aleut Communities of St. Paul & St. George Islands (St. George Island and Saint Paul Island)",
+}
+
+
+def _norm_name(x: str) -> str:
+    import re
+    import unicodedata
+    x = unicodedata.normalize("NFKD", x)
+    x = "".join(c for c in x if not unicodedata.combining(c))
+    x = x.lower().replace("&", "and").replace("’", "'")
+    x = re.sub(r"[^a-z0-9 ]", " ", x)
+    return re.sub(r"\s+", " ", x).strip()
+
+
+def load_official():
+    data = json.loads(
+        (ROOT / "research" / "bia_list_2026-01-30" / "entities.json").read_text()
+    )
+    entries = data["entries"]
+    index = {}
+    for e in entries:
+        index.setdefault(_norm_name(e["name"]), e)
+        if e.get("previously_listed_as"):
+            import re
+            prev = re.sub(r"\(See .+?\)\s*$", "", e["previously_listed_as"]).strip()
+            index.setdefault(_norm_name(prev), e)
+    return data, entries, index
+
+
+def verify_bia(rows_by_slug):
+    """Mutate BIA rows in place with verified official names; hard-fail on any
+    tuple<->entry mismatch."""
+    data, entries, index = load_official()
+    consumed = {}
+    problems = []
+    norm_entries = [(_norm_name(e["name"]), e) for e in entries]
+    for slug, row in rows_by_slug.items():
+        if slug in SECONDARY_OF:
+            target = SECONDARY_OF[slug]
+            assert any(e["name"] == target for e in entries), slug
+            row["name_verified_against_list"] = True
+            row["bia_list_edition"] = (
+                "91 FR 4102 (2026-01-30), FR Doc. 2026-01899 — 575 entities; "
+                "verified against research/bia_list_2026-01-30/entities.json"
+            )
+            extra = (f"Printed within the combined FR entry {target!r}, "
+                     "which bia:barona consumes.")
+            row["notes"] = (f"{row['notes']} {extra}".strip()
+                            if row.get("notes") else extra)
+            continue
+        official = None
+        if slug in OFFICIAL_NAME_OVERRIDES:
+            official = index.get(_norm_name(OFFICIAL_NAME_OVERRIDES[slug]))
+            if official is None or _norm_name(official["name"]) != _norm_name(
+                OFFICIAL_NAME_OVERRIDES[slug]
+            ):
+                problems.append(f"override for {slug} does not name a printed entry")
+                continue
+        else:
+            for cand in row["names"]:
+                official = index.get(_norm_name(cand))
+                if official:
+                    break
+            if official is None:
+                # unique-containment fallback: printed entries add trailing
+                # qualifiers ("(aka ...)", ", California", constituent-band
+                # parentheticals) to the familiar name, or vice versa
+                nn = _norm_name(row["bia_name"])
+                conts = [e for k, e in norm_entries if nn in k or k in nn]
+                if len({e["name"] for e in conts}) == 1:
+                    official = conts[0]
+        if official is None:
+            problems.append(f"no official entry for bia:{slug} ({row['bia_name']})")
+            continue
+        key = official["name"]
+        if key in consumed:
+            problems.append(
+                f"official entry consumed twice: {key!r} by {consumed[key]} and {slug}"
+            )
+            continue
+        consumed[key] = slug
+        old_names = row["names"]
+        names = [official["name"]]
+        if official.get("previously_listed_as"):
+            import re
+            prev = re.sub(r"\(See .+?\)\s*$", "", official["previously_listed_as"]).strip()
+            if _norm_name(prev) not in {_norm_name(n) for n in names}:
+                names.append(prev)
+        for n in old_names:
+            if _norm_name(n) not in {_norm_name(x) for x in names}:
+                names.append(n)
+        note = row.get("notes")
+        if official.get("pointer_to"):
+            extra = (f"Printed in the FR list as a cross-reference to "
+                     f"'{official['pointer_to']}'.")
+            note = f"{note} {extra}".strip() if note else extra
+        if slug == "venetie":
+            extra = ("Counted FR entry grouping Arctic Village and Village of "
+                     "Venetie (both printed as pointer entries).")
+            note = f"{note} {extra}".strip() if note else extra
+            for v in ("Arctic Village", "Village of Venetie"):
+                if _norm_name(v) not in {_norm_name(x) for x in names}:
+                    names.append(v)
+        row["bia_name"] = official["name"]
+        row["names"] = names
+        row["name_verified_against_list"] = True
+        row["bia_list_edition"] = (
+            "91 FR 4102 (2026-01-30), FR Doc. 2026-01899 — 575 entities; "
+            "verified against research/bia_list_2026-01-30/entities.json"
+        )
+        row["notes"] = note
+    for e in entries:
+        if e["name"] in consumed or e["name"] in OFFICIAL_EXCLUDED:
+            continue
+        if e.get("pointer_to"):
+            continue
+        problems.append(f"official entry not represented: {e['name']!r}")
+    if problems:
+        for p in problems:
+            print(f"FAIL: {p}", file=sys.stderr)
+        raise SystemExit(1)
 
 # Component reservations of the Minnesota Chippewa Tribe (one BIA entity).
 MCT_BANDS = [
@@ -616,6 +822,12 @@ NONBIA = [
     ("chappaquiddick-wampanoag", "Chappaquiddick Wampanoag Tribe", ["Chappaquiddick Tribe of the Wampanoag Nation"], ["MA"],
      "unrecognized",
      "Not on the BIA list; no federal recognition. Registry references it via the WAMP Owned directory (TBD-013)."),
+    ("valdez-native-tribe", "Valdez Native Tribe", [], ["AK"],
+     "not_on_bia_list",
+     "Not a printed entry on the FR 2026-01-30 list (verified 2026-08-28 against "
+     "research/bia_list_2026-01-30/). Tribal organization serving Alaska Natives "
+     "in Valdez; carried bia:valdez-native-tribe through the round-5 sweep, "
+     "reclassified nonbia when the list became checkable."),
 ]
 
 # nation_source string in sources.jsonl -> nation_id list.
@@ -795,9 +1007,10 @@ SCOPE_OVERRIDES = {
 
 def nation_rows() -> list[dict]:
     rows = []
+    bia_by_slug = {}
     for slug, bia_name, variants, states in BIA:
         names = [bia_name] + [v for v in variants if v != bia_name]
-        rows.append({
+        row = {
             "nation_id": f"bia:{slug}",
             "bia_name": bia_name,
             "names": names,
@@ -808,7 +1021,13 @@ def nation_rows() -> list[dict]:
             "bia_list_edition": "2026-01-30 Federal Register notice (575 entities)",
             "name_verified_against_list": False,
             "notes": None,
-        })
+        }
+        if slug in bia_by_slug:
+            print(f"FAIL: duplicate BIA slug {slug}", file=sys.stderr)
+            raise SystemExit(1)
+        bia_by_slug[slug] = row
+        rows.append(row)
+    verify_bia(bia_by_slug)
     for slug, name, variants, states in MCT_BANDS:
         rows.append({
             "nation_id": f"bia:minnesota-chippewa-tribe--{slug}",

@@ -1,0 +1,4048 @@
+{
+ "citation": "91 FR 4102-4106 (2026-01-30), FR Doc. 2026-01899",
+ "stated_total": 575,
+ "printed_entries": 577,
+ "count_note": "577 printed name-entries reconcile to the stated 575 Tribal entities via the two combined listings: the Native Village of Venetie Tribal Government entry groups Arctic Village and Village of Venetie (both also printed as (See ...) pointers), and the Pribilof Islands Aleut Communities entry groups St. George Island and Aleut Community of St. Paul Island (both also printed as (See ...) pointers).",
+ "extraction": "pdftotext -bbox-layout (poppler) from the FR PDF supplied by the owner 2026-08-28; entries joined by column-indent rule; one glitch repaired (missing space in 'Pulikla Tribe'). The PDF alongside this file is the immutable raw artifact.",
+ "entries": [
+  {
+   "section": "contiguous_48",
+   "name": "Absentee-Shawnee Tribe of Indians of Oklahoma",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Absentee-Shawnee Tribe of Indians of Oklahoma"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Agua Caliente Band of Cahuilla Indians of the Agua Caliente Indian Reservation, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Agua Caliente Band of Cahuilla Indians of the Agua Caliente Indian Reservation, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Ak-Chin Indian Community",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Ak-Chin Indian Community"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Alabama-Coushatta Tribe of Texas",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Alabama-Coushatta Tribe of Texas"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Alabama-Quassarte Tribal Town",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Alabama-Quassarte Tribal Town"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Alturas Indian Rancheria, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Alturas Indian Rancheria, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Apache Tribe of Oklahoma",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Apache Tribe of Oklahoma"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Assiniboine and Sioux Tribes of the Fort Peck Indian Reservation, Montana",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Assiniboine and Sioux Tribes of the Fort Peck Indian Reservation, Montana"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Augustine Band of Cahuilla Indians, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Augustine Band of Cahuilla Indians, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Bad River Band of the Lake Superior Tribe of Chippewa Indians of the Bad River Reservation, Wisconsin",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Bad River Band of the Lake Superior Tribe of Chippewa Indians of the Bad River Reservation, Wisconsin"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Bay Mills Indian Community, Michigan",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Bay Mills Indian Community, Michigan"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Bear River Band of the Rohnerville Rancheria, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Bear River Band of the Rohnerville Rancheria, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Berry Creek Rancheria of Maidu Indians of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Berry Creek Rancheria of Maidu Indians of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Big Lagoon Rancheria, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Big Lagoon Rancheria, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Big Pine Paiute Tribe of the Owens Valley",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Big Pine Paiute Tribe of the Owens Valley"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Big Sandy Rancheria of Western Mono Indians of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Big Sandy Rancheria of Western Mono Indians of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Big Valley Band of Pomo Indians of the Big Valley Rancheria, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Big Valley Band of Pomo Indians of the Big Valley Rancheria, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Bishop Paiute Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Bishop Paiute Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Blackfeet Tribe of the Blackfeet Indian Reservation of Montana",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Blackfeet Tribe of the Blackfeet Indian Reservation of Montana"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Blue Lake Rancheria, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Blue Lake Rancheria, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Bridgeport Indian Colony",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Bridgeport Indian Colony"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Buena Vista Rancheria of Me-Wuk Indians of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Buena Vista Rancheria of Me-Wuk Indians of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Burns Paiute Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Burns Paiute Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Cabazon Band of Cahuilla Indians",
+   "previously_listed_as": "Cabazon Band of Mission Indians, California",
+   "pointer_to": null,
+   "printed_entry": "Cabazon Band of Cahuilla Indians (previously listed as Cabazon Band of Mission Indians, California)"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Cachil DeHe Band of Wintun Indians of the Colusa Indian Community of the Colusa Rancheria, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Cachil DeHe Band of Wintun Indians of the Colusa Indian Community of the Colusa Rancheria, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Caddo Nation of Oklahoma",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Caddo Nation of Oklahoma"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Cahto Tribe of the Laytonville Rancheria",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Cahto Tribe of the Laytonville Rancheria"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Cahuilla Band of Indians",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Cahuilla Band of Indians"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "California Valley Miwok Tribe, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "California Valley Miwok Tribe, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Campo Band of Diegueno Mission Indians of the Campo Indian Reservation, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Campo Band of Diegueno Mission Indians of the Campo Indian Reservation, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Capitan Grande Band of Diegueno Mission Indians of California (Barona Group of Capitan Grande Band of Mission Indians of the Barona Reservation, California; Viejas (Baron Long) Group of Capitan Grande Band of Mission Indians of the Viejas Reservation, California)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Capitan Grande Band of Diegueno Mission Indians of California (Barona Group of Capitan Grande Band of Mission Indians of the Barona Reservation, California; Viejas (Baron Long) Group of Capitan Grande Band of Mission Indians of the Viejas Reservation, California)"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Catawba Indian Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Catawba Indian Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Cayuga Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Cayuga Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Cedarville Rancheria, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Cedarville Rancheria, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Chemehuevi Indian Tribe of the Chemehuevi Reservation, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Chemehuevi Indian Tribe of the Chemehuevi Reservation, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Cher-Ae Heights Indian Community of the Trinidad Rancheria, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Cher-Ae Heights Indian Community of the Trinidad Rancheria, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Cherokee Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Cherokee Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Cheyenne and Arapaho Tribes, Oklahoma",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Cheyenne and Arapaho Tribes, Oklahoma"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Cheyenne River Sioux Tribe of the Cheyenne River Reservation, South Dakota",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Cheyenne River Sioux Tribe of the Cheyenne River Reservation, South Dakota"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Chickahominy Indian Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Chickahominy Indian Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Chickahominy Indian Tribe—Eastern Division",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Chickahominy Indian Tribe—Eastern Division"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Chicken Ranch Rancheria of Me-Wuk Indians of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Chicken Ranch Rancheria of Me-Wuk Indians of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Chippewa Cree Indians of the Rocky Boy’s Reservation, Montana",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Chippewa Cree Indians of the Rocky Boy’s Reservation, Montana"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Chitimacha Tribe of Louisiana",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Chitimacha Tribe of Louisiana"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Citizen Potawatomi Nation, Oklahoma",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Citizen Potawatomi Nation, Oklahoma"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Cloverdale Rancheria of Pomo Indians of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Cloverdale Rancheria of Pomo Indians of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Cocopah Tribe of Arizona",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Cocopah Tribe of Arizona"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Coeur D’Alene Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Coeur D’Alene Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Cold Springs Rancheria of Mono Indians of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Cold Springs Rancheria of Mono Indians of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Colorado River Indian Tribes of the Colorado River Indian Reservation, Arizona and California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Colorado River Indian Tribes of the Colorado River Indian Reservation, Arizona and California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Comanche Nation, Oklahoma",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Comanche Nation, Oklahoma"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Confederated Salish and Kootenai Tribes of the Flathead Reservation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Confederated Salish and Kootenai Tribes of the Flathead Reservation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Confederated Tribes and Bands of the Yakama Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Confederated Tribes and Bands of the Yakama Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Confederated Tribes of Siletz Indians of Oregon",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Confederated Tribes of Siletz Indians of Oregon"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Confederated Tribes of the Chehalis Reservation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Confederated Tribes of the Chehalis Reservation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Confederated Tribes of the Colville Reservation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Confederated Tribes of the Colville Reservation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Confederated Tribes of the Coos, Lower Umpqua and Siuslaw Indians",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Confederated Tribes of the Coos, Lower Umpqua and Siuslaw Indians"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Confederated Tribes of the Goshute Reservation, Nevada and Utah",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Confederated Tribes of the Goshute Reservation, Nevada and Utah"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Confederated Tribes of the Grand Ronde Community of Oregon",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Confederated Tribes of the Grand Ronde Community of Oregon"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Confederated Tribes of the Umatilla Indian Reservation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Confederated Tribes of the Umatilla Indian Reservation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Confederated Tribes of the Warm Springs Reservation of Oregon",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Confederated Tribes of the Warm Springs Reservation of Oregon"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Coquille Indian Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Coquille Indian Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Coushatta Tribe of Louisiana",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Coushatta Tribe of Louisiana"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Cow Creek Band of Umpqua Tribe of Indians",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Cow Creek Band of Umpqua Tribe of Indians"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Cowlitz Indian Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Cowlitz Indian Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Coyote Valley Band of Pomo Indians of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Coyote Valley Band of Pomo Indians of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Crow Creek Sioux Tribe of the Crow Creek Reservation, South Dakota",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Crow Creek Sioux Tribe of the Crow Creek Reservation, South Dakota"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Crow Tribe of Montana",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Crow Tribe of Montana"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Delaware Nation, Oklahoma",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Delaware Nation, Oklahoma"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Delaware Tribe of Indians",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Delaware Tribe of Indians"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Dry Creek Rancheria Band of Pomo Indians, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Dry Creek Rancheria Band of Pomo Indians, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Duckwater Shoshone Tribe",
+   "previously_listed_as": "Duckwater Shoshone Tribe of the Duckwater Reservation, Nevada",
+   "pointer_to": null,
+   "printed_entry": "Duckwater Shoshone Tribe (previously listed as Duckwater Shoshone Tribe of the Duckwater Reservation, Nevada)"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Eastern Band of Cherokee Indians",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Eastern Band of Cherokee Indians"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Eastern Shawnee Tribe of Oklahoma",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Eastern Shawnee Tribe of Oklahoma"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Eastern Shoshone Tribe of the Wind River Reservation, Wyoming",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Eastern Shoshone Tribe of the Wind River Reservation, Wyoming"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Elem Indian Colony of Pomo Indians of the Sulphur Bank Rancheria, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Elem Indian Colony of Pomo Indians of the Sulphur Bank Rancheria, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Elk Valley Rancheria, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Elk Valley Rancheria, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Ely Shoshone Tribe of Nevada",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Ely Shoshone Tribe of Nevada"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Enterprise Rancheria of Maidu Indians of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Enterprise Rancheria of Maidu Indians of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Ewiiaapaayp Band of Kumeyaay Indians",
+   "previously_listed_as": "Ewiiaapaayp Band of Kumeyaay Indians, California",
+   "pointer_to": null,
+   "printed_entry": "Ewiiaapaayp Band of Kumeyaay Indians (previously listed as Ewiiaapaayp Band of Kumeyaay Indians, California)"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Federated Indians of Graton Rancheria, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Federated Indians of Graton Rancheria, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Flandreau Santee Sioux Tribe of South Dakota",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Flandreau Santee Sioux Tribe of South Dakota"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Forest County Potawatomi Community, Wisconsin",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Forest County Potawatomi Community, Wisconsin"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Fort Belknap Indian Community of the Fort Belknap Reservation of Montana",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Fort Belknap Indian Community of the Fort Belknap Reservation of Montana"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Fort Bidwell Indian Community of the Fort Bidwell Reservation of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Fort Bidwell Indian Community of the Fort Bidwell Reservation of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Fort Independence Indian Community of Paiute Indians of the Fort Independence Reservation, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Fort Independence Indian Community of Paiute Indians of the Fort Independence Reservation, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Fort McDermitt Paiute and Shoshone Tribes of the Fort McDermitt Indian Reservation, Nevada and Oregon",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Fort McDermitt Paiute and Shoshone Tribes of the Fort McDermitt Indian Reservation, Nevada and Oregon"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Fort McDowell Yavapai Nation, Arizona",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Fort McDowell Yavapai Nation, Arizona"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Fort Mojave Indian Tribe of Arizona, California & Nevada",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Fort Mojave Indian Tribe of Arizona, California & Nevada"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Fort Sill—Chiricahua—Warm Springs—Apache Tribe",
+   "previously_listed_as": "Fort Sill Apache Tribe of Oklahoma",
+   "pointer_to": null,
+   "printed_entry": "Fort Sill—Chiricahua—Warm Springs—Apache Tribe (previously listed as Fort Sill Apache Tribe of Oklahoma)"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Gila River Indian Community of the Gila River Indian Reservation, Arizona",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Gila River Indian Community of the Gila River Indian Reservation, Arizona"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Grand Traverse Band of Ottawa and Chippewa Indians, Michigan",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Grand Traverse Band of Ottawa and Chippewa Indians, Michigan"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Greenville Rancheria",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Greenville Rancheria"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Grindstone Indian Rancheria of Wintun-Wailaki Indians of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Grindstone Indian Rancheria of Wintun-Wailaki Indians of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Guidiville Rancheria of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Guidiville Rancheria of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Habematolel Pomo of Upper Lake, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Habematolel Pomo of Upper Lake, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Hannahville Indian Community, Michigan",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Hannahville Indian Community, Michigan"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Havasupai Tribe of the Havasupai Reservation, Arizona",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Havasupai Tribe of the Havasupai Reservation, Arizona"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Ho-Chunk Nation of Wisconsin",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Ho-Chunk Nation of Wisconsin"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Hoh Indian Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Hoh Indian Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Hoopa Valley Tribe, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Hoopa Valley Tribe, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Hopi Tribe of Arizona",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Hopi Tribe of Arizona"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Hopland Band of Pomo Indians, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Hopland Band of Pomo Indians, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Houlton Band of Maliseet Indians",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Houlton Band of Maliseet Indians"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Hualapai Indian Tribe of the Hualapai Indian Reservation, Arizona",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Hualapai Indian Tribe of the Hualapai Indian Reservation, Arizona"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Iipay Nation of Santa Ysabel, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Iipay Nation of Santa Ysabel, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Inaja Band of Diegueno Mission Indians of the Inaja and Cosmit Reservation, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Inaja Band of Diegueno Mission Indians of the Inaja and Cosmit Reservation, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Ione Band of Miwok Indians of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Ione Band of Miwok Indians of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Iowa Tribe of Kansas and Nebraska",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Iowa Tribe of Kansas and Nebraska"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Iowa Tribe of Oklahoma",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Iowa Tribe of Oklahoma"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Jackson Band of Miwuk Indians",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Jackson Band of Miwuk Indians"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Jamestown S’Klallam Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Jamestown S’Klallam Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Jamul Indian Village of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Jamul Indian Village of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Jena Band of Choctaw Indians",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Jena Band of Choctaw Indians"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Jicarilla Apache Nation, New Mexico",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Jicarilla Apache Nation, New Mexico"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Kaibab Band of Paiute Indians of the Kaibab Indian Reservation, Arizona",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Kaibab Band of Paiute Indians of the Kaibab Indian Reservation, Arizona"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Kalispel Indian Community of the Kalispel Reservation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Kalispel Indian Community of the Kalispel Reservation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Karuk Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Karuk Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Kashia Band of Pomo Indians of the Stewarts Point Rancheria, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Kashia Band of Pomo Indians of the Stewarts Point Rancheria, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Kaw Nation, Oklahoma",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Kaw Nation, Oklahoma"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Keweenaw Bay Indian Community, Michigan",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Keweenaw Bay Indian Community, Michigan"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Kialegee Tribal Town",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Kialegee Tribal Town"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Kickapoo Traditional Tribe of Texas",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Kickapoo Traditional Tribe of Texas"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Kickapoo Tribe of Indians of the Kickapoo Reservation in Kansas",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Kickapoo Tribe of Indians of the Kickapoo Reservation in Kansas"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Kickapoo Tribe of Oklahoma",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Kickapoo Tribe of Oklahoma"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Kiowa Tribe",
+   "previously_listed_as": "Kiowa Indian Tribe of Oklahoma",
+   "pointer_to": null,
+   "printed_entry": "Kiowa Tribe (previously listed as Kiowa Indian Tribe of Oklahoma)"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Klamath Tribes",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Klamath Tribes"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Kletsel Dehe Wintun Nation of the Cortina Rancheria",
+   "previously_listed_as": "Kletsel Dehe Band of Wintun Indians",
+   "pointer_to": null,
+   "printed_entry": "Kletsel Dehe Wintun Nation of the Cortina Rancheria (previously listed as Kletsel Dehe Band of Wintun Indians)"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Koi Nation of Northern California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Koi Nation of Northern California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Kootenai Tribe of Idaho",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Kootenai Tribe of Idaho"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "La Jolla Band of Luiseno Indians, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "La Jolla Band of Luiseno Indians, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "La Posta Band of Diegueno Mission Indians of the La Posta Indian Reservation, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "La Posta Band of Diegueno Mission Indians of the La Posta Indian Reservation, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Lac Courte Oreilles Band of Lake Superior Chippewa Indians of Wisconsin",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Lac Courte Oreilles Band of Lake Superior Chippewa Indians of Wisconsin"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Lac du Flambeau Band of Lake Superior Chippewa Indians of the Lac du Flambeau Reservation of Wisconsin",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Lac du Flambeau Band of Lake Superior Chippewa Indians of the Lac du Flambeau Reservation of Wisconsin"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Lac Vieux Desert Band of Lake Superior Chippewa Indians of Michigan",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Lac Vieux Desert Band of Lake Superior Chippewa Indians of Michigan"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Las Vegas Tribe of Paiute Indians of the Las Vegas Indian Colony, Nevada",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Las Vegas Tribe of Paiute Indians of the Las Vegas Indian Colony, Nevada"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Little River Band of Ottawa Indians, Michigan",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Little River Band of Ottawa Indians, Michigan"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Little Shell Tribe of Chippewa Indians of Montana",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Little Shell Tribe of Chippewa Indians of Montana"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Little Traverse Bay Bands of Odawa Indians, Michigan",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Little Traverse Bay Bands of Odawa Indians, Michigan"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Lone Pine Paiute-Shoshone Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Lone Pine Paiute-Shoshone Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Los Coyotes Band of Cahuilla and Cupeno Indians, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Los Coyotes Band of Cahuilla and Cupeno Indians, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Lovelock Paiute Tribe of the Lovelock Indian Colony, Nevada",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Lovelock Paiute Tribe of the Lovelock Indian Colony, Nevada"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Lower Brule Sioux Tribe of the Lower Brule Reservation, South Dakota",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Lower Brule Sioux Tribe of the Lower Brule Reservation, South Dakota"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Lower Elwha Tribal Community",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Lower Elwha Tribal Community"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Lower Sioux Indian Community in the State of Minnesota",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Lower Sioux Indian Community in the State of Minnesota"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Lumbee Tribe of North Carolina",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Lumbee Tribe of North Carolina (See SUPPLEMENTARY INFORMATION supra, noting conditions on the Tribe’s eligibility for Federal services)"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Lummi Tribe of the Lummi Reservation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Lummi Tribe of the Lummi Reservation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Lytton Rancheria of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Lytton Rancheria of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Makah Indian Tribe of the Makah Indian Reservation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Makah Indian Tribe of the Makah Indian Reservation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Manchester Band of Pomo Indians of the Manchester Rancheria, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Manchester Band of Pomo Indians of the Manchester Rancheria, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Manzanita Band of Diegueno Mission Indians of the Manzanita Reservation, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Manzanita Band of Diegueno Mission Indians of the Manzanita Reservation, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Mashantucket Pequot Indian Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Mashantucket Pequot Indian Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Mashpee Wampanoag Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Mashpee Wampanoag Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Match-E-Be-Nash-She-Wish Band of Pottawatomi",
+   "previously_listed_as": "Match-E-Be-Nash-She-Wish Band of Pottawatomi Indians of Michigan",
+   "pointer_to": null,
+   "printed_entry": "Match-E-Be-Nash-She-Wish Band of Pottawatomi (previously listed as Match-E-Be-Nash-She-Wish Band of Pottawatomi Indians of Michigan)"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Mechoopda Indian Tribe of Chico Rancheria, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Mechoopda Indian Tribe of Chico Rancheria, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Menominee Indian Tribe of Wisconsin",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Menominee Indian Tribe of Wisconsin"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Mesa Grande Band of Diegueno Mission Indians of the Mesa Grande Reservation, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Mesa Grande Band of Diegueno Mission Indians of the Mesa Grande Reservation, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Mescalero Apache Tribe of the Mescalero Reservation, New Mexico",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Mescalero Apache Tribe of the Mescalero Reservation, New Mexico"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Miami Tribe of Oklahoma",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Miami Tribe of Oklahoma"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Miccosukee Tribe of Indians",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Miccosukee Tribe of Indians"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Middletown Rancheria of Pomo Indians of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Middletown Rancheria of Pomo Indians of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Mi’kmaq Nation",
+   "previously_listed_as": "Aroostook Band of Micmacs",
+   "pointer_to": null,
+   "printed_entry": "Mi’kmaq Nation (previously listed as Aroostook Band of Micmacs)"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Minnesota Chippewa Tribe, Minnesota (Six component reservations: Bois Forte Band (Nett Lake); Fond du Lac Band; Grand Portage Band; Leech Lake Band; Mille Lacs Band; White Earth Band)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Minnesota Chippewa Tribe, Minnesota (Six component reservations: Bois Forte Band (Nett Lake); Fond du Lac Band; Grand Portage Band; Leech Lake Band; Mille Lacs Band; White Earth Band)"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Mississippi Band of Choctaw Indians",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Mississippi Band of Choctaw Indians"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Moapa Band of Paiute Indians of the Moapa River Indian Reservation, Nevada",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Moapa Band of Paiute Indians of the Moapa River Indian Reservation, Nevada"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Modoc Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Modoc Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Mohegan Tribe of Indians of Connecticut",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Mohegan Tribe of Indians of Connecticut"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Monacan Indian Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Monacan Indian Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Mooretown Rancheria of Maidu Indians of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Mooretown Rancheria of Maidu Indians of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Morongo Band of Mission Indians, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Morongo Band of Mission Indians, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Muckleshoot Indian Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Muckleshoot Indian Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Nansemond Indian Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Nansemond Indian Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Narragansett Indian Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Narragansett Indian Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Navajo Nation, Arizona, New Mexico, & Utah",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Navajo Nation, Arizona, New Mexico, & Utah"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Nez Perce Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Nez Perce Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Nisqually Indian Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Nisqually Indian Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Nooksack Indian Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Nooksack Indian Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Northern Arapaho Tribe of the Wind River Reservation, Wyoming",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Northern Arapaho Tribe of the Wind River Reservation, Wyoming"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Northern Cheyenne Tribe of the Northern Cheyenne Indian Reservation, Montana",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Northern Cheyenne Tribe of the Northern Cheyenne Indian Reservation, Montana"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Northfork Rancheria of Mono Indians of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Northfork Rancheria of Mono Indians of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Northwestern Band of the Shoshone Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Northwestern Band of the Shoshone Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Nottawaseppi Huron Band of the Potawatomi, Michigan",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Nottawaseppi Huron Band of the Potawatomi, Michigan"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Oglala Sioux Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Oglala Sioux Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Ohkay Owingeh, New Mexico",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Ohkay Owingeh, New Mexico"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Omaha Tribe of Nebraska",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Omaha Tribe of Nebraska"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Oneida Indian Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Oneida Indian Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Oneida Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Oneida Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Onondaga Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Onondaga Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Otoe-Missouria Tribe of Indians, Oklahoma",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Otoe-Missouria Tribe of Indians, Oklahoma"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Ottawa Tribe of Oklahoma",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Ottawa Tribe of Oklahoma"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Paiute Indian Tribe of Utah (Cedar Band of Paiutes, Kanosh Band of Paiutes, Koosharem Band of Paiutes, Indian Peaks Band of Paiutes, and Shivwits Band of Paiutes)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Paiute Indian Tribe of Utah (Cedar Band of Paiutes, Kanosh Band of Paiutes, Koosharem Band of Paiutes, Indian Peaks Band of Paiutes, and Shivwits Band of Paiutes)"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Paiute-Shoshone Tribe of the Fallon Reservation and Colony, Nevada",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Paiute-Shoshone Tribe of the Fallon Reservation and Colony, Nevada"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pala Band of Mission Indians",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pala Band of Mission Indians"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pamunkey Indian Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pamunkey Indian Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pascua Yaqui Tribe of Arizona",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pascua Yaqui Tribe of Arizona"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Paskenta Band of Nomlaki Indians of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Paskenta Band of Nomlaki Indians of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Passamaquoddy Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Passamaquoddy Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pauma Band of Luiseno Mission Indians of the Pauma & Yuima Reservation, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pauma Band of Luiseno Mission Indians of the Pauma & Yuima Reservation, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pawnee Nation of Oklahoma",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pawnee Nation of Oklahoma"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pechanga Band of Indians",
+   "previously_listed_as": "Pechanga Band of Luiseno Mission Indians of the Pechanga Reservation, California",
+   "pointer_to": null,
+   "printed_entry": "Pechanga Band of Indians (previously listed as Pechanga Band of Luiseno Mission Indians of the Pechanga Reservation, California)"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Penobscot Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Penobscot Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Peoria Tribe of Indians of Oklahoma",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Peoria Tribe of Indians of Oklahoma"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Picayune Rancheria of Chukchansi Indians of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Picayune Rancheria of Chukchansi Indians of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pinoleville Pomo Nation, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pinoleville Pomo Nation, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pit River Tribe, California (includes XL Ranch, Big Bend, Likely, Lookout, Montgomery Creek, and Roaring Creek Rancherias)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pit River Tribe, California (includes XL Ranch, Big Bend, Likely, Lookout, Montgomery Creek, and Roaring Creek Rancherias)"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Poarch Band of Creek Indians",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Poarch Band of Creek Indians"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pokagon Band of Potawatomi Indians, Michigan and Indiana",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pokagon Band of Potawatomi Indians, Michigan and Indiana"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Ponca Tribe of Indians of Oklahoma",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Ponca Tribe of Indians of Oklahoma"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Ponca Tribe of Nebraska",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Ponca Tribe of Nebraska"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Port Gamble S’Klallam Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Port Gamble S’Klallam Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Potter Valley Tribe, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Potter Valley Tribe, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Prairie Band Potawatomi Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Prairie Band Potawatomi Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Prairie Island Indian Community in the State of Minnesota",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Prairie Island Indian Community in the State of Minnesota"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pueblo of Acoma, New Mexico",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pueblo of Acoma, New Mexico"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pueblo of Cochiti, New Mexico",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pueblo of Cochiti, New Mexico"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pueblo of Isleta, New Mexico",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pueblo of Isleta, New Mexico"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pueblo of Jemez, New Mexico",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pueblo of Jemez, New Mexico"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pueblo of Laguna, New Mexico",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pueblo of Laguna, New Mexico"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pueblo of Nambe, New Mexico",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pueblo of Nambe, New Mexico"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pueblo of Picuris, New Mexico",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pueblo of Picuris, New Mexico"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pueblo of Pojoaque, New Mexico",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pueblo of Pojoaque, New Mexico"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pueblo of San Felipe, New Mexico",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pueblo of San Felipe, New Mexico"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pueblo of San Ildefonso, New Mexico",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pueblo of San Ildefonso, New Mexico"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pueblo of Sandia, New Mexico",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pueblo of Sandia, New Mexico"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pueblo of Santa Ana, New Mexico",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pueblo of Santa Ana, New Mexico"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pueblo of Santa Clara, New Mexico",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pueblo of Santa Clara, New Mexico"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pueblo of Taos, New Mexico",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pueblo of Taos, New Mexico"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pueblo of Tesuque, New Mexico",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pueblo of Tesuque, New Mexico"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pueblo of Zia, New Mexico",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pueblo of Zia, New Mexico"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pulikla Tribe of Yurok People",
+   "previously_listed_as": "Resighini Rancheria, California",
+   "pointer_to": null,
+   "printed_entry": "PuliklaTribe of Yurok People (previously listed as Resighini Rancheria, California)"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Puyallup Tribe of the Puyallup Reservation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Puyallup Tribe of the Puyallup Reservation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Pyramid Lake Paiute Tribe of the Pyramid Lake Reservation, Nevada",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pyramid Lake Paiute Tribe of the Pyramid Lake Reservation, Nevada"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Quapaw Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Quapaw Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Quartz Valley Indian Community of the Quartz Valley Reservation of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Quartz Valley Indian Community of the Quartz Valley Reservation of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Quechan Tribe of the Fort Yuma Indian Reservation, California & Arizona",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Quechan Tribe of the Fort Yuma Indian Reservation, California & Arizona"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Quileute Tribe of the Quileute Reservation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Quileute Tribe of the Quileute Reservation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Quinault Indian Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Quinault Indian Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Ramona Band of Cahuilla, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Ramona Band of Cahuilla, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Rappahannock Tribe, Inc.",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Rappahannock Tribe, Inc."
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Red Cliff Band of Lake Superior Chippewa Indians of Wisconsin",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Red Cliff Band of Lake Superior Chippewa Indians of Wisconsin"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Red Lake Band of Chippewa Indians, Minnesota",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Red Lake Band of Chippewa Indians, Minnesota"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Redding Rancheria, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Redding Rancheria, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Redwood Valley or Little River Band of Pomo Indians of the Redwood Valley Rancheria California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Redwood Valley or Little River Band of Pomo Indians of the Redwood Valley Rancheria California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Reno-Sparks Indian Colony, Nevada",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Reno-Sparks Indian Colony, Nevada"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Rincon Band of Luiseno Indians",
+   "previously_listed_as": "Rincon Band of Luiseno Mission Indians of Rincon Reservation, California",
+   "pointer_to": null,
+   "printed_entry": "Rincon Band of Luiseno Indians (previously listed as Rincon Band of Luiseno Mission Indians of Rincon Reservation, California)"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Robinson Rancheria",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Robinson Rancheria"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Rosebud Sioux Tribe of the Rosebud Indian Reservation, South Dakota",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Rosebud Sioux Tribe of the Rosebud Indian Reservation, South Dakota"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Round Valley Indian Tribes, Round Valley Reservation, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Round Valley Indian Tribes, Round Valley Reservation, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Sac & Fox Nation of Missouri in Kansas and Nebraska",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Sac & Fox Nation of Missouri in Kansas and Nebraska"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Sac & Fox Nation, Oklahoma",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Sac & Fox Nation, Oklahoma"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Sac & Fox Tribe of the Mississippi in Iowa",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Sac & Fox Tribe of the Mississippi in Iowa"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Saginaw Chippewa Indian Tribe of Michigan",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Saginaw Chippewa Indian Tribe of Michigan"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Saint Regis Mohawk Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Saint Regis Mohawk Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Salt River Pima-Maricopa Indian Community of the Salt River Reservation, Arizona",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Salt River Pima-Maricopa Indian Community of the Salt River Reservation, Arizona"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Samish Indian Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Samish Indian Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "San Carlos Apache Tribe of the San Carlos Reservation, Arizona",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "San Carlos Apache Tribe of the San Carlos Reservation, Arizona"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "San Juan Southern Paiute Tribe of Arizona",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "San Juan Southern Paiute Tribe of Arizona"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "San Pasqual Band of Diegueno Mission Indians of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "San Pasqual Band of Diegueno Mission Indians of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Santa Rosa Band of Cahuilla Indians, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Santa Rosa Band of Cahuilla Indians, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Santa Rosa Indian Community of the Santa Rosa Rancheria, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Santa Rosa Indian Community of the Santa Rosa Rancheria, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Santa Ynez Band of Chumash Mission Indians of the Santa Ynez Reservation, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Santa Ynez Band of Chumash Mission Indians of the Santa Ynez Reservation, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Santee Sioux Nation, Nebraska",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Santee Sioux Nation, Nebraska"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Santo Domingo Pueblo",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Santo Domingo Pueblo"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Sauk-Suiattle Indian Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Sauk-Suiattle Indian Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Sault Ste. Marie Tribe of Chippewa Indians, Michigan",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Sault Ste. Marie Tribe of Chippewa Indians, Michigan"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Scotts Valley Band of Pomo Indians of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Scotts Valley Band of Pomo Indians of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Seminole Tribe of Florida",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Seminole Tribe of Florida"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Seneca Nation of Indians",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Seneca Nation of Indians"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Seneca–Cayuga Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Seneca–Cayuga Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Shakopee Mdewakanton Sioux Community of Minnesota",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Shakopee Mdewakanton Sioux Community of Minnesota"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Shawnee Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Shawnee Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Sherwood Valley Rancheria of Pomo Indians of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Sherwood Valley Rancheria of Pomo Indians of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Shingle Springs Band of Miwok Indians, Shingle Springs Rancheria (Verona Tract), California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Shingle Springs Band of Miwok Indians, Shingle Springs Rancheria (Verona Tract), California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Shinnecock Indian Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Shinnecock Indian Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Shoalwater Bay Indian Tribe of the Shoalwater Bay Indian Reservation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Shoalwater Bay Indian Tribe of the Shoalwater Bay Indian Reservation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Shoshone-Bannock Tribes of the Fort Hall Reservation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Shoshone-Bannock Tribes of the Fort Hall Reservation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Shoshone-Paiute Tribes of the Duck Valley Reservation, Nevada",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Shoshone-Paiute Tribes of the Duck Valley Reservation, Nevada"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Sisseton-Wahpeton Oyate of the Lake Traverse Reservation, South Dakota",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Sisseton-Wahpeton Oyate of the Lake Traverse Reservation, South Dakota"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Skokomish Indian Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Skokomish Indian Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Skull Valley Band of Goshute Indians of Utah",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Skull Valley Band of Goshute Indians of Utah"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Snoqualmie Indian Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Snoqualmie Indian Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Soboba Band of Luiseno Indians, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Soboba Band of Luiseno Indians, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Sokaogon Chippewa Community, Wisconsin",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Sokaogon Chippewa Community, Wisconsin"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Southern Ute Indian Tribe of the Southern Ute Reservation, Colorado",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Southern Ute Indian Tribe of the Southern Ute Reservation, Colorado"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Spirit Lake Tribe, North Dakota",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Spirit Lake Tribe, North Dakota"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Spokane Tribe of the Spokane Reservation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Spokane Tribe of the Spokane Reservation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Squaxin Island Tribe of the Squaxin Island Reservation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Squaxin Island Tribe of the Squaxin Island Reservation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "St. Croix Chippewa Indians of Wisconsin",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "St. Croix Chippewa Indians of Wisconsin"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Standing Rock Sioux Tribe of North & South Dakota",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Standing Rock Sioux Tribe of North & South Dakota"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Stillaguamish Tribe of Indians of Washington",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Stillaguamish Tribe of Indians of Washington"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Stockbridge Munsee Community, Wisconsin",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Stockbridge Munsee Community, Wisconsin"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Summit Lake Paiute Tribe of Nevada",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Summit Lake Paiute Tribe of Nevada"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Suquamish Indian Tribe of the Port Madison Reservation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Suquamish Indian Tribe of the Port Madison Reservation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Susanville Indian Rancheria, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Susanville Indian Rancheria, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Swinomish Indian Tribal Community",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Swinomish Indian Tribal Community"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Sycuan Band of the Kumeyaay Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Sycuan Band of the Kumeyaay Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Table Mountain Rancheria",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Table Mountain Rancheria"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Tejon Indian Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Tejon Indian Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Te-Moak Tribe of Western Shoshone Indians of Nevada (Four constituent bands: Battle Mountain Band; Elko Band; South Fork Band; and Wells Band)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Te-Moak Tribe of Western Shoshone Indians of Nevada (Four constituent bands: Battle Mountain Band; Elko Band; South Fork Band; and Wells Band)"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "The Chickasaw Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "The Chickasaw Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "The Choctaw Nation of Oklahoma",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "The Choctaw Nation of Oklahoma"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "The Muscogee (Creek) Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "The Muscogee (Creek) Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "The Osage Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "The Osage Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "The Seminole Nation of Oklahoma",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "The Seminole Nation of Oklahoma"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Thlopthlocco Tribal Town",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Thlopthlocco Tribal Town"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Three Affiliated Tribes of the Fort Berthold Reservation, North Dakota",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Three Affiliated Tribes of the Fort Berthold Reservation, North Dakota"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Timbisha Shoshone Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Timbisha Shoshone Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Tohono O’odham Nation of Arizona",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Tohono O’odham Nation of Arizona"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Tolowa Dee-ni’ Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Tolowa Dee-ni’ Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Tonawanda Band of Seneca",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Tonawanda Band of Seneca"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Tonkawa Tribe of Indians of Oklahoma",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Tonkawa Tribe of Indians of Oklahoma"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Tonto Apache Tribe of Arizona",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Tonto Apache Tribe of Arizona"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Torres Martinez Desert Cahuilla Indians, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Torres Martinez Desert Cahuilla Indians, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Tulalip Tribes of Washington",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Tulalip Tribes of Washington"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Tule River Indian Tribe of the Tule River Reservation, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Tule River Indian Tribe of the Tule River Reservation, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Tunica-Biloxi Indian Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Tunica-Biloxi Indian Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Tuolumne Band of Me-Wuk Indians of the Tuolumne Rancheria of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Tuolumne Band of Me-Wuk Indians of the Tuolumne Rancheria of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Turtle Mountain Band of Chippewa Indians of North Dakota",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Turtle Mountain Band of Chippewa Indians of North Dakota"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Tuscarora Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Tuscarora Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Twenty-Nine Palms Band of Mission Indians of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Twenty-Nine Palms Band of Mission Indians of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "United Auburn Indian Community of the Auburn Rancheria of California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "United Auburn Indian Community of the Auburn Rancheria of California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "United Keetoowah Band of Cherokee Indians in Oklahoma",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "United Keetoowah Band of Cherokee Indians in Oklahoma"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Upper Mattaponi Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Upper Mattaponi Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Upper Sioux Community, Minnesota",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Upper Sioux Community, Minnesota"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Upper Skagit Indian Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Upper Skagit Indian Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Ute Indian Tribe of the Uintah & Ouray Reservation, Utah",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Ute Indian Tribe of the Uintah & Ouray Reservation, Utah"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Ute Mountain Ute Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Ute Mountain Ute Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Utu Utu Gwaitu Paiute Tribe of the Benton Paiute Reservation, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Utu Utu Gwaitu Paiute Tribe of the Benton Paiute Reservation, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Walker River Paiute Tribe of the Walker River Reservation, Nevada",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Walker River Paiute Tribe of the Walker River Reservation, Nevada"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Wampanoag Tribe of Gay Head (Aquinnah)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Wampanoag Tribe of Gay Head (Aquinnah)"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Washoe Tribe of Nevada & California (Carson Colony, Dresslerville Colony, Woodfords Community, Stewart Community, & Washoe Ranches)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Washoe Tribe of Nevada & California (Carson Colony, Dresslerville Colony, Woodfords Community, Stewart Community, & Washoe Ranches)"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "White Mountain Apache Tribe of the Fort Apache Reservation, Arizona",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "White Mountain Apache Tribe of the Fort Apache Reservation, Arizona"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Wichita and Affiliated Tribes (Wichita, Keechi, Waco, & Tawakonie), Oklahoma",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Wichita and Affiliated Tribes (Wichita, Keechi, Waco, & Tawakonie), Oklahoma"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Wilton Rancheria, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Wilton Rancheria, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Winnebago Tribe of Nebraska",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Winnebago Tribe of Nebraska"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Winnemucca Indian Colony of Nevada",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Winnemucca Indian Colony of Nevada"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Wiyot Tribe, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Wiyot Tribe, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Wyandotte Nation",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Wyandotte Nation"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Yankton Sioux Tribe of South Dakota",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Yankton Sioux Tribe of South Dakota"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Yavapai-Apache Nation of the Camp Verde Indian Reservation, Arizona",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Yavapai-Apache Nation of the Camp Verde Indian Reservation, Arizona"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Yavapai-Prescott Indian Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Yavapai-Prescott Indian Tribe"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Yerington Paiute Tribe of the Yerington Colony & Campbell Ranch, Nevada",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Yerington Paiute Tribe of the Yerington Colony & Campbell Ranch, Nevada"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Yocha Dehe Wintun Nation, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Yocha Dehe Wintun Nation, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Yomba Shoshone Tribe of the Yomba Reservation, Nevada",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Yomba Shoshone Tribe of the Yomba Reservation, Nevada"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Ysleta del Sur Pueblo",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Ysleta del Sur Pueblo"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Yuhaaviatam of San Manuel Nation",
+   "previously_listed_as": "San Manuel Band of Mission Indians, California",
+   "pointer_to": null,
+   "printed_entry": "Yuhaaviatam of San Manuel Nation (previously listed as San Manuel Band of Mission Indians, California)"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Yurok Tribe of the Yurok Reservation, California",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Yurok Tribe of the Yurok Reservation, California"
+  },
+  {
+   "section": "contiguous_48",
+   "name": "Zuni Tribe of the Zuni Reservation, New Mexico",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Zuni Tribe of the Zuni Reservation, New Mexico"
+  },
+  {
+   "section": "alaska",
+   "name": "Agdaagux Tribe of King Cove",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Agdaagux Tribe of King Cove"
+  },
+  {
+   "section": "alaska",
+   "name": "Akiachak Native Community",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Akiachak Native Community"
+  },
+  {
+   "section": "alaska",
+   "name": "Akiak Native Community",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Akiak Native Community"
+  },
+  {
+   "section": "alaska",
+   "name": "Alatna Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Alatna Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Algaaciq Native Village (St. Mary’s)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Algaaciq Native Village (St. Mary’s)"
+  },
+  {
+   "section": "alaska",
+   "name": "Allakaket Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Allakaket Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Aleut Community of St. Paul Island",
+   "previously_listed_as": "Saint Paul Island (See Pribilof Islands Aleut Communities of St. Paul & St. George Islands)",
+   "pointer_to": "Pribilof Islands Aleut Communities of St. Paul & St. George Islands",
+   "printed_entry": "Aleut Community of St. Paul Island (See Pribilof Islands Aleut Communities of St. Paul & St. George Islands) (previously listed as Saint Paul Island (See Pribilof Islands Aleut Communities of St. Paul & St. George Islands))"
+  },
+  {
+   "section": "alaska",
+   "name": "Alutiiq Tribe of Old Harbor",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Alutiiq Tribe of Old Harbor"
+  },
+  {
+   "section": "alaska",
+   "name": "Angoon Community Association",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Angoon Community Association"
+  },
+  {
+   "section": "alaska",
+   "name": "Anvik Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Anvik Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Arctic Village",
+   "previously_listed_as": null,
+   "pointer_to": "Native Village of Venetie Tribal Government",
+   "printed_entry": "Arctic Village (See Native Village of Venetie Tribal Government)"
+  },
+  {
+   "section": "alaska",
+   "name": "Asa’carsarmiut Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Asa’carsarmiut Tribe"
+  },
+  {
+   "section": "alaska",
+   "name": "Beaver Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Beaver Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Birch Creek Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Birch Creek Tribe"
+  },
+  {
+   "section": "alaska",
+   "name": "Central Council of the Tlingit & Haida Indian Tribes",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Central Council of the Tlingit & Haida Indian Tribes"
+  },
+  {
+   "section": "alaska",
+   "name": "Chalkyitsik Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Chalkyitsik Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Cheesh-Na Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Cheesh-Na Tribe"
+  },
+  {
+   "section": "alaska",
+   "name": "Chevak Native Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Chevak Native Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Chickaloon Native Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Chickaloon Native Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Chignik Bay Tribal Council",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Chignik Bay Tribal Council"
+  },
+  {
+   "section": "alaska",
+   "name": "Chignik Lake Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Chignik Lake Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Chilkat Indian Village (Klukwan)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Chilkat Indian Village (Klukwan)"
+  },
+  {
+   "section": "alaska",
+   "name": "Chilkoot Indian Association (Haines)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Chilkoot Indian Association (Haines)"
+  },
+  {
+   "section": "alaska",
+   "name": "Chinik Eskimo Community (Golovin)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Chinik Eskimo Community (Golovin)"
+  },
+  {
+   "section": "alaska",
+   "name": "Chuloonawick Native Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Chuloonawick Native Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Circle Native Community",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Circle Native Community"
+  },
+  {
+   "section": "alaska",
+   "name": "Craig Tribal Association",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Craig Tribal Association"
+  },
+  {
+   "section": "alaska",
+   "name": "Curyung Tribal Council",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Curyung Tribal Council"
+  },
+  {
+   "section": "alaska",
+   "name": "Douglas Indian Association",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Douglas Indian Association"
+  },
+  {
+   "section": "alaska",
+   "name": "Egegik Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Egegik Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Eklutna Native Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Eklutna Native Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Emmonak Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Emmonak Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Evansville Village (aka Bettles Field)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Evansville Village (aka Bettles Field)"
+  },
+  {
+   "section": "alaska",
+   "name": "Gulkana Village Council",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Gulkana Village Council"
+  },
+  {
+   "section": "alaska",
+   "name": "Healy Lake Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Healy Lake Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Holy Cross Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Holy Cross Tribe"
+  },
+  {
+   "section": "alaska",
+   "name": "Hoonah Indian Association",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Hoonah Indian Association"
+  },
+  {
+   "section": "alaska",
+   "name": "Hughes Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Hughes Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Huslia Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Huslia Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Hydaburg Cooperative Association",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Hydaburg Cooperative Association"
+  },
+  {
+   "section": "alaska",
+   "name": "Igiugig Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Igiugig Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Inupiat Community of the Arctic Slope",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Inupiat Community of the Arctic Slope"
+  },
+  {
+   "section": "alaska",
+   "name": "Iqugmiut Traditional Council",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Iqugmiut Traditional Council"
+  },
+  {
+   "section": "alaska",
+   "name": "Ivanof Bay Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Ivanof Bay Tribe"
+  },
+  {
+   "section": "alaska",
+   "name": "Kaguyak Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Kaguyak Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Kaktovik Village (aka Barter Island)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Kaktovik Village (aka Barter Island)"
+  },
+  {
+   "section": "alaska",
+   "name": "Kasigluk Traditional Elders Council",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Kasigluk Traditional Elders Council"
+  },
+  {
+   "section": "alaska",
+   "name": "Kenaitze Indian Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Kenaitze Indian Tribe"
+  },
+  {
+   "section": "alaska",
+   "name": "Ketchikan Indian Community",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Ketchikan Indian Community"
+  },
+  {
+   "section": "alaska",
+   "name": "King Island Native Community",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "King Island Native Community"
+  },
+  {
+   "section": "alaska",
+   "name": "King Salmon Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "King Salmon Tribe"
+  },
+  {
+   "section": "alaska",
+   "name": "Klawock Cooperative Association",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Klawock Cooperative Association"
+  },
+  {
+   "section": "alaska",
+   "name": "Knik Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Knik Tribe"
+  },
+  {
+   "section": "alaska",
+   "name": "Kokhanok Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Kokhanok Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Koyukuk Native Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Koyukuk Native Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Levelock Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Levelock Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Lime Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Lime Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Louden Tribe",
+   "previously_listed_as": "Galena Village (aka Louden Village)",
+   "pointer_to": null,
+   "printed_entry": "Louden Tribe (previously listed as Galena Village (aka Louden Village))"
+  },
+  {
+   "section": "alaska",
+   "name": "Manley Hot Springs Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Manley Hot Springs Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Manokotak Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Manokotak Village"
+  },
+  {
+   "section": "alaska",
+   "name": "McGrath Native Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "McGrath Native Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Mentasta Traditional Council",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Mentasta Traditional Council"
+  },
+  {
+   "section": "alaska",
+   "name": "Metlakatla Indian Community, Annette Island Reserve",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Metlakatla Indian Community, Annette Island Reserve"
+  },
+  {
+   "section": "alaska",
+   "name": "Naknek Native Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Naknek Native Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Afognak",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Afognak"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Akhiok",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Akhiok"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Akutan",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Akutan"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Aleknagik",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Aleknagik"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Ambler",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Ambler"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Atka",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Atka"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Atqasuk",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Atqasuk"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Barrow Inupiat Traditional Government",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Barrow Inupiat Traditional Government"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Belkofski",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Belkofski"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Brevig Mission",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Brevig Mission"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Buckland",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Buckland"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Cantwell",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Cantwell"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Chenega",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Chenega"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Chignik Lagoon",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Chignik Lagoon"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Chitina",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Chitina"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Chuathbaluk (Russian Mission, Kuskokwim)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Chuathbaluk (Russian Mission, Kuskokwim)"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Council",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Council"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Deering",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Deering"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Diomede (aka Inalik)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Diomede (aka Inalik)"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Eagle",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Eagle"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Eek",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Eek"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Ekuk",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Ekuk"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Ekwok",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Ekwok"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Elim",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Elim"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Eyak (Cordova)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Eyak (Cordova)"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of False Pass",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of False Pass"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Fort Yukon",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Fort Yukon"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Gakona",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Gakona"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Gambell",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Gambell"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Georgetown",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Georgetown"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Goodnews Bay",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Goodnews Bay"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Hamilton",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Hamilton"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Hooper Bay",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Hooper Bay"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Kanatak",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Kanatak"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Karluk",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Karluk"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Kiana",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Kiana"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Kipnuk",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Kipnuk"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Kivalina",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Kivalina"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Kluti Kaah (aka Copper Center)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Kluti Kaah (aka Copper Center)"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Kobuk",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Kobuk"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Kongiganak",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Kongiganak"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Kotzebue",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Kotzebue"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Koyuk",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Koyuk"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Kwigillingok",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Kwigillingok"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Kwinhagak (aka Quinhagak)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Kwinhagak (aka Quinhagak)"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Larsen Bay",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Larsen Bay"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Marshall (aka Fortuna Ledge)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Marshall (aka Fortuna Ledge)"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Mary’s Igloo",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Mary’s Igloo"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Mekoryuk",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Mekoryuk"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Minto",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Minto"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Nanwalek (aka English Bay)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Nanwalek (aka English Bay)"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Napaimute",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Napaimute"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Napakiak",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Napakiak"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Napaskiak",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Napaskiak"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Nelson Lagoon",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Nelson Lagoon"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Nightmute",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Nightmute"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Nikolski",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Nikolski"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Noatak",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Noatak"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Nuiqsut (aka Nooiksut)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Nuiqsut (aka Nooiksut)"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Nunam Iqua",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Nunam Iqua"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Nunapitchuk",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Nunapitchuk"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Ouzinkie",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Ouzinkie"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Paimiut",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Paimiut"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Perryville",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Perryville"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Pilot Point",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Pilot Point"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Point Hope",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Point Hope"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Point Lay",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Point Lay"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Port Graham",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Port Graham"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Port Heiden",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Port Heiden"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Port Lions",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Port Lions"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Ruby",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Ruby"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Saint Michael",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Saint Michael"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Savoonga",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Savoonga"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Scammon Bay",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Scammon Bay"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Selawik",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Selawik"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Shaktoolik",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Shaktoolik"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Shishmaref",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Shishmaref"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Shungnak",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Shungnak"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of South Naknek",
+   "previously_listed_as": "South Naknek Village",
+   "pointer_to": null,
+   "printed_entry": "Native Village of South Naknek (previously listed as South Naknek Village)"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Stevens",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Stevens"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Tanacross",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Tanacross"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Tanana",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Tanana"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Tatitlek",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Tatitlek"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Tazlina",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Tazlina"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Teller",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Teller"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Tetlin",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Tetlin"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Tuntutuliak",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Tuntutuliak"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Tununak",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Tununak"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Tyonek",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Tyonek"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Unalakleet",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Unalakleet"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Unga",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Unga"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Venetie Tribal Government (Arctic Village and Village of Venetie)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Venetie Tribal Government (Arctic Village and Village of Venetie)"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of Wales",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of Wales"
+  },
+  {
+   "section": "alaska",
+   "name": "Native Village of White Mountain",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Native Village of White Mountain"
+  },
+  {
+   "section": "alaska",
+   "name": "Nenana Native Association",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Nenana Native Association"
+  },
+  {
+   "section": "alaska",
+   "name": "New Koliganek Village Council",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "New Koliganek Village Council"
+  },
+  {
+   "section": "alaska",
+   "name": "New Stuyahok Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "New Stuyahok Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Newhalen Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Newhalen Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Newtok Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Newtok Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Nikolai Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Nikolai Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Ninilchik Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Ninilchik Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Nome Eskimo Community",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Nome Eskimo Community"
+  },
+  {
+   "section": "alaska",
+   "name": "Nondalton Tribe",
+   "previously_listed_as": "Nondalton Village",
+   "pointer_to": null,
+   "printed_entry": "Nondalton Tribe (previously listed as Nondalton Village)"
+  },
+  {
+   "section": "alaska",
+   "name": "Noorvik Native Community",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Noorvik Native Community"
+  },
+  {
+   "section": "alaska",
+   "name": "Northway Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Northway Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Nulato Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Nulato Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Nunakauyarmiut Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Nunakauyarmiut Tribe"
+  },
+  {
+   "section": "alaska",
+   "name": "Organized Village of Grayling (aka Holikachuk)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Organized Village of Grayling (aka Holikachuk)"
+  },
+  {
+   "section": "alaska",
+   "name": "Organized Village of Kake",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Organized Village of Kake"
+  },
+  {
+   "section": "alaska",
+   "name": "Organized Village of Kasaan",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Organized Village of Kasaan"
+  },
+  {
+   "section": "alaska",
+   "name": "Organized Village of Kwethluk",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Organized Village of Kwethluk"
+  },
+  {
+   "section": "alaska",
+   "name": "Organized Village of Saxman",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Organized Village of Saxman"
+  },
+  {
+   "section": "alaska",
+   "name": "Orutsararmiut Traditional Native Council",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Orutsararmiut Traditional Native Council"
+  },
+  {
+   "section": "alaska",
+   "name": "Oscarville Traditional Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Oscarville Traditional Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Pauloff Harbor Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pauloff Harbor Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Pedro Bay Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pedro Bay Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Petersburg Indian Association",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Petersburg Indian Association"
+  },
+  {
+   "section": "alaska",
+   "name": "Pilot Station Traditional Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pilot Station Traditional Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Pitka’s Point Traditional Council",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pitka’s Point Traditional Council"
+  },
+  {
+   "section": "alaska",
+   "name": "Platinum Traditional Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Platinum Traditional Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Portage Creek Village (aka Ohgsenakale)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Portage Creek Village (aka Ohgsenakale)"
+  },
+  {
+   "section": "alaska",
+   "name": "Pribilof Islands Aleut Communities of St. Paul & St. George Islands (St. George Island and Saint Paul Island)",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Pribilof Islands Aleut Communities of St. Paul & St. George Islands (St. George Island and Saint Paul Island)"
+  },
+  {
+   "section": "alaska",
+   "name": "Qagan Tayagungin Tribe of Sand Point",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Qagan Tayagungin Tribe of Sand Point"
+  },
+  {
+   "section": "alaska",
+   "name": "Qawalangin Tribe of Unalaska",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Qawalangin Tribe of Unalaska"
+  },
+  {
+   "section": "alaska",
+   "name": "Rampart Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Rampart Village"
+  },
+  {
+   "section": "alaska",
+   "name": "St. George Island",
+   "previously_listed_as": null,
+   "pointer_to": "Pribilof Islands Aleut Communities of St. Paul & St. George Islands",
+   "printed_entry": "St. George Island (See Pribilof Islands Aleut Communities of St. Paul & St. George Islands)"
+  },
+  {
+   "section": "alaska",
+   "name": "Salamatof Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Salamatof Tribe"
+  },
+  {
+   "section": "alaska",
+   "name": "Seldovia Village Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Seldovia Village Tribe"
+  },
+  {
+   "section": "alaska",
+   "name": "Shageluk Native Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Shageluk Native Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Sitka Tribe of Alaska",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Sitka Tribe of Alaska"
+  },
+  {
+   "section": "alaska",
+   "name": "Skagway Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Skagway Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Stebbins Community Association",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Stebbins Community Association"
+  },
+  {
+   "section": "alaska",
+   "name": "Sun’aq Tribe of Kodiak",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Sun’aq Tribe of Kodiak"
+  },
+  {
+   "section": "alaska",
+   "name": "Takotna Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Takotna Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Tangirnaq Native Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Tangirnaq Native Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Telida Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Telida Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Traditional Village of Togiak",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Traditional Village of Togiak"
+  },
+  {
+   "section": "alaska",
+   "name": "Tuluksak Native Community",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Tuluksak Native Community"
+  },
+  {
+   "section": "alaska",
+   "name": "Twin Hills Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Twin Hills Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Ugashik Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Ugashik Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Umkumiut Native Village",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Umkumiut Native Village"
+  },
+  {
+   "section": "alaska",
+   "name": "Village of Alakanuk",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Village of Alakanuk"
+  },
+  {
+   "section": "alaska",
+   "name": "Village of Anaktuvuk Pass",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Village of Anaktuvuk Pass"
+  },
+  {
+   "section": "alaska",
+   "name": "Village of Aniak",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Village of Aniak"
+  },
+  {
+   "section": "alaska",
+   "name": "Village of Atmautluak",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Village of Atmautluak"
+  },
+  {
+   "section": "alaska",
+   "name": "Village of Bill Moore’s Slough",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Village of Bill Moore’s Slough"
+  },
+  {
+   "section": "alaska",
+   "name": "Village of Chefornak",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Village of Chefornak"
+  },
+  {
+   "section": "alaska",
+   "name": "Village of Clarks Point",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Village of Clarks Point"
+  },
+  {
+   "section": "alaska",
+   "name": "Village of Crooked Creek",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Village of Crooked Creek"
+  },
+  {
+   "section": "alaska",
+   "name": "Village of Dot Lake",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Village of Dot Lake"
+  },
+  {
+   "section": "alaska",
+   "name": "Village of Iliamna",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Village of Iliamna"
+  },
+  {
+   "section": "alaska",
+   "name": "Village of Kalskag",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Village of Kalskag"
+  },
+  {
+   "section": "alaska",
+   "name": "Village of Kaltag",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Village of Kaltag"
+  },
+  {
+   "section": "alaska",
+   "name": "Village of Kotlik",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Village of Kotlik"
+  },
+  {
+   "section": "alaska",
+   "name": "Village of Lower Kalskag",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Village of Lower Kalskag"
+  },
+  {
+   "section": "alaska",
+   "name": "Village of Ohogamiut",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Village of Ohogamiut"
+  },
+  {
+   "section": "alaska",
+   "name": "Village of Red Devil",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Village of Red Devil"
+  },
+  {
+   "section": "alaska",
+   "name": "Village of Sleetmute",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Village of Sleetmute"
+  },
+  {
+   "section": "alaska",
+   "name": "Village of Solomon",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Village of Solomon"
+  },
+  {
+   "section": "alaska",
+   "name": "Village of Stony River",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Village of Stony River"
+  },
+  {
+   "section": "alaska",
+   "name": "Village of Venetie",
+   "previously_listed_as": null,
+   "pointer_to": "Native Village of Venetie Tribal Government",
+   "printed_entry": "Village of Venetie (See Native Village of Venetie Tribal Government)"
+  },
+  {
+   "section": "alaska",
+   "name": "Village of Wainwright",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Village of Wainwright"
+  },
+  {
+   "section": "alaska",
+   "name": "Wrangell Cooperative Association",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Wrangell Cooperative Association"
+  },
+  {
+   "section": "alaska",
+   "name": "Yakutat Tlingit Tribe",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Yakutat Tlingit Tribe"
+  },
+  {
+   "section": "alaska",
+   "name": "Yupiit of Andreafski",
+   "previously_listed_as": null,
+   "pointer_to": null,
+   "printed_entry": "Yupiit of Andreafski"
+  }
+ ]
+}

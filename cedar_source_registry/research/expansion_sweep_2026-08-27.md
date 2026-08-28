@@ -276,6 +276,43 @@ appended with `r6-*` batch labels.
   fetching the actual BIA list and diffing against the crosswalk (the
   standing needs-human egress item).
 
+## BIA list verified (2026-08-28)
+
+The owner supplied the FR 2026-01-30 notice as a PDF (now the immutable raw
+artifact in `research/bia_list_2026-01-30/` with a parsed `entities.json`),
+closing the biggest needs-human item without waiting for egress. Outcomes:
+
+- **Every crosswalk `bia_name` is now the official printed string and
+  `name_verified_against_list: true`** — enforced by a bijection check in
+  `tools/phase0_build_nations.py` that fails the build unless every BIA row
+  maps to exactly one printed entry and every printed entry is represented.
+  ~17 name-form fixes landed (e.g. "Pueblo of Nambe" not "Nambe Pueblo";
+  "Chickahominy Indian Tribe—Eastern Division"; "Iqugmiut" not "Iqurmiut";
+  official former names from 16 "previously listed as" annotations captured
+  as variants).
+- **575 confirmed from the primary source**; the "587" search-snippet figure
+  is dead. 577 printed name-entries reconcile to 575 via the Venetie and
+  Pribilof combined listings (their "(See ...)" pointers and groupings are
+  documented in entities.json's count_note). The Capitan Grande combined
+  entry covers both the Barona and Viejas rows.
+- **Lumbee Tribe of North Carolina is on the list** (recognized by Pub. L.
+  119-60, Dec 2025, with service-eligibility conditions noted in the FR
+  text) — already crosswalked via a wave-5 source reference.
+- **Corrections:** Valdez Native Tribe is not on the list → reclassified
+  `nonbia:` (its round-5 negative row remapped); the round-5
+  `bia:sac-and-fox-nation-oklahoma` row was a duplicate of the existing
+  Sac & Fox Nation row (filter miss) → removed, negative row remapped.
+  Seminole Tribe of Florida and White Mountain Apache — researched and
+  excluded in wave 5 but never crosswalked — got rows plus formal negative
+  rows citing the wave-5 log evidence.
+- **The full list is imported**, so the unchecked remainder is no longer an
+  estimate: **35 entities have never been checked** (excluding the MCT
+  umbrella entity, which is represented by its six band rows) — 21 small CA
+  rancherias/bands, Kickapoo TX, Meskwaki (IA), Saginaw Chippewa and Little
+  River Ottawa (MI), Samish and Sauk-Suiattle (WA), and 7 AK villages
+  (Ivanof Bay, Kaguyak, Napaimute, New Koliganek, Pedro Bay, Pitka's Point,
+  Yupiit of Andreafski). These are the round-7 target list.
+
 ## Follow-ups
 
 1. Fetch-verify the 7 new rows at page level (egress unblock or local run).
