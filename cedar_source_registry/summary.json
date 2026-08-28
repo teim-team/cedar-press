@@ -36,19 +36,19 @@
   "bia_list_total_note": "verified 2026-08-28 against the FR 2026-01-30 notice itself (91 FR 4102, owner-supplied PDF; research/bia_list_2026-01-30/). Crosswalk rows can exceed 575 because the combined Capitan Grande and Pribilof Islands entries are represented by their member rows",
   "bia_entities_in_crosswalk": 575,
   "nations_with_source_rows": 117,
-  "nations_negative_findings_only": 432,
-  "nations_checked": 549,
-  "bia_entities_unchecked_estimate": 35,
+  "nations_negative_findings_only": 466,
+  "nations_checked": 583,
+  "bia_entities_unchecked_estimate": 1,
   "negative_findings_by_result": {
-   "no_public_registry_found": 421,
+   "no_public_registry_found": 453,
    "procurement_platform_only": 3,
-   "unresolved": 11
+   "unresolved": 13
   },
   "rechecks_due_by": {
-   "2026-11-28": 6,
+   "2026-11-28": 8,
    "2027-02-27": 5,
    "2027-08-27": 141,
-   "2027-08-28": 283
+   "2027-08-28": 315
   }
  },
  "matching_rules": [

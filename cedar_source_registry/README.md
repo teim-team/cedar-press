@@ -14,7 +14,7 @@ the correction.
 | `sources.jsonl` | 162 | source program (the master registry; 148 wave-5 + TBD-166..179 from the 2026-08 expansion rounds) |
 | `scrape_queue.jsonl` | 93 | live source ranked for immediate ingestion |
 | `partnership_leads.jsonl` | 57 | confirmed-but-unpublished roster to request directly |
-| `negative_findings.jsonl` | 435 | Phase 3 formal negatives: tribes checked with no public registry found, with recheck dates |
+| `negative_findings.jsonl` | 469 | Phase 3 formal negatives: tribes checked with no public registry found, with recheck dates — with sources.jsonl, this covers every entity on the 2026 BIA list |
 | `cross_reference.jsonl` | 40 | secondary directory with `do_not_infer` guardrails |
 | `verification_log.jsonl` | 145 | append-only fact-check log: 31 wave-5 lines (18 verified, 5 researched-and-excluded, 4 URL corrections, 2 edits reverted) + 97 wave-5.1 search-only re-checks (`channel: web_search_only`) + 17 expansion-round additions and re-checks |
 | `nations.jsonl` | 584 | nation crosswalk (Phase 0, name-verified) — see "Nation crosswalk" below |

@@ -313,6 +313,39 @@ closing the biggest needs-human item without waiting for egress. Outcomes:
   (Ivanof Bay, Kaguyak, Napaimute, New Koliganek, Pedro Bay, Pitka's Point,
   Yupiit of Andreafski). These are the round-7 target list.
 
+## Round 7 (2026-08-28) — sweep complete
+
+The final 34 entities from the verified-list remainder. **With this round,
+every entity on the 2026 BIA list has been checked** (the sole "unchecked"
+crosswalk row is the Minnesota Chippewa Tribe umbrella entity, represented
+by its six band rows): 117 nations carry source rows, 466 carry only
+dated negatives with recheck dates.
+
+- **Enterprise-page inventory grew by 11** — the biggest single-round haul,
+  confirming that mid-size gaming tribes publish enterprise pages, not
+  member registries: Saginaw Chippewa (sagchip.org/business/ — plus a
+  Nov-2025 TERO ordinance stating TERO maintains an Indian-owned business
+  listing: a top outreach candidate), Meskwaki Inc. "Our Companies",
+  Yocha Dehe (/enterprises/ per-property pages), Paskenta, Tachi Yokut,
+  Kickapoo Traditional Tribe of Texas, Northfork (which also runs a
+  vendor Business Registration form — worth inspecting), Big Sandy,
+  Augustine, Samish, and California Valley Miwok (MIWOK Global — caveat:
+  CVMT has a long-running leadership dispute with rival web presences;
+  verify the publishing faction before any registry use).
+- **TERO-office-without-published-list outreach candidates:** Pit River
+  (office page + director, no list) and Saginaw Chippewa (ordinance-backed
+  listing, no list URL); Crow remains from round 6.
+- **Fast-recheck unresolveds (2026-11-28):** Picayune (chukchansi-nsn.gov
+  economic-development page — URL literally exists, content never surfaced;
+  note the misspelled path 'economicdevlopment' is verbatim) and Santa
+  Rosa Band of Cahuilla (economic-development page + TERO Commission on
+  the boards page).
+- Cedarville's agent-reported positive was demoted at integration (single
+  enterprise in site text, no listing page — the Igiugig pattern).
+  Napaimute is the most web-active of the final AK villages (Napaimute
+  Enterprises LLC news posts, no listing page); Kaguyak, New Koliganek,
+  Pitka's Point, and Yupiit of Andreafski have no web presence at all.
+
 ## Follow-ups
 
 1. Fetch-verify the 7 new rows at page level (egress unblock or local run).
