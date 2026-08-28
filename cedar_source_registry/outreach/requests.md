@@ -20,7 +20,7 @@ request away from current coverage.
 ### TBD-031 — Lummi Nation, NAOB Registry
 - **Contact point:** TERO@lummi-nsn.gov · (360) 312-2287 · Teresa Bumatay,
   TERO Director (contacts surfaced literally in lummi-nsn.gov page snippets,
-  2026-08-27). **Gmail draft created 2026-08-27 — awaiting owner send.**
+  2026-08-27). **SENT 2026-08-28** from esm247@cornell.edu (owner-approved; researcher framing — Coastal Band of the Chumash Nation enrollment, Cornell PhD, CICD/NEED background). Awaiting reply; check back ~2026-09-11.
 - **Ask:** the current Native American Owned Business registry, and whether
   Cedar may receive refreshed copies on a schedule.
 - **Cited basis:** the TERO site itself states an up-to-date registry is
@@ -32,7 +32,7 @@ request away from current coverage.
 - **Contact point:** jnilson@cdatribe-nsn.gov · (208) 686-6107 · Jim Nilson,
   TERO Compliance Officer (contacts from Idaho Transportation Dept TERO
   contacts page snippet, 2026-08-27; tribal page cdatribe-nsn.gov/tero/).
-  **Gmail draft created 2026-08-27 — awaiting owner send.**
+  **SENT 2026-08-28** from esm247@cornell.edu (owner-approved; researcher framing — Coastal Band of the Chumash Nation enrollment, Cornell PhD, CICD/NEED background). Awaiting reply; check back ~2026-09-11.
 - **Ask:** the current certified-business list.
 - **Cited basis:** certification program active with business-license and
   financial-verification requirements (ordinance Chapter 41); no published
@@ -53,8 +53,7 @@ request away from current coverage.
 - **Contact point:** DOC@ltbbodawa-nsn.gov · (231) 242-1584 (both from LTBB's
   own PDFs on ltbbodawa-nsn.gov, 2026-08-27).
 - **Ask:** the Tribal Citizen-Owned Business List the Department of Commerce
-  maintains and shares by request. **Gmail draft created 2026-08-27 —
-  awaiting owner send.**
+  maintains and shares by request. **SENT 2026-08-28** from esm247@cornell.edu (owner-approved; researcher framing — Coastal Band of the Chumash Nation enrollment, Cornell PhD, CICD/NEED background). Awaiting reply; check back ~2026-09-11.
 
 ### TBD-095 — Northern Cheyenne Tribe, TERO certified contractor list
 - **Contact point:** Stephanie Fisher, TERO Director · 406-477-6505 · page
