@@ -139,14 +139,20 @@ export function PressCedarFab({ gated = null, examples = [] }) {
     <div className="cedar-widget cedar-widget--launcher-only">
       {open ? (
         <div className="cedar-widget__panel" role="dialog" aria-label="Ask Cedar">
-          <button
-            type="button"
-            className="cedar-widget__close"
-            aria-label="Close Ask Cedar"
-            onClick={() => setOpen(false)}
-          >
-            <span aria-hidden="true">&#215;</span>
-          </button>
+          {/* A dialog header, not a floating glyph: the caption names the
+              panel and the close sits where every dialog keeps it. Sticky,
+              so a scrolled answer never carries the way out with it. */}
+          <div className="cedar-widget__panelhead">
+            <span className="cedar-widget__panelcap">Ask Cedar</span>
+            <button
+              type="button"
+              className="cedar-widget__close"
+              aria-label="Close Ask Cedar"
+              onClick={() => setOpen(false)}
+            >
+              <span aria-hidden="true">&#215;</span>
+            </button>
+          </div>
           {connected ? (
             <>
               <form className="cedar-widget__ask" onSubmit={ask}>
