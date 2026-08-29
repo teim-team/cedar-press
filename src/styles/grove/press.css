@@ -516,7 +516,32 @@
   .teim-rd .cp-split.auth-split { grid-template-columns: 1fr; }
   .teim-rd .cp-split .auth-editorial { order: -1; padding: 1.6rem 1.15rem 2rem; }
   .teim-rd .cp-split__brand--form { display: block; }
+  /* The wordmark above and the title below already carry both halves of
+   * this line; on the stacked page the partner eyebrow read the same
+   * claim three times in one screen. */
+  .teim-rd .cp-split__partner { display: none; }
+  /* Without the ripple mark beside it, the teal panel's opening centers
+   * and takes the width the mark was holding. */
+  .teim-rd .cp-hero2__inner { margin-inline: auto; text-align: center; }
+  .teim-rd .cp-hero2__lede { max-width: none; margin-inline: auto; }
+  .teim-rd .cp-cred { justify-content: center; }
+  .teim-rd .cp-cred__note { margin-inline: auto; }
 }
+/* Phones: the door states, it does not lecture. The linkage sentence and
+ * the team strip live on Methods (and the Credible Research card already
+ * says the credentials one-liner), so the long read stays for the pages
+ * that are for reading. The hero's gutters drop to the page gutter so the
+ * headline uses the width. */
+@media (max-width: 640px) {
+  .teim-rd .cp-hero2.auth-hero { padding-inline: 1.15rem; }
+  .teim-rd .cp-cats__how { display: none; }
+}
+/* Reveal on scroll: a marked section arrives as it enters the viewport,
+ * once. The gate adds .is-in from an IntersectionObserver; without one,
+ * everything is revealed immediately. */
+.teim-rd .cp-fade { opacity: 0; transform: translateY(14px); transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.2, 0, 0, 1); }
+.teim-rd .cp-fade.is-in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .teim-rd .cp-fade { opacity: 1; transform: none; transition: none; } }
 /* The platform's .auth-hero paints a teal gradient whose upper stops carry
  * white text at under 3:1, and a gradient inside one surface breaks the flat
  * colour rule besides. Override to the one teal that holds 4.5:1 under white,
@@ -755,6 +780,12 @@
 .teim-rd .cp-cred__ic svg { width: 18px; height: 18px; }
 .teim-rd .cp-cred__names { font-family: var(--mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; line-height: 1.7; color: #fff; overflow-wrap: anywhere; }
 .teim-rd .cp-cred__note { margin: 0.5rem 0 0; font-size: 0.66rem; line-height: 1.45; color: #fff; max-width: 52ch; }
+/* Phones skip the team strip: the Credible Research card above already
+ * carries the credentials one-liner, and Methods holds the full
+ * treatment. After the base rules, so the hide wins the cascade. */
+@media (max-width: 640px) {
+  .teim-rd .cp-cred__head, .teim-rd .cp-cred, .teim-rd .cp-cred__note { display: none; }
+}
 
 /* A capped dataset keeps its figure and loses its controls. The reader can
  * see the shape of what they do not have, and the way to open it sits where
