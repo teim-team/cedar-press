@@ -16,8 +16,9 @@ assessment is written from the source projects' own READMEs and audit reports,
 which are copied alongside the data so the claim is checkable.
 """
 import os, csv, io, shutil, hashlib, datetime
+from pathlib import Path
 
-BASE = r"C:\Users\esm247\Desktop\Cedar Press"
+BASE = str(Path(__file__).resolve().parent.parent)
 DEST = os.path.join(BASE, "data", "raw", "external", "gaming", "directory_core")
 MAN  = os.path.join(BASE, "data", "raw", "external", "gaming", "_SOURCE_MANIFEST.csv")
 os.makedirs(DEST, exist_ok=True)

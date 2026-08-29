@@ -85,10 +85,11 @@ from cedar_domain import (Tier, IdentifierType, RULED_METHODS,  # noqa: E402
                           ALGORITHMIC_METHODS, METHOD_ACCURACY, is_ruling,
                           NP_CLASSIFICATION_POSITIVE, np_ruling_is_native,
                           np_ruling_is_unrecognised)
+from pathlib import Path
 
 csv.field_size_limit(min(sys.maxsize, 2**31 - 1))
 
-CEDAR = r"C:\Users\esm247\Desktop\Cedar Press"
+CEDAR = str(Path(__file__).resolve().parent.parent)
 CLEAN = os.path.join(CEDAR, "data", "clean")
 REVIEW = os.path.join(CEDAR, "review")
 DOCS = os.path.join(CEDAR, "docs")

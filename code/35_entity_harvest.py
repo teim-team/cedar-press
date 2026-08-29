@@ -49,7 +49,7 @@ import cedar_domain as DOM   # noqa: E402  - DEALS_TRUTH, PROMOTED_TABLES
 
 csv.field_size_limit(1 << 30)
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 SPINE = CEDAR / "data" / "spine"
 RAWX = CEDAR / "data" / "raw" / "external"

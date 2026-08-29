@@ -1,6 +1,7 @@
 import fitz,os,json,csv
-RAW=r"C:\Users\esm247\Desktop\Cedar Press\data\raw\external\ancsa_portal_v2"
-OUT=r"C:\Users\esm247\Desktop\Cedar Press\data\interim\ancsa_ocr_v2"
+from pathlib import Path
+RAW=str(Path(__file__).resolve().parent.parent.parent / "data" / "raw" / "external" / "ancsa_portal_v2")
+OUT=str(Path(__file__).resolve().parent.parent.parent / "data" / "interim" / "ancsa_ocr_v2")
 os.makedirs(OUT,exist_ok=True)
 out=[]
 for f in sorted(os.listdir(RAW)):

@@ -40,7 +40,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 OCR_SCRIPT = "122_ocr_ordinance_scans.py"
 OCR_DIR = CEDAR / "data" / "raw" / "external" / "nigc_ordinances" / "ocr"
 LOGS = CEDAR / "logs"

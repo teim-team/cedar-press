@@ -94,7 +94,7 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CODE = CEDAR / "code"
 CLEAN = CEDAR / "data" / "clean"
 INTERIM = CEDAR / "data" / "interim"

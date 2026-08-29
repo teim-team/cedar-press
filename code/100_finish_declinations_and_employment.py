@@ -82,7 +82,7 @@ from collections import defaultdict
 from datetime import date, datetime
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 RAW = CEDAR / "data" / "raw" / "external" / "nigc_declinations"
 OCRDIR = RAW / "_ocr"

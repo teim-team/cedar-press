@@ -111,7 +111,7 @@ from collections import Counter, defaultdict
 from datetime import date, datetime
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(CEDAR / "code"))
 # 2026-08-26: this script tested `org_type_barred` alone, so the 471 filings
 # withdrawn by 350_withdraw_false_lobbying_attributions.py - Santa Rosa County

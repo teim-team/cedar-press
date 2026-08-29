@@ -37,6 +37,20 @@ Shared read-only: `cedar_pipeline.py`, `cedar_codebook.py`, `503`, `62`,
 commits; no agent commits. The B1 de-hardcode sweep (280 scripts) is
 deliberately NOT in this pass - it touches every file and runs solo, next.
 
+**Update 2026-08-29: the solo B1 pass has RUN and debt D1 is closed.** It swept
+298 files / 307 occurrences of the project-root literal to 0 unwaived, with one
+named exception (`516_release_manifest.py`'s `HARDCODED_ROOT`, which `replay`
+needs to rewrite past commits). It ran with no other workstream live, so the
+"touches every file" hazard did not materialise. Because it touched every file
+it necessarily edited files the table above assigns elsewhere - `516`, `62`,
+`293` - and each of those edits is either the mechanical root rewrite or a
+direct consequence of it, listed in `docs/RELEASE_REPLAY_LOG.md` §17. The one
+substantive change outside the rewrite is in `516`: its input-discovery
+resolvers recognised the project root **by matching the literal string**, so
+removing the literal would have blinded the only channel that sees NAGPRA's
+largest input. They now recognise the derived SHAPE instead (§17c), proven by
+comparing resolved path sets across all 414 files: 0 losses, 23 gains.
+
 ## ADR-001 — `source_record` as a first-class node (workstream A)
 
 **Status:** in progress. **Supersedes:** nothing.

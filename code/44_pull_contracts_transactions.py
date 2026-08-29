@@ -123,7 +123,7 @@ import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 OUT = CEDAR / "data" / "raw" / "contracts" / "usaspending_transactions_2026-08-06"
 LOGS = CEDAR / "logs"

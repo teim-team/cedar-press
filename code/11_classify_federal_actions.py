@@ -41,7 +41,7 @@ from collections import Counter
 from datetime import date
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 IN_CSV = CEDAR / "data" / "clean" / "federal_actions_raw.csv"
 OUT_CSV = CEDAR / "data" / "clean" / "federal_actions.csv"
 LOG_PATH = CEDAR / "logs" / "11_classify_federal_actions_2026-08-05.log"

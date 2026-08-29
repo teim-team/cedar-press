@@ -63,7 +63,7 @@ import time
 from datetime import date, datetime
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 RAW = CEDAR / "data" / "raw" / "external" / "nigc_declinations"
 IDX = RAW / "_index"
 PDFDIR = RAW / "pdf"

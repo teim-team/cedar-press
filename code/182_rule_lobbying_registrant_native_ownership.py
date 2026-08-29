@@ -103,7 +103,7 @@ from collections import Counter, defaultdict
 from datetime import date
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(CEDAR / "code"))
 # See the note in 180: this script filtered on `org_type_barred` alone and
 # would have read the 471 filings withdrawn by script 350 as live evidence.

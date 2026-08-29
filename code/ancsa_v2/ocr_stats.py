@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """Summarise OCR yield for both runs."""
 import json, os, csv
-ROOT = r"C:\Users\esm247\Desktop\Cedar Press"
+from pathlib import Path
+ROOT = str(Path(__file__).resolve().parent.parent.parent)
 
 
 def stats(ocr_dir, raw_dir, manifest, key_extractable=None):

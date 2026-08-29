@@ -23,8 +23,9 @@ term_end rules (no inference):
   Anything else stays blank.
 """
 import csv, os, re, collections, datetime, io
+from pathlib import Path
 
-BASE  = r"C:\Users\esm247\Desktop\Cedar Press"
+BASE  = str(Path(__file__).resolve().parent.parent)
 CLEAN = os.path.join(BASE, "data", "clean")
 INT   = os.path.join(BASE, "data", "interim")
 RUNDATE = datetime.date(2026, 8, 5)

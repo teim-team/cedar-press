@@ -73,7 +73,7 @@ _MINTED_PREFIXES = sorted(
 
 csv.field_size_limit(min(sys.maxsize, 2 ** 31 - 1))
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CODE = CEDAR / "code"
 CLEAN = CEDAR / "data" / "clean"
 OUT_DIR = CEDAR / "docs" / "schema"

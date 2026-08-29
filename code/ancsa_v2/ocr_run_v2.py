@@ -1,9 +1,10 @@
 import fitz, os, json, io, time, sys
 import pytesseract
 from PIL import Image
+from pathlib import Path
 pytesseract.pytesseract.tesseract_cmd=r"C:\Users\esm247\AppData\Local\Programs\Tesseract-OCR\tesseract.exe"
-RAW=r"C:\Users\esm247\Desktop\Cedar Press\data\raw\external\ancsa_portal_v2"
-OUT=r"C:\Users\esm247\Desktop\Cedar Press\data\interim\ancsa_ocr_v2"
+RAW=str(Path(__file__).resolve().parent.parent.parent / "data" / "raw" / "external" / "ancsa_portal_v2")
+OUT=str(Path(__file__).resolve().parent.parent.parent / "data" / "interim" / "ancsa_ocr_v2")
 scan=json.load(open(os.path.join(OUT,"text_scan.json")))
 os.makedirs(os.path.join(OUT,"pages"),exist_ok=True)
 # priority: fully blank docs first, then partial, biggest blank count first

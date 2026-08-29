@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Skipped/excluded leads from the ANCSA STAR portal harvest."""
 import csv, json
+from pathlib import Path
 
 COLS = ["Lead_ID", "Entity", "Lead_Description", "What_Was_Found", "Skip_Reason",
         "Source_URL", "Source_Retrieved", "Follow_Up", "Date_Logged"]
@@ -152,7 +153,7 @@ add("The 13th Regional Corporation",
     "not_in_source", "https://portal.akdbsstar.us/StarWebPortal/page/ANCSA/portal.aspx",
     "Absence from the dropdown is not evidence of absence of filings; it is evidence the corporation is not a current filer under AS 45.55.139. Verify separately before making any coverage claim about all thirteen regional corporations.")
 
-OUT = r"C:\Users\esm247\Desktop\Cedar Press\review\deals_skipped_ancsa_portal.csv"
+OUT = str(Path(__file__).resolve().parent.parent.parent / "review" / "deals_skipped_ancsa_portal.csv")
 with open(OUT, "w", newline="", encoding="utf-8") as f:
     w = csv.DictWriter(f, fieldnames=COLS)
     w.writeheader()

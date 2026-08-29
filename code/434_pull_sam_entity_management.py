@@ -53,7 +53,7 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 RAW = CEDAR / "data" / "raw" / "external" / "sam_entity_management"
 LOG = CEDAR / "logs" / "sam_entity_calls.jsonl"
 LOCK = CEDAR / "logs" / "_HOSTLOCK_api.sam.gov.json"

@@ -127,7 +127,7 @@ from pathlib import Path
 
 csv.field_size_limit(min(sys.maxsize, 2 ** 31 - 1))
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 ESM = CEDAR / "data" / "raw" / "esm_hci" / "ESM" / "raw"
 FILTERED = (CEDAR / "data" / "raw" / "contracts"

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """Build review/deals_skipped_ancsa_portal_v2.csv (schema matches review/deals_skipped_ancsa_portal.csv)."""
 import csv, os
-ROOT = r"C:\Users\esm247\Desktop\Cedar Press"
+from pathlib import Path
+ROOT = str(Path(__file__).resolve().parent.parent.parent)
 PRIOR = os.path.join(ROOT, "review", "deals_skipped_ancsa_portal.csv")
 SCHEMA = list(csv.reader(open(PRIOR, newline="", encoding="utf-8-sig")))[0]
 V = "https://portal.akdbsstar.us/StarWebPortal/ViewFile.aspx?Id="

@@ -91,7 +91,7 @@ from collections import Counter, defaultdict
 from datetime import date
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 REGISTER = CLEAN / "individual_native_firm_register.csv"
 PRIME = CLEAN / "prime_contracts.csv"

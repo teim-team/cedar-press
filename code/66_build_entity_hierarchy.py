@@ -68,7 +68,7 @@ from collections import Counter, defaultdict
 from datetime import date
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 SPINE_P = CEDAR / "data" / "spine" / "cedar_entity_spine.csv"
 FR_TXT = CEDAR / "data" / "raw" / "external" / "fr_recognized" / "2026-01899_raw.txt"

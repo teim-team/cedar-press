@@ -33,7 +33,7 @@ import json
 import sys
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 OUT = CEDAR / "web_claude" / "entity_reconciliation.html"
 QUEUE = CEDAR / "data" / "interim" / "review_queue.json"
 

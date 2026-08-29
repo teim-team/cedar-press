@@ -66,7 +66,7 @@ import requests
 
 # ---------------------------------------------------------------- config ----
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 RAW_DIR = CEDAR / "data" / "raw" / "federal_register"
 OUT_CSV = CEDAR / "data" / "clean" / "federal_actions_raw.csv"
 MANIFEST = RAW_DIR / "_shard_manifest.csv"

@@ -21,7 +21,7 @@ import re
 from datetime import date
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 DOFILE = CEDAR / "data" / "raw" / "esm_hci" / "ESM" / "code" / "hci_analysis.do"
 OUT = CEDAR / "data" / "spine" / "cedar_exclusion_rulings.csv"
 TODAY = date.today().isoformat()

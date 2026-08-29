@@ -59,7 +59,7 @@ from pathlib import Path
 
 csv.field_size_limit(min(sys.maxsize, 2147483647))
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CODE = CEDAR / "code"
 sys.path.insert(0, str(CODE))
 from cedar_domain import lobbying_attribution_withdrawn   # noqa: E402

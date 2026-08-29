@@ -23,7 +23,7 @@ import sys
 import zipfile
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 ESM = CEDAR / "data" / "raw" / "esm_hci" / "ESM"   # extracted; ESM.zip deleted 2026-08-12 as a verified duplicate
 
 csv.field_size_limit(min(sys.maxsize, 2**31 - 1))

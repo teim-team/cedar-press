@@ -47,7 +47,7 @@ import csv, json, re, subprocess, sys, urllib.parse
 from decimal import Decimal
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 PDFDIR = CEDAR / "data" / "raw" / "external" / "gaming_official" / "nm_tribal_revenue_sharing"
 REVIEW = CEDAR / "review"
 TODAY = "2026-08-26"

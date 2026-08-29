@@ -127,7 +127,7 @@ from collections import Counter
 from datetime import date
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CODE = CEDAR / "code"
 CLEAN = CEDAR / "data" / "clean"
 SPINE = CEDAR / "data" / "spine"
@@ -1554,6 +1554,16 @@ MUST_NOT_RISE = {
     # lint_key_stability()` rather than re-deriving it - two detectors for one
     # class is what retired 248.
     "lint_class7",
+    # class 8 added 2026-08-29, and it is debt **D1** from
+    # docs/RELEASE_REPLAY_LOG.md rather than a new idea: the absolute project
+    # root written into the source as a literal. 298 of 414 scripts carried it;
+    # the sweep took it to 0 (1 waived, in 516, which needs the string to
+    # rewrite it in a replay worktree). This is the only lint class with a
+    # measured instance of DATA LOSS: a replay worktree ran a script A1 had not
+    # rewritten, it addressed the LIVE tree, and four live files were written -
+    # RELEASE_REPLAY_LOG.md II.10.G3. A rise here means somebody has re-armed
+    # that gun. Fix is one line: Path(__file__).resolve().parent.parent.
+    "lint_class8",
     "lint_bug_class_instances",
     # F9: a SHIPPABLE table whose row grain, primary key and join cardinality
     # are not declared and validated. 207 of 210 today. Ratcheted rather than

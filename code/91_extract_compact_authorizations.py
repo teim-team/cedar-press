@@ -44,8 +44,9 @@ data/interim/compact_authorizations.csv              -- the kept rows
 Nothing is written to data/clean by this script. 92 assembles the published file.
 """
 import csv, os, re, sys, collections
+from pathlib import Path
 
-BASE = r"C:\Users\esm247\Desktop\Cedar Press"
+BASE = str(Path(__file__).resolve().parent.parent)
 EXT = os.path.join(BASE, "data", "raw", "external", "compacts")
 TXT = os.path.join(EXT, "text")
 CLEAN = os.path.join(BASE, "data", "clean")

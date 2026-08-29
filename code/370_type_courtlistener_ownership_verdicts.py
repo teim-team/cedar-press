@@ -61,7 +61,7 @@ import sys
 
 csv.field_size_limit(10 ** 8)
 
-ROOT = pathlib.Path(r"C:\Users\esm247\Desktop\Cedar Press")
+ROOT = pathlib.Path(__file__).resolve().parent.parent
 REVIEW = ROOT / "review"
 TODAY = "2026-08-26"
 OUT = REVIEW / f"courtlistener_ownership_verdicts_{TODAY}.csv"

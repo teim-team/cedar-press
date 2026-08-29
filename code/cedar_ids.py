@@ -37,7 +37,7 @@ import re
 import time
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 SPINE = CEDAR / "data" / "spine"
 REGISTRY = SPINE / "_id_registry.json"
 LOCK = SPINE / "_id_registry.lock"

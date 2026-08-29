@@ -30,7 +30,7 @@ from datetime import date
 from html.parser import HTMLParser
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 
 # The one place a row identity is minted. See ANC_KEY_COLUMNS below.
 sys.path.insert(0, str(CEDAR / "code"))

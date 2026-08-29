@@ -53,7 +53,7 @@ WRITES (staged; NOT merged -- other agents are live)
 import csv, sys
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 REVIEW = CEDAR / "review"
 TODAY = "2026-08-26"
 

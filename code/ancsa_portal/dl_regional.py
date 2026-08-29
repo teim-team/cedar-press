@@ -1,5 +1,6 @@
 import json, os, csv, time, hashlib, requests, re, sys
-RAW=r"C:\Users\esm247\Desktop\Cedar Press\data\raw\external\ancsa_portal"
+from pathlib import Path
+RAW=str(Path(__file__).resolve().parent.parent.parent / "data" / "raw" / "external" / "ancsa_portal")
 os.makedirs(RAW,exist_ok=True)
 UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
 S=requests.Session(); S.headers.update({"User-Agent":UA})

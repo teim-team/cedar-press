@@ -147,7 +147,7 @@ from pathlib import Path
 
 csv.field_size_limit(10 ** 9)
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 RAW = CEDAR / "data" / "raw" / "contracts" / "sam_contract_awards"
 CLEAN = CEDAR / "data" / "clean"
 REVIEW = CEDAR / "review"

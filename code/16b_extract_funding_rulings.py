@@ -11,8 +11,9 @@ the ruling (trailing // comment, else the ** comment on the following line,
 else the ** comment on the preceding line). Blank when the analyst wrote none.
 """
 import csv, os, re, datetime, collections
+from pathlib import Path
 
-CEDAR = r"C:\Users\esm247\Desktop\Cedar Press"
+CEDAR = str(Path(__file__).resolve().parent.parent)
 CODE  = os.path.join(CEDAR, "Federal Spending", "code")
 OUT   = os.path.join(CEDAR, "data", "spine", "federal_funding_rulings_from_dofile.csv")
 LOG   = os.path.join(CEDAR, "logs", "16_federal_funding_recon_2026-08-05.log")

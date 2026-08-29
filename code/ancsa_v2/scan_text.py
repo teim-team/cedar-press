@@ -1,5 +1,6 @@
 import fitz, os, json, csv, sys
-RAW=r"C:\Users\esm247\Desktop\Cedar Press\data\raw\external\ancsa_portal"
+from pathlib import Path
+RAW=str(Path(__file__).resolve().parent.parent.parent / "data" / "raw" / "external" / "ancsa_portal")
 man=list(csv.DictReader(open(os.path.join(RAW,"_SOURCE_MANIFEST.csv"),newline="",encoding="utf-8-sig")))
 out=[]
 for r in man:
@@ -18,7 +19,7 @@ for r in man:
     out.append({"file":f,"corp":r["corporation"],"year":r["period_covered"],"status":"pdf",
                 "pages":d.page_count,"blank":len(blanks),"chars":tot,"blank_pages":blanks})
     d.close()
-json.dump(out,open(r"C:\Users\esm247\Desktop\Cedar Press\data\interim\ancsa_ocr\text_scan.json","w"),indent=0)
+json.dump(out,open(str(Path(__file__).resolve().parent.parent.parent / "data" / "interim" / "ancsa_ocr" / "text_scan.json"),"w"),indent=0)
 tb=sum(x.get("blank",0) for x in out)
 print("files",len(out),"total blank pages",tb)
 for x in sorted(out,key=lambda z:-z.get("blank",0))[:45]:

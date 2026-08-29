@@ -90,7 +90,7 @@ from pathlib import Path
 
 csv.field_size_limit(min(sys.maxsize, 2147483647))
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 SPINE = CEDAR / "data" / "spine" / "cedar_entity_spine.csv"
 LEDGER = CEDAR / "data" / "clean" / "cedar_identifier_ledger_final.csv"
 EVIDENCE = CEDAR / "docs" / "BRISTOL_BAY_ENTITY_EVIDENCE.json"

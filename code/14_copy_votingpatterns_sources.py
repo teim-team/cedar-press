@@ -22,7 +22,7 @@ from datetime import date
 from pathlib import Path
 
 SRC = Path(r"C:\Users\esm247\Desktop\votingpatterns")
-DEST_ROOT = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+DEST_ROOT = Path(__file__).resolve().parent.parent
 DEST = DEST_ROOT / "data" / "raw" / "external" / "votingpatterns"
 DEST.mkdir(parents=True, exist_ok=True)
 

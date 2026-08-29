@@ -16,7 +16,7 @@ import csv, json, re, sys
 from collections import defaultdict, Counter
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 OUT = CEDAR / "review" / "agent_rulings_akvillagecorp_2026-08-06.csv"
 DOCS = CEDAR / "code" / "_agent_akvillagecorp_docs.json"
 COLS = ["review_id", "queue", "uei", "cage_code", "entity_or_firm",

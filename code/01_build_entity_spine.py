@@ -26,7 +26,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from cedar_pipeline import clean_state  # noqa: E402
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 EXT = CEDAR / "data" / "raw" / "external"
 SPINE = CEDAR / "data" / "spine"
 REVIEW = CEDAR / "review"

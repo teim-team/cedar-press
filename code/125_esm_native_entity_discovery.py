@@ -60,7 +60,7 @@ from collections import Counter, defaultdict
 from datetime import date
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 REVIEW = CEDAR / "review"
 ESM = CEDAR / "data" / "raw" / "esm_hci" / "ESM"   # extracted; ESM.zip deleted 2026-08-12 as a verified duplicate

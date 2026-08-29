@@ -12,7 +12,7 @@ import re
 from collections import Counter
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 SKIP_DIRS = {"data", "logs", "dist", "graveyard", ".git", "review"}
 
 # (pattern, replacement) - case-preserving via a callable.

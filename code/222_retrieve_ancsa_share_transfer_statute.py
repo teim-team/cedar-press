@@ -44,7 +44,7 @@ py -3 code/222_retrieve_ancsa_share_transfer_statute.py
 import csv, datetime, html, json, os, pathlib, re, sys, time
 import urllib.request, urllib.error
 
-ROOT = pathlib.Path(r"C:\Users\esm247\Desktop\Cedar Press")
+ROOT = pathlib.Path(__file__).resolve().parent.parent
 OUT = ROOT / "data" / "raw" / "external" / "untapped_2026-08-26"
 LOGS = ROOT / "logs"
 OUT.mkdir(parents=True, exist_ok=True)

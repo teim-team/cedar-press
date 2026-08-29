@@ -1,5 +1,6 @@
 import csv, json, re, sys, unicodedata
-ROSTER=r"C:\Users\esm247\Desktop\Cedar Press\data\clean\anc_ceiling_roster.csv"
+from pathlib import Path
+ROSTER=str(Path(__file__).resolve().parent.parent.parent / "data" / "clean" / "anc_ceiling_roster.csv")
 def norm(s):
     s=unicodedata.normalize("NFKD",s)
     s="".join(ch for ch in s if not unicodedata.combining(ch))

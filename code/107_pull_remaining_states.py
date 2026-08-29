@@ -115,7 +115,7 @@ The queue is small and two of its items are worth real money:
 import csv, sys, re, hashlib, collections, importlib.util
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 RAW = CEDAR / "data" / "raw" / "external" / "state_gaming"
 SPINE = CEDAR / "data" / "spine"

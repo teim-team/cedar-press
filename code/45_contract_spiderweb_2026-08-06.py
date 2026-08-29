@@ -48,7 +48,7 @@ from collections import defaultdict
 from datetime import date
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 REVIEW = CEDAR / "review"
 GAPFILL = CEDAR / "data" / "raw" / "contracts" / "usaspending_gapfill_2026-08-05"

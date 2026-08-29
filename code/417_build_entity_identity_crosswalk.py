@@ -79,7 +79,7 @@ import cedar_domain as D                                    # noqa: E402
 import cedar_ids as IDS                                     # noqa: E402
 from cedar_keys import surrogate_id                         # noqa: E402
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 SPINE = CEDAR / "data" / "spine" / "cedar_entity_spine.csv"
 LEDGER = CEDAR / "data" / "clean" / "cedar_identifier_ledger_final.csv"
 ASSIST_XW = CEDAR / "data" / "clean" / "assistance_tribe_id_crosswalk.csv"

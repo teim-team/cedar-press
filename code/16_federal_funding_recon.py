@@ -22,10 +22,11 @@ Switches:
   --all              everything
 """
 import csv, json, os, sys, argparse, datetime, collections, re
+from pathlib import Path
 
 csv.field_size_limit(10_000_000)
 
-CEDAR = r"C:\Users\esm247\Desktop\Cedar Press"
+CEDAR = str(Path(__file__).resolve().parent.parent)
 DISS  = r"C:\Users\esm247\Desktop\dissertation\data\tribal_federal_spending"
 
 A_RAW = os.path.join(CEDAR, "Federal Spending", "raw",

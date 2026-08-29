@@ -52,7 +52,7 @@ from collections import Counter
 from datetime import date
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 SPINE = CEDAR / "data" / "spine" / "cedar_entity_spine.csv"
 MASTER = CEDAR / "entity_master.csv"
 REVIEW = CEDAR / "review"

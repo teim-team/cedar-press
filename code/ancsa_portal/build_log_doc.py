@@ -2,9 +2,10 @@
 """Writes docs/ANCSA_PORTAL_BUILD_LOG.md from the harvested artefacts."""
 import csv, json, os
 from collections import Counter
+from pathlib import Path
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-CP = r"C:\Users\esm247\Desktop\Cedar Press"
+CP = str(Path(__file__).resolve().parent.parent.parent)
 idx = list(csv.DictReader(open(os.path.join(CP, "data", "clean", "ancsa_filings_index.csv"), encoding="utf-8-sig")))
 man = list(csv.DictReader(open(os.path.join(CP, "data", "raw", "external", "ancsa_portal", "_SOURCE_MANIFEST.csv"), encoding="utf-8-sig")))
 deals = list(csv.DictReader(open(os.path.join(CP, "data", "clean", "deals_ancsa_portal_additions.csv"), encoding="utf-8-sig")))

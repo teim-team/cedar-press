@@ -53,7 +53,7 @@ WRITES
 import csv, re, sys, importlib.util
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 RAW = CEDAR / "data" / "raw" / "external" / "gaming_official"
 TXT = RAW / "sec_filings" / "txt"
 TODAY = "2026-08-07"

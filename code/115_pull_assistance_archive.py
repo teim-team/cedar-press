@@ -144,7 +144,7 @@ import requests
 
 csv.field_size_limit(min(sys.maxsize, 2**31 - 1))
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 REVIEW = CEDAR / "review"
 LOGS = CEDAR / "logs"

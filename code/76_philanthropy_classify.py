@@ -44,7 +44,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 RAW = CEDAR / "data" / "raw" / "external" / "philanthropy"
 CLEAN = CEDAR / "data" / "clean"
 SPINE = CEDAR / "data" / "spine"

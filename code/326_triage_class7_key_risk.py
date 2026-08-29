@@ -63,7 +63,7 @@ from collections import defaultdict
 from datetime import date, datetime
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CODE = CEDAR / "code"
 CLEAN = CEDAR / "data" / "clean"
 SPINE = CEDAR / "data" / "spine"

@@ -134,7 +134,7 @@ from pathlib import Path
 
 import pandas as pd
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 REVIEW = CEDAR / "review"
 LOGS = CEDAR / "logs"

@@ -20,7 +20,7 @@ csv.field_size_limit(10 ** 8)
 from datetime import date
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 
 # ---------------------------------------------------------------------------

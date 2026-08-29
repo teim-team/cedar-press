@@ -41,8 +41,9 @@ in the standard agent-evidence schema, which script 92 then ingests.
 """
 import csv, os, re, collections
 import fitz
+from pathlib import Path
 
-BASE = r"C:\Users\esm247\Desktop\Cedar Press"
+BASE = str(Path(__file__).resolve().parent.parent)
 RAW = os.path.join(BASE, "data", "raw", "external", "gaming_official")
 PDF = os.path.join(RAW, "az_adg_gaming_status_report_20260701.pdf")
 OUT = os.path.join(RAW, "az_adg_status_report_extracted_2026-08-06.csv")

@@ -112,7 +112,7 @@ _pr = importlib.import_module("33_apply_party_rulings")
 resolve_entity = _pr.resolve_entity          # STANDING RULE 8: the one resolver
 norm = _pr.norm
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 SPINE = CEDAR / "data" / "spine"
 REVIEW = CEDAR / "review"

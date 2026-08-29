@@ -43,7 +43,7 @@ py -3 code/220_test_nobmf_eins_against_efile_index.py report
 import csv, io, json, os, sys, time, urllib.request, collections, datetime, pathlib
 
 csv.field_size_limit(10 ** 8)
-ROOT = pathlib.Path(r"C:\Users\esm247\Desktop\Cedar Press")
+ROOT = pathlib.Path(__file__).resolve().parent.parent
 SCHED_I = ROOT / "data" / "clean" / "np_schedule_i_grants.csv"
 OUT = ROOT / "data" / "raw" / "external" / "untapped_2026-08-26"
 REVIEW = ROOT / "review"

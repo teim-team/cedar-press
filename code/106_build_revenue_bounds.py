@@ -74,7 +74,7 @@ OUTPUTS
   review/revenue_bounds_single_property_refusals_2026-08-07.csv
 
 RUN
-  py -3 "C:/Users/esm247/Desktop/Cedar Press/code/106_build_revenue_bounds.py"
+  py -3 code/106_build_revenue_bounds.py
 """
 
 import csv
@@ -87,7 +87,7 @@ from collections import defaultdict
 from datetime import date
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 RAW = CEDAR / "data" / "raw" / "external" / "nigc"
 SPINE = CEDAR / "data" / "spine"

@@ -1,7 +1,18 @@
 # -*- coding: utf-8 -*-
+# ORDERING, WRITTEN DOWN BY A PERSON (class 6). `deals_ancsa_portal_additions.csv`
+# has two writers and they are NOT interchangeable:
+#     1. build_deals.py   (this file) opens it "w" and writes the 2015-2021 rows
+#     2. build_deals2.py  reads it back and APPENDS the 2022-2025 rows
+# So build_deals2.py runs LAST, and re-running this file alone silently drops
+# every row 2 added. Both are one-shot 2026-08-05 harvest scripts and neither is
+# in a build plan; the pairing was invisible until the D1 sweep replaced the
+# opaque absolute-path literal with a composed path the io scanner can read.
+# lint-ok: class6 - ordering declared above; build_deals2.py is the enricher and
+# runs last. Re-run 1 then 2, never 1 alone.
 """Build data/clean/deals_ancsa_portal_additions.csv from ANCSA STAR portal annual reports.
 Every date and every dollar figure below was re-read in the retrieved PDF text."""
 import csv, json, os
+from pathlib import Path
 
 COLS = ["Deal_ID","Event_Date","Event_Year","Event_Quarter","Event_Month","Deal_Title","Native_Party",
         "Native_Party_Type","Counterparty_or_Funder","Deal_Category","Industry","Event_Type","Status",
@@ -356,7 +367,7 @@ add("ANCSA-2020-001", "2020-01-01",
     "Effective date stated in the annual report subsequent-events note: \"Effective January 1, 2020, the Corporation's wholly owned subsidiary Chugach Commercial Holdings, LLC acquired the remaining 10% ownership interest in All American Oilfield, LLC.\"",
     "ANCSA portal harvest 2026-08-05. NO CONSIDERATION IS STATED in the retrieved document, so every value field is blank; no figure was inferred. Completes the ownership arc begun by ANCSA-2015-001 (90% acquired January 5, 2015). Retained despite the $1M default threshold because there is no value to test against the threshold; this is an ownership-change record.")
 
-OUT = r"C:\Users\esm247\Desktop\Cedar Press\data\clean\deals_ancsa_portal_additions.csv"
+OUT = str(Path(__file__).resolve().parent.parent.parent / "data" / "clean" / "deals_ancsa_portal_additions.csv")
 with open(OUT, "w", newline="", encoding="utf-8") as f:
     w = csv.DictWriter(f, fieldnames=COLS)
     w.writeheader()

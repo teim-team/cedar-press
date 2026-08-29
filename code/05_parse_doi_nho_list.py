@@ -25,7 +25,7 @@ from pathlib import Path
 
 import pdfplumber
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 PDF = CEDAR / "data" / "raw" / "external" / "doi_nho_complete_list_2025-04.pdf"
 OUT = CEDAR / "data" / "clean" / "nho_doi_notification_roster.csv"
 TODAY = date.today().isoformat()

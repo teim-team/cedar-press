@@ -53,7 +53,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 import cedar_ids as IDS                                     # noqa: E402
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 SPINE_F = CEDAR / "data" / "spine" / "cedar_entity_spine.csv"
 LEDGER_F = CEDAR / "data" / "clean" / "cedar_identifier_ledger_final.csv"
 ALIAS_F = CEDAR / "data" / "clean" / "entity_aliases.csv"

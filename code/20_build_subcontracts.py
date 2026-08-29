@@ -31,10 +31,11 @@ Awardee CAGE and position 23 is the Prime Awardee PARENT CAGE -- confirmed two w
 
 import csv, os, sys, shutil, hashlib, datetime, statistics
 from collections import Counter, defaultdict
+from pathlib import Path
 
 csv.field_size_limit(10_000_000)
 
-CEDAR = r"C:\Users\esm247\Desktop\Cedar Press"
+CEDAR = str(Path(__file__).resolve().parent.parent)
 ESM   = os.path.join(CEDAR, "data", "raw", "esm_hci", "ESM")
 EXT   = os.path.join(CEDAR, "data", "raw", "external", "subcontracts")
 CLEAN = os.path.join(CEDAR, "data", "clean")

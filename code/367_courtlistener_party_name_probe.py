@@ -61,7 +61,7 @@ import time
 import urllib.error
 import urllib.parse
 
-ROOT = pathlib.Path(r"C:\Users\esm247\Desktop\Cedar Press")
+ROOT = pathlib.Path(__file__).resolve().parent.parent
 REVIEW = ROOT / "review"
 TODAY = "2026-08-26"
 

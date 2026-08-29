@@ -45,7 +45,7 @@ have been nothing correct to point them at.
 import csv
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 OUT = CEDAR / "review" / "rulings_inbox_2026-08-05L.csv"
 
 # (uei, cage, firm, Elijah's answer verbatim)

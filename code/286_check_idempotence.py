@@ -62,7 +62,7 @@ import cedar_schema as CS             # noqa: E402
 
 csv.field_size_limit(min(sys.maxsize, 2 ** 31 - 1))
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CODE = CEDAR / "code"
 CLEAN = CEDAR / "data" / "clean"
 SCHEMA_DIR = CEDAR / "docs" / "schema"

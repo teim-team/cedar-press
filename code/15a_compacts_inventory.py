@@ -13,8 +13,9 @@ Zero fabrication: every emitted field is either read verbatim from a source
 file or derived by an explicitly-named deterministic rule.
 """
 import csv, os, re, sys, json, collections, io
+from pathlib import Path
 
-BASE = r"C:\Users\esm247\Desktop\Cedar Press"
+BASE = str(Path(__file__).resolve().parent.parent)
 EXT  = os.path.join(BASE, "data", "raw", "external", "compacts")
 PDF  = os.path.join(EXT, "pdf")
 TXT  = os.path.join(EXT, "text")

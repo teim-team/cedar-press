@@ -55,7 +55,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 RAW = CEDAR / "data" / "raw" / "external" / "philanthropy"
 RAW.mkdir(parents=True, exist_ok=True)
 

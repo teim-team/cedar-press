@@ -36,7 +36,7 @@ import json, os, time, urllib.request, urllib.error, urllib.parse
 from datetime import datetime, timezone
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 OUT = CEDAR / "data" / "raw" / "external" / "gaming_official" / "bypass_2026-08-26"
 LOCK = CEDAR / "logs" / "_HOSTLOCK_web.archive.org.json"
 UA = {"User-Agent": "CedarPress/1.0 (research; elijahsamsonmoreno@gmail.com)"}

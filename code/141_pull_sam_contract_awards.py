@@ -91,7 +91,7 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 RAW = CEDAR / "data" / "raw" / "contracts" / "sam_contract_awards"
 LOG = CEDAR / "logs" / "141_sam_calls.jsonl"
 BASE = "https://api.sam.gov/contract-awards/v1/search"

@@ -39,7 +39,7 @@ from collections import Counter
 from datetime import date
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 REVIEW = CEDAR / "review"
 TODAY = date.today().isoformat()
 LIMIT = 500

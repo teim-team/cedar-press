@@ -52,7 +52,7 @@ import json
 import re
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 RAW = CEDAR / "data" / "raw" / "external" / "philanthropy"
 OUT = CEDAR / "review" / "agent_native_org_candidates_philanthropy_2026-08-06.csv"
 HELD = RAW / "_held_for_other_agents_2026-08-06.csv"

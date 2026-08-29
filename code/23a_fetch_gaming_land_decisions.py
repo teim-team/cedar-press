@@ -14,8 +14,9 @@ Nothing is parsed here. This step only retrieves bytes and records provenance.
 """
 import os, csv, io, sys, time, hashlib, datetime
 import urllib.request
+from pathlib import Path
 
-BASE = r"C:\Users\esm247\Desktop\Cedar Press"
+BASE = str(Path(__file__).resolve().parent.parent)
 EXT  = os.path.join(BASE, "data", "raw", "external", "gaming")
 RAW  = os.path.join(EXT, "bia_gaming_land_decisions")
 os.makedirs(RAW, exist_ok=True)

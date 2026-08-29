@@ -6,8 +6,9 @@ Cedar Press/data/raw/external/federal_funding/ and write _SOURCE_MANIFEST.csv.
 Source trees are read-only; nothing under dissertation/ is modified.
 """
 import csv, os, shutil, hashlib, datetime
+from pathlib import Path
 
-CEDAR = r"C:\Users\esm247\Desktop\Cedar Press"
+CEDAR = str(Path(__file__).resolve().parent.parent)
 DISS  = r"C:\Users\esm247\Desktop\dissertation\data\tribal_federal_spending"
 DEST  = os.path.join(CEDAR, "data", "raw", "external", "federal_funding")
 LOG   = os.path.join(CEDAR, "logs", "16_federal_funding_recon_2026-08-05.log")

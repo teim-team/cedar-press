@@ -80,7 +80,7 @@ from collections import defaultdict
 from datetime import date
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 FOURWHEELER = Path(r"C:\Users\esm247\Desktop\4wheeler\casino_employment_validation")
 SRC = FOURWHEELER / "data" / "resolved_form5500_tribal.csv"
 

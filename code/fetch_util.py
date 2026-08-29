@@ -4,11 +4,12 @@ curl + declared browser User-Agent (the sec.gov trick from the 2000-2019 backfil
 Saves raw bytes to data/raw/external/federal_award_lists/ and returns decoded text.
 """
 import subprocess, re, html, os, sys, io, csv, datetime
+from pathlib import Path
 
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
 
-RAW = r"C:\Users\esm247\Desktop\Cedar Press\data\raw\external\federal_award_lists"
+RAW = str(Path(__file__).resolve().parent.parent / "data" / "raw" / "external" / "federal_award_lists")
 os.makedirs(RAW, exist_ok=True)
 
 MANIFEST = []

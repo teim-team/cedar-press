@@ -51,7 +51,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import cedar_domain as DOM   # noqa: E402  - DEALS_TRUTH, PROMOTED_TABLES
 import cedar_period_columns as PERIODS   # noqa: E402  - the ONE declaration
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 DOCS = CEDAR / "docs"
 TODAY = date.today().isoformat()

@@ -11,8 +11,9 @@ recipient or identifier is inferred.
 import csv, io, os, re, sys, json, datetime
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from fetch_util import RAW
+from pathlib import Path
 
-ROOT = r"C:\Users\esm247\Desktop\Cedar Press"
+ROOT = str(Path(__file__).resolve().parent.parent)
 OUT = os.path.join(ROOT, "data", "clean", "deals_federal_awards_additions.csv")
 SKIP = os.path.join(ROOT, "review", "federal_award_lists_skipped_leads.csv")
 TODAY = "2026-08-05"

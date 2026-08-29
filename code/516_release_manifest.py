@@ -158,9 +158,24 @@ CONTAINER_DIRS = {
     "code", "dist",
 }
 
-# The hardcoded absolute root that 280 of 385 scripts carry. Named here as a
-# constant because `replay` has to rewrite it and the manifest has to declare
-# that it did. See docs/RELEASE_REPLAY_LOG.md - this is blocking component B1.
+# The hardcoded absolute root that 298 of 414 scripts USED TO carry. Debt D1
+# was cleared on 2026-08-29: every live script now derives its root from
+# `Path(__file__).resolve()`, and `293_lint_bug_classes.py` class 8 holds that
+# at zero. This constant is NOT dead and must not be derived:
+#
+#   * `replay` materialises a git worktree at an ARBITRARY PAST COMMIT, and
+#     every commit before the sweep carries the literal. A1 has to keep
+#     rewriting it or those replays silently address the live tree - the G3
+#     incident below. Deriving this from __file__ would rewrite the clean
+#     room's own path to itself, i.e. do nothing, and do it invisibly.
+#   * `_declares_root_literal()` / the B1 detector below answer "does the code
+#     at this commit hardcode the root", which is a question about a STRING,
+#     not about where this file happens to live.
+#
+# See docs/RELEASE_REPLAY_LOG.md - this is blocking component B1.
+# lint-ok: class8 - the A1 rewrite target and the B1 detector's needle; replay
+# runs against past commits that still carry the literal, so this file must
+# know the string. Deriving it would make the detector always report clean.
 HARDCODED_ROOT = r"C:\Users\esm247\Desktop\Cedar Press"
 
 
@@ -262,11 +277,58 @@ def _json(p: Path, default=None):
 _ROOT_NAMES = {"CEDAR", "ROOT", "BASE", "PROJECT"}
 
 
-def path_constants(src: str) -> dict[str, str]:
+# THE DERIVED ROOT, WHICH IS NOW THE ONLY SPELLING (debt D1, cleared
+# 2026-08-29). Every one of these resolvers used to recognise the project root
+# by matching `HARDCODED_ROOT` as a string, with a name-convention fallback for
+# the handful of files that already derived it. The sweep inverted those
+# proportions: 297 files now say
+#
+#     CEDAR = Path(__file__).resolve().parent.parent
+#
+# and NOT ONE of them is a Constant any more. Left as it was, channel 2 would
+# have gone quietly blind - `RAW = str(Path(__file__).resolve().parent.parent
+# .parent / "data" / "raw" / "external" / "ancsa_portal")` resolves to nothing,
+# and the log's own §2 is the record of what channel 2 going blind costs: it is
+# the ONLY channel that sees the 18.2 MB nagpra_fulltext corpus the whole
+# dataset is parsed from. So the shape is recognised structurally, by counting
+# `.parent`s against the script's real depth below the root, which is exact and
+# needs no literal and no naming convention.
+def _derived_root_parents(node) -> int | None:
+    """`(pathlib.)Path(__file__)[.resolve()](.parent)+` -> how many `.parent`s.
+
+    None when the node is not that shape. `.resolve()` is optional because a
+    handful of modules omit it; the parent count is what carries the meaning.
+    """
+    n = 0
+    while isinstance(node, ast.Attribute) and node.attr == "parent":
+        n += 1
+        node = node.value
+    if n == 0:
+        return None
+    if isinstance(node, ast.Call) and not node.args and \
+            isinstance(node.func, ast.Attribute) and node.func.attr == "resolve":
+        node = node.func.value
+    if isinstance(node, ast.Call) and len(node.args) == 1:
+        f = node.func
+        if (getattr(f, "attr", None) or getattr(f, "id", None)) == "Path" and \
+                isinstance(node.args[0], ast.Name) and \
+                node.args[0].id == "__file__":
+            return n
+    return None
+
+
+def path_constants(src: str, depth: int = 2) -> dict[str, str]:
     """Module-level names bound to a path under the project root -> relpath.
 
-    Resolves `X = Path(r"<hardcoded root>")` and any `A / "seg" / "seg"` chain
-    built from a name already resolved. Returns POSIX relpaths from the root.
+    Resolves `X = Path(__file__).resolve().parent.parent` (and the retired
+    `X = Path(r"<hardcoded root>")` spelling, which past commits still carry
+    and `replay` still meets) plus any `A / "seg" / "seg"` chain built from a
+    name already resolved. Returns POSIX relpaths from the root.
+
+    `depth` is how many `.parent`s reach the project root FROM THIS SCRIPT -
+    2 for `code/x.py`, 3 for `code/sub/x.py`. A chain with fewer parents than
+    that names a directory INSIDE the tree (usually `code/`), not the root, and
+    is deliberately not resolved rather than guessed at.
     """
     try:
         tree = ast.parse(src)
@@ -275,6 +337,16 @@ def path_constants(src: str) -> dict[str, str]:
     env: dict[str, tuple[str, ...]] = {}
 
     def resolve(node) -> tuple[str, ...] | None:
+        # THE CURRENT SPELLING: Path(__file__).resolve().parent...
+        k = _derived_root_parents(node)
+        if k is not None:
+            return () if k >= depth else None
+        # str(<derived root chain>) - the spelling the D1 sweep used wherever
+        # the name had to stay a str because the module indexes it with
+        # os.path.join. `str()` is transparent to a path resolver.
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) \
+                and node.func.id == "str" and len(node.args) == 1:
+            return resolve(node.args[0])
         # Path(r"...") / Path("...")
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) \
                 and node.func.id == "Path" and len(node.args) == 1 \
@@ -341,9 +413,12 @@ def path_constants(src: str) -> dict[str, str]:
 # and os.path.join alike, at module level or inside a function - against the
 # module-level name environment.
 
-def path_expressions(src: str) -> dict[str, list[str]]:
+def path_expressions(src: str, depth: int = 2) -> dict[str, list[str]]:
     """relpath -> the spellings that produced it, for every resolvable path
-    expression in the module. Values are `join`/`div` for the record."""
+    expression in the module. Values are `join`/`div` for the record.
+
+    `depth` as in `path_constants`: how many `.parent`s reach the root from
+    this script."""
     try:
         tree = ast.parse(src)
     except SyntaxError:
@@ -354,6 +429,10 @@ def path_expressions(src: str) -> dict[str, list[str]]:
         return tuple(x for x in re.split(r"[\\/]", s) if x and x != ".")
 
     def res(node) -> tuple[str, ...] | None:
+        # THE CURRENT SPELLING: Path(__file__).resolve().parent...
+        k = _derived_root_parents(node)
+        if k is not None:
+            return () if k >= depth else None
         if isinstance(node, ast.Constant) and isinstance(node.value, str):
             v = node.value
             if v.rstrip("\\/").lower() == HARDCODED_ROOT.lower():
@@ -366,7 +445,7 @@ def path_expressions(src: str) -> dict[str, list[str]]:
         if isinstance(node, ast.Call):
             f = node.func
             fname = getattr(f, "attr", None) or getattr(f, "id", None)
-            if fname == "Path" and len(node.args) == 1:
+            if fname in ("Path", "str") and len(node.args) == 1:
                 return res(node.args[0])
             if fname == "join":                      # os.path.join(...)
                 parts: tuple[str, ...] = ()
@@ -531,7 +610,8 @@ def discover_inputs(scripts: list[str]) -> tuple[list[dict], list[str],
 
         # Path constants. Everything under data/ or review/ that EXISTS and is
         # not a declared write is a candidate input.
-        for const, relp in path_constants(src).items():
+        s_depth = len(Path(s).parts) + 1     # code/x.py -> 2 ; code/a/x.py -> 3
+        for const, relp in path_constants(src, s_depth).items():
             if relp.split("/")[0] in NON_INPUT_DIRS:
                 continue
             if not (relp.startswith("data/") or relp.startswith("review/")):
@@ -552,7 +632,7 @@ def discover_inputs(scripts: list[str]) -> tuple[list[dict], list[str],
 
         # Channel 2b: path EXPRESSIONS. Same filters, minus the constant-name
         # one, because these expressions are bound to no name.
-        for relp, hows in path_expressions(src).items():
+        for relp, hows in path_expressions(src, s_depth).items():
             if relp.split("/")[0] in NON_INPUT_DIRS or relp in CONTAINER_DIRS:
                 continue
             tgt = ROOT / relp
@@ -2079,7 +2159,7 @@ def cmd_replay(args) -> int:
     #    WORKSTREAM G, and this was learned the expensive way. A1 used to
     #    rewrite only the scripts in the manifest's code closure. Every other
     #    one of the 280 scripts carrying the literal
-    #    `Path(r"C:\Users\esm247\Desktop\Cedar Press")` therefore sat inside
+    #    `Path(r"<HARDCODED_ROOT>")` therefore sat inside
     #    the clean room still pointing at the LIVE TREE. A clean room that
     #    writes the live tree the moment you run the wrong file in it is not a
     #    clean room; it is a loaded gun with the safety filed off.
@@ -2088,7 +2168,7 @@ def cmd_replay(args) -> int:
     #    _place.py` was run inside the native-owned-businesses clean room to
     #    test whether the collection's AMBIGUOUS script would unblock its
     #    plan. 241 is not in that plan, so it had not been rewritten, so it
-    #    read and wrote `C:\Users\esm247\Desktop\Cedar Press\data`. Two live
+    #    read and wrote the LIVE tree's `data/`. Two live
     #    tables changed (`individual_native_firm_register.csv` lost the
     #    `cedar_uid` 503 had stamped into it;
     #    `individual_native_exclusion_pairs.csv` re-dated) before it was

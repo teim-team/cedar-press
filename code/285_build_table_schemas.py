@@ -50,7 +50,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import cedar_codebook as CB           # noqa: E402
 import cedar_schema as CS             # noqa: E402
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 SCHEMA_DIR = CEDAR / "docs" / "schema"
 TABLES_DIR = SCHEMA_DIR / "tables"

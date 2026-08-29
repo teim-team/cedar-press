@@ -34,7 +34,7 @@ import shutil
 from datetime import date
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 FRAG = CLEAN / "codebook" / "01_deals.csv"
 DEALS = CLEAN / "deals_classified.csv"

@@ -15,8 +15,9 @@ quote and the 1-based PDF page it came from so a human can check it.
 """
 import csv, os, re, sys, collections, random, io, json
 import fitz  # PyMuPDF
+from pathlib import Path
 
-BASE  = r"C:\Users\esm247\Desktop\Cedar Press"
+BASE  = str(Path(__file__).resolve().parent.parent)
 EXT   = os.path.join(BASE, "data", "raw", "external", "compacts")
 PDF   = os.path.join(EXT, "pdf")
 CLEAN = os.path.join(BASE, "data", "clean")

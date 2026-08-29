@@ -86,7 +86,7 @@ from collections import Counter
 from datetime import date
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 TODAY = date.today().isoformat()
 SCRIPT = "174_backfill_digital_gaming_tiers.py"

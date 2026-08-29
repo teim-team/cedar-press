@@ -25,7 +25,7 @@ Output: source_url merged into _SOURCE_MANIFEST.csv, and a coverage report.
 import csv, sys
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 RAW = CEDAR / "data" / "raw" / "external" / "state_gaming"
 URLS = RAW / "_retriever_urls.csv"
 MAN = RAW / "_SOURCE_MANIFEST.csv"

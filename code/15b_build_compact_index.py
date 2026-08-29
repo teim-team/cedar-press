@@ -38,8 +38,9 @@ fields; collapsing them into the plan columns would have required asserting
 things the sources do not say.
 """
 import csv, os, re, sys, collections, datetime, io, unicodedata
+from pathlib import Path
 
-BASE = r"C:\Users\esm247\Desktop\Cedar Press"
+BASE = str(Path(__file__).resolve().parent.parent)
 EXT  = os.path.join(BASE, "data", "raw", "external", "compacts")
 IDXF = os.path.join(EXT, "index", "bia_compact_index.csv")
 TXT  = os.path.join(EXT, "text")

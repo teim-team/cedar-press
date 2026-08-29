@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """Build data/clean/deals_ancsa_portal_v2_additions.csv (32-col schema, ANCSA2- prefix)."""
 import csv, os, glob
-ROOT = r"C:\Users\esm247\Desktop\Cedar Press"
+from pathlib import Path
+ROOT = str(Path(__file__).resolve().parent.parent.parent)
 SCHEMA = list(csv.reader(open(os.path.join(ROOT, "deals_historical_2020_2025.csv"),
                              newline="", encoding="utf-8-sig")))[0]
 V = "https://portal.akdbsstar.us/StarWebPortal/ViewFile.aspx?Id="

@@ -99,7 +99,7 @@ import urllib.request
 
 csv.field_size_limit(10 ** 8)
 
-ROOT = pathlib.Path(r"C:\Users\esm247\Desktop\Cedar Press")
+ROOT = pathlib.Path(__file__).resolve().parent.parent
 CLEAN = ROOT / "data" / "clean"
 REVIEW = ROOT / "review"
 LOGS = ROOT / "logs"

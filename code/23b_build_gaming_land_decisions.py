@@ -56,8 +56,9 @@ which Phase 2 extracts under the proposed/approved/built/current stage schema.
 entity_id is intentionally left BLANK. Spine linking is a separate, ruled step.
 """
 import os, re, csv, io, html, collections, datetime, unicodedata
+from pathlib import Path
 
-BASE  = r"C:\Users\esm247\Desktop\Cedar Press"
+BASE  = str(Path(__file__).resolve().parent.parent)
 RAW   = os.path.join(BASE, "data", "raw", "external", "gaming",
                      "bia_gaming_land_decisions")
 CLEAN = os.path.join(BASE, "data", "clean")

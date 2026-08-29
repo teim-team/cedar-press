@@ -83,7 +83,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import cedar_domain as DOM   # noqa: E402  - DEALS_TRUTH
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 TODAY = date.today().isoformat()
 SCRIPT = "255_fix_gaming_property_deal_counts.py"

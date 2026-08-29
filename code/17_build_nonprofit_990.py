@@ -40,7 +40,7 @@ from pathlib import Path
 
 import pandas as pd
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 DISS = Path(r"C:\Users\esm247\Desktop\dissertation\data\tribal_federal_spending")
 SAM = DISS / "sam_extracts"
 BMF_DIR = DISS / "irs_bmf"

@@ -24,7 +24,7 @@ from collections import Counter
 from datetime import date
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 TODAY = date.today().isoformat()
 csv.field_size_limit(min(sys.maxsize, 2**31 - 1))

@@ -1,13 +1,27 @@
 # -*- coding: utf-8 -*-
+# ORDERING, WRITTEN DOWN BY A PERSON (class 6). `ancsa_filings_index.csv` has two
+# writers and they are NOT interchangeable:
+#     1. build_manifest_index.py (this file) opens it "w" from the v1 portal
+#        harvest - every row lands with downloaded=no/yes as of 2026-08-05
+#     2. ancsa_v2/update_index.py reads it back, takes its own .bak_*_v2 backup,
+#        and flips `downloaded`, `retrieved_date`, `local_file`, `bytes` and
+#        `sha256` IN PLACE from the v2 manifest
+# So update_index.py runs LAST, and re-running this file alone reverts every v2
+# download it recorded. Both are one-shot 2026-08-05 harvest scripts and neither
+# is in a build plan; the pairing was invisible until the D1 sweep replaced the
+# opaque absolute-path literal with a composed path the io scanner can read.
+# lint-ok: class6 - ordering declared above; ancsa_v2/update_index.py is the
+# enricher and runs last. Re-run 1 then 2, never 1 alone.
 """Builds:
    data/raw/external/ancsa_portal/_SOURCE_MANIFEST.csv
    data/clean/ancsa_filings_index.csv
 """
 import csv, json, os, re, unicodedata
+from pathlib import Path
 
-RAW = r"C:\Users\esm247\Desktop\Cedar Press\data\raw\external\ancsa_portal"
-ROSTER = r"C:\Users\esm247\Desktop\Cedar Press\data\clean\anc_ceiling_roster.csv"
-IDX_OUT = r"C:\Users\esm247\Desktop\Cedar Press\data\clean\ancsa_filings_index.csv"
+RAW = str(Path(__file__).resolve().parent.parent.parent / "data" / "raw" / "external" / "ancsa_portal")
+ROSTER = str(Path(__file__).resolve().parent.parent.parent / "data" / "clean" / "anc_ceiling_roster.csv")
+IDX_OUT = str(Path(__file__).resolve().parent.parent.parent / "data" / "clean" / "ancsa_filings_index.csv")
 MAN_OUT = os.path.join(RAW, "_SOURCE_MANIFEST.csv")
 TODAY = "2026-08-05"
 VIEW = "https://portal.akdbsstar.us/StarWebPortal/ViewFile.aspx?Id="

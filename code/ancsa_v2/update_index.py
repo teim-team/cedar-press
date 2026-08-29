@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import csv, os, shutil
-ROOT=r"C:\Users\esm247\Desktop\Cedar Press"
+from pathlib import Path
+ROOT=str(Path(__file__).resolve().parent.parent.parent)
 IDX=os.path.join(ROOT,"data","clean","ancsa_filings_index.csv")
 MAN=os.path.join(ROOT,"data","raw","external","ancsa_portal_v2","_SOURCE_MANIFEST_V2.csv")
 bak=IDX+".bak_2026-08-05_v2"

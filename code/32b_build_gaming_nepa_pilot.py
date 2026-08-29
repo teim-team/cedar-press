@@ -18,8 +18,9 @@ their arithmetic in `derivation`; nothing derived is ever presented as reported.
 never guessed.
 """
 import os, csv, io, datetime
+from pathlib import Path
 
-BASE = r"C:\Users\esm247\Desktop\Cedar Press"
+BASE = str(Path(__file__).resolve().parent.parent)
 CLEAN = os.path.join(BASE, "data", "clean")
 LOG = os.path.join(BASE, "logs", "32_gaming_nepa_pilot.log")
 

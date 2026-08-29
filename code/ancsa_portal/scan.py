@@ -1,5 +1,6 @@
 import fitz, os, re, json, sys, glob
-RAW=r"C:\Users\esm247\Desktop\Cedar Press\data\raw\external\ancsa_portal"
+from pathlib import Path
+RAW=str(Path(__file__).resolve().parent.parent.parent / "data" / "raw" / "external" / "ancsa_portal")
 TXT=os.path.join(os.path.dirname(os.path.abspath(__file__)),"txt")
 os.makedirs(TXT,exist_ok=True)
 KW=re.compile(r"(acquisit|acquired|acquire[sd]?\b|business combination|purchase price|"

@@ -65,7 +65,7 @@ from pathlib import Path
 
 import requests
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CODE = CEDAR / "code"
 CLEAN = CEDAR / "data" / "clean"
 RAW = CEDAR / "data" / "raw" / "fr_ex_parte"

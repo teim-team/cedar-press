@@ -35,8 +35,9 @@ to data/clean until the pilot re-adjudication in 15e.
 """
 import csv, os, re, sys, collections, io, argparse
 import fitz
+from pathlib import Path
 
-BASE  = r"C:\Users\esm247\Desktop\Cedar Press"
+BASE  = str(Path(__file__).resolve().parent.parent)
 EXT   = os.path.join(BASE, "data", "raw", "external", "compacts")
 PDF   = os.path.join(EXT, "pdf")
 CLEAN = os.path.join(BASE, "data", "clean")

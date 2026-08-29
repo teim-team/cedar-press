@@ -70,7 +70,7 @@ import sys
 
 csv.field_size_limit(10 ** 8)
 
-ROOT = pathlib.Path(r"C:\Users\esm247\Desktop\Cedar Press")
+ROOT = pathlib.Path(__file__).resolve().parent.parent
 CLEAN = ROOT / "data" / "clean"
 REVIEW = ROOT / "review"
 TODAY = "2026-08-26"

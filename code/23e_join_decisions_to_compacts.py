@@ -27,8 +27,9 @@ rows (5.1%). compacts.csv carries bia_tribes_column_conflict for those rows; any
 join through a conflicted row is flagged here rather than silently trusted.
 """
 import os, re, csv, io, collections, unicodedata
+from pathlib import Path
 
-BASE  = r"C:\Users\esm247\Desktop\Cedar Press"
+BASE  = str(Path(__file__).resolve().parent.parent)
 CLEAN = os.path.join(BASE, "data", "clean")
 
 buf = io.StringIO()

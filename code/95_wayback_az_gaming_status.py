@@ -30,7 +30,7 @@ import json, os, re, sys, time, urllib.request, urllib.error, urllib.parse
 from datetime import datetime, timezone
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 RAW = CEDAR / "data" / "raw" / "external" / "gaming_official"
 OUT = RAW / "az_wayback"
 LOCK = CEDAR / "logs" / "_HOSTLOCK_web.archive.org.json"

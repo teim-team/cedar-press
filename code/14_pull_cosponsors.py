@@ -28,7 +28,7 @@ from pathlib import Path
 
 import pandas as pd
 
-ROOT = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+ROOT = Path(__file__).resolve().parent.parent
 CLEAN = ROOT / "data" / "clean"
 ENVFILE = Path(r"C:\Users\esm247\Desktop\votingpatterns\.env")
 BASE = "https://api.congress.gov/v3"

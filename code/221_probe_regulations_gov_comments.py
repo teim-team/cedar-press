@@ -57,7 +57,7 @@ import csv, json, os, re, sys, time, urllib.parse, urllib.request, urllib.error
 import collections, datetime, pathlib
 
 csv.field_size_limit(10 ** 8)
-ROOT = pathlib.Path(r"C:\Users\esm247\Desktop\Cedar Press")
+ROOT = pathlib.Path(__file__).resolve().parent.parent
 OUT = ROOT / "data" / "raw" / "external" / "untapped_2026-08-26"
 REVIEW = ROOT / "review"
 LOGS = ROOT / "logs"

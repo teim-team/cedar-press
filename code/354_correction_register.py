@@ -88,7 +88,7 @@ from pathlib import Path
 
 csv.field_size_limit(min(sys.maxsize, 2147483647))
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 REGISTER = CLEAN / "cedar_correction_register.csv"
 SCAN_CACHE = CLEAN / "_correction_scan_cache.json"

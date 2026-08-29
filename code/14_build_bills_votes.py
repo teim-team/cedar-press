@@ -34,7 +34,7 @@ import pandas as pd
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
-ROOT = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+ROOT = Path(__file__).resolve().parent.parent
 EXT = ROOT / "data" / "raw" / "external" / "votingpatterns"
 CLEAN = ROOT / "data" / "clean"
 SPINE = ROOT / "data" / "spine"

@@ -53,8 +53,9 @@ entity_id is left BLANK. Spine linking is a separate, ruled step.
 import os, re, csv, io, sys, math, collections, datetime, unicodedata, warnings
 warnings.filterwarnings("ignore")
 import pandas as pd
+from pathlib import Path
 
-BASE  = r"C:\Users\esm247\Desktop\Cedar Press"
+BASE  = str(Path(__file__).resolve().parent.parent)
 SRC   = os.path.join(BASE, "data", "raw", "external", "gaming", "directory_core")
 CLEAN = os.path.join(BASE, "data", "clean")
 FETCHED = "2026-08-05"

@@ -16,6 +16,14 @@ and retrieve the exact transitive inputs, code, configuration, environment and
 manual decisions needed to reproduce the released outputs — or explicitly state
 which component prevents exact reproduction.*
 
+> **Part III (solo B1 pass, 2026-08-29) closes debt D1.** No live script in
+> `code/` hardcodes the project root any more — **298 files / 307 occurrences
+> → 0 unwaived**, with one named exception in `516_release_manifest.py`, held
+> at zero by `293_lint_bug_classes.py` **class 8**. Blocking component **B1**
+> and adaptation **A1** below are therefore historical from this commit
+> forward. §17 has the census, the equivalence proof, and the near-miss the
+> sweep caused in 516's own input discovery.
+
 **Result.** A real clean-room replay was performed on the `nagpra` collection at
 commit `0de7096`. Every input was retrieved from a retained immutable store and
 nothing was read from the live tree. Two of the four tables reproduced
@@ -295,6 +303,12 @@ found all four on `nagpra`, and the replay then confirmed all four.
 
 ### B1 — `code_not_relocatable`: the project root is hardcoded
 
+> **CLEARED 2026-08-29 (Part III, §17).** Every count in this section is the
+> state before the sweep and is left as written, because it is what the replay
+> met. B1 is now **0 of 414** scripts, with one named and waived exception in
+> `516_release_manifest.py`, and adaptation A1 is a no-op at any commit from
+> the sweep forward. Read this section for the defect; read §17 for the fix.
+
 **280 of 385 scripts in `code/`** (72.7%) contain
 `Path(r"C:\Users\esm247\Desktop\Cedar Press")`. Three of them are in NAGPRA's
 scope. A checkout at any other path therefore reads *and writes* the live tree,
@@ -405,7 +419,7 @@ laundered into a bare `"proven": true`.
 
 | id | debt | measure today | target | gate |
 |---|---|---|---|---|
-| **D1** | Project root hardcoded, so no script can run outside `C:\Users\esm247\Desktop\Cedar Press` | **280 of 385** scripts (72.7%) contain the literal | 0; root derived as `Path(__file__).resolve().parent.parent` | `scripts_with_hardcoded_root`, **MUST_NOT_RISE**, ratchet to 0 |
+| **D1** ✅ | Project root hardcoded, so no script can run outside the one machine it was written on | **280 of 385** scripts (72.7%) contain the literal *(re-measured 2026-08-29 on the grown tree: **298 of 414**, 307 occurrences)* | 0; root derived as `Path(__file__).resolve().parent.parent` | **CLOSED 2026-08-29** — 0 unwaived, held by `293_lint_bug_classes.py` **class 8** and `62.lint_class8`, MUST_NOT_RISE. See §17 |
 | **D2** | Outputs shipped that predate their recorded inputs | **2 of 4** NAGPRA tables, proven by replay. The release-wide figure needs a frozen tree; the live sweep flags 260/260 and is not usable (see 4b) | 0 | `release_outputs_stale_vs_input`, **MUST_BE_ZERO**, measured on a frozen capture |
 | **D3** | Runtime-dispatch enrichers invisible to the build plan, so no plan reproduces the released columns | **13/13 collections.** `503_identity.py` writes **96** tables it is not planned to write; 327 writes 23; 33 backups are UNATTRIBUTED. `build.py plan nagpra` reports 0 phase-2 enrichers for a table 503 demonstrably edited | every writer of a shipped table appears in that collection's plan | `undeclared_enrichers`, **MUST_BE_ZERO** |
 | **D4** | Wall-clock written into output rows | **284 columns across 13/13 collections**; `nagpra_notices.fetched_date` is the one proven by replay | 0, or the column derives from the source's own date | `nondeterministic_output_columns`, **MUST_NOT_RISE**, ratchet down |
@@ -955,7 +969,7 @@ one-line request is in §15.
 
 | id | part I | now | movement |
 |---|---|---|---|
-| **D1** `code_not_relocatable` | 280 of 385 scripts | **unchanged, 280** | not this pass's file; the solo de-hardcode pass is next. A1 now rewrites all 281 present in the clean room (§10 G3) |
+| **D1** `code_not_relocatable` | 280 of 385 scripts | **unchanged, 280** at the time of part II; **CLEARED to 0 later the same day** by the solo B1 pass — see part III §17 | not this pass's file; the solo de-hardcode pass is next. A1 now rewrites all 281 present in the clean room (§10 G3) |
 | **D2** `output_stale_vs_input` | 2 of 4 nagpra tables | **4 of 4 captured collections flag it**; nagpra still 2 of 4, proven twice | UNCHANGED in kind, wider in measure. Every collection captured on a *frozen* tree still has an output older than a recorded input, so 260/260 was not purely a quiescence artefact |
 | **D3** `undeclared_enrichers` | 13/13 collections | **4 of 4 captured collections**, unchanged | still `503_identity.py`'s runtime dispatch. nagpra's bridge reproduces only because 503's stamp is currently ABSENT from the release — the debt is masked, not paid |
 | **D4** `nondeterministic_output_columns` | 284 across 13/13 | **283 across 12/13**, fully broken down per table, column and writer | −1, proven by bytes; nagpra at 0. §12 |
@@ -1023,3 +1037,283 @@ And, in the same breath:
   live tree before it was caught. It was caught, measured and reversed, and it
   is written down here because a log that records only the pipeline's faults is
   not evidence.
+
+---
+
+# Part III — D1 closed: no script hardcodes the project root
+
+*Solo B1 pass, 2026-08-29, on top of commit `bd18cd5`. One debt, swept, proven
+and gated. Parts I and II are unchanged; their counts are the state they met.*
+
+**D1 is closed.** Every live script in `code/` derives the project root from its
+own location. The literal survives in exactly one file, for a reason named
+below, and a lint class now holds the count at zero.
+
+|  | before | after |
+|---|---|---|
+| live `code/**/*.py` | 414 | 414 (unchanged) |
+| files containing the project-root literal | **298** (71.9%) | **1** |
+| occurrences of the literal | **307** | **1** |
+| unwaived occurrences | 307 | **0** |
+
+Part I measured **280 of 385**. That was true when it was written; the tree grew
+to 414 scripts before this pass, so the census was re-run rather than inherited.
+**298 of 414** is the number that was actually swept.
+
+## 17. The sweep
+
+### 17a. The census, before anything was changed
+
+Counted by regex over every `code/**/*.py` outside `__pycache__`, matching every
+spelling — backslash, forward slash, doubled backslash, raw and non-raw — and
+then classified by the shape of the line it sat on. **26 distinct line shapes,
+307 occurrences, 298 files:**
+
+| shape | n | rewritten to |
+|---|---|---|
+| **`Path(...)`-wrapped root** — `CEDAR = Path(r"<ROOT>")` (246), `ROOT = pathlib.Path(r"<ROOT>")` (10), `ROOT = Path(r"<ROOT>")` (2), `DEST_ROOT = Path(r"<ROOT>")` (1) | **259** | `Path(__file__).resolve().parent.parent`, keeping the `pathlib.` prefix where the module used it |
+| **bare-`str` root** — `BASE = r"<ROOT>"` (14), `CEDAR = r"<ROOT>"` (5), `ROOT = r"<ROOT>"` (5), `CP = r"<ROOT>"` (1) | **25** | `str(Path(__file__).resolve().parent.parent)` — still a `str`, because these modules index it with `os.path.join` |
+| **root-prefixed sub-path** — `RAW = r"<ROOT>\data\raw\external\ancsa_portal"` and 12 more sites | **19** | `str(<derived> / "data" / "raw" / "external" / "ancsa_portal")` |
+| **prose** — a docstring `RUN` line in `106_build_revenue_bounds.py`; two comment lines in `516` | **3** | the `RUN` line becomes `py -3 code/106_build_revenue_bounds.py`, the house form every other script already uses; the two comments were reworded |
+| **kept** — `516_release_manifest.py`'s `HARDCODED_ROOT` | **1** | unchanged and waived; see §17f |
+
+259 + 25 + 19 + 3 + 1 = **307**.
+
+Every variable name was kept exactly as the script already spelled it, so no
+call site anywhere changed. Depth is per file: `.parent.parent` for `code/x.py`
+and `.parent.parent.parent` for the **17** modified scripts that live under
+`code/ancsa_portal/` and `code/ancsa_v2/`.
+
+**Paths outside this project were left alone**, and they are not this debt:
+`C:\Users\esm247\Desktop\dissertation\...` in `01_build_entity_spine.py`,
+`...\votingpatterns\.env` in `14_pull_cosponsors.py`, the Tesseract binary in
+`ancsa_v2/ocr_run.py`, and 14 more across 18 files. Those name other people's
+trees, not this one; deriving them would be wrong, not tidier.
+
+38 files gained `from pathlib import Path` because they had used only the string
+form and had no pathlib import. The import is inserted after the last top-level
+import that precedes the first use, never inside a docstring or a coding line,
+and it is the only line added to those files.
+
+### 17b. The proof — three checks, all run, none assumed
+
+No rebuild pipeline was run. `cedar_pipeline.NEVER_RUN` and data safety forbid
+it, and the proof standard for a change that touches only how a constant is
+spelled is not "the build still works" — it is *this constant still names the
+same directory*.
+
+1. **Compile.** All 298 modified files parse and compile. 0 failures.
+
+2. **Root equivalence, evaluated rather than eyeballed.** For each modified
+   file, the derived expression was evaluated **from that file's real location
+   on disk** — `Path(<the file>).resolve()`, then one `.parent` per `.parent`
+   in the source, then each `/ "seg"` — and compared against the literal taken
+   out of `git show HEAD:<path>`. Every one of the 307 removed literals is
+   reproduced exactly by the expression that replaced it; no derived path falls
+   outside the project root. **298 of 298 proven, 0 failures.** 269 files
+   resolve to an identical set; the other 29 are the sub-path files, whose new
+   set is a superset only because the intermediate root is now visible too.
+
+   This check is the one that matters on Windows, where it is not obvious:
+   `Path(...).resolve()` follows junctions, and six folders on this Desktop are
+   junctions into `D:\Archive`. It was checked rather than assumed — Cedar
+   Press is not one of them, and `resolve()` returns the Desktop path.
+
+3. **The six read-only verify suites, end to end.** All exit 0:
+   `510_assertions.py verify` (34,525 assertions, 34,185 facts, 0 preserved
+   conflicts), `512 verify` (13 collections, 255 tables, 0 violations),
+   `503 verify`, `514 verify` (575 source records), `515 verify` (2,867
+   temporal facts), `516 verify` (5 releases, 76 blobs, 0 drift).
+
+### 17c. What the sweep nearly broke, and how that was caught
+
+**This is the part worth reading.** `516_release_manifest.py` discovers a
+release's inputs through several channels, and channel 2 — the module-level
+path-constant walk — recognised the project root **by matching the literal
+string**:
+
+```python
+if v.rstrip("\\/").lower() == HARDCODED_ROOT.lower():
+    return ()
+```
+
+Delete the literal from 297 files and that branch stops firing. Channel 2 would
+have gone quietly blind, and part I §2 is the record of what that costs: channel
+2 is the **only** channel that sees `data/raw/federal_register/nagpra_fulltext/`,
+the 18.2 MB, 6,700-file corpus the entire NAGPRA dataset is parsed out of.
+Channel 1 reports filenames and cannot see a directory built from path
+constants. A manifest that had inherited that blind spot would have certified a
+release as fully captured while its largest input went unrecorded — and `516
+verify` would still have exited 0, because `verify` re-hashes the blobs it was
+given and has no opinion about the ones it was never told about.
+
+Nothing in the verify suites would have caught this. It was found by reading the
+resolver rather than trusting the suite, and fixed by teaching both resolvers the
+**shape** instead of the string: `_derived_root_parents()` recognises
+`Path(__file__)[.resolve()](.parent)+` and counts the parents against the
+script's real depth below the root — 2 for `code/x.py`, 3 for `code/sub/x.py`.
+A chain with fewer parents than that names a directory *inside* the tree and is
+deliberately left unresolved rather than guessed at. `str(...)` is now
+transparent to both resolvers, since that is the spelling the sweep used
+wherever a name had to stay a `str` for `os.path.join`.
+
+`HARDCODED_ROOT` is still matched too, because `replay` materialises worktrees
+at **past commits**, and every commit before this one carries the literal.
+
+**Measured, not asserted.** Both resolvers were run over the old and the new
+source of all 414 files and the resolved path sets compared:
+
+```
+files with IDENTICAL resolved path sets : 391 of 414
+files that LOST resolutions (REGRESSION):   0
+files that GAINED resolutions           :  23
+```
+
+Zero losses. The 23 gains are real: the `ancsa_portal` and `ancsa_v2` harvest
+scripts held their inputs as opaque absolute literals that channel 2 skipped,
+and they now resolve — `data/raw/external/ancsa_portal`,
+`data/clean/anc_ceiling_roster.csv`, `data/interim/ancsa_ocr/` and eleven more.
+That is **D8** moving in the right direction as a side effect. Channel 1 was
+checked the same way: `cedar_pipeline.declared_io()` returns **identical**
+output for all 414 files, old and new.
+
+### 17d. Two real class-6 defects the sweep did not create but did expose
+
+Replacing an opaque literal with a composed path makes the table name readable
+to the io scanner, and 293's class-6 detector immediately found two pairings
+that had been invisible for as long as they had existed:
+
+- `deals_ancsa_portal_additions.csv` — `ancsa_portal/build_deals.py` opens it
+  `"w"`; `ancsa_portal/build_deals2.py` reads it back and appends the 2022–2025
+  rows. Re-running the first alone drops every row the second added.
+- `ancsa_filings_index.csv` — `ancsa_portal/build_manifest_index.py` opens it
+  `"w"`; `ancsa_v2/update_index.py` flips `downloaded`, `retrieved_date`,
+  `local_file`, `bytes` and `sha256` in place from the v2 manifest.
+
+Both are genuine, both are pre-existing, and neither was waived away as noise.
+The ordering was **written down in each rebuilder**, which is what class 6 asks
+for, and the waiver carries that ordering as its reason. A defect that becomes
+visible because a scanner started working is a defect found, not a defect
+introduced.
+
+One class-6 finding also *fell*: `class6|06_verify_nho_via_8a.py|nho_verified
+_entities.csv`, which was in 293's baseline for a file that was retired to
+`graveyard/2026-08-28_nho_disproven_8a_inference/` the day before this pass. It
+is stale baseline, unrelated to this work, and is named here so the next reader
+does not spend an hour on it as this pass did.
+
+### 17e. The gate that keeps it at zero
+
+`code/293_lint_bug_classes.py` gains **class 8**, *the absolute project root
+written as a literal instead of derived from `__file__`*. 62 imports
+`count_by_class()`, so `lint_class8` appears automatically and is registered in
+`62_no_regression_check.py`'s `MUST_NOT_RISE` set.
+
+The detector is deliberately **textual**, not AST-based: a root literal in a
+docstring's `RUN` line is still a literal a replay has to rewrite, still wrong
+the moment the tree moves, and still the thing somebody copies. It matches two
+needles, and **carries no literal of its own**:
+
+1. this checkout's own root, derived from `__file__` — so the check is correct
+   on whatever machine it runs on;
+2. any drive-absolute path ending in a `Cedar Press` directory — so a **stale
+   literal naming the original tree is still caught after the project has been
+   moved or cloned**, which is exactly when it does damage.
+
+**Proven by firing, not by reading it.** A single line,
+`SCRATCH_DIR = Path(r"<the root>")`, was injected into a live script
+(`94_rescan_universes.py`, sha `a1bfb0837a64feeb`):
+
+```
+CLASS8       1  the absolute project root written as a literal instead of derived from __file__
+      94_rescan_universes.py:121
+         SCRATCH_DIR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+
+NEW INSTANCES - STOP AND FIX BEFORE CONTINUING:
+  !! class8 ROSE 0 -> 1
+```
+
+exit **1**. The file was restored from a byte copy — sha `a1bfb0837a64feeb`,
+unchanged — and 293 returned to exit **0** with `CLASS8 0`. `--selftest` also
+carries a class-8 fixture, and that fixture is **built** from parts rather than
+written out, because a literal root inside the detector would be a class-8
+finding in the detector that reports class 8, and a check that has to waive
+itself teaches every reader that the waiver is the normal move.
+
+### 17f. The one exception, named
+
+**`code/516_release_manifest.py:179` — `HARDCODED_ROOT`.** Waived, with the
+reason on the line: `# lint-ok: class8 - the A1 rewrite target and the B1
+detector's needle`.
+
+It is not laziness and it is not derivable. `replay` checks out **arbitrary past
+commits**, and every commit before this pass carries the literal in ~280 files;
+A1 must keep rewriting it or those replays silently address the live tree — the
+G3 incident. And the B1 detector asks *"does the code at this commit hardcode
+the root"*, which is a question about a **string**, not about where the file
+happens to sit. Deriving it from `__file__` would rewrite the clean room's path
+to itself, i.e. do nothing, and do it invisibly.
+
+The two other occurrences in that file were prose in the G3 incident comment.
+They were reworded to `<HARDCODED_ROOT>` and "the LIVE tree's `data/`"; the
+account is unchanged and now carries no copy of the address.
+
+**No other exception was needed.** In particular `cedar_pipeline.py` was
+checked rather than assumed: its `CEDAR` is read at import by many modules, but
+`Path(__file__)` resolves against *cedar_pipeline.py's own* location regardless
+of which module imports it, so the derived form is correct for every importer.
+
+### 17g. What this changes for replay
+
+Adaptation **A1 is a no-op at any commit from this one forward.** `replay` still
+runs it — it must, for older commits — but it will rewrite 0 files, record 0
+adaptations, and its post-scan warning will name nothing. Concretely:
+
+- a clean room checked out at this commit is **sealed by construction**, not by
+  a rewrite that has to remember every file. G3 cannot recur in the way it
+  occurred, because there is no un-rewritten script left to fire it;
+- the replayed code is **byte-identical to the commit**, which was the second
+  half of B1 and the reason part I could not claim exact reproduction of the
+  code even where it reproduced the data;
+- `code_not_relocatable` drops out of the blocking list, so the replayability
+  verdict for a future capture is computed without it.
+
+**What it does not change**, and no one should read it as changing: D2, D3, D4,
+D7, D10 and D11 are untouched, and the verdicts on the five captured releases
+still read `not_exactly_replayable` for those reasons. One obstacle of four was
+removed; the other three are still there.
+
+### 17h. Gate state at the end of the pass
+
+```
+py -3 code/62_no_regression_check.py        exit 0   "no regressions."
+    code_scripts_total          414   (unchanged)
+    lint_class8                   0   (new metric, MUST_NOT_RISE)
+    lint_bug_class_instances    147   (fell from 148)
+py -3 code/293_lint_bug_classes.py          exit 0   CLASS8 0, 1 waived
+py -3 code/293_lint_bug_classes.py --selftest  exit 0   8 of 8 detectors
+py -3 code/510_assertions.py verify         exit 0
+py -3 code/512_build_dataset_contracts.py verify  exit 0
+py -3 code/503_identity.py verify           exit 0
+py -3 code/514_source_records.py verify     exit 0
+py -3 code/515_temporal.py verify           exit 0
+py -3 code/516_release_manifest.py verify   exit 0
+```
+
+`class6` fell 31 → 30 and `lint_bug_class_instances` 148 → 147; both falls are
+accounted for in §17d. Nothing rose. No file under `data/`, `docs/releases/` or
+`review/` was touched, and nothing on the `NEVER_RUN` list was executed.
+
+### 17i. Open, and left open rather than forced
+
+Nothing resisted the rewrite: all 26 shapes were mechanical and all 307
+occurrences are accounted for. Two things are worth the next pass's attention
+and are stated here rather than quietly done:
+
+1. `516`'s `_ROOT_NAMES` convention (`CEDAR`/`ROOT`/`BASE`/`PROJECT`) is now
+   redundant belt-and-braces beside the structural `_derived_root_parents()`
+   check. It is kept because past commits still need it; it can be retired when
+   no supported replay target predates this commit.
+2. The same literal still appears in **documentation** under `docs/` and in the
+   retired code under `graveyard/`. Neither executes, and both were out of
+   scope for this pass. Class 8 scans `code/` only.

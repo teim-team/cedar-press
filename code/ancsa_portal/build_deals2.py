@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """Appends the 2022-2025 ANCSA-portal deal rows to deals_ancsa_portal_additions.csv."""
 import csv, json
+from pathlib import Path
 
-CSVP = r"C:\Users\esm247\Desktop\Cedar Press\data\clean\deals_ancsa_portal_additions.csv"
+CSVP = str(Path(__file__).resolve().parent.parent.parent / "data" / "clean" / "deals_ancsa_portal_additions.csv")
 rows = list(csv.DictReader(open(CSVP, encoding="utf-8-sig")))
 COLS = list(rows[0].keys())
 TODAY = "2026-08-05"

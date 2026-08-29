@@ -67,7 +67,7 @@ import re
 import unicodedata
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 SCHEMA_DIR = CEDAR / "docs" / "schema"
 KEYS_JSON = SCHEMA_DIR / "keys.json"
 

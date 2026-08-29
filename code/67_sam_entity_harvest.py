@@ -70,7 +70,7 @@ from collections import Counter, defaultdict
 from datetime import date
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 RAW = CEDAR / "data" / "raw" / "external" / "sam_api"
 REVIEW = CEDAR / "review"

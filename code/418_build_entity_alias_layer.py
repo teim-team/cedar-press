@@ -101,7 +101,7 @@ import cedar_domain as D                                    # noqa: E402
 import cedar_ids as IDS                                     # noqa: E402
 from cedar_keys import normalise                            # noqa: E402
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 ALIAS = CEDAR / "data" / "clean" / "entity_aliases.csv"
 SPINE = CEDAR / "data" / "spine" / "cedar_entity_spine.csv"
 FR = CEDAR / "data" / "clean" / "federal_recognition_roster.csv"

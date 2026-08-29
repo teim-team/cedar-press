@@ -93,6 +93,18 @@ The six, with the real example each is named after:
            published that function specifically for 293 to adopt; re-deriving
            it here would be the two-detectors mistake that retired 248.
 
+  CLASS 8  THE ABSOLUTE PROJECT ROOT WRITTEN INTO THE SOURCE AS A LITERAL.
+           298 of 414 scripts opened with `CEDAR = Path(r"<one machine's
+           path>")`. That is an address, not a preference: a checkout at any
+           other path reads and WRITES the original tree. On 2026-08-29 a
+           replay worktree did exactly that - `241_promote_individual_native
+           _firms_in_place.py` had not been rewritten by adaptation A1, so it
+           wrote four files in the LIVE tree and dropped the `cedar_uid`
+           column 503 had stamped into `individual_native_firm_register.csv`.
+           It also means no release replays byte-identically, because the code
+           must be edited before it can run. Debt **D1**; swept to zero on
+           2026-08-29. Derive it: `Path(__file__).resolve().parent.parent`.
+
   CLASS 6  a full rebuild silently reverting an in-place enricher.
            `133 build` discarded 931 entity links and 9 columns that `168` had
            written four minutes earlier, and printed a LARGER row count that
@@ -145,6 +157,8 @@ CLASS_TITLES = {
               "enricher",
     "class7": "an id minted from OUTSIDE the row - a process hash, a rank or "
               "a position",
+    "class8": "the absolute project root written as a literal instead of "
+              "derived from __file__",
 }
 
 # Scripts that must never be executed. The linter never executes anything, but
@@ -770,6 +784,69 @@ def detect_class5(path, tree, lines):
 
 
 # --------------------------------------------------------------------------
+# CLASS 8 - the absolute project root written into the source as a literal
+# --------------------------------------------------------------------------
+#
+# Debt **D1** in docs/RELEASE_REPLAY_LOG.md, and the class with the only
+# measured instance of a linter finding that had already destroyed live data.
+#
+# 298 of 414 scripts once opened with some spelling of
+#
+#     CEDAR = Path(r"<the one machine this project was written on>")
+#
+# and that literal is not a preference. It is an ADDRESS. A checkout at any
+# other path - a clean-room replay, a second machine, a git worktree - runs
+# code that reads and, worse, WRITES the original tree. On 2026-08-29 that is
+# exactly what happened: `241_promote_individual_native_firms_in_place.py` was
+# run inside a replay worktree, was not one of the files adaptation A1 had
+# rewritten, and wrote four files in the LIVE tree, dropping the `cedar_uid`
+# column 503 had stamped into `individual_native_firm_register.csv`. Restored
+# from backups; recorded in RELEASE_REPLAY_LOG.md part II 10.G3.
+#
+# It also means no release is byte-identical on replay, because A1 has to edit
+# the code before the code can run. A checked-out commit that must be modified
+# to execute is not a reproduction of that commit.
+#
+# THE FIX IS ONE LINE AND IT IS ALWAYS THE SAME:
+#
+#     CEDAR = Path(__file__).resolve().parent.parent          # code/x.py
+#     CEDAR = Path(__file__).resolve().parent.parent.parent   # code/sub/x.py
+#
+# The detector is deliberately TEXTUAL rather than AST-based. A root literal in
+# a docstring's RUN line or in a comment is still a literal a replay has to
+# rewrite, still wrong the moment the tree moves, and still the thing somebody
+# copies. It matches two needles:
+#
+#   1. this checkout's OWN root, derived - so the check needs no literal of its
+#      own and stays correct on whatever machine it runs on;
+#   2. any drive-absolute path ending in a `Cedar Press` directory - so a stale
+#      literal naming the ORIGINAL tree is still caught after the project has
+#      been moved or cloned, which is precisely when it does the damage.
+
+_ROOT_SELF = str(CEDAR)
+_ROOT_ANY = re.compile(
+    r"[A-Za-z]:[\\/](?:[^\\/\r\n\"'<>|]+[\\/])*Cedar[ _%]{0,3}Press"
+    r"(?![A-Za-z0-9])", re.I)
+
+_WHY8 = ("the absolute project root is written into the source as a literal. "
+         "A checkout at any other path - a clean-room replay, another machine, "
+         "a git worktree - then READS AND WRITES the original tree; that is "
+         "the 241 incident (RELEASE_REPLAY_LOG.md II.10.G3), and it is why no "
+         "release replays byte-identically. Derive it instead: "
+         "`Path(__file__).resolve().parent.parent` for code/x.py, one further "
+         "`.parent` per code/ subdirectory. Paths OUTSIDE this project are not "
+         "this class and are not flagged.")
+
+
+def detect_class8(path, tree, lines):
+    out = []
+    for i, ln in enumerate(lines, 1):
+        if _ROOT_SELF in ln or _ROOT_ANY.search(ln):
+            out.append(Finding("class8", path.name, i, ln, _WHY8))
+    return out
+
+
+# --------------------------------------------------------------------------
 # CLASS 6 - full-rebuild writer vs in-place enricher on the same clean table
 # --------------------------------------------------------------------------
 
@@ -1281,7 +1358,7 @@ def scan(code_dir=CODE):
     for p, tree, lines in modules:
         for fn in (detect_class1, detect_class2a, detect_class2b,
                    detect_class2c, detect_class3, detect_class4,
-                   detect_class5):
+                   detect_class5, detect_class8):
             try:
                 findings += fn(p, tree, lines)
             except Exception as e:            # a detector must never take the
@@ -1377,9 +1454,20 @@ SELFTEST = {
 }
 
 
+# CLASS 8's fixture is BUILT rather than written out, for one reason: a literal
+# project root inside this file would be a class-8 finding in the detector that
+# reports class 8, and a detector that has to waive itself teaches everyone
+# reading it that the waiver is the normal move. The path below is a synthetic
+# root on a drive this project has never lived on, which is the case that
+# matters - a stale literal naming SOME OTHER tree, found after a move.
+_C8_ROOT = "D:" + chr(92) + "clean_room" + chr(92) + "Cedar Press"
+SELFTEST["class8"] = ('from pathlib import Path\n'
+                      'CEDAR = Path(r"%s")\n' % _C8_ROOT)
+
+
 def selftest():
     fns = (detect_class1, detect_class2a, detect_class2b, detect_class2c,
-           detect_class3, detect_class4, detect_class5)
+           detect_class3, detect_class4, detect_class5, detect_class8)
     bad = []
     for cls, src in sorted(SELFTEST.items()):
         tree, lines = ast.parse(src), src.splitlines()

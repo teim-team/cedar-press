@@ -46,7 +46,7 @@ WRITES (staged, never merged here -- other agents are live)
 import csv, glob, json, os, re, sys
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 TXT = CEDAR / "data" / "raw" / "fac" / "txt"
 SPINE = CEDAR / "data" / "clean" / "fac_tribal_single_audits.csv"
 REVIEW = CEDAR / "review"

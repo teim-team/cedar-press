@@ -32,7 +32,7 @@ import json, re, sys, time, urllib.request, urllib.parse, urllib.error
 from datetime import datetime, timezone
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 GO = CEDAR / "data" / "raw" / "external" / "gaming_official"
 BYPASS = GO / "bypass_2026-08-26"
 PDFDIR = GO / "nm_tribal_revenue_sharing"

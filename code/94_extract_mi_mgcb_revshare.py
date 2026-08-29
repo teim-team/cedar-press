@@ -38,7 +38,7 @@ from pathlib import Path
 
 import pdfplumber
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 RAW = CEDAR / "data" / "raw" / "external" / "gaming_official"
 TODAY = "2026-08-07"
 

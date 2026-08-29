@@ -90,7 +90,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 import cedar_codebook as CB                                    # noqa: E402
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 FRAG = CLEAN / "codebook"
 DOCS = CEDAR / "docs" / "codebooks"

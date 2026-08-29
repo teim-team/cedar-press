@@ -103,7 +103,7 @@ from collections import Counter
 from datetime import date
 from pathlib import Path
 
-CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
+CEDAR = Path(__file__).resolve().parent.parent
 
 sys.path.insert(0, str(CEDAR / "code"))
 from cedar_keys import surrogate_id                            # noqa: E402
