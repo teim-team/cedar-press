@@ -336,13 +336,47 @@ def cmd_ship(args) -> int:
                  f"changing is how this project lost work before. "
                  f"Stale locks (dead pid) do NOT block and are named above.")
 
+    # ---- Phase 6 release gate: nothing ships from uncommitted code --------
+    # Possible only since 2026-08-29, when this folder became a repository.
+    # The mission spec's release-gate rule: a release built from code that
+    # exists nowhere can never be replayed. A half-edited script or a stashed
+    # change would ship silently before this check existed. Data is untracked
+    # by design (versioned by checksum in the run manifests), so a dirty tree
+    # here is always SOURCE - and the fix is a commit, which takes a minute
+    # and buys a replayable release.
+    dirty = subprocess.run(
+        ["git", "status", "--porcelain"], cwd=str(ROOT),
+        capture_output=True, text=True, timeout=60).stdout.strip()
+    if dirty:
+        lines = dirty.splitlines()
+        listing = "".join("    " + l[3:] + "\n" for l in lines[:10])
+        sys.exit("refusing: uncommitted changes to source:\n" + listing
+                 + ("    ...\n" if len(lines) > 10 else "")
+                 + "Commit first - a release must point at a commit hash that "
+                   "actually contains the code that built it.")
+    commit = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=str(ROOT),
+        capture_output=True, text=True, timeout=60).stdout.strip()
+    print(f"  release commit: {commit[:12]} (tree clean)")
+
     for i, (script, argv, what, _watch) in enumerate(SHIP_CHAIN, 1):
         print(f"\n[{i}/{len(SHIP_CHAIN)}] {script} {' '.join(argv)}", flush=True)
         r = subprocess.run([sys.executable, str(HERE / script), *argv], cwd=str(ROOT))
         if r.returncode != 0:
             sys.exit(f"\nSTOPPED at step {i} ({script}) - exit {r.returncode}. "
                      f"Nothing after this ran. {_watch or ''}")
-    print("\nship chain complete. Check SHIP RATE in the 87 and 25 output above.")
+    stamp = ROOT / "docs" / "RELEASE_STAMP.json"
+    stamp.write_text(json.dumps({
+        "commit": commit,
+        "shipped_at": datetime.now().isoformat(timespec="seconds"),
+        "chain": [s for s, *_ in SHIP_CHAIN],
+        "note": "Replay: check out this commit. Data inputs are attested by "
+                "the run manifests' logical checksums, which git does not "
+                "cover and this stamp does not replace.",
+    }, indent=1), encoding="utf-8")
+    print("\nship chain complete. Release stamped " + commit[:12]
+          + " -> docs/RELEASE_STAMP.json. Check SHIP RATE in the 87 and 25 "
+            "output above.")
     return 0
 
 

@@ -577,6 +577,20 @@ def measure_shipping():
         _sh, _lic, _und = CB.registered_tables()
         m["tables_undocumented_in_codebook"] = len(_und)
         m["tables_shippable_via_codebook"] = len(_sh)
+        # Phase 1 contracts (512): a violation is a collection with no
+        # tables, an ORPHAN shippable table no collection claims, or a
+        # contract naming a script that no longer exists. Read from the
+        # generated JSON rather than re-deriving, so the gate and the
+        # contract document cannot disagree about the count.
+        _cj = CEDAR / "docs" / "schema" / "dataset_contracts.json"
+        if _cj.exists():
+            _doc = json.loads(_cj.read_text(encoding="utf-8"))
+            m["contract_violations"] = int(_doc.get("n_violations", 0))
+            m["contract_orphan_shippable"] = int(_doc.get("n_orphan_shippable", 0))
+        else:
+            note("docs/schema/dataset_contracts.json missing - run "
+                 "512_build_dataset_contracts.py; contract metrics not "
+                 "measured")
     except Exception as e:
         note(f"codebook registry unreadable ({type(e).__name__}) - "
              "tables_undocumented_in_codebook not measured")
@@ -1057,6 +1071,11 @@ MUST_BE_ZERO = {
     # rule 16: a NEW instance of one of the six named defect classes, measured
     # against 293's own baseline. Fix it, or waive the line with a reason.
     "lint_new_defect_instances",
+    # Phase 1 contracts (512): a violated contract is not a gap to burn down,
+    # it is the world contradicting a promise. An ORPHAN shippable table
+    # would ship with no owning collection, no plan and no contract - the
+    # shape that let 47 gaming tables ship at 0.87% before the registry.
+    "contract_violations", "contract_orphan_shippable",
 }
 # Metrics where an INCREASE is the regression. A registration gap rises when a
 # table lands in data/clean and nobody registers it - the last-mile failure

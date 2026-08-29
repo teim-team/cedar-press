@@ -73,22 +73,22 @@ COLLECTIONS: list[dict] = [
     # --- Cedar Press (standard) -------------------------------------------
     {"id": "funding", "name": "Federal Funding to Indian Country", "shelf": "standard",
      "prefixes": ["03"],
-     "tables": r"^(federal_funding|faads_|assistance_|bie_uio)"},
+     "tables": r"^(federal_funding|faads_|assistance_|bie_uio|native_passthrough|funding_identifier|inflation_deflator)"},
     {"id": "federal-register", "name": "Federal Register", "shelf": "standard",
      "prefixes": ["09"],
-     "tables": r"^(federal_actions|fr_(?!nagpra)|section_106|consultation_)"},
+     "tables": r"^(federal_actions|fr_(?!nagpra)|section_106|consultation_|correspondence_foia|nepa_)"},
     {"id": "legislation", "name": "Congressional Votes and Proposed Legislation", "shelf": "standard",
      "prefixes": ["10"],
-     "tables": r"^(bill_|native_bill|congress)"},
+     "tables": r"^(bill_|native_bill|congress|member_positions|native_issue_litigation)"},
     {"id": "deals", "name": "Indian Country Deals", "shelf": "standard",
      "prefixes": ["01"],
-     "tables": r"^deals_"},
+     "tables": r"^(deals_|tribal_resolution_financings|seminole_bond|ownership_events)"},
     {"id": "nagpra", "name": "NAGPRA", "shelf": "standard",
      "prefixes": ["11"],
      "tables": r"^(nagpra_|fr_nagpra)"},
     {"id": "lobbying", "name": "Lobbying", "shelf": "standard",
      "prefixes": ["04", "18"],
-     "tables": r"^(lobbying_|native_entity_lobbying|advocacy_|ferc_|admin_appeal|nrc_|oira_|hearing_|earmark|fr_ex_parte)"},
+     "tables": r"^(lobbying_|native_entity_lobbying|advocacy_|ferc_|admin_appeal|nrc_|oira_|hearing_|earmark|fr_ex_parte|agency_attention|tribe_year_lobbying)"},
 
     # --- Cedar Press+ (pro) ------------------------------------------------
     {"id": "contractors", "name": "Federal Prime Contracting", "shelf": "pro",
@@ -101,7 +101,7 @@ COLLECTIONS: list[dict] = [
                       "02l_individual_native_exclusion_pairs"]},
     {"id": "subcontracting", "name": "Federal Subcontracting", "shelf": "pro",
      "prefixes": [], "dirs": ["02b_subcontracting", "02p_subaward_entity_rollup"],
-     "tables": r"^(subaward|subcontract)"},
+     "tables": r"^(subaward|subcontract|prime_sub_network)"},
     {"id": "native-owned-businesses", "name": "Native-Owned Businesses", "shelf": "pro",
      "prefixes": [],
      "dirs": ["02f_individual_native_verification", "02i_individual_native_firm_register",
@@ -131,12 +131,12 @@ COLLECTIONS: list[dict] = [
     # --- Cedar Grove -------------------------------------------------------
     {"id": "gaming", "name": "Gaming Intelligence", "shelf": "grove",
      "prefixes": ["07", "14", "16"],
-     "tables": r"^(gaming_|nigc_|compact_|casino|loyalty_|digital_gaming|wa_machine)"},
+     "tables": r"^(gaming_|nigc_|compact_|casino|loyalty_|digital_gaming|wa_machine|compacts|ca_gaming|fl_gaming|state_gaming|fac_audit_)"},
 
     # --- Infrastructure: not sold as a collection, but everything joins it --
     {"id": "_entity_layer", "name": "Entity spine, identifiers and reference", "shelf": "infrastructure",
      "prefixes": ["00", "05", "08", "13"],
-     "tables": (r"^(cedar_entity|cedar_identifier|entity_|identifier_|alias|"
+     "tables": (r"^(cedar_entity|cedar_identifier|cedar_publishable|cedar_ruling|cedar_correction|cross_dataset_ruling|entity_|identifier_|alias|"
                 r"nho_|tcu_|uio_|bie_|native_fi|federal_recognition|intertribal|"
                 r"admin_region|foia_|visitor_|state_recognized)")},
 ]

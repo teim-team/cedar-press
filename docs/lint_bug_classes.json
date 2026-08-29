@@ -1,5 +1,5 @@
 {
-  "scanned_files": 408,
+  "scanned_files": 410,
   "counts": {
     "class1": 0,
     "class2a": 0,
@@ -178,7 +178,7 @@
     {
       "class": "class2c",
       "file": "13_build_fpds_hierarchy.py",
-      "line": 223,
+      "line": 248,
       "evidence": "stats[\"edge_rows_missing_side\"] += 1",
       "why": "counter 'edge_rows_missing_side' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -187,7 +187,7 @@
     {
       "class": "class2c",
       "file": "13_build_fpds_hierarchy.py",
-      "line": 226,
+      "line": 251,
       "evidence": "stats[\"self_edges_dropped\"] += 1",
       "why": "counter 'self_edges_dropped' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -1006,7 +1006,7 @@
     {
       "class": "class7",
       "file": "01_build_entity_spine.py",
-      "line": 269,
+      "line": 281,
       "evidence": "r[\"review_id\"] = f\"RV-{i:05d}\"",
       "why": "[WARN] POSITIONAL on target review_id -> no clean table. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": false,
@@ -1519,7 +1519,7 @@
     {
       "class": "class3",
       "file": "510_assertions.py",
-      "line": 224,
+      "line": 227,
       "evidence": "\"elijah_ruling\": dict(lineage_root=\"LR_HUMAN_OWNER\", tier_ceiling=\"A\",",
       "why": "a tier-A assignment sits within 6/3 lines of a ruling-method or status test, at 1 site(s), and this file has NO RECORDED DISPOSITION in 293's DISPOSITIONS table. A regex cannot decide this one - read the site and write the reason down. `attribution_method` says WHO decided; `confidence_tier` says WHAT was decided. Do NOT delete the entry to make this pass.",
       "waived": true,
@@ -2392,8 +2392,14 @@
         "149_apply_resource_entity_links.py",
         "83_build_resource_ledger.py"
       ],
+      "sam_entity_connections.csv": [
+        "511_sam_entity_hierarchy.py"
+      ],
       "sam_prime_contracts_fy2000_2007.csv": [
         "163_load_sam_contract_awards.py"
+      ],
+      "sam_subsidiary_candidates.csv": [
+        "511_sam_entity_hierarchy.py"
       ],
       "section_106_consultation_events.csv": [
         "130_build_section_106_consultation.py"
@@ -2755,7 +2761,7 @@
       },
       {
         "file": "510_assertions.py",
-        "line": 224,
+        "line": 227,
         "source": "\"elijah_ruling\": dict(lineage_root=\"LR_HUMAN_OWNER\", tier_ceiling=\"A\","
       },
       {

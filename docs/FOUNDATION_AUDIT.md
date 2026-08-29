@@ -198,6 +198,33 @@ Ranked by the spec's criteria. "Blast radius" is what breaks if it goes wrong.
 
 ---
 
+## F-1b. PHASES 1 AND 6, DELIVERED (added 2026-08-30)
+
+**Phase 1 — dataset contracts.** `code/512_build_dataset_contracts.py`
+generates `docs/schema/dataset_contracts.json` + `docs/DATASET_CONTRACTS.md`:
+13 collections, 255 tables, each with status (shippable / internal / licensed /
+undocumented), join keys, rebuilder, enrichers, NEVER_RUN warnings, and grain —
+**declared only where an owner ruling or build log stated it; unstated grain is
+recorded as unstated, never guessed.** Everything else is derived from the
+systems that own the facts (500's collections, the codebook registry, the
+pipeline's io map), because hand-maintained registries have already failed
+here three times. First run found **28 orphan shippable tables** — shipping
+with no owning collection — now all assigned; `contract_violations` and
+`contract_orphan_shippable` gate at MUST_BE_ZERO in 62.
+
+**Phase 6 — release gates, the half git enables.** `build.py ship --execute`
+now refuses a dirty tree ("a release must point at a commit hash that actually
+contains the code that built it") and stamps `docs/RELEASE_STAMP.json` with the
+commit on success. Proven by firing: its first invocation refused to ship its
+own uncommitted edit. Still open on Phase 6: replaying a *previous* release
+end-to-end has never been demonstrated — the stamp records what would be
+needed, it does not prove the replay works.
+
+Remaining: Phase 4 (agent handoff protocol), Phase 5 (gaming pilot),
+Phase 7 (dataset migration), and the Phase 6 replay proof.
+
+---
+
 ## F-3b. WHAT PHASE 3 MEASURED (added 2026-08-29)
 
 The assertion layer is built and its gate is green. The result it produced

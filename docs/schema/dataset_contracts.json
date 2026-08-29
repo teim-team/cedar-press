@@ -1,0 +1,3110 @@
+{
+ "built_date": "2026-08-29",
+ "derivation": "500.COLLECTIONS + cedar_codebook + cedar_pipeline; GRAIN declared, everything else derived",
+ "n_collections": 13,
+ "n_tables_claimed": 255,
+ "n_orphan_shippable": 0,
+ "orphans": [],
+ "n_violations": 0,
+ "violations": [],
+ "contracts": [
+  {
+   "collection": "funding",
+   "name": "Federal Funding to Indian Country",
+   "shelf": "standard",
+   "rebuild_command": "py -3 code/build.py run funding --execute",
+   "n_tables": 17,
+   "tables": [
+    {
+     "table": "assistance_tribe_id_crosswalk.csv",
+     "status": "internal-by-decision",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "152_build_assistance_id_crosswalk.py"
+     ],
+     "enriched_by": [
+      "503_identity.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "bie_uio_dollars_by_entity.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "bie_uio_identifier_links.csv",
+     "status": "internal-by-decision",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "uei",
+      "ein"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "faads_attribution_audit_sample.csv",
+     "status": "internal-by-decision",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "faads_entity_attribution.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "faads_identifier_coverage_by_agency_year.csv",
+     "status": "internal-by-decision",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "faads_transactions.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "faads_transactions_all_agencies.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "federal_funding_rulings_from_dofile.csv",
+     "status": "unregistered",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "federal_funding_transactions.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "one row per federal award transaction",
+     "rebuilt_by": [
+      "24_funding_merge.py"
+     ],
+     "enriched_by": [
+      "115_pull_assistance_archive.py",
+      "335_harmonize_assistance_seams_in_place.py",
+      "336_correct_scheme_resolution_by_spine_membership.py",
+      "503_identity.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "federal_funding_tribe_year_panel.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "federal_funding_year_comparison_2026-08-05.csv",
+     "status": "internal-by-decision",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "funding_identifier_harvest.csv",
+     "status": "internal-by-decision",
+     "key_columns": [
+      "cage_code"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "funding_identifier_netnew_ueis.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "inflation_deflator.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "native_passthrough.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "native_passthrough_pairs.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    }
+   ]
+  },
+  {
+   "collection": "federal-register",
+   "name": "Federal Register",
+   "shelf": "standard",
+   "rebuild_command": "py -3 code/build.py run federal-register --execute",
+   "n_tables": 26,
+   "tables": [
+    {
+     "table": "consultation_agency_coverage.csv",
+     "status": "UNDOCUMENTED",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "consultation_events.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "correspondence_foia_source_coverage.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "federal_actions.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "federal_actions_entity_bridge.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "federal_actions_raw.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "fr_abstract_availability_year.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "fr_consultation_by_agency.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "fr_consultation_notices.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "fr_consultation_referenced.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "fr_consultation_year.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "fr_content_classification.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "fr_ex_parte_notices.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "fr_ex_parte_parties.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "fr_ex_parte_party_entity_links.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "fr_recognized_entities.csv",
+     "status": "internal-by-decision",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "fr_relevance_stratum_audit.csv",
+     "status": "internal-by-decision",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "fr_relevance_tier_year.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "fr_theme_year.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "nepa_administrative_record_parties.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "nepa_eplanning_projects.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "nepa_project_documents.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "nepa_source_coverage.csv",
+     "status": "internal-by-decision",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "section_106_consultation_events.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "section_106_project_parties.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "section_106_source_coverage.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    }
+   ]
+  },
+  {
+   "collection": "legislation",
+   "name": "Congressional Votes and Proposed Legislation",
+   "shelf": "standard",
+   "rebuild_command": "py -3 code/build.py run legislation --execute",
+   "n_tables": 13,
+   "tables": [
+    {
+     "table": "bill_votes.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "bill_votes_entity_bridge.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "bill_votes_official_verification.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "congressional_correspondence_log.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "congressional_correspondence_systems.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "member_positions.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "native_bill_outcomes.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "native_bills.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "14_build_bills_votes.py"
+     ],
+     "enriched_by": [
+      "35_entity_harvest.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "native_bills_entity_bridge.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "native_bills_entity_class.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "native_bills_subject_sweep.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "native_issue_litigation_coverage.csv",
+     "status": "internal-by-decision",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "native_issue_litigation_positions.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "139_build_litigation_positions.py"
+     ],
+     "enriched_by": [
+      "140_build_grantmaker_funding_flows.py"
+     ],
+     "never_run_warning": []
+    }
+   ]
+  },
+  {
+   "collection": "deals",
+   "name": "Indian Country Deals",
+   "shelf": "standard",
+   "rebuild_command": "py -3 code/build.py run deals --execute",
+   "n_tables": 19,
+   "tables": [
+    {
+     "table": "deals_2000_2019_additions.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "deals_2026_ytd_additions.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "deals_anc_reports_additions.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "deals_ancsa_portal_additions.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "deals_ancsa_portal_v2_additions.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "deals_classified.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "deals_federal_awards_additions.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "deals_historical_additions.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "deals_party_attribution.csv",
+     "status": "internal-by-decision",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "deals_party_attribution_agent.csv",
+     "status": "internal-by-decision",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "uei",
+      "cage_code"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "deals_party_autoresolved.csv",
+     "status": "internal-by-decision",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "57_autoresolve_deal_parties.py"
+     ],
+     "enriched_by": [
+      "154_extend_autoresolved_parties_additive.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "deals_party_matches.csv",
+     "status": "internal-by-decision",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "deals_sec_2010_2017_additions.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "deals_source_index.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "deals_taxonomy.csv",
+     "status": "internal-by-decision",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "deals_tribal_debt_additions.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "ownership_events.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "entity_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "seminole_bond_disclosures.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "tribal_resolution_financings.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid",
+      "entity_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    }
+   ]
+  },
+  {
+   "collection": "nagpra",
+   "name": "NAGPRA",
+   "shelf": "standard",
+   "rebuild_command": "py -3 code/build.py run nagpra --execute",
+   "n_tables": 4,
+   "tables": [
+    {
+     "table": "fr_nagpra_title_index.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "fr_nagpra_title_index_year.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "nagpra_notice_entity_bridge.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "nagpra_notices.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    }
+   ]
+  },
+  {
+   "collection": "lobbying",
+   "name": "Lobbying",
+   "shelf": "standard",
+   "rebuild_command": "py -3 code/build.py run lobbying --execute",
+   "n_tables": 37,
+   "tables": [
+    {
+     "table": "admin_appeal_decisions.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "144_build_admin_appeals.py"
+     ],
+     "enriched_by": [
+      "168_link_adjudication_hubs.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "admin_appeal_parties.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "144_build_admin_appeals.py"
+     ],
+     "enriched_by": [
+      "168_link_adjudication_hubs.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "admin_appeal_positions.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "advocacy_passthrough.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "advocacy_passthrough_2026-08-07.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "agency_attention_vs_advocacy.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "agency_attention_vs_advocacy_year.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "earmarks.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid",
+      "entity_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "ferc_docket_filings.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "133_build_ferc_advocacy.py"
+     ],
+     "enriched_by": [
+      "168_link_adjudication_hubs.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "ferc_docket_parties.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "ferc_ex_parte_communications.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "ferc_ex_parte_parties.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "133_build_ferc_advocacy.py"
+     ],
+     "enriched_by": [
+      "168_link_adjudication_hubs.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "ferc_source_coverage.csv",
+     "status": "internal-by-decision",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "ferc_tribal_dockets.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "133_build_ferc_advocacy.py"
+     ],
+     "enriched_by": [
+      "168_link_adjudication_hubs.py",
+      "175_restore_ferc_docket_table_after_rebuild_revert.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "fr_ex_parte_notices.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "fr_ex_parte_parties.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "fr_ex_parte_party_entity_links.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "hearing_appearances.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid",
+      "entity_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "98_build_oira_and_hearings.py"
+     ],
+     "enriched_by": [
+      "400_promote_stranded_hearing_appearances.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "hearing_bill_links.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "lobbying_client_attribution.csv",
+     "status": "internal-by-decision",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "lobbying_disclosure_verbosity_year.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "lobbying_issue_families_filing.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid",
+      "entity_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "lobbying_issue_family_year.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "lobbying_registrant_client_relationships.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "lobbying_registrant_concentration.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "lobbying_registrant_identifiers.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "lobbying_registrant_native_ownership_evidence.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "lobbying_registrants.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "lobbying_target_entities.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "lobbying_unmatched_clients.csv",
+     "status": "internal-by-decision",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "native_entity_lobbying_disclosures.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid",
+      "entity_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "05_match_filings_v2.py"
+     ],
+     "enriched_by": [
+      "350_withdraw_false_lobbying_attributions.py",
+      "65_lobbying_organization_type_guard.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "nrc_meeting_participants.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "nrc_public_meetings.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "oira_federal_action_links.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "oira_meeting_participants.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid",
+      "entity_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "oira_meetings.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid",
+      "entity_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "tribe_year_lobbying_panel.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid",
+      "entity_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "05_match_filings_v2.py"
+     ],
+     "enriched_by": [
+      "351_rebuild_lobbying_panel_from_corrected_disclosures.py",
+      "65_lobbying_organization_type_guard.py"
+     ],
+     "never_run_warning": []
+    }
+   ]
+  },
+  {
+   "collection": "contractors",
+   "name": "Federal Prime Contracting",
+   "shelf": "pro",
+   "rebuild_command": "py -3 code/build.py run contractors --execute",
+   "n_tables": 11,
+   "tables": [
+    {
+     "table": "contractor_ranking.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "fpds_uei_cage_map.csv",
+     "status": "shippable",
+     "key_columns": [
+      "uei",
+      "cage_code"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "fpds_uei_edges.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "one row per DECLARED (child_uei, parent_uei, edge_type) - literal pairs observed on transactions; connections, not a verified tree",
+     "rebuilt_by": [
+      "13_build_fpds_hierarchy.py"
+     ],
+     "enriched_by": [
+      "26_fix_sanity_failures.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "prime_contracts.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "cage_code"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "40_build_prime_contracts.py"
+     ],
+     "enriched_by": [
+      "207_normalize_extent_competed.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "prime_contracts_archive_backfill.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "cage_code"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "prime_contracts_awards.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "cage_code"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "prime_contracts_entity_year.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "40_build_prime_contracts.py"
+     ],
+     "enriched_by": [
+      "131_merge_archive_backfill.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "prime_contracts_published.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "cage_code"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "sam_prime_contracts_fy2000_2007.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cage_code"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "sam_prime_contracts_fy2000_2007_PUBLISHABLE.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cage_code"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "sam_prime_contracts_fy2000_2007_reconciliation.csv",
+     "status": "internal-by-decision",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    }
+   ]
+  },
+  {
+   "collection": "subcontracting",
+   "name": "Federal Subcontracting",
+   "shelf": "pro",
+   "rebuild_command": "py -3 code/build.py run subcontracting --execute",
+   "n_tables": 5,
+   "tables": [
+    {
+     "table": "prime_sub_network.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "subaward_entity_rollup.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "subaward_identifier_harvest.csv",
+     "status": "internal-by-decision",
+     "key_columns": [
+      "uei",
+      "cage_code"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "subaward_identifier_netnew.csv",
+     "status": "internal-by-decision",
+     "key_columns": [
+      "uei",
+      "cage_code"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "subawards.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "20_build_subcontracts.py"
+     ],
+     "enriched_by": [
+      "121_pull_subawards_api.py",
+      "250_demote_stale_tierA_subaward_rows.py",
+      "45_promote_subawards.py"
+     ],
+     "never_run_warning": []
+    }
+   ]
+  },
+  {
+   "collection": "native-owned-businesses",
+   "name": "Native-Owned Businesses",
+   "shelf": "pro",
+   "rebuild_command": "py -3 code/build.py run native-owned-businesses --execute",
+   "n_tables": 7,
+   "tables": [
+    {
+     "table": "individual_native_exclusion_pairs.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "individual_native_firm_contracts.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "individual_native_firm_contracts_published.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "individual_native_firm_register.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "individual_native_ownership_verification.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "individual_native_prior_rulings.csv",
+     "status": "internal-by-decision",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "individual_native_verification_candidates.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    }
+   ]
+  },
+  {
+   "collection": "natural-resources",
+   "name": "Natural Resource Revenues",
+   "shelf": "pro",
+   "rebuild_command": "py -3 code/build.py run natural-resources --execute",
+   "n_tables": 9,
+   "tables": [
+    {
+     "table": "anc_ceiling_roster.csv",
+     "status": "shippable",
+     "key_columns": [
+      "uei",
+      "cage_code"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "ancsa_filings_index.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "nd_severance_allocation.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "resource_asset_source_coverage.csv",
+     "status": "internal-by-decision",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "resource_assets.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "resource_parties.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid",
+      "entity_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "resource_revenue.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "tribal_bond_issuances.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "tribal_tax_bases.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    }
+   ]
+  },
+  {
+   "collection": "nonprofits",
+   "name": "Native Nonprofits",
+   "shelf": "pro",
+   "rebuild_command": "py -3 code/build.py run nonprofits --execute",
+   "n_tables": 12,
+   "tables": [
+    {
+     "table": "fac_tribal_single_audits.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid",
+      "entity_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "grantmaker_funding_coverage.csv",
+     "status": "internal-by-decision",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "grantmaker_funding_flows.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "grantmaker_funding_overlap.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "np_ein_entity_hub.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid",
+      "entity_id",
+      "ein"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "np_ein_uei_bridge.csv",
+     "status": "internal-by-decision",
+     "key_columns": [
+      "uei",
+      "ein"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "np_financials.csv",
+     "status": "shippable",
+     "key_columns": [
+      "ein"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "np_grantee_financials.csv",
+     "status": "shippable",
+     "key_columns": [
+      "ein"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "np_org_scale.csv",
+     "status": "shippable",
+     "key_columns": [
+      "ein"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "np_orgs.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "entity_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "np_schedule_i_filers.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "np_schedule_i_grants.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    }
+   ]
+  },
+  {
+   "collection": "gaming",
+   "name": "Gaming Intelligence",
+   "shelf": "grove",
+   "rebuild_command": "py -3 code/build.py run gaming --execute",
+   "n_tables": 53,
+   "tables": [
+    {
+     "table": "ca_gaming_facilities_official.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "facility_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "103_build_california_gaming.py"
+     ],
+     "enriched_by": [
+      "266_apply_gaming_hub_spillover_rulings.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "ca_gaming_payments.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "compact_events.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "entity_id",
+      "compact_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "compact_obligation_tribal_agency_bridge.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "compact_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "compact_required_reports.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "entity_id",
+      "compact_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "compact_structured_terms.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "entity_id",
+      "compact_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "compact_terms.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "entity_id",
+      "compact_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "compact_versions.csv",
+     "status": "shippable",
+     "key_columns": [
+      "compact_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "compacts.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "entity_id",
+      "compact_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "digital_gaming_relationships.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "entity_id",
+      "facility_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "digital_gaming_revenue.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "entity_id",
+      "facility_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "119_build_digital_and_loyalty.py"
+     ],
+     "enriched_by": [
+      "174_backfill_digital_gaming_tiers.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "fac_audit_gaming_disclosures.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid",
+      "entity_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "fac_audit_sefa_gaming_programs.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid",
+      "entity_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "fl_gaming_payments.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "facility_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_capacity_official.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "facility_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "92_build_gaming_capacity_official.py"
+     ],
+     "enriched_by": [
+      "106_build_revenue_bounds.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_decision_compact_join.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_decision_events.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_device_observations.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "entity_id",
+      "facility_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_employment_observations.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "entity_id",
+      "facility_id",
+      "ein"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "100_finish_declinations_and_employment.py"
+     ],
+     "enriched_by": [
+      "158_merge_staged_labor_employment.py",
+      "262_repair_form5500_tribe_attribution.py",
+      "265_merge_osha_relift_rows.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_facilities.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "entity_id",
+      "facility_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_facility_metrics.csv",
+     "status": "licensed-never-ships",
+     "key_columns": [
+      "entity_id",
+      "facility_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_field_coverage.csv",
+     "status": "internal-by-decision",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_financing_events.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "91_build_nigc_declinations.py"
+     ],
+     "enriched_by": [
+      "100_finish_declinations_and_employment.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_game_finder_observations.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "entity_id",
+      "facility_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_game_finder_systems.csv",
+     "status": "internal-by-decision",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_land_decisions.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "entity_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_manufacturer_facts.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_mitigation_agreements.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_nigc_roster_link.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "facility_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_ordinance_ocr.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_ordinances.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_project_facilities.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid",
+      "entity_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_projections.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_properties.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "facility_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "82_build_gaming_property_dataset.py"
+     ],
+     "enriched_by": [
+      "160_sync_published_gaming_view.py",
+      "175_sync_published_property_view_entities.py",
+      "255_fix_gaming_property_deal_counts.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_property_capacity_history.csv",
+     "status": "licensed-never-ships",
+     "key_columns": [
+      "entity_id",
+      "facility_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_property_coverage.csv",
+     "status": "internal-by-decision",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "entity_id",
+      "facility_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_property_federal_traces.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "facility_id",
+      "compact_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_property_labor_demand.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "entity_id",
+      "facility_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_property_locations.csv",
+     "status": "UNDOCUMENTED",
+     "key_columns": [
+      "property_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_property_site_observations.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "entity_id",
+      "facility_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_property_universe_events.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid",
+      "entity_id",
+      "facility_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "89_nigc_map_wayback_universe.py"
+     ],
+     "enriched_by": [
+      "165_link_universe_events_to_hub.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_revenue_bounds.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "facility_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_source_claims.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "one row per claim extracted from one source document",
+     "rebuilt_by": [
+      "91_build_nigc_declinations.py"
+     ],
+     "enriched_by": [
+      "100_finish_declinations_and_employment.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_vendor_tribal_licenses.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid",
+      "entity_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "loyalty_program_property.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "entity_id",
+      "facility_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "loyalty_programs.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "entity_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "nigc_declination_letters.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "91_build_nigc_declinations.py"
+     ],
+     "enriched_by": [
+      "100_finish_declinations_and_employment.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "nigc_region_assignments.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "facility_id",
+      "administrative_region_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "nigc_regional_ggr.csv",
+     "status": "shippable",
+     "key_columns": [
+      "administrative_region_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "nigc_revenue_bands.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "state_gaming_observations.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "facility_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "wa_machine_allocations.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "wa_machine_transfers.csv",
+     "status": "UNDOCUMENTED",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    }
+   ]
+  },
+  {
+   "collection": "_entity_layer",
+   "name": "Entity spine, identifiers and reference",
+   "shelf": "infrastructure",
+   "rebuild_command": "py -3 code/build.py run _entity_layer --execute",
+   "n_tables": 47,
+   "tables": [
+    {
+     "table": "admin_region_assignments.csv",
+     "status": "shippable",
+     "key_columns": [
+      "administrative_region_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "admin_region_overlap_derived.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "admin_region_systems.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "admin_regional_observations.csv",
+     "status": "shippable",
+     "key_columns": [
+      "administrative_region_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "admin_regions.csv",
+     "status": "shippable",
+     "key_columns": [
+      "administrative_region_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "bie_uio_dollars_by_entity.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "bie_uio_identifier_links.csv",
+     "status": "internal-by-decision",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "uei",
+      "ein"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "cedar_correction_register.csv",
+     "status": "shippable",
+     "key_columns": [
+      "entity_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "cedar_entity_identity_crosswalk.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "cedar_entity_spine.csv",
+     "status": "unregistered",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "one row per canonical Native entity (hub). Sub-hubs (registrations, facilities) are NEVER rows here - IDENTIFIER_STANDARD.md",
+     "rebuilt_by": [
+      "01_build_entity_spine.py"
+     ],
+     "enriched_by": [
+      "08_build_review_page.py",
+      "115_pull_assistance_archive.py",
+      "163_promote_nho_universe_in_place.py",
+      "241_promote_individual_native_firms_in_place.py",
+      "416_reconcile_spine_id_columns.py",
+      "426_mint_bristol_bay_spine_entities.py",
+      "503_identity.py",
+      "510_assertions.py",
+      "51_add_anc_acronym_aliases.py",
+      "52_add_village_corporations.py",
+      "61_add_nho_intertribal_to_spine.py",
+      "66_build_entity_hierarchy.py",
+      "69_enrich_spine_from_federal_register.py",
+      "71_fix_known_defects.py",
+      "73_add_tcu_and_cdfi.py",
+      "74_add_organization_acronyms.py",
+      "75_add_bie_schools_and_uios.py"
+     ],
+     "never_run_warning": [
+      "01_build_entity_spine.py: A full rebuild DROPS EVERY APPENDED ENTITY - the village corporations, NHOs, TCUs, CDFIs, BIE schools and UIOs added by ..."
+     ]
+    },
+    {
+     "table": "cedar_identifier_graph_edges.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "cedar_identifier_graph_nodes.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "cedar_identifier_ledger.csv",
+     "status": "unregistered",
+     "key_columns": [
+      "tribe_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "01_build_entity_spine.py"
+     ],
+     "enriched_by": [
+      "03_apply_exclusions_and_tier.py",
+      "510_assertions.py"
+     ],
+     "never_run_warning": [
+      "01_build_entity_spine.py: A full rebuild DROPS EVERY APPENDED ENTITY - the village corporations, NHOs, TCUs, CDFIs, BIE schools and UIOs added by ..."
+     ]
+    },
+    {
+     "table": "cedar_identifier_ledger_final.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "one row per (identifier, entity, evidence) claim; tier X rows are REFUTATIONS and must not be dropped by consumers",
+     "rebuilt_by": [
+      "09_import_rulings.py"
+     ],
+     "enriched_by": [
+      "124_apply_rulings_in_place.py",
+      "163_promote_nho_universe_in_place.py",
+      "174_apply_rulings_to_source_tables.py",
+      "241_promote_individual_native_firms_in_place.py",
+      "50_fix_kootenai_conflation.py",
+      "56_apply_agent_identifier_rulings.py",
+      "63_cross_dataset_reconcile.py",
+      "71_fix_known_defects.py"
+     ],
+     "never_run_warning": [
+      "09_import_rulings.py: Rebuilds cedar_identifier_ledger_final.csv FROM the stale cedar_identifier_ledger_tiered.csv, which does not carry rows ..."
+     ]
+    },
+    {
+     "table": "cedar_identifier_ledger_tiered.csv",
+     "status": "internal-by-decision",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "03_apply_exclusions_and_tier.py"
+     ],
+     "enriched_by": [
+      "09_import_rulings.py",
+      "50_fix_kootenai_conflation.py",
+      "64_fix_village_government_misattribution.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "cedar_identifier_propagation.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "cedar_publishable_identifiers.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "cedar_ruling_ledger_consolidated.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "cedar_rulings.csv",
+     "status": "unregistered",
+     "key_columns": [
+      "cage_code"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "cross_dataset_ruling_map.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "entity_aliases.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid",
+      "entity_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "97_build_aliases_and_relationships.py"
+     ],
+     "enriched_by": [
+      "418_build_entity_alias_layer.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "entity_candidates_new.csv",
+     "status": "internal-by-decision",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "entity_candidates_rejected.csv",
+     "status": "internal-by-decision",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "entity_evidence_profile.csv",
+     "status": "internal-by-decision",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "151_rebuild_entity_evidence_profile.py"
+     ],
+     "enriched_by": [
+      "110_build_harmonized_views.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "entity_hierarchy.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "entity_name_harvest.csv",
+     "status": "internal-by-decision",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "entity_relationships.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "97_build_aliases_and_relationships.py"
+     ],
+     "enriched_by": [
+      "310_correct_overstated_owned_by_edge_tiers.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "entity_year_coverage.csv",
+     "status": "internal-by-decision",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "entity_year_panel.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "federal_recognition_events.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "federal_recognition_roster.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "foia_discovery_targets.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "foia_request_index.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "intertribal_memberships.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "intertribal_orgs.csv",
+     "status": "shippable",
+     "key_columns": [
+      "ein"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "native_fi_roster.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "nho_doi_notification_roster.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid",
+      "uei",
+      "cage_code"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "nho_ito_spine_crosswalk.csv",
+     "status": "internal-by-decision",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [
+      "61_add_nho_intertribal_to_spine.py"
+     ],
+     "enriched_by": [
+      "163_promote_nho_universe_in_place.py"
+     ],
+     "never_run_warning": []
+    },
+    {
+     "table": "nho_ownership_changes.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "nho_parents.csv",
+     "status": "internal-by-decision",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "nho_register.csv",
+     "status": "shippable",
+     "key_columns": [
+      "ein"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "nho_verified_entities.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid",
+      "uei",
+      "cage_code"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "tcu_cdfi_added.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "tcu_cdfi_ownership_evidence.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "tcu_roster.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "visitor_access_events.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "visitor_record_foia_requests.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    }
+   ]
+  }
+ ]
+}
