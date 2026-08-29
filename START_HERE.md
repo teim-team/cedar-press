@@ -455,6 +455,14 @@ today: 85% x17, 70% x152, 55% x45, 40% x55.
 
 ## TOMORROW, IN ORDER
 
+> **2026-08-30: every decision waiting on the owner is now ONE PAGE —
+> `review/OWNER_DECISION_QUEUE.md`.** Five items, each with its evidence
+> attached and the consequence of each answer stated. Agents: APPEND new
+> proposals there as well as to your inbox file; a ruling should take the
+> owner a minute, not an investigation.
+
+
+
 > ### UPDATED 2026-08-29 — the top of this list changed
 >
 > **Item 0 is now the only one that unblocks the rest of the mission spec.**

@@ -274,6 +274,14 @@ resolved 622,954 transactions on 2,315 UEIs
                                110,705 tx     $32,147,669,996
 ```
 
+**Integrator reconciliation, 2026-08-30.** An independent recount over the
+shipped artifact gave 124,544 tx / $36.76B and was briefly recorded as a
+discrepancy against the 110,705 / $32.15B above. Both are right at different
+scopes: 124,544 = ALL non-RESOLVED; of those, 110,705 ship an owner the layer
+cannot confirm ($32.1B), **9,402 ship an owner the layer actively CONTRADICTS
+($2.1B — the sharpest bucket)**, and ~4,437 ship no owner at all (~$2.5B, no
+exposure). 110,705 + 9,402 + 4,437 = 124,544. Discrepancy closed.
+
 Read the last line carefully. **$32.1 billion of obligations are attributed to
 an owner Cedar cannot demonstrate held the firm on the transaction date.**
 Those are not 110,705 errors — most of them are probably right. They are the
