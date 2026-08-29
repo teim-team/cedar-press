@@ -516,10 +516,6 @@
   .teim-rd .cp-split.auth-split { grid-template-columns: 1fr; }
   .teim-rd .cp-split .auth-editorial { order: -1; padding: 1.6rem 1.15rem 2rem; }
   .teim-rd .cp-split__brand--form { display: block; }
-  /* The wordmark above and the title below already carry both halves of
-   * this line; on the stacked page the partner eyebrow read the same
-   * claim three times in one screen. */
-  .teim-rd .cp-split__partner { display: none; }
   /* Without the ripple mark beside it, the teal panel's opening centers
    * and takes the width the mark was holding. */
   .teim-rd .cp-hero2__inner { margin-inline: auto; text-align: center; }
@@ -687,12 +683,6 @@
 /* The title states the entitlement rule in a full sentence, so it sets
  * tighter than a two-word heading would. */
 .teim-rd .cp-split__form .auth-editorial__title { font-size: clamp(1.4rem, 2.4vw, 1.75rem); line-height: 1.2; letter-spacing: -0.02em; }
-/* The right side is white and formy, so it loses the brand the moment the eye
- * crosses the divide. This puts the partnership back, in the masthead's own
- * register rather than as a second logo. */
-.teim-rd .cp-split__partner { margin: 0 0 0.7rem; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
-.teim-rd .cp-split__partner a { color: var(--dteal); text-decoration: none; }
-.teim-rd .cp-split__partner a:hover { text-decoration: underline; }
 .teim-rd .cp-gate__sub { font-family: var(--sans); font-size: 1rem; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); margin: 1.6rem 0 0.7rem; }
 .teim-rd .cp-split__form .cp-gate__form { margin-top: 0; }
 .teim-rd .cp-split__form .gv-btn--primary { width: 100%; padding: 0.8rem 1.5rem; font-size: 1rem; }

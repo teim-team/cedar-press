@@ -26,7 +26,7 @@ import { Link } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
 import { activatePressAccount, validatePressCode } from "../../api";
-import { LUMECON_URL, TBN_PLANS_URL, TBN_URL } from "../../features/grove/pressArticles";
+import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
 import {
   PRESS_METHODS_PATH,
   PRESS_REQUEST_PATH,
@@ -315,14 +315,13 @@ export default function PressGate({ user }) {
           <span className="cp-split__brand cp-split__brand--form" aria-hidden="true">
             Cedar Press
           </span>
-          <p className="cp-split__partner">
-            Built by <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a>. Available
-            exclusively through{" "}
-            <a href={TBN_URL} target="_blank" rel="noreferrer">Tribal Business News</a>.
-          </p>
           {/* "Through", not "to subscribers": the first sounds like every
               subscriber gets Cedar Press, and the upgrade line right below
-              says otherwise. The distribution relationship is the claim. */}
+              says otherwise. The distribution relationship is the claim —
+              once. The "Built by Lumecon / available through TBN" eyebrow
+              that used to sit above this title said the same thing in the
+              same breath at every width, so the title carries it alone;
+              who built it is the hero's and the footer's line. */}
           <h2 className="auth-editorial__title">
             Cedar Press is available exclusively through Tribal Business News.
           </h2>
