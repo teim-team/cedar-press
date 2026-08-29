@@ -235,9 +235,21 @@ verbatim record. The 103 unresolved are banks and non-Native counterparties,
 unresolved BY DESIGN; the table's own recorded refusals are honoured, not
 re-litigated.
 
+**Phase 6 replay — the verification half, demonstrated 2026-08-30.**
+Procedure, reproducible by anyone: `git worktree add <tmp> 98986ab`, junction
+`data/clean` into the worktree read-only, copy the small spine CSVs, run the
+commit's own `510 verify` and `512 verify`. Result: both pass with numbers
+identical to the live run (29,726 assertions / 29,363 facts / 332 refutations;
+13 collections / 255 tables / 0 violations), and the tracked identity register
+is byte-identical between git's copy and disk (sha256 match). What this proves:
+the code at a stamped commit runs and validates against the data. What it does
+NOT prove, stated plainly: a full BUILD replay — rebuilding dist/ from raw at
+that commit and matching digests — has still never been demonstrated, and the
+run-manifest checksums remain the only attestation of the data side.
+
 Remaining: Phase 5 at full breadth (the slice proves the stack; the gaming
-collection's 60+ tables have not each been walked through it), Phase 7
-(dataset migration), and the Phase 6 replay proof.
+collection's tables have not each been walked through it), Phase 7 (dataset
+migration), and the Phase 6 BUILD-replay proof.
 
 ---
 
