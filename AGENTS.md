@@ -4433,3 +4433,88 @@ table with rows has no verdict, names it, and exits non-zero. **Whoever built
 "extract the entity crosswalk as a standalone deliverable" is the one thing
 `87_build_dataset_notes.TERMS` forbids a subscriber to do, so SHIP is not the
 obvious answer.
+
+## NAMED GATE FAILURE — not mine, owner identified (2026-08-29, ~03:55)
+
+Per standing rule 15 option 3, by **workstream C** (release replay, F13).
+
+`62_no_regression_check.py` FAILS on one metric:
+
+    !! sem_entities_uid_reassigned = 1, must be 0
+
+    SEMANTIC CHANGES since the baseline (1 named of 1 total):
+      UID REASSIGNED  AKNF-ACSRMT-00-CALSTA-ASVCPR
+                      was: CE-00001-6S
+                      now: CE-00002-CJ
+
+**Owner: whoever is running `code/503_identity.py` this pass — workstream D**,
+which owns that file in `docs/ARCHITECTURE_DECISIONS.md`'s ownership table.
+
+Evidence, not inference:
+
+- `data/spine/cedar_identity_register.csv` was rewritten at **03:54:14** today
+  and now carries a **new column, `register_status`**. That column is written
+  in exactly one place: `code/503_identity.py:795` (`"register_status":
+  "active"`), 814, 859, 873, 893.
+- `code/503_identity.py` is MODIFIED in the working tree, so this is live work,
+  not abandoned work. Re-minting another agent's in-flight register would race
+  it, and the register is the one data file git tracks precisely because a
+  silent change to it must never be undetectable.
+- The register's diff is 1,537 lines replaced. The gate reports **1** uid
+  reassigned rather than 1,536, so this is not (yet) a mass re-key — but the
+  `minted` date on the moved row is **2026-08-29**, i.e. re-minted today.
+
+**What has to happen:** workstream D either (a) shows the reassignment is
+intended and re-records the semantic baseline WITH a written reason — the
+gate's own note says *do NOT re-record the baseline until you know why* — or
+(b) restores `AKNF-ACSRMT-00-CALSTA-ASVCPR` to `CE-00001-6S`. A uid that moves
+is the single thing the identity contract promises cannot happen ("the uid
+never changes" is written into every row of that register's own
+`class_since_basis` column), and 1,536 uids are stamped across 125 tables.
+
+Workstream C did not write to `data/spine/`, did not run `503_identity.py`, and
+touched only `code/516_release_manifest.py`, `code/build.py`,
+`docs/RELEASE_REPLAY_LOG.md`, `docs/releases/` and the untracked
+`data/_release_inputs/` store. `62` exited **0** earlier in this same session
+(03:38) and this metric was green then; it went red after 03:54.
+
+**Follow-up, same session, and it is the more important finding.** The gate
+did not settle — it OSCILLATED, and which metric fails depends on the second
+you run it:
+
+| run | result |
+|---|---|
+| 03:38 | exit 1 — `handoffs_failed_verification = 1` |
+| ~03:45 | exit 0 — `no regressions` |
+| ~03:55 | exit 1 — `sem_entities_uid_reassigned = 1` |
+| ~04:00 | exit 0 — `no regressions` |
+| 04:01 | exit 1 — `sem_facts_winner_changed 7,572` / `sem_facts_status_changed 1,504` / `sem_facts_removed 10,087` |
+| 04:03 | exit 1 — back to `sem_entities_uid_reassigned = 1` |
+
+Between those runs `data/clean/cedar_resolved_facts.csv` was rewritten (03:44 →
+04:00) and then reverted to its 03:44 mtime, and
+`data/spine/cedar_identity_register.csv` gained a column. Nothing workstream C
+did touches either file.
+
+**The gate is not lying and it is not broken. It is measuring a tree that four
+workstreams are writing at once.** A MUST_NOT_RISE metric compares against a
+baseline that assumes one writer, and the parallel pass broke that assumption
+without anyone deciding to. Two consequences, both for the integrator:
+
+1. **"62 exits 0" is not a durable claim during a parallel pass.** Any handoff
+   whose verify commands include `62` will pass or fail on timing. That is the
+   same self-reference the gate already carves out for
+   `handoffs_failed_only_on_this_gate`, one level up.
+2. **A release capture has the same problem**, and it is now measured rather
+   than argued: `516_release_manifest.py build --all` re-hashes every input at
+   the end and reported `quiescent: false`, naming
+   `cedar_resolved_facts.csv` and `_correction_scan_cache.json` as rewritten
+   mid-capture. See `docs/RELEASE_REPLAY_LOG.md` §4b and gated debt **D9**.
+
+**What has to happen:** the integrator serialises the identity/assertion layer
+work (`503_identity.py`, `510_assertions.py` — workstream D) against gate runs,
+or declares a freeze window before the gate and before any release capture.
+Whoever re-records the semantic baseline should also confirm
+`AKNF-ACSRMT-00-CALSTA-ASVCPR`'s uid is the one the register is meant to
+carry — the register's own `class_since_basis` column promises, in every row,
+that *the uid never changes*.

@@ -7,6 +7,7 @@ Cedar Press - build.py: one entry point per collection.
     py -3 code/build.py plan gaming --verbose   # with the reason for each step
     py -3 code/build.py run  gaming --execute   # actually run it
     py -3 code/build.py ship --execute          # the 7-step ship chain
+                                                #   + the release manifest
 
 WHY THIS EXISTS
 ---------------
@@ -260,6 +261,17 @@ SHIP_CHAIN = [
 ]
 
 
+# AFTER the seven, not inside them. The runbook's part 1 is a seven-step chain
+# and several docs quote that number; renumbering it here would make the prose
+# wrong everywhere at once. This is a POST-CHAIN step, and it is not optional:
+# without it a release ships with a stamp that names a commit and nothing else,
+# which is precisely what external review finding F13 refused to accept -
+# "a checksum is a receipt, not a backup". 516 records every transitive input,
+# retains what it can, and states by name what blocks exact replay.
+POST_CHAIN = ("516_release_manifest.py", "the release manifest + input retention",
+              "watch the per-collection verdict and the BLOCKING lines")
+
+
 def cmd_ship(args) -> int:
     """Run the documented ship chain. Dry run unless --execute."""
     print("\nSHIP CHAIN - docs/SHIPPING_RUNBOOK.md part 1\n")
@@ -268,6 +280,9 @@ def cmd_ship(args) -> int:
         print(f"       {what}")
         if watch:
             print(f"       ^ {watch}")
+    print(f"  8. {POST_CHAIN[0]} build --all   (post-chain)")
+    print(f"       {POST_CHAIN[1]}")
+    print(f"       ^ {POST_CHAIN[2]}")
     print()
 
     # Step 0 from the runbook: is anyone else still writing?
@@ -365,18 +380,48 @@ def cmd_ship(args) -> int:
         if r.returncode != 0:
             sys.exit(f"\nSTOPPED at step {i} ({script}) - exit {r.returncode}. "
                      f"Nothing after this ran. {_watch or ''}")
+    # ---- step 8, post-chain: the release manifest -------------------------
+    # This runs AFTER the outputs exist, because it hashes them. It is allowed
+    # to fail without unshipping what the chain built - but the stamp then says
+    # so, rather than claiming a replayability it does not have.
+    release_id = commit[:12]
+    print(f"\n[8/8 post-chain] 516_release_manifest.py build --all "
+          f"--release {release_id}", flush=True)
+    mr = subprocess.run(
+        [sys.executable, str(HERE / "516_release_manifest.py"), "build",
+         "--all", "--release", release_id], cwd=str(ROOT))
+    manifest = f"docs/releases/{release_id}/manifest.json"
+    verdict = "MANIFEST_FAILED"
+    if mr.returncode == 0:
+        try:
+            verdict = json.loads(
+                (ROOT / manifest).read_text(encoding="utf-8")
+            )["release_verdict"]
+        except Exception:
+            verdict = "MANIFEST_UNREADABLE"
+
     stamp = ROOT / "docs" / "RELEASE_STAMP.json"
     stamp.write_text(json.dumps({
         "commit": commit,
+        "release_id": release_id,
         "shipped_at": datetime.now().isoformat(timespec="seconds"),
-        "chain": [s for s, *_ in SHIP_CHAIN],
-        "note": "Replay: check out this commit. Data inputs are attested by "
-                "the run manifests' logical checksums, which git does not "
-                "cover and this stamp does not replace.",
+        "chain": [s for s, *_ in SHIP_CHAIN] + [POST_CHAIN[0]],
+        "release_manifest": manifest if mr.returncode == 0 else None,
+        "replayability_verdict": verdict,
+        "note": "Replay: `py -3 code/516_release_manifest.py replay --release "
+                f"{release_id} --into <dir>`, which restores the retained "
+                "inputs from data/_release_inputs/ and checks out this commit. "
+                "The manifest names every component that blocks exact "
+                "reproduction; read replayability_verdict above before "
+                "claiming this release was reproduced.",
     }, indent=1), encoding="utf-8")
     print("\nship chain complete. Release stamped " + commit[:12]
-          + " -> docs/RELEASE_STAMP.json. Check SHIP RATE in the 87 and 25 "
-            "output above.")
+          + f" -> docs/RELEASE_STAMP.json  (replayability: {verdict}). "
+            "Check SHIP RATE in the 87 and 25 output above.")
+    if mr.returncode != 0:
+        print("  WARNING: the release manifest did NOT build. The outputs "
+              "shipped; their inputs are not recorded or retained. Do not "
+              "call this release replayable.")
     return 0
 
 
