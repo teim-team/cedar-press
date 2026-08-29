@@ -7,6 +7,8 @@
 // took you depended on where you already were.
 import { Link, NavLink } from "react-router";
 
+import { useAuth } from "../../context/useAuth";
+
 /**
  * The reader's initials, from the address. Two letters where the address
  * has a separator to take them from, one otherwise.
@@ -60,6 +62,11 @@ const NAV = [
  */
 export function PressMast({ user, onSignOut, section = null, nav = true }) {
   const home = section === "home";
+  // The distribution line is for visitors deciding what this is; a
+  // subscriber already inside the product does not need the masthead
+  // re-introducing it on every page. Read from the session directly, since
+  // not every page threads `user` into the masthead.
+  const { user: signedIn } = useAuth();
   return (
     <>
     {/* The first stop for a keyboard or a screen reader: the nav and the
@@ -87,13 +94,16 @@ export function PressMast({ user, onSignOut, section = null, nav = true }) {
             <span className="cp-mast__word">CEDAR PRESS</span>
           </Link>
         )}
-        {/* Who made it and who sells it, said plainly. "A × partnership"
-            left both questions open. */}
-        <span className="cp-mast__of">
-          Built by <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a>. Available
-          exclusively through{" "}
-          <a href={TBN_URL} target="_blank" rel="noreferrer">Tribal Business News</a>.
-        </span>
+        {/* Who made it and who sells it, said plainly — to visitors. "A ×
+            partnership" left both questions open; a signed-in reader has
+            already answered them. */}
+        {signedIn ? null : (
+          <span className="cp-mast__of">
+            Built by <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a>. Available
+            exclusively through{" "}
+            <a href={TBN_URL} target="_blank" rel="noreferrer">Tribal Business News</a>.
+          </span>
+        )}
         {user ? (
           <span className="cp-mast__user">
             <Link className="cp-avatar" to={PRESS_SETTINGS_PATH} title={user.email}>
