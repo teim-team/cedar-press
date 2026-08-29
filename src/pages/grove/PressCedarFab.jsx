@@ -46,6 +46,18 @@ export function PressCedarFab({ gated = null, examples = [] }) {
     if (open && connected) inputRef.current?.focus();
   }, [open, connected]);
 
+  // Escape closes the panel. The launcher toggles it too, but on phones the
+  // browser's own toolbar can sit over the launcher while the panel is open,
+  // which left no visible way back out — the panel carries its own close.
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKey = (event) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
   useEffect(() => {
     const onScope = (event) => {
       const next = event?.detail;
@@ -127,6 +139,20 @@ export function PressCedarFab({ gated = null, examples = [] }) {
     <div className="cedar-widget cedar-widget--launcher-only">
       {open ? (
         <div className="cedar-widget__panel" role="dialog" aria-label="Ask Cedar">
+          {/* A dialog header, not a floating glyph: the caption names the
+              panel and the close sits where every dialog keeps it. Sticky,
+              so a scrolled answer never carries the way out with it. */}
+          <div className="cedar-widget__panelhead">
+            <span className="cedar-widget__panelcap">Ask Cedar</span>
+            <button
+              type="button"
+              className="cedar-widget__close"
+              aria-label="Close Ask Cedar"
+              onClick={() => setOpen(false)}
+            >
+              <span aria-hidden="true">&#215;</span>
+            </button>
+          </div>
           {connected ? (
             <>
               <form className="cedar-widget__ask" onSubmit={ask}>

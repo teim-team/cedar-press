@@ -21,12 +21,12 @@
 // There is deliberately no "create account" here: an account exists because an
 // entitlement does.
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
 import { activatePressAccount, validatePressCode } from "../../api";
-import { LUMECON_URL, TBN_PLANS_URL, TBN_URL } from "../../features/grove/pressArticles";
+import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
 import {
   PRESS_METHODS_PATH,
   PRESS_REQUEST_PATH,
@@ -118,6 +118,31 @@ function browserStorage() {
 
 export default function PressGate({ user }) {
   const { login, logout, refreshSession } = useAuth();
+  // The gate reads as one long scroll on a phone, so its sections arrive as
+  // they enter the viewport instead of standing there already. One-way, like
+  // the shelf bands: a section that has been seen stays seen. Anywhere
+  // without IntersectionObserver reveals everything immediately.
+  const fadeRoot = useRef(null);
+  useEffect(() => {
+    const nodes = [...(fadeRoot.current?.querySelectorAll(".cp-fade") ?? [])];
+    if (typeof IntersectionObserver === "undefined") {
+      nodes.forEach((node) => node.classList.add("is-in"));
+      return undefined;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-in");
+            observer.unobserve(entry.target);
+          }
+        }
+      },
+      { rootMargin: "-6% 0px" },
+    );
+    nodes.forEach((node) => observer.observe(node));
+    return () => observer.disconnect();
+  }, []);
   const [step, setStep] = useState(() => initialPressStep(browserStorage()));
   // Plans or sign-in, one at a time. Stacking both read as one long column
   // of competing calls to action; the panel opens on the side of the hinge
@@ -190,7 +215,7 @@ export default function PressGate({ user }) {
   };
 
   return (
-    <main className="empty-state auth-split cp-split">
+    <main className="empty-state auth-split cp-split" ref={fadeRoot}>
       <aside className="auth-hero cp-hero2">
         <span className="auth-hero__glow auth-hero__glow--a" aria-hidden="true" />
         <span className="auth-hero__glow auth-hero__glow--b" aria-hidden="true" />
@@ -208,20 +233,20 @@ export default function PressGate({ user }) {
         />
         <div className="auth-hero__inner cp-hero2__inner">
           <span className="cp-split__brand">Cedar Press</span>
-          <p className="cp-hero2__tagline">Trusted intelligence for Indian Country.</p>
+          <p className="cp-hero2__tagline cp-fade">Trusted intelligence for Indian Country.</p>
           {/* Two messages, on purpose: the door sells the asset ("this is
               the data you should want access to"), the signed-in overview
               keeps the editorial "Know what's shaping Indian Country."
               ("here's what you can do with it"). Neither repeats the tier
               lines: the shelves explain the ladder. */}
-          <h1 className="auth-hero__headline cp-hero2__headline">
+          <h1 className="auth-hero__headline cp-hero2__headline cp-fade">
             The data behind Indian Country.
           </h1>
-          <p className="auth-hero__lede cp-hero2__lede">
+          <p className="auth-hero__lede cp-hero2__lede cp-fade">
             Original collections built from fragmented records, connected through original
             research, and maintained as Indian Country changes.
           </p>
-          <ul className="cp-proof">
+          <ul className="cp-proof cp-fade">
             {PROOF_POINTS.map((point) => (
               <li className="cp-proof__item" key={point.id}>
                 {/* The title leads and holds the tile in both states; below
@@ -241,7 +266,7 @@ export default function PressGate({ user }) {
               conference should learn what is actually inside from the door,
               and eleven specific collection names say more than any
               adjective. Cedar is the way to ask what any of them means. */}
-          <div className="cp-cats">
+          <div className="cp-cats cp-fade">
             <p className="cp-cats__head">The intelligence inside</p>
             <p className="cp-cats__names">
               {CATALOG_NAMES.map((name, index) => (
@@ -266,8 +291,8 @@ export default function PressGate({ user }) {
           {/* The cards state the idea; the strip is what proves it. Text
               only: a row of institutional logos reads as sponsorship, which
               none of these have given, so the disclaimer travels with it. */}
-          <p className="cp-cred__head">Team experience</p>
-          <div className="cp-cred">
+          <p className="cp-cred__head cp-fade">Team experience</p>
+          <div className="cp-cred cp-fade">
             {CREDIBILITY_STRIP.map((group) => (
               <div className="cp-cred__group" key={group.id}>
                 <span className="cp-cred__ic" aria-hidden="true">{STRIP_ICONS[group.kind]}</span>
@@ -275,8 +300,8 @@ export default function PressGate({ user }) {
               </div>
             ))}
           </div>
-          <p className="cp-cred__note">{CREDIBILITY_DISCLAIMER}</p>
-          <Link className="cp-split__method" to={PRESS_METHODS_PATH}>
+          <p className="cp-cred__note cp-fade">{CREDIBILITY_DISCLAIMER}</p>
+          <Link className="cp-split__method cp-fade" to={PRESS_METHODS_PATH}>
             How Cedar builds its collections <span aria-hidden="true">&#8594;</span>
           </Link>
         </div>
@@ -290,14 +315,13 @@ export default function PressGate({ user }) {
           <span className="cp-split__brand cp-split__brand--form" aria-hidden="true">
             Cedar Press
           </span>
-          <p className="cp-split__partner">
-            Built by <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a>. Available
-            exclusively through{" "}
-            <a href={TBN_URL} target="_blank" rel="noreferrer">Tribal Business News</a>.
-          </p>
           {/* "Through", not "to subscribers": the first sounds like every
               subscriber gets Cedar Press, and the upgrade line right below
-              says otherwise. The distribution relationship is the claim. */}
+              says otherwise. The distribution relationship is the claim —
+              once. The "Built by Lumecon / available through TBN" eyebrow
+              that used to sit above this title said the same thing in the
+              same breath at every width, so the title carries it alone;
+              who built it is the hero's and the footer's line. */}
           <h2 className="auth-editorial__title">
             Cedar Press is available exclusively through Tribal Business News.
           </h2>
@@ -512,7 +536,7 @@ export default function PressGate({ user }) {
               to its own records — and the second two require no subscription,
               so they are named here where a non-subscriber actually arrives.
               Both pages are public. */}
-          <div className="cp-gate__other">
+          <div className="cp-gate__other cp-fade">
             <span className="cp-gate__othercap">Other ways to work with Cedar Press</span>
             {/* Governance before commerce: a nation's right to its own
                 records leads, and the project pathway follows. */}
