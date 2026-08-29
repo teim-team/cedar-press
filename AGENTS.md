@@ -90,6 +90,35 @@ When several agents run at once, file ownership is declared **before** editing i
 live data and commits. Only one agent may own a central file per pass. If two need
 incompatible changes to the same file, stage them; do not race.
 
+#### OPEN GATE FAILURE, named per standing rule 15 — `ship_dist_rows`
+
+`62_no_regression_check.py` exits 1 as of 2026-08-29 11:40 on:
+
+```
+!! ship_dist_rows FELL 8,463,001 -> 8,461,252
+!! ship_ratio_pct FELL 99.774% -> 99.773% AND shipped rows fell too.
+```
+
+**Owner: the prime-contracts / contractors workstream.** Measured, not guessed:
+the fall is **exactly** `prime_contracts_entity_year.csv`, shipped at 8,464 rows
+in `dist/02*/…notes.json` and 6,715 rows live — a delta of **1,749**, which is
+the whole of the regression to the row. The file was rewritten six minutes
+before the gate run by the new, uncommitted `code/428_rebuild_prime_entity_year.py`
+(`code/40_build_prime_contracts.py`, `code/131_merge_archive_backfill.py`,
+`code/114_pull_prime_archive.py` and `code/cedar_prime_panel.py` are modified in
+the same working tree). No other table in the shipping scan moved by an amount
+that could account for it; every other recently-touched table GREW.
+
+Nothing in the `federal-register` closure pass touches that table, that script
+or `dist/`. `federal-register`'s own gate is
+`py -3 code/519_closure_federal_register.py verify`, which exits 0, and the two
+lint counters this pass did move went DOWN (`lint_class6` 30 → 29,
+`lint_bug_class_instances` 147 → 146).
+
+Whoever owns 428 either restores the 1,749 rows or declares them in
+`cedar_correction_register.csv` with a `rows_removed` total EXACTLY equal to the
+fall — 62 allows a decline only on that exact arithmetic, deliberately.
+
 ---
 
 ## CURRENT STATE (2026-08-06) — superseded by the section above, kept as history

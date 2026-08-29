@@ -373,6 +373,154 @@ KNOWN_ORDERINGS = [
              "prime_contracts.csv reverts it and 207 must be re-run",
      "enricher_columns": ["extent_competed_normalized",
                           "extent_competed_normalized_basis"]},
+    # Declared 2026-08-29 by the `nagpra` closure pass, contract point C8.
+    #
+    # `build.py plan nagpra` printed "ENRICHER BACKUPS PRESENT on 2 table(s)
+    # -> re-run unknown". "Unknown" is not a plan, so both backups were run to
+    # ground and they turn out to be two different things.
+    #
+    # THE REAL ONE. 503 discovers its tables at RUNTIME - it stamps cedar_uid
+    # into every data/clean CSV carrying one of 18 entity-id columns - so no
+    # static io scan can attribute it and the plan listed zero phase-2
+    # enrichers for a table 503 demonstrably edited. This ordering has been
+    # PAID: 503 stamped the bridge on 2026-08-28 (the .bak_2026-08-28_pre505
+    # is the receipt) and the 2026-08-29 rebuild reverted it. The released
+    # bridge today has 14 columns and no cedar_uid, and the reason its replay
+    # is byte-identical is that the enricher's work is currently ABSENT, not
+    # that the plan reproduces it. `columns_lost_vs_backup` cannot see this:
+    # the newest backup is the PRE-505 state, so the live table matches it.
+    {"rebuild": "77_build_nagpra_dataset.py",
+     "enricher": "503_identity.py",
+     "file": "nagpra_notice_entity_bridge.csv",
+     "cost": "PAID 2026-08-29 - a rebuild dropped the cedar_uid 503 stamped "
+             "on 2026-08-28, and the shipped bridge lost the column a buyer "
+             "joins the entity layer on. Re-run `503_identity.py stamp "
+             "--apply` after any 77 build",
+     "enricher_columns": ["cedar_uid"]},
+    # AND THE ONE THAT IS NOT AN ENRICHER AT ALL, recorded because the next
+    # agent will otherwise re-investigate it: `*.bak_2026-08-26_pre_342_
+    # nagpra_refresh` beside BOTH nagpra tables is a hand-taken safety copy,
+    # not an enricher's backup. 342_pull_federal_register_incremental.py names
+    # its own backups `pre_342_pull_federal_register_incremental`, never
+    # mentions NAGPRA, and writes only federal_actions*.csv. nagpra_notices.csv
+    # carries no entity-id column either, so 503 skips it. Nothing enriches
+    # nagpra_notices.csv, and no ordering is declared for it.
+    #
+    # 78 is the other rebuilder in nagpra's plan and it writes 18 tables, only
+    # three of which belong to this collection. A full 78 run rewrites
+    # lobbying_issue_families_filing.csv from scratch and drops five columns it
+    # does not produce. The nagpra rebuild path therefore uses
+    # `78_content_analysis.py --nagpra-only`, which holds those writes back;
+    # the ordering below is what a FULL 78 run would owe.
+    {"rebuild": "78_content_analysis.py",
+     "enricher": "503_identity.py",
+     "file": "lobbying_issue_families_filing.csv",
+     "cost": "not yet paid - 78 is in the `nagpra` plan but rebuilds a "
+             "`lobbying` table. Use `78_content_analysis.py --nagpra-only` "
+             "for a nagpra rebuild; a full 78 run must be followed by 353 "
+             "then 503",
+     "enricher_columns": ["cedar_uid"]},
+    {"rebuild": "78_content_analysis.py",
+     "enricher": "353_propagate_lobbying_corrections_to_consumers.py",
+     "file": "lobbying_issue_families_filing.csv",
+     "cost": "not yet paid - see the sibling entry above. 353 writes the four "
+             "entity_id_withdrawn* columns in place; a full 78 run reverts a "
+             "correction, which is the disease corrections exist to cure",
+     "enricher_columns": ["entity_id_withdrawn", "entity_id_withdrawn_reason",
+                          "entity_id_withdrawn_by_script",
+                          "entity_id_withdrawn_date"]},
+
+    # ---- federal-register, declared 2026-08-29 during dataset closure ------
+    # THE ONE THAT IS IN THE DOCUMENTED REBUILD COMMAND. `build.py run
+    # federal-register --execute` puts `11_classify_federal_actions.py` in
+    # phase 1, and 11 is a FULL REBUILD of federal_actions.csv from
+    # federal_actions_raw.csv. That file carries two columns 11 does not write
+    # - `pre_2000_flag` and `floor_basis_field`, put there IN PLACE by
+    # `22_apply_temporal_floor.py`. So the collection's own rebuild command
+    # silently drops the flag the published view filters on.
+    #
+    # This was not guessed at. `342_pull_federal_register_incremental.py` says
+    # it in its own docstring - "**11 IS NOT RUN HERE**" - and 342 is the
+    # script that actually refreshed this corpus on 2026-08-26 (its
+    # `.bak_2026-08-26_pre_342_pull_federal_register_incremental` sits beside
+    # both tables and is a hand-taken safety copy, NOT an enricher backup;
+    # `columns_lost_vs_backup` is [] for both, so nothing is owed on those two
+    # receipts and the next agent need not re-investigate them).
+    {"rebuild": "11_classify_federal_actions.py",
+     "enricher": "22_apply_temporal_floor.py",
+     "file": "federal_actions.csv",
+     "cost": "not yet paid, but it is inside `build.py run federal-register "
+             "--execute`: 11 rebuilds this table from the raw pull and writes "
+             "31 of its 33 columns. pre_2000_flag and floor_basis_field are "
+             "22's, and the shipped view filters on pre_2000_flag. Prefer "
+             "342_pull_federal_register_incremental.py, which appends and "
+             "never runs 11; if 11 is run, re-run 22 immediately after",
+     "enricher_columns": ["pre_2000_flag", "floor_basis_field"]},
+    # SEVEN customer tables of the `federal-register` collection carry
+    # `cedar_uid` and a `.bak_2026-08-28_pre505` receipt beside them. 503
+    # discovers its tables at RUNTIME - it stamps every data/clean CSV carrying
+    # one of 18 entity-id columns - so no static io scan can attribute it, and
+    # `build.py plan federal-register` printed "ENRICHER BACKUPS PRESENT on 9
+    # table(s) -> re-run unknown" for all of them. "Unknown" is not a plan.
+    #
+    # The cost is measured, not imagined. `dist/cedar_press.db` - the shipped
+    # release - carries these seven tables WITHOUT cedar_uid: 28 columns where
+    # the live consultation_events.csv has 29. The release predates the stamp,
+    # so the state a rebuild would return them to is the state a buyer is
+    # holding right now, and it is a table that joins to nothing.
+    #
+    # `70_key_unjoined_datasets.py` is here for a second reason as well. It is
+    # the ONLY writer of federal_actions_entity_bridge.csv, and 293's io scan
+    # cannot see it: the write is `wr(CLEAN / "federal_actions_entity_bridge.
+    # csv", bridge)` and `wr(` matches no write hint, so the table has no
+    # rebuilder in the io map and `build.py plan federal-register` omits 70
+    # entirely. Declaring the ordering at least puts the script's name in the
+    # contract, where the next agent will find it.
+    {"rebuild": "96_build_consultation_events.py",
+     "enricher": "503_identity.py",
+     "file": "consultation_events.csv",
+     "cost": "not yet paid HERE, but paid on the identical shape in nagpra on "
+             "2026-08-29. The shipped release already has this table without "
+             "cedar_uid (28 cols vs 29 live); a rebuild returns it there. "
+             "Re-run `503_identity.py stamp --apply` after any 96 build",
+     "enricher_columns": ["cedar_uid"]},
+    {"rebuild": "70_key_unjoined_datasets.py",
+     "enricher": "503_identity.py",
+     "file": "federal_actions_entity_bridge.csv",
+     "cost": "not yet paid - and 70 is invisible to `build.py plan` because "
+             "293's io scan does not recognise its `wr(` write helper, so a "
+             "planned rebuild of this collection leaves the bridge stale "
+             "rather than reverting it. Run 70 by hand after 11, then 503",
+     "enricher_columns": ["cedar_uid"]},
+    {"rebuild": "154_build_fr_ex_parte_notices.py",
+     "enricher": "503_identity.py",
+     "file": "fr_ex_parte_parties.csv",
+     "cost": "not yet paid - declared on the pre505 receipt beside the table",
+     "enricher_columns": ["cedar_uid"]},
+    {"rebuild": "154_build_fr_ex_parte_notices.py",
+     "enricher": "503_identity.py",
+     "file": "fr_ex_parte_party_entity_links.csv",
+     "cost": "not yet paid - declared on the pre505 receipt beside the table",
+     "enricher_columns": ["cedar_uid"]},
+    {"rebuild": "134_build_nepa_eplanning.py",
+     "enricher": "503_identity.py",
+     "file": "nepa_administrative_record_parties.csv",
+     "cost": "not yet paid - declared on the pre505 receipt beside the table",
+     "enricher_columns": ["cedar_uid"]},
+    {"rebuild": "130_build_section_106_consultation.py",
+     "enricher": "503_identity.py",
+     "file": "section_106_consultation_events.csv",
+     "cost": "not yet paid - declared on the pre505 receipt beside the table. "
+             "130 is also AMBIGUOUS to build.py (it rebuilds "
+             "section_106_source_coverage.csv and enriches this file), so it "
+             "is not in the plan at all and must be run by hand - see "
+             "docs/datasets/federal-register.md",
+     "enricher_columns": ["cedar_uid"]},
+    {"rebuild": "130_build_section_106_consultation.py",
+     "enricher": "503_identity.py",
+     "file": "section_106_project_parties.csv",
+     "cost": "not yet paid - declared on the pre505 receipt beside the table",
+     "enricher_columns": ["cedar_uid"]},
 ]
 
 

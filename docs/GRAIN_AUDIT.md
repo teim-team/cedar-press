@@ -21,11 +21,11 @@ Three honest outcomes, and they are three different jobs:
 | | count |
 |---|---:|
 | shippable tables | 210 |
-| **DECLARED_VALIDATED** | **182** |
-| OPEN_WITH_EVIDENCE | 13 |
-| DEFECTIVE | 15 |
+| **DECLARED_VALIDATED** | **184** |
+| OPEN_WITH_EVIDENCE | 12 |
+| DEFECTIVE | 14 |
 | still unexplained | 0 |
-| ratchet `contract_grain_unstated_shippable` | **28** (was 207) |
+| ratchet `contract_grain_unstated_shippable` | **26** (was 207) |
 
 A declaration that the data contradicts is release-blocking through `contract_violations`; there are **0**.
 
@@ -59,7 +59,7 @@ These are not declaration gaps. Each is a table a buyer can double-count today. 
 
 ### `faads_transactions_all_agencies.csv`
 
-179,259 LITERAL duplicate rows of 2,769,748 (6.5%). The pre-2008 assistance pull has no transaction key at all, so nothing in the pipeline can notice a page fetched twice.
+179,259 LITERAL duplicate rows of 2,769,748 (6.5%). DIAGNOSED 2026-08-29 and it is NOT a page fetched twice, which is what this entry used to say: 174,348 of the 179,259 - 97% - come from ONE staged object, ed_fy2007_archive.zip, and 174,957 of the surplus rows are FY2007, while 40 other agency-years are almost clean. A duplicated fetch does not concentrate like that. All 179,259 carry an award_id_fain, and the staged zip carries `assistance_transaction_unique_key` and `modification_number` among its 112 columns - `30_funding_pre2008.to_out_row` took neither. This is the same projection loss proved exactly for the prime contracting archive, where 80,778 apparent duplicates resolved to 80,778 distinct transactions and went to zero without deleting a row (see 430). `to_out_row` and OUT_COLS now carry both columns, so the next `py -3 code/30_funding_pre2008.py build` states a grain. That build re-extracts a 2.77M-row shipped table and is queued in review/OWNER_DECISION_QUEUE.md rather than run unattended. Until it runs the duplication is DIAGNOSED, not repaired.
 
 - measured 2,769,748 rows, 179,259 whole-row duplicate(s) on 2026-08-29
 
@@ -98,12 +98,6 @@ These are not declaration gaps. Each is a table a buyer can double-count today. 
 101 LITERAL duplicate rows of 58,685. (object_id, recipient_name_as_filed) collides 860 times - some legitimately (one filer can grant to the same recipient twice on one return), but the 101 whole-row repeats are not that.
 
 - measured 58,685 rows, 101 whole-row duplicate(s) on 2026-08-29
-
-### `prime_contracts.csv`
-
-80,778 LITERAL duplicate rows of 1,217,768. The contractor codebook states the grain as 'contract x fiscal year x vendor'; that grain cannot hold while whole rows repeat. (contract_number, parent_contract_number) collides 630,270 times. Anyone summing total_obligations from this file is over-counting by whatever the duplicates carry.
-
-- measured 1,217,768 rows, 80,778 whole-row duplicate(s) on 2026-08-29
 
 ### `prime_contracts_archive_backfill.csv`
 
@@ -173,12 +167,6 @@ a MAP that maps nothing uniquely: `uei` repeats 11,455 times over 29,981 rows an
 
 docs/GAMING_NEPA_PILOT_LOG.md states the grain as 'one row per project x metric x geography x period'. The data CONTRADICTS it: that key collides 8 times over 116 rows, and adding `alternative` leaves 5. The only unique keys contain `value`, a measure. QUESTION: which column separates two projections of the same metric for the same project, geography and period - alternative, reported_or_calculated, or the source document?
 
-
-### `prime_contracts_entity_year.csv`  (8,464 rows)
-
-the table is NAMED entity-year and (tribe_id, fiscal_year) is NOT unique - 1,751 collisions over 8,464 rows; (cedar_uid, fiscal_year) collides identically. Uniqueness needs canonical_name AND confidence_tier as well. So one entity-year has several rows under different NAMES and tiers. QUESTION: is a row an entity-year (then the extra rows are a defect and anyone summing obligations_usd by tribe-year today DOUBLE-COUNTS), or is it deliberately entity x name-variant x year x tier? This is the single most consequential open question in the sweep.
-
-- unique on the full file: (`tribe_id`, `canonical_name`, `fiscal_year`, `confidence_tier`); (`cedar_uid`, `fiscal_year`, `confidence_tier`, `canonical_name`)
 
 ### `tribal_bond_issuances.csv`  (29 rows)
 
@@ -292,10 +280,10 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
-| `fr_nagpra_title_index.csv` | 6,606 | DECLARED_VALIDATED | `document_number` | — |
-| `fr_nagpra_title_index_year.csv` | 33 | DECLARED_VALIDATED | `publication_year` | — |
+| `fr_nagpra_title_index.csv` | 6,606 | DECLARED_VALIDATED | `document_number` | `document_number`→1 |
+| `fr_nagpra_title_index_year.csv` | 33 | DECLARED_VALIDATED | `publication_year` | `publication_year`→1 |
 | `nagpra_notice_entity_bridge.csv` | 51,521 | DECLARED_VALIDATED | `document_number` + `relationship` + `party_name_verbatim` | `tribe_id`→900 |
-| `nagpra_notices.csv` | 6,772 | DECLARED_VALIDATED | `document_number` | — |
+| `nagpra_notices.csv` | 6,772 | DECLARED_VALIDATED | `document_number` | `document_number`→1 |
 
 ### Lobbying  (`lobbying`)
 
@@ -340,17 +328,17 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 
 ### Federal Prime Contracting  (`contractors`)
 
-5 of 10 shippable tables declared.
+7 of 10 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
 | `contractor_ranking.csv` | 1,429 | OPEN_WITH_EVIDENCE | — | — |
 | `fpds_uei_cage_map.csv` | 29,981 | OPEN_WITH_EVIDENCE | — | `cage_code`→6, `uei`→16 |
 | `fpds_uei_edges.csv` | — | DECLARED_VALIDATED | `child_uei` + `parent_uei` + `edge_type` | — |
-| `prime_contracts.csv` | 1,217,768 | DEFECTIVE | — | `cage_code`→398,840, `cedar_uid`→111,398, `tribe_id`→111,398 |
+| `prime_contracts.csv` | 1,217,768 | DECLARED_VALIDATED | `contract_transaction_unique_key` + `contract_number` + `parent_contract_number` + `fiscal_year` + `awardee_uei` | `cage_code`→398,840, `cedar_uid`→111,398, `tribe_id`→111,398 |
 | `prime_contracts_archive_backfill.csv` | 631,507 | DEFECTIVE | — | `cage_code`→398,840, `cedar_uid`→50,208, `tribe_id`→50,208 |
 | `prime_contracts_awards.csv` | 455,080 | DECLARED_VALIDATED | `contract_number` | `cage_code`→85,976, `cedar_uid`→55,184, `tribe_id`→55,184 |
-| `prime_contracts_entity_year.csv` | 8,464 | OPEN_WITH_EVIDENCE | — | `cedar_uid`→63, `tribe_id`→63 |
+| `prime_contracts_entity_year.csv` | 8,464 | DECLARED_VALIDATED | `tribe_id` + `fiscal_year` | `cedar_uid`→63, `tribe_id`→63 |
 | `prime_contracts_published.csv` | 455,080 | DECLARED_VALIDATED | `contract_number` | `cage_code`→85,976, `cedar_uid`→55,184, `tribe_id`→55,184 |
 | `sam_prime_contracts_fy2000_2007.csv` | 269,312 | DECLARED_VALIDATED | `sam_transaction_key` | `cage_code`→304 |
 | `sam_prime_contracts_fy2000_2007_PUBLISHABLE.csv` | 269,312 | DECLARED_VALIDATED | `sam_transaction_key` | `cage_code`→304 |

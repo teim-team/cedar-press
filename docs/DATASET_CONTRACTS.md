@@ -4,9 +4,9 @@
 
 **13 collections, 255 tables claimed, 0 orphaned shippable tables, 0 violations.**
 
-**Grain: 182 of 210 shippable tables declare and VALIDATE a row grain, a primary key and a join cardinality; 28 do not.** A declared grain the data contradicts is a release-blocking violation, listed below. An unstated grain is ratcheted by `62_no_regression_check.contract_grain_unstated_shippable`: the count may only fall, and a new shippable table that lands without one fails the gate that day.
+**Grain: 184 of 210 shippable tables declare and VALIDATE a row grain, a primary key and a join cardinality; 26 do not.** A declared grain the data contradicts is a release-blocking violation, listed below. An unstated grain is ratcheted by `62_no_regression_check.contract_grain_unstated_shippable`: the count may only fall, and a new shippable table that lands without one fails the gate that day.
 
-<details><summary>Shippable tables with an UNSTATED grain (28) - a buyer cannot join these safely</summary>
+<details><summary>Shippable tables with an UNSTATED grain (26) - a buyer cannot join these safely</summary>
 
 - `admin_appeal_positions.csv` — the file has ONE row. `matter_id` and `cedar_uid` are unique, and so is every other column - one row proves nothing. QUESTION: is a row a POSITION taken by one organisation in one matter (in which case position_id is the key and it is empty of evidence), or one row per matter?
 - `cedar_identifier_graph_edges.csv`
@@ -28,9 +28,7 @@
 - `native_bills_subject_sweep.csv`
 - `native_passthrough.csv`
 - `np_schedule_i_grants.csv`
-- `prime_contracts.csv`
 - `prime_contracts_archive_backfill.csv`
-- `prime_contracts_entity_year.csv` — the table is NAMED entity-year and (tribe_id, fiscal_year) is NOT unique - 1,751 collisions over 8,464 rows; (cedar_uid, fiscal_year) collides identically. Uniqueness needs canonical_name AND confidence_tier as well. So one entity-year has several rows under different NAMES and tiers. QUESTION: is a row an entity-year (then the extra rows are a defect and anyone summing obligations_usd by tribe-year today DOUBLE-COUNTS), or is it deliberately entity x name-variant x year x tier? This is the single most consequential open question in the sweep.
 - `subawards.csv`
 - `tcu_cdfi_ownership_evidence.csv`
 - `tribal_bond_issuances.csv` — `cusip` is BLANK on all 29 rows, so the natural key of a bond table is absent, and the only unique column is `notes`. QUESTION: can CUSIPs be backfilled, and until then is a row one issuance (issuer, issue_date, series) or one disclosure document?
@@ -98,10 +96,10 @@ Rebuild: `py -3 code/build.py run federal-register --execute` — 26 tables.
 | table | status | keys | rebuilt by | enriched by |
 |---|---|---|---|---|
 | `consultation_agency_coverage.csv` | UNDOCUMENTED | — | — | — |
-| `consultation_events.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
+| `consultation_events.csv` | shippable | `tribe_id` `cedar_uid` | `96_build_consultation_events.py` | `503_identity.py` |
 | `correspondence_foia_source_coverage.csv` | shippable | — | — | — |
-| `federal_actions.csv` | shippable | — | — | — |
-| `federal_actions_entity_bridge.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
+| `federal_actions.csv` | shippable | — | `11_classify_federal_actions.py` | `22_apply_temporal_floor.py` `519_closure_federal_register.py` |
+| `federal_actions_entity_bridge.csv` | shippable | `tribe_id` `cedar_uid` | `70_key_unjoined_datasets.py` | `503_identity.py` |
 | `federal_actions_raw.csv` | shippable | — | — | — |
 | `fr_abstract_availability_year.csv` | shippable | — | — | — |
 | `fr_consultation_by_agency.csv` | shippable | — | — | — |
@@ -110,18 +108,18 @@ Rebuild: `py -3 code/build.py run federal-register --execute` — 26 tables.
 | `fr_consultation_year.csv` | shippable | — | — | — |
 | `fr_content_classification.csv` | shippable | — | — | — |
 | `fr_ex_parte_notices.csv` | shippable | — | — | — |
-| `fr_ex_parte_parties.csv` | shippable | `cedar_uid` | — | — |
-| `fr_ex_parte_party_entity_links.csv` | shippable | `cedar_uid` | — | — |
+| `fr_ex_parte_parties.csv` | shippable | `cedar_uid` | `154_build_fr_ex_parte_notices.py` | `503_identity.py` |
+| `fr_ex_parte_party_entity_links.csv` | shippable | `cedar_uid` | `154_build_fr_ex_parte_notices.py` | `503_identity.py` `519_closure_federal_register.py` |
 | `fr_recognized_entities.csv` | internal-by-decision | — | — | — |
 | `fr_relevance_stratum_audit.csv` | internal-by-decision | — | — | — |
 | `fr_relevance_tier_year.csv` | shippable | — | — | — |
 | `fr_theme_year.csv` | shippable | — | — | — |
-| `nepa_administrative_record_parties.csv` | shippable | `cedar_uid` | — | — |
+| `nepa_administrative_record_parties.csv` | shippable | `cedar_uid` | `134_build_nepa_eplanning.py` | `503_identity.py` |
 | `nepa_eplanning_projects.csv` | shippable | — | — | — |
 | `nepa_project_documents.csv` | shippable | — | — | — |
 | `nepa_source_coverage.csv` | internal-by-decision | — | — | — |
-| `section_106_consultation_events.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
-| `section_106_project_parties.csv` | shippable | `cedar_uid` | — | — |
+| `section_106_consultation_events.csv` | shippable | `tribe_id` `cedar_uid` | `130_build_section_106_consultation.py` | `503_identity.py` |
+| `section_106_project_parties.csv` | shippable | `cedar_uid` | `130_build_section_106_consultation.py` | `503_identity.py` |
 | `section_106_source_coverage.csv` | shippable | — | — | — |
 
 Declared grain — validated against the file on every run:
@@ -130,7 +128,7 @@ Declared grain — validated against the file on every run:
   - primary key: `consultation_event_id` + `participant_name_as_published`  (validated unique)
   - join cardinality: `cedar_uid` → many row(s) per value (measured max 170), `tribe_id` → many row(s) per value (measured max 170)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
-- `correspondence_foia_source_coverage.csv` — one row per source URL checked for congressional-correspondence coverage
+- `correspondence_foia_source_coverage.csv` — one row per source URL checked for congressional-correspondence coverage. 17 rows repeat (agency, source, status, evidence) under a DIFFERENT url - one agency publishing several correspondence pages, not a duplicate: the url is the probe and the probe is the row
   - primary key: `url`  (validated unique)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
 - `federal_actions.csv` — one row per Federal Register document, classified
@@ -152,10 +150,10 @@ Declared grain — validated against the file on every run:
 - `fr_consultation_notices.csv` — one row per Federal Register notice carrying a consultation signal
   - primary key: `document_number`  (validated unique)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
-- `fr_consultation_referenced.csv` — one row per Federal Register document that REFERENCES a consultation having been undertaken
+- `fr_consultation_referenced.csv` — one row per Federal Register document that REFERENCES a consultation having been undertaken. 652 rows repeat (year, title, agency, basis) under a DIFFERENT document_number, because the Federal Register reissues an identically titled NAGPRA notice for different collections - each is its own document and none is a duplicate. COUNT DOCUMENTS, NOT DISTINCT TITLES
   - primary key: `document_number`  (validated unique)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
-- `fr_consultation_year.csv` — one row per publication year of consultation counts
+- `fr_consultation_year.csv` — one row per publication year of consultation counts. 5 rows carry an identical PAIR of counts to another year - two quiet years coinciding, not a repeated row
   - primary key: `publication_year`  (validated unique)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
 - `fr_content_classification.csv` — one row per Federal Register document, with its relevance tier and themes
@@ -167,7 +165,7 @@ Declared grain — validated against the file on every run:
 - `fr_ex_parte_parties.csv` — one row per party named in a Federal Register ex parte notice
   - primary key: `fr_ex_parte_party_id`  (validated unique)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
-- `fr_ex_parte_party_entity_links.csv` — one row per resolved link from an ex parte party to a Cedar entity
+- `fr_ex_parte_party_entity_links.csv` — one row per resolved link from an ex parte party to a Cedar entity, across TWO source tables - `source_dataset` says which, and the join key is (source_dataset, source_row_id), never source_row_id alone. All 9 links currently come from `ferc_ex_parte_parties.csv`; `fr_ex_parte_parties.csv` resolves 0 of its 112 parties, so a join from fr_ex_parte_parties returns NOTHING and that is the data, not a broken key
   - primary key: `link_id`  (validated unique)
   - join cardinality: `cedar_uid` → many row(s) per value (measured max 2)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
@@ -262,7 +260,7 @@ Rebuild: `py -3 code/build.py run deals --execute` — 19 tables.
 | `deals_2000_2019_additions.csv` | shippable | — | — | — |
 | `deals_2026_ytd_additions.csv` | shippable | — | — | — |
 | `deals_anc_reports_additions.csv` | shippable | — | — | — |
-| `deals_ancsa_portal_additions.csv` | shippable | — | — | — |
+| `deals_ancsa_portal_additions.csv` | shippable | — | `build_deals.py` | `build_deals2.py` |
 | `deals_ancsa_portal_v2_additions.csv` | shippable | — | — | — |
 | `deals_classified.csv` | shippable | `cedar_uid` | — | — |
 | `deals_federal_awards_additions.csv` | shippable | — | — | — |
@@ -329,23 +327,26 @@ Rebuild: `py -3 code/build.py run nagpra --execute` — 4 tables.
 |---|---|---|---|---|
 | `fr_nagpra_title_index.csv` | shippable | — | — | — |
 | `fr_nagpra_title_index_year.csv` | shippable | — | — | — |
-| `nagpra_notice_entity_bridge.csv` | shippable | `tribe_id` | — | — |
+| `nagpra_notice_entity_bridge.csv` | shippable | `tribe_id` | `77_build_nagpra_dataset.py` | `503_identity.py` |
 | `nagpra_notices.csv` | shippable | — | — | — |
 
 Declared grain — validated against the file on every run:
 
-- `fr_nagpra_title_index.csv` — one row per Federal Register document identified as a NAGPRA notice by its title
+- `fr_nagpra_title_index.csv` — one row per Federal Register document whose TITLE is a NAGPRA notice heading. A title-only index of the parent FR corpus, not the notice product: its regex omits 'notice of intended disposition', so it is NOT a superset of nagpra_notices.csv (168 notices are in the product and not here; 2 are here and not there, having no cached full text). Use nagpra_notices.csv for the notices and this only for corpus-level coverage over time - docs/datasets/nagpra.md
   - primary key: `document_number`  (validated unique)
+  - join cardinality: `document_number` → one row(s) per value (measured max 1)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
-- `fr_nagpra_title_index_year.csv` — one row per publication year of NAGPRA notice counts
+- `fr_nagpra_title_index_year.csv` — one row per publication year, aggregating fr_nagpra_title_index.csv. Counts DOCUMENTS, not ancestors and not repatriations - docs/datasets/nagpra.md
   - primary key: `publication_year`  (validated unique)
+  - join cardinality: `publication_year` → one row(s) per value (measured max 1)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
-- `nagpra_notice_entity_bridge.csv` — one row per (notice, relationship, named party) - docs/NAGPRA_BUILD_LOG.md. (document_number, party) alone collides 12,800 times because one party can hold several relationships to one notice
+- `nagpra_notice_entity_bridge.csv` — one row per (notice, relationship, named party) - docs/NAGPRA_BUILD_LOG.md. (document_number, party) alone collides 12,800 times because one party can hold several relationships to one notice. `relationship` is a LEGAL FINDING and the values are not interchangeable: consulted (25 U.S.C. 3003-3004) is not culturally_affiliated, and filtering to one is mandatory before any count. `tribe_id` is blank wherever the resolver was not certain - 3,467 rows - and `resolve_method` says why (`ambiguous_containment:N:...` names every candidate it would not choose between)
   - primary key: `document_number` + `relationship` + `party_name_verbatim`  (validated unique)
-  - join cardinality: `tribe_id` → many row(s) per value (measured max 900)
+  - join cardinality: `document_number` → many row(s) per value (measured max 183), `tribe_id` → many row(s) per value (measured max 900)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
-- `nagpra_notices.csv` — one row per NAGPRA notice - docs/NAGPRA_BUILD_LOG.md
+- `nagpra_notices.csv` — one row per NAGPRA notice, keyed on the Federal Register document number - docs/NAGPRA_BUILD_LOG.md. A correction notice is its own row (is_correction=1) and does not supersede the row it amends. The `*_entity_ids` columns are PIPE-DELIMITED LISTS, not join keys: join to entities through nagpra_notice_entity_bridge.csv. `mni_total_stated` is blank wherever the notice did not state one total, and must never be defaulted to 0
   - primary key: `document_number`  (validated unique)
+  - join cardinality: `document_number` → one row(s) per value (measured max 1)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
 
 ## Lobbying  (`lobbying`, shelf: standard)
@@ -369,13 +370,13 @@ Rebuild: `py -3 code/build.py run lobbying --execute` — 37 tables.
 | `ferc_source_coverage.csv` | internal-by-decision | — | — | — |
 | `ferc_tribal_dockets.csv` | shippable | — | `133_build_ferc_advocacy.py` | `168_link_adjudication_hubs.py` `175_restore_ferc_docket_table_after_rebuild_revert.py` |
 | `fr_ex_parte_notices.csv` | shippable | — | — | — |
-| `fr_ex_parte_parties.csv` | shippable | `cedar_uid` | — | — |
-| `fr_ex_parte_party_entity_links.csv` | shippable | `cedar_uid` | — | — |
+| `fr_ex_parte_parties.csv` | shippable | `cedar_uid` | `154_build_fr_ex_parte_notices.py` | `503_identity.py` |
+| `fr_ex_parte_party_entity_links.csv` | shippable | `cedar_uid` | `154_build_fr_ex_parte_notices.py` | `503_identity.py` `519_closure_federal_register.py` |
 | `hearing_appearances.csv` | shippable | `cedar_uid` `entity_id` | `98_build_oira_and_hearings.py` | `400_promote_stranded_hearing_appearances.py` |
 | `hearing_bill_links.csv` | shippable | — | — | — |
 | `lobbying_client_attribution.csv` | internal-by-decision | `tribe_id` `cedar_uid` | — | — |
 | `lobbying_disclosure_verbosity_year.csv` | shippable | — | — | — |
-| `lobbying_issue_families_filing.csv` | shippable | `cedar_uid` `entity_id` | — | — |
+| `lobbying_issue_families_filing.csv` | shippable | `cedar_uid` `entity_id` | `78_content_analysis.py` | `353_propagate_lobbying_corrections_to_consumers.py` `503_identity.py` |
 | `lobbying_issue_family_year.csv` | shippable | — | — | — |
 | `lobbying_registrant_client_relationships.csv` | shippable | `cedar_uid` | — | — |
 | `lobbying_registrant_concentration.csv` | shippable | — | — | — |
@@ -436,7 +437,7 @@ Declared grain — validated against the file on every run:
 - `fr_ex_parte_parties.csv` — one row per party named in a Federal Register ex parte notice
   - primary key: `fr_ex_parte_party_id`  (validated unique)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
-- `fr_ex_parte_party_entity_links.csv` — one row per resolved link from an ex parte party to a Cedar entity
+- `fr_ex_parte_party_entity_links.csv` — one row per resolved link from an ex parte party to a Cedar entity, across TWO source tables - `source_dataset` says which, and the join key is (source_dataset, source_row_id), never source_row_id alone. All 9 links currently come from `ferc_ex_parte_parties.csv`; `fr_ex_parte_parties.csv` resolves 0 of its 112 parties, so a join from fr_ex_parte_parties returns NOTHING and that is the data, not a broken key
   - primary key: `link_id`  (validated unique)
   - join cardinality: `cedar_uid` → many row(s) per value (measured max 2)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
@@ -520,10 +521,18 @@ Declared grain — validated against the file on every run:
 - `fpds_uei_edges.csv` — one row per DECLARED (child_uei, parent_uei, edge_type) - literal pairs observed on transactions; connections, not a verified tree
   - primary key: `child_uei` + `parent_uei` + `edge_type`  (validated unique)
   - declared by: docs/HIERARCHY_MODEL.md
+- `prime_contracts.csv` — TWO populations under one schema, and the seam is real. Archive rows (FY2008-FY2026, source_file `FY*_All_Contracts_Full_*.zip`): one row per FPDS TRANSACTION, identified by `contract_transaction_unique_key`. BGOV rows (`master prime file.dta`): one row per (contract, parent vehicle, fiscal year, vendor) AGGREGATE, with an EMPTY transaction key because none exists for them. Both are additive in `total_obligations`; neither row count is comparable to the other
+  - primary key: `contract_transaction_unique_key` + `contract_number` + `parent_contract_number` + `fiscal_year` + `awardee_uei`  (validated unique)
+  - join cardinality: `cage_code` → many row(s) per value (measured max 398840), `cedar_uid` → many row(s) per value (measured max 111398), `contract_number` → many row(s) per value (measured max 11700), `tribe_id` → many row(s) per value (measured max 111398)
+  - declared by: code/430_restore_prime_transaction_key.py - the transaction key restored from the staged archive rows (1:1 on all 19 fiscal years), 2026-08-29 correctness pass. Literal duplicate rows 80,778 -> 0 with no row and no dollar removed
 - `prime_contracts_awards.csv` — one row per CONTRACT (award), rolled up across its transactions - not one row per transaction
   - primary key: `contract_number`  (validated unique)
   - join cardinality: `cage_code` → many row(s) per value (measured max 85976), `cedar_uid` → many row(s) per value (measured max 55184), `tribe_id` → many row(s) per value (measured max 55184)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
+- `prime_contracts_entity_year.csv` — one row per (Native entity, federal fiscal year) with that entity's prime contracting obligations summed across every attributed transaction. Tier A and tier B attributions are SEPARATE COLUMNS, never separate rows
+  - primary key: `tribe_id` + `fiscal_year`  (validated unique)
+  - join cardinality: `cedar_uid` → many row(s) per value (measured max 27), `fiscal_year` → many row(s) per value (measured max 298), `tribe_id` → many row(s) per value (measured max 27)
+  - declared by: code/cedar_prime_panel.py - the entity-year ruling, 2026-08-29 correctness pass; rebuilt by code/428_rebuild_prime_entity_year.py, whose assert_grain() refuses to write a panel this declaration would not hold for
 - `prime_contracts_published.csv` — one row per CONTRACT (award), the publishable projection of prime_contracts_awards.csv
   - primary key: `contract_number`  (validated unique)
   - join cardinality: `cage_code` → many row(s) per value (measured max 85976), `cedar_uid` → many row(s) per value (measured max 55184), `tribe_id` → many row(s) per value (measured max 55184)
@@ -603,7 +612,7 @@ Rebuild: `py -3 code/build.py run natural-resources --execute` — 9 tables.
 | table | status | keys | rebuilt by | enriched by |
 |---|---|---|---|---|
 | `anc_ceiling_roster.csv` | shippable | `uei` `cage_code` | — | — |
-| `ancsa_filings_index.csv` | shippable | — | — | — |
+| `ancsa_filings_index.csv` | shippable | — | `build_manifest_index.py` | `update_index.py` |
 | `nd_severance_allocation.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
 | `resource_asset_source_coverage.csv` | internal-by-decision | — | — | — |
 | `resource_assets.csv` | shippable | `cedar_uid` | — | — |

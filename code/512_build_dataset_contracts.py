@@ -174,6 +174,77 @@ GRAIN = {
         primary_key=["source_claim_id"],
         join_cardinality={},
         declared_by="docs/GAMING_DATASET_PLAN.md"),
+    # THE ANSWER TO THE SHARPEST OPEN QUESTION IN THE 2026-08-29 SWEEP.
+    #
+    # The table was 8,464 rows over 6,713 entity-years - 1,635 colliding keys -
+    # because all three writers keyed it on (tribe_id, canonical_name,
+    # fiscal_year, confidence_tier). The sweep asked whether that was a defect
+    # or a deliberate grain. It is a defect, and the proof is arithmetic: the
+    # four-column key and the two-column key sum to the IDENTICAL cent
+    # ($244,765,639,853.9x over 888,862 attributed rows), so the extra rows
+    # partition the entity-year rather than restating it, and collapsing them
+    # cannot lose a dollar.
+    #
+    # The cost was never an inflated groupby - that returned the right total.
+    # It was the JOIN: a buyer merging any other entity-year table onto a file
+    # NAMED entity-year got up to 3 copies of every row of their own table.
+    #
+    # `confidence_tier` was the one dimension carrying real information, so it
+    # is preserved as obligations_usd_tier_a / _tier_b COLUMNS and NOT under
+    # its old name - a `confidence_tier == "A"` filter must raise, not return a
+    # plausible partial total. `canonical_name` was ledger label noise (56 of
+    # 498 entities held more than one spelling of themselves) and is now taken
+    # from the entity spine, with the variants kept in `attribution_names`.
+    # A GRAIN WITH A SEAM IN IT, DECLARED RATHER THAN AVERAGED OVER.
+    #
+    # This file is TWO populations under one schema and the contract has to say
+    # so, because a buyer who assumes one will be wrong about the other:
+    #
+    #   FY2008-FY2026, source_file `FY*_All_Contracts_Full_*.zip`
+    #       one row per FPDS TRANSACTION. `contract_transaction_unique_key` is
+    #       non-empty and unique across all 841,002 of them.
+    #   FY2000-FY2022, source_file `master prime file.dta`
+    #       one row per (contract, parent vehicle, fiscal year, vendor)
+    #       AGGREGATE. No transaction key exists for these and the column is
+    #       EMPTY - honestly, rather than filled with something invented.
+    #
+    # The primary key below is validated on the FULL 1,217,768-row file: zero
+    # collisions. `parent_contract_number` is in it because it is what
+    # separates the BGOV aggregates - it differs in 7,827 of 7,827 groups that
+    # (contract_number, fiscal_year, awardee_uei) collides on. That was the
+    # measurement that turned "no key exists" into a key.
+    "prime_contracts.csv": dict(
+        grain="TWO populations under one schema, and the seam is real. "
+              "Archive rows (FY2008-FY2026, source_file "
+              "`FY*_All_Contracts_Full_*.zip`): one row per FPDS TRANSACTION, "
+              "identified by `contract_transaction_unique_key`. BGOV rows "
+              "(`master prime file.dta`): one row per (contract, parent "
+              "vehicle, fiscal year, vendor) AGGREGATE, with an EMPTY "
+              "transaction key because none exists for them. Both are "
+              "additive in `total_obligations`; neither row count is "
+              "comparable to the other",
+        primary_key=["contract_transaction_unique_key", "contract_number",
+                     "parent_contract_number", "fiscal_year", "awardee_uei"],
+        join_cardinality={"tribe_id": "many", "cedar_uid": "many",
+                          "cage_code": "many", "contract_number": "many"},
+        declared_by="code/430_restore_prime_transaction_key.py - the "
+                    "transaction key restored from the staged archive rows "
+                    "(1:1 on all 19 fiscal years), 2026-08-29 correctness "
+                    "pass. Literal duplicate rows 80,778 -> 0 with no row and "
+                    "no dollar removed"),
+    "prime_contracts_entity_year.csv": dict(
+        grain="one row per (Native entity, federal fiscal year) with that "
+              "entity's prime contracting obligations summed across every "
+              "attributed transaction. Tier A and tier B attributions are "
+              "SEPARATE COLUMNS, never separate rows",
+        primary_key=["tribe_id", "fiscal_year"],
+        join_cardinality={"tribe_id": "many", "cedar_uid": "many",
+                          "fiscal_year": "many"},
+        declared_by="code/cedar_prime_panel.py - the entity-year ruling, "
+                    "2026-08-29 correctness pass; rebuilt by "
+                    "code/428_rebuild_prime_entity_year.py, whose "
+                    "assert_grain() refuses to write a panel this "
+                    "declaration would not hold for"),
 }
 
 # ---------------------------------------------------------------------------
@@ -375,7 +446,10 @@ GRAIN_SWEEP = {
         {"tribe_id": "many", "cedar_uid": "many"}),
     "correspondence_foia_source_coverage.csv": _d(
         "one row per source URL checked for congressional-correspondence "
-        "coverage", ["url"]),
+        "coverage. 17 rows repeat (agency, source, status, evidence) under a "
+        "DIFFERENT url - one agency publishing several correspondence pages, "
+        "not a duplicate: the url is the probe and the probe is the row",
+        ["url"]),
     "federal_actions.csv": _d(
         "one row per Federal Register document, classified",
         ["document_number"]),
@@ -398,9 +472,16 @@ GRAIN_SWEEP = {
         ["document_number"]),
     "fr_consultation_referenced.csv": _d(
         "one row per Federal Register document that REFERENCES a "
-        "consultation having been undertaken", ["document_number"]),
+        "consultation having been undertaken. 652 rows repeat (year, title, "
+        "agency, basis) under a DIFFERENT document_number, because the "
+        "Federal Register reissues an identically titled NAGPRA notice for "
+        "different collections - each is its own document and none is a "
+        "duplicate. COUNT DOCUMENTS, NOT DISTINCT TITLES",
+        ["document_number"]),
     "fr_consultation_year.csv": _d(
-        "one row per publication year of consultation counts",
+        "one row per publication year of consultation counts. 5 rows carry "
+        "an identical PAIR of counts to another year - two quiet years "
+        "coinciding, not a repeated row",
         ["publication_year"]),
     "fr_content_classification.csv": _d(
         "one row per Federal Register document, with its relevance tier and "
@@ -412,7 +493,13 @@ GRAIN_SWEEP = {
         "one row per party named in a Federal Register ex parte notice",
         ["fr_ex_parte_party_id"]),
     "fr_ex_parte_party_entity_links.csv": _d(
-        "one row per resolved link from an ex parte party to a Cedar entity",
+        "one row per resolved link from an ex parte party to a Cedar entity, "
+        "across TWO source tables - `source_dataset` says which, and the join "
+        "key is (source_dataset, source_row_id), never source_row_id alone. "
+        "All 9 links currently come from `ferc_ex_parte_parties.csv`; "
+        "`fr_ex_parte_parties.csv` resolves 0 of its 112 parties, so a join "
+        "from fr_ex_parte_parties returns NOTHING and that is the data, not a "
+        "broken key",
         ["link_id"], {"cedar_uid": "many"}),
     "fr_relevance_tier_year.csv": _d(
         "one row per (publication year, relevance tier)",
@@ -776,22 +863,50 @@ GRAIN_SWEEP = {
         {"entity_id": "many", "cedar_uid": "many"}),
 
     # ---- nagpra -----------------------------------------------------------
+    # Closed 2026-08-29 by the nagpra closure pass. The four declarations
+    # below were already validating; what they gained is the two things a
+    # buyer gets wrong on THIS dataset, neither of which a scan can state:
+    #
+    #   * the title INDEX is not a subset or a superset of the notice product.
+    #     It is a different cut of the same corpus with a narrower regex, and
+    #     joining the two as if one contained the other loses 168 notices.
+    #   * `*_entity_ids` on nagpra_notices.csv are PIPE-DELIMITED LISTS. They
+    #     look like join keys and are not. The bridge is the join.
     "fr_nagpra_title_index.csv": _d(
-        "one row per Federal Register document identified as a NAGPRA "
-        "notice by its title", ["document_number"]),
+        "one row per Federal Register document whose TITLE is a NAGPRA "
+        "notice heading. A title-only index of the parent FR corpus, not the "
+        "notice product: its regex omits 'notice of intended disposition', "
+        "so it is NOT a superset of nagpra_notices.csv (168 notices are in "
+        "the product and not here; 2 are here and not there, having no "
+        "cached full text). Use nagpra_notices.csv for the notices and this "
+        "only for corpus-level coverage over time - docs/datasets/nagpra.md",
+        ["document_number"], {"document_number": "one"}),
     "fr_nagpra_title_index_year.csv": _d(
-        "one row per publication year of NAGPRA notice counts",
-        ["publication_year"]),
+        "one row per publication year, aggregating fr_nagpra_title_index.csv. "
+        "Counts DOCUMENTS, not ancestors and not repatriations - "
+        "docs/datasets/nagpra.md",
+        ["publication_year"], {"publication_year": "one"}),
     "nagpra_notice_entity_bridge.csv": _d(
         "one row per (notice, relationship, named party) - "
         "docs/NAGPRA_BUILD_LOG.md. (document_number, party) alone collides "
         "12,800 times because one party can hold several relationships to "
-        "one notice",
+        "one notice. `relationship` is a LEGAL FINDING and the values are "
+        "not interchangeable: consulted (25 U.S.C. 3003-3004) is not "
+        "culturally_affiliated, and filtering to one is mandatory before any "
+        "count. `tribe_id` is blank wherever the resolver was not certain - "
+        "3,467 rows - and `resolve_method` says why (`ambiguous_containment:"
+        "N:...` names every candidate it would not choose between)",
         ["document_number", "relationship", "party_name_verbatim"],
-        {"tribe_id": "many"}),
+        {"tribe_id": "many", "document_number": "many"}),
     "nagpra_notices.csv": _d(
-        "one row per NAGPRA notice - docs/NAGPRA_BUILD_LOG.md",
-        ["document_number"]),
+        "one row per NAGPRA notice, keyed on the Federal Register document "
+        "number - docs/NAGPRA_BUILD_LOG.md. A correction notice is its own "
+        "row (is_correction=1) and does not supersede the row it amends. The "
+        "`*_entity_ids` columns are PIPE-DELIMITED LISTS, not join keys: "
+        "join to entities through nagpra_notice_entity_bridge.csv. "
+        "`mni_total_stated` is blank wherever the notice did not state one "
+        "total, and must never be defaulted to 0",
+        ["document_number"], {"document_number": "one"}),
 
     # ---- native-owned businesses -----------------------------------------
     "individual_native_exclusion_pairs.csv": _d(
@@ -956,16 +1071,13 @@ GRAIN_OPEN = {
         "(issuer, issue_date, series) or one disclosure document?",
 
     # -- a documented grain the data contradicts ---------------------------
-    "prime_contracts_entity_year.csv":
-        "the table is NAMED entity-year and (tribe_id, fiscal_year) is NOT "
-        "unique - 1,751 collisions over 8,464 rows; (cedar_uid, "
-        "fiscal_year) collides identically. Uniqueness needs "
-        "canonical_name AND confidence_tier as well. So one entity-year has "
-        "several rows under different NAMES and tiers. QUESTION: is a row an "
-        "entity-year (then the extra rows are a defect and anyone summing "
-        "obligations_usd by tribe-year today DOUBLE-COUNTS), or is it "
-        "deliberately entity x name-variant x year x tier? This is the "
-        "single most consequential open question in the sweep.",
+    #
+    # `prime_contracts_entity_year.csv` WAS the sharpest entry in this block.
+    # ANSWERED AND CLOSED 2026-08-29 by the correctness pass: the grain is
+    # genuinely entity-year, the collapse is lossless to the cent, and the
+    # declaration is now in GRAIN below. The ruling and its evidence are in
+    # `code/cedar_prime_panel.py`; the rebuild is
+    # `code/428_rebuild_prime_entity_year.py`.
     "gaming_projections.csv":
         "docs/GAMING_NEPA_PILOT_LOG.md states the grain as 'one row per "
         "project x metric x geography x period'. The data CONTRADICTS it: "
@@ -990,21 +1102,43 @@ GRAIN_DEFECT = {
     # the file to compare the colliding rows as strings, so none of these is
     # a hash accident. A literal duplicate row carries no information a buyer
     # can use and every dollar in it is counted twice.
-    "prime_contracts.csv":
-        "80,778 LITERAL duplicate rows of 1,217,768. The contractor codebook "
-        "states the grain as 'contract x fiscal year x vendor'; that grain "
-        "cannot hold while whole rows repeat. (contract_number, "
-        "parent_contract_number) collides 630,270 times. Anyone summing "
-        "total_obligations from this file is over-counting by whatever the "
-        "duplicates carry.",
+    # `prime_contracts.csv` WAS here at 80,778 literal duplicate rows, with
+    # the note that "anyone summing total_obligations from this file is
+    # over-counting". CLOSED 2026-08-29, and THE NOTE WAS WRONG - which is
+    # worth saying plainly, because it is the kind of wrong that gets fixed by
+    # deleting real data.
+    #
+    # All 80,778 came from the USAspending ARCHIVE half, none from the BGOV
+    # half, and every colliding group tested resolved to distinct
+    # `contract_transaction_unique_key`s and more than one modification_number.
+    # 4,961 of FY2020's 5,194 surplus rows carried $0: administrative
+    # modifications. Nothing was over-counted. The archive MAPPER had dropped
+    # the transaction identity, so distinct transactions rendered identical.
+    # `code/430_restore_prime_transaction_key.py` joined the key back from the
+    # staged rows (1:1 on all 19 fiscal years) and the count went 80,778 -> 0
+    # WITHOUT removing a row or a dollar. The grain is declared in GRAIN.
     "prime_contracts_archive_backfill.csv":
         "60,919 LITERAL duplicate rows of 631,507. Same shape as "
         "prime_contracts.csv, which this file is merged into - the "
         "duplication is upstream of the merge, not created by it.",
     "faads_transactions_all_agencies.csv":
-        "179,259 LITERAL duplicate rows of 2,769,748 (6.5%). The pre-2008 "
-        "assistance pull has no transaction key at all, so nothing in the "
-        "pipeline can notice a page fetched twice.",
+        "179,259 LITERAL duplicate rows of 2,769,748 (6.5%). DIAGNOSED "
+        "2026-08-29 and it is NOT a page fetched twice, which is what this "
+        "entry used to say: 174,348 of the 179,259 - 97% - come from ONE "
+        "staged object, ed_fy2007_archive.zip, and 174,957 of the surplus "
+        "rows are FY2007, while 40 other agency-years are almost clean. A "
+        "duplicated fetch does not concentrate like that. All 179,259 carry "
+        "an award_id_fain, and the staged zip carries "
+        "`assistance_transaction_unique_key` and `modification_number` among "
+        "its 112 columns - `30_funding_pre2008.to_out_row` took neither. This "
+        "is the same projection loss proved exactly for the prime contracting "
+        "archive, where 80,778 apparent duplicates resolved to 80,778 "
+        "distinct transactions and went to zero without deleting a row (see "
+        "430). `to_out_row` and OUT_COLS now carry both columns, so the next "
+        "`py -3 code/30_funding_pre2008.py build` states a grain. That build "
+        "re-extracts a 2.77M-row shipped table and is queued in "
+        "review/OWNER_DECISION_QUEUE.md rather than run unattended. Until it "
+        "runs the duplication is DIAGNOSED, not repaired.",
     "faads_transactions.csv":
         "1,001 LITERAL duplicate rows of 60,661. Same cause as "
         "faads_transactions_all_agencies.csv.",

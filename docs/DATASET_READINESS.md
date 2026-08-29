@@ -18,8 +18,8 @@ BLOCKED 11 · NOT_TESTED 0
 | `nonprofits` | **BLOCKED** | 10 | 9/10 | 9/10 | 101 rows | 1 | declared |
 | `lobbying` | **BLOCKED** | 34 | 29/34 | 29/34 | 827 rows | 5 | declared |
 | `deals` | **BLOCKED** | 14 | 12/14 | 12/14 | clean | 2 | DESTRUCTIVE |
-| `contractors` | **BLOCKED** | 10 | 6/10 | 6/10 | 141,697 rows | 5 | declared |
 | `_entity_layer` | **BLOCKED** | 35 | 29/35 | 29/35 | 10,985 rows | 6 | DESTRUCTIVE |
+| `contractors` | **BLOCKED** | 10 | 7/10 | 7/10 | 141,697 rows | 5 | declared |
 | `funding` | **BLOCKED** | 10 | 7/10 | 7/10 | 180,374 rows | 3 | declared |
 
 ## Blockers, by dataset
@@ -78,20 +78,20 @@ BLOCKED 11 · NOT_TESTED 0
 - C5 no row-conservation coverage
 - C8 rebuild is DESTRUCTIVE (88_build_deals_taxonomy.py) - no safe documented rebuild path
 
-### `contractors` — BLOCKED
-
-- C1 grain UNSTATED on 4: contractor_ranking.csv, fpds_uei_cage_map.csv, prime_contracts.csv
-- C2 no validated primary key on 4
-- C3 literal duplicates: prime_contracts.csv(80,778), prime_contracts_archive_backfill.csv(60,919)
-- C7 DOUBLE-COUNTING RISK - money tables a buyer cannot safely total: contractor_ranking.csv, prime_contracts.csv, prime_contracts_archive_backfill.csv
-- C5 no row-conservation coverage
-
 ### `_entity_layer` — BLOCKED
 
 - C1 grain UNSTATED on 6: cedar_identifier_graph_edges.csv, cedar_ruling_ledger_consolidated.csv, cross_dataset_ruling_map.csv
 - C2 no validated primary key on 6
 - C3 literal duplicates: cedar_identifier_graph_edges.csv(2,451), cedar_ruling_ledger_consolidated.csv(6,302), cross_dataset_ruling_map.csv(2,228)
 - C8 rebuild is DESTRUCTIVE (01_build_entity_spine.py, 09_import_rulings.py) - no safe documented rebuild path
+
+### `contractors` — BLOCKED
+
+- C1 grain UNSTATED on 3: contractor_ranking.csv, fpds_uei_cage_map.csv, prime_contracts_archive_backfill.csv
+- C2 no validated primary key on 3
+- C3 literal duplicates: prime_contracts.csv(80,778), prime_contracts_archive_backfill.csv(60,919)
+- C7 DOUBLE-COUNTING RISK - money tables a buyer cannot safely total: contractor_ranking.csv, prime_contracts.csv, prime_contracts_archive_backfill.csv
+- C5 no row-conservation coverage
 
 ### `funding` — BLOCKED
 
