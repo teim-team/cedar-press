@@ -131,6 +131,11 @@ LICENSED_SOURCE_FILES = {
 # triage on every run and prints a loud mismatch if the two have drifted.
 # ---------------------------------------------------------------------------
 INTERNAL_TABLES = {
+    "cedar_dataset_readiness.csv":
+        "518's readiness scoreboard - READY / BLOCKED / NOT_TESTED per "
+        "dataset with named blockers. Internal because it describes OUR "
+        "production state, not the world; docs/DATASET_READINESS.md is the "
+        "human view and the project's current north star",
     "cedar_export_safety.csv":
         "517's per-table verdict on whether a buyer may AGGREGATE a table or "
         "only read its rows. Internal ONLY because it needs a codebook block "
