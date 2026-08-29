@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import { Link, useLocation } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
+import { useFadeIn } from "../../features/grove/useFadeIn";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
 import { NATIVE_LINKAGE } from "../../features/grove/pressCatalog";
 import { PRESS_METHODS_PATH } from "../../features/grove/pressRoutes";
@@ -26,6 +27,8 @@ import PressShelf from "./PressShelf";
 export default function CedarPressData() {
   useDocumentTitle("Collections");
   const { user, loading, logout } = useAuth();
+  // Sitewide arrival language; the shelf bands keep their own reveal.
+  const fadeRoot = useFadeIn();
   const { hash } = useLocation();
   const entitled = canReadCedarPress(user);
   useScrollToTop("data");
@@ -51,10 +54,10 @@ export default function CedarPressData() {
   }
   return (
     <div className="teim-rd teim-rd--paper">
-      <main id="cp-main" className="cp cp-page">
+      <main id="cp-main" className="cp cp-page" ref={fadeRoot}>
         <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="data" />
 
-        <section className="cp-mh">
+        <section className="cp-mh cp-fade">
           <p className="cp-hero__access">The collections</p>
           <h1 className="cp-mh__title">Every collection, and what it holds.</h1>
           <p className="cp-mh__sub">
@@ -68,7 +71,7 @@ export default function CedarPressData() {
         {/* The differentiator, said once and up front. The tiers are listed
             because "Native" covers several distinct relationships and
             merging them would be a claim the data does not support. */}
-        <section className="cp-surf cp-surf--pale cp-link" aria-label="What Cedar adds">
+        <section className="cp-surf cp-surf--pale cp-link cp-fade" aria-label="What Cedar adds">
           <Halo strength={0.8} />
           <div className="cp-surf__in">
             <div className="cp-head">

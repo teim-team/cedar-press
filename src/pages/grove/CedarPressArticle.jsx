@@ -34,6 +34,7 @@ import "../../styles/redesign.css";
 import "../../styles/grove/press.css";
 
 import { useAuth } from "../../context/useAuth";
+import { useFadeIn } from "../../features/grove/useFadeIn";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { EVENT, track } from "../../features/grove/telemetry.js";
 import { PressBack, PressFoot, PressMast } from "./PressChrome";
@@ -182,6 +183,8 @@ function DrawnFrom({ id, user }) {
 export default function CedarPressArticle() {
   const { articleId } = useParams();
   const { user, loading, logout } = useAuth();
+  // Sitewide arrival language: the head fades in; the prose stays put.
+  const fadeRoot = useFadeIn();
   const article = BY_ID[articleId];
   useDocumentTitle(article?.title ?? "Article not found");
   useEffect(() => {
@@ -243,7 +246,7 @@ export default function CedarPressArticle() {
 
   return (
     <div className="teim-rd teim-rd--paper">
-      <main id="cp-main" className="cp cp-page">
+      <main id="cp-main" className="cp cp-page" ref={fadeRoot}>
         <PressMast user={user} onSignOut={() => logout()} section="articles" />
 
         {/* Back goes to the briefs, not the hub: a piece belongs to the
@@ -251,7 +254,7 @@ export default function CedarPressArticle() {
         <PressBack label="All Data Briefs" to={PRESS_ARTICLES_PATH} />
 
         <article className="cp-ar">
-          <header className="cp-ar__head">
+          <header className="cp-ar__head cp-fade">
             <p className="cp-hero__access">{article.tag}</p>
             <h1 className="cp-ar__title">{article.title}</h1>
             <p className="cp-ar__dek">{article.dek}</p>

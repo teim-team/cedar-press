@@ -15,6 +15,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
+import { useFadeIn } from "../../features/grove/useFadeIn";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
 import { WORK_KINDS, loadWork, saveWork } from "../../features/grove/readerWork.js";
 import { LUMECON_URL, TBN_PLANS_URL, TBN_URL } from "../../features/grove/pressArticles";
@@ -100,6 +101,8 @@ export default function CedarPressSettings() {
   const { user, loading, logout } = useAuth();
   const entitled = canReadCedarPress(user);
   useScrollToTop("settings");
+  // Sitewide arrival language.
+  const fadeRoot = useFadeIn();
 
   if (!loading && !entitled) {
     return (
@@ -114,10 +117,10 @@ export default function CedarPressSettings() {
 
   return (
     <div className="teim-rd teim-rd--paper">
-      <main id="cp-main" className="cp cp-page">
+      <main id="cp-main" className="cp cp-page" ref={fadeRoot}>
         <PressMast user={entitled ? user : null} onSignOut={() => logout()} />
 
-        <section className="cp-mh">
+        <section className="cp-mh cp-fade">
           <p className="cp-hero__access">Settings</p>
           <h1 className="cp-mh__title">Your account.</h1>
           <p className="cp-mh__sub">
@@ -127,7 +130,7 @@ export default function CedarPressSettings() {
           </p>
         </section>
 
-        <div className="cp-set">
+        <div className="cp-set cp-fade">
           <section className="cp-set__card" aria-label="Subscription">
             <span className="cp-set__cap">Subscription</span>
             <dl className="cp-set__rows">

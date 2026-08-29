@@ -14,6 +14,9 @@ import { Link } from "react-router";
 
 import { LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_METHODS_PATH, PRESS_PATH } from "../../features/grove/pressRoutes";
+import { useAuth } from "../../context/useAuth";
+import { canReadCedarPress } from "../../features/grove/pressAccess";
+import { useFadeIn } from "../../features/grove/useFadeIn";
 import { PressCedarFab } from "./PressCedarFab";
 import { PressFoot, PressMast } from "./PressChrome";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
@@ -37,10 +40,15 @@ export default function CedarPressResearchAccess() {
   // Links here sit at the bottom of long pages; without the reset the
   // destination opens mid-scroll, past its headline.
   useScrollToTop();
+  // A public program page: signed out, the section nav's every door opens
+  // onto the gate, so only the wordmark leads out. Signed in, full chrome.
+  const { user } = useAuth();
+  const entitled = canReadCedarPress(user);
+  const fadeRoot = useFadeIn();
   return (
     <div className="teim-rd teim-rd--paper">
-      <main id="cp-main" className="cp cp-page">
-        <PressMast />
+      <main id="cp-main" className="cp cp-page" ref={fadeRoot}>
+        <PressMast nav={entitled} user={entitled ? user : null} />
 
         <section className="cp-trh">
           <div>
@@ -65,7 +73,7 @@ export default function CedarPressResearchAccess() {
 
         {/* Fit, as one comparison rather than a page of criteria. The two
             examples do more work than a policy paragraph would. */}
-        <section className="cp-fit" aria-label="Whether this fits">
+        <section className="cp-fit cp-fade" aria-label="Whether this fits">
           <div className="cp-fit__side cp-fit__side--yes">
             <span className="cp-fit__cap">Good fit</span>
             <p>A researcher needs the Lobbying collection for one defined journal article.</p>
@@ -76,7 +84,7 @@ export default function CedarPressResearchAccess() {
           </div>
         </section>
 
-        <section className="cp-msec" aria-label="What to include">
+        <section className="cp-msec cp-fade" aria-label="What to include">
           <span className="cp-sec__band">Include in the proposal</span>
           <ol className="cp-prop">
             {PROPOSAL.map((item, i) => (
@@ -96,7 +104,7 @@ export default function CedarPressResearchAccess() {
           </a>
         </section>
 
-        <PressFoot />
+        <PressFoot nav={entitled} />
         <PressCedarFab />
       </main>
     </div>

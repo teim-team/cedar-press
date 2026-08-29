@@ -7,6 +7,8 @@
 // took you depended on where you already were.
 import { Link, NavLink } from "react-router";
 
+import { useAuth } from "../../context/useAuth";
+
 /**
  * The reader's initials, from the address. Two letters where the address
  * has a separator to take them from, one otherwise.
@@ -52,9 +54,19 @@ const NAV = [
  * link, a shared brief — without going home first. `section` marks which
  * entry is current; a leaf page passes the section it belongs to (an article
  * marks Articles), so the nav still says where you are.
+ *
+ * `nav={false}` is for the public program pages read by someone signed out:
+ * every section link would land them on the gate, and a row of doors that
+ * all open onto a paywall reads as a broken site rather than a map. The
+ * wordmark still leads home.
  */
-export function PressMast({ user, onSignOut, section = null }) {
+export function PressMast({ user, onSignOut, section = null, nav = true }) {
   const home = section === "home";
+  // The distribution line is for visitors deciding what this is; a
+  // subscriber already inside the product does not need the masthead
+  // re-introducing it on every page. Read from the session directly, since
+  // not every page threads `user` into the masthead.
+  const { user: signedIn } = useAuth();
   return (
     <>
     {/* The first stop for a keyboard or a screen reader: the nav and the
@@ -82,13 +94,16 @@ export function PressMast({ user, onSignOut, section = null }) {
             <span className="cp-mast__word">CEDAR PRESS</span>
           </Link>
         )}
-        {/* Who made it and who sells it, said plainly. "A × partnership"
-            left both questions open. */}
-        <span className="cp-mast__of">
-          Built by <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a>. Available
-          exclusively through{" "}
-          <a href={TBN_URL} target="_blank" rel="noreferrer">Tribal Business News</a>.
-        </span>
+        {/* Who made it and who sells it, said plainly — to visitors. "A ×
+            partnership" left both questions open; a signed-in reader has
+            already answered them. */}
+        {signedIn ? null : (
+          <span className="cp-mast__of">
+            Built by <a href={LUMECON_URL} target="_blank" rel="noreferrer">Lumecon</a>. Available
+            exclusively through{" "}
+            <a href={TBN_URL} target="_blank" rel="noreferrer">Tribal Business News</a>.
+          </span>
+        )}
         {user ? (
           <span className="cp-mast__user">
             <Link className="cp-avatar" to={PRESS_SETTINGS_PATH} title={user.email}>
@@ -101,21 +116,23 @@ export function PressMast({ user, onSignOut, section = null }) {
           </span>
         ) : null}
       </div>
-      <nav className="cp-nav" aria-label="Sections">
-        <NavLink className="cp-nav__item" to={PRESS_PATH} end>
-          Overview
-        </NavLink>
-        {NAV.map((item) => (
-          <NavLink
-            key={item.id}
-            className="cp-nav__item"
-            to={item.to}
-            aria-current={item.id === section ? "page" : undefined}
-          >
-            {item.label}
+      {nav ? (
+        <nav className="cp-nav" aria-label="Sections">
+          <NavLink className="cp-nav__item" to={PRESS_PATH} end>
+            Overview
           </NavLink>
-        ))}
-      </nav>
+          {NAV.map((item) => (
+            <NavLink
+              key={item.id}
+              className="cp-nav__item"
+              to={item.to}
+              aria-current={item.id === section ? "page" : undefined}
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
+      ) : null}
     </header>
     </>
   );
@@ -147,18 +164,26 @@ export function PressBack({ label = "All of Cedar Press", to = PRESS_PATH }) {
  * The tribal-governments line makes the governance pathway discoverable
  * from every page without turning it into a marketing element: a council
  * office should not need a subscription to find out how to ask.
+ *
+ * `nav={false}` mirrors the masthead's slim mode for signed-out readers of
+ * the public program pages: the section links all end at the gate for them,
+ * so the footer keeps only the way home and the standing lines.
  */
-export function PressFoot({ flush = false }) {
+export function PressFoot({ flush = false, nav = true }) {
   return (
     <footer className={`cp-foot cp-foot--deep${flush ? " cp-foot--flush" : ""}`}>
       <div className="cp-foot__in">
         <nav className="cp-foot__nav" aria-label="Cedar Press">
           <Link to={PRESS_PATH}>Cedar Press</Link>
-          <Link to={PRESS_ARTICLES_PATH}>Articles</Link>
-          <Link to={PRESS_DATA_PATH}>Collections</Link>
-          <Link to={PRESS_WHATS_NEW_PATH}>What&rsquo;s new</Link>
-          <Link to={PRESS_METHODS_PATH}>Methods</Link>
-          <Link to={PRESS_SETTINGS_PATH}>Settings</Link>
+          {nav ? (
+            <>
+              <Link to={PRESS_ARTICLES_PATH}>Articles</Link>
+              <Link to={PRESS_DATA_PATH}>Collections</Link>
+              <Link to={PRESS_WHATS_NEW_PATH}>What&rsquo;s new</Link>
+              <Link to={PRESS_METHODS_PATH}>Methods</Link>
+              <Link to={PRESS_SETTINGS_PATH}>Settings</Link>
+            </>
+          ) : null}
         </nav>
         <div className="cp-foot__meta">
           <span className="cp-foot__gov">

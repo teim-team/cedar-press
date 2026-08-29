@@ -973,7 +973,8 @@
  * The account and the errands, in cards across the measure rather than a
  * column down the left. */
 .teim-rd .cp-set { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: 1.1rem; margin-top: 2rem; align-items: start; }
-.teim-rd .cp-set__card { border: 1px solid var(--line); border-radius: var(--radius-card, 14px); padding: 1.3rem 1.4rem; background: var(--bg); display: flex; flex-direction: column; }
+.teim-rd .cp-set__card { border: 1px solid var(--line); border-radius: var(--radius-card, 14px); padding: 1.3rem 1.4rem; background: var(--bg); display: flex; flex-direction: column; transition: border-color 0.18s ease, box-shadow 0.18s ease; }
+.teim-rd .cp-set__card:hover { border-color: var(--teal); box-shadow: 0 10px 26px rgba(10, 15, 38, 0.07); }
 .teim-rd .cp-set__cap { display: block; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dteal); margin-bottom: 0.9rem; }
 .teim-rd .cp-set__rows { margin: 0; display: flex; flex-direction: column; gap: 0.7rem; }
 .teim-rd .cp-set__rows > div { display: flex; flex-direction: column; gap: 0.15rem; border-top: 1px solid var(--line-soft); padding-top: 0.7rem; }
@@ -1450,10 +1451,24 @@
 .teim-rd .cp-verify__hard { font-size: 0.96rem; line-height: 1.55; font-weight: 700; color: var(--ink); margin: 1.3rem 0 0; padding-top: 1rem; border-top: 1px solid var(--teal-line); }
 
 .teim-rd .cp-flow { list-style: none; margin: 1.4rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.6rem; }
-.teim-rd .cp-flow__step { position: relative; padding: 1.1rem 1rem; border-top: 2px solid var(--teal); background: var(--surface, transparent); }
-.teim-rd .cp-flow__cap { display: block; font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dteal); margin-bottom: 0.4rem; }
+.teim-rd .cp-flow__step { position: relative; padding: 1.1rem 1rem; border-top: 2px solid var(--teal); background: var(--surface, transparent); transition: background 0.18s ease, border-color 0.18s ease; }
+.teim-rd .cp-flow__step:hover { background: var(--teal-tint); border-top-color: var(--dteal); }
+.teim-rd .cp-flow__head { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.4rem; }
+.teim-rd .cp-flow__n { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; color: var(--dteal); }
+.teim-rd .cp-flow__cap { display: block; font-family: var(--mono); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dteal); }
 .teim-rd .cp-flow__body { font-size: 0.94rem; line-height: 1.45; color: var(--ink); font-weight: 600; }
 @media (max-width: 900px) { .teim-rd .cp-flow { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* Phones consolidate: one stacked, numbered list, and the eyebrow stands
+ * down because the sentence is the step. Five compact rows instead of a
+ * 2-2-1 grid of tiles. */
+@media (max-width: 640px) {
+  .teim-rd .cp-flow { grid-template-columns: 1fr; gap: 0; border-top: 2px solid var(--teal); }
+  .teim-rd .cp-flow__step { display: grid; grid-template-columns: 2rem minmax(0, 1fr); column-gap: 0.7rem; align-items: baseline; padding: 0.7rem 0.15rem; border-top: 1px solid var(--line); background: none; }
+  .teim-rd .cp-flow__step:first-child { border-top: 0; }
+  .teim-rd .cp-flow__step:hover { background: none; }
+  .teim-rd .cp-flow__head { margin: 0; }
+  .teim-rd .cp-flow__cap { display: none; }
+}
 
 .teim-rd .cp-limits { margin-top: 3.4rem; padding-top: 1.6rem; border-top: 1px solid var(--line); }
 .teim-rd .cp-limits__body { font-size: 1.02rem; line-height: 1.65; color: var(--ink-2); margin: 0 0 1rem; max-width: 76ch; }
@@ -1876,7 +1891,8 @@
 /* Under the filter the feed is the answer to it, so it sits close rather than
  * across the standing section gap. */
 .teim-rd .cp-filter + .cp-feed { margin-top: 1.4rem; }
-.teim-rd .cp-feed__item { display: grid; grid-template-columns: minmax(0, 9rem) minmax(0, 1fr); gap: 0.4rem 2.5rem; padding: 1.4rem 0; border-top: 1px solid var(--line); scroll-margin-top: 4.6rem; }
+.teim-rd .cp-feed__item { display: grid; grid-template-columns: minmax(0, 9rem) minmax(0, 1fr); gap: 0.4rem 2.5rem; padding: 1.4rem 0; border-top: 1px solid var(--line); scroll-margin-top: 4.6rem; transition: border-color 0.18s ease; }
+.teim-rd .cp-feed__item:hover { border-top-color: var(--teal); }
 /* A permalink arrival lands mid-page; the tint says which release the link
  * meant. scroll-margin keeps it clear of the sticky filter. */
 .teim-rd .cp-feed__item:target { background: var(--teal-tint); }
@@ -1958,6 +1974,8 @@
  * its rule turns teal, the same quiet language as the reader's tables. */
 .teim-rd .cp-tr2__list li, .teim-rd .cp-prop li { transition: color 0.18s ease, border-color 0.18s ease; }
 .teim-rd .cp-tr2__list li:hover, .teim-rd .cp-prop li:hover { border-color: var(--dteal); }
+.teim-rd .cp-fit__side { transition: border-color 0.18s ease; }
+.teim-rd .cp-fit__side:hover { border-top-color: var(--dteal); }
 .teim-rd .cp-trh__cta { transition: background 0.18s ease, transform 0.18s ease; }
 .teim-rd .cp-trh__cta:hover { transform: translateY(-2px); }
 @media (prefers-reduced-motion: reduce) {

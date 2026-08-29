@@ -19,6 +19,7 @@ import { Link } from "react-router";
 import { LUMECON_URL, TBN_URL } from "../../features/grove/pressArticles";
 import { PRESS_PATH, PRESS_REQUEST_PATH } from "../../features/grove/pressRoutes";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
+import { useFadeIn } from "../../features/grove/useFadeIn";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import {
   CREDIBILITY_DISCLAIMER,
@@ -44,9 +45,12 @@ const TRUST_ROW = [
 export default function CedarPressMethods() {
   useDocumentTitle("Methods");
   useScrollToTop();
+  // Sitewide arrival language: each argument fades in as the reader
+  // reaches it.
+  const fadeRoot = useFadeIn();
   return (
     <div className="teim-rd teim-rd--paper">
-      <main id="cp-main" className="cp cp-page">
+      <main id="cp-main" className="cp cp-page" ref={fadeRoot}>
         <PressMast section="methods" />
 
         {/* The opening argument, given room. The claim under it is the one
@@ -62,9 +66,9 @@ export default function CedarPressMethods() {
           </p>
         </section>
 
-        <p className="cp-mh__claim">In many cases, the collection does not exist until Cedar builds it.</p>
+        <p className="cp-mh__claim cp-fade">In many cases, the collection does not exist until Cedar builds it.</p>
 
-        <section className="cp-msec" aria-label="The process">
+        <section className="cp-msec cp-fade" aria-label="The process">
           <span className="cp-sec__band">The process</span>
           <h2 className="cp-msec__title">From scattered records to maintained intelligence.</h2>
           <ProcessRail />
@@ -74,7 +78,7 @@ export default function CedarPressMethods() {
           </p>
         </section>
 
-        <section className="cp-msec" aria-label="One connected system">
+        <section className="cp-msec cp-fade" aria-label="One connected system">
           <span className="cp-sec__band">One system</span>
           <h2 className="cp-msec__title">Built as one connected intelligence system.</h2>
           <EcosystemDiagram />
@@ -83,7 +87,7 @@ export default function CedarPressMethods() {
           </p>
         </section>
 
-        <section className="cp-msec" aria-label="Maintenance">
+        <section className="cp-msec cp-fade" aria-label="Maintenance">
           <span className="cp-sec__band">Maintenance</span>
           <h2 className="cp-msec__title">Accuracy has a time dimension.</h2>
           <p className="cp-msec__lede">
@@ -104,7 +108,7 @@ export default function CedarPressMethods() {
             release log — so a row cannot say something the collection does
             not. Ask Cedar sits on each row because the profile behind the row
             is exactly what Cedar answers from. */}
-        <section className="cp-msec" aria-label="Methods by collection">
+        <section className="cp-msec cp-fade" aria-label="Methods by collection">
           <span className="cp-sec__band">Methods by collection</span>
           <h2 className="cp-msec__title">The specifics, collection by collection.</h2>
           <div className="cp-mbc">
@@ -168,7 +172,7 @@ export default function CedarPressMethods() {
 
         {/* Restraint, stated as commitments rather than left implicit: the
             things Cedar could do to look more complete and does not. */}
-        <section className="cp-msec" aria-label="What Cedar will not do">
+        <section className="cp-msec cp-fade" aria-label="What Cedar will not do">
           <span className="cp-sec__band">Commitments</span>
           <h2 className="cp-msec__title">What Cedar will not do.</h2>
           <ul className="cp-wont">
@@ -178,7 +182,7 @@ export default function CedarPressMethods() {
           </ul>
         </section>
 
-        <section className="cp-msec" aria-label="Expertise and accountability">
+        <section className="cp-msec cp-fade" aria-label="Expertise and accountability">
           <span className="cp-sec__band">Expertise</span>
           <h2 className="cp-msec__title">Built by people who know the systems.</h2>
           <div className="cp-exp">

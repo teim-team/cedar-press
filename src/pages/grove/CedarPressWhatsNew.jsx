@@ -39,6 +39,7 @@ import {
   recentActivity,
 } from "../../features/grove/pressReleases";
 import { PRESS_DATA_PATH } from "../../features/grove/pressRoutes";
+import { useFadeIn } from "../../features/grove/useFadeIn";
 import { useDocumentTitle } from "../../features/grove/useDocumentTitle";
 import { useScrollToTop } from "../../features/grove/useScrollToTop";
 import { AD_SLOT } from "../../features/grove/pressAds";
@@ -64,6 +65,9 @@ function anchorOf(entry) {
 export default function CedarPressWhatsNew() {
   useDocumentTitle("What’s new");
   useScrollToTop();
+  // Sitewide arrival language; the sticky filter stays out of it, since a
+  // transform mid-arrival would fight its pinning.
+  const fadeRoot = useFadeIn();
   const all = useMemo(() => buildFeed(), []);
   const [collection, setCollection] = useState("all");
   const [kind, setKind] = useState("all");
@@ -128,7 +132,7 @@ export default function CedarPressWhatsNew() {
 
   return (
     <div className="teim-rd teim-rd--paper">
-      <main id="cp-main" className="cp cp-page">
+      <main id="cp-main" className="cp cp-page" ref={fadeRoot}>
         <PressMast section="whats-new" />
 
         {/* Title across the page rather than down a 62ch column: this is the
@@ -136,7 +140,7 @@ export default function CedarPressWhatsNew() {
             explanation sits under it, and the activity summary holds the
             second column — the newest release is already the first row of the
             feed, so repeating it here said nothing. */}
-        <section className="cp-nh">
+        <section className="cp-nh cp-fade">
           <p className="cp-hero__access">Collection updates</p>
           <h1 className="cp-nh__title">Everything that changed, newest first.</h1>
           <div>
@@ -228,7 +232,7 @@ export default function CedarPressWhatsNew() {
         </div>
 
         {visible.length ? (
-          <ol className="cp-feed">
+          <ol className="cp-feed cp-fade">
             {visible.map((entry) => {
               const name = PRESS_CATALOG_BY_ID[entry.id]?.name ?? entry.id;
               const anchor = anchorOf(entry);
