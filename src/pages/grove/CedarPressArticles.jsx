@@ -10,6 +10,7 @@ import "../../styles/grove/press.css";
 import { Link } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
+import { useFadeIn } from "../../features/grove/useFadeIn";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
 import { AD_SLOT } from "../../features/grove/pressAds";
@@ -66,6 +67,8 @@ function ArticleCard({ article, compact = false }) {
 export default function CedarPressArticles() {
   useDocumentTitle("Articles");
   const { user, loading, logout } = useAuth();
+  // Sitewide arrival language.
+  const fadeRoot = useFadeIn();
   const entitled = canReadCedarPress(user);
   useScrollToTop("articles");
   if (!loading && !entitled) {
@@ -77,12 +80,12 @@ export default function CedarPressArticles() {
   }
   return (
     <div className="teim-rd teim-rd--paper">
-      <main id="cp-main" className="cp cp-page">
+      <main id="cp-main" className="cp cp-page" ref={fadeRoot}>
         <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="articles" />
 
         {/* The page says what it is: standing alone, it cannot borrow the
             reader's hero for context the way it did as a section. */}
-        <section className="cp-mh">
+        <section className="cp-mh cp-fade">
           <p className="cp-hero__access">Original research</p>
           <h1 className="cp-mh__title">The Data Briefs.</h1>
           <p className="cp-mh__sub">
@@ -92,7 +95,7 @@ export default function CedarPressArticles() {
           </p>
         </section>
 
-        <section className="cp-surf cp-surf--paper" id="briefs" aria-label="Latest research">
+        <section className="cp-surf cp-surf--paper cp-fade" id="briefs" aria-label="Latest research">
           <Contours strength={1} />
           <div className="cp-surf__in">
             <div className="cp-artgrid">

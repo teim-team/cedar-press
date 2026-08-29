@@ -120,7 +120,7 @@ export default function PressHub({ user }) {
   const all = sections(user);
   const note = all.find((section) => section.id === help)?.what;
   return (
-    <section className="cp-sec cp-hub" aria-label="Sections">
+    <section className="cp-sec cp-hub cp-fade" aria-label="Sections">
       <span className="cp-sec__band">Sections</span>
       <ul className="cp-hub__grid">
         {all.map((section) => {

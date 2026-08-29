@@ -28,6 +28,7 @@ import "../../styles/grove/press.css";
 import { Link } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
+import { useFadeIn } from "../../features/grove/useFadeIn";
 import { appUrl } from "../../features/grove/appLink.js";
 import { canReadCedarPress } from "../../features/grove/pressAccess";
 import { AD_SLOT } from "../../features/grove/pressAds";
@@ -52,6 +53,8 @@ export default function CedarPress() {
   useDocumentTitle();
   const { user, loading, logout } = useAuth();
   const entitled = canReadCedarPress(user);
+  // Sections arrive as they enter the viewport, sitewide language.
+  const fadeRoot = useFadeIn();
 
   // The gate is a full-bleed split screen, so it renders without the page's
   // masthead and gutter: those belong to the reader's page, and a sign-in
@@ -76,7 +79,7 @@ export default function CedarPress() {
   ].map((item) => ({ q: item.q, scope: { id: item.scope.id, name: item.scope.name } }));
   return (
     <div className="teim-rd teim-rd--paper">
-      <main id="cp-main" className="cp cp-page cp--screens cp--deepfoot">
+      <main id="cp-main" className="cp cp-page cp--screens cp--deepfoot" ref={fadeRoot}>
         <PressMast user={entitled ? user : null} onSignOut={() => logout()} section="home" />
 
         {loading ? null : (
@@ -90,7 +93,7 @@ export default function CedarPress() {
             product is for and lets the pages behind the doors explain the
             ladder themselves. The mission line lives at the close. */}
         <div className="cp-screen cp-open">
-          <section className="cp-hero">
+          <section className="cp-hero cp-fade">
             <h1>Know what&rsquo;s shaping Indian Country.</h1>
             <p>
               Original intelligence collections, data-driven insights, transparent research and
@@ -104,7 +107,7 @@ export default function CedarPress() {
               that. Four verbs, each real: the newest hosted brief is looked
               up, not hardcoded, and Ask Cedar opens the assistant that can
               answer the other three. */}
-          <nav className="cp-start" aria-label="Start here">
+          <nav className="cp-start cp-fade" aria-label="Start here">
             <button
               type="button"
               className="cp-start__act"
@@ -139,7 +142,7 @@ export default function CedarPress() {
             a seam — rule 4 — and the overview names no figures, so a unit
             is nowhere near a number. */}
         <PressAd slot={AD_SLOT.OVERVIEW} />
-        <section className="cp-surf cp-surf--deep cp-close" id="more" aria-label="What happens next">
+        <section className="cp-surf cp-surf--deep cp-close cp-fade" id="more" aria-label="What happens next">
           <Contours strength={1.2} />
           <div className="cp-close__in">
             <div className="cp-close__say">
