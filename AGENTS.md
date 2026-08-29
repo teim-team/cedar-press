@@ -4646,3 +4646,62 @@ in exactly the same way.
 four new instances are named by 293 in **`code/512_build_dataset_contracts.py`**
 (`hash("\x1f".join(parts))` and three siblings) — workstream **E**'s file this
 pass, modified mid-session. Owner: E.
+
+---
+
+## NAMED GATE FAILURE - `ship_dist_rows` and `lint_class6`, owners identified (2026-08-29, nagpra closure)
+
+Recorded under standing rule 15 option 3 - name the failing metric, the owning
+file and what has to happen - by the **nagpra closure agent**. `62` was **exit
+0** when this pass began and is **exit 1** at its end on three lines, **none of
+which this pass produced**. The arithmetic that proves it is below, because
+"not mine" without arithmetic is exactly what rule 15 forbids.
+
+```
+!! lint_new_defect_instances = 2, must be 0
+!! lint_bug_class_instances  ROSE 147 -> 148
+!! lint_class6               ROSE  30 ->  31
+!! ship_dist_rows            FELL 8,463,001 -> 8,461,252
+!! ship_ratio_pct            FELL 99.774% -> 99.773%
+```
+
+**1. `lint_class6` +1 / `lint_new_defect_instances` = 2. OWNER: the
+`federal-register` closure workstream, and both instances have the SAME
+cause.** 293 names the rebuild side, which is misleading here; 293's own
+`class6_io_map` names the new writer:
+
+    federal_actions.csv                    rebuild 11_classify_federal_actions.py
+                                           enrich  519_closure_federal_register.py
+    fr_ex_parte_party_entity_links.csv     rebuild 154_build_fr_ex_parte_notices.py
+                                           enrich  519_closure_federal_register.py
+
+`code/519_closure_federal_register.py` is UNTRACKED and was created this
+session. It is the in-place enricher on both pairs, so both findings arrived
+with it. **Declaring the pair in `cedar_pipeline.KNOWN_ORDERINGS` will NOT
+clear this** - `detect_class6` builds its map from the io scan alone and never
+reads that list. **WHAT HAS TO HAPPEN:** that workstream either makes 519 merge
+rather than write those two tables, or waives each line in 519 with
+`# lint-ok: class6 - <reason>`, then `py -3 code/293_lint_bug_classes.py
+--baseline`.
+
+No nagpra table is in the class6 set: `nagpra_notices.csv`,
+`nagpra_notice_entity_bridge.csv` and `fr_nagpra_title_index.csv` each have
+exactly one rebuilder and no enricher in that same map, and
+`cedar_harvest_conservation.csv` - which the nagpra builders now MERGE into -
+has no rebuilder at all, so it forms no pair.
+
+**2. `ship_dist_rows` -1,749. OWNER: the `contractors` closure workstream.**
+`prime_contracts_entity_year.csv` was deliberately collapsed from **8,464 rows
+to 6,715** this session - the entity-year regrain recorded in that agent's own
+`code/512_build_dataset_contracts.py` block ("the four-column key and the
+two-column key sum to the IDENTICAL cent"). 8,464 - 6,715 = **1,749**, the
+exact fall. This is intended work, not a loss: the metric is MUST_NOT_FALL
+because there is normally no benign cause, and a deliberate regrain is the
+benign cause it does not know about. **WHAT HAS TO HAPPEN:** that workstream
+re-publishes the dist artefact for the regrained table, or records the regrain
+where the shipping metric can see it. Do NOT re-baseline to clear it.
+
+`nagpra`'s own contribution to the shipping metrics this pass was **positive**:
+`fr_nagpra_title_index.csv` 6,606 -> 6,644 rows (a strict superset; the shipped
+copy predated its own input by 20 days). No nagpra table shrank, and the two
+large ones are byte-identical to their previous release.

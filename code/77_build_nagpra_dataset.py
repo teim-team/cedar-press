@@ -76,16 +76,61 @@ data/spine/. Names that look like real historical tribe names but do not
 resolve are written to review/nagpra_alias_proposals.csv for the recognition
 agent and for Elijah.
 
+ROW CONSERVATION - every source row lands in a NAMED bucket
+-----------------------------------------------------------
+Added 2026-08-29 to close contract point **C5** for this dataset
+(`docs/DATASET_READINESS.md`): *every harvested row has a named disposition*.
+Before this, the honest statement about the build was "6,772 notices and 51,521
+bridge rows came out" with no statement at all about what went in - 156,452
+parent-corpus rows were read and 149,678 of them left the build through a
+`break`/`continue` that counted nothing.
+
+Two ledgers now account for every row, and the totals must reconcile:
+
+    data/clean/nagpra_notices.csv               rows_in = federal_actions.csv
+    data/clean/nagpra_notice_entity_bridge.csv  rows_in = party fragments cut
+                                                out of the tribe-list spans
+
+They are merged into `data/clean/cedar_harvest_conservation.csv`, the file
+`510_assertions.py` invariant **I13** and `62_no_regression_check.py`
+(`harvest_rows_unaccounted`, MUST_BE_ZERO) already gate, using the same seven
+columns and the same rules: a reason of `other` / `unknown` / `misc` is refused
+by name, because an unnamed rejection is the defect the ledger exists to catch.
+
+TWO THINGS TO KNOW ABOUT THAT FILE, both of which cost time to discover:
+
+  * 510 keys its ledgers by the SOURCE table it harvests. These are keyed by
+    the OUTPUT table whose construction they account for, because a NAGPRA
+    output has no single source table - `nagpra_notices.csv` is cut out of
+    `federal_actions.csv` and `nagpra_notice_entity_bridge.csv` out of spans
+    inside cached document text. The arithmetic I13 checks is identical either
+    way: `rows_in == sum(dispositions)` within one key.
+
+  * `510_assertions.py all --apply` REWRITES that file from its own ledgers
+    only, so it will delete these four row-groups. That is not a hypothetical:
+    it is a plain `write_csv` in 510. So the ledgers are ALSO kept, durably and
+    in full, in `review/nagpra_row_conservation.csv`, and the repair is one
+    cheap command that recomputes nothing:
+
+        py -3 code/77_build_nagpra_dataset.py conservation
+
+    Run it whenever `62` reports `harvest_source_rows_read` falling, or
+    `518_dataset_readiness.py` puts `nagpra` back to BLOCKED on C5.
+
 STAGES
 ------
     py -3 code/77_build_nagpra_dataset.py fetch    # full text -> local cache
     py -3 code/77_build_nagpra_dataset.py build    # cache -> the two CSVs
+    py -3 code/77_build_nagpra_dataset.py conservation         # re-merge C5
+    py -3 code/77_build_nagpra_dataset.py conservation verify  # exit 1 on a gap
 
 Reads   data/clean/federal_actions.csv                     (the parent corpus)
         data/raw/federal_register/nagpra_fulltext/**.txt.gz (cached notice text)
         data/spine/cedar_entity_spine.csv                  (read-only)
 Writes  data/clean/nagpra_notices.csv                      one row per notice
         data/clean/nagpra_notice_entity_bridge.csv         one row per (notice, party)
+        data/clean/cedar_harvest_conservation.csv          MERGED, never rewritten
+        review/nagpra_row_conservation.csv                 the durable C5 ledger
         review/nagpra_alias_proposals.csv                  unresolved names
         review/nagpra_unparsed.csv                         notices that would not parse
         logs/77_nagpra_<date>.log
@@ -124,6 +169,168 @@ OUT_NOTICES = CLEAN / "nagpra_notices.csv"
 OUT_BRIDGE = CLEAN / "nagpra_notice_entity_bridge.csv"
 OUT_ALIASES = REVIEW / "nagpra_alias_proposals.csv"
 OUT_UNPARSED = REVIEW / "nagpra_unparsed.csv"
+
+# ------------------------------------------------------- row conservation ---
+#: The shared ledger 510 I13 and 62 gate on. MERGED into, never rewritten.
+CONSERVATION = CLEAN / "cedar_harvest_conservation.csv"
+#: This dataset's own durable copy of its four ledgers. It lives in review/
+#: and not data/clean/ on purpose: a new file under data/clean is a new
+#: SHIPPABLE table as far as 62 is concerned, and would raise four MUST_NOT_RISE
+#: registration metrics for a file that is process metadata, not product.
+LEDGER_LOCAL = REVIEW / "nagpra_row_conservation.csv"
+CONSERVATION_COLS = ["source_table", "rows_in", "disposition", "rows", "pct",
+                     "examples", "harvest_date"]
+
+#: The four customer tables of the `nagpra` collection, in the exact key form
+#: the ledger uses. `conservation verify` refuses to pass while any of them has
+#: no coverage, so a future builder cannot drop a ledger and stay green.
+CONSERVED_TABLES = (
+    "data/clean/nagpra_notices.csv",
+    "data/clean/nagpra_notice_entity_bridge.csv",
+    "data/clean/fr_nagpra_title_index.csv",         # written by 78
+    "data/clean/fr_nagpra_title_index_year.csv",    # written by 78
+)
+
+#: 510's I13 refuses these by name. Re-stated here so the refusal happens at
+#: the point a disposition is INVENTED, not two layers downstream.
+UNNAMED_REASON_RE = re.compile(r"(?:^|:)(other|unknown|misc|n/?a)\s*$", re.I)
+
+
+class RowLedger:
+    """Per-table row accounting. Named dispositions only.
+
+    Deliberately the same shape as `510_assertions.RowLedger`, because the two
+    write the same file and a second shape would be a second thing to keep in
+    step. Not imported from 510: 510 is another workstream's file and importing
+    it executes its module body.
+    """
+
+    def __init__(self, table):
+        self.table = table
+        self.rows_in = 0
+        self.counts = Counter()
+        self.examples = defaultdict(list)
+
+    def seen(self):
+        self.rows_in += 1
+
+    def note(self, disposition, example=""):
+        if UNNAMED_REASON_RE.search(disposition):
+            raise ValueError(
+                f"disposition {disposition!r} is not a NAMED reason - an "
+                f"unnamed rejection is the defect this ledger exists to catch")
+        self.counts[disposition] += 1
+        if example and len(self.examples[disposition]) < 3:
+            self.examples[disposition].append(str(example)[:80])
+
+    def unaccounted(self):
+        return self.rows_in - sum(self.counts.values())
+
+
+def conservation_rows(ledgers):
+    out = []
+    for lg in ledgers:
+        for disp, n in sorted(lg.counts.items()):
+            out.append(dict(source_table=lg.table, rows_in=lg.rows_in,
+                            disposition=disp, rows=n,
+                            pct=round(100.0 * n / max(lg.rows_in, 1), 2),
+                            examples="; ".join(lg.examples.get(disp, [])),
+                            harvest_date=TODAY))
+    return out
+
+
+def publish_conservation():
+    """MERGE the dataset's own ledger into the shared file. Never rewrite it.
+
+    Every key in `cedar_harvest_conservation.csv` that this dataset does not
+    own is preserved verbatim and in order; only the nagpra keys are replaced.
+    A wholesale rewrite here would delete 510's 37 rows - which is exactly the
+    failure this function is written to survive coming the other way.
+
+    Cheap: it reads two small CSVs and recomputes nothing, which is what makes
+    the documented repair after a 510 rewrite a one-liner rather than a
+    3-minute rebuild.
+    """
+    local = read_csv(LEDGER_LOCAL)
+    if not local:
+        log(f"  no {LEDGER_LOCAL.relative_to(CEDAR)} - nothing to publish. "
+            f"Run `build` (77) and `--nagpra-only` (78) first.")
+        return 1
+    ours = {r["source_table"] for r in local}
+    keep = [r for r in read_csv(CONSERVATION)
+            if (r.get("source_table") or "") not in ours]
+    write_csv(CONSERVATION, keep + local, CONSERVATION_COLS)
+    log(f"  merged {len(local)} nagpra disposition row(s) over "
+        f"{len(ours)} table(s); {len(keep)} row(s) of other ledgers untouched")
+    return 0
+
+
+def merge_conservation(ledgers):
+    """Record these ledgers and publish them.
+
+    Refuses to record a ledger that does not add up. A ledger with an
+    unaccounted remainder is worse than no ledger: it states a total that
+    licenses a reader to believe the rest was named.
+    """
+    bad = [lg for lg in ledgers if lg.unaccounted()]
+    if bad:
+        for lg in bad:
+            log(f"  CONSERVATION BREACH {lg.table}: {lg.rows_in:,} rows read, "
+                f"{sum(lg.counts.values()):,} accounted for, "
+                f"{lg.unaccounted():,} with no named disposition")
+        raise SystemExit(1)
+    ours = {lg.table for lg in ledgers}
+    keep = [r for r in read_csv(LEDGER_LOCAL)
+            if (r.get("source_table") or "") not in ours]
+    write_csv(LEDGER_LOCAL, keep + conservation_rows(ledgers),
+              CONSERVATION_COLS)
+    for lg in ledgers:
+        log(f"  conservation {lg.table}: {lg.rows_in:,} rows read")
+        for disp, n in sorted(lg.counts.items(), key=lambda kv: -kv[1]):
+            log(f"      {n:>9,}  {disp}")
+    publish_conservation()
+
+
+def conservation_verify():
+    """Exit 1 while any nagpra table lacks reconciling, named coverage.
+
+    Cheap - it reads one small CSV and computes nothing - so it can be a
+    handoff check and a pre-ship check without a rebuild.
+    """
+    by = defaultdict(list)
+    for r in read_csv(CONSERVATION):
+        by[r.get("source_table") or ""].append(r)
+    fails = []
+    for t in CONSERVED_TABLES:
+        rs = by.get(t)
+        if not rs:
+            fails.append(f"{t}: NO row-conservation coverage in "
+                         f"{CONSERVATION.name} - C5 is not met. Rebuild the "
+                         f"dataset, or see the ROW CONSERVATION note at the "
+                         f"top of this file")
+            continue
+        rows_in = int(rs[0]["rows_in"] or 0)
+        total = sum(int(r["rows"] or 0) for r in rs)
+        if total != rows_in:
+            fails.append(f"{t}: {rows_in:,} rows read but {total:,} accounted "
+                         f"for - {abs(rows_in - total):,} vanished without a "
+                         f"named disposition")
+        for r in rs:
+            d = r["disposition"]
+            if d == "UNACCOUNTED_FOR" and int(r["rows"] or 0):
+                fails.append(f"{t}: {r['rows']} row(s) UNACCOUNTED_FOR")
+            if UNNAMED_REASON_RE.search(d):
+                fails.append(f"{t}: disposition {d!r} is not a NAMED reason")
+        log(f"  OK  {t:48s} {rows_in:>9,} rows read, "
+            f"{len(rs)} named disposition(s)")
+    for f in fails:
+        log(f"  FAIL {f}")
+    if fails:
+        log(f"\n  {len(fails)} conservation failure(s). C5 NOT met.")
+        return 1
+    log(f"\n  all {len(CONSERVED_TABLES)} nagpra tables have reconciling, "
+        f"named row-conservation coverage. C5 met.")
+    return 0
 
 HOST = "www.federalregister.gov"
 HOSTLOCK = LOGS / f"_HOSTLOCK_{HOST}.json"
@@ -244,15 +451,32 @@ def write_csv(p, rows, fields):
     log(f"  wrote {p.relative_to(CEDAR)}  ({len(rows):,} rows)")
 
 
-def universe():
-    """The NAGPRA notice universe, from the parent corpus. No network."""
+#: The one reason a parent-corpus row does not enter the NAGPRA universe. It is
+#: 149,678 of 156,452 rows, and naming it is the whole point: "the rest" is not
+#: a disposition.
+NOT_A_NOTICE = ("rejected:federal_register_title_is_not_one_of_the_four_NAGPRA_"
+                "notice_headings_prescribed_by_43_CFR_10")
+
+
+def universe(led=None):
+    """The NAGPRA notice universe, from the parent corpus. No network.
+
+    `led` is the `nagpra_notices.csv` row ledger. The title filter is the
+    dataset's single largest drop, so it is counted HERE, where it happens,
+    rather than reconstructed afterwards by subtraction - a subtracted count
+    agrees with itself by construction and cannot detect a second silent drop.
+    """
     csv.field_size_limit(10 ** 9)
     out = []
     for r in read_csv(PARENT):
+        if led is not None:
+            led.seen()
         t = r.get("title") or ""
+        hit = False
         for rx, ntype, stage in NOTICE_TYPES:
             m = rx.search(t)
             if m:
+                hit = True
                 out.append({
                     "document_number": r["document_number"],
                     "publication_date": r["publication_date"],
@@ -269,6 +493,8 @@ def universe():
                     "is_correction": "1" if CORRECTION_RE.search(t) else "0",
                 })
                 break
+        if led is not None and not hit:
+            led.note(NOT_A_NOTICE, r.get("document_number") or "")
     out.sort(key=lambda r: (r["publication_date"], r["document_number"]))
     return out
 
@@ -1637,7 +1863,11 @@ def build_stage():
         f"({sum(1 for r in spine_raw if (r.get('fr_official_name') or '').strip()):,} "
         f"carry fr_official_name)")
 
-    docs = universe()
+    # C5. `led_notices.rows_in` is every row of the parent corpus, not the
+    # 6,774 that survive the title filter - the filter is itself a drop and it
+    # is the one this dataset is built on.
+    led_notices = RowLedger("data/clean/nagpra_notices.csv")
+    docs = universe(led_notices)
     log(f"NAGPRA notice universe (title-anchored): {len(docs):,}")
 
     notices, party_rows, unparsed = [], [], []
@@ -1646,6 +1876,8 @@ def build_stage():
         p = cache_path(meta["publication_date"], meta["document_number"])
         if not p.exists():
             missing += 1
+            led_notices.note("rejected:no_cached_full_text_retrieved_for_this_"
+                             "document", meta["document_number"])
             unparsed.append({"document_number": meta["document_number"],
                              "publication_date": meta["publication_date"],
                              "title": meta["title"][:180],
@@ -1657,12 +1889,22 @@ def build_stage():
         try:
             row, parties = parse_notice(meta, text)
         except Exception as exc:                       # never silently skip
+            # The exception CLASS, not str(exc): the message can carry a
+            # document-specific fragment, which would split one failure mode
+            # into hundreds of one-row buckets and hide the shape of it.
+            led_notices.note(f"rejected:parse_error:{exc.__class__.__name__}",
+                             meta["document_number"])
             unparsed.append({"document_number": meta["document_number"],
                              "publication_date": meta["publication_date"],
                              "title": meta["title"][:180],
                              "reason": f"parse_error:{exc.__class__.__name__}:{exc}",
                              "html_url": meta["html_url"]})
             continue
+        # A notice with no tribe-list span still EMITS a notice row - it is
+        # recorded in review/nagpra_unparsed.csv as a parser gap, not as a
+        # dropped source row, and calling it a rejection here would understate
+        # the table by 370.
+        led_notices.note("emitted", meta["document_number"])
         notices.append(row)
         for pr in parties:
             pr.update({"document_number": row["document_number"],
@@ -1857,8 +2099,25 @@ def build_stage():
         cache[name] = out
         return out
 
+    # C5, second ledger. One row IN is one fragment the span parser cut out of
+    # a tribe-list span; one row OUT is one bridge row. The two are not equal
+    # in either direction - a conjunction splits one fragment into two bridge
+    # rows, and the de-duplication at the end collapses some - so the ledger
+    # carries `_src`, the index of the fragment a bridge row came from, and
+    # settles every fragment's disposition AFTER the dedupe rather than
+    # guessing at it here.
+    led_bridge = RowLedger("data/clean/nagpra_notice_entity_bridge.csv")
+    disp_by_src = {}
+    REFUSED_PROSE = ("rejected:fragment_refused_by_the_trap_guard_as_narrative_"
+                     "prose_not_a_party_name")
+    REFUSED_PLACE = ("rejected:fragment_refused_by_the_trap_guard_as_a_place_"
+                     "name_or_trap_word")
+    DEDUPED = ("duplicate:same_notice_relationship_and_verbatim_name_already_"
+               "recorded_from_an_earlier_span")
+
     bridge, alias_props, refused = [], Counter(), []
-    for pr in party_rows:
+    for _src, pr in enumerate(party_rows):
+        led_bridge.seen()
         name = pr["party_name_verbatim"]
         tid, canon, how, tier = resolve(name)
         if tid == "SPLIT":
@@ -1868,7 +2127,8 @@ def build_stage():
                                    party_name_as_published=name,
                                    tribe_id=sid, canonical_name=scanon,
                                    resolve_method="conjunction_split+" + show,
-                                   confidence_tier="C", resolve_status="resolved"))
+                                   confidence_tier="C", resolve_status="resolved",
+                                   _src=_src))
                 stats["resolved"] += 1
             continue
         # A fragment the guard refused is not a party at all - it is prose or a
@@ -1878,12 +2138,14 @@ def build_stage():
         # proposed tribe aliases. It is recorded as a diagnostic instead, so
         # the mis-firing span stays visible without becoming data.
         if how == "refused_by_trap_guard":
+            is_prose = bool(PROSE_WORDS.search(name))
+            disp_by_src[_src] = REFUSED_PROSE if is_prose else REFUSED_PLACE
             refused.append({"document_number": pr["document_number"],
                             "publication_date": pr["publication_date"],
                             "relationship": pr["relationship"],
                             "span_label": pr["source_span_label"],
                             "refused_fragment": name[:300],
-                            "reason": ("prose_not_a_name" if PROSE_WORDS.search(name)
+                            "reason": ("prose_not_a_name" if is_prose
                                        else "place_name_or_trap_word")})
             continue
 
@@ -1895,7 +2157,7 @@ def build_stage():
         bridge.append(dict(pr, party_name_as_published=name,
                            tribe_id=tid, canonical_name=canon,
                            resolve_method=how, confidence_tier=tier,
-                           resolve_status=status))
+                           resolve_status=status, _src=_src))
 
     # de-duplicate: one row per (notice, relationship, verbatim name)
     seen, deduped = set(), []
@@ -1908,6 +2170,17 @@ def build_stage():
         deduped.append(b)
     log(f"bridge rows: {len(bridge):,} -> {len(deduped):,} after de-duplication")
     bridge = deduped
+
+    # Settle every fragment. A fragment counts as `emitted` when AT LEAST ONE
+    # bridge row descended from it survived the dedupe; a conjunction that
+    # produced two rows of which one collapsed still emitted.
+    survivors = {b["_src"] for b in bridge}
+    for _src, pr in enumerate(party_rows):
+        led_bridge.note(disp_by_src.get(
+            _src, "emitted" if _src in survivors else DEDUPED),
+            f"{pr['document_number']}: {pr['party_name_verbatim'][:48]}")
+    for b in bridge:
+        b.pop("_src", None)
 
     # notice-level rollups computed FROM the bridge, so they can never disagree
     by_doc = defaultdict(lambda: defaultdict(list))
@@ -1990,6 +2263,10 @@ def build_stage():
                for n, c in alias_props.most_common()],
               ["proposed_alias", "n_notices", "first_seen_relationship",
                "example_document", "note", "YOUR_RULING"])
+
+    # LAST, and after the outputs are on disk: a conservation ledger that
+    # disagreed with the table it describes would be worse than none.
+    merge_conservation([led_notices, led_bridge])
 
     report(notices, bridge, unparsed, stats, alias_props)
 
@@ -2120,8 +2397,16 @@ def main():
             release_host()
     elif cmd == "build":
         build_stage()
+    elif cmd == "conservation":
+        # `conservation` re-publishes the dataset's durable ledger into the
+        # shared file and then verifies it; `conservation verify` only reads.
+        rc = 0
+        if "verify" not in sys.argv[2:]:
+            rc = publish_conservation()
+        raise SystemExit(rc or conservation_verify())
     else:
-        raise SystemExit(f"unknown command {cmd!r} (fetch | build)")
+        raise SystemExit(f"unknown command {cmd!r} "
+                         f"(fetch | build | conservation [verify])")
 
 
 if __name__ == "__main__":

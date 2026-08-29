@@ -2,14 +2,14 @@
 
 *Generated 2026-08-29 by `code/518_dataset_readiness.py` from live artifacts. Three statuses only: **READY / BLOCKED / NOT_TESTED**. There is no 'mostly ready' — a dataset crosses the minimum shipping contract or it has named blockers.*
 
-## READY: 0 / 13
+## READY: 2 / 13
 
-BLOCKED 13 · NOT_TESTED 0
+BLOCKED 11 · NOT_TESTED 0
 
 | dataset | status | tables | grain | keys | duplicates | agg-unsafe | rebuild |
 |---|---|---:|---|---|---|---:|---|
-| `federal-register` | **BLOCKED** | 22 | 22/22 | 22/22 | clean | 0 | declared |
-| `nagpra` | **BLOCKED** | 4 | 4/4 | 4/4 | clean | 0 | declared |
+| `federal-register` | **READY** | 22 | 22/22 | 22/22 | clean | 0 | declared |
+| `nagpra` | **READY** | 4 | 4/4 | 4/4 | clean | 0 | declared |
 | `native-owned-businesses` | **BLOCKED** | 6 | 6/6 | 6/6 | clean | 0 | declared |
 | `natural-resources` | **BLOCKED** | 8 | 7/8 | 7/8 | clean | 1 | declared |
 | `legislation` | **BLOCKED** | 12 | 10/12 | 10/12 | 5 rows | 2 | declared |
@@ -18,19 +18,11 @@ BLOCKED 13 · NOT_TESTED 0
 | `nonprofits` | **BLOCKED** | 10 | 9/10 | 9/10 | 101 rows | 1 | declared |
 | `lobbying` | **BLOCKED** | 34 | 29/34 | 29/34 | 827 rows | 5 | declared |
 | `deals` | **BLOCKED** | 14 | 12/14 | 12/14 | clean | 2 | DESTRUCTIVE |
-| `contractors` | **BLOCKED** | 10 | 5/10 | 5/10 | 141,697 rows | 5 | declared |
+| `contractors` | **BLOCKED** | 10 | 6/10 | 6/10 | 141,697 rows | 5 | declared |
 | `_entity_layer` | **BLOCKED** | 35 | 29/35 | 29/35 | 10,985 rows | 6 | DESTRUCTIVE |
 | `funding` | **BLOCKED** | 10 | 7/10 | 7/10 | 180,374 rows | 3 | declared |
 
 ## Blockers, by dataset
-
-### `federal-register` — BLOCKED
-
-- C5 no row-conservation coverage
-
-### `nagpra` — BLOCKED
-
-- C5 no row-conservation coverage
 
 ### `native-owned-businesses` — BLOCKED
 
@@ -77,7 +69,6 @@ BLOCKED 13 · NOT_TESTED 0
 - C1 grain UNSTATED on 5: admin_appeal_positions.csv, ferc_docket_filings.csv, ferc_ex_parte_communications.csv
 - C2 no validated primary key on 5
 - C3 literal duplicates: ferc_docket_filings.csv(822), hearing_bill_links.csv(1), lobbying_registrant_native_ownership_evidence.csv(4)
-- C5 no row-conservation coverage
 
 ### `deals` — BLOCKED
 
@@ -89,8 +80,8 @@ BLOCKED 13 · NOT_TESTED 0
 
 ### `contractors` — BLOCKED
 
-- C1 grain UNSTATED on 5: contractor_ranking.csv, fpds_uei_cage_map.csv, prime_contracts.csv
-- C2 no validated primary key on 5
+- C1 grain UNSTATED on 4: contractor_ranking.csv, fpds_uei_cage_map.csv, prime_contracts.csv
+- C2 no validated primary key on 4
 - C3 literal duplicates: prime_contracts.csv(80,778), prime_contracts_archive_backfill.csv(60,919)
 - C7 DOUBLE-COUNTING RISK - money tables a buyer cannot safely total: contractor_ranking.csv, prime_contracts.csv, prime_contracts_archive_backfill.csv
 - C5 no row-conservation coverage

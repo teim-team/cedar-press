@@ -76,8 +76,16 @@ def read_csv(p):
         return list(csv.DictReader(fh))
 
 
+#: When set, `write_csv` writes ONLY these filenames and holds everything else
+#: back. See the `--nagpra-only` block in main() for why this exists.
+ONLY = None
+
+
 def write_csv(p, rows, cols=None):
     p = Path(p)
+    if ONLY is not None and p.name not in ONLY:
+        print(f"  (held back {p.name}: --nagpra-only)")
+        return
     if not rows:
         print(f"  (skipped {p.name}: no rows)")
         return
@@ -1072,15 +1080,41 @@ NAGPRA_TITLE = re.compile(
     re.I)
 
 
+#: The two NAGPRA tables this script owns are customer tables of the `nagpra`
+#: collection, so contract point C5 - every source row lands in a NAMED
+#: disposition bucket - applies to them. The ledger class, the durable file and
+#: the merge into `cedar_harvest_conservation.csv` all live in
+#: `77_build_nagpra_dataset.py`, which owns the collection; duplicating them
+#: here would be a second copy of the same rules to keep in step.
+def _nagpra_ledgers():
+    import importlib
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    return importlib.import_module("77_build_nagpra_dataset")
+
+
+#: 78 reads the whole FR corpus and keeps the NAGPRA notice titles. The drop is
+#: 149,846 of 156,452 rows and it gets a name, not a silent `continue`.
+NOT_A_NAGPRA_TITLE = ("rejected:federal_register_title_does_not_carry_a_NAGPRA_"
+                      "notice_heading_prescribed_by_43_CFR_10")
+NO_YEAR = ("rejected:publication_date_is_blank_so_the_notice_has_no_year_to_"
+           "aggregate_into")
+
+
 def build_diagnostics(fr_rows_raw, fr_out):
     print("\n[6] Corpus diagnostics and the corrected NAGPRA series")
     idx = {r["document_number"]: r for r in fr_out}
+    N = _nagpra_ledgers()
+    led_idx = N.RowLedger("data/clean/fr_nagpra_title_index.csv")
+    led_yr = N.RowLedger("data/clean/fr_nagpra_title_index_year.csv")
 
     nag, per_year = [], defaultdict(lambda: [0, 0])
     for r in fr_rows_raw:
+        led_idx.seen()
         t = r.get("title") or ""
         if not NAGPRA_TITLE.search(t):
+            led_idx.note(NOT_A_NAGPRA_TITLE, r.get("document_number") or "")
             continue
+        led_idx.note("emitted", r.get("document_number") or "")
         y = (r.get("publication_date") or "")[:4]
         has_abs = bool((r.get("abstract") or "").strip())
         o = idx.get(r.get("document_number", ""))
@@ -1105,6 +1139,14 @@ def build_diagnostics(fr_rows_raw, fr_out):
                      "does not depend on abstract availability",
         })
     write_csv(CLEAN / "fr_nagpra_title_index.csv", nag)
+    # The year table aggregates the index. `sorted(per_year) if y` drops the
+    # blank-year bucket, so a notice with no publication_date contributes to no
+    # year row at all - that is the disposition, and it is named rather than
+    # left as an unexplained gap between the two tables' totals.
+    for r in nag:
+        led_yr.seen()
+        led_yr.note("emitted" if r["publication_year"] else NO_YEAR,
+                    r["document_number"])
     write_csv(CLEAN / "fr_nagpra_title_index_year.csv",
               [{"publication_year": y,
                 "n_nagpra_notices": per_year[y][0],
@@ -1112,6 +1154,7 @@ def build_diagnostics(fr_rows_raw, fr_out):
                 "share_with_abstract": round(per_year[y][1] / per_year[y][0], 4)
                 if per_year[y][0] else ""}
                for y in sorted(per_year) if y])
+    N.merge_conservation([led_idx, led_yr])
     missed = sum(r["missed_by_tier_rule"] for r in nag)
     print(f"  {len(nag):,} NAGPRA notices by title; {missed:,} "
           f"({100*missed/len(nag):.1f}%) were missed by the relevance tier rule")
@@ -1134,8 +1177,41 @@ def build_diagnostics(fr_rows_raw, fr_out):
     return nag, missed
 
 
+#: What `--nagpra-only` is allowed to write. Everything else is held back.
+NAGPRA_ONLY_OUTPUTS = {"fr_nagpra_title_index.csv",
+                       "fr_nagpra_title_index_year.csv",
+                       "fr_abstract_availability_year.csv"}
+
+
 def main():
+    global ONLY
     print("=== Cedar Press 78: content analysis ===")
+
+    # --nagpra-only: REBUILD THE NAGPRA TABLES WITHOUT REVERTING ANOTHER
+    # COLLECTION'S ENRICHERS.
+    #
+    # 78 is one of the two rebuilders in `build.py plan nagpra`, but it writes
+    # 18 tables and only three of them belong to that collection. A full run
+    # rewrites `lobbying_issue_families_filing.csv` from scratch, and that file
+    # carries five columns 78 does not produce: `cedar_uid` (503_identity.py)
+    # and the four `entity_id_withdrawn*` columns (353). Running nagpra's plan
+    # end to end therefore destroys lobbying's enrichment and trips
+    # `62.files_with_columns_lost_vs_backup`, which must be zero.
+    #
+    # This is contract point C8 - "ONE documented rebuild path reproduces the
+    # tables without destroying later enrichment" - and the fix is to give the
+    # nagpra path its own entry point rather than to ask a future agent to
+    # remember. The classifiers are untouched: `build_fr` still runs in full,
+    # because `build_diagnostics` needs its per-document relevance tier; only
+    # the WRITES are held back.
+    if "--nagpra-only" in sys.argv:
+        ONLY = NAGPRA_ONLY_OUTPUTS
+        fr_rows = read_csv(FR)
+        print(f"--nagpra-only | FR {len(fr_rows):,} documents")
+        fr_out, *_ = build_fr(fr_rows)
+        build_diagnostics(fr_rows, fr_out)
+        return
+
     lob_rows = read_csv(LOBBY)
     fr_rows = read_csv(FR)
     print(f"lobbying {len(lob_rows):,} filings | FR {len(fr_rows):,} documents")
