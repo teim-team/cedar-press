@@ -24,7 +24,14 @@
 /data/*
 dist/
 logs/
-review/
+# `review/*` and not `review/`, because git cannot re-include anything under
+# an excluded DIRECTORY - the negation below would be silently inert.
+review/*
+# ...except the fixtures. A check whose proof is not in the repository is a
+# check nobody can re-run, and this project's standard is that an invariant is
+# proven by injecting the violation rather than asserted. They are code, not
+# review output.
+!review/fixtures_D/
 graveyard/
 
 # --- content, by extension, at any depth ---
@@ -87,6 +94,12 @@ data/restricted/
 !/data/spine/
 /data/spine/*
 !/data/spine/cedar_identity_register.csv
+# cedar_handle_history.csv is tracked for the SAME reason as the register and
+# is not regenerable: once a handle is retired, its valid_to and its
+# change_reason exist nowhere else. An untracked append-only history is a
+# history that dies with the working directory, and an old handle that stops
+# resolving is exactly the failure review finding F6 is about.
+!/data/spine/cedar_handle_history.csv
 
 # Reports and audit evidence that live in docs/ - small, prose-adjacent,
 # and meaningless without the commit they describe.

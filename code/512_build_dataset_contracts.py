@@ -79,30 +79,193 @@ JOIN_KEYS = ("tribe_id", "cedar_uid", "entity_id", "facility_id",
 # The absence of a table here means its grain is UNSTATED, and the contract
 # says so. Do not fill this in from a guess; that is the one way this file
 # can lie.
+#
+# A DECLARATION IS NOW FOUR THINGS, NOT ONE - external review F9.
+# A prose grain was honest and useless to a machine. What a buyer actually
+# needs before they join is:
+#
+#   grain             what one row IS, in words
+#   primary_key       the column set that is unique across the file
+#   join_keys         what a consumer may join on
+#   join_cardinality  how many rows they get back PER join key value:
+#                     "one"  exactly one row per value  (a lookup)
+#                     "many" more than one is expected  (a fan-out)
+#
+# `join_cardinality` is the field that stops the failure the reviewer named:
+# a buyer joins a table whose real grain is entity x UEI x year on cedar_uid
+# alone, gets a silent fan-out, and sums the award amount N times. Declaring
+# "many" does not stop them joining - it stops them being surprised, and it
+# makes the surprise a testable statement rather than a footnote.
+#
+# EVERY DECLARED FIELD IS VALIDATED AGAINST THE FILE ON EVERY RUN, and a
+# declaration the data contradicts is a release-blocking violation. A grain
+# that is merely UNSTATED is counted and ratcheted instead - see the note on
+# n_shippable_grain_unstated below for why the two are treated differently.
 # ---------------------------------------------------------------------------
 GRAIN = {
-    "cedar_entity_spine.csv":
-        "one row per canonical Native entity (hub). Sub-hubs (registrations, "
-        "facilities) are NEVER rows here - IDENTIFIER_STANDARD.md",
-    "cedar_identity_register.csv":
-        "one row per permanent cedar_uid, append-only, never re-minted",
-    "cedar_identifier_ledger_final.csv":
-        "one row per (identifier, entity, evidence) claim; tier X rows are "
-        "REFUTATIONS and must not be dropped by consumers",
-    "fpds_uei_edges.csv":
-        "one row per DECLARED (child_uei, parent_uei, edge_type) - literal "
-        "pairs observed on transactions; connections, not a verified tree",
-    "federal_funding_transactions.csv":
-        "one row per federal award transaction",
-    "cedar_assertions.csv":
-        "one row per (subject, predicate, object, source, polarity) claim - "
-        "append-only",
-    "cedar_resolved_facts.csv":
-        "one row per (cedar_uid, predicate) for single-valued predicates; one "
-        "per (cedar_uid, predicate, value) for multi-valued",
-    "gaming_source_claims.csv":
-        "one row per claim extracted from one source document",
+    "cedar_entity_spine.csv": dict(
+        grain="one row per canonical Native entity (hub). Sub-hubs "
+              "(registrations, facilities) are NEVER rows here - "
+              "IDENTIFIER_STANDARD.md",
+        primary_key=["tribe_id"],
+        join_cardinality={"tribe_id": "one", "cedar_uid": "one"},
+        declared_by="docs/IDENTIFIER_STANDARD.md 1"),
+    "cedar_identity_register.csv": dict(
+        grain="one row per permanent cedar_uid, append-only, never re-minted. "
+              "`handle` is the CURRENT display handle only; retired handles "
+              "live in cedar_handle_history.csv and still resolve",
+        primary_key=["cedar_uid"],
+        join_cardinality={"cedar_uid": "one"},
+        declared_by="docs/IDENTIFIER_STANDARD.md 0"),
+    "cedar_handle_history.csv": dict(
+        grain="one row per (handle, cedar_uid) binding ever issued, with the "
+              "interval it was current. A retired handle keeps its row so an "
+              "old join key never stops resolving",
+        primary_key=["handle"],
+        join_cardinality={"handle": "one", "cedar_uid": "many"},
+        declared_by="docs/IDENTIFIER_STANDARD.md 'THE RECLASSIFICATION RULE'"),
+    "cedar_identifier_ledger_final.csv": dict(
+        grain="one row per (identifier, entity, evidence) claim; tier X rows "
+              "are REFUTATIONS and must not be dropped by consumers",
+        # The evidence columns are part of the key because the declared grain
+        # says "evidence". Without them 4 rows collide - the same claim
+        # recorded twice, once with an evidence_url and once without. That is
+        # a real defect and it is visible here rather than hidden by a
+        # shorter key that would simply have failed.
+        primary_key=["identifier_type", "identifier", "tribe_id",
+                     "attribution_method", "evidence_url", "verified_date"],
+        # NOT uei/ein/cage_code: this table is LONG on identifier_type, so
+        # the identifier lives in one `identifier` column. The first version
+        # of this declaration named all three and the validator refused it -
+        # which is the point of validating a declaration.
+        join_cardinality={"cedar_uid": "many", "tribe_id": "many",
+                          "identifier": "many"},
+        declared_by="docs/IDENTIFIER_STANDARD.md 3"),
+    "fpds_uei_edges.csv": dict(
+        grain="one row per DECLARED (child_uei, parent_uei, edge_type) - "
+              "literal pairs observed on transactions; connections, not a "
+              "verified tree",
+        primary_key=["child_uei", "parent_uei", "edge_type"],
+        join_cardinality={},
+        declared_by="docs/HIERARCHY_MODEL.md"),
+    "cedar_assertions.csv": dict(
+        grain="one row per (subject, predicate, object, source, polarity) "
+              "claim - append-only",
+        primary_key=["assertion_id"],
+        join_cardinality={"cedar_uid": "many"},
+        declared_by="docs/ASSERTION_LAYER.md"),
+    "cedar_resolved_facts.csv": dict(
+        grain="one row per (cedar_uid, subject_qualifier, predicate) for "
+              "single-valued predicates; one per (cedar_uid, "
+              "subject_qualifier, predicate, value) for multi-valued",
+        primary_key=["cedar_uid", "subject_qualifier", "predicate",
+                     "object_value"],
+        join_cardinality={"cedar_uid": "many"},
+        declared_by="docs/ASSERTION_LAYER.md"),
+    "cedar_fact_conflicts.csv": dict(
+        grain="one row per losing or blocked assertion, kept rather than "
+              "deleted; many rows per resolved fact",
+        primary_key=["cedar_uid", "subject_qualifier", "predicate",
+                     "losing_value", "assertion_id", "decided_by_rule"],
+        join_cardinality={"cedar_uid": "many"},
+        declared_by="docs/ASSERTION_LAYER.md"),
+    "gaming_source_claims.csv": dict(
+        grain="one row per claim extracted from one source document",
+        primary_key=["source_claim_id"],
+        join_cardinality={},
+        declared_by="docs/GAMING_DATASET_PLAN.md"),
 }
+
+# A table whose grain is declared but whose PRIMARY KEY cannot be stated
+# without guessing. Recorded rather than left blank, so the gap is a task
+# with a name instead of a silence. These count as UNSTATED for the gate.
+GRAIN_OPEN = {
+    "federal_funding_transactions.csv":
+        "grain stated as 'one row per federal award transaction', but the "
+        "file is a UNION of assistance and archive pulls and no owner has "
+        "ruled whether assistance_transaction_unique_key is unique ACROSS "
+        "the union or only within one pull. Declaring a key we have not "
+        "ruled on is the one way this file can lie, so it stays open.",
+}
+
+
+UNSTATED = ("UNSTATED - no owner ruling or build log has declared this "
+            "table's grain")
+
+
+def _find(name):
+    for d in TABLE_DIRS:
+        p = ROOT / d / name
+        if p.exists():
+            return p
+    return None
+
+
+def validate_grain(name, decl, hdr):
+    """Check a DECLARED grain against the file. Returns a list of violation
+    strings, plus the measured cardinality it observed.
+
+    This is the half of F9 that makes a declaration worth anything. A prose
+    grain nobody tests is a comment. Reading the file is the only way to
+    learn that the key we published is not unique, or that a key we called a
+    lookup fans a buyer's join out 35 times.
+    """
+    v, measured = [], {}
+    p = _find(name)
+    if p is None:
+        return [f"{name}: grain is DECLARED but the table is not on disk"], {}
+    pk = decl.get("primary_key") or []
+    card = decl.get("join_cardinality") or {}
+    missing = [c for c in pk if c not in hdr]
+    if missing:
+        v.append(f"{name}: declared primary_key names column(s) not in the "
+                 f"header: {missing}")
+    missing_j = [c for c in card if c not in hdr]
+    if missing_j:
+        v.append(f"{name}: declared join_cardinality names column(s) not in "
+                 f"the header: {missing_j}")
+    live_pk = [c for c in pk if c in hdr]
+    live_card = {c: k for c, k in card.items() if c in hdr}
+    if not live_pk:
+        v.append(f"{name}: no usable primary key - a SHIPPABLE table with no "
+                 f"validated key cannot promise a buyer anything about a join")
+        return v, {}
+
+    seen, dup, dup_ex = set(), 0, None
+    counts = {c: {} for c in live_card}
+    n = 0
+    try:
+        with p.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+            for r in csv.DictReader(fh):
+                n += 1
+                k = tuple((r.get(c) or "") for c in live_pk)
+                if k in seen:
+                    dup += 1
+                    if dup_ex is None:
+                        dup_ex = k
+                seen.add(k)
+                for c in live_card:
+                    val = (r.get(c) or "").strip()
+                    if val:
+                        counts[c][val] = counts[c].get(val, 0) + 1
+    except Exception as e:
+        return [f"{name}: grain could not be validated ({type(e).__name__}: "
+                f"{e}) - UNVALIDATED IS NOT CLEAN"], {}
+
+    if dup:
+        v.append(f"{name}: declared primary_key {live_pk} is NOT unique - "
+                 f"{dup:,} duplicate row(s) of {n:,}, e.g. {dup_ex}. A buyer "
+                 f"joining on it gets rows we did not promise them.")
+    for c, kind in sorted(live_card.items()):
+        mx = max(counts[c].values()) if counts[c] else 0
+        measured[c] = mx
+        if kind == "one" and mx > 1:
+            worst = max(counts[c].items(), key=lambda kv: kv[1])[0]
+            v.append(f"{name}: join_cardinality declares '{c}' as ONE row per "
+                     f"value and the file has up to {mx:,} ({worst!r}). This "
+                     f"is the silent fan-out: a buyer joining on {c} and "
+                     f"summing a dollar column multiplies it {mx}x.")
+    return v, measured
 
 
 def build_contracts():
@@ -144,6 +307,7 @@ def build_contracts():
 
     contracts, violations = [], []
     claimed = set()
+    grain_checked, grain_stated = {}, set()
 
     for spec in arch.COLLECTIONS:
         cid = spec["id"]
@@ -171,12 +335,28 @@ def build_contracts():
                     violations.append(f"{name}: ordering names {s}, which "
                                       f"does not exist anywhere under code/")
             never = [s for s in rebuilds if s in CP.NEVER_RUN]
+            decl = GRAIN.get(name)
+            gv, measured = ([], {})
+            if decl and name not in grain_checked:
+                gv, measured = validate_grain(name, decl, hdr)
+                grain_checked[name] = (gv, measured)
+            elif decl:
+                gv, measured = grain_checked[name]
+            if decl:
+                grain_stated.add(name)
+            violations.extend(gv)
             rows.append(dict(
                 table=name,
                 status=status_of(name),
                 key_columns=keys,
-                grain=GRAIN.get(name, "UNSTATED - no owner ruling or build "
-                                      "log has declared this table's grain"),
+                grain=(decl["grain"] if decl else UNSTATED),
+                primary_key=(decl.get("primary_key", []) if decl else []),
+                join_cardinality=(decl.get("join_cardinality", {})
+                                  if decl else {}),
+                grain_declared_by=(decl.get("declared_by", "") if decl else ""),
+                grain_validated=bool(decl and not gv),
+                measured_rows_per_join_key=measured,
+                grain_open_question=GRAIN_OPEN.get(name, ""),
                 rebuilt_by=rebuilds,
                 enriched_by=enrichers,
                 never_run_warning=[
@@ -199,6 +379,27 @@ def build_contracts():
         violations.append(f"ORPHAN shippable table: {o} - registered in the "
                           f"codebook but claimed by NO collection")
 
+    # ------------------------------------------------------------------
+    # F9: AN UNSTATED GRAIN ON A SHIPPABLE TABLE IS A RELEASE DEFECT.
+    #
+    # It is NOT the same defect as a declared grain the data contradicts, and
+    # the two are counted separately on purpose:
+    #
+    #   declared and violated  -> a PROMISE WE BREAK. Release-blocking now,
+    #                             through n_violations / contract_violations.
+    #   unstated               -> a promise we never made. Also a defect - a
+    #                             buyer cannot join safely without it - but
+    #                             there are hundreds and blocking every one
+    #                             today would make this gate a thing to step
+    #                             around, which standing rule 15 says is
+    #                             worse than no gate. It is RATCHETED
+    #                             instead: 62 carries it as MUST_NOT_RISE, so
+    #                             the count may only fall, and a NEW shippable
+    #                             table with no declared grain fails the gate
+    #                             the day it lands.
+    #
+    # The honest number is printed on every run rather than summarised.
+    unstated = sorted(n for n in ship_names if n not in grain_stated)
     return dict(
         built_date=TODAY,
         derivation="500.COLLECTIONS + cedar_codebook + cedar_pipeline; "
@@ -207,6 +408,11 @@ def build_contracts():
         n_tables_claimed=len(claimed),
         n_orphan_shippable=len(orphans),
         orphans=orphans,
+        n_shippable=len(ship_names),
+        n_shippable_grain_stated=len(ship_names & grain_stated),
+        n_shippable_grain_unstated=len(unstated),
+        shippable_grain_unstated=unstated,
+        grain_open_questions=GRAIN_OPEN,
         n_violations=len(violations),
         violations=violations,
         contracts=contracts,
@@ -223,7 +429,28 @@ def write_md(doc):
          f"**{doc['n_collections']} collections, {doc['n_tables_claimed']} "
          f"tables claimed, {doc['n_orphan_shippable']} orphaned shippable "
          f"tables, {doc['n_violations']} violations.**",
+         "",
+         f"**Grain: {doc['n_shippable_grain_stated']} of "
+         f"{doc['n_shippable']} shippable tables declare and VALIDATE a row "
+         f"grain, a primary key and a join cardinality; "
+         f"{doc['n_shippable_grain_unstated']} do not.** A declared grain the "
+         f"data contradicts is a release-blocking violation, listed below. "
+         f"An unstated grain is ratcheted by "
+         f"`62_no_regression_check.contract_grain_unstated_shippable`: the "
+         f"count may only fall, and a new shippable table that lands without "
+         f"one fails the gate that day.",
          ""]
+    if doc["shippable_grain_unstated"]:
+        L.append("<details><summary>Shippable tables with an UNSTATED grain "
+                 f"({doc['n_shippable_grain_unstated']}) - a buyer cannot "
+                 "join these safely</summary>")
+        L.append("")
+        for t in doc["shippable_grain_unstated"]:
+            L.append(f"- `{t}`" + (f" — {doc['grain_open_questions'][t]}"
+                                   if t in doc["grain_open_questions"] else ""))
+        L.append("")
+        L.append("</details>")
+        L.append("")
     if doc["violations"]:
         L.append("## VIOLATIONS - the contract the world currently breaks")
         L.append("")
@@ -246,10 +473,23 @@ def write_md(doc):
         L.append("")
         stated = [t for t in c["tables"] if not t["grain"].startswith("UNSTATED")]
         if stated:
-            L.append("Declared grain:")
+            L.append("Declared grain — validated against the file on every run:")
             L.append("")
             for t in stated:
                 L.append(f"- `{t['table']}` — {t['grain']}")
+                L.append(f"  - primary key: "
+                         + (" + ".join(f"`{k}`" for k in t["primary_key"])
+                            or "—")
+                         + ("  (validated unique)" if t["grain_validated"]
+                            else "  (**VALIDATION FAILED — see violations**)"))
+                if t["join_cardinality"]:
+                    L.append("  - join cardinality: " + ", ".join(
+                        f"`{k}` → {v} row(s) per value"
+                        + (f" (measured max {t['measured_rows_per_join_key'].get(k)})"
+                           if t["measured_rows_per_join_key"].get(k) else "")
+                        for k, v in sorted(t["join_cardinality"].items())))
+                if t["grain_declared_by"]:
+                    L.append(f"  - declared by: {t['grain_declared_by']}")
             L.append("")
         warned = [t for t in c["tables"] if t["never_run_warning"]]
         for t in warned:
@@ -272,6 +512,11 @@ def main() -> int:
           f"{doc['n_tables_claimed']} tables claimed, "
           f"{doc['n_orphan_shippable']} orphan shippable, "
           f"{doc['n_violations']} violations")
+    print(f"  grain: {doc['n_shippable_grain_stated']}/{doc['n_shippable']} "
+          f"shippable tables declare AND validate a grain, primary key and "
+          f"join cardinality; {doc['n_shippable_grain_unstated']} UNSTATED "
+          f"(ratcheted by 62.contract_grain_unstated_shippable - the count "
+          f"may only fall)")
     for v in doc["violations"][:15]:
         print(f"    !! {v}")
     if doc["n_violations"] and len(doc["violations"]) > 15:

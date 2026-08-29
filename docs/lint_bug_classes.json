@@ -1,5 +1,5 @@
 {
-  "scanned_files": 410,
+  "scanned_files": 414,
   "counts": {
     "class1": 0,
     "class2a": 0,
@@ -747,7 +747,7 @@
       "file": "01_build_entity_spine.py",
       "line": 1,
       "evidence": "cedar_entity_spine.csv",
-      "why": "`cedar_entity_spine.csv` has FULL-REBUILD writer(s) ['01_build_entity_spine.py'] and IN-PLACE enricher(s) ['08_build_review_page.py', '115_pull_assistance_archive.py', '163_promote_nho_universe_in_place.py', '241_promote_individual_native_firms_in_place.py', '416_reconcile_spine_id_columns.py', '426_mint_bristol_bay_spine_entities.py', '503_identity.py', '510_assertions.py', '51_add_anc_acronym_aliases.py', '52_add_village_corporations.py', '61_add_nho_intertribal_to_spine.py', '66_build_entity_hierarchy.py', '69_enrich_spine_from_federal_register.py', '71_fix_known_defects.py', '73_add_tcu_and_cdfi.py', '74_add_organization_acronyms.py', '75_add_bie_schools_and_uios.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
+      "why": "`cedar_entity_spine.csv` has FULL-REBUILD writer(s) ['01_build_entity_spine.py'] and IN-PLACE enricher(s) ['08_build_review_page.py', '115_pull_assistance_archive.py', '163_promote_nho_universe_in_place.py', '241_promote_individual_native_firms_in_place.py', '416_reconcile_spine_id_columns.py', '426_mint_bristol_bay_spine_entities.py', '503_identity.py', '51_add_anc_acronym_aliases.py', '52_add_village_corporations.py', '61_add_nho_intertribal_to_spine.py', '66_build_entity_hierarchy.py', '69_enrich_spine_from_federal_register.py', '71_fix_known_defects.py', '73_add_tcu_and_cdfi.py', '74_add_organization_acronyms.py', '75_add_bie_schools_and_uios.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
       "waived": false,
       "waiver_reason": ""
     },
@@ -927,7 +927,7 @@
       "file": "91_build_nigc_declinations.py",
       "line": 1,
       "evidence": "gaming_source_claims.csv",
-      "why": "`gaming_source_claims.csv` has FULL-REBUILD writer(s) ['91_build_nigc_declinations.py'] and IN-PLACE enricher(s) ['100_finish_declinations_and_employment.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
+      "why": "`gaming_source_claims.csv` has FULL-REBUILD writer(s) ['91_build_nigc_declinations.py'] and IN-PLACE enricher(s) ['100_finish_declinations_and_employment.py', '510_assertions.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
       "waived": false,
       "waiver_reason": ""
     },
@@ -1519,7 +1519,7 @@
     {
       "class": "class3",
       "file": "510_assertions.py",
-      "line": 227,
+      "line": 229,
       "evidence": "\"elijah_ruling\": dict(lineage_root=\"LR_HUMAN_OWNER\", tier_ceiling=\"A\",",
       "why": "a tier-A assignment sits within 6/3 lines of a ruling-method or status test, at 1 site(s), and this file has NO RECORDED DISPOSITION in 293's DISPOSITIONS table. A regex cannot decide this one - read the site and write the reason down. `attribution_method` says WHO decided; `confidence_tier` says WHAT was decided. Do NOT delete the entry to make this pass.",
       "waived": true,
@@ -1597,6 +1597,9 @@
       "cedar_publishable_identifiers.csv": [
         "03_apply_exclusions_and_tier.py"
       ],
+      "cedar_resolution_policies.csv": [
+        "510_assertions.py"
+      ],
       "cedar_resolution_rules.csv": [
         "510_assertions.py"
       ],
@@ -1605,6 +1608,9 @@
       ],
       "cedar_spiderweb_v2.csv": [
         "18_spiderweb_v2_and_cage_backfill.py"
+      ],
+      "cedar_temporal_policy.csv": [
+        "515_temporal.py"
       ],
       "codebook_master.csv": [
         "41_build_codebooks.py"
@@ -2103,7 +2109,6 @@
         "416_reconcile_spine_id_columns.py",
         "426_mint_bristol_bay_spine_entities.py",
         "503_identity.py",
-        "510_assertions.py",
         "51_add_anc_acronym_aliases.py",
         "52_add_village_corporations.py",
         "61_add_nho_intertribal_to_spine.py",
@@ -2115,6 +2120,12 @@
         "75_add_bie_schools_and_uios.py"
       ],
       "cedar_fact_conflicts.csv": [
+        "510_assertions.py"
+      ],
+      "cedar_handle_history.csv": [
+        "503_identity.py"
+      ],
+      "cedar_harvest_conservation.csv": [
         "510_assertions.py"
       ],
       "cedar_identifier_ledger.csv": [
@@ -2138,11 +2149,23 @@
       "cedar_identity_register.csv": [
         "503_identity.py"
       ],
+      "cedar_observations.csv": [
+        "515_temporal.py"
+      ],
       "cedar_resolved_facts.csv": [
         "510_assertions.py"
       ],
+      "cedar_source_record_links.csv": [
+        "514_source_records.py"
+      ],
+      "cedar_source_records.csv": [
+        "514_source_records.py"
+      ],
       "cedar_source_registry.csv": [
         "510_assertions.py"
+      ],
+      "cedar_temporal_facts.csv": [
+        "515_temporal.py"
       ],
       "codebook_master.csv": [
         "104_build_wa_allocations.py",
@@ -2292,7 +2315,8 @@
         "165_link_universe_events_to_hub.py"
       ],
       "gaming_source_claims.csv": [
-        "100_finish_declinations_and_employment.py"
+        "100_finish_declinations_and_employment.py",
+        "510_assertions.py"
       ],
       "grantmaker_funding_coverage.csv": [
         "140_build_grantmaker_funding_flows.py"
@@ -2454,7 +2478,6 @@
         "416_reconcile_spine_id_columns.py",
         "426_mint_bristol_bay_spine_entities.py",
         "503_identity.py",
-        "510_assertions.py",
         "51_add_anc_acronym_aliases.py",
         "52_add_village_corporations.py",
         "61_add_nho_intertribal_to_spine.py",
@@ -2603,6 +2626,7 @@
       ],
       "gaming_source_claims.csv": [
         "100_finish_declinations_and_employment.py",
+        "510_assertions.py",
         "91_build_nigc_declinations.py"
       ],
       "hearing_appearances.csv": [
@@ -2761,7 +2785,7 @@
       },
       {
         "file": "510_assertions.py",
-        "line": 227,
+        "line": 229,
         "source": "\"elijah_ruling\": dict(lineage_root=\"LR_HUMAN_OWNER\", tier_ceiling=\"A\","
       },
       {

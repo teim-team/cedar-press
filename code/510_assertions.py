@@ -99,6 +99,8 @@ RESOLVED = CLEAN / "cedar_resolved_facts.csv"
 CONFLICTS = CLEAN / "cedar_fact_conflicts.csv"
 SOURCE_REG = SPINE / "cedar_source_registry.csv"
 RULE_REG = SPINE / "cedar_resolution_rules.csv"
+POLICY_REG = SPINE / "cedar_resolution_policies.csv"
+CONSERVATION = CLEAN / "cedar_harvest_conservation.csv"
 
 
 # =====================================================================
@@ -306,6 +308,206 @@ def support_status(group, n_families: int) -> str:
 def is_authority_for(source_id: str, predicate: str) -> bool:
     return predicate in SOURCES.get(source_id, {}).get("authority_for", [])
 
+
+# =====================================================================
+# RESOLUTION POLICIES - external review 2026-08-30, finding F10.
+# =====================================================================
+# ONE lexicographic rule order is wrong for a domain where stable legal
+# status, current leadership, mailing addresses and ownership all need
+# different treatment. The specific breakage the reviewer named:
+#
+#   R01 DENY_VETO ran BEFORE R02 AUTHORITY, so an equal-tier deny from a
+#   source with no authority over the predicate removed an authoritative
+#   Federal Register affirmation before authority was ever consulted.
+#
+# The fix is NOT another global special case ("skip R01 if authoritative").
+# It is that a predicate DECLARES which policy governs it, and the policy
+# names its own rule order and its own deny semantics. Three failure modes
+# the reviewer raised are policy dimensions here, not hard-coded branches:
+#
+#   1. deny_may_veto_authority  - an equal-tier non-authority deny must not
+#      silently remove an authoritative affirmation. The authority RETRACTING
+#      ITSELF still can (a Federal Register delisting is a real deny), which
+#      is why the test is "is the DENY's source an authority for this
+#      predicate", not "is there any deny".
+#   2. deny_may_be_older_than_affirm - an old equal-tier deny would otherwise
+#      permanently suppress a NEWER affirmation, because R06 RECENCY sits near
+#      last and is never reached once the value is out of contention. On a
+#      volatile predicate a stale refutation is not a refutation of today.
+#   3. corroboration_horizon_days - three stale directories agreeing must not
+#      outrank one current source on a predicate that changes. Families whose
+#      newest evidence is older than the horizon behind the freshest candidate
+#      do not COUNT toward corroboration for ranking. The honest full family
+#      count is still reported, so I6 and support_status are unaffected.
+#
+# rank_order is the per-policy precedence over the scoring dimensions. It
+# replaces the single hard-coded (authority, human, tier, families, recency)
+# tuple. R00/R01 are pre-filters and R07 is the terminal tiebreak, so they do
+# not appear here.
+RANK_DIMENSIONS = ("authority", "human", "tier", "families", "recency")
+RULE_OF_DIM = {
+    "authority": ("R02", "AUTHORITY"),
+    "human": ("R03", "HUMAN_OVER_MACHINE"),
+    "tier": ("R04", "TIER"),
+    "families": ("R05", "CORROBORATION"),
+    "recency": ("R06", "RECENCY"),
+}
+
+POLICIES = {
+    "STABLE_LEGAL_STATUS": dict(
+        label="Legal status and legal identity that changes only by federal act",
+        predicates=("entity.is_federally_recognized", "entity.fr_official_name",
+                    "entity.class", "entity.canonical_name",
+                    "entity.self_governance", "entity.bie_operation_type"),
+        rank_order=("authority", "human", "tier", "families", "recency"),
+        deny_may_veto_authority=False,
+        deny_tier_requirement="equal_or_higher",
+        deny_may_be_older_than_affirm=True,
+        corroboration_horizon_days=None,
+        why="Recognition and the official name are decided by a federal act "
+            "and published in the Federal Register. Nothing that is not that "
+            "act - including a same-tier deny from a compiled directory - may "
+            "remove the affirmation before authority is consulted; the deny "
+            "is recorded as a CONTEST instead of a deletion. Recency stays "
+            "near last: a fresh guess must never overwrite an old federal "
+            "record. Staleness is irrelevant here, so there is no horizon - "
+            "a 1994 Federal Register notice is not stale about recognition."),
+    "CURRENT_LEADERSHIP": dict(
+        label="Who currently holds an office - true only as of a date",
+        predicates=("entity.leader", "entity.chair", "entity.president",
+                    "entity.council", "entity.contact_person"),
+        rank_order=("authority", "human", "recency", "tier", "families"),
+        deny_may_veto_authority=True,
+        deny_tier_requirement="equal_or_higher",
+        deny_may_be_older_than_affirm=False,
+        corroboration_horizon_days=730,
+        why="A leadership fact is true AS OF a date and false afterwards. "
+            "Recency outranks tier and corroboration here and nowhere else: "
+            "three directories that all copied the 2019 chairman are three "
+            "echoes of one stale fact, and a single current source beats "
+            "them. A deny older than the affirmation it names cannot veto - "
+            "it refutes a previous holder, not this one."),
+    "CONTACT_LOCATION": dict(
+        label="Address, contact and web presence - changes without any legal act",
+        predicates=("entity.city", "entity.website", "entity.phone",
+                    "entity.address", "entity.registration_state",
+                    "entity.bia_region"),
+        rank_order=("authority", "human", "recency", "tier", "families"),
+        deny_may_veto_authority=True,
+        deny_tier_requirement="equal_or_higher",
+        deny_may_be_older_than_affirm=False,
+        corroboration_horizon_days=1095,
+        why="An organisation moves. Nothing legal records the move, so the "
+            "newest observation is usually the right one and old agreement "
+            "between directories is worth little. entity.state is NOT here - "
+            "the state a tribe is in is a stable legal-geography fact and is "
+            "governed by OWNERSHIP_AND_STRUCTURE below."),
+    "OWNERSHIP_AND_STRUCTURE": dict(
+        label="Parentage, ownership and the entity's place in the hierarchy",
+        predicates=("entity.parent", "entity.ultimate_parent",
+                    "entity.constituent_band_of", "entity.ownership_basis",
+                    "entity.serves_native_entities", "entity.state"),
+        rank_order=("authority", "human", "tier", "families", "recency"),
+        deny_may_veto_authority=False,
+        deny_tier_requirement="equal_or_higher",
+        deny_may_be_older_than_affirm=False,
+        corroboration_horizon_days=None,
+        why="Ownership changes on a dated event, not continuously, so recency "
+            "must not outrank evidence quality - but a deny that predates the "
+            "affirmation it names is refuting the PREVIOUS owner, not the "
+            "current one, and may not veto. Bitemporality (F5, workstream B) "
+            "is the real answer here; this policy is the interim guard that "
+            "stops a stale refutation from silently emptying a parent field."),
+    "IDENTIFIER_BINDING": dict(
+        label="Which registration identifiers belong to this entity",
+        predicates=("entity.identifier.", "entity.legal_business_name",
+                    "entity.alias"),
+        rank_order=("authority", "human", "tier", "families", "recency"),
+        deny_may_veto_authority=True,
+        deny_tier_requirement="equal_or_higher",
+        deny_may_be_older_than_affirm=True,
+        corroboration_horizon_days=None,
+        why="A tier-X row in the identifier ledger is HOW a wrong link is "
+            "withdrawn - 461 of them exist and 331 survived the harvest. The "
+            "deny must keep its full force here or the withdrawal mechanism "
+            "stops working. No source is declared authority_for an identifier "
+            "predicate, so deny_may_veto_authority is permissive but "
+            "currently unreachable; it is stated rather than assumed."),
+    "DEFAULT": dict(
+        label="Everything that has not declared a policy",
+        predicates=(),
+        rank_order=("authority", "human", "tier", "families", "recency"),
+        deny_may_veto_authority=False,
+        deny_tier_requirement="equal_or_higher",
+        deny_may_be_older_than_affirm=True,
+        corroboration_horizon_days=None,
+        why="The pre-F10 order, minus the F10 defect: authority is consulted "
+            "before a non-authority deny can delete a value. An undeclared "
+            "predicate gets the conservative reading."),
+}
+
+
+def policy_for(predicate: str):
+    """(policy_id, policy). Longest declared prefix wins, so a specific
+    predicate cannot be captured by a shorter family name."""
+    best, best_len = "DEFAULT", -1
+    for pid, pol in POLICIES.items():
+        for p in pol["predicates"]:
+            if (predicate == p or predicate.startswith(p)) and len(p) > best_len:
+                best, best_len = pid, len(p)
+    return best, POLICIES[best]
+
+
+def _days_between(a: str, b: str) -> int:
+    """Whole days from ISO date a to ISO date b. -1 when either is unknown -
+    an unknown date is never silently treated as fresh OR as stale."""
+    try:
+        return (date.fromisoformat(b[:10]) - date.fromisoformat(a[:10])).days
+    except Exception:
+        return -1
+
+
+def deny_is_effective(deny, affirm, predicate, pol):
+    """Does this deny remove this affirmation under this predicate's policy?
+
+    Returns (True, "") or (False, reason). A reason is a NAMED disposition,
+    never a silent skip - the blocked deny is written to the conflict table
+    so the refutation is visible as a contest rather than vanishing.
+    """
+    dt = TIER_RANK.get(deny["confidence_tier"], 0)
+    at = TIER_RANK.get(affirm["confidence_tier"], 0)
+    if pol["deny_tier_requirement"] == "strictly_higher":
+        if dt <= at:
+            return False, ""            # ordinary tier loss, not a policy block
+    elif dt < at:
+        return False, ""
+    if not pol["deny_may_veto_authority"]:
+        if (is_authority_for(affirm["source_id"], predicate)
+                and not is_authority_for(deny["source_id"], predicate)):
+            return False, "authority_not_yet_consulted"
+    if not pol["deny_may_be_older_than_affirm"]:
+        gap = _days_between(deny["verified_date"] or "",
+                            affirm["verified_date"] or "")
+        if gap > 0:
+            return False, "deny_predates_the_affirmation"
+    return True, ""
+
+
+def fresh_for_corroboration(group, pol, newest: str):
+    """The subset of a value's assertions whose evidence is recent enough to
+    COUNT as corroboration under this policy. No horizon -> everything."""
+    h = pol["corroboration_horizon_days"]
+    if not h or not newest:
+        return group
+    keep = []
+    for g in group:
+        gap = _days_between(g["verified_date"] or "", newest)
+        # gap < 0 means at least one date is unknown. Unknown is not proof of
+        # freshness, so it does not get to vote in a horizoned corroboration.
+        if 0 <= gap <= h:
+            keep.append(g)
+    return keep
+
 # =====================================================================
 # CARDINALITY - does this predicate have ONE answer or MANY?
 # =====================================================================
@@ -461,15 +663,24 @@ def phase_sources(apply: bool) -> list:
                  "preserving it. 443 entities hold more than one UEI. This "
                  "rule runs first because a contest that should never have "
                  "started cannot be fixed by the rules that follow."),
-        dict(rule_id="R01", name="DENY_VETO", applies_to="all",
+        dict(rule_id="R01", name="DENY_VETO",
+             applies_to="all, SUBJECT TO THE PREDICATE'S POLICY",
              statement="A deny assertion removes the value it names from "
                        "contention, if the deny is at a tier no lower than the "
-                       "affirm it opposes.",
+                       "affirm it opposes AND the predicate's resolution "
+                       "policy permits it. A deny the policy blocks is not "
+                       "discarded: it is written to the conflict table as "
+                       "R01-BLOCKED, a live contest.",
              why="Tier X in the identifier ledger is a NEGATIVE ruling - 461 of "
                  "them, mostly of the form: this UEI is NOT this tribe. A "
                  "refutation that loses to the claim it refutes is not a "
                  "refutation. The tier condition stops a tier-C guess from "
-                 "vetoing a tier-A federal record."),
+                 "vetoing a tier-A federal record. External review F10: this "
+                 "rule used to run BEFORE R02, so an equal-tier deny from a "
+                 "source with no authority over the predicate could delete an "
+                 "authoritative Federal Register affirmation that R02 would "
+                 "have upheld. Per-predicate policies now decide whether it "
+                 "may - see cedar_resolution_policies.csv."),
         dict(rule_id="R02", name="AUTHORITY", applies_to="declared predicates",
              statement="If a source is declared authority_for this predicate, "
                        "its value wins outright.",
@@ -508,6 +719,17 @@ def phase_sources(apply: bool) -> list:
                  "answer on every run or the build is not reproducible. It is "
                  "flagged because a coin flip is not a decision - it is a queue "
                  "of facts that need a human or a better source."),
+        dict(rule_id="R08", name="UNCONTESTED", applies_to="all",
+             statement="Exactly one value was asserted and nothing was "
+                       "refuted. No rule arbitrated anything.",
+             why="Added 2026-08-30. The resolver previously labelled these "
+                 "R02 AUTHORITY when the lone source happened to be an "
+                 "authority and R04 TIER otherwise - both read as though a "
+                 "contest had been won. External review finding 3 is exactly "
+                 "this overstatement: `resolved` only ever meant that a rule "
+                 "selected a value. When nothing competed, no rule did. What "
+                 "the single piece of evidence is WORTH is carried by "
+                 "support_status, which is the field built to carry it."),
     ]
     for i, r in enumerate(rules):
         r["precedence"] = i + 1
@@ -516,6 +738,35 @@ def phase_sources(apply: bool) -> list:
         write_csv(RULE_REG, rules,
                   ["precedence", "rule_id", "name", "applies_to", "statement",
                    "why", "built_date"])
+
+    # THE POLICIES, AS DATA. Same reason the rules are data: a buyer must be
+    # able to read why one predicate ranks recency above corroboration and
+    # another does not, without reading our source.
+    prows = []
+    for pid, pol in POLICIES.items():
+        prows.append(dict(
+            policy_id=pid,
+            label=pol["label"],
+            predicates="|".join(pol["predicates"]) or "(fallback)",
+            rank_order=" > ".join(
+                f"{RULE_OF_DIM[d][0]} {RULE_OF_DIM[d][1]}"
+                for d in pol["rank_order"]),
+            deny_may_veto_authority=int(pol["deny_may_veto_authority"]),
+            deny_tier_requirement=pol["deny_tier_requirement"],
+            deny_may_be_older_than_affirm=int(
+                pol["deny_may_be_older_than_affirm"]),
+            corroboration_horizon_days=pol["corroboration_horizon_days"] or "",
+            why=pol["why"],
+            built_date=TODAY))
+    if apply:
+        write_csv(POLICY_REG, prows,
+                  ["policy_id", "label", "predicates", "rank_order",
+                   "deny_may_veto_authority", "deny_tier_requirement",
+                   "deny_may_be_older_than_affirm",
+                   "corroboration_horizon_days", "why", "built_date"])
+    print(f"  policies       {len(prows):5d} resolution policies "
+          f"({sum(1 for p in prows if not p['deny_may_veto_authority'])} "
+          f"forbid a non-authority deny from pre-empting R02 AUTHORITY)")
 
     print(f"  sources        {len(rows):5d} declared, "
           f"{len(LINEAGE_ROOTS)} lineage roots, {len(rules)} rules")
@@ -529,15 +780,67 @@ def phase_sources(apply: bool) -> list:
 # PHASE 2: HARVEST - turn the tables Cedar already built into assertions.
 # Nothing is invented here. Every assertion cites the row it came from.
 # =====================================================================
+# =====================================================================
+# SOURCE-ROW CONSERVATION - defect class 2c, applied to the harvest.
+# =====================================================================
+# 293's class 2c is "a drop/skip/refusal counter that never names what it
+# dropped". The harvest had the stronger version of the same disease: rows
+# that were not counted at all. `continue` on a missing uid, `return` from
+# _emit on a blank value - each one correct, none of them recorded, so the
+# only honest statement anyone could make about the harvest was "32,878
+# assertions came out" with no statement at all about what went in.
+#
+# Every row of every harvested table now lands in exactly ONE named bucket:
+#
+#   emitted                   it produced at least one assertion
+#   duplicate                 an identical claim from the same source, collapsed
+#   rejected:<named reason>   deliberately not harvested, and WHY
+#
+# and the totals must reconcile: rows_in == sum(dispositions). Invariant I13
+# fails the build if they do not, so a new `continue` cannot be added without
+# either naming its reason or breaking the check. A reason of "other" or
+# "unknown" is refused by name - an unnamed rejection is the defect.
+class RowLedger:
+    """Per-source-table row accounting. Named dispositions only."""
+
+    def __init__(self, table):
+        self.table = table
+        self.rows_in = 0
+        self.counts = Counter()
+        self.examples = defaultdict(list)
+
+    def seen(self):
+        self.rows_in += 1
+
+    def note(self, disposition, example=""):
+        self.counts[disposition] += 1
+        if example and len(self.examples[disposition]) < 3:
+            self.examples[disposition].append(str(example)[:80])
+
+    def unaccounted(self):
+        return self.rows_in - sum(self.counts.values())
+
+
+CONSERVATION_LEDGERS = []
+
+
+def new_ledger(table):
+    led = RowLedger(table)
+    CONSERVATION_LEDGERS.append(led)
+    return led
+
+
 def _emit(out, subject, predicate, value, source_id, *, polarity="affirm",
           tier="", method="", rationale="", evidence_url="", quote="",
           verified="", origin="", qualifier=""):
+    """Returns True when an assertion was produced. The return value is what
+    lets a caller record `emitted` versus a named rejection."""
     value = "" if value is None else str(value).strip()
     if not value:
-        return
+        return False
     n = norm(value)
     if not n:
-        return
+        return False
     tier = cap_tier(tier, source_id)
     root = SOURCES[source_id]["lineage_root"]
     out.append(dict(
@@ -562,13 +865,33 @@ def _emit(out, subject, predicate, value, source_id, *, polarity="affirm",
         origin_table=origin,
         asserted_date=TODAY,
     ))
+    return True
 
 
 def harvest_spine(out) -> None:
+    led = new_ledger("data/spine/cedar_entity_spine.csv")
+    # A SECOND LEDGER AT A DIFFERENT GRAIN, LABELLED AS SUCH. The spine's
+    # `fr_official_name` column is asserted as a FEDERAL REGISTER fact at
+    # tier A whoever copied it in - which is right for a government row and
+    # wrong for anything else. Three ANCSA village CORPORATIONS carry a
+    # populated fr_official_name; asserting it would have Cedar publishing a
+    # Federal Register official name for an entity the roster cannot name.
+    # The refusal is counted here rather than folded into the row ledger,
+    # because a row can emit thirteen other predicates and still be refused
+    # on this one.
+    fr_led = new_ledger("data/spine/cedar_entity_spine.csv "
+                        "[fr_official_name column, grain = ROWS WITH A VALUE]")
+    try:
+        GOVSET = resolver()[0].GOV
+    except Exception:
+        GOVSET = set()
     rows = read_csv(SPINE / "cedar_entity_spine.csv")
     for r in rows:
+        led.seen()
         uid = (r.get("cedar_uid") or "").strip()
         if not uid:
+            led.note("rejected:spine_row_carries_no_cedar_uid",
+                     r.get("tribe_id"))
             continue
         route = r.get("verification_route", "")
         grade = r.get("evidence_grade", "")
@@ -582,14 +905,41 @@ def harvest_spine(out) -> None:
             "No provenance was recorded when this row was written. Counted, "
             "not hidden - see LR_UNATTRIBUTED."
             if sid == "unattributed_legacy" else "")
+        rcls = (r.get("entity_class") or "").strip()
+        got = 0
         for col, pred in SPINE_PREDICATES.items():
             # fr_official_name is by definition a Federal Register fact,
-            # whoever happened to copy it into the row.
-            s = "fr_tribal_list" if col == "fr_official_name" else sid
-            t = "A" if col == "fr_official_name" else tier
-            _emit(out, uid, pred, r.get(col), s, tier=t, rationale=rationale,
-                  evidence_url=url, quote=quote,
-                  origin="data/spine/cedar_entity_spine.csv")
+            # whoever happened to copy it into the row - BUT ONLY IF THE ROW
+            # IS A GOVERNMENT. The roster lists governments and cannot name a
+            # corporation, so on any other class this column is not an FR
+            # fact and there is no honest source to assert it under. It is
+            # REFUSED and named, never re-labelled: giving it a different
+            # source id would be inventing provenance to keep a value.
+            if col == "fr_official_name":
+                if not (r.get(col) or "").strip():
+                    continue
+                fr_led.seen()
+                if GOVSET and rcls not in GOVSET:
+                    fr_led.note(
+                        f"rejected:fr_official_name_on_a_NON_GOVERNMENT_class"
+                        f"[{rcls or 'unknown'}]_the_FR_roster_cannot_name_it",
+                        f"{r.get('tribe_id')}: {r.get(col)}")
+                    continue
+                ok = _emit(out, uid, pred, r.get(col), "fr_tribal_list",
+                           tier="A", rationale=rationale, evidence_url=url,
+                           quote=quote,
+                           origin="data/spine/cedar_entity_spine.csv")
+                fr_led.note("emitted" if ok
+                            else "rejected:value_does_not_normalise",
+                            r.get("tribe_id"))
+                got += ok
+                continue
+            got += _emit(out, uid, pred, r.get(col), sid, tier=tier,
+                         rationale=rationale, evidence_url=url, quote=quote,
+                         origin="data/spine/cedar_entity_spine.csv")
+        led.note("emitted" if got
+                 else "rejected:every_harvested_column_is_blank_on_this_row",
+                 r.get("tribe_id"))
 
 
 def harvest_identifiers(out) -> None:
@@ -598,11 +948,20 @@ def harvest_identifiers(out) -> None:
     p = CLEAN / "cedar_identifier_ledger_final.csv"
     if not p.exists():
         p = SPINE / "cedar_identifier_ledger.csv"
+    led = new_ledger(p.relative_to(ROOT).as_posix() + " [identifier links]")
     for r in read_csv(p):
+        led.seen()
         uid = (r.get("cedar_uid") or "").strip()
         ident = (r.get("identifier") or "").strip()
         itype = (r.get("identifier_type") or "").strip().upper()
-        if not uid or not ident or not itype:
+        if not uid:
+            led.note("rejected:ledger_row_has_no_cedar_uid", ident)
+            continue
+        if not ident:
+            led.note("rejected:ledger_row_has_no_identifier", uid)
+            continue
+        if not itype:
+            led.note("rejected:ledger_row_has_no_identifier_type", ident)
             continue
         tier = (r.get("confidence_tier") or "").strip().upper()
         method = (r.get("attribution_method") or "").strip()
@@ -622,13 +981,16 @@ def harvest_identifiers(out) -> None:
         if deny:
             rationale += (" [tier X = NEGATIVE ruling: this identifier is NOT "
                           "this entity]")
-        _emit(out, uid, f"entity.identifier.{itype}", ident, sid,
-              polarity="deny" if deny else "affirm",
-              tier="A" if deny else tier,
-              method=method, rationale=rationale,
-              evidence_url=r.get("evidence_url", ""),
-              verified=r.get("verified_date", ""),
-              origin=p.relative_to(ROOT).as_posix())
+        ok = _emit(out, uid, f"entity.identifier.{itype}", ident, sid,
+                   polarity="deny" if deny else "affirm",
+                   tier="A" if deny else tier,
+                   method=method, rationale=rationale,
+                   evidence_url=r.get("evidence_url", ""),
+                   verified=r.get("verified_date", ""),
+                   origin=p.relative_to(ROOT).as_posix())
+        led.note("emitted" if ok
+                 else "rejected:identifier_does_not_normalise_to_a_value",
+                 ident)
 
 
 def harvest_gaming_claims(out) -> dict:
@@ -647,26 +1009,35 @@ def harvest_gaming_claims(out) -> dict:
     honoured: many parties ARE non-Native - Wells Fargo appears five times -
     and an unresolved bank is the correct outcome, not a gap. Resolution
     failures are counted and returned, never silently skipped (class2c)."""
+    led = new_ledger("data/clean/gaming_source_claims.csv")
     rows = read_csv(CLEAN / "gaming_source_claims.csv")
     if not rows:
         return {"rows": 0, "resolved": 0, "refused": 0}
     mod, exact, gov, state_of, uid_of, tid_uid = resolver()
     n_res = n_ref = 0
     for r in rows:
+        led.seen()
         subj = (r.get("subject_value") or "").strip()
         if not subj:
+            led.note("rejected:claim_row_has_no_subject_value",
+                     r.get("source_claim_id"))
             continue
         how = (r.get("subject_resolve_how") or "")
         if "refused" in how.lower():
             n_ref += 1          # the table already ruled: do not re-litigate
+            led.note("rejected:subject_resolution_already_REFUSED_in_source",
+                     subj)
             continue
         tid, why = mod.resolve(subj, exact, gov, state_of)
         uid = tid_uid.get(tid or "", "")
         if not uid:
             n_ref += 1
+            led.note("rejected:subject_is_not_a_Native_entity_in_the_spine",
+                     subj)
             continue
         n_res += 1
         conf = (r.get("confidence") or "").lower()
+        led.note("emitted", subj)
         _emit(out, uid, "gaming." + (r.get("predicate") or "claim"),
               r.get("object_value") or subj, "nigc",
               tier={"high": "A", "medium": "B"}.get(conf, "C"),
@@ -730,22 +1101,62 @@ def harvest_fr_roster(out) -> dict:
     flags as dangerous - "SAN JUAN PUEBLO" loose-matches San Juan Southern
     Paiute, a different nation."""
     p = CLEAN / "fr_recognized_entities.csv"
+    led = new_ledger("data/clean/fr_recognized_entities.csv")
     rows = read_csv(p)
     if not rows:
         return {"rows": 0, "resolved": 0, "renames": 0}
     mod, exact, gov, state_of, uid_of, tid_uid = resolver()
+    cls_of = {r["tribe_id"]: (r.get("entity_class") or "").strip()
+              for r in read_csv(SPINE / "cedar_entity_spine.csv")
+              if r.get("tribe_id")}
+    refused_class = []
     n_res = n_ren = 0
     for r in rows:
+        led.seen()
         name = (r.get("fr_name") or "").strip()
-        if not name or (r.get("see_instead") or "").strip():
-            continue  # a see-instead entry is a pointer, not an entity
+        if not name:
+            led.note("rejected:roster_entry_has_no_name")
+            continue
+        if (r.get("see_instead") or "").strip():
+            led.note("rejected:see_instead_pointer_is_not_an_entity", name)
+            continue
         tid, how = mod.resolve(name, exact, gov, state_of)
         if not tid:
+            led.note("rejected:roster_name_did_not_match_the_spine", name)
             continue
         uid = tid_uid.get(tid, "")
         if not uid:
+            led.note("rejected:matched_handle_has_no_cedar_uid", tid)
+            continue
+        # THE ROSTER LISTS GOVERNMENTS. IT CANNOT NAME A CORPORATION.
+        #
+        # Found 2026-08-30 by workstream A, live in shipped data: three ANCSA
+        # village CORPORATIONS carried `entity.is_federally_recognized = yes`
+        # at tier A with support_status = authoritative and winning_source =
+        # fr_tribal_list. Cedar was attesting that a federal authority
+        # vouched for a claim that authority never made - review finding F1,
+        # not hypothetical.
+        #
+        # The route in was an alias: the FR GOVERNMENT name "Native Village
+        # of Nanwalek (aka English Bay)" had been written onto the English
+        # Bay CORPORATION's spine row, so resolve() returned it UNIQUELY.
+        # No ambiguity, so the gov-class tiebreak in 503 never ran and no
+        # existing guard could see it.
+        #
+        # The class test therefore cannot live in the matcher's ambiguity
+        # branch. It lives HERE, where the claim is made, and it is
+        # unconditional: an assertion sourced from the roster may only ever
+        # attach to a government-class entity, however confidently the name
+        # matched. Refused rows are NAMED and counted, never dropped.
+        cls = cls_of.get(tid, "")
+        if cls not in mod.GOV:
+            led.note(f"rejected:roster_matched_a_NON_GOVERNMENT_class"
+                     f"[{cls or 'unknown'}]_and_the_FR_roster_lists_"
+                     f"governments_only", f"{name} -> {tid}")
+            refused_class.append((name, tid, cls, how))
             continue
         n_res += 1
+        led.note("emitted", name)
         cite = (r.get("citation") or "").strip()
         _emit(out, uid, "entity.fr_official_name", name, "fr_tribal_list",
               tier="A", method="federal_register_roster",
@@ -770,26 +1181,41 @@ def harvest_fr_roster(out) -> dict:
                                 "predating the rename carries this name.",
                       evidence_url=cite,
                       origin="data/clean/fr_recognized_entities.csv")
-    return {"rows": len(rows), "resolved": n_res, "renames": n_ren}
+    if refused_class:
+        print(f"                 FR roster: {len(refused_class)} entr(ies) "
+              f"matched a NON-GOVERNMENT class and were REFUSED - the roster "
+              f"cannot name a corporation:")
+        for nm, tid, cls, how in refused_class[:10]:
+            print(f"                     {nm[:60]!r} -> {tid} [{cls}] ({how})")
+    return {"rows": len(rows), "resolved": n_res, "renames": n_ren,
+            "refused_class": len(refused_class)}
 
 
 def harvest_aliases(out) -> int:
     """entity_aliases already carries source_system, tier and confidence per
     alias - it was an assertion table that nobody called one."""
     n = 0
+    led = new_ledger("data/clean/entity_aliases.csv")
     for r in read_csv(CLEAN / "entity_aliases.csv"):
+        led.seen()
         uid = (r.get("cedar_uid") or "").strip()
         alias = (r.get("alias_name") or "").strip()
-        if not uid or not alias:
+        if not uid:
+            led.note("rejected:alias_row_has_no_cedar_uid", alias)
+            continue
+        if not alias:
+            led.note("rejected:alias_row_has_no_alias_name", uid)
             continue
         sysname = (r.get("source_system") or "").lower()
         sid = route_to_source(sysname, r.get("alias_type", ""), "")
-        _emit(out, uid, "entity.alias", alias, sid,
-              tier=(r.get("tier") or "").strip().upper(),
-              method=r.get("alias_type") or "alias",
-              rationale=r.get("alias_layer_basis", ""),
-              verified=r.get("last_observed_date", ""),
-              origin="data/clean/entity_aliases.csv")
+        ok = _emit(out, uid, "entity.alias", alias, sid,
+                   tier=(r.get("tier") or "").strip().upper(),
+                   method=r.get("alias_type") or "alias",
+                   rationale=r.get("alias_layer_basis", ""),
+                   verified=r.get("last_observed_date", ""),
+                   origin="data/clean/entity_aliases.csv")
+        led.note("emitted" if ok
+                 else "rejected:alias_does_not_normalise_to_a_value", alias)
         n += 1
     return n
 
@@ -822,13 +1248,22 @@ def harvest_ledger_attributes(out) -> dict:
     if not rows:
         return {"rows": 0, "state": 0, "legal_name": 0}
     n_state = n_name = 0
+    led = new_ledger(p.relative_to(ROOT).as_posix()
+                     + " [registration attributes]")
     for r in rows:
+        led.seen()
         uid = (r.get("cedar_uid") or "").strip()
         tier = (r.get("confidence_tier") or "").strip().upper()
         # A tier-X row is a REFUTATION of the identifier link. If we do not
         # believe this UEI belongs to this entity, we cannot use the address
         # attached to it to describe that entity.
-        if not uid or tier == "X":
+        if not uid:
+            led.note("rejected:ledger_row_has_no_cedar_uid",
+                     r.get("identifier"))
+            continue
+        if tier == "X":
+            led.note("rejected:tier_X_is_a_REFUTED_link_so_its_address_is_not_"
+                     "this_entity_s", r.get("identifier"))
             continue
         itype = (r.get("identifier_type") or "").strip().upper()
         sid = "irs_bmf" if itype == "EIN" else "sam_registration"
@@ -884,6 +1319,15 @@ def harvest_ledger_attributes(out) -> dict:
                   verified=r.get("verified_date", ""),
                   origin=p.relative_to(ROOT).as_posix())
             n_name += 1
+        if st or lbn:
+            led.note("emitted", r.get("identifier"))
+        else:
+            # NAMED, not silent: `clean_state` refused the value (it was a
+            # UEI, a multi-state string, or blank) AND no legal name was
+            # filed. 12,127 rows once held their own UEI in `state`.
+            led.note("rejected:no_usable_registration_state_and_no_legal_name"
+                     f":clean_state_verdict={verdict or 'blank'}",
+                     r.get("identifier"))
     return {"rows": len(rows), "state": n_state, "legal_name": n_name}
 
 
@@ -909,6 +1353,38 @@ def phase_harvest(apply: bool) -> list:
         seen.add(a["assertion_id"])
         uniq.append(a)
 
+    # ---- SOURCE-ROW CONSERVATION -------------------------------------
+    # The assertion-level collapse is its own ledger, at its own grain,
+    # labelled as such - not folded into the row counts, which would make
+    # both numbers wrong.
+    dedupe = new_ledger("(assertion-level dedupe, grain = ASSERTIONS not rows)")
+    dedupe.rows_in = len(out)
+    dedupe.note("emitted")
+    dedupe.counts["emitted"] = len(uniq)
+    dedupe.counts["duplicate:identical_claim_from_the_same_source"] = \
+        len(out) - len(uniq)
+
+    crows = []
+    for lg in CONSERVATION_LEDGERS:
+        for disp, n in sorted(lg.counts.items()):
+            crows.append(dict(
+                source_table=lg.table, rows_in=lg.rows_in,
+                disposition=disp, rows=n,
+                pct=round(100.0 * n / max(lg.rows_in, 1), 2),
+                examples="; ".join(lg.examples.get(disp, [])),
+                harvest_date=TODAY))
+        if lg.unaccounted():
+            crows.append(dict(
+                source_table=lg.table, rows_in=lg.rows_in,
+                disposition="UNACCOUNTED_FOR", rows=lg.unaccounted(),
+                pct=round(100.0 * lg.unaccounted() / max(lg.rows_in, 1), 2),
+                examples="", harvest_date=TODAY))
+    if apply:
+        write_csv(CONSERVATION, crows,
+                  ["source_table", "rows_in", "disposition", "rows", "pct",
+                   "examples", "harvest_date"])
+    unacc = sum(lg.unaccounted() for lg in CONSERVATION_LEDGERS)
+
     cols = ["assertion_id", "cedar_uid", "subject_qualifier", "predicate",
             "polarity", "object_value",
             "object_norm", "source_id", "lineage_root_id", "lineage_ancestry",
@@ -933,6 +1409,19 @@ def phase_harvest(apply: bool) -> list:
           f"{led['legal_name']} legal names (facts about the REGISTRATION, not the entity - see the note in harvest_ledger_attributes)")
     print(f"                 {deny} DENY assertions preserved (tier-X "
           f"refutations, which an overwrite model loses)")
+    print(f"  conservation   {sum(l.rows_in for l in CONSERVATION_LEDGERS):7d} "
+          f"source rows read, {unacc} UNACCOUNTED. Every other row is in a "
+          f"NAMED bucket in {CONSERVATION.name}:")
+    for lg in CONSERVATION_LEDGERS:
+        rej = {d: n for d, n in lg.counts.items() if d.startswith("rejected")}
+        if not rej:
+            continue
+        print(f"                 {lg.table}: {lg.rows_in:,} in, "
+              f"{lg.counts.get('emitted', 0):,} emitted")
+        for d, n in sorted(rej.items(), key=lambda kv: -kv[1]):
+            ex = "; ".join(lg.examples.get(d, [])[:2])
+            print(f"                     {n:>7,}  {d}"
+                  + (f"   e.g. {ex}" if ex else ""))
     return uniq
 
 
@@ -972,20 +1461,53 @@ def phase_resolve(assertions, apply: bool):
     for (uid, qual, pred), rows in sorted(by_fact.items()):
         affirms = [r for r in rows if r["polarity"] == "affirm"]
         denies = [r for r in rows if r["polarity"] == "deny"]
+        pid, pol = policy_for(pred)
 
-        # ---- R01 DENY_VETO -------------------------------------------
+        # ---- R01 DENY_VETO, UNDER THIS PREDICATE'S POLICY -------------
+        # F10: this used to run unconditionally and BEFORE authority, so an
+        # equal-tier deny from a source with no authority over the predicate
+        # deleted an authoritative affirmation that R02 would have upheld.
+        # The deny is no longer silently dropped either way: when the policy
+        # blocks it, it is written to the conflict table as a live contest.
         vetoed = {}
+        blocked = []
         surviving = []
         for a in affirms:
-            killer = next(
-                (d for d in denies
-                 if d["object_norm"] == a["object_norm"]
-                 and TIER_RANK.get(d["confidence_tier"], 0)
-                 >= TIER_RANK.get(a["confidence_tier"], 0)), None)
+            killer = None
+            for d in denies:
+                if d["object_norm"] != a["object_norm"]:
+                    continue
+                ok, why = deny_is_effective(d, a, pred, pol)
+                if ok:
+                    killer = d
+                    break
+                if why:
+                    blocked.append((d, a, why))
             if killer:
                 vetoed[a["object_norm"]] = killer
             else:
                 surviving.append(a)
+
+        for d, a, why in blocked:
+            rule_counts["R01-BLOCKED"] += 1
+            conflicts.append(dict(
+                cedar_uid=uid, subject_qualifier=qual, predicate=pred,
+                losing_value=d["object_value"],
+                losing_source=d["source_id"],
+                losing_tier=d["confidence_tier"],
+                losing_lineage_root=d["lineage_root_id"],
+                winning_value=a["object_value"],
+                winning_source=a["source_id"],
+                decided_by_rule="R01-BLOCKED",
+                decided_by_rule_name="DENY_BLOCKED_BY_POLICY",
+                assertion_id=d["assertion_id"],
+                evidence_url=d["evidence_url"],
+                note=f"A deny at a qualifying tier did NOT remove this value: "
+                     f"policy {pid} blocks it ({why}). The refutation is kept "
+                     f"as a live contest, not discarded - it wins the day its "
+                     f"source gains authority over this predicate or a newer "
+                     f"observation supports it.",
+                resolved_date=TODAY))
 
         if not surviving:
             if denies:
@@ -996,7 +1518,9 @@ def phase_resolve(assertions, apply: bool):
                     resolution_status="REFUTED_NO_SURVIVOR",
                     decided_by_rule="R01", decided_by_rule_name="DENY_VETO",
                     n_assertions=len(rows), n_candidate_values=0,
-                    n_independent_families=0, decided_by_coinflip=0,
+                    n_independent_families=0,
+                    n_independent_families_current=0,
+                    resolution_policy=pid, decided_by_coinflip=0,
                     conflict=0, competing_values="",
                     winning_source="", winning_tier="",
                     winning_lineage_root="", evidence_url="",
@@ -1020,6 +1544,7 @@ def phase_resolve(assertions, apply: bool):
         # becomes its own fact and NOTHING is filed as a loser. Only a deny
         # (R01, already applied above) can remove one.
         if is_multi(pred):
+            _newest_m = max((a["verified_date"] or "") for a in surviving)
             for vnorm, group in sorted(by_val.items()):
                 best = max(group, key=lambda g: (
                     TIER_RANK.get(g["confidence_tier"], 0),
@@ -1033,7 +1558,10 @@ def phase_resolve(assertions, apply: bool):
                     decided_by_rule="R00",
                     decided_by_rule_name="MULTI_VALUED_NO_CONTEST",
                     n_assertions=len(group), n_candidate_values=1,
-                    n_independent_families=len(independent_families(group)),
+                    n_independent_families=_fams,
+                    n_independent_families_current=len(independent_families(
+                        fresh_for_corroboration(group, pol, _newest_m))),
+                    resolution_policy=pid,
                     decided_by_coinflip=0, conflict=0, competing_values="",
                     winning_source=best["source_id"],
                     winning_tier=best["confidence_tier"],
@@ -1057,35 +1585,54 @@ def phase_resolve(assertions, apply: bool):
                     resolved_date=TODAY))
             continue
 
+        # THE RANK ORDER IS THE PREDICATE'S, NOT THE FILE'S. F10: one global
+        # lexicographic order cannot serve stable legal status and current
+        # leadership at once. `pol["rank_order"]` names this predicate's, and
+        # the dimensions are computed once so the decision and the reported
+        # `decided_by_rule` are derived from the SAME numbers.
+        newest = max((a["verified_date"] or "") for a in surviving)
+
+        def dims_of(group):
+            fams_all = len(independent_families(group))
+            return dict(
+                authority=int(any(is_authority_for(g["source_id"], pred)
+                                  for g in group)),
+                human=int(any(SOURCES[g["source_id"]]["lineage_root"]
+                              == "LR_HUMAN_OWNER" for g in group)),
+                tier=max(TIER_RANK.get(g["confidence_tier"], 0) for g in group),
+                families=len(independent_families(
+                    fresh_for_corroboration(group, pol, newest))),
+                families_all=fams_all,
+                recency=max((g["verified_date"] or "") for g in group),
+            )
+
+        DIMS = {v: dims_of(g) for v, g in by_val.items()}
+
         def score(item):
-            _, group = item
-            authority = any(pred in SOURCES[g["source_id"]]["authority_for"]
-                            for g in group)
-            human = any(SOURCES[g["source_id"]]["lineage_root"] == "LR_HUMAN_OWNER"
-                        for g in group)
-            tier = max(TIER_RANK.get(g["confidence_tier"], 0) for g in group)
-            fams = len(independent_families(group))
-            recency = max((g["verified_date"] or "") for g in group)
+            v, group = item
+            d = DIMS[v]
             tiebreak = min(hashlib.sha1(
                 f"{g['source_id']}|{g['object_norm']}".encode()).hexdigest()
                 for g in group)
-            return (authority, human, tier, fams, recency,
-                    # sha1 ascending, so negate by inverting the sort below
-                    tiebreak)
+            return tuple(d[k] for k in pol["rank_order"]) + (tiebreak,)
 
+        n_rank = len(pol["rank_order"])
         ranked = sorted(by_val.items(), key=score, reverse=True)
         # reverse=True flips the sha1 too, so re-break exact ties ascending
-        top_key = score(ranked[0])[:5]
-        tied = [it for it in ranked if score(it)[:5] == top_key]
+        top_key = score(ranked[0])[:n_rank]
+        tied = [it for it in ranked if score(it)[:n_rank] == top_key]
         if len(tied) > 1:
-            tied.sort(key=lambda it: score(it)[5])
+            tied.sort(key=lambda it: score(it)[n_rank])
             winner_val, winner_group = tied[0]
             coinflip = 1
         else:
             winner_val, winner_group = ranked[0]
             coinflip = 0
 
-        authority, human, tier, fams, recency, _ = score((winner_val, winner_group))
+        wd = DIMS[winner_val]
+        authority, human = wd["authority"], wd["human"]
+        tier, fams = wd["tier"], wd["families_all"]
+        fams_current = wd["families"]
 
         # R07 MAY NOT DECIDE AN IDENTITY-CRITICAL FACT. External review
         # 2026-08-30, finding 4: "a lower SHA-1 value has no relationship to
@@ -1121,7 +1668,9 @@ def phase_resolve(assertions, apply: bool):
                 decided_by_rule="R07-BARRED",
                 decided_by_rule_name="TIE_ON_IDENTITY_CRITICAL",
                 n_assertions=len(rows), n_candidate_values=len(ranked),
-                n_independent_families=fams, decided_by_coinflip=0,
+                n_independent_families=fams,
+                n_independent_families_current=fams_current,
+                resolution_policy=pid, decided_by_coinflip=0,
                 conflict=1,
                 competing_values=" | ".join(v for v, _ in ranked[:5]),
                 winning_source="", winning_tier="", winning_lineage_root="",
@@ -1132,23 +1681,33 @@ def phase_resolve(assertions, apply: bool):
                 resolved_date=TODAY))
             continue
 
+        # WHICH RULE DECIDED IT is now DERIVED from the same dimension vector
+        # the sort used, walking the policy's own order and naming the first
+        # dimension on which the winner strictly beat every other candidate.
+        # The old chain re-derived tier and family counts a second time and
+        # could therefore disagree with the sort that actually chose - and it
+        # reported R02 AUTHORITY for any winner that merely HAD authority,
+        # even when authority separated nothing.
+        rid = rname = None
         if coinflip:
             rid, rname = "R07", "DETERMINISTIC_TIEBREAK"
-        elif authority:
-            rid, rname = "R02", "AUTHORITY"
-        elif human:
-            rid, rname = "R03", "HUMAN_OVER_MACHINE"
-        elif len(ranked) > 1 and tier > max(
-                TIER_RANK.get(g["confidence_tier"], 0)
-                for _, grp in ranked[1:] for g in grp):
-            rid, rname = "R04", "TIER"
-        elif len(ranked) > 1 and fams > max(
-                len(independent_families(grp)) for _, grp in ranked[1:]):
-            rid, rname = "R05", "CORROBORATION"
         elif len(ranked) > 1:
-            rid, rname = "R06", "RECENCY"
-        else:
-            rid, rname = "R04", "TIER"
+            for dim in pol["rank_order"]:
+                other = max(DIMS[v][dim] for v, _ in ranked if v != winner_val)
+                if wd[dim] > other:
+                    rid, rname = RULE_OF_DIM[dim]
+                    break
+        if rid is None:
+            # NOTHING COMPETED. The old chain labelled these R02 AUTHORITY
+            # when the lone value happened to come from an authority and R04
+            # TIER otherwise, which reads as "authority beat something" and
+            # "the tier decided" when neither happened. That is the same
+            # overstatement finding F3 names: `resolved` meant only that a
+            # rule selected a value. A single candidate was selected by
+            # nobody. What the EVIDENCE is worth is carried by
+            # support_status, which is where it belongs.
+            rid, rname = ("R08", "UNCONTESTED") if len(ranked) == 1 else \
+                ("R07", "DETERMINISTIC_TIEBREAK")
         rule_counts[rid] += 1
 
         best = max(winner_group,
@@ -1211,7 +1770,9 @@ def phase_resolve(assertions, apply: bool):
             resolution_status="RESOLVED",
             decided_by_rule=rid, decided_by_rule_name=rname,
             n_assertions=len(rows), n_candidate_values=len(ranked),
-            n_independent_families=fams, decided_by_coinflip=coinflip,
+            n_independent_families=fams,
+            n_independent_families_current=fams_current,
+            resolution_policy=pid, decided_by_coinflip=coinflip,
             conflict=1 if len(ranked) > 1 or vetoed else 0,
             competing_values=" | ".join(competing[:5]),
             winning_source=best["source_id"],
@@ -1222,8 +1783,10 @@ def phase_resolve(assertions, apply: bool):
 
     rcols = ["cedar_uid", "subject_qualifier", "predicate", "object_value",
              "support_status", "resolution_status",
-             "decided_by_rule", "decided_by_rule_name", "n_assertions",
+             "decided_by_rule", "decided_by_rule_name", "resolution_policy",
+             "n_assertions",
              "n_candidate_values", "n_independent_families",
+             "n_independent_families_current",
              "decided_by_coinflip", "conflict", "competing_values",
              "winning_source", "winning_tier", "winning_lineage_root",
              "evidence_url", "resolution_note", "resolved_date"]
@@ -1407,6 +1970,138 @@ def phase_verify() -> int:
                      f"entity - one identifier, two owners, and no conflict "
                      f"row because multi-valued predicates do not contest "
                      f"across subjects: {ex}")
+
+    # I11: NO DENY MAY VETO A VALUE ITS PREDICATE'S POLICY PROTECTS.
+    # External review F10. The resolver applies the policy; this recomputes
+    # every veto that actually happened, from the stored conflict rows, and
+    # fails if any of them should have been blocked. It is the check that
+    # stops the ordering bug from being reintroduced by a future edit to
+    # phase_resolve without anyone noticing - the resolved table would look
+    # entirely normal, because a deleted value leaves no trace in it.
+    by_id = {a["assertion_id"]: a for a in assertions}
+    aff_idx = defaultdict(list)
+    for a in assertions:
+        if a["polarity"] == "affirm":
+            aff_idx[(a["cedar_uid"], a.get("subject_qualifier", ""),
+                     a["predicate"], a["object_norm"])].append(a)
+    illegal = 0
+    for c in conflicts:
+        if c.get("decided_by_rule") != "R01":
+            continue
+        d = by_id.get(c.get("assertion_id", ""))
+        if not d:
+            continue
+        _, pol = policy_for(c["predicate"])
+        for a in aff_idx.get((c["cedar_uid"], c.get("subject_qualifier", ""),
+                              c["predicate"], norm(c["losing_value"])), []):
+            ok, why = deny_is_effective(d, a, c["predicate"], pol)
+            if not ok and why:
+                illegal += 1
+    if illegal:
+        fails.append(f"I11 {illegal} deny veto(es) removed a value the "
+                     f"predicate's resolution policy protects (R01 running "
+                     f"ahead of R02 again - external review F10)")
+
+    # I12: every predicate that resolves must map to a declared policy, and
+    # every declared policy must actually govern something. A policy nobody
+    # reaches is the same dead declaration I7 catches for authority.
+    reached = {policy_for(r["predicate"])[0] for r in resolved}
+    for pid in POLICIES:
+        if pid not in reached and pid != "DEFAULT":
+            warns.append(f"I12 policy {pid} governs 0 resolved facts - either "
+                         f"its predicates are not harvested yet, or it is a "
+                         f"dead declaration")
+
+    # I13: SOURCE-ROW CONSERVATION. Every harvested source row is in exactly
+    # one NAMED bucket - emitted, duplicate, or a rejection with a stated
+    # reason. No unnamed disappearance. This is 293's defect class 2c applied
+    # to the harvest itself: a `continue` with no counter behind it is how a
+    # source row leaves the system with nobody able to say it ever arrived.
+    cons = read_csv(CONSERVATION)
+    if not cons:
+        fails.append("I13 no cedar_harvest_conservation.csv - the harvest "
+                     "cannot say what it did with the rows it read")
+    else:
+        by_tab = defaultdict(list)
+        for c in cons:
+            by_tab[c["source_table"]].append(c)
+        for tab, rs in sorted(by_tab.items()):
+            rows_in = int(rs[0]["rows_in"] or 0)
+            total = sum(int(r["rows"] or 0) for r in rs)
+            if total != rows_in:
+                fails.append(f"I13 {tab}: {rows_in:,} rows read but "
+                             f"{total:,} accounted for - "
+                             f"{abs(rows_in - total):,} row(s) vanished "
+                             f"without a named disposition")
+            for r in rs:
+                d = r["disposition"]
+                if d == "UNACCOUNTED_FOR" and int(r["rows"] or 0):
+                    fails.append(f"I13 {tab}: {r['rows']} row(s) UNACCOUNTED "
+                                 f"FOR")
+                if re.search(r"(?:^|:)(other|unknown|misc|n/?a)\s*$", d, re.I):
+                    fails.append(f"I13 {tab}: disposition {d!r} is not a "
+                                 f"NAMED reason - an unnamed rejection is the "
+                                 f"defect this invariant exists to catch")
+
+    # I14: FEDERAL RECOGNITION IS A PROPERTY OF A GOVERNMENT.
+    #
+    # An `entity.is_federally_recognized = yes` fact may not stand on an
+    # entity whose spine class is not a government class. An ANCSA village
+    # corporation, a tribally owned firm and a nonprofit are not federally
+    # recognized tribes however closely their name matches a roster entry -
+    # and the Federal Register, which IS the authority here, has never said
+    # they were.
+    #
+    # Written because it was live: three ANCSA village corporations carried
+    # this fact at tier A with support_status = authoritative and
+    # winning_source = fr_tribal_list on 2026-08-30. Every existing guard
+    # passed, because the roster name reached the corporation through a spine
+    # ALIAS and the match was therefore UNIQUE - no ambiguity, no tiebreak,
+    # no conflict row. A guard that only fires on ambiguity cannot see a
+    # confident wrong answer, so this one tests the CLAIM, not the match.
+    _cls = {r["tribe_id"]: (r.get("entity_class") or "").strip()
+            for r in read_csv(SPINE / "cedar_entity_spine.csv")
+            if r.get("tribe_id")}
+    _uid_cls = {r.get("cedar_uid", ""): (r.get("entity_class") or "").strip()
+                for r in read_csv(SPINE / "cedar_entity_spine.csv")
+                if r.get("cedar_uid")}
+    try:
+        _GOV = resolver()[0].GOV
+    except Exception:
+        _GOV = set()
+    if _GOV and _uid_cls:
+        wrong = [r for r in resolved
+                 if r["predicate"] == "entity.is_federally_recognized"
+                 and norm(r["object_value"]) == "yes"
+                 and _uid_cls.get(r["cedar_uid"], "") not in _GOV]
+        if wrong:
+            ex = "; ".join(f"{w['cedar_uid']} [{_uid_cls.get(w['cedar_uid'])}]"
+                           for w in wrong[:5])
+            fails.append(
+                f"I14 {len(wrong)} entit(ies) are asserted FEDERALLY "
+                f"RECOGNIZED but are not a government class in the spine. "
+                f"The Federal Register lists governments; it cannot name a "
+                f"corporation, and a fact carrying its authority must not "
+                f"claim otherwise: {ex}")
+        # The general form of the same rule. Recognition was the fact that
+        # was found wrong; the roster's OFFICIAL NAME reached the same three
+        # corporations by the same route, straight off the spine column, and
+        # would have survived a check that named only the recognition
+        # predicate. Any assertion CARRYING FEDERAL REGISTER AUTHORITY must
+        # attach to a government.
+        wrong2 = [a for a in assertions
+                  if a["source_id"] == "fr_tribal_list"
+                  and a["polarity"] == "affirm"
+                  and _uid_cls.get(a["cedar_uid"], "") not in _GOV
+                  and a["cedar_uid"] in _uid_cls]
+        if wrong2:
+            ex = "; ".join(f"{w['cedar_uid']} [{_uid_cls.get(w['cedar_uid'])}] "
+                           f"{w['predicate']}" for w in wrong2[:5])
+            fails.append(
+                f"I14 {len(wrong2)} assertion(s) cite the FEDERAL REGISTER as "
+                f"their source but their subject is not a government class. "
+                f"The roster cannot name a corporation, so an assertion "
+                f"wearing its authority may not point at one: {ex}")
 
     # I9: deny assertions survived the round trip.
     n_deny = sum(1 for a in assertions if a["polarity"] == "deny")

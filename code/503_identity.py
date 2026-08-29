@@ -162,10 +162,13 @@ def build_index():
     exact = {}
     gov = []           # (distinctive tokens, tid, canonical) - gov-class only
     state_of = {}      # tid -> spine state, for the AGENTS state-agreement guard
+    class_of = {}      # tid -> spine entity_class. THE SPINE IS THE AUTHORITY
+    #                    ON CLASS, and nothing else may be read for it.
     with SPINE.open(encoding="utf-8", errors="replace", newline="") as f:
         for r in csv.DictReader(f):
             tid = (r.get("tribe_id") or "").strip()
             cls = r.get("entity_class", "")
+            class_of[tid] = cls
             names = [r.get("canonical_name", "")] + (r.get("aliases") or "").split(";")
             for nm in names:
                 k = light(nm)
@@ -177,13 +180,51 @@ def build_index():
                 if t:
                     gov.append((t, tid, r.get("canonical_name", "")))
     if ALIASES.exists():
+        # A CLASS-LESS CANDIDATE DEFEATS EVERY CLASS GUARD DOWNSTREAM.
+        #
+        # This block read `r.get("entity_class", "")` from entity_aliases.csv,
+        # WHICH HAS NO SUCH COLUMN - its header is alias_id, entity_id,
+        # alias_name, ... and no class anywhere. So every alias-sourced
+        # candidate arrived with cls = "" and the gov-class filter in
+        # `resolve()`, `g = {t for t, cl in c if cl in GOV}`, could never
+        # match one. Two consequences, both measured 2026-08-30:
+        #
+        #   * "Native Village of Elim" went AMBIGUOUS_EXACT rather than
+        #     resolving to the village GOVERNMENT - the guard that exists
+        #     precisely for that case could not see the candidate.
+        #   * Three ANCSA village CORPORATIONS carried a Federal Register
+        #     roster name as a spine alias, so `resolve()` returned them
+        #     UNIQUELY, no ambiguity ever arose, the gov-class tiebreak never
+        #     ran, and 510 recorded `entity.is_federally_recognized = yes` on
+        #     them at tier A with winning_source = fr_tribal_list. The FR
+        #     roster lists GOVERNMENTS and cannot name a corporation; the
+        #     system was attesting that a federal authority vouched for a
+        #     claim that authority never made.
+        #
+        # The class now comes from the SPINE, keyed by tribe_id - the one
+        # place that owns it - and never from a column on the alias row.
+        # A tid the spine does not know contributes no candidate at all,
+        # because a candidate we cannot class is a candidate no guard can
+        # refuse.
+        unknown = {}
         with ALIASES.open(encoding="utf-8", errors="replace", newline="") as f:
             for r in csv.DictReader(f):
                 tid = (r.get("entity_id") or r.get("tribe_id") or "").strip()
                 nm = r.get("alias") or r.get("alias_name") or r.get("name") or ""
                 k = light(nm)
-                if tid and k:
-                    exact.setdefault(k, set()).add((tid, r.get("entity_class", "")))
+                if not (tid and k):
+                    continue
+                if tid not in class_of:
+                    unknown[tid] = unknown.get(tid, 0) + 1
+                    continue
+                exact.setdefault(k, set()).add((tid, class_of[tid]))
+        if unknown:
+            top = sorted(unknown.items(), key=lambda kv: -kv[1])[:5]
+            print(f"  build_index: {sum(unknown.values()):,} alias row(s) name "
+                  f"{len(unknown):,} entity id(s) the spine does not carry - "
+                  f"contributed NO candidate, because a candidate with no "
+                  f"class is one no class guard can refuse. Worst: "
+                  + ", ".join(f"{t} x{n}" for t, n in top))
     return exact, gov, state_of
 
 
@@ -441,6 +482,121 @@ SPINE = ROOT / "data" / "spine" / "cedar_entity_spine.csv"
 REGISTER = ROOT / "data" / "spine" / "cedar_identity_register.csv"
 XWALK = ROOT / "data" / "clean" / "assistance_tribe_id_crosswalk.csv"
 
+# =====================================================================
+# THE HANDLE CONTRACT - external review 2026-08-30, finding F6.
+# =====================================================================
+# `cedar_uid` is the stable external join key. A handle (TRBF-MIKMAQ-00) is a
+# DISPLAY identifier and it changes on reclassification, which
+# IDENTIFIER_STANDARD.md §0 has said since the day uids were minted.
+#
+# The policy was written and the code did not implement it. Before this
+# change `phase_mint` keyed the existing-uid lookup on the HANDLE alone:
+#
+#   existing = {handle -> uid}          rebuilt from the register every run
+#   uid = existing.get(handle)          a changed handle misses
+#   if not uid: mint a NEW uid          <- the uid was not permanent either
+#
+# So a reclassification did three wrong things at once: it minted a second
+# uid for an entity that already had one, it dropped the old handle from the
+# register entirely (the register is documented as append-only), and a buyer
+# who had joined on the handle silently lost their historical rows with no
+# way to discover it. The contract is now enforced rather than described:
+#
+#   1. cedar_uid is permanent and is the only documented join key.
+#   2. Handles are display identifiers, and an OLD handle always resolves to
+#      the SAME uid - forever, through cedar_handle_history.csv.
+#   3. A RETIRED HANDLE IS NEVER REUSED. Reassigning one to a different uid
+#      is refused as a hard error, not warned about, because the failure is
+#      silent at every later stage.
+#   4. The history table retains (handle, cedar_uid, valid_from, valid_to,
+#      status, change_reason) so the rebinding is auditable.
+HANDLE_HISTORY = ROOT / "data" / "spine" / "cedar_handle_history.csv"
+HANDLE_HISTORY_COLS = ["handle", "cedar_uid", "valid_from", "valid_to",
+                       "status", "change_reason", "recorded_date"]
+
+
+class HandleReuse(Exception):
+    """A retired handle was pointed at a different entity. Never recoverable
+    in place: whoever wrote it must pick a new handle."""
+
+
+def read_handle_history():
+    if not HANDLE_HISTORY.exists():
+        return []
+    with HANDLE_HISTORY.open(encoding="utf-8-sig", errors="replace",
+                             newline="") as f:
+        return list(csv.DictReader(f))
+
+
+def handle_resolution_map():
+    """EVERY handle ever issued -> its uid, retired ones included.
+
+    This is what makes rule 2 above true. A buyer or an old panel that still
+    carries `TRBF-MIKMAQ-00` after a reclassification resolves to the same
+    entity it always did."""
+    m = {}
+    for r in read_handle_history():
+        h = (r.get("handle") or "").strip()
+        if h:
+            m[h] = (r.get("cedar_uid") or "").strip()
+    return m
+
+
+def verify_handles():
+    """The handle contract, checked rather than described. Returns a list of
+    failure strings; empty means the contract holds.
+
+    H1  a handle is bound to exactly one uid, forever
+    H2  a retired handle still resolves (it is present in the history)
+    H3  every uid in the history is still in the register - a uid is never
+        dropped, even when its entity leaves the spine
+    H4  at most one CURRENT handle per uid
+    H5  every register handle appears in the history
+    """
+    out = []
+    hist = read_handle_history()
+    if not hist:
+        return ["H0 no cedar_handle_history.csv - run "
+                "`py -3 code/503_identity.py mint --apply`"]
+    bind = {}
+    current = {}
+    for r in hist:
+        h = (r.get("handle") or "").strip()
+        u = (r.get("cedar_uid") or "").strip()
+        if not h or not u:
+            out.append(f"H1 history row with a blank handle or uid: {r}")
+            continue
+        if h in bind and bind[h] != u:
+            out.append(f"H1 handle {h} is bound to TWO uids: {bind[h]} and "
+                       f"{u}. A retired handle is never reused.")
+        bind[h] = u
+        if (r.get("status") or "") == "current":
+            if u in current and current[u] != h:
+                out.append(f"H4 uid {u} has two CURRENT handles: "
+                           f"{current[u]} and {h}")
+            current[u] = h
+        elif not (r.get("valid_to") or "").strip():
+            out.append(f"H2 handle {h} is not current and has no valid_to - "
+                       f"a retirement with no date is not auditable")
+    reg = {}
+    if REGISTER.exists():
+        with REGISTER.open(encoding="utf-8", errors="replace", newline="") as f:
+            for r in csv.DictReader(f):
+                reg[(r.get("handle") or "").strip()] = r["cedar_uid"]
+    missing_uid = {u for u in bind.values()} - set(reg.values())
+    if missing_uid:
+        out.append(f"H3 {len(missing_uid)} uid(s) in the handle history are "
+                   f"NOT in the identity register - a uid was dropped: "
+                   f"{sorted(missing_uid)[:3]}")
+    for h, u in reg.items():
+        if h not in bind:
+            out.append(f"H5 register handle {h} has no history row")
+        elif bind[h] != u:
+            out.append(f"H1 register binds {h} -> {u}; history binds it to "
+                       f"{bind[h]}")
+    return out
+
+
 # Crockford base32: no I, L, O, U. A valid uid cannot contain an ambiguous glyph.
 B32 = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 
@@ -548,11 +704,31 @@ def phase_mint(argv) -> int:
     assert len(set(handles)) == len(handles), "duplicate handles in spine"
 
     # APPEND-ONLY: existing register assignments are immutable.
-    existing = {}
+    existing, eid_uid, prior = {}, {}, []
     if REGISTER.exists():
         for r in csv.DictReader(REGISTER.open(encoding="utf-8", errors="replace", newline="")):
+            prior.append(r)
             existing[r["handle"]] = r["cedar_uid"]
-    next_n = 1 + max((int(u.split("-")[1], 32) if False else 0 for u in existing.values()), default=0)
+            eid = (r.get("cedar_entity_id") or "").strip()
+            if eid:
+                eid_uid.setdefault(eid, r["cedar_uid"])
+
+    # THE HANDLE CONTRACT (F6). History first: a handle that was retired
+    # years ago must still resolve, and the register only ever carries the
+    # CURRENT handle.
+    history = read_handle_history()
+    hist_uid = handle_resolution_map()
+    hist_status = {(r.get("handle") or "").strip(): (r.get("status") or "")
+                   for r in history}
+    current_handle_of = {}
+    for r in history:
+        if (r.get("status") or "") == "current":
+            current_handle_of[(r.get("cedar_uid") or "").strip()] = \
+                (r.get("handle") or "").strip()
+    for h, u in existing.items():
+        hist_uid.setdefault(h, u)
+        current_handle_of.setdefault(u, h)
+
     # decode payloads to find max sequence
     def seq(uid):
         p = uid.split("-")[1]
@@ -560,19 +736,53 @@ def phase_mint(argv) -> int:
         for ch in p:
             n = n * 32 + B32.index(ch)
         return n
-    next_n = 1 + max((seq(u) for u in existing.values()), default=0)
+    next_n = 1 + max((seq(u) for u in
+                      list(existing.values()) + list(hist_uid.values())),
+                     default=0)
 
     lm = legacy_map()
     register, minted = [], 0
+    rebound, reused = [], []
     for r in sorted(rows, key=lambda x: (x.get("tribe_id") or x.get("cedar_entity_id") or "")):
         h = (r.get("tribe_id") or "").strip() or (r.get("cedar_entity_id") or "").strip()
-        uid = existing.get(h)
+        eid = (r.get("cedar_entity_id") or "").strip()
+        e_uid = eid_uid.get(eid) if eid else ""
+        # RULE 3, CHECKED BEFORE THE HANDLE IS HONOURED. A retired handle
+        # reappearing in the spine is either the same entity coming back
+        # (fine, same uid) or a NEW entity taking a dead name (never fine).
+        # This is checked first because the lookup below would otherwise hand
+        # the newcomer the retired entity's uid and every downstream join
+        # would silently point at the wrong entity.
+        if hist_status.get(h) == "retired":
+            if not e_uid:
+                raise HandleReuse(
+                    f"retired handle {h!r} reappears in the spine on a row "
+                    f"with no cedar_entity_id, so there is nothing to prove "
+                    f"it is the same entity that retired it "
+                    f"({hist_uid.get(h)}). A retired handle is never reused.")
+            if e_uid != hist_uid.get(h):
+                raise HandleReuse(
+                    f"retired handle {h!r} was bound to {hist_uid.get(h)} and "
+                    f"the spine now points it at {e_uid}. A retired handle is "
+                    f"never reused - see docs/IDENTIFIER_STANDARD.md 'THE "
+                    f"RECLASSIFICATION RULE'. Pick a new handle.")
+        uid = hist_uid.get(h) or existing.get(h)
+        if not uid and eid:
+            # THE RECLASSIFICATION CASE. The handle is new but the entity is
+            # not: follow it by cedar_entity_id and KEEP ITS UID. Before this
+            # branch existed the row minted a second uid for an entity that
+            # already had one, and the old handle vanished from the register.
+            uid = e_uid
+            if uid:
+                rebound.append((current_handle_of.get(uid, "?"), h, uid))
         if not uid:
             uid = mint(next_n); next_n += 1; minted += 1
+        if hist_uid.get(h) and hist_uid[h] != uid:
+            reused.append((h, hist_uid[h], uid))
         register.append({
             "cedar_uid": uid,
             "handle": h,
-            "cedar_entity_id": (r.get("cedar_entity_id") or "").strip(),
+            "cedar_entity_id": eid,
             "canonical_name": r.get("canonical_name", ""),
             "entity_class": r.get("entity_class", ""),
             "class_since_basis": "as recorded at first mint 2026-08-28; a "
@@ -582,13 +792,40 @@ def phase_mint(argv) -> int:
             "former_names": FORMER.get(h, ""),
             "same_as_legacy_cicd": lm.get(h, ""),
             "minted": existing.get(h) and "" or TODAY,
+            "register_status": "active",
         })
+
+    if reused:
+        raise HandleReuse(
+            f"{len(reused)} handle(s) are bound to a DIFFERENT uid than the "
+            f"handle history records: "
+            + "; ".join(f"{h}: {was} -> {now}" for h, was, now in reused[:5]))
+
+    # A UID IS NEVER DROPPED. An entity leaving the spine keeps its register
+    # row, marked retired, because a buyer's historical rows still carry it.
+    # The register is documented as append-only and, until this change, was
+    # silently rebuilt from the spine every run.
+    live = {x["cedar_uid"] for x in register}
+    retired_rows = 0
+    for r in prior:
+        if r["cedar_uid"] in live:
+            continue
+        r = dict(r)
+        r["register_status"] = "retired_no_longer_in_spine"
+        register.append(r)
+        retired_rows += 1
 
     uids = [x["cedar_uid"] for x in register]
     assert len(set(uids)) == len(uids), "uid collision"
     assert all(valid(u) for u in uids), "invalid uid minted"
-    print(f"  {len(register):,} entities -> {minted:,} new uids minted "
-          f"({len(existing):,} preserved from existing register)")
+    print(f"  {len(register):,} register rows -> {minted:,} new uids minted "
+          f"({len(existing):,} preserved from existing register, "
+          f"{retired_rows:,} retained for entities no longer in the spine)")
+    if rebound:
+        print(f"  {len(rebound)} handle(s) REBOUND to their existing uid "
+              f"(reclassification, uid unchanged):")
+        for was, now, u in rebound[:10]:
+            print(f"      {was} -> {now}   {u}")
     print(f"  sample: {register[0]['cedar_uid']} = {register[0]['handle']} "
           f"({register[0]['canonical_name'][:30]})")
     print(f"  with former names: {sum(1 for x in register if x['former_names'])}")
@@ -617,11 +854,56 @@ def phase_mint(argv) -> int:
 
     import shutil
     tmp = str(REGISTER) + ".part"
+    regcols = ["cedar_uid", "handle", "cedar_entity_id", "canonical_name",
+               "entity_class", "class_since_basis", "former_names",
+               "same_as_legacy_cicd", "minted", "register_status"]
     with io.open(tmp, "w", encoding="utf-8", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=list(register[0].keys()))
+        w = csv.DictWriter(f, fieldnames=regcols, restval="",
+                           extrasaction="ignore")
         w.writeheader(); w.writerows(register)
     os.replace(tmp, REGISTER)
     print(f"  wrote {REGISTER.relative_to(ROOT)}")
+
+    # ---- the handle <-> uid history table (F6, rule 4) ----------------
+    # Append-only. A handle row is closed (valid_to, status=retired) rather
+    # than deleted, so an old handle keeps resolving and the rebinding is
+    # auditable by the buyer it would otherwise have broken.
+    hist_rows, seen_pairs = [], set()
+    now_current = {x["cedar_uid"]: x["handle"] for x in register
+                   if x.get("register_status") == "active"}
+    for r in history:
+        h, u = (r.get("handle") or "").strip(), (r.get("cedar_uid") or "").strip()
+        seen_pairs.add((h, u))
+        if r.get("status") == "current" and now_current.get(u) not in (h, None):
+            r = dict(r)
+            r["status"] = "retired"
+            r["valid_to"] = TODAY
+            r["change_reason"] = (
+                r.get("change_reason") or
+                f"handle changed to {now_current.get(u)} on {TODAY}; the uid "
+                f"is unchanged and this handle still resolves to it")
+        hist_rows.append(r)
+    for x in register:
+        h, u = x["handle"], x["cedar_uid"]
+        if (h, u) in seen_pairs:
+            continue
+        hist_rows.append({
+            "handle": h, "cedar_uid": u,
+            "valid_from": x.get("minted") or TODAY, "valid_to": "",
+            "status": ("current" if x.get("register_status") == "active"
+                       else "retired"),
+            "change_reason": ("first recorded binding" if not history else
+                              "handle issued or first observed on this run"),
+            "recorded_date": TODAY})
+    tmp = str(HANDLE_HISTORY) + ".part"
+    with io.open(tmp, "w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=HANDLE_HISTORY_COLS, restval="",
+                           extrasaction="ignore")
+        w.writeheader(); w.writerows(hist_rows)
+    os.replace(tmp, HANDLE_HISTORY)
+    n_ret = sum(1 for r in hist_rows if r.get("status") == "retired")
+    print(f"  wrote {HANDLE_HISTORY.relative_to(ROOT)} - {len(hist_rows):,} "
+          f"handle bindings, {n_ret:,} retired and still resolving")
 
     by_handle = {x["handle"]: x["cedar_uid"] for x in register}
     bak = str(SPINE) + f".bak_{TODAY}_pre504"
@@ -682,6 +964,13 @@ def register_map():
     - it is only ever read.
     """
     m, legacy = {}, {}
+    # RETIRED HANDLES RESOLVE TOO (F6, rule 2). A dataset row or a buyer's
+    # join key written before a reclassification must keep pointing at the
+    # same entity; the history table is what makes that true, and it is read
+    # FIRST so the current register can only ever confirm it.
+    for h, u in handle_resolution_map().items():
+        if h and u:
+            m[h] = u
     with REGISTER.open(encoding="utf-8", errors="replace", newline="") as f:
         for r in csv.DictReader(f):
             uid = r["cedar_uid"]
@@ -834,7 +1123,16 @@ def main() -> int:
     argv = sys.argv[:]
 
     if a.phase == "verify":
-        return phase_mint(["--verify"]) or phase_stamp(["--verify"])
+        hf = verify_handles()
+        for f in hf:
+            print(f"  FAIL  {f}")
+        if not hf:
+            _h = read_handle_history()
+            print(f"  handle contract OK - {len(_h):,} bindings, "
+                  f"{sum(1 for r in _h if r.get('status') == 'retired'):,} "
+                  f"retired and still resolving, 0 reused")
+        rc = phase_mint(["--verify"]) or phase_stamp(["--verify"])
+        return 1 if hf else rc
     if a.phase == "reconcile":
         return phase_reconcile(argv)
     if a.phase == "mint":

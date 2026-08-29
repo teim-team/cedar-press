@@ -136,6 +136,7 @@ DOCS = CEDAR / "docs"
 RAW = CEDAR / "data" / "raw"
 BASELINE = CLEAN / "_regression_baseline.json"
 SHIP_CACHE = CLEAN / "_regression_ship_cache.json"
+SEM_BASELINE = CLEAN / "_regression_semantic_baseline.json"
 TODAY = date.today().isoformat()
 
 csv.field_size_limit(min(sys.maxsize, 2**31 - 1))
@@ -587,6 +588,39 @@ def measure_shipping():
             _doc = json.loads(_cj.read_text(encoding="utf-8"))
             m["contract_violations"] = int(_doc.get("n_violations", 0))
             m["contract_orphan_shippable"] = int(_doc.get("n_orphan_shippable", 0))
+            # External review F9. A SHIPPABLE table whose row grain, primary
+            # key, join key(s) and join cardinality are not declared AND
+            # validated cannot be joined safely: the named failure is a
+            # buyer joining a table whose real grain is entity x UEI x year
+            # on cedar_uid alone and multiplying every award amount.
+            #
+            # Two metrics, because there are two different defects:
+            #   contract_violations              a DECLARED grain the data
+            #                                    contradicts. Release-blocking
+            #                                    today (MUST_BE_ZERO).
+            #   contract_grain_unstated_shippable  never declared at all.
+            #                                    Also a release defect, but
+            #                                    207 of 210 tables are in it
+            #                                    and failing every one today
+            #                                    would make this gate a thing
+            #                                    to step around - standing
+            #                                    rule 15. RATCHETED: the count
+            #                                    may only fall, so a NEW
+            #                                    shippable table landing
+            #                                    without a grain fails the
+            #                                    gate the day it lands.
+            m["contract_grain_unstated_shippable"] = int(
+                _doc.get("n_shippable_grain_unstated", 0))
+            m["contract_grain_stated_shippable"] = int(
+                _doc.get("n_shippable_grain_stated", 0))
+            _un = _doc.get("shippable_grain_unstated", [])
+            if _un:
+                note(f"{len(_un)} SHIPPABLE table(s) have an UNSTATED row "
+                     f"grain - a buyer cannot join them safely. Ratcheted, "
+                     f"not waived. First few: "
+                     + ", ".join(_un[:6])
+                     + f" ... full list in docs/schema/dataset_contracts.json"
+                       f" -> shippable_grain_unstated")
         else:
             note("docs/schema/dataset_contracts.json missing - run "
                  "512_build_dataset_contracts.py; contract metrics not "
@@ -622,6 +656,61 @@ def measure_shipping():
             m["identity_facts_legacy_only"] = _leg
             m["identity_facts_unresolved_tie"] = _tie
 
+        # SOURCE-ROW CONSERVATION (510 I13). Every harvested source row must
+        # land in a NAMED bucket: emitted, duplicate, or a rejection with a
+        # stated reason. `harvest_rows_unaccounted` is the unnamed
+        # disappearance - defect class 2c at the harvest layer - and it is
+        # MUST_BE_ZERO. `harvest_source_rows_read` may not fall, because a
+        # harvester quietly ceasing to read a table looks exactly like a
+        # table that got smaller.
+        _cn = CLEAN / "cedar_harvest_conservation.csv"
+        if _cn.exists():
+            import csv as _csv3
+            _in, _un2, _rej = {}, 0, 0
+            with _cn.open(encoding="utf-8-sig", newline="") as _fh:
+                for _r in _csv3.DictReader(_fh):
+                    _in[_r["source_table"]] = int(_r["rows_in"] or 0)
+                    if _r["disposition"] == "UNACCOUNTED_FOR":
+                        _un2 += int(_r["rows"] or 0)
+                    if _r["disposition"].startswith("rejected"):
+                        _rej += int(_r["rows"] or 0)
+            m["harvest_source_rows_read"] = sum(_in.values())
+            m["harvest_rows_unaccounted"] = _un2
+            m["harvest_rows_rejected_named"] = _rej
+        else:
+            note("data/clean/cedar_harvest_conservation.csv missing - run "
+                 "510_assertions.py all --apply; source-row conservation NOT "
+                 "measured, which is not the same as clean")
+
+        # THE HANDLE CONTRACT (503, external review F6). cedar_uid is the
+        # documented join key and a handle is a display label - but only if
+        # a retired handle keeps resolving and is never reassigned. 503's
+        # own verify_handles() is the authority; this reads its inputs so
+        # the gate does not depend on another script being run first.
+        _hh2 = SPINE / "cedar_handle_history.csv"
+        if _hh2.exists():
+            import csv as _csv4
+            _bind, _bad, _cur = {}, 0, {}
+            with _hh2.open(encoding="utf-8-sig", newline="") as _fh:
+                _hrows = list(_csv4.DictReader(_fh))
+            for _r in _hrows:
+                _h, _u = _r["handle"].strip(), _r["cedar_uid"].strip()
+                if _h in _bind and _bind[_h] != _u:
+                    _bad += 1
+                _bind[_h] = _u
+                if _r.get("status") == "current":
+                    if _u in _cur and _cur[_u] != _h:
+                        _bad += 1
+                    _cur[_u] = _h
+            m["handle_history_bindings"] = len(_hrows)
+            m["handle_history_retired"] = sum(
+                1 for _r in _hrows if _r.get("status") == "retired")
+            m["handles_reused_or_double_bound"] = _bad
+        else:
+            note("data/spine/cedar_handle_history.csv missing - run "
+                 "503_identity.py mint --apply; the handle contract is NOT "
+                 "measured")
+
         # Phase 4 handoffs (513): a FAILED verification means a claim of
         # completed work was re-executed and DISPROVEN - that is stop-work,
         # not a queue. UNVERIFIED is a queue and only noted.
@@ -631,14 +720,58 @@ def measure_shipping():
             import csv as _csv
             with _hh.open(encoding="utf-8-sig", newline="") as _fh:
                 _hands = list(_csv.DictReader(_fh))
-            _last = {}
+            _last, _lastfail = {}, {}
             if _hv.exists():
                 with _hv.open(encoding="utf-8-sig", newline="") as _fh:
                     for _v in _csv.DictReader(_fh):
                         _last[_v["handoff_id"]] = _v["result"]
-            m["handoffs_failed_verification"] = sum(
-                1 for _h in _hands
-                if _last.get(_h["handoff_id"], "").startswith("FAILED"))
+                        _lastfail[_v["handoff_id"]] = _v.get("failures", "")
+
+            # THIS GATE MAY NOT BE THE ONLY EVIDENCE AGAINST A HANDOFF.
+            #
+            # A handoff's verify command list normally includes this script.
+            # So when a handoff verification fails ONLY on this gate, the
+            # metric below records it, this gate then fails BECAUSE of it,
+            # and re-running the verification fails again for the same
+            # reason. The gate becomes unable to return to green by any
+            # action - the deadlock happened on 2026-08-30, when workstream
+            # A's handoff was verified during a window in which an unrelated
+            # table was briefly unregistered.
+            #
+            # A gate that cannot be cleared is a gate people learn to step
+            # around, which is standing rule 15 in its worst form. So the
+            # self-reference is split out: a verification that failed on any
+            # of the WORKSTREAM'S OWN commands is a disproven claim and stays
+            # MUST_BE_ZERO. One that failed only on this gate is a stale
+            # record - it says the gate was red at the time, which this run
+            # is already measuring directly - and is counted, named and
+            # ratcheted instead. It clears by re-running
+            # `513_handoffs.py verify` once the gate is green.
+            _SELF = "62_no_regression_check.py"
+
+            def _failed_only_on_this_gate(hid):
+                f = (_lastfail.get(hid) or "").strip()
+                if not f:
+                    return False
+                parts = [x.strip() for x in f.split(";") if x.strip()]
+                return bool(parts) and all(_SELF in p for p in parts)
+
+            _failed = [_h["handoff_id"] for _h in _hands
+                       if _last.get(_h["handoff_id"], "").startswith("FAILED")]
+            _self_only = [h for h in _failed if _failed_only_on_this_gate(h)]
+            m["handoffs_failed_verification"] = len(_failed) - len(_self_only)
+            m["handoffs_failed_only_on_this_gate"] = len(_self_only)
+            for _h in _self_only:
+                note(f"handoff {_h} last verified FAILED, and the only "
+                     f"failing command was this gate itself. That is a stale "
+                     f"record, not a disproven claim - re-run "
+                     f"`py -3 code/513_handoffs.py verify {_h} --by <you>` "
+                     f"now that the gate is green.")
+            for _h in _failed:
+                if _h in _self_only:
+                    continue
+                note(f"handoff {_h} last verified FAILED on: "
+                     f"{_lastfail.get(_h, '(not recorded)')}")
             _unv = sum(1 for _h in _hands
                        if not _last.get(_h["handoff_id"])
                        and _h.get("verification_status", "") == "UNVERIFIED")
@@ -1090,6 +1223,148 @@ def measure_rulings_unapplied():
 
 # Metrics where a DECREASE is a regression. Everything else is reported but not
 # failed on, because a count can legitimately fall when something is corrected.
+# ===========================================================================
+# TRAP 5  -  A SILENT MASS RE-KEYING THAT EVERY COUNT ABOVE CALLS GREEN
+#
+# Row counts staying stable is not evidence that nothing happened. Every
+# metric in this file is an AGGREGATE, and an aggregate cannot see a rebuild
+# that keeps 32,551 facts and 1,536 entities while changing WHICH entity each
+# fact is about. That is the failure mode that matters commercially: a buyer
+# joined on cedar_uid last month, the mapping moved this month, and nothing
+# above says a word about it because both months have the same totals.
+#
+# So this compares the CONTENT of the identity-bearing fields against a
+# snapshot recorded alongside the numeric baseline:
+#
+#   resolved facts   winner value, support_status, resolution_status,
+#                    winning source, per (uid, qualifier, predicate)
+#   entities         handle -> uid, class, parent, ultimate parent
+#
+# `sem_entities_uid_reassigned` is MUST_BE_ZERO: a handle pointing at a
+# different uid than it did at the baseline is a re-keying, and there is no
+# benign version of it - the handle contract in 503 exists to make it
+# impossible, and this is the independent check that it did.
+# The rest are CEILINGS: change is normal, MASS change is a stop-work, and
+# the changed keys are PRINTED BY NAME rather than counted.
+# ===========================================================================
+SEM_FACTS = CLEAN / "cedar_resolved_facts.csv"
+SEM_SPINE = SPINE / "cedar_entity_spine.csv"
+SEM_REGISTER = SPINE / "cedar_identity_register.csv"
+
+
+def semantic_snapshot():
+    """The identity-bearing content, keyed so a re-keying cannot hide."""
+    facts = {}
+    if SEM_FACTS.exists():
+        with SEM_FACTS.open(encoding="utf-8-sig", errors="replace",
+                            newline="") as fh:
+            for r in csv.DictReader(fh):
+                k = "\t".join((r.get("cedar_uid", ""),
+                               r.get("subject_qualifier", ""),
+                               r.get("predicate", "")))
+                facts.setdefault(k, []).append("|".join((
+                    (r.get("object_value") or "")[:80],
+                    r.get("support_status", ""),
+                    r.get("resolution_status", ""),
+                    r.get("winning_source", ""))))
+    ent = {}
+    if SEM_SPINE.exists():
+        with SEM_SPINE.open(encoding="utf-8-sig", errors="replace",
+                            newline="") as fh:
+            for r in csv.DictReader(fh):
+                uid = (r.get("cedar_uid") or "").strip()
+                if uid:
+                    ent[uid] = "|".join((
+                        r.get("entity_class", ""),
+                        r.get("parent_entity_id", ""),
+                        r.get("ultimate_parent_entity_id", "")))
+    handles = {}
+    if SEM_REGISTER.exists():
+        with SEM_REGISTER.open(encoding="utf-8-sig", errors="replace",
+                               newline="") as fh:
+            for r in csv.DictReader(fh):
+                h = (r.get("handle") or "").strip()
+                if h:
+                    handles[h] = r.get("cedar_uid", "")
+    return {"facts": {k: sorted(v) for k, v in facts.items()},
+            "entities": ent, "handles": handles}
+
+
+def measure_semantic_diff():
+    """(metrics, [named changes]). Returns the snapshot too, so --baseline
+    writes exactly what was compared."""
+    snap = semantic_snapshot()
+    m = {"sem_facts_tracked": len(snap["facts"]),
+         "sem_entities_tracked": len(snap["entities"]),
+         "sem_handles_tracked": len(snap["handles"])}
+    named = []
+    if not SEM_BASELINE.exists():
+        note("NO SEMANTIC BASELINE ON FILE - a mass re-keying that keeps the "
+             "row counts stable CANNOT be detected until one is recorded: "
+             "py -3 code/62_no_regression_check.py --baseline. UNMEASURED is "
+             "not clean.")
+        return m, named, snap
+    try:
+        base = json.loads(SEM_BASELINE.read_text(encoding="utf-8"))
+    except Exception as e:
+        note(f"semantic baseline unreadable ({type(e).__name__}) - the "
+             f"semantic diff was SKIPPED, not passed")
+        return m, named, snap
+
+    bf, nf = base.get("facts", {}), snap["facts"]
+    win = sup = stat = 0
+    for k, nv in nf.items():
+        bv = bf.get(k)
+        if bv is None:
+            continue
+        b_parts = [x.split("|") for x in bv]
+        n_parts = [x.split("|") for x in nv]
+        if sorted(p[0] for p in b_parts) != sorted(p[0] for p in n_parts):
+            win += 1
+            if len(named) < 40:
+                named.append(("winner", k, "; ".join(p[0] for p in b_parts),
+                              "; ".join(p[0] for p in n_parts)))
+        if sorted(p[1] for p in b_parts) != sorted(p[1] for p in n_parts):
+            sup += 1
+        if sorted(p[2] for p in b_parts) != sorted(p[2] for p in n_parts):
+            stat += 1
+    m["sem_facts_winner_changed"] = win
+    m["sem_facts_support_changed"] = sup
+    m["sem_facts_status_changed"] = stat
+    m["sem_facts_added"] = len(set(nf) - set(bf))
+    m["sem_facts_removed"] = len(set(bf) - set(nf))
+
+    be, ne = base.get("entities", {}), snap["entities"]
+    cls = par = 0
+    for uid, nv in ne.items():
+        bv = be.get(uid)
+        if bv is None:
+            continue
+        b, n = bv.split("|"), nv.split("|")
+        if b[0] != n[0]:
+            cls += 1
+            if len(named) < 60:
+                named.append(("class", uid, b[0], n[0]))
+        if b[1:] != n[1:]:
+            par += 1
+            if len(named) < 60:
+                named.append(("parent", uid, "/".join(b[1:]), "/".join(n[1:])))
+    m["sem_entities_class_changed"] = cls
+    m["sem_entities_parent_changed"] = par
+    m["sem_entities_removed"] = len(set(be) - set(ne))
+
+    bh, nh = base.get("handles", {}), snap["handles"]
+    reassigned = 0
+    for h, nu in nh.items():
+        bu = bh.get(h)
+        if bu is not None and bu != nu:
+            reassigned += 1
+            named.append(("UID REASSIGNED", h, bu, nu))
+    m["sem_entities_uid_reassigned"] = reassigned
+    m["sem_handles_retired"] = len(set(bh) - set(nh))
+    return m, named, snap
+
+
 MUST_NOT_FALL = {
     "tier_A_ruled", "spine_entities", "spine_village_corporations",
     "spine_regional_ancs", "spine_nho", "spine_intertribal",
@@ -1107,6 +1382,14 @@ MUST_NOT_FALL = {
     # External review finding 3: identity-critical facts standing on a row
     # with no recorded provenance. This may only fall.
     "identity_facts_legacy_only",
+    # F9: a table that HAD a declared+validated grain must not lose it.
+    "contract_grain_stated_shippable",
+    # F6: the handle history is append-only. A binding is retired, never
+    # deleted, because a buyer's old join key must keep resolving forever.
+    "handle_history_bindings",
+    # 510 I13: a harvester that quietly stops reading a table looks exactly
+    # like a table that got smaller. Neither is allowed to be silent.
+    "harvest_source_rows_read",
     # SHIPPING. `ship_dist_rows` and `ship_tables_shipping` can only fall if
     # shipping was actively lost - a notes contract deleted, a dist artefact
     # rebuilt smaller, a table un-registered. There is no benign cause, which
@@ -1136,6 +1419,18 @@ MUST_BE_ZERO = {
     # Phase 4: a handoff whose verify commands were re-run and FAILED is a
     # disproven claim of completed work standing in the record.
     "handoffs_failed_verification",
+    # 510 I13: an unnamed disappearance. A source row that left the harvest
+    # with no disposition is defect class 2c at the layer where it does the
+    # most damage - nobody downstream can even tell it arrived.
+    "harvest_rows_unaccounted",
+    # F6: a handle bound to two uids, or a uid with two current handles.
+    # There is no benign version: every downstream join is wrong and nothing
+    # later can detect it.
+    "handles_reused_or_double_bound",
+    # TRAP 5: a handle that points at a different uid than it did at the
+    # baseline. This is the silent mass re-keying the aggregate counts above
+    # cannot see, and it is why the semantic snapshot exists.
+    "sem_entities_uid_reassigned",
 }
 # Metrics where an INCREASE is the regression. A registration gap rises when a
 # table lands in data/clean and nobody registers it - the last-mile failure
@@ -1196,9 +1491,33 @@ MUST_NOT_RISE = {
     # class is what retired 248.
     "lint_class7",
     "lint_bug_class_instances",
+    # F9: a SHIPPABLE table whose row grain, primary key and join cardinality
+    # are not declared and validated. 207 of 210 today. Ratcheted rather than
+    # zeroed, with the reason written where it is measured - a gate that
+    # fails on every table on day one is a gate everyone learns to step
+    # around, and standing rule 15 says that is worse than no gate.
+    "contract_grain_unstated_shippable",
+    # A handoff verification that failed ONLY on this gate. Stale, not
+    # disproven - see the reasoning where it is measured. It may only fall,
+    # and it falls by re-running the verification while the gate is green.
+    "handoffs_failed_only_on_this_gate",
 }
 # Metrics that must stay SMALL - a ceiling, not a floor.
-CEILINGS = {"kootenai_idaho_usd": 1_000_000.0}
+#
+# THE SEMANTIC CEILINGS (trap 5). These are not defects at 1 and are
+# stop-work at 500: facts do legitimately change winner when a source is
+# re-harvested, and entities do get reclassified. What no legitimate change
+# looks like is HUNDREDS at once while every count above stays green. When
+# one of these fires, look at the names printed under "SEMANTIC CHANGES"
+# before touching --baseline: re-recording the baseline is how a mass
+# re-keying becomes the new normal.
+CEILINGS = {"kootenai_idaho_usd": 1_000_000.0,
+            "sem_facts_winner_changed": 500.0,
+            "sem_facts_status_changed": 500.0,
+            "sem_facts_removed": 500.0,
+            "sem_entities_class_changed": 50.0,
+            "sem_entities_parent_changed": 50.0,
+            "sem_entities_removed": 10.0}
 
 
 def show(k, v):
@@ -1229,12 +1548,22 @@ def main():
     corr, stale_consumers, declared_removals = measure_corrections()
     now.update(corr)
     now.update(measure_lint_bug_classes())
+    sem, sem_named, sem_snap = measure_semantic_diff()
+    now.update(sem)
 
     if "--baseline" in sys.argv:
         BASELINE.write_text(json.dumps(
             {"recorded": TODAY, "metrics": now,
              "shipping": dist_by_file or {}}, indent=2), encoding="utf-8")
+        SEM_BASELINE.write_text(json.dumps(sem_snap), encoding="utf-8")
         print(f"baseline recorded -> {BASELINE.relative_to(CEDAR)}")
+        print(f"  and a SEMANTIC snapshot -> "
+              f"{SEM_BASELINE.relative_to(CEDAR)}: "
+              f"{len(sem_snap['facts']):,} resolved facts, "
+              f"{len(sem_snap['entities']):,} entities and "
+              f"{len(sem_snap['handles']):,} handle bindings, recorded by "
+              f"CONTENT. This is what lets the next run tell 'the totals held "
+              f"and everything got re-keyed' from 'nothing happened'.")
         print(f"  including a per-table dist row count for "
               f"{len(dist_by_file or {}):,} tables, which is what lets the "
               f"next run tell 'this table stopped shipping' from 'the total "
@@ -1247,10 +1576,38 @@ def main():
 
     fails, warns, loud = [], [], []
 
+    # A FAILURE MESSAGE THAT EXPLAINS THE WRONG DEFECT SENDS THE NEXT AGENT
+    # TO THE WRONG FILE. This loop used to append the Kootenai/CSKT sentence
+    # to every ceiling, which was fine while there was one ceiling and became
+    # actively misleading the moment the semantic ceilings were added - the
+    # same mistake recorded above for the lint_ and code_ metrics.
+    CEILING_WHY = {
+        "kootenai_idaho_usd": "the Kootenai/CSKT conflation has returned",
+        "sem_facts_winner_changed":
+            "facts changed WINNER in bulk while the row counts stayed green. "
+            "The changed keys are named under SEMANTIC CHANGES above. This is "
+            "a resolver or harvest change, and it is only safe if you can say "
+            "which one",
+        "sem_facts_status_changed":
+            "resolution_status changed in bulk - facts moved between "
+            "RESOLVED, REFUTED and UNRESOLVED_TIE without the counts moving",
+        "sem_facts_removed":
+            "facts present at the baseline are GONE. A fact leaving the "
+            "resolved table is a fact a buyer was joining to",
+        "sem_entities_class_changed":
+            "entities were RECLASSIFIED in bulk. Class drives the handle "
+            "prefix, the gov-class guards and eligibility",
+        "sem_entities_parent_changed":
+            "parentage moved in bulk - this re-keys ownership and every "
+            "roll-up built on it",
+        "sem_entities_removed":
+            "entities present at the baseline are gone from the spine",
+    }
     for k, limit in CEILINGS.items():
         if now.get(k, 0) > limit:
-            fails.append(f"{k} = {now[k]:,.2f}, above its ceiling {limit:,.0f} "
-                         f"- the Kootenai/CSKT conflation has returned")
+            fails.append(f"{k} = {now[k]:,.2f}, above its ceiling {limit:,.0f}"
+                         f" - {CEILING_WHY.get(k, 'no reason recorded for '
+                                                  'this ceiling')}")
 
     for k in sorted(MUST_BE_ZERO):
         v = now.get(k, 0)
@@ -1456,6 +1813,21 @@ def main():
               "the same claim is\n     the same disease as a ruling that is "
               "not applied at all. `354_correction_register.py --check` "
               "lists them in full.")
+
+    if sem_named:
+        print(f"\nSEMANTIC CHANGES since the baseline ({len(sem_named)} named "
+              f"of {sum(now.get(k, 0) for k in ('sem_facts_winner_changed', 'sem_entities_class_changed', 'sem_entities_parent_changed', 'sem_entities_uid_reassigned')):,} "
+              f"total) - the aggregate counts above cannot see these:")
+        for kind, key, was, isnow in sem_named[:40]:
+            print(f"  {kind:>14}  {key}")
+            print(f"                  was: {str(was)[:110]}")
+            print(f"                  now: {str(isnow)[:110]}")
+        if len(sem_named) > 40:
+            print(f"     ...and {len(sem_named) - 40} more")
+        print("     A count is not actionable; a key is a task. If this list "
+              "is long and every\n     number above is green, that is the "
+              "silent mass re-keying this check exists\n     for - do NOT "
+              "re-record the baseline until you know why.")
 
     if absent_cols:
         print("\nCOVERAGE COLUMNS THAT DO NOT EXIST (standing rule 14):")

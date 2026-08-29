@@ -151,14 +151,24 @@ These need design work beyond a session and are recorded as open, not waved off.
   would mis-key its pre-sale awards. Needs `valid_from`/`valid_to`,
   `observed_at`, `source_effective_date`, plus merge/split/successor/tombstone
   policy.
-- **F6 (critical) — mutable handles as customer join keys.** Accepted. The
-  contract must be: `cedar_uid` is the only documented join key, handles
-  become display labels, retired handles are never reassigned, and a
-  handle↔uid history table ships.
-- **F10 — global precedence is wrong for some predicates**, notably **R01
-  before R02**: an equal-tier non-authority deny can remove an authoritative
-  affirmation before authority is consulted. Accepted; wants per-predicate
-  policies rather than one lexicographic order.
+- ~~**F6 (critical) — mutable handles as customer join keys.**~~ **CLOSED
+  2026-08-30, workstream D.** `data/spine/cedar_handle_history.csv` retains
+  every `(handle, uid, valid_from, valid_to, status, change_reason)` binding;
+  an old handle always resolves to the same uid; a retired handle pointed at
+  another entity raises. The bug was worse than the finding said: the mint
+  phase keyed on the handle, so a reclassification **minted a second uid**
+  rather than merely breaking a buyer's join. See ADR-006.
+- ~~**F10 — global precedence is wrong for some predicates**~~ **CLOSED
+  2026-08-30, workstream D.** Six per-predicate resolution policies in
+  `data/spine/cedar_resolution_policies.csv`; a policy owns its rule order,
+  whether a non-authority deny may pre-empt R02, whether a stale deny may
+  veto, and whether stale families count toward corroboration. A blocked deny
+  is kept as an `R01-BLOCKED` contest, not discarded. Invariant **I11**
+  recomputes every veto and fails if one removed a protected value —
+  fixture-proven. **No live fact changed**: all 332 denies today are on
+  identifier predicates, which declare no authority, so the defect was
+  structural and unreached. It is now unreachable by construction rather
+  than by luck. See ADR-005.
 - **F11 — re-observation.** Correct: a re-check of an unchanged claim
   produces an unchanged assertion id, so the layer cannot record "still true
   as of today" without either mutating an append-only row or duplicating an
@@ -168,7 +178,22 @@ These need design work beyond a session and are recorded as open, not waved off.
 - **F13 — a checksum is a receipt, not a backup.** Accepted, and it sharpens
   what our replay drill proved: we demonstrated that *code at a commit runs
   and validates*, never that inputs could be reconstructed.
-- **F8, F9, F14, F15, F16** — accepted as stated.
+- ~~**F9 — grain**~~ **CLOSED as infrastructure 2026-08-30, workstream D,
+  and the honest number is uncomfortable.** A declaration is now `grain` +
+  `primary_key` + `join_keys` + `join_cardinality`, validated against the
+  file on every run; a declared grain the data contradicts is
+  release-blocking. **3 of 210 shippable tables declare and validate one.
+  207 do not**, and that count is ratcheted (`contract_grain_unstated_
+  shippable`, MUST_NOT_RISE) rather than claimed as done. See ADR-007.
+- **F8 — a subsidiary fused to its parent.** Analysed, proposal recorded, NOT
+  implemented. Measured: **3,511 distinct (entity, differing legal name)
+  pairs** across 714 entities, carrying **$173.9B** of prime dollars, are
+  currently representable only as an attribute of somebody else. The proposal
+  is a registration SUB-HUB with its own key and an assertable, refutable
+  `registration_is_separately_incorporated` defaulting to *unknown* — not
+  promotion of every registrant. It depends on ADR-003's validity time to be
+  worth anything. See ADR-008.
+- **F14, F15, F16** — accepted as stated, still open.
 
 ## One correction to the reviewer
 

@@ -74,6 +74,45 @@ corporation reclassified):
 A uid is **never reused**, even after an entity is retired — same rule as script
 numbers, for the same reason.
 
+#### The contract is now enforced, not described (external review F6)
+
+Until 2026-08-30 the four rules above were policy that the code did not
+implement. `503_identity.py phase_mint` keyed the existing-uid lookup on the
+**handle**, so a reclassification missed, **minted a second uid for an entity
+that already had one**, and dropped the old handle from a register documented
+as append-only. A buyer who had joined on a handle would have lost their
+historical rows with no way to discover it.
+
+`data/spine/cedar_handle_history.csv` retains every binding ever issued:
+
+```
+handle, cedar_uid, valid_from, valid_to, status, change_reason, recorded_date
+```
+
+- **`cedar_uid` is the only documented external join key.** Handles are
+  display identifiers.
+- **An old handle always resolves to the same uid**, through
+  `503.register_map()` — the map `stamp` keys every dataset with. The history
+  is read *first*, so the current register can only ever confirm it.
+- **A retired handle pointed at a different entity RAISES** (`HandleReuse`).
+  Not a warning: a reused handle resolves to the wrong entity in every
+  downstream join and nothing later can detect it.
+- **A uid is never dropped from the register.** An entity leaving the spine
+  keeps its row, marked `register_status = retired_no_longer_in_spine`.
+
+`503_identity.py verify` checks H1–H5 (one uid per handle forever; a
+retirement carries a date; no uid dropped; at most one current handle per
+uid; every register handle has a history row). `62_no_regression_check.py`
+carries `handles_reused_or_double_bound` (MUST_BE_ZERO),
+`handle_history_bindings` (MUST_NOT_FALL) and `sem_entities_uid_reassigned`
+(MUST_BE_ZERO — a handle pointing at a different uid than it did at the
+baseline is a silent re-keying).
+
+Proven by `review/fixtures_D/fixture_F6_handle_contract.py`: it reclassifies a
+real entity in a copy of the real spine, shows the uid does not move, shows
+the retired handle still resolves through `register_map()`, and shows that
+reusing it for a different entity raises.
+
 ### What this means for a customer
 
 Every shipped dataset carries `cedar_uid` **in the file**. A buyer holding one

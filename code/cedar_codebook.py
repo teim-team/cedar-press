@@ -159,6 +159,16 @@ INTERNAL_TABLES = {
         "facts win by R04 TIER unopposed. The eventual product is this table, "
         "not the assertion store - it is the one that says which value Cedar "
         "stands behind and which rule decided it",
+    "cedar_harvest_conservation.csv":
+        "510's row-accounting ledger: for every source table the harvest "
+        "reads, how many rows went in and the NAMED bucket each one landed "
+        "in - emitted, duplicate, or a rejection with a stated reason. "
+        "Internal because it describes OUR PROCESS, not the world, which is "
+        "the same test that keeps the assertion store internal. It is kept "
+        "and gated rather than printed and forgotten because it is the only "
+        "thing that can say a source row was ever read: 12,489 of 20,577 "
+        "identifier-ledger rows carry no cedar_uid and are dropped from the "
+        "harvest, and until this table existed nothing counted them",
     "cedar_fact_conflicts.csv":
         "the losing values 510 preserves. Internal alongside its two "
         "companions, and currently EMPTY - correctly, because no single-"

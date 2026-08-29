@@ -295,3 +295,148 @@ Also open:
 3. Write a `harvest_*` function that cites the row it read in `origin_table`.
 4. Run `all --apply`. `verify` will tell you if you declared an authority that
    never asserts, or claimed corroboration you do not have.
+
+---
+
+## Per-predicate resolution policy — the 2026-08-30 pass
+
+*External review F10, plus source-row conservation and two new invariants.
+Everything below is measured from the live tables, not restated.*
+
+### The rule order is the predicate's, not the file's
+
+`R01 DENY_VETO` ran **before** `R02 AUTHORITY`. An equal-tier deny from a
+source with no authority over the predicate therefore removed an
+authoritative Federal Register affirmation before authority was ever
+consulted. Fixing the order alone would have been another global special
+case; the reviewer's point is that one universal order cannot serve stable
+legal status, current leadership, addresses and ownership at once.
+
+Six policies now live in `data/spine/cedar_resolution_policies.csv`:
+
+| policy | rank order | deny may veto an authority | deny may predate the affirm | corroboration horizon |
+|---|---|---|---|---|
+| `STABLE_LEGAL_STATUS` | authority > human > tier > families > recency | no | yes | none |
+| `CURRENT_LEADERSHIP` | authority > human > **recency** > tier > families | yes | no | 730d |
+| `CONTACT_LOCATION` | authority > human > **recency** > tier > families | yes | no | 1095d |
+| `OWNERSHIP_AND_STRUCTURE` | authority > human > tier > families > recency | no | no | none |
+| `IDENTIFIER_BINDING` | authority > human > tier > families > recency | yes | yes | none |
+| `DEFAULT` | authority > human > tier > families > recency | no | yes | none |
+
+Three failure modes, three policy dimensions rather than three branches:
+
+- **an equal-tier non-authority deny deleting an authoritative fact** —
+  `deny_may_veto_authority`. The authority *retracting itself* still can: a
+  Federal Register delisting is a real deny.
+- **an old deny permanently suppressing a newer affirmation** —
+  `deny_may_be_older_than_affirm`. R06 RECENCY sits near last and is never
+  reached once a value is out of contention, so without this the refutation
+  is permanent.
+- **three stale directories beating one current source** —
+  `corroboration_horizon_days`. Applied to *ranking* only; the honest full
+  family count is still what the row reports, so I6 and `support_status` are
+  unaffected.
+
+**A blocked deny is not discarded.** It is written to the conflict table as
+`R01-BLOCKED` with the reason named, and it wins the day its source gains
+authority over the predicate.
+
+### R08 UNCONTESTED, and what it replaced
+
+The resolver labelled a lone uncontested value `R02 AUTHORITY` when its one
+source happened to be an authority and `R04 TIER` otherwise. Both read as
+though a contest had been won. Measured after the change:
+
+```
+R00 MULTI_VALUED_NO_CONTEST  23,554
+R08 UNCONTESTED               8,975      <- every single-valued fact in Cedar
+R01 DENY_VETO                    22
+R02..R07                          0
+```
+
+**Every single-valued fact in Cedar is uncontested.** That was always true —
+the previous labels hid it behind rule names. What the one piece of evidence
+is worth is carried by `support_status`, which is the field built to carry it.
+
+### Source-row conservation
+
+Every row of every harvested table now lands in exactly one **named** bucket
+in `data/clean/cedar_harvest_conservation.csv`. Invariant **I13** fails the
+build if `rows_in != sum(dispositions)`, and refuses a reason of `other`,
+`unknown`, `misc` or `n/a` by name. Measured on the first run:
+
+```
+83,676 source rows read      0 UNACCOUNTED     25,434 rejected, all named
+```
+
+The number the accounting surfaced immediately:
+
+| source | rows in | emitted | named rejection |
+|---|---:|---:|---|
+| identifier ledger (links) | 20,577 | 8,088 | **12,489 have no `cedar_uid`** |
+| identifier ledger (registration attrs) | 20,577 | 7,753 | 12,489 no uid; 332 tier X; 3 no usable value |
+| FR roster | 575 | 563 | 5 see-instead pointers, 4 unmatched, **3 non-government class** |
+| gaming claims | 113 | 10 | 71 not a Native entity, 32 already refused in source |
+
+**60.7% of the identifier ledger never reaches the assertion layer**, and
+until this table existed nothing counted it.
+
+### The Federal Register cannot name a corporation — I14
+
+Found live by workstream A, and it is review finding F1 arriving by a route
+no existing guard could see. Three ANCSA village **corporations** carried
+`entity.is_federally_recognized = yes` at tier A with
+`support_status = authoritative` and `winning_source = fr_tribal_list`:
+
+```
+CE-000AW-TW  The English Bay Corporation
+CE-000BP-VP  Russian Mission Native Corporation
+CE-000CB-YK  St. Mary's Native Corporation
+```
+
+The FR **government** name had been written onto the corporation's spine row
+as an alias, so `503.resolve()` returned it **uniquely** — no ambiguity, so
+the gov-class tiebreak never ran, no conflict row was written, and nothing in
+the pipeline could see it. Cedar was attesting that a federal authority
+vouched for a claim that authority never made.
+
+Two fixes and one invariant:
+
+1. `harvest_fr_roster` refuses any match whose spine class is not a
+   government class, however confidently the name matched. **3 refused.**
+2. `harvest_spine` refuses the `fr_official_name` column on a non-government
+   row. There is no honest source to assert it under, so it is refused and
+   named rather than re-labelled — re-labelling would be inventing
+   provenance to keep a value. **6 refused**, including
+   `ANVC-ELIMXX-00: Native Village of Elim` and
+   `ITO-BRSTL1-00: Bristol Bay Housing Authority`.
+3. **I14**: no `entity.is_federally_recognized = yes` may stand on a
+   non-government class, **and** no assertion citing `fr_tribal_list` may
+   attach to one. The second clause exists because the first would have
+   missed the official-name route entirely.
+
+The underlying mechanism was in `503.build_index`: alias candidates were
+added as `(tid, r.get("entity_class", ""))` from `entity_aliases.csv`, **which
+has no `entity_class` column**, so every alias-sourced candidate arrived
+class-less and no class guard could ever fire on one. The class now comes
+from the spine, keyed by `tribe_id`. `Native Village of Elim` resolves again:
+
+```
+before  AMBIGUOUS_EXACT
+after   AKNF-NVELIM-00-BERSTR-KAWRAK   "exact normalized, unique among government-class"
+```
+
+Resolved facts fell **32,551 → 32,545**: 9 facts wearing Federal Register
+authority that the Federal Register never issued.
+
+### Invariants added this pass
+
+| | |
+|---|---|
+| **I11** | no deny may veto a value its predicate's policy protects |
+| **I12** | every declared policy governs something (warning) |
+| **I13** | source-row conservation, with named reasons only |
+| **I14** | federal recognition, and FR-sourced facts, only on governments |
+
+Each is proven by a fixture that injects the violation, shows `verify` exits
+1, restores, and shows it exits 0 — `review/fixtures_D/`.
