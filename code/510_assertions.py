@@ -260,6 +260,53 @@ ROUTE_TO_SOURCE = [
 TIER_RANK = {"A": 3, "B": 2, "C": 1, "": 0}
 
 # =====================================================================
+# IDENTITY-CRITICAL PREDICATES - external review 2026-08-30, findings 3+4.
+# =====================================================================
+# A buyer joins on these, or makes a legal/eligibility judgement from them.
+# Two rules apply to them and to nothing else:
+#
+#   * a coin flip (R07) may NOT produce a shipped value. The reviewer's
+#     wording is exact: "R07 manufactures certainty". A hash comparison has
+#     no relationship to truth, and a buyer reading only the resolved table
+#     cannot tell an arbitrated fact from an arbitrary one. These resolve to
+#     UNRESOLVED_TIE and carry their candidates.
+#   * support_status is recorded ALONGSIDE resolution_status, because
+#     "resolved" only ever meant "a rule selected it", never "it is
+#     supported". A single legacy row with no provenance resolves cleanly
+#     and passes every invariant - the absence of competing evidence makes a
+#     bad claim EASIER to resolve, not harder.
+IDENTITY_CRITICAL = (
+    "entity.class", "entity.canonical_name", "entity.fr_official_name",
+    "entity.is_federally_recognized", "entity.parent",
+    "entity.ultimate_parent", "entity.constituent_band_of",
+    "entity.identifier.", "entity.state",
+)
+
+
+def is_identity_critical(predicate: str) -> bool:
+    return any(predicate == p or predicate.startswith(p)
+               for p in IDENTITY_CRITICAL)
+
+
+def support_status(group, n_families: int) -> str:
+    """What EVIDENCE stands behind a selected value - orthogonal to which
+    rule selected it. Reviewer finding 3."""
+    srcs = {g["source_id"] for g in group}
+    if any(is_authority_for(g["source_id"], g["predicate"]) for g in group):
+        return "authoritative"
+    if n_families > 1:
+        return "corroborated"
+    if srcs == {"unattributed_legacy"}:
+        return "legacy_only"
+    if all(int(g["independence_is_unverified"]) for g in group):
+        return "unverified_single_source"
+    return "traceable_single_source"
+
+
+def is_authority_for(source_id: str, predicate: str) -> bool:
+    return predicate in SOURCES.get(source_id, {}).get("authority_for", [])
+
+# =====================================================================
 # CARDINALITY - does this predicate have ONE answer or MANY?
 # =====================================================================
 # Caught on the first run of this script, and worth recording because it is
@@ -484,7 +531,7 @@ def phase_sources(apply: bool) -> list:
 # =====================================================================
 def _emit(out, subject, predicate, value, source_id, *, polarity="affirm",
           tier="", method="", rationale="", evidence_url="", quote="",
-          verified="", origin=""):
+          verified="", origin="", qualifier=""):
     value = "" if value is None else str(value).strip()
     if not value:
         return
@@ -494,8 +541,10 @@ def _emit(out, subject, predicate, value, source_id, *, polarity="affirm",
     tier = cap_tier(tier, source_id)
     root = SOURCES[source_id]["lineage_root"]
     out.append(dict(
-        assertion_id=aid(subject, predicate, n, source_id, polarity),
+        assertion_id=aid(subject + "|" + qualifier, predicate, n, source_id,
+                         polarity),
         cedar_uid=subject,
+        subject_qualifier=qualifier,
         predicate=predicate,
         polarity=polarity,
         object_value=value,
@@ -809,6 +858,7 @@ def harvest_ledger_attributes(out) -> dict:
             # registrations filed in AK, VA and OK" is true and useful, and
             # because it never competes with where the entity actually is.
             _emit(out, uid, "entity.registration_state", st, sid,
+                  qualifier=f"{itype}:{(r.get('identifier') or '').strip()}",
                   tier="B" if tier in ("A", "B") else "C",
                   method=f"registration_address:{itype}",
                   rationale="The state on the registration record behind this "
@@ -823,6 +873,7 @@ def harvest_ledger_attributes(out) -> dict:
         lbn = (r.get("legal_business_name") or "").strip()
         if lbn:
             _emit(out, uid, "entity.legal_business_name", lbn, sid,
+                  qualifier=f"{itype}:{(r.get('identifier') or '').strip()}",
                   tier="B" if tier in ("A", "B") else "C",
                   method=f"registration_name:{itype}",
                   rationale="The legal name on the registration. A different "
@@ -858,7 +909,8 @@ def phase_harvest(apply: bool) -> list:
         seen.add(a["assertion_id"])
         uniq.append(a)
 
-    cols = ["assertion_id", "cedar_uid", "predicate", "polarity", "object_value",
+    cols = ["assertion_id", "cedar_uid", "subject_qualifier", "predicate",
+            "polarity", "object_value",
             "object_norm", "source_id", "lineage_root_id", "lineage_ancestry",
             "independence_is_unverified", "confidence_tier",
             "attribution_method", "tier_rationale", "evidence_url",
@@ -904,14 +956,20 @@ def independent_families(assertions) -> set:
 
 
 def phase_resolve(assertions, apply: bool):
+    # THE SUBJECT OF A FACT IS (entity, qualifier). A registration's state
+    # belongs to that registration, not to the tribe - external review
+    # 2026-08-30, finding 7. Grouping on the entity alone let one tribe carry
+    # 35 registration states with no way to tell which registration each came
+    # from, and fanned a buyer's join out 35x.
     by_fact = defaultdict(list)
     for a in assertions:
-        by_fact[(a["cedar_uid"], a["predicate"])].append(a)
+        by_fact[(a["cedar_uid"], a.get("subject_qualifier", ""),
+                 a["predicate"])].append(a)
 
     resolved, conflicts = [], []
     rule_counts = Counter()
 
-    for (uid, pred), rows in sorted(by_fact.items()):
+    for (uid, qual, pred), rows in sorted(by_fact.items()):
         affirms = [r for r in rows if r["polarity"] == "affirm"]
         denies = [r for r in rows if r["polarity"] == "deny"]
 
@@ -932,7 +990,9 @@ def phase_resolve(assertions, apply: bool):
         if not surviving:
             if denies:
                 resolved.append(dict(
-                    cedar_uid=uid, predicate=pred, object_value="",
+                    cedar_uid=uid, subject_qualifier=qual, predicate=pred,
+                    object_value="",
+                    support_status="refuted",
                     resolution_status="REFUTED_NO_SURVIVOR",
                     decided_by_rule="R01", decided_by_rule_name="DENY_VETO",
                     n_assertions=len(rows), n_candidate_values=0,
@@ -964,9 +1024,11 @@ def phase_resolve(assertions, apply: bool):
                 best = max(group, key=lambda g: (
                     TIER_RANK.get(g["confidence_tier"], 0),
                     g["verified_date"] or ""))
+                _fams = len(independent_families(group))
                 resolved.append(dict(
-                    cedar_uid=uid, predicate=pred,
+                    cedar_uid=uid, subject_qualifier=qual, predicate=pred,
                     object_value=best["object_value"],
+                    support_status=support_status(group, _fams),
                     resolution_status="RESOLVED_MULTI",
                     decided_by_rule="R00",
                     decided_by_rule_name="MULTI_VALUED_NO_CONTEST",
@@ -981,7 +1043,8 @@ def phase_resolve(assertions, apply: bool):
                 rule_counts["R00"] += 1
             for v, killer in vetoed.items():
                 conflicts.append(dict(
-                    cedar_uid=uid, predicate=pred, losing_value=v,
+                    cedar_uid=uid, subject_qualifier=qual, predicate=pred,
+                    losing_value=v,
                     losing_source="(refuted)", losing_tier="X",
                     losing_lineage_root=killer["lineage_root_id"],
                     winning_value="", winning_source="",
@@ -1023,6 +1086,52 @@ def phase_resolve(assertions, apply: bool):
             coinflip = 0
 
         authority, human, tier, fams, recency, _ = score((winner_val, winner_group))
+
+        # R07 MAY NOT DECIDE AN IDENTITY-CRITICAL FACT. External review
+        # 2026-08-30, finding 4: "a lower SHA-1 value has no relationship to
+        # truth", and a buyer reading only the resolved table cannot tell an
+        # arbitrated value from an arbitrary one. The tie is REAL evidence
+        # that we do not know; publishing a hash winner converts our
+        # uncertainty into their false confidence. The candidates are kept
+        # and the fact ships as unresolved.
+        if coinflip and is_identity_critical(pred):
+            rule_counts["R07-BARRED"] += 1
+            for v, grp in ranked:
+                for g in grp:
+                    conflicts.append(dict(
+                        cedar_uid=uid, subject_qualifier=qual, predicate=pred,
+                        losing_value=g["object_value"],
+                        losing_source=g["source_id"],
+                        losing_tier=g["confidence_tier"],
+                        losing_lineage_root=g["lineage_root_id"],
+                        winning_value="", winning_source="",
+                        decided_by_rule="R07-BARRED",
+                        decided_by_rule_name="TIE_ON_IDENTITY_CRITICAL",
+                        assertion_id=g["assertion_id"],
+                        evidence_url=g["evidence_url"],
+                        note="Candidate in an unbroken tie on an "
+                             "identity-critical predicate. NOTHING was "
+                             "selected: a hash tiebreak would publish "
+                             "certainty we do not have.",
+                        resolved_date=TODAY))
+            resolved.append(dict(
+                cedar_uid=uid, subject_qualifier=qual, predicate=pred,
+                object_value="", support_status="unresolved_conflict",
+                resolution_status="UNRESOLVED_TIE",
+                decided_by_rule="R07-BARRED",
+                decided_by_rule_name="TIE_ON_IDENTITY_CRITICAL",
+                n_assertions=len(rows), n_candidate_values=len(ranked),
+                n_independent_families=fams, decided_by_coinflip=0,
+                conflict=1,
+                competing_values=" | ".join(v for v, _ in ranked[:5]),
+                winning_source="", winning_tier="", winning_lineage_root="",
+                evidence_url="",
+                resolution_note="Tie on an identity-critical predicate. Needs "
+                                "a human ruling or a better source; the "
+                                "candidates are in the conflict table.",
+                resolved_date=TODAY))
+            continue
+
         if coinflip:
             rid, rname = "R07", "DETERMINISTIC_TIEBREAK"
         elif authority:
@@ -1065,7 +1174,7 @@ def phase_resolve(assertions, apply: bool):
         for v, grp in losers:
             for g in grp:
                 conflicts.append(dict(
-                    cedar_uid=uid, predicate=pred,
+                    cedar_uid=uid, subject_qualifier=qual, predicate=pred,
                     losing_value=g["object_value"],
                     losing_source=g["source_id"],
                     losing_tier=g["confidence_tier"],
@@ -1082,7 +1191,8 @@ def phase_resolve(assertions, apply: bool):
                     resolved_date=TODAY))
         for v, killer in vetoed.items():
             conflicts.append(dict(
-                cedar_uid=uid, predicate=pred, losing_value=v,
+                cedar_uid=uid, subject_qualifier=qual, predicate=pred,
+                losing_value=v,
                 losing_source="(refuted)", losing_tier="X",
                 losing_lineage_root=killer["lineage_root_id"],
                 winning_value=best["object_value"],
@@ -1095,7 +1205,9 @@ def phase_resolve(assertions, apply: bool):
                 resolved_date=TODAY))
 
         resolved.append(dict(
-            cedar_uid=uid, predicate=pred, object_value=best["object_value"],
+            cedar_uid=uid, subject_qualifier=qual, predicate=pred,
+            object_value=best["object_value"],
+            support_status=support_status(winner_group, fams),
             resolution_status="RESOLVED",
             decided_by_rule=rid, decided_by_rule_name=rname,
             n_assertions=len(rows), n_candidate_values=len(ranked),
@@ -1108,13 +1220,15 @@ def phase_resolve(assertions, apply: bool):
             evidence_url=best["evidence_url"],
             resolution_note="", resolved_date=TODAY))
 
-    rcols = ["cedar_uid", "predicate", "object_value", "resolution_status",
+    rcols = ["cedar_uid", "subject_qualifier", "predicate", "object_value",
+             "support_status", "resolution_status",
              "decided_by_rule", "decided_by_rule_name", "n_assertions",
              "n_candidate_values", "n_independent_families",
              "decided_by_coinflip", "conflict", "competing_values",
              "winning_source", "winning_tier", "winning_lineage_root",
              "evidence_url", "resolution_note", "resolved_date"]
-    ccols = ["cedar_uid", "predicate", "losing_value", "losing_source",
+    ccols = ["cedar_uid", "subject_qualifier", "predicate", "losing_value",
+             "losing_source",
              "losing_tier", "losing_lineage_root", "winning_value",
              "winning_source", "decided_by_rule", "decided_by_rule_name",
              "assertion_id", "evidence_url", "note", "resolved_date"]
@@ -1124,12 +1238,16 @@ def phase_resolve(assertions, apply: bool):
 
     corrob = sum(1 for r in resolved if int(r["n_independent_families"] or 0) > 1)
     flip = sum(1 for r in resolved if int(r["decided_by_coinflip"] or 0))
+    from collections import Counter as _C
+    sup = _C(r.get("support_status", "?") for r in resolved)
     print(f"  resolve      {len(resolved):7d} facts, {len(conflicts)} losing "
           f"values KEPT (an overwrite model destroys these)")
     print(f"                 decided by: "
           + ", ".join(f"{k}={v}" for k, v in sorted(rule_counts.items())))
     print(f"                 {corrob} facts have >1 INDEPENDENT evidence "
           f"family; {flip} needed a coin flip and are flagged")
+    print("                 support: "
+          + ", ".join(f"{k}={v}" for k, v in sup.most_common()))
     return resolved, conflicts
 
 
@@ -1175,8 +1293,12 @@ def phase_verify() -> int:
     dupes = [k for k, v in ids.items() if v > 1]
     if dupes:
         fails.append(f"I3 {len(dupes)} duplicate assertion_id")
+    # The subject is (entity, qualifier) - see the resolve grouping. I3 caught
+    # this the moment the formula changed and verify still used the old
+    # signature, which is precisely its job.
     mism = sum(1 for a in assertions
-               if aid(a["cedar_uid"], a["predicate"], a["object_norm"],
+               if aid(a["cedar_uid"] + "|" + a.get("subject_qualifier", ""),
+                      a["predicate"], a["object_norm"],
                       a["source_id"], a["polarity"]) != a["assertion_id"])
     if mism:
         fails.append(f"I3 {mism} assertion_id do not recompute - the table is "
@@ -1192,8 +1314,11 @@ def phase_verify() -> int:
                          f"identity register: {sorted(orphan)[:3]}")
 
     # I5: every resolved fact traces back to at least one assertion.
-    have = {(a["cedar_uid"], a["predicate"]) for a in assertions}
-    lost = [r for r in resolved if (r["cedar_uid"], r["predicate"]) not in have]
+    have = {(a["cedar_uid"], a.get("subject_qualifier", ""), a["predicate"])
+            for a in assertions}
+    lost = [r for r in resolved
+            if (r["cedar_uid"], r.get("subject_qualifier", ""),
+                r["predicate"]) not in have]
     if lost:
         fails.append(f"I5 {len(lost)} resolved facts have no supporting "
                      f"assertion - the view invented them")
@@ -1203,11 +1328,13 @@ def phase_verify() -> int:
     # This is the check the whole lineage tree exists to make possible.
     by_fact = defaultdict(list)
     for a in assertions:
-        by_fact[(a["cedar_uid"], a["predicate"])].append(a)
+        by_fact[(a["cedar_uid"], a.get("subject_qualifier", ""),
+                 a["predicate"])].append(a)
     overclaim = 0
     for r in resolved:
         claimed = int(r.get("n_independent_families") or 0)
-        rows = by_fact.get((r["cedar_uid"], r["predicate"]), [])
+        rows = by_fact.get((r["cedar_uid"], r.get("subject_qualifier", ""),
+                            r["predicate"]), [])
         actual = len(independent_families(
             [x for x in rows if x["polarity"] == "affirm"
              and norm(x["object_value"]) == norm(r["object_value"])]))
@@ -1229,27 +1356,57 @@ def phase_verify() -> int:
                              f"asserts it 0 times - dead authority")
 
     # I8: nothing is silently dropped. Every losing value is in conflicts.
-    kept = {(c["cedar_uid"], c["predicate"], norm(c["losing_value"]))
-            for c in conflicts}
+    kept = {(c["cedar_uid"], c.get("subject_qualifier", ""), c["predicate"],
+             norm(c["losing_value"])) for c in conflicts}
     # A multi-valued predicate resolves to MANY rows, so "the winning value"
     # is a set, not a scalar. Collecting only the first would report every
     # further UEI on a tribe as silently dropped.
     won = defaultdict(set)
     for r in resolved:
-        won[(r["cedar_uid"], r["predicate"])].add(norm(r["object_value"]))
+        won[(r["cedar_uid"], r.get("subject_qualifier", ""),
+             r["predicate"])].add(norm(r["object_value"]))
     dropped = 0
-    for (uid, pred), rows in by_fact.items():
-        winners = won.get((uid, pred))
+    for (uid, qual, pred), rows in by_fact.items():
+        winners = won.get((uid, qual, pred))
         if not winners:
             continue
         for a in rows:
             if a["polarity"] == "affirm" and a["object_norm"] not in winners:
-                if (uid, pred, a["object_norm"]) not in kept:
+                if (uid, qual, pred, a["object_norm"]) not in kept:
                     dropped += 1
     if dropped:
         fails.append(f"I8 {dropped} losing values were dropped without being "
                      f"written to the conflict table - facts are being "
                      f"destroyed, which is the defect this layer exists to fix")
+
+    # I10: INVERSE UNIQUENESS. An entity may hold many UEIs; a single active
+    # UEI may NOT identify two entities. External review 2026-08-30, finding
+    # 2, and it is the sharpest finding in that review: R00 groups conflicts
+    # BY SUBJECT, so two agents attaching the same UEI to the Native Village
+    # of Elim and to Elim Native Corporation each produce a locally valid,
+    # non-competing assertion. Nothing reaches the conflict table and a
+    # transaction joined through that UEI is assigned twice.
+    #
+    # Measured at the time of the review: 0 violations across 4,069 UEIs,
+    # 2,897 CAGEs and 769 EINs. That was TRUE BY DISCIPLINE, not by
+    # construction - nothing enforced it. This invariant is the construction.
+    # A tier-X (deny) row is excluded: refuting a link is how a wrong one is
+    # withdrawn, and a withdrawn link must not count as a live claim.
+    inverse = defaultdict(set)
+    for a in assertions:
+        if not a["predicate"].startswith("entity.identifier."):
+            continue
+        if a["polarity"] == "deny":
+            continue
+        inverse[(a["predicate"], a["object_norm"])].add(a["cedar_uid"])
+    clashes = {k: v for k, v in inverse.items() if len(v) > 1}
+    if clashes:
+        ex = "; ".join(f"{k[1]} -> {sorted(v)}" for k, v in
+                       list(clashes.items())[:3])
+        fails.append(f"I10 {len(clashes)} identifier(s) bound to MORE THAN ONE "
+                     f"entity - one identifier, two owners, and no conflict "
+                     f"row because multi-valued predicates do not contest "
+                     f"across subjects: {ex}")
 
     # I9: deny assertions survived the round trip.
     n_deny = sum(1 for a in assertions if a["polarity"] == "deny")

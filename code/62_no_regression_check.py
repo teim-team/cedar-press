@@ -591,6 +591,37 @@ def measure_shipping():
             note("docs/schema/dataset_contracts.json missing - run "
                  "512_build_dataset_contracts.py; contract metrics not "
                  "measured")
+        # External review 2026-08-30, findings 3+4. Two metrics, and they
+        # measure DIFFERENT things on purpose:
+        #   identity_facts_legacy_only   selected, but the only evidence is a
+        #                                row with no recorded provenance
+        #   identity_facts_unresolved_tie  we declined to publish a hash
+        #                                winner on an identity-critical fact
+        # The second is a QUEUE and healthy - it is the system refusing to
+        # manufacture certainty. The first is exposure: it must not RISE,
+        # because it is what would ship as fact on no evidence.
+        _rf = CLEAN / "cedar_resolved_facts.csv"
+        if _rf.exists():
+            import csv as _csv2
+            _leg = _tie = 0
+            with _rf.open(encoding="utf-8-sig", newline="") as _fh:
+                for _r in _csv2.DictReader(_fh):
+                    _pred = _r.get("predicate", "")
+                    _crit = any(_pred == _c or _pred.startswith(_c) for _c in (
+                        "entity.class", "entity.canonical_name",
+                        "entity.fr_official_name",
+                        "entity.is_federally_recognized", "entity.parent",
+                        "entity.ultimate_parent", "entity.constituent_band_of",
+                        "entity.identifier.", "entity.state"))
+                    if not _crit:
+                        continue
+                    if _r.get("support_status") == "legacy_only":
+                        _leg += 1
+                    if _r.get("resolution_status") == "UNRESOLVED_TIE":
+                        _tie += 1
+            m["identity_facts_legacy_only"] = _leg
+            m["identity_facts_unresolved_tie"] = _tie
+
         # Phase 4 handoffs (513): a FAILED verification means a claim of
         # completed work was re-executed and DISPROVEN - that is stop-work,
         # not a queue. UNVERIFIED is a queue and only noted.
@@ -1073,6 +1104,9 @@ MUST_NOT_FALL = {
     "keyed_gaming_facilities", "keyed_np_orgs",
     "bridge_native_bills_entity_bridge", "bridge_bill_votes_entity_bridge",
     "bridge_federal_actions_entity_bridge",
+    # External review finding 3: identity-critical facts standing on a row
+    # with no recorded provenance. This may only fall.
+    "identity_facts_legacy_only",
     # SHIPPING. `ship_dist_rows` and `ship_tables_shipping` can only fall if
     # shipping was actively lost - a notes contract deleted, a dist artefact
     # rebuilt smaller, a table un-registered. There is no benign cause, which

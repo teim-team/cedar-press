@@ -3,7 +3,7 @@
 *Paste this whole document into another model (ChatGPT, etc.) and ask it to
 find flaws. It is self-contained: no repository access is needed. Everything
 here is real — the algorithms are the shipped code's logic, the numbers are
-measured, and the weaknesses section is honest. Generated 2026-08-30.*
+measured, and the weaknesses section is honest. Generated 2026-08-29; see docs/EXTERNAL_REVIEW_RESPONSE.md for what a review of this packet found and what changed as a result.*
 
 ---
 
@@ -222,8 +222,11 @@ blind spots?
 ## 6. Honest current weaknesses (do not soften these)
 
 - **Zero single-valued facts have a second independent source.** Across
-  8,975 single-valued facts: 0 have two sources, 0 disagreements found, 38
-  have >1 independent evidence family (mostly structural). The arbitration
+  8,975 single-valued facts: 0 have two sources. **The disagreement rate is
+  therefore UNDEFINED, not zero** - no two sources observe the same fact, so
+  there is nothing to disagree. Exactly **2** facts have >1 independent
+  evidence family (an earlier "38" counted multi-valued registration facts
+  collapsed onto the entity, which was a grain error, not corroboration). The arbitration
   machinery is proven but idle; the FR roster harvest added 565 matches and 0
   corroborations — correctly, because a copy of the FR inside our spine is
   the same evidence family.
