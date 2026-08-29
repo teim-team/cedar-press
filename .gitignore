@@ -113,3 +113,7 @@ data/restricted/
 # Regenerable caches (name says so).
 _profile_cache.json
 *_cache.json
+
+# The consolidated owner-decision queue is a curated document, not scratch -
+# its history shows what was asked and when it was answered.
+!review/OWNER_DECISION_QUEUE.md
