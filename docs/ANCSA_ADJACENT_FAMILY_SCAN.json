@@ -1,0 +1,28 @@
+{
+  "built": "2026-08-26",
+  "ruling": "docs/ANCSA_OWNERSHIP_RULING.md, Elijah 2026-08-26",
+  "script": "code/193_scan_adjacent_families_against_ancsa_ruling.py",
+  "rows_scanned": 540,
+  "by_family_and_verdict": {
+    "CONSTITUENT_BAND_VS_UMBRELLA_TRIBE|NOT_TOUCHED": {
+      "n": 42,
+      "usd_musd": 1297.81
+    },
+    "INTERTRIBAL_ORGANISATION_VS_MEMBER_TRIBE|NOT_TOUCHED": {
+      "n": 9,
+      "usd_musd": 662.88
+    },
+    "MIXED_CLASS|CONSTRAINED_NOT_SETTLED": {
+      "n": 4,
+      "usd_musd": 472.06
+    },
+    "MIXED_CLASS|NOT_TOUCHED": {
+      "n": 297,
+      "usd_musd": 8533.53
+    },
+    "TWO_DIFFERENT_TRIBES_ON_ONE_IDENTIFIER|NOT_TOUCHED": {
+      "n": 188,
+      "usd_musd": 10359.98
+    }
+  }
+}

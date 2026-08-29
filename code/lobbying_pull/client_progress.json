@@ -1,0 +1,1157 @@
+{
+ "tribe": {
+  "count": 671,
+  "next_page": 28,
+  "done": true
+ },
+ "tribal": {
+  "count": 144,
+  "next_page": 7,
+  "done": true
+ },
+ "pueblo": {
+  "count": 91,
+  "next_page": 5,
+  "done": true
+ },
+ "rancheria": {
+  "count": 71,
+  "next_page": 4,
+  "done": true
+ },
+ "band of": {
+  "count": 277,
+  "next_page": 13,
+  "done": true
+ },
+ "indian community": {
+  "count": 86,
+  "next_page": 5,
+  "done": true
+ },
+ "indian nation": {
+  "count": 98,
+  "next_page": 5,
+  "done": true
+ },
+ "alaska native": {
+  "count": 33,
+  "next_page": 3,
+  "done": true
+ },
+ "native hawaiian": {
+  "count": 3,
+  "next_page": 2,
+  "done": true
+ },
+ "village corporation": {
+  "count": 2,
+  "next_page": 2,
+  "done": true
+ },
+ "regional corporation": {
+  "count": 15,
+  "next_page": 2,
+  "done": true
+ },
+ "intertribal": {
+  "count": 10,
+  "next_page": 2,
+  "done": true
+ },
+ "cherokee nation": {
+  "count": 19,
+  "next_page": 2,
+  "done": true
+ },
+ "navajo nation": {
+  "count": 26,
+  "next_page": 3,
+  "done": true
+ },
+ "chickasaw nation": {
+  "count": 15,
+  "next_page": 2,
+  "done": true
+ },
+ "choctaw nation": {
+  "count": 11,
+  "next_page": 2,
+  "done": true
+ },
+ "muscogee": {
+  "count": 16,
+  "next_page": 2,
+  "done": true
+ },
+ "seminole nation": {
+  "count": 3,
+  "next_page": 2,
+  "done": true
+ },
+ "osage nation": {
+  "count": 4,
+  "next_page": 2,
+  "done": true
+ },
+ "mohegan": {
+  "count": 13,
+  "next_page": 2,
+  "done": true
+ },
+ "mashantucket pequot": {
+  "count": 7,
+  "next_page": 2,
+  "done": true
+ },
+ "narragansett": {
+  "count": 4,
+  "next_page": 2,
+  "done": true
+ },
+ "oneida indian": {
+  "count": 17,
+  "next_page": 2,
+  "done": true
+ },
+ "oneida nation": {
+  "count": 13,
+  "next_page": 2,
+  "done": true
+ },
+ "ho-chunk": {
+  "count": 13,
+  "next_page": 2,
+  "done": true
+ },
+ "stockbridge-munsee": {
+  "count": 4,
+  "next_page": 2,
+  "done": true
+ },
+ "saginaw chippewa": {
+  "count": 12,
+  "next_page": 2,
+  "done": true
+ },
+ "sault ste. marie": {
+  "count": 10,
+  "next_page": 2,
+  "done": true
+ },
+ "little traverse": {
+  "count": 3,
+  "next_page": 2,
+  "done": true
+ },
+ "lac du flambeau": {
+  "count": 1,
+  "next_page": 2,
+  "done": true
+ },
+ "lac courte oreilles": {
+  "count": 0,
+  "next_page": 2,
+  "done": true
+ },
+ "menominee": {
+  "count": 2,
+  "next_page": 2,
+  "done": true
+ },
+ "puyallup": {
+  "count": 8,
+  "next_page": 2,
+  "done": true
+ },
+ "tulalip": {
+  "count": 6,
+  "next_page": 2,
+  "done": true
+ },
+ "yakama": {
+  "count": 2,
+  "next_page": 2,
+  "done": true
+ },
+ "colville": {
+  "count": 7,
+  "next_page": 2,
+  "done": true
+ },
+ "muckleshoot": {
+  "count": 9,
+  "next_page": 2,
+  "done": true
+ },
+ "lummi": {
+  "count": 5,
+  "next_page": 2,
+  "done": true
+ },
+ "swinomish": {
+  "count": 4,
+  "next_page": 2,
+  "done": true
+ },
+ "salish": {
+  "count": 13,
+  "next_page": 2,
+  "done": true
+ },
+ "cocopah": {
+  "count": 0,
+  "next_page": 2,
+  "done": true
+ },
+ "havasupai": {
+  "count": 2,
+  "next_page": 2,
+  "done": true
+ },
+ "hualapai": {
+  "count": 8,
+  "next_page": 2,
+  "done": true
+ },
+ "yavapai": {
+  "count": 9,
+  "next_page": 2,
+  "done": true
+ },
+ "white mountain apache": {
+  "count": 5,
+  "next_page": 2,
+  "done": true
+ },
+ "san carlos apache": {
+  "count": 8,
+  "next_page": 2,
+  "done": true
+ },
+ "jicarilla apache": {
+  "count": 5,
+  "next_page": 2,
+  "done": true
+ },
+ "mescalero": {
+  "count": 8,
+  "next_page": 2,
+  "done": true
+ },
+ "fort sill": {
+  "count": 7,
+  "next_page": 2,
+  "done": true
+ },
+ "tohono o'odham": {
+  "count": 13,
+  "next_page": 2,
+  "done": true
+ },
+ "akimel": {
+  "count": 0,
+  "next_page": 2,
+  "done": true
+ },
+ "salt river": {
+  "count": 19,
+  "next_page": 2,
+  "done": true
+ },
+ "ak-chin": {
+  "count": 4,
+  "next_page": 2,
+  "done": true
+ },
+ "gila river": {
+  "count": 10,
+  "next_page": 2,
+  "done": true
+ },
+ "pascua yaqui": {
+  "count": 5,
+  "next_page": 2,
+  "done": true
+ },
+ "fort mojave": {
+  "count": 5,
+  "next_page": 2,
+  "done": true
+ },
+ "colorado river indian": {
+  "count": 4,
+  "next_page": 2,
+  "done": true
+ },
+ "ute mountain": {
+  "count": 4,
+  "next_page": 2,
+  "done": true
+ },
+ "southern ute": {
+  "count": 8,
+  "next_page": 2,
+  "done": true
+ },
+ "uintah": {
+  "count": 3,
+  "next_page": 2,
+  "done": true
+ },
+ "skull valley": {
+  "count": 0,
+  "next_page": 2,
+  "done": true
+ },
+ "shoshone": {
+  "count": 30,
+  "next_page": 3,
+  "done": true
+ },
+ "arapaho": {
+  "count": 22,
+  "next_page": 2,
+  "done": true
+ },
+ "northern cheyenne": {
+  "count": 3,
+  "next_page": 2,
+  "done": true
+ },
+ "fort belknap": {
+  "count": 7,
+  "next_page": 2,
+  "done": true
+ },
+ "fort peck": {
+  "count": 2,
+  "next_page": 2,
+  "done": true
+ },
+ "blackfeet": {
+  "count": 9,
+  "next_page": 2,
+  "done": true
+ },
+ "sisseton-wahpeton": {
+  "count": 4,
+  "next_page": 2,
+  "done": true
+ },
+ "spirit lake": {
+  "count": 2,
+  "next_page": 2,
+  "done": true
+ },
+ "turtle mountain": {
+  "count": 10,
+  "next_page": 2,
+  "done": true
+ },
+ "three affiliated": {
+  "count": 10,
+  "next_page": 2,
+  "done": true
+ },
+ "mandan": {
+  "count": 7,
+  "next_page": 2,
+  "done": true
+ },
+ "hidatsa": {
+  "count": 7,
+  "next_page": 2,
+  "done": true
+ },
+ "arikara": {
+  "count": 6,
+  "next_page": 2,
+  "done": true
+ },
+ "rosebud sioux": {
+  "count": 8,
+  "next_page": 2,
+  "done": true
+ },
+ "oglala sioux": {
+  "count": 6,
+  "next_page": 2,
+  "done": true
+ },
+ "cheyenne river sioux": {
+  "count": 7,
+  "next_page": 2,
+  "done": true
+ },
+ "standing rock": {
+  "count": 4,
+  "next_page": 2,
+  "done": true
+ },
+ "lower brule": {
+  "count": 2,
+  "next_page": 2,
+  "done": true
+ },
+ "crow creek": {
+  "count": 2,
+  "next_page": 2,
+  "done": true
+ },
+ "yankton sioux": {
+  "count": 6,
+  "next_page": 2,
+  "done": true
+ },
+ "santee sioux": {
+  "count": 7,
+  "next_page": 2,
+  "done": true
+ },
+ "winnebago": {
+  "count": 5,
+  "next_page": 2,
+  "done": true
+ },
+ "ponca": {
+  "count": 5,
+  "next_page": 2,
+  "done": true
+ },
+ "kickapoo": {
+  "count": 10,
+  "next_page": 2,
+  "done": true
+ },
+ "potawatomi": {
+  "count": 25,
+  "next_page": 2,
+  "done": true
+ },
+ "sac and fox": {
+  "count": 1,
+  "next_page": 2,
+  "done": true
+ },
+ "sac & fox": {
+  "count": 7,
+  "next_page": 2,
+  "done": true
+ },
+ "absentee shawnee": {
+  "count": 3,
+  "next_page": 2,
+  "done": true
+ },
+ "eastern shawnee": {
+  "count": 4,
+  "next_page": 2,
+  "done": true
+ },
+ "delaware nation": {
+  "count": 1,
+  "next_page": 2,
+  "done": true
+ },
+ "wyandotte": {
+  "count": 14,
+  "next_page": 2,
+  "done": true
+ },
+ "modoc": {
+  "count": 2,
+  "next_page": 2,
+  "done": true
+ },
+ "peoria": {
+  "count": 12,
+  "next_page": 2,
+  "done": true
+ },
+ "quapaw": {
+  "count": 8,
+  "next_page": 2,
+  "done": true
+ },
+ "tonkawa": {
+  "count": 0,
+  "next_page": 2,
+  "done": true
+ },
+ "kaw nation": {
+  "count": 1,
+  "next_page": 2,
+  "done": true
+ },
+ "pawnee": {
+  "count": 0,
+  "next_page": 2,
+  "done": true
+ },
+ "kiowa": {
+  "count": 0,
+  "next_page": 2,
+  "done": true
+ },
+ "comanche": {
+  "count": 1,
+  "next_page": 2,
+  "done": true
+ },
+ "wichita": {
+  "count": 7,
+  "next_page": 2,
+  "done": true
+ },
+ "caddo nation": {
+  "count": 0,
+  "next_page": 2,
+  "done": true
+ },
+ "alabama-coushatta": {
+  "count": 9,
+  "next_page": 2,
+  "done": true
+ },
+ "coushatta": {
+  "count": 18,
+  "next_page": 2,
+  "done": true
+ },
+ "tunica": {
+  "count": 12,
+  "next_page": 2,
+  "done": true
+ },
+ "chitimacha": {
+  "count": 3,
+  "next_page": 2,
+  "done": true
+ },
+ "jena band": {
+  "count": 3,
+  "next_page": 2,
+  "done": true
+ },
+ "passamaquoddy": {
+  "count": 4,
+  "next_page": 2,
+  "done": true
+ },
+ "penobscot": {
+  "count": 7,
+  "next_page": 2,
+  "done": true
+ },
+ "houlton": {
+  "count": 0,
+  "next_page": 2,
+  "done": true
+ },
+ "mi'kmaq": {
+  "count": 0,
+  "next_page": 2,
+  "done": true
+ },
+ "micmac": {
+  "count": 1,
+  "next_page": 2,
+  "done": true
+ },
+ "wampanoag": {
+  "count": 17,
+  "next_page": 2,
+  "done": true
+ },
+ "aquinnah": {
+  "count": 2,
+  "next_page": 2,
+  "done": true
+ },
+ "saint regis mohawk": {
+  "count": 1,
+  "next_page": 2,
+  "done": true
+ },
+ "st regis mohawk": {
+  "count": 6,
+  "next_page": 2,
+  "done": true
+ },
+ "mohawk": {
+  "count": 23,
+  "next_page": 2,
+  "done": true
+ },
+ "tuscarora": {
+  "count": 1,
+  "next_page": 2,
+  "done": true
+ },
+ "seneca nation": {
+  "count": 15,
+  "next_page": 2,
+  "done": true
+ },
+ "cayuga": {
+  "count": 10,
+  "next_page": 2,
+  "done": true
+ },
+ "onondaga": {
+  "count": 1,
+  "next_page": 2,
+  "done": true
+ },
+ "tonawanda": {
+  "count": 1,
+  "next_page": 2,
+  "done": true
+ },
+ "lumbee": {
+  "count": 5,
+  "next_page": 2,
+  "done": true
+ },
+ "catawba": {
+  "count": 10,
+  "next_page": 2,
+  "done": true
+ },
+ "miccosukee": {
+  "count": 17,
+  "next_page": 2,
+  "done": true
+ },
+ "oklahoma seminole": {
+  "count": 2,
+  "next_page": 2,
+  "done": true
+ },
+ "burns paiute": {
+  "count": 2,
+  "next_page": 2,
+  "done": true
+ },
+ "warm springs": {
+  "count": 7,
+  "next_page": 2,
+  "done": true
+ },
+ "umatilla": {
+  "count": 7,
+  "next_page": 2,
+  "done": true
+ },
+ "siletz": {
+  "count": 4,
+  "next_page": 2,
+  "done": true
+ },
+ "grand ronde": {
+  "count": 8,
+  "next_page": 2,
+  "done": true
+ },
+ "coquille": {
+  "count": 8,
+  "next_page": 2,
+  "done": true
+ },
+ "cow creek": {
+  "count": 11,
+  "next_page": 2,
+  "done": true
+ },
+ "coos": {
+  "count": 24,
+  "next_page": 2,
+  "done": true
+ },
+ "nez perce": {
+  "count": 5,
+  "next_page": 2,
+  "done": true
+ },
+ "kalispel": {
+  "count": 14,
+  "next_page": 2,
+  "done": true
+ },
+ "coeur d'alene": {
+  "count": 14,
+  "next_page": 2,
+  "done": true
+ },
+ "kootenai": {
+  "count": 11,
+  "next_page": 2,
+  "done": true
+ },
+ "shoshone-bannock": {
+  "count": 4,
+  "next_page": 2,
+  "done": true
+ },
+ "northwestern band": {
+  "count": 0,
+  "next_page": 2,
+  "done": true
+ },
+ "duckwater": {
+  "count": 3,
+  "next_page": 2,
+  "done": true
+ },
+ "moapa": {
+  "count": 3,
+  "next_page": 2,
+  "done": true
+ },
+ "las vegas paiute": {
+  "count": 6,
+  "next_page": 2,
+  "done": true
+ },
+ "pyramid lake": {
+  "count": 6,
+  "next_page": 2,
+  "done": true
+ },
+ "walker river": {
+  "count": 7,
+  "next_page": 2,
+  "done": true
+ },
+ "fallon": {
+  "count": 10,
+  "next_page": 2,
+  "done": true
+ },
+ "fort independence": {
+  "count": 1,
+  "next_page": 2,
+  "done": true
+ },
+ "bishop": {
+  "count": 19,
+  "next_page": 2,
+  "done": true
+ },
+ "big pine": {
+  "count": 1,
+  "next_page": 2,
+  "done": true
+ },
+ "lone pine": {
+  "count": 1,
+  "next_page": 2,
+  "done": true
+ },
+ "timbisha": {
+  "count": 5,
+  "next_page": 2,
+  "done": true
+ },
+ "morongo": {
+  "count": 5,
+  "next_page": 2,
+  "done": true
+ },
+ "soboba": {
+  "count": 6,
+  "next_page": 2,
+  "done": true
+ },
+ "pala": {
+  "count": 53,
+  "next_page": 4,
+  "done": true
+ },
+ "pauma": {
+  "count": 0,
+  "next_page": 2,
+  "done": true
+ },
+ "rincon": {
+  "count": 0,
+  "next_page": 2,
+  "done": true
+ },
+ "san manuel": {
+  "count": 8,
+  "next_page": 2,
+  "done": true
+ },
+ "san pasqual": {
+  "count": 4,
+  "next_page": 2,
+  "done": true
+ },
+ "santa rosa": {
+  "count": 20,
+  "next_page": 2,
+  "done": true
+ },
+ "santa ynez": {
+  "count": 9,
+  "next_page": 2,
+  "done": true
+ },
+ "sycuan": {
+  "count": 4,
+  "next_page": 2,
+  "done": true
+ },
+ "viejas": {
+  "count": 12,
+  "next_page": 2,
+  "done": true
+ },
+ "barona": {
+  "count": 7,
+  "next_page": 2,
+  "done": true
+ },
+ "manzanita": {
+  "count": 3,
+  "next_page": 2,
+  "done": true
+ },
+ "campo": {
+  "count": 5,
+  "next_page": 2,
+  "done": true
+ },
+ "torres-martinez": {
+  "count": 2,
+  "next_page": 2,
+  "done": true
+ },
+ "twenty-nine palms": {
+  "count": 7,
+  "next_page": 2,
+  "done": true
+ },
+ "augustine": {
+  "count": 16,
+  "next_page": 2,
+  "done": true
+ },
+ "pechanga": {
+  "count": 10,
+  "next_page": 2,
+  "done": true
+ },
+ "agua caliente": {
+  "count": 13,
+  "next_page": 2,
+  "done": true
+ },
+ "cabazon": {
+  "count": 7,
+  "next_page": 2,
+  "done": true
+ },
+ "yurok": {
+  "count": 5,
+  "next_page": 2,
+  "done": true
+ },
+ "hoopa": {
+  "count": 6,
+  "next_page": 2,
+  "done": true
+ },
+ "karuk": {
+  "count": 7,
+  "next_page": 2,
+  "done": true
+ },
+ "tolowa": {
+  "count": 2,
+  "next_page": 2,
+  "done": true
+ },
+ "round valley": {
+  "count": 2,
+  "next_page": 2,
+  "done": true
+ },
+ "pinoleville": {
+  "count": 0,
+  "next_page": 2,
+  "done": true
+ },
+ "sherwood valley": {
+  "count": 0,
+  "next_page": 2,
+  "done": true
+ },
+ "manchester": {
+  "count": 6,
+  "next_page": 2,
+  "done": true
+ },
+ "stewarts point": {
+  "count": 0,
+  "next_page": 2,
+  "done": true
+ },
+ "cher-ae heights": {
+  "count": 0,
+  "next_page": 2,
+  "done": true
+ },
+ "blue lake": {
+  "count": 6,
+  "next_page": 2,
+  "done": true
+ },
+ "robinson": {
+  "count": 35,
+  "next_page": 3,
+  "done": true
+ },
+ "rumsey": {
+  "count": 3,
+  "next_page": 2,
+  "done": true
+ },
+ "yocha dehe": {
+  "count": 7,
+  "next_page": 2,
+  "done": true
+ },
+ "shingle springs": {
+  "count": 4,
+  "next_page": 2,
+  "done": true
+ },
+ "miwok": {
+  "count": 12,
+  "next_page": 2,
+  "done": true
+ },
+ "ione band": {
+  "count": 5,
+  "next_page": 2,
+  "done": true
+ },
+ "buena vista": {
+  "count": 12,
+  "next_page": 2,
+  "done": true
+ },
+ "tule river": {
+  "count": 7,
+  "next_page": 2,
+  "done": true
+ },
+ "hopi": {
+  "count": 16,
+  "next_page": 2,
+  "done": true
+ },
+ "zuni": {
+  "count": 6,
+  "next_page": 2,
+  "done": true
+ },
+ "havasu": {
+  "count": 2,
+  "next_page": 2,
+  "done": true
+ },
+ "calista": {
+  "count": 9,
+  "next_page": 2,
+  "done": true
+ },
+ "doyon": {
+  "count": 10,
+  "next_page": 2,
+  "done": true
+ },
+ "sealaska": {
+  "count": 11,
+  "next_page": 2,
+  "done": true
+ },
+ "ahtna": {
+  "count": 6,
+  "next_page": 2,
+  "done": true
+ },
+ "asrc": {
+  "count": 3,
+  "next_page": 2,
+  "done": true
+ },
+ "arctic slope regional": {
+  "count": 6,
+  "next_page": 2,
+  "done": true
+ },
+ "bering straits": {
+  "count": 4,
+  "next_page": 2,
+  "done": true
+ },
+ "bristol bay": {
+  "count": 16,
+  "next_page": 2,
+  "done": true
+ },
+ "chugach": {
+  "count": 13,
+  "next_page": 2,
+  "done": true
+ },
+ "cook inlet": {
+  "count": 29,
+  "next_page": 3,
+  "done": true
+ },
+ "ciri": {
+  "count": 5,
+  "next_page": 2,
+  "done": true
+ },
+ "koniag": {
+  "count": 6,
+  "next_page": 2,
+  "done": true
+ },
+ "nana": {
+  "count": 10,
+  "next_page": 2,
+  "done": true
+ },
+ "aleut corporation": {
+  "count": 5,
+  "next_page": 2,
+  "done": true
+ },
+ "afognak": {
+  "count": 2,
+  "next_page": 2,
+  "done": true
+ },
+ "alutiiq": {
+  "count": 4,
+  "next_page": 2,
+  "done": true
+ },
+ "ukpeagvik": {
+  "count": 5,
+  "next_page": 2,
+  "done": true
+ },
+ "olgoonik": {
+  "count": 1,
+  "next_page": 2,
+  "done": true
+ },
+ "goldbelt": {
+  "count": 4,
+  "next_page": 2,
+  "done": true
+ },
+ "huna totem": {
+  "count": 1,
+  "next_page": 2,
+  "done": true
+ },
+ "kuskokwim": {
+  "count": 1,
+  "next_page": 2,
+  "done": true
+ },
+ "tanana chiefs": {
+  "count": 4,
+  "next_page": 2,
+  "done": true
+ },
+ "kamehameha schools": {
+  "count": 8,
+  "next_page": 2,
+  "done": true
+ },
+ "office of hawaiian affairs": {
+  "count": 6,
+  "next_page": 2,
+  "done": true
+ },
+ "alu like": {
+  "count": 0,
+  "next_page": 2,
+  "done": true
+ },
+ "papa ola lokahi": {
+  "count": 1,
+  "next_page": 2,
+  "done": true
+ },
+ "alakaina": {
+  "count": 0,
+  "next_page": 2,
+  "done": true
+ },
+ "nakupuna": {
+  "count": 0,
+  "next_page": 2,
+  "done": true
+ },
+ "national congress of american indians": {
+  "count": 1,
+  "next_page": 2,
+  "done": true
+ },
+ "ncai": {
+  "count": 0,
+  "next_page": 2,
+  "done": true
+ },
+ "national indian gaming": {
+  "count": 11,
+  "next_page": 2,
+  "done": true
+ },
+ "alaska federation of natives": {
+  "count": 8,
+  "next_page": 2,
+  "done": true
+ },
+ "native american rights fund": {
+  "count": 6,
+  "next_page": 2,
+  "done": true
+ },
+ "narf": {
+  "count": 0,
+  "next_page": 2,
+  "done": true
+ },
+ "national council of urban indian": {
+  "count": 2,
+  "next_page": 2,
+  "done": true
+ },
+ "indian land tenure": {
+  "count": 1,
+  "next_page": 2,
+  "done": true
+ },
+ "indian health board": {
+  "count": 13,
+  "next_page": 2,
+  "done": true
+ },
+ "self-governance": {
+  "count": 0,
+  "next_page": 2,
+  "done": true
+ }
+}

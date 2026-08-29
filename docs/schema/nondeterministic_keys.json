@@ -1,0 +1,1124 @@
+{
+ "classes": {
+  "BYPASSED_ID_SERVICE": {
+   "severity": "WARN",
+   "why": "mints an id under a prefix `cedar_ids.PREFIXES` owns, without calling `cedar_ids.allocate`. The service takes an exclusive file lock and re-reads the counter from disk so two agents cannot mint the same id; an f-string does neither."
+  },
+  "OBJECT_ADDRESS": {
+   "severity": "BLOCKING",
+   "why": "builtin id() is a memory address, stable only within one process."
+  },
+  "POSITIONAL": {
+   "severity": "WARN",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  "PROCESS_HASH": {
+   "severity": "BLOCKING",
+   "why": "builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build."
+  },
+  "PROCESS_RANDOM": {
+   "severity": "BLOCKING",
+   "why": "uuid4/urandom/unseeded random. A new value every call, by design."
+  },
+  "RANK_DERIVED": {
+   "severity": "BLOCKING",
+   "why": "assigned from a row's RANK among other rows. Shifts by one when any row above it is added, removed or reordered - and the rows above it live in a file another agent can write."
+  },
+  "SET_ITERATION": {
+   "severity": "WARN",
+   "why": "iterates a set while minting ids. Set order is stable within a process and NOT across processes for str/bytes members."
+  }
+ },
+ "findings": [
+  {
+   "affects_clean_tables": [
+    "ca_gaming_facilities_official.csv",
+    "ca_gaming_payments.csv"
+   ],
+   "klass": "OBJECT_ADDRESS",
+   "line": 1211,
+   "mint_prefix": "",
+   "script": "103_build_california_gaming.py",
+   "script_writes": [
+    "103_sdf_local_mitigation_unverified.csv",
+    "103_zone_log.csv",
+    "ca_gaming_facilities_official.csv",
+    "ca_gaming_payments.csv",
+    "ca_gaming_unresolved_%s.csv"
+   ],
+   "severity": "BLOCKING",
+   "snippet": "seed[id(s)] = min(named, key=lambda nf: abs(nf[0] - c))[1]",
+   "target": null,
+   "why": "builtin id() is a memory address, stable only within one process."
+  },
+  {
+   "affects_clean_tables": [
+    "ca_gaming_facilities_official.csv",
+    "ca_gaming_payments.csv"
+   ],
+   "klass": "OBJECT_ADDRESS",
+   "line": 1214,
+   "mint_prefix": "",
+   "script": "103_build_california_gaming.py",
+   "script_writes": [
+    "103_sdf_local_mitigation_unverified.csv",
+    "103_zone_log.csv",
+    "ca_gaming_facilities_official.csv",
+    "ca_gaming_payments.csv",
+    "ca_gaming_unresolved_%s.csv"
+   ],
+   "severity": "BLOCKING",
+   "snippet": "f = seed[id(s)]",
+   "target": null,
+   "why": "builtin id() is a memory address, stable only within one process."
+  },
+  {
+   "affects_clean_tables": [
+    "ca_gaming_facilities_official.csv",
+    "ca_gaming_payments.csv"
+   ],
+   "klass": "OBJECT_ADDRESS",
+   "line": 1223,
+   "mint_prefix": "",
+   "script": "103_build_california_gaming.py",
+   "script_writes": [
+    "103_sdf_local_mitigation_unverified.csv",
+    "103_zone_log.csv",
+    "ca_gaming_facilities_official.csv",
+    "ca_gaming_payments.csv",
+    "ca_gaming_unresolved_%s.csv"
+   ],
+   "severity": "BLOCKING",
+   "snippet": "out[id(s)] = f",
+   "target": null,
+   "why": "builtin id() is a memory address, stable only within one process."
+  },
+  {
+   "affects_clean_tables": [
+    "ca_gaming_facilities_official.csv",
+    "ca_gaming_payments.csv"
+   ],
+   "klass": "OBJECT_ADDRESS",
+   "line": 1281,
+   "mint_prefix": "",
+   "script": "103_build_california_gaming.py",
+   "script_writes": [
+    "103_sdf_local_mitigation_unverified.csv",
+    "103_zone_log.csv",
+    "ca_gaming_facilities_official.csv",
+    "ca_gaming_payments.csv",
+    "ca_gaming_unresolved_%s.csv"
+   ],
+   "severity": "BLOCKING",
+   "snippet": "recs[j][fmap[id(s)]].append(s)",
+   "target": null,
+   "why": "builtin id() is a memory address, stable only within one process."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "PROCESS_HASH",
+   "line": 1832,
+   "mint_prefix": "FERC-",
+   "script": "133_build_ferc_advocacy.py",
+   "script_writes": [],
+   "severity": "BLOCKING",
+   "snippet": "\"ferc_filing_id\": f\"FERC-{d}-{sub}-{acc}-\"",
+   "target": "ferc_filing_id",
+   "why": "builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "PROCESS_HASH",
+   "line": 1833,
+   "mint_prefix": "",
+   "script": "133_build_ferc_advocacy.py",
+   "script_writes": [],
+   "severity": "BLOCKING",
+   "snippet": "f\"{abs(hash(aff)) % 10000:04d}\",",
+   "target": null,
+   "why": "builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "PROCESS_RANDOM",
+   "line": 372,
+   "mint_prefix": "",
+   "script": "143_build_gaming_property_locations.py",
+   "script_writes": [],
+   "severity": "BLOCKING",
+   "snippet": "b = \"----cedar\" + uuid.uuid4().hex",
+   "target": null,
+   "why": "uuid4/urandom/unseeded random. A new value every call, by design."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "RANK_DERIVED",
+   "line": 482,
+   "mint_prefix": "INV-",
+   "script": "170_build_individual_native_candidates.py",
+   "script_writes": [],
+   "severity": "BLOCKING",
+   "snippet": "\"verification_id\": f\"INV-{rank:04d}\",",
+   "target": "verification_id",
+   "why": "assigned from a row's RANK among other rows. Shifts by one when any row above it is added, removed or reordered - and the rows above it live in a file another agent can write."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "OBJECT_ADDRESS",
+   "line": 486,
+   "mint_prefix": "",
+   "script": "171_build_individual_native_verification.py",
+   "script_writes": [],
+   "severity": "BLOCKING",
+   "snippet": "used_web.add(id(w))",
+   "target": null,
+   "why": "builtin id() is a memory address, stable only within one process."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "PROCESS_HASH",
+   "line": 1034,
+   "mint_prefix": "",
+   "script": "227_anomaly_sweep.py",
+   "script_writes": [],
+   "severity": "BLOCKING",
+   "snippet": "k = hash(tuple(row[i] for i in dup_idx))",
+   "target": null,
+   "why": "builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "OBJECT_ADDRESS",
+   "line": 199,
+   "mint_prefix": "",
+   "script": "293_lint_bug_classes.py",
+   "script_writes": [],
+   "severity": "BLOCKING",
+   "snippet": "owner[id(s)] = block",
+   "target": null,
+   "why": "builtin id() is a memory address, stable only within one process."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "OBJECT_ADDRESS",
+   "line": 465,
+   "mint_prefix": "",
+   "script": "293_lint_bug_classes.py",
+   "script_writes": [],
+   "severity": "BLOCKING",
+   "snippet": "block = owner.get(id(n))",
+   "target": null,
+   "why": "builtin id() is a memory address, stable only within one process."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "OBJECT_ADDRESS",
+   "line": 598,
+   "mint_prefix": "",
+   "script": "84_build_nigc_regions.py",
+   "script_writes": [],
+   "severity": "BLOCKING",
+   "snippet": "matched_f = {id(p[0]) for p in pairs}",
+   "target": null,
+   "why": "builtin id() is a memory address, stable only within one process."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "OBJECT_ADDRESS",
+   "line": 605,
+   "mint_prefix": "",
+   "script": "84_build_nigc_regions.py",
+   "script_writes": [],
+   "severity": "BLOCKING",
+   "snippet": "if id(r) not in matched_f]",
+   "target": null,
+   "why": "builtin id() is a memory address, stable only within one process."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "OBJECT_ADDRESS",
+   "line": 620,
+   "mint_prefix": "",
+   "script": "84_build_nigc_regions.py",
+   "script_writes": [],
+   "severity": "BLOCKING",
+   "snippet": "matched_f.add(id(r))",
+   "target": null,
+   "why": "builtin id() is a memory address, stable only within one process."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "OBJECT_ADDRESS",
+   "line": 853,
+   "mint_prefix": "",
+   "script": "85_build_admin_region_crosswalk.py",
+   "script_writes": [
+    "admin_region_missing_bia.csv"
+   ],
+   "severity": "BLOCKING",
+   "snippet": "uniq = {id(a): a for a in agency_rows.values()}",
+   "target": null,
+   "why": "builtin id() is a memory address, stable only within one process."
+  },
+  {
+   "affects_clean_tables": [
+    "np_orgs.csv"
+   ],
+   "klass": "PROCESS_HASH",
+   "line": 1887,
+   "mint_prefix": "",
+   "script": "99_build_earmarks_and_schedc.py",
+   "script_writes": [
+    "np_orgs.csv"
+   ],
+   "severity": "BLOCKING",
+   "snippet": "\"earmark_id\": f\"EMK-E{fy}-{abs(hash(p.stem)) % 10**6}-{n:05d}\",",
+   "target": null,
+   "why": "builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build."
+  },
+  {
+   "affects_clean_tables": [
+    "np_orgs.csv"
+   ],
+   "klass": "OBJECT_ADDRESS",
+   "line": 1957,
+   "mint_prefix": "",
+   "script": "99_build_earmarks_and_schedc.py",
+   "script_writes": [
+    "np_orgs.csv"
+   ],
+   "severity": "BLOCKING",
+   "snippet": "joined[id(rs[0])] = es[0]",
+   "target": null,
+   "why": "builtin id() is a memory address, stable only within one process."
+  },
+  {
+   "affects_clean_tables": [
+    "np_orgs.csv"
+   ],
+   "klass": "OBJECT_ADDRESS",
+   "line": 1958,
+   "mint_prefix": "",
+   "script": "99_build_earmarks_and_schedc.py",
+   "script_writes": [
+    "np_orgs.csv"
+   ],
+   "severity": "BLOCKING",
+   "snippet": "joined[id(es[0])] = None          # consumed; drop the standalone",
+   "target": null,
+   "why": "builtin id() is a memory address, stable only within one process."
+  },
+  {
+   "affects_clean_tables": [
+    "np_orgs.csv"
+   ],
+   "klass": "OBJECT_ADDRESS",
+   "line": 1967,
+   "mint_prefix": "",
+   "script": "99_build_earmarks_and_schedc.py",
+   "script_writes": [
+    "np_orgs.csv"
+   ],
+   "severity": "BLOCKING",
+   "snippet": "if id(s) in joined and joined[id(s)] is None:",
+   "target": null,
+   "why": "builtin id() is a memory address, stable only within one process."
+  },
+  {
+   "affects_clean_tables": [
+    "np_orgs.csv"
+   ],
+   "klass": "OBJECT_ADDRESS",
+   "line": 2006,
+   "mint_prefix": "",
+   "script": "99_build_earmarks_and_schedc.py",
+   "script_writes": [
+    "np_orgs.csv"
+   ],
+   "severity": "BLOCKING",
+   "snippet": "e = joined.get(id(s))",
+   "target": null,
+   "why": "builtin id() is a memory address, stable only within one process."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 269,
+   "mint_prefix": "RV-",
+   "script": "01_build_entity_spine.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "r[\"review_id\"] = f\"RV-{i:05d}\"",
+   "target": "review_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 116,
+   "mint_prefix": "EXCL-",
+   "script": "02_extract_exclusion_rulings.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "r[\"exclusion_id\"] = f\"EXCL-{i:04d}\"",
+   "target": "exclusion_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 90,
+   "mint_prefix": "NHO-DOI-",
+   "script": "05_parse_doi_nho_list.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "r[\"nho_id\"] = f\"NHO-DOI-{i:04d}\"",
+   "target": "nho_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 163,
+   "mint_prefix": "ANC-",
+   "script": "07_parse_ancsa_ceiling.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "r[\"anc_id\"] = f\"ANC-{i:04d}\"",
+   "target": "anc_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 941,
+   "mint_prefix": "OCRCLM-",
+   "script": "100_finish_declinations_and_employment.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"candidate_claim_id\": f\"OCRCLM-{len(ocr_claims)+1:05d}\",",
+   "target": "candidate_claim_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 1216,
+   "mint_prefix": "DLC-",
+   "script": "100_finish_declinations_and_employment.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"pair_id\": f\"DLC-{len(out)+1:04d}\", \"deal_id\": d[\"Deal_ID\"],",
+   "target": "pair_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 1361,
+   "mint_prefix": "DLC-",
+   "script": "100_finish_declinations_and_employment.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"pair_id\": f\"DLC-{len(out)+1:04d}\", \"deal_id\": d[\"Deal_ID\"],",
+   "target": "pair_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 1420,
+   "mint_prefix": "DLC-",
+   "script": "100_finish_declinations_and_employment.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"pair_id\": f\"DLC-{len(out)+1:04d}\", \"deal_id\": \"\",",
+   "target": "pair_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 1580,
+   "mint_prefix": "EMP-OSHA-",
+   "script": "100_finish_declinations_and_employment.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"observation_id\": f\"EMP-OSHA-{len(out)+1:06d}\",",
+   "target": "observation_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 1673,
+   "mint_prefix": "EMP-LODES-",
+   "script": "100_finish_declinations_and_employment.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"observation_id\": f\"EMP-LODES-{n:06d}\",",
+   "target": "observation_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 1894,
+   "mint_prefix": "EMP-DOC-",
+   "script": "100_finish_declinations_and_employment.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"observation_id\": f\"EMP-DOC-{n+1:06d}\",",
+   "target": "observation_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 1953,
+   "mint_prefix": "EMP-EA-",
+   "script": "100_finish_declinations_and_employment.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"observation_id\": f\"EMP-EA-{n:06d}\",",
+   "target": "observation_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 629,
+   "mint_prefix": "WAALLOC-",
+   "script": "104_build_wa_allocations.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "allocation_id=f\"WAALLOC-{n:04d}\",",
+   "target": "allocation_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 308,
+   "mint_prefix": "NIGCBAND-",
+   "script": "106_build_revenue_bounds.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"band_id\": f\"NIGCBAND-{fy}-{i+1}\",",
+   "target": "band_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [
+    "state_gaming_observations.csv"
+   ],
+   "klass": "POSITIONAL",
+   "line": 991,
+   "mint_prefix": "SG-",
+   "script": "107_pull_remaining_states.py",
+   "script_writes": [
+    "state_gaming_observations.csv"
+   ],
+   "severity": "WARN",
+   "snippet": "r[\"observation_id\"] = f\"SG-{st}-{seq[st]:05d}\"",
+   "target": "observation_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 961,
+   "mint_prefix": "PT-",
+   "script": "111_build_advocacy_passthrough.py",
+   "script_writes": [
+    "agent_native_org_candidates_philanthropy_2026-08-06.csv"
+   ],
+   "severity": "WARN",
+   "snippet": "review_id=f\"PT-{n:05d}\", queue=\"advocacy_passthrough\",",
+   "target": "review_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 975,
+   "mint_prefix": "PT-",
+   "script": "111_build_advocacy_passthrough.py",
+   "script_writes": [
+    "agent_native_org_candidates_philanthropy_2026-08-06.csv"
+   ],
+   "severity": "WARN",
+   "snippet": "passthrough_id=f\"PT-{n:05d}\",",
+   "target": "passthrough_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 1031,
+   "mint_prefix": "PT-",
+   "script": "111_build_advocacy_passthrough.py",
+   "script_writes": [
+    "agent_native_org_candidates_philanthropy_2026-08-06.csv"
+   ],
+   "severity": "WARN",
+   "snippet": "passthrough_id=f\"PT-{n:05d}\", funder_entity_id=\"\", funder_name=\"\",",
+   "target": "passthrough_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 1052,
+   "mint_prefix": "PT-",
+   "script": "111_build_advocacy_passthrough.py",
+   "script_writes": [
+    "agent_native_org_candidates_philanthropy_2026-08-06.csv"
+   ],
+   "severity": "WARN",
+   "snippet": "review_id=f\"PT-{n:05d}\", queue=\"advocacy_passthrough\",",
+   "target": "review_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 576,
+   "mint_prefix": "GMF-",
+   "script": "117_build_gaming_devices.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"fact_id\": f\"GMF-{seq:05d}\",",
+   "target": "fact_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 623,
+   "mint_prefix": "GMF-",
+   "script": "117_build_gaming_devices.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "f[\"fact_id\"] = f\"GMF-{i:05d}\"",
+   "target": "fact_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 295,
+   "mint_prefix": "NIGC-ORD-",
+   "script": "118_build_gaming_ordinances.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "r[\"ordinance_id\"] = (f\"NIGC-ORD-{r['index_date'].replace('-', '')}\"",
+   "target": "ordinance_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 830,
+   "mint_prefix": "S106P-FR-",
+   "script": "130_build_section_106_consultation.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"party_id\": f\"S106P-FR-{dn}-{len(parties)}\",",
+   "target": "party_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 974,
+   "mint_prefix": "S106-FR-",
+   "script": "130_build_section_106_consultation.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"consultation_event_id\": f\"S106-FR-{dn}-{i}\",",
+   "target": "consultation_event_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 1031,
+   "mint_prefix": "RASL-",
+   "script": "135_build_resource_assets.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"proposal_id\": f\"RASL-{len(props)+1:04d}\",",
+   "target": "proposal_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 1070,
+   "mint_prefix": "RASL-",
+   "script": "135_build_resource_assets.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"proposal_id\": f\"RASL-{len(props)+1:04d}\",",
+   "target": "proposal_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 1317,
+   "mint_prefix": "",
+   "script": "140_build_grantmaker_funding_flows.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "flow_id=f\"{oid}-{i:05d}\",",
+   "target": "flow_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 953,
+   "mint_prefix": "GLOC-",
+   "script": "143_build_gaming_property_locations.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "r[\"location_observation_id\"] = f\"GLOC-{pid}-{seq[pid]:02d}\"",
+   "target": "location_observation_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 1353,
+   "mint_prefix": "FREXPU-",
+   "script": "154_build_fr_ex_parte_notices.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"candidate_id\": f\"FREXPU-{dn}-{len(unresolved)}\",",
+   "target": "candidate_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 1442,
+   "mint_prefix": "FREXPU-",
+   "script": "154_build_fr_ex_parte_notices.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"candidate_id\": f\"FREXPU-{dn}-{j}\",",
+   "target": "candidate_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 208,
+   "mint_prefix": "EMP-F5500-",
+   "script": "156_stage_form5500_gaming_employment.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"observation_id\": f\"EMP-F5500-{n:06d}\",",
+   "target": "observation_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 506,
+   "mint_prefix": "EMP-OSHATRIBE-",
+   "script": "157_stage_osha_tribe_level_employment.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"observation_id\": f\"EMP-OSHATRIBE-{n:05d}\",",
+   "target": "observation_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [
+    "compact_events.csv",
+    "compact_versions.csv",
+    "compacts.csv"
+   ],
+   "klass": "POSITIONAL",
+   "line": 262,
+   "mint_prefix": "EVT-",
+   "script": "15b_build_compact_index.py",
+   "script_writes": [
+    "compact_events.csv",
+    "compact_versions.csv",
+    "compacts.csv"
+   ],
+   "severity": "WARN",
+   "snippet": "event_id=f\"EVT-{st}-{tribe_slug}-{r['date_iso'].replace('-','')}-{len(events)+1:04d}\",",
+   "target": "event_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 753,
+   "mint_prefix": "FDP-",
+   "script": "168_link_adjudication_hubs.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"ferc_docket_party_id\": f\"FDP-{len(hub) + 1:06d}\",",
+   "target": "ferc_docket_party_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 786,
+   "mint_prefix": "FDP-",
+   "script": "168_link_adjudication_hubs.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"ferc_docket_party_id\": f\"FDP-{len(hub) + 1:06d}\",",
+   "target": "ferc_docket_party_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [
+    "gaming_decision_events.csv",
+    "gaming_land_decisions.csv"
+   ],
+   "klass": "POSITIONAL",
+   "line": 380,
+   "mint_prefix": "",
+   "script": "23b_build_gaming_land_decisions.py",
+   "script_writes": [
+    "gaming_decision_events.csv",
+    "gaming_land_decisions.csv"
+   ],
+   "severity": "WARN",
+   "snippet": "event_id=f\"{did}-E{len([e for e in events if e['decision_id']==did]) + 1:02d}\",",
+   "target": "event_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 1406,
+   "mint_prefix": "NHOIT-",
+   "script": "36_build_nho_intertribal.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "rq.append({\"review_id\": f\"NHOIT-{i:03d}\", **r})",
+   "target": "review_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 496,
+   "mint_prefix": "OWN-NHO-2026-",
+   "script": "61_add_nho_intertribal_to_spine.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"event_id\": f\"OWN-NHO-2026-{i:03d}\",",
+   "target": "event_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 441,
+   "mint_prefix": "RRE-ONRR-REV-",
+   "script": "83_build_resource_ledger.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"resource_revenue_event_id\": f\"RRE-ONRR-REV-{i:06d}\",",
+   "target": "resource_revenue_event_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 515,
+   "mint_prefix": "RRE-ONRR-DISB-",
+   "script": "83_build_resource_ledger.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"resource_revenue_event_id\": f\"RRE-ONRR-DISB-{fy}-{seq[fy]:02d}\",",
+   "target": "resource_revenue_event_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 524,
+   "mint_prefix": "FY",
+   "script": "83_build_resource_ledger.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"source_record_id\": f\"FY{fy}|Native American tribes and individuals|\"",
+   "target": "source_record_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 1420,
+   "mint_prefix": "RESOURCE:",
+   "script": "83_build_resource_ledger.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"review_id\": f\"RESOURCE:{code}:BAD_MEASUREMENT_STATUS:{seq}\",",
+   "target": "review_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 2574,
+   "mint_prefix": "CEDAR-",
+   "script": "83_build_resource_ledger.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "\"resource_asset_id\": f\"CEDAR-{kind}-{i:06d}\",",
+   "target": "resource_asset_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "BYPASSED_ID_SERVICE",
+   "line": 194,
+   "mint_prefix": "",
+   "script": "84_build_nigc_regions.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "ADMREG[(_s[\"version\"], _r)] = f\"CEDAR-ADMREG-{_n:06d}\"",
+   "target": "CEDAR-ADMREG",
+   "why": "mints an id under a prefix `cedar_ids.PREFIXES` owns, without calling `cedar_ids.allocate`. The service takes an exclusive file lock and re-reads the counter from disk so two agents cannot mint the same id; an f-string does neither."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "BYPASSED_ID_SERVICE",
+   "line": 644,
+   "mint_prefix": "",
+   "script": "85_build_admin_region_crosswalk.py",
+   "script_writes": [
+    "admin_region_missing_bia.csv"
+   ],
+   "severity": "WARN",
+   "snippet": "return f\"CEDAR-ADMREG-{v:06d}\"",
+   "target": "CEDAR-ADMREG",
+   "why": "mints an id under a prefix `cedar_ids.PREFIXES` owns, without calling `cedar_ids.allocate`. The service takes an exclusive file lock and re-reads the counter from disk so two agents cannot mint the same id; an f-string does neither."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 743,
+   "mint_prefix": "CEDAR-ADMOBS-",
+   "script": "85_build_admin_region_crosswalk.py",
+   "script_writes": [
+    "admin_region_missing_bia.csv"
+   ],
+   "severity": "WARN",
+   "snippet": "\"observation_id\": f\"CEDAR-ADMOBS-{len(observations)+1:06d}\",",
+   "target": "observation_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "BYPASSED_ID_SERVICE",
+   "line": 1333,
+   "mint_prefix": "",
+   "script": "85_build_admin_region_crosswalk.py",
+   "script_writes": [
+    "admin_region_missing_bia.csv"
+   ],
+   "severity": "WARN",
+   "snippet": "id_block_start=f\"CEDAR-ADMREG-{lo:06d}\",",
+   "target": "CEDAR-ADMREG",
+   "why": "mints an id under a prefix `cedar_ids.PREFIXES` owns, without calling `cedar_ids.allocate`. The service takes an exclusive file lock and re-reads the counter from disk so two agents cannot mint the same id; an f-string does neither."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "BYPASSED_ID_SERVICE",
+   "line": 1334,
+   "mint_prefix": "",
+   "script": "85_build_admin_region_crosswalk.py",
+   "script_writes": [
+    "admin_region_missing_bia.csv"
+   ],
+   "severity": "WARN",
+   "snippet": "id_block_end=f\"CEDAR-ADMREG-{hi:06d}\",",
+   "target": "CEDAR-ADMREG",
+   "why": "mints an id under a prefix `cedar_ids.PREFIXES` owns, without calling `cedar_ids.allocate`. The service takes an exclusive file lock and re-reads the counter from disk so two agents cannot mint the same id; an f-string does neither."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 209,
+   "mint_prefix": "NIGC-DL-",
+   "script": "90_fetch_nigc_declinations.py",
+   "script_writes": [
+    "declination_letters_index.csv"
+   ],
+   "severity": "WARN",
+   "snippet": "r[\"cedar_opinion_id\"] = f\"NIGC-DL-{r['index_date'].replace('-', '')}-{n:02d}\"",
+   "target": "cedar_opinion_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 382,
+   "mint_prefix": "GCO-",
+   "script": "92_build_gaming_capacity_official.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "k[\"observation_id\"] = f\"GCO-{src}-{seq[src]:05d}\"",
+   "target": "observation_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 1472,
+   "mint_prefix": "CPU-",
+   "script": "95_parse_compact_terms.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "review_id=f\"CPU-{v['version_id']}-{n['term_field']}-{n['source_page']}\",",
+   "target": "review_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 1560,
+   "mint_prefix": "CTM-",
+   "script": "95_parse_compact_terms.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "term_id=f\"CTM-{v['version_id']}-{j:04d}\",",
+   "target": "term_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [],
+   "klass": "POSITIONAL",
+   "line": 1614,
+   "mint_prefix": "CRR-",
+   "script": "95_parse_compact_terms.py",
+   "script_writes": [],
+   "severity": "WARN",
+   "snippet": "report_id=f\"CRR-{v['version_id']}-{j:04d}\",",
+   "target": "report_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [
+    "np_orgs.csv"
+   ],
+   "klass": "POSITIONAL",
+   "line": 1626,
+   "mint_prefix": "EMK-H",
+   "script": "99_build_earmarks_and_schedc.py",
+   "script_writes": [
+    "np_orgs.csv"
+   ],
+   "severity": "WARN",
+   "snippet": "\"earmark_id\": f\"EMK-H{fy}-{n+1:05d}\",",
+   "target": "earmark_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  },
+  {
+   "affects_clean_tables": [
+    "np_orgs.csv"
+   ],
+   "klass": "POSITIONAL",
+   "line": 1661,
+   "mint_prefix": "EMK-S",
+   "script": "99_build_earmarks_and_schedc.py",
+   "script_writes": [
+    "np_orgs.csv"
+   ],
+   "severity": "WARN",
+   "snippet": "\"earmark_id\": f\"EMK-S{fy}-{n+1:05d}\",",
+   "target": "earmark_id",
+   "why": "assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed."
+  }
+ ],
+ "generated": "2026-08-26",
+ "hand_ruled": {
+  "non_deterministic": {
+   "earmarks.csv": {
+    "earmark_id": {
+     "cause": "abs(hash(p.stem)) % 10**6 in the EXPLANATORY-statement branch only (the H and S branches are positional)",
+     "fix": "surrogate_id('EMK', row, join_instead)",
+     "join_instead": [
+      "fiscal_year",
+      "chamber",
+      "requesting_member",
+      "recipient_name",
+      "project_title",
+      "amount_enacted"
+     ],
+     "measured": "not measured across builds - the E-branch rows are the only ones affected; H/S rows are positional, which is a different and lesser defect",
+     "producer": "99_build_earmarks_and_schedc.py:1887",
+     "severity": "BLOCKING",
+     "why_unstable": "same PYTHONHASHSEED defect as ferc_filing_id, found 2026-08-26 by 284_audit_nondeterministic_keys.py and NOT previously recorded anywhere"
+    }
+   },
+   "ferc_docket_filings.csv": {
+    "ferc_filing_id": {
+     "cause": "abs(hash(filer_organization)) % 10000",
+     "fix": "surrogate_id('FERCFIL', row, join_instead)",
+     "join_instead": [
+      "docket_number",
+      "accession_number",
+      "filer_organization_as_recorded"
+     ],
+     "measured": "4 of 2,534 documents shared between the 2026-08-12 and 2026-08-26 files kept their id",
+     "producer": "133_build_ferc_advocacy.py:1833",
+     "severity": "BLOCKING",
+     "why_unstable": "Python randomises string hashing per process (PYTHONHASHSEED); the same document gets a new id in every build"
+    }
+   }
+  },
+  "privacy_surrogate": {
+   "individual_native_firm_contracts.csv": {
+    "natural_key_internal": [
+     "awardee_uei",
+     "piid",
+     "modification_number"
+    ],
+    "policy": "cedar_domain.may_publish_individual_native_field",
+    "prefix": "INF",
+    "published_key": "surrogate_entity_id",
+    "salt": null,
+    "why": "same one-hop exposure; the contract facts publish, the identifier that resolves to a person does not"
+   },
+   "individual_native_firm_register.csv": {
+    "natural_key_internal": [
+     "awardee_uei"
+    ],
+    "policy": "cedar_domain.may_publish_individual_native_field",
+    "prefix": "INF",
+    "published_key": "surrogate_entity_id",
+    "salt": null,
+    "salt_note": "NO SALT. A salt that is not persisted makes the key non-deterministic - the defect this module exists to kill. A salt that IS persisted is recoverable by anyone holding the file. The protection here is that the UEI column never ships, not that the digest is secret; say so plainly rather than implying more.",
+    "why": "SAM's public entity search resolves a UEI to a legal name and a street address. For a firm whose legal name IS a person's name, publishing the UEI publishes the person by one hop. cedar_domain already withholds awardee_uei and cage_code for exactly this reason; the primary key must obey the same rule or it reintroduces what the field policy removed."
+   }
+  },
+  "rank_derived": {
+   "individual_native_firm_register.csv": {
+    "verification_id": {
+     "cause": "INV-{rank:04d}, assigned in descending obligation order",
+     "join_instead": "SEE PRIVACY_SURROGATE - this table may not be keyed on its natural key either",
+     "producer": "170_build_individual_native_candidates.py:482",
+     "recorded_at": "171_build_individual_native_verification.py:338",
+     "severity": "BLOCKING",
+     "why_unstable": "a concurrent agent rewrote prime_contracts.csv, every rank below the change shifted by one, and INV-0307 briefly carried another firm's ownership sentence"
+    }
+   }
+  }
+ },
+ "produced_by": "284_audit_nondeterministic_keys.py"
+}

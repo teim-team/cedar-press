@@ -1,0 +1,102 @@
+# Cedar Press - what git tracks and what it does not.
+#
+# THE RULE: git tracks SOURCE. Code, prose, schemas, manifests, contracts,
+# and the identity register. Everything that is CONTENT stays out.
+#
+# Content is versioned by checksum, not by git: run manifests carry input and
+# output logical checksums, and retired data is MOVEd to graveyard/ rather than
+# deleted, so the history git would provide already exists elsewhere and is
+# stronger (it survives a file being rewritten in place). Putting multi-GB
+# tables in git would version bytes we already version, and would make the
+# repo unusable for the agents that have to clone it.
+#
+# Content is identified by EXTENSION ANYWHERE, not by directory, because data
+# in this project does not stay in data/ - there are 2.5 GB of raw dumps in
+# "Federal Spending/", 21 MB of scraped text in code/ancsa_portal/txt/, and
+# loose .dta files at the repo root. A directory-based rule misses all three.
+# Anything genuinely source-like that happens to carry a data extension is
+# re-included by name in the ALLOWLIST at the bottom.
+
+# --- whole trees that are outputs. These are excluded as DIRECTORIES so git
+#     never walks them: data/ alone is 38 GB, and an extension-only rule still
+#     makes git descend into every folder looking for the files it does track.
+#     (Measured: extension-only staged 17,595 files and did not finish.) ---
+/data/*
+dist/
+logs/
+review/
+graveyard/
+
+# --- content, by extension, at any depth ---
+*.csv
+*.tsv
+*.dta
+*.sav
+*.xlsx
+*.xls
+*.parquet
+*.jsonl
+*.ndjson
+*.bin
+*.zip
+*.gz
+*.7z
+*.pdf
+*.txt
+*.shp
+*.dbf
+*.shx
+*.prj
+*.gpkg
+*.geojson
+*.db
+*.sqlite
+*.sqlite3
+
+# --- never-commit noise ---
+__pycache__/
+*.py[cod]
+*.bak_*
+*.part
+*.tmp
+.venv/
+.env
+.env.local
+*.egg-info/
+.DS_Store
+Thumbs.db
+
+# --- licensed / restricted material must never enter version control,
+#     regardless of extension or of any allowlist entry below ---
+data/restricted/
+**/restricted/
+
+# =====================================================================
+# ALLOWLIST - source-like files that carry a content extension.
+# Must come last: in gitignore the LAST matching rule wins.
+# Keep this list short. If it grows, the thing being added is probably
+# data, and the answer is a checksum in a manifest, not a git blob.
+# =====================================================================
+
+# The identity register: the canonical CE-XXXXX-CC assignments. This is the
+# one table that IS source - every other table in the project references it,
+# and a silent change to it would be undetectable without git history.
+# git cannot re-include a file whose PARENT DIRECTORY is excluded, so the
+# path has to be walked back down one level at a time: allow the spine dir,
+# re-exclude its contents, then allow the one file.
+!/data/spine/
+/data/spine/*
+!/data/spine/cedar_identity_register.csv
+
+# Reports and audit evidence that live in docs/ - small, prose-adjacent,
+# and meaningless without the commit they describe.
+!docs/**/*.csv
+!docs/**/*.txt
+
+# Requirements / lockfiles, wherever they turn up.
+!requirements*.txt
+!constraints*.txt
+
+# Regenerable caches (name says so).
+_profile_cache.json
+*_cache.json

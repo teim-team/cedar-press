@@ -1,0 +1,70 @@
+# Dataset 3 — Federal Funding (Assistance)
+
+*Maintenance doc. Generated 2026-08-28. Tier: **Cedar Press ($500) - Federal Funding to Indian Country***
+
+## What this is
+
+Grants, direct payments and other assistance to Native entities, built as an attribution LAYER over the raw transaction spine.
+
+## Files
+
+| File | Rows | Size |
+|---|---:|---:|
+| `data/clean/federal_funding_transactions.csv` | 701,955 | 508 MB |
+| `data/clean/federal_funding_tribe_year_panel.csv` | 5,496 | 712 KB |
+| `data/clean/funding_identifier_harvest.csv` | 37,704 | 5 MB |
+
+## Refresh
+
+**Cadence:** `data/clean/federal_funding_transactions.csv` is still SPINE ONLY — 476,924 rows ending `action_date` 2023-04-05. The 2023-04-06 → 2026-07-31 forward fill (136,301 rows) is retrieved and staged at `data/raw/federal_funding/usaspending_2023_2026/` but NOT merged; read its `_SOURCE.md` before merging (112-col vs 105-col schema, congressional district split into `_original`/`_current` and NOT value-identical). Credit types 07/08/09 for FY2007–2023-04-05 are still outstanding — see the credit-programme rules below.
+
+**Build:** `code/24_funding_merge.py (MR-1..MR-8)`
+
+Run `py -3 code/00_run_all.py --list` to see pipeline stages.
+
+## NEVER do these
+
+- **NEVER ADD LOAN DOLLARS TO OBLIGATIONS.** A $10M loan guarantee is not $10M of federal outlay — the subsidy cost is. USAspending carries three separate money fields and they are not interchangeable: `federal_action_obligation` (grants and direct payments), `face_value_of_loan` (the principal the borrower receives), and `original_loan_subsidy_cost` (what the loan actually costs the government, and the ONLY one commensurable with an obligation). This is measured, not theorised: of the 6 direct-loan (`07`) transactions already retrieved in the 2026-08-05 forward fill, **all 6 carry `federal_action_obligation` = 0.00 exactly**, against $171,416,169.27 of face value and $40,224,977.47 of subsidy cost. Summing face value into an obligations series would invent $171.4M of federal spending out of six rows that report zero. Report face value and subsidy cost in their OWN columns, never pooled, and label any combined figure explicitly.
+- **NEVER read `obl_type_07_direct_loan` / `_08_guaranteed_loan` / `_09_insurance` = $0 as 'no credit activity'.** Those panel columns are built from `federal_action_obligation`, which is structurally zero on credit rows. A zero there means the panel cannot see the programme, not that the programme is absent. `code/24_funding_merge.py`'s `TX_COLS` (32 columns) carries NO loan field at all, so a credit backfill merged through it TODAY would drop face value and subsidy cost silently and leave $0 rows behind. Add `face_value_of_loan`, `original_loan_subsidy_cost` and a `dollar_basis` column to `TX_COLS` BEFORE merging any 07/08/09 rows.
+- **NEVER sum `total_face_value_of_loan` or `total_loan_subsidy_cost` across transactions.** They are AWARD-CUMULATIVE snapshots repeated on every transaction of the award — the same error class as treating award summaries as transactions (~2.2x inflation) and as summing FSRS subawards unfiltered ($68.7B of impossible rows). Demonstrated on the retrieved rows: award `ASST_NON_CLSS00000089776_012` (Navajo Tribal Utility Authority, USDA PACE) has two transactions, each carrying `total_face_value_of_loan` = $100,000,000. Summing across the 6 retrieved rows gives $271,416,169.27 against a true transactional total of $171,416,169.27 — a $100M overstatement from six rows. The transactional fields are `face_value_of_loan` and `original_loan_subsidy_cost`; those are the ones that sum.
+- **NEVER assume loan amounts are positive.** Face value and subsidy cost are SIGNED, exactly as obligations are. One of the 6 retrieved credit rows is −$10,250,021.00 of face value and −$3,862,207.91 of subsidy cost (a downward modification moving a Navajo Tribal Utility Authority loan from CFDA 10.757 PACE to 10.850 Rural Electrification). An `abs()` or a positive-only filter would double-count that award.
+- **NEVER treat obligations as unsigned either.** Deobligations are negative and belong in the series. Measured on this dataset: the spine carries 25,099 negative-obligation rows summing −$2,894,421,223.31 (most negative −$84,675,000.00), and the staged forward fill a further 10,931 rows summing −$1,934,806,042.38. Filtering them out inflates every total; keeping them can legitimately make an agency-year net negative, which is a fact about the data and not a bug to be smoothed.
+- **NEVER treat `business_types_code ∈ {I,J,K}` as proof the recipient is Native.** It is USAspending's self-reported Recipient Type and it admits false positives, so it defines the POPULATION, not the attribution. Observed in the retrieved rows: `GLENCORE LTD.` (New York, USDA commodity loan) is coded `K` — Indian/Native American Tribally Designated Organization. The spine carries `PORT AUTHORITY OF NEW YORK & NEW JERSEY` on the same basis. Attribution runs through `cedar_identifier_ledger_final.csv` on exact UEI and nowhere else; neither of those UEIs is in the ledger, and that is the guard working.
+- NEVER dedup on (award_id, uei, family) keeping max-$. That operator discarded ~$60.6B, 83.7% of it distinct fiscal-year slices of live awards. There is no dedup step — the transaction key is already 1:1 across all 476,924 rows.
+- Never drop rows. Alaska, exclusions and unattributed rows are RETAINED with flags.
+- Never use first_seen_year. It produced a false 'coverage thins after 2022' finding.
+- Never silently 'fix' fed_funding_do_file_corrtd.do.
+
+## Known issues and caveats
+
+- Regression test: the attributed lower-48 subset must reproduce 364,095 rows / $107,047,741,074.94. It currently PASSES exactly.
+- obligated amounts are Stata float (single precision) in the .dta. Double-precision sums differ by ~$45 on $107B — representation error, not a bug.
+- The do-file does not rebuild its own .dta: the Oneida renumbering is incomplete (line 696 WI catch-all after NY at 684-685; line 1516 still says 204). Authority is the .dta: 204 = NY, 205 = WI.
+- FY2000–2007 absent entirely (USAspending assistance begins FY2008). FAADS is under investigation as the fix; the seam at 2008 is the real risk.
+- USAspending assistance has NO EIN and NO CAGE columns (105 fields, none a tax ID).
+- **THREE OF TEN ASSISTANCE TYPES ARE MISSING FROM THE SPINE, AND ALL THREE ARE CREDIT.** Measured across all 476,924 spine rows, `assistance_type_code` takes exactly seven values — `06` 188,824 · `04` 112,915 · `02` 71,028 · `03` 68,643 · `05` 19,096 · `10` 10,084 · `11` 6,334 — and zero rows of `07` direct loan, `08` guaranteed/insured loan, `09` insurance. Whether that is a request-side omission in the 2023-04-09 download or genuine sparsity is NOT yet established and must not be asserted either way until the FY2007–2023 credit pull returns. This matters for Native economy coverage specifically: loan guarantees are how much tribal housing, business and infrastructure financing actually flows.
+- **Expect the credit backfill to be SMALL in row count and LARGE in face value.** The 2026-08-05 forward fill already requested all ten types (`02`–`11`) and, over 3.3 years and 136,301 rows, returned **6** credit transactions — all `07`, zero `08`, zero `09`. Those 6 rows carry $171.4M of face value. So a low row count is the expected result, not evidence the pull failed, and dollar coverage is not proportional to row coverage.
+- **The tribal recipient filter is itself why credit looks nearly empty, and that is a coverage limit to publish rather than a defect to fix.** The population is `recipient_type_names=indian_native_american_tribal_government`, i.e. the recipient of record is a tribal GOVERNMENT or tribally designated organization. Credit programmes that lend to individual Native borrowers rather than to a tribe — HUD Section 184 Indian Home Loan Guarantee is the large one — have an individual as recipient of record and therefore CANNOT appear in this population at all. Zero Section 184 rows would be a property of the filter, not a finding about Section 184. Do not report the tribal-filtered credit total as 'federal credit to Indian Country'; it is federal credit to tribal governments and tribally designated organizations. Section 184 needs its own population definition and its own pull.
+- **LOAN MONEY IS ALREADY IN THE SPINE, HIDING ON GRANT ROWS.** Measured across all 476,924 spine rows: the TRANSACTIONAL loan fields `face_value_of_loan` and `original_loan_subsidy_cost` are nonzero on **0** rows (corroborated by the lineage-A .dta, where Stata compressed both to `byte`) — but the AWARD-CUMULATIVE `total_face_value_of_loan` and `total_loan_subsidy_cost` are nonzero on **7** rows, carrying $3,716,000.00 of loan principal and $218,036.00 of subsidy cost. All 7 are `assistance_type_code` = **`04` PROJECT GRANT**, mostly USDA CFDA 10.766 Community Facilities. They are the GRANT LEG of combination loan-and-grant awards: the grant transaction is what USAspending publishes under type 04, and the award's loan totals ride along on it. Two consequences. (1) Anyone summing `total_face_value_of_loan` over the spine today adds $3.7M of loan principal to a grant series, with no type-07 row anywhere in the file to make it visible. (2) When the 07/08/09 backfill lands it will retrieve the LOAN legs of awards whose GRANT legs we already hold — join on `assistance_award_unique_key` and do not count them as new awards.
+- The credit rows that exist are USDA and EPA infrastructure lending, not housing: CFDA 10.766 Community Facilities (Catawba Indian Nation), 66.958 EPA WIFIA (Gun Lake Tribe), 10.757 PACE and 10.850 Rural Electrification (Navajo Tribal Utility Authority), 10.051 Commodity Loans. Ledger attribution on those 6 rows: 4 tier A (Catawba, Navajo ×3), 0 tier B, 1 UEI absent from the ledger (Glencore), and **1 row with a BLANK `recipient_uei`** — Gun Lake Tribe's $55,975,447 WIFIA loan, the second largest credit row we hold, which UEI-exact matching structurally cannot attribute. Blank-UEI rows are a known floor on credit attribution and must be counted and reported, never quietly dropped.
+
+---
+
+**House rules that apply to every dataset:**
+
+- Never falsely attribute. Missing coverage is expandable; a wrong attribution is not.
+- Only tier A publishes. Elijah's rulings are the only promotion path.
+- Flag, never delete. Retain and mark rather than drop.
+- Cedar Press is self-contained — stage inputs into `data/raw/external/` and build from local copies.
+- Temporal floor is 2000; pre-2000 rows carry `pre_2000_flag = 1`.
+
+See `STATE_OF_BUILD.md`, `docs/CROSS_DATASET_LEARNING.md`, and `docs/COVERAGE_EXPANSION_OPTIONS.md`.
+
+## Reference
+
+- **Codebook** — `docs/codebooks/` defines every variable, its type and units. Regenerate with `py -3 code/41_build_codebooks.py`; it is measured from the data, so it cannot drift from the files.
+- **Oddities** — `docs/DATA_ODDITIES.md` states what a zero, a negative and a blank MEAN in each dataset. They are not rare: 9.7% of contract rows are negative (deobligations, which belong in the total) and 9.9% are zero (actions that moved no money). Zero is an assertion; blank is a silence; neither is an error. Never filter an oddity out silently - flag it, count it, explain it.
+- **Refresh cadence** — `docs/REFRESH_CADENCE.md` gives the pull schedule for every dataset, the incremental change key for each source, and the re-run chain that must follow ANY refresh. Refresh on the SOURCE's clock, not ours: pulling a quarterly source weekly earns rate limits, and every unnecessary rebuild is a chance to lose a hand correction (`code/31` once silently reset a dataset from 93 keyed to 0).
+- **Coverage** — `docs/COVERAGE_AUDIT.md` reports the observed year range and any gaps against the 2000-2026 target. Regenerate with `py -3 code/35_coverage_audit.py`.
+
+A codebook says WHAT each variable is. It deliberately does not say how a value was derived - the linkage method is the product, so columns whose values would disclose it are marked internal and withheld from published extracts.

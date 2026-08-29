@@ -1,0 +1,2440 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+	<meta http-equiv="Cache-Control" content="no-store" />
+
+	<meta charset="utf-8">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<meta name="format-detection" content="telephone=no">
+
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+	<title>Alaska State Legislature</title>
+
+	<style type="text/css">@font-face {font-family:'Cinzel';font-style:normal;font-weight:400;src:url(/cf-fonts/s/cinzel/5.2.8/latin/400/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Cinzel';font-style:normal;font-weight:400;src:url(/cf-fonts/s/cinzel/5.2.8/latin-ext/400/normal.woff2);unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:'Cinzel';font-style:normal;font-weight:700;src:url(/cf-fonts/s/cinzel/5.2.8/latin/700/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Cinzel';font-style:normal;font-weight:700;src:url(/cf-fonts/s/cinzel/5.2.8/latin-ext/700/normal.woff2);unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:'Cinzel';font-style:normal;font-weight:900;src:url(/cf-fonts/s/cinzel/5.2.8/latin/900/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Cinzel';font-style:normal;font-weight:900;src:url(/cf-fonts/s/cinzel/5.2.8/latin-ext/900/normal.woff2);unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}</style>
+
+	<link type="text/css" href="//akleg.gov/css/all.css" rel="stylesheet" media="all" />
+
+	<link href="//akleg.gov/css/ui-lightness/jquery-ui-1.10.4.custom.css" rel="stylesheet">
+
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+	<script type="text/javascript">window.jQuery || document.write('<script src="//akleg.gov/js/jquery-1.8.3.min.js"><\/script>')</script>
+
+	<script type="text/javascript" src="//akleg.gov/js/jquery.main.js"></script>    <!--[if lt IE 9]><link media="all" rel="stylesheet" href="css/ie.css"><script src="js/ie.js"></script><![endif]-->
+
+	<script src="//akleg.gov/js/jquery.findyourrep-pack.min.js"></script>
+
+	<link rel="stylesheet" href="//akleg.gov/css/jquery.findyourrep.min.css" />
+
+	<link rel="stylesheet" href="//akleg.gov/css/colorbox.css" />
+
+	<link rel="stylesheet" type="text/css" href="//akleg.gov/css/print.css" media="print" />
+
+	<script src="//akleg.gov/js/jquery.colorbox.js" type="text/javascript"></script>
+
+	<script>
+		if ((navigator.userAgent.indexOf('iPhone') != -1) || (navigator.userAgent.indexOf('iPod') != -1) || (navigator.userAgent.indexOf('iPad') != -1)) {
+			////cdn.akleg.gov:1935/live/_definst_/mp4:< ?=$stream['Name']? >/playlist.m3u8';
+		}
+		else {
+			$(document).ready(function () {
+				//Examples of how to assign the Colorbox event to elements
+				$(".iframe").colorbox({ iframe: true, escKey: true, width: "720px", height: "450px" });
+				$('#cboxTitle').remove();
+			});
+		}
+	</script>
+
+	<script>
+		$(".FYR").findYourRep({
+			apikey: '34b4a0c2252b4a8582140cc55bd4c874',
+			apis: "openstates",
+			title: 'WHO REPRESENTS ME?',
+			text: 'Enter address and zip code',
+			action: 'FIND'
+		});
+	</script>
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-17647732-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function () {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : '//www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+</head>
+
+
+<body>
+	<div id="overlay" style="display:none;position:absolute;background-color:white;top:0px;left:200px;">
+
+	</div>
+	<div class="wrapper-holder">
+
+		<div id="wrapper">
+			<header id="header">
+				<div class="header-holder">
+					<strong class="logo"><a href="//w3.akleg.gov/index.php">The Alaska State Legislature</a></strong>
+					<form action="/basis/Search" method="get" class="destop search-form">
+						<fieldset>
+							<input type="submit" value="search">
+							<input type="hidden" name="session" value="34" />
+							<div class="text-holder">
+								<div class="text">
+									<input type="search" name="search" id="searchinput" placeholder="Enter Bill, Code, Statute or Keyword">
+								</div>
+							</div>
+						</fieldset>
+					</form>
+				</div>
+			</header>
+			<div id="main">
+				<div class="main-frame">
+					<div class="main-holder">
+						<form action="#" class="main-nav search-form">
+							<fieldset>
+								<nav>
+									<a class="opener" href="//akleg.gov/index.php">menu</a>
+									<ul id="nav">
+										<li>
+											<div class="has-drop">
+												<a class="opener-drop" href="//akleg.gov/index.php">
+													<span>Home</span>
+													<em class="arrow-left"></em>
+													<em class="arrow-right"></em>
+												</a>
+											</div>
+										</li>
+										<li>
+											<div>
+												<a href="//akleg.gov/senate.php">
+													<span>Senate</span>
+													<em class="arrow-left"></em>
+													<em class="arrow-right"></em>
+												</a>
+												<div class="drop">
+													<ul>
+														<li class="drop-multi-drop">
+															<div>
+																<a class="opener-multi" href="//akleg.gov/senate.php">
+																	<span>Current Members</span>
+																	<em class="arrow-left"></em>
+																	<em class="arrow-right"></em>
+																</a>
+															</div>
+														</li>
+														<li>
+															<div>
+																<a href="/basis/mbr_info.asp?session=all">
+																	<span>Past Members</span>
+																	<em class="arrow-left"></em>
+																	<em class="arrow-right"></em>
+																</a>
+																<div class="multi-drop">
+																	<ul>
+																		<li>
+																			<div>
+																				<a href="/basis/mbr_info.asp?session=34">
+																					<span>By Session</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+																		<li>
+																			<div>
+																				<a href="/basis/mbr_info.asp?session=all">
+																					<span>Alphabetical</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+																	</ul>
+																</div>
+															</div>
+														</li>
+													</ul>
+												</div>
+											</div>
+										</li>
+										<li>
+											<div>
+												<a href="//akleg.gov/house.php">
+													<span>House</span>
+													<em class="arrow-left"></em>
+													<em class="arrow-right"></em>
+												</a>
+												<div class="drop">
+													<ul>
+														<li>
+															<div>
+																<a href="//akleg.gov/house.php">
+																	<span>Current Members</span>
+																	<em class="arrow-left"></em>
+																	<em class="arrow-right"></em>
+																</a>
+															</div>
+														</li>
+														<li>
+															<div>
+																<a href="/basis/mbr_info.asp?session=all">
+																	<span>Past Members</span>
+																	<em class="arrow-left"></em>
+																	<em class="arrow-right"></em>
+																</a>
+																<div class="multi-drop">
+																	<ul>
+																		<li>
+																			<div>
+																				<a href="/basis/mbr_info.asp?session=34">
+																					<span>By Session</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+																		<li>
+																			<div>
+																				<a href="/basis/mbr_info.asp?session=all">
+																					<span>Alphabetical</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+																	</ul>
+																</div>
+															</div>
+														</li>
+													</ul>
+												</div>
+											</div>
+										</li>
+										<li>
+											<div class="active">
+												<a href="/basis/Home/BillsandLaws">
+													<span>Bills &amp; Laws</span>
+													<em class="arrow-left"></em>
+													<em class="arrow-right"></em>
+												</a>
+												<div class="drop">
+													<ul>
+
+
+														<li class="drop-multi-drop">
+															<div>
+																<a class="opener-multi" href="/basis/Home/Bill">
+																	<span>Bills</span>
+																	<em class="arrow-left"></em>
+																	<em class="arrow-right"></em>
+																</a>
+																<div class="multi-drop">
+
+																	<ul>
+
+																		<li>
+																			<div>
+																				<a href="/basis/Bill/Range/34?bill1=&bill2=">
+																					<span>All Introduced</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+
+																		<li>
+																			<div>
+																				<a href="/basis/Bill/ActionsByDate/34">
+																					<span>Actions by Date</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+																		<li>
+																			<div>
+																				<a href="/basis/Bill/AwaitActions/34">
+																					<span>Awaiting Actions</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+
+																		<li>
+																			<div>
+																				<a href="/basis/Bill/Conference/34">
+																					<span>Bills sent to Conf Committee</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+																		<li>
+																			<div>
+																				<a href="/basis/committee/">
+																					<span>Bills in Committee</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+																		<li>
+																			<div>
+																				<a href="/basis/Bill/Vetos/34">
+																					<span>Governor's Vetoes</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+																		<li>
+																			<div>
+																				<a href="/basis/Bill/Passed/34">
+																					<span>Passed Legislation</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+																		<li>
+																			<div>
+																				<a href="/basis/Bill/Prefile/34">
+																					<span>Prefile Bill Summary</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+																		<li>
+																			<div>
+																				<a href="/basis/Bill/Requestors/34">
+																					<span>Requestor Summary</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+																		<li>
+																			<div>
+																				<a href="/basis/Bill/Stats/34">
+																					<span>Statistics</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+																		<li>
+																			<div>
+																				<a href="/basis/Bill/Sponsors/34">
+																					<span>Sponsor Summary</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+																		<li>
+																			<div>
+																				<a href="/basis/Bill/Subjects/34">
+																					<span>Subject Summary</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+																	</ul>
+																</div>
+															</div>
+														</li>
+														<li>
+															<div>
+																<a href="/basis/Home/Law">
+																	<span>Laws</span>
+																	<em class="arrow-left"></em>
+																	<em class="arrow-right"></em>
+																</a>
+																<div class="multi-drop">
+																	<ul>
+																		<li>
+																			<div>
+																				<a href="//ltgov.alaska.gov/services/alaskas-constitution/">
+																					<span>Constitution</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+																		<li>
+																			<div>
+																				<a href="//akleg.gov/pages/constitutional_convention.php">
+																					<span>Constitutional Convention Files</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+																		<li>
+																			<div>
+																				<a href="//www.akleg.gov/basis/statutes.asp">
+																					<span>Statutes</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+																		<li>
+																			<div>
+																				<a href="/basis/Law/EO/34">
+																					<span>Executive Orders - Current</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+																		<li>
+																			<div>
+																				<a href="/basis/folioproxy.asp?url=//wwwjnu03.akleg.org/cgi-bin/folioisa.dll/exor">
+																					<span>Executive Orders - Historical</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+																		<li>
+																			<div>
+																				<a href="/basis/aac.asp">
+																					<span>Administrative Code</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+																	</ul>
+																</div>
+															</div>
+														</li>
+														<li>
+															<div>
+																<a href="/basis/Journal/Find/34">
+																	<span>Journals</span>
+																	<em class="arrow-left"></em>
+																	<em class="arrow-right"></em>
+																</a>
+															</div>
+														</li>
+														<li>
+															<div>
+																<a href="#">
+																	<span>Session Laws & Resolves</span>
+																	<em class="arrow-left"></em>
+																	<em class="arrow-right"></em>
+																</a>
+																<div class="multi-drop">
+																	<ul>
+																		<li>
+																			<div>
+																				<a href="/basis/Bill/Passed/34?sel=13">
+																					<span>Session Laws & Resolves 2025</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+																		<li>
+																			<div>
+																				<a href="/basis/Bill/Passed/34?sel=14">
+																					<span>Session Laws & Resolves 2026</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+																		<li>
+																			<div>
+																				<a href="/basis/folioproxy.asp?url=//wwwjnu03.akleg.org/cgi-bin/folioisa.dll/slpr">
+																					<span>1981 - Previous Year Session Law</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+																		<li>
+																			<div>
+																				<a href="/basis/folioproxy.asp?url=//wwwjnu03.akleg.org/cgi-bin/folioisa.dll/lrpr">
+																					<span>1983 - Previous Year Legislative Resolves</span>
+																					<em class="arrow-left"></em>
+																					<em class="arrow-right"></em>
+																				</a>
+																			</div>
+																		</li>
+																	</ul>
+																</div>
+															</div>
+														</li>
+														<li>
+															<div>
+																<a href="/basis/Home/Tool">
+																	<span>Tools</span>
+																	<em class="arrow-left"></em>
+																	<em class="arrow-right"></em>
+																</a>
+																<div class="multi-drop">
+																	<ul>
+																		<li>
+																			<div>
+																				<a href="/basis/Statutes/Sirs/34">
+																					<span>Statute Information Retrieval System</span>
+																				</a>
+																			</div>
+																		</li>
+																		<li>
+																			<div>
+																				<a href="/basis/btmf_login.asp?session=34">
+																					<span>Bill Tracking Management Facility</span>
+																				</a>
+																			</div>
+																		</li>
+																	</ul>
+																</div>
+															</div>
+														</li>
+														<li>
+															<div>
+																<a href="/basis/Home/Archive">
+																	<span>Past Legislatures (Archives)</span>
+																	<em class="arrow-left"></em>
+																	<em class="arrow-right"></em>
+																</a>
+															</div>
+														</li>
+													</ul>
+												</div>
+											</div>
+										</li>
+										<li>
+											<div>
+												<a href="/basis/Committee/">
+													<span>Committees</span>
+													<em class="arrow-left"></em>
+													<em class="arrow-right"></em>
+												</a>
+												<div class="drop">
+													<ul>
+														<li class="drop-multi-drop">
+															<div>
+																<a class="opener-multi" href="/index.php?tab2#tab2">
+																	<span>Hearing Schedule</span>
+																	<em class="arrow-left"></em>
+																	<em class="arrow-right"></em>
+																</a>
+															</div>
+														</li>
+														<li>
+															<div>
+																<a href="/basis/Committee/?tab0#tabCom0">
+																	<span>Standing Committees</span>
+																	<em class="arrow-left"></em>
+																	<em class="arrow-right"></em>
+																</a>
+															</div>
+														</li>
+														<li>
+															<div>
+																<a href="/basis/Committee/?tab4#tabCom4">
+																	<span>Finance Committees</span>
+																	<em class="arrow-left"></em>
+																	<em class="arrow-right"></em>
+																</a>
+															</div>
+														</li>
+														<li>
+															<div>
+																<a href="/basis/Committee/?tab1#tabCom1">
+																	<span>Special Committees</span>
+																	<em class="arrow-left"></em>
+																	<em class="arrow-right"></em>
+																</a>
+															</div>
+														</li>
+														<li>
+															<div>
+																<a href="/basis/Committee/?tab3#tabCom3">
+																	<span>Joint Committees</span>
+																	<em class="arrow-left"></em>
+																	<em class="arrow-right"></em>
+																</a>
+															</div>
+														</li>
+														<li>
+															<div>
+																<a href="/basis/Committee/?tab5#tabCom5">
+																	<span>Conference Committees</span>
+																	<em class="arrow-left"></em>
+																	<em class="arrow-right"></em>
+																</a>
+															</div>
+														</li>
+														<li>
+															<div>
+																<a href="/basis/Committee/?tab2#tabCom2">
+																	<span>Other Committees</span>
+																	<em class="arrow-left"></em>
+																	<em class="arrow-right"></em>
+																</a>
+															</div>
+														</li>
+														<li>
+															<div>
+																<a href="//akleg.gov/index.php?tab4#tab4">
+																	<span>Minutes</span>
+																	<em class="arrow-left"></em>
+																	<em class="arrow-right"></em>
+																</a>
+															</div>
+														</li>
+													</ul>
+												</div>
+											</div>
+										</li>
+										<li>
+											<div>
+												<a href="//akleg.gov/publications.php">
+													<span>Publications</span>
+													<em class="arrow-left"></em>
+													<em class="arrow-right"></em>
+												</a>
+											</div>
+										</li>
+										<li>
+											<div>
+												<a href="//akleg.gov/start.php">
+													<span>Get Started</span>
+													<em class="arrow-left"></em>
+													<em class="arrow-right"></em>
+												</a>
+											</div>
+										</li>
+										<li>
+											<div>
+												<a href="//akleg.gov/lios.php">
+													<span>Information Offices</span>
+													<em class="arrow-left"></em>
+													<em class="arrow-right"></em>
+												</a>
+											</div>
+										</li>
+										<li>
+											<div>
+												<a href="//akleg.gov/legaffairs.php">
+													<span>Legislative Affairs</span>
+													<em class="arrow-left"></em>
+													<em class="arrow-right"></em>
+												</a>
+											</div>
+										</li>
+										<li>
+											<div>
+												<a href="//akleg.gov/agencies.php">
+													<span>Legislative Agencies</span>
+													<em class="arrow-left"></em>
+													<em class="arrow-right"></em>
+												</a>
+											</div>
+										</li>
+										<li>
+											<div>
+												<a href="//akleg.gov/links.php">
+													<span>Links</span>
+													<em class="arrow-left"></em>
+													<em class="arrow-right"></em>
+												</a>
+												<div class="drop">
+													<ul>
+														<li class="drop-multi-drop">
+															<div>
+																<a class="opener-multi" href="//akleg.gov/links.php?links=leg">
+																	<span>Legislative Branch</span>
+																	<em class="arrow-left"></em>
+																	<em class="arrow-right"></em>
+																</a>
+															</div>
+														</li>
+														<li class="drop-multi-drop">
+															<div>
+																<a class="opener-multi" href="//akleg.gov/links.php?links=exec">
+																	<span>Executive Branch</span>
+																	<em class="arrow-left"></em>
+																	<em class="arrow-right"></em>
+																</a>
+															</div>
+														</li>
+														<li>
+															<div>
+																<a href="//akleg.gov/links.php?links=jud">
+																	<span>Judicial Branch</span>
+																	<em class="arrow-left"></em>
+																	<em class="arrow-right"></em>
+																</a>
+															</div>
+														</li>
+														<li>
+															<div>
+																<a href="//akleg.gov/links.php?links=fed">
+																	<span>Alaska Delegation</span>
+																	<em class="arrow-left"></em>
+																	<em class="arrow-right"></em>
+																</a>
+															</div>
+														</li>
+													</ul>
+												</div>
+											</div>
+										</li>
+									</ul>
+								</nav>
+
+
+
+
+								<input class="mobile" type="submit" value="search">
+								<div class="mobile text-holder">
+									<div class="text">
+										<input type="search" placeholder="search">
+									</div>
+								</div>
+							</fieldset>
+						</form>
+
+
+
+
+						
+
+
+						
+						
+						
+
+    <style>
+        .committeeAction{display:none;}
+        .Merrors a {text-decoration:none;font-weight:bold;text-transform:uppercase;text-align:left;margin:0px;padding:0px;}
+        .Merrors  td, .Merrors + tr td {
+           
+            margin: 0px;
+            padding: 0px;
+        }
+       
+    </style>
+            <script>
+                function toggleActions(e) {
+                    e = e || window.event;
+                    var button = e.target || e.srcElement;
+                    el = $(button);
+                    if (el.val() == "Display Committee Actions") {
+                        $(".committeeAction").show();
+                        el.val("Hide Committee Actions");
+                        document.cookie = "showComActions=Yes";
+                    }
+                    else {
+                        $(".committeeAction").hide();
+                        el.val("Display Committee Actions");
+                        document.cookie = "showComActions=No";
+                    }
+                }
+            </script>
+            <div id="content">
+                
+    <style>
+
+    </style>
+    <ul class="breadcrumbs">
+        <li><a href="/">Home</a></li>
+
+        <li style="width:260px;height:19px;border:none;">
+            <span class="breadcrumbDynamic">
+                <select aria-label="Session Selection" onchange="changeSession()" name="sessionSelect" id="sessionSelect">
+                        <option value="34"   selected>
+                            34th Legislature(2025 - 2026)
+                        </option>
+                        <option value="33" >
+                            33rd Legislature(2023 - 2024)
+                        </option>
+                        <option value="32" >
+                            32nd Legislature(2021 - 2022)
+                        </option>
+                        <option value="31" >
+                            31st Legislature(2019 - 2020)
+                        </option>
+                        <option value="30" >
+                            30th Legislature(2017 - 2018)
+                        </option>
+                        <option value="29" >
+                            29th Legislature(2015 - 2016)
+                        </option>
+                        <option value="28" >
+                            28th Legislature(2013 - 2014)
+                        </option>
+                        <option value="27" >
+                            27th Legislature(2011 - 2012)
+                        </option>
+                        <option value="26" >
+                            26th Legislature(2009 - 2010)
+                        </option>
+                        <option value="25" >
+                            25th Legislature(2007 - 2008)
+                        </option>
+                        <option value="24" >
+                            24th Legislature(2005 - 2006)
+                        </option>
+                        <option value="23" >
+                            23rd Legislature(2003 - 2004)
+                        </option>
+                        <option value="22" >
+                            22nd Legislature(2001 - 2002)
+                        </option>
+                        <option value="21" >
+                            21st Legislature(1999 - 2000)
+                        </option>
+                        <option value="20" >
+                            20th Legislature(1997 - 1998)
+                        </option>
+                        <option value="19" >
+                            19th Legislature(1995 - 1996)
+                        </option>
+                        <option value="18" >
+                            18th Legislature(1993 - 1994)
+                        </option>
+                </select>
+            </span>
+        </li>
+        <li style="height:19px;border:none;">
+            <span class="breadcrumbDynamic">
+                Bill 
+            </span>
+        </li>
+        <li><span class="breadcrumbDynamic">Detail</span></li>
+        <li><span>HB 126</span></li>
+        <li><span id="BCtab"></span></li>
+    </ul>
+    <script>
+        var intSess = "34";
+        function changeSession() {
+            session = $("#sessionSelect").val();
+            document.cookie = "legislature=" + session;
+
+            location.href = document.URL.replace(intSess, parseInt(session));
+        }
+    </script>
+
+                <div class="content-page style"  >
+                    
+
+<div class="heading-container">
+    <em class="date ">34th Legislature(2025-2026)</em>
+    <h1>Bill History/Action for Legislature</h1>
+<a class="btn-bill" href="/basis/Bill/Detail/34?Root=HB 127">Next Bill</a></div>
+
+                    <div class="information-holder" style="margin-bottom:12px;">
+                        <ul class="information">
+                            <li>
+                                <span>Bill </span>
+                                <strong>HB 126 </strong>
+                            </li>
+
+                            <li>
+                                <span>Current Status </span>
+                                <strong>CHAPTER 37 SLA 26</strong>
+
+                            </li>
+                            <li>
+                                <span>Status Date </span>
+                                <strong>06/24/2026</strong>
+                            </li>
+
+
+                        </ul>
+                        <ul class="information">
+                            <li>
+                                <span>Bill Version</span>
+                                <strong>SCS CSHB 126(L&amp;C)</strong>
+                            </li>
+                            <li>
+                                <span>Short Title </span>
+                                <strong>REINSTATEMENT NATIVE CORPS/ANCSA REPORTS</strong>
+                            </li>
+
+                        </ul>
+                    </div>
+                    <div class="information-holder">
+                        <ul class="information" style="width:100%">
+                            <li>
+                                <span>Sponsor(S) </span>
+
+                                <strong> REPRESENTATIVES FOSTER, Jimmie, Burke, Dibert, Josephson, Allard, Bynum, Kopp, D.Nelson<BR>
+SENATORS Gray-Jackson, Giessel, Claman, Cronk, Merrick, Stevens<BR>
+ </strong><br />
+                            </li>
+
+                            <li>
+                                <span>Title</span>
+                                <strong> &quot;An Act relating to the reinstatement of Native village corporations; relating to proxy solicitations to shareholders of corporations organized under state law under the Alaska Native Claims Settlement Act; and providing for an effective date.&quot;</strong>
+                            </li>
+                        </ul>
+                           </div>
+
+                    <form method="get" class="number-row style">
+                        <fieldset>
+                            <label for="lab01">Bill Number:</label>
+                            <input id="lab01" name="Root" type="text" placeholder="">
+                            <input type="submit" value="Search Bill">
+                            <a class="btn-bill" href="/basis/Bill/Detail/34?Root=HB 127">Next Bill</a>
+                            <ul class="btn-bar">
+                                <li><a onclick="return confirm('This document is hosted on a website other than www.akleg.gov  and is neither controlled nor condoned by the Legislative Affairs Agency');" href="http://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=14714">Sponsor Statement</a></li>
+
+
+                </ul >
+
+
+            </fieldset >
+
+
+        </form >
+
+                    
+                    <ul class="tabs">
+                        <li><a class="active" href="#tab6_4">Actions</a></li>
+                        <li><a href="#tab1_4">Full Text</a></li>
+                        <li><a href="#tab2_4">Fiscal Notes</a></li>
+                        <li><a href="#tab3_4">Amendments</a></li>
+                        <li><a href="#tab4_4"><nobr>Minutes and Audio</nobr></a></li>
+                        <li><a href="#tab5_4">Documents</a></li>
+                       
+                    </ul>
+                    <div class="tabs-content">
+                        <div class="fulltext" id="tab1_4">
+                            
+                            <table class="table">
+                                <tr class="caption">
+                                    <td colspan="3" class="uppercase">Full Text of HB 126</td>
+                                    <td>Intro/ Offered</td>
+                                    <td colspan="2">Passed</td>
+                                </tr>
+                                <tr>
+                                    <th>Version</th>
+                                    <th>Amended Name</th>
+                                    <th>PDF</th>
+                                    <th>Date</th>
+                                    <th>House</th>
+                                    <th>Senate</th>
+                                </tr>
+                                <tbody>
+
+                                        <tr>
+                                            <td data-label="Version"><span><a href="/basis/Bill/Text/34?Hsid=HB0126A">HB0126A</a></span></td>
+                                            <td data-label="Amended Name"><span class="blue">HB 126</span></td>
+                                            <td data-label="PDF">
+
+                                                <span>
+<a class="pdf" href="https://www.akleg.gov/PDF/34/Bills/HB0126A.PDF">pdf</a>
+                                                </span>
+                                            </td>
+                                            <td data-label="Date"><span class="blue"><time datetime="2025-03-05">        <time datetime="3/5/2025 12:00:00 AM">03/05/2025</time>
+</time></span></td>
+                                            <td data-label="House"><span class="blue"><time> <time></time></time></span></td>
+                                            <td data-label="Senate"><span class="blue"><time> <time></time></time></span></td>
+                                        </tr>
+                                        <tr>
+                                            <td data-label="Version"><span><a href="/basis/Bill/Text/34?Hsid=HB0126B">HB0126B</a></span></td>
+                                            <td data-label="Amended Name"><span class="blue">CSHB 126(TRB)</span></td>
+                                            <td data-label="PDF">
+
+                                                <span>
+<a class="pdf" href="https://www.akleg.gov/PDF/34/Bills/HB0126B.PDF">pdf</a>
+                                                </span>
+                                            </td>
+                                            <td data-label="Date"><span class="blue"><time datetime="2025-05-02">        <time datetime="5/2/2025 12:00:00 AM">05/02/2025</time>
+</time></span></td>
+                                            <td data-label="House"><span class="blue"><time> <time></time></time></span></td>
+                                            <td data-label="Senate"><span class="blue"><time> <time></time></time></span></td>
+                                        </tr>
+                                        <tr>
+                                            <td data-label="Version"><span><a href="/basis/Bill/Text/34?Hsid=HB0126C">HB0126C</a></span></td>
+                                            <td data-label="Amended Name"><span class="blue">CSHB 126(TRB) am</span></td>
+                                            <td data-label="PDF">
+
+                                                <span>
+<a class="pdf" href="https://www.akleg.gov/PDF/34/Bills/HB0126C.PDF">pdf</a>
+                                                </span>
+                                            </td>
+                                            <td data-label="Date"><span class="blue"><time datetime="2025-05-18">        <time datetime="5/18/2025 12:00:00 AM">05/18/2025</time>
+</time></span></td>
+                                            <td data-label="House"><span class="blue"><time datetime="2025-05-18">        <time datetime="5/18/2025 12:00:00 AM">05/18/2025</time>
+</time></span></td>
+                                            <td data-label="Senate"><span class="blue"><time> <time></time></time></span></td>
+                                        </tr>
+                                        <tr>
+                                            <td data-label="Version"><span><a href="/basis/Bill/Text/34?Hsid=HB0126D">HB0126D</a></span></td>
+                                            <td data-label="Amended Name"><span class="blue">SCS CSHB 126(CRA)</span></td>
+                                            <td data-label="PDF">
+
+                                                <span>
+<a class="pdf" href="https://www.akleg.gov/PDF/34/Bills/HB0126D.PDF">pdf</a>
+                                                </span>
+                                            </td>
+                                            <td data-label="Date"><span class="blue"><time datetime="2026-03-04">        <time datetime="3/4/2026 12:00:00 AM">03/04/2026</time>
+</time></span></td>
+                                            <td data-label="House"><span class="blue"><time> <time></time></time></span></td>
+                                            <td data-label="Senate"><span class="blue"><time> <time></time></time></span></td>
+                                        </tr>
+                                        <tr>
+                                            <td data-label="Version"><span><a href="/basis/Bill/Text/34?Hsid=HB0126E">HB0126E</a></span></td>
+                                            <td data-label="Amended Name"><span class="blue">SCS CSHB 126(L&amp;C)</span></td>
+                                            <td data-label="PDF">
+
+                                                <span>
+<a class="pdf" href="https://www.akleg.gov/PDF/34/Bills/HB0126E.PDF">pdf</a>
+                                                </span>
+                                            </td>
+                                            <td data-label="Date"><span class="blue"><time datetime="2026-05-13">        <time datetime="5/13/2026 12:00:00 AM">05/13/2026</time>
+</time></span></td>
+                                            <td data-label="House"><span class="blue"><time datetime="2026-05-20">        <time datetime="5/20/2026 12:00:00 AM">05/20/2026</time>
+</time></span></td>
+                                            <td data-label="Senate"><span class="blue"><time datetime="2026-05-19">        <time datetime="5/19/2026 12:00:00 AM">05/19/2026</time>
+</time></span></td>
+                                        </tr>
+                                            <tr><td align=center colspan=6><hr></td></tr>
+                                            <tr></tr>
+                                        <tr>
+                                            <td data-label="Version"><span><a href="/basis/Bill/Text/34?Hsid=HB0126Z">HB0126Z</a></span></td>
+                                            <td data-label="Amended Name"><span class="blue">Enrolled HB 126</span></td>
+                                            <td data-label="PDF">
+
+                                                <span>
+<a class="pdf" href="https://www.akleg.gov/PDF/34/Bills/HB0126Z.PDF">pdf</a>
+                                                </span>
+                                            </td>
+                                            <td data-label="Date"><span class="blue"><time datetime="2026-05-20">        <time datetime="5/20/2026 12:00:00 AM">05/20/2026</time>
+</time></span></td>
+                                            <td data-label="House"><span class="blue"><time> <time></time></time></span></td>
+                                            <td data-label="Senate"><span class="blue"><time> <time></time></time></span></td>
+                                        </tr>
+
+
+
+
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div id="tab2_4" class="fiscalnotes">
+                            <h2>Fiscal Action Summary</h2>
+                            <table class="table" style="table-layout:auto;">
+                                <tr class="caption">
+                                    <td colspan="4" class="blue">HB 126</td>
+                                    <td colspan="3">Published</td>
+                                </tr>
+                                <tr>
+                                    <th style="width:115px">Fiscal Note</th>
+                                    <th style="width:150px">Preparer</th>
+                                    <th style="width:75px">Date</th>
+                                    <th style="width:25px">Chamber</th>
+                                    <th style="width:55px">Fiscal Impact</th>
+                                    <th>Cmte Report</th>
+                                    <th>Approp Bill</th>
+                                </tr>
+                                <tbody>
+
+                                            <tr>
+                                                <td data-label="Fiscal Note"><span><a class="pdf" href="https://www.akleg.gov/PDF/34/F/HB0126-1-2-050225-CED-N.PDF">pdf</a> Fiscal Note 1</span></td>
+                                                <td data-label="Preparer"><span>Commerce, Community &amp; Econ. Dev.</span></td>
+                                                <td data-label="Date"><span><time datetime="05/02/2025">05/02/2025</time></span></td>
+                                                <td data-label="Ch"><span>H</span></td>
+                                                <td data-label="Fiscal Impact"><span class="uppercase">N</span></td>
+                                                <td data-label="Cmte Report">
+                                                    <span>
+
+                                                        <a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB126&Page=00987#0987'>HTRB</a>, <a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB126&Page=01188#1188'>HCRA</a>
+                                                        
+                                                    </span>
+                                                </td>
+                                                
+                                                <td data-label="Approp Bill"></td>
+                                            </tr>
+                                            <tr>
+                                                <td data-label="Fiscal Note"><span><a class="pdf" href="https://www.akleg.gov/PDF/34/F/HB0126-2-2-050225-CED-N.PDF">pdf</a> Fiscal Note 2</span></td>
+                                                <td data-label="Preparer"><span>Commerce, Community &amp; Econ. Dev.</span></td>
+                                                <td data-label="Date"><span><time datetime="05/02/2025">05/02/2025</time></span></td>
+                                                <td data-label="Ch"><span>H</span></td>
+                                                <td data-label="Fiscal Impact"><span class="uppercase">N</span></td>
+                                                <td data-label="Cmte Report">
+                                                    <span>
+
+                                                        <a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB126&Page=00987#0987'>HTRB</a>, <a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB126&Page=01188#1188'>HCRA</a>
+                                                        
+                                                    </span>
+                                                </td>
+                                                
+                                                <td data-label="Approp Bill"></td>
+                                            </tr>
+                                            <tr>
+                                                <td data-label="Fiscal Note"><span><a class="pdf" href="https://www.akleg.gov/PDF/34/F/HB0126-3-2-030426-CED-N.PDF">pdf</a> Fiscal Note 3</span></td>
+                                                <td data-label="Preparer"><span>Commerce, Community &amp; Econ. Dev.</span></td>
+                                                <td data-label="Date"><span><time datetime="03/04/2026">03/04/2026</time></span></td>
+                                                <td data-label="Ch"><span>S</span></td>
+                                                <td data-label="Fiscal Impact"><span class="uppercase">N</span></td>
+                                                <td data-label="Cmte Report">
+                                                    <span>
+
+                                                        <a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB126&Page=01829#1829'>SCRA</a>
+                                                        
+                                                    </span>
+                                                </td>
+                                                
+                                                <td data-label="Approp Bill"></td>
+                                            </tr>
+                                            <tr>
+                                                <td data-label="Fiscal Note"><span><a class="pdf" href="https://www.akleg.gov/PDF/34/F/HB0126-4-2-030426-CED-N.PDF">pdf</a> Fiscal Note 4</span></td>
+                                                <td data-label="Preparer"><span>Commerce, Community &amp; Econ. Dev.</span></td>
+                                                <td data-label="Date"><span><time datetime="03/04/2026">03/04/2026</time></span></td>
+                                                <td data-label="Ch"><span>S</span></td>
+                                                <td data-label="Fiscal Impact"><span class="uppercase">N</span></td>
+                                                <td data-label="Cmte Report">
+                                                    <span>
+
+                                                        <a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB126&Page=01829#1829'>SCRA</a>
+                                                        
+                                                    </span>
+                                                </td>
+                                                
+                                                <td data-label="Approp Bill"></td>
+                                            </tr>
+                                            <tr>
+                                                <td data-label="Fiscal Note"><span><a class="pdf" href="https://www.akleg.gov/PDF/34/F/HB0126-5-2-051326-CED-N.PDF">pdf</a> Fiscal Note 5</span></td>
+                                                <td data-label="Preparer"><span>Commerce, Community &amp; Econ. Dev.</span></td>
+                                                <td data-label="Date"><span><time datetime="05/13/2026">05/13/2026</time></span></td>
+                                                <td data-label="Ch"><span>S</span></td>
+                                                <td data-label="Fiscal Impact"><span class="uppercase">N</span></td>
+                                                <td data-label="Cmte Report">
+                                                    <span>
+
+                                                        <a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB126&Page=02620#2620'>SL&C</a>
+                                                        
+                                                    </span>
+                                                </td>
+                                                
+                                                <td data-label="Approp Bill"></td>
+                                            </tr>
+                                            <tr>
+                                                <td data-label="Fiscal Note"><span><a class="pdf" href="https://www.akleg.gov/PDF/34/F/HB0126-6-2-051326-CED-N.PDF">pdf</a> Fiscal Note 6</span></td>
+                                                <td data-label="Preparer"><span>Commerce, Community &amp; Econ. Dev.</span></td>
+                                                <td data-label="Date"><span><time datetime="05/13/2026">05/13/2026</time></span></td>
+                                                <td data-label="Ch"><span>S</span></td>
+                                                <td data-label="Fiscal Impact"><span class="uppercase">N</span></td>
+                                                <td data-label="Cmte Report">
+                                                    <span>
+
+                                                        <a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB126&Page=02620#2620'>SL&C</a>
+                                                        
+                                                    </span>
+                                                </td>
+                                                
+                                                <td data-label="Approp Bill"></td>
+                                            </tr>
+</tbody>
+                            </table>
+                        </div>
+                        <div id="tab3_4" class="amendments">
+                            <h2>Bill Amendments Summary</h2>
+                            <ul class="information">
+                                <li>
+                                    <span>Bill <span>:</span></span>
+                                    <strong>HB 126</strong>
+                                </li>
+                            </ul>
+                            <p>Amendments that are adopted are incorporated into the next version of the bill. <br />PDF versions of the amendment may have slight variations from the Journal entry. The Journal should be considered the authoritative version.</p>
+                            <table class="table">
+                                <tr class="caption">
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td>Action</td>
+                                    <td>Journal</td>
+                                </tr>
+                                <tr>
+                                    <th>Amendment</th>
+                                    <th>Chamber</th>
+                                    <th>Action</th>
+                                    <th>Date</th>
+                                    <th>Page</th>
+                                    <th>PDF</th>
+                                </tr>
+                                <tbody>
+                                        <tr>
+                                            <td data-label="Amendment"><span>
+                                                AM 1 </span></td>
+                                            <td data-label="Chamber"><span class="uppercase">H</span></td>
+                                            <td data-label="Action"><span>AM NO 1 ADOPTED Y23 N17</span></td>
+                                            <td data-label="Date"><span><time datetime="2025-05-18">2025-05-18</time></span></td>
+                                            <td data-label="Page"><span class="blue"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=01292#1292'>1292</a></span></td>
+                                            <td>
+<a class="pdf" href="https://www.akleg.gov/PDF/34/A/HB0126-H001.PDF">pdf</a>                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td data-label="Amendment"><span>
+                                                AM 2 </span></td>
+                                            <td data-label="Chamber"><span class="uppercase">H</span></td>
+                                            <td data-label="Action"><span>AM NO 2 FAILED Y17 N23</span></td>
+                                            <td data-label="Date"><span><time datetime="2025-05-18">2025-05-18</time></span></td>
+                                            <td data-label="Page"><span class="blue"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=01295#1295'>1295</a></span></td>
+                                            <td>
+<a class="pdf" href="https://www.akleg.gov/PDF/34/A/HB0126-H002.PDF">pdf</a>                                            </td>
+                                        </tr>
+
+
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="tab4_4" class="minutes">
+                            <h2>House and Senate Minutes/Recordings</h2>
+                            <ul class="information">
+                                <li>
+                                    <span>Bill <span>:</span></span>
+                                    <strong>HB 126</strong>
+                                </li>
+                                <li>
+                                </li>
+                            </ul>
+                            
+<table class="table">
+    <tbody>
+        <tr>
+            <th>
+                Meeting Date
+            </th>
+            <th>
+                Start Time
+            </th>
+            <th>
+                Title
+            </th>
+            <th colspan="2">
+                Meeting Details
+            </th>
+        </tr>
+            <tr>
+                <td class="col01">5/11/2026</td>
+                <td class="col02">1:30 PM</td>
+                <td class="col03">SENATE LABOR &amp; COMMERCE</td>
+                <td class="col04">
+                </td>
+                <td class="col05">
+                        <a class="link-video" href="http://www.akleg.gov/basis/Meeting/Detail?Meeting=SL%26C 2026-05-11 13:30:00">Audio/Video</a>
+                </td>
+
+            </tr>
+            <tr>
+                <td class="col01">5/4/2026</td>
+                <td class="col02">1:30 PM</td>
+                <td class="col03">SENATE LABOR &amp; COMMERCE</td>
+                <td class="col04">
+                </td>
+                <td class="col05">
+                        <a class="link-video" href="http://www.akleg.gov/basis/Meeting/Detail?Meeting=SL%26C 2026-05-04 13:30:00">Audio/Video</a>
+                </td>
+
+            </tr>
+            <tr>
+                <td class="col01">4/27/2026</td>
+                <td class="col02">1:30 PM</td>
+                <td class="col03">SENATE LABOR &amp; COMMERCE</td>
+                <td class="col04">
+                </td>
+                <td class="col05">
+                        <a class="link-video" href="http://www.akleg.gov/basis/Meeting/Detail?Meeting=SL%26C 2026-04-27 13:30:00">Audio/Video</a>
+                </td>
+
+            </tr>
+            <tr>
+                <td class="col01">3/3/2026</td>
+                <td class="col02">1:30 PM</td>
+                <td class="col03">SENATE COMMUNITY &amp; REGIONAL AFFAIRS</td>
+                <td class="col04">
+                </td>
+                <td class="col05">
+                        <a class="link-video" href="http://www.akleg.gov/basis/Meeting/Detail?Meeting=SCRA 2026-03-03 13:30:00">Audio/Video</a>
+                </td>
+
+            </tr>
+            <tr>
+                <td class="col01">2/24/2026</td>
+                <td class="col02">1:30 PM</td>
+                <td class="col03">SENATE COMMUNITY &amp; REGIONAL AFFAIRS</td>
+                <td class="col04">
+                </td>
+                <td class="col05">
+                        <a class="link-video" href="http://www.akleg.gov/basis/Meeting/Detail?Meeting=SCRA 2026-02-24 13:30:00">Audio/Video</a>
+                </td>
+
+            </tr>
+            <tr>
+                <td class="col01">5/13/2025</td>
+                <td class="col02">8:00 AM</td>
+                <td class="col03">HOUSE COMMUNITY &amp; REGIONAL AFFAIRS</td>
+                <td class="col04">
+<a href="http://www.akleg.gov/basis/Meeting/Detail?Meeting=HCRA 2025-05-13 08:00:00">Minutes</a>                </td>
+                <td class="col05">
+                        <a class="link-video" href="http://www.akleg.gov/basis/Meeting/Detail?Meeting=HCRA 2025-05-13 08:00:00">Audio/Video</a>
+                </td>
+
+            </tr>
+            <tr>
+                <td class="col01">5/8/2025</td>
+                <td class="col02">8:00 AM</td>
+                <td class="col03">HOUSE COMMUNITY &amp; REGIONAL AFFAIRS</td>
+                <td class="col04">
+<a href="http://www.akleg.gov/basis/Meeting/Detail?Meeting=HCRA 2025-05-08 08:00:00">Minutes</a>                </td>
+                <td class="col05">
+                        <a class="link-video" href="http://www.akleg.gov/basis/Meeting/Detail?Meeting=HCRA 2025-05-08 08:00:00">Audio/Video</a>
+                </td>
+
+            </tr>
+            <tr>
+                <td class="col01">5/1/2025</td>
+                <td class="col02">8:00 AM</td>
+                <td class="col03">HOUSE TRIBAL AFFAIRS</td>
+                <td class="col04">
+<a href="http://www.akleg.gov/basis/Meeting/Detail?Meeting=HTRB 2025-05-01 08:00:00">Minutes</a>                </td>
+                <td class="col05">
+                        <a class="link-video" href="http://www.akleg.gov/basis/Meeting/Detail?Meeting=HTRB 2025-05-01 08:00:00">Audio/Video</a>
+                </td>
+
+            </tr>
+    </tbody>
+</table>
+
+
+                        </div>
+                        <div id="tab5_4" class="documents">
+                            <h2>Documents for Bill HB 126 34th Legislature</h2>
+
+                            <p>Additional documents may be added - continue to check back. </p>
+                            <table class="table">
+    <tr>
+        <th class="DocName">Document Name</th>
+
+        <th class="time-col">Date/Time</th>
+        <th class="subject">Subjects</th>
+    </tr>
+    <tbody>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=15977" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=15977');return false;">HB126 Chris Slottee-Response to SLAC Questions 05.04.26 Letter.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+SL&amp;C       5/11/2026 1:30:00 PM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=15976" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=15976');return false;">HB126 DCCED-DBS Response to SL&amp;C Questions 05.05.26.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+SL&amp;C       5/11/2026 1:30:00 PM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=15924" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=15924');return false;">HB126 Dunbar-Draft Proposed Amendment H.3.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+SL&amp;C       5/11/2026 1:30:00 PM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=15923" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=15923');return false;">HB126 Public Testimony-Letter-ANVCA 03.16.26.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+SL&amp;C       5/11/2026 1:30:00 PM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=15922" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=15922');return false;">HB126 Response to Proposed Amendment 05.11.26.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+SL&amp;C       5/11/2026 1:30:00 PM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=15267" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=15267');return false;">HB126 Draft Proposed CS ver. T.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+SL&amp;C       5/4/2026 1:30:00 PM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=14714" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=14714');return false;">HB126 Sponsor Statement version H.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+SL&amp;C       4/27/2026 1:30:00 PM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=14713" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=14713');return false;">HB126 Sectional Analysis version H.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+SL&amp;C       4/27/2026 1:30:00 PM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=14712" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=14712');return false;">HB126SCSCS(CRA)-DCCED-DBS-03.04.26.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+SL&amp;C       4/27/2026 1:30:00 PM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=14711" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=14711');return false;">HB126(CRA) ver. H.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+SL&amp;C       4/27/2026 1:30:00 PM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=14710" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=14710');return false;">HB126SCSCS(CRA)-DCCED-CBPL-03.06.26.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+SL&amp;C       4/27/2026 1:30:00 PM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=14709" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=14709');return false;">HB126 Summary of Changes ver G.A to ver. H.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+SL&amp;C       4/27/2026 1:30:00 PM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=10857" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=10857');return false;">HB126 - SCRA CS work draft version H.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+SCRA       3/3/2026 1:30:00 PM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=10704" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=10704');return false;">HB126 - Legal Opinion version G.A.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+SCRA       3/3/2026 1:30:00 PM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=10344" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=10344');return false;">HB126 DCCED CPBL Fiscal Note 2.20.26 ieBYO.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+SCRA       2/24/2026 1:30:00 PM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=10343" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=10343');return false;">HB126 DCCED Fiscal Note 2.20.26 gXxWM.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+SCRA       2/24/2026 1:30:00 PM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=10197" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=10197');return false;">HB 126 Summary of Changes version G.A.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+SCRA       2/24/2026 1:30:00 PM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=10196" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=10196');return false;">HB 126 Sectional Analysis version G.A.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+SCRA       2/24/2026 1:30:00 PM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=10195" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=10195');return false;">HB 126 Sponsor Statement version G.A.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+SCRA       2/24/2026 1:30:00 PM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=7372" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=7372');return false;">HB 126 Version G 5.2.25.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+HCRA       5/8/2025 8:00:00 AM<br />HCRA       5/13/2025 8:00:00 AM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=7371" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=7371');return false;">HB 126 Version N 3.5.25.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+HCRA       5/8/2025 8:00:00 AM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=7359" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=7359');return false;">HB 126 Fiscal Note Two - DCCED-CBPL 5.2.25.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+HCRA       5/8/2025 8:00:00 AM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=7358" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=7358');return false;">HB 126 Fiscal Note One - DCCED-DBS 5.2.25.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+HCRA       5/8/2025 8:00:00 AM<br />HCRA       5/13/2025 8:00:00 AM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=7357" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=7357');return false;">HB 126 Version I.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+HCRA       5/8/2025 8:00:00 AM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=7356" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=7356');return false;">HB 126 Sponsor Statement version I.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+HCRA       5/8/2025 8:00:00 AM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=6804" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=6804');return false;">HB 126 Fiscal Note DCCED2.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+HCRA       5/13/2025 8:00:00 AM<br />HTRB       5/1/2025 8:00:00 AM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=6803" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=6803');return false;">HB 126 Fiscal Note DCCED.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+HCRA       5/13/2025 8:00:00 AM<br />HTRB       5/1/2025 8:00:00 AM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=6795" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=6795');return false;">HB 126  Letter requesting reinstatment.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+HCRA       5/13/2025 8:00:00 AM<br />HTRB       5/1/2025 8:00:00 AM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=6662" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=6662');return false;">HB 126 version N.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+HTRB       5/1/2025 8:00:00 AM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=6661" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=6661');return false;">HB 126 Sponsor Statement version N.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+HCRA       5/13/2025 8:00:00 AM<br />HTRB       5/1/2025 8:00:00 AM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=6660" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=6660');return false;">HB 126 Hearing Request version N.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+HTRB       5/1/2025 8:00:00 AM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td data-label="Document"><a onclick="return confirm('This document has been placed here by a legislator\'s office and is neither controlled nor condoned by the Legislative Affairs Agency');"  href="https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=6659" onclick="inLineDoc('https://www.akleg.gov/basis/get_documents.asp?session=34&amp;docid=6659');return false;">HB 126 Draft CS Version I.pdf</a></td>
+                <td data-label="MeetingTime">
+                    <span class="uppercase">
+HTRB       5/1/2025 8:00:00 AM<br />                    </span>
+
+                </td>
+                <td>
+                    <span class="uppercase">
+HB 126<br />                    </span>
+                </td>
+            </tr>
+
+
+    </tbody>
+</table>
+                        </div>
+                       
+
+                        <div id="tab6_4" class="actions">
+                            <span style="float:right;margin:5px;padding:5px;"><input type=button onclick="toggleActions();" value="Display Committee Actions" /></span>
+                            <table class="table">
+                                <tr>
+                                    <th width="80px">Jrn Date</th>
+                                    <th width="60px">Jrn Page</th>
+                                    <th>Text</th>
+                                </tr>
+                                <tbody>
+
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-03-05">3/5/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=00297#0297'>297</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) READ THE FIRST TIME - REFERRALS</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-03-05">3/5/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=00297#0297'>297</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) TRB, CRA</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-03-11">3/11/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=00440#0440'>440</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) COSPONSOR(S): JIMMIE</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-03-21">3/21/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=00515#0515'>515</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) COSPONSOR(S): BURKE</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-04-30">4/30/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=00974#0974'>974</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) COSPONSOR(S): DIBERT</span></td>
+                                        </tr>
+                                        <tr class="committeeAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-01">5/1/2025</time></td>
+                                                <td>
+                                                    <span data-label="Page" class="text"><a href='/basis/Meeting/Detail/?Meeting=HTRB 2025-05-01 08:00:00&Bill=HB 126'>Text</a></span>
+                                                </td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) TRIBAL AFFAIRS at 08:00 AM DAVIS 106</span></td>
+                                        </tr>
+                                        <tr class="committeeAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-01">5/1/2025</time></td>
+                                                <td>
+                                                    <span data-label="Page" class="text"><a href='/basis/Meeting/Detail/?Meeting=HTRB 2025-05-01 08:00:00&Bill=HB 126'>Text</a></span>
+                                                </td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) Moved CSHB 126(TRB) Out of Committee </span></td>
+                                        </tr>
+                                        <tr class="committeeAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-01">5/1/2025</time></td>
+                                                <td>
+                                                    <a name="2025-05-01HTRB"></a>
+                                                    <span data-label="Page" class="text"><a href='/basis/Meeting/Detail/?Meeting=HTRB 2025-05-01 08:00:00&Bill=HB 126'>Min</a></span>
+                                                </td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) Minutes (HTRB)</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-02">5/2/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=00987#0987'>987</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) TRB RPT CS(TRB) NEW TITLE 6DP 1NR</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-02">5/2/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=00987#0987'>987</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) DP: MOORE, UNDERWOOD, SCHWANKE, BURKE, STORY, DIBERT</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-02">5/2/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=00987#0987'>987</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) NR: CARRICK</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-02">5/2/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=00987#0987'>987</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) FN1: ZERO(CED)</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-02">5/2/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=00987#0987'>987</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) FN2: ZERO(CED)</span></td>
+                                        </tr>
+                                        <tr class="committeeAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-08">5/8/2025</time></td>
+                                                <td>
+                                                    <span data-label="Page" class="text"><a href='/basis/Meeting/Detail/?Meeting=HCRA 2025-05-08 08:00:00&Bill=HB 126'>Text</a></span>
+                                                </td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) COMMUNITY &amp; REGIONAL AFFAIRS at 08:00 AM BARNES 124</span></td>
+                                        </tr>
+                                        <tr class="committeeAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-08">5/8/2025</time></td>
+                                                <td>
+                                                    <span data-label="Page" class="text"><a href='/basis/Meeting/Detail/?Meeting=HCRA 2025-05-08 08:00:00&Bill=HB 126'>Text</a></span>
+                                                </td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) Heard &amp; Held </span></td>
+                                        </tr>
+                                        <tr class="committeeAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-08">5/8/2025</time></td>
+                                                <td>
+                                                    <a name="2025-05-08HCRA"></a>
+                                                    <span data-label="Page" class="text"><a href='/basis/Meeting/Detail/?Meeting=HCRA 2025-05-08 08:00:00&Bill=HB 126'>Min</a></span>
+                                                </td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) Minutes (HCRA)</span></td>
+                                        </tr>
+                                        <tr class="committeeAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-13">5/13/2025</time></td>
+                                                <td>
+                                                    <span data-label="Page" class="text"><a href='/basis/Meeting/Detail/?Meeting=HCRA 2025-05-13 08:00:00&Bill=HB 126'>Text</a></span>
+                                                </td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) COMMUNITY &amp; REGIONAL AFFAIRS at 08:00 AM BARNES 124</span></td>
+                                        </tr>
+                                        <tr class="committeeAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-13">5/13/2025</time></td>
+                                                <td>
+                                                    <span data-label="Page" class="text"><a href='/basis/Meeting/Detail/?Meeting=HCRA 2025-05-13 08:00:00&Bill=HB 126'>Text</a></span>
+                                                </td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) Moved CSHB 126(TRB) Out of Committee </span></td>
+                                        </tr>
+                                        <tr class="committeeAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-13">5/13/2025</time></td>
+                                                <td>
+                                                    <a name="2025-05-13HCRA"></a>
+                                                    <span data-label="Page" class="text"><a href='/basis/Meeting/Detail/?Meeting=HCRA 2025-05-13 08:00:00&Bill=HB 126'>Min</a></span>
+                                                </td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) Minutes (HCRA)</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-14">5/14/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=01188#1188'>1188</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) CRA RPT CS(TRB) NEW TITLE 5DP</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-14">5/14/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=01188#1188'>1188</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) DP: HOLLAND, PRAX, HALL, HIMSCHOOT, MEARS</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-14">5/14/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=01188#1188'>1188</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) FN1: ZERO(CED)</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-14">5/14/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=01188#1188'>1188</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) FN2: ZERO(CED)</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-18">5/18/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=01292#1292'>1292</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) RULES TO CALENDAR 5/18/2025</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-18">5/18/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=01292#1292'>1292</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) READ THE SECOND TIME</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-18">5/18/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=01292#1292'>1292</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) TRB CS ADOPTED UC</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-18">5/18/2025</time></td>
+                                                <td>
+                                                    <span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=01292#AM1'>1292</a></span>
+                                                </td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) AM NO 1 ADOPTED Y23 N17</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-18">5/18/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=01294#1294'>1294</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) ...CHANGES TITLE OF LEGISLATION</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-18">5/18/2025</time></td>
+                                                <td>
+                                                    <span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=01295#AM2'>1295</a></span>
+                                                </td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) AM NO 2 FAILED Y17 N23</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-18">5/18/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=01296#1296'>1296</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) MOTION TO RESCIND ACTION (ADOPTING)AM 1 WITHDRAWN</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-18">5/18/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=01296#1296'>1296</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) ADVANCED TO THIRD READING UC</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-18">5/18/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=01296#1296'>1296</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) READ THE THIRD TIME CSHB 126(TRB) AM</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-18">5/18/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=01296#1296'>1296</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) PASSED Y40</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-18">5/18/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=01297#1297'>1297</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) EFFECTIVE DATE(S) SAME AS PASSAGE</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-18">5/18/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=01305#1305'>1305</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) COSPONSOR(S): JOSEPHSON, ALLARD, BYNUM, KOPP, NELSON</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-18">5/18/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=01306#1306'>1306</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) TRANSMITTED TO (S)</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-18">5/18/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=01306#1306'>1306</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) VERSION: CSHB 126(TRB) AM</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-19">5/19/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=01339#1339'>1339</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) READ THE FIRST TIME - REFERRALS</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2025-05-19">5/19/2025</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=01339#1339'>1339</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) CRA, L&amp;C</span></td>
+                                        </tr>
+                                        <tr class="committeeAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-02-24">2/24/2026</time></td>
+                                                <td>
+                                                    <span data-label="Page" class="text"><a href='/basis/Meeting/Detail/?Meeting=SCRA 2026-02-24 13:30:00&Bill=HB 126'>Text</a></span>
+                                                </td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) COMMUNITY &amp; REGIONAL AFFAIRS at 01:30 PM BELTZ 105 (TSBldg)</span></td>
+                                        </tr>
+                                        <tr class="committeeAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-02-24">2/24/2026</time></td>
+                                                <td>
+                                                    <span data-label="Page" class="text"><a href='/basis/Meeting/Detail/?Meeting=SCRA 2026-02-24 13:30:00&Bill=HB 126'>Text</a></span>
+                                                </td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) Heard &amp; Held </span></td>
+                                        </tr>
+                                        <tr class="committeeAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-03-03">3/3/2026</time></td>
+                                                <td>
+                                                    <span data-label="Page" class="text"><a href='/basis/Meeting/Detail/?Meeting=SCRA 2026-03-03 13:30:00&Bill=HB 126'>Text</a></span>
+                                                </td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) COMMUNITY &amp; REGIONAL AFFAIRS at 01:30 PM BELTZ 105 (TSBldg)</span></td>
+                                        </tr>
+                                        <tr class="committeeAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-03-03">3/3/2026</time></td>
+                                                <td>
+                                                    <span data-label="Page" class="text"><a href='/basis/Meeting/Detail/?Meeting=SCRA 2026-03-03 13:30:00&Bill=HB 126'>Text</a></span>
+                                                </td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) Moved SCS CSHB 126(CRA) Out of Committee </span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-03-04">3/4/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=01829#1829'>1829</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) CRA RPT SCS 3DP 1NR   NEW TITLE</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-03-04">3/4/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=01829#1829'>1829</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) TITLE CHANGE: SCR 13</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-03-04">3/4/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=01829#1829'>1829</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) DP: MERRICK, OLSON, GRAY-JACKSON</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-03-04">3/4/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=01829#1829'>1829</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) NR: YUNDT</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-03-04">3/4/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=01829#1829'>1829</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) FN3: ZERO(CED)</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-03-04">3/4/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=01829#1829'>1829</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) FN4: ZERO(CED)</span></td>
+                                        </tr>
+                                        <tr class="committeeAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-04-27">4/27/2026</time></td>
+                                                <td>
+                                                    <span data-label="Page" class="text"><a href='/basis/Meeting/Detail/?Meeting=SL%26C 2026-04-27 13:30:00&Bill=HB 126'>Text</a></span>
+                                                </td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) LABOR &amp; COMMERCE at 01:30 PM BELTZ 105 (TSBldg)</span></td>
+                                        </tr>
+                                        <tr class="committeeAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-04-27">4/27/2026</time></td>
+                                                <td>
+                                                    <span data-label="Page" class="text"><a href='/basis/Meeting/Detail/?Meeting=SL%26C 2026-04-27 13:30:00&Bill=HB 126'>Text</a></span>
+                                                </td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) Heard &amp; Held </span></td>
+                                        </tr>
+                                        <tr class="committeeAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-04">5/4/2026</time></td>
+                                                <td>
+                                                    <span data-label="Page" class="text"><a href='/basis/Meeting/Detail/?Meeting=SL%26C 2026-05-04 13:30:00&Bill=HB 126'>Text</a></span>
+                                                </td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) LABOR &amp; COMMERCE at 01:30 PM BELTZ 105 (TSBldg)</span></td>
+                                        </tr>
+                                        <tr class="committeeAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-04">5/4/2026</time></td>
+                                                <td>
+                                                    <span data-label="Page" class="text"><a href='/basis/Meeting/Detail/?Meeting=SL%26C 2026-05-04 13:30:00&Bill=HB 126'>Text</a></span>
+                                                </td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) Heard &amp; Held </span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-06">5/6/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=02493#2493'>2493</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) CROSS SPONSOR(S): GRAY-JACKSON, GIESSEL, CLAMAN, CRONK, MERRICK, STEVENS</span></td>
+                                        </tr>
+                                        <tr class="committeeAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-11">5/11/2026</time></td>
+                                                <td>
+                                                    <span data-label="Page" class="text"><a href='/basis/Meeting/Detail/?Meeting=SL%26C 2026-05-11 13:30:00&Bill=HB 126'>Text</a></span>
+                                                </td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) LABOR &amp; COMMERCE at 01:30 PM BELTZ 105 (TSBldg)</span></td>
+                                        </tr>
+                                        <tr class="committeeAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-11">5/11/2026</time></td>
+                                                <td>
+                                                    <span data-label="Page" class="text"><a href='/basis/Meeting/Detail/?Meeting=SL%26C 2026-05-11 13:30:00&Bill=HB 126'>Text</a></span>
+                                                </td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) Moved SCS CSHB 126(L&amp;C) Out of Committee </span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-13">5/13/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=02620#2620'>2620</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) L&amp;C RPT SCS 1NR 2DP 1AM   NEW TITLE</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-13">5/13/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=02620#2620'>2620</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) TITLE CHANGE: SCR 13</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-13">5/13/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=02620#2620'>2620</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) NR: BJORKMAN</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-13">5/13/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=02620#2620'>2620</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) DP: GRAY-JACKSON, YUNDT</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-13">5/13/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=02620#2620'>2620</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) AM: DUNBAR</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-13">5/13/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=02620#2620'>2620</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) FN5: ZERO(CED)</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-13">5/13/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=02620#2620'>2620</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) FN6: ZERO(CED)</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-18">5/18/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=02758#2758'>2758</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) RULES TO CALENDAR 5/18/2026</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-18">5/18/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=02758#2758'>2758</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) READ THE SECOND TIME</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-18">5/18/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=02758#2758'>2758</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) L&amp;C SCS ADOPTED UC</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-18">5/18/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=02759#2759'>2759</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) ADVANCED TO THIRD READING 5/19 CAL</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-19">5/19/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=02795#2795'>2795</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) READ THE THIRD TIME SCS CSHB 126(L&amp;C)</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-19">5/19/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=02795#2795'>2795</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) PASSED Y20 N-</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-19">5/19/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=02795#2795'>2795</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) EFFECTIVE DATE(S) SAME AS PASSAGE</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-19">5/19/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=02806#2806'>2806</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) TRANSMITTED TO (H) AS AMENDED</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-19">5/19/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=S&Bill=HB 126&Page=02806#2806'>2806</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(S) VERSION: SCS CSHB 126(L&amp;C)</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-20">5/20/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=02970#2970'>2970</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) CONCUR MESSAGE RECEIVED</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-20">5/20/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=02970#2970'>2970</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) CONCUR MESSAGE TAKEN UP</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-20">5/20/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=02970#2970'>2970</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) CONCUR AM OF (S) Y36 N3 A1</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-20">5/20/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=02971#2971'>2971</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) EFFECTIVE DATE(S) SAME AS PASSAGE</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-05-20">5/20/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=02971#2971'>2971</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) TITLE CHANGE: SCR 13</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-06-10">6/10/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=03059#3059'>3059</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) 1:55 P.M. 6/8/26 TRANSMITTED TO GOVERNOR</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-07-03">7/3/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=03147#3147'>3147</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) SIGNED INTO LAW 6/24 CHAPTER 37 SLA 26</span></td>
+                                        </tr>
+                                        <tr class="floorAction" style="cursor:pointer">
+                                            <td><time data-label=" date" datetime="2026-07-03">7/3/2026</time></td>
+                                                <td><span data-label="Page" class="text"><a href='/basis/Journal/Pages/34?Chamber=H&Bill=HB 126&Page=03147#3147'>3147</a></span></td>
+                                            <td style="text-align:left"><span data-label="Text" class="text">(H) EFFECTIVE DATE(S) OF LAW 6/25/26</span></td>
+                                        </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <ul class="list-links">
+                        <li>
+                            <a href="/basis/Bill/Similar/34?Root=HB%20126">Similar Subject Match</a>
+                            <span>or</span>
+                            <a href="/basis/Bill/Exact/34?Root=HB%20126">Exact Subject Match</a>
+                        </li>
+                            <li><a href="/basis/Bill/Subject/34?subject=ALASKA%20NATIVES">ALASKA NATIVES</a></li>
+                            <li><a href="/basis/Bill/Subject/34?subject=CORPORATIONS">CORPORATIONS</a></li>
+                            <li><a href="/basis/Bill/Subject/34?subject=NATIVE%20ORGANIZATIONS">NATIVE ORGANIZATIONS</a></li>
+                    </ul>
+                    <form action="#" class="number-row style">
+                        <fieldset>
+                            <label for="lab02">Bill Number:</label>
+                            <input id="lab02" name="Root" type="text" placeholder="">
+                            <input type="submit" value="Display Bill">
+                            <a class="btn-bill" href="/basis/Bill/Detail/34?Root=HB 127">Next Bill</a>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+            
+
+						
+
+					</div>
+				</div>
+			</div>
+
+
+			
+
+
+
+
+
+
+
+
+
+
+
+
+			<footer id="footer">
+				<div class="footer-holder">
+					<div class="footer-frame">
+						<div class="info-block">
+							<h2><span>Welcome to</span><br>The Alaska State Legislature </h2>
+							<div class="description">
+								<a class="logo" href="#"><img src="//akleg.gov/images/logo.png" width="105" height="107" alt="The Seal of the State of Alaska"></a>
+								<p>This web site is the place to <a href="https://www.akleg.gov/basis/btmf_login.asp?session=33">track bills</a>, <a href="https://www.elections.alaska.gov/electoral-process/#elected-officials">locate</a> and <a href="https://akleg.gov/docs/akleg-legislator-contact-list-whos-who.php">contact your legislators</a>, and access <a href="http://www.akleg.gov/basis/Committee/">committee information</a>.  <strong>Questions?  Try our</strong> <a href="http://akleg.gov/webmaster.php">help wizard</a> or call <strong>907-465-4648.</strong></p>
+							</div>
+						</div>
+						<div class="info-box">
+
+							<div class="box" style="padding:15px;">
+
+								<style type="text/css">
+									.info-box h6 {
+										display: inline-block;
+										vertical-align: top;
+										color: #2e4676;
+										font: 20px/23px Georgia, serif;
+										font-style: normal;
+										font-variant-caps: normal;
+										font-variant-ligatures: normal;
+										font-variant-numeric: normal;
+										font-variant-east-asian: normal;
+										font-weight: normal;
+										font-stretch: normal;
+										font-size: 20px;
+										line-height: 23px;
+										font-family: Georgia, serif;
+										margin: 0 0 3px;
+									}
+								</style>
+
+								<h6>SMS Bill Tracking</h6>
+
+								<span style="font-size:12px;line-height:20px;">
+									Text a bill number (ex: HB1) to 559-245-2529 to enroll in text alerts. You will receive an enrollment confirmation and instructions on how to stop receiving the alerts.
+								</span>
+
+							</div>
+
+						</div>
+
+						<div class="user-block">
+							<form action="#" class="address-form">
+								<fieldset>
+									<div class="FYR"><div class="find-your-rep fyr-container" id="fyr" data-apis="openstates"><h2>WHO REPRESENTS ME??</h2><div class="fyr-controls"><textarea onkeypress="function(e){ if(e.key==13){$('#fyr-submit').click();}}" id="fyr-input-enter" placeholder="Enter Full Address"></textarea><button id="fyr-submit" class="fyr-submit">FIND</button></div></div></div>
+								</fieldset>
+							</form>
+							<!-- <div class="mobile-panel desctop">
+								<span>Mobile Apps</span>
+								<ul>
+									<li><a href="http://itunes.apple.com/us/app/the-alaska-legislature/id449649208?mt=8"><img src="//akleg.gov/images/app-store.png" width="132" height="45" alt="image description"></a></li>
+									<li><a href="https://play.google.com/store/apps/details?id=com.AKLeg.AndroidApp&feature=search_result#?t=W251bGwsMSwyLDEsImNvbS5BS0xlZy5BbmRyb2lkQXBwIl0."><img src="//akleg.gov/images/google-play.png" width="123" height="44" alt="image description"></a></li>
+								</ul>
+							</div> -->
+						</div>
+					</div>
+				</div>
+				<div class="footer-nav">
+					<div class="footer-nav-holder">
+						<div class="nav-holder">
+							<div class="col">
+								<h2>Quick Links</h2>
+								<nav class="navigation">
+									<ul>
+										<li><a href="http://www.akleg.gov/basis/folio.asp">Infobases</a></li>
+										<li><a href="http://akleg.gov/Districts.php">Districts</a></li>
+										<li><a href="http://akleg.gov/faq.php">FAQ</a></li>
+									</ul>
+									<ul>
+										<li><a href="http://akleg.gov/lios.php">Legislative Information Offices</a></li>
+										<li><a href="http://akleg.gov/legaffairs.php">Legislative Affairs Agency</a></li>
+										<li><a href="http://www.akleg.gov/poms/">Public Opinion Messages</a></li>
+									</ul>
+								</nav>
+							</div>
+							<div class="col style">
+								<h2>Legislative Links</h2>
+								<nav class="navigation">
+									<ul>
+										<li><a href="http://www.legfin.akleg.gov/">Finance</a></li>
+										<li><a href="http://legaudit.akleg.gov/">Audit</a></li>
+										<li><a href="http://ombud.alaska.gov/">Ombudsman</a></li>
+									</ul>
+																		<ul class="nav-style">
+										<li><a href="/100years/legislature.php">100 Years Centennial</a></li>
+										<li><a href="https://ovr.akleg.gov/">Office of Victims' Rights</a></li>
+										<li><a href="http://www.legfin.akleg.gov/JERRI/AllReports.php">Statutory Reporting</a></li>
+									</ul>
+									<ul>
+										<li><a href="http://ethics.akleg.gov/">Ethics</a></li>
+										<li><a href="http://lba.akleg.gov/">LB&amp;A</a></li>
+									</ul>
+
+								</nav>
+							</div>
+							<div class="col">
+								<h2>senate</h2>
+								<nav class="navigation">
+									<ul>
+										<li><a onclick="return confirm('This website is not controlled by the Legislative Affairs Agency');" href="http://www.alaskasenate.org/">Majority</a></li>
+										<li><a onclick="return confirm('This website is not controlled by the Legislative Affairs Agency');" href="https://alaskasenateminority.com/">Minority</a></li>
+
+									</ul>
+								</nav>
+							</div>
+							<div class="col">
+								<h2>house</h2>
+								<nav class="navigation" style="width:100% !important;">
+									<ul>
+
+										<li><a onclick="return confirm('This website is not controlled by the Legislative Affairs Agency');" href="http://www.alaskahousemajority.com/">Majority</a></li>
+										<li><a onclick="return confirm('This website is not controlled by the Legislative Affairs Agency');" href="https://alaskahouse.org/">Minority</a></li>
+										<!-- do not delete
+
+										<li><a onclick="return confirm('This website is not controlled by the Legislative Affairs Agency');" href="https://www.alaskahousegop.com/">Minority</a></li> -->
+									</ul>
+								</nav>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="footer-container">
+					<div class="mobile-panel mobile">
+						<span><a href="http://akleg.gov/disclaimer.php">Disclaimer / Credits</a></span>
+						<span><a href="http://akleg.gov/webmaster.php?step=1">Webmaster</a></span>
+						<span><a href="http://akleg.gov/ada.php">Accessibility</span>
+						<span>Mobile Apps</span>
+						<ul>
+							<li><a href="#"><img src="//akleg.gov/images/app-store02.png" width="116" height="39" alt="image description"></a></li>
+							<li><a href="#"><img src="//akleg.gov/images/google-play02.png" width="109" height="38" alt="image description"></a></li>
+						</ul>
+					</div>
+					<div class="copyright">
+						Copyright &copy; 2026 Alaska Legislature, All Rights Reserved.
+						<ul class="add-nav">
+							<li><a href="http://akleg.gov/disclaimer.php">Disclaimer / Credits</a></li>
+							<li><a href="http://akleg.gov/webmaster.php?step=1">Webmaster</a></li>
+							<li><a href="http://akleg.gov/ada.php">Accessibility</a></li>
+						</ul>
+					</div>
+					<!--<ul class="add-nav">
+						<li><a href="http://akleg.gov/disclaimer.php">Disclaimer / Credits</a></li>
+						<li><a href="http://akleg.gov/webmaster.php?step=1">Webmaster</a></li>
+					</ul>-->
+				</div>
+			</footer>
+		</div>
+	</div>
+	<!--Start of Tawk.to Script-->
+	<script type="text/javascript">
+		var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+		(function () {
+			var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
+			s1.async = true;
+			s1.src = 'https://embed.tawk.to/581103441e35c727dc13abe8/default';
+			s1.charset = 'UTF-8';
+			s1.setAttribute('crossorigin', '*');
+			s0.parentNode.insertBefore(s1, s0);
+		})();
+	</script>
+	<!--End of Tawk.to Script-->
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2686a2889a9de92',t:'MTc4NTk2MDMwNg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+
+<script>
+$(".FYR").findYourRep({
+	apikey: 'bc56f0b8-c374-4f78-996b-fd575a8b8d5b',
+	apis:"openstates",
+	title: 'WHO REPRESENTS ME?',
+	resultTemplate: "<li class='fyr-rep cf'><a href='{{ url }}' target='_top'><img src='{{ photoUrl }}' alt='photo of'><h4>{{ name }}</h4><p class='fyr-details'>{{ details }}</p></a></li>",
+	text: 'Enter Your Full Address',
+	action: 'FIND'});
+</script>
+
+
+
+<script type="text/javascript">
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-17647732-1']);
+	_gaq.push(['_trackPageview']);
+
+	(function () {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	})();
+</script>
+<script>
+	function submitFYR(e) { if (e.key == "Enter") { $('#fyr-submit').click(); } }
+
+
+	function doRefresh() {
+		$.ajax({
+			url: "/includes/updatewidget.php",
+			success: function (data) {
+				$("#updated2").html(data);
+				setTimeout(doRefresh, 15000);
+			}
+		});
+	}
+	setTimeout(doRefresh, 15000);
+</script>
+
+
+
+
+</html>

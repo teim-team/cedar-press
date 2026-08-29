@@ -1,0 +1,2087 @@
+{
+ "generated_utc": "2026-08-26T22:30:39.961237+00:00",
+ "script": "code/197_measure_pre2007_identifier_surface.py",
+ "network_requests_issued": 0,
+ "purpose": "Separate 'FAADS-as-held carries no recipient identifier' (true) from 'pre-FY2007 per-entity spending is unobtainable' (does not follow).",
+ "faads": {
+  "path": "C:\\Users\\esm247\\Desktop\\Cedar Press\\data\\clean\\faads_transactions_all_agencies.csv",
+  "columns": [
+   "fiscal_year",
+   "cfda_program",
+   "agency",
+   "recipient_name",
+   "recipient_type",
+   "recipient_city",
+   "recipient_state",
+   "recipient_zip",
+   "recipient_duns",
+   "obligated_usd",
+   "assistance_type",
+   "action_date",
+   "source_url",
+   "fetched_date",
+   "tribe_id",
+   "recipient_uei",
+   "recipient_type_description",
+   "cfda_title",
+   "assistance_type_description",
+   "awarding_sub_agency",
+   "award_id_fain",
+   "record_type",
+   "api_endpoint",
+   "source_file"
+  ],
+  "total_rows": 2769748,
+  "overall_populated_pct": {
+   "recipient_duns": 24.4439,
+   "recipient_uei": 21.8306,
+   "tribe_id": 0.0,
+   "award_id_fain": 100.0,
+   "recipient_name": 99.9984,
+   "recipient_city": 88.607,
+   "recipient_state": 99.9978,
+   "recipient_zip": 86.4077,
+   "recipient_type": 99.9978,
+   "cfda_program": 100.0,
+   "source_url": 100.0,
+   "api_endpoint": 100.0,
+   "source_file": 100.0
+  },
+  "by_fiscal_year": {
+   "2001": {
+    "rows": 316006,
+    "obligated_usd": 208466539440.0,
+    "populated_pct": {
+     "recipient_duns": 0.0003,
+     "recipient_uei": 0.0003,
+     "tribe_id": 0.0,
+     "award_id_fain": 100.0,
+     "recipient_name": 99.9858,
+     "recipient_city": 84.3031,
+     "recipient_state": 100.0,
+     "recipient_zip": 66.1715,
+     "recipient_type": 100.0,
+     "cfda_program": 100.0,
+     "source_url": 100.0,
+     "api_endpoint": 100.0,
+     "source_file": 100.0
+    },
+    "distinct_name_city_state_zip": 88138
+   },
+   "2002": {
+    "rows": 321290,
+    "obligated_usd": 213130194613.0,
+    "populated_pct": {
+     "recipient_duns": 0.0009,
+     "recipient_uei": 0.0006,
+     "tribe_id": 0.0,
+     "award_id_fain": 100.0,
+     "recipient_name": 100.0,
+     "recipient_city": 81.8563,
+     "recipient_state": 100.0,
+     "recipient_zip": 81.7062,
+     "recipient_type": 100.0,
+     "cfda_program": 100.0,
+     "source_url": 100.0,
+     "api_endpoint": 100.0,
+     "source_file": 100.0
+    },
+    "distinct_name_city_state_zip": 69519
+   },
+   "2003": {
+    "rows": 334206,
+    "obligated_usd": 215364062845.0,
+    "populated_pct": {
+     "recipient_duns": 0.0018,
+     "recipient_uei": 0.0012,
+     "tribe_id": 0.0,
+     "award_id_fain": 100.0,
+     "recipient_name": 100.0,
+     "recipient_city": 82.9183,
+     "recipient_state": 100.0,
+     "recipient_zip": 82.3887,
+     "recipient_type": 100.0,
+     "cfda_program": 100.0,
+     "source_url": 100.0,
+     "api_endpoint": 100.0,
+     "source_file": 100.0
+    },
+    "distinct_name_city_state_zip": 71542
+   },
+   "2004": {
+    "rows": 318543,
+    "obligated_usd": 233362400508.0,
+    "populated_pct": {
+     "recipient_duns": 0.0028,
+     "recipient_uei": 0.0025,
+     "tribe_id": 0.0,
+     "award_id_fain": 100.0,
+     "recipient_name": 100.0,
+     "recipient_city": 82.263,
+     "recipient_state": 100.0,
+     "recipient_zip": 81.7459,
+     "recipient_type": 100.0,
+     "cfda_program": 100.0,
+     "source_url": 100.0,
+     "api_endpoint": 100.0,
+     "source_file": 100.0
+    },
+    "distinct_name_city_state_zip": 69562
+   },
+   "2005": {
+    "rows": 327210,
+    "obligated_usd": 226862765043.9,
+    "populated_pct": {
+     "recipient_duns": 0.0021,
+     "recipient_uei": 0.0012,
+     "tribe_id": 0.0,
+     "award_id_fain": 100.0,
+     "recipient_name": 100.0,
+     "recipient_city": 84.4287,
+     "recipient_state": 100.0,
+     "recipient_zip": 84.0078,
+     "recipient_type": 100.0,
+     "cfda_program": 100.0,
+     "source_url": 100.0,
+     "api_endpoint": 100.0,
+     "source_file": 100.0
+    },
+    "distinct_name_city_state_zip": 72435
+   },
+   "2006": {
+    "rows": 377738,
+    "obligated_usd": 258093652125.93,
+    "populated_pct": {
+     "recipient_duns": 0.0103,
+     "recipient_uei": 0.0093,
+     "tribe_id": 0.0,
+     "award_id_fain": 100.0,
+     "recipient_name": 100.0,
+     "recipient_city": 90.23,
+     "recipient_state": 100.0,
+     "recipient_zip": 89.4504,
+     "recipient_type": 100.0,
+     "cfda_program": 100.0,
+     "source_url": 100.0,
+     "api_endpoint": 100.0,
+     "source_file": 100.0
+    },
+    "distinct_name_city_state_zip": 76247
+   },
+   "2007": {
+    "rows": 774755,
+    "obligated_usd": 475359703131.83,
+    "populated_pct": {
+     "recipient_duns": 87.3786,
+     "recipient_uei": 78.0374,
+     "tribe_id": 0.0,
+     "award_id_fain": 100.0,
+     "recipient_name": 100.0,
+     "recipient_city": 99.1976,
+     "recipient_state": 99.9923,
+     "recipient_zip": 99.7917,
+     "recipient_type": 99.9923,
+     "cfda_program": 100.0,
+     "source_url": 100.0,
+     "api_endpoint": 100.0,
+     "source_file": 100.0
+    },
+    "distinct_name_city_state_zip": null
+   }
+  },
+  "api_endpoint_values": {
+   "https://api.usaspending.gov/api/v2/bulk_download/awards/": 2769748
+  },
+  "distinct_source_files": 77,
+  "source_file_sample": [
+   "ed_fy2007_archive.zip",
+   "hud_fy2007_archive.zip",
+   "dot_fy2007_archive.zip",
+   "usda_fy2003.zip",
+   "usda_fy2002.zip",
+   "dot_fy2006.zip",
+   "usda_fy2004.zip",
+   "hud_fy2006.zip"
+  ]
+ },
+ "fpds_extracts": [
+  {
+   "path": "C:\\Users\\esm247\\Desktop\\Cedar Press\\data\\raw\\esm_hci\\ESM\\raw\\Data Request 4-5-2023 File 1.csv",
+   "rows_scanned": 1101796,
+   "pre_fy2007": {
+    "rows": 117319,
+    "obligated_usd": 23371141529.83,
+    "distinct_uei": 4087,
+    "distinct_cage": 33,
+    "distinct_duns": 4071,
+    "distinct_piid": 48374
+   },
+   "by_fiscal_year": {
+    "1989": {
+     "rows": 85,
+     "obligated_usd": 730950000.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 81.1765,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 85.8824,
+      "type_of_set_aside": 5.8824,
+      "naics_code": 0.0,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1997": {
+     "rows": 8,
+     "obligated_usd": 1287012.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 50.0,
+      "recipient_duns": 87.5,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 62.5,
+      "naics_code": 50.0,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1998": {
+     "rows": 60,
+     "obligated_usd": 9578089.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 70.0,
+      "recipient_duns": 91.6667,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 31.6667,
+      "naics_code": 71.6667,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1999": {
+     "rows": 2454,
+     "obligated_usd": 734071694.38,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 1.9152,
+      "recipient_duns": 99.7148,
+      "recipient_name": 99.837,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.6333,
+      "type_of_set_aside": 88.7531,
+      "naics_code": 3.7897,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2000": {
+     "rows": 3460,
+     "obligated_usd": 900041355.01,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.5491,
+      "recipient_duns": 99.5954,
+      "recipient_name": 99.7399,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.7977,
+      "type_of_set_aside": 90.2023,
+      "naics_code": 6.6763,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2001": {
+     "rows": 5098,
+     "obligated_usd": 1391534306.37,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.4119,
+      "recipient_duns": 97.3911,
+      "recipient_name": 99.7254,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8235,
+      "type_of_set_aside": 92.7619,
+      "naics_code": 96.8811,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2002": {
+     "rows": 8275,
+     "obligated_usd": 1707183740.5,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.4834,
+      "recipient_duns": 98.4532,
+      "recipient_name": 99.8187,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.7946,
+      "type_of_set_aside": 93.7039,
+      "naics_code": 97.5347,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2003": {
+     "rows": 13524,
+     "obligated_usd": 3179892203.96,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.3845,
+      "recipient_duns": 99.4972,
+      "recipient_name": 99.9778,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8595,
+      "type_of_set_aside": 93.3969,
+      "naics_code": 97.1088,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2004": {
+     "rows": 21378,
+     "obligated_usd": 4201378918.27,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.3415,
+      "recipient_duns": 99.565,
+      "recipient_name": 99.986,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.5977,
+      "type_of_set_aside": 73.1406,
+      "naics_code": 95.7807,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2005": {
+     "rows": 26095,
+     "obligated_usd": 5132222120.2,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.2261,
+      "recipient_duns": 99.4022,
+      "recipient_name": 99.9808,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.6743,
+      "type_of_set_aside": 84.0659,
+      "naics_code": 84.771,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2006": {
+     "rows": 36882,
+     "obligated_usd": 5383002090.14,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.225,
+      "recipient_duns": 99.5797,
+      "recipient_name": 99.9648,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.7966,
+      "type_of_set_aside": 94.3224,
+      "naics_code": 87.1374,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2007": {
+     "rows": 44150,
+     "obligated_usd": 6655905397.71,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.4054,
+      "recipient_duns": 99.6149,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8754,
+      "type_of_set_aside": 96.376,
+      "naics_code": 92.6546,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2008": {
+     "rows": 52105,
+     "obligated_usd": 9485137910.91,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.4875,
+      "recipient_duns": 99.2515,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8062,
+      "type_of_set_aside": 98.2075,
+      "naics_code": 92.7915,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2009": {
+     "rows": 55098,
+     "obligated_usd": 11183315595.57,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.4374,
+      "recipient_duns": 98.8148,
+      "recipient_name": 99.9964,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.6388,
+      "type_of_set_aside": 99.4918,
+      "naics_code": 98.4773,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2010": {
+     "rows": 61854,
+     "obligated_usd": 11877196263.82,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.4446,
+      "recipient_duns": 98.8214,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.6767,
+      "type_of_set_aside": 99.0461,
+      "naics_code": 99.0267,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2011": {
+     "rows": 63412,
+     "obligated_usd": 11594287739.64,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.522,
+      "recipient_duns": 98.4577,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.7508,
+      "type_of_set_aside": 99.3455,
+      "naics_code": 99.5253,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 99.9984
+     }
+    },
+    "2012": {
+     "rows": 57875,
+     "obligated_usd": 12658444355.31,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.6583,
+      "recipient_duns": 98.1011,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8652,
+      "type_of_set_aside": 99.4263,
+      "naics_code": 99.6976,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 99.9983
+     }
+    },
+    "2013": {
+     "rows": 51407,
+     "obligated_usd": 9569604092.73,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.9007,
+      "recipient_duns": 97.7805,
+      "recipient_name": 99.9961,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8755,
+      "type_of_set_aside": 99.5273,
+      "naics_code": 99.8774,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 99.9981
+     }
+    },
+    "2014": {
+     "rows": 54933,
+     "obligated_usd": 11554869847.1,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 1.0303,
+      "recipient_duns": 97.6007,
+      "recipient_name": 99.9909,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8926,
+      "type_of_set_aside": 99.5558,
+      "naics_code": 99.9035,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2015": {
+     "rows": 58791,
+     "obligated_usd": 11247667460.23,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 1.6006,
+      "recipient_duns": 97.9266,
+      "recipient_name": 99.9711,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8758,
+      "type_of_set_aside": 99.6428,
+      "naics_code": 99.9524,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 99.9983
+     }
+    },
+    "2016": {
+     "rows": 62327,
+     "obligated_usd": 11956826228.79,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 2.8559,
+      "recipient_duns": 97.9575,
+      "recipient_name": 99.931,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.7818,
+      "type_of_set_aside": 99.5909,
+      "naics_code": 99.9005,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 99.9984
+     }
+    },
+    "2017": {
+     "rows": 65064,
+     "obligated_usd": 13346040145.71,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 76.3279,
+      "recipient_duns": 97.3242,
+      "recipient_name": 99.8709,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8002,
+      "type_of_set_aside": 98.752,
+      "naics_code": 99.854,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2018": {
+     "rows": 62787,
+     "obligated_usd": 14245690823.58,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 99.9729,
+      "recipient_duns": 95.0276,
+      "recipient_name": 99.8646,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.4457,
+      "type_of_set_aside": 44.6,
+      "naics_code": 99.8965,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 99.9952
+     }
+    },
+    "2019": {
+     "rows": 62970,
+     "obligated_usd": 15820199992.24,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 99.9905,
+      "recipient_duns": 93.4572,
+      "recipient_name": 99.7554,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.873,
+      "type_of_set_aside": 41.6278,
+      "naics_code": 99.6649,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 99.9984
+     }
+    },
+    "2020": {
+     "rows": 66954,
+     "obligated_usd": 17851581207.13,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 99.994,
+      "recipient_duns": 91.521,
+      "recipient_name": 99.7401,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8895,
+      "type_of_set_aside": 39.209,
+      "naics_code": 99.9522,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2021": {
+     "rows": 67082,
+     "obligated_usd": 19662035963.12,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 99.9985,
+      "cage_code": 99.9866,
+      "recipient_duns": 81.4183,
+      "recipient_name": 99.3351,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8614,
+      "type_of_set_aside": 38.3068,
+      "naics_code": 99.8867,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 99.9508
+     }
+    },
+    "2022": {
+     "rows": 74896,
+     "obligated_usd": 21333084283.42,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 99.996,
+      "cage_code": 100.0,
+      "recipient_duns": 20.6406,
+      "recipient_name": 96.5579,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8598,
+      "type_of_set_aside": 35.3837,
+      "naics_code": 99.9399,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 99.8171
+     }
+    },
+    "2023": {
+     "rows": 22772,
+     "obligated_usd": 5389911109.25,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 100.0,
+      "recipient_duns": 0.0,
+      "recipient_name": 97.2071,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.9341,
+      "type_of_set_aside": 33.3084,
+      "naics_code": 99.9912,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    }
+   }
+  },
+  {
+   "path": "C:\\Users\\esm247\\Desktop\\Cedar Press\\data\\raw\\esm_hci\\ESM\\raw\\Data Request 4-5-2023 File 2.csv",
+   "rows_scanned": 1078021,
+   "pre_fy2007": {
+    "rows": 126950,
+    "obligated_usd": 25576673658.68,
+    "distinct_uei": 2046,
+    "distinct_cage": 46,
+    "distinct_duns": 2043,
+    "distinct_piid": 52099
+   },
+   "by_fiscal_year": {
+    "1979": {
+     "rows": 6,
+     "obligated_usd": 224000.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 100.0,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 0.0,
+      "naics_code": 0.0,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1980": {
+     "rows": 2,
+     "obligated_usd": 139000.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 100.0,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 0.0,
+      "naics_code": 0.0,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1981": {
+     "rows": 4,
+     "obligated_usd": 106000.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 100.0,
+      "recipient_name": 75.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 0.0,
+      "naics_code": 0.0,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1982": {
+     "rows": 4,
+     "obligated_usd": 13000.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 100.0,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 0.0,
+      "naics_code": 0.0,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1983": {
+     "rows": 8,
+     "obligated_usd": 267000.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 100.0,
+      "recipient_name": 75.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 0.0,
+      "naics_code": 0.0,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1984": {
+     "rows": 6,
+     "obligated_usd": 92000.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 100.0,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 0.0,
+      "naics_code": 0.0,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1985": {
+     "rows": 7,
+     "obligated_usd": 309000.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 100.0,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 0.0,
+      "naics_code": 0.0,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1986": {
+     "rows": 7,
+     "obligated_usd": 438000.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 100.0,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 0.0,
+      "naics_code": 0.0,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1987": {
+     "rows": 6,
+     "obligated_usd": 216000.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 100.0,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 0.0,
+      "naics_code": 0.0,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1988": {
+     "rows": 6,
+     "obligated_usd": 803000.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 100.0,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 0.0,
+      "naics_code": 0.0,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1989": {
+     "rows": 20,
+     "obligated_usd": 819000.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 100.0,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 0.0,
+      "naics_code": 0.0,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1990": {
+     "rows": 25,
+     "obligated_usd": 1261000.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 96.0,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 4.0,
+      "naics_code": 0.0,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1991": {
+     "rows": 11,
+     "obligated_usd": 325000.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 90.9091,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 9.0909,
+      "naics_code": 0.0,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1992": {
+     "rows": 15,
+     "obligated_usd": 5841000.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 100.0,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 0.0,
+      "naics_code": 0.0,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1993": {
+     "rows": 17,
+     "obligated_usd": 822000.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 100.0,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 0.0,
+      "naics_code": 0.0,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1994": {
+     "rows": 15,
+     "obligated_usd": 1149000.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 100.0,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 0.0,
+      "naics_code": 0.0,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1995": {
+     "rows": 17,
+     "obligated_usd": 10968000.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 100.0,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 0.0,
+      "naics_code": 0.0,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1996": {
+     "rows": 9,
+     "obligated_usd": 4527000.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 100.0,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 0.0,
+      "naics_code": 0.0,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1997": {
+     "rows": 27,
+     "obligated_usd": 8881072.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 37.037,
+      "recipient_duns": 100.0,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 55.5556,
+      "naics_code": 37.037,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1998": {
+     "rows": 77,
+     "obligated_usd": 17209013.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 76.6234,
+      "recipient_duns": 98.7013,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 44.1558,
+      "naics_code": 76.6234,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1999": {
+     "rows": 3816,
+     "obligated_usd": 1081019818.85,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 1.5985,
+      "recipient_duns": 99.9476,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.6593,
+      "type_of_set_aside": 71.8029,
+      "naics_code": 3.3281,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2000": {
+     "rows": 4025,
+     "obligated_usd": 951384429.65,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 1.441,
+      "recipient_duns": 99.8758,
+      "recipient_name": 99.8758,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8261,
+      "type_of_set_aside": 57.9627,
+      "naics_code": 7.8758,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2001": {
+     "rows": 5215,
+     "obligated_usd": 1363876239.8,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.8437,
+      "recipient_duns": 99.8466,
+      "recipient_name": 99.9041,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.9233,
+      "type_of_set_aside": 74.1323,
+      "naics_code": 96.4334,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2002": {
+     "rows": 8889,
+     "obligated_usd": 1855736831.05,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.7425,
+      "recipient_duns": 99.28,
+      "recipient_name": 99.9213,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8988,
+      "type_of_set_aside": 83.339,
+      "naics_code": 97.5138,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2003": {
+     "rows": 15650,
+     "obligated_usd": 3409724648.91,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.639,
+      "recipient_duns": 99.6677,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.4952,
+      "type_of_set_aside": 81.3546,
+      "naics_code": 96.8435,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2004": {
+     "rows": 21550,
+     "obligated_usd": 4218702604.1,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.9466,
+      "recipient_duns": 99.4756,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 98.9745,
+      "type_of_set_aside": 66.8631,
+      "naics_code": 92.6821,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2005": {
+     "rows": 27593,
+     "obligated_usd": 5728922289.6,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.7611,
+      "recipient_duns": 99.3767,
+      "recipient_name": 99.9928,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.46,
+      "type_of_set_aside": 81.2561,
+      "naics_code": 82.0897,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2006": {
+     "rows": 39923,
+     "obligated_usd": 6912897711.72,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.7489,
+      "recipient_duns": 99.5441,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.6593,
+      "type_of_set_aside": 92.2225,
+      "naics_code": 86.5917,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2007": {
+     "rows": 44681,
+     "obligated_usd": 7626641563.93,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.9266,
+      "recipient_duns": 99.6688,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8389,
+      "type_of_set_aside": 94.2906,
+      "naics_code": 93.5073,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2008": {
+     "rows": 50686,
+     "obligated_usd": 9452223769.76,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 1.0378,
+      "recipient_duns": 99.3055,
+      "recipient_name": 99.998,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.9665,
+      "type_of_set_aside": 96.8177,
+      "naics_code": 93.8425,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2009": {
+     "rows": 51744,
+     "obligated_usd": 11114847593.25,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.8252,
+      "recipient_duns": 98.8868,
+      "recipient_name": 99.9961,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.942,
+      "type_of_set_aside": 97.9109,
+      "naics_code": 98.6511,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2010": {
+     "rows": 56811,
+     "obligated_usd": 11730411556.51,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.7411,
+      "recipient_duns": 98.7555,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.9243,
+      "type_of_set_aside": 98.4827,
+      "naics_code": 98.8893,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2011": {
+     "rows": 59234,
+     "obligated_usd": 11172017903.69,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.7479,
+      "recipient_duns": 98.5785,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.9645,
+      "type_of_set_aside": 98.9094,
+      "naics_code": 99.2606,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2012": {
+     "rows": 54326,
+     "obligated_usd": 12433406463.27,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.8283,
+      "recipient_duns": 98.0488,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.9116,
+      "type_of_set_aside": 99.2876,
+      "naics_code": 99.5656,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2013": {
+     "rows": 49260,
+     "obligated_usd": 9413778162.12,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 1.0495,
+      "recipient_duns": 97.6391,
+      "recipient_name": 99.9878,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.9269,
+      "type_of_set_aside": 99.3382,
+      "naics_code": 99.7544,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2014": {
+     "rows": 52473,
+     "obligated_usd": 11178218022.4,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 1.3073,
+      "recipient_duns": 97.4063,
+      "recipient_name": 99.9809,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.9428,
+      "type_of_set_aside": 99.2758,
+      "naics_code": 99.8933,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 99.9981
+     }
+    },
+    "2015": {
+     "rows": 55924,
+     "obligated_usd": 10959387235.33,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 1.8471,
+      "recipient_duns": 97.7094,
+      "recipient_name": 99.9714,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.9213,
+      "type_of_set_aside": 99.4904,
+      "naics_code": 99.9428,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2016": {
+     "rows": 59390,
+     "obligated_usd": 11827759547.32,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 2.9281,
+      "recipient_duns": 98.0704,
+      "recipient_name": 99.9326,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8299,
+      "type_of_set_aside": 99.5285,
+      "naics_code": 99.8855,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2017": {
+     "rows": 62694,
+     "obligated_usd": 13213146896.74,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 76.6708,
+      "recipient_duns": 97.6314,
+      "recipient_name": 99.8788,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.9282,
+      "type_of_set_aside": 98.7208,
+      "naics_code": 99.8405,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 99.9984
+     }
+    },
+    "2018": {
+     "rows": 61660,
+     "obligated_usd": 14454549814.51,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 99.9951,
+      "recipient_duns": 95.2984,
+      "recipient_name": 99.8913,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.601,
+      "type_of_set_aside": 42.9371,
+      "naics_code": 99.914,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 99.9968
+     }
+    },
+    "2019": {
+     "rows": 61548,
+     "obligated_usd": 15943443379.04,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 99.9951,
+      "recipient_duns": 93.3028,
+      "recipient_name": 99.8018,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8976,
+      "type_of_set_aside": 40.5001,
+      "naics_code": 99.6312,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 99.9968
+     }
+    },
+    "2020": {
+     "rows": 65906,
+     "obligated_usd": 17925336377.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 100.0,
+      "recipient_duns": 91.8778,
+      "recipient_name": 99.78,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.9105,
+      "type_of_set_aside": 38.2697,
+      "naics_code": 99.9165,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2021": {
+     "rows": 66930,
+     "obligated_usd": 19881693766.26,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 100.0,
+      "recipient_duns": 81.8348,
+      "recipient_name": 99.3964,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.9163,
+      "type_of_set_aside": 37.1986,
+      "naics_code": 99.8984,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 99.9492
+     }
+    },
+    "2022": {
+     "rows": 74980,
+     "obligated_usd": 21661918886.24,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 99.9987,
+      "cage_code": 100.0,
+      "recipient_duns": 20.7175,
+      "recipient_name": 96.5271,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.9,
+      "type_of_set_aside": 34.4825,
+      "naics_code": 99.952,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 99.7986
+     }
+    },
+    "2023": {
+     "rows": 22824,
+     "obligated_usd": 5410098766.65,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 100.0,
+      "recipient_duns": 0.0,
+      "recipient_name": 97.231,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.9518,
+      "type_of_set_aside": 32.5053,
+      "naics_code": 99.9606,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    }
+   }
+  },
+  {
+   "path": "C:\\Users\\esm247\\Desktop\\Cedar Press\\data\\raw\\esm_hci\\ESM\\raw\\Data Request 5-8-2023 IDVs.csv",
+   "rows_scanned": 100074,
+   "pre_fy2007": {
+    "rows": 4864,
+    "obligated_usd": 335101148.75,
+    "distinct_uei": 1096,
+    "distinct_cage": 5,
+    "distinct_duns": 936,
+    "distinct_piid": 2413
+   },
+   "by_fiscal_year": {
+    "1989": {
+     "rows": 4,
+     "obligated_usd": 0.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 100.0,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 0.0,
+      "type_of_set_aside": 0.0,
+      "naics_code": 0.0,
+      "awarding_agency_name": 0.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1994": {
+     "rows": 1,
+     "obligated_usd": 0.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 0.0,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 0.0,
+      "naics_code": 100.0,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1997": {
+     "rows": 2,
+     "obligated_usd": 0.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 50.0,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 50.0,
+      "naics_code": 50.0,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1998": {
+     "rows": 2,
+     "obligated_usd": 0.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 50.0,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 100.0,
+      "naics_code": 100.0,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "1999": {
+     "rows": 95,
+     "obligated_usd": 321000.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 95.7895,
+      "recipient_name": 97.8947,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 91.5789,
+      "naics_code": 10.5263,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2000": {
+     "rows": 134,
+     "obligated_usd": 4353471.07,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 96.2687,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 88.0597,
+      "naics_code": 16.4179,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2001": {
+     "rows": 160,
+     "obligated_usd": 12293239.0,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 1.875,
+      "recipient_duns": 95.0,
+      "recipient_name": 99.375,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 93.75,
+      "naics_code": 91.25,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2002": {
+     "rows": 220,
+     "obligated_usd": 14397626.49,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.9091,
+      "recipient_duns": 95.9091,
+      "recipient_name": 100.0,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 90.0,
+      "naics_code": 91.3636,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2003": {
+     "rows": 369,
+     "obligated_usd": 68217328.77,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.271,
+      "recipient_duns": 90.5149,
+      "recipient_name": 99.458,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 100.0,
+      "type_of_set_aside": 87.5339,
+      "naics_code": 94.8509,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2004": {
+     "rows": 1000,
+     "obligated_usd": 47875019.63,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0,
+      "recipient_duns": 74.4,
+      "recipient_name": 99.8,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.6,
+      "type_of_set_aside": 57.1,
+      "naics_code": 88.0,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2005": {
+     "rows": 1258,
+     "obligated_usd": 53480953.19,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.0795,
+      "recipient_duns": 72.814,
+      "recipient_name": 99.4436,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.682,
+      "type_of_set_aside": 88.5533,
+      "naics_code": 99.1256,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2006": {
+     "rows": 1619,
+     "obligated_usd": 134162510.6,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.3088,
+      "recipient_duns": 83.9407,
+      "recipient_name": 99.6912,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8765,
+      "type_of_set_aside": 94.8116,
+      "naics_code": 98.5794,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2007": {
+     "rows": 2665,
+     "obligated_usd": 208021653.51,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.5253,
+      "recipient_duns": 84.2026,
+      "recipient_name": 99.3996,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.6623,
+      "type_of_set_aside": 97.1482,
+      "naics_code": 99.212,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2008": {
+     "rows": 3118,
+     "obligated_usd": 245084558.71,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.4811,
+      "recipient_duns": 79.7306,
+      "recipient_name": 99.4227,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8717,
+      "type_of_set_aside": 98.3323,
+      "naics_code": 99.1341,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2009": {
+     "rows": 4230,
+     "obligated_usd": 241176208.37,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.4728,
+      "recipient_duns": 81.0402,
+      "recipient_name": 99.4563,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.6454,
+      "type_of_set_aside": 98.6998,
+      "naics_code": 99.7872,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 99.9764
+     }
+    },
+    "2010": {
+     "rows": 5099,
+     "obligated_usd": 241183921.52,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.8041,
+      "recipient_duns": 80.251,
+      "recipient_name": 99.1567,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8235,
+      "type_of_set_aside": 93.1555,
+      "naics_code": 99.745,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2011": {
+     "rows": 5338,
+     "obligated_usd": 238536594.67,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.7306,
+      "recipient_duns": 81.4537,
+      "recipient_name": 99.2694,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8501,
+      "type_of_set_aside": 89.378,
+      "naics_code": 99.8127,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2012": {
+     "rows": 5273,
+     "obligated_usd": 253488161.21,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.2655,
+      "recipient_duns": 80.5614,
+      "recipient_name": 99.2604,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.9431,
+      "type_of_set_aside": 91.6746,
+      "naics_code": 99.5259,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2013": {
+     "rows": 5841,
+     "obligated_usd": 318788251.78,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 0.3595,
+      "recipient_duns": 73.2409,
+      "recipient_name": 99.3152,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8973,
+      "type_of_set_aside": 88.4609,
+      "naics_code": 99.9486,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2014": {
+     "rows": 5821,
+     "obligated_usd": 293100350.93,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 2.113,
+      "recipient_duns": 70.5721,
+      "recipient_name": 97.7667,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8969,
+      "type_of_set_aside": 88.0605,
+      "naics_code": 99.9485,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2015": {
+     "rows": 6083,
+     "obligated_usd": 319237237.61,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 1.1014,
+      "recipient_duns": 73.2205,
+      "recipient_name": 96.893,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.7534,
+      "type_of_set_aside": 91.7639,
+      "naics_code": 99.9342,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2016": {
+     "rows": 6238,
+     "obligated_usd": 420763510.19,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 6.7009,
+      "recipient_duns": 67.7621,
+      "recipient_name": 97.403,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8237,
+      "type_of_set_aside": 87.0151,
+      "naics_code": 99.9198,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2017": {
+     "rows": 6047,
+     "obligated_usd": 441656507.18,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 76.9969,
+      "recipient_duns": 66.132,
+      "recipient_name": 96.5437,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8512,
+      "type_of_set_aside": 89.3832,
+      "naics_code": 99.9339,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2018": {
+     "rows": 6260,
+     "obligated_usd": 382439303.74,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 99.9681,
+      "recipient_duns": 63.5304,
+      "recipient_name": 95.7987,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.9042,
+      "type_of_set_aside": 91.278,
+      "naics_code": 99.8083,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2019": {
+     "rows": 6389,
+     "obligated_usd": 332506259.23,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 100.0,
+      "recipient_duns": 61.0111,
+      "recipient_name": 96.0088,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8278,
+      "type_of_set_aside": 93.8175,
+      "naics_code": 99.9687,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2020": {
+     "rows": 8146,
+     "obligated_usd": 409500061.61,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 100.0,
+      "recipient_duns": 60.5328,
+      "recipient_name": 96.4154,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8404,
+      "type_of_set_aside": 93.9479,
+      "naics_code": 99.9754,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    },
+    "2021": {
+     "rows": 6880,
+     "obligated_usd": 498495492.49,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 100.0,
+      "recipient_duns": 61.7297,
+      "recipient_name": 97.8198,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.7965,
+      "type_of_set_aside": 94.157,
+      "naics_code": 99.8837,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 99.9564
+     }
+    },
+    "2022": {
+     "rows": 8723,
+     "obligated_usd": 498668212.01,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 100.0,
+      "recipient_duns": 37.9801,
+      "recipient_name": 97.0767,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.8968,
+      "type_of_set_aside": 94.5202,
+      "naics_code": 99.9541,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 99.6905
+     }
+    },
+    "2023": {
+     "rows": 3059,
+     "obligated_usd": 231468860.01,
+     "populated_pct": {
+      "action_date_fiscal_year": 100.0,
+      "federal_action_obligation": 100.0,
+      "uei_id": 100.0,
+      "cage_code": 100.0,
+      "recipient_duns": 0.0,
+      "recipient_name": 95.9137,
+      "award_id_piid": 100.0,
+      "recipient_state_code": 99.7058,
+      "type_of_set_aside": 92.5793,
+      "naics_code": 99.9346,
+      "awarding_agency_name": 100.0,
+      "ultimate_parent_uei": 100.0
+     }
+    }
+   }
+  }
+ ]
+}

@@ -1,0 +1,144 @@
+{
+ "key_contract": [
+  {
+   "columns": [
+    "corporation_name",
+    "anc_class"
+   ],
+   "producer": "07_parse_ancsa_ceiling.py",
+   "spec": "anc_id",
+   "status": "AGREES"
+  },
+  {
+   "columns": [
+    "tribe_name",
+    "effective_start",
+    "measurement_type"
+   ],
+   "producer": "104_build_wa_allocations.py",
+   "spec": "allocation_id",
+   "status": "AGREES"
+  },
+  {
+   "columns": [
+    "fiscal_year",
+    "band_ordinal",
+    "band_label"
+   ],
+   "producer": "106_build_revenue_bounds.py",
+   "spec": "band_id",
+   "status": "AGREES"
+  },
+  {
+   "columns": [
+    "manufacturer",
+    "fact_type",
+    "device_class",
+    "geography",
+    "period_end"
+   ],
+   "producer": "117_build_gaming_devices.py",
+   "spec": "fact_id",
+   "status": "AGREES"
+  },
+  {
+   "columns": [
+    "document_number",
+    "party_name_as_published",
+    "party_role"
+   ],
+   "producer": "130_build_section_106_consultation.py",
+   "spec": "party_id_s106",
+   "status": "AGREES"
+  },
+  {
+   "columns": [
+    "document_number",
+    "participant_name_as_published",
+    "participant_role"
+   ],
+   "producer": "130_build_section_106_consultation.py",
+   "spec": "consultation_event_id",
+   "status": "AGREES"
+  },
+  {
+   "columns": [
+    "compact_id",
+    "event_date",
+    "event_type"
+   ],
+   "producer": "15b_build_compact_index.py",
+   "spec": "compact_event_id",
+   "status": "AGREES"
+  },
+  {
+   "columns": [
+    "effective_month",
+    "acquirer_entity",
+    "target_entity",
+    "direction"
+   ],
+   "producer": "61_add_nho_intertribal_to_spine.py",
+   "spec": "nho_ownership_event_id",
+   "status": "AGREES"
+  },
+  {
+   "columns": [
+    "region_system_code",
+    "administrative_region_id",
+    "observation_name",
+    "observation_year"
+   ],
+   "producer": "85_build_admin_region_crosswalk.py",
+   "spec": "admin_observation_id",
+   "status": "AGREES"
+  },
+  {
+   "columns": [
+    "fiscal_year",
+    "chamber",
+    "requesting_member",
+    "recipient_name",
+    "project_title",
+    "amount_enacted",
+    "source_url",
+    "source_quote"
+   ],
+   "producer": "99_build_earmarks_and_schedc.py",
+   "spec": "earmark_id",
+   "status": "AGREES"
+  },
+  {
+   "columns": [
+    "docket_number",
+    "subdocket",
+    "accession_number",
+    "filer_organization_as_recorded",
+    "document_description_verbatim"
+   ],
+   "producer": "133_build_ferc_advocacy.py",
+   "spec": "ferc_filing_id",
+   "status": "AGREES"
+  }
+ ],
+ "minted_prefixes": [
+  "CEDAR-CONTRACT",
+  "CEDAR-FAMILY",
+  "CEDAR-ADMREG",
+  "CEDAR-EVENT",
+  "CEDAR-CLAIM",
+  "CEDAR-ALIAS",
+  "CEDAR-IDENT",
+  "CEDAR-XWALK",
+  "CEDAR-LEASE",
+  "CEDAR-WELL",
+  "CEDAR-ENT",
+  "CEDAR-FAC",
+  "CEDAR-REL",
+  "CEDAR-SRC",
+  "CEDAR-OBS"
+ ],
+ "produced_by": "328_audit_id_service_bypass.py",
+ "undeclared_mints": [],
+ "unparsed": []
+}

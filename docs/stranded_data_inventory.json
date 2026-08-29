@@ -1,0 +1,1159 @@
+{
+ "generated": "2026-08-26",
+ "generated_at": "2026-08-26T21:14:49",
+ "script": "399_inventory_stranded_data.py",
+ "files": [
+  {
+   "file": "data/staging/gaming_employment_form5500_staged.csv",
+   "zone": "staging",
+   "rows": 2046,
+   "cols": 34,
+   "mtime": "2026-08-26T17:23:50"
+  },
+  {
+   "file": "data/staging/gaming_employment_osha_tribe_staged.csv",
+   "zone": "staging",
+   "rows": 502,
+   "cols": 38,
+   "mtime": "2026-08-26T19:03:46"
+  },
+  {
+   "file": "data/staging/gaming_property_loyalty_tiers_2026-08-26.csv",
+   "zone": "staging",
+   "rows": 65,
+   "cols": 27,
+   "mtime": "2026-08-26T21:04:48"
+  },
+  {
+   "file": "data/staging/gaming_property_self_published_assertions_2026-08-26.csv",
+   "zone": "staging",
+   "rows": 622,
+   "cols": 33,
+   "mtime": "2026-08-26T21:04:48"
+  },
+  {
+   "file": "data/staging/gaming_property_self_published_claims_2026-08-26.csv",
+   "zone": "staging",
+   "rows": 41,
+   "cols": 34,
+   "mtime": "2026-08-26T21:04:48"
+  },
+  {
+   "file": "data/staging/gaming_property_site_recovered_claims_2026-08-26.csv",
+   "zone": "staging",
+   "rows": 231,
+   "cols": 33,
+   "mtime": "2026-08-26T21:04:48"
+  },
+  {
+   "file": "data/staging/subawards_raw_match/subawards_raw_match_2026-08-07.csv",
+   "zone": "staging",
+   "rows": 8513,
+   "cols": 49,
+   "mtime": "2026-08-07T16:24:30"
+  },
+  {
+   "file": "data/staging/subawards_usaspending_2026-08-05/subaward_native_entities_2026-08-05.csv",
+   "zone": "staging",
+   "rows": 444,
+   "cols": 10,
+   "mtime": "2026-08-06T14:17:31"
+  },
+  {
+   "file": "data/staging/subawards_usaspending_2026-08-05/subaward_rows_by_fiscal_year.csv",
+   "zone": "staging",
+   "rows": 22,
+   "cols": 7,
+   "mtime": "2026-08-06T14:17:31"
+  },
+  {
+   "file": "data/staging/subawards_usaspending_2026-08-05/subaward_uei_netnew_2026-08-05.csv",
+   "zone": "staging",
+   "rows": 252078,
+   "cols": 8,
+   "mtime": "2026-08-06T14:17:31"
+  },
+  {
+   "file": "data/staging/subawards_usaspending_2026-08-05/subawards_native_linked_2026-08-05.csv",
+   "zone": "staging",
+   "rows": 53417,
+   "cols": 35,
+   "mtime": "2026-08-06T14:17:30"
+  },
+  {
+   "file": "data/staging/tribal_vendor_lists/tribal_certification_facts_sample_2026-08-26.csv",
+   "zone": "staging",
+   "rows": 4,
+   "cols": 27,
+   "mtime": "2026-08-26T20:46:15"
+  },
+  {
+   "file": "data/staging/tribal_vendor_lists/tribal_certification_joins_2026-08-26.csv",
+   "zone": "staging",
+   "rows": 60,
+   "cols": 28,
+   "mtime": "2026-08-26T20:33:20"
+  },
+  {
+   "file": "data/staging/tribal_vendor_lists/tribal_certification_rules_2026-08-26.csv",
+   "zone": "staging",
+   "rows": 14,
+   "cols": 32,
+   "mtime": "2026-08-26T20:45:58"
+  },
+  {
+   "file": "data/staging/tribal_vendor_lists/tribal_certification_sources_2026-08-26.csv",
+   "zone": "staging",
+   "rows": 62,
+   "cols": 24,
+   "mtime": "2026-08-26T20:46:15"
+  },
+  {
+   "file": "data/interim/103_sdf_local_mitigation_unverified.csv",
+   "zone": "interim",
+   "rows": 1292,
+   "cols": 23,
+   "mtime": "2026-08-07T18:47:01"
+  },
+  {
+   "file": "data/interim/103_zone_log.csv",
+   "zone": "interim",
+   "rows": 1189,
+   "cols": 4,
+   "mtime": "2026-08-07T18:47:26"
+  },
+  {
+   "file": "data/interim/105_litigation_figures.csv",
+   "zone": "interim",
+   "rows": 48,
+   "cols": 7,
+   "mtime": "2026-08-07T19:02:56"
+  },
+  {
+   "file": "data/interim/105_zone_log.csv",
+   "zone": "interim",
+   "rows": 1887,
+   "cols": 4,
+   "mtime": "2026-08-07T19:02:56"
+  },
+  {
+   "file": "data/interim/119_mi_footing.csv",
+   "zone": "interim",
+   "rows": 270,
+   "cols": 7,
+   "mtime": "2026-08-07T21:30:30"
+  },
+  {
+   "file": "data/interim/142_crawl_manifest.csv",
+   "zone": "interim",
+   "rows": 2307,
+   "cols": 8,
+   "mtime": "2026-08-12T20:24:00"
+  },
+  {
+   "file": "data/interim/142_gamefinder_manifest.csv",
+   "zone": "interim",
+   "rows": 223,
+   "cols": 8,
+   "mtime": "2026-08-12T20:00:27"
+  },
+  {
+   "file": "data/interim/142_property_domains.csv",
+   "zone": "interim",
+   "rows": 440,
+   "cols": 15,
+   "mtime": "2026-08-12T19:29:43"
+  },
+  {
+   "file": "data/interim/384_property_domains.csv",
+   "zone": "interim",
+   "rows": 136,
+   "cols": 15,
+   "mtime": "2026-08-26T20:56:13"
+  },
+  {
+   "file": "data/interim/compact_authorizations.csv",
+   "zone": "interim",
+   "rows": 747,
+   "cols": 29,
+   "mtime": "2026-08-06T18:43:47"
+  },
+  {
+   "file": "data/interim/compact_authorizations_candidates.csv",
+   "zone": "interim",
+   "rows": 2356,
+   "cols": 19,
+   "mtime": "2026-08-06T18:43:47"
+  },
+  {
+   "file": "data/interim/compact_duration_candidates.csv",
+   "zone": "interim",
+   "rows": 545,
+   "cols": 15,
+   "mtime": "2026-08-05T14:21:16"
+  },
+  {
+   "file": "data/interim/compacts_pdf_inventory.csv",
+   "zone": "interim",
+   "rows": 1187,
+   "cols": 8,
+   "mtime": "2026-08-05T14:00:09"
+  },
+  {
+   "file": "data/interim/hearing_appearances_corpus.csv",
+   "zone": "interim",
+   "rows": 70380,
+   "cols": 23,
+   "mtime": "2026-08-07T18:33:01"
+  },
+  {
+   "file": "data/interim/ocr_shards/ocr_shard_0.csv",
+   "zone": "interim",
+   "rows": 28,
+   "cols": 14,
+   "mtime": "2026-08-13T08:49:16"
+  },
+  {
+   "file": "data/interim/ocr_shards/ocr_shard_1.csv",
+   "zone": "interim",
+   "rows": 26,
+   "cols": 14,
+   "mtime": "2026-08-13T11:46:16"
+  },
+  {
+   "file": "data/interim/ocr_shards/ocr_shard_2.csv",
+   "zone": "interim",
+   "rows": 31,
+   "cols": 14,
+   "mtime": "2026-08-13T09:44:54"
+  },
+  {
+   "file": "data/interim/ocr_shards/ocr_shard_3.csv",
+   "zone": "interim",
+   "rows": 31,
+   "cols": 14,
+   "mtime": "2026-08-13T11:23:23"
+  },
+  {
+   "file": "data/interim/ocr_shards/ocr_shard_4.csv",
+   "zone": "interim",
+   "rows": 29,
+   "cols": 14,
+   "mtime": "2026-08-13T10:34:05"
+  },
+  {
+   "file": "data/interim/ocr_shards/ocr_shard_5.csv",
+   "zone": "interim",
+   "rows": 27,
+   "cols": 14,
+   "mtime": "2026-08-13T09:20:04"
+  },
+  {
+   "file": "data/interim/ocr_shards/ocr_shard_6.csv",
+   "zone": "interim",
+   "rows": 31,
+   "cols": 14,
+   "mtime": "2026-08-13T11:53:00"
+  },
+  {
+   "file": "data/interim/ocr_shards/ocr_shard_7.csv",
+   "zone": "interim",
+   "rows": 30,
+   "cols": 14,
+   "mtime": "2026-08-13T11:17:37"
+  },
+  {
+   "file": "data/interim/oira_federal_action_links_corpus.csv",
+   "zone": "interim",
+   "rows": 14975,
+   "cols": 10,
+   "mtime": "2026-08-07T18:33:02"
+  },
+  {
+   "file": "data/interim/oira_meeting_participants_corpus.csv",
+   "zone": "interim",
+   "rows": 95529,
+   "cols": 19,
+   "mtime": "2026-08-07T18:33:02"
+  },
+  {
+   "file": "data/interim/oira_meetings_corpus.csv",
+   "zone": "interim",
+   "rows": 8227,
+   "cols": 21,
+   "mtime": "2026-08-07T18:33:01"
+  },
+  {
+   "file": "data/interim/terms_candidates_full.csv",
+   "zone": "interim",
+   "rows": 1885,
+   "cols": 15,
+   "mtime": "2026-08-05T14:19:15"
+  },
+  {
+   "file": "data/interim/terms_candidates_v2.csv",
+   "zone": "interim",
+   "rows": 153,
+   "cols": 15,
+   "mtime": "2026-08-05T14:10:39"
+  },
+  {
+   "file": "data/interim/terms_candidates_v3.csv",
+   "zone": "interim",
+   "rows": 145,
+   "cols": 15,
+   "mtime": "2026-08-05T14:13:10"
+  },
+  {
+   "file": "data/interim/terms_candidates_v4.csv",
+   "zone": "interim",
+   "rows": 63,
+   "cols": 15,
+   "mtime": "2026-08-05T14:14:22"
+  },
+  {
+   "file": "data/interim/terms_pilot_candidates.csv",
+   "zone": "interim",
+   "rows": 429,
+   "cols": 15,
+   "mtime": "2026-08-05T14:05:25"
+  },
+  {
+   "file": "Assistance_56G180126_TransactionHistory_1.csv",
+   "zone": "root",
+   "rows": 92,
+   "cols": 101,
+   "mtime": "2026-08-05T11:45:34"
+  },
+  {
+   "file": "bgov.csv",
+   "zone": "root",
+   "rows": 878,
+   "cols": 28,
+   "mtime": "2026-08-05T11:44:57"
+  },
+  {
+   "file": "contract-03-18-23-19-40-24.csv",
+   "zone": "root",
+   "rows": 4000,
+   "cols": 63,
+   "mtime": "2026-08-05T11:45:30"
+  },
+  {
+   "file": "deals_2026_ytd.csv",
+   "zone": "root",
+   "rows": 90,
+   "cols": 31,
+   "mtime": "2026-08-26T17:14:35"
+  },
+  {
+   "file": "deals_historical_2020_2025.csv",
+   "zone": "root",
+   "rows": 56,
+   "cols": 32,
+   "mtime": "2026-08-05T18:18:24"
+  },
+  {
+   "file": "entity_crosswalk_bgov.csv",
+   "zone": "root",
+   "rows": 752,
+   "cols": 18,
+   "mtime": "2026-08-05T11:47:41"
+  },
+  {
+   "file": "entity_master.csv",
+   "zone": "root",
+   "rows": 815,
+   "cols": 20,
+   "mtime": "2026-08-05T11:47:41"
+  }
+ ],
+ "dispositions": [
+  {
+   "path": "data/staging/gaming_employment_form5500_staged.csv",
+   "files": [
+    "data/staging/gaming_employment_form5500_staged.csv"
+   ],
+   "rows": 2046,
+   "verdict": "ALREADY-LANDED",
+   "declared_verdict": "ALREADY-LANDED",
+   "check_holds": true,
+   "producer": "156_stage_form5500_gaming_employment.py",
+   "promoted_table": "data/clean/gaming_employment_observations.csv",
+   "evidence": "1975 of 2046 rows present in the promoted table on (ack_id, year, ein, employment); the 71 absent are EXACTLY the 71 rows script 262 withdrew as NOT_NATIVE to review/form5500_gaming_not_native_2026-08-26.csv",
+   "scripts_naming_it": [
+    "156_stage_form5500_gaming_employment.py",
+    "158_merge_staged_labor_employment.py",
+    "160_ship_gap_report.py",
+    "164_link_facility_hub_sources.py",
+    "399_inventory_stranded_data.py"
+   ]
+  },
+  {
+   "path": "data/staging/gaming_employment_osha_tribe_staged.csv",
+   "files": [
+    "data/staging/gaming_employment_osha_tribe_staged.csv"
+   ],
+   "rows": 502,
+   "verdict": "ALREADY-LANDED",
+   "declared_verdict": "ALREADY-LANDED",
+   "check_holds": true,
+   "producer": "157_stage_osha_tribe_level_employment.py + 264/265",
+   "promoted_table": "data/clean/gaming_employment_observations.csv",
+   "evidence": "502 of 502 rows present on (establishment_id, year, employment); 0 uncovered",
+   "scripts_naming_it": [
+    "157_stage_osha_tribe_level_employment.py",
+    "158_merge_staged_labor_employment.py",
+    "164_link_facility_hub_sources.py",
+    "265_merge_osha_relift_rows.py",
+    "399_inventory_stranded_data.py"
+   ]
+  },
+  {
+   "path": "data/staging/subawards_usaspending_2026-08-05/subawards_native_linked_2026-08-05.csv",
+   "files": [
+    "data/staging/subawards_usaspending_2026-08-05/subawards_native_linked_2026-08-05.csv"
+   ],
+   "rows": 53417,
+   "verdict": "ALREADY-LANDED",
+   "declared_verdict": "ALREADY-LANDED",
+   "check_holds": true,
+   "producer": "40_pull_usaspending_subawards.py -> 45_promote_subawards.py",
+   "promoted_table": "data/clean/subawards.csv",
+   "evidence": "53417 of 53417 rows present in subawards.csv on (subaward_number, prime_award_unique_key, subaward_amount); 0 uncovered",
+   "scripts_naming_it": [
+    "399_inventory_stranded_data.py",
+    "41_match_subawards_to_ledger.py"
+   ]
+  },
+  {
+   "path": "data/staging/subawards_raw_match/subawards_raw_match_2026-08-07.csv",
+   "files": [
+    "data/staging/subawards_raw_match/subawards_raw_match_2026-08-07.csv"
+   ],
+   "rows": 8513,
+   "verdict": "ALREADY-LANDED",
+   "declared_verdict": "ALREADY-LANDED",
+   "check_holds": true,
+   "producer": "94_match_raw_subawards.py -> 45_promote_subawards.py",
+   "promoted_table": "data/clean/subawards.csv",
+   "evidence": "8513 of 8513 rows present in subawards.csv on (subaward_number, prime_award_unique_key, subaward_amount); 0 uncovered",
+   "scripts_naming_it": [
+    "399_inventory_stranded_data.py"
+   ]
+  },
+  {
+   "path": "data/staging/subawards_usaspending_2026-08-05/subaward_native_entities_2026-08-05.csv",
+   "files": [
+    "data/staging/subawards_usaspending_2026-08-05/subaward_native_entities_2026-08-05.csv"
+   ],
+   "rows": 444,
+   "verdict": "SUPERSEDED",
+   "declared_verdict": "SUPERSEDED",
+   "check_holds": true,
+   "producer": "40_pull_usaspending_subawards.py",
+   "promoted_table": "data/clean/subaward_entity_rollup.csv",
+   "evidence": "the clean rollup holds 450 entities against the staged 444; the 2 staged-only entities are excluded by the rollup's OWN declared basis 'duplicate_status==primary AND subaward_exceeds_prime_flag!=yes' (['yes', 'yes'])",
+   "scripts_naming_it": [
+    "399_inventory_stranded_data.py",
+    "41_match_subawards_to_ledger.py"
+   ]
+  },
+  {
+   "path": "data/staging/subawards_usaspending_2026-08-05/subaward_uei_netnew_2026-08-05.csv",
+   "files": [
+    "data/staging/subawards_usaspending_2026-08-05/subaward_uei_netnew_2026-08-05.csv"
+   ],
+   "rows": 252078,
+   "verdict": "INTERMEDIATE-BY-DESIGN",
+   "declared_verdict": "INTERMEDIATE-BY-DESIGN",
+   "check_holds": true,
+   "producer": "40_pull_usaspending_subawards.py",
+   "promoted_table": "(none - it is not subawards)",
+   "evidence": "252,078 rows, 252,078 distinct `uei`, 8 columns - ONE ROW PER UEI. This is a DIMENSION table over the universe-wide pull, not subawards. Summing it into a subaward row count produces the phantom ~317k figure that fooled a previous reader",
+   "scripts_naming_it": [
+    "399_inventory_stranded_data.py",
+    "41_match_subawards_to_ledger.py"
+   ]
+  },
+  {
+   "path": "data/staging/subawards_usaspending_2026-08-05/subaward_rows_by_fiscal_year.csv",
+   "files": [
+    "data/staging/subawards_usaspending_2026-08-05/subaward_rows_by_fiscal_year.csv"
+   ],
+   "rows": 22,
+   "verdict": "INTERMEDIATE-BY-DESIGN",
+   "declared_verdict": "INTERMEDIATE-BY-DESIGN",
+   "check_holds": true,
+   "producer": "40_pull_usaspending_subawards.py",
+   "promoted_table": "(none - it is a 22-row run summary)",
+   "evidence": "22 rows, 7 columns. A per-fiscal-year COUNT of the pull, one row per year. An aggregate of a table that is already promoted; recompute it, never promote it. Consumer(s): the pull's own log",
+   "scripts_naming_it": [
+    "399_inventory_stranded_data.py",
+    "41_match_subawards_to_ledger.py"
+   ]
+  },
+  {
+   "path": "data/staging/tribal_vendor_lists/",
+   "files": [
+    "data/staging/tribal_vendor_lists/tribal_certification_facts_sample_2026-08-26.csv",
+    "data/staging/tribal_vendor_lists/tribal_certification_joins_2026-08-26.csv",
+    "data/staging/tribal_vendor_lists/tribal_certification_rules_2026-08-26.csv",
+    "data/staging/tribal_vendor_lists/tribal_certification_sources_2026-08-26.csv"
+   ],
+   "rows": 140,
+   "verdict": "LIVE-WRITER",
+   "declared_verdict": "LIVE-WRITER",
+   "check_holds": true,
+   "producer": "320_stage_tribal_certification_facts.py .. 324",
+   "promoted_table": "(in flight)",
+   "evidence": "4 CSV(s), newest written 2026-08-26T20:46:15 (28 min ago). Scripts 320-324 (tribal certification) are a LIVE WRITER at dispatch - concurrency rule 6",
+   "scripts_naming_it": []
+  },
+  {
+   "path": "data/interim/oira_meetings_corpus.csv",
+   "files": [
+    "data/interim/oira_meetings_corpus.csv"
+   ],
+   "rows": 8227,
+   "verdict": "INTERMEDIATE-BY-DESIGN",
+   "declared_verdict": "INTERMEDIATE-BY-DESIGN",
+   "check_holds": true,
+   "producer": "98_build_oira_and_hearings.py",
+   "promoted_table": "data/clean/oira_meetings.csv",
+   "evidence": "the corpus is 8,227 rows and the published Native slice is 72; every slice row is present in the corpus (0 absent). 98_build_oira_and_hearings.py states the design in its own source: 'THE PUBLISHED FILE IS THE NATIVE SLICE. THE CORPUS IS CONTEXT.' - publishing the corpus would ship non-Native rows as a Native product",
+   "scripts_naming_it": [
+    "399_inventory_stranded_data.py",
+    "98_build_oira_and_hearings.py"
+   ]
+  },
+  {
+   "path": "data/interim/oira_meeting_participants_corpus.csv",
+   "files": [
+    "data/interim/oira_meeting_participants_corpus.csv"
+   ],
+   "rows": 95529,
+   "verdict": "INTERMEDIATE-BY-DESIGN",
+   "declared_verdict": "INTERMEDIATE-BY-DESIGN",
+   "check_holds": true,
+   "producer": "98_build_oira_and_hearings.py",
+   "promoted_table": "data/clean/oira_meeting_participants.csv",
+   "evidence": "the corpus is 95,529 rows and the published Native slice is 1,128; every slice row is present in the corpus (0 absent). 98_build_oira_and_hearings.py states the design in its own source: 'THE PUBLISHED FILE IS THE NATIVE SLICE. THE CORPUS IS CONTEXT.' - publishing the corpus would ship non-Native rows as a Native product",
+   "scripts_naming_it": [
+    "399_inventory_stranded_data.py",
+    "98_build_oira_and_hearings.py"
+   ]
+  },
+  {
+   "path": "data/interim/oira_federal_action_links_corpus.csv",
+   "files": [
+    "data/interim/oira_federal_action_links_corpus.csv"
+   ],
+   "rows": 14975,
+   "verdict": "INTERMEDIATE-BY-DESIGN",
+   "declared_verdict": "INTERMEDIATE-BY-DESIGN",
+   "check_holds": true,
+   "producer": "98_build_oira_and_hearings.py",
+   "promoted_table": "data/clean/oira_federal_action_links.csv",
+   "evidence": "14,975 rows, 10 columns. RIN -> Federal Register links for the WHOLE OIRA corpus; the published file carries the links for the 72 Native-slice meetings only. Consumer(s): 98 (slices it to the published meetings)",
+   "scripts_naming_it": [
+    "399_inventory_stranded_data.py",
+    "98_build_oira_and_hearings.py"
+   ]
+  },
+  {
+   "path": "data/interim/hearing_appearances_corpus.csv",
+   "files": [
+    "data/interim/hearing_appearances_corpus.csv"
+   ],
+   "rows": 70380,
+   "verdict": "INTERMEDIATE-BY-DESIGN",
+   "declared_verdict": "INTERMEDIATE-BY-DESIGN",
+   "check_holds": true,
+   "producer": "98_build_oira_and_hearings.py",
+   "promoted_table": "data/clean/hearing_appearances.csv",
+   "evidence": "the corpus is 70,380 rows and the published Native slice is 2,674; every slice row is present in the corpus (0 absent). 98_build_oira_and_hearings.py states the design in its own source: 'THE PUBLISHED FILE IS THE NATIVE SLICE. THE CORPUS IS CONTEXT.' - publishing the corpus would ship non-Native rows as a Native product",
+   "scripts_naming_it": [
+    "399_inventory_stranded_data.py",
+    "400_promote_stranded_hearing_appearances.py",
+    "98_build_oira_and_hearings.py"
+   ]
+  },
+  {
+   "path": "data/interim/compact_authorizations.csv",
+   "files": [
+    "data/interim/compact_authorizations.csv"
+   ],
+   "rows": 747,
+   "verdict": "INTERMEDIATE-BY-DESIGN",
+   "declared_verdict": "INTERMEDIATE-BY-DESIGN",
+   "check_holds": true,
+   "producer": "91_extract_compact_authorizations.py",
+   "promoted_table": "data/clean/gaming_capacity_official.csv",
+   "evidence": "684 of 747 rows published by 92 into gaming_capacity_official.csv; the 63 absent are 60 `statewide_pool_or_tier` rows routed to the review queue and 3 rows with NEITHER a tribe NOR a state - both refusals are written into 92's source with their reasons",
+   "scripts_naming_it": [
+    "399_inventory_stranded_data.py",
+    "91_extract_compact_authorizations.py",
+    "92_build_gaming_capacity_official.py"
+   ]
+  },
+  {
+   "path": "data/interim/compact_authorizations_candidates.csv",
+   "files": [
+    "data/interim/compact_authorizations_candidates.csv"
+   ],
+   "rows": 2356,
+   "verdict": "INTERMEDIATE-BY-DESIGN",
+   "declared_verdict": "INTERMEDIATE-BY-DESIGN",
+   "check_holds": true,
+   "producer": "91_extract_compact_authorizations.py",
+   "promoted_table": "data/clean/gaming_capacity_official.csv",
+   "evidence": "2,356 rows, 19 columns. EVERY candidate, kept or rejected, with `kept` and `reject_reason`. 91's docstring states: 'Nothing is written to data/clean by this script. 92 assembles the published file.' Consumer(s): 91 itself, then 92",
+   "scripts_naming_it": [
+    "399_inventory_stranded_data.py",
+    "91_extract_compact_authorizations.py"
+   ]
+  },
+  {
+   "path": "data/interim/terms_candidates_full.csv",
+   "files": [
+    "data/interim/terms_candidates_full.csv"
+   ],
+   "rows": 1885,
+   "verdict": "INTERMEDIATE-BY-DESIGN",
+   "declared_verdict": "INTERMEDIATE-BY-DESIGN",
+   "check_holds": true,
+   "producer": "15d_terms_extract.py",
+   "promoted_table": "data/clean/compact_terms.csv",
+   "evidence": "1885 candidates -> 1311 rows of compact_terms.csv; of the 601 not published, 545 are the duration term_types that 15e routes to compact_duration_candidates.csv (545 rows) because they are NOT compact_terms term_types, and the remainder are dropped for an ambiguous source_pdf -> version_id join (15e refuses to guess)",
+   "scripts_naming_it": [
+    "15e_finalize_terms.py",
+    "399_inventory_stranded_data.py"
+   ]
+  },
+  {
+   "path": "data/interim/compact_duration_candidates.csv",
+   "files": [
+    "data/interim/compact_duration_candidates.csv"
+   ],
+   "rows": 545,
+   "verdict": "INTERMEDIATE-BY-DESIGN",
+   "declared_verdict": "INTERMEDIATE-BY-DESIGN",
+   "check_holds": true,
+   "producer": "15e_finalize_terms.py",
+   "promoted_table": "data/clean/compacts.csv (term_end / renewal_provisions)",
+   "evidence": "545 rows, 15 columns. Term-length / term-end / renewal quotes. 15e's docstring: 'these are NOT compact_terms term_types; they feed compacts.term_end and compacts.renewal_provisions'. Consumer(s): 15e (back-fills compacts.csv)",
+   "scripts_naming_it": [
+    "15e_finalize_terms.py",
+    "399_inventory_stranded_data.py"
+   ]
+  },
+  {
+   "path": "data/interim/compacts_pdf_inventory.csv",
+   "files": [
+    "data/interim/compacts_pdf_inventory.csv"
+   ],
+   "rows": 1187,
+   "verdict": "INTERMEDIATE-BY-DESIGN",
+   "declared_verdict": "INTERMEDIATE-BY-DESIGN",
+   "check_holds": true,
+   "producer": "15a_compacts_inventory.py",
+   "promoted_table": "data/clean/compact_versions.csv",
+   "evidence": "1,187 rows, 8 columns. A FILE INVENTORY of the 1,187-document compact PDF corpus (filename, bytes, has_txt, parsed date form). Retrieval bookkeeping, not compact facts. Consumer(s): 15b_build_compact_index.py",
+   "scripts_naming_it": [
+    "15a_compacts_inventory.py",
+    "399_inventory_stranded_data.py"
+   ]
+  },
+  {
+   "path": "data/interim/terms_pilot_candidates.csv",
+   "files": [
+    "data/interim/terms_pilot_candidates.csv"
+   ],
+   "rows": 429,
+   "verdict": "SUPERSEDED",
+   "declared_verdict": "SUPERSEDED",
+   "check_holds": true,
+   "producer": "15c_terms_pilot.py",
+   "promoted_table": "(superseded)",
+   "evidence": "429 rows over 28 source PDFs, against terms_candidates_full.csv's 1885 rows over 736 PDFs; 20 rows carry forward exactly. A PILOT SAMPLE superseded by the corpus-wide run the same day - the divergence is the pattern being tightened between iterations, not lost data",
+   "scripts_naming_it": [
+    "15c_terms_pilot.py",
+    "399_inventory_stranded_data.py"
+   ]
+  },
+  {
+   "path": "data/interim/terms_candidates_v2.csv",
+   "files": [
+    "data/interim/terms_candidates_v2.csv"
+   ],
+   "rows": 153,
+   "verdict": "SUPERSEDED",
+   "declared_verdict": "SUPERSEDED",
+   "check_holds": true,
+   "producer": "15d_terms_extract.py",
+   "promoted_table": "(superseded)",
+   "evidence": "153 rows over 30 source PDFs, against terms_candidates_full.csv's 1885 rows over 736 PDFs; 63 rows carry forward exactly. A PILOT SAMPLE superseded by the corpus-wide run the same day - the divergence is the pattern being tightened between iterations, not lost data",
+   "scripts_naming_it": [
+    "15d_terms_extract.py",
+    "399_inventory_stranded_data.py"
+   ]
+  },
+  {
+   "path": "data/interim/terms_candidates_v3.csv",
+   "files": [
+    "data/interim/terms_candidates_v3.csv"
+   ],
+   "rows": 145,
+   "verdict": "SUPERSEDED",
+   "declared_verdict": "SUPERSEDED",
+   "check_holds": true,
+   "producer": "15d_terms_extract.py (iteration)",
+   "promoted_table": "(superseded)",
+   "evidence": "145 rows over 30 source PDFs, against terms_candidates_full.csv's 1885 rows over 736 PDFs; 65 rows carry forward exactly. A PILOT SAMPLE superseded by the corpus-wide run the same day - the divergence is the pattern being tightened between iterations, not lost data",
+   "scripts_naming_it": [
+    "399_inventory_stranded_data.py"
+   ]
+  },
+  {
+   "path": "data/interim/terms_candidates_v4.csv",
+   "files": [
+    "data/interim/terms_candidates_v4.csv"
+   ],
+   "rows": 63,
+   "verdict": "SUPERSEDED",
+   "declared_verdict": "SUPERSEDED",
+   "check_holds": true,
+   "producer": "15d_terms_extract.py (iteration)",
+   "promoted_table": "(superseded)",
+   "evidence": "63 rows over 30 source PDFs, against terms_candidates_full.csv's 1885 rows over 736 PDFs; 63 rows carry forward exactly. A PILOT SAMPLE superseded by the corpus-wide run the same day - the divergence is the pattern being tightened between iterations, not lost data",
+   "scripts_naming_it": [
+    "399_inventory_stranded_data.py"
+   ]
+  },
+  {
+   "path": "data/interim/103_sdf_local_mitigation_unverified.csv",
+   "files": [
+    "data/interim/103_sdf_local_mitigation_unverified.csv"
+   ],
+   "rows": 1292,
+   "verdict": "INTERMEDIATE-BY-DESIGN",
+   "declared_verdict": "INTERMEDIATE-BY-DESIGN",
+   "check_holds": true,
+   "producer": "103_build_california_gaming.py",
+   "promoted_table": "(deliberately NOT published)",
+   "evidence": "1,292 rows, 23 columns. WITHHELD ON THE RECORD, for two reasons either of which suffices, quoted from 103's source: (1) NO TRIBE IS NAMED - the appendices are county -> local agency -> project -> amount, and attaching a county fire-district grant to a tribe would be an inference from geography alone; (2) the line items DO NOT FOOT against the printed per-county totals. Promoting it would publish 1,292 unfooted dollar rows attributed by geography. Consumer(s): a future 103 pass",
+   "scripts_naming_it": [
+    "103_build_california_gaming.py",
+    "399_inventory_stranded_data.py"
+   ]
+  },
+  {
+   "path": "data/interim/103_zone_log.csv",
+   "files": [
+    "data/interim/103_zone_log.csv"
+   ],
+   "rows": 1189,
+   "verdict": "INTERMEDIATE-BY-DESIGN",
+   "declared_verdict": "INTERMEDIATE-BY-DESIGN",
+   "check_holds": true,
+   "producer": "103_build_california_gaming.py",
+   "promoted_table": "(none)",
+   "evidence": "1,189 rows, 4 columns. PDF zone-parse log: file, zone, status, detail. Parse provenance. Consumer(s): the build's own audit trail",
+   "scripts_naming_it": [
+    "103_build_california_gaming.py",
+    "399_inventory_stranded_data.py"
+   ]
+  },
+  {
+   "path": "data/interim/105_zone_log.csv",
+   "files": [
+    "data/interim/105_zone_log.csv"
+   ],
+   "rows": 1887,
+   "verdict": "INTERMEDIATE-BY-DESIGN",
+   "declared_verdict": "INTERMEDIATE-BY-DESIGN",
+   "check_holds": true,
+   "producer": "105_build_florida_gaming.py",
+   "promoted_table": "(none)",
+   "evidence": "1,887 rows, 4 columns. PDF zone-parse log: file, zone, status, detail. Consumer(s): the build's own audit trail",
+   "scripts_naming_it": [
+    "105_build_florida_gaming.py",
+    "399_inventory_stranded_data.py"
+   ]
+  },
+  {
+   "path": "data/interim/105_litigation_figures.csv",
+   "files": [
+    "data/interim/105_litigation_figures.csv"
+   ],
+   "rows": 48,
+   "verdict": "INTERMEDIATE-BY-DESIGN",
+   "declared_verdict": "INTERMEDIATE-BY-DESIGN",
+   "check_holds": true,
+   "producer": "105_build_florida_gaming.py",
+   "promoted_table": "(none)",
+   "evidence": "48 rows, 7 columns. Figures quoted inside LITIGATION documents (document, doc_class, figure_kind, page, quote). A number a party ASSERTED in a filing is not a measured fact and carries no tribe key. Consumer(s): 105's own review pass",
+   "scripts_naming_it": [
+    "105_build_florida_gaming.py",
+    "399_inventory_stranded_data.py"
+   ]
+  },
+  {
+   "path": "data/interim/119_mi_footing.csv",
+   "files": [
+    "data/interim/119_mi_footing.csv"
+   ],
+   "rows": 270,
+   "verdict": "INTERMEDIATE-BY-DESIGN",
+   "declared_verdict": "INTERMEDIATE-BY-DESIGN",
+   "check_holds": true,
+   "producer": "119_build_digital_and_loyalty.py",
+   "promoted_table": "(none)",
+   "evidence": "270 rows, 7 columns. A FOOTING CHECK - columns are product_type/year/month/metric/published/summed/foots. It is the arithmetic proof that the Michigan figures reconcile, not new observations. 119 IS ON THE DO-NOT-RUN LIST. Consumer(s): 119's own reconciliation",
+   "scripts_naming_it": [
+    "119_build_digital_and_loyalty.py",
+    "399_inventory_stranded_data.py"
+   ]
+  },
+  {
+   "path": "data/interim/142_crawl_manifest.csv",
+   "files": [
+    "data/interim/142_crawl_manifest.csv"
+   ],
+   "rows": 2307,
+   "verdict": "INTERMEDIATE-BY-DESIGN",
+   "declared_verdict": "INTERMEDIATE-BY-DESIGN",
+   "check_holds": true,
+   "producer": "142_build_property_site_observations.py",
+   "promoted_table": "(none)",
+   "evidence": "2,307 rows, 8 columns. HTTP retrieval manifest: host, url, status, bytes, robots. Fetch provenance for the property-site corpus. Consumer(s): 142 and 382_remine_property_site_corpus.py (LIVE)",
+   "scripts_naming_it": [
+    "142_build_property_site_observations.py",
+    "382_remine_property_site_corpus.py",
+    "399_inventory_stranded_data.py"
+   ]
+  },
+  {
+   "path": "data/interim/142_gamefinder_manifest.csv",
+   "files": [
+    "data/interim/142_gamefinder_manifest.csv"
+   ],
+   "rows": 223,
+   "verdict": "INTERMEDIATE-BY-DESIGN",
+   "declared_verdict": "INTERMEDIATE-BY-DESIGN",
+   "check_holds": true,
+   "producer": "142_build_property_site_observations.py",
+   "promoted_table": "(none)",
+   "evidence": "223 rows, 8 columns. Retrieval manifest for the three game-finder systems behind gaming_game_finder_observations.csv. Consumer(s): 142",
+   "scripts_naming_it": [
+    "142_build_property_site_observations.py",
+    "399_inventory_stranded_data.py"
+   ]
+  },
+  {
+   "path": "data/interim/142_property_domains.csv",
+   "files": [
+    "data/interim/142_property_domains.csv"
+   ],
+   "rows": 440,
+   "verdict": "INTERMEDIATE-BY-DESIGN",
+   "declared_verdict": "INTERMEDIATE-BY-DESIGN",
+   "check_holds": true,
+   "producer": "142_build_property_site_observations.py",
+   "promoted_table": "(none)",
+   "evidence": "440 rows, 15 columns. facility -> candidate host discovery with a `verified` flag. It is the crawl's INPUT frontier. Consumer(s): 142 and 382_remine_property_site_corpus.py (LIVE)",
+   "scripts_naming_it": [
+    "142_build_property_site_observations.py",
+    "382_remine_property_site_corpus.py",
+    "383_adjudicate_property_site_refusals.py",
+    "384_crawl_uncrawled_open_properties.py",
+    "399_inventory_stranded_data.py"
+   ]
+  },
+  {
+   "path": "data/interim/ocr_shards/",
+   "files": [
+    "data/interim/ocr_shards/ocr_shard_0.csv",
+    "data/interim/ocr_shards/ocr_shard_1.csv",
+    "data/interim/ocr_shards/ocr_shard_2.csv",
+    "data/interim/ocr_shards/ocr_shard_3.csv",
+    "data/interim/ocr_shards/ocr_shard_4.csv",
+    "data/interim/ocr_shards/ocr_shard_5.csv",
+    "data/interim/ocr_shards/ocr_shard_6.csv",
+    "data/interim/ocr_shards/ocr_shard_7.csv"
+   ],
+   "rows": 233,
+   "verdict": "ALREADY-LANDED",
+   "declared_verdict": "ALREADY-LANDED",
+   "check_holds": true,
+   "producer": "150_run_ocr_overnight.py",
+   "promoted_table": "data/clean/gaming_ordinance_ocr.csv",
+   "evidence": "233 shard rows, 0 uncovered in gaming_ordinance_ocr.csv (263 rows) on (ordinance_id, pdf_md5); 153_merge_ordinance_ocr.py is the consumer",
+   "scripts_naming_it": []
+  },
+  {
+   "path": "Assistance_56G180126_TransactionHistory_1.csv",
+   "files": [
+    "Assistance_56G180126_TransactionHistory_1.csv"
+   ],
+   "rows": 92,
+   "verdict": "ALREADY-LANDED",
+   "declared_verdict": "ALREADY-LANDED",
+   "check_holds": true,
+   "producer": "(manual export)",
+   "promoted_table": "data/clean/federal_funding_transactions.csv",
+   "evidence": "92 of 92 rows present in federal_funding_transactions.csv on `assistance_transaction_unique_key`. It is a single-FAIN drill-down export (award_id_fain 56G180126), a QA artefact",
+   "scripts_naming_it": [
+    "399_inventory_stranded_data.py",
+    "cedar_domain.py"
+   ]
+  },
+  {
+   "path": "bgov.csv",
+   "files": [
+    "bgov.csv"
+   ],
+   "rows": 878,
+   "verdict": "ALREADY-LANDED",
+   "declared_verdict": "ALREADY-LANDED",
+   "check_holds": true,
+   "producer": "(manual BGOV export)",
+   "promoted_table": "data/clean/cedar_identifier_ledger_final.csv",
+   "evidence": "878 of 878 distinct CAGE codes present in cedar_identifier_ledger_final.csv; 878 ledger rows carry source_file=entity_crosswalk_bgov.csv at attribution_method=`bgov_manual`. NOTE the ledger stores the value in `identifier`, NOT in a `cage_code` column - a check aimed at `cage_code` returns 0 of 878 and reads as a total stranding (DEFECT 2b)",
+   "scripts_naming_it": [
+    "01_build_entity_spine.py",
+    "03_apply_exclusions_and_tier.py",
+    "399_inventory_stranded_data.py",
+    "401_register_root_csv_parts.py",
+    "cedar_domain.py"
+   ]
+  },
+  {
+   "path": "contract-03-18-23-19-40-24.csv",
+   "files": [
+    "contract-03-18-23-19-40-24.csv"
+   ],
+   "rows": 4000,
+   "verdict": "ALREADY-LANDED",
+   "declared_verdict": "ALREADY-LANDED",
+   "check_holds": true,
+   "producer": "(USAspending search export)",
+   "promoted_table": "data/clean/fpds_uei_cage_map.csv",
+   "evidence": "named as an input in 13_build_fpds_hierarchy.py's FILES list and cited by `source_file` on 28 rows of fpds_uei_cage_map.csv and 27 of fpds_uei_edges.csv. It is a RAW SOURCE INPUT misfiled in the project root, not an unpromoted output. Exactly 4,000 rows is the USAspending Advanced Search download cap - a truncated export, never a ledger",
+   "scripts_naming_it": [
+    "13_build_fpds_hierarchy.py",
+    "399_inventory_stranded_data.py",
+    "401_register_root_csv_parts.py",
+    "cedar_domain.py"
+   ]
+  },
+  {
+   "path": "entity_crosswalk_bgov.csv",
+   "files": [
+    "entity_crosswalk_bgov.csv"
+   ],
+   "rows": 752,
+   "verdict": "ALREADY-LANDED",
+   "declared_verdict": "ALREADY-LANDED",
+   "check_holds": true,
+   "producer": "(hand-built crosswalk)",
+   "promoted_table": "data/clean/cedar_identifier_ledger_final.csv",
+   "evidence": "878 of 878 CAGE codes present in the identifier ledger at tier A via attribution_method=`bgov_manual`; 03_apply_exclusions_and_tier.py names this file in AUTHORITY_FILES",
+   "scripts_naming_it": [
+    "01_build_entity_spine.py",
+    "03_apply_exclusions_and_tier.py",
+    "399_inventory_stranded_data.py",
+    "cedar_domain.py"
+   ]
+  },
+  {
+   "path": "entity_master.csv",
+   "files": [
+    "entity_master.csv"
+   ],
+   "rows": 815,
+   "verdict": "ALREADY-LANDED",
+   "declared_verdict": "ALREADY-LANDED",
+   "check_holds": true,
+   "producer": "(hand-built registry)",
+   "promoted_table": "data/spine/cedar_entity_spine.csv",
+   "evidence": "751 of 815 Entity_IDs carried on the spine's `cedar_entity_id`; a further 28 of the remaining 64 match a spine canonical name or alias exactly. 36 are neither - see NEEDS-A-RULING",
+   "scripts_naming_it": [
+    "01_build_entity_spine.py",
+    "35_entity_harvest.py",
+    "36_build_nho_intertribal.py",
+    "374_build_cedar_taxonomy_export.py",
+    "399_inventory_stranded_data.py",
+    "401_register_root_csv_parts.py",
+    "415_audit_identity_layer.py",
+    "416_reconcile_spine_id_columns.py",
+    "417_build_entity_identity_crosswalk.py",
+    "52_add_village_corporations.py",
+    "66_build_entity_hierarchy.py",
+    "cedar_domain.py",
+    "cedar_ids.py"
+   ]
+  },
+  {
+   "path": "deals_2026_ytd.csv",
+   "files": [
+    "deals_2026_ytd.csv"
+   ],
+   "rows": 90,
+   "verdict": "ALREADY-LANDED",
+   "declared_verdict": "ALREADY-LANDED",
+   "check_holds": true,
+   "producer": "155_collect_deals_2026_08.py",
+   "promoted_table": "data/clean/deals_classified.csv",
+   "evidence": "already declared in cedar_domain.PROMOTED_TABLES as a part of data/clean/deals_classified.csv; 90 of 90 Deal_IDs present in the promoted table (script 153 merged the root ledgers on 2026-08-26; MA2020-008 was withdrawn as a duplicate of ANCSA2-2020-004)",
+   "scripts_naming_it": [
+    "153_merge_base_ledgers_into_classified.py",
+    "155_collect_deals_2026_08.py",
+    "24_generate_dataset_docs.py",
+    "35_coverage_audit.py",
+    "399_inventory_stranded_data.py",
+    "401_register_root_csv_parts.py",
+    "54_reconcile_deals_duplicates.py",
+    "88_build_deals_taxonomy.py",
+    "build_log_doc.py",
+    "build_skipped_v2.py",
+    "build_v2.py",
+    "cedar_domain.py"
+   ]
+  },
+  {
+   "path": "deals_historical_2020_2025.csv",
+   "files": [
+    "deals_historical_2020_2025.csv"
+   ],
+   "rows": 56,
+   "verdict": "ALREADY-LANDED",
+   "declared_verdict": "ALREADY-LANDED",
+   "check_holds": true,
+   "producer": "(hand-built ledger)",
+   "promoted_table": "data/clean/deals_classified.csv",
+   "evidence": "already declared in cedar_domain.PROMOTED_TABLES as a part of data/clean/deals_classified.csv; 55 of 56 Deal_IDs present in the promoted table (script 153 merged the root ledgers on 2026-08-26; MA2020-008 was withdrawn as a duplicate of ANCSA2-2020-004)",
+   "scripts_naming_it": [
+    "153_merge_base_ledgers_into_classified.py",
+    "24_generate_dataset_docs.py",
+    "35_coverage_audit.py",
+    "399_inventory_stranded_data.py",
+    "401_register_root_csv_parts.py",
+    "54_reconcile_deals_duplicates.py",
+    "88_build_deals_taxonomy.py",
+    "build_log_doc.py",
+    "build_skipped_v2.py",
+    "build_v2.py",
+    "cedar_domain.py"
+   ]
+  },
+  {
+   "path": "reconcile_queue.csv",
+   "files": [],
+   "rows": 326,
+   "verdict": "NEEDS-A-RULING",
+   "declared_verdict": "NEEDS-A-RULING",
+   "check_holds": true,
+   "producer": "(review queue)",
+   "promoted_table": "(none - it is a queue)",
+   "evidence": "at review\\reconcile_queue.csv: 326 rows, 326 with an EMPTY `YOUR_RULING`. It is not data, it is 326 unanswered questions: [('neid_unmatched', 214), ('village_corp_region_unmapped', 73), ('bgov_tribe_unmatched', 34), ('deal_missing_source', 5)]",
+   "scripts_naming_it": [
+    "399_inventory_stranded_data.py",
+    "401_register_root_csv_parts.py",
+    "cedar_domain.py"
+   ]
+  },
+  {
+   "path": "data/staging/gaming_property_loyalty_tiers_2026-08-26.csv",
+   "files": [
+    "data/staging/gaming_property_loyalty_tiers_2026-08-26.csv"
+   ],
+   "rows": 65,
+   "verdict": "LIVE-WRITER",
+   "declared_verdict": "LIVE-WRITER",
+   "check_holds": true,
+   "producer": "(a run in flight)",
+   "promoted_table": "(in flight)",
+   "evidence": "written 10 minute(s) ago (2026-08-26T21:04:48), inside the 90-minute live window. Concurrency rule 6: check mtimes and running processes before writing a shared table. Not ruled on here; re-run 399 once the owning agent is done.",
+   "scripts_naming_it": []
+  },
+  {
+   "path": "data/staging/gaming_property_self_published_assertions_2026-08-26.csv",
+   "files": [
+    "data/staging/gaming_property_self_published_assertions_2026-08-26.csv"
+   ],
+   "rows": 622,
+   "verdict": "LIVE-WRITER",
+   "declared_verdict": "LIVE-WRITER",
+   "check_holds": true,
+   "producer": "(a run in flight)",
+   "promoted_table": "(in flight)",
+   "evidence": "written 10 minute(s) ago (2026-08-26T21:04:48), inside the 90-minute live window. Concurrency rule 6: check mtimes and running processes before writing a shared table. Not ruled on here; re-run 399 once the owning agent is done.",
+   "scripts_naming_it": []
+  },
+  {
+   "path": "data/staging/gaming_property_self_published_claims_2026-08-26.csv",
+   "files": [
+    "data/staging/gaming_property_self_published_claims_2026-08-26.csv"
+   ],
+   "rows": 41,
+   "verdict": "LIVE-WRITER",
+   "declared_verdict": "LIVE-WRITER",
+   "check_holds": true,
+   "producer": "(a run in flight)",
+   "promoted_table": "(in flight)",
+   "evidence": "written 10 minute(s) ago (2026-08-26T21:04:48), inside the 90-minute live window. Concurrency rule 6: check mtimes and running processes before writing a shared table. Not ruled on here; re-run 399 once the owning agent is done.",
+   "scripts_naming_it": []
+  },
+  {
+   "path": "data/staging/gaming_property_site_recovered_claims_2026-08-26.csv",
+   "files": [
+    "data/staging/gaming_property_site_recovered_claims_2026-08-26.csv"
+   ],
+   "rows": 231,
+   "verdict": "LIVE-WRITER",
+   "declared_verdict": "LIVE-WRITER",
+   "check_holds": true,
+   "producer": "(a run in flight)",
+   "promoted_table": "(in flight)",
+   "evidence": "written 10 minute(s) ago (2026-08-26T21:04:48), inside the 90-minute live window. Concurrency rule 6: check mtimes and running processes before writing a shared table. Not ruled on here; re-run 399 once the owning agent is done.",
+   "scripts_naming_it": []
+  },
+  {
+   "path": "data/interim/384_property_domains.csv",
+   "files": [
+    "data/interim/384_property_domains.csv"
+   ],
+   "rows": 136,
+   "verdict": "LIVE-WRITER",
+   "declared_verdict": "LIVE-WRITER",
+   "check_holds": true,
+   "producer": "(a run in flight)",
+   "promoted_table": "(in flight)",
+   "evidence": "written 19 minute(s) ago (2026-08-26T20:56:13), inside the 90-minute live window. Concurrency rule 6: check mtimes and running processes before writing a shared table. Not ruled on here; re-run 399 once the owning agent is done.",
+   "scripts_naming_it": [
+    "384_crawl_uncrawled_open_properties.py"
+   ]
+  }
+ ],
+ "no_disposition": [],
+ "totals": {
+  "files_scanned": 52,
+  "rows_scanned": 529450,
+  "by_verdict_files": {
+   "ALREADY-LANDED": 19,
+   "SUPERSEDED": 5,
+   "INTERMEDIATE-BY-DESIGN": 19,
+   "LIVE-WRITER": 9,
+   "NEEDS-A-RULING": 0
+  },
+  "by_verdict_rows": {
+   "ALREADY-LANDED": 71394,
+   "SUPERSEDED": 1234,
+   "INTERMEDIATE-BY-DESIGN": 455587,
+   "LIVE-WRITER": 1235,
+   "NEEDS-A-RULING": 326
+  }
+ }
+}

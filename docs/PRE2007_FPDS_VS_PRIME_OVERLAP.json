@@ -1,0 +1,601 @@
+{
+ "generated_utc": "2026-08-26T22:33:50.172965+00:00",
+ "script": "code/198_compare_fpds_extracts_vs_prime_clean.py",
+ "network_requests_issued": 0,
+ "cutoff_fiscal_year": 2007,
+ "join_key": "contract_number/award_id_piid + fiscal_year + UEI (funding_agency deliberately EXCLUDED -- it is a rendered label, not an identifier; see AGENTS.md 2026-08-12)",
+ "prime_clean": {
+  "total_rows": 1217768,
+  "by_fiscal_year": {
+   "2000": {
+    "rows": 2505,
+    "obligated_usd": 900034353.03,
+    "uei_pct": 100.0,
+    "cage_pct": 0.519,
+    "attributed_pct": 23.234,
+    "source_files": {
+     "master prime file.dta": 2505
+    }
+   },
+   "2001": {
+    "rows": 3803,
+    "obligated_usd": 1391534308.65,
+    "uei_pct": 100.0,
+    "cage_pct": 0.394,
+    "attributed_pct": 28.819,
+    "source_files": {
+     "master prime file.dta": 3803
+    }
+   },
+   "2002": {
+    "rows": 5966,
+    "obligated_usd": 1706455088.77,
+    "uei_pct": 100.0,
+    "cage_pct": 0.386,
+    "attributed_pct": 38.652,
+    "source_files": {
+     "master prime file.dta": 5966
+    }
+   },
+   "2003": {
+    "rows": 9882,
+    "obligated_usd": 3178289708.63,
+    "uei_pct": 100.0,
+    "cage_pct": 0.344,
+    "attributed_pct": 50.051,
+    "source_files": {
+     "master prime file.dta": 9882
+    }
+   },
+   "2004": {
+    "rows": 15324,
+    "obligated_usd": 4189405284.85,
+    "uei_pct": 100.0,
+    "cage_pct": 0.176,
+    "attributed_pct": 46.763,
+    "source_files": {
+     "master prime file.dta": 15324
+    }
+   },
+   "2005": {
+    "rows": 17446,
+    "obligated_usd": 5107046245.3,
+    "uei_pct": 100.0,
+    "cage_pct": 0.189,
+    "attributed_pct": 48.063,
+    "source_files": {
+     "master prime file.dta": 17446
+    }
+   },
+   "2006": {
+    "rows": 25808,
+    "obligated_usd": 5318438329.57,
+    "uei_pct": 100.0,
+    "cage_pct": 0.232,
+    "attributed_pct": 39.065,
+    "source_files": {
+     "master prime file.dta": 25808
+    }
+   },
+   "2007": {
+    "rows": 28844,
+    "obligated_usd": 6570380342.86,
+    "uei_pct": 100.0,
+    "cage_pct": 0.395,
+    "attributed_pct": 43.912,
+    "source_files": {
+     "master prime file.dta": 28844
+    }
+   },
+   "2008": {
+    "rows": 60446,
+    "obligated_usd": 11882572343.63,
+    "uei_pct": 100.0,
+    "cage_pct": 68.813,
+    "attributed_pct": 68.719,
+    "source_files": {
+     "FY2008_All_Contracts_Full_20260806.zip": 41527,
+     "master prime file.dta": 18919
+    }
+   },
+   "2009": {
+    "rows": 59831,
+    "obligated_usd": 13128574397.95,
+    "uei_pct": 100.0,
+    "cage_pct": 72.581,
+    "attributed_pct": 72.481,
+    "source_files": {
+     "FY2009_All_Contracts_Full_20260806.zip": 43359,
+     "master prime file.dta": 16472
+    }
+   },
+   "2010": {
+    "rows": 64092,
+    "obligated_usd": 13415534078.91,
+    "uei_pct": 100.0,
+    "cage_pct": 71.478,
+    "attributed_pct": 71.391,
+    "source_files": {
+     "FY2010_All_Contracts_Full_20260806.zip": 45749,
+     "master prime file.dta": 18343
+    }
+   },
+   "2011": {
+    "rows": 65427,
+    "obligated_usd": 12883333937.41,
+    "uei_pct": 100.0,
+    "cage_pct": 71.876,
+    "attributed_pct": 71.791,
+    "source_files": {
+     "FY2011_All_Contracts_Full_20260806.zip": 46962,
+     "master prime file.dta": 18465
+    }
+   },
+   "2012": {
+    "rows": 60177,
+    "obligated_usd": 14106078950.89,
+    "uei_pct": 100.0,
+    "cage_pct": 70.436,
+    "attributed_pct": 70.341,
+    "source_files": {
+     "FY2012_All_Contracts_Full_20260806.zip": 42322,
+     "master prime file.dta": 17855
+    }
+   },
+   "2013": {
+    "rows": 50633,
+    "obligated_usd": 10743875176.84,
+    "uei_pct": 100.0,
+    "cage_pct": 72.068,
+    "attributed_pct": 71.927,
+    "source_files": {
+     "FY2013_All_Contracts_Full_20260806.zip": 36412,
+     "master prime file.dta": 14221
+    }
+   },
+   "2014": {
+    "rows": 51780,
+    "obligated_usd": 12061390005.39,
+    "uei_pct": 100.0,
+    "cage_pct": 70.328,
+    "attributed_pct": 70.131,
+    "source_files": {
+     "FY2014_All_Contracts_Full_20260806.zip": 36307,
+     "master prime file.dta": 15473
+    }
+   },
+   "2015": {
+    "rows": 54619,
+    "obligated_usd": 11541525344.0,
+    "uei_pct": 100.0,
+    "cage_pct": 68.65,
+    "attributed_pct": 68.328,
+    "source_files": {
+     "FY2015_All_Contracts_Full_20260806.zip": 37309,
+     "master prime file.dta": 17310
+    }
+   },
+   "2016": {
+    "rows": 57574,
+    "obligated_usd": 12194667609.54,
+    "uei_pct": 100.0,
+    "cage_pct": 66.414,
+    "attributed_pct": 65.7,
+    "source_files": {
+     "FY2016_All_Contracts_Full_20260806.zip": 37812,
+     "master prime file.dta": 19762
+    }
+   },
+   "2017": {
+    "rows": 61668,
+    "obligated_usd": 13424720035.52,
+    "uei_pct": 100.0,
+    "cage_pct": 91.13,
+    "attributed_pct": 68.885,
+    "source_files": {
+     "FY2017_All_Contracts_Full_20260706.zip": 42196,
+     "master prime file.dta": 19472
+    }
+   },
+   "2018": {
+    "rows": 59355,
+    "obligated_usd": 14892770254.63,
+    "uei_pct": 100.0,
+    "cage_pct": 99.978,
+    "attributed_pct": 71.662,
+    "source_files": {
+     "FY2018_All_Contracts_Full_20260706.zip": 42409,
+     "master prime file.dta": 16946
+    }
+   },
+   "2019": {
+    "rows": 59808,
+    "obligated_usd": 16712040515.29,
+    "uei_pct": 100.0,
+    "cage_pct": 99.993,
+    "attributed_pct": 73.259,
+    "source_files": {
+     "FY2019_All_Contracts_Full_20260706.zip": 43794,
+     "master prime file.dta": 16014
+    }
+   },
+   "2020": {
+    "rows": 62115,
+    "obligated_usd": 18512224320.13,
+    "uei_pct": 100.0,
+    "cage_pct": 99.997,
+    "attributed_pct": 73.641,
+    "source_files": {
+     "FY2020_All_Contracts_Full_20260706.zip": 45713,
+     "master prime file.dta": 16402
+    }
+   },
+   "2021": {
+    "rows": 61291,
+    "obligated_usd": 20197547000.34,
+    "uei_pct": 100.0,
+    "cage_pct": 99.993,
+    "attributed_pct": 72.069,
+    "source_files": {
+     "FY2021_All_Contracts_Full_20260706.zip": 44127,
+     "master prime file.dta": 17164
+    }
+   },
+   "2022": {
+    "rows": 69879,
+    "obligated_usd": 22212817017.34,
+    "uei_pct": 100.0,
+    "cage_pct": 100.0,
+    "attributed_pct": 65.191,
+    "source_files": {
+     "FY2022_All_Contracts_Full_20260706.zip": 45509,
+     "master prime file.dta": 24370
+    }
+   },
+   "2023": {
+    "rows": 45747,
+    "obligated_usd": 17754126742.33,
+    "uei_pct": 100.0,
+    "cage_pct": 100.0,
+    "attributed_pct": 100.0,
+    "source_files": {
+     "FY2023_All_Contracts_Full_20260706.zip": 45747
+    }
+   },
+   "2024": {
+    "rows": 53056,
+    "obligated_usd": 18985625391.46,
+    "uei_pct": 100.0,
+    "cage_pct": 100.0,
+    "attributed_pct": 100.0,
+    "source_files": {
+     "FY2024_All_Contracts_Full_20260706.zip": 53056
+    }
+   },
+   "2025": {
+    "rows": 48879,
+    "obligated_usd": 18629676089.14,
+    "uei_pct": 100.0,
+    "cage_pct": 100.0,
+    "attributed_pct": 100.0,
+    "source_files": {
+     "FY2025_All_Contracts_Full_20260706.zip": 48879
+    }
+   },
+   "2026": {
+    "rows": 61813,
+    "obligated_usd": 8364575788.37,
+    "uei_pct": 100.0,
+    "cage_pct": 100.0,
+    "attributed_pct": 100.0,
+    "source_files": {
+     "FY2026_All_Contracts_Full_20260706.zip": 61813
+    }
+   }
+  }
+ },
+ "prime_pre2007_distinct_keys": 78267,
+ "prime_pre2007_distinct_uei": 3914,
+ "fpds_extracts": [
+  {
+   "path": "C:\\Users\\esm247\\Desktop\\Cedar Press\\data\\raw\\esm_hci\\ESM\\raw\\Data Request 4-5-2023 File 1.csv",
+   "rows_scanned": 1101796,
+   "pre_fy2007_rows": 117319,
+   "pre_fy2007_distinct_keys_piid_fy_uei": 80607,
+   "keys_matching_prime_exactly": 78267,
+   "keys_matching_prime_on_piid_fy_only": 76,
+   "keys_NOT_in_prime": 2263,
+   "usd_on_matched": 21802041339.2,
+   "usd_on_unmatched": 1569100190.63,
+   "distinct_uei_pre2007": 4087,
+   "distinct_uei_pre2007_ABSENT_from_prime_pre2007": 173,
+   "by_fiscal_year": {
+    "1989": {
+     "rows": 85,
+     "rows_not_in_prime": 85,
+     "usd_not_in_prime": 730950000.0
+    },
+    "1997": {
+     "rows": 8,
+     "rows_not_in_prime": 8,
+     "usd_not_in_prime": 1287012.0
+    },
+    "1998": {
+     "rows": 60,
+     "rows_not_in_prime": 60,
+     "usd_not_in_prime": 9578089.0
+    },
+    "1999": {
+     "rows": 2454,
+     "rows_not_in_prime": 2454,
+     "usd_not_in_prime": 734071694.38
+    },
+    "2000": {
+     "rows": 3460,
+     "rows_not_in_prime": 2,
+     "usd_not_in_prime": 7000.0
+    },
+    "2001": {
+     "rows": 5098,
+     "rows_not_in_prime": 0,
+     "usd_not_in_prime": 0.0
+    },
+    "2002": {
+     "rows": 8275,
+     "rows_not_in_prime": 72,
+     "usd_not_in_prime": 728647.0
+    },
+    "2003": {
+     "rows": 13524,
+     "rows_not_in_prime": 15,
+     "usd_not_in_prime": 1487109.65
+    },
+    "2004": {
+     "rows": 21378,
+     "rows_not_in_prime": 87,
+     "usd_not_in_prime": 11554712.08
+    },
+    "2005": {
+     "rows": 26095,
+     "rows_not_in_prime": 199,
+     "usd_not_in_prime": 21406018.57
+    },
+    "2006": {
+     "rows": 36882,
+     "rows_not_in_prime": 185,
+     "usd_not_in_prime": 58029907.95
+    }
+   }
+  },
+  {
+   "path": "C:\\Users\\esm247\\Desktop\\Cedar Press\\data\\raw\\esm_hci\\ESM\\raw\\Data Request 4-5-2023 File 2.csv",
+   "rows_scanned": 1078021,
+   "pre_fy2007_rows": 126950,
+   "pre_fy2007_distinct_keys_piid_fy_uei": 81802,
+   "keys_matching_prime_exactly": 47531,
+   "keys_matching_prime_on_piid_fy_only": 2582,
+   "keys_NOT_in_prime": 26240,
+   "usd_on_matched": 17645051719.15,
+   "usd_on_unmatched": 7931621939.53,
+   "distinct_uei_pre2007": 2046,
+   "distinct_uei_pre2007_ABSENT_from_prime_pre2007": 770,
+   "by_fiscal_year": {
+    "1979": {
+     "rows": 6,
+     "rows_not_in_prime": 6,
+     "usd_not_in_prime": 224000.0
+    },
+    "1980": {
+     "rows": 2,
+     "rows_not_in_prime": 2,
+     "usd_not_in_prime": 139000.0
+    },
+    "1981": {
+     "rows": 4,
+     "rows_not_in_prime": 4,
+     "usd_not_in_prime": 106000.0
+    },
+    "1982": {
+     "rows": 4,
+     "rows_not_in_prime": 4,
+     "usd_not_in_prime": 13000.0
+    },
+    "1983": {
+     "rows": 8,
+     "rows_not_in_prime": 8,
+     "usd_not_in_prime": 267000.0
+    },
+    "1984": {
+     "rows": 6,
+     "rows_not_in_prime": 6,
+     "usd_not_in_prime": 92000.0
+    },
+    "1985": {
+     "rows": 7,
+     "rows_not_in_prime": 7,
+     "usd_not_in_prime": 309000.0
+    },
+    "1986": {
+     "rows": 7,
+     "rows_not_in_prime": 7,
+     "usd_not_in_prime": 438000.0
+    },
+    "1987": {
+     "rows": 6,
+     "rows_not_in_prime": 6,
+     "usd_not_in_prime": 216000.0
+    },
+    "1988": {
+     "rows": 6,
+     "rows_not_in_prime": 6,
+     "usd_not_in_prime": 803000.0
+    },
+    "1989": {
+     "rows": 20,
+     "rows_not_in_prime": 20,
+     "usd_not_in_prime": 819000.0
+    },
+    "1990": {
+     "rows": 25,
+     "rows_not_in_prime": 25,
+     "usd_not_in_prime": 1261000.0
+    },
+    "1991": {
+     "rows": 11,
+     "rows_not_in_prime": 11,
+     "usd_not_in_prime": 325000.0
+    },
+    "1992": {
+     "rows": 15,
+     "rows_not_in_prime": 15,
+     "usd_not_in_prime": 5841000.0
+    },
+    "1993": {
+     "rows": 17,
+     "rows_not_in_prime": 17,
+     "usd_not_in_prime": 822000.0
+    },
+    "1994": {
+     "rows": 15,
+     "rows_not_in_prime": 15,
+     "usd_not_in_prime": 1149000.0
+    },
+    "1995": {
+     "rows": 17,
+     "rows_not_in_prime": 17,
+     "usd_not_in_prime": 10968000.0
+    },
+    "1996": {
+     "rows": 9,
+     "rows_not_in_prime": 9,
+     "usd_not_in_prime": 4527000.0
+    },
+    "1997": {
+     "rows": 27,
+     "rows_not_in_prime": 27,
+     "usd_not_in_prime": 8881072.0
+    },
+    "1998": {
+     "rows": 77,
+     "rows_not_in_prime": 77,
+     "usd_not_in_prime": 17209013.0
+    },
+    "1999": {
+     "rows": 3816,
+     "rows_not_in_prime": 3816,
+     "usd_not_in_prime": 1081019818.85
+    },
+    "2000": {
+     "rows": 4025,
+     "rows_not_in_prime": 2504,
+     "usd_not_in_prime": 526393176.39
+    },
+    "2001": {
+     "rows": 5215,
+     "rows_not_in_prime": 2872,
+     "usd_not_in_prime": 621991157.52
+    },
+    "2002": {
+     "rows": 8889,
+     "rows_not_in_prime": 4160,
+     "usd_not_in_prime": 738677506.64
+    },
+    "2003": {
+     "rows": 15650,
+     "rows_not_in_prime": 6205,
+     "usd_not_in_prime": 1048595264.53
+    },
+    "2004": {
+     "rows": 21550,
+     "rows_not_in_prime": 5989,
+     "usd_not_in_prime": 915716610.24
+    },
+    "2005": {
+     "rows": 27593,
+     "rows_not_in_prime": 6949,
+     "usd_not_in_prime": 1250921148.18
+    },
+    "2006": {
+     "rows": 39923,
+     "rows_not_in_prime": 8248,
+     "usd_not_in_prime": 1693898172.18
+    }
+   }
+  },
+  {
+   "path": "C:\\Users\\esm247\\Desktop\\Cedar Press\\data\\raw\\esm_hci\\ESM\\raw\\Data Request 5-8-2023 IDVs.csv",
+   "rows_scanned": 100074,
+   "pre_fy2007_rows": 4864,
+   "pre_fy2007_distinct_keys_piid_fy_uei": 3005,
+   "keys_matching_prime_exactly": 7,
+   "keys_matching_prime_on_piid_fy_only": 1,
+   "keys_NOT_in_prime": 2997,
+   "usd_on_matched": 7477359.9,
+   "usd_on_unmatched": 327623788.85,
+   "distinct_uei_pre2007": 1096,
+   "distinct_uei_pre2007_ABSENT_from_prime_pre2007": 131,
+   "by_fiscal_year": {
+    "1989": {
+     "rows": 4,
+     "rows_not_in_prime": 4,
+     "usd_not_in_prime": 0.0
+    },
+    "1994": {
+     "rows": 1,
+     "rows_not_in_prime": 1,
+     "usd_not_in_prime": 0.0
+    },
+    "1997": {
+     "rows": 2,
+     "rows_not_in_prime": 2,
+     "usd_not_in_prime": 0.0
+    },
+    "1998": {
+     "rows": 2,
+     "rows_not_in_prime": 2,
+     "usd_not_in_prime": 0.0
+    },
+    "1999": {
+     "rows": 95,
+     "rows_not_in_prime": 95,
+     "usd_not_in_prime": 321000.0
+    },
+    "2000": {
+     "rows": 134,
+     "rows_not_in_prime": 134,
+     "usd_not_in_prime": 4353471.07
+    },
+    "2001": {
+     "rows": 160,
+     "rows_not_in_prime": 160,
+     "usd_not_in_prime": 12293239.0
+    },
+    "2002": {
+     "rows": 220,
+     "rows_not_in_prime": 220,
+     "usd_not_in_prime": 14397626.49
+    },
+    "2003": {
+     "rows": 369,
+     "rows_not_in_prime": 369,
+     "usd_not_in_prime": 68217328.77
+    },
+    "2004": {
+     "rows": 1000,
+     "rows_not_in_prime": 988,
+     "usd_not_in_prime": 44911785.84
+    },
+    "2005": {
+     "rows": 1258,
+     "rows_not_in_prime": 1254,
+     "usd_not_in_prime": 52051249.08
+    },
+    "2006": {
+     "rows": 1619,
+     "rows_not_in_prime": 1615,
+     "usd_not_in_prime": 131078088.6
+    }
+   }
+  }
+ ]
+}

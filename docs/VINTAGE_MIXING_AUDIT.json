@@ -1,0 +1,5689 @@
+{
+ "generated": "2026-08-26T23:52:16.436304+00:00",
+ "script": "code/334_audit_source_vintage_mixing.py",
+ "modifies_datasets": false,
+ "tables_scanned": 276,
+ "MIXED_SOURCE_VINTAGE": [
+  "federal_funding_transactions.csv"
+ ],
+ "PARTIALLY_STAMPED": [],
+ "SINGLE_VINTAGE_OR_UNSTAMPED": [
+  "_bill_actions.csv",
+  "_bill_actions_fetch_log.csv",
+  "_bill_metadata_backfill.csv",
+  "_cosponsor_fetch_log.csv",
+  "_cosponsors.csv",
+  "admin_appeal_decisions.csv",
+  "admin_appeal_parties.csv",
+  "admin_appeal_positions.csv",
+  "admin_region_assignments.csv",
+  "admin_region_overlap_derived.csv",
+  "admin_region_systems.csv",
+  "admin_regional_observations.csv",
+  "admin_regions.csv",
+  "advocacy_passthrough.csv",
+  "advocacy_passthrough_2026-08-07.csv",
+  "agency_attention_vs_advocacy.csv",
+  "agency_attention_vs_advocacy_year.csv",
+  "anc_ceiling_roster.csv",
+  "ancsa_filings_index.csv",
+  "assistance_tribe_id_crosswalk.csv",
+  "bie_uio_dollars_by_entity.csv",
+  "bie_uio_identifier_links.csv",
+  "bill_votes.csv",
+  "bill_votes_entity_bridge.csv",
+  "bill_votes_official_verification.csv",
+  "brand_family_proposals.csv",
+  "brand_family_registry.csv",
+  "ca_gaming_facilities_official.csv",
+  "ca_gaming_payments.csv",
+  "cedar_cage_backfill.csv",
+  "cedar_identifier_graph_edges.csv",
+  "cedar_identifier_graph_nodes.csv",
+  "cedar_identifier_ledger_final.csv",
+  "cedar_identifier_ledger_tiered.csv",
+  "cedar_identifier_propagation.csv",
+  "cedar_inherited_from_rulings_2026-08-05.csv",
+  "cedar_inherited_from_rulings_2026-08-06.csv",
+  "cedar_inherited_from_rulings_2026-08-07.csv",
+  "cedar_publishable_identifiers.csv",
+  "cedar_ruling_ledger_consolidated.csv",
+  "cedar_spiderweb_v2.csv",
+  "codebook_master.csv",
+  "compact_events.csv",
+  "compact_obligation_tribal_agency_bridge.csv",
+  "compact_required_reports.csv",
+  "compact_structured_terms.csv",
+  "compact_terms.csv",
+  "compact_versions.csv",
+  "compacts.csv",
+  "congressional_correspondence_log.csv",
+  "congressional_correspondence_systems.csv",
+  "consultation_agency_coverage.csv",
+  "consultation_events.csv",
+  "content_analysis_accuracy.csv",
+  "content_audit_fr_relevance.csv",
+  "content_audit_fr_theme.csv",
+  "content_audit_lobbying_family.csv",
+  "contractor_ranking.csv",
+  "correspondence_foia_source_coverage.csv",
+  "coverage_audit.csv",
+  "cross_dataset_ruling_map.csv",
+  "deals_2000_2019_additions.csv",
+  "deals_2026_ytd_additions.csv",
+  "deals_anc_reports_additions.csv",
+  "deals_ancsa_portal_additions.csv",
+  "deals_ancsa_portal_v2_additions.csv",
+  "deals_classified.csv",
+  "deals_federal_awards_additions.csv",
+  "deals_historical_additions.csv",
+  "deals_party_attribution.csv",
+  "deals_party_attribution_agent.csv",
+  "deals_party_autoresolved.csv",
+  "deals_party_matches.csv",
+  "deals_sec_2010_2017_additions.csv",
+  "deals_source_index.csv",
+  "deals_taxonomy.csv",
+  "deals_tribal_debt_additions.csv",
+  "digital_gaming_relationships.csv",
+  "digital_gaming_revenue.csv",
+  "earmarks.csv",
+  "entity_aliases.csv",
+  "entity_candidates_new.csv",
+  "entity_candidates_rejected.csv",
+  "entity_evidence_profile.csv",
+  "entity_hierarchy.csv",
+  "entity_name_harvest.csv",
+  "entity_relationships.csv",
+  "entity_year_coverage.csv",
+  "entity_year_panel.csv",
+  "faads_attribution_audit_sample.csv",
+  "faads_entity_attribution.csv",
+  "faads_identifier_coverage_by_agency_year.csv",
+  "faads_transactions.csv",
+  "faads_transactions_all_agencies.csv",
+  "fac_audit_gaming_disclosures.csv",
+  "fac_audit_sefa_gaming_programs.csv",
+  "fac_tribal_single_audits.csv",
+  "federal_actions.csv",
+  "federal_actions_entity_bridge.csv",
+  "federal_actions_raw.csv",
+  "federal_funding_tribe_year_panel.csv",
+  "federal_funding_year_comparison_2026-08-05.csv",
+  "federal_recognition_events.csv",
+  "federal_recognition_roster.csv",
+  "ferc_docket_filings.csv",
+  "ferc_docket_parties.csv",
+  "ferc_ex_parte_communications.csv",
+  "ferc_ex_parte_parties.csv",
+  "ferc_source_coverage.csv",
+  "ferc_tribal_dockets.csv",
+  "fl_gaming_payments.csv",
+  "foia_discovery_targets.csv",
+  "foia_request_index.csv",
+  "fpds_uei_cage_map.csv",
+  "fpds_uei_edges.csv",
+  "fr_abstract_availability_year.csv",
+  "fr_consultation_by_agency.csv",
+  "fr_consultation_notices.csv",
+  "fr_consultation_referenced.csv",
+  "fr_consultation_year.csv",
+  "fr_content_classification.csv",
+  "fr_ex_parte_notices.csv",
+  "fr_ex_parte_parties.csv",
+  "fr_ex_parte_party_entity_links.csv",
+  "fr_nagpra_title_index.csv",
+  "fr_nagpra_title_index_year.csv",
+  "fr_recognized_entities.csv",
+  "fr_relevance_stratum_audit.csv",
+  "fr_relevance_tier_year.csv",
+  "fr_theme_year.csv",
+  "funding_identifier_harvest.csv",
+  "funding_identifier_netnew_ueis.csv",
+  "gaming_capacity_official.csv",
+  "gaming_decision_compact_join.csv",
+  "gaming_decision_events.csv",
+  "gaming_device_observations.csv",
+  "gaming_employment_observations.csv",
+  "gaming_facilities.csv",
+  "gaming_facility_metrics.csv",
+  "gaming_field_coverage.csv",
+  "gaming_financing_events.csv",
+  "gaming_game_finder_observations.csv",
+  "gaming_game_finder_systems.csv",
+  "gaming_land_decisions.csv",
+  "gaming_manufacturer_facts.csv",
+  "gaming_mitigation_agreements.csv",
+  "gaming_nigc_roster_link.csv",
+  "gaming_ordinance_ocr.csv",
+  "gaming_ordinances.csv",
+  "gaming_project_facilities.csv",
+  "gaming_projections.csv",
+  "gaming_properties.csv",
+  "gaming_property_capacity_history.csv",
+  "gaming_property_coverage.csv",
+  "gaming_property_federal_traces.csv",
+  "gaming_property_labor_demand.csv",
+  "gaming_property_locations.csv",
+  "gaming_property_site_observations.csv",
+  "gaming_property_universe_events.csv",
+  "gaming_revenue_bounds.csv",
+  "gaming_source_claims.csv",
+  "gaming_vendor_tribal_licenses.csv",
+  "grantmaker_funding_coverage.csv",
+  "grantmaker_funding_flows.csv",
+  "grantmaker_funding_overlap.csv",
+  "hearing_appearances.csv",
+  "hearing_bill_links.csv",
+  "individual_native_exclusion_pairs.csv",
+  "individual_native_firm_contracts.csv",
+  "individual_native_firm_contracts_published.csv",
+  "individual_native_firm_register.csv",
+  "individual_native_ownership_verification.csv",
+  "individual_native_prior_rulings.csv",
+  "individual_native_verification_candidates.csv",
+  "inflation_deflator.csv",
+  "instrument_taxonomy.csv",
+  "intertribal_memberships.csv",
+  "intertribal_orgs.csv",
+  "lobbying_client_attribution.csv",
+  "lobbying_disclosure_verbosity_year.csv",
+  "lobbying_issue_families_filing.csv",
+  "lobbying_issue_family_year.csv",
+  "lobbying_registrant_client_relationships.csv",
+  "lobbying_registrant_concentration.csv",
+  "lobbying_registrant_identifiers.csv",
+  "lobbying_registrant_native_ownership_evidence.csv",
+  "lobbying_registrants.csv",
+  "lobbying_target_entities.csv",
+  "lobbying_unmatched_clients.csv",
+  "loyalty_program_property.csv",
+  "loyalty_programs.csv",
+  "member_positions.csv",
+  "nagpra_notice_entity_bridge.csv",
+  "nagpra_notices.csv",
+  "native_bill_outcomes.csv",
+  "native_bills.csv",
+  "native_bills_entity_bridge.csv",
+  "native_bills_entity_class.csv",
+  "native_bills_subject_sweep.csv",
+  "native_entity_lobbying_disclosures.csv",
+  "native_fi_roster.csv",
+  "native_issue_litigation_coverage.csv",
+  "native_issue_litigation_positions.csv",
+  "native_passthrough.csv",
+  "native_passthrough_pairs.csv",
+  "nd_severance_allocation.csv",
+  "nepa_administrative_record_parties.csv",
+  "nepa_eplanning_projects.csv",
+  "nepa_project_documents.csv",
+  "nepa_source_coverage.csv",
+  "nho_doi_notification_roster.csv",
+  "nho_ito_spine_crosswalk.csv",
+  "nho_ownership_changes.csv",
+  "nho_parents.csv",
+  "nho_register.csv",
+  "nho_verified_entities.csv",
+  "nigc_declination_letters.csv",
+  "nigc_region_assignments.csv",
+  "nigc_regional_ggr.csv",
+  "nigc_revenue_bands.csv",
+  "np_ein_entity_hub.csv",
+  "np_ein_uei_bridge.csv",
+  "np_financials.csv",
+  "np_grantee_financials.csv",
+  "np_org_scale.csv",
+  "np_orgs.csv",
+  "np_schedule_i_filers.csv",
+  "np_schedule_i_grants.csv",
+  "nrc_meeting_participants.csv",
+  "nrc_public_meetings.csv",
+  "oira_federal_action_links.csv",
+  "oira_meeting_participants.csv",
+  "oira_meetings.csv",
+  "ownership_events.csv",
+  "prime_contracts.csv",
+  "prime_contracts_archive_backfill.csv",
+  "prime_contracts_awards.csv",
+  "prime_contracts_entity_year.csv",
+  "prime_contracts_published.csv",
+  "prime_sub_network.csv",
+  "resource_asset_source_coverage.csv",
+  "resource_assets.csv",
+  "resource_parties.csv",
+  "resource_revenue.csv",
+  "sam_prime_contracts_fy2000_2007.csv",
+  "sam_prime_contracts_fy2000_2007_PUBLISHABLE.csv",
+  "sam_prime_contracts_fy2000_2007_reconciliation.csv",
+  "section_106_consultation_events.csv",
+  "section_106_project_parties.csv",
+  "section_106_source_coverage.csv",
+  "seminole_bond_disclosures.csv",
+  "series_breaks.csv",
+  "source_coverage_admin_appeals.csv",
+  "source_coverage_fac.csv",
+  "source_coverage_nrc_meetings.csv",
+  "source_coverage_tribal_legislative.csv",
+  "source_coverage_vendor_disclosure.csv",
+  "source_coverage_visitor_records.csv",
+  "state_gaming_observations.csv",
+  "subaward_entity_rollup.csv",
+  "subaward_identifier_harvest.csv",
+  "subaward_identifier_netnew.csv",
+  "subawards.csv",
+  "tcu_cdfi_added.csv",
+  "tcu_cdfi_ownership_evidence.csv",
+  "tcu_roster.csv",
+  "tribal_bond_issuances.csv",
+  "tribal_resolution_financings.csv",
+  "tribal_tax_bases.csv",
+  "tribe_year_lobbying_panel.csv",
+  "variable_registry.csv",
+  "visitor_access_events.csv",
+  "visitor_record_foia_requests.csv",
+  "wa_machine_allocations.csv",
+  "wa_machine_transfers.csv"
+ ],
+ "detail": {
+  "_bill_actions.csv": {
+   "file": "_bill_actions.csv",
+   "rows": 31936,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 31936
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "_bill_actions_fetch_log.csv": {
+   "file": "_bill_actions_fetch_log.csv",
+   "rows": 3061,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 3061
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "_bill_metadata_backfill.csv": {
+   "file": "_bill_metadata_backfill.csv",
+   "rows": 128,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 128
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "_cosponsor_fetch_log.csv": {
+   "file": "_cosponsor_fetch_log.csv",
+   "rows": 275,
+   "columns": 6,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "_cosponsors.csv": {
+   "file": "_cosponsors.csv",
+   "rows": 5318,
+   "columns": 8,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "admin_appeal_decisions.csv": {
+   "file": "admin_appeal_decisions.csv",
+   "rows": 15613,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 15613
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "admin_appeal_parties.csv": {
+   "file": "admin_appeal_parties.csv",
+   "rows": 20027,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 20027
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "admin_appeal_positions.csv": {
+   "file": "admin_appeal_positions.csv",
+   "rows": 1,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 1
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "admin_region_assignments.csv": {
+   "file": "admin_region_assignments.csv",
+   "rows": 2124,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 2124
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 2124
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "85_build_admin_region_crosswalk.py": 2124
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "admin_region_overlap_derived.csv": {
+   "file": "admin_region_overlap_derived.csv",
+   "rows": 28,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 28
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "admin_region_systems.csv": {
+   "file": "admin_region_systems.csv",
+   "rows": 6,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 6
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 6
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "admin_regional_observations.csv": {
+   "file": "admin_regional_observations.csv",
+   "rows": 27,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 27
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 27
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "85_build_admin_region_crosswalk.py": 27
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "admin_regions.csv": {
+   "file": "admin_regions.csv",
+   "rows": 155,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 155
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "85_build_admin_region_crosswalk.py": 155
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "advocacy_passthrough.csv": {
+   "file": "advocacy_passthrough.csv",
+   "rows": 1620,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 1620
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "advocacy_passthrough_2026-08-07.csv": {
+   "file": "advocacy_passthrough_2026-08-07.csv",
+   "rows": 1620,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 1620
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "agency_attention_vs_advocacy.csv": {
+   "file": "agency_attention_vs_advocacy.csv",
+   "rows": 22,
+   "columns": 11,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "agency_attention_vs_advocacy_year.csv": {
+   "file": "agency_attention_vs_advocacy_year.csv",
+   "rows": 698,
+   "columns": 4,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "anc_ceiling_roster.csv": {
+   "file": "anc_ceiling_roster.csv",
+   "rows": 196,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 196
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "ancsa_filings_index.csv": {
+   "file": "ancsa_filings_index.csv",
+   "rows": 19269,
+   "provenance_columns": {
+    "retrieved_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 19269
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "assistance_tribe_id_crosswalk.csv": {
+   "file": "assistance_tribe_id_crosswalk.csv",
+   "rows": 361,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 361
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "bie_uio_dollars_by_entity.csv": {
+   "file": "bie_uio_dollars_by_entity.csv",
+   "rows": 114,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 114
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "bie_uio_identifier_links.csv": {
+   "file": "bie_uio_identifier_links.csv",
+   "rows": 302,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 5,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "faads_transactions_all_agencies.csv": 116,
+      "federal_funding_transactions.csv": 100,
+      "prime_contracts.csv": 41,
+      "np_orgs.csv": 28,
+      "subawards.csv": 17
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 302
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "bill_votes.csv": {
+   "file": "bill_votes.csv",
+   "rows": 423,
+   "columns": 60,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "bill_votes_entity_bridge.csv": {
+   "file": "bill_votes_entity_bridge.csv",
+   "rows": 75,
+   "columns": 10,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "bill_votes_official_verification.csv": {
+   "file": "bill_votes_official_verification.csv",
+   "rows": 305,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 305
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "brand_family_proposals.csv": {
+   "file": "brand_family_proposals.csv",
+   "rows": 609,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 609
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "brand_family_registry.csv": {
+   "file": "brand_family_registry.csv",
+   "rows": 106,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 106
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "ca_gaming_facilities_official.csv": {
+   "file": "ca_gaming_facilities_official.csv",
+   "rows": 245,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 245
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 245
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/103_build_california_gaming.py": 245
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "ca_gaming_payments.csv": {
+   "file": "ca_gaming_payments.csv",
+   "rows": 40164,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 40164
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 40164
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/103_build_california_gaming.py": 40164
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "cedar_cage_backfill.csv": {
+   "file": "cedar_cage_backfill.csv",
+   "rows": 4362,
+   "columns": 7,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "cedar_identifier_graph_edges.csv": {
+   "file": "cedar_identifier_graph_edges.csv",
+   "rows": 46051,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 46051
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "cedar_identifier_graph_nodes.csv": {
+   "file": "cedar_identifier_graph_nodes.csv",
+   "rows": 115471,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 115471
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "cedar_identifier_ledger_final.csv": {
+   "file": "cedar_identifier_ledger_final.csv",
+   "rows": 20577,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 11,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "master_tribal_entity_registry.csv": 13190,
+      "need_v6_geocoded.csv": 5076,
+      "contracting": 1029,
+      "entity_crosswalk_bgov.csv": 878,
+      "funding": 298,
+      "review/agent_rulings_spiderweb_2026-08-06.csv": 51,
+      "review/agent_rulings_akvillagecorp_2026-08-06.csv": 30,
+      "nho_verified_entities.csv": 18,
+      "review/agent_rulings_villagecorp_2026-08-05.csv": 5,
+      "review/agent_rulings_deals_2026-08-05.csv": 1,
+      "review/agent_rulings_villagecorp_v2_2026-08-05.csv": 1
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "cedar_identifier_ledger_tiered.csv": {
+   "file": "cedar_identifier_ledger_tiered.csv",
+   "rows": 19232,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 3,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "master_tribal_entity_registry.csv": 13191,
+      "need_v6_geocoded.csv": 5163,
+      "entity_crosswalk_bgov.csv": 878
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "cedar_identifier_propagation.csv": {
+   "file": "cedar_identifier_propagation.csv",
+   "rows": 1157,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 1157
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "cedar_inherited_from_rulings_2026-08-05.csv": {
+   "file": "cedar_inherited_from_rulings_2026-08-05.csv",
+   "rows": 80,
+   "columns": 9,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "cedar_inherited_from_rulings_2026-08-06.csv": {
+   "file": "cedar_inherited_from_rulings_2026-08-06.csv",
+   "rows": 80,
+   "columns": 9,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "cedar_inherited_from_rulings_2026-08-07.csv": {
+   "file": "cedar_inherited_from_rulings_2026-08-07.csv",
+   "rows": 100,
+   "columns": 9,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "cedar_publishable_identifiers.csv": {
+   "file": "cedar_publishable_identifiers.csv",
+   "rows": 1577,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 2,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "entity_crosswalk_bgov.csv": 878,
+      "master_tribal_entity_registry.csv": 699
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "cedar_ruling_ledger_consolidated.csv": {
+   "file": "cedar_ruling_ledger_consolidated.csv",
+   "rows": 15587,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 39,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "_top_25_of_39": {
+       "review/osha_gambling_unresolved_2026-08-26.csv": 4576,
+       "data/clean/cross_dataset_ruling_map.csv": 2850,
+       "review/auto_applied_2026-08-07.csv": 1228,
+       "review/agent_rulings_spiderweb_2026-08-06.csv": 966,
+       "review/agent_identifier_rulings_applied.csv": 865,
+       "review/agent_rulings_deals_2026-08-05.csv": 609,
+       "review/federal_awards_fain_backfill_2026-08-05.csv": 594,
+       "review/agent_native_org_candidates_philanthropy_2026-08-06.csv": 567,
+       "data/clean/lobbying_client_attribution.csv": 458,
+       "review/agent_rulings_akvillagecorp_2026-08-06.csv": 426,
+       "review/agent_rulings_lobbying_2026-08-05.csv": 381,
+       "review/agent_rulings_nonprofit_2026-08-05.csv": 375,
+       "review/rulings_inbox_NORMALISED_2026-08-07.csv": 321,
+       "review/agent_rulings_nonak_entities_2026-08-06.csv": 177,
+       "review/agent_rulings_lobbying_v2_2026-08-06.csv": 161,
+       "review/rulings_inbox_2026-08-05L.csv": 154,
+       "review/agent_native_org_candidates_annualreports_2026-08-06.csv": 107,
+       "review/rulings_inbox_2026-08-05g.csv": 77,
+       "review/agent_rulings_conflicts_2026-08-06.csv": 77,
+       "review/agent_rulings_np_followup_2026-08-05.csv": 75,
+       "review/np_needs_elijah_2026-08-05.csv": 74,
+       "review/agent_rulings_villagecorp_2026-08-05.csv": 65,
+       "review/lobbying_still_ambiguous.csv": 60,
+       "review/agent_rulings_villagecorp_v2_2026-08-05.csv": 44,
+       "review/rulings_inbox_2026-08-05e.csv": 34
+      }
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "cedar_spiderweb_v2.csv": {
+   "file": "cedar_spiderweb_v2.csv",
+   "rows": 79,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "fpds_uei_edges.csv": 79
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "codebook_master.csv": {
+   "file": "codebook_master.csv",
+   "rows": 2798,
+   "columns": 10,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "compact_events.csv": {
+   "file": "compact_events.csv",
+   "rows": 31,
+   "columns": 19,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "compact_obligation_tribal_agency_bridge.csv": {
+   "file": "compact_obligation_tribal_agency_bridge.csv",
+   "rows": 927,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 927
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "compact_required_reports.csv": {
+   "file": "compact_required_reports.csv",
+   "rows": 4121,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 4121
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "95_parse_compact_terms.py": 4121
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "compact_structured_terms.csv": {
+   "file": "compact_structured_terms.csv",
+   "rows": 2887,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 2887
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "95_parse_compact_terms.py": 2887
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "compact_terms.csv": {
+   "file": "compact_terms.csv",
+   "rows": 1311,
+   "columns": 21,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "compact_versions.csv": {
+   "file": "compact_versions.csv",
+   "rows": 1158,
+   "columns": 25,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "compacts.csv": {
+   "file": "compacts.csv",
+   "rows": 707,
+   "columns": 33,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "congressional_correspondence_log.csv": {
+   "file": "congressional_correspondence_log.csv",
+   "rows": 0,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 0,
+     "blank_rows": 0,
+     "blank_pct": null,
+     "values": {}
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "congressional_correspondence_systems.csv": {
+   "file": "congressional_correspondence_systems.csv",
+   "rows": 257,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 257
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "consultation_agency_coverage.csv": {
+   "file": "consultation_agency_coverage.csv",
+   "rows": 66,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 66
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 66
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "consultation_events.csv": {
+   "file": "consultation_events.csv",
+   "rows": 11402,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 11402
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 11402
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "content_analysis_accuracy.csv": {
+   "file": "content_analysis_accuracy.csv",
+   "rows": 4,
+   "columns": 16,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "content_audit_fr_relevance.csv": {
+   "file": "content_audit_fr_relevance.csv",
+   "rows": 120,
+   "columns": 9,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "content_audit_fr_theme.csv": {
+   "file": "content_audit_fr_theme.csv",
+   "rows": 110,
+   "columns": 8,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "content_audit_lobbying_family.csv": {
+   "file": "content_audit_lobbying_family.csv",
+   "rows": 120,
+   "columns": 8,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "contractor_ranking.csv": {
+   "file": "contractor_ranking.csv",
+   "rows": 1429,
+   "provenance_columns": {
+    "source_vintage": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26T18:45:37": 1429
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 1429
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "correspondence_foia_source_coverage.csv": {
+   "file": "correspondence_foia_source_coverage.csv",
+   "rows": 124,
+   "columns": 8,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "coverage_audit.csv": {
+   "file": "coverage_audit.csv",
+   "rows": 716,
+   "columns": 6,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "cross_dataset_ruling_map.csv": {
+   "file": "cross_dataset_ruling_map.csv",
+   "rows": 7507,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 8,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "np_orgs.csv": 4760,
+      "federal_funding_transactions.csv": 1968,
+      "fpds_uei_cage_map.csv": 278,
+      "funding_identifier_harvest.csv": 261,
+      "cedar_identifier_ledger_final.csv": 206,
+      "nho_verified_entities.csv": 32,
+      "subaward_identifier_harvest.csv": 1,
+      "np_ein_uei_bridge.csv": 1
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "deals_2000_2019_additions.csv": {
+   "file": "deals_2000_2019_additions.csv",
+   "rows": 40,
+   "columns": 32,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "deals_2026_ytd_additions.csv": {
+   "file": "deals_2026_ytd_additions.csv",
+   "rows": 0,
+   "columns": 31,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "deals_anc_reports_additions.csv": {
+   "file": "deals_anc_reports_additions.csv",
+   "rows": 28,
+   "columns": 32,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "deals_ancsa_portal_additions.csv": {
+   "file": "deals_ancsa_portal_additions.csv",
+   "rows": 34,
+   "columns": 32,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "deals_ancsa_portal_v2_additions.csv": {
+   "file": "deals_ancsa_portal_v2_additions.csv",
+   "rows": 42,
+   "columns": 32,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "deals_classified.csv": {
+   "file": "deals_classified.csv",
+   "rows": 935,
+   "provenance_columns": {
+    "classified_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 2,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 790,
+      "2026-08-26": 145
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "deals_federal_awards_additions.csv": {
+   "file": "deals_federal_awards_additions.csv",
+   "rows": 594,
+   "columns": 32,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "deals_historical_additions.csv": {
+   "file": "deals_historical_additions.csv",
+   "rows": 30,
+   "columns": 32,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "deals_party_attribution.csv": {
+   "file": "deals_party_attribution.csv",
+   "rows": 56,
+   "columns": 13,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "deals_party_attribution_agent.csv": {
+   "file": "deals_party_attribution_agent.csv",
+   "rows": 530,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "agent_rulings_deals_2026-08-05.csv": 530
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "deals_party_autoresolved.csv": {
+   "file": "deals_party_autoresolved.csv",
+   "rows": 502,
+   "columns": 11,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "deals_party_matches.csv": {
+   "file": "deals_party_matches.csv",
+   "rows": 481,
+   "columns": 6,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "deals_sec_2010_2017_additions.csv": {
+   "file": "deals_sec_2010_2017_additions.csv",
+   "rows": 16,
+   "columns": 32,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "deals_source_index.csv": {
+   "file": "deals_source_index.csv",
+   "rows": 533,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 533
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "deals_taxonomy.csv": {
+   "file": "deals_taxonomy.csv",
+   "rows": 48,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 48
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "deals_tribal_debt_additions.csv": {
+   "file": "deals_tribal_debt_additions.csv",
+   "rows": 6,
+   "columns": 32,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "digital_gaming_relationships.csv": {
+   "file": "digital_gaming_relationships.csv",
+   "rows": 154,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 154
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 154
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/119_build_digital_and_loyalty.py": 154
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "digital_gaming_revenue.csv": {
+   "file": "digital_gaming_revenue.csv",
+   "rows": 10661,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 10661
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 10661
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/119_build_digital_and_loyalty.py": 10661
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "earmarks.csv": {
+   "file": "earmarks.csv",
+   "rows": 1002,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 1002
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 1002
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "entity_aliases.csv": {
+   "file": "entity_aliases.csv",
+   "rows": 5943,
+   "columns": 15,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "entity_candidates_new.csv": {
+   "file": "entity_candidates_new.csv",
+   "rows": 2874,
+   "columns": 26,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "entity_candidates_rejected.csv": {
+   "file": "entity_candidates_rejected.csv",
+   "rows": 1045,
+   "columns": 27,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "entity_evidence_profile.csv": {
+   "file": "entity_evidence_profile.csv",
+   "rows": 1282,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 1282
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "entity_hierarchy.csv": {
+   "file": "entity_hierarchy.csv",
+   "rows": 952,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 952
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "entity_name_harvest.csv": {
+   "file": "entity_name_harvest.csv",
+   "rows": 31728,
+   "columns": 14,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "entity_relationships.csv": {
+   "file": "entity_relationships.csv",
+   "rows": 2292,
+   "columns": 16,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "entity_year_coverage.csv": {
+   "file": "entity_year_coverage.csv",
+   "rows": 196,
+   "columns": 7,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "entity_year_panel.csv": {
+   "file": "entity_year_panel.csv",
+   "rows": 12534,
+   "columns": 41,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "faads_attribution_audit_sample.csv": {
+   "file": "faads_attribution_audit_sample.csv",
+   "rows": 2287,
+   "columns": 12,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "faads_entity_attribution.csv": {
+   "file": "faads_entity_attribution.csv",
+   "rows": 29594,
+   "columns": 26,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "faads_identifier_coverage_by_agency_year.csv": {
+   "file": "faads_identifier_coverage_by_agency_year.csv",
+   "rows": 77,
+   "columns": 11,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "faads_transactions.csv": {
+   "file": "faads_transactions.csv",
+   "rows": 60661,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 7,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "doi_fy2004.zip": 10703,
+      "doi_fy2007.zip": 9662,
+      "doi_fy2006.zip": 9235,
+      "doi_fy2005.zip": 9088,
+      "doi_fy2003.zip": 8180,
+      "doi_fy2001.zip": 6951,
+      "doi_fy2002.zip": 6842
+     }
+    },
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 60661
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "faads_transactions_all_agencies.csv": {
+   "file": "faads_transactions_all_agencies.csv",
+   "rows": 2769748,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 77,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "_top_25_of_77": {
+       "ed_fy2007_archive.zip": 344401,
+       "hud_fy2007_archive.zip": 171554,
+       "dot_fy2007_archive.zip": 86921,
+       "usda_fy2003.zip": 83132,
+       "usda_fy2002.zip": 83010,
+       "dot_fy2006.zip": 82719,
+       "usda_fy2004.zip": 81886,
+       "hud_fy2006.zip": 80126,
+       "usda_fy2005.zip": 79426,
+       "hhs_fy2003.zip": 78411,
+       "dot_fy2003.zip": 76401,
+       "usda_fy2001.zip": 75609,
+       "dot_fy2005.zip": 74905,
+       "hhs_fy2007_archive.zip": 74163,
+       "dot_fy2004.zip": 73094,
+       "dot_fy2002.zip": 72996,
+       "hhs_fy2002.zip": 72497,
+       "hhs_fy2005.zip": 69899,
+       "dot_fy2001.zip": 68810,
+       "usda_fy2007_archive.zip": 67615,
+       "hhs_fy2004.zip": 66921,
+       "hhs_fy2006.zip": 65296,
+       "hud_fy2001.zip": 64292,
+       "usda_fy2006.zip": 63459,
+       "ed_fy2006.zip": 50197
+      }
+     }
+    },
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 2769748
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "fac_audit_gaming_disclosures.csv": {
+   "file": "fac_audit_gaming_disclosures.csv",
+   "rows": 1521,
+   "provenance_columns": {
+    "retrieved_at": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 1521
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 1521
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "fac_audit_sefa_gaming_programs.csv": {
+   "file": "fac_audit_sefa_gaming_programs.csv",
+   "rows": 1,
+   "provenance_columns": {
+    "retrieved_at": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 1
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 1
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "fac_tribal_single_audits.csv": {
+   "file": "fac_tribal_single_audits.csv",
+   "rows": 6780,
+   "provenance_columns": {
+    "retrieved_at": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 6780
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 6780
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "federal_actions.csv": {
+   "file": "federal_actions.csv",
+   "rows": 156452,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 156452
+     }
+    },
+    "classified_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 156452
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "federal_actions_entity_bridge.csv": {
+   "file": "federal_actions_entity_bridge.csv",
+   "rows": 5786,
+   "columns": 13,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "federal_actions_raw.csv": {
+   "file": "federal_actions_raw.csv",
+   "rows": 156452,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 156452
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "federal_funding_transactions.csv": {
+   "file": "federal_funding_transactions.csv",
+   "rows": 701955,
+   "provenance_columns": {
+    "source_archive_stamp": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 2,
+     "blank_rows": 476924,
+     "blank_pct": 67.94,
+     "values": {
+      "20260706": 131495,
+      "20260806": 93536
+     }
+    },
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 21,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "Assistance_PrimeTransactions_2023-04-09_H19M53S53_1.csv": 476924,
+      "FY2024_All_Assistance_Full_20260706.zip": 50686,
+      "FY2025_All_Assistance_Full_20260706.zip": 44471,
+      "FY2023_All_Assistance_Full_20260806.zip": 34511,
+      "FY2026_All_Assistance_Full_20260706.zip": 24895,
+      "FY2007_All_Assistance_Full_20260706.zip": 11443,
+      "FY2022_All_Assistance_Full_20260806.zip": 6300,
+      "FY2020_All_Assistance_Full_20260806.zip": 5921,
+      "FY2021_All_Assistance_Full_20260806.zip": 4811,
+      "FY2012_All_Assistance_Full_20260806.zip": 4713,
+      "FY2018_All_Assistance_Full_20260806.zip": 4357,
+      "FY2013_All_Assistance_Full_20260806.zip": 4023,
+      "FY2011_All_Assistance_Full_20260806.zip": 3892,
+      "FY2014_All_Assistance_Full_20260806.zip": 3600,
+      "FY2019_All_Assistance_Full_20260806.zip": 3554,
+      "FY2016_All_Assistance_Full_20260806.zip": 3512,
+      "FY2017_All_Assistance_Full_20260806.zip": 3366,
+      "FY2010_All_Assistance_Full_20260806.zip": 3361,
+      "FY2015_All_Assistance_Full_20260806.zip": 3086,
+      "FY2009_All_Assistance_Full_20260806.zip": 3017,
+      "FY2008_All_Assistance_Full_20260806.zip": 1512
+     }
+    },
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 3,
+     "blank_rows": 476924,
+     "blank_pct": 67.94,
+     "values": {
+      "2026-08-07": 131495,
+      "2026-08-12": 76504,
+      "2026-08-26": 17032
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": true,
+   "mixed_on": [
+    "source_archive_stamp"
+   ],
+   "PARTIALLY_STAMPED": true,
+   "partially_stamped_on": [
+    "source_archive_stamp"
+   ]
+  },
+  "federal_funding_tribe_year_panel.csv": {
+   "file": "federal_funding_tribe_year_panel.csv",
+   "rows": 5496,
+   "columns": 15,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "federal_funding_year_comparison_2026-08-05.csv": {
+   "file": "federal_funding_year_comparison_2026-08-05.csv",
+   "rows": 26,
+   "columns": 10,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "federal_recognition_events.csv": {
+   "file": "federal_recognition_events.csv",
+   "rows": 366,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 366
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "federal_recognition_roster.csv": {
+   "file": "federal_recognition_roster.csv",
+   "rows": 17058,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 17058
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "ferc_docket_filings.csv": {
+   "file": "ferc_docket_filings.csv",
+   "rows": 102615,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 2,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 77714,
+      "2026-08-26": 24901
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 102615
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/133_build_ferc_advocacy.py": 102615
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "ferc_docket_parties.csv": {
+   "file": "ferc_docket_parties.csv",
+   "rows": 11563,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 11563
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/168_link_adjudication_hubs.py": 11563
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "ferc_ex_parte_communications.csv": {
+   "file": "ferc_ex_parte_communications.csv",
+   "rows": 713,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 2,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 709,
+      "2026-08-26": 4
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 713
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/133_build_ferc_advocacy.py": 713
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "ferc_ex_parte_parties.csv": {
+   "file": "ferc_ex_parte_parties.csv",
+   "rows": 4246,
+   "provenance_columns": {
+    "retrieved_at": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 4246
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 4246
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/133_build_ferc_advocacy.py": 4246
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "ferc_source_coverage.csv": {
+   "file": "ferc_source_coverage.csv",
+   "rows": 9,
+   "columns": 7,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "ferc_tribal_dockets.csv": {
+   "file": "ferc_tribal_dockets.csv",
+   "rows": 307,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 2,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 184,
+      "2026-08-26": 123
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 307
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/133_build_ferc_advocacy.py": 307
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "fl_gaming_payments.csv": {
+   "file": "fl_gaming_payments.csv",
+   "rows": 9756,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 9756
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 9756
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/105_build_florida_gaming.py": 9756
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "foia_discovery_targets.csv": {
+   "file": "foia_discovery_targets.csv",
+   "rows": 122,
+   "columns": 12,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "foia_request_index.csv": {
+   "file": "foia_request_index.csv",
+   "rows": 9481,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 9481
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "fpds_uei_cage_map.csv": {
+   "file": "fpds_uei_cage_map.csv",
+   "rows": 24977,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 10,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "Data Request 4-5-2023 File 1.csv;Data Request 4-5-2023 File 2.csv": 7494,
+      "Data Request 4-5-2023 File 1.csv": 6909,
+      "Data Request 4-5-2023 File 1.csv;Data Request 4-5-2023 File 2.csv;Data Request 5-8-2023 IDVs.csv": 4991,
+      "Data Request 4-5-2023 File 2.csv": 2706,
+      "Data Request 4-5-2023 File 1.csv;Data Request 5-8-2023 IDVs.csv": 1665,
+      "Data Request 5-8-2023 IDVs.csv": 857,
+      "subcontract-05-09-23-22-23-37.csv": 297,
+      "Data Request 4-5-2023 File 2.csv;Data Request 5-8-2023 IDVs.csv": 30,
+      "contract-03-18-23-19-40-24.csv": 21,
+      "contract-03-18-23-19-40-24.csv;subcontract-05-09-23-22-23-37.csv": 7
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "fpds_uei_edges.csv": {
+   "file": "fpds_uei_edges.csv",
+   "rows": 2290,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 10,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "Data Request 4-5-2023 File 1.csv;Data Request 4-5-2023 File 2.csv;Data Request 5-8-2023 IDVs.csv": 908,
+      "Data Request 4-5-2023 File 1.csv;Data Request 4-5-2023 File 2.csv": 576,
+      "subcontract-05-09-23-22-23-37.csv": 372,
+      "Data Request 4-5-2023 File 1.csv": 197,
+      "Data Request 4-5-2023 File 1.csv;Data Request 5-8-2023 IDVs.csv": 74,
+      "Data Request 5-8-2023 IDVs.csv": 67,
+      "Data Request 4-5-2023 File 2.csv": 64,
+      "contract-03-18-23-19-40-24.csv": 21,
+      "contract-03-18-23-19-40-24.csv;subcontract-05-09-23-22-23-37.csv": 6,
+      "Data Request 4-5-2023 File 2.csv;Data Request 5-8-2023 IDVs.csv": 5
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "fr_abstract_availability_year.csv": {
+   "file": "fr_abstract_availability_year.csv",
+   "rows": 33,
+   "columns": 4,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "fr_consultation_by_agency.csv": {
+   "file": "fr_consultation_by_agency.csv",
+   "rows": 21,
+   "columns": 3,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "fr_consultation_notices.csv": {
+   "file": "fr_consultation_notices.csv",
+   "rows": 484,
+   "columns": 11,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "fr_consultation_referenced.csv": {
+   "file": "fr_consultation_referenced.csv",
+   "rows": 1829,
+   "columns": 5,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "fr_consultation_year.csv": {
+   "file": "fr_consultation_year.csv",
+   "rows": 33,
+   "columns": 3,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "fr_content_classification.csv": {
+   "file": "fr_content_classification.csv",
+   "rows": 156452,
+   "columns": 13,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "fr_ex_parte_notices.csv": {
+   "file": "fr_ex_parte_notices.csv",
+   "rows": 7820,
+   "provenance_columns": {
+    "retrieved_at": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 7820
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 7820
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/154_build_fr_ex_parte_notices.py": 7820
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "fr_ex_parte_parties.csv": {
+   "file": "fr_ex_parte_parties.csv",
+   "rows": 112,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 112
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/154_build_fr_ex_parte_notices.py": 112
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "fr_ex_parte_party_entity_links.csv": {
+   "file": "fr_ex_parte_party_entity_links.csv",
+   "rows": 9,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 9
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/154_build_fr_ex_parte_notices.py": 9
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "fr_nagpra_title_index.csv": {
+   "file": "fr_nagpra_title_index.csv",
+   "rows": 6606,
+   "columns": 10,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "fr_nagpra_title_index_year.csv": {
+   "file": "fr_nagpra_title_index_year.csv",
+   "rows": 33,
+   "columns": 4,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "fr_recognized_entities.csv": {
+   "file": "fr_recognized_entities.csv",
+   "rows": 575,
+   "columns": 7,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "fr_relevance_stratum_audit.csv": {
+   "file": "fr_relevance_stratum_audit.csv",
+   "rows": 4,
+   "columns": 5,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "fr_relevance_tier_year.csv": {
+   "file": "fr_relevance_tier_year.csv",
+   "rows": 132,
+   "columns": 3,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "fr_theme_year.csv": {
+   "file": "fr_theme_year.csv",
+   "rows": 627,
+   "columns": 5,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "funding_identifier_harvest.csv": {
+   "file": "funding_identifier_harvest.csv",
+   "rows": 37704,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 2,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "award_level_panel_research_ready_deduped.csv": 24994,
+      "Assistance_PrimeTransactions_2023-04-09_H19M53S53_1.csv": 12710
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "funding_identifier_netnew_ueis.csv": {
+   "file": "funding_identifier_netnew_ueis.csv",
+   "rows": 4249,
+   "columns": 1,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "gaming_capacity_official.csv": {
+   "file": "gaming_capacity_official.csv",
+   "rows": 6461,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 2,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 3816,
+      "2026-08-06": 2645
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 6461
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "gaming_decision_compact_join.csv": {
+   "file": "gaming_decision_compact_join.csv",
+   "rows": 138,
+   "columns": 16,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "gaming_decision_events.csv": {
+   "file": "gaming_decision_events.csv",
+   "rows": 265,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 265
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "gaming_device_observations.csv": {
+   "file": "gaming_device_observations.csv",
+   "rows": 1326,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 3,
+     "blank_rows": 168,
+     "blank_pct": 12.67,
+     "values": {
+      "2026-08-07": 989,
+      "2026-08-06": 106,
+      "2026-08-05": 63
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 1326
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "gaming_employment_observations.csv": {
+   "file": "gaming_employment_observations.csv",
+   "rows": 3246,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 2477,
+     "blank_pct": 76.31,
+     "values": {
+      "2026-08-07": 769
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 2,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 2477,
+      "2026-08-07": 769
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 2,
+     "blank_rows": 769,
+     "blank_pct": 23.69,
+     "values": {
+      "156_stage_form5500_gaming_employment.py": 1975,
+      "157_stage_osha_tribe_level_employment.py": 502
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "gaming_facilities.csv": {
+   "file": "gaming_facilities.csv",
+   "rows": 787,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 2,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 774,
+      "2026-08-26": 13
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "gaming_facility_metrics.csv": {
+   "file": "gaming_facility_metrics.csv",
+   "rows": 68211,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 4,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "tribal_casino_panel.dta": 64181,
+      "data.ct.gov i6ts-ib7c (https://data.ct.gov/Business/Slot-Machine-Revenues/i6ts-ib7c)": 2988,
+      "published_tribal_gaming_revenue_v3_audited.csv": 530,
+      "per_property_gaming_revenue_FINAL_v3_audited.csv": 512
+     }
+    },
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 2,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 65223,
+      "2026-08-26": 2988
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "gaming_field_coverage.csv": {
+   "file": "gaming_field_coverage.csv",
+   "rows": 109,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 109
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "gaming_financing_events.csv": {
+   "file": "gaming_financing_events.csv",
+   "rows": 293,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 293
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 2,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 148,
+      "2026-08-06": 145
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "gaming_game_finder_observations.csv": {
+   "file": "gaming_game_finder_observations.csv",
+   "rows": 6851,
+   "provenance_columns": {
+    "retrieved_at": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 6851
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 6851
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/142_build_property_site_observations.py": 6851
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "gaming_game_finder_systems.csv": {
+   "file": "gaming_game_finder_systems.csv",
+   "rows": 3,
+   "provenance_columns": {
+    "retrieved_at": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 3
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/142_build_property_site_observations.py": 3
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "gaming_land_decisions.csv": {
+   "file": "gaming_land_decisions.csv",
+   "rows": 138,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 138
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "gaming_manufacturer_facts.csv": {
+   "file": "gaming_manufacturer_facts.csv",
+   "rows": 62,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 62
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 62
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "gaming_mitigation_agreements.csv": {
+   "file": "gaming_mitigation_agreements.csv",
+   "rows": 24,
+   "columns": 20,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "gaming_nigc_roster_link.csv": {
+   "file": "gaming_nigc_roster_link.csv",
+   "rows": 453,
+   "columns": 17,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "gaming_ordinance_ocr.csv": {
+   "file": "gaming_ordinance_ocr.csv",
+   "rows": 263,
+   "columns": 18,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "gaming_ordinances.csv": {
+   "file": "gaming_ordinances.csv",
+   "rows": 1155,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 2,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 820,
+      "2026-08-12": 335
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 1155
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "gaming_project_facilities.csv": {
+   "file": "gaming_project_facilities.csv",
+   "rows": 19,
+   "columns": 39,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "gaming_projections.csv": {
+   "file": "gaming_projections.csv",
+   "rows": 116,
+   "columns": 22,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "gaming_properties.csv": {
+   "file": "gaming_properties.csv",
+   "rows": 784,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 2,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 774,
+      "2026-08-26": 10
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 2,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 774,
+      "2026-08-26": 10
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "gaming_property_capacity_history.csv": {
+   "file": "gaming_property_capacity_history.csv",
+   "rows": 64181,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 64181
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "gaming_property_coverage.csv": {
+   "file": "gaming_property_coverage.csv",
+   "rows": 784,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 784
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "gaming_property_federal_traces.csv": {
+   "file": "gaming_property_federal_traces.csv",
+   "rows": 774,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 774
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "gaming_property_labor_demand.csv": {
+   "file": "gaming_property_labor_demand.csv",
+   "rows": 43,
+   "provenance_columns": {
+    "retrieved_at": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 43
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 43
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/142_build_property_site_observations.py": 43
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "gaming_property_locations.csv": {
+   "file": "gaming_property_locations.csv",
+   "rows": 2212,
+   "provenance_columns": {
+    "retrieved_at": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 6,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 639,
+      "2026-08-05": 592,
+      "2026-04-27": 405,
+      "2026-08-06": 350,
+      "2026-03-12": 149,
+      "2026-08-07": 77
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 2212
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/143_build_gaming_property_locations.py": 2212
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "gaming_property_site_observations.csv": {
+   "file": "gaming_property_site_observations.csv",
+   "rows": 262,
+   "provenance_columns": {
+    "retrieved_at": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 262
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 262
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/142_build_property_site_observations.py": 262
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "gaming_property_universe_events.csv": {
+   "file": "gaming_property_universe_events.csv",
+   "rows": 10,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 10
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "gaming_revenue_bounds.csv": {
+   "file": "gaming_revenue_bounds.csv",
+   "rows": 13803,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 13803
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "gaming_source_claims.csv": {
+   "file": "gaming_source_claims.csv",
+   "rows": 113,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 113
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 113
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "gaming_vendor_tribal_licenses.csv": {
+   "file": "gaming_vendor_tribal_licenses.csv",
+   "rows": 740,
+   "provenance_columns": {
+    "retrieved_at": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 740
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 740
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "grantmaker_funding_coverage.csv": {
+   "file": "grantmaker_funding_coverage.csv",
+   "rows": 27,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 27
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/140_build_grantmaker_funding_flows.py": 27
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "grantmaker_funding_flows.csv": {
+   "file": "grantmaker_funding_flows.csv",
+   "rows": 18656,
+   "provenance_columns": {
+    "retrieved_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 18656
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 18656
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/140_build_grantmaker_funding_flows.py": 18656
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "grantmaker_funding_overlap.csv": {
+   "file": "grantmaker_funding_overlap.csv",
+   "rows": 69,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 69
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/140_build_grantmaker_funding_flows.py": 69
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "hearing_appearances.csv": {
+   "file": "hearing_appearances.csv",
+   "rows": 2667,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 2667
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 2667
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "hearing_bill_links.csv": {
+   "file": "hearing_bill_links.csv",
+   "rows": 465,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 465
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "individual_native_exclusion_pairs.csv": {
+   "file": "individual_native_exclusion_pairs.csv",
+   "rows": 5,
+   "columns": 17,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "individual_native_firm_contracts.csv": {
+   "file": "individual_native_firm_contracts.csv",
+   "rows": 324,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 324
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "individual_native_firm_contracts_published.csv": {
+   "file": "individual_native_firm_contracts_published.csv",
+   "rows": 613,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 613
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "individual_native_firm_register.csv": {
+   "file": "individual_native_firm_register.csv",
+   "rows": 45,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 45
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "individual_native_ownership_verification.csv": {
+   "file": "individual_native_ownership_verification.csv",
+   "rows": 335,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 335
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "individual_native_prior_rulings.csv": {
+   "file": "individual_native_prior_rulings.csv",
+   "rows": 45,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 6,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "data/spine/cedar_exclusion_rulings.csv <- hci_analysis.do": 31,
+      "review/rulings_inbox_2026-08-08_elijah_batch2.csv": 5,
+      "review/rulings_inbox_2026-08-07_elijah.csv": 4,
+      "review/rulings_inbox_2026-08-05i.csv": 2,
+      "review/rulings_inbox_2026-08-05j.csv": 2,
+      "review/rulings_inbox_2026-08-05m.csv": 1
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "individual_native_verification_candidates.csv": {
+   "file": "individual_native_verification_candidates.csv",
+   "rows": 335,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 335
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "inflation_deflator.csv": {
+   "file": "inflation_deflator.csv",
+   "rows": 27,
+   "columns": 6,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "instrument_taxonomy.csv": {
+   "file": "instrument_taxonomy.csv",
+   "rows": 17,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 17
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "intertribal_memberships.csv": {
+   "file": "intertribal_memberships.csv",
+   "rows": 989,
+   "columns": 7,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "intertribal_orgs.csv": {
+   "file": "intertribal_orgs.csv",
+   "rows": 57,
+   "provenance_columns": {
+    "retrieved_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 57
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "lobbying_client_attribution.csv": {
+   "file": "lobbying_client_attribution.csv",
+   "rows": 458,
+   "columns": 11,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "lobbying_disclosure_verbosity_year.csv": {
+   "file": "lobbying_disclosure_verbosity_year.csv",
+   "rows": 27,
+   "columns": 4,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "lobbying_issue_families_filing.csv": {
+   "file": "lobbying_issue_families_filing.csv",
+   "rows": 27796,
+   "columns": 14,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "lobbying_issue_family_year.csv": {
+   "file": "lobbying_issue_family_year.csv",
+   "rows": 476,
+   "columns": 9,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "lobbying_registrant_client_relationships.csv": {
+   "file": "lobbying_registrant_client_relationships.csv",
+   "rows": 1309,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 1309
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "180_build_lobbying_registrant_hub.py": 1309
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "lobbying_registrant_concentration.csv": {
+   "file": "lobbying_registrant_concentration.csv",
+   "rows": 36,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 36
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "180_build_lobbying_registrant_hub.py": 36
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "lobbying_registrant_identifiers.csv": {
+   "file": "lobbying_registrant_identifiers.csv",
+   "rows": 525,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 525
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "181_enrich_lobbying_registrant_identifiers.py": 525
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "lobbying_registrant_native_ownership_evidence.csv": {
+   "file": "lobbying_registrant_native_ownership_evidence.csv",
+   "rows": 27,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 27
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "182_rule_lobbying_registrant_native_ownership.py": 27
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "lobbying_registrants.csv": {
+   "file": "lobbying_registrants.csv",
+   "rows": 653,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 653
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "180_build_lobbying_registrant_hub.py": 653
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "lobbying_target_entities.csv": {
+   "file": "lobbying_target_entities.csv",
+   "rows": 116,
+   "columns": 3,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "lobbying_unmatched_clients.csv": {
+   "file": "lobbying_unmatched_clients.csv",
+   "rows": 515,
+   "columns": 13,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "loyalty_program_property.csv": {
+   "file": "loyalty_program_property.csv",
+   "rows": 48,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 48
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/119_build_digital_and_loyalty.py": 48
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "loyalty_programs.csv": {
+   "file": "loyalty_programs.csv",
+   "rows": 18,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 18
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/119_build_digital_and_loyalty.py": 18
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "member_positions.csv": {
+   "file": "member_positions.csv",
+   "rows": 136119,
+   "columns": 17,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "nagpra_notice_entity_bridge.csv": {
+   "file": "nagpra_notice_entity_bridge.csv",
+   "rows": 51338,
+   "columns": 14,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "nagpra_notices.csv": {
+   "file": "nagpra_notices.csv",
+   "rows": 6729,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 6729
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "native_bill_outcomes.csv": {
+   "file": "native_bill_outcomes.csv",
+   "rows": 3069,
+   "columns": 25,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "native_bills.csv": {
+   "file": "native_bills.csv",
+   "rows": 3069,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 3,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "tribal_bill_intros.csv": 2809,
+      "HSall_rollcalls.csv (via tribal roll-call classification)": 228,
+      "all_bill_intros.csv via 73_bills_votes_completion.py --sweep": 32
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "native_bills_entity_bridge.csv": {
+   "file": "native_bills_entity_bridge.csv",
+   "rows": 676,
+   "columns": 12,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "native_bills_entity_class.csv": {
+   "file": "native_bills_entity_class.csv",
+   "rows": 2694,
+   "columns": 13,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "native_bills_subject_sweep.csv": {
+   "file": "native_bills_subject_sweep.csv",
+   "rows": 2414,
+   "columns": 21,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "native_entity_lobbying_disclosures.csv": {
+   "file": "native_entity_lobbying_disclosures.csv",
+   "rows": 27796,
+   "columns": 34,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "native_fi_roster.csv": {
+   "file": "native_fi_roster.csv",
+   "rows": 94,
+   "provenance_columns": {
+    "retrieved_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 94
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "native_issue_litigation_coverage.csv": {
+   "file": "native_issue_litigation_coverage.csv",
+   "rows": 8,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 8
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "native_issue_litigation_positions.csv": {
+   "file": "native_issue_litigation_positions.csv",
+   "rows": 197,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 197
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 197
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/136_build_litigation_positions.py": 197
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "native_passthrough.csv": {
+   "file": "native_passthrough.csv",
+   "rows": 1262,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 1262
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "native_passthrough_pairs.csv": {
+   "file": "native_passthrough_pairs.csv",
+   "rows": 212,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 212
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "nd_severance_allocation.csv": {
+   "file": "nd_severance_allocation.csv",
+   "rows": 7,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 7
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 7
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "nepa_administrative_record_parties.csv": {
+   "file": "nepa_administrative_record_parties.csv",
+   "rows": 36,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 36
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 36
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/134_build_nepa_eplanning.py": 36
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "nepa_eplanning_projects.csv": {
+   "file": "nepa_eplanning_projects.csv",
+   "rows": 312,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 312
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 312
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/134_build_nepa_eplanning.py": 312
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "nepa_project_documents.csv": {
+   "file": "nepa_project_documents.csv",
+   "rows": 789,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 789
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 789
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/134_build_nepa_eplanning.py": 789
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "nepa_source_coverage.csv": {
+   "file": "nepa_source_coverage.csv",
+   "rows": 5,
+   "columns": 7,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "nho_doi_notification_roster.csv": {
+   "file": "nho_doi_notification_roster.csv",
+   "rows": 190,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 190
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "nho_ito_spine_crosswalk.csv": {
+   "file": "nho_ito_spine_crosswalk.csv",
+   "rows": 269,
+   "columns": 8,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "nho_ownership_changes.csv": {
+   "file": "nho_ownership_changes.csv",
+   "rows": 9,
+   "provenance_columns": {
+    "retrieved_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 9
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "nho_parents.csv": {
+   "file": "nho_parents.csv",
+   "rows": 21,
+   "columns": 4,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "nho_register.csv": {
+   "file": "nho_register.csv",
+   "rows": 218,
+   "provenance_columns": {
+    "retrieved_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 218
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "nho_verified_entities.csv": {
+   "file": "nho_verified_entities.csv",
+   "rows": 36,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "hawaii_nho_candidates.csv + rulings_inbox": 36
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "nigc_declination_letters.csv": {
+   "file": "nigc_declination_letters.csv",
+   "rows": 327,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 327
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 327
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "nigc_region_assignments.csv": {
+   "file": "nigc_region_assignments.csv",
+   "rows": 2438,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 2438
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 2438
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "nigc_regional_ggr.csv": {
+   "file": "nigc_regional_ggr.csv",
+   "rows": 198,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 198
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 198
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "nigc_revenue_bands.csv": {
+   "file": "nigc_revenue_bands.csv",
+   "rows": 20,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 20
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 20
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "np_ein_entity_hub.csv": {
+   "file": "np_ein_entity_hub.csv",
+   "rows": 2303,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 2303
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "167_link_nonprofit_family_via_ein_hub.py": 2303
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "np_ein_uei_bridge.csv": {
+   "file": "np_ein_uei_bridge.csv",
+   "rows": 28,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "irs_990_to_federal_funding_match_2026_05_01.csv": 28
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 28
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "np_financials.csv": {
+   "file": "np_financials.csv",
+   "rows": 8507,
+   "provenance_columns": {
+    "retrieved_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 8507
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "np_grantee_financials.csv": {
+   "file": "np_grantee_financials.csv",
+   "rows": 4058,
+   "provenance_columns": {
+    "retrieved_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 4058
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 4058
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "np_org_scale.csv": {
+   "file": "np_org_scale.csv",
+   "rows": 1157,
+   "provenance_columns": {
+    "retrieved_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 1157
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "np_orgs.csv": {
+   "file": "np_orgs.csv",
+   "rows": 12764,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 12764
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "np_schedule_i_filers.csv": {
+   "file": "np_schedule_i_filers.csv",
+   "rows": 10314,
+   "provenance_columns": {
+    "retrieved_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 435,
+     "blank_pct": 4.22,
+     "values": {
+      "2026-08-07": 9879
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 10314
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "np_schedule_i_grants.csv": {
+   "file": "np_schedule_i_grants.csv",
+   "rows": 58685,
+   "provenance_columns": {
+    "retrieved_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 330,
+     "blank_pct": 0.56,
+     "values": {
+      "2026-08-07": 58355
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 58685
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "nrc_meeting_participants.csv": {
+   "file": "nrc_meeting_participants.csv",
+   "rows": 407,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 407
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "nrc_public_meetings.csv": {
+   "file": "nrc_public_meetings.csv",
+   "rows": 251,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 251
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "oira_federal_action_links.csv": {
+   "file": "oira_federal_action_links.csv",
+   "rows": 145,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 145
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "oira_meeting_participants.csv": {
+   "file": "oira_meeting_participants.csv",
+   "rows": 1128,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 1128
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 1128
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "oira_meetings.csv": {
+   "file": "oira_meetings.csv",
+   "rows": 72,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 72
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 72
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "ownership_events.csv": {
+   "file": "ownership_events.csv",
+   "rows": 98,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 4,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "deals_historical_2020_2025.csv": 38,
+      "data/clean/deals_historical_additions.csv": 26,
+      "deals_2026_ytd.csv": 18,
+      "data/clean/deals_2000_2019_additions.csv": 16
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "prime_contracts.csv": {
+   "file": "prime_contracts.csv",
+   "rows": 1217768,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 20,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "master prime file.dta": 376766,
+      "FY2026_All_Contracts_Full_20260706.zip": 61813,
+      "FY2024_All_Contracts_Full_20260706.zip": 53056,
+      "FY2025_All_Contracts_Full_20260706.zip": 48879,
+      "FY2011_All_Contracts_Full_20260806.zip": 46962,
+      "FY2010_All_Contracts_Full_20260806.zip": 45749,
+      "FY2023_All_Contracts_Full_20260706.zip": 45747,
+      "FY2020_All_Contracts_Full_20260706.zip": 45713,
+      "FY2022_All_Contracts_Full_20260706.zip": 45509,
+      "FY2021_All_Contracts_Full_20260706.zip": 44127,
+      "FY2019_All_Contracts_Full_20260706.zip": 43794,
+      "FY2009_All_Contracts_Full_20260806.zip": 43359,
+      "FY2018_All_Contracts_Full_20260706.zip": 42409,
+      "FY2012_All_Contracts_Full_20260806.zip": 42322,
+      "FY2017_All_Contracts_Full_20260706.zip": 42196,
+      "FY2008_All_Contracts_Full_20260806.zip": 41527,
+      "FY2016_All_Contracts_Full_20260806.zip": 37812,
+      "FY2015_All_Contracts_Full_20260806.zip": 37309,
+      "FY2013_All_Contracts_Full_20260806.zip": 36412,
+      "FY2014_All_Contracts_Full_20260806.zip": 36307
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 2,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 841002,
+      "2026-08-06": 376766
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "prime_contracts_archive_backfill.csv": {
+   "file": "prime_contracts_archive_backfill.csv",
+   "rows": 631507,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 15,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "FY2011_All_Contracts_Full_20260806.zip": 46962,
+      "FY2010_All_Contracts_Full_20260806.zip": 45749,
+      "FY2020_All_Contracts_Full_20260706.zip": 45713,
+      "FY2022_All_Contracts_Full_20260706.zip": 45509,
+      "FY2021_All_Contracts_Full_20260706.zip": 44127,
+      "FY2019_All_Contracts_Full_20260706.zip": 43794,
+      "FY2009_All_Contracts_Full_20260806.zip": 43359,
+      "FY2018_All_Contracts_Full_20260706.zip": 42409,
+      "FY2012_All_Contracts_Full_20260806.zip": 42322,
+      "FY2017_All_Contracts_Full_20260706.zip": 42196,
+      "FY2008_All_Contracts_Full_20260806.zip": 41527,
+      "FY2016_All_Contracts_Full_20260806.zip": 37812,
+      "FY2015_All_Contracts_Full_20260806.zip": 37309,
+      "FY2013_All_Contracts_Full_20260806.zip": 36412,
+      "FY2014_All_Contracts_Full_20260806.zip": 36307
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 631507
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "prime_contracts_awards.csv": {
+   "file": "prime_contracts_awards.csv",
+   "rows": 455080,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 455080
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "prime_contracts_entity_year.csv": {
+   "file": "prime_contracts_entity_year.csv",
+   "rows": 8464,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 8464
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "prime_contracts_published.csv": {
+   "file": "prime_contracts_published.csv",
+   "rows": 455080,
+   "columns": 24,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "prime_sub_network.csv": {
+   "file": "prime_sub_network.csv",
+   "rows": 220,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "subcontract-05-09-23-22-23-37.csv": 220
+     }
+    },
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 220
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "resource_asset_source_coverage.csv": {
+   "file": "resource_asset_source_coverage.csv",
+   "rows": 18,
+   "columns": 8,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "resource_assets.csv": {
+   "file": "resource_assets.csv",
+   "rows": 35,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 3,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 30,
+      "2026-08-12": 3,
+      "2026-08-06": 2
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 35
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "resource_parties.csv": {
+   "file": "resource_parties.csv",
+   "rows": 1436,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 3,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 1212,
+      "2026-08-05": 219,
+      "2026-08-12": 5
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 2,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 1395,
+      "2026-08-12": 41
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "resource_revenue.csv": {
+   "file": "resource_revenue.csv",
+   "rows": 10482,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 2,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 10297,
+      "2026-08-05": 185
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 10482
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "sam_prime_contracts_fy2000_2007.csv": {
+   "file": "sam_prime_contracts_fy2000_2007.csv",
+   "rows": 8273,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "awardResponse_zrlwsqiydG_20260826_211751.csv": 8273
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 8273
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "sam_prime_contracts_fy2000_2007_PUBLISHABLE.csv": {
+   "file": "sam_prime_contracts_fy2000_2007_PUBLISHABLE.csv",
+   "rows": 8273,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "awardResponse_zrlwsqiydG_20260826_211751.csv": 8273
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 8273
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "sam_prime_contracts_fy2000_2007_reconciliation.csv": {
+   "file": "sam_prime_contracts_fy2000_2007_reconciliation.csv",
+   "rows": 3,
+   "columns": 13,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "section_106_consultation_events.csv": {
+   "file": "section_106_consultation_events.csv",
+   "rows": 1363,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 1363
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 1363
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/130_build_section_106_consultation.py": 1363
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "section_106_project_parties.csv": {
+   "file": "section_106_project_parties.csv",
+   "rows": 51,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 51
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 51
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/130_build_section_106_consultation.py": 51
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "section_106_source_coverage.csv": {
+   "file": "section_106_source_coverage.csv",
+   "rows": 5,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 1,
+     "blank_pct": 20.0,
+     "values": {
+      "2026-08-12": 4
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "seminole_bond_disclosures.csv": {
+   "file": "seminole_bond_disclosures.csv",
+   "rows": 29,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 2,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 18,
+      "2026-08-05": 11
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 29
+     }
+    },
+    "built_by_script": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "code/105_build_florida_gaming.py": 29
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "series_breaks.csv": {
+   "file": "series_breaks.csv",
+   "rows": 24,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-26": 24
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "source_coverage_admin_appeals.csv": {
+   "file": "source_coverage_admin_appeals.csv",
+   "rows": 114,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 114
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "source_coverage_fac.csv": {
+   "file": "source_coverage_fac.csv",
+   "rows": 62,
+   "provenance_columns": {
+    "retrieved_at": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 62
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "source_coverage_nrc_meetings.csv": {
+   "file": "source_coverage_nrc_meetings.csv",
+   "rows": 37,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 37
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "source_coverage_tribal_legislative.csv": {
+   "file": "source_coverage_tribal_legislative.csv",
+   "rows": 17,
+   "provenance_columns": {
+    "retrieved_at": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 17
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "source_coverage_vendor_disclosure.csv": {
+   "file": "source_coverage_vendor_disclosure.csv",
+   "rows": 2,
+   "provenance_columns": {
+    "retrieved_at": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 2
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "source_coverage_visitor_records.csv": {
+   "file": "source_coverage_visitor_records.csv",
+   "rows": 11,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 11
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "state_gaming_observations.csv": {
+   "file": "state_gaming_observations.csv",
+   "rows": 494,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 0,
+     "blank_rows": 494,
+     "blank_pct": 100.0,
+     "values": {}
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 494
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "subaward_entity_rollup.csv": {
+   "file": "subaward_entity_rollup.csv",
+   "rows": 450,
+   "columns": 9,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "subaward_identifier_harvest.csv": {
+   "file": "subaward_identifier_harvest.csv",
+   "rows": 304,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "subcontract-05-09-23-22-23-37.csv": 304
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "subaward_identifier_netnew.csv": {
+   "file": "subaward_identifier_netnew.csv",
+   "rows": 210,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "subcontract-05-09-23-22-23-37.csv": 210
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "subawards.csv": {
+   "file": "subawards.csv",
+   "rows": 63548,
+   "provenance_columns": {
+    "source_file": {
+     "kind": "SOURCE_VINTAGE",
+     "distinct_values": 25,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "fy2019": 9254,
+      "fy2018": 8492,
+      "fy2025": 7130,
+      "fy2016": 5566,
+      "fy2017": 5512,
+      "fy2015": 5198,
+      "fy2014": 4913,
+      "fy2020": 3704,
+      "fy2013": 3631,
+      "fy2026": 3341,
+      "fy2012": 3070,
+      "fy2011": 1939,
+      "subcontract-05-09-23-22-23-37.csv": 998,
+      "Assistance_Subawards_2026-08-05_H22M21S36_1.csv": 230,
+      "Assistance_Subawards_2026-08-05_H21M11S29_1.csv": 166,
+      "fy2010": 141,
+      "Assistance_Subawards_2026-08-05_H22M29S09_1.csv": 116,
+      "Assistance_Subawards_2026-08-05_H21M06S27_1.csv": 96,
+      "fy2009": 33,
+      "fy2002": 7,
+      "fy2008": 7,
+      "fy2003": 1,
+      "fy2004": 1,
+      "fy2007": 1,
+      "fy2001": 1
+     }
+    },
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 63548
+     }
+    },
+    "promoted_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 2,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 55035,
+      "2026-08-07": 8513
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "tcu_cdfi_added.csv": {
+   "file": "tcu_cdfi_added.csv",
+   "rows": 130,
+   "columns": 27,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "tcu_cdfi_ownership_evidence.csv": {
+   "file": "tcu_cdfi_ownership_evidence.csv",
+   "rows": 130,
+   "columns": 6,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "tcu_roster.csv": {
+   "file": "tcu_roster.csv",
+   "rows": 37,
+   "provenance_columns": {
+    "retrieved_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-06": 37
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "tribal_bond_issuances.csv": {
+   "file": "tribal_bond_issuances.csv",
+   "rows": 29,
+   "provenance_columns": {
+    "retrieved_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-05": 29
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "tribal_resolution_financings.csv": {
+   "file": "tribal_resolution_financings.csv",
+   "rows": 1,
+   "provenance_columns": {
+    "retrieved_at": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 1
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 1
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "tribal_tax_bases.csv": {
+   "file": "tribal_tax_bases.csv",
+   "rows": 1712,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 1712
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 1712
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "tribe_year_lobbying_panel.csv": {
+   "file": "tribe_year_lobbying_panel.csv",
+   "rows": 5051,
+   "columns": 13,
+   "provenance_columns": {},
+   "NO_PROVENANCE_COLUMN": true
+  },
+  "variable_registry.csv": {
+   "file": "variable_registry.csv",
+   "rows": 22,
+   "provenance_columns": {
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 22
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "visitor_access_events.csv": {
+   "file": "visitor_access_events.csv",
+   "rows": 20,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 20
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "visitor_record_foia_requests.csv": {
+   "file": "visitor_record_foia_requests.csv",
+   "rows": 667,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-12": 667
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "wa_machine_allocations.csv": {
+   "file": "wa_machine_allocations.csv",
+   "rows": 75,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 75
+     }
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 1,
+     "blank_rows": 0,
+     "blank_pct": 0.0,
+     "values": {
+      "2026-08-07": 75
+     }
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  },
+  "wa_machine_transfers.csv": {
+   "file": "wa_machine_transfers.csv",
+   "rows": 0,
+   "provenance_columns": {
+    "fetched_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 0,
+     "blank_rows": 0,
+     "blank_pct": null,
+     "values": {}
+    },
+    "built_date": {
+     "kind": "BUILD_PROVENANCE",
+     "distinct_values": 0,
+     "blank_rows": 0,
+     "blank_pct": null,
+     "values": {}
+    }
+   },
+   "MIXED_SOURCE_VINTAGE": false,
+   "mixed_on": [],
+   "PARTIALLY_STAMPED": false,
+   "partially_stamped_on": []
+  }
+ }
+}

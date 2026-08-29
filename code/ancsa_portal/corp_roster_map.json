@@ -1,0 +1,362 @@
+{
+ "Afognak Native Corporation": {
+  "anc_id": "ANC-0015",
+  "roster_name": "Afognak Native Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Ahtna, Inc.": {
+  "anc_id": "ANC-0001",
+  "roster_name": "Ahtna Incorporated",
+  "anc_class": "ANC_REGIONAL",
+  "how": "exact_normalized"
+ },
+ "Alaska Peninsula Corporation": {
+  "anc_id": "ANC-0020",
+  "roster_name": "Alaska Peninsula Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Aleknagik Natives Limited": {
+  "anc_id": "ANC-0021",
+  "roster_name": "Aleknagik Natives, Ltd",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Aleut Corporation": {
+  "anc_id": "ANC-0002",
+  "roster_name": "Aleut Corporation",
+  "anc_class": "ANC_REGIONAL",
+  "how": "exact_normalized"
+ },
+ "Arctic Slope Regional Corporation": {
+  "anc_id": "ANC-0003",
+  "roster_name": "Arctic Slope Regional Corporation",
+  "anc_class": "ANC_REGIONAL",
+  "how": "exact_normalized"
+ },
+ "Azachorok Inc.": {
+  "anc_id": "ANC-0027",
+  "roster_name": "Azachorok, Inc",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Bering Straits Native Corporation": {
+  "anc_id": "ANC-0004",
+  "roster_name": "Bering Straits Native Corporation",
+  "anc_class": "ANC_REGIONAL",
+  "how": "exact_normalized"
+ },
+ "Bethel Native Corporation": {
+  "anc_id": "ANC-0034",
+  "roster_name": "Bethel Native Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Bristol Bay Native Corporation": {
+  "anc_id": "ANC-0005",
+  "roster_name": "Bristol Bay Native Corporation",
+  "anc_class": "ANC_REGIONAL",
+  "how": "exact_normalized"
+ },
+ "Calista Corporation": {
+  "anc_id": "ANC-0006",
+  "roster_name": "Calista Corporation",
+  "anc_class": "ANC_REGIONAL",
+  "how": "exact_normalized"
+ },
+ "Choggiung Limited": {
+  "anc_id": "ANC-0048",
+  "roster_name": "Choggiung, Ltd",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Chugach Alaska Corporation": {
+  "anc_id": "ANC-0007",
+  "roster_name": "Chugach Alaska Corporation",
+  "anc_class": "ANC_REGIONAL",
+  "how": "exact_normalized"
+ },
+ "Cook Inlet Region, Inc. ": {
+  "anc_id": "ANC-0008",
+  "roster_name": "Cook Inlet Region, Inc",
+  "anc_class": "ANC_REGIONAL",
+  "how": "exact_normalized"
+ },
+ "Deloycheet, Inc.": {
+  "anc_id": "ANC-0054",
+  "roster_name": "Deloycheet, Inc",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Doyon Limited": {
+  "anc_id": "ANC-0009",
+  "roster_name": "Doyon, Limited",
+  "anc_class": "ANC_REGIONAL",
+  "how": "exact_normalized"
+ },
+ "Emmonak Corporation": {
+  "anc_id": "ANC-0061",
+  "roster_name": "Emmonak Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "The Eyak Corporation": {
+  "anc_id": "ANC-0063",
+  "roster_name": "Eyak Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Far West, Incorporated": {
+  "anc_id": "ANC-0064",
+  "roster_name": "Far West, Inc",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Gana-A'Yoo, Limited": {
+  "anc_id": "ANC-0065",
+  "roster_name": "Gana-A\u2019Yoo, Ltd",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Goldbelt Incorporated": {
+  "anc_id": "ANC-0067",
+  "roster_name": "Goldbelt, Inc",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Gwitchyaa Zhee Corporation": {
+  "anc_id": "ANC-0069",
+  "roster_name": "Gwitchyaa Zhee Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Haida Corporation": {
+  "anc_id": "ANC-0070",
+  "roster_name": "Haida Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Huna Totem Corporation": {
+  "anc_id": "ANC-0072",
+  "roster_name": "Huna Totem Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Kake Tribal Corporation": {
+  "anc_id": "ANC-0079",
+  "roster_name": "Kake Tribal Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Kenai Natives Association Inc.": {
+  "anc_id": "ANC-0083",
+  "roster_name": "Kenai Natives Association, Inc",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Kijik Corporation": {
+  "anc_id": "ANC-0085",
+  "roster_name": "Kijik Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Kikiktagruk Inupiat Corporation": {
+  "anc_id": "ANC-0086",
+  "roster_name": "Kikiktagruk Inupiat Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Klawock Heenya Corporation": {
+  "anc_id": "ANC-0088",
+  "roster_name": "Klawock Heenya Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Koniag, Inc.": {
+  "anc_id": "ANC-0010",
+  "roster_name": "Koniag, Incorporated",
+  "anc_class": "ANC_REGIONAL",
+  "how": "exact_normalized"
+ },
+ "Kootznoowoo Incorporated": {
+  "anc_id": "ANC-0094",
+  "roster_name": "Kootznoowoo, Inc",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "K'oyitl'ots'ina, Limited": {
+  "anc_id": "ANC-0103",
+  "roster_name": "K\u2019oyitl\u2019ots\u2019ina, Ltd. (K Corp)",
+  "anc_class": "ANC_VILLAGE",
+  "how": "substring"
+ },
+ "The Kuskokwim Corporation": {
+  "anc_id": "ANC-0175",
+  "roster_name": "The Kuskokwim Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Kuukpik Corporation": {
+  "anc_id": "ANC-0100",
+  "roster_name": "Kuukpik Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Leisnoi Incorporated": {
+  "anc_id": "ANC-0104",
+  "roster_name": "Leisnoi, Inc",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Manokotak Natives Limited": {
+  "anc_id": "ANC-0108",
+  "roster_name": "Manokotak Natives, Ltd",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "NANA Regional Corporation, Inc.": {
+  "anc_id": "ANC-0011",
+  "roster_name": "NANA (NANA Regional Corporation, Inc.)",
+  "anc_class": "ANC_REGIONAL",
+  "how": "substring"
+ },
+ "Natives of Kodiak, Incorporated": {
+  "anc_id": "ANC-0118",
+  "roster_name": "Natives of Kodiak, Inc",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Old Harbor Native Corporation": {
+  "anc_id": "ANC-0130",
+  "roster_name": "Old Harbor Native Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Olgoonik Corporation": {
+  "anc_id": "ANC-0131",
+  "roster_name": "Olgoonik Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Ounalashka Corporation": {
+  "anc_id": "ANC-0134",
+  "roster_name": "Ounalashka Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Ouzinkie Native Corporation": {
+  "anc_id": "ANC-0135",
+  "roster_name": "Ouzinkie Native Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Paug-Vik Inc. Ltd.": {
+  "anc_id": "ANC-0136",
+  "roster_name": "Paug-Vik Incorporated, Ltd",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Qanirtuuq, Inc.": {
+  "anc_id": "ANC-0142",
+  "roster_name": "Qanirtuuq, Inc",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Sea Lion Corporation": {
+  "anc_id": "ANC-0150",
+  "roster_name": "Sea Lion Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Sealaska Corporation": {
+  "anc_id": "ANC-0012",
+  "roster_name": "Sealaska Corporation",
+  "anc_class": "ANC_REGIONAL",
+  "how": "exact_normalized"
+ },
+ "Shaan Seet, Inc.": {
+  "anc_id": "ANC-0153",
+  "roster_name": "Shaan Seet, Inc",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Shee Atika, Incorporated": {
+  "anc_id": "ANC-0155",
+  "roster_name": "Shee Atik\u00e1, Incorporated",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Shishmaref Native Corporation": {
+  "anc_id": "ANC-0156",
+  "roster_name": "Shishmaref Native Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Sitnasuak Native Corporation": {
+  "anc_id": "ANC-0159",
+  "roster_name": "Sitnasuak Native Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Stuyahok Limited": {
+  "anc_id": "ANC-0166",
+  "roster_name": "Stuyahok, Ltd",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Tanadgusix Corporation": {
+  "anc_id": "ANC-0169",
+  "roster_name": "Tanadgusix Corporation (TDX)",
+  "anc_class": "ANC_VILLAGE",
+  "how": "substring"
+ },
+ "Tikigaq Corporation": {
+  "anc_id": "ANC-0180",
+  "roster_name": "Tikigaq Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Toghotthele Corporation": {
+  "anc_id": "ANC-0181",
+  "roster_name": "Toghotthele Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Togiak Natives Limited": {
+  "anc_id": "ANC-0182",
+  "roster_name": "Togiak Natives, Ltd",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Tozitna, Limited": {
+  "anc_id": "ANC-0183",
+  "roster_name": "Tozitna, Ltd",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Tyonek Native Corporation": {
+  "anc_id": "ANC-0178",
+  "roster_name": "The Tyonek Native Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Ukpeagvik Inupiat Corporation": {
+  "anc_id": "ANC-0188",
+  "roster_name": "Ukpeagvik I\u00f1upiat Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Unalakleet Native Corporation": {
+  "anc_id": "ANC-0189",
+  "roster_name": "Unalakleet Native Corporation",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ },
+ "Yak-Tat Kwaan, Inc.": {
+  "anc_id": "ANC-0195",
+  "roster_name": "Yak-Tat Kwaan, Inc",
+  "anc_class": "ANC_VILLAGE",
+  "how": "exact_normalized"
+ }
+}

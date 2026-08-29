@@ -1,0 +1,385 @@
+{
+  "generated": "2026-08-28",
+  "generated_by": "code/392_write_unshipped_codebook_fragments.py",
+  "dry_run": false,
+  "blocks_written": [
+    "04n_lobbying_issue_family_year",
+    "05n_tcu_cdfi_ownership_evidence",
+    "07zc_gaming_mitigation_agreements",
+    "17b_grantmaker_funding_overlap"
+  ],
+  "blocks_ready": {
+    "04n_lobbying_issue_family_year": {
+      "file": "lobbying_issue_family_year.csv",
+      "rows": 476,
+      "variables": 9,
+      "published_variables": 9,
+      "defined_variables": 9,
+      "publishable_by_rule": 9,
+      "defined_share": 1.0
+    },
+    "05n_tcu_cdfi_ownership_evidence": {
+      "file": "tcu_cdfi_ownership_evidence.csv",
+      "rows": 130,
+      "variables": 6,
+      "published_variables": 6,
+      "defined_variables": 6,
+      "publishable_by_rule": 6,
+      "defined_share": 1.0
+    },
+    "17b_grantmaker_funding_overlap": {
+      "file": "grantmaker_funding_overlap.csv",
+      "rows": 69,
+      "variables": 20,
+      "published_variables": 12,
+      "defined_variables": 12,
+      "publishable_by_rule": 12,
+      "defined_share": 1.0
+    },
+    "07zc_gaming_mitigation_agreements": {
+      "file": "gaming_mitigation_agreements.csv",
+      "rows": 24,
+      "variables": 20,
+      "published_variables": 17,
+      "defined_variables": 17,
+      "publishable_by_rule": 18,
+      "defined_share": 0.944
+    }
+  },
+  "refused_thin_documentation": [],
+  "block_key_collisions": [
+    {
+      "file": "fr_content_classification.csv",
+      "block": "09b_fr_content_classification"
+    },
+    {
+      "file": "ferc_docket_filings.csv",
+      "block": "04s_ferc_docket_filings"
+    },
+    {
+      "file": "lobbying_issue_families_filing.csv",
+      "block": "04m_lobbying_issue_families_filing"
+    },
+    {
+      "file": "fpds_uei_cage_map.csv",
+      "block": "02n_fpds_uei_cage_map"
+    },
+    {
+      "file": "cedar_identifier_ledger_final.csv",
+      "block": "05e_identifier_ledger"
+    },
+    {
+      "file": "admin_appeal_parties.csv",
+      "block": "04x_admin_appeal_parties"
+    },
+    {
+      "file": "ancsa_filings_index.csv",
+      "block": "12c_ancsa_filings_index"
+    },
+    {
+      "file": "federal_recognition_roster.csv",
+      "block": "05h_federal_recognition_roster"
+    },
+    {
+      "file": "admin_appeal_decisions.csv",
+      "block": "04w_admin_appeal_decisions"
+    },
+    {
+      "file": "entity_year_panel.csv",
+      "block": "05o_entity_year_panel"
+    },
+    {
+      "file": "np_schedule_i_filers.csv",
+      "block": "04f_schedule_i_filers"
+    },
+    {
+      "file": "cross_dataset_ruling_map.csv",
+      "block": "05f_cross_dataset_ruling_map"
+    },
+    {
+      "file": "gaming_game_finder_observations.csv",
+      "block": "07q_gaming_game_finder_observations"
+    },
+    {
+      "file": "fac_tribal_single_audits.csv",
+      "block": "07ze_fac_tribal_single_audits"
+    },
+    {
+      "file": "fr_nagpra_title_index.csv",
+      "block": "11b_fr_nagpra_title_index"
+    },
+    {
+      "file": "federal_actions_entity_bridge.csv",
+      "block": "09h_federal_actions_entity_bridge"
+    },
+    {
+      "file": "ferc_ex_parte_parties.csv",
+      "block": "04t_ferc_ex_parte_parties"
+    },
+    {
+      "file": "fpds_uei_edges.csv",
+      "block": "02o_fpds_uei_edges"
+    },
+    {
+      "file": "fr_consultation_referenced.csv",
+      "block": "09i_fr_consultation_referenced"
+    },
+    {
+      "file": "cedar_publishable_identifiers.csv",
+      "block": "05d_publishable_identifiers"
+    },
+    {
+      "file": "fac_audit_gaming_disclosures.csv",
+      "block": "07zf_fac_audit_gaming_disclosures"
+    },
+    {
+      "file": "native_passthrough.csv",
+      "block": "02q_native_passthrough"
+    },
+    {
+      "file": "earmarks.csv",
+      "block": "04zf_earmarks"
+    },
+    {
+      "file": "intertribal_memberships.csv",
+      "block": "05j_intertribal_memberships"
+    },
+    {
+      "file": "compact_obligation_tribal_agency_bridge.csv",
+      "block": "08b_compact_obligation_tribal_agency_bridge"
+    },
+    {
+      "file": "nepa_project_documents.csv",
+      "block": "04zb_nepa_project_documents"
+    },
+    {
+      "file": "gaming_properties.csv",
+      "block": "07r_gaming_properties"
+    },
+    {
+      "file": "gaming_property_federal_traces.csv",
+      "block": "07s_gaming_property_federal_traces"
+    },
+    {
+      "file": "gaming_vendor_tribal_licenses.csv",
+      "block": "07t_gaming_vendor_tribal_licenses"
+    },
+    {
+      "file": "ferc_ex_parte_communications.csv",
+      "block": "04u_ferc_ex_parte_communications"
+    },
+    {
+      "file": "agency_attention_vs_advocacy_year.csv",
+      "block": "04r_agency_attention_vs_advocacy_year"
+    },
+    {
+      "file": "native_bills_entity_bridge.csv",
+      "block": "10b_native_bills_entity_bridge"
+    },
+    {
+      "file": "fr_theme_year.csv",
+      "block": "09c_fr_theme_year"
+    },
+    {
+      "file": "deals_source_index.csv",
+      "block": "01b_deals_source_index"
+    },
+    {
+      "file": "fr_consultation_notices.csv",
+      "block": "09j_fr_consultation_notices"
+    },
+    {
+      "file": "gaming_nigc_roster_link.csv",
+      "block": "07u_gaming_nigc_roster_link"
+    },
+    {
+      "file": "subaward_entity_rollup.csv",
+      "block": "02p_subaward_entity_rollup"
+    },
+    {
+      "file": "nrc_meeting_participants.csv",
+      "block": "04za_nrc_meeting_participants"
+    },
+    {
+      "file": "federal_recognition_events.csv",
+      "block": "05i_federal_recognition_events"
+    },
+    {
+      "file": "nepa_eplanning_projects.csv",
+      "block": "04zc_nepa_eplanning_projects"
+    },
+    {
+      "file": "ferc_tribal_dockets.csv",
+      "block": "04v_ferc_tribal_dockets"
+    },
+    {
+      "file": "bill_votes_official_verification.csv",
+      "block": "10c_bill_votes_official_verification"
+    },
+    {
+      "file": "gaming_financing_events.csv",
+      "block": "07v_gaming_financing_events"
+    },
+    {
+      "file": "gaming_property_site_observations.csv",
+      "block": "07w_gaming_property_site_observations"
+    },
+    {
+      "file": "nrc_public_meetings.csv",
+      "block": "04z_nrc_public_meetings"
+    },
+    {
+      "file": "native_passthrough_pairs.csv",
+      "block": "02r_native_passthrough_pairs"
+    },
+    {
+      "file": "native_issue_litigation_positions.csv",
+      "block": "04ze_native_issue_litigation_positions"
+    },
+    {
+      "file": "anc_ceiling_roster.csv",
+      "block": "12b_anc_ceiling_roster"
+    },
+    {
+      "file": "nho_doi_notification_roster.csv",
+      "block": "05k_nho_doi_notification_roster"
+    },
+    {
+      "file": "gaming_decision_compact_join.csv",
+      "block": "07z_gaming_decision_compact_join"
+    },
+    {
+      "file": "fr_relevance_tier_year.csv",
+      "block": "09d_fr_relevance_tier_year"
+    },
+    {
+      "file": "lobbying_target_entities.csv",
+      "block": "04p_lobbying_target_entities"
+    },
+    {
+      "file": "gaming_projections.csv",
+      "block": "07za_gaming_projections"
+    },
+    {
+      "file": "bie_uio_dollars_by_entity.csv",
+      "block": "03b_bie_uio_dollars_by_entity"
+    },
+    {
+      "file": "gaming_source_claims.csv",
+      "block": "07x_gaming_source_claims"
+    },
+    {
+      "file": "ownership_events.csv",
+      "block": "12d_ownership_events"
+    },
+    {
+      "file": "native_fi_roster.csv",
+      "block": "05m_native_fi_roster"
+    },
+    {
+      "file": "bill_votes_entity_bridge.csv",
+      "block": "10d_bill_votes_entity_bridge"
+    },
+    {
+      "file": "wa_machine_allocations.csv",
+      "block": "14b_wa_machine_allocations"
+    },
+    {
+      "file": "loyalty_program_property.csv",
+      "block": "16e_loyalty_program_property"
+    },
+    {
+      "file": "gaming_property_labor_demand.csv",
+      "block": "07y_gaming_property_labor_demand"
+    },
+    {
+      "file": "tcu_roster.csv",
+      "block": "05l_tcu_roster"
+    },
+    {
+      "file": "nepa_administrative_record_parties.csv",
+      "block": "04zd_nepa_administrative_record_parties"
+    },
+    {
+      "file": "nho_verified_entities.csv",
+      "block": "05g_nho_verified_entities"
+    },
+    {
+      "file": "fr_abstract_availability_year.csv",
+      "block": "09e_fr_abstract_availability_year"
+    },
+    {
+      "file": "fr_consultation_year.csv",
+      "block": "09f_fr_consultation_year"
+    },
+    {
+      "file": "fr_nagpra_title_index_year.csv",
+      "block": "11c_fr_nagpra_title_index_year"
+    },
+    {
+      "file": "tribal_bond_issuances.csv",
+      "block": "12f_tribal_bond_issuances"
+    },
+    {
+      "file": "inflation_deflator.csv",
+      "block": "19_inflation_deflator"
+    },
+    {
+      "file": "lobbying_disclosure_verbosity_year.csv",
+      "block": "04o_lobbying_disclosure_verbosity_year"
+    },
+    {
+      "file": "agency_attention_vs_advocacy.csv",
+      "block": "04q_agency_attention_vs_advocacy"
+    },
+    {
+      "file": "fr_consultation_by_agency.csv",
+      "block": "09g_fr_consultation_by_agency"
+    },
+    {
+      "file": "visitor_access_events.csv",
+      "block": "13b_visitor_access_events"
+    },
+    {
+      "file": "gaming_project_facilities.csv",
+      "block": "07zb_gaming_project_facilities"
+    },
+    {
+      "file": "gaming_property_universe_events.csv",
+      "block": "07zd_gaming_property_universe_events"
+    },
+    {
+      "file": "nho_ownership_changes.csv",
+      "block": "12e_nho_ownership_changes"
+    },
+    {
+      "file": "nd_severance_allocation.csv",
+      "block": "15b_nd_severance_allocation"
+    },
+    {
+      "file": "admin_appeal_positions.csv",
+      "block": "04y_admin_appeal_positions"
+    },
+    {
+      "file": "fac_audit_sefa_gaming_programs.csv",
+      "block": "07zg_fac_audit_sefa_gaming_programs"
+    },
+    {
+      "file": "tribal_resolution_financings.csv",
+      "block": "07zh_tribal_resolution_financings"
+    }
+  ],
+  "would_capture_non_ship_tables": [],
+  "definition_provenance": {
+    "docs/codebooks/04s_lobbying_issue_family_year.md": 4,
+    "41_DESCRIPTIONS": 16,
+    "docs/codebooks/05p_tcu_cdfi_ownership_evidence.md": 4,
+    "docs/codebooks/17b_grantmaker_funding_overlap.md": 16,
+    "docs/codebooks/05_entities.md": 1,
+    "docs/codebooks/07zi_gaming_mitigation_agreements.md": 12,
+    "docs/codebooks/07b_nigc_regions.md": 1,
+    "UNDEFINED": 1
+  },
+  "rows_registered": 699,
+  "undefined_columns_tiered_internal": 1
+}

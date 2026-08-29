@@ -1,0 +1,282 @@
+# The Cedar identifier standard
+
+*Policy, hand-written, stable. **No counts live here** — every number about
+identifiers is measured by `code/501_build_entity_inventory.py` into
+`docs/ENTITY_INVENTORY.md`. A rule that carries its own statistics goes stale
+and starts lying; this file carries only rules.*
+
+Read this before writing anything that resolves, joins, or publishes an entity.
+
+---
+
+## 0. THE PERMANENT IDENTITY — read this before §1
+
+**`cedar_uid` is the identity. Everything else, including the class-prefixed
+handle, is an attribute.** Minted 2026-08-28 by `503_identity.py mint`
+into `data/spine/cedar_identity_register.csv`, and materialised onto every
+dataset by `503_identity.py stamp`.
+
+    CE-1A7K3-MQ
+    │  │     └─ TWO check characters, from two independent weightings
+    │  └─ 5 chars, Crockford base32 (I, L, O, U are NOT in the alphabet)
+    └─ namespace
+
+**It encodes nothing on purpose.** Everything about an entity can change except
+its identity:
+
+- a **state-recognized tribe wins federal recognition** — its class changes and
+  its handle changes (`TRBS-…` → `TRBF-…`); **`cedar_uid` does not.** Any time
+  series keyed on the uid survives the event unbroken.
+- a nation **renames** — a dated alias; same uid.
+- a firm's **ownership changes** — a relationship edge; same uid.
+
+An identifier that encodes class is an identifier that must be rewritten the day
+the class changes, and rewriting an identity is the one unforgivable act in an
+identity system. So the readable prefix stayed — agents genuinely use it, it
+caught a zero-for-O typo, it kills the Elim defect — but it was **demoted from
+identity to handle**.
+
+### The check character is not decoration
+
+`O`, `I`, `L` and `U` cannot appear in a valid uid, so the `BANN 0 YEEL KON`
+class of transcription error is **unrepresentable**, not merely detectable.
+
+The two trailing characters come from two independent weightings — one linear,
+one quadratic — so an error that lands in the null space of the first is caught
+by the second. **Measured on the live register:**
+
+| error class | one check char | two check chars |
+|---|---:|---:|
+| single substitution | 95.5% (382/400) | **100% (1000/1000)** |
+| adjacent transposition | partial | **100% (579/579)** |
+
+The single-character version was built first and stress-tested the same hour;
+95.5% is what a mod-32 character gives you and it is not good enough for an
+identifier a customer transcribes. It was replaced before anything shipped —
+**the whole reason to decide this now is that it is free now and expensive
+later.** `503_identity.py` self-test asserts the properties on every run.
+
+### THE RECLASSIFICATION RULE — decided now, before it is needed
+
+When an entity's class changes (recognition granted, restored, terminated, or a
+corporation reclassified):
+
+1. **`cedar_uid` never changes.** Not for any reason. Ever.
+2. The **old handle is retired to an alias** with `valid_to` set. It keeps
+   resolving — historical filings use it and must keep working.
+3. A **new handle is minted** in the new class and becomes current, with
+   `valid_from`.
+4. `entity_class` and `class_since_basis` are updated on the register row, with
+   the citation (FR notice, court order) in the basis.
+5. **No row is rewritten in any dataset.** They carry `cedar_uid`; they are
+   already correct.
+
+A uid is **never reused**, even after an entity is retired — same rule as script
+numbers, for the same reason.
+
+### What this means for a customer
+
+Every shipped dataset carries `cedar_uid` **in the file**. A buyer holding one
+CSV can join it to any other Cedar dataset without holding the spine and without
+a join whose semantics we control. Measured 2026-08-28: **125 tables,
+3,007,088 of 3,007,806 entity-bearing rows (100.0%) carry a resolved uid.**
+Blank means the handle is not a known entity — never "no entity", and never
+guessed.
+
+---
+
+## 1. There is one identity system, and it is ours
+
+**`cedar_uid` is the identity (see §0); the class-prefixed handle below is the
+readable attribute of it.** Every Native entity has both, and nothing outside
+them is an identity — everything else is an *attribute of* an entity.
+
+Cedar IDs are class-prefixed and readable on sight:
+
+| prefix | class |
+|---|---|
+| `TRBF` | Federally recognized tribe |
+| `TRBS` | State-recognized tribe |
+| `AKNF` | Federally recognized Alaska Native Village |
+| `ANVC` | Alaska Native Village Corporation |
+| `ANRC` | Alaska Native Regional Corporation |
+| `NHO` | Native Hawaiian Organization |
+| `ITO` | Intertribal Organization |
+| `TCU` | Tribal College or University |
+| `CDFI` | Native Community Development Financial Institution |
+| `UIO` | Urban Indian Organization |
+| `BIE` | BIE School |
+| `CNSF` | Federal-level constituency entity |
+| `CNSS` | State-level constituency entity |
+| `SGVF` | Federal-level self-governance consortium |
+| `CEDAR-ENT-` | Individually Native-owned business and other minted entities |
+
+*Verified against the spine 2026-08-28: every prefix above is present, and no
+prefix in the spine is missing from this table. If you add a class, add its
+prefix here — an undocumented prefix is how a reader concludes a class does not
+exist.*
+
+`tribe_id` is the canonical column name for a Cedar ID, for historical reasons.
+It is **not** a tribe-only field — an NHO and an individually-owned firm both
+carry one. Do not rename it casually; ~71 tables key on it.
+
+### The CICD / lineage-A integer scheme is RETIRED as an identity
+
+`lineageA_dofile_integer` (small integers: `192`, `201`, `343`) came in with the
+HCI/CICD contracting lineage. It is **no longer an identity**. It survives in
+exactly one role: **evidence of which vintage a row came from**, the same role
+`extent_competed` plays for the FY2016/17 seam.
+
+- Never mint a new row on it.
+- Never join across it and Cedar IDs — the ranges overlap and *disagree*:
+  `playground.do` says `307 → Stillaguamish`; the assistance lineage's `307` is
+  `southern ute indian tribe`. A join across the seam silently mislabels.
+- `tribe_id_scheme_resolved` declares which scheme a row is on. It is never
+  blank. Read it before grouping by entity, or you will split one entity at the
+  boundary and double-count it in a distinct count.
+
+**Retiring it is a promotion, not a deletion** — see §5.
+
+---
+
+## 2. The hub model
+
+    external identifiers  ─┐
+    (UEI, CAGE, EIN, UBI)  │
+                           ▼
+      sub-hub  ────────►  ENTITY  ◄────────  collection rows
+    (facility, property,  (Cedar ID)         (contracts, grants,
+     docket, EIN filer)                       filings, deals …)
+
+**The entity is the hub.** Everything associated with it hangs off the Cedar ID.
+
+**Sub-hubs exist where a thing is complex enough to deserve its own record and
+its own children.** A casino is the worked example: a facility has capacity
+observations, employment observations, property locations, financing events and
+licences of its own, *and* it belongs to an entity. Flattening it onto the
+entity would lose the level at which most gaming facts are actually true.
+
+Implemented sub-hubs today: `facility_id` (gaming_facilities), `property_id`
+(gaming_property_locations, itself parent to `location_observation_id`),
+`np_ein_entity_hub`, and the FERC docket filer layer.
+
+**Hierarchy is a relationship, not an identity.** Corporate parentage is
+genuinely ambiguous — a subsidiary is sometimes operated as a parent, ANCSA
+corporations invert the usual shape, and the same firm appears as both in
+different sources. So Cedar does **not** encode hierarchy in the id. Parentage
+lives in `entity_relationships` / `parent_entity_id` as a typed, evidenced,
+revisable claim. If you find yourself wanting to change an entity's id because
+its ownership changed, you want a relationship edge instead.
+
+---
+
+## 3. External identifiers are attributes, and they are open-ended
+
+`cedar_identifier_ledger_final.csv` is the register: one row per
+(identifier_type, identifier, tribe_id) with a tier and a method.
+
+Tracked today: **UEI**, **CAGE**, **EIN**. Expected and welcome as they are
+collected: **state registration ids** (Washington UBI, state SOS numbers),
+**NIGC ids**, **SAM legacy ids**, tribal charter numbers, licence numbers.
+
+Adding a type requires nothing but a new `identifier_type` value and a tier
+rationale. **Do not add a column per identifier type** — that is why this is a
+long table and not a wide one, and it is what lets a new state's UBI land
+without a schema change.
+
+**An identifier is not a link.** The exactness of the KEY says nothing about the
+correctness of the LINK. An EIN is an exact string and 821 EIN rows still sit at
+tier B. `attribution_method` says *who* decided; `confidence_tier` says *what*
+was decided. Read the sign before you inherit the authority.
+
+---
+
+## 4. Proprietary identifiers: hold internally, never publish
+
+Some identifiers we may **use** but may not **redistribute**. They are real and
+useful for QA and matching; they are not ours to hand out.
+
+| identifier | source | status |
+|---|---|---|
+| DUNS / D&B fields | Dun & Bradstreet Open Data | **internal only** — attaches to every base award dated before 2022-04-04 |
+| Casino City ids | Casino City | **internal only** — read for QA, never published |
+
+Rules:
+
+1. **Never ship a proprietary identifier as a column.** Not in `dist/`, not in a
+   codebook, not in an export. Naming it in a caveat is fine and expected —
+   saying *"we hold this and will not publish it"* is a disclosure, not a leak.
+2. **Mark it in the column name where practical.** `duns_internal_only` and
+   `dnb_open_data_restricted` are the established convention. Follow it.
+3. **Where a table mixes both, ship a `_PUBLISHABLE` variant** rather than
+   filtering at export time. `sam_prime_contracts_fy2000_2007_PUBLISHABLE.csv`
+   is the pattern: the restriction is visible in the filename, so a later reader
+   cannot pick the wrong file by accident.
+4. **Facts derived from a proprietary id are usually fine; the id is not.**
+   Contract facts publish. The D&B legal name and street address do not, in bulk.
+5. A proprietary id may **never** be the only evidence for a published link. If
+   removing it would leave the link unsupported, the link is not publishable.
+
+### What "publishable" already means in practice
+
+`cedar_publishable_identifiers.csv` is the enforced answer, and it is stricter
+than the rules above require:
+
+- **CAGE and UEI only.** EIN is held in the ledger and is **not** in the
+  publishable set — an EIN identifies a filer and reaches further into an
+  organization's affairs than a procurement id does.
+- **Tier A only.** Every row is tier A; nothing tier B or below ships, which is
+  the same rule as §5's "tier B may not key a dollar", applied to identity.
+
+Publish from that table. Do not re-derive a publishable set by filtering the
+full ledger yourself — the filter is the policy, and a second copy of it will
+drift from this one.
+
+---
+
+## 5. Promoting a legacy id to a Cedar ID
+
+A crosswalk from a legacy scheme is **a ruling, not a computation.** It is
+adopted per-row, by match basis, never in one pass.
+
+| match basis | disposition |
+|---|---|
+| **exact** | promote |
+| **alias** | promote — the alias layer is first-class and evidenced |
+| **distinctive spine token** | promote with review |
+| **core resolver** | REVIEW. `core()` has folded the distinguishing word before — *NATIONAL EDUCATION ASSOCIATION → National **INDIAN** Education Association* |
+| **containment** | **REFUSE.** AGENTS.md: containment may resolve an owner already named in evidence — never detect a match, and **never key a dollar** |
+| **no candidate** | spine gap. Mint the entity or record the refusal; do not force a match |
+
+**Keep the legacy value.** Promotion adds the Cedar ID and sets
+`tribe_id_scheme_resolved`; it does not overwrite the original. The legacy value
+is the evidence of provenance and it is how a mis-promotion is ever found.
+
+---
+
+## 6. For an agent picking this up
+
+Resolve an entity, in order. Stop at the first that succeeds:
+
+1. **Cedar ID already on the row** — use it. Check `tribe_id_scheme_resolved`
+   first; if it says a legacy scheme, you do not have a Cedar ID.
+2. **Exact external identifier** — UEI, then CAGE, then EIN, via
+   `cedar_identifier_ledger_final.csv`. Carry the row's tier forward; **do not
+   upgrade it because the key was exact.**
+3. **Alias** — `entity_aliases.csv`.
+4. **Stop.** If none of those resolve it, the honest output is
+   `unattributed` plus a refusal reason. A guessed entity is fabrication, and
+   every expensive misattribution in this project began as a plausible guess.
+
+Never:
+
+- join on a legacy integer;
+- strip a compound NEID suffix to make a join work (`AKNF-MTLKTL-00-TLNGHD` is
+  canonical; its apparent "base" is not in the spine);
+- let a tier-B link key a dollar figure;
+- treat a `RULED` attribution method as a positive ruling — negative rulings are
+  ruled too, and they are tier X.
+
+**Related:** `docs/NATIVE_ENTITY_NUANCES.md` (the domain knowledge that resolves names — FR parentheticals, renames, enterprises, exclusions) ·  `docs/ARCHITECTURE.md` (what exists, generated) ·
+`docs/ENTITY_INVENTORY.md` (coverage per entity, generated) · `AGENTS.md` (the
+defect classes) · `docs/CEDAR_TAXONOMY.md` (entity classes).
