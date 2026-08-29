@@ -119,6 +119,31 @@ FPDS_BIG = {
 }
 
 FILES = [
+    # ADDED 2026-08-30. The assistance side was never harvested: the original
+    # build read only the CONTRACT extracts, so the 2,290 edges skewed toward
+    # 8(a) contractors and missed assistance-heavy organisations entirely -
+    # measured: Bristol Bay Area Health Corporation, 695 transactions in the
+    # clean table, ZERO edges here. recipient_parent_uei in this file is the
+    # same SAM-sourced entity block the FPDS files carry, public and
+    # unmetered - the systematic alternative to the SAM Entity API, whose key
+    # measured out at 10 calls/day with the hierarchy section hidden.
+    # The absolute path is honoured by os.path.join(RAW, fname), which
+    # returns an absolute second argument unchanged; this file lives outside
+    # RAW and is not copied, because 600 MB has one home on this machine.
+    (str(__import__("pathlib").Path(PROJECT) / "Federal Spending" / "raw" /
+         "Assistance_PrimeTransactions_2023-04-09_H19M53S53_1.csv"),
+     {
+        "kind": "usaspending_assistance",
+        "uei": "recipient_uei",
+        "uei_name": "recipient_name",
+        "fallback_name": "recipient_name_raw",
+        "cage": None,                      # assistance carries no CAGE
+        "year": "action_date_fiscal_year",
+        "date": "action_date",
+        "parents": [
+            ("parent_uei", "recipient_parent_uei", "recipient_parent_name"),
+        ],
+     }),
     ("Data Request 4-5-2023 File 1.csv", FPDS_BIG),
     ("Data Request 4-5-2023 File 2.csv", FPDS_BIG),
     ("Data Request 5-8-2023 IDVs.csv", FPDS_BIG),
@@ -301,8 +326,10 @@ def stream_file(fname: str, spec: dict, limit: int | None) -> dict:
     for i, c in enumerate(header):
         idx.setdefault(c.strip(), i)  # first occurrence wins for duplicate names
 
-    if spec["kind"] in ("fpds", "usaspending_contract"):
-        need = [spec["uei"], spec["uei_name"], spec["cage"], spec["year"], spec["date"]]
+    if spec["kind"] in ("fpds", "usaspending_contract", "usaspending_assistance"):
+        need = [spec["uei"], spec["uei_name"], spec["year"], spec["date"]]
+        if spec.get("cage"):               # assistance files carry no CAGE
+            need.append(spec["cage"])
         need += [p[1] for p in spec["parents"]] + [p[2] for p in spec["parents"]]
         if spec.get("fallback_name"):
             need.append(spec["fallback_name"])
@@ -336,12 +363,14 @@ def stream_file(fname: str, spec: dict, limit: int | None) -> dict:
             continue
 
         try:
-            if spec["kind"] in ("fpds", "usaspending_contract"):
+            if spec["kind"] in ("fpds", "usaspending_contract",
+                                "usaspending_assistance"):
                 uei = norm_uei(row[idx[spec["uei"]]])
                 name = norm(row[idx[spec["uei_name"]]])
                 if not name and spec.get("fallback_name"):
                     name = norm(row[idx[spec["fallback_name"]]])
-                cage = norm(row[idx[spec["cage"]]]).upper()
+                cage = (norm(row[idx[spec["cage"]]]).upper()
+                        if spec.get("cage") else "")
                 yr = year_of(row[idx[spec["year"]]], row[idx[spec["date"]]])
 
                 if uei:
@@ -428,8 +457,17 @@ def stream_file(fname: str, spec: dict, limit: int | None) -> dict:
 # ---------------------------------------------------------------------------
 # Writers
 # ---------------------------------------------------------------------------
-def write_edges() -> None:
+def write_edges(limit=0) -> None:
     os.makedirs(CLEAN, exist_ok=True)
+    if limit:
+        # A --limit run is a SMOKE TEST, and on 2026-08-30 one overwrote the
+        # shipping edge table with a 2,000-rows-per-file sample: 2,290 edges
+        # became 841 in data/clean with nothing marking them partial. A test
+        # mode that writes production output is the FERC class4 disease in a
+        # new coat - partial state presented as the real thing. Truncated
+        # runs now write nothing and say so.
+        log(f"--limit {limit} run: outputs NOT written (smoke test only)")
+        return
     with open(EDGES_OUT, "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
         w.writerow(
@@ -463,7 +501,10 @@ def write_edges() -> None:
     log(f"wrote {EDGES_OUT} ({len(edges):,} rows)")
 
 
-def write_cages() -> None:
+def write_cages(limit=0) -> None:
+    if limit:
+        log(f"--limit {limit} run: cage map NOT written (smoke test only)")
+        return
     with open(CAGE_OUT, "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
         w.writerow(
@@ -808,8 +849,8 @@ def main() -> None:
             continue
         per_file_stats.append(stream_file(fname, spec, args.limit))
 
-    write_edges()
-    write_cages()
+    write_edges(args.limit)
+    write_cages(args.limit)
     build_report(t0)
 
     log(f"DONE in {(time.time()-t0)/60:.1f} minutes")

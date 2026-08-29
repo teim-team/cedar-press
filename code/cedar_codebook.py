@@ -131,6 +131,18 @@ LICENSED_SOURCE_FILES = {
 # triage on every run and prints a loud mismatch if the two have drifted.
 # ---------------------------------------------------------------------------
 INTERNAL_TABLES = {
+    "sam_entity_connections.csv":
+        "511's declared-connection working set, currently near-empty because "
+        "the SAM key measured out at 10 calls/day WITH the hierarchy section "
+        "hidden at that tier - the pull is parked, its worklist saved in "
+        "review/sam_hierarchy_state.json. The shippable product of this idea "
+        "is fpds_uei_edges.csv, which carries the same declarations from "
+        "public unmetered files",
+    "sam_subsidiary_candidates.csv":
+        "511's discovery queue: UEIs the ledger does not know, attributed to "
+        "an owning entity via a DECLARED connection at tier B. A candidate "
+        "queue is our resolution process, not an event in the world; rows "
+        "graduate into the ledger, never ship from here",
     "cedar_assertions.csv":
         "the raw assertion store behind 510. INTERNAL FOR NOW, NOT FOREVER - "
         "and the reason is a measurement, so it is testable: on 2026-08-29 "
