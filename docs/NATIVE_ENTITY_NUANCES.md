@@ -174,3 +174,17 @@ the assertion layer now carries the permanent refutation. The **repoint** of
 those rows to `SGVF-BRSTLB-00` keys dollars, so it is queued for an owner
 ruling in `review/rulings_inbox_2026-08-29_agent.csv`, with the CAGE check
 above as its verification protocol.
+
+**The API route (checked 2026-08-29, owner's suggestion).** cage.dla.mil has no
+public API, but the same FAR-declared hierarchy is served by the [SAM Entity
+Management API](https://open.gsa.gov/api/entity-api/):
+`api.sam.gov/entity-information/v3/entities?ueiSAM=<UEI>` with `SAM_API_KEY`
+(the user-environment key `set_sam_key.ps1` persists). Verified live on BBAHC:
+name, CAGE, structure, state of incorporation, physical address, website, and
+`entityHierarchyInformation` all in one response. **An ABSENT hierarchy section
+means no owner was declared — the entity is its own highest-level owner** —
+which is itself the answer for a tribally governed nonprofit. Calls are metered
+on the shared key (the FY2000–2007 backfill budget lives on it too), so use it
+for adjudication evidence, not bulk pulls; the bulk spiderweb stays
+`fpds_uei_edges.csv`, and the monthly SAM public entity extract is the road to
+refreshing it without burning calls.
