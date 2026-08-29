@@ -493,7 +493,7 @@
     {
       "class": "class2c",
       "file": "77_build_nagpra_dataset.py",
-      "line": 359,
+      "line": 382,
       "evidence": "state[\"fail\"] += 1",
       "why": "counter 'fail' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -502,7 +502,7 @@
     {
       "class": "class2c",
       "file": "77_build_nagpra_dataset.py",
-      "line": 1727,
+      "line": 1753,
       "evidence": "stats[\"containment_rejected\"] += 1",
       "why": "counter 'containment_rejected' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -511,7 +511,7 @@
     {
       "class": "class2c",
       "file": "77_build_nagpra_dataset.py",
-      "line": 356,
+      "line": 379,
       "evidence": "state[\"fail\"] += 1",
       "why": "counter 'fail' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -520,7 +520,7 @@
     {
       "class": "class2c",
       "file": "77_build_nagpra_dataset.py",
-      "line": 1769,
+      "line": 1795,
       "evidence": "stats[\"guard_refusals\"] += 1",
       "why": "counter 'guard_refusals' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -529,7 +529,7 @@
     {
       "class": "class2c",
       "file": "77_build_nagpra_dataset.py",
-      "line": 348,
+      "line": 371,
       "evidence": "state[\"miss\"] += 1",
       "why": "counter 'miss' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -538,7 +538,7 @@
     {
       "class": "class2c",
       "file": "77_build_nagpra_dataset.py",
-      "line": 327,
+      "line": 350,
       "evidence": "state[\"fail\"] += 1",
       "why": "counter 'fail' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -1356,6 +1356,42 @@
     },
     {
       "class": "class7",
+      "file": "512_build_dataset_contracts.py",
+      "line": 1677,
+      "evidence": "h = hash(\"\\x1f\".join(parts))",
+      "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
+      "waived": true,
+      "waiver_reason": "this hash MINTS NOTHING. It is a"
+    },
+    {
+      "class": "class7",
+      "file": "512_build_dataset_contracts.py",
+      "line": 1687,
+      "evidence": "h = hash(\"\\x1f\".join(row))",
+      "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
+      "waived": true,
+      "waiver_reason": "same within-process membership test,"
+    },
+    {
+      "class": "class7",
+      "file": "512_build_dataset_contracts.py",
+      "line": 1712,
+      "evidence": "if hash(k) in collided[gj]:",
+      "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
+      "waived": true,
+      "waiver_reason": "the hash only decides whether to"
+    },
+    {
+      "class": "class7",
+      "file": "512_build_dataset_contracts.py",
+      "line": 1718,
+      "evidence": "if hash(k) in row_collided:",
+      "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
+      "waived": true,
+      "waiver_reason": "as above: a filter in front of an"
+    },
+    {
+      "class": "class7",
       "file": "83_build_resource_ledger.py",
       "line": 441,
       "evidence": "\"resource_revenue_event_id\": f\"RRE-ONRR-REV-{i:06d}\",",
@@ -1519,7 +1555,7 @@
     {
       "class": "class3",
       "file": "510_assertions.py",
-      "line": 229,
+      "line": 256,
       "evidence": "\"elijah_ruling\": dict(lineage_root=\"LR_HUMAN_OWNER\", tier_ceiling=\"A\",",
       "why": "a tier-A assignment sits within 6/3 lines of a ruling-method or status test, at 1 site(s), and this file has NO RECORDED DISPOSITION in 293's DISPOSITIONS table. A regex cannot decide this one - read the site and write the reason down. `attribution_method` says WHO decided; `confidence_tier` says WHAT was decided. Do NOT delete the entry to make this pass.",
       "waived": true,
@@ -2785,7 +2821,7 @@
       },
       {
         "file": "510_assertions.py",
-        "line": 229,
+        "line": 256,
         "source": "\"elijah_ruling\": dict(lineage_root=\"LR_HUMAN_OWNER\", tier_ceiling=\"A\","
       },
       {

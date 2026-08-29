@@ -314,6 +314,117 @@ def path_constants(src: str) -> dict[str, str]:
     return {k: "/".join(v) for k, v in env.items() if v}
 
 
+# --- CHANNEL 2b: PATH EXPRESSIONS, NOT JUST PATH CONSTANTS -------------------
+#
+# WORKSTREAM G, debt D8. Channel 2 as written resolves module-level names bound
+# to a `Path(...) / "seg"` chain. `20_build_subcontracts.py` spells its inputs
+# two ways channel 2 cannot see, and the subcontracting clean room proved it by
+# crashing:
+#
+#     ESM = os.path.join(CEDAR, "data", "raw", "esm_hci", "ESM")     <- join()
+#     SOURCES = [(os.path.join(ESM, "raw", "subcontract-...csv"), ...)]
+#                                                    ^ inside a list of tuples,
+#                                                      bound to no name at all
+#
+# Both are real, both existed on disk, neither was retained, and the replay
+# stopped at `IndexError: list index out of range` because every source was
+# skipped as missing.
+#
+# The second spelling also settles an ambiguity nothing else can. Five of these
+# files exist TWICE under data/ - once in data/raw/esm_hci/ESM and once in
+# data/raw/external/subcontracts. `resolve_filename` correctly refuses to guess
+# between two hits and returns None, which is how they became `undiscovered`.
+# The path expression in the script names exactly one of them. A filename is
+# ambiguous; a path is not.
+#
+# So: resolve every path-shaped EXPRESSION anywhere in the module - `/` chains
+# and os.path.join alike, at module level or inside a function - against the
+# module-level name environment.
+
+def path_expressions(src: str) -> dict[str, list[str]]:
+    """relpath -> the spellings that produced it, for every resolvable path
+    expression in the module. Values are `join`/`div` for the record."""
+    try:
+        tree = ast.parse(src)
+    except SyntaxError:
+        return {}
+    env: dict[str, tuple[str, ...]] = {}
+
+    def seg(s: str) -> tuple[str, ...]:
+        return tuple(x for x in re.split(r"[\\/]", s) if x and x != ".")
+
+    def res(node) -> tuple[str, ...] | None:
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            v = node.value
+            if v.rstrip("\\/").lower() == HARDCODED_ROOT.lower():
+                return ()
+            if v.startswith(("http:", "https:")) or ":" in v[:3]:
+                return None            # a URL, or some other absolute drive
+            return seg(v)
+        if isinstance(node, ast.Name):
+            return env.get(node.id)
+        if isinstance(node, ast.Call):
+            f = node.func
+            fname = getattr(f, "attr", None) or getattr(f, "id", None)
+            if fname == "Path" and len(node.args) == 1:
+                return res(node.args[0])
+            if fname == "join":                      # os.path.join(...)
+                parts: tuple[str, ...] = ()
+                for i, a in enumerate(node.args):
+                    r = res(a)
+                    if r is None:
+                        return None
+                    parts = r if i == 0 else parts + r
+                return parts
+            return None
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div):
+            left = res(node.left)
+            if left is None:
+                return None
+            right = res(node.right)
+            return None if right is None else left + right
+        return None
+
+    # Build the name environment in FILE ORDER, resolving each module-level
+    # binding with the same resolver. Python requires a module-level name to be
+    # bound before it is used, so one forward pass is enough - and it is what
+    # lets `ESM = os.path.join(CEDAR, "data", "raw", "esm_hci", "ESM")` be a
+    # base for the five `os.path.join(ESM, "raw", ...)` expressions below it.
+    # A root name whose binding is unresolvable (the `Path(__file__).resolve()
+    # .parent.parent` spelling) is the project root by convention.
+    for node in tree.body:
+        if not isinstance(node, ast.Assign) or len(node.targets) != 1 or \
+                not isinstance(node.targets[0], ast.Name):
+            continue
+        n = node.targets[0].id
+        v = res(node.value)
+        if v is not None:
+            env[n] = v
+        elif n in _ROOT_NAMES:
+            env[n] = ()
+
+    out: dict[str, list[str]] = {}
+    for node in ast.walk(tree):
+        how = None
+        if isinstance(node, ast.Call) and \
+                (getattr(node.func, "attr", None) == "join"):
+            how = "os.path.join"
+        elif isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div):
+            how = "path_div"
+        if how is None:
+            continue
+        r = res(node)
+        if not r:
+            continue
+        relp = "/".join(r)
+        if not (relp.startswith("data/") or relp.startswith("review/")):
+            continue
+        out.setdefault(relp, [])
+        if how not in out[relp]:
+            out[relp].append(how)
+    return out
+
+
 def local_imports(src: str) -> list[str]:
     """Names of sibling code/ modules a script imports, including the
     `importlib.import_module("33_apply_party_rulings")` form that a plain
@@ -439,6 +550,22 @@ def discover_inputs(scripts: list[str]) -> tuple[list[dict], list[str],
             e["how_found"].append(f"path_constant:{const}")
             e["read_by"].append(s)
 
+        # Channel 2b: path EXPRESSIONS. Same filters, minus the constant-name
+        # one, because these expressions are bound to no name.
+        for relp, hows in path_expressions(src).items():
+            if relp.split("/")[0] in NON_INPUT_DIRS or relp in CONTAINER_DIRS:
+                continue
+            tgt = ROOT / relp
+            if not tgt.exists():
+                continue
+            if tgt.is_file() and tgt.name in writes:
+                continue
+            e = found.setdefault(relp, {"path": relp, "how_found": [],
+                                        "read_by": []})
+            for h in hows:
+                e["how_found"].append(f"path_expression:{h}")
+            e["read_by"].append(s)
+
     # A file the collection WRITES is not an input to the collection, even when
     # another script in scope reads it - it is an intermediate, and replaying
     # from it would replay from our own output.
@@ -450,10 +577,101 @@ def discover_inputs(scripts: list[str]) -> tuple[list[dict], list[str],
     # and every accuracy figure it publishes is measured against them. Those
     # rows exist nowhere else and no procedure can re-fetch them, so they are
     # inputs of the only kind that MUST be retained.
+    # A DIRECTORY WITH A NAMED CHILD IN THE SAME SET IS A NAMESPACE, NOT A
+    # CORPUS. Channel 2b resolves `ESM = join(CEDAR,"data","raw","esm_hci",
+    # "ESM")` AND the five files spelled `join(ESM, "raw", "...")` beneath it.
+    # Retaining both would copy a 296 MB tree to get five files the script
+    # actually opens. Retaining only the tree would lose which five they are.
+    # So keep the children and drop the base - the same distinction
+    # CONTAINER_DIRS makes by hand, computed instead of listed.
+    # --- CHANNEL 4: MANIFEST-DRIVEN EXPANSION --------------------------------
+    #
+    # WORKSTREAM G, debt D8. There is a class of input NO static channel can
+    # reach: one enumerated at RUNTIME from a data file. `108_build_tribal_tax
+    # _bases.py` reads `data/raw/external/tribal_tax/_SOURCE_MANIFEST.csv` and
+    # opens whatever that manifest's `file` column names. Static discovery saw
+    # exactly one of six state corpora - the one file whose path happened to be
+    # spelled as a literal - and the clean room reported
+    # "MI: source unusable, skipped" nine times and built 24 rows against a
+    # released 1,712.
+    #
+    # These reads are worse than `undiscovered_inputs`, because they never
+    # reach that list either: the io scanner sees an open() on a variable, not
+    # an unresolvable NAME. They were invisible in both directions.
+    #
+    # A `_SOURCE_MANIFEST.csv` is the project's own convention for "here is
+    # what was fetched and where it landed", so it can be READ rather than
+    # guessed at. Paths are relative to the manifest's own directory.
+    _MANIFEST_FILE_COLS = ("file", "local_file", "path", "filename")
+    for mp in [p for p in list(found)
+               if Path(p).name.startswith("_SOURCE_MANIFEST")
+               and p.endswith(".csv")]:
+        base_dir = (ROOT / mp).parent
+        try:
+            with open(ROOT / mp, encoding="utf-8-sig", newline="") as fh:
+                rdr = csv.DictReader(fh)
+                col = next((c for c in _MANIFEST_FILE_COLS
+                            if c in (rdr.fieldnames or [])), None)
+                if not col:
+                    continue
+                for row in rdr:
+                    v = (row.get(col) or "").strip()
+                    if not v:
+                        continue
+                    tgt = base_dir / v
+                    if not tgt.is_file():
+                        continue
+                    relp = rel(tgt)
+                    if relp in found or Path(relp).name in writes:
+                        continue
+                    found[relp] = {
+                        "path": relp,
+                        "how_found": [f"source_manifest_expansion:{mp}"],
+                        "read_by": sorted(set(found[mp]["read_by"]))}
+        except Exception:
+            continue
+
+    # It applies to a named SUBDIRECTORY too: `data/raw/federal_register`
+    # resolves from `RAW / "federal_register"` used as a base for the
+    # `nagpra_fulltext` corpus underneath it. Retaining the parent would add
+    # 400 MB of sibling corpora this collection never opens, and would retain
+    # the 18 MB it does open twice.
+    all_found = set(found)
+    for d in [p for p in list(found) if (ROOT / p).is_dir()]:
+        if any(f != d and f.startswith(d + "/") for f in all_found):
+            found[d]["role_note"] = ("dropped as a namespace: named files "
+                                     "beneath it are captured individually")
+            found.pop(d)
+
     out = []
     for relp, e in sorted(found.items()):
         base = Path(relp).name
-        if base in writes and not _is_manual(relp) \
+        # WORKSTREAM G. `written_in_scope` is recorded SEPARATELY from `role`,
+        # because the two answer different questions and conflating them broke
+        # two clean rooms. `role` asks "is this an input?". `written_in_scope`
+        # asks "will the run overwrite it?" - and a restored blob is read-only,
+        # so a file the run legitimately rewrites must be restored WRITABLE or
+        # the replay dies on PermissionError at a file nobody was reading.
+        # Measured, not theorised: `data/clean/nd_severance_allocation.csv`
+        # (113 rebuilds it) and `review/resource_ledger_unresolved.csv` (83
+        # writes it as a report) each stopped the natural-resources replay.
+        e["written_in_scope"] = base in writes
+        # The intermediate rule matches on BASENAME, because `declared_io`
+        # reports basenames. That is safe inside data/clean and data/spine,
+        # where Cedar's derived tables have unique names, and unsafe outside
+        # it: `_SOURCE_MANIFEST.csv` exists in 40-odd raw directories, one
+        # script in scope writes one of them, and the basename match then
+        # condemned `data/raw/external/tribal_tax/_SOURCE_MANIFEST.csv` - a
+        # pure INPUT to 108, and the file that tells it which six state
+        # corpora to parse - as this collection's own intermediate. It was not
+        # restored, 108 found no sources, and tribal_tax_bases.csv replayed 24
+        # rows against a released 1,712.
+        #
+        # So the rule applies only where the name is trustworthy. A raw,
+        # staging or review file a script rewrites is still restored; it is
+        # restored WRITABLE, which `written_in_scope` above is what for.
+        derived = relp.startswith("data/clean/") or relp.startswith("data/spine/")
+        if base in writes and derived and not _is_manual(relp) \
                 and "path_constant" not in ";".join(e["how_found"]):
             e["role"] = "intermediate_written_in_scope"
         else:
@@ -617,17 +835,58 @@ def retain(p: Path, digest: str, budget: list[int], retain_max: int) -> dict:
     return {"mode": "retained", "blob": rel(bp), "deduplicated": False}
 
 
+# A DIRECTORY BLOB HAS A FORM, AND THE FORM HAS A VERSION.
+#
+# v1 wrote every entry with date_time=(1980,1,1) to make the archive bytes
+# deterministic. That was solving a problem the design had already solved -
+# the blob is NAMED by the tree's merkle root, so the archive's own bytes
+# never needed to be stable - and it silently discarded part of the input.
+#
+# It discarded something load-bearing. `77_build_nagpra_dataset.py` was fixed
+# this pass so `fetched_date` reads the CACHED ARTIFACT's mtime instead of the
+# clock (blocker B4, and it worked). A retention scheme that zeroes mtimes
+# therefore hands the clean room a corpus whose every file claims to have been
+# fetched on 1980-01-01, and the replay diverges for a reason that is entirely
+# ours. The mtime of a raw cache file is not metadata about the input; for
+# this pipeline it IS input.
+#
+# v2 preserves mtimes. Two limits, stated rather than discovered later:
+#   * zip timestamps have 2-second granularity, so a preserved mtime can be up
+#     to 2s earlier than the source's;
+#   * zip stores LOCAL time with no zone, so restoring in a different timezone
+#     shifts every mtime by the offset. Both are recorded in the manifest.
+DIR_BLOB_FORM = "zip_of_tree_v2_mtime_preserved"
+_V1_EPOCH = (1980, 1, 1, 0, 0, 0)
+
+
+def _dir_blob_is_v1(bp: Path) -> bool:
+    """A v1 blob is one whose every entry carries the zeroed 1980 stamp."""
+    try:
+        with zipfile.ZipFile(bp) as z:
+            infos = z.infolist()
+            return bool(infos) and all(i.date_time == _V1_EPOCH for i in infos)
+    except Exception:
+        return False
+
+
 def retain_dir(d: Path, digest: str, budget: list[int],
                retain_max: int) -> dict:
-    """Directory inputs are retained as one deterministic zip named by the
-    tree's merkle root - not by the zip's own hash, which is not stable."""
+    """Directory inputs are retained as one zip named by the tree's merkle root
+    - not by the zip's own hash, which is not stable."""
     total = sum(p.stat().st_size for p in d.rglob("*") if p.is_file())
     bp = _blob_path(digest, ".zip")
+    upgraded = False
     if bp.exists():
-        return {"mode": "retained", "blob": rel(bp), "deduplicated": True,
-                "form": "zip_of_tree"}
+        if not _dir_blob_is_v1(bp):
+            return {"mode": "retained", "blob": rel(bp), "deduplicated": True,
+                    "form": DIR_BLOB_FORM}
+        # A v1 blob is content-correct and mtime-lossy. Rewrite it in place:
+        # the name is the merkle root, which does not change, so every manifest
+        # that already points at this blob keeps pointing at the right tree and
+        # gains the timestamps it should always have had.
+        upgraded = True
     if total > retain_max or total > budget[0]:
-        return {"mode": "referenced_only", "blob": None, "form": "zip_of_tree",
+        return {"mode": "referenced_only", "blob": None, "form": DIR_BLOB_FORM,
                 "reason": f"tree {total:,} B exceeds the retention limit "
                           f"({retain_max:,} B) or remaining budget "
                           f"({budget[0]:,} B)"}
@@ -635,14 +894,28 @@ def retain_dir(d: Path, digest: str, budget: list[int],
     tmp = bp.with_suffix(".zip.part")
     with zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as z:
         for p in sorted(x for x in d.rglob("*") if x.is_file()):
-            zi = zipfile.ZipInfo(p.relative_to(d).as_posix(),
-                                 date_time=(1980, 1, 1, 0, 0, 0))
+            zi = zipfile.ZipInfo(
+                p.relative_to(d).as_posix(),
+                date_time=datetime.fromtimestamp(p.stat().st_mtime).timetuple()[:6])
             zi.compress_type = zipfile.ZIP_DEFLATED
             z.writestr(zi, p.read_bytes())
+    try:
+        os.chmod(bp, 0o644)
+    except Exception:
+        pass
     tmp.replace(bp)
-    budget[0] -= total
-    return {"mode": "retained", "blob": rel(bp), "deduplicated": False,
-            "form": "zip_of_tree"}
+    if not upgraded:
+        budget[0] -= total
+    try:
+        os.chmod(bp, 0o444)
+    except Exception:
+        pass
+    return {"mode": "retained", "blob": rel(bp),
+            "deduplicated": False, "form": DIR_BLOB_FORM,
+            "upgraded_from_v1_zeroed_mtimes": upgraded,
+            "mtime_fidelity": "zip local time, 2-second granularity; restoring "
+                              "in a different timezone shifts mtimes by the "
+                              "offset"}
 
 
 # ------------------------------------------------------------- outputs -------
@@ -868,6 +1141,19 @@ def build_collection(cid: str, budget: list[int], retain_max: int,
     # of NAGPRA's PARSER, not of its data.
     producer = {t["table"]: c["collection"]
                 for c in contracts.values() for t in c.get("tables", [])}
+
+    # A COLLECTION'S OWN RELEASED TABLE IS NEVER ITS INPUT. Discovery works
+    # per script and cannot know the collection's table list; build_collection
+    # can. `nd_severance_allocation.csv` is one of natural-resources' nine
+    # shipped tables AND is read by a sibling script, so discovery called it an
+    # input and the replay restored the released answer into the clean room -
+    # where 113 then had to overwrite it to produce the very table the compare
+    # would grade. Seeding a replay with the release is how a replay grades a
+    # release against itself.
+    own_tables = set(p["tables"])
+    for e in inputs:
+        if Path(e["path"]).name in own_tables:
+            e["role"] = "output_of_this_collection"
 
     in_rows, manual = [], []
     for e in inputs:
@@ -1207,29 +1493,99 @@ def cmd_build(args) -> int:
     # input was being rewritten under it describes a state that never existed
     # at any single moment. So re-read every file input at the END and say
     # whether the tree held still while we looked at it.
-    moved = []
+    #
+    # WORKSTREAM G, D9. Content re-hashing alone under-detects. A rewrite that
+    # produces the same bytes still means another process HELD THE FILE OPEN
+    # and rewrote it while we were reading the rest of the collection, and a
+    # `--apply` run that ends in an identical write is exactly the shape
+    # workstream F's pipeline has. So recheck three things, not one:
+    #
+    #   inputs   sha256 + (mtime, size)   - content and the fact of a write
+    #   outputs  (mtime, size)            - the released hashes we just took
+    #                                       are void if the table moved after
+    #
+    # Outputs are checked on mtime/size rather than content because rehashing
+    # a 1.0 GB table to learn something a stat call already told us doubles
+    # the cost of every capture. The asymmetry is deliberate and recorded.
+    moved, touched, out_moved = [], [], []
     for c in cols:
         for i in c["inputs"]:
             fp = ROOT / i["path"]
             if i["kind"] != "file" or not fp.exists():
                 continue
+            st = fp.stat()
+            now_mt = datetime.fromtimestamp(
+                st.st_mtime, timezone.utc).isoformat(timespec="seconds")
             if sha256_file(fp) != i["sha256"]:
                 moved.append(i["path"])
+            elif now_mt != i.get("mtime") or st.st_size != i.get("bytes"):
+                touched.append({"path": i["path"], "mtime_at_hash": i.get("mtime"),
+                                "mtime_now": now_mt,
+                                "bytes_at_hash": i.get("bytes"),
+                                "bytes_now": st.st_size})
+        for o in c["outputs"]:
+            if not o.get("present"):
+                continue
+            op = ROOT / o["path"]
+            if not op.exists():
+                out_moved.append({"path": o["path"], "why": "deleted mid-capture"})
+                continue
+            st = op.stat()
+            now_mt = datetime.fromtimestamp(
+                st.st_mtime, timezone.utc).isoformat(timespec="seconds")
+            if now_mt != o.get("mtime") or st.st_size != o.get("bytes"):
+                out_moved.append({"path": o["path"], "mtime_at_hash": o.get("mtime"),
+                                  "mtime_now": now_mt,
+                                  "bytes_at_hash": o.get("bytes"),
+                                  "bytes_now": st.st_size})
+    quiescent = not (moved or touched or out_moved)
     doc["capture_integrity"] = {
         "inputs_rechecked": sum(1 for c in cols for i in c["inputs"]
                                 if i["kind"] == "file"),
+        "outputs_rechecked": sum(1 for c in cols for o in c["outputs"]
+                                 if o.get("present")),
+        "input_check": "sha256 + (mtime, size)",
+        "output_check": "(mtime, size) only - see the note in cmd_build",
         "changed_during_capture": moved,
-        "quiescent": not moved,
+        "inputs_rewritten_same_content": touched,
+        "outputs_changed_during_capture": out_moved,
+        "quiescent": quiescent,
+        "enforced": bool(getattr(args, "require_quiescent", False)),
     }
-    if moved:
+    if not quiescent:
         doc["release_verdict"] = "not_exactly_replayable"
+        detail = {"inputs_content_changed": moved,
+                  "inputs_rewritten_same_content": [t["path"] for t in touched],
+                  "outputs_changed": [o["path"] for o in out_moved]}
         for c in cols:
             c["replayability"]["blocking_components"].append({
-                "component": "inputs changed while the manifest was being built",
+                "component": "the tree moved while the manifest was being built",
                 "class": "input_changed_during_capture",
                 "why": "the hashes in this manifest do not all describe one "
                        "moment. Re-capture on a quiescent tree.",
-                "detail": moved})
+                "detail": detail})
+
+    # D9 ENFORCEMENT. A non-quiescent capture is not a release receipt; it is a
+    # description of a state that never held still. With --require-quiescent
+    # the run REFUSES to file it under docs/releases/<id>/ - the evidence is
+    # kept under docs/releases/_rejected/ so the refusal itself is auditable -
+    # and exits non-zero so a caller redoes it rather than shipping it.
+    if not quiescent and getattr(args, "require_quiescent", False):
+        rej = RELEASES / "_rejected"
+        rej.mkdir(parents=True, exist_ok=True)
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        rp = rej / f"{release_id}__{stamp}.json"
+        rp.write_text(json.dumps(doc, indent=1, default=str), encoding="utf-8")
+        print(f"\nCAPTURE REFUSED: the tree was not quiescent.")
+        for p in moved:
+            print(f"    INPUT CONTENT CHANGED   {p}")
+        for t in touched:
+            print(f"    INPUT REWRITTEN (same bytes)  {t['path']}  "
+                  f"{t['mtime_at_hash']} -> {t['mtime_now']}")
+        for o in out_moved:
+            print(f"    OUTPUT CHANGED          {o['path']}")
+        print(f"  not filed as a release. evidence -> {rel(rp)}")
+        return 1
 
     d = RELEASES / release_id
     d.mkdir(parents=True, exist_ok=True)
@@ -1267,11 +1623,260 @@ def cmd_build(args) -> int:
     return 0
 
 
+# --------------------------------------------------------------- survey ------
+#
+# WORKSTREAM G. `build` is the expensive command: it sha256s every input and
+# fully parses every output. On the 13-collection sweep that is an hour, which
+# is a fine price for a receipt and an absurd one for the question "which
+# collection is cheapest to replay next?". Survey answers only that question,
+# from stat() calls and the AST scan, with no hashing and no CSV parsing.
+#
+# It is a PLANNING tool and it says so in its own output: a footprint here is
+# what the discovery channels can SEE. A collection with undiscovered reads may
+# be far larger than its number, and that is precisely why the number is
+# printed beside the undiscovered count rather than alone.
+
+def _bytes_of(p: Path) -> tuple[int, int]:
+    if p.is_dir():
+        n = t = 0
+        for x in p.rglob("*"):
+            if x.is_file():
+                n += 1
+                t += x.stat().st_size
+        return t, n
+    return (p.stat().st_size, 1) if p.exists() else (0, 0)
+
+
+def survey_collection(cid: str) -> dict:
+    p = plan_for(cid)
+    scripts = p["phase1"] + p["phase2"]
+    inputs, undiscovered, closure, unresolved = discover_inputs(scripts)
+    in_bytes = in_files = 0
+    n_dirs = 0
+    over_max = []
+    for e in inputs:
+        b, n = _bytes_of(ROOT / e["path"])
+        in_bytes += b
+        in_files += n
+        if (ROOT / e["path"]).is_dir():
+            n_dirs += 1
+        if b > RETAIN_MAX_BYTES:
+            over_max.append({"path": e["path"], "bytes": b})
+    out_bytes = out_present = 0
+    for t in p["tables"]:
+        for d in ("data/clean", "data/spine"):
+            tp = ROOT / d / t
+            if tp.exists():
+                out_bytes += tp.stat().st_size
+                out_present += 1
+                break
+    missing = [s for s in scripts if not (HERE / s).exists()]
+    return {
+        "collection": cid, "shelf": p["shelf"],
+        "n_tables": len(p["tables"]), "n_tables_present": out_present,
+        "n_scripts_to_run": len(scripts),
+        "n_phase1": len(p["phase1"]), "n_phase2": len(p["phase2"]),
+        "plan_scripts_missing": missing,
+        "n_code_closure": len(closure),
+        "n_inputs": len(inputs), "n_directory_inputs": n_dirs,
+        "input_bytes": in_bytes, "input_files": in_files,
+        "inputs_over_retain_max": over_max,
+        "n_undiscovered_inputs": len(undiscovered),
+        "output_bytes": out_bytes,
+        "blocked_scripts": p["blocked"], "ambiguous_scripts": p["ambiguous"],
+    }
+
+
+def cmd_survey(args) -> int:
+    cids = [args.collection] if args.collection else [c["id"] for c in
+                                                      collections()]
+    rows = []
+    for cid in cids:
+        print(f"  surveying {cid} ...", flush=True)
+        rows.append(survey_collection(cid))
+    rows.sort(key=lambda r: (bool(r["plan_scripts_missing"]),
+                             r["n_scripts_to_run"] == 0,
+                             r["input_bytes"]))
+    print(f"\n{'collection':26} {'inputs':>7} {'input MB':>10} {'undisc':>7} "
+          f"{'run':>4} {'tables':>7} {'out MB':>9}  notes")
+    print("-" * 104)
+    for r in rows:
+        notes = []
+        if r["plan_scripts_missing"]:
+            notes.append("PLAN SCRIPT MISSING: " +
+                         ",".join(r["plan_scripts_missing"]))
+        if r["n_scripts_to_run"] == 0:
+            notes.append("NO REBUILD PATH (0 scripts planned)")
+        if r["inputs_over_retain_max"]:
+            notes.append(f"{len(r['inputs_over_retain_max'])} input(s) over "
+                         f"RETAIN_MAX")
+        if r["n_directory_inputs"]:
+            notes.append(f"{r['n_directory_inputs']} dir input(s)")
+        print(f"{r['collection'][:26]:26} {r['n_inputs']:7} "
+              f"{r['input_bytes']/1e6:10.1f} {r['n_undiscovered_inputs']:7} "
+              f"{r['n_scripts_to_run']:4} "
+              f"{r['n_tables_present']}/{r['n_tables']:>5} "
+              f"{r['output_bytes']/1e6:9.1f}  {'; '.join(notes)}")
+    d = RELEASES / "_analysis"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "collection_survey.json").write_text(
+        json.dumps({"generated_at": _now(), "commit": git("rev-parse", "HEAD"),
+                    "note": "footprints are what the discovery channels can "
+                            "SEE; read them beside n_undiscovered_inputs",
+                    "collections": rows}, indent=1), encoding="utf-8")
+    print(f"\n-> {rel(d / 'collection_survey.json')}")
+    return 0
+
+
+# --------------------------------------------------------------- stamps ------
+#
+# WORKSTREAM G, debt D4 / blocker B4. The first replay pass counted 284
+# run-stamp columns release-wide and stopped there. A count is a size, not a
+# work plan: fixing one still meant finding which table carries it and which
+# of 385 scripts writes it. This command produces the lookup - collection,
+# table, column, constant value, and the script(s) that write that column into
+# that table - so each future fix starts at an edit rather than at a hunt.
+#
+# The worked example to copy is code/77_build_nagpra_dataset.py: `fetched_date`
+# used to be `date.today()` and is now derived from the cached artifact
+# (`cache_fetched_date`), blank when the cache cannot say. Blank-when-unknown
+# is the point. A stamp invented to fill a column is a lie that reproduces.
+
+_IO_WRITE_CACHE: dict[str, set[str]] | None = None
+
+
+def _write_index() -> dict[str, set[str]]:
+    """table -> {scripts that declare a write of it}. Built once."""
+    global _IO_WRITE_CACHE
+    if _IO_WRITE_CACHE is None:
+        idx: dict[str, set[str]] = {}
+        for nm in sorted(_code_corpus()):
+            try:
+                io = CP.declared_io(HERE / nm)
+            except Exception:
+                continue
+            for t in set(io["writes"]) | set(io["read_modify_write"]):
+                idx.setdefault(t, set()).add(nm)
+        _IO_WRITE_CACHE = idx
+    return _IO_WRITE_CACHE
+
+
+def attribute_stamp(table: str, column: str) -> dict:
+    """Who writes `column` into `table`, and how sure are we.
+
+    Three tiers, strongest first, and the tier is recorded beside the answer:
+
+      declared_writer_names_column  a script that declares a WRITE of this
+                                    table also contains the column name
+      declared_writer_only          a script writes the table but the column
+                                    name never appears in it - the column is
+                                    inherited from an upstream frame
+      names_column_only             no declared writer contains it; fall back
+                                    to any script that names both
+    """
+    writers = sorted(_write_index().get(table, set()))
+    corpus = _code_corpus()
+    strong = [w for w in writers if column in corpus.get(w, "")]
+    if strong:
+        return {"scripts": strong, "attribution": "declared_writer_names_column",
+                "all_declared_writers": writers}
+    if writers:
+        loose = sorted(nm for nm, src in corpus.items()
+                       if column in src and table in src)
+        return {"scripts": writers, "attribution": "declared_writer_only",
+                "also_name_the_column": loose[:8],
+                "all_declared_writers": writers}
+    loose = sorted(nm for nm, src in corpus.items()
+                   if column in src and table in src)
+    return {"scripts": loose or ["UNATTRIBUTED"],
+            "attribution": "names_column_only" if loose else "none",
+            "all_declared_writers": []}
+
+
+def cmd_stamps(args) -> int:
+    cids = [args.collection] if args.collection else [c["id"] for c in
+                                                      collections()]
+    per_collection, seen_tables = [], set()
+    total_cols = 0
+    for cid in cids:
+        p = plan_for(cid)
+        planned = set(p["phase1"]) | set(p["phase2"])
+        tabs = []
+        for t in p["tables"]:
+            tp = None
+            for d in ("data/clean", "data/spine"):
+                if (ROOT / d / t).exists():
+                    tp = ROOT / d / t
+                    break
+            if tp is None:
+                continue
+            key = rel(tp)
+            print(f"  {cid}/{t} ...", flush=True)
+            prof = profile_table(tp)
+            if not prof["run_stamp_columns"]:
+                seen_tables.add(key)
+                continue
+            cols = []
+            for s in prof["run_stamp_columns"]:
+                a = attribute_stamp(t, s["column"])
+                cols.append({
+                    "column": s["column"],
+                    "constant_value": s["constant_value"],
+                    "written_by": a["scripts"],
+                    "attribution": a["attribution"],
+                    "writer_in_this_collections_plan": bool(
+                        set(a["scripts"]) & planned),
+                    "all_declared_writers": a["all_declared_writers"],
+                })
+                total_cols += 1
+            tabs.append({"table": t, "path": key, "rows": prof["rows"],
+                         "n_stamp_columns": len(cols), "columns": cols})
+            seen_tables.add(key)
+        per_collection.append({"collection": cid, "shelf": p["shelf"],
+                               "n_tables_scanned": len(p["tables"]),
+                               "n_tables_with_stamps": len(tabs),
+                               "n_stamp_columns": sum(t["n_stamp_columns"]
+                                                      for t in tabs),
+                               "tables": tabs})
+    doc = {
+        "generated_at": _now(), "commit": git("rev-parse", "HEAD"),
+        "definition": "a column whose every non-blank value across the whole "
+                      "table is one single ISO date. Detected by full scan, "
+                      "never sampled.",
+        "caveat": "a single-date column in a table that legitimately covers "
+                  "one day is a FALSE POSITIVE of this test. The constant "
+                  "value is printed beside every column so a reader can tell "
+                  "the two apart; nothing here is auto-fixed.",
+        "worked_example": "code/77_build_nagpra_dataset.py::cache_fetched_date "
+                          "- derive the date from the cached artifact, leave "
+                          "it BLANK when the artifact cannot say. That single "
+                          "change made nagpra_notices.csv byte-reproducible.",
+        "total_stamp_columns": total_cols,
+        "distinct_tables_scanned": len(seen_tables),
+        "collections": per_collection,
+    }
+    d = RELEASES / "_analysis"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "run_stamp_breakdown.json").write_text(
+        json.dumps(doc, indent=1, default=str), encoding="utf-8")
+
+    print(f"\nRUN-STAMP BREAKDOWN  ({total_cols} columns, "
+          f"{len(seen_tables)} tables scanned)")
+    print(f"{'collection':26} {'tables w/ stamps':>17} {'columns':>8}")
+    print("-" * 56)
+    for c in per_collection:
+        print(f"{c['collection'][:26]:26} {c['n_tables_with_stamps']:17} "
+              f"{c['n_stamp_columns']:8}")
+    print(f"\n-> {rel(d / 'run_stamp_breakdown.json')}")
+    return 0
+
+
 # --------------------------------------------------------------- verify ------
 
 def cmd_verify(args) -> int:
     ids = ([args.release] if args.release
-           else sorted(p.name for p in RELEASES.glob("*") if p.is_dir()))
+           else sorted(p.name for p in RELEASES.glob("*")
+                       if p.is_dir() and not p.name.startswith("_")))
     if not ids:
         sys.exit("no releases under docs/releases/")
     bad = 0
@@ -1321,6 +1926,39 @@ def cmd_verify(args) -> int:
 
 # --------------------------------------------------------------- replay ------
 
+def _extract_tree(bp: Path, tgt: Path) -> int:
+    """Restore a directory blob WITH its timestamps.
+
+    `ZipFile.extractall` does not restore mtimes - it leaves every extracted
+    file stamped with the moment of extraction. That was invisible until
+    `77_build_nagpra_dataset.py` was fixed to read `fetched_date` off the
+    cached artifact's mtime: from that point on, a clean room restored by
+    extractall reports every one of 6,700 cached documents as fetched TODAY,
+    and the replay diverges from the release for a reason that belongs
+    entirely to the retention layer. Measured, not assumed: on this
+    interpreter, extractall on an entry stamped 2017 produced a file stamped
+    with the current wall clock.
+
+    So: extract, then re-stamp each file from its own zip entry.
+    """
+    n = 0
+    with zipfile.ZipFile(bp) as z:
+        z.extractall(tgt)
+        for info in z.infolist():
+            if info.is_dir():
+                continue
+            fp = tgt / info.filename
+            if not fp.exists():
+                continue
+            try:
+                ts = datetime(*info.date_time).timestamp()
+                os.utime(fp, (ts, ts))
+                n += 1
+            except (ValueError, OSError):
+                pass
+    return n
+
+
 REPLAY_README = """\
 CLEAN-ROOM REPLAY of Cedar release {rid}
 =========================================
@@ -1369,12 +2007,33 @@ def cmd_replay(args) -> int:
     # 2. the inputs, from the store. NEVER from the live tree: restoring from
     #    the live tree would replay against today's data and call it the
     #    release's data, which is precisely the fiction F13 names.
-    restored = skipped = 0
+    #    AND NEVER THE COLLECTION'S OWN INTERMEDIATES. `discover_inputs`
+    #    already computes a role: a file the collection WRITES that another
+    #    script in scope reads back is `intermediate_written_in_scope`, not an
+    #    input. That role was computed and then ignored here, and the
+    #    subcontracting clean room showed what it costs:
+    #
+    #      PermissionError: data/clean/subawards.csv
+    #
+    #    `20_build_subcontracts.py` REBUILDS subawards.csv. The replay had
+    #    restored the released copy on top of it, read-only, so the rebuilder
+    #    could not write its own output. Seeding a clean room with the answer
+    #    is worse than an error even when it does not error: the enrichers
+    #    downstream would then have run against the RELEASED table rather than
+    #    the one this replay built, and the compare would have graded the
+    #    release against itself.
+    restored = skipped = intermediates = writable = 0
+    not_restored_roles: list[str] = []
     missing: list[str] = []
     for c in m["collections"]:
         for i in c["inputs"]:
             r = i["retention"]
             tgt = wt / i["path"]
+            if i.get("role") in ("intermediate_written_in_scope",
+                                 "output_of_this_collection"):
+                intermediates += 1
+                not_restored_roles.append(f"{i['path']}  [{i['role']}]")
+                continue
             if r["mode"] != "retained":
                 missing.append(f"{i['path']}  ({r.get('reason', r['mode'])})")
                 skipped += 1
@@ -1387,37 +2046,102 @@ def cmd_replay(args) -> int:
             tgt.parent.mkdir(parents=True, exist_ok=True)
             if i["kind"] == "directory":
                 tgt.mkdir(parents=True, exist_ok=True)
-                with zipfile.ZipFile(bp) as z:
-                    z.extractall(tgt)
+                _extract_tree(bp, tgt)
             else:
                 shutil.copy2(bp, tgt)
+                # A blob is stored read-only and copy2 carries the mode across,
+                # which is the point: a clean room physically cannot mutate
+                # what it was given. But a file THIS RUN DECLARES A WRITE OF is
+                # not in that category - restoring it read-only converts a
+                # replay into a PermissionError on a file nobody was reading.
+                # So: writable, counted, and named in the run record.
+                if i.get("written_in_scope"):
+                    try:
+                        os.chmod(tgt, 0o644)
+                        writable += 1
+                    except Exception:
+                        pass
             restored += 1
-    print(f"  inputs restored {restored}   not restorable {skipped}")
+    print(f"  inputs restored {restored}   not restorable {skipped}"
+          f"   own outputs / intermediates NOT restored "
+          f"(the run rebuilds them) {intermediates}")
+    if writable:
+        print(f"  restored WRITABLE because the run declares a write of them: "
+              f"{writable}")
+    for x in not_restored_roles:
+        print(f"    NOT RESTORED (by design)  {x}")
     for x in missing:
         print(f"    NOT RESTORED  {x}")
 
-    # 3. adaptation A1 - the root rewrite.
+    # 3. adaptation A1 - the root rewrite, applied to EVERY SCRIPT IN THE
+    #    CLEAN ROOM, not only the ones this release names.
+    #
+    #    WORKSTREAM G, and this was learned the expensive way. A1 used to
+    #    rewrite only the scripts in the manifest's code closure. Every other
+    #    one of the 280 scripts carrying the literal
+    #    `Path(r"C:\Users\esm247\Desktop\Cedar Press")` therefore sat inside
+    #    the clean room still pointing at the LIVE TREE. A clean room that
+    #    writes the live tree the moment you run the wrong file in it is not a
+    #    clean room; it is a loaded gun with the safety filed off.
+    #
+    #    It fired. During this pass `241_promote_individual_native_firms_in
+    #    _place.py` was run inside the native-owned-businesses clean room to
+    #    test whether the collection's AMBIGUOUS script would unblock its
+    #    plan. 241 is not in that plan, so it had not been rewritten, so it
+    #    read and wrote `C:\Users\esm247\Desktop\Cedar Press\data`. Two live
+    #    tables changed (`individual_native_firm_register.csv` lost the
+    #    `cedar_uid` 503 had stamped into it;
+    #    `individual_native_exclusion_pairs.csv` re-dated) before it was
+    #    caught and both were restored byte-for-byte from 241's own backups.
+    #    Recorded in docs/RELEASE_REPLAY_LOG.md rather than quietly repaired.
+    #
+    #    The manifest's closure is a statement about what the RELEASE ran. It
+    #    was never a statement about what a human will type at a prompt inside
+    #    the room, and using it as one confused a description with a boundary.
     adapt = []
-    scripts = sorted({c2["script"] for c in m["collections"] for c2 in c["code"]})
-    for s in scripts:
-        sp = wt / "code" / s
-        if not sp.exists():
-            continue
+    in_scope = {c2["script"] for c in m["collections"] for c2 in c["code"]}
+    unrewritten = []
+    for sp in sorted((wt / "code").glob("*.py")):
         src = sp.read_text(encoding="utf-8", errors="replace")
         if HARDCODED_ROOT not in src:
             continue
         before = hashlib.sha256(src.encode("utf-8")).hexdigest()
         new = src.replace(HARDCODED_ROOT, str(wt))
-        sp.write_text(new, encoding="utf-8")
-        adapt.append({"file": f"code/{s}", "adaptation": "A1_root_rewrite",
+        try:
+            sp.write_text(new, encoding="utf-8")
+        except OSError as e:
+            unrewritten.append(f"code/{sp.name}: {e}")
+            continue
+        adapt.append({"file": f"code/{sp.name}", "adaptation": "A1_root_rewrite",
                       "from": HARDCODED_ROOT, "to": str(wt),
+                      "in_release_scope": sp.name in in_scope,
                       "sha256_before": before,
                       "sha256_after": hashlib.sha256(
                           new.encode("utf-8")).hexdigest()})
+    # Prove the room is sealed, rather than asserting it. Any file still
+    # naming the live root after the rewrite is a hole, and it is printed.
+    leaks = [f"code/{p.name}" for p in sorted((wt / "code").glob("*.py"))
+             if HARDCODED_ROOT in p.read_text(encoding="utf-8",
+                                              errors="replace")]
     (wt / "adaptations.json").write_text(
         json.dumps({"release": args.release, "applied_at": _now(),
+                    "scope": "every code/*.py in the clean room, so a script "
+                             "outside the release's plan cannot reach the "
+                             "live tree",
+                    "n_rewritten": len(adapt),
+                    "n_in_release_scope": sum(1 for a in adapt
+                                              if a["in_release_scope"]),
+                    "still_naming_the_live_root": leaks,
+                    "rewrite_failed": unrewritten,
                     "adaptations": adapt}, indent=1), encoding="utf-8")
-    print(f"  adaptation A1 applied to {len(adapt)} script(s)")
+    n_scope = sum(1 for a in adapt if a["in_release_scope"])
+    print(f"  adaptation A1 applied to {len(adapt)} script(s) "
+          f"({n_scope} in this release's scope, "
+          f"{len(adapt) - n_scope} others, so nothing run here by hand can "
+          f"reach the live tree)")
+    if leaks or unrewritten:
+        print(f"  WARNING: {len(leaks)} script(s) STILL name the live root "
+              f"after the rewrite: {', '.join((leaks + unrewritten)[:5])}")
 
     for d in ("logs", "review", "dist"):
         (wt / d).mkdir(parents=True, exist_ok=True)
@@ -1660,6 +2384,8 @@ def cmd_list(_args) -> int:
     print(f"{'release':20} {'commit':14} {'verdict':44} {'collections':>11}")
     print("-" * 94)
     for d in sorted(RELEASES.glob("*")):
+        if d.name.startswith("_"):
+            continue          # _rejected/, _analysis/ are not releases
         m = _json(d / "manifest.json")
         if not m:
             continue
@@ -1683,7 +2409,21 @@ def main() -> int:
                    help="hash and record inputs but do not copy them")
     b.add_argument("--retain-max", type=int, default=RETAIN_MAX_BYTES)
     b.add_argument("--budget", type=int, default=RETAIN_BUDGET_BYTES)
+    b.add_argument("--require-quiescent", action="store_true",
+                   help="refuse to file the capture as a release if any input "
+                        "or output moved while it was being taken (D9). The "
+                        "evidence is kept under docs/releases/_rejected/.")
     b.set_defaults(func=cmd_build)
+
+    sv = sub.add_parser("survey", help="cheap per-collection replay footprint: "
+                                       "no hashing, no CSV parsing")
+    sv.add_argument("--collection")
+    sv.set_defaults(func=cmd_survey)
+
+    st = sub.add_parser("stamps", help="per-collection run-stamp column "
+                                       "breakdown with the writing script")
+    st.add_argument("--collection")
+    st.set_defaults(func=cmd_stamps)
 
     v = sub.add_parser("verify", help="re-hash every retained blob")
     v.add_argument("--release")

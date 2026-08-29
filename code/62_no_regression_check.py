@@ -1418,9 +1418,6 @@ MUST_NOT_FALL = {
     "keyed_gaming_facilities", "keyed_np_orgs",
     "bridge_native_bills_entity_bridge", "bridge_bill_votes_entity_bridge",
     "bridge_federal_actions_entity_bridge",
-    # External review finding 3: identity-critical facts standing on a row
-    # with no recorded provenance. This may only fall.
-    "identity_facts_legacy_only",
     # F9: a table that HAD a declared+validated grain must not lose it.
     "contract_grain_stated_shippable",
     # F6: the handle history is append-only. A binding is retired, never
@@ -1489,6 +1486,20 @@ MUST_BE_ZERO = {
 # table lands in data/clean and nobody registers it - the last-mile failure
 # this project keeps repeating, and one whose fix is cheap and local.
 MUST_NOT_RISE = {
+    # External review finding F3: identity-critical facts standing on a row
+    # with no recorded provenance. A RISE is new unsupported exposure and is
+    # the regression; a FALL is the pay-down F3 asked for.
+    #
+    # INSTALLED BACKWARDS on 2026-08-30 by the integrator - it sat in
+    # MUST_NOT_FALL, so the gate failed the FIRST TIME anything improved the
+    # number (workstream F's IRS harvest, 4,100 -> 4,089). Found independently
+    # by workstreams E and F within the hour, each of whom proved it was not
+    # their work: E by reverting every file of its own task and reproducing
+    # the failure, F by checking sem_facts_removed = 0 on the same run. Two
+    # agents refusing to step around a red gate is the process working;
+    # the integrator writing a ratchet without a fixture that proves its
+    # direction is how it was needed.
+    "identity_facts_legacy_only",
     "ship_tables_at_zero",
     "tables_missing_codebook_block", "tables_missing_from_25_TABLES",
     "tables_missing_from_27_SPEC", "tables_missing_notes_contract",

@@ -3,6 +3,14 @@
 *Workstream C, 2026-08-29. External review finding **F13**, ADR-004. This
 document is the evidence for one claim and the refutation of a larger one.*
 
+> **Superseded in part.** Part I below is the record of the first clean-room
+> replay, and its findings stand as written for the state of the tree on
+> 2026-08-30. Two of its statements are no longer true and are corrected in
+> **Part II** (workstream G, 2026-08-29, commit `6c92a41`): §8's *"no table in
+> this release is byte-identical on replay"* — four now are — and §5's B4,
+> which is fixed for `nagpra`. Read part I for the method and part II for the
+> current numbers.
+
 **The claim being tested.** *Given a Cedar release identifier, we can identify
 and retrieve the exact transitive inputs, code, configuration, environment and
 manual decisions needed to reproduce the released outputs — or explicitly state
@@ -482,3 +490,536 @@ Not met:
 "It ran" is not "it reproduced", and "it reproduced the content" is not "it
 reproduced the release". This document is written so nobody has to guess which
 one we mean.
+
+---
+
+# Part II — replay breadth (workstream G, 2026-08-29, commit `6c92a41`)
+
+*Part I above is workstream C's account of the first clean-room replay. This
+part extends coverage from one collection to four, re-tests the one C replayed
+after its blocking B4 column was fixed, and closes D9 for the captures it
+took. It also records two defects in `516` itself, one live-tree incident, and
+two new debts, because a replay log that records only the pipeline's faults is
+advocacy rather than evidence.*
+
+**Headline.** `nagpra_notices.csv` and `nagpra_notice_entity_bridge.csv` are
+now **BYTE-IDENTICAL on replay** — 6,772 and 51,521 rows, sha256 equal on both
+sides. Part I's closing sentence, *"no table in this release is byte-identical
+on replay"*, is **superseded**: four tables across two collections now are.
+
+## 9. What was replayed, and what it produced
+
+Four collections captured at `6c92a41`, all four **quiescent**, all inputs
+retained and re-verified, all four clean rooms built from the blob store alone.
+25 tables compared. Every verdict below is computed by `516 compare`, never
+asserted.
+
+```
+collection                inputs retained   tables   byte-identical   artefacts
+nagpra                       8 / 8            4          2            docs/releases/nagpra-6c92a41/
+subcontracting              20 / 20           5          2            docs/releases/subcontracting-6c92a41/
+natural-resources           44 / 44           9          0            docs/releases/natural-resources-6c92a41/
+native-owned-businesses      4 / 4            7          0            docs/releases/native-owned-businesses-6c92a41/
+                                             --         --
+                                             25          4
+```
+
+**Why these three.** Chosen on measured input footprint, smallest first, using
+the new `516 survey` (which needs no hashing and no CSV parsing). At the time
+of choosing, subcontracting was the smallest collection in the release at
+64.5 MB, natural-resources second at 430 MB, native-owned-businesses third at
+816 MB. Two of those numbers were wrong, and finding out why is §11:
+subcontracting is really 1,882 MB once discovery can see `os.path.join`. The
+survey is kept as `docs/releases/_analysis/collection_survey.json`.
+
+### 9a. `nagpra` — B4 is fixed, and the fix is proven by bytes
+
+```
+table                            verdict                    replay / released
+nagpra_notices.csv               BYTE_IDENTICAL               6,772 /  6,772
+nagpra_notice_entity_bridge.csv  BYTE_IDENTICAL              51,521 / 51,521
+fr_nagpra_title_index.csv        SUPERSET +38                 6,644 /  6,606
+fr_nagpra_title_index_year.csv   DIFFERS_ROWS                    33 /     33
+```
+
+`nagpra_notices.csv` was `IDENTICAL_EXCEPT fetched_date` in part I. Since then
+`77_build_nagpra_dataset.py` gained `cache_fetched_date()`, which reads the
+date off the **cached artifact** and returns `""` when the artifact cannot say,
+instead of `date.today()`. sha256 `e6cc77950c62…` on both sides, all 66
+columns, all 6,772 rows. The `nondeterministic_output_column` blocker no longer
+appears for this collection at all: its run-stamp count is **0**, the only zero
+in the release (§12).
+
+Run twice, on two separate captures and two separate clean rooms, with the same
+result.
+
+`nagpra_notice_entity_bridge.csv` reproduced byte-identically for a different
+and less comfortable reason. In part I the released copy carried an extra
+`cedar_uid` column that `503_identity.py` had stamped in. The released table
+today has 14 columns and no `cedar_uid` — a rebuild since 503 last ran dropped
+it. The bytes match because **the enricher's work is currently absent from the
+release**, not because the plan now reproduces it. B3 is still live and still
+blocking: the manifest raises `undeclared_enricher` on this collection from the
+`.bak_…_pre505` evidence, and the day 503 runs again this table stops
+reproducing.
+
+The two `fr_nagpra_title_index*` tables fail exactly as in part I, unchanged:
+**B2**, a released output written 2026-08-06 from a `federal_actions.csv`
+rewritten 2026-08-26. All 6,606 released rows are present and identical in the
+replay, which adds 38 rows of 2026 publications the released file could not
+have seen. A faithful replay cannot reproduce a table its recorded input never
+produced.
+
+### 9b. `subcontracting` — 2 of 5, and a live API call inside a build plan
+
+```
+prime_sub_network.csv            BYTE_IDENTICAL                 220 /    220
+subaward_identifier_harvest.csv  BYTE_IDENTICAL                 304 /    304
+subaward_identifier_netnew.csv   DIFFERS_ROWS (subset, -17)     193 /    210
+subaward_entity_rollup.csv       DIFFERS_SCHEMA                 507 /    450
+subawards.csv                    DIFFERS_SCHEMA              56,817 / 72,837
+```
+
+Two tables reproduce to the byte. The other three fail for one reason with a
+name: **`121_pull_subawards_api.py` is a phase-2 enricher in this collection's
+plan and it fetches from `api.usaspending.gov` at build time.** In the clean
+room it downloaded fy2021 (765,109 rows) and **failed on 4 of its 5 fiscal
+years**, because the cached download tokens the release used have expired at
+the source. The 16,020-row shortfall in `subawards.csv` is those four years;
+`subaward_entity_rollup.csv` is downstream of it.
+
+This is a class of blocker the manifest could not previously state, and it is
+worse than a missing file: **a release whose build plan performs a live API
+call has, as one of its inputs, the internet on the day it ran.** Retention
+cannot hold that and no threshold change makes it retainable. Recorded as
+**D10**.
+
+`250_demote_stale_tierA_subaward_rows.py`, also in the plan, could not run at
+all: it requires `review/ancsa_tierA_subaward_disposition_<TODAY>.csv`,
+produced by `249`, which is not in the plan. A filename containing today's date
+can never be an input to yesterday's release.
+
+The four columns `compare` set aside for `subawards.csv` — `cedar_uid`,
+`deflator_factor_2025`, `inflation_base_year`, `subaward_amount_real2025` —
+are all written by scripts outside this collection's plan, which is B3 again in
+a second collection.
+
+### 9c. `natural-resources` — 0 of 9, and D7 confirmed by execution
+
+```
+anc_ceiling_roster.csv             IDENTICAL_EXCEPT fetched_date   196 /    196
+nd_severance_allocation.csv        DIFFERS_SCHEMA                    7 /      7
+resource_revenue.csv               DIFFERS_SCHEMA                9,562 / 10,482
+resource_parties.csv               DIFFERS_SCHEMA                  118 /  1,436
+tribal_tax_bases.csv               DIFFERS_SCHEMA                   96 /  1,712
+resource_assets.csv                DIFFERS_SCHEMA                    0 /     35
+ancsa_filings_index.csv            NOT_PRODUCED                      - / 19,269
+resource_asset_source_coverage.csv NOT_PRODUCED                      - /     18
+tribal_bond_issuances.csv          NOT_PRODUCED                      - /     29
+```
+
+Nothing reproduces. One table, `anc_ceiling_roster.csv`, is identical on all
+196 rows once `fetched_date` is set aside — a D4 column, one line from
+reproducible by the pattern 77 now demonstrates.
+
+**D7 is confirmed by execution, not inspection.** The plan's sixth command is
+`py -3 code/update_index.py`, and in the clean room it produced
+`can't open file … code\update_index.py: [Errno 2] No such file or directory`.
+The rebuild command printed in `docs/DATASET_CONTRACTS.md` for this collection
+does not run.
+
+Three of the nine tables have **no writer in the plan at all**.
+`resource_asset_source_coverage.csv` is written by
+`135_build_resource_assets.py`, which `build.py` classifies AMBIGUOUS
+(rebuilder for one table, enricher for two others) and therefore omits. A table
+nobody plans to write is a table nobody can replay. Recorded as **D11**.
+
+The row shortfalls are input discovery, and they are the honest size of D8:
+`tribal_tax_bases.csv` replayed 96 rows against a released 1,712 because
+`108_build_tribal_tax_bases.py` enumerates its sources at runtime out of a
+`_SOURCE_MANIFEST.csv`. 516 now reads those manifests (§11), which moved this
+table from 24 replayed rows to 96. The remaining gap is real and unclosed.
+
+### 9d. `native-owned-businesses` — 0 of 7, and the reason is structural
+
+All seven tables `NOT_PRODUCED`. This collection's plan contains **zero phase-1
+rebuilders**; its single planned command,
+`242_build_individual_native_firm_contracts.py`, aborts on its first check:
+
+```
+ABORT: individual_native_firm_register.csv is empty or missing. Run code/241 first.
+```
+
+`241_promote_individual_native_firms_in_place.py` is AMBIGUOUS, so it is not in
+the plan. Running it as a named adaptation did not rescue the replay either: in
+a correctly sealed clean room 241 aborts on *its* required inputs, which the
+manifest never named because 241 is not in scope, so its reads were never
+discovered. **This collection has no from-scratch build path at all**, and that
+is a fact about the release, not about the replay.
+
+Its one substantive input, `data/clean/prime_contracts.csv` (815,967,130 B),
+exceeds the default `RETAIN_MAX_BYTES` of 512 MiB. Captured at the default it is
+`referenced_only` and the release is additionally blocked on
+`input_not_retained` — that capture was taken and the blocker observed. The
+release filed here raised `--retain-max` to 1 GiB and retained it, so that one
+blocker is discharged and the threshold in force is recorded in the manifest.
+**Two releases captured under different thresholds are not silently
+comparable.** The thresholds used were 512 MiB (nagpra, natural-resources),
+1 GiB (native-owned-businesses), 2 GiB (subcontracting), chosen so the replay
+could actually run rather than to flatter the retention figure.
+
+## 10. Three defects found in the replay machinery itself
+
+The clean room tests the manifest as hard as it tests the pipeline. It failed
+three times, and all three were `516`'s fault.
+
+### G1 — retention discarded mtimes that the pipeline reads as data
+
+Directory inputs were retained as a zip with every entry stamped
+`(1980,1,1)` "for determinism" — determinism the design did not need, because a
+directory blob is NAMED by its tree's merkle root, not by the archive's own
+bytes. Separately, `ZipFile.extractall` **does not restore timestamps at all**:
+measured on this interpreter, an entry stamped 2017 extracts with the current
+wall clock.
+
+Neither mattered until `77` was fixed to read `fetched_date` off the cached
+artifact's mtime. From that moment the retention layer was handing the clean
+room a 6,700-file corpus whose every document claimed to have been fetched on
+the day of the replay, and `nagpra_notices.csv` could not have reproduced for a
+reason belonging entirely to us. **The fix to B4 turned a filesystem timestamp
+into data, and the retention layer was throwing it away.**
+
+Fixed: directory blobs are now `zip_of_tree_v2_mtime_preserved`; a v1 blob is
+rewritten in place on the next capture (the merkle name does not change, so
+every existing manifest keeps pointing at the right tree and gains the
+timestamps it should always have had); and `_extract_tree` re-stamps every
+restored file from its zip entry. Two limits are recorded in the manifest
+rather than discovered later: zip timestamps have 2-second granularity, and zip
+stores local time with no zone, so restoring in a different timezone shifts
+every mtime by the offset.
+
+### G2 — the clean room was seeded with the release's own answers
+
+`discover_inputs` computed a `role` for every input and `replay` ignored it.
+Three consequences, each found by a crash:
+
+- `data/clean/subawards.csv` is `20_build_subcontracts.py`'s own output. It was
+  restored read-only on top of the rebuild target: `PermissionError`. Worse
+  than the error is the version that does not error — the phase-2 enrichers
+  would then have run against the **released** table, and the compare would
+  have graded the release against itself.
+- `data/clean/nd_severance_allocation.csv` is one of natural-resources' nine
+  shipped tables and is also read by a sibling script, so discovery called it
+  an input. Same failure. Roles now include `output_of_this_collection`,
+  computed from the collection's own table list, which discovery cannot know
+  and `build_collection` can.
+- `review/resource_ledger_unresolved.csv` is a report `83` writes. Restored
+  read-only: `PermissionError` on a file nobody was reading. Inputs now carry
+  `written_in_scope`, and anything the run declares a write of is restored
+  **writable** — the read-only guarantee still holds for everything else.
+
+A basename-matching bug rode along with this. `declared_io` reports basenames,
+and `_SOURCE_MANIFEST.csv` exists in 40-odd raw directories. One script in
+scope writes one of them, so the basename match condemned
+`data/raw/external/tribal_tax/_SOURCE_MANIFEST.csv` — a pure input to `108`,
+and the file that tells it which six state corpora to parse — as this
+collection's own intermediate. It was withheld, `108` logged
+"MI: source unusable, skipped" nine times, and `tribal_tax_bases.csv` replayed
+24 rows. The intermediate rule now applies only under `data/clean` and
+`data/spine`, where Cedar's table names are unique and the basename can be
+trusted.
+
+### G3 — the clean room was not sealed, and it wrote to the live tree
+
+**This one caused real damage. It is recorded in full.**
+
+Adaptation A1 rewrote the hardcoded project root only in the scripts the
+manifest's closure names. The other ~280 scripts carrying
+`Path(r"C:\Users\esm247\Desktop\Cedar Press")` sat inside the clean room still
+pointing at the **live tree**. The manifest's closure is a description of what
+the release ran; it was being used as a boundary, and those are not the same
+thing.
+
+It fired. Testing whether native-owned-businesses' AMBIGUOUS script would
+unblock its plan (§9d), `241_promote_individual_native_firms_in_place.py` was
+run inside that clean room. It was not in scope, so it had not been rewritten,
+so it read and wrote the live tree. At `2026-08-29 06:28:09 -0400` four live
+files were written:
+
+```
+data/clean/individual_native_firm_register.csv    CHANGED - lost the cedar_uid
+                                                    column 503 had stamped in;
+                                                    built_date 08-26 -> 08-29
+                                                    on all 45 rows
+data/clean/individual_native_exclusion_pairs.csv  CHANGED - flagged_date
+                                                    re-dated on all 5 rows; two
+                                                    frozenset-repr columns
+                                                    re-ordered
+data/spine/cedar_entity_spine.csv                 rewritten, BYTE-IDENTICAL
+data/clean/cedar_identifier_ledger_final.csv      rewritten, BYTE-IDENTICAL
+```
+
+**Remediation, verified.** The two changed files were restored byte-for-byte
+from `241`'s own `.bak_2026-08-29_pre_241_…` backups, with their original
+mtimes; sha256 and row counts re-checked afterwards, and `cedar_uid` is back in
+the register (45 rows, 90,897 B, sha `c34c882a457cb361…`). The two
+byte-identical files had only their mtimes moved; those were restored from the
+same backups after confirming content equality first. One file is **not**
+restored and is named here rather than omitted:
+`review/individual_native_canonical_name_privacy_2026-08-29.csv`, a dated
+review artefact that the 03:22 run of the same script had already created that
+morning and for which no backup exists. Nothing else in the tree was touched:
+no live file carries an mtime after 06:28:09 that belongs to workstream G.
+
+**Fixed.** A1 now rewrites **every** `code/*.py` in the clean room — 281 files
+for these releases — records per file whether it was in the release's scope,
+then re-scans the room and prints a warning naming any file that still contains
+the live root. Re-tested by firing: after the fix, the same 241 run inside the
+same clean room aborts on its own missing inputs and writes nothing outside the
+room, confirmed by `find` over the live tree.
+
+One incidental determinism defect surfaced from the diff and deserves a line:
+`individual_native_exclusion_pairs.csv` stores `repr(frozenset(...))` in
+`firm_name_core` and `excluded_entity_name_core`. Set iteration order over
+strings is not stable across processes, so those columns differ between two
+runs that computed the same set. It is not a run-stamp column, so `compare`
+will not set it aside, and it is not workstream G's file to fix.
+
+## 11. Input discovery: a third spelling and a fourth channel
+
+Part I named three discovery channels. Two more were needed, both found by a
+clean room refusing to run.
+
+**Channel 2b — path EXPRESSIONS, not just path constants.**
+`20_build_subcontracts.py` spells its inputs as
+`os.path.join(CEDAR, "data", "raw", "esm_hci", "ESM")` and then as
+`os.path.join(ESM, "raw", "subcontract-…csv")` inside a module-level list of
+tuples, bound to no name at all. Channel 2 resolved neither spelling, the five
+files were never retained, and the replay died at `IndexError: list index out
+of range` under five `MISSING INPUT (skipped)` warnings. 516 now resolves
+`os.path.join` and `/` chains **anywhere** in a module against the module-level
+name environment, built in file order with the same resolver.
+
+That also settles an ambiguity nothing else could. Five of those files exist
+**twice** under `data/` — once in `data/raw/esm_hci/ESM`, once in
+`data/raw/external/subcontracts`. `resolve_filename` correctly refused to guess
+between two hits and returned `None`, which is exactly how they became
+`undiscovered`. A filename is ambiguous; a path is not.
+
+**Channel 4 — manifest-driven expansion.** There is a class of input no static
+channel can reach: one enumerated at RUNTIME from a data file. `108` reads
+`_SOURCE_MANIFEST.csv` and opens whatever its `file` column names. These reads
+never even reached `undiscovered_inputs`, because the io scanner sees an
+`open()` on a variable rather than an unresolvable name — they were invisible
+in both directions. 516 now reads a discovered `_SOURCE_MANIFEST*.csv` and
+expands the files it names, relative to the manifest's own directory. For
+natural-resources that is **+15 inputs**, and `tribal_tax_bases.csv` moved from
+24 replayed rows to 96.
+
+A **namespace rule** keeps this from over-collecting: a discovered directory
+with a discovered file or subdirectory beneath it is a namespace, not a corpus,
+and is dropped in favour of its named children. Without it the five ESM files
+would have cost a 5.5 GB tree, and `data/raw/federal_register` would have been
+retained whole to obtain the 18 MB corpus underneath it. This is
+`CONTAINER_DIRS`' hand-maintained distinction, computed instead of listed.
+
+**Measured effect, release-wide** (`516 survey`, no hashing, no CSV parsing):
+
+```
+                              part I      now
+undiscovered reads              236        203
+collections affected             11         11
+inputs named                    513        582
+
+input footprint, MB       part I      now     what changed
+  gaming                  13,954   8,046     container dirs replaced by named children
+  legislation             16,592   2,138
+  _entity_layer           16,708   2,938
+  nonprofits              17,261   2,021
+  lobbying                16,438   2,270
+  deals                   14,379   1,113
+  subcontracting              65   1,882     os.path.join inputs became visible
+  natural-resources          430     311
+```
+
+The large collections' footprint collapse is not a saving; it is a correction —
+those figures were inflated by container directories counted as inputs, the
+same error `CONTAINER_DIRS` was written to prevent, one level down.
+Subcontracting moves the other way, and that direction is the one that matters:
+it was never a 65 MB collection, and a manifest that said so would have
+certified a release while its five substantive raw inputs went unretained.
+
+Two new 516 commands, both cheap:
+
+```
+py -3 code/516_release_manifest.py survey    # per-collection replay footprint
+py -3 code/516_release_manifest.py stamps    # the D4 breakdown, §12
+```
+
+## 12. D4 / B4, broken down so each fix is a lookup
+
+Part I reported "284 run-stamp columns" and stopped there. A count is a size,
+not a work plan: fixing one still meant finding which table carried it and
+which of 385 scripts wrote it. `516 stamps` now produces
+`docs/releases/_analysis/run_stamp_breakdown.json` — collection, table, column,
+the constant value it holds, and the script(s) that write that column into that
+table.
+
+**283 columns across 255 tables and 12 of 13 collections.** The drop from 284
+is exactly one: `nagpra_notices.fetched_date`, fixed and proven by bytes in
+§9a. **nagpra is now the only collection at zero.**
+
+```
+collection                tables w/ stamps   columns      by COLUMN NAME
+funding                          9              9      built_date         112
+federal-register                16             24      fetched_date        53
+legislation                     11             12      retrieved_date      13
+deals                           15             24      retrieved_at        12
+nagpra                           0              0      entity_link_date    11
+lobbying                        29             38      entity_keyed_date   10
+contractors                      8              9      Data_As_Of           8
+subcontracting                   1              1      Date_Added           8
+native-owned-businesses          6             10      build_date           5
+natural-resources                7             10      ruled_date           5
+nonprofits                      12             19      first_seen           3
+gaming                          46             93      last_seen            3
+_entity_layer                   30             34
+```
+
+**How much of this is now a lookup rather than an investigation:**
+
+```
+206 of 283   a script that DECLARES A WRITE of the table also contains the
+             column name                      -> open that file, find that line
+ 15 of 283   a declared writer exists but the column name is not in it; the
+             column is inherited from an upstream frame
+ 46 of 283   no declared writer contains it; attributed to scripts that name
+             both the table and the column
+ 16 of 283   UNATTRIBUTED
+205 of 283   the attributed writer is IN that collection's build plan
+```
+
+The largest single concentration is `gaming` (93 columns over 46 tables), then
+`lobbying` (38). By name, `built_date` (112) and `fetched_date` (53) are 58% of
+the debt and both take the same one-line fix, already demonstrated:
+**`code/77_build_nagpra_dataset.py::cache_fetched_date` — derive the date from
+the cached artifact, and leave it BLANK when the artifact cannot say.**
+Blank-when-unknown is the point; a date invented at build time to fill a column
+is a lie that reproduces.
+
+**One caveat the file states about itself.** A column whose every non-blank
+value is a single ISO date is a run-stamp *candidate*. A table that legitimately
+covers one day is a false positive of the same test — two columns hold
+`1998-05-20`, which is nobody's build date. The constant value is printed
+beside every column so a reader can tell the two apart, and nothing is
+auto-fixed.
+
+**No pipeline script was edited by workstream G. The breakdown is the
+deliverable.**
+
+## 13. D9 — closed for these captures, and enforced rather than hoped
+
+Part I's D9 was "a release capture is only valid on a frozen tree, and nothing
+enforces the freeze". 516 now enforces it.
+
+`build --require-quiescent` re-checks, at the end of every capture:
+
+```
+inputs    sha256 + (mtime, size)    content, and the FACT of a write
+outputs   (mtime, size)             the released hashes just taken are void if
+                                    the table moved after they were taken
+```
+
+Content-only re-hashing under-detected. A rewrite that lands the same bytes
+still means another process held the file open and wrote it while we were
+reading the rest of the collection, and an `--apply` run that ends in an
+identical write is exactly the shape of the pipelines running beside this pass.
+Outputs are checked on stat rather than content deliberately — rehashing a
+1.0 GB table to learn what a stat call already said doubles the cost of every
+capture — and that asymmetry is recorded in the manifest instead of being left
+for a reader to discover.
+
+On failure the capture is **refused**: it is not filed under
+`docs/releases/<id>/`, the evidence is written to `docs/releases/_rejected/` so
+the refusal itself is auditable, and the command exits non-zero so a caller
+redoes it rather than shipping it.
+
+**All four captures in this pass were taken with `--require-quiescent`, and all
+four reported `quiescent: True`** — 76 file inputs and 25 outputs re-checked,
+zero movement, while workstreams E and F were writing other parts of the tree.
+D9 is **CLOSED for these four releases** and remains open as a project-wide
+guarantee, because nothing yet stops a capture taken *without* the flag. The
+one-line request is in §15.
+
+## 14. Debt ledger — deltas, measured
+
+| id | part I | now | movement |
+|---|---|---|---|
+| **D1** `code_not_relocatable` | 280 of 385 scripts | **unchanged, 280** | not this pass's file; the solo de-hardcode pass is next. A1 now rewrites all 281 present in the clean room (§10 G3) |
+| **D2** `output_stale_vs_input` | 2 of 4 nagpra tables | **4 of 4 captured collections flag it**; nagpra still 2 of 4, proven twice | UNCHANGED in kind, wider in measure. Every collection captured on a *frozen* tree still has an output older than a recorded input, so 260/260 was not purely a quiescence artefact |
+| **D3** `undeclared_enrichers` | 13/13 collections | **4 of 4 captured collections**, unchanged | still `503_identity.py`'s runtime dispatch. nagpra's bridge reproduces only because 503's stamp is currently ABSENT from the release — the debt is masked, not paid |
+| **D4** `nondeterministic_output_columns` | 284 across 13/13 | **283 across 12/13**, fully broken down per table, column and writer | −1, proven by bytes; nagpra at 0. §12 |
+| **D5** `collections_never_replayed` | 12 of 13 (1 replayed, 4 of 260 tables) | **9 of 13** (4 replayed, **25 tables compared, 4 byte-identical**) | **IMPROVED**. First byte-identical replays in the project |
+| **D6** `release_inputs_referenced_only` | 296 MB for 1 collection | **3,032 MB store; 76 of 76 inputs retained across 4 collections, 0 referenced-only** at the thresholds used | measured. At the DEFAULT 512 MiB threshold, `prime_contracts.csv` (816 MB) and one 1.2 GB subaward corpus are referenced-only — 2 of 76. Thresholds are per release and recorded per release |
+| **D7** `plan_scripts_missing` | 3 collections, by inspection | **unchanged, 3**; one now confirmed BY EXECUTION (`update_index.py`, §9c) | evidence upgraded from inspection to a traceback |
+| **D8** `undiscovered_inputs` | 236 across 11 of 13 | **203 across 11 of 13**; subcontracting 6→2, natural-resources 4→3, nagpra 0; inputs named 513→582 | **IMPROVED** by channels 2b and 4 (§11). Subcontracting's residue is 2 runtime lock/state files that do not exist on disk |
+| **D9** `release_captures_non_quiescent` | 2 inputs rewritten under the 13-collection sweep | **0 across 4 captures**, enforced by `--require-quiescent`, refusal path tested | **CLOSED for these captures**; open project-wide until the flag is the default |
+| **D10** *(new)* `build_plan_calls_a_live_api` | — | **1 known**: `121_pull_subawards_api.py`, in subcontracting's plan. 4 of its 5 fiscal years failed in the clean room because the source's tokens expired | a release whose plan fetches at build time has the internet as an input. Retention cannot hold it and no threshold change helps |
+| **D11** *(new)* `tables_no_planned_script_writes` | — | **7 of 9 native-owned-businesses tables have no phase-1 writer at all (0 planned rebuilders); 3 of 9 natural-resources tables have no writer in the plan** | distinct from D7: the script exists, the PLAN never calls it, usually because `build.py` classified it AMBIGUOUS |
+
+## 15. Changes needed in files workstream G does not own
+
+Carried forward from part I §7 and still open: register D1–D6 in
+`62_no_regression_check.py`; give `503_identity.py` a machine-readable run
+record; mention post-chain step 8 in `docs/SHIPPING_RUNBOOK.md`.
+
+New this pass:
+
+1. **`code/62_no_regression_check.py` (integrator)** — add
+   `release_captures_non_quiescent` MUST_BE_ZERO and
+   `nondeterministic_output_columns` MUST_NOT_RISE **at a floor of 283**, so
+   the next `built_date` that lands fails the gate the day it lands.
+   `516 stamps` prints the number.
+2. **`code/build.py` (integrator)** — `ship --execute` should pass
+   `--require-quiescent` to step 8. The flag exists, is tested, and refuses
+   correctly; nothing currently makes it the default, and that gap is the whole
+   of what D9 still is.
+3. **`code/121_pull_subawards_api.py`** — it is planned as an enricher and it
+   fetches. Either split the fetch into a stage the plan does not run (as `77`
+   does) or declare the collection unreplayable by construction. D10.
+4. **`cedar_pipeline.KNOWN_ORDERINGS`** — declaring an ordering for
+   `241_promote_individual_native_firms_in_place.py` and
+   `135_build_resource_assets.py` would place two AMBIGUOUS scripts that are
+   each the only writer of tables their collection ships, and would unblock two
+   collections' plans. D11.
+5. **`code/241_promote_individual_native_firms_in_place.py`** — writes
+   `repr(frozenset(...))` into two CSV columns; set iteration order is not
+   stable across processes (§10 G3).
+
+## 16. Verdict, restated
+
+**Commercial-release condition "a release successfully replayed from retained
+immutable inputs": still PARTIALLY MET — but the sentence part I could not
+write can now be written.**
+
+- **4 tables are byte-identical on replay** — 6,772 + 51,521 + 220 + 304 rows
+  across 2 collections, sha256 equal on both sides, produced from inputs
+  restored out of the blob store with nothing read from the live tree.
+- 4 of 13 collections have been replayed and graded; 25 tables compared.
+- All 4 captures were taken on a tree proven quiescent, by the tool, at capture
+  time — the first captures in this project of which that is true.
+- 76 of 76 inputs retained and re-verified; the store is 3,032 MB and `verify`
+  exits 0 over every blob of every release.
+
+And, in the same breath:
+
+- **21 of 25 replayed tables did not reproduce.** Ten of those were not
+  produced at all, because two collections' plans do not name a writer for
+  every table they ship.
+- One collection's plan **calls a live API**, which no retention policy can make
+  replayable.
+- 9 of 13 collections remain unreplayed.
+- The replay machinery itself had three defects (§10), one of which wrote to the
+  live tree before it was caught. It was caught, measured and reversed, and it
+  is written down here because a log that records only the pipeline's faults is
+  not evidence.

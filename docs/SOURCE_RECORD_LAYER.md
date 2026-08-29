@@ -417,12 +417,20 @@ Stated plainly, because the spec forbids claiming unverified behaviour.
 
 - **One dataset.** `fr_recognized_entities.csv`, 575 rows, chosen because it
   is the one source Cedar declares `authority_for` anything — which is exactly
-  the condition under which a bad match does the most damage. The other
-  harvesters in 510 are untouched and still fuse the two claims.
-- **The three wrong recognition facts are still in
-  `cedar_resolved_facts.csv`.** 514 measures and evidences them; applying the
-  correction means changing `510_assertions.py`, which is workstream D's file
-  this pass. Filed in the handoff, not done here.
+  the condition under which a bad match does the most damage. **The other
+  harvesters in 510 still fuse the two claims** — `harvest_gaming_claims`
+  calls `503.resolve()` inline for all 113 NIGC rows, and the IRS harvest
+  added on 2026-08-31 reads its EIN→entity links from
+  `cedar_identifier_ledger_final.csv` rather than from a source-record node.
+  Both are the same shape as the defect this layer fixed; neither is covered
+  by a `SOURCE_DATASETS` entry yet.
+- ~~**The three wrong recognition facts are still in
+  `cedar_resolved_facts.csv`.**~~ **CLOSED 2026-08-31 (workstream F).**
+  `510.harvest_fr_roster` now emits only from links this layer has accepted,
+  so the three ANCSA corporations are refused by the `denied` link rather than
+  by a guard downstream of the match, and the three repointings land on the
+  Alaska Native village GOVERNMENTS the roster is naming. Invariant **I17** in
+  `510 verify` makes the link table the only route in.
 - **`verified` is 1 of 571 accepted links.** There is no second mapping route
   for this dataset that is genuinely independent, so almost every link is an
   honest `proposed`.
@@ -435,11 +443,69 @@ Stated plainly, because the spec forbids claiming unverified behaviour.
 - **`kind = entity` is trusted from the upstream parser.** The Alaska section
   heading shows that parser is not perfect. The layer surfaces the row; it
   does not repair `fr_recognized_entities.csv`.
-- **Nothing downstream consumes these tables yet.** They are new, internal,
-  and not registered in `cedar_codebook.INTERNAL_TABLES` — living in
-  `data/spine/` they are outside the shipping scan, so no gate reports them as
-  an unregistered table. Registration is workstream D's call and is requested
-  in the handoff.
+- ~~**Nothing downstream consumes these tables yet.**~~ **`510` consumes them
+  as of 2026-08-31** — see *The layer has a consumer* below. They are still
+  not registered in `cedar_codebook.INTERNAL_TABLES`; living in `data/spine/`
+  they are outside the shipping scan, so no gate reports them as an
+  unregistered table. Registration is the integrator's call and is repeated in
+  the handoff — it matters more now that a shipped fact depends on them.
+
+---
+
+## The layer has a consumer — 2026-08-31, workstream F
+
+`510.harvest_fr_roster` no longer calls `503.resolve()`. It reads the facts
+from `cedar_source_records.csv` and the match from
+`cedar_source_record_links.csv`, and emits **only** from links with
+`link_role = identifies` and `link_status ∈ (verified, proposed)`. Everything
+else is a named row in `cedar_harvest_conservation.csv` at the grain of the
+source-record node.
+
+```
+566 records emitted        (was 563 through the old inline resolve)
+  5 cross_reference        a pointer printed in the roster, may not carry its facts
+  3 contested              >1 eligible candidate, NOTHING accepted
+  1 unresolved             the Alaska section HEADING, no eligible entity
+  0 lost, 0 repointed
+```
+
+Every assertion now carries its `link_id`, `link_status` and `match_route` in
+`tier_rationale`, with the sentence that is the whole of F1: *matched to this
+entity by Cedar's own procedure, NOT by the Federal Register*. A buyer can
+follow the id to the evidence and refute the match without touching the fact.
+
+**Invariant I17** in `510 verify` is the mechanical form of it, in two
+clauses: a roster fact on an entity no accepted link names fails the build,
+and an accepted link that produced no assertion fails it too — the old bare
+`continue`, now illegal. Both proven by fixture in
+`review/fixtures_F/fixture_I17_fr_link_provenance.py`.
+
+### The rebuild, and what it changed
+
+The link table on disk had been generated before workstream D repaired
+`503.build_index` (the alias-class defect this document reported as a change
+request). A re-run was therefore no longer byte-identical, so this document's
+regenerability claim had quietly stopped being true. Rebuilt with `514 all
+--apply`; `verify`, all 13 `fixtures` and `determinism` green, 585 → 586
+links, and exactly one record changed answer:
+
+```
+before   proposed   'Delaware Tribe of Indians' -> CE-00142-4V
+after    contested  CE-00141-Y2 | CE-00142-4V, nothing accepted
+```
+
+With the class field repaired both candidates are government-class, so the
+gov-class tiebreak that used to separate them no longer can and `503` returns
+`AMBIGUOUS_EXACT`. The cause is upstream of both scripts:
+`data/clean/entity_aliases.csv` carries **`Delaware Tribe of Indians` as a
+CAGE-derived legal alias of `CE-00141-Y2` Delaware *Nation***, two different
+federally recognized tribes. `contested` with both candidates kept is the
+correct answer to a contaminated index; the repair is to withdraw the alias,
+which is not this layer's to make. Filed in the handoff.
+
+The lesson is worth keeping: **a link table is an input like any other, and a
+stale one is worse than none.** 510 keeps its own government-class guard at
+the point the claim is made, for exactly that reason.
 
 ## Adding a source dataset
 

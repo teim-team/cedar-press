@@ -95,6 +95,17 @@ TODAY = date.today().isoformat()
 csv.field_size_limit(10_000_000)
 
 ASSERTIONS = CLEAN / "cedar_assertions.csv"
+# The source-record layer (514, ADR-001). 510 does NOT resolve source rows to
+# entities any more: it reads what a source record SAYS from the node table
+# and reads WHICH ENTITY that record means from the link table, which carries
+# its own evidence, its own status and its own refutations. See the rewiring
+# note above harvest_fr_roster.
+SOURCE_RECORDS = SPINE / "cedar_source_records.csv"
+SOURCE_RECORD_LINKS = SPINE / "cedar_source_record_links.csv"
+# The only two statuses a consumer may join on. `contested` means more than
+# one eligible candidate and NOTHING accepted; `denied` is a refutation kept
+# by name; `unresolved` is a record with no eligible Cedar entity at all.
+ACCEPTED_LINK_STATUSES = ("verified", "proposed")
 RESOLVED = CLEAN / "cedar_resolved_facts.csv"
 CONFLICTS = CLEAN / "cedar_fact_conflicts.csv"
 SOURCE_REG = SPINE / "cedar_source_registry.csv"
@@ -407,7 +418,7 @@ POLICIES = {
         label="Address, contact and web presence - changes without any legal act",
         predicates=("entity.city", "entity.website", "entity.phone",
                     "entity.address", "entity.registration_state",
-                    "entity.bia_region"),
+                    "entity.registration_city", "entity.bia_region"),
         rank_order=("authority", "human", "recency", "tier", "families"),
         deny_may_veto_authority=True,
         deny_tier_requirement="equal_or_higher",
@@ -547,6 +558,11 @@ MULTI_VALUED = (
     "entity.alias",
     "entity.legal_business_name",   # many registrations, many filed names
     "entity.registration_state",    # an entity may register in many states
+    # Added 2026-08-31 with the IRS harvest. Same reasoning as
+    # registration_state and the same subject: an entity with four EINs has
+    # four filing cities, none of them competing, and each carries the
+    # `EIN:<ein>` qualifier that says which filing it came from.
+    "entity.registration_city",
 )
 
 
@@ -1104,107 +1120,192 @@ def resolver():
 
 
 def harvest_fr_roster(out) -> dict:
-    """The Federal Register roster as its own voice.
+    """The Federal Register roster, THROUGH THE SOURCE-RECORD LINK LAYER.
 
-    This matters more than the row count suggests. Every `fr_official_name` in
-    the spine was previously asserted BY THE SPINE and merely labelled as an FR
-    fact - the roster had no independent say. Harvesting the roster directly
-    means the FR now asserts its own content, so R02 AUTHORITY has a real
-    authority behind it instead of a self-report wearing a federal label.
+    REWIRED 2026-08-31 (workstream F). Until this change the harvester made
+    its own entity-resolution decision inline:
 
-    `previously_listed_as` is the other prize: the roster records its OWN
-    renames, which is the historical-alias gap docs/NATIVE_ENTITY_NUANCES.md
-    flags as dangerous - "SAN JUAN PUEBLO" loose-matches San Juan Southern
-    Paiute, a different nation."""
-    p = CLEAN / "fr_recognized_entities.csv"
-    led = new_ledger("data/clean/fr_recognized_entities.csv")
-    rows = read_csv(p)
-    if not rows:
-        return {"rows": 0, "resolved": 0, "renames": 0}
-    mod, exact, gov, state_of, uid_of, tid_uid = resolver()
-    cls_of = {r["tribe_id"]: (r.get("entity_class") or "").strip()
-              for r in read_csv(SPINE / "cedar_entity_spine.csv")
-              if r.get("tribe_id")}
-    refused_class = []
-    n_res = n_ren = 0
-    for r in rows:
-        led.seen()
-        name = (r.get("fr_name") or "").strip()
-        if not name:
-            led.note("rejected:roster_entry_has_no_name")
-            continue
-        if (r.get("see_instead") or "").strip():
-            led.note("rejected:see_instead_pointer_is_not_an_entity", name)
-            continue
         tid, how = mod.resolve(name, exact, gov, state_of)
-        if not tid:
-            led.note("rejected:roster_name_did_not_match_the_spine", name)
+        if not tid: continue
+        _emit(out, tid_uid[tid], "entity.fr_official_name", name,
+              "fr_tribal_list", tier="A")
+
+    which is external review finding F1 in three lines: the Federal Register's
+    claim ("this line is a federally recognized entity") and CEDAR'S claim
+    ("this line means CE-xxxxx-xx") left the function fused into one row
+    wearing the FR's authority. The FR is authoritative about its own line and
+    has never said anything about a cedar_uid.
+
+    ADR-001 split them into two tables, and this function now consumes both:
+
+        cedar_source_records.csv        what the record SAYS   <- the facts
+        cedar_source_record_links.csv   which entity it MEANS  <- the match
+
+    An assertion is emitted ONLY from a link whose `link_status` is one this
+    layer accepts (`verified` or `proposed`) and whose `link_role` is
+    `identifies`. Everything else is a NAMED disposition and stays visible:
+
+      * `cross_reference` - "Arctic Village (See Native Village of Venetie)"
+        is a POINTER printed in the roster. It refers to Venetie and asserts
+        nothing about a tribe called Arctic Village, so it may never carry the
+        roster's facts. The pre-rewire code reached the same outcome by
+        `continue`, which recorded nothing.
+      * `contested` - more than one eligible candidate and NOTHING accepted.
+        The FR combined listings (Capitan Grande, Te-Moak) are here.
+      * `denied` - a refutation of a mapping, kept in the table by name. The
+        three ANCSA village CORPORATIONS that carried
+        `entity.is_federally_recognized = yes` at tier A are denied links, so
+        they cannot be harvested even by accident.
+      * `unresolved` - no eligible Cedar entity. The Alaska section HEADING
+        carried as `kind = entity` by the upstream parser is here.
+
+    THE CLASS GUARD STAYS. 514's eligibility rule already refuses a
+    non-government candidate, but a link table is an input like any other and
+    an input may be wrong. I14 tests the CLAIM, not the match, and this guard
+    is its harvest-time half: an assertion sourced from the roster may only
+    ever attach to a government-class entity, however the link was made.
+    Refusals are counted and named, never dropped.
+
+    The link's status, route and id are written into every assertion's
+    `tier_rationale`, so a buyer reading a shipped fact can see that the
+    Federal Register vouched for the CONTENT and that Cedar - not the FR -
+    vouched for the match, and can follow `link_id` to the evidence for it.
+    """
+    recs = [r for r in read_csv(SOURCE_RECORDS)
+            if r.get("source_dataset") == "fr_recognized_entities"]
+    led = new_ledger("data/spine/cedar_source_records.csv "
+                     "[fr_recognized_entities, via cedar_source_record_links]")
+    if not recs:
+        # NOT a silent skip: the layer this harvester now depends on is
+        # missing, and saying so beats emitting nothing and reporting 0.
+        print("                 FR roster: cedar_source_records.csv is ABSENT "
+              "or carries no fr_recognized_entities rows - run "
+              "514_source_records.py all --apply. NOTHING was harvested.")
+        return {"rows": 0, "resolved": 0, "renames": 0, "refused_class": 0,
+                "links_accepted": 0}
+    links = [l for l in read_csv(SOURCE_RECORD_LINKS)
+             if l.get("source_dataset") == "fr_recognized_entities"]
+    by_rec = defaultdict(list)
+    for l in links:
+        by_rec[l["source_record_id"]].append(l)
+    uid_cls = {r["cedar_uid"]: (r.get("entity_class") or "").strip()
+               for r in read_csv(SPINE / "cedar_entity_spine.csv")
+               if r.get("cedar_uid")}
+    try:
+        GOVSET = resolver()[0].GOV
+    except Exception:
+        GOVSET = set()
+
+    refused_class = []
+    n_res = n_ren = n_acc = 0
+    for rec in sorted(recs, key=lambda r: r["source_record_id"]):
+        led.seen()
+        rid = rec["source_record_id"]
+        mine = by_rec.get(rid, [])
+        accepted = [l for l in mine
+                    if l["link_status"] in ACCEPTED_LINK_STATUSES
+                    and l["link_role"] == "identifies"
+                    and (l.get("cedar_uid") or "").strip()]
+        name = (rec.get("record_says_name") or "").strip()
+        if not accepted:
+            roles = {l["link_role"] for l in mine}
+            sts = sorted({l["link_status"] for l in mine})
+            if not mine:
+                led.note("rejected:source_record_has_NO_link_row_at_all_"
+                         "rerun_514_source_records", name or rid)
+            elif roles == {"cross_reference"}:
+                led.note("rejected:link_role_cross_reference_is_a_POINTER_"
+                         "printed_in_the_roster_not_a_listing_of_this_entity",
+                         name or rid)
+            elif "contested" in sts:
+                led.note("rejected:link_status_contested_more_than_one_"
+                         "eligible_candidate_and_NOTHING_accepted",
+                         name or rid)
+            elif "unresolved" in sts:
+                led.note("rejected:link_status_unresolved_no_eligible_cedar_"
+                         "entity_for_this_record", name or rid)
+            else:
+                led.note(f"rejected:no_accepted_identifies_link_statuses_"
+                         f"are_{'+'.join(sts) or 'none'}", name or rid)
             continue
-        uid = tid_uid.get(tid, "")
-        if not uid:
-            led.note("rejected:matched_handle_has_no_cedar_uid", tid)
-            continue
-        # THE ROSTER LISTS GOVERNMENTS. IT CANNOT NAME A CORPORATION.
-        #
-        # Found 2026-08-30 by workstream A, live in shipped data: three ANCSA
-        # village CORPORATIONS carried `entity.is_federally_recognized = yes`
-        # at tier A with support_status = authoritative and winning_source =
-        # fr_tribal_list. Cedar was attesting that a federal authority
-        # vouched for a claim that authority never made - review finding F1,
-        # not hypothetical.
-        #
-        # The route in was an alias: the FR GOVERNMENT name "Native Village
-        # of Nanwalek (aka English Bay)" had been written onto the English
-        # Bay CORPORATION's spine row, so resolve() returned it UNIQUELY.
-        # No ambiguity, so the gov-class tiebreak in 503 never ran and no
-        # existing guard could see it.
-        #
-        # The class test therefore cannot live in the matcher's ambiguity
-        # branch. It lives HERE, where the claim is made, and it is
-        # unconditional: an assertion sourced from the roster may only ever
-        # attach to a government-class entity, however confidently the name
-        # matched. Refused rows are NAMED and counted, never dropped.
-        cls = cls_of.get(tid, "")
-        if cls not in mod.GOV:
-            led.note(f"rejected:roster_matched_a_NON_GOVERNMENT_class"
-                     f"[{cls or 'unknown'}]_and_the_FR_roster_lists_"
-                     f"governments_only", f"{name} -> {tid}")
-            refused_class.append((name, tid, cls, how))
-            continue
-        n_res += 1
-        led.note("emitted", name)
-        cite = (r.get("citation") or "").strip()
-        _emit(out, uid, "entity.fr_official_name", name, "fr_tribal_list",
-              tier="A", method="federal_register_roster",
-              rationale=f"Listed in the Federal Register roster. Matched to the "
-                        f"spine by: {how}",
-              evidence_url=cite, quote=(r.get("raw_entry") or "")[:500],
-              origin="data/clean/fr_recognized_entities.csv")
-        _emit(out, uid, "entity.is_federally_recognized", "yes",
-              "fr_tribal_list", tier="A", method="federal_register_roster",
-              rationale="Appears on the statutory roster. This is the ONE fact "
-                        "the Federal Register is unambiguously authoritative "
-                        "for.",
-              evidence_url=cite, origin="data/clean/fr_recognized_entities.csv")
-        for former in re.split(r"[;|]", r.get("previously_listed_as") or ""):
-            former = former.strip()
-            if former and norm(former) != norm(name):
-                n_ren += 1
-                _emit(out, uid, "entity.alias", former, "fr_tribal_list",
-                      tier="A", method="federal_register_rename",
-                      rationale="The Federal Register's own record of what this "
-                                "nation was previously listed as. A filing "
-                                "predating the rename carries this name.",
-                      evidence_url=cite,
-                      origin="data/clean/fr_recognized_entities.csv")
+        n_acc += len(accepted)
+        # SR5 guarantees one record is ACCEPTED onto at most one entity, so
+        # `accepted` is a single row in practice. It is written as a loop
+        # rather than as `accepted[0]` because relying on a guarantee that
+        # lives in another script is how the 90-UEI cardinality bug happened.
+        emitted_any = False
+        refused_here = 0
+        for link in accepted:
+            uid = link["cedar_uid"].strip()
+            cls = uid_cls.get(uid, "")
+            if GOVSET and cls not in GOVSET:
+                refused_here += 1
+                refused_class.append((name, uid, cls, link["link_id"]))
+                continue
+            cite = (rec.get("record_citation") or "").strip()
+            quote = (rec.get("record_verbatim") or "")[:500]
+            # THE MATCH IS CEDAR'S, AND THE ASSERTION SAYS SO. This sentence
+            # is the F1 fix as a buyer sees it.
+            prov = (f"Matched to this entity by Cedar's own procedure, NOT by "
+                    f"the Federal Register: link {link['link_id']} "
+                    f"[{link['link_status']}] via {link['match_route']} "
+                    f"({link['match_method'][:120]}). The Federal Register is "
+                    f"authoritative for what its record says and asserts "
+                    f"nothing about which Cedar entity it means; the match is "
+                    f"separately refutable in "
+                    f"data/spine/cedar_source_record_links.csv.")
+            got = _emit(out, uid, "entity.fr_official_name", name,
+                        "fr_tribal_list", tier="A",
+                        method="federal_register_roster",
+                        rationale="Listed in the Federal Register roster. "
+                                  + prov,
+                        evidence_url=cite, quote=quote,
+                        origin=SOURCE_RECORDS.relative_to(ROOT).as_posix())
+            if (rec.get("record_says_is_federally_recognized") or "").strip():
+                got += _emit(
+                    out, uid, "entity.is_federally_recognized",
+                    rec["record_says_is_federally_recognized"],
+                    "fr_tribal_list", tier="A",
+                    method="federal_register_roster",
+                    rationale="Appears on the statutory roster. This is the "
+                              "ONE fact the Federal Register is unambiguously "
+                              "authoritative for. " + prov,
+                    evidence_url=cite,
+                    origin=SOURCE_RECORDS.relative_to(ROOT).as_posix())
+            for former in re.split(
+                    r"[;|]", rec.get("record_says_previously_listed_as") or ""):
+                former = former.strip()
+                if former and norm(former) != norm(name):
+                    if _emit(out, uid, "entity.alias", former,
+                             "fr_tribal_list", tier="A",
+                             method="federal_register_rename",
+                             rationale="The Federal Register's own record of "
+                                       "what this nation was previously "
+                                       "listed as. A filing predating the "
+                                       "rename carries this name. " + prov,
+                             evidence_url=cite,
+                             origin=SOURCE_RECORDS.relative_to(ROOT)
+                             .as_posix()):
+                        n_ren += 1
+            if got:
+                emitted_any = True
+                n_res += 1
+        if emitted_any:
+            led.note("emitted", name)
+        elif refused_here:
+            led.note("rejected:every_accepted_link_points_at_a_NON_GOVERNMENT_"
+                     "class_and_the_FR_roster_lists_governments_only", name)
+        else:
+            led.note("rejected:accepted_link_carried_no_value_that_normalises",
+                     name or rid)
     if refused_class:
-        print(f"                 FR roster: {len(refused_class)} entr(ies) "
-              f"matched a NON-GOVERNMENT class and were REFUSED - the roster "
-              f"cannot name a corporation:")
-        for nm, tid, cls, how in refused_class[:10]:
-            print(f"                     {nm[:60]!r} -> {tid} [{cls}] ({how})")
-    return {"rows": len(rows), "resolved": n_res, "renames": n_ren,
-            "refused_class": len(refused_class)}
+        print(f"                 FR roster: {len(refused_class)} ACCEPTED "
+              f"link(s) pointed at a NON-GOVERNMENT class and were REFUSED - "
+              f"the roster cannot name a corporation:")
+        for nm, uid, cls, lid in refused_class[:10]:
+            print(f"                     {nm[:60]!r} -> {uid} [{cls}] ({lid})")
+    return {"rows": len(recs), "resolved": n_res, "renames": n_ren,
+            "refused_class": len(refused_class), "links_accepted": n_acc}
 
 
 def harvest_aliases(out) -> int:
@@ -1347,6 +1448,447 @@ def harvest_ledger_attributes(out) -> dict:
     return {"rows": len(rows), "state": n_state, "legal_name": n_name}
 
 
+# =====================================================================
+# THE IRS EVIDENCE FAMILY - the first genuinely independent second source.
+# =====================================================================
+# Until 2026-08-31 `LR_IRS` existed in the lineage tree and did almost
+# nothing: `irs_bmf` asserted an EIN and the legal name that came with it,
+# both copied out of Cedar's own identifier ledger. Every single-valued fact
+# in Cedar rested on one source and `corroborated` stood at 2.
+#
+# The IRS Business Master File is a real second family. Its root does not
+# derive from LR_FEDERAL_REGISTER, LR_SAM or anything else in the tree, so an
+# IRS address agreeing with the spine is not an echo - which is exactly the
+# test `LR_CICD -> LR_FEDERAL_REGISTER` exists to make possible.
+#
+# THE GRAIN QUESTION HAS TO BE ANSWERED FIRST, AND PER CLASS.
+# -----------------------------------------------------------
+# An IRS filing address belongs to the FILING ORGANIZATION. Whether that is a
+# fact about the Cedar entity depends entirely on what the Cedar entity is:
+#
+#   * A tribal college, a Native CDFI, an urban Indian organization, an
+#     intertribal council, an NHO - these ARE incorporated, IRS-exempt
+#     organizations. The filer and the entity are the same legal person, so
+#     the filed address IS the entity's address. This is the real second
+#     opinion, and it is the only place `entity.state` / `entity.city` may be
+#     asserted from this family.
+#
+#   * A tribe, an Alaska Native village government, a state-recognized tribe,
+#     an ANCSA corporation, a BIE school - a government is not a 501(c)(3),
+#     and the EIN bound to it in Cedar's ledger belongs to some organization
+#     that files: a charitable arm, a housing authority, an enterprise, in
+#     more than one measured case an unrelated body that shares a word with
+#     the tribe's name. Its address is REGISTRATION-GRADE and goes to
+#     `entity.registration_state` / `entity.registration_city` with the
+#     `EIN:<ein>` subject qualifier, exactly as F7 requires - never to
+#     `entity.state`.
+#
+# THIS IS THE ALASKA-VILLAGES-MOVED-TO-VIRGINIA MISTAKE, AND IT IS NOT
+# HYPOTHETICAL HERE EITHER. The first version of `harvest_ledger_attributes`
+# asserted a SAM registration address as `entity.state` and relocated 100+
+# Alaska Native village governments to the lower 48 (see the note in that
+# function, and docs/ASSERTION_LAYER.md). The same shape is sitting in this
+# data: EIN 16015647 in the ledger is `PENOBSCOT MARINE MUSEUM`, keyed to the
+# Penobscot Nation; EIN 391795874 is `ROSEBUD INC` of Cambridge, WISCONSIN,
+# keyed to the Rosebud Sioux Tribe of SOUTH DAKOTA. Asserting either as
+# `entity.state` would move a tribe.
+#
+# THE SECOND GUARD: THE FILER MUST BE THE ENTITY, NOT A RELATIVE OF IT.
+# The class rule is necessary and not sufficient. Measured on the live join,
+# three of the fifteen tribal-college EIN links point at a DIFFERENT
+# organization:
+#
+#   Institute of American Indian Arts      -> INSTITUTE OF AMERICAN INDIAN
+#                                             ARTS **FOUNDATION**
+#   Northwest Indian College (WA)          -> NORTHWEST INDIAN COMMUNITY
+#                                             DEVELOPMENT C... (MN)
+#   Nebraska Indian Community College      -> NEBRASKA INDIAN CHILD WELFARE
+#                                             COALITION
+#
+# A college's foundation is a real organisation with its own address, and
+# publishing its city as the college's is the containment error again at a
+# smaller scale. So an entity-grade IRS fact additionally requires the FILED
+# NAME to identify the entity - equal to its canonical name or to a recorded
+# alias, after folding corporate suffixes. That test is not entity resolution
+# (the EIN -> entity link is read from Cedar's ledger, never made here); it
+# answers the different question of whether the filer and the entity are one
+# legal person, which is the question the grain turns on.
+#
+# WHAT IS DELIBERATELY NOT DONE. `entity.legal_business_name` is emitted for
+# EVERY accepted EIN link and ALWAYS with the `EIN:<ein>` qualifier, entity
+# grade or not: a legal name is a name ON A FILING, and the 36 phantom
+# "corroborations" F7 removed were exactly what happens when filed names are
+# collapsed onto the entity.
+IRS_ENTITY_GRADE_CLASSES = {
+    "Tribal College or University":
+        "A tribal college is an incorporated, IRS-exempt institution that "
+        "files in its own name. Its BMF address is the college's address.",
+    "Native Community Development Financial Institution":
+        "A Native CDFI is a certified, incorporated financial institution "
+        "and files its own return. The filer and the entity are one person.",
+    "Native Financial Institution":
+        "Same reasoning as a Native CDFI: an incorporated institution that "
+        "files in its own name.",
+    "Urban Indian Organization":
+        "A UIO is a nonprofit corporation contracting under the Indian "
+        "Health Care Improvement Act. It files its own 990.",
+    "Intertribal Organization":
+        "An intertribal council, board or association is an incorporated "
+        "membership organisation with its own staff and offices - it is not "
+        "an arm of any one member tribe, so its filed address is its own.",
+    "Native Hawaiian Organization":
+        "Cedar's NHO universe IS a universe of organisations - the DOI ONHR "
+        "notification list enumerates them - and an NHO that appears in the "
+        "BMF is filing for itself. No federal roster fixes an NHO's address, "
+        "so this is the best evidence that exists.",
+    "Federal-level self-governance consortium":
+        "A self-governance consortium (a regional health corporation, a "
+        "tribal governments' council) is separately incorporated and files "
+        "its own return; the member tribes do not.",
+}
+
+# Trailing tokens that do not distinguish one legal person from another.
+# `foundation`, `association`, `authority` and `fund` are NOT here on
+# purpose - the IAIA Foundation is a different organisation from the IAIA.
+_FILER_SUFFIX = {"inc", "incorporated", "corp", "corporation", "llc", "llp",
+                 "co", "company", "ltd", "limited"}
+
+
+def filer_key(s: str) -> str:
+    """The comparison key for 'is the filer this same legal person'. Folds
+    case, punctuation, the apostrophe family and SPACES - the IRS prints
+    `TOHONO O ODHAM` where the spine holds `Tohono O'odham` - then drops
+    trailing corporate suffixes from both sides."""
+    toks = norm(s).split()
+    while toks and toks[0] == "the":
+        toks.pop(0)
+    while toks and toks[-1] in _FILER_SUFFIX:
+        toks.pop()
+    return "".join(toks)
+
+
+def filer_is_distinctive(s: str) -> bool:
+    """A one-word name is a coincidence waiting to happen. `ROSEBUD` in the
+    BMF matched the Rosebud Sioux Tribe's canonical name `Rosebud` exactly
+    and is a Wisconsin company. Two tokens and 14 folded characters is the
+    bar; it is a judgement, written here so it can be argued with."""
+    k = filer_key(s)
+    return len(k) >= 14 and len(norm(s).split()) >= 2
+
+
+def _ein9(v) -> str:
+    d = re.sub(r"\D", "", str(v or ""))
+    return d.zfill(9) if d else ""
+
+
+def harvest_irs_bmf(out) -> dict:
+    """IRS Business Master File facts, joined through links Cedar already made.
+
+    Two link routes, both READ and neither invented here - the F1 discipline
+    applied to a second dataset:
+
+      1. `cedar_identifier_ledger_final.csv`, EIN rows at tier != X. Cedar's
+         adjudicated identifier register; tier X is a refutation of the link
+         and is excluded, because if we do not believe the EIN belongs to the
+         entity we cannot use the address filed under it.
+      2. `np_orgs.csv`'s own `cedar_uid` + `cedar_link_tier`. This link was
+         made by script 70, not adjudicated in the ledger, so it is used ONLY
+         where the strongest guard also passes - a self-filing entity class
+         AND a filed name that identifies the entity. It never produces a
+         registration-grade fact, because minting 1,400 registration facts
+         off an unadjudicated link is how a weak link becomes load-bearing.
+
+    Facts come from the BMF row; identity comes from the link. `state`,
+    `city` and the filed name are the BMF's content and Cedar asserts none
+    of them about itself.
+    """
+    bmf_rows = read_csv(CLEAN / "np_orgs.csv")
+    if not bmf_rows:
+        print("                 IRS BMF: data/clean/np_orgs.csv is ABSENT - "
+              "nothing harvested from the IRS family.")
+        return {"rows": 0, "entity_grade": 0, "registration_grade": 0,
+                "disagreements": []}
+    bmf = {}
+    for r in bmf_rows:
+        k = _ein9(r.get("EIN"))
+        if k:
+            bmf.setdefault(k, r)
+    sp = read_csv(SPINE / "cedar_entity_spine.csv")
+    uid_cls = {r["cedar_uid"]: (r.get("entity_class") or "").strip()
+               for r in sp if r.get("cedar_uid")}
+    uid_canon = {r["cedar_uid"]: (r.get("canonical_name") or "").strip()
+                 for r in sp if r.get("cedar_uid")}
+    uid_alias = defaultdict(set)
+    for r in read_csv(CLEAN / "entity_aliases.csv"):
+        u = (r.get("cedar_uid") or "").strip()
+        if u and (r.get("alias_name") or "").strip():
+            uid_alias[u].add(filer_key(r["alias_name"]))
+
+    def filer_is_the_entity(uid, filed):
+        k = filer_key(filed)
+        if not k or not filer_is_distinctive(filed):
+            return False
+        return k == filer_key(uid_canon.get(uid, "")) or k in uid_alias[uid]
+
+    uid_state = {r["cedar_uid"]: (r.get("state") or "").strip()
+                 for r in sp if r.get("cedar_uid")}
+    n_ent = n_reg = 0
+    entity_grade_rows = []
+    filer_not_entity = []
+    ein_state_mismatch = []
+
+    def emit_entity_grade(uid, row, tier, why, route):
+        """entity.state / entity.city - THE SECOND OPINION. Subject is the
+        entity itself, so these compete with the spine and are arbitrated."""
+        nonlocal n_ent
+        got = 0
+        st, verdict = clean_state(row.get("state"), row.get("EIN", ""))
+        rationale = (
+            f"IRS Business Master File filing address. Asserted about the "
+            f"ENTITY, not about a registration, because this entity's class "
+            f"is one that FILES IN ITS OWN NAME ({why}) and the filed name "
+            f"{(row.get('org_name') or '')[:60]!r} identifies it. Link route: "
+            f"{route}. A BMF address on any other class is a fact about the "
+            f"filing organisation and is asserted as "
+            f"entity.registration_state/_city instead - see I16.")
+        if st:
+            got += _emit(out, uid, "entity.state", st, "irs_bmf", tier=tier,
+                         method="irs_bmf_filing_address",
+                         rationale=rationale,
+                         evidence_url=row.get("source_url", ""),
+                         verified=row.get("bmf_vintage_fetched", ""),
+                         origin="data/clean/np_orgs.csv")
+            entity_grade_rows.append((uid, "entity.state", st, row))
+        city = (row.get("city") or "").strip()
+        if city:
+            got += _emit(out, uid, "entity.city", city.title(), "irs_bmf",
+                         tier=tier, method="irs_bmf_filing_address",
+                         rationale=rationale,
+                         evidence_url=row.get("source_url", ""),
+                         verified=row.get("bmf_vintage_fetched", ""),
+                         origin="data/clean/np_orgs.csv")
+            entity_grade_rows.append((uid, "entity.city", city.title(), row))
+        if got:
+            n_ent += 1
+        return got
+
+    def emit_registration_grade(uid, ein, row, tier):
+        """A fact about the FILING ORGANISATION, qualified with the EIN that
+        produced it. It can never compete with where the entity is."""
+        nonlocal n_reg
+        qual = f"EIN:{ein}"
+        got = 0
+        st, verdict = clean_state(row.get("state"), ein)
+        base = ("The address on the IRS Business Master File record filed "
+                "under this EIN. A fact about the REGISTRATION - the filer is "
+                "frequently a charitable arm, a housing authority or an "
+                "enterprise, and in measured cases an unrelated organisation "
+                "sharing a word with the entity's name. Never resolved "
+                "against entity.state/entity.city.")
+        if st:
+            got += _emit(out, uid, "entity.registration_state", st, "irs_bmf",
+                         qualifier=qual, tier=tier,
+                         method="irs_bmf_filing_address:EIN",
+                         rationale=base,
+                         evidence_url=row.get("source_url", ""),
+                         verified=row.get("bmf_vintage_fetched", ""),
+                         origin="data/clean/np_orgs.csv")
+        city = (row.get("city") or "").strip()
+        if city:
+            got += _emit(out, uid, "entity.registration_city", city.title(),
+                         "irs_bmf", qualifier=qual, tier=tier,
+                         method="irs_bmf_filing_address:EIN",
+                         rationale=base,
+                         evidence_url=row.get("source_url", ""),
+                         verified=row.get("bmf_vintage_fetched", ""),
+                         origin="data/clean/np_orgs.csv")
+        filed = (row.get("org_name") or "").strip()
+        if filed:
+            got += _emit(out, uid, "entity.legal_business_name", filed,
+                         "irs_bmf", qualifier=qual, tier=tier,
+                         method="irs_bmf_filed_name:EIN",
+                         rationale="The organisation name as filed with the "
+                                   "IRS under this EIN. Always registration "
+                                   "grade: a legal name is a name ON A "
+                                   "FILING, and collapsing filed names onto "
+                                   "the entity is what manufactured the 36 "
+                                   "phantom corroborations F7 removed.",
+                         evidence_url=row.get("source_url", ""),
+                         verified=row.get("bmf_vintage_fetched", ""),
+                         origin="data/clean/np_orgs.csv")
+        if got:
+            n_reg += 1
+        return got
+
+    # ---- ROUTE 1: the adjudicated identifier ledger ------------------
+    lp = CLEAN / "cedar_identifier_ledger_final.csv"
+    ledger = [r for r in read_csv(lp)
+              if (r.get("identifier_type") or "").strip().upper() == "EIN"]
+    l1 = new_ledger(lp.relative_to(ROOT).as_posix()
+                    + " [EIN links -> IRS BMF facts, grain = EIN LEDGER ROWS]")
+    seen_ein = set()
+    for r in ledger:
+        l1.seen()
+        uid = (r.get("cedar_uid") or "").strip()
+        ein = (r.get("identifier") or "").strip()
+        tier = (r.get("confidence_tier") or "").strip().upper()
+        if not uid:
+            l1.note("rejected:EIN_ledger_row_has_no_cedar_uid", ein)
+            continue
+        if tier == "X":
+            l1.note("rejected:tier_X_is_a_REFUTED_EIN_link_so_the_address_"
+                    "filed_under_it_is_not_this_entity_s", ein)
+            continue
+        row = bmf.get(_ein9(ein))
+        if not row:
+            l1.note("rejected:EIN_is_not_in_the_IRS_BMF_extract_on_disk_so_"
+                    "there_is_no_IRS_record_to_read", ein)
+            continue
+        seen_ein.add(_ein9(ein))
+        atier = "B" if tier in ("A", "B") else "C"
+        got = emit_registration_grade(uid, ein, row, atier)
+        cls = uid_cls.get(uid, "")
+        why = IRS_ENTITY_GRADE_CLASSES.get(cls)
+        if why and filer_is_the_entity(uid, row.get("org_name")):
+            got += emit_entity_grade(uid, row, atier, why,
+                                     "identifier ledger EIN link, tier "
+                                     + (tier or "?"))
+        elif why:
+            # A SELF-FILING CLASS WHOSE FILER IS SOMEBODY ELSE. This is not a
+            # rejection to be counted and forgotten: on an entity that DOES
+            # file its own return, an EIN filed under a different
+            # organisation's name is evidence that the LINK is wrong, not
+            # that the address is. Measured live: the Institute of American
+            # Indian Arts' EIN resolves to the IAIA FOUNDATION; Northwest
+            # Indian College's (WA) resolves to a Minnesota organisation.
+            # Queued rather than acted on - the ledger is not this file.
+            filer_not_entity.append(dict(
+                cedar_uid=uid, entity=uid_canon.get(uid, ""), entity_class=cls,
+                ein=ein, ledger_tier=tier, filed=row.get("org_name", ""),
+                irs_state=(row.get("state") or "").strip(),
+                spine_state=(uid_state.get(uid, "")),
+                irs_city=(row.get("city") or "").strip()))
+        # A registration-grade fact never moves an entity, but a filing
+        # address in a DIFFERENT STATE from the entity is still the clearest
+        # cheap signal that an EIN may be keyed to the wrong entity. Counted
+        # and listed, never used to overwrite anything.
+        _rst, _ = clean_state(row.get("state"), ein)
+        _est = uid_state.get(uid, "")
+        if _rst and _est and _rst.upper() != _est.upper():
+            ein_state_mismatch.append(dict(
+                cedar_uid=uid, entity=uid_canon.get(uid, ""), entity_class=cls,
+                ein=ein, ledger_tier=tier, filed=row.get("org_name", ""),
+                irs_state=_rst, spine_state=_est,
+                irs_city=(row.get("city") or "").strip()))
+        l1.note("emitted" if got else
+                "rejected:IRS_BMF_row_carries_no_state_no_city_and_no_filed_"
+                "name", ein)
+
+    # ---- ROUTE 2: np_orgs' own link, ENTITY GRADE ONLY ---------------
+    l2 = new_ledger("data/clean/np_orgs.csv "
+                    "[IRS BMF rows via np_orgs own cedar_uid link, "
+                    "ENTITY-GRADE ONLY, grain = BMF ROWS]")
+    for r in bmf_rows:
+        l2.seen()
+        ein = (r.get("EIN") or "").strip()
+        if _ein9(ein) in seen_ein:
+            l2.note("rejected:EIN_already_harvested_through_the_adjudicated_"
+                    "identifier_ledger_route", ein)
+            continue
+        uid = (r.get("cedar_uid") or "").strip()
+        ltier = (r.get("cedar_link_tier") or "").strip().upper()
+        if not uid:
+            l2.note("rejected:BMF_row_is_not_linked_to_any_cedar_entity", ein)
+            continue
+        if ltier == "X":
+            l2.note("rejected:np_orgs_link_tier_X_is_a_REFUTED_link", ein)
+            continue
+        if ltier not in ("A", "B"):
+            l2.note(f"rejected:np_orgs_link_tier_{ltier or 'blank'}_is_below_"
+                    f"the_bar_for_an_unadjudicated_link", ein)
+            continue
+        cls = uid_cls.get(uid, "")
+        why = IRS_ENTITY_GRADE_CLASSES.get(cls)
+        if not why:
+            l2.note(f"rejected:entity_class[{cls or 'unknown'}]_does_not_FILE_"
+                    f"IN_ITS_OWN_NAME_so_this_BMF_address_belongs_to_the_"
+                    f"filing_organisation_not_the_entity", ein)
+            continue
+        if not filer_is_the_entity(uid, r.get("org_name")):
+            l2.note("rejected:filed_name_does_not_identify_this_entity_so_the_"
+                    "filer_is_a_RELATED_organisation_not_the_entity_itself",
+                    f"{r.get('org_name')} -> {uid}")
+            continue
+        got = emit_entity_grade(uid, r, "B" if ltier == "A" else "C", why,
+                                f"np_orgs cedar_uid link, tier {ltier}")
+        l2.note("emitted" if got else
+                "rejected:IRS_BMF_row_carries_no_state_and_no_city", ein)
+
+    # ---- ROUTE 3 THAT IS NOT A ROUTE: the strict 990 extract ---------
+    # tribal_irs990_verified_strict.csv is named in the second-source brief,
+    # so it is READ and MEASURED rather than quietly ignored. Measured
+    # 2026-08-31 against np_orgs: 1,090 of 1,090 EINs are already present,
+    # with ZERO differences in filed name and ZERO in state (33 rows differ
+    # in city, and in every one of those the strict file is the emptier).
+    # It is the same IRS BMF extract, narrowed. Harvesting it would book one
+    # fact twice under one family - the LR_CICD mistake with a different
+    # table - so every row lands in a named echo bucket and nothing is
+    # emitted. The measurement is the product.
+    sp3 = ROOT / "data" / "raw" / "external" / \
+        "tribal_irs990_verified_strict.csv"
+    l3 = new_ledger("data/raw/external/tribal_irs990_verified_strict.csv")
+    n_new = n_diff_name = n_diff_state = n_diff_city = 0
+    for r in read_csv(sp3):
+        l3.seen()
+        row = bmf.get(_ein9(r.get("EIN")))
+        if not row:
+            n_new += 1
+            l3.note("rejected:EIN_is_in_the_strict_990_extract_but_not_in_the_"
+                    "np_orgs_BMF_table_so_there_is_no_linked_entity_to_"
+                    "assert_about", r.get("EIN"))
+            continue
+        if norm(r.get("NAME")) != norm(row.get("org_name")):
+            n_diff_name += 1
+        if (r.get("STATE") or "").strip().upper() != \
+                (row.get("state") or "").strip().upper():
+            n_diff_state += 1
+        if (r.get("CITY") or "").strip().upper() != \
+                (row.get("city") or "").strip().upper():
+            n_diff_city += 1
+        l3.note("rejected:same_IRS_BMF_record_as_np_orgs_csv_this_is_an_ECHO_"
+                "of_one_family_not_a_second_source", r.get("EIN"))
+
+    # ---- what disagreed with the spine -------------------------------
+    spine_state = {r["cedar_uid"]: (r.get("state") or "").strip()
+                   for r in sp if r.get("cedar_uid")}
+    spine_city = {r["cedar_uid"]: (r.get("city") or "").strip()
+                  for r in sp if r.get("cedar_uid")}
+    agree = disagree = novel = 0
+    disagreements = []
+    for uid, pred, val, row in entity_grade_rows:
+        held = (spine_state if pred == "entity.state" else spine_city
+                ).get(uid, "")
+        if not held:
+            novel += 1
+        elif norm(held) == norm(val):
+            agree += 1
+        else:
+            disagree += 1
+            disagreements.append(dict(
+                cedar_uid=uid, predicate=pred, spine=held, irs=val,
+                entity=uid_canon.get(uid, ""), filed=row.get("org_name", ""),
+                ein=row.get("EIN", "")))
+    return {"rows": len(bmf_rows), "entity_grade": n_ent,
+            "registration_grade": n_reg, "agree": agree, "disagree": disagree,
+            "novel": novel, "disagreements": disagreements,
+            "filer_not_entity": filer_not_entity,
+            "ein_state_mismatch": ein_state_mismatch,
+            "strict_rows": l3.rows_in, "strict_unmatched": n_new,
+            "strict_diff_name": n_diff_name,
+            "strict_diff_state": n_diff_state,
+            "strict_diff_city": n_diff_city}
+
+
 def phase_harvest(apply: bool) -> list:
     out = []
     harvest_spine(out)
@@ -1359,6 +1901,7 @@ def phase_harvest(apply: bool) -> list:
     n_fr = len(out) - n_spine - n_ident - n_game
     n_alias = harvest_aliases(out)
     led = harvest_ledger_attributes(out)
+    irs = harvest_irs_bmf(out)
 
     # Deterministic order, and collapse identical claims from one source.
     seen, uniq = set(), []
@@ -1423,6 +1966,76 @@ def phase_harvest(apply: bool) -> list:
           f"DESIGN)")
     print(f"                 ledger registrations: {led['state']} states, "
           f"{led['legal_name']} legal names (facts about the REGISTRATION, not the entity - see the note in harvest_ledger_attributes)")
+    print(f"                 IRS BMF (the SECOND EVIDENCE FAMILY): "
+          f"{irs['entity_grade']} entity-grade address facts "
+          f"(entity.state/city on classes that FILE IN THEIR OWN NAME), "
+          f"{irs['registration_grade']} registration-grade "
+          f"(EIN-qualified, can never move an entity)")
+    if irs.get("entity_grade"):
+        print(f"                     vs the spine: {irs['agree']} AGREE, "
+              f"{irs['disagree']} DISAGREE, {irs['novel']} the spine had "
+              f"nothing to compare")
+        for d in irs["disagreements"]:
+            print(f"                       DISAGREE {d['cedar_uid']} "
+                  f"{d['entity'][:34]!r} {d['predicate']}: spine "
+                  f"{d['spine']!r} vs IRS {d['irs']!r} "
+                  f"(EIN {d['ein']} {d['filed'][:40]!r})")
+    if irs.get("filer_not_entity"):
+        print(f"                     {len(irs['filer_not_entity'])} EIN "
+              f"link(s) on an entity that DOES file its own return, where "
+              f"the FILED NAME is a different organisation - candidate wrong "
+              f"links, queued not acted on:")
+        for d in irs["filer_not_entity"][:8]:
+            print(f"                       {d['cedar_uid']} "
+                  f"{d['entity'][:32]!r} EIN {d['ein']} filed as "
+                  f"{d['filed'][:44]!r} ({d['irs_state']} vs spine "
+                  f"{d['spine_state']})")
+    if irs.get("ein_state_mismatch"):
+        print(f"                     {len(irs['ein_state_mismatch'])} live "
+              f"EIN link(s) file in a DIFFERENT STATE from the entity. Not a "
+              f"fact conflict (different subjects) - a wrong-link signal:")
+        for d in irs["ein_state_mismatch"][:8]:
+            print(f"                       {d['cedar_uid']} "
+                  f"{d['entity'][:30]!r} [{d['entity_class'][:22]}] EIN "
+                  f"{d['ein']} {d['filed'][:34]!r} {d['irs_state']} vs spine "
+                  f"{d['spine_state']}")
+    # The two IRS findings are QUEUE ITEMS, not conclusions. They name a
+    # link in `cedar_identifier_ledger_final.csv`, which this workstream does
+    # not own, so they are written where rulings are collected and left for
+    # an owner's decision rather than acted on here.
+    if apply and (irs.get("filer_not_entity") or irs.get("ein_state_mismatch")):
+        qrows = []
+        for d in irs.get("filer_not_entity", []):
+            qrows.append(dict(d, finding="EIN_FILER_IS_A_DIFFERENT_ORGANISATION",
+                              why="This entity's class DOES file its own IRS "
+                                  "return, but the name filed under this EIN "
+                                  "is another organisation (often a "
+                                  "foundation). The LINK is the suspect, not "
+                                  "the address.",
+                              raised_by="510_assertions.harvest_irs_bmf",
+                              raised_date=TODAY))
+        for d in irs.get("ein_state_mismatch", []):
+            qrows.append(dict(d, finding="EIN_FILES_IN_A_DIFFERENT_STATE",
+                              why="A live (non-tier-X) EIN link whose IRS "
+                                  "filing state differs from the entity's "
+                                  "state. Legitimate for a national arm; a "
+                                  "wrong-link signal otherwise. No fact was "
+                                  "changed - registration grade never "
+                                  "competes with entity.state.",
+                              raised_by="510_assertions.harvest_irs_bmf",
+                              raised_date=TODAY))
+        write_csv(ROOT / "review" / f"irs_ein_link_queue_{TODAY}.csv", qrows,
+                  ["finding", "cedar_uid", "entity", "entity_class", "ein",
+                   "ledger_tier", "filed", "irs_state", "spine_state",
+                   "irs_city", "why", "raised_by", "raised_date"])
+        print(f"                     {len(qrows)} IRS link finding(s) written "
+              f"to review/irs_ein_link_queue_{TODAY}.csv for an owner ruling")
+    if irs.get("strict_rows"):
+        print(f"                     strict 990 extract: "
+              f"{irs['strict_rows']} rows, {irs['strict_unmatched']} not in "
+              f"np_orgs, {irs['strict_diff_name']} filed-name and "
+              f"{irs['strict_diff_state']} state differences - the same BMF "
+              f"extract narrowed, harvested as an ECHO and emitting nothing")
     print(f"                 {deny} DENY assertions preserved (tier-X "
           f"refutations, which an overwrite model loses)")
     print(f"  conservation   {sum(l.rows_in for l in CONSERVATION_LEDGERS):7d} "
@@ -2141,6 +2754,112 @@ def phase_verify() -> int:
                 f"their source but their subject is not a government class. "
                 f"The roster cannot name a corporation, so an assertion "
                 f"wearing its authority may not point at one: {ex}")
+
+    # I16: AN IRS FILING ADDRESS BELONGS TO THE ORGANISATION THAT FILED IT.
+    #
+    # This is the Alaska-villages-moved-to-Virginia defect, made mechanical
+    # before it can happen a second time from a different source. In 2026-08
+    # a SAM registration address was asserted as `entity.state` and the
+    # resolver dutifully relocated 100+ Alaska Native village GOVERNMENTS to
+    # the lower 48, because an enterprise of theirs had filed a mailing
+    # address there. The resolved view came out worse than the spine it was
+    # built to check, and the fix was not a rule weight - it was to stop
+    # asserting the fact about the wrong subject.
+    #
+    # The IRS family is the same shape. `PENOBSCOT MARINE MUSEUM` and
+    # `ROSEBUD INC` of Cambridge, Wisconsin are both live EIN links in
+    # Cedar's ledger. An IRS BMF address may therefore only become an
+    # ENTITY-grade fact where the entity's class is one that FILES IN ITS OWN
+    # NAME (IRS_ENTITY_GRADE_CLASSES, each with its written reason); on every
+    # other class it is registration grade and must carry the `EIN:<ein>`
+    # qualifier that says which filing it came from - F7's rule, enforced
+    # here rather than trusted.
+    if _uid_cls:
+        bad16 = [a for a in assertions
+                 if a["source_id"] == "irs_bmf"
+                 and a["predicate"] in ("entity.state", "entity.city")
+                 and a["cedar_uid"] in _uid_cls
+                 and _uid_cls.get(a["cedar_uid"], "")
+                 not in IRS_ENTITY_GRADE_CLASSES]
+        if bad16:
+            ex = "; ".join(f"{w['cedar_uid']} [{_uid_cls.get(w['cedar_uid'])}] "
+                           f"{w['predicate']}={w['object_value']}"
+                           for w in bad16[:5])
+            fails.append(
+                f"I16 {len(bad16)} IRS-sourced address fact(s) are asserted "
+                f"about an ENTITY whose class does not file its own IRS "
+                f"return. A BMF address belongs to the FILING ORGANISATION - "
+                f"this is how 100+ Alaska Native villages were moved to the "
+                f"lower 48 from SAM, and it may not happen again from the "
+                f"IRS: {ex}")
+    unq16 = [a for a in assertions
+             if a["source_id"] == "irs_bmf"
+             and (a["predicate"].startswith("entity.registration_")
+                  or a["predicate"] == "entity.legal_business_name")
+             and not (a.get("subject_qualifier") or "").startswith("EIN:")]
+    if unq16:
+        fails.append(
+            f"I16 {len(unq16)} IRS-sourced registration fact(s) carry no "
+            f"EIN: subject qualifier. A registration-grade fact whose subject "
+            f"is the bare entity fans a buyer's join out and lets a deny "
+            f"remove a value that is still true of another filing - external "
+            f"review F7: {unq16[0]['cedar_uid']} {unq16[0]['predicate']}")
+
+    # I17: THE FEDERAL REGISTER HARVEST MAY ONLY ASSERT THROUGH AN ACCEPTED
+    # SOURCE-RECORD LINK.
+    #
+    # ADR-001 exists because `harvest_fr_roster` used to call `503.resolve()`
+    # itself and emit the FR's facts onto whatever came back, fusing the
+    # source's claim with Cedar's match. The rewiring makes the link table
+    # the only route in; this invariant is what stops a future edit from
+    # quietly restoring the inline resolve. It is the mechanical form of the
+    # rule that the roster's authority stops at the match.
+    #
+    # Two clauses, because the old defect had two halves:
+    #   1. an assertion carrying the roster's content onto an entity NO
+    #      accepted link names - a match Cedar never made or has refuted;
+    #   2. an ACCEPTED link that produced NO assertion - the old `continue`,
+    #      which left ten source rows with no trace of any kind.
+    _fr_recs = {r["source_record_id"]: r for r in read_csv(SOURCE_RECORDS)
+                if r.get("source_dataset") == "fr_recognized_entities"}
+    _fr_links = [l for l in read_csv(SOURCE_RECORD_LINKS)
+                 if l.get("source_dataset") == "fr_recognized_entities"]
+    if _fr_recs and _fr_links:
+        _origin = SOURCE_RECORDS.relative_to(ROOT).as_posix()
+        _acc = [l for l in _fr_links
+                if l["link_status"] in ACCEPTED_LINK_STATUSES
+                and l["link_role"] == "identifies"
+                and (l.get("cedar_uid") or "").strip()]
+        _acc_uids = {l["cedar_uid"] for l in _acc}
+        stray = sorted({a["cedar_uid"] for a in assertions
+                        if a.get("origin_table") == _origin
+                        and a["cedar_uid"] not in _acc_uids})
+        if stray:
+            fails.append(
+                f"I17 {len(stray)} entit(ies) carry a Federal Register "
+                f"roster fact with NO accepted `identifies` link naming them "
+                f"in cedar_source_record_links.csv. The roster's authority "
+                f"stops at the match (ADR-001/F1): a fact may only be "
+                f"harvested through a link Cedar has accepted and can "
+                f"separately refute: {stray[:5]}")
+        _rec_yes = {l["cedar_uid"] for l in _acc
+                    if (_fr_recs.get(l["source_record_id"], {})
+                        .get("record_says_is_federally_recognized") or "")
+                    .strip()
+                    and (_fr_recs.get(l["source_record_id"], {})
+                         .get("record_says_name") or "").strip()
+                    and (not _GOV or _uid_cls.get(l["cedar_uid"], "") in _GOV)}
+        _have = {a["cedar_uid"] for a in assertions
+                 if a["source_id"] == "fr_tribal_list"
+                 and a["predicate"] == "entity.is_federally_recognized"
+                 and a.get("origin_table") == _origin}
+        missing = sorted(_rec_yes - _have)
+        if missing:
+            fails.append(
+                f"I17 {len(missing)} accepted `identifies` link(s) on a "
+                f"government-class entity produced NO recognition assertion. "
+                f"An accepted link that emits nothing is the old `continue` "
+                f"wearing a new table: {missing[:5]}")
 
     # I9: deny assertions survived the round trip.
     n_deny = sum(1 for a in assertions if a["polarity"] == "deny")

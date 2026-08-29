@@ -440,3 +440,233 @@ authority that the Federal Register never issued.
 
 Each is proven by a fixture that injects the violation, shows `verify` exits
 1, restores, and shows it exits 0 — `review/fixtures_D/`.
+
+---
+
+## The F1 rollout and the second evidence family — the 2026-08-31 pass
+
+*Workstream F. Two changes to one file: the Federal Register harvest stops
+resolving entities itself, and the IRS becomes the first source that can
+disagree with the spine about the same thing. Every number below is measured
+from the live tables.*
+
+### The roster harvest now consumes the link layer
+
+`harvest_fr_roster` used to call `503.resolve()` and emit onto whatever came
+back. ADR-001 split the source's claim from Cedar's match into two tables in
+`data/spine/`; until this pass **nothing consumed them**. It does now:
+
+```
+cedar_source_records.csv        what the record SAYS   -> the facts
+cedar_source_record_links.csv   which entity it MEANS  -> the match
+```
+
+An assertion is emitted only from a link with `link_role = identifies` and
+`link_status ∈ (verified, proposed)`. Every other record lands in a named
+bucket in `cedar_harvest_conservation.csv`, at the grain of the source-record
+node rather than the raw roster row.
+
+| | before | after |
+|---|---:|---:|
+| roster records that produced facts | 563 | **566** |
+| refused, `cross_reference` pointer (not a listing) | 5 *(unnamed `continue`)* | 5 |
+| refused, `contested` — >1 eligible candidate, nothing accepted | 4 *(as "did not match")* | 3 |
+| refused, `unresolved` — no eligible Cedar entity | — | 1 |
+| refused at harvest on non-government class | 3 | **0** — the link layer denies them first |
+| facts lost | — | **0** |
+
+**+3 records, 0 lost, 0 repointed.** The three gained are the ones the class
+guard had to refuse before, because the only match on offer was an ANCSA
+corporation. The link layer's class-restricted retry recovers the government
+the roster is actually naming, so the fact lands on the right entity instead
+of being dropped:
+
+| record | before | after |
+|---|---|---|
+| `Algaaciq Native Village (St. Mary's)` | refused (ANV **Corporation**) | `CE-0000B-2K` Fed. rec. AK Native Village |
+| `Native Village of Chuathbaluk (Russian Mission…)` | refused (ANV **Corporation**) | `CE-00017-FZ` Fed. rec. AK Native Village |
+| `Native Village of Nanwalek (aka English Bay)` | refused (ANV **Corporation**) | `CE-0003Q-SF` Fed. rec. AK Native Village |
+
+**The nine wrong facts stay gone.** Re-checked on every run and by fixture:
+all five ANCSA corporations that ever carried a roster fact
+(`CE-000AW-TW`, `CE-000BP-VP`, `CE-000CB-YK`, `CE-0008S-YH`, `CE-000BZ-HQ`)
+hold **0** `fr_tribal_list` assertions and **0** resolved recognition or
+official-name facts, and **0** roster-sourced assertions in the whole store
+sit on a non-government class.
+
+**A defect the rewiring surfaced.** `cedar_source_record_links.csv` on disk
+had been built before workstream D repaired `503.build_index`, and a re-run
+was no longer byte-identical — the layer's own regenerability claim had
+quietly stopped being true. Rebuilt (`514 all --apply`, `verify` and all 13
+fixtures green), and one record changed answer:
+
+```
+Delaware Tribe of Indians   proposed -> CE-00142-4V      became CONTESTED
+```
+
+The cause is in `data/clean/entity_aliases.csv`, not in either script:
+**`Delaware Tribe of Indians` is carried as a CAGE-derived legal alias of
+`CE-00141-Y2` Delaware *Nation***. They are two different federally
+recognized tribes. With the class field repaired, both candidates are now
+government-class, the gov-class tiebreak can no longer separate them, and
+`503` returns `AMBIGUOUS_EXACT`. The honest outcome is a contested record with
+both candidates kept; the fix is to withdraw the alias, which is not this
+file's to make. Filed in the handoff.
+
+### The IRS, and the grain decision it forced
+
+`LR_IRS` had been in the lineage tree since the layer was built and asserted
+almost nothing: an EIN and the legal name copied out of Cedar's own ledger.
+It is a real second family — its root derives from nothing, so an IRS address
+agreeing with the spine is not an echo.
+
+**An IRS filing address belongs to the FILING ORGANISATION.** Whether that is
+a fact about the Cedar entity depends entirely on what the entity is, so the
+decision is made **per class and written into the code** with its reason:
+
+| grain | classes | predicate |
+|---|---|---|
+| **entity** | Tribal College or University · Native CDFI · Native Financial Institution · Urban Indian Organization · Intertribal Organization · Native Hawaiian Organization · Federal-level self-governance consortium | `entity.state`, `entity.city` |
+| **registration** | everything else — tribes, AK village governments, state-recognized tribes, ANCSA corporations, constituency entities, BIE schools | `entity.registration_state`, `entity.registration_city`, qualified `EIN:<ein>` |
+
+A tribe is a government; a government does not file a Form 990. The EIN bound
+to one in Cedar's ledger belongs to *some organisation that files* — and the
+live data says exactly that. EIN `16015647` on the Penobscot Nation is
+**`PENOBSCOT MARINE MUSEUM`**; EIN `391795874` on the Rosebud Sioux Tribe of
+South Dakota is **`ROSEBUD INC` of Cambridge, WISCONSIN**. Asserting either as
+`entity.state` is the Alaska-villages-moved-to-Virginia mistake arriving from
+a second source, and `entity.legal_business_name` is therefore *always*
+registration grade too — collapsing filed names onto the entity is what
+manufactured the 36 phantom corroborations F7 removed.
+
+**The class rule is necessary and not sufficient.** Three of fifteen
+tribal-college EIN links point at a *different organisation*, so an
+entity-grade fact additionally requires the **filed name to identify the
+entity** — equal to its canonical name or a recorded alias after folding
+corporate suffixes, and distinctive (≥2 tokens, ≥14 folded characters,
+because `ROSEBUD` matched a canonical name exactly and is a Wisconsin
+company). That test is not entity resolution: the EIN→entity link is read
+from Cedar's ledger and never made here. It answers the different question of
+whether the filer and the entity are **one legal person**, which is what the
+grain turns on.
+
+Two link routes, both read, neither invented here:
+
+1. `cedar_identifier_ledger_final.csv`, EIN rows at tier ≠ X — Cedar's
+   adjudicated register. Tier X is a refutation of the link, so the address
+   filed under it cannot describe the entity. **319 rows excluded on that
+   ground alone.**
+2. `np_orgs.csv`'s own `cedar_uid`. Not adjudicated in the ledger, so used
+   **only** where the strongest guard also passes — self-filing class *and*
+   filed-name identity — and never for a registration-grade fact.
+
+`tribal_irs990_verified_strict.csv` is read, measured and **emits nothing**:
+1,090 of 1,090 EINs are already in `np_orgs`, with **0** filed-name and **0**
+state differences. It is the same BMF extract, narrowed. Harvesting it would
+book one fact twice inside one family — the `LR_CICD` mistake with a different
+table — so all 1,090 rows land in a named `ECHO` bucket. The measurement is
+the product.
+
+### The first real corroboration numbers
+
+| | before | after |
+|---|---:|---:|
+| single-valued facts with **more than one source** | **0** | **13** |
+| …of those, **AGREE** | — | **13** |
+| …of those, **DISAGREE** | — | **0** |
+| facts with >1 **independent** evidence family (`corroborated`) | 2 | **4** |
+| `legacy_only` | 11,661 | **11,650** |
+| `identity_facts_legacy_only` | 4,100 | **4,089** |
+| resolved facts | 32,545 | 34,185 |
+| conflicts | 0 | 0 |
+
+**Do not read that as a big result.** All 13 are `entity.state`, and only two
+reach `corroborated`, because a second source can only *corroborate* when the
+first one is a family whose independence we can vouch for:
+
+```
+CE-000W1-JS  Native Hawaiian Organization Charity   HI   elijah_ruling        + irs_bmf
+CE-000YE-AY  Makaha Cultural Learning Center        HI   nhoa_member_directory + irs_bmf
+```
+
+The other 11 pair the IRS with `unattributed_legacy`, which by design votes
+for nothing. They still move — `legacy_only → traceable_single_source` — and
+that is the whole of the 11-row fall in the exposure metric. **Eleven rows of
+a 4,100-row debt is a demonstration, not a payment.**
+
+The IRS also added **38 `entity.state` and 51 `entity.city` facts where Cedar
+had none at all** — mostly intertribal organisations, which had no state in
+the spine. Coverage, not corroboration, and counted separately for that
+reason.
+
+### What actually disagreed — and it is not the addresses
+
+Zero disagreements at entity grain is a consequence of the guards, not of the
+data being clean. The disagreements the IRS family found are about **links**,
+and they are written to `review/irs_ein_link_queue_<date>.csv` for an owner
+ruling rather than acted on here — `cedar_identifier_ledger_final.csv` is not
+this file's to change.
+
+**6 EIN links on entities that *do* file their own returns, filed under a
+different organisation's name:**
+
+| entity | EIN filed as |
+|---|---|
+| Institute of American Indian Arts | INSTITUTE OF AMERICAN INDIAN ARTS **FOUNDATION** |
+| White Earth Tribal and Community College | …COLLEGE **FOUNDATION** |
+| Northwest Indian College (**WA**) | NORTHWEST INDIAN COMMUNITY DEVELOPMENT CENTER (**MN**) |
+| Nebraska Indian Community College | NEBRASKA INDIAN **CHILD WELFARE COALITION** |
+| Council of Athabascan Tribal Governments | ATHABASCAN **FIDDLERS ASSOCIATION** |
+| Chugachmiut (**AK**) | **LAKOTA LANGUAGE CONSORTIUM** (**IN**) |
+
+A college's foundation is a real organisation with its own address. Publishing
+its city as the college's is the containment error at a smaller scale, and the
+name test is what stops it.
+
+**328 live (non-tier-X) EIN links file in a different state from the entity.**
+Not a fact conflict — different subjects, and registration grade can never
+compete with `entity.state` — but the cheapest wrong-link signal there is:
+
+```
+CE-0016E-P7  Lumbee (NC)                        <- NORTH EASTERN BAND OF CHEROKEE (NY)
+CE-001AB-RW  Seneca-Cayuga Nation (OK)          <- SENECA NATION LIBRARY (NY)
+CE-0019R-1H  St. Croix Chippewa (WI)            <- AKWESASNE BOYS & GIRLS CLUB (NY)
+CE-001DJ-HV  Lenape Indian Tribe of Delaware    <- LENAPE VALLEY SOCCER CLUB INC (NJ)
+                                                  …and 5 more Lenape Valley
+                                                  school-sports charities in NJ
+```
+
+`Lenape Valley` is a New Jersey **place name**, and the housing-authority
+lesson in `NATIVE_ENTITY_NUANCES.md` — "TUSCARAWAS METROPOLITAN HOUSING is an
+Ohio county housing authority" — is the same rule these rows break.
+
+### Invariants added this pass
+
+| | |
+|---|---|
+| **I16** | an IRS address may be an *entity* fact only on a class that files its own return, and every IRS registration fact must carry its `EIN:` qualifier |
+| **I17** | the Federal Register harvest may assert only through an **accepted** source-record link, and every accepted link must produce its assertion |
+
+Both are proven by fixtures that inject the violation, show `verify` exits 1,
+restore, and show it exits 0 — `review/fixtures_F/`. I17's second clause is
+the old bare `continue` made illegal: an accepted link that emits nothing now
+fails the build.
+
+### Open
+
+- **`identity_facts_legacy_only` is gated in the wrong direction.** It sits in
+  `62_no_regression_check.MUST_NOT_FALL` under a comment reading *"This may
+  only fall"*, and `docs/EXTERNAL_REVIEW_RESPONSE.md` records it as
+  MUST_NOT_RISE. As installed, the ratchet fails the build for every payment
+  against the exposure the external review asked for — it failed on this one.
+  `62` is the integrator's file this pass; filed as a one-line change request.
+- **11 of 4,100.** The overlap between the IRS family and the spine's
+  identity-critical fields is small and will stay small until a second source
+  exists for `entity.class` and `entity.canonical_name`, which is where the
+  4,089 actually sit.
+- **`entity.city` is still effectively single-sourced.** The spine holds a
+  city on 229 of 1,536 rows, so the IRS mostly had nothing to agree or
+  disagree with.
+- The **Delaware alias** and the **334 IRS link findings** are queue items,
+  not corrections. Nothing in `cedar_identifier_ledger_final.csv` or
+  `entity_aliases.csv` was changed.

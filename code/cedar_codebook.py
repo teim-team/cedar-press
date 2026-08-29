@@ -131,6 +131,17 @@ LICENSED_SOURCE_FILES = {
 # triage on every run and prints a loud mismatch if the two have drifted.
 # ---------------------------------------------------------------------------
 INTERNAL_TABLES = {
+    "cedar_source_records.csv":
+        "the source-record nodes behind 514 - what each source row literally "
+        "says, with NO cedar_uid column by construction. Load-bearing for "
+        "shipped facts since 510.harvest_fr_roster consumes it, but it is our "
+        "resolution process, not an event in the world; the facts it feeds "
+        "ship through the assertion layer",
+    "cedar_source_record_links.csv":
+        "the refers_to layer: which Cedar entity each source record names, "
+        "with its own evidence, status and refusals. The F1 fix made "
+        "mechanical. Same reasoning as its sibling above - process, not "
+        "world; consumed by 510, never shipped raw",
     "sam_entity_connections.csv":
         "511's declared-connection working set, currently near-empty because "
         "the SAM key measured out at 10 calls/day WITH the hierarchy section "

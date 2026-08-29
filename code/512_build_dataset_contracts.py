@@ -176,21 +176,905 @@ GRAIN = {
         declared_by="docs/GAMING_DATASET_PLAN.md"),
 }
 
+# ---------------------------------------------------------------------------
+# THE 2026-08-29 GRAIN SWEEP (workstream E).
+#
+# ADR-007 shipped the validator and left 207 shippable tables undeclared. Each
+# entry below was derived the same way and no other way:
+#
+#   1. candidate keys generated from the file, then CONFIRMED unique across
+#      the FULL file by `512 probe` - not a sample, not a guess, not a
+#      column that merely looks like an id. The measurements are in
+#      docs/schema/grain_evidence.json with the date they were taken.
+#   2. the row meaning written from the table's own columns and, where one
+#      exists, the build log that states it.
+#   3. where the data could NOT answer what a row is meant to be, NOTHING is
+#      declared - the table goes to GRAIN_OPEN with the candidates tested and
+#      the collision counts, or to GRAIN_DEFECT when the file has literal
+#      duplicate rows.
+#
+# `join_cardinality` says "one" ONLY where the column is part of the primary
+# key or was separately confirmed unique. A column that happens to measure
+# one row per value today - a facility that appears once because only one
+# event has been recorded for it - is declared "many", because "one" is a
+# PROMISE and that one is not ours to make. Every declared field is
+# re-validated against the file on every run; a wrong promise here fails the
+# release, which is the entire point of writing it down.
+# ---------------------------------------------------------------------------
+EVID = ("workstream-E grain sweep 2026-08-29: primary key confirmed unique "
+        "on the FULL file; evidence in docs/schema/grain_evidence.json")
+
+
+def _d(grain, primary_key, join_cardinality=None, declared_by=EVID):
+    return dict(grain=grain, primary_key=primary_key,
+                join_cardinality=join_cardinality or {},
+                declared_by=declared_by)
+
+
+GRAIN_SWEEP = {
+    # ---- entity layer -----------------------------------------------------
+    "admin_region_assignments.csv": _d(
+        "one row per assignment of a subject (entity, facility or other "
+        "keyed subject) to one administrative region, with the interval it "
+        "held", ["assignment_id"], {"administrative_region_id": "many"}),
+    "admin_region_overlap_derived.csv": _d(
+        "one row per derived pair of administrative regions from two "
+        "different region systems that share tribes",
+        ["administrative_region_id_a", "administrative_region_id_b"]),
+    "admin_region_systems.csv": _d(
+        "one row per administrative region SYSTEM (an agency's way of "
+        "dividing the country), not per region",
+        ["region_system_code"]),
+    "admin_regional_observations.csv": _d(
+        "one row per statistic published at the level of one administrative "
+        "region", ["observation_id"], {"administrative_region_id": "many"}),
+    "admin_regions.csv": _d(
+        "one row per administrative region within a system",
+        ["administrative_region_id"], {"administrative_region_id": "one"}),
+    "cedar_correction_register.csv": _d(
+        "one row per recorded correction action - what was withdrawn or "
+        "repointed, in which table, and why", ["correction_id"],
+        {"entity_id": "many"}),
+    "cedar_entity_identity_crosswalk.csv": _d(
+        "one row per mapping between a Cedar entity and one external "
+        "identifier in one external scheme", ["crosswalk_id"],
+        {"cedar_uid": "many"}),
+    "cedar_identifier_graph_nodes.csv": _d(
+        "one row per identifier observed anywhere in Cedar, with its "
+        "resolution and its block - docs/IDENTIFIER_GRAPH_BUILD_LOG.md",
+        ["node"]),
+    "cedar_identifier_propagation.csv": _d(
+        "one row per (dataset, identifier) propagation proposal, with the "
+        "path it travelled and the tier that path earns",
+        ["dataset", "identifier"]),
+    "cedar_publishable_identifiers.csv": _d(
+        "one row per identifier Cedar may publish, with the entity it is "
+        "attributed to and the evidence tier", ["identifier"],
+        {"tribe_id": "many", "cedar_uid": "many"}),
+    "entity_aliases.csv": _d(
+        "one row per alias binding: one name form for one entity from one "
+        "source system", ["alias_id"],
+        {"cedar_uid": "many", "entity_id": "many"}),
+    "entity_hierarchy.csv": _d(
+        "one row per entity, carrying its parent and ultimate parent - "
+        "docs/ALIAS_RELATIONSHIP_MIGRATION_LOG.md", ["tribe_id"],
+        {"tribe_id": "one", "cedar_uid": "one"}),
+    "entity_relationships.csv": _d(
+        "one row per directed relationship between two entities, with the "
+        "interval and the evidence", ["relationship_id"]),
+    "entity_year_panel.csv": _d(
+        "one row per (entity, calendar year). A JOIN ON cedar_uid ALONE "
+        "FANS OUT ACROSS 28 YEARS - summing a dollar column after that join "
+        "multiplies it", ["tribe_id", "year"],
+        {"tribe_id": "many", "cedar_uid": "many"}),
+    "federal_recognition_events.csv": _d(
+        "one row per federal recognition status change, identified by the "
+        "entity and the Federal Register notice that effected it - "
+        "docs/RECOGNITION_HISTORY_BUILD_LOG.md",
+        ["entity_key", "fr_document_number"],
+        {"tribe_id": "many", "cedar_uid": "many"}),
+    "federal_recognition_roster.csv": _d(
+        "one row per (recognition notice, listed entry) - the entry as "
+        "printed, not the entity - docs/RECOGNITION_HISTORY_BUILD_LOG.md",
+        ["fr_document_number", "entry_raw"],
+        {"tribe_id": "many", "cedar_uid": "many"}),
+    "foia_discovery_targets.csv": _d(
+        "one row per discovered FOIA-related URL, with what it was found on "
+        "and whether it fetched", ["url"]),
+    "intertribal_memberships.csv": _d(
+        "one row per (intertribal organisation, member entity as named, "
+        "observation year)",
+        ["org_id", "member_entity_name", "year_observed"]),
+    "intertribal_orgs.csv": _d(
+        "one row per intertribal organisation", ["proposed_id"],
+        {"ein": "many"}),
+    "native_fi_roster.csv": _d(
+        "one row per Native financial institution. The roster mints no id: "
+        "`name` IS the key, so a renamed institution changes key",
+        ["name"]),
+    "nho_doi_notification_roster.csv": _d(
+        "one row per Native Hawaiian Organisation on the DOI notification "
+        "list", ["nho_id"]),
+    "nho_ownership_changes.csv": _d(
+        "one row per recorded ownership-change event affecting an NHO firm",
+        ["event_id"], {"cedar_uid": "many"}),
+    "nho_register.csv": _d(
+        "one row per Native Hawaiian Organisation in the register",
+        ["proposed_id"], {"ein": "many"}),
+    "nho_verified_entities.csv": _d(
+        "one row per verified NHO contracting firm, keyed by its UEI",
+        ["uei"], {"uei": "one", "cage_code": "one"}),
+    "tcu_cdfi_added.csv": _d(
+        "one row per entity added to the spine by the TCU/CDFI pass",
+        ["tribe_id"], {"tribe_id": "one", "cedar_uid": "one"}),
+    "tcu_roster.csv": _d(
+        "one row per tribal college or university. No id is minted; `name` "
+        "is the key", ["name"]),
+    "visitor_access_events.csv": _d(
+        "one row per visitor-access event recovered from an agency visitor "
+        "record", ["visitor_access_event_id"]),
+
+    # ---- contractors ------------------------------------------------------
+    "prime_contracts_awards.csv": _d(
+        "one row per CONTRACT (award), rolled up across its transactions - "
+        "not one row per transaction", ["contract_number"],
+        {"tribe_id": "many", "cedar_uid": "many", "cage_code": "many"}),
+    "prime_contracts_published.csv": _d(
+        "one row per CONTRACT (award), the publishable projection of "
+        "prime_contracts_awards.csv", ["contract_number"],
+        {"tribe_id": "many", "cedar_uid": "many", "cage_code": "many"}),
+    "sam_prime_contracts_fy2000_2007.csv": _d(
+        "one row per FPDS transaction in the FY2000-2007 SAM archive pull",
+        ["sam_transaction_key"], {"cage_code": "many"}),
+    "sam_prime_contracts_fy2000_2007_PUBLISHABLE.csv": _d(
+        "one row per FPDS transaction in the FY2000-2007 SAM archive pull, "
+        "publishable projection", ["sam_transaction_key"],
+        {"cage_code": "many"}),
+
+    # ---- deals ------------------------------------------------------------
+    "deals_2000_2019_additions.csv": _d(
+        "one row per deal event added by the 2000-2019 backfill", ["Deal_ID"]),
+    "deals_anc_reports_additions.csv": _d(
+        "one row per deal event added from ANC annual reports", ["Deal_ID"]),
+    "deals_ancsa_portal_additions.csv": _d(
+        "one row per deal event added from the ANCSA portal", ["Deal_ID"]),
+    "deals_ancsa_portal_v2_additions.csv": _d(
+        "one row per deal event added from the ANCSA portal, second pass",
+        ["Deal_ID"]),
+    "deals_classified.csv": _d(
+        "one row per classified deal event - the merged deals ledger",
+        ["Deal_ID"], {"cedar_uid": "many"}),
+    "deals_federal_awards_additions.csv": _d(
+        "one row per deal event derived from a federal award", ["Deal_ID"]),
+    "deals_historical_additions.csv": _d(
+        "one row per deal event added by the historical pass", ["Deal_ID"]),
+    "deals_sec_2010_2017_additions.csv": _d(
+        "one row per deal event added from SEC filings 2010-2017",
+        ["Deal_ID"]),
+    "deals_tribal_debt_additions.csv": _d(
+        "one row per deal event added from the tribal-debt pass",
+        ["Deal_ID"]),
+    "deals_source_index.csv": _d(
+        "one row per Native party named in the deals ledger, with the "
+        "sources its deals were discovered through", ["native_party"]),
+    "ownership_events.csv": _d(
+        "one row per ownership-change event derived from the deals ledger",
+        ["event_id"], {"tribe_id": "many", "cedar_uid": "many",
+                       "entity_id": "many"}),
+    "seminole_bond_disclosures.csv": _d(
+        "one row per bond disclosure document filed for the obligor",
+        ["disclosure_id"], {"tribe_id": "many", "cedar_uid": "many"}),
+
+    # ---- federal register -------------------------------------------------
+    "consultation_events.csv": _d(
+        "one row per (consultation event, participant as published). "
+        "`consultation_event_id` alone is NOT unique - an event with "
+        "several named participants has one row each, and 1,006 rows name "
+        "no participant at all",
+        ["consultation_event_id", "participant_name_as_published"],
+        {"tribe_id": "many", "cedar_uid": "many"}),
+    "correspondence_foia_source_coverage.csv": _d(
+        "one row per source URL checked for congressional-correspondence "
+        "coverage", ["url"]),
+    "federal_actions.csv": _d(
+        "one row per Federal Register document, classified",
+        ["document_number"]),
+    "federal_actions_entity_bridge.csv": _d(
+        "one row per (Federal Register document, entity named in it)",
+        ["document_number", "tribe_id"],
+        {"tribe_id": "many", "cedar_uid": "many"}),
+    "federal_actions_raw.csv": _d(
+        "one row per Federal Register document as pulled, before "
+        "classification", ["document_number"]),
+    "fr_abstract_availability_year.csv": _d(
+        "one row per publication year: how many FR documents that year "
+        "carried an abstract", ["publication_year"]),
+    "fr_consultation_by_agency.csv": _d(
+        "one row per normalised department, counting its consultation "
+        "notices. One row carries a blank department and is the unattributed "
+        "bucket", ["normalized_department"]),
+    "fr_consultation_notices.csv": _d(
+        "one row per Federal Register notice carrying a consultation signal",
+        ["document_number"]),
+    "fr_consultation_referenced.csv": _d(
+        "one row per Federal Register document that REFERENCES a "
+        "consultation having been undertaken", ["document_number"]),
+    "fr_consultation_year.csv": _d(
+        "one row per publication year of consultation counts",
+        ["publication_year"]),
+    "fr_content_classification.csv": _d(
+        "one row per Federal Register document, with its relevance tier and "
+        "themes", ["document_number"]),
+    "fr_ex_parte_notices.csv": _d(
+        "one row per Federal Register ex parte notice",
+        ["fr_ex_parte_notice_id"]),
+    "fr_ex_parte_parties.csv": _d(
+        "one row per party named in a Federal Register ex parte notice",
+        ["fr_ex_parte_party_id"]),
+    "fr_ex_parte_party_entity_links.csv": _d(
+        "one row per resolved link from an ex parte party to a Cedar entity",
+        ["link_id"], {"cedar_uid": "many"}),
+    "fr_relevance_tier_year.csv": _d(
+        "one row per (publication year, relevance tier)",
+        ["publication_year", "relevance_tier"]),
+    "fr_theme_year.csv": _d(
+        "one row per (publication year, theme)",
+        ["publication_year", "theme"]),
+    "nepa_administrative_record_parties.csv": _d(
+        "one row per (NEPA administrative record, party as published)",
+        ["party_id", "party_name_as_published"], {"cedar_uid": "many"}),
+    "nepa_eplanning_projects.csv": _d(
+        "one row per NEPA ePlanning project", ["nepa_number"]),
+    "nepa_project_documents.csv": _d(
+        "one row per (NEPA project, document as named in the record)",
+        ["nepa_number", "document_name_verbatim"]),
+    "section_106_consultation_events.csv": _d(
+        "one row per Section 106 consultation event",
+        ["consultation_event_id"],
+        {"tribe_id": "many", "cedar_uid": "many"}),
+    "section_106_project_parties.csv": _d(
+        "one row per party named in a Section 106 undertaking", ["party_id"]),
+    "section_106_source_coverage.csv": _d(
+        "one row per source swept for Section 106 records, with what it "
+        "yielded and what it could not", ["source"]),
+
+    # ---- funding ----------------------------------------------------------
+    "bie_uio_dollars_by_entity.csv": _d(
+        "one row per BIE school or Urban Indian Organisation entity, with "
+        "its dollars summed across sources", ["tribe_id"],
+        {"tribe_id": "one", "cedar_uid": "one"}),
+    "faads_entity_attribution.csv": _d(
+        "one row per FAADS transaction that was attributed to an entity - "
+        "docs/FAADS_NAME_ATTRIBUTION_LOG.md", ["faads_row_id"],
+        {"tribe_id": "many", "cedar_uid": "many"}),
+    # The GRAIN_OPEN entry this replaces asked whether
+    # `assistance_transaction_unique_key` is unique ACROSS the union of the
+    # assistance and archive pulls or only within one pull. It was the right
+    # question and it stayed open because nobody had looked. The probe
+    # looked: the key is unique across all 701,955 rows of the union. That is
+    # a MEASUREMENT, not a ruling - which is exactly why it is declared here
+    # rather than written into a document. A declaration is re-tested on
+    # every run, so the day a pull breaks it the release fails; the open
+    # question could only ever be forgotten.
+    "federal_funding_transactions.csv": _d(
+        "one row per federal assistance award TRANSACTION, across the union "
+        "of the assistance and archive pulls",
+        ["assistance_transaction_unique_key"],
+        {"tribe_id": "many", "cedar_uid": "many"}),
+    "federal_funding_tribe_year_panel.csv": _d(
+        "one row per (entity, federal fiscal year). A join on tribe_id "
+        "alone fans out across years",
+        ["tribe_id", "fiscal_year"],
+        {"tribe_id": "many", "cedar_uid": "many"}),
+    "funding_identifier_netnew_ueis.csv": _d(
+        "one row per recipient UEI that the funding pull added and no other "
+        "Cedar source had", ["recipient_uei"]),
+    "inflation_deflator.csv": _d(
+        "one row per year of the GDP deflator series", ["year"]),
+    "native_passthrough_pairs.csv": _d(
+        "one row per (paying entity, receiving entity) pair, rolled up "
+        "across their subawards", ["from_tribe_id", "to_tribe_id"]),
+
+    # ---- gaming -----------------------------------------------------------
+    "ca_gaming_facilities_official.csv": _d(
+        "one row per facility as it appears on ONE official California list "
+        "at ONE as-of date - a facility on three lists has three rows",
+        ["record_id"], {"tribe_id": "many", "cedar_uid": "many",
+                        "facility_id": "many"}),
+    "ca_gaming_payments.csv": _d(
+        "one row per published California gaming payment observation "
+        "(fund x party x period x metric)", ["payment_id"],
+        {"tribe_id": "many", "cedar_uid": "many"}),
+    "compact_events.csv": _d(
+        "one row per dated event in a compact's life", ["event_id"],
+        {"tribe_id": "many", "cedar_uid": "many", "entity_id": "many",
+         "compact_id": "many"}),
+    "compact_obligation_tribal_agency_bridge.csv": _d(
+        "one row per compact reporting obligation bridged to the named "
+        "tribal gaming agency", ["bridge_id"],
+        {"tribe_id": "many", "cedar_uid": "many", "compact_id": "many"}),
+    "compact_required_reports.csv": _d(
+        "one row per reporting obligation typed out of one compact version",
+        ["report_id"], {"tribe_id": "many", "cedar_uid": "many",
+                        "entity_id": "many", "compact_id": "many"}),
+    "compact_structured_terms.csv": _d(
+        "one row per structured term extracted from one compact version",
+        ["term_id"], {"tribe_id": "many", "cedar_uid": "many",
+                      "entity_id": "many", "compact_id": "many"}),
+    "compact_terms.csv": _d(
+        "one row per term quote extracted from one compact version",
+        ["version_id", "quote"],
+        {"tribe_id": "many", "cedar_uid": "many", "entity_id": "many",
+         "compact_id": "many"}),
+    "compact_versions.csv": _d(
+        "one row per compact version (original or amendment)",
+        ["version_id"], {"compact_id": "many"}),
+    "compacts.csv": _d(
+        "one row per compact", ["compact_id"],
+        {"compact_id": "one", "tribe_id": "many", "cedar_uid": "many",
+         "entity_id": "many"}),
+    "digital_gaming_relationships.csv": _d(
+        "one row per digital-gaming relationship (tribe x brand x product "
+        "authorisation)", ["digital_gaming_id"],
+        {"tribe_id": "many", "cedar_uid": "many", "entity_id": "many"}),
+    "digital_gaming_revenue.csv": _d(
+        "one row per published digital-gaming revenue observation "
+        "(licensee x period x metric)", ["revenue_id"],
+        {"tribe_id": "many", "cedar_uid": "many", "entity_id": "many"}),
+    "fac_audit_gaming_disclosures.csv": _d(
+        "one row per gaming disclosure QUOTE found on one page of one "
+        "Single Audit report. The table mints no disclosure id, so the "
+        "quote is part of the key; `report_id` alone repeats",
+        ["report_id", "verbatim_quote", "source_page"],
+        {"cedar_uid": "many", "entity_id": "many"}),
+    "fl_gaming_payments.csv": _d(
+        "one row per published Florida gaming payment observation, "
+        "forecasts included and flagged", ["payment_id"],
+        {"tribe_id": "many", "cedar_uid": "many"}),
+    "gaming_capacity_official.csv": _d(
+        "one row per officially published capacity observation "
+        "(facility x metric x as-of date)", ["observation_id"],
+        {"tribe_id": "many", "cedar_uid": "many", "facility_id": "many"}),
+    "gaming_decision_compact_join.csv": _d(
+        "one row per BIA gaming-land decision, with the compacts it was "
+        "matched to", ["decision_id"]),
+    "gaming_decision_events.csv": _d(
+        "one row per dated status event behind a gaming-land decision - "
+        "docs/GAMING_BUILD_LOG_2026-08-05.md", ["event_id"]),
+    "gaming_device_observations.csv": _d(
+        "one row per device observation (facility x date x device class)",
+        ["observation_id"], {"tribe_id": "many", "cedar_uid": "many",
+                             "entity_id": "many", "facility_id": "many"}),
+    "gaming_employment_observations.csv": _d(
+        "one row per employment observation at one geographic level",
+        ["observation_id"], {"tribe_id": "many", "cedar_uid": "many",
+                             "entity_id": "many", "facility_id": "many",
+                             "ein": "many"}),
+    "gaming_facilities.csv": _d(
+        "one row per gaming facility - the directory core, "
+        "docs/GAMING_BUILD_LOG_2026-08-05.md", ["facility_id"],
+        {"facility_id": "one", "tribe_id": "many", "cedar_uid": "many",
+         "entity_id": "many"}),
+    "gaming_financing_events.csv": _d(
+        "one row per financing event evidenced by an NIGC opinion",
+        ["financing_event_id"], {"cedar_uid": "many"}),
+    "gaming_game_finder_observations.csv": _d(
+        "one row per game-finder listing observation", ["observation_id"],
+        {"tribe_id": "many", "cedar_uid": "many", "entity_id": "many",
+         "facility_id": "many"}),
+    "gaming_land_decisions.csv": _d(
+        "one row per BIA gaming-land decision record - "
+        "docs/GAMING_BUILD_LOG_2026-08-05.md", ["decision_id"],
+        {"tribe_id": "many", "cedar_uid": "many", "entity_id": "many"}),
+    "gaming_manufacturer_facts.csv": _d(
+        "one row per manufacturer fact taken from one filing", ["fact_id"]),
+    "gaming_mitigation_agreements.csv": _d(
+        "one row per service commitment in a mitigation agreement between "
+        "a project and one counterparty government",
+        ["project_id", "counterparty_government", "service"]),
+    "gaming_nigc_roster_link.csv": _d(
+        "one row per Cedar facility linked to the NIGC roster",
+        ["facility_id"], {"facility_id": "one", "tribe_id": "many",
+                          "cedar_uid": "many"}),
+    "gaming_ordinance_ocr.csv": _d(
+        "one row per gaming ordinance PDF put through OCR",
+        ["ordinance_id"], {"tribe_id": "many", "cedar_uid": "many"}),
+    "gaming_ordinances.csv": _d(
+        "one row per gaming ordinance or amendment", ["ordinance_id"],
+        {"tribe_id": "many", "cedar_uid": "many"}),
+    "gaming_project_facilities.csv": _d(
+        "one row per development ALTERNATIVE per program source - "
+        "docs/GAMING_NEPA_PILOT_LOG.md",
+        ["project_id", "alternative", "source_document"]),
+    "gaming_properties.csv": _d(
+        "one row per gaming property, the temporal view of the facility "
+        "directory", ["facility_id"],
+        {"facility_id": "one", "tribe_id": "many", "cedar_uid": "many"}),
+    "gaming_property_federal_traces.csv": _d(
+        "one row per gaming property, carrying the federal traces found for "
+        "it", ["facility_id"],
+        {"facility_id": "one", "tribe_id": "many", "cedar_uid": "many",
+         "compact_id": "many"}),
+    "gaming_property_labor_demand.csv": _d(
+        "one row per labour-demand observation on a property site",
+        ["observation_id"], {"tribe_id": "many", "cedar_uid": "many",
+                             "entity_id": "many", "facility_id": "many"}),
+    "gaming_property_site_observations.csv": _d(
+        "one row per metric observed on a property's own website at one "
+        "retrieval", ["observation_id"],
+        {"tribe_id": "many", "cedar_uid": "many", "entity_id": "many",
+         "facility_id": "many"}),
+    "gaming_property_universe_events.csv": _d(
+        "one row per change detected between two snapshots of the NIGC "
+        "property universe", ["event_id"],
+        {"facility_id": "many", "cedar_uid": "many", "entity_id": "many"}),
+    "gaming_revenue_bounds.csv": _d(
+        "one row per (facility or tribe, fiscal year) revenue bound",
+        ["bound_id"], {"tribe_id": "many", "cedar_uid": "many",
+                       "facility_id": "many"}),
+    "gaming_vendor_tribal_licenses.csv": _d(
+        "one row per (vendor, tribal gaming regulator) licence as reported "
+        "in one source document. `license_number` is blank on all 740 rows "
+        "and cannot be part of the key",
+        ["vendor_name", "tribal_gaming_regulator", "source_url"],
+        {"cedar_uid": "many", "entity_id": "many"}),
+    "loyalty_program_property.csv": _d(
+        "one row per property enrolled in a loyalty program",
+        ["loyalty_program_id", "facility_id"],
+        {"facility_id": "one", "tribe_id": "many", "cedar_uid": "many",
+         "entity_id": "many"}),
+    "loyalty_programs.csv": _d(
+        "one row per loyalty program. One program per operating tribe today",
+        ["loyalty_program_id"],
+        {"tribe_id": "one", "cedar_uid": "one", "entity_id": "one"}),
+    "nigc_declination_letters.csv": _d(
+        "one row per NIGC declination opinion", ["cedar_opinion_id"],
+        {"cedar_uid": "many"}),
+    "nigc_region_assignments.csv": _d(
+        "one row per (facility, NIGC region assignment start year)",
+        ["facility_id", "effective_start_year"],
+        {"facility_id": "many", "tribe_id": "many", "cedar_uid": "many",
+         "administrative_region_id": "many"}),
+    "nigc_regional_ggr.csv": _d(
+        "one row per (NIGC region, fiscal year) gross gaming revenue "
+        "figure", ["administrative_region_id", "fiscal_year"],
+        {"administrative_region_id": "many"}),
+    "nigc_revenue_bands.csv": _d(
+        "one row per (fiscal year, revenue band) in the NIGC band table",
+        ["band_id"]),
+    "state_gaming_observations.csv": _d(
+        "one row per state-published gaming observation "
+        "(facility or tribe x metric x period)", ["observation_id"],
+        {"tribe_id": "many", "cedar_uid": "many", "facility_id": "many"}),
+    "wa_machine_allocations.csv": _d(
+        "one row per Washington machine-allocation record for a tribe over "
+        "an interval", ["allocation_id"],
+        {"tribe_id": "many", "cedar_uid": "many"}),
+
+    # ---- legislation ------------------------------------------------------
+    "bill_votes.csv": _d(
+        "one row per roll-call vote on a Native-relevant bill", ["vote_id"]),
+    "bill_votes_entity_bridge.csv": _d(
+        "one row per (roll-call vote, entity named in the bill)",
+        ["vote_id", "tribe_id"],
+        {"tribe_id": "many", "cedar_uid": "many"}),
+    "bill_votes_official_verification.csv": _d(
+        "one row per roll call as pulled from the official record - "
+        "docs/BILLS_VOTES_COMPLETION_LOG.md", ["vote_id"]),
+    "congressional_correspondence_systems.csv": _d(
+        "one row per (correspondence system, quoted evidence for it). "
+        "`system_id` alone repeats where several citations evidence one "
+        "system", ["system_id", "verbatim_quote"]),
+    "member_positions.csv": _d(
+        "one row per (roll-call vote, member of Congress) - the member's "
+        "cast position", ["vote_id", "bioguide_id"]),
+    "native_bill_outcomes.csv": _d(
+        "one row per bill, with its final disposition - "
+        "docs/BILLS_VOTES_COMPLETION_LOG.md", ["bill_id"]),
+    "native_bills.csv": _d(
+        "one row per Native-relevant bill", ["bill_id"]),
+    "native_bills_entity_bridge.csv": _d(
+        "one row per (bill, entity named in it)", ["bill_id", "tribe_id"],
+        {"tribe_id": "many", "cedar_uid": "many"}),
+    "native_bills_entity_class.csv": _d(
+        "one row per (bill, class-match BASIS) where the bill names a class "
+        "of Native entity rather than an entity. (bill_id, entity_class) is "
+        "NOT unique - 34 collisions - because one class can be matched "
+        "through more than one basis",
+        ["bill_id", "class_match_basis"]),
+    "native_issue_litigation_positions.csv": _d(
+        "one row per position taken by an organisation in one case at one "
+        "stage", ["position_id"]),
+
+    # ---- lobbying ---------------------------------------------------------
+    "admin_appeal_decisions.csv": _d(
+        "one row per published administrative appeal decision",
+        ["decision_id"]),
+    "admin_appeal_parties.csv": _d(
+        "one row per party named in an administrative appeal decision",
+        ["party_id"], {"cedar_uid": "many"}),
+    "advocacy_passthrough.csv": _d(
+        "one row per funder-to-recipient grant that the passthrough chain "
+        "connects to lobbying", ["passthrough_id"], {"cedar_uid": "many"}),
+    "advocacy_passthrough_2026-08-07.csv": _d(
+        "one row per funder-to-recipient grant in the 2026-08-07 snapshot "
+        "of advocacy_passthrough", ["passthrough_id"],
+        {"cedar_uid": "many"}),
+    "agency_attention_vs_advocacy.csv": _d(
+        "one row per department, comparing Federal Register attention with "
+        "lobbying targeting", ["department"]),
+    "agency_attention_vs_advocacy_year.csv": _d(
+        "one row per (department, year)", ["department", "year"]),
+    "earmarks.csv": _d(
+        "one row per congressional earmark request", ["earmark_id"],
+        {"cedar_uid": "many", "entity_id": "many"}),
+    "ferc_docket_parties.csv": _d(
+        "one row per party on a FERC docket", ["ferc_docket_party_id"],
+        {"cedar_uid": "many"}),
+    "ferc_ex_parte_parties.csv": _d(
+        "one row per party row printed in a FERC ex parte notice table. "
+        "`ferc_ex_parte_party_id` alone is NOT unique (9 collisions) and "
+        "must not be used as a key",
+        ["ferc_ex_parte_party_id", "table_row_quote"],
+        {"cedar_uid": "many"}),
+    "ferc_tribal_dockets.csv": _d(
+        "one row per FERC docket swept, with retrieved-vs-reported totals - "
+        "docs/UNSHIPPED_TABLE_TRIAGE.md", ["docket_number", "subdocket"]),
+    "hearing_appearances.csv": _d(
+        "one row per witness appearance at a congressional hearing",
+        ["hearing_appearance_id"],
+        {"cedar_uid": "many", "entity_id": "many"}),
+    "lobbying_disclosure_verbosity_year.csv": _d(
+        "one row per filing year of disclosure verbosity measures",
+        ["filing_year"]),
+    "lobbying_issue_families_filing.csv": _d(
+        "one row per LDA filing, with the issue families classified from "
+        "its text", ["filing_uuid"],
+        {"cedar_uid": "many", "entity_id": "many"}),
+    "lobbying_issue_family_year.csv": _d(
+        "one row per (issue family, filing year)",
+        ["issue_family", "filing_year"]),
+    "lobbying_registrant_client_relationships.csv": _d(
+        "one row per (registrant, client) - "
+        "docs/LOBBYING_REGISTRANT_BUILD_LOG.md",
+        ["registrant_id", "client_id"], {"cedar_uid": "many"}),
+    "lobbying_registrant_concentration.csv": _d(
+        "one row per scope over which concentration is measured - "
+        "docs/LOBBYING_REGISTRANT_BUILD_LOG.md", ["scope", "scope_value"]),
+    "lobbying_registrant_identifiers.csv": _d(
+        "one row per identifier assertion about a registrant, with its "
+        "asserter - docs/LOBBYING_REGISTRANT_BUILD_LOG.md",
+        ["identifier", "asserted_by_source"]),
+    "lobbying_registrants.csv": _d(
+        "one row per Senate LDA registrant_id - "
+        "docs/LOBBYING_REGISTRANT_BUILD_LOG.md", ["registrant_id"]),
+    "lobbying_target_entities.csv": _d(
+        "one row per government entity as written on the filings",
+        ["government_entity_as_filed"]),
+    "native_entity_lobbying_disclosures.csv": _d(
+        "one row per LDA filing attributed to a Native entity",
+        ["filing_uuid"], {"cedar_uid": "many", "entity_id": "many"}),
+    "nrc_meeting_participants.csv": _d(
+        "one row per external participant in an NRC public meeting",
+        ["participant_id"], {"cedar_uid": "many"}),
+    "nrc_public_meetings.csv": _d(
+        "one row per NRC public meeting", ["nrc_meeting_id"]),
+    "oira_federal_action_links.csv": _d(
+        "one row per (OIRA meeting, Federal Register document) link",
+        ["oira_meeting_id", "federal_action_document_number"]),
+    "oira_meeting_participants.csv": _d(
+        "one row per attendee organisation at an OIRA meeting - "
+        "docs/OIRA_HEARINGS_BUILD_LOG.md", ["oira_participant_id"],
+        {"cedar_uid": "many", "entity_id": "many"}),
+    "oira_meetings.csv": _d(
+        "one row per OIRA meeting; attendance lives in "
+        "oira_meeting_participants.csv - docs/OIRA_HEARINGS_BUILD_LOG.md",
+        ["oira_meeting_id"], {"cedar_uid": "many", "entity_id": "many"}),
+    "tribe_year_lobbying_panel.csv": _d(
+        "one row per (entity, filing year). A join on entity alone fans out "
+        "across years", ["entity_id", "filing_year"],
+        {"entity_id": "many", "cedar_uid": "many"}),
+
+    # ---- nagpra -----------------------------------------------------------
+    "fr_nagpra_title_index.csv": _d(
+        "one row per Federal Register document identified as a NAGPRA "
+        "notice by its title", ["document_number"]),
+    "fr_nagpra_title_index_year.csv": _d(
+        "one row per publication year of NAGPRA notice counts",
+        ["publication_year"]),
+    "nagpra_notice_entity_bridge.csv": _d(
+        "one row per (notice, relationship, named party) - "
+        "docs/NAGPRA_BUILD_LOG.md. (document_number, party) alone collides "
+        "12,800 times because one party can hold several relationships to "
+        "one notice",
+        ["document_number", "relationship", "party_name_verbatim"],
+        {"tribe_id": "many"}),
+    "nagpra_notices.csv": _d(
+        "one row per NAGPRA notice - docs/NAGPRA_BUILD_LOG.md",
+        ["document_number"]),
+
+    # ---- native-owned businesses -----------------------------------------
+    "individual_native_exclusion_pairs.csv": _d(
+        "one row per (identifier, excluded entity) exclusion ruling",
+        ["identifier_type", "identifier"]),
+    "individual_native_firm_contracts.csv": _d(
+        "one row per (individually-Native-owned firm, fiscal year)",
+        ["surrogate_entity_id", "fiscal_year"], {"cedar_uid": "many"}),
+    "individual_native_firm_contracts_published.csv": _d(
+        "one row per published aggregate CELL "
+        "(cell type x dimension 1 x dimension 2) - not per firm",
+        ["cell_type", "dimension_1", "dimension_2"]),
+    "individual_native_firm_register.csv": _d(
+        "one row per individually-Native-owned firm ruled into the class",
+        ["surrogate_entity_id"], {"cedar_uid": "one"}),
+    "individual_native_ownership_verification.csv": _d(
+        "one row per verification candidate, with its four independent "
+        "evidence fields - "
+        "docs/INDIVIDUAL_NATIVE_OWNERSHIP_VERIFICATION_BUILD_LOG.md",
+        ["verification_id"]),
+    "individual_native_verification_candidates.csv": _d(
+        "one row per candidate UEI staged for individual-Native "
+        "verification", ["verification_id"]),
+
+    # ---- natural resources ------------------------------------------------
+    "anc_ceiling_roster.csv": _d(
+        "one row per Alaska Native Corporation on the ANCSA ceiling roster",
+        ["anc_id"]),
+    "ancsa_filings_index.csv": _d(
+        "one row per document in the ANCSA portal index, downloaded or not "
+        "- docs/ANCSA_PORTAL_BUILD_LOG.md", ["portal_document_id"]),
+    "nd_severance_allocation.csv": _d(
+        "one row per North Dakota severance-allocation rule in force over "
+        "an interval", ["allocation_id"],
+        {"tribe_id": "many", "cedar_uid": "many"}),
+    "resource_assets.csv": _d(
+        "one row per resource asset (lease, tract, agreement or well)",
+        ["resource_asset_id"]),
+    "resource_parties.csv": _d(
+        "one row per (party link, entity as named). `party_link_id` alone "
+        "has 1 collision and is not a key on its own",
+        ["party_link_id", "entity_name"],
+        {"cedar_uid": "many", "entity_id": "many"}),
+    "resource_revenue.csv": _d(
+        "one row per resource revenue event as recorded by its source "
+        "system", ["resource_revenue_event_id"], {"cedar_uid": "many"}),
+    "tribal_tax_bases.csv": _d(
+        "one row per (tribe, tax type, period) - "
+        "docs/TRIBAL_TAX_DECOMPOSITION.md", ["tax_observation_id"],
+        {"tribe_id": "many", "cedar_uid": "many"}),
+
+    # ---- nonprofits -------------------------------------------------------
+    "fac_tribal_single_audits.csv": _d(
+        "one row per Single Audit report for a tribal auditee",
+        ["report_id"], {"cedar_uid": "many", "entity_id": "many"}),
+    "grantmaker_funding_flows.csv": _d(
+        "one row per named grant recipient on a grantmaker's own return - "
+        "docs/GRANTMAKER_FUNDING_FLOWS_BUILD_LOG.md", ["flow_id"]),
+    "grantmaker_funding_overlap.csv": _d(
+        "one row per (funder, resolved recipient target) overlap cell",
+        ["funder_key", "recipient_resolved_target"]),
+    "np_ein_entity_hub.csv": _d(
+        "one row per EIN linked to a Cedar entity", ["ein"],
+        {"ein": "one", "cedar_uid": "many", "entity_id": "many"}),
+    "np_financials.csv": _d(
+        "one row per (EIN, tax filing period) - "
+        "docs/NONPROFIT_FINANCIALS_LOG.md", ["ein", "tax_period"],
+        {"ein": "many"}),
+    "np_grantee_financials.csv": _d(
+        "one row per (EIN, source return) for pulled grantee 990s",
+        ["ein", "source_url"], {"ein": "many"}),
+    "np_org_scale.csv": _d(
+        "one row per pulled EIN, latest year and scale band - "
+        "docs/NONPROFIT_FINANCIALS_LOG.md", ["ein"], {"ein": "one"}),
+    "np_orgs.csv": _d(
+        "one row per EIN considered for the Native nonprofit universe, "
+        "ruled in or out", ["EIN"],
+        {"tribe_id": "many", "cedar_uid": "many", "entity_id": "many"}),
+    "np_schedule_i_filers.csv": _d(
+        "one row per parsed 990 return - docs/SCHEDULE_I_BUILD_LOG.md",
+        ["object_id"]),
+
+    # ---- subcontracting ---------------------------------------------------
+    "prime_sub_network.csv": _d(
+        "one row per (prime UEI, sub UEI) edge, rolled up across subawards",
+        ["prime_uei", "sub_uei"]),
+    "subaward_entity_rollup.csv": _d(
+        "one row per entity, rolled up across both sides of the subaward "
+        "network", ["tribe_id"],
+        {"tribe_id": "one", "cedar_uid": "one"}),
+}
+
+GRAIN.update(GRAIN_SWEEP)
+
 # A table whose grain is declared but whose PRIMARY KEY cannot be stated
 # without guessing. Recorded rather than left blank, so the gap is a task
 # with a name instead of a silence. These count as UNSTATED for the gate.
 GRAIN_OPEN = {
-    "federal_funding_transactions.csv":
-        "grain stated as 'one row per federal award transaction', but the "
-        "file is a UNION of assistance and archive pulls and no owner has "
-        "ruled whether assistance_transaction_unique_key is unique ACROSS "
-        "the union or only within one pull. Declaring a key we have not "
-        "ruled on is the one way this file can lie, so it stays open.",
+    # -- the file cannot testify about itself: 0 or 1 rows ------------------
+    "congressional_correspondence_log.csv":
+        "the file has ZERO rows. Every candidate key is vacuously unique, so "
+        "the data cannot evidence a grain. QUESTION: is this table meant to "
+        "ship empty, and what is one row when it fills?",
+    "deals_2026_ytd_additions.csv":
+        "the file has ZERO rows (the build log records 1 row added, which is "
+        "not what is on disk). QUESTION: was the YTD additions file consumed "
+        "into deals_classified.csv and left as a stub, or did a rebuild "
+        "empty it?",
+    "admin_appeal_positions.csv":
+        "the file has ONE row. `matter_id` and `cedar_uid` are unique, and "
+        "so is every other column - one row proves nothing. QUESTION: is a "
+        "row a POSITION taken by one organisation in one matter (in which "
+        "case position_id is the key and it is empty of evidence), or one "
+        "row per matter?",
+    "fac_audit_sefa_gaming_programs.csv":
+        "the file has ONE row. Uniqueness is vacuous. QUESTION: is a row a "
+        "(report, federal program) line off the SEFA, so that report_id "
+        "repeats once a second program is parsed?",
+    "tribal_resolution_financings.csv":
+        "the file has ONE row. Uniqueness is vacuous. QUESTION: is a row one "
+        "financing INSTRUMENT (instrument_number) or one tribal resolution?",
+
+    # -- an id column that is not unique, and no key that is ---------------
+    "foia_request_index.csv":
+        "no key was found at any arity up to 6 over 9,481 rows. "
+        "`foia_request_id` REPEATS 381 times; adding `status` still leaves "
+        "66 collisions; adding source_url, received_date and both `seeks_*` "
+        "flags still leaves 8. QUESTION: is a row one FOIA request - in "
+        "which case the 381 repeats are a defect and the id must be made "
+        "unique - or one (request, matched tribe mention), in which case the "
+        "key needs the entity column and should be stated?",
+    "visitor_record_foia_requests.csv":
+        "the only unique key over 667 rows is `request_description_verbatim`, "
+        "a free-text field. `foia_request_id` has 22 collisions. QUESTION: "
+        "does one FOIA request legitimately appear once per agency or per "
+        "discovery role, or is the id supposed to be unique?",
+    "ferc_ex_parte_communications.csv":
+        "`ferc_ex_parte_id` has 56 collisions over 713 rows, and adding "
+        "accession_number, docket_number or the FR document number removes "
+        "none of them - the colliding rows differ somewhere else. QUESTION: "
+        "what distinguishes two rows sharing a ferc_ex_parte_id? Until that "
+        "is named the table has no key.",
+    "fpds_uei_cage_map.csv":
+        "a MAP that maps nothing uniquely: `uei` repeats 11,455 times over "
+        "29,981 rows and (uei, cage_code, source_file) still collides 4,680 "
+        "times. The only unique key needs all six columns including "
+        "first_year and last_year, and 22,518 rows have a blank cage_code. "
+        "QUESTION: is a row a (UEI, CAGE) pair as OBSERVED in one source "
+        "file and year-range - and if so should the year range be part of "
+        "the published key - or is the table meant to be one row per UEI?",
+    "contractor_ranking.csv":
+        "the only unique keys over 1,429 rows require "
+        "`firm_transaction_rows` - a MEASURE. A key that needs a count in it "
+        "is not a grain. (owner_entity_id, operating_company_uei, "
+        "link_identifier) collides 30 times. QUESTION: is a row an "
+        "(owner, operating company, identifier link) triple, and if so what "
+        "distinguishes the 30 collisions?",
+    "tribal_bond_issuances.csv":
+        "`cusip` is BLANK on all 29 rows, so the natural key of a bond table "
+        "is absent, and the only unique column is `notes`. QUESTION: can "
+        "CUSIPs be backfilled, and until then is a row one issuance "
+        "(issuer, issue_date, series) or one disclosure document?",
+
+    # -- a documented grain the data contradicts ---------------------------
+    "prime_contracts_entity_year.csv":
+        "the table is NAMED entity-year and (tribe_id, fiscal_year) is NOT "
+        "unique - 1,751 collisions over 8,464 rows; (cedar_uid, "
+        "fiscal_year) collides identically. Uniqueness needs "
+        "canonical_name AND confidence_tier as well. So one entity-year has "
+        "several rows under different NAMES and tiers. QUESTION: is a row an "
+        "entity-year (then the extra rows are a defect and anyone summing "
+        "obligations_usd by tribe-year today DOUBLE-COUNTS), or is it "
+        "deliberately entity x name-variant x year x tier? This is the "
+        "single most consequential open question in the sweep.",
+    "gaming_projections.csv":
+        "docs/GAMING_NEPA_PILOT_LOG.md states the grain as 'one row per "
+        "project x metric x geography x period'. The data CONTRADICTS it: "
+        "that key collides 8 times over 116 rows, and adding `alternative` "
+        "leaves 5. The only unique keys contain `value`, a measure. "
+        "QUESTION: which column separates two projections of the same metric "
+        "for the same project, geography and period - alternative, "
+        "reported_or_calculated, or the source document?",
+}
+
+
+# A table with a KEY DEFECT: the data itself is broken, so no declaration is
+# possible until a pipeline owner fixes it. Distinct from GRAIN_OPEN, which is
+# a question about INTENT that the data cannot answer. A defect is a question
+# about the DATA that the data answers all too clearly - and workstream E does
+# not own the pipelines, so these are named and reported, never patched here.
+# Each entry names the measurement that proves it; the numbers live in
+# docs/schema/grain_evidence.json and are re-measured by `probe`.
+GRAIN_DEFECT = {
+    # Every count below is a LITERAL duplicate: the whole row, every column,
+    # byte for byte. They were found by hashing each row and then re-reading
+    # the file to compare the colliding rows as strings, so none of these is
+    # a hash accident. A literal duplicate row carries no information a buyer
+    # can use and every dollar in it is counted twice.
+    "prime_contracts.csv":
+        "80,778 LITERAL duplicate rows of 1,217,768. The contractor codebook "
+        "states the grain as 'contract x fiscal year x vendor'; that grain "
+        "cannot hold while whole rows repeat. (contract_number, "
+        "parent_contract_number) collides 630,270 times. Anyone summing "
+        "total_obligations from this file is over-counting by whatever the "
+        "duplicates carry.",
+    "prime_contracts_archive_backfill.csv":
+        "60,919 LITERAL duplicate rows of 631,507. Same shape as "
+        "prime_contracts.csv, which this file is merged into - the "
+        "duplication is upstream of the merge, not created by it.",
+    "faads_transactions_all_agencies.csv":
+        "179,259 LITERAL duplicate rows of 2,769,748 (6.5%). The pre-2008 "
+        "assistance pull has no transaction key at all, so nothing in the "
+        "pipeline can notice a page fetched twice.",
+    "faads_transactions.csv":
+        "1,001 LITERAL duplicate rows of 60,661. Same cause as "
+        "faads_transactions_all_agencies.csv.",
+    "subawards.csv":
+        "10,770 LITERAL duplicate rows of 72,837. (subaward_number, "
+        "subaward_date) collides 27,470 times, so even the natural key of a "
+        "subaward is not unique here.",
+    "native_passthrough.csv":
+        "114 LITERAL duplicate rows of 1,262. This table is derived from "
+        "subawards.csv and inherits its duplication; the passthrough dollars "
+        "are therefore over-stated by an unmeasured amount.",
+    "np_schedule_i_grants.csv":
+        "101 LITERAL duplicate rows of 58,685. (object_id, "
+        "recipient_name_as_filed) collides 860 times - some legitimately "
+        "(one filer can grant to the same recipient twice on one return), "
+        "but the 101 whole-row repeats are not that.",
+    "ferc_docket_filings.csv":
+        "822 LITERAL duplicate rows of 102,615. docs/ANOMALY_REPORT.md "
+        "already records 9,570 rows repeating (docket_number, "
+        "accession_number); this measurement is the stricter one - 822 rows "
+        "repeat in EVERY column.",
+    "cedar_ruling_ledger_consolidated.csv":
+        "6,302 LITERAL duplicate rows of 15,587 - 40% of the file. A ruling "
+        "ledger that records the same ruling twice cannot be counted, and "
+        "157 source files feed it.",
+    "cedar_identifier_graph_edges.csv":
+        "2,451 LITERAL duplicate rows of 46,051. A graph with duplicate "
+        "edges inflates `n_asserting_sources` and every degree count "
+        "computed from it.",
+    "cross_dataset_ruling_map.csv":
+        "2,228 LITERAL duplicate rows of 7,507 - 30% of the file.",
+    "native_bills_subject_sweep.csv":
+        "5 LITERAL duplicate rows of 2,414.",
+    "tcu_cdfi_ownership_evidence.csv":
+        "4 LITERAL duplicate rows of 130.",
+    "lobbying_registrant_native_ownership_evidence.csv":
+        "4 LITERAL duplicate rows of 27 - 15% of a table the build log "
+        "describes as 'one row per evidence route'. Four evidence routes are "
+        "recorded twice.",
+    "hearing_bill_links.csv":
+        "1 LITERAL duplicate row of 465: (bill_id, event_id) = "
+        "(119-s-3878, 338549) appears twice.",
 }
 
 
 UNSTATED = ("UNSTATED - no owner ruling or build log has declared this "
             "table's grain")
+
+
+def _evidence_table(name):
+    """The probe's measurements for one table, or {}."""
+    if not hasattr(_evidence_table, "_cache"):
+        try:
+            _evidence_table._cache = json.loads(
+                EVIDENCE_JSON.read_text(encoding="utf-8")).get("tables", {})
+        except Exception:
+            _evidence_table._cache = {}
+    ev = _evidence_table._cache.get(name)
+    if not ev:
+        return {}
+    uniq = [c["key"] for c in ev.get("candidates_tested", [])
+            if c.get("unique") and not c.get("null_rows")]
+    return dict(rows=ev.get("rows"),
+                tested_date=ev.get("tested_date"),
+                whole_row_duplicates=ev.get("whole_row_duplicates"),
+                duplicate_claims_under_distinct_ids=ev.get(
+                    "natural_key_duplicate_rows"),
+                unique_keys_measured=uniq,
+                max_rows_per_join_key_value=ev.get(
+                    "max_rows_per_join_key_value", {}))
 
 
 def _find(name):
@@ -235,17 +1119,29 @@ def validate_grain(name, decl, hdr):
     counts = {c: {} for c in live_card}
     n = 0
     try:
+        # csv.reader with resolved indices, not DictReader: the declared set
+        # is now ~200 tables and several GB, and DictReader rebuilds a dict
+        # per row. Same comparison, same "" for a short row - just fast
+        # enough that validating EVERY declaration on EVERY run stays a thing
+        # nobody is tempted to skip.
         with p.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
-            for r in csv.DictReader(fh):
+            rr = csv.reader(fh)
+            head = [h.strip() for h in next(rr, [])]
+            pos = {c: head.index(c) for c in set(live_pk) | set(live_card)
+                   if c in head}
+            pk_i = [pos[c] for c in live_pk if c in pos]
+            card_i = [(c, pos[c]) for c in live_card if c in pos]
+            for row in rr:
                 n += 1
-                k = tuple((r.get(c) or "") for c in live_pk)
+                w = len(row)
+                k = tuple((row[i] if i < w else "") for i in pk_i)
                 if k in seen:
                     dup += 1
                     if dup_ex is None:
                         dup_ex = k
                 seen.add(k)
-                for c in live_card:
-                    val = (r.get(c) or "").strip()
+                for c, i in card_i:
+                    val = row[i].strip() if i < w else ""
                     if val:
                         counts[c][val] = counts[c].get(val, 0) + 1
     except Exception as e:
@@ -357,6 +1253,8 @@ def build_contracts():
                 grain_validated=bool(decl and not gv),
                 measured_rows_per_join_key=measured,
                 grain_open_question=GRAIN_OPEN.get(name, ""),
+                grain_defect=GRAIN_DEFECT.get(name, ""),
+                grain_evidence=_evidence_table(name),
                 rebuilt_by=rebuilds,
                 enriched_by=enrichers,
                 never_run_warning=[
@@ -399,7 +1297,29 @@ def build_contracts():
     #                             the day it lands.
     #
     # The honest number is printed on every run rather than summarised.
+    #
+    # WORKSTREAM E, 2026-08-29. The 207 are no longer one undifferentiated
+    # pile. Every shippable table without a validated declaration is now in
+    # exactly one of three states, and they are counted separately because
+    # they are three different pieces of work for three different people:
+    #
+    #   DECLARED_VALIDATED  a key was measured unique on the FULL file and
+    #                       the row meaning is stated. Leaves the ratchet.
+    #   OPEN_WITH_EVIDENCE  the data cannot answer what one row is meant to
+    #                       BE. Stays in the ratchet, but carries the
+    #                       candidates tested, the collision counts and the
+    #                       one question an owner must answer.
+    #   DEFECTIVE           the table has duplicate rows or a broken key.
+    #                       That is a DATA bug, not a declaration gap; it is
+    #                       named here and fixed in the pipeline, not here.
+    #
+    # A table in NONE of the three is the only genuinely silent case left,
+    # and it is reported as `grain_unexplained` so it cannot hide.
     unstated = sorted(n for n in ship_names if n not in grain_stated)
+    open_q = sorted(n for n in unstated if n in GRAIN_OPEN)
+    defective = sorted(n for n in unstated if n in GRAIN_DEFECT)
+    unexplained = sorted(n for n in unstated
+                         if n not in GRAIN_OPEN and n not in GRAIN_DEFECT)
     return dict(
         built_date=TODAY,
         derivation="500.COLLECTIONS + cedar_codebook + cedar_pipeline; "
@@ -412,7 +1332,14 @@ def build_contracts():
         n_shippable_grain_stated=len(ship_names & grain_stated),
         n_shippable_grain_unstated=len(unstated),
         shippable_grain_unstated=unstated,
+        n_shippable_grain_open_with_evidence=len(open_q),
+        n_shippable_grain_defective=len(defective),
+        n_shippable_grain_unexplained=len(unexplained),
+        shippable_grain_open_with_evidence=open_q,
+        shippable_grain_defective=defective,
+        shippable_grain_unexplained=unexplained,
         grain_open_questions=GRAIN_OPEN,
+        grain_defects=GRAIN_DEFECT,
         n_violations=len(violations),
         violations=violations,
         contracts=contracts,
@@ -499,15 +1426,575 @@ def write_md(doc):
     OUT_MD.write_text("\n".join(L), encoding="utf-8")
 
 
+# ---------------------------------------------------------------------------
+# THE GRAIN PROBE - workstream E, 2026-08-29.
+#
+# ADR-007 shipped the declaration machinery and left 207 shippable tables with
+# no declaration at all. A grain is a design intention and cannot be invented
+# by a scan - but a KEY is a property of the data, and that CAN be measured.
+# The probe measures it and writes evidence; it never declares.
+#
+#   1. candidates are generated from a SAMPLE. Sampling is safe in one
+#      direction only, and that is the direction we need: a key that is
+#      unique across the whole file is unique on every prefix of it, so a
+#      sample cannot HIDE a real key - it can only propose a false one.
+#   2. every proposal is then CONFIRMED on the full file. A false proposal
+#      dies there, with its collision count recorded as evidence.
+#   3. duplicates are exact. Uniqueness is tested with a hash set for memory,
+#      and every hash that collides is re-read in a second pass and compared
+#      as a literal string, so a duplicate reported here is a literal
+#      duplicate and not a birthday collision.
+#
+# A measured key is EVIDENCE for a grain, never proof of one: `state` is
+# unique in a 50-row table of states and equally unique in a 50-row table of
+# state-years that happens to cover a single year. That is why the probe's
+# output is read by a human who then either declares in GRAIN - where every
+# field is validated against the file on every run - or writes the specific
+# unanswerable question into GRAIN_OPEN.
+#
+#   py -3 code/512_build_dataset_contracts.py probe          # all unstated
+#   py -3 code/512_build_dataset_contracts.py probe NAME...  # named tables
+# ---------------------------------------------------------------------------
+EVIDENCE_JSON = ROOT / "docs" / "schema" / "grain_evidence.json"
+AUDIT_MD = ROOT / "docs" / "GRAIN_AUDIT.md"
+
+# Columns that are MEASURES, not keys. A key containing a dollar amount is an
+# accident of the data, not a grain - without this list the probe "solves" a
+# payments panel by adding the payment amount to the key and calling it
+# unique, which is exactly the lie ADR-007 exists to prevent.
+#
+# Substring, prefix and suffix are kept APART on purpose. The first version
+# of this list tested `"n_"` as a substring and quietly disqualified
+# `publicatio_n_year`, `regio_n_name`, `transactio_n_id` and every other
+# column with an n before an underscore - the composite search for three
+# year-panel tables then had fewer than two columns to work with and returned
+# nothing at all. A heuristic that silently eats its own inputs is worse than
+# a crude one.
+_MEASURE_SUB = (
+    "amount", "_usd", "usd_", "dollar", "_pct", "percent", "share", "ratio",
+    "score", "_rate", "median", "_text", "description", "notes", "summary",
+    "comment", "abstract", "obligat", "outlay", "spend", "revenue", "salary",
+    "employees", "confidence",
+)
+_MEASURE_PREFIX = ("n_", "num_", "cnt_", "count_", "avg_", "sum_", "mean_",
+                   "median_", "total_", "pct_")
+_MEASURE_SUFFIX = ("_count", "_sum", "_avg", "_mean", "_total", "_n")
+_KEY_BITS = ("_id", "_uid", "_key", "_code", "_no", "_num", "_number",
+             "_uuid", "_hash", "_slug", "_pk")
+_KEY_EXACT = {"id", "uid", "key", "uuid", "handle", "ein", "uei", "duns",
+              "cage_code", "tribe_id", "cedar_uid", "entity_id", "piid",
+              "fain", "award_id", "docket", "accession", "filing_uuid"}
+
+
+def _is_measure(c):
+    lc = c.lower()
+    return (any(b in lc for b in _MEASURE_SUB)
+            or lc.startswith(_MEASURE_PREFIX)
+            or lc.endswith(_MEASURE_SUFFIX))
+
+
+def _is_keyish(c):
+    lc = c.lower()
+    return lc in _KEY_EXACT or any(lc.endswith(b) for b in _KEY_BITS)
+
+
+def _sample(path, limit=120_000):
+    rows = []
+    with path.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+        r = csv.reader(fh)
+        hdr = [h.strip() for h in next(r, [])]
+        for row in r:
+            rows.append(row)
+            if len(rows) >= limit:
+                break
+    return hdr, rows
+
+
+def _candidates(hdr, rows):
+    """Propose key column-sets, best first, from the sample."""
+    n = len(rows)
+    if n == 0 or not hdr:
+        return []
+    idx = {c: i for i, c in enumerate(hdr)}
+    dist = [set() for _ in hdr]
+    nulls = [0] * len(hdr)
+    for row in rows:
+        for i in range(len(hdr)):
+            v = row[i].strip() if i < len(row) else ""
+            if v == "":
+                nulls[i] += 1
+            elif len(dist[i]) < 400_000:
+                dist[i].add(v)
+    dist = [len(x) for x in dist]
+
+    def collisions(cols):
+        seen, dup, nul = set(), 0, 0
+        for row in rows:
+            parts = [(row[idx[c]].strip() if idx[c] < len(row) else "")
+                     for c in cols]
+            if any(p == "" for p in parts):
+                nul += 1
+            k = "\x1f".join(parts)
+            if k in seen:
+                dup += 1
+            seen.add(k)
+        return dup, nul
+
+    singles = [([c], 0 if _is_keyish(c) else 1) for i, c in enumerate(hdr)
+               if dist[i] == n and nulls[i] == 0]
+    singles.sort(key=lambda t: (t[1], len(t[0][0])))
+    out = [c for c, _ in singles][:4]
+    if out:
+        # A superset of a unique column is unique too and says nothing extra.
+        return out
+
+    base = [c for i, c in enumerate(hdr)
+            if not _is_measure(c) and dist[i] > 1 and nulls[i] <= 0.4 * n]
+    if len(base) < 2:
+        # Nothing but measures left. Report what IS unique rather than
+        # nothing at all - a candidate is evidence for a human, and a key
+        # that needs a dollar column in it is one a human will refuse.
+        base = [c for i, c in enumerate(hdr)
+                if dist[i] > 1 and nulls[i] <= 0.4 * n]
+    base.sort(key=lambda c: (-int(_is_keyish(c)), -dist[idx[c]]))
+    base = base[:14]
+
+    pairs = []
+    for a in range(len(base)):
+        for b in range(a + 1, len(base)):
+            cols = [base[a], base[b]]
+            dup, nul = collisions(cols)
+            pairs.append((dup, nul, cols))
+    pairs.sort(key=lambda t: (t[0], t[1],
+                              -int(any(_is_keyish(c) for c in t[2]))))
+    out += [c for dup, nul, c in pairs if dup == 0][:3]
+
+    if not out:
+        trips = []
+        for dup, nul, cols in pairs[:8]:
+            for c in base:
+                if c in cols:
+                    continue
+                d2, n2 = collisions(cols + [c])
+                trips.append((d2, n2, cols + [c]))
+        trips.sort(key=lambda t: (t[0], t[1]))
+        out += [c for dup, nul, c in trips if dup == 0][:3]
+        if not out and trips:
+            cur, best = list(trips[0][2]), trips[0][0]
+            while len(cur) < 6 and best > 0:
+                cands = []
+                for c in base:
+                    if c in cur:
+                        continue
+                    d2, n2 = collisions(cur + [c])
+                    cands.append((d2, n2, c))
+                cands.sort(key=lambda t: (t[0], t[1]))
+                if not cands or cands[0][0] >= best:
+                    break            # no column reduces the collisions
+                best, cur = cands[0][0], cur + [cands[0][2]]
+            out.append(cur)
+        if pairs:
+            out.append(pairs[0][2])       # the near-miss, recorded as evidence
+    seen, uniq = set(), []
+    for c in out:
+        t = tuple(c)
+        if t and t not in seen:
+            seen.add(t)
+            uniq.append(list(c))
+    return uniq[:6]
+
+
+# Build stamps: columns that record WHEN WE BUILT THE ROW, not what the row
+# is about. Two rows identical except for these are the same fact recorded
+# twice, so they are excluded when asking whether a surrogate id is hiding a
+# duplicate.
+_STAMP_COLS = {
+    "built_date", "build_date", "built_by_script", "build_script",
+    "fetched_date", "fetch_date", "retrieved_at", "retrieved_date",
+    "generated_date", "generated_at", "run_id", "snapshot_date", "as_of_date",
+    "pulled_date", "extract_date", "load_date", "ingested_at", "row_id",
+    "record_id", "id", "uid",
+}
+
+
+def _natural_key(hdr, surrogate):
+    """Everything a row SAYS, with the surrogate id and the build stamps
+    taken out.
+
+    A unique surrogate id proves only that the builder counted rows. If the
+    same claim appears twice under two ids, the table has a duplicate a buyer
+    will double-count and the surrogate hides it. This is the candidate that
+    asks that question.
+    """
+    drop = set(surrogate) | {c for c in hdr if c.lower() in _STAMP_COLS}
+    return [c for c in hdr if c not in drop]
+
+
+def _confirm(path, hdr, cands, join_cols):
+    """FULL-FILE confirmation of proposed keys.
+
+    Returns (n_rows, {tuple(cols): stats}, {join_col: max rows per value},
+    exact whole-row duplicate count). Hash sets are budgeted so a 2.8M-row
+    table is walked more than once rather than held in memory more than once.
+    """
+    idx = {c: i for i, c in enumerate(hdr)}
+    jidx = {c: idx[c] for c in join_cols if c in idx}
+    with path.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+        rr = csv.reader(fh)
+        next(rr, None)
+        n_rows = sum(1 for _ in rr)
+    per_pass = max(1, 3_000_000 // max(n_rows, 1))
+    stats, jmax = {}, {c: {} for c in jidx}
+    row_hashes, row_collided, row_dups = set(), set(), 0
+    groups = [cands[i:i + per_pass]
+              for i in range(0, len(cands), per_pass)] or [[]]
+    for gi, group in enumerate(groups):
+        seen = [set() for _ in group]
+        collided = [set() for _ in group]
+        nulls = [0] * len(group)
+        with path.open(encoding="utf-8-sig", errors="replace",
+                       newline="") as fh:
+            rr = csv.reader(fh)
+            next(rr, None)
+            for row in rr:
+                for gj, cols in enumerate(group):
+                    parts, bad = [], False
+                    for c in cols:
+                        i = idx[c]
+                        v = row[i].strip() if i < len(row) else ""
+                        if v == "":
+                            bad = True
+                        parts.append(v)
+                    if bad:
+                        nulls[gj] += 1
+                    # lint-ok: class7 - this hash MINTS NOTHING. It is a
+                    # within-process membership test that keeps a
+                    # 2.8M-row uniqueness check in memory; it is never
+                    # written to a row, a file or a key, and every hash that
+                    # collides is re-read below and compared as a literal
+                    # string, so the answer does not depend on it. Waived,
+                    # not hidden.
+                    h = hash("\x1f".join(parts))
+                    (collided[gj].add(h) if h in seen[gj] else seen[gj].add(h))
+                if gi == 0:
+                    for c, i in jidx.items():
+                        v = row[i].strip() if i < len(row) else ""
+                        if v:
+                            jmax[c][v] = jmax[c].get(v, 0) + 1
+                    # lint-ok: class7 - same within-process membership test,
+                    # over the whole row, to find literal duplicate rows.
+                    # Nothing is minted and no collision is trusted.
+                    h = hash("\x1f".join(row))
+                    (row_collided.add(h) if h in row_hashes
+                     else row_hashes.add(h))
+        for gj, cols in enumerate(group):
+            stats[tuple(cols)] = dict(key=list(cols), null_rows=nulls[gj],
+                                      distinct_hashes=len(seen[gj]),
+                                      duplicate_rows=None,
+                                      example_duplicate="")
+        need = [gj for gj in range(len(group)) if collided[gj]]
+        if need or (gi == 0 and row_collided):
+            exact = [dict() for _ in group]
+            rowexact = set()
+            with path.open(encoding="utf-8-sig", errors="replace",
+                           newline="") as fh:
+                rr = csv.reader(fh)
+                next(rr, None)
+                for row in rr:
+                    for gj in need:
+                        k = "\x1f".join(
+                            (row[idx[c]].strip() if idx[c] < len(row) else "")
+                            for c in group[gj])
+                        # lint-ok: class7 - the hash only decides whether to
+                        # KEEP this row for the exact string comparison two
+                        # lines down. The duplicate count comes from that
+                        # comparison, never from the hash.
+                        if hash(k) in collided[gj]:
+                            exact[gj][k] = exact[gj].get(k, 0) + 1
+                    if gi == 0 and row_collided:
+                        k = "\x1f".join(row)
+                        # lint-ok: class7 - as above: a filter in front of an
+                        # exact whole-row string comparison, not an id.
+                        if hash(k) in row_collided:
+                            if k in rowexact:
+                                row_dups += 1
+                            else:
+                                rowexact.add(k)
+            for gj in need:
+                st = stats[tuple(group[gj])]
+                st["duplicate_rows"] = sum(v - 1 for v in exact[gj].values()
+                                           if v > 1)
+                ex = max(exact[gj].items(), key=lambda kv: kv[1]) \
+                    if exact[gj] else None
+                st["example_duplicate"] = (
+                    ex[0].replace("\x1f", " | ")[:160]
+                    if ex and ex[1] > 1 else "")
+        for cols in group:
+            if stats[tuple(cols)]["duplicate_rows"] is None:
+                stats[tuple(cols)]["duplicate_rows"] = 0
+        if gi == 0:
+            row_collided = set()
+            row_hashes = set()
+    return n_rows, stats, {c: (max(v.values()) if v else 0)
+                           for c, v in jmax.items()}, row_dups
+
+
+def probe(names=()):
+    """Measure candidate keys for every shippable table with no declaration.
+
+    Writes docs/schema/grain_evidence.json. Merges with what is already
+    there, so probing one table does not erase the evidence for the rest.
+    """
+    doc = build_contracts()
+    targets = list(names) or list(doc["shippable_grain_unstated"])
+    prev = {}
+    if EVIDENCE_JSON.exists():
+        try:
+            prev = json.loads(EVIDENCE_JSON.read_text(
+                encoding="utf-8")).get("tables", {})
+        except Exception:
+            prev = {}
+    out = dict(prev)
+    # `NAME:col+col` forces a specific candidate to be tested and recorded.
+    # The keys a HUMAN would expect to be unique - `foia_request_id` on a
+    # FOIA index - are the ones an open question has to quote a number for,
+    # and the generator only proposes keys it thinks might win.
+    forced = {}
+    clean = []
+    for t in targets:
+        if ":" in t:
+            n, _, spec = t.partition(":")
+            forced.setdefault(n, []).append(spec.split("+"))
+            clean.append(n)
+        else:
+            clean.append(t)
+    targets = sorted(set(clean))
+    for i, name in enumerate(sorted(targets), 1):
+        p = _find(name)
+        if p is None:
+            out[name] = dict(error="not on disk", tested_date=TODAY)
+            continue
+        hdr, rows = _sample(p)
+        cands = _candidates(hdr, rows)
+        generated_best = cands[0] if cands else None
+        for k in forced.get(name, []):
+            k = [c for c in k if c in hdr]
+            if k and k not in cands:
+                cands = [k] + cands
+        # Does a unique surrogate id hide a duplicated claim? Only asked
+        # where the sample IS the whole file, so the answer is exact and the
+        # wide key is never held in memory for a multi-million-row table.
+        nat = []
+        if (generated_best and len(generated_best) == 1
+                and len(rows) < 120_000 and 1 < len(hdr) <= 80):
+            nat = _natural_key(hdr, generated_best)
+            if nat and nat not in cands:
+                cands = cands + [nat]
+        jcols = [k for k in JOIN_KEYS if k in hdr]
+        n, stats, jmax, rowdups = _confirm(p, hdr, cands, jcols)
+        natdup = (stats.get(tuple(nat), {}).get("duplicate_rows")
+                  if nat else None)
+        if nat:
+            stats.pop(tuple(nat), None)
+        cl = [dict(key=s["key"], unique=(s["duplicate_rows"] == 0),
+                   duplicate_rows=s["duplicate_rows"],
+                   null_rows=s["null_rows"],
+                   example_duplicate=s.get("example_duplicate", ""),
+                   tested_date=TODAY)
+              for s in stats.values()]
+        # KEEP what earlier runs measured. The first version of this replaced
+        # a table's candidate list wholesale, so re-probing one table to add
+        # a forced key SILENTLY DELETED the collision counts an open question
+        # was already quoting. Evidence accumulates; a re-measurement of the
+        # SAME key supersedes, a different key is kept with the date it was
+        # taken.
+        fresh = {tuple(c["key"]) for c in cl}
+        for old in (prev.get(name) or {}).get("candidates_tested", []):
+            if tuple(old.get("key") or []) not in fresh:
+                old.setdefault("tested_date", (prev[name].get("tested_date")
+                                               or ""))
+                cl.append(old)
+        cl.sort(key=lambda c: (not c["unique"], c["null_rows"] > 0,
+                               len(c["key"])))
+        out[name] = dict(
+            path=str(p.relative_to(ROOT)).replace("\\", "/"),
+            rows=n, n_columns=len(hdr), columns=hdr,
+            whole_row_duplicates=rowdups,
+            natural_key=nat,
+            natural_key_duplicate_rows=natdup,
+            join_columns_present=jcols,
+            max_rows_per_join_key_value=jmax,
+            candidates_tested=cl,
+            tested_date=TODAY)
+        print(f"  [{i}/{len(targets)}] {name}: {n:,} rows, "
+              f"{sum(1 for c in cl if c['unique'])}/{len(cl)} candidate key(s)"
+              f" unique, {rowdups:,} whole-row dup(s)"
+              + (f", {natdup:,} duplicate claim(s) under distinct ids"
+                 if natdup else ""), flush=True)
+    EVIDENCE_JSON.parent.mkdir(parents=True, exist_ok=True)
+    EVIDENCE_JSON.write_text(json.dumps(
+        dict(generated=TODAY,
+             method="sample-generated candidates, FULL-FILE confirmation; "
+                    "hash uniqueness with exact re-read of every colliding "
+                    "hash. Produced by 512_build_dataset_contracts.py probe.",
+             n_tables=len(out), tables=out), indent=1), encoding="utf-8")
+    print(f"  wrote {EVIDENCE_JSON.relative_to(ROOT)} ({len(out)} tables)")
+    return 0
+
+
+def write_audit(doc):
+    """docs/GRAIN_AUDIT.md - the grain sweep, per collection, for a human.
+
+    Generated from the same document 62 gates on, so the prose and the gate
+    cannot drift apart.
+    """
+    n_ship = doc["n_shippable"]
+    L = [
+        "# Grain audit - what one row IS, table by table",
+        "",
+        f"*Generated {doc['built_date']} by "
+        f"`code/512_build_dataset_contracts.py` (workstream E). Regenerate "
+        f"rather than edit. Measurements live in "
+        f"`docs/schema/grain_evidence.json`; re-measure with "
+        f"`py -3 code/512_build_dataset_contracts.py probe`.*",
+        "",
+        "## Why this document exists",
+        "",
+        "Cedar Press is sold to buyers who JOIN it. A table whose real grain "
+        "is entity x UEI x year, joined on `cedar_uid` alone, silently "
+        "multiplies every dollar in it. External review finding F9 named "
+        "that failure; ADR-007 built the machinery that validates a "
+        "declaration - and left **207 of 210 shippable tables with no "
+        "declaration at all**. This is the sweep that reduces that number "
+        "using evidence rather than guesswork.",
+        "",
+        "## What was measured",
+        "",
+        "For every undeclared shippable table the probe generated candidate "
+        "keys from a sample and then **confirmed each one against the full "
+        "file** - 207 tables, several GB. Uniqueness is hash-based for "
+        "memory and every colliding hash is re-read and compared as a "
+        "literal string, so a duplicate reported here is a literal "
+        "duplicate. Sampling can only ever propose a false key (a key unique "
+        "on the whole file is unique on every prefix of it); the full-file "
+        "confirm is what kills those.",
+        "",
+        "Three honest outcomes, and they are three different jobs:",
+        "",
+        "| outcome | meaning | who acts |",
+        "|---|---|---|",
+        "| **DECLARED_VALIDATED** | a key measured unique on the full file, "
+        "and the row meaning is stated | done - it is in `GRAIN` and "
+        "re-validated on every run |",
+        "| **OPEN_WITH_EVIDENCE** | the data cannot say what one row is "
+        "*meant* to be | an owner answers the named question |",
+        "| **DEFECTIVE** | the table has duplicate rows or a broken key | "
+        "the pipeline owner fixes the DATA; a declaration cannot |",
+        "",
+        f"| | count |",
+        "|---|---:|",
+        f"| shippable tables | {n_ship} |",
+        f"| **DECLARED_VALIDATED** | "
+        f"**{doc['n_shippable_grain_stated']}** |",
+        f"| OPEN_WITH_EVIDENCE | {doc['n_shippable_grain_open_with_evidence']}"
+        f" |",
+        f"| DEFECTIVE | {doc['n_shippable_grain_defective']} |",
+        f"| still unexplained | {doc['n_shippable_grain_unexplained']} |",
+        f"| ratchet `contract_grain_unstated_shippable` | "
+        f"**{doc['n_shippable_grain_unstated']}** (was 207) |",
+        "",
+        "A declaration that the data contradicts is release-blocking through "
+        "`contract_violations`; there are "
+        f"**{doc['n_violations']}**.",
+        "",
+    ]
+    if doc["shippable_grain_defective"]:
+        L += ["## DEFECTIVE - data bugs found by the sweep", "",
+              "These are not declaration gaps. Each is a table a buyer can "
+              "double-count today. Workstream E does not own these "
+              "pipelines and has changed no data.", ""]
+        for t in doc["shippable_grain_defective"]:
+            ev = _evidence_table(t)
+            L.append(f"### `{t}`")
+            L.append("")
+            L.append(f"{doc['grain_defects'][t]}")
+            L.append("")
+            if ev:
+                L.append(f"- measured {ev.get('rows'):,} rows, "
+                         f"{ev.get('whole_row_duplicates'):,} whole-row "
+                         f"duplicate(s) on {ev.get('tested_date')}")
+                L.append("")
+    if doc["shippable_grain_open_with_evidence"]:
+        L += ["## OPEN_WITH_EVIDENCE - the rulings a human must make", "",
+              "Each is a question the DATA cannot answer, with what was "
+              "tested attached. Declaring past one of these is the one way "
+              "this file can lie.", ""]
+        for t in doc["shippable_grain_open_with_evidence"]:
+            ev = _evidence_table(t)
+            _n = ev.get("rows")
+            L.append(f"### `{t}`"
+                     + (f"  ({_n:,} row{'' if _n == 1 else 's'})"
+                        if _n else ""))
+            L.append("")
+            L.append(doc["grain_open_questions"][t])
+            L.append("")
+            if ev.get("unique_keys_measured"):
+                L.append("- unique on the full file: "
+                         + "; ".join("(" + ", ".join(f"`{c}`" for c in k)
+                                     + ")"
+                                     for k in ev["unique_keys_measured"]))
+            L.append("")
+    L += ["## Per collection", ""]
+    for c in doc["contracts"]:
+        rows = [t for t in c["tables"] if t["status"] == "shippable"]
+        if not rows:
+            continue
+        n_dec = sum(1 for t in rows if t["grain_validated"])
+        L.append(f"### {c['name']}  (`{c['collection']}`)")
+        L.append("")
+        L.append(f"{n_dec} of {len(rows)} shippable tables declared.")
+        L.append("")
+        L.append("| table | rows | outcome | primary key | max rows per "
+                 "join-key value |")
+        L.append("|---|---:|---|---|---|")
+        for t in sorted(rows, key=lambda r: r["table"]):
+            ev = t.get("grain_evidence") or {}
+            if t["grain_validated"]:
+                out = "DECLARED_VALIDATED"
+            elif t["grain_defect"]:
+                out = "DEFECTIVE"
+            elif t["grain_open_question"]:
+                out = "OPEN_WITH_EVIDENCE"
+            elif t["primary_key"]:
+                out = "**DECLARATION FAILED**"
+            else:
+                out = "unexplained"
+            jm = ev.get("max_rows_per_join_key_value") or \
+                t.get("measured_rows_per_join_key") or {}
+            L.append("| `{}` | {} | {} | {} | {} |".format(
+                t["table"],
+                f"{ev['rows']:,}" if ev.get("rows") is not None else "—",
+                out,
+                " + ".join(f"`{k}`" for k in t["primary_key"]) or "—",
+                ", ".join(f"`{k}`→{v:,}" for k, v in sorted(jm.items()))
+                or "—"))
+        L.append("")
+    AUDIT_MD.write_text("\n".join(L), encoding="utf-8")
+
+
 def main() -> int:
+    if len(sys.argv) > 1 and sys.argv[1] == "probe":
+        return probe(sys.argv[2:])
     verify_only = len(sys.argv) > 1 and sys.argv[1] == "verify"
     doc = build_contracts()
     if not verify_only:
         OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
         OUT_JSON.write_text(json.dumps(doc, indent=1), encoding="utf-8")
         write_md(doc)
-        print(f"  wrote {OUT_JSON.relative_to(ROOT)} and "
-              f"{OUT_MD.relative_to(ROOT)}")
+        write_audit(doc)
+        print(f"  wrote {OUT_JSON.relative_to(ROOT)}, "
+              f"{OUT_MD.relative_to(ROOT)} and "
+              f"{AUDIT_MD.relative_to(ROOT)}")
     print(f"  {doc['n_collections']} collections, "
           f"{doc['n_tables_claimed']} tables claimed, "
           f"{doc['n_orphan_shippable']} orphan shippable, "
@@ -517,6 +2004,11 @@ def main() -> int:
           f"join cardinality; {doc['n_shippable_grain_unstated']} UNSTATED "
           f"(ratcheted by 62.contract_grain_unstated_shippable - the count "
           f"may only fall)")
+    print(f"  of the {doc['n_shippable_grain_unstated']} undeclared: "
+          f"{doc['n_shippable_grain_open_with_evidence']} OPEN with a named "
+          f"question, {doc['n_shippable_grain_defective']} DEFECTIVE (a data "
+          f"bug, not a declaration gap), "
+          f"{doc['n_shippable_grain_unexplained']} still unexplained")
     for v in doc["violations"][:15]:
         print(f"    !! {v}")
     if doc["n_violations"] and len(doc["violations"]) > 15:

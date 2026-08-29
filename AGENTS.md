@@ -4518,3 +4518,49 @@ Whoever re-records the semantic baseline should also confirm
 `AKNF-ACSRMT-00-CALSTA-ASVCPR`'s uid is the one the register is meant to
 carry — the register's own `class_since_basis` column promises, in every row,
 that *the uid never changes*.
+
+---
+
+### THE `identity_facts_legacy_only` RATCHET IS INSTALLED BACKWARDS (2026-08-31, workstream F)
+
+Named here because standing rule 15 requires a failing gate line to be named
+with its owner rather than stepped around. **`62_no_regression_check.py` is
+the integrator's file this pass; workstream F did not edit it.**
+
+`identity_facts_legacy_only` — identity-critical facts standing on a row with
+no recorded provenance — is listed in **`MUST_NOT_FALL`**, under a comment
+that reads, in the same three lines:
+
+```python
+    # External review finding 3: identity-critical facts standing on a row
+    # with no recorded provenance. This may only fall.
+    "identity_facts_legacy_only",
+```
+
+`docs/EXTERNAL_REVIEW_RESPONSE.md` records the intent explicitly: *"That
+number is now a gated metric (`identity_facts_legacy_only`, MUST_NOT_RISE) so
+the exposure can only shrink."* As installed, the gate does the opposite: it
+**fails the build every time the exposure is paid down**, which is the one
+thing external review findings F3/F4 asked for.
+
+It fired on 2026-08-31 the first time anything reduced it:
+
+```
+!! identity_facts_legacy_only FELL 4,100 -> 4,089
+```
+
+The 11 rows are `entity.state` facts that gained a second, IRS-sourced
+assertion and moved from `legacy_only` to `traceable_single_source`. Nothing
+was removed — `sem_facts_removed = 0` on the same run.
+
+**Fix (integrator, one line):** move `"identity_facts_legacy_only"` from
+`MUST_NOT_FALL` to `MUST_NOT_RISE`. Do **not** re-record the baseline to clear
+it — the file's own words: *"--baseline is a floor, not an acknowledgement
+button"* — because that would fix the floor at 4,089 and fail the next payment
+in exactly the same way.
+
+**Also failing on that run, and NOT workstream F's:** `lint_class7` 42 → 46,
+`lint_bug_class_instances` 147 → 151 and `lint_new_defect_instances` = 4. All
+four new instances are named by 293 in **`code/512_build_dataset_contracts.py`**
+(`hash("\x1f".join(parts))` and three siblings) — workstream **E**'s file this
+pass, modified mid-session. Owner: E.

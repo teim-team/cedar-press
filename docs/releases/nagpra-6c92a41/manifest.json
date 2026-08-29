@@ -1,0 +1,1033 @@
+{
+ "release_id": "nagpra-6c92a41",
+ "generated_at": "2026-08-29T10:31:38+00:00",
+ "generated_by": "code/516_release_manifest.py",
+ "commit": "6c92a41f7b3275f3e4ee8edafd03cfb8e65be5ce",
+ "commit_subject": "Integrator: dollar-discrepancy reconciled; owner decision queue consolidated",
+ "tree_clean_at_capture": false,
+ "code_in_scope_matches_commit": true,
+ "dirty_paths": [
+  "GENTS.md",
+  "code/510_assertions.py",
+  "code/512_build_dataset_contracts.py",
+  "code/516_release_manifest.py",
+  "docs/ASSERTION_LAYER.md",
+  "docs/DATASET_CONTRACTS.md",
+  "docs/SOURCE_RECORD_LAYER.md",
+  "docs/lint_bug_classes.json",
+  "docs/schema/dataset_contracts.json",
+  "docs/GRAIN_AUDIT.md",
+  "docs/releases/_analysis/",
+  "docs/releases/nagpra-6c92a41/",
+  "docs/releases/native-owned-businesses-6c92a41/",
+  "docs/releases/natural-resources-6c92a41/",
+  "docs/releases/subcontracting-6c92a41/",
+  "docs/schema/grain_evidence.json"
+ ],
+ "retention_policy": {
+  "store": "data/_release_inputs",
+  "retain_max_bytes": 536870912,
+  "release_budget_bytes": 12884901888,
+  "budget_remaining_bytes": 12884901888,
+  "addressing": "content-addressed by sha256; blobs deduplicate across releases"
+ },
+ "environment": {
+  "python_version": "3.14.7",
+  "python_implementation": "CPython",
+  "python_executable": "C:\\Users\\esm247\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "machine": "AMD64",
+  "filesystem_case_sensitive": false,
+  "cwd_at_capture": "C:\\Users\\esm247\\Desktop\\Cedar Press",
+  "packages": [
+   "Deprecated==1.3.1",
+   "Jinja2==3.1.6",
+   "MarkupSafe==3.0.3",
+   "PyMuPDF==1.27.2.2",
+   "PyYAML==6.0.3",
+   "Pygments==2.20.0",
+   "RapidFuzz==3.14.5",
+   "WMI==1.5.1",
+   "affine==2.4.0",
+   "annotated-doc==0.0.4",
+   "anyio==4.13.0",
+   "asttokens==3.0.1",
+   "attrs==26.1.0",
+   "babel==2.18.0",
+   "beautifulsoup4==4.14.3",
+   "brotli==1.2.0",
+   "browser-cookie3==0.20.1",
+   "certifi==2026.2.25",
+   "cffi==2.0.0",
+   "charset-normalizer==3.4.7",
+   "click==8.3.3",
+   "cligj==0.7.2",
+   "colorama==0.4.6",
+   "commonmark==0.9.1",
+   "contourpy==1.3.3",
+   "cryptography==46.0.7",
+   "curl_cffi==0.15.0",
+   "cycler==0.12.1",
+   "dbfread==2.0.7",
+   "decorator==5.2.1",
+   "duckdb==1.5.5",
+   "et_xmlfile==2.0.0",
+   "executing==2.2.1",
+   "faicons==0.2.2",
+   "filelock==3.29.0",
+   "flatbuffers==25.12.19",
+   "fonttools==4.62.1",
+   "formulaic==1.2.1",
+   "fsspec==2026.4.0",
+   "geopandas==1.1.3",
+   "great-tables==0.21.0",
+   "greenlet==3.4.0",
+   "h11==0.16.0",
+   "hf-xet==1.4.3",
+   "htmltools==0.6.1",
+   "httpcore==1.0.9",
+   "httplib2==0.31.2",
+   "httpx==0.28.1",
+   "huggingface_hub==1.12.2",
+   "idna==3.11",
+   "importlib_metadata==9.0.0",
+   "importlib_resources==7.1.0",
+   "inflate64==1.0.4",
+   "interface-meta==1.3.0",
+   "ipython==9.13.0",
+   "ipython_pygments_lexers==1.1.1",
+   "jedi==0.20.0",
+   "joblib==1.5.3",
+   "jsonschema-specifications==2025.9.1",
+   "jsonschema==4.26.0",
+   "kiwisolver==1.5.0",
+   "linearmodels==7.0",
+   "llvmlite==0.47.0",
+   "lxml==6.1.0",
+   "lz4==4.4.5",
+   "maketables==0.1.8",
+   "markdown-it-py==3.0.0",
+   "markdown_pdf==1.13.1",
+   "matplotlib-inline==0.2.2",
+   "matplotlib==3.10.8",
+   "mdurl==0.1.2",
+   "mpmath==1.3.0",
+   "multivolumefile==0.2.3",
+   "mypy_extensions==1.1.0",
+   "narwhals==2.19.0",
+   "networkx==3.6.1",
+   "numba==0.65.1",
+   "numpy==2.4.4",
+   "onnxruntime==1.28.0",
+   "opencv-python==5.0.0.93",
+   "openpyxl==3.1.5",
+   "packaging==26.1",
+   "pandas==3.0.2",
+   "parso==0.8.7",
+   "patool==4.0.4",
+   "patsy==1.0.2",
+   "pdf2image==1.17.0",
+   "pdfminer.six==20251230",
+   "pdfplumber==0.11.9",
+   "pikepdf==10.6.0",
+   "pillow-avif-plugin==1.5.5",
+   "pillow==12.2.0",
+   "pillow_heif==1.3.0",
+   "plantuml==0.3.0",
+   "playwright==1.58.0",
+   "prompt_toolkit==3.0.52",
+   "protobuf==7.35.1",
+   "psutil==7.2.2",
+   "pure_eval==0.2.3",
+   "py7zr==1.1.0",
+   "pyarrow==24.0.0",
+   "pybcj==1.0.7",
+   "pyclipper==1.4.0",
+   "pycparser==3.0",
+   "pycryptodome==3.23.0",
+   "pycryptodomex==3.23.0",
+   "pyee==13.0.1",
+   "pyfixest==0.50.1",
+   "pyhdfe==0.2.0",
+   "pyogrio==0.12.1",
+   "pyparsing==3.3.2",
+   "pypdf==6.10.2",
+   "pypdfium2==5.7.0",
+   "pyppmd==1.3.1",
+   "pyproj==3.7.2",
+   "pyreadstat==1.3.3",
+   "pyshp==3.0.3",
+   "pytesseract==0.3.13",
+   "python-dateutil==2.9.0.post0",
+   "python-docx==1.2.0",
+   "python-pptx==1.0.2",
+   "pywin32==311",
+   "rapidocr-onnxruntime==1.2.3",
+   "rarfile==4.2",
+   "rasterio==1.5.0",
+   "referencing==0.37.0",
+   "regex==2026.4.4",
+   "reportlab==4.4.10",
+   "requests==2.33.1",
+   "rich==15.0.0",
+   "rpds-py==2026.6.3",
+   "safetensors==0.7.0",
+   "scikit-learn==1.8.0",
+   "scipy==1.17.1",
+   "seaborn==0.13.2",
+   "sentencepiece==0.2.1",
+   "setuptools==81.0.0",
+   "shadowcopy==0.0.4",
+   "shapely==2.1.2",
+   "shellingham==1.5.4",
+   "six==1.17.0",
+   "soupsieve==2.8.3",
+   "stack-data==0.6.3",
+   "statsmodels==0.14.6",
+   "sympy==1.14.0",
+   "tabulate==0.10.0",
+   "texttable==1.7.0",
+   "threadpoolctl==3.6.0",
+   "tokenizers==0.22.2",
+   "torch==2.11.0",
+   "tqdm==4.67.3",
+   "traitlets==5.15.0",
+   "transformers==5.7.0",
+   "typer==0.25.0",
+   "typing_extensions==4.15.0",
+   "tzdata==2026.1",
+   "urllib3==2.6.3",
+   "wcwidth==0.7.0",
+   "wrapt==2.2.0rc10",
+   "xlrd==2.0.2",
+   "xlsxwriter==3.2.9",
+   "zipp==3.23.1"
+  ],
+  "packages_sha256": "fcffb05785cb1675b913df1fc7b1f737969106068b3ac53b236bd6eb5bd0affe",
+  "note": "The scripts in scope import only the standard library; the package lock is recorded so a future divergence is visible, not because a third-party version is currently load-bearing."
+ },
+ "collections": [
+  {
+   "collection": "nagpra",
+   "name": "NAGPRA",
+   "shelf": "standard",
+   "n_tables": 4,
+   "ambiguous_scripts": [],
+   "blocked_scripts": [],
+   "code": [
+    {
+     "script": "33_apply_party_rulings.py",
+     "sha256": "62019145e34c244a57ef2935ae017ac30c372ad6823b6138f7de6c8669567d12",
+     "git_blob_working": "1fae06ba8a8524c5d8080748b419926692db88ab",
+     "git_blob_at_commit": "1fae06ba8a8524c5d8080748b419926692db88ab",
+     "matches_commit": true,
+     "tracked": true,
+     "never_run": false,
+     "role": "imported"
+    },
+    {
+     "script": "77_build_nagpra_dataset.py",
+     "sha256": "7e15f38300c56b99af6f34c8f0a58dccecb335816bb7b98f7373eecfbeb73ba5",
+     "git_blob_working": "49ef96ae73c8c105286763b730933760e1d83196",
+     "git_blob_at_commit": "49ef96ae73c8c105286763b730933760e1d83196",
+     "matches_commit": true,
+     "tracked": true,
+     "never_run": false,
+     "role": "phase1_rebuild"
+    },
+    {
+     "script": "78_content_analysis.py",
+     "sha256": "d18c6ae9070a46754055e7d2a97781a8005f02ad6789a15cc8158161683d966b",
+     "git_blob_working": "0106a36870b9731d4e76aac74f2affa49780cccb",
+     "git_blob_at_commit": "0106a36870b9731d4e76aac74f2affa49780cccb",
+     "matches_commit": true,
+     "tracked": true,
+     "never_run": false,
+     "role": "phase1_rebuild"
+    },
+    {
+     "script": "cedar_domain.py",
+     "sha256": "77ce8e3b77cf12c7530ae73139699ffbb5e5bb0589d4cc9718b7f3ee38fe04f3",
+     "git_blob_working": "27504dc93362a0bff7287f668e7623cfd2bd34fe",
+     "git_blob_at_commit": "27504dc93362a0bff7287f668e7623cfd2bd34fe",
+     "matches_commit": true,
+     "tracked": true,
+     "never_run": false,
+     "role": "imported"
+    }
+   ],
+   "inputs": [
+    {
+     "path": "data/clean/content_audit_fr_relevance.csv",
+     "how_found": [
+      "declared_io"
+     ],
+     "read_by": [
+      "78_content_analysis.py"
+     ],
+     "written_in_scope": true,
+     "role": "input",
+     "kind": "file",
+     "sha256": "bc20de61c1cf5024a8f9716145864846668e52b894c22629985dbb4b8af6ac9b",
+     "bytes": 78211,
+     "mtime": "2026-08-06T21:03:48+00:00",
+     "rows": 120,
+     "n_columns": 9,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/bc/bc20de61c1cf5024a8f9716145864846668e52b894c22629985dbb4b8af6ac9b.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "manual_hand_coded",
+      "confidence": "declared",
+      "detail": "hand-coded ground truth; there is no source to re-fetch. Retention is the ONLY retrieval path.",
+      "regenerate_frame_with": [
+       "py -3 code/78_content_analysis.py --emit-audit"
+      ]
+     },
+     "manual_decision_input": true
+    },
+    {
+     "path": "data/clean/content_audit_fr_theme.csv",
+     "how_found": [
+      "declared_io"
+     ],
+     "read_by": [
+      "78_content_analysis.py"
+     ],
+     "written_in_scope": true,
+     "role": "input",
+     "kind": "file",
+     "sha256": "677be88c62af471f0506de98a87e532dfabddd5038b63c0811ca6935906f838c",
+     "bytes": 67575,
+     "mtime": "2026-08-06T21:05:23+00:00",
+     "rows": 110,
+     "n_columns": 8,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/67/677be88c62af471f0506de98a87e532dfabddd5038b63c0811ca6935906f838c.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "manual_hand_coded",
+      "confidence": "declared",
+      "detail": "hand-coded ground truth; there is no source to re-fetch. Retention is the ONLY retrieval path.",
+      "regenerate_frame_with": [
+       "py -3 code/78_content_analysis.py --emit-audit"
+      ]
+     },
+     "manual_decision_input": true
+    },
+    {
+     "path": "data/clean/content_audit_lobbying_family.csv",
+     "how_found": [
+      "declared_io"
+     ],
+     "read_by": [
+      "78_content_analysis.py"
+     ],
+     "written_in_scope": true,
+     "role": "input",
+     "kind": "file",
+     "sha256": "89614b29c640df66de0150f23d911b48496006e105d6a764a0d4feb44a4285ca",
+     "bytes": 43305,
+     "mtime": "2026-08-06T21:07:16+00:00",
+     "rows": 120,
+     "n_columns": 8,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/89/89614b29c640df66de0150f23d911b48496006e105d6a764a0d4feb44a4285ca.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "manual_hand_coded",
+      "confidence": "declared",
+      "detail": "hand-coded ground truth; there is no source to re-fetch. Retention is the ONLY retrieval path.",
+      "regenerate_frame_with": [
+       "py -3 code/78_content_analysis.py --emit-audit"
+      ]
+     },
+     "manual_decision_input": true
+    },
+    {
+     "path": "data/clean/federal_actions.csv",
+     "how_found": [
+      "declared_io",
+      "path_constant:FR",
+      "path_constant:PARENT",
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "77_build_nagpra_dataset.py",
+      "78_content_analysis.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "91115b7fbd37464ac4f1ceadcd3571a52f216d53693c5a867482802bd31b152f",
+     "bytes": 255405367,
+     "mtime": "2026-08-26T23:54:05+00:00",
+     "rows": 156772,
+     "n_columns": 33,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/91/91115b7fbd37464ac4f1ceadcd3571a52f216d53693c5a867482802bd31b152f.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced by the `federal-register` collection; replay that collection's manifest first",
+      "producing_collection": "federal-register",
+      "confidence": "declared"
+     }
+    },
+    {
+     "path": "data/clean/native_bills.csv",
+     "how_found": [
+      "path_constant:BILLS",
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "78_content_analysis.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "07d4916b83cfeb880775860a34bd4a7e30e604dee6366f26e275303013630989",
+     "bytes": 1511028,
+     "mtime": "2026-08-06T20:36:44+00:00",
+     "rows": 3069,
+     "n_columns": 29,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/07/07d4916b83cfeb880775860a34bd4a7e30e604dee6366f26e275303013630989.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced by the `legislation` collection; replay that collection's manifest first",
+      "producing_collection": "legislation",
+      "confidence": "declared"
+     }
+    },
+    {
+     "path": "data/clean/native_entity_lobbying_disclosures.csv",
+     "how_found": [
+      "declared_io",
+      "path_constant:LOBBY",
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "78_content_analysis.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "370edc9f944352ce11d9cb9eb1f4f3ed455894af4f885bc3bd0c133be5602155",
+     "bytes": 18720767,
+     "mtime": "2026-08-29T03:44:10+00:00",
+     "rows": 27796,
+     "n_columns": 40,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/37/370edc9f944352ce11d9cb9eb1f4f3ed455894af4f885bc3bd0c133be5602155.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced by the `lobbying` collection; replay that collection's manifest first",
+      "producing_collection": "lobbying",
+      "confidence": "declared"
+     }
+    },
+    {
+     "path": "data/raw/federal_register/nagpra_fulltext",
+     "how_found": [
+      "path_constant:CACHE",
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "77_build_nagpra_dataset.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "directory",
+     "tree_sha256": "4a1b6c06090af1698370b5e4340e47643d6a390b4371810f9e16235977db71db",
+     "n_files": 6772,
+     "bytes": 18205526,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/4a/4a1b6c06090af1698370b5e4340e47643d6a390b4371810f9e16235977db71db.zip",
+      "deduplicated": true,
+      "form": "zip_of_tree_v2_mtime_preserved"
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "py -3 code/77_build_nagpra_dataset.py fetch",
+      "urls": [
+       "https://www.federalregister.gov/documents/full_text/text/{y}/{m}/{d}/{dn}.txt"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/spine/cedar_entity_spine.csv",
+     "how_found": [
+      "declared_io",
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "33_apply_party_rulings.py",
+      "77_build_nagpra_dataset.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "a3220efc1b2cd3190bbca6a1ae2b187c112f351515dfc022a74eabdd166cb8d4",
+     "bytes": 1394076,
+     "mtime": "2026-08-29T07:22:35+00:00",
+     "rows": 1536,
+     "n_columns": 44,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/a3/a3220efc1b2cd3190bbca6a1ae2b187c112f351515dfc022a74eabdd166cb8d4.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced by the `_entity_layer` collection; replay that collection's manifest first",
+      "producing_collection": "_entity_layer",
+      "confidence": "declared"
+     }
+    }
+   ],
+   "undiscovered_inputs": [],
+   "io_scan_unresolved_names": [
+    {
+     "name": "Assistance_56G180126_TransactionHistory_1.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "bgov.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": false,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "cedar_identifier_ledger_final.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "contract-03-18-23-19-40-24.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "deals_*_additions.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": false,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "deals_2026_ytd.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": false,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "deals_classified.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "deals_historical_2020_2025.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": false,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "entity_crosswalk_bgov.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": false,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "entity_master.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": false,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "federal_funding_transactions.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "fpds_uei_cage_map.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "gaming_facility_metrics.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "gaming_property_capacity_history.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    }
+   ],
+   "manual_decision_inputs": [
+    "data/clean/content_audit_fr_relevance.csv",
+    "data/clean/content_audit_fr_theme.csv",
+    "data/clean/content_audit_lobbying_family.csv"
+   ],
+   "configuration": {
+    "77_build_nagpra_dataset.py": {
+     "WORKERS": "2",
+     "SLEEP": "0.55",
+     "MAX_RETRIES": "5"
+    },
+    "78_content_analysis.py": {
+     "AUDIT_SEED": "20260806",
+     "N_AUDIT_LOBBY": "120",
+     "N_AUDIT_FR_TIER": "120",
+     "N_AUDIT_FR_THEME": "110"
+    },
+    "cedar_domain.py": {
+     "INDIVIDUAL_NATIVE_MIN_CELL_FIRMS": "3"
+    }
+   },
+   "commands": [
+    {
+     "step": 1,
+     "argv": [
+      "py",
+      "-3",
+      "code/77_build_nagpra_dataset.py",
+      "build"
+     ],
+     "phase": "rebuild",
+     "exists": true,
+     "note": "this script is staged (fetch | build); the release runs the build stage against the retained cache"
+    },
+    {
+     "step": 2,
+     "argv": [
+      "py",
+      "-3",
+      "code/78_content_analysis.py"
+     ],
+     "phase": "rebuild",
+     "exists": true
+    }
+   ],
+   "outputs": [
+    {
+     "table": "fr_nagpra_title_index.csv",
+     "present": true,
+     "path": "data/clean/fr_nagpra_title_index.csv",
+     "sha256": "39cef60c02315a165d104989c8395bade749c36aa4f9109c0f28cacb928d5b41",
+     "bytes": 2130958,
+     "rows": 6606,
+     "columns": [
+      "document_number",
+      "publication_date",
+      "publication_year",
+      "title",
+      "agency_names",
+      "notice_kind",
+      "has_abstract",
+      "relevance_tier_from_tier_rule",
+      "missed_by_tier_rule",
+      "basis"
+     ],
+     "primary_key": [
+      "document_number"
+     ],
+     "primary_key_kind": "natural",
+     "primary_key_proven": true,
+     "primary_key_evidence": "document_number: 6,606 distinct over 6,606 rows, 0 blank, full scan",
+     "codebook_block": null,
+     "documented": false,
+     "contract_status": "shippable",
+     "declared_grain": "one row per Federal Register document identified as a NAGPRA notice by its title",
+     "contract_key_columns": [],
+     "mtime": "2026-08-06T21:25:14+00:00",
+     "run_stamp_columns": [],
+     "enricher_backups": [],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 6606,
+       "how": "full csv scan, header excluded"
+      },
+      {
+       "check": "distinct_document_number",
+       "value": 6606,
+       "blank": 0,
+       "how": "full scan"
+      }
+     ]
+    },
+    {
+     "table": "fr_nagpra_title_index_year.csv",
+     "present": true,
+     "path": "data/clean/fr_nagpra_title_index_year.csv",
+     "sha256": "ada95e749e233b4b4476398de29511245cbad19b920b69dc6089cee8ec906344",
+     "bytes": 645,
+     "rows": 33,
+     "columns": [
+      "publication_year",
+      "n_nagpra_notices",
+      "n_with_abstract",
+      "share_with_abstract"
+     ],
+     "primary_key": [
+      "publication_year"
+     ],
+     "primary_key_kind": "natural",
+     "primary_key_proven": true,
+     "primary_key_evidence": "publication_year: 33 distinct over 33 rows, 0 blank, full scan",
+     "codebook_block": null,
+     "documented": false,
+     "contract_status": "shippable",
+     "declared_grain": "one row per publication year of NAGPRA notice counts",
+     "contract_key_columns": [],
+     "mtime": "2026-08-06T21:25:14+00:00",
+     "run_stamp_columns": [],
+     "enricher_backups": [],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 33,
+       "how": "full csv scan, header excluded"
+      }
+     ]
+    },
+    {
+     "table": "nagpra_notice_entity_bridge.csv",
+     "present": true,
+     "path": "data/clean/nagpra_notice_entity_bridge.csv",
+     "sha256": "b8b5a7744de101d2552766162d3e02be2210cbc1851a837b943454aaf4743a73",
+     "bytes": 35897229,
+     "rows": 51521,
+     "columns": [
+      "document_number",
+      "publication_date",
+      "notice_type",
+      "institution_name",
+      "relationship",
+      "party_name_verbatim",
+      "party_name_as_published",
+      "tribe_id",
+      "canonical_name",
+      "resolve_method",
+      "resolve_status",
+      "confidence_tier",
+      "source_span_label",
+      "source_span_text"
+     ],
+     "primary_key": [
+      "document_number",
+      "publication_date",
+      "notice_type",
+      "institution_name",
+      "relationship",
+      "party_name_verbatim",
+      "party_name_as_published",
+      "tribe_id",
+      "canonical_name",
+      "resolve_method",
+      "resolve_status",
+      "confidence_tier",
+      "source_span_label",
+      "source_span_text"
+     ],
+     "primary_key_kind": "deterministic_surrogate",
+     "primary_key_proven": true,
+     "primary_key_evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (51,338 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+     "codebook_block": "11_nagpra",
+     "documented": true,
+     "contract_status": "shippable",
+     "declared_grain": "one row per (notice, relationship, named party) - docs/NAGPRA_BUILD_LOG.md. (document_number, party) alone collides 12,800 times because one party can hold several relationships to one notice",
+     "contract_key_columns": [
+      "tribe_id"
+     ],
+     "mtime": "2026-08-29T09:15:47+00:00",
+     "run_stamp_columns": [],
+     "enricher_backups": [
+      {
+       "backup": "data/clean/nagpra_notice_entity_bridge.csv.bak_2026-08-26_pre_342_nagpra_refresh",
+       "tag": "2026-08-26_pre_342_nagpra_refresh",
+       "attribution": "numeric_prefix_in_tag",
+       "written_by": [
+        "342_pull_federal_register_incremental.py"
+       ]
+      },
+      {
+       "backup": "data/clean/nagpra_notice_entity_bridge.csv.bak_2026-08-28_pre505",
+       "tag": "2026-08-28_pre505",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "503_identity.py"
+       ]
+      }
+     ],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 51521,
+       "how": "full csv scan, header excluded"
+      },
+      {
+       "check": "distinct_document_number",
+       "value": 6358,
+       "blank": 0,
+       "how": "full scan"
+      },
+      {
+       "check": "distinct_tribe_id",
+       "value": 568,
+       "blank": 3467,
+       "how": "full scan"
+      }
+     ]
+    },
+    {
+     "table": "nagpra_notices.csv",
+     "present": true,
+     "path": "data/clean/nagpra_notices.csv",
+     "sha256": "e6cc77950c626b7ec5556d366ac51c4b365b04780164458d91440e0e2c38b1dc",
+     "bytes": 10871983,
+     "rows": 6772,
+     "columns": [
+      "document_number",
+      "publication_date",
+      "publication_year",
+      "notice_type",
+      "notice_title_form",
+      "statute_stage",
+      "is_correction",
+      "title",
+      "institution_name",
+      "institution_primary",
+      "institution_names_all",
+      "institution_city",
+      "institution_state",
+      "institution_count",
+      "institution_name_basis",
+      "institution_type_derived",
+      "responsible_party_statement",
+      "object_categories",
+      "mni_total_stated",
+      "mni_basis",
+      "mni_statement_count",
+      "mni_statements",
+      "n_associated_funerary_objects_stated",
+      "n_unassociated_funerary_objects_stated",
+      "n_sacred_objects_stated",
+      "n_objects_of_cultural_patrimony_stated",
+      "cultural_items_total_stated",
+      "removal_counties",
+      "removal_states",
+      "removal_location_statements",
+      "removal_location_basis",
+      "repatriation_eligible_date",
+      "response_deadline_date",
+      "window_days_derived",
+      "n_consulted_named",
+      "n_consulted_resolved",
+      "consulted_entity_ids",
+      "n_affiliated_named",
+      "n_affiliated_resolved",
+      "affiliated_entity_ids",
+      "n_disposition_priority_named",
+      "n_disposition_priority_resolved",
+      "disposition_priority_entity_ids",
+      "n_repatriation_recipient_named",
+      "n_repatriation_recipient_resolved",
+      "repatriation_recipient_entity_ids",
+      "n_letter_of_support_named",
+      "n_letter_of_support_resolved",
+      "letter_of_support_entity_ids",
+      "n_aboriginal_land_named",
+      "n_aboriginal_land_resolved",
+      "aboriginal_land_entity_ids",
+      "n_parties_named",
+      "n_entities_resolved",
+      "has_resolved_entity",
+      "lineal_descendant_determination",
+      "culturally_unidentifiable",
+      "parse_template",
+      "spans_found",
+      "agency_names",
+      "html_url",
+      "pdf_url",
+      "full_text_url",
+      "source_url",
+      "parent_dataset",
+      "fetched_date"
+     ],
+     "primary_key": [
+      "document_number"
+     ],
+     "primary_key_kind": "natural",
+     "primary_key_proven": true,
+     "primary_key_evidence": "document_number: 6,729 distinct over 6,729 rows, 0 blank, full scan",
+     "codebook_block": "11_nagpra",
+     "documented": true,
+     "contract_status": "shippable",
+     "declared_grain": "one row per NAGPRA notice - docs/NAGPRA_BUILD_LOG.md",
+     "contract_key_columns": [],
+     "mtime": "2026-08-29T09:15:47+00:00",
+     "run_stamp_columns": [],
+     "enricher_backups": [
+      {
+       "backup": "data/clean/nagpra_notices.csv.bak_2026-08-26_pre_342_nagpra_refresh",
+       "tag": "2026-08-26_pre_342_nagpra_refresh",
+       "attribution": "numeric_prefix_in_tag",
+       "written_by": [
+        "342_pull_federal_register_incremental.py"
+       ]
+      }
+     ],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 6772,
+       "how": "full csv scan, header excluded"
+      },
+      {
+       "check": "distinct_document_number",
+       "value": 6772,
+       "blank": 0,
+       "how": "full scan"
+      }
+     ]
+    }
+   ],
+   "rebuild_command": "py -3 code/build.py run nagpra --execute",
+   "replayability": {
+    "verdict": "not_exactly_replayable",
+    "blocking_components": [
+     {
+      "component": "released output predates a recorded input",
+      "class": "output_stale_vs_input",
+      "why": "2 output(s) were last written BEFORE an input this manifest records as consumed. The released bytes were not produced by those inputs, so a faithful replay CANNOT reproduce them and should not be expected to.",
+      "evidence_strength": "mtime only. A content-identical rewrite of an input moves its mtime without changing what it says, so this can flag a release that is in fact current. It stays blocking because the opposite error - shipping a stale table as replayable - is the one that costs money.",
+      "detail": [
+       {
+        "table": "fr_nagpra_title_index.csv",
+        "output_written": "2026-08-06T21:25:14+00:00",
+        "inputs_written_later": [
+         {
+          "input": "data/clean/federal_actions.csv",
+          "written": "2026-08-26T23:54:05+00:00"
+         },
+         {
+          "input": "data/clean/native_entity_lobbying_disclosures.csv",
+          "written": "2026-08-29T03:44:10+00:00"
+         },
+         {
+          "input": "data/spine/cedar_entity_spine.csv",
+          "written": "2026-08-29T07:22:35+00:00"
+         }
+        ]
+       },
+       {
+        "table": "fr_nagpra_title_index_year.csv",
+        "output_written": "2026-08-06T21:25:14+00:00",
+        "inputs_written_later": [
+         {
+          "input": "data/clean/federal_actions.csv",
+          "written": "2026-08-26T23:54:05+00:00"
+         },
+         {
+          "input": "data/clean/native_entity_lobbying_disclosures.csv",
+          "written": "2026-08-29T03:44:10+00:00"
+         },
+         {
+          "input": "data/spine/cedar_entity_spine.csv",
+          "written": "2026-08-29T07:22:35+00:00"
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "component": "in-place enricher outside the collection's plan",
+      "class": "undeclared_enricher",
+      "why": "a script wrote these outputs AFTER the rebuilder and is not in the plan, so the manifest's command list does not reproduce the released columns. The evidence is the enricher's own .bak_ file, not an inference.",
+      "detail": [
+       {
+        "table": "nagpra_notice_entity_bridge.csv",
+        "script": "342_pull_federal_register_incremental.py",
+        "evidence": "data/clean/nagpra_notice_entity_bridge.csv.bak_2026-08-26_pre_342_nagpra_refresh"
+       },
+       {
+        "table": "nagpra_notice_entity_bridge.csv",
+        "script": "503_identity.py",
+        "evidence": "data/clean/nagpra_notice_entity_bridge.csv.bak_2026-08-28_pre505"
+       },
+       {
+        "table": "nagpra_notices.csv",
+        "script": "342_pull_federal_register_incremental.py",
+        "evidence": "data/clean/nagpra_notices.csv.bak_2026-08-26_pre_342_nagpra_refresh"
+       }
+      ]
+     },
+     {
+      "component": "absolute project root hardcoded in code",
+      "class": "code_not_relocatable",
+      "why": "3 script(s) in scope bind the project root to 'C:\\\\Users\\\\esm247\\\\Desktop\\\\Cedar Press', so a checkout at any other path reads and WRITES the live tree. A clean-room replay requires the documented root rewrite (see docs/RELEASE_REPLAY_LOG.md, adaptation A1).",
+      "detail": [
+       "33_apply_party_rulings.py",
+       "77_build_nagpra_dataset.py",
+       "78_content_analysis.py"
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "release_verdict": "not_exactly_replayable",
+ "capture_integrity": {
+  "inputs_rechecked": 7,
+  "outputs_rechecked": 4,
+  "input_check": "sha256 + (mtime, size)",
+  "output_check": "(mtime, size) only - see the note in cmd_build",
+  "changed_during_capture": [],
+  "inputs_rewritten_same_content": [],
+  "outputs_changed_during_capture": [],
+  "quiescent": true,
+  "enforced": true
+ }
+}
