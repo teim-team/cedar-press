@@ -131,6 +131,28 @@ LICENSED_SOURCE_FILES = {
 # triage on every run and prints a loud mismatch if the two have drifted.
 # ---------------------------------------------------------------------------
 INTERNAL_TABLES = {
+    "cedar_assertions.csv":
+        "the raw assertion store behind 510. INTERNAL FOR NOW, NOT FOREVER - "
+        "and the reason is a measurement, so it is testable: on 2026-08-29 "
+        "ZERO of its 8,975 single-valued facts had a second source. Shipping "
+        "a provenance table whose every row cites exactly one source would "
+        "sell the APPEARANCE of corroboration while proving its absence. It "
+        "also carries internal source ids and the unattributed_legacy marker, "
+        "which are our process, not the world. Revisit the moment a second "
+        "independent source is harvested for the same predicate",
+    "cedar_resolved_facts.csv":
+        "the resolved view computed by 510 from cedar_assertions. Internal "
+        "for exactly as long as its input is: a resolved view is only worth "
+        "shipping once resolution has done something, and today 7,477 of its "
+        "facts win by R04 TIER unopposed. The eventual product is this table, "
+        "not the assertion store - it is the one that says which value Cedar "
+        "stands behind and which rule decided it",
+    "cedar_fact_conflicts.csv":
+        "the losing values 510 preserves. Internal alongside its two "
+        "companions, and currently EMPTY - correctly, because no single-"
+        "valued fact yet has competing values. An empty conflict table is "
+        "the honest output of a warehouse with one source per fact; it is "
+        "not evidence that nothing conflicts",
     "assistance_tribe_id_crosswalk.csv":
         "a PROPOSAL that is deliberately not applied. START_HERE.md records "
         "that 152 and 24 both decline to write it in - 'the NEID crosswalk "

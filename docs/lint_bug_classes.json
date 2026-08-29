@@ -1,5 +1,5 @@
 {
-  "scanned_files": 407,
+  "scanned_files": 408,
   "counts": {
     "class1": 0,
     "class2a": 0,
@@ -747,7 +747,7 @@
       "file": "01_build_entity_spine.py",
       "line": 1,
       "evidence": "cedar_entity_spine.csv",
-      "why": "`cedar_entity_spine.csv` has FULL-REBUILD writer(s) ['01_build_entity_spine.py'] and IN-PLACE enricher(s) ['08_build_review_page.py', '115_pull_assistance_archive.py', '163_promote_nho_universe_in_place.py', '241_promote_individual_native_firms_in_place.py', '416_reconcile_spine_id_columns.py', '426_mint_bristol_bay_spine_entities.py', '503_identity.py', '51_add_anc_acronym_aliases.py', '52_add_village_corporations.py', '61_add_nho_intertribal_to_spine.py', '66_build_entity_hierarchy.py', '69_enrich_spine_from_federal_register.py', '71_fix_known_defects.py', '73_add_tcu_and_cdfi.py', '74_add_organization_acronyms.py', '75_add_bie_schools_and_uios.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
+      "why": "`cedar_entity_spine.csv` has FULL-REBUILD writer(s) ['01_build_entity_spine.py'] and IN-PLACE enricher(s) ['08_build_review_page.py', '115_pull_assistance_archive.py', '163_promote_nho_universe_in_place.py', '241_promote_individual_native_firms_in_place.py', '416_reconcile_spine_id_columns.py', '426_mint_bristol_bay_spine_entities.py', '503_identity.py', '510_assertions.py', '51_add_anc_acronym_aliases.py', '52_add_village_corporations.py', '61_add_nho_intertribal_to_spine.py', '66_build_entity_hierarchy.py', '69_enrich_spine_from_federal_register.py', '71_fix_known_defects.py', '73_add_tcu_and_cdfi.py', '74_add_organization_acronyms.py', '75_add_bie_schools_and_uios.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
       "waived": false,
       "waiver_reason": ""
     },
@@ -756,7 +756,7 @@
       "file": "01_build_entity_spine.py",
       "line": 1,
       "evidence": "cedar_identifier_ledger.csv",
-      "why": "`cedar_identifier_ledger.csv` has FULL-REBUILD writer(s) ['01_build_entity_spine.py'] and IN-PLACE enricher(s) ['03_apply_exclusions_and_tier.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
+      "why": "`cedar_identifier_ledger.csv` has FULL-REBUILD writer(s) ['01_build_entity_spine.py'] and IN-PLACE enricher(s) ['03_apply_exclusions_and_tier.py', '510_assertions.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
       "waived": false,
       "waiver_reason": ""
     },
@@ -1515,6 +1515,15 @@
       "why": "[BLOCKING] OBJECT_ADDRESS on target (unnamed) -> np_financials.csv, np_orgs.csv. builtin id() is a memory address, stable only within one process. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
       "waiver_reason": "`id()` here is PYTHON OBJECT IDENTITY for an in-memory object,"
+    },
+    {
+      "class": "class3",
+      "file": "510_assertions.py",
+      "line": 224,
+      "evidence": "\"elijah_ruling\": dict(lineage_root=\"LR_HUMAN_OWNER\", tier_ceiling=\"A\",",
+      "why": "a tier-A assignment sits within 6/3 lines of a ruling-method or status test, at 1 site(s), and this file has NO RECORDED DISPOSITION in 293's DISPOSITIONS table. A regex cannot decide this one - read the site and write the reason down. `attribution_method` says WHO decided; `confidence_tier` says WHAT was decided. Do NOT delete the entry to make this pass.",
+      "waived": true,
+      "waiver_reason": "this entry names WHO decided, never WHAT was decided."
     }
   ],
   "class6_io_map": {
@@ -1587,6 +1596,9 @@
       ],
       "cedar_publishable_identifiers.csv": [
         "03_apply_exclusions_and_tier.py"
+      ],
+      "cedar_resolution_rules.csv": [
+        "510_assertions.py"
       ],
       "cedar_ruling_ledger_consolidated.csv": [
         "173_consolidate_rulings_ledger.py"
@@ -2074,6 +2086,9 @@
       "ca_gaming_facilities_official.csv": [
         "266_apply_gaming_hub_spillover_rulings.py"
       ],
+      "cedar_assertions.csv": [
+        "510_assertions.py"
+      ],
       "cedar_correction_register.csv": [
         "354_correction_register.py"
       ],
@@ -2088,6 +2103,7 @@
         "416_reconcile_spine_id_columns.py",
         "426_mint_bristol_bay_spine_entities.py",
         "503_identity.py",
+        "510_assertions.py",
         "51_add_anc_acronym_aliases.py",
         "52_add_village_corporations.py",
         "61_add_nho_intertribal_to_spine.py",
@@ -2098,8 +2114,12 @@
         "74_add_organization_acronyms.py",
         "75_add_bie_schools_and_uios.py"
       ],
+      "cedar_fact_conflicts.csv": [
+        "510_assertions.py"
+      ],
       "cedar_identifier_ledger.csv": [
-        "03_apply_exclusions_and_tier.py"
+        "03_apply_exclusions_and_tier.py",
+        "510_assertions.py"
       ],
       "cedar_identifier_ledger_final.csv": [
         "124_apply_rulings_in_place.py",
@@ -2117,6 +2137,12 @@
       ],
       "cedar_identity_register.csv": [
         "503_identity.py"
+      ],
+      "cedar_resolved_facts.csv": [
+        "510_assertions.py"
+      ],
+      "cedar_source_registry.csv": [
+        "510_assertions.py"
       ],
       "codebook_master.csv": [
         "104_build_wa_allocations.py",
@@ -2422,6 +2448,7 @@
         "416_reconcile_spine_id_columns.py",
         "426_mint_bristol_bay_spine_entities.py",
         "503_identity.py",
+        "510_assertions.py",
         "51_add_anc_acronym_aliases.py",
         "52_add_village_corporations.py",
         "61_add_nho_intertribal_to_spine.py",
@@ -2434,7 +2461,8 @@
       ],
       "cedar_identifier_ledger.csv": [
         "01_build_entity_spine.py",
-        "03_apply_exclusions_and_tier.py"
+        "03_apply_exclusions_and_tier.py",
+        "510_assertions.py"
       ],
       "cedar_identifier_ledger_final.csv": [
         "09_import_rulings.py",
@@ -2724,6 +2752,11 @@
         "file": "310_correct_overstated_owned_by_edge_tiers.py",
         "line": 18,
         "source": "add(\"\", \"owned_by\", eid, tier=D.Tier.A.value, confidence=0.90, ...)"
+      },
+      {
+        "file": "510_assertions.py",
+        "line": 224,
+        "source": "\"elijah_ruling\": dict(lineage_root=\"LR_HUMAN_OWNER\", tier_ceiling=\"A\","
       },
       {
         "file": "97_build_aliases_and_relationships.py",

@@ -186,7 +186,7 @@ Ranked by the spec's criteria. "Blast radius" is what breaks if it goes wrong.
 
 | # | finding | severity | likelihood | blast radius | detection difficulty | migration cost |
 |---|---|---|---|---|---|---|
-| 1 | **No assertion layer; facts overwritten** (F-1) | critical | certain — it is the current design | every published field in 12 datasets | invisible: the losing value is simply gone | high |
+| ~~1~~ | ~~**No assertion layer; facts overwritten** (F-1)~~ **BUILT 2026-08-29** — `code/510_assertions.py`, `docs/ASSERTION_LAYER.md` | ~~critical~~ | — | 23,310 assertions, 22,984 resolved facts, 331 refutations carried | now visible: every losing value is written to `cedar_fact_conflicts.csv` | done |
 | 2 | **No `lineage_root_id`; self-confirmation possible** (F-1.1) | critical | unknown, UNVERIFIED | any claim resting on "two sources agree" | very high — looks like corroboration | medium |
 | 3 | **Registry and datasets in different trees** (F-0.1) | high | certain | the unregistered-source-id gate cannot exist | low, once stated | low (option a) |
 | ~~4~~ | ~~**No commit substrate for the dataset tree** (F-0.2)~~ **RESOLVED** `2036e46` | ~~high~~ | — | code side now covered; data side still needs `run_id` + checksums | done | — |
@@ -195,6 +195,46 @@ Ranked by the spec's criteria. "Blast radius" is what breaks if it goes wrong.
 | 7 | No agent-task dependency graph or handoff schema | medium | certain | duplicated work, unverifiable "done" | low | low |
 | 8 | 3 tables still undocumented in the codebook | medium | certain | those 3 cannot ship | already gated | low |
 | 9 | `docs/DOC_CONTRADICTIONS_2026-08-26.md` not re-run since today's changes | medium | certain | stale arbiter of conflicting numbers | low | low |
+
+---
+
+## F-3b. WHAT PHASE 3 MEASURED (added 2026-08-29)
+
+The assertion layer is built and its gate is green. The result it produced
+matters more than the machinery, and it is not the result that was expected.
+
+**Every fact in Cedar rests on exactly one source.** Over 8,975 single-valued
+facts: **0** have more than one source weighing in, **0** genuine
+disagreements exist, and **2** have more than one independent evidence family —
+the same 2 rows that already carried `TWO_INDEPENDENT_FEDERAL_SOURCES`.
+
+So the arbitration layer currently has nothing to arbitrate. That is not a
+failure of the layer; it is the layer doing the one job that had to come first,
+which is making the state of the evidence base **measurable**. Before it, the
+claim "Cedar overwrites facts" was an inference from the schema. It is now a
+number.
+
+Two things follow, and they reorder the remaining work:
+
+1. **The next real task is a second independent source, not more machinery.**
+   Harvesting the Federal Register roster directly was tried first: 565 of 575
+   entries matched the spine and the corroborated-fact count stayed at **2** —
+   correctly, because a copy of the FR living in the spine and the FR itself
+   are the same evidence family. The lineage model works. What is missing is a
+   source that is genuinely *elsewhere*.
+2. **A ratchet that punishes correct classification was found and fixed.**
+   Registering the three new tables as internal-by-decision raised four
+   `tables_missing_from_*` counters by three apiece. `62` skipped licensed
+   files from those counts but not internal ones. Making it consistent dropped
+   `ship_tables_at_zero` 68 → 13 and `tables_missing_from_25_TABLES` 234 → 179:
+   55 of the tables those metrics were reporting as unregistered had been
+   correctly classified all along.
+
+Also surfaced, pre-existing and still open: **`ANRC-BRBYCO-00` (Bristol Bay
+Native Corporation) is keyed to "BRISTOL BAY AREA HEALTH CORPORATION" across
+742 rows in 9 tables** (`FA-01`, informational in `62`, not gating). These are
+different entities. It is exactly the class of error the assertion layer is
+built to expose, and a good first test once a second source exists.
 
 ---
 

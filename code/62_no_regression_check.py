@@ -506,6 +506,18 @@ def measure_shipping():
             continue
         if p.name in CB.LICENSED_SOURCE_FILES:
             continue                       # licensed files must never ship
+        if p.name in CB.INTERNAL_TABLES:
+            # INTERNAL BY DECISION, and therefore not a registration gap -
+            # exactly the reasoning already applied to licensed files one line
+            # up, and to tables_undocumented_in_codebook below.
+            #
+            # 2026-08-29: adding three internal tables (510's assertion store,
+            # resolved view and conflict table) raised FOUR "missing from X"
+            # ratchets by three apiece, reporting a registration backlog for
+            # files that are registered - as internal - and must never appear
+            # in 25_TABLES or 27_SPEC. A counter that rises when you correctly
+            # classify a table teaches the next agent to avoid classifying.
+            continue
         rows = _scan_rows(p, cache, stats)
         clean_by_file[p.name] = rows
         d = dist_notes.get(p.name)
