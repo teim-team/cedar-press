@@ -139,11 +139,37 @@ def cache_fetched_date(path) -> str:
     separating this table from an exact replay: the 2026-08-30 clean-room run
     reproduced 6,772 of 6,772 rows and 65 of 66 columns, differing on this one.
 
-    The honest value is a property of the artifact we parsed, so it is read
-    from that file's mtime. If the artifact is missing we return "" rather
-    than substituting the clock - an unknown fetch date is unknown, and a
-    date invented at build time is exactly the defect being removed.
+    RETRACTED 2026-08-30, same day, on external review. The first fix read the
+    artifact's MTIME and called it fetched_date. That made the column
+    deterministic and WRONG: an mtime is set by whichever of download, local
+    copy, extraction, restore or rsync touched the file last, and some tools
+    preserve the REMOTE modification time, so a file fetched today can carry
+    an mtime from 2019. "Deterministically wrong metadata is worse than
+    deterministically missing metadata" - the reviewer, and they are right.
+
+    So this returns the recorded retrieval time when one exists in the fetch
+    sidecar, and "" otherwise. The mtime is still emitted, but under its own
+    honest name (artifact_mtime) as technical metadata - never renamed into
+    provenance. Determinism is preserved either way; correctness is no longer
+    traded for it. Going forward `fetch` writes retrieval time explicitly at
+    the acquisition boundary.
     """
+    p = pathlib.Path(path)
+    side = p.with_suffix(p.suffix + ".fetchmeta")
+    if side.exists():
+        try:
+            import json as _json
+            v = (_json.loads(side.read_text(encoding="utf-8"))
+                 .get("retrieved_at") or "")
+            return v[:10]
+        except (OSError, ValueError):
+            pass
+    return ""                       # unknown retrieval time stays UNKNOWN
+
+
+def artifact_mtime(path) -> str:
+    """The cached file's mtime, under its own name. Technical metadata about
+    OUR copy of the artifact - not a claim about when it was retrieved."""
     try:
         from datetime import datetime as _dt
         return _dt.utcfromtimestamp(
@@ -1586,6 +1612,8 @@ def parse_notice(meta, text):
         # the cached artifact, not of the run that parsed it.
         "fetched_date": cache_fetched_date(
             cache_path(meta["publication_date"], meta["document_number"])),
+        "artifact_mtime": artifact_mtime(
+            cache_path(meta["publication_date"], meta["document_number"])),
     }
     return row, parties
 
@@ -1932,7 +1960,7 @@ def build_stage():
         "lineal_descendant_determination", "culturally_unidentifiable",
         "parse_template", "spans_found", "agency_names",
         "html_url", "pdf_url", "full_text_url", "source_url",
-        "parent_dataset", "fetched_date",
+        "parent_dataset", "fetched_date", "artifact_mtime",
     ]
     BRIDGE_FIELDS = [
         "document_number", "publication_date", "notice_type", "institution_name",

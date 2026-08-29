@@ -634,6 +634,22 @@ def measure_shipping():
         # The second is a QUEUE and healthy - it is the system refusing to
         # manufacture certainty. The first is exposure: it must not RISE,
         # because it is what would ship as fact on no evidence.
+        # External review round 2, MEASURED critical: a table whose grain is
+        # unresolved or which carries literal duplicate rows, AND which
+        # carries money columns, is one a buyer will total and get a wrong
+        # answer from - and the wrong answer looks completely normal. 517
+        # classifies these; this counts them so the exposure can only shrink.
+        _es = CLEAN / "cedar_export_safety.csv"
+        if _es.exists():
+            import csv as _csv3
+            with _es.open(encoding="utf-8-sig", newline="") as _fh:
+                _rows = list(_csv3.DictReader(_fh))
+            m["export_unsafe_money_tables"] = sum(
+                1 for _r in _rows
+                if _r.get("aggregation_safe") == "0" and _r.get("money_columns"))
+            m["export_row_level_only"] = sum(
+                1 for _r in _rows if _r.get("aggregation_safe") == "0")
+
         _rf = CLEAN / "cedar_resolved_facts.csv"
         if _rf.exists():
             import csv as _csv2
@@ -1500,6 +1516,8 @@ MUST_NOT_RISE = {
     # the integrator writing a ratchet without a fixture that proves its
     # direction is how it was needed.
     "identity_facts_legacy_only",
+    # Money tables a buyer must not aggregate. May only fall.
+    "export_unsafe_money_tables",
     "ship_tables_at_zero",
     "tables_missing_codebook_block", "tables_missing_from_25_TABLES",
     "tables_missing_from_27_SPEC", "tables_missing_notes_contract",

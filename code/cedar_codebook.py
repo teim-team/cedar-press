@@ -131,6 +131,12 @@ LICENSED_SOURCE_FILES = {
 # triage on every run and prints a loud mismatch if the two have drifted.
 # ---------------------------------------------------------------------------
 INTERNAL_TABLES = {
+    "cedar_export_safety.csv":
+        "517's per-table verdict on whether a buyer may AGGREGATE a table or "
+        "only read its rows. Internal ONLY because it needs a codebook block "
+        "and a notes contract before it ships - it is otherwise exactly what "
+        "a buyer should receive, and shipping it is the point. Until then it "
+        "gates internally: see docs/EXPORT_SAFETY.md",
     "cedar_source_records.csv":
         "the source-record nodes behind 514 - what each source row literally "
         "says, with NO cedar_uid column by construction. Load-bearing for "
