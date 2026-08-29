@@ -101,6 +101,7 @@ import sys
 import threading
 import time
 from collections import Counter, defaultdict
+import pathlib
 from datetime import date, datetime, timezone
 from pathlib import Path
 
@@ -127,6 +128,28 @@ OUT_UNPARSED = REVIEW / "nagpra_unparsed.csv"
 HOST = "www.federalregister.gov"
 HOSTLOCK = LOGS / f"_HOSTLOCK_{HOST}.json"
 TODAY = date.today().isoformat()
+
+
+def cache_fetched_date(path) -> str:
+    """When the CACHED DOCUMENT was fetched - not when this build ran.
+
+    `fetched_date` used to hold `TODAY`, so every rebuild rewrote the column
+    and `nagpra_notices.csv` could never be byte-identical across runs. That
+    is blocker B4 in docs/RELEASE_REPLAY_LOG.md, and it was the ONLY column
+    separating this table from an exact replay: the 2026-08-30 clean-room run
+    reproduced 6,772 of 6,772 rows and 65 of 66 columns, differing on this one.
+
+    The honest value is a property of the artifact we parsed, so it is read
+    from that file's mtime. If the artifact is missing we return "" rather
+    than substituting the clock - an unknown fetch date is unknown, and a
+    date invented at build time is exactly the defect being removed.
+    """
+    try:
+        from datetime import datetime as _dt
+        return _dt.utcfromtimestamp(
+            pathlib.Path(path).stat().st_mtime).date().isoformat()
+    except (OSError, ValueError, TypeError):
+        return ""
 LOG_PATH = LOGS / f"77_nagpra_{TODAY}.log"
 
 TEXT_URL = "https://www.federalregister.gov/documents/full_text/text/{y}/{m}/{d}/{dn}.txt"
@@ -1559,7 +1582,10 @@ def parse_notice(meta, text):
             y=meta["publication_date"][:4], m=meta["publication_date"][5:7],
             d=meta["publication_date"][8:10], dn=meta["document_number"]),
         "parent_dataset": "federal_actions.csv (Cedar Press Dataset 9)",
-        "fetched_date": TODAY,
+        # WAS `TODAY`. See cache_fetched_date() - this is a property of
+        # the cached artifact, not of the run that parsed it.
+        "fetched_date": cache_fetched_date(
+            cache_path(meta["publication_date"], meta["document_number"])),
     }
     return row, parties
 

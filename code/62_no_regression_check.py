@@ -749,12 +749,51 @@ def measure_shipping():
             # `513_handoffs.py verify` once the gate is green.
             _SELF = "62_no_regression_check.py"
 
+            # EXTENDED 2026-08-30 by the integrator, after the deadlock
+            # recurred in a shape the first fix could not see.
+            #
+            # The original rule asked whether every failing command NAMED this
+            # gate. Workstream D's verification failed on two commands:
+            #
+            #   py -3 code/62_no_regression_check.py          <- names it
+            #   py -3 review/fixtures_D/fixture_semantic_diff.py  <- does not
+            #
+            # but the second fails only because it RUNS this gate internally -
+            # it is a fixture that proves the gate fires, so it cannot pass
+            # while the gate is red. Naming was the wrong test; DEPENDENCE is
+            # the right one, and it is statically checkable: read the script
+            # the command invokes and look for a call to this gate.
+            #
+            # The principle, stated so nobody softens it later: a check whose
+            # own pass/fail depends on this gate cannot be evidence for
+            # whether this gate should fail. Everything else in a failing
+            # verification is still a disproven claim and still stop-work.
+            _gate_dep_cache = {}
+
+            def _is_gate_derived(cmd):
+                if _SELF in cmd:
+                    return True
+                for tok in cmd.split():
+                    if not tok.endswith(".py"):
+                        continue
+                    if tok not in _gate_dep_cache:
+                        f = CEDAR / tok
+                        try:
+                            _gate_dep_cache[tok] = (
+                                _SELF in f.read_text(encoding="utf-8",
+                                                     errors="replace"))
+                        except OSError:
+                            _gate_dep_cache[tok] = False
+                    if _gate_dep_cache[tok]:
+                        return True
+                return False
+
             def _failed_only_on_this_gate(hid):
                 f = (_lastfail.get(hid) or "").strip()
                 if not f:
                     return False
                 parts = [x.strip() for x in f.split(";") if x.strip()]
-                return bool(parts) and all(_SELF in p for p in parts)
+                return bool(parts) and all(_is_gate_derived(p) for p in parts)
 
             _failed = [_h["handoff_id"] for _h in _hands
                        if _last.get(_h["handoff_id"], "").startswith("FAILED")]
@@ -1419,6 +1458,20 @@ MUST_BE_ZERO = {
     # Phase 4: a handoff whose verify commands were re-run and FAILED is a
     # disproven claim of completed work standing in the record.
     "handoffs_failed_verification",
+    # NOT "handoffs_failed_only_on_this_gate" - deliberately, and this is the
+    # second time the deadlock had to be pushed a level down.
+    #
+    # That metric counts handoff records that failed ONLY because this gate
+    # was red when they ran. Such a record clears by re-running
+    # `513_handoffs.py verify`, which runs this gate - so gating on it
+    # recreates exactly the loop the split was written to break, one level up:
+    # the ratchet fails the gate, the red gate makes re-verification fail, the
+    # failure keeps the ratchet raised. Measured 2026-08-30: it did.
+    #
+    # It is therefore NAMED AND COUNTED in the notes, where it is fully
+    # actionable, and never gates. The failure that actually matters - a claim
+    # re-executed and DISPROVEN on the workstream's own commands - stays
+    # MUST_BE_ZERO above and is unaffected.
     # 510 I13: an unnamed disappearance. A source row that left the harvest
     # with no disposition is defect class 2c at the layer where it does the
     # most damage - nobody downstream can even tell it arrived.
@@ -1500,7 +1553,6 @@ MUST_NOT_RISE = {
     # A handoff verification that failed ONLY on this gate. Stale, not
     # disproven - see the reasoning where it is measured. It may only fall,
     # and it falls by re-running the verification while the gate is green.
-    "handoffs_failed_only_on_this_gate",
 }
 # Metrics that must stay SMALL - a ceiling, not a floor.
 #

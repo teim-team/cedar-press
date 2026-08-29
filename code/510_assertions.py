@@ -154,6 +154,15 @@ LINEAGE_ROOTS = {
         label="SBA 8(a) and related certifications",
         derives_from="", independence_is_unverified=0,
         note="Authoritative for entity-owned 8(a) status."),
+    "LR_STATE_REGULATOR": dict(
+        label="A state regulator's own filing or docket (gaming commission, "
+              "securities regulator, secretary of state)",
+        derives_from="", independence_is_unverified=0,
+        note="A state regulator is an INDEPENDENT observer of the entity, not "
+             "the entity speaking about itself - so it is its own family and "
+             "may corroborate a federal source. It is authoritative for what "
+             "it regulates and for nothing else; a state gaming commission "
+             "does not decide federal recognition."),
     "LR_NHOA": dict(
         label="Native Hawaiian Organizations Association directory",
         derives_from="", independence_is_unverified=0,
@@ -218,6 +227,13 @@ SOURCES = {
     "sba_8a": dict(lineage_root="LR_SBA", tier_ceiling="A", authority_for=[]),
     "nhoa_member_directory": dict(lineage_root="LR_NHOA", tier_ceiling="C",
                                   authority_for=[]),
+    # Added 2026-08-30 for workstream B: 127 facts were falling back to
+    # org_self_statement, which is wrong in BOTH directions - it credited the
+    # entity with saying something a regulator said, and it put a regulator's
+    # filing in the self-statement evidence family. A state gaming commission
+    # or securities regulator is an independent observer of the entity.
+    "state_regulatory_filing": dict(lineage_root="LR_STATE_REGULATOR",
+                                    tier_ceiling="A", authority_for=[]),
     "org_self_statement": dict(lineage_root="LR_SELF", tier_ceiling="B",
                                authority_for=["entity.website"]),
     # lint-ok: class3 - this entry names WHO decided, never WHAT was decided.
@@ -1941,6 +1957,29 @@ def phase_verify() -> int:
         fails.append(f"I8 {dropped} losing values were dropped without being "
                      f"written to the conflict table - facts are being "
                      f"destroyed, which is the defect this layer exists to fix")
+
+    # I15: NO INTERRUPTED FIXTURE LEFT ITS BACKUP BEHIND.
+    #
+    # Fixtures inject a violation into a live table and restore it in a
+    # `finally`. A `finally` does not run when the process is KILLED, and on
+    # 2026-08-30 an integrator timeout cut a verification loop mid-fixture and
+    # left an injected row in cedar_resolved_facts.csv. The tables were then
+    # WRONG while every other invariant passed, because an injected row is
+    # indistinguishable from a real one - the only trace was the abandoned
+    # .fixturebak file sitting beside it.
+    #
+    # So the trace is the check. A surviving backup means a fixture did not
+    # finish, which means the table beside it must be assumed contaminated
+    # until it is rebuilt. Cheap, exact, and it fails loudly instead of
+    # letting a later invariant fail for a reason that looks unrelated.
+    strays = sorted(p.name for d in (CLEAN, SPINE) if d.exists()
+                    for p in d.glob("*.fixturebak"))
+    if strays:
+        fails.append(f"I15 {len(strays)} abandoned fixture backup(s) - a "
+                     f"fixture was interrupted before it could restore, so "
+                     f"the live table beside each is CONTAMINATED. Restore "
+                     f"from the .fixturebak and re-run the build: "
+                     f"{strays[:4]}")
 
     # I10: INVERSE UNIQUENESS. An entity may hold many UEIs; a single active
     # UEI may NOT identify two entities. External review 2026-08-30, finding

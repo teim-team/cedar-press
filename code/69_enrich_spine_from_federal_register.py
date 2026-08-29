@@ -109,6 +109,35 @@ def parse_fr():
     return [o for o in out if len(o) > 3 and o[0].isupper()]
 
 
+# ---------------------------------------------------------------------------
+# 91 FR 4102 is a list under SECTION HEADINGS, and the parser could not tell a
+# heading from an entry. Result, found 2026-08-30 by the source-record layer:
+#
+#   "Native Entities Within the State of Alaska Recognized by and Eligible To
+#    Receive Services From the United States Bureau of Indian Affairs"
+#
+# was carried in fr_recognized_entities.csv as `kind = entity` - the TITLE of
+# the Alaska list, filed as a tribe. It resolved to nothing, so it was
+# invisible until something started counting what failed to resolve.
+#
+# A heading is recognised by what it does rather than by matching its text: it
+# describes a CATEGORY of entities ("Native Entities Within...", "...Recognized
+# by and Eligible To Receive Services From...") instead of naming one. Matching
+# the literal string would fix this year's notice and silently break on the
+# next one, which is the same brittleness the parser already has.
+# ---------------------------------------------------------------------------
+_HEADING_MARKERS = (
+    "recognized by and eligible to receive services",
+    "native entities within the state of",
+    "indian entities recognized by and eligible",
+)
+
+
+def is_section_heading(name: str) -> bool:
+    n = " ".join((name or "").lower().split())
+    return any(mark in n for mark in _HEADING_MARKERS)
+
+
 def main():
     print("=== Cedar Press 69: enrich spine from 91 FR 4102 ===\n")
     m = load_m33()
@@ -121,7 +150,8 @@ def main():
         see = SEE_RE.search(e)
         base = PREV_RE.sub("", e)
         base = SEE_RE.sub("", base).strip().rstrip(",").strip()
-        kind = ("cross_reference" if see else
+        kind = ("section_heading" if is_section_heading(base) else
+                "cross_reference" if see else
                 "rename" if prev else "entity")
         kinds[kind] += 1
         roster.append({
@@ -134,6 +164,10 @@ def main():
             "parsed": TODAY,
         })
     print(f"  entities        : {kinds['entity']}")
+    if kinds["section_heading"]:
+        print(f"  section headings: {kinds['section_heading']}   "
+              f"(list TITLES, not entities - excluded from the roster and "
+              f"NAMED here rather than dropped silently)")
     print(f"  renames         : {kinds['rename']}   (alias of the same entity)")
     print(f"  cross-references: {kinds['cross_reference']}   "
           f"(a DIFFERENT entity - never merged)")
