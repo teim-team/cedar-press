@@ -22,6 +22,21 @@ Shared, read-only for everyone: `cedar_pipeline.py`, `cedar_codebook.py`,
 
 ---
 
+## Workstream file ownership, pass 2 (2026-08-30, second wave)
+
+The pass-1 table above is EXPIRED. Current owners:
+
+| workstream | owns (may edit) | must not touch |
+|---|---|---|
+| **E** grain sweep | `code/512_build_dataset_contracts.py` (GRAIN/declarations only), `docs/GRAIN_AUDIT.md`, new grain-evidence outputs | `510`, `514`, `516`, `build.py`, `503` |
+| **F** F1 rollout + second source | `code/510_assertions.py`, `code/514_source_records.py`, their docs | `512`, `516`, `62`, `build.py` |
+| **G** replay breadth | `code/516_release_manifest.py`, `docs/RELEASE_REPLAY_LOG.md`, `docs/releases/` | all other code |
+
+Shared read-only: `cedar_pipeline.py`, `cedar_codebook.py`, `503`, `62`,
+`build.py`. `62` edits route through the integrator this pass. Integrator
+commits; no agent commits. The B1 de-hardcode sweep (280 scripts) is
+deliberately NOT in this pass - it touches every file and runs solo, next.
+
 ## ADR-001 — `source_record` as a first-class node (workstream A)
 
 **Status:** in progress. **Supersedes:** nothing.
