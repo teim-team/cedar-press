@@ -8,6 +8,11 @@ money moves to and through Native entities, and what evidence backs each claim. 
 state and tribal sources, resolves them to a single entity spine, and ships them to a
 subscriber web application.
 
+> ### PICKING UP WORK? READ `NEXT_SESSION.md` FIRST.
+> One page: what landed, what is red and how to clear it, what is open in
+> priority order, and three things that were WRONG and are now right — do not
+> re-inherit them.
+>
 > ### THE NORTH STAR, as of 2026-08-30
 >
 > **`docs/DATASET_READINESS.md` — READY / BLOCKED / NOT_TESTED per dataset.**
