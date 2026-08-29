@@ -16,10 +16,43 @@ That is exactly how the Kootenai correction was lost three times.
   2. 29 rows whose tribe_id is not a spine id at all.
   3. Two universities attributed to tribes.
   4. A spine typo.
+  5. 12,127 ledger rows whose `state` column holds THAT ROW'S OWN UEI.
+
+DEFECT 5, added 2026-08-29 - a corrupt column in a table that SHIPS.
+
+`cedar_identifier_ledger_final.csv` is published by 25_build_publication_layer.
+Its `state` column, measured over 20,577 rows:
+
+    12,127  a UEI              59.0%   <- and in every single case, the row's
+     4,072  empty                          OWN uei, character for character
+     3,481  a valid state      16.9%
+       849  other text  (full state names, '-')
+        48  multi-state strings like 'ARIZONA; CALIFORNIA; COLORADO'
+
+The builder is NOT at fault: `01_build_entity_spine.py` reads
+`r.get("physical_state")`, which is the correct column. The corruption is in
+the external source, `data/raw/external/master_tribal_entity_registry.csv`,
+where `physical_state` equals the row's own `uei` in 12,127 of 13,191 rows
+(92%) and holds a real state in only 134.
+
+So this is an INHERITED defect, and the fix is in two halves:
+
+  * here, for the live tables, because a shipped column that is 59% identifiers
+    is worse than an empty one - a buyer filtering by state gets silence for
+    most of the ledger and never learns why;
+  * in `01`, which now REFUSES a physical_state that is not a state, so a
+    rebuild cannot reintroduce it. 01 is NEVER_RUN, so the guard there is for
+    the day someone overrides it - which is exactly when a silent regression
+    would be least welcome.
+
+Raw is never edited, and 71 writes a timestamped `.bak_<date>_pre71` before it
+touches a ledger, so the rejected values survive in two places without adding a
+column to a table that ships.
 """
 
 import csv
 import shutil
+import sys
 from collections import Counter
 from datetime import date
 from pathlib import Path
@@ -27,6 +60,7 @@ from pathlib import Path
 CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
 CLEAN = CEDAR / "data" / "clean"
 SPINE_P = CEDAR / "data" / "spine" / "cedar_entity_spine.csv"
+sys.path.insert(0, str(Path(__file__).parent))
 TODAY = date.today().isoformat()
 
 # name as it appears in the data -> the spine entity it is
@@ -74,6 +108,9 @@ BARRED_FIRMS = {
 }
 
 SPINE_TYPO = {"TRBF-WRMSPR-00": ("Warms Springs Tribe", "Warm Springs Tribe")}
+
+
+from cedar_pipeline import clean_state  # noqa: E402
 
 
 def read_csv(p):
@@ -162,6 +199,30 @@ def main():
                 r["tribe_id"] = NAME_FIX[nm]
                 r["canonical_name"] = by_id[NAME_FIX[nm]]["canonical_name"]
                 stats["tier-A rows given their entity"] += 1
+
+        # ---- defect 5: a state column that is 59% identifiers ------------
+        # Runs as its own pass, AFTER the loop above, because every branch
+        # there ends in `continue` - a withdrawn or remapped row still has a
+        # corrupt state, and folding this in would have skipped 12,000 of them.
+        rejects = Counter()
+        for r in rows:
+            if "state" not in r:
+                break
+            before = (r.get("state") or "").strip()
+            after, verdict = clean_state(before, r.get("identifier", ""))
+            if verdict in ("kept", "empty"):
+                continue
+            # No `state_source_value` column is added. That was the first
+            # design and it was wrong: this table SHIPS, so a new column is a
+            # schema change needing a codebook block and a dist rebuild, paid
+            # to store a value that is already preserved twice - in
+            # data/raw/external/master_tribal_entity_registry.csv, which is
+            # never edited, and in the .bak_<date>_pre71 copy written above.
+            r["state"] = after
+            rejects[verdict.split(" (")[0]] += 1
+            stats["state values corrected"] += 1
+        for verdict, n in rejects.most_common():
+            print(f"    state: {n:6d}  {verdict}")
 
         with open(p, "w", encoding="utf-8", newline="") as fh:
             w = csv.DictWriter(fh, fieldnames=list(rows[0].keys()),

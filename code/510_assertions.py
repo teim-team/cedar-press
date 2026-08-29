@@ -85,6 +85,9 @@ from collections import Counter, defaultdict
 from datetime import date
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from cedar_pipeline import clean_state  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 CLEAN = ROOT / "data" / "clean"
 SPINE = ROOT / "data" / "spine"
@@ -277,6 +280,8 @@ MULTI_VALUED = (
     "entity.identifier.",   # a tribe may hold many UEIs, CAGEs and EINs
     "gaming.",              # many claims, many counterparties, many dates
     "entity.alias",
+    "entity.legal_business_name",   # many registrations, many filed names
+    "entity.registration_state",    # an entity may register in many states
 )
 
 
@@ -710,6 +715,97 @@ def harvest_aliases(out) -> int:
     return n
 
 
+def harvest_ledger_attributes(out) -> dict:
+    """THE SECOND INDEPENDENT SOURCE for entity.state.
+
+    The identifier ledger carries more than identifiers. Each row also holds
+    the `state` and `legal_business_name` that came with the REGISTRATION - a
+    SAM or IRS record, not the Federal Register - so it is a genuinely
+    different evidence family from everything the spine says. That is what
+    item 0 in START_HERE was asking for, and it was already on disk.
+
+    It could not be harvested until 2026-08-29. The `state` column held THAT
+    ROW'S OWN UEI in 12,127 of 20,577 rows (59%), inherited from
+    master_tribal_entity_registry.csv where physical_state == uei in 92% of
+    rows. 71_fix_known_defects.py defect 5 cleared it and normalised 846 full
+    state names, leaving 4,327 rows with a usable state. Harvesting it before
+    that would have asserted 12,127 UEIs as states, at tier A, from a source
+    the rules trust.
+
+    `canonical_name` is deliberately NOT harvested here: the ledger copies it
+    from the spine, so it is the same family and would be an echo, not a second
+    opinion. `legal_business_name` IS harvested - it is the name on the
+    registration, which is a different claim from the entity's canonical name
+    and frequently a different string.
+    """
+    p = CLEAN / "cedar_identifier_ledger_final.csv"
+    rows = read_csv(p)
+    if not rows:
+        return {"rows": 0, "state": 0, "legal_name": 0}
+    n_state = n_name = 0
+    for r in rows:
+        uid = (r.get("cedar_uid") or "").strip()
+        tier = (r.get("confidence_tier") or "").strip().upper()
+        # A tier-X row is a REFUTATION of the identifier link. If we do not
+        # believe this UEI belongs to this entity, we cannot use the address
+        # attached to it to describe that entity.
+        if not uid or tier == "X":
+            continue
+        itype = (r.get("identifier_type") or "").strip().upper()
+        sid = "irs_bmf" if itype == "EIN" else "sam_registration"
+        st, verdict = clean_state(r.get("state"), r.get("identifier", ""))
+        if st:
+            # NOT entity.state. THIS IS THE STATE OF THE REGISTRATION, and a
+            # registration belongs to the REGISTRANT - usually a tribally
+            # owned enterprise, not the tribe.
+            #
+            # The first version of this harvester asserted it as entity.state,
+            # on the reasoning that a SAM address is a genuinely independent
+            # second source. It is independent. It is also about a different
+            # subject. The resolver did exactly what it was told and moved
+            # Akiak and Arctic Village to VIRGINIA, Alutiiq to CALIFORNIA and
+            # Anaktuvuk Pass to FLORIDA - Alaska Native village governments
+            # relocated to the lower 48 because an enterprise of theirs
+            # registered a mailing address there. 100+ entities, and the
+            # resolved view was WORSE than the spine it was meant to check.
+            #
+            # This is the containment error the project already bars elsewhere,
+            # wearing a new hat: a property of a thing owned by an entity is
+            # not a property of the entity. Under the hub model in
+            # IDENTIFIER_STANDARD.md a registration is a sub-hub, and its
+            # address is a fact about the sub-hub.
+            #
+            # Kept as a MULTI-valued fact, because "this entity has
+            # registrations filed in AK, VA and OK" is true and useful, and
+            # because it never competes with where the entity actually is.
+            _emit(out, uid, "entity.registration_state", st, sid,
+                  tier="B" if tier in ("A", "B") else "C",
+                  method=f"registration_address:{itype}",
+                  rationale="The state on the registration record behind this "
+                            "identifier. A fact about the REGISTRATION, not "
+                            "about the entity - the registrant is often a "
+                            "tribally owned enterprise headquartered "
+                            "elsewhere. Never resolved against entity.state.",
+                  evidence_url=r.get("evidence_url", ""),
+                  verified=r.get("verified_date", ""),
+                  origin=p.relative_to(ROOT).as_posix())
+            n_state += 1
+        lbn = (r.get("legal_business_name") or "").strip()
+        if lbn:
+            _emit(out, uid, "entity.legal_business_name", lbn, sid,
+                  tier="B" if tier in ("A", "B") else "C",
+                  method=f"registration_name:{itype}",
+                  rationale="The legal name on the registration. A different "
+                            "claim from the entity's canonical name, and often "
+                            "a different string - this is where a tribally "
+                            "owned enterprise appears under its own name.",
+                  evidence_url=r.get("evidence_url", ""),
+                  verified=r.get("verified_date", ""),
+                  origin=p.relative_to(ROOT).as_posix())
+            n_name += 1
+    return {"rows": len(rows), "state": n_state, "legal_name": n_name}
+
+
 def phase_harvest(apply: bool) -> list:
     out = []
     harvest_spine(out)
@@ -721,6 +817,7 @@ def phase_harvest(apply: bool) -> list:
     fr = harvest_fr_roster(out)
     n_fr = len(out) - n_spine - n_ident - n_game
     n_alias = harvest_aliases(out)
+    led = harvest_ledger_attributes(out)
 
     # Deterministic order, and collapse identical claims from one source.
     seen, uniq = set(), []
@@ -746,6 +843,8 @@ def phase_harvest(apply: bool) -> list:
           f"gaming {n_game}, FR roster {n_fr}, aliases {n_alias}")
     print(f"                 FR roster: {fr['resolved']}/{fr['rows']} entries "
           f"matched to the spine, {fr['renames']} recorded renames harvested")
+    print(f"                 ledger registrations: {led['state']} states, "
+          f"{led['legal_name']} legal names (facts about the REGISTRATION, not the entity - see the note in harvest_ledger_attributes)")
     print(f"                 {deny} DENY assertions preserved (tier-X "
           f"refutations, which an overwrite model loses)")
     return uniq
@@ -912,8 +1011,24 @@ def phase_resolve(assertions, apply: bool):
         best = max(winner_group,
                    key=lambda g: (TIER_RANK.get(g["confidence_tier"], 0),
                                   g["verified_date"] or ""))
-        competing = [v for v, _ in ranked[1:]]
-        for v, grp in ranked[1:]:
+
+        # THE LOSERS ARE "EVERYTHING THAT IS NOT THE WINNER", never ranked[1:].
+        #
+        # Caught by invariant I8 on 2026-08-29, the first time this resolver
+        # had real competition to arbitrate. When R07 breaks a tie it reorders
+        # the candidates, so the coin-flip winner is not necessarily ranked[0]
+        # - and taking ranked[1:] as the losers then files THE WINNER as a
+        # losing value and drops the real loser entirely. CE-00006-4P resolved
+        # to VA, recorded VA as the conflict, and lost AK altogether. 98 values
+        # went that way.
+        #
+        # This is the third time in one session that a plausible-looking line
+        # in this script silently destroyed data it was written to preserve.
+        # I8 is why it was found; the branch is now derived from the winner
+        # rather than from the sort order, so it cannot disagree with itself.
+        losers = [(v, grp) for v, grp in ranked if v != winner_val]
+        competing = [v for v, _ in losers]
+        for v, grp in losers:
             for g in grp:
                 conflicts.append(dict(
                     cedar_uid=uid, predicate=pred,

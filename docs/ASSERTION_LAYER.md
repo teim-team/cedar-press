@@ -42,15 +42,15 @@ again by someone else — and the value Cedar stands behind is **computed** from
 ordered, public rules.
 
 ```
-data/clean/cedar_assertions.csv        23,310   every claim, with who and why
-data/clean/cedar_resolved_facts.csv    22,984   the winner + WHICH RULE decided
+data/clean/cedar_assertions.csv        29,718   every claim, with who and why
+data/clean/cedar_resolved_facts.csv    29,356   the winner + WHICH RULE decided
 data/clean/cedar_fact_conflicts.csv         0   every losing value, kept
 data/spine/cedar_source_registry.csv       15   sources + evidence lineage
 data/spine/cedar_resolution_rules.csv       8   the rules, as data
 ```
 
 All three `data/clean` tables are **internal by decision** — see the reason
-recorded in `cedar_codebook.INTERNAL_TABLES`, and *Where this is honestly weak*
+recorded in `cedar_codebook.INTERNAL_TABLES`, and *Where this stands, honestly*
 below.
 
 ### Nothing here was invented
@@ -165,44 +165,124 @@ naming:
   and `org_self_statement`/`entity.website` — both still open, both listed
   below.
 
-## Where this is honestly weak
+## The second source, and the trap it sprang
 
-Stated plainly, because the mission spec forbids claiming unverified behaviour,
-and because these numbers are the actual result of Phase 3.
+*Added 2026-08-29, the same day. This is the most useful section in this
+document, because it records an error the layer caught before it shipped.*
 
-**Every fact in Cedar rests on exactly one source.** Measured over 8,975
-single-valued facts:
+The layer's first result was that **every fact in Cedar rested on exactly one
+source** — 0 of 8,975 single-valued facts had a second, and only 2 had more than
+one independent evidence family. So the next move was to find a second source,
+and the identifier ledger looked ideal: each row carries the `state` and
+`legal_business_name` that came with the **registration** — a SAM or IRS record,
+genuinely a different evidence family from anything the spine says.
+
+**First the column turned out to be corrupt.** `state` in
+`cedar_identifier_ledger_final.csv` — a table that **ships** — held *that row's
+own UEI* in 12,127 of 20,577 rows:
+
+| `state` contained | rows | |
+|---|---:|---|
+| a UEI | 12,127 | 59.0% — in every case the row's own, character for character |
+| empty | 4,072 | |
+| a valid state | 3,481 | 16.9% |
+| other text | 849 | full state names, `-` |
+| multi-state strings | 48 | `ARIZONA; CALIFORNIA; COLORADO` |
+
+The builder was not at fault: `01_build_entity_spine.py` reads `physical_state`,
+which is correct. The corruption is **inherited** — in
+`data/raw/external/master_tribal_entity_registry.csv`, `physical_state` equals
+the row's own `uei` in 12,127 of 13,191 rows (92%). A buyer filtering the ledger
+by state got silence for 59% of it and no way to learn why. Fixed by
+`71_fix_known_defects.py` defect 5, which also normalised 846 full state names,
+leaving **4,327 rows with a usable state** (up from 3,481). The validator now
+lives in `cedar_pipeline.clean_state` so `01` and `71` cannot drift, and `01`
+refuses the bad value if anyone ever overrides its `NEVER_RUN`.
+
+**Then the real trap.** With a clean column, the harvester asserted it as
+`entity.state`. The resolver did exactly as instructed:
+
+| entity | spine | resolved | why |
+|---|---|---|---|
+| Akiak | AK | **VA** | an enterprise registered in Virginia |
+| Alutiiq | AK | **CA** | |
+| Anaktuvuk Pass | AK | **FL** | |
+| Arctic Village | AK | **VA** | |
+| Beaver | AK | **OK** | |
+
+**Alaska Native village governments were being relocated to the lower 48**,
+across 100+ entities, because an enterprise of theirs filed a mailing address
+there. The resolved view came out *worse* than the spine it was built to check.
+
+A registration address belongs to the **registrant** — usually a tribally owned
+enterprise — not to the tribe. This is the containment error the project already
+bars elsewhere, wearing a new hat: **a property of a thing an entity owns is not
+a property of the entity.** Under the hub model in `IDENTIFIER_STANDARD.md`, a
+registration is a sub-hub and its address is a fact about the sub-hub.
+
+The fix was not to weight a rule differently. It was to **stop asserting it about
+the wrong subject**. It is now `entity.registration_state`, multi-valued — *this
+entity has registrations filed in AK, VA and OK* is true, useful, and can never
+compete with where the entity actually is.
+
+**What it cost and what it bought.** `entity.state` still has exactly one source;
+the obvious second source was never a second opinion about the same thing.
+Without this layer, someone would eventually have "enriched" the spine's `state`
+from SAM and moved a hundred Alaska villages to Virginia silently, keeping no
+losing value and no record of why.
+
+**A third bug, caught by an invariant.** With real competition to arbitrate for
+the first time, **I8 failed**: 98 losing values were dropped without reaching the
+conflict table. When R07 breaks a tie it reorders the candidates, so the winner
+is not necessarily `ranked[0]` — and taking `ranked[1:]` as the losers filed *the
+winner* as a losing value and dropped the real loser. `CE-00006-4P` resolved to
+VA, recorded VA as its own conflict, and lost AK entirely. Losers are now derived
+from the winner rather than from the sort order.
+
+Three times in one session a plausible line in this script silently destroyed
+data it was written to preserve — the 90-UEI cardinality bug, this one, and the
+wrong-subject assertion. Each was caught by a check written before it happened.
+That is the argument for the invariants, and it is not hypothetical.
+
+## Where this stands, honestly
+
+Stated plainly, because the mission spec forbids claiming unverified behaviour.
+
+```
+29,718 assertions   29,356 resolved facts   331 refutations   0 conflicts
+```
 
 | | |
 |---|---|
-| facts with **more than one source** weighing in | **0** |
-| facts with more than one **independent** evidence family | **2** |
-| genuine disagreements found | **0** |
-| conflicts preserved | **0** |
+| single-valued facts with **more than one source** | **0** |
+| facts with more than one **independent** evidence family | **38** (was 2) |
+| genuine disagreements between sources | **0** |
 
-This is not a bug in the layer and the zeros are not a failure to find
-conflicts — they are the measured state of the evidence base, and the layer is
-what makes it visible. **An arbitration layer with one source per fact is
-correct and idle.** Its value begins the moment a second genuinely independent
-source is harvested for the same predicate.
+The layer still has little to arbitrate, and that is the measured state of the
+evidence base rather than a failure to look. `entity.state`, `entity.class`,
+`entity.city` and every other single-valued entity field remain single-sourced.
 
-Harvesting the Federal Register roster directly was the first attempt at that
-and it demonstrates the model working rather than the corroboration growing:
-565 of 575 roster entries matched the spine, and the count of independently
-corroborated facts stayed at 2. Correct — a copy of the FR sitting in the spine
-and the FR itself are the **same family**. Copying a source into your own table
-does not corroborate it. Most warehouses would have scored that as 565 new
-confirmations.
+Harvesting the Federal Register roster demonstrates the model rather than growing
+the corroboration: 565 of 575 roster entries matched the spine and the
+corroborated count did **not** move, because a copy of the FR living in the spine
+and the FR itself are the **same family**. Most warehouses would have booked that
+as 565 new confirmations.
 
 Also open:
 
-- **`gaming_source_claims` contributes 0 assertions.** It has no `cedar_uid`
-  column and only 10 of its 113 rows have a resolved subject.
-- **11,676 of 23,310 assertions are `unattributed_legacy`** — half the store
-  carries no evidence because the row it came from never recorded any.
-- **Two dead authorities**, above, are declared but never assert.
+- **`gaming_source_claims` contributes 0 assertions.** No `cedar_uid` column, and
+  only 10 of its 113 rows have a resolved subject.
+- **11,676 of 29,718 assertions are `unattributed_legacy`** — the row they came
+  from never recorded any evidence.
+- **Two dead authorities** — `bia_directory`/`entity.bia_region` and
+  `org_self_statement`/`entity.website` — declared but never asserting, flagged
+  by the layer's own I7 check on every run.
 - **`entity.is_federally_recognized` has no negative case.** The roster asserts
   `yes` for those on it; nothing asserts `no` for those off it.
+- **`ANRC-BRBYCO-00`** (Bristol Bay Native Corporation) is still keyed to
+  "BRISTOL BAY AREA HEALTH CORPORATION" in 9 tables. A correction was applied to
+  three lobbying tables and not the rest — `354_correction_register.py --check`
+  lists them.
 
 ## Adding a source
 

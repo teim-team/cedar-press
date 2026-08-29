@@ -23,6 +23,9 @@ from collections import Counter, defaultdict
 from datetime import date
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).parent))
+from cedar_pipeline import clean_state  # noqa: E402
+
 CEDAR = Path(r"C:\Users\esm247\Desktop\Cedar Press")
 EXT = CEDAR / "data" / "raw" / "external"
 SPINE = CEDAR / "data" / "spine"
@@ -178,7 +181,16 @@ def build():
             "tier_rationale": rationale,
             "evidence_url": (r.get("attribution_source_url") or "").strip(),
             "verified_date": (r.get("verified_date") or "").strip(),
-            "state": (r.get("physical_state") or "").strip(),
+            # A STATE COLUMN MAY ONLY HOLD A STATE. The external registry's
+            # `physical_state` holds the row's OWN uei in 12,127 of 13,191 rows
+            # (92%) and a real state in 134. Read straight through, that put
+            # 12,127 identifiers into the `state` column of a table that SHIPS,
+            # and nothing noticed for as long as this file has existed - a
+            # buyer filtering the ledger by state would have got silence for
+            # 59% of it and never learned why. Fixed in the live tables by
+            # 71_fix_known_defects.py defect 5; guarded here so an override of
+            # NEVER_RUN cannot bring it back.
+            "state": clean_state(r.get("physical_state"), uei)[0],
             "prime_dollars_M": (r.get("total_master_prime_dol_M") or "").strip(),
             "source_file": "master_tribal_entity_registry.csv",
         })

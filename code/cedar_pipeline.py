@@ -503,3 +503,60 @@ if __name__ == "__main__":
         print(f"    {b.name}")
     lost, src = columns_lost_vs_backup("ferc_docket_filings.csv")
     print(f"\n  columns lost vs {src}: {lost or 'none'}")
+
+# =====================================================================
+# STATE VALIDATION - shared, because two scripts need the same answer.
+# =====================================================================
+# Lives here rather than in 71_fix_known_defects.py because 01 needs it
+# too, and a module whose name starts with a digit cannot be imported by
+# name. Two copies of a validator is how the two of them drift apart.
+US_STATES = set(
+    "AL AK AZ AR CA CO CT DE FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS "
+    "MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV "
+    "WI WY DC PR VI GU AS MP".split())
+
+_STATE_NAME = {
+    "ALABAMA": "AL", "ALASKA": "AK", "ARIZONA": "AZ", "ARKANSAS": "AR",
+    "CALIFORNIA": "CA", "COLORADO": "CO", "CONNECTICUT": "CT",
+    "DELAWARE": "DE", "FLORIDA": "FL", "GEORGIA": "GA", "HAWAII": "HI",
+    "IDAHO": "ID", "ILLINOIS": "IL", "INDIANA": "IN", "IOWA": "IA",
+    "KANSAS": "KS", "KENTUCKY": "KY", "LOUISIANA": "LA", "MAINE": "ME",
+    "MARYLAND": "MD", "MASSACHUSETTS": "MA", "MICHIGAN": "MI",
+    "MINNESOTA": "MN", "MISSISSIPPI": "MS", "MISSOURI": "MO", "MONTANA": "MT",
+    "NEBRASKA": "NE", "NEVADA": "NV", "NEW HAMPSHIRE": "NH",
+    "NEW JERSEY": "NJ", "NEW MEXICO": "NM", "NEW YORK": "NY",
+    "NORTH CAROLINA": "NC", "NORTH DAKOTA": "ND", "OHIO": "OH",
+    "OKLAHOMA": "OK", "OREGON": "OR", "PENNSYLVANIA": "PA",
+    "RHODE ISLAND": "RI", "SOUTH CAROLINA": "SC", "SOUTH DAKOTA": "SD",
+    "TENNESSEE": "TN", "TEXAS": "TX", "UTAH": "UT", "VERMONT": "VT",
+    "VIRGINIA": "VA", "WASHINGTON": "WA", "WEST VIRGINIA": "WV",
+    "WISCONSIN": "WI", "WYOMING": "WY", "DISTRICT OF COLUMBIA": "DC",
+    "PUERTO RICO": "PR",
+}
+
+
+def clean_state(raw, own_uei=""):
+    """Return (value, verdict). A state column may only hold a state.
+
+    Verdicts NAME what was rejected rather than counting it - the class2c
+    defect in 293 is a refusal counter that never says what it refused, and a
+    silent blanking of 12,127 rows is precisely that defect at scale.
+
+    A multi-state string is NOT split into a first state. 'ARIZONA;
+    CALIFORNIA; COLORADO' is a registrant operating in three places, and
+    picking the first would invent a headquarters the source never claimed.
+    """
+    v = (raw or "").strip().upper()
+    if not v:
+        return "", "empty"
+    if v in US_STATES:
+        return v, "kept"
+    if v in _STATE_NAME:
+        return _STATE_NAME[v], "normalised from full name"
+    if own_uei and v == (own_uei or "").strip().upper():
+        return "", "REJECTED: held this row's own UEI"
+    if ";" in v:
+        return "", "REJECTED: multi-state string, no single state claimed"
+    if len(v) == 12 and v.isalnum():
+        return "", "REJECTED: looks like a UEI"
+    return "", f"REJECTED: not a state ({v[:24]})"
