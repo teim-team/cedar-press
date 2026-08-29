@@ -4734,3 +4734,66 @@ where the shipping metric can see it. Do NOT re-baseline to clear it.
 `fr_nagpra_title_index.csv` 6,606 -> 6,644 rows (a strict superset; the shipped
 copy predated its own input by 20 days). No nagpra table shrank, and the two
 large ones are byte-identical to their previous release.
+
+## NAMED GATE FAILURE — the `ship_dist_rows` item is mine, and an agent cannot clear it (2026-08-29, correctness pass)
+
+The nagpra closure agent's entry above correctly attributes the **-1,749** on
+`ship_dist_rows` to the contractors correctness pass. It is mine. Here is the
+accounting it asked for, and the reason "re-publish the dist artefact" does not
+work.
+
+**The arithmetic closes exactly, and the builder refuses to write unless it
+does.** `py -3 code/428_rebuild_prime_entity_year.py` prints, on every run:
+
+```
+rows before                                       8,464
+- surplus name/tier variants of a key that still exists  -1,751
++ (tribe_id, fiscal_year) keys that did not exist before     +2
+- keys that EXISTED before and do not now                    -0
+rows after                                        6,715
+reconciles: 8,464 - 1,751 + 2 - 0 = 6,715  EXACT
+```
+
+and raises `SystemExit` if any entity-year present before is absent now, or if
+the arithmetic does not close. **No entity-year was lost and no dollar was
+lost** — the total is $244,765,639,853.91 against $244,765,639,853.98 of
+attributed row dollars, inside the derived cent-rounding bound. The +2 keys and
++$483,461.85 are rulings 174/427/64 that had been applied to
+`prime_contracts.csv` and never cascaded to the panel; the panel had been
+shipping pre-ruling numbers.
+
+**Why re-publishing dist does not clear it.** `62.ship_dist_rows` is
+`Σ min(dist_rows, clean_rows)`. The clean file legitimately holds 1,749 fewer
+rows, so the min is 6,715 whether dist is refreshed or not. Any correct regrain
+of a shipped table moves this metric down and nothing an agent may run moves it
+back.
+
+**Why the sanctioned allowance does not clear it either — and this is a real
+gate defect worth someone's attention.** `62` allows a `ship_dist_rows` fall
+when the correction register declares `rows_removed` **exactly equal to the
+fall**, but it compares against `sum(declared_removals.values())` — the sum of
+every removal ever declared. The register already carries 55 rows from the
+lobbying episode, which the current baseline has absorbed. Declaring 1,749 makes
+the sum 1,804 against a fall of 1,749, so it can never match. **The allowance
+works exactly once.** Twenty lines further down in the same file the per-file
+form of the same allowance is written correctly (`dec = declared_removals.get(f)`
+compared against that file's own fall). The aggregate check should use the same
+shape. `62` is owned and was not edited; no register row was written, because
+writing one that cannot match would only add noise to a MUST_NOT_RISE
+propagation check.
+
+**WHAT HAS TO HAPPEN:** the integrator either fixes the aggregate allowance to
+be per-table and consumable, or re-records the baseline now that the collapse
+is verified and reconciled. Written up as §8a of
+`review/OWNER_DECISION_QUEUE.md`. Do not re-baseline to hide it; re-baseline
+because the fall is proven benign.
+
+**`lint_class6` +1 and `lint_new_defect_instances` = 2 are NOT mine, and the
+nagpra entry above names the owner correctly** — `code/519_closure_federal_
+register.py`, the federal-register workstream. Confirmed independently from
+293's own `class6_io_map`: it is the sole enricher on both
+`federal_actions.csv` and `fr_ex_parte_party_entity_links.csv`, and both
+findings appeared with it. This pass moved class6 the other way: restoring the
+transaction key and the panel regrain left `prime_contracts.csv` and
+`prime_contracts_entity_year.csv` with no wholesale rebuilder at all, which
+removed one finding.

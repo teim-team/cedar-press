@@ -4,8 +4,8 @@
 
 **The rule that matters most:** unknown ownership may ship as unknown. **Contradicted ownership may never ship as a definite historical owner.**
 
-- **SAFE_TO_AGGREGATE**: 186
-- **ROW_LEVEL_ONLY**: 28 (of which **14 carry money columns** — the unsafe analysis is also the most likely one)
+- **SAFE_TO_AGGREGATE**: 189
+- **ROW_LEVEL_ONLY**: 25 (of which **11 carry money columns** — the unsafe analysis is also the most likely one)
 
 ## Ownership as-of status
 
@@ -42,9 +42,6 @@
 | `native_bills_subject_sweep.csv` | legislation | — | grain UNSTATED; no validated primary key; 5 literal duplicate rows |
 | `native_passthrough.csv` | funding | amount_usd|amount_countable | grain UNSTATED; no validated primary key; 114 literal duplicate rows |
 | `np_schedule_i_grants.csv` | nonprofits | cash_grant_usd|noncash_assistance_usd | grain UNSTATED; no validated primary key; 101 literal duplicate rows |
-| `prime_contracts.csv` | contractors | total_obligations|total_award_value|total_obligations_real2025|total_award_value_real2025 | grain UNSTATED; no validated primary key; 80778 literal duplicate rows |
-| `prime_contracts_archive_backfill.csv` | contractors | total_obligations|total_award_value|total_obligations_real2025|total_award_value_real2025 | grain UNSTATED; no validated primary key; 60919 literal duplicate rows |
-| `prime_contracts_entity_year.csv` | contractors | obligations_usd | grain UNSTATED; no validated primary key |
 | `subawards.csv` | subcontracting | subaward_amount|prime_award_amount|subaward_amount_real2025 | grain UNSTATED; no validated primary key; 10770 literal duplicate rows |
 | `tcu_cdfi_ownership_evidence.csv` | _entity_layer | — | grain UNSTATED; no validated primary key; 4 literal duplicate rows |
 | `tribal_bond_issuances.csv` | natural-resources | par_amount | grain UNSTATED; no validated primary key |

@@ -4,9 +4,9 @@
 
 **13 collections, 255 tables claimed, 0 orphaned shippable tables, 0 violations.**
 
-**Grain: 184 of 210 shippable tables declare and VALIDATE a row grain, a primary key and a join cardinality; 26 do not.** A declared grain the data contradicts is a release-blocking violation, listed below. An unstated grain is ratcheted by `62_no_regression_check.contract_grain_unstated_shippable`: the count may only fall, and a new shippable table that lands without one fails the gate that day.
+**Grain: 185 of 210 shippable tables declare and VALIDATE a row grain, a primary key and a join cardinality; 25 do not.** A declared grain the data contradicts is a release-blocking violation, listed below. An unstated grain is ratcheted by `62_no_regression_check.contract_grain_unstated_shippable`: the count may only fall, and a new shippable table that lands without one fails the gate that day.
 
-<details><summary>Shippable tables with an UNSTATED grain (26) - a buyer cannot join these safely</summary>
+<details><summary>Shippable tables with an UNSTATED grain (25) - a buyer cannot join these safely</summary>
 
 - `admin_appeal_positions.csv` — the file has ONE row. `matter_id` and `cedar_uid` are unique, and so is every other column - one row proves nothing. QUESTION: is a row a POSITION taken by one organisation in one matter (in which case position_id is the key and it is empty of evidence), or one row per matter?
 - `cedar_identifier_graph_edges.csv`
@@ -28,7 +28,6 @@
 - `native_bills_subject_sweep.csv`
 - `native_passthrough.csv`
 - `np_schedule_i_grants.csv`
-- `prime_contracts_archive_backfill.csv`
 - `subawards.csv`
 - `tcu_cdfi_ownership_evidence.csv`
 - `tribal_bond_issuances.csv` — `cusip` is BLANK on all 29 rows, so the natural key of a bond table is absent, and the only unique column is `notes`. QUESTION: can CUSIPs be backfilled, and until then is a row one issuance (issuer, issue_date, series) or one disclosure document?
@@ -507,10 +506,10 @@ Rebuild: `py -3 code/build.py run contractors --execute` — 11 tables.
 | `contractor_ranking.csv` | shippable | — | — | — |
 | `fpds_uei_cage_map.csv` | shippable | `uei` `cage_code` | — | — |
 | `fpds_uei_edges.csv` | shippable | — | `13_build_fpds_hierarchy.py` | `26_fix_sanity_failures.py` |
-| `prime_contracts.csv` | shippable | `tribe_id` `cedar_uid` `cage_code` | `40_build_prime_contracts.py` | `207_normalize_extent_competed.py` |
+| `prime_contracts.csv` | shippable | `tribe_id` `cedar_uid` `cage_code` | `40_build_prime_contracts.py` | `207_normalize_extent_competed.py` `429_apply_asof_ownership_status.py` `430_restore_prime_transaction_key.py` |
 | `prime_contracts_archive_backfill.csv` | shippable | `tribe_id` `cedar_uid` `cage_code` | — | — |
 | `prime_contracts_awards.csv` | shippable | `tribe_id` `cedar_uid` `cage_code` | — | — |
-| `prime_contracts_entity_year.csv` | shippable | `tribe_id` `cedar_uid` | `40_build_prime_contracts.py` | `131_merge_archive_backfill.py` |
+| `prime_contracts_entity_year.csv` | shippable | `tribe_id` `cedar_uid` | `40_build_prime_contracts.py` | `131_merge_archive_backfill.py` `428_rebuild_prime_entity_year.py` |
 | `prime_contracts_published.csv` | shippable | `tribe_id` `cedar_uid` `cage_code` | — | — |
 | `sam_prime_contracts_fy2000_2007.csv` | shippable | `cage_code` | — | — |
 | `sam_prime_contracts_fy2000_2007_PUBLISHABLE.csv` | shippable | `cage_code` | — | — |
@@ -525,6 +524,10 @@ Declared grain — validated against the file on every run:
   - primary key: `contract_transaction_unique_key` + `contract_number` + `parent_contract_number` + `fiscal_year` + `awardee_uei`  (validated unique)
   - join cardinality: `cage_code` → many row(s) per value (measured max 398840), `cedar_uid` → many row(s) per value (measured max 111398), `contract_number` → many row(s) per value (measured max 11700), `tribe_id` → many row(s) per value (measured max 111398)
   - declared by: code/430_restore_prime_transaction_key.py - the transaction key restored from the staged archive rows (1:1 on all 19 fiscal years), 2026-08-29 correctness pass. Literal duplicate rows 80,778 -> 0 with no row and no dollar removed
+- `prime_contracts_archive_backfill.csv` — one row per FPDS TRANSACTION in the USAspending static archive for FY2008-FY2022, restricted to rows the identifier ledger matched at tier A or B. This is the staged half of prime_contracts.csv and every row of it is also in that file - the two must NEVER be summed together
+  - primary key: `contract_transaction_unique_key`  (validated unique)
+  - join cardinality: `cedar_uid` → many row(s) per value (measured max 50208), `contract_number` → many row(s) per value (measured max 7029), `tribe_id` → many row(s) per value (measured max 50208)
+  - declared by: code/430_restore_prime_transaction_key.py, 2026-08-29 correctness pass: 631,507 rows, key unique on the FULL file, literal duplicate rows 60,919 -> 0 with no row and no dollar removed
 - `prime_contracts_awards.csv` — one row per CONTRACT (award), rolled up across its transactions - not one row per transaction
   - primary key: `contract_number`  (validated unique)
   - join cardinality: `cage_code` → many row(s) per value (measured max 85976), `cedar_uid` → many row(s) per value (measured max 55184), `tribe_id` → many row(s) per value (measured max 55184)

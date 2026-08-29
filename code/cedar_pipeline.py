@@ -328,6 +328,57 @@ KNOWN_ORDERINGS = [
              "dataset now materialises. 01 is NEVER_RUN; if it is ever forced, "
              "re-run 504 then 505",
      "enricher_columns": ["cedar_uid"]},
+    {"rebuild": "114_pull_prime_archive.py",
+     "enricher": "430_restore_prime_transaction_key.py",
+     "file": "prime_contracts_archive_backfill.csv",
+     "cost": "NONE, and writing that down is the point: 114's `map_row` and "
+             "`PRIME_FIELDS` now emit `contract_transaction_unique_key` "
+             "themselves, so a re-pull WRITES the column rather than "
+             "dropping it. 430 is a ONE-TIME backfill for the 631,507 rows "
+             "pulled before the mapper was fixed - the 60,919 apparent "
+             "literal duplicates that were distinct FPDS transactions all "
+             "along - and is a no-op on a fresh pull",
+     "enricher_columns": ["contract_transaction_unique_key"]},
+    # THE 2026-08-29 CORRECTNESS PASS. Three enrichers whose columns a rebuild
+    # of prime_contracts.csv silently removes - and each of them is a column a
+    # buyer's correctness depends on, not a convenience.
+    {"rebuild": "40_build_prime_contracts.py",
+     "enricher": "429_apply_asof_ownership_status.py",
+     "file": "prime_contracts.csv",
+     "cost": "not yet paid - declared at creation. A rebuild drops "
+             "`owner_attribution_status`, and the file then presents Cedar's "
+             "CURRENT owner on twenty-six years of dated transactions with "
+             "nothing saying whether the temporal layer confirms it. 81.4% of "
+             "$244.766B is not confirmed and $2.074B is actively "
+             "CONTRADICTED, so the missing column is the difference between "
+             "'unknown, and it says so' and 'definite, and it is wrong'",
+     "enricher_columns": ["owner_attribution_status",
+                          "owner_as_of_transaction_cedar_uid"]},
+    {"rebuild": "40_build_prime_contracts.py",
+     "enricher": "430_restore_prime_transaction_key.py",
+     "file": "prime_contracts.csv",
+     "cost": "not yet paid - declared at creation. A rebuild drops "
+             "`contract_transaction_unique_key` and 80,778 distinct FPDS "
+             "transactions become byte-identical rows again. The danger is "
+             "not the duplication, it is that the next reader believes the "
+             "grain audit and DELETES them - they carry real dollars, and "
+             "97% of them are $0 administrative modifications whose loss "
+             "would silently change every contract-count in the dataset",
+     "enricher_columns": ["contract_transaction_unique_key"]},
+    {"rebuild": "40_build_prime_contracts.py",
+     "enricher": "428_rebuild_prime_entity_year.py",
+     "file": "prime_contracts_entity_year.csv",
+     "cost": "not yet paid - declared at creation. 40 rebuilds the panel from "
+             "the .dta and 428 re-derives it from prime_contracts.csv AS IT "
+             "STANDS. Only 428 sees the archive merge (131), the rulings "
+             "(174/427/64) and the as-of stamp (429). Skipping it left the "
+             "panel 42 (entity, year) cells stale and $4,729,215.51 of "
+             "village-corporation dollars booked on the village GOVERNMENT "
+             "after the row table had already been corrected",
+     "enricher_columns": ["obligations_usd_owner_asof_confirmed",
+                          "obligations_usd_owner_asof_not_confirmed",
+                          "owner_attribution_statuses",
+                          "obligations_usd_tier_a", "obligations_usd_tier_b"]},
     {"rebuild": "24_funding_merge.py",
      "enricher": "503_identity.py",
      "file": "federal_funding_transactions.csv",

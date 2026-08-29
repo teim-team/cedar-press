@@ -111,6 +111,21 @@ OUT_COLS = [
     "fetched_date", "tribe_id", "recipient_uei", "recipient_type_description",
     "cfda_title", "assistance_type_description", "awarding_sub_agency",
     "award_id_fain", "record_type", "api_endpoint", "source_file",
+    # THE TRANSACTION IDENTITY. Added 2026-08-29 - see `to_out_row`. The bulk
+    # download is a TRANSACTION feed; without these two columns two distinct
+    # assistance actions on one FAIN are one indistinguishable row, which is
+    # what 179,259 "literal duplicate rows" in this table actually are.
+    "assistance_transaction_unique_key", "modification_number",
+]
+
+#: The 24-column schema this file had before the transaction identity was
+#: added. The prior Interior slice on disk is still in it, and a rebuild must
+#: carry those rows forward with the two new columns BLANK rather than refuse -
+#: an empty transaction key is honest about a row whose source did not record
+#: one here, and refusing would mean the schema fix could never be applied.
+OUT_COLS_PRE_TRANSACTION_KEY = [
+    c for c in OUT_COLS
+    if c not in ("assistance_transaction_unique_key", "modification_number")
 ]
 
 # If an agency-slice exceeds this many rows, only the source-flagged tribal rows
@@ -502,6 +517,40 @@ def estimate_rows(path: str) -> int:
 
 
 def to_out_row(r: dict, source_file: str) -> dict:
+    """One bulk-download assistance transaction -> one output row.
+
+    CARRIES THE TRANSACTION IDENTITY. Added 2026-08-29, and here is what its
+    absence cost.
+
+    `faads_transactions_all_agencies.csv` was recorded in
+    `docs/GRAIN_AUDIT.md` as holding **179,259 literal duplicate rows of
+    2,769,748 (6.5%)**, with the note that "the pre-2008 assistance pull has no
+    transaction key at all, so nothing in the pipeline can notice a page
+    fetched twice". Measured 2026-08-29 by hashing every row:
+
+      * **174,348 of the 179,259 - 97% - come from ONE staged object,
+        `ed_fy2007_archive.zip`**, and 174,957 of the surplus rows are FY2007.
+        A page fetched twice does not concentrate like that in one agency-year
+        while leaving 40 other agency-years almost clean.
+      * Every one of the 179,259 carries an `award_id_fain`.
+      * The staged zip carries **`assistance_transaction_unique_key` and
+        `modification_number` among its 112 columns**, and this function took
+        neither.
+
+    So these are almost certainly distinct assistance TRANSACTIONS on the same
+    FAIN - the same shape proved exactly for the prime contracting archive in
+    `code/430_restore_prime_transaction_key.py`, where 80,778 apparent
+    duplicates resolved to 80,778 distinct FPDS transactions and the count went
+    to zero without deleting a row or a dollar.
+
+    Taking the key here means the next `build` can state a grain and validate a
+    key instead of shipping a table a buyer is told not to aggregate. It does
+    NOT retro-fix the file on disk: that needs a re-extract of the staged zips
+    (`py -3 code/30_funding_pre2008.py build`), which is a full rebuild of a
+    2.77M-row shipped table and is queued for an owner rather than run at the
+    end of a session. Until then the duplication remains DIAGNOSED, not
+    repaired, and `review/OWNER_DECISION_QUEUE.md` says so.
+    """
     obl = r.get("federal_action_obligation") or ""
     try:
         obl = f"{float(obl):.2f}"
@@ -532,6 +581,12 @@ def to_out_row(r: dict, source_file: str) -> dict:
         "record_type": r.get("record_type_code", ""),
         "api_endpoint": API,
         "source_file": source_file,
+        # The transaction identity. See the docstring: without it two distinct
+        # assistance transactions on one FAIN become one indistinguishable row,
+        # and 179,259 rows were miscounted as duplicates because of it.
+        "assistance_transaction_unique_key":
+            r.get("assistance_transaction_unique_key", ""),
+        "modification_number": r.get("modification_number", ""),
     }
 
 
@@ -592,10 +647,19 @@ def stage_build() -> None:
         if os.path.exists(prior):
             with open(prior, newline="", encoding="utf-8") as pf:
                 rd = csv.DictReader(pf)
-                if rd.fieldnames != OUT_COLS:
+                if rd.fieldnames not in (OUT_COLS,
+                                         OUT_COLS_PRE_TRANSACTION_KEY):
                     raise SystemExit(
                         f"prior file schema drift:\n {rd.fieldnames}\n vs\n {OUT_COLS}")
+                pre_key = rd.fieldnames == OUT_COLS_PRE_TRANSACTION_KEY
                 for row in rd:
+                    if pre_key:
+                        # NAMED, not silently defaulted: this slice predates the
+                        # transaction key and does not carry one. Blank means
+                        # "the source we hold for these rows did not record it",
+                        # never "there was only one transaction".
+                        row["assistance_transaction_unique_key"] = ""
+                        row["modification_number"] = ""
                     w.writerow(row)
                     written += 1
                     per_agency_written[row["agency"]] = per_agency_written.get(row["agency"], 0) + 1

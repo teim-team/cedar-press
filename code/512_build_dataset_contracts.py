@@ -232,6 +232,19 @@ GRAIN = {
                     "(1:1 on all 19 fiscal years), 2026-08-29 correctness "
                     "pass. Literal duplicate rows 80,778 -> 0 with no row and "
                     "no dollar removed"),
+    "prime_contracts_archive_backfill.csv": dict(
+        grain="one row per FPDS TRANSACTION in the USAspending static archive "
+              "for FY2008-FY2022, restricted to rows the identifier ledger "
+              "matched at tier A or B. This is the staged half of "
+              "prime_contracts.csv and every row of it is also in that file - "
+              "the two must NEVER be summed together",
+        primary_key=["contract_transaction_unique_key"],
+        join_cardinality={"tribe_id": "many", "cedar_uid": "many",
+                          "contract_number": "many"},
+        declared_by="code/430_restore_prime_transaction_key.py, 2026-08-29 "
+                    "correctness pass: 631,507 rows, key unique on the FULL "
+                    "file, literal duplicate rows 60,919 -> 0 with no row and "
+                    "no dollar removed"),
     "prime_contracts_entity_year.csv": dict(
         grain="one row per (Native entity, federal fiscal year) with that "
               "entity's prime contracting obligations summed across every "
@@ -1117,10 +1130,13 @@ GRAIN_DEFECT = {
     # `code/430_restore_prime_transaction_key.py` joined the key back from the
     # staged rows (1:1 on all 19 fiscal years) and the count went 80,778 -> 0
     # WITHOUT removing a row or a dollar. The grain is declared in GRAIN.
-    "prime_contracts_archive_backfill.csv":
-        "60,919 LITERAL duplicate rows of 631,507. Same shape as "
-        "prime_contracts.csv, which this file is merged into - the "
-        "duplication is upstream of the merge, not created by it.",
+    # `prime_contracts_archive_backfill.csv` WAS here at 60,919 literal
+    # duplicate rows. CLOSED 2026-08-29, same cause and same fix as its
+    # sibling: this file IS the FY2008-FY2022 tier-A/B staged archive rows,
+    # 631,507 of them, 1:1 and to the row. Its own entry already said "the
+    # duplication is upstream of the merge, not created by it" - it was
+    # upstream of the MAPPER. `430` stamped the transaction key and the count
+    # went 60,919 -> 0 with nothing removed. Declared in GRAIN.
     "faads_transactions_all_agencies.csv":
         "179,259 LITERAL duplicate rows of 2,769,748 (6.5%). DIAGNOSED "
         "2026-08-29 and it is NOT a page fetched twice, which is what this "

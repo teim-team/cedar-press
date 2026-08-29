@@ -1723,7 +1723,32 @@ def main():
         # tomorrow the arithmetic stops matching and the gate fails again, so
         # a declared correction cannot be stretched to cover an unrelated
         # loss. That is the difference between an allowance and an excuse.
-        allow_total = sum(declared_removals.values()) if declared_removals else 0
+        # THE ALLOWANCE WORKED EXACTLY ONCE, and a correctness workstream
+        # proved it on 2026-08-30 rather than re-baselining around it.
+        #
+        # It summed EVERY removal the register has ever declared. The baseline
+        # has already absorbed the older ones, so the sum drifts permanently
+        # above any single fall: 1,804 declared against a legitimate fall of
+        # 1,749, unmatchable by any correct action. An allowance that can only
+        # fire once is worse than none - the second person to need it
+        # re-baselines instead, which is the habit this whole gate exists to
+        # break.
+        #
+        # The per-table form twenty lines below was written correctly all
+        # along (`declared_removals.get(f, 0)`), so the aggregate is now
+        # COMPOSED from it: count a table's declared removal only when that
+        # table's shipped rows actually fell by exactly that amount THIS run.
+        # Self-limiting, consumable, and it cannot be stretched to cover an
+        # unrelated loss - which was the original intent, and is preserved.
+        allow_total = 0
+        if declared_removals and base_ship:
+            for _f, _dec in declared_removals.items():
+                _was = base_ship.get(_f)
+                _now = dist_by_file.get(_f)
+                if _was is None or _now is None:
+                    continue
+                if _was - _now == _dec:
+                    allow_total += _dec
         for k in sorted(MUST_NOT_FALL):
             b, n = base.get(k), now.get(k)
             if not (numeric(b) and numeric(n)):

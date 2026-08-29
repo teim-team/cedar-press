@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+# lint-ok: class6 - prime_contracts_archive_backfill.csv has this script as
+# its rebuilder and 430_restore_prime_transaction_key.py as an enricher, and
+# there is NOTHING for the rebuild to revert: `map_row` and `PRIME_FIELDS`
+# now emit `contract_transaction_unique_key` themselves, so a re-pull writes
+# the column this script used to drop. 430 is a ONE-TIME backfill for the
+# 631,507 rows that were pulled before the mapper was fixed; on a fresh pull
+# it is a no-op. The ordering is declared in cedar_pipeline.KNOWN_ORDERINGS
+# anyway, so a future reader is not relying on this comment alone.
 """
 Cedar Press - 114: prime contracts from the USAspending STATIC ARCHIVE.
 
@@ -631,6 +639,24 @@ PRIME_FIELDS = [
     "place_of_perform_state", "tribe_id", "canonical_name",
     "attribution_method", "confidence_tier", "attributed_flag",
     "source_file", "source_authority", "built_date",
+    # THE TRANSACTION IDENTITY. Added 2026-08-29.
+    #
+    # The archive is a TRANSACTION feed and this mapper used to project it onto
+    # the 38-column BGOV schema, which carries no modification number, no
+    # action date and no transaction key. Two distinct FPDS transactions on one
+    # contract-year-vendor therefore rendered BYTE-IDENTICAL, and 80,778 such
+    # rows were recorded as "literal duplicate rows" that "anyone summing
+    # total_obligations is over-counting". They were not duplicates: every one
+    # of FY2020's 2,825 colliding groups resolves to fully distinct
+    # `contract_transaction_unique_key`s and more than one modification_number,
+    # and 4,961 of that year's 5,194 surplus rows carry $0 - administrative
+    # modifications. Dropping the key over-counted nothing; it destroyed the
+    # row's identity, which is worse, because it invites a de-duplication that
+    # would delete real transactions and real dollars.
+    #
+    # BGOV rows keep an EMPTY key: they are award-year-vendor AGGREGATES, and
+    # inventing a transaction key for them is the same error in reverse.
+    "contract_transaction_unique_key",
 ]
 
 
@@ -784,6 +810,9 @@ def map_row(r, zipname, sa_map=None):
                             f"monthly file), stamp "
                             f"{(re.search(r'_(\\d{8})[.]zip$', zipname) or [None, STAMP])[1]}",
         "built_date": TODAY,
+        # Carried verbatim - see the note on PRIME_FIELDS. Without it two
+        # distinct transactions become one indistinguishable row.
+        "contract_transaction_unique_key": s("contract_transaction_unique_key"),
     }
 
 
@@ -1833,54 +1862,56 @@ def cmd_codebook(args):
 #
 # `code/40_build_prime_contracts.py` is the file's normal builder and MUST NOT
 # be run to fix this: it rebuilds `prime_contracts.csv` from the .dta and
-# would erase every archive row appended here. So this extends the panel
-# incrementally, for the new fiscal years only, append-only, refusing any year
-# already present.
+# would erase every archive row appended here.
+#
+# THIS USED TO APPEND, PER NEW FISCAL YEAR, AND THAT WAS TWO DEFECTS.
+#
+#   1. It keyed the panel on (tribe_id, canonical_name, fiscal_year,
+#      confidence_tier), the same key 40 and 131 used. The file is NAMED
+#      entity-year and a buyer joining on (tribe_id, fiscal_year) fanned out
+#      up to 3x. See `cedar_prime_panel` for the ruling and its evidence.
+#   2. Appending only the NEW years meant every in-place correction applied to
+#      `prime_contracts.csv` after the last panel write - rulings from 174,
+#      427 and 64 - never reached the panel at all. Measured 2026-08-29: 42
+#      (entity, year) cells were stale, $483,461.85 net, including
+#      $4,729,215.51 of ANVC- village-corporation dollars that the row table
+#      had already corrected and the panel was still publishing on the village
+#      GOVERNMENT.
+#
+# So the cascade is now a full re-derivation from `prime_contracts.csv` as it
+# stands. That is cheap (one pass over an already-open file), it is idempotent,
+# and it cannot go stale by construction - which the append path could, and did.
 # --------------------------------------------------------------------------
 PANEL = CLEAN / "prime_contracts_entity_year.csv"
-PANEL_FIELDS = ["tribe_id", "canonical_name", "fiscal_year",
-                "confidence_tier", "obligations_usd", "n_contracts",
-                "built_date"]
 
 
 def cmd_panel(args):
-    sa_map = award_setaside_map()
+    sys.path.insert(0, str(CEDAR / "code"))
+    import cedar_prime_panel as _P
+
     with open(PANEL, encoding="utf-8-sig", newline="") as fh:
-        rd = csv.DictReader(fh)
-        if rd.fieldnames != PANEL_FIELDS:
-            log(f"REFUSING: panel header changed. file={rd.fieldnames}")
-            sys.exit(5)
-        present = {int(r["fiscal_year"]) for r in rd}
-
-    years = [y for y in sorted(int(p.name[2:6])
-                               for p in FILTERED.glob("FY*_ledger_rows.csv"))
-             if y in NEW_FY]
-    todo = [y for y in years if y not in present]
-    skip = [y for y in years if y in present]
-    if skip:
-        log(f"SKIPPING {skip}: already in the panel")
-    if not todo:
-        log("panel already current")
-        return
-
-    agg = {}
-    for fy in todo:
-        for row in _iter_mapped(fy, sa_map):
-            if not row["attributed_flag"]:
-                continue
-            k = (row["tribe_id"], row["canonical_name"], row["fiscal_year"],
-                 row["confidence_tier"])
-            e = agg.setdefault(k, [0.0, 0])
-            e[0] += row["total_obligations"]
-            e[1] += 1
-    out = [{"tribe_id": t, "canonical_name": c, "fiscal_year": y,
-            "confidence_tier": tier, "obligations_usd": round(v[0], 2),
-            "n_contracts": v[1], "built_date": TODAY}
-           for (t, c, y, tier), v in sorted(agg.items())]
-    with open(PANEL, "a", encoding="utf-8", newline="") as fh:
-        csv.DictWriter(fh, fieldnames=PANEL_FIELDS).writerows(out)
-    log(f"appended {len(out):,} panel rows for {todo} "
-        f"({len({r['tribe_id'] for r in out}):,} entities)")
+        before = list(csv.DictReader(fh))
+    panel, stats = _P.build_from_prime(panel_path=PANEL, today=TODAY)
+    _P.write_panel(panel, PANEL)
+    log(f"re-derived the entity-year panel from prime_contracts.csv: "
+        f"{len(before):,} -> {len(panel):,} rows, "
+        f"{len({r['tribe_id'] for r in panel}):,} entities, "
+        f"FY{min(int(r['fiscal_year']) for r in panel)}-"
+        f"FY{max(int(r['fiscal_year']) for r in panel)}")
+    log(f"  one row per (tribe_id, fiscal_year), verified; "
+        f"${stats['source_attributed_obligations_usd']:,.2f} attributed "
+        f"obligations conserved")
+    for t, n in sorted(stats["tier_other_than_A_or_B"].items()):
+        log(f"  !! confidence_tier {t!r} on {n:,} attributed row(s)")
+    _xp, _xn = _P.write_excluded(stats, TODAY)
+    log(f"wrote {_xp.relative_to(CEDAR)}  ({_xn:,} named exclusions - every "
+        f"(awardee_uei, awardee_name, fiscal_year, reason) that entered no "
+        f"entity total)")
+    if stats["entities_missing_cedar_uid"]:
+        log(f"  !! {len(stats['entities_missing_cedar_uid']):,} entity(ies) "
+            f"with no cedar_uid: "
+            f"{', '.join(sorted(stats['entities_missing_cedar_uid'])[:10])} "
+            f"-> re-run `py -3 code/503_identity.py stamp --apply`")
 
 
 # --------------------------------------------------------------------------

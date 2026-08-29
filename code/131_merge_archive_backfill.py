@@ -94,6 +94,7 @@ WHAT IS DELIBERATELY LEFT ALONE
 
 Reads  data/clean/prime_contracts.csv
        data/clean/prime_contracts_archive_backfill.csv
+       data/spine/cedar_entity_spine.csv        (via cedar_prime_panel)
 Writes data/clean/prime_contracts.csv            (backed up first)
        data/clean/prime_contracts_entity_year.csv (backed up first)
        review/prime_merge_bgov_only_attributed_<date>.csv
@@ -111,6 +112,9 @@ from datetime import date
 from pathlib import Path
 
 CEDAR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(CEDAR / "code"))
+
+import cedar_prime_panel  # noqa: E402  (needs CEDAR on the path first)
 CLEAN = CEDAR / "data" / "clean"
 REVIEW = CEDAR / "review"
 TODAY = date.today().isoformat()
@@ -269,27 +273,24 @@ def main():
     print(f"\nwrote {SHIPPED.name}")
 
     # ---- rebuild the entity-year panel (the guard reads THIS file) -------
-    panel = defaultdict(lambda: [0.0, 0])
-    with open(SHIPPED, encoding="utf-8-sig", newline="") as fh:
-        for r in csv.DictReader(fh):
-            if r.get("attributed_flag") != "1":
-                continue
-            k = (r["tribe_id"], r["canonical_name"], r["fiscal_year"],
-                 r["confidence_tier"])
-            panel[k][0] += float(r.get("total_obligations") or 0)
-            panel[k][1] += 1
-    prows = [{"tribe_id": t, "canonical_name": c, "fiscal_year": y,
-              "confidence_tier": tier, "obligations_usd": round(v[0], 2),
-              "n_contracts": v[1], "built_date": TODAY}
-             for (t, c, y, tier), v in sorted(panel.items())]
-    ppart = PANEL.with_suffix(".csv.part")
-    with open(ppart, "w", encoding="utf-8", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=list(prows[0].keys()))
-        w.writeheader()
-        w.writerows(prows)
-    os.replace(ppart, PANEL)
+    #
+    # THE GRAIN IS (tribe_id, fiscal_year). This block used to key the panel on
+    # (tribe_id, canonical_name, fiscal_year, confidence_tier) - one entity-year
+    # in up to three rows - and so did 40 and 114. A buyer merging any other
+    # entity-year table onto a file NAMED entity-year fanned out and multiplied
+    # their own dollars, with nothing to warn them. The aggregation now lives in
+    # `cedar_prime_panel` so the three copies cannot drift apart again, and it
+    # REFUSES to write a panel whose primary key is not unique or whose dollars
+    # do not equal the rows it summed.
+    prows, pstats = cedar_prime_panel.build_from_prime(
+        prime_path=SHIPPED, panel_path=PANEL, today=TODAY)
+    cedar_prime_panel.write_panel(prows, PANEL)
     print(f"wrote {PANEL.name}  ({len(prows):,} rows, "
-          f"{len({r['tribe_id'] for r in prows}):,} entities)")
+          f"{len({r['tribe_id'] for r in prows}):,} entities, "
+          f"one row per (tribe_id, fiscal_year) - verified)")
+    cedar_prime_panel.print_stats(pstats)
+    _xp, _xn = cedar_prime_panel.write_excluded(pstats, TODAY)
+    print(f"wrote {_xp.relative_to(CEDAR)}  ({_xn:,} named exclusions - every (awardee_uei, awardee_name, fiscal_year, reason) that entered no entity total)")
 
     # ---- what changed ----------------------------------------------------
     be = {k for k in ent_before if k}

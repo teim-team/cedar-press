@@ -21,11 +21,11 @@ Three honest outcomes, and they are three different jobs:
 | | count |
 |---|---:|
 | shippable tables | 210 |
-| **DECLARED_VALIDATED** | **184** |
+| **DECLARED_VALIDATED** | **185** |
 | OPEN_WITH_EVIDENCE | 12 |
-| DEFECTIVE | 14 |
+| DEFECTIVE | 13 |
 | still unexplained | 0 |
-| ratchet `contract_grain_unstated_shippable` | **26** (was 207) |
+| ratchet `contract_grain_unstated_shippable` | **25** (was 207) |
 
 A declaration that the data contradicts is release-blocking through `contract_violations`; there are **0**.
 
@@ -98,12 +98,6 @@ These are not declaration gaps. Each is a table a buyer can double-count today. 
 101 LITERAL duplicate rows of 58,685. (object_id, recipient_name_as_filed) collides 860 times - some legitimately (one filer can grant to the same recipient twice on one return), but the 101 whole-row repeats are not that.
 
 - measured 58,685 rows, 101 whole-row duplicate(s) on 2026-08-29
-
-### `prime_contracts_archive_backfill.csv`
-
-60,919 LITERAL duplicate rows of 631,507. Same shape as prime_contracts.csv, which this file is merged into - the duplication is upstream of the merge, not created by it.
-
-- measured 631,507 rows, 60,919 whole-row duplicate(s) on 2026-08-29
 
 ### `subawards.csv`
 
@@ -328,7 +322,7 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 
 ### Federal Prime Contracting  (`contractors`)
 
-7 of 10 shippable tables declared.
+8 of 10 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
@@ -336,9 +330,9 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 | `fpds_uei_cage_map.csv` | 29,981 | OPEN_WITH_EVIDENCE | — | `cage_code`→6, `uei`→16 |
 | `fpds_uei_edges.csv` | — | DECLARED_VALIDATED | `child_uei` + `parent_uei` + `edge_type` | — |
 | `prime_contracts.csv` | 1,217,768 | DECLARED_VALIDATED | `contract_transaction_unique_key` + `contract_number` + `parent_contract_number` + `fiscal_year` + `awardee_uei` | `cage_code`→398,840, `cedar_uid`→111,398, `tribe_id`→111,398 |
-| `prime_contracts_archive_backfill.csv` | 631,507 | DEFECTIVE | — | `cage_code`→398,840, `cedar_uid`→50,208, `tribe_id`→50,208 |
+| `prime_contracts_archive_backfill.csv` | 631,507 | DECLARED_VALIDATED | `contract_transaction_unique_key` | `cage_code`→398,840, `cedar_uid`→50,208, `tribe_id`→50,208 |
 | `prime_contracts_awards.csv` | 455,080 | DECLARED_VALIDATED | `contract_number` | `cage_code`→85,976, `cedar_uid`→55,184, `tribe_id`→55,184 |
-| `prime_contracts_entity_year.csv` | 8,464 | DECLARED_VALIDATED | `tribe_id` + `fiscal_year` | `cedar_uid`→63, `tribe_id`→63 |
+| `prime_contracts_entity_year.csv` | 6,715 | DECLARED_VALIDATED | `tribe_id` + `fiscal_year` | `cedar_uid`→27, `tribe_id`→27 |
 | `prime_contracts_published.csv` | 455,080 | DECLARED_VALIDATED | `contract_number` | `cage_code`→85,976, `cedar_uid`→55,184, `tribe_id`→55,184 |
 | `sam_prime_contracts_fy2000_2007.csv` | 269,312 | DECLARED_VALIDATED | `sam_transaction_key` | `cage_code`→304 |
 | `sam_prime_contracts_fy2000_2007_PUBLISHABLE.csv` | 269,312 | DECLARED_VALIDATED | `sam_transaction_key` | `cage_code`→304 |

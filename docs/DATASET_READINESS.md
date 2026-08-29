@@ -13,13 +13,13 @@ BLOCKED 11 · NOT_TESTED 0
 | `native-owned-businesses` | **BLOCKED** | 6 | 6/6 | 6/6 | clean | 0 | declared |
 | `natural-resources` | **BLOCKED** | 8 | 7/8 | 7/8 | clean | 1 | declared |
 | `legislation` | **BLOCKED** | 12 | 10/12 | 10/12 | 5 rows | 2 | declared |
+| `contractors` | **BLOCKED** | 10 | 8/10 | 8/10 | clean | 2 | declared |
 | `subcontracting` | **BLOCKED** | 3 | 2/3 | 2/3 | 10,770 rows | 1 | declared |
 | `gaming` | **BLOCKED** | 46 | 44/46 | 44/46 | clean | 2 | declared |
 | `nonprofits` | **BLOCKED** | 10 | 9/10 | 9/10 | 101 rows | 1 | declared |
 | `lobbying` | **BLOCKED** | 34 | 29/34 | 29/34 | 827 rows | 5 | declared |
 | `deals` | **BLOCKED** | 14 | 12/14 | 12/14 | clean | 2 | DESTRUCTIVE |
 | `_entity_layer` | **BLOCKED** | 35 | 29/35 | 29/35 | 10,985 rows | 6 | DESTRUCTIVE |
-| `contractors` | **BLOCKED** | 10 | 7/10 | 7/10 | 141,697 rows | 5 | declared |
 | `funding` | **BLOCKED** | 10 | 7/10 | 7/10 | 180,374 rows | 3 | declared |
 
 ## Blockers, by dataset
@@ -40,6 +40,13 @@ BLOCKED 11 · NOT_TESTED 0
 - C1 grain UNSTATED on 2: congressional_correspondence_log.csv, native_bills_subject_sweep.csv
 - C2 no validated primary key on 2
 - C3 literal duplicates: native_bills_subject_sweep.csv(5)
+- C5 no row-conservation coverage
+
+### `contractors` — BLOCKED
+
+- C1 grain UNSTATED on 2: contractor_ranking.csv, fpds_uei_cage_map.csv
+- C2 no validated primary key on 2
+- C7 DOUBLE-COUNTING RISK - money tables a buyer cannot safely total: contractor_ranking.csv
 - C5 no row-conservation coverage
 
 ### `subcontracting` — BLOCKED
@@ -84,14 +91,6 @@ BLOCKED 11 · NOT_TESTED 0
 - C2 no validated primary key on 6
 - C3 literal duplicates: cedar_identifier_graph_edges.csv(2,451), cedar_ruling_ledger_consolidated.csv(6,302), cross_dataset_ruling_map.csv(2,228)
 - C8 rebuild is DESTRUCTIVE (01_build_entity_spine.py, 09_import_rulings.py) - no safe documented rebuild path
-
-### `contractors` — BLOCKED
-
-- C1 grain UNSTATED on 3: contractor_ranking.csv, fpds_uei_cage_map.csv, prime_contracts_archive_backfill.csv
-- C2 no validated primary key on 3
-- C3 literal duplicates: prime_contracts.csv(80,778), prime_contracts_archive_backfill.csv(60,919)
-- C7 DOUBLE-COUNTING RISK - money tables a buyer cannot safely total: contractor_ranking.csv, prime_contracts.csv, prime_contracts_archive_backfill.csv
-- C5 no row-conservation coverage
 
 ### `funding` — BLOCKED
 

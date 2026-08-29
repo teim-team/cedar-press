@@ -31,12 +31,14 @@ and counted, never guessed.
 
 Reads  data/raw/esm_hci/ESM/clean/master prime file.dta
        data/clean/cedar_identifier_ledger_final.csv
+       data/spine/cedar_entity_spine.csv        (via cedar_prime_panel)
 Writes data/clean/prime_contracts.csv
        data/clean/prime_contracts_entity_year.csv
        review/prime_unlinked_top_vendors.csv
 """
 
 import csv
+import sys
 from collections import Counter, defaultdict
 from datetime import date
 from pathlib import Path
@@ -44,6 +46,9 @@ from pathlib import Path
 import pandas as pd
 
 CEDAR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(CEDAR / "code"))
+
+import cedar_prime_panel  # noqa: E402  (needs CEDAR on the path first)
 CLEAN = CEDAR / "data" / "clean"
 REVIEW = CEDAR / "review"
 TODAY = date.today().isoformat()
@@ -259,25 +264,37 @@ def main():
           f"({obl_lnk/obl_all*100:.1f}%)")
 
     # ---- entity-year panel ----------------------------------------------
-    panel = defaultdict(lambda: [0.0, 0])
-    for r in out:
-        if not r["attributed_flag"]:
-            continue
-        k = (r["tribe_id"], r["canonical_name"], r["fiscal_year"],
-             r["confidence_tier"])
-        panel[k][0] += float(r["total_obligations"] or 0)
-        panel[k][1] += 1
-    prows = [{"tribe_id": t, "canonical_name": c, "fiscal_year": y,
-              "confidence_tier": tier, "obligations_usd": round(v[0], 2),
-              "n_contracts": v[1], "built_date": TODAY}
-             for (t, c, y, tier), v in sorted(panel.items())]
-    p2 = CLEAN / "prime_contracts_entity_year.csv"
-    with open(p2, "w", encoding="utf-8", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=list(prows[0].keys()))
-        w.writeheader()
-        w.writerows(prows)
+    #
+    # THE GRAIN IS (tribe_id, fiscal_year) AND NOTHING ELSE.
+    #
+    # This block used to key the panel on (tribe_id, canonical_name,
+    # fiscal_year, confidence_tier), so one entity-year held up to three rows -
+    # measured 2026-08-29 at 8,464 rows over 6,713 entity-years, 1,635 keys
+    # colliding. The file is NAMED entity-year and declares `tribe_id` as a key
+    # column, so a buyer merging any other entity-year table onto this one
+    # FANNED OUT and multiplied their own dollars. `131` and `114` carried
+    # copies of the same key, so the aggregation now lives in ONE module and
+    # all three call it. See `cedar_prime_panel` for the evidence that
+    # collapsing is lossless (both keys sum to the identical cent) and for why
+    # `confidence_tier` survives as COLUMNS rather than as rows.
+    prows, pstats = cedar_prime_panel.aggregate(
+        out, TODAY,
+        spine_names=cedar_prime_panel.spine_canonical_names(),
+        uid_of=cedar_prime_panel.existing_uids(
+            CLEAN / "prime_contracts_entity_year.csv"))
+    cedar_prime_panel.assert_grain(prows)
+    cedar_prime_panel.assert_conservation(
+        prows, sum(float(r["total_obligations"] or 0) for r in out
+                   if r["attributed_flag"] and r["tribe_id"]
+                   and str(r["fiscal_year"]).strip()))
+    p2 = cedar_prime_panel.write_panel(
+        prows, CLEAN / "prime_contracts_entity_year.csv")
     print(f"wrote {p2.relative_to(CEDAR)}  ({len(prows):,} rows, "
-          f"{len({r['tribe_id'] for r in prows}):,} entities)")
+          f"{len({r['tribe_id'] for r in prows}):,} entities, "
+          f"one row per (tribe_id, fiscal_year) - verified)")
+    cedar_prime_panel.print_stats(pstats)
+    _xp, _xn = cedar_prime_panel.write_excluded(pstats, TODAY)
+    print(f"wrote {_xp.relative_to(CEDAR)}  ({_xn:,} named exclusions - every (awardee_uei, awardee_name, fiscal_year, reason) that entered no entity total)")
 
     # ---- what we are missing --------------------------------------------
     top = sorted(unlinked.items(), key=lambda kv: -kv[1][0])[:400]

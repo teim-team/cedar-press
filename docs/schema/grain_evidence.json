@@ -1,7 +1,7 @@
 {
  "generated": "2026-08-29",
  "method": "sample-generated candidates, FULL-FILE confirmation; hash uniqueness with exact re-read of every colliding hash. Produced by 512_build_dataset_contracts.py probe.",
- "n_tables": 207,
+ "n_tables": 208,
  "tables": {
   "admin_region_assignments.csv": {
    "path": "data/clean/admin_region_assignments.csv",
@@ -15157,7 +15157,7 @@
   "prime_contracts.csv": {
    "path": "data/clean/prime_contracts.csv",
    "rows": 1217768,
-   "n_columns": 44,
+   "n_columns": 47,
    "columns": [
     "contract_number",
     "parent_contract_number",
@@ -15202,9 +15202,12 @@
     "ruling_applied_date",
     "extent_competed_normalized",
     "extent_competed_normalized_basis",
-    "cedar_uid"
+    "cedar_uid",
+    "owner_attribution_status",
+    "owner_as_of_transaction_cedar_uid",
+    "contract_transaction_unique_key"
    ],
-   "whole_row_duplicates": 80778,
+   "whole_row_duplicates": 0,
    "natural_key": [],
    "natural_key_duplicate_rows": null,
    "join_columns_present": [
@@ -15226,7 +15229,8 @@
      "unique": false,
      "duplicate_rows": 630270,
      "null_rows": 0,
-     "example_duplicate": "FA300216C0004 | nan"
+     "example_duplicate": "FA300216C0004 | nan",
+     "tested_date": "2026-08-29"
     },
     {
      "key": [
@@ -15237,7 +15241,8 @@
      "unique": false,
      "duplicate_rows": 342810,
      "null_rows": 0,
-     "example_duplicate": "FA300216C0004 | nan | 2018"
+     "example_duplicate": "FA300216C0004 | nan | 2018",
+     "tested_date": "2026-08-29"
     },
     {
      "key": [
@@ -15248,7 +15253,23 @@
      "unique": false,
      "duplicate_rows": 342810,
      "null_rows": 0,
-     "example_duplicate": "FA300216C0004 | 2018 | nan"
+     "example_duplicate": "FA300216C0004 | 2018 | nan",
+     "tested_date": "2026-08-29"
+    },
+    {
+     "key": [
+      "contract_number",
+      "parent_contract_number",
+      "awardee_name",
+      "sector",
+      "place_of_perform_state",
+      "extent_competed_normalized"
+     ],
+     "unique": false,
+     "duplicate_rows": 613918,
+     "null_rows": 6519,
+     "example_duplicate": "FA300216C0004 | nan | ASRC COMMUNICATIONS, LTD. | 56 | OK | FULL AND OPEN COMPETITION AFTER EXCLUSION OF SOURCES",
+     "tested_date": "2026-08-29"
     }
    ],
    "tested_date": "2026-08-29"
@@ -15256,7 +15277,7 @@
   "prime_contracts_archive_backfill.csv": {
    "path": "data/clean/prime_contracts_archive_backfill.csv",
    "rows": 631507,
-   "n_columns": 39,
+   "n_columns": 40,
    "columns": [
     "contract_number",
     "parent_contract_number",
@@ -15296,9 +15317,10 @@
     "source_file",
     "source_authority",
     "built_date",
-    "cedar_uid"
+    "cedar_uid",
+    "contract_transaction_unique_key"
    ],
-   "whole_row_duplicates": 60919,
+   "whole_row_duplicates": 0,
    "natural_key": [],
    "natural_key_duplicate_rows": null,
    "join_columns_present": [
@@ -15314,13 +15336,24 @@
    "candidates_tested": [
     {
      "key": [
+      "contract_transaction_unique_key"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-08-29"
+    },
+    {
+     "key": [
       "contract_number",
       "parent_contract_number"
      ],
      "unique": false,
      "duplicate_rows": 408488,
      "null_rows": 0,
-     "example_duplicate": "FA300216C0004 | nan"
+     "example_duplicate": "FA300216C0004 | nan",
+     "tested_date": "2026-08-29"
     },
     {
      "key": [
@@ -15334,7 +15367,8 @@
      "unique": false,
      "duplicate_rows": 380191,
      "null_rows": 0,
-     "example_duplicate": "FA300216C0004 | nan | Dept Of Defense | ENID | BELTSVILLE | 1TBH2"
+     "example_duplicate": "FA300216C0004 | nan | Dept Of Defense | ENID | BELTSVILLE | 1TBH2",
+     "tested_date": "2026-08-29"
     }
    ],
    "tested_date": "2026-08-29"
@@ -15404,17 +15438,26 @@
   },
   "prime_contracts_entity_year.csv": {
    "path": "data/clean/prime_contracts_entity_year.csv",
-   "rows": 8464,
-   "n_columns": 8,
+   "rows": 6715,
+   "n_columns": 17,
    "columns": [
     "tribe_id",
+    "cedar_uid",
     "canonical_name",
     "fiscal_year",
-    "confidence_tier",
     "obligations_usd",
     "n_contracts",
-    "built_date",
-    "cedar_uid"
+    "obligations_usd_tier_a",
+    "n_contracts_tier_a",
+    "obligations_usd_tier_b",
+    "n_contracts_tier_b",
+    "confidence_tiers",
+    "attribution_name_variants_n",
+    "attribution_names",
+    "obligations_usd_owner_asof_confirmed",
+    "obligations_usd_owner_asof_not_confirmed",
+    "owner_attribution_statuses",
+    "built_date"
    ],
    "whole_row_duplicates": 0,
    "natural_key": [],
@@ -15424,10 +15467,43 @@
     "cedar_uid"
    ],
    "max_rows_per_join_key_value": {
-    "tribe_id": 63,
-    "cedar_uid": 63
+    "tribe_id": 27,
+    "cedar_uid": 27
    },
    "candidates_tested": [
+    {
+     "key": [
+      "tribe_id",
+      "fiscal_year"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-08-29"
+    },
+    {
+     "key": [
+      "cedar_uid",
+      "fiscal_year"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-08-29"
+    },
+    {
+     "key": [
+      "attribution_names",
+      "fiscal_year"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-08-29"
+    },
     {
      "key": [
       "tribe_id",
@@ -15463,28 +15539,6 @@
      "duplicate_rows": 1436,
      "null_rows": 0,
      "example_duplicate": "Chenega | 2018",
-     "tested_date": "2026-08-29"
-    },
-    {
-     "key": [
-      "cedar_uid",
-      "fiscal_year"
-     ],
-     "unique": false,
-     "duplicate_rows": 1751,
-     "null_rows": 0,
-     "example_duplicate": "CE-0011T-53 | 2017",
-     "tested_date": "2026-08-29"
-    },
-    {
-     "key": [
-      "tribe_id",
-      "fiscal_year"
-     ],
-     "unique": false,
-     "duplicate_rows": 1751,
-     "null_rows": 0,
-     "example_duplicate": "TRBF-ABSXFP-00 | 2017",
      "tested_date": "2026-08-29"
     },
     {
@@ -17584,6 +17638,10 @@
      "example_duplicate": ""
     }
    ],
+   "tested_date": "2026-08-29"
+  },
+  "contractors": {
+   "error": "not on disk",
    "tested_date": "2026-08-29"
   }
  }
