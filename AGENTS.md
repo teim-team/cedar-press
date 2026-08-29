@@ -10,7 +10,89 @@ Three interlocking data assets, built to TEIM-grade evidentiary standards:
 ## THE PRIME DIRECTIVE
 **Zero fabrication.** Never write a deal row, dollar amount, date, or identifier that is not present in retrieved or uploaded evidence. When evidence lacks a date, skip the row and name it in the run log (see RUN-2026Q3-008: two skipped leads). A smaller true dataset always beats a larger padded one. When context runs low, stop adding rows and close out cleanly — degraded-context transcription is fabrication with extra steps.
 
-## CURRENT STATE (2026-08-06) — read this before the 07-31 sections below
+## CURRENT STATE (2026-08-30) — THE MANDATE CHANGED. Read this before anything else.
+
+*Everything below this section, including the 2026-08-06 CURRENT STATE, is history. It is
+still true about what happened; it is no longer what you should optimise for.*
+
+### The objective
+
+**Not** "make Cedar architecturally sound." That phase produced real value and is
+substantially done. The objective now is:
+
+> **How many Cedar datasets can we confidently ship, update later without heroics, and
+> expect customers to join and aggregate correctly?**
+
+**Start every session at `docs/DATASET_READINESS.md`** (regenerate:
+`py -3 code/518_dataset_readiness.py`). It reports **READY / BLOCKED / NOT_TESTED** per
+dataset with named blockers.
+
+**There is no fourth status.** Do not write "mostly ready", "substantially complete",
+"green-ish", or "effectively done". A dataset crosses the ten-point production contract in
+`518_dataset_readiness.py` or it has NAMED blockers. Vague statuses are how nine datasets
+sit at 80% forever.
+
+### The ten-point contract a dataset must cross
+
+C1 validated grain · C2 validated primary and join keys · C3 duplicates removed or
+explained · C4 central identity system, no silent resolution of dangerous ambiguity ·
+C5 every harvested row has a NAMED disposition · C6 unresolved identity conflicts do not
+ship as definite facts · C7 no known double-counting path · C8 ONE documented rebuild path
+that does not destroy later enrichment · C9 an update procedure another session can execute
+from the document alone · C10 regression and semantic-diff gates cover the outputs.
+
+### How to choose work
+
+1. **Customer-facing correctness defects first.** A wrong number a buyer will actually
+   compute outranks any architectural improvement.
+2. **Then close the dataset nearest the line.** Prefer turning *9 datasets at 80%* into
+   *3 READY + 6 at 80%* over moving all nine to 85%.
+3. **Architecture work needs a licence.** Do it only when it blocks a dataset from READY,
+   prevents a demonstrated customer-facing error, removes repeated manual work across
+   datasets, makes updates materially safer, or closes an adopted release requirement.
+   Otherwise it is backlog. **Do not perfect a mechanism because a review found a
+   theoretically possible edge case.**
+4. **Fix the generating pipeline, never the output CSV.** Hand-cleaning a shipped file is
+   a defect that returns on the next rebuild.
+
+### Rules this arc paid for — violate these and the work is wrong
+
+- **A check does not count until a fixture proves it FIRES.** Inject the violation, exit 1,
+  restore, exit 0, and assert the NAMED invariant fired, not merely that the gate went red.
+  A check that has never failed on purpose is not known to work.
+- **A check reading a key that does not exist passes for the same reason it is useless.**
+  This happened three times in two days: an export gate reading a duplicate-count field the
+  probe never wrote; a scoreboard globbing release manifests at the wrong path; a resolver
+  matching a literal that had just been deleted. **Verify your input actually contains what
+  you think it does before trusting a green result.**
+- **Authority belongs to a source's CLAIM, never to our match.** The Federal Register is
+  authoritative about what its row says, not about which Cedar entity it refers to. Keep
+  those separable and separately refutable — `docs/SOURCE_RECORD_LAYER.md`.
+- **Modelling uncertainty is worthless if the export collapses it.** Unknown may ship as
+  unknown. **Contradicted may never ship as definite.** `docs/EXPORT_SAFETY.md`.
+- **Unknown stays unknown.** Never invent a date, an owner, or a boundary to make an
+  interval tidy or a column deterministic. Deterministically wrong metadata is worse than
+  deterministically missing metadata.
+- **Every dropped row gets a NAMED reason.** `other` / `unknown` / `misc` are refused.
+- **A falling metric is not automatically an improvement.** Deleting unsupported facts
+  improves the same counter that adding provenance does. Track disposition, not just count.
+- **Never re-baseline to clear a red gate.** `--baseline` records a floor while GREEN. A
+  gate you stepped around is a gate the next six sessions will also step around.
+- **Check `cedar_pipeline.NEVER_RUN` before any rebuild.** Several destroy later
+  enrichment. Run `py -3 code/build.py plan <collection>` first, every time.
+- **Self-verification is refused.** A completion claim is a row in `513_handoffs.py` with
+  re-executable commands; a different session runs them. "I checked it" is not evidence.
+
+### Parallel agents
+
+When several agents run at once, file ownership is declared **before** editing in
+`docs/ARCHITECTURE_DECISIONS.md`. No agent commits — an integrator verifies claims against
+live data and commits. Only one agent may own a central file per pass. If two need
+incompatible changes to the same file, stage them; do not race.
+
+---
+
+## CURRENT STATE (2026-08-06) — superseded by the section above, kept as history
 
 Much of this file was written 2026-07-31 and describes an xlsx-centred project. **The build is now a script pipeline in `code/`, numbered in run order, writing to `data/clean/`.** Where a 07-31 statement conflicts with this section, this section wins. The older sections are retained because their *findings* remain true; their *counts and queues* do not.
 

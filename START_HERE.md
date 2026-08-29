@@ -455,6 +455,22 @@ today: 85% x17, 70% x152, 55% x45, 40% x55.
 
 ## TOMORROW, IN ORDER
 
+> ### 2026-08-30: THE MANDATE CHANGED — start at the scoreboard, not here
+>
+> **`docs/DATASET_READINESS.md`** — READY / BLOCKED / NOT_TESTED per dataset, with named
+> blockers. Regenerate with `py -3 code/518_dataset_readiness.py`.
+>
+> The objective is no longer architectural soundness. It is **how many datasets we can
+> ship, update without heroics, and have customers aggregate correctly**. Current honest
+> state: **READY 0 / 13**, with three datasets one blocker from the line.
+>
+> The order of work is fixed: **customer-facing correctness defects first**, then close the
+> dataset nearest READY, then — only if it blocks closure — architecture. `AGENTS.md`
+> CURRENT STATE (2026-08-30) carries the full rules; the items below this box are the older
+> pull/backfill queue and remain valid but are no longer the priority.
+
+
+
 > **2026-08-30: every decision waiting on the owner is now ONE PAGE —
 > `review/OWNER_DECISION_QUEUE.md`.** Five items, each with its evidence
 > attached and the consequence of each answer stated. Agents: APPEND new
