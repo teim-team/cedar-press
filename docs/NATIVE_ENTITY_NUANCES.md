@@ -123,3 +123,54 @@ re-surfaces as a candidate.
 State-recognized (`TRBS`) and unrecognized communities are real organizations
 that appear in filings and directories. They get spine rows in their own class
 — never a TRBF row, and never silently dropped.
+
+## Verifying ownership: the CAGE spiderweb, and why it cannot finish the job
+
+*Added 2026-08-29 from an owner note, the same day it resolved FA-01.*
+
+**The tool.** [cage.dla.mil](https://cage.dla.mil/Home/UsageAgree) — enter a UEI
+or CAGE code, get the corporate hierarchy links up to the **highest-level
+owner**. If the chain leaves ownership unclear, the company's own website
+(about page, plus the address) makes the final call. Nearly every company that
+contracts ends up in this database; it is rare to hold a CAGE or UEI and not be
+there. The search sits behind a usage-agreement session cookie, so it is a
+**manual** verification step, not a scraper target — which also keeps the
+methodology human-replicable.
+
+**Where the data comes from, so it is not double-counted.** The hierarchy is
+the registrant's own FAR 4.18 / 52.204-17 ownership declaration filed through
+SAM — self-certified, with DLA verifying only that the declared owner's CAGE
+exists. In the assertion layer's terms it is the **LR_SAM evidence family**,
+not an independent one. But it is a far stronger *kind* of claim than an
+address: a legal ownership declaration, which is exactly what ultimate-owner
+attribution needs.
+
+**The caveat that makes the spine necessary (owner's words, 2026-08-29).** The
+declared highest-level owner is often the highest *incorporated* owner — **Ho-Chunk,
+Inc., not the Winnebago Tribe of Nebraska** — because the tribe itself need not
+hold a CAGE in the chain. So the federal spiderweb can terminate one hop short
+of the truth, and *it is impossible to establish a correct corporate hierarchy
+outside of tribes doing it for you*. That last hop — holding company → tribe —
+is Cedar's proprietary edge, and the reason the spine's ultimate-owner
+knowledge cannot be replaced by any federal database.
+
+**The spiderweb we already hold.** `data/clean/fpds_uei_edges.csv` carries
+2,290 parent/ultimate-parent edges over 1,844 registrants, straight from FPDS
+contract actions — no SAM API calls, no scraping. Measured 2026-08-29 it is
+sometimes *better* than the worst case above: Ho-Chunk, Inc.'s declared parent
+in FPDS **is** WINNEBAGO TRIBE OF NEBRASKA (90 observations). And it displays
+the adjacent trap in its own rows: `HO-CHUNK NATION → HO-CHUNK NATION` sits
+beside it — Wisconsin's Ho-Chunk Nation is a **different sovereign** from
+Nebraska's Winnebago Tribe, one careless name-match away from a false merge
+(the spine's `TRBF-WNNBGO`/phantom-id history in `71` is that exact lesson).
+
+**Worked case: FA-01, Bristol Bay.** `cluster_v3` keyed UEI `NL5HNWNUFMK4`
+(legal name BRISTOL BAY AREA HEALTH CORPORATION) to `ANRC-BRBYCO-00`, the ANCSA
+regional corporation — "Bristol Bay" matched, the wrong Bristol Bay won. The
+spine already held the health consortium as its own entity, `SGVF-BRSTLB-00`.
+The withdrawal was propagated to all 10 stale tables (742 rows) by
+`354_correction_register.py --apply`; the ledgers record it as **tier X**, so
+the assertion layer now carries the permanent refutation. The **repoint** of
+those rows to `SGVF-BRSTLB-00` keys dollars, so it is queued for an owner
+ruling in `review/rulings_inbox_2026-08-29_agent.csv`, with the CAGE check
+above as its verification protocol.

@@ -489,11 +489,15 @@ today: 85% x17, 70% x152, 55% x45, 40% x55.
 > 3. **`entity.website`** from `org_self_statement` — the layer's own I7 check already
 >    flags this as a *dead authority*: declared authoritative, asserts 0 times.
 >
-> **A ready-made first test exists.** `ANRC-BRBYCO-00` (Bristol Bay Native Corporation) is
-> keyed to **"BRISTOL BAY AREA HEALTH CORPORATION"** across **742 rows in 9 tables**
-> (`FA-01` in `62`, informational, not gating). Those are different entities. A second
-> source on `entity.canonical_name` should surface it as a real conflict — which is
-> precisely what the layer is for, and what an overwrite model can never show you.
+> ~~**A ready-made first test exists.**~~ **DONE 2026-08-29.** The Bristol Bay defect is
+> closed: `354_correction_register.py --apply` (new flag) propagated the applied FA-01
+> ruling to all 10 stale tables — 742 rows unlinked, the ledgers marked **tier X** so the
+> refutation is permanent and harvested by 510 as deny assertion #332. Root cause was a
+> `cluster_v3` name-cluster: "Bristol Bay" matched, the wrong Bristol Bay won, while the
+> spine already held the health consortium as `SGVF-BRSTLB-00`. The **repoint** of those
+> rows to `SGVF-BRSTLB-00` keys dollars, so it awaits an owner ruling —
+> `review/rulings_inbox_2026-08-29_agent.csv`, verification protocol: the owner's CAGE
+> check (see the new ownership section in `docs/NATIVE_ENTITY_NUANCES.md`).
 >
 > Also open, all recorded in `docs/ASSERTION_LAYER.md` under *Where this is honestly weak*:
 > `gaming_source_claims` contributes 0 assertions (no `cedar_uid`; 10 of 113 rows resolved);

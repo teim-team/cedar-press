@@ -69,6 +69,7 @@ list this project has ever kept.
 USE
 ---
     py -3 code/354_correction_register.py --check     # propagation, verbose
+    py -3 code/354_correction_register.py --apply     # finish every stale one
     py -3 code/354_correction_register.py --list
 
 `62_no_regression_check.py` IMPORTS this module rather than re-implementing
@@ -328,10 +329,23 @@ def check_propagation(verbose=False):
                     # Drop the correction's own preserved provenance columns.
                     live = [i for i, h in enumerate(hdr)
                             if PROVENANCE_MARKER not in h.strip().lower()]
+                    # A row that REFUTES the link is not a stale link. The
+                    # identifier ledgers record a withdrawn attribution as
+                    # confidence_tier = X - the house convention for a
+                    # negative ruling, and what 510_assertions.py harvests as
+                    # polarity=deny. The pair MUST co-occur in such a row: a
+                    # refutation that does not name what it refutes is a
+                    # blank, and blanks cannot say "this UEI is NOT BBNC".
+                    tier_i = next((i for i, h in enumerate(hdr)
+                                   if h.strip().lower() == "confidence_tier"),
+                                  None)
                     for row in rd:
                         cells = set(row[i].strip() for i in live
                                     if i < len(row))
                         if eid in cells and key in cells:
+                            if tier_i is not None and tier_i < len(row) \
+                                    and row[tier_i].strip().upper() == "X":
+                                continue
                             n += 1
                             if not example and hdr:
                                 example = "; ".join(
@@ -357,11 +371,121 @@ def check_propagation(verbose=False):
     return len(stale), stale
 
 
+def apply_propagation():
+    """Finish every correction the checker calls stale, using the checker's
+    own findings - the finder and the fixer are one function apart, so they
+    cannot disagree about what needs doing.
+
+    Two actions, chosen by what the table is:
+
+      identifier ledgers  -> confidence_tier = X, pair KEPT. The house
+                             convention for a negative ruling (71 does this
+                             for barred firms; 510 harvests it as a deny
+                             assertion). The refutation must name what it
+                             refutes, so eid and key stay in the row.
+      every other table   -> UNLINK, exactly the action the original FA-01
+                             correction applied: blank each cell equal to the
+                             withdrawn entity_id (or its cedar_uid - the uid
+                             would otherwise keep the link alive under a
+                             different name), keep the observed name and every
+                             provenance column.
+
+    NOT done here, deliberately: repointing the rows to SGVF-BRSTLB-00, the
+    spine's own Bristol Bay Area Health Corporation. That would key 695
+    funding rows' dollars to an entity by name evidence, and the standing rule
+    is that keying a dollar is a RULING, not a computation. The proposal goes
+    to the rulings inbox instead.
+    """
+    import shutil
+    from datetime import date
+    n, stale = check_propagation(verbose=False)
+    if not n:
+        print("  nothing stale - the register is fully propagated")
+        return 0
+    regs = load()
+    by_pair = {}
+    for r in regs:
+        by_pair.setdefault((r.get("entity_id", ""), r.get("withdrawn_key", "")), r)
+    today = date.today().isoformat()
+
+    by_table = {}
+    for s in stale:
+        by_table.setdefault(s["table"], []).append(s)
+
+    new_regs = []
+    for fn, items in sorted(by_table.items()):
+        path = CLEAN / fn
+        rows = read_csv(path)
+        if not rows:
+            continue
+        hdr = list(rows[0].keys())
+        is_ledger = fn.startswith("cedar_identifier_ledger")
+        shutil.copy2(path, str(path) + f".bak_{today}_pre354")
+        touched = {s["entity_id"]: 0 for s in items}
+        for s in items:
+            eid, key = s["entity_id"], s["withdrawn_key"]
+            orig = by_pair.get((eid, key), {})
+            uid = (orig.get("cedar_uid") or "").strip()
+            reason = (orig.get("reason") or "").strip()
+            hit = 0
+            for r in rows:
+                cells = {v.strip() for v in r.values() if v}
+                if eid not in cells or key not in cells:
+                    continue
+                if is_ledger:
+                    if (r.get("confidence_tier") or "").upper() == "X":
+                        continue
+                    r["confidence_tier"] = "X"
+                    r["tier_rationale"] = (
+                        f"Withdrawn {today} by 354 propagation of "
+                        f"{orig.get('correction_id', 'FA-01')}: {reason}"
+                    )[:500]
+                else:
+                    for col in hdr:
+                        v = (r.get(col) or "").strip()
+                        if v == eid or (uid and v == uid):
+                            r[col] = ""
+                hit += 1
+            if hit:
+                new_regs.append({
+                    "finding_id": s.get("finding_id") or "FA-01",
+                    "entity_id": eid,
+                    "withdrawn_key": key,
+                    "table": fn,
+                    "column_unlinked": ("confidence_tier=X" if is_ledger
+                                        else "every cell equal to the id"),
+                    "rows_affected": hit,
+                    "rows_removed": 0,
+                    "action": "REFUTE" if is_ledger else "UNLINK",
+                    "repointed_to": "",
+                    "provenance_preserved": "all name and evidence columns",
+                    "reason": reason or "propagated from the applied "
+                                        "correction; see the original row",
+                    "cedar_uid": uid,
+                })
+                touched[s["entity_id"]] = touched.get(s["entity_id"], 0) + hit
+                print(f"  {fn}: {hit} row(s) "
+                      f"{'REFUTED (tier X)' if is_ledger else 'unlinked'} "
+                      f"for {eid} <-> {key[:40]!r}")
+        with open(path, "w", newline="", encoding="utf-8") as fh:
+            w = csv.DictWriter(fh, fieldnames=hdr, extrasaction="ignore")
+            w.writeheader()
+            w.writerows(rows)
+    added = record(new_regs, "354_correction_register.py --apply")
+    print(f"\n  {added} correction row(s) appended to the register")
+    n2, _ = check_propagation(verbose=False)
+    print(f"  re-check: {n2} stale consumer(s) remain")
+    return 1 if n2 else 0
+
+
 def main():
     regs = load()
     print("=== Cedar Press 354: correction register ===\n")
     print(f"  register: {REGISTER.relative_to(CEDAR)}")
     print(f"  declared corrections: {len(regs):,}")
+    if "--apply" in sys.argv:
+        print("  applying every stale propagation:\n")
+        return apply_propagation()
     if "--list" in sys.argv:
         for r in regs:
             print(f"   {r['correction_id']}  {r['finding_id']:6s} "

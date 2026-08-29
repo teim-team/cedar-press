@@ -279,10 +279,11 @@ Also open:
   by the layer's own I7 check on every run.
 - **`entity.is_federally_recognized` has no negative case.** The roster asserts
   `yes` for those on it; nothing asserts `no` for those off it.
-- **`ANRC-BRBYCO-00`** (Bristol Bay Native Corporation) is still keyed to
-  "BRISTOL BAY AREA HEALTH CORPORATION" in 9 tables. A correction was applied to
-  three lobbying tables and not the rest — `354_correction_register.py --check`
-  lists them.
+- ~~**`ANRC-BRBYCO-00`** still keyed to "BRISTOL BAY AREA HEALTH CORPORATION"~~
+  **CLOSED 2026-08-29** — `354 --apply` propagated the ruling to all 10 tables
+  (742 rows); the ledgers carry it as tier X, harvested here as deny assertion
+  #332. The repoint to `SGVF-BRSTLB-00` awaits an owner ruling (it keys
+  dollars) — `review/rulings_inbox_2026-08-29_agent.csv`.
 
 ## Adding a source
 
