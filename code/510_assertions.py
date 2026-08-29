@@ -582,23 +582,53 @@ def harvest_identifiers(out) -> None:
               origin=p.relative_to(ROOT).as_posix())
 
 
-def harvest_gaming_claims(out) -> None:
-    for r in read_csv(CLEAN / "gaming_source_claims.csv"):
-        if str(r.get("subject_entity_resolved", "")).strip() != "1":
-            continue  # an unresolved subject has no cedar_uid to attach to
-        uid = (r.get("cedar_uid") or "").strip()
-        if not uid:
+def harvest_gaming_claims(out) -> dict:
+    """The Phase 5 gaming-pilot slice: claims finally reach the layer.
+
+    Until 2026-08-30 this harvester contributed ZERO assertions, because it
+    required a cedar_uid column the claims table has never had - its
+    subject_entity_id values are NIGC party ids, a different namespace.
+
+    The fix deliberately does NOT write identity back into the claims table.
+    gaming_source_claims stays the verbatim record of what each document
+    says; identity attaches HERE, at harvest, through the same 503 resolver
+    the FR-roster harvest uses - with its gov-class guards, its researched
+    equivalences and its refusal to guess. The table's own recorded refusals
+    (subject_resolve_how = "containment_refused_for_a_party...") stay
+    honoured: many parties ARE non-Native - Wells Fargo appears five times -
+    and an unresolved bank is the correct outcome, not a gap. Resolution
+    failures are counted and returned, never silently skipped (class2c)."""
+    rows = read_csv(CLEAN / "gaming_source_claims.csv")
+    if not rows:
+        return {"rows": 0, "resolved": 0, "refused": 0}
+    mod, exact, gov, state_of, uid_of, tid_uid = resolver()
+    n_res = n_ref = 0
+    for r in rows:
+        subj = (r.get("subject_value") or "").strip()
+        if not subj:
             continue
+        how = (r.get("subject_resolve_how") or "")
+        if "refused" in how.lower():
+            n_ref += 1          # the table already ruled: do not re-litigate
+            continue
+        tid, why = mod.resolve(subj, exact, gov, state_of)
+        uid = tid_uid.get(tid or "", "")
+        if not uid:
+            n_ref += 1
+            continue
+        n_res += 1
         conf = (r.get("confidence") or "").lower()
         _emit(out, uid, "gaming." + (r.get("predicate") or "claim"),
-              r.get("object_value") or r.get("subject_value"), "nigc",
+              r.get("object_value") or subj, "nigc",
               tier={"high": "A", "medium": "B"}.get(conf, "C"),
               method=r.get("source_type", "nigc"),
-              rationale=r.get("claim_note", ""),
+              rationale=((r.get("claim_note") or "")
+                         + f" [subject resolved to spine: {why}]")[:500],
               evidence_url=r.get("source_url", ""),
               quote=r.get("supporting_text", ""),
               verified=r.get("claim_date", ""),
               origin="data/clean/gaming_source_claims.csv")
+    return {"rows": len(rows), "resolved": n_res, "refused": n_ref}
 
 
 # =====================================================================
@@ -812,7 +842,7 @@ def phase_harvest(apply: bool) -> list:
     n_spine = len(out)
     harvest_identifiers(out)
     n_ident = len(out) - n_spine
-    harvest_gaming_claims(out)
+    game = harvest_gaming_claims(out)
     n_game = len(out) - n_spine - n_ident
     fr = harvest_fr_roster(out)
     n_fr = len(out) - n_spine - n_ident - n_game
@@ -843,6 +873,10 @@ def phase_harvest(apply: bool) -> list:
           f"gaming {n_game}, FR roster {n_fr}, aliases {n_alias}")
     print(f"                 FR roster: {fr['resolved']}/{fr['rows']} entries "
           f"matched to the spine, {fr['renames']} recorded renames harvested")
+    print(f"                 gaming claims: {game['resolved']}/{game['rows']} "
+          f"subjects resolved via 503, {game['refused']} refused or "
+          f"unresolvable (banks and non-Native parties stay unresolved BY "
+          f"DESIGN)")
     print(f"                 ledger registrations: {led['state']} states, "
           f"{led['legal_name']} legal names (facts about the REGISTRATION, not the entity - see the note in harvest_ledger_attributes)")
     print(f"                 {deny} DENY assertions preserved (tier-X "

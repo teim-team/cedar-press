@@ -220,8 +220,24 @@ own uncommitted edit. Still open on Phase 6: replaying a *previous* release
 end-to-end has never been demonstrated — the stamp records what would be
 needed, it does not prove the replay works.
 
-Remaining: Phase 4 (agent handoff protocol), Phase 5 (gaming pilot),
-Phase 7 (dataset migration), and the Phase 6 replay proof.
+**Phase 4 — handoffs (added same day).** `code/513_handoffs.py`: a handoff is
+a ROW born UNVERIFIED, carrying the commit hash, the touched tables' row
+counts, and `verify_commands` — the exact commands whose exit 0 constitutes
+proof. `verify` RE-EXECUTES them (it does not read the claim and nod), records
+who/when/at-what-commit, and **refuses self-verification** — proven by firing
+on its first recorded handoff. A disproven claim gates at MUST_BE_ZERO
+(`handoffs_failed_verification`); the unverified queue is a note.
+
+**Phase 5 — gaming pilot slice (added same day).** `gaming_source_claims` went
+from contributing 0 assertions to 10/113 — identity attaches AT HARVEST through
+the 503 resolver, never written back into the claims table, which stays the
+verbatim record. The 103 unresolved are banks and non-Native counterparties,
+unresolved BY DESIGN; the table's own recorded refusals are honoured, not
+re-litigated.
+
+Remaining: Phase 5 at full breadth (the slice proves the stack; the gaming
+collection's 60+ tables have not each been walked through it), Phase 7
+(dataset migration), and the Phase 6 replay proof.
 
 ---
 

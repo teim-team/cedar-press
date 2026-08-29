@@ -591,6 +591,29 @@ def measure_shipping():
             note("docs/schema/dataset_contracts.json missing - run "
                  "512_build_dataset_contracts.py; contract metrics not "
                  "measured")
+        # Phase 4 handoffs (513): a FAILED verification means a claim of
+        # completed work was re-executed and DISPROVEN - that is stop-work,
+        # not a queue. UNVERIFIED is a queue and only noted.
+        _hv = CEDAR / "review" / "handoff_verifications.csv"
+        _hh = CEDAR / "review" / "agent_handoffs.csv"
+        if _hh.exists():
+            import csv as _csv
+            with _hh.open(encoding="utf-8-sig", newline="") as _fh:
+                _hands = list(_csv.DictReader(_fh))
+            _last = {}
+            if _hv.exists():
+                with _hv.open(encoding="utf-8-sig", newline="") as _fh:
+                    for _v in _csv.DictReader(_fh):
+                        _last[_v["handoff_id"]] = _v["result"]
+            m["handoffs_failed_verification"] = sum(
+                1 for _h in _hands
+                if _last.get(_h["handoff_id"], "").startswith("FAILED"))
+            _unv = sum(1 for _h in _hands
+                       if not _last.get(_h["handoff_id"])
+                       and _h.get("verification_status", "") == "UNVERIFIED")
+            if _unv:
+                note(f"{_unv} handoff(s) await INDEPENDENT verification - "
+                     f"py -3 code/513_handoffs.py list --unverified")
     except Exception as e:
         note(f"codebook registry unreadable ({type(e).__name__}) - "
              "tables_undocumented_in_codebook not measured")
@@ -1076,6 +1099,9 @@ MUST_BE_ZERO = {
     # would ship with no owning collection, no plan and no contract - the
     # shape that let 47 gaming tables ship at 0.87% before the registry.
     "contract_violations", "contract_orphan_shippable",
+    # Phase 4: a handoff whose verify commands were re-run and FAILED is a
+    # disproven claim of completed work standing in the record.
+    "handoffs_failed_verification",
 }
 # Metrics where an INCREASE is the regression. A registration gap rises when a
 # table lands in data/clean and nobody registers it - the last-mile failure
