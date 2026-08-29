@@ -21,10 +21,11 @@
 // There is deliberately no "create account" here: an account exists because an
 // entitlement does.
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
 
 import { useAuth } from "../../context/useAuth";
+import { useFadeIn } from "../../features/grove/useFadeIn";
 import { activatePressAccount, validatePressCode } from "../../api";
 import { TBN_PLANS_URL } from "../../features/grove/pressArticles";
 import {
@@ -119,30 +120,8 @@ function browserStorage() {
 export default function PressGate({ user }) {
   const { login, logout, refreshSession } = useAuth();
   // The gate reads as one long scroll on a phone, so its sections arrive as
-  // they enter the viewport instead of standing there already. One-way, like
-  // the shelf bands: a section that has been seen stays seen. Anywhere
-  // without IntersectionObserver reveals everything immediately.
-  const fadeRoot = useRef(null);
-  useEffect(() => {
-    const nodes = [...(fadeRoot.current?.querySelectorAll(".cp-fade") ?? [])];
-    if (typeof IntersectionObserver === "undefined") {
-      nodes.forEach((node) => node.classList.add("is-in"));
-      return undefined;
-    }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-in");
-            observer.unobserve(entry.target);
-          }
-        }
-      },
-      { rootMargin: "-6% 0px" },
-    );
-    nodes.forEach((node) => observer.observe(node));
-    return () => observer.disconnect();
-  }, []);
+  // they enter the viewport instead of standing there already.
+  const fadeRoot = useFadeIn();
   const [step, setStep] = useState(() => initialPressStep(browserStorage()));
   // Plans or sign-in, one at a time. Stacking both read as one long column
   // of competing calls to action; the panel opens on the side of the hinge
