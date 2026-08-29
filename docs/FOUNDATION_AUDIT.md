@@ -38,7 +38,7 @@ with a checksum and a staleness gate; (b) make Cedar Press a sibling package the
 repo imports; (c) move the registry into Cedar Press and publish it outward.
 **(a) is the smallest change that makes the gate real** and is reversible.
 
-### F-0.2 Per-phase commits are impossible in the tree that holds the datasets.
+### F-0.2 Per-phase commits are impossible in the tree that holds the datasets. — **RESOLVED 2026-08-29**
 
 **OBSERVED.** `git rev-parse --is-inside-work-tree` in `Desktop/Cedar Press`
 returns *"fatal: not a git repository."* `cedar-press-repo` is a git repo, but
@@ -52,10 +52,28 @@ dataset tree. Every retirement in this project is therefore done by MOVE to
 `graveyard/<date>_<reason>/` with an evidence index — that convention is the de
 facto version control and it is why nothing here is ever deleted.
 
-**Substitute proposed, not yet built:** a content-addressed `run_id` +
-`code_version` (hash of `code/**.py`) + input/output logical checksums in the
-run manifest gives every guarantee the spec wanted from a commit hash **except**
-revert. Revert stays manual via `graveyard/` and `.bak_*`.
+**RESOLVED — `git init` in `Desktop/Cedar Press`, commit `2036e46`.** The owner's
+ruling settled it: *"ultimately, this work is gonna eventually live in a single
+repo. So you can build whatever. And we have a folder called Cedar Press. It
+doesn't matter, that folder is the repo."* The audit had treated the north-star
+instruction as a prohibition on committing anywhere; it was a rule about what
+gets *showcased*, not about what gets *versioned*. Recording that so the same
+wrong inference is not made again.
+
+The tree tracks **990 files, 38.8 MB** — source only. Content is excluded by
+extension at any depth, which matters because data here does not live in
+`data/`: 2.5 GB sat in `Federal Spending/`, 139 MB in `code/lobbying_pull/`,
+21 MB of scraped pages in `code/ancsa_portal/txt/`, and loose `.dta` files at
+the repo root. A directory-based rule missed all four. `data/spine/cedar_identity_register.csv`
+is the one deliberate exception: every table references it, so a silent edit to
+it would otherwise be undetectable.
+
+**The substitute is still wanted, and is now complementary rather than a
+replacement.** A commit hash pins the *code*; it says nothing about whether the
+38 GB the code read was the same 38 GB. `run_id` + `code_version` + input/output
+logical checksums remain the only thing that can attest to the data side, and
+the handoff schema should carry **both**. Revert of data stays manual via
+`graveyard/` and `.bak_*` — git does not and should not cover it.
 
 ---
 
@@ -171,7 +189,7 @@ Ranked by the spec's criteria. "Blast radius" is what breaks if it goes wrong.
 | 1 | **No assertion layer; facts overwritten** (F-1) | critical | certain — it is the current design | every published field in 12 datasets | invisible: the losing value is simply gone | high |
 | 2 | **No `lineage_root_id`; self-confirmation possible** (F-1.1) | critical | unknown, UNVERIFIED | any claim resting on "two sources agree" | very high — looks like corroboration | medium |
 | 3 | **Registry and datasets in different trees** (F-0.1) | high | certain | the unregistered-source-id gate cannot exist | low, once stated | low (option a) |
-| 4 | **No commit substrate for the dataset tree** (F-0.2) | high | certain | release provenance, rollback, handoff `commit hash` | low | medium |
+| ~~4~~ | ~~**No commit substrate for the dataset tree** (F-0.2)~~ **RESOLVED** `2036e46` | ~~high~~ | — | code side now covered; data side still needs `run_id` + checksums | done | — |
 | 5 | `ferc_filing_id` non-deterministic, **4/2,534 stable** | high | certain | any join on that id; nothing keys on it *yet* | already measured | low |
 | 6 | Undeclared many-to-many joins unguarded | high | unknown | silent row multiplication in any build | high | medium |
 | 7 | No agent-task dependency graph or handoff schema | medium | certain | duplicated work, unverifiable "done" | low | low |
@@ -206,8 +224,9 @@ order, smallest blocking thing first:
 1. **F-0.1** — vendor `sources.jsonl` + `schema/` into Cedar Press with a
    checksum and staleness gate. Unblocks the unregistered-source-id gate, which
    several later phases depend on. Low cost, reversible.
-2. **F-0.2** — run manifest with `run_id` + `code_version` + logical checksums,
-   as the commit substitute.
+2. ~~**F-0.2**~~ — **done for the code side** (`git init`, commit `2036e46`). The run
+   manifest with `run_id` + `code_version` + logical checksums is still needed
+   for the **data** side, which no commit hash can attest to.
 3. **Phase 3 first, not Phase 1** — the assertion layer (F-1, F-2) is the
    critical finding and the thing that gets harder every day the current
    overwrite behaviour continues. Extend `cedar_identifier_ledger`'s proven
