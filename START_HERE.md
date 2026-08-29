@@ -10,10 +10,24 @@ things, the hard safety rules, and **where the data actually goes** — the Coll
 pipeline into `github.com/teim-team/cedar-press`. This file covers *current state*.
 
 **Before quoting a number out of any build log, check
-`docs/DOC_CONTRADICTIONS_2026-08-26.md`.** There is no version control here, so superseded
-figures never get overwritten — they sit in the document where they were written, looking
-exactly as authoritative as current ones. That register indexes ~25 places where two
-documents disagree, and says which is right.
+`docs/DOC_CONTRADICTIONS_2026-08-26.md`.** Superseded figures never get overwritten — they
+sit in the document where they were written, looking exactly as authoritative as current
+ones. That register indexes ~25 places where two documents disagree, and says which is
+right.
+
+> **UPDATE 2026-08-29 — there IS version control now.** `Desktop/Cedar Press` is a git
+> repository as of commit `2036e46`. It tracks **source only**: 990 files, 38.8 MB — code,
+> prose, schemas, manifests, and `data/spine/cedar_identity_register.csv`. It does **not**
+> track the ~46 GB of content; data stays versioned by checksum in the run manifests and
+> retired by MOVE to `graveyard/`, which survives a file being rewritten in place in a way
+> git would not. This does not fix the stale-numbers problem above — a superseded figure in
+> a committed document is still committed — but from here on **every change has an author,
+> a date and a diff**, so the next contradiction can be traced instead of guessed at.
+>
+> `.gitignore` excludes content by **extension at any depth**, not by directory, because
+> data here does not live in `data/`: 2.5 GB sat in `Federal Spending/`, 139 MB in
+> `code/lobbying_pull/`, 21 MB of scraped pages in `code/ancsa_portal/txt/`, and loose
+> `.dta` files at the repo root. A directory rule missed all four.
 
 ---
 
@@ -112,6 +126,7 @@ find its row here and stop — you do not need to grep `docs/`.*
 | `docs/WORK_QUEUE.md` | the queue |
 | **`docs/NATIVE_ENTITY_NUANCES.md`** | **the entity-type domain knowledge: FR parenthetical bands, renames, village tribe vs village corp, ultimate-owner enterprises. Took the assistance reconciliation from 78% to 100%.** |
 | **`docs/IDENTIFIER_STANDARD.md`** | **one identity system (ours), the hub/sub-hub model, external ids, and what may never be published. Read before resolving or joining an entity.** |
+| **`docs/ASSERTION_LAYER.md`** | **new 2026-08-29. How a fact carries who said it, why two sources agreeing can be one source twice (evidence lineage), and the 8 ordered rules that pick the value Cedar stands behind. Read before adding a source or trusting a corroboration count.** |
 | **`code/build.py`** | **one entry point per collection.** `plan <id>` shows the ordered rebuilds-then-enrichers; `run <id> --execute` runs it. Holds no knowledge of its own — reads NEVER_RUN, the orderings, and the collection map. |
 | `docs/ARCHITECTURE.md` · `docs/ENTITY_INVENTORY.md` · `docs/ARCHIVE_CANDIDATES.md` | **GENERATED** by `code/500_*` / `501_*` / `502_*` — what exists, what we hold per entity, and what is safe to retire. Never hand-edit; re-run the script. |
 | `README.md` · `STATE_OF_BUILD.md` · `STATE_OF_THE_LAND_2026-08-07.md` | ⚠ the last two are **the densest concentrations of superseded numbers in the project** and carry banners saying so. Their *reasoning* is still good. Prefer this file on any conflict. |
@@ -175,6 +190,7 @@ find its row here and stop — you do not need to grep `docs/`.*
 | topic | doc |
 |---|---|
 | entity spine | `ENTITY_HARVEST_LOG.md` · `ENTITY_KEY_PROPAGATION_LOG.md` · `BIE_UIO_BUILD_LOG.md` · `TCU_CDFI_BUILD_LOG.md` · `NHO_SPINE_MERGE_LOG.md` · `NHO_INTERTRIBAL_REGISTER_LOG.md` |
+| **assertions, provenance & evidence lineage** | **`ASSERTION_LAYER.md`** — `code/510_assertions.py`; the source registry and resolution rules ship as data in `data/spine/cedar_source_registry.csv` and `cedar_resolution_rules.csv` |
 | aliases & relationships | `ALIAS_RELATIONSHIP_MIGRATION_LOG.md` |
 | identifier graph | `IDENTIFIER_GRAPH_BUILD_LOG.md` |
 | ANCSA / Alaska | `ANCSA_OWNERSHIP_RULING.md` · `ANCSA_PORTAL_BUILD_LOG.md` · `ANCSA_PORTAL_V2_LOG.md` |
@@ -438,6 +454,52 @@ today: 85% x17, 70% x152, 55% x45, 40% x55.
 ---
 
 ## TOMORROW, IN ORDER
+
+> ### UPDATED 2026-08-29 — the top of this list changed
+>
+> **Item 0 is now the only one that unblocks the rest of the mission spec.**
+> `docs/ASSERTION_LAYER.md` is new and `docs/FOUNDATION_AUDIT.md` §F-3b records why.
+>
+> **0. Harvest a SECOND, GENUINELY INDEPENDENT SOURCE for a field the spine already
+> asserts.** This is now the highest-value work in the project, ahead of every pull below.
+>
+> The assertion layer is built (`code/510_assertions.py`, Phase 3, gate green) and it
+> measured something nobody had measured before: **every fact in Cedar rests on exactly one
+> source.** Across 8,975 single-valued facts — **0** have a second source, **0** disagree,
+> and **2** have more than one independent evidence family. The arbitration machinery works
+> and has nothing to arbitrate.
+>
+> Do not read that as "the data agrees with itself." It means nothing has ever checked it.
+>
+> Harvesting the Federal Register roster directly was the first attempt and is worth
+> understanding before the second: 565 of 575 entries matched the spine, and the
+> corroborated count **stayed at 2** — correctly, because a copy of the FR sitting in the
+> spine and the FR itself are the **same evidence family**. Copying a source into your own
+> table does not corroborate it. A warehouse without lineage would have booked 565 new
+> confirmations there.
+>
+> So the second source must be *elsewhere*, not a republication. Best candidates, in order
+> of how much they would settle:
+>
+> 1. **IRS BMF / Form 990** for `entity.state`, `entity.city` and the filed legal name —
+>    genuinely independent of the FR roster, and already a declared source
+>    (`LR_IRS`) with nothing harvested into it.
+> 2. **SAM registration** addresses for the same fields — `LR_SAM`, also declared and
+>    unharvested. Note it is self-reported, so it is NOT authoritative for ownership.
+> 3. **`entity.website`** from `org_self_statement` — the layer's own I7 check already
+>    flags this as a *dead authority*: declared authoritative, asserts 0 times.
+>
+> **A ready-made first test exists.** `ANRC-BRBYCO-00` (Bristol Bay Native Corporation) is
+> keyed to **"BRISTOL BAY AREA HEALTH CORPORATION"** across **742 rows in 9 tables**
+> (`FA-01` in `62`, informational, not gating). Those are different entities. A second
+> source on `entity.canonical_name` should surface it as a real conflict — which is
+> precisely what the layer is for, and what an overwrite model can never show you.
+>
+> Also open, all recorded in `docs/ASSERTION_LAYER.md` under *Where this is honestly weak*:
+> `gaming_source_claims` contributes 0 assertions (no `cedar_uid`; 10 of 113 rows resolved);
+> **11,676 of 23,310 assertions are `unattributed_legacy`**, meaning half the store carries
+> no evidence because the row it came from never recorded any; and
+> `entity.is_federally_recognized` has no negative case.
 
 1. **SAM FY2000–2007. BLOCKED ON A KEY — see the correction below.**
    Resets 00:00 UTC. Six variants, **one extract each covers all eight years** —
