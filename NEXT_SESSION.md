@@ -20,7 +20,16 @@ Three statuses only. Never write "mostly ready".
 
 ---
 
-## 1. THE GATE IS RED. Clear it first — it is a 5-minute job.
+## 1. ~~THE GATE IS RED~~ — CLEARED 2026-09-01, gate exit 0
+
+Register row written, and the allowance itself needed two more fixes: it
+compared dist-to-dist when the metric sums `min(dist, clean)`, and then
+`ship_ratio_pct` failed for the same fall the line above had just allowed.
+Both fixed; baseline recorded while green.
+
+**Read `docs/TWELVE_DATASET_PLAN.md` — that is now the operating plan.**
+
+### Superseded — kept for the reasoning
 
 ```
 py -3 code/62_no_regression_check.py     # exit 1
