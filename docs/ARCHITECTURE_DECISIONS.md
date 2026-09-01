@@ -51,6 +51,22 @@ removing the literal would have blinded the only channel that sees NAGPRA's
 largest input. They now recognise the derived SHAPE instead (§17c), proven by
 comparing resolved path sets across all 414 files: 0 losses, 23 gains.
 
+## Workstream ownership, pass 3 (2026-09-01) — cleanup, learning, universe
+
+Pass-2 table EXPIRED. Current owners:
+
+| ws | owns (may edit) | must not touch |
+|---|---|---|
+| **H** inventory + known issues | `docs/INVENTORY.md`, `docs/KNOWN_ISSUES.md`, `code/521_inventory.py` | any pipeline, 510, 512, 62, 503, build.py |
+| **I** learn from rulings | `docs/NATIVE_ENTITY_NUANCES.md`, `docs/RESOLUTION_RULES_LEARNED.md`, `code/522_mine_rulings.py` | 503, 510, any pipeline |
+| **J** spiderweb harvest | `code/523_spiderweb_harvest.py` + its new candidate tables, `docs/SPIDERWEB_LEARNING_PLAN.md` | 503, 510, 512, 62, build.py |
+| **K** org universe completeness | `docs/ORG_UNIVERSE_AUDIT.md`, `code/524_universe_gap.py` | the spine, 503, 510, any pipeline |
+
+Nobody commits. Nobody runs `510 --apply` or `build.py ship --execute`.
+`NATIVE_ENTITY_NUANCES.md` belongs to **I** alone this pass — K reports gaps
+into its own doc and requests nuance edits through its handoff.
+Integrator owns 62, 512, 517, 518 and all commits.
+
 ## ADR-001 — `source_record` as a first-class node (workstream A)
 
 **Status:** in progress. **Supersedes:** nothing.
