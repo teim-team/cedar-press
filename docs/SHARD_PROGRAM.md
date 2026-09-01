@@ -61,6 +61,12 @@ to depth 2, because the second layer is where the spiderweb actually lives.
 
 - **Scrape and download, don't survey.** Raw captures plus normalized JSONL into
   `data/staging/`. A list of URLs is not the deliverable.
+- **Take what the page sends, not just what it shows** — see
+  `docs/HIDDEN_DATA_TECHNIQUES.md`. A directory rendering 10 of 340 rows usually
+  ships all 340 in a JSON blob or an API the page itself calls. On tribal sites
+  the WordPress media library (`/wp-json/wp/v2/media`) and ArcGIS
+  `FeatureServer` endpoints are the two highest-yield sources, and one API call
+  is *gentler* on a small server than thirty page fetches.
 - **Newsletters, everywhere.** Owner: tribal newsletters are where deals surface
   before any federal filing. Record the channel, format, archive depth and
   cadence; sample 3 recent issues; do **not** harvest full archives yet.
