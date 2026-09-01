@@ -322,6 +322,7 @@ def build_index():
         # because a candidate we cannot class is a candidate no guard can
         # refuse.
         unknown = {}
+        brand_solo = {}
         with ALIASES.open(encoding="utf-8", errors="replace", newline="") as f:
             for r in csv.DictReader(f):
                 tid = (r.get("entity_id") or r.get("tribe_id") or "").strip()
@@ -332,6 +333,37 @@ def build_index():
                 if tid not in class_of:
                     unknown[tid] = unknown.get(tid, 0) + 1
                     continue
+                # A SINGLE-TOKEN BRAND WORD IS NOT AN ENTITY NAME.
+                #
+                # Measured 2026-09-01 by shard J: entity_aliases.csv holds 104
+                # rows at alias_type='brand' and EVERY ONE is a single token.
+                # Among them: advantage, ancillary, applied, broadband,
+                # colorado, cultural, door, feet, field, fire, indigenous,
+                # link, managed, media, nexus, peak, program, research. These
+                # are fragments of company names, not names. `cultural`
+                # resolved to Southern Ute; `indigenous` to Delaware Nation.
+                #
+                # 541 already refuses all 104 and names them. Nothing else did,
+                # and this index is what `resolve()` matches against - so the
+                # hub itself was carrying them.
+                #
+                # Live exposure when this guard was added was ONE: `Alutiiq` is
+                # both the register canonical name of the Afognak village
+                # corporation and a brand alias pointing at a different entity.
+                # Small, because `clean()` does not strip INC/LLC, so only a
+                # record whose WHOLE normalized name is the bare token can
+                # collide. It is fixed here anyway: the surface grows with every
+                # harvest, nine entity shards are landing new business names as
+                # this is written, and a latent identity defect fires on data
+                # that has not arrived yet. This is the Enterprise Rancheria
+                # shape (NATIVE_ENTITY_NUANCES) living in the brand registry.
+                #
+                # Multi-token brand aliases are kept - "Ho-Chunk Inc" is a real
+                # trading name and refusing it would lose true matches.
+                if (r.get("alias_type") or "").strip() == "brand" \
+                        and len(k.split()) == 1:
+                    brand_solo[k] = tid
+                    continue
                 exact.setdefault(k, set()).add((tid, class_of[tid]))
         if unknown:
             top = sorted(unknown.items(), key=lambda kv: -kv[1])[:5]
@@ -340,6 +372,11 @@ def build_index():
                   f"contributed NO candidate, because a candidate with no "
                   f"class is one no class guard can refuse. Worst: "
                   + ", ".join(f"{t} x{n}" for t, n in top))
+        if brand_solo:
+            sample = ", ".join(sorted(brand_solo)[:8])
+            print(f"  build_index: refused {len(brand_solo):,} single-token "
+                  f"alias_type='brand' row(s) - a brand fragment is not an "
+                  f"entity name. e.g. {sample}")
     return exact, gov, state_of
 
 

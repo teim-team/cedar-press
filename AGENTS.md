@@ -5117,3 +5117,84 @@ written down: a puller must have a deadline AND must publish, per run, what it
 was asked for against what it got.** Any future shard probe should copy the
 `expected_total` / `attempted_this_run` / `coverage_complete` block from
 `code/553_shard_d_web_probe.py` rather than rediscovering this.
+
+## GATE FAIL 2026-09-01 ~19:40 — NOT shard H. Owners named by the gate itself.
+
+Recorded under standing rule 15 option 3 by **shard H** (the Native Hawaiian
+Organization / state-recognized tribe / individually Native-owned business
+slice: `data/staging/tribe_web_map/shard_h.csv`,
+`data/staging/entity_profiles/shard_h.jsonl`,
+`data/staging/anc_subsidiaries/shard_h.jsonl`,
+`data/staging/tribe_harvest/shard_h/newsletters.jsonl`).
+
+**The failing metrics, and `293`'s own attribution for the three lint lines:**
+
+| line | moved | the instance `293` names |
+|---|---|---|
+| `lint_class2b` | 0 → 1 | `shard_f_membership.py` — **shard F** |
+| `lint_class2c` | 60 → 61 | `344_pull_nigc_document_surface.py` — **gaming** |
+| `lint_class5` | 6 → 7 | `shard_g_newsletters.py` — **shard G** |
+| `lint_bug_class_instances` | 146 → 147 | the sum of the three above |
+| `lint_new_defect_instances` | = 3 | the same three |
+| `tables_missing_from_25_TABLES` | 179 → 184 | new `data/clean/` tables, below |
+| `tables_missing_from_27_SPEC` | 194 → 195 | same |
+
+**Proven not to be shard H.** This workstream wrote **no file in `code/`** — all
+four of its scripts live in the session scratchpad
+(`scratchpad/shardh/h1…h7`), which `293` does not scan and which cannot move a
+lint metric. It created **no table in `data/clean/`**; its four outputs are in
+`data/staging/`, outside every `ship_*` and `tables_missing_*` metric. Its only
+`data/clean/` and `data/spine/` interaction is read-only.
+
+The newest `data/clean/` arrivals by mtime, none of them shard H's:
+`native_owned_businesses.csv` 19:26 (`code/330_build_native_owned_businesses.py`),
+`nonprofit_schedule_c_lobbying.csv` / `nonprofit_schedule_c_coverage.csv` 19:20,
+`regulations_gov_entity_coverage.csv` 19:15, `admin_appeal_positions.csv` 18:57.
+
+This is the phenomenon the 2026-08-26 19:10 and 2026-09-01 16:45 entries above
+already name — **a gate reading a shared tree mid-write, on a day with fourteen
+live workstreams, reports another agent's incomplete step as a regression.**
+Named, not shrugged at; the remedies belong to shards F and G and the gaming
+workstream respectively.
+
+---
+
+## GATE FAIL 2026-09-01 ~20:1x — shard E. Two lines were mine; both fixed. Rest named.
+
+Shard E (ANCSA corporate spiderweb) ran `62` at the end of its pass. **Exit 1.**
+Per standing rule 15 this is recorded, not stepped around.
+
+**Mine, and fixed in this pass** — both were flagged the moment they landed and
+both are gone from the current `293` run:
+
+| metric | line | what I did |
+|---|---|---|
+| `lint_class1` 0 → 2 then 0 → 4 | the `glob.glob` pairs in `531_shard_e_anc_report_mine.py` and `533_shard_e_build_subsidiary_edges.py` | **waived with a reason.** The interim text layer of the Alaska DBS STAR portal PDFs IS the source of record for this build; there is no promoted table of annual-report text and none is possible. The promoted artefact is the edge file `533` writes. |
+| `lint_class4` | `if time.time() > RUN_DEADLINE:` in `532_shard_e_anc_web_probe.py` | **fixed, then waived.** The deadline no longer marks anything complete: every exit now writes `_coverage_<stage>.json` with `candidates_total`, `candidates_attempted`, an explicit `complete` boolean, `deadline_truncated`, and the unattempted URLs BY NAME; the host lock carries the same fields. This one mattered for real — a deadline-truncated crawl of a corporate tree must never be readable as the whole tree, because half a subsidiary list is a wrong answer, not a small one. |
+
+`293` after the fixes names **no `*shard_e*` file in any class.**
+
+**Not mine, named with their owners** — unchanged from the shard D and shard H
+entries above, plus one that arrived after them:
+
+| metric | new instance | owner |
+|---|---|---|
+| `lint_class2b` 0 → 1 | `shard_f_membership.py` | **shard F** |
+| `lint_class2c` 60 → 61 | `344_pull_nigc_document_surface.py` | **gaming** |
+| `lint_class5` 6 → 8 | `547_shard_c_hidden_endpoint_sweep.py`, `shard_g_newsletters.py` | **shards C and G** |
+| `tables_missing_from_25_TABLES` / `_27_SPEC`, `native_owned_businesses.csv` at 0% ship | new `data/clean/` tables | `330_build_native_owned_businesses.py` and the other 19:1x–19:2x arrivals |
+
+**Shard E adds no `data/clean/` table and no `data/spine/` write.** Its whole
+output is under `data/staging/anc_subsidiaries/`, `data/staging/tribe_web_map/`
+and `data/staging/tribe_harvest/shard_e/`, so it cannot move any `ship_*` or
+`tables_missing_*` metric. Read-only against the spine, `503`, `510`, `512`.
+
+*Also worth carrying forward from this pass, because it is a data-quality trap
+and not a lint one:* the corroboration guard in `534_shard_e_build_web_map.py`.
+A domain generated from an entity name that ANSWERS is not evidence it is the
+right site — `englishbay.com` is a Vancouver photo blog, `nima.com` is somebody
+else's business. A guessed URL is only recorded as the entity's site if the page
+carries a distinctive token of the name AND an ANCSA/Alaska Native signal;
+otherwise it is `UNRELATED_DOMAIN` with the reason. **A false "website found" is
+worse than an honest absence**, and any shard generating candidate domains needs
+the same check.

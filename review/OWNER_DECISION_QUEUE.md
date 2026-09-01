@@ -359,3 +359,168 @@ with its ledger method, its rationale, and the token sets that do and do not
 overlap. **The harvest hangs nothing from any of them.**
 
 **If these are wrong:** they are already carrying dollars in shipped tables.
+
+---
+
+## 12. Nonprofits — the 990 mission text says WHY each row is here (shard J, 2026-09-01)
+
+Your question: *"does it say it's native focused in the description... do we have
+nonprofits that we know have a reason to be on the master list?"* Yes, and the
+corpus was already on disk. `code/541_shard_j_mine_990_mission_text.py` reads
+**10,651 local IRS 990 XML returns** (471 MB, no download) and pulls each
+filer's `MissionDesc`, `ActivityOrMissionDesc`, `PrimaryExemptPurposeTxt` and
+every program-service `Desc`. **4,296 of the 12,764 np_orgs EINs** have a local
+return; of the 4,122 whose BMF tier is `full_990`/`990_EZ`, **4,105 (99.6%)** are
+already here, and only 12 are absent from the IRS index entirely.
+
+**The answer, as a histogram of `inclusion_basis` (ADR-013), over 4,296 EINs:**
+
+| basis | EINs | what it means |
+|---|---:|---|
+| `placename_only` | **2,653** | the mission has NO Native word at all, and the row is here because a name token matched |
+| `no_native_signal` | 948 | no Native word and no place-name explanation either |
+| `subject_classification` | 419 | Native-focused, names no entity |
+| `native_serving_not_native_controlled` | 15 | Native people named alongside an explicit broad, non-Native constituency |
+| `named_entity` | **132** | the mission names a specific nation or Cedar entity |
+| `program_authority` | 49 | ISDEAA / IHS / NAHASDA / ICWA / BIE named in the filing |
+| `geographic` | 44 | reservation, trust land, ANCSA region — no nation named |
+| `no_mission_text` | 36 | filed (mostly 990-PF) with no mission narrative |
+
+**62% of the nonprofit rows that have a 990 carry no Native word anywhere in
+their own mission statement.** That is the size of the place-name defect,
+measured for the first time from the organisations' own filings rather than
+from their names.
+
+### 12a. The 412 tier-A rows — DECISION: bulk-rule the 21 that state a non-Native purpose
+
+The doc says 412; the file says **697** `confidence_tier = A` rows are
+`classification_ruling = UNRULED` (`docs/datasets/06_nonprofit.md` line 26 is
+stale). **293 of the 697 have a local 990.** They split:
+
+| basis | n | settleable now |
+|---|---:|---|
+| `placename_only` | 214 | **21 at `high`** — the filing names a plainly non-Native purpose |
+| `subject_classification` | 24 | 9 at `high` |
+| `named_entity` | 22 | 9 at `high` |
+| `no_mission_text` | 22 | — |
+| `geographic` | 7 | — |
+| `program_authority` | 4 | 1 at `high` |
+
+The 21 `placename_only / high` rows are the cheapest rulings available. Each
+one's own 990 states what it is:
+
+    MOHEGAN FIRE COMPANY INC              "TO PROVIDE VOLUNTEER FIRE AND AMBULANCE SERVICE TO THE COMMUNITY"
+    MOHEGAN VOLUNTEER FIRE ASSOCIATION    "...SERVICES TO THE LAKE MOHEGAN, NEW YORK DISTRICT"
+    LAKOTA AMBULANCE SERVICE INC          "AFFORDABLE RURAL AMBULANCE SERVICE TO NELSON [COUNTY]"
+    APACHE AMBULANCE SERVICE INC          "ambulance service to Town of Apache and surrounding area"
+    PEQUOT LIBRARY ASSOCIATION            "...A COLLECTION OF RARE BOOKS, MANUSCRIPTS, AND ARCHIVES"
+    JEMEZ VALLEY CREDIT UNION             "...MEMBERS AT LEGITIMATE RATES OF INTEREST"
+    PAWNEE CITY PUBLIC LIBRARY FOUNDATION "A STRONG PUBLIC LIBRARY IS THE FOUNDATION..."
+    LENAPE VALLEY YOUTH BASEBALL AND SOFTBALL, MOJAVE RIVER ACADEMY SCHOOLS,
+    COMMUNITIES IN SCHOOLS PUYALLUP, THE CHEHALIS FOUNDATION, SHOSHONE PROJECT INC,
+    SHOSHONE MEDICAL CENTER FOUNDATION, BANNOCK YOUTH FOUNDATION, COQUILLE STUDENT
+    LOAN FUND, FRIENDS OF PAWNEE BILL RANCH, CHRISTMAS IN ACTION WICHITA TX,
+    CENTRAL DAKOTA ENTERPRISES, DON SHERWOOD ENDOWMENT (ROTARY),
+    MOHEGAN VOLUNTEER EXEMPT FIREMENS BENEVOLENT ASSOCIATION
+
+**If YES:** 21 tier-A rows are ruled `place_name_coincidence` on the strength of
+the filer's own words, and the tier-A revenue aggregate stops being unquotable
+for those rows.
+
+**One to pull out before you sign:** `ROSEBUD ECONOMIC DEVELOPMENT CORP` lands in
+this band on the phrase "Rosebud Chamber of Commerce". Rosebud, Texas has one
+too, and the text does not settle which Rosebud this is.
+
+The remaining 184 tier-A `placename_only` rows are `medium` (no Native word, but
+no affirmative civic purpose either) and 9 are `low` (the filing says "our
+culture / our people", so the org may BE the nation talking about itself —
+**deliberately not settled**).
+
+Full evidence with quotes: `data/staging/np_mission/inclusion_basis.jsonl`.
+
+### 12b. The mint proposal — 644 candidates, and only 90 are actually mints
+
+`data/staging/np_mission/mint_proposal.csv`, ranked strongest basis first. Every
+row carries the verbatim quote and the source XML path.
+
+| proposed action | n |
+|---|---:|
+| **KEY BY BASIS, do not mint** (no entity is named; the basis IS the claim) | 512 |
+| **MINT** as a new nonprofit entity, keyed to the nation it names | 90 |
+| **ATTACH EIN to an entity already in the register** — do not mint a duplicate | **42** |
+
+The 42 are the immediate win: organisations already in the 1,555-entity register
+whose EIN is simply not attached — Oglala Lakota College, National Indian Health
+Board, Native American Rights Fund, Lac Courte Oreilles Ojibwe University and
+School, Council for Native Hawaiian Advancement, Fresno American Indian Health
+Project, Indian Health Board of Minneapolis, United Tribes Technical College,
+California Rural Indian Health Board, Northwest Portland Area Indian Health
+Board, Great Plains Tribal Leaders Health Board, and 31 more.
+
+**Recommendation on the architectural question:** do **not** mint ~11,300
+nonprofits into a 1,555-entity register. Mint the 90, attach the 42, key the
+other 512 by `inclusion_basis` alone, and leave the ~11,300 out. Reasoning is in
+the shard report; the short version is that the register has no entity class
+that fits a nonprofit, and 11,300 rows of `subject_classification` would swamp
+the 1,555 governmental and institutional entities 8:1 while adding no identity
+that ADR-013's basis key does not already carry.
+
+### 12c. DECISION: `entity_aliases.csv` holds 104 alias rows that are single English words
+
+Measured while building the matcher. **Every one of the 104 `alias_type='brand'`
+rows is a single token**, and among them:
+
+    advantage  applied  ancillary  corporate  cultural  door  feet  field
+    fire  indigenous  link  managed  media  nexus  peak  program  research
+
+`cultural` resolves to Southern Ute (`TRBF-STHUTE-00`). `indigenous` resolves to
+Delaware Nation (`TRBF-DELAWN-00`). This is the Enterprise Rancheria defect
+(`docs/NATIVE_ENTITY_NUANCES.md`) living in the brand registry, and any matcher
+reading the alias layer without knowing it will key half a corpus. 541 refuses
+all 104 and names each one; nothing else in the repo does.
+
+Two more measured while matching, both worth a rule rather than a patch:
+
+* **"Solo" must be counted on DISTINCTIVE tokens, never on total tokens.**
+  *Fond du Lac* is three tokens but only one distinctive one — it keyed the Fond
+  du Lac Yacht Club, Rotary Club Charities, County Farm Bureau Cooperative, High
+  School Hockey, Volleyball Club, Historical Society, Concert Association and
+  nine more Wisconsin civic bodies to the Minnesota Ojibwe band. Tuscarawas,
+  wearing a longer name so it clears a token-count guard.
+* **The apostrophe must be deleted in normalisation, not spaced.** Spacing it
+  turns "St. Mary's" into three tokens, which lets a two-token name pass a
+  three-token confidence test: PEORIA SYMPHONY ORCHESTRA keyed to St. Mary's
+  (Algaaciq) off the words "ST. MARY'S CATHEDRAL" in a concert-venue list.
+
+**Decision:** withdraw the 104 brand aliases from `entity_aliases.csv`, or retype
+them so no matcher can read them as entity names? Shard J did not touch the file.
+
+### 12d. What else the local corpus connects to — measured, not built
+
+| source | volume, local | connects dataset 6 to |
+|---|---:|---|
+| **Schedule C** lobbying and political activity | **860 returns, 415 EINs (361 of them in np_orgs)**; 222 501(h)-electing and 245 non-electing; $6.14M lobbying by np_orgs filers; **314 narrative blocks / 166 KB of free-text lobbying description**; 124 returns declaring direct contact with legislators, 37 declaring rallies | **dataset 4 (lobbying)** — and it captures advocacy the LDA never sees |
+| **Schedule I** grants made | 1,490 returns, 63,628 grant blocks, 60,353 recipient EINs, 89,168 purpose statements | **dataset 3 (funding)** — largely already built: `np_schedule_i_grants.csv` holds 58,685 rows |
+| Officers | 141,654 person blocks | governance structure only — **not publishable as a roster** |
+| Mission narrative, whole corpus | 10,391 of 10,651 returns carry it | the basis layer above |
+
+Schedule C was the one worth extracting, and it is extracted:
+`data/staging/np_mission/schedule_c_lobbying.csv`, 860 rows, grain = one filed
+return (a few EIN-years appear twice where the IRS index holds two object_ids
+for one period — de-duplicate on `(ein, tax_period_end)` before summing).
+
+**A defect for whoever owns `code/99_build_earmarks_and_schedc.py`:** it already
+appends 30 `schedc_*` columns to `np_financials.csv`, but records
+`schedc_present = 1` on only **93** rows with a lobbying total of **$82,303**.
+Two causes, both measurable here: it reaches a narrower slice of the corpus than
+what is on disk, and it reads only the 501(h) `...Grp` shape, so the **245
+non-electing filers** who report a flat `TotalLobbyingExpendituresAmt` are read
+as zero. That is an undercount, not a coverage limit.
+
+**One limit worth stating plainly:** `native_serving_not_native_controlled` is
+assigned to only 15 organisations, and that is a property of the source, not of
+the classifier. **A Form 990 does not disclose who controls the filer.** The
+tier is assigned only where the filing itself states a broad non-Native
+constituency; absence of the tier is never evidence that an organisation IS
+Native-controlled. Separating Native-controlled from Native-serving needs a
+governance source — bylaws, a tribal charter, a board roster — not the 990.
