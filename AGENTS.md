@@ -5289,3 +5289,46 @@ Full write-up, sources and the resulting field-by-field decision:
 `docs/datasets/natural_resources_sources.md`, "The pre-1907 classification
 correction". The scoping question it raises is queued for the owner in
 `review/OWNER_DECISION_QUEUE.md`.
+
+### FOLLOW-UP 2026-09-01 — the brand-alias guard landed; the token bug did NOT
+
+The lobbying workstream adopted shard J's brand-alias measurement into
+`503_identity.py`'s `build_index` (104 single-token `alias_type='brand'` rows
+refused; multi-token brand names kept, since "Ho-Chunk Inc" is a real trading
+name). Confirmed live: `build_index` now prints the refusal and names the rows.
+
+**The second defect is still open, and it is the more dangerous of the two.**
+`503`'s loose-path guards (`ADMIN_GEOGRAPHY`, `CIVIC_FORM`) are denylists of
+words, so they cannot refuse a civic form nobody has listed. Measured with
+`py -3 code/541_shard_j_mine_990_mission_text.py --resolver-exposure`, which
+calls `503.resolve()` READ-ONLY and writes only to `data/staging/np_mission/`:
+
+    830  np_orgs organisations that 503 keys AND that have a local 990
+    562  of them, the filing gives no Native word at all   <- a screen, not a verdict
+     66  the filing states an affirmative NON-Native civic purpose, over 25 entities
+
+`UMATILLA ELECTRIC COOPERATIVE ASSOCIATION` — the $592M leak named at the top
+of `docs/datasets/06_nonprofit.md` — **still resolves to `TRBF-UMATLL-00`
+today**, reason string *"gov-class distinctive-token match on 'Umatilla Tribe',
+unique"*. So do Oneida-Madison Electric Cooperative, Oneida Healthcare Systems
+(a 101-bed acute care hospital), Seneca Hose Co No 1, South Onondaga Fire
+Department, Taos Volunteer Fire Department, the Puyallup, Washoe and Wyandotte
+education associations, and 58 more.
+
+The 562 are deliberately NOT claimed as errors: a tribal government's own 990
+often says "services to our members" and names no Native word, so silence
+proves nothing. Only the 66 carry an affirmative contradiction.
+
+Evidence with quotes: `data/staging/np_mission/resolver_exposure.csv` (830
+rows; `verdict = CONTRADICTED_BY_FILING` on the 66). Owner decision written up
+as item **12e** in `review/OWNER_DECISION_QUEUE.md`, three options ranked.
+
+**Owner of `503`:** the general fix is a shape rule, not more denylist words. A
+distinctive-token set that is entirely a US settlement name is not distinctive
+— *Fond du Lac* is two tokens and a Wisconsin city, so every organisation in
+that city satisfies the subset test, and `ENVISION GREATER FOND DU LAC`,
+`FOND DU LAC FESTIVALS INC` and `FOND DU LAC ADULT LITERACY SERVICES INC` prove
+that no word list reaches them. The strongest available rule is that where
+Cedar holds the organisation's own 990 and it states a non-Native purpose,
+that evidence outranks any name match; the corpus is already on disk for 4,296
+of the 12,764. Shard J did not touch `503`.

@@ -524,3 +524,154 @@ tier is assigned only where the filing itself states a broad non-Native
 constituency; absence of the tier is never evidence that an organisation IS
 Native-controlled. Separating Native-controlled from Native-serving needs a
 governance source — bylaws, a tribal charter, a board roster — not the 990.
+
+---
+
+## Do the 30 pre-1907 Osage rows belong in the natural-resources ledger?
+
+*Appended 2026-09-01 by workstream O, after your "1880? What data goes that far
+back lol". The question was right. The fields are already fixed; this is the
+scope call, and it is genuinely arguable, so it is yours.*
+
+**Decision:** keep the 30 rows for 1880–1906 in `data/clean/resource_revenue.csv`,
+or move them out of the natural-resources dataset.
+
+### What is already done, so this is not urgent
+
+The rows were stamped `commodity = "Osage Mineral Estate (oil, gas, sand and
+gravel, water use)"` and `land_status = trust`, with confidence **A** on four of
+them. The Mineral Estate was created by the **1906 Osage Allotment Act**, and
+the first Osage oil lease of any kind was the **Foster lease of 1896-03-16** —
+so for 1880–1895 Cedar was asserting oil revenue from an estate that did not
+exist. **Corrected**: commodity blank, `resource_type = not_stated`,
+`land_status = not_stated`, `revenue_type = trust_disbursement`, all 30 demoted
+to **B**, and the sourced explanation carried in `beneficiary_note`. Nothing
+deleted — row count unchanged at 11,305.
+
+### What the payments actually were
+
+Louis F. Burns, "Osage", *Encyclopedia of Oklahoma History and Culture*,
+Oklahoma Historical Society, entry OS001 — the Osage Trust Estate *"came from
+treaty settlements, land sales from the Kansas Reservation, and accumulated
+interest on money held in trust by the United States"*; *"Income mainly from
+grazing leases caused the commissioner of Indian affairs to call the Osages 'the
+richest people on earth'"*; and decisively, *"**Petroleum income did not become
+a monetary factor until after Osage allotment in 1906–1907.**"*
+
+Your own prior — trust interest on the Kansas land-sale proceeds — is **the
+larger half of the right answer**. The source adds grazing income, which
+complicates it: grass-lease income *is* resource revenue. The published figure
+is one number covering both and nothing apportions it, so Cedar does not.
+
+### The two answers
+
+**KEEP THEM IN** (current state). They are one continuous series that the Osage
+Minerals Council publishes as one table, 1880–2032. Splitting it across two
+Cedar tables hides the seam from anyone reading only one of them. The corrected
+fields already make the block excludable with a single predicate —
+`resource_type = 'not_stated'` or `commodity = ''` — so a subscriber charting
+resource revenue drops them automatically.
+
+**MOVE THEM OUT.** The **BTFA precedent points this way and it is squarely on
+point.** BTFA was deliberately kept out of this ledger because Interior's own
+description makes royalties one of six ingredients: *"Trust funds include
+payments from judgment awards, settlements of claims, land-use agreements,
+royalties on natural resource use, other proceeds derived directly from trust
+resources, and financial investment income."* A pre-1907 Osage payment is that
+same mixture. If BTFA is scale context rather than a series, consistency says
+these are too.
+
+**If MOVE:** they leave `resource_revenue.csv` and land in a
+`data/clean/` sibling for pre-estate distributions, or in `review/` as context.
+Cost: the published series gains a 1907 floor and the seam has to be documented
+in two places instead of one. About an hour, and it is reversible.
+
+Evidence and both arguments in full:
+`docs/datasets/natural_resources_sources.md`, "The pre-1907 classification
+correction". Code: `code/83_build_resource_ledger.py`, `_osage_period_fields`.
+
+### 12e. The Fond du Lac token bug, measured against the live resolver — 66 contradictions, and Umatilla Electric is still one of them
+
+Follow-up after the lobbying workstream adopted the brand-alias guard (12c).
+The second defect in that list is **not** fixed and it is the more dangerous
+one. `data/staging/np_mission/resolver_exposure.csv`, produced by
+`py -3 code/541_shard_j_mine_990_mission_text.py --resolver-exposure`, which
+calls `503.resolve()` **read-only** and writes only into staging.
+
+**Why a second test was needed.** `503`'s loose path wins on *"the spine
+entity's distinctive tokens are a subset of the filed name"*, and its two
+guards — `ADMIN_GEOGRAPHY` and `CIVIC_FORM` — are **denylists of words**:
+COUNTY, YACHT, ROTARY, GOLF, LIBRARY. A denylist can only refuse a civic form
+somebody already thought of. It catches `FOND DU LAC YACHT CLUB`. It does not
+catch `ENVISION GREATER FOND DU LAC`, `FOND DU LAC FESTIVALS INC` or
+`FOND DU LAC ADULT LITERACY SERVICES INC`, because no word in those names is on
+either list. The guards are also blind to the shape itself: *Fond du Lac* is a
+two-token distinctive set that is **entirely a Wisconsin city name**, so every
+organisation in that city satisfies the subset test.
+
+**The mission text is the orthogonal test, and it runs the other way round.**
+Instead of asking whether the filed NAME looks civic, it asks what the
+organisation says it does. Crossed over the 830 np_orgs organisations that
+`503` keys *and* that have a local 990:
+
+| what the filing says | 503 keys it | 503 does not |
+|---|---:|---:|
+| `placename_only` | **562** | 2,091 |
+| `no_native_signal` | 69 | 879 |
+| `named_entity` | 74 | 58 |
+| `subject_classification` | 74 | 345 |
+| `geographic` | 18 | 26 |
+| `program_authority` | 17 | 32 |
+
+The 562 are a screen, not a verdict — a tribal government's own 990 often
+says "services to our members" and names no Native word at all, so silence
+proves nothing. **The defensible subset is the 66 where the filing states an
+affirmative non-Native civic purpose**, over **25 spine entities**:
+
+    UMATILLA ELECTRIC COOPERATIVE ASSOCIATION -> TRBF-UMATLL-00
+        "UMATILLA ELECTRIC COOPERATIVE IS A MEMBER-OWNED ELECTRIC UTILITY
+         THAT SELLS ENERGY AND OTHER SERVICES..."
+    ONEIDA-MADISON ELECTRIC COOPERATIVE INC   -> TRBF-ONDANY-00   electric cooperative
+    ONEIDA HEALTHCARE SYSTEMS INC             -> TRBF-ONDANY-00   101-bed acute care hospital
+    SENECA HOSE CO NO 1 INC                   -> TRBF-SNCNAT-00   volunteer fire company
+    SENECA VOLUNTEER AMBULANCE SQUAD          -> TRBF-SNCNAT-00   ambulance, Seneca IL
+    SOUTH ONONDAGA FIRE DEPARTMENT INC        -> TRBF-ONNDGA-00   fire department
+    TAOS VOLUNTEER FIRE DEPARTMENT INC        -> TRBF-TAOSPB-00   volunteer fire
+    PUYALLUP EDUCATION ASSOCIATION            -> TRBF-PUYLLP-00   teachers' association
+    WASHOE EDUCATION ASSOCIATION              -> TRBF-WASHOE-00   Washoe County School District
+    WYANDOTTE EDUCATION ASSOCIATION           -> TRBF-WYNDTT-00   Wyandotte public schools
+    TUSCARORA TOWNSHIP VOLUNTEER FIRE ASSOC   -> TRBF-TSCARA-00   volunteer fire
+    SPORTING WICHITA INC                      -> TRBF-WKWTOK-00   youth soccer club
+    ST LUKES HEALTH FOUNDATION OF SIOUX CITY  -> SGVF-NDNHLT-00   regional medical center
+    SHEPPTON ONEIDA VOLUNTEER FIRE CO, SENECA ROCKS VFD, SENECA VALLEY
+    FOUNDATION, SOUTH SENECA AMBULANCE CORPS, CHEROKEE PASS FIRE DISTRICT,
+    SEMINOLE TRAIL VOLUNTEER FIRE DEPARTMENT, ROSEBUD COMMUNITY HOSPITAL, ...
+
+Concentration: Seneca Nation 9, Wichita 6, Cherokee Nation 5, Tuscarora 5,
+Mohegan 4, ND Native Health 4, Oneida NY 4, Puyallup 4, Klamath 3, Onondaga 3,
+Wyandotte 3, Osage 2.
+
+**`UMATILLA ELECTRIC COOPERATIVE ASSOCIATION` is the $592M leak named at the
+top of `docs/datasets/06_nonprofit.md`, and `503.resolve()` still returns
+`TRBF-UMATLL-00` for it today** — reason string *"gov-class distinctive-token
+match on 'Umatilla Tribe', unique"*. The doc records the symptom; this is the
+first measurement of the mechanism still being live in the resolver.
+
+**Decision, three options:**
+
+1. **Feed the 66 to `503` as declared exclusions** (`RESOLUTIONS` entries, the
+   TUSCARAWAS pattern). Smallest change, fixes exactly these, fixes nothing
+   else — a hand list, which is what the 2026-09-01 guards were written to
+   replace.
+2. **Add a shape rule to the loose path** — refuse when the spine entity's
+   distinctive-token set is entirely a US settlement name and the filed name
+   contributes no Native term. This is the general fix and it reaches
+   `ENVISION GREATER FOND DU LAC`, which no denylist will.
+3. **Let evidence beat the name.** Where Cedar holds the organisation's own
+   990 and it states a non-Native purpose, that outranks any name match. This
+   is the strongest and it is the only one that scales, because the corpus is
+   already on disk for 4,296 of the 12,764.
+
+**Recommendation: 3, with 2 as the fallback where no 990 exists.**
+Shard J did not touch `503` — it is another workstream's file and the guard
+belongs with its owner, exactly as the brand-alias fix did.

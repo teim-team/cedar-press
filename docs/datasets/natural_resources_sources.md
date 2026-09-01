@@ -68,7 +68,7 @@ it whenever the ledger is rebuilt; do not edit a number into it by hand.
 | 7 | **ND State Treasurer, tax distribution search** (Three Affiliated Tribes) | payment | 2008-09 .. **2026-08** | 2008-09 .. **2026-08** | 492 | **none.** Refreshed 2026-09-01: +3 payments, +$18.78M. Pre-2008 distributions do not exist (2007 enabling act) |
 | 8 | **UT COBI fund financials** (Uintah Basin + Navajo Revitalization Funds) | fund × fiscal year | UBRF FY1996 .. FY2025 · NRF FY1997 .. FY2025 | identical | 118 | **none** — FY2026 not closed |
 | 9 | **MT DOR quarterly county distribution letters** | production quarter | 49 cover letters, oldest 2014-Q1 distribution | all 49 | 49 | **none of the letters is missing.** Every quarter reads `Tribal Distribution: $0.00`. Nothing before 2014 exists (24 probed URLs, all 404) |
-| 10 | **Osage Minerals Council headright payment history** | quarter (1906+) / year (1880–1905) | **1880 .. 2026-Q2** in one spreadsheet | **1880 .. 2026-Q2** | 508 | **none.** Was 2000+ until this pass — the floor was a target, not the document's |
+| 10 | **Osage Minerals Council headright payment history** | quarter (1906+) / year (1880–1905) | **1880 .. 2026-Q2** in one spreadsheet | **1880 .. 2026-Q2** | 508 | **none in coverage** — but the 30 rows before 1907 carry **no commodity and `resource_type = not_stated`**, because the Osage Mineral Estate did not exist yet. See *The pre-1907 classification correction* below. Whether they belong in this table at all is an **open scoping question with the owner** |
 | 11 | **Osage Minerals Council quarterly newsletters** | production quarter | index lists newsletters; 8 dateable, 2 URLs 404 | 2014-Q3 .. 2022-Q1 | 68 | **post-2022-Q1 newsletters not located**; **2015-01 and 2015-07 are link rot** (recorded, not silence) |
 | 12 | **ANCSA §7(i)/§7(j)**, from 166 regional-corporation annual reports on disk | corporation × fiscal year | the ANCSA portal index holds **19,269 filings**; 166 annual reports converted to text | FY2014 .. FY2025 (period ends), 12 of 12 regionals | 185 | **village corporations entirely absent** (173 of them, same portal, proven path). Calista FY2024/FY2025 refused — the reports state only a percentage change |
 | 13 | **OSMRE AML fee-based grant distribution** | tribe × federal fiscal year | **FY2002 .. FY2026** (live site FY2016+; FY2002–FY2015 recovered from Wayback this pass) | **FY2013 .. FY2026** | 76 | **FY2002–FY2012 retrieved and HELD** — pre-sequestration vintages have a different table every year and FY2010–FY2012 have **no text layer at all**. **4 tribe-years held by the gate**: FY2015 Hopi and Navajo, FY2018 Crow and Navajo — all scanned-OCR corruption, all named in `review/resource_ledger_unresolved.csv`. Every other tribe-year FY2013–FY2026 is built (38 of 42) |
@@ -302,6 +302,110 @@ between a figure two published numbers agree on and one printed once.
 
 ---
 
+---
+
+## The pre-1907 classification correction
+
+*Added 2026-09-01 after the owner asked, of the new 1880 floor, "what data goes
+that far back lol". The question was right and the answer did not fully
+defend.*
+
+**What was wrong.** Dropping the Osage coverage floor to the document's own
+floor published 30 rows for 1880–1906, and every one of them was stamped with
+the modern characterisation the loop applied to all Osage rows:
+
+```
+commodity   = "Osage Mineral Estate (oil, gas, sand and gravel, water use)"   30 of 30
+land_status = trust                                                           30 of 30
+confidence  = A on 4 of them (the 1906 quarters)
+```
+
+The Osage Mineral Estate was **created by the Osage Allotment Act of 1906**.
+The first Osage oil lease of any kind was the **Foster lease, granted by the
+BIA on 1896-03-16**. So for 1880–1895 Cedar was asserting oil-and-gas revenue
+from an estate that did not exist, in years with no Osage oil lease at all.
+
+**This was a classification defect, not fabrication.** The figures are real,
+published by the Osage Minerals Council, and faithfully transcribed; the
+1906 quarters even pass the quarters-sum-to-the-printed-annual-total gate. What
+was wrong is what Cedar *said they were*.
+
+**What they actually were — sourced, not inferred.** Louis F. Burns, "Osage",
+*Encyclopedia of Oklahoma History and Culture*, Oklahoma Historical Society,
+[entry OS001](https://www.okhistory.org/publications/enc/entry?entry=OS001):
+
+> "Allotment brought a division of the Osage Trust Estate. This financial
+> estate came from **treaty settlements, land sales from the Kansas
+> Reservation, and accumulated interest on money held in trust by the United
+> States**."
+
+> "Income mainly from **grazing leases** caused the commissioner of Indian
+> affairs to call the Osages 'the richest people on earth.'"
+
+> "**Petroleum income did not become a monetary factor until after Osage
+> allotment in 1906–1907.**"
+
+> "Income from grass and mineral leases were distributed quarterly on a per
+> capita basis to those who had been living in 1907."
+
+Corroborated on the date an oil lease first existed by
+[Wikipedia, "Osage Nation"](https://en.wikipedia.org/wiki/Osage_Nation):
+*"The BIA granted the request on March 16, 1896, with the stipulation that
+Foster was to pay the Osage tribe a 10% royalty on all sales of petroleum
+produced."* And by the Council's own spreadsheet, third footnote:
+*"Individual payments began in 1909."*
+
+**What Cedar now says, and what it deliberately still does not say.** The
+published figure is **one number per year**. It covers trust interest — which
+is **not** resource revenue — and grass-lease income — which **would** be — and
+no source apportions them. Splitting it would be a model. So:
+
+| field | pre-1907 value | why |
+|---|---|---|
+| `commodity` | **blank** | the source names none, and a blank is a single cheap predicate a consumer can filter on |
+| `resource_type` | `not_stated` | not `mixed`, which asserts a mixture of *minerals* |
+| `revenue_type` | `trust_disbursement` | what the source describes; already in the controlled vocabulary |
+| `land_status` | `not_stated` | `trust` is an anachronism before the Act that created the trust |
+| `confidence` | **B** on all 30 | the four A rows demoted |
+| `beneficiary_note` | carries the sourced explanation verbatim | |
+| `amount_sign_meaning` | says the per-headright basis is **retrospective** | |
+
+The 16 rows for 1880–1895 additionally carry: *"THERE WAS NO OSAGE OIL LEASE OF
+ANY KIND IN THIS YEAR… A petroleum characterisation of this payment is not
+merely unsourced — it is impossible."*
+
+**The boundary is 1906/1907, and 1907–1908 get a lesser caveat.** From 1907 the
+estate existed and mineral income was flowing, so those rows keep their
+commodity — but the Council's own footnote still says individual payments had
+not begun, so the eight 1907–1908 quarterly rows carry a grain caveat. 1909
+onward is unchanged.
+
+**Nothing was deleted.** House rule: flag, never delete. Row count is unchanged
+at 11,305.
+
+### The open scoping question — for the owner, not for this workstream
+
+**Should the 30 pre-1907 rows be in `resource_revenue.csv` at all?** There is a
+real precedent on each side and it is the owner's call, queued in
+`review/OWNER_DECISION_QUEUE.md`.
+
+*Against keeping them* — **the BTFA precedent, and it is squarely on point.**
+BTFA was deliberately kept OUT of this ledger because Interior's own
+description makes royalties one of six ingredients: *"Trust funds include
+payments from judgment awards, settlements of claims, land-use agreements,
+royalties on natural resource use, other proceeds derived directly from trust
+resources, and financial investment income."* A pre-1907 Osage payment is
+exactly that mixture. If BTFA is scale context rather than a ledger series,
+these arguably are too.
+
+*For keeping them* — they are **one continuous series published by one body**.
+The Council draws 1880–2032 as a single line. Splitting it across two Cedar
+tables would hide the seam from anyone reading only one of them, and the
+corrected fields already make the block excludable with a single predicate
+(`resource_type = 'not_stated'` or `commodity = ''`), which BTFA never was.
+
+They are kept **in**, corrected, pending that decision.
+
 ## KNOWN OPEN ITEMS THIS PASS DID NOT CLOSE
 
 | Item | Owner | Why not closed |
@@ -310,4 +414,5 @@ between a figure two published numbers agree on and one printed once.
 | `docs/codebooks/12_resources.md` is stale — it does not describe `reclamation_fee_distribution`, the two OSMRE `source_system` values, or the `per_headright_rate` / `entity_specific_component` levels | natural resources | `codebook_master.csv` is a **shared** file and fourteen workstreams were live. Registering a fragment mid-write is the collision `docs/RESOURCE_ASSETS_BUILD_LOG.md` already records. Queued, deliberately |
 | `resource_revenue.csv` carries **820 rows not yet in `dist/`** | integrator | Shipping is `build.py ship --execute`, which this workstream is not permitted to run |
 | `tribal_bond_issuances.csv` has a placeholder `issue_date` on all 29 rows, no stated grain and no primary key | natural resources | Named above. Out of scope for one pass; it is a documented defect now rather than an invisible one |
+| **Whether the 30 pre-1907 Osage rows belong in `resource_revenue.csv` at all** — their fields are corrected, but the scope call is genuinely arguable and the BTFA precedent cuts against keeping them | **owner** | Queued in `review/OWNER_DECISION_QUEUE.md`. Kept in, corrected, pending the decision |
 | 4 `SPINE_ALIAS` rows queued: `MHA Nation`, `Mandan, Hidatsa, and Arikara Nation`, `Osage Minerals Council` | entity spine | The spine is append-only and not this script's to edit. No ledger row depends on them; they prevent a *future* source failing to resolve |

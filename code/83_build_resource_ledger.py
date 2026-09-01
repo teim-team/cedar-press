@@ -1658,6 +1658,151 @@ OSAGE_HEADRIGHT_NOTE = (
     "non-Osage holders, so this is not a payment to a tribal government."
 )
 
+# ---------------------------------------------------------------------------
+# THE PRE-1907 BLOCK. A SOURCE'S OWN RETROSPECTIVE LABELLING IS NOT A FACT
+# ABOUT THE PERIOD IT DESCRIBES.
+#
+# WHAT WENT WRONG, 2026-09-01. Dropping the coverage floor to the document's
+# own floor published 30 rows for 1880-1906 and stamped every one of them
+#
+#     commodity   = "Osage Mineral Estate (oil, gas, sand and gravel, water use)"
+#     land_status = trust
+#
+# because that is what the modern rows carry and the loop did not distinguish.
+# The Osage Mineral Estate was created by the Osage Allotment Act of 1906.
+# For 1880-1895 Cedar was therefore asserting oil-and-gas revenue from an
+# estate that did not exist, in years when there was no Osage oil lease at
+# all - and four of those rows carried confidence A.
+#
+# The transcription was faithful. THE DEFECT IS CLASSIFICATION. The Council
+# expresses its whole 1880-2032 series on a per-headright basis because that
+# is the only way to draw one continuous line; Cedar copied that
+# presentational convenience into a commodity field, where it became a
+# historical claim the record does not support. Nothing was fabricated and
+# nothing is deleted - the payments are real and published. What is corrected
+# is what Cedar says they WERE.
+#
+# WHAT THEY ACTUALLY WERE, and this is sourced, not inferred:
+#
+#   Louis F. Burns, "Osage", Encyclopedia of Oklahoma History and Culture,
+#   Oklahoma Historical Society, entry OS001:
+#     "Allotment brought a division of the Osage Trust Estate. This financial
+#      estate came from treaty settlements, land sales from the Kansas
+#      Reservation, and accumulated interest on money held in trust by the
+#      United States."
+#     "Income mainly from grazing leases caused the commissioner of Indian
+#      affairs to call the Osages 'the richest people on earth.'"
+#     "Petroleum income did not become a monetary factor until after Osage
+#      allotment in 1906-1907."
+#     "Income from grass and mineral leases were distributed quarterly on a
+#      per capita basis to those who had been living in 1907."
+#
+#   Corroborating, on when an oil lease first existed at all - Wikipedia,
+#   "Osage Nation", on the Foster lease: "The BIA granted the request on
+#   March 16, 1896, with the stipulation that Foster was to pay the Osage
+#   tribe a 10% royalty on all sales of petroleum produced." So there was no
+#   Osage oil lease of any kind before 1896-03-16.
+#
+#   And the Council's own spreadsheet, third footnote: "Individual payments
+#   began in 1909."
+#
+# So a pre-1907 payment is a distribution out of the Osage Trust Estate -
+# treaty settlements, Kansas land-sale proceeds, accumulated Treasury interest
+# and grazing (grass) lease income - of which mineral revenue is at most a
+# late and minor ingredient, and before 1896 is provably none.
+#
+# WHY IT IS NOT DECOMPOSED, AND WHY NO COMMODITY IS GUESSED. The published
+# figure is one number per year. Splitting it into interest, grass and mineral
+# components would be a model. Grazing income WOULD be resource revenue and
+# trust interest would NOT, and no source apportions them - so the honest
+# value for `commodity` is BLANK and for `resource_type` is `not_stated`,
+# which is exactly what those values exist for. `revenue_type` becomes
+# `trust_disbursement`, which is what the source describes and is already in
+# the controlled vocabulary.
+#
+# THE SAME SHAPE AS THE BTFA DECISION, and the precedent cuts BOTH ways, which
+# is why the scoping question goes to the owner rather than being settled
+# here. BTFA was kept OUT of this ledger because "Trust funds include payments
+# from judgment awards, settlements of claims, land-use agreements, royalties
+# on natural resource use ... and financial investment income" - royalties are
+# one of six ingredients. The pre-1907 Osage payment is that same mixture. It
+# is kept IN, for now, because it is one continuous series published by one
+# body and splitting it across two Cedar tables would hide the seam from
+# anyone reading only one of them. Queued in review/OWNER_DECISION_QUEUE.md.
+# ---------------------------------------------------------------------------
+
+#: Last year for which Cedar refuses to characterise an Osage payment as
+#: mineral revenue. The Osage Allotment Act was approved 1906-06-28 and its
+#: roll was of persons living in 1907; Burns dates petroleum income becoming a
+#: monetary factor to "after Osage allotment in 1906-1907".
+OSAGE_PRE_ESTATE_LAST_YEAR = 1906
+
+#: The year an Osage oil lease first existed at all. Before this there is no
+#: petroleum ingredient to argue about.
+OSAGE_FIRST_OIL_LEASE_YEAR = 1896
+
+OSAGE_OHS_CITE = ("Louis F. Burns, 'Osage', Encyclopedia of Oklahoma History "
+                  "and Culture, Oklahoma Historical Society, entry OS001, "
+                  "https://www.okhistory.org/publications/enc/entry?entry=OS001")
+
+OSAGE_PRE_ESTATE_NOTE = (
+    "PRE-ESTATE PAYMENT - NOT MINERAL REVENUE, AND CEDAR DOES NOT ASSERT WHAT "
+    "IT WAS. The Osage Mineral Estate was created by the Osage Allotment Act "
+    "of 1906; this payment predates it. The Osage Minerals Council publishes "
+    "1880 onward in one table on a per-headright basis because that is how a "
+    "continuous series is drawn, but headrights did not exist in this period "
+    "and THE COUNCIL'S PRESENTATION IS NOT A STATEMENT ABOUT THE PERIOD. "
+    "Sourced: " + OSAGE_OHS_CITE + " states that the Osage Trust Estate 'came "
+    "from treaty settlements, land sales from the Kansas Reservation, and "
+    "accumulated interest on money held in trust by the United States', that "
+    "'Income mainly from grazing leases caused the commissioner of Indian "
+    "affairs to call the Osages the richest people on earth', and that "
+    "'Petroleum income did not become a monetary factor until after Osage "
+    "allotment in 1906-1907.' The published figure is a single number and no "
+    "source apportions it between trust interest (NOT resource revenue) and "
+    "grass-lease income (which WOULD be), so commodity is left blank and "
+    "resource_type is not_stated rather than guessed. The Council's own third "
+    "footnote adds: 'Individual payments began in 1909.'"
+)
+
+OSAGE_NO_OIL_YET_NOTE = (
+    " THERE WAS NO OSAGE OIL LEASE OF ANY KIND IN THIS YEAR. The first was "
+    "the Foster lease, granted by the BIA on 1896-03-16. A petroleum "
+    "characterisation of this payment is not merely unsourced - it is "
+    "impossible."
+)
+
+OSAGE_PRE_ESTATE_LAND_BASIS = (
+    "NOT STATED, and deliberately not 'trust'. The 1906 Osage Allotment Act "
+    "reserved the mineral estate in trust and this payment predates the Act, "
+    "so the trust characterisation that is correct for every later row is an "
+    "anachronism here. The Osage purchased their Indian Territory reservation "
+    "in 1872; what tenure applied to whatever generated this payment is not "
+    "stated by any source retrieved, and is therefore not asserted."
+)
+
+#: Carried on the 1907 and 1908 rows only. By then the estate existed and
+#: mineral income was flowing, so the commodity stands - but the source's own
+#: footnote still says individual payments had not begun, and a reader
+#: comparing a 1907 figure with a 2026 one should be told.
+OSAGE_PRE_INDIVIDUAL_NOTE = (
+    " GRAIN CAVEAT: the Osage Minerals Council's own footnote records that "
+    "'Individual payments began in 1909.' The 1906 Act's roll was of persons "
+    "living in 1907, and this year's figure predates individual annuitant "
+    "payment - it is published on the same per-headright basis as later years "
+    "but was not paid that way."
+)
+
+#: Set on every pre-1907 row. Cheap for a consumer to filter on, and it does
+#: not depend on anyone reading a note.
+OSAGE_PRE_ESTATE_AMOUNT_MEANING = (
+    "dollars per full headright as PUBLISHED RETROSPECTIVELY by the Osage "
+    "Minerals Council; headrights did not exist in this period. Not a total, "
+    "not additive with any other row, and NOT characterised as resource "
+    "revenue - see beneficiary_note."
+)
+
+
 MECHANISM_FIELDS = [
     "state", "state_code", "native_entity", "resource", "mechanism",
     "outcome", "authority_type", "citation", "citation_url", "quote",
@@ -1772,6 +1917,75 @@ def _osage_grid(path):
     return grid, annual, notes
 
 
+def _osage_period_fields(year):
+    """Period-correct commodity, land status and confidence for one Osage year.
+
+    ONE FUNCTION, TWO CALL SITES. The quarterly loop and the annual loop both
+    need this, and the reason it is a function rather than two inline
+    conditionals is that the bug being fixed here was precisely a modern
+    characterisation applied by a loop that did not know what year it was in.
+    Two copies would drift.
+
+    Three regimes, and the boundaries are sourced in the block above:
+
+      year <= 1895              no Osage oil lease existed at all
+      1896 <= year <= 1906      the Foster lease exists, but Burns dates
+                                petroleum becoming "a monetary factor" to
+                                after allotment in 1906-1907
+      year >= 1907              the Mineral Estate exists and mineral income
+                                is flowing; the modern characterisation holds
+
+    For the first two the commodity is left BLANK and `resource_type` is
+    `not_stated`. That is not laziness - the published figure is one number
+    covering trust interest (not resource revenue) and grass-lease income
+    (which would be), and no source apportions them. A blank commodity is a
+    single cheap predicate a consumer can filter on; a note is not.
+    """
+    if year > OSAGE_PRE_ESTATE_LAST_YEAR:
+        return {
+            "revenue_type": "direct_pay",
+            "resource_type": "mixed",
+            "commodity": ("Osage Mineral Estate (oil, gas, sand and gravel, "
+                          "water use)"),
+            "land_status": "trust",
+            "land_status_basis": ("the 1906 Osage Allotment Act reserved the "
+                                  "entire mineral estate of Osage County to "
+                                  "the Osage Nation, held in trust by the "
+                                  "United States"),
+            # 1907 and 1908 keep the commodity - the estate existed and
+            # mineral income was flowing - but the Council's own footnote
+            # says individual payments had not started, so the grain caveat
+            # travels with them.
+            "note_suffix": (OSAGE_PRE_INDIVIDUAL_NOTE if year < 1909 else ""),
+            "party_basis_suffix": "",
+            "confidence": "A",
+            "amount_sign_meaning": "",
+        }
+    return {
+        "revenue_type": "trust_disbursement",
+        "resource_type": "not_stated",
+        "commodity": "",
+        "land_status": "not_stated",
+        "land_status_basis": OSAGE_PRE_ESTATE_LAND_BASIS,
+        "note_suffix": " " + OSAGE_PRE_ESTATE_NOTE + (
+            OSAGE_NO_OIL_YET_NOTE if year < OSAGE_FIRST_OIL_LEASE_YEAR else ""),
+        "party_basis_suffix": (
+            " PERIOD CAVEAT: this payment PREDATES the 1906 Act, so the Act "
+            "is cited here as the basis for the Nation's ownership of the "
+            "estate TODAY, not as the basis for this payment. What the "
+            "Nation's interest was in this year is not asserted."),
+        # B, not A, and this is a demotion applied deliberately. The AMOUNT is
+        # faithfully transcribed from the Council's own published table, and
+        # for the 1906 quarters it also passes the quarters-sum-to-the-printed-
+        # annual-total gate. What cannot be graded A is the ROW: a row whose
+        # commodity, resource type and land status are all unsupported for its
+        # own period is not tier-A evidence about anything, however good its
+        # arithmetic. The tier travels with the row, not with the number.
+        "confidence": "B",
+        "amount_sign_meaning": OSAGE_PRE_ESTATE_AMOUNT_MEANING,
+    }
+
+
 def parse_osage_headrights(spine, rev_rows, party_rows, unresolved):
     """Quarterly dollars per full headright, published by the Osage Minerals
     Council.
@@ -1851,6 +2065,7 @@ def parse_osage_headrights(spine, rev_rows, party_rows, unresolved):
             real, factor = real2025(rate, year)
             eid = f"RRE-OK-HR-{year}Q{q}"
             built += 1
+            pre = _osage_period_fields(year)
             rev_rows.append({
                 "resource_revenue_event_id": eid,
                 # NOT the Nation. The estate's proceeds go to headright
@@ -1859,17 +2074,17 @@ def parse_osage_headrights(spine, rev_rows, party_rows, unresolved):
                 "recipient_entity_id": "",
                 "recipient_entity_name": "Holders of Osage headrights (individuals)",
                 "beneficiary_entity_id": "", "beneficiary_entity_name": "",
-                "beneficiary_note": OSAGE_HEADRIGHT_NOTE + " " + OSAGE_ESTATE_NOTE,
+                "beneficiary_note": OSAGE_HEADRIGHT_NOTE + " "
+                                    + OSAGE_ESTATE_NOTE + pre["note_suffix"],
                 "payer_entity_id": "PAYER-US-BIA",
                 "payer_entity_name": PAYERS["PAYER-US-BIA"],
                 "operator_entity_id": "", "operator_entity_name": "",
                 "related_asset_ids": "",
                 "source_system": "OMC_headright_payment_history",
                 "source_record_id": f"{year}|Q{q}|dollars per full headright",
-                "revenue_type": "direct_pay",
-                "resource_type": "mixed",
-                "commodity": "Osage Mineral Estate (oil, gas, sand and gravel, "
-                             "water use)",
+                "revenue_type": pre["revenue_type"],
+                "resource_type": pre["resource_type"],
+                "commodity": pre["commodity"],
                 "product": "", "mineral_lease_type": "",
                 "period_type": "quarter",
                 "period_start": f"{year}-{3 * (q - 1) + 1:02d}-01",
@@ -1880,13 +2095,12 @@ def parse_osage_headrights(spine, rev_rows, party_rows, unresolved):
                 "inflation_base_year": BASE_YEAR if factor else "",
                 "measurement_status": "actual_payment",
                 "aggregation_level": "per_headright_rate",
-                # The 1906 Act reserved the estate in trust. That is stated by
-                # statute, not read off a map, so it is recorded.
-                "land_status": "trust",
-                "land_status_basis": "the 1906 Osage Allotment Act reserved the "
-                                     "entire mineral estate of Osage County to "
-                                     "the Osage Nation, held in trust by the "
-                                     "United States",
+                # The 1906 Act reserved the estate in trust. That is stated
+                # by statute, not read off a map, so it is recorded - for
+                # every year the Act was actually in force. See
+                # _osage_period_fields for why 1906 and earlier do not get it.
+                "land_status": pre["land_status"],
+                "land_status_basis": pre["land_status_basis"],
                 "allocation_formula": f"Distributed per full headright; the "
                                       f"Osage Minerals Council prints a divisor "
                                       f"of {OSAGE_HEADRIGHT_DIVISOR} headrights "
@@ -1897,13 +2111,14 @@ def parse_osage_headrights(spine, rev_rows, party_rows, unresolved):
                 "allocation_formula_effective_start": "",
                 "allocation_formula_effective_end": "",
                 "allocation_formula_source_url": OK_SRC,
-                "amount_sign_meaning": "dollars per FULL headright for the "
-                                       "quarter; not a total and not additive "
-                                       "with any other row",
+                "amount_sign_meaning": pre["amount_sign_meaning"]
+                                       or "dollars per FULL headright for the "
+                                          "quarter; not a total and not "
+                                          "additive with any other row",
                 "geography_note": "Osage County, Oklahoma - the mineral estate "
                                   "is coextensive with the county. No well or "
                                   "lease is named.",
-                "confidence": "A",
+                "confidence": pre["confidence"],
                 "source_url": OK_SRC,
                 "fetched_date": TODAY, "built_date": TODAY,
             })
@@ -1917,10 +2132,11 @@ def parse_osage_headrights(spine, rev_rows, party_rows, unresolved):
                 # why the recipient column is blank and this link is not.
                 "relationship": "parent_native_entity",
                 "interest_share_pct": "100",
-                "basis": f"1906 Osage Allotment Act reserved the mineral estate "
-                         f"to the Osage Nation undivided; published by the "
-                         f"Nation's own Minerals Council; resolve_entity/{how}",
-                "confidence": "A", "source_url": OK_SRC,
+                "basis": (f"1906 Osage Allotment Act reserved the mineral "
+                          f"estate to the Osage Nation undivided; published by "
+                          f"the Nation's own Minerals Council; "
+                          f"resolve_entity/{how}") + pre["party_basis_suffix"],
+                "confidence": pre["confidence"], "source_url": OK_SRC,
                 "fetched_date": TODAY, "built_date": TODAY,
             })
     # -- 1880-1905: ANNUAL grain, because that is how they were paid -------
@@ -1945,6 +2161,7 @@ def parse_osage_headrights(spine, rev_rows, party_rows, unresolved):
         real, factor = real2025(rate, year)
         eid = f"RRE-OK-HR-{year}-ANNUAL"
         annual_built += 1
+        pre = _osage_period_fields(year)
         rev_rows.append({
             "resource_revenue_event_id": eid,
             "recipient_entity_id": "",
@@ -1956,16 +2173,17 @@ def parse_osage_headrights(spine, rev_rows, party_rows, unresolved):
                                   "1906 one payment per year was made, so this "
                                   "is a year, not a quarter, and it is not "
                                   "comparable row-for-row with the quarterly "
-                                  "series that begins in 1906.",
+                                  "series that begins in 1906."
+                                + pre["note_suffix"],
             "payer_entity_id": "PAYER-US-BIA",
             "payer_entity_name": PAYERS["PAYER-US-BIA"],
             "operator_entity_id": "", "operator_entity_name": "",
             "related_asset_ids": "",
             "source_system": "OMC_headright_payment_history",
             "source_record_id": f"{year}|ANNUAL|dollars per full headright",
-            "revenue_type": "direct_pay", "resource_type": "mixed",
-            "commodity": "Osage Mineral Estate (oil, gas, sand and gravel, "
-                         "water use)",
+            "revenue_type": pre["revenue_type"],
+            "resource_type": pre["resource_type"],
+            "commodity": pre["commodity"],
             "product": "", "mineral_lease_type": "",
             "period_type": "calendar_year",
             "period_start": f"{year}-01-01", "period_end": f"{year}-12-31",
@@ -1975,15 +2193,11 @@ def parse_osage_headrights(spine, rev_rows, party_rows, unresolved):
             "inflation_base_year": BASE_YEAR if factor else "",
             "measurement_status": "actual_payment",
             "aggregation_level": "per_headright_rate",
-            "land_status": "trust",
-            "land_status_basis": "the 1906 Osage Allotment Act reserved the "
-                                 "entire mineral estate of Osage County to the "
-                                 "Osage Nation, held in trust by the United "
-                                 "States. NOTE that these years PREDATE the "
-                                 "1906 Act; the payments are recorded by the "
-                                 "Council in the same series and the trust "
-                                 "characterisation is stated for the estate as "
-                                 "it exists today, not as it stood in 1880.",
+            # WAS `trust`, with a note explaining that it was really about
+            # the estate as it exists today. A field value that needs a note
+            # to say it does not mean what it says is a wrong field value.
+            "land_status": pre["land_status"],
+            "land_status_basis": pre["land_status_basis"],
             "allocation_formula": f"Distributed per full headright; the Osage "
                                   f"Minerals Council prints a divisor of "
                                   f"{OSAGE_HEADRIGHT_DIVISOR} headrights. THE "
@@ -1994,16 +2208,19 @@ def parse_osage_headrights(spine, rev_rows, party_rows, unresolved):
             "allocation_formula_effective_start": "",
             "allocation_formula_effective_end": "",
             "allocation_formula_source_url": OK_SRC,
-            "amount_sign_meaning": "dollars per FULL headright for the YEAR; "
-                                   "not a total, not additive with any other "
-                                   "row, and not comparable with a quarterly "
-                                   "row",
+            "amount_sign_meaning": pre["amount_sign_meaning"]
+                                   or "dollars per FULL headright for the "
+                                      "YEAR; not a total, not additive with "
+                                      "any other row, and not comparable with "
+                                      "a quarterly row",
             "geography_note": "Osage County, Oklahoma. No well or lease is "
                               "named.",
-            # B, not A: the quarterly gate (four quarters must sum to the
-            # printed annual total) cannot run on a year that has only one
-            # printed figure. Nothing corroborates these cells.
-            "confidence": "B",
+            # B, and for two independent reasons: the quarterly gate (four
+            # quarters must sum to the printed annual total) cannot run on a
+            # year with only one printed figure, AND every one of these years
+            # predates the Mineral Estate, so the row's characterisation is
+            # not tier-A evidence about anything. See _osage_period_fields.
+            "confidence": pre["confidence"],
             "source_url": OK_SRC,
             "fetched_date": TODAY, "built_date": TODAY,
         })
@@ -2014,9 +2231,10 @@ def parse_osage_headrights(spine, rev_rows, party_rows, unresolved):
             "party_role": "mineral_estate_owner",
             "relationship": "parent_native_entity",
             "interest_share_pct": "100",
-            "basis": f"published by the Osage Nation's own Minerals Council "
-                     f"in its headright payment history; resolve_entity/{how}",
-            "confidence": "B", "source_url": OK_SRC,
+            "basis": (f"published by the Osage Nation's own Minerals Council "
+                      f"in its headright payment history; "
+                      f"resolve_entity/{how}") + pre["party_basis_suffix"],
+            "confidence": pre["confidence"], "source_url": OK_SRC,
             "fetched_date": TODAY, "built_date": TODAY,
         })
 
