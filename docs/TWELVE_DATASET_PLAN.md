@@ -74,7 +74,15 @@ the global figure by roughly 20 points, and it is one dataset, one join path.
 | | | | ANCSA Group Corporation | 6 |
 | | | | State constituency entity | 3 |
 
-Every one has a permanent `CE-XXXXX-CC` that never changes, plus a mutable
+**On the 210 NHOs — the owner's question, answered:** 179 of them come from
+the DOI ONHR notification list (`doi_roster_only`); the rest are NHOA members,
+self-statements and one ruling. Only **15 carry any federal identifier** and
+only **6 have prime contract dollars**. So 210 is right for the DOI universe
+and 6 is right for NHOs visible in contracting — different questions, both
+true. At 7% identifier coverage it is the largest proportional identity gap in
+the master list.
+
+Every entity has a permanent `CE-XXXXX-CC` that never changes, plus a mutable
 display handle with full history. This is the compiled master list; it is
 `data/spine/cedar_identity_register.csv` and it is the one table git tracks.
 
@@ -125,6 +133,20 @@ for either READY dataset.** Testing it is the next verification task, and it
 may demote a dataset. That is the point.
 
 ---
+
+## Do this FIRST: `docs/SPIDERWEB_LEARNING_PLAN.md`
+
+Measured 2026-09-01: of 2,901 declared ownership edges, **1,097 have exactly
+one end keyed** — each a named firm a registrant declared into the corporate
+family of an entity we already know, and we are discarding the identification
+it hands us. The identifier graph (115,471 nodes / 46,051 edges) is built and
+essentially unmined.
+
+Harvesting that before the next build round raises identity coverage across
+every dataset at once, and several datasets are blocked on exactly the
+knowledge it would produce. It also carries the multi-party and
+ownership-continuity work, which are schema changes better made before more
+tables are declared READY against the current shape.
 
 ## The route: all twelve, in dependency order
 
