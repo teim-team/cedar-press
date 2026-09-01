@@ -67,6 +67,65 @@ Nobody commits. Nobody runs `510 --apply` or `build.py ship --execute`.
 into its own doc and requests nuance edits through its handoff.
 Integrator owns 62, 512, 517, 518 and all commits.
 
+## ADR-010 — RECORD SCOPE: not every record has one Native entity (2026-09-01)
+
+**Status:** adopted, and it CORRECTS ADR-009's measurement. Owner's framing:
+
+> "Some of these datasets are not gonna connect to a specific native entity
+> necessarily. Like, the votes impact probably in most cases all of Indian
+> country... you have these multi-coalition, like NARF or NCAI, that are
+> advocating on behalf of all of Indian country. We're focused on Indian
+> country broadly, so that's why we have nonprofits who may serve natives or
+> give to native causes but aren't native. And to the extent we can get to the
+> specific native entity, otherwise if they're just valuable in and of
+> themselves... if there's a geographic dimension, maybe we can include that."
+
+**The defect this fixes.** ADR-009 made attachment measurable and then treated
+every unkeyed row as a failure. That conflates two completely different things:
+
+    "we could not identify the entity"        <- a defect, work to do
+    "there is no single entity to identify"   <- the correct representation
+
+A bill that changes federal Indian law affects all 574 federally recognized
+tribes. NCAI lobbying on behalf of Indian Country is not an unresolved link to
+one tribe. A foundation that funds Native causes is not itself Native. Under
+ADR-009 as written, `legislation` would be pushed toward inventing an entity
+attribution to clear a blocker — the exact failure the Prime Directive forbids.
+
+**Decision.** Every record carries a `record_scope`:
+
+| scope | meaning | entity attachment |
+|---|---|---|
+| `entity` | about one Native entity | one `cedar_uid`, required |
+| `multi_entity` | about several, named | a party bridge, ≥2 |
+| `indian_country` | general applicability | **none, and that is correct** |
+| `geographic` | a region, state or BIA area | an area code, not an entity |
+| `native_serving` | actor is not Native but the money or effect is | the Native counterparty where one exists; the actor stays unkeyed **on purpose** |
+| `unresolved` | we believe an entity exists and have not found it | **the only scope that is a defect** |
+
+`unresolved` is the work queue. The rest are answers.
+
+**Consequences.**
+
+1. **Coverage is measured against the resolvable denominator**, not the row
+   count. "40% keyed" is meaningless if half those rows are
+   `indian_country` by nature. The honest metric is
+   `entity-scoped rows that carry a uid / entity-scoped rows`.
+2. **`native_serving` is deliberate scope, not a gap.** Cedar covers Indian
+   Country broadly: a non-Native foundation granting to Native causes belongs
+   in the data, and forcing a Native uid onto the grantor would be false.
+3. **Geography is a first-class fallback.** Where an entity cannot be named but
+   a place can, record the place. A record scoped to a BIA region or a state
+   is more useful than one scoped to nothing.
+4. **Datasets differ in their natural scope mix**, and that mix is a property
+   of the dataset, not a score. `contractors` should be almost entirely
+   `entity`; `legislation` should be mostly `indian_country`; `lobbying` is
+   genuinely mixed and that is the interesting thing about it.
+
+**What does NOT change.** Where a specific entity IS nameable, name it — scope
+is not an excuse for leaving resolution undone. The test for `indian_country`
+is that the record's own subject is general, not that resolution was hard.
+
 ## ADR-009 — the entity layer is DATASET 13, not infrastructure (2026-09-01)
 
 **Status:** adopted. Owner's framing, recorded in his words:

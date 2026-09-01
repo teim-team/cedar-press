@@ -70,10 +70,42 @@ RESOLVED = ROOT / "data" / "clean" / "cedar_resolved_facts.csv"
 LINKS = ROOT / "data" / "spine" / "cedar_source_record_links.csv"
 RELEASES = ROOT / "docs" / "releases"
 
+# =====================================================================
+# NATURAL SCOPE per dataset - ADR-010.
+# =====================================================================
+# ADR-009 made entity attachment measurable and then treated every unkeyed row
+# as a failure. That is wrong for whole datasets: a bill changing federal
+# Indian law affects all of Indian Country and has NO single entity to attach;
+# NCAI lobbying on behalf of everyone is not an unresolved link to one tribe;
+# a non-Native foundation granting to Native causes is correctly not Native.
+#
+# So attachment is scored ONLY where the dataset's subject is an entity.
+# `mixed` datasets are reported but never blocked on the raw percentage,
+# because the honest denominator - entity-scoped rows only - is not yet
+# derivable per row. Deriving it is the work ADR-010 sets up; until then the
+# scoreboard must not push a dataset toward INVENTING an attribution to clear
+# a blocker, which is the Prime Directive violation this avoids.
+NATURAL_SCOPE = {
+    "contractors": "entity",          # a contract has an awardee
+    "subcontracting": "entity",       # prime AND sub, both entities
+    "funding": "entity",              # an award has a recipient
+    "deals": "entity",                # a deal has parties
+    "gaming": "entity",               # a facility has an operator
+    "natural-resources": "entity",    # a lease has a lessor
+    "native-owned-businesses": "entity",
+    "nagpra": "entity",               # notices name affiliated tribes
+    "_entity_layer": "hub",
+    "legislation": "indian_country",  # a bill's subject is usually general
+    "federal-register": "mixed",      # notices range from one tribe to all
+    "lobbying": "mixed",              # a tribe's own filing vs NCAI's
+    "nonprofits": "mixed",            # Native-controlled AND Native-serving
+}
+
 COLS = ["dataset", "status", "shelf", "n_customer_tables", "blockers",
         "c1_grain", "c2_keys", "c3_duplicates", "c4_identity_path",
         "c5_row_conservation", "c6_unresolved_conflicts", "c7_double_counting",
         "c8_rebuild_path", "c9_update_documented", "c10_gates",
+        "natural_scope",
         "tables_row_level_only", "duplicate_rows_total",
         "identity_model", "rebuild_entry", "destructive_rebuild",
         "enricher_ordering", "replay_status", "next_action", "measured_date"]
@@ -217,11 +249,13 @@ def measure():
         # ADR-009: a spoke cannot be READY on identity while most of its rows
         # are not attached to the hub. 50% is deliberately a floor, not a
         # target - it is the line below which the dataset is mostly unkeyed.
-        if keyed_pct is not None and keyed_pct < 50 and cid != "_entity_layer":
+        scope = NATURAL_SCOPE.get(cid, "entity")
+        if keyed_pct is not None and keyed_pct < 50 and scope == "entity":
             blockers.append(
                 f"C4 only {keyed_pct:.0f}% of entity-bearing rows carry a "
-                f"Cedar id - this dataset is not attached to the entity "
-                f"layer (dataset 13). See ADR-009.")
+                f"Cedar id, and every record in this dataset HAS an entity "
+                f"subject - so this is unresolved work, not scope. See "
+                f"ADR-009 and ADR-010.")
         if never:
             blockers.append(f"C8 rebuild is DESTRUCTIVE ({', '.join(never)}) - "
                             f"no safe documented rebuild path")
@@ -241,8 +275,10 @@ def measure():
             c2_keys=f"{len(names)-len(nokey)}/{len(names)}",
             c3_duplicates="clean" if not dup_tables else f"{dup_total:,} rows",
             c4_identity_path=("HUB (dataset 13)" if cid == "_entity_layer"
-                              else f"{keyed_pct:.0f}% keyed to hub"
+                              else f"{keyed_pct:.0f}% keyed"
+                              + ("" if scope == "entity" else f" [{scope}]")
                               if keyed_pct is not None else "no id columns"),
+            natural_scope=scope,
             c5_row_conservation=f"{len(covered)}/{len(names)}",
             c6_unresolved_conflicts="0 shipped as definite",
             c7_double_counting="none" if not money_unsafe else f"{len(money_unsafe)} tables",
