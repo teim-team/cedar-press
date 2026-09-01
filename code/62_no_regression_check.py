@@ -1744,9 +1744,19 @@ def main():
         if declared_removals and base_ship:
             for _f, _dec in declared_removals.items():
                 _was = base_ship.get(_f)
-                _now = dist_by_file.get(_f)
-                if _was is None or _now is None:
+                if _was is None:
                     continue
+                # ship_dist_rows is SUM(min(dist_rows, clean_rows)), so a
+                # regrain that shrinks the CLEAN file lowers the metric while
+                # dist still holds the old count until the next publish. The
+                # first version of this compared dist-to-dist and therefore
+                # never fired for exactly the case it was written for.
+                # Compare against the same effective figure the metric uses.
+                _d = dist_by_file.get(_f)
+                _c = clean_by_file.get(_f)
+                if _d is None and _c is None:
+                    continue
+                _now = min(x for x in (_d, _c) if x is not None)
                 if _was - _now == _dec:
                     allow_total += _dec
         for k in sorted(MUST_NOT_FALL):
@@ -1873,6 +1883,17 @@ def main():
                 f"shipped rows did NOT fall ({b_dist:,} -> {n_dist:,}). The "
                 f"warehouse grew; the shelf did not. Biggest unshipped: "
                 + ", ".join(f"{f} ({n:,})" for f, n in grew))
+        elif allow_total and b_dist - n_dist == allow_total:
+            # The shelf shrank by EXACTLY the rows the register declares
+            # withdrawn, which ship_dist_rows above has already allowed and
+            # named. Failing the ratio for the same fall would make the
+            # allowance unusable - one metric grants it, the next revokes it.
+            # The condition is deliberately the same exact match, not `<=`.
+            loud.append(
+                f"ship_ratio_pct fell {b_ratio:.3f}% -> {n_ratio:.3f}%, "
+                f"driven by the SAME {allow_total:,} declared-withdrawn row(s) "
+                f"already allowed on ship_dist_rows above. Allowed for the "
+                f"same reason and re-checked every run.")
         else:
             fails.append(
                 f"ship_ratio_pct FELL {b_ratio:.3f}% -> {n_ratio:.3f}% AND "
