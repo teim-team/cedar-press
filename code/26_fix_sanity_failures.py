@@ -33,11 +33,26 @@ CLEAN = CEDAR / "data" / "clean"
 TODAY = date.today().isoformat()
 
 # Parents that must never transmit ownership. Each needs a stated reason.
+#
+# 2026-09-01 (workstream J): this dict held ONE UEI and the source file already
+# contained three registrants recording as GOVERNMENT OF THE UNITED STATES; the
+# 2026-09-01 source expansion took it to five. Two of them slipped through with
+# one declared child each, unflagged, straight into the spiderweb harvest. So
+# the literal is now a FLOOR and the working set is DERIVED from the recorded
+# parent name on every run - recognising the shape, not the instance, which is
+# the same correction §17c already applied to the NAGPRA channels.
+FED_ROLLUP_NAME = "GOVERNMENT OF THE UNITED STATES"
+FED_ROLLUP_REASON = (
+    "federal_registrant_rollup",
+    "Records as GOVERNMENT OF THE UNITED STATES. Its children include BIA, IHS "
+    "and tribally-controlled grant schools. Inheriting through it would "
+    "attribute federal agencies to tribes.")
 BLOCKLISTED_PARENTS = {
-    "NW2RJN8TQQW1": ("federal_registrant_rollup",
-                     "Records as GOVERNMENT OF THE UNITED STATES. Carries 29 children "
-                     "including BIA, IHS and tribally-controlled grant schools. "
-                     "Inheriting through it would attribute federal agencies to tribes."),
+    "NW2RJN8TQQW1": FED_ROLLUP_REASON,
+    "GK1ECPGZV897": FED_ROLLUP_REASON,
+    "R8U7S9K184F6": FED_ROLLUP_REASON,
+    "V425F7L4X4R1": FED_ROLLUP_REASON,
+    "FVP4QBB76J19": FED_ROLLUP_REASON,
 }
 
 
@@ -65,11 +80,23 @@ def fix_edges():
         return
     shutil.copy2(p, p.with_suffix(p.suffix + ".bak_" + TODAY))
 
+    # derive: any UEI ever recorded under the roll-up name, whichever end
+    blocked = dict(BLOCKLISTED_PARENTS)
+    for r in rows:
+        for uei_col, name_col in (("parent_uei", "parent_name"),
+                                  ("child_uei", "child_name")):
+            if FED_ROLLUP_NAME in (r.get(name_col) or "").upper():
+                u = (r.get(uei_col) or "").strip().upper()
+                if u and u not in blocked:
+                    blocked[u] = FED_ROLLUP_REASON
+                    print(f"  derived from recorded name: {u} "
+                          f"({(r.get(name_col) or '').strip()})")
+
     n = 0
     for r in rows:
         parent = (r.get("parent_uei") or "").strip().upper()
         child = (r.get("child_uei") or "").strip().upper()
-        hit = BLOCKLISTED_PARENTS.get(parent) or BLOCKLISTED_PARENTS.get(child)
+        hit = blocked.get(parent) or blocked.get(child)
         if hit:
             r["blocklisted_parent"] = "1"
             r["blocklist_reason"] = hit[0]

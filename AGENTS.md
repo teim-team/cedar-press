@@ -90,9 +90,27 @@ When several agents run at once, file ownership is declared **before** editing i
 live data and commits. Only one agent may own a central file per pass. If two need
 incompatible changes to the same file, stage them; do not race.
 
-#### OPEN GATE FAILURE, named per standing rule 15 — `ship_dist_rows`
+#### ~~OPEN GATE FAILURE~~ — CLOSED 2026-09-01. `62` exits 0.
 
-`62_no_regression_check.py` exits 1 as of 2026-08-29 11:40 on:
+**Re-measured 2026-09-01 by workstream H: `py -3 code/62_no_regression_check.py`
+exits 0 and prints `no regressions`.** The correction-register row was written,
+the shipping allowance was repaired twice over (it compared dist-to-dist when
+the metric sums `min(dist, clean)`, and `ship_ratio_pct` then failed on the
+same fall the line above had just allowed), and the baseline was recorded while
+green — `data/clean/_regression_baseline.json` now carries
+`ship_dist_rows = 8,461,252`.
+
+Also verified rather than assumed: `prime_contracts_entity_year.csv` is
+**6,715 rows with 0 literal duplicate rows**, which is the collapsed grain the
+correction declared. The regain of the 1,749 rows is neither owed nor wanted.
+
+**The paragraph below is kept because the reasoning is the valuable part** —
+this is what a correctly named, correctly owned gate failure looks like, and it
+got fixed instead of inherited. It is history, not an open item.
+
+##### The failure as it stood, 2026-08-29
+
+`62_no_regression_check.py` exited 1 as of 2026-08-29 11:40 on:
 
 ```
 !! ship_dist_rows FELL 8,463,001 -> 8,461,252
@@ -4797,3 +4815,69 @@ findings appeared with it. This pass moved class6 the other way: restoring the
 transaction key and the panel regrain left `prime_contracts.csv` and
 `prime_contracts_entity_year.csv` with no wholesale rebuilder at all, which
 removed one finding.
+
+---
+
+## 2026-09-01, workstream J (spiderweb harvest) — a red gate that is NOT mine, named
+
+`62_no_regression_check.py` fails on six MUST_NOT_RISE metrics
+(`ship_tables_at_zero`, `tables_missing_codebook_block`,
+`tables_missing_from_25_TABLES`, `tables_missing_from_27_SPEC`,
+`tables_missing_notes_contract`, `tables_undocumented_in_codebook`, each +1).
+
+**Cause and owner:** `data/clean/cedar_dataset_punchlist.csv` (418 rows,
+written 16:41) — a NEW unregistered table produced by
+`code/526_dataset_standard.py`, which is not workstream J's file and did not
+exist when this pass started. All six metrics rise by exactly one, which is
+what one unregistered table in `data/clean` does.
+
+**Proved, not asserted:** the file was moved aside and the gate re-run with
+every one of J's changes still in place. Result: **`no regressions`, exit 0.**
+The file was restored immediately.
+
+**What has to happen:** whoever owns `526` registers a codebook block for
+`cedar_dataset_punchlist.csv` (or declares it INTERNAL), then re-runs
+87 -> 25 -> 27 per `docs/SHIPPING_RUNBOOK.md`.
+
+J's own outputs are in `review/`, which 62 correctly does not scan, precisely
+so that a candidate queue cannot move a shipping ratchet.
+
+---
+
+## GATE FAIL 2026-09-01 16:45 — NOT the ruling-mining workstream. Owner named.
+
+Recorded under standing rule 15 option 3 by **workstream I** (ruling mining:
+`code/522_mine_rulings.py`, `code/503_identity.py` loose-path guards,
+`docs/RESOLUTION_RULES_LEARNED.md`, `docs/NATIVE_ENTITY_NUANCES.md`).
+
+**The failing metrics, all six of them one event:** `ship_tables_at_zero`
+13→14, `tables_missing_codebook_block` 3→4, `tables_missing_from_25_TABLES`
+179→180, `tables_missing_from_27_SPEC` 194→195, `tables_missing_notes_contract`
+14→15, `tables_undocumented_in_codebook` 3→4. `ship_tables_total` rose 213→214:
+**exactly one new table landed in `data/clean/` and it is undocumented.**
+
+**Owner: `code/526_dataset_standard.py` / `code/518_dataset_readiness.py` — the
+dataset-standard workstream.** The table is
+`data/clean/cedar_dataset_readiness.csv`, created 16:31 today, and those are
+the only scripts that write it. The remedy the gate prescribes (write a
+codebook block, then `87 → 25 → 27`) belongs to that workstream.
+
+**Proven not to be workstream I.** This workstream created exactly one file,
+`data/interim/ruling_corpus_mined.csv`, which is in `interim/` and is therefore
+outside every shipping metric — `62`'s own output never names it. Its only
+`data/clean/` interaction is read-only. The `503` guards added this pass change
+no table: they alter `resolve()`, which is not run with `--apply` here, and
+`503 reconcile` moved by one legacy id carrying **$0**
+(`ONONDAGA COUNTY RESOURCE RECOVERY AGENCY INC`, correctly refused).
+
+**Two earlier failure sets in the same hour, both also other workstreams', both
+already gone by 16:45** — `lint_class2b` +1 (`524_universe_gap.py`),
+then `files_with_columns_lost_vs_backup` = 1 with `lint_class2c` +1
+(`fpds_uei_edges.csv` against `.bak_2026-09-01_pre523_source_expansion`, and
+`13_build_fpds_hierarchy.py`; the spiderweb workstream, `523`). Three
+completely different regression sets from three consecutive runs of an
+unchanged gate. This is the phenomenon the 2026-08-26 19:10 entry above already
+names — *a gate that reads a shared directory mid-write reports another
+agent's incomplete step as a regression* — and on a parallel-workstream day it
+is the normal case, not the exception. **Compare file creation times against
+the live workstreams before believing a `62` failure is yours.**

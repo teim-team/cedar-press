@@ -108,6 +108,121 @@ def tokens(s: str) -> frozenset:
     return frozenset(w for w in clean(s).split() if w not in GENERIC)
 
 
+# =====================================================================
+# THE LOOSE-PATH REFUSAL GUARDS
+#
+# WHY THEY EXIST, MEASURED 2026-09-01 (workstream I, code/522_mine_rulings.py
+# `guards`). `resolve()`'s last resort is a DISTINCTIVE-TOKEN SUBSET test -
+# a spine entity wins if every one of its distinctive tokens appears in the
+# filed name. For the ~400 spine entities whose distinctive set is a SINGLE
+# token that is also an American place name (Wichita, Klamath, Taos, Laguna,
+# Osage, Onondaga, Tuscarora, Cowlitz, Umatilla, Robinson, Peoria), that test
+# is satisfied by any organisation in the county. Swept over every name a
+# human has ever REFUSED in this project - 5,197 distinct subjects from
+# `cedar_ruling_ledger_consolidated.csv` (verdict NEGATIVE) and
+# `nonprofit_exclusion_rulings.csv` - `resolve()` returned a tribe for
+# **2,458 of them, 47%**:
+#
+#     ONONDAGA GOLF AND COUNTRY CLUB      -> TRBF-ONNDGA-00
+#     TUSCARORA SOCCER CLUB               -> TRBF-TSCARA-00
+#     COWLITZ COUNTY AUXILIARY COMMS      -> TRBF-COWLTZ-00
+#     ST. AUGUSTINE DISTILLERY            -> TRBF-AGSTNE-00
+#     OTTEN JOHNSON ROBINSON NEFF         -> TRBF-ROBNSN-00
+#
+# These are not hypotheticals: every one is a name a human already refused.
+#
+# THE TWO GUARDS, AND WHY THEY ARE RULES RATHER THAN BLOCKLISTS
+# -------------------------------------------------------------
+# G1 ADMIN-GEOGRAPHY, and it is CANONICAL-AWARE. A US administrative or
+#    settlement-geography word in the filed name means the tribal token is
+#    naming a PLACE - unless the entity's OWN canonical name carries the same
+#    word, which is what keeps the FOREST COUNTY POTAWATOMI COMMUNITY, COLD
+#    SPRINGS RANCHERIA and the CONFEDERATED TRIBES OF WARM SPRINGS resolving.
+#    This is the "Wichita Falls rule" in NATIVE_ENTITY_NUANCES.md, coded.
+#    TOWNSHIP, VILLAGE and CITY are DELIBERATELY ABSENT: Kayenta Township is
+#    the Navajo Nation's own municipal government and Indian Township is a
+#    Passamaquoddy reservation government - both settled by owner rulings in
+#    review/ruling_vs_table_contradictions_2026-08-26.csv.
+#
+# G2 CIVIC FORM. A congregation, a sports club, a service club, a PTO, a
+#    sheriff's association or a cemetery association is a civic body that
+#    borrowed the county's name. Every token below was selected on a measured
+#    criterion, not taste: it must appear in ZERO of the 1,952 names a human
+#    ruled TO an entity and ZERO of the 1,536 spine canonical names.
+#    MUSEUM and LIONS were in the first draft and were REMOVED by a HELD-OUT
+#    control the fitting never saw - the owner's own 2021 BGOV crosswalk,
+#    which contains MAKAH MUSEUM, SOUTHERN UTE CULTURAL CENTER & MUSEUM and
+#    the NATIVE VILLAGE OF PORT LIONS. HOSPITAL, FOUNDATION, ASSOCIATION,
+#    SCHOOL, CENTER, PARK and MEMORIAL were considered and REJECTED: each
+#    occurs on real spine entities or real owner-ruled Native organisations.
+#
+# BOTH GUARDS FIRE ONLY ON THE LOOSE TOKEN-SUBSET PATH. A declared
+# equivalence, an exact canonical name and an exact alias all resolve EARLIER
+# in `resolve()` and are untouched - so a spine entity that really is called
+# "... Cemetery Association" still resolves by its own name.
+#
+# BLAST RADIUS, measured before and after on the real corpus:
+#   refused-name false resolutions   2,458 -> 1,046   (-1,412, -57%)
+#   owner-ruled entity names resolved 1,117 -> 1,117  (unchanged)
+#   spine canonical names resolved    1,532 -> 1,532  (unchanged)
+#   503 reconcile legacy ids          359/361 -> 359/361 (unchanged)
+# Re-measure any time with: py -3 code/522_mine_rulings.py guards
+# =====================================================================
+
+# G1. Administrative and settlement geography. Canonical-aware: see above.
+ADMIN_GEOGRAPHY = {
+    "COUNTY", "COUNTIES", "PARISH", "BOROUGH", "MUNICIPALITY", "MUNICIPAL",
+    "METROPOLITAN", "FALLS", "HEIGHTS", "JUNCTION", "BEACH", "DOWNTOWN",
+    "ESTATES", "BLUFF", "SUBDIVISION", "UNINCORPORATED",
+}
+
+# G2. Civic organisational forms. Zero occurrences in 1,952 owner-ruled
+# entity names and zero in 1,536 spine canonical names, measured 2026-09-01.
+CIVIC_FORM = {
+    # congregations and religious bodies
+    "BAPTIST", "CHRISTIAN", "CHRIST", "MINISTRIES", "MINISTRY", "MINISTERIAL",
+    "BIBLE", "CATHOLIC", "METHODIST", "LUTHERAN", "PRESBYTERIAN",
+    "EVANGELICAL", "GOSPEL", "CALVARY", "CHAPEL", "FOURSQUARE", "TEMPLE",
+    "SYNAGOGUE", "ISLAMIC", "BUDDHIST", "BAHAIS", "CONGREGATION", "CHURCH",
+    "CHURCHES",
+    # sport and recreation
+    "GOLF", "SOCCER", "BASEBALL", "SOFTBALL", "BASKETBALL", "FOOTBALL",
+    "HOCKEY", "LACROSSE", "VOLLEYBALL", "TENNIS", "WRESTLING", "CHEER",
+    "ATHLETIC", "ATHLETICS", "SPORTS", "AMATEUR", "YACHT", "ROWING",
+    "CYCLING", "SKI", "KENNEL", "BOOSTERS", "BOOSTER",
+    # service clubs and fraternal orders  (LIONS excluded: Port Lions, AK)
+    "ROTARY", "KIWANIS", "ELKS", "LEGION", "SCOUTS", "SCOUTING", "YMCA",
+    "YWCA", "AUXILIARY", "POSSE", "MASONIC", "CLUB", "CLUBS",
+    # school-adjacent volunteer bodies  (SCHOOL excluded: 160 BIE spine rows)
+    "PTO", "PTA", "TEACHER", "TEACHERS", "MONTESSORI", "ALUMNI", "ALUMNAE",
+    # arts, heritage and letters  (MUSEUM excluded: Makah Museum)
+    "SYMPHONY", "ORCHESTRA", "CHORALE", "OPERA", "THEATRE", "THEATER",
+    "GUILD", "LIBRARY", "HISTORICAL", "GENEALOGICAL", "AUDUBON", "SOCIETY",
+    # public safety, municipal services, chambers
+    "SHERIFF", "SHERIFFS", "FIREFIGHTERS", "FIREFIGHTER", "POLICE", "DEPUTY",
+    "CEMETERY", "HOSPICE", "HUMANE", "CHAMBER",
+}
+
+
+def loose_path_refusal(filed: str, canonical: str) -> str:
+    """Why the loose token-subset path must NOT claim `filed`, or ''.
+
+    `canonical` is the spine name that would have won. The admin-geography
+    test is canonical-aware so that an entity whose own name carries the word
+    (Forest County Potawatomi) is never refused by it.
+    """
+    ft = set(clean(filed).split())
+    hit = ft & ADMIN_GEOGRAPHY
+    if hit and not (hit & set(clean(canonical).split())):
+        return ("REFUSED_ADMIN_GEOGRAPHY:" + ",".join(sorted(hit))
+                + " - a US place name, not the nation it is named for")
+    hit = ft & CIVIC_FORM
+    if hit:
+        return ("REFUSED_CIVIC_FORM:" + ",".join(sorted(hit))
+                + " - a civic organisation carrying a place name")
+    return ""
+
+
 # Filed names that are the SAME entity under an older or variant name,
 # verified against the spine 2026-08-28 (rename, spelling, or full legal name).
 # These are equivalences, not matches - the spine row already exists.
@@ -254,6 +369,17 @@ def resolve(filed: str, exact, gov, state_of, top_states=""):
     if not ft:
         return None, "no distinctive tokens"
     hits = {(tid, canon) for t, tid, canon in gov if t and t <= ft}
+    # THE LOOSE-PATH GUARDS. Everything below this line reaches its answer by
+    # "the spine entity's tokens are a subset of the filed name", which for a
+    # single-token entity whose token is a US place name is satisfied by every
+    # organisation in the county. 2,458 names a human already refused resolved
+    # through here before this ran. See ADMIN_GEOGRAPHY / CIVIC_FORM above.
+    if hits:
+        kept = {(tid, cn) for tid, cn in hits
+                if not loose_path_refusal(filed, cn)}
+        if not kept:
+            return None, loose_path_refusal(filed, sorted(hits)[0][1])
+        hits = kept
     # prefer the most specific candidate: drop any hit whose tokens are a
     # strict subset of another hit's tokens (e.g. 'Seminole' loses to
     # 'Seminole Oklahoma' when both are subsets of the filed name)

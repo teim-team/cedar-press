@@ -185,6 +185,138 @@ FILES = [
 ]
 
 # ---------------------------------------------------------------------------
+# ADDED 2026-09-01 (workstream J, spiderweb harvest).
+#
+# THE DEFECT. The 2026-08-30 pass added ONE assistance extract and the edge
+# count went 2,290 -> 2,901. Nobody then asked the next question: what ELSE on
+# disk carries a parent-UEI column that this script does not open? Measured
+# today by scanning every CSV under data/raw for a column matching
+# /parent.*uei/: 40 files carry one and this script read 6 of them.
+#
+# The 34 unread files are already filtered to the Cedar universe by the
+# harvesters that pulled them, they total under 900 MB, and they stream in
+# about 10 seconds. Measured before this change: they contribute **1,848
+# declared (child, parent, edge_type) triples that the edge list does not
+# have** - a 64% increase - and the largest are the ANC families this
+# project cares most about:
+#
+#     ASRC FEDERAL FACILITIES LOGISTICS, LLC -> ARCTIC SLOPE REGIONAL   38,821 obs
+#     FSS ALUTIIQ JOINT VENTURE              -> AFOGNAK NATIVE CORP     15,111
+#     AFFIGENT, LLC                          -> NANA REGIONAL CORP      14,863
+#     EYAK TECHNOLOGY, LLC                   -> THE EYAK CORP            6,520
+#     CHUGACH WORLD SERVICES, INC.           -> CHUGACH ALASKA CORP      6,433
+#     GOLDBELT RAVEN, L.L.C.                 -> GOLDBELT, INCORPORATED   3,529
+#
+# None of these needed a network call, an API key or a scrape. They needed
+# somebody to look at the directory.
+#
+# The lists are GLOBBED, not enumerated, so the next FY shard or the next
+# assistance pull is read without a code change - the enumeration is how the
+# gap opened in the first place.
+def _extra_files():
+    import glob
+    import pathlib
+    P = pathlib.Path(PROJECT)
+    out = []
+
+    # (a) The USAspending CONTRACT archive, FY2007-FY2026. 21 shards, one per
+    #     fiscal year, each carrying recipient_parent_uei. This is the same
+    #     SAM entity block FPDS carries; it is the backfill behind
+    #     prime_contracts_archive_backfill.csv and its parent column was
+    #     never read.
+    for p in sorted(glob.glob(str(
+            P / "data" / "raw" / "contracts" / "usaspending_archive_2026-08-07"
+            / "filtered" / "FY*_ledger_rows.csv"))):
+        out.append((p, {
+            "kind": "usaspending_assistance",
+            "uei": "recipient_uei", "uei_name": "recipient_name",
+            "fallback_name": None, "cage": "cage_code",
+            "year": "action_date_fiscal_year", "date": "action_date",
+            "parents": [("parent_uei", "recipient_parent_uei",
+                         "recipient_parent_name")],
+        }))
+
+    # (b) Assistance prime transactions pulled 2023-2026 and the credit-program
+    #     pulls. The 2026-08-30 addition read only the April-2023 snapshot, so
+    #     every assistance declaration made since then was invisible.
+    for pat in ("data/raw/federal_funding/usaspending_2023_2026/"
+                "Assistance_PrimeTransactions_*.csv",
+                "data/raw/federal_funding/usaspending_credit_2026-08-06/"
+                "Assistance_PrimeTransactions_*.csv"):
+        for p in sorted(glob.glob(str(P / pat))):
+            out.append((p, {
+                "kind": "usaspending_assistance",
+                "uei": "recipient_uei", "uei_name": "recipient_name",
+                "fallback_name": "recipient_name_raw", "cage": None,
+                "year": "action_date_fiscal_year", "date": "action_date",
+                "parents": [("parent_uei", "recipient_parent_uei",
+                             "recipient_parent_name")],
+            }))
+
+    # (c) Assistance SUBAWARDS. Two parties per row, so the file is read
+    #     twice - once from the subawardee's side, once from the prime's -
+    #     rather than growing a new `kind`. The subawardee -> prime edge is
+    #     emitted as `prime_to_sub`, which is CONTRACTING AND NOT OWNERSHIP
+    #     and is labelled as such so no consumer can mistake it.
+    for p in sorted(glob.glob(str(
+            P / "data" / "raw" / "federal_funding" / "usaspending_2023_2026"
+            / "Assistance_Subawards_*.csv"))):
+        out.append((p, {
+            "kind": "usaspending_assistance",
+            "uei": "subawardee_uei", "uei_name": "subawardee_name",
+            "fallback_name": None, "cage": None,
+            "year": "subaward_action_date_fiscal_year",
+            "date": "subaward_action_date",
+            "parents": [
+                ("parent_uei", "subawardee_parent_uei",
+                 "subawardee_parent_name"),
+                ("prime_to_sub", "prime_awardee_uei", "prime_awardee_name"),
+            ],
+        }))
+        out.append((p, {
+            "kind": "usaspending_assistance",
+            "uei": "prime_awardee_uei", "uei_name": "prime_awardee_name",
+            "fallback_name": None, "cage": None,
+            "year": "prime_award_latest_action_date_fiscal_year",
+            "date": "prime_award_latest_action_date",
+            "parents": [("parent_uei", "prime_awardee_parent_uei",
+                         "prime_awardee_parent_name")],
+        }))
+
+    # (d) The gapfill recipient universe: one row per recipient, carrying the
+    #     parent declaration and a CAGE. No fiscal-year column, so year_of()
+    #     falls through to the date.
+    p = str(P / "data" / "raw" / "contracts" / "usaspending_gapfill_2026-08-05"
+            / "gapfill_recipient_universe.csv")
+    if os.path.exists(p):
+        out.append((p, {
+            "kind": "usaspending_assistance",
+            "uei": "recipient_uei", "uei_name": "recipient_name",
+            "fallback_name": None, "cage": "cage_code",
+            "year": "first_action_date", "date": "first_action_date",
+            "parents": [("parent_uei", "recipient_parent_uei",
+                         "recipient_parent_name")],
+        }))
+
+    # (e) The HCI assistance transaction-history extract, which sits in the
+    #     same raw directory as the three FPDS files and was skipped.
+    p = str(P / "data" / "raw" / "esm_hci" / "ESM" / "raw"
+            / "Assistance_56G180126_TransactionHistory_1.csv")
+    if os.path.exists(p):
+        out.append((p, {
+            "kind": "usaspending_assistance",
+            "uei": "recipient_uei", "uei_name": "recipient_name",
+            "fallback_name": None, "cage": None,
+            "year": "action_date_fiscal_year", "date": "action_date",
+            "parents": [("parent_uei", "recipient_parent_uei",
+                         "recipient_parent_name")],
+        }))
+    return out
+
+
+FILES = FILES + _extra_files()
+
+# ---------------------------------------------------------------------------
 # Accumulators
 # ---------------------------------------------------------------------------
 # (child_uei, parent_uei, edge_type) -> dict
@@ -196,6 +328,9 @@ stats = defaultdict(int)
 per_file_stats: list[dict] = []
 all_ueis: set[str] = set()
 malformed_uei: set[str] = set()
+# every edge refused for a malformed identifier, kept BY NAME so the
+# report can list them - a count of drops is not actionable.
+dropped_malformed_edges: set[tuple] = set()
 # uei -> Counter(name -> observations); used to pick the MODAL recorded name
 uei_names: dict[str, Counter] = defaultdict(Counter)
 # diagnostics per (file, parent column): how often it was populated at all
@@ -249,6 +384,22 @@ def add_edge(child, child_name, parent, parent_name, etype, src, yr):
         return
     if child == parent:
         stats["self_edges_dropped"] += 1
+        return
+    # A UEI IS TWELVE CHARACTERS. Malformed values were already tallied into
+    # `malformed_uei` for the report but were still EMITTED as edges, and the
+    # literal string "NAN" - a serialiser's NaN, not an identifier - reached
+    # data/clean as the declared parent of 12 children spanning 11 different
+    # Cedar entities. A spiderweb harvest reading that file inherits eleven
+    # false families from one three-letter typo. Counting a defect is not the
+    # same as refusing it.
+    if not UEI_RE.match(child) or not UEI_RE.match(parent):
+        bad = child if not UEI_RE.match(child) else parent
+        dropped_malformed_edges.add((child, child_name, parent, parent_name,
+                                     etype, src))
+        if stats["edges_dropped_malformed_uei"] < 20:
+            log(f"    dropped malformed UEI {bad!r} on edge "
+                f"{child!r} -> {parent!r} ({etype}) in {src}")
+        stats["edges_dropped_malformed_uei"] += 1
         return
     key = (child, parent, etype)
     e = edges.get(key)
@@ -622,6 +773,11 @@ def build_report(t_start: float) -> None:
     for et in sorted(by_type):
         log(f"   {et:<22}: {by_type[et]:,}")
     log(f"Self-edges dropped (rows)     : {stats['self_edges_dropped']:,}")
+    log(f"Edges dropped, malformed UEI  : "
+        f"{stats['edges_dropped_malformed_uei']:,} rows over "
+        f"{len(dropped_malformed_edges)} distinct edges")
+    for e in sorted(dropped_malformed_edges)[:40]:
+        log(f"    REFUSED {e[0]!r} ({e[1]}) -> {e[2]!r} ({e[3]}) [{e[4]}] {e[5]}")
     log(f"Ownership parents w/ >1 child : {len(multi):,}")
     log(f"NEW ownership pairs vs old    : {len(truly_new):,}")
     log("=" * 72)

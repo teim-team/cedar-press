@@ -131,6 +131,10 @@ LICENSED_SOURCE_FILES = {
 # triage on every run and prints a loud mismatch if the two have drifted.
 # ---------------------------------------------------------------------------
 INTERNAL_TABLES = {
+    "cedar_dataset_punchlist.csv":
+        "526's per-dataset punch list - the specific named actions between "
+        "each dataset and clean. Internal because it describes OUR work "
+        "queue, not the world; docs/datasets/_PUNCHLIST.md is the human view",
     "cedar_dataset_readiness.csv":
         "518's readiness scoreboard - READY / BLOCKED / NOT_TESTED per "
         "dataset with named blockers. Internal because it describes OUR "

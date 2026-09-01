@@ -6,85 +6,203 @@ several datasets are blocked on exactly the knowledge it would produce.*
 
 ---
 
-## The premise
+## STATUS 2026-09-01 — phases 1 and 2 are BUILT, and this page's own headline number was wrong
 
-Cedar has been *storing* relationships and only lightly *reading* them. The
-owner's framing — "I don't think you've actually learned as much as you could
-about the linkages" — is correct, and it is measurable.
+`code/523_spiderweb_harvest.py` (workstream J) implements phases 1 and 2. Run
+`py -3 code/523_spiderweb_harvest.py all`.
+
+The premise this plan opened with was right - Cedar stores relationships and
+barely reads them - and phases 3, 4 and 5 below still stand as written. But
+three of the numbers phases 1 and 2 rested on did not survive contact with the
+data, so the original phase-1/phase-2 sections are REPLACED by what follows
+rather than left standing beside their corrections. The premise table is kept
+here for the record:
 
 | table | rows | what we do with it today |
 |---|---:|---|
-| `cedar_identifier_graph_nodes` | **115,471** | built, essentially unmined |
-| `cedar_identifier_graph_edges` | **46,051** | built, essentially unmined |
-| `fpds_uei_edges` | 2,901 | read for parent lookups only |
+| `cedar_identifier_graph_nodes` | 115,471 | mined by 523 phase 2 |
+| `cedar_identifier_graph_edges` | 46,051 | mined by 523 phase 2 |
+| `fpds_uei_edges` | **5,167** (was 2,901) | harvested by 523 phase 1 |
 | `entity_relationships` | 2,292 | read for hierarchy display |
 | `entity_hierarchy` | 952 | read for rollups |
 | `prime_sub_network` | 220 | barely read |
 | `cedar_spiderweb_v2` | 79 | superseded |
 
-## The single sharpest number
+### Correction 1 — the ingest was reading 6 of the 40 files on disk
 
-Of 2,901 declared ownership edges:
+This plan's sharpest number - **1,097 one-ended edges of 2,901** - was computed
+against an edge list that did not yet exist in full. A scan of every CSV under
+`data/raw` for a column matching `/parent.*uei/` found **40 files carrying one,
+and `13_build_fpds_hierarchy.py` opened 6.** The unread 34 are the
+FY2007-FY2026 USAspending contract archive, the 2023-2026 assistance pulls, the
+assistance subawards and the gapfill recipient universe. They are already
+filtered to the Cedar universe, they total under 900 MB, and they stream in
+about ten seconds.
 
-| | edges |
+    declared edges        2,901  ->  5,167     (+78%)
+    new ownership pairs                1,621
+    CAGE triples         29,981  ->  34,601
+    network calls                          0
+    wall clock                       1.2 min
+
+The largest additions are the ANC families this project cares most about —
+ASRC Federal Facilities Logistics under Arctic Slope (38,821 observations),
+FSS Alutiiq under Afognak, Affigent under NANA, five Chugach subsidiaries,
+Goldbelt Raven under Goldbelt. **This is the second time the same defect was
+found** — 2026-08-30 added one assistance file for +611 edges and stopped
+there. The file list is now GLOBBED, not enumerated, because enumeration is how
+the gap opened.
+
+Two smaller ingest defects were fixed in the same pass. The literal string
+`NAN` was being emitted as a parent UEI for 12 children spanning 11 different
+Cedar entities — a UEI is twelve characters, and malformed values were being
+counted for the report but still written. And **five** registrants record as
+GOVERNMENT OF THE UNITED STATES while the `blocklisted_parent` column flags
+one, so the roll-up set is now derived from the recorded name on every run.
+
+### Correction 2 — "keyed" has two definitions and they differ by 1,222 UEIs
+
+| surface | UEIs keyed |
 |---|---:|
-| both ends keyed to a Cedar entity | 712 |
-| **exactly one end keyed** | **1,097** |
-| neither end keyed | 1,092 |
+| `cedar_identifier_ledger_final.csv` | 4,074 |
+| `cedar_identifier_graph_nodes.csv` (`resolved_entity`) | 4,904 |
+| union | 5,296 |
 
-**Those 1,097 are the harvest.** Each is a *named firm* that a registrant
-declared into the corporate family of an entity we already know. It is not a
-name-match guess — it is a FAR-declared relationship, the strongest
-non-proprietary ownership evidence available, and we are throwing away the
-identification it hands us.
+Asking only the ledger reports roughly twice the harvest that exists: 856 edges
+have an "unkeyed" end the identifier graph already resolves. Those are a
+**ledger backfill**, not new identification, and they land in their own named
+decline bucket. Any future count of "unkeyed" must say which surface it asked.
 
-Known parents with the most unkeyed children today: Arctic Slope Regional
-Corporation (4), Sealaska (4), Cherokee Nation (2), Eastern Band of Cherokee
-(2), plus intermediate holdcos like APM LLC (6) and Hal Hays Construction (4)
-that are themselves unkeyed and sit between a tribe and its subsidiaries.
+### Correction 3 — most one-ended edges point UP, not down
+
+This page reads as though each one-ended edge hands us a new subsidiary. It
+does not. Measured: **56 entities gained a declared PARENT, 34 gained a
+declared subsidiary.** The dominant shape is a holding company sitting *above*
+an entity we already hold — the Ho-Chunk caveat in `NATIVE_ENTITY_NUANCES.md`
+seen from the other side.
 
 ---
 
-## Phase 1 — harvest the one-ended edges (highest value, lowest risk)
+## What phase 1 produces now
 
-For each of the 1,097, the keyed end gives the family and the unkeyed end
-gives a name and a UEI. Produce a **candidate** row per edge — never an
-automatic spine entity — carrying:
+    source edges                                             5,167
+    ACCEPTED one-ended ownership edges                         268
+    candidate rows (incl. 32 sibling)                          300
+        intermediate_holdco   165     subsidiary_of              65
+        unclear                38     sibling_under_same_parent  32
+    distinct candidate firms                                   159
+    Cedar entities touched                                      86
+    identifier-backfill candidates     258 rows / 246 UEIs / 7 disputed
+    suspect keyed anchors REFUSED       73 links over 43 entities
 
-- the declared relationship and its direction,
-- the keyed end's `cedar_uid`,
-- the unkeyed end's UEI, CAGE, legal name, state,
-- an **attachment class**: `subsidiary_of` / `intermediate_holdco` /
-  `sibling_under_same_parent` / `unclear`,
-- and the tier: **B, never A** — a declaration is evidence of a connection,
-  not proof of Native ownership. `docs/NATIVE_ENTITY_NUANCES.md` already
-  records why: the declared highest owner is often the highest *incorporated*
-  owner, and the last hop to the tribe is ours, not SAM's.
+Every declined edge sits in a named bucket and the buckets sum to 5,167
+(`523_spiderweb_declines.csv`, enforced as invariant I5).
 
-**Transitive closure is explicitly out of scope.** If A→B and B→C are both
-declared, we do NOT assert A→C. Chains break at holdcos, and inventing the
-closure is how a spiderweb becomes a fabrication.
+| output | what it is |
+|---|---|
+| `review/523_spiderweb_ownership_candidates.csv` | ranked tier-B candidates; `unambiguous = Y` is the rule-first slice |
+| `review/523_spiderweb_candidate_firms.csv` | firm-level rollup with conflict flags |
+| `review/523_identifier_backfill_candidates.csv` | UEIs that ARE entities we already hold |
+| `review/523_suspect_keyed_anchors.csv` | existing ledger links the harvest refused to build on |
+| `review/523_spiderweb_declines.csv` | the full accounting |
+| `review/523_idgraph_q1..q4_*.csv` | the four phase-2 queues |
 
-Expected: several hundred firms newly attributable, and a measurable rise in
-the 48% global keyed rate.
+All three actionable batches are written up in `review/OWNER_DECISION_QUEUE.md`
+item 9, with the consequence of each answer stated.
 
-## Phase 2 — mine the 46,051-edge identifier graph
+## The hand validation, and what it cost to be honest about it
 
-Untouched. It links identifiers to observed names across datasets, which is
-precisely the evidence needed for the four questions we keep answering by hand:
+A random sample of 20 candidates (seed 20260901) was checked by hand against
+the spine, the ledger and the source edge. **The first pass stood up 8 times
+out of 20.** Nothing was fabricated — every row cited a real declared edge —
+but the classification was wrong 11 times, always the same way: one registrant
+holding two UEIs, published as an intermediate holding company.
 
-1. **Which unkeyed identifiers co-occur with keyed ones** on the same
-   document, award or filing? Co-occurrence is weak evidence alone but strong
-   when combined with a declared edge.
-2. **Which observed names cluster to one identifier?** That is the alias
-   layer's raw material, and the Delaware contamination (a CAGE legal name
-   equating two distinct tribes) proves the clustering must be *reviewed*, not
-   applied.
-3. **Which identifiers appear in many datasets but carry no entity?** Ranked by
-   dataset count, that is a prioritised work queue instead of a flat list.
-4. **Where does one entity hold identifiers that never co-occur?** A possible
-   sign of two entities merged under one uid — the inverse of the duplicate
-   problem, and currently invisible.
+    KOMAN CONSTRUCTION, LLC      ->  KOMAN CONSTRUCTION LLC
+    GILA RIVER INDIAN COMMUNITY  ->  GILA RIVER INDIAN COMMUNITY
+    TATITLEK TECHNOLOGIES        ->  TATITLEK CORPORATION  (= the entity itself)
+
+The generator was fixed rather than the rate reported. Six discriminating rules
+came out of it, each carrying the counter-example that bounds it:
+
+1. **Identical declared names on the same edge are one registrant, not two.**
+   Within-row string equality — no spine lookup, so no Bristol Bay exposure.
+2. **The entity's own name, longer.** The spine stores "Gila River"; the
+   registrant files "GILA RIVER INDIAN COMMUNITY". Same entity when the
+   entity's distinctive tokens are all present and every extra is a class word.
+   *Counter-example that forces a uniqueness test:* `Delaware Nation` and
+   `Delaware Tribe of Indians` are two sovereigns and both reduce to
+   {DELAWARE}, so the rule fires only when that token set belongs to ONE spine
+   entity.
+3. **`LIMITED LIABILITY COMPANY` is a legal form, not a name.**
+   *Counter-example:* `TEPA EC, LLC` and `TEPA LLC` differ by {EC}, which is
+   not a class word — a real subsidiary and its real parent. A plain prefix
+   test merges them; a class-words-only difference does not.
+4. **Fold diacritics before stripping non-ASCII.** Ukpeagvik Inupiat
+   Corporation is written with a dotted g in the spine; blanking it split the
+   token, so the corporation failed to match itself and was published as a
+   holding company above itself.
+5. **An unreviewed name cluster is not an anchor.** Barrow holds 103 UEIs, 58
+   of them `cluster_v3` "Algorithmic name clustering, unreviewed", clustered on
+   the word GOVERNMENT — its real subsidiary is UIC **Government** Services
+   LLC, and the cluster swept in Computer Sciences Corporation and General
+   Dynamics IT. If a link's legal name shares no distinctive token with its
+   entity, nothing may hang from it.
+6. **A place named for a tribe is not the tribe** (the Tuscarawas precedent,
+   met twice here). `KLAMATH 9-1-1 EMERGENCY COMMUNICATIONS DISTRICT` and
+   `COUNTY OF MOULTRIE` (Illinois) each share a token with the tribe they were
+   keyed to. A local-government form word in the name means the shared place
+   name is the whole of the evidence, and that is not enough.
+
+Also learned, and applied to the ranking rather than to a filter: **one
+observation is a filing, not a pattern.** OKLAHOMA STATE UNIVERSITY MEDICAL
+AUTHORITY declares CHOCTAW NATION OF OKLAHOMA as its parent on exactly one 2026
+row. Real data, wrong conclusion. Single-observation edges stay as candidates
+and are excluded from `unambiguous`.
+
+**After the fixes, the same-seed sample stands up 18 of 20.** Both remaining
+failures are inherited rather than generated: the keyed end is itself keyed to
+the wrong Native entity in the ledger (`Qivliq Commercial Group` under NANA,
+`FSI Holdings` under Koniag). Neither is a fabricated relationship, and both
+are the same disease as section 9c of the owner queue.
+
+## Phase 2 — the four queues, measured
+
+| # | question | answer | file |
+|---|---|---|---|
+| 1 | unkeyed identifiers co-occurring with keyed ones | **200**, all unambiguous. Cherokee Boys Club ($315M), Cherokee General ($263M), Miccosukee Corporation ($246M) lead. Most co-occurrence was already consumed by `169`; this is the residue, and it is the high-dollar residue. | `523_idgraph_q1_cooccurrence.csv` |
+| 2 | names clustering to identifiers | **9,814** clusters: **154 CONTAMINATION_RISK** (one name, two entities) and **614 alias material**. Review, never auto-apply. | `523_idgraph_q2_name_clusters.csv` |
+| 3 | identifiers in many datasets carrying no entity | **90,539**, ranked by dataset count then dollars. **346 in two or more datasets**, **$506B** observed. The head is not obscure: Southcentral Foundation $3.1B, Norton Sound Health $952M, White Earth $652M, Warm Springs $597M, CRIHB $571M, Seminole Nation of Oklahoma $440M. | `523_idgraph_q3_unkeyed_by_dataset_count.csv` |
+| 4 | one entity holding identifiers that never co-occur | **708** entities; **52** where two dollar-bearing islands share no name stem. `TRBF-DELAWN-00` ranks fifth with 14 identifiers in 9 components, one stemmed UNAMI — the Delaware contamination, found independently by this method. | `523_idgraph_q4_split_entity_suspects.csv` |
+
+Q3 first reported 90,889 and ranked ONEIDA NATION ($1.1B) second while it sat
+in the ledger the whole time, because it asked only the graph. Corrected to the
+union. A work queue that sends a reviewer at finished work is worse than no
+queue.
+
+Q4 is a REVIEW queue and its verdict says so: a tribe legitimately holds
+differently-named subsidiaries, so the shape is not itself a defect. The rank
+says where a two-entities-merged-under-one-uid error is most findable.
+
+## Guards, and the proof they fire
+
+`523 verify` checks six invariants; `523 fixtures` injects a violation of each,
+asserts exit 1, restores in a `finally` and asserts exit 0.
+
+    I1 tier B, never A            I2 no transitive closure
+    I3 federal roll-ups blocked   I4 prime_to_sub is not ownership
+    I5 every edge in a NAMED bucket, summing to the source count
+    I0 a hops-1 candidate's unkeyed end is not in fact keyed
+
+## What phase 1 deliberately did NOT do
+
+No spine entity was minted, `510 --apply` was not run, and the identifier
+ledger was not edited. Two things are queued for whoever owns them:
+
+* **`169_build_identifier_graph.py` should be re-run.** It was built against
+  2,901 edges and there are now 5,167. Q1 and Q3 will both improve.
+* **The 73 suspect anchors need rulings.** They are already carrying dollars in
+  shipped tables; the harvest refusing to build on them does not unwind them.
 
 ## Phase 3 — multi-party as a first-class shape
 
