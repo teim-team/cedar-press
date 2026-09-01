@@ -42,9 +42,9 @@ again by someone else — and the value Cedar stands behind is **computed** from
 ordered, public rules.
 
 ```
-data/clean/cedar_assertions.csv        29,718   every claim, with who and why
-data/clean/cedar_resolved_facts.csv    29,356   the winner + WHICH RULE decided
-data/clean/cedar_fact_conflicts.csv         0   every losing value, kept
+data/clean/cedar_assertions.csv        34,615   every claim, with who and why
+data/clean/cedar_resolved_facts.csv    34,275   the winner + WHICH RULE decided
+data/clean/cedar_fact_conflicts.csv          0   every losing value, kept
 data/spine/cedar_source_registry.csv       15   sources + evidence lineage
 data/spine/cedar_resolution_rules.csv       8   the rules, as data
 ```

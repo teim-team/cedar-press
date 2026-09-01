@@ -116,7 +116,7 @@ two FAADS tables alone (2,830,409 rows at 0%) moves the global figure from
 **44.3% to 83.4%** — 39 points, not the ~20 stated before 2026-09-01 — and it
 is one dataset, one join path.
 
-### The master list — 1,536 distinct Native entities, permanently identified
+### The master list — 1,555 distinct Native entities, permanently identified
 
 | class | n | | class | n |
 |---|---:|---|---|---:|
@@ -193,7 +193,7 @@ may demote a dataset. That is the point.
 
 ## Do this FIRST: `docs/SPIDERWEB_LEARNING_PLAN.md`
 
-Measured 2026-09-01: of 2,901 declared ownership edges, **1,097 have exactly
+Measured 2026-09-01 (revised the same day, the ingest was reading 6 of 40 source files): of 5,167 declared ownership edges, **1,097 have exactly
 one end keyed** — each a named firm a registrant declared into the corporate
 family of an entity we already know, and we are discarding the identification
 it hands us. The identifier graph (115,471 nodes / 46,051 edges) is built and

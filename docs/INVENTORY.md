@@ -21,10 +21,10 @@ py -3 code/521_inventory.py check      # exit 1 if the headline is stale
 | status `undocumented` | 3 |
 | status `spine` | 18 |
 | status `excluded-by-codebook` | 7 |
-| rows across all inventoried tables | 8,915,870 |
+| rows across all inventoried tables | 8,916,135 |
 | entity-bearing tables | 137 |
-| entity-bearing rows | 7,250,729 |
-| — carrying a Cedar id | 3,215,604 (44.3%) |
+| entity-bearing rows | 7,250,993 |
+| — carrying a Cedar id | 3,215,886 (44.4%) |
 | grain declared AND validated | 186 |
 | shipping in `dist/cedar_press.db` | 181 |
 | scripts inventoried (`code/**/*.py`) | **427** |
@@ -52,17 +52,17 @@ py -3 code/521_inventory.py check      # exit 1 if the headline is stale
 | `_cosponsors.csv` | excluded-by-codebook | 5,318 | 8 | — | — | n/a | 2024 | 2026-08-05 | — | — | — | — | — |
 | `brand_family_proposals.csv` | internal-by-decision | 609 | 12 | — | — | n/a | — | 2026-08-06 | — | — | — | — | — |
 | `brand_family_registry.csv` | internal-by-decision | 106 | 8 | — | — | 100% | — | 2026-08-28 | — | — | — | — | — |
-| `cedar_assertions.csv` | internal-by-decision | 34,503 | 19 | — | — | 100% | 2026 | 2026-08-29 | — | — | — | — | — |
+| `cedar_assertions.csv` | internal-by-decision | 34,615 | 19 | — | — | 100% | 2026 | 2026-09-01 | — | — | — | — | — |
 | `cedar_cage_backfill.csv` | internal-by-decision | 4,362 | 7 | — | — | n/a | 2026 | 2026-08-05 | — | — | — | — | — |
 | `cedar_dataset_punchlist.csv` | internal-by-decision | 418 | 8 | — | — | n/a | 2026 | 2026-09-01 | — | — | — | — | — |
 | `cedar_dataset_readiness.csv` | internal-by-decision | 13 | 25 | — | — | n/a | 2026 | 2026-09-01 | — | — | — | — | — |
 | `cedar_export_safety.csv` | internal-by-decision | 214 | 11 | — | — | n/a | — | 2026-08-29 | — | — | — | — | — |
-| `cedar_fact_conflicts.csv` | internal-by-decision | 0 | 15 | — | — | n/a | — | 2026-08-29 | — | — | — | — | — |
-| `cedar_harvest_conservation.csv` | internal-by-decision | 88 | 7 | — | — | n/a | — | 2026-08-29 | — | — | — | — | — |
+| `cedar_fact_conflicts.csv` | internal-by-decision | 0 | 15 | — | — | n/a | — | 2026-09-01 | — | — | — | — | — |
+| `cedar_harvest_conservation.csv` | internal-by-decision | 88 | 7 | — | — | n/a | — | 2026-09-01 | — | — | — | — | — |
 | `cedar_inherited_from_rulings_2026-08-05.csv` | internal-by-decision | 80 | 9 | — | — | n/a | 2026 | 2026-08-05 | — | — | — | — | — |
 | `cedar_inherited_from_rulings_2026-08-06.csv` | internal-by-decision | 80 | 9 | — | — | n/a | 2026 | 2026-08-06 | — | — | — | — | — |
 | `cedar_inherited_from_rulings_2026-08-07.csv` | internal-by-decision | 100 | 9 | — | — | n/a | 2026 | 2026-08-07 | — | — | — | — | — |
-| `cedar_resolved_facts.csv` | internal-by-decision | 34,163 | 22 | — | — | 100% | 2026 | 2026-08-29 | — | — | — | — | — |
+| `cedar_resolved_facts.csv` | internal-by-decision | 34,275 | 22 | — | — | 100% | 2026 | 2026-09-01 | — | — | — | — | — |
 | `cedar_spiderweb_v2.csv` | internal-by-decision | 79 | 16 | — | — | 100% | 2026 | 2026-08-28 | — | — | — | — | — |
 | `codebook_master.csv` | excluded-by-codebook | 4,614 | 10 | — | — | n/a | — | 2026-08-29 | — | — | 41_build_codebooks.py | 104_build_wa_allocatio, 107_pull_remaining_sta, 108_build_tribal_tax_b +9 | **NEVER_RUN:** 41 |
 | `content_analysis_accuracy.csv` | internal-by-decision | 4 | 16 | — | — | n/a | 2026 | 2026-08-06 | — | — | — | — | — |
@@ -132,7 +132,7 @@ py -3 code/521_inventory.py check      # exit 1 if the headline is stale
 | `federal_actions.csv` | shippable | 156,772 | 33 | Y | document_number | n/a | 2026 | 2026-08-26 | db | safe | 11_classify_federal_ac | 22_apply_temporal_floo, 519_closure_federal_re | — |
 | `federal_actions_entity_bridge.csv` | shippable | 5,786 | 14 | Y | document_number+tribe_id | 100% | 2026 | 2026-08-28 | db | safe | 70_key_unjoined_datase | 503_identity.py | — |
 | `federal_actions_raw.csv` | shippable | 156,772 | 25 | Y | document_number | n/a | 2026 | 2026-08-26 | db | safe | — | — | — |
-| `fr_abstract_availability_year.csv` | shippable | 33 | 4 | Y | publication_year | n/a | 2026 | 2026-08-29 | db | safe | — | — | — |
+| `fr_abstract_availability_year.csv` | shippable | 33 | 4 | Y | publication_year | n/a | 2026 | 2026-09-01 | db | safe | — | — | — |
 | `fr_consultation_by_agency.csv` | shippable | 21 | 3 | Y | normalized_department | n/a | — | 2026-08-06 | — | safe | — | — | — |
 | `fr_consultation_notices.csv` | shippable | 484 | 11 | Y | document_number | n/a | 2026 | 2026-08-06 | db | safe | — | — | — |
 | `fr_consultation_referenced.csv` | shippable | 1,829 | 5 | Y | document_number | n/a | 2025 | 2026-08-06 | db | safe | — | — | — |
@@ -292,10 +292,10 @@ py -3 code/521_inventory.py check      # exit 1 if the headline is stale
 
 | table | status | rows | cols | grain | PK | keyed | latest yr | modified | ship | agg | built by | enriched by | flags |
 |---|---|---:|---:|---|---|---:|---:|---|---|---|---|---|---|
-| `fr_nagpra_title_index.csv` | shippable | 6,644 | 10 | Y | document_number | n/a | 2026 | 2026-08-29 | db | safe | — | — | — |
-| `fr_nagpra_title_index_year.csv` | shippable | 33 | 4 | Y | publication_year | n/a | 2026 | 2026-08-29 | db | safe | — | — | — |
-| `nagpra_notice_entity_bridge.csv` | shippable | 51,521 | 14 | Y | document_number+relationship+party_name_verbatim | 93% | 2026 | 2026-08-29 | db | safe | 77_build_nagpra_datase | 503_identity.py | — |
-| `nagpra_notices.csv` | shippable | 6,772 | 67 | Y | document_number | n/a | 2027 | 2026-08-29 | db | safe | — | — | — |
+| `fr_nagpra_title_index.csv` | shippable | 6,644 | 10 | Y | document_number | n/a | 2026 | 2026-09-01 | db | safe | — | — | — |
+| `fr_nagpra_title_index_year.csv` | shippable | 33 | 4 | Y | publication_year | n/a | 2026 | 2026-09-01 | db | safe | — | — | — |
+| `nagpra_notice_entity_bridge.csv` | shippable | 51,521 | 14 | Y | document_number+relationship+party_name_verbatim | 93% | 2026 | 2026-09-01 | db | safe | 77_build_nagpra_datase | 503_identity.py | — |
+| `nagpra_notices.csv` | shippable | 6,772 | 67 | Y | document_number | n/a | 2027 | 2026-09-01 | db | safe | — | — | — |
 
 ### `native-owned-businesses` — pro shelf — 7 table(s)
 
@@ -363,7 +363,7 @@ py -3 code/521_inventory.py check      # exit 1 if the headline is stale
 | `bie_uio_identifier_links.csv` | internal-by-decision | 302 | 20 | — | — | 100% | — | 2026-08-28 | — | — | — | — | — |
 | `cedar_correction_register.csv` | shippable | 175 | 14 | Y | correction_id | 99% | — | 2026-09-01 | notes | safe | — | — | — |
 | `cedar_entity_identity_crosswalk.csv` | shippable | 10,107 | 20 | Y | crosswalk_id | 100% | — | 2026-08-28 | db | safe | — | — | — |
-| `cedar_entity_spine.csv` | spine | 1,555 | 44 | Y | tribe_id | 99% | — | 2026-09-01 | — | — | 01_build_entity_spine. | 08_build_review_page.p, 115_pull_assistance_ar, 163_promote_nho_univer +14 | **NEVER_RUN:** 01 |
+| `cedar_entity_spine.csv` | spine | 1,555 | 44 | Y | tribe_id | 100% | — | 2026-09-01 | — | — | 01_build_entity_spine. | 08_build_review_page.p, 115_pull_assistance_ar, 163_promote_nho_univer +14 | **NEVER_RUN:** 01 |
 | `cedar_identifier_graph_edges.csv` | shippable | 46,051 | 13 | **DEFECT** | — | n/a | — | 2026-08-26 | db | **row-only** | — | — | 2,451 dup rows |
 | `cedar_identifier_graph_nodes.csv` | shippable | 115,471 | 16 | Y | node | n/a | — | 2026-08-29 | db | safe | — | — | — |
 | `cedar_identifier_ledger.csv` | spine | 19,232 | 14 | — | — | 29% | — | 2026-08-05 | — | — | 01_build_entity_spine. | 03_apply_exclusions_an, 510_assertions.py | **NEVER_RUN:** 01 |
@@ -374,7 +374,7 @@ py -3 code/521_inventory.py check      # exit 1 if the headline is stale
 | `cedar_ruling_ledger_consolidated.csv` | shippable | 15,587 | 15 | **DEFECT** | — | n/a | 2026 | 2026-08-26 | db | **row-only** | — | — | 6,302 dup rows |
 | `cedar_rulings.csv` | spine | 8 | 15 | — | — | 62% | — | 2026-08-05 | — | — | — | — | — |
 | `cross_dataset_ruling_map.csv` | shippable | 7,507 | 8 | **DEFECT** | — | n/a | 2026 | 2026-08-05 | notes | **row-only** | — | — | 2,228 dup rows |
-| `entity_aliases.csv` | shippable | 6,296 | 19 | Y | alias_id | 100% | 2026 | 2026-08-29 | db | safe | 97_build_aliases_and_r | 418_build_entity_alias | — |
+| `entity_aliases.csv` | shippable | 6,298 | 19 | Y | alias_id | 100% | 2026 | 2026-09-01 | db | safe | 97_build_aliases_and_r | 418_build_entity_alias | — |
 | `entity_candidates_new.csv` | internal-by-decision | 2,874 | 27 | — | — | 0% | — | 2026-08-28 | — | — | — | — | — |
 | `entity_candidates_rejected.csv` | internal-by-decision | 1,045 | 28 | — | — | 0% | — | 2026-08-28 | — | — | — | — | — |
 | `entity_evidence_profile.csv` | internal-by-decision | 1,282 | 11 | — | — | 100% | — | 2026-08-28 | — | — | 151_rebuild_entity_evi | 110_build_harmonized_v | — |
@@ -408,14 +408,14 @@ py -3 code/521_inventory.py check      # exit 1 if the headline is stale
 |---|---|---:|---:|---|---|---:|---:|---|---|---|---|---|---|
 | `cedar_event_id_registry.csv` | spine | 11 | 8 | — | — | n/a | 2026 | 2026-09-01 | — | — | — | — | — |
 | `cedar_exclusion_rulings.csv` | spine | 123 | 12 | — | — | n/a | — | 2026-08-05 | — | — | — | — | — |
-| `cedar_handle_history.csv` | spine | 1,536 | 7 | — | — | 100% | 2026 | 2026-08-29 | — | — | — | — | — |
-| `cedar_identity_register.csv` | spine | 1,536 | 10 | — | — | 100% | — | 2026-08-29 | — | — | — | — | — |
+| `cedar_handle_history.csv` | spine | 1,555 | 7 | — | — | 100% | 2026 | 2026-09-01 | — | — | — | — | — |
+| `cedar_identity_register.csv` | spine | 1,555 | 10 | — | — | 100% | — | 2026-09-01 | — | — | — | — | — |
 | `cedar_observations.csv` | spine | 35,741 | 17 | — | — | n/a | — | 2026-08-29 | — | — | — | — | — |
-| `cedar_resolution_policies.csv` | spine | 6 | 10 | — | — | n/a | — | 2026-08-29 | — | — | — | — | — |
-| `cedar_resolution_rules.csv` | spine | 9 | 7 | — | — | n/a | — | 2026-08-29 | — | — | — | — | — |
+| `cedar_resolution_policies.csv` | spine | 6 | 10 | — | — | n/a | — | 2026-09-01 | — | — | — | — | — |
+| `cedar_resolution_rules.csv` | spine | 9 | 7 | — | — | n/a | — | 2026-09-01 | — | — | — | — | — |
 | `cedar_source_record_links.csv` | spine | 585 | 19 | — | — | 100% | 2026 | 2026-08-29 | — | — | — | — | — |
 | `cedar_source_records.csv` | spine | 575 | 17 | — | — | n/a | 2026 | 2026-08-29 | — | — | — | — | — |
-| `cedar_source_registry.csv` | spine | 16 | 11 | — | — | n/a | — | 2026-08-29 | — | — | — | — | — |
+| `cedar_source_registry.csv` | spine | 17 | 11 | — | — | n/a | — | 2026-09-01 | — | — | — | — | — |
 | `cedar_temporal_facts.csv` | spine | 2,867 | 32 | — | — | n/a | 2026 | 2026-08-29 | — | — | — | — | — |
 | `cedar_temporal_policy.csv` | spine | 10 | 6 | — | — | n/a | — | 2026-08-29 | — | — | — | — | — |
 | `consortium_entities.csv` | spine | 1 | 12 | — | — | n/a | — | 2026-08-05 | — | — | — | — | — |
@@ -494,7 +494,7 @@ py -3 code/521_inventory.py check      # exit 1 if the headline is stale
 | `fpds_uei_cage_map.csv` | 29,981 | 34,601 | +4,620 | unstated |
 | `fr_nagpra_title_index.csv` | 6,606 | 6,644 | +38 | validated |
 | `cedar_correction_register.csv` | 173 | 175 | +2 | validated |
-| `entity_aliases.csv` | 6,297 | 6,296 | -1 | validated |
+| `entity_aliases.csv` | 6,297 | 6,298 | +1 | validated |
 
 Re-probe with `py -3 code/512_build_dataset_contracts.py probe` (owned by the integrator this pass).
 
@@ -524,7 +524,7 @@ Ranked by UNKEYED rows, because that is the size of the lever, not the percentag
 | `foia_request_index.csv` | _entity_layer | 9,481 | 3.6% | 9,137 |
 | `ca_gaming_payments.csv` | gaming | 40,164 | 89.0% | 4,434 |
 | `ferc_ex_parte_parties.csv` | lobbying | 4,246 | 0.2% | 4,237 |
-| `nagpra_notice_entity_bridge.csv` | nagpra | 51,521 | 93.3% | 3,467 |
+| `nagpra_notice_entity_bridge.csv` | nagpra | 51,521 | 93.3% | 3,468 |
 | `entity_candidates_new.csv` | _entity_layer | 2,874 | 0.0% | 2,874 |
 | `digital_gaming_revenue.csv` | gaming | 10,661 | 73.3% | 2,849 |
 | `federal_recognition_roster.csv` | _entity_layer | 17,058 | 89.3% | 1,820 |

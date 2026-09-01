@@ -4599,7 +4599,7 @@ gate's own note says *do NOT re-record the baseline until you know why* — or
 (b) restores `AKNF-ACSRMT-00-CALSTA-ASVCPR` to `CE-00001-6S`. A uid that moves
 is the single thing the identity contract promises cannot happen ("the uid
 never changes" is written into every row of that register's own
-`class_since_basis` column), and 1,536 uids are stamped across 125 tables.
+`class_since_basis` column), and 1,555 uids are stamped across 125 tables (1,536 until 19 IHS self-governance consortia were promoted 2026-09-01).
 
 Workstream C did not write to `data/spine/`, did not run `503_identity.py`, and
 touched only `code/516_release_manifest.py`, `code/build.py`,
