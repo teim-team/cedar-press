@@ -67,6 +67,25 @@ Nobody commits. Nobody runs `510 --apply` or `build.py ship --execute`.
 into its own doc and requests nuance edits through its handoff.
 Integrator owns 62, 512, 517, 518 and all commits.
 
+## Workstream ownership, pass 4 (2026-09-01) — ACQUISITION, not hygiene
+
+Owner: *"I'm concerned because it seems like you're missing stuff for every
+dataset."* He is right. The 418-item punch list is entirely hygiene; not one
+line says "get the missing years". This pass is acquisition.
+
+| ws | dataset | owns | job |
+|---|---|---|---|
+| **L** | subcontracting | `code/121_pull_subawards_api.py`, subaward tables | pull FY2022-24, which its own line 21 says were NEVER SUBMITTED |
+| **M** | gaming | gaming pullers + `docs/datasets/gaming_sources.md` | enumerate the source surface, then fetch what is missing |
+| **N** | lobbying | lobbying/beyond-LDA pullers + `docs/datasets/lobbying_sources.md` | same, with emphasis on non-LDA channels |
+| **O** | natural-resources | resource pullers + `docs/datasets/natural_resources_sources.md` | same; ONRR through 2026 and the unbuilt states |
+| **P** | native-owned-businesses | `data/staging/business_registry/`, the TERO harvest | scrape 16 of the 18 found lists; promote 544 staged to clean |
+
+**No new general-purpose scripts.** One clean puller per dataset, reusing what
+exists. The owner asked for this explicitly.
+Nobody commits. Nobody runs `510 --apply` or `build.py ship --execute`.
+Integrator owns 62, 503, 510, 512, 517, 518, 526, 527 and all commits.
+
 ## ADR-013 — INCLUSION BASIS is a key (2026-09-01)
 
 **Status:** adopted. The owner:
