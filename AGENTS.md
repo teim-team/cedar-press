@@ -4881,3 +4881,67 @@ names — *a gate that reads a shared directory mid-write reports another
 agent's incomplete step as a regression* — and on a parallel-workstream day it
 is the normal case, not the exception. **Compare file creation times against
 the live workstreams before believing a `62` failure is yours.**
+
+## GATE FAIL 2026-09-01 — the shard program launch. One line IS mine; the rest named.
+
+Fourteen workstreams were live when this gate ran (nine entity shards A–I, plus
+subawards, gaming, lobbying, natural-resources and TERO acquisition). Per the
+2026-08-26 19:10 entry and the note directly above, **a gate reading a shared
+directory mid-write reports another agent's incomplete step as a regression**,
+and on a day like this that is the normal case. Attribution below, not a shrug.
+
+### MINE, AND FIXED IN THE SAME PASS
+
+`code_duplicate_numbers` 43 → 44. I named the shard consolidator
+`532_shard_consolidate.py`; shard E independently claimed 532 for
+`532_shard_e_anc_web_probe.py`, mid-flight, as part of a coherent 531/532/533
+block. **Renamed mine to `528_shard_consolidate.py`** (528 and 529 were free)
+and updated every reference in `docs/SHARD_PROGRAM.md` and
+`docs/SHARD_COVERAGE.md`. Shard E's block was left untouched — it is running.
+
+The general lesson, since this will recur every time agents are launched in
+parallel: `ls code/<n>_*` is not sufficient when other agents are *concurrently*
+choosing numbers. Whoever is still running keeps the number; the integrator moves.
+
+### NOT MINE — named, with owners
+
+| line | owner | what |
+|---|---|---|
+| `files_with_columns_lost_vs_backup` = 1 | `144_build_admin_appeals.py` | see below |
+| `lint_class1` 0 → 2 | `531_shard_e_anc_report_mine.py` (shard E) | two `glob.glob` calls |
+| `lint_class2c` 60 → 62 | `144_build_admin_appeals.py`, `344_pull_nigc_document_surface.py` (gaming) | silent skip counters |
+| `lint_class4` 9 → 12 | `221_probe_regulations_gov_comments.py` (lobbying), `532_shard_e_anc_web_probe.py` (shard E), `shard_d_web_probe.py` (shard D) | deadline/budget breaks |
+| `lint_class5` 6 → 7 | `shard_c_tribe_web_probe.py` (shard C) | `if key in done` resume guard |
+| `ship_*`, `tables_missing_*`, `tables_undocumented_in_codebook` +2 each | the 2 new tables listed under NEW TABLES AT A 0% SHIP RATIO | new tables, not yet in the codebook |
+
+Every one of these agents was briefed to finish with `62` exit 0, so these are
+theirs to clear before handoff. They are recorded here so the next session does
+not re-diagnose them, and so no one records them as "pre-existing, not mine."
+
+### THE ONE WORTH READING — a hub key was dropped, quietly
+
+`admin_appeal_positions.csv`, re-derived today by `144_build_admin_appeals.py`:
+
+- rows **1 → 8** (real growth, good)
+- **added** `record_scope`, `record_scope_basis`, `inclusion_basis`,
+  `derivation_basis` — correct ADR-010 / ADR-013 work, all 8 rows
+  `multi_entity` / `named_entity`
+- **dropped `cedar_uid`**, which the backup had populated
+
+`native_entity_id` is still populated 8 of 8, so the identity is not lost — but
+the **hub key column is**, and C4 attachment is measured on `cedar_uid`. A
+re-derive that adds the new ADR columns while dropping the one that attaches the
+table to dataset 13 is a hub-and-spoke regression wearing the costume of an
+upgrade, and it is invisible unless something diffs against the backup.
+
+Not repaired here: `144` is another workstream's file and `cedar_uid` is
+resolver output, so restoring it by mapping `native_entity_id` in a utility
+script would be exactly the unsourced identity write `503`/`510` exist to
+prevent. **Owner of 144: re-add `cedar_uid` through the resolver, not by hand.**
+
+Generalisable, and the reason this is written up rather than just fixed: an
+enricher that rewrites a table wholesale will silently drop any column it does
+not know about. This is the class-6 shape that destroyed the conservation ledger
+on 2026-09-01 (see `510_assertions.py`), now in a different file. **A rebuild
+writer on a table other scripts enrich must preserve unknown columns, or the
+gate's backup diff is the only thing standing between us and silent loss.**
