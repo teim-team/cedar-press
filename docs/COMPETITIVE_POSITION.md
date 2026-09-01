@@ -201,23 +201,41 @@ tierA links resolved to a spine ID: 827, covering 265 entities of 866
 An entity profile page is keyed on the entity. Half the best evidence cannot currently
 reach one.
 
-**Finding 2 — six of the ten datasets have a zero-percent-populated entity key.**
-Not "sparse." Zero.
+**Finding 2 (2026-08-06) — six of the ten datasets have a zero-percent-populated
+entity key.** Not "sparse." Zero.
 
-*Denominators corrected 2026-08-26 where the underlying file has since grown. The numerators
-were NOT re-derived — they are 2026-08-06 measurements and are floors, not current values.*
+> **CLOSED 2026-09-01. Finding 2 is no longer true of any dataset.** Every
+> zero above is now populated; the weakest is nonprofits at 11.1%. The finding
+> was correct when written and it drove the identity work that fixed it — which
+> is why it is kept rather than deleted.
 
-| Dataset | Entity key | Populated (2026-08-06) | File size now |
+*Denominators corrected 2026-08-26 where the underlying file has since grown. The
+2026-08-06 numerators were floors, not current values.*
+
+**RE-MEASURED 2026-09-01 (workstream H), and the five bolded zeros are no longer
+zero.** They were the sharpest claim in this section — *"Not 'sparse.' Zero."* —
+and every one of them has been closed since. Leaving them in a
+competitive-position document understates the product by the exact amount of
+work that has been done on it. Keyed counts below are non-empty `cedar_uid`,
+measured by `code/521_inventory.py`; per-table figures in `docs/INVENTORY.md`.
+
+| Dataset | Entity key | Populated (2026-08-06) | Live 2026-09-01 |
 |---|---|---|---|
-| Prime contracting | `tribe_id` | 279,432 / ~~617,142~~ (45%), 424 distinct | **1,217,768 rows; 888,803 rows attributed (79.0% of dollars), 498 distinct** |
-| Federal funding | `tribe_id` | 365,535 / ~~476,924~~ (77%), 361 distinct | **684,923 rows** |
-| Lobbying | `entity_id` | 27,796 / 27,796 (100%), 300 distinct | unchanged |
-| Subcontracting | `sub_uei` | ~~998 / 998 (100%), 92 distinct~~ | **63,548 rows; 63,504 (99.9%) carry a Native entity on the prime side, the sub side, or both** |
-| **Compacts** | `entity_id` | **0 / 707** |
-| **Gaming facilities** | `entity_id` | **0 / 774** |
-| **Nonprofits** | `entity_id` | **0 / 12,764** |
-| **Bills** | `affected_entities` | **0 / 3,037** |
-| **Federal Actions** | `tribe_or_native_entity` | **0 / 156,452** |
+| Prime contracting | `cedar_uid` | 279,432 / ~~617,142~~ (45%), 424 distinct | **888,958 / 1,217,768 (73.0%)**, 498 distinct entities, $244.77B attributed |
+| Federal funding | `cedar_uid` | 365,535 / ~~476,924~~ (77%), 361 distinct | **552,602 / 701,955 (78.7%)** |
+| Lobbying | `cedar_uid` | 27,796 / 27,796 (100%), 300 distinct | 26,484 / 27,796 (95.3%) — *fell because 353 WITHDREW entity ids a correction disproved; a lower number here is the correction working* |
+| Subcontracting | `cedar_uid` | ~~998 / 998 (100%), 92 distinct~~ | **31,483 / 72,837 (43.2%)** on the sub side; the file grew 63,548 → 72,837 |
+| **Compacts** | `cedar_uid` | **0 / 707** | **702 / 707 (99.3%)** |
+| **Gaming facilities** | `cedar_uid` | **0 / 774** | **785 / 787 (99.7%)** |
+| **Nonprofits** | `cedar_uid` | **0 / 12,764** | **1,423 / 12,764 (11.1%)** — closed, but the weakest of the five |
+| **Bills** | bridge table | **0 / 3,037** | **676** rows in `native_bills_entity_bridge.csv`, all keyed |
+| **Federal Actions** | bridge table | **0 / 156,452** | **5,786** rows in `federal_actions_entity_bridge.csv`, all keyed |
+
+**Bills and Federal Actions changed shape, not just count.** Neither carries an
+entity column on the fact table any more; both key through a **bridge**, which
+is the correct many-to-many shape and the one `nagpra` already runs at 51,521
+rows. Quoting "0 / 156,452" against a table that was never going to hold the
+key is the wrong denominator as well as the wrong numerator.
 | **Ownership events** | `native_entity_neid` | **0 / 98** |
 
 "Cross-dataset linkage" is the product thesis. Today it is true of four datasets and

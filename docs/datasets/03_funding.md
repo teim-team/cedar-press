@@ -1,6 +1,6 @@
 # Dataset 3 — Federal Funding (Assistance)
 
-*Maintenance doc. Generated 2026-08-28. Tier: **Cedar Press ($500) - Federal Funding to Indian Country***
+*Maintenance doc. Generated 2026-09-01. Tier: **Cedar Press ($500) - Federal Funding to Indian Country***
 
 ## What this is
 
@@ -10,8 +10,8 @@ Grants, direct payments and other assistance to Native entities, built as an att
 
 | File | Rows | Size |
 |---|---:|---:|
-| `data/clean/federal_funding_transactions.csv` | 701,955 | 508 MB |
-| `data/clean/federal_funding_tribe_year_panel.csv` | 5,496 | 712 KB |
+| `data/clean/federal_funding_transactions.csv` | 701,955 | 552 MB |
+| `data/clean/federal_funding_tribe_year_panel.csv` | 5,496 | 782 KB |
 | `data/clean/funding_identifier_harvest.csv` | 37,704 | 5 MB |
 
 ## Refresh

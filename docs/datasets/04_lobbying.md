@@ -1,6 +1,6 @@
 # Dataset 4 — Native Influence / Lobbying
 
-*Maintenance doc. Generated 2026-08-28. Tier: **Cedar Press ($500) - Lobbying***
+*Maintenance doc. Generated 2026-09-01. Tier: **Cedar Press ($500) - Lobbying***
 
 ## What this is
 
@@ -11,7 +11,7 @@ Senate LDA filings by and about Native entities, including the government-entiti
 | File | Rows | Size |
 |---|---:|---:|
 | `data/clean/native_entity_lobbying_disclosures.csv` | 27,796 | 18 MB |
-| `data/clean/tribe_year_lobbying_panel.csv` | 4,997 | 893 KB |
+| `data/clean/tribe_year_lobbying_panel.csv` | 4,997 | 952 KB |
 | `data/clean/lobbying_unmatched_clients.csv` | 515 | 79 KB |
 
 ## Refresh

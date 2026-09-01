@@ -1055,7 +1055,17 @@ break is a *definitional* widening of 713210 in 2022 that the crosswalk does not
 
 ---
 
-## F. SUBAWARDS — `subawards.csv` (63,548 rows)
+## F. SUBAWARDS — `subawards.csv` (~~63,548~~ **72,837** rows)
+
+> *Row count re-measured 2026-09-01 (workstream H): the file grew to 72,837
+> after the FY2021 API pull. **The per-year and per-threshold measurements
+> below are 2026-08-26 and were NOT re-derived** — they describe the reporting
+> regime, which has not changed, not the file size. Two things that HAVE
+> changed and bear on this section: the file carries **10,770 literal duplicate
+> rows** (14.8%), and `(subaward_number, subaward_date)` collides 27,470
+> times — so the `duplicate_status = 'primary'` filter this section relies on
+> is necessary but is **not sufficient** to make the file uniquely keyed. See
+> `docs/KNOWN_ISSUES.md` §C2.*
 
 ### F1 · `FFATA_SUBAWARD` · **STRUCTURAL + THRESHOLD** — subcontracting cannot reach 2000
 

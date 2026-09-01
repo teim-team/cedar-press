@@ -1,6 +1,6 @@
 # Dataset 1 — Indian Country Deals
 
-*Maintenance doc. Generated 2026-08-28. Tier: **Cedar Press ($500) - Indian Country Deals***
+*Maintenance doc. Generated 2026-09-01. Tier: **Cedar Press ($500) - Indian Country Deals***
 
 ## What this is
 
@@ -19,7 +19,7 @@ Dated M&A, financing, land, and award events where a Native entity is a principa
 
 **Cadence:** Monthly newsroom sweep; quarterly deep pass with one historical year backfilled (reverse-chronological — link rot punishes delay).
 
-**Build:** `code/22_deals_sweep.py (per-run), agent-driven`
+**Build:** `py -3 code/build.py plan deals   (then run it; the ledger sweep itself is agent-driven and per-run). Promoted table is written by 57_autoresolve_deal_parties.py; 88_build_deals_taxonomy.py is on cedar_pipeline.NEVER_RUN and must not be used to rebuild it.`
 
 Run `py -3 code/00_run_all.py --list` to see pipeline stages.
 

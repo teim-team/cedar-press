@@ -1,5 +1,5 @@
 {
-  "scanned_files": 421,
+  "scanned_files": 426,
   "counts": {
     "class1": 0,
     "class2a": 0,
@@ -179,7 +179,7 @@
     {
       "class": "class2c",
       "file": "13_build_fpds_hierarchy.py",
-      "line": 248,
+      "line": 383,
       "evidence": "stats[\"edge_rows_missing_side\"] += 1",
       "why": "counter 'edge_rows_missing_side' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -188,7 +188,7 @@
     {
       "class": "class2c",
       "file": "13_build_fpds_hierarchy.py",
-      "line": 251,
+      "line": 386,
       "evidence": "stats[\"self_edges_dropped\"] += 1",
       "why": "counter 'self_edges_dropped' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -757,7 +757,7 @@
       "file": "01_build_entity_spine.py",
       "line": 1,
       "evidence": "cedar_entity_spine.csv",
-      "why": "`cedar_entity_spine.csv` has FULL-REBUILD writer(s) ['01_build_entity_spine.py'] and IN-PLACE enricher(s) ['08_build_review_page.py', '115_pull_assistance_archive.py', '163_promote_nho_universe_in_place.py', '241_promote_individual_native_firms_in_place.py', '416_reconcile_spine_id_columns.py', '426_mint_bristol_bay_spine_entities.py', '503_identity.py', '51_add_anc_acronym_aliases.py', '52_add_village_corporations.py', '61_add_nho_intertribal_to_spine.py', '66_build_entity_hierarchy.py', '69_enrich_spine_from_federal_register.py', '71_fix_known_defects.py', '73_add_tcu_and_cdfi.py', '74_add_organization_acronyms.py', '75_add_bie_schools_and_uios.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
+      "why": "`cedar_entity_spine.csv` has FULL-REBUILD writer(s) ['01_build_entity_spine.py'] and IN-PLACE enricher(s) ['08_build_review_page.py', '115_pull_assistance_archive.py', '163_promote_nho_universe_in_place.py', '241_promote_individual_native_firms_in_place.py', '416_reconcile_spine_id_columns.py', '426_mint_bristol_bay_spine_entities.py', '503_identity.py', '51_add_anc_acronym_aliases.py', '524_universe_gap.py', '52_add_village_corporations.py', '61_add_nho_intertribal_to_spine.py', '66_build_entity_hierarchy.py', '69_enrich_spine_from_federal_register.py', '71_fix_known_defects.py', '73_add_tcu_and_cdfi.py', '74_add_organization_acronyms.py', '75_add_bie_schools_and_uios.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
       "waived": false,
       "waiver_reason": ""
     },
@@ -1652,6 +1652,9 @@
       "cedar_entity_spine.csv": [
         "01_build_entity_spine.py"
       ],
+      "cedar_event_id_registry.csv": [
+        "525_event_ids.py"
+      ],
       "cedar_exclusion_rulings.csv": [
         "02_extract_exclusion_rulings.py"
       ],
@@ -2182,6 +2185,7 @@
         "426_mint_bristol_bay_spine_entities.py",
         "503_identity.py",
         "51_add_anc_acronym_aliases.py",
+        "524_universe_gap.py",
         "52_add_village_corporations.py",
         "61_add_nho_intertribal_to_spine.py",
         "66_build_entity_hierarchy.py",
@@ -2564,6 +2568,7 @@
         "426_mint_bristol_bay_spine_entities.py",
         "503_identity.py",
         "51_add_anc_acronym_aliases.py",
+        "524_universe_gap.py",
         "52_add_village_corporations.py",
         "61_add_nho_intertribal_to_spine.py",
         "66_build_entity_hierarchy.py",

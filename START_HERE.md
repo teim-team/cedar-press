@@ -462,7 +462,10 @@ today: 85% x17, 70% x152, 55% x45, 40% x55.
 >
 > The objective is no longer architectural soundness. It is **how many datasets we can
 > ship, update without heroics, and have customers aggregate correctly**. Current honest
-> state: **READY 0 / 13**, with three datasets one blocker from the line.
+> state: **READY 2 / 13** — `nagpra` and `federal-register` — with
+> `native-owned-businesses` one blocker from the line (C5 row conservation).
+> *(This line read "READY 0 / 13" until 2026-09-01. Do not quote it; the
+> scoreboard is `docs/DATASET_READINESS.md` and it is regenerated, not typed.)*
 >
 > The order of work is fixed: **customer-facing correctness defects first**, then close the
 > dataset nearest READY, then — only if it blocks closure — architecture. `AGENTS.md`

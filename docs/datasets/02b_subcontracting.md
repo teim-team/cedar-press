@@ -1,6 +1,6 @@
 # Dataset 2b — Subcontracting
 
-*Maintenance doc. Generated 2026-08-28. Tier: **Cedar Press+ ($1,000) - Federal Subcontracting***
+*Maintenance doc. Generated 2026-09-01. Tier: **Cedar Press+ ($1,000) - Federal Subcontracting***
 
 ## What this is
 
@@ -10,7 +10,7 @@ Subaward relationships in both directions: Native entities as SUBS under non-Nat
 
 | File | Rows | Size |
 |---|---:|---:|
-| `data/clean/subawards.csv` | 72,837 | 57 MB |
+| `data/clean/subawards.csv` | 72,837 | 58 MB |
 | `data/clean/subaward_identifier_harvest.csv` | 304 | 44 KB |
 | `data/clean/prime_sub_network.csv` | 220 | 33 KB |
 | `data/clean/subaward_identifier_netnew.csv` | 210 | 44 KB |

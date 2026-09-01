@@ -1,6 +1,6 @@
 # Tribal Gaming Development & Markets
 
-*Maintenance doc. Generated 2026-08-28. Tier: **Cedar Grove ($2,500) - Gaming Intelligence***
+*Maintenance doc. Generated 2026-09-01. Tier: **Cedar Grove ($2,500) - Gaming Intelligence***
 
 ## What this is
 
@@ -10,7 +10,7 @@ Two layers: the current facility universe (directory core) and the proposal-to-o
 
 | File | Rows | Size |
 |---|---:|---:|
-| `data/clean/gaming_land_decisions.csv` | 138 | 178 KB |
+| `data/clean/gaming_land_decisions.csv` | 138 | 180 KB |
 | `data/clean/gaming_decision_events.csv` | 265 | 127 KB |
 | `data/clean/gaming_facilities.csv` | 787 | 1 MB |
 
@@ -18,7 +18,7 @@ Two layers: the current facility universe (directory core) and the proposal-to-o
 
 **Cadence:** Quarterly index scrape; NEPA extraction is Phase 2 and pilot-gated.
 
-**Build:** `code/23_gaming_phase1.py`
+**Build:** `py -3 code/build.py plan gaming   (46 tables, 7 declared rebuilders incl. 82_build_gaming_property_dataset.py, 91_build_nigc_declinations.py, 92_build_gaming_capacity_official.py)`
 
 Run `py -3 code/00_run_all.py --list` to see pipeline stages.
 

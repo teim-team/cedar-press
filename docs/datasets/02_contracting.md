@@ -1,6 +1,6 @@
 # Dataset 2 — Federal Contracting (Prime)
 
-*Maintenance doc. Generated 2026-08-28. Tier: **Cedar Press+ ($1,000) - Federal Prime Contracting***
+*Maintenance doc. Generated 2026-09-01. Tier: **Cedar Press+ ($1,000) - Federal Prime Contracting***
 
 ## What this is
 
@@ -11,9 +11,9 @@ Prime contract obligations to Native entities, resolved through the identifier s
 | File | Rows | Size |
 |---|---:|---:|
 | `data/clean/cedar_identifier_ledger_final.csv` | 20,577 | 5 MB |
-| `data/clean/cedar_publishable_identifiers.csv` | 1,577 | 335 KB |
-| `data/clean/fpds_uei_edges.csv` | 2,290 | 445 KB |
-| `data/clean/fpds_uei_cage_map.csv` | 24,977 | 3 MB |
+| `data/clean/cedar_publishable_identifiers.csv` | 1,577 | 344 KB |
+| `data/clean/fpds_uei_edges.csv` | 5,167 | 2 MB |
+| `data/clean/fpds_uei_cage_map.csv` | 34,601 | 8 MB |
 | `data/clean/cedar_cage_backfill.csv` | 4,362 | 467 KB |
 
 ## Refresh

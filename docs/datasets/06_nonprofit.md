@@ -1,6 +1,6 @@
 # Dataset 6 — Native Nonprofit & Philanthropic Economy
 
-*Maintenance doc. Generated 2026-08-28. Tier: **Cedar Press+ ($1,000) - Native Nonprofits***
+*Maintenance doc. Generated 2026-09-01. Tier: **Cedar Press+ ($1,000) - Native Nonprofits***
 
 ## What this is
 

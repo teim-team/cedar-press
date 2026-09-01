@@ -1,6 +1,6 @@
 # Dataset 10 — Native Bills & Congressional Votes
 
-*Maintenance doc. Generated 2026-08-28. Tier: **Cedar Press ($500) - Congressional Votes and Proposed Legislation***
+*Maintenance doc. Generated 2026-09-01. Tier: **Cedar Press ($500) - Congressional Votes and Proposed Legislation***
 
 ## What this is
 
@@ -14,8 +14,8 @@ Bills affecting Native entities, their roll calls, member positions and cosponso
 | `data/clean/bill_votes.csv` | 423 | 335 KB |
 | `data/clean/member_positions.csv` | 136,119 | 14 MB |
 | `data/clean/native_bill_outcomes.csv` | 3,069 | 2 MB |
-| `data/clean/native_bills_entity_bridge.csv` | 676 | 196 KB |
-| `data/clean/bill_votes_entity_bridge.csv` | 75 | 17 KB |
+| `data/clean/native_bills_entity_bridge.csv` | 676 | 204 KB |
+| `data/clean/bill_votes_entity_bridge.csv` | 75 | 18 KB |
 | `data/clean/native_bills_entity_class.csv` | 2,694 | 1 MB |
 | `data/clean/native_bills_subject_sweep.csv` | 2,414 | 1 MB |
 | `data/clean/bill_votes_official_verification.csv` | 305 | 108 KB |

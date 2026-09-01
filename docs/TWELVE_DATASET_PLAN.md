@@ -20,20 +20,33 @@ out to be the same question asked from four sides:
 
 ### Year coverage — better than expected, and the gaps are mostly deliberate
 
-109 dated tables. Latest year present:
+**RE-MEASURED 2026-09-01 (workstream H) and now regenerable** —
+`py -3 code/521_inventory.py`, per-table figures in `docs/INVENTORY.md`. This
+section read *"109 dated tables · 57 at 2026 · 78 of 109 current"*; the scan
+behind it saw fewer than half the dated tables it could have. Scope is stated
+explicitly this time: **the 210 SHIPPABLE tables**, coverage columns only, with
+provenance stamps (`fetched_date`, `classified_date`, …) refused by name so
+Cedar's own clock is never read as the data's coverage.
 
-| latest year | tables |
+| latest coverage year | shippable tables |
 |---:|---:|
-| 2026 | **57** |
-| 2025 | 21 |
-| 2024 | 3 |
-| 2023 | 9 |
-| ≤2022 | 4 |
+| 2026 | **123** |
+| 2025 | 22 |
+| 2024 | 2 |
+| 2023 | 2 |
+| ≤2022 | 16 |
+| no coverage column at all | 45 |
 
-**78 of 109 tables are current through 2025 or 2026.** Of the 30 ending
-earlier, most are **archives by design, not staleness** — `faads_*` is
-explicitly the FY2000–2007 backfill, `sam_prime_contracts_fy2000_2007` says so
-in its name, `tcu_roster` carries founding years back to 1962.
+**145 of 165 dated shippable tables are current through 2025 or 2026** — 88%,
+against the 72% this section used to report. Of the 20 ending earlier, most are
+**archives by design, not staleness** — `faads_*` is explicitly the
+FY2000–2007 backfill, `sam_prime_contracts_fy2000_2007` says so in its name,
+`tcu_roster` carries founding years back to 1962.
+
+A further **13 tables carry dates beyond 2026** — compact expiries, bond
+maturities, FPDS `2099` period-of-performance sentinels. Those are not
+coverage and are counted at 2026 above rather than being allowed to overstate
+how current the data is; they are named in `docs/INVENTORY.md`.
 
 **The distinction matters and we do not currently record it.** A table ending
 in 2007 because that is its era is healthy; a table ending in 2023 because
@@ -41,12 +54,30 @@ nobody re-pulled it is a gap. Action: add `coverage_intent`
 (`current` | `archive` | `point_in_time`) to the dataset contract, so the
 scoreboard can tell them apart and flag only the real ones.
 
-### Identity — the honest number is 48%
+### Identity — the honest number is 44%
 
-**2,195,145 entity-bearing rows scanned; 1,053,435 carry a Cedar id (48.0%).**
+**CORRECTED 2026-09-01 (workstream H).** This section read *"2,195,145
+entity-bearing rows scanned; 1,053,435 carry a Cedar id (48.0%)"*, and that
+figure contradicted the table printed immediately below it: the denominator
+2,195,145 is **smaller than `faads_transactions_all_agencies.csv` alone**
+(2,769,748 rows), which the same table lists as entity-bearing and 0% keyed. A
+scan that reports a total smaller than one of its own members has skipped
+something.
 
-42 tables sit under 75% keyed. The concentration is extreme — a handful of
-very large tables account for most of the unkeyed mass:
+Re-measured with the definition stated explicitly, and now regenerable:
+
+> A table is **entity-bearing** if its header carries `cedar_uid` or one of the
+> eighteen id columns in `503_identity.ID_COLS` (imported by
+> `code/521_inventory.py`, not copied). A row is **keyed** if that column holds
+> a non-empty, non-null-word value.
+
+**134 entity-bearing tables · 7,250,710 rows · 3,215,604 carry a Cedar id
+(44.3%).** Regenerate with `py -3 code/521_inventory.py`; the per-table figures
+are in `docs/INVENTORY.md`.
+
+**46 tables sit under 75% keyed** (the section previously said 42). The
+concentration is extreme and the direction of the lever is unchanged — a
+handful of very large tables account for most of the unkeyed mass:
 
 | table | keyed |
 |---|---|
@@ -56,8 +87,11 @@ very large tables account for most of the unkeyed mass:
 | `ferc_ex_parte_parties.csv` | 0.2% (4,246) |
 | `entity_candidates_new/rejected` | 0% — correct, these are *candidates* |
 
-**This is the single biggest lever in the project.** Keying FAADS alone moves
-the global figure by roughly 20 points, and it is one dataset, one join path.
+**This is the single biggest lever in the project**, and on the corrected
+denominator it is a bigger lever than this section used to claim. Keying the
+two FAADS tables alone (2,830,409 rows at 0%) moves the global figure from
+**44.3% to 83.4%** — 39 points, not the ~20 stated before 2026-09-01 — and it
+is one dataset, one join path.
 
 ### The master list — 1,536 distinct Native entities, permanently identified
 
@@ -158,8 +192,10 @@ Ordered so that each wave unblocks the next, not by size.
 uncertainty mass in Cedar. It also carries the destroyed-identity defect
 already diagnosed in `prime_contracts` (a transaction feed projected onto a
 schema with no modification number) and needs a full re-extract. Doing this
-one first turns the global keyed figure from 48% to roughly 68% and gives
-every downstream measurement a real denominator.
+one first turns the global keyed figure from **44.3% to roughly 83%**
+(corrected 2026-09-01; this read "48% to roughly 68%" against a denominator
+that had silently omitted the 2.77M-row table it was about) and gives every
+downstream measurement a real denominator.
 
 ### Wave 2 — the closest to the line (one blocker each)
 

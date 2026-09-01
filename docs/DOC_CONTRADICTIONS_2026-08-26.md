@@ -17,24 +17,35 @@ much damage acting on the wrong value would do.
 
 ---
 
-## Ground truth, measured 2026-08-26
+## Ground truth
 
-| file | value |
-|---|---|
-| `data/clean/prime_contracts.csv` | 1,217,768 rows · $310.01B · FY2000–2026 · attributed $244.77B (79.0%) across 498 entities |
-| `data/clean/federal_funding_transactions.csv` | 684,923 rows · FY2007–2026 |
-| `data/clean/faads_transactions_all_agencies.csv` | 2,769,748 rows |
-| `data/clean/subawards.csv` | 63,548 rows |
-| `data/clean/cedar_identifier_ledger_final.csv` | 20,559 rows · A 2,148 · B 5,690 · C 12,524 · X 197 · `tier_A_ruled` 1,538 |
-| `data/spine/cedar_entity_spine.csv` | **1,310 entities**, 16 classes |
-| `data/clean/gaming_ordinances.csv` | 1,155 rows = 321 `ORIGINAL_ORDINANCE` + 834 `AMENDMENT`; **299 distinct `tribe_id`**, 55 rows blank; 314 distinct `tribe_name` |
-| `data/clean/gaming_property_locations.csv` | 2,212 rows; **1,068 rows** `publishable = Y` with coordinates |
-| `data/clean/deals_classified.csv` | 921 rows · 874 entity-linked |
-| `data/clean/resource_revenue.csv` | 10,482 rows · **734 recipient-linked** |
-| `data/clean/ferc_docket_filings.csv` | 81,805 rows · 127 dockets · `ADVOCACY` 18,310 + `GOVERNMENT_ENGAGEMENT` 228 · `is_lobbying` = 0 on every row |
-| `data/clean/fac_tribal_single_audits.csv` | 6,780 rows · 2,052 `is_public = 1` |
-| `data/clean/np_schedule_i_grants.csv` | 58,685 rows · **627** distinct `filer_ein` |
-| `data/clean/admin_appeal_decisions.csv` | 15,613 = IBIA 4,855 + IBLA 10,758 |
+**RE-MEASURED 2026-09-01 by workstream H.** This register exists to be the
+arbiter when two documents disagree, which makes a stale line here the most
+expensive stale line in the repository — it is *believed*. Six of the fourteen
+rows had gone stale in five days. The `2026-09-01` column is the live count;
+where it differs, **the 2026-09-01 figure is the one to quote.**
+
+The regenerable, always-current version of this table is
+`docs/INVENTORY.md` (`py -3 code/521_inventory.py`), which measures every one
+of 300+ tables rather than these fourteen. Prefer it. This register is kept for
+the *contradictions* below, which are prose and cannot be regenerated.
+
+| file | as measured 2026-08-26 | measured 2026-09-01 |
+|---|---|---|
+| `data/clean/prime_contracts.csv` | 1,217,768 rows · $310.01B · FY2000–2026 · attributed $244.77B (79.0%) across 498 entities | **unchanged at 1,217,768 rows**; attributed obligations $244,765,639,853.91 across 498 entities; **0 literal duplicate rows** (the 80,778 were distinct FPDS transactions, restored by `430`, none deleted) |
+| `data/clean/federal_funding_transactions.csv` | 684,923 rows · FY2007–2026 | **701,955 rows** |
+| `data/clean/faads_transactions_all_agencies.csv` | 2,769,748 rows | unchanged · 179,259 literal duplicate rows (DIAGNOSED, not repaired) |
+| `data/clean/subawards.csv` | 63,548 rows | **72,837 rows** · 10,770 literal duplicates |
+| `data/clean/cedar_identifier_ledger_final.csv` | 20,559 rows · A 2,148 · B 5,690 · C 12,524 · X 197 · `tier_A_ruled` 1,538 | **20,577 rows · A 2,286 · X 468 · `tier_A_ruled` 1,676** (from `62`'s live metrics) |
+| `data/spine/cedar_entity_spine.csv` | **1,310 entities**, 16 classes | **1,555 entities, 17 classes** — and it moved TWICE during the 2026-09-01 pass (1,536 → 1,555 while three workstreams ran). Never quote the spine size from a document; read `data/spine/cedar_identity_register.csv`, the one table git tracks |
+| `data/clean/gaming_ordinances.csv` | 1,155 rows = 321 `ORIGINAL_ORDINANCE` + 834 `AMENDMENT`; **299 distinct `tribe_id`**, 55 rows blank; 314 distinct `tribe_name` | 1,155 rows unchanged; **302 distinct `tribe_id`** |
+| `data/clean/gaming_property_locations.csv` | 2,212 rows; **1,068 rows** `publishable = Y` with coordinates | 2,212 rows; **1,471 rows `publishable = Y`** (741 `N`, which is the figure §7 of the owner queue uses). The 1,068 was the *with-coordinates* subset — a different question, and the two were being read as the same one |
+| `data/clean/deals_classified.csv` | 921 rows · 874 entity-linked | **935 rows · 886 entity-linked** |
+| `data/clean/resource_revenue.csv` | 10,482 rows · **734 recipient-linked** | unchanged |
+| `data/clean/ferc_docket_filings.csv` | 81,805 rows · 127 dockets · `ADVOCACY` 18,310 + `GOVERNMENT_ENGAGEMENT` 228 · `is_lobbying` = 0 on every row | **102,615 rows** · 822 literal duplicates |
+| `data/clean/fac_tribal_single_audits.csv` | 6,780 rows · 2,052 `is_public = 1` | unchanged |
+| `data/clean/np_schedule_i_grants.csv` | 58,685 rows · **627** distinct `filer_ein` | unchanged · 101 literal duplicates |
+| `data/clean/admin_appeal_decisions.csv` | 15,613 = IBIA 4,855 + IBLA 10,758 | unchanged at 15,613 |
 
 ---
 

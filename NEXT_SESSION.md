@@ -97,7 +97,12 @@ does not become the seventh session to step around a red line.
 
 ## 4. Open, in priority order
 
-1. **Register row for the 1,749** (§1). Clears the gate.
+1. ~~**Register row for the 1,749** (§1). Clears the gate.~~ **DONE — struck
+   2026-09-01 (workstream H).** §1 above records it; re-verified by running
+   `py -3 code/62_no_regression_check.py`, exit 0, `no regressions`, and by
+   measuring `prime_contracts_entity_year.csv` at 6,715 rows / 0 literal
+   duplicates. Leaving a completed item at the top of a priority list is how
+   the next session reads the whole list as stale.
 2. **`517_export_safety` still calls `RESOLVED` definite.** The pipeline now
    knows better than the gate does. Align 517 with the three-way split
    (`CONFIRMED_AS_OF` is the only definite state).

@@ -7,7 +7,10 @@ GENERATED REPORT. Moves nothing, deletes nothing.
 
 WHY
 ---
-code/ holds 419 scripts. Some are load-bearing, some are one-off fixes that
+code/ holds several hundred scripts - the live census is printed at the top of
+the report itself, and is deliberately NOT repeated here, because the last
+hardcoded figure in this docstring (419) was stale by the time anyone read it.
+Some are load-bearing, some are one-off fixes that
 were applied months ago, some are superseded versions still sitting beside
 their replacement and quietly writing the same table (the v1 lobbying chain
 retired on 2026-08-28 was exactly that). Nothing distinguished them, so nobody
@@ -148,9 +151,28 @@ def main() -> int:
 
     # 6. DOES IT WRITE ANYTHING AT ALL - not just to data/clean?
     # A puller filling data/raw and a generator filling docs/ are both alive.
+    #
+    # REPAIRED 2026-09-01 (workstream H). This regex was written before the
+    # solo B1 de-hardcode sweep and it did not survive it. The sweep rewrote
+    # every project-root literal into `Path(__file__)...parent / "data" /
+    # "raw"`, so the path stopped being the string `data/raw` and became four
+    # separate string constants - and the pattern matched none of them. It also
+    # never recognised a plain `open(p, "wb").write(...)`, which is how the
+    # ANCSA portal crawler saves every PDF it fetches.
+    #
+    # MEASURED, not guessed: 48 scripts flipped from "writes nothing anywhere"
+    # to "writes", among them `code/ancsa_portal/download.py` - a live crawler
+    # that this report was listing as an ARCHIVE CANDIDATE while it was filling
+    # data/raw/external/ancsa_portal. That is the exact failure mode §17c of
+    # docs/RELEASE_REPLAY_LOG.md caught in 516's input discovery; the same
+    # sweep blinded this detector too and nobody re-ran it.
     WRITES_SOMEWHERE = _re.compile(
         r"(data/raw|data/staging|data[\\/]+raw|data[\\/]+staging|"
-        r"docs/|review/|logs/|dist/|\.write_text\(|to_csv\(|json\.dump)", _re.I)
+        r"docs/|review/|logs/|dist/|\.write_text\(|to_csv\(|json\.dump|"
+        # the SHAPE the de-hardcode sweep produces: "data" / "raw"
+        r"[\"']data[\"']\s*/\s*[\"'](raw|staging|interim|restricted)[\"']|"
+        # and a bare file write, text or binary
+        r"open\([^)]*[\"'][wax]b?[\"'])", _re.I)
     writes_anywhere = set()
     for p in all_py:
         try:

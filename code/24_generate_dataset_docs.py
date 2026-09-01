@@ -95,7 +95,16 @@ SPEC = {
                  "deals_*_additions.csv (9 files)"],
         "refresh": "Monthly newsroom sweep; quarterly deep pass with one historical "
                    "year backfilled (reverse-chronological — link rot punishes delay).",
-        "build": "code/22_deals_sweep.py (per-run), agent-driven",
+        # CORRECTED 2026-09-01 (workstream H): `code/22_deals_sweep.py` does
+        # not exist and never has in this tree - `code/22_apply_temporal_floor.py`
+        # holds that number. A runbook naming a script that is not on disk fails
+        # contract point C9 the moment somebody tries to execute it, which is the
+        # whole test C9 is.
+        "build": "py -3 code/build.py plan deals   (then run it; the ledger "
+                 "sweep itself is agent-driven and per-run). Promoted table is "
+                 "written by 57_autoresolve_deal_parties.py; "
+                 "88_build_deals_taxonomy.py is on cedar_pipeline.NEVER_RUN and "
+                 "must not be used to rebuild it.",
         "never": [
             "**NEVER chart 'deals by year' without splitting negotiated transactions "
             "from federal awards.** The ledger holds two populations: 622 'Grant / "
@@ -656,7 +665,10 @@ SPEC = {
                   "compact_events.csv"],
         "live": [],
         "refresh": "Quarterly against the BIA compact index + FR notice sweep.",
-        "build": "code/15_build_compacts.py",
+        # CORRECTED 2026-09-01 (workstream H): `code/15_build_compacts.py`
+        # does not exist. The compact chain is the 15a-15e sequence.
+        "build": "py -3 code/15a_compacts_inventory.py -> 15b_build_compact_index.py "
+                 "-> 15c_terms_pilot.py -> 15d_terms_extract.py -> 15e_finalize_terms.py",
         "never": [
             "Never trust the BIA index's Tribes column. It is misaligned with Title on 61 of "
             "1,189 rows (5.1%) — Mohegan filed under Mississippi Choctaw, Mashpee under "
@@ -688,7 +700,12 @@ SPEC = {
                   "gaming_facilities.csv"],
         "live": [],
         "refresh": "Quarterly index scrape; NEPA extraction is Phase 2 and pilot-gated.",
-        "build": "code/23_gaming_phase1.py",
+        # CORRECTED 2026-09-01 (workstream H): `code/23_gaming_phase1.py` does
+        # not exist; `code/23_cross_dataset_propagation.py` holds that number and
+        # is a different thing entirely.
+        "build": "py -3 code/build.py plan gaming   (46 tables, 7 declared "
+                 "rebuilders incl. 82_build_gaming_property_dataset.py, "
+                 "91_build_nigc_declinations.py, 92_build_gaming_capacity_official.py)",
         "never": [
             "Never quote a proposal-stage number as a facility fact. 1,108 capacity "
             "observations are proposal/construction stage, including 298 machine counts.",

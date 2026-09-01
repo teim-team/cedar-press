@@ -1,6 +1,6 @@
 # Dataset Maintenance Docs
 
-*Generated 2026-08-28 by `code/24_generate_dataset_docs.py`. Edit the SPEC in that script, not these files.*
+*Generated 2026-09-01 by `code/24_generate_dataset_docs.py`. Edit the SPEC in that script, not these files.*
 
 One file per dataset. Each answers: what it is, where its inputs are, how to refresh it, what is known to be wrong, and what must never be done to it.
 

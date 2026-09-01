@@ -114,7 +114,10 @@ meant "a rule selected it", never "it is supported".
    Of these, **4,100 are identity-critical facts standing on `legacy_only`
    evidence** — a row with no recorded provenance. That number is now a gated
    metric (`identity_facts_legacy_only`, MUST_NOT_RISE) so the exposure can
-   only shrink.
+   only shrink. *(Re-measured 2026-09-01: **4,089**. The ratchet floor in
+   `data/clean/_regression_baseline.json` reads 4089, so the exposure has in
+   fact shrunk by 11 and the gate has locked in the smaller number. Where this
+   paragraph and the baseline disagree, the baseline is the live figure.)*
 
 2. **R07 may no longer decide an identity-critical predicate.** Ties on
    entity class, canonical name, official name, recognition, parentage,
@@ -182,9 +185,17 @@ These need design work beyond a session and are recorded as open, not waved off.
   and the honest number is uncomfortable.** A declaration is now `grain` +
   `primary_key` + `join_keys` + `join_cardinality`, validated against the
   file on every run; a declared grain the data contradicts is
-  release-blocking. **3 of 210 shippable tables declare and validate one.
-  207 do not**, and that count is ratcheted (`contract_grain_unstated_
-  shippable`, MUST_NOT_RISE) rather than claimed as done. See ADR-007.
+  release-blocking. When this was written, **3 of 210 shippable tables
+  declared and validated one and 207 did not**, and that count was ratcheted
+  (`contract_grain_unstated_shippable`, MUST_NOT_RISE) rather than claimed as
+  done.
+
+  **Updated 2026-09-01 (workstream H), measured: 185 of 210 now declare and
+  validate a grain; 25 do not.** The sweep tested candidate keys against the
+  FULL file for all 207 and split them honestly — 185 DECLARED_VALIDATED, 12
+  OPEN_WITH_EVIDENCE (a question only an owner can answer), 13 DEFECTIVE (the
+  data is broken and a declaration cannot fix it), 0 unexplained.
+  `contract_violations` is still 0. See ADR-007 and `docs/GRAIN_AUDIT.md`.
 - **F8 — a subsidiary fused to its parent.** Analysed, proposal recorded, NOT
   implemented. Measured: **3,511 distinct (entity, differing legal name)
   pairs** across 714 entities, carrying **$173.9B** of prime dollars, are

@@ -174,6 +174,17 @@ LINEAGE_ROOTS = {
              "may corroborate a federal source. It is authoritative for what "
              "it regulates and for nothing else; a state gaming commission "
              "does not decide federal recognition."),
+    "LR_IHS": dict(
+        label="Indian Health Service rosters - Tribal Self-Governance "
+              "Program compactors, Title V urban programs",
+        derives_from="", independence_is_unverified=0,
+        note="A federal roster of organisations that have COMPACTED with IHS. "
+             "Authoritative for that fact and for nothing else - compacting "
+             "does not make an organisation a tribe, and the 19 entities "
+             "added from it on 2026-09-01 are self-governance consortia, not "
+             "governments. Independent of the Federal Register: a consortium "
+             "on this roster is generally NOT on the FR tribal list, which is "
+             "the whole reason it needed its own class."),
     "LR_NHOA": dict(
         label="Native Hawaiian Organizations Association directory",
         derives_from="", independence_is_unverified=0,
@@ -238,6 +249,13 @@ SOURCES = {
     "sba_8a": dict(lineage_root="LR_SBA", tier_ceiling="A", authority_for=[]),
     "nhoa_member_directory": dict(lineage_root="LR_NHOA", tier_ceiling="C",
                                   authority_for=[]),
+    # Added 2026-09-01. Workstream K appended 19 tribal health organisations
+    # from the IHS Tribal Self-Governance roster, each carrying its
+    # verification_route - but route_to_source could not see the route, so 57
+    # identity-critical facts landed as unattributed_legacy and the exposure
+    # ratchet ROSE. The provenance existed; the harvester was blind to it.
+    "ihs_roster": dict(lineage_root="LR_IHS", tier_ceiling="A",
+                       authority_for=[]),
     # Added 2026-08-30 for workstream B: 127 facts were falling back to
     # org_self_statement, which is wrong in BOTH directions - it credited the
     # entity with saying something a regulator said, and it put a regulator's
@@ -267,6 +285,9 @@ SOURCES = {
 # mapped to sources. Longest matching pattern wins, so specific beats generic.
 ROUTE_TO_SOURCE = [
     ("doi_onhr_notification_list", "doi_onhr_notification_list"),
+    ("ihs_tribal_self_governance", "ihs_roster"),
+    ("ihs_title_v", "ihs_roster"),
+    ("ihs_roster", "ihs_roster"),
     ("nhoa_member_directory", "nhoa_member_directory"),
     ("elijah_ruling", "elijah_ruling"),
     ("owner note", "elijah_ruling"),
@@ -1939,9 +1960,28 @@ def phase_harvest(apply: bool) -> list:
                 pct=round(100.0 * lg.unaccounted() / max(lg.rows_in, 1), 2),
                 examples="", harvest_date=TODAY))
     if apply:
-        write_csv(CONSERVATION, crows,
-                  ["source_table", "rows_in", "disposition", "rows", "pct",
-                   "examples", "harvest_date"])
+        # MERGE, NEVER REWRITE. cedar_harvest_conservation.csv is SHARED -
+        # 519 (federal-register, 22 ledgers, 2,046,000 rows) and 77/78
+        # (nagpra, 372,182 rows) both merge their C5 coverage into it, and
+        # both say so in their docstrings.
+        #
+        # This function wrote it wholesale. On 2026-09-01 the integrator ran
+        # `510 all --apply` after a spine append and destroyed both: the file
+        # went from 2,146,673 accounted rows to 101,176, and 62 caught it as
+        # harvest_source_rows_read falling by 95%. Two datasets silently lost
+        # the evidence for the contract point they had just been closed on.
+        #
+        # This is the class-6 shape - a full-rebuild writer and in-place
+        # enrichers on one table with no declared ordering - in a file that
+        # gates other people's work. The fix is the one 519 already used:
+        # preserve every key this run does not own.
+        _KEY = ("source_table", "disposition")
+        _cols = ["source_table", "rows_in", "disposition", "rows", "pct",
+                 "examples", "harvest_date"]
+        _mine = {(r["source_table"], r["disposition"]) for r in crows}
+        _kept = [r for r in read_csv(CONSERVATION)
+                 if (r.get("source_table"), r.get("disposition")) not in _mine]
+        write_csv(CONSERVATION, crows + _kept, _cols)
     unacc = sum(lg.unaccounted() for lg in CONSERVATION_LEDGERS)
 
     cols = ["assertion_id", "cedar_uid", "subject_qualifier", "predicate",

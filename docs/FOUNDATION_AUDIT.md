@@ -131,7 +131,7 @@ duplicating.
 
 | spec requirement | existing implementation | state |
 |---|---|---|
-| dependency cycle detection, pipeline | `cedar_pipeline.KNOWN_ORDERINGS` + `derived_orderings()` — **80 orderings across 33 tables** | live |
+| dependency cycle detection, pipeline | `cedar_pipeline.KNOWN_ORDERINGS` + `derived_orderings()` — **103 orderings across 48 tables** (27 curated with a paid cost written down, 76 derived from 293's class-6 scan). *Re-measured 2026-09-01; the figure here read 80/33 when written* | live |
 | "do not run this" enforcement | `cedar_pipeline.guard()` / `NEVER_RUN` (4 scripts), enforced in code not comment | live |
 | build entry point per dataset | `code/build.py plan|run|ship` — 12 collections + entity layer | live |
 | machine-readable dataset inventory | `docs/ARCHITECTURE.md` + `docs/schema/dependency_manifest.json` (401 KB), both generated | live |
@@ -139,22 +139,29 @@ duplicating.
 | canonical id stability | `cedar_uid`, meaning-free, 2 check chars, **100% substitution / 100% transposition** caught, deterministic re-mint verified by identical register digest | live |
 | id materialised on every dataset | `503_identity.py stamp` — **125 tables, 3,007,088 rows (100.0%)** | live |
 | release/regression gate | `62_no_regression_check.py` — ratcheted metrics, `MUST_BE_ZERO` / `MUST_NOT_RISE`, non-zero exit | live |
-| failure-pattern detection | `293_lint_bug_classes.py` — **7 classes, 147 unwaived**, waivers counted and named | live |
+| failure-pattern detection | `293_lint_bug_classes.py` — **8 numbered classes (class 2 splits a/b/c, so 10 gated counters), 146 unwaived** across 426 scanned files, waivers counted and named. *Re-measured 2026-09-01; read "7 classes, 147" when written — class 8 (`code_not_relocatable`) was added by the B1 sweep that closed debt D1, and class 6 fell 30 → 29* | live |
 | retirement with history | `graveyard/<date>_<reason>/GRAVEYARD_INDEX.md`, nothing deleted | live |
 
 ### F-2.1 The spec's failure-pattern list maps onto 293 more than it differs
 
-**OBSERVED**, current counts:
+**OBSERVED.** Counts as first written (2026-08-29), and **re-measured
+2026-09-01 by workstream H** against `62`'s live `lint_class*` metrics:
 
-| spec pattern | 293 class | count |
-|---|---|---:|
-| id minted from outside the row (process hash, rank, position) | **class7** | 42 |
-| full rebuild silently reverting an in-place enricher | class6 | 30 |
-| a drop counter that never names what it dropped | class2c | 60 |
-| a per-unit budget that truncates and still marks COMPLETE | class4 | 9 |
-| an "already done" short-circuit that rewrites its own log | class5 | 6 |
-| a RULED method read as a positive ruling | class3 | 0 |
-| reading staging/additions instead of the promoted table | class1 | 0 |
+| spec pattern | 293 class | as written | live 2026-09-01 |
+|---|---|---:|---:|
+| id minted from outside the row (process hash, rank, position) | **class7** | 42 | 42 |
+| full rebuild silently reverting an in-place enricher | class6 | 30 | **29** |
+| a drop counter that never names what it dropped | class2c | 60 | 60 |
+| a per-unit budget that truncates and still marks COMPLETE | class4 | 9 | 9 |
+| an "already done" short-circuit that rewrites its own log | class5 | 6 | 6 |
+| a RULED method read as a positive ruling | class3 | 0 | 0 |
+| reading staging/additions instead of the promoted table | class1 | 0 | 0 |
+| *(added after this table was written)* the project root hardcoded | class8 | — | **0, CLOSED** |
+| **total unwaived** | | 147 | **146** |
+
+Class 8 did not exist when this section was written: it was added by the solo
+B1 de-hardcode pass that closed debt D1, and it holds at 0 as MUST_NOT_RISE.
+`class2a` and `class2b` are also live counters at 0.
 
 **INFERENCE:** Phase 6's release gate should add the spec's *missing* checks to
 `62`/`293` as new ratcheted metrics — not stand up a second command system.
@@ -194,7 +201,7 @@ Ranked by the spec's criteria. "Blast radius" is what breaks if it goes wrong.
 | 6 | Undeclared many-to-many joins unguarded | high | unknown | silent row multiplication in any build | high | medium |
 | 7 | No agent-task dependency graph or handoff schema | medium | certain | duplicated work, unverifiable "done" | low | low |
 | 8 | 3 tables still undocumented in the codebook | medium | certain | those 3 cannot ship | already gated | low |
-| 9 | `docs/DOC_CONTRADICTIONS_2026-08-26.md` not re-run since today's changes | medium | certain | stale arbiter of conflicting numbers | low | low |
+| 9 | ~~`docs/DOC_CONTRADICTIONS_2026-08-26.md` not re-run~~ **ADDRESSED 2026-09-01.** It has no generator to re-run — it is hand-written — which is why it went stale: **6 of its 14 ground-truth rows** were wrong by 2026-09-01 (`federal_funding_transactions` 684,923→701,955; `subawards` 63,548→72,837; spine 1,310→1,536; `ferc_docket_filings` 81,805→102,615; `deals_classified` 921→935; the ledger row). All six are corrected in place with both figures shown. The durable fix is `docs/INVENTORY.md` / `code/521_inventory.py`, which measures all 300+ tables and **is** regenerable | medium | certain | stale arbiter of conflicting numbers | low | low |
 
 ---
 
@@ -301,10 +308,27 @@ Stated plainly, because the spec forbids claiming unverified behaviour.
   `build.py run --execute` has never been executed for any collection.
 - **UNVERIFIED:** determinism of any dataset build. The only determinism proven
   today is the **identity register** (identical digest on re-mint) — not a build.
-- **UNVERIFIED:** whether a previous release can be reproduced. `dist/` holds
-  one CSV; the shipping chain has never been run end to end.
-- **UNVERIFIED:** actual vs declared row grain per dataset. The spec requires
-  both; only declared grain exists, in `docs/datasets/*.md` and the codebook.
+- ~~**UNVERIFIED:** whether a previous release can be reproduced. `dist/` holds
+  one CSV; the shipping chain has never been run end to end.~~
+  **PARTLY ANSWERED — updated 2026-09-01 (workstream H).** Two of the three
+  claims in that sentence were already false when written and the third has
+  moved. `dist/` holds **144 product directories, a 202-table
+  `cedar_press.db`, `cedar_press_master.xlsx` and 199 `.notes.json` receipts**,
+  not one CSV. Four collections have since been captured and replayed
+  (`nagpra`, `subcontracting`, `natural-resources`,
+  `native-owned-businesses`) with **25 tables compared and 4 byte-identical** —
+  `docs/RELEASE_REPLAY_LOG.md` part II. What is *still* unverified is a full
+  BUILD replay: rebuilding `dist/` from raw at a stamped commit and matching
+  digests. Debt **D5**, 9 of 13 collections never replayed.
+- ~~**UNVERIFIED:** actual vs declared row grain per dataset. The spec requires
+  both; only declared grain exists, in `docs/datasets/*.md` and the codebook.~~
+  **CLOSED — updated 2026-09-01.** ADR-007 made a declaration four things
+  (`grain` + `primary_key` + `join_keys` + `join_cardinality`) and validates
+  every declared field against the file on **every run**. Actual grain is
+  measured for all 210 shippable tables and recorded in
+  `docs/schema/grain_evidence.json`: **185 declared-and-validated, 12 open on
+  an owner ruling, 13 defective in the data, 0 unexplained**, with
+  `contract_violations` gating at MUST_BE_ZERO and reading 0.
 - **NOT DONE:** the per-dataset trace table (source registration → … →
   publication) for all 12. `docs/ARCHITECTURE.md` has the tables-and-scripts
   half; the source-acquisition and snapshot half is not machine-readable.

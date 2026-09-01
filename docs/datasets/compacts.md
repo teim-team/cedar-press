@@ -1,6 +1,6 @@
 # Tribal-State Gaming Compacts
 
-*Maintenance doc. Generated 2026-08-28. Tier: **Cedar Grove ($2,500) - Gaming Intelligence***
+*Maintenance doc. Generated 2026-09-01. Tier: **Cedar Grove ($2,500) - Gaming Intelligence***
 
 ## What this is
 
@@ -10,16 +10,16 @@ Class III compacts and amendments — who may operate what, until when, and on w
 
 | File | Rows | Size |
 |---|---:|---:|
-| `data/clean/compacts.csv` | 707 | 666 KB |
+| `data/clean/compacts.csv` | 707 | 674 KB |
 | `data/clean/compact_versions.csv` | 1,158 | 910 KB |
 | `data/clean/compact_terms.csv` | 1,311 | 1 MB |
-| `data/clean/compact_events.csv` | 31 | 20 KB |
+| `data/clean/compact_events.csv` | 31 | 21 KB |
 
 ## Refresh
 
 **Cadence:** Quarterly against the BIA compact index + FR notice sweep.
 
-**Build:** `code/15_build_compacts.py`
+**Build:** `py -3 code/15a_compacts_inventory.py -> 15b_build_compact_index.py -> 15c_terms_pilot.py -> 15d_terms_extract.py -> 15e_finalize_terms.py`
 
 Run `py -3 code/00_run_all.py --list` to see pipeline stages.
 
