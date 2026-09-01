@@ -4952,10 +4952,17 @@ gate's backup diff is the only thing standing between us and silent loss.**
 natural-resources file or table.** Standing rule 15 option 3: named, with
 owners, rather than recorded as "pre-existing" and stepped around.
 
-*Three consecutive runs of the unchanged gate at 18:57, 19:26 and 19:52
-produced three DIFFERENT regression sets, because fourteen workstreams were
-writing `code/` and `data/clean/` throughout. The set below is the 19:52 run.
-The sets are different; the ownership conclusion is the same in all three.*
+*FOUR consecutive runs of the unchanged gate produced four DIFFERENT
+regression sets, because fourteen workstreams were writing `code/` and
+`data/clean/` throughout. The table below is the 19:52 run. The final run,
+after this workstream's last edit, reads: `lint_class2b` +1
+(`shard_f_membership.py`), `lint_class2c` +1
+(`344_pull_nigc_document_surface.py`), `lint_class5` +2
+(`547_shard_c_hidden_endpoint_sweep.py`, `shard_g_newsletters.py`),
+`tables_missing_from_25_TABLES` and `tables_missing_from_27_SPEC` +1 each.
+`code_duplicate_numbers` had cleared by then — somebody renamed. The sets are
+different every time; the ownership conclusion is the same in all four, and
+`files_with_columns_lost_vs_backup` is **0** in all four.*
 
 | line | owner (named by `62`/`293` itself) | what |
 |---|---|---|
@@ -5198,3 +5205,87 @@ carries a distinctive token of the name AND an ANCSA/Alaska Native signal;
 otherwise it is `UNRELATED_DOMAIN` with the reason. **A false "website found" is
 worse than an honest absence**, and any shard generating candidate domains needs
 the same check.
+
+## A SOURCE'S OWN RETROSPECTIVE LABELLING IS NOT A FACT ABOUT THE PERIOD IT DESCRIBES (2026-09-01)
+
+*Found by the owner, in one line: "1880? What data goes that far back lol."
+Named here because it is a defect SHAPE this project had not written down, and
+it will recur anywhere a modern publisher backfills a long series.*
+
+The Osage Minerals Council publishes one spreadsheet titled **"OSAGE HEADRIGHT
+HISTORY — 1880-2032 ACTUAL PRICES"**. Workstream O dropped a coverage floor to
+the document's own floor and published all of it, applying the characterisation
+the loop applied to every other Osage row:
+
+```
+commodity   = "Osage Mineral Estate (oil, gas, sand and gravel, water use)"
+land_status = trust
+confidence  = A on four rows
+```
+
+The Osage Mineral Estate was **created by the Osage Allotment Act of 1906**.
+The first Osage oil lease of any kind was the **Foster lease, 1896-03-16**. So
+sixteen rows asserted oil-and-gas revenue **from an estate that did not exist,
+in years with no oil lease at all** — and the source itself says so, three
+footnotes down: *"Individual payments began in 1909."*
+
+**Nothing was fabricated.** Every figure is real, published, faithfully
+transcribed; the 1906 quarters even passed the arithmetic gate. Every gate this
+project has built — cross-foot, two-table agreement, verbatim-quote
+verification — **passed, and none of them could have caught this**, because
+they all check whether the NUMBER is right and this was a defect in what the
+number was SAID TO BE.
+
+### The shape
+
+> A publisher extending a series backwards labels the whole series with its
+> CURRENT vocabulary, because that is the only way to draw one continuous line.
+> That labelling is a presentational convenience about the TABLE. Copying it
+> into a typed field turns it into a historical claim about the PERIOD — one
+> the publisher never made and the record may flatly contradict.
+
+The tell is **a field value that needs a note to explain it does not mean what
+it says.** The first version of these rows carried `land_status = trust` with a
+basis reading *"the trust characterisation is stated for the estate as it
+exists today, not as it stood in 1880."* That sentence is the bug reporting
+itself. **A field that has to be annotated into meaning something else is a
+wrong field value, not an annotated one.**
+
+### What to do about it
+
+1. **When you extend a series past a regime change, find the regime change and
+   make the loop know about it.** Statutes, charters and programmes have start
+   dates. `code/83_build_resource_ledger.py::_osage_period_fields` is the
+   pattern: one function, both emission paths, three explicit regimes with the
+   boundary years sourced in a comment block. Two inline conditionals would
+   drift, and drift is how this happened.
+2. **Blank beats confident-wrong, and `not_stated` beats `mixed`.** Where a
+   published figure covers several mechanisms and no source apportions them,
+   emit an empty commodity and `resource_type = not_stated`. Both are single
+   cheap predicates a consumer can filter on. `mixed` is itself a claim — it
+   asserts a mixture *of the things this column normally holds*.
+3. **Do not substitute a plausible mechanism for a sourced one.** The prior
+   here — trust interest on the Kansas land-sale proceeds — turned out to be
+   the larger half of the right answer, and it would still have been wrong to
+   write it into a field without a citation. It also missed grazing income,
+   which *is* resource revenue, which is exactly the sort of thing a plausible
+   inference misses.
+4. **Confidence grades the ROW, not the arithmetic.** The four demoted rows
+   passed their gate. A row whose commodity, resource type and land status are
+   all unsupported for its own period is not tier-A evidence about anything,
+   however good its sums.
+5. **Ask what the series' own footnotes say before trusting its columns.** This
+   sheet's third footnote — *"Individual payments began in 1909"* — was parsed,
+   carried into the build, and printed to stdout, and nobody read it against
+   the rows being written.
+
+**And the cheapest check of all, which is what the owner actually did: look at
+the earliest row and ask whether that thing existed yet.** A coverage mandate
+makes floors drop, and a dropped floor walks a modern vocabulary backwards into
+a period that never had it. Every long-series backfill should get that one
+question before it ships.
+
+Full write-up, sources and the resulting field-by-field decision:
+`docs/datasets/natural_resources_sources.md`, "The pre-1907 classification
+correction". The scoping question it raises is queued for the owner in
+`review/OWNER_DECISION_QUEUE.md`.

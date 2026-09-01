@@ -1,0 +1,626 @@
+# The Native influence surface — every channel, what it evidences, and what we hold
+
+*Workstream N, acquisition pass 4. Written 2026-09-01. Every figure below is
+measured off the live files on that date, not quoted from a build log.*
+
+> **The owner's framing, and the reason this document exists:**
+> *"lobbying, you have emails and letters to people because tribes aren't on
+> the LDA."*
+
+**He is right, and it is now measured.** A tribe petitioning the federal
+government usually does it through government-to-government consultation,
+correspondence, hearings, dockets and rulemaking comments — not through a
+registered lobbyist. Counting only LDA filings would report a Native influence
+universe less than half its real size:
+
+| | spine entities reached |
+|---|---:|
+| appear in **LDA** filings (`native_entity_lobbying_disclosures`) | **300** |
+| appear in a **non-LDA** channel | **669** |
+| appear in a non-LDA channel and **NEVER on the LDA** | **373** |
+| appear on the LDA and **nowhere else** | **4** |
+| union of every influence channel Cedar holds | 673 of 1,555 |
+| **no influence record in any channel** | **882** |
+
+**Four.** Four entities of 1,555 are visible to the LDA and invisible to
+everything else. The LDA is not the spine of this dataset; it is one channel
+of twenty, and the narrowest one that carries a dollar figure.
+
+The single sharpest illustration is IRS Form 990 **Schedule C**, parsed in
+full for the first time this pass (§4b). Of the 30 spine entities that attach
+a Schedule C, **22 appear nowhere in the LDA**; of the 13 that report an
+actual lobbying dollar, **10 do not**. They are the Native American Rights
+Fund, the National Indian Education Association, the American Indian Higher
+Education Consortium, the National American Indian Housing Council, the
+Intertribal Timber Council, the Alaska Native Tribal Health Consortium — the
+organisations that do most of Indian Country's collective advocacy, reporting
+their lobbying spend under penalty of perjury on a form the Lobbying
+Disclosure Act never sees.
+
+### Per-channel reach, and how much of it is LDA-invisible
+
+| channel | spine entities reached | of those, NOT on the LDA |
+|---|---:|---:|
+| consultation events | 396 | 128 |
+| hearing appearances | 319 | 118 |
+| admin appeals (IBIA/IBLA) | 249 | 91 |
+| earmarks / CPF | 224 | 84 |
+| **990 Schedule C** *(new this pass)* | **171** | **95** |
+| FOIA request index | 122 | 31 |
+| FERC dockets | 105 | 31 |
+| Section 106 consultation | 84 | 28 |
+| OIRA EO 12866 | 29 | 15 |
+| NRC meetings | 10 | 0 |
+| regulations.gov *(partial — 51 of 1,712 names)* | 25 | 7 |
+| FERC / FR ex parte | 7 | 3 |
+
+---
+
+## 1. THE COVERAGE TABLE
+
+*Ordered by acquisition priority. `earliest available` is the source's own
+floor — where a boundary is statutory or is the publisher's own horizon, the
+row is **COMPLETE**, not missing.*
+
+| # | channel | what it evidences | held? | earliest available | earliest held | latest available | latest held | gap | why the gap |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | **LDA LD-1/LD-2 disclosures** `native_entity_lobbying_disclosures.csv` (27,796) | who a tribe hired, what it paid, what it lobbied on, **and which agencies it contacted** (20,871 rows carry `government_entities`, 1,410 distinct targets) | **YES** | 1999 Q1 (LDA 1995; electronic filings from 1999) | **1999** | 2026 Q3 (due 20 Oct 2026) | **2026 Q2 complete, Q3 open** | **NONE** | **COMPLETE.** 1999 is the statutory/electronic floor. |
+| 2 | **LDA LD-203 contributions** | political contributions reported by registrants and their lobbyists — the companion table the plan names | **NO** | 2008 (HLOGA) | — | current | — | **WHOLE CHANNEL** | Never pulled. `lda.gov/api/v1/contributions/` exists and is free. **Highest-value LDA-side gap.** |
+| 3 | **regulations.gov public submissions** `regulations_gov_comments.csv` + `regulations_gov_entity_coverage.csv` | **the archetypal non-LDA act**: a tribe, over its own signature, telling an agency what it wants on a live rulemaking docket | **PARTIAL — 51 of 1,712 query names banked** | ~2003 (eRulemaking launch; no date floor on the v4 API) | **2002** | current | **2026** | **97% of the entity sweep** | Nothing was held before today. The sweep is 1,712 query names at ~12 s/query — **~8 wall-clock hours for one pass** — and it checkpoints per entity. See §4. |
+| 4 | **Tribal consultation notices** `consultation_events.csv` (11,402), `fr_consultation_notices.csv` (484), `consultation_agency_coverage.csv` | statutory government-to-government consultation — the channel that exists *because* tribes are sovereigns and that LDA cannot see at all | **YES** | 1994 (federalregister.gov API floor) | **1994-01-13** | current | **2026-05-20** | 3 months stale; 29 agencies only | FR notices only. Agency-published agendas, attendance sheets and consultation summaries are a second, unbuilt leg. |
+| 5 | **Section 106 / NHPA consultation** `section_106_consultation_events.csv` (1,363) | THPO and tribal consultation on undertakings affecting historic properties | **YES** | 1994 (FR floor) | **1994-01-07** | current | **2026-08-11** | current | Agency-side Section 106 files are not FR-published. |
+| 6 | **Congressional hearing testimony** `hearing_appearances.csv` (2,674), `hearing_bill_links.csv` | who testified, for which organisation, before which committee | **YES** | 1995 (govinfo CHRG collection floor) | **1997-04-24** | current | **2026-07-21** | 1995–1996 | Two-source build: Congress.gov committee-meeting API from the **112th Congress** (measured: 105/108/110 return count 0, and **every witness record in the API is a HOUSE meeting**), plus a govinfo CHRG witness-field sweep that supplies the Senate. The 1995–96 tail is a CHRG re-sweep, not a new source. |
+| 7 | **IBIA / IBLA administrative appeals** `admin_appeal_decisions.csv` (15,613), `admin_appeal_parties.csv` (20,027), `admin_appeal_positions.csv` (8) | who formally challenged an Interior action — advocacy through adjudication | **YES** | 1970 (first OHA chronological index) | **1969-09-04** | current | **2026-07-28** | **NONE** | **COMPLETE.** 114 of 114 board-years, IBIA + IBLA, every one HTTP 200. |
+| 8 | **FERC docket filings** `ferc_docket_filings.csv` (102,615), `ferc_docket_parties.csv` (11,563) | intervention, protest and comment in energy licensing — hydro relicensing and pipeline certificates are where tribal water, fish and land claims are actually fought | **YES** | ~1981 (eLibrary scanned floor) | **1990-01-03** | current | **2026-08-26** | **1981–1989** | The 1990 floor is `133`'s own `filed_date_beg=01-01-1990` window, **not** eLibrary's. A pre-1990 slice is available and unattempted. |
+| 9 | **FERC ex parte / off-the-record** `ferc_ex_parte_parties.csv` (4,246), `ferc_ex_parte_communications.csv` (713) | named parties who communicated with FERC decision-makers outside the record | **YES** | 1994 (FR floor) | **1999** | current | **2026** | none | See §3 for why only 9 of these resolve to a Native entity. |
+| 10 | **Federal Register ex parte, ALL agencies** `fr_ex_parte_notices.csv` (7,820), `fr_ex_parte_parties.csv` (112) | the same disclosure obligation at every agency that publishes one, not just FERC | **YES** | 1994 (federalregister.gov API floor) | **1994-01-03** | current | **2026-08-24** | **NONE** | **COMPLETE** to the API's own horizon. Pre-1994 FR exists on paper/govinfo and is not machine-searchable by phrase. |
+| 11 | **OIRA / EO 12866 meetings** `oira_meetings.csv` (72), `oira_meeting_participants.csv` (1,128) | outside parties meeting OMB while a significant rule is under review — regulatory advocacy the LDA barely reflects | **YES** | **2014** (measured, see note) | **2014-09-30** | current | **2026-05-05** | **NONE at this source** | **COMPLETE.** Half-year probes across 1994–2026 return a rendered result set only from 2014-01-01 forward; month-level probes for 2005, 2012 and 2013 fall back to the empty search form. reginfo.gov's *searchable* meeting universe begins in 2014. Earlier EO 12866 meetings happened; this source will not serve them. |
+| 12 | **NRC public meetings** `nrc_public_meetings.csv` (251), `nrc_meeting_participants.csv` (407) | tribal participation in nuclear licensing and waste siting | **YES** | 2003-10-01 (NRC schedule floor) | **2013-10-01** | current | **2026-08-13** | **2003–2013** | The 2013 floor is the **keyword filter's** floor, not the schedule's: the NRC schedule carries no purpose text early enough for a keyword sweep to bite. `145` already says so in code. A title-only or committee-side sweep would reach 2003. |
+| 13 | **Earmarks / Community Project Funding** `earmarks.csv` (1,002) | the outcome side — a named member requesting named dollars for a named recipient | **PARTIAL** | FY1991 (earmark era) / **FY2022** (post-moratorium CPF disclosure) | **FY2023** | FY2027 | **FY2027** | **FY2022**, and the whole **FY1991–FY2010 era** | FY2022 House request table **has no recipient column at all** — 448 rows staged, 0 attributable, and inventing a recipient from the project title would be fabrication. FY1991–2010 earmarks predate any structured federal disclosure; the surviving compilations are third-party (TCS, OMB's dead earmarks.omb.gov) — see §5. |
+| 14 | **Agency FOIA logs (correspondence + calendars)** `foia_request_index.csv` (9,481), `visitor_record_foia_requests.csv` (667), `correspondence_foia_source_coverage.csv` | who is asking for tribal correspondence, leadership calendars and visitor records — a map of the correspondence channel, not the correspondence | **PARTIAL** | agency-dependent, typically FY2015+ | **1975** (one row); dense from **2019** | current | **2026** | **~97 of ~100 agencies** | Only **3** publish here: DOI, Interior–Indian Affairs, IHS. EPA, USDA, HHS, DOE, Army Corps and Commerce all publish FOIA logs and none is pulled. |
+| 15 | **Litigation / amicus participation** `native_issue_litigation_positions.csv` (197) | who filed alongside or against tribes, and which side the brief says it supports | **PILOT ONLY** | 1789 in principle; CourtListener/RECAP from ~1990s | 2016 (Brackeen line) | current | 2025 | **essentially the whole channel** | A hand-curated two-case pilot (ICWA/*Brackeen*, *Maverick Gaming*) plus FERC docket spillover. No systematic amicus harvest. CourtListener has a free API. |
+| 16 | **State lobbying registration** | **the channel where tribes DO register** — compact politics is state politics, and several states disclose the individual official contacted | **NO** | state-dependent; CA 1974, WA 1972 | — | current | — | **WHOLE CHANNEL** | Eight systems, eight schemas. Phase 2 by cost, not by value. WA, CA, OK, AZ, NM, MN, NY, AK first, gaming-ranked. |
+| 17 | **FACA advisory committees** | standing seats on federal advisory committees — a long-run engagement signal | **NO** | 1972 (FACA); FACA database from 1997 | — | current | — | **WHOLE CHANNEL** | Small, stable, cheap, free. `facadatabase.gov` has an API. Never attempted. |
+| 18 | **Sponsored / privately funded travel** | House and Senate travel disclosure — a real observable relationship | **NO** | 2007 (HLOGA) | — | current | — | **WHOLE CHANNEL** | Free from House Clerk and Senate Office of Public Records. Never attempted. |
+| 19 | **Campaign finance / tribal PACs** | contributions by tribes and tribal enterprises | **NO — deliberately deferred** | 1979 (FEC electronic) | — | current | — | Phase 3 | Held back on purpose. It is the field most likely to be read as an accusation, and tribal contributions are already politically contested. Not a coverage failure; a sequencing decision. |
+| 20 | **IRS 990 Schedule C — Political Campaign and Lobbying Activities** `nonprofit_schedule_c_lobbying.csv` (6,870), `nonprofit_schedule_c_coverage.csv` | **the largest non-LDA lobbying corpus Cedar holds**: self-reported lobbying expenditure, 501(h) election status and political activity, signed under penalty of perjury by Native nonprofits, intertribal organisations and tribal consortia — most of whom never retain a registered federal lobbyist | **YES — built this pass** | TY2015 (IRS e-file index floor: submission years 2017+) | **TY2015** | current | **TY2026** | **25,348 indexed returns not yet downloaded** | Index files exist for submission years **2017–2026 only**; 2009–2016 return 404 at both apps.irs.gov and the S3 root — that floor is the IRS's. The remaining gap is a **fetch backlog, not an absence**. See §4b. |
+
+---
+
+## 2. WHAT IS STRUCTURALLY UNAVAILABLE
+
+*The boundary of the dataset, stated so nobody re-hunts it.*
+
+**1. A tribe's own advocacy budget.** A federally recognized tribe is a
+sovereign government. It files no 990, no LM-2 and no annual report. Where it
+lobbies **in-house** — its own government-affairs director, its chairman's
+travel to Washington, its counsel's time — **no disclosure regime anywhere
+requires it to say so, and none does.** The LDA reaches it only when the tribe
+registers as its own registrant (self-filers, whose figure is *expenses*, not
+income). Everything else is invisible by construction. This is the single
+largest structural hole in the dataset and it cannot be closed by any pull.
+
+**2. The content of consultation.** Consultation is government-to-government.
+Agencies publish that a consultation occurred, its date and often its topic;
+what a tribe actually asked for is in a letter, a transcript or a summary that
+is frequently not published and is FOIA-dependent where it exists. We hold the
+**event**, not the **ask**.
+
+**3. Person-level meeting records.** No US regime produces them. The LDA names
+the *government entity* contacted (which Cedar does parse, at scale — 20,871
+rows), never the person. OIRA is the one exception and it starts in 2014.
+Anyone claiming person-level federal lobbying meetings is modelling, not
+recording.
+
+**4. Correspondence itself.** Congressional and agency correspondence with
+tribes is not a published series. `foia_request_index.csv` maps *requests for*
+that correspondence — a map of the channel, deliberately, not the channel. The
+letters arrive only through individual FOIA, one at a time.
+
+**5. Pre-1994 Federal Register full text, by phrase.** federalregister.gov's
+API floor is 1994. Earlier volumes exist on govinfo as page images and are not
+phrase-searchable, so an ex parte or consultation sweep cannot run against
+them at any price.
+
+**6. Pre-2011 earmark disclosure.** Congress ran no structured earmark
+disclosure before the FY2008 reforms and abolished earmarks entirely FY2011–
+FY2021. OMB's earmarks database is dead. What survives is third-party
+compilation — which can be **cited**, but is not a federal record and must
+never be merged into `earmarks.csv` as if it were.
+
+**7. Schedule C reaches only organisations that file a 990 at all.** A
+federally recognized tribe files no 990, so its own lobbying never appears
+there — Schedule C sees the *nonprofit and consortium* layer of Indian
+Country, not the governments. And within that layer, **6,453 of 12,764
+organisations are 990-N e-Postcard filers** who file no Schedule C by law. The
+channel is real and large, and it is structurally blind to tribal governments
+and to every small nonprofit. Both boundaries are columns
+(`filing_regime`, `reporting_regime`), not footnotes.
+
+**8. Tribal internal decision-making.** Council resolutions authorising
+advocacy, retainer agreements, and the deliberations behind a position are
+sovereign internal records. Some tribes publish resolutions; most do not.
+There is no universe to sweep.
+
+---
+
+## 3. THE TWO "BROKEN" TABLES — both diagnosed, one fixed
+
+### `admin_appeal_positions.csv` — **1 row → 8. Not a failed pull.**
+
+Two separate facts produced the single row, and neither is a fetch failure.
+
+**The pull is complete.** `source_coverage_admin_appeals.csv` is **114 of 114**
+board-years — IBIA and IBLA, 1970–2026 — every one HTTP 200. Nothing is
+missing from the source side.
+
+**The ceiling is the source.** A position row needs a decision whose caption
+names BOTH a resolved Native entity AND a *different* organisation. An OHA
+chronological index publishes exactly three columns — case name, date decided,
+citation — and an IBLA caption is normally the appellant alone. Measured on
+the live tables:
+
+```
+decisions                                        15,613
+  native_entity_link_basis = NOT_STATED_IN_CAPTION 14,593
+  CANDIDATE_HELD_FOR_RULING                           454
+  PARTY_NAME_RESOLVED                                 566
+    ...of which name a SECOND organisation              8   <- the universe
+```
+
+**And the one row was stale.** `logs/144_admin_appeals_2026-08-12.json` records
+the build that wrote it: `tribe_linked: 397`, `positions: 1`. Scripts 163 and
+168 later raised resolved party rows to **566 in place**, and nothing
+recomputed the positions that depend on them. The file was one row of a
+then-correct eight.
+
+**Fix, this pass:** a new zero-network stage on the existing puller —
+
+```
+py -3 code/144_build_admin_appeals.py positions      # 1 -> 8 rows
+```
+
+It re-derives from the **live** decisions and parties tables rather than
+re-running `main()`, because a full rebuild would rewrite
+`admin_appeal_decisions.csv` and `admin_appeal_parties.csv` from cached HTML
+and **discard the 163/168/327/505 enrichment that makes the recomputation
+worth doing** — defect class 6, the enricher runs last, so the rebuild must
+not run at all. `position` stays `UNDETERMINED` on all 8 rows for the reason
+`144`'s docstring gives: the caption establishes who appealed and never
+establishes whether the Interior action favoured or harmed the tribe.
+
+### `fr_ex_parte_party_entity_links.csv` — **9 rows. Reality, not a failure.**
+
+The denominator is 4,246 FERC ex parte party rows plus 112 FR ex parte party
+rows. FERC ex parte disclosure is dominated by pipeline and utility counsel.
+Scanning every party name for any Native token at all:
+
+```
+4,246 party names
+   27 carry a Native-looking token
+        ...of which "International Paper", "International Union of Operating
+           Engineers", "International Brotherhood of Teamsters", "National
+           Oceanic and Atmospheric Administration", "Village of Warwick,
+           New York", "Governor of Indiana Mike Braun", "Cheryl B. Creekmore"
+   ~12 are actual Native entities
+    9  linked, tier A
+    5  HELD in review/fr_ex_parte_unresolved_candidates.csv, each with a
+       stated refusal reason
+```
+
+**The resolver worked exactly as designed.** All five near-misses are in the
+review queue, not silently dropped:
+
+| party as printed | refusal reason | nearest spine name |
+|---|---|---|
+| Quapaw Tribe of Oklahoma | `entity_name_does_not_lead_record` | Quapaw Nation |
+| Confederated Tribes of Coos Lower Umpua and Siuslaw Indians Chairman Mark Ingersoll | `entity_name_does_not_lead_record` | Confederated Coos |
+| Confederated Tribes of Coos, Lower Umqua and Siuslaw Indians | `entity_name_does_not_lead_record` | Confederated Coos |
+| Confederated Tribes of Siuslaw Indians | `no_spine_match` | — |
+| The Hobi Tribe | `no_spine_match` | — (a source typo for Hopi) |
+
+**Four of these five are owner rulings away from being links** — Quapaw Nation
+and Confederated Coos are both on the spine, and "The Hobi Tribe" is FERC's own
+misspelling. That is a **review-queue** item, not a pull. Nine is the honest
+number until someone rules; the ceiling with rulings is about fourteen.
+
+**Neither table was a failed pull. One was a stale derivation and is fixed;
+the other is the true shape of an energy-regulator ex parte docket.**
+
+---
+
+## 4. WHAT THIS PASS FETCHED
+
+### regulations.gov — the channel Cedar held **none** of
+
+Before today the entire repo's contact with regulations.gov was a 33-query
+reachability probe (`221`, 2026-08-26) that touched no shared table. The
+`ADMINISTRATIVE_COMMENT` member of the project's own `AdvocacyChannel` enum
+had no source behind it.
+
+**Measured before writing a line of the puller** — each of these decided part
+of the design:
+
+| measurement | consequence |
+|---|---|
+| `X-Ratelimit-Limit: 1000` per hour, per api.data.gov key | the binding constraint on the whole channel; enforced by an in-process rolling 3,600 s window (budget 900), **not** a fixed sleep, because a fixed sleep cannot survive two runs inside one hour |
+| `page[size]=250` honoured; `meta.totalPages` / `hasNextPage` truthful | pagination is trustworthy; documented ceiling is page 20 (5,000 records) |
+| response 0.5–6 s warm, ~20 s cold | cold-start latency is **not** a throttle and must not be read as one |
+| **the comment SEARCH response carries no `organization` field** — attributes are exactly `agencyId, documentType, highlightedContent, lastModifiedDate, objectId, postedDate, title, withdrawn` | the submitter's organisation exists **only** on the per-comment detail endpoint, one request each. This single fact decides the shape: search yields cheap *candidates* and yields *attributions* only where the TITLE itself names the entity |
+| `"A" OR "B"` returns 0 | `searchTerm` is a phrase, not a query language. Queries cannot be batched; the budget is linear in entities and there is no way around it |
+
+**What it writes, and the line between the files:**
+
+- `data/clean/regulations_gov_comments.csv` — **attributed only**: the
+  comment's own title names the entity. `record_scope = entity`,
+  `inclusion_basis = named_entity`.
+- `data/clean/regulations_gov_entity_coverage.csv` — **one row per entity
+  queried, including every entity that returned nothing**, with its query URL.
+  A zero here is a measured zero. *Absence under a filter is a property of the
+  filter.*
+- `review/regulations_gov_comment_candidates.csv` — `TEXT_MENTION_ONLY`. **A
+  rulemaking that mentions a tribe is not a comment by that tribe.** These are
+  candidates for a ruling and they stay out of `data/clean`, per the sweep
+  doctrine: a sweep produces candidates, never attributions.
+
+**ADR-010 is honoured in the schema.** An intertribal organisation, a
+self-governance consortium or a federal-level constituency entity gets
+`record_scope = indian_country` with `cedar_entity_id` still naming the filer —
+who filed and who the filing is for are two different columns, and NCAI is not
+an unresolved link to one tribe.
+
+**Page budget.** Page 1 for every entity; pages 2–4 only where page 1 produced
+at least one title-attributed hit — i.e. only where the name has demonstrated
+it finds the entity's *own* comments. Without that gate a two-token place name
+("Bear River", 813 hits; "Blue Lake", 2,139) spends the hour's budget on other
+people's comments about a lake.
+
+**Cost, measured live: ~12 s per query, 1,712 query names — about 8 wall-clock
+hours for one complete pass**, and ~2,300 requests against a 900/hour budget
+puts a hard floor of ~2.5 hours on it regardless of latency. **The stage
+checkpoints after every single entity.**
+
+#### BANKED SO FAR — 51 of 1,712 query names (3.0%)
+
+| | |
+|---|---:|
+| query names completed | **51** of 1,712 |
+| attributed comments in `data/clean` | **172** |
+| distinct spine entities attributed | **25** |
+| review candidates (`TEXT_MENTION_ONLY`) | **4,806** |
+| coverage rows written (incl. measured zeros) | 51 — 48 `FULL`, 3 `CAPPED` |
+| posted-date range already seen | **2002 – 2026** |
+| HTTP refusals | 2 |
+
+Top agencies among attributed comments: **EPA 78, FWS 12, BOEM 12, BIA 9,
+CEQ 9, NIGC 9**. Note what that ordering says — a tribe's rulemaking advocacy
+lands mostly at the **environmental** agencies, not at Indian Affairs. Nine
+BIA comments against seventy-eight EPA ones is the shape of the channel, and
+it is invisible in an LDA-only view.
+
+**Three operational lessons banked with the data**, all worth keeping because
+all three cost real rows or published a wrong number:
+
+1. **A stopped background job is not a stopped poller.** Killing the shell
+   wrapper left the python child running; it went on writing while a
+   replacement run started, producing 211 duplicate rows across the two output
+   files. The deterministic row ids made the repair exact — `_dedupe` now runs
+   at the end of every harvest, and the coverage table (which had no natural
+   row id) got one: `(cedar_entity_id, query_name_source)`, keeping the last
+   read. Verified afterwards: **51 coverage rows, 51 checkpoint keys, zero
+   mismatches in either direction.**
+2. **Two shipped artefacts disagreed about the size of one table.**
+   `25_build_publication_layer.py` counts CSV *records*;
+   `27_build_dataset_manifests.py` counts *physical lines*. regulations.gov
+   titles and search excerpts carry raw newlines, so a valid 172-row table was
+   published to buyers in its manifest as **1,219 rows**. Neither script is
+   wrong on its own; the disagreement is. Fixed at source — the harvest now
+   collapses whitespace in `title` and `highlighted_excerpt` (an excerpt is a
+   display string and its line breaks are the search engine's, not the
+   submitter's), and the 104 existing cells were repaired in place. Both
+   artefacts now say 172. **Any table whose text fields can carry newlines has
+   this bug in its manifest**; `nonprofit_schedule_c_lobbying.csv` was checked
+   and is clean (6,871 raw lines for 6,870 records).
+3. **A killed poller must not hold the host forever.** The same kill left
+   `_HOSTLOCK_api.regulations.gov.json` with `active: true`, and every later
+   run exited 3. `claim_host` now reads `Win32_Process`, and **reclaims a lock
+   whose PID is verifiably a dead python interpreter**, recording what it
+   reclaimed and on what evidence. An UNKNOWN result is treated as live — a
+   failed start is recoverable, stealing a lock from a running poller is not.
+
+To continue:
+
+```
+py -3 code/221_probe_regulations_gov_comments.py harvest     # resumes; re-run until it says
+                                                             # "harvest complete for every
+                                                             #  spine query name"
+py -3 code/221_probe_regulations_gov_comments.py detail      # adds the verbatim `organization`
+                                                             # field and full comment text
+```
+
+State: `data/raw/external/regulations_gov/_221_harvest_state.json`
+(`done`, `queries_sent`, `refused_by_host`, per-run history).
+Log: `logs/221_regulations_gov_harvest.log`.
+
+### 4b. IRS 990 Schedule C — the corpus that was already on disk
+
+**Nobody had to fetch anything.** The returns were downloaded on 2026-08-07
+and most of them had never been read. Measured 2026-09-01, before writing the
+step:
+
+```
+index target returns .................... 32,218      (IRS e-file index, filtered
+                                                        to Cedar's Native-nonprofit EINs)
+downloaded to data/raw/external/irs990_schedc/xml/ .. 6,870   (235 MB)
+PARSED into np_financials.csv .......................  2,195
+ON DISK AND NEVER PARSED ............................  4,675   <- 4,053 EINs
+```
+
+The unparsed slice was almost entirely **tax years 2024 (1,896) and 2025
+(2,144)**: `step_schedc` ran on 2026-08-07 and the download kept going after
+it finished. The two most recent years of nonprofit lobbying disclosure were
+on disk, already paid for, and invisible.
+
+`--steps schedc-lobbying` now parses **all 6,870**, reusing 99's existing
+`parse_schedule_c` (whose tag names were inventoried across 2,647 real returns,
+not guessed) and writing a **lobbying** table rather than touching
+`np_financials.csv`, which belongs to the nonprofit workstream.
+
+**Result:**
+
+| | |
+|---|---:|
+| returns parsed | **6,870** (was 2,195) |
+| distinct EINs | **4,293** |
+| Schedule C **attached** to the return | 475 |
+| reported an actual lobbying dollar | 132 |
+| total self-reported lobbying, all years | **$3,325,511** |
+| parse errors | **0** |
+| EINs resolving to a spine entity | 548 → **171 distinct spine entities** |
+| spine entities attaching a Schedule C | 30, of which **22 are NOT on the LDA** |
+| spine entities reporting a lobbying dollar | 13, of which **10 are NOT on the LDA** |
+
+#### PERMANENT COVERAGE TABLE — Schedule C
+
+*From `data/clean/nonprofit_schedule_c_coverage.csv`. `index_year` is the IRS
+**submission** year, not the tax year — a TY2024 return can be submitted in
+2025. `not downloaded` is **Cedar's fetch backlog, not an absence at the IRS.***
+
+| index year | index targets | downloaded | parsed | Sch C attached | reported $ | distinct EINs | EINs → spine | not downloaded |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2017 | 2,842 | 199 | 199 | 8 | 4 | 197 | 59 | 2,643 |
+| 2018 | 2,785 | 284 | 284 | 15 | 6 | 254 | 75 | 2,501 |
+| 2019 | 2,461 | 289 | 289 | 16 | 9 | 266 | 78 | 2,172 |
+| 2020 | 2,385 | 248 | 248 | 7 | 4 | 228 | 68 | 2,137 |
+| 2021 | 3,414 | 372 | 372 | 17 | 7 | 351 | 114 | 3,042 |
+| 2022 | 3,776 | 250 | 250 | 11 | 5 | 243 | 73 | 3,526 |
+| 2023 | 4,058 | 463 | 463 | 18 | 7 | 432 | 133 | 3,595 |
+| 2024 | 4,241 | 542 | 542 | 24 | 6 | 508 | 147 | 3,699 |
+| 2025 | 4,378 | 2,546 | 2,546 | 231 | 51 | 2,507 | 327 | 1,832 |
+| 2026 | 1,878 | 1,677 | 1,677 | 128 | 33 | 1,675 | 171 | 201 |
+| **total** | **32,218** | **6,870** | **6,870** | **475** | **132** | **4,293** | **548** | **25,348** |
+
+Tax years present in the parsed corpus: **2015 (2), 2016 (234), 2017 (279),
+2018 (306), 2019 (193), 2020 (339), 2021 (304), 2022 (422), 2023 (532),
+2024 (2,086), 2025 (2,164), 2026 (9).**
+
+#### THREE THINGS THAT MUST TRAVEL WITH ANY SCHEDULE C FIGURE
+
+**1. ABSENT IS NOT ZERO, and the table says which.** 6,395 of 6,870 returns
+carry no Schedule C at all — a filer that answered "No" to the Form 990 Part IV
+lobbying question attaches none. That is a *reported fact* and is different
+from a filer that attached the schedule and entered $0 (330 rows,
+`SCHEDULE_C_FILED_NO_PART_II_FIGURES`). `reporting_regime` distinguishes all
+four states on every row.
+
+**2. THE THREE REGIMES ARE NEVER MERGED.** Part II-A (501(h) **electing**, 55
+returns) splits grassroots from direct against a statutory ceiling; Part II-B
+(**non-electing**, 90 returns) has one total and yes/no activity checkboxes and
+*no* grassroots/direct line at all. A blank grassroots cell on a Part II-B row
+means the form has no such line, not that the read failed. `lobbying_usd_basis`
+names the exact line every headline figure came from, which is what makes the
+column comparable at all.
+
+**3. THE 990-N FLOOR.** 6,453 of 12,764 organisations in `np_orgs.csv` are
+990-N e-Postcard filers, reporting gross receipts under $50,000 and nothing
+else. **No Schedule C exists for them and none is missing.** Zero lobbying
+there is the filing regime, not a finding. Any denominator built without
+`filing_regime` is wrong by construction.
+
+**Tier discipline, and it is the thing most likely to go wrong here.**
+`np_orgs.csv` carries `entity_tier = X` on 4,962 rows — a **negative** owner
+ruling, where the spine id is what the owner ruled *against*. Reading "has a
+spine id" as "is linked" would republish 40 owner **exclusions** as
+attributions (START_HERE standing rule 1b, in a new vocabulary). A link here
+therefore requires a spine id **AND** a tier that is not X **AND** a
+`classification_ruling` that is not `place_name_coincidence`: 1,416 EINs
+linkable, 11,348 refused **with the reason recorded per row** in
+`entity_link_refusal_reason`, so "not linked" is never confusable with "not
+checked".
+
+**The resolution queue is 73 EINs, not 5,561.** 5,561 rows carry
+`record_scope = unresolved`, which under ADR-010 is the one scope that is a
+defect — but **410 of them attach no Schedule C at all**, so resolving them
+would change nothing. The rows that matter are those that *reported a
+lobbying dollar* and did not resolve: **110 returns over 73 EINs**, written to
+`review/schedc_unresolved_lobbying_filers.csv` sorted by dollars at stake.
+
+And the queue's composition is itself the warning. The top of it is almost
+entirely **place-name coincidence** — Yavapai Community Hospital ($277,963),
+Indian River Memorial Hospital ($178,943), the Foundation for Seminole State
+College of Florida, Indian River State College, Pomona College — the exact
+containment trap this project has paid for repeatedly. Mixed in with them are
+genuine Native organisations: the **Indian Health Board of Minneapolis**
+($75,632, an urban Indian organisation) and the **National Native American
+Boarding School Healing Coalition** ($66,914). Ruling one of the false ones
+OUT is worth as much as ruling a real one in, and the review file says so on
+every row.
+
+**ADR-010 in the schema.** NARF, NIEA, AIHEC and the Housing Council are
+`cedar_native_entity_class = native org` — coalitions advocating for a
+constituency, not for one tribe — so they carry `record_scope =
+indian_country` with `cedar_entity_id` still naming the filer. Who filed and
+who the filing is for are two different columns.
+
+**Ownership, recorded because two agents read the same XML.** SHARD-J mines
+the same `irs990_*` tree for nonprofit **mission text** and owns
+`data/staging/np_mission/`. **Schedule C is workstream N's**, and this step
+writes only `nonprofit_schedule_c_lobbying.csv`,
+`nonprofit_schedule_c_coverage.csv` and `review/schedc_xml_not_in_index.csv`.
+It never opens `np_financials.csv` for writing — that stays the nonprofit
+workstream's, and `step_schedc` remains its producer. Two readers of one XML
+tree is fine; two writers to one table is the defect this project has paid for
+repeatedly. *SHARD-J was not reachable by message from this session; the split
+above is asserted here and relayed through the coordinator.*
+
+### `admin_appeal_positions.csv` — 1 → 8 rows, zero network. See §3.
+
+---
+
+## 5. RANKED REMAINING GAPS
+
+*Ordered by entities-reached per unit of work, not by size.*
+
+| rank | gap | cost | why it ranks here |
+|---|---|---|---|
+| **1** | **Finish the regulations.gov sweep** — 1,661 of 1,712 query names outstanding | ~8 API-hours, resumable, no new code | It is the only channel that plausibly reaches a large share of the **882 spine entities with no influence record at all**, and early returns already attribute comments to small tribes that have never filed an LDA report. |
+| **2** | **The 25,348 Schedule C returns indexed but never downloaded** | `--steps irs-xml`, one host, already written and rate-disciplined | The parse now costs nothing (§4b) — the only remaining constraint is the fetch. 6,870 of 32,218 returns produced 171 spine entities and 95 that the LDA cannot see; the other 79% of the index is the same corpus, unread. Ranked just behind regulations.gov only because that channel starts from zero coverage while this one already has a working spine. |
+| **3** | **LD-203 contributions** | one endpoint, free, same key and same host as the LDA pull already running | The plan named it; it was never built. It closes the LDA leg. |
+| **4** | **FOIA logs for the other ~97 agencies** | one parser per agency; EPA, USDA, HHS, DOE, Corps, Commerce first | Correspondence is the owner's stated channel. Three agencies is a pilot, not coverage. |
+| **5** | **regulations.gov `detail` pass** over every attributed comment | 1 request per comment; rate-limited | It converts a *title match* into the submitter's own `organization` string plus their verbatim text — a tier-A attribution and a citable quote instead of a name match. |
+| **6** | **FERC eLibrary 1981–1989** | re-run `133` with an earlier `filed_date_beg` | The 1990 floor is ours, not the source's. Hydro relicensing fights from the 1980s are exactly the era the dissertation cares about. |
+| **7** | **NRC 2003–2013** | change the sweep from keyword to title/committee | `145` already documents that its floor is the filter's, not the schedule's. |
+| **8** | **State lobbying registration** (WA, CA, OK, AZ, NM, MN, NY, AK) | eight systems, eight schemas — the most expensive item here | **This is where tribes actually register.** Compact politics is state politics, and several states disclose the individual official contacted, which no federal regime does. High value, high cost; that is why it is eighth and not first. |
+| **9** | **Systematic amicus harvest** via CourtListener | free API, one puller | 197 hand-curated rows is a pilot. The counter-lobby layer the plan describes lives here. |
+| **10** | **FACA advisory committees** | free API, small | Cheap, stable, and a genuine long-run engagement signal. |
+| **11** | **Sponsored travel** | free, small | Real observable relationships; smallest payoff of the free channels. |
+| **12** | **Congressional hearings 1995–1996** | re-sweep CHRG | Two years. Completes channel 6 to its source floor. |
+| **13** | Rule the **5 FR ex parte**, **454 admin-appeal** and **73 Schedule C** held candidates | zero network, owner rulings | Not a pull. `review/schedc_unresolved_lobbying_filers.csv` (73 EINs, sorted by dollars), `review/fr_ex_parte_unresolved_candidates.csv` (5) and `review/admin_appeal_entity_link_candidates.csv` (454). Expect most Schedule C rulings to be NEGATIVE — the list is led by Indian River Memorial Hospital and Pomona College — and a negative ruling is worth as much as a positive one. |
+
+---
+
+## 6. RULES THAT BIND THIS DATASET
+
+- **A meeting is not lobbying.** Consultation is a statutory obligation on the
+  *agency*. `is_lobbying = 0` on every consultation, ex parte, comment,
+  appeal, hearing and OIRA row, and it is asserted in code at import
+  (`cedar_domain.AdvocacyChannel.<X>.is_lobbying`).
+- **Build the fact, not the verdict.** No row here carries a position or an
+  alignment label that the source did not write. Where a position exists it is
+  the filing's own words (`lda_position_reported`), and `alignment` is derived
+  per (org, rule) from two sourced positions — never authored.
+- **A search hit is a hit on TEXT.** A rulemaking that mentions a tribe is not
+  a comment by that tribe. Text-only matches go to `review/`, never to
+  `data/clean/`.
+- **ADR-010.** NCAI, NARF, USET, AFN and every other coalition advocating for
+  Indian Country broadly is `record_scope = indian_country` — a correct
+  answer, not an unresolved link. Do not force a single tribe onto it.
+- **A sweep that finds nothing is a result** and is recorded as one, with the
+  date, the surface probed and the count. That is what
+  `regulations_gov_entity_coverage.csv` and
+  `source_coverage_admin_appeals.csv` are for.
+
+---
+
+## 7. UPDATE RUNBOOK
+
+```bash
+# 1. LDA, quarterly (Jan/Apr/Jul/Oct, ~3 weeks after quarter end)
+py -3 code/lobbying_pull/04_pull_lda_v2.py        # resume-safe, dedupes on filing_uuid
+py -3 code/lobbying_pull/05_match_filings_v2.py
+
+# 2. regulations.gov, continuous until complete, then quarterly
+py -3 code/221_probe_regulations_gov_comments.py harvest    # resumes from checkpoint
+py -3 code/221_probe_regulations_gov_comments.py detail
+
+# 3. Federal Register channels, monthly
+py -3 code/154_build_fr_ex_parte_notices.py index
+py -3 code/154_build_fr_ex_parte_notices.py fetch
+py -3 code/154_build_fr_ex_parte_notices.py build
+py -3 code/96_build_consultation_events.py
+py -3 code/130_build_section_106_consultation.py
+
+# 4. Hearings + OIRA, monthly.  THE ENRICHER RUNS LAST - 98 full-rebuilds
+#    hearing_appearances.csv and 400 enriches it in place (defect class 6).
+py -3 code/98_build_oira_and_hearings.py --stage oira-index
+py -3 code/98_build_oira_and_hearings.py --stage hearings-govinfo
+py -3 code/400_promote_stranded_hearing_appearances.py --dry-run
+py -3 code/400_promote_stranded_hearing_appearances.py --apply
+
+# 5. Admin appeals, annually (indices gain a year a year).
+#    `positions` is zero-network and safe any time; the full build is NOT,
+#    because it rewrites decisions/parties from cached HTML.
+py -3 code/144_build_admin_appeals.py positions
+
+# 6. FERC, monthly;  NRC, quarterly;  earmarks, per appropriations cycle
+py -3 code/133_build_ferc_advocacy.py
+py -3 code/145_build_nrc_public_meetings.py
+py -3 code/99_build_earmarks_and_schedc.py --steps earmarks-pull,earmarks-stage,earmarks
+
+# 7. IRS 990 Schedule C.  The PARSE is zero-network and can run any time;
+#    only the FETCH touches a host.  25,348 indexed returns are still
+#    un-fetched, so irs-xml is the one that moves coverage.
+py -3 code/99_build_earmarks_and_schedc.py --steps irs-index          # refresh the index
+py -3 code/99_build_earmarks_and_schedc.py --steps irs-xml            # the fetch backlog
+py -3 code/99_build_earmarks_and_schedc.py --steps schedc-lobbying    # zero network
+
+# 8. After ADDING ANY TABLE here, register it or it cannot ship:
+py -3 code/cedar_codebook.py check          # must print SAFE
+py -3 -c "import sys;sys.path.insert(0,'code');import cedar_codebook;cedar_codebook.build()"
+py -3 code/87_build_dataset_notes.py
+py -3 code/25_build_publication_layer.py
+py -3 code/27_build_dataset_manifests.py
+
+# gate, every time
+py -3 code/62_no_regression_check.py
+```
+
+**Never:** `01_build_entity_spine.py`, `09_import_rulings.py`,
+`41_build_codebooks.py`, `88_build_deals_taxonomy.py` (`cedar_pipeline.NEVER_RUN`).
+**Never** `144_build_admin_appeals.py` with no argument unless you intend to
+discard the 163/168/327/505 enrichment.
+
+
+---
+
+## 8. GATE STATE AT HANDOFF — `62` exits 1, and not on a lobbying line
+
+**Every counter this workstream moved is back at or below its baseline.**
+Adding four tables raised six shipping ratchets; all six were worked to
+completion rather than waived:
+
+| counter | on arrival | after registration | mine? |
+|---|---|---|---|
+| `tables_undocumented_in_codebook` | 3 → 5 | **3** | cleared — codebook fragments + master rebuild |
+| `tables_missing_codebook_block` | 3 → 5 | **3** | cleared |
+| `tables_missing_notes_contract` | 14 → 18 | **14** | cleared — `87` |
+| `ship_tables_at_zero` | 13 → 17 | **13** | cleared — `25` |
+| `tables_missing_from_25_TABLES` | 179 → 184 | **180** | 4 of 5 cleared; the +1 is `native_owned_businesses.csv` |
+| `tables_missing_from_27_SPEC` | 194 → 199 | **195** | 4 of 5 cleared; same table |
+
+Publication layer after registration: **SHIP RATE 100.0%** (8,497,608 of
+8,499,886 rows), **sanity 13/13 passed**, all four new tables in
+`cedar_press.db` with valid manifests and 0 errors.
+
+**Two lint instances were introduced by this workstream and both were FIXED,
+not waived:** `class2c` in `144_build_admin_appeals.py` (a refusal counter that
+named no row — it now prints the decision id, party id and which of the three
+legs was empty) and `class4` in `221_probe_regulations_gov_comments.py` (a page
+budget that could truncate and still mark an entity done — the checkpoint key
+now carries the budget). **One waiver was taken, with evidence**: `class5` on
+`_dedupe`'s schema guard, which is not an "already done" short-circuit and
+whose paired log write belongs to an unrelated stage; the harvest state was
+checked and demonstrably merges rather than resets.
+
+**What remains red at handoff belongs to other live workstreams**, named here
+so the next session does not re-diagnose it and nobody records it as
+"pre-existing, not mine":
+
+| line | owner |
+|---|---|
+| `lint_class2b` — `shard_f_membership.py` | shard F |
+| `lint_class2c` — `344_pull_nigc_document_surface.py` | gaming |
+| `lint_class5` — `547_shard_c_hidden_endpoint_sweep.py` | shard C |
+| `lint_class5` — `shard_g_newsletters.py` | shard G |
+| `tables_missing_from_25_TABLES` / `27_SPEC` +1 each, `NEW TABLES AT 0% SHIP` — `native_owned_businesses.csv` (2,393 rows) | workstream P |
+| `F-DELAWARE-ALIAS` in `cedar_identifier_ledger_final.csv` / `_tiered.csv` | pre-existing correction-propagation backlog |
