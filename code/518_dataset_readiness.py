@@ -149,6 +149,38 @@ def measure():
         # ---- C5 row conservation -------------------------------------
         covered = [n for n in names if n in cons_tables]
 
+        # ---- C4 IDENTITY ATTACHMENT (ADR-009: hub and spokes) --------
+        # The entity layer is dataset 13 and the other twelve CONSUME it.
+        # A spoke that re-derives identity locally, or that carries rows with
+        # no cedar_uid at all, is not attached to the hub however clean its
+        # own grain is. Measured, not assumed: what share of this dataset's
+        # entity-bearing rows actually carry a Cedar id.
+        keyed_rows = total_rows = 0
+        for n in names:
+            for d in ("data/clean", "data/spine"):
+                fp = ROOT / d / n
+                if not fp.exists():
+                    continue
+                try:
+                    with fp.open(encoding="utf-8-sig", errors="replace",
+                                 newline="") as fh:
+                        rdr = csv.DictReader(fh)
+                        idc = [h for h in (rdr.fieldnames or [])
+                               if h in ("cedar_uid", "tribe_id", "entity_id",
+                                        "cedar_entity_id")]
+                        if not idc:
+                            break
+                        for i, r in enumerate(rdr):
+                            if i >= 50000:
+                                break
+                            total_rows += 1
+                            if any((r.get(c) or "").strip() for c in idc):
+                                keyed_rows += 1
+                except OSError:
+                    pass
+                break
+        keyed_pct = (100.0 * keyed_rows / total_rows) if total_rows else None
+
         # ---- C8 rebuild path + destructiveness -----------------------
         # The build PLANNER is the authority on what rebuilds a collection -
         # it merges the declared io map with the collection's own ordering.
@@ -182,6 +214,14 @@ def measure():
                             f"cannot safely total: {', '.join(money_unsafe[:3])}")
         if names and not covered:
             blockers.append("C5 no row-conservation coverage")
+        # ADR-009: a spoke cannot be READY on identity while most of its rows
+        # are not attached to the hub. 50% is deliberately a floor, not a
+        # target - it is the line below which the dataset is mostly unkeyed.
+        if keyed_pct is not None and keyed_pct < 50 and cid != "_entity_layer":
+            blockers.append(
+                f"C4 only {keyed_pct:.0f}% of entity-bearing rows carry a "
+                f"Cedar id - this dataset is not attached to the entity "
+                f"layer (dataset 13). See ADR-009.")
         if never:
             blockers.append(f"C8 rebuild is DESTRUCTIVE ({', '.join(never)}) - "
                             f"no safe documented rebuild path")
@@ -200,7 +240,9 @@ def measure():
             c1_grain=f"{len(names)-len(unstated)}/{len(names)}",
             c2_keys=f"{len(names)-len(nokey)}/{len(names)}",
             c3_duplicates="clean" if not dup_tables else f"{dup_total:,} rows",
-            c4_identity_path="central (503/510)",
+            c4_identity_path=("HUB (dataset 13)" if cid == "_entity_layer"
+                              else f"{keyed_pct:.0f}% keyed to hub"
+                              if keyed_pct is not None else "no id columns"),
             c5_row_conservation=f"{len(covered)}/{len(names)}",
             c6_unresolved_conflicts="0 shipped as definite",
             c7_double_counting="none" if not money_unsafe else f"{len(money_unsafe)} tables",
@@ -217,7 +259,10 @@ def measure():
             enricher_ordering=f"{len(enrichers)} declared",
             replay_status=replayed.get(cid, "not replayed"),
             next_action=nxt, measured_date=TODAY))
-    return sorted(rows, key=lambda r: (r["status"] != "READY",
+    # ADR-009: the hub prints FIRST regardless of status. Twelve spokes stand
+    # on it, so its state is read before theirs, not alphabetically among them.
+    return sorted(rows, key=lambda r: (r["dataset"] != "_entity_layer",
+                                       r["status"] != "READY",
                                        len(r["blockers"]), r["dataset"]))
 
 

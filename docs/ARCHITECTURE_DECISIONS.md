@@ -67,6 +67,58 @@ Nobody commits. Nobody runs `510 --apply` or `build.py ship --execute`.
 into its own doc and requests nuance edits through its handoff.
 Integrator owns 62, 512, 517, 518 and all commits.
 
+## ADR-009 — the entity layer is DATASET 13, not infrastructure (2026-09-01)
+
+**Status:** adopted. Owner's framing, recorded in his words:
+
+> "The big shift is basically focusing on building thirteen datasets,
+> essentially, the thirteenth being the native entity layer. That's how we
+> queue and everything — rather than having every dataset kind of identify
+> native entities but not having everything talk to each other."
+
+**Context.** Cedar grew dataset-first. Each collection learned to recognise
+Native entities on its own, and the shared spine arrived afterwards to
+reconcile what they had each already decided. The symptoms are all through
+this repo: 42 tables under 75% keyed; three ANCSA corporations carrying
+"federally recognized" because one harvester resolved on its own; a CAGE alias
+equating two distinct Delaware sovereigns because an alias layer was fed
+without review; `deals` able to name only one Native party because nothing
+required it to speak a shared many-to-many shape.
+
+Every one of those is the same defect: **twelve datasets each doing their own
+identification and not talking to each other.**
+
+**Decision.** The entity layer is dataset **13** — a first-class product with a
+grain, a contract, a readiness status and a runbook, exactly like the other
+twelve. It is not "infrastructure" and it is not internal plumbing. It is the
+hub, and the other twelve are spokes that CONSUME it rather than re-deriving
+it.
+
+Three consequences, and they have teeth:
+
+1. **Consumption, not re-derivation.** A dataset does not resolve entities. It
+   attaches to `cedar_uid` through the identity layer, and where it cannot, it
+   records a candidate — it does not invent a local answer. `510`'s
+   `harvest_fr_roster` was rewired to work this way on 2026-08-30 and it is
+   the pattern; every other harvester still fusing the two claims is debt.
+
+2. **Readiness is capped by the hub.** A spoke cannot be more READY on identity
+   than the hub it stands on. The scoreboard now reports this explicitly
+   rather than letting a dataset claim clean identity while the layer beneath
+   it is unmeasured. This is why dataset 13 is worked FIRST when its state
+   blocks others.
+
+3. **The shared shapes live in the hub, not in each spoke.** Multi-party
+   bridges at `(record, cedar_uid, role)`, ownership-change events with
+   validity intervals, alias history, handle history. Twelve local
+   implementations of many-to-many is how `nagpra` ended up correct and
+   `deals` ended up singular.
+
+**What this does NOT mean.** The hub does not absorb domain tables. Gaming
+facilities stay in gaming. It owns *identity and the relationships between
+identities* — who exists, what they are called, what they are, who owns whom,
+and when each of those was true.
+
 ## ADR-001 — `source_record` as a first-class node (workstream A)
 
 **Status:** in progress. **Supersedes:** nothing.
