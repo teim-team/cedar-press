@@ -1,0 +1,313 @@
+# Natural resources — the source surface
+
+*Workstream O, 2026-09-01. Companion to `docs/RESOURCE_LEDGER_BUILD_LOG.md`
+(ONRR/ND/UT/MT), `docs/RESOURCE_LEDGER_STATES_LOG.md` (the 15-state sweep),
+`docs/RESOURCE_RECIPIENT_SIDE_LOG.md` (ANCSA §7(i)) and
+`docs/RESOURCE_ASSETS_BUILD_LOG.md` (the asset layer).*
+
+**Those documents say what was built and why. This one answers a different
+question: for every source, what years EXIST upstream, what years Cedar HOLDS,
+and what is left.** Every figure below was measured against the files on disk
+or against a live probe on the date stated. Nothing is copied from an older
+document.
+
+---
+
+## THE ONE-PARAGRAPH ANSWER
+
+The ledger is **11,305 revenue events, $50.97B nominal, spanning 1880–2026**,
+from **12 source systems**. It was 10,482 rows over 1993–2026 before this pass.
+Against the coverage mandate the honest position is: **the recent end is now
+current to the last month each publisher has released**, and **the historical
+end reaches the first year each source exists** for every source but one. The
+one exception is OSMRE FY2002–FY2012, which is retrieved and held rather than
+guessed. What the dataset cannot do — and this is a property of the record, not
+a backlog — is **name a tribe on 87% of its dollars**, because the federal
+collector is forbidden by law to publish below a national aggregate.
+
+**Three things this pass changed that are worth knowing before reading the
+table:**
+
+1. **The pre-2003 hole was never a hole.** `Am_Ind_Coll.pdf` has been on disk
+   since 2026-08-06 and prints American Indian mineral revenue for **every
+   calendar year from 1925**. Two earlier waves read it with `pdftotext`, got
+   garbage, and scoped it out against a "2000–2026 target". Read by
+   *coordinate* instead of by line it comes out clean and it now reconciles
+   three independent ways. **CY1925–CY2000, 315 rows, $4.09B.**
+2. **The OSMRE hold was right to refuse and wrong about the cause.** The
+   second wave held eleven PDFs because the text layer looked offset by one
+   row, and proposed a de-skew. The offset was a `pdftotext` artefact; the
+   proposed de-skew was *also* wrong. `pdfplumber` reads the same page
+   correctly with no de-skew at all. **FY2013–FY2026 now built for the Crow
+   Tribe, the Hopi Tribe and the Navajo Nation — 38 of 42 tribe-years,
+   $35.19M actually paid after sequestration.** The refusal to publish an
+   unproven de-skew is the reason a false attribution never shipped.
+3. **A second AML money stream existed and had never been fetched.** The IIJA
+   (Bipartisan Infrastructure Law) appropriation is published by OSMRE as its
+   own annual table. **FY2022–FY2026 plus a one-time distribution.**
+
+---
+
+## COVERAGE — the permanent table
+
+**This table is the deliverable, not documentation.** A gap belongs here, in
+writing, where the next session sees it — not in someone's memory. Re-measure
+it whenever the ledger is rebuilt; do not edit a number into it by hand.
+
+`upstream` = what the publisher actually offers, verified on the date given.
+`held` = what `data/clean/resource_revenue.csv` carries today.
+
+| # | Source | Grain | Upstream exists | Cedar holds | Rows | GAP |
+|---|---|---|---|---|---:|---|
+| 1 | **ONRR NRRD monthly revenue** (Native American land class) | month × revenue type × commodity | 2003-01 .. **2026-07** (portal floor is stated as Jan 2003) | 2003-01 .. **2026-07** | 9,277 | **none** — current to the last month published |
+| 2 | **ONRR NRRD fiscal-year disbursements** (`Native American tribes and individuals`) | federal fiscal year | FY2003 .. **FY2025** | FY2003 .. **FY2025** | 157 | **none** — FY2026 not yet released |
+| 3 | **ONRR calendar-year / fiscal-year revenue** | year | 2003 .. 2025 | *held raw, not published* | 0 | **by design** — same dollars as #1 at a coarser grain; publishing both would double the ledger. Retained as the reconciliation check |
+| 4 | **ONRR production volumes** (monthly + calendar year) | volume | 2003 .. 2025 | *held raw, not published* | 0 | **by design** — volumes with no attributable owner, and volume × price is a model this project refuses |
+| 5 | **MMS/MRM American Indian collections — CALENDAR year** | calendar year × component | **CY1925 .. CY2000** | **CY1925 .. CY2000** | 315 | **CY2001, CY2002 do not exist** in any archive route probed |
+| 6 | **MMS/MRM American Indian collections — FISCAL year** | federal fiscal year × component | FY1994 .. FY2001 | FY1994 .. FY2001 (**FY1997 held**) | 42 | **FY1997** held: the source's own components miss its own printed subtotal by $10. **FY2002 does not exist** |
+| 7 | **ND State Treasurer, tax distribution search** (Three Affiliated Tribes) | payment | 2008-09 .. **2026-08** | 2008-09 .. **2026-08** | 492 | **none.** Refreshed 2026-09-01: +3 payments, +$18.78M. Pre-2008 distributions do not exist (2007 enabling act) |
+| 8 | **UT COBI fund financials** (Uintah Basin + Navajo Revitalization Funds) | fund × fiscal year | UBRF FY1996 .. FY2025 · NRF FY1997 .. FY2025 | identical | 118 | **none** — FY2026 not closed |
+| 9 | **MT DOR quarterly county distribution letters** | production quarter | 49 cover letters, oldest 2014-Q1 distribution | all 49 | 49 | **none of the letters is missing.** Every quarter reads `Tribal Distribution: $0.00`. Nothing before 2014 exists (24 probed URLs, all 404) |
+| 10 | **Osage Minerals Council headright payment history** | quarter (1906+) / year (1880–1905) | **1880 .. 2026-Q2** in one spreadsheet | **1880 .. 2026-Q2** | 508 | **none.** Was 2000+ until this pass — the floor was a target, not the document's |
+| 11 | **Osage Minerals Council quarterly newsletters** | production quarter | index lists newsletters; 8 dateable, 2 URLs 404 | 2014-Q3 .. 2022-Q1 | 68 | **post-2022-Q1 newsletters not located**; **2015-01 and 2015-07 are link rot** (recorded, not silence) |
+| 12 | **ANCSA §7(i)/§7(j)**, from 166 regional-corporation annual reports on disk | corporation × fiscal year | the ANCSA portal index holds **19,269 filings**; 166 annual reports converted to text | FY2014 .. FY2025 (period ends), 12 of 12 regionals | 185 | **village corporations entirely absent** (173 of them, same portal, proven path). Calista FY2024/FY2025 refused — the reports state only a percentage change |
+| 13 | **OSMRE AML fee-based grant distribution** | tribe × federal fiscal year | **FY2002 .. FY2026** (live site FY2016+; FY2002–FY2015 recovered from Wayback this pass) | **FY2013 .. FY2026** | 76 | **FY2002–FY2012 retrieved and HELD** — pre-sequestration vintages have a different table every year and FY2010–FY2012 have **no text layer at all**. **4 tribe-years held by the gate**: FY2015 Hopi and Navajo, FY2018 Crow and Navajo — all scanned-OCR corruption, all named in `review/resource_ledger_unresolved.csv`. Every other tribe-year FY2013–FY2026 is built (38 of 42) |
+| 14 | **OSMRE AML IIJA grant distribution** | tribe × federal fiscal year | FY2022 .. FY2026 + one-time 2023-12-18 | **all of it** | 18 | **none** |
+
+### The same table for the non-revenue tables in this collection
+
+| Table | Rows | Coverage held | GAP |
+|---|---:|---|---|
+| `resource_parties.csv` | 1,938 | party links for every attributable event | — |
+| `resource_assets.csv` | 35 | 30 ANCSA estates/projects, 2 Osage, 3 SEC-filed coal leases | **BIA LTRO allotment tracts are not public** — the largest structural hole in the layer. NIOGEMS lease/tract/well ids are **empty by construction**, waiting on access |
+| `resource_asset_source_coverage.csv` | 18 | 7 WITHHOLDS · 4 PUBLISHES · 4 NOT_CHECKED · 3 NOT_FOUND | the 4 NOT_CHECKED are village filings, BIA forestry, water-rights settlements, BIA rights-of-way |
+| `tribal_tax_bases.csv` | 1,712 | ND 1990–2026 (1,640 rows; severance 426 rows, Three Affiliated only) · WA 2023–24 · NM · MT 2019–23 · MI 2024 · OK 2023–24 | every state but ND is a handful of rows. **26 rows carry `MULTIPLE TRIBES - NOT DISAGGREGATED`** and cannot be keyed |
+| `nd_severance_allocation.csv` | 7 | the four statutory periods 2007/2013/2015/2019 | — |
+| `ancsa_filings_index.csv` | 19,269 | portal sweep, retrieved 2026-08-05 | **stale by four weeks**; 166 of the filings are downloaded, the rest are index rows |
+| `anc_ceiling_roster.csv` | 196 | roster, fetched 2026-08-05 | — |
+| `tribal_bond_issuances.csv` | 29 | **every row carries `issue_date = 2021-01-26`** | that is a placeholder, not 29 same-day issues. `62`/`518` already flag this table for an unstated grain and no primary key. **Not fixed this pass — it is a real defect and it is named here so it stops being invisible** |
+
+---
+
+## WHAT EXISTS AND CEDAR DOES NOT HOLD AT ALL
+
+Ranked by expected value. Items 1–3 need no new access.
+
+1. **ANCSA village corporation filings — 173 corporations, same portal, proven
+   retrieval path, zero new access.** They hold the **surface** estate where
+   the regionals hold the **subsurface**, and they are the *receiving* side of
+   §7(j), which the regionals' reports structurally omit. This is the single
+   largest named-entity gap in the dataset.
+2. **OSMRE AML FY2002–FY2012.** All fourteen PDFs are now on disk. FY2002–FY2009
+   print a clean per-tribe distribution on a "Page 8/9"-style table; the reason
+   they are held is that the layout changes in every vintage and this pass
+   would not publish a read it could not gate. **FY2010–FY2012 are scanned
+   images with no text layer** and need OCR or hand transcription.
+3. **Indian water rights settlements.** Enacted public laws that **quantify** a
+   tribe's water right in acre-feet. This would be the best-evidenced asset
+   class anywhere in the collection — a named tribe, an exact quantity, in the
+   Statutes at Large. Recorded `NOT_CHECKED`, never `NOT_FOUND`.
+4. **Navajo Tax Commission collections by tax type, FY2012–FY2024**, including
+   Oil & Gas Severance, at `tax.navajo-nsn.gov`. **Must be read visually** —
+   `pdftotext` shifts every row label down by one, and the source itself swaps
+   two FY2024 values. The `?ver=` token in the URL is load-bearing. **Do not
+   cite `navajotax.org`**, which is now a squatter.
+5. **Navajo Nation audited actuals.** The parser is shipped; the remaining
+   years need harvesting from `dibb.nnols.org` into
+   `data/raw/resources/new_mexico/cedar_navajo_audited_actuals.csv`.
+6. **BIA forestry timber sales by reservation.** `bia.gov/bia/ots/forestry`
+   404s. The only plausible route to named-tribe timber value for AK/WA/MN/WI/CA.
+7. **EDGAR full-text search for tribal lease language generally** —
+   `"Indian Mineral Development Act"`, `"lease of Indian land"`. One query found
+   the Peabody Navajo/Hopi leases; the seam is unworked.
+8. **La Plata County ACFRs** — the Southern Ute compact payment under C.R.S.
+   24-61 art. 6.02. Blocked on a JavaScript document centre.
+9. **Montana Secretary of State records request** — the terminated Blackfeet
+   oil and gas agreement, filed under MCA 18-11-107 and not online.
+10. **BIA NIOGEMS.** The one system holding Indian lease, tract, agreement and
+    well identifiers. Internal to BIA, ~50 tribal users across 8 reservations.
+    **A partnership target, never a cited source.** The join columns already
+    exist and are empty, so access would be a merge and not a rebuild.
+
+### Checked, and there is nothing there
+
+Recorded so nobody walks this ground again. Full evidence in
+`data/raw/resources/_state_mechanisms/cedar_state_mechanism_register.csv`
+(47 findings, 16 states) and `docs/RESOURCE_LEDGER_STATES_LOG.md`.
+
+**NO MECHANISM** — MT beyond Fort Peck, NV, MN, MI, TX, LA, and severance
+sharing in CO, WY, AZ, OK. **Nevada is the strongest negative in the
+collection**: its Net Proceeds of Minerals Bulletin publishes named royalty
+recipient × operator × mine × commodity × county with dollar amounts — exactly
+the table this dataset wants — and **no tribe appears in any of eleven years**.
+
+**MECHANISM EXISTS, NO PUBLIC SERIES** — WA (RCW 43.06.480, Quinault timber
+excise agreement), WI (Wis. Stat. 70.395(2)(d)2m, a $100,000 capped
+entitlement), CO (C.R.S. Title 24 art. 61 — and it runs the *other* way: the
+Southern Ute is exempted from state severance tax and pays La Plata County),
+AZ (Peabody's Navajo and Hopi coal leases publish rates, never dollars).
+
+**LEGALLY CLOSED** — New Mexico (NMSA 7-29-4.1, 7-31-5, 7-32-5 deduct tribal
+royalties; § 7-1-8 makes taxpayer detail confidential and § 7-1-8.2 has no
+oil-and-gas disclosure equivalent) and Colorado (C.R.S. 39-7-101(4) makes the
+tribal-royalty statements private documents; disclosure is a petty offense).
+**The data exists and cannot be obtained.**
+
+---
+
+## THE ATTRIBUTION BOUNDARY — read this before quoting any total
+
+### 87% of these dollars cannot name a tribe, and that is the source's doing
+
+Measured on the current file, 11,305 rows:
+
+| | rows | share |
+|---|---:|---|
+| **aggregate — the publisher suppresses the entity** | 9,840 | 87.0% |
+| **entity attributed** (a role id, or a `resource_parties` link) | 1,405 | 12.4% |
+| recipient is a **class or collective**, named but not keyed | 60 | 0.5% |
+| **unattributed for want of a resolver** | **0** | **0.0%** |
+
+**The dataset-readiness figure of "28% entity-keyed" is not a resolution
+failure.** It counts `recipient_entity_id` on `resource_revenue.csv`, and this
+dataset deliberately routes attribution through `resource_parties.csv` instead
+— because a single owner column on a revenue row would have to pick one of the
+tribal government, the allottees, the enterprise, the operator, the lessee and
+the trust account, and would assert a false exclusivity. Counting the party
+table as well, **zero rows are unattributed for want of a match.**
+
+The 9,840 aggregate rows are ONRR (9,277 monthly + 157 fiscal-year
+disbursements), its MMS-era predecessor (315 calendar + 42 fiscal) and
+Montana's $0.00 state-aggregate letters (49). Interior's own words:
+
+> "For all Native American land, the federal government only releases natural
+> resource extraction and revenue information in aggregate. Specific data on
+> Native American revenues are confidential and proprietary. Treaties, laws,
+> and regulations dictate what data the government can release."
+
+Verified at the data level every build, not taken from site copy: **0 of 9,277
+Native monthly revenue rows carry any geography, against 99.8% of Federal rows
+in the same file.**
+
+The 60 class/collective rows are 53 Osage "Major Details" component lines and
+7 Osage gross-production-tax outflows to the State of Oklahoma — both are
+line items inside a series whose attribution sits on the sibling total row.
+
+**19 distinct entities** are touched: 12 ANCSA regional corporations, the
+Three Affiliated Tribes, the Osage Nation, the Navajo Nation, the Crow Tribe,
+the Hopi Tribe, the Ute Indian Tribe, and one ANC subsidiary joint venture.
+
+### `operator_entity_id` is 0% and that is correct
+
+Operators are Teck Alaska, Peabody Western Coal, Westmoreland, Donlin Gold —
+**non-Native counterparties, which are not in the entity spine and must never
+be written as though they were.** They are carried as `operator_name` text and,
+where they pay, as a `PAYER-` label. The `PAYER-` prefix is what stops a
+downstream join treating the State of Oklahoma as a Native entity.
+
+### Individual allottees: what is suppressed, and what we refuse to publish
+
+Two separate things, and they are often confused.
+
+**Suppressed by the publisher.** ONRR's Native American land class *mixes*
+tribal mineral interests with individual Indian (allottee) interests and cannot
+be decomposed. Interior's disbursement category is literally named
+**"Native American tribes and individuals"**. The portal states:
+
+> "Individual mineral owners (allottees) may request that payments be made
+> directly to them… **The amounts paid for extraction on tribal lands vary by
+> tribe and are not available to the public.**"
+
+Every federal row carries that caveat in `beneficiary_note`.
+
+**Refused by Cedar Press.** Where allottee-level detail *is* reachable, this
+dataset does not publish a natural person. The live case is the Osage: 508
+headright rows carry
+`recipient_entity_name = "Holders of Osage headrights (individuals)"` —
+a **class**, never a person — and the amount is **dollars per full headright**,
+a rate, with `aggregation_level = per_headright_rate` so the non-additivity is
+machine-visible. The Council prints a divisor of 2,228.97393 headrights beside
+it. **The divisor is used only as a check and never as a multiplier**, because
+multiplying would manufacture an aggregate, and dividing an aggregate would
+approach an individual's income. **BIA LTRO allotment tracts and Individual
+Indian Money account detail are not public and are not sought.**
+
+---
+
+## GATES — why you can trust the new rows
+
+Nothing here was published on a parser's say-so.
+
+**MMS CY1925–2000 (315 rows).** Three gates, all must pass or the whole layer
+is held: (1) each of 76 years must cross-foot to its own printed annual total;
+(2) each of 6 columns must reproduce the total printed for it on the summary
+page; (3) CY1996–CY2000 must reproduce, to the cent, the **independent hand
+transcription** the first wave published from the same document. Measured:
+**76/76, 6/6, 30/30**, and the 76 annual totals sum to the document's own
+printed grand total of **$4,088,925,436** exactly.
+
+**OSMRE AML (76 rows).** Each document prints the same numbers in two
+independently typeset tables. A tribe-year publishes only if all five hold:
+components sum to the printed total at 100%; net components sum to the printed
+total after reductions; amount − reduction = net for every component; the grant
+page's total equals the mandatory page's total; the grant page's components sum
+to its own total. **FY2018 Crow fails it** — the scanned OCR prints 1,180,946
+where 1,242,983 − 82,037 = 1,160,946 — and is held. That is the gate doing its
+job on the exact file the earlier wave was right to distrust.
+
+**OSMRE IIJA (18 rows).** Every row's distribution must sum to the national
+total the table prints for itself. This caught a real defect during the build:
+the row reader was emitting each printed row twice and the table footed to
+exactly double.
+
+**Osage headrights (508 rows).** Unchanged and still binding: every complete
+year must satisfy Q1+Q2+Q3+Q4 == the printed annual total. **All 121 quarterly
+years 1906–2026 pass.** The 26 annual-only years 1880–1905 have no quarters to
+sum, so they are graded **B** rather than A — that is the honest difference
+between a figure two published numbers agree on and one printed once.
+
+---
+
+## THINGS THAT WILL BITE YOU
+
+- **`aggregation_level` is load-bearing. Never sum across it.** A
+  `national_aggregate` row already contains the `entity_specific` money.
+  `per_headright_rate` is a rate, not a total. `entity_specific_component` rows
+  demonstrably do not partition their own total — in 2016Q3 the Osage oil line
+  alone exceeds the quarter's stated total revenue.
+- **The fee-based AML series and the IIJA series are different
+  appropriations.** They are separate `source_system` values and must never be
+  added as one series.
+- **All three tribal AML programmes are CERTIFIED**, so their fee-based State
+  and Tribal Share is $0 and the money arrives as a Certified In Lieu payment
+  one column over. Reading the share column alone reports three tribes
+  receiving nothing.
+- **A zero is an assertion, not a blank.** Montana's 49 quarters of $0.00, the
+  Crow and Hopi 0.0000% IIJA shares, and 350 zero ONRR rows are all measured
+  statements. Dropping them converts a measured fact into an absence.
+- **Negatives belong in every total.** 1,770 ONRR rows (19.1%) are negative —
+  refunds, recoupments and prior-period corrections summing to about −$1.08B.
+- **ND's 2019 split is vintage-based, not a date switch.** 80/20 applies only
+  to wells spudded after 2019-06-30, for the life of the well, so every
+  post-2019 monthly distribution is a blend. `allocation_formula` says so in
+  the field itself so a subscriber cannot pick up 80/20 and multiply.
+- **`pdftotext -layout` is not safe on any document in this collection.** It
+  produced a fabricated one-row offset on the MMS calendar table AND on the
+  OSMRE tables, in opposite ways, and in both cases every number was
+  individually plausible. Use `pdfplumber` word coordinates.
+- **A filter that finds nothing looks exactly like a series that does not
+  exist.** Both bugs found in this pass were that shape: a hardcoded page title
+  held six perfectly readable OSMRE fiscal years, and a non-total sort key
+  silently swapped 28 ONRR event ids between rows on every refresh.
+
+---
+
+## KNOWN OPEN ITEMS THIS PASS DID NOT CLOSE
+
+| Item | Owner | Why not closed |
+|---|---|---|
+| **ONRR monthly and calendar-year grains no longer agree** — CY2024 differs by $25,202.49, CY2025 by $1,302.57. The 2026-08-06 vintage of the same two files reconciled to **$0.00** across all 23 shared years | natural resources | Recorded as `RESOURCE:ONRR:GRAIN_DISAGREEMENT`. Only the two most recent years move, which is what a rolling restatement looks like. Re-check on the next refresh: if it spreads to older years the choice of grain needs re-arguing |
+| `docs/codebooks/12_resources.md` is stale — it does not describe `reclamation_fee_distribution`, the two OSMRE `source_system` values, or the `per_headright_rate` / `entity_specific_component` levels | natural resources | `codebook_master.csv` is a **shared** file and fourteen workstreams were live. Registering a fragment mid-write is the collision `docs/RESOURCE_ASSETS_BUILD_LOG.md` already records. Queued, deliberately |
+| `resource_revenue.csv` carries **820 rows not yet in `dist/`** | integrator | Shipping is `build.py ship --execute`, which this workstream is not permitted to run |
+| `tribal_bond_issuances.csv` has a placeholder `issue_date` on all 29 rows, no stated grain and no primary key | natural resources | Named above. Out of scope for one pass; it is a documented defect now rather than an invisible one |
+| 4 `SPINE_ALIAS` rows queued: `MHA Nation`, `Mandan, Hidatsa, and Arikara Nation`, `Osage Minerals Council` | entity spine | The spine is append-only and not this script's to edit. No ledger row depends on them; they prevent a *future* source failing to resolve |

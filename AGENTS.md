@@ -4945,3 +4945,175 @@ not know about. This is the class-6 shape that destroyed the conservation ledger
 on 2026-09-01 (see `510_assertions.py`), now in a different file. **A rebuild
 writer on a table other scripts enrich must preserve unknown columns, or the
 gate's backup diff is the only thing standing between us and silent loss.**
+
+## GATE FAIL 2026-09-01 — natural resources (workstream O). None of it is mine; owners named.
+
+`py -3 code/62_no_regression_check.py` exits 1. **Not one failing line is a
+natural-resources file or table.** Standing rule 15 option 3: named, with
+owners, rather than recorded as "pre-existing" and stepped around.
+
+*Three consecutive runs of the unchanged gate at 18:57, 19:26 and 19:52
+produced three DIFFERENT regression sets, because fourteen workstreams were
+writing `code/` and `data/clean/` throughout. The set below is the 19:52 run.
+The sets are different; the ownership conclusion is the same in all three.*
+
+| line | owner (named by `62`/`293` itself) | what |
+|---|---|---|
+| `code_duplicate_numbers` 43 → 44 | the shard workstreams | a new script reused a taken number. **Not this workstream: it created no script.** The only file it edited is `code/83_build_resource_ledger.py`, which already existed |
+| `lint_class2b` 0 → 1 | `shard_f_membership.py` (shard F) | |
+| `lint_class2c` 60 → 61 | `344_pull_nigc_document_surface.py` (gaming) | `skipped += 1` silent counter |
+| `lint_class5` 6 → 7 | `shard_g_newsletters.py` (shard G) | `if uid in done:` resume guard |
+| `lint_new_defect_instances` = 3, `lint_bug_class_instances` 146 → 147 | the three above | roll-up of the same three |
+| `tables_missing_codebook_block`, `tables_missing_from_25_TABLES`, `tables_missing_from_27_SPEC`, `tables_undocumented_in_codebook` | native-owned businesses (`native_owned_businesses.csv`, 2,393 rows) and four other new tables that appeared and were registered between runs | new `data/clean/` tables with no codebook block |
+
+**Proven not to be workstream O.** `293_lint_bug_classes.py` reports **zero**
+hits in `code/83_build_resource_ledger.py`, the only script this workstream
+edited. No new `data/clean/` table was created — every row landed in
+`resource_revenue.csv` and `resource_parties.csv`, both already in the
+shipping baseline and the codebook.
+
+### The one line that WAS mine, and it was fixed before this run
+
+`files_with_columns_lost_vs_backup` is **0**. It was 1 earlier today
+(`144_build_admin_appeals.py`), and this workstream came within one command of
+adding a second: `83_build_resource_ledger.py` writes with a DECLARED field
+list and `extrasaction="ignore"`, so its first append run rewrote
+`resource_revenue.csv` from **41 columns to 40** and deleted `cedar_uid` from
+10,482 rows. Row count unchanged, no error, no warning.
+
+The declared field list is a contract for the columns a script FILLS. It was
+never a licence to delete another script's. Fixed with `fields_preserving()`,
+which unions the declared list with whatever the published header already
+carries, and every write in the file now routes through it. **This is the
+class-6 shape the entry directly above this one describes, in a fifth file** —
+a rebuild writer on a table other scripts enrich must preserve unknown columns.
+
+### The measured-not-failed line that IS natural resources
+
+`resource_revenue.csv` grew **10,482 → 11,305** this pass and `dist/` has not
+been rebuilt, so ~823 of the 5,035 `ship_unshipped_rows` are its. **That is the
+integrator's step** — `build.py ship --execute` is outside this workstream's
+permissions — and it is expected, not a defect. `ship_ratio_pct` is 99.941 and
+did not fall on this run.
+
+## GATE FAIL 2026-09-01 19:40 — NOT shard J. One line WAS mine and is fixed; the rest named.
+
+Recorded under standing rule 15 option 3 by **shard J** (990 mission-text
+mining: `code/541_shard_j_mine_990_mission_text.py`,
+`data/staging/np_mission/`, appended item 12 in
+`review/OWNER_DECISION_QUEUE.md`). Shard J writes nothing to `data/clean/`,
+`data/spine/` or `code/` beyond that one new script.
+
+### MINE, AND FIXED IN THE SAME PASS
+
+`lint_class2c` 60 → **62** on the first run, of which one instance was
+`541_shard_j_mine_990_mission_text.py - sc["returns_with_mission_text"] += 1`.
+It is not a drop counter at all — `DROP_WORD` in `293_lint_bug_classes.py`
+matches **`miss` inside the word `mission`**. Renamed the key to
+`returns_with_purpose_narrative`; the instance is gone and `class2c` is back to
+61, the one remaining instance being `344`'s (below). Worth knowing for anyone
+else mining 990 text: **a counter with "mission" in its name trips class2c.**
+
+### NOT MINE — named, with owners (state at 19:40)
+
+| line | owner | what |
+|---|---|---|
+| `code_duplicate_numbers` 43 → 44 | shard C and shard D | `547_shard_c_hidden_endpoint_sweep.py` and `547_shard_d_web_probe.py` both claimed **547**, concurrently. Per the launch entry above, whoever is still running keeps the number. `541` is unique and is shard J's. |
+| `lint_class2b` 0 → 1 | `shard_f_membership.py` (shard F) | computes a share and reads columns by name without an existence check |
+| `lint_class2c` 60 → 61 | `344_pull_nigc_document_surface.py` (gaming) | `skipped += 1` naming nothing |
+| `lint_class5` 6 → 7 | `shard_g_newsletters.py` (shard G) | `if uid in done` resume guard |
+| `tables_*` +1 / +5 each, `tables_undocumented_in_codebook` 3 → 4 | see below | new undocumented tables in `data/clean/` |
+
+Nine `data/clean/*.csv` files were written by other workstreams during this
+pass alone: `admin_appeal_positions.csv`, `codebook_master.csv`,
+`native_owned_businesses.csv`, `nonprofit_schedule_c_coverage.csv`,
+`nonprofit_schedule_c_lobbying.csv`, `regulations_gov_comments.csv`,
+`regulations_gov_entity_coverage.csv`, `resource_parties.csv`,
+`resource_revenue.csv`. `ship_tables_total` 213 → 218. **None is shard J's** —
+shard J's five outputs are all under `data/staging/np_mission/`, which `62`
+does not scan.
+
+Also worth recording: between shard J's baseline run at 19:05 and this one,
+`lint_class1` fell 4 → 0 and `lint_class4` fell 12 → 9 as shard E and shards
+C/D/G cleared their own instances, while `class2b` and `class5` appeared fresh.
+**Three different regression sets from three runs of an unchanged gate in
+thirty-five minutes.** Compare file creation times against the live
+workstreams before believing a `62` failure is yours — the entry above already
+says this and it held again.
+
+### A FINDING, not a gate line — two workstreams built Schedule C in parallel
+
+`data/clean/nonprofit_schedule_c_lobbying.csv` (6,870 rows, 19:20, the lobbying
+workstream) and `data/staging/np_mission/schedule_c_lobbying.csv` (860 rows,
+shard J) were built within the same hour from the same corpus, and they are
+**complementary, not duplicates**:
+
+* the clean table enumerates every return in `irs990_schedc/` (6,870) and marks
+  which carry a Schedule C;
+* shard J's staging table scans **all three** local 990 directories and finds
+  **860 returns that actually contain a Schedule C — 475 in `irs990_schedc/`,
+  376 in `irs990_grantee/`, 9 in `irs990_grantmakers/`.** The 385 outside the
+  schedc directory are invisible to a dir-scoped pull.
+* shard J's also carries the **314 `ExplanationTxt` narrative blocks (166 KB)**
+  in which filers describe their lobbying in prose, read from the Schedule C
+  subtree only — the same tag carries Schedule O narrative everywhere else in a
+  990 and scooping it up would report general supplemental text as lobbying.
+
+Whoever owns the clean table should fold in the other two directories and the
+narrative before this ships. Shard J did not touch it.
+
+### AND A REAL UNDERCOUNT IN AN EXISTING SCRIPT
+
+`code/99_build_earmarks_and_schedc.py` appends 30 `schedc_*` columns to
+`np_financials.csv` and records `schedc_present = 1` on **93 rows** with a
+lobbying total of **$82,303**. Measured against the same local corpus, 860
+returns carry a Schedule C. Two causes: it reaches a narrower slice than what is
+on disk, and `schedc_total_lobbying` reads only the 501(h) `...Grp` shape, so
+the **245 non-electing filers** who report a flat `TotalLobbyingExpendituresAmt`
+are all read as zero. That is a defect, not a coverage limit. Owner of 99.
+
+## GATE FAIL 2026-09-01 — shard D. Two lines were mine; both fixed. Rest named.
+
+Recorded under standing rule 15 by **workstream SHARD-D** (tribes with a gaming
+facility, `tribe_id` sorted, rows 214–284; `code/553_shard_d_web_probe.py`,
+`data/staging/tribe_web_map/shard_d.csv`,
+`data/staging/tribe_harvest/shard_d/`).
+
+### MINE, AND FIXED IN THE SAME PASS
+
+| line | what | fix |
+|---|---|---|
+| `lint_class4` 9 → 10 | `if time.time() > RUN_DEADLINE: break` in my probe, in a file that writes the completion word `FETCHED`, with no comparison of retrieved against the total the run was asked for | the probe now computes `expected_total` (candidate rows in the file), counts `attempted_this_run` and `unattempted_after_deadline`, writes `coverage_complete` and **returns exit 3** when the deadline truncated it. A deadline-truncated run can no longer be read as complete coverage of a slice. Verified: 293 reports no `shard_d` finding. |
+| `code_duplicate_numbers` 43 → 44 | I named my probe `547_shard_d_web_probe.py`; shard C had concurrently claimed 547 for `547_shard_c_hidden_endpoint_sweep.py` | **renamed mine to `553_shard_d_web_probe.py`** (548–553 were all free; took the top of the free block to leave room for the agents still choosing). Shard C keeps 547 — it is running. Same lesson as the launch entry above: `ls code/<n>_*` is not sufficient when agents choose numbers concurrently. |
+
+A `lint_class5` finding also appeared on my probe mid-pass (`if key in done:`
+resume guard, in a file that rewrote a run-state JSON wholesale). Fixed properly
+rather than waived: the run state is now **appended** to `_run_state.jsonl`, so a
+later run that skips everything already on disk cannot overwrite the run that did
+the fetching with a zeroed summary. This is the same principle as
+`PULL_DISCIPLINE.md`'s "a shared lock field must not be ambiguous".
+
+### NOT MINE — named, with owners
+
+| line | owner |
+|---|---|
+| `lint_class2b` 0 → 1 | `shard_f_membership.py` (shard F) |
+| `lint_class2c` 60 → 61 | `344_pull_nigc_document_surface.py` (gaming) |
+| `lint_class5` 6 → 7 | `shard_g_newsletters.py` (shard G) — `if uid in done:` |
+| `tables_missing_codebook_block`, `tables_missing_from_25_TABLES`, `tables_missing_from_27_SPEC`, `tables_undocumented_in_codebook`, all +1..+5 | new tables in `data/clean/` from other workstreams. **Shard D writes nothing to `data/clean/`** — every output is under `data/staging/`, which `62` does not scan. |
+| `F-DELAWARE-ALIAS` on `cedar_identifier_ledger_final.csv` / `_tiered.csv` | the identifier-ledger workstream |
+
+### THE ONE WORTH READING — two shard programs, one lint class, opposite causes
+
+Shard C, shard E, the lobbying workstream and I all tripped `lint_class4` on the
+same day with the same line shape (`if <deadline/budget>: break`). That is not
+four careless agents; it is **a defect class that every polite web puller
+naturally writes**, because `PULL_DISCIPLINE.md` rule "BACKOFF BOUNDS THE RATE,
+NOT THE RUN" *requires* a `RUN_DEADLINE`, and 293 correctly objects that a
+deadline plus a success word with no coverage arithmetic is a silent truncation.
+
+**The two rules are both right and they compose into one requirement nobody had
+written down: a puller must have a deadline AND must publish, per run, what it
+was asked for against what it got.** Any future shard probe should copy the
+`expected_total` / `attempted_this_run` / `coverage_complete` block from
+`code/553_shard_d_web_probe.py` rather than rediscovering this.

@@ -76,6 +76,7 @@ Writes data/clean/resource_assets.csv
 
 import argparse
 import csv
+import re
 import subprocess
 import sys
 import time
@@ -146,7 +147,13 @@ MEASUREMENT_STATUS = {"actual_payment", "reported_revenue", "statutory_allocatio
 REVENUE_TYPE = {"royalty", "bonus", "rent", "lease_payment",
                 "surface_damage_payment", "severance_tax_share",
                 "production_tax_share", "trust_disbursement", "direct_pay",
-                "fund_deposit", "grant_from_resource_fund"}
+                "fund_deposit", "grant_from_resource_fund",
+                # OSMRE distributes a SMCRA per-ton coal reclamation fee to
+                # tribes with approved Abandoned Mine Land programmes. It is
+                # not a royalty (nobody produced anything), not a severance
+                # tax share and not a grant the tribe applied for - it is a
+                # statutory distribution of a fee levied on someone else.
+                "reclamation_fee_distribution"}
 
 LAND_STATUS = {"trust", "fee", "mixed", "not_stated"}
 
@@ -176,6 +183,7 @@ AGGREGATION_LEVEL = {
 # North Dakota as a Native entity.
 PAYERS = {
     "PAYER-US-ONRR": "United States, Office of Natural Resources Revenue",
+    "PAYER-US-OSMRE": "United States, Office of Surface Mining Reclamation and Enforcement",
     "PAYER-US-BIA": "United States, Bureau of Indian Affairs",
     "PAYER-US-BTFA": "United States, Bureau of Trust Funds Administration",
     "PAYER-STATE-ND": "State of North Dakota",
@@ -318,11 +326,44 @@ def read_csv(p):
         return list(csv.DictReader(fh))
 
 
+def header_of(p):
+    """The column names already on disk, or [] if the file is absent."""
+    p = Path(p)
+    if not p.exists():
+        return []
+    with open(p, encoding="utf-8-sig", errors="replace", newline="") as fh:
+        return csv.DictReader(fh).fieldnames or []
+
+
+def fields_preserving(p, declared):
+    """`declared` plus every column the published file already carries.
+
+    THIS EXISTS BECAUSE THIS SCRIPT SILENTLY DROPPED A COLUMN.
+
+    `resource_revenue.csv` and `resource_parties.csv` carry `cedar_uid`,
+    appended by a later script that this one has never heard of. `write_csv`
+    writes a DECLARED field list with `extrasaction="ignore"`, so every append
+    run rewrote the file 41 columns -> 40 and deleted `cedar_uid` from 10,482
+    rows. The row count was unchanged and no error was raised - the exact
+    shape 62_no_regression_check.py catches as `files_with_columns_lost_vs_
+    backup`, and the exact shape AGENTS.md keeps warning about: the file still
+    looks healthy afterwards, just narrower.
+
+    A declared field list is this script's contract for the columns it FILLS.
+    It was never a licence to delete somebody else's. Extra columns are kept
+    in their published order, after the declared ones, and rows this script
+    creates simply leave them blank.
+    """
+    extra = [c for c in header_of(p) if c not in declared]
+    return list(declared) + extra
+
+
 def write_csv(p, rows, fields):
     p = Path(p)
     p.parent.mkdir(parents=True, exist_ok=True)
     with open(p, "w", encoding="utf-8", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=fields, extrasaction="ignore")
+        w = csv.DictWriter(fh, fieldnames=fields, extrasaction="ignore",
+                           restval="")
         w.writeheader()
         w.writerows(rows)
     try:
@@ -414,17 +455,61 @@ def build_onrr(rev_rows, party_rows, unresolved):
     print(f"\n  GRAIN RECONCILIATION monthly vs calendar-year, {len(shared)} shared "
           f"years: max abs difference ${worst:,.2f}")
     if worst > 1.0:
+        # THIS WENT FROM $0.00 TO NON-ZERO BETWEEN VINTAGES, and a printed
+        # warning nobody reads is not a record. The 2026-08-06 pull
+        # reconciled to the cent across all 23 shared years; the 2026-09-01
+        # pull does not. Only the two most recent years move, which is what a
+        # rolling restatement looks like - ONRR revises recent months and the
+        # two files are cut on different days. The MONTHLY grain is still the
+        # one published, because it is finer and reaches further forward, but
+        # the disagreement is now a fact about the data and it is filed as
+        # one instead of scrolling past.
+        off = sorted(((y, m_by_y[y] - a_by_y[y]) for y in shared
+                      if abs(m_by_y[y] - a_by_y[y]) > 1.0),
+                     key=lambda t: -abs(t[1]))
         print("    !! the two grains disagree - publishing monthly only would "
               "lose money; investigate before trusting either")
+        for y, d in off:
+            print(f"       {y}: monthly - calendar-year = ${d:,.2f}")
+        unresolved.append({
+            "review_id": "RESOURCE:ONRR:GRAIN_DISAGREEMENT",
+            "source_system": "ONRR_NRRD_monthly_revenue",
+            "raw_name": "monthly_revenue.csv vs calendar_year_revenue.csv",
+            "context": "; ".join(f"CY{y} monthly minus calendar-year = "
+                                 f"${d:,.2f}" for y, d in off)
+                       + f" | max ${worst:,.2f} across {len(shared)} shared "
+                         f"years. The 2026-08-06 vintage of the same two "
+                         f"files reconciled to $0.00 across all 23 shared "
+                         f"years, so this is new.",
+            "reason": "publisher_grain_disagreement_recent_years_only",
+            "suggested_action": "NOT a build error and NOT blocking - the "
+                                "monthly grain is published and is finer. "
+                                "Re-check on the next refresh: if the gap "
+                                "closes it was a restatement in flight; if it "
+                                "persists or spreads to older years the two "
+                                "files have diverged and the choice of grain "
+                                "needs re-arguing.",
+            "source_url": f"{ONRR_BASE}/monthly_revenue.csv",
+            "queued_date": TODAY,
+        })
     only_monthly = sorted(set(m_by_y) - set(a_by_y))
     if only_monthly:
         print(f"    monthly extends beyond the calendar-year file: {only_monthly}")
 
     # -- REVENUE rows, monthly grain ---------------------------------------
     neg = zero = 0
+    # THE SORT KEY MUST BE TOTAL, because the ordinal in the event id is
+    # assigned from it. Without `Mineral Lease Type` the key has 34 ties -
+    # the New Mexico humate rows are identical on date, revenue type,
+    # commodity and product and differ only in lease type - and every refresh
+    # swapped 28 event ids between rows whose amounts differ. Nothing errors:
+    # the file has the same row count and the same total, and a consumer
+    # holding `RRE-ONRR-REV-007736` silently gets a different payment.
+    # Measured with the lease type added: 0 ties.
     for i, r in enumerate(sorted(monthly, key=lambda x: (
             x["Date"].split("/")[2], x["Date"].split("/")[0],
-            x["Revenue Type"], x["Commodity"], x["Product"])), 1):
+            x["Revenue Type"], (x.get("Mineral Lease Type") or ""),
+            x["Commodity"], x["Product"])), 1):
         mm, _dd, yy = r["Date"].split("/")
         year = int(yy)
         amt = float(r["Revenue"] or 0)
@@ -753,80 +838,20 @@ def build_onrr_historical(rev_rows, unresolved):
                 "source_url": url,
                 "fetched_date": TODAY, "built_date": TODAY,
             })
-    # -- CALENDAR-YEAR series, transcribed from the same MMS source ---------
-    # The calendar-year table lives in a single figure whose text layer is
-    # offset AND column-scrambled, so it is transcribed rather than regexed -
-    # a parser that produces the right answer on one mangled table and a wrong
-    # one on the next is not worth having. Transcription is checked by the
-    # same gate: each row must cross-foot, and the printed 1996-2000 column
-    # totals must reproduce, or nothing is published.
-    cyp = src / "cedar_transcribed_cy_1996_2000.csv"
-    cy = read_csv(cyp)
+    # -- THE CALENDAR-YEAR SERIES MOVED OUT OF THIS FUNCTION ---------------
+    #
+    # This block used to emit 30 rows for CY1996-CY2000 from
+    # `cedar_transcribed_cy_1996_2000.csv`, a hand transcription of five years
+    # of the MMS calendar-year figure. `build_mms_full_calendar` now reads the
+    # SAME document by coordinate and publishes all 76 years, CY1925-CY2000,
+    # under the same `RRE-MMS-CY` ids - so leaving this here produced 30
+    # duplicate primary keys, which the append gate refused to write. Good.
+    #
+    # The transcription is NOT deleted and NOT redundant. It is gate 3 of the
+    # new layer: the coordinate read must reproduce all 30 of its values to
+    # the cent or the whole layer is held. An independent second reading of a
+    # source is worth more as a check than as a duplicate row.
     cy_built = 0
-    for r in cy:
-        year = int(r["calendar_year"])
-        parts = {"Coal": float(r["coal_royalties"]),
-                 "Gas": float(r["gas_royalties"]),
-                 "Oil": float(r["oil_royalties"]),
-                 "Other royalties": float(r["other_royalties"]),
-                 "Rents": float(r["rents"]),
-                 "Other revenues": float(r["other_revenues"])}
-        printed_total = float(r["total_printed"])
-        if abs(sum(parts.values()) - printed_total) >= 1.0:
-            unresolved.append({
-                "review_id": f"RESOURCE:MMS:CY{year}",
-                "source_system": "MMS_MRM_american_indian_revenues_calendar",
-                "raw_name": f"Calendar Year {year}",
-                "context": f"components {sum(parts.values()):,.0f} vs printed "
-                           f"total {printed_total:,.0f}",
-                "reason": "arithmetic_reconciliation_failed",
-                "suggested_action": "Re-read the source figure. HELD.",
-                "source_url": r["source_url"], "queued_date": TODAY,
-            })
-            continue
-        for comp, amt in parts.items():
-            real, factor = real2025(amt, year)
-            cy_built += 1
-            rev_rows.append({
-                "resource_revenue_event_id":
-                    f"RRE-MMS-CY{year}-{MMS_COMPONENT_SLUG[comp]}",
-                "recipient_entity_id": "", "recipient_entity_name": "",
-                "beneficiary_entity_id": "", "beneficiary_entity_name": "",
-                "beneficiary_note": MMS_NOTE,
-                "payer_entity_id": "", "payer_entity_name": "",
-                "operator_entity_id": "", "operator_entity_name": "",
-                "related_asset_ids": "",
-                "source_system": "MMS_MRM_american_indian_revenues_calendar",
-                "source_record_id": f"CY{year}|{comp}",
-                "revenue_type": ("rent" if comp == "Rents" else
-                                 "other_reported_revenue"
-                                 if comp == "Other revenues" else "royalty"),
-                "resource_type": {"Coal": "coal", "Gas": "oil_and_gas",
-                                  "Oil": "oil_and_gas"}.get(comp, "mixed"),
-                "commodity": comp, "product": "", "mineral_lease_type": "",
-                "period_type": "calendar_year",
-                "period_start": f"{year}-01-01", "period_end": f"{year}-12-31",
-                "payment_date": "",
-                "amount_usd": f"{amt:.2f}",
-                "amount_usd_real2025": real, "deflator_factor_2025": factor,
-                "inflation_base_year": BASE_YEAR if factor else "",
-                "measurement_status": "reported_revenue",
-                "aggregation_level": "national_aggregate",
-                "land_status": "not_stated",
-                "land_status_basis": "MMS published an American Indian lands "
-                                     "aggregate; it does not state trust vs fee",
-                "allocation_formula": "",
-                "allocation_formula_effective_start": "",
-                "allocation_formula_effective_end": "",
-                "allocation_formula_source_url": "",
-                "amount_sign_meaning": "negative = refund or prior-period "
-                                       "correction; retained",
-                "geography_note": "National aggregate across all American "
-                                  "Indian lands; no state, county or tribe.",
-                "confidence": "B",
-                "source_url": r["source_url"],
-                "fetched_date": TODAY, "built_date": TODAY,
-            })
 
     print(f"  MMS-era pre-2003: {built:,} fiscal-year rows built, {held:,} "
           f"year(s) held for failing the reconciliation gate; "
@@ -1668,7 +1693,25 @@ OK_NEWS_SRC = OK_SRC + "/newsletters"
 # CY1925-1995 series was scoped out on. The headright file reaches 1880 and is
 # retained whole under data/raw; only 2000 forward is published, so the two
 # eras of this dataset share one rule instead of each having its own.
-OK_FLOOR_YEAR = 2000
+# COVERAGE FLOOR FOR THE OSAGE SERIES.
+#
+# This was 2000, from a 2000-2026 target the owner has since retired: "some of
+# these other datasets exist over longer time horizons". The Osage Minerals
+# Council's own spreadsheet is one of them - it prints quarterly payments back
+# to 1906 and one annual payment per year back to 1880, and holding the floor
+# at 2000 discarded 94 published years of a named-entity series for no reason
+# but a target.
+#
+# The floor is now the DOCUMENT's floor. It is not a loosened gate: every
+# complete year still has to satisfy Q1+Q2+Q3+Q4 == the printed annual total
+# or it is held, and all 121 quarterly years from 1906 to 2026 pass.
+OK_FLOOR_YEAR = 1906
+
+# 1880-1905 predate quarterly payment. The sheet's own footnote says so -
+# "Between 1880 - 1906, one payment per year was recorded" - so those years
+# are published at ANNUAL grain with period_type=calendar_year rather than
+# split into four quarters that were never paid.
+OK_ANNUAL_ONLY_FLOOR = 1880
 
 
 def _osage_grid(path):
@@ -1880,8 +1923,109 @@ def parse_osage_headrights(spine, rev_rows, party_rows, unresolved):
                 "confidence": "A", "source_url": OK_SRC,
                 "fetched_date": TODAY, "built_date": TODAY,
             })
+    # -- 1880-1905: ANNUAL grain, because that is how they were paid -------
+    #
+    # The sheet's own footnote is the authority for the grain change:
+    # "Between 1880 - 1906, one payment per year was recorded". Splitting
+    # these into quarters would invent three payments a year that never
+    # happened, and there is no quarterly cell to split. They therefore carry
+    # period_type=calendar_year and a different id family, so a consumer
+    # cannot accidentally treat an annual figure as a quarterly one.
+    #
+    # THE QUARTERLY GATE CANNOT APPLY - there are no quarters to sum - so
+    # these rows are graded B rather than A. That is the honest difference
+    # between a figure two published numbers agree on and a figure printed
+    # once.
+    annual_built = 0
+    for year in sorted(y for y in annual
+                       if OK_ANNUAL_ONLY_FLOOR <= y < OK_FLOOR_YEAR):
+        if any((year, q) in grid for q in range(1, 5)):
+            continue          # a quarterly year; already emitted above
+        rate = annual[year]
+        real, factor = real2025(rate, year)
+        eid = f"RRE-OK-HR-{year}-ANNUAL"
+        annual_built += 1
+        rev_rows.append({
+            "resource_revenue_event_id": eid,
+            "recipient_entity_id": "",
+            "recipient_entity_name": "Holders of Osage headrights (individuals)",
+            "beneficiary_entity_id": "", "beneficiary_entity_name": "",
+            "beneficiary_note": OSAGE_HEADRIGHT_NOTE + " " + OSAGE_ESTATE_NOTE
+                                + " ANNUAL GRAIN: the Osage Minerals Council's "
+                                  "own footnote records that between 1880 and "
+                                  "1906 one payment per year was made, so this "
+                                  "is a year, not a quarter, and it is not "
+                                  "comparable row-for-row with the quarterly "
+                                  "series that begins in 1906.",
+            "payer_entity_id": "PAYER-US-BIA",
+            "payer_entity_name": PAYERS["PAYER-US-BIA"],
+            "operator_entity_id": "", "operator_entity_name": "",
+            "related_asset_ids": "",
+            "source_system": "OMC_headright_payment_history",
+            "source_record_id": f"{year}|ANNUAL|dollars per full headright",
+            "revenue_type": "direct_pay", "resource_type": "mixed",
+            "commodity": "Osage Mineral Estate (oil, gas, sand and gravel, "
+                         "water use)",
+            "product": "", "mineral_lease_type": "",
+            "period_type": "calendar_year",
+            "period_start": f"{year}-01-01", "period_end": f"{year}-12-31",
+            "payment_date": "",
+            "amount_usd": f"{rate:.2f}",
+            "amount_usd_real2025": real, "deflator_factor_2025": factor,
+            "inflation_base_year": BASE_YEAR if factor else "",
+            "measurement_status": "actual_payment",
+            "aggregation_level": "per_headright_rate",
+            "land_status": "trust",
+            "land_status_basis": "the 1906 Osage Allotment Act reserved the "
+                                 "entire mineral estate of Osage County to the "
+                                 "Osage Nation, held in trust by the United "
+                                 "States. NOTE that these years PREDATE the "
+                                 "1906 Act; the payments are recorded by the "
+                                 "Council in the same series and the trust "
+                                 "characterisation is stated for the estate as "
+                                 "it exists today, not as it stood in 1880.",
+            "allocation_formula": f"Distributed per full headright; the Osage "
+                                  f"Minerals Council prints a divisor of "
+                                  f"{OSAGE_HEADRIGHT_DIVISOR} headrights. THE "
+                                  f"DIVISOR IS NOT APPLIED HERE - multiplying "
+                                  f"this rate by it would manufacture an "
+                                  f"aggregate, and the modern divisor is in "
+                                  f"any case not the 1880 one.",
+            "allocation_formula_effective_start": "",
+            "allocation_formula_effective_end": "",
+            "allocation_formula_source_url": OK_SRC,
+            "amount_sign_meaning": "dollars per FULL headright for the YEAR; "
+                                   "not a total, not additive with any other "
+                                   "row, and not comparable with a quarterly "
+                                   "row",
+            "geography_note": "Osage County, Oklahoma. No well or lease is "
+                              "named.",
+            # B, not A: the quarterly gate (four quarters must sum to the
+            # printed annual total) cannot run on a year that has only one
+            # printed figure. Nothing corroborates these cells.
+            "confidence": "B",
+            "source_url": OK_SRC,
+            "fetched_date": TODAY, "built_date": TODAY,
+        })
+        party_rows.append({
+            "party_link_id": f"PL-{eid}-OWNER",
+            "object_type": "revenue_event", "object_id": eid,
+            "entity_id": tid, "entity_name": canon, "entity_is_native": 1,
+            "party_role": "mineral_estate_owner",
+            "relationship": "parent_native_entity",
+            "interest_share_pct": "100",
+            "basis": f"published by the Osage Nation's own Minerals Council "
+                     f"in its headright payment history; resolve_entity/{how}",
+            "confidence": "B", "source_url": OK_SRC,
+            "fetched_date": TODAY, "built_date": TODAY,
+        })
+
+    qyrs = sorted({y for y, _q in grid if y >= OK_FLOOR_YEAR})
     print(f"  OK headrights: {built:,} quarterly rate rows "
-          f"({OK_FLOOR_YEAR}+), {held:,} year(s) held by the annual-total gate")
+          f"({min(qyrs) if qyrs else '-'}-{max(qyrs) if qyrs else '-'}), "
+          f"{annual_built:,} annual rate rows "
+          f"({OK_ANNUAL_ONLY_FLOOR}-{OK_FLOOR_YEAR - 1}), "
+          f"{held:,} year(s) held by the annual-total gate")
     if notes:
         print(f"      source footnotes carried as comparability breaks: {len(notes)}")
     return grid
@@ -2214,78 +2358,1101 @@ def build_oklahoma(spine, rev_rows, party_rows, unresolved):
         parse_osage_newsletters(spine, rev_rows, party_rows, unresolved, grid)
 
 
-# ---------------------------------------------------------------------------
-# OSMRE Abandoned Mine Land fee distributions - FOUND, HELD, AND WHY.
+# ===========================================================================
+# LAYER 1c - THE FULL MMS CALENDAR-YEAR SERIES, CY1925-CY2000.
 #
-# This is the best-looking source in the second wave and it is not built. It
-# deserves the space because the next agent will find it too.
+# WHY THIS EXISTS. Two earlier waves stopped at a 2000-2026 target and wrote
+# the pre-2000 record off as "scoped but not built". The owner has since asked
+# for every source's full historical horizon, and this one was already on disk:
+# `Am_Ind_Coll.pdf`, retrieved 2026-08-06, prints American Indian mineral
+# revenue collections for EVERY calendar year from 1925 to 2000.
 #
-# WHAT IT IS. SMCRA levies a per-ton reclamation fee on coal production
-# (30 U.S.C. 1232) and distributes half of it to states and tribes with
-# approved AML programs. OSMRE publishes the distribution as a table naming
-# the Crow Tribe, the Hopi Tribe and the Navajo Nation with dollar amounts,
-# every fiscal year from FY2016 to FY2026 without a gap. Named entity,
-# measured amount, continuous series, federal publisher - it passes every test
-# this project applies.
+# WHY IT WAS HARD, AND WHY IT IS NOW SAFE. `pdftotext -layout` cannot read this
+# table. Each numeric column is its own text block with its own starting y, so
+# a line-based dump interleaves columns belonging to different years - the
+# Total for CY1925 lands on the line labelled 1926, and the "Other royalties"
+# column drifts independently of the rest. Numbers come out individually
+# plausible and systematically misattributed.
 #
-# WHY IT IS HELD. The text layer of these PDFs is VERTICALLY OFFSET BY ONE ROW
-# in the distribution column, the same defect that nearly wrecked the MMS
-# series. Measured on the FY2022 file:
+# The fix is not a smarter de-skew. It is to stop reading LINES and read
+# COORDINATES: pdfplumber gives every number an (x1, top), the columns are
+# right-aligned so x1 clusters them, and `top` matches each number to the YEAR
+# LABEL PRINTED AT THE SAME HEIGHT. There is then no offset left to guess at.
 #
-#   Wyoming        No   3,059,874.30   -            241,490.23    3,059,874
-#   Crow Tribe     No           974.31 (776,388.22) 3,059,874.30          -
-#   Hopi Tribe     Yes    776,388.22   -                  974.31    799,809
-#   Navajo Nation  Yes    799,808.95   -                       -    812,928
+# THREE INDEPENDENT GATES, all of which must pass or nothing is published:
+#   1. per year   coal+gas+oil+other royalties+rents+other revenues == the
+#                 printed annual total                        (76 checks)
+#   2. per column computed column sum == the total printed for that column on
+#                 the summary page                             (6 checks)
+#   3. CY1996-CY2000 must reproduce, to the cent, the HAND TRANSCRIPTION the
+#      first wave published from this same document. Two independent readings
+#      of one source agreeing is evidence - docs/CROSS_SOURCE_VERIFICATION.md
+#      applied to our own work.                               (30 checks)
 #
-# Read naively, the Hopi Tribe collected $776,388.22 and received $799,809.
-# Read correctly, $776,388.22 is Hopi's collection printed on Crow's line and
-# $799,809 is NAVAJO's distribution printed on Hopi's line. Every number is
-# individually plausible and every attribution is wrong by one row.
+# Measured on this build: 76/76, 6/6, 30/30, and the sum of the 76 printed
+# annual totals reproduces the document's own printed CY1925-2000 grand total
+# of $4,088,925,436 exactly.
 #
-# The MMS layer above was publishable because the document printed subtotals
-# that let a de-skew be PROVEN right. These tables print no per-row check, the
-# eleven files are not laid out alike, and FY2018 is a scanned OCR document
-# whose text contains `StatefTribe` and `Ir."mr""r't~:`. A de-skew across all
-# eleven could not be verified, and an unverifiable de-skew that assigns real
-# dollars to the wrong tribe is exactly the false attribution this project
-# refuses.
+# WHAT IT IS NOT. Still a national aggregate over all American Indian lands,
+# still no tribe, still mixing tribal and individual allottee interests. A
+# 76-year series does not become attributable by being long.
+# ===========================================================================
+
+MMS_FULL_PDF = "Am_Ind_Coll.pdf"
+MMS_FULL_URL = ("https://web.archive.org/web/20021226031907id_/"
+                "http://www.mrm.mms.gov:80/Stats/pdfdocs/Indian/Am_Ind_Coll.PDF")
+
+#: Printed on the CY1925-2000 summary page. This is gate 2.
+MMS_FULL_PRINTED_COLUMN_TOTALS = {
+    "Coal": 962786076.0, "Gas": 1080034780.0, "Oil": 1646066273.0,
+    "Other royalties": 335534836.0, "Rents": 9891815.0,
+    "Other revenues": 54611656.0,
+}
+MMS_FULL_PRINTED_GRAND_TOTAL = 4088925436.0
+
+#: The two table pages and the years each begins and ends with. DECLARED, not
+#: discovered: if a future vintage paginates differently this fails loudly
+#: instead of quietly reading the wrong table.
+MMS_FULL_PAGES = [(6, 1925, 1971), (7, 1972, 2000)]
+
+#: Column order, left to right. Page 6 prints no Rents and no Other revenues
+#: at all - the document prints "N/A" for every year to 1971 - so it carries
+#: five numeric columns, not seven.
+MMS_FULL_COLS_7 = ["Coal", "Gas", "Oil", "Other royalties", "Rents",
+                   "Other revenues", "total"]
+MMS_FULL_COLS_5 = ["Coal", "Gas", "Oil", "Other royalties", "total"]
+
+MMS_FULL_COMPONENTS = ["Coal", "Gas", "Oil", "Other royalties", "Rents",
+                       "Other revenues"]
+
+_MMS_NUM_TOKEN = re.compile(r"^\(?\$?[\d][\d,]*\)?$")
+
+
+def _mms_money(tok):
+    """Parenthesised negatives, commas stripped. '(2,108,946)' -> -2108946.0"""
+    neg = tok.startswith("(") or tok.endswith(")")
+    v = float(re.sub(r"[^\d]", "", tok) or 0)
+    return -v if neg else v
+
+
+def _mms_full_page(page, year_first, year_last):
+    """Read one page of the CY1925-2000 table by COORDINATE, not by line.
+
+    Returns ({year: [value or None per data column]}, [column x positions]).
+    The caller checks the column count before naming the columns, so a
+    layout change cannot silently rename them.
+    """
+    words = [w for w in page.extract_words() if _MMS_NUM_TOKEN.match(w["text"])]
+    clusters = []
+    for w in sorted(words, key=lambda w: w["x1"]):
+        if clusters and abs(clusters[-1][0] - w["x1"]) < 5:
+            clusters[-1][1].append(w)
+        else:
+            clusters.append([w["x1"], [w]])
+
+    year_col = None
+    for x, members in clusters:
+        texts = [m["text"] for m in sorted(members, key=lambda m: m["top"])]
+        if (len(texts) >= 5 and texts[0] == str(year_first)
+                and all(t.isdigit() and len(t) == 4 for t in texts[:5])):
+            year_col = (x, members)
+            break
+    if year_col is None:
+        raise ValueError(f"no year column starting {year_first}")
+
+    year_top = {int(w["text"]): w["top"] for w in year_col[1]}
+    if min(year_top) != year_first or max(year_top) != year_last:
+        raise ValueError(f"year column runs {min(year_top)}-{max(year_top)}, "
+                         f"expected {year_first}-{year_last}")
+
+    # BAND THE TABLE. The SOURCE footnote under the table contains the literal
+    # "1982", which clusters as a phantom column and shifts every column name
+    # by one if it is not excluded. Only words printed at the height of an
+    # actual year row are table cells.
+    lo = min(year_top.values()) - 3
+    hi = max(year_top.values()) + 3
+    data = []
+    for x, members in clusters:
+        if x <= year_col[0] + 20:
+            continue
+        in_band = [m for m in members if lo <= m["top"] <= hi]
+        if in_band:
+            data.append((x, in_band))
+
+    rows = {}
+    for year, top in year_top.items():
+        vals = []
+        for _x, members in data:
+            hit = [m for m in members if abs(m["top"] - top) < 4]
+            vals.append(_mms_money(hit[0]["text"]) if hit else None)
+        rows[year] = vals
+    return rows, [x for x, _m in data]
+
+
+def build_mms_full_calendar(rev_rows, unresolved):
+    """CY1925-CY2000 American Indian mineral revenue collections."""
+    try:
+        import pdfplumber
+    except ImportError:
+        print("  MMS CY1925-2000: pdfplumber not installed - layer NOT built")
+        return
+    path = RAW / "onrr_historical" / MMS_FULL_PDF
+    if not path.exists():
+        print(f"  MMS CY1925-2000: {MMS_FULL_PDF} absent - layer NOT built")
+        return
+
+    series = {}
+    with pdfplumber.open(str(path)) as pdf:
+        for page_index, y0, y1 in MMS_FULL_PAGES:
+            rows, xs = _mms_full_page(pdf.pages[page_index], y0, y1)
+            names = (MMS_FULL_COLS_7 if len(xs) == 7 else
+                     MMS_FULL_COLS_5 if len(xs) == 5 else None)
+            if names is None:
+                unresolved.append({
+                    "review_id": f"RESOURCE:MMS:CY_TABLE_PAGE_{page_index}",
+                    "source_system": "MMS_MRM_american_indian_revenues_calendar",
+                    "raw_name": MMS_FULL_PDF,
+                    "context": f"page {page_index} clustered into {len(xs)} "
+                               f"numeric columns; the table has 5 or 7",
+                    "reason": "column_count_unexpected",
+                    "suggested_action": "The PDF vintage changed. Re-declare "
+                                        "MMS_FULL_PAGES and the column names. "
+                                        "WHOLE LAYER HELD.",
+                    "source_url": MMS_FULL_URL, "queued_date": TODAY,
+                })
+                print(f"  MMS CY1925-2000: page {page_index} gave {len(xs)} "
+                      f"columns, expected 5 or 7 - LAYER HELD")
+                return
+            for year, vals in rows.items():
+                d = dict(zip(names, vals))
+                d.setdefault("Rents", None)
+                d.setdefault("Other revenues", None)
+                series[year] = d
+
+    # -- GATE 1: every year cross-foots to its own printed total ------------
+    failed = {}
+    for year in sorted(series):
+        d = series[year]
+        if d.get("total") is None:
+            failed[year] = (None, None)
+            continue
+        got = sum(d[c] or 0.0 for c in MMS_FULL_COMPONENTS)
+        if abs(got - d["total"]) >= 1.0:
+            failed[year] = (got, d["total"])
+
+    # -- GATE 2: every column reproduces its printed total ------------------
+    col_fail = []
+    for comp, printed in MMS_FULL_PRINTED_COLUMN_TOTALS.items():
+        got = sum(series[y][comp] or 0.0 for y in series)
+        if abs(got - printed) >= 1.0:
+            col_fail.append((comp, got, printed))
+    grand = sum(series[y]["total"] or 0.0 for y in series)
+    grand_ok = abs(grand - MMS_FULL_PRINTED_GRAND_TOTAL) < 1.0
+
+    # -- GATE 3: agree with the first wave's independent hand transcription -
+    tr = {int(r["calendar_year"]): r for r in
+          read_csv(RAW / "onrr_historical" / "cedar_transcribed_cy_1996_2000.csv")}
+    tr_map = {"Coal": "coal_royalties", "Gas": "gas_royalties",
+              "Oil": "oil_royalties", "Other royalties": "other_royalties",
+              "Rents": "rents", "Other revenues": "other_revenues"}
+    tr_fail = []
+    for year, row in sorted(tr.items()):
+        if year not in series:
+            tr_fail.append((year, "absent from the coordinate read", "", ""))
+            continue
+        for comp, col in tr_map.items():
+            a, b = series[year][comp] or 0.0, float(row[col])
+            if abs(a - b) >= 0.01:
+                tr_fail.append((year, comp, a, b))
+
+    checks = len(tr) * len(tr_map)
+    print("\n  MMS CY1925-2000 GATES (all must pass, or nothing is published)")
+    print(f"    per-year cross-foot        : {len(series) - len(failed)}/"
+          f"{len(series)} pass")
+    print(f"    per-column printed total   : "
+          f"{len(MMS_FULL_PRINTED_COLUMN_TOTALS) - len(col_fail)}/"
+          f"{len(MMS_FULL_PRINTED_COLUMN_TOTALS)} pass")
+    print(f"    printed grand total        : ${grand:,.0f} vs "
+          f"${MMS_FULL_PRINTED_GRAND_TOTAL:,.0f}  "
+          f"{'OK' if grand_ok else 'MISMATCH'}")
+    print(f"    agrees with the CY1996-2000 hand transcription: "
+          f"{checks - len(tr_fail)}/{checks} values")
+
+    if col_fail or not grand_ok or tr_fail:
+        for comp, got, printed in col_fail:
+            print(f"    !! column {comp}: {got:,.0f} vs printed {printed:,.0f}")
+        for item in tr_fail:
+            print(f"    !! transcription disagreement: {item}")
+        unresolved.append({
+            "review_id": "RESOURCE:MMS:CY1925_2000_TABLE",
+            "source_system": "MMS_MRM_american_indian_revenues_calendar",
+            "raw_name": "American Indian mineral revenue collections CY1925-2000",
+            "context": f"column-gate failures={len(col_fail)}; grand total "
+                       f"{'OK' if grand_ok else 'MISMATCH'}; disagreements "
+                       f"with the hand transcription={len(tr_fail)}",
+            "reason": "arithmetic_reconciliation_failed",
+            "suggested_action": "The coordinate read is wrong for this PDF "
+                                "vintage. WHOLE LAYER HELD - a de-skew that "
+                                "cannot be proven is not published.",
+            "source_url": MMS_FULL_URL, "queued_date": TODAY,
+        })
+        print("  MMS CY1925-2000: LAYER HELD - a gate failed")
+        return
+
+    built = 0
+    for year in sorted(series):
+        if year in failed:
+            got, printed = failed[year]
+            unresolved.append({
+                "review_id": f"RESOURCE:MMS:CY{year}",
+                "source_system": "MMS_MRM_american_indian_revenues_calendar",
+                "raw_name": f"Calendar Year {year}",
+                "context": f"components {got} vs printed total {printed}",
+                "reason": "arithmetic_reconciliation_failed",
+                "suggested_action": "Re-read the table page. YEAR HELD.",
+                "source_url": MMS_FULL_URL, "queued_date": TODAY,
+            })
+            continue
+        d = series[year]
+        for comp in MMS_FULL_COMPONENTS:
+            amt = d[comp]
+            # None is "the document prints N/A", which is NOT zero. A zero
+            # would assert nothing was collected; N/A says the split was not
+            # reported. No row is emitted, and the absence is visible as an
+            # absent row rather than as a false zero.
+            if amt is None:
+                continue
+            real, factor = real2025(amt, year)
+            built += 1
+            rev_rows.append({
+                "resource_revenue_event_id":
+                    f"RRE-MMS-CY{year}-{MMS_COMPONENT_SLUG[comp]}",
+                "recipient_entity_id": "", "recipient_entity_name": "",
+                "beneficiary_entity_id": "", "beneficiary_entity_name": "",
+                "beneficiary_note": MMS_NOTE,
+                "payer_entity_id": "", "payer_entity_name": "",
+                "operator_entity_id": "", "operator_entity_name": "",
+                "related_asset_ids": "",
+                "source_system": "MMS_MRM_american_indian_revenues_calendar",
+                "source_record_id": f"CY{year}|{comp}",
+                "revenue_type": ("rent" if comp == "Rents" else
+                                 "other_reported_revenue"
+                                 if comp == "Other revenues" else "royalty"),
+                "resource_type": {"Coal": "coal", "Gas": "oil_and_gas",
+                                  "Oil": "oil_and_gas"}.get(comp, "mixed"),
+                "commodity": comp, "product": "", "mineral_lease_type": "",
+                "period_type": "calendar_year",
+                "period_start": f"{year}-01-01", "period_end": f"{year}-12-31",
+                "payment_date": "",
+                "amount_usd": f"{amt:.2f}",
+                "amount_usd_real2025": real, "deflator_factor_2025": factor,
+                "inflation_base_year": BASE_YEAR if factor else "",
+                "measurement_status": "reported_revenue",
+                "aggregation_level": "national_aggregate",
+                "land_status": "not_stated",
+                "land_status_basis": "MMS published an American Indian lands "
+                                     "aggregate; it does not state trust vs fee",
+                "allocation_formula": "",
+                "allocation_formula_effective_start": "",
+                "allocation_formula_effective_end": "",
+                "allocation_formula_source_url": "",
+                "amount_sign_meaning": "negative = refund or prior-period "
+                                       "correction; retained",
+                "geography_note": "National aggregate across all American "
+                                  "Indian lands; no state, county or tribe. "
+                                  "The document states that figures before "
+                                  "1982 come from U.S. Geological Survey "
+                                  "records and 1982 onward from MMS records.",
+                # B, not A: an archived PDF read by coordinate. Three gates
+                # passed, including agreement with an independent hand
+                # transcription of the same table, but that is still weaker
+                # evidence than a machine-readable file from the publisher.
+                "confidence": "B",
+                "source_url": MMS_FULL_URL,
+                "fetched_date": "2026-08-06", "built_date": TODAY,
+            })
+    yrs = sorted(series)
+    print(f"  MMS CY1925-2000: {built:,} rows built across {len(yrs)} years "
+          f"{min(yrs)}-{max(yrs)}, {len(failed):,} year(s) held")
+
+
+# ===========================================================================
+# LAYER 6 - OSMRE ABANDONED MINE LAND DISTRIBUTIONS. NOW BUILT.
 #
-# So the files are retrieved into data/raw and held, with the hazard recorded.
-# ---------------------------------------------------------------------------
+# THE PRIOR HOLD WAS RIGHT TO REFUSE AND WRONG ABOUT THE CAUSE, and both
+# halves matter.
+#
+# The second wave found these files, called them "the highest-value unbuilt
+# lead in the wave", and held them because the text layer looked offset by one
+# row. It recorded the evidence, from FY2022:
+#
+#     Wyoming        No   3,059,874.30   -   241,490.23   3,059,874
+#     Crow Tribe     No           974.31 (776,388.22) 3,059,874.30   -
+#     Hopi Tribe     Yes    776,388.22   -        974.31    799,809
+#     Navajo Nation  Yes    799,808.95   -             -    812,928
+#
+# and concluded that $799,809 was the Navajo Nation's money printed on Hopi's
+# line. RE-MEASURED HERE WITH pdfplumber, THE SAME PAGE READS:
+#
+#     Crow Tribe     Yes  229,617.11  (229,617.11)  -  -
+#     Hopi Tribe     Yes           -            -   -  -
+#     Navajo Nation  Yes  557,275.46  (557,275.46)  -  -
+#
+# The offset was an artefact of `pdftotext`, not of the document - and the
+# proposed de-skew would have been wrong too. Neither $799,809 nor $776,388
+# has anything to do with any tribe: they are Utah's and Texas's collections.
+# The refusal to publish an unproven de-skew is exactly why that error never
+# shipped, which is the whole argument for the gate discipline.
+#
+# WHAT THE SERIES ACTUALLY IS. SMCRA levies a per-ton reclamation fee on coal
+# production (30 U.S.C. 1232) and distributes it to states and tribes with
+# approved AML programs. The Crow Tribe, the Hopi Tribe and the Navajo Nation
+# are the three tribes with approved programmes, and all three are CERTIFIED -
+# they have completed their coal reclamation - so they are ineligible for the
+# fee-based State and Tribal Share and instead receive an equivalent
+# "Certified In Lieu" payment from the Treasury. That is why the State and
+# Tribal Share column is zero for all three in most years and the money
+# appears one column over. Reading the share column alone would report three
+# tribes receiving nothing.
+#
+# THE GATE, which the prior wave said did not exist. It does; it just is not
+# printed on one page. Each document carries the same numbers twice:
+#
+#   page "TOTAL MANDATORY GRANT DISTRIBUTION"  four component columns and a
+#                                              total. Components must sum to
+#                                              the total.
+#   page "AML ... MANDATORY DISTRIBUTION"      the same four components as
+#                                              (amount, sequestration
+#                                              reduction, amount at 94.3%)
+#                                              triples, plus a total at 100%
+#                                              and a total after reductions.
+#
+# A tribe-year is published only if ALL of these hold:
+#   sum(component amounts)      == printed total at 100%
+#   sum(component net amounts)  == printed total after reductions
+#   amount - reduction          == net amount, for every component
+#   the grant page's total      == the mandatory page's total at 100%
+#
+# That is two independently typeset tables agreeing plus three arithmetic
+# identities. FY2018 fails it - the file is scanned OCR whose text contains
+# `NavajoNatior` and `HopiTriba`, and whose Crow row prints 1,180,946 where
+# 1,242,983 - 82,037 = 1,160,946 - so FY2018 is HELD, by the gate, correctly.
+#
+# THE IIJA SERIES IS A SECOND, SEPARATE STREAM and it had never been fetched.
+# The Infrastructure Investment and Jobs Act appropriated new AML money on top
+# of the fee-based fund; OSMRE publishes it as its own annual table. Only the
+# Navajo Nation qualifies. It is a DIFFERENT source_system, never added to the
+# fee-based figure.
+#
+# COVERAGE, and the honest edge of it. OSMRE's live page publishes FY2016
+# onward. FY2002-FY2015 were recovered from web.archive.org in this pass and
+# are on disk. FY2013-FY2015 carry the sequestration table and are built.
+# FY2002-FY2012 predate sequestration, have a different table on every
+# vintage, and FY2010-FY2012 have NO TEXT LAYER AT ALL - they are scanned
+# images. They are retrieved, held, and queued per year with the reason.
+# ===========================================================================
 
 OSMRE_INDEX = "https://www.osmre.gov/resources/grants-resources"
 
+#: filename -> (fiscal year, the URL it was retrieved from). Declared rather
+#: than inferred from the filename, because the names are not a pattern:
+#: FY19GrantDistFINAL, FYGrantDist21, AML_Distribution_2022_3.
+OSMRE_AML_FILES = {
+    "FY02GrantDist.pdf": (2002, "wayback"), "FY03GrantDist.pdf": (2003, "wayback"),
+    "FY04GrantDist.pdf": (2004, "wayback"), "FY05GrantDist.pdf": (2005, "wayback"),
+    "FY06GrantDist.pdf": (2006, "wayback"), "FY07GrantDist.pdf": (2007, "wayback"),
+    "FY08GrantDist.pdf": (2008, "wayback"), "FY09GrantDist.pdf": (2009, "wayback"),
+    "FY10GrantDist.pdf": (2010, "wayback"), "FY11GrantDist.pdf": (2011, "wayback"),
+    "FY12GrantDist.pdf": (2012, "wayback"), "FY13GrantDist.pdf": (2013, "wayback"),
+    "FY14GrantDist.pdf": (2014, "wayback"), "FY15GrantDist.pdf": (2015, "wayback"),
+    "FY16GrantDist.pdf": (2016, "live"), "FY17GrantDist.pdf": (2017, "live"),
+    "FY18GrantDist.pdf": (2018, "live"), "FY19GrantDistFINAL.pdf": (2019, "live"),
+    "FY20GrantDist.pdf": (2020, "live"), "FYGrantDist21.pdf": (2021, "live"),
+    "AML_Distribution_2022_3.pdf": (2022, "live"),
+    "FY-2023-AML-fee-grant-distribution.pdf": (2023, "live"),
+    "FY-24-AML-Fee-Based-Distributions.pdf": (2024, "live"),
+    "FY_2025_AML_Fee-Based_Distribution_508.pdf": (2025, "live"),
+    "FY2026_AML_Fee-Based_Grant_Dsitribution_02.20.2026.pdf": (2026, "live"),
+}
+
+OSMRE_WAYBACK = ("https://web.archive.org/web/2018id_/"
+                 "http://www.osmre.gov/resources/grants/docs/")
+OSMRE_LIVE = "https://www.osmre.gov/sites/default/files/"
+
+#: The three tribes with OSMRE-approved AML programmes. Nobody else appears.
+OSMRE_TRIBES = {
+    "crowtribe": "Crow Tribe",
+    "hopitribe": "Hopi Tribe",
+    "navajonation": "Navajo Nation",
+}
+
+OSMRE_NOTE = (
+    "SMCRA per-ton coal reclamation fee distribution (30 U.S.C. 1232) to a "
+    "tribe with an OSMRE-approved Abandoned Mine Land programme. All three "
+    "tribal programmes are CERTIFIED - reclamation of coal sites complete - "
+    "so the tribe is ineligible for the fee-based State and Tribal Share and "
+    "receives an equivalent Certified In Lieu payment from Treasury instead. "
+    "A zero in the State and Tribal Share column is therefore a statement "
+    "about eligibility, not about money received."
+)
+
+# THE TITLE IS NOT ALWAYS ON LINE 0 AND IS NOT ALWAYS SPELT THE SAME.
+# FY2019+ prints the title first and "Page 6" second; FY2013-FY2018 print
+# "Page 6" first and the title second. FY2013 says "TOTAL MANDATORY
+# CALCULATION", FY2014/FY2015 say "TOTAL MANDATORY DISTRIBUTION", FY2016+ say
+# "TOTAL MANDATORY GRANT DISTRIBUTION". Matching one spelling on line 0 held
+# six fiscal years that were perfectly readable - and a filter that finds
+# nothing looks exactly like a series that does not exist, which is the trap
+# docs/PULL_DISCIPLINE.md names for `recipient_type_names`.
+_OSMRE_TITLE_GRANT = re.compile(
+    r"TOTAL MANDATORY (?:GRANT )?(?:DISTRIBUTION|CALCULATION)", re.I)
+_OSMRE_TITLE_SEQ = re.compile(r"AML.{0,25}MANDATORY DISTRIBUTION", re.I)
+#: how many leading lines of a page to search for either title
+_OSMRE_TITLE_LINES = 2
+_OSMRE_MONEY = re.compile(r"^\(?\$?-?[\d][\d,]*(\.\d{1,2})?\)?$")
+
+
+def _osmre_rows(page):
+    """{tribe key: [numeric cells]} for every tribal row on this page.
+
+    Cells are rebuilt from word COORDINATES, not from the page's text lines.
+    These PDFs split a single number across two words ('1 57,711'), so words
+    closer than 3pt are one cell; a real column gap is far wider. The label is
+    every leading cell that is not a number, joined and lowercased, which
+    absorbs both 'Crow Tribe' and 'CrowTribe'.
+    """
+    out = {}
+    words = page.extract_words()
+    tops = sorted({round(w["top"], 1) for w in words
+                   if w["text"].rstrip(",.").lower().startswith(
+                       ("crow", "hopi", "navajo"))})
+    for top in tops:
+        row = sorted([w for w in words if abs(w["top"] - top) < 3.0],
+                     key=lambda w: w["x0"])
+        cells, cur = [], None
+        for w in row:
+            if cur is not None and w["x0"] - cur[1] < 3.0:
+                cur = (cur[0] + w["text"], w["x1"])
+            else:
+                if cur is not None:
+                    cells.append(cur[0])
+                cur = (w["text"], w["x1"])
+        if cur is not None:
+            cells.append(cur[0])
+        label, i = "", 0
+        while i < len(cells) and not (_OSMRE_MONEY.match(cells[i])
+                                      or cells[i] in ("-", "--", "—")):
+            label += cells[i]
+            i += 1
+        key = re.sub(r"[^a-z]", "", label.lower())
+        # 'HopiTriba' / 'NavajoNatior' are OCR corruptions of the label; the
+        # value gate below is what decides whether the ROW is trustworthy, so
+        # the label is matched by prefix and the corruption recorded upstream.
+        for k in OSMRE_TRIBES:
+            if key.startswith(k[:8]):
+                key = k
+                break
+        if key not in OSMRE_TRIBES:
+            continue
+        vals, ok = [], True
+        for c in cells[i:]:
+            if c in ("-", "--", "—", "�"):
+                vals.append(0.0)
+                continue
+            if "%" in c or not _OSMRE_MONEY.match(c):
+                ok = False
+                break
+            neg = c.startswith("(") or c.endswith(")")
+            v = float(re.sub(r"[^\d.]", "", c) or 0)
+            vals.append(-v if neg else v)
+        out[key] = vals if ok else None
+    return out
+
+
+def _osmre_cells(page):
+    """Every row on the page, as (label_text, [cell strings]).
+
+    Cells come from word COORDINATES, not from the page's text lines: these
+    PDFs split one number across two words ('$ 2 96,296.30', '1 57,711'), and
+    words closer than 3pt are therefore one cell while a real column gap is
+    far wider.
+    """
+    words = page.extract_words()
+    # CLUSTER the tops before iterating them. Cells on one printed row do not
+    # share an exact `top` - 100.1 and 100.4 are the same row - so iterating
+    # every distinct rounded top emitted the SAME row once per distinct value
+    # and the table footed to twice its printed national total. The gate
+    # caught it; this is why the gate is there.
+    bands = []
+    for top in sorted({round(w["top"], 1) for w in words}):
+        if bands and top - bands[-1] < 3.0:
+            continue
+        bands.append(top)
+    rows = []
+    for top in bands:
+        line = sorted([w for w in words if abs(w["top"] - top) < 3.0],
+                      key=lambda w: w["x0"])
+        cells, cur = [], None
+        for w in line:
+            if cur is not None and w["x0"] - cur[1] < 3.0:
+                cur = (cur[0] + w["text"], w["x1"])
+            else:
+                if cur is not None:
+                    cells.append(cur[0])
+                cur = (w["text"], w["x1"])
+        if cur is not None:
+            cells.append(cur[0])
+        if cells:
+            rows.append(cells)
+    return rows
+
+
+def _osmre_val(tok):
+    """A money cell, or None if this token is not money.
+
+    A bare '$' is a separate word in some vintages and carries no value; it is
+    skipped rather than treated as a parse failure. A dash is zero - the
+    tables use it for 'nothing', which is an assertion, not a blank.
+    """
+    if tok in ("$",):
+        return "SKIP"
+    if tok in ("-", "--", "\u2014", "\ufffd"):
+        return 0.0
+    if "%" in tok or not _OSMRE_MONEY.match(tok):
+        return None
+    neg = tok.startswith("(") or tok.endswith(")")
+    v = float(re.sub(r"[^\d.]", "", tok) or 0)
+    return -v if neg else v
+
+
+def _osmre_iija_rows(page):
+    """Read an IIJA annual distribution table.
+
+    Returns ({tribe key: {gross, reduction, net}}, printed footing gross,
+    summed gross over the data rows).
+
+    ROW SHAPE. Every row is
+        label | unfunded inventory | Yes/No | tonnage | PERCENTAGE | amount
+    and FY2026 appends | (sequestration reduction) | adjusted amount. The
+    PERCENTAGE cell is the anchor - the only cell whose type is unambiguous -
+    so the money is located RELATIVE TO IT rather than by a fixed column
+    index that a new column would silently shift. FY2026 added exactly such a
+    column.
+
+    THE FOOTING ROW IS PARSED THE SAME WAY, not specially. It also carries a
+    percentage (100.0000%), so anything that treats it as a data row adds the
+    table to itself - which is what happened, and what the caller's gate
+    caught: the sum came to exactly twice the printed total. The footing is
+    identified by LABEL and routed out of the sum.
+    """
+    out, summed, printed = {}, 0.0, None
+    for cells in _osmre_cells(page):
+        pct_at = [i for i, c in enumerate(cells) if c.endswith("%")]
+        if len(pct_at) != 1:
+            continue
+        label = re.sub(r"[^a-z]", "", "".join(
+            c for c in cells[:pct_at[0]] if _osmre_val(c) is None).lower())
+        tail = []
+        for c in cells[pct_at[0] + 1:]:
+            v = _osmre_val(c)
+            if v == "SKIP":
+                continue
+            if v is None:
+                tail = None
+                break
+            tail.append(v)
+        if not tail:
+            continue
+        if len(tail) == 1:
+            gross, reduction, net = tail[0], 0.0, tail[0]
+        elif len(tail) == 3:
+            gross, reduction, net = tail[0], abs(tail[1]), tail[2]
+            if abs(gross - reduction - net) >= 0.51:
+                continue
+        else:
+            continue
+        # startswith, not equality: FY2024/FY2025 print "Nat'l Total $ ... No
+        # Data ..." and the label collapses to "natltotalnodata".
+        if label.startswith(("total", "natltotal", "nationaltotal",
+                             "nattotal")):
+            printed = gross
+            continue
+        summed += gross
+        for k in OSMRE_TRIBES:
+            if label.startswith(k[:8]):
+                out[k] = {"gross": gross, "reduction": reduction, "net": net}
+                break
+    return out, printed, summed
+
+
+def _osmre_amlis_rows(page):
+    """Read the one-time e-AMLIS distribution table.
+
+    Returns ({tribe key: amount}, printed total, summed).
+    Every row is `label | $ | amount`, and the table prints its own Total.
+    """
+    out, summed, printed = {}, 0.0, None
+    for cells in _osmre_cells(page):
+        vals = [v for v in (_osmre_val(c) for c in cells)
+                if isinstance(v, float)]
+        label = re.sub(r"[^a-z]", "", "".join(
+            c for c in cells if _osmre_val(c) is None).lower())
+        if not vals:
+            continue
+        if label in ("total", "totalfunding", "totalfundingdistribution"):
+            printed = vals[-1]
+            continue
+        if label in ("statestribes", "statestribesfundingdistribution"):
+            continue
+        summed += vals[-1]
+        for k in OSMRE_TRIBES:
+            if label.startswith(k[:8]):
+                out[k] = vals[-1]
+                break
+    return out, printed, summed
+
 
 def build_osmre_aml(spine, rev_rows, party_rows, unresolved):
-    src = RAW / "_federal" / "osmre" / "aml"
-    files = sorted(src.glob("*.pdf"))
-    if not files:
-        print("  OSMRE AML: files absent - nothing to hold")
+    """OSMRE AML fee-based distributions, and the separate IIJA stream."""
+    try:
+        import pdfplumber
+    except ImportError:
+        print("  OSMRE AML: pdfplumber not installed - layer NOT built")
         return
-    unresolved.append({
-        "review_id": "RESOURCE:FEDERAL:OSMRE_AML_FEE_DISTRIBUTION",
-        "source_system": "OSMRE_AML_fee_based_grant_distribution",
-        "raw_name": "Crow Tribe / Hopi Tribe / Navajo Nation",
-        "context": f"{len(files)} annual distribution PDFs retrieved "
-                   f"(FY2016-FY2026, no gap). Each names three tribes with "
-                   f"dollar amounts. The text layer is offset by ONE ROW in "
-                   f"the distribution column: in FY2022 the $799,809 printed "
-                   f"on the Hopi line is the Navajo Nation's distribution, and "
-                   f"the $776,388.22 printed on the Crow line is Hopi's "
-                   f"collection. The documents print no per-row subtotal, so a "
-                   f"de-skew cannot be proven correct the way the MMS one was, "
-                   f"and FY2018 is scanned OCR with corrupted labels.",
-        "reason": "pdf_text_layer_offset_no_reconciliation_available",
-        "suggested_action": "HIGH VALUE, DO NOT GUESS. Re-extract with "
-                            "positional (bbox) parsing rather than -layout, or "
-                            "transcribe the three tribal rows by eye, and gate "
-                            "on the page-1 'State and Tribal share' total. "
-                            "Publishing the naive parse would attribute one "
-                            "tribe's money to another.",
-        "source_url": OSMRE_INDEX, "queued_date": TODAY,
-    })
-    print(f"  OSMRE AML: {len(files)} PDFs retrieved and HELD - text layer is "
-          f"offset by one row and no per-row check exists to prove a de-skew")
+    src = RAW / "_federal" / "osmre" / "aml"
+    if not src.exists():
+        print("  OSMRE AML: files absent - nothing to build")
+        return
+
+    resolved, unres_tribe = {}, []
+    for key, name in OSMRE_TRIBES.items():
+        tid, canon, how = resolve_entity(name, spine)
+        if tid:
+            resolved[key] = (tid, canon, how)
+        else:
+            unres_tribe.append((name, how))
+    for name, how in unres_tribe:
+        unresolved.append({
+            "review_id": f"RESOURCE:OSMRE:{name}",
+            "source_system": "OSMRE_AML_fee_based_grant_distribution",
+            "raw_name": name,
+            "context": "Tribe with an OSMRE-approved Abandoned Mine Land "
+                       "programme, named with a dollar amount in every annual "
+                       "distribution table.",
+            "reason": how,
+            "suggested_action": "Resolve or add an alias. That tribe's rows "
+                                "are HELD.",
+            "source_url": OSMRE_INDEX, "queued_date": TODAY,
+        })
+
+    built = held = 0
+    covered, held_years = [], []
+    for fname, (fy, origin) in sorted(OSMRE_AML_FILES.items(),
+                                      key=lambda kv: kv[1][0]):
+        path = src / fname
+        if not path.exists():
+            continue
+        url = (OSMRE_WAYBACK + fname if origin == "wayback"
+               else OSMRE_LIVE + "inline-files/" + fname)
+        try:
+            with pdfplumber.open(str(path)) as pdf:
+                grant = seq = None
+                for pg in pdf.pages:
+                    head = "\n".join(
+                        ((pg.extract_text() or "").split("\n") + ["", ""]
+                         )[:_OSMRE_TITLE_LINES])
+                    if grant is None and _OSMRE_TITLE_GRANT.search(head):
+                        grant = _osmre_rows(pg)
+                    if seq is None and _OSMRE_TITLE_SEQ.search(head):
+                        seq = _osmre_rows(pg)
+        except Exception as exc:                       # noqa: BLE001
+            grant = seq = None
+            reason = f"pdf_unreadable: {exc}"
+        else:
+            reason = None
+
+        if grant is None or seq is None:
+            held += 1
+            held_years.append(fy)
+            unresolved.append({
+                "review_id": f"RESOURCE:OSMRE:AML:FY{fy}",
+                "source_system": "OSMRE_AML_fee_based_grant_distribution",
+                "raw_name": f"FY{fy} AML grant distribution ({fname})",
+                "context": (reason or
+                            f"the document does not carry BOTH a 'TOTAL "
+                            f"MANDATORY GRANT DISTRIBUTION' page and an "
+                            f"'AML MANDATORY DISTRIBUTION' page "
+                            f"(grant page {'found' if grant else 'MISSING'}, "
+                            f"sequestration page "
+                            f"{'found' if seq else 'MISSING'}). Pre-FY2013 "
+                            f"vintages predate sequestration and lay the "
+                            f"tables out differently in every year; "
+                            f"FY2010-FY2012 have no text layer at all and are "
+                            f"scanned images."),
+                "reason": "no_two_table_cross_check_available",
+                "suggested_action": "The file IS on disk. Declare this "
+                                    "vintage's page and column layout, or "
+                                    "transcribe the three tribal rows by eye, "
+                                    "and gate on the page-1 'State and Tribal "
+                                    "share' total. DO NOT publish a single-"
+                                    "table read - the FY2022 hold in this "
+                                    "file shows what that costs.",
+                "source_url": url, "queued_date": TODAY,
+            })
+            continue
+
+        year_built = 0
+        for key, (tid, canon, how) in resolved.items():
+            g, s = grant.get(key), seq.get(key)
+            if g is None or s is None or len(s) < 5 or (len(s) - 2) % 3:
+                held += 1
+                unresolved.append({
+                    "review_id": f"RESOURCE:OSMRE:AML:FY{fy}:{OSMRE_TRIBES[key]}",
+                    "source_system": "OSMRE_AML_fee_based_grant_distribution",
+                    "raw_name": f"{OSMRE_TRIBES[key]} FY{fy}",
+                    "context": f"grant-page cells={g}; sequestration-page "
+                               f"cells={s}. A cell failed to parse as money "
+                               f"(OCR corruption) or the row shape is not "
+                               f"(3 x components) + total + total-after.",
+                    "reason": "row_shape_or_ocr_failure",
+                    "suggested_action": "Read this row visually and compare "
+                                        "against the printed column totals. "
+                                        "ROW HELD.",
+                    "source_url": url, "queued_date": TODAY,
+                })
+                continue
+            triples = [(s[i], s[i + 1], s[i + 2])
+                       for i in range(0, len(s) - 2, 3)]
+            total_100, total_after = s[-2], s[-1]
+            checks = {
+                "components sum to the printed total at 100%":
+                    abs(sum(t[0] for t in triples) - total_100) < 0.51,
+                "net components sum to the printed total after reductions":
+                    abs(sum(t[2] for t in triples) - total_after) < 0.51,
+                "amount minus reduction equals net, per component":
+                    all(abs(t[0] - t[1] - t[2]) < 0.51 for t in triples),
+                "the grant page's total equals the mandatory page's total":
+                    bool(g) and abs(g[-1] - total_100) < 0.51,
+                "the grant page's components sum to its own total":
+                    bool(g) and abs(sum(g[:-1]) - g[-1]) < 0.51,
+            }
+            if not all(checks.values()):
+                held += 1
+                held_years.append(fy)
+                unresolved.append({
+                    "review_id": f"RESOURCE:OSMRE:AML:FY{fy}:{OSMRE_TRIBES[key]}",
+                    "source_system": "OSMRE_AML_fee_based_grant_distribution",
+                    "raw_name": f"{OSMRE_TRIBES[key]} FY{fy}",
+                    "context": "; ".join(f"{k}: {'ok' if v else 'FAILED'}"
+                                         for k, v in checks.items())
+                               + f" | grant={g} seq={s}",
+                    "reason": "arithmetic_reconciliation_failed",
+                    "suggested_action": "Two independently typeset tables in "
+                                        "the same document disagree, or the "
+                                        "text layer is corrupt. Read the row "
+                                        "visually. ROW HELD, never published.",
+                    "source_url": url, "queued_date": TODAY,
+                })
+                continue
+
+            for label, amount, status in (
+                    ("mandatory_distribution_before_sequestration", total_100,
+                     "statutory_allocation"),
+                    ("mandatory_distribution_after_sequestration", total_after,
+                     "actual_payment")):
+                real, factor = real2025(amount, fy)
+                eid = (f"RRE-OSMRE-AML-FY{fy}-"
+                       f"{key.upper()}-{'PRE' if 'before' in label else 'POST'}")
+                built += 1
+                year_built += 1
+                rev_rows.append({
+                    "resource_revenue_event_id": eid,
+                    "recipient_entity_id": tid, "recipient_entity_name": canon,
+                    "beneficiary_entity_id": tid,
+                    "beneficiary_entity_name": canon,
+                    "beneficiary_note": OSMRE_NOTE,
+                    "payer_entity_id": "PAYER-US-OSMRE",
+                    "payer_entity_name": PAYERS["PAYER-US-OSMRE"],
+                    "operator_entity_id": "", "operator_entity_name": "",
+                    "related_asset_ids": "",
+                    "source_system": "OSMRE_AML_fee_based_grant_distribution",
+                    "source_record_id": f"FY{fy}|{OSMRE_TRIBES[key]}|{label}",
+                    "revenue_type": "reclamation_fee_distribution",
+                    "resource_type": "coal",
+                    "commodity": "Coal (abandoned mine land reclamation fee)",
+                    "product": "", "mineral_lease_type": "",
+                    "period_type": "federal_fiscal_year",
+                    "period_start": f"{fy - 1}-10-01",
+                    "period_end": f"{fy}-09-30",
+                    "payment_date": "",
+                    "amount_usd": f"{amount:.2f}",
+                    "amount_usd_real2025": real,
+                    "deflator_factor_2025": factor,
+                    "inflation_base_year": BASE_YEAR if factor else "",
+                    "measurement_status": status,
+                    "aggregation_level": "entity_specific",
+                    "land_status": "not_stated",
+                    "land_status_basis": "OSMRE distributes on programme "
+                                         "approval, not on land status; the "
+                                         "table states neither trust nor fee",
+                    "allocation_formula": "SMCRA 30 U.S.C. 1232: 50% of "
+                                          "reclamation fees collected in the "
+                                          "state or tribal area. THE THREE "
+                                          "TRIBAL PROGRAMMES ARE CERTIFIED, "
+                                          "so the fee-based share is replaced "
+                                          "by an equivalent Certified In Lieu "
+                                          "payment. The formula is not "
+                                          "applied here and must not be used "
+                                          "to derive a collection figure.",
+                    "allocation_formula_effective_start": "",
+                    "allocation_formula_effective_end": "",
+                    "allocation_formula_source_url": url,
+                    "amount_sign_meaning": (
+                        "the distribution calculated at 100% before the "
+                        "sequestration reduction; NOT money received - the "
+                        "POST row is"
+                        if "before" in label else
+                        "the distribution actually made after the "
+                        "sequestration reduction required by 2 U.S.C. 901a"),
+                    "geography_note": "Named tribe; OSMRE prints no county or "
+                                      "site.",
+                    "confidence": "A",
+                    "source_url": url,
+                    "fetched_date": TODAY, "built_date": TODAY,
+                })
+                party_rows.append({
+                    "party_link_id": f"PL-{eid}-RECIPIENT",
+                    "object_type": "revenue_event", "object_id": eid,
+                    "entity_id": tid, "entity_name": canon,
+                    "entity_is_native": 1,
+                    "party_role": "recipient",
+                    "relationship": "parent_native_entity",
+                    "interest_share_pct": "100",
+                    "basis": f"OSMRE FY{fy} AML grant distribution table names "
+                             f"the tribe and the amount; resolve_entity/{how}",
+                    "confidence": "A", "source_url": url,
+                    "fetched_date": TODAY, "built_date": TODAY,
+                })
+        if year_built:
+            covered.append(fy)
+
+    # -- the IIJA stream, a SEPARATE appropriation, never additive ----------
+    iija_built = build_osmre_iija(spine, rev_rows, party_rows, unresolved,
+                                  resolved)
+
+    cov = sorted(set(covered))
+    print(f"  OSMRE AML fee-based : {built:,} rows, FY"
+          f"{min(cov) if cov else '-'}-FY{max(cov) if cov else '-'} "
+          f"({len(cov)} fiscal years), {held:,} row/year(s) held by the gate")
+    if held_years:
+        print(f"      held: FY{sorted(set(held_years))}")
+    print(f"  OSMRE AML IIJA      : {iija_built:,} rows")
+
+
+OSMRE_IIJA_FILES = {
+    "BIL_Distribution_FY_22.pdf": 2022,
+    "BIL_Distribution_2023.pdf": 2023,
+    "FY24-BIL-Distribution-06-03-24.pdf": 2024,
+    "IIJA_Distrib2025_Final_508.pdf": 2025,
+    "IIJA-Distrib2026_For-Printing-and-Webpage_0.pdf": 2026,
+}
+
+OSMRE_IIJA_NOTE = (
+    "Infrastructure Investment and Jobs Act (Pub. L. 117-58) abandoned mine "
+    "land grant distribution. THIS IS A SEPARATE APPROPRIATION from the SMCRA "
+    "fee-based AML fund and the two must never be added as if one series. "
+    "Only the Navajo Nation qualifies; the Crow and Hopi tribes are printed "
+    "with a 0.0000% share, which is an assertion of ineligibility, not a "
+    "missing value."
+)
+
+
+def build_osmre_iija(spine, rev_rows, party_rows, unresolved, resolved):
+    """The IIJA AML stream. Fetched for the first time in this pass."""
+    import pdfplumber
+    src = RAW / "_federal" / "osmre" / "iija"
+    if not src.exists():
+        return 0
+    built = 0
+    for fname, fy in sorted(OSMRE_IIJA_FILES.items(), key=lambda kv: kv[1]):
+        path = src / fname
+        if not path.exists():
+            continue
+        url = OSMRE_LIVE + "inline-files/" + fname
+        with pdfplumber.open(str(path)) as pdf:
+            rows, total_printed, total_summed = _osmre_iija_rows(pdf.pages[0])
+        # TABLE GATE. Every row's distribution must sum to the "Nat'l Total"
+        # the table prints for itself. This is the whole-of-table check the
+        # fee-based series gets from having two tables; here there is one
+        # table, and its own footing is the only independent number in it.
+        if total_printed is None or abs(total_summed - total_printed) >= 1.0:
+            unresolved.append({
+                "review_id": f"RESOURCE:OSMRE:IIJA:FY{fy}",
+                "source_system": "OSMRE_AML_IIJA_grant_distribution",
+                "raw_name": f"FY{fy} IIJA AML grant distribution ({fname})",
+                "context": f"rows sum to {total_summed:,.2f} against a printed "
+                           f"national total of "
+                           f"{'ABSENT' if total_printed is None else format(total_printed, ',.2f')}",
+                "reason": "arithmetic_reconciliation_failed",
+                "suggested_action": "The row parse is dropping or duplicating "
+                                    "rows. WHOLE YEAR HELD.",
+                "source_url": url, "queued_date": TODAY,
+            })
+            print(f"      IIJA FY{fy} HELD: rows sum to {total_summed:,.0f} vs "
+                  f"printed {total_printed}")
+            continue
+        for key, (tid, canon, how) in resolved.items():
+            row = rows.get(key)
+            if row is None:
+                continue
+            # `net` is what moved. FY2026 prints a sequestration reduction and
+            # a net; earlier years print only the distribution, and net is set
+            # equal to it. A printed zero against a printed 0.0000% share is
+            # PUBLISHED, because docs/DATA_ODDITIES.md is explicit that a zero
+            # is an assertion and dropping it converts a measured fact into an
+            # absence - here, the assertion that the Crow and Hopi tribes are
+            # ineligible for this appropriation.
+            amount = row["net"]
+            real, factor = real2025(amount, fy)
+            eid = f"RRE-OSMRE-IIJA-FY{fy}-{key.upper()}"
+            built += 1
+            rev_rows.append({
+                "resource_revenue_event_id": eid,
+                "recipient_entity_id": tid, "recipient_entity_name": canon,
+                "beneficiary_entity_id": tid, "beneficiary_entity_name": canon,
+                "beneficiary_note": OSMRE_IIJA_NOTE,
+                "payer_entity_id": "PAYER-US-OSMRE",
+                "payer_entity_name": PAYERS["PAYER-US-OSMRE"],
+                "operator_entity_id": "", "operator_entity_name": "",
+                "related_asset_ids": "",
+                "source_system": "OSMRE_AML_IIJA_grant_distribution",
+                "source_record_id": f"FY{fy}|{OSMRE_TRIBES[key]}|IIJA "
+                                    f"distribution",
+                "revenue_type": "reclamation_fee_distribution",
+                "resource_type": "coal",
+                "commodity": "Coal (abandoned mine land reclamation, IIJA)",
+                "product": "", "mineral_lease_type": "",
+                "period_type": "federal_fiscal_year",
+                "period_start": f"{fy - 1}-10-01", "period_end": f"{fy}-09-30",
+                "payment_date": "",
+                "amount_usd": f"{amount:.2f}",
+                "amount_usd_real2025": real, "deflator_factor_2025": factor,
+                "inflation_base_year": BASE_YEAR if factor else "",
+                "measurement_status": "actual_payment",
+                "aggregation_level": "entity_specific",
+                "land_status": "not_stated",
+                "land_status_basis": "OSMRE distributes on programme approval, "
+                                     "not on land status",
+                "allocation_formula": "IIJA sec. 40701 apportions by historic "
+                                      "coal production tonnage. The tonnage is "
+                                      "printed but the apportionment is NOT "
+                                      "recomputed here.",
+                "allocation_formula_effective_start": "",
+                "allocation_formula_effective_end": "",
+                "allocation_formula_source_url": url,
+                "amount_sign_meaning": "zero is an assertion of a 0.0000% "
+                                       "share, not a missing value",
+                "geography_note": "Named tribe; no county or site.",
+                "confidence": "A", "source_url": url,
+                "fetched_date": TODAY, "built_date": TODAY,
+            })
+            party_rows.append({
+                "party_link_id": f"PL-{eid}-RECIPIENT",
+                "object_type": "revenue_event", "object_id": eid,
+                "entity_id": tid, "entity_name": canon, "entity_is_native": 1,
+                "party_role": "recipient",
+                "relationship": "parent_native_entity",
+                "interest_share_pct": "100",
+                "basis": f"OSMRE FY{fy} IIJA AML grant distribution table "
+                         f"names the tribe and the amount; "
+                         f"resolve_entity/{how}",
+                "confidence": "A", "source_url": url,
+                "fetched_date": TODAY, "built_date": TODAY,
+            })
+
+    # The one-time $8M AMLIS distribution, December 2023. Its own document and
+    # its own event ids, because it is not part of either annual series.
+    one = src / "one-time-BIL-distribution-for-AMLIS-activities-Dec-18-2023.pdf"
+    if one.exists():
+        url = (OSMRE_LIVE + "inline-files/"
+               "one-time-BIL-distribution-for-AMLIS-activities-Dec-18-2023.pdf")
+        with pdfplumber.open(str(one)) as pdf:
+            rows, printed, summed = _osmre_amlis_rows(pdf.pages[0])
+        # GATE: 27 recipients at $296,296.30 must foot to the $8,000,000.10
+        # the document prints for itself, twice.
+        if printed is None or abs(summed - printed) >= 1.0:
+            unresolved.append({
+                "review_id": "RESOURCE:OSMRE:IIJA:AMLIS_ONE_TIME",
+                "source_system": "OSMRE_AML_IIJA_grant_distribution",
+                "raw_name": "One-time $8M e-AMLIS distribution, 2023-12-18",
+                "context": f"rows sum to {summed:,.2f} against a printed total "
+                           f"of {'ABSENT' if printed is None else format(printed, ',.2f')}",
+                "reason": "arithmetic_reconciliation_failed",
+                "suggested_action": "HELD. Re-read the table.",
+                "source_url": url, "queued_date": TODAY,
+            })
+            rows = {}
+        for key, (tid, canon, how) in resolved.items():
+            amount = rows.get(key)
+            if amount is None:
+                continue
+            real, factor = real2025(amount, 2024)
+            eid = f"RRE-OSMRE-IIJA-AMLIS1X-{key.upper()}"
+            built += 1
+            rev_rows.append({
+                "resource_revenue_event_id": eid,
+                "recipient_entity_id": tid, "recipient_entity_name": canon,
+                "beneficiary_entity_id": tid, "beneficiary_entity_name": canon,
+                "beneficiary_note": "One-time $8,000,000 IIJA distribution to "
+                                    "states and tribes for e-AMLIS inventory "
+                                    "activities, announced 2023-12-18. A "
+                                    "single event, not an annual series.",
+                "payer_entity_id": "PAYER-US-OSMRE",
+                "payer_entity_name": PAYERS["PAYER-US-OSMRE"],
+                "operator_entity_id": "", "operator_entity_name": "",
+                "related_asset_ids": "",
+                "source_system": "OSMRE_AML_IIJA_grant_distribution",
+                "source_record_id": "2023-12-18|one-time e-AMLIS distribution|"
+                                    + OSMRE_TRIBES[key],
+                "revenue_type": "reclamation_fee_distribution",
+                "resource_type": "coal",
+                "commodity": "Coal (e-AMLIS inventory activities, IIJA)",
+                "product": "", "mineral_lease_type": "",
+                "period_type": "federal_fiscal_year",
+                "period_start": "2023-10-01", "period_end": "2024-09-30",
+                "payment_date": "2023-12-18",
+                "amount_usd": f"{amount:.2f}",
+                "amount_usd_real2025": real, "deflator_factor_2025": factor,
+                "inflation_base_year": BASE_YEAR if factor else "",
+                "measurement_status": "actual_payment",
+                "aggregation_level": "entity_specific",
+                "land_status": "not_stated",
+                "land_status_basis": "not stated by the source",
+                "allocation_formula": "$8,000,000 divided equally among the "
+                                      "eligible states and tribes; the source "
+                                      "prints each recipient's amount and it "
+                                      "is read, not derived.",
+                "allocation_formula_effective_start": "",
+                "allocation_formula_effective_end": "",
+                "allocation_formula_source_url": url,
+                "amount_sign_meaning": "one-time payment",
+                "geography_note": "Named tribe; no site.",
+                "confidence": "A", "source_url": url,
+                "fetched_date": TODAY, "built_date": TODAY,
+            })
+            party_rows.append({
+                "party_link_id": f"PL-{eid}-RECIPIENT",
+                "object_type": "revenue_event", "object_id": eid,
+                "entity_id": tid, "entity_name": canon, "entity_is_native": 1,
+                "party_role": "recipient",
+                "relationship": "parent_native_entity",
+                "interest_share_pct": "100",
+                "basis": f"OSMRE one-time e-AMLIS distribution table names the "
+                         f"tribe and the amount; resolve_entity/{how}",
+                "confidence": "A", "source_url": url,
+                "fetched_date": TODAY, "built_date": TODAY,
+            })
+    return built
 
 
 # ---------------------------------------------------------------------------
@@ -2423,7 +3590,11 @@ def build_states2(spine, rev_rows, party_rows, unresolved):
 
     before = len(rev_rows)
     build_oklahoma(spine, rev_rows, party_rows, unresolved)
-    build_osmre_aml(spine, rev_rows, party_rows, unresolved)
+    # OSMRE used to be called from here, back when it only queued a review
+    # row and wrote nothing. It now WRITES, under `RRE-OSMRE-` - an id family
+    # `STATES2_ID_PREFIXES` does not own - so calling it here would emit rows
+    # `--more-states` is not allowed to replace, and the second run would trip
+    # the primary-key gate. It has its own switch: `--osmre`.
     build_navajo(spine, rev_rows, party_rows, unresolved)
     build_transcribed_layer(spine, rev_rows, party_rows, unresolved,
                             STATES2_LAYERS)
@@ -2493,7 +3664,8 @@ def repair_mms_ids(rows):
     return fixed
 
 
-def append_ledger(rev_rows, party_rows, unresolved, id_prefixes):
+def append_ledger(rev_rows, party_rows, unresolved, id_prefixes,
+                  review_prefixes=()):
     """Union new rows into the published ledger WITHOUT rewriting it.
 
     The rule: this function may delete only rows whose event id starts with a
@@ -2501,6 +3673,15 @@ def append_ledger(rev_rows, party_rows, unresolved, id_prefixes):
     untouched and unreordered. That is what makes `--more-states` safe to run
     against a ledger another wave already published, and what makes running it
     twice produce the same file rather than a doubled one.
+
+    `review_prefixes` DOES THE SAME FOR THE HELD-FOR-REVIEW FILE, and it was
+    missing. Held rows were only replaced when the SAME review_id came back,
+    so a hold that stops being true just stays. Two of those were live in this
+    file at once: `RESOURCE:FEDERAL:OSMRE_AML_FEE_DISTRIBUTION`, still saying
+    the OSMRE tables could not be read after they had been read and published,
+    and a `RESOURCE:OSMRE:AML:FY2018` row carrying a Python NameError from a
+    half-finished run. A stale hold is worse than no hold: it tells the next
+    agent that work is impossible when it is done.
     """
     rev_path = CLEAN / "resource_revenue.csv"
     par_path = CLEAN / "resource_parties.csv"
@@ -2520,7 +3701,12 @@ def append_ledger(rev_rows, party_rows, unresolved, id_prefixes):
     # via object_id - never via its own id, which would leave orphans behind.
     kept_par = [r for r in existing_par if not owned(r.get("object_id", ""))]
     new_ids = {r["review_id"] for r in unresolved}
-    kept_unr = [r for r in existing_unr if r.get("review_id") not in new_ids]
+    kept_unr = [r for r in existing_unr
+                if r.get("review_id") not in new_ids
+                and not any((r.get("review_id") or "").startswith(pre)
+                            for pre in review_prefixes)]
+    dropped_unr = len(existing_unr) - len(kept_unr) - len(
+        [r for r in existing_unr if r.get("review_id") in new_ids])
 
     print(f"\n  APPEND, not rewrite:")
     repair_mms_ids(kept_rev)
@@ -2541,10 +3727,16 @@ def append_ledger(rev_rows, party_rows, unresolved, id_prefixes):
           f"{len(all_rev):,} ids, all unique")
     print(f"    rows this layer replaced (its own)    : {replaced:,}")
     print(f"    rows this layer adds                  : {len(rev_rows):,}")
+    if dropped_unr:
+        print(f"    stale held-for-review rows dropped    : {dropped_unr:,}")
 
-    write_csv(rev_path, all_rev, REVENUE_FIELDS)
-    write_csv(par_path, kept_par + party_rows, PARTY_FIELDS)
-    write_csv(unr_path, kept_unr + unresolved, UNRESOLVED_FIELDS)
+    # fields_preserving, not the bare declared list: a column another
+    # script appended (cedar_uid) must survive an append run.
+    write_csv(rev_path, all_rev, fields_preserving(rev_path, REVENUE_FIELDS))
+    write_csv(par_path, kept_par + party_rows,
+              fields_preserving(par_path, PARTY_FIELDS))
+    write_csv(unr_path, kept_unr + unresolved,
+              fields_preserving(unr_path, UNRESOLVED_FIELDS))
     return len(kept_rev), replaced
 
 
@@ -2603,18 +3795,98 @@ def build_assets():
 
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# WHICH EVENT IDS EACH SWITCH OWNS.
+#
+# THIS TABLE CLOSES A LIVE LANDMINE, and it is worth saying exactly what it
+# was. `main()` used to end with an UNCONDITIONAL
+#
+#     write_csv(CLEAN / "resource_revenue.csv", rev, REVENUE_FIELDS)
+#
+# outside the `--all` branch. So `--onrr` on its own built 9,395 ONRR rows and
+# then wrote the whole ledger from just those - silently deleting the North
+# Dakota, Utah, Montana, Oklahoma, Navajo and ANCSA layers. `--states` alone
+# did the mirror image. Only `--more-states` was safe, because it returned
+# early through `append_ledger`.
+#
+# That is the same failure shape as the one recorded in
+# docs/RESOURCE_ASSETS_BUILD_LOG.md, where the identical bug quietly truncated
+# `resource_assets.csv` to its header for six days: the file still looks
+# healthy afterwards, just smaller. Nothing errors and nothing warns.
+#
+# Every partial switch now returns through `append_ledger`, which may delete
+# ONLY rows whose event id starts with a prefix that switch owns and carries
+# everything else through untouched.
+LAYER_ID_PREFIXES = {
+    "onrr": ("RRE-ONRR-", "RRE-MMS-FY"),
+    "historical": ("RRE-MMS-CY",),
+    "states": ("RRE-ND-", "RRE-UT-", "RRE-MT-"),
+    "osmre": ("RRE-OSMRE-",),
+}
+
+#: Every source_system this script writes. `--all` refuses to rebuild if the
+#: published ledger carries one that is not in here, because a rebuild from
+#: raw would delete those rows.
+MINE_SOURCE_SYSTEMS = {
+    "ONRR_NRRD_monthly_revenue", "ONRR_NRRD_fiscal_year_disbursements",
+    "MMS_MRM_american_indian_revenues",
+    "MMS_MRM_american_indian_revenues_calendar",
+    "ND_State_Treasurer_tax_distribution_search",
+    "UT_COBI_fund_financials", "MT_DOR_county_oil_gas_distribution",
+    "OMC_headright_payment_history", "OMC_quarterly_newsletter",
+    "NN_audited_financial_statements",
+    "OSMRE_AML_fee_based_grant_distribution",
+    "OSMRE_AML_IIJA_grant_distribution",
+}
+
+
+def _append_and_report(name, rev, parties, unresolved, prefixes,
+                       review_prefixes=()):
+    carried, replaced = append_ledger(rev, parties, unresolved, prefixes,
+                                      review_prefixes)
+    added = sum(float(r["amount_usd"]) for r in rev)
+    ents = ({r["recipient_entity_id"] for r in rev if r["recipient_entity_id"]}
+            | {p["entity_id"] for p in parties
+               if p.get("entity_is_native") in (1, "1")})
+    yrs = sorted({r["period_start"][:4] for r in rev
+                  if r["period_start"][:4].isdigit()})
+    print(f"\n--- {name} summary ---")
+    print(f"  revenue events written    : {len(rev):,}")
+    if yrs:
+        print(f"  years covered             : {yrs[0]}-{yrs[-1]} "
+              f"({len(yrs)} distinct years)")
+    print(f"  dollars written (nominal) : ${added:,.2f}")
+    print(f"  distinct entities         : {len(ents):,}  {sorted(ents)}")
+    print(f"  party links               : {len(parties):,}")
+    print(f"  held for review           : {len(unresolved):,}")
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--fetch", action="store_true")
-    ap.add_argument("--onrr", action="store_true")
-    ap.add_argument("--states", action="store_true")
+    ap.add_argument("--fetch", action="store_true",
+                    help="re-download the ONRR bulk files")
+    ap.add_argument("--onrr", action="store_true",
+                    help="ONRR monthly revenue + FY disbursements + the "
+                         "MMS-era FISCAL-year layer. APPEND mode.")
+    ap.add_argument("--historical", action="store_true",
+                    help="the full MMS CALENDAR-year series CY1925-CY2000, "
+                         "read by coordinate from Am_Ind_Coll.pdf. APPEND "
+                         "mode, no network.")
+    ap.add_argument("--osmre", action="store_true",
+                    help="OSMRE Abandoned Mine Land distributions to the "
+                         "Crow, Hopi and Navajo programmes, fee-based and "
+                         "IIJA. APPEND mode, no network.")
+    ap.add_argument("--states", action="store_true",
+                    help="first-wave states (ND/UT/MT). APPEND mode.")
     ap.add_argument("--more-states", dest="more_states", action="store_true",
                     help="second-wave states (OK/CO/NM/WY/AZ/MT-others/AK/WA/"
                          "MN/WI/MI/NV/CA/TX/LA). APPENDS to the published "
                          "ledger; replaces only its own rows.")
     ap.add_argument("--all", action="store_true")
     a = ap.parse_args()
-    do_all = a.all or not (a.fetch or a.onrr or a.states or a.more_states)
+    partial = (a.fetch or a.onrr or a.states or a.more_states
+               or a.historical or a.osmre)
+    do_all = a.all or not partial
 
     print("=== Cedar Press 83: Native Natural Resources Ledger ===\n")
 
@@ -2635,16 +3907,10 @@ def main():
     # just smaller. So a rebuild refuses if it does not recognise every
     # source_system already published.
     if do_all:
-        mine = {"ONRR_NRRD_monthly_revenue", "ONRR_NRRD_fiscal_year_disbursements",
-                "MMS_MRM_american_indian_revenues",
-                "MMS_MRM_american_indian_revenues_calendar",
-                "ND_State_Treasurer_tax_distribution_search",
-                "UT_COBI_fund_financials", "MT_DOR_county_oil_gas_distribution",
-                "OMC_headright_payment_history", "OMC_quarterly_newsletter",
-                "NN_audited_financial_statements"}
         published = Counter(r.get("source_system", "")
                             for r in read_csv(CLEAN / "resource_revenue.csv"))
-        foreign = {k: v for k, v in published.items() if k and k not in mine}
+        foreign = {k: v for k, v in published.items()
+                   if k and k not in MINE_SOURCE_SYSTEMS}
         if foreign:
             print("REFUSING --all: resource_revenue.csv carries rows this "
                   "script did not write, and a rebuild from raw would delete "
@@ -2687,15 +3953,55 @@ def main():
         print(f"  comparability breaks      : {len(breaks):,}")
         return
 
-    if do_all or a.onrr:
+    # ---- PARTIAL SWITCHES, each one APPEND-ONLY -------------------------
+    # Every branch below returns through `append_ledger`. None of them may
+    # reach the whole-file write at the bottom, which is a full rebuild and
+    # nothing else. See LAYER_ID_PREFIXES for why.
+    if a.onrr and not do_all:
+        print("[1] ONRR - revenue from Native American lands - APPEND mode")
+        build_onrr(rev, parties, unresolved)
+        build_onrr_historical(rev, unresolved)
+        _append_and_report("ONRR", rev, parties, unresolved,
+                           LAYER_ID_PREFIXES["onrr"])
+        return
+
+    if a.historical and not do_all:
+        print("[1c] MMS CY1925-CY2000 - APPEND mode, no network")
+        build_mms_full_calendar(rev, unresolved)
+        _append_and_report("MMS CY1925-2000", rev, parties, unresolved,
+                           LAYER_ID_PREFIXES["historical"],
+                           review_prefixes=("RESOURCE:MMS:CY",))
+        return
+
+    if a.osmre and not do_all:
+        print("[6] OSMRE Abandoned Mine Land - APPEND mode, no network")
+        build_osmre_aml(spine, rev, parties, unresolved)
+        _append_and_report("OSMRE AML", rev, parties, unresolved,
+                           LAYER_ID_PREFIXES["osmre"],
+                           review_prefixes=("RESOURCE:OSMRE:",
+                                            "RESOURCE:FEDERAL:OSMRE"))
+        return
+
+    if a.states and not do_all:
+        print("[2] State-tribal series ND/UT/MT - APPEND mode")
+        build_states(spine, rev, parties, unresolved)
+        _append_and_report("ND/UT/MT", rev, parties, unresolved,
+                           LAYER_ID_PREFIXES["states"])
+        return
+
+    if do_all:
         print("[1] ONRR - revenue from Native American lands")
         build_onrr(rev, parties, unresolved)
         build_onrr_historical(rev, unresolved)
+        build_mms_full_calendar(rev, unresolved)
         print()
 
-    if do_all or a.states:
         print("[2] State-tribal series")
         build_states(spine, rev, parties, unresolved)
+        print()
+
+        print("[6] OSMRE Abandoned Mine Land")
+        build_osmre_aml(spine, rev, parties, unresolved)
         print()
 
     if do_all:
@@ -2737,11 +4043,13 @@ def main():
                 print(f"       {v:6,}  {k}")
             print("  Run code/130_build_resource_assets.py instead; it appends.")
         else:
-            write_csv(apath, assets, ASSET_FIELDS)
+            write_csv(apath, assets, fields_preserving(apath, ASSET_FIELDS))
     elif not apath.exists():
         write_csv(apath, [], ASSET_FIELDS)
-    write_csv(CLEAN / "resource_revenue.csv", rev, REVENUE_FIELDS)
-    write_csv(CLEAN / "resource_parties.csv", parties, PARTY_FIELDS)
+    rp = CLEAN / "resource_revenue.csv"
+    pp = CLEAN / "resource_parties.csv"
+    write_csv(rp, rev, fields_preserving(rp, REVENUE_FIELDS))
+    write_csv(pp, parties, fields_preserving(pp, PARTY_FIELDS))
     write_csv(REVIEW / "resource_ledger_unresolved.csv", unresolved,
               UNRESOLVED_FIELDS)
 
