@@ -283,8 +283,8 @@
   *evidence:* no conservation coverage
 - **C5 / medium** · `cross_dataset_ruling_map.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
-- **C11 / medium** · `entity_aliases.csv` — drop 3 always-empty column(s) with a correction-register row, or populate them  
-  *evidence:* always empty in 6,296 rows: start_date, first_observed_date, last_observed_date
+- **C11 / medium** · `entity_aliases.csv` — drop 1 always-empty column(s) with a correction-register row, or populate them  
+  *evidence:* always empty in 6,298 rows: start_date
 - **C5 / medium** · `entity_hierarchy.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
 - **C11 / medium** · `entity_relationships.csv` — drop 2 always-empty column(s) with a correction-register row, or populate them  

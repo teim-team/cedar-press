@@ -1,5 +1,28 @@
 # The twelve-dataset plan — measured state and the route to READY
 
+> ## SUPERSEDED IN PLACES, 2026-09-01 evening. Read this box first.
+>
+> Four workstreams (inventory, ruling-mining, spiderweb harvest, universe gaps)
+> landed after this page was written and moved several of its numbers. The
+> reasoning below still stands; these figures replace the ones in the body:
+>
+> | this page said | actually |
+> |---|---|
+> | identity keyed **48%** | **44.3%** — the old denominator was smaller than one member table |
+> | grain unstated on **207** tables | **25** |
+> | `prime_contracts` **80,778 duplicates** | **0** — they were distinct FPDS transactions; a de-dupe would have DELETED real rows |
+> | declared ownership edges **2,901** | **5,167** — the ingest was reading 6 of 40 files carrying a parent UEI |
+> | master list **1,536** entities | **1,555** — 19 IHS self-governance consortia promoted |
+> | FAADS lever "**~20 points**" | **+39 points** |
+>
+> **New since:** `$1,783,253,649` found unattributed on one UEI (Tanana Chiefs
+> Conference filing as DENA NENA HENASH) and fixed; the resolver was
+> contradicting recorded human refusals **47%** of the time, now 57% less;
+> `docs/datasets/_PUNCHLIST.md` turns the standard into **418 named actions**.
+>
+> **The live plan is the punch list.** This page is the reasoning behind it.
+
+
 *Written 2026-09-01. Every number here was measured from live data today, not
 recalled. Companion to `docs/DATASET_READINESS.md` (the scoreboard) and
 `NEXT_SESSION.md` (the immediate queue).*
