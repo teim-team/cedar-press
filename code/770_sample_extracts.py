@@ -535,7 +535,7 @@ BIG_BYTES = 200 * 1024 * 1024
 # **Codex asked to "correct the source decoding/normalization and regenerate",
 # and that only works for 9.6% of them.** The classic repeated
 # UTF-8-read-as-cp1252 chain is reversible and `unmojibake()` reverses it:
-# `ÃÂ½` -> `½`, `ÃÂ°C` -> `°C`, `SELFÃÂ·` -> `SELF·`. But
+# `Ã‚Â½` -> `½`, `Ã‚Â°C` -> `°C`, `SELFÃ‚Â·` -> `SELF·`. But
 # **116 of 1,212 affected cells recover; 1,096 (90.4%) do not**, because they
 # are not a pure re-encoding chain - characters have been SUBSTITUTED. The
 # dominant residue is `Ã¢Â‚¬Â„¢` for a single U+2019 apostrophe, where the
@@ -568,6 +568,23 @@ def unmojibake(s: str, rounds: int = 5) -> str:
         else:
             break
     return s
+
+
+def _moji_fixed() -> int:
+    return sum(v[0] for d in MOJIBAKE_SEEN.values() for v in d.values())
+
+
+def _moji_left() -> int:
+    return sum(v[1] for d in MOJIBAKE_SEEN.values() for v in d.values())
+
+
+def _moji_total() -> int:
+    """Computed, never typed. Codex PR #29 round 5: the summary said
+    '1,096 of 1,212' while the per-dataset breakdown printed directly below it
+    added to 1,098 of 1,214 - it had been written from the `subcontracting`
+    measurement alone and never counted `nagpra`'s two cells. A hardcoded
+    summary beside a computed breakdown always drifts."""
+    return _moji_fixed() + _moji_left()
 
 
 def count_mojibake(row: dict, cols: list, dataset: str) -> None:
@@ -1039,11 +1056,14 @@ def main() -> int:
                   "In `subawards.csv` (87,177 rows) **1,433 cells** carry it: "
                   "`description` 1,423 rows (1.63%), `subaward_number` 6, "
                   "`sub_parent_name` 2, `sub_name` 2.", "",
-                  "**The obvious remedy only reaches 9.6% of it.** The "
+                  "**The obvious remedy only reaches "
+                  f"{100.0 * _moji_fixed() / max(_moji_total(), 1):.1f}% of it.** The "
                   "repeated UTF-8-read-as-cp1252 chain is reversible and is "
-                  "reversed here \u2014 `\u00c3\u0082\u00c2\u00bd` becomes `\u00bd`, `\u00c3\u0082\u00c2\u00b0C` becomes "
-                  "`\u00b0C`. But **116 of 1,212 affected cells recover and 1,096 "
-                  "(90.4%) do not**, because they are not a pure re-encoding "
+                  "reversed here \u2014 `\u00c3\u201a\u00c2\u00bd` becomes `\u00bd`, `\u00c3\u201a\u00c2\u00b0C` becomes "
+                  "`\u00b0C`. But "
+                  f"**{_moji_fixed():,} of {_moji_total():,} affected cells "
+                  f"recover and {_moji_left():,} "
+                  f"({100.0 * _moji_left() / max(_moji_total(), 1):.1f}%) do not**, because they are not a pure re-encoding "
                   "chain: characters have been substituted. Codex's own "
                   "example is the clearest case \u2014 `2\u00c2\u20ac?` holds a literal "
                   "`?` where a character was destroyed upstream, and you "

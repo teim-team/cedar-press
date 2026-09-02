@@ -397,3 +397,53 @@ statements. All nine are `TRIBE_LEVEL_MULTI_FACILITY_NOT_DISAMBIGUATED`, because
 the Nation operates four facilities and 980 keys attribution by the tribe's
 facility count rather than by the host.
 <!-- END TERMS-METHOD -->
+
+<!-- BEGIN TERMS-OWNER-RULING-2026-09-02 -->
+## Owner ruling, 2026-09-02: a tribal website's terms language does not block harvest
+
+> *"So tribal websites, I actually don't care if they say it does scrape.
+> Because if it's publicly available and you can scrape it, scrape it."*
+
+This **supersedes** the `TERMS_STATED_RESTRICTIVE` exclusion as it applied to
+Native entities' own websites. The eight-source hard list — Confederated
+Colville, CTUIR/Umatilla, Yakama, Chickasaw, NANA/Akima, Southern Ute, Forest
+County Potawatomi, Stillaguamish — is **released for harvest of their own
+public web pages**. So is the `METHOD_RESTRICTED_HOSTS` state invented for
+navajo-nsn.gov.
+
+The reasoning is the owner's and it is his to make: this is publicly served
+content, he carries the publication risk, and a reuse restriction in a terms
+page is a licensing question rather than a technical boundary.
+
+### What this ruling does NOT touch
+
+Four things are unchanged, and none of them is a terms question:
+
+1. **Technical access controls.** No login-gated content, no admin or staging
+   paths, no exploiting a misconfiguration. `/Stagingsite/` stays refused.
+   Publicly *reachable* is not the same as publicly *served*.
+2. **A natural person's data held apart from their public role** — home
+   address, personal email or phone, DOB, SSN/TIN. This is a privacy line, not
+   a licensing one, and the owner has drawn it himself: a firm's name is not
+   PII, a person's home phone is. The Southern Ute file purged today carried
+   `owner_name_raw`, `email`, `phone` and `address_raw`; **under this ruling
+   the business rows may be harvested and those four fields still may not be
+   published.**
+3. **Non-tribal licensors.** EMMA/MSRB bars redistribution of its output "sold
+   or free of charge" and names "any manual process", with CUSIP Global
+   Services as a second licensor. That is a contract with a third party, not a
+   tribal publisher's preference, and it stands.
+4. **Proprietary identifiers** — Casino City, D-U-N-S — held internally, never
+   shipped.
+
+### What changes in practice
+
+* `source_terms_status = TERMS_STATED_RESTRICTIVE` on a Native entity's own
+  site becomes a **recorded observation, not a gate**. Keep recording it; stop
+  refusing on it.
+* Robots `Disallow` and named-agent refusals: continue to record them, and
+  treat them as the publisher's operational preference rather than a
+  prohibition on public pages. Rate-limit politely and identify honestly.
+* Every previously refused Native-entity host is now a **harvest candidate**,
+  and the refusals already logged are the worklist.
+<!-- END TERMS-OWNER-RULING-2026-09-02 -->
