@@ -3,6 +3,10 @@
 
     py -3 scripts/import_cedar_manifest.py [--workspace "<path to data workspace>"]
 
+``--workspace`` defaults to THIS REPOSITORY, because since the consolidation
+the data workspace and the product site are one tree. See
+``_default_workspace()`` for the pre-consolidation case that is still handled.
+
 WHAT THIS CLOSES
 ----------------
 ``server/cedar_press/collections.py`` shipped four hand-written datasets and
@@ -76,7 +80,41 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-DEFAULT_WORKSPACE = REPO.parents[2] if REPO.name.startswith("agent-") else REPO.parent
+
+#: The manifest 1135 writes and this script reads. Its presence is what says a
+#: directory IS a Cedar data workspace, rather than a directory next to one.
+WORKSPACE_MARKER = Path("dist") / "review" / "MANIFEST.csv"
+
+
+def _default_workspace() -> Path:
+    """Where Cedar's ``dist/`` lives when ``--workspace`` is not given.
+
+    SINCE THE CONSOLIDATION THE ANSWER IS THIS REPOSITORY, and the default
+    said otherwise. The product site and the data workspace used to be two
+    checkouts sitting side by side, so ``REPO.parent`` was right; they are one
+    tree now. An ordinary consolidated checkout -- ``/workspace/cedar-press``,
+    or ``Desktop/Cedar Press`` -- has no name beginning with ``agent-``, so the
+    no-argument command this module's own docstring documents searched the
+    checkout's PARENT and died on
+    ``missing input: <parent>/dist/collection_descriptors.json``. Measured
+    2026-09-02 from ``scratchpad/consolidate``: it looked in
+    ``scratchpad/dist/``. The documented default could not be executed as
+    documented unless every caller knew to add ``--workspace .``, which is
+    precisely the knowledge a default exists to remove.
+
+    The ``agent-<hash>`` worktree case is kept rather than deleted, because a
+    ``.claude/worktrees/agent-*`` checkout of the SITE-ONLY tree really does
+    sit two levels below the data workspace and really has no ``dist/`` of its
+    own. It is now conditioned on that being true instead of assumed from the
+    directory name, so a worktree of the CONSOLIDATED tree -- which carries
+    its own tracked ``dist/review/MANIFEST.csv`` -- correctly uses itself.
+    """
+    if REPO.name.startswith("agent-") and not (REPO / WORKSPACE_MARKER).exists():
+        return REPO.parents[2]
+    return REPO
+
+
+DEFAULT_WORKSPACE = _default_workspace()
 
 #: The storefront's twelve, by product id, in shelf-then-catalog order. The
 #: shelf placement is Cedar's own (``shelf`` in the descriptors); this tuple

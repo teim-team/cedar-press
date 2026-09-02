@@ -888,11 +888,11 @@
         "n_tables": 11
       },
       "sample": {
-        "table": "bill_votes.csv",
-        "path": "/data/cedar/samples/legislation/bill_votes__10.csv",
+        "table": "native_bills.csv",
+        "path": "/data/cedar/samples/legislation/native_bills__10.csv",
         "rows": 10,
-        "of": 423,
-        "columns": 71
+        "of": 3069,
+        "columns": 29
       },
       "tables": [
         {
@@ -1613,11 +1613,11 @@
         "n_tables": 35
       },
       "sample": {
-        "table": "lobbying_registrants.csv",
-        "path": "/data/cedar/samples/lobbying/lobbying_registrants__10.csv",
+        "table": "native_entity_lobbying_disclosures.csv",
+        "path": "/data/cedar/samples/lobbying/native_entity_lobbying_disclosures__10.csv",
         "rows": 10,
-        "of": 653,
-        "columns": 52
+        "of": 27825,
+        "columns": 44
       },
       "tables": [
         {
