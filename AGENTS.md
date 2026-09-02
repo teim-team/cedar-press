@@ -4590,7 +4590,8 @@ Evidence, not inference:
   it, and the register is the one data file git tracks precisely because a
   silent change to it must never be undetectable.
 - The register's diff is 1,537 lines replaced. The gate reports **1** uid
-  reassigned rather than 1,536, so this is not (yet) a mass re-key — but the
+  reassigned rather than all 1,536 rows the register then held (**1,555**
+  today), so this is not (yet) a mass re-key — but the
   `minted` date on the moved row is **2026-08-29**, i.e. re-minted today.
 
 **What has to happen:** workstream D either (a) shows the reassignment is
@@ -5531,3 +5532,155 @@ non-measure columns still leave 6 duplicates, and **every collision is a
 withheld row** (0 among the 1,295 published). Fix proposed by WS2: `269` emits
 `operating_company_seq` (1..n within owner, existing sort order) — unique by
 construction, leaks nothing.
+
+### GATE FAIL 2026-09-01, second reading — SHARD-G's attribution
+
+`62` exits 1 at 21:0x with 13 `!!` lines. **None of them is shard G's.** Shard G
+added exactly two lint instances during its run and cleared both before this
+reading, which is why neither appears below:
+
+* `lint_class4` +1, `shard_g_registry_pull.py` — **FIXED, not waived.** The
+  script now compares `result_count` against `expected_total` (the declared
+  OBJECTS list) and sets `run_complete: false` with the missing keys named, so a
+  deadline-truncated pull can never be read as a finished refresh. class4 is back
+  at its baseline 9.
+* `lint_class5` +1, `shard_g_newsletters.py` — **WAIVED with a reason in the
+  source** (`# lint-ok: class5`). The resume guard is real, but the summary this
+  file writes is recomputed by re-reading every record in `newsletters.jsonl`,
+  prior runs included, so a resumed run reports the full standing totals rather
+  than this run's zeros. That is the inverse of the class-5 defect. `293` counts
+  and names the waiver.
+
+The 13 lines that remain, with owners, measured 21:0x:
+
+| line | owner named by the gate itself |
+|---|---|
+| `lint_class1` 0 → 2 | `573_ws3_grain_and_money.py` (`CLEAN.glob`), `585_factcheck_nigc_keys.py` |
+| `lint_class5` 6 → 7 | `571_shard_m_vendor_list_sweep.py` (`if handle in existing`) |
+| `lint_class7` 42 → 45 | `583_labor_surface_factcheck.py` (three: a RANK-derived `observation_id`, and two `id(r)` uses) |
+| `lint_new_defect_instances` = 6, `lint_bug_class_instances` 146 → 150 | the same three files |
+| `code_duplicate_numbers` 43 → 44 | a numbered script claimed concurrently. Shard G's four scripts are `shard_g_slice_and_mine.py`, `shard_g_registry_pull.py`, `shard_g_build_crosswalk.py`, `shard_g_web_map.py`, `shard_g_served_entity.py`, `shard_g_newsletters.py` — deliberately unnumbered, per concurrency rule 3, so they cannot collide |
+| `tables_missing_from_25_TABLES` 179 → 186, `_27_SPEC` 194 → 201, `tables_undocumented_in_codebook` 3 → 10 | the 8 new `data/clean` tables the gate lists: `nigc_document_surface`, `native_owned_businesses`, `nigc_action_parties`, `nigc_enforcement_actions`, `sam_native_class_distributions`, `nigc_game_classification_opinions`, `nigc_indian_lands_opinions`, `nigc_management_contract_approvals` — gaming and SAM workstreams |
+| `contract_violations` = 6, `contract_orphan_shippable` = 5 | same 8 new tables, no dataset contract yet |
+| `F-DELAWARE-ALIAS` in `cedar_identifier_ledger_final/_tiered` | the correction register's owner; not touched today by shard G |
+
+**Shard G writes nothing to `data/clean`, nothing to the spine and no numbered
+script**, so it cannot move any of those lines. Its outputs are
+`data/staging/institution_registry/`, `data/staging/tribe_harvest/shard_g/` and
+`data/staging/tribe_web_map/shard_g.csv`, none of which `62` scans.
+
+### Shard H, third run of the same gate at ~21:15 — sixth distinct failing set today
+
+Re-run after shard H's identifier and adjudication pass. The set has changed
+completely again; the shard L / shard F / shard G lint instances named an hour
+ago have CLEARED, and `code_duplicate_numbers` is back to 43. What is failing now:
+
+```
+contract_orphan_shippable = 6            contract_violations = 8
+contract_grain_unstated_shippable 25->32 files_with_columns_lost_vs_backup = 3
+lint_class1 0->1  : 585_factcheck_nigc_keys.py   (gaming / fact-check)
+lint_class6 +1    : 518_dataset_readiness.py     (dataset-standard workstream)
+tables_missing_from_25_TABLES 179->185, _27_SPEC 194->200
+SHIPPING LOST: advocacy_passthrough_2026-08-07.csv
+```
+
+The `SHIPPING LOST` line is a **read artifact, not a loss**:
+`data/clean/advocacy_passthrough_2026-08-07.csv` is present on disk, 2,012,716
+bytes, mtime Aug 28 23:43. The gate read the tree while another workstream was
+mid-write. Anyone acting on that line should confirm the file first.
+
+**Six consecutive runs of an unchanged gate, six different regression sets, none
+of them shard H's.** Shard H has now written six files, every one under
+`data/staging/`; `ls data/clean/*shard_h*` returns nothing and it has never held
+a write handle on `data/clean`, `data/spine`, or `code/`. Its own product check
+passes at every run:
+
+```
+shard_h ok  316 web-map rows | 319 profiles | 100 subsidiary edges
+            141 newsletter rows | 70 identifiers | 10 class rulings
+```
+
+The standing lesson from the 2026-08-26 19:10 entry is now measured six times in
+one day: **on a parallel-workstream day, `62` cannot attribute a failure by
+itself, and the only reliable attribution is `293`'s own named instance plus a
+file mtime compared against the live workstreams.**
+
+## GATE FAIL 2026-09-01 ~21:2x — shard M. One line WAS mine and is fixed; the rest named.
+
+`py -3 code/62_no_regression_check.py` exit 1. Shard M owns only
+`review/tribal_vendor_list_registry_2026-08-26.csv` (149 appended rows),
+`data/staging/business_registry/TBD-M0*.jsonl` + `shard_m_business_identifiers.jsonl`,
+`data/staging/tribe_harvest/shard_m/**`, and `code/690_shard_m_vendor_list_sweep.py`.
+It wrote nothing to `data/clean`.
+
+### MINE, AND FIXED IN THE SAME PASS
+
+`code_duplicate_numbers` 43 → 44, and it took **three renames**, which is the
+point worth recording:
+
+| I claimed | collided with | when |
+|---|---|---|
+| `561_shard_m_…` | `561_shard_k_alaska_villages.py` | shard K, mid-flight |
+| `571_shard_m_…` | `571_closure_native_owned_businesses.py` | appeared after I moved |
+| `588_shard_m_…` | `588_promote_self_published_claims.py` | appeared after I moved again |
+| `690_shard_m_vendor_list_sweep.py` | — | free, and far from the active band |
+
+`ls code/<n>_*` is not sufficient when a dozen agents are choosing numbers in
+the same ten minutes — the check is stale the moment it returns. Two of these
+three collisions were with scripts created *after* my check passed. **When many
+agents are live, do not take the next free number in the active band; take one
+several hundred above it.** `code_duplicate_numbers` is back to its 43 floor.
+
+Also mine and fixed: `lint_class5` 6 → 7, `690_shard_m_…:if handle in existing`.
+Waived with a reason rather than removed — the registry is append-only and
+shard L is writing it concurrently, so that line stops a duplicate row; it
+rewrites nothing and discards no prior result.
+
+### NOT MINE — named, with owners
+
+| line | owner |
+|---|---|
+| `lint_class1` 0 → 1, `585_factcheck_nigc_keys.py` (`FILES = [...staged.csv]`) | the NIGC / gaming workstream |
+| `lint_class6` new instance, `518_dataset_readiness.py` → `cedar_dataset_readiness.csv` | owner of 518 |
+| `files_with_columns_lost_vs_backup` = 3: `ca_gaming_facilities_official.csv` (−`entity_tier_basis`, `entity_keyed_date`), `entity_evidence_profile.csv` (−`in_spine`, `rows_per_source`, `amounts_per_source_NEVER_SUM`), `gaming_property_coverage.csv` (−`cedar_uid`) | gaming workstream and 505 |
+| `contract_orphan_shippable` = 6, `contract_violations` = 8, `contract_grain_unstated_shippable` 25 → 32 | the contracts workstream |
+| `corrections_not_propagated` 2 → 3 (BURNST casino host; DELAWARE alias in both identifier ledgers) | correction-register owner |
+| `tables_missing_from_25_TABLES` 179 → 187 and `_27_SPEC` 194 → 202 | the eight new tables written to `data/clean` between 20:51 and 21:17 |
+| `SHIPPING LOST: advocacy_passthrough_2026-08-07.csv` (1,620 rows, table gone) | advocacy workstream |
+
+### THE ONE WORTH READING — an exclusion recorded in one mode did not bind another
+
+Shard M read `www.stillaguamish.com/terms-of-use` **before** enumerating
+anything, found *"prior written permission … Any unauthorized use of the
+materials appearing on this site may violate copyright"*, and correctly dropped
+the host. Four hours later its own `--deep` mode re-probed the same host and
+pulled 1,506 media-index entries, because that mode's exclusion check consulted
+only the hard-coded `TERMS_RESTRICTIVE_HOSTS` constant and never looked at the
+verdict this same script had already written to its own log.
+
+Quarantined to
+`data/staging/tribe_harvest/shard_m/QUARANTINE_terms_restrictive_stillaguamish.jsonl`,
+dropped from `deep_probe.jsonl` and `deep_hits.csv`, `publishable=N`, nothing
+harvested. The fix is a `_restrictive_from_log()` lookup, but the generalisable
+shape is:
+
+> **A refusal recorded in one code path must be enforced from a single place
+> every other path reads.** A constant plus a runtime verdict is two sources of
+> truth for one decision, and the second mode written will consult the wrong
+> one. Terms exclusions in particular get added over time — which is exactly
+> when a hard-coded list goes stale.
+
+The mirror-image defect, also shard M's, also worth one line: the terms matcher
+fired on inline CSS in `nhbp-nsn.gov/legal/` and recorded Nottawaseppi
+Potawatomi as TERMS_STATED_RESTRICTIVE. That page is the Legal *Department's*
+page and states no restriction. **A false restrictive is not the safe direction
+— it silently deletes a tribe from the study.** Strip tags and style blocks
+before matching, and re-read every hit before recording it.
+
+*Shard H addendum, ~21:30, fourth run:* same set reproduced, same owners
+(`585_factcheck_nigc_keys.py`, `518_dataset_readiness.py`), plus one new line —
+`corrections_not_propagated` 2 → 3, which belongs to the correction-register
+workstream (`354_correction_register.py`), not to shard H. Shard H's file count
+in `data/clean/` is still zero. Shard H is done; its two handoffs are
+**HAND-638038475C** and **HAND-593FBD19BB**, both awaiting a different session
+to verify.

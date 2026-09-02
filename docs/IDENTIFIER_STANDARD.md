@@ -389,3 +389,40 @@ a sub-hub. Getting from a sub-hub to its hub is the crosswalking work, and the
 routes in order of strength are: the parent's own published subsidiary list
 (shard E's 482 edges, 355 of them from audited filings under Alaska Statute
 45.55.139), a declared parent UEI in FPDS, then anything name-based.
+
+### Joining `fpds_uei_cage_map.csv`: two traps, both measured
+
+**1. Do not pick the row with the most observations.** A UEI has several rows in
+this map and they disagree about `cage_code` — the highest-observation row very
+often has it **blank** while a sibling row carries the code.
+
+Shard H's first lookup did exactly that and recovered **2 CAGEs for 45 firms**.
+Re-ranking so that rows *having* a CAGE sort first took it to **23**, with no
+additional network requests. Before that fix, `cedar_identifier_ledger_final.csv`
+held **no CAGE at all for any of the 40 UEI-bearing firms in that class**.
+
+```python
+# WRONG - picks a blank cage_code most of the time
+best = max(rows_for_uei, key=lambda r: int(r["n_observations"] or 0))
+
+# RIGHT - prefer a row that actually carries the identifier
+best = max(rows_for_uei,
+           key=lambda r: (bool(clean_cage(r["cage_code"])),
+                          int(r["n_observations"] or 0)))
+```
+
+**2. The literal string `NAN`** sits in `cage_code` on 2,196 rows spanning 2,193
+UEIs. Excluding it from the index is necessary but **not sufficient**: shard H
+excluded it correctly and still nearly shipped a join payload *reporting*
+`map_cage_code: NAN` for Cherokee Components (UEI `DNLMR9ACL2J7`), because every
+map row for that UEI carries the sentinel. No CAGE was minted, but a downstream
+reader would have taken `NAN` as the firm's code. **Suppress the sentinel on
+output, not just on lookup.**
+
+### One registrant can carry two legal names with no shared token
+
+UEI `SE78D4FEDA87` appears on CAGE `0SU10` as both **`CHEROKEE INFORMATION
+SERVICES, INC.`** and **`AXSEUM, INC.`** — one registrant, one rename, zero
+tokens in common. No name matcher reaches across that; the identifier does. It
+is the ASRC argument in miniature, and it is the reason the map is worth its
+defects.

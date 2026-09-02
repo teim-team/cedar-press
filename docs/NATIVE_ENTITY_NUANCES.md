@@ -139,8 +139,13 @@ subset path — because for the ~400 spine entities whose distinctive set is ONE
 token that is also an American place name, that test is satisfied by every
 organisation in the county. Two guards now sit on that path
 (`ADMIN_GEOGRAPHY`, `CIVIC_FORM` in `503`), removing **1,403 false resolutions
-with zero loss** on 1,952 owner-ruled entity names and 1,536 spine canonical
-names. They also make the hand-written TUSCARAWAS entry in `RESOLUTIONS`
+with zero loss** on 1,952 owner-ruled entity names and the **1,536 spine
+canonical names that run was measured against**. The spine now holds **1,555**
+— 19 IHS consortia promoted after that run — and **the zero-loss result has
+not been re-measured against the 19 new names.** Re-running `503` is the only
+way to re-derive it and this documentation pass was not permitted to; treat
+"zero loss" as proven for 1,536 of 1,555 names and unproven for the rest.
+They also make the hand-written TUSCARAWAS entry in `RESOLUTIONS`
 redundant — the shape rule reaches the same answer unaided. Full derivation,
 counter-examples and blast radius: `docs/RESOLUTION_RULES_LEARNED.md` R1–R2.
 Two carve-outs worth remembering here: **a county is never a tribe, but a
@@ -315,8 +320,19 @@ is Cedar's proprietary edge, and the reason the spine's ultimate-owner
 knowledge cannot be replaced by any federal database.
 
 **The spiderweb we already hold.** `data/clean/fpds_uei_edges.csv` carries
-2,290 parent/ultimate-parent edges over 1,844 registrants, straight from FPDS
-contract actions — no SAM API calls, no scraping. Measured 2026-08-29 it is
+**4,617 parent/ultimate-parent edges over 2,725 registrants** (2,726
+`parent_uei` + 1,891 `ultimate_parent_uei`), straight from FPDS contract
+actions — no SAM API calls, no scraping. Re-measured 2026-09-01, up from the
+2,290 over 1,844 recorded here on 2026-08-29.
+
+**The file's total row count is 5,167 and that is NOT the ownership figure.**
+The remaining **550 rows are `edge_type = prime_to_sub`** — a prime-to-
+subcontractor relationship, which is a contracting fact and not an ownership
+declaration. Quoting 5,167 as the spiderweb would book 550 subcontracts as
+corporate parentage, which is the same class of error as the Bristol Bay
+mismatch below. **Always filter `edge_type` before counting.** A further 99
+rows carry `blocklisted_parent = 1` and must be excluded from any attribution.
+Measured 2026-08-29 it is
 sometimes *better* than the worst case above: Ho-Chunk, Inc.'s declared parent
 in FPDS **is** WINNEBAGO TRIBE OF NEBRASKA (90 observations). And it displays
 the adjacent trap in its own rows: `HO-CHUNK NATION → HO-CHUNK NATION` sits
@@ -358,3 +374,48 @@ was added to `13_build_fpds_hierarchy.py`: **2,290 → 2,901 edges** and
 across 191 transactions its declared parent is **itself** — its own
 highest-level owner, not BBNC. `511_sam_entity_hierarchy.py` (the API sweep)
 is parked with its worklist saved; its shippable product was this harvest.
+
+## An NHO-OWNED firm is not an NHO (2026-09-01, shard H)
+
+The same shape as the 8(a) lesson above, one level along, and it was found by
+adjudicating nine rows rather than by reasoning about the rule.
+
+**Honua Consulting, LLC** and **Nohopapa Hawaiʻi, LLC** both carry the federal
+socio-economic flag **`native_hawaiian_organization_owned_firm`** in their
+SAM / USAspending records. Both are for-profit Hawaiʻi LLCs — cultural-resource-
+management consultancies that sell Section 106 services. The flag means the firm
+is **owned by** a Native Hawaiian Organization. It does not mean the firm **is**
+one. Any pipeline that reads it as a class signal converts every NHO subsidiary
+into an NHO, which is the containment defect with a federal flag on it.
+
+Pair it with the rule already recorded here — *"an SBA 8(a) certification does
+not prove NHO ownership"* — and the general form is:
+
+> **A socio-economic flag describes a RELATIONSHIP to a class. It is never
+> membership of that class.** `..._owned_firm` in particular always names the
+> owner, never the registrant.
+
+### And "Inc" tells you nothing in Hawaiʻi
+
+Nine DOI-list organisations were flagged as for-profit entities sitting in the
+NHO class purely on the corporate form in their legal name. **Two of the nine
+turned out to be Hawaiʻi Domestic Nonprofit Corporations** — Aha Moku o Maui Inc
+(DCCA 235198D2, the Maui council inside DLNR's statutory ʻAha Moku system) and
+Mana Health Services, Inc (DCCA 248241 D2). Hawaiʻi nonprofit corporations
+routinely use "Inc" and "Corp". Three were genuinely for-profit (Honua, Nohopapa,
+Kawaileo Law LLLC — an LLLC cannot be a nonprofit) and four could not be sourced
+at all. **Read the DCCA registration type; never the suffix.**
+
+Access note for whoever goes next: the current Hawaiʻi DCCA portal
+(`hbe.dcca.hawaii.gov`) is `robots.txt: Disallow: /`. The **legacy official PDF
+endpoint** `hbe.ehawaii.gov/documents/business.pdf?fileNumber=<n>` still serves
+the same records and is the rung that worked.
+
+### Two live collisions recorded while doing it
+
+- **Do not attach EIN 38-4029022 to `Aloha ʻĀina o Hawaiʻi, Inc`.** That
+  501(c)(3) is in **Cottonwood, Arizona**, established 2017. Name collision.
+- **`Meje, Inc`'s published domain is gone.** `mymeje.com` now redirects to
+  `daon.com`, an unrelated identity-verification vendor. The DOI list's URL for
+  it points at a stranger — a reminder that a roster URL is a claim with a date
+  on it.
