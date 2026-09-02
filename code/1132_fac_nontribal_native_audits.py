@@ -4,6 +4,7 @@
     py -3 code/1132_fac_nontribal_native_audits.py report    # the gap, no network
     py -3 code/1132_fac_nontribal_native_audits.py fetch     # the FAC bulk CSVs
     py -3 code/1132_fac_nontribal_native_audits.py apply     # match + write the tables
+    py -3 code/1132_fac_nontribal_native_audits.py codebook  # register it so it can ship
     py -3 code/1132_fac_nontribal_native_audits.py verify    # exits 1 when the work did NOT land
     py -3 code/1132_fac_nontribal_native_audits.py selftest  # proves verify FIRES
 
@@ -1210,15 +1211,52 @@ def _verify(quiet=False):
     else:
         note.append("V13 0 rows bound on a covered-component identifier")
 
-    # 7c. is_public must not be CONSTANT. The published export writes `t`/`f`
-    #     and a `true`/`false` test silently marks every filing withheld.
-    pubvals = Counter(c["is_public"] for c in census)
-    if len(pubvals) < 2:
-        fail.append("V14 is_public is constant (%s) across all %d rows. The "
-                    "FAC export writes `t`/`f`; a true/false test reads every "
-                    "filing as withheld." % (dict(pubvals), len(census)))
+    # 7c. THE PARSED is_public MUST AGREE WITH THE SOURCE, ROW BY ROW.
+    #
+    #     First draft of this invariant said "is_public must not be CONSTANT",
+    #     on the reasoning that the export writes `t`/`f` and a true/false
+    #     test would mark everything withheld. It fired - on a CORRECT table.
+    #     The raw export really does say `t` on all 545: **every one of these
+    #     non-tribal-typed Native auditees publishes its reporting package**,
+    #     because the 2 CFR 200.512(b)(2) opt-out is a right of an Indian
+    #     tribe or tribal organization and these auditees are NHOs, urban
+    #     Indian organizations, CDFIs and colleges. Against 147's tribal set
+    #     at 30.2% public, that is a finding, not a defect - and a
+    #     "must not be constant" check is exactly the shape this repo keeps
+    #     getting wrong: a plausible number about the wrong thing.
+    #
+    #     So the check compares the PARSED value to the SOURCE value for the
+    #     same report_id, which is what the original defect actually broke,
+    #     and reports UNMEASURED when the export is not on disk rather than
+    #     printing clean (AGENT_FIELD_GUIDE rule 4).
+    gen = BULK / "general.csv"
+    if not gen.exists():
+        note.append("V14 UNMEASURED - %s absent, is_public cannot be checked "
+                    "against its source" % gen.name)
     else:
-        note.append("V14 is_public %s" % dict(pubvals))
+        want = {c["report_id"]: str(c["is_public"]) for c in census}
+        seen, mism = 0, []
+        with open(gen, encoding="utf-8-sig", newline="") as fh:
+            for g in csv.DictReader(fh):
+                rid = g.get("report_id")
+                if rid not in want:
+                    continue
+                seen += 1
+                raw = str(g.get("is_public", "")).strip().lower()
+                exp = "1" if raw in ("t", "true", "1", "yes", "y") else "0"
+                if want[rid] != exp:
+                    mism.append((rid, raw, want[rid]))
+        if seen != len(want):
+            fail.append("V14 only %d of %d census report_ids found in the "
+                        "export - UNMEASURED, not clean" % (seen, len(want)))
+        elif mism:
+            fail.append("V14 %d rows' is_public disagrees with the export "
+                        "(e.g. %s raw=%r stored=%s)"
+                        % (len(mism), mism[0][0], mism[0][1], mism[0][2]))
+        else:
+            note.append("V14 is_public agrees with the export on all %d rows "
+                        "(%s)" % (seen, dict(Counter(c["is_public"]
+                                                     for c in census))))
 
     # 8. SEFA, when present, points only at census reports and carries ALNs
     if sefa:
@@ -1326,7 +1364,7 @@ def cmd_selftest():
         results.append(("V13 additional_* binding", not ok13,
                         any(x.startswith("V13") for x in f13)))
 
-        # V14: every filing marked withheld (the t/f vocabulary defect)
+        # V14: the t/f vocabulary defect - every filing marked withheld
         poisoned = [dict(r, is_public="0") for r in rows]
         write_csv(OUT_CENSUS, poisoned, CENSUS_COLS)
         ok14, f14, _ = _verify()
@@ -1351,6 +1389,132 @@ def cmd_selftest():
     return 0 if bad == 0 else 1
 
 
+
+# ---------------------------------------------------------------------------
+# codebook -- the SHIPPING gate. `41_build_codebooks.py` is the one script on
+# NEVER_RUN because it rewrites the master from a hardcoded dict, so this
+# writes its OWN fragment and APPENDS only new keys to the master, never
+# rewrites it. Same pattern as 1072's and 1130's `codebook` stages.
+# ---------------------------------------------------------------------------
+CB_FIELDS = ["dataset", "variable", "type", "units", "pct_filled", "n_rows",
+             "published", "access_tier", "description", "generated"]
+CB_BLOCKS = {
+    "19a_fac_native_nontribal_single_audits": OUT_CENSUS,
+    "19b_fac_native_nontribal_sefa_programs": OUT_SEFA,
+}
+CB_DESC = {
+    "report_id": "THE KEY. The Federal Audit Clearinghouse's own id for ONE "
+                 "Single Audit reporting package. DISJOINT from every "
+                 "report_id in fac_tribal_single_audits.csv - the two tables "
+                 "may be UNIONed without double-counting.",
+    "award_reference": "The FAC's own per-report SEFA line key. With "
+                       "report_id it is the primary key of the SEFA table.",
+    "entity_id": "The Cedar spine entity this filing is attributed to. Many "
+                 "filings per entity - one per audited year.",
+    "entity_tier": "INHERITED from the row that supplied the key, never "
+                   "assigned here. An exact EIN says nothing about whether "
+                   "the LINK is right; entity_tier_inherited_from names the "
+                   "file the tier came from.",
+    "entity_tier_inherited_from": "The table whose row supplied both the "
+                                  "identifier and the tier. Read this before "
+                                  "trusting entity_tier.",
+    "entity_match_method": "How the entity was reached. For a name match it "
+                           "is resolve_entity's leg, and it is only ever "
+                           "exact / core / alias - CONTAINMENT IS REFUSED, "
+                           "because it put $29.64B of Commonwealth of "
+                           "Virginia on an Alaska village in the first build "
+                           "of this table.",
+    "discovery_net": "Which key found it: ein_exact, uei_exact or "
+                     "auditee_name. An additional_ein/uei never binds a "
+                     "filing - it names a COVERED COMPONENT, not the auditee.",
+    "total_amount_expended": "THE AUDITEE'S OWN total federal awards "
+                             "expended in that audit, as filed. NOT Cedar's "
+                             "attribution: where the auditee is a consortium "
+                             "serving many nations the whole figure sits on "
+                             "one row. Summing across years for one entity "
+                             "totals a multi-year run, so say so.",
+    "amount_expended": "The dollars on ONE SEFA line. These SUM to the "
+                       "report's total_amount_expended, so summing this "
+                       "table AND the census table together double-counts "
+                       "every dollar.",
+    "aln": "Assistance Listing Number (formerly CFDA), rendered "
+           "federal_agency_prefix.federal_award_extension. The federal "
+           "programme the auditee drew on.",
+    "is_public": "1 where the auditee did NOT elect to withhold its "
+                 "reporting package. All 545 rows are 1: the 2 CFR "
+                 "200.512(b)(2) opt-out is a right of an Indian tribe or "
+                 "tribal organization, and these auditees are NHOs, urban "
+                 "Indian organizations, CDFIs and colleges. 147's "
+                 "tribal-typed set is 30.2% public.",
+    "evidence_family": "Always audited_filing. Independent of FPDS and of "
+                       "FSRS, so a corroboration from it is a real second "
+                       "source and not a republication.",
+    "measurement_type": "AUDITED_FEDERAL_EXPENDITURES. Never gross revenue, "
+                        "never an obligation, never an outlay.",
+}
+CB_GENERIC = ("Carried verbatim from the FAC's published bulk export; see "
+              "docs/FAC_NONTRIBAL_SINGLE_AUDITS_LOG_2026-09-02.md.")
+
+
+def _cb_type(vals):
+    nn = [v for v in vals if (v or "").strip()]
+    if not nn:
+        return "text"
+    if all(re.fullmatch(r"-?\d+", v.strip()) for v in nn):
+        return "integer"
+    if all(re.fullmatch(r"-?\d+(\.\d+)?", v.strip()) for v in nn):
+        return "numeric"
+    return "text"
+
+
+def cmd_codebook():
+    master = CLEAN / "codebook_master.csv"
+    fragdir = CLEAN / "codebook"
+    fragdir.mkdir(parents=True, exist_ok=True)
+    have = {(r["dataset"], r["variable"]) for r in read_csv(master)}
+    added = 0
+    for block, path in CB_BLOCKS.items():
+        rows = read_csv(path)
+        if not rows:
+            print("  ! %s has no rows - run `apply` first" % Path(path).name)
+            return 1
+        frag = []
+        for col in rows[0].keys():
+            vals = [r.get(col, "") for r in rows]
+            filled = sum(1 for x in vals if (x or "").strip())
+            frag.append({
+                "dataset": block, "variable": col, "type": _cb_type(vals),
+                "units": ("usd" if ("amount" in col or "expended" in col)
+                          else "code" if col.endswith(
+                              ("_id", "_ein", "_uei", "aln", "_prefix",
+                               "_extension", "_zip"))
+                          else "date" if col.endswith(("_date", "_year"))
+                          else "text"),
+                "pct_filled": round(100.0 * filled / len(rows), 1),
+                "n_rows": len(rows), "published": 1,
+                # Organisation names, cities and federal identifiers only. No
+                # auditee or auditor contact name, email, phone or street
+                # line is written by this build - invariant V8.
+                "access_tier": "public",
+                "description": CB_DESC.get(col, CB_GENERIC),
+                "generated": TODAY})
+        write_csv(fragdir / (block + ".csv"), frag, CB_FIELDS)
+        new = [r for r in frag if (r["dataset"], r["variable"]) not in have]
+        if new:
+            bak = master.with_name(
+                master.name + ".bak_%s_pre_1132_fac_nontribal" % TODAY)
+            if not bak.exists():
+                shutil.copy2(master, bak)
+            with open(master, "a", encoding="utf-8", newline="") as fh:
+                csv.DictWriter(fh, fieldnames=CB_FIELDS,
+                               extrasaction="ignore").writerows(new)
+            added += len(new)
+        print("  %s: %d variables, %d appended to the master"
+              % (block, len(frag), len(new)))
+    print("  codebook: %d new master rows (APPEND only, never a rewrite)"
+          % added)
+    return 0
+
 # --------------------------------------------------------------------------
 def main():
     args = sys.argv[1:]
@@ -1361,6 +1525,8 @@ def main():
         return cmd_fetch(force="--force" in args)
     if cmd == "apply":
         return cmd_apply(no_sefa="--no-sefa" in args)
+    if cmd == "codebook":
+        return cmd_codebook()
     if cmd == "verify":
         return cmd_verify()
     if cmd == "selftest":

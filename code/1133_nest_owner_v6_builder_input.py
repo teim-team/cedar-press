@@ -355,6 +355,43 @@ FAMILY_TO_EVIDENCE_CLASS = {
 }
 
 
+# ---------------------------------------------------------------------------
+# APPLIED CORRECTIONS - a refutation Cedar already made may not be re-imported
+# ---------------------------------------------------------------------------
+# `data/clean/cedar_correction_register.csv` (written by
+# `code/354_correction_register.py`) records 178 APPLIED corrections as
+# (entity, withdrawn_key) pairs: a name that was linked to an entity and has
+# been UNLINKED, with the reason. `62_no_regression_check.py` scans every
+# sibling table for a row that still keys one of them.
+#
+# THIS CHECK EXISTS BECAUSE THIS PASS TRIPPED IT. The owner's v6 file is an
+# earlier vintage than the corrections, and its first ingest put
+# `BRISTOL BAY AREA HEALTH CORPORATION` back under Bristol Bay Native
+# Corporation (`ANRC-BRBYCO-00` / `CE-0007A-ZA`) as a NEST enterprise. That is
+# finding **FA-01**, settled 2026-08-26 and again on 2026-08-29: BBAHC is a
+# separate tribal health organisation, `SGVF-BRSTLB-00`; 742 rows were
+# unlinked, the ledgers marked tier X, and the refutation harvested by `510`
+# as deny assertion #332. `62` caught the re-import on the first run after
+# the ingest.
+#
+# **An old file is a time machine.** Any pass that imports a dataset built
+# before a correction will re-assert what the correction withdrew, and it will
+# look like coverage. The register is the guard, and it is read here rather
+# than a second list being written.
+def load_corrections(m72):
+    """-> {(entity_key, normalised withdrawn name)} for every applied UNLINK."""
+    out = {}
+    for r in rd(CLEAN / "cedar_correction_register.csv"):
+        key = m72.norm(r.get("withdrawn_key") or "")
+        if not key:
+            continue
+        for ent in ((r.get("entity_id") or "").strip(),
+                    (r.get("cedar_uid") or "").strip()):
+            if ent:
+                out[(ent, key)] = r
+    return out
+
+
 def norm_uei(s):
     s = re.sub(r"[^A-Za-z0-9]", "", s or "").upper()
     return s if len(s) == 12 else ""
@@ -366,7 +403,15 @@ def build_context():
     m30 = load_1130()
     reg, by_handle, by_stem, _names = m30.load_register()
     reg_by_uid = {r["cedar_uid"]: r for r in reg}
-    nest = rd(CLEAN / "nest_enterprises.csv")
+    # NEVER LET AN INSTRUMENT SCAN ITS OWN OUTPUT (AGENT_FIELD_GUIDE rule 10,
+    # five instruments in this repo have now done it). The UEI-collision and
+    # already-clustered tests below ask "does NEST ALREADY hold this firm" -
+    # and after the first ingest NEST holds THIS SCRIPT'S OWN ROWS, so the
+    # answer would depend on whether 1072 had been run yet. Rows whose
+    # source_id is this pass are excluded, which makes `apply` idempotent and
+    # its output independent of build order.
+    nest_all = rd(CLEAN / "nest_enterprises.csv")
+    nest = [r for r in nest_all if SOURCE_ID not in (r.get("source_id") or "")]
     uei_owner = {}          # UEI -> (enterprise_id, hub uid, name, column)
     nest_keys = set()       # (hub uid, normalised name) - the clustering key
     for r in nest:
@@ -378,12 +423,13 @@ def build_context():
                                          r["enterprise_name"], c))
         nest_keys.add((r["owner_hub_cedar_uid"],
                        r.get("enterprise_name_normalized") or ""))
+    corrections = load_corrections(m72)
     return (m72, m30, reg, by_handle, by_stem, reg_by_uid, nest, uei_owner,
-            nest_keys)
+            nest_keys, corrections)
 
 
 def classify(rows, m72, m30, by_handle, by_stem, reg, reg_by_uid, uei_owner,
-             nest_keys):
+             nest_keys, corrections):
     """-> (edges, refused, uei_held, counts). No writes."""
     edges, refused, uei_held = [], [], []
     counts = Counter()
@@ -463,6 +509,21 @@ def classify(rows, m72, m30, by_handle, by_stem, reg, reg_by_uid, uei_owner,
                    "the owner's tribe_id %s does not crosswalk to a live "
                    "register entity, and an unresolved parent is an honest "
                    "outcome that is never forced (ADR-010). %s" % (tid, note))
+            continue
+
+        # AN APPLIED CORRECTION IS A REFUTATION, AND IT OUTRANKS THIS FILE.
+        nk = m72.norm(name)
+        corr = (corrections.get((tid, nk)) or corrections.get((uid, nk)))
+        if corr:
+            refuse("APPLIED_CORRECTION_" + (corr.get("finding_id") or "UNKNOWN"),
+                   "Cedar has ALREADY WITHDRAWN this link. %s unlinked "
+                   "%r from %s in %s on %s (%s rows). The owner's file is an "
+                   "earlier vintage than the correction and re-asserts it. "
+                   "Reason on the register: %s"
+                   % (corr.get("recorded_by_script"),
+                      corr.get("withdrawn_key"), corr.get("entity_id"),
+                      corr.get("table"), corr.get("recorded_date"),
+                      corr.get("rows_affected"), (corr.get("reason") or "")[:160]))
             continue
 
         u = norm_uei(r.get("enterprise_uei"))
@@ -635,16 +696,18 @@ def run(write):
         return 2
     ctx = build_context()
     (m72, m30, reg, by_handle, by_stem, reg_by_uid, nest, uei_owner,
-     nest_keys) = ctx
+     nest_keys, corrections) = ctx
     rows = rd(V6)
     print("=== 1133 %s ===" % ("apply" if write else "report"))
     print("  owner v6            %6d rows" % len(rows))
-    print("  live NEST           %6d enterprises, %d distinct UEIs held"
-          % (len(nest), len(uei_owner)))
+    print("  live NEST           %6d enterprises, %d not from this pass, "
+          "%d distinct UEIs held"
+          % (len(rd(CLEAN / "nest_enterprises.csv")), len(nest),
+             len(uei_owner)))
 
     edges, refused, uei_held, counts, xwalk = classify(
         rows, m72, m30, by_handle, by_stem, reg, reg_by_uid, uei_owner,
-        nest_keys)
+        nest_keys, corrections)
 
     print("  EMITTED as builder input   %6d edges on %d hubs"
           % (len(edges), len({e["hub_cedar_uid"] for e in edges})))
@@ -846,6 +909,32 @@ def _verify():
             note.append("W6 0 of %d `unmatched` names reached NEST"
                         % len(banned))
 
+    # W7 - no APPLIED CORRECTION was re-imported. `62` scans every sibling
+    #      table for this; the point of checking it here is that a red 62 is
+    #      found after the rebuild, and this is found before it.
+    m72 = load_1072()
+    corr = load_corrections(m72)
+    if not corr:
+        fail.append("W7 UNMEASURED - cedar_correction_register.csv is empty "
+                    "or absent, so this check proves nothing")
+    else:
+        back = []
+        for r in mine:
+            nk = m72.norm(r.get("enterprise_name") or "")
+            for ent in ((r.get("owner_hub_handle") or "").strip(),
+                        (r.get("owner_hub_cedar_uid") or "").strip()):
+                if ent and (ent, nk) in corr:
+                    back.append(r)
+                    break
+        if back:
+            fail.append("W7 %d owner-v6 rows re-import a WITHDRAWN link "
+                        "(e.g. %s under %s)"
+                        % (len(back), back[0].get("enterprise_name"),
+                           back[0].get("owner_hub_name")))
+        else:
+            note.append("W7 0 of %d applied corrections re-imported"
+                        % len(corr))
+
     return (not fail), fail, note
 
 
@@ -922,6 +1011,30 @@ def cmd_selftest():
         shutil.copy2(baks[p], p)
         baks[p].unlink(missing_ok=True)
         baks.pop(p)
+
+        # W7: a WITHDRAWN link back in NEST (the FA-01 shape)
+        m72 = load_1072()
+        corr = load_corrections(m72)
+        rows2 = rd(p)
+        hit2 = next((r for r in rows2
+                     if SOURCE_ID in (r.get("source_id") or "")), None)
+        if hit2 is None or not corr:
+            results.append(("W7 withdrawn link re-imported", False, False))
+        else:
+            shutil.copy2(p, p.with_suffix(".csv.selftest_bak"))
+            baks[p] = p.with_suffix(".csv.selftest_bak")
+            ent, key = next(iter(corr))
+            src = corr[(ent, key)]
+            hit2["owner_hub_cedar_uid"] = src.get("cedar_uid") or ent
+            hit2["owner_hub_handle"] = src.get("entity_id") or ent
+            hit2["enterprise_name"] = src.get("withdrawn_key")
+            wcsv(p, rows2, first=list(rows2[0].keys()))
+            o, f, _ = _verify()
+            results.append(("W7 withdrawn link re-imported", not o,
+                            any(x.startswith("W7") for x in f)))
+            shutil.copy2(baks[p], p)
+            baks[p].unlink(missing_ok=True)
+            baks.pop(p)
 
         # W5: conservation gone
         baks[OUT_CONSV] = OUT_CONSV.with_suffix(".csv.selftest_bak")

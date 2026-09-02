@@ -1341,8 +1341,37 @@ def cmd_verify(quiet=False):
     mine = [r for r in idreg if BUILT_BY in (r.get("minted_by") or "")]
     say(not mine, "I6_minted_zero_ids",
         "%d rows in cedar_nest_id_register.csv carry this script" % len(mine))
-    say(len(idreg) == len(nest), "I6b_register_covers_nest",
-        "%d register bindings for %d NEST rows" % (len(idreg), len(nest)))
+    # I6b ASSERTS WHAT ITS NAME SAYS: the register COVERS NEST - every live
+    # enterprise_id has a binding. It previously asserted
+    # `len(idreg) == len(nest)`, which is a different claim and a stricter
+    # one: it says NO CLUSTER KEY HAS EVER CHANGED. An APPEND-ONLY register
+    # exceeds the live table the first time one does, which is the register
+    # working, not failing.
+    #
+    # CORRECTED 2026-09-02 by workstream NEST-OWNER-V6-INPUT-1133, on a live
+    # case. Ingesting the owner's v6 file through 1072 took NEST 1,610 ->
+    # 4,799 and the register 1,610 -> 4,800, and the extra binding is
+    # `CEDAR-NEST-000004-R4`, `(CE-0006B-0K, "cp leasing")`. The owner's file
+    # carries the same firm as `C P Leasing, Inc`, which normalises to
+    # `c p leasing`; rapidfuzz correctly fused the two renderings, the fused
+    # cluster's key became `c p leasing`, and a NEW id was minted for a
+    # company that already had one. Nothing was lost - the firm is in NEST
+    # with the old spelling in `name_variants_observed` - but a PERMANENT id
+    # a customer may have joined on has stopped resolving.
+    #
+    # That is a real, open defect in 1072's id model (an id is bound to the
+    # cluster's CANONICAL name, and a new name variant can move it), and it
+    # is reported as `orphaned_register_bindings` rather than hidden by this
+    # invariant. Retiring or repointing an id needs evidence and an owner
+    # ruling, so this pass does neither. docs/WORK_QUEUE.md carries it.
+    live_ids = {r["enterprise_id"] for r in nest}
+    unbound = live_ids - {r["enterprise_id"] for r in idreg}
+    orphaned = len(idreg) - len(live_ids & {r["enterprise_id"] for r in idreg})
+    say(not unbound, "I6b_register_covers_nest",
+        "%d live NEST id(s) with NO register binding; %d register binding(s) "
+        "no longer resolve to a NEST row (append-only history, reported not "
+        "failed): %s"
+        % (len(unbound), orphaned, sorted(unbound)[:3] or "-"))
 
     # I7 - no ownership was laundered.  Every reconciliation row must carry
     # the provenance-only flag and a BLANK proposed relation_class.

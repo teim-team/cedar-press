@@ -2897,7 +2897,17 @@ append-only `cedar_nest_id_register.csv`. `1133` owns the admission decisions;
   `relation_class = ownership`; it did, on 3,189 rows, until invariant **W3**
   caught it.
 
-**Consequence.** NEST 1,610 → **4,799 enterprises**, 3,190 ids minted, 472
-owner hubs. `1072 verify` PASS on all 8 invariants; `1102` (the enricher) must
-run LAST after any rebuild.
+* **An APPLIED CORRECTION outranks the file.** The owner's v6 predates
+  finding **FA-01** and re-asserted `BRISTOL BAY AREA HEALTH CORPORATION`
+  under Bristol Bay Native Corporation, a link Cedar withdrew on 2026-08-26
+  and marked tier X. `1133` now reads `cedar_correction_register.csv` (254
+  applied pairs) and refuses any edge that re-imports one. Invariant **W7**.
+  **An old file is a time machine**: any pass importing a dataset built before
+  a correction will re-assert what the correction withdrew, and it arrives
+  looking like coverage.
+
+**Consequence.** NEST 1,610 → **4,798 enterprises** (3,189 carrying
+`source_id = OWNERV6`), 3,190 ids minted, 472 owner hubs, relations
+3,789 → 7,559. `1072 verify` PASS on all 8 invariants; `1102` (the enricher)
+must run LAST after any rebuild.
 <!-- END ADR-034-OWNER-V6-BUILDER-INPUT -->

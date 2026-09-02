@@ -624,3 +624,88 @@ The register-as-search-key is the cheapest instrument that moves the first
 two, and `identifiers` is where it pays fastest, because
 `fpds_uei_cage_map.csv` is sitting on disk naming 666 of them already.
 <!-- END MASTER-LIST-SWEEP-2026-09-02 -->
+
+<!-- BEGIN FAC-NONTRIBAL-AND-NEST-INPUT-2026-09-02 -->
+## 2026-09-02 — what these two passes left open, in order of value per hour
+
+*From `code/1132_fac_nontribal_native_audits.py` and
+`code/1133_nest_owner_v6_builder_input.py`. Full write-ups:
+`docs/FAC_NONTRIBAL_SINGLE_AUDITS_LOG_2026-09-02.md` and the
+`NEST-OWNER-V6-INPUT-2026-09-02` block in `docs/NEST_BUILD_LOG.md`.
+Model decisions **ADR-033** and **ADR-034**.*
+
+1. **986 Alaska Native corporate subsidiaries are held, not lost, and one
+   column would release them.** `1072 assemble` holds **1,281 rows** across
+   **221 village governments** under `ANCSA_OWNERSHIP_RULING` rule 2, and 986
+   of the firms on them are in NEST under no hub at all. The guard is right —
+   the ruling says a village government asserted as owner of an ANC resolves
+   to *"nothing … refuse, send to review"*, and `held_rows.csv` IS that review
+   queue. What closes it is a per-row source naming the CORPORATION, the way
+   `anc_tribal_subsidiary_lookup.csv` does in its own `parent_entity_type`.
+   **The correction belongs in the owner's file.**
+
+2. **414 rows are held on a refusal the owner lifted on 2026-09-02.**
+   `1072`'s `RESTRICTED_NAME` / `RESTRICTED_HOST` predates
+   `PUBLICATION_POLICY.md` `TERMS-OWNER-RULING-2026-09-02`, which released
+   Colville, CTUIR/Umatilla, Yakama, Chickasaw, NANA/Akima, Southern Ute,
+   Forest County Potawatomi and Stillaguamish for harvest of their own public
+   pages. 330 of the 414 are owner-v6 rows (`akima.com/our-company/` alone is
+   52). `AGENT_FIELD_GUIDE` rule 9: a reversed refusal that is still cached
+   never takes effect. Owner of `1072` decides; not an agent's unilateral edit
+   to a publication-policy guard.
+
+3. **3,140 SBA-certified Native firms with no owner nation named** are
+   registered in `data/staging/nest/owner_v6_refused.csv` under
+   `SBA_CERTIFIED_BUT_NO_OWNER_NAMED`, with name and UEI. They are not NEST
+   rows (NEST's grain needs an owner) and they belong to
+   `native-owned-businesses` / the individually-Native-owned class. The
+   register makes the promotion a **join, not a re-harvest**. Largest single
+   block of unhubbed enterprise identity on this machine.
+
+4. **172 cross-hub UEI disagreements need an adjudication.**
+   `data/staging/nest/owner_v6_uei_already_held.csv`. One federal registration
+   that NEST and the owner's file place under two different owners. Must not
+   be settled by whichever pass ran last.
+
+5. **The FAC historic (pre-2016) download is `NOT_ACQUIRED`, not absent.**
+   `https://www.fac.gov/data/download/historic/`. `1132` covers 2016–2025 only,
+   from the current export. Same shape of pull, one host lock, four objects.
+
+6. **Six spine gaps, unchanged and still the cheapest register additions here:**
+   NAFOA, NAJA, ILTF, First Nations Development Institute, the Five Civilized
+   Tribes council, IHS Tribal Self-Governance. Plus `TRBF-CSAKT-00`
+   Confederated Salish and Kootenai (ambiguous against Cedar's truncated
+   `Confederated Salish`) and `NHO-MANUKAI-00` Manu Kai LLC.
+
+7. **`py -3 code/build.py plan nest` mislabels `1072` as an in-place
+   enricher.** It is a FULL REBUILD; `1102` is the enricher and must run last.
+   The plan currently lists all three of 1072/1102/1130 under *Phase 2* and
+   *Phase 1* as empty, so a reader following it would run them in an order
+   that reverts `1102`. Defect in the dependency manifest, not in the scripts.
+
+8. **A `1072` enterprise_id is not stable against the arrival of a name
+   variant, and one has already stopped resolving.**
+   `CEDAR-NEST-000004-R4`, `(CE-0006B-0K, "cp leasing")`. `1072` binds the id
+   to `(hub, norm(cluster's CANONICAL display name))`, and the canonical name
+   is chosen by evidence rank — so when the owner's `C P Leasing, Inc` arrived
+   and rapidfuzz correctly fused it with the existing `Cp Leasing`, the
+   cluster key moved from `cp leasing` to `c p leasing` and a NEW id was
+   minted for a company that already had one. Nothing was lost; the old
+   spelling is in `name_variants_observed`. But **`enterprise_id` is
+   permanent** and a customer who joined on it gets nothing.
+   Once in 3,190 mints, and it will recur. **The engineering fix**: when a
+   cluster's key is new but the cluster CONTAINS a member name whose
+   `(hub, norm)` already has a register binding, REUSE that binding instead of
+   minting — with a deterministic tie-break, and refusing where two members
+   each carry one, because that is two enterprises fusing and needs evidence.
+   **Not done here**: retiring or repointing an id needs an owner ruling.
+   Written up in the `NEST-OWNER-V6-INPUT-2026-09-02` block of
+   `docs/NEST_BUILD_LOG.md`.
+
+9. **`1130`'s I6b was hiding item 8 and is corrected.** It asserted
+   `len(register) == len(NEST)` under the name `register_covers_nest`. An
+   append-only register exceeds the live table the first time a cluster key
+   changes, so that equality measures "nothing has ever changed", not
+   coverage. It now asserts every live NEST id has a binding, and reports the
+   orphan count beside it. This repo's signature defect, found in a gate.
+<!-- END FAC-NONTRIBAL-AND-NEST-INPUT-2026-09-02 -->

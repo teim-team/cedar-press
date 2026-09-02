@@ -14,7 +14,7 @@
     "duplicate_name_variant_basis"
   ],
   "jv_observation_floor": 20,
-  "base_fields_md5": "babc2eb916a5a50e4400d9466faeeaed",
+  "base_fields_md5": "06253f927c2820e677d2758615831400",
   "contradictions": [
     {
       "enterprise_id": "CEDAR-NEST-001798-0Z",
@@ -369,17 +369,17 @@
       "note": "ENTITY_MATCH_RULES rule 12: when a declared parent contradicts an attribution, suspect the PARENT row first. Check whether the ledger row for the parent UEI is the ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION defect before treating this as a NEST error."
     }
   ],
-  "rows": 4799,
+  "rows": 4798,
   "corroboration": {
-    "NO_DECLARED_PARENT": 3876,
-    "PARENT_UNRESOLVED": 338,
+    "NO_DECLARED_PARENT": 3874,
+    "PARENT_UNRESOLVED": 339,
     "PARENT_BELOW_JV_FLOOR": 270,
     "CORROBORATED": 293,
     "CONTRADICTED": 22
   },
   "route": {
-    "rung1_published_uei": 412,
-    "rung2_exact_normalised_name": 241
+    "rung1_published_uei": 414,
+    "rung2_exact_normalised_name": 240
   },
   "published_uei": 2504,
   "dupe_groups": 62,

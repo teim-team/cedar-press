@@ -219,6 +219,7 @@ find its row here and stop — you do not need to grep `docs/`.*
 | OIRA / hearings | `OIRA_HEARINGS_BUILD_LOG.md` | — |
 | earmarks | `EARMARKS_SCHEDC_BUILD_LOG.md` | — |
 | `fac_tribal_single_audits.csv` | `GAMING_FINANCIAL_EXHAUST_BUILD_LOG.md` | plus the CORRECTION section in this file (opt-out, not a bar) |
+| `fac_native_nontribal_single_audits.csv`, `fac_native_nontribal_sefa_programs.csv` | **`FAC_NONTRIBAL_SINGLE_AUDITS_LOG_2026-09-02.md`** | new 2026-09-02, `code/1132`. **`entity_type = tribal` is a fact about the FILING FORM, not the filer**: that filter supplies 6,774 of 147's 6,780 rows and reaches 638 of 1,555 spine entities; the 917 it misses are led by 210 NHOs, 152 ANCSA village corporations, 114 BIE schools and 55 Native CDFIs, none of which files as a tribe. Asked again without it: **545 filings, 99 net-new entities, $9.78B audited federal expenditures, 7,252 SEFA lines on 506 ALNs**. **DISJOINT from 147 on `report_id`** (invariant V4) so the two may be UNIONed. Route is the FAC's own published bulk export, because `api.fac.gov` was in scheduled maintenance and answered 404 on every path. **Three nine-figure false attributions were caught and fixed inside the build** — `COMMONWEALTH OF VIRGINIA -> Pribilof Islands` at $29.64B among them; the fix is that `resolve_entity`'s CONTAINMENT leg may never key a dollar. Model decision: **ADR-033** |
 | dataset 5 (linked file) | `DATASET5_LINKED_FILE_BUILD_LOG.md` | — |
 
 ### The spine, identifiers and rulings

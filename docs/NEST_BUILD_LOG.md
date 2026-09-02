@@ -1007,3 +1007,382 @@ collection can only move that number down. Measured after this pass:
 `518` READY 15/15 unchanged, `1116 verify` clean over 290 markdown files,
 `293` zero findings in `1130_*`.
 <!-- END NEST-OWNER-V6-2026-09-02 -->
+
+<!-- BEGIN NEST-OWNER-V6-INPUT-2026-09-02 -->
+## UPDATE 2026-09-02 (later) — THE OWNER'S FILE IS NOW AN **INPUT**, AND NEST IS 4,799
+
+*`code/1133_nest_owner_v6_builder_input.py`. `report | apply | verify |
+selftest`. Zero network. **Zero Cedar ids minted by 1133** — `1072 build`
+mints them from the append-only register, which stays the only place an
+enterprise id is created. Every figure below is re-derivable with
+`py -3 code/1133_nest_owner_v6_builder_input.py report`.*
+
+The section above measured 4,786 net-new enterprises in the owner's v6 file and
+**deliberately did not append them**, because `1072 build` is a full rebuild and
+an in-place append is reverted by the next run while printing a larger row
+count. This pass solves that, and it does not solve it by appending more
+carefully.
+
+### THE SHAPE OF THE FIX
+
+```
+1133 apply     ->  data/staging/nest/owner_v6_edges.jsonl      (5,794 edges)
+1072 load_sources()  source 7 reads it
+1072 assemble  ->  hub resolution + the ANCSA and restricted-publisher guards
+1072 build     ->  clustering + id minting from cedar_nest_id_register.csv
+1102           ->  the in-place enricher. IT RUNS LAST, after every rebuild.
+1133 verify    ->  exits 1 while the rows are NOT in NEST
+```
+
+The rows now come back on **every** rebuild. Nothing is post-processed, and
+`1133` writes not one byte of `nest_enterprises.csv`.
+
+The split of labour is deliberate: `1133` owns the admission DECISIONS,
+`1072` owns the clustering, the guards and the ids. Every other NEST source is
+staged by a sibling script and read by `load_sources()` exactly this way —
+`1070`'s held CSV is source 6a — and putting 5,794 rows of reasoning inside a
+file many workstreams edit is how a shared file gets clobbered.
+
+**`1072`'s new source 7 is loud when the input is absent.** It prints a named
+warning and records `_owner_v6_INPUT_ABSENT` in the provenance counter, because
+an absence must never print as a clean result.
+
+### THE RESULT
+
+| | before | after |
+|---|---:|---:|
+| `nest_enterprises.csv` | 1,610 | **4,798** |
+| `nest_enterprise_relations.csv` | 3,789 | **7,559** |
+| owner hubs | 129 | **472** |
+| ids in `cedar_nest_id_register.csv` | 1,610 | **4,800** (3,190 minted) |
+| enterprises **absent from federal contracting** | 977 | **2,438** |
+
+`1072 verify` PASS on all 8 invariants — including **I8**, no Alaska Native
+Village government owns an ANCSA corporation. `1102 verify` 0 breaches.
+Model decision: **ADR-034**.
+
+By owner class: tribal_government 3,282 · alaska_native_corporation 1,416 ·
+native_hawaiian_organization 100. **3,189 of the 4,798 rows carry
+`source_id = OWNERV6`.**
+
+### INDEPENDENT CONFIRMATION — 1130 RE-RUN AFTER THE INGEST
+
+`1130` is a reconciliation of the owner's file against NEST, and it was written
+before any of this. Re-running `1130 build` on the rebuilt table is therefore a
+check nobody designed to be flattering:
+
+| `reconciliation_status` | before the ingest | after |
+|---|---:|---:|
+| `ALREADY_IN_NEST` | 440 | **3,628** |
+| `NET_NEW_TO_NEST` | 4,563 | 1,385 |
+| `NET_NEW_HUB_DISAGREEMENT` | 223 | 213 |
+
+**+3,188 ALREADY_IN_NEST, and the table grew 1,610 → 4,798.** The 1,598 still
+outstanding are the rows `1072`'s own guards held —
+1,281 on the ANCSA village-government rule and 330 on the restricted-publisher
+list — and are itemised below. `1130 verify` is back to **31 invariants OK**.
+
+The pre-ingest artefacts are preserved, not overwritten:
+`data/staging/nest_owner_v6_PRE_INGEST_2026-09-02/`.
+
+### A PERMANENT ID STOPPED RESOLVING, AND THAT IS AN OPEN DEFECT IN `1072`
+
+The register went 1,610 → 4,800 bindings while NEST settled at **4,798**, so
+**two** bindings no longer resolve. One is a withdrawal this pass made on
+purpose (`CEDAR-NEST-001736-2H`, the FA-01 row below). The other is the defect:
+**`CEDAR-NEST-000004-R4`, `(CE-0006B-0K, "cp leasing")`**.
+
+Nothing was lost. The owner's file carries the same firm as `C P Leasing, Inc`,
+which normalises to `c p leasing`; rapidfuzz **correctly** fused the two
+renderings; the fused cluster's key became `c p leasing`; and `1072` minted a
+NEW id for a company that already had one. The firm is in NEST with the old
+spelling in `name_variants_observed`.
+
+**But `enterprise_id` is permanent, and a customer who joined on
+`CEDAR-NEST-000004-R4` now gets nothing.** The cause is structural: `1072`
+binds the id to the cluster's CANONICAL name, so the arrival of a name VARIANT
+can move the key. It happened once in 3,190 mints and it will happen again.
+
+Retiring or repointing an id needs evidence and an owner ruling, so this pass
+did neither. What it did do is **correct the invariant that was hiding it**:
+`1130`'s **I6b** asserted `len(register) == len(NEST)`, which is not what its
+name says — an APPEND-ONLY register exceeds the live table the first time any
+cluster key changes, which is the register *working*. I6b now asserts what it
+is called (every live NEST id has a binding) and **reports** the orphan count
+beside it. `docs/WORK_QUEUE.md` carries the defect.
+
+### DECISION 5 — AN OLD FILE IS A TIME MACHINE, AND IT PUT A REFUTED LINK BACK
+
+**`62_no_regression_check.py` caught this on the first run after the ingest,
+and it is the most important thing in this section.** The first build put
+
+```
+nest_enterprises.csv  1 row(s) still key ANRC-BRBYCO-00 to
+                      'BRISTOL BAY AREA HEALTH CORPORATION'   [FA-01]
+```
+
+FA-01 is settled. Bristol Bay Area Health Corporation is a **separate** tribal
+health organisation, `SGVF-BRSTLB-00`; the link to Bristol Bay Native
+Corporation was a `cluster_v3` name-cluster error, 742 rows were unlinked on
+2026-08-26, the ledgers were marked **tier X** so the refutation is permanent,
+and `510` harvested it as deny assertion #332.
+
+**The owner's v6 file predates the correction, so it still asserts it.** Any
+pass that imports a dataset built before a correction will re-assert what the
+correction withdrew — and it will arrive looking exactly like coverage.
+
+`1133` now reads `data/clean/cedar_correction_register.csv` (written by
+`code/354_correction_register.py`, **254 applied (entity, withdrawn_key)
+pairs**) and refuses any edge whose `(entity, normalised name)` is one of them.
+It catches exactly one row, `APPLIED_CORRECTION_FA-01`, registered with the
+correction's own reason text. Invariant **W7** fails the build if a withdrawn
+link reaches NEST, and its fixture injects one and proves it fires. The point
+of checking it in `1133` rather than relying on `62` is timing: a red `62` is
+found *after* the rebuild, and `W7` is found before it.
+
+### A MEASURED PROPERTY: THE EDGE COUNT WOBBLES BY 2, THE TABLE DOES NOT
+
+`1133` asks "does NEST already hold this firm" to avoid minting a second
+enterprise for one company — and after the first ingest **NEST holds this
+script's own rows**, which is `AGENT_FIELD_GUIDE` rule 10 (five instruments in
+this repo have scanned their own output). Rows whose `source_id` is `OWNERV6`
+are therefore excluded from that context.
+
+The exclusion is not perfectly stable, because `source_id` is the *best* source
+of a cluster and a cluster mixing this file with another can flip. Measured
+over four `apply → assemble → build` cycles:
+
+```
+staged edges       5,791  ->  5,789  ->  5,791  ->  5,789
+nest_enterprises   4,798      4,798      4,798      4,798
+ids minted             0          0          0          0
+```
+
+**The enterprise table and the id register are a fixed point; only the staged
+edge count moves, by 2 rows in 5,791 (0.03%), and only in the direction of
+admitting more.** It is recorded rather than hidden. The stable fix is to do
+the UEI-duplicate test against the STAGED EDGE SET inside `1072`, where the
+other sources' UEIs are visible before anything is clustered, rather than
+against the built table — that is a `1072` change and was not made here.
+
+### DECISION 1 — THE 12,085 UNHUBBED ROWS ARE **NOT** "NAMED, NEVER FOLDED"
+
+The task for this pass described them that way. They were measured instead, and
+they are four different things:
+
+| rows | what the owner's own file says about them |
+|---:|---|
+| **8,928** | `attribution_method = unmatched`, `data_sources = master_entity_registry`, `verification_source` BLANK |
+| **3,140** | `data_sources = sba_dsbs_native_entities`, `parent_entity_type = TRIBAL_ENTITY_UNCROSSWALKED_SBA` |
+| 16 | AIHEC tribal colleges |
+| 1 | a tribal-press row |
+
+**The 8,928 are the owner's own UNMATCHED RESIDUE, and they are REFUSED.** His
+file says so in its own column. They are FPDS awardees his resolver could not
+attribute to any Native entity, and reading them settles it — `Merchen & Reed
+Gravel Inc`, `Goldenlook Of San Antonio Inc`, `Supplemental Medical Services,
+Inc.`, `A A M C Inc`, and **natural persons**: `Benward, Ursula`,
+`William Woolard`. Nothing in the file asserts that any of them is
+Native-owned. Admitting them would be fabrication at a scale of 8,928 rows and
+would publish natural persons into a business dataset.
+
+**This is `START_HERE` §1b in a third vocabulary: `unmatched` is a NEGATIVE
+result.** Inheriting the row while dropping its sign is exactly how 317
+`elijah_ruling` tier-X refusals were once published as confident attributions.
+Invariant **W6** fails the build if any of these names reaches NEST — scoped to
+names the emitted set does not also carry, because 11 of them are *also*
+carried by a properly hubbed row and a bare name test called those leaks.
+
+**The 3,140 SBA rows are real firms with no owner named.** `SALCO LLC`, `HAKU
+SYSTEMS LLC`, `MAKWA GLOBAL SERVICES, LLC` — self-certified Native-owned, 8(a),
+in the SBA certification register. That is evidence. It is not a NEST row:
+NEST's grain is (owner hub, enterprise name) and no owner nation is named on
+any of them. They are registered for `native-owned-businesses` / the
+individually-Native-owned class, by name and UEI, so the promotion is a **join
+and not a re-harvest**. They are the largest single block of unhubbed
+enterprise identity on this machine and the route to them is the identifier,
+not the name.
+
+All 12,319 refusals sit in `data/staging/nest/owner_v6_refused.csv` with the
+measured reason. Nothing was deleted; conservation balances **18,110 in,
+18,110 accounted, 0 unaccounted**.
+
+### DECISION 2 — THE 160 v3-ONLY ROWS ARE NOT 158 LOST FIRMS. DO NOT RECOVER.
+
+The section above staged them as recovery candidates and the obvious next move
+is to recover them. **One measurement settles that it is wrong:**
+
+```
+v3-only rows whose UEI is ALSO IN v6 :  160 of 160
+v3-only rows whose exact name string is in v6 under that UEI :  0 of 160
+```
+
+Every one is the same firm, under the same federal registration, spelled
+differently:
+
+| v3 | v6, same UEI |
+|---|---|
+| `GLACIER TECHNOLOGIES LLC` | `Glacier Technologies Limited Liability Company` |
+| `GOLDBELT HAWK L.L.C.` | `Goldbelt Hawk Llc` |
+| `BOWHEAD MANUFACTURING COMPANY, L.L.C.` | `Bowhead Manufacturing Company` |
+| `CADDO INDUSTRIES ENTERPRISE` | `CADDO INDUSTRIES ENTERPRISES` |
+| `AHTNA SUPPORT & TRAINING SERVICES LLC` | `Ahtna Support And Training Services Limited …` |
+
+NEST clusters on the normalised NAME. `norm()` strips a trailing corporate form
+but not `limited liability` in the middle of one, so `glacier technologies` and
+`glacier technologies limited liability` are two keys — and rapidfuzz declines
+to fuse them because the merge rule caps the length difference at 6 and theirs
+is 18. **Recovering v3 would have created up to 158 duplicate enterprises**,
+which is the exact defect the merged-not-appended design of `1072` exists to
+stop and which already cost 25 duplicate rows once.
+
+So the v3 strings are recorded as **observed name variants keyed on UEI** —
+`data/staging/nest/owner_v3_name_variants.csv` — and not as enterprises. The
+loss the recovery list described does not exist. What exists is 160 extra
+renderings of names Cedar already holds: worth having, worth nothing as rows.
+
+### DECISION 3 — NO `relation_class` INVENTED, AND ONE `or "subsidiary"` NEARLY UNDID IT
+
+v6 has 31 columns and **not one states a relationship word**. So no ownership
+is claimed, and the rows land as `relationship = unspecified`,
+`relation_class = affiliation`.
+
+**It is emitted as the literal `unspecified` and not as a blank, and that
+distinction cost a whole build.** `1072.stage_build` reads
+`canon_rel(x.get("relationship") or "subsidiary")`, so a BLANK is coerced to
+`subsidiary` and published as `relation_class = ownership`. The first build of
+this input did exactly that on **3,189 rows** — 3,189 affiliations silently
+promoted to ownership claims, inside the dataset whose own docstring says *an
+affiliation recorded as ownership is the defect it is most exposed to*.
+Invariant **W3** caught it. It is now 0.
+
+**W3 allows exactly one lawful exception and names it.** Where the cluster
+carries a SECOND source that DID state a relationship,
+`relationship_as_recorded` shows it beside `unspecified` and the ownership
+claim belongs to that source. One row qualifies: `C P Leasing, Inc` under
+Tlingit & Haida, 2 distinct sources, one of them goldbelt.com's own directory.
+A check that fires on a correct row is the failure mode this repo names most
+often, so the invariant tests
+`relationship_as_recorded ⊆ {unspecified}`, not `relation_class == ownership`.
+
+### DECISION 4 — A UEI CEDAR ALREADY HOLDS IS A CORROBORATION, NOT A NEW FIRM
+
+A UEI is one federal registration for one firm, so an owner row carrying a UEI
+a live NEST row already holds is that firm again. **But the collision only
+matters when the row would create a NEW cluster.** Where NEST already holds
+`(this hub, this normalised name)` the row MERGES and raises the observation
+count, which is the whole point of putting the file through the builder's
+clustering. Refusing on the UEI alone discarded **173** of exactly those, so
+the rule tests the clustering key first.
+
+What is refused: **21** same-hub and **172** cross-hub rows that would have
+created a second enterprise for a firm Cedar already registers. Registered in
+`data/staging/nest/owner_v6_uei_already_held.csv` — the cross-hub ones are an
+**ownership disagreement needing adjudication**, and they must not be settled
+by whichever pass ran last.
+
+### THE LARGEST OPEN ITEM THIS PASS SURFACED — 1,281, NOT 212
+
+The section above measured **223 hub disagreements, of which 212** hub an ANCSA
+subsidiary on the Native Village GOVERNMENT. That was the count of net-new
+*clusters*. Put the whole raw file through `1072 assemble` and the count of
+**rows** the guard has to hold is **1,281**, across **221 distinct village
+governments** — Chenega 128, Barrow 123, Pribilof Islands 98, Eagle 78,
+Afognak 53, Tyonek 51. **986 of the firms named on them are in NEST under no
+hub at all**, so this is not a rounding difference: it is the single largest
+block of Alaska Native corporate structure still outside the dataset.
+
+**No new guard was written, because `1072` already implements the owner's own
+ruling and is applying it correctly.** `ANCSA_OWNERSHIP_RULING` says rule 1 (the
+operating company belongs to the village CORPORATION) is the **presumption**,
+that rule 3 (the government owns it directly) is *"an exception you must
+EVIDENCE, not assume"*, and that a village government asserted as owner of an
+ANC resolves to *"nothing — the attribution is wrong … refuse, send to
+review."* `stage_assemble` repoints where the source itself names the
+corporation and HOLDS otherwise. **`held_rows.csv` IS the review queue the
+ruling prescribes**, and every one of the 1,281 is in it with its reason.
+
+**The correction belongs in the owner's file.** What would close it here is a
+source that names the corporation per row — the owner's own
+`anc_tribal_subsidiary_lookup.csv` does exactly that in its
+`parent_entity_type` column, which is why `1072` repoints its 549 rows and
+cannot repoint these.
+
+### A SECOND OPEN ITEM: 414 ROWS HELD ON A REFUSAL THE OWNER HAS SINCE LIFTED
+
+`1072`'s `RESTRICTED_NAME` / `RESTRICTED_HOST` predates
+`docs/PUBLICATION_POLICY.md` **`TERMS-OWNER-RULING-2026-09-02`**, which released
+the eight-source hard list — Colville, CTUIR/Umatilla, Yakama, Chickasaw,
+NANA/Akima, Southern Ute, Forest County Potawatomi, Stillaguamish — for harvest
+of their own public pages. `assemble` currently holds **414 rows** on it, **330
+of them from the owner's v6 file** (`akima.com/our-company/` alone is 52).
+
+This pass did **not** change it: a publication-policy guard on a shared builder
+is not an agent's unilateral edit at the end of a pass. But it is
+`AGENT_FIELD_GUIDE` rule 9 exactly — *when a refusal is reversed, the cached
+refusals must be retired or the correction never takes effect* — and it is
+worth 414 rows to whoever owns `1072` next.
+
+### CROSSWALK, AND ONE FIX TO IT
+
+`tribe_id` is the same handle scheme at an earlier vintage, so `1130`'s
+`resolve_parent` is imported rather than re-implemented — one crosswalk, not a
+second detector. Rows resolved: `handle_exact` 5,711 · `handle_stem_unique` 6 ·
+`name_tokens_class_gated_unique` 74 · unresolved 38.
+
+**The crosswalk is per `tribe_id`, not per row.** 29 rows carry a `tribe_id`
+and a BLANK `canonical_name`, and resolving per row dropped
+`resolve_parent` into its name route with nothing to match on — **83 rows
+refused as `UNRESOLVED_NO_DISTINCTIVE_TOKENS` for a parent the same file names
+on another row.** The name is a property of the parent, so the best name seen
+for each `tribe_id` anywhere in the file is used. That fix alone recovered 57
+rows.
+
+The 8 unresolved parents stand as `1130` left them and are **not** forced:
+`TRBF-CSAKT-00` Confederated Salish and Kootenai (ambiguous against Cedar's
+truncated `Confederated Salish`), `NHO-MANUKAI-00` Manu Kai LLC, and six spine
+gaps — **NAFOA, NAJA, ILTF, First Nations Development Institute, the Five
+Civilized Tribes council, IHS Tribal Self-Governance**. Those six remain the
+cheapest register additions on this page.
+
+### A CORRECTION TO THE SECTION ABOVE
+
+The `223 HUB DISAGREEMENTS` table in the previous block reads
+**212 / 20 / 14**, and those three numbers sum to **246**, not 223. The live
+`data/staging/nest_owner_v6/enterprise_reconciliation.csv` says
+**196 / 14 / 13 = 223**, which does. The doc's table is from an earlier run;
+the file is right. (The 212 is still the right order of magnitude for the
+*cluster* count, and the raw-row count is 1,281 — see above.)
+
+### THE `nest_entity_dual_role.csv` LINE — ALREADY DONE, MEASURED
+
+The previous block left one line for an integrator: add
+`nest_entity_dual_role.csv` (358 rows, ADR-032) to `500`'s `nest` collection.
+**No edit was needed.** That collection's selector is the regex `^nest_`, which
+already claims the table; `docs/ARCHITECTURE.md` line 375 lists it under *NEST*
+with its 358 rows and both writers. Verified by re-running
+`py -3 code/500_build_architecture_map.py`.
+
+### THE GATE
+
+```
+py -3 code/1133_nest_owner_v6_builder_input.py verify    -> exit 0, 6 invariants
+py -3 code/1133_nest_owner_v6_builder_input.py selftest  -> 5/5 fixtures FIRE
+py -3 code/1072_tribally_owned_enterprises.py verify     -> PASS, 8 invariants
+py -3 code/1102_nest_corroboration_adjudication.py verify-> 0 breaches
+py -3 code/846_session_audit.py                          -> 28/28
+```
+
+**W2 is the invariant that matters.** A staged file is not a delivered row, and
+a conservation check would pass on a no-op, so `verify` asserts the intended
+delta **on the table the consumer reads**: at least 2,800 rows of
+`nest_enterprises.csv` must carry `source_id = OWNERV6`. It currently reads
+3,190 of 4,799, and its fixture strips the source id from the live table and
+proves the check goes red.
+
+**Ordering, written down.** `1072 build` is a full rebuild and `1102` is an
+in-place enricher on the same file. Run `1133 apply` → `1072 assemble` →
+`1072 build` → `1102`. `py -3 code/build.py plan nest` currently lists `1072`
+under *in-place enrichers* rather than *full rebuilds*, which is wrong and is a
+defect in the dependency manifest, not in this ordering.
+<!-- END NEST-OWNER-V6-INPUT-2026-09-02 -->
