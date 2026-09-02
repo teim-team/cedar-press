@@ -212,9 +212,10 @@ live table. **All seven invariants hold; exit 0.**
 
 * **un-attributed: 103,171 rows, $16,997,581,754.88**, from 737 identifiers
 * **repointed: 6,550 rows, $2,443,371,845.81**, across 67 identifiers
-* **126 entities moved**; gains and losses net to $0.04, which is one half-cent
-  per cent-rounded term and is *stated* in the gate rather than tolerated
-  silently
+* **124 named entities changed total**; gains and losses net to $0.02, which is
+  one half-cent per cent-rounded term and is *stated* in the gate rather than
+  tolerated silently. `review/1079_entity_ledger_2026-09-02.csv` lists 126 rows
+  — it also carries the two whose total moved to and from zero
 * **227,540 prime rows now carry `identifier_ruling_quarantined = Y`** — the
   whole $45.9B exposure is visible, including the $28.9B still attributed
 
@@ -322,6 +323,52 @@ py -3 code/1079_quarantine_method_exposure.py selftest  # proves every invariant
 `.bak_<TAG>` exists has already been processed by this pass*, and the pre-state
 inputs — the ledger and the prime aggregates — are read from that backup, never
 from the live table. A half-finished run can simply be re-run.
+
+## 9. What twelve concurrent agents did to this pass, measured
+
+This ran with **twelve other agent python processes live in the repo**, and
+three of the four things that went wrong were about that.
+
+1. **The rename lost to WinError 5 three times, and the first diagnosis was
+   wrong.** `os.replace(tmp, path)` was being called from inside
+   `with open(path)` — this process still held the destination open. POSIX
+   allows it; Windows does not. The standalone retry succeeded seconds later
+   only because the failing PROCESS had exited and dropped its own handle. The
+   neighbours were innocent and their being there made the wrong explanation
+   plausible. **Look for your own handle before you blame the neighbours.**
+2. **A rollback of this pass is a write to every other agent's table.** To
+   re-run the classifier from a clean pre-state, six tables were restored from
+   this pass's own `.bak_<TAG>` copies — the script-163 incident in miniature.
+   It was done from a **literal list of six files, never a glob**, and the one
+   table another agent had touched in the window was then checked
+   column-by-column and byte-for-byte: `prime_contracts.csv` and
+   `prime_contracts.csv.bak_2026-09-02_pre_1085_prime_psc_desc_repull` are
+   md5-identical (`604df2d7f9e0403cc428699eb8407675`), so 1085's write was a
+   no-op restore of exactly what it had read and nothing of theirs was lost.
+3. **A concurrent agent then reverted this pass's `prime_contracts.csv` to an
+   earlier version of the same pass's output, and the gate caught it.** After
+   the clean apply, `1085` wrote back its 06:33 snapshot. `verify` failed I5
+   and I5b by **$400,033.89 and one row** — exactly three identifiers'
+   difference between the first run's plan and the final one, `MUSKOGEE
+   TECHNOLOGY JOINT VENTURE` (8 rows, $500,078, withdrawn then held once the
+   JV exemption existed) against `Johnson Joddie` ($90,700) and `Danny Charlie`
+   ($9,344.11). The prime leg was re-applied and everything reconciles.
+   **A gate that re-derives both sides found a cross-agent revert that a stored
+   proof would have agreed with.**
+4. **`code/62_no_regression_check.py` is BROKEN as of 09:20 and it is not
+   mine.** `NameError: name 'ROOT' is not defined` at line 1996 — someone is
+   editing it live. Its last complete run (09:0x) exited 1 on 14 regressions,
+   every one of which was traced to another workstream; the table is in
+   `AGENTS.md` under this date. The one line that named this pass's columns as
+   "lost" was a mid-flight read of the 70-column pre-state and does not
+   reproduce.
+
+**A standing hazard this leaves behind:** `1085` holds a 06:33 snapshot of
+`prime_contracts.csv`. If it writes that snapshot again it will revert this
+pass a second time, and the signal will be `1079 verify` failing I5 by a
+few hundred thousand dollars. The fix is always the same and is cheap: delete
+`prime_contracts.csv.bak_2026-09-02_pre_1079_quarantine_method_exposure` after
+restoring the live file from it, then re-run `1079 apply`.
 
 **This is an IN-PLACE ENRICHER.** `40_build_prime_contracts.py` reverts all
 five columns, exactly as it reverts 207's two, 950's nine and 871's thirteen.

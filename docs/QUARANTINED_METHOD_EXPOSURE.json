@@ -146,6 +146,8 @@
     "TRBF-BIDWLL-00": -2530.24,
     "AKNF-QUNHGK-00-CALSTA-ASVCPR": -750.0,
     "AKNF-HAMLTN-00-CALSTA-ASVCPR": -1.0,
+    "TRBF-COCHTI-00": 0.01,
+    "TRBF-ALQSRT-00": 0.01,
     "CNSF-MINNCH-LL": 855035.0,
     "AKNF-KKTOVK-00-ARCSLO": 1028015.7,
     "TRBF-ONDAWI-00": 2424370.7,
@@ -157,6 +159,6 @@
     "ANRC-CKINLT-00": 821183874.88,
     "ANRC-BRBYCO-00": 904571914.65
   },
-  "entities_moved": 124,
+  "entities_moved": 126,
   "invariants_failed": []
 }

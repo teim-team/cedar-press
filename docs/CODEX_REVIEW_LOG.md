@@ -729,3 +729,105 @@ finding since baseline belongs to another workstream (1011, 1060, 1085, 1086,
 846, 852, 873, 992, 1030, 1031, 1110, 980, 1081, 1077, 1107, 30, 518, 870,
 871). `760 selftest` — three fixtures, all pass. `760 verify` — exits 1,
 correctly, on the named finding it exists to raise.
+
+### Round 3 answered and pushed as `71da9cb`; round 4 triggered
+
+All five replies posted to their own threads via
+`POST /pulls/29/comments/{id}/replies`. Then a fresh `@codex review` on
+`/issues/29/comments`, because a push is not a trigger.
+
+### THE GENERATOR COULD NOT RUN, AND THAT IS THE BIGGEST THING FOUND THIS CYCLE
+
+Fixing finding 2 needed `770` to run, and it no longer could. It loaded each
+source table whole via `load()`, and `prime_contracts.csv` is now **1.46 GB
+across 75 columns** — roughly **10 GB of Python objects** on a machine with
+**16.4 GB total and 1.6 GB free**, with ten other jobs writing. Measured:
+
+    total RAM                16,456,500 KB
+    free at the time          1,607,584 KB
+    prime_contracts.csv       1.46 GB / 75 columns / 1,217,768 rows
+
+A run that took **seven minutes for all fourteen datasets** two days ago spent
+**over thirty minutes on `contractors` alone**, wrote one sample, and died
+with a zero-byte log. It was swapping, and the project directory is a junction
+to the slow spindle. **This is not a performance complaint: the bridge to the
+product had stopped working and no gate said so**, because nothing measures
+whether a generator completes — only whether its output looks right, and stale
+output looks right.
+
+Large tables now stream in **two passes** and are never held: pass one keeps a
+one-byte completeness score per publishable row (`array("B")` — **1.2 MB** for
+1.2 M rows against ~10 GB for the dicts) plus per-column sentinel counts; pass
+two lifts only the wanted rows. Small tables keep the original in-memory path
+untouched, so nothing that already worked changed shape. Threshold 200 MB.
+
+**The equivalence is asserted, not claimed.** `770 proveequal <table>` runs
+both engines on the same file and exits 1 unless every sampled cell matches:
+
+    nest_enterprises.csv          1.9 MB   PASS  10 rows x 17 cols
+    native_owned_businesses.csv   6.0 MB   PASS  10 rows x 16 cols
+    nagpra_notices.csv           10.8 MB   PASS  10 rows x 16 cols
+    np_orgs.csv                  13.7 MB   PASS  10 rows x 15 cols
+    subawards.csv                82.7 MB   PASS  10 rows x 14 cols
+
+**And the honest limit of that proof, stated to Codex rather than left for it
+to find: the table that matters most cannot be proved this way, precisely
+because it does not fit in memory.** `proveequal` needs both engines, one of
+which is the engine that fails. So the most-used path is the least directly
+verified, and that is written down rather than papered over.
+
+#### The first version of the streaming shipped a five-row sample
+
+`contractors` came out with **5 rows of 10**. Pass two indexed against pass
+one's row positions, and a concurrent enricher rewrote `prime_contracts.csv`
+between the two reads — **same row count, different publishable rows**, so
+five of the ten wanted positions no longer held a row that passed `keep()`.
+
+**A short sample is the quiet failure of this design: it looks like a small
+table, not a race.** Nothing in the output distinguished "this dataset has 5
+publishable rows" from "five of my ten targets moved". Pass two now also
+collects an evenly strided spare buffer and tops up from it in order, and
+prints a `RACED` line naming how many rows were replaced — so a moving source
+is **reported**, not absorbed. The weakest remaining claim is whether the
+top-up preserves the even spread the docstring promises; that was handed to
+Codex explicitly as the place to look first, rather than asserted.
+
+#### What the samples run also caught, belonging to other workstreams
+
+Named with the measurement, per the field guide:
+
+- **`subawards.csv` lost then regained three columns inside one hour.** One
+  run reported `DRIFT subcontracting: SHOW asks for a column the table does
+  not have -> subaward_source_record_id, prime_cedar_uid, sub_cedar_uid` and
+  14 columns; the next found all 17 and 87,177 rows against 76,859. A rebuild
+  landed between them.
+- **`bill_votes.csv` went 14 → 15 columns** and its ten sampled rows changed
+  entirely at an unchanged 423 rows.
+- **`deals_classified.csv`** 935 → 1,079 → 1,073 across the cycle.
+- **`prime_contracts.csv` gained five `identifier_ruling_*` columns** (70 →
+  75) from the enricher that won the race against 772.
+
+None of these is this workstream's, and each is a fact about the branch's own
+diff, which is why they are recorded here rather than reported as defects.
+
+### Standing rules this cycle earned
+
+1. **A push does not trigger a Codex review.** Only opening the PR, marking a
+   draft ready, or an `@codex review` comment does. Two commits went
+   unreviewed because of this.
+2. **A mtime guard around your own READ cannot detect a writer whose read
+   predates yours.** 772's guard is correct and could not have seen the
+   collision that reverted its 617,097 cells.
+3. **When you correct a number, grep the repo for the old one before you
+   commit.** Three instances in one branch of a figure fixed in one place and
+   left standing in another — `owned`'s two row counts, `345,180` /
+   `345,108`, and the blockers overview. The field guide's "numbers go stale
+   in place" is written about old documents; these rotted inside a single
+   edit.
+4. **A count published in a rendered field cannot be qualified in a field
+   nobody renders.** `rows_label` reaches the customer; `n_rows_basis` does
+   not.
+5. **Nothing measures whether a generator completed.** A generator that dies
+   leaves valid-looking stale output, and every check downstream reads the
+   output. `770` was broken for at least one full cycle before anyone needed
+   it to run.
