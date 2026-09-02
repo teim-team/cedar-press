@@ -430,3 +430,31 @@ for the shards that own them.
    shards fetched a restricted host. A ruling that lives only in a CSV nobody
    joins to is a ruling that gets re-broken. Read
    `source_terms_status` before you fetch.
+
+### The town has the same name, and it has a council too
+
+*Same shard, same day, one rung further down.*
+
+After the circular-evidence fix, the derived-domain rung still accepted
+`scottsvalley.gov` as the website of the **Scotts Valley Band of Pomo
+Indians**. It is the **City of Scotts Valley, California**. The page carried
+both of the tribe's distinctive tokens — they are the same two words because
+they are the same place — and it passed the class-marker test on the word
+**`council`**, which appeared seven times because a city has a city council.
+`tribe`, `tribal`, `band`, `rancheria`, `pomo` and `indian`: zero occurrences
+each.
+
+A marker that both kinds of organisation use is not a class marker. Two rules
+came out of it:
+
+* **Drop any positive marker a look-alike also uses.** `council` went; `city
+  of` and `town of` never belonged.
+* **Add negative markers, and let them win.** A page that calls itself the
+  City of X, a school district, a chamber of commerce or a public library is
+  not a tribal government however much of the name it carries. The same guard
+  catches `biglagoon.org`, which is Big Lagoon **Elementary School**.
+
+And record *which* marker qualified a page, in the row. A gate can then re-read
+it — `verify` invariant (12) in `code/1020_tail_web_probe.py` refuses any
+derived government site that does not name the marker it passed on, which is
+how the four rows written before the fix were found and re-run.

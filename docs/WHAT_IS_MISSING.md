@@ -345,12 +345,38 @@ but no county.
 > (60 → 68 columns, 423 → 423 rows) and both are in the sample's `SHOW` list.
 > The read below is left exactly as written; this box says what changed.*
 >
-> **Item 1 — `bill_title` and `bill_title_source`.** 390 of 423, verbatim from
-> `native_bills.csv`, and the other 33 state their reason on the row rather
-> than going blank: 25 `NO_BILL_ID_ON_VOTE`, 8
-> `TITLE_BLANK_IN_native_bills.csv` (five treaty documents, three pre-1980
-> House resolutions). `890 verify` refuses any title that is not
+> **Item 1 — `bill_title` and `bill_title_source`.** **398 of 423**, verbatim
+> from `native_bills.csv`. `890 verify` refuses any title that is not
 > byte-identical to the `native_bills.csv` value it cites.
+>
+> > **UPDATED 2026-09-02 by `code/1092_bill_titles_residue_and_scope.py`.**
+> > This read **390 of 423** with 8 rows at
+> > `TITLE_BLANK_IN_native_bills.csv`. **All eight are closed and that
+> > category is now 0.** They were not a source gap: every canonical
+> > congress.gov bill_type slug in `native_bills.csv` is 100% titled and
+> > every NON-canonical slug was 0% (`hre` 0/2, `hjr` 0/1, `treatydoc` 0/2,
+> > `treatydocno` 0/3), because `14_pull_cosponsors.py` hard-codes an
+> > `ok_types` allow-list that Voteview's `hre`/`hjr` abbreviations fail and
+> > treaty documents are not on `/bill` at all. 18 GETs, all HTTP 200 first
+> > time. Two treaty identifiers were ambiguous (`TREATYDOC1134`,
+> > `TREATYDOC1173` — Voteview writes them with no separator) and were
+> > settled by requiring a Senate action on the roll call's own date AND
+> > `congressConsidered` equal to the vote's Congress: Treaty Doc. **113-4**
+> > (Spain tax protocol) and **117-3** (Finland/Sweden NATO accession).
+> >
+> > **The honest floor on the remaining 25: 22 are facts about the world.**
+> > All 25 carry no `bill_id` and Voteview records no bill number for any of
+> > them. 22 are votes on reservations to a resolution of ratification — 17
+> > Panama Canal Treaty, 4 Neutrality Treaty, 1 US-UK tax treaty — no bill,
+> > therefore no bill title: `SOURCE_DOES_NOT_PUBLISH`. **3 name a numbered
+> > measure inside their own question text** (`H100-0888` H.Con.Res. 331,
+> > `S100-0452` S.Res. 386, `S100-0417` six S.Res. en bloc) and are
+> > `NOT_ACQUIRED` → now **`ON_DISK_NOT_PROMOTED`**: their eight titles are
+> > staged at
+> > `data/raw/external/congress_gov/1092_title_residue_unlinked.csv` and
+> > deliberately not promoted, because promoting one means minting a
+> > `bill_id` and a `native_bills.csv` row — a decision for
+> > `14_build_bills_votes.py`, not an enrichment.
 >
 > **Item 2 — `threshold_required`, plus six provenance columns.** Two
 > corrections to the read below, both measured:
@@ -383,6 +409,31 @@ but no county.
 > violations, including flipping H105-0482 back to a simple majority.
 >
 > **Item 3 (the party split) is NOT closed** and remains as written below.
+>
+> ### ADDENDUM 2026-09-02 — `code/1093_bill_votes_majority_anomaly.py`
+>
+> The sixteen were explained by `threshold_required` and then became
+> **invisible**: `result_reconciles_with_threshold` reads `Y` on all 351
+> testable rows and `N` on none, so nothing on the row told a buyer WHICH
+> sixteen would look like data-entry errors. `bill_votes.csv` 68 → **71**
+> columns, 423 → 423 rows:
+>
+> `result_contradicts_simple_majority` — `MAJORITY_YEA_BUT_REJECTED` **16**,
+> `MINORITY_YEA_BUT_AGREED` **0**, `N` 335, `NOT_TESTABLE_NO_RESULT` 72.
+> `result_anomaly_class` — `HOUSE_SUSPENSION_TWO_THIRDS` **9**,
+> `SENATE_CLOTURE_THREE_FIFTHS` **5**,
+> `SENATE_THREE_FIFTHS_NOT_IN_QUESTION_TEXT` **2**. **9 + 5 + 2 = 16.**
+> `result_anomaly_basis` carries the rule cited and the arithmetic worked,
+> per row.
+>
+> The classes are derived from ROW PROPERTIES — chamber, `threshold_required`,
+> question text, `threshold_agrees_with_official` — never from a list of vote
+> ids, so a rebuild that adds a Congress is classified rather than
+> mislabelled. **An anomaly outside the three classes, or one whose result
+> does not reconcile under the stated threshold, is a refusal to write.** All
+> ten checks across `1092` and `1093` were proven to fire against the live
+> CSV: inject, assert exit 1 and that the named invariant appears, restore
+> from a literal path, assert exit 0.
 
 **1. No bill title. The buyer cannot tell what was voted on.** — `ON_DISK_NOT_PROMOTED`
 The sample offers `114-hr-360` and *"On Motion to Suspend the Rules and Pass,
@@ -391,7 +442,7 @@ as Amended"*. **`native_bills.csv` holds a title for 390 of the 423 votes
 `sponsor`, `policy_area` and `cosponsor_count`. This is the cheapest
 high-value join in the thirteen datasets.
 
-**2. Nine votes read `Failed` with more yea than nay, and no column explains why.** — `NOT_ACQUIRED` (derivable)
+**2. Nine votes read `Failed` with more yea than nay, and no column explains why.** — CLOSED; the count was **sixteen**, and "derivable from `question`" is FALSE for the Senate — see the box above
 The sample contains one: `H105-0482`, 229 yea to 176 nay, **Failed** — correct,
 because suspension of the rules requires two-thirds. There are **nine such rows
 in the table** (`H097-0770`, `H099-0529`, `H100-0889`, `H101-0788`, `H105-0482`,
@@ -666,7 +717,7 @@ Ranked by buyer impact per unit of work. All twelve are `ON_DISK_NOT_PROMOTED`.
 | 4 | `lobbying` | add `spend_reported_usd`, `issue_codes`, `government_entities_lobbied` | $645.1M, 405, 388 |
 | 5 | `subcontracting` | add `description`, `prime_award_amount`; swap tribe handle → `cedar_uid` | 76,813 / 73,057 / 33,503 |
 | 6 | `gaming` | join `gaming_revenue_bounds` and ordinance class onto the facility | 694 of 787 facilities; 263 of 284 tribes |
-| 7 | `legislation` | join `native_bills.title` and `.outcome` on `bill_id` | 390 of 423 titles |
+| 7 | `legislation` | join `native_bills.title` and `.outcome` on `bill_id` | DONE — 398 of 423 titles (was 390; `code/890` made the join, `code/1092` closed the last 8) |
 | 8 | `contractors` | promote 6-digit `naics_code` + `action_date` from the archive extract | 904,282 rows already local |
 | 9 | `funding` | add `cedar_uid` and `recipient_uei`; rebuild `canonical_name` from the register | 552,602 / 668,347; 341,486 drifted |
 | 10 | `_entity_layer` | swap `minted`/`register_status` for the FR legal name and state | 536 legal names, 509 differ |

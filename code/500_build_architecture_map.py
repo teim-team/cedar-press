@@ -76,7 +76,13 @@ COLLECTIONS: list[dict] = [
      "tables": r"^(federal_funding|faads_|assistance_|bie_uio|native_passthrough|funding_identifier|inflation_deflator)"},
     {"id": "federal-register", "name": "Federal Register", "shelf": "standard",
      "prefixes": ["09"],
-     "tables": r"^(federal_actions|fr_(?!nagpra)|section_106|consultation_|correspondence_foia|nepa_)"},
+     # `dear_tribal_leader` and `dtll_` added 2026-09-02 (workstream FR-DTLL).
+     # The letters are the non-Federal-Register half of the same consultation
+     # record this collection already ships: `consultation_events.csv` typed
+     # six rows `dear_tribal_leader_letter` because the FR is the only place
+     # it looks. Without this pattern both tables reach no collection and 512
+     # counts them as shippable-with-no-owner.
+     "tables": r"^(federal_actions|fr_(?!nagpra)|section_106|consultation_|correspondence_foia|nepa_|dear_tribal_leader|dtll_)"},
     {"id": "legislation", "name": "Congressional Votes and Proposed Legislation", "shelf": "standard",
      "prefixes": ["10"],
      "tables": r"^(bill_|native_bill|congress|member_positions|native_issue_litigation)"},

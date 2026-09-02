@@ -263,7 +263,12 @@ def build(dry_run=False) -> int:
             st["status"].get(r["federal_link_status"], 0) + 1
 
         # -- part two: the unreviewed heading/anchor scrape -----------------
-        r["publishable_before_1100"] = r.get("publishable") or ""
+        # WRITE ONCE. A second run would otherwise capture the value THIS
+        # script already changed and the original `Y` would be lost - the
+        # preserved-value column has to be the one thing that is not
+        # recomputed.
+        if not (r.get("publishable_before_1100") or "").strip():
+            r["publishable_before_1100"] = r.get("publishable") or ""
         if SCRAPE_CAVEAT in (r.get("verification_basis") or ""):
             st["scrape_caveat"] += 1
             if (r.get("business_name_is_person_name") or "").strip() == "-1":

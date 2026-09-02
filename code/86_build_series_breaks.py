@@ -324,6 +324,66 @@ BREAKS = [
      "reports $0.00 in obligated_usd BY DESIGN - the money sits in face value "
      "and subsidy cost.",
      "MEASURED", "internal: 46_pull_funding_credit_types.py, queued"),
+
+    # ---- lobbying: added 2026-09-02 by code/1091_lobby_amendment_supersession.py
+    # These three are the reason a buyer cannot sum this collection blind.
+    # Every figure re-measured from the live files that day with csv.reader.
+    ("native_entity_lobbying_disclosures", "spend_usd", "1999-2026",
+     "PRIOR_YEAR_RESTATEMENT",
+     "An amended LD-2 RESTATES the period it amends, and the LDA publishes "
+     "the amendment as a NEW filing with its own uuid rather than replacing "
+     "the original. Both ship. Measured on 27,825 rows: 1,416 amendment rows "
+     "carrying $41,640,996; 1,005 (client, registrant, year, period, form "
+     "family) groups hold an amendment beside the filing it restates; 1,064 "
+     "rows are superseded by a later filing in their own group.",
+     "A NAIVE SUM(spend_usd) DOUBLE-COUNTS $37,349,254 - 5.15% of the "
+     "$725,743,974.52 total. Since 2026-09-02 the file carries "
+     "`is_superseded`, `superseded_by_filing_uuid`, `supersession_status` and "
+     "`supersession_group_id`; the additive filing-grain total is "
+     "SUM(spend_usd) WHERE is_superseded = 0 = $688,394,720.51. No row is "
+     "dropped. 129 rows sit in AMBIGUOUS_* statuses where which filing "
+     "restates which is not knowable from the LDA fields, and are NOT "
+     "superseded - they are still in the total and are flagged, not guessed.",
+     "MEASURED",
+     "internal: code/1091_lobby_amendment_supersession.py measure"),
+
+    ("native_entity_lobbying_disclosures", "spend_usd", "n/a",
+     "THREE_TOTALS_ONE_NAME",
+     "Three tables in this collection answer 'how much did tribal lobbying "
+     "cost' and give three different numbers, all correct about different "
+     "questions: lobbying_registrants.spend_reported_usd $645,052,868.51 "
+     "(653 rows, one per LDA registrant, already amendment-deduplicated); "
+     "tribe_year_lobbying_panel.total_lobbying_spend_usd $680,561,640.52 "
+     "(5,001 rows, one per entity-year, drops withdrawn and barred "
+     "attributions); native_entity_lobbying_disclosures.spend_usd "
+     "$725,743,974.52 (27,825 rows, one per filing, amendments included).",
+     "ADDING ANY TWO OF THEM COUNTS THE SAME DOLLAR TWICE. Pick one and say "
+     "which. Never add income_usd to expenses_usd on a row - only one is ever "
+     "populated, and 11,314 filings (40.7%) report no dollar at all, so a $0 "
+     "here usually means 'reported nothing', not 'spent nothing'. Every LDA "
+     "figure is a good-faith estimate rounded to $10,000 at source, so a "
+     "dollar-exact total implies precision the source does not have. Full "
+     "rules: docs/MONEY_TOTALLING_RULES.md.",
+     "MEASURED",
+     "internal: code/1091_lobby_amendment_supersession.py; "
+     "docs/MONEY_TOTALLING_RULES.md"),
+
+    ("tribe_year_lobbying_panel", "total_lobbying_spend_usd", "n/a",
+     "THREE_TOTALS_ONE_NAME",
+     "This panel is a ROLL-UP of native_entity_lobbying_disclosures.csv, not "
+     "a second observation of the same money. Measured 2026-09-02: 5,001 "
+     "rows, $680,561,640.52, which is $45,182,334.00 below the filing-level "
+     "$725,743,974.52 because the panel drops withdrawn and organisation-"
+     "type-barred attributions.",
+     "NEVER ADD THIS TO native_entity_lobbying_disclosures.spend_usd OR TO "
+     "lobbying_registrants.spend_reported_usd - each pair double-counts. The "
+     "panel is also NOT amendment-adjusted: the filing table's "
+     "amendment-superseded rows ($37,349,254) are inside this number too, so "
+     "it is not comparable with SUM(spend_usd) WHERE is_superseded = 0 "
+     "($688,394,720.51) either. Pick one table, say which, and stay in it.",
+     "MEASURED",
+     "internal: code/1091_lobby_amendment_supersession.py; "
+     "docs/MONEY_TOTALLING_RULES.md"),
 ]
 
 HEADER = ["dataset", "column", "break_period", "break_type", "what_changed",

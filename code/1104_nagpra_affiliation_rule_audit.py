@@ -396,6 +396,10 @@ def audit(quiet=False):
     # every distinct unresolved party name -> the notices that name it
     party_docs = defaultdict(set)
     for r in bridge:
+        # lint-ok: class3 - the opposite reading. This does not treat
+        # `resolved` as a positive OUTCOME; it EXCLUDES already-keyed rows so
+        # the alias-proposal set is exactly the unkeyed remainder. No tier and
+        # no attribution is assigned anywhere in this file.
         if r.get("resolve_status") == "resolved":
             continue
         nm = (r.get("party_name_verbatim") or "").strip()

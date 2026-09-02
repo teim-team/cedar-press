@@ -1116,8 +1116,8 @@ a dataset's readiness and adds four tables (`native_owned_businesses.csv`
 Filed in `review/OWNER_DECISION_QUEUE.md`.
 <!-- END ADR-018 -->
 
-<!-- BEGIN ADR-018 -->
-## ADR-018 — tribal debt: the registered-fund holdings seam, and one boundary crossed on purpose (workstream TRIBAL-DEBT, 2026-09-02)
+<!-- BEGIN ADR-022-TRIBAL-DEBT -->
+## ADR-022 — tribal debt: the registered-fund holdings seam, and one boundary crossed on purpose (workstream TRIBAL-DEBT, 2026-09-02)
 
 **Status:** accepted 2026-09-02. Declared before editing, per AGENTS.md
 *Parallel agents*. Build record: `docs/TRIBAL_DEBT_HOLDINGS_BUILD_LOG.md`.
@@ -1173,7 +1173,7 @@ then debugged as though it were failing. Every subsequent patch in this build
 asserts its target text is present before replacing it. This is the same shape
 as the nine entries in `docs/AGENT_FIELD_GUIDE.md` section 3 — a step that
 reported on itself rather than on its effect — and it belongs on that list.
-<!-- END ADR-018 -->
+<!-- END ADR-022-TRIBAL-DEBT -->
 
 <!-- BEGIN ADR-019-QUARANTINE -->
 ## ADR-019 — the ledger's RULING must reach the transaction tables (workstream QUARANTINE, 2026-09-02)
@@ -1239,3 +1239,186 @@ file beside each table is the signal.
    North Wind / LBYD CAGE rows are repaired here. Adjudicating a population in
    the same pass that discovered it is the mistake this repo keeps paying for.
 <!-- END ADR-019-QUARANTINE -->
+
+<!-- BEGIN ADR-020-SUBHUB-REGISTERS -->
+
+## ADR-020 — `cedar_nest_id_register.csv` is a SUB-HUB register, not a second entity space. And a blank endpoint is a sub-hub Cedar declined to mint.
+
+*Decided 2026-09-02 by the `_entity_layer` deepening pass
+(`code/1098_entity_rel_counterparty.py`). This ADR answers two questions that
+were being asked as if they were separate and are one question.*
+
+### The question
+
+1,375 NEST enterprises hold Cedar-minted ids in `data/spine/cedar_nest_id_register.csv`
+(1,610 bindings today), and the standing open item asks whether those are
+sub-hubs of their owning nation or a parallel identifier space. Separately,
+`entity_relationships.csv` has a blank endpoint on **1,772 of 2,292 rows
+(77.3%)**, and `AGENTS.md` names that file as the ownership source of truth.
+
+### The decision
+
+**Both are the same fact and the model already answers it.**
+`docs/IDENTIFIER_STANDARD.md` §2: the entity is the hub; a thing complex enough
+to have its own children and its own facts gets a **sub-hub**; a UEI or a CAGE
+identifies a **registration**, and a registration is a sub-hub. So:
+
+| register | grain | prefix | keyed to |
+|---|---|---|---|
+| `cedar_identity_register.csv` | one row per Native entity (HUB) | `CE-` + class handle | itself |
+| `cedar_nest_id_register.csv` | one row per owned ENTERPRISE (SUB-HUB) | `CEDAR-NEST-` | `owner_hub_cedar_uid` -> the spine |
+| `gaming_facilities.facility_id` | one row per facility (SUB-HUB) | — | its entity |
+| `np_ein_entity_hub` | one row per EIN filer (SUB-HUB) | — | its entity |
+
+`CEDAR-NEST-` is **the enterprise level of the existing sub-hub layer**, exactly
+as `facility_id` is the facility level. It is not a parallel entity space, it may
+never be joined as if it were one, and a `CEDAR-NEST-` id may not appear where a
+`cedar_uid` is expected. Every NEST row already carries `owner_hub_cedar_uid`
+into the spine, which is the entire relation; nothing further is needed and
+nothing should be minted to express it.
+
+### What follows for the blank endpoints, and why they are not a hole
+
+Measured on the live file, **every one of the 1,772 names its counterparty in
+prose, and nothing is unrecoverable**:
+
+| relation | rows | blank side | what the prose holds |
+|---|---:|---|---|
+| `owned_by` | 1,462 | source | firm legal name **+ UEI (996) or CAGE (466)** |
+| `affiliated_with` | 148 | target | the TDHE's published name (7 also blank on the source side) |
+| `brand_of` | 106 | source | the brand family **+ its `CEDAR-ALIAS-` id** |
+| `operated_by` | 56 | target | "the United States (Dept of the Interior, BIE)" |
+
+**The standing read — *"996 recover a UEI only from prose; 466 recover
+nothing"* — is wrong on the 466. They recover a CAGE code.** Recovery on the
+ownership edges is 1,462 of 1,462, 100%.
+
+So the blank `source_entity_id` on an `owned_by` edge is **correct**, and the
+rows say so themselves: *"No spine entity for the firm and no intermediate
+holding layer invented."* Filling it by minting would put 1,462 registrations
+into the entity namespace and invert the hub model. A brand family is "a name
+family, not a legal person" and the federal government is out of scope for a
+register of Native entities.
+
+**The defect was that the identity lived only in an English sentence.** 1098
+promotes it into nine declared columns — `counterparty_kind`,
+`counterparty_name_as_recorded`, `counterparty_identifier_type`,
+`counterparty_identifier`, `counterparty_identity_state` and a
+`counterparty_nest_enterprise_id` bridge — with an anti-fabrication invariant
+that every promoted value is a **verbatim substring of that row's own `notes`**.
+
+### And the same answer settles the constellation
+
+`cedar_constellation_edges.csv` has a name-only from-side on **2,408 of 3,153
+edges (76.4%)** and the standing proposal is to mint them. Measured:
+
+- **2,365 of the 2,408 are `native_owned_businesses` rows at tier
+  `registered_with`** — TERO-certified firms — and **all 2,365 already join to
+  `native_owned_businesses.business_source_id` through the `from_record_key`
+  already on the edge.** They are not unidentified; they are identified by a
+  stable directory-row key.
+- **186 of them now carry a published federal UEI**, promoted onto the directory
+  by `code/1100` from the `1001` crosswalk. *The sweep was extended by
+  minting nothing.*
+- **278 of them carry `business_name_is_person_name = 1`.** Minting a
+  `cedar_uid` per unkeyed from-side would create **278 natural persons in the
+  entity register**, which `docs/PUBLICATION_POLICY.md` forbids outright.
+
+**So: do not mint the constellation's from-side.** Carry `from_record_key` and
+the federal link. If a class of them is ever minted it is the
+`CEDAR-ENT-` individually-Native-owned class, one reviewed row at a time, and
+never the 278.
+
+### The bridge, and the one thing it refused
+
+1098 resolves an `owned_by` firm to a NEST enterprise only when both sides agree
+on the OWNER: rung 1 published UEI, rung 2 published CAGE, rung 3 the normalised
+name unique among the enterprises of that same owner hub. **262 of 1,462 (17.9%)
+resolve.** 23 more would resolve through NEST's own `uei_candidate` and are
+refused — a candidate on one side plus a candidate on the other is not evidence.
+
+**One resolved on the identifier and disagreed about the owner, and it is the
+first cross-source ownership disagreement the entity layer has produced:**
+`Laulima Government Solutions, LLC` (UEI `QTJZT9K41S61`) is Bering Straits
+Native Corporation in `entity_relationships` (tier A, owner ruling) and
+Alaka'ina Foundation in NEST (`parent_declared_subsidiary_list`, source
+`http://beringalakaina.com/`). The source host names both parents;
+`ENTITY_MATCH_RULES` rule 11 says a joint venture genuinely has two. **Refused,
+not reconciled** — `review/entity_rel_nest_owner_conflicts_2026-09-02.csv`.
+
+<!-- END ADR-020-SUBHUB-REGISTERS -->
+
+
+<!-- BEGIN ADR-021 -->
+## ADR-021 — clearing the owner decision queue (workstream DQC, 2026-09-02)
+
+**Status:** accepted 2026-09-02. Declared here rather than before the edits
+because DQC ran against files no other pass-4/5 workstream claims; the
+exceptions are named below and each was written additively, backed up, and
+proved conserved.
+
+**Mandate.** The owner's standing rule, repeated five times: *"I'm not deciding
+anything except adjudicating Native entities — you are doing it. Stop asking,
+and make corrections and updates and findings."*
+
+### Owned (edited)
+
+`code/1103_decision_queue_clearance.py` ·
+`docs/DECISION_QUEUE_CLEARANCE_2026-09-02.md` ·
+`data/staging/decision_queue_1103/` ·
+`review/OWNER_DECISION_QUEUE.md` (inside `DQC-CLEARANCE-2026-09-02` markers) ·
+the eight `review/` queue CSVs listed in the doc.
+
+### Touched outside `review/`, and why each was DQC's to touch
+
+| file | why |
+|---|---|
+| `data/clean/native_business_contract_links.csv` | the mandate names item C's 35 `WITHHOLD_PENDING_RULING` rows as an owner ruling to APPLY, and the gate column is where it applies |
+| `data/clean/native_business_identifier_crosswalk.csv` | same ruling, identifier side |
+| `data/clean/anc_ceiling_roster.csv` | the mandate names item 10f and says *label, never delete* |
+
+All three are **additive only** — new columns, no column removed, no row added
+or removed, no money column touched — and each carries a
+`.bak_2026-09-02_pre_1103_decision_queue_clearance`.
+
+### NOT touched, deliberately
+
+`cedar_identifier_ledger_final.csv`, `cedar_entity_spine.csv`,
+`entity_aliases.csv`, `prime_contracts.csv`, `federal_funding_transactions.csv`,
+`503_identity.py`, `62`, `512`, `517`, `518`, `build.py`, and
+`docs/ENTITY_MATCH_RULES.md`. **A disposition is not a repoint.** Every item
+needing one of those is handed over by name in the doc's HANDOVERS table.
+
+### The decision rule this pass adds
+
+**A DECISION MUST BE WRITTEN ONTO THE ROW THAT ASKED FOR IT.** Four of the
+eleven `16.x` items had already been decided and were still being presented as
+open, because the ruling was recorded in a sibling file, a staging table or a
+summary doc rather than on the queue row. An invisible ruling is re-asked. A
+pass that cannot write back to the asking row has not finished.
+
+This is the same failure the project already documents for numbers — *"superseded
+figures never get overwritten; they sit in the document where they were
+written, looking exactly as authoritative as current ones"* — and it costs more,
+because a stale number misleads a reader while a stale question consumes a whole
+session.
+
+### Two defects DQC committed and caught in itself
+
+Recorded because the field guide's section 3 is about exactly this shape.
+
+1. **The join key was blank.** The first run wrote the earmark dispositions on
+   `recipient_name` and left 477 rows unruled — precisely the 477 whose
+   recipient cell is empty in the source. The dispositions carried a unique
+   `earmark_id` the whole time. A second variant joined subawards on the bare
+   name and collided 362 rows onto a sibling's disposition. The joiner now tries
+   several candidate keys including composites, **prints which one it used**,
+   HOLDs any row whose key carries more than one disposition rather than
+   guessing, and refuses to write a file that would look ruled and is not.
+2. **The selftest's column-drop case did not fire, and it was right not to.** It
+   dropped a column *this script had added*, which the baseline never carried,
+   so "no column lost" was the correct answer to the wrong question. It now
+   drops a column the baseline actually holds. *Verify your input contains what
+   you think it does.*
+
+<!-- END ADR-021 -->

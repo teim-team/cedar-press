@@ -499,16 +499,37 @@ def is_challenge(html):
 
 # For the page to be THIS KIND of organisation, not merely a page that
 # happens to contain the name.
+# A MUNICIPALITY SHARES THE PLACE NAME AND HAS A COUNCIL TOO.
+# `scottsvalley.gov` is the **City of Scotts Valley, California**: both of the
+# Scotts Valley Band of Pomo Indians' distinctive tokens on the page, and
+# `council` seven times -- a CITY council. It was accepted as the tribe's
+# government site. `council` is not a tribal marker, it is a marker of local
+# government of any kind, and including it made the class test agree with the
+# wrong kind of government.
 CLASS_MARKERS = {
-    "Federally recognized tribe": ("tribe", "tribal", "rancheria", "nation",
-                                   "band", "reservation", "pueblo",
-                                   "indian", "tribal council"),
+    "Federally recognized tribe": ("tribe", "tribal", "rancheria",
+                                   "band of", "reservation", "pueblo",
+                                   "indian", "tribal council", "nsn.gov"),
     "Native Hawaiian Organization": ("hawaii", "hawaiian", "ohana", "kanaka",
                                      "homestead", "moku", "ahupua",
                                      "nonprofit", "non-profit", "kupuna"),
     "Individually Native-owned business": ("llc", " inc", "company",
                                            "our services", "about us",
                                            "contact us"),
+}
+
+# AND A POSITIVE MARKER IS NOT ENOUGH WHEN A NEGATIVE ONE IS SHOUTING.
+# A page that calls itself the City of X, a school district or a chamber of
+# commerce is not a tribal government, however many of the tribe's words it
+# contains -- they are the same words because they are the same place name.
+NOT_THIS_CLASS = {
+    "Federally recognized tribe": ("city of", "town of", "county of",
+                                   "school district", "chamber of commerce",
+                                   "unified school", "elementary school",
+                                   "public library", "fire district"),
+    "Native Hawaiian Organization": ("city of", "county of",
+                                     "school district",
+                                     "chamber of commerce"),
 }
 
 
@@ -1054,16 +1075,24 @@ def try_host(host, name, tag, cls=""):
                         "page-text identity check is possible; a derived or "
                         "guessed host can NEVER be accepted for this entity. "
                         "title=" + title[:70])
-            marker = any(m in body.lower()[:20_000]
-                         for m in CLASS_MARKERS.get(cls, ()))
+            low = body.lower()[:20_000]
+            hit_markers = [m for m in CLASS_MARKERS.get(cls, ()) if m in low]
+            anti = [m for m in NOT_THIS_CLASS.get(cls, ()) if m in low]
+            marker = bool(hit_markers) and not anti
+            if anti and not hit_markers:
+                return (r["final_url"], st, "wrong_kind_of_organisation",
+                        "carries the entity's name but describes itself as "
+                        + "/".join(anti[:3]) + " and shows no marker of this "
+                        "entity class; title=" + title[:70])
             # ALL of the entity's distinctive tokens AND a class marker.
             # "half the tokens" is what let an elementary school through for
             # Big Lagoon Rancheria.
             if ntok and hits == ntok and marker:
                 return (r["final_url"], st, "verified",
                         "name evidence " + str(hits) + "/" + str(ntok)
-                        + " tokens ALL present in the page text, plus a "
-                        + "class marker; title=" + title[:80]
+                        + " tokens ALL present in the page text, plus class "
+                        + "marker(s) " + ",".join(hit_markers[:4])
+                        + "; title=" + title[:80]
                         + "; rung=" + r.get("rung", ""))
             return (r["final_url"], st, "unverified",
                     "200 but name evidence " + str(hits) + "/" + str(ntok)
@@ -1659,6 +1688,9 @@ def check(path=WEBMAP):
         from a publisher-stated route. Nothing on a page can identify it --
         the village of *Council* matched `kawerak.org` in a sibling sweep.
     (11) no 2xx from a host on the terms/named-agent refusal list.
+    (12) a DERIVED `government` row must name the class marker that qualified
+        it. `scottsvalley.gov` -- the City of Scotts Valley -- was accepted as
+        the Scotts Valley Band of Pomo Indians on the word `council`.
     """
     bad = []
     if not os.path.exists(path):
@@ -1779,6 +1811,14 @@ def check(path=WEBMAP):
                            "publisher has refused this agent"
                            % (i, uid, url[:60]))
 
+            # (12) A DERIVED TRIBAL SITE MUST NAME THE MARKER THAT QUALIFIED
+            # IT, and `council` alone no longer qualifies -- a city has one.
+            if ut == "government" and "DERIVED domain" in ev                     and "class marker(s)" not in ev:
+                bad.append("line %d: %s is a DERIVED government site that "
+                           "does not name the class marker it passed on -- "
+                           "written before the City-of-Scotts-Valley fix"
+                           % (i, uid))
+
             k = (uid, ut, url)
             if url and k in seen:
                 bad.append("line %d: duplicate row %s" % (i, str(k)))
@@ -1805,6 +1845,11 @@ def selftest():
          [None, "x", "y", "government", "https://colvilletribes.com/", "200",
           TODAY, "TRIED: a | b | c"]),
         ("2xx from a host that refused us", None),
+        ("derived site, no marker named",
+         [None, "Scotts Valley", "y", "government",
+          "https://www.scottsvalley.gov/", "200", TODAY,
+          "TRIED: a | b | c || DERIVED domain, name-verified against the "
+          "page; tokens ALL present"]),
         ("generic name, guessed URL",
          [None, "Council", "y", "government", "https://kawerak.org", "200",
           TODAY, "TRIED: a | b | c || DERIVED domain, name-verified against "

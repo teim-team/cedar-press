@@ -361,10 +361,20 @@ SHOW = {
     # H105-0482 - 229 yea to 176 nay, **Failed** - sat in these ten rows
     # reading as a data-entry error; it is a House suspension vote and needed
     # two-thirds, and the column now says so on the row.
+    #
+    # 2026-09-02, GRAIN-LEGISLATION second pass: `result_contradicts_simple_majority`
+    # added, from code/1093. `threshold_required` explains H105-0482 only if
+    # the reader already suspects something is wrong with it - and 890's own
+    # `result_reconciles_with_threshold` reads Y on all 351 testable rows, so
+    # nothing in the sample POINTS at the row. This column reads
+    # MAJORITY_YEA_BUT_REJECTED on exactly the 16 votes a majority tally
+    # mispredicts (9 House suspensions + 5 Senate cloture + 2 Senate 3/5 that
+    # the question text cannot see) and N on the other 335. `result_anomaly_class`
+    # and `result_anomaly_basis` are on the table for the buyer who follows up.
     "legislation": ["vote_id", "congress", "chamber", "date", "bill_id",
                     "bill_title", "question", "result", "yea", "nay",
-                    "threshold_required", "margin",
-                    "vehicle_type", "majority_side"],
+                    "threshold_required", "result_contradicts_simple_majority",
+                    "margin", "vehicle_type", "majority_side"],
     # 2026-09-02, INT-READY: `participant_role` is an INFERENCE and the sample
     # presented it as a fact. `invited_did_not_participate` (1,211 rows) is a
     # claim about a named tribe's conduct, derived from notice language, and

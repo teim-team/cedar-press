@@ -15,6 +15,23 @@ expenses on the quarterly Senate and House LDA disclosure.
 duplicates removed, non-standard records (registrations, terminations) set
 aside before any total is struck.
 
+> **CORRECTED 2026-09-02.** That paragraph described an intention, not the
+> shipped file. Until 2026-09-02 `native_entity_lobbying_disclosures.csv`
+> applied **no** amendment supersession: 1,416 amendment rows, 1,432
+> registrations and 1,233 terminations all shipped as rows and a naive
+> `SUM(spend_usd)` double-counted **$37,349,254.01 — 5.15%** of the
+> $725,743,974.52 total. It is now done **as flags, not deletions** —
+> `is_superseded`, `superseded_by_filing_uuid`, `supersession_status`,
+> `supersession_group_id`, written by
+> `code/1091_lobby_amendment_supersession.py`. The additive filing-grain total
+> is `SUM(spend_usd) WHERE is_superseded = 0` = **$688,394,720.51**.
+> Registrations and terminations are **not** set aside: registrations carry
+> $0 by construction and terminations carry $17,280,761.63 of real reported
+> spend for the period they close, so setting them aside would delete money
+> rather than deduplicate it. Full account, including the 129 rows where
+> supersession is refused as unknowable: the `LOBBY-SUPERSESSION` block in
+> `docs/MONEY_TOTALLING_RULES.md`.
+
 **Whole dollars for the payer.** A filing's full value counts once toward the
 organisation that paid it. Rankings of organisations and industries are
 therefore whole-dollar and sum to the real money.

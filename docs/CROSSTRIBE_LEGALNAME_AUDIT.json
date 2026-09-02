@@ -2,23 +2,23 @@
   "built": "2026-09-02",
   "script": "1099_crosstribe_legalname_audit.py",
   "ledger": "data/clean/cedar_identifier_ledger_final.csv",
-  "government_keyed_rows_scanned": 5836,
-  "skipped_legal_form_in_name": 2771,
+  "government_keyed_rows_scanned": 5772,
+  "skipped_legal_form_in_name": 2708,
   "skipped_keyed_entity_explains_the_name": 857,
   "skipped_name_reaches_more_than_one_government": 0,
   "collisions": 13,
   "prime_rows_exposed": 415,
   "prime_obligations_usd_exposed": 5720765.52,
   "by_disposition": {
-    "REGISTRATION_STATE_CONTRADICTS_KEYED_ENTITY": 5,
-    "NO_STATE_ON_ANY_RECORD": 4,
-    "TRANSACTION_STATE_AGREES_WITH_KEYED_ENTITY": 1,
     "TRANSACTION_STATE_CONTRADICTS_KEYED_ENTITY": 2,
-    "STATE_CANNOT_SEPARATE": 1
+    "STATE_CANNOT_SEPARATE": 1,
+    "TRANSACTION_STATE_AGREES_WITH_KEYED_ENTITY": 1,
+    "NO_STATE_ON_ANY_RECORD": 4,
+    "REGISTRATION_STATE_CONTRADICTS_KEYED_ENTITY": 5
   },
   "by_tier": {
-    "A": 8,
-    "B": 5
+    "B": 5,
+    "A": 8
   },
   "register": "review/ledger_crossgov_name_collisions_2026-09-02.csv",
   "cases": [

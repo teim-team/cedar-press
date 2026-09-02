@@ -415,6 +415,15 @@ INTERNAL_TABLES = {
         "a self-measurement of Cedar's own collection - what we swept, what "
         "answered, how much we covered. A fact about us, not about Indian "
         "Country",
+    "dtll_source_coverage.csv":
+        "1090's Dear Tribal Leader coverage record: one row per (host, "
+        "series, index URL) probed, with the HTTP status, the sitemap shards "
+        "walked against the shards that exist, and a coverage_status in "
+        "Cedar's absence vocabulary. A fact about OUR probe and a publisher's "
+        "INDEX, not an event in Indian Country - and it is what stops "
+        "`www.hhs.gov returned 403` and `6 of 38 shards walked` from being "
+        "read as zero. The customer-facing form is the coverage sentence in "
+        "the federal-register descriptor's method",
     "consultation_source_probe.csv":
         "962's Dear Tribal Leader probe: five rows recording what each "
         "publisher answered when asked how many such letters it carries, so "

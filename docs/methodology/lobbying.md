@@ -213,17 +213,39 @@ filings carry no dollar figure at all** · expenses 228. Sums: income
 
 ### Four independent double-count paths, one of them unfixed
 
-1. **Amendments ship as their own rows and nothing supersedes the original.**
+1. **Amendments ship as their own rows. ~~Nothing supersedes the original.~~
+   CLOSED 2026-09-02 — as flags, not deletions.**
    `docs/METHODOLOGY_LOBBYING.md` describes the kept-unchanged cleaning
    sequence as *"amendments applied over the originals they replace…
    non-standard records (registrations, terminations) set aside before any
-   total is struck."* **The shipped file does not do this.** Measured: **1,416
-   amendment rows carrying $41,640,996**; **1,135
+   total is struck."* **The shipped file did not do this until 2026-09-02.**
+   Measured: **1,416 amendment rows carrying $41,640,996.01**; **1,135
    `(client_id, registrant_id, filing_year, filing_period)` groups contain an
-   amendment alongside the original it amends**; a naive `SUM(spend_usd)`
-   **double-counts about $28,961,112 — 4.0% of the $725.74M total.** Also
-   present: 1,432 Registration rows, 1,233 Termination rows and 4,907
-   "(No Activity)" rows.
+   amendment alongside the original it amends** — that count reproduces to the
+   row. Also present: 1,432 Registration rows, 1,233 Termination rows and
+   4,907 "(No Activity)" rows.
+
+   **The $28,961,112 previously printed here does not reproduce and has been
+   withdrawn.** The string appeared in this document twice and in no script.
+   Eight candidate definitions were measured against the live file on
+   2026-09-02 — $33,218,483, $36,347,996, $39,183,189, $40,119,485,
+   $45,805,356, $47,866,925 and two filtered variants — and none produces it.
+   **The measured double-count is $37,349,254.01 — 5.15% of $725,743,974.52**,
+   over 1,064 rows, computed by `code/1091_lobby_amendment_supersession.py`,
+   whose `selftest` proves all eight of its invariants fire.
+
+   The file now carries `is_superseded`, `superseded_by_filing_uuid`,
+   `supersession_status` and `supersession_group_id`. **No row was dropped**
+   and no existing cell changed; row and money conservation were proved on the
+   write. The additive filing-grain total is `SUM(spend_usd) WHERE
+   is_superseded = 0` = **$688,394,720.51**. 129 rows carry an `AMBIGUOUS_*`
+   status where which filing restates which is not knowable from the LDA
+   fields Cedar holds; they stay **in** the total and are flagged, not
+   guessed. Registrations and terminations are still **not** set aside:
+   registrations carry $0 by construction, and terminations carry
+   $17,280,761.63 of real reported spend for the period they close. Full
+   account: the `LOBBY-SUPERSESSION` block of
+   `docs/MONEY_TOTALLING_RULES.md`.
 2. **`spend_touching` against `spend_allocated`.** A filing naming four
    agencies contributes a quarter to each under even division
    (`spend_allocated_usd`, which sums to the true total) or its full value to
@@ -237,13 +259,18 @@ filings carry no dollar figure at all** · expenses 228. Sums: income
    **rounded to the nearest $10,000.** A dollar-exact total implies precision
    the source does not have.
 
-> **A trap worth naming.** `data/clean/cedar_export_safety.csv` classifies
+> **A trap worth naming, and it is still open.**
+> `data/clean/cedar_export_safety.csv` classifies
 > `native_entity_lobbying_disclosures.csv` as **`SAFE_TO_AGGREGATE`,
 > `aggregation_safe = 1`**, and `518` reports C7 double-counting as **none**
 > for the whole collection. **That verdict is a literal-duplicate-row and
 > primary-key test** — `filing_uuid` is unique with 0 duplicate rows — **and it
-> is not an amendment-supersession test.** The $29.0M above passes straight
-> through it.
+> is not an amendment-supersession test.** The $37.3M above passes straight
+> through it, and still does: the flag columns added 2026-09-02 make the
+> correct total *computable*, they do not change what `517` measures. Either
+> `517` gains a notion of *additive under a stated predicate* or the lobbying
+> contract in `512` declares one; **both files are the integrator's**, so this
+> is an owner decision, not an agent's edit.
 
 `tribe_year_lobbying_panel.csv` — **5,001 rows**, 302 entities, 1999–2026,
 `total_lobbying_spend_usd` **$680,561,641** [measured], which is $45.2M below
@@ -365,9 +392,17 @@ EPA-22 "Quill", HUD/ADM-09, USDA/FNS-13, HHS), plus 249 FOIA-log evidence rows.
 
 ## 5. What a buyer may total
 
-- **`spend_usd` at filing grain, after excluding amendments.** The unfiltered
-  sum is $725,743,975 and **double-counts about $28,961,112** across 1,135
-  amendment/original groups.
+- **`spend_usd` at filing grain, `WHERE is_superseded = 0` —
+  $688,394,720.51.** The unfiltered sum is $725,743,974.52 and
+  **double-counts $37,349,254.01 (5.15%)** over 1,064 rows superseded by a
+  later filing in their own supersession group. Filter on the column; do not
+  try to reconstruct it from `filing_type_display`, which cannot see which
+  original an amendment amends.
+- **A fourth number now exists, and it is the additive one.** $645.1M
+  (registrants) · $680.6M (panel) · $688.4M (filings, superseded excluded) ·
+  $725.7M (filings, unfiltered). **Adding any two counts the same dollar
+  twice**, and the two middle figures are within $7.8M of each other by
+  coincidence.
 - **Never add `income_usd` and `expenses_usd` on one row** — only one is ever
   populated, and adding them across a portfolio is a different operation from
   adding them on a row.
@@ -529,14 +564,17 @@ indefinitely, so a year is never closed.
    `163_load_sam_contract_awards.py` and
    `163_promote_nho_universe_in_place.py`, and the only script that touches
    `oha.doi.gov` is **`code/144_build_admin_appeals.py`**.
-10. **`docs/METHODOLOGY_LOBBYING.md`'s "what we keep, unchanged" section says
-    amendments are applied over the originals they replace and registrations
-    and terminations are set aside before any total is struck.** **The shipped
-    file does not do this** — 1,416 amendment rows, 1,432 registrations and
-    1,233 terminations all ship as rows, and a naive `SUM(spend_usd)`
-    double-counts about **$29.0M** while `cedar_export_safety.csv` marks the
-    table `aggregation_safe = 1`. This is the most consequential item on the
-    list, because a document describes a cleaning step that the data has not
-    had.
+10. **~~`docs/METHODOLOGY_LOBBYING.md`'s "what we keep, unchanged" section says
+    amendments are applied over the originals they replace…~~ RESOLVED
+    2026-09-02.** It did say that and the shipped file did not do it — 1,416
+    amendment rows, 1,432 registrations and 1,233 terminations all shipping as
+    rows. Supersession now ships **as flags, not deletions**
+    (`code/1091_lobby_amendment_supersession.py`); the measured double-count is
+    **$37,349,254.01 (5.15%)**, not the ~~$29.0M~~ this list carried, which
+    reproduced under no definition tried. Registrations and terminations are
+    still not set aside, and should not be: registrations are $0 by
+    construction and terminations carry $17,280,761.63 of real spend.
+    `cedar_export_safety.csv` still marks the table `aggregation_safe = 1` —
+    that half is **open and is the integrator's** (`517`/`512`).
 11. **`docs/API_KEYS.md` records `lda.senate.gov` as dead.** Re-probed
     2026-09-01: it returns HTTP 200 and serves lda.gov's content. It redirects.

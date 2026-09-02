@@ -8,6 +8,75 @@ file.*
 
 ---
 
+<!-- BEGIN DQC-CLEARANCE-2026-09-02 -->
+> # STATUS 2026-09-02 — the queue was CLEARED. Read this before working any item below.
+>
+> Workstream **DQC** (`code/1103_decision_queue_clearance.py`) ruled and applied
+> the queue on 2026-09-02. Full evidence:
+> **`docs/DECISION_QUEUE_CLEARANCE_2026-09-02.md`**.
+> `verify` PASS, 11 tables, 0 breaches. `selftest` PASS — a deleted row, a $1
+> change and a dropped column each detected on purpose.
+>
+> **THE FINDING THAT REFRAMES EVERY ITEM BELOW: this was not a backlog of
+> undecided questions. It was largely a backlog of decisions that were made and
+> never written down where the queue could see them.** 16.7, 16.8, 16.9 and
+> 16.10 were decided on 2026-09-01 and sat unread in a staging table. 16.5's 711
+> rows were ruled the same day into a *sibling* file. 16.4's `mentions` measure
+> was already shipping. And of the master queue's $82.1B, **$42.3B was already
+> answered by the pipeline** — in the ledger or in the live assistance table.
+>
+> **The rule this earns, and it belongs beside "numbers go stale in place":**
+> **a decision must be written onto the row that asked for it.** A ruling in a
+> sibling file, a staging table or a summary doc is invisible to the queue, and
+> an invisible ruling is re-asked. If a pass cannot write back to the asking
+> row, it has not finished.
+>
+> | item | status 2026-09-02 |
+> |---|---|
+> | **16.1 / 16.2 / 16.3** | **RULED 2026-09-01, confirmed.** Not re-litigated |
+> | **16.4** text mention | **RULED NO, and already implemented** — `regulations_gov_entity_coverage.csv` has carried `text_mention_rows` all along. CLOSED |
+> | **16.5** OSHA | **APPLIED.** 711 of 711 (47 keyed, 664 floor) + 4,560 wide-file rows (PROMOTE 79 · HOLD 81 · REFUSE 2,551 · FLOOR 1,849) |
+> | **16.6** master queue | **ALL 6,559 ROWS RULED, $82.06B conserved.** 27 classes, ruled once each against live data. `ALREADY_APPLIED` 1,115 / $42.33B |
+> | **16.7** | **APPLIED.** REFUSE 552 · AFFIRM_TIER_B 484 · HOLD 187 — **zero promotions to tier A**, correctly |
+> | **16.8** | **APPLIED.** ACCEPT 211 · HOLD 168 · REFUSE 670, on the three-notice rule |
+> | **16.9** | **APPLIED.** FLOOR 5,111 · REFUSE 939 · DEFECT 637 · HOLD 109 |
+> | **16.10** | **APPLIED.** FLOOR 6,000 · ACCEPT 57 · REFUSE 19 · HOLD 18 |
+> | **16.11** vendor-list consent | **STILL YOURS.** Not a method question — see the escalation list |
+> | **10e** mint or record | **DECIDED: option 3.** Mint the class, populate only from RULED rows. Execution is the spine owner's |
+> | **10f** roster artefacts | **APPLIED.** 4 artefacts + 1 duplicate LABELLED, 196 rows kept, nothing deleted |
+> | **A** 59 tier-C/X | **DOLLAR-BAND RECOMMENDATION REFUSED.** A dollar band measures the cost of being wrong, not the evidence for being right. All 59 held on evidence |
+> | **B** 16 firms | **12 of 16 SETTLED OFFLINE** on the declared parent UEI and the address — 8 ACCEPT, 5 REFUSE, 1 SPLIT, 2 HOLD. No browser opened |
+> | **C** person-named firms | **OWNER'S RULING APPLIED.** 607 + 33 rows released to PUBLISH; 4 DUNS rows held `INTERNAL_ONLY_PROPRIETARY` on D&B's licence, not on any judgement about the firms |
+>
+> **The biggest single correction: `Arctic Slope Technical Services, Inc.` is
+> NOT one firm.** Two ANC families hold the name, and the declared parents
+> separate them — `SGK5EGB9VQM8` and `JRCDHBZD87J1` declare **ASRC**;
+> `EB42FC6C9N64` (trading as SIVUNIQ), `WWJXZJT6VKK9` and `JW45GQBY26N3` declare
+> **NANA**. The $12.0B directory row takes the two ASRC UEIs only. A naive
+> one-name-one-UEI merge was the most expensive wrong attribution available in
+> the crosswalk.
+>
+> **A new general rule, proposed as ENTITY_MATCH_RULES rule 16: a state-equality
+> gate is the wrong shape for a nation whose territory crosses state lines.**
+> `KFowler Construction` was refused on `directory=AZ, federal=NM`. The Navajo
+> Nation is a tri-state nation — AZ, NM and UT — so that disagreement is
+> agreement at the level that matters.
+>
+> ### What is still genuinely yours
+> 1. **16.11**, the vendor-list consent question. No agent should touch it.
+> 2. **The Native Village of Eyak is not in the spine and $583M turns on it.**
+>    Kluti Kaah already carries a tier-X ruling naming Eyak as the true owner
+>    and Cedar has nowhere to put the answer. Mint it, or accept the money stays
+>    unattributable.
+> 3. **NEST-1's ledger rows and the tier-A `Ho-Chunk Nation` CAGE `3VFL3`.**
+>    Your ruling already answers it; the ledger is the integrator's file.
+> 4. **Two CAGE lookups** — `Kaiva Services` and `Eastern Shawnee Professional
+>    Services` (whose own name contradicts the directory's certifier).
+> 5. **Item A's 59**, if you want them keyed at all. Cedar loses nothing by
+>    leaving them as a stated floor; it loses correctness by guessing them.
+<!-- END DQC-CLEARANCE-2026-09-02 -->
+
+
 ## 1. BBAHC repoint — evidence complete, sign-off only
 
 **Decision:** repoint the 742 rows unlinked from `ANRC-BRBYCO-00` (Bristol Bay
@@ -1635,3 +1704,106 @@ conduit-issuer path is real under the TERMS-SCOPE ruling (a third party's filing
 is not the restricted entity's), but it **cuts the other way for EMMA
 continuing disclosure specifically**, because those documents are filed *by the
 obligor*. For the eight hard-listed sources their own filings stay excluded.
+
+---
+
+## EL-1. Eight tier-A identifier rows whose legal name is ANOTHER nation's official name — $3.68M, five of them PUBLISHED
+
+*Appended 2026-09-02 by the `_entity_layer` pass.
+Detector: `code/1099_crosstribe_legalname_audit.py`.
+Full register with evidence: `review/ledger_crossgov_name_collisions_2026-09-02.csv`.*
+
+**Decision:** for each row below, repoint the identifier to the proposed nation,
+or confirm the current key and say why.
+
+Nothing has been repointed. The ledger carries a new
+`crossgov_name_collision_*` flag family and no `tribe_id`, tier or method was
+touched (`ENTITY_MATCH_RULES` rule 8; the Bristol Bay precedent for anything
+that keys a dollar).
+
+**The predicate**, so you can judge the detector and not just the rows: the row
+is keyed to a government-class entity; its `legal_business_name` carries **no
+legal-form token** (so it presents as a government, not a firm — this is what
+keeps the CORRECT `Ho-Chunk, Inc.` rows out); the keyed entity's own names leave
+a residue; and exactly one OTHER government's official names account for the
+whole name. 13 rows out of 5,836 government-keyed ledger rows.
+
+| id | tier / method | keyed now | the name on the row | proposed | evidence |
+|---|---|---|---|---|---|
+| UEI `HLTFBD3FTDG8` | A `hand` | Fort Sill-Chiricahua-Warm Springs-Apache (OK) | "Confederated Tribes Of Warm Springs Reservation Of Oregon" | `TRBF-WRMSPR-00` (OR) | **285 prime rows, $3,552,567, `recipient_state_code = OR` on 285 of 285** |
+| UEI `LWRAHAFNKQ13` | A `hand` | Santee Sioux (NE) | "Flandreau Santee Sioux Tribe" | `TRBF-FLANDR-00` (SD) | 7 rows, $51,336 |
+| CAGE `50WN1` | A `bgov_manual` | Santee Sioux (NE) | "Flandreau Santee Sioux Tribe" | `TRBF-FLANDR-00` (SD) | 4 rows, $51,336; registration state SD |
+| CAGE `4AD60` | A `bgov_manual` | Santee Sioux (NE) | "Flandreau Santee Sioux Tribe" | `TRBF-FLANDR-00` (SD) | 6 rows, $24,521; registration state SD |
+| CAGE `4XH62` | A `bgov_manual` | Yavapai-Apache (AZ) | "Chignik Lagoon, Native Village Of" | `AKNF-CGNKLG-00-…` (AK) | registration state **AK**; an Alaska Native Village keyed to an Arizona tribe |
+| CAGE `3VFL3` | A `bgov_manual` | Winnebago (NE) | "Ho-Chunk Nation" | `TRBF-HOCHNK-00` (WI) | registration state **WI**; source row `entity_crosswalk_bgov.csv` XW-0729 is the ONLY Wisconsin row among Winnebago's 27, and it sets `Subsidiary_Flag = 1` — **a federally recognized tribe cannot be a subsidiary of another federally recognized tribe** |
+| CAGE `3XGD7` | A `bgov_manual` | Sac and Fox Nation (OK) | "Sac & Fox Nation Of Missouri In Kansas And Nebraska" | `TRBF-SCFXMO-00` (KS) | registration state KS |
+| UEI `PHLGX6MG6UK1` | B `cluster_v3` | Shoshone-Paiute (NV) | "ELY SHOSHONE TRIBE" | `TRBF-ELYTNV-00` (NV) | both NV — **the address cannot separate them**; flagged, not proposed |
+
+**Five of the eight are in `cedar_publishable_identifiers.csv`**, so Cedar is
+today publishing "this CAGE belongs to that nation" for each of them.
+
+**One case is the opposite and needs no ruling, only a spine edit.** UEI
+`H1ZEEZK2D6B3`, `"San Juan Pueblo Tribal Council"`, is keyed to **Ohkay Owingeh
+(NM) and that is CORRECT** — Ohkay Owingeh *is* the renamed San Juan Pueblo, and
+113 of 113 awards are in New Mexico. It only looks like a collision because the
+spine does not carry `San Juan Pueblo` in Ohkay Owingeh's `aliases`, so a former
+name reads as a foreign one, and the apparent rival `TRBF-SNJUAN-00` is the San
+Juan **Southern Paiute** Tribe of **Arizona**. **Ask: add the alias?**
+
+**If YES on a row:** the identifier and its prime rows move to the proposed
+nation; `$3.55M` of the total is the Warm Springs row alone.
+**If NO:** say which rung of `ENTITY_MATCH_RULES` rule 13 answers it, so the
+detector can learn the exception rather than re-raise it next quarter.
+
+---
+
+## EL-2. `Laulima Government Solutions, LLC` has two declared owners
+
+**Decision:** is this a joint venture (two parents, both correct) or is one side
+wrong?
+
+- `entity_relationships.csv`, tier A: owned by **Bering Straits Native
+  Corporation** — *"Ruled by Elijah 2026-08-06: re-attributed to Bering Straits
+  Native Corporation (matched by exact); the earlier claim was wrong."*
+- `nest_enterprises.csv`, shard-H `parent_declared_subsidiary_list`: a
+  subsidiary of **Alaka'ina Foundation**, source `http://beringalakaina.com/`.
+
+**The host name contains both.** `ENTITY_MATCH_RULES` rule 11: a JV genuinely
+has two parents. No link was written and neither side was altered.
+File: `review/entity_rel_nest_owner_conflicts_2026-09-02.csv`.
+
+**If JV:** NEST should carry it as `relation_class = affiliation`, not ownership.
+**If one side wrong:** name which, and the other is withdrawn.
+
+---
+
+## EL-3. 523 rows of `native_owned_businesses` are an unreviewed page scrape, and 178 of them are people's names
+
+**Decision:** ratify the publish hold, or name a review route.
+
+`code/1070`'s sweep staged 1,106 rows. The 583 OWNERSHIP rows went to NEST,
+which **refused 229 of them** as *"unreviewed HTML heading/anchor scrape"* —
+the block yields page furniture and **natural persons' names**, and
+`docs/NEST_BUILD_LOG.md` makes that a hard rule. The 523 RELATIONSHIP rows were
+merged into `native_owned_businesses.csv` and **the same refusal was never
+applied to them**. Measured on the live table before this pass:
+
+- all 523 carry the caveat *"HTML heading/anchor scrape — not a table; review
+  before resolving"* in their own `verification_basis`;
+- all 523 read `business_name_is_person_name = -1` — **1070 hard-codes it; the
+  detector in `code/330` was never run on them**;
+- all 523 read `publishable = Y`.
+
+Three of the first three inspected: `"Tribal Enterprise Directory"` (the page's
+own heading), `"Rebecca Naragon"` (a person), `"Akwesasne Farmers Market"` (a
+real enterprise).
+
+`code/1100` ran `looks_like_person()` over exactly those 523: **178 ARE a
+natural person's name, 87 are not, 258 undecidable** — and set
+`publish_hold = Y` with `publishable = N` on all 523, preserving the prior value
+in `publishable_before_1100`. Reversible by one column copy.
+
+**If RATIFY:** 523 rows stop publishing; the directory's publishable count falls
+by 523 and its person-name exposure goes to zero on this family.
+**If REVIEW:** the 87 the detector cleared are the cheapest re-entry, and USET's
+directory would need a table parse rather than a heading scrape.

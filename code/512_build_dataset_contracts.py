@@ -2731,6 +2731,50 @@ GRAIN_LEGISLATION = {}
 GRAIN.update(GRAIN_LEGISLATION)
 
 # ---------------------------------------------------------------------------
+# WORKSTREAM DEALS-MERGE-1088, 2026-09-02, code/1088_merge_staged_deals.py.
+#
+# The tenth `deals_*_additions.csv` slice, and the first that carries FOUR
+# channels at once - tribal press, SEC EDGAR, the ANCSA STAR portal, and
+# Cedar's own identifier observations. Its grain is the same as its nine
+# siblings' and the same as `deals_classified.csv`: one row per DEAL EVENT,
+# keyed on `Deal_ID`.
+#
+# TWO THINGS A BUYER MUST NOT DO WITH THIS FILE, both already true of the
+# nine siblings and both worth restating because this slice makes the second
+# one bite harder:
+#
+#   1. NEVER sum it alongside `deals_classified.csv`. Every one of its 144
+#      rows is IN `deals_classified.csv` - it is the source of those rows, not
+#      an addition to them. `docs/methodology/deals.md` section 6 states the
+#      same rule for the other nine, which together hold $22.67B of the
+#      classified table's own money.
+#   2. NEVER sum `Announced_Value_USD` and `Project_Total_Value_USD` together.
+#      They are deliberately disjoint here: $58,500,000 was MOVED out of the
+#      first into the second because the source phrase named a facility
+#      ceiling rather than consideration. Adding them back re-creates exactly
+#      the error the move exists to prevent.
+GRAIN_DEALS_MERGE = {
+    "deals_press_edgar_ancsa_additions.csv": _d(
+        "one row per DEAL EVENT admitted by code/1088_merge_staged_deals.py, "
+        "keyed on Deal_ID. Four channels in one file, readable from the "
+        "Deal_ID prefix: NLTR- tribal press, SECX- SEC EDGAR, ANCSA3- ANCSA "
+        "annual reports filed under Alaska Statute 45.55.139, IDOBS- an "
+        "ownership change Cedar OBSERVED in federal identifier data and that "
+        "no source announced. The IDOBS rows carry a BLANK Event_Date on "
+        "purpose: their evidence is a fiscal-year window and a window is not "
+        "a date.",
+        primary_key=["Deal_ID"],
+        join_cardinality={"Deal_ID": "one", "Native_Party": "many",
+                          "cedar_uid": "many", "Source_1": "many"},
+        declared_by="workstream DEALS-MERGE-1088 2026-09-02: Deal_ID "
+                    "confirmed 144 distinct / 0 blank on the FULL 144-row "
+                    "file with csv.DictReader; 0 literal duplicate rows; "
+                    "Source_1 non-blank on 144 of 144, which "
+                    "code/1088 `verify` re-asserts and exits 1 on"),
+}
+GRAIN.update(GRAIN_DEALS_MERGE)
+
+# ---------------------------------------------------------------------------
 # WORKSTREAM INT-READY, 2026-09-02 - the two 990 Schedule C tables.
 #
 # Both were ORPHANS: built by `code/99_build_earmarks_and_schedc.py`, written
@@ -2991,6 +3035,45 @@ GRAIN_SEC_GAMING = {
         declared_by="workstream SEC-GAMING 2026-09-02, code/1080 verify V12"),
 }
 GRAIN.update(GRAIN_SEC_GAMING)
+
+# --- FR-DTLL: Dear Tribal Leader letters, harvested from the agencies -------
+# Workstream FR-DTLL, 2026-09-02, code/1090_dtll_agency_harvest.py.
+# `consultation_events.csv` carried SIX rows typed `dear_tribal_leader_letter`
+# because it reads the Federal Register, and DTLLs are not Federal Register
+# documents. These two tables are the agencies' own publication of them.
+GRAIN_FR_DTLL = {
+    "dear_tribal_leader_letters.csv": _d(
+        "one row per DOCUMENT an agency published in its own Dear Tribal "
+        "Leader letter series - `record_kind` says whether that document is "
+        "the `letter`, an `enclosure` attached to one, or the publisher's own "
+        "`publisher_index_page`. **Counting rows counts documents, not "
+        "letters**; filter `record_kind = 'letter'` for a letter count. Where "
+        "a publisher lists the same document under two dates (8 of 807), the "
+        "row carries the EARLIEST and `also_listed_under_dates` carries the "
+        "rest, so nothing the publisher said is discarded and the key stays "
+        "one row per document.",
+        primary_key=["letter_id"],
+        join_cardinality={"letter_id": "one", "document_url": "one",
+                          "source_index_url": "many"},
+        declared_by="workstream FR-DTLL 2026-09-02: letter_id and "
+                    "document_url each confirmed 807 distinct / 0 blank on "
+                    "the FULL 807-row file, and INV-DTLL-DUP fails the build "
+                    "on a repeated document_url"),
+    "dtll_source_coverage.csv": _d(
+        "one row per (source host, series, index URL) PROBED for a Dear "
+        "Tribal Leader letter series, carrying the HTTP status, how many "
+        "sitemap shards were walked against how many exist, and a "
+        "`coverage_status` in Cedar's absence vocabulary. A row is a fact "
+        "about OUR probe and about a publisher's INDEX - never about whether "
+        "the agency writes such letters. `NOT_CHECKED` is a refusal, "
+        "`REPORTED_FLOOR_PARTIAL_INDEX` is an unwalked remainder, and neither "
+        "may be read as zero.",
+        primary_key=["coverage_id"],
+        join_cardinality={"coverage_id": "one", "source_host": "many"},
+        declared_by="workstream FR-DTLL 2026-09-02: coverage_id confirmed "
+                    "distinct / 0 blank on the full file"),
+}
+GRAIN.update(GRAIN_FR_DTLL)
 
 # A table whose grain is declared but whose PRIMARY KEY cannot be stated
 # without guessing. Recorded rather than left blank, so the gap is a task

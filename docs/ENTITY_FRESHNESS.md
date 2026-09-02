@@ -1,6 +1,6 @@
 # Entity freshness — when was each entity last touched by anything
 
-*Generated 2026-09-02 by `code/830_entity_freshness.py` across 151 entity-bearing tables. An update is ANY change: a row appearing, a date advancing, an identifier landing. `built_date` and `fetched_date` are deliberately NOT counted — they say when Cedar ran, not when the entity changed, and 70 tables carry one.*
+*Generated 2026-09-02 by `code/830_entity_freshness.py` across 153 entity-bearing tables. An update is ANY change: a row appearing, a date advancing, an identifier landing. `built_date` and `fetched_date` are deliberately NOT counted — they say when Cedar ran, not when the entity changed, and 70 tables carry one.*
 
 This answers a question no other instrument can. Coverage says who has a website; cadence says which SOURCE is behind; readiness says which DATASET meets the contract. All three aggregate across entities, so an entity can sit untouched for two years while every one of them reads green.
 
@@ -9,8 +9,8 @@ This answers a question no other instrument can. Coverage says who has a website
 | entities in the register | 1,555 |
 | **appear in NO substantive Cedar row** | **0** |
 | (the old, unfixable measure: no row in ANY table, identity layer included) | 0 |
-| present but carrying no usable date | 167 |
-| last change more than a year ago | 397 |
+| present but carrying no usable date | 162 |
+| last change more than a year ago | 402 |
 
 ## Columns REFUSED as build stamps
 
@@ -23,7 +23,7 @@ This answers a question no other instrument can. Coverage says who has a website
 | `gaming_property_self_published_claims.csv` | `as_of_date` | 106 | 2026-08-12, 2026-09-02 |
 | `gaming_web_harvest_observations.csv` | `as_of_date` | 87 | 2026-09-02 |
 
-Median days since last change: **120**. p90: **1,365**. Oldest: **15,715**.
+Median days since last change: **125**. p90: **1,365**. Oldest: **15,715**.
 
 ## The tail — 25 entities nobody has touched longest
 

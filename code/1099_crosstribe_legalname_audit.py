@@ -408,13 +408,13 @@ def build(dry_run=False) -> int:
             for h in hits}
     out_fields = list(fields) + [c for c in NEW if c not in fields]
     for r in rows:
+        # plain assignment, not setdefault - this audit recomputes its own
+        # columns every run and must not carry a stale flag forward
         for c in NEW:
-            r.setdefault(c, "")
+            r[c] = ""
         k = (r.get("identifier_type"), r.get("identifier"),
              (r.get("tribe_id") or "").strip())
         if k not in flagged:
-            for c in NEW:
-                r[c] = ""
             continue
         h = hmap[k]
         r["crossgov_name_collision_flag"] = "Y"

@@ -653,8 +653,172 @@ def cmd_selftest():
     return 1 if bad else 0
 
 
-CMDS = {"measure": cmd_measure, "apply": cmd_apply,
-        "verify": cmd_verify, "selftest": cmd_selftest}
+# ---------------------------------------------------------------------------
+# THE SHIPPED SURFACE. A flag a buyer never reads is not a fix.
+#
+# `dist/04_lobbying/native_entity_lobbying_disclosures.NOTES.md` promises
+# "No silent exclusions - rows we exclude from a total are flagged as columns
+# rather than deleted", describes `spend_usd` as "Reported lobbying spend for
+# the filing period", and says nothing at all about amendments or about the
+# other two tribal-lobbying totals. `tribe_year_lobbying_panel.NOTES.md`
+# describes `total_lobbying_spend_usd` as, in full, "Amount."
+#
+# So the shipped sample COULD be summed to a wrong number innocently. The two
+# levers that put the warning in front of a buyer both feed
+# `code/87_build_dataset_notes.py`:
+#
+#   data/clean/series_breaks.csv   -> the "## Comparability" block in NOTES.md
+#                                     (added by code/86, three rows, 24 -> 27)
+#   data/clean/codebook_master.csv -> the per-variable Description column
+#                                     (this command)
+#
+# Both are DATA, not another agent's script, and 87 regenerates the shipped
+# notes from them.
+CODEBOOK_MASTER = CLEAN / "codebook_master.csv"
+CODEBOOK_FRAG = CLEAN / "codebook" / "04_lobbying.csv"
+CB_GROUP = "04_lobbying"
+
+SPEND_USD_DESC = (
+    "Reported lobbying spend for the filing period: income_usd for an "
+    "outside registrant, expenses_usd for a self-filer, and only one of the "
+    "two is ever populated. DO NOT SUM THIS COLUMN BLIND. An amended LD-2 "
+    "restates the period it amends and the LDA publishes it as a NEW filing "
+    "rather than replacing the original, so a naive SUM double-counts "
+    "$37,349,254 - 5.15% of the $725,743,974.52 naive total. The additive "
+    "figure is SUM(spend_usd) WHERE is_superseded = 0 = $688,394,720.51. "
+    "40.7% of filings (11,314) report no dollar at all, so a 0 here usually "
+    "means 'reported nothing', not 'spent nothing'. Every LDA figure is a "
+    "good-faith estimate rounded to $10,000 at source. NEVER add this to "
+    "tribe_year_lobbying_panel.total_lobbying_spend_usd ($680,561,640.52) or "
+    "to lobbying_registrants.spend_reported_usd ($645,052,868.51) - the same "
+    "money at three grains. [measured 2026-09-02]")
+
+PANEL_TOTAL_DESC = (
+    "Lobbying spend rolled up to one (entity, filing year). A ROLL-UP of "
+    "native_entity_lobbying_disclosures.csv, not a second observation: "
+    "$680,561,640.52 over 5,001 rows, $45,182,334.00 below the filing-level "
+    "$725,743,974.52 because the panel drops withdrawn and organisation-type-"
+    "barred attributions. NEVER add it to the filing table or to "
+    "lobbying_registrants.spend_reported_usd ($645,052,868.51). It is also "
+    "NOT amendment-adjusted - the $37,349,254 of superseded amendment money "
+    "is inside this number too. [measured 2026-09-02]")
+
+NEW_COL_DESC = {
+    "supersession_group_id":
+        "The set of filings that describe ONE reporting obligation: a "
+        "blake2b digest over (client_id, registrant_id, filing_year, "
+        "filing_period, form family), where form family separates a "
+        "REGISTRATION from the REPORT that follows it. Without that fifth "
+        "part a $0 registration amendment sits in the same bucket as the "
+        "quarterly report and would appear to supersede it.",
+    "supersession_status":
+        "Why this row is or is not superseded. AMENDMENT_SURVIVOR (the "
+        "latest amendment - total this one), SUPERSEDED_BY_AMENDMENT, "
+        "SUPERSEDED_BY_LATER_AMENDMENT, NOT_SUPERSEDED, "
+        "REGISTRATION_NO_MONEY, UNFLAGGED_DUPLICATE_CANDIDATE (a repeated "
+        "filing_type_display the LDA never flagged as an amendment - NOT "
+        "superseded, because the source never said one replaces the other), "
+        "AMBIGUOUS_MULTIPLE_ORIGINALS and "
+        "AMBIGUOUS_ORIGINAL_POSTED_AFTER_AMENDMENT (129 rows where which "
+        "filing restates which is not knowable from the LDA fields Cedar "
+        "holds - flagged and left IN the total, never guessed).",
+    "is_superseded":
+        "1 when a later filing in the same supersession_group_id restates "
+        "this one. 1,064 of 27,825 rows, carrying $37,349,254.01. The "
+        "additive filing-grain total is SUM(spend_usd) WHERE is_superseded "
+        "= 0. No superseded row is deleted.",
+    "superseded_by_filing_uuid":
+        "The filing_uuid of the filing that restates this one, blank where "
+        "nothing does. Always resolves to a row in the same "
+        "supersession_group_id that is not itself superseded.",
+}
+
+
+def _cb_read(p):
+    if not p.exists():
+        return None, None
+    with open(p, newline="", encoding="utf-8") as fh:
+        r = csv.DictReader(fh)
+        return r.fieldnames, list(r)
+
+
+def cmd_codebook():
+    hdr, rows = read_rows(TARGET)
+    if not rows:
+        print("UNMEASURED: target is empty or unreadable")
+        return 1
+    n = len(rows)
+    fill = {c: round(100.0 * sum(1 for r in rows if (r.get(c) or "").strip())
+                     / n, 1) for c in NEW_COLS}
+    print("=== 1091 codebook ===")
+    print("   measured fill on %s rows: %s" % (n, fill))
+
+    spec = {
+        "supersession_group_id": ("text", "code"),
+        "supersession_status": ("text", "category"),
+        "is_superseded": ("integer", "flag"),
+        "superseded_by_filing_uuid": ("text", "code"),
+    }
+    rc = 0
+    for path in (CODEBOOK_MASTER, CODEBOOK_FRAG):
+        f, cb = _cb_read(path)
+        if cb is None:
+            print("   !! %s absent - UNMEASURED, not clean" % path)
+            rc = 1
+            continue
+        before = len(cb)
+        bak = path.with_name(path.name + BAK_TAG)
+        if not bak.exists():
+            shutil.copy2(path, bak)
+        have = {(r["dataset"], r["variable"]) for r in cb}
+        touched = 0
+        for r in cb:
+            if r["dataset"] != CB_GROUP:
+                continue
+            if r["variable"] == "spend_usd" and r["description"] != SPEND_USD_DESC:
+                r["description"] = SPEND_USD_DESC
+                touched += 1
+            if (r["variable"] == "total_lobbying_spend_usd"
+                    and r["description"] != PANEL_TOTAL_DESC):
+                r["description"] = PANEL_TOTAL_DESC
+                touched += 1
+        added = 0
+        for c in NEW_COLS:
+            if (CB_GROUP, c) in have:
+                for r in cb:
+                    if r["dataset"] == CB_GROUP and r["variable"] == c:
+                        r["description"] = NEW_COL_DESC[c]
+                        r["pct_filled"] = fill[c]
+                        r["n_rows"] = n
+                continue
+            t, u = spec[c]
+            row = {k: "" for k in f}
+            row.update({"dataset": CB_GROUP, "variable": c, "type": t,
+                        "units": u, "pct_filled": fill[c], "n_rows": n,
+                        "published": "1", "access_tier": "public",
+                        "description": NEW_COL_DESC[c], "generated": TODAY})
+            cb.append(row)
+            added += 1
+        tmp = path.with_name(path.name + ".part")
+        with open(tmp, "w", newline="", encoding="utf-8") as fh:
+            w = csv.DictWriter(fh, fieldnames=f, extrasaction="ignore")
+            w.writeheader()
+            w.writerows(cb)
+        tmp.replace(path)
+        after = len(cb)
+        print("   %-34s %d -> %d rows  (+%d new, %d descriptions rewritten)"
+              % (path.name, before, after, added, touched))
+        if after - before != added:
+            print("   !! ROW CONSERVATION: %d - %d != %d"
+                  % (after, before, added))
+            rc = 1
+    print("\n   These land in dist/04_lobbying/*.NOTES.md the next time "
+          "code/87_build_dataset_notes.py runs.")
+    return rc
+
+
+CMDS = {"measure": cmd_measure, "apply": cmd_apply, "verify": cmd_verify,
+        "selftest": cmd_selftest, "codebook": cmd_codebook}
 
 if __name__ == "__main__":
     c = sys.argv[1] if len(sys.argv) > 1 else "measure"

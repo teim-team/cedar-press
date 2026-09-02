@@ -217,6 +217,7 @@ import re
 import shutil
 import sys
 import tempfile
+import time
 from datetime import date
 from pathlib import Path
 
@@ -585,8 +586,17 @@ class Evidence:
 
     # -- prime ------------------------------------------------------------
     def _prime(self):
-        """duckdb reads the 1.4GB table in seconds; csv takes minutes."""
+        """duckdb reads the 1.4GB table in seconds; csv takes minutes.
+
+        Reads the PRE-state: this pass's own backup when one exists, the live
+        table otherwise.  On a resumed `apply` the live table already carries
+        the withdrawals, and aggregating it reported $9,344 of withdrawn
+        dollars where the true figure is $16.99B."""
         import duckdb
+        pre = Path(str(PRIME) + TAG)
+        src = str(pre if pre.exists() else PRIME)
+        if pre.exists():
+            print(f"  prime aggregates read from {pre.name} (the pre-state)")
         con = duckdb.connect()
         q = """SELECT upper(trim(awardee_uei)) uei,
                       mode(awardee_name) nm, count(*) n,
@@ -594,7 +604,7 @@ class Evidence:
                       string_agg(DISTINCT recipient_state_code, '|') states
                FROM read_csv_auto(?, all_varchar=true, sample_size=-1)
                WHERE tribe_id <> '' AND attribution_method = 'uei_exact' GROUP BY 1"""
-        for uei, nm, n, usd, st in con.execute(q, [str(PRIME)]).fetchall():
+        for uei, nm, n, usd, st in con.execute(q, [src]).fetchall():
             self.prime_by_uei[uei] = dict(name=nm or "", n=n, usd=usd or 0.0, states=st or "")
         q2 = """SELECT upper(trim(cage_code)) cage, count(*) n,
                        sum(TRY_CAST(total_obligations AS DOUBLE)) usd,
@@ -602,14 +612,14 @@ class Evidence:
                 FROM read_csv_auto(?, all_varchar=true, sample_size=-1)
                 WHERE tribe_id <> '' AND attribution_method = 'cage_exact'
                   AND upper(trim(cage_code)) <> 'NAN' GROUP BY 1"""
-        for cage, n, usd, nm, st in con.execute(q2, [str(PRIME)]).fetchall():
+        for cage, n, usd, nm, st in con.execute(q2, [src]).fetchall():
             self.prime_by_cage[cage] = dict(name=nm or "", n=n, usd=usd or 0.0, states=st or "")
         q3 = """SELECT upper(trim(parent_uei)) pu, count(*) n,
                        sum(TRY_CAST(total_obligations AS DOUBLE)) usd
                 FROM read_csv_auto(?, all_varchar=true, sample_size=-1)
                 WHERE tribe_id <> '' AND attribution_method = 'parent_uei' GROUP BY 1"""
         self.prime_by_parent = {pu: dict(n=n, usd=usd or 0.0)
-                                for pu, n, usd in con.execute(q3, [str(PRIME)]).fetchall()}
+                                for pu, n, usd in con.execute(q3, [src]).fetchall()}
         con.close()
 
 
@@ -822,8 +832,20 @@ def backup(p: Path):
     return b
 
 
-def atomic_rows(path: Path, header, row_iter):
-    """`.part`-then-rename: an interruption must not look like a completion."""
+def already_done(p: Path):
+    """A file whose `.bak_<TAG>` exists was reached by an earlier run of this
+    pass.  See the RESUME note above."""
+    return Path(str(p) + TAG).exists()
+
+
+def atomic_rows(path: Path, header, row_iter, wait_s=600):
+    """`.part`-then-rename: an interruption must not look like a completion.
+
+    The rename RETRIES.  Twelve other agent processes were live in this repo
+    when this pass ran, and a concurrent reader holding a 1.4GB table open is
+    enough to lose `os.replace` to WinError 5 with the `.part` already complete
+    and correct.  Waiting is the fix; forcing is not.
+    """
     tmp = Path(str(path) + ".part")
     n = 0
     with open(tmp, "w", newline="", encoding="utf-8") as fh:
@@ -832,8 +854,23 @@ def atomic_rows(path: Path, header, row_iter):
         for r in row_iter:
             w.writerow(r)
             n += 1
-    os.replace(tmp, path)
-    return n
+    deadline = time.time() + wait_s
+    attempt = 0
+    while True:
+        attempt += 1
+        try:
+            os.replace(tmp, path)
+            if attempt > 1:
+                print(f"    (rename of {path.name} won on attempt {attempt}; "
+                      f"a concurrent reader had it open)")
+            return n
+        except PermissionError:
+            if time.time() > deadline:
+                raise
+            if attempt == 1:
+                print(f"    {path.name} is held open by another process - waiting for the "
+                      f"lock, .part is complete on disk ...", flush=True)
+            time.sleep(5)
 
 
 class Plan:
@@ -1234,6 +1271,17 @@ def main(mode):
         return verify()
 
     print(f"=== Cedar Press {STEM} - mode={mode} ===\n")
+    if mode == "apply":
+        lb = Path(str(LEDGER) + TAG)
+        if lb.exists():
+            hdr0 = next(csv.reader(open(LEDGER, newline="", encoding="utf-8-sig")))
+            if all(c in hdr0 for c in NEW_LEDGER_COLS):
+                print(f"RESUMING an earlier `apply`. Restoring {LEDGER.name} from "
+                      f"{lb.name} so the triage sees the PRE-state - a ledger already "
+                      f"carrying tier X on the withdrawn rows would classify them "
+                      f"'already non-attributing' and the downstream tables would never "
+                      f"get their withdrawals.")
+                shutil.copy2(lb, LEDGER)
     print("loading evidence: spine, ledger, fpds edges, deals, "
           "166 ANCSA annual reports, prime aggregates ...")
     ev = Evidence()
@@ -1279,7 +1327,10 @@ def main(mode):
 
     # ---------------------------------------------------------------- apply
     print("\nmeasuring prime_contracts BEFORE ...")
-    before = measure_prime()
+    pre = Path(str(PRIME) + TAG)
+    before = measure_prime(pre if pre.exists() else None)
+    if pre.exists():
+        print(f"  (measured from {pre.name} - the pre-state, byte-for-byte)")
     print(f"  {before['rows']:,} rows | {before['columns']} cols | "
           f"${before['total_obligations']:,.2f} total | "
           f"${before['attributed_obligations']:,.2f} attributed")
@@ -1305,6 +1356,9 @@ def main(mode):
         if not path.exists():
             print(f"  SKIP (absent) {path.name}")
             continue
+        if already_done(path):
+            print(f"  SKIP (already processed by this pass - {TAG} exists) {path.name}")
+            continue
         s, m = rewrite_prime_like(path, ev, plan, spec)
         stats[path.name] = dict(s)
         if path == PRIME:
@@ -1315,7 +1369,9 @@ def main(mode):
               f"| repointed {s['repointed_rows']:,} (${s['repointed_usd']:,.2f})")
 
     sp = CLEAN / "subawards.csv"
-    if sp.exists():
+    if sp.exists() and already_done(sp):
+        print(f"  SKIP (already processed by this pass) {sp.name}")
+    elif sp.exists():
         s, m = rewrite_subawards(sp, plan)
         stats["subawards.csv"] = dict(s)
         stats["subawards_entity_delta"] = {k: round(v, 2) for k, v in m.items() if abs(v) > 0.004}
@@ -1352,8 +1408,10 @@ def main(mode):
         disposition_counts=dict(cnt),
         disposition_usd={k: round(v, 2) for k, v in usd.items()},
         applied_identifiers=len(ap),
-        withdrawn_usd=round(stats[PRIME.name]["withdrawn_usd"], 2),
-        repointed_usd=round(stats[PRIME.name]["repointed_usd"], 2),
+        withdrawn_usd=round(stats.get(PRIME.name, {}).get(
+            "withdrawn_usd",
+            round(before["attributed_obligations"] - after["attributed_obligations"], 2)), 2),
+        repointed_usd=round(stats.get(PRIME.name, {}).get("repointed_usd", 0.0), 2),
         before=before, after=after,
         entity_delta={k: v for k, v in sorted(ent.items(), key=lambda kv: kv[1])},
         file_stats=stats,

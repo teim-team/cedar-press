@@ -95,6 +95,13 @@ BASE = "https://files.usaspending.gov/award_data_archive"
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/125.0 Safari/537.36")
 STAMPS = ["20260806", "20260906", "20261006", "20260706"]
+# PACING. FINDING 6 in logs/_HOSTLOCK_files.usaspending.gov.json: six ~2GB
+# objects in twelve minutes edge-blocked this host. On 2026-09-02 this script
+# took eight ~1.2GB objects in twenty-six minutes and was blocked at the ninth.
+# So the measured safe rate is SLOWER than one object every three minutes.
+# 8 minutes between objects puts 19 objects over ~2.5 hours, which is the
+# shape a monthly archive can absorb. Override only downward.
+INTER_OBJECT_PAUSE_S = int(os.environ.get("CEDAR_1085_PAUSE_S", "480"))
 YEARS = list(range(2008, 2027))
 
 KEY = "contract_transaction_unique_key"
@@ -246,8 +253,32 @@ def wanted_set():
 
 
 # ---------------------------------------------------------------- 2. pull
+class EdgeBlocked(Exception):
+    """The host is refusing at the edge. Not a fact about any fiscal year."""
+
+
 def resolve_stamp(fy):
-    """HEAD the candidates in order; the FIRST 200 wins. Never assume a stamp."""
+    """HEAD the candidates in order; the FIRST 200 wins. Never assume a stamp.
+
+    THE THREE FAILURE SHAPES ARE NOT INTERCHANGEABLE
+    (`docs/PULL_DISCIPLINE.md` rule 4), and getting this wrong on 2026-09-02
+    cost the run its host:
+
+      404                     a fact about THAT ONE KEY. Try the next stamp.
+      instant disconnect <1s  an EDGE BLOCK. A fact about the HOST. Every
+                              further request extends it. RAISE, do not
+                              continue to the next year.
+      slow / timeout          the server is busy. Retry is fine.
+
+    The first version of this function logged an edge refusal, slept 30s, tried
+    the next stamp, then returned `None` and let the caller record the year as
+    `stamp_unresolved` and MOVE ON TO THE NEXT YEAR - four fresh requests per
+    year, against a host that was refusing us for request rate. That is FINDING
+    6 in `logs/_HOSTLOCK_files.usaspending.gov.json` reproduced exactly:
+    "six ~2GB objects in twelve minutes edge-blocked it". This run took eight
+    ~1.2GB objects in twenty-six minutes and got the same answer.
+    """
+    seen_404 = 0
     for s in STAMPS:
         u = "%s/FY%d_All_Contracts_Full_%s.zip" % (BASE, fy, s)
         req = urllib.request.Request(u, method="HEAD", headers={"User-Agent": UA})
@@ -258,14 +289,22 @@ def resolve_stamp(fy):
                     return s, u, int(r.headers.get("Content-Length") or 0)
         except urllib.error.HTTPError as e:
             if e.code == 404:
+                seen_404 += 1
                 continue                       # a fact about THIS key only
             log("    HEAD %s: HTTP %s" % (s, e.code))
         except Exception as e:                              # noqa: BLE001
             el = time.time() - t
-            log("    HEAD %s: %s (%s)"
-                % (s, "edge refusing" if el < 1 else "slow", e))
+            if el < 1.0:
+                raise EdgeBlocked(
+                    "FY%d HEAD %s: instant disconnect in %.2fs (%s). This is "
+                    "an EDGE BLOCK and it is a fact about the host, not about "
+                    "FY%d." % (fy, s, el, e, fy))
+            log("    HEAD %s: slow after %.1fs (%s)" % (s, el, e))
             time.sleep(30)
-    return None, None, 0
+    if seen_404 == len(STAMPS):
+        return None, None, 0        # genuinely absent from today's bucket
+    raise EdgeBlocked("FY%d: no stamp answered and not every attempt was a "
+                      "404. Refusing to call this an absence." % fy)
 
 
 def fetch(url, dest, expect, tries=6):
@@ -302,8 +341,13 @@ def fetch(url, dest, expect, tries=6):
                 break
         except Exception as e:                              # noqa: BLE001
             el = time.time() - t0
+            if el < 1.0 and not have:
+                # An instant disconnect on a fresh connection is the edge, not
+                # the server. Retrying it is what extends the block.
+                raise EdgeBlocked("download %s: instant disconnect in %.2fs "
+                                  "(%s)" % (dest.name, el, e))
             log("    %s after %.1fs (%s); retry in %ds"
-                % ("edge refusing" if el < 1 else "slow/failed", el, e, delay))
+                % ("slow/failed", el, e, delay))
             if attempt == tries - 1:
                 raise
             time.sleep(delay)
@@ -392,11 +436,25 @@ def cmd_pull(only=None):
                     % (fy, format(rec.get("rows_kept", 0), ",")))
                 continue
             log("FY%d ---------------------------------------------" % fy)
-            stamp, url, size = resolve_stamp(fy)
+            try:
+                stamp, url, size = resolve_stamp(fy)
+            except EdgeBlocked as e:
+                log("STOP-WORK: %s" % e)
+                log("Every further request extends the block "
+                    "(docs/PULL_DISCIPLINE.md rule 4). Stopping the whole run, "
+                    "not moving to the next year. Everything already filtered "
+                    "is on disk and `pull` resumes from _state.json.")
+                st["edge_block"] = {"when": now(), "detail": str(e),
+                                    "years_done": sorted(
+                                        k for k, v in st["years"].items()
+                                        if v.get("status") == "filtered")}
+                save_state(st)
+                break
             if not stamp:
-                log("FY%d: no stamp answered 200. Recorded as UNRESOLVED - a "
-                    "fact about today's bucket, not about the year." % fy)
-                st["years"][str(fy)] = {"status": "stamp_unresolved", "when": now()}
+                log("FY%d: every candidate stamp returned 404 - the object is "
+                    "genuinely absent from today's bucket." % fy)
+                st["years"][str(fy)] = {"status": "absent_all_stamps_404",
+                                        "when": now()}
                 save_state(st)
                 continue
             log("    stamp %s  %s bytes" % (stamp, format(size, ",")))
@@ -423,6 +481,9 @@ def cmd_pull(only=None):
             save_state(st)
             zp.unlink()
             log("    released %s" % zp.name)
+            if fy != YEARS[-1]:
+                log("    pausing %ds before the next object (pacing, not a retry)" % INTER_OBJECT_PAUSE_S)
+                time.sleep(INTER_OBJECT_PAUSE_S)
         write_manifest(st)
         return 0
     finally:

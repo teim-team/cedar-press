@@ -250,9 +250,10 @@ STATE_CITY = re.compile(
     rf"\b({SN}),\s*([A-Z][A-Za-z.'\-]*(?:\s+[A-Z][A-Za-z.'\-]*){{0,3}})\b")
 
 MAIL_TO = re.compile(
-    r"(mail|send|submit|address(?:ed)? to|attention|attn|p\.?o\.? box|"
-    r"mail stop|fax|e-?mail|comments|signed at|dated at|cancel|postpone|"
-    r"has been removed)", re.I)
+    r"(mail|send|submit|address(?:ed)? to|attention|attn|box|"
+    r"mail stop|fax|e-?mail|comments|telephone|suite|should contact|"
+    r"may contact|signed at|dated at|cancel|postpone|has been removed|"
+    r"were removed from|repatriat)", re.I)
 # `\b(?!\d)` matters: without it "May 1997" reads as "May 19".
 DATE_ROW = re.compile(rf"\b({MN})\s+\d{{1,2}}\b(?!\d)", re.I)
 
@@ -322,18 +323,62 @@ def iso_dates(text):
     return sorted(set(out))
 
 
+# A street fragment is not a city. "2401 M Street, NW, Washington, DC" yields
+# the phantom `NW, Washington`; "11111 North 7th Street, West Dunlap Avenue
+# Phoenix, AZ" yields `West Dunlap Avenue Phoenix, AZ`. Both are printed by the
+# notice and neither is a place name, so they are refused. Directionals are
+# only refused STANDING ALONE or beside a street word, so `North Little Rock`
+# and `West Valley City` survive.
+STREET_TOKEN = re.compile(
+    r"(Avenue|Ave|Street|Road|Boulevard|Blvd|Drive|Suite|Floor|Room|"
+    r"Parkway|Highway|Zone|Building|Plaza|Hotel|Resort|Hall|Center|Centre|"
+    r"NW|NE|SW|SE)", re.I)
+STATE_TO_AB = {
+    "alabama": "AL", "alaska": "AK", "arizona": "AZ", "arkansas": "AR",
+    "california": "CA", "colorado": "CO", "connecticut": "CT",
+    "delaware": "DE", "florida": "FL", "georgia": "GA", "hawaii": "HI",
+    "idaho": "ID", "illinois": "IL", "indiana": "IN", "iowa": "IA",
+    "kansas": "KS", "kentucky": "KY", "louisiana": "LA", "maine": "ME",
+    "maryland": "MD", "massachusetts": "MA", "michigan": "MI",
+    "minnesota": "MN", "mississippi": "MS", "missouri": "MO", "montana": "MT",
+    "nebraska": "NE", "nevada": "NV", "new hampshire": "NH",
+    "new jersey": "NJ", "new mexico": "NM", "new york": "NY",
+    "north carolina": "NC", "north dakota": "ND", "ohio": "OH",
+    "oklahoma": "OK", "oregon": "OR", "pennsylvania": "PA",
+    "rhode island": "RI", "south carolina": "SC", "south dakota": "SD",
+    "tennessee": "TN", "texas": "TX", "utah": "UT", "vermont": "VT",
+    "virginia": "VA", "washington": "WA", "west virginia": "WV",
+    "wisconsin": "WI", "wyoming": "WY", "district of columbia": "DC",
+}
+
+
+def _canon(city, state):
+    st = state.upper() if state.upper() in ABBR_SET else         STATE_TO_AB.get(state.lower(), state.lower())
+    return (re.sub(r"[^a-z]", "", city.lower()), st)
+
+
 def places_in(segment):
     """Place strings the segment PRINTS, in the publisher's own word order."""
-    hits = []
+    hits, seen = [], set()
+
+    def add(text, city, state):
+        if STREET_TOKEN.search(city) or len(city.strip()) < 3:
+            return
+        k = _canon(city, state)
+        if k in seen:
+            return
+        seen.add(k)
+        hits.append(text)
+
     for city, state in CITY_STATE.findall(segment):
-        hits.append(f"{city.strip()}, {state}")
+        add(f"{city.strip()}, {state}", city, state)
     for state, city in STATE_CITY.findall(segment):
         # "Washington, DC" also matches State,City as ("Washington", "DC").
         # A second capture of the same span is not a second place.
         if city in ABBR_SET or city.lower() in STATE_SET:
             continue
-        hits.append(f"{state}, {city.strip()}")
-    return [h for h in dict.fromkeys(hits) if len(h) > 4]
+        add(f"{state}, {city.strip()}", city, state)
+    return [h for h in hits if len(h) > 4]
 
 
 def parse_notice(text):
@@ -375,13 +420,27 @@ def parse_notice(text):
                     break
     dq = " | ".join(dict.fromkeys(dqs))[:2000]
 
+    # A LOCATION IS THE LOCATION OF AN EVENT, and a notice that announces no
+    # event has none. Measured before this guard existed: 657 of 703 new
+    # locations landed on `NAGPRA_consultation_reported` rows and every one
+    # sampled was a MUSEUM CONTACT ADDRESS or an EXCAVATION COUNTY -
+    # "Cambridge, MA" from "should contact Patricia Capone, Peabody Museum",
+    # "Coconino County, AZ" from where remains were removed in 1985. Both are
+    # real places the notice prints; neither is where a consultation was held.
+    # So: the notice must announce a meeting before any place is read as one.
+    is_meeting_notice = bool(dates) or bool(MEETING_ACTION.search(f["action"]))
     places, lqs, lb = [], [], ""
+    if not is_meeting_notice:
+        return sorted(set(dates)), dq, db, [], "", ""
     for src, label in ((f["addresses"], "addresses_field"),
                        (f["dates"], "dates_field"),
                        (f["supp"], "supplementary_information")):
         for s in table_segments(src):
+            # the ADDRESSES table convention pairs a date with a place, and it
+            # only means a meeting inside a notice OF meetings
             anchored = bool(EVENT_VERB.search(s)) or (
-                label == "addresses_field" and bool(DATE_ROW.search(s)))
+                label == "addresses_field" and bool(DATE_ROW.search(s))
+                and bool(MEETING_ACTION.search(f["action"])))
             if not anchored or MAIL_TO.search(s):
                 continue
             got = places_in(s)

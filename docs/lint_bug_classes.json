@@ -1,12 +1,12 @@
 {
-  "scanned_files": 596,
+  "scanned_files": 597,
   "counts": {
     "class1": 1,
     "class2a": 3,
     "class2b": 0,
     "class2c": 72,
-    "class3": 3,
-    "class4": 13,
+    "class3": 2,
+    "class4": 14,
     "class5": 7,
     "class6": 28,
     "class7": 46,
@@ -125,7 +125,7 @@
     {
       "class": "class2c",
       "file": "1085_prime_psc_desc_repull.py",
-      "line": 506,
+      "line": 567,
       "evidence": "skipped_nonblank += 1",
       "why": "counter 'skipped_nonblank' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -206,9 +206,18 @@
     {
       "class": "class3",
       "file": "1104_nagpra_affiliation_rule_audit.py",
-      "line": 399,
+      "line": 403,
       "evidence": "if r.get(\"resolve_status\") == \"resolved\":",
       "why": "'resolve_status' is compared to a PROCESSED value (['resolved']) and the word 'outcome' appears nowhere in this file. `status` says the ruling was PROCESSED; `outcome` says what it DECIDED - one ruling read SETTLED while its outcome was 'HOLD - RETRACTION REQUIRED'.",
+      "waived": true,
+      "waiver_reason": "the opposite reading. This does not treat"
+    },
+    {
+      "class": "class4",
+      "file": "1110_tribal_debt_court_distress.py",
+      "line": 450,
+      "evidence": "if time.time() - START > RUN_DEADLINE_S:",
+      "why": "a budget (RUN_DEADLINE_S) exits a loop, the file writes a completion marker (['COMPLETE', 'ok', 'retrieved']), and it never compares what it RETRIEVED against the total the SOURCE reported. That is the PER_DOCKET_BUDGET_S defect: four dockets written at 2,300-3,200 of 3,555-4,847 and marked `done`, so no resume would ever revisit them.",
       "waived": false,
       "waiver_reason": ""
     },
@@ -1126,7 +1135,7 @@
       "file": "1107_punchlist_claim_verify.py",
       "line": 1,
       "evidence": "codebook_master.csv",
-      "why": "`codebook_master.csv` has FULL-REBUILD writer(s) ['1107_punchlist_claim_verify.py', '41_build_codebooks.py'] and IN-PLACE enricher(s) ['104_build_wa_allocations.py', '107_pull_remaining_states.py', '108_build_tribal_tax_bases.py', '111_build_advocacy_passthrough.py', '112_pull_grantee_990s.py', '113_build_nd_severance.py', '130_build_section_106_consultation.py', '132_build_schedule_i_layer.py', '140_build_grantmaker_funding_flows.py', '96_build_consultation_events.py', '97_build_aliases_and_relationships.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
+      "why": "`codebook_master.csv` has FULL-REBUILD writer(s) ['1107_punchlist_claim_verify.py', '41_build_codebooks.py'] and IN-PLACE enricher(s) ['104_build_wa_allocations.py', '107_pull_remaining_states.py', '108_build_tribal_tax_bases.py', '1108_codebook_fragment_repair.py', '111_build_advocacy_passthrough.py', '112_pull_grantee_990s.py', '113_build_nd_severance.py', '130_build_section_106_consultation.py', '132_build_schedule_i_layer.py', '140_build_grantmaker_funding_flows.py', '96_build_consultation_events.py', '97_build_aliases_and_relationships.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
       "waived": false,
       "waiver_reason": ""
     },
@@ -1610,9 +1619,18 @@
     {
       "class": "class7",
       "file": "1084_nagpra_split_artefact_audit.py",
-      "line": 669,
+      "line": 672,
       "evidence": "rows = [{\"nagpra_notice_institution_id\": f\"X#{i+1:02d}\",",
       "why": "[WARN] POSITIONAL on target nagpra_notice_institution_id -> nagpra_notice_institutions.csv, nagpra_notices.csv. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
+      "waived": true,
+      "waiver_reason": "a SELFTEST fixture. `X#01` is a synthetic key for"
+    },
+    {
+      "class": "class7",
+      "file": "1110_tribal_debt_court_distress.py",
+      "line": 391,
+      "evidence": "\"target_id\": f\"T{i:02d}_{stype}\",",
+      "why": "[WARN] POSITIONAL on target target_id -> no clean table. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": false,
       "waiver_reason": ""
     },
@@ -1826,7 +1844,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 3885,
+      "line": 4037,
       "evidence": "h = hash(\"\\x1f\".join(parts))",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1835,7 +1853,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 3895,
+      "line": 4047,
       "evidence": "h = hash(\"\\x1f\".join(row))",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1844,7 +1862,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 3920,
+      "line": 4072,
       "evidence": "if hash(k) in collided[gj]:",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1853,7 +1871,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 3926,
+      "line": 4078,
       "evidence": "if hash(k) in row_collided:",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -2752,6 +2770,7 @@
         "104_build_wa_allocations.py",
         "107_pull_remaining_states.py",
         "108_build_tribal_tax_bases.py",
+        "1108_codebook_fragment_repair.py",
         "111_build_advocacy_passthrough.py",
         "112_pull_grantee_990s.py",
         "113_build_nd_severance.py",
@@ -3021,7 +3040,8 @@
         "1072_tribally_owned_enterprises.py"
       ],
       "nest_enterprises.csv": [
-        "1072_tribally_owned_enterprises.py"
+        "1072_tribally_owned_enterprises.py",
+        "1102_nest_corroboration_adjudication.py"
       ],
       "nho_ito_spine_crosswalk.csv": [
         "163_promote_nho_universe_in_place.py"
@@ -3217,6 +3237,7 @@
         "107_pull_remaining_states.py",
         "108_build_tribal_tax_bases.py",
         "1107_punchlist_claim_verify.py",
+        "1108_codebook_fragment_repair.py",
         "111_build_advocacy_passthrough.py",
         "112_pull_grantee_990s.py",
         "113_build_nd_severance.py",
@@ -3398,6 +3419,10 @@
         "615_set_publishable_native_owned_businesses.py",
         "771_normalize_nboa_certification_dates.py",
         "953_nob_federal_identifier_candidates.py"
+      ],
+      "nest_enterprises.csv": [
+        "1072_tribally_owned_enterprises.py",
+        "1102_nest_corroboration_adjudication.py"
       ],
       "nho_ito_spine_crosswalk.csv": [
         "163_promote_nho_universe_in_place.py",

@@ -676,3 +676,277 @@ added to. `py -3 code/1082_tribal_debt_holdings_disclosure.py verify` fails
 (exit 1) on invariant `I3_no_holding_asserts_a_summable_total` if any row loses
 it, and `selftest` proves that check fires.
 <!-- END TRIBAL-DEBT -->
+
+<!-- BEGIN LOBBY-SUPERSESSION -->
+## The LDA amendment double-count, closed 2026-09-02 — and the FOURTH lobbying number that now exists
+
+*Appended by `code/1091_lobby_amendment_supersession.py`. Every figure below
+was re-measured with `csv.reader` from the live file on 2026-09-02; nothing is
+quoted from a build log. Nothing outside these markers was touched.*
+
+### What was wrong
+
+`docs/METHODOLOGY_LOBBYING.md` described the cleaning sequence as *"amendments
+applied over the originals they replace ... non-standard records
+(registrations, terminations) set aside before any total is struck."*
+**`native_entity_lobbying_disclosures.csv` had never done this.** An amended
+LD-2 *restates* the period it amends, and the LDA publishes the amendment as a
+**new filing with its own uuid** rather than replacing the original. Both ship.
+
+`data/clean/cedar_export_safety.csv` marked the table `SAFE_TO_AGGREGATE /
+aggregation_safe = 1` — **correctly for what `517` measures** (`filing_uuid` is
+unique, 0 literal duplicate rows) and **not for what a buyer does with
+`spend_usd`.** A literal-duplicate-row test is not an amendment-supersession
+test, and the whole double-count passed straight through it.
+
+### The measurement, and the doc figure that does not reproduce
+
+| | |
+|---|---:|
+| rows | 27,825 |
+| amendment rows | 1,416 · $41,640,996.01 |
+| groups on `(client_id, registrant_id, filing_year, filing_period)` holding an amendment **and** a non-amendment | **1,135** |
+| the same, with **form family** added to the key | 1,005 |
+| rows superseded by a later filing in their own group | **1,064** |
+| **money on superseded rows** | **$37,349,254.01 — 5.15%** |
+
+**`docs/methodology/lobbying.md`'s "$28,961,112 — 4.0%" does not reproduce.**
+The string appears in that document twice and in no script. Eight candidate
+definitions were measured against the live file: $33,218,483 (sum-minus-max
+within the mixed groups), $36,347,996 (the amendment rows), $39,183,189 (the
+non-amendment rows), $40,119,485 (all-but-latest by `dt_posted`), $45,805,356
+(all-but-latest over every multi-row group), $47,866,925 (sum-minus-min), and
+the two `attribution_withdrawn` / `org_type_barred` variants, which move
+further away rather than closer. **The 1,135 reproduces to the row; the dollar
+figure reproduces under nothing.** $37,349,254.01 is the figure this project
+can defend, and the methodology doc has been corrected to it.
+
+### Why the doc's key could not be used as written
+
+`(client_id, registrant_id, filing_year, filing_period)` puts a REGISTRATION in
+the same bucket as the REPORT that follows it:
+
+```
+key ('153096','43651','1999','mid_year')
+  3014138c...  Registration                 $0       posted 1999-03-29
+  f8fa8e38...  Registration - Amendment     $0       posted 1999-06-03
+  bca72f60...  Mid-Year Report         $60,000       posted 1999-08-13
+```
+
+A naive "the amendment supersedes the group" rule keeps the **$0 registration
+amendment** and deletes the **$60,000 report**. The key therefore carries a
+fifth component — the form family, REGISTRATION or REPORT — and even then it
+**refuses** in the 294 groups that still hold more than one non-amendment row.
+
+### What ships now
+
+Four columns, added in place. **No row was dropped, no existing cell changed,
+no money column rewritten, and no new money column created.** Row conservation
+27,825 → 27,825 and money conservation on all three dollar columns to the cent
+were proved on the write and are re-provable with `verify`.
+
+| column | |
+|---|---|
+| `supersession_group_id` | blake2b digest over the five-part key |
+| `supersession_status` | eight values, including two `AMBIGUOUS_*` refusals |
+| `is_superseded` | 1 on 1,064 rows |
+| `superseded_by_filing_uuid` | resolves into the same group, never to a superseded row |
+
+Status distribution, with the money on each:
+
+```
+NOT_SUPERSEDED                             24,106   $645,244,682.29
+REGISTRATION_NO_MONEY                       1,183             $0.00
+AMENDMENT_SURVIVOR                            973    $31,306,058.22
+SUPERSEDED_BY_AMENDMENT                       958    $33,654,987.22
+UNFLAGGED_DUPLICATE_CANDIDATE                 370     $8,194,182.00
+SUPERSEDED_BY_LATER_AMENDMENT                 106     $3,694,266.79
+AMBIGUOUS_MULTIPLE_ORIGINALS                   93     $2,320,542.00
+AMBIGUOUS_ORIGINAL_POSTED_AFTER_AMENDMENT      36     $1,329,256.00
+```
+
+**129 rows are `AMBIGUOUS_*`, carrying $3,649,798.** Which filing restates
+which is not knowable there from the LDA fields Cedar holds, so they are **left
+in the total and flagged**, never guessed. 370 rows are
+`UNFLAGGED_DUPLICATE_CANDIDATE` — a repeated `filing_type_display` with no
+amendment flag anywhere in the group. The LDA never said one replaces the
+other, so Cedar does not say it either.
+
+### THE FOURTH NUMBER. Read this before quoting any of them.
+
+The three-totals table earlier in this document is still exact — all three were
+re-measured 2026-09-02 and all three reproduce to the cent. **This work adds a
+fourth figure to the same collection, and it is the only additive one at filing
+grain:**
+
+| table | column | figure | one row is |
+|---|---|---:|---|
+| `lobbying_registrants.csv` | `spend_reported_usd` | $645,052,868.51 | one registrant — **already** amendment-deduplicated by `180` |
+| `tribe_year_lobbying_panel.csv` | `total_lobbying_spend_usd` | $680,561,640.52 | one (entity, year) — **not** amendment-adjusted |
+| `native_entity_lobbying_disclosures.csv` | `spend_usd` | **$688,394,720.51** | one filing, `WHERE is_superseded = 0` — **the additive one** |
+| `native_entity_lobbying_disclosures.csv` | `spend_usd` | $725,743,974.52 | one filing, unfiltered — **double-counts $37.3M** |
+
+**Adding any two of these four counts the same dollar twice.** The two middle
+figures are within $7.8M of each other and measure *different populations by
+different rules*; their closeness is a coincidence and is the most likely way
+someone gets this wrong.
+
+That `lobbying_registrants.csv` was **already** doing supersession is the
+corroboration for the key used here. Its shipped codebook has said since
+2026-08-26: *"Deduplicated to one value per (registrant, client, year,
+reporting period), taken from the filing with the latest dt_posted, because an
+amendment supersedes what it amends."* The rollup did it; the filing table it
+was built from did not.
+
+### Where the warning reaches a buyer
+
+Not in this document — a buyer never opens it. Three rows were added to
+`data/clean/series_breaks.csv` (24 → 27, zero pre-existing rows lost, written
+by `code/86_build_series_breaks.py`), which `code/87_build_dataset_notes.py`
+renders as the **`## Comparability`** block of
+`dist/04_lobbying/native_entity_lobbying_disclosures.NOTES.md` and
+`dist/04_lobbying/tribe_year_lobbying_panel.NOTES.md`, and the codebook
+descriptions of `spend_usd` and `total_lobbying_spend_usd` were rewritten in
+`codebook_master.csv`. Before 2026-09-02 neither shipped note mentioned
+amendments or the other totals at all, and the panel's
+`total_lobbying_spend_usd` was described, in full, as *"Amount."*
+
+### The check, and the proof that it fires
+
+```
+py -3 code/1091_lobby_amendment_supersession.py measure    # read-only
+py -3 code/1091_lobby_amendment_supersession.py verify     # exit 1 on breach
+py -3 code/1091_lobby_amendment_supersession.py selftest   # 8/8 fire
+```
+
+`selftest` injects one synthetic violation at a time, asserts the **named**
+invariant is among the failures, restores, and asserts clean again — I1 row
+conservation, I2 money conservation, I3 cell preservation, I4 key preservation,
+I5 superseder resolves, I6 one survivor per group, I7 the drop accounts
+exactly. The first draft of I6 printed **SILENT** on a real violation: it
+picked a superseded row out of a two-row group, so un-superseding it emptied
+the group of superseded rows and the invariant's precondition went false. That
+is AGENT_FIELD_GUIDE §3 in miniature and it is why the fixture now picks from a
+group with at least two superseded rows.
+
+`1091` is an **in-place enricher**. `code/lobbying_pull/05_match_filings_v2.py`
+rebuilds this table from `raw_filings.jsonl` and reverts it. The order after
+any such rebuild is **65 → 350 → 351 → 353 → 1091**; `1091` is idempotent and
+recomputes rather than appends.
+
+### OWNER DECISION OUTSTANDING
+
+`517`/`512` still class this table `SAFE_TO_AGGREGATE`, `aggregation_safe = 1`,
+and that classification is **correct on its own terms** — it is a primary-key
+and literal-duplicate test, and both still pass. It is nevertheless the field a
+buyer's tooling reads before it reads any prose. Either `517` gains a notion of
+*additive under a stated predicate*, or the lobbying contract in `512` declares
+one. **Both files are the integrator's.** The measurement is here; the
+classification is not an agent's to change.
+<!-- END LOBBY-SUPERSESSION -->
+
+<!-- BEGIN SEC-GAMING -->
+
+## SEC-filed gaming money — a third class, and the fee is not the revenue (workstream SEC-GAMING, 2026-09-02)
+
+*Appended by `code/1080_sec_gaming_facility_revenue.py`. Every figure below was
+re-counted from the live files on 2026-09-02 with `csv.reader`. This section is
+inside `<!-- BEGIN SEC-GAMING -->` / `<!-- END SEC-GAMING -->`; `574` rewrites
+this file wholesale and preserves only marked blocks.*
+
+`sec_gaming_financial_disclosures.csv` (67 rows) and
+`sec_gaming_management_contract_terms.csv` (7 rows) hold what a **public SEC
+registrant filed about a tribal gaming property under a federal disclosure
+obligation** — the property's own revenues where the registrant is the tribal
+gaming authority, and the management or relinquishment fee where the registrant
+is the manager.
+
+### They are a THIRD class, and they are pooled with neither of the other two
+
+Gaming already separates a regulator's figure from an operator's self-published
+claim. These rows are neither.
+
+| class | example table | what it is |
+|---|---|---|
+| regulator | `nigc_regional_ggr.csv`, `gaming_capacity_official.csv` | a regulator's measurement of the industry |
+| self-published | `gaming_property_self_published_claims.csv` | what a casino says about itself on its own website |
+| **SEC-filed** | **`sec_gaming_financial_disclosures.csv`** | **the filer's own accounting of its own contract or its own property, filed with the SEC and (in a 10-K) sitting inside or beside audited statements** |
+
+`assertion_class = SEC_FILED_FINANCIAL_DISCLOSURE`, deliberately outside
+`cedar_domain.MeasurementType` and outside the `SELF_PUBLISHED_*` family.
+`not_summable_with` is populated on every row and names
+`gaming_revenue_bounds.csv`, `nigc_regional_ggr.csv`, `nigc_revenue_bands.csv`,
+`gaming_capacity_official.csv`, `state_gaming_observations.csv` and both
+self-published tables.
+
+**Never add an SEC-derived property figure to an NIGC regional ceiling.** The
+property is *inside* the region; the ceiling already contains it. `1080 verify`
+measures the overlap rather than asserting there is none: **7 of the 8
+facility_ids in this table also carry a `REGIONAL_GGR_CEILING` bound row.** That
+is expected. It is the whole reason the fence is declared.
+
+### Four traps inside the table itself
+
+**1. A 10-K restates the two prior fiscal years, and 32 of the 67 rows are such
+a restatement.** Mohegan Sun's FY2017 net revenues of $1,079,920 thousand appear
+in the FY2017, FY2018 *and* FY2019 10-Ks. All three rows are kept — each is a
+real disclosure in a real filing — but **only `is_first_filing_of_this_fact = Y`
+is safe to total. That subset is 49 of 67 rows.** Summing the whole table by
+property-year triples Mohegan Sun. `restatements_agree` records whether the
+later filings match the first: **0 of 32 disagree**, which is the only genuine
+internal corroboration this table has.
+
+**2. `figure_type` is not decoration. Never sum across it.** Six kinds are in
+force and they are four different quantities about one property:
+`FACILITY_NET_REVENUES` (32) · `MANAGEMENT_FEE_REVENUE` (16) ·
+`RELINQUISHMENT_PAYMENT` (7) · `DERIVED_FACILITY_GROSS_REVENUES_AS_DEFINED` (7) ·
+`DERIVED_FACILITY_NET_INCOME_AS_DEFINED` (3) · `FACILITY_NET_GAMING_REVENUE` (2).
+A manager's fee and the property's revenue are related by a contract, not by
+addition.
+
+**3. THE FEE DOES NOT IMPLY THE REVENUE. It implies the contract's own base, and
+that base is usually PROFIT.** This is the correction this workstream owes the
+premise it started from. IGRA defines "net revenues" at **25 U.S.C. § 2703(9)**
+as gross gaming revenues *less* amounts paid out as prizes and *less* total
+gaming-related operating expenses excluding management fees — far closer to
+operating profit than to revenue. And the contracts in this corpus do not even
+share one base: Lakes' Red Hawk fee is *"30% of net revenue (as defined by the
+development and management agreement)"*; Red Rock's Graton fee is *"24% of
+Graton Resort's net income (as defined in the management agreement)"* in years
+1–4 and 27% in years 5–7. Dividing a fee by its rate recovers **that contract's
+base and nothing else**, which is why the derived types say `AS_DEFINED` and
+never say "revenue" unqualified. A derived row carries `derived_from_fee = Y`,
+the arithmetic in `derivation_arithmetic`, the rate's own accession in
+`derivation_percentage_source_accession`, and a `derivation_caveat` that says
+what the base is. **`1080 verify` V10 refuses a derived figure that wears a
+reported figure's `figure_type`.**
+
+Of the **8 distinct (property, rate) fee formulas** found across 51 statements, only **two** supported a derivation - Mohegan Sun at a flat 5% and Graton at a flat
+27% - and the other six did not: Four Winds is *"24% of net income up to a certain
+threshold and 19% over that threshold"* with the threshold undisclosed; Cimarron
+is 30% of net income *"in excess of $4 million"*; Gun Lake's rate is never
+stated (the "30% of the facility's net income" in the same 10-K belongs to the
+**North Fork** project); and one apparent FireKeepers term is the **statutory
+NIGC ceiling** recited in a regulatory-background section, not that contract's
+fee.
+
+**4. Twelve rows are a property a tribe owns that is NOT Indian-lands gaming.**
+`facility_is_on_indian_lands` is `N` on the twelve Mohegan Sun Pocono rows — a
+Pennsylvania racino owned by the Mohegan Tribal Gaming Authority — and the nine
+Ontario `MGE Niagara Resorts` rows were rejected outright and are not in the
+table. They are labelled rather than dropped because a reader of MTGA's segment
+table needs to see why the segment lines do not add up to the tribal properties.
+
+### How much of the universe this reaches, stated honestly
+
+**8 facility records, 7 distinct Indian-lands properties, 6 tribes.** Against
+787 facilities that is **0.9%**. It is not a solution to the missing-revenue
+problem and must never be presented as one; it is a deep, well-evidenced core
+for the handful of tribal casinos whose economics passed through a public
+company's books. What it does add is duration — Mohegan Sun is covered for 15
+distinct years (2000–2022), Graton for 5, Seneca Allegany for 3.
+
+`sec_gaming_management_contract_terms.csv` **carries no money at all.**
+`fee_percentage` is a rate. Nothing in that table may be totalled with anything.
+
+<!-- END SEC-GAMING -->

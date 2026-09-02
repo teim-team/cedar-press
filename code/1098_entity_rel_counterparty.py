@@ -327,12 +327,15 @@ def build(dry_run=False) -> int:
              "nest_would_resolve_via_nest_uei_candidate_REFUSED": 0}
 
     for r in rows:
+        # Every row gets every column, blank by default. Written as a plain
+        # assignment rather than setdefault: this enricher RECOMPUTES its own
+        # columns on every run, so carrying a previous run's value forward
+        # would make a stale link survive a fix. 293 class 2a exists because
+        # the two shapes were mixed on one variable.
         for c in NEW:
-            r.setdefault(c, "")
+            r[c] = ""
         cp = classify(r)
         if cp is None:
-            for c in NEW:
-                r[c] = ""
             continue
         stats["blank_endpoint_rows"] += 1
         if cp["basis"] == "UNPARSED":

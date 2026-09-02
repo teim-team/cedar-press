@@ -10,8 +10,9 @@ Cedar Press - 1092: finish the bill-title backfill, and un-stale the scope
 column the first backfill left behind.
 
     py -3 code/1092_bill_titles_residue_and_scope.py measure   # read-only, no network
-    py -3 code/1092_bill_titles_residue_and_scope.py pull      # api.congress.gov, <= 12 requests
+    py -3 code/1092_bill_titles_residue_and_scope.py pull      # api.congress.gov, 18 requests
     py -3 code/1092_bill_titles_residue_and_scope.py write     # in-place enrich native_bills.csv
+    py -3 code/1092_bill_titles_residue_and_scope.py codebook  # refresh the 2 rows 890 owns
     py -3 code/1092_bill_titles_residue_and_scope.py verify    # read-only, exit 1
     py -3 code/1092_bill_titles_residue_and_scope.py selftest  # prove verify fires
 
@@ -89,14 +90,21 @@ than one is a REFUSAL written to the staging file as
 
 WHAT THIS SCRIPT WILL NOT DO
 ============================
-* It will not touch the 25 votes with no `bill_id`. Twenty-two are Panama
-  Canal / US-UK tax treaty reservation votes with no bill and no bill title;
-  three name a measure in their question text but assigning them a `bill_id`
-  changes the vote-to-bill linkage, `n_rollcalls` and the entity bridge, which
-  is a build decision and not an enrichment. `890` already states the reason
-  on each row and `1093` re-states the classification.
+* It will not PROMOTE anything for the 25 votes with no `bill_id`. 22 are
+  votes on reservations to a resolution of ratification - 17 Panama Canal
+  Treaty, 4 Neutrality Treaty, 1 US-UK tax treaty [measured] - where there is
+  no bill and therefore no bill title: SOURCE_DOES_NOT_PUBLISH, a fact about
+  the world. The other 3 name a numbered measure in their own question text
+  and ARE closable at the source; their eight titles are fetched into
+  `1092_title_residue_unlinked.csv` as evidence and go no further, because
+  assigning a `bill_id` means adding a row to `native_bills.csv` and
+  rebuilding `n_rollcalls`, `native_bill_outcomes.csv` and both entity
+  bridges. That is a decision for `14_build_bills_votes.py`.
 * It will not paraphrase, shorten or case-fold a title. Verbatim or blank.
 * It will not run the scope ruler on a row whose title is still blank.
+* It will not re-rule the 2,901 rows ruled before it. The spine has grown and
+  76 of those rulings no longer reproduce; `verify` prints them every run and
+  they stay on file. Re-ruling moves a published `tribe-specific` count.
 
 WHAT IT READS / WRITES
 ======================
@@ -106,9 +114,19 @@ reads   data/clean/native_bills.csv
 network api.congress.gov  /bill/{c}/{type}/{n}   and  /treaty/{c}/{n}
 staging data/raw/external/congress_gov/1092_title_residue/*.json   (raw, verbatim)
         data/raw/external/congress_gov/1092_title_residue_targets.csv
+        data/raw/external/congress_gov/1092_title_residue_unlinked.csv
+            EVIDENCE ONLY. `staged_titles()` reads the targets file and never
+            this one, so nothing here can reach a clean table by accident.
 writes  data/clean/native_bills.csv   (in place; .bak_<date>_pre_1092_... first)
         columns touched: title, record_basis, bill_scope, bill_scope_basis
         rows: 3,069 in -> 3,069 out, proven every run
+        `codebook` mode also refreshes the two rows 890 owns in
+        data/clean/codebook/10_bills_votes.csv and codebook_master.csv,
+        because filling the titles moved the numbers those rows state.
+
+RE-RUN ORDER after any `14_build_bills_votes.py` rebuild:
+    14 -> 73 -> 1092 (pull is idempotent; `write` alone suffices if the
+    staging file is present) -> 890 -> 1093.
 """
 from __future__ import annotations
 

@@ -209,6 +209,27 @@ def _terms():
             f"{len(ex)} host-level exclusions, none swept a nation")
 
 
+@claim("no two marker blocks share a name in a shared doc", critical=True)
+def _markers():
+    """Two blocks with one marker name are ONE block to any tool that
+    preserves by marker - the next wholesale regenerate silently deletes one.
+    Found live on 2026-09-02: ARCHITECTURE_DECISIONS.md carried two blocks both
+    named ADR-018, from two different workstreams on the same day."""
+    import re as _re, collections as _c
+    bad = []
+    for d in sorted((ROOT / "docs").glob("*.md")):
+        try:
+            names = _re.findall(r"<!--\s*BEGIN\s+([A-Za-z0-9_\-]+)\s*-->",
+                                d.read_text(encoding="utf-8", errors="replace"))
+        except OSError:
+            continue
+        for n, k in _c.Counter(names).items():
+            if k > 1:
+                bad.append(f"{d.name}: {n} x{k}")
+    return (not bad, "; ".join(bad[:4]) or
+            f"{sum(1 for _ in (ROOT / 'docs').glob('*.md'))} docs, every marker name unique")
+
+
 # ---------------------------------------------------------------- CICD
 @claim("the CICD scheme is gone from every table and every reachable read")
 def _cicd():

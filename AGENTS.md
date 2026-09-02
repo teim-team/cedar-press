@@ -6400,3 +6400,169 @@ within an axis and reports **2**, both Chugach, both real. **60 enterprises are
 now corroborated by two independent evidence families**, which is the first
 answer this project has to `ASSERTION_LAYER.md`'s finding that every fact rests
 on exactly one source.
+
+---
+
+## 2026-09-02 — GRAIN-LEGISLATION: the anomaly count, the eight missing titles, and the scope column nobody replayed
+
+`code/1092_bill_titles_residue_and_scope.py` (new) and
+`code/1093_bill_votes_majority_anomaly.py` (new). Both declared in
+`cedar_pipeline.KNOWN_ORDERINGS` at creation. Chain is now
+**14 → 73 → 1092 → 890 → 1093**, enrichers last.
+
+**THE ANOMALY COUNT IS 16, RE-MEASURED FROM THE LIVE FILE, AND THE
+COMPOSITION IS 9 + 5 + 2.** An anomaly = a simple-majority reading of the
+tally mispredicts the recorded outcome. 351 of 423 votes are testable;
+`MAJORITY_YEA_BUT_REJECTED` 16, `MINORITY_YEA_BUT_AGREED` **0**, `N` 335,
+`NOT_TESTABLE_NO_RESULT` 72.
+
+* 9 `HOUSE_SUSPENSION_TWO_THIRDS` — the nine `docs/WHAT_IS_MISSING.md` names.
+* 5 `SENATE_CLOTURE_THREE_FIFTHS` — S102-0315, S104-0027, S109-0531,
+  S115-0399, S115-0402.
+* **2 `SENATE_THREE_FIFTHS_NOT_IN_QUESTION_TEXT` — the two that moved the
+  count.** `S108-0356` (2003-09-23, 49–45, *Motion Rejected*, senate.gov
+  `majority_requirement` 3/5): a Congressional Budget Act point-of-order
+  waiver on S.Amdt. 1734, *"To provide additional funds for clinical services
+  of the Indian Health Service, with an offset."* `S114-0351` (2016-02-02,
+  52–43, *Amendment Rejected*, 3/5): S.Amdt. 3030 to S. 2012 under a
+  unanimous-consent 60-vote agreement. **Neither is a cloture motion and
+  neither threshold appears in the question string** — both read `On the
+  Motion` / `On the Amendment`. Both carry
+  `threshold_agrees_with_official = N`; only the join to
+  `bill_votes_official_verification.csv` can see them.
+
+The classes are derived from ROW PROPERTIES — chamber, `threshold_required`,
+question text, agreement with the official record — never from a list of vote
+ids, so a rebuild that adds a Congress gets classified rather than
+mislabelled. An anomaly outside the three classes is a **refusal to write**.
+
+**Why a new column when 890 already had one.**
+`result_reconciles_with_threshold` reads **Y on all 351 testable rows and N on
+none**, so it cannot distinguish the sixteen from the 335. The anomaly was
+explained and then became invisible. `result_contradicts_simple_majority`,
+`result_anomaly_class` and `result_anomaly_basis` are what a buyer reads.
+`bill_votes.csv` 68 → 71 columns, **423 rows in → 423 out**, proven each run.
+
+**EIGHT TITLE-LESS BILLS, AND THE CAUSE WAS CEDAR'S SPELLING, NOT THE
+SOURCE.** Every canonical congress.gov bill_type slug in `native_bills.csv` is
+100% titled (`hr` 1651/1651, `s` 1332/1332, `hres` 38/38, `hjres` 23/23,
+`sjres` 12/12, `sconres` 5/5). Every non-canonical slug was **0%** (`hre` 0/2,
+`hjr` 0/1, `treatydoc` 0/2, `treatydocno` 0/3). `14_pull_cosponsors.py`
+hard-codes an `ok_types` allow-list; `hre` and `hjr` are Voteview's
+abbreviations for `hres` and `hjres` and fail it, and treaty documents are not
+on `/bill` at all. Asked correctly — and on `/treaty/{congress}/{number}` —
+**all eight answered HTTP 200 on the first attempt**, 18 GETs total, one
+poller, hostlock taken and released, real User-Agent, `.part`-then-rename.
+`bill_title` on `bill_votes.csv` **390 → 398 of 423**;
+`TITLE_BLANK_IN_native_bills.csv` **8 → 0**.
+
+Two treaty identifiers were **ambiguous** and were settled by evidence, not
+plausibility. Voteview writes `TREATYDOC1134` and `TREATYDOC1173` with no
+separator, so 1|134, 11|34 and 113|4 all read the first. A candidate was
+accepted only where the treaty's own action list carried a Senate action on
+the roll call's date AND `congressConsidered` equalled the vote's Congress.
+`1134` = **Treaty Doc. 113-4** (Protocol Amending the Tax Convention with
+Spain); `1173` = **Treaty Doc. 117-3** (Accession of Finland and Sweden to the
+North Atlantic Treaty). Also note: `treaty.topic` is a CATEGORY
+("Commercial"), not a title — the title is the `Treaty - Short Title` entry in
+`treaty.titles`, and nothing else was accepted as one.
+
+**THE HONEST FLOOR ON THE OTHER 25: 22 ARE FACTS ABOUT THE WORLD.** All 25
+carry no `bill_id` and Voteview records no bill number for any of them
+(verified against `HSall_rollcalls.csv`). 22 are votes on reservations to a
+resolution of ratification — 17 Panama Canal Treaty, 4 Neutrality Treaty, 1
+US-UK tax treaty — no bill, therefore no bill title: `SOURCE_DOES_NOT_PUBLISH`.
+**3 name a numbered measure in their own question text** and are
+`NOT_ACQUIRED`: `H100-0888` (H.Con.Res. 331), `S100-0452` (S.Res. 386),
+`S100-0417` (six S.Res. en bloc). Their eight titles were fetched and are on
+disk, **deliberately unpromoted**, at
+`data/raw/external/congress_gov/1092_title_residue_unlinked.csv` — promoting
+one means minting a `bill_id` and a `native_bills.csv` row and rebuilding
+`n_rollcalls`, `native_bill_outcomes.csv` and both entity bridges, which is a
+decision for `14_build_bills_votes.py` and not an enrichment. The next pass
+starts at `ON_DISK_NOT_PROMOTED` instead of `NOT_ACQUIRED`. So: **33
+title-less votes → 8 closed, 3 closable and staged, 22 unclosable and correct.**
+
+**THE FOUND DEFECT: A BACKFILL RAN AND THE DERIVATION THAT DEPENDS ON IT
+NEVER DID.** `bill_scope` was blank on **168 of 3,069** and none of the 168
+was unrulable. 128 gained a `title` on 2026-08-05 and still said
+`bill_scope_basis = no_title_available`; 32 came from `73 --sweep` with a
+blank basis; 8 had no title. `93-hr-10337` — *"An Act to provide for final
+settlement of the conflicting rights and interests of the Hopi and Navajo
+Tribes…"* — was scored `no_title_available`. 1092 replays 14's OWN ruler
+(imported from `14_build_bills_votes.py`, never re-implemented) over all 168.
+`bill_scope`: `general` 2,417 → **2,569**, `tribe-specific` 484 → **500**,
+blank 168 → **0**. `native_bills.csv` **3,069 rows in → 3,069 out**.
+
+**FLAGGED, NOT FIXED — `bill_scope` now carries two ruler vintages.** The
+spine has grown to 3,717 usable names. Re-running today's ruler over the
+2,901 pre-1092 rulings changes **76** of them; those were NOT re-ruled,
+because that moves a published `tribe-specific` count and is an owner
+decision. `1092 verify` prints them every run. **Two of the causes are
+spine-quality problems, not new knowledge:** an entity literally named
+**"Tribal Self-Governance"** matches 14 generic bill titles and **"Native
+Health"** matches 7 — names that generic arguably belong in the ruler's
+`GENERIC` exclusion list, alongside `indian`, `tribe`, `nation`. The 168 rows
+1092 ruled are stamped `scope_ruled_1092_2026-09-02` in `record_basis`, and
+152 of the 168 came back `no_specific_entity_matched`, which is vintage-safe
+in the only direction that matters — a smaller spine cannot produce a match a
+larger one did not.
+
+**EVERY CHECK PROVEN TO FIRE AT THE FILE LEVEL**, not only in `selftest`:
+inject into the live CSV, assert exit 1 AND that the NAMED invariant appears,
+restore from a literal path (never a glob — the 163 incident), assert exit 0.
+1092 C1–C5 and 1093 D1–D5, ten for ten. 1093's D5 is the one that matters
+after a rebuild: it exits 1 when 890's threshold columns are absent rather
+than reporting a clean result it did not measure.
+
+**STALE NUMBERS CORRECTED IN PLACE** rather than left to look authoritative:
+890's docstring and its two codebook variable descriptions (`bill_title`,
+`bill_title_source`) stated 390/8 and now state 398/0, refreshed in
+`codebook/10_bills_votes.csv` and `codebook_master.csv` by
+`1092 codebook` (130 → 130 and 5,199 → 5,199 rows, conserved).
+`docs/methodology/legislation.md` had **five** stale claims: BLOCKED (it is
+`READY`, 11 tables, per `518`), the nine-anomaly paragraph, "no
+`threshold_required` column exists", "390 of the 423", and the `bill_scope`
+distribution. All corrected, with the superseded figure kept beside the new
+one. `docs/WHAT_IS_MISSING.md`'s CLOSED box for this dataset had already been
+corrected to sixteen by the `890` pass; its Item 1 figures (390 of 423, 8
+`TITLE_BLANK_IN_native_bills.csv`) and its cross-dataset table row 7 were
+updated here to 398 / 0, and item 2's heading now says CLOSED. **Its body
+prose still proposes the wrong derivation** — "87 votes whose `question`
+contains 'suspend'", which catches `S095-0741` (a Panama Canal reservation
+reading "…SHALL BE SUSPENDED UNTIL SETTLEMENT") and mistypes `H095-0549` (an
+*order a second* motion, decided by majority). That prose is left verbatim by
+that file's own convention — *"the read below is left exactly as written"* —
+and the correction sits in the box above it.
+
+`code/770_sample_extracts.py`'s `legislation` SHOW list gains
+`result_contradicts_simple_majority`. **770 was NOT run**: it regenerates
+every dataset's sample and four other workstreams had live processes against
+`data/clean` during this pass. The list change is inert until the integrator
+runs it, which is the point.
+
+### The gates, and who owns the red
+
+`py -3 code/518_dataset_readiness.py` → **READY  legislation  11 tables**.
+`1092 verify`, `1092 selftest`, `1093 verify`, `1093 selftest` → **exit 0**.
+
+`py -3 code/293_lint_bug_classes.py` → **exit 1**, and
+`py -3 code/62_no_regression_check.py` → **exit 1**. Standing rule 15 says name
+the owner with a measurement rather than record it as pre-existing and walk on.
+Measured: **`1092_*` and `1093_*` contribute ZERO findings to `293`** (0 of
+226 findings name either file). The 27 new lint instances are
+`1098_entity_rel_counterparty` (4), `1060_splink_pilot` (3),
+`1030_sec_edgar_native_transactions` (2), `1031_ancsa_45_55_139_annual_reports`
+(2), `1086_faads_award_key_promote` (2), `873_build_aiannh_crosswalk` (2),
+`992_newsletter_deal_candidates` (2), `1107_punchlist_claim_verify` (2), and
+one each in `1011`, `1081`, `1085`, `1099`, `1101`, `1104`, `846`, `852`,
+`980`, `518`, `30`, `870`, `871`, `1077`. `62`'s
+`files_with_columns_lost_vs_backup = 2` is `native_fi_roster.csv` (lost
+`in_cicd_nafi_map`) and `cedar_entity_spine.csv` (lost `cicd_verified`), both
+against `.bak_2026-09-02_pre844` — script `844`, not this workstream. The
+shipping losses (`hearing_bill_links` 465 → 464,
+`native_bills_subject_sweep` 2,414 → 2,409, `advocacy_passthrough_2026-08-07`
+gone) predate this pass; `native_bills_subject_sweep` already read 2,409 in
+`docs/methodology/legislation.md` before it started. **Neither table this pass
+touched lost a row or a column: `bill_votes.csv` 423 → 423 and 68 → 71
+columns; `native_bills.csv` 3,069 → 3,069 and 29 → 29 columns.**

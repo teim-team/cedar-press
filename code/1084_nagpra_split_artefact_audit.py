@@ -666,6 +666,9 @@ def selftest() -> int:
         cities = cities or [""] * len(names)
         states = states or [""] * len(names)
         titles = {"X": title}
+        # lint-ok: class7 - a SELFTEST fixture. `X#01` is a synthetic key for
+        # an in-memory row that is never written anywhere; the shipped id is
+        # minted by 1077 from the notice's own published title ordinal.
         rows = [{"nagpra_notice_institution_id": f"X#{i+1:02d}",
                  "document_number": "X", "institution_seq": i + 1,
                  "institution_name": n, "institution_city": cities[i],

@@ -672,12 +672,41 @@ def _month_end(y, m):
     return None
 
 
+def cached_json(url, key):
+    """Fetch once, keep it. `.part` then rename.
+
+    Without this a correction to how the date is READ costs the whole run's
+    requests again, which is how a host gets hammered for a one-line fix.
+    """
+    os.makedirs(os.path.join(STAGE, "pp"), exist_ok=True)
+    p = os.path.join(STAGE, "pp", key + ".json")
+    if os.path.exists(p):
+        with open(p, encoding="utf-8") as fh:
+            d = json.load(fh)
+        return (None, d["note"]) if d.get("note") != "200" else (d["obj"], "200")
+    obj, note = get_json(url)
+    if note in ("200", "HTTP 404"):          # a settled answer is cacheable;
+        with open(p + ".part", "w", encoding="utf-8") as fh:   # a timeout is not
+            json.dump({"obj": obj, "note": note}, fh)
+        os.replace(p + ".part", p)
+    return obj, note
+
+
 def pp_filings(ein):
-    """-> ({org, tax_period_end}|None, note). The date is the IRS's."""
-    obj, note = get_json(PP_ORG % ein)
+    """-> ({org, tax_period_end, basis}|None, note). The date is the IRS's.
+
+    TWO IRS DATES, AND THE NEWER ONE IS NOT IN THE FILINGS LIST.
+    `organization.tax_period` comes from the Exempt Organizations Business
+    Master File, which the IRS refreshes monthly; `filings_with_data` lags it
+    by one to two returns. Alu Like Inc: BMF tax period 2025-06, newest filing
+    2023-06 -- twenty-four months apart, both true, and taking only the
+    filings understates the entity's most recent IRS record by two years.
+    Take the later of the two and SAY which one won.
+    """
+    obj, note = cached_json(PP_ORG % ein, "org_" + str(ein))
     if obj is None:
         return None, note
-    best = ""
+    best, basis = "", ""
     for f in ((obj.get("filings_with_data") or [])
               + (obj.get("filings_without_data") or [])):
         raw = str(f.get("tax_prd") or "")
@@ -685,10 +714,24 @@ def pp_filings(ein):
             y, m = int(raw[:4]), int(raw[4:])
             if 1 <= m <= 12 and 1990 <= y <= 2100:
                 end = _month_end(y, m)
-                s = sane_date(end.isoformat()) if end else ""
-                if s > best:
-                    best = s
-    return {"org": obj.get("organization") or {}, "tax_period_end": best}, "200"
+                d = sane_date(end.isoformat()) if end else ""
+                if d > best:
+                    best, basis = d, ("`tax_prd` on the most recent Form 990 "
+                                      "the IRS has published for this EIN")
+    org = obj.get("organization") or {}
+    tp = str(org.get("tax_period") or "")[:10]
+    if len(tp) >= 7 and tp[:4].isdigit():
+        y, m = int(tp[:4]), int(tp[5:7])
+        if 1 <= m <= 12:
+            end = _month_end(y, m)
+            d = sane_date(end.isoformat()) if end else ""
+            if d > best:
+                best, basis = d, ("`tax_period` on the IRS Exempt "
+                                  "Organizations Business Master File record "
+                                  "for this EIN, which the IRS refreshes "
+                                  "monthly and which runs ahead of the "
+                                  "published returns")
+    return {"org": org, "tax_period_end": best, "basis": basis}, "200"
 
 
 def route_irs990(tail, ents, budget=300):
@@ -747,9 +790,8 @@ def route_irs990(tail, ents, budget=300):
                                + (org.get("state") or "")).strip(" |"),
                 "as_of_date": d if ok else "",
                 "as_of_date_basis": (
-                    "last day of `tax_prd` (YYYYMM), the tax period the IRS "
-                    "states on the most recent return filed under this EIN. "
-                    "The date is the IRS's."
+                    "last day of the tax period the IRS states for this EIN, "
+                    "read from " + res["basis"] + ". The date is the IRS's."
                     if ok else
                     "no date: the EIN on disk resolves to a different "
                     "organisation, or the IRS lists no dated filing for it"),
@@ -850,7 +892,9 @@ def route_irs990_search(tail, ents, budget=900):
         st = states.get(u, "")
         url = pp_search_url(nm, st)
         spent += 1
-        obj, note = get_json(url)
+        obj, note = cached_json(url, "search_" + re.sub(r"[^A-Za-z0-9]", "_",
+                                                        deacc(nm))[:60]
+                                + "_" + (st or "ANY"))
         if obj is None and note == "HTTP 404":
             # PROPUBLICA ANSWERS A ZERO-RESULT SEARCH WITH 404, NOT AN EMPTY
             # LIST. Measured 2026-09-02: `q=alu+like` -> 200 with one
@@ -917,8 +961,8 @@ def route_irs990_search(tail, ents, budget=900):
                            + (h.get("state") or "")).strip(" |"),
             "as_of_date": d,
             "as_of_date_basis": (
-                "last day of `tax_prd` (YYYYMM), the tax period the IRS "
-                "states on the most recent return filed under EIN " + ein
+                "last day of the tax period the IRS states for EIN " + ein
+                + ", read from " + (res["basis"] if res else "")
                 + ". The date is the IRS's."
                 if d else
                 "no date: the organisation is on the IRS list but no return "

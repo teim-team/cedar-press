@@ -329,6 +329,27 @@ def classify(path):
 #: Ordering pairs that were paid for in lost work. `after` must run AFTER
 #: `before` whenever `before` runs, or `before`'s columns are gone.
 KNOWN_ORDERINGS = [
+    # --- federal-register consultation, added 2026-09-02 by workstream FR-DTLL
+    # `96` rebuilds consultation_events.csv from fr_consultation_notices.csv
+    # and fr_consultation_referenced.csv. `1089` then writes eight columns
+    # into it IN PLACE: the join key the file never had, the measured NAGPRA
+    # overlap a buyer needs in order not to double-count against the `nagpra`
+    # dataset, and the parsed event date/place with the publisher's own
+    # sentence beside each. A `96` run that is not followed by `1089` reverts
+    # all eight and the table silently goes back to claiming no relationship
+    # to a dataset that shares 10,920 of its 11,402 rows.
+    {"rebuild": "96_build_consultation_events.py",
+     "enricher": "1089_fr_consultation_overlap_and_event_parse.py",
+     "file": "consultation_events.csv",
+     "cost": "the table loses fr_document_number - its only join key to the "
+             "156,897-row Federal Register corpus - and loses the measured "
+             "NAGPRA overlap, so a buyer holding both federal-register and "
+             "nagpra has nothing on the row telling them 95.8% of these rows "
+             "describe a notice the other dataset also ships",
+     "enricher_columns": ["fr_document_number", "nagpra_notice_overlap",
+                          "nagpra_bridge_overlap", "nagpra_coverage_window",
+                          "event_date_basis", "event_date_source_quote",
+                          "location_basis", "location_source_quote"]},
     # --- subcontracting, added 2026-09-02 by workstream SUBAWARD-FUNDING ----
     # `subawards.csv` has a PRIMARY KEY for the first time -
     # (source_dataset, subaward_source_record_id) - and both halves are

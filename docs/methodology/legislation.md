@@ -16,10 +16,12 @@ came from a build log or docstring without independent measurement. Where a doc
 and the data disagreed, the measurement won; the disagreements are listed at
 the end.
 
-**Readiness: BLOCKED**, on exactly one table. [measured —
-`docs/DATASET_READINESS.md`, regenerated 2026-09-02: 12 tables, grain 11/12,
-keys 11/12, duplicates clean, C4 **100% keyed [indian_country]**] The blocker
-is `congressional_correspondence_log.csv`, which has **zero rows** — see §6.
+**Readiness: READY**, 11 tables. [measured — `py -3 code/518_dataset_readiness.py`,
+re-run 2026-09-02 after this section was first written: `READY  legislation
+11 tables  maintain`.] The earlier BLOCKED reading in this file was against a
+12-table scoreboard whose blocker was `congressional_correspondence_log.csv`,
+a zero-row table — see §6, which is kept because the *reasoning* about an
+empty table is still the reasoning.
 
 ---
 
@@ -164,8 +166,16 @@ searched **disjoint spaces** — coder A substantive amendments, coder B
 procedural motions to recommit — so overlap was zero by construction and the
 statistic is undefined rather than bad.
 
-`bill_scope` [measured]: `general` **2,417** · `tribe-specific` **484** · blank
-168. A bill is tribe-specific if its title contains a spine name — canonical or
+`bill_scope` [re-measured 2026-09-02, after `code/1092_bill_titles_residue_and_scope.py`]:
+`general` **2,569** · `tribe-specific` **500** · blank **0**. It read
+`general` 2,417 · `tribe-specific` 484 · blank **168** until that run, and the
+168 were not unrulable rows: **they were rows the ruler had never been run
+on.** 128 got a title from the 2026-08-05 backfill and nobody replayed the
+scope derivation, so they still said `bill_scope_basis = no_title_available`
+while carrying a title — `93-hr-10337`, *"An Act to provide for final
+settlement of the conflicting rights and interests of the Hopi and Navajo
+Tribes…"*, among them. 32 more came in through `73 --sweep` with a blank
+basis, and 8 had no title at all (see §6). A bill is tribe-specific if its title contains a spine name — canonical or
 alias, at least 8 characters, matched on a word boundary, across 1,124 names —
 or one of five designators (`Rancheria`, `Pueblo of X`, `Confederated
 Tribes/Salish/Bands`, `Band of`, `Indian Colony`). **The matched string is
@@ -250,14 +260,51 @@ prevent.**
 - **`member_positions.csv` is the transaction grain**; `bill_votes.csv` is its
   roll-up and the two must not be unioned. The yea counts reconcile exactly, so
   either is usable — never both.
-- **Nine votes read `Failed` with more yea than nay**, and there is no column
-  explaining why. `H105-0482` is 229 yea to 176 nay and **correctly Failed**,
-  because suspension of the rules requires two-thirds. There are nine such rows
-  (`H097-0770`, `H099-0529`, `H100-0889`, `H101-0788`, `H105-0482`,
-  `H105-0568`, `H108-0229`, `H109-1107`, `H112-1442`) and **no
-  `threshold_required` column exists.** A buyer will file it as a bug. The
-  threshold is derivable from `question` — 87 votes contain "suspend" — and
-  belongs on the row.
+- **SIXTEEN votes read as failures on a majority tally, and the row now says
+  why.** `H105-0482` is 229 yea to 176 nay and **correctly Failed**, because
+  suspension of the rules requires two-thirds. This paragraph said *nine* and
+  said no `threshold_required` column existed; both were true when written and
+  neither is now.
+
+  `code/890_bill_votes_threshold_and_titles.py` added `threshold_required`
+  (official record on 305 votes, question-text derivation on 118) and
+  `code/1093_bill_votes_majority_anomaly.py` added
+  `result_contradicts_simple_majority`, `result_anomaly_class` and
+  `result_anomaly_basis`. **Re-measured from the live file 2026-09-02:
+  MAJORITY_YEA_BUT_REJECTED on 16 rows, MINORITY_YEA_BUT_AGREED on 0, N on
+  335, NOT_TESTABLE_NO_RESULT on 72.** The composition is **9 + 5 + 2**:
+
+  | class | n | votes |
+  |---|---:|---|
+  | `HOUSE_SUSPENSION_TWO_THIRDS` | 9 | H097-0770 H099-0529 H100-0889 H101-0788 H105-0482 H105-0568 H108-0229 H109-1107 H112-1442 |
+  | `SENATE_CLOTURE_THREE_FIFTHS` | 5 | S102-0315 S104-0027 S109-0531 S115-0399 S115-0402 |
+  | `SENATE_THREE_FIFTHS_NOT_IN_QUESTION_TEXT` | 2 | S108-0356 S114-0351 |
+
+  **The nine were the House half. The two extra ones are the finding.**
+  `S108-0356` (2003-09-23, 49–45, *Motion Rejected*) is a Congressional Budget
+  Act point-of-order waiver on S.Amdt. 1734, *"To provide additional funds for
+  clinical services of the Indian Health Service, with an offset"*;
+  `S114-0351` (2016-02-02, 52–43, *Amendment Rejected*) is S.Amdt. 3030 to
+  S. 2012 under a unanimous-consent 60-vote agreement. **Neither is a cloture
+  motion and neither threshold appears anywhere in the question string** —
+  both read `On the Motion` / `On the Amendment` — so a question-text-only
+  derivation leaves exactly these two looking like data-entry errors. They are
+  on the row only because senate.gov's own `majority_requirement` was joined
+  from `bill_votes_official_verification.csv`, and both carry
+  `threshold_agrees_with_official = N`.
+
+  **The trap, restated because it has cost this dataset a count once already:
+  `threshold_required` is a property of THE VOTE'S OWN RECORDED PROCEDURE, not
+  of the chamber.** 311 of 423 votes are simple majority and 85 are
+  two-thirds, in the same two chambers; `H095-0549` (376–19) contains "SUSPEND
+  THE RULES" in its question and is a SIMPLE majority, because the question is
+  *ordering a second* on the suspension motion. And the derivation is wrong on
+  12 of the 92 Senate votes that can be checked against an official record —
+  13%.
+
+  Note that `result_reconciles_with_threshold` reads **Y on all 351 testable
+  rows and N on none**, so it cannot tell a buyer which sixteen rows will look
+  wrong to them. That is what `result_contradicts_simple_majority` is for.
 - **`republican_pro_tribal_share` excludes the 21 circularity-flagged votes.**
   Recomputing it without that filter reproduces the circularity.
 
@@ -271,11 +318,45 @@ prevent.**
 - **398 of 423 votes carry a `bill_id`** — Voteview records no bill number on
   25. 879 companion links exist, 35 of them pointing at a bill outside the
   table.
-- **`native_bills.title` covers only 390 of the 423 votes**, and the shipped
-  sample of `bill_votes.csv` shows `114-hr-360` and *"On Motion to Suspend the
-  Rules and Pass, as Amended"* — a buyer cannot tell what was voted on. This is
-  the cheapest high-value join in the thirteen datasets and it has not been
-  made.
+- **`bill_title` now covers 398 of the 423 votes** [measured 2026-09-02]. It
+  read 390 until `code/1092_bill_titles_residue_and_scope.py` closed the
+  eight, and the join itself was made by `code/890`. **All eight blanks had
+  one cause and it was not the source:** every canonical congress.gov
+  bill_type slug in `native_bills.csv` is 100% titled (`hr` 1651/1651, `s`
+  1332/1332, `hres` 38/38, `hjres` 23/23, `sjres` 12/12, `sconres` 5/5) and
+  every NON-canonical slug was 0% (`hre` 0/2, `hjr` 0/1, `treatydoc` 0/2,
+  `treatydocno` 0/3). `code/14_pull_cosponsors.py` hard-codes an `ok_types`
+  allow-list that `hre` and `hjr` — Voteview's abbreviations for `hres` and
+  `hjres` — fail, and treaty documents are not on `/bill` at all. Asked with
+  the right slug, and on `/treaty/{congress}/{number}`, all eight answered
+  HTTP 200 first time.
+
+  Two of the five treaty identifiers were **ambiguous** — Voteview writes
+  `TREATYDOC1134` and `TREATYDOC1173` with no separator, so 1|134, 11|34 and
+  113|4 all read the first. They were settled by evidence, not by
+  plausibility: a candidate was accepted only where the treaty's own action
+  list carried a Senate action on the roll call's date AND congress.gov's
+  `congressConsidered` equalled the vote's Congress. `1134` is **Treaty Doc.
+  113-4**, the Protocol Amending the Tax Convention with Spain; `1173` is
+  **Treaty Doc. 117-3**, the Protocols on the Accession of Finland and Sweden
+  to the North Atlantic Treaty.
+
+- **The honest floor on the remaining 25 title-less votes: 22 of them are
+  facts about the world.** Those 25 carry no `bill_id`, and Voteview records
+  no bill number for any of them [verified against `HSall_rollcalls.csv`].
+  **22 are votes on reservations to a resolution of ratification** — 17
+  Panama Canal Treaty, 4 Neutrality Treaty, 1 US-UK tax treaty — where there
+  is no bill and therefore no bill title: `SOURCE_DOES_NOT_PUBLISH`. **3 name
+  a numbered measure inside their own question text** (`H100-0888`
+  H.Con.Res. 331, `S100-0452` S.Res. 386, `S100-0417` six S.Res. adopted en
+  bloc) and are `NOT_ACQUIRED` — their eight titles were fetched and are on
+  disk at `data/raw/external/congress_gov/1092_title_residue_unlinked.csv`,
+  deliberately **not promoted**, because promoting one means minting a
+  `bill_id` and a `native_bills.csv` row and rebuilding `n_rollcalls`,
+  `native_bill_outcomes.csv` and both entity bridges. That is a decision for
+  `14_build_bills_votes.py`, not an enrichment. `S100-0417` adopted six
+  resolutions on one roll call, so no single bill title is the right answer
+  for that row at all.
 - **The party split is on the table and not in the sample.** `D_yea`, `D_nay`,
   `R_yea`, `R_nay`, `present` and `not_voting` are populated on **all 423
   rows**, as are `republican_yea_share` and `pro_tribal_is_yea` (240). For a
@@ -353,6 +434,39 @@ Native bill becomes invisible.** The commands are
    AI-generated codings needing expert validation — is not repeated in any
    Cedar-side document**, and it is the single most important caveat in the
    dataset. It is recorded here.
-4. **`docs/WHAT_IS_MISSING.md` describes the nine anomalous `Failed` votes and
-   the absent `threshold_required` column accurately**, and the derivation
-   (87 votes whose `question` contains "suspend") has not been done.
+4. **`docs/WHAT_IS_MISSING.md` describes NINE anomalous `Failed` votes and an
+   absent `threshold_required` column. Both statements are now stale**, and
+   the count was never nine: it is **sixteen** (9 House suspensions + 5 Senate
+   cloture rejections + 2 Senate three-fifths thresholds that appear nowhere
+   in the question text). The derivation it proposes — "87 votes whose
+   `question` contains 'suspend'" — is also the wrong rule: matching bare
+   `suspend` catches `S095-0741`, a Panama Canal Treaty reservation reading
+   "…SHALL BE SUSPENDED UNTIL SETTLEMENT", and matching `suspend the rules`
+   alone mistypes `H095-0549`, an *order a second* motion decided by majority.
+   Done 2026-09-02 by `code/890` and `code/1093`.
+
+5. **A title backfill ran without replaying the derivation that depends on
+   titles, and nothing caught it for four weeks.** 128 rows gained a `title`
+   on 2026-08-05 and kept `bill_scope_basis = no_title_available`; 32 more
+   arrived from `73 --sweep` with a blank basis.
+   `code/287_build_dependency_manifest.py` exists for exactly this shape, and
+   `bill_votes.csv` and `native_bills.csv` both had **no declared ordering at
+   all** until 2026-09-02. Both are now in `cedar_pipeline.KNOWN_ORDERINGS`;
+   the chain is **14 → 73 → 1092 → 890 → 1093**, enrichers last.
+
+6. **`bill_scope` carries two ruler vintages, and it is flagged rather than
+   repaired.** The scope ruler reads spine names out of
+   `cedar_entity_spine.csv`, which has grown: it carried 3,717 usable names on
+   2026-09-02. Re-running today's ruler over the 2,901 rulings made on
+   2026-08-05 changes **76** of them. Those 76 were NOT re-ruled — that moves
+   a published `tribe-specific` count and is an owner decision — and
+   `py -3 code/1092_bill_titles_residue_and_scope.py verify` prints them every
+   run. Two of the causes are spine-quality problems rather than new
+   knowledge: an entity literally named **"Tribal Self-Governance"** matches
+   14 generic bill titles and **"Native Health"** matches 7, and names that
+   generic arguably belong in the ruler's `GENERIC` exclusion list. The 168
+   rows 1092 ruled were ruled with the 2026-09-02 spine and stamped
+   `scope_ruled_1092_2026-09-02` in `record_basis`; **152 of the 168 came back
+   `no_specific_entity_matched`, which is vintage-safe in the only direction
+   that matters** — a smaller spine cannot produce a match a larger one did
+   not — so only the 16 `tribe-specific` rulings are vintage-sensitive.
