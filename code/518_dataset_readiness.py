@@ -101,6 +101,26 @@ NATURAL_SCOPE = {
     "nonprofits": "mixed",            # Native-controlled AND Native-serving
 }
 
+# Who is working each dataset. A BLOCKED dataset with no entry here is the
+# one state that cannot fix itself - see the check at the bottom of main().
+# Keep this current: an entry naming a workstream that has finished is worse
+# than a blank, because it reports coverage that does not exist.
+OWNERS = {
+    "_entity_layer":            "hub",
+    "contractors":              "grain-ws5",
+    "subcontracting":           "subawards pull",
+    "funding":                  "grain-ws4",
+    "deals":                    "grain-ws5",
+    "gaming":                   "int-2-gaming",
+    "natural-resources":        "grain-ws3 (C5 banked, deliberately not merged)",
+    "native-owned-businesses":  "enterprise (READY - extending)",
+    "nonprofits":               "grain-ws5",
+    "lobbying":                 "grain-ws4",
+    "legislation":              "grain-ws4",
+    "federal-register":         "READY - maintain",
+    "nagpra":                   "READY - maintain",
+}
+
 COLS = ["dataset", "status", "shelf", "n_customer_tables", "blockers",
         "c1_grain", "c2_keys", "c3_duplicates", "c4_identity_path",
         "c5_row_conservation", "c6_unresolved_conflicts", "c7_double_counting",
@@ -353,6 +373,33 @@ def main() -> int:
         print("\n  CLOSEST TO READY:")
         for r in close:
             print(f"    {r['dataset']:24s} {len(r['blockers'].split(' | '))} blocker(s)")
+
+    # ---- A BLOCKED DATASET WITH NOBODY ON IT ----------------------------
+    # 2026-09-01: the owner asked whether all thirteen were being worked. They
+    # were not - nine were blocked with no workstream assigned, and nothing
+    # said so. The scoreboard reported STATUS and never OWNERSHIP, so a
+    # dataset could sit blocked indefinitely while every report looked
+    # complete. `_entity_layer` sat that way longest because its blockers
+    # needed the spine builders touched and I kept deferring it.
+    #
+    # An unowned blocker is the one state that cannot fix itself, so it is now
+    # the last thing this script prints and the loudest.
+    unowned = [r for r in rows
+               if r["status"] == "BLOCKED"
+               and not OWNERS.get(r["dataset"])]
+    print()
+    if unowned:
+        print(f"  !! {len(unowned)} BLOCKED DATASET(S) WITH NO WORKSTREAM "
+              f"ASSIGNED - this is the only status that cannot fix itself:")
+        for r in unowned:
+            print(f"       {r['dataset']:24s} "
+                  f"{len(r['blockers'].split(' | '))} blocker(s)")
+        print("     Assign one in OWNERS at the top of this file, or explain "
+              "in AGENTS.md why the dataset is deliberately parked.")
+    else:
+        n_b = sum(1 for r in rows if r["status"] == "BLOCKED")
+        print(f"  every blocked dataset has a workstream ({n_b} blocked, "
+              f"{len(rows) - n_b} READY)")
     return 0
 
 
