@@ -7696,3 +7696,271 @@ this repo's signature defect and the first one where reading the code could not
 have caught it.
 
 **Not committed. Not re-baselined.**
+
+
+---
+
+## 2026-09-02 — NP-WEBSITE + GAMING-TOTAL (`code/1125`, `1126`, `1127`; ADR-031)
+
+**What landed.** The nonprofits' own websites were read (JOB 1) and the annual
+series with gaming in it was built (JOB 2).
+
+- `review/np_website_native_check_2026-09-02.csv` — 697 `NATIVE_VERIFIED_STRICT`
+  organisations, 167 pages actually read, 11 whose own words say they are
+  Native, 35 whose own words name a different community. `1125 verify` exit 0,
+  `selftest` 7/7. Build log: `docs/NP_WEBSITE_NATIVE_CHECK_2026-09-02.md`.
+  **`np_orgs.csv` was not opened for writing.**
+- `data/clean/annual_indian_country_money_series.csv` — 116 rows,
+  (fiscal_year, series_id). `1126 verify` exit 0, `selftest` 9/9. Rules in
+  `MONEY_TOTALLING_RULES.md` `GAMING-TOTAL`; build log
+  `docs/ANNUAL_MONEY_SERIES_BUILD_LOG_2026-09-02.md`; grain `GRAIN_ANNUAL_TOTAL`
+  in `512`; codebook fragment `05s_annual_indian_country_money_series`,
+  registered shippable.
+- `nonprofit_schedule_c_coverage.coverage_basis` no longer carries one constant
+  string on all ten rows. Fixed at `code/99` (`schedc_coverage_basis()`),
+  applied by `1127`, which imports 99's own function rather than copying it.
+  `1127 verify` exit 0, `selftest` 3/3.
+
+**One new totalling defect found, and it was in a published table.**
+`nigc_regional_ggr.csv` grouped by `fiscal_year` alone **doubles FY2002, FY2007
+and FY2016** — $29.213B / $52.160B / $62.600B against $14.497B / $26.016B /
+$31.300B — because every NIGC report restates the prior year and those three
+sit under two `region_system_version` values. The discriminator
+(`figure_vintage`) was already in the file and nothing was reading it.
+`1126 verify` V6 re-derives the naive sum every run and fails unless the fence
+removes at least three overlap years, so the check can tell working from
+unnecessary.
+
+### The 62 gate, named honestly (standing rule 15)
+
+`62` is RED and was red before this pass. What is ours:
+
+| red line | ours? | measured |
+|---|---|---|
+| `tables_missing_from_25_TABLES` 179→233, `from_27_SPEC` 194→240, `missing_notes_contract` 14→44, `ship_tables_at_zero` 13→43 | **+1 each, ours** | `annual_indian_country_money_series.csv` is one new table in `data/clean`. The other ~53 are other passes'. `62`'s own text says these count the CURATED OVERRIDE list and are *"not the shipping gate"*. |
+| `tables_undocumented_in_codebook`, `tables_missing_codebook_block` | **ours went DOWN** | both **28 → 26** when the `05s_` fragment landed. This is the metric that actually gates shipping and our table now passes it. |
+| `lint_class1` 0→1, `class2c` 60→69, `class3` 0→2, `class4` 9→14, `class7` 42→44, `lint_bug_class_instances` 146→163 | **not ours** | `293` names **zero** findings in `1125`, `1126` or `1127` — measured from `docs/lint_bug_classes.json`. `1125` had two class-2c drop counters and **both were fixed, not waived**: `plan` now prints every organisation it refused and `fetch` prints every host that returned no readable page. |
+| `rulings_unapplied` 1,215→2,894 | not ours | this pass applied no rulings and wrote no ledger row. |
+| `tier_A_ruled` FELL 1,676→1,669, `contract_violations` 13, `contract_orphan_shippable` 8, `F-DELAWARE-ALIAS`, `SHIPPING LOST advocacy_passthrough`, `hearing_bill_links` 465→464, `native_bills_subject_sweep` 2,414→2,409 | not ours | no ledger, spine, bills table or `dist/` manifest was opened. |
+
+**`code/1116 ... verify` went RED → GREEN in this pass.** It was failing on four
+superseded literals in `docs/DEPENDENCY_MANIFEST.md:68` — a GENERATED file, so
+the fix was at source in `cedar_pipeline.py`'s enricher-cost string (787 named
+as a ROW count with the 714 property denominator beside it; 174 split into 113
+evidenced / 58 unsupported / 3 not-collected), then `287` regenerated. Now
+`no unanswered superseded literals` across 290 files, exit 0.
+
+### Two things the next agent should not have to rediscover
+
+**1. `1125` and `1129` found the same `846` 0x08 defect independently, hours
+apart.** `1129` owns the repair and its `KNOWN_ISSUES` block says so.
+`ESCAPE-COLLAPSE-1125` is the part that is NOT covered there: **seven other
+live scripts carry the same corruption — 41 bytes, 16 lines — and none is
+repaired.** `code/503_identity.py` is the worst of them: both the `\b` and the
+`\1` backreference collapsed, so an identity normaliser is inert and would emit
+a control byte if it ever matched.
+
+**2. This environment collapses a doubled backslash on the way into a shell
+heredoc, and it did so three times in one session** — in a repair script (the
+"fix" replaced 0x08 with 0x08 and reported success), in a Python source patch
+(a line-continuation backslash became a real newline and broke the file), and
+in the first draft of the `KNOWN_ISSUES` entry describing the defect. Write
+`bytes([0x5C, 0x62])`, or use an editor, and assert the remaining count.
+
+**Not committed. Not re-baselined.**
+
+---
+
+# 2026-09-02 · LS · `1134` — the ledger's `state` column held 12,127 UEIs, and the fix for it was applied downstream of the defect
+
+`code/1134_repair_ledger_state_uei_contamination.py` — `report` / `apply` /
+`verify` / `selftest`. Number claimed atomically via `1050_preflight.py claim`.
+
+## The measured state, before anything was written
+
+| table | rows | `state` = this row's own `identifier` |
+|---|---:|---:|
+| `data/spine/cedar_identifier_ledger.csv` | 19,232 | **12,127** (63%) |
+| `data/clean/cedar_publishable_identifiers.csv` | 1,577 | **699** |
+| `data/clean/cedar_identifier_ledger_tiered.csv` | 19,232 | 0 |
+| `data/clean/cedar_identifier_ledger_final.csv` | 20,577 | 0 |
+
+All 12,127 are `identifier_type = UEI`, all from
+`master_tribal_entity_registry.csv`, all 12,127 distinct identifiers. The
+4,937 CAGE and 1,104 EIN rows were never affected.
+
+## THE BRIEF SAID COLUMN SHIFT. THE SHIFT WIDTH IS ZERO.
+
+Worth stating plainly, because the wrong diagnosis leads to the wrong repair: a
+shift displaces every field past the insertion point, so a one-column fix would
+have left the rest wrong. Measured three ways, all agreeing it is a
+**single-cell overwrite**:
+
+1. **v3 (broken) vs v6 (repaired), 11,392 rows matched 1:1 on (uei, name,
+   tribe_id), all 26 columns.** Differences: `hq_state` 11,392, `hq_city`
+   11,391 (**v3-blank**, filled later by the geocoder), `hq_zip` 909 (same),
+   and 2 rows on six columns (an unrelated record correction). Every other
+   column byte-identical. No debris, no hole.
+2. **The raw registry, 13,191 rows x 12 columns.** Exactly ONE column ever
+   equals the row's own UEI: `physical_state`, 12,127 times. Both neighbours
+   (`verified_date`, `n_transactions_master_prime`) are 100% populated on the
+   contaminated rows.
+3. **The code.** `dissertation/.../sam_extracts/build_master_entity_registry.py`
+   line 126: `physical_state=("recipient_location_state_code", "first") if
+   "recipient_location_state_code" in prime.columns else ("awardee_uei",
+   "first")`. `master prime file.dta` has no such column, so the else branch
+   aggregated the UEI into the state field for every UEI in master prime. The
+   1,064 rows that came by the hand-matched path never went through that
+   groupby: 134 real states, 929 blanks.
+
+**A silent column SUBSTITUTION is worse than a shift.** A shift is a parser bug
+you fix once; a fallback that swaps in a different real column emits a full
+column of plausible values, fails no check, and recurs on the next renamed
+column upstream. Raised with the owner as `LS-1` in
+`review/OWNER_DECISION_QUEUE.md` — it is his repo, and Cedar's guard does not
+protect his own analyses. His attribution logic is NOT affected:
+`cluster_v3_parent_brand.py:237` takes state from `recipient_state_code`
+directly and its `geo_ok` gate was live throughout.
+
+## THE $8.21B HYPOTHESIS WAS TESTED AND IS FALSE
+
+Put to this pass as potentially the largest finding here: that the **15,878**
+`ledger_uei_state_disagreement_withheld` rows in
+`federal_funding_transactions.csv` — **$8,210,723,480.00**, 120 proposed
+entities — were withheld against a corrupted state.
+
+**0 of 15,878 rows. $0.00 of $8.21B.**
+
+`115_pull_assistance_archive.py:892` builds its comparison state from
+`cedar_entity_spine.csv`, keyed on `tribe_id`. It has never read the identifier
+ledger's `state`. The spine's `state` is clean — 1,492 two-letter codes, 63
+blanks, **zero UEIs** across 1,555 rows — and a blank yields `agree="unknown"`,
+which cannot withhold. All 120 proposed entities carry a real two-letter spine
+state. **98 of the 120 also have contaminated ledger rows**, which is precisely
+why the coincidence reads as causal. Nothing was re-attributed; Santa Clara
+County Housing Authority (CA) is still not Pueblo of Santa Clara (NM).
+
+## THE DEFECT SAT UPSTREAM OF ITS OWN FIX
+
+`71_fix_known_defects.py` defect 5 found this and repaired
+`cedar_identifier_ledger_tiered.csv` and `cedar_identifier_ledger_final.csv`.
+It never touched `data/spine/cedar_identifier_ledger.csv`, the file both are
+BUILT FROM, and it never touched `cedar_publishable_identifiers.csv`, which
+`03` writes from the same rows in the same pass. So every shipped copy measured
+clean while the source measured 63% corrupt, and a rerun of `03` would have
+pushed all 12,127 back in.
+
+**Rule: when you repair a derived table, name and check the table it derives
+from in the same pass.** A green check on a pipeline's output says nothing
+about its input.
+
+**And sweep the CLASS, not the instance.** The brief named one table. `62`'s
+new rule-18 check looks at every CSV in `data/spine/` and `data/clean/` that
+carries both an `identifier` and a `state` column — 5 tables — and that is the
+only reason `cedar_publishable_identifiers.csv`, **1,577 rows, every one of
+them tier A and publishable**, was found at all. Its other 878 rows held
+unnormalised full state names, so not one row of the most customer-facing copy
+of the ledger carried a usable state.
+
+## THE REPAIR
+
+Authority: `data/raw/external/need_v6_geocoded.csv` (v6, 18,110 rows, 0
+contaminated), keyed on `enterprise_uei`. A state is written **only** where v6
+gives exactly one two-letter value, and **BLANK** otherwise. Nothing is
+inferred from a name, a ZIP or a sibling row.
+
+| table | recovered | left BLANK | full names normalised | blanks filled from v6 |
+|---|---:|---:|---:|---:|
+| `cedar_identifier_ledger.csv` (spine) | **11,943** | **184** | 828 | 76 |
+| `cedar_publishable_identifiers.csv` | **697** | **2** | 828 | 0 |
+| `cedar_identifier_ledger_tiered.csv` | 0 | 0 | 0 | **12,019** |
+| `cedar_identifier_ledger_final.csv` | 0 | 0 | 0 | **12,026** |
+
+0 conflicts (no UEI for which v6 gives two states), 0 missing v6 rows.
+`docs/LEDGER_STATE_REPAIR_1134.json` carries the summary, the per-table
+disposition counts and the 184 identifiers left blank BY NAME;
+`review/ledger_state_repair_1134_cells.csv` (git-ignored, 2.8 MB) carries all
+38,603 individual cell dispositions. Both are derived from the `.bak` rather
+than from the run's counters — the first version
+wrote counters, and the idempotent rerun of the script that made the manifest
+overwrote it with zeroes.
+
+**BLANKING IS NOT REPAIRING.** 71 blanked what it rejected. v6 held the true
+state for **12,019 of 14,923** blank rows in the tiered ledger and **12,026 of
+16,250** in the final one. A shipped column reading "unknown" where the
+authority says "VA" is the first defect in different clothes.
+
+**48 multi-state strings (`Alabama; Texas`) and 3 junk values (`BRUNEI &
+MUARA`, `-`) were LEFT EXACTLY AS THEY ARE**, not blanked. Blanking deletes
+evidence with nothing to recover it from. Flag, never delete.
+
+## `verify` FAILS WHEN THE WORK HAS NOT LANDED, AND THAT IS PROVEN
+
+Four invariants: I1 absence, **I2 presence**, I3 honesty vs v6, I4 blast radius
+against the `.bak`. I2 requires every row v6 can speak to to carry v6's answer
+— so an untouched table scores 0 and fails, and **a table somebody merely
+BLANKED also scores 0 and also fails**. `selftest` runs the real check against
+a synthetic table in all three states and asserts the two failures and the one
+pass; it also asserts I4 catches a change outside `state`. All four green.
+
+I4 on the live run: spine 19,232 rows / 14 cols unchanged, **13,031 `state`
+cells moved and nothing else**; tiered 19,232 / 22, 12,019 cells; final 20,577
+/ 29, 12,026 cells; publishable 1,577 / 18, 1,527 cells.
+
+## THE REGENERATE DEFECT — CLOSED, AND PROVED, NOT ASSERTED
+
+* **`01_build_entity_spine.py`** already ran `clean_state` on the registry leg,
+  and `LEDGER_REFRESH = ()` means `merge_table` cannot overwrite a repaired
+  cell. Dry run AFTER the repair: `19,232 -> 19,358 rows (+126 new, 19,106
+  matched, 0 lost), 14 -> 14 cols, 0 blanks filled, 0 refreshed`. **The repair
+  survives a rebuild.**
+* **`03_apply_exclusions_and_tier.py` had NO guard** and is the only route from
+  the spine ledger into both clean tables. One added (`clean_state`, verdicts
+  printed by NAME, not counted in silence). **Proved, not asserted: 500
+  contaminated rows injected into a COPY of the spine ledger, `03` run against
+  it with `CLEAN` / `SPINE` / `REVIEW` repointed at a temp dir — it printed
+  `[0] state column guard - 500 REJECTED: held this row's own UEI`, and 0
+  reached either output.** No live file was touched by that test.
+* **`62_no_regression_check.py` rule 18**, `ledger_state_holds_own_identifier`,
+  added to `MUST_BE_ZERO`. Currently **0**, across 5 tables carrying both
+  columns.
+
+## GATE 62 — what is mine and what is not
+
+`ledger_state_holds_own_identifier = 0`. Every other failing line was already
+failing and is already owned above in this journal:
+
+| line | mine? | evidence |
+|---|---|---|
+| `tier_A_ruled` FELL 1,676 -> 1,669 | **no** | recomputed off my own `.bak`: **1,669 before AND 1,669 after**. Unchanged by this pass |
+| `rulings_unapplied` 1,215 -> 2,894 | no | no ruling applied, no ruling-ledger row written |
+| `contract_violations` 14, `ship_tables_at_zero` 13->44, the four `tables_*` lines, `SHIPPING LOST`, `hearing_bill_links`, `native_bills_subject_sweep` | no | no new table created, and no `dist/` manifest, bills table or codebook opened |
+| `lint_*` ROSE | no | `293` names **zero** findings in `1134`. Its one hit on `03_apply_exclusions_and_tier.py` is class6 (`cedar_identifier_ledger_tiered.csv` has both a rebuild writer and an in-place enricher) and is **in the baseline** — `293`'s NEW-instance list names 1077, 30, 518, 870 and 99 for class6, not 03. class6 overall FELL 31 -> 27 |
+
+`846_session_audit.py`: **27/27 pass, 0 fail.**
+
+## One thing the next agent should not have to rediscover
+
+**`docs/STATE_OF_THE_LAND.md` does not exist**, and a brief sent this pass to
+read it. The root-level `STATE_OF_THE_LAND_2026-08-07.md` is the nearest thing
+and carries its own superseded-numbers banner. The live orientation set is
+`README.md` -> `START_HERE.md` -> `docs/AGENT_FIELD_GUIDE.md` -> this file.
+
+## POSTSCRIPT — two more files carry it, and they are NOT live tables
+
+A sweep of `dist/`, `data/staging/` and `review/` for the same shape found two
+more, both dated 2026-08-05 review-queue snapshots and both still read by live
+code (`1103`, `173`, `581`, `91`):
+
+    review/review_queue_2026-08-05.csv                                   1,008
+    review/_already_ruled_removals/..._already_ruled_2026-08-26.csv        739
+
+**Deliberately not repaired.** They are dated snapshots of what the queue said
+on a day, and the whole value of a snapshot is that it still says it. The
+consumers use them for `identifier`, `tribe_id` and the ruling columns, not for
+`state`. Rule-18 in `62` scopes to `data/spine/` and `data/clean/` — the live
+tables — on purpose; widening it to `review/` would make every historical
+artefact a gate failure.
+
+**`dist/` is clean.** No shipped table carries both an `identifier` and a
+`state` column with a contaminated row, so nothing reached a customer.

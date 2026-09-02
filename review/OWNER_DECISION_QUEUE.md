@@ -3035,3 +3035,107 @@ needs an owner.
 **3,306 of your UEIs are in no Cedar table at all.** That is the real
 identifier value in your file, and it is the ingest in OV6-2.
 <!-- END OWNER-V6-NEST-2026-09-02 -->
+
+---
+
+<!-- BEGIN LEDGER-STATE-1134-2026-09-02 -->
+## LS-1. Your registry builder writes the UEI into the state column. One line, still live.
+
+*Appended 2026-09-02 by `code/1134_repair_ledger_state_uei_contamination.py`.
+Cedar's side is REPAIRED and does not wait on you. This item is about the file
+on your machine, which is still producing the defect.*
+
+### What was wrong, and it is not what the previous block above says
+
+The block `OWNER-V6-NEST-2026-09-02` (immediately above) calls this a **column
+shift**. **It is not. The shift width is zero.** Measured three ways:
+
+| evidence | result |
+|---|---|
+| `native_entity_enterprise_dataset_v3.csv` vs `v6`, 11,392 rows matched 1:1, all 26 columns | only `hq_state` (11,392) differs, plus `hq_city` / `hq_zip` which are v3-**blank** and were filled later by your geocoder. Every other column byte-identical |
+| `master_tribal_entity_registry.csv`, 13,191 rows x 12 columns | exactly **one** column ever equals the row's own UEI: `physical_state`, 12,127 times. Both neighbours 100% populated and correctly typed |
+| the code | a named-column fallback, quoted below |
+
+A shift of width N leaves N columns of debris on one side and a hole on the
+other. There is neither. **One cell is overwritten; nothing is displaced.**
+
+### The line
+
+`dissertation/data/tribal_federal_spending/sam_extracts/build_master_entity_registry.py`, **line 126**:
+
+```python
+physical_state=("recipient_location_state_code", "first")
+    if "recipient_location_state_code" in prime.columns
+    else ("awardee_uei", "first")
+```
+
+`master prime file.dta` has no `recipient_location_state_code`, so the `else`
+branch fired and aggregated **the UEI** into `physical_state` for every UEI in
+master prime — 12,127 of 13,191 rows. The other 1,064 came in by the
+hand-matched path, never went through that groupby, and carry a real state
+(134) or a blank (929).
+
+**This is the part worth your attention.** A column shift is a parser bug: you
+fix the reader once. A fallback that silently substitutes a *different, real*
+column cannot fail loudly — it produces a full column of plausible-looking
+values — and the same line will do it again for whatever column gets renamed
+upstream next. Every consumer of `physical_state` in that repo has been reading
+UEIs for 92% of rows since 2026-05-01.
+
+**Your attribution logic is NOT affected.** `cluster_v3_parent_brand.py` line
+237 takes state from `recipient_state_code` directly, and its `geo_ok` gate was
+live throughout. The damage is confined to the registry file and the NEED
+enterprise datasets v1/v2/v3 built from it. **v5 partially and v6 fully repair
+it** (v6: 0 contaminated rows), which is why Cedar could recover.
+
+> **The question, and it is yours because it is your repo:** fix line 126 to
+> RAISE when `recipient_location_state_code` is absent, rather than substitute.
+> Cedar cannot do this for you and Cedar's guard does not protect your own
+> analyses.
+
+### Cedar's side — done, not waiting
+
+Repaired from **your v6**, keyed on `enterprise_uei`, writing a state only
+where v6 gives exactly one two-letter value and leaving it **BLANK** otherwise.
+Nothing guessed:
+
+| table | contaminated | recovered from v6 | left BLANK |
+|---|---:|---:|---:|
+| `data/spine/cedar_identifier_ledger.csv` | 12,127 | **11,943** | **184** |
+| `data/clean/cedar_publishable_identifiers.csv` | 699 | **697** | **2** |
+| `data/clean/cedar_identifier_ledger_tiered.csv` | 0 | — | — |
+| `data/clean/cedar_identifier_ledger_final.csv` | 0 | — | — |
+
+Plus 828 full state names normalised (`Oklahoma` -> `OK`) and **24,121 blank
+`state` cells filled** from v6 across the clean ledgers — `71_fix_known_defects.py`
+had *blanked* the contaminated cells rather than recovering them, and v6 knew
+the answer for 12,019 / 12,026 of them.
+
+**48 multi-state strings (`Alabama; Texas`) and 3 junk values (`BRUNEI &
+MUARA`, `-`) were LEFT EXACTLY AS THEY ARE.** Blanking them is a deletion of
+evidence with no recovery behind it. They are flagged, not edited.
+
+### The $8.21B hypothesis was tested and is FALSE
+
+It was put to this pass that the 15,878 `ledger_uei_state_disagreement_withheld`
+rows in `federal_funding_transactions.csv` — **$8,210,723,480.00** across 120
+proposed entities — might have been withheld against a corrupted state, making
+the withholdings spurious and the money wrongly unattributed.
+
+**Measured: 0 of 15,878 rows. $0.00 of $8.21B.**
+
+`code/115_pull_assistance_archive.py` line 892 builds its comparison state from
+`cedar_entity_spine.csv`, keyed on `tribe_id`. It has never read the identifier
+ledger's `state` column. The spine's own `state` is clean — 1,492 two-letter
+codes, 63 blanks, **zero UEIs** across 1,555 rows — and a blank yields
+`agree = "unknown"`, which cannot withhold. All 120 proposed entities carry a
+real two-letter spine state.
+
+98 of those 120 entities *do* have contaminated ledger rows, which is exactly
+why the coincidence reads as causal. It is not. **The withholdings stand and
+nothing is re-attributed.** Santa Clara County Housing Authority (CA) is still
+not Pueblo of Santa Clara (NM).
+
+**No decision is required on this.** It is recorded here so it is not
+re-opened as an $8.2B question a fourth time.
+<!-- END LEDGER-STATE-1134-2026-09-02 -->

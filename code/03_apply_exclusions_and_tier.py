@@ -22,9 +22,13 @@ review/conflicts_<date>.csv                     disagreements needing a ruling
 """
 
 import csv
+import sys
 from collections import Counter, defaultdict
 from datetime import date
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from cedar_pipeline import clean_state  # noqa: E402
 
 CEDAR = Path(__file__).resolve().parent.parent
 SPINE = CEDAR / "data" / "spine"
@@ -91,6 +95,42 @@ def main():
     print(f"exclusion rulings : {len(excl):,}\n")
 
     excl_idx = {(r["identifier_type"], r["identifier"].upper()): r for r in excl}
+
+    # ---- 0. A STATE COLUMN MAY ONLY HOLD A STATE -------------------------
+    # This script is the ONLY route from `data/spine/cedar_identifier_ledger.csv`
+    # into `cedar_identifier_ledger_tiered.csv`, and from there into
+    # `cedar_identifier_ledger_final.csv`, which ~15 scripts read. It used to
+    # copy `state` straight through.
+    #
+    # That mattered: for as long as the file existed, the spine ledger held
+    # this row's OWN 12-character UEI in `state` on 12,127 of 19,232 rows
+    # (63%), because the upstream registry builder aggregated `awardee_uei`
+    # into `physical_state` on a missing-column fallback. `71_fix_known_
+    # defects.py` defect 5 blanked the two CLEAN ledgers and never touched
+    # the spine one, so the contamination sat UPSTREAM OF ITS OWN FIX and any
+    # rerun of this script would have pushed all 12,127 straight back in.
+    # `1134_repair_ledger_state_uei_contamination.py` repaired the spine
+    # ledger from the owner's v6 (11,943 recovered, 184 blank, nothing
+    # guessed); this guard is what stops the rebuild reverting it.
+    #
+    # A fix a rebuild reverts is not a fix.
+    rejected = Counter()
+    for row in ledger:
+        before = (row.get("state") or "").strip()
+        after, verdict = clean_state(before, row.get("identifier", ""))
+        if verdict in ("kept", "empty"):
+            continue
+        # NAMED, not silently counted: a refusal counter that never says what
+        # it refused is 293's class2c defect, and blanking 12,127 cells in
+        # silence is that defect at scale.
+        row["state"] = after
+        rejected[verdict.split(" (")[0]] += 1
+    if rejected:
+        print("[0] state column guard - values refused, NOT written:")
+        for v, n in rejected.most_common():
+            print(f"      {n:6,}  {v}")
+    else:
+        print("[0] state column guard: every state value is a state")
 
     # ---- 1. apply exclusions ---------------------------------------------
     print("[1] Applying exclusion jurisprudence")

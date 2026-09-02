@@ -1233,6 +1233,55 @@ UNAPPLIED_RE = re.compile(
 # import-don't-restate rule that governs 160's shipping registries above.
 # ===========================================================================
 
+def measure_ledger_state_column():
+    """RULE 18: a `state` column may never hold the row's own identifier.
+
+    This is not a hypothetical. `data/spine/cedar_identifier_ledger.csv` held
+    the row's own 12-character UEI in `state` on 12,127 of 19,232 rows (63%)
+    for as long as the file existed, and nothing noticed - a buyer filtering
+    the ledger by state got silence for most of it and never learned why.
+
+    It survived a fix, which is why it is a GATE and not a comment.
+    `71_fix_known_defects.py` defect 5 cleaned the two CLEAN ledgers in
+    `data/clean/` and never touched the spine ledger they are built FROM, so
+    the defect sat upstream of its own repair, invisible to anyone who checked
+    the shipped table. Repaired by
+    `1134_repair_ledger_state_uei_contamination.py` (11,943 states recovered
+    from the owner's v6, 184 left blank, nothing guessed); guarded at the
+    writers in `01_build_entity_spine.py` and `03_apply_exclusions_and_tier.py`.
+
+    Measured on every table that carries both an `identifier` and a `state`,
+    not just the three known ones - the class is what is being watched, not
+    the instance.
+    """
+    m, hits = {}, []
+    seen = 0
+    for p in sorted(list(SPINE.glob("*.csv")) + list(CLEAN.glob("*.csv"))):
+        hdr = header_of(p)
+        if "state" not in hdr or "identifier" not in hdr:
+            continue
+        seen += 1
+        n = 0
+        try:
+            with open(p, encoding="utf-8-sig", errors="replace",
+                      newline="") as fh:
+                for r in csv.DictReader(fh):
+                    s = (r.get("state") or "").strip()
+                    if s and s == (r.get("identifier") or "").strip():
+                        n += 1
+        except OSError:
+            continue
+        if n:
+            hits.append((p.name, n))
+            note(f"RULE 18 {p.name}: {n:,} rows hold the row's own identifier "
+                 f"in `state`. Repair: py -3 code/"
+                 f"1134_repair_ledger_state_uei_contamination.py apply")
+    m["ledger_state_holds_own_identifier"] = sum(n for _f, n in hits)
+    note(f"rule 18 state-column check: {seen} table(s) carry both "
+         f"`identifier` and `state`; {len(hits)} contaminated")
+    return m
+
+
 def measure_corrections():
     """(metrics, [stale consumer rows])."""
     reg = load_module(CODE / "354_correction_register.py")
@@ -1599,6 +1648,12 @@ MUST_BE_ZERO = {
     # rule 17: a NEW wholesale writer that would delete a column or a
     # paragraph nobody declared. Answered from 845's own baseline.
     "regenerate_new_unsafe_writers",
+    # rule 18: a `state` column holding the row's own identifier. 12,127 rows
+    # of the spine ledger did, upstream of the fix that cleaned the tables
+    # built from it, so the shipped copy looked clean while the source was
+    # not. Zero is the only acceptable value in any table carrying both
+    # columns - see measure_ledger_state_column().
+    "ledger_state_holds_own_identifier",
     # Phase 1 contracts (512): a violated contract is not a gap to burn down,
     # it is the world contradicting a promise. An ORPHAN shippable table
     # would ship with no owning collection, no plan and no contract - the
@@ -1777,6 +1832,7 @@ def main():
     now.update(rul)
     corr, stale_consumers, declared_removals = measure_corrections()
     now.update(corr)
+    now.update(measure_ledger_state_column())
     now.update(measure_lint_bug_classes())
     now.update(measure_regenerate_guard())
     sem, sem_named, sem_snap = measure_semantic_diff()

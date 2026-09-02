@@ -143,6 +143,9 @@ import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from cedar_pipeline import clean_state  # noqa: E402
+
 csv.field_size_limit(10 ** 9)
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -154,11 +157,26 @@ V6 = EXT / "need_v6_geocoded.csv"
 SPINE_LEDGER = SPINE / "cedar_identifier_ledger.csv"
 TIERED = CLEAN / "cedar_identifier_ledger_tiered.csv"
 FINAL = CLEAN / "cedar_identifier_ledger_final.csv"
+# FOUND BY SWEEPING THE CLASS, NOT THE INSTANCE. The brief named one table.
+# Checking every table in data/spine/ and data/clean/ that carries BOTH an
+# `identifier` and a `state` column turned up a fourth: this one, 1,577 rows,
+# EVERY ROW tier A and publishable, 699 of them holding the row's own UEI in
+# `state` and the other 878 holding an unnormalised full state name - so not
+# one row of the most customer-facing copy of the ledger carries a usable
+# state. It is written by 03 from the spine ledger and 71 never saw it.
+PUBID = CLEAN / "cedar_publishable_identifiers.csv"
 
 TODAY = "2026-09-02"
 BUILT_BY = "1134_repair_ledger_state_uei_contamination.py"
 BAK_TAG = f".bak_{TODAY}_pre_1134_repair_ledger_state_uei_contamination"
 MANIFEST = ROOT / "docs" / "LEDGER_STATE_REPAIR_1134.json"
+# The per-cell table lives OUTSIDE docs/ on purpose. `.gitignore` re-includes
+# `docs/**/*.csv`, and 38,603 dispositions is 8.4 MB against a 38.8 MB source
+# repo - an audit record that big does not belong in git history when the
+# `.bak_*_pre_1134_*` copy beside every table already holds the before state
+# byte for byte. docs/ keeps the SUMMARY and the one short exception list,
+# which is the part a reader actually needs.
+CELLS = ROOT / "review" / "ledger_state_repair_1134_cells.csv"
 
 STATE2 = re.compile(r"^[A-Z]{2}$")
 
@@ -231,7 +249,7 @@ def report():
     print(f"authority: {V6.relative_to(ROOT).as_posix()}  "
           f"{n_v6:,} rows, {len(v6):,} UEIs with exactly one state\n")
 
-    for p in (SPINE_LEDGER, TIERED, FINAL):
+    for p in (SPINE_LEDGER, TIERED, FINAL, PUBID):
         if not p.exists():
             print(f"{p.relative_to(ROOT).as_posix()}: ABSENT")
             continue
@@ -271,13 +289,19 @@ def report():
 # apply
 # ---------------------------------------------------------------------------
 def _repair_file(p, v6, fill_blanks):
-    """Returns (n_written, n_left_blank, n_blanks_filled, manifest_rows)."""
+    """Returns (n_written, n_left_blank, n_blanks_filled, n_normalised,
+    n_left_alone, manifest_rows)."""
     rows, fields = rd(p)
     if "state" not in fields:
         raise SystemExit(f"{p} has no `state` column - refusing to guess one")
-    shutil.copy2(p, str(p) + BAK_TAG)
+    # NEVER overwrite an existing pre-1134 backup. It is the baseline I4
+    # measures the blast radius against, and a second `apply` that refreshed
+    # it would compare the repaired file with itself and score clean.
+    bak = Path(str(p) + BAK_TAG)
+    if not bak.exists():
+        shutil.copy2(p, bak)
 
-    wrote = left = filled = 0
+    wrote = left = filled = normed = alone = 0
     man = []
     for r in rows:
         ident = (r.get("identifier") or "").strip().upper()
@@ -298,8 +322,57 @@ def _repair_file(p, v6, fill_blanks):
             if true_state:
                 r["state"] = true_state
                 filled += 1
+        elif cur and not STATE2.match(cur.upper()):
+            # `Oklahoma` -> `OK`. LOSSLESS, and it is the same rule
+            # cedar_pipeline.clean_state applies, so the spine ledger stops
+            # disagreeing with its own clean children about what a state is.
+            #
+            # A multi-state string (`Alabama; Texas`, 48 rows) and a junk
+            # value (`BRUNEI & MUARA`, `-`, 3 rows) are LEFT EXACTLY AS THEY
+            # ARE. clean_state would blank them and 71 did blank them in the
+            # clean ledgers; blanking is a deletion of evidence with no
+            # recovery behind it, and this script's rule is flag, never
+            # delete. They are counted and named in `report`.
+            val, verdict = clean_state(cur, ident)
+            if verdict == "normalised from full name":
+                r["state"] = val
+                normed += 1
+            else:
+                alone += 1
     wr(p, rows, fields)
-    return wrote, left, filled, man
+    return wrote, left, filled, normed, alone, man
+
+
+def manifest_from_backup(p):
+    """Every `state` cell this repair moved, read off the pre-1134 backup.
+
+    Derived, so a rerun that repairs nothing still writes the true record.
+    """
+    bak = Path(str(p) + BAK_TAG)
+    if not bak.exists():
+        return []
+    before, _ = rd(bak)
+    after, _ = rd(p)
+    if len(before) != len(after):
+        return []
+    out = []
+    for a, b in zip(before, after):
+        was = (a.get("state") or "").strip()
+        now = (b.get("state") or "").strip()
+        if was == now:
+            continue
+        ident = (b.get("identifier") or "").strip().upper()
+        out.append({
+            "table": p.name,
+            "identifier": ident,
+            "identifier_type": (b.get("identifier_type") or "").strip().upper(),
+            "was": "SELF_IDENTIFIER" if was == ident else (was or "BLANK"),
+            "now": now,
+            "disposition": ("recovered" if was == ident and now
+                            else "blank" if was == ident
+                            else "blank_filled" if not was
+                            else "normalised")})
+    return out
 
 
 def apply_():
@@ -312,20 +385,37 @@ def apply_():
         print("  spine ledger already holds 0 contaminated rows - nothing to "
               "repair there. Continuing to the clean ledgers.")
 
-    wrote, left, _f, man = _repair_file(SPINE_LEDGER, v6, fill_blanks=False)
+    wrote, left, _f, normed, alone, man = _repair_file(
+        SPINE_LEDGER, v6, fill_blanks=True)
     print(f"  {SPINE_LEDGER.relative_to(ROOT).as_posix()}")
     print(f"    contaminated repaired with a v6 state : {wrote:,}")
     print(f"    contaminated left BLANK (v6 silent)   : {left:,}")
+    print(f"    full state names normalised to 2-char : {normed:,}")
+    print(f"    non-state values LEFT ALONE, not blanked: {alone:,}")
 
-    for p in (TIERED, FINAL):
+    for p in (TIERED, FINAL, PUBID):
         if not p.exists():
             continue
-        w2, l2, f2, m2 = _repair_file(p, v6, fill_blanks=True)
+        w2, l2, f2, n2, a2, m2 = _repair_file(p, v6, fill_blanks=True)
         man.extend(m2)
         print(f"  {p.relative_to(ROOT).as_posix()}")
         print(f"    contaminated repaired                 : {w2:,}")
         print(f"    contaminated left BLANK               : {l2:,}")
         print(f"    blank UEI rows filled from v6         : {f2:,}")
+        print(f"    full state names normalised           : {n2:,}")
+        print(f"    non-state values LEFT ALONE           : {a2:,}")
+
+    # THE MANIFEST IS DERIVED FROM THE BACKUP, NOT FROM THIS RUN'S COUNTERS.
+    # A second `apply` legitimately repairs 0 rows, and the first version of
+    # this wrote a 0-disposition manifest over a 12,127-disposition one - the
+    # audit record erased by the idempotent rerun of the script that made it.
+    man = manifest_from_backup(SPINE_LEDGER)
+    n_bad = sum(1 for m in man if m["was"] == "SELF_IDENTIFIER")
+    wrote = sum(1 for m in man if m["disposition"] == "recovered")
+    left = sum(1 for m in man if m["disposition"] == "blank")
+    for q in (TIERED, FINAL, PUBID):
+        if q.exists():
+            man.extend(manifest_from_backup(q))
 
     MANIFEST.write_text(json.dumps(
         {"built_by": BUILT_BY, "built_date": TODAY,
@@ -340,9 +430,26 @@ def apply_():
                         "master prime file"),
          "spine_contaminated_rows": n_bad,
          "spine_recovered": wrote, "spine_left_blank": left,
-         "identifiers": man}, indent=2) + "\n", encoding="utf-8")
-    print(f"\n  manifest -> {MANIFEST.relative_to(ROOT).as_posix()} "
-          f"({len(man):,} identifier dispositions)")
+         "cells_changed_total": len(man),
+         "cells_by_table_and_disposition": {
+             f"{k[0]}|{k[1]}": v for k, v in sorted(Counter(
+                 (m["table"], m["disposition"]) for m in man).items())},
+         # The one list a reader needs BY NAME rather than by count: the
+         # identifiers the authority could not speak for, which are the rows
+         # now honestly blank. Short. The full per-cell table is the CSV.
+         "left_blank_because_v6_had_no_state": sorted(
+             {m["identifier"] for m in man if m["disposition"] == "blank"}),
+         "cells_table": CELLS.relative_to(ROOT).as_posix()},
+        indent=2) + "\n", encoding="utf-8")
+    if man:
+        CELLS.parent.mkdir(parents=True, exist_ok=True)
+        with open(CELLS, "w", encoding="utf-8", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=list(man[0].keys()))
+            w.writeheader()
+            w.writerows(man)
+    print(f"\n  manifest -> {MANIFEST.relative_to(ROOT).as_posix()} (summary)")
+    print(f"  cells    -> {CELLS.relative_to(ROOT).as_posix()} "
+          f"({len(man):,} dispositions)")
     return verify()
 
 
@@ -374,11 +481,21 @@ def _verify_table(p, v6, strict_presence):
     agree = sum(1 for r in speakable
                 if (r.get("state") or "").strip().upper()
                 == v6[(r.get("identifier") or "").strip().upper()])
-    if strict_presence and agree < EXPECT_RECOVERABLE:
-        fails.append(f"I2 {name}: only {agree:,} UEI rows carry their v6 "
-                     f"state; the repair claims {EXPECT_RECOVERABLE:,}. "
-                     f"THE WORK HAS NOT LANDED. (A blanked-but-unrepaired "
-                     f"table scores 0 here and that is the point.)")
+    # Two thresholds, and the SECOND is the one that generalises: EVERY row
+    # v6 can speak to must carry v6's answer. A floor alone can be met by a
+    # table that was already partly right; equality cannot.
+    floor = strict_presence if isinstance(strict_presence, int) else 1
+    if agree < floor or (speakable and agree != len(speakable)):
+        fails.append(f"I2 {name}: {agree:,} of {len(speakable):,} v6-speakable "
+                     f"UEI rows carry their v6 state (floor {floor:,}). "
+                     f"THE WORK HAS NOT LANDED. A blanked-but-unrepaired "
+                     f"table scores 0 here and that is the point - a "
+                     f"conservation proof that nothing broke is not a proof "
+                     f"that something happened.")
+    elif not speakable:
+        fails.append(f"I2 {name}: v6 can speak to 0 rows of this table, so "
+                     f"the repair is UNPROVABLE here, which is not the same "
+                     f"as done.")
     else:
         notes.append(f"I2 {name}: {agree:,} of {len(speakable):,} v6-speakable "
                      f"UEI rows carry their v6 state")
@@ -430,7 +547,8 @@ def verify():
     v6, _ = v6_states()
     print("\n=== 1134 verify ===")
     fails, notes = [], []
-    for p, strict in ((SPINE_LEDGER, True), (TIERED, True), (FINAL, True)):
+    for p, strict in ((SPINE_LEDGER, EXPECT_RECOVERABLE), (TIERED, 1),
+                      (FINAL, 1), (PUBID, 1)):
         if not p.exists():
             notes.append(f"{p.relative_to(ROOT).as_posix()}: ABSENT")
             continue

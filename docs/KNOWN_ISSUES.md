@@ -1517,3 +1517,95 @@ canonical)`. `845 verify` is green — 3 unsafe writers, 0 new since baseline.
   is to GENERALISE `Deal_ID` into a `CEDAR-EVENT` id rather than mint beside it.
   Owner decision; see ADR-030 and `review/OWNER_DECISION_QUEUE.md`.
 <!-- END PLACE-IDS-1129 -->
+
+---
+
+<!-- BEGIN LEDGER-STATE-1134 -->
+# LS · The `state` column of the identifier ledger held the row's own UEI — and did so UPSTREAM of its own fix
+
+*2026-09-02, `code/1134_repair_ledger_state_uei_contamination.py`. FIXED.
+Recorded here for the two general lessons, not for the repair.*
+
+**The defect.** `data/spine/cedar_identifier_ledger.csv`, 12,127 of 19,232
+rows (63%), `state` = that row's own 12-character UEI. All 12,127 are
+`identifier_type = UEI` from `master_tribal_entity_registry.csv`.
+`data/clean/cedar_publishable_identifiers.csv` — **1,577 rows, every one tier A
+and publishable** — had 699 more, and its remaining 878 held unnormalised full
+state names, so **not one row of the most customer-facing copy of the ledger
+carried a usable state**.
+
+## Lesson 1 — A FIX APPLIED DOWNSTREAM OF THE DEFECT LOOKS LIKE A FIX FOREVER
+
+`71_fix_known_defects.py` defect 5 found this and cleaned
+`cedar_identifier_ledger_tiered.csv` and `cedar_identifier_ledger_final.csv`.
+It never touched `data/spine/cedar_identifier_ledger.csv`, the file both are
+BUILT FROM. So the defect sat upstream of its own repair: every shipped copy
+measured clean, the source measured 63% corrupt, and a rerun of
+`03_apply_exclusions_and_tier.py` would have pushed all 12,127 straight back
+in. It also missed `cedar_publishable_identifiers.csv` entirely, which 03
+writes from the same rows in the same pass.
+
+**Rule: when you repair a derived table, name the table it derives from in the
+same commit, and check it.** A green check on the output of a pipeline says
+nothing about the input.
+
+## Lesson 2 — SWEEP THE CLASS, NOT THE INSTANCE
+
+The brief named one table. `62`'s new rule-18 check looks at **every** CSV in
+`data/spine/` and `data/clean/` carrying both an `identifier` and a `state`
+column — 5 tables — and that is the only reason
+`cedar_publishable_identifiers.csv` was found. A check written against the
+three tables somebody already knew about would have passed.
+
+## Lesson 3 — "COLUMN SHIFT" WAS THE WRONG DIAGNOSIS, AND THE RIGHT ONE IS WORSE
+
+Recorded in `review/OWNER_DECISION_QUEUE.md` (`OWNER-V6-NEST-2026-09-02`) as a
+column shift travelling in from the owner's enterprise dataset. **The shift
+width is zero** — measured against v6 across all 26 columns on 11,392 matched
+rows, and against the raw 12-column registry, where exactly one column ever
+equals the row's own UEI. The cause is
+`sam_extracts/build_master_entity_registry.py:126`, a pandas `agg` whose
+missing-column fallback substitutes `awardee_uei` for
+`recipient_location_state_code`. A shift is a parser bug you fix once; a silent
+column substitution produces a full column of plausible values and recurs on
+the next renamed column. Corrected in the queue under `LS-1`; the original
+block is left standing as written (flag, never delete).
+
+## Lesson 4 — BLANKING IS NOT REPAIRING, AND `verify` MUST KNOW THE DIFFERENCE
+
+71 replaced each rejected value with `""`. Safe, and lossy: the owner's v6 held
+the true state for **12,019 of 14,923** blank rows in the tiered ledger and
+**12,026 of 16,250** in the final one. A shipped column reading "unknown" where
+the authority says "VA" is the first defect wearing different clothes.
+
+1134's `verify` therefore asserts a POSITIVE — every row v6 can speak to must
+carry v6's answer — and its `selftest` runs that check against a synthetic
+table in three states: contaminated (FAILS), **blanked but unrepaired (FAILS)**,
+repaired (passes). A conservation proof that nothing broke is not a proof that
+something happened.
+
+## What stands, and what was deliberately not done
+
+- **48 multi-state strings and 3 junk values were LEFT ALONE**, not blanked.
+  Blanking deletes evidence with no recovery behind it.
+- **184 spine rows and 2 publishable rows are BLANK** because v6 has no state
+  for those UEIs. Blank is the honest answer; nothing was inferred.
+- **The $8.21B withheld-attribution hypothesis is FALSE.** 0 of the 15,878
+  `ledger_uei_state_disagreement_withheld` rows in
+  `federal_funding_transactions.csv` were withheld against a corrupted state —
+  `115_pull_assistance_archive.py:892` reads `cedar_entity_spine.csv`, whose
+  `state` is clean on all 1,555 rows. Full working in the queue under `LS-1`.
+
+## The guard
+
+- `01_build_entity_spine.py` already ran `clean_state` on the registry leg;
+  `LEDGER_REFRESH = ()` means `merge_table` cannot overwrite a repaired cell.
+  Dry run after the repair: 19,232 -> 19,358 rows, **0 refreshed, 0 blanks
+  filled**, 0 lost. The repair survives a rebuild.
+- `03_apply_exclusions_and_tier.py` had NO guard and is the only route from the
+  spine ledger into both clean tables. One added, and **proved**: 500
+  contaminated rows injected into a copy of the spine ledger, 03 run against
+  it, **0 reached either output**.
+- `62_no_regression_check.py` rule 18,
+  `ledger_state_holds_own_identifier`, is in `MUST_BE_ZERO`.
+<!-- END LEDGER-STATE-1134 -->
