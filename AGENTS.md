@@ -8297,3 +8297,46 @@ is the price of walking past it.
 `data/clean/native_bills.csv` are not yet in `dist/customer/legislation.csv`.
 A `1137 build` carries them through. Until then the storefront legislation
 file still has no way to reach a Native entity.
+
+## AGENTS THAT STALL, AND HOW TO TELL (2026-09-02)
+
+One agent slept **5.4 hours** waiting on a build that never finished, wrote
+nothing, and was killed with no result. Two rules came out of it, and the
+second is the one that nearly cost a healthy agent its work.
+
+### Rules every agent brief must carry
+
+- **Never sleep more than 120 seconds in one call.** Poll in short intervals
+  and print a progress line each time.
+- **Never spend more than 15 minutes on any single external thing** - a fetch,
+  a build, a subprocess. Abandon it, write down exactly where it stuck, move
+  on. A partial result with an honest account beats silence.
+- **Print progress every few minutes.** Silence is indistinguishable from
+  death from outside.
+- **Check whether the artifact already exists before waiting on it.** This
+  project has repeatedly "discovered" sources already on disk: a 5,087-row SBA
+  8(a) extract the spine builder already loaded, an 807-letter corpus recorded
+  as unacquired, a 1.34 GB FAC bulk export.
+
+### The liveness signal that LIES
+
+A subagent's `.output` file mtime is **not** a liveness signal. Measured on
+2026-09-02 with seven agents running: four showed 0.0 MB files and 20-41
+minutes of silence and **all four were working** - one had just written
+`code/1143_methodology_papers.py`, another `code/1148_nagpra_nps_databases.py`.
+Killing on that signal would have destroyed live work.
+
+**Use repo activity instead.** Files appearing under `code/`, `docs/` and
+`review/` are ground truth that an agent is alive:
+
+```python
+now = time.time()
+for p in list(Path("code").glob("*.py")) + list(Path("docs").glob("*.md")):
+    if (now - p.stat().st_mtime) / 60 < 45:
+        print(p)
+```
+
+The one unambiguous corpse had **322 minutes** of silence AND a zero-byte
+output AND no file anywhere in the tree bearing its claimed script number.
+Require all three before killing, and prefer sending the agent a message
+first - a message forces a tool round, and a live agent answers it.
