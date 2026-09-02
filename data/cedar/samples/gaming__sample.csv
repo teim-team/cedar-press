@@ -1,11 +1,11 @@
-facility_id,tribe,facility_name,city,state,property_status,open_date,open_date_precision,close_date,gaming_machines,table_games,hotel_rooms,employees,gaming_class_ii_authorized,gaming_class_iii_authorized,has_revenue_bound,revenue_bound_strongest_status,state_revenue_disclosure_status,cedar_uid
-CCP-686900,Organized Village of Kake,Keex Kwan Gaming – Bingo,Kake,AK,current,2003-01-01,day,2006-04,,,12,25,1,,Y,REGIONAL_GGR_CEILING,,CE-0006Y-JE
-CCP-522600,Pauma-Yuima Band of Mission Indians,Casino Pauma,Pauma Valley,CA,current,2001-05,month,,1039,18,,437,1,1,Y,REGIONAL_GGR_CEILING,,CE-00185-A6
-CCP-36600,Ute Mountain Ute Tribe,Ute Mountain Casino Hotel,Towaoc,CO,,1992-09,month,,,,,,1,1,Y,REGIONAL_GGR_CEILING,SEALED_BY_STATUTE_OR_COMPACT,CE-001BZ-N0
-CCP-755400,White Earth Band of Chippewa Indians,Ice Cracking Lodge,Ponsford,MN,current,2002-11,month,2005-09,19,,15,,,,Y,REGIONAL_GGR_CEILING,SEALED_BY_STATUTE_OR_COMPACT,CE-000QH-SS
-CCP-668400,Confederated Salish & Kootenai Tribes,Morigeau's Restaurant and Four Star Bar,Ravalli,MT,current,,,2006-11,7,,,,1,1,Y,REGIONAL_GGR_CEILING,,CE-0013X-1E
-CCP-528800,Pueblo of Santa Clara,Santa Claran Hotel Casino,Espanola,NM,current,2001-06,month,,659,5,122,300,1,,Y,SINGLE_PROPERTY_ATTRIBUTED,,CE-0019Q-VR
-CCP-765400,Chickasaw Nation,Chickasaw Travel Stop - Davis Gaming,Davis,OK,current,1995,year,,69,,,26,1,1,Y,REGIONAL_GGR_CEILING,,CE-00135-HP
-CCP-676000,Kickapoo Tribe of Oklahoma,Kickapoo Conoco Station,Harrah,OK,current,2003-04-01,day,2009-11,32,,,10,1,1,Y,REGIONAL_GGR_CEILING,,CE-0015R-DH
-CCP-305300,Modoc Tribe of Oklahoma/Miami Tribe of Oklahoma,The Stables Casino,Miami,OK,current,1998,year,,486,4,,170,1,1,Y,REGIONAL_GGR_CEILING,,CE-0016Y-PQ
-CCP-513400,Kalispel Tribe of Indians,Northern Quest Resort & Casino,Airway Heights,WA,current,2000,year,,1651,37,250,2000,1,1,Y,REGIONAL_GGR_CEILING,,CE-0015K-FM
+facility_id,tribe,facility_name,city,state,property_status,open_date,open_date_precision,close_date,gaming_machines,table_games,hotel_rooms,employees,gaming_class_ii_authorized,gaming_class_iii_authorized,has_revenue_bound,revenue_bound_strongest_status,state_revenue_disclosure_status,cedar_uid,operating_entity_cedar_uids,n_operating_entities
+CCP-686900,Organized Village of Kake,Keex Kwan Gaming – Bingo,Kake,AK,current,2003-01-01,day,2006-04,,,12,25,1,,Y,REGIONAL_GGR_CEILING,,CE-0006Y-JE,CE-0006Y-JE,1
+CCP-522600,Pauma-Yuima Band of Mission Indians,Casino Pauma,Pauma Valley,CA,current,2001-05,month,,1039,18,,437,1,1,Y,REGIONAL_GGR_CEILING,,CE-00185-A6,CE-00185-A6,1
+CCP-36600,Ute Mountain Ute Tribe,Ute Mountain Casino Hotel,Towaoc,CO,,1992-09,month,,,,,,1,1,Y,REGIONAL_GGR_CEILING,SEALED_BY_STATUTE_OR_COMPACT,CE-001BZ-N0,CE-001BZ-N0,1
+CCP-755400,White Earth Band of Chippewa Indians,Ice Cracking Lodge,Ponsford,MN,current,2002-11,month,2005-09,19,,15,,,,Y,REGIONAL_GGR_CEILING,SEALED_BY_STATUTE_OR_COMPACT,CE-000QH-SS,CE-000QH-SS,1
+CCP-668400,Confederated Salish & Kootenai Tribes,Morigeau's Restaurant and Four Star Bar,Ravalli,MT,current,,,2006-11,7,,,,1,1,Y,REGIONAL_GGR_CEILING,,CE-0013X-1E,CE-0013X-1E,1
+CCP-528800,Pueblo of Santa Clara,Santa Claran Hotel Casino,Espanola,NM,current,2001-06,month,,659,5,122,300,1,,Y,SINGLE_PROPERTY_ATTRIBUTED,,CE-0019Q-VR,CE-0019Q-VR,1
+CCP-765400,Chickasaw Nation,Chickasaw Travel Stop - Davis Gaming,Davis,OK,current,1995,year,,69,,,26,1,1,Y,REGIONAL_GGR_CEILING,,CE-00135-HP,CE-00135-HP,1
+CCP-676000,Kickapoo Tribe of Oklahoma,Kickapoo Conoco Station,Harrah,OK,current,2003-04-01,day,2009-11,32,,,10,1,1,Y,REGIONAL_GGR_CEILING,,CE-0015R-DH,CE-0015R-DH,1
+CCP-305300,Modoc Tribe of Oklahoma/Miami Tribe of Oklahoma,The Stables Casino,Miami,OK,current,1998,year,,486,4,,170,1,1,Y,REGIONAL_GGR_CEILING,,CE-0016Y-PQ,CE-0016Y-PQ|CE-00175-5P,2
+CCP-513400,Kalispel Tribe of Indians,Northern Quest Resort & Casino,Airway Heights,WA,current,2000,year,,1651,37,250,2000,1,1,Y,REGIONAL_GGR_CEILING,,CE-0015K-FM,CE-0015K-FM,1

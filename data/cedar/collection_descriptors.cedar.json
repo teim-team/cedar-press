@@ -1,0 +1,170 @@
+{
+  "_entity_layer": {
+    "cedar_id": "_entity_layer",
+    "product_id": "_entity_layer",
+    "status": "READY",
+    "blockers": [
+      "-"
+    ],
+    "n_rows": 326899,
+    "n_tables": 35,
+    "sample_file": "samples/_entity_layer__sample.csv",
+    "needs_copy": false
+  },
+  "contractors": {
+    "cedar_id": "contractors",
+    "product_id": "contractors",
+    "status": "READY",
+    "blockers": [
+      "-"
+    ],
+    "n_rows": 3345971,
+    "n_tables": 10,
+    "sample_file": "samples/contractors__sample.csv",
+    "needs_copy": false
+  },
+  "deals": {
+    "cedar_id": "deals",
+    "product_id": "deals",
+    "status": "READY",
+    "blockers": [
+      "-"
+    ],
+    "n_rows": 2386,
+    "n_tables": 14,
+    "sample_file": "samples/deals__sample.csv",
+    "needs_copy": false
+  },
+  "federal-register": {
+    "cedar_id": "federal-register",
+    "product_id": "federal-register",
+    "status": "READY",
+    "blockers": [
+      "-"
+    ],
+    "n_rows": 501676,
+    "n_tables": 22,
+    "sample_file": "samples/federal-register__sample.csv",
+    "needs_copy": false
+  },
+  "funding": {
+    "cedar_id": "funding",
+    "product_id": "funding",
+    "status": "READY",
+    "blockers": [
+      "-"
+    ],
+    "n_rows": 3573831,
+    "n_tables": 10,
+    "sample_file": "samples/funding__sample.csv",
+    "needs_copy": false
+  },
+  "gaming": {
+    "cedar_id": "gaming",
+    "product_id": "gaming",
+    "status": "READY",
+    "blockers": [
+      "-"
+    ],
+    "n_rows": 127312,
+    "n_tables": 54,
+    "sample_file": "samples/gaming__sample.csv",
+    "needs_copy": false
+  },
+  "legislation": {
+    "cedar_id": "legislation",
+    "product_id": "legislation",
+    "status": "READY",
+    "blockers": [
+      "-"
+    ],
+    "n_rows": 149293,
+    "n_tables": 11,
+    "sample_file": "samples/legislation__sample.csv",
+    "needs_copy": false
+  },
+  "lobbying": {
+    "cedar_id": "lobbying",
+    "product_id": "lobbying",
+    "status": "READY",
+    "blockers": [
+      "-"
+    ],
+    "n_rows": 242199,
+    "n_tables": 35,
+    "sample_file": "samples/lobbying__sample.csv",
+    "needs_copy": false
+  },
+  "nagpra": {
+    "cedar_id": "nagpra",
+    "product_id": "nagpra",
+    "status": "READY",
+    "blockers": [
+      "-"
+    ],
+    "n_rows": 72302,
+    "n_tables": 5,
+    "sample_file": "samples/nagpra__sample.csv",
+    "needs_copy": false
+  },
+  "owned": {
+    "cedar_id": "native-owned-businesses",
+    "product_id": "owned",
+    "status": "READY",
+    "blockers": [
+      "-"
+    ],
+    "n_rows": 1657,
+    "n_tables": 6,
+    "sample_file": "samples/owned__sample.csv",
+    "needs_copy": false
+  },
+  "natural-resources": {
+    "cedar_id": "natural-resources",
+    "product_id": "natural-resources",
+    "status": "READY",
+    "blockers": [
+      "-"
+    ],
+    "n_rows": 34491,
+    "n_tables": 8,
+    "sample_file": "samples/natural-resources__sample.csv",
+    "needs_copy": false
+  },
+  "nest": {
+    "cedar_id": "nest",
+    "product_id": "nest",
+    "status": "READY",
+    "blockers": [
+      "-"
+    ],
+    "n_rows": 4974,
+    "n_tables": 2,
+    "sample_file": "samples/nest__sample.csv",
+    "needs_copy": false
+  },
+  "nonprofits": {
+    "cedar_id": "nonprofits",
+    "product_id": "nonprofits",
+    "status": "READY",
+    "blockers": [
+      "-"
+    ],
+    "n_rows": 123293,
+    "n_tables": 10,
+    "sample_file": "samples/nonprofits__sample.csv",
+    "needs_copy": false
+  },
+  "subcontracting": {
+    "cedar_id": "subcontracting",
+    "product_id": "subcontracting",
+    "status": "READY",
+    "blockers": [
+      "-"
+    ],
+    "n_rows": 77529,
+    "n_tables": 3,
+    "sample_file": "samples/subcontracting__sample.csv",
+    "needs_copy": false
+  }
+}
