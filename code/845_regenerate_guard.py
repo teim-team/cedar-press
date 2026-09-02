@@ -938,6 +938,8 @@ MD_PROVEN_SAFE = {
     "docs/REVIEW_BACKLOG_RULINGS.md":
         "2026-09-02 regen: byte-identical. 603 reproduces the whole doc, "
         "numbered doctrine sections included.",
+    "docs/ANCSA_PORTAL_BUILD_LOG.md":
+        "2026-09-02 regen: byte-identical. build_log_doc.py reproduces the whole document, its 19 narrative headings included - they are f-string built, which is why the orphan-heading signal read 19 of 20.",
     "docs/DOC_STALENESS.md":
         "2026-09-02 regen: 5 removed / 4 added, 1 unpaired - a doc that stopped qualifying as stale, not a paragraph. Every removed line carries a number.",
     "docs/LOBBYING_BUILD_LOG_2026-08-05.md":

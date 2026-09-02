@@ -392,6 +392,20 @@ real dataclass on `main`: **14 of 14 construct.**
 - **The two `PRODUCT_ID` maps could drift silently.** 770 now reads 760's dict
   and exits 1 if they differ. One dict, two call sites, one updated, is exactly
   how finding 7 happened.
+- **A renamed sample leaves its old file behind, and the old file still looks
+  like a sample.** After `native-owned-businesses__sample.csv` became
+  `owned__sample.csv`, the first one sat in `dist/samples/` with stale rows
+  and anything copying `dist/samples/*` would have shipped both - one of them
+  out of date and claimed by no descriptor id. 770 now retires any
+  `*__sample.csv` it did not write in the current run, to `.csv.retired`, and
+  prints which. Found by diffing `dist/` against the product repo after the
+  push, not by any gate.
+- **A concurrent rebuild moved a sample out from under the branch.** The
+  `nest` workstream rebuilt `nest_enterprises.csv` between the sample being
+  drawn and the branch being pushed, so the ten shipped rows were already a
+  different ten. Caught by the same `dist/`-vs-repo diff and refreshed in
+  `4c3ac3a`. **Re-diff after pushing, not before**: the window that matters is
+  the one after your last regeneration.
 - **A gaming "encoding bug" that was not one.** `Keex Kwan Gaming – Bingo`
   renders as `Keex Kwan Gaming ? Bingo` in a cp1252 console. The bytes are a
   correct UTF-8 en dash in both the table and the sample. Measured before

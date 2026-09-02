@@ -101,7 +101,7 @@ One agent owns a central file per pass. The integrator owns `62`, `512`, `517`,
 
 ## 3. This repo's signature defect: a check that does not measure its own name
 
-Nine measured instances. They share one shape — *the number was produced, it
+Thirteen measured instances. They share one shape — *the number was produced, it
 was plausible, and it was about something else.*
 
 | the check | what it reported | what it was actually measuring |
@@ -115,8 +115,12 @@ was plausible, and it was about something else.*
 | `518` C4 | 47,877 rows with an attached identity | `owner_as_of_transaction_cedar_uid = "UNKNOWN"`. A populated cell is not a resolved identity |
 | `518` C4 | percentages for `prime_contracts`, `subawards`, `faads_transactions*` | **estimates**: `SCAN_CAP = 50_000` rows per table. It now names them in `c4_sampled_tables` — read that field before quoting a C4 figure as a census |
 | two, in one day, 2026-09-01 | a column match; a de-dupe | a regex matching `tract` inside `contract_number`; a de-dupe key that evaluated to `""` and would have matched **everything** |
+| `845` regenerate guard v1 | 33 unsafe writers, worst at 62 and 53 columns | **name overlap, not the writer's actual output path.** `910`'s 62-column finding was an 11-column review file and `76`'s 27-column finding was a script that only READS that table - 9 of 29 findings were pairings that do not exist, while 26 real ones were invisible because the literal reached the writer as a `write_csv()` argument. A detector loud about nothing and silent about something. `code/845_regenerate_guard.py` |
+| a regen-and-diff check | `docs/LOBBYING_BUILD_LOG_2026-08-05.md` PROVEN SAFE, byte-identical | **the generator never ran.** `06_build_log_stats_v2.py` exited 2 - it lives in `code/lobbying_pull/`, not `code/` - and an untouched doc is that check's strongest PASS. **Any regenerate-and-diff anywhere in this repo has this hole: assert the exit code before you read the diff.** `845 regen` now refuses on a nonzero exit |
+| `845 scan_md` | 0 markdown docs at risk | **`git log` returned nothing**, so every doc scored 0 hand edits and the whole half printed clean. Seen from inside `62`, where the standalone run of the same code saw 9. It now RAISES rather than report a number it cannot measure, and `62` prints UNMEASURED |
+| `845` class 3, first run | 13 sites UNDETERMINED, 6 of them wrongly | **`awards, stats = [], Counter()`** - a tuple bound to a tuple. The key set was fully knowable and the analyser could not see through the unpacking, so it reported *unmeasured* where the honest answer was *clean*. Undetermined is the safe direction to be wrong in, and it is still wrong |
 
-**The three habits that catch all nine:**
+**The four habits that catch all thirteen:**
 
 1. **A check does not count until a fixture proves it FIRES.** Inject the
    violation, assert exit 1 *and* that the NAMED invariant is what fired,
@@ -127,6 +131,13 @@ was plausible, and it was about something else.*
    instances in two days.
 3. **Print the denominator, the sample cap, and one worked example row.** Every
    entry above would have died on sight next to a single real row.
+4. **An absence of evidence must never print as evidence of absence.** Added
+   2026-09-02, from two instances in one hour. A subprocess that did not run,
+   a `git log` that returned nothing, a detector that could not resolve a
+   name - each produced a CLEAN result, and clean is the strongest thing these
+   checks can say. Check the exit code, check the input is non-empty, and emit
+   **UNMEASURED** rather than a number. `62` already had this discipline for
+   `293`; every new check needs it too.
 
 ---
 

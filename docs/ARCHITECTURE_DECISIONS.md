@@ -870,7 +870,7 @@ this pass touched, so the two columns are the same instrument:
 | unsafe CSV writer triples (`845 csv`) | **65** | **0** |
 | scripts carrying at least one | 48 | 0 |
 | columns a rebuild would have deleted | **355** | 0 |
-| writers whose header derives from the in-memory row, not the file | 93 | 93 (reported, unfixed) |
+| writers whose header derives from the in-memory row, not the file | 114 sites, 10 losing a column | **0 losing a column** (see PART 3) |
 | of them, pairings that did not exist | 9 of v1's 29 | 0 |
 | tables proved to survive a rebuild (`1074 carry`) | - | **63** |
 | positional writers with header != row length (`1074 positional`) | 0 of 40 | 0 of 40 |
@@ -897,10 +897,9 @@ on the fix, and does NOT fire on a table the script merely names.
 
 **Two shapes remain, both reported and neither fixed:**
 
-1. **93 writers use `fieldnames=list(rows[0].keys())`.** That looks derived
-   and is not - it derives from the row this build just built, not from the
-   file on disk, so a rebuild drops an enricher's column exactly as a literal
-   would. Listed under the CSV report, not counted in it.
+1. ~~**93 writers use `fieldnames=list(rows[0].keys())`.**~~ **CLOSED - see
+   PART 3 below.** 114 sites, 10 of which actually lost a column; all ten
+   fixed, and class 3 is now in the baseline and rule 17.
 2. **7 markdown docs** carry a generator plus hand-edit commits plus headings
    the generator cannot emit. Every number there is an UPPER BOUND.
    `845 regen <doc>` settles one by regenerating and diffing, and restores the
@@ -953,4 +952,79 @@ untouched.
 **Baseline.** `docs/schema/regenerate_guard_baseline.json` was re-recorded
 AFTER the fixes and now holds **7 markdown entries and zero CSV entries**.
 Nothing of this workstream's making is grandfathered in it.
+### PART 3, recorded 2026-09-02 — class 3, the header derived from memory
+
+The outcome above listed `fieldnames=list(rows[0].keys())` as *reported and
+not fixed*. It is now measured and closed. **114 sites; 10 that actually lose
+a column.**
+
+The whole point is that 104 of them are fine, and a blanket rewrite of 114
+would have been 104 edits made for nothing plus 104 chances to break a working
+build. The pattern is a defect only where all three hold: the script writes a
+table that already exists in `data/clean/` or `data/spine/`, that table carries
+a column something else added, and the in-memory rows do not carry it.
+
+| verdict | n | what it means |
+|---|---:|---|
+| **LOSES** | **9** | measured against the live header. Fixed. |
+| **UNDETERMINED** | 1 | `82`'s two `**{f"latest_{m}": ...}` spreads. Fixed too - and the guard was right to refuse to guess: read by hand, the real loss was one column, not the 21 a naive count would have claimed. |
+| read-modify-write | 5 | `rows = read_csv(P)` then rewrite `P`. The keys ARE the live header. **This is the correct idiom**, not a defect. |
+| writes a live table, loses nothing | 8 | |
+| writes no shipped table | 91 | a fresh table the script owns outright. Nothing to preserve. |
+
+**The ten:** `82_build_gaming_property_dataset.py` (x2 — capacity history lost
+the six `entity_*` link columns; `gaming_properties.csv` lost `cedar_uid`),
+`122_ocr_ordinance_scans.py` (5), `151_rebuild_entity_evidence_profile.py` (2),
+and `cedar_uid` from `57`, `58`, `66`, `75`, `79`, `127`.
+
+**`79_build_award_level_contracts.py` was half-converted and this caught it.**
+Part 1 fixed its `PUBLISHED` literal writing `prime_contracts_published.csv`
+and left the sibling writer four lines above emitting
+`prime_contracts_awards.csv` from `list(awards[0].keys())`. One script, two
+writers, one fixed. Both now derive.
+
+**Four detector defects were found by building this, and all four are in the
+field guide's section-3 table** rather than only here, because each is a shape
+that recurs:
+
+1. **`845` v1 paired on name overlap, not the output path** — 9 phantom
+   findings of 29, 26 real ones invisible.
+2. **A regen-and-diff check reads a generator that FAILED TO RUN as a PASS.**
+   `06_build_log_stats_v2.py` exited 2 and its doc was reported PROVEN SAFE.
+   *Any* regenerate-and-diff in this repo has that hole.
+3. **`scan_md` scored every doc at 0 when `git log` returned nothing** — an
+   empty history printing a clean bill, observed from inside `62`.
+4. **`awards, stats = [], Counter()`** — a tuple bound to a tuple made six
+   fully-knowable key sets read UNDETERMINED.
+
+The habit they earn is now habit 4 in the field guide: **an absence of evidence
+must never print as evidence of absence.** Check the exit code, check the input
+is non-empty, emit UNMEASURED rather than a number.
+
+**The guard now recognises its own fix structurally.** `carry_forward_funcs()`
+finds any function that reads a csv header and returns a concatenation, so a
+wrapped writer reads as safe without being registered by name — and the next
+agent's own helper is understood for free. Without it the guard flagged all
+ten repairs as fresh defects.
+
+**`845 selftest` now carries six assertions**, three of them new: class 3 FIRES
+on an in-memory writer that drops a live column; it does NOT fire once wrapped
+in a carry-forward; and a read-modify-write on the same file reads as CORRECT.
+
+**Markdown, finished.** 21 (upper bound) → **4**. Eight docs settled by actually
+regenerating and diffing, recorded in `MD_PROVEN_SAFE` with their evidence.
+`docs/LOBBYING_BUILD_LOG_2026-08-05.md` — the one genuine candidate — is
+**"the generator is right and the prose is stale"**: 35 removed lines, 30 of
+them unpaired, and **every single one carries a number** with a numeric
+counterpart on the added side (39,448 → 40,968 raw filings; the ambiguous
+queue 361 → 5 because the rulings were applied). `regen` now counts removed
+lines containing no digit at all, which is the shape of a sentence somebody
+wrote, and reports zero here.
+
+**The four left are not mine to settle.** `DATASET_READINESS.md` (518),
+`GRAIN_AUDIT.md` and `DATASET_CONTRACTS.md` (512) are written by
+integrator-owned generators and were not run. `INVENTORY.md` (521) is slow
+rather than owned.
+
+**Baseline** re-recorded after the fixes: **0 CSV, 0 class 3, 4 markdown.**
 <!-- END ADR-017 -->

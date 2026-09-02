@@ -1,10 +1,5 @@
 [
  [
-  "06_build_log_stats_v2.py",
-  "docs/LOBBYING_BUILD_LOG_2026-08-05.md",
-  "markdown"
- ],
- [
   "512_build_dataset_contracts.py",
   "docs/DATASET_CONTRACTS.md",
   "markdown"
@@ -22,16 +17,6 @@
  [
   "521_inventory.py",
   "docs/INVENTORY.md",
-  "markdown"
- ],
- [
-  "527_doc_staleness.py",
-  "docs/DOC_STALENESS.md",
-  "markdown"
- ],
- [
-  "build_log_doc.py",
-  "docs/ANCSA_PORTAL_BUILD_LOG.md",
   "markdown"
  ]
 ]
