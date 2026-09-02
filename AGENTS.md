@@ -8340,3 +8340,57 @@ The one unambiguous corpse had **322 minutes** of silence AND a zero-byte
 output AND no file anywhere in the tree bearing its claimed script number.
 Require all three before killing, and prefer sending the agent a message
 first - a message forces a tool round, and a live agent answers it.
+
+---
+
+## 2026-09-02 · `62` IS RED AND NONE OF IT IS MONEY-RECON-1144 — the rule-15 naming
+
+*Workstream MONEY-RECON-1144 ran `62_no_regression_check.py` at 17:33–17:41Z.
+It exited with **22 regression lines**. Standing rule 15 forbids recording a
+FAIL as "pre-existing, not mine" and walking away, and requires naming the line
+and its owner here instead. This is that naming. Nothing below is a claim that
+these are acceptable — it is a claim about **who can fix each one**.*
+
+**First, the one that WAS mine, and is fixed.** `293` flagged
+`class2c 1144_money_reconciliation_prime_sub.py: missing += 1` — a refusal
+counter that named no key. `linkage_verify` now collects and prints the
+offending `(source_dataset, subaward_source_record_id)` pairs instead of
+tallying them. Re-run of `293` no longer names `1144` in any class.
+
+**Second, the honest baseline.** `62` was **not green before this pass**, and
+the shape of the diff says so on its own: `ship_tables_shipping` rose 197 → 227
+and `harvest_source_rows_read` rose 2.1M → 13.2M in the same window. That is a
+large shipping and acquisition wave landing from several agents, not the
+footprint of one measurement pass that wrote 900 cells. `846` was already
+**2 fail / 2 critical at `HEAD` (`bff0ba8`)** before MONEY-RECON-1144 began;
+it is 2 fail / 1 critical now.
+
+| regression | named owner | evidence |
+|---|---|---|
+| `regenerate_new_unsafe_writers = 1` | **workstream LINKAGE (`1139`/`1140`)** | `845 verify` names it exactly: `1139_linkage_coverage.py markdown -> docs/LINKAGE_COVERAGE.md`. Committed in `75d178b`, before this pass |
+| `lint_class1` 0 → 1 | `1011_cross_dataset_reconciliation.py` | named by `293` |
+| `lint_class2c` 60 → 69 | `1060` (×2), `1085`, `1086`, `846`, `852`, `873` | named by `293`. `1144`'s instance was the tenth and is fixed |
+| `lint_class3` 0 → 2 | `1060_splink_pilot.py`, `992_newsletter_deal_candidates.py` | named by `293` |
+| `lint_class4` 9 → 15 | `1030`, `1031`, `1111`, `1147`, `980`, `992` | named by `293`. **`1147` appeared mid-pass** — it did not exist when this workstream started |
+| `lint_class6` (2 new sites despite the net fall) | `1077`, `30`, `518`, `870`, `99` | named by `293` |
+| `lint_class7` 42 → 44 | `1030`, `1031` | named by `293` |
+| `contract_violations = 16`, `contract_orphan_shippable = 11`, `tables_missing_from_25_TABLES` 179 → 243, `tables_missing_from_27_SPEC` 194 → 250, `tables_undocumented_in_codebook` 3 → 34, `tables_missing_codebook_block` 3 → 34, `tables_missing_notes_contract` 14 → 54, `ship_tables_at_zero` 13 → 53 | **workstream MONEY-FED-2026-09-02** (`1145_cosponsor_harvest.py`, `1147_released_host_directories.py`, `1148_nagpra_nps_databases.py`, `GRAIN_MONEY_FED` in `512`) | these are one event, not eight: a wave of new tables landed without codebook blocks. `512`'s working copy carries `GRAIN_MONEY_FED`, +131 lines, uncommitted at 17:35, and its own comment names the three scripts |
+| `SHIPPING LOST: advocacy_passthrough_2026-08-07.csv`; `hearing_bill_links.csv` 465 → 464; `native_bills_subject_sweep.csv` 2,414 → 2,409 | **same wave** — a shipping-set regression, and `62` itself points at `tables_undocumented_in_codebook` as the usual cause | |
+| `tier_A_ruled` FELL 1,676 → 1,669 | **NOT DETERMINED** | the metric reads `cedar_identifier_ledger_final.csv`, which MONEY-RECON-1144 never opened. Whoever wrote the ledger today owns it; this pass could not identify which of the nine concurrent agents that was, and says so rather than guessing |
+| `rulings_unapplied` ROSE 1,215 → 2,894 | **NOT DETERMINED** | same. A near-tripling in one day is a large event and deserves a named owner it does not yet have |
+
+**What MONEY-RECON-1144 touched, in full, so this table can be checked rather
+than believed:** `code/1144_*` (new), the four stale figures in `512`'s
+`GRAIN_SUBAWARD_FUNDING` descriptor string, marked blocks in
+`MONEY_TOTALLING_RULES.md` / `KNOWN_ISSUES.md` / `ARCHITECTURE_DECISIONS.md` /
+`WORK_QUEUE.md`, two `review/1144_*` files, and 900 cells on 290 rows of
+`data/clean/subawards.csv` (rows and columns unchanged, money unchanged to the
+cent, prior values retained). **It shipped nothing, registered no table, and
+minted no tier.** None of the eight shipping-set metrics can be reached from
+that surface.
+
+**The two lines above marked NOT DETERMINED are the real debt in this
+section.** Naming a file is not naming an owner, and `62`'s rule exists because
+"not mine" is how six sessions in a row hid everything else this gate could
+have said.
+
