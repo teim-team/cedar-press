@@ -75,6 +75,37 @@ TOTAL_BUDGET_S = 3600.0
 
 # ---------------------------------------------------------------- host lock
 
+# --- REGENERATE GUARD (ADR-017, 2026-09-02) --------------------------------
+def _carry_live_columns(path, canonical):
+    """Derive this writer's header instead of declaring it.
+
+    A wholesale writer holding a FIXED `fieldnames` list deletes every column
+    an in-place enricher added since - no error, no exception, a diff nobody
+    reads. Canonical order first so column order stays stable, then whatever
+    the live file already carries. A retired column stays retired because it
+    is not on disk; a promoted column survives because it is.
+
+    THIS BUILD CANNOT REPOPULATE AN ENRICHER'S COLUMN. Carried columns are
+    written BLANK and NAMED on stdout, which is strictly better than deleted:
+    the schema survives and the enricher can refill them. Re-run the enricher
+    after this build - `cedar_pipeline.enrichers_to_rerun(<table>)` names it.
+    """
+    import csv as _csv
+    import os as _os
+    canonical = list(canonical)
+    _p = str(path)
+    if not _os.path.exists(_p):
+        return canonical
+    with open(_p, encoding="utf-8-sig", newline="", errors="replace") as _fh:
+        _live = next(_csv.reader(_fh), [])
+    _extra = [c for c in _live if c and c not in canonical]
+    if _extra:
+        print("  [regenerate guard] %s: carrying %d enricher column(s) through "
+              "this rebuild, BLANK - re-run the enricher: %s"
+              % (_os.path.basename(_p), len(_extra), ", ".join(_extra)))
+    return canonical + _extra
+
+
 def claim_lock(note):
     LOGS.mkdir(parents=True, exist_ok=True)
     if LOCK.exists():
@@ -461,17 +492,22 @@ def build_events(snapshots):
                   "carries extract_route_changed=1 and should be read as "
                   "possibly an artefact of the page's own markup change.")
 
-    fields = ["event_id", "event_type", "marker_title", "prior_marker_title",
-              "marker_address",
-              "latitude", "longitude", "prior_latitude", "prior_longitude",
-              "prior_address", "from_snapshot_timestamp", "from_snapshot_date",
-              "from_snapshot_url", "to_snapshot_timestamp", "to_snapshot_date",
-              "to_snapshot_url", "from_marker_count", "to_marker_count",
-              "extract_route_from", "extract_route_to", "extract_route_changed",
-              "event_note", "source_url", "built_date"]
+    EVENT_CANONICAL = ["event_id", "event_type", "marker_title",
+                       "prior_marker_title", "marker_address",
+                       "latitude", "longitude", "prior_latitude",
+                       "prior_longitude", "prior_address",
+                       "from_snapshot_timestamp", "from_snapshot_date",
+                       "from_snapshot_url", "to_snapshot_timestamp",
+                       "to_snapshot_date", "to_snapshot_url",
+                       "from_marker_count", "to_marker_count",
+                       "extract_route_from", "extract_route_to",
+                       "extract_route_changed", "event_note", "source_url",
+                       "built_date"]
     out = CLEAN / "gaming_property_universe_events.csv"
+    fields = _carry_live_columns(out, EVENT_CANONICAL)
     with open(out, "w", encoding="utf-8", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=fields, extrasaction="ignore")
+        w = csv.DictWriter(fh, fieldnames=fields, extrasaction="ignore",
+                           restval="")
         w.writeheader()
         w.writerows(events)
     print(f"\nwrote {out.relative_to(CEDAR)}  ({len(events):,} events over "

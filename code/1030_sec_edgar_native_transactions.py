@@ -828,6 +828,122 @@ def cmd_mine(limit=None, min_evidence="all"):
     return 0
 
 
+# ============================================================= fetch-leads ==
+# The 860 sweep's window opens on 2017-05-22. The entity-driven FTS runs from
+# 2001, and 13,377 of its accessions are outside the 860 index - most of them
+# BEFORE that window.
+#
+# `docs/DEALS_SEC_2010_2017_BUILD_LOG.md` ranked "the counterparty seam,
+# extended" as follow-up 3 and named the companies to run it against: Full
+# House Resorts, Century Casinos, Nevada Gold & Casinos, Warwick Valley /
+# Empire Resorts and Butler National. The entity sweep found four of those
+# five on its own, by searching tribe names rather than company names - which
+# is the mandate's point demonstrated in reverse.
+#
+# This fetches those filers' transactional filings into the SAME cache and the
+# SAME manifest, so `mine` reads them with no special case.
+
+LEAD_FILERS = [
+    "EMPIRE RESORTS", "ALPHA HOSPITALITY", "WATERFORD GAMING",
+    "NEVADA GOLD & CASINOS", "VENTURE CATALYST", "SYCUAN FUNDS",
+    "FULL HOUSE RESORTS", "CENTURY CASINOS", "LAKES ENTERTAINMENT",
+    "GOLDEN ENTERTAINMENT", "BUTLER NATIONAL", "SENECA GAMING",
+    "TRACKPOWER", "EC DEVELOPMENT",
+]
+
+
+def cmd_fetch_leads(limit=400):
+    """Fetch the pre-2017 counterparty seam the entity sweep surfaced."""
+    import collections
+    out("=== 1030 fetch-leads - the pre-2017 counterparty seam ===")
+    out("")
+    if not FTS_HITS.exists():
+        raise SystemExit("run `fts` first")
+    want = [w.upper() for w in LEAD_FILERS]
+    seen, pool = set(), []
+    with open(FTS_HITS, encoding="utf-8-sig", newline="") as fh:
+        for r in csv.DictReader(fh):
+            fd = (r["filer_display_names"] or "").upper()
+            if not any(w in fd for w in want):
+                continue
+            form = (r["form"] or "").strip()
+            if form not in TRANSACTIONAL_FORMS and not form.startswith("EX-"):
+                continue
+            if r["accession"] in seen or not r["document_url"]:
+                continue
+            seen.add(r["accession"])
+            pool.append(r)
+    pool.sort(key=lambda r: r["file_date"])
+    out(f"  {len(pool):,} distinct transactional filings from the named "
+        f"filers, {pool[0]['file_date']}..{pool[-1]['file_date']}")
+    for k, v in collections.Counter(
+            r["filer_display_names"].split("(CIK")[0].strip()[:42]
+            for r in pool).most_common(15):
+        out(f"    {v:4d}  {k}")
+
+    man = load_manifest()
+    todo = [r for r in pool if r["accession"] not in man][:int(limit)]
+    out("")
+    out(f"  {len(man):,} already in the manifest; fetching {len(todo):,}")
+    if not todo:
+        return 0
+    CACHE.mkdir(parents=True, exist_ok=True)
+    first = not FETCH_MANIFEST.exists()
+    ok = fail = consecutive = 0
+    started = time.time()
+    with HostLock("www.sec.gov",
+                  "sequential, single stream, >=0.17s gap, stop after 5 "
+                  "consecutive refusals, 2h deadline",
+                  "1030 pre-2017 counterparty seam") as lock:
+        for i, r in enumerate(todo, 1):
+            if time.time() - started > RUN_DEADLINE_S:
+                out("  RUN_DEADLINE reached; stopping cleanly")
+                break
+            url = r["document_url"]
+            dest = cache_path(r["accession"], url.rsplit("/", 1)[-1])
+            rec = {"accession": r["accession"], "cik": r["cik"],
+                   "form": r["form"], "file_date": r["file_date"],
+                   "document_url": url, "fetched_by": SCRIPT,
+                   "fetched_at": datetime.now(timezone.utc).isoformat()}
+            try:
+                if dest.exists() and dest.stat().st_size > 0:
+                    b = dest.read_bytes()
+                    rec.update(local_file=str(dest.relative_to(CEDAR)),
+                               bytes=len(b), md5=md5(b),
+                               http_status="cached",
+                               note="already_on_disk_skipped")
+                    lock.bump(already_on_disk_skipped=1)
+                else:
+                    time.sleep(GAP)
+                    status, body = http_get(url, ARCH_HDR, timeout=90)
+                    dest.write_bytes(body)
+                    rec.update(local_file=str(dest.relative_to(CEDAR)),
+                               bytes=len(body), md5=md5(body),
+                               http_status=status, note="downloaded_this_run")
+                    ok += 1
+                    consecutive = 0
+                    lock.bump(downloaded_this_run=1, requests_made=1)
+            except Exception as e:
+                rec.update(local_file="", bytes=0, md5="",
+                           http_status=getattr(e, "code", "ERR"),
+                           note=f"{type(e).__name__}: {e}")
+                fail += 1
+                consecutive += 1
+                lock.state["refused_by_host"].append(
+                    f'{r["accession"]}: {type(e).__name__}')
+                lock.bump(requests_made=1)
+            append_manifest(rec, first)
+            first = False
+            if consecutive >= 5:
+                out("  5 consecutive refusals - stopping")
+                break
+            if i % 50 == 0:
+                out(f"  {i:,}/{len(todo):,}  ok={ok:,} fail={fail:,}")
+    out("")
+    out(f"  downloaded {ok:,}  failed {fail:,}")
+    return 0
+
+
 # ================================================================ holdings ==
 # The triage sets 1,881 registered-investment-company reports aside because a
 # schedule of investments discloses no transaction. That is right, and it
@@ -1393,6 +1509,8 @@ def main(argv):
         return cmd_submissions(ciks=kw.get("ciks"))
     if cmd == "holdings":
         return cmd_holdings(limit=kw.get("limit", 60))
+    if cmd == "fetch-leads":
+        return cmd_fetch_leads(limit=kw.get("limit", 400))
     if cmd == "verify":
         return cmd_verify()
     if cmd == "verify-synthetic":

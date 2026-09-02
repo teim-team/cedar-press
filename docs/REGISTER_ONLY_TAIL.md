@@ -15,7 +15,7 @@
 | `cedar_resolved_facts.csv` | what Cedar has adjudicated |
 | `entity_aliases.csv` | names, one or more for every entity |
 
-Excluding the identity layer and any table that is a census of the register, **83** register entities have no row in any of the 136 substantive tables, and **31** more have exactly one.
+Excluding the identity layer and any table that is a census of the register, **83** register entities have no row in any of the 138 substantive tables, and **31** more have exactly one.
 
 The slice worked here is both — the thin tail, **114** entities. The line between the two groups moved while this was being written: the newsletter workstream landed `tribal_newsletter_corpus.csv` and 21 entities that had been register-only an hour earlier acquired one row apiece. Slicing on zero alone would have dropped them at the moment they became reachable. `n_substantive_tables` on every evidence row keeps the two states told apart.
 
@@ -34,9 +34,9 @@ The slice worked here is both — the thin tail, **114** entities. The line betw
 
 | route | rows |
 |---|---:|
-| NCES_CCD | 86 |
-| USASPENDING | 28 |
-| IRS_990 | 20 |
+| NCES_CCD | 85 |
+| USASPENDING | 32 |
+| IRS_990 | 24 |
 | NONE | 2 |
 
 ## Checked, nothing located — 2

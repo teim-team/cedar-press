@@ -350,6 +350,37 @@ def match_terms(desc):
     return hits, strong
 
 
+# --- REGENERATE GUARD (ADR-017, 2026-09-02) --------------------------------
+def _carry_live_columns(path, canonical):
+    """Derive this writer's header instead of declaring it.
+
+    A wholesale writer holding a FIXED `fieldnames` list deletes every column
+    an in-place enricher added since - no error, no exception, a diff nobody
+    reads. Canonical order first so column order stays stable, then whatever
+    the live file already carries. A retired column stays retired because it
+    is not on disk; a promoted column survives because it is.
+
+    THIS BUILD CANNOT REPOPULATE AN ENRICHER'S COLUMN. Carried columns are
+    written BLANK and NAMED on stdout, which is strictly better than deleted:
+    the schema survives and the enricher can refill them. Re-run the enricher
+    after this build - `cedar_pipeline.enrichers_to_rerun(<table>)` names it.
+    """
+    import csv as _csv
+    import os as _os
+    canonical = list(canonical)
+    _p = str(path)
+    if not _os.path.exists(_p):
+        return canonical
+    with open(_p, encoding="utf-8-sig", newline="", errors="replace") as _fh:
+        _live = next(_csv.reader(_fh), [])
+    _extra = [c for c in _live if c and c not in canonical]
+    if _extra:
+        print("  [regenerate guard] %s: carrying %d enricher column(s) through "
+              "this rebuild, BLANK - re-run the enricher: %s"
+              % (_os.path.basename(_p), len(_extra), ", ".join(_extra)))
+    return canonical + _extra
+
+
 def read_csv(p):
     with open(p, encoding="utf-8-sig", newline="") as f:
         return list(csv.DictReader(f))
@@ -621,7 +652,7 @@ def main():
                     "publication was located. NOT_FOUND, not WITHHOLDS: no "
                     "agency statement of refusal was retrieved." % n})
 
-    fields = [
+    VISITOR_CANONICAL = [
         "visitor_access_event_id", "appointment_start_date",
         "appointment_end_date", "appointment_made_date",
         "appointment_cancelled_date", "n_visitor_records",
@@ -638,7 +669,9 @@ def main():
         "release_label", "release_date", "source_url", "source_record_id",
         "source_codebook_url", "fetched_date", "confidence_tier",
     ]
-    write_csv(CLEAN / "visitor_access_events.csv", rows, fields)
+    events_p = CLEAN / "visitor_access_events.csv"
+    write_csv(events_p, rows,
+              _carry_live_columns(events_p, VISITOR_CANONICAL))
     if foia_rows:
         write_csv(CLEAN / "visitor_record_foia_requests.csv", foia_rows,
                   list(foia_rows[0].keys()))

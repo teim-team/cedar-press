@@ -27,7 +27,7 @@ Three honest outcomes, and they are three different jobs:
 | still unexplained | 7 |
 | ratchet `contract_grain_unstated_shippable` | **7** (was 207) |
 
-A declaration that the data contradicts is release-blocking through `contract_violations`; there are **12**.
+A declaration that the data contradicts is release-blocking through `contract_violations`; there are **11**.
 
 ## Per collection
 
@@ -304,7 +304,7 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 
 ### Entity spine, identifiers and reference  (`_entity_layer`)
 
-34 of 35 shippable tables declared.
+35 of 35 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
@@ -323,7 +323,7 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 | `cedar_publishable_identifiers.csv` | 1,577 | DECLARED_VALIDATED | `identifier` | `cedar_uid`→35, `tribe_id`→35 |
 | `cedar_ruling_ledger_consolidated.csv` | 43,321 | DECLARED_VALIDATED | `subject_key` + `source_file` + `source_row_ordinal` | `resolved_tribe_id`→661, `subject_key`→2,778 |
 | `cross_dataset_ruling_map.csv` | 22,936 | DECLARED_VALIDATED | `source_file` + `target_row_ordinal` + `identifier_type` + `channel` | `identifier`→2,776 |
-| `entity_aliases.csv` | 6,297 | **DECLARATION FAILED** | `alias_id` | `cedar_uid`→20, `entity_id`→20 |
+| `entity_aliases.csv` | 6,297 | DECLARED_VALIDATED | `alias_id` | `cedar_uid`→20, `entity_id`→20 |
 | `entity_hierarchy.csv` | 952 | DECLARED_VALIDATED | `tribe_id` | `cedar_uid`→1, `tribe_id`→1 |
 | `entity_relationships.csv` | 2,292 | DECLARED_VALIDATED | `relationship_id` | — |
 | `entity_year_panel.csv` | 12,534 | DECLARED_VALIDATED | `tribe_id` + `year` | `cedar_uid`→28, `tribe_id`→28 |

@@ -278,7 +278,7 @@ it. Corrections are recorded under the table, not silently applied.*
 | …attributed | ” | **$244.77B (79.0%)** ✅ | 498 entities ✅ · 888,803 rows |
 | Assistance | `federal_funding_transactions.csv` | **701,955** ⚠ | FY2007–2026 ✅ · *was written 684,923* · **3 source vintages, 2 id schemes — see below** |
 | FAADS (pre-2008) | `faads_transactions_all_agencies.csv` | 2,769,748 ✅ | unharmonised |
-| Subawards | `subawards.csv` | **72,837** ✅ | **FY2021 PROMOTED 2026-08-28: 173 → 9,462.** FY2022–24 still 89/120/166 — those three jobs failed server-side |
+| Subawards | `subawards.csv` | **76,859** ✅ | **FY2021 PROMOTED 2026-08-28: 173 → 9,462.** FY2022–24 still 89/120/166 — those three jobs failed server-side |
 | 990 Schedule I | `np_schedule_i_grants.csv` | **58,685** ✅ | **627** distinct `filer_ein` — *was written 628* |
 | Grantmaker funding flows | `grantmaker_funding_flows.csv` | **18,656** ✅ | 14 grantmakers ✅ |
 | FOIA discovery index | `foia_request_index.csv` | **9,481** ✅ | source logs span 1993–2026; **parsed dates span 1975–2026 and 1,775 rows carry none** |
@@ -808,7 +808,7 @@ staging directory.** Both were investigated on 2026-08-26 and both are dead ends
 LANDED AND IS PROMOTED (2026-08-28).** `_state.json` now shows
 `fy2021: finished`, 765,109 rows (csv-parsed and confirmed exactly: 242,337
 contracts + 522,772 assistance). It was promoted on 2026-08-28 and
-`subawards.csv` is **72,837** rows. **fy2022, fy2023, fy2024 and
+`subawards.csv` is **76,859** rows. **fy2022, fy2023, fy2024 and
 fy2020_procurement remain `status: failed`** with the opaque body
 `"An error occurred."` — those four are still upstream.
 

@@ -88,6 +88,37 @@ DISC = CLEAN / "native_entity_lobbying_disclosures.csv"
 PANEL = CLEAN / "tribe_year_lobbying_panel.csv"
 PRE65 = CLEAN / "native_entity_lobbying_disclosures.csv.bak_2026-08-06_pre65"
 
+# --- REGENERATE GUARD (ADR-017, 2026-09-02) --------------------------------
+def _carry_live_columns(path, canonical):
+    """Derive this writer's header instead of declaring it.
+
+    A wholesale writer holding a FIXED `fieldnames` list deletes every column
+    an in-place enricher added since - no error, no exception, a diff nobody
+    reads. Canonical order first so column order stays stable, then whatever
+    the live file already carries. A retired column stays retired because it
+    is not on disk; a promoted column survives because it is.
+
+    THIS BUILD CANNOT REPOPULATE AN ENRICHER'S COLUMN. Carried columns are
+    written BLANK and NAMED on stdout, which is strictly better than deleted:
+    the schema survives and the enricher can refill them. Re-run the enricher
+    after this build - `cedar_pipeline.enrichers_to_rerun(<table>)` names it.
+    """
+    import csv as _csv
+    import os as _os
+    canonical = list(canonical)
+    _p = str(path)
+    if not _os.path.exists(_p):
+        return canonical
+    with open(_p, encoding="utf-8-sig", newline="", errors="replace") as _fh:
+        _live = next(_csv.reader(_fh), [])
+    _extra = [c for c in _live if c and c not in canonical]
+    if _extra:
+        print("  [regenerate guard] %s: carrying %d enricher column(s) through "
+              "this rebuild, BLANK - re-run the enricher: %s"
+              % (_os.path.basename(_p), len(_extra), ", ".join(_extra)))
+    return canonical + _extra
+
+
 PANEL_FIELDS = [
     "entity_id", "canonical_name", "entity_type", "entity_state", "filing_year",
     "total_lobbying_spend_usd", "spend_from_client_income_usd",
@@ -262,8 +293,10 @@ def main():
         print(f"\n  backed up -> {bak.name}")
 
     part = PANEL.with_suffix(PANEL.suffix + ".part")
+    _fields = _carry_live_columns(PANEL, PANEL_FIELDS)
     with open(part, "w", newline="", encoding="utf-8") as fh:
-        w = csv.DictWriter(fh, fieldnames=PANEL_FIELDS, extrasaction="ignore")
+        w = csv.DictWriter(fh, fieldnames=_fields, extrasaction="ignore",
+                           restval="")
         w.writeheader()
         for r in new:
             w.writerow(r)

@@ -92,6 +92,37 @@ REFUSED = CEDAR / "review" / f"identity_crosswalk_refused_{TODAY}.csv"
 
 csv.field_size_limit(min(sys.maxsize, 2**31 - 1))
 
+# --- REGENERATE GUARD (ADR-017, 2026-09-02) --------------------------------
+def _carry_live_columns(path, canonical):
+    """Derive this writer's header instead of declaring it.
+
+    A wholesale writer holding a FIXED `fieldnames` list deletes every column
+    an in-place enricher added since - no error, no exception, a diff nobody
+    reads. Canonical order first so column order stays stable, then whatever
+    the live file already carries. A retired column stays retired because it
+    is not on disk; a promoted column survives because it is.
+
+    THIS BUILD CANNOT REPOPULATE AN ENRICHER'S COLUMN. Carried columns are
+    written BLANK and NAMED on stdout, which is strictly better than deleted:
+    the schema survives and the enricher can refill them. Re-run the enricher
+    after this build - `cedar_pipeline.enrichers_to_rerun(<table>)` names it.
+    """
+    import csv as _csv
+    import os as _os
+    canonical = list(canonical)
+    _p = str(path)
+    if not _os.path.exists(_p):
+        return canonical
+    with open(_p, encoding="utf-8-sig", newline="", errors="replace") as _fh:
+        _live = next(_csv.reader(_fh), [])
+    _extra = [c for c in _live if c and c not in canonical]
+    if _extra:
+        print("  [regenerate guard] %s: carrying %d enricher column(s) through "
+              "this rebuild, BLANK - re-run the enricher: %s"
+              % (_os.path.basename(_p), len(_extra), ", ".join(_extra)))
+    return canonical + _extra
+
+
 FIELDS = [
     "crosswalk_id",
     "cedar_entity_id", "cedar_entity_name", "cedar_entity_class",
@@ -379,8 +410,9 @@ def main():
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     tmp = OUT.with_suffix(".csv.part")
+    _fields = _carry_live_columns(OUT, FIELDS)
     with open(tmp, "w", encoding="utf-8", newline="") as fh:
-        w = csv.DictWriter(fh, FIELDS)
+        w = csv.DictWriter(fh, _fields, restval="", extrasaction="ignore")
         w.writeheader()
         w.writerows(out)
     tmp.replace(OUT)
@@ -397,7 +429,9 @@ def main():
 
     # Concurrency rule 4: verify by RE-READING.
     back, back_cols = read(OUT)
-    assert back_cols == FIELDS, f"column drift: {back_cols}"
+    # The header is DERIVED (see _carry_live_columns), so the drift check is
+    # against what this run intended to write, not against the literal.
+    assert back_cols == _fields, f"column drift: {back_cols}"
     assert len(back) == len(out), f"{len(out)} written, {len(back)} read back"
     assert len({r['crosswalk_id'] for r in back}) == len(back), \
         "crosswalk_id is not unique on re-read"

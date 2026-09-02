@@ -162,11 +162,18 @@ RESTRICTED_HOST_SUFFIXES = (
 )
 
 # Never requested. Not "hidden data" — someone's private infrastructure.
-FORBIDDEN_PATH_MARKERS = (
-    "/wp-admin", "/wp-login", "/admin", "/administrator", "/.env", "/.git",
-    "/backup", "/phpmyadmin", "/xmlrpc.php", "/user/login", "/login",
-    "/signin", "/wp-content/debug.log",
-)
+# MATCHED BY PATH SEGMENT, NOT BY SUBSTRING. The substring form flagged
+# /departments/administrative-offices/gaming-office/ on tonation-nsn.gov as an
+# admin path (2026-09-02) — the same shape as the project's standing
+# "a place suffix makes a tribe name a place" trap. A guard that over-matches
+# stops good work as surely as one that under-matches lets bad work through.
+FORBIDDEN_SEGMENTS = {
+    "wp-admin", "wp-login.php", "admin", "administrator", "adminer",
+    ".env", ".git", ".svn", "backup", "backups", "phpmyadmin", "xmlrpc.php",
+    "login", "signin", "sign-in", "logon", "cpanel", "webmail", "wp-config.php",
+    "staging", "dev", "test-site", "db", "dump",
+}
+FORBIDDEN_SUFFIXES = (".sql", ".bak", ".tar.gz", ".zip.bak", "debug.log", ".htpasswd")
 
 # Parked / hijacked signals. A guessed domain that returns 200 is fabrication
 # with a status code next to it (PULL_DISCIPLINE.md, shard H).

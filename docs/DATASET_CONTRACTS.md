@@ -2,7 +2,7 @@
 
 *Generated 2026-09-02 by `code/512_build_dataset_contracts.py` (mission Phase 1). Regenerate rather than edit; `verify` exits 1 when the world breaks a contract, and 62 gates on it.*
 
-**13 collections, 266 tables claimed, 7 orphaned shippable tables, 12 violations.**
+**14 collections, 268 tables claimed, 7 orphaned shippable tables, 11 violations.**
 
 **Grain: 218 of 225 shippable tables declare and VALIDATE a row grain, a primary key and a join cardinality; 7 do not.** A declared grain the data contradicts is a release-blocking violation, listed below. An unstated grain is ratcheted by `62_no_regression_check.contract_grain_unstated_shippable`: the count may only fall, and a new shippable table that lands without one fails the gate that day.
 
@@ -24,7 +24,6 @@
 - federal_funding_tribe_year_panel.csv: declared primary_key names column(s) not in the header: ['tribe_id']
 - federal_funding_tribe_year_panel.csv: declared join_cardinality names column(s) not in the header: ['tribe_id']
 - federal_funding_tribe_year_panel.csv: declared primary_key ['fiscal_year'] is NOT unique - 5,480 duplicate row(s) of 5,496, e.g. ('2008',). A buyer joining on it gets rows we did not promise them.
-- entity_aliases.csv: declared primary_key ['alias_id'] is NOT unique - 1 duplicate row(s) of 6,298, e.g. ('',). A buyer joining on it gets rows we did not promise them.
 - ORPHAN shippable table: native_owned_businesses.bak_2026-09-02_010526.csv - registered in the codebook but claimed by NO collection
 - ORPHAN shippable table: native_owned_businesses.bak_2026-09-02_010557.csv - registered in the codebook but claimed by NO collection
 - ORPHAN shippable table: native_owned_businesses.csv - registered in the codebook but claimed by NO collection
@@ -670,6 +669,26 @@ Declared grain — validated against the file on every run:
   - primary key: `verification_id`  (validated unique)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
 
+## NEST: Native Enterprise Structures and Ties  (`nest`, shelf: pro)
+
+Rebuild: `py -3 code/build.py run nest --execute` — 2 tables.
+
+| table | status | keys | rebuilt by | enriched by |
+|---|---|---|---|---|
+| `nest_enterprise_relations.csv` | UNDOCUMENTED | `cedar_uid` | — | — |
+| `nest_enterprises.csv` | UNDOCUMENTED | `cedar_uid` `uei` `cage_code` | — | — |
+
+Declared grain — validated against the file on every run:
+
+- `nest_enterprise_relations.csv` — one row per ASSERTION that a named source made about one parent->enterprise relationship: (enterprise, asserting source, document, edition). A wholly-owned subsidiary named in nine consecutive AS 45.55.139 audited annual reports is nine rows, and that is the point - the run of years is what dates the relationship and what `first_observed_year` / `last_observed_year` on the enterprise row are derived from. `relation_class` says whether the assertion is OWNERSHIP or AFFILIATION; summing or counting across this table without filtering it counts a joint venture as a subsidiary.
+  - primary key: `enterprise_edge_id`  (validated unique)
+  - join cardinality: `cedar_uid` → many row(s) per value (measured max 367), `enterprise_edge_id` → one row(s) per value (measured max 1), `enterprise_id` → many row(s) per value (measured max 14), `owner_hub_cedar_uid` → many row(s) per value (measured max 367)
+  - declared by: workstream nest 2026-09-02: enterprise_edge_id confirmed 3,492 distinct / 0 blank on the FULL 3,492-row file with csv.reader; 0 literal duplicate rows. Two same-source restatements of one firm (Goldbelt's `CP Marine` / `CP Marine LLC`; BBCH's `CCI Industrial Services LLC` / `... Inc`) collide by design and are collapsed in the build - one page saying a thing twice is one assertion
+- `nest_enterprises.csv` — one row per ENTERPRISE that a Native entity owns or has published a tie to - a sub-hub of its owner, never a spine entity in its own right (docs/IDENTIFIER_STANDARD.md §2). Identity is the Cedar-minted `enterprise_id`; the owner is `owner_hub_cedar_uid`, which is always a spine entity. NOT one row per assertion - a firm named in ten annual reports is ONE row here and ten rows in nest_enterprise_relations.csv. NOT one row per legal entity either: the grain is (owner hub, enterprise), so a joint venture between two Native owners is correctly two rows, one per parent, which is what ENTITY_MATCH_RULES rule 11 says a JV is.
+  - primary key: `enterprise_id`  (validated unique)
+  - join cardinality: `cedar_uid` → many row(s) per value (measured max 168), `enterprise_id` → one row(s) per value (measured max 1), `owner_hub_cedar_uid` → many row(s) per value (measured max 168), `parent_enterprise_id` → many row(s) per value (measured max 34)
+  - declared by: workstream nest 2026-09-02: enterprise_id confirmed 1,482 distinct / 0 blank on the FULL 1,482-row file with csv.reader; 0 literal duplicate rows; (owner_hub_cedar_uid, enterprise_name_normalized) tested and also unique at 1,482, and is the key the append-only id register data/spine/cedar_nest_id_register.csv binds so that a rebuild re-uses the same enterprise_id instead of re-keying the dataset
+
 ## Natural Resource Revenues  (`natural-resources`, shelf: pro)
 
 Rebuild: `py -3 code/build.py run natural-resources --execute` — 9 tables.
@@ -1173,7 +1192,7 @@ Declared grain — validated against the file on every run:
   - join cardinality: `identifier` → many row(s) per value (measured max 2776)
   - declared by: workstream GRAIN-HUB 2026-09-01: the key is unique by construction - 23 refuses to write if it is not - and confirmed unique on the FULL 22,936-row file. Re-measured by code/741_hub_grain_and_rebuild.py verify
 - `entity_aliases.csv` — one row per alias binding: one name form for one entity from one source system
-  - primary key: `alias_id`  (**VALIDATION FAILED — see violations**)
+  - primary key: `alias_id`  (validated unique)
   - join cardinality: `cedar_uid` → many row(s) per value (measured max 20), `entity_id` → many row(s) per value (measured max 20)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
 - `entity_hierarchy.csv` — one row per entity, carrying its parent and ultimate parent - docs/ALIAS_RELATIONSHIP_MIGRATION_LOG.md

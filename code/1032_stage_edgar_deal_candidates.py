@@ -445,6 +445,47 @@ LEAD_COLS = ["lead_id", "native_party", "what_the_filing_says",
 LEADS_OUT = REVIEW / "deals_sec_edgar_1032_leads.csv"
 
 
+# ------------------------------------------------------- INTRA-FAMILY ------
+# The owner's rule: **a change of reporting parent within one tribal corporate
+# family is NOT a transaction.** "A company changes from All Native Group to
+# Ho-Chunk Inc, but it's still the same Native entity."
+#
+# The same rule bites in EDGAR in a shape the owner's example does not cover:
+# one Native government appears in a filing under three or four names, and a
+# passage-level matcher hits all of them. Every case below was a candidate,
+# and none became a row.
+
+INTRA_FAMILY_REFUSED = [
+ ("Mohegan Tribal Gaming Authority -> Mohegan Gaming & Entertainment -> Mohegan",
+  "The registrant renamed its trading style twice across the window: filings say 'Mohegan Tribal Gaming Authority d/b/a Mohegan Gaming & Entertainment (\u201cMGE\u201d)' from 2019 and simply 'Mohegan' from 2022. Same CIK 1005276, same instrumentality of the same Tribe. A relabelling, not a transaction."),
+ ("The Mohegan Tribe of Indians of Connecticut vs Mohegan Tribal Gaming Authority",
+  "Every Mohegan credit agreement names BOTH - the Tribe as an additional party for representations and the Authority as Borrower. Two names, one hub and its sub-hub. One row per instrument, never two."),
+ ("MGE Niagara Entertainment Inc.; Mohegan Escrow Issuer, LLC; MS Digital Entertainment Holdings LLC",
+  "Financing and operating vehicles of MTGA. MGE Niagara's own credit agreement (2021-07-14, amended 2022) and Mohegan Escrow Issuer's appearance as a co-issuer in fund holdings are the SAME family's paper. Only the Niagara ASSET ACQUISITION on 2019-06-11 is a transaction, and Cedar already holds it as ND-2019-003."),
+ ("Native Village of Tetlin / Tetlin Tribal Council / Tetlin Village Council",
+  "Contango ORE's filings use all three for one government - the 10-Q says 'the Tetlin Tribal Council, the council formed by the governing body for the Native Village of Tetlin, an Alaska Native Tribe'. The matcher fired on all three and produced ONE row, SEC1032-006."),
+ ("Federated Indians of Graton Rancheria / Graton Economic Development Authority",
+  "The tribe and its economic development authority both sign the management agreements. One party for Cedar's purposes."),
+ ("North Fork Rancheria of Mono Indians / the Mono / North Fork Rancheria Economic Development Authority",
+  "Three names in one sentence of Red Rock's 10-K. One tribe."),
+ ("Cook Inlet Region, Inc. - CIK 24363 and CIK 1313243",
+  "One ANC with two EDGAR registrations, filing Schedules 13D/13G under each. An EDGAR registration artefact, not two entities and not a transaction between them."),
+ ("Oglala Sioux Tribe - CIK 850003 and CIK 1422871",
+  "Same shape: 'OGLALA SIOUX TRIBE' and 'OGLALA SIOUX TRIBE OF THE PINE RIDGE INDIAN RESERVATION, SOUTH DAKOTA' hold separate CIKs. One government."),
+ ("Southern Ute Indian Tribe - four CIKs (1429685, 1116555, 1166097 and the SUIT Growth Fund d/b/a)",
+  "Four registrations including a 'SUIT Growth Fund' d/b/a spelt two ways in EDGAR's own index ('SUIT' and 'SUITE'). One government, and in any case HELD on the restricted-terms question."),
+ ("Afognak Native Corporation: `Aleyon Inc.` and `Alcyon`",
+  "The FY2016 report spells the target Aleyon and the FY2017 purchase-price allocation spells it Alcyon. One acquisition described twice, not two. Neither spelling was corrected and the row (AS4555139-TX-002) discloses both."),
+ ("Bristol Bay Industrial, LLC / Bristol Bay Native Corporation",
+  "NOT refused as intra-family - a subsidiary acting as counterparty to a THIRD party is a transaction. Recorded here so the distinction is explicit: a move BETWEEN two Cedar sub-hubs is a relabelling; a deal between a sub-hub and an outsider is a deal."),
+ ("Huna Totem Corporation / Icy Strait Point / Aak'w Landing, LLC / Glacier Creek Development, LLC",
+  "Same distinction. All three are Huna Totem consolidated subsidiaries per its own AS 45.55.139 annual report, so an NCLH agreement with any of them is one Huna Totem transaction - but it IS a transaction, because the counterparty is outside the family."),
+]
+
+INTRA_COLS = ["candidate", "why_refused", "refused_by", "refused_date"]
+INTRA_OUT = REVIEW / "deals_sec_edgar_1032_intra_family_refused.csv"
+
+
 # ------------------------------------------------------------------- REJECT
 REJECT = [
  ("Tuscarora", 39, "TC PipeLines, LP", "Tuscarora Gas Transmission Company, a pipeline named for Tuscarora, Nevada. Not the Tuscarora Nation. Classic place-name trap - the filing's own definitions list it beside GTN, Bison, Great Lakes, North Baja and PNGTS."),
@@ -571,6 +612,14 @@ def cmd_stage():
                         "record_scope": "LEAD_NOT_A_DEAL"})
     out(f"  {len(LEADS)} leads that a filing revealed but could not date or "
         f"value -> {LEADS_OUT.relative_to(CEDAR)}")
+
+    with open(INTRA_OUT, "w", encoding="utf-8", newline="") as fh:
+        w = csv.writer(fh)
+        w.writerow(INTRA_COLS)
+        for c, why in INTRA_FAMILY_REFUSED:
+            w.writerow([c, why, SCRIPT, TODAY])
+    out(f"  {len(INTRA_FAMILY_REFUSED)} intra-family / one-entity-many-names "
+        f"cases recorded -> {INTRA_OUT.relative_to(CEDAR)}")
     return 0
 
 

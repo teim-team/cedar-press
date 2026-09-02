@@ -37,6 +37,37 @@ AUTHORITY_METHODS = {"hand", "web_verified", "bgov_manual", "subsidiary_lookup"}
 AUTHORITY_FILES = {"entity_crosswalk_bgov.csv"}
 
 
+# --- REGENERATE GUARD (ADR-017, 2026-09-02) --------------------------------
+def _carry_live_columns(path, canonical):
+    """Derive this writer's header instead of declaring it.
+
+    A wholesale writer holding a FIXED `fieldnames` list deletes every column
+    an in-place enricher added since - no error, no exception, a diff nobody
+    reads. Canonical order first so column order stays stable, then whatever
+    the live file already carries. A retired column stays retired because it
+    is not on disk; a promoted column survives because it is.
+
+    THIS BUILD CANNOT REPOPULATE AN ENRICHER'S COLUMN. Carried columns are
+    written BLANK and NAMED on stdout, which is strictly better than deleted:
+    the schema survives and the enricher can refill them. Re-run the enricher
+    after this build - `cedar_pipeline.enrichers_to_rerun(<table>)` names it.
+    """
+    import csv as _csv
+    import os as _os
+    canonical = list(canonical)
+    _p = str(path)
+    if not _os.path.exists(_p):
+        return canonical
+    with open(_p, encoding="utf-8-sig", newline="", errors="replace") as _fh:
+        _live = next(_csv.reader(_fh), [])
+    _extra = [c for c in _live if c and c not in canonical]
+    if _extra:
+        print("  [regenerate guard] %s: carrying %d enricher column(s) through "
+              "this rebuild, BLANK - re-run the enricher: %s"
+              % (_os.path.basename(_p), len(_extra), ", ".join(_extra)))
+    return canonical + _extra
+
+
 def read_csv(p):
     with open(p, encoding="utf-8-sig", newline="") as fh:
         return list(csv.DictReader(fh))
@@ -140,15 +171,19 @@ def main():
 
     # ---- 3. write outputs -------------------------------------------------
     print("\n[3] Writing outputs")
-    fields = ["identifier_type", "identifier", "tribe_id", "canonical_name",
-              "legal_business_name", "entity_class", "attribution_method",
-              "confidence_tier", "tier_rationale", "is_authority",
-              "exclusion_id", "exclusion_evidence", "evidence_url",
-              "verified_date", "state", "prime_dollars_M", "source_file"]
-    write_csv(CLEAN / "cedar_identifier_ledger_tiered.csv", ledger, fields)
+    LEDGER_CANONICAL = ["identifier_type", "identifier", "tribe_id",
+                        "canonical_name", "legal_business_name",
+                        "entity_class", "attribution_method",
+                        "confidence_tier", "tier_rationale", "is_authority",
+                        "exclusion_id", "exclusion_evidence", "evidence_url",
+                        "verified_date", "state", "prime_dollars_M",
+                        "source_file"]
+    tiered_p = CLEAN / "cedar_identifier_ledger_tiered.csv"
+    write_csv(tiered_p, ledger, _carry_live_columns(tiered_p, LEDGER_CANONICAL))
 
     publishable = [r for r in ledger if r["confidence_tier"] == "A"]
-    write_csv(CLEAN / "cedar_publishable_identifiers.csv", publishable, fields)
+    pub_p = CLEAN / "cedar_publishable_identifiers.csv"
+    write_csv(pub_p, publishable, _carry_live_columns(pub_p, LEDGER_CANONICAL))
 
     if caught:
         write_csv(REVIEW / f"false_attributions_caught_{TODAY}.csv", caught,

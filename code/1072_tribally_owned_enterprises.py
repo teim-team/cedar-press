@@ -1310,6 +1310,14 @@ def stage_build(argv) -> int:
             "enterprise_name_normalized": nk,
             "name_variants_observed": " | ".join(v for v in variants if v != cname),
             "owner_hub_cedar_uid": hub_uid,
+            # `cedar_uid` is the documented external join key and every
+            # shipped Cedar table carries it (IDENTIFIER_STANDARD §0). On a
+            # NEST row it is the OWNER's uid, not the enterprise's: the
+            # enterprise is a sub-hub and sub-hubs are never spine entities,
+            # so it has no `CE-` uid of its own and inventing one would put a
+            # non-entity into the entity namespace. Its own identity is
+            # `enterprise_id`.
+            "cedar_uid": hub_uid,
             "owner_hub_handle": hub.get("handle", ""),
             "owner_hub_name": hub.get("canonical_name", ""),
             "owner_hub_entity_class": hub.get("entity_class", ""),
@@ -1391,6 +1399,7 @@ def stage_build(argv) -> int:
                 "child_name_as_recorded": tidy(x["child_name_raw"]),
                 "parent_name_as_recorded": tidy(x.get("parent_name", "")),
                 "owner_hub_cedar_uid": hub_uid,
+                "cedar_uid": hub_uid,       # the owner - see the note above
                 "owner_hub_handle": hub.get("handle", ""),
                 "owner_hub_name": hub.get("canonical_name", ""),
                 "relationship": canon_rel(x.get("relationship", "subsidiary"))[0],
@@ -1615,10 +1624,263 @@ def stage_selfcheck(argv) -> int:
     return 0 if all(ok for _l, ok in results) else 1
 
 
+# ===========================================================================
+# STAGE `codebook` - register the two tables so they can ship
+# ===========================================================================
+# A clean table that no `codebook_master.csv` block documents at 60% column
+# overlap is INVISIBLE to `87_build_dataset_notes.py`, to `512`'s shippable
+# list and therefore to `518`'s scoreboard - it reports the collection as
+# NOT_TESTED with "0 tables", which is what NEST did on its first run.
+# `docs/GAMING_SOURCE_AUDIT_2026-08-26.md` is the expensive version of this:
+# the gaming collection shipped 912 of 104,412 rows because of it.
+#
+# Two writes, deliberately:
+#   * the FRAGMENT `data/clean/codebook/<block>.csv`, which is the file this
+#     dataset owns and which a future `cedar_codebook.py build` folds in;
+#   * an APPEND to `codebook_master.csv`, because `build` rewrites the master
+#     wholesale and three other agents are live on this machine today. An
+#     append cannot shrink the master; a rewrite can, which is exactly why
+#     `41_build_codebooks.py` is the one script on NEVER_RUN.
+CB_FIELDS = ["dataset", "variable", "type", "units", "pct_filled", "n_rows",
+             "published", "access_tier", "description", "generated"]
+
+CB_BLOCK = {"nest_enterprises.csv": "18a_nest_enterprises",
+            "nest_enterprise_relations.csv": "18b_nest_enterprise_relations"}
+
+CB_DESC = {
+    "enterprise_id":
+        "THE KEY. Permanent Cedar identifier for this enterprise, "
+        "`CEDAR-NEST-nnnnnn-CC`. The ordinal is allocated under an exclusive "
+        "lock by code/cedar_ids.py and the two trailing characters are "
+        "503_identity check characters over two independent weightings, so a "
+        "single substitution or an adjacent transposition in a transcribed id "
+        "is caught. Bound to (owner hub, normalised name) in the append-only "
+        "register data/spine/cedar_nest_id_register.csv, so a rebuild reuses "
+        "it rather than re-keying the dataset. Never reused.",
+    "enterprise_name": "The enterprise's name as its owner writes it, taken "
+        "from the most authoritative and most recent source that named it.",
+    "enterprise_name_normalized": "Lower-cased, punctuation-folded, "
+        "corporate-suffix-stripped form of the name. A matching key, not a "
+        "legal name.",
+    "name_variants_observed": "Other spellings of this firm seen in the "
+        "sources, pipe-separated. A decade of audited filings drifts: "
+        "`Ahtna Design Build, Inc` and `Ahtna Design-Build, Inc` are one "
+        "company, and this column is the evidence that they were folded.",
+    "owner_hub_cedar_uid": "The Cedar uid of the entity that owns this "
+        "enterprise - a nation, an ANCSA corporation or an NHO. Always a "
+        "spine entity.",
+    "cedar_uid": "The documented external join key. On a NEST row it is the "
+        "OWNER's uid, not the enterprise's: an enterprise is a sub-hub and "
+        "sub-hubs are never spine entities (IDENTIFIER_STANDARD §2). The "
+        "enterprise's own identity is `enterprise_id`.",
+    "owner_hub_handle": "The owner's readable Cedar handle (`TRBF-`, `ANVC-`, "
+        "`ANRC-`, `NHO-`). A display attribute; join on the uid.",
+    "owner_hub_name": "The owner's canonical name in the Cedar spine.",
+    "owner_hub_entity_class": "The owner's Cedar entity class.",
+    "owner_class": "tribal_government | alaska_native_corporation | "
+        "native_hawaiian_organization. The three owner families this dataset "
+        "covers, derived from the owner's entity class.",
+    "owner_hub_state": "The owner's state. NEVER copied onto the enterprise: "
+        "a nation's companies are frequently registered elsewhere.",
+    "parent_enterprise_id": "The IMMEDIATE owner where that owner is itself "
+        "an enterprise in this table - the holding company. Blank when the "
+        "nation owns the enterprise directly.",
+    "parent_name": "The immediate owner's name: the holding company, or the "
+        "nation itself at level 1.",
+    "parent_is_hub": "Y when the immediate owner is the nation itself, N when "
+        "it is another enterprise. The one-column answer to 'is this a "
+        "direct holding'.",
+    "hierarchy_level": "1 = owned directly by the nation. 2 = owned by a "
+        "level-1 enterprise. 3 = one further down. A sub-hub is never a peer "
+        "of its hub, and the chain is what this dataset exists to keep.",
+    "relationship": "The relationship in one controlled vocabulary: "
+        "wholly_owned, majority_owned, subsidiary, division, holding_company, "
+        "operating_company, declared_suborganization, joint_venture, "
+        "shareholding_or_ancestry, passive_investment.",
+    "relation_class": "ownership | affiliation. THE STRUCTURES/TIES SPLIT. "
+        "Filter to `ownership` for the corporate chain. `affiliation` rows "
+        "are real published relationships that are NOT ownership - a joint "
+        "venture genuinely has two parents, and ANCSA shareholding is not a "
+        "parent-subsidiary link. An affiliation counted as ownership is the "
+        "defect this dataset is most exposed to.",
+    "relationship_as_recorded": "What the source called it, before "
+        "normalisation. Kept so a mapping decision can be re-judged.",
+    "ownership_percent_stated": "The ownership percentage where a source "
+        "stated one. Blank means unstated, never 100.",
+    "sector": "Industry or line of business where a source stated one.",
+    "status": "operating (named by its owner in a source dated 2024 or "
+        "later) | last_seen_earlier (named, but only in older sources) | "
+        "unknown (no source states a period). `last_seen_earlier` is not a "
+        "claim that the enterprise closed.",
+    "status_basis": "The sentence behind `status`, naming the years.",
+    "city": "The enterprise's city, from a source Cedar may redistribute.",
+    "state_province": "The enterprise's state.",
+    "address_basis": "Which source the address came from. D&B-derived "
+        "recipient addresses in the contracting tables are deliberately NOT "
+        "used here - IDENTIFIER_STANDARD §4 forbids their bulk "
+        "dissemination.",
+    "address_is_publishable": "Y where an address is present and its source "
+        "carries no redistribution restriction.",
+    "uei": "SAM Unique Entity Identifier, ONLY where the owner published it "
+        "or an SBA register carried it against this firm. Never a name match.",
+    "cage_code": "CAGE code, ONLY where the owner published it. ASRC Federal "
+        "publishes a CAGE next to each operating company, which is how firms "
+        "sharing no token with 'Arctic Slope' are reachable at all.",
+    "identifier_basis": "How the identifier on this row was obtained. An "
+        "identifier with no basis is not published.",
+    "uei_candidate": "A UEI that an exact normalised name match suggests. A "
+        "CANDIDATE, not an identifier: the exactness of the key says nothing "
+        "about the correctness of the link. Do not treat as an attribution.",
+    "uei_candidate_basis": "How the candidate was proposed, and why it is "
+        "only a candidate.",
+    "identifier_status": "external_identifier (the owner or a register "
+        "published a UEI or CAGE) | cedar_minted_only (no external identifier "
+        "exists, so the Cedar id is the only one). The second is the majority "
+        "and is the reason this dataset mints.",
+    "in_federal_contracting": "Y | N. Whether this enterprise appears in the "
+        "FPDS awardee universe by published identifier or exact legal name. "
+        "N IS THE HEADLINE: an enterprise a nation owns that federal "
+        "contracting has never seen. A name collision makes a firm look "
+        "present, so the error runs against the count - N is a floor.",
+    "in_federal_contracting_basis": "Which test answered, and against what.",
+    "identity_scope": "What the source asserted: tribally_owned_entity (the "
+        "nation's own register of its companies) or "
+        "parent_asserted_subsidiary (a parent corporation's subsidiary "
+        "list). The same gradient native_owned_businesses.csv uses.",
+    "assertion_class": "OWNERSHIP. What kind of claim the row makes.",
+    "evidence_class": "The strongest evidence behind the row: "
+        "audited_annual_report_as_45_55_139 (an ANCSA corporation's audited "
+        "Principles of Consolidation note, filed with the Alaska Division of "
+        "Banking and Securities - the strongest class available) | "
+        "nation_self_published_enterprise_register | "
+        "parent_self_published_company_list | "
+        "parent_declared_subsidiary_list.",
+    "n_source_observations": "How many separate assertions in "
+        "nest_enterprise_relations.csv stand behind this row.",
+    "n_distinct_sources": "How many distinct sources those assertions come "
+        "from. One source repeated ten times is one source.",
+    "first_observed_year": "The earliest year any source named this "
+        "enterprise as its owner's.",
+    "last_observed_year": "The most recent such year.",
+    "enterprise_existing_cedar_uid": "Set where this enterprise is ALREADY a "
+        "Cedar spine entity in its own right - a Native CDFI or college the "
+        "nation owns. The row does not pretend it is new.",
+    "constellation_edge_id": "The matching edge in "
+        "cedar_constellation_edges.csv where one exists. That file records "
+        "SERVICE relationships (who serves a community); NEST records "
+        "ownership and corporate affiliation. The two corroborate; they do "
+        "not duplicate, and a TERO-certified firm is a constellation edge "
+        "and not a NEST row unless the nation also owns it.",
+    "constellation_note": "Why the constellation edge is a corroboration "
+        "rather than the same fact twice.",
+    "source_id": "The source that carried the strongest assertion.",
+    "source_url": "Where that assertion was published.",
+    "source_document": "The document that carried it, for filings.",
+    "source_edition_date": "The date the source itself states.",
+    "hub_resolution_method": "How the owner was resolved to a spine entity.",
+    "hub_resolution_note": "Any ruling applied while resolving the owner - "
+        "an ANCSA village-government repoint, or a refused name collision.",
+    "record_scope": "BUSINESS.",
+    "population_basis": "The population this row was drawn from.",
+    "publishable": "Y | N per docs/PUBLICATION_POLICY.md.",
+    "publishable_basis": "Why. TERMS_STATED_RESTRICTIVE publishers are "
+        "excluded upstream and do not appear here at all.",
+    "retrieved_date": "When Cedar retrieved the evidence.",
+    "built_by_script": "The script that wrote the row.",
+    "built_date": "When.",
+    # --- relations table ---
+    "enterprise_edge_id": "THE KEY. One assertion by one source about one "
+        "parent->enterprise relationship.",
+    "child_name_as_recorded": "The enterprise's name exactly as this source "
+        "wrote it. Every one of these appears VERBATIM in the source "
+        "document; a name that did not was dropped, not corrected.",
+    "parent_name_as_recorded": "The parent's name exactly as this source "
+        "wrote it.",
+    "depth_as_recorded": "The depth the source itself stated, where it did.",
+    "source_fiscal_year": "The fiscal year of the filing that carried the "
+        "assertion.",
+    "quote": "The sentence that asserts the relationship. This is what makes "
+        "an ownership claim checkable rather than asserted.",
+}
+
+CB_GENERIC = ("Column of the NEST enterprise register. See "
+              "docs/NEST_BUILD_LOG.md for how it is derived.")
+
+
+def _cb_type(vals):
+    v = [x for x in vals if (x or "").strip()]
+    if not v:
+        return "text"
+    if all(re.match(r"^-?\d+$", x) for x in v):
+        return "integer"
+    if all(re.match(r"^-?\d*\.?\d+$", x) for x in v):
+        return "numeric"
+    if all(re.match(r"^\d{4}-\d{2}-\d{2}$", x) for x in v):
+        return "date"
+    return "text"
+
+
+def stage_codebook(argv) -> int:
+    frag_dir = CLEAN / "codebook"
+    frag_dir.mkdir(parents=True, exist_ok=True)
+    master = CLEAN / "codebook_master.csv"
+    existing = read_csv(master)
+    have = {(r["dataset"], r["variable"]) for r in existing}
+    new_rows = []
+    for fname, block in CB_BLOCK.items():
+        path = CLEAN / fname
+        rows = read_csv(path)
+        if not rows:
+            print(f"  ! {fname} has no rows - run `build` first")
+            return 1
+        hdr = list(rows[0].keys())
+        frag = []
+        for col in hdr:
+            vals = [r.get(col, "") for r in rows]
+            filled = sum(1 for x in vals if (x or "").strip())
+            frag.append({
+                "dataset": block, "variable": col, "type": _cb_type(vals),
+                "units": "code" if col.endswith(("_id", "_uid", "_uei",
+                                                 "_code", "handle"))
+                         else "date" if col.endswith(("_date", "_year"))
+                         else "text",
+                "pct_filled": round(100.0 * filled / len(rows), 1),
+                "n_rows": len(rows), "published": 1,
+                # Every column here is either Cedar's own derivation or a fact
+                # the owner published about itself. No DUNS, no D&B street
+                # address and no vendor-licensed field is carried, which is
+                # why the whole block is `public` rather than mixed.
+                "access_tier": "public",
+                "description": CB_DESC.get(col, CB_GENERIC),
+                "generated": BUILT,
+            })
+        write_csv(frag_dir / (block + ".csv"), CB_FIELDS, frag)
+        for r in frag:
+            if (r["dataset"], r["variable"]) not in have:
+                new_rows.append(r)
+        print(f"  {block}: {len(frag)} variables documented, {len(rows)} rows")
+
+    if new_rows:
+        bak = master.with_suffix(
+            f".csv.bak_{BUILT}_pre_1072_tribally_owned_enterprises")
+        if not bak.exists():
+            bak.write_bytes(master.read_bytes())
+        with master.open("a", encoding="utf-8", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=CB_FIELDS, extrasaction="ignore")
+            for r in new_rows:
+                w.writerow(r)
+        print(f"  appended {len(new_rows)} rows to codebook_master.csv "
+              f"({len(existing)} -> {len(existing) + len(new_rows)}); "
+              f"backup {bak.name}")
+    else:
+        print("  codebook_master.csv already carries both blocks")
+    return 0
+
+
 def main() -> int:
     stages = {"mine": stage_mine, "assemble": stage_assemble,
-              "build": stage_build, "verify": stage_verify,
-              "selfcheck": stage_selfcheck}
+              "build": stage_build, "codebook": stage_codebook,
+              "verify": stage_verify, "selfcheck": stage_selfcheck}
     if len(sys.argv) < 2 or sys.argv[1] not in stages:
         print(__doc__)
         print("stages: " + " ".join(sorted(stages)))

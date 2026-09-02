@@ -213,6 +213,22 @@ GENERIC = {"school", "schools", "community", "day", "elementary", "middle",
 
 MINIMAL_STOP = {"the", "of", "and", "inc", "incorporated", "llc", "corp"}
 
+# TWO SCHOOLS ON ONE CAMPUS ARE TWO ENTITIES, AND THE ONLY WORD THAT SEPARATES
+# THEM IS ON THE GENERIC LIST.
+# The first pass matched "Cherokee Central Middle School" to CCD's "Cherokee
+# Central Elementary School": `middle` and `elementary` are both generic, so
+# after stripping them the two names were identical. Cedar carries Cherokee
+# Central Elementary, Middle AND High as three separate register entities, and
+# Crow Creek Reservation High beside Crow Creek Tribal Elementary. Handing all
+# of them one NCES id would have been three wrong first rows dressed as three
+# right ones.
+#
+# The level word is generic for SCORING -- it must not be what earns a match --
+# and decisive for REFUSING. If both names state a level and the levels do not
+# overlap, they are different schools whatever else they share.
+LEVEL = {"elementary", "middle", "high", "junior", "senior", "primary",
+         "secondary", "preparatory", "dormitory"}
+
 
 def toks(name, allow_fallback=True):
     """Distinctive words. Returns [] only if `allow_fallback` is off.
@@ -256,6 +272,14 @@ def name_matches(a, b, need=None):
     every health corporation in Alaska and 'Day School' matches ninety BIE
     schools. What is left is the part that identifies the organisation.
     """
+    la = {w for w in re.sub(r"[^a-z ]", " ", deacc(a).lower()).split()
+          if w in LEVEL}
+    lb = {w for w in re.sub(r"[^a-z ]", " ", deacc(b).lower()).split()
+          if w in LEVEL}
+    if la and lb and not (la & lb):
+        return False, ("school level conflict: " + "/".join(sorted(la))
+                       + " vs " + "/".join(sorted(lb))
+                       + " -- different schools")
     sa, sb = toks(a, False), toks(b, False)
     fallback = not sa
     ta = set(sa or toks(a))
@@ -272,7 +296,11 @@ def name_matches(a, b, need=None):
         elif len(ta) <= 2:
             need = min(len(ta), len(tb))
         else:
-            need = max(1, int(round(min(len(ta), len(tb)) * 0.6)))
+            # FLOOR OF TWO, NOT ONE. At 60% of three tokens the threshold
+            # rounded to one, and "Two Eagle River School" matched CCD's
+            # "Salt River Elementary School" on the single shared word
+            # `river`. One common geographic word is not an identification.
+            need = max(2, int(round(min(len(ta), len(tb)) * 0.6)))
     ok = len(inter) >= need
     return ok, ("tokens %d/%d shared (%s) need %d%s"
                 % (len(inter), min(len(ta), len(tb)),
@@ -830,6 +858,9 @@ def check(path=OUT):
     (5) NONE_FOUND names >= 2 routes tried -- a negative from one route is not
         a negative
     (6) checked_date on every row
+    (7) a facility match is RE-DERIVED from the matched name recorded in
+        `fact_value` and must still pass. A note written by the matcher
+        cannot audit the matcher.
     """
     bad = []
     if not os.path.exists(path):
@@ -860,6 +891,22 @@ def check(path=OUT):
                 if it == "NCES_SCHOOL_ID" and not re.fullmatch(r"\d{12}", iv):
                     bad.append("line %d: NCES school id %r is not 12 digits"
                                % (i, iv))
+            # (7) RE-DERIVE THE MATCH, DO NOT TRUST THE NOTE.
+            # `match_method` is written by the same code that made the match,
+            # so it agrees with itself by construction and proves nothing. The
+            # matched name is in `fact_value`, so the gate can run the CURRENT
+            # rule against it. This is what caught "Two Eagle River School"
+            # holding Salt River Elementary's NCES id and "Cherokee Central
+            # Middle School" holding the Elementary school's -- both written
+            # with a confident-looking match_method.
+            if ec == "FACILITY_DIRECTORY" and (r.get("fact_value") or ""):
+                matched = (r["fact_value"].split(" | ")[0] or "").strip()
+                ok, note = name_matches(r.get("canonical_name", ""), matched)
+                if not ok:
+                    bad.append("line %d: %s is matched to %r, which the "
+                               "current rule REFUSES: %s"
+                               % (i, uid, matched[:50], note[:80]))
+
             if ec == "NONE_FOUND":
                 n = len([x for x in ev.split(" | ") if x.strip()])
                 if "TRIED:" not in ev or n < 2:
@@ -892,6 +939,12 @@ def selftest():
         ("malformed EIN", dict(base, identifier_value="99")),
         ("malformed NCES id", dict(base, identifier_type="NCES_SCHOOL_ID",
                                    identifier_value="12345")),
+        ("facility match the rule refuses",
+         dict(base, route="NCES_CCD", evidence_class="FACILITY_DIRECTORY",
+              identifier_type="NCES_SCHOOL_ID",
+              identifier_value="590002000149",
+              canonical_name="Cherokee Central Middle School",
+              fact_value="Cherokee Central Elementary School | LEA 1 | x")),
         ("thin negative", dict(base, evidence_class="NONE_FOUND",
                                identifier_type="", identifier_value="",
                                source="", source_url="", match_method="",

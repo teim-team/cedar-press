@@ -60,6 +60,13 @@ THE LADDER (docs/HIDDEN_DATA_TECHNIQUES.md; recorded per entity in `evidence`)
         pages are detected by their boilerplate, not by length; and a
         single-word domain label is never guessed. `verify` invariant (6)
         enforces the first of those against the written rows.
+    R8  HAND SEARCH, by legal name, common name and community name
+        separately. Three tribes the mechanical ladder could not reach were
+        one search each: a website-builder subdomain, a reservation-specific
+        government site, and a registered domain serving a placeholder. The
+        table is a source of CANDIDATES only -- every entry is fetched and
+        name-checked at run time like any guess, and the search that worked
+        is written into `evidence`.
 
 THREE THINGS THAT ARE NOT "NO WEBSITE"
     `government_refused_robots`  the site exists and its robots.txt says
@@ -659,13 +666,23 @@ def load_nho():
         end = order[n + 1][1] if n + 1 < len(order) else len(lines)
         block = "\n".join(lines[i:end])
         site = ""
+        raw_site = ""
         m = re.search(r"Website:\s*\n?\s*(\S[^\n]*)", block)
         if m:
             v = m.group(1).strip()
-            site = "" if v.lower().startswith("none") else v
+            raw_site = v
+            # THE FIELD IS FREE TEXT AND ORGANISATIONS WRITE PROSE IN IT.
+            # Two entries say "Under Construction" and "Pending". Taken
+            # literally the parser produced `https://Under Construction` and
+            # `https://Pending` and filed them as the organisation's website.
+            # A value only counts as a website if it looks like a host.
+            if re.match(r"^(https?://)?[A-Za-z0-9][A-Za-z0-9.-]*\.[A-Za-z]{2,}",
+                        v):
+                site = v
         mails = re.findall(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}",
                            block)
-        out[key[k]] = {"website": site, "emails": sorted(set(mails)),
+        out[key[k]] = {"website": site, "website_field_text": raw_site,
+                       "emails": sorted(set(mails)),
                        "website_field_present": bool(m),
                        "website_none_listed": bool(m) and not site}
     with open(NHO_JSON, "w", encoding="utf-8") as fh:
@@ -698,12 +715,23 @@ def nho_lookup(name, nho):
 
 
 # --------------------------------------------------------- R3 email domain
+# A SHARED INSTITUTIONAL DOMAIN IS NOT THE ORGANISATION'S DOMAIN.
+# One ohana lists a contact at `@hawaii.edu`, and R3 dutifully fetched the
+# University of Hawaii. A volunteer's work address says where that person
+# works, not who the organisation is, and mapping an entity onto its
+# volunteer's employer is a misattribution with a 108 KB homepage attached.
+SHARED_TLD = (".edu", ".gov", ".mil", ".us")
+
+
 def domains_from_emails(emails):
     out = []
     for e in emails:
         d = e.split("@")[-1].lower().strip(". ")
-        if d and d not in FREEMAIL and "." in d and d not in out:
-            out.append(d)
+        if not d or "." not in d or d in FREEMAIL or d in out:
+            continue
+        if d.endswith(SHARED_TLD):
+            continue
+        out.append(d)
     return out
 
 
@@ -779,11 +807,62 @@ def candidate_hosts(row):
                 stems.append(base)
     out = []
     for b in stems[:4]:
-        for suf in (".org", "-nsn.gov", ".nsn.gov", ".com", ".nsn.us"):
+        # `.net` earned its place: Guidiville Rancheria publishes
+        # admin@guidiville.net and the first suffix list would never have
+        # tried it.
+        for suf in (".org", "-nsn.gov", ".nsn.gov", ".com", ".nsn.us",
+                    ".net"):
             h = b + suf
             if h not in out:
                 out.append(h)
     return out[:12]
+
+
+# ---------------------------------------------------------------- R8
+# HAND SEARCH, BY EVERY NAME THE ENTITY GOES BY. RECORDED, NOT ASSERTED.
+#
+# The rungs above are all mechanical, and mechanical rungs cannot reach a
+# tribal site hosted on a website-builder subdomain or one whose domain bears
+# no resemblance to the tribe's name. Three of the eleven tribes the automated
+# ladder could not close were reachable in one search each -- searching the
+# legal name, the common name and the community name separately, which is the
+# rung docs/HIDDEN_DATA_TECHNIQUES.md calls for and which no regex performs.
+#
+# EVERY ENTRY HERE IS STILL FETCHED AND NAME-CHECKED AT RUN TIME by the same
+# `try_host` the guesses go through. This table supplies the candidate; it does
+# not supply the verdict. A URL that stops working, starts serving a challenge
+# or fails the name test is recorded that way on the next run, and nothing
+# here is exempt from `verify`.
+#
+# `how` is written into `evidence` so the next agent knows the search that
+# worked, and a customer asking where the URL came from gets a real answer.
+R8_HAND_SEARCH = {
+    # BIA `website` field EMPTY for all three.
+    "CE-0015T-S3": {          # Kialegee Tribal Town
+        "host": "kialegeetribal.yourwebsitespace.com",
+        "how": "searched the legal name 'Kialegee Tribal Town' rather than a "
+               "derived domain; the tribe's site is on a website-builder "
+               "subdomain (formerly kialegeetribal.webstarts.com, which now "
+               "301s here), a shape no domain guess can reach",
+    },
+    "CE-0018R-W1": {          # Passamaquoddy Tribe
+        "host": "passamaquoddy.com",
+        "how": "the Passamaquoddy Tribe governs at two reservations and the "
+               "BIA directory lists no website; this is the Indian Township "
+               "(Motahkomikuk) tribal government site. Sipayik's "
+               "wabanaki.com and passamaquoddypeople.com both answer 200 "
+               "with a bot challenge and are NOT recorded as reached",
+    },
+    # Guidiville publishes admin@guidiville.net, so the DOMAIN is
+    # publisher-stated -- but the domain serves a Sonic.net "future home of"
+    # placeholder. Included so the finding is "domain registered, no site
+    # published" rather than a silent absence.
+    "CE-0014V-TC": {          # Guidiville Rancheria
+        "host": "guidiville.net",
+        "how": "domain derived from admin@guidiville.net, the address the "
+               "tribe publishes in the BIA and CNIGA directories",
+    },
+}
 
 
 def try_host(host, name, tag, cls=""):
@@ -1012,8 +1091,14 @@ def run():
                                     "TRIED: R5 machine-readable probe || "
                                     "open: " + ", ".join(mr))
                 elif rec.get("website_none_listed"):
+                    txt = (rec.get("website_field_text") or "").strip()
                     tried.append("R2 the organisation's own DOI entry states "
-                                 "Website: None listed")
+                                 "Website: "
+                                 + (txt if txt else "None listed")
+                                 + (" (not a host name; recorded as no "
+                                    "website published)"
+                                    if txt and not txt.lower()
+                                    .startswith("none") else ""))
                 # ---- R3 domain derived from a published email -----------
                 for d in domains_from_emails(rec.get("emails") or [])[:2]:
                     if got_url:
@@ -1047,8 +1132,17 @@ def run():
         # updated the form. A publisher-stated negative is strong evidence; it
         # is not the end of the ladder, and treating it as one reproduced
         # exactly the false absence this workstream exists to prevent.
+        # AND R7 IS OFF FOR INDIVIDUALLY NATIVE-OWNED BUSINESSES.
+        # Even hardened, it matched "Laguna Creek LLC" to lagunacreek.org --
+        # the Laguna Creek Watershed Council. Both name tokens on the page,
+        # and the class markers available for a small business ("about us",
+        # "contact us", "llc") are on essentially every website there is, so
+        # the class test that saves the tribal and NHO cases does no work
+        # here. A rung whose guard cannot discriminate for a class should not
+        # run for that class. These entities are identified by UEI and CAGE in
+        # SAM and SBA, which is where the next attempt should go; the honest
+        # record for now is checked-and-not-found.
         if not got_url and cls in ("Federally recognized tribe",
-                                   "Individually Native-owned business",
                                    "Native Hawaiian Organization"):
             n_try = 0
             for h in candidate_hosts(row):
@@ -1080,6 +1174,11 @@ def run():
             if n_try:
                 tried.append("R7 tried " + str(n_try) + " derived candidate "
                              "domain(s) in total")
+        elif cls == "Individually Native-owned business":
+            tried.append("R7 domain derivation DELIBERATELY NOT RUN for this "
+                         "class -- its guard cannot discriminate (see the "
+                         "note at this rung); UEI/CAGE via SAM and SBA is the "
+                         "route, and it is not attempted here")
 
         # ---- R4 IRS / ProPublica Nonprofit Explorer ---------------------
         if not got_url and cls in ("Native Hawaiian Organization",
@@ -1100,6 +1199,33 @@ def run():
                         + ". NOT a website: this is a filing record, and it "
                         "is here because it is a first row for an entity "
                         "that had none.")
+
+        # ---- R8 hand search ---------------------------------------------
+        if not got_url and uid in R8_HAND_SEARCH:
+            h8 = R8_HAND_SEARCH[uid]
+            u8, st8, verdict, note8 = try_host(h8["host"], name,
+                                               uid + "__r8", cls)
+            tried.append("R8 hand search -> " + h8["host"] + " -> " + verdict)
+            if verdict == "verified":
+                emit(uid, name, cls,
+                     "government" if cls == "Federally recognized tribe"
+                     else "organization", u8, st8,
+                     "TRIED: " + " | ".join(tried) + " || " + note8
+                     + " || FOUND BY HAND SEARCH: " + h8["how"])
+                got_url = True
+                mr = probe_machine_readable(u8, uid + "__mr")
+                if mr:
+                    n_open += 1
+                    emit(uid, name, cls, "machine_readable_surface", u8, 200,
+                         "TRIED: R5 machine-readable probe || open: "
+                         + ", ".join(mr))
+            elif u8:
+                emit(uid, name, cls,
+                     "parked_domain" if verdict == "parked_domain"
+                     else "unverified_government", u8, st8,
+                     "TRIED: " + " | ".join(tried) + " || " + note8
+                     + " || CANDIDATE FROM HAND SEARCH, NOT accepted as a "
+                       "live site: " + h8["how"])
 
         # ---- R6 the honest negative -------------------------------------
         if not got_url:

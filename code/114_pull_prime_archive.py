@@ -660,6 +660,42 @@ PRIME_FIELDS = [
 ]
 
 
+def _prime_header(path, canonical=None):
+    """REGENERATE GUARD (ADR-017, 2026-09-02): the LIVE header, widened.
+
+    Before this, both writers below refused outright unless the file header
+    EQUALLED `PRIME_FIELDS`. That refusal was correct - appending a 39-field
+    row to a 70-column file MISALIGNS every field past index 38, because
+    `contract_transaction_unique_key` sits at 38 in PRIME_FIELDS while
+    `ruling_status` sits at 38 in the live file - but it also left this script
+    unable to run at all once 207 / 843 / 950 / 871 had enriched the table.
+    A writer that can only refuse is not safe, it is retired.
+
+    So: write the LIVE header, and refuse only if a column this script MAPS is
+    absent from it. Rows this script derives carry blanks in the enricher
+    columns; rows already in the file keep theirs. Blank means "this build did
+    not produce it", never "it went away" - re-run the enrichers named by
+    `cedar_pipeline.enrichers_to_rerun("prime_contracts.csv")` afterwards.
+
+    Returns (header_to_write, enricher_columns_this_build_leaves_blank).
+    """
+    canonical = list(canonical if canonical is not None else PRIME_FIELDS)
+    p = Path(path)
+    if not p.exists():
+        return canonical, []
+    with open(p, encoding="utf-8-sig", newline="") as _fh:
+        live = next(csv.reader(_fh), [])
+    if not live:
+        return canonical, []
+    missing = [c for c in canonical if c not in live]
+    if missing:
+        log("REFUSING: " + p.name + " does not carry "
+            + str(len(missing)) + " column(s) this script maps: "
+            + str(missing))
+        sys.exit(5)
+    return live, [c for c in live if c not in canonical]
+
+
 def _deflator():
     with open(CLEAN / "inflation_deflator.csv", encoding="utf-8-sig",
               newline="") as fh:
@@ -1505,10 +1541,13 @@ def cmd_append(args):
         with open(PRIMARY, encoding="utf-8", newline="") as fh:
             rd = csv.reader(fh)
             header = next(rd)
-        if header != PRIME_FIELDS:
-            log("REFUSING: prime_contracts.csv header is not what this script "
-                f"maps to.\n  file:   {header}\n  mapper: {PRIME_FIELDS}")
-            sys.exit(5)
+        _fields, _carried = _prime_header(PRIMARY)
+        if _carried:
+            log("appending under the LIVE " + str(len(_fields))
+                + "-column header; the " + str(len(_carried))
+                + " enricher column(s) below are BLANK on the rows this "
+                + "script derives - re-run their enrichers: "
+                + ", ".join(_carried))
         existing_sources = set()
         existing_fy = Counter()
         with open(PRIMARY, encoding="utf-8", newline="") as fh:
@@ -1527,7 +1566,8 @@ def cmd_append(args):
             new_years = [y for y in new_years if y not in clash]
         n, by_fy, dollars = 0, Counter(), Counter()
         with open(PRIMARY, "a", encoding="utf-8", newline="") as fh:
-            w = csv.DictWriter(fh, fieldnames=PRIME_FIELDS)
+            w = csv.DictWriter(fh, fieldnames=_fields, extrasaction="ignore",
+                               restval="")
             for fy in new_years:
                 for row in _iter_mapped(fy, sa_map):
                     w.writerow(row)
@@ -1544,8 +1584,14 @@ def cmd_append(args):
     # ---- parallel file for the years the .dta already covers --------------
     if overlap_years:
         n, by_fy, dollars = 0, Counter(), Counter()
+        _bf_fields, _bf_carried = _prime_header(BACKFILL)
+        if _bf_carried:
+            log(BACKFILL.name + ": carrying " + str(len(_bf_carried))
+                + " enricher column(s) through the rebuild, BLANK - "
+                + ", ".join(_bf_carried))
         with open(BACKFILL, "w", encoding="utf-8", newline="") as fh:
-            w = csv.DictWriter(fh, fieldnames=PRIME_FIELDS)
+            w = csv.DictWriter(fh, fieldnames=_bf_fields,
+                               extrasaction="ignore", restval="")
             w.writeheader()
             for fy in overlap_years:
                 for row in _iter_mapped(fy, sa_map):
@@ -1619,9 +1665,13 @@ def cmd_rebuild(args):
     with open(PRIMARY, encoding="utf-8", newline="") as fh:
         rd = csv.reader(fh)
         header = next(rd)
-    if header != PRIME_FIELDS:
-        log(f"REFUSING: header is not what this script maps to.\n  file: {header}")
-        sys.exit(5)
+    _fields, _carried = _prime_header(PRIMARY)
+    if _carried:
+        log("rebuilding under the LIVE " + str(len(_fields))
+            + "-column header. Rows this script re-derives carry BLANK in "
+            + str(len(_carried)) + " enricher column(s); rows it keeps are "
+            + "untouched. Re-run the enrichers afterwards: "
+            + ", ".join(_carried))
 
     present = Counter()
     with open(PRIMARY, encoding="utf-8", newline="") as fh:
@@ -1660,7 +1710,8 @@ def cmd_rebuild(args):
     with open(PRIMARY, encoding="utf-8", newline="") as fi, \
             open(tmp, "w", encoding="utf-8", newline="") as fo:
         rd = csv.DictReader(fi)
-        w = csv.DictWriter(fo, fieldnames=PRIME_FIELDS)
+        w = csv.DictWriter(fo, fieldnames=_fields, extrasaction="ignore",
+                           restval="")
         w.writeheader()
         for r in rd:
             if r["source_file"] in targets:
