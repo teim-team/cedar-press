@@ -884,9 +884,33 @@ project's evidence layer — refusal logs, coverage audits, series-break
 registers, probe outputs. Those are marked so nobody triages them again.
 
 What is left is **eleven questions**, below, in the order that disposes of the
-most rows per answer. **Nothing here was decided by an agent.** Every item is an
-attribution, a tier promotion or a scoping call, and Cedar's standing rule is
-that only tier A publishes and an owner ruling is the only path to it.
+most rows per answer.
+
+> ## STATUS, updated 2026-09-01 after the owner changed the standing rule
+>
+> The owner, same day: *"I don't care about you listing issues, you decide how
+> to fix them. The only thing I should need to adjudicate is uncertain native
+> entities — but even then you can review websites and SAM or annual reports as
+> long as you document the decisions and learn from them."*
+>
+> **Nine of the eleven are now DECIDED.** Write-up with the evidence behind each:
+> **`docs/REVIEW_BACKLOG_RULINGS.md`**. Per-row dispositions:
+> `data/staging/review_backlog_class_dispositions.csv` (15,911 rows) and
+> `data/staging/master_queue_identifier_adjudication.csv` (579 rows). Four new
+> numbered rules went into `docs/ENTITY_MATCH_RULES.md` as rules 7–12 so the
+> next thousand rows are cheap.
+>
+> | still yours | why it was not decided |
+> |---|---|
+> | **16.11 vendor-list consent** (62 rows) | Not a method question. It is a decision about Cedar's relationship with the nations whose lists these are, and the one failure mode that would damage this project's standing rather than its accuracy. Recommendation below unchanged. |
+> | **16.5 OSHA** (711 establishments / 1,879 filings) | Owned by INT-1, handed over with the evidence. |
+>
+> **Nothing was applied to a shipping table.** Every decision is a disposition
+> with its evidence attached; applying them to the ledger or the spine is a
+> separate, reversible pass that must run against a green gate.
+
+Every item is an attribution, a tier promotion or a scoping call, and Cedar's
+standing rule remains that only tier A publishes.
 
 ---
 
@@ -1005,13 +1029,28 @@ coverage gap.
 
 **The evidence.** `MASTER_QUEUE_2026-08-07.csv` — 6,559 ranked entity questions,
 each with `dollars_at_stake`, an evidence URL and a written question.
-**`YOUR_RULING` is filled on ZERO of them.** Re-measured today: the 4,300 rows in
-`_already_ruled_removals/` overlap this file by exactly **1**, so these 6,559 are
-the genuinely unseen remainder, not a re-ask.
+**`YOUR_RULING` is filled on ZERO of them.**
+
+> **CORRECTION, same day, against my own earlier figure.** An earlier draft of
+> this item said the `_already_ruled_removals/` corpus overlaps this file "by
+> exactly 1". **That was wrong and it was wrong for the reason this project
+> keeps writing down: the join key was blank.** 2,443 of the 6,559 rows carry an
+> EMPTY `identifier` column, so joining on it matched almost nothing and
+> reported a queue as wholly unseen. The UEI is present — inside the free-text
+> `question` — and read from there the real overlap is **223 rows carrying
+> $10.8B of the $82.1B, 3.4% already ruled**. Six of the top fifty by dollars
+> are already-ruled rows still sitting here with an empty `YOUR_RULING`,
+> including `SAN CARLOS APACHE TRIBAL COUNCIL` ($847M), `LUMMI INDIAN BUSINESS
+> COUNCIL` ($696M) and `HOOPA VALLEY TRIBE` ($495M), all removed from the live
+> queue on 2026-08-26. **The MASTER QUEUE is partly stale and does not say so.**
 
 **Recommendation:** do not attempt it as a queue. **Sort by `dollars_at_stake`
 and rule the top 50** — the ranking exists precisely so the tail never has to be
 read — then close the rest into 16.1's stated floor.
+
+**DONE, 2026-09-01.** All 50 adjudicated by `code/604_adjudicate_master_queue_by_identifier.py`
+— 23 ACCEPT, 18 REFUSE, 6 ALREADY_RULED, 2 HOLD, 1 FLOOR, none left open. See
+`docs/REVIEW_BACKLOG_RULINGS.md`.
 
 ---
 
@@ -1089,3 +1128,170 @@ harvested record.
 sitting in the NEEDS AN OWNER RULING bucket.** The remaining ~30,000 sit in 93
 smaller files, each listed with its own one-line reason in
 `docs/REVIEW_BACKLOG.md`.
+
+
+---
+
+## 10. Nonprofits — shard-I harvest — 2026-09-01
+
+*Appended by workstream SHARD-I. **Nothing below has been applied.** No `tier`, no `classification_ruling`, no spine row and no `np_orgs.csv` cell was written. Every quote is a literal substring of bytes retrieved and kept on disk under `data/staging/np_harvest/raw/`.*
+
+### 10a. FIRST — the `412` in the dataset doc is not a measurement
+
+`docs/datasets/06_nonprofit.md` says *"412 tier-A rows are awaiting a ruling."* That number is a **hardcoded string literal** in `code/24_generate_dataset_docs.py` (~line 506). It is not computed from `np_orgs.csv` and it does not move when the data moves. `docs/FACT_CHECK_2026-08-06.md` B-25 already flagged it as wrong once.
+
+**Measured against the live file today:**
+
+| | rows |
+|---|---:|
+| `confidence_tier = A` | 712 |
+| …of which `classification_ruling = UNRULED` — **the real backlog** | **697** |
+| …in shard-I's strata (`990_N` / `not_required_to_file` / `UNKNOWN`) | 480 |
+| …in shard-J's strata (`full_990` / `990_EZ`) | 217 |
+
+**Decision:** may the doc generator compute this figure from the data instead of carrying a literal? **Recommendation: yes.** A hardcoded count in a maintenance doc is a fact with no error term — it cannot be wrong loudly, only quietly. The same applies to the `$592M` / `$497M` figures in the same bullet, which the fact-check also found stale.
+
+### 10b. Tier-A ruling evidence — 480 organisations, split four ways
+
+Shard I fetched each organisation's **own website** and recorded what it says it is. `resolves_to` is an evidence-backed candidate label. **It is not a ruling and must not be applied as one.**
+
+| `resolves_to` | orgs | what the evidence is |
+|---|---:|---|
+| `native_entity` | **4** | the org's own page asserts a Native control or charter relationship |
+| `placename_only` | **35** | the org's own page describes a member-owned, county or denominational body with no Native content |
+| `native_serving_not_native_controlled` | **19** | Native language, but no control, charter or ownership asserted |
+| `undetermined` | **422** | no readable page — see 10c |
+
+File: `data/staging/np_harvest/tier_a_ruling_evidence_shard_i.csv` — one row per organisation, with the quote, the source page and the raw bytes path.
+
+**Strongest `native_entity` evidence** (own words):
+
+| EIN | organisation | the organisation's own sentence |
+|---|---|---|
+| 311328543 | ZUNI CHRISTIAN MISSION SCHOOL | "By God’s grace, what began in 1897 as pioneer mission work of the Christian Reformed denomination, has matured into a ministry that is governed by local boards of Zuni Christians—an unparalleled accomplishment in mission efforts among the Pueblo tribes of the…" |
+| 933214988 | NISENAN MIWOK COLLECTIVE | "Jane Rey at Frank’s Exchange Who We Are The Nisenan Miwok Collective 501(c)(3) is the nonprofit arm of the Southern Hill Nisenan Tribal community." |
+| 331174840 | LIPAN APACHE TRIBE OF TEXAS INC | "[] The Lipan Apache Tribe of Texas is a historical Native American tribe, and the 501c(3) Lipan Apache Tribe of Texas, Inc, is an instrumentality of the tribe, not the tribe itself." |
+| 910891385 | TLINGIT AND HAIDA INDIANS OF ALASKA-WASHINGTON CHAPTER | "In 1912 the Alaska Native Brotherhood (ANB) was founded by Tlingit, Haida and Tsimshian leaders who united to work to correct the injustices experienced by Alaska Natives throughout the Territory of Alaska." |
+
+**Strongest `placename_only` evidence** — the Umatilla Electric shape, recommended for demotion out of tier A:
+
+| EIN | organisation | revenue on file | what its own site says it is |
+|---|---|---:|---|
+| 852069418 | APACHE LEAP MEDIA | — | Z89.3 & 101.5 HD3 KZAO |
+| 860828870 | PARTNERS FOR PAIUTE NEIGHBORHOOD CENTER | — | Partners for Paiute \| Community assistance |
+| 873791650 | CAHUILLA ELEMENTARY PARENT TEACHER ORGANIZATION | — | Charity \| Cahuilla Elementary PTO \| Palm Springs |
+| 800302641 | MOJAVE ARCHERS | — | Mojave Archers |
+| 330964160 | MOJAVE RIVER VALLEY HORSEMENS ASSOCIATION | — | MRVHA \| Horse Shows & Events in Apple Valley |
+| 920435652 | MOJAVE TRAILS OUTREACH & FOOD PANTRY | — | Mojave Trails Outreach & Food Pantry |
+| 922962028 | MON PETIT MOJAVE FOUNDATION INC | — | Mon Petit Mojave |
+| 272857715 | STRAIGHTWAY M B C OF MOJAVE | — | Straightway MBC of Mojave |
+| 222523902 | MOHEGAN & PEQUOT MODEL RAILROAD CLUB INCORPORATED | — | Mohegan Pequot Model Railroad Club Inc. |
+| 222720928 | PEQUOT CYCLISTS INC | — | Pequot Cyclists |
+
+**`native_serving_not_native_controlled`** — the distinction the 990s are worst at, and the reason a website pass was worth running. Serving is not control; the doc's own Jemez Mountains Electric note is the precedent.
+
+| EIN | organisation | the sentence that carries Native language |
+|---|---|---|
+| 453844277 | OGLALA PET PROJECT | "Oglala Pet Project (OPP) is a 100% volunteer driven, community based 501(c)3 non-profit organization located on the Pine Ridge Indian Reservation in South Dakota." |
+| 462925916 | ZUNI PUEBLO MAINSTREET | "How are you doing these days?) Zuni Pueblo became the first Native American community to be designated as a MainStreet Community in the United States in July of 2012." |
+| 920124517 | ALEUT FOUNDATION | "Looking ahead, Mei hopes to become a physician serving underserved communities, especially Indigenous populations." |
+| 884129140 | APACHE KNIFE FOUNDATION | "[] Tci-He-Nde, Western Apache people, Fort Apache Indian Reservation, San Carlos Apaches, the Chiricahua Apache Nation, Ndee, Nde, GoFundMe, fundraising, Charity, New Charity, Apache Coffee, Apache, Robert Redfeather, Redfeather, Chiricahua…" |
+| 881907630 | CHEEE FOKAA BAND OF NORTHEASTERN POMO | "Chhé’ee Ti’dóo (Salt Spring Valley) Our Mission History Get Involved ﻿ Contact Us Our Mission — Chhé'ee Fókaa Band of Northeastern Pomo 0 Skip to Content Our Mission Our Language History Get Involved Contact Us Open Menu Close Menu Our Miss…" |
+| 364896186 | SANTA YNEZ CHUMASH OCEANOGRAPHIC INSTITUTE | "Facing Uncomfortable History: Native American Boarding Schools An introduction to forced assimilation in Native American boarding schools." |
+| 841432104 | FRAY ANGELICO CHAVEZ CHAPTER GSHA- PUEBLO | "About Home Events About Publications FACC Library Videos Contact Links Photo Gallery Menu FACC-GSHA Home Events About Publications FACC Library Videos Contact Links Photo Gallery The Fray Angelico Chavez Chapter (FACC) is a non-profit organ…" |
+| 237171302 | MOHEGAN STRIDERS ASSOC | "Chief Harold Tantaquideon, direct descendent of Uncas, Chief of the powerful Mohegan Nation, joined retired sports writer John DeGange in this unique honor." |
+
+**Decision:** apply these as rulings in bulk by `resolves_to`, or read the quotes row by row? **Recommendation: bulk-apply `placename_only` where the page is substantive and carries zero Native language** (that is a strong negative and it is where the tier-A revenue leak lives), and **read `native_entity` row by row** — a promotion is the expensive direction to get wrong.
+
+### 10c. The finding that decides whether the rest is worth attempting
+
+**392 of the 480 tier-A organisations in shard-I's strata are UNREACHABLE BY WEBSITE** — they supplied no website on their e-Postcard and Cedar holds no e-file return for them. There is no page to read, so `undetermined` here means *no instrument existed*, not *the evidence was ambiguous*.
+
+This generalises. Measured on the **whole** `990_N` population rather than a sample, from the IRS e-Postcard bulk corpus (one request, 93 MB, `Last-Modified 2026-08-31`):
+
+| stratum | rows | found in e-Postcard | carry a website | **website hit rate** |
+|---|---:|---:|---:|---:|
+| `990_N` | 6453 | 5573 (86.4%) | 1329 | **20.6%** |
+| `not_required_to_file` | 2060 | 96 (4.7%) | 17 | **0.8%** |
+| `UNKNOWN` | 129 | 18 (13.9%) | 8 | **6.2%** |
+
+**And a website FIELD is not a website.** The funnel, every rung measured:
+
+| rung | orgs |
+|---|---:|
+| organisations in shard-I's strata | 8,642 |
+| carry a non-blank website field | 1,476 |
+| the field actually parses as a URL | 1,019 |
+| the host answered 2xx | 864 |
+| the page carried an evidence-bearing sentence | 251 |
+| **the page asserted Native CONTROL** | **15** |
+
+Every no-content outcome is NAMED rather than left blank — 51 dead DNS, 40 TLS failures, 79 fields that were not URLs (`N/A` is the commonest value), 36 pages that served bytes but yielded no extractable text. *(shard H's rule: a truncated or script-rendered read must report why, never a bare negative. Zero reads hit the size cap this run.)*
+
+**Robots audit** (prompted by shard H losing 22 hosts to a phantom block): this shard never used `urllib.robotparser`. `robots.txt` is fetched by curl with the **same UA** used for content and any non-200 yields an EMPTY rule set, i.e. ALLOWED. All **11** hosts recorded `ROBOTS_DISALLOW` were re-audited against their saved `robots.txt`: **11 genuine, 0 phantom** (six are `facebook.com`). No organisation was written off as closed because our own check lied.
+
+**No domain was guessed.** Every URL probed came from the filer's own IRS return. Shard H's finding that a guessed domain returning 200 is fabrication with a status code next to it does not bite here because no candidate was ever generated from an organisation name.
+
+**Decision:** are the remaining `990_N` organisations worth pursuing? **Recommendation: no further web sweep, and here is the arithmetic.** About four in five postcard filers publish no website at all; of the ones that do, roughly 14% of the pages fetched were dead, parked or refused. A second sweep buys a small number of thin pages at a large number of requests. **The cheap remaining routes are not web routes**: state charity registries (bulk, free, and they carry a purpose statement), and the group-exemption parent, which names the affiliation directly. Both are Tier-1 in `docs/PULL_DISCIPLINE.md` terms — bounded objects, not per-org fetches.
+
+### 10c-bis. The structured-endpoint pass paid for itself, and here is the number
+
+`docs/HIDDEN_DATA_TECHNIQUES.md` was adopted mid-run. It matters most for exactly this population: **635 of 831 sites had a RENDERED page too thin to decide anything from.**
+
+| technique | sites where it produced data |
+|---|---:|
+| `meta_opengraph` | 669 |
+| `feed_link_rel` | 293 |
+| `wp_json_advertised_by_link_rel` | 219 |
+| `jsonld_schema_org` | 195 |
+| `data_attributes` | 108 |
+| `wp_json_inferred_from_wp_content_paths` | 28 |
+| `embedded_app_state_present` | 24 |
+| `select_option_vocabulary` | 17 |
+| `html_comment_carrying_native_language` | 4 |
+| `published_google_sheet` | 4 |
+
+Reading the structured routes out of bytes ALREADY retrieved cost **zero extra requests**. A bounded second pass then called 683 documented public endpoints (`/wp-json/wp/v2/pages`, `/wp-json/wp/v2/media`, `/feed/`) across 270 organisations and returned **2,419 PDF-library items, 1,261 feed items, 31 annual reports and 84 newsletter PDFs** — and added evidence on **55 organisations whose rendered page carried none at all.**
+
+Worked example: **Samish Neighborhood Association** rendered a near-empty shell. `/wp-json/wp/v2/pages` returned 17 pages of text and the media library listed 64 documents — enough to resolve it, and it resolves to `placename_only`. The technique that produced the data is recorded per site in the `evidence` field, as the doc requires.
+
+**Boundary, asserted not merely intended:** only documented public endpoints were requested. `structured_probe.py` carries a `FORBIDDEN` regex covering `/wp-admin`, `/admin`, `/.env`, `/.git`, `/staging`, backups and dumps, and it *raises* rather than skips. Nothing behind a login, no robots `Disallow` path, no `TERMS_STATED_RESTRICTIVE` source.
+
+### 10c-ter. Newsletters — where small Native nonprofits actually publish
+
+140 organisations probed, 127 readable. Channel counts:
+
+| channel | orgs |
+|---|---:|
+| `facebook_only` | 77 |
+| `wordpress_blog` | 54 |
+| `own_site` | 22 |
+| `mailchimp` | 20 |
+| `wix` | 19 |
+| `squarespace` | 10 |
+| `constant_contact` | 1 |
+
+**`facebook_only` is the largest single channel.** That is a finding for the funding and deals datasets: a bulletin that never leaves Facebook is invisible to every route Cedar currently runs, and `facebook.com/robots.txt` disallows `/` for `*`, so it is not harvestable. Depth and cadence are recorded; archives were NOT downloaded. File: `data/staging/np_harvest/newsletters_shard_i.jsonl`.
+
+### 10d. `filing_req_cd = 14` is a 51-row seam the doc says is invisible
+
+The dataset doc warns that *"tribal instrumentalities largely DO NOT file 990s (IRC §7871) — the LARGEST tribal institutions can be invisible here."* True in general. But **BMF `filing_req_cd = 14` is the governmental-instrumentality code, and 51 `np_orgs` rows carry it** — the instrumentalities that hold an EIN anyway. They include San Carlos Apache College, Seneca Nation Library, Seneca Nation of Indians Economic Development Company, Cherokee Nation Education Corporation, Kickapoo Nation School and Quileute Tribal School. They also include County of Apache and Indian River State College, so it is a seam, not a whitelist.
+
+**Decision:** should `filing_req_cd = 14` become a named review stratum? **Recommendation: yes** — 51 rows is a one-sitting adjudication and it is the densest concentration of genuine tribal institutions anywhere in this dataset. Relatedly, **1,491 of the 2,060 `not_required_to_file` rows are churches** (`filing_req_cd = 06`), which the doc already excludes in principle but which still sit in the row count.
+
+### 10e. 4,362 candidate nonprofit→spine links — record or mint?
+
+**This is the architectural question and it is yours, not an agent's.** `data/spine/cedar_identity_register.csv` has 17 entity classes and **no nonprofit class**, while `np_orgs.csv` holds 12,764 organisations of which 1,423 (11.1%) carry a `cedar_uid`.
+
+Shard I found that **every one of the 6,646 unkeyed `tribe_id_token_match` values resolves exactly to an existing `spine.handle`** — 4,362 of them in shard-I's strata. So the links are mechanically available today.
+
+**They should not be minted, and the harvest is the reason why.** Of the candidates where a website could be read, **434 were CONTRADICTED by the organisation's own site** and only **6 were corroborated**. A token match is the Umatilla Electric shape: `PENOBSCOT COUNTY CONSERVATION ASSOCIATION` token-matches `TRBF-PNBSCT-00` and is a Maine sportsmen's club.
+
+**Decision, three options:**
+
+1. **Mint a `Native nonprofit` entity class and key all ~11,300.** Fast coverage; imports every place-name false positive into the master list, where `START_HERE.md` standing rule 1 says a laundered tier can never be un-laundered. **Not recommended.**
+2. **Mint nothing; keep nonprofits keyed only by EIN, and let the spine reach them through `np_ein_uei_bridge.csv`.** Honest, but the bridge is **28 rows**, so in practice the nonprofit economy stays outside the entity layer.
+3. **Mint a nonprofit class, but populate it only from RULED rows** — the 89 promotions already in `docs/NONPROFIT_CLASSIFICATION_RESEARCH_LOG.md`, the `native_entity` evidence rows above, the 51 `filing_req_cd = 14` instrumentalities, and whatever shard J's mission-text pass promotes. Every other row stays a candidate in `data/staging/np_harvest/candidate_spine_matches_shard_i.csv`. **Recommended.** It makes the class exist, so the dataset has somewhere to key to, without the entity layer inheriting an unadjudicated backlog.
+
+Files: `data/staging/np_harvest/candidate_spine_matches_shard_i.csv` (4,362 rows, each with `corroboration` and a per-row recommendation), `shard_i.jsonl` (9,918 harvested rows), `README.md` (what is and is not a claim).
+

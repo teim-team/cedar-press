@@ -5684,3 +5684,87 @@ workstream (`354_correction_register.py`), not to shard H. Shard H's file count
 in `data/clean/` is still zero. Shard H is done; its two handoffs are
 **HAND-638038475C** and **HAND-593FBD19BB**, both awaiting a different session
 to verify.
+
+
+---
+
+## 2026-09-01 — `62` FAILS, and none of it is shard-I's
+
+*Recorded under standing rule 15, which forbids writing "pre-existing, not mine"
+and walking on. Shard-I (Native nonprofit harvest) ran `62_no_regression_check.py`
+at the end of its run. **EXIT 1.** Shard-I owns `data/staging/np_harvest/` and
+one appended section in `review/OWNER_DECISION_QUEUE.md`, and wrote nothing to
+`code/`, `data/clean/`, `data/spine/` or `np_orgs.csv` — verified by
+`git status`, and by `np_harvest` appearing **0 times** in the gate output.
+`293_lint_bug_classes.py` scans `CODE = CEDAR / "code"` only, so this shard's
+scripts are not even in its surface.*
+
+**The failing lines and who owns them.** Each is a live concurrent workstream;
+these are theirs to clear before their handoff:
+
+| failing metric | named instance | owner |
+|---|---|---|
+| `lint_class1` 0 → 1 | `585_factcheck_nigc_keys.py` — `FILES = [...]` | NIGC fact-check workstream |
+| `lint_class6` | `518_dataset_readiness.py` — `cedar_dataset_readiness.csv` | readiness workstream |
+| `lint_class7` | `570_shard_l_vendor_list_hunt.py` — `f"{source_id}:{i}"` | shard L |
+| `lint_class2c` 60 → 62 | `344_pull_nigc_document_surface.py`, `541_shard_j_mine_990_mission_text.py` | NIGC pull; **shard J** |
+| `lint_class4` 9 → 10 | `shard_g_registry_pull.py` — `if time.time() > RUN_DEADLINE:` | shard G |
+| `lint_class5` 6 → 7 | `221_probe_regulations_gov_comments.py` | regulations.gov workstream |
+| `files_with_columns_lost_vs_backup` = 3 | `ca_gaming_facilities_official.csv`, `entity_evidence_profile.csv`, `gaming_property_coverage.csv` | gaming / evidence-profile workstreams |
+| `contract_violations` = 8, `contract_orphan_shippable` = 6 | — | contracts workstream |
+| `corrections_not_propagated` 2 → 3 | `TRBF-BURNST-00`→`oldcampcasino.com`; `TRBF-DELAWN-00`→`Delaware Tribe of Indians` | gaming property; identifier ledger |
+| `SHIPPING LOST` | `advocacy_passthrough_2026-08-07.csv` gone from `data/clean` | advocacy workstream |
+
+**One of these is worth a second look by whoever integrates.** `SHIPPING LOST:
+advocacy_passthrough_2026-08-07.csv was shipping 1,620 rows and the table is
+GONE from data/clean`. A vanished shipping table is a different shape of defect
+from a lint rise: the others are new code that can be fixed in place, this one
+is data that is no longer there. It is the same class the 144 `cedar_uid` note
+above describes — a rebuild writer dropping what it did not know about.
+
+**Shard-I's own gate state, for the record:** the shard produced no table in
+`data/clean`, no `code/` module, and no contract-covered output, so there is no
+metric in `62` it could move in either direction. Its outputs are staging
+artefacts and a review proposal, both of which are outside the gate's surface by
+design — nothing here is a waiver.
+
+## `advocacy_passthrough_2026-08-07.csv` IS NOT LOST — THAT LINE IS MINE
+
+Three separate agents have now stopped to investigate `62`'s
+`SHIPPING LOST: advocacy_passthrough_2026-08-07.csv ... GONE from data/clean`,
+and two correctly diagnosed it as a mid-write artifact. It is neither lost nor
+an artifact. **It is a deliberate change I made on 2026-09-01, and the gate's
+wording is wrong.**
+
+The file is on disk at 2,012,716 bytes and reads 1,620 rows. What changed is
+its shipping status: it and `advocacy_passthrough.csv` were **both**
+`status=shippable` in the lobbying collection, 1,620 rows each, the same
+$193,592,975 in `grant_amount_usd` — so anyone totalling the collection's
+pass-through got $387M. The dated snapshot is now `internal-by-decision` via
+`cedar_codebook`, following the precedent already in that file for
+`cedar_identifier_ledger_tiered.csv`.
+
+So the metric moved for the right reason and the message is misleading: a table
+leaving the ship list reports as **GONE from `data/clean`**, which sends a
+reader to look for a missing file. **Nobody should spend further time on it.**
+
+The gate line deserves fixing to distinguish *deregistered* from *deleted* —
+they are opposite situations and only one is an incident. Recorded here rather
+than fixed, because `62` is the shared gate and several agents are live.
+
+## THE 990-N e-POSTCARD CORPUS IS NOW IN `data/raw/external/irs990n/`
+
+Shard I found it and asked for it to be promoted out of its staging directory.
+Done, with a manifest. It is the **only public source carrying a website field
+for 990-N postcard filers**, and it is one 93 MB object rather than thousands of
+per-organisation fetches — 86.4% of Cedar's `990_N` stratum appears in it and
+20.6% carry a non-blank website field.
+
+It is also the measurement that closes a question: **do not run a further web
+sweep on the remaining 6,353 postcard filers.** Shard I measured the whole
+population rather than sampling, and the funnel collapses about 100:1 —
+1,476 website fields, 1,019 parse as a URL, 864 answer 2xx, 251 carry an
+evidence-bearing sentence, **15 assert Native control**. For
+`not_required_to_file` the field rate is 0.83%, and 1,491 of those 2,060 are
+churches. The cheap routes left are state charity registries and
+group-exemption parents, which are bounded objects rather than per-org fetches.
