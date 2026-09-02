@@ -868,7 +868,7 @@ the count v1 could see, and v1 was wrong in both directions.
 | of them, pairings that did not exist | 9 of v1's 29 | 0 |
 | tables proved to survive a rebuild (`1074 carry`) | - | **63** |
 | positional writers with header != row length (`1074 positional`) | 0 of 40 | 0 of 40 |
-| markdown docs a rebuild could overwrite | 21 (upper bound) | **9** |
+| markdown docs a rebuild could overwrite | 21 (upper bound) | **7** |
 
 **What the detector got wrong, and why it matters more than the fixes.** v1
 paired a `fieldnames` literal with any `.csv` name mentioned ANYWHERE in the
@@ -895,16 +895,28 @@ on the fix, and does NOT fire on a table the script merely names.
    and is not - it derives from the row this build just built, not from the
    file on disk, so a rebuild drops an enricher's column exactly as a literal
    would. Listed under the CSV report, not counted in it.
-2. **9 markdown docs** carry a generator plus hand-edit commits plus headings
+2. **7 markdown docs** carry a generator plus hand-edit commits plus headings
    the generator cannot emit. Every number there is an UPPER BOUND.
    `845 regen <doc>` settles one by regenerating and diffing, and restores the
    doc either way. Three were settled that way and are recorded in
-   `MD_PROVEN_SAFE` with their evidence: `REFRESH_CADENCE.md` (3 changed
+   `MD_PROVEN_SAFE` with their evidence. Five in total: `REFRESH_CADENCE.md` (3 changed
    lines, all measurements that moved - and `630` already splices into
    `<!-- CEDAR:CADENCE-MEASURED START -->`, a second marker vocabulary the
    check did not know), `ENTITY_FRESHNESS.md`, `DEPENDENCY_MANIFEST.md`.
-   `DOC_STALENESS.md` regenerates with one unpaired removal that is a row
-   which stopped qualifying, not prose.
+   plus `REVIEW_BACKLOG_RULINGS.md` (byte-identical) and
+   `docs/datasets/_PUNCHLIST.md`. `DOC_STALENESS.md` regenerates with one
+   unpaired removal that is a row which stopped qualifying, not prose, and is
+   left flagged rather than asserted safe. `LOBBYING_BUILD_LOG_2026-08-05.md`
+   regenerates with **30** unpaired removals and is the one genuine candidate
+   the sweep found; it needs a human read, not a script.
+
+   **Two traps `regen` hit and now refuses.** A generator that FAILS TO RUN
+   leaves the doc byte-identical, which is this command's strongest PASS -
+   `06_build_log_stats_v2.py` exited 2 (it lives in `code/lobbying_pull/`, not
+   `code/`) and the doc was reported PROVEN SAFE on a diff that never
+   happened. And `scan_md` now RAISES when `git log` returns nothing, because
+   an empty history scores every doc at 0 hand edits and prints the markdown
+   half as clean; that exact 0 was observed once from inside `62`.
 
 **What a fix costs, measured.** `114_pull_prime_archive.py` is the sharpest
 case. `PRIME_FIELDS` is 39 and `prime_contracts.csv` is 70, and index 38 is
@@ -933,6 +945,6 @@ untouched.
    edit first.
 
 **Baseline.** `docs/schema/regenerate_guard_baseline.json` was re-recorded
-AFTER the fixes and now holds **9 markdown entries and zero CSV entries**.
+AFTER the fixes and now holds **7 markdown entries and zero CSV entries**.
 Nothing of this workstream's making is grandfathered in it.
 <!-- END ADR-017 -->

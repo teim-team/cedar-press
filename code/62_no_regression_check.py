@@ -1466,8 +1466,9 @@ MUST_NOT_FALL = {
 # written to close a reviewer finding - within hours of it being written.
 #
 # `regenerate_unsafe_writers` is MUST_NOT_RISE, not MUST_BE_ZERO: the CSV half
-# is at 0 and the 9 markdown entries are pre-existing, each an UPPER BOUND
-# that needs `845 regen <doc>` to settle. Zeroing it by fiat would be a
+# is at 0 and the 7 remaining markdown entries are pre-existing, each an
+# UPPER BOUND that needs `845 regen <doc>` to settle - five were settled that
+# way on 2026-09-02 and are recorded in 845's MD_PROVEN_SAFE with evidence. Zeroing it by fiat would be a
 # waiver wearing a ratchet's clothes.
 # `regenerate_new_unsafe_writers` IS MUST_BE_ZERO and is answered from 845's
 # OWN baseline, the same arrangement as 293 - so a NEW instance fails the gate

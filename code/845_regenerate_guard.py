@@ -455,7 +455,10 @@ def scan_csv(p: Path, live: dict):
         # literals VISIBLE here: module level, plus this function's own locals,
         # minus anything shadowed by a parameter of this function.
         _fn = _enclosing_func(tree, node.lineno)
-        _k = id(_fn) if _fn is not None else 0
+        # keyed on the function's OWN line, not `id()`: a memory address is a
+        # non-deterministic key (lint class7) and this cache is easier to
+        # reason about when the key is something in the source.
+        _k = _fn.lineno if _fn is not None else 0
         if _k not in _scope_cache:
             lits = dict(modlits)
             hist = local_hist(_fn, modenv)
@@ -675,6 +678,12 @@ MD_PROVEN_SAFE = {
     "docs/DEPENDENCY_MANIFEST.md":
         "2026-09-02 regen: 18 removed / 34 added, 0 unpaired removals - the "
         "manifest grew, nothing was lost.",
+    "docs/REVIEW_BACKLOG_RULINGS.md":
+        "2026-09-02 regen: byte-identical. 603 reproduces the whole doc, "
+        "numbered doctrine sections included.",
+    "docs/datasets/_PUNCHLIST.md":
+        "2026-09-02 regen: 4 removed / 14 added, 0 unpaired removals - open "
+        "item counts moved, nothing was lost.",
 }
 
 

@@ -9,9 +9,9 @@ Shard N's slice is derived, not listed: every register entity that no other shar
 | entity class | has a site of its own | site exists, we are refused or challenged | no site of its own; another party publishes about it | checked, no web presence located |
 |---|---|---|---|---|
 | Native Hawaiian Organization | 4 | 0 | 11 | 54 |
-| Federally recognized tribe | 54 | 3 | 4 | 1 |
+| Federally recognized tribe | 53 | 4 | 4 | 1 |
 | Individually Native-owned business | 0 | 0 | 1 | 7 |
-| **total** | **58** | **3** | **16** | **62** |
+| **total** | **57** | **4** | **16** | **62** |
 
 *`checked, no web presence located` is a FINDING. Every one of those entities carries a row naming the routes run and the date. For **64 of the 69** Native Hawaiian Organizations here, the route that settled it was the organisation's own entry in the DOI Office of Native Hawaiian Relations notification list, which records `Website: None listed`. That is the organisation telling its registrar it has none — not us failing to find one.*
 
@@ -20,18 +20,18 @@ Shard N's slice is derived, not listed: every register entity that no other shar
 | url_type | n | meaning |
 |---|---:|---|
 | `none_established` | 60 | checked, nothing found at all |
-| `government` | 54 | verified tribal government site |
-| `machine_readable_surface` | 53 | the host answers wp-json / sitemap / feed — a harvestable surface for the next agent |
-| `no_own_site_found` | 21 | checked; something was found but not a site of the entity's own |
-| `form_990` | 16 | IRS filing record ABOUT the entity; not its website |
+| `government` | 53 | verified tribal government site |
+| `machine_readable_surface` | 52 | the host answers wp-json / sitemap / feed — a harvestable surface for the next agent |
+| `no_own_site_found` | 22 | checked; something was found but not a site of the entity's own |
+| `form_990` | 17 | IRS filing record ABOUT the entity; not its website |
 | `directory_profile` | 5 | a consortium or directory page about the entity, published in the BIA `website` field |
 | `organization` | 4 | verified organisation site |
 | `government_blocked_bot_protection` | 4 | site exists; 403 to research UA AND to browser headers |
 | `parked_domain` | 2 |  |
-| `government_refused_robots` | 1 | site exists; robots.txt Disallow: / — refused by every route |
 | `unverified_organization` | 1 | URL published by DOI that did not answer |
+| `government_refused_robots` | 1 | site exists; robots.txt Disallow: / — refused by every route |
 
-## Reached but not harvestable — 19
+## Reached but not harvestable — 20
 
 *These are not coverage gaps and they are not absences. Filing either one as `none found` would misreport a nation's own decision, or an edge WAF, as an empty web presence.*
 
@@ -44,6 +44,7 @@ Shard N's slice is derived, not listed: every register entity that no other shar
 | Koi | Federally recognized tribe | site exists, we are refused or challenged | `government_blocked_bot_protection` https://www.koinationsonoma.com/ |
 | Paiute of Utah | Federally recognized tribe | site exists, we are refused or challenged | `government_blocked_bot_protection` https://pitu.gov/ |
 | Potter Valley | Federally recognized tribe | site exists, we are refused or challenged | `government_blocked_bot_protection` https://pottervalleytribe.com/ |
+| Samish | Federally recognized tribe | site exists, we are refused or challenged | `government_refused_robots` https://www.samishtribe.nsn.us/ |
 | Cherokee Unlimited, Inc | Individually Native-owned business | no site of its own; another party publishes about it | `form_990` https://projects.propublica.org/nonprofits/organizations/630930547 |
 | Ahonui Homestead Association | Native Hawaiian Organization | no site of its own; another party publishes about it | `form_990` https://projects.propublica.org/nonprofits/organizations/833506697 |
 | Captain Kimo's Hawaiian Adventures | Native Hawaiian Organization | no site of its own; another party publishes about it | `form_990` https://projects.propublica.org/nonprofits/organizations/884330264 |

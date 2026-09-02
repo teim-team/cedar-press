@@ -764,10 +764,35 @@ def domains_from_emails(emails):
 
 # ------------------------------------------------------------ R4 990/IRS
 def propublica(name, state=""):
+    """IRS filer lookup. ALL of the name's distinctive tokens, or nothing.
+
+    THE FIRST RULE HERE WAS `len(want & got) >= len(want) - 1`, AND IT
+    ATTRIBUTED SIX FILERS TO THE WRONG ORGANISATION:
+
+        Cherokee Unlimited, Inc   ->  DUCKS UNLIMITED INC, Memphis TN
+        Samish Indian Nation      ->  Samish Montessori School
+        Koi Nation of N. Calif.   ->  Koi Heart, New Orleans LA
+        Fort Bidwell Indian Comm. ->  Fort Bidwell Volunteer Fire Department
+        Grindstone Rancheria      ->  Grindstone Association, Winter Harbor ME
+        Potter Valley Tribe       ->  Potter Valley Cemetery Auxiliary
+
+    "n-1 of the tokens" means a two-word name matches on ONE word, and one
+    word is a place name or a common adjective. An EIN on the wrong entity is
+    the same defect as a URL on the wrong entity, and harder to spot because
+    an EIN looks like a fact.
+
+    Two changes. Every distinctive token must be present, and the filer's
+    state must not contradict the register's -- and see the caller: this
+    route no longer runs for federally recognized tribes at all, because a
+    tribe is not a 501(c)(3) and everything that matched one was a local
+    organisation sharing the place name.
+    """
     q = urllib.parse.urlencode({"q": name})
-    url = PP_SEARCH + "?" + q + ("&state%5Bid%5D=" + state if state else "")
-    r = fetch(url, timeout=40, respect_robots=False)
+    r = fetch(PP_SEARCH + "?" + q, timeout=40, respect_robots=False)
     if not isinstance(r["status"], int) or r["status"] != 200:
+        # 404 is this API's empty-search answer, not a transport failure.
+        if r["status"] == 404:
+            return None, "propublica:zero_results(404 is its empty search)"
         return None, "propublica:" + str(r["status"])
     try:
         d = json.loads(r["text"])
@@ -777,11 +802,20 @@ def propublica(name, state=""):
     if not orgs:
         return None, "propublica:0_results"
     want = set(tokens(_deaccent(name)))
+    if not want:
+        return None, "propublica:no distinctive tokens in the entity name"
     for o in orgs:
         got = set(tokens(_deaccent(o.get("name", ""))))
-        if want and len(want & got) >= max(1, len(want) - 1):
-            return o, "propublica:matched"
-    return None, "propublica:" + str(len(orgs)) + "_results_none_matched"
+        if not want.issubset(got):
+            continue
+        ost = (o.get("state") or "").upper()
+        if state and ost and ost != state.upper():
+            continue
+        return o, ("propublica:matched on ALL of " + ",".join(sorted(want))
+                   + "; filer state " + (ost or "?"))
+    return None, ("propublica:" + str(len(orgs))
+                  + "_results, none carried every token of "
+                  + ",".join(sorted(want)))
 
 
 # ------------------------------------------------------------------ shape
@@ -1237,12 +1271,18 @@ def run():
                          "route, and it is not attempted here")
 
         # ---- R4 IRS / ProPublica Nonprofit Explorer ---------------------
+        # NOT FOR TRIBES. A federally recognized tribe is a government, not
+        # an exempt organisation; it does not file a 990, so every hit is
+        # some other body that shares its place name -- six of them did.
         if not got_url and cls in ("Native Hawaiian Organization",
-                                   "Federally recognized tribe",
                                    "Individually Native-owned business"):
-            st_code = "HI" if cls == "Native Hawaiian Organization" else ""
-            o, note = propublica(name, st_code)
+            o, note = propublica(name, (row.get("state") or "").strip())
             tried.append("R4 ProPublica Nonprofit Explorer -> " + note)
+        elif not got_url and cls == "Federally recognized tribe":
+            tried.append("R4 IRS/990 NOT RUN: a federally recognized tribe is "
+                         "a government and does not file a 990; every match "
+                         "this route produced for a tribe was a different "
+                         "local organisation sharing the place name")
             if o:
                 ein = o.get("strein") or str(o.get("ein"))
                 emit(uid, name, cls, "form_990",
