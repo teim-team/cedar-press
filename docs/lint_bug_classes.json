@@ -1,12 +1,12 @@
 {
-  "scanned_files": 626,
+  "scanned_files": 630,
   "counts": {
     "class1": 1,
-    "class2a": 0,
+    "class2a": 1,
     "class2b": 0,
     "class2c": 69,
     "class3": 2,
-    "class4": 15,
+    "class4": 14,
     "class5": 6,
     "class6": 27,
     "class7": 44,
@@ -214,13 +214,22 @@
       "waiver_reason": ""
     },
     {
-      "class": "class4",
-      "file": "1137_customer_dataset_combine.py",
-      "line": 398,
-      "evidence": "if len(rows) > WORKBOOK_MAX_ROWS:",
-      "why": "a budget (WORKBOOK_MAX_ROWS) exits a loop, the file writes a completion marker (['ok']), and it never compares what it RETRIEVED against the total the SOURCE reported. That is the PER_DOCKET_BUDGET_S defect: four dockets written at 2,300-3,200 of 3,555-4,847 and marked `done`, so no resume would ever revisit them.",
+      "class": "class2a",
+      "file": "1140_linkage_close.py",
+      "line": 272,
+      "evidence": "row.setdefault(c, \"\")",
+      "why": "`row` was filled with every key at line 418, so this setdefault is a NO-OP and the column ships EMPTY. This is the 119 defect: tier 154/154 blank, confidence_tier 10,661/10,661 blank. Use `x[k] = x.get(k) or DEFAULT`.",
       "waived": false,
       "waiver_reason": ""
+    },
+    {
+      "class": "class2c",
+      "file": "1141_gaming_quality_pass.py",
+      "line": 855,
+      "evidence": "fails += 1",
+      "why": "counter 'fails' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
+      "waived": true,
+      "waiver_reason": "the counter is incremented on the line AFTER"
     },
     {
       "class": "class2c",
@@ -855,7 +864,7 @@
     {
       "class": "class2c",
       "file": "846_session_audit.py",
-      "line": 589,
+      "line": 677,
       "evidence": "fails += 1",
       "why": "counter 'fails' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -3538,7 +3547,7 @@
   "class7_source": "284_audit_nondeterministic_keys.lint_key_stability()",
   "class7_note": "284 fixture self-test PASS - 5 synthetic defect shapes re-found; of the 3 measured real instances 1 now recorded FIXED",
   "class9_source": "1136_control_byte_gate.scan()",
-  "class9_note": "1136 scanned 977 files (code/*.py, docs/*.md, docs/schema/*, root *.md) for 0x00-0x08, 0x0b, 0x0c, 0x0e-0x1f, 0x7f",
+  "class9_note": "1136 scanned 982 files (code/*.py, docs/*.md, docs/schema/*, root *.md) for 0x00-0x08, 0x0b, 0x0c, 0x0e-0x1f, 0x7f",
   "tier_inheritance": {
     "sites": [
       {
@@ -3731,7 +3740,7 @@
         "why": "WAS `if tier != Tier.A and not ruled: continue` and then minted an `owned_by` edge at TIER A - method membership alone admitted the row and the consumer assigned the tier, on an edge that is in OWNERSHIP_BEARING and can therefore carry money. NOT the negative-ruling bug: `ledger_firms` filters `confidence_tier == X` out first, so no exclusion reaches it. Measured exposure 2026-08-26: 36 ledger rows - 34 tier-B `elijah_ruling_redirect`, 2 tier-C `web_verified` (Kijik, Paskenta, Paug-Vik, Sitnasuak, Tlingit & Haida); the ENTITY is right on all 36 and only the TIER was over-stated. FIXED 2026-08-26: the tier and its confidence are inherited verbatim, and where several ledger rows share the (entity, normalised name) dedupe key the STRONGEST is taken so the answer cannot depend on row order. The live rows were corrected separately and in place by `code/310_correct_overstated_owned_by_edge_tiers.py` - 97 is a FULL REBUILD and entity_relationships.csv has in-place consumers."
       }
     },
-    "ledger_rows": 20577,
+    "ledger_rows": 20740,
     "ledger_exposure_note": "RULED methods read from cedar_domain.RULED_METHODS",
     "would_be_over_stated": {
       "X|elijah_ruling": 344,

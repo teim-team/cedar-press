@@ -756,9 +756,34 @@ def build(dry: bool, only: tuple = ()) -> int:
                     refused.append(f"{tpath.stem}(1:many on {key} -> {col})")
                     continue
                 thdr, trows, _ = load(tpath)
+                # RE-MEASURE. The contracts file records a cardinality that was
+                # true when the grain sweep ran; the table may have been
+                # rebuilt since. Codex, PR #35: `setdefault` silently keeps the
+                # first row and discards the rest, and the row-count check
+                # CANNOT catch it - a join widens rows and never appends to
+                # `frows`, so the count is unchanged by construction and the
+                # advertised safeguard passes while the customer receives an
+                # arbitrary one of N supporting records.
+                #
+                # It also answers the review question I put in the PR: no,
+                # trusting the declared measurement is not sufficient. Measure
+                # on the rows actually loaded, and refuse when it fails.
                 idx = {}
+                dupe_key = 0
                 for r in trows:
-                    idx.setdefault((r.get(key) or "").strip(), r)
+                    k2 = (r.get(key) or "").strip()
+                    if k2 in idx:
+                        dupe_key += 1
+                        continue
+                    idx[k2] = r
+                if dupe_key:
+                    refused.append(f"{tpath.stem}(DECLARED 1:1 on {key}, "
+                                   f"MEASURED {dupe_key} duplicate key(s) - "
+                                   f"join refused, contracts file is stale)")
+                    print(f"      !! {tpath.stem}: declared one-to-one on "
+                          f"{key}, measured {dupe_key} duplicate key(s); "
+                          f"REFUSED")
+                    continue
                 new = [c2 for c2 in thdr if c2 != key and c2 not in fhdr]
                 if not new:
                     continue
@@ -787,7 +812,18 @@ def build(dry: bool, only: tuple = ()) -> int:
         # defect the freshness gate exists to catch, one file type over: a
         # deliverable that no longer corresponds to anything.
         if not dry:
-            for stale_f in list(OUT.glob(f"{coll}.csv")) +                     list(OUT.glob(f"{coll}__*.csv")) +                     list(OUT.glob(f"{coll}.xlsx")) +                     list(OUT.glob(f"{coll}__CODEBOOK.md")):
+            # Sweep EVERY artifact of the previous build, notes included.
+            # Codex, PR #35: if a later build runs without reportlab, an old
+            # __NOTES.pdf survives, notes() records generation as unavailable,
+            # and verify passes because it only checks the path exists - a
+            # current CSV shipping beside outdated notes. A failed
+            # regeneration has to be visibly absent.
+            for _pat in (f"{coll}.csv", f"{coll}__*.csv",
+                         f"{coll}__NOTES.txt", f"{coll}__NOTES.pdf",
+                         f"{coll}__NOTES.pdf.absent",
+                         f"{coll}__CODEBOOK.md", f"{coll}.xlsx"):
+                for stale_f in OUT.glob(_pat):
+                    stale_f.unlink()
                 stale_f.unlink()
 
         # BAND THE COLUMNS BEFORE ANYTHING IS WRITTEN, so the CSV, the
@@ -1022,6 +1058,31 @@ def verify() -> int:
                        f"spreadsheet")
         if int(m.get("rows") or 0) == 0:
             bad.append(f"{m['dataset']}: zero rows")
+        # RE-READ THE DELIVERED FILE. Codex, PR #35: a truncated or partially
+        # written CSV has a NEWER mtime, so stale() calls it current, and
+        # checking only that the path exists while taking the row count from
+        # the manifest lets a header-only paid dataset pass. The manifest is
+        # this script's own claim about its work; a gate that reads it is
+        # grading its own homework.
+        _f = OUT / f"{m['dataset']}.csv"
+        if _f.exists():
+            try:
+                with _f.open(encoding="utf-8-sig", errors="replace",
+                             newline="") as fh:
+                    _rd = csv.reader(fh)
+                    _hdr = next(_rd, [])
+                    _n = sum(1 for _ in _rd)
+            except OSError as e:
+                bad.append(f"{m['dataset']}: unreadable ({e})")
+            else:
+                _want_r = int(m.get("rows") or 0)
+                _want_c = int(m.get("columns") or 0)
+                if _n != _want_r:
+                    bad.append(f"{m['dataset']}: manifest says {_want_r:,} "
+                               f"rows, the file holds {_n:,}")
+                if len(_hdr) != _want_c:
+                    bad.append(f"{m['dataset']}: manifest says {_want_c} "
+                               f"columns, the header holds {len(_hdr)}")
     for b in bad[:25]:
         print("  FAIL " + b)
     print(f"  1137 verify   {'FAIL' if bad else 'ok'}   {len(bad)} problem(s); "
