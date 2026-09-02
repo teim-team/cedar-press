@@ -167,10 +167,25 @@ DATASETS = [
         collection="subcontracting", table="subawards.csv",
         denom="one subaward row. LINKED if EITHER side (prime or subawardee) "
               "resolves, because either one makes the row attributable",
+        role="EITHER party. **`cedar_uid` on this table is the PRIME leg** - "
+             "it equals `prime_cedar_uid` on 39,567 of its 40,201 non-blank "
+             "values - and it is **BLANK BY DESIGN** on the majority "
+             "population, where the Native party is the SUBAWARDEE. Reading "
+             "`cedar_uid` alone gives 44.77% and that is a fill rate, not "
+             "coverage. **Do not write a subawardee id into `cedar_uid` to "
+             "close it**: the column would then mean the prime on some rows "
+             "and the subawardee on others, and every customer "
+             "`GROUP BY cedar_uid` would silently mix the two - the same "
+             "class of defect as the identifier ledger holding a UEI in "
+             "`state`. Exposing the subawardee leg is a SCHEMA decision, in "
+             "its own named column",
         linked_sql=f"({nb('prime_cedar_uid')} OR {nb('sub_cedar_uid')})",
-        alts=[("subawardee_side", nb("sub_cedar_uid")),
-              ("prime_side", nb("prime_cedar_uid")),
-              ("row_level:cedar_uid", nb("cedar_uid"))],
+        alts=[("subawardee_side:sub_cedar_uid", nb("sub_cedar_uid")),
+              ("prime_side:prime_cedar_uid", nb("prime_cedar_uid")),
+              ("row_level:cedar_uid_ONLY_a_fill_rate", nb("cedar_uid")),
+              ("either_side_via_tribe_id_columns",
+               f"({nb('prime_native_tribe_id')} OR "
+               f"{nb('sub_native_tribe_id')})")],
         money="subaward_amount", name_col="subawardee_name",
     ),
     dict(
@@ -581,11 +596,17 @@ def render(cov):
             mt = d["money_total"] or 0.0
             mu = d["money_unlinked"] or 0.0
             share = (100.0 * mu / mt) if mt else 0.0
-            A(f"**Money on unlinked rows: ${mu:,.2f} of ${mt:,.2f}** in "
-              f"`{d['money_col']}` ({share:.2f}%). This sums a column as "
-              f"recorded and is subject to `docs/MONEY_TOTALLING_RULES.md`. "
-              f"It measures EXPOSURE - how much money is not attributable - "
-              f"and is not a Cedar total of anything.")
+            A(f"**Money on unlinked rows: ${mu:,.2f} of an UNFILTERED "
+              f"${mt:,.2f}** in `{d['money_col']}`, {share:.2f}%. "
+              f"**Neither figure is a Cedar total and neither may be quoted "
+              f"as one.** They sum the column exactly as recorded, with no "
+              f"countability rule applied; `docs/MONEY_TOTALLING_RULES.md` "
+              f"governs every total this project publishes, and on "
+              f"`subawards` in particular the countable total is billions "
+              f"below the unfiltered one. What is measured here is EXPOSURE "
+              f"- the share of the money that sits on rows nothing can be "
+              f"attributed to - and a ratio of two unfiltered sums answers "
+              f"that question honestly while answering no other.")
             A("")
         if d.get("residue_top"):
             A("**The largest unlinked residue, by row count:**")

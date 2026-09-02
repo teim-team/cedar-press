@@ -732,11 +732,18 @@ Indian Country revenue in AGGREGATE, which is a fact about the world.
    with 585 keyed; the class needs the ladder, not a matcher. Note the standing
    caution in `ENTITY_LAYER_DEEPENING_2026-09-02.md`: 461 of the 1,423 live
    keys are place-name collisions measured against the wrong tribe.
-2. **`subcontracting` — 87,355 of 89,809 (97.27%) if either side counts, but
-   only 40,201 (44.77%) at the row level.** The two are different questions
-   and the second is the one a customer joining on `cedar_uid` experiences.
-   Deciding which the product means is a definition question, not a matching
-   one, and it is worth an hour before anybody matches anything.
+2. **`subcontracting` is NOT a gap and must not be matched at.** It reads
+   97.59% when either party counts. `cedar_uid` on `subawards` is the **PRIME
+   leg** — it equals `prime_cedar_uid` on 39,567 of its 40,201 non-blank
+   values — and it is **blank by design** on the majority population, where
+   the Native party is the SUBAWARDEE. The 44.77% that column gives is a fill
+   rate, not coverage. **Writing a subawardee id into `cedar_uid` would make
+   one column mean the prime on some rows and the subawardee on others**, and
+   every customer `GROUP BY cedar_uid` would silently mix the two — the same
+   defect class as the identifier ledger holding a UEI in `state`. If the
+   subawardee leg is worth exposing it needs its **own named column with its
+   own documented meaning**, which is a schema decision. Nothing was written
+   at those rows.
 3. **`legislation` — 591 of 3,069 (19.26%), newly measurable.** The named-entity
    bridge is exhausted. Growing it means a better title/text matcher over
    2,478 unlinked bills, against `ENTITY_MATCH_RULES` rule 1 — the token traps

@@ -16,7 +16,7 @@ making everything we have good."*
 | dataset | LINKED before | LINKED after | what changed |
 |---|---:|---:|---|
 | `legislation` | **no entity column existed** | 591 of 3,069 (19.26%) | the bridge was on disk and unreachable |
-| `contractors` | 789,360 (64.82%) | 791,394 (64.99%) | +2,034 rows / **$803,507,507** — a ruling stamped and never keyed |
+| `contractors` | 789,360 (64.82%) | 791,839 (65.02%) | +2,034 rows / **$803,507,507** (a ruling stamped and never keyed), +318 / $87,926,027 (declared ultimate parent), +127 / $15,015,304 (sibling registrations) |
 | `funding` | 552,602 / 553,106 / 549,530 *(three columns, three answers)* | 549,136 (78.23%) | +154 McGrath rows; −504 rows that claimed an attribution they did not have |
 | identifier ledger | — | +163 rows | `fpds_uei_cage_map.csv` bridged, tier inherited |
 
@@ -184,6 +184,46 @@ assigned by the consumer. The remaining 457 rows rest on tier C sources
 
 ---
 
+## T7 — the declared ULTIMATE parent, which was on disk the whole time
+
+`data/clean/fpds_uei_edges.csv` carries parent/child UEI relationships **the
+registrant filed about itself** — the identifier evidence rule 4 asks for.
+Rule 11 sets the thresholds: an edge observed 20+ times is ownership, and
+**the parent's tier does not transfer**, so every row here is written at tier
+B even where the parent's ledger row is tier A.
+
+**318 rows / $87,926,026.94, three entities.**
+
+| firm | declared ultimate parent | observations | rows | amount |
+|---|---|---:|---:|---:|
+| Sage Systems Technologies (2 name renderings) | OLD HARBOR NATIVE CORPORATION → `ANVC-LDHRBR-00` | 1,204 | 283 | $65,231,689 |
+| Hal Hays Construction, Inc. (3 registrations) | HAL HAYS CONSTRUCTION, INC. → `CEDAR-ENT-000084` | 26–37 | 24 | $18,407,525 |
+| Polu Kai Services, Llc | POLU KAI SERVICES, LLC → `CEDAR-ENT-000085` | 34 | 11 | $4,286,813 |
+
+Two of the three are the multiple-registration case the owner describes:
+*"they'll get a new CAGE technically as a new company for the 8(a)
+pass-through stuff, but it's literally the same company."*
+
+### The refusal is the interesting half
+
+**`Nisga'A Tek, LLC` — 64 rows, $167,829,000, the largest candidate by a
+factor of two — is refused.** It declares `GOLDBELT HAWK L.L.C.` as its
+parent **70 times**, comfortably over rule 11's floor, and Goldbelt Hawk is a
+tier-A Goldbelt registration. It is refused because that edge is
+`parent_uei`, not `ultimate_parent_uei`, and **the immediate level is exactly
+where an 8(a) mentor-protégé JOINT VENTURE declares its managing venturer.**
+The Nisga'a are a British Columbia First Nation, so the firm reads as a
+cross-border JV, and an aggregate party must never resolve to one entity.
+
+Requiring the ULTIMATE edge excludes it **structurally**, not by hand — which
+is the difference between a rule and a list. The gate is also `n_observations
+>= 20`, `blocklisted_parent` unset (78 of 2,684 edges are roll-ups like
+GOVERNMENT OF THE UNITED STATES), the parent resolving to exactly one live
+entity, and the child declaring exactly one ultimate parent, because two is a
+joint venture.
+
+---
+
 ## T5 — 504 rows / $494,305,407.20 that said they were keyed and were not
 
 `attribution_status = 'cedar_neid'`, `attributed_flag = '1'`,
@@ -237,6 +277,7 @@ does not re-derive them.
 | "1,088 `FOUND_NOT_EXTRACTED` surfaces" | **280 matrix cells** over 246 entities, or **7,538 evidence rows** — neither is 1,088 | `cedar_harvest_coverage_matrix.csv` / `..._evidence.csv` |
 | "`fpds_uei_cage_map.csv` reaches 666 of 1,555 spine entities — the highest-yield unused source" | 6,858 distinct real (UEI, CAGE) pairs; gated yield **163 identifiers and 0 attributed rows** — see T4 | `code/1140_linkage_close.py report --only ledger` |
 | "151 rows / $11,358,100.32" of McGrath assistance | **154 rows / $11,384,182.32** — see T2 | `docs/KNOWN_ISSUES.md` ESCAPE-COLLAPSE-1136-RESOLUTION |
+| "`subcontracting` 44.8% — the lowest rate of any large dataset" | **97.59%.** `cedar_uid` on `subawards` is the PRIME leg — it equals `prime_cedar_uid` on 39,567 of its 40,201 non-blank values — and it is **blank by design** on the majority population, where the Native party is the SUBAWARDEE. 44.77% is that column's fill rate, not coverage. **Nothing was written at those rows**, and writing a subawardee id into `cedar_uid` would make one column mean two things | `code/1139_linkage_coverage.py`, the `subcontracting` role sentence |
 | a coverage scan reporting `nagpra`, `legislation` and `native-owned-businesses` as having **no entity key** | only `legislation` was true. `nagpra` is 90.83% linked through six LIST-VALUED role columns; `native-owned-businesses` is 94.89% linked through the certifying nation | ADR-037 §2, §3 |
 
 **"3,306 of the owner's v6 UEIs are in no Cedar table at all" was NOT

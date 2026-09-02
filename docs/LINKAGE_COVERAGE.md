@@ -11,7 +11,7 @@
 | `funding` | `federal_funding_transactions.csv` | 701,955 | 549,136 | 78.23% | 152,819 | 78.47% of 699,836 |
 | `gaming` | `gaming_facilities.csv` | 787 | 785 | 99.75% | 2 | — |
 | `natural-resources` | `resource_revenue.csv` | 11,305 | 705 | 6.24% | 10,600 | 73.67% of 957 |
-| `native-owned-businesses` | `native_owned_businesses.csv` | 3,529 | 3,380 | 95.78% | 149 | — |
+| `native-owned-businesses` | `native_owned_businesses.csv` | 4,273 | 4,124 | 96.51% | 149 | — |
 | `nonprofits` | `np_orgs.csv` | 12,764 | 1,423 | 11.15% | 11,341 | 18.23% of 7,804 |
 | `deals` | `deals_classified.csv` | 1,073 | 959 | 89.38% | 114 | — |
 | `lobbying` | `native_entity_lobbying_disclosures.csv` | 27,825 | 26,513 | 95.28% | 1,312 | — |
@@ -20,7 +20,7 @@
 | `nagpra` | `nagpra_notices.csv` | 6,792 | 6,169 | 90.83% | 623 | — |
 | `nest` | `nest_enterprises.csv` | 4,798 | 4,798 | 100.00% | 0 | — |
 
-**Across the 13 measured flagships: 1,484,339 of 2,092,876 rows (70.92%) carry a resolved Cedar entity.** That total sums tables whose rows are not the same kind of thing - a contract award and a NAGPRA notice each count as one - so it is a SCALE figure and never a quality figure. Quote the per-dataset rows.
+**Across the 13 measured flagships: 1,485,083 of 2,093,620 rows (70.93%) carry a resolved Cedar entity.** That total sums tables whose rows are not the same kind of thing - a contract award and a NAGPRA notice each count as one - so it is a SCALE figure and never a quality figure. Quote the per-dataset rows.
 
 ---
 
@@ -38,7 +38,7 @@
 | `gate_only:attributed_flag` | 791,839 | +0 |
 | `display_only:cedar_uid` | 791,935 | +96 |
 
-**Money on unlinked rows: $79,657,510,974.82 of $310,005,258,660.75** in `total_obligations` (25.70%). This sums a column as recorded and is subject to `docs/MONEY_TOTALLING_RULES.md`. It measures EXPOSURE - how much money is not attributable - and is not a Cedar total of anything.
+**Money on unlinked rows: $79,657,510,974.82 of an UNFILTERED $310,005,258,660.75** in `total_obligations`, 25.70%. **Neither figure is a Cedar total and neither may be quoted as one.** They sum the column exactly as recorded, with no countability rule applied; `docs/MONEY_TOTALLING_RULES.md` governs every total this project publishes, and on `subawards` in particular the countable total is billions below the unfiltered one. What is measured here is EXPOSURE - the share of the money that sits on rows nothing can be attributed to - and a ratio of two unfiltered sums answers that question honestly while answering no other.
 
 **The largest unlinked residue, by row count:**
 
@@ -54,15 +54,18 @@
 
 **Denominator: 89,809 rows.** One row is one subaward row. LINKED if EITHER side (prime or subawardee) resolves, because either one makes the row attributable.
 
+**Which entity the link names:** EITHER party. **`cedar_uid` on this table is the PRIME leg** - it equals `prime_cedar_uid` on 39,567 of its 40,201 non-blank values - and it is **BLANK BY DESIGN** on the majority population, where the Native party is the SUBAWARDEE. Reading `cedar_uid` alone gives 44.77% and that is a fill rate, not coverage. **Do not write a subawardee id into `cedar_uid` to close it**: the column would then mean the prime on some rows and the subawardee on others, and every customer `GROUP BY cedar_uid` would silently mix the two - the same class of defect as the identifier ledger holding a UEI in `state`. Exposing the subawardee leg is a SCHEMA decision, in its own named column.
+
 **LINKED: 87,645 (97.59%)** - `(coalesce(trim(CAST(prime_cedar_uid AS VARCHAR)),'') <> '' OR coalesce(trim(CAST(sub_cedar_uid AS VARCHAR)),'') <> '')`
 
 | alternative reading | rows | apart from LINKED |
 |---|---:|---:|
-| `subawardee_side` | 49,684 | -37,961 |
-| `prime_side` | 39,704 | -47,941 |
-| `row_level:cedar_uid` | 40,201 | -47,444 |
+| `subawardee_side:sub_cedar_uid` | 49,684 | -37,961 |
+| `prime_side:prime_cedar_uid` | 39,704 | -47,941 |
+| `row_level:cedar_uid_ONLY_a_fill_rate` | 40,201 | -47,444 |
+| `either_side_via_tribe_id_columns` | 87,645 | +0 |
 
-**Money on unlinked rows: $1,567,901,108.10 of $57,020,557,710.47** in `subaward_amount` (2.75%). This sums a column as recorded and is subject to `docs/MONEY_TOTALLING_RULES.md`. It measures EXPOSURE - how much money is not attributable - and is not a Cedar total of anything.
+**Money on unlinked rows: $1,567,901,108.10 of an UNFILTERED $57,020,557,710.47** in `subaward_amount`, 2.75%. **Neither figure is a Cedar total and neither may be quoted as one.** They sum the column exactly as recorded, with no countability rule applied; `docs/MONEY_TOTALLING_RULES.md` governs every total this project publishes, and on `subawards` in particular the countable total is billions below the unfiltered one. What is measured here is EXPOSURE - the share of the money that sits on rows nothing can be attributed to - and a ratio of two unfiltered sums answers that question honestly while answering no other.
 
 ## `funding` - `federal_funding_transactions.csv`
 
@@ -78,7 +81,7 @@
 | `gate_only:attribution_status` | 552,756 | +3,620 |
 | `gate_only:attributed_flag` | 549,180 | +44 |
 
-**Money on unlinked rows: $51,534,695,533.83 of $219,689,020,478.59** in `obligated_usd` (23.46%). This sums a column as recorded and is subject to `docs/MONEY_TOTALLING_RULES.md`. It measures EXPOSURE - how much money is not attributable - and is not a Cedar total of anything.
+**Money on unlinked rows: $51,534,695,533.83 of an UNFILTERED $219,689,020,478.59** in `obligated_usd`, 23.46%. **Neither figure is a Cedar total and neither may be quoted as one.** They sum the column exactly as recorded, with no countability rule applied; `docs/MONEY_TOTALLING_RULES.md` governs every total this project publishes, and on `subawards` in particular the countable total is billions below the unfiltered one. What is measured here is EXPOSURE - the share of the money that sits on rows nothing can be attributed to - and a ratio of two unfiltered sums answers that question honestly while answering no other.
 
 **The largest unlinked residue, by row count:**
 
@@ -120,32 +123,32 @@
 | `key_only:recipient_entity_id` | 705 | +0 |
 | `status:keyed_to_cedar_entity` | 705 | +0 |
 
-**Money on unlinked rows: $44,993,300,565.36 of $50,973,259,111.49** in `amount_usd` (88.27%). This sums a column as recorded and is subject to `docs/MONEY_TOTALLING_RULES.md`. It measures EXPOSURE - how much money is not attributable - and is not a Cedar total of anything.
+**Money on unlinked rows: $44,993,300,565.36 of an UNFILTERED $50,973,259,111.49** in `amount_usd`, 88.27%. **Neither figure is a Cedar total and neither may be quoted as one.** They sum the column exactly as recorded, with no countability rule applied; `docs/MONEY_TOTALLING_RULES.md` governs every total this project publishes, and on `subawards` in particular the countable total is billions below the unfiltered one. What is measured here is EXPOSURE - the share of the money that sits on rows nothing can be attributed to - and a ratio of two unfiltered sums answers that question honestly while answering no other.
 
 ## `native-owned-businesses` - `native_owned_businesses.csv`
 
-**Denominator: 3,529 rows.** One row is one directory listing of a Native-owned business.
+**Denominator: 4,273 rows.** One row is one directory listing of a Native-owned business.
 
-**Second denominator, also correct:** the customer file carries only `publishable = Y`, which is 2,446 rows, of which 2,297 are LINKED (93.91%). Say which denominator you used; the two differ by 1,083 rows.
+**Second denominator, also correct:** the customer file carries only `publishable = Y`, which is 2,446 rows, of which 2,297 are LINKED (93.91%). Say which denominator you used; the two differ by 1,827 rows.
 
 **Which entity the link names:** the CERTIFYING NATION whose TERO, member directory or licence register the listing comes from. NOT the firm: these firms are owned by PEOPLE (identity_scope any_native 1,567 / citizen 385 / shareholder_descendant_or_spouse 98; 280 rows' names ARE natural persons), a sole proprietor is not a spine entity, and `business_entity_id` is populated on 4 rows precisely because the resolver refuses to manufacture one.
 
-**LINKED: 3,380 (95.78%)** - `coalesce(trim(CAST(certifying_authority_entity_id AS VARCHAR)),'') <> ''`
+**LINKED: 4,124 (96.51%)** - `coalesce(trim(CAST(certifying_authority_entity_id AS VARCHAR)),'') <> ''`
 
 | alternative reading | rows | apart from LINKED |
 |---|---:|---:|
-| `the_firm_itself:business_entity_id` | 5 | -3,375 |
-| `federal_crosswalk:federal_link_status=LINKED` | 203 | -3,177 |
+| `the_firm_itself:business_entity_id` | 5 | -4,119 |
+| `federal_crosswalk:federal_link_status=LINKED` | 203 | -3,921 |
 
 **The largest unlinked residue, by row count:**
 
 | name as recorded | rows |
 |---|---:|
-| Goldsmith Trucking LLC | 1 |
-| Silver Bear Construction LLC | 1 |
-| White Shield, Inc. | 1 |
-| Ampkwa Images | 1 |
-| Indigenous Arts Tattoo LLC | 1 |
+| Bishop & Sons Excavating, LLC | 1 |
+| Drew’s Pro Wash Plus LLC | 1 |
+| Sevengen Counseling | 1 |
+| 4 Pillars Consulting | 1 |
+| Wildwood Cottage | 1 |
 
 ## `nonprofits` - `np_orgs.csv`
 
@@ -180,17 +183,17 @@
 |---|---:|---:|
 | `key_only:native_party_entity_id` | 959 | +0 |
 
-**Money on unlinked rows: $5,318,739,389.00 of $47,880,355,533.49** in `Announced_Value_USD` (11.11%). This sums a column as recorded and is subject to `docs/MONEY_TOTALLING_RULES.md`. It measures EXPOSURE - how much money is not attributable - and is not a Cedar total of anything.
+**Money on unlinked rows: $5,318,739,389.00 of an UNFILTERED $47,880,355,533.49** in `Announced_Value_USD`, 11.11%. **Neither figure is a Cedar total and neither may be quoted as one.** They sum the column exactly as recorded, with no countability rule applied; `docs/MONEY_TOTALLING_RULES.md` governs every total this project publishes, and on `subawards` in particular the countable total is billions below the unfiltered one. What is measured here is EXPOSURE - the share of the money that sits on rows nothing can be attributed to - and a ratio of two unfiltered sums answers that question honestly while answering no other.
 
 **The largest unlinked residue, by row count:**
 
 | name as recorded | rows | amount |
 |---|---:|---:|
 | Tunica-Biloxi | 6 | $0.00 |
-| Mohegan Tribe of Indians of Connecticut (Mohegan Tribal Gaming Authori | 4 | $638,913,000.00 |
 | Shee Atika, Incorporated | 4 | $18,300,000.00 |
+| Mohegan Tribe of Indians of Connecticut (Mohegan Tribal Gaming Authori | 4 | $638,913,000.00 |
+| Seminole | 3 | $0.00 |
 | Cook Inlet Housing Authority | 3 | $17,000,000.00 |
-| Mohegan | 3 | $0.00 |
 
 ## `lobbying` - `native_entity_lobbying_disclosures.csv`
 
@@ -202,7 +205,7 @@
 |---|---:|---:|
 | `key_only:entity_id` | 26,513 | +0 |
 
-**Money on unlinked rows: $45,182,334.00 of $725,743,974.52** in `spend_usd` (6.23%). This sums a column as recorded and is subject to `docs/MONEY_TOTALLING_RULES.md`. It measures EXPOSURE - how much money is not attributable - and is not a Cedar total of anything.
+**Money on unlinked rows: $45,182,334.00 of an UNFILTERED $725,743,974.52** in `spend_usd`, 6.23%. **Neither figure is a Cedar total and neither may be quoted as one.** They sum the column exactly as recorded, with no countability rule applied; `docs/MONEY_TOTALLING_RULES.md` governs every total this project publishes, and on `subawards` in particular the countable total is billions below the unfiltered one. What is measured here is EXPOSURE - the share of the money that sits on rows nothing can be attributed to - and a ratio of two unfiltered sums answers that question honestly while answering no other.
 
 **The largest unlinked residue, by row count:**
 
@@ -269,7 +272,7 @@
 | American Museum of Natural History | 13 |
 | California Department of Transportation | 11 |
 | University of Nevada, Las Vegas | 9 |
-| Tennessee Valley Authority | 8 |
+| Arizona State Museum, University of Arizona | 8 |
 
 ## `nest` - `nest_enterprises.csv`
 
