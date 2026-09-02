@@ -59,6 +59,20 @@ The column set of every sample is fixed by the curated `SHOW` list in `code/770_
 - `federal-register` — blank on all 10 sampled rows: `format`
 - `owned` — blank on all 10 sampled rows: `naics`, `federal_uei_candidate`
 
+## Mojibake: repaired where it can be, de-preferred where it cannot
+
+Codex, PR #29 round 4, found `2Â€? CONDUIT` in the subcontracting sample. It is real in the bytes — unlike a round-2 report of the same shape, which was a cp1252 console rendering a correct UTF-8 en dash and was measured before being reported.
+
+In `subawards.csv` (87,177 rows) **1,433 cells** carry it: `description` 1,423 rows (1.63%), `subaward_number` 6, `sub_parent_name` 2, `sub_name` 2.
+
+**The obvious remedy only reaches 9.6% of it.** The repeated UTF-8-read-as-cp1252 chain is reversible and is reversed here — `ÃÂ½` becomes `½`, `ÃÂ°C` becomes `°C`. But **116 of 1,212 affected cells recover and 1,096 (90.4%) do not**, because they are not a pure re-encoding chain: characters have been substituted. Codex's own example is the clearest case — `2Â€?` holds a literal `?` where a character was destroyed upstream, and you cannot re-decode information that is gone.
+
+So a cell that is still corrupt after repair scores as **empty** for sampling, and the sampler prefers a clean row. 98.4% of subaward rows are unaffected and a ten-row showcase should not spend one of them on corruption. **No row is dropped from the dataset and no money column is touched** — only the sample's choice is steered, and the counts are here so the guard surfaces the defect rather than hiding it.
+
+- `contractors` — `awardee_name` 1 repaired / 0 unrecoverable, `parent_name` 1 repaired / 0 unrecoverable
+- `nagpra` — `institution_name` 0 repaired / 2 unrecoverable
+- `subcontracting` — `description` 114 repaired / 1089 unrecoverable, `sub_name` 0 repaired / 1 unrecoverable, `subaward_number` 0 repaired / 6 unrecoverable
+
 ## Null sentinels, stripped here and named rather than hidden
 
 Codex, PR #29 round 3, found `funding_agency = "Nan"` in the contractors sample — a stringified float any consumer would group and filter on as a real agency. **No sample ships one now.** A cell whose ENTIRE content is a null token (`nan`, `none`, `null`, `<na>`, `nat`, case-insensitive) is blanked before the rows are drawn, so a row is also never judged complete for holding one. Whole cell only: `NANA Regional Corporation` and `Nanakuli` are real values here and a substring rule would eat both. `NA` and `N/A` are deliberately left alone — `NA` is an abbreviation a human may have typed to mean *not applicable*, which is a statement, not a float.

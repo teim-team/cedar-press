@@ -258,7 +258,7 @@ that bite hardest:
 ## One thing that reads as a bug and is not
 
 In `gaming__sample.csv`, a facility shows `property_status = current` with a
-past `close_date`. **Both are correct.** 113 of 787 facilities carry a past
+past `close_date`. **Both are correct.** 113 of 787 rows carry a past
 close date while currently operating — Casino Morongo closed in 2010 and
 Chukchansi Gold in 2014, and both reopened and are open today.
 
@@ -268,14 +268,24 @@ the data side.
 
 ## Status of the fourteen
 
-**12 of 14 are READY as regenerated for this push**, against 14 of 14 in the
-last one. Both blocked datasets are named, with the contract point each one
+**11 of 14 are READY as regenerated for this push**, against 12 in the last
+one and 14 the one before. Both blocked datasets are named, with the contract point each one
 misses, in `collection_descriptors.cedar.json`:
 
 | | | |
 |---|---|---|
-| `owned` | BLOCKED | its published row count is contradicted by its own sample — a check added on this branch, section below |
+| `owned` | BLOCKED | its published row count is contradicted by its own sample — a check added on this branch, section below. Its count is **withdrawn** |
+| `federal-register` | BLOCKED | its sample is drawn from `consultation_events.csv`, which the contract marked **`UNDOCUMENTED`** rather than `shippable` at 09:23 today. Its 490,274-row count is **not** in dispute and still ships |
 | `deals` | BLOCKED | `C1 grain UNSTATED` and `C2 no validated primary key` on `deals_press_edgar_ancsa_additions.csv`, a table another workstream added to the collection while this branch was open |
+
+**The two blocks are treated differently on purpose, and that distinction is
+enforced in code.** An *arithmetic* violation — a published count smaller than
+one of the dataset's own tables — is provably wrong, so the count is
+withdrawn. A *membership* violation — the sample source is not a shippable
+member — leaves the count untouched, because nothing contradicts it.
+Collapsing the two would have withheld `federal-register`'s 490,274 because a
+different table's codebook status lapsed, which is a remedy out of all
+proportion to the measurement.
 
 **The `deals` block is not this workstream's and is named rather than
 absorbed.** It is also the honest illustration of why this section says
@@ -496,6 +506,130 @@ holds this minute, no sample ships a fictitious agency. The counts are printed
 per column and published in `samples/README.md` as a coverage fact, so the
 guard surfaces the upstream defect rather than concealing it.
 
+## Codex round 4: three findings, three right
+
+| # | finding | verdict |
+|---|---|---|
+| 1 | the blocker still described a whole-dataset count conflict after the count was withdrawn | **Right — and it is the fourth instance on this branch** |
+| 2 | topping up after a race publishes a mixed-version sample; restart instead | **Right, including the part I could not see** |
+| 3 | `2Â€? CONDUIT` is corrupt and should not ship | **Right that it is corrupt; the suggested remedy reaches 9.6% of it** |
+
+### Finding 1 — a stale number inside the very fix that made it stale
+
+The blocker read *"the descriptor claims 1,657 rows for the whole dataset"* in
+the same commit that set `n_rows` to null and relabelled 1,657 as the unsummed
+size of six heterogeneous tables. A consumer relying on `cedar.blockers` was
+told the open problem is an exact count conflict, when the point of the other
+fix is that **no dataset-level count exists**. It now describes the membership
+and grain conflict, which is what is actually unresolved.
+
+**That is the fourth time on this branch a number was corrected in one place
+and left standing in another** — `owned`'s two row counts, `345,180` /
+`345,108`, the blockers overview, and now this. The first three were a
+correction and an old copy elsewhere. This one was inside the fix itself.
+
+### Finding 2 — right, and the hole was bigger than the one it named
+
+The top-up restored the sample's *cardinality* and nothing else: the surviving
+targets came from the old file's positions and completeness scores, the spares
+from the rewritten file, so their union was a mixed-version sample that
+preserved neither "most complete" nor "evenly spread". Codex also named the
+case I had not seen — **a rewrite that leaves all ten target positions
+publishable needs no replacements at all**, so the `RACED` warning never fires
+and a silently mixed sample ships. One more check that did not measure its own
+name, in the code written to catch exactly that.
+
+There is no top-up now. The file is stamped `(size, mtime_ns)` before pass 1
+and re-stamped after pass 2 — **on every attempt, not only when the sample
+came up short**. If it moved, both passes are discarded and the sample is
+re-drawn from a fresh snapshot; after three attempts it **raises rather than
+publish**. Refusing is the honest outcome when a table will not hold still.
+
+**And unifying the engines caught a live divergence.** `proveequal
+subawards.csv` failed on row 1 after the mojibake work, because the streaming
+engine discounted corrupt cells when scoring rows and the in-memory engine did
+not, so the two chose different rows. `completeness()` now delegates to
+`_score()` — one ranking function, both paths. That is the check earning its
+keep on the exact thing it was written for.
+
+### Finding 3 — right about the corruption; the remedy only reaches 9.6%
+
+Real in the bytes this time: `b"1. 2\xc3\x82\xe2\x82\xac? CONDUIT"`. Worth
+contrasting with the round-2 report of the same shape, which was a cp1252
+*console* rendering a correct UTF-8 en dash and was measured before being
+reported and found to be nothing.
+
+Scale in `subawards.csv` (87,177 rows): **1,433 cells** — `description` 1,423
+rows (1.63%), `subaward_number` 6, `sub_parent_name` 2, `sub_name` 2.
+
+Codex asked to *"correct the source decoding/normalization and regenerate"*.
+The repeated UTF-8-read-as-cp1252 chain is reversible and is now reversed —
+`Ã‚Â½` → `½`, `Ã‚Â°C` → `°C`, `SELFÃ‚Â·` → `SELF·`. But **116 of 1,212
+affected cells recover and 1,096 (90.4%) do not**, because they are not a pure
+re-encoding chain: characters have been *substituted*. The dominant residue is
+`Ã¢Â‚¬Â„¢` standing for a single `'`, where the `â` of a well-formed triple
+mojibake has become `Â`. And Codex's own example is the clearest case: `2Â€?`
+carries a literal `?` where a character was destroyed upstream. **You cannot
+re-decode information that is gone.**
+
+So the remedy is proportionate rather than complete. What repairs is repaired;
+what does not now **scores as empty**, so the sampler prefers a clean row —
+which also fixes the reason a corrupt row was *preferred* in the first place,
+namely that a long mojibake description looked like a well-filled cell. 98.4%
+of subaward rows are unaffected and a ten-row showcase should not spend one of
+them on corruption. **No row is dropped from the dataset and no money column
+is touched.** The counts ship in `samples/README.md`.
+
+## Two findings this side brought in round 4
+
+### `gaming_facilities.csv` contains seven rows that say there is no facility
+
+Every "of 787" figure in this document — including two Codex used — divides by
+a denominator that includes **seven rows whose `facility_name` is literally
+`No casino`**:
+
+    VP-0242  Havasupai        AZ        VP-0254  Zuni               NM
+    VP-0243  Hopi             AZ        VP-0336  Pueblo of Zia      NM
+    VP-0102  Quartz Valley    CA        VP-0337  Pueblo of Cochiti  NM
+                                        VP-0338  Pueblo of Picuris  NM
+
+These are not facilities and not duplicates. They are placeholders recording
+that a nation does **not** operate a casino, shipped in the facility table as
+though they were casinos. **787 rows, 780 facilities.**
+
+They surfaced from the other half of this finding. A dedupe review,
+`review/gaming_facility_duplicate_candidates_2026-09-02.csv`, proposes 56
+duplicate groups, and **collapsing the 52 marked `LIKELY_SAME_PROPERTY` gives
+exactly 734** — the figure now circulating as the true facility count. It
+should not be adopted yet, for three measured reasons:
+
+1. **No verdict has been applied.** All 56 rows carry `verdict_needed`, and
+   the live table has `duplicate_of_facility_id` populated on **10 rows**, not
+   59. 787 is what ships.
+2. **Four groups are cross-tribe and must not be collapsed** — the file says
+   so itself with `DIFFERENT_TRIBES_CHECK_BOTH`. `7 Clans First Council` pairs
+   Otoe-Missouria with the Ponca Tribe; `Stables Casino` pairs the Miami Tribe
+   with Modoc Nation, which is a **joint operation**, not a duplicate — the
+   same fact pattern as Codex's round-2 finding 5.
+3. **Two of the 56 groups are a normalisation artefact**: the grouper reduced
+   `No casino` to the token `NO` and grouped Havasupai with Hopi, and four
+   Pueblos with each other. That is how the seven placeholder rows were found.
+
+So: **787 ships, 780 are facilities, 734 is a proposal with four exceptions
+and two artefacts in it.** Stated rather than adopted.
+
+### Claims re-measured against live data, and one that is already done
+
+- **`nest`** — 1,610 enterprises, **977 (60.7%) with `in_federal_contracting =
+  N`**, confirmed to the row. It already **has** a sample (`nest__sample.csv`,
+  10 rows, 17 columns) and full editorial copy; the brief asking for both is
+  describing a gap that was closed on the previous push.
+- **`natural-resources` is aggregate by publisher, not by our failure** —
+  `national_aggregate` 9,791 + `state_aggregate` 167 = **9,958 of 11,305
+  (88.1%)**, against `entity_specific` 779 and `per_headright_rate` 508. The
+  figure in circulation is 87%; measured today it is 88.1%.
+- **`deals`** — 1,073 rows, up from 935 when this branch opened.
+
 ## Why the samples moved more than the fixes explain
 
 Fixing finding 2 needed the generator to run, and it could not. `770` loaded
@@ -563,7 +697,7 @@ in principle and disproportionate in remedy.
 | 2 | one Old Harbor award credited to Three Affiliated | **4,947 rows, $449,376,831.04** | repointed at source and in five materialised tables, with row and money conservation proved to the cent |
 | 3 | C4 blocker removed while the README says 42% | the README was the stale half | README corrected; blocker stays removed; measurement change explained above |
 | 4 | self-referential `parent_contract_number` | **156,592 rows (12.86%)**, two distinct causes | cleared in place; the fabricating fallback removed from the generator |
-| 5 | a jointly run casino exposes one operator | **1 of 787** facilities | `operating_entity_cedar_uids` + `n_operating_entities` on the table and in the sample |
+| 5 | a jointly run casino exposes one operator | **1 of 787 rows** (see the denominator note below) | `operating_entity_cedar_uids` + `n_operating_entities` on the table and in the sample |
 | 6 | notice-type text inside an institution name | **966 rows**; distinct institutions 2,184 → 1,798 | parser fixed at source; 6 residual colon names flagged, not stripped |
 | 7 | `owned` has no `owned__sample.csv` | 1 of 14 ids | the sample filename is the product id, and the two maps now fail a check if they drift |
 | 8 | one notice's institutions all get Yale's address | **392 notices** name >1 institution | `nagpra_notice_institutions.csv`, 7,234 rows, one per (notice, institution), each with its own city and state |
