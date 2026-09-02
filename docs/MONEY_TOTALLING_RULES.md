@@ -13,7 +13,7 @@
 
 ### The subaward trap, in dollars
 
-`subawards.csv` totals $45,624,073,879.27 across all 72,837 rows. **That figure must never be quoted.** The correct total is $24,413,436,422.47 over 54,719 rows. The money rule removes **$21,210,637,456.80** — 46.5% of the unfiltered figure.
+`subawards.csv` totals $45,624,073,879.27 across all 72,837 rows. **That figure must never be quoted.** The correct total is $24,413,436,422.47 over 54,719 rows. The money rule removes **$21,210,637,456.80** — 86.9% of the unfiltered figure.
 
 And that corrected total is still **not additive with prime contracting**. A subaward is a slice of a prime award Cedar already publishes. Federal dollars obligated = primes. Subawards say where those dollars went next.
 
@@ -252,3 +252,97 @@ the same dollar:
 **Sum at most one of the three, and say which.** A single tribe-year can carry
 all three legitimately, and their sum is meaningless.
 <!-- END INT-2-GAMING -->
+
+<!-- BEGIN UPSTREAM -->
+## The Schedule I refusal is CLOSED, and the line ordinal exists
+
+*Appended 2026-09-01 by workstream UPSTREAM. Re-measured by
+`py -3 code/781_upstream_grain_columns.py --check`.*
+
+The GRAIN-WS5 section above prescribes the fix and is correct in every
+particular; this records that it has been applied, because that block says
+`np_schedule_i_grants.csv` has **no key that validates** and it now has one.
+
+| statement | before | after |
+|---|---:|---:|
+| rows | 58,685 | **58,685** |
+| whole-row duplicates | 101 | **0** |
+| grant dollars a de-dupe would have deleted | $2,089,185 | **$0 — no row was deleted** |
+| validated primary key | none | **`(object_id, schedule_i_line_seq)`** |
+| `517` export class | ROW_LEVEL_ONLY | **SAFE_TO_AGGREGATE** |
+
+`schedule_i_line_seq` is 1..n within `object_id` in document order, exactly as
+WS5 specified. **It changes no totalling rule above.** `cash_grant_usd` still
+reconciles to `np_schedule_i_filers.part2_cash_grant_total_usd` at
+$16,439,532,633 on both sides, still must never be added to
+`federal_funding_transactions.csv` / `faads_*` / `native_passthrough.csv`, and
+is still GRANTS MADE BY NONPROFITS rather than money reaching Indian Country.
+What changed is that a buyer can now key the table and see that the two
+$20,000 First Nations Development Institute grants to the Seneca Nation are
+two grants.
+
+`132` was fixed in the same pass so a rebuild reproduces the column. **It
+cannot be run today**: both its XML caches (`data/raw/external/irs990_schedc
+/xml`, `data/raw/external/irs990_grantee/xml`) hold **zero files**, so a run
+would write an empty table over 58,685 real rows. The column was therefore
+added in place by `code/781`, which refuses to write if a single column would
+go missing or if any colliding group turned out to span a return
+`np_schedule_i_filers.csv` holds more than once.
+
+### `517.MONEY_HINTS` is fixed — the note on `tribal_resolution_financings.csv` above
+
+The WS5 row for `tribal_resolution_financings.csv` records that
+`517.MONEY_HINTS` substring-matches `amount` and calls `principal_amount_text`
+and `pledged_revenues_text` money columns. Two workstreams flagged that and
+nobody owned it. `517` now carries `MONEY_ANTI_HINTS`: a column whose name ends
+in `_text`, `_basis`, `_type`, `_date`, `_flag`, `_countable`, `_cnt`, `_note`,
+`_quote`, `_url` and the rest, or begins `is_` / `has_` / `n_`, is not money
+however it matches. Measured across every shippable header: **202 names matched
+`MONEY_HINTS` and 27 of them were this**, including `amount_countable` — the
+0/1 flag on `native_passthrough.csv` that started the complaint — plus
+`payment_date`, `obligation_type`, `Value_Type` and thirteen `*_value_basis`
+columns. `native_passthrough.csv` still reports `amount_usd`, which is real
+money: the fix removes the false positives and not the true one.
+<!-- END UPSTREAM -->
+
+<!-- BEGIN FAADS -->
+
+# The FY2007 seam, as an exact set — and what the two faads tables are
+
+*Appended 2026-09-01 by workstream FAADS (`code/791_faads_transaction_key_and_repoint.py`). Re-measured on every run of `791 seam`; enforced by `791 seam --verify`.* **This file is written WHOLESALE by `574`, which preserves only marked blocks; this section is inside `<!-- BEGIN FAADS -->` / `<!-- END FAADS -->` so it survives.**
+
+## The FY2007 overlap is no longer an estimate
+
+GRAIN-WS4 measured the seam at **98.9% of the modern table's FY2007 dollars** and could not do better, because neither side carried a transaction key. `30_funding_pre2008.to_out_row` dropped `assistance_transaction_unique_key`; the re-extract on 2026-09-01 restored it on every FY2007 row. Both sides now carry the same source identity, so the overlap is a **set intersection, not a ratio**:
+
+| | rows | obligations |
+|---|---:|---:|
+| `faads_transactions_all_agencies.csv` FY2007 | 774,755 | $475,359,703,131.83 |
+| …carrying `assistance_transaction_unique_key` | **774,755 (100%)** | |
+| `federal_funding_transactions.csv` FY2007 | 11,443 | $2,189,838,445.60 |
+| **…that are the SAME TRANSACTION as an archive row** | **11,063** | **$2,165,856,968.60** |
+| …present only in the modern table | 380 | $23,981,477.00 |
+
+WS4's dollar estimate was right to the cent; what is new is that the overlap is now **11,063 identified rows** a consumer can subtract by key, instead of a percentage they have to trust.
+
+## The rule, and what enforces it
+
+**Stack FY2001–2006 from `faads_transactions_all_agencies.csv` and FY2007 onward from `federal_funding_transactions.csv`.** The modern table is the attributed one, so the seam belongs on its side. Loading both files whole double-counts 11,063 FY2007 transactions and $2,165,856,969.
+
+No code can stop a buyer adding two files together. What **is** enforced, by `py -3 code/791_faads_transaction_key_and_repoint.py seam --verify` (exit 1 on breach), is the property that makes the rule checkable rather than advisory:
+
+1. **every FY2007 row of the archive table carries a transaction key**, so the overlap stays a set — if a future rebuild drops the column again this fails immediately and loudly instead of the seam quietly reverting to an estimate;
+2. **the overlap is exactly the recorded row count and dollar figure**, re-measured against `docs/schema/faads_fy2007_seam.json`, which is written for consumers to subtract programmatically.
+
+## Neither faads table is a Native table — restated, because the re-extract did not change it
+
+`faads_transactions_all_agencies.csv`: `tribe_id` blank on **all 2,769,748 rows**; its $1,830,639,317,708 is the whole federal assistance universe for FY2001–2007, every recipient in the country. `faads_transactions.csv`: 60,661 rows, $9,348,473,200, `tribe_id` blank on all of them — an **agency** filter (Interior), not a Native one, and carried verbatim into the all-agencies file, so **never add the two**. The Native attribution for these years lives outside both files, in `faads_entity_attribution.csv` (29,594 rows, FY2001–06, $4,721,685,550 carried verbatim off the transactions — a projection, never new money).
+
+## What a buyer may total, now that the grain is stated for one of the pair
+
+- **`faads_transactions.csv` — SAFE at transaction grain.** `assistance_transaction_unique_key` is unique on all 60,661 rows (0 collisions, 0 blanks) and the grain is declared in `512.GRAIN_FAADS`. The 1,001 rows it was blocked on as literal duplicates are **1,001 distinct source transactions**; the count is 0 now and **not one row was deleted**.
+- **`faads_transactions_all_agencies.csv` — still ROW-LEVEL ONLY, and by a knowable amount.** The key is present on 825,754 of 2,769,748 rows (29.8%: every FY2007 row, every Interior row) and unique where present. It is blank on the 1,943,994 FY2001–2006 rows of the other nine agencies because those staged objects were requested with a 20-column subset and **physically lack the column** — the USAspending Award Data Archive, the only full-column route, begins at FY2007. **3,441 rows** remain byte-identical to another row across all 27 columns, all of them inside that unkeyed region. `obligated_usd` is additive at transaction grain; the residual exposure a buyer carries is those 3,441 rows.
+
+**Nothing was de-duplicated.** Whole-row duplicates fell 179,259 → 3,441 on the all-agencies table and 1,001 → 0 on the Interior table by **restoring an identity column, not by deleting a row**. A de-dupe would have destroyed $8,291,124,113 of real obligations — `ed_fy2007_archive.zip` holds 344,401 rows and 344,401 distinct keys, and the worst apparent group (445 identical UC Irvine rows) is 740 real transactions carrying modification numbers 0001–0740, 592 of them $0.
+
+<!-- END FAADS -->

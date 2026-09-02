@@ -32,7 +32,15 @@ WHAT MAKES A SAMPLE HONEST
 2. **Publishable rows only.** `publishable = N` and
    `TERMS_STATED_RESTRICTIVE` never appear - Navajo's 346 NBOA rows are
    excluded here exactly as they are excluded from a release.
-3. **No natural persons**, per the standing rule.
+3. **No PERSONAL CONTACT DATA.** Codex was right that the earlier wording -
+   "a table carrying a natural person is refused" - is not what this enforces
+   and not what it should. `lobbying_registrants.csv` publishes STEPHEN GRAHAM
+   of Boston MA, and that is correct: an individual may register as a lobbyist
+   and the registration IS the public record the Lobbying Disclosure Act
+   creates. A lobbying dataset that hid individual registrants would be broken.
+   What is refused is a person's data held APART from their public role - home
+   address, personal email or phone, date of birth, SSN or TIN - which is the
+   `NEVER` list below.
 4. **Spread, not `head()`.** Sorting by row order returns one agency, one
    year, one tribe, and a buyer concludes the dataset is narrow. Rows are
    sampled evenly across the file after preferring COMPLETE rows, so what
@@ -56,7 +64,7 @@ TODAY = date.today().isoformat()
 CLEAN = ROOT / "data" / "clean"
 OUT = ROOT / "dist" / "samples"
 CONTRACTS = ROOT / "docs" / "schema" / "dataset_contracts.json"
-N = 30
+N = 10
 
 # Curated: the table a CUSTOMER would open first. Not the largest.
 FLAGSHIP = {
@@ -75,6 +83,65 @@ FLAGSHIP = {
     "_entity_layer":            "cedar_identity_register.csv",
 }
 SPINE = {"cedar_identity_register.csv"}
+
+# WHAT A CUSTOMER SAMPLE SHOWS. Curated per dataset, because the full internal
+# schema is not the product: gaming_facilities carries 105 columns, nine of them
+# entirely blank, and every metric repeats four times as value / value_basis /
+# observation_status / observed_date. That provenance is right to keep in the
+# table and wrong to open a sample with.
+#
+# Anything not listed is dropped from the SAMPLE only. Nothing is removed from
+# the dataset.
+SHOW = {
+    "gaming": ["facility_id", "tribe", "facility_name", "city", "state",
+               "property_status", "open_date", "close_date",
+               "gaming_machines", "table_games", "hotel_rooms", "employees",
+               "cedar_uid"],
+    "contractors": ["contract_number", "fiscal_year", "awardee_name",
+                    "awardee_uei", "parent_name", "canonical_name",
+                    "total_obligations", "setaside", "funding_agency",
+                    "confidence_tier", "cedar_uid"],
+    "subcontracting": ["subaward_number", "fiscal_year", "subaward_date",
+                       "prime_name", "sub_name", "sub_state",
+                       "subaward_amount", "duplicate_status", "direction",
+                       "naics", "prime_native_tribe_id", "sub_native_tribe_id"],
+    "funding": ["award_id_fain", "fiscal_year", "action_date",
+                "recipient_name", "recipient_state_code", "obligated_usd",
+                "cfda", "cfda_title", "awarding_agency_name",
+                "assistance_type_description", "canonical_name"],
+    "natural-resources": ["resource_revenue_event_id", "period_start",
+                          "recipient_entity_name", "commodity", "revenue_type",
+                          "amount_usd", "aggregation_level", "source_system",
+                          "confidence"],
+    "native-owned-businesses": ["business_name_raw", "certifying_authority_name",
+                                "programme_name", "identity_scope",
+                                "directory_type", "city", "state_province",
+                                "naics", "certification_expiration",
+                                "source_terms_status", "publishable"],
+    "nonprofits": ["EIN", "org_name", "city", "state", "tier",
+                   "classification_ruling", "confidence_tier",
+                   "bmf_revenue_amt", "tribe_canonical_name", "cedar_uid"],
+    "deals": ["Deal_ID", "Event_Date", "Deal_Title", "Native_Party",
+              "Counterparty_or_Funder", "Deal_Category", "Industry",
+              "Event_Type", "Status", "Record_Scope"],
+    "lobbying": ["registrant_id", "registrant_name", "registrant_city",
+                 "registrant_state", "n_filings_native_clients",
+                 "n_native_clients", "n_distinct_native_entities",
+                 "native_entity_classes", "first_filing_year_corpus",
+                 "last_filing_year_corpus"],
+    "legislation": ["vote_id", "congress", "chamber", "date", "bill_id",
+                    "question", "result", "yea", "nay", "margin",
+                    "vehicle_type", "majority_side"],
+    "federal-register": ["consultation_event_id", "notice_date", "agency",
+                         "consultation_type", "topic", "tribe_name",
+                         "participant_name_as_published", "participant_role",
+                         "format", "comment_deadline",
+                         "federal_register_citation"],
+    "nagpra": ["document_number", "publication_date", "title",
+               "agency_names", "notice_kind", "relevance_tier_from_tier_rule"],
+    "_entity_layer": ["cedar_uid", "handle", "canonical_name", "entity_class",
+                      "minted", "register_status"],
+}
 
 # A row carrying any of these is withheld outright.
 NEVER = ("owner_name_raw", "email", "phone", "home_address", "personal_email",
@@ -140,7 +207,13 @@ def main() -> int:
         if bad:
             unsafe.append(f"{did}: {tbl} carries {bad}")
             continue
+        # curate: keep only the columns a buyer needs, in the stated order,
+        # and never a column that is blank on every sampled row
+        want = [c for c in SHOW.get(did, cols) if c in cols]
+        cols = want or cols
         rs = sample(rows, cols, N)
+        cols = [c for c in cols
+                if any((r.get(c) or "").strip() for r in rs)]
         if not rs:
             skipped.append(f"{did}: no publishable rows")
             continue

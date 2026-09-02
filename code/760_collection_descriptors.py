@@ -95,6 +95,16 @@ except Exception:
 
 # The site's `level` field takes the evidence registry's vocabulary. Cedar's
 # scope vocabulary is richer, so map rather than pretend they are identical.
+# THE PRODUCT'S ID IS NOT ALWAYS CEDAR'S ID, and Codex caught the one case.
+# `deals` and `contractors` match exactly, which is what made the assumption
+# look safe. But the catalog, launch collection, article wiring, profile
+# construction and API tests all call the owned-business collection `owned`.
+# Emitting `native-owned-businesses` would leave a READY dataset unable to
+# replace the demonstration record it is meant to replace, silently.
+PRODUCT_ID = {
+    "native-owned-businesses": "owned",
+}
+
 LEVEL = {
     "entity": "entity",
     "hub": "entity",
@@ -152,23 +162,43 @@ def main() -> int:
         scope = NATURAL_SCOPE.get(did, "entity")
         c = copy.get(did, {})
         nrows = rows_in(tabs)
+        # EMIT THE CONTRACT EXACTLY. `CollectionDataset(**descriptor)` raised
+        # TypeError on `n_rows` and the object omitted `version` and
+        # `downloads`, which release and profile consumers require - so not one
+        # of the 13 could be loaded. Cedar's own extras now live under
+        # `cedar`, which the dataclass never sees.
         d = {
-            "id": did,
+            "id": PRODUCT_ID.get(did, did),
             "shelf": r.get("shelf") or "standard",
             "level": LEVEL.get(scope, "entity"),
             "origin": "lumecon",
             "rows_label": f"{nrows:,} rows",
-            "n_rows": nrows,
-            "n_tables": len(tabs),
             "vintage": cadence.get(did, ""),
+            "version": "v0",          # pre-release; the platform owns bumping
             "updated": TODAY,
-            "cedar_status": r.get("status"),
+            # `downloads` is a PRODUCT metric that lives in the platform
+            # database. Cedar has no business inventing a number here, but the
+            # dataclass requires the field - so it is present and ZERO, which
+            # says "not counted here" rather than fabricating a count.
+            "downloads": 0,
             # editorial - never generated
             "name": c.get("name", ""),
             "short_name": c.get("short_name", ""),
             "tracks": c.get("tracks", ""),
             "sources": c.get("sources", ""),
             "method": c.get("method", ""),
+        }
+        # Cedar-side facts, namespaced so they never reach the dataclass.
+        # Codex: "All nine non-ready descriptors contain only the generic value
+        # BLOCKED; a consumer cannot distinguish a publication-rights block
+        # from an incomplete schema." So the named blockers travel too.
+        d["cedar"] = {
+            "cedar_id": did,
+            "status": r.get("status"),
+            "blockers": [b.strip() for b in
+                         (r.get("blockers") or "").split(" | ") if b.strip()],
+            "n_rows": nrows,
+            "n_tables": len(tabs),
         }
         d["needs_copy"] = not all(d[k] for k in
                                   ("name", "short_name", "tracks",
@@ -181,12 +211,12 @@ def main() -> int:
         OUT.parent.mkdir(parents=True, exist_ok=True)
         OUT.write_text(json.dumps(out, indent=2) + "\n", encoding="utf-8")
 
-    shippable = [d for d in out if d["cedar_status"] == "READY"]
+    shippable = [d for d in out if d["cedar"]["status"] == "READY"]
     print(f"  760 collection descriptors   {len(out)} datasets   "
           f"{len(shippable)} READY   {len(missing)} READY-but-no-copy")
-    for d in sorted(out, key=lambda x: (x["cedar_status"] != "READY", x["id"])):
+    for d in sorted(out, key=lambda x: (x["cedar"]["status"] != "READY", x["id"])):
         flag = "" if not d["needs_copy"] else "  <- needs editorial copy"
-        print(f"    {d['cedar_status']:<8} {d['id']:<24} "
+        print(f"    {d['cedar']['status']:<8} {d['id']:<24} "
               f"{d['shelf']:<14} {d['level']:<20} "
               f"{d['rows_label']:>14}{flag}")
     if missing:

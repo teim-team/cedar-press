@@ -14,7 +14,7 @@
     "short_name": "Subcontracting",
     "tracks": "Subaward transactions where a Native entity is the prime, the subcontractor, or both, drawn from federal subaward reporting.",
     "sources": "FSRS subaward reporting via USAspending, keyed to the prime award.",
-    "method": "Both sides of every subaward are resolved independently, so a Native prime paying a non-Native sub and the reverse are distinguishable rather than collapsed. Repeat monthly filings of one subaward are retained and flagged in-band rather than deleted, because the filings are real events: summing without that filter overstates the total by 46.5%. A subaward is a slice of a prime award and must never be added to the prime contracting dataset — the totalling rules ship with the data."
+    "method": "Both sides of every subaward are resolved independently, so a Native prime paying a non-Native sub and the reverse are distinguishable rather than collapsed. Repeat monthly filings of one subaward are retained and flagged in-band rather than deleted, because the filings are real events: summing without that filter overstates the total by 86.9%. A subaward is a slice of a prime award and must never be added to the prime contracting dataset — the totalling rules ship with the data."
   },
 
   "funding": {

@@ -39,7 +39,7 @@ catches its own errors, and today alone it caught:
   obligations
 - a Crown Heights Jewish organisation keyed to Council, Alaska
 - a `$200B` benchmark "shortfall" that was a deflation artefact
-- `subaward_amount` overstating by **$21.21B (46.5%)** if summed unfiltered
+- `subaward_amount` overstating by **$21.21B (86.9%)** if summed unfiltered
 
 It stays, it stays internal, and it is not the customer-facing product.
 
