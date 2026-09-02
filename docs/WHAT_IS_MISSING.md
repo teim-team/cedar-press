@@ -65,7 +65,40 @@ samples will see columns appear and disappear.
 
 ## THE FOUR THINGS THAT WOULD EMBARRASS US IN FRONT OF A CUSTOMER
 
-Ranked. All four are in the shipped samples right now.
+Ranked. All four were in the shipped samples when this was written.
+
+> ### STATUS 2026-09-02 — all four are out of the samples, and one is only half fixed
+>
+> Done by the `codex` workstream, pushed to `cedar-data-samples`:
+>
+> | # | what shipped | what changed |
+> |---|---|---|
+> | 1 | nonprofits looked like an unchecked keyword search | `funnel_stage`, `placename_risk_flag` and `canonical_name_token_match` now ship. **The display is fixed; the matcher is not** — see the new measurement below. |
+> | 2 | Acoma credited to a school | `cedar_uid` now ships beside `canonical_name`, so the buyer sees the key and not only the label. The correction to the severity claim is in the branch README. |
+> | 3 | `0098` as a contract number | `parent_contract_number` now ships first, and clearing it turned up 262,773 rows of literal `nan`. |
+> | 4 | six date formats | ISO at 330's write point and applied to the live file by `771`. |
+>
+> Plus the unrecorded failure mode in the paragraph above: 770 no longer drops
+> blank columns, blank ones are named in the sample README, and a `SHOW` entry
+> for a column the table does not carry is now a hard `verify` failure. It
+> caught a live one within the hour — the nagpra flagship swap to
+> `nagpra_notices.csv` left the old `SHOW` list behind and the sample fell to
+> four columns.
+>
+> **The one that is only half fixed is #1.** All 44 rows keyed to
+> `Chickahominy Indians-Eastern Division` turn on the token `EASTERN`, and not
+> one of them is in Virginia: 40 are Order of the Eastern Star chapters in SD
+> and ND, the rest are two ELCA synod bodies, a Meals on Wheels, a university
+> seed-stock foundation and an Eastern Star retirement home. **But a blanket
+> exclusion of the class would be wrong**, and that is the reason it was not
+> applied here: three of the rows carrying that token match are real Native
+> organisations keyed to the *wrong* tribe — `WIQUAPAUG EASTERN PEQUOT INDIAN
+> TRIBE` (RI), `EASTERN BAND OF CHICKASAW INDIANS FOUNDATION INC` (TN) and
+> `EASTERN CHEROKEE SOUTHERN IROQUOIS AND UNITED TRIBES OF SOUTH CAROLINA`
+> (SC, already ruled `native_controlled`). Excluding on the token would bury a
+> misattribution rather than fix it, and the redirect grammar
+> (`elijah_ruling_redirect`) is the correct instrument, not the block. Handed
+> to the nonprofits workstream with the 44 rows named.
 
 ### 1. The nonprofits sample looks like a keyword search that nobody checked
 
