@@ -15,6 +15,7 @@ import {
   collectionsOnShelf,
 } from "./pressCatalog.js";
 import {
+  PLAN_REACH,
   SHELF,
   canOpenDataset,
   canReadCedarPress,
@@ -72,6 +73,36 @@ test("the shelves nest upward", () => {
   assert.equal(shelfReach(as("grove")), SHELF.GROVE);
 });
 
+// Not being sold the page and not reaching the collections are different
+// facts, and `tree` is the tier that separates them. Tree includes Grove and
+// Grove carries every dataset, so Tree reaches every shelf; Tree is still not
+// sold the Cedar Press storefront, so it still cannot read the page. `tree`
+// was absent from PLAN_REACH while the server's SHELF_BY_TIER carried it,
+// which served a Tree subscriber twelve collections and rendered none.
+test("Tree reaches every shelf and still does not read the page", () => {
+  assert.equal(shelfReach(as("tree")), SHELF.GROVE);
+  for (const shelf of Object.values(SHELF)) {
+    assert.equal(canOpenDataset(as("tree"), { shelf }), true, shelf);
+  }
+  assert.equal(canReadCedarPress(as("tree")), false);
+});
+
+// The one map the server has to match. The cross-language comparison is in
+// `server/tests/test_access.py`, which reads this export; this pins the
+// JavaScript half so a key cannot be dropped here and the failure blamed on
+// the Python side.
+test("every plan that reaches a shelf declares which one", () => {
+  assert.deepEqual(PLAN_REACH, {
+    press: SHELF.STANDARD,
+    press_pro: SHELF.PRO,
+    grove: SHELF.GROVE,
+    tree: SHELF.GROVE,
+  });
+  for (const reach of Object.values(PLAN_REACH)) {
+    assert.ok(Object.values(SHELF).includes(reach), reach);
+  }
+});
+
 test("Standard opens the standard shelf and nothing above it", () => {
   const standard = { shelf: SHELF.STANDARD };
   const pro = { shelf: SHELF.PRO };
@@ -100,10 +131,19 @@ test("a dataset with no shelf defaults closed to Standard", () => {
   assert.equal(canOpenDataset(as("press_pro"), {}), true);
 });
 
+// This test used to assert `tree` here too, which is the drift rather than a
+// contract: Tree is a plan, and the server has always answered that it reaches
+// the Grove shelf. `press_catalog.py` settles which side was right — "`tree` is
+// the full platform, which includes Grove" — so the assertion has moved to
+// "Tree reaches every shelf and still does not read the page" above, and this
+// test is left to its own subject, which is having no plan at all. The
+// platform tiers that genuinely reach nothing are kept.
 test("nobody without a plan opens anything", () => {
   for (const shelf of Object.values(SHELF)) {
     assert.equal(canOpenDataset(null, { shelf }), false, shelf);
-    assert.equal(canOpenDataset(as("tree"), { shelf }), false, shelf);
+    for (const tier of ["free", "sprout", "sapling"]) {
+      assert.equal(canOpenDataset(as(tier), { shelf }), false, `${tier}/${shelf}`);
+    }
   }
 });
 

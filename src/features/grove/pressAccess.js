@@ -7,10 +7,27 @@
  * Cedar Press is a standalone product, not a rung on the platform ladder and
  * not a Cedar Grove surface. It is sold through Tribal Business News: an
  * eligible membership issues an access code, the code creates the account.
+ * Cedar Grove is a superset of it by content — Grove carries all the datasets,
+ * plus a data library and other public data work — but Press reads the same
+ * upstream Grove does and runs without it.
  *
- * Cedar Grove does not include Cedar Press, and neither does Tree. This used
- * to return true for both, which meant a Grove licensee was shown a page
- * nobody sold them and the copy told readers their Grove plan covered it.
+ * TWO QUESTIONS, NOT ONE
+ * "Does this plan include Cedar Press?" and "which collections does this plan
+ * open?" have different answers, and this module answers both. Running them
+ * together is what produced the two defects below.
+ *
+ * `canReadCedarPress` is the page. Cedar Grove does not include it and neither
+ * does Tree: a Grove or Tree licensee reaches the collections through Grove,
+ * not through this storefront. This used to return true for both, which meant
+ * a Grove licensee was shown a page nobody sold them and the copy told readers
+ * their Grove plan covered it.
+ *
+ * `shelfReach` is the collections. Grove reaches every shelf because Grove
+ * carries every dataset, and Tree reaches every shelf because Tree includes
+ * Grove. `tree` was missing from PLAN_REACH while the server's
+ * `SHELF_BY_TIER` carried it, so a Tree subscriber was served twelve
+ * collections by the API and shown none of them here. The maps are compared
+ * key for key by `server/tests/test_access.py`.
  *
  * THREE SHELVES
  * A dataset sits on one of them, and that is the only access fact about it:
@@ -56,12 +73,25 @@ export const SHELF = Object.freeze({
 
 const SHELF_ORDER = [SHELF.STANDARD, SHELF.PRO, SHELF.GROVE];
 
-// How far up the shelves each plan reaches. A plan absent from this map
-// reaches nothing, which is the safe answer for an unknown or lapsed tier.
-const PLAN_REACH = Object.freeze({
+/**
+ * How far up the shelves each plan reaches. A plan absent from this map
+ * reaches nothing, which is the safe answer for an unknown or lapsed tier.
+ *
+ * Exported so `server/tests/test_access.py` can compare it against
+ * `repository.SHELF_BY_TIER` key for key. It must stay identical to that map:
+ * this decides what renders and that decides what is served, and a tier in one
+ * and not the other is a reader who is served data the page will not show, or
+ * shown a card the API will refuse.
+ *
+ * `tree` reaches the Grove shelf because Tree includes Grove and Grove carries
+ * every dataset. That is not the same as saying Tree includes the Cedar Press
+ * page — it does not; see `canReadCedarPress`.
+ */
+export const PLAN_REACH = Object.freeze({
   press: SHELF.STANDARD,
   press_pro: SHELF.PRO,
   grove: SHELF.GROVE,
+  tree: SHELF.GROVE,
 });
 
 /** Whether this user's plan includes the Cedar Press page at all. */

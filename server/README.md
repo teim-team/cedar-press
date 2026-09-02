@@ -3,7 +3,12 @@
 A FastAPI service serving the routes the React client calls. Python because
 the part of this service with real logic in it — inclusion rules, entity
 resolution, release bookkeeping, CSV shaping — was already written in Python
-for Cedar Grove, and is carried over here rather than reimplemented.
+for Cedar Grove, and was carried over here rather than reimplemented.
+
+That is provenance, not a dependency. Cedar Press is a standalone product: this
+package imports nothing from Cedar Grove and calls no Grove service. It reads
+`data/cedar/collections.manifest.json`, generated from the Cedar data workspace
+in `code/`, which is the same file the JavaScript client reads.
 
 ```
 cedar_press/
@@ -14,6 +19,10 @@ cedar_press/
   press_catalog.py   briefs and the citation register, likewise
   claims.py          the claim-class discipline the findings are held to
 ```
+
+`tests/test_collection.py` and `tests/test_access.py` each run both the Python
+and the JavaScript implementation and compare them — the collection values in
+the first, the access rules in the second — so the two cannot drift.
 
 ## Running it
 

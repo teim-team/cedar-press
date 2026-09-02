@@ -3,15 +3,64 @@
 The Cedar Press web client: a Vite + React application built as a static
 bundle and served at `cedarpress.ai`.
 
-## Shared lineage
+## Cedar Press is standalone; Cedar Grove is a superset
 
-Cedar Press and the Lumecon platform render the same collections. Rather than
-describe them twice, this client carries the platform's own modules — design
-tokens, figure specs, collection and release models, entitlement rules — so a
-change to a collection reaches both surfaces and neither can drift from the
-other. Files under `src/features/grove/`, `src/components/grove/`,
-`src/pages/grove/` and `src/styles/` keep the platform's paths for that
-reason: re-syncing a module is a copy, not a translation.
+Cedar Press is a product in its own right. It has no runtime dependency on
+Cedar Grove: nothing in this repository imports a Grove module, calls a Grove
+service, or reads a file only Grove produces.
+
+The relationship that remains is one of content. Cedar Grove includes all the
+datasets Cedar Press sells, and adds a data library and other public data work
+that this repository neither builds nor describes. Grove is therefore a
+superset of Press *by content*, and the two are siblings by construction: both
+read the same upstream, the Cedar data workspace, and neither reads the other.
+
+```
+  code/  (the Cedar data workspace)
+    │
+    └── scripts/import_cedar_manifest.py
+          │
+          └── data/cedar/collections.manifest.json ──┬── server/cedar_press/  (Python)
+                                                     └── src/features/grove/  (JavaScript)
+```
+
+`data/cedar/collections.manifest.json` is generated, never hand-edited, and is
+the only source of collection values either implementation reads.
+`server/tests/test_collection.py` runs both implementations and compares them
+field by field; `server/tests/test_access.py` does the same for the access
+rules.
+
+### Where the `grove/` paths came from
+
+The retired model was a pipeline: the data workspace fed Cedar Grove, and Cedar
+Grove published a slice of itself as Cedar Press. Under that model this client
+carried the platform's own modules and kept the platform's paths so that
+"re-syncing a module is a copy, not a translation" — which is why the code sits
+under `src/features/grove/`, `src/components/grove/`, `src/pages/grove/` and
+`src/styles/grove/`.
+
+The owner retired the model on 2026-09-02. Nothing re-syncs from Grove any
+more, so the paths no longer state a fact about the code; they are vestigial
+names. Note that `src/features/`, `src/components/` and `src/pages/` contain
+*only* a `grove/` directory each: every file under those paths is Cedar Press,
+and there is no Grove code in this repository to be distinguished from.
+
+**The rename is a named next step, not done here.** Measured on
+`cedar-consolidated` at `05b438d`:
+
+| | |
+|---|---|
+| Files to move | 55 (`features/grove` 32, `pages/grove` 21, `components/grove` 1, `styles/grove` 1) |
+| Path references to rewrite | 164, across 42 files |
+| Referencing files inside `src/` | 22 — 17 pages, 2 features, and one each of `context/`, `components/` and `main.jsx` |
+| Referencing files outside `src/` | 20 — `package.json`, `tests/smoke.spec.js`, 3 under `scripts/`, 5 under `server/cedar_press/`, 4 under `code/`, 5 under `docs/`, 1 under `data/` |
+| Files also touched by an open PR | 12 — 9 by #36, 3 by #37 (2 of them new files) |
+
+It is a mechanical rename with no behaviour change, and the reason to defer it
+is the last row: every one of those 12 files would become a rename/edit
+conflict in a PR that is already open against this branch. It should land as
+its own commit once #36, #37 and #38 are merged, moving the four directories to
+`press/` and rewriting the references in one pass.
 
 ## Layout
 
@@ -73,13 +122,27 @@ carrying `code` — the shape `pressSignup.pressSignupError` already reads.
 | `GET /press/releases` | Release history |
 | `GET /press/articles` | Published briefs |
 | `GET /press/collections/:id/download` | A release file, served as a blob |
+| `GET /press/collections/:id/profile` | The collection's data dictionary |
 | `POST /cedar/ask` | Cedar, scoped to this surface |
+| `GET`, `PATCH /press/profile` | The reader's declared work — **not served by `server/`** |
+
+Every row but the last is implemented by the FastAPI service in `server/`.
+`/press/profile` (`src/features/grove/readerWork.js`) exists only on the
+Lumecon platform backend, so a deployment pointed at Cedar Press's own API
+404s on it: the read is swallowed and reads as "not answered", the write
+rejects with nothing shown to the reader. It is the one endpoint the client
+still assumes the platform for, and closing it is either implementing the
+route in `server/` or dropping the connected path in favour of the
+`localStorage` one `readerWork.js` already has.
 
 ## Running the API
 
-The API is a FastAPI service in `server/`, carrying Cedar Grove's own Python
-collection modules rather than reimplementing them, so the inclusion rules and
-release bookkeeping have one definition.
+The API is a FastAPI service in `server/`. Its collection modules were ported
+from Cedar Grove's Python package rather than rewritten, so the inclusion rules
+and release bookkeeping kept one definition. That is where the code came from,
+not something it still depends on: the service imports nothing from Grove and
+reads its values from `data/cedar/collections.manifest.json` like the client
+does.
 
 ```sh
 pip install -e server[dev]

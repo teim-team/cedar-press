@@ -50,8 +50,10 @@ function sections(user) {
     .map((entry) => historyFor(user, entry).from)
     .filter(Boolean);
   // What the plans tile can honestly offer this reader: Cedar Press+ is an
-  // upgrade only to someone who does not already have it; above that, the
-  // next rung is Cedar Grove.
+  // upgrade only to someone who does not already have it. Past that there is
+  // no further rung of this product — Cedar Grove is a different one, which
+  // carries the same collections and more, so the tile names it as a move
+  // rather than as the top of a ladder.
   const hasPro = canOpenDataset(user, { shelf: "pro" });
   const newest = recentlyUpdated(1)[0];
   return [
@@ -99,7 +101,7 @@ function sections(user) {
       icon: WantMoreIcon,
       meta: "Subscription",
       what: hasPro
-        ? "Your membership, managed through Tribal Business News. The step beyond this shelf is Cedar Grove, where the same collections open for analysis."
+        ? "Your membership, managed through Tribal Business News. Cedar Grove is a separate product that carries these same collections, and more, in an environment built for analysis."
         : "What your subscription includes and what Cedar Press+ adds, managed and upgraded through Tribal Business News.",
     },
     {

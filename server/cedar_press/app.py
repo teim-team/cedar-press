@@ -10,7 +10,9 @@ written in Python for Cedar Grove, and they are the part of this service with
 real logic in it — inclusion rules, entity resolution, release bookkeeping,
 CSV shaping. ``collections.py`` and ``press_catalog.py`` are those modules,
 carried over rather than reimplemented, so a correction lands in one place
-and the shelves and the downloads cannot disagree.
+and the shelves and the downloads cannot disagree. Where the code came from,
+not what it needs: this service imports nothing from Cedar Grove and calls no
+Grove endpoint. Cedar Press runs standalone.
 
 WHERE THE DATABASE GOES
 Every route reads through ``repository.py``. Today that repository answers

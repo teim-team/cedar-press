@@ -1,6 +1,14 @@
-"""The launch collection: what the standalone Cedar Grove license reads.
+"""The launch collection: the twelve datasets Cedar Press sells.
 
 Mirrors ``src/features/grove/collection.js``.
+
+This docstring used to open "what the standalone Cedar Grove license reads",
+from the model in which Cedar Grove published a slice of itself as Cedar Press.
+That model was retired on 2026-09-02. Cedar Press is a standalone product, and
+this module is the Cedar Press launch collection; Cedar Grove reads the same
+twelve because Grove carries all the datasets, not because Press is a view of
+Grove. Where the two diverge is recorded in ``EXCLUDED_COLLECTIONS`` and
+compared against the Cedar data workspace by ``server/tests/test_access.py``.
 
 This module holds the collection's descriptors, the findings the collection
 currently supports (in the same claim shapes the organizational findings use,

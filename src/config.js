@@ -15,6 +15,23 @@
  * Every module that reaches for data asks `isConnected()` rather than
  *guessing from a failed request, so a network error never silently reads as
  * "this deployment is standalone" and quietly shows fixtures in production.
+ *
+ * TWO SENSES OF "STANDALONE", AND THEY ARE NOT THE SAME
+ * The word above means "no API configured". The product sense — Cedar Press
+ * is a standalone product, not a surface of Cedar Grove — is a different
+ * claim, and it holds in both modes: nothing in this client imports a Grove
+ * module or calls a Grove endpoint, and `VITE_API_URL` can name Cedar Press's
+ * own FastAPI service in `server/`, which implements the contract in
+ * `api.js`. Keep the two apart when reading this file.
+ *
+ * ONE ROUTE THAT IS NOT YET BOTH
+ * `server/` serves every endpoint `api.js` calls except `/press/profile`
+ * (GET and PATCH, the reader's declared work — see `readerWork.js`). That
+ * route exists only on the Lumecon platform backend, so a CONNECTED
+ * deployment pointed at Cedar Press's own API 404s on it: the read is
+ * swallowed by `CedarPressSettings.jsx` and reads as "not answered", and the
+ * write rejects with nothing shown. It is the one place the client still
+ * assumes the platform, and it is named here rather than left to be found.
  */
 
 const raw = import.meta.env?.VITE_API_URL ?? "";
