@@ -102,6 +102,17 @@ COLUMNS = [
     "award_id_fain",
     "record_type_code",
     "usaspending_permalink",
+    # THE ROOT CAUSE OF THE MISSING TRANSACTION KEY, fixed 2026-09-01 (faads).
+    # `to_out_row` was taught to carry `assistance_transaction_unique_key` on
+    # 2026-08-29, but the FY2001-2006 bulk jobs were REQUESTED with this
+    # 20-column subset and the key was not in it, so the staged zips for those
+    # years physically do not contain it and no re-extract can recover it.
+    # (The FY2007 `*_archive.zip` objects and the seven DOI seam zips are full
+    # 112-column downloads and DO carry it - that is why FY2007 and Interior
+    # come back keyed and FY2001-2006 for the other nine agencies do not.)
+    # Any future pull now asks for it. See docs/FAADS_TRANSACTION_KEY_LOG.md.
+    "assistance_transaction_unique_key",
+    "modification_number",
 ]
 
 OUT_COLS = [
@@ -111,6 +122,13 @@ OUT_COLS = [
     "fetched_date", "tribe_id", "recipient_uei", "recipient_type_description",
     "cfda_title", "assistance_type_description", "awarding_sub_agency",
     "award_id_fain", "record_type", "api_endpoint", "source_file",
+    # `cedar_uid` is stamped by 503_identity.py and is BLANK on every row of
+    # both faads tables (tribe_id is blank here by design - tier C, no name
+    # matching). It is carried anyway, in its original position, because a
+    # rebuild that silently narrows a shipped header is the defect this
+    # project has paid for most often; 62's
+    # `files_with_columns_lost_vs_backup` exists to catch exactly this.
+    "cedar_uid",
     # THE TRANSACTION IDENTITY. Added 2026-08-29 - see `to_out_row`. The bulk
     # download is a TRANSACTION feed; without these two columns two distinct
     # assistance actions on one FAIN are one indistinguishable row, which is
@@ -127,6 +145,15 @@ OUT_COLS_PRE_TRANSACTION_KEY = [
     c for c in OUT_COLS
     if c not in ("assistance_transaction_unique_key", "modification_number")
 ]
+
+#: And the schema BEFORE 503 stamped `cedar_uid`. Both older shapes are
+#: accepted on read and widened on write; neither is ever written back.
+OUT_COLS_PRE_CEDAR_UID = [
+    c for c in OUT_COLS_PRE_TRANSACTION_KEY if c != "cedar_uid"
+]
+
+#: Every accepted shape of the prior Interior slice, widest first.
+PRIOR_SCHEMAS = (OUT_COLS, OUT_COLS_PRE_TRANSACTION_KEY, OUT_COLS_PRE_CEDAR_UID)
 
 # If an agency-slice exceeds this many rows, only the source-flagged tribal rows
 # (business_types_code containing 'I') are written to the combined transactions
@@ -647,19 +674,22 @@ def stage_build() -> None:
         if os.path.exists(prior):
             with open(prior, newline="", encoding="utf-8") as pf:
                 rd = csv.DictReader(pf)
-                if rd.fieldnames not in (OUT_COLS,
-                                         OUT_COLS_PRE_TRANSACTION_KEY):
+                if list(rd.fieldnames or []) not in [list(x) for x in PRIOR_SCHEMAS]:
                     raise SystemExit(
-                        f"prior file schema drift:\n {rd.fieldnames}\n vs\n {OUT_COLS}")
-                pre_key = rd.fieldnames == OUT_COLS_PRE_TRANSACTION_KEY
+                        "prior file schema drift:" + chr(10)
+                        + f" {rd.fieldnames}" + chr(10)
+                        + " vs" + chr(10) + f" {OUT_COLS}")
+                # WIDEN, NEVER NARROW. A column the prior shape does not have
+                # is written BLANK and NAMED in the log; a column it does have
+                # is carried through untouched. Blank means "the source object
+                # we hold for these rows did not record it", never "there was
+                # only one transaction" and never "this column went away".
+                widened = [c for c in OUT_COLS if c not in (rd.fieldnames or [])]
+                if widened:
+                    log(f"prior Interior slice widened with blank {widened}")
                 for row in rd:
-                    if pre_key:
-                        # NAMED, not silently defaulted: this slice predates the
-                        # transaction key and does not carry one. Blank means
-                        # "the source we hold for these rows did not record it",
-                        # never "there was only one transaction".
-                        row["assistance_transaction_unique_key"] = ""
-                        row["modification_number"] = ""
+                    for c in widened:
+                        row[c] = ""
                     w.writerow(row)
                     written += 1
                     per_agency_written[row["agency"]] = per_agency_written.get(row["agency"], 0) + 1

@@ -19,6 +19,15 @@
     "168_link_adjudication_hubs.py"
    ]
   },
+  "ancsa_filings_index.csv": {
+   "enrichers": [
+    "814_gaming_nr_grain_and_conservation.py",
+    "84_resource_recipient_side.py"
+   ],
+   "rebuilders": [
+    "814_gaming_nr_grain_and_conservation.py"
+   ]
+  },
   "assistance_tribe_id_crosswalk.csv": {
    "enrichers": [
     "503_identity.py"
@@ -48,6 +57,7 @@
   },
   "cedar_identifier_ledger_final.csv": {
    "enrichers": [
+    "09_import_rulings.py",
     "124_apply_rulings_in_place.py",
     "163_promote_nho_universe_in_place.py",
     "174_apply_rulings_to_source_tables.py",
@@ -70,13 +80,11 @@
   },
   "cedar_identifier_ledger_tiered.csv": {
    "enrichers": [
-    "09_import_rulings.py",
     "50_fix_kootenai_conflation.py",
     "64_fix_village_government_misattribution.py"
    ],
    "rebuilders": [
     "03_apply_exclusions_and_tier.py",
-    "09_import_rulings.py",
     "50_fix_kootenai_conflation.py",
     "64_fix_village_government_misattribution.py"
    ]
@@ -182,11 +190,31 @@
   },
   "faads_entity_attribution.csv": {
    "enrichers": [
-    "710_faads_attribution_content_key.py"
+    "710_faads_attribution_content_key.py",
+    "791_faads_transaction_key_and_repoint.py"
    ],
    "rebuilders": [
     "710_faads_attribution_content_key.py",
-    "73_faads_name_attribution.py"
+    "73_faads_name_attribution.py",
+    "791_faads_transaction_key_and_repoint.py"
+   ]
+  },
+  "faads_transactions.csv": {
+   "enrichers": [
+    "791_faads_transaction_key_and_repoint.py"
+   ],
+   "rebuilders": [
+    "574_ws1_money_and_conservation.py",
+    "791_faads_transaction_key_and_repoint.py"
+   ]
+  },
+  "fac_audit_sefa_gaming_programs.csv": {
+   "enrichers": [
+    "814_gaming_nr_grain_and_conservation.py"
+   ],
+   "rebuilders": [
+    "147_build_fac_single_audits.py",
+    "814_gaming_nr_grain_and_conservation.py"
    ]
   },
   "federal_actions.csv": {
@@ -215,11 +243,13 @@
   },
   "ferc_docket_filings.csv": {
    "enrichers": [
-    "168_link_adjudication_hubs.py"
+    "168_link_adjudication_hubs.py",
+    "781_upstream_grain_columns.py"
    ],
    "rebuilders": [
     "133_build_ferc_advocacy.py",
-    "168_link_adjudication_hubs.py"
+    "168_link_adjudication_hubs.py",
+    "781_upstream_grain_columns.py"
    ]
   },
   "ferc_ex_parte_communications.csv": {
@@ -372,6 +402,15 @@
     "98_build_oira_and_hearings.py"
    ]
   },
+  "hearing_bill_links.csv": {
+   "enrichers": [
+    "781_upstream_grain_columns.py"
+   ],
+   "rebuilders": [
+    "781_upstream_grain_columns.py",
+    "98_build_oira_and_hearings.py"
+   ]
+  },
   "individual_native_ownership_verification.csv": {
    "enrichers": [
     "269_build_contractor_ranking.py"
@@ -470,6 +509,15 @@
     "99_build_earmarks_and_schedc.py"
    ]
   },
+  "np_schedule_i_grants.csv": {
+   "enrichers": [
+    "781_upstream_grain_columns.py"
+   ],
+   "rebuilders": [
+    "132_build_schedule_i_layer.py",
+    "781_upstream_grain_columns.py"
+   ]
+  },
   "prime_contracts.csv": {
    "enrichers": [
     "114_pull_prime_archive.py",
@@ -535,7 +583,7 @@
   }
  },
  "generated": "2026-09-01",
- "generated_at": "2026-09-01T22:39:49",
+ "generated_at": "2026-09-01T23:15:01",
  "known_orderings": [
   {
    "cost": "931 entity links and 9 columns discarded on 2026-08-26; the rebuild printed a LARGER row count and read as progress",
@@ -558,7 +606,7 @@
    "rebuild": "133_build_ferc_advocacy.py"
   },
   {
-   "cost": "09 reverts 50's patches; 09 is in NEVER_RUN for this and worse",
+   "cost": "09 reverted 50's patches by rebuilding _final from the stale _tiered. Fixed 2026-09-01 (C8): 09 now re-tiers LIVE _final in place, so it no longer reverts 50 - but 50 still runs after it",
    "enricher": "50_fix_kootenai_conflation.py",
    "enricher_columns": [],
    "file": "cedar_identifier_ledger_final.csv",
@@ -586,7 +634,7 @@
    "rebuild": "05_match_filings_v2.py"
   },
   {
-   "cost": "not yet paid - a spine rebuild drops cedar_uid, which every dataset now materialises. 01 is NEVER_RUN; if it is ever forced, re-run 504 then 505",
+   "cost": "not yet paid - a spine rebuild drops cedar_uid, which every dataset now materialises. 01 append-merges since 2026-09-01, so a rerun no longer drops appended entities; even so, re-run 504 then 505",
    "enricher": "503_identity.py",
    "enricher_columns": [
     "cedar_uid"
@@ -797,10 +845,7 @@
   }
  ],
  "never_run": {
-  "01_build_entity_spine.py": "A full rebuild DROPS EVERY APPENDED ENTITY - the village corporations, NHOs, TCUs, CDFIs, BIE schools and UIOs added by scripts 52, 61, 73 and 75. Safe to IMPORT, never to RUN. Append-merge instead, re-reading the spine immediately before writing so a concurrent agent is not clobbered. 2026-09-01: it now takes a .bak_<date>_pre01 before writing, like every other spine writer, and the replay order + row/column census a restore must hit are in REPLAY_ORDERS below and docs/schema/hub_rebuild_census.json. THE BACKUP IS NOT A LICENCE - a direct invocation still drops 868 of 1,555 entities and 32 of 44 columns; it only means the loss is now recoverable.",
-  "09_import_rulings.py": "Rebuilds cedar_identifier_ledger_final.csv FROM the stale cedar_identifier_ledger_tiered.csv, which does not carry rows later scripts appended directly to _final. Running it on 2026-08-08 destroyed 1,327 ledger rows and 451 village-corporation links, 121 of them tier A - lost, not moved. Use 124_apply_rulings_in_place.py. 2026-09-01: it now takes a .bak_<date>_pre09 before any REPLACING write (appends are not backed up - an append destroys nothing). Re-measured today it would drop 1,345 rows, 18 of them tier A elijah_ruling / nho_verified_entities adjudications. THE BACKUP IS NOT A LICENCE.",
-  "41_build_codebooks.py": "Writes codebook_master.csv in 'w' mode from a hardcoded 19-group DATASETS dict. Running it today DELETES 21 OF THE 43 dataset blocks, including every block registered on 2026-08-26. The single most destructive command in the repo, and its name does not say so. Use cedar_codebook.write_fragment() or cedar_register_codebook.py.",
-  "88_build_deals_taxonomy.py": "Rebuilds the deals taxonomy. Its glob read deals_*_additions.csv and never saw the 131 rows in the two root ledgers - the miscount that propagated as '790 deals' for three weeks. The glob was repaired at source, but a full taxonomy rebuild still discards the party rulings 33/53/57/154 wrote in place."
+  "41_build_codebooks.py": "Writes codebook_master.csv in 'w' mode from a hardcoded 19-group DATASETS dict. Running it today DELETES 21 OF THE 43 dataset blocks, including every block registered on 2026-08-26. The single most destructive command in the repo, and its name does not say so. Use cedar_codebook.write_fragment() or cedar_register_codebook.py."
  },
  "produced_by": "287_build_dependency_manifest.py",
  "readers": {
@@ -986,7 +1031,8 @@
   ],
   "MONEY_TOTALLING_RULES.md": [
    "574_ws1_money_and_conservation.py",
-   "730_ws4_grain_money_conservation.py"
+   "730_ws4_grain_money_conservation.py",
+   "814_gaming_nr_grain_and_conservation.py"
   ],
   "NONPROFIT_DATASET_PLAN.md": [
    "465_consolidation_inventory.py"
@@ -1416,7 +1462,8 @@
    "73_bills_votes_completion.py"
   ],
   "anc_ceiling_roster.csv": [
-   "32_build_deals_party_queue.py"
+   "32_build_deals_party_queue.py",
+   "814_gaming_nr_grain_and_conservation.py"
   ],
   "ancsa_attribution_changes_2026-08-26.csv": [
    "249_audit_ancsa_tierA_subaward_repoints.py"
@@ -1424,7 +1471,8 @@
   "ancsa_filings_index.csv": [
    "135_build_resource_assets.py",
    "533_shard_e_build_subsidiary_edges.py",
-   "536_shard_e_newsletters.py"
+   "536_shard_e_newsletters.py",
+   "814_gaming_nr_grain_and_conservation.py"
   ],
   "anti_tribal_votes_expanded.csv": [
    "14_build_bills_votes.py"
@@ -1690,6 +1738,7 @@
    "76_philanthropy_classify.py",
    "77_build_nagpra_dataset.py",
    "79_build_award_level_contracts.py",
+   "814_gaming_nr_grain_and_conservation.py",
    "81_build_passthrough_dataset.py",
    "82_build_gaming_property_dataset.py",
    "83_build_resource_ledger.py",
@@ -1745,7 +1794,8 @@
    "62_no_regression_check.py",
    "730_ws4_grain_money_conservation.py",
    "731_ws5_grain_contractors_nonprofits_deals.py",
-   "77_build_nagpra_dataset.py"
+   "77_build_nagpra_dataset.py",
+   "814_gaming_nr_grain_and_conservation.py"
   ],
   "cedar_id_system_audit.json": [
    "415_audit_identity_layer.py"
@@ -1766,6 +1816,7 @@
   ],
   "cedar_identifier_ledger_final.csv": [
    "08_build_review_page.py",
+   "09_import_rulings.py",
    "111_build_advocacy_passthrough.py",
    "114_pull_prime_archive.py",
    "115_pull_assistance_archive.py",
@@ -1859,7 +1910,8 @@
    "596_shard_f_org_rosters.py",
    "602_shard_f_verify.py",
    "62_no_regression_check.py",
-   "690_shard_m_vendor_list_sweep.py"
+   "690_shard_m_vendor_list_sweep.py",
+   "830_entity_freshness.py"
   ],
   "cedar_navajo_audited_actuals.csv": [
    "83_build_resource_ledger.py"
@@ -2251,13 +2303,18 @@
   "faads_entity_attribution.csv": [
    "710_faads_attribution_content_key.py",
    "730_ws4_grain_money_conservation.py",
+   "791_faads_transaction_key_and_repoint.py",
    "94_rescan_universes.py"
+  ],
+  "faads_fy2007_seam.json": [
+   "791_faads_transaction_key_and_repoint.py"
   ],
   "faads_identifier_coverage_by_agency_year.csv": [
    "35_coverage_audit.py"
   ],
   "faads_transactions.csv": [
    "30_funding_pre2008.py",
+   "791_faads_transaction_key_and_repoint.py",
    "_agent_akvillagecorp_build.py"
   ],
   "faads_transactions_all_agencies.csv": [
@@ -2266,20 +2323,23 @@
    "199_faads_identifier_by_agency_year.py",
    "234_measure_reporting_regime_signatures.py",
    "73_faads_name_attribution.py",
+   "791_faads_transaction_key_and_repoint.py",
    "94_rescan_universes.py"
   ],
   "fac_audit_gaming_disclosures.csv": [
    "147_build_fac_single_audits.py"
   ],
   "fac_audit_sefa_gaming_programs.csv": [
-   "573_ws3_grain_and_money.py"
+   "573_ws3_grain_and_money.py",
+   "814_gaming_nr_grain_and_conservation.py"
   ],
   "fac_general_census.json": [
    "147_build_fac_single_audits.py"
   ],
   "fac_sefa_gaming.json": [
    "147_build_fac_single_audits.py",
-   "573_ws3_grain_and_money.py"
+   "573_ws3_grain_and_money.py",
+   "814_gaming_nr_grain_and_conservation.py"
   ],
   "fac_seminole_tribe_of_florida.json": [
    "105_build_florida_gaming.py"
@@ -2346,6 +2406,7 @@
    "425_establish_bristol_bay_entities.py",
    "503_identity.py",
    "63_cross_dataset_reconcile.py",
+   "791_faads_transaction_key_and_repoint.py",
    "80_build_instrument_taxonomy.py",
    "94_rescan_universes.py",
    "_agent_akvillagecorp_build.py"
@@ -2364,7 +2425,8 @@
   "ferc_docket_filings.csv": [
    "139_build_litigation_positions.py",
    "168_link_adjudication_hubs.py",
-   "573_ws3_grain_and_money.py"
+   "573_ws3_grain_and_money.py",
+   "781_upstream_grain_columns.py"
   ],
   "ferc_ex_parte_communications.csv": [
    "573_ws3_grain_and_money.py"
@@ -2383,6 +2445,7 @@
   ],
   "fiscal_year_disbursements.csv": [
    "573_ws3_grain_and_money.py",
+   "814_gaming_nr_grain_and_conservation.py",
    "83_build_resource_ledger.py"
   ],
   "fn_grantee_profiles_2026-08-06.csv": [
@@ -2647,6 +2710,9 @@
    "587_gaming_facility_corrections.py",
    "588_promote_self_published_claims.py"
   ],
+  "gaming_property_self_published_claims.csv": [
+   "814_gaming_nr_grain_and_conservation.py"
+  ],
   "gaming_property_self_published_claims_2026-08-26.csv": [
    "588_promote_self_published_claims.py"
   ],
@@ -2717,7 +2783,11 @@
    "400_promote_stranded_hearing_appearances.py"
   ],
   "hearing_bill_links.csv": [
-   "573_ws3_grain_and_money.py"
+   "573_ws3_grain_and_money.py",
+   "781_upstream_grain_columns.py"
+  ],
+  "hub_rebuild_census.json": [
+   "812_c8_rebuild_proof.py"
   ],
   "hud_onap_awards_parsed.csv": [
    "85_build_admin_region_crosswalk.py"
@@ -2736,6 +2806,9 @@
    "191_apply_ancsa_ownership_ruling.py",
    "219_probe_courtlistener_recap.py",
    "415_audit_identity_layer.py"
+  ],
+  "index_rows.csv": [
+   "814_gaming_nr_grain_and_conservation.py"
   ],
   "individual_native_exclusion_pairs.csv": [
    "575_closure_native_owned_businesses.py"
@@ -2879,6 +2952,7 @@
   ],
   "monthly_revenue.csv": [
    "573_ws3_grain_and_money.py",
+   "814_gaming_nr_grain_and_conservation.py",
    "83_build_resource_ledger.py"
   ],
   "nagpra_alias_proposals.csv": [
@@ -3113,7 +3187,8 @@
   "np_schedule_i_filers.csv": [
    "167_link_nonprofit_family_via_ein_hub.py",
    "573_ws3_grain_and_money.py",
-   "731_ws5_grain_contractors_nonprofits_deals.py"
+   "731_ws5_grain_contractors_nonprofits_deals.py",
+   "781_upstream_grain_columns.py"
   ],
   "np_schedule_i_grants.csv": [
    "139_build_litigation_positions.py",
@@ -3123,7 +3198,8 @@
    "181_enrich_lobbying_registrant_identifiers.py",
    "220_test_nobmf_eins_against_efile_index.py",
    "573_ws3_grain_and_money.py",
-   "731_ws5_grain_contractors_nonprofits_deals.py"
+   "731_ws5_grain_contractors_nonprofits_deals.py",
+   "781_upstream_grain_columns.py"
   ],
   "np_schedule_i_recipients_2026-08-12.csv": [
    "129_build_review_queue.py"
@@ -3149,6 +3225,9 @@
   ],
   "per_property_gaming_revenue_FINAL_v3_audited.csv": [
    "23d_build_gaming_facilities.py"
+  ],
+  "pointer_snapshot.json": [
+   "791_faads_transaction_key_and_repoint.py"
   ],
   "prime_contracts.csv": [
    "114_pull_prime_archive.py",
@@ -3258,6 +3337,7 @@
    "149_apply_resource_entity_links.py",
    "168_link_adjudication_hubs.py",
    "573_ws3_grain_and_money.py",
+   "814_gaming_nr_grain_and_conservation.py",
    "83_build_resource_ledger.py",
    "84_resource_recipient_side.py"
   ],
@@ -3568,9 +3648,9 @@
     "writes in 'w' mode or builds from data/raw",
     "names itself an in-place enricher"
    ],
-   "mtime": "2026-09-01T22:06:52",
-   "never_run": true,
-   "never_run_reason": "A full rebuild DROPS EVERY APPENDED ENTITY - the village corporations, NHOs, TCUs, CDFIs, BIE schools and UIOs added by scripts 52, 61, 73 and 75. Safe to IMPORT, never to RUN. Append-merge instead, re-reading the spine immediately before writing so a concurrent agent is not clobbered. 2026-09-01: it now takes a .bak_<date>_pre01 before writing, like every other spine writer, and the replay order + row/column census a restore must hit are in REPLAY_ORDERS below and docs/schema/hub_rebuild_census.json. THE BACKUP IS NOT A LICENCE - a direct invocation still drops 868 of 1,555 entities and 32 of 44 columns; it only means the loss is now recoverable.",
+   "mtime": "2026-09-01T22:58:50",
+   "never_run": false,
+   "never_run_reason": null,
    "read_modify_write": [],
    "reads": [
     "canonical_tribe_table.csv",
@@ -3581,7 +3661,10 @@
    ],
    "templated": [],
    "unknown": [
+    "_SOURCE_MANIFEST.csv",
     "anc_tribal_subsidiary_lookup.csv",
+    "cedar_entity_spine.csv",
+    "cedar_identifier_ledger.csv",
     "hawaii_nho_candidates.csv",
     "hawaii_nho_candidates_2026_05_01.csv",
     "master_tribal_entity_registry_2026-05-06.csv",
@@ -3591,11 +3674,7 @@
     "tribal_irs990_verified_strict.csv",
     "tribal_irs990_verified_strict_2026_04_30.csv"
    ],
-   "writes": [
-    "_SOURCE_MANIFEST.csv",
-    "cedar_entity_spine.csv",
-    "cedar_identifier_ledger.csv"
-   ]
+   "writes": []
   },
   "02_extract_exclusion_rulings.py": {
    "classification": "rebuild",
@@ -3726,25 +3805,25 @@
    "classification": "both",
    "evidence": [
     "writes in 'w' mode or builds from data/raw",
-    "read-modify-writes: cedar_identifier_ledger_tiered.csv"
+    "read-modify-writes: cedar_identifier_ledger_final.csv"
    ],
-   "mtime": "2026-09-01T22:07:21",
-   "never_run": true,
-   "never_run_reason": "Rebuilds cedar_identifier_ledger_final.csv FROM the stale cedar_identifier_ledger_tiered.csv, which does not carry rows later scripts appended directly to _final. Running it on 2026-08-08 destroyed 1,327 ledger rows and 451 village-corporation links, 121 of them tier A - lost, not moved. Use 124_apply_rulings_in_place.py. 2026-09-01: it now takes a .bak_<date>_pre09 before any REPLACING write (appends are not backed up - an append destroys nothing). Re-measured today it would drop 1,345 rows, 18 of them tier A elijah_ruling / nho_verified_entities adjudications. THE BACKUP IS NOT A LICENCE.",
+   "mtime": "2026-09-01T22:53:04",
+   "never_run": false,
+   "never_run_reason": null,
    "read_modify_write": [
-    "cedar_identifier_ledger_tiered.csv"
+    "cedar_identifier_ledger_final.csv"
    ],
    "reads": [
     "cedar_entity_spine.csv",
     "cedar_exclusion_rulings.csv",
+    "cedar_identifier_ledger_final.csv",
     "cedar_identifier_ledger_tiered.csv",
     "uei_hierarchy_graph.csv"
    ],
    "templated": [],
    "unknown": [],
    "writes": [
-    "cedar_identifier_ledger_final.csv",
-    "cedar_identifier_ledger_tiered.csv"
+    "cedar_identifier_ledger_final.csv"
    ]
   },
   "100_finish_declinations_and_employment.py": {
@@ -3826,7 +3905,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: gaming_property_coverage.csv"
    ],
-   "mtime": "2026-09-01T21:30:26",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -3875,7 +3954,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: _SOURCE_MANIFEST.csv, _discovered_links.csv, ca_gaming_facilities_official.csv"
    ],
-   "mtime": "2026-09-01T21:43:12",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -4523,7 +4602,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: _HOSTLOCK_api.usaspending.gov.json, _state.json, subawards.csv"
    ],
-   "mtime": "2026-09-01T21:36:08",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -4785,7 +4864,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: codebook_master.csv"
    ],
-   "mtime": "2026-08-12T16:52:40",
+   "mtime": "2026-09-01T23:01:21",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -4815,7 +4894,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: _fetch_state.json, _fr_match_state.json"
    ],
-   "mtime": "2026-08-29T06:59:55",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -5186,7 +5265,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: admin_appeal_positions.csv"
    ],
-   "mtime": "2026-09-01T18:57:09",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -6353,7 +6432,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: 05b_identifier_graph.csv"
    ],
-   "mtime": "2026-09-01T22:01:55",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -6597,7 +6676,7 @@
     "writes in 'w' mode or builds from data/raw",
     "names itself an in-place enricher"
    ],
-   "mtime": "2026-09-01T21:59:58",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -6932,7 +7011,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: lobbying_registrants.csv"
    ],
-   "mtime": "2026-08-29T06:59:55",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -7639,7 +7718,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: _221_harvest_state.json, regulations_gov_comment_detail_2026-08-26.csv"
    ],
-   "mtime": "2026-09-01T19:32:58",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -7777,7 +7856,7 @@
    "evidence": [
     "writes in 'w' mode or builds from data/raw"
    ],
-   "mtime": "2026-09-01T21:58:50",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -8235,7 +8314,7 @@
   "25_build_publication_layer.py": {
    "classification": "unknown",
    "evidence": [],
-   "mtime": "2026-09-01T20:41:09",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -8411,7 +8490,7 @@
    "evidence": [
     "read-modify-writes: individual_native_ownership_verification.csv"
    ],
-   "mtime": "2026-09-01T21:58:02",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -8485,7 +8564,7 @@
    "evidence": [
     "writes in 'w' mode or builds from data/raw"
    ],
-   "mtime": "2026-09-01T21:38:42",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -8764,7 +8843,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: _state.json"
    ],
-   "mtime": "2026-08-29T11:30:19",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -11285,7 +11364,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: grain_evidence.json"
    ],
-   "mtime": "2026-09-01T22:11:57",
+   "mtime": "2026-09-01T23:12:22",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -11436,6 +11515,8 @@
     "gaming_properties.csv",
     "gaming_property_federal_traces.csv",
     "gaming_property_labor_demand.csv",
+    "gaming_property_self_published_assertions.csv",
+    "gaming_property_self_published_claims.csv",
     "gaming_property_site_observations.csv",
     "gaming_property_universe_events.csv",
     "gaming_revenue_bounds.csv",
@@ -11660,7 +11741,7 @@
    "evidence": [
     "read-modify-writes: cedar_export_safety.csv"
    ],
-   "mtime": "2026-08-29T10:26:12",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -12150,7 +12231,7 @@
     "writes in 'w' mode or builds from data/raw",
     "names itself an in-place enricher"
    ],
-   "mtime": "2026-09-01T19:24:11",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -12168,7 +12249,7 @@
    "evidence": [
     "names itself an in-place enricher"
    ],
-   "mtime": "2026-09-01T19:15:29",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -12187,7 +12268,7 @@
   "536_shard_e_newsletters.py": {
    "classification": "unknown",
    "evidence": [],
-   "mtime": "2026-09-01T19:35:57",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -12204,7 +12285,7 @@
    "evidence": [
     "names itself an in-place enricher"
    ],
-   "mtime": "2026-09-01T19:21:26",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -12271,7 +12352,7 @@
    "evidence": [
     "writes in 'w' mode or builds from data/raw"
    ],
-   "mtime": "2026-09-01T19:09:04",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -12283,7 +12364,7 @@
   "547_shard_c_hidden_endpoint_sweep.py": {
    "classification": "unknown",
    "evidence": [],
-   "mtime": "2026-09-01T20:00:25",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -12323,7 +12404,7 @@
   "553_shard_d_web_probe.py": {
    "classification": "unknown",
    "evidence": [],
-   "mtime": "2026-09-01T19:10:37",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -12358,7 +12439,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: shard_k.csv"
    ],
-   "mtime": "2026-09-01T20:51:44",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -12726,7 +12807,7 @@
     "writes in 'w' mode or builds from data/raw",
     "names itself an in-place enricher"
    ],
-   "mtime": "2026-09-01T21:19:31",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -12832,7 +12913,7 @@
    "evidence": [
     "names itself an in-place enricher"
    ],
-   "mtime": "2026-09-01T21:05:49",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -12848,7 +12929,7 @@
    "evidence": [
     "writes in 'w' mode or builds from data/raw"
    ],
-   "mtime": "2026-09-01T21:33:34",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -12870,7 +12951,7 @@
     "writes in 'w' mode or builds from data/raw",
     "names itself an in-place enricher"
    ],
-   "mtime": "2026-09-01T20:41:02",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -12904,7 +12985,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: cedar_correction_register.csv, gaming_facilities.csv"
    ],
-   "mtime": "2026-09-01T21:31:08",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -12933,7 +13014,7 @@
     "writes in 'w' mode or builds from data/raw",
     "names itself an in-place enricher"
    ],
-   "mtime": "2026-09-01T21:16:55",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -13007,7 +13088,7 @@
     "writes in 'w' mode or builds from data/raw",
     "names itself an in-place enricher"
    ],
-   "mtime": "2026-09-01T18:48:28",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -13030,7 +13111,7 @@
    "evidence": [
     "writes in 'w' mode or builds from data/raw"
    ],
-   "mtime": "2026-09-01T18:51:46",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -13044,7 +13125,7 @@
    "evidence": [
     "writes in 'w' mode or builds from data/raw"
    ],
-   "mtime": "2026-09-01T20:29:09",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -13058,7 +13139,7 @@
    "evidence": [
     "writes in 'w' mode or builds from data/raw"
    ],
-   "mtime": "2026-09-01T18:54:42",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -13078,7 +13159,7 @@
    "evidence": [
     "writes in 'w' mode or builds from data/raw"
    ],
-   "mtime": "2026-09-01T18:55:15",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -13094,7 +13175,7 @@
   "595_shard_f_org_web_reprobe.py": {
    "classification": "unknown",
    "evidence": [],
-   "mtime": "2026-09-01T20:32:28",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -13110,7 +13191,7 @@
    "evidence": [
     "names itself an in-place enricher"
    ],
-   "mtime": "2026-09-01T19:24:51",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -13126,7 +13207,7 @@
    "evidence": [
     "writes in 'w' mode or builds from data/raw"
    ],
-   "mtime": "2026-09-01T19:54:17",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -13140,7 +13221,7 @@
   "598_shard_f_newsletters.py": {
    "classification": "unknown",
    "evidence": [],
-   "mtime": "2026-09-01T19:09:37",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -13152,7 +13233,7 @@
   "599_shard_f_ein_990.py": {
    "classification": "unknown",
    "evidence": [],
-   "mtime": "2026-09-01T19:08:34",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -13191,7 +13272,7 @@
    "evidence": [
     "writes in 'w' mode or builds from data/raw"
    ],
-   "mtime": "2026-09-01T20:31:38",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -13207,7 +13288,7 @@
    "evidence": [
     "writes in 'w' mode or builds from data/raw"
    ],
-   "mtime": "2026-09-01T20:32:00",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -13223,7 +13304,7 @@
   "602_shard_f_verify.py": {
    "classification": "unknown",
    "evidence": [],
-   "mtime": "2026-09-01T20:40:43",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -13240,7 +13321,7 @@
    "evidence": [
     "writes in 'w' mode or builds from data/raw"
    ],
-   "mtime": "2026-09-01T21:17:01",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -13265,7 +13346,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: ENTITY_MATCH_RULES.md"
    ],
-   "mtime": "2026-09-01T21:15:18",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -13774,7 +13855,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: _state.json, tribal_vendor_list_registry_2026-08-26.csv"
    ],
-   "mtime": "2026-09-01T22:38:31",
+   "mtime": "2026-09-01T22:55:40",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -14004,7 +14085,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: cedar_harvest_conservation.csv"
    ],
-   "mtime": "2026-09-01T22:21:08",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -14036,7 +14117,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: TCU_CDFI_BUILD_LOG.md, _org_fetch_state.json, cedar_entity_spine.csv, native_fi_roster.csv, tcu_cdfi_added.csv, tcu_cdfi_already_in_spine.csv, tcu_cdfi_refused.csv"
    ],
-   "mtime": "2026-09-01T22:05:47",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -14091,7 +14172,7 @@
     "writes in 'w' mode or builds from data/raw",
     "names itself an in-place enricher"
    ],
-   "mtime": "2026-08-29T06:59:56",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -14111,17 +14192,19 @@
    "templated": [],
    "unknown": [
     "native_bill_outcomes.csv",
-    "native_bills_entity_class.csv",
-    "native_bills_subject_sweep.csv"
+    "native_bills_entity_class.csv"
    ],
-   "writes": []
+   "writes": [
+    "native_bills_subject_sweep.csv"
+   ]
   },
   "73_faads_name_attribution.py": {
-   "classification": "rebuild",
+   "classification": "both",
    "evidence": [
-    "writes in 'w' mode or builds from data/raw"
+    "writes in 'w' mode or builds from data/raw",
+    "names itself an in-place enricher"
    ],
-   "mtime": "2026-08-29T06:59:56",
+   "mtime": "2026-09-01T23:11:38",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -14143,7 +14226,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: cedar_identifier_graph_edges.csv"
    ],
-   "mtime": "2026-09-01T22:25:01",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -14280,7 +14363,7 @@
   "760_collection_descriptors.py": {
    "classification": "unknown",
    "evidence": [],
-   "mtime": "2026-09-01T22:09:37",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -14358,7 +14441,7 @@
    "evidence": [
     "names itself an in-place enricher"
    ],
-   "mtime": "2026-09-01T22:23:54",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -14442,6 +14525,34 @@
     "agent_native_org_candidates_philanthropy_2026-08-06.csv"
    ]
   },
+  "781_upstream_grain_columns.py": {
+   "classification": "both",
+   "evidence": [
+    "writes in 'w' mode or builds from data/raw",
+    "read-modify-writes: ferc_docket_filings.csv, hearing_bill_links.csv, np_schedule_i_grants.csv"
+   ],
+   "mtime": "2026-09-01T22:53:04",
+   "never_run": false,
+   "never_run_reason": null,
+   "read_modify_write": [
+    "ferc_docket_filings.csv",
+    "hearing_bill_links.csv",
+    "np_schedule_i_grants.csv"
+   ],
+   "reads": [
+    "ferc_docket_filings.csv",
+    "hearing_bill_links.csv",
+    "np_schedule_i_filers.csv",
+    "np_schedule_i_grants.csv"
+   ],
+   "templated": [],
+   "unknown": [],
+   "writes": [
+    "ferc_docket_filings.csv",
+    "hearing_bill_links.csv",
+    "np_schedule_i_grants.csv"
+   ]
+  },
   "78_content_analysis.py": {
    "classification": "both",
    "evidence": [
@@ -14493,6 +14604,40 @@
     "wrote _content_analysis_stats.json"
    ]
   },
+  "791_faads_transaction_key_and_repoint.py": {
+   "classification": "both",
+   "evidence": [
+    "writes in 'w' mode or builds from data/raw",
+    "read-modify-writes: faads_entity_attribution.csv, faads_fy2007_seam.json, faads_transactions.csv, pointer_snapshot.json"
+   ],
+   "mtime": "2026-09-01T23:12:22",
+   "never_run": false,
+   "never_run_reason": null,
+   "read_modify_write": [
+    "faads_entity_attribution.csv",
+    "faads_fy2007_seam.json",
+    "faads_transactions.csv",
+    "pointer_snapshot.json"
+   ],
+   "reads": [
+    "faads_entity_attribution.csv",
+    "faads_fy2007_seam.json",
+    "faads_transactions.csv",
+    "faads_transactions_all_agencies.csv",
+    "federal_funding_transactions.csv",
+    "pointer_snapshot.json"
+   ],
+   "templated": [],
+   "unknown": [
+    "FAADS_TRANSACTION_KEY_LOG.md"
+   ],
+   "writes": [
+    "faads_entity_attribution.csv",
+    "faads_fy2007_seam.json",
+    "faads_transactions.csv",
+    "pointer_snapshot.json"
+   ]
+  },
   "79_build_award_level_contracts.py": {
    "classification": "rebuild",
    "evidence": [
@@ -14534,6 +14679,75 @@
    "unknown": [],
    "writes": [
     "instrument_taxonomy.csv"
+   ]
+  },
+  "812_c8_rebuild_proof.py": {
+   "classification": "both",
+   "evidence": [
+    "writes in 'w' mode or builds from data/raw",
+    "names itself an in-place enricher"
+   ],
+   "mtime": "2026-09-01T22:53:11",
+   "never_run": false,
+   "never_run_reason": null,
+   "read_modify_write": [],
+   "reads": [
+    "hub_rebuild_census.json"
+   ],
+   "templated": [],
+   "unknown": [
+    "cedar_entity_spine.csv",
+    "deals_classified.csv"
+   ],
+   "writes": [
+    "c8_rebuild_proof.json"
+   ]
+  },
+  "814_gaming_nr_grain_and_conservation.py": {
+   "classification": "both",
+   "evidence": [
+    "writes in 'w' mode or builds from data/raw",
+    "read-modify-writes: MONEY_TOTALLING_RULES.md, ancsa_filings_index.csv, cedar_harvest_conservation.csv, fac_audit_sefa_gaming_programs.csv"
+   ],
+   "mtime": "2026-09-01T23:11:20",
+   "never_run": false,
+   "never_run_reason": null,
+   "read_modify_write": [
+    "MONEY_TOTALLING_RULES.md",
+    "ancsa_filings_index.csv",
+    "cedar_harvest_conservation.csv",
+    "fac_audit_sefa_gaming_programs.csv"
+   ],
+   "reads": [
+    "MONEY_TOTALLING_RULES.md",
+    "anc_ceiling_roster.csv",
+    "ancsa_filings_index.csv",
+    "cedar_entity_spine.csv",
+    "cedar_harvest_conservation.csv",
+    "fac_audit_sefa_gaming_programs.csv",
+    "fac_sefa_gaming.json",
+    "fiscal_year_disbursements.csv",
+    "gaming_property_self_published_claims.csv",
+    "index_rows.csv",
+    "monthly_revenue.csv",
+    "resource_revenue.csv"
+   ],
+   "templated": [],
+   "unknown": [
+    "gaming_property_self_published_assertions.csv",
+    "nd_severance_allocation.csv",
+    "resource_assets.csv",
+    "resource_parties.csv",
+    "tribal_bond_issuances.csv",
+    "tribal_tax_bases.csv"
+   ],
+   "writes": [
+    "GAMING_NR_GRAIN_AND_CONSERVATION.md",
+    "MONEY_TOTALLING_RULES.md",
+    "ancsa_filings_index.csv",
+    "cedar_harvest_conservation.csv",
+    "fac_audit_sefa_gaming_programs.csv",
+    "gaming_nr_evidence.json"
    ]
   },
   "81_build_passthrough_dataset.py": {
@@ -14578,6 +14792,23 @@
    "writes": [
     "gaming_properties.csv",
     "gaming_property_capacity_history.csv"
+   ]
+  },
+  "830_entity_freshness.py": {
+   "classification": "unknown",
+   "evidence": [],
+   "mtime": "2026-09-01T23:11:09",
+   "never_run": false,
+   "never_run_reason": null,
+   "read_modify_write": [],
+   "reads": [
+    "cedar_identity_register.csv"
+   ],
+   "templated": [],
+   "unknown": [],
+   "writes": [
+    "ENTITY_FRESHNESS.md",
+    "cedar_entity_freshness.csv"
    ]
   },
   "83_build_resource_ledger.py": {
@@ -14774,14 +15005,12 @@
    "classification": "both",
    "evidence": [
     "writes in 'w' mode or builds from data/raw",
-    "read-modify-writes: deals_classified.csv"
+    "names itself an in-place enricher"
    ],
-   "mtime": "2026-08-29T06:59:56",
-   "never_run": true,
-   "never_run_reason": "Rebuilds the deals taxonomy. Its glob read deals_*_additions.csv and never saw the 131 rows in the two root ledgers - the miscount that propagated as '790 deals' for three weeks. The glob was repaired at source, but a full taxonomy rebuild still discards the party rulings 33/53/57/154 wrote in place.",
-   "read_modify_write": [
-    "deals_classified.csv"
-   ],
+   "mtime": "2026-09-01T22:53:04",
+   "never_run": false,
+   "never_run_reason": null,
+   "read_modify_write": [],
    "reads": [
     "deals_*_additions.csv",
     "deals_classified.csv",
@@ -14793,7 +15022,6 @@
     "deals_2026_ytd.csv"
    ],
    "writes": [
-    "deals_classified.csv",
     "deals_taxonomy.csv"
    ]
   },
@@ -14962,7 +15190,7 @@
    "evidence": [
     "writes in 'w' mode or builds from data/raw"
    ],
-   "mtime": "2026-09-01T20:41:59",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -15274,7 +15502,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: _chrg_search_state.json, committee_names.json"
    ],
-   "mtime": "2026-08-29T06:59:56",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -15315,7 +15543,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: _SOURCE_MANIFEST.csv, _cds_requests.json, _staged_requests.csv, _xml_fetch_log.csv, _zip_manifest.csv, nonprofit_schedule_c_lobbying.csv, np_financials.csv"
    ],
-   "mtime": "2026-09-01T19:20:18",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -15803,7 +16031,7 @@
     "writes in 'w' mode or builds from data/raw",
     "names itself an in-place enricher"
    ],
-   "mtime": "2026-09-01T22:18:33",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -16019,7 +16247,7 @@
    "evidence": [
     "writes in 'w' mode or builds from data/raw"
    ],
-   "mtime": "2026-09-01T20:32:28",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -16037,7 +16265,7 @@
    "evidence": [
     "writes in 'w' mode or builds from data/raw"
    ],
-   "mtime": "2026-09-01T19:31:12",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -16068,7 +16296,7 @@
   "shard_g_newsletters.py": {
    "classification": "unknown",
    "evidence": [],
-   "mtime": "2026-09-01T20:17:10",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -16085,7 +16313,7 @@
   "shard_g_registry_pull.py": {
    "classification": "unknown",
    "evidence": [],
-   "mtime": "2026-09-01T19:26:18",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -16103,7 +16331,7 @@
    "evidence": [
     "writes in 'w' mode or builds from data/raw"
    ],
-   "mtime": "2026-09-01T19:18:17",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -16125,7 +16353,7 @@
     "writes in 'w' mode or builds from data/raw",
     "names itself an in-place enricher"
    ],
-   "mtime": "2026-09-01T20:48:18",
+   "mtime": "2026-09-01T22:53:04",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -16154,7 +16382,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: shard_g.csv"
    ],
-   "mtime": "2026-09-01T20:18:07",
+   "mtime": "2026-09-01T22:53:05",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -16173,7 +16401,7 @@
    ]
   }
  },
- "tables_with_enricher_backup": 188,
+ "tables_with_enricher_backup": 191,
  "writers": {
   "%s.json": [
    "119_build_digital_and_loyalty.py",
@@ -16440,6 +16668,9 @@
   "DOC_STALENESS.md": [
    "527_doc_staleness.py"
   ],
+  "ENTITY_FRESHNESS.md": [
+   "830_entity_freshness.py"
+  ],
   "ENTITY_HARVEST_LOG.md": [
    "35_entity_harvest.py"
   ],
@@ -16483,6 +16714,9 @@
   "GAMING_DEVICE_BUILD_LOG.md": [
    "117_build_gaming_devices.py"
   ],
+  "GAMING_NR_GRAIN_AND_CONSERVATION.md": [
+   "814_gaming_nr_grain_and_conservation.py"
+  ],
   "GRAIN_AUDIT.md": [
    "512_build_dataset_contracts.py"
   ],
@@ -16500,7 +16734,8 @@
   ],
   "MONEY_TOTALLING_RULES.md": [
    "574_ws1_money_and_conservation.py",
-   "730_ws4_grain_money_conservation.py"
+   "730_ws4_grain_money_conservation.py",
+   "814_gaming_nr_grain_and_conservation.py"
   ],
   "ND_SEVERANCE_BUILD_LOG.md": [
    "113_build_nd_severance.py"
@@ -16697,7 +16932,6 @@
    "42_write_subaward_source_doc.py"
   ],
   "_SOURCE_MANIFEST.csv": [
-   "01_build_entity_spine.py",
    "100_finish_declinations_and_employment.py",
    "103_build_california_gaming.py",
    "104_build_wa_allocations.py",
@@ -17091,6 +17325,7 @@
    "07_parse_ancsa_ceiling.py"
   ],
   "ancsa_filings_index.csv": [
+   "814_gaming_nr_grain_and_conservation.py",
    "84_resource_recipient_side.py"
   ],
   "anomaly_report.json": [
@@ -17136,6 +17371,9 @@
   "brand_government_corrections.csv": [
    "72_fix_brand_and_government_misattribution.py"
   ],
+  "c8_rebuild_proof.json": [
+   "812_c8_rebuild_proof.py"
+  ],
   "ca_gaming_facilities_official.csv": [
    "103_build_california_gaming.py",
    "266_apply_gaming_hub_spillover_rulings.py"
@@ -17169,11 +17407,13 @@
    "518_dataset_readiness.py",
    "621_dataset_coverage.py"
   ],
+  "cedar_entity_freshness.csv": [
+   "830_entity_freshness.py"
+  ],
   "cedar_entity_identity_crosswalk.csv": [
    "417_build_entity_identity_crosswalk.py"
   ],
   "cedar_entity_spine.csv": [
-   "01_build_entity_spine.py",
    "08_build_review_page.py",
    "115_pull_assistance_archive.py",
    "163_promote_nho_universe_in_place.py",
@@ -17216,7 +17456,8 @@
    "575_closure_native_owned_businesses.py",
    "730_ws4_grain_money_conservation.py",
    "731_ws5_grain_contractors_nonprofits_deals.py",
-   "77_build_nagpra_dataset.py"
+   "77_build_nagpra_dataset.py",
+   "814_gaming_nr_grain_and_conservation.py"
   ],
   "cedar_id_system_audit.json": [
    "415_audit_identity_layer.py"
@@ -17229,7 +17470,6 @@
    "169_build_identifier_graph.py"
   ],
   "cedar_identifier_ledger.csv": [
-   "01_build_entity_spine.py",
    "03_apply_exclusions_and_tier.py",
    "510_assertions.py"
   ],
@@ -17249,7 +17489,6 @@
   ],
   "cedar_identifier_ledger_tiered.csv": [
    "03_apply_exclusions_and_tier.py",
-   "09_import_rulings.py",
    "50_fix_kootenai_conflation.py",
    "64_fix_village_government_misattribution.py"
   ],
@@ -17440,8 +17679,7 @@
   "deals_classified.csv": [
    "126_apply_deal_party_attribution.py",
    "153_merge_base_ledgers_into_classified.py",
-   "155_collect_deals_2026_08.py",
-   "88_build_deals_taxonomy.py"
+   "155_collect_deals_2026_08.py"
   ],
   "deals_duplicate_candidates.csv": [
    "54_reconcile_deals_duplicates.py"
@@ -17555,19 +17793,25 @@
   ],
   "faads_entity_attribution.csv": [
    "710_faads_attribution_content_key.py",
-   "73_faads_name_attribution.py"
+   "73_faads_name_attribution.py",
+   "791_faads_transaction_key_and_repoint.py"
+  ],
+  "faads_fy2007_seam.json": [
+   "791_faads_transaction_key_and_repoint.py"
   ],
   "faads_identifier_coverage_by_agency_year.csv": [
    "30_funding_pre2008.py"
   ],
   "faads_transactions.csv": [
-   "574_ws1_money_and_conservation.py"
+   "574_ws1_money_and_conservation.py",
+   "791_faads_transaction_key_and_repoint.py"
   ],
   "faads_transactions_all_agencies.csv": [
    "30_funding_pre2008.py"
   ],
   "fac_audit_sefa_gaming_programs.csv": [
-   "147_build_fac_single_audits.py"
+   "147_build_fac_single_audits.py",
+   "814_gaming_nr_grain_and_conservation.py"
   ],
   "fac_pdf_fetch_log.csv": [
    "147_build_fac_single_audits.py"
@@ -17627,7 +17871,8 @@
   ],
   "ferc_docket_filings.csv": [
    "133_build_ferc_advocacy.py",
-   "168_link_adjudication_hubs.py"
+   "168_link_adjudication_hubs.py",
+   "781_upstream_grain_columns.py"
   ],
   "ferc_docket_parties.csv": [
    "168_link_adjudication_hubs.py"
@@ -17838,6 +18083,9 @@
   "gaming_nigc_roster_link.csv": [
    "157_reconcile_nigc_roster.py"
   ],
+  "gaming_nr_evidence.json": [
+   "814_gaming_nr_grain_and_conservation.py"
+  ],
   "gaming_ordinance_ocr.csv": [
    "122_ocr_ordinance_scans.py",
    "153_merge_ordinance_ocr.py"
@@ -17949,6 +18197,7 @@
    "98_build_oira_and_hearings.py"
   ],
   "hearing_bill_links.csv": [
+   "781_upstream_grain_columns.py",
    "98_build_oira_and_hearings.py"
   ],
   "hub_rebuild_census.json": [
@@ -18131,6 +18380,9 @@
    "14_build_bills_votes.py",
    "14_pull_cosponsors.py"
   ],
+  "native_bills_subject_sweep.csv": [
+   "73_bills_votes_completion.py"
+  ],
   "native_entity_lobbying_disclosures.csv": [
    "350_withdraw_false_lobbying_attributions.py",
    "65_lobbying_organization_type_guard.py"
@@ -18249,7 +18501,8 @@
    "132_build_schedule_i_layer.py"
   ],
   "np_schedule_i_grants.csv": [
-   "132_build_schedule_i_layer.py"
+   "132_build_schedule_i_layer.py",
+   "781_upstream_grain_columns.py"
   ],
   "nrc_entity_link_candidates.csv": [
    "145_build_nrc_public_meetings.py"
@@ -18286,6 +18539,9 @@
   ],
   "party_rulings_unresolved.csv": [
    "33_apply_party_rulings.py"
+  ],
+  "pointer_snapshot.json": [
+   "791_faads_transaction_key_and_repoint.py"
   ],
   "prime_contracts.csv": [
    "114_pull_prime_archive.py",

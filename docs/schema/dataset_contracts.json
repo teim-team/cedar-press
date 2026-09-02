@@ -2,7 +2,7 @@
  "built_date": "2026-09-01",
  "derivation": "500.COLLECTIONS + cedar_codebook + cedar_pipeline; GRAIN declared, everything else derived",
  "n_collections": 13,
- "n_tables_claimed": 263,
+ "n_tables_claimed": 264,
  "n_orphan_shippable": 6,
  "orphans": [
   "native_owned_businesses.csv",
@@ -12,15 +12,12 @@
   "regulations_gov_entity_coverage.csv",
   "sam_native_class_distributions.csv"
  ],
- "n_shippable": 222,
- "n_shippable_grain_stated": 209,
- "n_shippable_grain_unstated": 13,
+ "n_shippable": 223,
+ "n_shippable_grain_stated": 213,
+ "n_shippable_grain_unstated": 10,
  "shippable_grain_unstated": [
   "congressional_correspondence_log.csv",
   "faads_transactions_all_agencies.csv",
-  "fac_audit_sefa_gaming_programs.csv",
-  "gaming_property_self_published_assertions.csv",
-  "gaming_property_self_published_claims.csv",
   "native_owned_businesses.csv",
   "native_passthrough.csv",
   "nonprofit_schedule_c_coverage.csv",
@@ -30,12 +27,11 @@
   "sam_native_class_distributions.csv",
   "subawards.csv"
  ],
- "n_shippable_grain_open_with_evidence": 2,
+ "n_shippable_grain_open_with_evidence": 1,
  "n_shippable_grain_defective": 3,
- "n_shippable_grain_unexplained": 8,
+ "n_shippable_grain_unexplained": 6,
  "shippable_grain_open_with_evidence": [
-  "congressional_correspondence_log.csv",
-  "fac_audit_sefa_gaming_programs.csv"
+  "congressional_correspondence_log.csv"
  ],
  "shippable_grain_defective": [
   "faads_transactions_all_agencies.csv",
@@ -43,8 +39,6 @@
   "subawards.csv"
  ],
  "shippable_grain_unexplained": [
-  "gaming_property_self_published_assertions.csv",
-  "gaming_property_self_published_claims.csv",
   "native_owned_businesses.csv",
   "nonprofit_schedule_c_coverage.csv",
   "nonprofit_schedule_c_lobbying.csv",
@@ -70,9 +64,8 @@
   "subawards.csv": "10,770 LITERAL duplicate rows of 72,837. (subaward_number, subaward_date) collides 27,470 times, so even the natural key of a subaward is not unique here.",
   "native_passthrough.csv": "114 LITERAL duplicate rows of 1,262. This table is derived from subawards.csv and inherits its duplication; the passthrough dollars are therefore over-stated by an unmeasured amount."
  },
- "n_violations": 8,
+ "n_violations": 7,
  "violations": [
-  "federal_funding_transactions.csv: ordering names 820_repair_subhub_funding_attribution.py, which does not exist anywhere under code/",
   "entity_aliases.csv: declared primary_key ['alias_id'] is NOT unique - 1 duplicate row(s) of 6,298, e.g. ('',). A buyer joining on it gets rows we did not promise them.",
   "ORPHAN shippable table: native_owned_businesses.csv - registered in the codebook but claimed by NO collection",
   "ORPHAN shippable table: nonprofit_schedule_c_coverage.csv - registered in the codebook but claimed by NO collection",
@@ -202,7 +195,7 @@
     },
     {
      "table": "faads_entity_attribution.csv",
-     "status": "UNDOCUMENTED",
+     "status": "shippable",
      "key_columns": [
       "tribe_id",
       "cedar_uid"
@@ -404,8 +397,7 @@
       "115_pull_assistance_archive.py",
       "335_harmonize_assistance_seams_in_place.py",
       "336_correct_scheme_resolution_by_spine_membership.py",
-      "503_identity.py",
-      "820_repair_subhub_funding_attribution.py"
+      "503_identity.py"
      ],
      "never_run_warning": []
     },
@@ -6642,12 +6634,23 @@
       "cedar_uid",
       "entity_id"
      ],
-     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
-     "primary_key": [],
-     "join_cardinality": {},
-     "grain_declared_by": "",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
+     "grain": "one SEFA FEDERAL AWARD LINE - one `federal_awards` record of one Single Audit reporting package - whose `federal_program_name` names gaming or a casino, on a report already in Cedar's tribal audit census. NOT one row per audit and NOT one row per tribe: `report_id` REPEATS once a report carries a second gaming line, which is why the key needs the FAC's own `award_reference`. It ships at ONE row today and that is a coverage fact, not a grain fact - it is the only line of a WITHHELD tribal reporting package the FAC still disseminates. `amount_expended` is a FEDERAL AWARD EXPENDITURE and is NOT gaming revenue; it may not be summed with any gaming money column",
+     "primary_key": [
+      "report_id",
+      "award_reference"
+     ],
+     "join_cardinality": {
+      "report_id": "many",
+      "entity_id": "many",
+      "cedar_uid": "many"
+     },
+     "grain_declared_by": "workstream GAMING-NR 2026-09-01: answers the GRAIN_OPEN question from the FAC's own cached record. Key confirmed unique with no blank component on the FULL file by code/814_gaming_nr_grain_and_conservation.py verify",
+     "grain_validated": true,
+     "measured_rows_per_join_key": {
+      "cedar_uid": 1,
+      "entity_id": 1,
+      "report_id": 1
+     },
      "grain_open_question": "the file has ONE row. Uniqueness is vacuous. QUESTION: is a row a (report, federal program) line off the SEFA, so that report_id repeats once a second program is parsed?",
      "grain_defect": "",
      "grain_evidence": {
@@ -6679,8 +6682,12 @@
        "entity_id": 1
       }
      },
-     "rebuilt_by": [],
-     "enriched_by": [],
+     "rebuilt_by": [
+      "147_build_fac_single_audits.py"
+     ],
+     "enriched_by": [
+      "814_gaming_nr_grain_and_conservation.py"
+     ],
      "never_run_warning": []
     },
     {
@@ -7714,12 +7721,28 @@
       "entity_id",
       "facility_id"
      ],
-     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
-     "primary_key": [],
-     "join_cardinality": {},
-     "grain_declared_by": "",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
+     "grain": "one SELF-PUBLISHED ASSERTION OCCURRENCE: one sentence on one page of a gaming property's OWN website making one claim about itself. Keyed by 382 as a digest of (site host, page URL, assertion kind, asserted value, first 120 characters of the quote), so the SAME claim on two pages of one host is two rows and the same sentence twice on one page is collapsed. THIS IS NOT A MEASUREMENT TABLE - every `assertion_class` is deliberately outside `cedar_domain.MeasurementType`, and the class is a first-class column because a buyer must be able to filter on it. NEVER SUM OR RECONCILE AGAINST A REGULATOR: not gaming_capacity_official.csv, not nigc_regional_ggr.csv, not nigc_revenue_bands.csv, not state_gaming_observations.csv, not wa_machine_allocations.csv. A casino's claim about its own floor and a regulator's count of that floor are TWO CLAIMS ABOUT ONE THING; adding them doubles the floor and preferring the larger turns marketing into a statistic. 2 rows are WITHDRAWN_NOT_SELF_PUBLISHED and are retained, labelled, rather than deleted",
+     "primary_key": [
+      "assertion_id"
+     ],
+     "join_cardinality": {
+      "assertion_id": "one",
+      "facility_id": "many",
+      "tribe_id": "many",
+      "cedar_uid": "many",
+      "site_host": "many",
+      "source_url": "many"
+     },
+     "grain_declared_by": "workstream GAMING-NR 2026-09-01: grain asserted in code by code/588_promote_self_published_claims.py, which refuses to write on a duplicate key; confirmed unique with no blank component and 0 literal duplicate rows on the FULL 622-row file by code/814_gaming_nr_grain_and_conservation.py verify",
+     "grain_validated": true,
+     "measured_rows_per_join_key": {
+      "assertion_id": 1,
+      "cedar_uid": 51,
+      "facility_id": 51,
+      "site_host": 51,
+      "source_url": 5,
+      "tribe_id": 51
+     },
      "grain_open_question": "",
      "grain_defect": "",
      "grain_evidence": {},
@@ -7735,12 +7758,30 @@
       "cedar_uid",
       "facility_id"
      ],
-     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
-     "primary_key": [],
-     "join_cardinality": {},
-     "grain_declared_by": "",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
+     "grain": "one ADJUDICATED CLAIM OCCURRENCE - one numeric claim a gaming property publishes about itself, as the adjudicating script identified it, namespaced by `claim_family` (recovered_from_refusal_pile | first_pass_extraction). NOT one row per (source_url, metric, value): that triple collides 15 times and every collision is REAL - one page states the same number in two sentences about two different things, so collapsing it deletes a ballroom. True repetition of the SAME sentence is collapsed upstream and counted in `n_occurrences_collapsed`. THIS IS NOT A MEASUREMENT TABLE: `assertion_class` is SELF_PUBLISHED_OPERATOR_CLAIM on every row and never becomes one. NEVER SUM OR RECONCILE AGAINST A REGULATOR - the per-row `not_summable_with` column names the tables. Two further traps carried as columns: `value_is_bounded` = Y means the source said 'more than 1,000 slots' and a bound is not a count, and `also_in_gaming_property_site_observations` = Y means the row restates an observation that already ships in gaming_property_site_observations.csv, so stacking the two files double counts it",
+     "primary_key": [
+      "claim_id"
+     ],
+     "join_cardinality": {
+      "claim_id": "one",
+      "source_claim_id": "one",
+      "facility_id": "many",
+      "tribe_id": "many",
+      "cedar_uid": "many",
+      "site_host": "many",
+      "source_url": "many"
+     },
+     "grain_declared_by": "workstream GAMING-NR 2026-09-01: grain asserted in code by code/588_promote_self_published_claims.py, which refuses to write on a duplicate key; confirmed unique with no blank component and 0 literal duplicate rows on the FULL 270-row file by code/814_gaming_nr_grain_and_conservation.py verify",
+     "grain_validated": true,
+     "measured_rows_per_join_key": {
+      "cedar_uid": 22,
+      "claim_id": 1,
+      "facility_id": 22,
+      "site_host": 22,
+      "source_claim_id": 1,
+      "source_url": 7,
+      "tribe_id": 22
+     },
      "grain_open_question": "",
      "grain_defect": "",
      "grain_evidence": {},
@@ -8538,7 +8579,7 @@
    "name": "Entity spine, identifiers and reference",
    "shelf": "infrastructure",
    "rebuild_command": "py -3 code/build.py run _entity_layer --execute",
-   "n_tables": 47,
+   "n_tables": 48,
    "tables": [
     {
      "table": "admin_region_assignments.csv",
@@ -8843,6 +8884,25 @@
        "entity_id": 94
       }
      },
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "cedar_entity_freshness.csv",
+     "status": "UNDOCUMENTED",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "primary_key": [],
+     "join_cardinality": {},
+     "grain_declared_by": "",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
      "rebuilt_by": [],
      "enriched_by": [],
      "never_run_warning": []
