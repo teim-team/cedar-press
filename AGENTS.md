@@ -7451,3 +7451,31 @@ ventures, so the same identifier was WITHDRAWN in one run and HELD in the next
 — 8 rows and $500,078 that reconciled against nothing. Defect class 7. Fixed
 with `first(nm ORDER BY c DESC, nm)`, and the joint-venture test now reads
 every name the registrant ever filed.
+
+**ADDENDUM 09:20 — `code/62_no_regression_check.py` IS BROKEN AND IT IS NOT
+MINE.** It now dies before printing anything:
+
+```
+File "code/62_no_regression_check.py", line 1996, in main
+    _live = (ROOT / "data" / "clean" / f).exists()
+NameError: name 'ROOT' is not defined
+```
+
+The integrator owns 62 and no agent may edit it, so this is reported, not
+fixed. **The standing gate is down for every workstream, not just this one**,
+and a red gate nobody can run is worse than a red gate. Its last complete run
+(09:0x, output preserved at the path named in the QUARANTINE section above)
+exited 1 on 14 regressions, all traced to other workstreams.
+
+**ADDENDUM 11:0x — a second cross-agent event, and the gate caught it.** After
+this pass finished, an enricher landed on `prime_contracts.csv` at 10:57
+(1,461,714,396 -> 1,462,947,197 bytes, same 75 columns, same 1,217,768 rows).
+`1079 verify` re-ran and all seven invariants still held — attributed dollars
+had fallen by exactly this pass's $16,997,581,754.88 and not a cent more — so
+the write touched no attribution. **That is what a gate re-deriving both sides
+buys: it can tell a neighbour's edit from a regression.** The Copper River
+extension below was therefore applied with `CEDAR_1079_REDO=1`, which
+re-processes each table from its CURRENT state instead of restoring it, so the
+10:57 work was preserved rather than reverted. **Restoring your own backup is a
+write to every other agent's table; re-processing in place is not.**
+

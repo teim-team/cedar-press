@@ -191,7 +191,8 @@ IDENTITY_CANDIDATES = ("cedar_uid", "business_entity_id", "entity_id",
                        "recipient_cedar_uid", "owner_hub_cedar_uid")
 
 
-def flagship_readiness(tbl: str, tables_of_all: dict) -> list:
+def flagship_readiness(tbl: str, tables_of_all: dict,
+                       status_all: dict | None = None) -> list:
     """Contract failures measured ON the flagship table itself."""
     src = ROOT / "data" / "clean" / tbl
     if not src.exists():
@@ -226,16 +227,41 @@ def flagship_readiness(tbl: str, tables_of_all: dict) -> list:
     # inferred: it is absent from every collection's table list.
     claimed_anywhere = any(tbl in v for v in tables_of_all.values())
     if not claimed_anywhere:
-        out.append(f"C1 grain: UNSTATED on {tbl} - no collection contract "
-                   f"claims it, so it carries no declared grain and no "
-                   f"validated primary key")
+        # Say WHICH of the two it is. Writing "no collection contract claims
+        # it" for a table the contract lists as UNDOCUMENTED is the same
+        # imprecision this whole check exists to catch, and it was committed
+        # here first.
+        listed = status_all.get(tbl) if status_all else None
+        if listed:
+            out.append(f"C1 grain: UNSTATED on {tbl} - the contract lists it "
+                       f"as `{listed}` rather than `shippable`, so no grain "
+                       f"and no primary key are declared for it")
+        else:
+            out.append(f"C1 grain: UNSTATED on {tbl} - no collection "
+                       f"contract claims it at all, so it carries no "
+                       f"declared grain and no validated primary key")
     return out
 
 
-def flagship_violations(tables_of: dict, nrows_of: dict) -> list:
-    """One entry per collection whose descriptor row count is contradicted by
-    the sample it ships. Returns [(collection, flagship, flagship_rows,
-    descriptor_rows, reason)]."""
+def flagship_violations(tables_of: dict, nrows_of: dict,
+                        status_of: dict | None = None) -> list:
+    """One entry per collection whose descriptor is contradicted by the sample
+    it ships: [(collection, flagship, flagship_rows, descriptor_rows, reason,
+    kind)].
+
+    `kind` matters and the two are NOT the same defect:
+
+      arithmetic   the published count is provably wrong - it is smaller than
+                   one of the dataset's own tables. The number must be
+                   withdrawn.
+      membership   the count is arithmetically fine and the SAMPLE SOURCE is
+                   not a shippable member of the collection. The dataset is
+                   blocked and the count still stands.
+
+    Collapsing them would withhold `federal-register`'s 490,274 - a figure
+    nothing contradicts - because a different table's codebook status
+    lapsed. A remedy has to be proportionate to what was actually measured.
+    """
     flag, spine = _flagship_map()
     out = []
     for cid, tbl in sorted(flag.items()):
@@ -252,11 +278,20 @@ def flagship_violations(tables_of: dict, nrows_of: dict) -> list:
             out.append((cid, tbl, n, nrows_of[cid],
                         f"the sampled table alone holds {n:,} rows and the "
                         f"descriptor claims {nrows_of[cid]:,} for the whole "
-                        f"dataset"))
+                        f"dataset", "arithmetic"))
         elif not claimed and tbl not in spine:
-            out.append((cid, tbl, n, nrows_of[cid],
-                        f"{tbl} is the table the sample is drawn from and no "
-                        f"collection contract claims it"))
+            st = (status_of or {}).get(cid, {}).get(tbl)
+            if st is None:
+                why = (f"{tbl} is the table the sample is drawn from and no "
+                       f"collection contract claims it at all, so it carries "
+                       f"no declared grain, no validated key and no rebuild "
+                       f"path")
+            else:
+                why = (f"{tbl} is the table the sample is drawn from and the "
+                       f"{cid} contract marks it `{st}`, not `shippable` - "
+                       f"the customer is shown rows from a table Cedar does "
+                       f"not currently consider publishable")
+            out.append((cid, tbl, n, nrows_of[cid], why, "membership"))
     return out
 
 
@@ -291,6 +326,7 @@ def selftest() -> int:
         got = flagship_violations(tables_of, nrows_of)
         hit = len(got) == want_n and (want_n == 0 or
                                       want_sub in got[0][4])
+        # got[i][5] is the kind; the fixtures below assert it too.
         print(f"    {'PASS' if hit else 'FAIL'}  {name}")
         if not hit:
             ok = False
@@ -333,6 +369,17 @@ def main() -> int:
                  if CONTRACTS.exists() else {"contracts": []})
     tables_of = {c["collection"]: [t["table"] for t in c.get("tables", [])
                                    if t.get("status") == "shippable"]
+                 for c in contracts.get("contracts", [])}
+    # THE FULL STATUS, not just the shippable subset. Added 2026-09-02 after
+    # the flagship check reported `federal-register`'s sample source as "no
+    # collection contract claims it", which was false: the contract lists
+    # `consultation_events.csv` and marks it **UNDOCUMENTED**. Two different
+    # defects - absent from the collection, and present but not shippable -
+    # were collapsed into one message, which is this repo's signature failure
+    # (a check reporting something other than what it measured) committed by
+    # the check written to catch it two rounds earlier.
+    status_of = {c["collection"]: {t["table"]: t.get("status", "?")
+                                   for t in c.get("tables", [])}
                  for c in contracts.get("contracts", [])}
     cadence = {}
     if CADENCE.exists():
@@ -408,17 +455,45 @@ def main() -> int:
     # than the table its own sample comes from is not ready to replace a demo
     # record. The status reverts on its own the moment the contract is fixed.
     nrows_of = {c["cedar_id"]: c["n_rows"] for c in cedar_side.values()}
-    fviol = flagship_violations(tables_of, nrows_of)
+    fviol = flagship_violations(tables_of, nrows_of, status_of)
     by_cedar_id = {c["cedar_id"]: c for c in cedar_side.values()}
-    for cid, tbl, frows, drows, reason in fviol:
+    for cid, tbl, frows, drows, reason, kind in fviol:
         c = by_cedar_id[cid]
-        c["blockers"] = [b for b in c["blockers"] if b != "-"] + [
-            f"FLAGSHIP MISMATCH: {reason} (500.COLLECTIONS does not claim "
-            f"{tbl} for {cid}; see ADR-018)"]
+        # CODEX PR #29 ROUND 4, FINDING 1. This blocker used to read "the
+        # descriptor claims 1,657 for the whole dataset" - which stopped
+        # being true in the same commit that set `n_rows` to null and
+        # relabelled 1,657 as the unsummed size of six heterogeneous tables.
+        # A consumer was being told the remaining problem is an exact
+        # whole-dataset count conflict, when the whole point of the other fix
+        # is that **no dataset-level count exists**. So the blocker now
+        # describes the MEMBERSHIP AND GRAIN conflict, which is what is
+        # actually unresolved, and quotes the two measurements as what they
+        # are rather than as a disagreement between two totals.
+        #
+        # Fourth instance on this branch of a number corrected in one place
+        # and left standing in another, and the first where the stale copy
+        # was inside the very fix that made it stale.
+        if kind == "arithmetic":
+            msg = (f"COLLECTION MEMBERSHIP: {tbl}, the table this dataset's "
+                   f"sample is drawn from, holds {frows:,} rows and no "
+                   f"collection contract claims it - so it carries no "
+                   f"declared grain, no validated key and no rebuild path. "
+                   f"The {drows:,} rows the contract does claim are "
+                   f"{c['n_tables']} tables of differing grain and are not a "
+                   f"dataset-level total either; see ADR-018. No row count "
+                   f"is published for this collection until membership and "
+                   f"grain are settled.")
+        else:
+            msg = (f"COLLECTION MEMBERSHIP: {reason}. The {drows:,}-row "
+                   f"total over the {c['n_tables']} shippable tables is not "
+                   f"in dispute and still ships; see ADR-018.")
+        c["blockers"] = [b for b in c["blockers"] if b != "-"] + [msg]
         c["status"] = "BLOCKED"
         c["flagship_table"] = tbl
         c["flagship_rows"] = frows
-        c["blockers"] += flagship_readiness(tbl, tables_of)
+        c["blockers"] += flagship_readiness(
+            tbl, tables_of,
+            {k: v for m in status_of.values() for k, v in m.items()})
         # CODEX PR #29 ROUND 3, FINDING 1, AND IT IS RIGHT.
         #
         # This published the SUM, 1,657 + 2,916 = 4,573, as `rows_label`. That
@@ -437,26 +512,36 @@ def main() -> int:
         # that reads like a claim is not". So NO COUNT IS STATED. The two
         # component measurements ship separately, each labelled with the table
         # set it came from, and neither is added to the other.
-        c["n_rows"] = None
         c["n_rows_contract_tables"] = drows
         c["n_rows_flagship"] = frows
-        c["n_rows_basis"] = (
-            f"NOT SUMMED. {drows:,} rows over the {c['n_tables']} tables the "
-            f"collection contract claims, and {frows:,} in {tbl}, the "
-            f"unclaimed table the sample is drawn from. Whether these are "
-            f"disjoint rows of one dataset is undetermined, so no total is "
-            f"published.")
-        for d in out:
-            if d["id"] == c["product_id"]:
-                d["rows_label"] = "row count unresolved"
+        if kind == "arithmetic":
+            c["n_rows"] = None
+            c["n_rows_basis"] = (
+                f"NOT SUMMED. {drows:,} rows over the {c['n_tables']} tables "
+                f"the collection contract claims, and {frows:,} in {tbl}, "
+                f"the unclaimed table the sample is drawn from. Whether "
+                f"these are disjoint rows of one dataset is undetermined, so "
+                f"no total is published.")
+            for d in out:
+                if d["id"] == c["product_id"]:
+                    d["rows_label"] = "row count unresolved"
+        else:
+            # The count is not the thing in dispute here. Withdrawing it
+            # would be a remedy out of proportion to the measurement.
+            c["n_rows_basis"] = (
+                f"{drows:,} rows over the {c['n_tables']} shippable tables "
+                f"the contract claims; unchanged. The block concerns {tbl}, "
+                f"the sample source, not this total.")
     if fviol:
         print(f"  760 FLAGSHIP MISMATCH - {len(fviol)} of {len(out)} "
               f"collections publish a row count their own sample contradicts:")
-        for cid, tbl, frows, drows, reason in fviol:
-            print(f"    !! {cid}: {reason}")
+        for cid, tbl, frows, drows, reason, kind in fviol:
+            print(f"    !! [{kind}] {cid}: {reason}")
             print(f"       sample source {tbl} = {frows:,} rows; "
-                  f"contract tables = {drows:,}; NOT summed, no count "
-                  f"published, marking BLOCKED")
+                  f"contract tables = {drows:,}; "
+                  + ("count WITHDRAWN" if kind == "arithmetic"
+                     else "count STANDS (not in dispute)")
+                  + ", marking BLOCKED")
 
     # ---- THE CONTRACT CHECK THAT SHOULD HAVE EXISTED IN ROUND 1 --------
     # `CollectionDataset(**descriptor)` is the call the README advertises, so

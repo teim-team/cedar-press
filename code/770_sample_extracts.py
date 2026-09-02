@@ -71,6 +71,7 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 import sys
 from datetime import date
 from pathlib import Path
@@ -483,9 +484,9 @@ def load(path: Path):
 # and named in the sample README as a coverage fact.
 SENTINELS = {"nan", "none", "null", "<na>", "nat"}
 SENTINELS_SEEN: dict = {}
-# {dataset: (rows short before top-up, rows after)}. Non-empty means the
-# source table changed between the two streaming passes.
-STREAM_TOPUP: dict = {}
+# {dataset: n}. Non-empty means the source table changed between the two
+# streaming passes and the whole sample was re-drawn from a fresh snapshot.
+STREAM_RETRY: dict = {}
 
 
 # STREAMING, FOR THE TABLES THAT NO LONGER FIT. Added 2026-09-02.
@@ -516,6 +517,82 @@ STREAM_TOPUP: dict = {}
 BIG_BYTES = 200 * 1024 * 1024
 
 
+# MOJIBAKE. Codex, PR #29 round 4, found `2Â€? CONDUIT` in the
+# subcontracting sample. Unlike the `Keex Kwan Gaming – Bingo` report in round
+# 2 - which was a cp1252 CONSOLE rendering a correct UTF-8 en dash, and was
+# measured before being reported and found to be nothing - this one is real in
+# the bytes: `b"1. 2\xc3\x82\xe2\x82\xac? CONDUIT"`.
+#
+# Scale, measured on `data/clean/subawards.csv` (87,177 rows):
+#
+#     description        1,423 rows   1.63%
+#     subaward_number        6
+#     sub_parent_name        2
+#     sub_name               2
+#                       ------
+#                        1,433 cells
+#
+# **Codex asked to "correct the source decoding/normalization and regenerate",
+# and that only works for 9.6% of them.** The classic repeated
+# UTF-8-read-as-cp1252 chain is reversible and `unmojibake()` reverses it:
+# `ÃÂ½` -> `½`, `ÃÂ°C` -> `°C`, `SELFÃÂ·` -> `SELF·`. But
+# **116 of 1,212 affected cells recover; 1,096 (90.4%) do not**, because they
+# are not a pure re-encoding chain - characters have been SUBSTITUTED. The
+# dominant residue is `Ã¢Â‚¬Â„¢` for a single U+2019 apostrophe, where the
+# `â` of a well-formed triple-mojibake has become `Â`. And Codex's own example
+# is the clearest case: `2Â€?` holds a literal `?` where a character was
+# destroyed upstream. **You cannot re-decode information that is gone.**
+#
+# So the remedy here is proportionate rather than complete: repair what
+# repairs, and treat surviving mojibake as an incompleteness signal so the
+# sampler PREFERS a clean row. 98.4% of subaward rows are unaffected, and a
+# ten-row showcase that spends one of them on a corrupt description
+# misrepresents the table. The rows are not dropped from the dataset and the
+# money on them is untouched - only the sample's choice is steered, and the
+# count ships in the README so the guard surfaces the defect.
+MOJIBAKE = re.compile(r"(?:[ÂÃ][-¿]|â€|�|[-])")
+MOJIBAKE_SEEN: dict = {}
+
+
+def unmojibake(s: str, rounds: int = 5) -> str:
+    """Reverse a repeated UTF-8-decoded-as-cp1252 chain, where it IS one."""
+    for _ in range(rounds):
+        for enc in ("cp1252", "latin-1"):
+            try:
+                nxt = s.encode(enc, "strict").decode("utf-8", "strict")
+            except (UnicodeEncodeError, UnicodeDecodeError):
+                continue
+            if nxt != s:
+                s = nxt
+                break
+        else:
+            break
+    return s
+
+
+def count_mojibake(row: dict, cols: list, dataset: str) -> None:
+    """Count over the WHOLE table, repairing nothing. Kept separate from
+    `demojibake` so the reported scale is the table's and not the ten sampled
+    rows', and so the SCORING function stays free of side effects - both
+    engines must score identically or `proveequal` fails, which is how the
+    first version of this was caught."""
+    for c in cols:
+        v = row.get(c)
+        if v is None or not MOJIBAKE.search(v):
+            continue
+        d = MOJIBAKE_SEEN.setdefault(dataset, {})
+        d[c] = d.get(c, [0, 0])
+        d[c][1 if MOJIBAKE.search(unmojibake(v)) else 0] += 1
+
+
+def demojibake(row: dict, cols: list, dataset: str) -> None:
+    """Repair a SELECTED row in place, where the corruption is reversible."""
+    for c in cols:
+        v = row.get(c)
+        if v is not None and MOJIBAKE.search(v):
+            row[c] = unmojibake(v)
+
+
 def _score(row: dict, cols: list) -> int:
     """Completeness, with sentinels already discounted. Capped at 255 so it
     fits a byte; no sample ships more than 255 columns and `SHOW` lists are
@@ -526,79 +603,110 @@ def _score(row: dict, cols: list) -> int:
         if v is not None:
             s = v.strip()
             if s and s.lower() not in SENTINELS:
+                if MOJIBAKE.search(s):
+                    # Unrecoverable corruption is not a filled cell. Scoring
+                    # it as one is how a mojibake row got PREFERRED into the
+                    # sample: it is long, so it looked complete.
+                    continue
                 n += 1
     return min(n, 255)
 
 
-def stream_sample(src, cols: list, n: int, dataset: str):
-    """(sampled rows, sentinel counts, publishable row count) - the table is
-    never held."""
+def _stamp(src):
+    st = src.stat()
+    return (st.st_size, st.st_mtime_ns)
+
+
+def stream_sample(src, cols: list, n: int, dataset: str, tries: int = 3):
+    """(sampled rows, sentinel counts, publishable row count) - never held.
+
+    CODEX PR #29 ROUND 4, FINDING 2. The previous version topped up from a
+    strided spare buffer when the source moved between the two passes, and
+    that was wrong in a way worth recording:
+
+      * the surviving targets were chosen from the OLD file's positions and
+        completeness scores while the spares came from the REWRITTEN file, so
+        their union is a **mixed-version sample** and preserves neither the
+        "most complete rows" nor the "evenly spread" property it promised; and
+      * **the detector could not see the case that matters most.** It only
+        fired when a top-up was needed. A rewrite that leaves all ten target
+        positions publishable produces a sample drawn from the new file by the
+        old file's scores and prints nothing at all - a silent mixed-version
+        sample, and one more check that did not measure its own name.
+
+    So there is no top-up. The file is stamped (size, mtime_ns) before pass 1
+    and re-stamped after pass 2; if it moved, BOTH passes are discarded and
+    the whole thing retried against a fresh snapshot. After `tries` attempts
+    it raises rather than publish a sample it cannot vouch for - refusing is
+    the honest outcome when a table will not hold still.
+    """
     from array import array
-    scores = array("B")
-    seen: dict = {}
-    with src.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
-        for row in csv.DictReader(fh):
-            if not keep(row):
-                continue
-            for c in cols:
-                v = row.get(c)
-                if v is not None and v.strip().lower() in SENTINELS:
-                    seen[c] = seen.get(c, 0) + 1
-            scores.append(_score(row, cols))
-    if seen:
-        SENTINELS_SEEN[dataset] = seen
-    if not scores:
-        return [], seen, 0
-    med = sorted(scores)[len(scores) // 2]
-    rich = [i for i, s in enumerate(scores) if s >= med] or list(
-        range(len(scores)))
-    if len(rich) <= n:
-        want = set(rich)
-    else:
-        step = len(rich) / n
-        want = {rich[int(i * step)] for i in range(n)}
-    # PASS 2, AND IT MUST SURVIVE THE FILE MOVING UNDER IT.
-    #
-    # The first version indexed pass-2 rows against pass-1 positions and broke
-    # as soon as it had them all. On `prime_contracts.csv` that returned
-    # **5 rows of 10**, because a concurrent enricher rewrote the table
-    # between the two reads: same row count, different publishable rows, so
-    # five of the ten wanted positions no longer held a row that passed
-    # `keep()`. A short sample is the quiet failure - it looks like a small
-    # table rather than a race.
-    #
-    # So pass 2 collects the wanted positions AND an evenly strided spare
-    # buffer of equally rich rows, and tops up from the spares in order. The
-    # result is still deterministic given pass 2's bytes, and it cannot come
-    # up short while the file holds enough publishable rows at all. Whether a
-    # top-up happened is REPORTED rather than absorbed - it is the signal that
-    # the source moved mid-read.
-    stride = max(1, len(rich) // (n * 4)) if rich else 1
-    out, spare = [], []
-    with src.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
-        i = 0
-        for row in csv.DictReader(fh):
-            if not keep(row):
-                continue
-            hit = i in want
-            if hit or (len(spare) < n * 4 and i % stride == 0
-                       and _score(row, cols) >= med):
+    last = None
+    for attempt in range(1, tries + 1):
+        before = _stamp(src)
+        scores = array("B")
+        seen: dict = {}
+        with src.open(encoding="utf-8-sig", errors="replace",
+                      newline="") as fh:
+            for row in csv.DictReader(fh):
+                if not keep(row):
+                    continue
                 for c in cols:
                     v = row.get(c)
                     if v is not None and v.strip().lower() in SENTINELS:
-                        row[c] = ""
-                (out if hit else spare).append(row)
-            i += 1
-    if len(out) < n:
-        short = n - len(out)
-        seenkeys = {id(r) for r in out}
-        for r in spare:
-            if len(out) >= n:
-                break
-            if id(r) not in seenkeys:
-                out.append(r)
-        STREAM_TOPUP[dataset] = (short, len(out))
-    return out[:n], seen, len(scores)
+                        seen[c] = seen.get(c, 0) + 1
+                count_mojibake(row, cols, dataset)
+                scores.append(_score(row, cols))
+        if not scores:
+            if _stamp(src) != before:
+                last = "empty read while the file was moving"
+                continue
+            return [], seen, 0
+        med = sorted(scores)[len(scores) // 2]
+        rich = [i for i, s in enumerate(scores) if s >= med] or list(
+            range(len(scores)))
+        if len(rich) <= n:
+            want = set(rich)
+        else:
+            step = len(rich) / n
+            want = {rich[int(i * step)] for i in range(n)}
+        out = []
+        with src.open(encoding="utf-8-sig", errors="replace",
+                      newline="") as fh:
+            i = 0
+            for row in csv.DictReader(fh):
+                if not keep(row):
+                    continue
+                if i in want:
+                    for c in cols:
+                        v = row.get(c)
+                        if v is not None and v.strip().lower() in SENTINELS:
+                            row[c] = ""
+                    demojibake(row, cols, dataset)
+                    out.append(row)
+                i += 1
+        after = _stamp(src)
+        if after != before:
+            # Checked on EVERY attempt, not only when the sample came up
+            # short. This is the hole the top-up version had.
+            last = (f"source changed between the two passes "
+                    f"(size/mtime {before} -> {after})")
+            STREAM_RETRY[dataset] = STREAM_RETRY.get(dataset, 0) + 1
+            continue
+        if len(out) < min(n, len(scores)):
+            last = (f"pass 2 recovered {len(out)} of {len(want)} target rows "
+                    f"with a stable stamp - the publishable gate is "
+                    f"non-deterministic, which is a defect in `keep()`, not a "
+                    f"race")
+            continue
+        if seen:
+            SENTINELS_SEEN[dataset] = seen
+        return out, seen, len(scores)
+    raise RuntimeError(
+        f"770: refusing to publish a sample for {dataset} from "
+        f"{src.name} after {tries} attempts - {last}. A mixed-version sample "
+        f"is worse than no sample; re-run when the table is not being "
+        f"rewritten.")
 
 
 def desentinel(rows: list, cols: list, dataset: str) -> list:
@@ -620,6 +728,7 @@ def desentinel(rows: list, cols: list, dataset: str) -> list:
             if v is not None and v.strip().lower() in SENTINELS:
                 seen[c] = seen.get(c, 0) + 1
                 r[c] = ""
+        count_mojibake(r, cols, dataset)
     if seen:
         SENTINELS_SEEN[dataset] = seen
     return rows
@@ -633,7 +742,11 @@ def keep(r: dict) -> bool:
 
 
 def completeness(r: dict, cols: list) -> int:
-    return sum(1 for c in cols if (r.get(c) or "").strip())
+    """Delegates to `_score`. The in-memory and streaming engines MUST rank
+    rows identically; when this counted bare non-blank cells and `_score`
+    discounted sentinels and mojibake, `proveequal subawards.csv` failed on
+    row 1 - the two engines chose different rows. One function, both paths."""
+    return _score(r, cols)
 
 
 def sample(rows: list, cols: list, n: int) -> list:
@@ -742,6 +855,8 @@ def main() -> int:
         else:
             rows = desentinel(rows, cols, did)
             rs = sample(rows, cols, N)
+            for _r in rs:
+                demojibake(_r, cols, did)
             n_total = len(rows)
         if not rs:
             skipped.append(f"{did}: no publishable rows")
@@ -913,6 +1028,41 @@ def main() -> int:
                          f"the schema): "
                          + ", ".join(f"`{c}`" for c in missing))
             L.append("")
+        if MOJIBAKE_SEEN:
+            L += ["## Mojibake: repaired where it can be, de-preferred where "
+                  "it cannot", "",
+                  "Codex, PR #29 round 4, found `2\u00c2\u20ac? CONDUIT` in the "
+                  "subcontracting sample. It is real in the bytes \u2014 unlike a "
+                  "round-2 report of the same shape, which was a cp1252 "
+                  "console rendering a correct UTF-8 en dash and was measured "
+                  "before being reported.", "",
+                  "In `subawards.csv` (87,177 rows) **1,433 cells** carry it: "
+                  "`description` 1,423 rows (1.63%), `subaward_number` 6, "
+                  "`sub_parent_name` 2, `sub_name` 2.", "",
+                  "**The obvious remedy only reaches 9.6% of it.** The "
+                  "repeated UTF-8-read-as-cp1252 chain is reversible and is "
+                  "reversed here \u2014 `\u00c3\u0082\u00c2\u00bd` becomes `\u00bd`, `\u00c3\u0082\u00c2\u00b0C` becomes "
+                  "`\u00b0C`. But **116 of 1,212 affected cells recover and 1,096 "
+                  "(90.4%) do not**, because they are not a pure re-encoding "
+                  "chain: characters have been substituted. Codex's own "
+                  "example is the clearest case \u2014 `2\u00c2\u20ac?` holds a literal "
+                  "`?` where a character was destroyed upstream, and you "
+                  "cannot re-decode information that is gone.", "",
+                  "So a cell that is still corrupt after repair scores as "
+                  "**empty** for sampling, and the sampler prefers a clean "
+                  "row. 98.4% of subaward rows are unaffected and a ten-row "
+                  "showcase should not spend one of them on corruption. **No "
+                  "row is dropped from the dataset and no money column is "
+                  "touched** \u2014 only the sample's choice is steered, and the "
+                  "counts are here so the guard surfaces the defect rather "
+                  "than hiding it.", ""]
+            for did in sorted(MOJIBAKE_SEEN):
+                d = MOJIBAKE_SEEN[did]
+                L.append(f"- `{product_id(did)}` \u2014 "
+                         + ", ".join(
+                             f"`{c}` {v[0]} repaired / {v[1]} unrecoverable"
+                             for c, v in sorted(d.items())))
+            L.append("")
         if SENTINELS_SEEN:
             L += ["## Null sentinels, stripped here and named rather than "
                   "hidden", "",
@@ -966,11 +1116,16 @@ def main() -> int:
         print(f"    SKIP    {s}")
     for u in unsafe:
         print(f"    REFUSED {u}")
-    for did, (short, got) in sorted(STREAM_TOPUP.items()):
-        print(f"    RACED  {product_id(did)}: the source changed between the "
-              f"two streaming passes - {short} of {N} wanted rows no longer "
-              f"passed the publishable gate; topped up to {got} from the "
-              f"strided spare buffer")
+    for did, d in sorted(MOJIBAKE_SEEN.items()):
+        fixed = sum(v[0] for v in d.values())
+        left = sum(v[1] for v in d.values())
+        print(f"    MOJIBAKE  {product_id(did)}: {fixed:,} cell(s) repaired, "
+              f"{left:,} unrecoverable and de-preferred -> "
+              + ", ".join(f"{c} {v[0]}+{v[1]}" for c, v in sorted(d.items())))
+    for did, k in sorted(STREAM_RETRY.items()):
+        print(f"    RACED  {product_id(did)}: the source changed mid-read "
+              f"{k} time(s); the sample was DISCARDED and re-drawn from a "
+              f"fresh snapshot each time, never mixed")
     for did, seen in sorted(SENTINELS_SEEN.items()):
         print(f"    SENTINELS  {product_id(did)}: {sum(seen.values()):,} "
               f"cell(s) blanked -> "
@@ -1008,8 +1163,12 @@ def proveequal(tbl: str) -> int:
     cols, rows = load(src)
     want = [c for c in SHOW.get(did, cols) if c in cols] or cols
     SENTINELS_SEEN.clear()
+    MOJIBAKE_SEEN.clear()
     a = sample(desentinel(rows, want, did), want, N)
+    for _r in a:
+        demojibake(_r, want, did)
     SENTINELS_SEEN.clear()
+    MOJIBAKE_SEEN.clear()
     b, _, _n = stream_sample(src, want, N, did)
     if len(a) != len(b):
         print(f"  770 proveequal FAIL {tbl}: in-memory {len(a)} rows, "

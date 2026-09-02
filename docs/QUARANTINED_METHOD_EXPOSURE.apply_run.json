@@ -9,18 +9,18 @@
   ],
   "disposition_counts": {
     "KEEP": 5224,
-    "WITHDRAW": 737,
+    "WITHDRAW": 743,
     "REPOINT": 67,
-    "HOLD": 764
+    "HOLD": 758
   },
   "disposition_usd": {
-    "KEEP": 23028321289.34,
-    "WITHDRAW": 16997581754.88,
+    "KEEP": 23028321289.35,
+    "WITHDRAW": 17070388086.6,
     "REPOINT": 2443371845.81,
-    "HOLD": 6327484436.9
+    "HOLD": 6254678105.18
   },
-  "applied_identifiers": 804,
-  "withdrawn_usd": 16997581754.88,
+  "applied_identifiers": 810,
+  "withdrawn_usd": 72806331.72,
   "repointed_usd": 2443371845.81,
   "before": {
     "rows": 1217768,
@@ -36,9 +36,9 @@
     "rows": 1217768,
     "columns": 75,
     "total_obligations": 310005258660.75,
-    "attributed_rows": 785787,
-    "attributed_obligations": 228037829478.54,
-    "flagged_attributed_rows": 124369,
+    "attributed_rows": 785737,
+    "attributed_obligations": 227965023146.82,
+    "flagged_attributed_rows": 124319,
     "attributed_rows_still_withdrawn": 0,
     "has_new_cols": true
   },
@@ -49,7 +49,7 @@
     "TRBF-TEMOAK-00": -831089252.44,
     "TRBF-CABAZN-00": -561576234.43,
     "TRBF-ESWNDR-00": -556765503.78,
-    "AKNF-KLTIKH-00-AHTNAI-CPPRRV": -458327883.59,
+    "AKNF-KLTIKH-00-AHTNAI-CPPRRV": -531134215.31,
     "TRBF-BNVSTA-00": -407530780.63,
     "TRBS-SEMSEN-00": -371030936.05,
     "AKNF-MRSHLL-00-CALSTA-ASVCPR": -342493454.61,
@@ -157,8 +157,8 @@
     "TRBF-BIDWLL-00": -2530.24,
     "AKNF-QUNHGK-00-CALSTA-ASVCPR": -750.0,
     "AKNF-HAMLTN-00-CALSTA-ASVCPR": -1.0,
-    "ANVC-KSKKWM-00": 0.01,
-    "TRBF-COCHTI-00": 0.01,
+    "TRBF-COCHTI-00": -0.01,
+    "TRBF-ALQSRT-00": -0.01,
     "CNSF-MINNCH-LL": 855035.0,
     "AKNF-KKTOVK-00-ARCSLO": 1028015.7,
     "TRBF-ONDAWI-00": 2424370.7,
@@ -172,7 +172,7 @@
   },
   "file_stats": {
     "ledger": {
-      "ledger_withdrawn": 737,
+      "ledger_withdrawn": 743,
       "ledger_repointed": 67,
       "written": 20577,
       "cols_before": 26,
@@ -180,15 +180,52 @@
     },
     "prime_contracts.csv": {
       "rows": 1217768,
-      "withdrawn_rows": 103171,
-      "flagged_quarantined_rows": 227540,
-      "flagged_attributed_rows": 227540,
       "repointed_rows": 6550,
+      "flagged_quarantined_rows": 6600,
+      "flagged_attributed_rows": 6550,
+      "unknown_attribution_method_rows": 56,
+      "withdrawn_rows": 50,
       "written": 1217768,
-      "withdrawn_usd": 16997581754.88,
+      "withdrawn_usd": 72806331.72,
       "repointed_usd": 2443371845.81,
-      "cols_before": 70,
+      "cols_before": 75,
       "cols_after": 75
-    }
+    },
+    "prime_contracts_archive_backfill.csv": {
+      "rows": 631507,
+      "repointed_rows": 2829,
+      "written": 631507,
+      "withdrawn_usd": 0.0,
+      "repointed_usd": 1114571836.48,
+      "cols_before": 40,
+      "cols_after": 40
+    },
+    "prime_contracts_awards.csv": {
+      "rows": 455080,
+      "repointed_rows": 1944,
+      "written": 455080,
+      "withdrawn_usd": 0.0,
+      "repointed_usd": 2392894655.13,
+      "cols_before": 31,
+      "cols_after": 31
+    },
+    "prime_contracts_published.csv": {
+      "rows": 455080,
+      "repointed_rows": 1944,
+      "written": 455080,
+      "withdrawn_usd": 0.0,
+      "repointed_usd": 2392894655.13,
+      "cols_before": 25,
+      "cols_after": 25
+    },
+    "subawards.csv": {
+      "rows": 87177,
+      "prime_repointed": 186,
+      "sub_repointed": 122,
+      "written": 87177,
+      "cols_before": 71,
+      "cols_after": 71
+    },
+    "subawards_entity_delta": {}
   }
 }

@@ -305,6 +305,28 @@ NORTHWIND_TARGET = "ANRC-CKINLT-00"
 NORTHWIND_NAME_RE = re.compile(r"^(north wind|lbyd)\b", re.I)
 NORTHWIND_FROM_HUBS = {"TRBF-ESWNDR-00", "TRBF-LUMBEE-00"}
 
+# THE COPPER RIVER FAMILY, brought into scope 2026-09-02 on a SECOND,
+# INDEPENDENT confirmation.  `docs/CROSS_SOURCE_VERIFICATION.md`: one source is
+# a claim, two agreeing is a verification.
+#
+#   * this pass reached WITHDRAW on every member from the NAME side - the firms
+#     share no distinctive token with Barrow, Kluti Kaah or Seldovia - and
+#     un-attributed 4,216 rows / $1,426,875,878.31 of them on the UEI leg;
+#   * a concurrent workstream reached the same verdict from the IDENTIFIER
+#     side: the family declares `ALASKA NATIVE GOVERNMENT SERVICES, LLC`
+#     (TNM3D4HVCZT5) as both `parent_uei` and `ultimate_parent_uei`, sits in
+#     Anchorage / Eagle River, and shares ZERO UEIs with the Eyak Corporation
+#     family in Dulles VA.
+#
+# Leaving `COPPER RIVER DATA SOLUTIONS` and `COPPER RIVER GOVERNMENT SOLUTIONS`
+# on Kluti Kaah while their four siblings sit unattributed would be the
+# internal contradiction 1075 exists to fix.  Scope is extended to this NAMED
+# family only, exactly as it was for North Wind / LBYD - not to the CAGE leg at
+# large, which stays reported and flagged (QM-1 in the owner queue).
+COPPERRIVER_NAME_RE = re.compile(r"^copper river\b", re.I)
+COPPERRIVER_FROM_HUBS = {"AKNF-KLTIKH-00-AHTNAI-CPPRRV", "AKNF-SLDVIA-00-CKINLT",
+                         "AKNF-INPTBW-00-ARCSLO"}
+
 # ENTITY_MATCH_RULES rule 7: a residue that is an INSTITUTION FORM means "a
 # body the nation created" and the disposition is HOLD, never ACCEPT.  A
 # regional corporation's annual report names these as customers and partners.
@@ -332,6 +354,13 @@ ORG_GENERIC = frozenset("""government governmental services service solutions so
     community communities village villages rancheria reservation pueblo people peoples traditional
     governing governance corporations alaska alaskan hawaiian hawaii new north south east west
     northern southern eastern western upper lower old grand great big small""".split())
+
+# The vocabulary `40_build_prime_contracts.py` writes into
+# `prime_contracts.attribution_method`, plus the values a ruling writes.
+# Anything else means the column has been overwritten by something that is
+# not 40, and this pass must not trust it - see rewrite_prime_like.
+KNOWN_JOIN_METHODS = {"", "uei_exact", "cage_exact", "parent_uei",
+                      "unattributed", "ruling_applied", "ruling_applied_tier_c"}
 
 UNATTRIBUTED_PRIME = {
     "tribe_id": "", "canonical_name": "", "attribution_method": "unattributed",
@@ -824,9 +853,12 @@ def triage(ev):
             disp, tgt, basis = dispose(ev, it, ident, lr, firm,
                                        pa.get("allnames", ""))
 
-        in_scope = (it == "UEI") or (
-            it == "CAGE" and NORTHWIND_NAME_RE.match(firm or "")
-            and lr.get("tribe_id") in NORTHWIND_FROM_HUBS)
+        named_family_cage = (
+            (NORTHWIND_NAME_RE.match(firm or "")
+             and lr.get("tribe_id") in NORTHWIND_FROM_HUBS)
+            or (COPPERRIVER_NAME_RE.match(firm or "")
+                and lr.get("tribe_id") in COPPERRIVER_FROM_HUBS))
+        in_scope = (it == "UEI") or (it == "CAGE" and named_family_cage)
         if not in_scope and disp in ("WITHDRAW", "REPOINT"):
             basis = ("REPORTED, NOT APPLIED - the CAGE leg is outside this pass's declared "
                      "scope and is newly measured here -- " + basis)
@@ -858,10 +890,15 @@ def backup(p: Path):
     return b
 
 
+REDO = os.environ.get("CEDAR_1079_REDO") == "1"
+
+
 def already_done(p: Path):
     """A file whose `.bak_<TAG>` exists was reached by an earlier run of this
-    pass.  See the RESUME note above."""
-    return Path(str(p) + TAG).exists()
+    pass.  See the RESUME note above.  CEDAR_1079_REDO=1 overrides it to widen
+    an already-applied pass in place, without restoring anything - see the REDO
+    note above `backup`."""
+    return (not REDO) and Path(str(p) + TAG).exists()
 
 
 def atomic_rows(path: Path, header, row_iter, wait_s=600):
@@ -932,8 +969,11 @@ def rewrite_prime_like(path: Path, ev, plan, spec):
     with open(path, newline="", encoding="utf-8-sig") as fh:
         hdr = next(csv.reader(fh))
     ix = {c: i for i, c in enumerate(hdr)}
-    add = [c for c in NEW_PRIME_COLS if spec.get("visibility") and c not in hdr]
+    want = NEW_PRIME_COLS if spec.get("visibility") else []
+    add = [c for c in want if c not in hdr]
     out_hdr = hdr + add
+    # positions to write into when the column is already on the table
+    inplace = {c: ix[c] for c in want if c in ix}
 
     def g(row, c):
         return row[ix[c]] if c in ix else ""
@@ -958,6 +998,16 @@ def rewrite_prime_like(path: Path, ev, plan, spec):
 
                 # which LEDGER row keyed this transaction, in script 40's order
                 am = g(row, "attribution_method") if "attribution_method" in ix else ""
+                if am not in KNOWN_JOIN_METHODS:
+                    # The column does not hold a method 40 writes. Either a
+                    # vocabulary change or another pass overwriting it - on
+                    # 2026-09-02 a concurrent workstream wrote a 240-character
+                    # withdrawal REASON into it and left tribe_id set, which
+                    # made those rows invisible to this pass. Fall back to 40's
+                    # own order rather than trusting the label.
+                    if am:
+                        stat["unknown_attribution_method_rows"] += 1
+                    am = ""
                 if am == "uei_exact" or (not am and u in ev.uei_pick):
                     leg, key, lr = "UEI", u, ev.uei_pick.get(u)
                 elif am == "cage_exact" or (not am and cg != "NAN" and cg in ev.cage_pick):
@@ -1008,12 +1058,18 @@ def rewrite_prime_like(path: Path, ev, plan, spec):
                             row[ix["cedar_uid"]] = plan.uid.get(new, "")
                         stat["repointed_rows"] += 1
                         rev = "REPOINTED_BY_1079"
-                if add:
-                    row = row + [rm, rt, rq, basis, rev]
-                    if rq == "Y":
-                        stat["flagged_quarantined_rows"] += 1
-                        if tid:
-                            stat["flagged_attributed_rows"] += 1
+                    if want:
+                        vals = [rm, rt, rq, basis, rev]
+                        if add:
+                            row = row + vals
+                        else:
+                            for c, v in zip(NEW_PRIME_COLS, vals):
+                                if c in inplace:
+                                    row[inplace[c]] = v
+                        if rq == "Y":
+                            stat["flagged_quarantined_rows"] += 1
+                            if "tribe_id" in ix and row[ix["tribe_id"]]:
+                                stat["flagged_attributed_rows"] += 1
                 yield row
 
         finally:
