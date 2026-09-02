@@ -151,3 +151,46 @@ has been re-pushed on top of `main` at `1241a19`. **A new PR must be opened for
 the standing loop to continue** — that is the one action on this page that
 cannot be done from this machine. Once it exists, Codex reviews on open; read
 all four endpoints listed at the top before deciding it found nothing.
+
+### The PR to open, ready to paste
+
+    gh pr create --repo teim-team/cedar-press \
+      --base main --head cedar-data-samples \
+      --title "Cedar data: the Acoma correction, and four defects a buyer would have seen"
+
+Body:
+
+> Standing PR for the data side of the handshake. #26 merged and GitHub deleted
+> the branch; this re-opens the loop on top of `main`.
+>
+> **The correction first, because it is owed.** Round 1 told Codex that the
+> `PUEBLO OF ACOMA (INC)` finding was "a real defect, and worse than the ten
+> rows showed — 2,434 rows and $1.008B." **That was wrong.** The keyed columns
+> are correct: those rows carry `cedar_uid = CE-0011W-HN`, Pueblo of Acoma,
+> federally recognized. It is a labelling defect — `canonical_name` is copied
+> verbatim from a legacy do-file key that literally holds
+> `{234, 'haaku community academy', NM}`. Of 552,602 keyed rows, 345,108
+> disagree with the register and 339,129 of those (98.3%, $94.0B) are that same
+> legacy reconciliation: right identity, stale label. The genuinely wrong
+> attribution found by chasing it was **820 rows and $181,881,441.37 of United
+> Keetoowah Band obligations credited to Cherokee Nation**, fixed at source in
+> `7b35193`; the legacy id scheme is retired in `b3a0d7f`.
+>
+> **Four defects out of the samples.** `contract_number` was shipping FPDS
+> modification stubs (`0098`, `0006`, `SBA0001`) as if they were keys —
+> `parent_contract_number` now ships beside it and the pair is the key, and
+> adding it exposed 262,773 rows holding the literal string `nan`. The
+> nonprofits sample showed `classification_ruling`, which is filled on 3.1% of
+> rows, instead of `funnel_stage`, which is where the 4,651 exclusions live.
+> `deals` shipped no dollar value though the descriptor promises one.
+> `certification_expiration` shipped in six date formats and every date that
+> reached a customer was un-normalised.
+>
+> **And a failure mode in the builder.** It silently deleted any requested
+> column that was blank across the ten sampled rows, so the sample schema was
+> not stable across rebuilds. Fixed, and the new hard check caught a live drift
+> within the hour.
+>
+> The 46.5% / 86.9% split is closed by stating the denominator in all four
+> places. 11 of 13 datasets are READY, up from 4. All 13 descriptors verified
+> against the `CollectionDataset` dataclass on `main`.
