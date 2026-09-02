@@ -806,6 +806,14 @@ def cmd_mine(limit=None, min_evidence="all"):
         with open(READ_QUEUE, encoding="utf-8-sig", newline="") as fh:
             for q in csv.DictReader(fh):
                 fq[q["accession"]] = q["filer_display_names"]
+    # `fetch-leads` pulls filings the 860 read queue never saw, so their filer
+    # names live in the FTS hit file instead. Without this the whole pre-2017
+    # counterparty seam lands in the candidate file with a BLANK filer.
+    if FTS_HITS.exists():
+        with open(FTS_HITS, encoding="utf-8-sig", newline="") as fh:
+            for q in csv.DictReader(fh):
+                if q["accession"] not in fq and q["filer_display_names"]:
+                    fq[q["accession"]] = q["filer_display_names"]
     for row in rows:
         row["filer_display_names"] = fq.get(row["accession"], "")
 

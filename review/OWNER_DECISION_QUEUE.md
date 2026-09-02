@@ -1348,34 +1348,44 @@ Files: `data/clean/anc_ceiling_roster.csv` (new columns `cedar_uid`,
 
 Full write-up: `docs/NATIVE_BUSINESS_IDENTIFIER_CROSSWALK_LOG.md`.
 Row-level evidence: `review/native_business_identifier_proposals_2026-09-02.csv`
-(71 proposals, your inbox format, each with candidate UEIs and a `cage.dla.mil`
-protocol). Current state: **186 of 2,393 directory rows linked, 153 UEIs,
-$6.32B prime / $474.7M subawards**, up from `business_entity_id` populated on 4.
+(75 proposals, your inbox format, each with candidate UEIs, the dollars at
+stake, and a `cage.dla.mil` protocol).
 
-### A. 55 tier-C promotions — a unique name with no geography behind it
+**Where it stands.** `business_entity_id` was populated on **4 of 2,393** rows.
+**203 rows are now linked** to a federal contracting record across **169
+distinct UEIs**: **$13.43B prime** (of which **$11.67B was already attributed**
+to a Cedar entity and **$1.76B was not**), **$2.16B subawards**, plus $71.3M of
+SAM FY2000–07 net-new. Nothing below is attributed until you rule.
 
-Exactly one federal entity carries the name, the directory row carries **no
-city and no state**, so nothing corroborates it. Held at tier C, published
-nowhere.
-**If PROMOTE (as a class):** 55 more firms link; a wrong one keys a dollar to
-the wrong firm.
-**If REFUSE (as a class):** they stay honest and empty.
-**Recommendation:** rule the *class* by dollar band — promote where the federal
-entity's obligations are under, say, $250K (the cost of an error is small and
-the volume is where the coverage is), adjudicate the handful above it one by
-one. 47 of the 55 are under $250K.
+**The route that worked was not the one anyone expected.** The tribal
+directories publish **no** CAGE, UEI or DUNS — measured across all 249 raw
+objects. The web probe of all 99 firm websites the directories published found
+identifiers on **5 hosts**. What actually broke it open was
+**`federal_contract_number`**, a column already in the table on 20 ASRC rows:
+a printed PIID resolving to one UEI links **BROADLEAF, INUTEQ and VISTRONIX** —
+the three firms the mandate names as unreachable by any name matcher.
 
-### B. 8 ambiguous holds and 8 state conflicts — 16 named firms
+### A. 59 tier-C/X promotions — a unique name with no geography behind it
 
-Each needs one CAGE lookup. The holds are one directory name over 2–5 federal
-UEIs that do **not** share a city (so they are not 8(a) successor entities —
-those are already merged automatically). The conflicts are a same-name federal
-recipient in a different state; the veto refused them and may be wrong where
-the directory printed a mailing address.
-**Biggest single item:** `Arctic Slope Technical Services, Inc.` (ASRC
-subsidiary directory) over 5 UEIs spanning NM, CO, AK, AL and MD, the largest
-carrying **$12.0B** — which also publishes under the name `SIVUNIQ`. Nothing is
-attributed until you rule.
+Exactly one federal entity carries the name; the directory row carries no city
+and no state, so nothing corroborates it. Held, published nowhere.
+**Recommendation:** rule the *class* by dollar band. **30 of the 59 are under
+$250K** — the cost of an error there is small and that is where the coverage
+is. The **29 above** it are worth one lookup each; the largest are
+`Seven Generations Architecture & Engineering` (Cherokee Nation → a Kalamazoo
+MI recipient, **$240.3M**), `Fire Creek, LLC` ($99.7M, a Winnebago NE
+recipient) and `DT-Trak Consulting` ($108.1M, Miller SD) — each a plausible
+Native firm and each keyed to a state the certifying nation does not sit in.
+
+### B. 8 ambiguous holds and 8 state conflicts — 16 firms, one CAGE lookup each
+
+The holds are one directory name over 2–5 federal UEIs that do **not** share a
+city, so they are not 8(a) successor entities (those merge automatically).
+The conflicts are a same-name federal recipient in a different state; the veto
+refused them and may be wrong wherever the directory printed a mailing address.
+**Biggest single item:** `Arctic Slope Technical Services, Inc.` over 5 UEIs
+spanning NM, CO, AK, AL and MD — the largest carrying **$12.0B** and also
+trading as **`SIVUNIQ`**.
 
 ### C. THE POLICY ONE — a UEI on a firm named after a person
 
@@ -1384,257 +1394,31 @@ attributed until you rule.
 * **Your rule:** a firm's name is not PII even when the firm is named after its
   owner. A prior pass wrongly withheld 521 rows on that ground.
 * **Cedar's coded policy** (`cedar_domain.INDIVIDUAL_NATIVE_WITHHELD_FIELDS`)
-  is about the **identifier**, not the name: SAM's public entity search resolves
-  a UEI to a name *and a street address*, so for a sole-proprietor firm the UEI
-  is a pointer to that person's front door.
+  is about the **identifier**, not the name: SAM's public entity search
+  resolves a UEI to a name *and a street address*, so for a sole-proprietor
+  firm the UEI is a pointer to that person's front door.
 
 Both can be true, and this build did **not** decide between them. Every row
-carries its identifier plus `identifier_publish_gate`; **29 crosswalk rows on
-16 linked firms** are currently `WITHHOLD_PENDING_RULING`.
+carries its identifier plus `identifier_publish_gate`; **35 crosswalk rows on
+19 linked firms** are `WITHHOLD_PENDING_RULING` today.
 **Decision:** does the UEI/CAGE of a firm whose legal name is a person's name
 publish (a) always, (b) never, or (c) only where the firm is demonstrably
 incorporated — an LLC/Inc suffix on the registered legal name?
-**Recommendation:** (c). It keeps your rule about names intact, and withholds
+**Recommendation:** (c). It keeps your rule about names intact and withholds
 only the one field that resolves to a home address.
 
----
+### FYI, not a decision — two things the 950–959 agent should see
 
-<!-- BEGIN SPLINK-PILOT-1060 -->
-
-## 16. Two alias rows send Ho-Chunk Inc to Wisconsin and Seminole Nation to Florida (splink pilot, band 1060, 2026-09-02)
-
-**Both are members of the three collision pairs you named as disqualifying, and
-both are live in `prime_contracts.csv` right now.** Found by
-`code/1060_splink_pilot.py`; full write-up `docs/SPLINK_PILOT_2026-09-02.md`.
-Dollars are small. The class is not — this is the shape of the $181,881,441.37
-UKB merge, caught before it grew.
-
-**D1.** `data/clean/entity_aliases.csv` carries
-
-```
-entity_id TRBF-HOCHNK-00  (Ho-Chunk Nation of Wisconsin, CE-00150-XS)
-alias_name "Ho Chunk Inc"   alias_type legal   source_system UEI
-```
-
-Ho-Chunk Inc is the **Winnebago Tribe of Nebraska's** holding company
-(`TRBF-WNNBGO-00` / `CE-001C8-GH`), which Cedar already knows — Ho-Chunk
-Builders, Ho-Chunk Shared Services and HCI Winnebago are all keyed to Winnebago.
-That one alias row makes `503_identity.resolve` return **Wisconsin** for
-`HO CHUNK INC` at its *strongest* evidence class ("exact normalized name/alias,
-unique"). Currently mis-keyed in `prime_contracts`:
-
-| contractor | city, state | keyed to | obligations |
-|---|---|---|---:|
-| HO-CHUNK CONSTRUCTION MANAGEMENT SERVICES COMPANY | Winnebago, **NE** | CE-00150-XS (**WI**) | $0.60M |
-| HO CHUNK INC | Winnebago, **NE** | CE-00150-XS (**WI**) | $0.02M |
-
-**D2.** The same file carries
-
-```
-entity_id TRBF-SMNLFL-00  (Seminole Tribe of Florida, CE-001A9-CA)
-alias_name "Seminole Nation"  alias_type full_form_federal_filing  source_system cedar_generated
-```
-
-"Seminole Nation" is the **Oklahoma** tribe (`TRBF-SMNLOK-00` / `CE-001AA-J3`).
-The spine `aliases` column additionally gives the Florida tribe the bare token
-`Seminole`. `503` therefore sends `SEMINOLE NATION SERVICES, LLC` (**OK**) to
-**Florida**, and `prime_contracts` has it that way today, along with
-`HARD ROCK HOTEL AND CASINO TULSA` (**OK**, Cherokee Nation's property; Hard
-Rock is the Florida tribe's brand).
-
-**Decision:** (a) retire both alias rows and repoint the four affected UEIs, or
-(b) retire the aliases only and leave the rows to re-resolve, or (c) hold.
-**Recommendation:** (a). Neither alias is defensible on its own terms — one
-names a different nation's company, the other names a different nation.
-**Rung 1 of your own ladder settles both on the state alone**, which is why the
-pilot's model refused the merge splink-side (Wisconsin scored p=0.1878 against a
-Nebraska entity at 0.9507; Oklahoma Seminole beat Florida 0.2029 to 0.0299).
-
-**If YES:** four contractor rows re-key, $0.62M moves; the alias layer stops
-manufacturing the error for every future name that carries those tokens.
-**If NO:** the two aliases stay and any new `Ho-Chunk *` or `Seminole *` filer
-resolves the same wrong way.
-
-## 17. 475 single-token aliases are unguarded; 101 of them are live collision hazards
-
-`503_identity.build_index()` refuses a single-token alias only when
-`alias_type == 'brand'` (104 rows, added after the shard-J finding). Measured
-across all 6,298 rows of `entity_aliases.csv` on 2026-09-02:
-
-| alias_type | single-token rows | refused today |
-|---|---:|---|
-| common | 328 | no |
-| acronym | 141 | no |
-| brand | 104 | **yes** |
-| shortened | 3 | no |
-| legal | 3 | no |
-| **total** | **579** | **104** |
-
-A blanket refusal is wrong — `Afognak`, `Ahtna`, `Akutan`, `Chevak`,
-`Chalkyitsik` are real single-word names and rule 14 says that orthography is a
-*positive* signal. The structural predicate is narrower and measurable:
-**101 single-token index keys are owned outright by one spine entity while the
-same token is also a distinctive token of a different spine entity** — `BEAVER`
-(Beaver AK vs Beaver Kwit'chin Corp vs Beaver Creek Indians), `BRISTOL`
-(Choggiung Ltd vs four Bristol Bay entities), `BLACKFEET`, `CADDO`, `CAHUILLA`,
-`CHEHALIS`, `CHITIMACHA`, `CHUNK`. Each of those is a name-only win waiting to
-land on the wrong entity, and the Ho-Chunk and Seminole cases in item 16 are two
-that already have.
-
-**Decision:** extend the single-token guard from `alias_type='brand'` to
-**any single-token alias whose token is also a distinctive token of a different
-spine entity** (the 101), keeping the other 478 as they are?
-**Recommendation:** yes — it is the structural predicate
-`docs/ENTITY_MATCH_RULES.md` asks for rather than another denylist, it is
-re-derivable rather than typed, and it refuses nothing that is unambiguous.
-
-## 18. Is a graded score worth having on the rows 503 declines? (the splink verdict)
-
-`splink 4.0.16` was piloted against contractor→nation attribution on 690
-owner-ruled UEIs, 345 held out. **It is dominated by the incumbent at every
-operating point**: 87.5% precision / 38.6% recall at p≥0.5 against 503's
-89.3% / 53.0%, and nothing in the whole threshold × margin grid exceeds 93.2%
-precision. Worse, `match_probability` is **not reproducible run to run** —
-precision at p≥0.95 moved over 80.8–88.5% on byte-identical input, and
-enlarging splink's `u` sample from 5M to 100M pairs did not fix it — so a fixed
-band does not mean the same thing next week. Recommendation is **REJECT as a
-matcher**. Full numbers: `docs/SPLINK_PILOT_2026-09-02.md`.
-
-Two things it does do better than 503, both about *knowing what it does not
-know*: on your 116 tier-X refusals 503 would link 41.9% anyway while splink
-links **0% above p=0.99 and 6% above p=0.95**; and it passes all three of your
-collision cases by scoring them uncertain rather than by getting them right.
-
-The one configuration that could earn a place: **scored only on the 140 held-out
-rows 503 declined, splink at p≥0.5 proposes 9 and gets 6 right (66.7%)** —
-+1.7 points of recall, queue-grade and nowhere near apply-grade. Note that as a
-straight replacement it is negative-sum: at p≥0.5 it rescues 6 rows 503 declined
-while breaking 11 rows 503 got right.
-
-**Decision:** do you want `review/splink_pilot_adjudication_queue_2026-09-02.csv`
-(**252 rows, $0.96B**, every row carrying address / website / co-located-UEI /
-CAGE for ladder rungs 1–4) as a standing queue that regenerates, or was this a
-one-off measurement?
-**Recommendation:** keep the queue, drop the model as a matcher. Three caveats.
-(1) Sort by `margin_over_runner_up` after dollars — **15 of the 19 top-1 errors
-have the truth at rank 2 or 3**, so a thin margin is the signal, not noise.
-(2) The bottom cut is 0.5, not the 0.1 the recall curve argues for: at 0.1 the
-queue is 1,273 rows / $10.06B and its *highest-dollar* rows are junk
-(`All Cities Enterprises` → All **Pueblo** Council of Governors, on the token
-`ALL`). Regenerate the wider one with `queue --reject 0.1` if you want it.
-(3) Splink is **no use as a cross-check** on rows 503 got wrong: at p≥0.1 it
-agreed with the wrong answer 9 times and disagreed 10 — a coin flip on exactly
-the rows that matter.
-
-<!-- END SPLINK-PILOT-1060 -->
-
-<!-- BEGIN NEWSLETTER-CORPUS-990 -->
-
-## 19. Middletown Rancheria's newsletters sit under a `/Stagingsite/` path — refuse, or ask?
-
-`code/991_newsletter_gap_sweep.py` found **13 Middletown Rancheria newsletter
-PDFs** through the tribe's own WordPress media index. Every one is served from
-
-```
-https://middletownrancheria-nsn.gov/Stagingsite/wp-content/uploads/...
-```
-
-They return 200, they are linked by the site's own machine-readable index, and
-nothing about them is login-gated. They are also, by their path, a **staging
-environment that is publicly reachable** — which
-`docs/HIDDEN_DATA_TECHNIQUES.md` calls an operator mistake rather than an
-invitation.
-
-The sweep **refused all 13** and recorded them in `refused_paths` with the
-reason. Middletown still shows as `FOUND` because it publishes other channels
-that are not under that path, so the refusal costs coverage but not the entity.
-
-**Decision:** stand by the refusal, or treat a `/Stagingsite/` path that the
-site's own public media index advertises as ordinary published content?
-**Recommendation:** stand by the refusal, and if the back run matters, **ask
-Middletown** — the same route the terms-restricted eight get. A path the
-operator did not mean to expose is exactly the case where a cleverer fetch
-damages standing with the nations Cedar covers, and the cost here is thirteen
-PDFs from one rancheria.
-
-## 20. Shard I's tribe-serving nonprofit slice contains place-name collisions
-
-Building the newsletter corpus surfaced **13 organisations that are not Native**
-sitting in `data/staging/np_harvest/newsletters_shard_i.jsonl` — Peoria
-Astronomical Society, Wichita Shakespeare Company, Onondaga Cycling Club, Fond
-du Lac County Audubon Society, Clinton Symphony Orchestra of the Mohawk Valley,
-Seminole Audubon Society, Lake Quinault Historical Society and others. They
-reached the slice because a city, a county and a valley carry the same names as
-nations.
-
-They are **flagged, not deleted**, in `data/clean/tribal_newsletter_corpus.csv`
-(`note` begins `FLAG_UPSTREAM`) and are excluded from every count of Native
-publications. Two of them carry a non-empty `tribe_id`, so the collision has
-already propagated at least that far.
-
-**Decision:** this is shard I's slice to fix, not the newsletter corpus's.
-Should the 13 be removed at source, and should the rest of that slice be
-re-derived with a structural guard rather than a name match?
-**Recommendation:** yes to both, and note that the guard already exists — item
-17's single-token rule is the same failure in a different table.
-
-<!-- END NEWSLETTER-CORPUS-990 -->
-
-<!-- BEGIN DEALS-IDENTIFIER-SWEEP-1071 -->
-
-## 19. `cluster_v3` has put the Bureau of Indian Affairs inside Barrow — Bristol Bay's defect class is not closed (identifier deal sweep, band 1071, 2026-09-02)
-
-`cedar_identifier_ledger_final.csv` attributes **`Indian Affairs, Bureau Of`
-(8 UEIs + CAGE `6B3X6`)** and **`Computer Sciences Corporation`
-(UEI `L2RLDSEQJ5M1`)** to `AKNF-INPTBW-00-ARCSLO`, tier **B**, method
-**`cluster_v3`** — the same name-cluster mechanism, and the same shape, as the
-Bristol Bay FA-01 defect `START_HERE.md` records as closed on 2026-08-29. There
-are **2,001 tier-B `cluster_v3` rows** in the ledger; these are two of them.
-
-**What it already cost, measured:** `review/1010_ownership_change_candidates.csv`
-resolves hubs from the whole ledger at every tier. Re-tested against tier A
-only, **72 of its 98 candidates lose their Native side** — including its largest
-by dollars, General Dynamics IT at $3.06B, which is on the list because Barrow
-"owns" Computer Sciences Corporation. `review/1071_consolidated_deal_candidates.csv`
-carries the re-test per row in `tierA_native_side_confirmed`; it is **carried,
-not applied**, because a consumer may not assign a tier (START_HERE trap 1) and
-equally may not hide one.
-
-**Decision:** should the `cluster_v3` tier-B rows whose `legal_business_name` is
-a federal agency or a Fortune-500 prime be swept to tier **X** the way FA-01
-was? That is a write to a shared table and an agent should not make it.
-**Recommendation:** yes, and scope it by the same test FA-01 used — the cluster
-matched a place or agency token, not a distinctive corporate name. A ranked list
-is cheap to produce from the ledger on request.
-
-## 20. Two contracting-visible ownership changes that are in no Cedar source — merge or not?
-
-Both surfaced only because a subawardee's UEI stayed constant while its declared
-parent changed, and neither is in `deals_classified.csv`:
-
-| identifier | change | FY | evidence |
-|---|---|---|---|
-| `PTJATEQ7Q873` WHPacific, Inc. | **NANA Regional Corporation → NV5 Global, Inc.** | 2019→2021 | `subawards.csv`, `sub_uei=PTJATEQ7Q873` |
-| `F2BEQJNKFY83` Clarus Fluid Intelligence, LLC | **Clarus (Koniag) → Chestnut Park** | 2017→2019 | `subawards.csv`, `sub_uei=F2BEQJNKFY83` |
-
-**Both carry a gap, not a date** — two fiscal years separate the runs, so the
-event lies somewhere inside the window and no `Event_Date` may be written. Both
-carry **no value**; none was published.
-
-**Decision:** do these enter `deals_classified.csv` as `OBSERVED_IN_FILINGS`
-rows with a year range and a blank value, or do they wait for a press or filing
-confirmation? The existing ledger has no status for "seen in federal filings,
-never announced", and this wave's whole premise is that such transactions are
-the ones nobody else can report.
-**Recommendation:** admit them with `deal_status_std = OBSERVED_IN_FILINGS`,
-`Date_Basis` naming the fiscal-year window explicitly, and a blank value. The
-WHPacific row additionally carries `terms_restricted_source = NANA / Akima` —
-the constraint is on NANA's own publications, and this row rests on FSRS, so it
-publishes; the flag is there so nobody quotes NANA's site alongside it.
-
-Full build log and the other two defects this sweep had to fix first
-(the FY2007/2008 `awardee_name` rendering seam, and `Tanadgusix Corporation
-(TDX)` failing to match `TANADGUSIX CORPORATION`) are in
-**`docs/DEALS_IDENTIFIER_SWEEP_2026-09-02.md`**.
-
-<!-- END DEALS-IDENTIFIER-SWEEP-1071 -->
+1. **`code/953`'s name-only matcher and this one agree on 140 rows and
+   disagree on 0**, which is reassuring but is *not* corroboration — both read
+   the same federal tables (`docs/ASSERTION_LAYER.md`, evidence lineage).
+   **But 6 of 953's `unique_name_match` rows contradict the directory's own
+   recorded state** — e.g. `Arrowhead Contractors, LLC`, certified in North
+   Carolina, keyed to a Louisiana recipient. Those 6 are in the conflicts file.
+2. **`TBD-059` (Doyon) is 8 rows and 4 of them are prose, not firms** —
+   `"Enjoy lunch at Kantishna Roadhouse"`, `"KRH Earns Best Wilderness Lodge"`,
+   `", Klawock Island Ventures, and"`. Two more, Huna Totem Corporation and
+   Klawock Heenya Corporation, are Doyon's **joint-venture partners in
+   Na-Dena'**, not Doyon subsidiaries, yet carry
+   `identity_scope = parent_asserted_subsidiary`. That is an ownership
+   over-claim on the strongest evidence class in the dataset.

@@ -1,0 +1,156 @@
+{
+  "measured_date": "2026-09-02",
+  "from": {
+    "cedar_uid": "CE-0016W-A5",
+    "tribe_id": "TRBF-MHATAT-00",
+    "name": "Three Affiliated"
+  },
+  "to": {
+    "cedar_uid": "CE-000A9-81",
+    "tribe_id": "ANVC-LDHRBR-00",
+    "name": "Old Harbor Native Corporation"
+  },
+  "disputed_identifiers": [
+    "1Y3A4",
+    "4FK09",
+    "60C58",
+    "FGELS2KFR825",
+    "NW3JPQEZRPK1"
+  ],
+  "rows_repointed_total": 12282,
+  "per_file": {
+    "data/clean/cedar_identifier_ledger_final.csv": {
+      "rows": 20577,
+      "cols": 22,
+      "repointed": 5,
+      "money_conserved": true,
+      "money_cents_by_col": {},
+      "cents_moved_off_CE-0016W-A5": 0,
+      "cents_moved_onto_CE-000A9-81": 0,
+      "breaches": []
+    },
+    "data/clean/cedar_identifier_ledger_tiered.csv": {
+      "rows": 19232,
+      "cols": 22,
+      "repointed": 3,
+      "money_conserved": true,
+      "money_cents_by_col": {},
+      "cents_moved_off_CE-0016W-A5": 0,
+      "cents_moved_onto_CE-000A9-81": 0,
+      "breaches": []
+    },
+    "data/spine/cedar_identifier_ledger.csv": {
+      "rows": 19232,
+      "cols": 14,
+      "repointed": 3,
+      "money_conserved": true,
+      "money_cents_by_col": {},
+      "cents_moved_off_CE-0016W-A5": 0,
+      "cents_moved_onto_CE-000A9-81": 0,
+      "breaches": []
+    },
+    "data/clean/cedar_entity_identity_crosswalk.csv": {
+      "rows": 10107,
+      "cols": 20,
+      "repointed": 5,
+      "money_conserved": true,
+      "money_cents_by_col": {},
+      "cents_moved_off_CE-0016W-A5": 0,
+      "cents_moved_onto_CE-000A9-81": 0,
+      "breaches": []
+    },
+    "data/clean/cedar_identifier_graph_nodes.csv": {
+      "rows": 115471,
+      "cols": 16,
+      "repointed": 5,
+      "money_conserved": true,
+      "money_cents_by_col": {},
+      "cents_moved_off_CE-0016W-A5": 0,
+      "cents_moved_onto_CE-000A9-81": 0,
+      "breaches": []
+    },
+    "data/clean/cedar_resolved_facts.csv": {
+      "rows": 34275,
+      "cols": 22,
+      "repointed": 5,
+      "money_conserved": true,
+      "money_cents_by_col": {},
+      "cents_moved_off_CE-0016W-A5": 0,
+      "cents_moved_onto_CE-000A9-81": 0,
+      "breaches": []
+    },
+    "data/clean/cedar_assertions.csv": {
+      "rows": 34615,
+      "cols": 19,
+      "repointed": 5,
+      "money_conserved": true,
+      "money_cents_by_col": {},
+      "cents_moved_off_CE-0016W-A5": 0,
+      "cents_moved_onto_CE-000A9-81": 0,
+      "breaches": []
+    },
+    "data/clean/prime_contracts.csv": {
+      "rows": 1217768,
+      "cols": 70,
+      "repointed": 4947,
+      "money_conserved": true,
+      "money_cents_by_col": {
+        "total_obligations": 31000525866121,
+        "total_award_value": 562579112082881,
+        "total_obligations_real2025": 38498437026082,
+        "total_award_value_real2025": 658018196531092
+      },
+      "cents_moved_off_CE-0016W-A5": 44937683104,
+      "cents_moved_onto_CE-000A9-81": 44937683104,
+      "breaches": []
+    },
+    "data/clean/prime_contracts_archive_backfill.csv": {
+      "rows": 631507,
+      "cols": 40,
+      "repointed": 4533,
+      "money_conserved": true,
+      "money_cents_by_col": {
+        "total_obligations": 16248048061939,
+        "total_award_value": 335284420091166,
+        "total_obligations_real2025": 21069167225512,
+        "total_award_value_real2025": 416003943043399
+      },
+      "cents_moved_off_CE-0016W-A5": 33050909378,
+      "cents_moved_onto_CE-000A9-81": 33050909378,
+      "breaches": []
+    },
+    "data/clean/prime_contracts_awards.csv": {
+      "rows": 455080,
+      "cols": 31,
+      "repointed": 1158,
+      "money_conserved": true,
+      "money_cents_by_col": {},
+      "cents_moved_off_CE-0016W-A5": 0,
+      "cents_moved_onto_CE-000A9-81": 0,
+      "breaches": []
+    },
+    "data/clean/prime_contracts_published.csv": {
+      "rows": 455080,
+      "cols": 25,
+      "repointed": 1158,
+      "money_conserved": true,
+      "money_cents_by_col": {},
+      "cents_moved_off_CE-0016W-A5": 0,
+      "cents_moved_onto_CE-000A9-81": 0,
+      "breaches": []
+    },
+    "data/clean/subawards.csv": {
+      "rows": 76859,
+      "cols": 71,
+      "repointed": 455,
+      "money_conserved": true,
+      "money_cents_by_col": {
+        "subaward_amount": 4730166081978
+      },
+      "cents_moved_off_CE-0016W-A5": 1295130164,
+      "cents_moved_onto_CE-000A9-81": 1295130164,
+      "breaches": []
+    }
+  },
+  "flagged_not_moved": 20
+}

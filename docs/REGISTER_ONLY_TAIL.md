@@ -15,7 +15,7 @@
 | `cedar_resolved_facts.csv` | what Cedar has adjudicated |
 | `entity_aliases.csv` | names, one or more for every entity |
 
-Excluding the identity layer and any table that is a census of the register, **83** register entities have no row in any of the 138 substantive tables, and **31** more have exactly one.
+Excluding the identity layer and any table that is a census of the register, **83** register entities have no row in any of the 140 substantive tables, and **31** more have exactly one.
 
 The slice worked here is both — the thin tail, **114** entities. The line between the two groups moved while this was being written: the newsletter workstream landed `tribal_newsletter_corpus.csv` and 21 entities that had been register-only an hour earlier acquired one row apiece. Slicing on zero alone would have dropped them at the moment they became reachable. `n_substantive_tables` on every evidence row keeps the two states told apart.
 
@@ -23,12 +23,12 @@ The slice worked here is both — the thin tail, **114** entities. The line betw
 
 | entity class | in the thin tail | of those, in ZERO tables | given a first row here |
 |---|---:|---:|---:|
-| BIE School | 87 | 83 | 86 |
+| BIE School | 87 | 83 | 85 |
 | Federal-level self-governance consortium | 18 | 0 | 18 |
 | Native Community Development Financial Institution | 3 | 0 | 3 |
 | Individually Native-owned business | 3 | 0 | 2 |
 | Urban Indian Organization | 3 | 0 | 3 |
-| **total** | **114** | **83** | **112** |
+| **total** | **114** | **83** | **111** |
 
 ## What was found
 
@@ -36,14 +36,15 @@ The slice worked here is both — the thin tail, **114** entities. The line betw
 |---|---:|
 | NCES_CCD | 85 |
 | USASPENDING | 32 |
-| IRS_990 | 24 |
-| NONE | 2 |
+| IRS_990 | 21 |
+| NONE | 3 |
 
-## Checked, nothing located — 2
+## Checked, nothing located — 3
 
 *Every one of these has a row in `register_only_first_rows.csv` naming the routes run and the date. That is a finding. It is not the same as unexamined, and the two must never be collapsed.*
 
 | entity | class |
 |---|---|
+| Cherokee Central Middle School | BIE School |
 | Shiprock Reservation Dormitory | BIE School |
 | Tallsalt Advisors / Mette Associates | Individually Native-owned business |

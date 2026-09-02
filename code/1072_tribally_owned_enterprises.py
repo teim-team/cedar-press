@@ -744,6 +744,14 @@ def load_sources() -> tuple:
         aid = (x.get("certifying_authority_entity_id") or "").strip()
         if sid and aid:
             nob_auth.setdefault(sid, (aid, x.get("certifying_authority_name", "")))
+    # lint-ok: class1 - this glob ENUMERATES a source directory; it is not a
+    # partial view of a set whose other members live elsewhere. The defect
+    # class 1 names is `deals_*_additions.csv`, which silently omitted two
+    # root ledgers holding 131 rows. Every business-registry harvest is a
+    # `TBD-*.jsonl` in this one directory by construction, the selection
+    # predicate is on the ROW (directory_type = subsidiary_directory), not
+    # on the filename, and `stage_assemble` prints a per-source count so a
+    # missing file shows up as an absent line rather than as silence.
     for path in sorted((CEDAR / "data/staging/business_registry").glob("TBD-*.jsonl")):
         rows = read_jsonl(path)
         if not rows:
@@ -1877,10 +1885,101 @@ def stage_codebook(argv) -> int:
     return 0
 
 
+
+# ===========================================================================
+# STAGE `conserve` - C5 row conservation, measured not typed
+# ===========================================================================
+# `data/clean/cedar_harvest_conservation.csv` is the ledger 518 reads for C5.
+# Its question is not "how many rows are there" but "where did every row that
+# entered go" - the discipline that caught a de-duplication which would have
+# destroyed $8,291,124,113 of real obligations. Three accountings are written:
+# the ACQUISITION funnel (every raw assertion, kept or refused, by reason),
+# and one partition of each published table. Every number is recomputed from
+# the files on every run; none is copied from a previous report.
+CONSERVATION = CLEAN / "cedar_harvest_conservation.csv"
+CONS_FIELDS = ["source_table", "rows_in", "disposition", "rows", "pct",
+               "examples", "harvest_date"]
+
+
+def stage_conserve(argv) -> int:
+    ents = read_csv(OUT_ENT)
+    edges = read_csv(OUT_EDGE)
+    held = read_csv(HELD)
+    kept = read_jsonl(EDGES_STAGED)
+    if not ents:
+        print("  run `build` first")
+        return 1
+
+    out = []
+
+    def add(table, rows_in, groups, examples=None):
+        examples = examples or {}
+        total = 0
+        for disp, n in groups:
+            total += n
+            out.append({
+                "source_table": table, "rows_in": rows_in,
+                "disposition": disp, "rows": n,
+                "pct": round(100.0 * n / rows_in, 2) if rows_in else 0.0,
+                "examples": examples.get(disp, ""), "harvest_date": BUILT})
+        assert total == rows_in, (
+            f"{table}: dispositions sum to {total}, not {rows_in} - a row "
+            f"conservation ledger that does not conserve is worse than none")
+
+    # 1. THE ACQUISITION FUNNEL. Every ownership assertion any source made.
+    raw = len(kept) + len(held)
+    hold_groups = Counter(h.get("hold_class", "UNKNOWN") for h in held)
+    ex = {}
+    for h in held:
+        k = "refused:" + h.get("hold_class", "UNKNOWN").lower()
+        ex.setdefault(k, (h.get("hold_reason") or "")[:200])
+    add("data/staging/nest/raw_ownership_assertions", raw,
+        [("emitted:assertion_kept_with_a_resolved_owner_and_a_named_source",
+          len(kept))]
+        + [(f"refused:{k.lower()}", v) for k, v in sorted(hold_groups.items())],
+        ex)
+
+    # 2. THE ENTERPRISE TABLE, by what the row actually claims.
+    rc = Counter(r["relation_class"] for r in ents)
+    nosrc = sum(1 for r in ents
+                if not (r["source_url"].strip() or r["source_document"].strip()))
+    add("data/clean/nest_enterprises.csv", len(ents), [
+        ("emitted:ownership_asserted_by_the_owner_itself",
+         rc.get("ownership", 0)),
+        ("emitted:published_tie_that_is_NOT_ownership_relation_class_affiliation",
+         rc.get("affiliation", 0)),
+        ("rejected:ownership_claim_with_no_source", nosrc),
+    ], {"rejected:ownership_claim_with_no_source":
+        "structurally impossible: `verify` I3 exits 1 on any such row, and "
+        "`selfcheck` proves that check fires"})
+
+    # 3. THE RELATIONS TABLE, by evidence class - the honest picture of what
+    #    this dataset rests on.
+    ec = Counter(e["evidence_class"] for e in edges)
+    add("data/clean/nest_enterprise_relations.csv", len(edges),
+        [("emitted:" + k, v) for k, v in sorted(ec.items())])
+
+    prior = [r for r in read_csv(CONSERVATION)
+             if not (r.get("source_table") or "").split("/")[-1].startswith("nest")
+             and "staging/nest" not in (r.get("source_table") or "")]
+    bak = CONSERVATION.with_suffix(
+        f".csv.bak_{BUILT}_pre_1072_tribally_owned_enterprises")
+    if CONSERVATION.exists() and not bak.exists():
+        bak.write_bytes(CONSERVATION.read_bytes())
+    write_csv(CONSERVATION, CONS_FIELDS, prior + out)
+    for r in out:
+        print(f"  {r['source_table'].split('/')[-1]:<34} {r['rows']:>6}  "
+              f"{r['pct']:>6}%  {r['disposition'][:64]}")
+    print(f"  ledger {len(prior)} prior rows + {len(out)} NEST rows; "
+          f"backup {bak.name}")
+    return 0
+
+
 def main() -> int:
     stages = {"mine": stage_mine, "assemble": stage_assemble,
               "build": stage_build, "codebook": stage_codebook,
-              "verify": stage_verify, "selfcheck": stage_selfcheck}
+              "conserve": stage_conserve, "verify": stage_verify,
+              "selfcheck": stage_selfcheck}
     if len(sys.argv) < 2 or sys.argv[1] not in stages:
         print(__doc__)
         print("stages: " + " ".join(sorted(stages)))

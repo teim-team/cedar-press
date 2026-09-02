@@ -604,6 +604,10 @@ def verify(argv):
                 "identifier_value": "SHORT"}]
         check("malformed identifier is caught",
               "malformed_identifier" in _invariants(bad))
+        bad = [{"identifier_type": "", "may_publish": "N",
+                "identifier_value": "", "business_source_id": "junk"}]
+        check("a torn row with no identifier_type is caught",
+              "torn_row" in _invariants(bad))
         return 1 if fails else 0
 
     if not CROSSWALK.exists():
@@ -612,7 +616,7 @@ def verify(argv):
     rows = list(csv.DictReader(open(CROSSWALK, encoding="utf-8-sig")))
     caught = _invariants(rows)
     for k in ("duns_published", "malformed_identifier",
-              "restricted_source_published"):
+              "restricted_source_published", "torn_row"):
         check(f"no {k}", k not in caught, caught.get(k, ""))
     check("every crosswalk row names a directory business",
           all(r["business_source_id"] for r in rows))
@@ -639,6 +643,15 @@ def _invariants(rows):
             out.setdefault("malformed_identifier", f"{typ}:{val}")
         if pub and r.get("source_id") in restricted:
             out.setdefault("restricted_source_published", r.get("source_id"))
+        # A TORN ROW. Two processes held this file open on 2026-09-02 - `web`
+        # was still running when `1001 build` rewrote it - and the crosswalk
+        # ended with a line reading
+        # `business_source_id = "ode/1001_link_businesses_to_contracting.py"`:
+        # the tail of one writer's row landing at another writer's offset. It
+        # passed every other check because every OTHER field was empty. A row
+        # with no identifier_type is not a row.
+        if not typ:
+            out.setdefault("torn_row", repr(r.get("business_source_id"))[:60])
     return out
 
 

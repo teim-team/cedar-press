@@ -804,7 +804,12 @@ def map_row(r, zipname, sa_map=None):
 
     return {
         "contract_number": s("award_id_piid"),
-        "parent_contract_number": s("parent_award_id_piid") or s("award_id_piid"),
+        # NO `or s("award_id_piid")` FALLBACK. A standalone award references no
+        # IDV, and writing its own PIID here fabricates a parent/child
+        # edge that a consumer cannot tell from a real one. Codex, PR #29
+        # finding 4. Blank means standalone; `contract_number` still
+        # carries the PIID. See code/1076_clear_self_parent_piid.py.
+        "parent_contract_number": s("parent_award_id_piid"),
         "fiscal_year": fy,
         "pre_2000_flag": int(fy < 2000),
         "awardee_name": s("recipient_name"),

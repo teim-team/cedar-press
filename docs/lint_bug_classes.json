@@ -1,23 +1,23 @@
 {
-  "scanned_files": 556,
+  "scanned_files": 564,
   "counts": {
     "class1": 1,
     "class2a": 0,
     "class2b": 0,
-    "class2c": 65,
+    "class2c": 66,
     "class3": 2,
-    "class4": 12,
-    "class5": 6,
+    "class4": 13,
+    "class5": 7,
     "class6": 25,
-    "class7": 46,
+    "class7": 45,
     "class8": 0,
-    "lint_bug_class_instances": 157
+    "lint_bug_class_instances": 159
   },
   "findings": [
     {
       "class": "class1",
       "file": "1011_cross_dataset_reconciliation.py",
-      "line": 428,
+      "line": 430,
       "evidence": "for pth in sorted(glob.glob(C(\"deals_*_additions.csv\"))):",
       "why": "glob pattern 'deals_*_additions.csv' enumerates a derived/staged artefact. If a PROMOTED table holds the truth, this reads the additions and never the ledger (the 88/57/41/82/35 defect). If reading the staged file IS the job - a promoter, a stager, a diff - waive it with a reason.",
       "waived": false,
@@ -37,7 +37,7 @@
       "file": "1031_ancsa_45_55_139_annual_reports.py",
       "line": 214,
       "evidence": "if time.time() - started > RUN_DEADLINE_S:",
-      "why": "a budget (RUN_DEADLINE_S) exits a loop, the file writes a completion marker (['\\nOK', ' fetched   ', 'ok']), and it never compares what it RETRIEVED against the total the SOURCE reported. That is the PER_DOCKET_BUDGET_S defect: four dockets written at 2,300-3,200 of 3,555-4,847 and marked `done`, so no resume would ever revisit them.",
+      "why": "a budget (RUN_DEADLINE_S) exits a loop, the file writes a completion marker (['\\nOK', ' fetched   ', 'Completed', 'ok']), and it never compares what it RETRIEVED against the total the SOURCE reported. That is the PER_DOCKET_BUDGET_S defect: four dockets written at 2,300-3,200 of 3,555-4,847 and marked `done`, so no resume would ever revisit them.",
       "waived": false,
       "waiver_reason": ""
     },
@@ -53,16 +53,16 @@
     {
       "class": "class5",
       "file": "105_build_florida_gaming.py",
-      "line": 870,
+      "line": 901,
       "evidence": "if len([w for w in hdr if w[\"text\"] == \"Receipts\"]) < 1 or \\",
-      "why": "an 'already done' short-circuit (len([w for w in hdr if w['text'] == 'Receipts']) < 1 or len(hdr) < 2) skips the work, and this file still rewrites a log/summary artefact wholesale at line 2164. On a second run the counters are zero and the log says so - the 164 defect: 187 facilities rewritten to read '0 sources'. Re-running a build must not change its output; merge into the existing log or refuse to rewrite it.",
+      "why": "an 'already done' short-circuit (len([w for w in hdr if w['text'] == 'Receipts']) < 1 or len(hdr) < 2) skips the work, and this file still rewrites a log/summary artefact wholesale at line 2199. On a second run the counters are zero and the log says so - the 164 defect: 187 facilities rewritten to read '0 sources'. Re-running a build must not change its output; merge into the existing log or refuse to rewrite it.",
       "waived": false,
       "waiver_reason": ""
     },
     {
       "class": "class2c",
       "file": "1060_splink_pilot.py",
-      "line": 285,
+      "line": 305,
       "evidence": "drop_nc += 1",
       "why": "counter 'drop_nc' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -71,7 +71,7 @@
     {
       "class": "class2c",
       "file": "1060_splink_pilot.py",
-      "line": 288,
+      "line": 308,
       "evidence": "drop_ns += 1",
       "why": "counter 'drop_ns' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -96,6 +96,24 @@
       "waiver_reason": ""
     },
     {
+      "class": "class1",
+      "file": "1072_tribally_owned_enterprises.py",
+      "line": 755,
+      "evidence": "for path in sorted((CEDAR / \"data/staging/business_registry\").glob(\"TBD-*.jsonl\")):",
+      "why": "glob pattern 'data/staging/business_registry' enumerates a derived/staged artefact. If a PROMOTED table holds the truth, this reads the additions and never the ledger (the 88/57/41/82/35 defect). If reading the staged file IS the job - a promoter, a stager, a diff - waive it with a reason.",
+      "waived": true,
+      "waiver_reason": "this glob ENUMERATES a source directory; it is not a"
+    },
+    {
+      "class": "class5",
+      "file": "1075_fix_old_harbor_attribution.py",
+      "line": 255,
+      "evidence": "if not col or uid_col not in cols:",
+      "why": "an 'already done' short-circuit (not col or uid_col not in cols) skips the work, and this file still rewrites a log/summary artefact wholesale at line 481. On a second run the counters are zero and the log says so - the 164 defect: 187 facilities rewritten to read '0 sources'. Re-running a build must not change its output; merge into the existing log or refuse to rewrite it.",
+      "waived": false,
+      "waiver_reason": ""
+    },
+    {
       "class": "class2c",
       "file": "107b_fill_source_urls.py",
       "line": 74,
@@ -116,7 +134,7 @@
     {
       "class": "class2c",
       "file": "114_pull_prime_archive.py",
-      "line": 1667,
+      "line": 1723,
       "evidence": "dropped += 1",
       "why": "counter 'dropped' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -683,7 +701,7 @@
     {
       "class": "class2c",
       "file": "75_add_bie_schools_and_uios.py",
-      "line": 898,
+      "line": 929,
       "evidence": "skipped += 1",
       "why": "counter 'skipped' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -740,6 +758,15 @@
       "line": 602,
       "evidence": "state[\"fail\"] += 1",
       "why": "counter 'fail' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
+      "waived": false,
+      "waiver_reason": ""
+    },
+    {
+      "class": "class2c",
+      "file": "846_session_audit.py",
+      "line": 294,
+      "evidence": "fails += 1",
+      "why": "counter 'fails' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
       "waiver_reason": ""
     },
@@ -839,6 +866,15 @@
       "line": 291,
       "evidence": "missing += 1",
       "why": "counter 'missing' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
+      "waived": false,
+      "waiver_reason": ""
+    },
+    {
+      "class": "class4",
+      "file": "980_gaming_web_harvest.py",
+      "line": 341,
+      "evidence": "if time.time() - started > READ_BUDGET_S:",
+      "why": "a budget (READ_BUDGET_S) exits a loop, the file writes a completion marker (['OK']), and it never compares what it RETRIEVED against the total the SOURCE reported. That is the PER_DOCKET_BUDGET_S defect: four dockets written at 2,300-3,200 of 3,555-4,847 and marked `done`, so no resume would ever revisit them.",
       "waived": false,
       "waiver_reason": ""
     },
@@ -1286,7 +1322,7 @@
     {
       "class": "class7",
       "file": "05_parse_doi_nho_list.py",
-      "line": 90,
+      "line": 121,
       "evidence": "r[\"nho_id\"] = f\"NHO-DOI-{i:04d}\"",
       "why": "[WARN] POSITIONAL on target nho_id -> nho_doi_notification_roster.csv. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": false,
@@ -1376,7 +1412,7 @@
     {
       "class": "class7",
       "file": "1031_ancsa_45_55_139_annual_reports.py",
-      "line": 471,
+      "line": 518,
       "evidence": "\"candidate_id\": f\"AS4555139-{n:05d}\",",
       "why": "[WARN] POSITIONAL on target candidate_id -> no clean table. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": false,
@@ -1421,7 +1457,7 @@
     {
       "class": "class7",
       "file": "107_pull_remaining_states.py",
-      "line": 991,
+      "line": 1022,
       "evidence": "r[\"observation_id\"] = f\"SG-{st}-{seq[st]:05d}\"",
       "why": "[WARN] POSITIONAL on target observation_id -> codebook_master.csv, state_gaming_observations.csv. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": false,
@@ -1637,7 +1673,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 3753,
+      "line": 3811,
       "evidence": "h = hash(\"\\x1f\".join(parts))",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1646,7 +1682,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 3763,
+      "line": 3821,
       "evidence": "h = hash(\"\\x1f\".join(row))",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1655,7 +1691,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 3788,
+      "line": 3846,
       "evidence": "if hash(k) in collided[gj]:",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1664,7 +1700,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 3794,
+      "line": 3852,
       "evidence": "if hash(k) in row_collided:",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1726,6 +1762,15 @@
     },
     {
       "class": "class7",
+      "file": "845_regenerate_guard.py",
+      "line": 414,
+      "evidence": "_k = id(_fn) if _fn is not None else 0",
+      "why": "[BLOCKING] OBJECT_ADDRESS on target (unnamed) -> no clean table. builtin id() is a memory address, stable only within one process. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
+      "waived": false,
+      "waiver_reason": ""
+    },
+    {
+      "class": "class7",
       "file": "84_build_nigc_regions.py",
       "line": 627,
       "evidence": "matched_f = {id(p[0]) for p in pairs}",
@@ -1775,24 +1820,6 @@
       "line": 395,
       "evidence": "k[\"observation_id\"] = f\"GCO-{src}-{seq[src]:05d}\"",
       "why": "[WARN] POSITIONAL on target observation_id -> gaming_capacity_official.csv. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
-      "waived": false,
-      "waiver_reason": ""
-    },
-    {
-      "class": "class7",
-      "file": "940_staleness_sweep.py",
-      "line": 259,
-      "evidence": "and id(n) not in doc_nodes):",
-      "why": "[BLOCKING] OBJECT_ADDRESS on target (unnamed) -> no clean table. builtin id() is a memory address, stable only within one process. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
-      "waived": false,
-      "waiver_reason": ""
-    },
-    {
-      "class": "class7",
-      "file": "940_staleness_sweep.py",
-      "line": 255,
-      "evidence": "doc_nodes.add(id(body[0].value))",
-      "why": "[BLOCKING] OBJECT_ADDRESS on target (unnamed) -> no clean table. builtin id() is a memory address, stable only within one process. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": false,
       "waiver_reason": ""
     },
@@ -1862,7 +1889,7 @@
     {
       "class": "class3",
       "file": "1060_splink_pilot.py",
-      "line": 265,
+      "line": 285,
       "evidence": "where l.identifier_type='UEI' and l.confidence_tier='A'",
       "why": "a tier-A assignment sits within 6/3 lines of a ruling-method or status test, at 2 site(s), and this file has NO RECORDED DISPOSITION in 293's DISPOSITIONS table. A regex cannot decide this one - read the site and write the reason down. `attribution_method` says WHO decided; `confidence_tier` says WHAT was decided. Do NOT delete the entry to make this pass.",
       "waived": false,
@@ -2182,6 +2209,12 @@
       ],
       "gaming_vendor_tribal_licenses.csv": [
         "148_build_gaming_vendor_tribal_licenses.py"
+      ],
+      "gaming_web_harvest_coverage.csv": [
+        "980_gaming_web_harvest.py"
+      ],
+      "gaming_web_harvest_observations.csv": [
+        "980_gaming_web_harvest.py"
       ],
       "geo_aiannh_county_observed.csv": [
         "873_build_aiannh_crosswalk.py"
@@ -2506,6 +2539,7 @@
         "503_identity.py"
       ],
       "cedar_harvest_conservation.csv": [
+        "1072_tribally_owned_enterprises.py",
         "510_assertions.py",
         "572_ws2_contracts.py",
         "574_ws1_money_and_conservation.py",
@@ -2538,6 +2572,9 @@
         "503_identity.py",
         "843_retire_cicd_scheme.py",
         "961_promote_register_legal_names_and_state.py"
+      ],
+      "cedar_nest_id_register.csv": [
+        "1072_tribally_owned_enterprises.py"
       ],
       "cedar_observations.csv": [
         "515_temporal.py"
@@ -2801,6 +2838,12 @@
       "nd_severance_allocation.csv": [
         "113_build_nd_severance.py"
       ],
+      "nest_enterprise_relations.csv": [
+        "1072_tribally_owned_enterprises.py"
+      ],
+      "nest_enterprises.csv": [
+        "1072_tribally_owned_enterprises.py"
+      ],
       "nho_ito_spine_crosswalk.csv": [
         "163_promote_nho_universe_in_place.py"
       ],
@@ -2951,6 +2994,7 @@
         "75_add_bie_schools_and_uios.py"
       ],
       "cedar_harvest_conservation.csv": [
+        "1072_tribally_owned_enterprises.py",
         "510_assertions.py",
         "572_ws2_contracts.py",
         "574_ws1_money_and_conservation.py",
@@ -3238,12 +3282,12 @@
       },
       {
         "file": "1060_splink_pilot.py",
-        "line": 265,
+        "line": 285,
         "source": "where l.identifier_type='UEI' and l.confidence_tier='A'"
       },
       {
         "file": "1060_splink_pilot.py",
-        "line": 276,
+        "line": 296,
         "source": "where l.identifier_type='UEI' and l.confidence_tier='A'"
       },
       {

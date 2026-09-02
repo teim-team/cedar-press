@@ -134,7 +134,19 @@ def main():
         y = int(row.year)
         out.append({
             "contract_number": row.contract_number,
-            "parent_contract_number": row.parent_contract_number,
+            # THE .dta ENCODES "STANDALONE" AS SELF-PARENT, AND CEDAR MUST
+            # NOT SHIP THAT AS A VEHICLE REFERENCE. Measured in the raw
+            # source: 216,882 of 617,142 rows carry
+            # parent_contract_number == contract_number and NOT ONE is blank.
+            # A column where "no parent" never occurs and self-parent occurs
+            # on 35.1% of rows is a column where self-parent IS "no parent" -
+            # and the FPDS archive rows carry a genuine blank on 31.2%, the
+            # same population at the same rate under the honest encoding.
+            # Codex, PR #29 finding 4. See code/1076_clear_self_parent_piid.py.
+            "parent_contract_number": (
+                "" if (row.parent_contract_number or "") ==
+                      (row.contract_number or "")
+                else row.parent_contract_number),
             "fiscal_year": y,
             "pre_2000_flag": int(y < FLOOR),
             "awardee_name": row.awardee_name,

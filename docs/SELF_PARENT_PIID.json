@@ -1,0 +1,108 @@
+{
+  "measured_date": "2026-09-02",
+  "per_table": {
+    "data/clean/prime_contracts.csv": {
+      "rows": 1217768,
+      "cols": 70,
+      "self_parent_rows": 156592,
+      "share": 0.128589,
+      "by_source_file": {
+        "master prime file.dta": 156587,
+        "FY2009_All_Contracts_Full_20260806.zip": 3,
+        "FY2010_All_Contracts_Full_20260806.zip": 2
+      },
+      "examples": [
+        {
+          "contract_number": "N6871100C8173",
+          "fiscal_year": "2000",
+          "awardee_name": "A.R.I. Building & Roofing, Inc",
+          "source_file": "master prime file.dta"
+        },
+        {
+          "contract_number": "DACA6398C0021",
+          "fiscal_year": "2000",
+          "awardee_name": "Amex Cost Consultants",
+          "source_file": "master prime file.dta"
+        },
+        {
+          "contract_number": "FA667500M5006",
+          "fiscal_year": "2000",
+          "awardee_name": "Amex Cost Consultants",
+          "source_file": "master prime file.dta"
+        },
+        {
+          "contract_number": "N6871197C3726",
+          "fiscal_year": "2000",
+          "awardee_name": "Bennie Sanchez",
+          "source_file": "master prime file.dta"
+        },
+        {
+          "contract_number": "F0865000C0034",
+          "fiscal_year": "2000",
+          "awardee_name": "Cw Construction Services, Inc.",
+          "source_file": "master prime file.dta"
+        }
+      ],
+      "money_cents": {
+        "total_obligations": 31000525866121,
+        "total_award_value": 562579112082881,
+        "total_obligations_real2025": 38498437026082,
+        "total_award_value_real2025": 658018196531092
+      },
+      "breaches": []
+    },
+    "data/clean/prime_contracts_archive_backfill.csv": {
+      "rows": 631507,
+      "cols": 40,
+      "self_parent_rows": 5,
+      "share": 8e-06,
+      "by_source_file": {
+        "FY2009_All_Contracts_Full_20260806.zip": 3,
+        "FY2010_All_Contracts_Full_20260806.zip": 2
+      },
+      "examples": [
+        {
+          "contract_number": "HHSI242200910157B",
+          "fiscal_year": "2009",
+          "awardee_name": "IRON EAGLE ENTERPRISES INC",
+          "source_file": "FY2009_All_Contracts_Full_20260806.zip"
+        },
+        {
+          "contract_number": "AG5375120601",
+          "fiscal_year": "2009",
+          "awardee_name": "MESCALERO APACHE TRIBE",
+          "source_file": "FY2009_All_Contracts_Full_20260806.zip"
+        },
+        {
+          "contract_number": "AG5375120601",
+          "fiscal_year": "2009",
+          "awardee_name": "MESCALERO APACHE TRIBE",
+          "source_file": "FY2009_All_Contracts_Full_20260806.zip"
+        },
+        {
+          "contract_number": "GS06F0103Z",
+          "fiscal_year": "2010",
+          "awardee_name": "TKC COMMUNICATIONS, LLC",
+          "source_file": "FY2010_All_Contracts_Full_20260806.zip"
+        },
+        {
+          "contract_number": "DTOS5910D00507",
+          "fiscal_year": "2010",
+          "awardee_name": "BOWHEAD SYSTEMS MANAGEMENT LLC",
+          "source_file": "FY2010_All_Contracts_Full_20260806.zip"
+        }
+      ],
+      "money_cents": {
+        "total_obligations": 16248048061939,
+        "total_award_value": 335284420091166,
+        "total_obligations_real2025": 21069167225512,
+        "total_award_value_real2025": 416003943043399
+      },
+      "breaches": []
+    }
+  },
+  "generator_fix": "fallback removed",
+  "raw_dta_self_parent": 216882,
+  "raw_dta_rows": 617142,
+  "raw_dta_blank_parent": 0
+}

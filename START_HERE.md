@@ -228,6 +228,7 @@ find its row here and stop — you do not need to grep `docs/`.*
 | identifier graph | `IDENTIFIER_GRAPH_BUILD_LOG.md` |
 | ANCSA / Alaska | `ANCSA_OWNERSHIP_RULING.md` · `ANCSA_PORTAL_BUILD_LOG.md` · `ANCSA_PORTAL_V2_LOG.md` |
 | individually Native-owned class | `INDIVIDUAL_NATIVE_CLASS_PROPOSAL.md` · `INDIVIDUAL_NATIVE_OWNERSHIP_VERIFICATION_BUILD_LOG.md` |
+| Native-owned business ↔ contracting crosswalk | **`NATIVE_BUSINESS_IDENTIFIER_CROSSWALK_LOG.md`** — `code/1000_harvest_business_identifiers.py` + `code/1001_link_businesses_to_contracting.py`. Builds `native_business_contract_links.csv` (one row per directory row), `native_business_identifier_crosswalk.csv` and `native_business_contracting_by_nation.csv`. **The directories publish NO federal identifiers — measured across all 249 raw objects — so the join runs from the federal side.** 203 of 2,393 rows linked, 169 UEIs, $13.43B prime ($1.76B of it previously unattributed), $2.16B subawards. Companion to the `COLUMN_PROMOTION_LOG` row above: 953 wrote candidate columns onto the directory, this pass owns the crosswalk |
 | taxonomy | `CEDAR_TAXONOMY.md` (+ `.json`) |
 | admin regions | `ADMIN_REGION_CROSSWALK_LOG.md` |
 | derivation policy | `SELF_DISCLOSED_DERIVATION.md` |

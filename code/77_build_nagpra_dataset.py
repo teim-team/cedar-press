@@ -1403,6 +1403,19 @@ def is_state_only(s):
 TYPE_PREFIX_RE = re.compile(
     r"^Notice of (?:Inventory Completion|Intent to Repatriate|"
     r"Intended Repatriation|Intended Disposition)\b", re.I)
+# THE 2015+ TITLE FORM PUTS AN OBJECT PHRASE BETWEEN THE NOTICE TYPE AND THE
+# COLON: "Notice of Intent To Repatriate Cultural Items: <institution>".
+# TYPE_PREFIX_RE stops at "Repatriate", the startswith(":") test then fails,
+# and the parser falls through to title_remainder keeping "Cultural Items:"
+# inside institution_name - 857 of 6,792 rows, splitting 287 institutions in
+# two (Codex PR #29 finding 6). Anchored on a lookahead for the colon, so
+# where there is no colon nothing is consumed and no institution name can be
+# eaten. See code/1077_nagpra_institution_grain.py.
+OBJECT_HEAD_RE = re.compile(
+    r"^\s*(?:of\s+)?(?:Cultural Items?|"
+    r"Human Remains(?:\s+and\s+(?:Associated\s+)?Funerary Objects)?|"
+    r"Native American Human Remains[^:]{0,80})?"
+    r"(?:\s*Amendment)?\s*(?=:)", re.I)
 POSSESSION_RE = re.compile(
     r"\b(?:in the (?:possession|control|physical custody) of)\s+", re.I)
 CITY_STATE_RE = re.compile(r",\s*([A-Za-z][A-Za-z .'\-]{1,30}?),\s*([A-Z]{2})\s*$")
@@ -1437,6 +1450,9 @@ def parse_institution(title):
     body, how = "", ""
     m = TYPE_PREFIX_RE.match(t)
     rest = t[m.end():] if m else t
+    _om = OBJECT_HEAD_RE.match(rest)
+    if _om:
+        rest = rest[_om.end():]
     if rest.lstrip().startswith(":"):
         body, how = rest.lstrip()[1:].strip(), "title_colon"
     else:
@@ -1469,13 +1485,23 @@ def institution_type(name):
 # Affairs and in the Possession of the Oshkosh Public Museum'. Counting the
 # joined string as one institution overstates the number of distinct holders
 # and hides both parties from a per-institution view.
+# SPLIT ON THE SEMICOLON FIRST. The Federal Register separates co-holders
+# with "; " and closes the list with "; and ". Splitting on ", and " first
+# cuts INSIDE ordinary organisation names: "South Carolina Department of
+# Parks, Recreation, and Tourism" became two institutions, one of them
+# "Tourism, Columbia, SC", which does not exist (Codex PR #29 finding 8). The
+# legacy rule is kept for the pre-2000 titles that carry no semicolon.
+INST_SEMI_RE = re.compile(r";")
 INST_SPLIT_RE = re.compile(
     r",\s+and\s+|;\s+and\s+|\s+and in the (?:possession|control|physical custody) of\s+",
     re.I)
 
 
 def institution_parts(body):
-    parts = [p.strip(" ,;.") for p in INST_SPLIT_RE.split(body or "") if p.strip()]
+    _b = body or ""
+    _segs = _b.split(";") if ";" in _b else INST_SPLIT_RE.split(_b)
+    parts = [re.sub(r"^\s*and\s+", "", p.strip(" ,;."), flags=re.I)
+             for p in _segs if p.strip()]
     parts = [re.sub(r"^the\s+", "", p, flags=re.I).strip() for p in parts]
     # Strip a trailing ', City, ST' from each part, not just the last.
     out = []

@@ -159,6 +159,7 @@ COLS = ["cedar_uid", "canonical_name", "entity_class",
         "match_method", "checked_date", "evidence"]
 
 _last = [0.0]
+_STATE_UID = ""
 
 
 def _pace(sec=0.6):
@@ -492,15 +493,22 @@ def _pp_once(query):
     return (d.get("organizations") or []), "ok"
 
 
-def propublica(name, state=""):
+def propublica(name, state="", reject_other_states=True):
     """Full name, then the distinctive tokens alone.
 
-    `state` is accepted and DELIBERATELY IGNORED. Filtering on the register's
-    state killed Utah Navaho Health System -- 200 and a hit without the
-    filter, 404 with it -- because the state an organisation FILES in is not
-    always the state Cedar records it in. A filter that removes true positives
-    to save a name test is a bad trade when the name test is the real
-    discriminator.
+    `state` is never sent to the API as a FILTER -- doing that killed Utah
+    Navaho Health System, which answers 200 without the filter and 404 with
+    it, because the state an organisation FILES in is not always the state
+    Cedar records it in. It is used afterwards as a REJECTION test instead,
+    which is a different and safer thing: a filter removes true positives
+    silently, a rejection only discards a candidate we already have in hand
+    and can name in the evidence.
+
+    The rejection earns its place. The broadened token query `cherokee
+    central` matched **Cherokee Central Middle School (North Carolina)** to
+    **Central Texas Cherokee Township (Austin, TX)** -- two shared words, two
+    unrelated organisations, 1,200 miles apart. Widening a query widens what
+    can come back, so a widened query needs a narrowing test beside it.
 
     The token retry is the same lesson as SEARCHING FOR THE INSTITUTION
     INSTEAD OF THE THING: 'Juel Fairbanks Recovery Services' returns nothing
@@ -526,8 +534,16 @@ def propublica(name, state=""):
             ok, mnote = name_matches(name, o.get("name", ""))
             if not ok and o.get("sub_name"):
                 ok, mnote = name_matches(name, o["sub_name"])
+            if ok and reject_other_states and state \
+                    and (o.get("state") or "").upper() not in ("", state):
+                notes.append("q=%r name-matched %r but it files in %s, not %s "
+                             "-- REJECTED on state"
+                             % (q, (o.get("name") or "")[:40],
+                                o.get("state"), state))
+                continue
             if ok:
-                return o, "propublica: q=%r %s" % (q, mnote)
+                return o, ("propublica: q=%r %s; state %s"
+                           % (q, mnote, o.get("state") or "?"))
         notes.append("q=%r %d results, none passed the name test"
                      % (q, len(orgs)))
     return None, "propublica: " + "; ".join(notes)
@@ -670,9 +686,7 @@ def run():
                                "any substantive Cedar table.")
 
         if not got or cls != "BIE School":
-            o, note = propublica(name, st if st in ("HI", "AK", "CA", "OK",
-                                                    "AZ", "UT", "MT", "MN")
-                                 else "")
+            o, note = propublica(name, st)
             tried.append("IRS/990 via ProPublica Nonprofit Explorer -> " + note)
             if o:
                 got = True
@@ -861,11 +875,17 @@ def check(path=OUT):
     (7) a facility match is RE-DERIVED from the matched name recorded in
         `fact_value` and must still pass. A note written by the matcher
         cannot audit the matcher.
+    (8) a matched 990 filer must not sit in a different state from the
+        entity. Caught a North Carolina school matched to an Austin, Texas
+        nonprofit on two shared words.
     """
     bad = []
     if not os.path.exists(path):
         return ["register_only_first_rows.csv has never been written"]
-    known = {r["cedar_uid"] for r in read_register() if r.get("cedar_uid")}
+    _reg = read_register()
+    known = {r["cedar_uid"] for r in _reg if r.get("cedar_uid")}
+    reg_state = {r["cedar_uid"]: (r.get("state") or "").strip()
+                 for r in _reg if r.get("cedar_uid")}
     with open(path, encoding="utf-8-sig", errors="replace", newline="") as fh:
         for i, r in enumerate(csv.DictReader(fh), 2):
             uid = (r.get("cedar_uid") or "").strip()
@@ -907,6 +927,18 @@ def check(path=OUT):
                                "current rule REFUSES: %s"
                                % (i, uid, matched[:50], note[:80]))
 
+            # (8) A TAX FILER IN ANOTHER STATE IS ANOTHER ORGANISATION.
+            # `fact_value` records the filer's city and state, and the
+            # register records the entity's, so the gate can compare them
+            # without re-querying anything.
+            if ec == "TAX_FILER":
+                want = (reg_state.get(uid) or "").upper()
+                mm = re.search(r"\|\s*[A-Za-z .'-]*\s([A-Z]{2})\s*\|",
+                               r.get("fact_value") or "")
+                if want and mm and mm.group(1) != want:
+                    bad.append("line %d: %s is in %s but the matched filer is "
+                               "in %s" % (i, uid, want, mm.group(1)))
+
             if ec == "NONE_FOUND":
                 n = len([x for x in ev.split(" | ") if x.strip()])
                 if "TRIED:" not in ev or n < 2:
@@ -919,6 +951,10 @@ def selftest():
     import tempfile
     p = os.path.join(tempfile.gettempdir(), "reg_only_selftest.csv")
     real = next(r["cedar_uid"] for r in read_register() if r.get("cedar_uid"))
+    global _STATE_UID
+    _STATE_UID = next((r["cedar_uid"] for r in read_register()
+                       if (r.get("state") or "").strip()
+                       and r["cedar_uid"] != real), real)
 
     def w(row):
         with open(p, "w", encoding="utf-8", newline="") as fh:
@@ -945,6 +981,10 @@ def selftest():
               identifier_value="590002000149",
               canonical_name="Cherokee Central Middle School",
               fact_value="Cherokee Central Elementary School | LEA 1 | x")),
+        ("990 filer in the wrong state",
+         dict(base, evidence_class="TAX_FILER",
+              cedar_uid=_STATE_UID,
+              fact_value="Central Texas Cherokee Township | Austin TX | x")),
         ("thin negative", dict(base, evidence_class="NONE_FOUND",
                                identifier_type="", identifier_value="",
                                source="", source_url="", match_method="",

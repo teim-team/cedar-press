@@ -2,9 +2,9 @@
 
 *Generated 2026-09-02 by `code/512_build_dataset_contracts.py` (mission Phase 1). Regenerate rather than edit; `verify` exits 1 when the world breaks a contract, and 62 gates on it.*
 
-**14 collections, 268 tables claimed, 7 orphaned shippable tables, 11 violations.**
+**14 collections, 270 tables claimed, 7 orphaned shippable tables, 11 violations.**
 
-**Grain: 218 of 225 shippable tables declare and VALIDATE a row grain, a primary key and a join cardinality; 7 do not.** A declared grain the data contradicts is a release-blocking violation, listed below. An unstated grain is ratcheted by `62_no_regression_check.contract_grain_unstated_shippable`: the count may only fall, and a new shippable table that lands without one fails the gate that day.
+**Grain: 220 of 227 shippable tables declare and VALIDATE a row grain, a primary key and a join cardinality; 7 do not.** A declared grain the data contradicts is a release-blocking violation, listed below. An unstated grain is ratcheted by `62_no_regression_check.contract_grain_unstated_shippable`: the count may only fall, and a new shippable table that lands without one fails the gate that day.
 
 <details><summary>Shippable tables with an UNSTATED grain (7) - a buyer cannot join these safely</summary>
 
@@ -675,8 +675,8 @@ Rebuild: `py -3 code/build.py run nest --execute` — 2 tables.
 
 | table | status | keys | rebuilt by | enriched by |
 |---|---|---|---|---|
-| `nest_enterprise_relations.csv` | UNDOCUMENTED | `cedar_uid` | — | — |
-| `nest_enterprises.csv` | UNDOCUMENTED | `cedar_uid` `uei` `cage_code` | — | — |
+| `nest_enterprise_relations.csv` | shippable | `cedar_uid` | — | — |
+| `nest_enterprises.csv` | shippable | `cedar_uid` `uei` `cage_code` | — | — |
 
 Declared grain — validated against the file on every run:
 
@@ -797,7 +797,7 @@ Declared grain — validated against the file on every run:
 
 ## Gaming Intelligence  (`gaming`, shelf: grove)
 
-Rebuild: `py -3 code/build.py run gaming --execute` — 61 tables.
+Rebuild: `py -3 code/build.py run gaming --execute` — 63 tables.
 
 | table | status | keys | rebuilt by | enriched by |
 |---|---|---|---|---|
@@ -847,6 +847,8 @@ Rebuild: `py -3 code/build.py run gaming --execute` — 61 tables.
 | `gaming_revenue_bounds.csv` | shippable | `tribe_id` `cedar_uid` `facility_id` | — | — |
 | `gaming_source_claims.csv` | shippable | — | `91_build_nigc_declinations.py` | `100_finish_declinations_and_employment.py` `510_assertions.py` |
 | `gaming_vendor_tribal_licenses.csv` | shippable | `cedar_uid` `entity_id` | — | — |
+| `gaming_web_harvest_coverage.csv` | unregistered | `tribe_id` `cedar_uid` | — | — |
+| `gaming_web_harvest_observations.csv` | unregistered | `tribe_id` `cedar_uid` | — | — |
 | `loyalty_program_property.csv` | shippable | `tribe_id` `cedar_uid` `entity_id` `facility_id` | — | — |
 | `loyalty_programs.csv` | shippable | `tribe_id` `cedar_uid` `entity_id` | — | — |
 | `nigc_action_parties.csv` | shippable | `cedar_uid` | — | — |

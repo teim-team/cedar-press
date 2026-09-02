@@ -118,7 +118,23 @@ NOW = datetime.now(timezone.utc).isoformat()
 
 ASSERTION_CLASS = "SELF_PUBLISHED_OPERATOR_ASSERTION"
 NOT_SUMMABLE = ("nigc_gross_gaming_revenue;state_regulator_device_counts;"
-                "gaming_facility_metrics.official")
+                "gaming_facility_metrics.official;"
+                "other_rows_of_this_table_for_the_same_facility")
+
+# A capacity figure can describe ONE ROOM. chukchansigold.com publishes "79 slot
+# machines at the entrance" and "45 slot machines" in the Firehouse Lounge; both
+# are true and neither is the property total, and summing them is wrong in a way
+# no total, count or date range would reveal.
+SUBSCOPE_RE = re.compile(
+    r"\b(at the entrance|in the [a-z' ]{3,28}(lounge|room|bar|hall|pavilion|annex)|"
+    # NOTE: two rules were removed after their first run. A bare "bar with" and
+    # "featuring N slot machines and" flagged Karuk and Yocha Dehe, whose
+    # sentences are property-level. A scope flag that fires on ordinary prose
+    # devalues the flag everywhere it is right.
+    r"(smoke[- ]free (?:gaming )?area|non[- ]smoking (?:gaming )?area|"
+    r"second floor|upper level|lower level|east wing|west wing|north wing|"
+    r"south wing) (?:featuring|with|offers|has)|"
+    r"a (?:separate|dedicated) [a-z ]{3,20} (?:area|room|floor))\b", re.I)
 POPULATION_BASIS = "cedar_gaming_facilities_and_web_map"
 
 # ---------------------------------------------------------------------------
@@ -255,7 +271,10 @@ def is_restricted_tribe(tribe_id, name):
 
 def forbidden_path(url):
     p = urllib.parse.urlparse(url).path.lower()
-    return any(m in p for m in FORBIDDEN_PATH_MARKERS)
+    segs = [s for s in p.split("/") if s]
+    if any(s in FORBIDDEN_SEGMENTS for s in segs):
+        return True
+    return p.endswith(FORBIDDEN_SUFFIXES)
 
 
 def robots_verdict(scheme, host):
@@ -297,7 +316,7 @@ def robots_ok(url):
         return True, note + "; can_fetch raised -> allowed"
 
 
-def fetch(url, accept=None):
+def fetch(url, accept=None, relax_tls=False):
     """One request. Returns a dict; never raises."""
     hdr = dict(BROWSERISH)
     if accept:
@@ -308,7 +327,7 @@ def fetch(url, accept=None):
            "final_url": "", "text": "", "content": b"", "note": ""}
     try:
         r = requests.get(url, headers=hdr, timeout=(10, TIMEOUT), allow_redirects=True,
-                         stream=True)
+                         stream=True, verify=not relax_tls)
         # WALL-CLOCK BUDGET. requests' read timeout is PER SOCKET READ: a server
         # that trickles a few bytes every 20s never trips it. On 2026-09-02 that
         # hung a worker for seven minutes with no error and no output. A timeout
@@ -459,6 +478,42 @@ def stage_targets():
             "terms_restricted": "Y" if restricted else "N",
             "population_basis": POPULATION_BASIS,
         })
+
+    # Fold in anything the ESCALATION ladder confirmed. A site recovered by
+    # rung 2 or 3 is a target like any other; leaving it out of targets.csv
+    # would mean the ladder found a nation's site and the harvest never used it.
+    esc_path = os.path.join(STG, "escalation.jsonl")
+    n_esc = 0
+    if os.path.exists(esc_path):
+        for line in io.open(esc_path, encoding="utf-8"):
+            try:
+                e = json.loads(line)
+            except Exception:
+                continue
+            if not str(e.get("verdict", "")).startswith("CONFIRMED_SITE"):
+                continue
+            tid = e.get("tribe_id")
+            host = e.get("host")
+            if not tid or not host or (tid, host, "escalated") in seen:
+                continue
+            seen.add((tid, host, "escalated"))
+            d = by_tribe.get(tid)
+            if not d:
+                continue
+            rows.append({
+                "tribe_id": tid, "cedar_uid": d["cedar_uid"], "tribe_name": d["tribe_name"],
+                "host": host, "seed_url": e.get("final_url") or e.get("url"),
+                "url_type": "escalated_government",
+                "surface": "tribe", "n_facilities": len(d["facility_ids"]),
+                "facility_ids": ";".join(x for x in d["facility_ids"] if x)[:900],
+                "facility_names": ";".join(x for x in d["facility_names"] if x)[:900],
+                "states": ";".join(sorted(d["states"])),
+                "terms_restricted": "Y" if (is_restricted_tribe(tid, d["tribe_name"])
+                                            or is_restricted_host(host)) else "N",
+                "population_basis": POPULATION_BASIS})
+            n_esc += 1
+    if n_esc:
+        log(f"targets: +{n_esc} rows folded in from the escalation ladder")
 
     rows.sort(key=lambda r: (r["tribe_name"].lower(), r["surface"], r["host"]))
     cols = list(rows[0].keys())
@@ -613,24 +668,67 @@ def extract_hidden(body_text):
     return out
 
 
-def classify_page(host, body_text, hidden, facility_names):
-    """Parked / hijacked detection. A domain name is never evidence."""
-    low = (body_text or "")[:400000].lower()
+def _apex(h):
+    parts = (h or "").lower().split(".")
+    return ".".join(parts[-2:]) if len(parts) >= 2 else (h or "").lower()
+
+
+def classify_page(host, body_text, hidden, facility_names, final_url=""):
+    """Parked / hijacked detection. A domain name is never evidence.
+
+    TIGHTENED 2026-09-02 after the first pass produced ten false positives out
+    of eighteen. Two causes, both the same shape — a marker matched somewhere
+    it did not mean anything:
+
+      * HIJACK MARKERS were matched against the RAW HTML, so 'bandar' inside
+        minified JS flagged mewuk.com, paskenta-nsn.gov and winnebagotribe.com,
+        and a Korean word in an hreflang language switcher flagged Kickapoo
+        Lucky Eagle. Markers are now matched against VISIBLE TEXT and the
+        <title> only, and body-only evidence needs TWO distinct markers.
+      * AN OFF-APEX og:url IS USUALLY A REDIRECT, NOT A HIJACK. cherokee.org ->
+        cherokee.gov, lvpaiute.com -> lvpaiute.gov, hoplandtribe.com ->
+        hbpi.gov and southwindcasino.com -> rockandbrewscasinobraman.com are
+        nations moving or rebranding, which is a FINDING worth recording, not a
+        refusal. It is only suspicious when og:url matches neither the host we
+        asked for nor the host we actually landed on.
+    """
+    visible = strip_tags(body_text or "")[:400000]
+    low = visible.lower()
     title = (hidden.get("title") or "").lower()
     for m in PARKED_MARKERS:
-        if m in low:
-            return "PARKED_DOMAIN", f"parking marker in body: {m!r}"
-    for m in HIJACK_MARKERS:
         if m in low or m in title:
-            return "DOMAIN_SUSPECT", f"off-topic/hijack marker present: {m!r}"
-    # canonical / og:url must sit on the same apex
+            return "PARKED_DOMAIN", f"parking marker in visible text: {m!r}"
+    in_title = [m for m in HIJACK_MARKERS if m in title]
+    in_body = [m for m in HIJACK_MARKERS if m in low]
+    if in_title:
+        return "DOMAIN_SUSPECT", f"hijack marker in <title>: {in_title[:3]!r}"
+    if len(set(in_body)) >= 2:
+        return "DOMAIN_SUSPECT", f"two or more hijack markers in visible text: {sorted(set(in_body))[:4]!r}"
+
     ogu = hidden.get("meta_tags", {}).get("og:url") or ""
+    final_host = urllib.parse.urlparse(final_url or "").netloc.lower()
     if ogu:
         oh = urllib.parse.urlparse(ogu).netloc.lower()
-        apex = ".".join(host.split(".")[-2:])
-        if oh and apex and not oh.endswith(apex):
-            return "DOMAIN_SUSPECT", f"og:url host {oh!r} is off-apex from {host!r}"
-    # a distinctive facility-name token should appear in the title
+        # An og:url pointing at the SITE'S OWN HOSTING PLATFORM, or at a bare
+        # IP, is a misconfiguration by the operator — not a sign the domain is
+        # someone else's. swo-nsn.gov (azurewebsites.net) and miamination.com
+        # (a raw IPv4) were both flagged as suspect on that basis and neither is.
+        hosting = ("azurewebsites.net", "wpengine.com", "netlify.app", "vercel.app",
+                   "squarespace.com", "godaddysites.com", "wixsite.com", "weebly.com",
+                   "myshopify.com", "cloudfront.net", "herokuapp.com", "pantheonsite.io",
+                   "wordpress.com", "webflow.io", "duda.co", "websitepro.hosting")
+        if oh and (re.match(r"^\d{1,3}(\.\d{1,3}){3}(:\d+)?$", oh)
+                   or any(oh.endswith(x) for x in hosting)):
+            oh = ""
+        if oh and _apex(oh) not in (_apex(host), _apex(final_host)):
+            if final_host and _apex(final_host) != _apex(host):
+                return "DOMAIN_MIGRATED", (f"{host!r} redirects to {final_host!r}; the page's own "
+                                           f"og:url is {oh!r}")
+            return "DOMAIN_SUSPECT", (f"og:url host {oh!r} matches neither the requested host "
+                                      f"{host!r} nor the landed host {final_host!r}")
+    if final_host and _apex(final_host) != _apex(host):
+        return "DOMAIN_MIGRATED", f"{host!r} redirects to {final_host!r}"
+
     toks = set()
     for fn in facility_names:
         for t in re.findall(r"[A-Za-z]{5,}", fn or ""):
@@ -1150,6 +1248,133 @@ def pages_one_host(host, t, recs, done):
     return n_req
 
 
+# ---------------------------------------------------------------------------
+# STAGE 3b — custom post types. docs/HIDDEN_DATA_TECHNIQUES.md: "a custom post
+# type name is the single highest-yield signal in this project." /wp/v2/types
+# named them; this fetches the collections they front. One request per CPT.
+# ---------------------------------------------------------------------------
+CPT_INTEREST = re.compile(
+    r"^(?:"
+    r"enterprise|enterprises|tribalbusiness|business|businesses|vendor|vendors|"
+    r"supplier|suppliers|procurement|rfp|rfps|bid|bids|solicitation|tero|"
+    r"casino|casinos|casino[-_]game|casino_posts|game|games|gaming|"
+    r"hotel|hotels|hotel[-_]rooms|room|rooms|rooms_posts|vq-room|whp-room|"
+    r"dining|dining_posts|restaurant|restaurants|venue|venues|"
+    r"entertainment|entertainment_posts|amenity|amenities|property|properties|"
+    r"promotion|promotions|promotions_posts|promo|offer|offers|my-offers|"
+    r"department|departments|service|services|cpt_services|program|programs|"
+    r"press-room|news"
+    r")$", re.I)
+CPT_SKIP_PREFIX = ("wp_", "elementor", "tribe_", "tec_", "avada", "jp_", "pum_",
+                   "fl-", "e-", "um_", "jet-", "coblocks", "jetpack", "spectra",
+                   "astra-", "kadence", "salient", "spl_", "mec-", "rm_", "wpb_")
+
+
+def stage_cpt(limit=None, deadline_min=45):
+    """Fetch the collection behind every substantive custom post type."""
+    recs_by_host = {}
+    for line in io.open(PROBE, encoding="utf-8"):
+        try:
+            r = json.loads(line)
+        except Exception:
+            continue
+        recs_by_host.setdefault(r.get("host"), []).append(r)
+    targets = {}
+    for r in csv.DictReader(io.open(TARGETS, encoding="utf-8-sig")):
+        targets.setdefault(r["host"], r)
+    done = load_done(PAGES, lambda r: r["url"])
+
+    work = []
+    for host, recs in sorted(recs_by_host.items()):
+        t = targets.get(host)
+        if not t or t["terms_restricted"] == "Y" or is_restricted_host(host):
+            continue
+        types = []
+        for rec in recs:
+            for pt in (rec.get("post_types") or []):
+                if pt.startswith(CPT_SKIP_PREFIX) or pt in (
+                        "post", "page", "attachment", "nav_menu_item"):
+                    continue
+                if CPT_INTEREST.match(pt):
+                    types.append(pt)
+        types = sorted(set(types))[:6]
+        if types:
+            work.append((host, t, types))
+    if limit:
+        work = work[:limit]
+    log(f"cpt: {len(work)} hosts, {sum(len(w[2]) for w in work)} custom post types")
+
+    deadline = time.time() + deadline_min * 60
+    buckets = [work[i::WORKERS] for i in range(WORKERS)]
+    counters = {"hosts": 0, "req": 0, "items": 0}
+    cl = threading.Lock()
+
+    def worker(bucket):
+        for host, t, types in bucket:
+            if time.time() > deadline:
+                log("RUN_DEADLINE reached; stopping cleanly.")
+                return
+            nr = ni = 0
+            for pt in types:
+                url = (f"https://{host}/wp-json/wp/v2/{pt}"
+                       f"?per_page=100&_fields=id,link,title,date,modified,slug")
+                if url in done or forbidden_path(url):
+                    continue
+                ok, rnote = robots_ok(url)
+                rec = {"tribe_id": t["tribe_id"], "cedar_uid": t["cedar_uid"],
+                       "tribe_name": t["tribe_name"], "host": host,
+                       "surface": t["surface"], "url": url,
+                       "discovered_via": "wp_types", "page_class": "custom_post_type",
+                       "custom_post_type": pt, "checked_date": TODAY,
+                       "robots_note": rnote,
+                       "technique": ("docs/HIDDEN_DATA_TECHNIQUES.md #3 "
+                                     f"(WP REST custom post type '{pt}')")}
+                if not ok:
+                    rec["http_status"] = "ROBOTS_DISALLOW"
+                    appendl(PAGES, rec)
+                    done.add(url)
+                    continue
+                res = fetch(url, accept="application/json,*/*")
+                nr += 1
+                rec.update({"http_status": res["http_status"],
+                            "content_type": res["content_type"], "bytes": res["bytes"],
+                            "final_url": res["final_url"], "note": res["note"]})
+                for h, v in (res.get("headers") or {}).items():
+                    if h.lower().startswith("x-wp-"):
+                        rec[h.lower()] = v
+                if res["http_status"] == "200" and res["bytes"] > 40:
+                    fn, md5 = save_raw(res["final_url"] or url, res["content"], ".json")
+                    rec["raw_file"], rec["md5"] = fn, md5
+                    try:
+                        data = json.loads(res["text"])
+                        if isinstance(data, list):
+                            rec["n_items"] = len(data)
+                            ni += len(data)
+                            rec["cpt_items"] = [
+                                {"title": ((it.get("title") or {}).get("rendered") or "")[:180],
+                                 "link": it.get("link"), "slug": it.get("slug"),
+                                 "modified": it.get("modified")}
+                                for it in data[:60] if isinstance(it, dict)]
+                    except Exception as e:
+                        rec["parse_note"] = f"{type(e).__name__}: {str(e)[:140]}"
+                appendl(PAGES, rec)
+                done.add(url)
+            with cl:
+                counters["hosts"] += 1
+                counters["req"] += nr
+                counters["items"] += ni
+                log(f"[{counters['hosts']:>4}/{len(work)}] cpt {host:38} "
+                    f"req={counters['req']} items={counters['items']}")
+
+    threads = [threading.Thread(target=worker, args=(b,), daemon=True) for b in buckets]
+    for th in threads:
+        th.start()
+    for th in threads:
+        th.join()
+    log(f"cpt done: hosts={counters['hosts']} requests={counters['req']} "
+        f"items={counters['items']}")
+
+
 def harvest_capacity(text):
     hits = []
     for metric, rx in CAP_PATTERNS:
@@ -1184,7 +1409,8 @@ def harvest_capacity(text):
 OBS_COLS = [
     "observation_id", "observation_kind", "assertion_class", "assertion_class_note",
     "not_summable_with", "metric", "value", "value_verbatim", "unit",
-    "value_is_bounded", "bound_direction", "text_value",
+    "value_is_bounded", "bound_direction", "bound_basis",
+    "measurement_scope", "measurement_scope_basis", "text_value",
     "tribe_id", "cedar_uid", "tribe_name", "facility_ids", "facility_names",
     "n_facilities_for_tribe", "facility_attribution_status", "state",
     "site_host", "source_url", "source_quote", "page_class", "discovered_via",
@@ -1201,7 +1427,9 @@ COV_COLS = [
     "jsonld_present", "jsonld_types", "app_state_markers", "arcgis_endpoints",
     "google_sheets", "n_html_comment_blocks", "n_data_attr_keys",
     "ajax_endpoints_observed_not_fetched",
-    "n_pages_fetched", "n_capacity_observations", "n_identity_observations",
+    "n_pages_fetched", "n_vendor_tero_pages_fetched",
+    "n_custom_post_type_items", "custom_post_types_harvested",
+    "n_capacity_observations", "n_identity_observations",
     "vendor_tero_urls_found", "checked_and_absent", "terms_restricted",
     "population_basis", "checked_date", "built_by",
 ]
@@ -1253,6 +1481,25 @@ def stage_build():
         feed = ep("feed") or {}
 
         hid = (home or {}).get("hidden") or {}
+        # RE-ADJUDICATE the page verdict from the saved raw HTML rather than
+        # trusting the verdict the probe wrote. The probe log is the RECORD of
+        # what was served; the verdict is a JUDGEMENT, and a judgement that
+        # cannot be revised without re-fetching is a judgement nobody can fix.
+        if home and home.get("raw_file"):
+            rp = os.path.join(RAW, home["raw_file"])
+            if os.path.exists(rp):
+                try:
+                    body = io.open(rp, encoding="utf-8", errors="replace").read()
+                    hid = extract_hidden(body)
+                    v, w = classify_page(host, body, hid,
+                                         (t.get("facility_names") or "").split(";"),
+                                         home.get("final_url") or "")
+                    home = dict(home)
+                    home["page_verdict"], home["page_verdict_basis"] = v, w
+                    home["hidden"] = hid
+                except Exception as e:
+                    home = dict(home)
+                    home["page_verdict_basis"] = (home.get("page_verdict_basis") or "") +                         f" | re-adjudication failed: {type(e).__name__}"
         n_sitemap = max((smi.get("n_items") or 0), (sm.get("n_items") or 0))
 
         vendor_urls = []
@@ -1278,7 +1525,8 @@ def stage_build():
 
         # ---- identity from JSON-LD (technique 1) ----
         org = hid.get("jsonld_org")
-        if org and (home or {}).get("page_verdict") in ("OK", "NAME_TOKEN_ABSENT"):
+        if org and (home or {}).get("page_verdict") in ("OK", "NAME_TOKEN_ABSENT",
+                                                        "DOMAIN_MIGRATED"):
             for field, val in (("legal_or_published_name", org.get("name")),
                                ("legal_name", org.get("legalName")),
                                ("street_address", org.get("streetAddress")),
@@ -1344,6 +1592,15 @@ def stage_build():
                     h["value_is_bounded"] = True
                     h["bound_direction"] = "at_least"
                     h["bound_basis"] = "trailing '+' in the operator's own wording"
+                sub = SUBSCOPE_RE.search(h.get("quote") or "")
+                if sub:
+                    scope = "SUBPROPERTY_QUALIFIED"
+                    scope_basis = ("the operator's own sentence qualifies this to part of the "
+                                   f"property: {sub.group(0)[:80]!r}")
+                else:
+                    scope = "UNVERIFIED_SCOPE"
+                    scope_basis = ("nothing in the sentence says whether this is the whole "
+                                   "property or one room; Cedar has not verified it either way")
                 obs.append({
                     "observation_id": _oid(host, pg["url"], h["metric"], h["value"]),
                     "observation_kind": "CAPACITY_SIGNAL",
@@ -1355,7 +1612,10 @@ def stage_build():
                     "metric": h["metric"], "value": h["value"],
                     "value_verbatim": h["value_verbatim"], "unit": unit,
                     "value_is_bounded": "Y" if h["value_is_bounded"] else "N",
-                    "bound_direction": h["bound_direction"], "text_value": "",
+                    "bound_direction": h["bound_direction"],
+                    "bound_basis": h.get("bound_basis", ""),
+                    "measurement_scope": scope, "measurement_scope_basis": scope_basis,
+                    "text_value": "",
                     "tribe_id": pg["tribe_id"], "cedar_uid": pg["cedar_uid"],
                     "tribe_name": pg["tribe_name"], "facility_ids": fac_ids,
                     "facility_names": pg.get("facility_names") or "",
@@ -1475,7 +1735,18 @@ def stage_build():
             "ajax_endpoints_observed_not_fetched": ";".join(
                 [a for a in (hid.get("ajax_endpoints") or []) if "admin-ajax" in a.lower()])[:300],
             "n_pages_fetched": len([p for p in pgs if p.get("http_status") == "200"
-                                    and p.get("page_class") != "child_sitemap"]),
+                                    and p.get("page_class") not in
+                                    ("child_sitemap", "custom_post_type")]),
+            "n_vendor_tero_pages_fetched": len(
+                [p for p in pgs if p.get("http_status") == "200"
+                 and p.get("page_class") == "vendor_procurement_tero"]),
+            "n_custom_post_type_items": sum(
+                (p.get("n_items") or 0) for p in pgs
+                if p.get("page_class") == "custom_post_type"),
+            "custom_post_types_harvested": ";".join(sorted(
+                {p.get("custom_post_type") for p in pgs
+                 if p.get("page_class") == "custom_post_type"
+                 and (p.get("n_items") or 0) > 0 and p.get("custom_post_type")}))[:300],
             "n_capacity_observations": n_cap, "n_identity_observations": n_ident,
             "vendor_tero_urls_found": ";".join(vendor_urls)[:1500],
             "checked_and_absent": ";".join(sorted(set(absent))),
@@ -1704,9 +1975,91 @@ def selftest():
     return ok
 
 
+# ===========================================================================
+# STAGE 2b — ESCALATION. "A negative from search alone is not a negative."
+# For a nation whose only sourced URL failed, walk the ladder the mandate
+# names: the nation's own domain, its .nsn.us / -nsn.gov form, and the FACILITY
+# name separately. Every candidate is judged by classify_page BEFORE it counts
+# as found — a guessed domain that returns 200 is fabrication with a status
+# code next to it, so the bar is: not parked, og:url on the same apex, and a
+# distinctive name token in the <title>.
+# ===========================================================================
+ESCALATE = os.path.join(STG, "escalation.jsonl")
+
+
+def stage_escalate(cand_csv):
+    rows = list(csv.DictReader(io.open(cand_csv, encoding="utf-8-sig")))
+    done = load_done(ESCALATE, lambda r: r["url"])
+    n = 0
+    for r in rows:
+        url = r["candidate_url"].strip()
+        host = urllib.parse.urlparse(url).netloc.lower()
+        if url in done:
+            continue
+        if is_restricted_tribe(r["tribe_id"], r["tribe_name"]) or is_restricted_host(host):
+            appendl(ESCALATE, {**r, "url": url, "host": host,
+                               "http_status": "EXCLUDED_TERMS_STATED_RESTRICTIVE",
+                               "checked_date": TODAY})
+            continue
+        ok, rnote = robots_ok(url)
+        rec = {"tribe_id": r["tribe_id"], "cedar_uid": r["cedar_uid"],
+               "tribe_name": r["tribe_name"], "facility_names": r.get("facility_names", ""),
+               "host": host, "url": url, "rung": r.get("rung", ""),
+               "derivation": r.get("derivation", ""), "robots_note": rnote,
+               "checked_date": TODAY}
+        if not ok:
+            rec["http_status"] = "ROBOTS_DISALLOW"
+            appendl(ESCALATE, rec)
+            continue
+        res = fetch(url)
+        n += 1
+        # A certificate that covers the apex but not www (or vice versa) is a
+        # misconfiguration, not a refusal — crit-nsn.gov behaved this way for
+        # shard A. Retry ONCE with relaxed TLS and SAY SO on the row.
+        if "SSLError" in (res.get("note") or ""):
+            res2 = fetch(url, relax_tls=True)
+            n += 1
+            if res2["http_status"] == "200":
+                rec["tls_relaxed"] = True
+                rec["tls_relaxed_basis"] = ("certificate verification failed; retrieved with "
+                                            "verification relaxed. This is a TLS "
+                                            "misconfiguration on the host, not an access "
+                                            "control, and the content is unauthenticated.")
+                res = res2
+        rec.update({"http_status": res["http_status"], "content_type": res["content_type"],
+                    "bytes": res["bytes"], "final_url": res["final_url"],
+                    "note": res["note"]})
+        if res["http_status"] == "200" and res["bytes"] > 200:
+            fn, md5 = save_raw(res["final_url"] or url, res["content"], ".html")
+            rec["raw_file"], rec["md5"] = fn, md5
+            hid = extract_hidden(res["text"])
+            v, w = classify_page(host, res["text"], hid,
+                                 (r.get("facility_names") or "").split(";"),
+                                 res["final_url"])
+            rec["page_verdict"], rec["page_verdict_basis"] = v, w
+            rec["hidden"] = hid
+            rec["title"] = hid.get("title")
+            # NAME_TOKEN_ABSENT is a SOFT flag, not a refusal. rincon-nsn.gov is
+            # genuinely the Rincon Band's site; its <title> is the nation's name
+            # because the property is Caesars-branded (Harrah's Resort Southern
+            # California). Treating that as "not found" would be a false negative
+            # of exactly the kind this stage exists to prevent.
+            rec["verdict"] = (
+                "CONFIRMED_SITE" if v in ("OK", "DOMAIN_MIGRATED")
+                else "CONFIRMED_SITE_FACILITY_NAME_NOT_IN_TITLE" if v == "NAME_TOKEN_ABSENT"
+                else "REFUSED_" + v)
+        else:
+            rec["verdict"] = "NOT_A_SITE_" + str(res["http_status"])
+        appendl(ESCALATE, rec)
+        log(f"{rec.get('verdict'):28} {rec['http_status']:>6}  {url}")
+    log(f"escalate: {n} candidates fetched -> {ESCALATE}")
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("stage", choices=["targets", "probe", "pages", "build", "verify"])
+    ap.add_argument("stage", choices=["targets", "probe", "pages", "cpt", "escalate",
+                                     "build", "verify"])
+    ap.add_argument("--candidates", default=None)
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--deadline-min", type=int, default=110)
     ap.add_argument("--surface", default=None, choices=[None, "gaming", "tribe"])
@@ -1719,6 +2072,13 @@ def main():
         stage_probe(a.limit, a.deadline_min, a.surface)
     elif a.stage == "pages":
         stage_pages(a.limit, a.deadline_min)
+    elif a.stage == "cpt":
+        stage_cpt(a.limit, a.deadline_min)
+    elif a.stage == "escalate":
+        if not a.candidates:
+            log("escalate needs --candidates <csv>")
+            sys.exit(2)
+        stage_escalate(a.candidates)
     elif a.stage == "build":
         stage_build()
     elif a.stage == "verify":

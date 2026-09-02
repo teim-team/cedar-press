@@ -1,0 +1,14 @@
+{
+  "measured_date": "2026-09-02",
+  "notices": 6792,
+  "notice_cols": 67,
+  "bridge_rows": 7234,
+  "bridge_rows_with_state": 7087,
+  "multi_institution_notices": 392,
+  "prefix_stripped_rows": 857,
+  "institution_count_corrected": 45,
+  "city_state_repointed": 325,
+  "distinct_institution_names_before": 2184,
+  "distinct_institution_names_after": 1775,
+  "generator": "object-phrase strip added; parse_institution now consumes it; semicolon rule added; institution_parts now semicolon-aware"
+}

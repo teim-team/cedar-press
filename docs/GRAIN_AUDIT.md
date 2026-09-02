@@ -20,8 +20,8 @@ Three honest outcomes, and they are three different jobs:
 
 | | count |
 |---|---:|
-| shippable tables | 225 |
-| **DECLARED_VALIDATED** | **218** |
+| shippable tables | 227 |
+| **DECLARED_VALIDATED** | **220** |
 | OPEN_WITH_EVIDENCE | 0 |
 | DEFECTIVE | 0 |
 | still unexplained | 7 |
@@ -208,6 +208,15 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 | `individual_native_firm_register.csv` | 45 | DECLARED_VALIDATED | `surrogate_entity_id` | `cedar_uid`→1 |
 | `individual_native_ownership_verification.csv` | 335 | DECLARED_VALIDATED | `verification_id` | — |
 | `individual_native_verification_candidates.csv` | 335 | DECLARED_VALIDATED | `verification_id` | — |
+
+### NEST: Native Enterprise Structures and Ties  (`nest`)
+
+2 of 2 shippable tables declared.
+
+| table | rows | outcome | primary key | max rows per join-key value |
+|---|---:|---|---|---|
+| `nest_enterprise_relations.csv` | — | DECLARED_VALIDATED | `enterprise_edge_id` | `cedar_uid`→367, `enterprise_edge_id`→1, `enterprise_id`→14, `owner_hub_cedar_uid`→367 |
+| `nest_enterprises.csv` | — | DECLARED_VALIDATED | `enterprise_id` | `cedar_uid`→168, `enterprise_id`→1, `owner_hub_cedar_uid`→168, `parent_enterprise_id`→34 |
 
 ### Natural Resource Revenues  (`natural-resources`)
 

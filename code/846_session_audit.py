@@ -147,6 +147,43 @@ def _aliaskey():
     return (blank == 0, f"{blank} of {len(rs):,} rows have a blank alias_id")
 
 
+@claim("no register entity is published as another entity's subsidiary",
+       critical=True)
+def _peer():
+    """Huna Totem and Klawock Heenya are ANCSA village corporations with their
+    own cedar_uid, and Na-Dena' JOINT VENTURE partners of Doyon. They shipped as
+    Doyon subsidiaries under `parent_asserted_subsidiary` - an ownership
+    over-claim on the strongest evidence class. A peer is never a subsidiary."""
+    reg = {r.get("handle") for r in rows(SPINE / "cedar_identity_register.csv")
+           if r.get("handle")}
+    bad = []
+    for r in rows(CLEAN / "native_owned_businesses.csv"):
+        if (r.get("identity_scope") or "") != "parent_asserted_subsidiary":
+            continue
+        bid = (r.get("business_entity_id") or "").strip()
+        if bid and bid in reg and bid != (r.get("certifying_authority_entity_id") or ""):
+            bad.append(f"{r.get('business_name_raw','?')[:34]} under "
+                       f"{r.get('certifying_authority_name','?')[:24]}")
+    return (not bad, "; ".join(bad[:3]) or
+            "no register entity claimed as a subsidiary of another")
+
+
+@claim("no scrape artefact ships as a business")
+def _artefact():
+    """The Doyon Na-Deno' page scrape filed list punctuation and marketing copy
+    as firms - ', Klawock Island Ventures, and' and 'Enjoy lunch at Kantishna
+    Roadhouse' were both publishable=Y."""
+    import re as _re
+    BAD = _re.compile(r"^\s*,|^(enjoy|visit|book|explore|learn|read)\s|"
+                      r"earns|awarded?.*lodge", _re.I)
+    bad = [r.get("business_name_raw", "") for r in
+           rows(CLEAN / "native_owned_businesses.csv")
+           if (r.get("publishable") or "") == "Y"
+           and BAD.search(r.get("business_name_raw") or "")]
+    return (not bad, f"{len(bad)} publishable artefact(s)"
+                     + (f": {bad[0][:44]}" if bad else ""))
+
+
 # ---------------------------------------------------------------- CICD
 @claim("the CICD scheme is gone from every table and every reachable read")
 def _cicd():

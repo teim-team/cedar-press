@@ -2,7 +2,7 @@
  "built_date": "2026-09-02",
  "derivation": "500.COLLECTIONS + cedar_codebook + cedar_pipeline; GRAIN declared, everything else derived",
  "n_collections": 14,
- "n_tables_claimed": 268,
+ "n_tables_claimed": 270,
  "n_orphan_shippable": 7,
  "orphans": [
   "native_owned_businesses.bak_2026-09-02_010526.csv",
@@ -13,8 +13,8 @@
   "regulations_gov_entity_coverage.csv",
   "sam_native_class_distributions.csv"
  ],
- "n_shippable": 225,
- "n_shippable_grain_stated": 218,
+ "n_shippable": 227,
+ "n_shippable_grain_stated": 220,
  "n_shippable_grain_unstated": 7,
  "shippable_grain_unstated": [
   "native_owned_businesses.bak_2026-09-02_010526.csv",
@@ -5621,7 +5621,7 @@
    "tables": [
     {
      "table": "nest_enterprise_relations.csv",
-     "status": "UNDOCUMENTED",
+     "status": "shippable",
      "key_columns": [
       "cedar_uid"
      ],
@@ -5654,7 +5654,7 @@
     },
     {
      "table": "nest_enterprises.csv",
-     "status": "UNDOCUMENTED",
+     "status": "shippable",
      "key_columns": [
       "cedar_uid",
       "uei",
@@ -6566,7 +6566,7 @@
    "name": "Gaming Intelligence",
    "shelf": "grove",
    "rebuild_command": "py -3 code/build.py run gaming --execute",
-   "n_tables": 61,
+   "n_tables": 63,
    "tables": [
     {
      "table": "ca_gaming_facilities_official.csv",
@@ -8639,6 +8639,50 @@
        "entity_id": 287
       }
      },
+     "key_refused": {},
+     "population_scope": {},
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_web_harvest_coverage.csv",
+     "status": "unregistered",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "primary_key": [],
+     "join_cardinality": {},
+     "grain_declared_by": "",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "key_refused": {},
+     "population_scope": {},
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_web_harvest_observations.csv",
+     "status": "unregistered",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "primary_key": [],
+     "join_cardinality": {},
+     "grain_declared_by": "",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
      "key_refused": {},
      "population_scope": {},
      "rebuilt_by": [],

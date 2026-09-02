@@ -2,9 +2,9 @@
 
 *Generated 2026-09-02 by `code/518_dataset_readiness.py` from live artifacts. Three statuses only: **READY / BLOCKED / NOT_TESTED**. There is no 'mostly ready' — a dataset crosses the minimum shipping contract or it has named blockers.*
 
-## READY: 13 / 14
+## READY: 14 / 14
 
-BLOCKED 0 · NOT_TESTED 1
+BLOCKED 0 · NOT_TESTED 0
 
 | dataset | status | tables | grain | keys | duplicates | agg-unsafe | rebuild |
 |---|---|---:|---|---|---|---:|---|
@@ -19,12 +19,8 @@ BLOCKED 0 · NOT_TESTED 1
 | `nagpra` | **READY** | 4 | 4/4 | 4/4 | clean | 0 | declared |
 | `native-owned-businesses` | **READY** | 6 | 6/6 | 6/6 | clean | 0 | declared |
 | `natural-resources` | **READY** | 8 | 8/8 | 8/8 | clean | 0 | declared |
+| `nest` | **READY** | 2 | 2/2 | 2/2 | clean | 0 | declared |
 | `nonprofits` | **READY** | 10 | 10/10 | 10/10 | clean | 0 | declared |
 | `subcontracting` | **READY** | 3 | 3/3 | 3/3 | clean | 0 | declared |
-| `nest` | **NOT_TESTED** | 0 | 0/0 | 0/0 | clean | 0 | MISSING |
 
 ## Blockers, by dataset
-
-### `nest` — NOT_TESTED
-
-- no shippable tables declared

@@ -130,6 +130,7 @@ INVARIANTS (`verify`)
 from __future__ import annotations
 
 import argparse
+import collections
 import csv
 import hashlib
 import importlib.util
@@ -1541,6 +1542,42 @@ STRUCTURED_NOTE = ("title.rendered", "HTML <table>", "member pages",
                    "index page of the sitemap collection")
 
 
+# A DIRECTORY INDEX THAT YIELDED A CROWD IS A LIST, SUFFIX OR NO SUFFIX.
+# USET's `/departments/economic-development/tribal-enterprise-directory`
+# returned 471 names — "Akwesasne Farmers Market", "Choctaw Fresh Produce",
+# "Penobscot Indian Nation Fish and Game", "Passamaquoddy Maple Syrup". 425
+# of them carry no LLC/Inc/Services token, and the corporate-signal tier
+# would have thrown away the single richest directory found in this sweep on
+# the grounds that a farmers market is not spelled like a defence contractor.
+#
+# The evidence that these ARE the list is structural and it is not the name:
+# the page's own path says directory, and one page produced dozens of them.
+# A nav bar does not have 471 items. Staged, and flagged so the flag can be
+# filtered on — never silently mixed in with a CPT row.
+DIRECTORY_INDEX_PATH = re.compile(
+    r"/[^/]*(director(y|ies)|regist(er|ry)|listings?|roster|"
+    r"member[s]?|compan(y|ies)|subsidiar(y|ies)|enterprises?|"
+    r"businesses|affiliates?|portfolio)[^/]*/?$", re.I)
+DIRECTORY_INDEX_MIN_NAMES = 8
+
+# The price of the directory-index tier, paid honestly. Turning the suffix
+# rule off on those pages lets marketing furniture through with the real
+# enterprises: "Government", "Press Kit", "Seaport NxG Contract Vehicle",
+# "Digital Ops & IT Modernization", "Capabilities". These are section
+# headings and federal contract vehicles, not firms. They go to review.
+NOT_A_FIRM_ON_AN_INDEX = re.compile(
+    r"^(government|commercial|federal|state|local|press ?kit|media ?kit|"
+    r"capabilit\w*|overview|our (mission|vision|values|history|leadership|"
+    r"people|team|approach|impact)|leadership|history|mission|vision|"
+    r"values|careers?|contact\b|locations?|newsroom|resources?|"
+    r"testimonials?|partners?|clients?|customers?|awards?|certifications?|"
+    r"past performance|quality|safety|sustainability|"
+    r"contract vehicles?|gsa\b|idiq\b|naics ?code|sic ?code|"
+    r"annual report|financials?|shareholders?|board of directors|"
+    r"more info|read more|learn more|apply now|see all)\b"
+    r"|contract vehicle\b|\bnaics\b", re.I)
+
+
 def stages_or_reviews(r: dict) -> tuple[bool, str]:
     """(stage?, why not). An address-shaped NAME never stages.
 
@@ -1560,6 +1597,12 @@ def stages_or_reviews(r: dict) -> tuple[bool, str]:
     if note.startswith(STRUCTURED_NOTE):
         return True, ""
     if CORP_SIGNAL.search(nm):
+        return True, ""
+    if r.get("_page_is_directory_index"):
+        if NOT_A_FIRM_ON_AN_INDEX.search(nm):
+            return False, ("on a directory index but the text is section "
+                           "furniture or a federal contract vehicle, not a "
+                           "firm")
         return True, ""
     return False, ("unstructured heading/anchor scrape and the name carries "
                    "no corporate signal")
@@ -1587,6 +1630,14 @@ def stage_build() -> None:
     if not rows:
         print("[stage] no harvested rows yet")
         return
+    # mark every row whose SOURCE PAGE is a directory index that yielded a
+    # crowd. Counted over the harvest, not guessed at per row.
+    percount = collections.Counter(x["source_page_url"] for x in rows)
+    for x in rows:
+        pth = up.urlparse(x["source_page_url"]).path
+        x["_page_is_directory_index"] = bool(
+            DIRECTORY_INDEX_PATH.search(pth)
+            and percount[x["source_page_url"]] >= DIRECTORY_INDEX_MIN_NAMES)
     pair, nameonly = existing_keys()
     # ALSO de-duplicate against shard E's hand-adjudicated ANC edges. Shard E
     # is not in native_owned_businesses.csv, so the live-file check cannot
@@ -1721,6 +1772,12 @@ def stage_build() -> None:
                  if r.get("auto_ruled") == "Y" else ""),
                 (f"RELATION={r['ownership_relation']}"
                  if r.get("ownership_relation") else ""),
+                ("HEADING_SCRAPE_ON_A_DIRECTORY_INDEX"
+                 if (r.get("_page_is_directory_index")
+                     and not (r.get("extraction_note", "")
+                              .startswith(STRUCTURED_NOTE))
+                     and not CORP_SIGNAL.search(r["business_name_raw"]))
+                 else ""),
                 ("ADDRESS_OR_CONTACT_REDACTED_FROM_QUOTE"
                  if redact_quote(r["identity_claim_text"])[1] else ""),
             ] if x),
@@ -1961,12 +2018,20 @@ def report() -> None:
         with open(STAGED, encoding="utf-8-sig", newline="") as fh:
             rows = list(csv.DictReader(fh))
         print(f"\nstaged rows: {len(rows)}")
+        # The class of the AUTHORITY, resolved from the spine first and the
+        # sweep verdicts second. Reading it only out of `verdicts` reported
+        # every ANCSA row as "?" — code/1073's authorities are keyed from
+        # ancsa_filings_index.csv and were never sweep targets.
         cls = {}
+        for x in spine_rows():
+            cls[x["cedar_uid"]] = CLASS_OF.get(x["entity_class"],
+                                               x["entity_class"])
         with open(VERDICTS, encoding="utf-8-sig", newline="") as fh:
             for v in csv.DictReader(fh):
-                cls[v["cedar_uid"]] = v["klass"]
-        c = collections.Counter(cls.get(r["certifying_authority_entity_id"],
-                                        "?") for r in rows)
+                cls.setdefault(v["cedar_uid"], v["klass"])
+        c = collections.Counter(
+            cls.get(r["certifying_authority_entity_id"], "unkeyed_authority")
+            for r in rows)
         print("  by class:", dict(c))
         print("  identity_scope:",
               dict(collections.Counter(r["identity_scope"] for r in rows)))

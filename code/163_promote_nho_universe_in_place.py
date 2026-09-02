@@ -297,9 +297,42 @@ def load(p):
         return list(csv.DictReader(fh))
 
 
+# --- REGENERATE GUARD (ADR-017, 2026-09-02) --------------------------------
+def _carry_live_columns(path, canonical):
+    """Derive this writer's header instead of declaring it.
+
+    A wholesale writer holding a FIXED `fieldnames` list deletes every column
+    an in-place enricher added since - no error, no exception, a diff nobody
+    reads. Canonical order first so column order stays stable, then whatever
+    the live file already carries. A retired column stays retired because it
+    is not on disk; a promoted column survives because it is.
+
+    THIS BUILD CANNOT REPOPULATE AN ENRICHER'S COLUMN. Carried columns are
+    written BLANK and NAMED on stdout, which is strictly better than deleted:
+    the schema survives and the enricher can refill them. Re-run the enricher
+    after this build - `cedar_pipeline.enrichers_to_rerun(<table>)` names it.
+    """
+    import csv as _csv
+    import os as _os
+    canonical = list(canonical)
+    _p = str(path)
+    if not _os.path.exists(_p):
+        return canonical
+    with open(_p, encoding="utf-8-sig", newline="", errors="replace") as _fh:
+        _live = next(_csv.reader(_fh), [])
+    _extra = [c for c in _live if c and c not in canonical]
+    if _extra:
+        print("  [regenerate guard] %s: carrying %d enricher column(s) through "
+              "this rebuild, BLANK - re-run the enricher: %s"
+              % (_os.path.basename(_p), len(_extra), ", ".join(_extra)))
+    return canonical + _extra
+
+
 def write_atomic(path, rows, fields, backup_tag):
     """Back up, write `.part`, rename. An interruption must not look like a
     completion (START_HERE, standing rules)."""
+    # REGENERATE GUARD (ADR-017, 2026-09-02): derive the header, do not declare it.
+    fields = _carry_live_columns(path, fields)
     path = Path(path)
     if path.exists():
         bak = Path(str(path) + f".bak_{TODAY}_{backup_tag}")

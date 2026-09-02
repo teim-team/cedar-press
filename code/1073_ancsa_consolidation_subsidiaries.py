@@ -304,6 +304,9 @@ def documents() -> list[dict]:
     return out
 
 
+SHARD_E_PAIRS: set = set()
+
+
 def mine_doc(d: dict) -> tuple[list[dict], dict]:
     text = d["txt"].read_text(encoding="utf-8", errors="ignore")
     text = text.replace(" ", " ")
@@ -322,8 +325,21 @@ def mine_doc(d: dict) -> tuple[list[dict], dict]:
         if not n or n == pnorm or n in seen:
             return
         q = re.sub(r"\s+", " ", quote).strip()
-        if first_word(name).lower() not in q.lower():
+        fw = first_word(name).lower()
+        if fw not in q.lower():
             return                       # the quote must contain the name
+        # WINDOW THE QUOTE ON THE NAME, do not truncate to the first 400
+        # characters. A consolidation note runs to 1,600 characters and the
+        # tenth subsidiary it lists sits past any head-truncation, so ten
+        # rows shipped a quote that did not contain the name it was evidence
+        # for — and W2 caught exactly that. The stored quote must support the
+        # row it is attached to.
+        i = q.lower().find(fw)
+        lo = max(0, i - 160)
+        q = ("..." if lo else "") + q[lo:i + 240] + (
+            "..." if i + 240 < len(q) else "")
+        if (_norm(parent), _norm(name)) in SHARD_E_PAIRS:
+            return      # shard E adjudicated this edge by hand; do not re-emit
         seen.add(n)
         names_stated = True
         found.append({
@@ -345,7 +361,7 @@ def mine_doc(d: dict) -> tuple[list[dict], dict]:
             "identity_scope": "parent_asserted_subsidiary",
             "assertion_class": "OWNERSHIP",
             "directory_type": "enterprise_register",
-            "identity_claim_text": q[:400],
+            "identity_claim_text": q[:420],
             "source_url": d["portal_url"],
             "source_page_url": d["portal_url"],
             "source_edition": d["period"],
@@ -427,6 +443,10 @@ DOCLOG_COLS = ["doc_id", "corporation_name", "cedar_uid", "anc_class",
 
 
 def stage_mine(limit=None) -> None:
+    global SHARD_E_PAIRS
+    SHARD_E_PAIRS = shard_e_pairs()
+    print(f"[mine] {len(SHARD_E_PAIRS)} shard E edges already adjudicated by "
+          f"hand; those pairs are not re-emitted")
     docs = documents()
     if limit:
         docs = docs[:limit]
