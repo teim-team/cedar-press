@@ -18,7 +18,7 @@
 | `shard_k` | Alaska Native Village governments | RUNNING_OR_DONE | 1,201 | 228 |
 | `shard_l` | vendor lists, unsurveyed federally recognized tribes, 1st half | NOT_STARTED | 0 | 0 |
 | `shard_m` | vendor lists, unsurveyed federally recognized tribes, 2nd half | NOT_STARTED | 0 | 0 |
-| `shard_n` | the coverage tail - every entity no other shard touched | RUNNING_OR_DONE | 192 | 127 |
+| `shard_n` | the coverage tail - every entity no other shard touched | RUNNING_OR_DONE | 220 | 139 |
 
 ## Coverage by entity class
 
@@ -26,37 +26,37 @@
 
 | entity class | in register | with a URL | touched, none found | untouched |
 |---|---:|---:|---:|---:|
-| Federally recognized tribe | 349 | 327 | 11 | 11 |
+| Federally recognized tribe | 349 | 332 | 17 | 0 |
 | Federally recognized Alaska Native Village | 228 | 228 | 0 | 0 |
-| Native Hawaiian Organization | 210 | 126 | 84 | 0 |
+| Native Hawaiian Organization | 210 | 116 | 94 | 0 |
 | BIE School | 185 | 183 | 2 | 0 |
 | Alaska Native Village Corporation | 173 | 38 | 135 | 0 |
 | Native Community Development Financial Institution | 64 | 61 | 3 | 0 |
 | State-recognized tribe | 64 | 62 | 2 | 0 |
-| Intertribal Organization | 56 | 53 | 3 | 0 |
-| Individually Native-owned business | 45 | 23 | 21 | 1 |
+| Intertribal Organization | 56 | 49 | 7 | 0 |
+| Individually Native-owned business | 45 | 18 | 27 | 0 |
 | Urban Indian Organization | 43 | 43 | 0 | 0 |
 | Tribal College or University | 37 | 37 | 0 | 0 |
 | Native Financial Institution | 29 | 29 | 0 | 0 |
-| Federal-level self-governance consortium | 29 | 29 | 0 | 0 |
+| Federal-level self-governance consortium | 29 | 28 | 1 | 0 |
 | Federal-level constituency entity | 22 | 22 | 0 | 0 |
 | Alaska Native Regional Corporation | 12 | 12 | 0 | 0 |
 | ANCSA Group Corporation | 6 | 0 | 6 | 0 |
-| State-level constituency entity | 3 | 3 | 0 | 0 |
-| **total** | **1,555** | **1,276** | **267** | **12** |
+| State-level constituency entity | 3 | 2 | 1 | 0 |
+| **total** | **1,555** | **1,260** | **295** | **0** |
 
 ## URL types harvested
 
 | type | n |
 |---|---:|
-| government | 600 |
+| government | 603 |
 | newsletter | 545 |
 | casino | 448 |
-| corporate | 427 |
+| corporate | 422 |
 | institution | 419 |
 | api_endpoint | 371 |
-| organization | 318 |
-| form_990 | 300 |
+| organization | 319 |
+| form_990 | 305 |
 | tribal_council | 254 |
 | regulator_record | 238 |
 | consortium | 227 |
@@ -64,12 +64,12 @@
 | tero | 106 |
 | subsidiary_list | 101 |
 | gaming_authority | 90 |
-| none_established | 76 |
 | annual_report | 71 |
+| none_established | 68 |
 | recognition_record | 64 |
 | wp_media_pdf | 61 |
+| machine_readable_surface | 52 |
 | failed_government | 51 |
-| machine_readable_surface | 51 |
 | failed_casino | 48 |
 | membership_list | 46 |
 | wp_types | 44 |
@@ -79,16 +79,18 @@
 | failed_newsletter | 26 |
 | business_licence | 25 |
 | unverified_casino | 24 |
+| no_own_site_found | 21 |
 | sitemap | 20 |
 | procurement | 20 |
 | certification | 19 |
 | shareholder | 17 |
 | failed_gaming_authority | 10 |
 | failed_tero | 8 |
+| parked_domain | 7 |
 | unverified_newsletter | 5 |
-| parked_domain | 5 |
+| directory_profile | 5 |
 | unverified_tero | 4 |
-| unverified_organization | 3 |
+| government_blocked_bot_protection | 4 |
 | closed_property | 2 |
 | TERMS_RESTRICTED_DO_NOT_HARVEST | 2 |
 | government_candidate | 1 |
@@ -96,3 +98,5 @@
 | unverified_business_licence | 1 |
 | DOMAIN_HIJACKED_DO_NOT_LINK | 1 |
 | leadership | 1 |
+| government_refused_robots | 1 |
+| unverified_organization | 1 |

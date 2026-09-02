@@ -81,6 +81,26 @@ CONTRACTS = ROOT / "docs" / "schema" / "dataset_contracts.json"
 CADENCE = ROOT / "docs" / "REFRESH_CADENCE.json"
 COPY = ROOT / "docs" / "datasets" / "_descriptors.json"
 OUT = ROOT / "dist" / "collection_descriptors.json"
+# CEDAR'S OWN FACTS SHIP IN A SIBLING FILE, NOT INSIDE THE DESCRIPTOR.
+# Codex, PR #29 finding 1: `CollectionDataset(**descriptor)` - the call this
+# file's README advertises and claims to have verified - raised TypeError on
+# EVERY ONE OF THE 13, because each object also carried `cedar` and
+# `needs_copy` and the dataclass declares neither. That is the SAME defect
+# round 1 closed on PR #26 (`n_rows` at the top level), reintroduced by the
+# fix for it: moving Cedar's fields under a namespaced key made them tidy and
+# left them just as unsupported. A keyword the dataclass does not declare is
+# fatal whether it is one key or five.
+#
+# So the descriptor is now EXACTLY the dataclass and nothing else, which is
+# the first of the two repairs Codex offered, and the Cedar facts move here:
+OUT_CEDAR = ROOT / "dist" / "collection_descriptors.cedar.json"
+
+# The dataclass contract, restated so this file can FAIL on a mismatch rather
+# than hope. Copied from `server/cedar_press/collections.py` on `main`,
+# 2026-09-02. Order is the dataclass's own.
+DATACLASS_FIELDS = ("id", "name", "short_name", "origin", "level", "tracks",
+                    "rows_label", "downloads", "vintage", "version", "updated",
+                    "sources", "method", "shelf")
 
 # 518's own vocabulary, imported rather than restated so the two cannot drift.
 try:
@@ -155,7 +175,7 @@ def main() -> int:
             pass
     copy = json.loads(COPY.read_text(encoding="utf-8")) if COPY.exists() else {}
 
-    out, missing = [], []
+    out, missing, cedar_side = [], [], {}
     for r in ready:
         did = r["dataset"]
         tabs = tables_of.get(did, [])
@@ -192,31 +212,63 @@ def main() -> int:
         # Codex: "All nine non-ready descriptors contain only the generic value
         # BLOCKED; a consumer cannot distinguish a publication-rights block
         # from an incomplete schema." So the named blockers travel too.
-        d["cedar"] = {
+        cedar_side[d["id"]] = {
             "cedar_id": did,
+            "product_id": d["id"],
             "status": r.get("status"),
             "blockers": [b.strip() for b in
                          (r.get("blockers") or "").split(" | ") if b.strip()],
             "n_rows": nrows,
             "n_tables": len(tabs),
+            "sample_file": f"samples/{d['id']}__sample.csv",
+            "needs_copy": not all(d[k] for k in ("name", "short_name",
+                                                 "tracks", "sources",
+                                                 "method")),
         }
-        d["needs_copy"] = not all(d[k] for k in
-                                  ("name", "short_name", "tracks",
-                                   "sources", "method"))
-        if d["needs_copy"] and r.get("status") == "READY":
+        if cedar_side[d["id"]]["needs_copy"] and r.get("status") == "READY":
             missing.append(did)
         out.append(d)
+
+    # ---- THE CONTRACT CHECK THAT SHOULD HAVE EXISTED IN ROUND 1 --------
+    # `CollectionDataset(**descriptor)` is the call the README advertises, so
+    # it is CHECKED here rather than asserted in prose. The dataclass lives in
+    # another repository and cannot be imported, so its field list is declared
+    # at the top of this file and the check is exact IN BOTH DIRECTIONS - a
+    # missing field and an unsupported extra are the same TypeError. An extra
+    # key is what broke all 13 objects twice: `n_rows` on PR #26, and `cedar`
+    # plus `needs_copy` on PR #29, introduced by the fix for the first.
+    bad = []
+    for d in out:
+        extra = sorted(set(d) - set(DATACLASS_FIELDS))
+        absent = [f for f in DATACLASS_FIELDS if f not in d]
+        if extra or absent:
+            bad.append(f"{d.get('id')}: extra={extra} missing={absent}")
+    if bad:
+        print(f"  760 CONTRACT BREACH - {len(bad)} of {len(out)} descriptors "
+              f"do not match CollectionDataset:")
+        for b in bad[:13]:
+            print(f"    !! {b}")
+        return 1
 
     if not verify:
         OUT.parent.mkdir(parents=True, exist_ok=True)
         OUT.write_text(json.dumps(out, indent=2) + "\n", encoding="utf-8")
+        OUT_CEDAR.write_text(json.dumps(cedar_side, indent=2) + "\n",
+                             encoding="utf-8")
 
-    shippable = [d for d in out if d["cedar"]["status"] == "READY"]
+    shippable = [c for c in cedar_side.values() if c["status"] == "READY"]
     print(f"  760 collection descriptors   {len(out)} datasets   "
           f"{len(shippable)} READY   {len(missing)} READY-but-no-copy")
-    for d in sorted(out, key=lambda x: (x["cedar"]["status"] != "READY", x["id"])):
-        flag = "" if not d["needs_copy"] else "  <- needs editorial copy"
-        print(f"    {d['cedar']['status']:<8} {d['id']:<24} "
+    print(f"    contract: {len(out)}/{len(out)} carry EXACTLY the "
+          f"{len(DATACLASS_FIELDS)} CollectionDataset fields, so "
+          f"CollectionDataset(**descriptor) loads every one")
+    print(f"    Cedar's own facts: dist/collection_descriptors.cedar.json, "
+          f"keyed by PRODUCT id")
+    for d in sorted(out, key=lambda x: (
+            cedar_side[x["id"]]["status"] != "READY", x["id"])):
+        c = cedar_side[d["id"]]
+        flag = "" if not c["needs_copy"] else "  <- needs editorial copy"
+        print(f"    {c['status']:<8} {d['id']:<24} "
               f"{d['shelf']:<14} {d['level']:<20} "
               f"{d['rows_label']:>14}{flag}")
     if missing:

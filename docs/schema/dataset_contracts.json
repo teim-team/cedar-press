@@ -2,7 +2,7 @@
  "built_date": "2026-09-02",
  "derivation": "500.COLLECTIONS + cedar_codebook + cedar_pipeline; GRAIN declared, everything else derived",
  "n_collections": 14,
- "n_tables_claimed": 270,
+ "n_tables_claimed": 271,
  "n_orphan_shippable": 7,
  "orphans": [
   "native_owned_businesses.bak_2026-09-02_010526.csv",
@@ -13,8 +13,8 @@
   "regulations_gov_entity_coverage.csv",
   "sam_native_class_distributions.csv"
  ],
- "n_shippable": 227,
- "n_shippable_grain_stated": 220,
+ "n_shippable": 228,
+ "n_shippable_grain_stated": 221,
  "n_shippable_grain_unstated": 7,
  "shippable_grain_unstated": [
   "native_owned_businesses.bak_2026-09-02_010526.csv",
@@ -2864,7 +2864,7 @@
    "name": "NAGPRA",
    "shelf": "standard",
    "rebuild_command": "py -3 code/build.py run nagpra --execute",
-   "n_tables": 4,
+   "n_tables": 5,
    "tables": [
     {
      "table": "fr_nagpra_title_index.csv",
@@ -2994,6 +2994,33 @@
      "never_run_warning": []
     },
     {
+     "table": "nagpra_notice_institutions.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "one row per (NAGPRA notice, institution named in that notice), in the order the notice's Federal Register title lists them. NOT one row per institution - an institution appearing in 22 notices has 22 rows - and NOT one row per notice: 392 of 6,792 notices name more than one holder. `institution_city` and `institution_state` are THIS institution's, parsed from its own segment of the title, which is the fact the single columns on nagpra_notices.csv cannot carry.",
+     "primary_key": [
+      "nagpra_notice_institution_id"
+     ],
+     "join_cardinality": {
+      "nagpra_notice_institution_id": "one",
+      "document_number": "many"
+     },
+     "grain_declared_by": "workstream pr29 2026-09-02: nagpra_notice_institution_id confirmed 7,234 distinct / 0 blank on the FULL 7,234-row file; document_number joins many-to-one onto nagpra_notices.csv, 6,792 of 6,792 present; the id is document_number + the notice's own listing ordinal, so it is deterministic across rebuilds and is not positional in the file (defect class 7)",
+     "grain_validated": true,
+     "measured_rows_per_join_key": {
+      "document_number": 8,
+      "nagpra_notice_institution_id": 1
+     },
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "key_refused": {},
+     "population_scope": {},
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
      "table": "nagpra_notices.csv",
      "status": "shippable",
      "key_columns": [],
@@ -3034,8 +3061,12 @@
      },
      "key_refused": {},
      "population_scope": {},
-     "rebuilt_by": [],
-     "enriched_by": [],
+     "rebuilt_by": [
+      "77_build_nagpra_dataset.py"
+     ],
+     "enriched_by": [
+      "1077_nagpra_institution_grain.py"
+     ],
      "never_run_warning": []
     }
    ]
@@ -8647,7 +8678,7 @@
     },
     {
      "table": "gaming_web_harvest_coverage.csv",
-     "status": "unregistered",
+     "status": "UNDOCUMENTED",
      "key_columns": [
       "tribe_id",
       "cedar_uid"
@@ -8669,7 +8700,7 @@
     },
     {
      "table": "gaming_web_harvest_observations.csv",
-     "status": "unregistered",
+     "status": "UNDOCUMENTED",
      "key_columns": [
       "tribe_id",
       "cedar_uid"

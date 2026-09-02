@@ -512,6 +512,16 @@ def cmd_mine(limit=None):
                 d = DATE.findall(s)
                 if not m and not d:
                     continue
+                # The quote is CLIPPED at 1,000 characters. Figures found past
+                # the clip point are real in the document and absent from the
+                # row's own evidence, which is exactly the thing invariant I3
+                # refuses. Re-derive both lists from the clipped text so a row
+                # can never cite what it does not show.
+                clipped = s.strip()[:1000]
+                m = MONEY.findall(clipped)
+                d = DATE.findall(clipped)
+                if not m and not d:
+                    continue
                 n += 1
                 mrow = man.get(r["portal_document_id"], {})
                 rows.append({
@@ -795,7 +805,134 @@ ANCSA_TX = [
       quote="The purchase price recorded in cash was $454,000 and a $390,000 note payable for the purchase.",
       notes="The two components are both stated as consideration FOR THE PURCHASE, so they sum: 454,000 + 390,000 = 844,000. This is the one place in this file where a value is a sum, and it is written out here so a reviewer can refuse it. TARGET NOT NAMED and DATE IS A PLACEHOLDER - both must be settled from the source PDF before merging.",
       conf="Low"),
+
+ dict(cid="AS4555139-TX-015", corp="Choggiung Limited", fy="2019",
+      date="2018-08-01",
+      basis="FISCAL-YEAR PLACEHOLDER. The FY ending 2019-03-31 report carries the acquisition-date allocation; the note does not give the acquisition date in the extracted passage, and the earnout runs 'from the acquisition date through July 31, 2021'.",
+      title="Choggiung Limited acquires Bristol Industries, LLC",
+      cls="Alaska Native Village Corporation", cp="Bristol Industries, LLC",
+      role="Acquirer", cat="Acquisition", instr="Business combination with contingent consideration",
+      status="Completed", sclass="Completed",
+      value="2691398", vtype="CASH consideration only - see notes on the contingent half",
+      quote="The following table summarizes the consideration paid for Bristol Industries, LLC and the amounts of estimated fair value of the assets acquired and liabilities assumed at the acquisition date: Consideration: Cash $ 2,691,398",
+      notes="TWO DEFENSIBLE VALUES AND ONE CHOICE. The FY2020 report states Consideration: Cash $2,691,398, Contingent consideration arrangement $2,691,398, Fair value of total consideration transferred $5,382,796. Under ASC 805 the contingent half IS consideration, so $5,382,796 is a legitimate figure - but it is a fair-value ESTIMATE of a payment conditional on Bristol Industries' EBITDA through 2021-07-31, capped at $897,133 per closing anniversary, and the deals ledger's convention is to carry what was actually paid. announced_value_usd is the $2,691,398 of cash and BOTH figures are recorded here so a reviewer can take the other. DATE IS A PLACEHOLDER.",
+      conf="Medium"),
+ dict(cid="AS4555139-TX-016", corp="Natives of Kodiak, Incorporated", fy="2019",
+      date="2019-04-01",
+      basis="'On April 1, 2019, the Company's wholly owned subsidiary KOMAN Government Solutions, LLC (KGS) entered into a stock purchase agreement'",
+      title="KOMAN Government Solutions, LLC acquires 100% of Trinity Analysis and Development Corporation",
+      cls="Alaska Native Village Corporation", cp="Trinity Analysis and Development Corporation",
+      role="Acquirer", cat="Acquisition", instr="Stock purchase agreement",
+      status="Completed", sclass="Completed",
+      value="1500000", vtype="Cash portion of the consideration; long-term debt is a further, separately stated component",
+      quote="On April 1, 2019, the Company\u2019s wholly owned subsidiary KOMAN Government Solutions, LLC (KGS) entered into a stock purchase agreement to acquire 100% of the issued and outstanding shares of common stock of Trinity Analysis and Development Corporation, a Florida corporation, for $1,500,000 cash and long-term debt with a fa",
+      notes="VALUE IS A FLOOR: the consideration is '$1,500,000 cash AND long-term debt', and the debt component is not quantified in this sentence. The same note adds 'three potential payments of additional purchase price of $250,000 each based on certain events occurring before the third anniversary of closing' - contingent, so excluded.",
+      conf="High"),
+ dict(cid="AS4555139-TX-017", corp="Natives of Kodiak, Incorporated", fy="2018",
+      date="2018-11-21",
+      basis="'On November 21, 2018, the Trust purchased a 13.5% ownership interest'",
+      title="The Natives of Kodiak settlement trust purchases a 13.5% interest in Global Windcrest Partners II, LLC",
+      cls="Alaska Native Village Corporation", cp="Global Windcrest Partners II, LLC",
+      role="Equity investor", cat="Equity investment", instr="Purchase of a minority interest",
+      status="Completed", sclass="Completed",
+      value="499500", vtype="Total purchase price as stated",
+      quote="On November 21, 2018, the Trust purchased a 13.5% ownership interest in Global Windcrest Partners II, LLC, a real estate company established for purposes of developing Global Windcrest II, LLC, for a total purchase price of $499,500.",
+      notes="The buyer is the corporation's SETTLEMENT TRUST, not the corporation. Under ANCSA a settlement trust is a distinct legal person holding assets for shareholders, and the distinction should survive into the entity layer rather than be flattened to the corporation.",
+      conf="High"),
+ dict(cid="AS4555139-TX-018", corp="Bethel Native Corporation", fy="2019",
+      date="2019-04-15",
+      basis="MONTH-LEVEL ONLY - 'a lease purchase agreement executed in April 2019'. Mid-month placeholder.",
+      title="Bethel Native Corporation completes a purchase of just over $20,000,000 through a lease purchase agreement",
+      cls="Alaska Native Village Corporation", cp="not named in the extracted passage",
+      role="Acquirer", cat="Acquisition", instr="Lease purchase agreement",
+      status="Completed", sclass="Completed",
+      value="20000000", vtype="'just over $20,000,000' - the filing's own words; the exact figure is not stated",
+      quote="The purchase price was just over $20,000,000, secured through a lease purchase agreement executed in April 2019.",
+      notes="THE FILING SAYS 'JUST OVER' AND GIVES NO EXACT FIGURE. $20,000,000 is therefore a FLOOR, and value_type says so. The target is not named in this passage and must be read from the source PDF before merging. This is the largest single village-corporation transaction in this wave.",
+      conf="Medium"),
+ dict(cid="AS4555139-TX-019", corp="Old Harbor Native Corporation", fy="2023",
+      date="2023-06-30",
+      basis="FISCAL-YEAR PLACEHOLDER - the allocation table gives no acquisition date in the extracted passage.",
+      title="Old Harbor Native Corporation acquires EP Roofing, LLC",
+      cls="Alaska Native Village Corporation", cp="EP Roofing, LLC",
+      role="Acquirer", cat="Acquisition", instr="Business combination with a seller note and contingent consideration",
+      status="Completed", sclass="Completed",
+      value="4746526", vtype="Cash $3,123,186 plus the $1,623,340 note payable; the contingent $399,271 is excluded",
+      quote="Consideration: Cash $ 3,123,186 Note payable 1,623,340 Contingent consideration 399,271 Fair value of consideration $ 5,145,797",
+      notes="VALUE CHOICE MADE EXPLICIT: the filing's own 'Fair value of consideration' is $5,145,797 and includes $399,271 of CONTINGENT consideration, which the same note describes as 'up to $100,000 annually for five years, depending on EP Roofing, LLC's profitability.' announced_value_usd carries cash + note = $4,746,526, the amount actually owed regardless of performance. A reviewer who prefers the ASC 805 total should take $5,145,797; both are in this row. DATE IS A PLACEHOLDER.",
+      conf="Medium"),
+ dict(cid="AS4555139-TX-020", corp="Old Harbor Native Corporation", fy="2025",
+      date="2025-06-30",
+      basis="FISCAL-YEAR PLACEHOLDER - the allocation table gives no acquisition date in the extracted passage.",
+      title="Old Harbor Native Corporation acquires STR Holdings, LLC for $21,791,744 in cash",
+      cls="Alaska Native Village Corporation", cp="STR Holdings, LLC",
+      role="Acquirer", cat="Acquisition", instr="Business combination",
+      status="Completed", sclass="Completed",
+      value="21791744", vtype="Cash transferred by Old Harbor, as stated",
+      quote="The following table summarizes the consideration paid for STR Holdings, LLC along with the amounts of the assets acquired and liabilities assumed, which were recognized at the acquisition: Consideration Cash (Transferred by OHI) $ 21,791,744",
+      notes="The largest transaction in this wave, and the second time Old Harbor appears - it acquired EP Roofing in FY2023 (AS4555139-TX-019). VALUE TRAP AVOIDED: the recognised assets in the same table ($8,923,493 cash, $30,776,942 other current assets, $28,257,741 property and equipment against $31,670,544 of current liabilities) are the ALLOCATION, not the price. DATE IS A PLACEHOLDER and must be settled before merging.",
+      conf="Medium"),
+ dict(cid="AS4555139-TX-021", corp="Kootznoowoo Incorporated", fy="2025",
+      date="2025-06-30",
+      basis="FISCAL-YEAR PLACEHOLDER - the consideration table gives no acquisition date in the extracted passage.",
+      title="Kootznoowoo Incorporated completes an acquisition for total consideration of $2,980,000",
+      cls="Alaska Native Village Corporation", cp="not named in the extracted passage",
+      role="Acquirer", cat="Acquisition", instr="Business combination with deferred payments",
+      status="Completed", sclass="Completed",
+      value="2980000", vtype="Total consideration transferred, as stated: cash at closing plus two deferred payments",
+      quote="Cash paid at closing $ 2,086,000 Deferred payment \u2013 first anniversary of closing 745,000 Deferred payment \u2013 second anniversary of closing 149,000 Total consideration transferred $ 2,980,000",
+      notes="The deferred payments are FIXED by date, not contingent on performance, so they belong in the total and the filing itself sums them. A further $157,219 of the sellers' transaction costs was 'accounted for as additional consideration transferred' - NOT added here, because it is an accounting treatment of a cost rather than a price agreed between the parties, and adding it would make the row disagree with the filing's own stated total. TARGET NOT NAMED and DATE IS A PLACEHOLDER.",
+      conf="Medium"),
+ dict(cid="AS4555139-TX-022", corp="Paug-Vik Inc. Ltd.", fy="2025",
+      date="2025-06-30",
+      basis="FISCAL-YEAR PLACEHOLDER - the allocation gives no acquisition date in the extracted passage.",
+      title="Paug-Vik Inc. Ltd. completes an acquisition for a total purchase price of $700,000",
+      cls="Alaska Native Village Corporation", cp="not named in the extracted passage",
+      role="Acquirer", cat="Acquisition", instr="Purchase of a business including a DOT lease",
+      status="Completed", sclass="Completed",
+      value="700000", vtype="Total purchase price, as stated and as cross-footed by the allocation",
+      quote="The final purchase consideration was allocated to the assets acquired as follows: Building and improvement $ 282,500 Intangible asset \u2013 DOT lease 88,710 Goodwill 328,790 Total purchase price $ 700,000",
+      notes="The allocation cross-foots: 282,500 + 88,710 + 328,790 = 700,000, which confirms the total is a price and not a fair-value estimate. TARGET NOT NAMED and DATE IS A PLACEHOLDER.",
+      conf="Medium"),
+ dict(cid="AS4555139-TX-023", corp="Shee Atika, Incorporated", fy="2021",
+      date="2021-06-30",
+      basis="FISCAL-YEAR PLACEHOLDER. The FY2024 report calls it 'the Lakota acquisition in 2021'; the FY2021 allocation gives no date in the extracted passage.",
+      title="Shee Atika, Incorporated acquires Lakota",
+      cls="Alaska Native Village Corporation", cp="Lakota (as named in the FY2024 report)",
+      role="Acquirer", cat="Acquisition", instr="Business combination, part-funded by notes payable to individuals",
+      status="Completed", sclass="Completed", value="", vtype="",
+      quote="The purchase price allocation for the acquisition was as follows: Cash and cash equivalents $ 78,826 Accounts receivable 1,444,296 Property and equipment 93,770 Goodwill 5,166,154 Total Assets Acquired 6,783,046",
+      notes="VALUE TRAP AVOIDED: $6,783,046 of Total Assets Acquired and $6,546,454 of Net Assets Acquired are the ALLOCATION, and $5,166,154 of it is GOODWILL. Neither is a stated price and the price is not stated. announced_value_usd is blank. Part of the price was a note payable to individuals, carried at $2,083,430 and secured by commercial property in Sitka - a BALANCE, not the price.",
+      conf="Medium"),
+ dict(cid="AS4555139-TX-024", corp="Shee Atika, Incorporated", fy="2024",
+      date="2024-06-30",
+      basis="FISCAL-YEAR PLACEHOLDER - 'An additional $2.5 million was added to the balance in FY24 for the acquisition of Eikon Research'.",
+      title="Shee Atika, Incorporated acquires Eikon Research",
+      cls="Alaska Native Village Corporation", cp="Eikon Research",
+      role="Acquirer", cat="Acquisition", instr="Business combination, part-funded by notes payable to individuals",
+      status="Completed", sclass="Completed", value="", vtype="",
+      quote="An additional $2.5 million was added to the balance in FY24 for the acquisition of Eikon Research as discussed in Note 14.",
+      notes="VALUE TRAP: the $2.5 million is an ADDITION TO THE NOTE-PAYABLE BALANCE for a portion of the purchase price, not the purchase price. announced_value_usd is blank. The FY2024 goodwill roll-forward shows $4,605,775 of goodwill acquired during the year, which is also not a price. DATE IS A PLACEHOLDER.",
+      conf="Low"),
 ]
+
+
+# The owner's rule inside one ANC: a sale between two subsidiaries of the same
+# corporation is a relabelling, not a transaction.
+ANCSA_INTRA_FAMILY_REFUSED = [
+ ("Shee Atika: SAFE sells its interest in SAE to SAI, 2021, $147,000 cash, gain $175,824",
+  "SAFE and SAI are both Shee Atika entities. The asset never leaves the family, so under the owner's rule this is a relabelling. The cash and the recognised gain are internal."),
+ ("Shee Atika: SAFE sells its interest in AMTS to SAI, 2021, $117,000 cash, gain $145,055",
+  "Same family, same reason."),
+ ("Shee Atika: SAFE sells its interest in BAS to SAI, 2021, $49,000 cash, loss $52,433",
+  "Same family, same reason. Note the LOSS - an internal transfer can book a loss, which is another reason it is not a market price."),
+ ("Natives of Kodiak: the WCPB transaction, purchase price $4,500,000 against a carrying value of ($117,550)",
+  "The filing says the difference 'was recorded to equity' AS A RESULT OF THE COMMON CONTROL. A common-control transaction is the accounting name for exactly what the owner's rule describes, and the $4,500,000 is not a market price. Refused."),
+ ("Old Harbor: $108,333 contributed to Nuniaq Patrol, LLC 'to fund 1/3 of the vessel's purchase price'",
+  "A capital contribution into a jointly owned vehicle is not the price of anything Old Harbor bought - the same trap ANCSA_PORTAL_V2_LOG records for Huna Totem's $2,550,000 into Na-Dena'."),
+]
+
+ANCSA_INTRA_OUT = REVIEW / "deals_ancsa_1031_intra_family_refused.csv"
 
 
 def cmd_stage():
@@ -807,9 +944,34 @@ def cmd_stage():
     with open(MANIFEST, encoding="utf-8-sig", newline="") as fh:
         for r in csv.DictReader(fh):
             man[r["portal_document_id"]] = r
-    by_key = {}
+    # A corporation can have MORE THAN ONE document for a fiscal year, so
+    # (corporation, year) does not identify the source. Locate the document by
+    # SEARCHING for the quote instead: that both finds the right file and is
+    # itself the evidence the quote exists. The (corporation, year) key is
+    # kept only to break a tie.
+    def _norm(t):
+        return re.sub(r"\s+", " ", t)
+
+    texts = {}
     for r in ex:
-        by_key.setdefault((r["corporation_name"], r["period_covered"]), r)
+        if not r["txt_file"]:
+            continue
+        tf = CEDAR / r["txt_file"]
+        if tf.exists():
+            texts[r["portal_document_id"]] = (
+                r, _norm(tf.read_text(encoding="utf-8", errors="replace")))
+
+    def find_source(corp, fy, quote):
+        q = _norm(quote).strip()
+        hits = [r for r, t in texts.values() if q in t]
+        if not hits:
+            return None
+        exact = [r for r in hits
+                 if r["corporation_name"] == corp and r["period_covered"] == fy]
+        if exact:
+            return exact[0]
+        same_corp = [r for r in hits if r["corporation_name"] == corp]
+        return (same_corp or hits)[0]
 
     deals = _deals_index()
     tokfreq = {}
@@ -818,7 +980,7 @@ def cmd_stage():
             tokfreq[t] = tokfreq.get(t, 0) + 1
     rows, missing = [], []
     for t in ANCSA_TX:
-        src = by_key.get((t["corp"], t["fy"]))
+        src = find_source(t["corp"], t["fy"], t["quote"])
         if not src:
             missing.append(t["cid"])
             continue
@@ -849,8 +1011,15 @@ def cmd_stage():
         w.writerows(rows)
     out(f"  {len(rows)} transactions -> {STAGED_TX.relative_to(CEDAR)}")
     if missing:
-        out(f"  {len(missing)} not stageable - source document not yet "
-            f"extracted: {', '.join(missing)}")
+        out(f"  {len(missing)} not stageable - no extracted document "
+            f"contains the quote: {', '.join(missing)}")
+    with open(ANCSA_INTRA_OUT, "w", encoding="utf-8", newline="") as fh:
+        w = csv.writer(fh)
+        w.writerow(["candidate", "why_refused", "refused_by", "refused_date"])
+        for c, why in ANCSA_INTRA_FAMILY_REFUSED:
+            w.writerow([c, why, SCRIPT, TODAY])
+    out(f"  {len(ANCSA_INTRA_FAMILY_REFUSED)} intra-family transfers refused "
+        f"-> {ANCSA_INTRA_OUT.relative_to(CEDAR)}")
     return 0
 
 

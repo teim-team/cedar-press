@@ -10,6 +10,8 @@ content it does not know about - a CSV column, or a paragraph of markdown.
                                                   # writer appears
     py -3 code/845_regenerate_guard.py baseline   # re-record, AFTER fixing
     py -3 code/845_regenerate_guard.py selftest   # prove the detectors FIRE
+    py -3 code/845_regenerate_guard.py regen <doc> # THE HONEST TEST: rebuild
+                                                  # that doc and diff it
 
 WHY
 ---
@@ -143,7 +145,16 @@ BASELINE = ROOT / "docs" / "schema" / "regenerate_guard_baseline.json"
 
 CSV_RE = re.compile(r"[A-Za-z0-9_.\-]+\.csv")
 MD_RE = re.compile(r"[A-Za-z0-9_.\-]+\.md")
-MARKER_RE = re.compile(r"<!--\s*BEGIN\s+([A-Za-z0-9_\-]+)\s*-->")
+# TWO marker vocabularies are in use and both are load-bearing. The first
+# version of this check knew only `<!-- BEGIN X -->` and therefore reported
+# `docs/REFRESH_CADENCE.md` - which `630` splices into
+# `<!-- CEDAR:CADENCE-MEASURED START -->` and says so in its own output - as
+# the worst UNMARKED hand-edited doc in the repo. Regenerating it and diffing
+# showed three changed lines: a timestamp and two counts that had genuinely
+# moved. Do not narrow this again without grepping the docs first.
+MARKER_RE = re.compile(
+    r"<!--\s*(?:BEGIN\s+([A-Za-z0-9_\-]+)|CEDAR:([A-Za-z0-9_\-]+)"
+    r"[^>]*?\sSTART)\s*-->")
 
 
 # ---------------------------------------------------------------- live state
@@ -559,41 +570,155 @@ def _git(*args):
         return ""
 
 
+def _md_writes_in(p: Path) -> set:
+    """Repo-relative `.md` paths this script WRITES, resolved on the AST.
+
+    A regex over the source text is not good enough and the first version
+    proved it: it matched any `.md` filename within 500 characters of the word
+    `write`, so `AGENTS.md` - named in eleven scripts' prose - came back as a
+    generated document with 26 hand edits, while
+    `docs/MONEY_TOTALLING_RULES.md`, the ONE case we know was destroyed this
+    way, did not appear at all. Same failure shape as every entry in the field
+    guide's section 3: a number was produced, it was plausible, and it was
+    about something else.
+    """
+    out = set()
+    try:
+        src = p.read_text(encoding="utf-8", errors="replace")
+        tree = ast.parse(src)
+    except (OSError, SyntaxError):
+        return out
+    if ".md" not in src:
+        return out
+    modenv = const_env(tree)
+
+    def _record(expr, scope, line):
+        """Resolve the WHOLE path, then trust only an exact hit.
+
+        Falling back to `ROOT / basename` credits five different scripts with
+        writing the repo's top-level README.md when what they each write is
+        `docs/datasets/README.md`, `docs/codebooks/README.md` or a
+        `graveyard/*/README.md`. A basename is not an identity.
+        """
+        env = env_at(modenv, local_hist(scope, modenv), line)
+        s = (_resolve(expr, env) or "").replace("\\", "/")
+        if not s.endswith(".md") or "*" in s:
+            return
+        s = s.lstrip("./")
+        rootstr = str(ROOT).replace("\\", "/")
+        if s.startswith(rootstr):
+            s = s[len(rootstr):].lstrip("/")
+        cand = ROOT / s
+        if cand.exists() and cand.is_file():
+            out.add(str(cand.relative_to(ROOT)).replace("\\", "/"))
+
+    for scope in [tree] + [n for n in ast.walk(tree)
+                           if isinstance(n, (ast.FunctionDef,
+                                             ast.AsyncFunctionDef))]:
+        for n in ast.walk(scope):
+            if isinstance(n, ast.Call):
+                fn = getattr(n.func, "attr", "") or getattr(n.func, "id", "")
+                if fn == "write_text" and isinstance(n.func, ast.Attribute):
+                    _record(n.func.value, scope if scope is not tree else None,
+                            n.lineno)
+                elif fn == "open" and len(n.args) > 1:
+                    mode = getattr(n.args[1], "value", "")
+                    if isinstance(mode, str) and "w" in mode:
+                        _record(n.args[0],
+                                scope if scope is not tree else None, n.lineno)
+    return out
+
+
 def md_generators() -> dict:
     """doc path (repo-relative) -> [scripts that write it wholesale]."""
     gen = {}
     for p in sorted(CODE.rglob("*.py")):
         if "graveyard" in p.parts or ".bak" in p.name:
             continue
-        try:
-            src = p.read_text(encoding="utf-8", errors="replace")
-        except OSError:
-            continue
-        if ".md" not in src:
-            continue
-        for m in re.finditer(MD_RE, src):
-            doc = m.group(0)
-            target = None
-            for cand in (DOCS / doc, ROOT / doc):
-                if cand.exists():
-                    target = cand
-                    break
-            if target is None:
-                continue
-            seg = src[max(0, m.start() - 500):m.end() + 500]
-            if not re.search(r"write_text\(|open\([^)]*[\"']w[\"']|\.write\(",
-                             seg):
-                continue
-            rel = str(target.relative_to(ROOT)).replace("\\", "/")
+        for rel in _md_writes_in(p):
             gen.setdefault(rel, [])
             if p.name not in gen[rel]:
                 gen[rel].append(p.name)
     return gen
 
 
+def _commit_files() -> dict:
+    """commit sha -> set(paths). One `git log` instead of one `git show` per
+    commit per doc; the per-commit version took minutes and timed out."""
+    out, cur = {}, None
+    for line in _git("log", "--format=@@%H", "--name-only").splitlines():
+        line = line.strip().replace("\\", "/")
+        if line.startswith("@@"):
+            cur = line[2:]
+            out[cur] = set()
+        elif line and cur:
+            out[cur].add(line)
+    return out
+
+
+HEAD_RE = re.compile(r"^#{1,4}\s+(.+?)\s*$", re.M)
+
+# Docs whose generator was actually RUN and whose output was diffed against
+# the live file. This is the measurement the two static signals only stand in
+# for, so it OUTRANKS them. Nothing goes in here without the `regen` output
+# that justifies it, and the entry says what that output was.
+#
+# NOT a waiver list. A waiver silences a check; these are results.
+MD_PROVEN_SAFE = {
+    "docs/REFRESH_CADENCE.md":
+        "2026-09-02 regen: 3 changed lines - a timestamp and two counts that "
+        "genuinely moved (4,656->4,659 comment rows, 5,368->5,472 URL rows). "
+        "630 also splices into <!-- CEDAR:CADENCE-MEASURED START -->.",
+    "docs/ENTITY_FRESHNESS.md":
+        "2026-09-02 regen: 1 removed line, replaced in the same hunk. "
+        "0 unpaired removals.",
+    "docs/DEPENDENCY_MANIFEST.md":
+        "2026-09-02 regen: 18 removed / 34 added, 0 unpaired removals - the "
+        "manifest grew, nothing was lost.",
+}
+
+
+def orphan_headings(doc_text: str, scripts) -> list:
+    """Headings in the doc that appear in NO string literal of its generator.
+
+    The commit signal is archaeology and it over-counts: an integrator
+    sweeping a regenerated doc into an unrelated commit is indistinguishable
+    from a human writing a paragraph. This is the cheap stand-in for the
+    honest test - regenerate and diff - and it is evidence about the CONTENT
+    rather than about the history. A heading the generator cannot emit is
+    content a rebuild deletes.
+
+    It is still a signal, not a proof: a generator that builds a heading by
+    interpolation (`f"## {name}"`) produces headings this cannot match, so a
+    doc of those reads as all-orphan. Read the two signals together.
+    """
+    lit = []
+    for s in scripts:
+        p = CODE / s
+        if not p.exists():
+            continue
+        try:
+            tree = ast.parse(p.read_text(encoding="utf-8", errors="replace"))
+        except (OSError, SyntaxError):
+            continue
+        for n in ast.walk(tree):
+            if isinstance(n, ast.Constant) and isinstance(n.value, str):
+                lit.append(n.value)
+    blob = "\n".join(lit)
+    out = []
+    for h in HEAD_RE.findall(doc_text):
+        core = h.strip("*_# ").strip()
+        if len(core) < 8:
+            continue
+        if core not in blob:
+            out.append(core)
+    return out
+
+
 def scan_md() -> list:
-    """[(hand_edits, doc, scripts, n_markers, note)] ranked."""
+    """[(risk, doc, scripts, n_markers, note)] ranked."""
     gen = md_generators()
+    commit_files = _commit_files()
     rows = []
     for rel, scripts in sorted(gen.items()):
         path = ROOT / rel
@@ -601,24 +726,33 @@ def scan_md() -> list:
             text = path.read_text(encoding="utf-8", errors="replace")
         except OSError:
             continue
-        markers = sorted(set(MARKER_RE.findall(text)))
+        markers = sorted({a or b for a, b in MARKER_RE.findall(text)})
         commits = [c for c in _git("log", "--format=%H", "--", rel).split() if c]
         hand = 0
         for c in commits[:40]:
-            touched = {t.replace("\\", "/")
-                       for t in _git("show", "--name-only", "--format=",
-                                     c).split()}
+            touched = commit_files.get(c, set())
             if not any(("code/" + s) in touched for s in scripts):
                 hand += 1
-        if markers:
+        orph = orphan_headings(text, scripts)
+        nheads = len(HEAD_RE.findall(text))
+        if rel in MD_PROVEN_SAFE:
+            note = "PROVEN SAFE BY REGENERATION - " + MD_PROVEN_SAFE[rel]
+            risk = 0
+        elif markers:
             note = ("%d marker block(s) preserved: %s"
                     % (len(markers), ", ".join(markers)))
             risk = 0
-        elif hand:
-            note = ("UNMARKED and hand-edited. UPPER BOUND - an integrator "
-                    "sweeping a regenerated doc into an unrelated commit looks "
-                    "identical. Regenerate and diff before acting.")
+        elif hand and orph:
+            note = ("%d of %d heading(s) appear in NO string literal of the "
+                    "generator, e.g. %s. UPPER BOUND on both signals - "
+                    "regenerate and diff before acting."
+                    % (len(orph), nheads, "; ".join(orph[:3])))
             risk = hand
+        elif hand:
+            note = ("hand-edit commits but EVERY heading is reproducible by "
+                    "the generator - most likely an integrator sweep, not "
+                    "hand-authored prose. Lowest priority.")
+            risk = 0
         else:
             note = "fully generated, no hand edits recorded - wholesale is right"
             risk = 0
@@ -770,9 +904,13 @@ def _print_md(mrows):
             continue
         print("    %3d hand-edit commit(s)  %-46s <- %s" % (hand, doc, scripts))
         print("                             %s" % note)
-    print("\n    %d doc(s) protect content with markers; %d are fully "
-          "generated with no hand edits."
-          % (len(marked), len(mrows) - len(at_risk) - len(marked)))
+    print("\n    %d doc(s) protect content with markers; %d were PROVEN safe "
+          "by regenerating\n    and diffing; %d are fully generated with no "
+          "hand edits."
+          % (len(marked), len(MD_PROVEN_SAFE),
+             len(mrows) - len(at_risk) - len(marked) - len(MD_PROVEN_SAFE)))
+    print("    `845 regen <doc>` runs that test for any of the %d above; it "
+          "restores the doc either way." % len(at_risk))
     print("    PREFER 574's repair: COMPUTE the sentence inside the generator "
           "from the same\n    data. A marker preserves prose that can still go "
           "stale; a computed sentence cannot.")
@@ -784,10 +922,103 @@ def _key(rows, mrows):
     return k
 
 
+def regen_diff(docarg: str) -> int:
+    """THE HONEST TEST, as one command: regenerate the doc and diff it.
+
+        py -3 code/845_regenerate_guard.py regen docs/REFRESH_CADENCE.md
+
+    The commit signal and the orphan-heading signal are both proxies. This is
+    the measurement. It copies the doc aside, runs its generator with no
+    arguments, diffs, and RESTORES the doc either way - so a doc that
+    regenerates clean is left byte-identical.
+
+    It cannot undo a generator's OTHER side effects, and it does not try to.
+    Read the generator's docstring first; several of these refuse network by
+    default and several do not.
+    """
+    import shutil
+    import tempfile
+    gen = md_generators()
+    rel = docarg.replace("\\", "/")
+    if rel not in gen:
+        cands = [k for k in gen if k.endswith("/" + rel) or k == rel
+                 or Path(k).name == rel]
+        if len(cands) != 1:
+            print("  no single generator known for %r." % docarg)
+            print("  known: %s" % ", ".join(sorted(gen)[:8]) + " ...")
+            return 2
+        rel = cands[0]
+    scripts = gen[rel]
+    if len(scripts) != 1:
+        print("  %s is written by %d scripts: %s. Run them by hand; this "
+              "would not know the order." % (rel, len(scripts),
+                                             ", ".join(scripts)))
+        return 2
+    script = scripts[0]
+    path = ROOT / rel
+    tmp = Path(tempfile.mkdtemp()) / path.name
+    shutil.copy2(path, tmp)
+    print("  regenerating %s with code/%s ..." % (rel, script))
+    try:
+        r = subprocess.run([sys.executable, str(CODE / script)], cwd=str(ROOT),
+                           capture_output=True, text=True, timeout=1800)
+        after = path.read_text(encoding="utf-8", errors="replace")
+    finally:
+        shutil.copy2(tmp, path)
+    before = tmp.read_text(encoding="utf-8", errors="replace")
+    print("  generator exit %d; doc restored to its pre-run bytes" % r.returncode)
+    import difflib
+    d = list(difflib.unified_diff(before.splitlines(), after.splitlines(),
+                                  "live", "regenerated", lineterm="", n=0))
+    # A REMOVED LINE IS NOT A HAND EDIT. `docs/DOC_STALENESS.md` regenerates
+    # with five removals and all five are measurements that moved - 13
+    # collections became 14, a doc stopped qualifying as stale. Count the
+    # hunks where removals OUTNUMBER additions; those are the only candidates,
+    # and even they still need a human to read them.
+    gone = [l for l in d if l.startswith("-") and not l.startswith("---")]
+    add = [l for l in d if l.startswith("+") and not l.startswith("+++")]
+    unpaired, minus, plus = 0, 0, 0
+    for line in d + ["@@"]:
+        if line.startswith("@@"):
+            unpaired += max(0, minus - plus)
+            minus = plus = 0
+        elif line.startswith("-") and not line.startswith("---"):
+            minus += 1
+        elif line.startswith("+") and not line.startswith("+++"):
+            plus += 1
+    print("  %d diff line(s): %d removed, %d added, %d removed WITHOUT a "
+          "replacement in the same hunk"
+          % (max(0, len(d) - 2), len(gone), len(add), unpaired))
+    for line in d[:80]:
+        print("    " + line)
+    if len(d) > 80:
+        print("    ... %d more" % (len(d) - 80))
+    if not gone:
+        print("\n  VERDICT: regenerates byte-identical. Nothing is at risk and "
+              "wholesale is correct.")
+    elif not unpaired:
+        print("\n  VERDICT: every removed line has a replacement - these are "
+              "measurements that moved,\n  not hand-authored prose. A rebuild "
+              "is safe.")
+    else:
+        print("\n  VERDICT: %d line(s) disappear with nothing put in their "
+              "place. READ THEM before\n  concluding anything - a row that "
+              "stopped qualifying looks the same as a deleted\n  paragraph. If "
+              "any is genuinely hand-authored, prefer 574's repair: COMPUTE it"
+              "\n  inside the generator; use a marker only where it cannot be "
+              "derived." % unpaired)
+    return 0
+
+
 def main() -> int:
     mode = sys.argv[1] if len(sys.argv) > 1 else "report"
     if mode == "selftest":
         return selftest()
+    if mode == "regen":
+        if len(sys.argv) < 3:
+            print("  usage: 845_regenerate_guard.py regen <doc path>")
+            return 2
+        return regen_diff(sys.argv[2])
 
     live = live_headers()
     rows, mem = ([], []) if mode == "md" else collect_csv(live)

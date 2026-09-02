@@ -2,13 +2,14 @@
   "measured_date": "2026-09-02",
   "notices": 6792,
   "notice_cols": 67,
-  "bridge_rows": 7234,
-  "bridge_rows_with_state": 7087,
-  "multi_institution_notices": 392,
-  "prefix_stripped_rows": 857,
+  "distinct_document_number": 6792,
+  "prefixed_institution_name_before": 857,
+  "prefixed_institution_name_after": 0,
+  "distinct_institution_name_before": 2184,
+  "distinct_institution_name_after": 1863,
   "institution_count_corrected": 45,
-  "city_state_repointed": 325,
-  "distinct_institution_names_before": 2184,
-  "distinct_institution_names_after": 1775,
-  "generator": "object-phrase strip added; parse_institution now consumes it; semicolon rule added; institution_parts now semicolon-aware"
+  "city_state_repointed": 356,
+  "bridge_rows": 7234,
+  "multi_institution_notices": 392,
+  "generator": "code/77_build_nagpra_dataset.py patched: OBJECT_HEAD_RE + semicolon-first institution_parts"
 }

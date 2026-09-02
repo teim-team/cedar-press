@@ -83,6 +83,42 @@ OUT = ROOT / "dist" / "samples"
 CONTRACTS = ROOT / "docs" / "schema" / "dataset_contracts.json"
 N = 10
 
+# THE FILENAME IS THE PRODUCT'S ID, NOT CEDAR'S. Codex, PR #29 finding 7: the
+# descriptor emits `owned` and the sample shipped as
+# `native-owned-businesses__sample.csv`, so an id-based manifest consumer -
+# which is the only kind the descriptor invites - could not find the file for
+# the one dataset whose two sides disagree. The mapping is the SAME dict as
+# `PRODUCT_ID` in `code/760_collection_descriptors.py` and is duplicated here
+# rather than imported because a module name beginning with a digit is not
+# importable; `verify` fails if the two ever diverge.
+PRODUCT_ID = {
+    "native-owned-businesses": "owned",
+}
+
+
+def product_id(did: str) -> str:
+    return PRODUCT_ID.get(did, did)
+
+
+def _760_product_id_map() -> dict:
+    """Read PRODUCT_ID out of 760 by text, so drift is a hard failure rather
+    than two files quietly disagreeing about a filename."""
+    src = (ROOT / "code" / "760_collection_descriptors.py")
+    if not src.exists():
+        return {}
+    txt = src.read_text(encoding="utf-8")
+    i = txt.find("PRODUCT_ID = {")
+    if i < 0:
+        return {}
+    body = txt[i + len("PRODUCT_ID = {"):txt.find("}", i)]
+    out = {}
+    for line in body.splitlines():
+        line = line.strip().rstrip(",")
+        if ":" in line and line.startswith('"'):
+            k, v = line.split(":", 1)
+            out[k.strip().strip('"')] = v.strip().strip('"')
+    return out
+
 # Curated: the table a CUSTOMER would open first. Not the largest.
 FLAGSHIP = {
     "contractors":              "prime_contracts.csv",
@@ -133,7 +169,15 @@ SHOW = {
                "gaming_class_ii_authorized", "gaming_class_iii_authorized",
                "has_revenue_bound", "revenue_bound_strongest_status",
                "state_revenue_disclosure_status",
-               "cedar_uid"],
+               # 2026-09-02, PR #29 finding 5. `cedar_uid` holds ONE operator
+               # and The Stables Casino is run jointly by the Modoc Nation and
+               # the Miami Tribe of Oklahoma, so entity filtering found it
+               # under one and never the other. `operating_entity_cedar_uids`
+               # (written by code/1078) carries every operator with the
+               # primary first, and `n_operating_entities` is how a buyer
+               # knows to read it - 1 on 786 of 787 facilities.
+               "cedar_uid", "operating_entity_cedar_uids",
+               "n_operating_entities"],
     # `parent_contract_number` leads because `contract_number` on its own is
     # NOT a key: 290,525 rows (23.9%) carry six characters or fewer and the
     # sample was shipping `0098`, `0006`, `0003`, `SBA0001` as if they were
@@ -146,10 +190,12 @@ SHOW = {
     # literal string `nan`, a pandas float written through `str()`, which
     # counts as present and means absent. `772_strip_nan_sentinels.py` cleared
     # it. What is left is complementary, and the cross-tab has an empty cell
-    # where it matters: 664,470 rows carry a real parent and a full child PIID,
-    # 290,525 a real parent and a modification stub, 262,773 no parent and a
-    # full standalone PIID, and **zero** rows have neither. So a buyer keys on
-    # the pair, and the sample now shows both.
+    # where it matters. RE-MEASURED 2026-09-02 after 1076 cleared 156,592
+    # self-parent rows (Codex PR #29 finding 4): 507,884 rows carry a real
+    # parent and a full child PIID, 290,519 a real parent and a modification
+    # stub, 419,359 no parent and a full standalone PIID, and 6 have neither -
+    # six-character legacy PIIDs with no vehicle. The earlier "zero with
+    # neither" was an artefact of the self-parents. A buyer keys on the pair.
     #
     # 2026-09-02, PROMOTE (ADR-016): WHAT WAS BOUGHT, AND WHEN.
     # `prime_contracts.csv` shipped no NAICS at all - only `sector`, the
@@ -330,8 +376,18 @@ SHOW = {
     # affiliated tribes the notice names and Cedar resolved.
     # `mni_total_stated` is the notice's OWN figure - Cedar states no count of
     # its own and infers nothing beyond the notice's words.
+    # 2026-09-02, PR #29 findings 6 and 8. `institution_name` no longer
+    # carries the notice-type heading ("Cultural Items: U.S. Army Corps of
+    # Engineers, Omaha District" was 857 rows and split 287 institutions in
+    # two), and `institution_count` now ships beside `institution_city` /
+    # `institution_state` because those two are the PRIMARY institution's and
+    # 392 notices name more than one holder. Where the count is >1 the row
+    # cannot carry the geography and the answer is
+    # `nagpra_notice_institutions.csv`, one row per (notice, institution),
+    # 7,234 rows - see code/1077.
     "nagpra": ["document_number", "publication_date", "notice_type",
                "institution_name", "institution_city", "institution_state",
+               "institution_count",
                "mni_total_stated", "mni_basis", "removal_states",
                "n_affiliated_named", "n_affiliated_resolved",
                "affiliated_entity_ids", "repatriation_eligible_date",
@@ -485,15 +541,15 @@ def main() -> int:
             sparse.append((did, blank))
         if absent:
             notincols.append((did, absent))
-        dst = OUT / f"{did}__sample.csv"
+        dst = OUT / f"{product_id(did)}__sample.csv"
         if not verify:
             with dst.open("w", encoding="utf-8", newline="") as fh:
                 w = csv.DictWriter(fh, fieldnames=cols, extrasaction="ignore")
                 w.writeheader()
                 for r in rs:
                     w.writerow(r)
-        built.append((did, tbl, len(rs), len(rows), len(cols),
-                      grain.get(tbl, "UNSTATED")))
+        built.append((product_id(did), tbl, len(rs), len(rows),
+                      len(cols), grain.get(tbl, "UNSTATED")))
 
     if not verify:
         L = ["# Cedar Press — sample extracts", "",
@@ -552,12 +608,23 @@ def main() -> int:
               "`subawards` to `prime_contracts`.", "",
               "## Two columns that look like keys and are not, alone", "",
               "- **`prime_contracts.contract_number`** is the awarding PIID "
-              "and on 290,525 rows (23.9%) it is a modification stub — `0098`, "
+              "and on 290,519 rows (23.9%) it is a modification stub — `0098`, "
               "`0006`, `SBA0001` — meaningless without the IDV it references. "
               "**`parent_contract_number` ships beside it and the pair is the "
-              "key.** They are complementary: 664,470 rows carry both, 290,525 "
-              "a parent plus a stub, 262,773 no parent and a complete "
-              "standalone PIID, and **no row has neither**.",
+              "key.** Re-measured 2026-09-02 after "
+              "`1076_clear_self_parent_piid.py`: **507,884** rows carry a real "
+              "parent and a full child PIID, **290,519** a real parent and a "
+              "modification stub, **419,359** no parent and a complete "
+              "standalone PIID, and **6** have neither — all six a "
+              "six-character PIID from the legacy `.dta` with no vehicle, "
+              "which is a short pre-FPDS-NG identifier rather than a stub, so "
+              "they are named rather than counted as broken. *This paragraph "
+              "read 664,470 / 290,525 / 262,773 / **zero** with neither until "
+              "today. That zero was true only because 156,592 rows (12.86%) "
+              "carried `parent_contract_number == contract_number` — a "
+              "self-parent the legacy source uses to mean standalone, and "
+              "which Cedar was shipping as a vehicle reference. Codex, PR #29 "
+              "finding 4, saw one of them.*",
               "- **`federal_funding_transactions.canonical_name`** is a legacy "
               "display label, not Cedar's name for the entity. Group on "
               "**`cedar_uid`**, which is the key ADR-009 mandates. Measured "
@@ -582,10 +649,12 @@ def main() -> int:
                   "dataset rather than something to hide by dropping the "
                   "column.", ""]
             for did, blank in sparse:
-                L.append(f"- `{did}` — blank on all {N} sampled rows: "
+                L.append(f"- `{product_id(did)}` — blank on all {N} sampled "
+                         f"rows: "
                          + ", ".join(f"`{c}`" for c in blank))
             for did, missing in notincols:
-                L.append(f"- `{did}` — **requested but not present in the "
+                L.append(f"- `{product_id(did)}` — **requested but not "
+                         f"present in the "
                          f"source table** (a `SHOW` list that has drifted from "
                          f"the schema): "
                          + ", ".join(f"`{c}`" for c in missing))
@@ -601,9 +670,11 @@ def main() -> int:
     for u in unsafe:
         print(f"    REFUSED {u}")
     for did, blank in sparse:
-        print(f"    SPARSE  {did}: blank on all {N} rows -> {', '.join(blank)}")
+        print(f"    SPARSE  {product_id(did)}: blank on all {N} rows -> "
+              f"{', '.join(blank)}")
     for did, missing in notincols:
-        print(f"    DRIFT   {did}: SHOW asks for a column the table does not "
+        print(f"    DRIFT   {product_id(did)}: SHOW asks for a column the "
+              f"table does not "
               f"have -> {', '.join(missing)}")
     # A `SHOW` entry naming a column the source table does not carry is a real
     # drift and `verify` fails on it. A column that is merely blank on the ten

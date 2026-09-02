@@ -126,6 +126,8 @@ INVARIANTS (`verify`)
       says NO_LIST_FOUND names the machine-readable routes that were run
   V6  the staged file has exactly the 58 columns of the live schema
   V7  no staged row carries a person-held field (email, phone, street address)
+  V8  no staged row comes from an authority whose site was never established
+      as its own, or whose publisher refused
 """
 from __future__ import annotations
 
@@ -327,6 +329,16 @@ SCOPE_BY_KIND = {
     # existing scopes says it, so it gets its own declared value rather than
     # being flattened into `any_native`.
     "nho_member_directory": "association_member",
+    # AN INTERTRIBAL BODY'S AGGREGATED DIRECTORY DOES NOT MAKE IT THE OWNER.
+    # USET's Tribal Enterprise Directory lists Choctaw Fresh Produce and
+    # Passamaquoddy Maple Syrup. Those ARE tribally owned — by the Mississippi
+    # Band of Choctaw and the Passamaquoddy Tribe, not by USET. Writing
+    # `tribally_owned_entity` against a keyed authority of USET would assert
+    # an ownership the source never asserted, which is the one thing the
+    # affiliation rule exists to prevent. The claim the source actually makes
+    # is: this is a tribal enterprise of one of my member nations.
+    "intertribal_member_enterprise": "tribally_owned_entity_of_a_member_nation",
+    "intertribal_member_directory": "association_member",
     "member_business_list": "any_native",
     "licence_register": "unknown",
     "vendor_list": "vendor_relationship",
@@ -338,6 +350,11 @@ ASSERTION_BY_KIND = {
     "anc_operating_companies": "OWNERSHIP",
     "nho_subsidiaries": "OWNERSHIP",
     "anc_shareholder_directory": "OWNERSHIP",
+    # RELATIONSHIP relative to the KEYED entity: USET is not the owner. The
+    # ownership fact is real and belongs to a member nation Cedar has not
+    # resolved on this row.
+    "intertribal_member_enterprise": "RELATIONSHIP",
+    "intertribal_member_directory": "RELATIONSHIP",
     "nho_member_directory": "RELATIONSHIP",
     "member_business_list": "OWNERSHIP",
     "licence_register": "RELATIONSHIP",
@@ -349,6 +366,8 @@ DIRECTORY_TYPE_BY_KIND = {
     "anc_operating_companies": "enterprise_register",
     "nho_subsidiaries": "enterprise_register",
     "anc_shareholder_directory": "shareholder_vendor",
+    "intertribal_member_enterprise": "aggregated_member_enterprise_directory",
+    "intertribal_member_directory": "member_directory",
     "nho_member_directory": "member_directory",
     "member_business_list": "member_business_list",
     "licence_register": "business_licence_register",
@@ -410,6 +429,38 @@ def names_entity(html: str, canonical: str) -> str:
         if re.search(r"\b" + t + r"\b", low):
             return "YES(short): " + t
     return "NO"
+
+
+def distinctive_tokens(canonical: str) -> list[str]:
+    return [t for t in re.split(r"[^a-z]+", _fold(canonical))
+            if len(t) >= 4 and t not in CORP_STOP]
+
+
+def host_corroborates(host: str, canonical: str) -> bool:
+    """Does the DOMAIN carry the entity's name?
+
+    Needed for the 14 entities whose canonical name is nothing but stopwords
+    once tribal and corporate furniture is removed: `Council`, `Eek`, `Ute`,
+    `Koi`. For those the page-text name check degenerates — the word
+    "council" appears on every tribal website ever built, and it passed
+    kawerak.org (the Bering Strait regional consortium) as the village of
+    Council's own site, which then produced six rows of navigation furniture
+    filed under a tribal government. A name that carries no information
+    cannot establish identity from page text alone; the domain has to say it
+    too.
+    """
+    h = re.sub(r"[^a-z0-9]", "", _bare(host).rsplit(".", 1)[0])
+    flat = re.sub(r"[^a-z0-9]", "", _fold(canonical))
+    if flat and flat in h:
+        return True
+    # and the other direction: `councilnative.com` for "Council Native
+    # Corporation". Every token of that name is a stopword, so the token
+    # test below cannot fire, and the domain is plainly the entity's.
+    if len(h) >= 5 and h in flat:
+        return True
+    toks = [t for t in re.split(r"[^a-z]+", _fold(canonical))
+            if len(t) >= 3 and t not in CORP_STOP]
+    return bool(toks) and all(t in h for t in toks)
 
 
 def classify(blob: str, klass: str) -> tuple[str | None, str]:
@@ -626,6 +677,14 @@ def sweep_entity(t: dict) -> dict:
         return log
 
     log["names_entity"] = names_entity(body, t["canonical_name"])
+    if (log["names_entity"].startswith("YES")
+            and not distinctive_tokens(t["canonical_name"])
+            and not host_corroborates(log["host"], t["canonical_name"])):
+        log["names_entity"] = "INDETERMINATE"
+        log["errors"].append(
+            "canonical name carries no distinctive token once tribal and "
+            "corporate stopwords are removed, and the domain does not carry "
+            "it either - identity cannot be established from page text")
     if not log["names_entity"].startswith("YES"):
         log["errors"].append(
             "served page does not name the entity — not treated as this "
@@ -841,7 +900,8 @@ def sweep_entity(t: dict) -> dict:
     return log
 
 
-def stage_sweep(limit=None, only=None, hours=DEFAULT_HOURS) -> None:
+def stage_sweep(limit=None, only=None, hours=DEFAULT_HOURS,
+                redo=None) -> None:
     E._deadline[0] = time.time() + hours * 3600
     RAW.mkdir(parents=True, exist_ok=True)
     done = set()
@@ -853,6 +913,7 @@ def stage_sweep(limit=None, only=None, hours=DEFAULT_HOURS) -> None:
                 except Exception:
                     pass
     pop = targets()
+    done -= (redo or set())
     todo = [t for t in pop if t["tribe_id"] not in done]
     if only:
         todo = [t for t in todo if t["klass"] in only]
@@ -941,8 +1002,11 @@ def verdict_for(d: dict) -> str:
     if d.get("reached") != "Y":
         return "UNREACHABLE"
     if d.get("names_entity", "") and not d["names_entity"].startswith("YES"):
-        return ("HIJACKED_OR_WRONG_DOMAIN"
-                if d["names_entity"] == "HIJACK" else "DOMAIN_NOT_THE_ENTITY")
+        if d["names_entity"] == "HIJACK":
+            return "HIJACKED_OR_WRONG_DOMAIN"
+        if d["names_entity"] == "INDETERMINATE":
+            return "NAME_CHECK_INDETERMINATE"
+        return "DOMAIN_NOT_THE_ENTITY"
     if d.get("robots_allowed") is False:
         return "ROBOTS_DISALLOW"
     if d.get("terms_status") == "TERMS_STATED_RESTRICTIVE":
@@ -1608,6 +1672,24 @@ def stages_or_reviews(r: dict) -> tuple[bool, str]:
                    "no corporate signal")
 
 
+# A verdict in this set means we never established that the site belongs to
+# the entity, or that the publisher refused. Neither can produce a row.
+# ...and it applies ONLY to rows harvested from that website. Measured
+# immediately: the first version dropped 131 ANCSA rows because the web sweep
+# could not reach The Kuskokwim Corporation's, Alaska Peninsula's and
+# Toghotthele's websites. Their evidence is an audited state filing. A verdict
+# about a corporation's WEBSITE says nothing about its AS 45.55.139 filing,
+# and letting one route's failure delete another route's evidence is the same
+# error as inheriting a tier from the wrong source row.
+WEB_ROUTES = {"custom_post_type", "rest_search", "wp_media", "sitemap",
+              "sitemap_collection", "nav_link"}
+
+DISQUALIFYING_VERDICTS = {
+    "NAME_CHECK_INDETERMINATE", "DOMAIN_NOT_THE_ENTITY",
+    "HIJACKED_OR_WRONG_DOMAIN", "EXCLUDED_TERMS",
+    "TERMS_STATED_RESTRICTIVE", "ROBOTS_DISALLOW",
+}
+
 REVIEW_CSV = OUT / "candidates_for_review_2026-09-02.csv"
 REVIEW_COLS = ["authority_name", "authority_cedar_uid", "klass",
                "business_name_raw", "kind", "route", "extraction_note",
@@ -1638,6 +1720,18 @@ def stage_build() -> None:
         x["_page_is_directory_index"] = bool(
             DIRECTORY_INDEX_PATH.search(pth)
             and percount[x["source_page_url"]] >= DIRECTORY_INDEX_MIN_NAMES)
+    # AN AUTHORITY WHOSE SITE WAS NEVER ESTABLISHED AS ITS OWN CANNOT CERTIFY
+    # ANYTHING. Kawerak.org answered the name check for the village of
+    # Council because "council" is on every tribal website, and six rows of
+    # navigation furniture were harvested under a tribal government's name
+    # before the indeterminate-name guard existed. The guard fixed the
+    # VERDICT; this drops the ROWS the bad verdict produced.
+    disqualified = {}
+    if VERDICTS.exists():
+        with open(VERDICTS, encoding="utf-8-sig", newline="") as fh:
+            for v in csv.DictReader(fh):
+                if v["verdict"] in DISQUALIFYING_VERDICTS and v["cedar_uid"]:
+                    disqualified[v["cedar_uid"]] = v["verdict"]
     pair, nameonly = existing_keys()
     # ALSO de-duplicate against shard E's hand-adjudicated ANC edges. Shard E
     # is not in native_owned_businesses.csv, so the live-file check cannot
@@ -1652,12 +1746,17 @@ def stage_build() -> None:
                         _nk(d.get("child_name_raw", ""))))
     out, seen, dropped = [], set(), {"dup_live_pair": 0, "dup_within": 0,
                                      "no_name": 0, "dup_shard_e": 0,
-                                     "to_review": 0}
+                                     "to_review": 0,
+                                     "authority_identity_not_established": 0}
     review = []
     for r in rows:
         nk = _nk(r["business_name_raw"])
         if not nk:
             dropped["no_name"] += 1
+            continue
+        if (r.get("route") in WEB_ROUTES
+                and r["authority_cedar_uid"] in disqualified):
+            dropped["authority_identity_not_established"] += 1
             continue
         keep, why_not = stages_or_reviews(r)
         if not keep:
@@ -1694,6 +1793,15 @@ def stage_build() -> None:
         kind = r["kind"]
         if r.get("klass") == "anc" and kind == "member_business_list":
             kind = "anc_shareholder_directory"
+        if r.get("klass") == "intertribal":
+            # `/members/` on an association lists its MEMBERS (AIGA lists
+            # tribes, ANCSA Regional Association lists the twelve ANCs);
+            # anything else it calls an enterprise directory lists its
+            # members' FIRMS. Different claims, told apart by the path.
+            pth = up.urlparse(r["source_page_url"]).path.lower()
+            kind = ("intertribal_member_directory"
+                    if re.search(r"/members?/?$", pth)
+                    else "intertribal_member_enterprise")
         r["kind"] = kind
         r["identity_scope"] = SCOPE_BY_KIND[kind]
         r["assertion_class"] = ASSERTION_BY_KIND[kind]
@@ -1864,6 +1972,12 @@ def verify(staged: Path = STAGED, verdicts: Path = VERDICTS,
             bad.append(f"V5 {len(missing)} population entities have no "
                        f"verdict row, e.g. {sorted(missing)[:3]}")
 
+    disq = {}
+    if verdicts.exists():
+        with open(verdicts, encoding="utf-8-sig", newline="") as fh:
+            for v in csv.DictReader(fh):
+                if v["verdict"] in DISQUALIFYING_VERDICTS and v["cedar_uid"]:
+                    disq[v["cedar_uid"]] = v["verdict"]
     pair, _ = existing_keys()
     PERSON = re.compile(r"@|\b\d{3}[-. ]\d{3}[-. ]\d{4}\b|"
                         r"\b\d{1,6}\s+[A-Za-z].{0,30}\b"
@@ -1883,6 +1997,13 @@ def verify(staged: Path = STAGED, verdicts: Path = VERDICTS,
              _nk(r["business_name_raw"]))
         if k in pair:                                                 # V3
             bad.append(f"V3 staged row duplicates the live file: {k}")
+        if (r["certifying_authority_entity_id"] in disq
+                and r["inclusion_basis"] != "audited_filing_as_45_55_139"):
+                                                                      # V8
+            bad.append(f"V8 staged row from an authority whose site was "
+                       f"never established as its own "
+                       f"({disq[r['certifying_authority_entity_id']]}): "
+                       f"{r['certifying_authority_name']}")
         if r["identity_scope"] not in DECLARED_SCOPES:                # V4
             bad.append(f"V4 undeclared identity_scope "
                        f"{r['identity_scope']!r}")
@@ -1963,6 +2084,18 @@ def selftest() -> int:
     bad = verify(s, v, quiet=True)
     fired = [b for b in bad if b.startswith("V3")]
     print(f"  V3: {'FIRES' if fired else 'DID NOT FIRE'}")
+    ok &= bool(fired)
+
+    # V8 — a row from an authority whose site was never established as its own
+    s8, v8 = mk([{**good, "certifying_authority_entity_id": "CE-TEST-1",
+                  "inclusion_basis": "program_authority"}],
+                [{"tribe_id": "X", "cedar_uid": "CE-TEST-1",
+                  "host": "example-nonexistent-cedar.test", "probed": "Y",
+                  "reached": "Y", "verdict": "NAME_CHECK_INDETERMINATE",
+                  "routes": "sitemap", "canonical_name": "X"}])
+    bad = verify(s8, v8, quiet=True)
+    fired = [b for b in bad if b.startswith("V8")]
+    print(f"  V8: {'FIRES' if fired else 'DID NOT FIRE'}")
     ok &= bool(fired)
 
     # V5 — a NO_LIST_FOUND verdict with no route run
@@ -2050,6 +2183,9 @@ def main() -> int:
     ap.add_argument("--only", help="comma list of anc,nho,tribal_government,"
                                    "intertribal")
     ap.add_argument("--hours", type=float, default=DEFAULT_HOURS)
+    ap.add_argument("--redo", help="comma list of tribe_ids to re-probe even "
+                                   "though they are already in host_log; the "
+                                   "LAST record per entity wins")
     a = ap.parse_args()
     only = set(a.only.split(",")) if a.only else None
 
@@ -2069,7 +2205,8 @@ def main() -> int:
         print(f"\nexcluded hosts in force: {len(excluded_hosts())}")
         return 0
     if a.stage == "sweep":
-        stage_sweep(limit=a.limit, only=only, hours=a.hours)
+        stage_sweep(limit=a.limit, only=only, hours=a.hours,
+                    redo=set((a.redo or "").split(",")) - {""})
         return 0
     if a.stage == "harvest":
         stage_harvest(hours=a.hours, limit=a.limit)

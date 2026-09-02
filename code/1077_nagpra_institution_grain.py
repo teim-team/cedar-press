@@ -329,7 +329,7 @@ def main() -> int:
         r["institution_city"] = parts[0][1]
         r["institution_state"] = parts[0][2]
         r["institution_name_basis"] = how
-        if LEFTOVER_PREFIX_RE.match(body):
+        if LEFTOVER_PREFIX_RE.match(r["institution_name"]):
             i6_breach += 1
 
         for i, (nm, city, st) in enumerate(parts, 1):

@@ -1111,6 +1111,21 @@ def run():
                         emit(uid, name, cls, "organization", u2, st2,
                                 "TRIED: " + " | ".join(tried) + " || " + note2)
                         got_url = True
+                    elif u2:
+                        # THE DOMAIN IS STILL PUBLISHER-STATED EVEN WHEN IT
+                        # SERVES NOTHING. alepahou.org is the Alepa Hou
+                        # Foundation's domain -- it is in the email address
+                        # the foundation filed with DOI -- and it returns an
+                        # empty page. "Registered, nothing published" is a
+                        # more useful and more accurate record than silence,
+                        # and it tells the next agent not to re-derive it.
+                        emit(uid, name, cls,
+                             "parked_domain" if verdict == "parked_domain"
+                             else "unverified_organization", u2, st2,
+                             "TRIED: " + " | ".join(tried) + " || " + note2
+                             + " || the DOMAIN is publisher-stated (it is in "
+                               "the email address the organisation filed with "
+                               "DOI); what it serves is not a site")
             else:
                 tried.append("R2 DOI ONHR list: no entry matched this name "
                              "(register name may predate the April 2025 "

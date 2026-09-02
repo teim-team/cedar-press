@@ -744,15 +744,14 @@ def load_sources() -> tuple:
         aid = (x.get("certifying_authority_entity_id") or "").strip()
         if sid and aid:
             nob_auth.setdefault(sid, (aid, x.get("certifying_authority_name", "")))
-    # lint-ok: class1 - this glob ENUMERATES a source directory; it is not a
-    # partial view of a set whose other members live elsewhere. The defect
-    # class 1 names is `deals_*_additions.csv`, which silently omitted two
-    # root ledgers holding 131 rows. Every business-registry harvest is a
-    # `TBD-*.jsonl` in this one directory by construction, the selection
-    # predicate is on the ROW (directory_type = subsidiary_directory), not
-    # on the filename, and `stage_assemble` prints a per-source count so a
-    # missing file shows up as an absent line rather than as silence.
-    for path in sorted((CEDAR / "data/staging/business_registry").glob("TBD-*.jsonl")):
+    # EVERY `.jsonl` in the directory, not `TBD-*.jsonl`. The prefix filter
+    # was the class-1 shape - a pattern that silently omits any harvest filed
+    # under a different naming convention, the way the deals additions glob
+    # omitted two root ledgers holding 131 rows. The selection predicate
+    # belongs on the ROW (`directory_type = subsidiary_directory`), which it
+    # is, and `stage_assemble` prints a per-source count so a file that
+    # contributes nothing is an absent LINE rather than a silence.
+    for path in sorted((CEDAR / "data/staging/business_registry").glob("*.jsonl")):
         rows = read_jsonl(path)
         if not rows:
             continue
@@ -1292,12 +1291,26 @@ def stage_build(argv) -> int:
         state = next((x["child_state"] for x in es if (x.get("child_state") or "").strip()), "")
         addr_basis = "parent's own subsidiary listing" if city else ""
         if not city:
-            d = dsbs_by_uei.get(uei) or dsbs_by_uei.get(uei_cand) or dsbs_by_name.get(nk)
+            # THE BASIS MUST NAME THE LOOKUP THAT ACTUALLY ANSWERED. The first
+            # version labelled every DSBS hit "keyed on UEI" because it tested
+            # `(uei or uei_cand) in dsbs_by_uei` AFTER the fallback chain had
+            # already run - so 623 rows claimed a UEI key when only 102 rows
+            # carry a UEI at all, and most were exact-name matches wearing an
+            # identifier's clothes. That is this repo's signature defect: a
+            # field that does not measure its own name.
+            d, how = None, ""
+            if uei and uei in dsbs_by_uei:
+                d, how = dsbs_by_uei[uei], "published UEI"
+            elif uei_cand and uei_cand in dsbs_by_uei:
+                d, how = (dsbs_by_uei[uei_cand],
+                          "a CANDIDATE UEI proposed by an exact normalized "
+                          "name match - weaker than an identifier")
+            elif nk in dsbs_by_name:
+                d, how = dsbs_by_name[nk], "exact normalized name"
             if d:
                 city, state = d.get("City", ""), d.get("State", "")
-                addr_basis = ("SBA Dynamic Small Business Search extract, keyed on "
-                              + ("UEI" if (uei or uei_cand) in dsbs_by_uei else
-                                 "exact normalized name"))
+                addr_basis = ("SBA Dynamic Small Business Search extract, "
+                              "matched on " + how)
         if not state and hub.get("state"):
             pass          # never infer a firm's state from its owner's
 

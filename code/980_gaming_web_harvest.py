@@ -368,6 +368,20 @@ def fetch(url, accept=None, relax_tls=False):
     except Exception as e:
         out["http_status"] = "TRANSPORT_FAILURE"
         out["note"] = f"{type(e).__name__}: {str(e)[:160]}"
+        # A certificate that covers the apex but not www (or an expired chain) is
+        # a MISCONFIGURATION on the host, not an access control. Retry ONCE with
+        # verification relaxed and SAY SO on the row — cahtotribe-nsn.gov is a
+        # real tribal government site that was recorded as unreachable until this
+        # ran, and crit-nsn.gov behaved the same way for shard A.
+        if (not relax_tls) and "SSL" in type(e).__name__.upper():
+            alt = fetch(url, accept=accept, relax_tls=True)
+            if alt["http_status"] == "200":
+                alt["tls_relaxed"] = True
+                alt["note"] = ((alt.get("note") or "") +
+                               " | TLS_VERIFICATION_RELAXED: the certificate failed "
+                               "verification; content retrieved unauthenticated. This is a "
+                               "host misconfiguration, not an access control.").strip(" |")
+                return alt
     return out
 
 
@@ -490,7 +504,13 @@ def stage_targets():
                 e = json.loads(line)
             except Exception:
                 continue
-            if not str(e.get("verdict", "")).startswith("CONFIRMED_SITE"):
+            # Judge from page_verdict, not from the stored `verdict` string: the
+            # log is append-only, so an early row carries the verdict wording in
+            # force when it was written. The EVIDENCE (page_verdict) is stable;
+            # the LABEL is not, and folding on the label would strand
+            # rincon-nsn.gov under a wording this script no longer uses.
+            if e.get("http_status") != "200" or e.get("page_verdict") not in (
+                    "OK", "DOMAIN_MIGRATED", "NAME_TOKEN_ABSENT"):
                 continue
             tid = e.get("tribe_id")
             host = e.get("host")
@@ -912,6 +932,7 @@ def probe_one_host(host, r, done):
                 rec.update({"http_status": res["http_status"],
                             "content_type": res["content_type"], "bytes": res["bytes"],
                             "final_url": res["final_url"], "note": res["note"],
+                            "tls_relaxed": bool(res.get("tls_relaxed")),
                             "resp_headers": res.get("headers", {})})
                 if res["http_status"] == "200" and res["bytes"] > 200:
                     fn, md5 = save_raw(res["final_url"] or url, res["content"], ".html")

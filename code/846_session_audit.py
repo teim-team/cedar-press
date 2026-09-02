@@ -184,6 +184,31 @@ def _artefact():
                      + (f": {bad[0][:44]}" if bad else ""))
 
 
+@claim("no nation is excluded on terms it never stated")
+def _terms():
+    """A restriction attaches to the host and path where the terms were found.
+    It does not propagate across a nation's other hosts. On 2026-09-02 ONE
+    restricted page - navajoeconomy.org/business-regulatory - had excluded all
+    eight Navajo hosts including four casinos, and Navajo is not on the
+    hard-listed source list. Over-exclusion is a defect, not caution."""
+    HARD = {"Confederated Colville", "Umatilla Tribe", "Confederated Yakama",
+            "The Chickasaw Nation", "Southern Ute", "Forest County",
+            "Stillaguamish"}
+    p = CLEAN / "gaming_web_harvest_coverage.csv"
+    if not p.exists():
+        return (True, "coverage table absent - nothing to check")
+    ex = [r for r in rows(p)
+          if r.get("harvest_status") == "EXCLUDED_TERMS_STATED_RESTRICTIVE"]
+    # a nation not on the hard list may have AT MOST the hosts that themselves
+    # stated terms - never a whole-nation sweep
+    import collections
+    by = collections.Counter(r.get("tribe_name") for r in ex
+                             if r.get("tribe_name") not in HARD)
+    bad = [f"{k} ({v} hosts)" for k, v in by.items() if v > 1]
+    return (not bad, "; ".join(bad) or
+            f"{len(ex)} host-level exclusions, none swept a nation")
+
+
 # ---------------------------------------------------------------- CICD
 @claim("the CICD scheme is gone from every table and every reachable read")
 def _cicd():

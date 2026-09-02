@@ -16,7 +16,7 @@ BLOCKED 0 · NOT_TESTED 0
 | `gaming` | **READY** | 54 | 54/54 | 54/54 | clean | 0 | declared |
 | `legislation` | **READY** | 11 | 11/11 | 11/11 | clean | 0 | declared |
 | `lobbying` | **READY** | 35 | 35/35 | 35/35 | clean | 0 | declared |
-| `nagpra` | **READY** | 4 | 4/4 | 4/4 | clean | 0 | declared |
+| `nagpra` | **READY** | 5 | 5/5 | 5/5 | clean | 0 | declared |
 | `native-owned-businesses` | **READY** | 6 | 6/6 | 6/6 | clean | 0 | declared |
 | `natural-resources` | **READY** | 8 | 8/8 | 8/8 | clean | 0 | declared |
 | `nest` | **READY** | 2 | 2/2 | 2/2 | clean | 0 | declared |

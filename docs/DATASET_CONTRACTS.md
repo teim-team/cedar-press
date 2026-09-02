@@ -2,9 +2,9 @@
 
 *Generated 2026-09-02 by `code/512_build_dataset_contracts.py` (mission Phase 1). Regenerate rather than edit; `verify` exits 1 when the world breaks a contract, and 62 gates on it.*
 
-**14 collections, 270 tables claimed, 7 orphaned shippable tables, 11 violations.**
+**14 collections, 271 tables claimed, 7 orphaned shippable tables, 11 violations.**
 
-**Grain: 220 of 227 shippable tables declare and VALIDATE a row grain, a primary key and a join cardinality; 7 do not.** A declared grain the data contradicts is a release-blocking violation, listed below. An unstated grain is ratcheted by `62_no_regression_check.contract_grain_unstated_shippable`: the count may only fall, and a new shippable table that lands without one fails the gate that day.
+**Grain: 221 of 228 shippable tables declare and VALIDATE a row grain, a primary key and a join cardinality; 7 do not.** A declared grain the data contradicts is a release-blocking violation, listed below. An unstated grain is ratcheted by `62_no_regression_check.contract_grain_unstated_shippable`: the count may only fall, and a new shippable table that lands without one fails the gate that day.
 
 <details><summary>Shippable tables with an UNSTATED grain (7) - a buyer cannot join these safely</summary>
 
@@ -339,14 +339,15 @@ Declared grain — validated against the file on every run:
 
 ## NAGPRA  (`nagpra`, shelf: standard)
 
-Rebuild: `py -3 code/build.py run nagpra --execute` — 4 tables.
+Rebuild: `py -3 code/build.py run nagpra --execute` — 5 tables.
 
 | table | status | keys | rebuilt by | enriched by |
 |---|---|---|---|---|
 | `fr_nagpra_title_index.csv` | shippable | — | — | — |
 | `fr_nagpra_title_index_year.csv` | shippable | — | — | — |
 | `nagpra_notice_entity_bridge.csv` | shippable | `tribe_id` | `77_build_nagpra_dataset.py` | `503_identity.py` |
-| `nagpra_notices.csv` | shippable | — | — | — |
+| `nagpra_notice_institutions.csv` | shippable | — | — | — |
+| `nagpra_notices.csv` | shippable | — | `77_build_nagpra_dataset.py` | `1077_nagpra_institution_grain.py` |
 
 Declared grain — validated against the file on every run:
 
@@ -362,6 +363,10 @@ Declared grain — validated against the file on every run:
   - primary key: `document_number` + `relationship` + `party_name_verbatim`  (validated unique)
   - join cardinality: `document_number` → many row(s) per value (measured max 183), `tribe_id` → many row(s) per value (measured max 900)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
+- `nagpra_notice_institutions.csv` — one row per (NAGPRA notice, institution named in that notice), in the order the notice's Federal Register title lists them. NOT one row per institution - an institution appearing in 22 notices has 22 rows - and NOT one row per notice: 392 of 6,792 notices name more than one holder. `institution_city` and `institution_state` are THIS institution's, parsed from its own segment of the title, which is the fact the single columns on nagpra_notices.csv cannot carry.
+  - primary key: `nagpra_notice_institution_id`  (validated unique)
+  - join cardinality: `document_number` → many row(s) per value (measured max 8), `nagpra_notice_institution_id` → one row(s) per value (measured max 1)
+  - declared by: workstream pr29 2026-09-02: nagpra_notice_institution_id confirmed 7,234 distinct / 0 blank on the FULL 7,234-row file; document_number joins many-to-one onto nagpra_notices.csv, 6,792 of 6,792 present; the id is document_number + the notice's own listing ordinal, so it is deterministic across rebuilds and is not positional in the file (defect class 7)
 - `nagpra_notices.csv` — one row per NAGPRA notice, keyed on the Federal Register document number - docs/NAGPRA_BUILD_LOG.md. A correction notice is its own row (is_correction=1) and does not supersede the row it amends. The `*_entity_ids` columns are PIPE-DELIMITED LISTS, not join keys: join to entities through nagpra_notice_entity_bridge.csv. `mni_total_stated` is blank wherever the notice did not state one total, and must never be defaulted to 0
   - primary key: `document_number`  (validated unique)
   - join cardinality: `document_number` → one row(s) per value (measured max 1)
@@ -847,8 +852,8 @@ Rebuild: `py -3 code/build.py run gaming --execute` — 63 tables.
 | `gaming_revenue_bounds.csv` | shippable | `tribe_id` `cedar_uid` `facility_id` | — | — |
 | `gaming_source_claims.csv` | shippable | — | `91_build_nigc_declinations.py` | `100_finish_declinations_and_employment.py` `510_assertions.py` |
 | `gaming_vendor_tribal_licenses.csv` | shippable | `cedar_uid` `entity_id` | — | — |
-| `gaming_web_harvest_coverage.csv` | unregistered | `tribe_id` `cedar_uid` | — | — |
-| `gaming_web_harvest_observations.csv` | unregistered | `tribe_id` `cedar_uid` | — | — |
+| `gaming_web_harvest_coverage.csv` | UNDOCUMENTED | `tribe_id` `cedar_uid` | — | — |
+| `gaming_web_harvest_observations.csv` | UNDOCUMENTED | `tribe_id` `cedar_uid` | — | — |
 | `loyalty_program_property.csv` | shippable | `tribe_id` `cedar_uid` `entity_id` `facility_id` | — | — |
 | `loyalty_programs.csv` | shippable | `tribe_id` `cedar_uid` `entity_id` | — | — |
 | `nigc_action_parties.csv` | shippable | `cedar_uid` | — | — |

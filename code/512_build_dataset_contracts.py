@@ -2849,6 +2849,37 @@ GRAIN_NEST = {
 }
 GRAIN.update(GRAIN_NEST)
 
+# --- PR29: the NAGPRA institution bridge -----------------------------------
+# Workstream `pr29`, 2026-09-02, code/1077_nagpra_institution_grain.py. Own
+# dict, per the field guide - nobody else's is touched.
+#
+# Codex, PR #29 finding 8: a notice naming institutions in three states shipped
+# ONE institution_city/state, so geography-level filtering put all of them at
+# Yale. The notice grain is right and the fact is many-valued; this is the
+# same split the dataset already makes for tribes in
+# nagpra_notice_entity_bridge.csv.
+GRAIN_PR29 = {
+    "nagpra_notice_institutions.csv": _d(
+        "one row per (NAGPRA notice, institution named in that notice), in "
+        "the order the notice's Federal Register title lists them. NOT one "
+        "row per institution - an institution appearing in 22 notices has 22 "
+        "rows - and NOT one row per notice: 392 of 6,792 notices name more "
+        "than one holder. `institution_city` and `institution_state` are THIS "
+        "institution's, parsed from its own segment of the title, which is "
+        "the fact the single columns on nagpra_notices.csv cannot carry.",
+        primary_key=["nagpra_notice_institution_id"],
+        join_cardinality={"nagpra_notice_institution_id": "one",
+                          "document_number": "many"},
+        declared_by="workstream pr29 2026-09-02: nagpra_notice_institution_id "
+                    "confirmed 7,234 distinct / 0 blank on the FULL 7,234-row "
+                    "file; document_number joins many-to-one onto "
+                    "nagpra_notices.csv, 6,792 of 6,792 present; the id is "
+                    "document_number + the notice's own listing ordinal, so "
+                    "it is deterministic across rebuilds and is not "
+                    "positional in the file (defect class 7)"),
+}
+GRAIN.update(GRAIN_PR29)
+
 # A table whose grain is declared but whose PRIMARY KEY cannot be stated
 # without guessing. Recorded rather than left blank, so the gap is a task
 # with a name instead of a silence. These count as UNSTATED for the gate.

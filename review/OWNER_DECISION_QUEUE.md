@@ -1422,3 +1422,110 @@ only the one field that resolves to a home address.
    Na-Dena'**, not Doyon subsidiaries, yet carry
    `identity_scope = parent_asserted_subsidiary`. That is an ownership
    over-claim on the strongest evidence class in the dataset.
+
+---
+
+## APPENDED 2026-09-02 by the gaming web-harvest workstream (`code/980_gaming_web_harvest.py`)
+
+### Is the Navajo Nation a `TERMS_STATED_RESTRICTIVE` source for its CASINO sites?
+
+**Decision:** does the Navajo restriction cover the whole nation, or only
+`navajoeconomy.org`?
+
+**Why it is being asked.** `review/tribal_vendor_list_registry_2026-08-26.csv`
+marks Navajo `TERMS_STATED_RESTRICTIVE`, and the quote that justifies it is a
+copyright footer on **navajoeconomy.org** — *"(c) 2025, www.navajoeconomy.org.
+All Rights Reserved."* The standing hard list in the workstream mandate names
+eight nations and **Navajo is not one of them**.
+
+This run excluded the nation **entirely** — the safe direction — and no request
+of any kind was made. The cost is four properties and their nation-side pages:
+**Fire Rock, Northern Edge, Flowing Water and Twin Arrows**, plus
+`navajogaming.com` / `navajocasinos.com`.
+
+**If the restriction is registry-wide (status quo):** those four properties stay
+out of `gaming_web_harvest_observations.csv` permanently, and the exclusion is
+already recorded per host as `EXCLUDED_TERMS_STATED_RESTRICTIVE`. Asking the
+Nation is the route back in.
+**If it covers only `navajoeconomy.org`:** the casino hosts become harvestable
+on the next run; nothing else changes, because they were never touched.
+
+**Recommendation:** rule it narrow to the vendor-directory source unless the
+casino sites carry their own restrictive terms, and re-read those four sites'
+terms pages before harvesting either way.
+
+**A related error this run found and fixed.** `dancingeaglecasino.com` had been
+placed in the restricted-host list as Navajo. **Dancing Eagle is Pueblo of
+Laguna.** An over-broad restriction costs a nation its coverage just as surely
+as a missed one costs the publisher their terms. Corrected in
+`code/980_gaming_web_harvest.py`; no other misassignment found.
+
+### FYI, not a decision — four tribal domains are compromised or dead
+
+Recorded, never linked, never harvested from. All four should be marked in
+`data/staging/cedar_web_map.csv`:
+
+- **`mewuk.com`** (Tuolumne Band of Me-Wuk) — the **Tribal Gaming Agency** page
+  carries injected SEO spam linking to Indonesian gambling sites at
+  `103.179.73.92`. The design and title are the nation's own; the injection is
+  not. This one is worth telling someone about.
+- **`cahto.org`** (Cahto Tribe) — fully hijacked; `<title>` is *"Cahto: Situs
+  Slot Online Terpercaya 2022"*. The tribe's real site is
+  `cahtotribe-nsn.gov`, which fails TLS verification and was recovered only by
+  a relaxed-TLS retry.
+- **`theluckydogcasino.com`** (Skokomish) and **`desertrosecasino.com`**
+  (Alturas Indian Rancheria) — both parked and **for sale** on HugeDomains.
+
+Ten further hosts have simply **moved** (`cherokee.org → cherokee.gov`,
+`lvpaiute.com → lvpaiute.gov`, `hoplandtribe.com → hbpi.gov`,
+`southwindcasino.com → rockandbrewscasinobraman.com`, …). Those are findings,
+not refusals. Full list in `docs/GAMING_WEB_HARVEST_LOG.md`.
+
+---
+
+## NEST-1 — Ho-Chunk: repoint five ledger rows from the Ho-Chunk Nation of Wisconsin to the Winnebago Tribe of Nebraska?
+
+*Raised 2026-09-02 by workstream `nest` (`code/1072_tribally_owned_enterprises.py`).
+A recommendation, not an edit: these rows belong to another workstream's table.*
+
+**Your own ruling is already the answer** — *"Ho-Chunk means a sub-hub, or
+Winnebago casino is a sub-hub. And then the hub is Winnebago Tribe."* This item
+exists only to say which rows it applies to and what NEST found independently.
+
+**What NEST holds, from the parents' own published company lists:**
+
+| enterprise | owner in NEST | source |
+|---|---|---|
+| Ho-Chunk Inc | Winnebago (`TRBF-WNNBGO-00`) | `hochunkinc.com` |
+| Ho-Chunk Farms | Winnebago | `hochunkinc.com` |
+| Ho-Chunk Trading Group | Winnebago | `hochunktrading.com` |
+| Ho-Chunk Construction Group | Winnebago | `hochunkconstructiongroup.com` |
+| HoChunk Community Capital (CDFI) | Winnebago | `hochunkcdfi.org` — already `CDFI-HCHNKC-00` in the spine |
+
+**What the ledger holds** (`review/named_collision_families_2026-09-02.csv`):
+`Ho Chunk Inc` (UEI `DMA6EKCMAPB7`), `HO-CHUNK FARMS` (CAGE `7CE83`) and
+`HO-CHUNK CONSTRUCTION MANAGEMENT` (CAGE `8APB4`) are keyed to **Ho-Chunk Nation
+of Wisconsin** (`TRBF-HOCHNK-00`) — a different federally recognized tribe that
+shares one word — and separately `Ho-Chunk Nation` CAGE `3VFL3`, **tier A**, is
+keyed to Winnebago. The contamination runs in both directions.
+
+**Why NEST did not simply match its way to this.** The naive version of its
+"a named firm that resolves to a Cedar hub is not that hub's subsidiary" guard
+**held Ho-Chunk, Inc. and lost the row**, because `norm()` strips `Inc` and the
+name then equals the spine's `Ho-Chunk`. The rule that fixed it is structural
+and general: **a GOVERNMENT-class hub can never BE somebody else's subsidiary,
+so a government-class name match is always the collision and never the
+identity.**
+
+**The question:** repoint the three Winnebago-company rows to `TRBF-WNNBGO-00`,
+and re-examine the tier-A `Ho-Chunk Nation` CAGE `3VFL3` row keyed to Winnebago,
+which looks like the same collision inverted.
+
+- **Yes** → the ledger agrees with what both nations publish about themselves,
+  and dollars stop crossing between two tribes.
+- **No** → NEST and the ledger will disagree about the same five firms, and a
+  customer joining the two datasets on `cedar_uid` sees it.
+
+**Verification protocol, your own (ENTITY_MATCH_RULES rule 13):** the addresses.
+Ho-Chunk, Inc. is Winnebago, Nebraska; the Ho-Chunk Nation is Black River Falls,
+Wisconsin. Rung 1 settles it.

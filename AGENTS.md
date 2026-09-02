@@ -6244,3 +6244,63 @@ key that does not exist passes for the same reason it is useless."*
 | a declared **`national_mirror`** scope leaves C4's denominator | the claim must name the table holding the Native attribution; that table must exist and be ≥50% attached, or the claim is refused and the mirror is scored as before | `912` T4 |
 
 Each has a matching control (C1–C4) proving it does not over-fire.
+
+---
+
+## GATE ATTRIBUTION 2026-09-02 — workstream `nest` (dataset 14)
+
+`code/1072_tribally_owned_enterprises.py` built **NEST: Native Enterprise
+Structures and Ties** — `data/clean/nest_enterprises.csv` (1,482) and
+`nest_enterprise_relations.csv` (3,492). `518` reports **READY 14 / 14**. Full
+record in **`docs/NEST_BUILD_LOG.md`**.
+
+**`62_no_regression_check.py` exits 1.** Naming what is and is not this
+workstream's, with the measurement, per standing rule 15.
+
+**NOT ours — checked, not asserted:**
+
+- `lint_bug_class_instances`, `lint_class1/2c/3/4/5/7`. **`293` reports ZERO
+  findings in `1072_*` across all seven classes.** The new-since-baseline list
+  names `1011`, `1060`, `846`, `852`, `873`, `992`, `1030`, `1031`, `980`,
+  `1075`, `1077`, `845`, `870`, `871`, `518`, `77`. One class-1 finding *was*
+  raised against 1072 and was **fixed, not waived**: the business-registry loop
+  globbed `TBD-*.jsonl`, a prefix filter with the same shape as the deals
+  additions glob that omitted 131 rows. It now enumerates `*.jsonl` and selects
+  on the row (`directory_type = subsidiary_directory`), and `1072` is declared
+  in `cedar_domain.PROMOTED_TABLE_PRODUCERS` because reading the staged parts
+  is its job and it reads every one.
+- `contract_violations = 11`. The 11 are four `federal_funding_*` declarations
+  naming the dropped `tribe_id` column and seven orphan shippable tables
+  (`native_owned_businesses*`, `prime_contracts.bak_*`, `regulations_gov_*`,
+  `sam_native_class_distributions`). **NEST contributed 2 and they are fixed** —
+  both tables now carry `cedar_uid`, which is the documented external join key
+  and which the declaration had promised before the column existed.
+- `rulings_unapplied 1,215 → 2,894`, `files_with_columns_lost_vs_backup = 4`,
+  `SHIPPING LOST: advocacy_passthrough_2026-08-07.csv`, and the two tables that
+  stopped shipping (`hearing_bill_links`, `native_bills_subject_sweep`). This
+  workstream wrote none of those files.
+
+**OURS, and open:**
+
+- **`nest_enterprises.csv` and `nest_enterprise_relations.csv` are BUILT and
+  DOCUMENTED but NOT SHIPPED.** They are 2 of the ~20 tables behind
+  `tables_missing_from_25_TABLES`, `tables_missing_notes_contract`,
+  `ship_tables_at_zero` and `tables_undocumented_in_codebook`; the other ~18 are
+  the geography workstream's `geo_*` tables and the constellation's
+  `cedar_constellation_*`. Codebook blocks **are** registered
+  (`18a_nest_enterprises`, `18b_nest_enterprise_relations`, appended to
+  `codebook_master.csv` rather than rewriting it, backup
+  `.bak_2026-09-02_pre_1072_tribally_owned_enterprises`). What remains is the
+  chain in `docs/SHIPPING_RUNBOOK.md` — `87 → 25 → 27` — which rewrites
+  publication state for **every** collection at once. **Deliberately not run
+  here**: three other agents were writing to `data/clean` during this pass, and
+  `25`'s curated-override list is already churning (the gate says so in its own
+  message). It is one command for the integrator, and it ships the geography and
+  constellation tables in the same pass.
+
+**`code/845_regenerate_guard.py` CRASHES** and could not be run:
+`TypeError: const_env() takes 1 positional argument but 3 were given`
+(`845:418`, called from `scan_csv`). Mid-edit by its own workstream, not caused
+here. Its instruction was followed anyway: `1072.write_csv` derives its header
+as `CANONICAL + [c for c in live if c not in CANONICAL]`, so a column another
+workstream adds to a NEST table survives a rebuild instead of being deleted.

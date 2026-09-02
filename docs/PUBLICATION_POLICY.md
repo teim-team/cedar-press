@@ -271,3 +271,36 @@ counter-example is enough to keep it out of a rule.
 The ultimate-parent-family test above remains the discriminator. Note also that
 `fpds_uei_cage_map.csv` carries blank and literal-`NAN` CAGE values on the same
 UEIs, so any CAGE-based reasoning has to clean that first.
+
+<!-- BEGIN TERMS-SCOPE -->
+## A terms restriction is scoped to the SOURCE that stated it, not to the nation
+
+**Ruling, 2026-09-02.** The gaming web harvest excluded the **entire Navajo
+Nation** — Fire Rock, Northern Edge, Flowing Water and Twin Arrows — because
+one Navajo host, `navajoeconomy.org/business-regulatory/`, is recorded
+`TERMS_STATED_RESTRICTIVE`. The casinos sit on different hosts entirely.
+
+**That is over-compliance, and it misrepresents the publisher.** The owner's
+principle is *"terms are a decision the publisher made, not an obstacle."* The
+Navajo Nation made a decision about its business-regulatory page. It made no
+decision about its gaming properties' sites. Treating one restrictive page as a
+nation-wide prohibition invents a restriction the publisher never stated, and
+would let a single page on any tribal domain erase that nation from the dataset.
+
+**The rule:**
+
+* A restriction attaches to the **host and path** where the terms were found.
+* It does **not** propagate to other hosts operated by the same entity.
+* It does **not** propagate from a subdomain to an apex, or the reverse, unless
+  the terms themselves say so.
+* The eight hard-listed sources — Confederated Colville, CTUIR/Umatilla,
+  Yakama, Chickasaw, NANA/Akima, Southern Ute, Forest County Potawatomi,
+  Stillaguamish — remain excluded **by every route**, including Wayback, the
+  WordPress media API and any harmonized derivative. That list names sources,
+  and it is unchanged by this ruling.
+* Over-exclusion is recorded as a defect, not as caution. An entity absent for
+  a restriction its publisher never stated is as wrong as one included against
+  stated terms — it is simply wrong in the quieter direction.
+
+`navajoeconomy.org` stays excluded. The Navajo gaming hosts do not.
+<!-- END TERMS-SCOPE -->

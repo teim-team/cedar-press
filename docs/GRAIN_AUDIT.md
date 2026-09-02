@@ -20,8 +20,8 @@ Three honest outcomes, and they are three different jobs:
 
 | | count |
 |---|---:|
-| shippable tables | 227 |
-| **DECLARED_VALIDATED** | **220** |
+| shippable tables | 228 |
+| **DECLARED_VALIDATED** | **221** |
 | OPEN_WITH_EVIDENCE | 0 |
 | DEFECTIVE | 0 |
 | still unexplained | 7 |
@@ -118,13 +118,14 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 
 ### NAGPRA  (`nagpra`)
 
-4 of 4 shippable tables declared.
+5 of 5 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
 | `fr_nagpra_title_index.csv` | 6,606 | DECLARED_VALIDATED | `document_number` | `document_number`→1 |
 | `fr_nagpra_title_index_year.csv` | 33 | DECLARED_VALIDATED | `publication_year` | `publication_year`→1 |
 | `nagpra_notice_entity_bridge.csv` | 51,521 | DECLARED_VALIDATED | `document_number` + `relationship` + `party_name_verbatim` | `tribe_id`→900 |
+| `nagpra_notice_institutions.csv` | — | DECLARED_VALIDATED | `nagpra_notice_institution_id` | `document_number`→8, `nagpra_notice_institution_id`→1 |
 | `nagpra_notices.csv` | 6,772 | DECLARED_VALIDATED | `document_number` | `document_number`→1 |
 
 ### Lobbying  (`lobbying`)
