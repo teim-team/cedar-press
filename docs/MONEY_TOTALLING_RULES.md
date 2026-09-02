@@ -1401,18 +1401,18 @@ that total Cedar claims to have attributed to a nation:
 | | rows | obligations |
 |---|---:|---:|
 | attributed, before 2026-09-02 | 888,958 | $245,035,411,233.42 |
-| attributed, after | 785,787 | **$228,037,829,478.54** |
-| moved to the honestly-unattributed pool | 103,171 | **$16,997,581,754.88** |
+| attributed, after | 785,737 | **$227,965,023,146.82** |
+| moved to the honestly-unattributed pool | 103,221 | **$17,070,388,086.60** |
 
 **Anyone quoting "$244.77B attributed / 79.0%" from `START_HERE.md` is quoting
-a superseded figure.** The current attributed total is $228.04B, and the
-unattributed pool it publishes as a virtue grew by $16.998B.
+a superseded figure.** The current attributed total is $227.97B, and the
+unattributed pool it publishes as a virtue grew by $17.070B.
 
 **Three new rules for anyone summing this table.**
 
 1. **`identifier_ruling_quarantined = 'Y'` marks money that rests on a
-   discredited method.** 227,540 rows carry it, $28.93B of them still
-   attributed. It is legitimate to publish, and it is not legitimate to publish
+   discredited method.** 227,540 rows carry it, $28,862,571,317.64 of them
+   still attributed. It is legitimate to publish, and it is not legitimate to publish
    *silently*: any per-entity total should be able to state how much of itself
    sits on a quarantined ruling.
 2. **`identifier_ruling_method` is the RULING; `attribution_method` is the
@@ -1426,7 +1426,7 @@ unattributed pool it publishes as a virtue grew by $16.998B.
    table, and the levels it deltas are already in `prime_contracts.csv`.
 
 **Subaward dollars are reported separately and may not be added to any of the
-above.** On the sub side 1,971 rows lost a `sub_native_tribe_id` and 114 were
-repointed; on the prime side 517 and 117. Those are subaward amounts, a
+above.** On the sub side 1,971 rows lost a `sub_native_tribe_id` and 122 were
+repointed; on the prime side 517 and 186. Those are subaward amounts, a
 different money column in a different file.
 <!-- END QUARANTINE -->

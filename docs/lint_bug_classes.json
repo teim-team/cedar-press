@@ -1,17 +1,17 @@
 {
-  "scanned_files": 598,
+  "scanned_files": 602,
   "counts": {
     "class1": 1,
     "class2a": 0,
     "class2b": 0,
     "class2c": 69,
     "class3": 2,
-    "class4": 13,
+    "class4": 14,
     "class5": 6,
     "class6": 26,
-    "class7": 46,
+    "class7": 44,
     "class8": 0,
-    "lint_bug_class_instances": 163
+    "lint_bug_class_instances": 162
   },
   "findings": [
     {
@@ -166,6 +166,33 @@
       "why": "a budget (RUN_DEADLINE_S) exits a loop, the file writes a completion marker (['COMPLETE', 'ok', 'retrieved']), and it never compares what it RETRIEVED against the total the SOURCE reported. That is the PER_DOCKET_BUDGET_S defect: four dockets written at 2,300-3,200 of 3,555-4,847 and marked `done`, so no resume would ever revisit them.",
       "waived": true,
       "waiver_reason": "this deadline cannot mark anything COMPLETE. It"
+    },
+    {
+      "class": "class4",
+      "file": "1111_probe_new_source_candidates.py",
+      "line": 97,
+      "evidence": "if _host_calls.get(host, 0) >= MAX_PER_HOST:",
+      "why": "a budget (MAX_PER_HOST, RUN_DEADLINE_S) exits a loop, the file writes a completion marker (['ok']), and it never compares what it RETRIEVED against the total the SOURCE reported. That is the PER_DOCKET_BUDGET_S defect: four dockets written at 2,300-3,200 of 3,555-4,847 and marked `done`, so no resume would ever revisit them.",
+      "waived": false,
+      "waiver_reason": ""
+    },
+    {
+      "class": "class1",
+      "file": "1112_harvest_coverage_matrix.py",
+      "line": 515,
+      "evidence": "for path in sorted(glob.glob(P(\"data\", \"staging\", \"business_registry\", \"TBD-*.jsonl\"))):",
+      "why": "glob pattern 'staging' enumerates a derived/staged artefact. If a PROMOTED table holds the truth, this reads the additions and never the ledger (the 88/57/41/82/35 defect). If reading the staged file IS the job - a promoter, a stager, a diff - waive it with a reason.",
+      "waived": true,
+      "waiver_reason": "reading the staged artefact IS the job. This is an AUDIT of what"
+    },
+    {
+      "class": "class1",
+      "file": "1112_harvest_coverage_matrix.py",
+      "line": 621,
+      "evidence": "paths += sorted(glob.glob(P(\"data\", \"staging\", \"tribe_harvest\", \"shard_l\", \"probe*.jsonl\")))",
+      "why": "glob pattern 'staging' enumerates a derived/staged artefact. If a PROMOTED table holds the truth, this reads the additions and never the ledger (the 88/57/41/82/35 defect). If reading the staged file IS the job - a promoter, a stager, a diff - waive it with a reason.",
+      "waived": true,
+      "waiver_reason": "these are PROBE LOGS, not a staged copy of a promoted table. No"
     },
     {
       "class": "class5",
@@ -809,7 +836,7 @@
     {
       "class": "class2c",
       "file": "846_session_audit.py",
-      "line": 411,
+      "line": 428,
       "evidence": "fails += 1",
       "why": "counter 'fails' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -1798,24 +1825,6 @@
     },
     {
       "class": "class7",
-      "file": "770_sample_extracts.py",
-      "line": 594,
-      "evidence": "seenkeys = {id(r) for r in out}",
-      "why": "[BLOCKING] OBJECT_ADDRESS on target (unnamed) -> no clean table. builtin id() is a memory address, stable only within one process. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
-      "waived": false,
-      "waiver_reason": ""
-    },
-    {
-      "class": "class7",
-      "file": "770_sample_extracts.py",
-      "line": 598,
-      "evidence": "if id(r) not in seenkeys:",
-      "why": "[BLOCKING] OBJECT_ADDRESS on target (unnamed) -> no clean table. builtin id() is a memory address, stable only within one process. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
-      "waived": false,
-      "waiver_reason": ""
-    },
-    {
-      "class": "class7",
       "file": "83_build_resource_ledger.py",
       "line": 559,
       "evidence": "\"resource_revenue_event_id\": f\"RRE-ONRR-REV-{i:06d}\",",
@@ -2050,6 +2059,9 @@
       ],
       "cedar_export_safety.csv": [
         "517_export_safety.py"
+      ],
+      "cedar_harvest_coverage_evidence.csv": [
+        "1112_harvest_coverage_matrix.py"
       ],
       "cedar_identifier_ledger_tiered.csv": [
         "03_apply_exclusions_and_tier.py"
@@ -2640,6 +2652,9 @@
         "77_build_nagpra_dataset.py",
         "814_gaming_nr_grain_and_conservation.py"
       ],
+      "cedar_harvest_coverage_matrix.csv": [
+        "1112_harvest_coverage_matrix.py"
+      ],
       "cedar_identifier_graph_edges.csv": [
         "741_hub_grain_and_rebuild.py"
       ],
@@ -3002,6 +3017,8 @@
       "prime_contracts.csv": [
         "1079_quarantine_method_exposure.py",
         "1085_prime_psc_desc_repull.py",
+        "1111_copper_river_attribution.py",
+        "1113_copper_river_complete_attribution.py",
         "114_pull_prime_archive.py",
         "131_merge_archive_backfill.py",
         "174_apply_rulings_to_source_tables.py",
@@ -3373,6 +3390,8 @@
       "prime_contracts.csv": [
         "1079_quarantine_method_exposure.py",
         "1085_prime_psc_desc_repull.py",
+        "1111_copper_river_attribution.py",
+        "1113_copper_river_complete_attribution.py",
         "114_pull_prime_archive.py",
         "131_merge_archive_backfill.py",
         "174_apply_rulings_to_source_tables.py",

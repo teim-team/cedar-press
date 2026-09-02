@@ -281,6 +281,51 @@ def _split():
     return (not bad, f"{len(bad)} notice(s) split a department name mid-name")
 
 
+@claim("attribution_method holds only its controlled vocabulary", critical=True)
+def _vocab():
+    """`1111` wrote an English sentence into a field that `40` switches on, and
+    it broke a neighbouring pass's leg detection on 1,486 rows. The vocabulary
+    IS the interface; prose belongs in `attribution_source_line`."""
+    VOCAB = {"", "unattributed", "uei_exact", "cage_exact", "parent_uei",
+             "ruling_applied"}
+    import collections as _c
+    bad = _c.Counter()
+    p = CLEAN / "prime_contracts.csv"
+    if not p.exists():
+        return (True, "table absent")
+    with p.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+        for r in csv.DictReader(fh):
+            v = (r.get("attribution_method") or "")
+            if v not in VOCAB:
+                bad[v[:40]] += 1
+    n = sum(bad.values())
+    return (n == 0, f"{n:,} row(s) off-vocabulary"
+                    + (f": {bad.most_common(1)[0][0]}" if bad else ""))
+
+
+@claim("an attributed row carries the columns the table attributes WITH",
+       critical=True)
+def _attributed():
+    """A row with a `cedar_uid` and no `tribe_id` / `attributed_flag` is not
+    attributed, whatever a commit message says. `1111` set two display columns
+    and left 4,266 rows reading `attributed_flag = 0` while announcing $1.5B.
+    Conservation was proven and conservation was never the risk — nothing moved
+    because nothing landed."""
+    half = 0
+    p = CLEAN / "prime_contracts.csv"
+    if not p.exists():
+        return (True, "table absent")
+    with p.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+        rd = csv.DictReader(fh)
+        if "attributed_flag" not in (rd.fieldnames or []):
+            return (True, "no attributed_flag column")
+        for r in rd:
+            if (r.get("cedar_uid") or "").strip() and                (r.get("attributed_flag") or "") != "1" and                (r.get("attribution_method") or "") != "unattributed":
+                half += 1
+    return (half == 0, f"{half:,} row(s) carry a cedar_uid but are not "
+                       f"attributed_flag=1")
+
+
 # ---------------------------------------------------------------- CICD
 @claim("the CICD scheme is gone from every table and every reachable read")
 def _cicd():

@@ -906,18 +906,49 @@ and then check the entry says `UNDOCUMENTED` no longer.
 `docs/QUARANTINE_EXPOSURE_LOG_2026-09-02.md`. CDR-11 and CDR-12 in
 `review/1011_cross_dataset_findings.csv` are closed. **These four are not.**
 
-**1. The CAGE leg of the quarantine was measured for the first time and NOT
-adjudicated — 508 identifiers, $3,608,856,488.** CDR-11 scoped on UEI ledger
+**1. The CAGE leg of the quarantine was measured for the first time and is
+adjudicated only where a SECOND source confirmed it — 502 identifiers,
+$3,536,050,157 remain.** CDR-11 scoped on UEI ledger
 rows; `40_build_prime_contracts.py` keys on three legs. `cage_exact` on a
 quarantined CAGE row carries 14,149 prime rows and $7.25B, and `need_v6` —
 **6.5% accurate** — is 838 tier-B CAGE rows of it. It is flagged in
 `identifier_ruling_quarantined` and written to
 `review/1079_owner_holds_2026-09-02.csv`; it is not repaired. Adjudicating a
 population in the same pass that discovered it is the mistake this repo keeps
-paying for. **This is the largest single piece of unfinished attribution work
-in contracting.**
+paying for — so the only CAGE rows repaired are the two named families where an
+INDEPENDENT workstream reached the same verdict (North Wind / LBYD, and Copper
+River). **This is the largest single piece of unfinished attribution work in
+contracting.**
 
-**2. $6,327,484,436 across 764 identifiers is HELD, not decided.** Unresolved
+**1a. A NEIGHBOURING PASS IS WITHDRAWING ROWS IN A WAY NO CONSUMER CAN SEE.**
+Found 2026-09-02 on the Copper River family: rows were "withdrawn" by writing a
+240-character English sentence into `prime_contracts.attribution_method` while
+leaving `tribe_id` populated. The rows stayed attributed — `tribe_id` is what
+every consumer keys on — and the prose also put that column outside
+`40_build_prime_contracts.py`'s vocabulary. This is CDR-11 in a mirror: there
+the method column hid a ruling, here it *was* the ruling and nothing else
+recorded it. 1079 no longer trusts the column (it falls back to 40's own
+resolution order and counts `unknown_attribution_method_rows`), but **the
+convention itself needs a ruling**: a withdrawal must clear `tribe_id`.
+
+**1b. $1.5B THAT A COMMIT MESSAGE CALLS ATTRIBUTED IS NOT ATTRIBUTED IN THE
+TABLE.** The same pass then *attributed* the Copper River family to the Native
+Village of Eyak on excellent evidence — `copperrivermc.com`, verbatim: *"Owned
+by the Native Village of Eyak, the Copper River Family of Companies …"* — and
+recorded it the same way. Measured on the live table 2026-09-02 after all
+passes: **4,294 Copper River rows, $1,512,965,388, and `tribe_id` is blank on
+4,288 of them.** `canonical_name` and `cedar_uid` say Native Village of Eyak;
+`confidence_tier` is `C` and `attributed_flag` is `0`; six rows name Eyak in
+`canonical_name` while `tribe_id` still says `ANVC-SLDVSS-00` (Seldovia), so
+the row disagrees with itself. **No ledger row keys any Copper River identifier
+to an Eyak hub**, so a rebuild reverts the whole thing.
+**The destination is right and the write is unfinished.** 1079 deliberately did
+not finish it: attributing $1.5B from another workstream's prose, with no
+ledger row behind it, is the failure mode this pass exists to remove. 1079's
+tier X does **not** block the fix — `40_build_prime_contracts.py` skips tier X
+and takes the first tier A/B row, so a ruled Eyak ledger row wins a rebuild.
+
+**2. $6,254,678,105 across 758 identifiers is HELD, not decided.** Unresolved
 is a legitimate outcome (ADR-010), but it is a queue, not an answer. The
 biggest four are named in the log's §6.
 
@@ -942,3 +973,25 @@ touched tables are the signal.
 
 `_load_declared_removals()` was added at import time and used `ROOT`, which is bound further down the module. Reported by the stale-tail workstream, and true when it looked. The loader now derives its path from `__file__` instead, and `62` imports clean: `runpy` with `run_name='not_main'` raises no `NameError`, and a full run has completed since. **A failure observed inside a live edit window is real but perishable — re-measure before recording it as an issue.**
 <!-- END A5-RESOLUTION -->
+
+<!-- BEGIN HARVEST-COVERAGE-1112 -->
+## `docs/SHARD_COVERAGE.md` measures site discovery, not harvest — and two of its shards are mislabelled
+
+*Measured 2026-09-02 by `code/1112_harvest_coverage_matrix.py`. Full account:
+`docs/HARVEST_COVERAGE_AUDIT_2026-09-02.md`.*
+
+- Its **`untouched = 0`** column is true and is about `cedar_web_map.csv` membership.
+  Per *thing* — enterprises, CAGE/UEI, individual-business directories, gaming,
+  newsletters — the never-checked count runs **373 to 1,439 of 1,555**.
+  **CAGE / UEI / DUNS has never been looked for on 1,439 of the 1,555 (92.5%).**
+- **`shard_l` and `shard_m` are listed `NOT_STARTED`. Both ran.** shard_l holds 152
+  entity verdicts and 13 probe logs; shard_m holds a 148-entity deep probe and a
+  149-entity host log. The shard table is keyed on web-map rows and they wrote none.
+- **`1,254 with a URL` does not reproduce**: 1,275 entities have a 2xx URL of a
+  non-dead type, 1,484 have any URL string.
+- **185 of 185 BIE Schools have never been looked at for any of the five things**,
+  though 182 of them have a live site.
+
+Per-entity, per-thing state with the artefact that proves each cell:
+`data/clean/cedar_harvest_coverage_matrix.csv` (7,775 rows).
+<!-- END HARVEST-COVERAGE-1112 -->

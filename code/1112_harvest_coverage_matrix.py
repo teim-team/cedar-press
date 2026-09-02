@@ -14,8 +14,8 @@ Harvest types
 
 Outcome vocabulary - six values, precedence in this order.
     HARVESTED              content rows exist for this entity+type in a table on disk
-    FOUND_NOT_EXTRACTED    the surface was located and reached, nothing was pulled into a table
     REFUSED                robots.txt or stated terms forbade it, at the ENTITY's own host
+    FOUND_NOT_EXTRACTED    the surface was located and reached, nothing was pulled into a table
     CHECKED_ABSENT         looked for, positively determined not published
     ATTEMPTED_INCONCLUSIVE an attempt is on record but it could not decide
                            (host unreachable, no host known, page does not name the entity)
@@ -45,7 +45,12 @@ BUILT_DATE = datetime.date.today().isoformat()
 
 TYPES = ["enterprises", "identifiers", "individual_business", "gaming", "newsletter"]
 
-PRECEDENCE = ["HARVESTED", "FOUND_NOT_EXTRACTED", "REFUSED",
+# REFUSED outranks FOUND_NOT_EXTRACTED deliberately.  A located surface on a host
+# that has refused us is not a surface we may act on, and recording it as "found"
+# is exactly the defect that put 42 2xx rows on 13 hosts which refuse this agent by
+# name in robots.txt.  Only robots/terms evidence emits REFUSED; a 403 from a WAF
+# is ATTEMPTED_INCONCLUSIVE, because a WAF is not a stated refusal.
+PRECEDENCE = ["HARVESTED", "REFUSED", "FOUND_NOT_EXTRACTED",
               "CHECKED_ABSENT", "ATTEMPTED_INCONCLUSIVE", "NEVER_CHECKED"]
 RANK = {v: i for i, v in enumerate(PRECEDENCE)}
 
@@ -244,7 +249,9 @@ def collect_outputs():
         uid = s(r, "cedar_uid")
         found = s(r, "found")
         out = "FOUND_NOT_EXTRACTED" if found not in ("", "[]", "None") else "CHECKED_ABSENT"
-        if s(r, "robots_disallow") not in ("", "[]", "None", "False"):
+        # a Disallow of /wp-admin/ or *?lightbox= is not a refusal of a newsletter.
+        # Only a whole-site ban, or one naming this agent, is.
+        if robots_bans_whole_site(s(r, "robots_disallow")):
             out = "REFUSED"
         ev(uid, "newsletter", out,
            "data/staging/tribe_harvest/newsletter_gap_sweep/gap_sweep.jsonl",
@@ -501,6 +508,10 @@ def collect_verdicts():
     # the STAGED-ONLY directories: 18 of 36 TBD-* files in data/staging/business_registry
     # never reached data/clean/native_owned_businesses.csv.  They are harvested content
     # sitting on disk, so the entity has been looked at - the row just was not promoted.
+    # lint-ok: class1 - reading the staged artefact IS the job. This is an AUDIT of what
+    # is on disk versus what reached the promoted table; the whole finding is that 16 of
+    # these files have zero rows in data/clean/native_owned_businesses.csv. Reading the
+    # promoted table instead would make the gap invisible, which is the defect inverted.
     for path in sorted(glob.glob(P("data", "staging", "business_registry", "TBD-*.jsonl"))):
         base = os.path.basename(path)
         sid = base.split("_")[0]
@@ -539,9 +550,9 @@ def collect_verdicts():
         if s(r, "terms_status") == "TERMS_STATED_RESTRICTIVE":
             ev(uid, "individual_business", "REFUSED", art,
                "terms " + s(r, "terms_url"), s(r, "checked_date"))
-        elif "Disallow" in s(r, "robots_note"):
+        elif robots_bans_whole_site(s(r, "robots_note")):
             ev(uid, "individual_business", "REFUSED", art,
-               "robots " + s(r, "robots_note")[:80], s(r, "checked_date"))
+               "robots bans the whole site: " + s(r, "robots_note")[:80], s(r, "checked_date"))
 
 
 # ------------------------------------------------------------- gaming probes
@@ -603,6 +614,10 @@ PROBE_LOGS = [
 
 def collect_probe_sweep():
     paths = [P(*rel.split("/")) for rel in PROBE_LOGS]
+    # lint-ok: class1 - these are PROBE LOGS, not a staged copy of a promoted table. No
+    # promoted table records which URLs were requested; the log is the only evidence that
+    # a check happened at all, and distinguishing "checked" from "never checked" is the
+    # entire deliverable.
     paths += sorted(glob.glob(P("data", "staging", "tribe_harvest", "shard_l", "probe*.jsonl")))
     for path in paths:
         art = os.path.relpath(path, ROOT).replace("\\", "/")
@@ -631,7 +646,7 @@ def collect_probe_sweep():
                 elif st in ("404", "410"):
                     out = "CHECKED_ABSENT"
                 elif st in ("403", "401"):
-                    out = "REFUSED"
+                    out = "ATTEMPTED_INCONCLUSIVE"   # a WAF block is not a stated refusal
                 else:
                     out = "ATTEMPTED_INCONCLUSIVE"
                 for uid in uids:
@@ -666,6 +681,25 @@ STOPWORDS = {"tribe", "tribes", "tribal", "band", "bands", "nation", "nations",
              "traditional", "federated", "confederated", "confederacy", "colony",
              "town", "city", "county", "alaska", "hawaiian", "hawaii", "natives",
              "eek", "ute", "koi"}
+
+
+def robots_bans_whole_site(note):
+    """True only when robots.txt disallows the WHOLE site, or names this agent.
+
+    NOT a simple substring test.  `"Disallow" in note` fires on the string
+    'no Disallow directives' (34 hosts in shard_m) and on 'Disallow: /wp-admin/'
+    (24 more), neither of which refuses a newsletter or a TERO page.  Measured
+    while building this audit; it would have reported 106 refusals where the
+    honest number is far smaller, which is this repo's signature defect in a
+    detector written to find that defect.
+    """
+    n = (note or "").replace("Disallow:", " ").replace(",", ";")
+    for part in n.split(";"):
+        t = part.strip().strip("'\"[] ")
+        if t == "/" or t == "/*":
+            return True
+    low = (note or "").lower()
+    return "claudebot" in low or "anthropic" in low
 
 
 def contamination_flags():
@@ -927,7 +961,21 @@ def selftest():
         w = csv.DictWriter(fh, fieldnames=hdr)
         w.writeheader()
         w.writerows(poisoned)
-    print("-- verify against a POISONED copy (must exit 1) --")
+    print("-- fixture: robots_bans_whole_site must not fire on a partial Disallow --")
+    fixtures = [("no Disallow directives", False),
+                ("our group (*): no Disallow directives", False),
+                ("Disallow: /wp-admin/", False),
+                ("['/wp-admin/']", False),
+                ("['*?lightbox=']", False),
+                ("robots.txt 404", False),
+                ("Disallow: /; /CurrentEvents.aspx", True),
+                ("['/']", True),
+                ("robots.txt disallows ClaudeBot by name", True)]
+    fx = [(t, robots_bans_whole_site(t), e) for t, e in fixtures
+          if robots_bans_whole_site(t) != e]
+    print("   %s  %d cases" % ("PASS" if not fx else "FAIL " + str(fx), len(fixtures)))
+
+    print("\n-- verify against a POISONED copy (must exit 1) --")
     INVARIANTS = []
     rc_bad = verify(tmp)
     named = {n for n, ok, _ in INVARIANTS if not ok}
@@ -935,7 +983,7 @@ def selftest():
     print("\n-- verify against the real matrix (must exit 0) --")
     INVARIANTS = []
     rc_good = verify(MATRIX)
-    ok = (rc_bad == 1 and rc_good == 0
+    ok = (rc_bad == 1 and rc_good == 0 and not fx
           and {"row_count_is_entities_x_types",
                "non_never_checked_names_an_artefact"} <= named)
     print("\nSELFTEST %s - poisoned rc=%s fired=%s clean rc=%s"

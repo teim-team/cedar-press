@@ -207,17 +207,125 @@ live table. **All seven invariants hold; exit 0.**
 | `prime_contracts.csv` rows | 1,217,768 | **1,217,768** |
 | columns | 70 | **75** |
 | **total obligations** | **$310,005,258,660.75** | **$310,005,258,660.75** |
-| attributed rows | 888,958 | 785,787 |
-| attributed obligations | $245,035,411,233.42 | $228,037,829,478.54 |
+| attributed rows | 888,958 | 785,737 |
+| attributed obligations | $245,035,411,233.42 | $227,965,023,146.82 |
 
-* **un-attributed: 103,171 rows, $16,997,581,754.88**, from 737 identifiers
+* **un-attributed: 103,221 rows, $17,070,388,086.60**, from 743 identifiers
 * **repointed: 6,550 rows, $2,443,371,845.81**, across 67 identifiers
-* **124 named entities changed total**; gains and losses net to $0.02, which is
+* **126 named entities changed total**; gains and losses net to $0.04, which is
   one half-cent per cent-rounded term and is *stated* in the gate rather than
   tolerated silently. `review/1079_entity_ledger_2026-09-02.csv` lists 126 rows
   — it also carries the two whose total moved to and from zero
 * **227,540 prime rows now carry `identifier_ruling_quarantined = Y`** — the
-  whole $45.9B exposure is visible, including the $28.9B still attributed
+  whole $45.9B exposure is visible, including the $28,862,571,317.64 that
+  remains attributed and is now labelled as resting on a discredited method
+
+**Why the withdrawals, in one table.** Nothing here rests on a token test
+alone; all seven rungs had already failed by the time any of these was reached.
+
+| basis | identifiers | obligations |
+|---|---:|---:|
+| a FRAGMENT of a multi-token hub name (§4c) | 428 | $5,928,542,515.66 |
+| the registrant's own declared parent is a listed non-Native owner | 2 | $5,566,559,560.79 |
+| no shared distinctive token with the hub at all | 225 | $4,352,299,115.51 |
+| the only shared token is on `NAME_TRAPS` | 69 | $1,169,560,016.36 |
+| the awardee IS a government agency | 19 | $53,426,878.28 |
+
+
+### 5a. The Copper River family — my removal was right, my destination was wrong
+
+`docs/CROSS_SOURCE_VERIFICATION.md`: one source is a claim, two agreeing is a
+verification. Three passes converged on this family within an hour, and the
+sequence is worth recording because the *disagreement* was the useful part.
+
+* **This pass, from the NAME side.** The firms share no distinctive token with
+  Barrow, Kluti Kaah or Seldovia; no rung of the ladder was reached; verdict
+  WITHDRAW. 2,546 rows / $1,028,280,369.01 un-attributed, plus the two CAGE
+  rows below.
+* **A concurrent workstream, from the IDENTIFIER side.** Every operating
+  company declares `ALASKA NATIVE GOVERNMENT SERVICES, LLC` (TNM3D4HVCZT5) as
+  both `parent_uei` and `ultimate_parent_uei`; the family is Anchorage / Eagle
+  River; it shares zero UEIs with the Eyak Corporation family in Dulles VA.
+  Same verdict: not these hubs.
+* **`code/1111_copper_river_attribution.py`, from the WEBSITE — and this one
+  outranks both.** `copperrivermc.com`, quoted verbatim: *"Owned by the Native
+  Village of Eyak, the Copper River Family of Companies are a collection of
+  both current and graduated Small Business Administration (SBA) 8(a)
+  Certified entities"*.
+
+**Rule 13 rung 2 beats rule 13 rung 7.** An organisation's own statement of
+affiliation outranks any inference from names, and this pass never had access
+to it — the ladder here is offline by construction. So the correct destination
+for the Copper River family is the **Native Village of Eyak**
+(`CE-0004H-T9`), **not** the unattributed pool, and this pass's WITHDRAW should
+be read as *"not Barrow, not Kluti Kaah, not Seldovia"* — which is right — and
+not as *"nobody"*.
+
+On the second confirmation the two remaining CAGE rows were brought into scope
+here, the same narrow named-family exception CDR-12 used for North Wind / LBYD:
+
+| CAGE | firm | rows | $ | was |
+|---|---|---:|---:|---|
+| `9JJF4` | COPPER RIVER DATA SOLUTIONS, LLC | 47 | $72,242,487.28 | Kluti Kaah |
+| `9XSE4` | COPPER RIVER GOVERNMENT SOLUTIONS, LLC | 3 | $563,844.44 | Kluti Kaah |
+
+**And the destination has not actually landed. Measured on the live table after
+all three passes:**
+
+| who touched the row | `tribe_id` | rows | obligations |
+|---|---|---:|---:|
+| 1079 withdrew it | *(blank)* | 2,546 | $1,028,280,369.01 |
+| 1111 named Eyak in `canonical_name` / `cedar_uid` | *(blank)* | 1,720 | $471,401,841.02 |
+| neither | *(blank)* | 22 | $12,872,336.90 |
+| 1111 renamed, `tribe_id` still Seldovia | `ANVC-SLDVSS-00` | 6 | $410,841.50 |
+
+**Not one Copper River row is attributed.** 1111 wrote `canonical_name` and
+`cedar_uid` but never `tribe_id`, and left `confidence_tier = C` and
+`attributed_flag = 0`; six rows now name Eyak in `canonical_name` while
+`tribe_id` still says Seldovia, so the row disagrees with itself. No ledger row
+keys any Copper River identifier to an Eyak hub — all seven are tier X from
+this pass. The finishing work is theirs, not mine: writing a $1.5B attribution
+onto another workstream's prose, with no ledger row behind it, is the failure
+mode this whole pass exists to remove. **This pass's tier X does not block
+them** — `40_build_prime_contracts.py` skips tier X and takes the first tier
+A/B row, so a ruled Eyak ledger row will win a rebuild outright.
+
+### 5b. The same defect, twice, in the neighbouring pass — and it is CDR-11 in a mirror
+
+Both halves of that workstream's Copper River decision were recorded in columns
+no consumer keys on.
+
+**Withdrawing.** Rows were "withdrawn" by writing a 240-character English
+sentence into `prime_contracts.attribution_method` while leaving `tribe_id`
+populated:
+
+```
+tribe_id           = AKNF-KLTIKH-00-AHTNAI-CPPRRV        <- still set
+attribution_method = "withdrawn 2026-09-02: awardee is a COPPER RIVER family
+                      company whose declared parent_uei AND ultimate_parent_uei
+                      are ALASKA NATIVE GOVERNMENT SERVICES, LLC ..."
+```
+
+**Attributing.** Rows were "attributed" by writing `canonical_name` and
+`cedar_uid` and a 600-character sentence into `attribution_method`, while
+`tribe_id` stayed blank and `attributed_flag` stayed `0`.
+
+In both directions the key is untouched and the verdict lives in a text field.
+That is the exact mirror of CDR-11, where `attribution_method` *hid* a ruling
+instead of *being* one — and it is why a commit message can honestly say
+"$1.5B attributed" about a table in which nothing is attributed.
+
+It also silently disabled this pass, whose leg detection trusted
+`attribution_method` to hold one of four values and skipped every row where it
+did not. Fixed by refusing to trust the label: anything outside
+`40_build_prime_contracts.py`'s vocabulary now falls back to 40's own
+resolution order, and the rows are counted in
+`unknown_attribution_method_rows`.
+
+**The rule: a decision must be written onto the column the consumer keys on.**
+`docs/DECISION_QUEUE_CLEARANCE` already earned the sibling of this — *"a
+decision must be written onto the row that asked for it"*. This is the column
+version, and it is worth the same standing.
 
 ### Who lost, and who gained
 
@@ -248,14 +356,14 @@ and 19 Lumbee CAGE rows moved to `ANRC-CKINLT-00`. `Wind River Construction
 LLC` was deliberately **not** moved: Wind River is the Eastern Shoshone
 reservation, which is exactly why `wind` is a trap.
 
-## 6. What could NOT be decided — 764 identifiers, $6.33B
+## 6. What could NOT be decided — 758 identifiers, $6.25B
 
 `review/1079_owner_holds_2026-09-02.csv`. Unresolved is a legitimate outcome
 (rule 13 rung 6; ADR-010).
 
 | class | n | $ |
 |---|---:|---:|
-| **the CAGE leg, out of this pass's declared scope** | 508 | $3,608,856,488 |
+| **the CAGE leg, out of this pass's declared scope** | 502 | $3,536,050,157 |
 | weak name evidence, no corroborator anywhere | 206 | $1,133,706,844 |
 | a declared parent that is not in the ledger but supports the hub (CDR-03) | 11 | $827,811,407 |
 | a joint venture on a fragment | 37 | $735,310,554 |

@@ -831,3 +831,194 @@ diff, which is why they are recorded here rather than reported as defects.
    leaves valid-looking stale output, and every check downstream reads the
    output. `770` was broken for at least one full cycle before anyone needed
    it to run.
+
+---
+
+## PR #29 — ROUND 4, answered and pushed as `caa0d3f`
+
+Codex reviewed `71da9cb` and left **three** findings, all P2. **All three
+right.** One had a remedy that is only 9.6% possible, and that is measured
+rather than argued.
+
+| # | file | finding | verdict | what it did not show |
+|---|---|---|---|---|
+| 1 | `collection_descriptors.cedar.json` | the blocker still describes a whole-dataset count conflict after the count was withdrawn | **Right — 4th instance on this branch, 1st inside the fix itself** | the same imprecision existed one layer down, in the check |
+| 2 | `README.md` | restart after a race; do not top up | **Right, and it named the case I could not see** | the detector could not fire on the worst case |
+| 3 | `subcontracting__sample.csv` | `2Â€? CONDUIT` is corrupt | **Right; the suggested remedy reaches 9.6%** | 1,433 cells, of which 1,096 are unrecoverable |
+
+### Finding 1 — and the imprecision it exposed in my own check
+
+The blocker read *"the descriptor claims 1,657 rows for the whole dataset"* in
+the same commit that set `n_rows` to null. Rewritten to the membership and
+grain conflict.
+
+**Fixing it surfaced a second collection**, and my check described it wrongly.
+`federal-register`'s sample comes from `consultation_events.csv`, and the
+check said *"no collection contract claims it"*. **False.** The contract lists
+it and marks it **`UNDOCUMENTED`**; the codebook registration lapsed in the
+contract regenerated at 09:23 the same day. Two distinct defects — absent from
+the collection, and present but not shippable — collapsed into one message.
+**That is this repo's signature failure committed by the check written two
+rounds earlier to catch it.** Both branches now read the real status out of
+the contract.
+
+**And it forced a distinction that was missing.** The remedy must match the
+measurement:
+
+| kind | what is wrong | what happens to the count |
+|---|---|---|
+| `arithmetic` | the published count is smaller than one of the dataset's own tables — provably wrong | **withdrawn** |
+| `membership` | the sample source is not a shippable member; the count is untouched by that | **stands** |
+
+Collapsing them would have suppressed `federal-register`'s **490,274** — a
+figure nothing contradicts — because a different table's codebook status
+lapsed. `kind` is carried through the code, not inferred at the call site.
+
+### Finding 2 — the hole was bigger than the finding named
+
+Codex: *"a rewrite that leaves all ten target positions publishable will not
+require replacements at all."* Exactly. In that case the sample is drawn from
+the **new** file using the **old** file's positions and scores, no top-up
+fires, and **nothing prints**. The `RACED` detector could only see the case it
+was not needed for.
+
+No top-up now. `(size, mtime_ns)` before pass 1, re-stamped after pass 2, **on
+every attempt**; any change discards both passes and re-draws from a fresh
+snapshot; after three attempts it **raises rather than publish**. A second,
+separate refusal covers the other cause: pass 2 short with a **stable** stamp
+is not a race, it means `keep()` is non-deterministic, and it says so.
+
+**`proveequal` then earned its keep on the exact thing it was written for.**
+It failed on `subawards.csv` row 1: the streaming engine discounted corrupt
+cells when scoring completeness and the in-memory engine did not, so the two
+chose different rows. `completeness()` now delegates to `_score()` — one
+ranking function, both paths. Both engines agree cell for cell on five tables
+up to **104.3 MB**.
+
+### Finding 3 — right about the corruption, and the remedy is 9.6% possible
+
+Real in the bytes: `b"1. 2\\xc3\\x82\\xe2\\x82\\xac? CONDUIT"`. Explicitly
+contrasted with the round-2 report of the same shape, which was a cp1252
+console rendering a correct UTF-8 en dash and was measured before being
+reported.
+
+    subawards.csv, 87,177 rows
+      description        1,423 rows   1.63%
+      subaward_number        6
+      sub_parent_name        2
+      sub_name               2
+                        ------
+                         1,433 cells
+
+    affected cells                     1,212
+      recovered by re-decoding           116   9.6%
+      still corrupt after re-decoding  1,096  90.4%
+
+They are not a pure re-encoding chain — characters have been **substituted**,
+so there is no decode to correct. The dominant residue is `Ã¢Â‚¬Â„¢` for a
+single U+2019, where the `â` of a well-formed triple mojibake has become `Â`.
+Codex's own example is the clearest case: `2Â€?` holds a literal `?` where a
+character was destroyed upstream — almost certainly `2" CONDUIT`. **You cannot
+re-decode information that is gone.**
+
+Proportionate remedy: repair what repairs; score what does not as an **empty
+cell** so the sampler prefers a clean row. That also fixes *why* a corrupt row
+was preferred — a long mojibake description looked like a well-filled field to
+the completeness score. No row dropped, no money column touched, counts
+published. Blanking the 1,096 outright was considered and declined, and the
+declination was put to Codex as an open question rather than settled
+unilaterally: a corrupt string still carries readable words a searcher may
+want.
+
+### Found by this side: seven "facilities" that say there is no facility
+
+`gaming_facilities.csv` carries **seven rows whose `facility_name` is
+literally `No casino`** — `VP-0242` Havasupai, `VP-0243` Hopi, `VP-0102`
+Quartz Valley, `VP-0254` Zuni, `VP-0336` Zia, `VP-0337` Cochiti, `VP-0338`
+Picuris. They are placeholders recording that a nation does **not** operate a
+casino, shipped in the facility table as though they were casinos.
+
+**787 rows, 780 facilities.** Every "of 787" figure divides by the inflated
+one — including two of Codex's own from round 2 ("1 of 787", "58 of 787").
+
+**The circulating "true count is 734" is arithmetically reconstructible and
+must not be adopted yet.** 787 − 53 (the extra rows in the 52 groups marked
+`LIKELY_SAME_PROPERTY` in `review/gaming_facility_duplicate_candidates_2026-09-02.csv`)
+= 734 exactly. Three measured reasons to hold:
+
+1. **No verdict is applied.** All 56 groups carry `verdict_needed`, and the
+   live table has `duplicate_of_facility_id` populated on **10** rows, not 59.
+2. **Four groups are cross-tribe and the file says so** —
+   `DIFFERENT_TRIBES_CHECK_BOTH`. `7 Clans First Council` pairs
+   Otoe-Missouria with the Ponca Tribe; **`Stables Casino` pairs the Miami
+   Tribe with Modoc Nation, which is a joint operation, not a duplicate** —
+   the same fact pattern as Codex's round-2 finding 5, arriving from the
+   opposite direction.
+3. **Two of the 56 are a normalisation artefact.** The grouper reduced
+   `No casino` to the token `NO` and grouped Havasupai with Hopi, and four
+   Pueblos with each other. That artefact is how the seven placeholder rows
+   were found — a bad grouping key surfacing a real defect.
+
+### Coordinator claims re-measured, and one already closed
+
+- **`nest` 977 of 1,610 (60.7%) absent from federal contracting** — confirmed
+  exactly. But the brief's *"still needs a sample and copy"* is **stale**:
+  `nest__sample.csv` (10 rows, 17 columns) and full editorial copy in
+  `docs/datasets/_descriptors.json` both shipped on the previous push.
+- **`natural-resources` aggregate share is 88.1%, not 87%** —
+  `national_aggregate` 9,791 + `state_aggregate` 167 = 9,958 of 11,305,
+  against `entity_specific` 779 and `per_headright_rate` 508.
+- **`deals` 1,073 rows** — confirmed; descriptor total 2,662.
+- **`gaming` "~734"** — see above. Not adopted, with the number that says why.
+
+### Gate state
+
+`760 selftest` three fixtures, all pass. `760 verify` exits 1 on the two named
+findings, correctly. `770 proveequal` passes on five tables to 104.3 MB.
+`293_lint_bug_classes.py` names **zero** findings in `760` or `770`. All 14
+descriptors construct against the real `CollectionDataset` dataclass read from
+`origin/main`. Post-push `dist/`-vs-repo diff: in sync.
+
+### After round 4: a shipped descriptor said a source was unacquired, and it is 807 letters
+
+Found by re-checking `docs/datasets/_descriptors.json` against live data, which
+is the standing instruction and the reason it is standing.
+
+The `federal-register` `method` — customer-facing copy, shipped in
+`collection_descriptors.json` — told a buyer that the Federal Register's 46
+"Dear Tribal Leader" documents put a thin count *"close to the source's own
+ceiling"*, and that the letters agencies post on their own websites were
+*"recorded as not yet acquired, not as absent"*.
+
+Measured on `data/clean/dear_tribal_leader_letters.csv`:
+
+| | |
+|---|---:|
+| letters | **807** |
+| span | **2000–2026** |
+| Indian Health Service | 783 |
+| Bureau of Indian Education | 14 |
+| Bureau of Indian Affairs | 10 |
+
+**17.5x the Register's 46**, and the surface the copy called unacquired has
+been acquired. The brief that prompted the check said 597; it is 807 — it grew
+again between the brief and the measurement, which is the ordinary condition
+of this project and the argument for measuring rather than quoting.
+
+**The cause is a reasoning error this project makes repeatedly and it is kept
+in the copy for that reason.** `ihs.gov` answered **406**, and the 406 was read
+as a property of the publisher when it was a property of the *request's
+headers*. Same shape as "a 403 on robots.txt means the site forbids you", "one
+auditee's opt-out is a property of the source", and "no `gh` means no GitHub
+auth" — the last of which is recorded at the top of this very file. **An
+error response describes the exchange, not the publisher.**
+
+Corrected at source and regenerated; the descriptor is never hand-edited.
+Pushed as `fdbd2ec`.
+
+**And this branch's own round-2 lesson was applied before shipping it.** The en
+and em dashes in the new sentence render as `?` in a cp1252 console. The bytes
+were checked and are correct UTF-8 (`\xe2\x80\x93`, `\xe2\x80\x94`); no
+descriptor contains mojibake; all 14 still construct against the real
+`CollectionDataset` read from `origin/main`. The round-2 false alarm and the
+round-4 real one are told apart by reading bytes, every time.

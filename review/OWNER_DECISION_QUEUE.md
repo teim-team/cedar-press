@@ -2107,6 +2107,10 @@ keys on three legs. The two nobody had measured:
 | `cage_exact` on a quarantined CAGE ledger row | 14,149 | $7,252,015,101 |
 | `parent_uei` on a quarantined UEI ledger row | 41,055 | $489,839,872 |
 
+*(Two named families have since been repaired out of that CAGE total on a
+second, independent confirmation — North Wind / LBYD and Copper River — leaving
+502 identifiers and $3,536,050,157 open.)*
+
 `need_v6` — the method START_HERE records at **6.5% accuracy** — lives almost
 entirely on this leg: 838 tier-B CAGE rows. It put 60+ CAGE codes on
 `TRBF-LUMBEE-00`, the Lumbee Tribe of **North** Carolina, whose registered
@@ -2115,12 +2119,12 @@ names include `NORTH WIND …` ×30, `GSI NORTH AMERICA`, `MERCEDES-BENZ RESEARC
 `NORTH VALLEY CARING SERVICES`, `TDX NORTH SLOPE GENERATING` and `CAROLINA
 PLACE APARTMENTS`. The token is `north`.
 
-508 of those identifiers, $3,608,856,488, ran the full seven-rung ladder and
+502 of those identifiers, $3,536,050,157, ran the full seven-rung ladder and
 came back WITHDRAW or REPOINT. They were downgraded to HOLD **only** because
 the CAGE leg was outside the declared scope of that pass. They are in
 `review/1079_owner_holds_2026-09-02.csv` with their evidence and their basis.
 
-**Consequence of each answer.** *Go* — another ~$3.6B moves from a discredited
+**Consequence of each answer.** *Go* — another ~$3.5B moves from a discredited
 attribution to honestly unattributed or to a repointed owner, on evidence that
 is already gathered and already written down. *Wait* — the flag
 (`identifier_ruling_quarantined = 'Y'`) means no consumer can mistake it for a
@@ -2168,4 +2172,168 @@ structural predicate in this repo can currently express.
 **Consequence.** *Rule it by hand* — one ruling, $336.3M, and the class stays
 small. *Automate it* — needs a language signal Cedar does not have yet, and it
 would break correct ANC links on the way.
+---
+
+## QM-4. Copper River: the right owner, found — and $1.5B still not attributed to them
+
+**Decision:** who finishes it, and does the Native Village of Eyak get a ruled
+ledger row?
+
+**The evidence is as good as this project gets.** `code/1111_copper_river_attribution.py`
+ran your ladder to rung 2 and the website says it outright —
+`copperrivermc.com`, verbatim: *"Owned by the Native Village of Eyak, the
+Copper River Family of Companies are a collection of both current and graduated
+Small Business Administration (SBA) 8(a) Certified entities"*. Two other
+readings agree it is **not** Barrow, Kluti Kaah or Seldovia: the family declares
+`ALASKA NATIVE GOVERNMENT SERVICES, LLC` as parent and ultimate parent and sits
+in Anchorage, and it shares zero UEIs with the Eyak **Corporation** family in
+Dulles VA. Two Eyak entities in Cordova, and the website names the **tribe**.
+
+**But the table does not say so.** Measured on the live file after every pass:
+
+| who touched the row | `tribe_id` | rows | obligations |
+|---|---|---:|---:|
+| 1079 withdrew it from a wrong hub | *(blank)* | 2,546 | $1,028,280,369.01 |
+| 1111 wrote `canonical_name` + `cedar_uid` = Eyak | *(blank)* | 1,720 | $471,401,841.02 |
+| neither | *(blank)* | 22 | $12,872,336.90 |
+| 1111 renamed it, `tribe_id` still Seldovia | `ANVC-SLDVSS-00` | 6 | $410,841.50 |
+
+`confidence_tier` is `C`, `attributed_flag` is `0`, and **no ledger row keys any
+Copper River identifier to an Eyak hub** — so a rebuild of
+`prime_contracts.csv` reverts all of it. Six rows currently name one entity in
+`canonical_name` and a different one in `tribe_id`.
+
+**Why 1079 did not just finish it.** Writing a $1.5B attribution onto another
+workstream's prose, with no ledger row behind it, is precisely the defect this
+pass was chartered to remove. The removal from the wrong hubs is done and
+proven; the destination needs a ruling that lands in the ledger.
+
+**Consequence of each answer.** *Rule it and write the ledger rows* — the
+Native Village of Eyak gains $1.5B, it survives a rebuild, and Cedar's largest
+single correct attribution of the night is real rather than cosmetic. *Leave
+it* — the rows stay honestly unattributed, which is a defensible state, but the
+table will keep carrying `canonical_name = Native Village of Eyak` on rows with
+no `tribe_id`, which is not.
 <!-- END QM-QUARANTINE -->
+
+---
+
+## PR29-2. Seven rows in `gaming_facilities.csv` say there is no facility — and the "734" dedupe is not ready to apply
+
+*Appended 2026-09-02 by workstream PR29-LOOP. Evidence: `docs/CODEX_REVIEW_LOG.md`, PR #29 round 4.*
+
+### Decision A — remove or relabel the seven placeholder rows?
+
+`gaming_facilities.csv` ships 787 rows. **Seven have `facility_name = "No casino"`:**
+
+| facility_id | nation | state |
+|---|---|---|
+| `VP-0242` | Havasupai | AZ |
+| `VP-0243` | Hopi | AZ |
+| `VP-0102` | Quartz Valley | CA |
+| `VP-0254` | Zuni | NM |
+| `VP-0336` | Pueblo of Zia | NM |
+| `VP-0337` | Pueblo of Cochiti | NM |
+| `VP-0338` | Pueblo of Picuris | NM |
+
+They record that a nation does **not** operate a casino. That is a real and
+useful fact — Cedar deliberately distinguishes "attempted, none found" from
+"untouched" — but it is being carried in the **facility** table, where every
+row is otherwise a facility. **787 rows, 780 facilities**, and every "of 787"
+denominator in the product README and in two of Codex's own findings is
+inflated by seven.
+
+Three options, in ascending order of work:
+
+1. **Relabel in place** — add `is_facility = N` (or reuse an existing status
+   column) so a consumer can filter. Cheapest, keeps the negative evidence,
+   and every downstream count has to learn the filter.
+2. **Move them** to a `gaming_absence_observations` table. Cleanest grain, and
+   the negative evidence keeps a home; costs a new shipped table.
+3. **Delete** — loses a genuine, deliberately collected fact. Not recommended.
+
+**This is an owner call because it changes a published denominator**, and
+because option 2 adds a table to a collection that already carries 54.
+
+### Decision B — apply the 56-group dedupe, and on what terms?
+
+`review/gaming_facility_duplicate_candidates_2026-09-02.csv` proposes 56
+groups. **Collapsing the 52 marked `LIKELY_SAME_PROPERTY` gives exactly 734**,
+which is the figure now circulating as the true facility count. It should not
+be adopted as-is:
+
+- **All 56 carry `verdict_needed`** — nothing has been adjudicated. The live
+  table has `duplicate_of_facility_id` on **10** rows, not 59.
+- **Four are cross-tribe** and the file flags them `DIFFERENT_TRIBES_CHECK_BOTH`:
+  `7 Clans First Council` (Otoe-Missouria + Ponca), `Stables` (Miami Tribe +
+  Modoc Nation), and the two `NO` groups. **`Stables Casino` is a joint
+  operation, not a duplicate** — collapsing it would erase one nation's
+  interest in a property, which is the exact defect Codex raised from the
+  other direction in round 2 finding 5.
+- **Two of the 56 are a normalisation artefact** — the grouper reduced
+  `No casino` to the token `NO` and grouped Havasupai with Hopi, and four
+  Pueblos with each other. Those two groups are Decision A, not duplicates.
+
+So the honest disposition is **52 candidates to review, 4 to refuse, and a
+denominator question underneath both**. If the 52 are confirmed the count
+becomes 734 of which 727 are facilities; until they are, **787 is what ships**
+and the product README says so.
+
+### What is already in place
+
+Nothing is blocked by this. The product README states 787 as the shipped row
+count, names 780 as the facility count, and records 734 as a proposal with its
+exceptions rather than adopting it. No figure in the product asserts a dedupe
+that has not happened.
+
+---
+
+<!-- BEGIN HARVEST-COVERAGE-1112 -->
+## HC-1. A restricted publisher's TERO list was harvested anyway, and 21 rows sit in staging
+
+**Decision:** delete or keep `data/staging/business_registry/TBD-D01_southern_ute_indian_owned_business_list.jsonl`?
+
+`review/tribal_vendor_list_registry_2026-08-26.csv` rules Southern Ute
+`EXCLUDED_TERMS_STATED_RESTRICTIVE`, quoting southernute-nsn.gov: *"under this
+license you may not: modify or copy the materials; use the materials for any
+commercial purpose, or for any public display."* The excluded `list_url` is
+`.../2026/03/2026-Indian-Own-Business-List.pdf`.
+
+On **2026-09-01**, `run-2026-09-01-shardd` extracted **21 rows from that exact
+PDF** into `TBD-D01`, with a cached copy at `raw/TRBF-STHUTE-00_tero_b05678af.pdf`.
+The rows carry named natural persons, street addresses, phones and emails.
+`TBD-D01` has **no row in the vendor-list registry**, so nothing connected the
+harvest back to the exclusion. Nothing has been published from it.
+
+**Consequence.** *Purge* — move both files to `graveyard/`, register the exclusion
+against `TBD-D01` as well as `TBD-055`, and the record shows Cedar caught and
+reversed it. *Keep in staging* — 21 rows of a source whose publisher has told us
+not to copy it stay on disk, and the next promotion pass that globs
+`business_registry/TBD-*.jsonl` will pick them up, because that is exactly how
+they got here.
+
+Evidence: `docs/HARVEST_COVERAGE_AUDIT_2026-09-02.md`, final section.
+
+## HC-2. 634 directory rows are harvested, on disk, and invisible to every coverage number
+
+**Decision:** promote the 16 `HARVESTED_STAGING_ONLY` sources into
+`data/clean/native_owned_businesses.csv` with `publishable = N`, or leave them staged?
+
+16 of 36 `TBD-*` files in `data/staging/business_registry/` have zero rows in the
+clean table — 634 rows across 15 tribes that are not currently certifying
+authorities in it at all (Puyallup 88, Hoopa 136, Aquinnah 101, Pyramid Lake 73,
+Sisseton-Wahpeton 45, Bad River 39, Little Traverse 35, Citizen Potawatomi 27,
+Spokane 23, Kalispel 12, Chehalis 10, Shoshone-Bannock 10, Chitimacha 7, Delaware
+Tribe 4, California Valley Miwok 3). `individual_business` coverage reads 58
+entities harvested instead of 73 because of it.
+
+**All 16 are `publishable = N`**, so promotion buys internal honesty and zero
+shippable rows. **`TBD-C01` must be excluded** — it is a byte-equal duplicate of
+the already-promoted `TBD-079` and a glob would add 337 phantom rows. **`TBD-D01`
+must be excluded** pending HC-1.
+
+**Consequence.** *Promote* — coverage stops understating what Cedar holds, and the
+publish gate does the work it exists to do. *Leave staged* — every count off
+`native_owned_businesses.csv` keeps understating by 634 rows and 15 nations, and
+the next agent re-harvests sources already on this machine.
+<!-- END HARVEST-COVERAGE-1112 -->
