@@ -376,8 +376,12 @@ def cmd_build() -> int:
                 m.get("postal_code", ""),
                 loc.get("address_1", ""), loc.get("city", ""), loc.get("state", ""),
                 loc.get("postal_code", ""), loc.get("telephone_number", ""),
-                prim.get("code", ""), prim.get("desc", ""),
-                " | ".join(t.get("desc", "") for t in tx),
+                prim.get("code") or "", prim.get("desc") or "",
+                # NPPES serves `desc: null` on some taxonomy entries -
+                # measured, not hypothetical. `t.get("desc","")` returns None
+                # for a key that EXISTS with a null value, which is the exact
+                # difference between "absent" and "present and empty".
+                " | ".join((t.get("desc") or "") for t in tx),
                 f"{API}?number={npi}", now, "cms_nppes", "KNOWN_IDENTIFIER",
                 "term_match",
                 "returned by an NPPES organization_name query seeded from a "
@@ -452,7 +456,7 @@ def cmd_build() -> int:
                     f"{jaccard(e['canonical_name'], nm):.4f}",
                     loc.get("state", ""), sa, loc.get("city", ""), ca,
                     b.get("enumeration_date", ""), b.get("last_updated", ""),
-                    prim.get("desc", ""), info["n"], info.get("truncated", False),
+                    prim.get("desc") or "", info["n"], info.get("truncated", False),
                     "C", "nppes_name_query_candidate", "cms_nppes",
                     f"{API}?number={npi}", now, "KNOWN_IDENTIFIER",
                     "term_match", info["query"]])

@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-02T12:16:19",
+ "generated": "2026-09-02T12:31:51",
  "generated_by": "code/1115_defect_class_retro_sweep.py",
  "not_mechanically_detectable": {
   "C10": "a decision written somewhere the asker cannot see - 27,067 queue rows answered in sibling files. Needs a queue-vs-answer join, surveyed by hand.",
@@ -118,8 +118,8 @@
   {
    "class": "C1",
    "where": "code/1115_defect_class_retro_sweep.py",
-   "line": 1626,
-   "what": "capped read `list()[:2]` in `detect_C6` then a whole-population claim at line 1753: '\\nimport csv\\nCAP = 20000\\ndef audit(p):\\n    rows = []\\n    with open(p) as f:\\n        for i, row in enumerate(csv.reader(f)):\\n            rows.append(row)\\n        '  [claim is in `<module>()`, which calls `detect_C6()` - the cap is INVISIBLE at the claim]",
+   "line": 1630,
+   "what": "capped read `list()[:2]` in `detect_C6` then a whole-population claim at line 1757: '\\nimport csv\\nCAP = 20000\\ndef audit(p):\\n    rows = []\\n    with open(p) as f:\\n        for i, row in enumerate(csv.reader(f)):\\n            rows.append(row)\\n        '  [claim is in `<module>()`, which calls `detect_C6()` - the cap is INVISIBLE at the claim]",
    "size": 2,
    "unit": "row cap",
    "detail": "DESTRUCTIVE claim - the 526 shape"
@@ -127,8 +127,8 @@
   {
    "class": "C1",
    "where": "code/1115_defect_class_retro_sweep.py",
-   "line": 1628,
-   "what": "capped read `list()[:2]` in `detect_C6` then a whole-population claim at line 1753: '\\nimport csv\\nCAP = 20000\\ndef audit(p):\\n    rows = []\\n    with open(p) as f:\\n        for i, row in enumerate(csv.reader(f)):\\n            rows.append(row)\\n        '  [claim is in `<module>()`, which calls `detect_C6()` - the cap is INVISIBLE at the claim]",
+   "line": 1632,
+   "what": "capped read `list()[:2]` in `detect_C6` then a whole-population claim at line 1757: '\\nimport csv\\nCAP = 20000\\ndef audit(p):\\n    rows = []\\n    with open(p) as f:\\n        for i, row in enumerate(csv.reader(f)):\\n            rows.append(row)\\n        '  [claim is in `<module>()`, which calls `detect_C6()` - the cap is INVISIBLE at the claim]",
    "size": 2,
    "unit": "row cap",
    "detail": "DESTRUCTIVE claim - the 526 shape"
@@ -136,8 +136,8 @@
   {
    "class": "C1",
    "where": "code/1121_acquire_nppes_corroboration.py",
-   "line": 225,
-   "what": "capped read `break at 200 rows` in `cmd_pull` then a whole-population claim at line 233: 'truncated'",
+   "line": 241,
+   "what": "capped read `break at 200 rows` in `cmd_pull` then a whole-population claim at line 249: 'truncated'",
    "size": 200,
    "unit": "row cap",
    "detail": "DESTRUCTIVE claim - the 526 shape"
@@ -694,29 +694,29 @@
   {
    "class": "C2",
    "where": "code/1115_defect_class_retro_sweep.py",
-   "line": 1108,
+   "line": 1112,
    "what": "input glob `*.md` matches this script's OWN output ['x.md']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
    "size": 1,
    "unit": "own outputs matched",
-   "detail": "written at line 1943; written at line 1949"
+   "detail": "written at line 1947; written at line 1953"
   },
   {
    "class": "C2",
    "where": "code/1115_defect_class_retro_sweep.py",
-   "line": 1108,
+   "line": 1112,
    "what": "input glob `*.md` matches this script's OWN output ['x.md']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
    "size": 1,
    "unit": "own outputs matched",
-   "detail": "written at line 1943; written at line 1949"
+   "detail": "written at line 1947; written at line 1953"
   },
   {
    "class": "C2",
    "where": "code/1115_defect_class_retro_sweep.py",
-   "line": 1297,
+   "line": 1301,
    "what": "input glob `*.csv` matches this script's OWN output ['neg.csv', 'pos.csv']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
    "size": 2,
    "unit": "own outputs matched",
-   "detail": "written at line 1902; written at line 1909"
+   "detail": "written at line 1906; written at line 1913"
   },
   {
    "class": "C3",
@@ -1360,7 +1360,7 @@
   {
    "class": "C3",
    "where": "code/846_session_audit.py",
-   "line": 342,
+   "line": 354,
    "what": "unanchored substring test decides an outcome: `'NO CASINO' in (r.get('facility_name') or '').upper()` in `_denom`",
    "size": 1,
    "unit": "site",
@@ -1521,8 +1521,8 @@
   },
   {
    "class": "C5",
-   "where": "code/1111_copper_river_attribution.py",
-   "line": 108,
+   "where": "code/1123_copper_river_attribution.py",
+   "line": 118,
    "what": "`main()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
    "size": 1,
    "unit": "conservation-only writer",
@@ -2358,15 +2358,6 @@
   },
   {
    "class": "C12b",
-   "where": "code/1111_copper_river_attribution.py",
-   "line": 176,
-   "what": "backup tag `_pre1111` names a NUMBER, not a script stem - and 1111 is carried by 2 different scripts ['1111_copper_river_attribution.py', '1111_probe_new_source_candidates.py']. THIS IS THE 163 SHAPE: a restore by that tag cannot tell whose backup it is.",
-   "size": 1001,
-   "unit": "risk",
-   "detail": "1 file(s) on disk carry `_pre1111`. Convention: `.bak_<date>_pre_1111_copper_river_attribution`. b = str(PRIME) + f\".bak_{TODAY}_pre1111\""
-  },
-  {
-   "class": "C12b",
    "where": "code/1113_copper_river_complete_attribution.py",
    "line": 158,
    "what": "backup tag `_pre1113` names a NUMBER, not a script stem (the number is unique today; the next `claim` cannot reuse it, but a stale citation still can).",
@@ -2377,7 +2368,7 @@
   {
    "class": "C12b",
    "where": "code/1115_defect_class_retro_sweep.py",
-   "line": 1221,
+   "line": 1225,
    "what": "backup tag `_pre163` names a NUMBER, not a script stem - and 163 is carried by 2 different scripts ['163_load_sam_contract_awards.py', '163_promote_nho_universe_in_place.py']. THIS IS THE 163 SHAPE: a restore by that tag cannot tell whose backup it is.",
    "size": 1013,
    "unit": "risk",
@@ -3737,8 +3728,8 @@
    "class": "C14",
    "where": "data/clean/cedar_dataset_readiness.csv",
    "line": 0,
-   "what": "`blockers` carries sentinel string(s) {'-': 13} on 13 of 14 rows - SOFT sentinel - may be a legitimate coded value (FPDS `NONE`, a real `none` answer). Verify against the codebook before acting",
-   "size": 13,
+   "what": "`blockers` carries sentinel string(s) {'-': 15} on 15 of 15 rows - SOFT sentinel - may be a legitimate coded value (FPDS `NONE`, a real `none` answer). Verify against the codebook before acting",
+   "size": 15,
    "unit": "rows",
    "detail": ""
   },
@@ -3746,7 +3737,25 @@
    "class": "C14",
    "where": "data/clean/cedar_dataset_readiness.csv",
    "line": 0,
-   "what": "`c7_double_counting` carries sentinel string(s) {'none': 14} on 14 of 14 rows - SOFT sentinel - may be a legitimate coded value (FPDS `NONE`, a real `none` answer). Verify against the codebook before acting",
+   "what": "`c7_double_counting` carries sentinel string(s) {'none': 15} on 15 of 15 rows - SOFT sentinel - may be a legitimate coded value (FPDS `NONE`, a real `none` answer). Verify against the codebook before acting",
+   "size": 15,
+   "unit": "rows",
+   "detail": ""
+  },
+  {
+   "class": "C14",
+   "where": "data/clean/cedar_dataset_readiness.csv",
+   "line": 0,
+   "what": "`c4_sampled_tables` carries sentinel string(s) {'-': 15} on 15 of 15 rows - SOFT sentinel - may be a legitimate coded value (FPDS `NONE`, a real `none` answer). Verify against the codebook before acting",
+   "size": 15,
+   "unit": "rows",
+   "detail": ""
+  },
+  {
+   "class": "C14",
+   "where": "data/clean/cedar_dataset_readiness.csv",
+   "line": 0,
+   "what": "`c4_national_mirrors` carries sentinel string(s) {'-': 14} on 14 of 15 rows - SOFT sentinel - may be a legitimate coded value (FPDS `NONE`, a real `none` answer). Verify against the codebook before acting",
    "size": 14,
    "unit": "rows",
    "detail": ""
@@ -3755,26 +3764,8 @@
    "class": "C14",
    "where": "data/clean/cedar_dataset_readiness.csv",
    "line": 0,
-   "what": "`c4_sampled_tables` carries sentinel string(s) {'-': 14} on 14 of 14 rows - SOFT sentinel - may be a legitimate coded value (FPDS `NONE`, a real `none` answer). Verify against the codebook before acting",
-   "size": 14,
-   "unit": "rows",
-   "detail": ""
-  },
-  {
-   "class": "C14",
-   "where": "data/clean/cedar_dataset_readiness.csv",
-   "line": 0,
-   "what": "`c4_national_mirrors` carries sentinel string(s) {'-': 13} on 13 of 14 rows - SOFT sentinel - may be a legitimate coded value (FPDS `NONE`, a real `none` answer). Verify against the codebook before acting",
-   "size": 13,
-   "unit": "rows",
-   "detail": ""
-  },
-  {
-   "class": "C14",
-   "where": "data/clean/cedar_dataset_readiness.csv",
-   "line": 0,
-   "what": "`c4_unmeasured_tables` carries sentinel string(s) {'-': 2} on 2 of 14 rows - SOFT sentinel - may be a legitimate coded value (FPDS `NONE`, a real `none` answer). Verify against the codebook before acting",
-   "size": 2,
+   "what": "`c4_unmeasured_tables` carries sentinel string(s) {'-': 3} on 3 of 15 rows - SOFT sentinel - may be a legitimate coded value (FPDS `NONE`, a real `none` answer). Verify against the codebook before acting",
+   "size": 3,
    "unit": "rows",
    "detail": ""
   },
@@ -5172,15 +5163,6 @@
    "size": 333,
    "unit": "rows",
    "detail": "'add row-conservation: every source row into a NAMED bucket, merged int' x164; 'add an inclusion basis - a row must be able to say WHY it is in Cedar ' x43; 'drop 1 always-empty column(s) with a correction-register row, or popul' x34"
-  },
-  {
-   "class": "C7",
-   "where": "data/clean/cedar_dataset_readiness.csv",
-   "line": 0,
-   "what": "`next_action` is an interface column (2 distinct value(s) over 14 populated rows) but 1 value(s) on 1 rows are FREE TEXT. Prose in `attribution_method` broke another pass on 1,486 rows.",
-   "size": 1,
-   "unit": "rows",
-   "detail": "'C1 grain UNSTATED on 1: deals_press_edgar_ancsa_additions.csv' x1"
   },
   {
    "class": "C7",
@@ -8108,6 +8090,6 @@
    "detail": "match_method='AMBIGUOUS_TOKEN:CNSF-TEMOAK-BT,CNSF-TEMOAK-EK,CNSF-TEMOAK-SF,CNSF-TEMO' x4; match_method='AMBIGUOUS_TOKEN:CNSF-CPTNGR-BA,CNSF-CPTNGR-VJ,TRBF-CPTNGR-00' x3"
   }
  ],
- "data_rows_scanned": 10548870,
+ "data_rows_scanned": 10548872,
  "data_tables_scanned": 363
 }

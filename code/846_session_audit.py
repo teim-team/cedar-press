@@ -371,6 +371,30 @@ def _denom():
                 + ("" if ok else "  <- shape changed, re-derive before quoting"))
 
 
+@claim("cedar_uid and tribe_id never name different entities", critical=True)
+def _uid_handle():
+    """A repoint that sets the display column and leaves the keying column is
+    a row asserting two sovereigns at once. My Ho-Chunk repoint left 21 rows
+    reading cedar_uid=Winnebago Nebraska and tribe_id=Ho-Chunk Wisconsin — the
+    same defect as the Copper River attribution, made in the same hour, and I
+    fixed only the one I was looking at. Measured table-wide: 21 rows, one
+    pair, all mine."""
+    reg = {r["handle"]: r["cedar_uid"] for r in rows(SPINE / "cedar_identity_register.csv")
+           if r.get("handle")}
+    p = CLEAN / "prime_contracts.csv"
+    if not p.exists():
+        return (True, "table absent")
+    bad = 0; ex = ""
+    with p.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+        for r in csv.DictReader(fh):
+            u = (r.get("cedar_uid") or "").strip()
+            t = (r.get("tribe_id") or "").strip()
+            if u and t and t in reg and reg[t] != u:
+                bad += 1
+                if not ex: ex = f"{u} vs {t} (={reg[t]})"
+    return (bad == 0, f"{bad:,} row(s) name two entities" + (f": {ex}" if ex else ""))
+
+
 # ---------------------------------------------------------------- CICD
 @claim("the CICD scheme is gone from every table and every reachable read")
 def _cicd():

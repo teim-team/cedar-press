@@ -1116,7 +1116,7 @@ code alone, when running `62` through a wrapper.**
 <!-- END CORROBORATION-1118 -->
 
 <!-- BEGIN DEFECT-SWEEP-1115 -->
-## The retroactive defect-class sweep, 2026-09-02 — 900 instances of 12 classes
+## The retroactive defect-class sweep, 2026-09-02 — 898 instances of 12 classes
 
 `code/1115_defect_class_retro_sweep.py`. Report:
 `docs/defect_class_retro_sweep.json`. Re-run:
@@ -1139,13 +1139,13 @@ detector has a synthetic positive and a synthetic negative in `selftest`;
 | C4 token/containment keying a dollar | 53 | **$1.34T gross** | `fac_tribal_single_audits` 2,864/6,780 rows (42.2%), $42.4B |
 | C5 invariance proved, occurrence not | 39 | 39 writers | **`1111` — FIXED.** 38 conservation-only writers remain |
 | C6 display column vs keying column | 57 | 55,525 rows split | **`prime_contracts`: one `cedar_uid` on two sovereigns, 17,280 rows** |
-| C7 prose in a controlled vocabulary | 232 | 170,749 rows | `native_entity_lobbying_disclosures.filing_type_display`, 50 values |
+| C7 prose in a controlled vocabulary | 231 | 170,748 rows | `native_entity_lobbying_disclosures.filing_type_display`, 50 values |
 | C8 a refusal cached as a completion | 6 | 7 sites | five `_robots_cache` dicts that store the failure |
 | C9 absence printed as evidence of absence | 44 | 44 subprocesses | `subprocess.run` whose `.returncode` is never read |
 | C12 duplicate marker name in one file | **0** | — | MEASURED zero. 3 cross-file reuses, none sharing a generator |
-| C12b bare-number backup tag | **157** | 569 files on disk | **34 sites on a COLLIDING number — the 163 incident, still loaded** |
+| C12b bare-number backup tag | **156** | 569 files on disk | **34 sites on a COLLIDING number — the 163 incident, still loaded** |
 | C13 positional writers | 0 | — | delegated to `845`; enforced by `62` rule 17 |
-| C14 sentinel string in a live column | 147 | 2,935,686 rows | **`prime_contracts.owner_as_of_transaction_cedar_uid = "UNKNOWN"` on 1,066,926 rows / $264.5B** |
+| C14 sentinel string in a live column | 147 | 2,935,692 rows | **`prime_contracts.owner_as_of_transaction_cedar_uid = "UNKNOWN"` on 1,066,926 rows / $264.5B** |
 
 **C10** (a decision written where the asker cannot see) and **C11** (a
 present-tense map inverting a past event) have **no detector here and no
@@ -1171,7 +1171,7 @@ Recorded in the report under `not_mechanically_detectable`.
    display column already says the likely-correct answer and the keying
    column disagrees with it.** Owner ruling: `review/OWNER_DECISION_QUEUE.md`
    item **DS-1**. Not touched.
-4. **157 bare-number backup tags, 34 of them on a colliding number.** The
+4. **156 bare-number backup tags, 34 of them on a colliding number.** The
    field guide's §1 rule (`.bak_<date>_pre_<stem>`) has never been measured.
    `_pre163` alone has **13 files on disk** and 163 is two different scripts.
    A restore by that tag still cannot tell whose backup it is.
