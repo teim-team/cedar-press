@@ -62,8 +62,13 @@ THE ONE RULE THAT MAKES A JOIN SAFE
 than one row per key does not enrich the flagship, it MULTIPLIES it - and when
 the multiplied rows carry money, every total downstream is silently wrong. This
 project has already paid for that lesson once: the unfiltered `subaward_amount`
-runs **86.9% above** the correct figure (the filter removes $21.21B; 86.9% is
-of the correct $24.41B, not the inflated $45.62B).
+overstates the countable total - by 63.4% as measured on 2026-09-02, and the
+point is that the number MOVES. It has shipped as 46.5%, 86.9%, 82.9% and
+63.4%; two of those were right when written and all four were hardcoded while
+the table grew from 76,859 rows to 89,809. `cedar_publication.subaward_warning()`
+now measures it from the delivered file on every build, and returns both
+denominators named, because `removed / countable` and `removed / unfiltered`
+differ by nearly 2x and quoting one as the other is the original defect.
 
 So a supporting table is folded in only when the contracts file has MEASURED
 its cardinality on the shared key as one. That is not a guess: `1137` reads
@@ -115,7 +120,7 @@ from cedar_publication import (          # noqa: E402
     NEVER, GATES, FLAGSHIP, DROP_COLS, YEAR_COLS, CUSTOMER_SHELVES,
     STOREFRONT_SHELVES, GROVE_SHELVES, BUILD_SHELVES,
     N_STOREFRONT_EXPECTED, N_BUILT_EXPECTED,
-    row_ok, publishable_columns, shelves,
+    row_ok, publishable_columns, shelves, subaward_warning,
 )
 
 csv.field_size_limit(10_000_000)
@@ -355,10 +360,15 @@ def codebook(coll, c, fname, fmeta, cols, rows, prof, joined, refused, held):
     A(f"- Check freshness: `py -3 code/1137_customer_dataset_combine.py verify` "
       f"— fails if any source table is newer than this spreadsheet.")
     A(f"- Rebuild the sources first: `{c.get('rebuild_command','(not declared)')}`")
+    # MEASURED, not typed. This sentence carried 86.9% while the live figure
+    # was 63.4% and MONEY_TOTALLING_RULES said 82.9% - three vintages of one
+    # warning shipping at once, because the table underneath kept growing
+    # (76,859 rows when the rules doc was written, 89,809 now). A figure that
+    # has moved three times is a derivation problem, which is the same rule
+    # this project already applied to the gaming denominator.
     A("- A **sum** in the table above is the raw column total. It is NOT "
       "necessarily the dataset's money answer — filters and de-duplication "
-      "rules live in the methodology paper, and the unfiltered subaward total "
-      "runs 86.9% above the correct one.")
+      "rules live in the methodology paper. " + subaward_warning())
     (OUT / f"{coll}__CODEBOOK.md").write_text("\n".join(L) + "\n",
                                               encoding="utf-8")
 
@@ -452,9 +462,8 @@ def notes(coll, c, fname, fmeta, cols, rows, prof, joined, refused, held):
         A("")
     L.extend(_wrap("A column total is the raw sum of that column. It is NOT "
                    "necessarily this dataset's money answer - filters and "
-                   "de-duplication rules live in the methodology paper. The "
-                   "unfiltered subaward total runs 86.9% above the correct "
-                   "one."))
+                   "de-duplication rules live in the methodology paper. "
+                   + subaward_warning()))
     A("")
     A("COLUMNS")
     A("-" * 7)

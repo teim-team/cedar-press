@@ -30,11 +30,25 @@ two observers, not one source copied twice, and where they disagree that is a
 FINDING - `nagpra_notice_source_corroboration.csv` records agreement and
 disagreement per notice and NEITHER value is overwritten.
 
-The other five tables have no Cedar counterpart at all.  The grants table in
-particular is federal money to tribes and museums that appears in no other
-Cedar table: NAGPRA consultation/documentation and repatriation grants are
-awarded by NPS outside the USAspending assistance stream Cedar already holds
-(cross-checked in `report`).
+The other five tables have no Cedar counterpart at all.
+
+THE GRANTS TABLE PARTLY DOES, AND THE CHECK CHANGED THE CLAIM.  A first draft
+of this docstring said NAGPRA grants "appear in no other Cedar table."  That is
+FALSE and the measurement is worth carrying:
+`federal_funding_transactions.csv` holds **696 rows on CFDA 15.922 (NATIVE
+AMERICAN GRAVES PROTECTION AND REPATRIATION ACT), FY2007-2026, $11,215,956.86**.
+What it does NOT hold is the years:
+
+    Cedar assistance, CFDA 15.922   FY2007  1 row  $4,000 | FY2008-2012  ZERO
+    NPS grants database             FY2007-2012  212 awards  $10,556,264
+
+**736 of the 1,221 awards - $38,248,137 - are FY2012 or earlier, a window in
+which Cedar's assistance stream holds one $4,000 transaction.**  From FY2013 the
+two overlap but do not agree: Cedar counts transactions (modifications
+included, and FY2026 nets to -$29,464 in deobligations) while NPS publishes the
+award, so the annual dollars run roughly a third to a half of the NPS figure.
+Treat them as two grains of one programme, never as one series - and never sum
+them together.
 
 SOURCE, ROUTE AND TERMS
 -----------------------
@@ -45,8 +59,12 @@ each public page issue.  `https://apps.cr.nps.gov/robots.txt` is **404**, which
 per `docs/PULL_DISCIPLINE.md` is NOT a disallow (a site that will not serve a
 robots file is not a site that forbids you); `https://www.nps.gov/robots.txt`
 answers 200 and disallows only `/ns/`, `/search/` and `/loader.cfm`, none of
-which is on this path.  U.S. National Park Service work: public domain,
-`source_terms_status = PUBLIC_DOMAIN_US_GOVERNMENT_WORK`.
+which is on this path.  U.S. National Park Service work: the NPS disclaimer
+states the material "is generally considered in the public domain", so
+`source_terms_status = TERMS_STATED_NO_REUSE_RESTRICTION` - which is the value
+`cedar_publication.GATES` allows.  See the comment on `TERMS` below: the
+accurate-sounding `PUBLIC_DOMAIN_US_GOVERNMENT_WORK` is NOT in that allow-set
+and would have withheld all 21,658 rows from the product without a word.
 
 REFUSED, DELIBERATELY: `/nagprapublic/home/getcontacts`.  Its columns are
 `FirstName, LastName, Company, Title, Phone, Email` - a natural person's
@@ -98,11 +116,24 @@ SLEEP_S = 1.5
 MAX_RUN_S = 45 * 60
 MAX_ATTEMPTS = 4
 
-TERMS = "PUBLIC_DOMAIN_US_GOVERNMENT_WORK"
-TERMS_BASIS = ("National Park Service, a U.S. Government agency; "
-               "apps.cr.nps.gov/robots.txt 404 (not a disallow), "
-               "www.nps.gov/robots.txt disallows only /ns/, /search/, "
-               "/loader.cfm - none on this path; measured 2026-09-02")
+# MUST be a value in `cedar_publication.GATES["source_terms_status"]`
+# ({SILENT, TERMS_STATED_NO_REUSE_RESTRICTION, ""}) or every row here is
+# WITHHELD at publication time and nothing says so. The first draft wrote
+# `PUBLIC_DOMAIN_US_GOVERNMENT_WORK`, which is true and would have gated all
+# 21,658 rows out of the product silently. The vocabulary has no public-domain
+# member; `TERMS_STATED_NO_REUSE_RESTRICTION` is the accurate one it does have,
+# and the public-domain fact is carried in `source_terms_basis` and
+# `source_terms_url` instead of being smuggled into the gate column.
+TERMS = "TERMS_STATED_NO_REUSE_RESTRICTION"
+TERMS_URL = "https://www.nps.gov/aboutus/disclaimer.htm"
+TERMS_BASIS = (
+    "National Park Service disclaimer, quoted 2026-09-02: 'material created by "
+    "the National Park Service and presented on this website, unless otherwise "
+    "indicated, is generally considered in the public domain. It may be "
+    "distributed or copied as permitted by applicable law' (17 U.S.C. 101, "
+    "105). Robots: apps.cr.nps.gov/robots.txt is 404, which is NOT a disallow; "
+    "www.nps.gov/robots.txt answers 200 and disallows only /ns/, /search/ and "
+    "/loader.cfm, none of which is on this path.")
 BUILD_DATE = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 # Endpoint -> (referer page, DataTables column list, output table, out columns)
@@ -215,7 +246,8 @@ CORROB = CLEAN / "nagpra_notice_source_corroboration.csv"
 CEDAR_NOTICES = CLEAN / "nagpra_notices.csv"
 
 PROV_COLS = ["source_dataset", "source_endpoint", "source_url",
-             "source_terms_status", "source_terms_basis", "retrieved_at"]
+             "source_terms_status", "source_terms_url", "source_terms_basis",
+             "retrieved_at"]
 
 # Floors for verify. Taken from the source's own recordsTotal on the first full
 # run and deliberately set just under it. Never re-baselined to clear a gate.
@@ -533,6 +565,7 @@ def cmd_apply() -> int:
                 "source_endpoint": ep,
                 "source_url": BASE + ep,
                 "source_terms_status": TERMS,
+                "source_terms_url": TERMS_URL,
                 "source_terms_basis": TERMS_BASIS,
                 "retrieved_at": retrieved[:19],
             })

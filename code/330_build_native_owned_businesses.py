@@ -1911,31 +1911,40 @@ def phase_promote(argv):
     # reproduce them instead of silently dropping fifteen nations again.
     # 1146's V6 invariant fails while this hook is absent.
     # ------------------------------------------------------------------
-    _shard_file = STAGE / "_shard_admission_dispositions.json"
-    if _shard_file.exists():
-        _shard = json.loads(_shard_file.read_text(encoding="utf-8"))
-        for _sid, _d in (_shard.get("sources") or {}).items():
-            if _sid in SIBLING or _sid in SOURCES:
-                continue            # never override a decision made in code
-            SIBLING[_sid] = dict(
-                disposition=_d.get("disposition", "INCLUDE"),
-                tribe_id=_d.get("tribe_id"),
-                authority=_d.get("authority", ""),
-                programme=_d.get("programme", ""),
-                assertion_class=_d.get("assertion_class", ""),
-                why=(_d.get("why", "") +
-                     f"  [adjudicated by {_shard.get('_written_by')} on "
-                     f"{_shard.get('_written_date')}; "
-                     f"{_shard_file.relative_to(ROOT)}]"),
-            )
-        print(f"  shard admissions: {len(_shard.get('sources') or {})} source "
-              f"decision(s) read from {_shard_file.relative_to(ROOT)}")
+    # Any sibling pass may drop a `_*_dispositions.json` here. Today there are
+    # two: `_shard_admission_dispositions.json` (code/1146, the shard-C/L/M
+    # directories) and `_released_host_dispositions.json` (code/1147, the six
+    # sources the 2026-09-02 terms ruling released).
+    _disp_files = sorted(STAGE.glob("_*_dispositions.json"))
+    if _disp_files:
+        for _f in _disp_files:
+            _shard = json.loads(_f.read_text(encoding="utf-8"))
+            _n = 0
+            for _sid, _d in (_shard.get("sources") or {}).items():
+                if _sid in SIBLING or _sid in SOURCES:
+                    continue        # never override a decision made in code
+                SIBLING[_sid] = dict(
+                    disposition=_d.get("disposition", "INCLUDE"),
+                    tribe_id=_d.get("tribe_id"),
+                    authority=_d.get("authority", ""),
+                    programme=_d.get("programme", ""),
+                    assertion_class=_d.get("assertion_class", ""),
+                    why=(_d.get("why", "") +
+                         f"  [adjudicated by {_shard.get('_written_by')} on "
+                         f"{_shard.get('_written_date')}; "
+                         f"{_f.relative_to(ROOT)}]"),
+                )
+                _n += 1
+            print(f"  sibling admissions: {_n} new source decision(s) from "
+                  f"{_f.name}")
     else:
         # An absence must never print as a clean result.
-        print("  !! shard admissions: _shard_admission_dispositions.json is "
-              "ABSENT. Fifteen shard-C/L/M directories will be refused as "
-              "UNKNOWN_SOURCE_ID and dropped from this rebuild. Run "
-              "`py -3 code/1146_shard_directory_admission.py apply` first.")
+        print("  !! sibling admissions: NO `_*_dispositions.json` in "
+              f"{STAGE.relative_to(ROOT)}. Twenty-one shard and released-host "
+              "directories will be refused as UNKNOWN_SOURCE_ID and dropped "
+              "from this rebuild. Run "
+              "`py -3 code/1146_shard_directory_admission.py apply` and "
+              "`py -3 code/1147_released_host_directories.py apply` first.")
 
     # source metadata for files this script did not write (the four harvested
     # on 2026-08-28). Read from the rows themselves, never invented.

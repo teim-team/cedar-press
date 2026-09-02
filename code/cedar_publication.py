@@ -301,6 +301,89 @@ def row_ok(r: dict) -> tuple[bool, str]:
     return True, ""
 
 
+#: The delivered subcontracting spreadsheet, and the fence that makes its money
+#: column summable. Both are named here so a caller cannot quietly use a
+#: different rule and report a different percentage - which is exactly how this
+#: figure came to ship in three values.
+SUBAWARD_FILE = "subcontracting.csv"
+SUBAWARD_FENCE = ("duplicate_status == 'primary'",
+                  "subaward_exceeds_prime_flag != 'yes'")
+
+
+def subaward_overstatement(dist_customer=None):
+    """Measure how far a naive sum of `subaward_amount` overshoots.
+
+    Returns a dict, or None when the delivered file is absent - never a
+    fallback constant, because a stale constant is what this replaces.
+
+    WHY THIS IS MEASURED AND NOT TYPED
+    -----------------------------------
+    The warning "the unfiltered subaward total runs N% above the correct one"
+    has shipped as 46.5%, 86.9%, 82.9% and 63.4%. Two of those were right when
+    written; all four were hardcoded, and the table underneath kept moving
+    (76,859 rows when the rules doc was regenerated, 89,809 today). A buyer
+    holding two Cedar documents saw two different numbers and reasonably
+    concluded one of us could not do arithmetic.
+
+    The denominator is the trap. `removed / countable` and `removed / unfiltered`
+    are both defensible and they differ by a factor of nearly two, so BOTH are
+    returned, each named for its denominator, and callers must print which one
+    they mean.
+    """
+    import csv as _csv
+    base = Path(dist_customer) if dist_customer else (ROOT / "dist" / "customer")
+    f = base / SUBAWARD_FILE
+    if not f.exists():
+        return None
+    _csv.field_size_limit(10_000_000)
+    rows = unf = cnt = 0
+    unf_sum = cnt_sum = 0.0
+    with f.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+        for r in _csv.DictReader(fh):
+            rows += 1
+            raw = (r.get("subaward_amount") or "").replace(",", "").replace("$", "").strip()
+            try:
+                v = float(raw)
+            except ValueError:
+                continue
+            unf += 1
+            unf_sum += v
+            if ((r.get("duplicate_status") or "") == "primary"
+                    and (r.get("subaward_exceeds_prime_flag") or "") != "yes"):
+                cnt += 1
+                cnt_sum += v
+    if cnt_sum <= 0:
+        return None
+    removed = unf_sum - cnt_sum
+    return {
+        "rows": rows,
+        "unfiltered_usd": unf_sum,
+        "countable_usd": cnt_sum,
+        "removed_usd": removed,
+        # Named for their denominators. They differ by nearly 2x and quoting
+        # one as though it were the other is the original defect.
+        "pct_of_countable": round(100.0 * removed / cnt_sum, 1),
+        "pct_of_unfiltered": round(100.0 * removed / unf_sum, 1),
+    }
+
+
+def subaward_warning(dist_customer=None) -> str:
+    """One sentence a document can print, with its denominator stated."""
+    m = subaward_overstatement(dist_customer)
+    if not m:
+        return ("A column total is the raw sum of that column and is not "
+                "necessarily this dataset's money answer; the filters live in "
+                "the methodology paper. (The subaward figure could not be "
+                "measured - dist/customer/subcontracting.csv is absent.)")
+    return (f"Summing `subaward_amount` over every row overstates the "
+            f"countable total by {m['pct_of_countable']}% "
+            f"(${m['unfiltered_usd']:,.2f} unfiltered against "
+            f"${m['countable_usd']:,.2f} countable; the rule removes "
+            f"${m['removed_usd']:,.2f}, which is "
+            f"{m['pct_of_unfiltered']}% of the unfiltered total). Measured "
+            f"from the delivered file, not quoted.")
+
+
 def publishable_columns(header) -> list:
     """Header minus what may never be published.
 

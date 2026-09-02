@@ -6,12 +6,12 @@
 
 | dataset | flagship | rows (denominator) | LINKED | % | unlinked | % of rows that CAN name an entity |
 |---|---|---:|---:|---:|---:|---:|
-| `contractors` | `prime_contracts.csv` | 1,217,768 | 791,521 | 65.00% | 426,247 | 68.51% of 1,153,140 |
-| `subcontracting` | `subawards.csv` | 89,809 | 87,355 | 97.27% | 2,454 | — |
+| `contractors` | `prime_contracts.csv` | 1,217,768 | 791,839 | 65.02% | 425,929 | 68.54% of 1,153,140 |
+| `subcontracting` | `subawards.csv` | 89,809 | 87,645 | 97.59% | 2,164 | — |
 | `funding` | `federal_funding_transactions.csv` | 701,955 | 549,136 | 78.23% | 152,819 | 78.47% of 699,836 |
 | `gaming` | `gaming_facilities.csv` | 787 | 785 | 99.75% | 2 | — |
 | `natural-resources` | `resource_revenue.csv` | 11,305 | 705 | 6.24% | 10,600 | 73.67% of 957 |
-| `native-owned-businesses` | `native_owned_businesses.csv` | 2,916 | 2,767 | 94.89% | 149 | — |
+| `native-owned-businesses` | `native_owned_businesses.csv` | 3,529 | 3,380 | 95.78% | 149 | — |
 | `nonprofits` | `np_orgs.csv` | 12,764 | 1,423 | 11.15% | 11,341 | 18.23% of 7,804 |
 | `deals` | `deals_classified.csv` | 1,073 | 959 | 89.38% | 114 | — |
 | `lobbying` | `native_entity_lobbying_disclosures.csv` | 27,825 | 26,513 | 95.28% | 1,312 | — |
@@ -20,7 +20,7 @@
 | `nagpra` | `nagpra_notices.csv` | 6,792 | 6,169 | 90.83% | 623 | — |
 | `nest` | `nest_enterprises.csv` | 4,798 | 4,798 | 100.00% | 0 | — |
 
-**Across the 13 measured flagships: 1,483,118 of 2,092,263 rows (70.89%) carry a resolved Cedar entity.** That total sums tables whose rows are not the same kind of thing - a contract award and a NAGPRA notice each count as one - so it is a SCALE figure and never a quality figure. Quote the per-dataset rows.
+**Across the 13 measured flagships: 1,484,339 of 2,092,876 rows (70.92%) carry a resolved Cedar entity.** That total sums tables whose rows are not the same kind of thing - a contract award and a NAGPRA notice each count as one - so it is a SCALE figure and never a quality figure. Quote the per-dataset rows.
 
 ---
 
@@ -28,17 +28,17 @@
 
 **Denominator: 1,217,768 rows.** One row is one prime contract award row (FPDS / USAspending), FY2000-2026.
 
-**Third denominator - the one that says whether a low figure is a DEFECT.** 64,628 rows can never name an individual Cedar entity, because an owner ruling says the awardee is not a Native entity, or that the award is a CLASS-level fact naming no individual entity. `RULED_OWNER_NOT_IN_SPINE` is deliberately NOT counted here - that one IS a Cedar gap (`ruling_status IN ('RULED_NOT_NATIVE','RULED_CLASS_ONLY')`). Against the 1,153,140 rows that CAN, this dataset is **68.51%** linked. The ratchet still runs on the raw 65.00%, so this reading can never be used to make a real fall look like a change of definition.
+**Third denominator - the one that says whether a low figure is a DEFECT.** 64,628 rows can never name an individual Cedar entity, because an owner ruling says the awardee is not a Native entity, or that the award is a CLASS-level fact naming no individual entity. `RULED_OWNER_NOT_IN_SPINE` is deliberately NOT counted here - that one IS a Cedar gap (`ruling_status IN ('RULED_NOT_NATIVE','RULED_CLASS_ONLY')`). Against the 1,153,140 rows that CAN, this dataset is **68.54%** linked. The ratchet still runs on the raw 65.02%, so this reading can never be used to make a real fall look like a change of definition.
 
-**LINKED: 791,521 (65.00%)** - `coalesce(trim(CAST(tribe_id AS VARCHAR)),'') <> '' AND attributed_flag = '1'`
+**LINKED: 791,839 (65.02%)** - `coalesce(trim(CAST(tribe_id AS VARCHAR)),'') <> '' AND attributed_flag = '1'`
 
 | alternative reading | rows | apart from LINKED |
 |---|---:|---:|
-| `key_only:tribe_id` | 791,617 | +96 |
-| `gate_only:attributed_flag` | 791,521 | +0 |
-| `display_only:cedar_uid` | 791,617 | +96 |
+| `key_only:tribe_id` | 791,935 | +96 |
+| `gate_only:attributed_flag` | 791,839 | +0 |
+| `display_only:cedar_uid` | 791,935 | +96 |
 
-**Money on unlinked rows: $79,745,437,001.76 of $310,005,258,660.75** in `total_obligations` (25.72%). This sums a column as recorded and is subject to `docs/MONEY_TOTALLING_RULES.md`. It measures EXPOSURE - how much money is not attributable - and is not a Cedar total of anything.
+**Money on unlinked rows: $79,657,510,974.82 of $310,005,258,660.75** in `total_obligations` (25.70%). This sums a column as recorded and is subject to `docs/MONEY_TOTALLING_RULES.md`. It measures EXPOSURE - how much money is not attributable - and is not a Cedar total of anything.
 
 **The largest unlinked residue, by row count:**
 
@@ -54,15 +54,15 @@
 
 **Denominator: 89,809 rows.** One row is one subaward row. LINKED if EITHER side (prime or subawardee) resolves, because either one makes the row attributable.
 
-**LINKED: 87,355 (97.27%)** - `(coalesce(trim(CAST(prime_cedar_uid AS VARCHAR)),'') <> '' OR coalesce(trim(CAST(sub_cedar_uid AS VARCHAR)),'') <> '')`
+**LINKED: 87,645 (97.59%)** - `(coalesce(trim(CAST(prime_cedar_uid AS VARCHAR)),'') <> '' OR coalesce(trim(CAST(sub_cedar_uid AS VARCHAR)),'') <> '')`
 
 | alternative reading | rows | apart from LINKED |
 |---|---:|---:|
-| `subawardee_side` | 49,404 | -37,951 |
-| `prime_side` | 39,684 | -47,671 |
-| `row_level:cedar_uid` | 40,201 | -47,154 |
+| `subawardee_side` | 49,684 | -37,961 |
+| `prime_side` | 39,704 | -47,941 |
+| `row_level:cedar_uid` | 40,201 | -47,444 |
 
-**Money on unlinked rows: $1,662,416,606.58 of $57,020,557,710.47** in `subaward_amount` (2.92%). This sums a column as recorded and is subject to `docs/MONEY_TOTALLING_RULES.md`. It measures EXPOSURE - how much money is not attributable - and is not a Cedar total of anything.
+**Money on unlinked rows: $1,567,901,108.10 of $57,020,557,710.47** in `subaward_amount` (2.75%). This sums a column as recorded and is subject to `docs/MONEY_TOTALLING_RULES.md`. It measures EXPOSURE - how much money is not attributable - and is not a Cedar total of anything.
 
 ## `funding` - `federal_funding_transactions.csv`
 
@@ -104,8 +104,8 @@
 
 | name as recorded | rows |
 |---|---:|
-| Konkow Valley Band - no casino | 1 |
 | Golden Eagle Casino | 1 |
+| Konkow Valley Band - no casino | 1 |
 
 ## `natural-resources` - `resource_revenue.csv`
 
@@ -124,28 +124,28 @@
 
 ## `native-owned-businesses` - `native_owned_businesses.csv`
 
-**Denominator: 2,916 rows.** One row is one directory listing of a Native-owned business.
+**Denominator: 3,529 rows.** One row is one directory listing of a Native-owned business.
 
-**Second denominator, also correct:** the customer file carries only `publishable = Y`, which is 2,044 rows, of which 1,895 are LINKED (92.71%). Say which denominator you used; the two differ by 872 rows.
+**Second denominator, also correct:** the customer file carries only `publishable = Y`, which is 2,446 rows, of which 2,297 are LINKED (93.91%). Say which denominator you used; the two differ by 1,083 rows.
 
 **Which entity the link names:** the CERTIFYING NATION whose TERO, member directory or licence register the listing comes from. NOT the firm: these firms are owned by PEOPLE (identity_scope any_native 1,567 / citizen 385 / shareholder_descendant_or_spouse 98; 280 rows' names ARE natural persons), a sole proprietor is not a spine entity, and `business_entity_id` is populated on 4 rows precisely because the resolver refuses to manufacture one.
 
-**LINKED: 2,767 (94.89%)** - `coalesce(trim(CAST(certifying_authority_entity_id AS VARCHAR)),'') <> ''`
+**LINKED: 3,380 (95.78%)** - `coalesce(trim(CAST(certifying_authority_entity_id AS VARCHAR)),'') <> ''`
 
 | alternative reading | rows | apart from LINKED |
 |---|---:|---:|
-| `the_firm_itself:business_entity_id` | 4 | -2,763 |
-| `federal_crosswalk:federal_link_status=LINKED` | 203 | -2,564 |
+| `the_firm_itself:business_entity_id` | 5 | -3,375 |
+| `federal_crosswalk:federal_link_status=LINKED` | 203 | -3,177 |
 
 **The largest unlinked residue, by row count:**
 
 | name as recorded | rows |
 |---|---:|
-| Cates & Erb Inc. | 1 |
-| CG Contractors LLC | 1 |
-| Davis Construction & Excavation | 1 |
-| K&B Excavating LLC | 1 |
-| Minahan Cutting, Inc. | 1 |
+| Goldsmith Trucking LLC | 1 |
+| Silver Bear Construction LLC | 1 |
+| White Shield, Inc. | 1 |
+| Ampkwa Images | 1 |
+| Indigenous Arts Tattoo LLC | 1 |
 
 ## `nonprofits` - `np_orgs.csv`
 
@@ -165,8 +165,8 @@
 | name as recorded | rows |
 |---|---:|
 | FARMERS EDUCATIONAL & COOPERATIVE UNION OF AMERICA NORTH DAKOTA DIV | 65 |
-| SOUTH DAKOTA CONGRESS OF PARENTS AND TEACHERS | 41 |
 | ASSOCIATION OF OLD CROWS | 41 |
+| SOUTH DAKOTA CONGRESS OF PARENTS AND TEACHERS | 41 |
 | ORDER OF THE EASTERN STAR OF SOUTH DAKOTA | 28 |
 | VETERANS OF FOREIGN WARS OF THE UNITED STATES DEPT OF NORTH DAKOTA | 28 |
 
@@ -230,9 +230,9 @@
 |---|---:|
 | Unrecognized Southeast Alaska Native Communities Recognition and Compe | 17 |
 | Tribal Adoption Parity Act | 12 |
-| Alaska Native Veterans Land Allotment Equity Act | 9 |
 | Endangered Species Management Self-Determination Act | 9 |
-| Mowa Band of Choctaw Indians Recognition Act | 8 |
+| Alaska Native Veterans Land Allotment Equity Act | 9 |
+| State, Tribal, and Local Species Transparency and Recovery Act | 8 |
 
 ## `federal-register` - `consultation_events.csv`
 
@@ -269,7 +269,7 @@
 | American Museum of Natural History | 13 |
 | California Department of Transportation | 11 |
 | University of Nevada, Las Vegas | 9 |
-| Arizona State Museum, University of Arizona | 8 |
+| Tennessee Valley Authority | 8 |
 
 ## `nest` - `nest_enterprises.csv`
 
@@ -288,4 +288,13 @@
 `py -3 code/1139_linkage_coverage.py baseline` records the figures above as a floor in `data/clean/_linkage_coverage_baseline.json`, and `verify` exits 1 when any dataset falls more than 25 basis points (0.25 pp) below it. `code/62_no_regression_check.py` carries the same figures as `linkage_<dataset>_bp` (MUST_NOT_FALL) by importing `metrics()` from this file, so there is ONE measurement and not two - `248` is a retired stub for exactly the reason that two detectors for one class drift.
 
 **The tolerance is not zero on purpose.** Several flagships are rebuilt by other workstreams, and a rebuild that adds honest unlinked rows lowers the ratio without losing a single link. Losing links cannot hide inside it: 25 bp of `prime_contracts` is more than 3,000 rows. **`linkage_<dataset>_rows` is carried beside it with NO tolerance at all**, so a fall in the absolute count of linked rows fails the gate even when the ratio holds.
+
+---
+
+<!-- BEGIN LINKAGE-NOTES -->
+## Notes a person wrote, which the generator will not delete
+
+*This file is rewritten WHOLESALE by `code/1139_linkage_coverage.py apply`, which is the defect class `code/845_regenerate_guard.py` exists to catch. Anything you write **between the BEGIN and END markers of this block** is read off disk and carried forward on every regeneration. Anything outside them is gone on the next run. If you need a second protected section, give it a marker name nobody else has — two blocks sharing a name are one block to the preserver.*
+
+<!-- END LINKAGE-NOTES -->
 

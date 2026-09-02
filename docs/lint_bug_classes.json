@@ -1,12 +1,12 @@
 {
-  "scanned_files": 637,
+  "scanned_files": 638,
   "counts": {
     "class1": 1,
     "class2a": 0,
     "class2b": 0,
-    "class2c": 70,
+    "class2c": 69,
     "class3": 2,
-    "class4": 14,
+    "class4": 15,
     "class5": 6,
     "class6": 27,
     "class7": 44,
@@ -223,11 +223,11 @@
       "waiver_reason": "the counter is incremented on the line AFTER"
     },
     {
-      "class": "class2c",
-      "file": "1144_money_reconciliation_prime_sub.py",
-      "line": 678,
-      "evidence": "missing += 1",
-      "why": "counter 'missing' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
+      "class": "class4",
+      "file": "1147_released_host_directories.py",
+      "line": 345,
+      "evidence": "if self.n >= MAX_REQUESTS:",
+      "why": "a budget (MAX_REQUESTS, PER_HOST_DELAY_S) exits a loop, the file writes a completion marker (['  OK  ']), and it never compares what it RETRIEVED against the total the SOURCE reported. That is the PER_DOCKET_BUDGET_S defect: four dockets written at 2,300-3,200 of 3,555-4,847 and marked `done`, so no resume would ever revisit them.",
       "waived": false,
       "waiver_reason": ""
     },
@@ -1127,7 +1127,7 @@
       "file": "41_build_codebooks.py",
       "line": 1,
       "evidence": "codebook_master.csv",
-      "why": "`codebook_master.csv` has FULL-REBUILD writer(s) ['41_build_codebooks.py'] and IN-PLACE enricher(s) ['104_build_wa_allocations.py', '107_pull_remaining_states.py', '108_build_tribal_tax_bases.py', '1108_codebook_fragment_repair.py', '111_build_advocacy_passthrough.py', '112_pull_grantee_990s.py', '113_build_nd_severance.py', '130_build_section_106_consultation.py', '132_build_schedule_i_layer.py', '140_build_grantmaker_funding_flows.py', '96_build_consultation_events.py', '97_build_aliases_and_relationships.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
+      "why": "`codebook_master.csv` has FULL-REBUILD writer(s) ['41_build_codebooks.py'] and IN-PLACE enricher(s) ['104_build_wa_allocations.py', '107_pull_remaining_states.py', '108_build_tribal_tax_bases.py', '1108_codebook_fragment_repair.py', '111_build_advocacy_passthrough.py', '112_pull_grantee_990s.py', '113_build_nd_severance.py', '1146_shard_directory_admission.py', '130_build_section_106_consultation.py', '132_build_schedule_i_layer.py', '140_build_grantmaker_funding_flows.py', '96_build_consultation_events.py', '97_build_aliases_and_relationships.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
       "waived": false,
       "waiver_reason": ""
     },
@@ -1845,7 +1845,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 4498,
+      "line": 4679,
       "evidence": "h = hash(\"\\x1f\".join(parts))",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1854,7 +1854,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 4508,
+      "line": 4689,
       "evidence": "h = hash(\"\\x1f\".join(row))",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1863,7 +1863,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 4533,
+      "line": 4714,
       "evidence": "if hash(k) in collided[gj]:",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1872,7 +1872,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 4539,
+      "line": 4720,
       "evidence": "if hash(k) in row_collided:",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -2787,6 +2787,7 @@
         "111_build_advocacy_passthrough.py",
         "112_pull_grantee_990s.py",
         "113_build_nd_severance.py",
+        "1146_shard_directory_admission.py",
         "130_build_section_106_consultation.py",
         "132_build_schedule_i_layer.py",
         "140_build_grantmaker_funding_flows.py",
@@ -3289,6 +3290,7 @@
         "111_build_advocacy_passthrough.py",
         "112_pull_grantee_990s.py",
         "113_build_nd_severance.py",
+        "1146_shard_directory_admission.py",
         "130_build_section_106_consultation.py",
         "132_build_schedule_i_layer.py",
         "140_build_grantmaker_funding_flows.py",
@@ -3557,7 +3559,7 @@
   "class7_source": "284_audit_nondeterministic_keys.lint_key_stability()",
   "class7_note": "284 fixture self-test PASS - 5 synthetic defect shapes re-found; of the 3 measured real instances 1 now recorded FIXED",
   "class9_source": "1136_control_byte_gate.scan()",
-  "class9_note": "1136 scanned 992 files (code/*.py, docs/*.md, docs/schema/*, root *.md) for 0x00-0x08, 0x0b, 0x0c, 0x0e-0x1f, 0x7f",
+  "class9_note": "1136 scanned 994 files (code/*.py, docs/*.md, docs/schema/*, root *.md) for 0x00-0x08, 0x0b, 0x0c, 0x0e-0x1f, 0x7f",
   "tier_inheritance": {
     "sites": [
       {

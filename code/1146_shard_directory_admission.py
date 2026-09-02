@@ -115,6 +115,7 @@ WRITES  data/clean/native_owned_businesses.csv          (APPEND via merge_table)
 from __future__ import annotations
 
 import argparse
+import collections
 import csv
 import importlib
 import json
@@ -505,6 +506,52 @@ def build_rows(verbose=True):
             n += 1
         counts[sid] = n
 
+    # ------------------------------------------------------------------
+    # DEFECT CLASS 7 - A NON-UNIQUE PRIMARY KEY, INHERITED FROM STAGING.
+    #
+    # shard_m keys a Pyramid Lake row on a hash of the FIRM NAME, and the
+    # 2025 Approved Business Licenses list issues a firm one licence per
+    # activity: `I80 Smoke Shop` holds five (General, Convenience Store,
+    # Liquor Retail x2, Food Services). Six firms therefore share one
+    # `business_source_id` across twelve rows.
+    #
+    # These are NOT duplicate rows - AGENT_FIELD_GUIDE 4, four of five
+    # duplicate allegations in this repo were phantom. Every one differs in
+    # `business_license_number` and `service_category_raw`, and collapsing
+    # them would delete real licences. The ROWS are right; the KEY is wrong.
+    #
+    # So the key is widened with the discriminator the source itself
+    # publishes - the licence number - and only where it collides, so no
+    # existing key changes. Where the source printed no licence number the
+    # row takes an ordinal and SAYS SO in validation_flags, because an
+    # invented ordinal that looks like a licence number would be worse than
+    # the collision.
+    # ------------------------------------------------------------------
+    by_key = collections.Counter(r["business_source_id"] for r in out)
+    collided = {k for k, v in by_key.items() if v > 1}
+    if collided:
+        seen_ord = collections.Counter()
+        for r in out:
+            k = r["business_source_id"]
+            if k not in collided:
+                continue
+            disc = re.sub(r"[^A-Za-z0-9]+", "-",
+                          (r.get("business_license_number") or "")).strip("-")
+            if disc:
+                basis = "business_license_number"
+            else:
+                seen_ord[k] += 1
+                disc = f"n{seen_ord[k]}"
+                basis = ("ORDINAL - the source printed no licence number for "
+                         "this row; this suffix is Cedar's, not the source's")
+            r["business_source_id"] = f"{k}#{disc}"
+            r["validation_flags"] = ";".join(
+                x for x in [r.get("validation_flags"),
+                            f"business_source_id_disambiguated_by={basis}"] if x)
+        print(f"  disambiguated {len(collided)} colliding "
+              f"business_source_id(s) covering "
+              f"{sum(by_key[k] for k in collided)} rows")
+
     # A column this script emits that the live table does not hold would be a
     # silent schema change. Refuse it.
     emitted = set()
@@ -586,9 +633,69 @@ def _summarise(rows, counts):
     print(f"    resolved to a spine entity            {res:,}")
 
 
+def _repair_live_keys(dry_run=False):
+    """One-shot, idempotent: apply the same disambiguation to rows ALREADY in
+    the live table.
+
+    The collision was applied on 2026-09-02 before it was noticed, so twelve
+    Pyramid Lake rows are in `data/clean` under six keys. `merge_table` did
+    not lose them - it keys ordinally - but `business_source_id` is the
+    declared primary key of this table and a consumer joining on it gets one
+    of five licences at random. This rewrites those keys with the same rule
+    `build_rows` now uses, so the two agree and a re-`apply` matches instead
+    of appending a second copy.
+    """
+    with CLEAN.open(encoding="utf-8", newline="") as fh:
+        rd = csv.DictReader(fh)
+        fields, rows = rd.fieldnames, list(rd)
+    mine = {r["business_source_id"] for r in rows if r["source_id"] in ADMIT}
+    cnt = collections.Counter(r["business_source_id"] for r in rows
+                              if r["source_id"] in ADMIT)
+    collided = {k for k, v in cnt.items() if v > 1}
+    if not collided:
+        return 0
+    seen_ord = collections.Counter()
+    n = 0
+    for r in rows:
+        if r["source_id"] not in ADMIT:
+            continue
+        k = r["business_source_id"]
+        if k not in collided:
+            continue
+        disc = re.sub(r"[^A-Za-z0-9]+", "-",
+                      (r.get("business_license_number") or "")).strip("-")
+        if disc:
+            basis = "business_license_number"
+        else:
+            seen_ord[k] += 1
+            disc = f"n{seen_ord[k]}"
+            basis = ("ORDINAL - the source printed no licence number for this "
+                     "row; this suffix is Cedar's, not the source's")
+        r["business_source_id"] = f"{k}#{disc}"
+        r["validation_flags"] = ";".join(
+            x for x in [r.get("validation_flags"),
+                        f"business_source_id_disambiguated_by={basis}"] if x)
+        n += 1
+    print(f"  repairing {len(collided)} colliding primary key(s) already in "
+          f"the live table, covering {n} rows"
+          + ("  (DRY RUN)" if dry_run else ""))
+    if dry_run:
+        return n
+    shutil.copy2(CLEAN, CLEAN.with_name(
+        CLEAN.name + ".bak_2026-09-02_pre_1146_key_repair"))
+    part = CLEAN.with_suffix(".csv.part_1146keys")
+    with part.open("w", encoding="utf-8", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=fields, extrasaction="ignore")
+        w.writeheader()
+        w.writerows(rows)
+    part.replace(CLEAN)
+    return n
+
+
 def cmd_apply(args):
     import cedar_pipeline as cp
 
+    _repair_live_keys(dry_run=args.dry_run)
     before = _live_source_counts()
     rows, counts, _ = build_rows()
     if not rows:
@@ -764,6 +871,20 @@ def cmd_verify(args, table=None, floors=None):
             if miss:
                 bad.append(f"V5 disposition file does not cover {miss}")
 
+    # V7 - `business_source_id` is this table's declared primary key and it
+    # must be unique. Six shard_m keys collided across eighteen Pyramid Lake
+    # rows on first apply, because shard_m hashes the FIRM NAME and the source
+    # issues one licence per activity. Widened, not collapsed - the rows are
+    # real. This invariant is what stops it coming back.
+    keys = collections.Counter()
+    with table.open(encoding="utf-8", newline="") as fh:
+        for r in csv.DictReader(fh):
+            keys[r["business_source_id"]] += 1
+    dupes = [k for k, v in keys.items() if v > 1]
+    if dupes:
+        bad.append(f"V7 business_source_id is not unique: {len(dupes)} key(s) "
+                   f"over {sum(keys[k] for k in dupes)} rows, e.g. {dupes[:3]}")
+
     # V6 - 330 actually reads that file. A disposition nobody loads is inert.
     src = (ROOT / "code" / "330_build_native_owned_businesses.py").read_text(
         encoding="utf-8", errors="replace")
@@ -878,6 +999,46 @@ def cmd_codebook(_args):
         mfields = rd.fieldnames
         mrows = list(rd)
 
+    # ------------------------------------------------------------------
+    # RECOVER 02m rows a `cedar_codebook build` has already dropped.
+    #
+    # This is not hypothetical. The docstring above predicted it at 17:2x on
+    # 2026-09-02 and it HAPPENED at 17:38, between two runs of this command:
+    # the 02m block went 74 variable rows -> 53, losing every column 953,
+    # 1070 and 1100 had written straight into the master. `cedar_codebook
+    # build` is fragment-driven and the global shrink guard cannot see a
+    # 21-row loss inside a 6,000-row file.
+    #
+    # The rows are recovered from the newest master backup that still holds
+    # them, DESCRIPTION VERBATIM - nothing is re-worded here - and the
+    # measured columns are recomputed below like every other row.
+    # ------------------------------------------------------------------
+    have = {r["variable"] for r in mrows if r.get("dataset") == CODEBOOK_DATASET}
+    recovered = []
+    for c in cols:
+        if c in have:
+            continue
+        for bak in sorted(MASTER.parent.glob(MASTER.name + ".bak_*"),
+                          key=lambda p: p.stat().st_mtime, reverse=True):
+            try:
+                with bak.open(encoding="utf-8-sig", newline="") as fh:
+                    for r in csv.DictReader(fh):
+                        if (r.get("dataset") == CODEBOOK_DATASET
+                                and r.get("variable") == c
+                                and (r.get("description") or "").strip()):
+                            mrows.append({k: r.get(k, "") for k in mfields})
+                            have.add(c)
+                            recovered.append((c, bak.name))
+                            break
+            except OSError:
+                continue
+            if c in have:
+                break
+    if recovered:
+        print(f"  RECOVERED {len(recovered)} codebook row(s) a fragment "
+              f"rebuild had dropped: {[c for c, _ in recovered]}")
+        print(f"           source: {recovered[0][1]}")
+
     touched, unknown = 0, []
     for r in mrows:
         if r.get("dataset") != CODEBOOK_DATASET:
@@ -939,6 +1100,23 @@ def cmd_codebook(_args):
         w.writeheader()
         w.writerows(mrows)
     part.replace(MASTER)
+
+    # And write the FRAGMENT with the full block, so the next
+    # `cedar_codebook build` reproduces all of it instead of dropping back to
+    # 330's 53 CLEAN_COLUMNS. Reporting the divergence was not enough - it
+    # recurred within fifteen minutes of being written down.
+    frag = MASTER.parent / "codebook" / f"{CODEBOOK_DATASET}.csv"
+    block = [r for r in mrows if r.get("dataset") == CODEBOOK_DATASET]
+    if frag.exists() and block:
+        with frag.open(encoding="utf-8-sig", newline="") as fh:
+            ffields = next(csv.reader(fh))
+        with frag.open("w", encoding="utf-8", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=ffields, extrasaction="ignore")
+            w.writeheader()
+            for r in block:
+                w.writerow({k: r.get(k, "") for k in ffields})
+        print(f"  fragment {frag.relative_to(ROOT)}: {len(block)} variables "
+              f"(was 53 - a rebuild no longer drops the enrichment columns)")
 
     print(f"  {CODEBOOK_DATASET}: {touched} variable rows re-measured "
           f"against {n:,} live rows")

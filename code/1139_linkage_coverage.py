@@ -622,13 +622,65 @@ def render(cov):
       f"beside it with NO tolerance at all**, so a fall in the absolute "
       f"count of linked rows fails the gate even when the ratio holds.")
     A("")
+    A("---")
+    A("")
+    A("<!-- BEGIN LINKAGE-NOTES -->")
+    A("## Notes a person wrote, which the generator will not delete")
+    A("")
+    A("*This file is rewritten WHOLESALE by "
+      "`code/1139_linkage_coverage.py apply`, which is the defect class "
+      "`code/845_regenerate_guard.py` exists to catch. Anything you write "
+      "**between the BEGIN and END markers of this block** is read off disk "
+      "and carried forward on every regeneration. Anything outside them is "
+      "gone on the next run. If you need a second protected section, give it "
+      "a marker name nobody else has — two blocks sharing a name are one "
+      "block to the preserver.*")
+    A("")
+    A("<!-- END LINKAGE-NOTES -->")
+    A("")
     return "\n".join(L) + "\n"
+
+
+MARKER_RE = re.compile(
+    r"<!--\s*BEGIN\s+([A-Za-z0-9_\-]+)\s*-->(.*?)<!--\s*END\s+\1\s*-->",
+    re.S)
+
+
+def carry_marked_blocks(new_text: str, doc: Path) -> str:
+    """Re-insert every `<!-- BEGIN X -->…<!-- END X -->` block already on disk.
+
+    This file is written WHOLESALE, which is the defect class `845` names:
+    a generator that rewrites a doc over a paragraph a human wrote. `574`
+    deleted exactly such a paragraph, written to close a reviewer finding,
+    within hours of its being written. The convention that came out of that
+    is a marker pair, and a marker only helps if the generator honours it -
+    so this reads the live file FIRST and carries every marked block forward,
+    replacing an empty placeholder of the same name and appending any block
+    the generator does not know about.
+    """
+    if not doc.exists():
+        return new_text
+    try:
+        old = doc.read_text(encoding="utf-8")
+    except OSError:
+        return new_text
+    out = new_text
+    for name, body in MARKER_RE.findall(old):
+        block = f"<!-- BEGIN {name} -->{body}<!-- END {name} -->"
+        here = re.search(
+            rf"<!--\s*BEGIN\s+{re.escape(name)}\s*-->.*?"
+            rf"<!--\s*END\s+{re.escape(name)}\s*-->", out, re.S)
+        if here:
+            out = out[:here.start()] + block + out[here.end():]
+        else:
+            out = out.rstrip() + "\n\n" + block + "\n"
+    return out
 
 
 def do_apply():
     cov = coverage()
     OUT.write_text(json.dumps(cov, indent=2), encoding="utf-8")
-    DOC.write_text(render(cov), encoding="utf-8")
+    DOC.write_text(carry_marked_blocks(render(cov), DOC), encoding="utf-8")
     print(f"wrote {DOC.relative_to(ROOT)}")
     print(f"wrote {OUT.relative_to(ROOT)}")
     return 0
