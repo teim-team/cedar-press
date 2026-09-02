@@ -301,28 +301,127 @@ NATION_WORD = re.compile(
     r"indigenous|indian country|first nations?)\b", re.I)
 
 
+# A LAND ACKNOWLEDGEMENT IS NOT A SELF-DESCRIPTION, and treating it as one is
+# the single loudest false positive this pass found. `LUMMI ISLAND HISTORICAL
+# SOCIETY` writes "Our deepest respect and gratitude for our Indigenous
+# neighbours, the Lummi Nation"; `COMMUNITIES IN SCHOOLS PUYALLUP` writes "this
+# land acknowledgement is one small step toward true allyship". Both sentences
+# name a nation, and both say the organisation is NOT it. Scored as Native
+# self-description they would have manufactured exactly the corroboration this
+# whole pass exists to test for.
+ACKNOWLEDGEMENT = re.compile(
+    r"(land acknowledg|we acknowledge|acknowledge that (?:we|this|the)|"
+    r"traditional (?:and unceded )?(?:home)?lands? of|"
+    r"ancestral (?:home)?lands? of|unceded (?:territor|lands)|"
+    r"original (?:stewards|caretakers|inhabitants|peoples?)|allyship|"
+    r"pay (?:our )?respects? to|whose (?:traditional )?land|"
+    r"indigenous neighbou?rs|we honou?r the)", re.I)
+
+# FIRST-PERSON IDENTITY, in two strengths, because "we are proud to serve
+# Native American students" and "we are enrolled members of the Shinnecock
+# Indian Nation" are not the same sentence and a single pattern cannot tell
+# them apart. STRONG wins over SERVING; WEAK loses to it.
+STRONG_IDENTITY = re.compile(
+    r"(enrolled (?:members?|citizens?) of the|"
+    r"tribally[- ](?:chartered|owned|controlled|operated)|"
+    r"(?:chartered|established|created|founded) by (?:the )?"
+    r"(?:federally[- ]recognized )?[A-Za-z'’ .-]{0,45}"
+    r"(?:tribes?|tribal|nations?|pueblos?|bands?|rancheria)|"
+    r"an? (?:instrumentality|arm|program|department|division|entity|"
+    r"subsidiary) of the [A-Za-z'’ .-]{0,45}"
+    r"(?:tribe|nation|pueblo|band|community)|"
+    r"is an? (?:federally[- ]recognized|native[- ]owned|native[- ]led|"
+    r"native[- ]controlled|indigenous[- ]led|tribal government)|"
+    r"(?:recognized|reorganized) as a tribal government|"
+    r"our (?:tribe|nation|pueblo|rancheria)\b|"
+    r"our tribal (?:members?|citizens?|communit\w+|government|council|"
+    r"people|elders|youth|families)|"
+    r"indigenous[- ]l(?:e|ea)d organization)", re.I)
+
+WEAK_IDENTITY = re.compile(
+    r"(we are [^.;]{0,60}?(?:federally[- ]recognized|tribal|native|"
+    r"indigenous|american indian|alaska native|native hawaiian)|"
+    r"our people\b|the tribe(?:'|’)s (?:own |)programs)", re.I)
+
+# SERVING is a different fact from BEING, and the nonprofits methodology
+# already draws that line: "Native control was never inferred from a
+# reservation service area alone -- that is native_serving at most."
+SERVING = re.compile(
+    r"(serv(?:es|ing|e) .{0,50}(?:native|american indian|alaska native|"
+    r"indigenous|tribal)|"
+    r"our (?:students|clients|patients|families|participants) are "
+    r".{0,40}(?:native|american indian|indigenous)|"
+    r"(?:support|assist|help) .{0,40}(?:native american|american indian|"
+    r"alaska native|indigenous|tribal) (?:people|communit|famil|youth|student))",
+    re.I)
+
+
+def _classify(wp, corpus):
+    """Split the page's own sentences into the four things they can be.
+
+    Precedence, and it is the whole point of the function:
+      acknowledgement  -> removed first; naming a nation to say you are NOT it
+      STRONG identity  -> beats a service claim in the same sentence
+      service claim    -> beats a WEAK identity phrase in the same sentence
+      weak identity    -> what is left of "we are ... Native"
+    """
+    ctrl, nat, _memb = wp.evidence(corpus)
+    named = [s for s in (ctrl + nat) if NATION_WORD.search(s)]
+    ack = [s for s in named if ACKNOWLEDGEMENT.search(s)]
+    rest = [s for s in named if s not in ack]
+    ident, serve = [], []
+    for s in rest:
+        if STRONG_IDENTITY.search(s):
+            ident.append(s)
+        elif SERVING.search(s):
+            serve.append(s)
+        elif WEAK_IDENTITY.search(s):
+            ident.append(s)
+    control = [s for s in ctrl if s in ident]
+    return control, ident, serve, ack, rest
+
+
 def verdict_for(wp, corpus, status_ok, thin):
     """
-    Returns (verdict, why). SILENCE IS NOT REFUTATION and the vocabulary keeps
-    the two apart.
+    Returns (verdict, why, quotes). SILENCE IS NOT REFUTATION, and neither is
+    a land acknowledgement, and neither is serving Native people -- the
+    vocabulary keeps all four apart.
     """
     if not status_ok:
-        return "NOT_CHECKED_NO_READABLE_PAGE", "the host returned no readable page"
+        return ("NOT_CHECKED_NO_READABLE_PAGE",
+                "the host returned no readable page", [])
     if thin:
         return ("NOT_CHECKED_PAGE_TOO_THIN",
                 "the page loaded but carries almost no text -- a parked or "
                 "script-rendered shell; absence of Native language here is a "
-                "property of the page, not of the organisation")
-    ctrl, nat, memb = wp.evidence(corpus)
-    strong = [s for s in (ctrl + nat) if NATION_WORD.search(s)]
-    if ctrl and strong:
+                "property of the page, not of the organisation", [])
+    control, ident, serve, ack, rest = _classify(wp, corpus)
+    if control and ident:
         return ("WEBSITE_SAYS_NATIVE_AND_STATES_A_CONTROL_RELATIONSHIP",
-                "the organisation's own page states a Native control, charter "
-                "or ownership relationship")
-    if strong:
+                "the organisation's own page states, in the first person, a "
+                "Native charter, ownership or control relationship",
+                (control + ident)[:3])
+    if ident:
         return ("WEBSITE_SAYS_NATIVE",
-                "the organisation's own page describes itself as Native, "
-                "tribal, or serving a named nation")
+                "the organisation's own page describes ITSELF as Native, "
+                "tribal, or a body of a named nation", ident[:3])
+    if serve:
+        return ("WEBSITE_SAYS_IT_SERVES_NATIVE_PEOPLE",
+                "the organisation's own page says it SERVES Native people and "
+                "does not claim to BE Native. Serving is not control -- the "
+                "nonprofits methodology refuses that inference explicitly.",
+                serve[:3])
+    if ack and not rest:
+        return ("WEBSITE_ACKNOWLEDGES_A_NATION_BUT_DOES_NOT_CLAIM_TO_BE_ONE",
+                "the only Native language on the page is a land "
+                "acknowledgement or a statement of allyship, which names a "
+                "nation in order to say the organisation is NOT it",
+                ack[:3])
+    if rest:
+        return ("WEBSITE_USES_NATIVE_LANGUAGE_UNSPECIFICALLY",
+                "the page carries Native language that is neither a "
+                "first-person identity claim, a service claim, nor an "
+                "acknowledgement. A human read is what this is for.", rest[:3])
     other = OTHER_COMMUNITY.search(corpus)
     if other:
         return ("WEBSITE_NAMES_A_DIFFERENT_COMMUNITY",
@@ -330,17 +429,32 @@ def verdict_for(wp, corpus, status_ok, thin):
                 "place or institution type for itself (matched literal: %r). "
                 "THIS IS NOT A REFUTATION of the IRS-side row; it is the "
                 "organisation's own description of itself."
-                % other.group(0))
+                % other.group(0), [])
     return ("CHECKED_NO_SIGNAL",
             "the page was read in full and carries no Native language. "
-            "SILENCE IS NOT REFUTATION.")
+            "SILENCE IS NOT REFUTATION.", [])
+
+
+# PUBLICATION_POLICY carve-out #2 survives the owner's terms ruling: a natural
+# person's data held apart from their public role may not be PUBLISHED, even
+# though the page may be harvested. The raw bytes stay on disk under
+# data/staging/; what reaches review/ is redacted. This fired on its first run
+# -- LEGACY TRADITIONAL SCHOOL MARICOPA's quote carried a phone number -- which
+# is why the check exists rather than the assumption.
+CONTACT = re.compile(r"[\w.+-]+@[\w-]+\.[\w.]+"
+                     r"|\(?\d{3}\)?[ .-]\d{3}[ .-]\d{4}")
+REDACT = "[contact detail redacted: PUBLICATION_POLICY natural-person carve-out]"
+
+
+def redact(s):
+    return CONTACT.sub(REDACT, s or "")
 
 
 def quotes_for(wp, corpus, limit=3):
-    ctrl, nat, memb = wp.evidence(corpus)
+    control, ident, serve, ack, rest = _classify(wp, corpus)
     out = []
-    for s in (ctrl + nat):
-        if NATION_WORD.search(s) and s not in out:
+    for s in (control + ident + serve + ack + rest):
+        if s not in out:
             out.append(s)
     return out[:limit]
 
@@ -621,21 +735,54 @@ COLS = ["EIN", "org_name", "state", "city", "disposition", "np_orgs_tier",
 
 
 def cmd_build(a):
+    """Re-derive every verdict FROM THE SAVED BYTES, then write the review CSV.
+
+    The verdict is recomputed here rather than trusted from the fetch, because
+    the bytes are on disk and the classifier is the thing most likely to need
+    sharpening. It already did: the first fetch scored a land acknowledgement
+    as a Native self-description. Re-classifying from the saved page costs no
+    network and means a corrected reading never requires re-asking a host.
+    """
+    wp = load_wp()
     rows = rj(PROBE)
     if not rows:
         raise SystemExit("UNMEASURED: %s is empty. Run `fetch` first. An "
                          "absence of evidence must never print as evidence of "
                          "absence." % os.path.relpath(PROBE, ROOT))
-    seen, out = set(), []
+    seen, out, reclassified = set(), [], 0
     for r in rows:
         if r["EIN"] in seen:
             continue
         seen.add(r["EIN"])
-        q = r.get("native_self_description_quotes") or []
         o = dict(r)
-        o["native_self_description_quote_1"] = q[0] if len(q) > 0 else ""
-        o["native_self_description_quote_2"] = q[1] if len(q) > 1 else ""
+        corpus, have = "", False
+        for key in ("raw_home", "raw_about"):
+            rel = o.get(key) or ""
+            p = os.path.join(ROOT, rel) if rel else ""
+            if p and os.path.exists(p):
+                have = True
+                corpus += wp.to_text(open(p, "rb").read()) + "\n"
+        if have:
+            corpus = corpus[:400_000]
+            v, why, quotes = verdict_for(wp, corpus, True, len(corpus) < 400)
+            if v != o.get("verdict"):
+                reclassified += 1
+            o["verdict"], o["verdict_basis"] = v, why
+            o["other_community_quote"] = (
+                other_quote(wp, corpus)
+                if v == "WEBSITE_NAMES_A_DIFFERENT_COMMUNITY" else "")
+        else:
+            quotes = o.get("native_self_description_quotes") or []
+        o["native_self_description_quote_1"] = redact(quotes[0] if quotes
+                                                      else "")
+        o["native_self_description_quote_2"] = redact(quotes[1]
+                                                      if len(quotes) > 1
+                                                      else "")
+        o["other_community_quote"] = redact(o.get("other_community_quote"))
+        o["own_990_quote"] = redact(o.get("own_990_quote"))
         out.append({c: o.get(c, "") for c in COLS})
+    print("re-classified %d of %d rows from the saved bytes" %
+          (reclassified, len(out)))
     out.sort(key=lambda r: (r["verdict"], r["org_name"]))
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     tmp = OUT + ".part"
@@ -648,7 +795,7 @@ def cmd_build(a):
     print("wrote %s -- %d organisations" % (os.path.relpath(OUT, ROOT), len(out)))
     for k, v in c.most_common():
         print("  %-56s %5d" % (k, v))
-    return out
+    return 0
 
 
 # --------------------------------------------------------------------------
@@ -709,7 +856,13 @@ def _checks(rows, ladder):
                 t = re.sub(r"\s+", " ", wp.to_text(open(p, "rb").read()))
             except Exception:
                 continue
-            if re.sub(r"\s+", " ", q) in t:
+            # A redacted quote is checked in fragments: every piece EITHER
+            # side of the redaction must still be literally present, so the
+            # redaction can hide a phone number and cannot hide a fabrication.
+            frags = [re.sub(r"\s+", " ", x).strip()
+                     for x in q.split(REDACT)]
+            frags = [x for x in frags if len(x) > 20]
+            if frags and all(x in t for x in frags):
                 found = True
                 break
         if not found:

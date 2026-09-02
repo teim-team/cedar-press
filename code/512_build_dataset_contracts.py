@@ -3363,6 +3363,50 @@ GRAIN_ACQUIRE = {
 }
 GRAIN.update(GRAIN_ACQUIRE)
 
+# --------------------------------------------------------------------------
+# workstream PLACE-IDS (ADR-030), code/1129_place_ids.py, 2026-09-02.
+# Do not edit another workstream's dict; this one is mine.
+# --------------------------------------------------------------------------
+GRAIN_PLACE = {
+    "cedar_places.csv": _d(
+        "one row per DISTINCT PHYSICAL PLACE a Cedar entity operates, across "
+        "four classes declared in `place_class`: GAMING_PROPERTY (717), "
+        "BIA_OFFICE (93), BIE_SCHOOL (187), IHS_FACILITY (0, NOT_ACQUIRED and "
+        "declared UNPOPULATED rather than silently absent).
+"
+        "IT IS NOT ONE ROW PER SOURCE RECORD. 771 gaming facility rows "
+        "resolve to 717 places because 53 adjudicated groups are one property "
+        "held under two source vintages (`CCP-` Casino City Press, `VP-`, "
+        "`TPL-`, `CED-`); `source_keys` is the semicolon-joined list of every "
+        "source key bound to the place, and `n_source_keys` is its length.
+"
+        "A PLACE IS A SUB-HUB, NEVER A PEER OF ITS OPERATOR. "
+        "`operator_cedar_uid` may be BLANK and blank is never 'no operator': "
+        "for BIA_OFFICE the operator is a federal agency and is not a Cedar "
+        "entity; for BIE_SCHOOL it is UNRESOLVED, because matching a school "
+        "name to a nation by name is the containment defect. "
+        "`operator_basis` states which, on every row.
+"
+        "DO NOT COUNT PLACES AS A PROXY FOR ANYTHING ELSE. 714 is the "
+        "MECHANICAL name-collision count gated in `846::_denom`; 717 is the "
+        "adjudicated count, and the three-row difference is three groups the "
+        "vendor itself minted two property ids for - a casino and its hotel "
+        "twice, and two casinos 67 km apart sharing one brand. "
+        "`code/1129_place_ids.py verify` V9 recomputes the reconciliation on "
+        "every run and fails when it stops holding.",
+        primary_key=["cedar_place_id"],
+        join_cardinality={"cedar_place_id": "one",
+                          "operator_cedar_uid": "many"},
+        declared_by="workstream PLACE-IDS 2026-09-02, ADR-030, code/1129: "
+                    "the id is minted once and bound APPEND-ONLY in "
+                    "data/spine/cedar_place_id_register.csv (one row per "
+                    "SOURCE KEY, several keys may share one id - that is what "
+                    "a merge IS), so a rebuild mints zero and reproduces "
+                    "identical keys; proven by a second `mint --apply` "
+                    "minting 0 over 1,051 bindings"),
+}
+GRAIN.update(GRAIN_PLACE)
+
 # A table whose grain is declared but whose PRIMARY KEY cannot be stated
 # without guessing. Recorded rather than left blank, so the gap is a task
 # with a name instead of a silence. These count as UNSTATED for the gate.

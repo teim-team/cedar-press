@@ -4,14 +4,14 @@
     "class1": 1,
     "class2a": 0,
     "class2b": 0,
-    "class2c": 72,
+    "class2c": 71,
     "class3": 2,
     "class4": 14,
     "class5": 6,
     "class6": 27,
     "class7": 44,
     "class8": 0,
-    "lint_bug_class_instances": 166
+    "lint_bug_class_instances": 165
   },
   "findings": [
     {
@@ -206,7 +206,7 @@
     {
       "class": "class2c",
       "file": "1125_np_website_native_check.py",
-      "line": 582,
+      "line": 657,
       "evidence": "refused += 1",
       "why": "counter 'refused' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -215,18 +215,9 @@
     {
       "class": "class2c",
       "file": "1125_np_website_native_check.py",
-      "line": 381,
+      "line": 456,
       "evidence": "src[\"REFUSED_only_url_is_the_KEYED_ENTITYS_site_not_the_orgs\"] += 1",
       "why": "counter 'REFUSED_only_url_is_the_KEYED_ENTITYS_site_not_the_orgs' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
-      "waived": false,
-      "waiver_reason": ""
-    },
-    {
-      "class": "class2c",
-      "file": "1129_place_ids.py",
-      "line": 742,
-      "evidence": "miss += 1",
-      "why": "counter 'miss' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
       "waiver_reason": ""
     },

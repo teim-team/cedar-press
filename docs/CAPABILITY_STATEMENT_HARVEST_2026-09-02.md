@@ -19,39 +19,39 @@ py -3 code/1114_capability_statement_harvest.py selftest      # PASSES
 
 ---
 
-## THE HEADLINE — 53 facts in Cedar now have a second source
+## THE HEADLINE — 55 facts in Cedar now have a second source
 
 `docs/ASSERTION_LAYER.md` measured that **0 of 8,975 single-valued facts carry a
 second source**. Every UEI and CAGE Cedar holds came from the federal side —
 FPDS, SAM, the award archive — which is one evidence family however many tables
 it has been copied into.
 
-This pass read **145 distinct federal identifiers off the entities' own public
+This pass read **151 distinct federal identifiers off the entities' own public
 pages**, an `entity_self_published_web` evidence family that has never touched
 the federal one:
 
 | disposition | distinct identifiers | what it is |
 |---|---:|---|
-| `CORROBORATES_LEDGER_SAME_ENTITY` | **53** | the entity publishes the identifier the ledger already attributes to it. **The first genuine corroboration in this project.** |
-| `NOT_IN_LEDGER` | 73 | self-disclosed and previously unheld |
+| `CORROBORATES_LEDGER_SAME_ENTITY` | **55** | the entity publishes the identifier the ledger already attributes to it. **The first genuine corroboration in this project.** |
+| `NOT_IN_LEDGER` | 77 | self-disclosed and previously unheld |
 | `HELD_IN_LEDGER_UNDER_ANOTHER_ENTITY` | 19 | a parent publishes an identifier the ledger attributes to a different entity — an **ownership signal**, not a repointing licence |
 
-By type: CAGE 51 · UEI 39 · DUNS 31 · NAICS 21 · EIN 3.
+By type: CAGE 53 · UEI 39 · DUNS 33 · NAICS 23 · EIN 3.
 Per-identifier exhibit, with the label matched, the quote around it, the source
 URL and the document md5:
 **`review/capability_statement_identifiers_1114_2026-09-02.csv`**.
 
-**The 31 DUNS rows are flagged `may_publish = N`.** D-U-N-S is proprietary under
+**The 33 DUNS rows are flagged `may_publish = N`.** D-U-N-S is proprietary under
 ruling item 4 and stays internal *even though the entity published it itself*.
 
 **Where they came from** — 14 entities, and the shape is worth reading:
 
 | entity | identifiers | corroborating |
 |---|---:|---:|
-| NANA Regional Corporation (`akima.com`) | 86 | 51 |
-| Kikiktagruk Inupiat Corporation | 19 | 4 |
+| NANA Regional Corporation (`akima.com`) | 80 | 45 |
+| Kikiktagruk Inupiat Corporation | 18 | 4 |
 | Nakupuna Foundation | 16 | 1 |
-| Kootznoowoo · Kijik · Sealaska · Tyonek · Southcentral Foundation · Urban Indian Center of Salt Lake · Afognak · Tatitlek · Tyonek Native Corp · Native American Connections · Grand Ronde | 52 | 5 |
+| Kijik · Kootznoowoo · Sealaska · Tyonek · Afognak · Tatitlek · Tyonek Native Corp · Southcentral Foundation · Urban Indian Center of Salt Lake · Native American Connections · Grand Ronde | 37 | 5 |
 
 **Almost all of it is Alaska Native corporations and NHO operating groups.**
 A tribal *government* site publishes governance, not a capability statement; the
@@ -65,7 +65,7 @@ should shape the next pass: point it at the enterprise, not the nation.
 
 **981 entity+host probes, 879 reached, 47 refused, 55 unreachable on every rung**
 (https/http × www/apex × declared UA/browser headers × relaxed TLS).
-**3,577 documents fetched, 3,476 distinct md5.** 22,013 surfaces recorded.
+**3,630 documents fetched, 3,529 distinct md5.** 23,787 surfaces recorded.
 
 ### Job 1 — the hosts the 2026-09-02 ruling released
 
@@ -74,7 +74,7 @@ navajo-nsn.gov were reached and harvested:
 
 | host | reached | wp media items | surfaces | identifiers |
 |---|---|---:|---:|---:|
-| `akima.com` (NANA) | Y | — | 60 | **92** |
+| `akima.com` (NANA) | Y | — | 60 | **80** |
 | `southernute-nsn.gov` | Y | 4,638 | 65 | 0 |
 | `fcpotawatomi.com` | Y | 3,257 | 63 | 0 |
 | `nana.com` | Y | 726 | 6 | 0 |
@@ -89,8 +89,8 @@ Two of the eight are **not any entity's mapped URL in `cedar_web_map.csv`** —
 `akima.com` is NANA's operating group and `chickasawbusinessnetwork.com` is the
 Chickasaw Nation's business portal — so walking the web map would never have
 reached them. They are bound to their owner by hand in `RELEASED_HOST_OWNERS`,
-with the owner named rather than inferred. **`akima.com` alone produced 92 of
-the pass's 173 finding rows**, which is the whole argument for doing this by
+with the owner named rather than inferred. **`akima.com` alone produced 80 of
+the pass's 151 distinct identifiers**, which is the whole argument for doing this by
 host and not by map row.
 
 Two more were being probed as the wrong host entirely: Colville's best 2xx URL
@@ -109,8 +109,8 @@ flag — the three conditions the route needs.
 | outcome | entities |
 |---|---:|
 | `HARVESTED` | 15 |
-| `FOUND_NOT_EXTRACTED` | 138 |
-| `CHECKED_ABSENT` | 223 |
+| `FOUND_NOT_EXTRACTED` | 142 |
+| `CHECKED_ABSENT` | 219 |
 | `REFUSED` | 47 |
 | `ATTEMPTED_INCONCLUSIVE` | 558 |
 
@@ -149,8 +149,9 @@ The BIE-school refusals are concentrated on shared state-education and diocesan
 hosts whose robots ban every agent at the root — recorded per host in
 `data/staging/capability_1114/refusals_1114.csv`.
 
-Identifier yield from the institution classes is **two entities** (Southcentral
-Foundation, Urban Indian Center of Salt Lake, Native American Connections). A
+Identifier yield from the institution classes is **three entities** (Southcentral
+Foundation, Urban Indian Center of Salt Lake, Native American Connections) and
+one identifier each. A
 school does not publish a capability statement. That is a fact about the world,
 and it is now measured rather than assumed.
 
@@ -163,17 +164,17 @@ harvest_type), each naming the basis of its outcome.
 
 | harvest type | HARVESTED | FOUND_NOT_EXTRACTED | CHECKED_ABSENT | REFUSED | ATTEMPTED_INCONCLUSIVE |
 |---|---:|---:|---:|---:|---:|
-| identifiers | 15 | 138 | 223 | 47 | 558 |
-| enterprises | 0 | 208 | 192 | 47 | 534 |
-| individual business | 0 | 149 | 226 | 47 | 559 |
-| gaming | 0 | 214 | 196 | 47 | 524 |
+| identifiers | 15 | 142 | 219 | 47 | 558 |
+| enterprises | 0 | 211 | 189 | 47 | 534 |
+| individual business | 0 | 150 | 225 | 47 | 559 |
+| gaming | 0 | 215 | 195 | 47 | 524 |
 | newsletter | 0 | 370 | 116 | 47 | 448 |
 
-**`FOUND_NOT_EXTRACTED` is 1,079 cells and is the biggest thing this pass leaves
+**`FOUND_NOT_EXTRACTED` is 1,088 cells and is the biggest thing this pass leaves
 behind.** A newsletter archive located on a sitemap is not a newsletter in a
 table, and calling it harvested is how a coverage number stops meaning anything.
 The surfaces are all recorded, with the technique that found each one, in
-`data/staging/capability_1114/surfaces_found.jsonl` (22,013 rows) — the next
+`data/staging/capability_1114/surfaces_found.jsonl` (20,724 rows; the 23,787 in the summary is that spool de-duplicated against the CSV the first 47 hosts wrote before the spool existed) — the next
 pass is an extraction, not a crawl.
 
 ---
@@ -260,9 +261,9 @@ document. `verify` V7 caught it — the identical-md5 ceiling exists for exactly
 this — and the answer was to **purge, not to raise the ceiling**. A ceiling
 raised to accommodate a defect is a waiver wearing a gate's clothes.
 
-`purge` collapsed **187 duplicate document rows across 139 (host, md5) pairs**;
-**76 finding rows rode on a purged URL and went with them**; 3,577 documents and
-3,476 distinct md5 remain. Every dropped row is kept with its reason in
+`purge` collapsed **209 duplicate document rows across 158 (host, md5) pairs**
+over two runs; **79 finding rows rode on a purged URL and went with them**;
+3,630 documents and 3,529 distinct md5 remain. Every dropped row is kept with its reason in
 `data/staging/capability_1114/purged_duplicate_documents.csv`. URLs are
 defragmented at candidate time so it cannot recur.
 
@@ -321,12 +322,17 @@ whole ledger. If a future edit loosens the charset rule, 19,473 rows say so.
 1. **509 entities still `NEVER_CHECKED` for a federal identifier.** They fail
    one of the route's three conditions. Closing them means finding a live site,
    not running this script again.
-2. **1,079 `FOUND_NOT_EXTRACTED` cells** — surfaces located, nothing pulled into
+2. **1088 `FOUND_NOT_EXTRACTED` cells** — surfaces located, nothing pulled into
    a table. The URLs and the technique that found each are on disk. This is an
    extraction task, not a crawl.
-3. **419,582 WordPress media documents advertised across 310 hosts** and
-   `MEDIA_PAGE_CAP` reads 2,500 of them per host. Southern Ute alone advertises
-   4,638. Raising the cap on the ~15 hosts above it is cheap and targeted.
+3. **49 host records still have a truncated media index.** `deepmedia` resumed
+   250 of them — 139,097 outstanding media records, about 1,450 requests,
+   **2,485 new CAP/BIZ surfaces**, of which the ranked harvest turned 80 into
+   fetched documents and 7 into new identifiers. The 49 that remain exceed the
+   200-page resume cap (meherrinnation.org advertises 13,564). The coverage row
+   carries `media_index_truncated` so a reader can see which absences rest on a
+   partial read: **89 of the 944 `CHECKED_ABSENT` cells** do, and all of them
+   still clear V10 on the other three routes.
 4. **167 entities whose site does not name them** — this pass adds to the 127
    already in `data/staging/native_business_sweep_1070/verdicts.csv` rather than
    resolving any. A site that does not name the entity is an identity problem,

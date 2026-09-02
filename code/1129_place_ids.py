@@ -725,7 +725,11 @@ def migrate_one(path, keycol, mapping, apply, absent_reason_for):
             i = newcols.index(keycol) + 1 if keycol in newcols else len(newcols)
             newcols.insert(i, c)
             i += 1
-    hit = miss = blank = 0
+    # A DROP COUNTER MUST NAME WHAT IT DROPPED (293 class 2c, the "87 defect":
+    # the number goes in the log and the key does not, and twenty days pass).
+    # So every unmapped key is collected, printed and written out, not tallied.
+    hit = blank = 0
+    unmapped = Counter()
     for r in rows:
         k = (r.get(keycol) or "").strip()
         if not k:
@@ -739,7 +743,8 @@ def migrate_one(path, keycol, mapping, apply, absent_reason_for):
         if pid:
             hit += 1
         else:
-            miss += 1
+            unmapped[k] += 1
+    miss = sum(unmapped.values())
 
     after_sums = _numeric_sums(rows, before_cols)
     assert len(rows) == before_rows, "row count moved"
@@ -752,7 +757,7 @@ def migrate_one(path, keycol, mapping, apply, absent_reason_for):
     if apply:
         write_rows(path, rows, newcols, backup=True)
     return (path.name, before_rows, len(before_cols), len(newcols),
-            hit, miss, blank, len(before_sums))
+            hit, miss, blank, len(before_sums), unmapped)
 
 
 def cmd_migrate(args):
@@ -776,28 +781,37 @@ def cmd_migrate(args):
         return "facility_id not in the place register"
 
     total = Counter()
-    reports = []
+    reports, unmapped_keys = [], Counter()
     for p in gaming_tables():
         rep = migrate_one(p, "facility_id", gmap, apply, why_gaming)
         if rep:
             reports.append(rep)
             total["rows"] += rep[1]; total["hit"] += rep[4]
             total["miss"] += rep[5]; total["blank"] += rep[6]
+            unmapped_keys.update(rep[8])
     rep = migrate_one(BIA_OFFICES, "GlobalID", bmap, apply,
                       lambda k: "GlobalID not in the place register")
     if rep:
         reports.append(rep)
         total["rows"] += rep[1]; total["hit"] += rep[4]
         total["miss"] += rep[5]; total["blank"] += rep[6]
+        unmapped_keys.update(rep[8])
 
     print(f"  {len(reports)} tables{' MIGRATED' if apply else ' (DRY RUN)'}")
     print("  %-48s %8s %5s %5s %8s %6s %6s %5s"
           % ("table", "rows", "col-", "col+", "keyed", "unmap", "blank", "num"))
-    for nm, nr, cb, ca, hit, miss, blank, nnum in reports:
+    for nm, nr, cb, ca, hit, miss, blank, nnum, _u in reports:
         print("  %-48s %8d %5d %5d %8d %6d %6d %5d"
               % (nm, nr, cb, ca, hit, miss, blank, nnum))
     print(f"  TOTAL rows {total['rows']:,} · keyed {total['hit']:,} · "
           f"unmapped {total['miss']:,} · no source key {total['blank']:,}")
+    # NAME every key that did not map, and say what it is.
+    print(f"  {len(unmapped_keys)} distinct source key(s) did not map, "
+          f"{sum(unmapped_keys.values()):,} row(s):")
+    for k, n in sorted(unmapped_keys.items()):
+        print(f"      {k:<12} {n:>7,} row(s)   {why_gaming(k)[:78]}")
+    if not unmapped_keys:
+        print("      none")
     print("  row and money conservation asserted per table across the write "
           "(row count identical; every numeric column's sum identical to the "
           "cent) - an assertion failure raises, it does not warn.")

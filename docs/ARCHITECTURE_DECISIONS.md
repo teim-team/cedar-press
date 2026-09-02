@@ -2357,9 +2357,316 @@ no `GRAIN_*` dict to `code/512`, and touched neither `62` nor `518`.
 <!-- END ADR-027-CAPABILITY-1114 -->
 
 <!-- BEGIN ADR-030-PLACE-IDS -->
-## ADR-030 — CLAIMED 2026-09-02 by place-id agent
+## ADR-030 — ONE Cedar identifier for PLACES, and the candidates that were refused
 
-*Placeholder. Replace this line with the decision; keep the markers.*
+*Decided 2026-09-02. Built by `code/1129_place_ids.py`. Register:
+`data/spine/cedar_place_id_register.csv`. Directory: `data/clean/cedar_places.csv`.
+Gate: `py -3 code/1129_place_ids.py verify` (15 checks) and `selftest`, which
+proves four of them FIRE.*
+
+### The owner's question, and the test that answers it
+
+> *"we probably need IDs for other things. Right? Like gaming properties so we
+> can know we're talking about the same property... what things need IDs and
+> what would be easy to track. I don't want a billion IDs, obviously."*
+
+> *"We need our own ID system for certain things. Like, casinos make sense.
+> Enterprises in general makes sense, so you can analyze — **it's like our own
+> D-U-N-S number**, basically."*
+
+**THE TEST.** A thing earns a Cedar identifier only when all three hold:
+
+1. it **recurs across two or more sources that key it differently**, AND
+2. **Cedar must assert** that two records are the same thing, AND
+3. **no stable external identifier already exists.**
+
+**THE D-U-N-S ANALOGY IS THE DESIGN SPEC.** A D-U-N-S names an *operating unit*
+and survives a rename, an ownership change and a relocation, because it names
+the thing rather than the current facts about it. That is exactly the property
+a Cedar place id must have, and it is the whole reason one is worth minting. A
+casino that is renamed, transferred to a different tribal enterprise and rebuilt
+across the road is the same place; an id that has to be reissued for any of
+those is not an identity, it is a label.
+
+### THE DECISION: one `CEDAR-PLACE` id, four classes, class in a COLUMN
+
+```
+CEDAR-PLACE-000123-K7
+|           |      \- two check characters, from two independent weightings
+|           |         (503_identity.check_chars - one linear, one quadratic, so
+|           |         an error in the null space of one is caught by the other)
+|           \- 6-digit ordinal, allocated by cedar_ids.allocate() under an
+|              exclusive file lock, so two agents cannot mint the same id
+\- namespace: what KIND of thing this id names
+```
+
+`place_class` is one of `GAMING_PROPERTY`, `BIE_SCHOOL`, `IHS_FACILITY`,
+`BIA_OFFICE`. **The class is a column, never the prefix.** `cedar_ids.id_type()`
+reads the registry and never infers from a string — for the same reason
+`cedar_uid` encodes nothing (`IDENTIFIER_STANDARD.md` §0): a gaming property
+that stops gaming must not have to be re-keyed, and rewriting an identity is
+the one unforgivable act in an identity system.
+
+**The contract, copied from `503` and enforced rather than described:**
+
+| promise | how it is held |
+|---|---|
+| permanent | the binding `(place_class, source_scheme, source_key) -> id` is read FIRST, always |
+| never reused | a closed casino keeps its id; ordinals only ever go up |
+| check-digited | `503_identity.check_chars`. `O`, `I`, `L`, `U` are not in the alphabet, so the zero-for-O error is *unrepresentable*, not merely detectable |
+| minted once | the register is APPEND-ONLY. **Proven: a second `mint --apply` minted 0 and reproduced 1,051 identical bindings.** |
+| a sub-hub | a place hangs off the entity that OPERATES it, never a peer of it, and **the operator can change without the place changing** |
+
+**One check-character implementation in the project.** `1129` renders the
+ordinal `cedar_ids` allocates and appends `503`'s two characters — the same
+split NEST uses for `CEDAR-NEST-nnnnnn-CC`. Allocation is permanent and locked
+in one place; transcription safety comes from another; neither is
+re-implemented.
+
+**"Queued per dataset" is namespacing, not separate registers.** One atomic
+allocator (`cedar_ids._Lock`, `O_CREAT|O_EXCL`), one prefix per kind of thing:
+`CE-` entities, `CEDAR-NEST-` enterprises, `CEDAR-PLACE-` places. Two datasets
+cannot collide because they share the allocator, not because they avoid each
+other.
+
+### WHY A PLACE PASSES THE TEST — the evidence, not the argument
+
+**1. Recurs across sources keyed differently.** `gaming_facilities.facility_id`
+is *source-scoped*: **595 `CCP-` (Casino City Press), 164 `VP-` (a second
+vintage), 15 `TPL-`, 13 `CED-`**, and **26 clean tables key on it** — 24 with at
+least one non-blank value, two declaring the column and never populating it.
+
+**2. Cedar must assert two records are the same thing.** That split is *why*
+there are 58 same-name candidate groups. `Casino Del Sol` (`CCP-544900`) and
+`Casino Del Sol Resort` (`VP-0041`) are one property at 5655 W Valencia, Tucson,
+held twice, and 26 tables inherit the split.
+
+**3. No stable external identifier exists — and the one that looks stable
+collides.** `bia_offices.OFFICEID` is **not unique**: `OFID0038` is *both*
+**Salt River Agency** (33.4662, -111.8655) and **San Carlos Agency** (33.3537,
+-110.4528), two agencies 130 km apart. 93 rows, 92 ids. An external identifier
+that collides is not one — and that is exactly what the mint fixes: after
+migration those two rows carry two distinct `cedar_place_id`s, and `OFFICEID`
+is kept beside them as evidence of where the row came from.
+
+### THE CANDIDATES THAT FAIL THE TEST — named, so nobody re-opens them
+
+| candidate | fails on | why |
+|---|---|---|
+| **Federal awards and contracts** | **3** | PIID and UEI are stable, federally assigned, and already the join key. A Cedar id here would be a second name for something that already has one. |
+| **Federal Register and NAGPRA documents** | **3** | the FR document number and the NAGPRA notice id are stable federal identifiers. `federal_actions.csv` and `nagpra_notices.csv` — the two datasets already READY — key on them today. |
+| **Geographies** | **3** | FIPS and GEOID are stable, versioned and universally understood. Minting over them would make Cedar's geography unjoinable to every other dataset in the world. |
+| **Enterprises** | **already minted** | `CEDAR-NEST-nnnnnn-CC`, 1,610 bindings in `data/spine/cedar_nest_id_register.csv`. The owner's *"enterprises in general makes sense"* is **already satisfied**. A second enterprise id is the "billion IDs" failure in its purest form. |
+| **Deals** | **already minted** | `deals_classified.Deal_ID` is Cedar-minted. See EVENTS below — it needs GENERALISING, not a sibling. |
+| **People** | **policy, not a test outcome** | never, for any reason. A natural person's data held apart from their public role is `CONSTRAINED`, and a person-level identifier is precisely the artefact that would make re-identification cheap. |
+
+### EVENTS / TRANSACTIONS — passes the test, and the answer is to GENERALISE `Deal_ID`, not to mint beside it
+
+Tested honestly rather than assumed, and it **passes all three**:
+
+1. *Recurs across sources keyed differently* — **yes.** The Bristol Bay
+   Industrial / GHEMM acquisition of 2022-06-15 is held twice: once from the
+   ANCSA portal as `ANCSA2-2022-003`, and once found independently in EDGAR.
+2. *Cedar must assert two records are the same thing* — **yes, and it is already
+   doing it by hand.** The deals merge refused 36 internal duplicates across
+   four staging channels and found 17 candidates already in the ledger.
+3. *No stable external id exists* — **yes.** An SEC accession number identifies
+   a **filing**; a PIID identifies an **award**. Neither survives the same
+   transaction being reported in two places, which is the whole problem.
+
+**And `Deal_ID` carries the same defect `facility_id` does: it is
+SOURCE-SCOPED.** Measured on the live table — 1,073 rows, 15 channel prefixes:
+`FA-NTI` 272, `FA-HUD` 222, `ND-202…` 154, `NLTR-2…` 90, `FA-EDA` 51,
+`FA-DOE` 49, `ANCSA2` 42, `ANCSA-` 34, `ANCSA3` 24, `SECX-2` 22, `MA2020` 14,
+`ACQ202` 8, `IDOBS-` 2. The prefix records **which pipeline found the event** —
+exactly what `CCP-` and `VP-` record — and it will split the same event the
+same way.
+
+**RECOMMENDED, NOT DONE TONIGHT, and deliberately so.** The mandate was to mint
+**one** id and only one; minting a second in the same pass is the thing the
+owner said he does not want. The proposal is a **generalisation**: keep
+`Deal_ID` on every row as the source key — it is the evidence of which channel
+found the event — and mint a `CEDAR-EVENT-nnnnnn-CC` beside it that also covers
+ownership changes visible only in contracting and never reported as a deal.
+One concept, one id, one register: the same shape as this ADR. It is an owner
+decision because, like the 58 gaming groups, it will require refusing merges by
+hand.
+
+### THE ADJUDICATION — 58 groups, worked one at a time, 5 held open
+
+`review/place_gaming_adjudication_2026-09-02.csv` carries one verdict and one
+basis per group. **Three rules, ordered, each stated as a refusal so the default
+is NOT to merge:**
+
+**P0 — DIFFERENT OPERATORS: HOLD_OPEN (2 groups).** Two rows naming two
+different sovereigns are not adjudicable as one place by a name test, whatever
+their addresses say. `7 Clans First Council` is filed to the **Ponca Tribe**
+(`VP-0170`) in one vintage and the **Otoe-Missouria** (`CCP-843900`) in the
+other, at the identical street address, 12875 N Hwy 77, Newkirk OK. `The
+Stables` is filed to the **Modoc Nation** (`VP-0153`) and the **Miami Tribe of
+Oklahoma** (`CCP-305300`) at 530 H St SE, Miami OK — and is in fact *jointly*
+owned by both. Merging either would settle an ownership question by way of a
+duplicate sweep. **They stay two, and the contradiction is recorded rather than
+resolved.**
+
+**P1 — THE SOURCE ITSELF MINTED TWO PROPERTY IDS: HOLD_OPEN (3 groups).** Where
+**both** rows carry a distinct non-blank `casino_city_id`, the one vendor that
+mints property ids has recorded two properties, and Cedar does not overrule a
+source's own property-level distinction with a name test:
+
+- `Cities of Gold Casino` (39300) / `Cities of Gold Hotel` (841600) — a casino
+  and its hotel, which the mandate names as legitimately two places;
+- `Glacier Peaks Casino` (406800) / `Glacier Peaks Hotel` (1005500) — likewise;
+- `Three Rivers Casino` (1126400, Coos Bay, **97420**) / `Three Rivers Casino
+  Resort` (639700, Florence, **97439**) — **67 km apart**. Two different casinos
+  sharing one brand. Merging these would have been a fabrication.
+
+**P2 — otherwise: MERGE (53 groups, 54 extra rows collapse).** One operator,
+names differing only in the generic facility vocabulary, two source vintages.
+
+**THE COORDINATE PAIR IS DELIBERATELY NOT USED, and this is worth keeping.**
+Measured on these groups, rows at an **identical street address** sit 519 m
+apart (Seneca Niagara), 758 m (Pala) and 1,583 m (Casino Del Sol) — while the
+one pair **6 m** apart (Glacier Peaks) is a casino and a hotel that are *not*
+one place. The coordinates in this table are geocoded at varying precision, so
+a distance threshold would have measured the geocoder, not the place. It is
+this repo's signature defect in a new dress: a check that does not measure its
+own name.
+
+**16 rows are not places at all** and get **no id**, recorded in
+`review/place_non_place_rows_2026-09-02.csv`. Their names *say* "no casino" —
+7 exactly, 9 inside a longer name (`Grand Canyon West - no casino`, `Tribal
+admin only - no casino`, `No casino currently`) — so the test is a **substring**,
+never `== "no casino"`. Each is an assertion that an entity operates **no**
+gaming property; it is not a record of a place, it is merged into nothing, and
+`cedar_place_id_absent_reason` says so on every row that carries it. *(Three of
+the sixteen incidentally name a real non-gaming place — Grand Canyon West, the
+Las Vegas Paiute smoke shop, Pipe Spring National Monument. A place id for
+those would have to come from a source about those places, never from a row
+whose measured facts are about a casino that does not exist.)*
+
+### THE RECONCILED COUNT: 717, and the whole difference from 714 is three named groups
+
+`code/1129_place_ids.py::reconcile()` **computes** this ladder from the live
+file on every run; `verify` check V9 fails if it stops reconciling.
+
+```
+787 rows - 16 non-places   = 771 facility rows
+771 - 57 mechanical extras = 714    <- 846_session_audit.py::_denom
+771 - 54 adjudicated extras = 717   <- this pass
+difference = the 3 groups held by P1:
+             CITIES OF GOLD (NM), GLACIER PEAKS (MT), THREE RIVERS (OR)
+```
+
+**`_denom` is not re-baselined and does not need to be.** It measures a
+mechanical name-collision count and it is correct about what it measures; the
+mandate staged those groups *unmerged on purpose* precisely because a mechanical
+count is not an adjudication. **714 is the upper bound on merges; 717 is what
+the evidence supports.** The three-row gap is the price of not merging two
+casinos 67 km apart.
+
+**Totals minted: 997 places over 1,051 source-key bindings —
+GAMING_PROPERTY 717 (771 keys), BIA_OFFICE 93, BIE_SCHOOL 187.**
+
+### IHS_FACILITY is declared and UNPOPULATED, and verify says so
+
+There is no IHS facility directory on this machine — `1050 ondisk ihs` returns
+area-office HTML and a self-governance compact list. It is **NOT_ACQUIRED**, not
+`CONSTRAINED`, and not a deficiency of this pass. `verify` prints it as
+UNPOPULATED and does **not** count it as a pass, because *a verify that passes
+on an empty target set is the defect of the night*. The register is append-only,
+so acquiring it later mints ids beside the existing ones and moves nothing.
+
+### The sub-hub link is stated where it is blank, never guessed
+
+- **GAMING_PROPERTY** — `operator_cedar_uid` from `gaming_facilities.cedar_uid`.
+- **BIA_OFFICE** — **blank**. A BIA agency office is operated by a federal
+  agency, which is not a Cedar entity; `operator_basis` says exactly that. A
+  place whose operator is not a Cedar entity is still a place.
+- **BIE_SCHOOL** — **blank**, with the reason on the row: 129 of 187 are
+  tribally-controlled, and matching a school name to a nation by name is the
+  containment defect. Blank means *unresolved*, never *no operator*. The BIE
+  binding key is the normalised school name plus state — unique across all 187
+  features, measured — because the feature service publishes only `OBJECTID`,
+  an ArcGIS row ordinal that is not stable across a republish. That is condition
+  3 of the test in its strongest form, and it is stated rather than hidden.
+
+### Migration: 27 tables, additive, conservation proven per table
+
+Every table **keeps its source key** and **gains `cedar_place_id` beside it**,
+plus `cedar_place_id_absent_reason`, which is never blank when the id is. A
+source key is the evidence of where a row came from and is never overwritten.
+
+**194,477 rows across 27 tables · 165,212 keyed · 0 unexplained unmapped.** The
+170 unmapped rows are all non-place placeholder rows, and the migration
+**names every one of the 16 distinct keys** rather than tallying them — 29,095
+further rows carry no source key at all and say so on the row.
+
+Row and money conservation is **asserted inside the write** on every table: row
+count identical, and **every numeric column's sum identical to the cent**,
+computed before and after. An assertion failure raises; it does not warn.
+
+### THE GATE, and the fixtures that prove it fires
+
+`py -3 code/1129_place_ids.py verify` — **15 checks, exits 1 on breach.**
+`selftest` injects four violations, asserts the **named** check fires, restores,
+and re-asserts green:
+
+| fixture | fires |
+|---|---|
+| **the register is emptied** | **V0** — the empty-target-set defect, tested first and on purpose |
+| one transcribed check character | V1 |
+| one source key bound to two ids | V2 |
+| `cedar_place_id` dropped by a rebuild | V6 |
+
+**V0 is a FLOOR per class** — `GAMING_PROPERTY >= 717`, `BIA_OFFICE >= 93`,
+`BIE_SCHOOL >= 187` — so the gate goes red when the mint **did not land**, not
+only when something moved (field guide rule 5). A later acquisition raises a
+floor rather than breaking the gate.
+
+### Two defects found on the way, both fixed, neither introduced by this pass
+
+**1. `846_session_audit.py::_denom` — THE GATE FOR THIS VERY LADDER — was
+measuring nothing, and had been since it was committed.** Nine **0x08 backspace
+bytes** sit in the source where `\b` was intended, across three regexes in
+`846`. In `_denom`'s `loose()` the pattern read `\x08(CASINO|RESORT|…)\x08`,
+which matches no string that can exist, so the generic facility vocabulary was
+never stripped: every name stayed distinct, the check found **0 duplicate
+groups**, and it reported *"771 distinct properties — shape changed, re-derive
+before quoting"*. Two other checks were blinded the same way — `\bearns\b` /
+`\bawarded?\b.*\blodge\b` in the business-name detector, and
+`(Tourism|Recreation|…)\b` in the NAGPRA tail detector. Confirmed present in
+the committed blob (`git show HEAD:code/846_session_audit.py` counts the same
+nine), so it is not a working-tree accident. **Repaired: 9 bytes, `0x08` ->
+`\b`. `_denom` now PASSES at exactly 787 - 16 - 57 = 714**, which is what the
+mandate said it should say. *Measured 2026-09-02: the word-boundary and
+unbounded forms were compared on the live file and give identical results —
+58 groups, 57 extras, 714 — so the repair changes no adjudication.*
+
+**2. Three wholesale writers would have deleted the new column on their next
+rebuild.** `1080_sec_gaming_facility_revenue.py` (`FIG_COLS`, `TERM_COLS`) and
+`92_build_gaming_capacity_official.py` (`COLS`) were all flagged NEW by
+`845_regenerate_guard.py` the moment the migration landed. This is class 6, and
+it is the rebuild/enricher collision `START_HERE.md` records happening for the
+fourth time. Fixed with the repair `845` itself prescribes and recognises
+structurally: a `carry_live_columns(path, canonical)` helper that reads the live
+header and returns canonical-order-first plus whatever the file already carries.
+A rebuild now writes the column **blank** and the enricher refills it.
+**`845 verify` is green again — 3 unsafe writers, 0 new since baseline.**
+
+### Ordering — the enricher runs LAST
+
+`1129 migrate` is an in-place enricher on 27 tables. A full rebuild of any of
+them now preserves the column but **cannot repopulate it**. After any such
+rebuild:
+
+```
+py -3 code/1129_place_ids.py migrate --apply
+py -3 code/1129_place_ids.py verify
+```
+
+The `.bak_2026-09-02_pre_1129_place_ids` files beside each table are the signal
+that this pass touched it.
 <!-- END ADR-030-PLACE-IDS -->
 
 <!-- BEGIN ADR-028-FORWARD-CONSTRUCTION -->
