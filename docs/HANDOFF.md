@@ -8,6 +8,45 @@ only "what was happening and what to do next."*
 
 ---
 
+<!-- BEGIN FWD-CONSTRUCTION-HANDOFF-2026-09-02 -->
+## 2026-09-02T17:00Z — forward construction on contractors / subcontracting / funding
+
+Full record: `docs/ARCHITECTURE_DECISIONS.md` **ADR-028**. Three lines if you
+read nothing else:
+
+1. **Contracting attributes are CLOSED at the ceiling.** All nineteen
+   USAspending archive objects re-fetched and applied.
+   `product_or_service_code` **247,987 (20.4%) → 840,754 (69.04%)**, which is
+   **99.97% of the 841,002-row archive stratum**, 99.7%+ in every fiscal year.
+   The other 376,766 rows are BGOV lineage with no transaction key and no
+   re-pull reaches them. `py -3 code/1085_prime_psc_desc_repull.py apply` after
+   ANY rebuild of `prime_contracts.csv` — including `871`, which rewrites it.
+2. **FY2023 and FY2024 subawards are folded in; FY2022 is the only empty year
+   left and is generating now.** `subawards.csv` 76,859 → **89,809**;
+   countable **$34,906,694,737.65** over 69,921 rows (the money rule removes
+   $22,113,862,972.82 = **63.4% of the correct total**, 38.8% of the raw — say
+   which). FY2023 Q4 had come back header-only with `status: finished` and
+   **0 rows**; re-pulled, it is **231,453 rows**. `fy2022_q1..q4` submitted
+   16:47Z, tokens checkpointed — resume with `121 collect`, then the chain in
+   `docs/KNOWN_ISSUES.md` block `FWD-CONSTRUCTION-2026-09-02`.
+3. **The FAADS transaction-key dispute is SETTLED and it changed the answer.**
+   The 60 twenty-column zips genuinely never held the key — measured, not
+   argued. But the claim that no full-column source exists for FY2001–2006 is
+   **false**: the service's own job record gives DOI FY2001 as
+   `total_columns: 112` and ED FY2001 as `20`, same endpoint, same day, 79
+   minutes apart. **1,943,994 rows CAN be keyed, by a re-pull merged by
+   content.** Owner item **FWD-1**.
+
+**The rule this pass earned, and it cost three separate passes' work in one
+day: A CONSERVATION PROOF IS NOT A LANDING PROOF.** `1085`, `1079` and `1109`
+each conserved every row and every cent, each exited 0, and each was absent
+from the live file hours later. Every one of those checks was true when it ran.
+Ship the check that fails when the work did NOT happen — for a column
+promotion that is `head -1` on the live file.
+
+---
+<!-- END FWD-CONSTRUCTION-HANDOFF-2026-09-02 -->
+
 ## THE ONE-PARAGRAPH VERSION
 
 Cedar Press has ~7.4M shipped rows across 11 collections and the collection

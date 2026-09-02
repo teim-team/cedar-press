@@ -2642,3 +2642,120 @@ The Sea Lion row is the only one that is Cedar's own fault. **Which record is
 right?**
 
 <!-- END LADDER-1117-1122-QUEUE -->
+
+<!-- BEGIN CAPABILITY-1114-QUEUE -->
+## CAP-1. Ely Shoshone: the record says the host refuses us. It does not, today.
+
+*From `code/1114_capability_statement_harvest.py`, 2026-09-02. Full account:
+`docs/CAPABILITY_STATEMENT_HARVEST_2026-09-02.md` §2.*
+
+**What Cedar records.** `review/tribal_vendor_list_registry_2026-08-26.csv`
+excludes `elyshoshonetribe.com` as `ROBOTS_DISALLOW`, quoting *"robots.txt
+explicitly names and disallows 'ClaudeBot', 'anthropic-ai', 'GPTBot',
+'Amazonbot' and others"*, with the note *"The origin explicitly refuses
+ClaudeBot and anthropic-ai. Fetching the same content from an archive would
+honour the letter of robots.txt and defeat its purpose. Manual research only."*
+`review/1020_named_agent_robots_exposure.csv` rows 40-41 carry it forward and
+shard N purged the host's bodies on it.
+
+**What the file says, fetched 2026-09-02, one request, reproducible.** It is the
+Squarespace template and it is **one group**: thirty `User-agent:` lines —
+`AI2Bot`, `anthropic-ai`, `CCBot`, `ClaudeBot`, `GPTBot`, … ,
+`AdsBot-Google-Mobile-Apps` — then `User-agent: *`, then a single shared rule
+block of **27 path-scoped `Disallow` directives**: `/config`, `/search`,
+`/account`, `/commerce/digital-download/`, `/api/`, `/static/` and 21
+query-parameter patterns. **There is no `Disallow: /` in the file for any
+agent.** `ClaudeBot` is bound by exactly the rules the wildcard is bound by.
+
+**The question.** Being *named* in a `User-agent:` list is not being
+*disallowed*. Does Cedar read the named-agent list as a refusal anyway?
+
+| answer | consequence |
+|---|---|
+| **A — the file governs; being named is not being refused** | Ely Shoshone comes off the exclusion list, its bodies may be re-fetched, and `review/1020_named_agent_robots_exposure.csv` needs re-deriving because the same conflation may sit on other rows in it. The registry note is corrected, not deleted. |
+| **B — a publisher who lists us among the AI crawlers has expressed a preference, whatever the directives say** | the exclusion stands, and the *reason* in the registry should be rewritten: it is a stated preference, not a `Disallow`. Cedar then has a rule that reads intent out of a `User-agent` line, and it should be written down as such so it is applied consistently rather than per-shard. |
+
+**Bounded, and it matters.** The file may have changed since 2026-08-26 and
+nothing on this machine can prove it did not; option A does not require the
+earlier reading to have been wrong at the time. What is certain is that
+`www.penobscotnation.org`, checked the same minute by the same parser, **does**
+carry `Disallow: /` for `ClaudeBot` and stays refused. The two hosts are
+distinguishable and Cedar currently treats them the same.
+
+**Nothing was harvested on this reading.** Robots and the home page only.
+
+## CAP-2. 31 self-published D-U-N-S numbers — held, or dropped?
+
+Entities published their own D-U-N-S on their own capability statements. Ruling
+item 4 makes D-U-N-S internal-only, and they are flagged `may_publish = N` in
+`review/capability_statement_identifiers_1114_2026-09-02.csv`.
+
+**Hold them as an internal matching key, or do not record a proprietary
+identifier at all even when the subject published it?** Holding is the current
+state. Dropping costs 31 rows and removes a D&B-derived string from the
+warehouse entirely.
+<!-- END CAPABILITY-1114-QUEUE -->
+
+<!-- BEGIN FWD-CONSTRUCTION-QUEUE-2026-09-02 -->
+
+## FWD-1. 1,943,994 FAADS rows CAN be keyed after all. Spend ~60 bulk-download jobs on it, or leave the grain refused?
+
+**The dispute is settled and both sides were half right.** Two workstreams
+disagreed about why `assistance_transaction_unique_key` sits on only **825,754
+of 2,769,748 rows (29.81%)** of `faads_transactions_all_agencies.csv`. Settled
+by opening every staged zip and reading its header bytes
+(`code/1083_faads_zip_column_census.py`, re-run 2026-09-02T15:40Z): **83 members
+over 77 objects, 0 unmeasured. 23 members are 112 columns and carry the key; 60
+are 20 columns and do not, one identical header signature across all 60.** The
+live table splits **60 unkeyed source objects / 17 keyed**, with nothing in
+between. So no re-extract of the bytes on disk recovers anything, and
+derivation is closed too — two of the key's five components are physically
+absent.
+
+**What is new is that the ceiling is not permanent.** The doc said *"there is
+no full-column source for those years to re-extract from."* Its own census
+disproves that, and the SERVER's own job records are the evidence — two FY2001
+assistance objects from the same 2026-08-05 pull, 79 minutes apart:
+
+| state record | `total_columns` reported by the service | key |
+|---|---:|---|
+| `seam/_meta.json` → `"2001"` (DOI, 19:06Z) | **112** | **PRESENT** |
+| `agencies/_state.json` → `jobs.ed_fy2001` (20:25Z) | **20** | ABSENT |
+
+Same endpoint, identical record schema, identical
+`All_PrimeTransactions_2026-08-05_*.zip` naming. The only difference is the
+`columns` key in the payload, and `30_funding_pre2008.COLUMNS` has since been
+fixed. The state is **`NOT_ACQUIRED`, not `SOURCE_DOES_NOT_PUBLISH`.**
+
+**The ask.** A recovery pull is 10 agencies × FY2001–2006 = **60 bulk-download
+jobs** (not 54 — that figure is not reproducible from any file here), one at a
+time on a host that allows one poller, at roughly an hour a job.
+
+- **Say yes** and `faads_transactions_all_agencies.csv` can declare a primary
+  key for the first time, and the 3,441 remaining byte-identical rows resolve
+  the way `prime_contracts`' 80,778 did — by a restored key, not a delete.
+- **Say no** and the grain stays REFUSED, which is honest and is the current
+  state. Nothing is broken by saying no.
+
+**The condition, either way, is not negotiable and is why this is your call and
+not an agent's:** the merge must be **by content, never by replacement**. All
+**29,594** attributions in `faads_entity_attribution.csv` are keyed to
+`faads_row_id`, which is a ROW POSITION. A rebuild re-points every one of them
+silently. `code/791`'s fingerprint-and-ordinal pass is the route that survives
+it.
+
+Evidence: `docs/FAADS_TRANSACTION_KEY_SETTLEMENT_2026-09-02.md` (closing
+section), `docs/FAADS_ZIP_COLUMN_CENSUS.json`, `docs/methodology/funding.md` §4b.
+
+## FWD-2. FY2022 subawards: four jobs are generating right now. Nothing needed unless they fail.
+
+Recorded so it is not rediscovered. `fy2022_q1..q4` had **never been
+submitted** — FY2022 holds **89 countable rows / $47,021,525** and is now the
+only empty year in `subawards.csv`. All four were submitted 2026-09-02T16:47Z
+and are generating one at a time; tokens are checkpointed, so a dead poller
+loses nothing. **If they come back `failed` a third time** — the full-year
+`fy2022` job has already failed twice with the opaque body *"An error
+occurred."* — that is the point at which FY2022 stops being a scheduling
+problem and becomes a finding about the source, and it should be written down
+as one rather than re-submitted a fourth time.
+<!-- END FWD-CONSTRUCTION-QUEUE-2026-09-02 -->

@@ -434,6 +434,16 @@ KNOWN_ORDERINGS = [
     # subawards.csv, and on 2026-09-02 that reverted 1085's PSC/description
     # fills on 326,166 rows without anything erroring. Two tables, one
     # ordering rule.
+    {"rebuild": "40_build_prime_contracts.py",
+     "enricher": "1085_prime_psc_desc_repull.py",
+     "file": "prime_contracts.csv",
+     "cost": "the same 592,925 values as the 871 entry below. Registered "
+             "against the declared rebuild as well, because 40 is what "
+             "build.py plans and 871 is only the way it happened to be lost "
+             "on 2026-09-02",
+     "enricher_columns": ["product_or_service_code",
+                          "product_or_service_code_description",
+                          "award_base_description", "naics_description"]},
     {"rebuild": "871_promote_geo_keys_contracts.py",
      "enricher": "1085_prime_psc_desc_repull.py",
      "file": "prime_contracts.csv",

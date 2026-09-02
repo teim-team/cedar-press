@@ -14,11 +14,11 @@
     }
   },
   "subawards": {
-    "rows": 76859,
-    "cents": 4730166081978,
+    "rows": 89809,
+    "cents": 5702055771047,
     "tiers": {
-      "unkeyed": 64719,
-      "exact_award_summary": 12140
+      "unkeyed": 71615,
+      "exact_award_summary": 18194
     }
   }
 }

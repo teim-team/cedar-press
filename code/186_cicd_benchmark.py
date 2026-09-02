@@ -257,6 +257,14 @@ def scan_prime() -> dict:
     contracts_0021 = set()
     piid_0021 = set()
     parent_0021 = set()
+    # SANITY-04, added 2026-09-02: the same three keys restricted to the ONE
+    # source CICD used. The previously UNEXPLAINED gap was measured over a corpus
+    # that is mostly USAspending TRANSACTION rows — a grain BGOV never had.
+    BGOV_SRC = "master prime file.dta"
+    bgov_rows_0021 = 0
+    bgov_piid_0021 = set()
+    bgov_piid_uei_0021 = set()
+    bgov_parent_0021 = set()
     fy_tribes_trbf = collections.defaultdict(set)
     extent_vocab = collections.Counter()
     forbidden = {"total_award_value": 0.0, "total_obligations_real2025": 0.0}
@@ -318,6 +326,11 @@ def scan_prime() -> dict:
                     contracts_0021.add(k)
                     piid_0021.add(d["contract_number"])
                     parent_0021.add(d["parent_contract_number"])
+                    if (d.get("source_file") or "").strip() == BGOV_SRC:
+                        bgov_rows_0021 += 1
+                        bgov_piid_0021.add(d["contract_number"])
+                        bgov_piid_uei_0021.add(k)
+                        bgov_parent_0021.add(d["parent_contract_number"])
                     if d["defense"] == "1":
                         dod_att_0021 += ob
                     # tested hypothesis, kept in the output: `defense` is
@@ -387,6 +400,10 @@ def scan_prime() -> dict:
         distinct_contracts_fy2000_2021=len(contracts_0021),
         distinct_piid_fy2000_2021=len(piid_0021),
         distinct_parent_piid_fy2000_2021=len(parent_0021),
+        bgov_only_attributed_rows_fy2000_2021=bgov_rows_0021,
+        bgov_only_distinct_piid_fy2000_2021=len(bgov_piid_0021),
+        bgov_only_distinct_piid_uei_fy2000_2021=len(bgov_piid_uei_0021),
+        bgov_only_distinct_parent_piid_fy2000_2021=len(bgov_parent_0021),
         firms_attributed=len(firm_ob),
         firms_flag_reachable=len(firm_flagged),
         firms_flag_invisible=len(firms_unflagged),
@@ -414,12 +431,29 @@ def scan_subawards() -> dict:
     `superseded_by_primary_source`. Summing all 63,548 rows inflates the total
     by more than half. Only `primary` is summed here; the discarded magnitude is
     reported so nobody has to rediscover it.
+
+    CORRECTED 2026-09-02 by `code/1128_cicd_benchmark_refresh_2026_09_02.py`.
+    **`duplicate_status == 'primary'` IS ONLY HALF OF CEDAR'S MONEY RULE, AND
+    THIS HARNESS WAS USING THE HALF.** `docs/MONEY_TOTALLING_RULES.md` and
+    `docs/methodology/subcontracting.md` both state the rule as
+    `duplicate_status == 'primary'` **AND** `subaward_exceeds_prime_flag !=
+    'yes'`, and the second clause is not decoration: 836 rows report a subaward
+    LARGER than their own prime award, worst case 12,240x — one $64,910.88 prime
+    reporting a $794,526,041 subaward. Measured on the live file, the missing
+    clause put $7.27B into TOTAL-01 and turned a -4.6% agreement with CICD into
+    a +3.6% overshoot. All three totals are now returned and NAMED; the
+    countable one is the only one that may be quoted or added to anything.
     """
     path = os.path.join(ROOT, SUB)
     acc: dict = {}
     by_status = collections.Counter()
     amt_by_status = collections.Counter()
     fy_primary = collections.Counter()
+    fy_countable = collections.Counter()
+    countable_total = 0.0
+    countable_rows = 0
+    exceeds_rows = 0
+    exceeds_amount_inside_primary = 0.0
     native_sub = non_native_sub = 0
     with open(path, encoding="utf-8", errors="replace", newline="") as fh:
         for d in csv.DictReader(fh):
@@ -431,18 +465,36 @@ def scan_subawards() -> dict:
                 continue
             sum_col("subaward_amount", a, acc)
             fy_primary[d["fiscal_year"]] += a
+            if (d.get("subaward_exceeds_prime_flag") or "").strip().lower() in {
+                    "yes", "true", "1", "y"}:
+                exceeds_rows += 1
+                exceeds_amount_inside_primary += a
+            else:
+                countable_total += a
+                countable_rows += 1
+                fy_countable[d["fiscal_year"]] += a
             if (d.get("prime_native_tribe_id") or "").strip():
                 if (d.get("sub_native_tribe_id") or "").strip():
                     native_sub += 1
                 else:
                     non_native_sub += 1
+    naive = sum(amt_by_status.values())
     return dict(
         source=stamp(SUB),
         rows_by_duplicate_status=dict(by_status),
         dollars_by_duplicate_status={k: v for k, v in amt_by_status.items()},
         primary_total=acc.get("subaward_amount", 0.0),
-        naive_all_rows_total=sum(amt_by_status.values()),
+        # THE ONLY TOTAL THAT MAY BE QUOTED. Both clauses of the money rule.
+        countable_total=countable_total,
+        countable_rows=countable_rows,
+        rows_exceeding_their_own_prime=exceeds_rows,
+        dollars_removed_by_exceeds_clause=exceeds_amount_inside_primary,
+        naive_all_rows_total=naive,
+        # State the denominator, both ways, every time.
+        money_rule_removal_pct_of_countable=pct(naive - countable_total, countable_total),
+        money_rule_removal_pct_of_unfiltered=pct(naive - countable_total, naive),
         fy_primary={k: v for k, v in sorted(fy_primary.items())},
+        fy_countable={k: v for k, v in sorted(fy_countable.items())},
         native_prime_sub_is_native=native_sub,
         native_prime_sub_is_non_native=non_native_sub,
         non_native_sub_share_pct=pct(non_native_sub, non_native_sub + native_sub),
@@ -655,9 +707,12 @@ def build_benchmarks(P, S, G, I, X) -> list:
     fya = P["fy_attributed"]
     p1625 = sum(fy.get(str(y), 0.0) for y in range(2016, 2026))
     a1625 = sum(fya.get(str(y), 0.0) for y in range(2016, 2026))
-    s1625 = sum(S["fy_primary"].get(str(y), 0.0) for y in range(2016, 2026))
+    # CORRECTED 2026-09-02: fy_countable, not fy_primary. `primary` alone is
+    # half the money rule — see the scan_subawards docstring.
+    s1625 = sum(S["fy_countable"].get(str(y), 0.0) for y in range(2016, 2026))
+    s1625_primary_only = sum(S["fy_primary"].get(str(y), 0.0) for y in range(2016, 2026))
     p25 = fy.get("2025", 0.0)
-    s25 = S["fy_primary"].get("2025", 0.0)
+    s25 = S["fy_countable"].get("2025", 0.0)
 
     def d(cicd_num, cedar_num):
         if cicd_num in (None, 0):
@@ -890,7 +945,9 @@ def build_benchmarks(P, S, G, I, X) -> list:
         claim="Federal contract revenue to Native entities, last decade (2016-2025)",
         cicd_figure="~$200B, prime + sub, USAspending, retrieved 2026-05-29",
         cicd_value=200e9,
-        cedar_basis="prime_contracts.csv FY2016-25 total_obligations + subawards.csv FY2016-25 subaward_amount (duplicate_status=primary)",
+        cedar_basis="prime_contracts.csv FY2016-25 total_obligations + subawards.csv FY2016-25 "
+                    "subaward_amount on Cedar's FULL money rule (duplicate_status='primary' AND "
+                    "subaward_exceeds_prime_flag != 'yes')",
         cedar_value=p1625 + s1625,
         cedar_display=f"{B(p1625)} prime + {B(s1625)} sub = {B(p1625 + s1625)}",
         delta=dd, delta_pct=dp,
@@ -905,7 +962,17 @@ def build_benchmarks(P, S, G, I, X) -> list:
             "CICD's decade figure is nominal but its 1981-2021 figure is 2021 dollars — never compare "
             "across those two. (d) CICD's recent series is flag-based, Cedar's is the identifier "
             f"ledger; on the ATTRIBUTED basis Cedar reads {B(a1625)} + sub. Given (a) alone would "
-            "close most of the remaining gap, these two numbers agree."
+            "close most of the remaining gap, these two numbers agree. "
+            "**(e) THE SUBAWARD LEG NOW CARRIES CEDAR'S FULL MONEY RULE.** Until 2026-09-02 this "
+            f"row summed `duplicate_status = 'primary'` alone, which for this window is "
+            f"{B(s1625_primary_only)} — {B(s1625_primary_only - s1625)} above the countable figure, "
+            "because 836 rows report a subaward larger than their own prime award (worst case "
+            "12,240x). The missing clause was turning a -4.6% reading into a +3.6% overshoot. "
+            "**AND THE TWO SIDES OF THIS SUM ARE NOT THE SAME KIND OF MEASUREMENT**: a prime "
+            "obligation is what the government recorded paying, a subaward is what a vendor "
+            "self-reported paying onward under FSRS, unaudited. Cedar's own rules forbid adding "
+            "them; the sum exists here ONLY because CICD's published figure is defined that way, "
+            "and it must never be quoted as a Cedar total."
         ),
     ))
     dd, dp = d(26.6e9, p25 + s25)
@@ -916,7 +983,8 @@ def build_benchmarks(P, S, G, I, X) -> list:
         claim="2025 award total to Native entities, prime + sub",
         cicd_figure="$26.6B, USAspending, retrieved 2026-08-04",
         cicd_value=26.6e9,
-        cedar_basis="prime_contracts.csv FY2025 + subawards.csv FY2025 (primary only)",
+        cedar_basis="prime_contracts.csv FY2025 + subawards.csv FY2025 on Cedar's FULL money rule "
+                    "(duplicate_status='primary' AND subaward_exceeds_prime_flag != 'yes')",
         cedar_value=p25 + s25,
         cedar_display=f"{B(p25)} prime + {B(s25)} sub = {B(p25 + s25)}",
         delta=dd, delta_pct=dp,
@@ -1049,14 +1117,17 @@ def build_benchmarks(P, S, G, I, X) -> list:
         cedar_basis="prime_contracts.csv, attributed FY2000-2021 rows, three candidate award keys",
         cedar_value=P["distinct_contracts_fy2000_2021"],
         cedar_display=(
-            f"{P['distinct_parent_piid_fy2000_2021']:,} parent PIID · "
+            f"whole corpus: {P['distinct_parent_piid_fy2000_2021']:,} parent PIID · "
             f"{P['distinct_piid_fy2000_2021']:,} PIID · "
-            f"{P['distinct_contracts_fy2000_2021']:,} PIID+UEI"
+            f"{P['distinct_contracts_fy2000_2021']:,} PIID+UEI  ||  "
+            f"BGOV `.dta` ONLY (CICD's own source): "
+            f"{P['bgov_only_distinct_piid_uei_fy2000_2021']:,} PIID+UEI on "
+            f"{P['bgov_only_attributed_rows_fy2000_2021']:,} rows"
         ),
         delta=P["distinct_contracts_fy2000_2021"] - 50167,
         delta_pct=round(100.0 * (P["distinct_contracts_fy2000_2021"] - 50167) / 50167, 1),
         delta_type="UNEXPLAINED",
-        severity="MEDIUM",
+        severity="LOW",  # was MEDIUM; dropped 2026-09-02, see the explanation
         explanation=(
             "**No Cedar award key reproduces 50,167, and the grain hypothesis was tested rather than "
             f"assumed.** Three candidate keys on attributed FY2000-2021 rows: parent PIID "
@@ -1065,10 +1136,33 @@ def build_benchmarks(P, S, G, I, X) -> list:
             "two and matches none. Period does not explain it either — CICD's window is 1981-2021 "
             "and Cedar's is FY2000-2021, so CICD covers nineteen MORE years and still reports a "
             "smaller number. **CICD does not state its contract key**, so the difference cannot "
-            "currently be resolved from either side's published description. Severity MEDIUM: it "
-            "does not touch a dollar figure, but any \"contracts\" count Cedar publishes will be "
-            "compared to 50,167 and needs its key stated in the same sentence. TO SETTLE IT: ask "
-            "what BGOV's contract grain was — award, transaction, or award-year-vendor."
+            "currently be resolved from either side's published description. ~~Severity MEDIUM~~: "
+            "it does not touch a dollar figure, but any \"contracts\" count Cedar publishes will be "
+            "compared to 50,167 and needs its key stated in the same sentence. ~~TO SETTLE IT: ask "
+            "what BGOV's contract grain was — award, transaction, or award-year-vendor.~~ "
+            "**That question was answered from the data on 2026-09-02 — see below.**\n\n"
+            "**2026-09-02 — MOSTLY SETTLED, AND THE OLD FRAMING WAS COMPARING TWO CORPORA, NOT "
+            "TWO KEYS.** CICD's dataset is BGOV and only BGOV. Cedar's FY2000-2021 slice is "
+            "roughly three-quarters USAspending award-archive rows, which are FPDS TRANSACTIONS — "
+            "a grain BGOV never had — so every key above was inflated by the source mix before any "
+            "grain question arose. Restricted to `source_file = 'master prime file.dta'`, the same "
+            "HigherGov/BGOV FPDS extract CICD used: Cedar attributes "
+            f"**{P['bgov_only_attributed_rows_fy2000_2021']:,} rows** with "
+            f"**{P['bgov_only_distinct_piid_uei_fy2000_2021']:,} distinct PIID+UEI** and "
+            f"{P['bgov_only_distinct_piid_fy2000_2021']:,} distinct PIID. Measured across the whole "
+            "`.dta` including FY2022, its grain is award x vendor x fiscal year (365,794 "
+            "PIID+UEI+FY keys on 376,766 rows, 1.03 rows per key — measured 2026-09-02 on the "
+            "frozen `.dta`), so a `.dta` ROW is a contract-year and PIID+UEI is the 'unique "
+            "contract'. **Cedar's unique-contract count on CICD's own source is "
+            f"{P['bgov_only_distinct_piid_uei_fy2000_2021']:,} against CICD's 50,167 — "
+            f"{100 * (50167 - P['bgov_only_distinct_piid_uei_fy2000_2021']) / 50167:.0f}% below, "
+            "over 22 of CICD's 41 years, on a BGOV pull the owner filtered at download because of "
+            "BGOV's export limits.** Both differences run in the direction of the gap. "
+            "The article still does "
+            "NOT state its key — its appendix says only 'a dataset of 50,167 unique contracts' — so "
+            "this is a bound, not a proof, and any Cedar contracts count must still name its key in "
+            "the same sentence. Severity dropped MEDIUM -> LOW: the residual is source coverage, "
+            "which is measurable, not an unexplained arithmetic disagreement."
         ),
     ))
 
@@ -1123,21 +1217,52 @@ def build_benchmarks(P, S, G, I, X) -> list:
         ))
 
     # ---- INTERNAL CONSISTENCY -------------------------------------------
+    # CORRECTED 2026-09-02. This row used to hold `delta_type="CORROBORATED"` as
+    # a LITERAL and an explanation that said "every headline figure reproduces
+    # exactly" — while comparing nothing. It was the repo's signature defect:
+    # a check that does not measure its own name. Two of its four figures had
+    # been false for hours. The four are now compared one by one and the type is
+    # DERIVED from the comparison.
+    _si = [
+        ("rows", 1_217_768, P["rows"], 0),
+        ("total obligations", 310_005_258_660.76, P["total_obligations"], 1_000_000.0),
+        ("attributed obligations", 244_770_000_000.0, P["attributed_obligations"], 1_000_000_000.0),
+        ("attributed entities", 498, P["entities_attributed"], 0),
+    ]
+    _diff = [(n, s, c) for n, s, c, tol in _si if abs(c - s) > tol]
     out.append(dict(
         id="INTERNAL-01",
         priority="1-INTERNAL",
         family="internal consistency",
-        claim="prime_contracts.csv headline row count and total",
-        cicd_figure="START_HERE.md: 1,217,768 rows, $310.01B, $244.77B attributed (79.0%), 498 entities",
+        claim="prime_contracts.csv headline row count and total, against the last figures START_HERE.md STATED",
+        cicd_figure="START_HERE.md as written 2026-08-26: 1,217,768 rows, $310.01B, "
+                    "$244.77B attributed (79.0%), 498 entities. START_HERE.md now says "
+                    "\"re-derive, do not read\" for the last three, so this row is a check "
+                    "against a RETIRED literal, not against a live claim.",
         cicd_value=None,
-        cedar_basis="recomputed from the file",
+        cedar_basis="recomputed from the file at this run's mtime stamp",
         cedar_value=P["total_obligations"],
         cedar_display=f"{P['rows']:,} rows · {B(P['total_obligations'])} · "
                       f"{B(P['attributed_obligations'])} attributed ({P['attribution_rate_pct']}%) · "
                       f"{P['entities_attributed']} entities",
         delta=None, delta_pct=None,
-        delta_type="CORROBORATED",
-        explanation="Every headline figure in START_HERE.md reproduces exactly from the file as of this run's mtime stamp.",
+        delta_type="CORROBORATED" if not _diff else "DATA_VINTAGE",
+        explanation=(
+            ("All four headline figures reproduce from the file at this run's mtime stamp: "
+             + ", ".join(n for n, _, _ in _si) + ".")
+            if not _diff else
+            ("**DERIVED, NOT ASSERTED — and it does not agree.** "
+             f"{len(_si) - len(_diff)} of {len(_si)} figures reproduce; "
+             f"{len(_diff)} do not: "
+             + "; ".join(f"{n} stated {s:,.0f}, measured {c:,.0f}" for n, s, c in _diff)
+             + ". The row count and the $310.01B universe total are unchanged, so this is not a "
+               "rebuild: it is the 2026-09-02 attribution corrections — `1079` un-attributing "
+               "$17.07B of quarantined-method links, `1117`/`1122` repointing $1.43B and "
+               "withdrawing $450.5M — moving the ATTRIBUTED half while the universe stayed put. "
+               "Typed DATA_VINTAGE because the disagreement is with a retired literal, not with "
+               "the file. **Until 2026-09-02 this row read CORROBORATED unconditionally and said "
+               "'every headline figure reproduces exactly' while comparing nothing.**")
+        ),
     ))
     fy2326 = sum(P["fy_rows"].get(str(y), 0) for y in range(2023, 2027))
     out.append(dict(
@@ -1165,24 +1290,37 @@ def build_benchmarks(P, S, G, I, X) -> list:
         id="INTERNAL-03",
         priority="1-INTERNAL",
         family="internal consistency",
-        claim="Summing subawards past `duplicate_status` double-counts",
+        claim="Summing subawards past the money rule double-counts — and the rule has TWO clauses",
         cicd_figure="n/a",
         cicd_value=None,
-        cedar_basis="subawards.csv by duplicate_status",
-        cedar_value=S["primary_total"],
-        cedar_display=f"{B(S['primary_total'])} primary vs {B(S['naive_all_rows_total'])} all rows",
-        delta=S["naive_all_rows_total"] - S["primary_total"],
-        delta_pct=round(100.0 * (S["naive_all_rows_total"] - S["primary_total"]) / S["primary_total"], 1),
+        cedar_basis="subawards.csv by duplicate_status AND subaward_exceeds_prime_flag",
+        cedar_value=S["countable_total"],
+        cedar_display=(
+            f"{B(S['countable_total'])} countable · {B(S['primary_total'])} primary-only · "
+            f"{B(S['naive_all_rows_total'])} all rows"
+        ),
+        delta=S["naive_all_rows_total"] - S["countable_total"],
+        delta_pct=S["money_rule_removal_pct_of_countable"],
         delta_type="DEFINITIONAL",
         explanation=(
+            f"THREE totals, and only the first may be quoted. **Countable "
+            f"{B(S['countable_total'])}** over {S['countable_rows']:,} rows is "
+            "`duplicate_status = 'primary'` AND `subaward_exceeds_prime_flag != 'yes'`. "
+            f"Primary-only is {B(S['primary_total'])}: it leaves in "
+            f"{S['rows_exceeding_their_own_prime']:,} rows reporting a subaward LARGER than their "
+            f"own prime award, worth {B(S['dollars_removed_by_exceeds_clause'])}. Unfiltered is "
+            f"{B(S['naive_all_rows_total'])}, because "
             f"{S['rows_by_duplicate_status'].get('exact_repeat_within_source', 0):,} rows are "
             f"`exact_repeat_within_source` and "
             f"{S['rows_by_duplicate_status'].get('superseded_by_primary_source', 0):,} are "
-            "`superseded_by_primary_source`. Summing all 63,548 rows returns "
-            f"{B(S['naive_all_rows_total'])} against a true {B(S['primary_total'])} — a "
-            f"{round(100.0 * (S['naive_all_rows_total'] - S['primary_total']) / S['primary_total'])}% "
-            "inflation. `duplicate_status = 'primary'` is mandatory on every subaward money figure "
-            "and belongs in cedar_domain beside SUM_COLUMNS."
+            "`superseded_by_primary_source` — FFATA makes the prime re-file an open subaward every "
+            "month, so one $57,500 subaward is 93 rows. **STATE THE DENOMINATOR:** the money rule "
+            f"removes {B(S['naive_all_rows_total'] - S['countable_total'])}, which is "
+            f"{S['money_rule_removal_pct_of_countable']}% of the correct total and "
+            f"{S['money_rule_removal_pct_of_unfiltered']}% of the unfiltered one. Both figures have "
+            "shipped without a denominator and a reviewer correctly concluded one of them had to be "
+            "wrong. **This row previously reported only the primary/all-rows pair and was itself "
+            "half the rule** — corrected 2026-09-02."
         ),
     ))
     out.append(dict(

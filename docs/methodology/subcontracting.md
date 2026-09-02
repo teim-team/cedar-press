@@ -1,52 +1,49 @@
 # Methodology — Native Federal Subcontracting
 
-**`subcontracting`. `data/clean/subawards.csv`, 87,177 rows.
-Unfiltered `subaward_amount` $51,447,159,579.79; the correct total is
-$29,468,837,987.91.** [re-measured 2026-09-02T15:50Z]
+**`subcontracting`. `data/clean/subawards.csv`, 89,809 rows.
+Unfiltered `subaward_amount` $57,020,557,710.47; the correct total is
+$34,906,694,737.65.** [re-measured 2026-09-02T17:00Z, cents-exact]
 
-> **EVERY FIGURE BELOW DATED EARLIER ON 2026-09-02 PREDATES THE 12:09Z FOLD-IN
-> AND IS SUPERSEDED.** `121 append` added **10,318 rows** at 12:09Z — the
-> FY2023 Q3 and FY2024 Q1–Q4 bulk-download quarters — taking the table
-> 76,859 → **87,177**. The money rule moves with it:
+> ### EVERY FIGURE BELOW DATED EARLIER ON 2026-09-02 PREDATES TWO FOLD-INS AND IS SUPERSEDED.
+>
+> `121 append` ran twice today: **+10,318 rows at 12:09Z** (FY2023 Q3, FY2024
+> Q1–Q4) and **+2,632 at 16:49Z** (FY2023 Q4, which had come back as a
+> header-only object and was re-pulled). 76,859 → 87,177 → **89,809**. The full
+> declared enricher chain was then run in order — `910 rescan`, `910 apply`,
+> `911 apply`, `871`, `81`, `1109 index`, `1109 apply` — and every step proved
+> row and money conservation to the cent.
 >
 > ```
-> all 87,177 rows                            $51,447,159,579.79   <- never quote this
+> all 89,809 rows                            $57,020,557,710.47   <- never quote this
 > countable: duplicate_status == 'primary'
 >        AND subaward_exceeds_prime_flag != 'yes'
->        67,583 rows                         $29,468,837,987.91   <- the correct total
-> the money rule removes                     $21,978,321,591.88
->    = 42.7% of the unfiltered figure
->    = 74.6% MORE than the correct total
+>        69,921 rows                         $34,906,694,737.65   <- the correct total
+> the money rule removes                     $22,113,862,972.82
+>    = 38.8% of the unfiltered figure
+>    = 63.4% MORE than the correct total
 > ```
 >
-> `duplicate_status` [re-measured]: `primary` **68,249** ·
-> `exact_repeat_within_source` **18,082** · `superseded_by_primary_source` 846.
-> **State the denominator** — 42.7% and 74.6% are the same difference against
-> two different bases, and the older pair (45.3% / 82.9%) is now wrong on both.
+> **State the denominator.** 38.8% and 63.4% are the same difference over two
+> bases. Both the older pairs — 45.3% / 82.9%, and 46.5% / 86.9% before that —
+> are now wrong on both numbers *and* were each quoted at some point with the
+> wrong noun. The overstatement has FALLEN because the money the fold-in added
+> is overwhelmingly `primary`, which is what a real year of coverage looks like.
 >
-> FY2024 is no longer empty: **8,839 rows, 8,175 countable, $3,133,280,000**,
-> against the 166 / $113,334,471 the "known limits" section still reports. FY2023
-> is **5,745 rows / 4,874 countable** and is now Q1–Q3, not Q1–Q2.
-> **FY2022 is still 89 countable rows and `fy2022_q1..q4` have never been
-> submitted** — see §7.
-
-*Written 2026-09-02. This is the methodology record: what was pulled and from
-where, how the rows were made, how entities were attributed, what was decided
-and why, what the known limits are, and how often it has to be re-pulled. It is
-not the product copy (`docs/datasets/_descriptors.json`) and not the codebook
-(`docs/codebooks/`).*
-
-**A note on the figures.** `[measured]` means the figure was re-counted from
-the live file with `csv.reader` on 2026-09-02, streaming the whole file.
-`[from the record]` means it came from a build log or docstring without
-independent measurement. Where a doc and the data disagreed, the measurement
-won; the disagreements are listed at the end.
-
-**Readiness: BLOCKED**, with five named blockers — C1 grain unstated on
-`subawards.csv`, C2 no validated primary key, C3 10,770 literal duplicates,
-C7 double-counting risk, C4 42% of entity-bearing rows keyed. [measured —
-`docs/DATASET_READINESS.md`, regenerated 2026-09-02] Every one of those is
-explained below, and three of the five are **deliberate**.
+> `duplicate_status` [re-measured]: `primary` **70,597** ·
+> `exact_repeat_within_source` **18,366** · `superseded_by_primary_source` 846.
+>
+> **The two years this document tells a buyer not to quote:**
+>
+> | | this doc says | measured now |
+> |---|---|---|
+> | FY2023 | *"half a year: 4,100 rows / $1,537,605,212, Q1 and Q2 only"* | **8,216 rows, 7,063 countable, $7,528,402,466 — all four quarters** |
+> | FY2024 | *"166 countable / $113,334,471, zero FSRS"* | **8,965 rows, 8,291 countable, $3,157,482,237** |
+> | FY2022 | *"89 countable / $47,021,525"* | **unchanged — 89 / $47,021,525.** `fy2022_q1..q4` were never submitted; all four went in at 16:47Z and are generating. This is now the only empty year. |
+>
+> Enricher coverage on the whole table after the chain: primary key
+> `(source_dataset, subaward_source_record_id)` **0 blank / 0 collisions on
+> 89,809 rows**; `subaward_sam_report_id` **88,811 (98.89%)**; at least one
+> Cedar leg **87,355 (97.27%)**; **subawardee's own county 85,858 (95.6%)**.
 
 ---
 
@@ -315,25 +312,83 @@ HigherGov export has no DUNS at all), sub-side city, ZIP and place of
 performance, congressional districts, CFDA numbers, and the five
 highly-compensated-officer pairs.
 
-> ### ⚠ THIS BLOCK DESCRIBED A LANDING THAT IS NOT IN THE FILE. Measured 2026-09-02T15:45Z.
+> ### ✅ RE-LANDED 2026-09-02T16:58Z, ON THE ENLARGED TABLE. What follows is the record of how it was lost.
+>
+> **Re-run after the fold-in, in the declared order, as the LAST step.**
+> `1109 index` was rebuilt first because the old index predated the FY2023 Q3
+> and Q4 zips: **68 CSV members, 8,916,498 source rows, 8,869,339 distinct
+> `subaward_sam_report_id`, 0 rows with no id, 57 ids seen twice with a
+> different subawardee address** (first occurrence kept). Then `apply`:
+>
+> | | |
+> |---|---:|
+> | rows | 89,809 → 89,809 **conserved** |
+> | `subaward_amount` | $57,020,557,710.47 → $57,020,557,710.47 **conserved to the cent** |
+> | **county from the subawardee's own ZIP** | **85,858 (95.6%)** |
+> | ZIP recovered, not in the county crosswalk | 2,424 (2.7%) |
+> | no `subaward_sam_report_id`, no join possible | 998 (1.1%) |
+> | source published no ZIP | 529 (0.6%) |
+> | live header | **81 columns; all ten `geo_subawardee_*` present** |
+> | `selftest` | exit 0 — all three invariants proven to FIRE on an injected violation |
+>
+> **`verify` reports INV-SGEO-1 as UNMEASURED for this run, and that is the
+> honest answer rather than a pass.** Its baseline is the newest
+> `.bak_*_pre_1109_*` on disk, and the only one there was the 76,859-row
+> vintage from 10:24Z — two fold-ins ago. Comparing against it produced a
+> "FAIL rows 76,859 → 89,809", which is not a breach, it is the day's work.
+> The stale snapshot was moved aside
+> (`.superseded_pre_fold_in_76859_kept_as_evidence`) so `verify` says
+> UNMEASURED instead of reporting somebody else's legitimate change as a
+> violation. The conservation figures above are measured **by the apply itself,
+> during the write**, which is the run that can actually see it.
+>
+> **Two code fixes so neither half recurs**, both 2026-09-02:
+> - `1109`'s and `1085`'s `backup()` now supersede a same-day snapshot whose
+>   size does not match the live file and re-take it — the rule
+>   `871_promote_geo_keys_contracts.py` already earned the hard way.
+> - the ten columns are registered in `121`'s `POST_PROMOTION_COLS` and in
+>   `cedar_pipeline.KNOWN_ORDERINGS`, so the next `121 match` accepts them
+>   instead of refusing, and `build.py` and `62` know 1109 runs last.
+>
+> ---
+>
+> ### ⚠ HOW IT WAS LOST. Measured 2026-09-02T15:45Z, before the re-run above.
 >
 > `docs/SUBAWARDEE_GEO_PROMOTION.json` records a successful apply at
 > **10:37:13Z** — written by `cmd_apply` only *after* `atomic_replace`
-> succeeded, so it did land. **It is not there now.** The live
+> succeeded, so it did land. **It was not there at 15:45Z.** The live
 > `data/clean/subawards.csv` has **71 columns and carries exactly one
 > `geo_subawardee_*` column — `geo_subawardee_county_gap_reason`, the old gap
 > sentence.** None of the ten promoted columns is present.
 >
-> **The mechanism is named, in another script's own docstring.**
-> `871_promote_geo_keys_contracts.py :: backup()` carries a 2026-09-02 incident
-> note: its same-day second run addressed the FIRST run's date-stamped snapshot
-> and so **rebuilt the live tables from a morning vintage** — *"at 09:04 it took
-> `subawards.csv` from 87,177 rows back to 76,859 … and it took
-> `prime_contracts.csv` back to a 01:14 snapshot, discarding `1085`'s 326,166
-> PSC/description fills and dropping five columns belonging to `1079`."*
-> **That note lists 1085 and 1079 as the casualties and does not list 1109; the
-> ten `geo_subawardee_*` columns are a third.** The bug in `backup()` is fixed;
-> the damage to this promotion was not repaired when the row count was.
+> **The mechanism is in this project's own logs, to the minute, and it is not
+> an accident — it is a guard doing its job and the operator paying it off in
+> the wrong currency.**
+>
+> | time | event | evidence |
+> |---|---|---|
+> | 10:37:13Z | `1109 apply` lands the ten columns, county on 73,388 of 76,859 | `docs/SUBAWARDEE_GEO_PROMOTION.json` |
+> | **12:01:12Z** | **`121 match` REFUSES**: *"subawards.csv header is not the promoted schema … columns append() cannot fill=['geo_subawardee_city', 'geo_subawardee_state_code', …]"* — naming exactly these ten | `logs/121_match.log` |
+> | **12:03:54Z** | **`121 match` runs clean on the same file** | `logs/121_match2.log` |
+> | 12:09:09Z | `121 append` reads the file as *"76,859 existing … 71 columns"* | `logs/121_append.log` |
+>
+> **In the 162 seconds between those two `match` runs the ten columns were
+> taken back out of the table so the promotion could proceed.** The guard was
+> right — a column `append()` cannot fill WOULD be blanked on every appended
+> row — and the resolution chosen was to delete the blocked work rather than to
+> register it. `POST_PROMOTION_COLS` had been extended for `871`'s ten geo
+> columns eleven hours earlier, *explicitly on the geography workstream's
+> behalf*, and 1109's ten were simply never added.
+>
+> **A separate, larger revert happened an hour later and is worth not
+> confusing with this one.** `871_promote_geo_keys_contracts.py :: backup()`
+> carries its own 2026-09-02 incident note: a same-day second run addressed the
+> FIRST run's date-stamped snapshot and **rebuilt both live tables from a
+> morning vintage** — *"at 09:04 it took `subawards.csv` from 87,177 rows back
+> to 76,859 … and it took `prime_contracts.csv` back to a 01:14 snapshot,
+> discarding `1085`'s 326,166 PSC/description fills and dropping five columns
+> belonging to `1079`."* That bug is fixed and the row count was repaired; it is
+> **not** what removed the ten columns, which were already gone by 12:03Z.
 >
 > **The lesson, which this repo has now paid for twice in one day: a
 > conservation proof is not a landing proof.** 1109's `verify` and `selftest`
@@ -423,10 +478,61 @@ dead"* — the server reports `rows_so_far = 0` until the file is built.
 ## 5. What a buyer may total
 
 - **`subaward_amount` is additive only on rows where `duplicate_status ==
-  'primary'` AND `subaward_exceeds_prime_flag != 'yes'`.** 58,117 rows,
-  **$25,864,997,128.19**. [measured]
+  'primary'` AND `subaward_exceeds_prime_flag != 'yes'`.**
+  ~~58,117 rows, **$25,864,997,128.19**.~~ **RE-MEASURED 2026-09-02 by
+  `code/1128_cicd_benchmark_refresh_2026_09_02.py measure`, independently of the
+  banner at the top of this file and agreeing with it to the cent: 69,921 rows,
+  $34,906,694,737.65.** The struck figures predate the two `121 append`
+  fold-ins this document's own header records, and they are the pair that was
+  still circulating as settled — see that header for both denominators.
 - **Never add subawards to `prime_contracts.csv`.** A subaward is a slice of a
   prime award already counted there.
+
+<!-- BEGIN REGIME-1128 -->
+### The deeper reason the two never sum: they are not the same KIND of measurement
+
+*Added 2026-09-02 from the owner's own account of why CICD's 2022 article
+graphed a prime series and stated the prime+subaward figure as a single total
+rather than graphing it. Written as a fact about the SOURCES, not as a Cedar
+limitation.*
+
+**A prime obligation is what the government recorded paying. A subaward is what
+a vendor said it paid onward.** FPDS is a government reporting system; FSRS is a
+prime contractor's self-report, threshold-gated and unaudited, with no
+government verification on the sub side. Two reporting regimes, two completeness
+profiles, two different epistemic objects.
+
+That is the reason underneath the slice-of-a-prime rule, and it is the stronger
+one. Even if double-counting were somehow not a concern, a
+government-recorded figure and a vendor-reported figure would not belong in one
+sum, because the reader cannot tell which half of the total carries which
+warranty.
+
+**Consequence for any annual series: year-over-year movement in this table is
+partly reporting behaviour, not economic activity.** Measured on the live file,
+countable subaward dollars by fiscal year run FY2018 $3.82B → FY2019 $3.27B →
+**FY2020 $0.58B** → FY2021 $4.83B → **FY2022 $0.05B** → FY2023 $7.53B →
+FY2024 $3.16B. FY2020 and FY2022 are collection and filing artefacts this
+document already names in §6 — an empty FSRS contracts member and four
+never-submitted jobs — and nothing economic happened in either year to justify
+the shape. **Any chart of subawards by year must carry that caveat on its face,
+or it will be read as a trend.** A single stated total is the honest form for
+this quantity in a publication, which is exactly the form CICD chose.
+
+**None of this is an argument against holding the data or linking it to
+entities.** The subaward layer is the only place a Native entity appears as the
+*subcontractor* rather than the prime, and no FPDS row can show that
+relationship. `911` resolved `prime_cedar_uid` and `sub_cedar_uid` separately
+for that reason. ~~43,282 rows (56%)~~ **RE-MEASURED 2026-09-02 on the
+89,809-row file by `code/1128_cicd_benchmark_refresh_2026_09_02.py`: 47,671 rows
+(53.1%) have a `sub_cedar_uid` and NO `prime_cedar_uid` — their only Native party
+is the SUBAWARDEE — and 47,561 of those carry a blank `cedar_uid`, which is the
+prime leg and is legitimately blank there.** 1,733 rows carry both legs, 37,951
+the prime leg only, and **2,454 (2.73%) carry neither**, so at least one leg is
+resolved on 97.27%. The 43,282/56% pair predates the two `121 append` fold-ins
+and should not be re-quoted. Vendor-reported is a reason to **label** the
+dataset, not a reason to discount it.
+<!-- END REGIME-1128 -->
 - **Never pool the two populations.** A Native prime paying a non-Native sub
   and a non-Native prime paying a Native sub are different economic
   relationships running in opposite directions, and summing them double-counts
@@ -448,15 +554,38 @@ dead"* — the server reports `rows_so_far = 0` until the file is built.
 
 ## 6. Known limits
 
-- **FY2022 and FY2024 are effectively empty and must not be quoted.** FY2022
+- ~~**FY2022 and FY2024 are effectively empty and must not be quoted.** FY2022
   holds **89 countable rows / $47,021,525**; FY2024 **166 / $113,334,471** —
   all HigherGov and forward-fill, **zero FSRS**. FY2023 is **half a year**:
   4,100 rows / $1,537,605,212, Q1 and Q2 only (2022-10-01..2023-03-31, 361,109
-  raw rows). Label it as such. [measured]
-- Countable rows by fiscal year [measured]: 2010 129 · 2011 1,567 · 2012 2,131
+  raw rows). Label it as such.~~ **TWO OF THE THREE ARE CLOSED, 2026-09-02.**
+  FY2024 is **8,291 countable rows / $3,157,482,237** and FY2023 is **7,063 /
+  $7,528,402,466 across all four quarters** — 749,548 raw rows over
+  2022-10-01..2023-09-30. **FY2022 is unchanged at 89 / $47,021,525 and is the
+  one year that must still not be quoted**; its four quarters were submitted at
+  16:47Z and are generating.
+- **A `finished` job with no error message can still be empty, and the row
+  count is the only thing that says so.** `fy2023_q4` returned HTTP 200,
+  `status: finished`, `message: null` — and a 1,889-byte zip whose two CSV
+  members are 4,144 and 3,992 bytes: one header line each, **0 rows**, built in
+  80 seconds where its four sibling quarters took 2,809–4,087. The re-pull
+  returned **231,453 rows**, the largest of any FY2023 or FY2024 quarter. The
+  detector that caught it was not the pull log: it was three months of the
+  clean table reading **14 / 24 / 23** rows against 484–704 in every
+  neighbouring month. **Compare a window against its neighbours; a zero that
+  the server reports without complaint looks exactly like a fact about the
+  world.**
+- ~~Countable rows by fiscal year [measured]: 2010 129 · 2011 1,567 · 2012 2,131
   · 2013 2,471 · 2014 3,658 · 2015 4,014 · 2016 4,174 · 2017 3,552 · 2018 5,485
   · 2019 6,259 · **2020 3,185** · 2021 7,408 · **2022 87** · **2023 3,457** ·
-  **2024 126** · 2025 7,042 · 2026 3,325.
+  **2024 126** · 2025 7,042 · 2026 3,325.~~
+  **RE-MEASURED 2026-09-02T17:00Z after both fold-ins** — 2010 129 · 2011 1,567
+  · 2012 2,131 · 2013 2,471 · 2014 3,658 · 2015 4,014 · 2016 4,174 · 2017 3,552
+  · 2018 5,485 · 2019 6,259 · 2020 3,185 · **2021 7,441** · **2022 87** ·
+  **2023 7,063** · **2024 8,291** · 2025 7,042 · 2026 3,325. Only the three bold
+  years moved; every other year reproduces to the row, which is the check that
+  the append added rather than disturbed. **FY2022 is now the only year a buyer
+  must be told not to quote.**
 - **FY2020 has no FSRS contract subawards at all.** The 2026-08-05 `fy2020` job
   returned an assistance member of 456,412 rows and a **contracts member of
   4,144 bytes — one header line and zero data rows**, against FY2019's 439 MB.

@@ -150,6 +150,28 @@ def write_csv(p, rows, fields):
 
 
 # ------------------------------------------------------------------ schema
+def carry_live_columns(path, canonical):
+    """Canonical order first, then any column the LIVE file already carries.
+
+    Added 2026-09-02 by code/1129_place_ids.py, which promoted
+    `cedar_place_id` onto this table in place. A FIXED header on a wholesale
+    writer silently deletes an in-place enricher's work - class 6, and the
+    exact defect `code/845_regenerate_guard.py` names. A rebuilder cannot
+    REPOPULATE an enricher's column, so it writes it BLANK and the enricher
+    refills it: `py -3 code/1129_place_ids.py migrate --apply`. Blank keeps
+    the schema and every consumer's join; dropped breaks both.
+
+    A retired column stays retired, because it is not on disk."""
+    import csv as _csv
+    from pathlib import Path as _P
+    p = _P(path)
+    live = []
+    if p.exists():
+        with p.open(encoding="utf-8-sig", errors="replace", newline="") as _f:
+            live = next(_csv.reader(_f), [])
+    return list(canonical) + [c for c in live if c and c not in canonical]
+
+
 COLS = [
     "observation_id",
     "facility_id", "facility_name", "tribe_id", "tribe_canonical_name",
@@ -1008,7 +1030,8 @@ def main():
     # WRITE
     # =====================================================================
     print()
-    write_csv(CLEAN / "gaming_capacity_official.csv", rows, COLS)
+    write_csv(CLEAN / "gaming_capacity_official.csv", rows,
+              carry_live_columns(CLEAN / "gaming_capacity_official.csv", COLS))
 
     ucols = sorted({k for u in unresolved for k in u.keys()})
     for pref in ("YOUR_RULING", "reason"):

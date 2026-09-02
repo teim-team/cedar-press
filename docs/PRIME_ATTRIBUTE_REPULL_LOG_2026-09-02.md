@@ -139,16 +139,21 @@ Apply, `code/1085 apply`:
 | `verify` | exit 0 |
 | `selftest` | exit 0 — both invariants proven to FIRE on an injected violation |
 
-Column fill, before → after:
+Column fill, before → after — **these are the EIGHT-OBJECT PARTIAL RUN's
+figures and are superseded; the closing table at the top of this file has
+the final ones (PSC 840,754 / 69.04%). Kept because they are the measured
+midpoint that shows what each tranche of objects bought:**
 
-| column | before | after |
+| column | before | after (partial, 8 of 19 objects) |
 |---|---:|---:|
 | `product_or_service_code` | 247,987 (20.4%) | **574,011 (47.1%)** |
 | `product_or_service_code_description` | 247,987 (20.4%) | **574,011 (47.1%)** |
 | `award_base_description` | 247,987 (20.4%) | **573,320 (47.1%)** |
 | `naics_description` | 247,987 (20.4%) | **561,536 (46.1%)** |
 
-By fiscal year, on the archive stratum, PSC fill is now:
+By fiscal year, on the archive stratum, PSC fill **at the partial-run
+midpoint** was — every one of these is now 99.7% or better; see the
+closing table:
 
 ```
 FY2008  99.7%   FY2013 100.0%   FY2018  11.3%   FY2023  73.9%
@@ -160,7 +165,9 @@ FY2012 100.0%   FY2017   6.8%   FY2022  47.7%
 
 **The eight re-pulled years are at ~100%; the eleven that are not are still on
 the gapfill corpus alone.** That contrast is the measurement of what the
-re-pull buys, and it is why finishing it matters.
+re-pull buys, and it is why finishing it matters. **It was finished the same
+day** — all eleven remaining objects landed between 12:12Z and 15:09Z and every
+year is now 99.7% or better.
 
 ## What stopped it, and why the run stopped rather than pushing through
 

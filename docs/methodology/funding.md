@@ -310,12 +310,19 @@ by content — never replace them** — then re-run `791 repoint`.
 > `count(distinct source_file)` over the unkeyed rows is exactly **60**.
 >
 > **And reason 2 above — "there is no full-column route for those years" — is
-> wrong.** `seam/doi_fy2001.zip` is a **112-column FY2001 object carrying the
-> key**, pulled by this same script from this same
-> `bulk_download/awards` endpoint on 2026-08-05 at 19:06Z, **79 minutes before**
-> the 20-column `agencies/ed_fy2001.zip` at 20:25Z. The only difference is the
-> `columns` key in the payload. The archive listing beginning at FY2007 is true
-> and irrelevant — these objects never came from the archive.
+> wrong, and the server's own job records say so.** Both of these are FY2001
+> assistance objects from the same 2026-08-05 pre-2008 pull, and each carries
+> the `total_columns` the bulk-download service itself reported:
+>
+> | state record | job object | `total_columns` | key |
+> |---|---|---:|---|
+> | `seam/_meta.json` → `"2001"` | `All_PrimeTransactions_2026-08-05_H19M06S26840101.zip` | **112** | **PRESENT** |
+> | `agencies/_state.json` → `jobs.ed_fy2001` | `All_PrimeTransactions_2026-08-05_H20M25S29905347.zip` | **20** | ABSENT |
+>
+> Same endpoint, same day, **79 minutes apart**, identical record schema. The
+> only difference is the `columns` key in the payload. The archive listing
+> beginning at FY2007 is true and irrelevant — these objects never came from
+> the archive.
 >
 > So the state of the 1,943,994 unkeyed rows is **`NOT_ACQUIRED`**, not
 > `SOURCE_DOES_NOT_PUBLISH`. **Reasons 1 and 3 are untouched and are what still

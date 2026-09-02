@@ -915,8 +915,12 @@ def probe_entity(job):
                 add(su, fam, ti or su, "wp/v2/media")
         page += 1
     rec["media_scanned"] = seen
-    media_ok = (rec["wp"] == "Y"
-                and (seen >= rec["media_total"] or page > MEDIA_PAGE_CAP))
+    # COMPLETE, not merely attempted: `or page > MEDIA_PAGE_CAP` made a
+    # truncated index look like a finished route and let a CHECKED_ABSENT rest
+    # on 2,500 of 13,564 documents.
+    media_ok = (rec["wp"] == "Y" and seen >= rec["media_total"])
+    rec["media_index_truncated"] = bool(
+        rec["media_total"] and seen < rec["media_total"])
 
     # 2 - custom post types. The highest-yield single signal in this project.
     types_ok = False
@@ -1173,6 +1177,15 @@ def harvest(limit_per_entity=12, workers=10, only_job=None):
         s = dict(s, surface_url=u)
         if s["vocabulary_family"] != "CAP":
             continue
+        # lint-ok: class5 - this short-circuit is in `harvest`, which writes no
+        # log or summary at all; `run_summary.json` is written only by `build`,
+        # and `build` recomputes every counter from the FULL on-disk spools
+        # (host_probe.jsonl, documents.jsonl, the findings and surfaces
+        # spools), never from a run's in-memory counters. A second `harvest`
+        # that skips everything therefore leaves the summary unchanged rather
+        # than rewriting it to zero, which is the 164 defect this class exists
+        # to catch. Re-running the whole chain on an unchanged tree reproduces
+        # the same summary byte for byte.
         if NON_DOCUMENT_EXT.search(u) or u in already:
             continue
         if u in seen_urls:
@@ -1270,6 +1283,182 @@ def harvest(limit_per_entity=12, workers=10, only_job=None):
 
 
 # ===========================================================================
+# DEEPMEDIA - finish the media index on the hosts MEDIA_PAGE_CAP truncated.
+#
+# 245 distinct hosts advertise more media than the run read: meherrinnation.org
+# 13,564 against 2,500; choctawnation.com 11,313 against 1,888. A
+# CHECKED_ABSENT resting on 18% of a host's document library is a weaker claim
+# than it looks, and the coverage row now SAYS so - but saying so is second
+# best to finishing the read. It costs about 1,450 requests in total, because
+# the index returns 100 records per request and crawling for the same
+# documents would cost thousands. This RESUMES at the page the run stopped on
+# and rewrites the host record in place, so the truncation flag clears only
+# when the read is genuinely complete.
+# ===========================================================================
+def deepmedia(workers=10, page_cap=200):
+    hosts = read_jsonl(HOSTLOG)
+    todo, seen = [], set()
+    for h in hosts:
+        key = (h["cedar_uid"], h["host"])
+        if key in seen or h["reached"] != "Y":
+            continue
+        seen.add(key)
+        if (h.get("media_total") or 0) > (h.get("media_scanned") or 0):
+            todo.append(h)
+    print("deepmedia: %d host records to finish, %d media records outstanding"
+          % (len(todo), sum(h["media_total"] - h["media_scanned"] for h in todo)))
+    if not todo:
+        return 0
+
+    def one(h):
+        hs = HostSession(h["host"])
+        for scheme in ("https", "http"):
+            r = hs._try("%s://%s/robots.txt" % (scheme, h["host"]))
+            if not isinstance(r, Exception) and r.status_code == 200:
+                hs.robots_body = r.text
+                break
+        if robots_bans_whole_site(hs.robots_body)[0] or hs.reach() is None:
+            return h, [], h["media_scanned"]
+        root = hs.root
+        start = (h["media_scanned"] // 100) + 1
+        page, scanned, out = start, h["media_scanned"], []
+        total_pages = page_cap
+        while page <= total_pages and page <= page_cap:
+            r = hs.get("%s/wp-json/wp/v2/media?per_page=100&page=%d"
+                       "&_fields=source_url,title,date,mime_type" % (root, page))
+            if r is None:
+                break
+            try:
+                items = json.loads(r.text)
+            except ValueError:
+                break
+            if not isinstance(items, list) or not items:
+                break
+            total_pages = min(page_cap,
+                              int(r.headers.get("X-WP-TotalPages", 1) or 1))
+            for it in items:
+                scanned += 1
+                su = it.get("source_url", "") or ""
+                ti = re.sub(r"<[^>]+>", "",
+                            (it.get("title") or {}).get("rendered", ""))
+                if NON_DOCUMENT_EXT.search(su):
+                    continue
+                fam = ("CAP" if CAP_PAT.search(su + " " + ti)
+                       else "BIZ" if BIZ_PAT.search(su + " " + ti) else "")
+                if fam:
+                    out.append({"cedar_uid": h["cedar_uid"],
+                                "canonical_name": h["canonical_name"],
+                                "entity_class": h["entity_class"],
+                                "vocabulary_family": fam,
+                                "surface_url": up.urldefrag(su)[0],
+                                "surface_title": (ti or su)[:160],
+                                "technique": "wp/v2/media (deepmedia resume)",
+                                "host": h["host"], "checked_date": TODAY,
+                                "built_by": BUILT_BY})
+            page += 1
+        return h, out, scanned
+
+    from concurrent.futures import as_completed
+    updated, n, newsurf = {}, 0, 0
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        futs = dict((ex.submit(one, h), h) for h in todo)
+        for fut in as_completed(futs):
+            n += 1
+            try:
+                h, out, scanned = fut.result()
+            except Exception as exc:
+                print("   ! %s raised %s" % (futs[fut]["host"], exc))
+                continue
+            for s in out:
+                append_jsonl(SURFACES_SPOOL, s)
+            newsurf += len(out)
+            updated[(h["cedar_uid"], h["host"])] = scanned
+            if n % 40 == 0 or n == len(todo):
+                print("   %d/%d  +%d surfaces (total %d)"
+                      % (n, len(todo), len(out), newsurf), flush=True)
+
+    tmp = HOSTLOG.with_suffix(".jsonl.part")
+    with tmp.open("w", encoding="utf-8") as fh:
+        for h in hosts:
+            k = (h["cedar_uid"], h["host"])
+            if k in updated and updated[k] > (h.get("media_scanned") or 0):
+                h["media_scanned"] = updated[k]
+                h["media_index_truncated"] = h["media_total"] > updated[k]
+                h["deepmedia_resumed"] = TODAY
+            fh.write(json.dumps(h, ensure_ascii=False) + "\n")
+    os.replace(tmp, HOSTLOG)
+    still = sum(1 for h in read_jsonl(HOSTLOG)
+                if (h.get("media_total") or 0) > (h.get("media_scanned") or 0))
+    print("deepmedia: %d new CAP/BIZ surfaces; %d host records still truncated"
+          % (newsurf, still))
+    return 0
+
+
+# ===========================================================================
+# PURGE - collapse (host, md5) duplicates and the findings that rode on them.
+#
+# V7 fired on the real run: www.tyonek.com returned the same md5 ELEVEN times,
+# because /capabilities, /capabilities/, /capabilities#manufacturing,
+# /capabilities/#services and six more fragments were treated as eleven
+# documents. Same shape as the `?wpdmdl=` incident - green statuses, valid
+# files, one document. The answer is to purge, not to raise the ceiling: a
+# ceiling raised to accommodate a defect is a waiver wearing a gate's clothes.
+# Within one host, one md5 is one document; the shortest URL is kept because a
+# fragment is always longer than the page it points into.
+# ===========================================================================
+PURGE_LOG = STAGE / "purged_duplicate_documents.csv"
+
+
+def purge():
+    docs = read_jsonl(DOCLOG)
+    if not docs:
+        print("no documents on record")
+        return 0
+    keep, dropped = {}, []
+    for d in docs:
+        k = (d["host"], d["md5"])
+        cur = keep.get(k)
+        if cur is None or len(d["url"]) < len(cur["url"]):
+            if cur is not None:
+                dropped.append(cur)
+            keep[k] = d
+        else:
+            dropped.append(d)
+    if not dropped:
+        print("no duplicate (host, md5) documents - nothing to purge")
+        return 0
+    dead_urls = set(d["url"] for d in dropped) - set(
+        d["url"] for d in keep.values())
+    finds = read_jsonl(FINDINGS_SPOOL) + read_csv(FINDINGS)
+    kept_f = [f for f in finds if f.get("source_url") not in dead_urls]
+    lost_f = len(finds) - len(kept_f)
+
+    tmp = DOCLOG.with_suffix(".jsonl.part")
+    with tmp.open("w", encoding="utf-8") as fh:
+        for d in keep.values():
+            fh.write(json.dumps(d, ensure_ascii=False) + "\n")
+    os.replace(tmp, DOCLOG)
+    tmp = FINDINGS_SPOOL.with_suffix(".jsonl.part")
+    with tmp.open("w", encoding="utf-8") as fh:
+        for f in kept_f:
+            fh.write(json.dumps(f, ensure_ascii=False) + "\n")
+    os.replace(tmp, FINDINGS_SPOOL)
+    if FINDINGS.exists():
+        FINDINGS.unlink()          # rebuilt from the spool by `build`
+    write_csv(PURGE_LOG, [dict(d, purged_reason=(
+        "identical md5 to a shorter URL on the same host - one document "
+        "reached through several fragment URLs"), purged_date=TODAY,
+        built_by=BUILT_BY) for d in dropped])
+    print("purged %d duplicate document rows across %d host+md5 pairs; "
+          "%d finding rows rode on a purged URL and went with them; "
+          "%d documents remain, %d distinct md5"
+          % (len(dropped), len(set((d["host"], d["md5"]) for d in dropped)),
+             lost_f, len(keep), len(set(d["md5"] for d in keep.values()))))
+    print("record: %s" % PURGE_LOG)
+    return 0
+
+
+# ===========================================================================
 # BUILD  (offline) - outcomes, corroboration, refusals
 # ===========================================================================
 HARVEST_TYPES = ["enterprises", "identifiers", "individual_business",
@@ -1343,7 +1532,18 @@ def build():
                 "entity_class": h["entity_class"], "host": h["host"],
                 "jobs": h["jobs"], "checked_date": h["checked_date"],
                 "built_by": BUILT_BY}
-        rr = h.get("routes_run") or {}
+        rr = dict(h.get("routes_run") or {})
+        # A TRUNCATED MEDIA INDEX IS NOT A COMPLETED ROUTE. The run marked
+        # `media_index` true when the page cap was reached, so a host whose
+        # index advertises 13,564 documents and of which 2,500 were read
+        # counted as fully searched - and V10 would then accept a
+        # CHECKED_ABSENT behind it. 250 of the 310 WordPress hosts are in that
+        # state. Re-derived here from the counts the run recorded, so the
+        # correction needs no re-crawl.
+        truncated = (h.get("media_total", 0) or 0) > (h.get("media_scanned", 0) or 0)
+        if truncated:
+            rr["media_index"] = False
+            rr["media_index_truncated"] = True
         mr_ran = sum(1 for k in ("media_index", "custom_post_types",
                                  "rest_search", "sitemap") if rr.get(k))
         if h["reached"] == "REFUSED":
@@ -1394,6 +1594,9 @@ def build():
                                             "absence" % mr_ran)
             row["identity_verdict"] = h["identity_verdict"]
             row["machine_readable_routes_run"] = mr_ran
+            row["media_index_truncated"] = "Y" if truncated else "N"
+            row["media_advertised"] = h.get("media_total", 0)
+            row["media_scanned"] = h.get("media_scanned", 0)
             row["routes_run"] = json.dumps(rr)
             row["n_surfaces"] = len(surf_by.get(uid, []))
             row["n_identifiers"] = len(find_by.get(uid, []))
@@ -1634,8 +1837,8 @@ def selftest():
 
 def main():
     ap = argparse.ArgumentParser(description="1114 capability-statement harvest")
-    ap.add_argument("cmd", choices=["worklist", "run", "harvest", "build",
-                                    "verify", "selftest"])
+    ap.add_argument("cmd", choices=["worklist", "run", "harvest", "deepmedia",
+                                    "purge", "build", "verify", "selftest"])
     ap.add_argument("--job", default="identifiers",
                     choices=["released", "identifiers", "institutions"])
     ap.add_argument("--limit", type=int, default=None)
@@ -1649,6 +1852,10 @@ def main():
             set(h.strip() for h in a.hosts.split(",") if h.strip()) or None)
     elif a.cmd == "harvest":
         harvest(workers=a.workers)
+    elif a.cmd == "deepmedia":
+        sys.exit(deepmedia(workers=a.workers))
+    elif a.cmd == "purge":
+        sys.exit(purge())
     elif a.cmd == "build":
         build()
     elif a.cmd == "verify":

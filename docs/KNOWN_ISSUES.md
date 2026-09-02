@@ -1283,3 +1283,90 @@ reporting that seven owner-graded assertions were withdrawn. The way back to
 `prime_contracts.csv`. Neither number is gate-verified, because the gate does
 not run.
 <!-- END LADDER-1117-1122 -->
+
+<!-- BEGIN CAPABILITY-1114 -->
+## `elyshoshonetribe.com` is recorded as refusing this agent and, measured 2026-09-02, does not
+
+*Found by `code/1114_capability_statement_harvest.py`. Full account:
+`docs/CAPABILITY_STATEMENT_HARVEST_2026-09-02.md` §2.*
+
+`review/tribal_vendor_list_registry_2026-08-26.csv` records `ROBOTS_DISALLOW`
+for Ely Shoshone, quoting *"robots.txt explicitly names and disallows
+'ClaudeBot', 'anthropic-ai', 'GPTBot', 'Amazonbot' and others"*.
+`review/1020_named_agent_robots_exposure.csv` rows 40-41 carry it forward, and
+shard N purged the host's bodies on it.
+
+The live file is the Squarespace template and is **one group**: thirty
+`User-agent:` lines — `AI2Bot` … `ClaudeBot` … `AdsBot-Google-Mobile-Apps`,
+then `User-agent: *` — followed by a single shared block of **27 path-scoped
+`Disallow` directives**. **There is no `Disallow: /` in the file for any agent.**
+`ClaudeBot` is subject to exactly the wildcard's rules.
+
+**Being named in a `User-agent:` list is not being disallowed.** This is the
+mirror of the defect the coverage audit caught in itself, where
+`"Disallow" in robots_note` fired on the string `no Disallow directives`: there
+a *string* match manufactured 106 refusals, here a *name* match manufactured
+one. A false refusal is the more expensive direction, because it leaves no
+artefact to trip over — it reads as a completed decision.
+
+**Bounded claim:** as of 2026-09-02 the file does not disallow us. It may have
+changed since 2026-08-26 and nothing on this machine can prove it did not.
+`www.penobscotnation.org`, checked the same minute by the same parser, **does**
+carry `Disallow: /` for `ClaudeBot` and is correctly still refused — which is
+the evidence the parser reads groups rather than strings.
+
+**Not acted on.** Nothing was harvested from Ely Shoshone beyond robots.txt and
+the home page. Raised in `review/OWNER_DECISION_QUEUE.md` for a ruling.
+
+## Two hazards this project has written down, in a form the written version misses
+
+- **"Ask robots as every name that means you" needs its second half: and no
+  name that does not.** `CCBot` (Common Crawl) sat in this script's agent-token
+  tuple for its first 47 hosts and recorded four false refusals. Three of the
+  four turned out to name `ClaudeBot` genuinely; `wildhorseresort.com` did not
+  and was recovered. An over-broad refusal is invisible because it fails safe.
+- **A URL fragment is not a document.** `verify` V7 fired on the live run:
+  `www.tyonek.com` returned the same md5 **eleven** times because
+  `/capabilities`, `/capabilities/`, `/capabilities#manufacturing` and eight
+  more were treated as separate objects — the `?wpdmdl=` shape reached by a
+  different road. Purged (187 rows, 76 findings), not waived. Defrag at
+  candidate time.
+<!-- END CAPABILITY-1114 -->
+
+<!-- BEGIN FWD-CONSTRUCTION-2026-09-02 -->
+## Open after the 2026-09-02 forward-construction pass
+
+**1. FY2022 subawards are still 89 countable rows / $47,021,525, and it is the
+only empty year left.** `fy2022_q1..q4` had never been submitted; all four were
+submitted at 16:47Z and are generating server-side, one at a time, tokens
+checkpointed in
+`data/raw/subcontracts/usaspending_2026-08-12/_state.json`. **If the poller
+died, nothing is lost — resume with `py -3 code/121_pull_subawards_api.py
+collect`, then `match` → `append` → `910 rescan` → `910 apply` → `911 apply`
+→ `871` → `1085 apply` → `81` → `1109 index` → `1109 apply`.** Never
+re-submit an accepted token (rule 5).
+
+**2. `1109 verify`'s INV-SGEO-1 is UNMEASURED, not passing.** The only
+`.bak_*_pre_1109_*` on disk was the 76,859-row vintage from before two fold-ins,
+so it was moved aside rather than used as a comparand that would report the
+day's work as a breach. The conservation figures for the 16:58Z run are the ones
+the apply measured during the write (89,809 → 89,809, $57,020,557,710.47
+unchanged). The next `1109 apply` will take a correct snapshot automatically.
+
+**3. `docs/datasets/_PUNCHLIST_CLAIM_AUDIT.md` reports `product_or_service_code`,
+`product_or_service_code_description`, `award_base_description` and
+`naics_description` at 247,987 non-blank.** All four are now 827,858–840,754.
+It is GENERATED — re-derive with `py -3 code/1107_punchlist_claim_verify.py`,
+do not hand-edit.
+
+**4. `62_no_regression_check.py` will exit 1 on `code_duplicate_numbers`.**
+`1050_preflight.py` measured **44** colliding script numbers against a ratchet
+floor of 43 at 15:34Z. Not this pass's — no new number was claimed here; the
+work ran through existing scripts. Named so the next agent does not inherit it
+as an unowned red gate.
+
+**5. The FAADS 112-column re-pull is feasible, not run, and needs an owner
+ruling.** 1,943,994 rows can be keyed; the state is `NOT_ACQUIRED`, not
+`SOURCE_DOES_NOT_PUBLISH`. See
+`docs/FAADS_TRANSACTION_KEY_SETTLEMENT_2026-09-02.md`, closing section.
+<!-- END FWD-CONSTRUCTION-2026-09-02 -->

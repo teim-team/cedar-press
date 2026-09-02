@@ -201,9 +201,12 @@ false, and this page's own census disproves it.**
 | `agencies/ed_fy2001.zip` | `All_Assistance_PrimeTransactions_2026-08-05_H20M25S30_1.csv` | 2026-08-05 **20:25Z** | **20** | ABSENT |
 
 Same fiscal year, same endpoint — `POST api.usaspending.gov/api/v2/bulk_download/awards/`
-— same script, same day, **79 minutes apart.**
-`data/raw/external/faads/seam/_meta.json` records `"total_columns": 112` for
-DOI FY2001 and a build time of **10.1 seconds**. The only difference between
+— same day, **79 minutes apart**, and the SERVER's own job record states the
+width in both cases: `data/raw/external/faads/seam/_meta.json` → `"2001"` has
+`"total_columns": 112` (build time **10.1 seconds**, 6,951 rows) and
+`data/raw/external/faads/agencies/_state.json` → `jobs.ed_fy2001` has
+`"total_columns": 20`. Identical record schema, identical
+`All_PrimeTransactions_2026-08-05_*.zip` naming. The only difference between
 the two payloads is the `columns` key: `30_funding_pre2008.build_payload` sends
 `COLUMNS` (20 of 112), and the seam job omitted it.
 

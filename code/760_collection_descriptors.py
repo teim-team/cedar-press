@@ -358,6 +358,52 @@ def selftest() -> int:
     return 0 if ok else 1
 
 
+# COMPUTE, NEVER TYPE - the editorial copy included.
+#
+# Codex PR #29 round 6 raised three findings that are one defect: a figure
+# measured by 770 and re-typed by hand into `docs/datasets/_descriptors.json`.
+#
+#   finding 1  the descriptor said the subaward overstatement was $45.62B /
+#              $24.41B / 86.9% while the README generated from the live table
+#              in the same push said $51.45B / $29.47B / 74.6%. `subawards.csv`
+#              had grown 76,859 -> 87,177 rows under the typed copy.
+#   finding 3  the gaming descriptor prescribed "every per-facility rate
+#              divides by 780" and then, later in the same string, withheld a
+#              percentage because the denominator may be ~727.
+#   finding 7  natural-resources shipped 87% where the measurement is 88.1%.
+#
+# So the copy carries `{{TOKENS}}` and they are substituted from the facts 770
+# measured on this run. **An unknown token is a hard failure**, not a
+# passthrough: shipping a literal `{{SUBAWARD_CORRECT}}` to a customer is
+# worse than shipping a stale number, and a stale number is the thing this
+# exists to prevent. A token also fails if 770 has not run, because a
+# descriptor built from last week's measurements is exactly the defect.
+FACTS = ROOT / "dist" / "measured_facts.json"
+TOKEN = re.compile(r"\{\{([A-Z0-9_]+)\}\}")
+
+
+def substitute(copy: dict, facts: dict) -> tuple[dict, list]:
+    missing = []
+    out = {}
+    for did, block in copy.items():
+        #  carries non-dict entries alongside the dataset
+        # blocks (a leading comment string). Pass them through untouched
+        # rather than assuming every value is a block.
+        if not isinstance(block, dict):
+            out[did] = block
+            continue
+        nb = {}
+        for k, v in block.items():
+            if isinstance(v, str):
+                for m in TOKEN.finditer(v):
+                    if m.group(1) not in facts:
+                        missing.append(f"{did}.{k}: {{{{{m.group(1)}}}}}")
+                v = TOKEN.sub(lambda m: facts.get(m.group(1), m.group(0)), v)
+            nb[k] = v
+        out[did] = nb
+    return out, missing
+
+
 def main() -> int:
     verify = len(sys.argv) > 1 and sys.argv[1] == "verify"
     if not READINESS.exists():
@@ -392,6 +438,17 @@ def main() -> int:
         except (ValueError, AttributeError, TypeError):
             pass
     copy = json.loads(COPY.read_text(encoding="utf-8")) if COPY.exists() else {}
+    facts = (json.loads(FACTS.read_text(encoding="utf-8"))
+             if FACTS.exists() else {})
+    copy, missing_tokens = substitute(copy, facts)
+    if missing_tokens:
+        print(f"  760 UNRESOLVED COPY TOKENS - {len(missing_tokens)}; "
+              f"{'dist/measured_facts.json is absent, so 770 has not run' if not facts else 'no measurement was emitted for these'}:")
+        for mt in missing_tokens[:12]:
+            print(f"    !! {mt}")
+        print("    Run `py -3 code/770_sample_extracts.py` first. Refusing to "
+              "ship copy with an unsubstituted token or a stale number.")
+        return 1
 
     out, missing, cedar_side = [], [], {}
     for r in ready:
@@ -434,8 +491,16 @@ def main() -> int:
             "cedar_id": did,
             "product_id": d["id"],
             "status": r.get("status"),
+            # CODEX PR #29 ROUND 6, FINDING 2. The scoreboard writes a
+            # literal "-" for "no blockers" and it was passed straight
+            # through, so all 11 READY datasets shipped `blockers: ["-"]` -
+            # a non-empty array holding a real-looking blocker, to a consumer
+            # this README tells to enumerate that field. Absence is `[]`.
+            # Same class as the `nan` sentinel: a placeholder that reads as a
+            # value.
             "blockers": [b.strip() for b in
-                         (r.get("blockers") or "").split(" | ") if b.strip()],
+                         (r.get("blockers") or "").split(" | ")
+                         if b.strip() and b.strip() != "-"],
             "n_rows": nrows,
             "n_tables": len(tabs),
             "sample_file": f"samples/{d['id']}__sample.csv",
@@ -487,7 +552,7 @@ def main() -> int:
             msg = (f"COLLECTION MEMBERSHIP: {reason}. The {drows:,}-row "
                    f"total over the {c['n_tables']} shippable tables is not "
                    f"in dispute and still ships; see ADR-018.")
-        c["blockers"] = [b for b in c["blockers"] if b != "-"] + [msg]
+        c["blockers"] = c["blockers"] + [msg]
         c["status"] = "BLOCKED"
         c["flagship_table"] = tbl
         c["flagship_rows"] = frows

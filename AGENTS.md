@@ -7583,3 +7583,58 @@ That is a true and useful thing for the gate to say. It is also why the
 codebook registry is the metric to act on and the other four are downstream
 of it: registering a block is an agent's job, and the ship chain is the
 integrator's.
+
+---
+
+## 2026-09-02 — `62` IS RED AND NONE OF IT IS THE CAPABILITY-STATEMENT PASS. Named, per standing rule 15.
+
+*Workstream CAPABILITY-1114 (`code/1114_capability_statement_harvest.py`).
+Build log `docs/CAPABILITY_STATEMENT_HARVEST_2026-09-02.md`, ADR-027.*
+
+`py -3 code/62_no_regression_check.py` exits 1. Standing rule 15 forbids
+recording that as "pre-existing, not mine" and walking on, so here is the
+measurement and the owner of each line. **`1114` contributes nothing to any of
+them**, and the evidence is that it is possible to say so precisely rather than
+by assertion:
+
+* **`code_duplicate_numbers` = 43, at the floor.** `1050_preflight.py claim`
+  allocated `1114` strictly above the frontier; `ls code/1114_*` returns exactly
+  one file. (Preflight reported **44** at the start of this session — above the
+  floor and already failing `62` before this pass wrote a line. It is back at 43,
+  cleared by whoever owned it.)
+* **`lint_bug_class_instances` 146 → 170**, and the class rises under it
+  (`class1` 0→1, `class2c` 60→72, `class3` 0→2, `class4` 9→14, `class7` 42→49).
+  `293` names every new instance by file. They are:
+  `1011_cross_dataset_reconciliation.py` (class1) ·
+  `1060_splink_pilot.py` (class2c ×2, class3) ·
+  `1085_prime_psc_desc_repull.py` · `1086_faads_award_key_promote.py` ·
+  `1125_np_website_native_check.py` (×2) · `1129_place_ids.py` ·
+  `846_session_audit.py` · `852_extend_constellation_edges.py` ·
+  `873_build_aiannh_crosswalk.py`.
+  **`1114` appears once in `docs/lint_bug_classes.json` and it is in the WAIVED
+  list** — one `class5` line, waived in place with the reason that `harvest`
+  writes no log and `build` recomputes `run_summary.json` from the full on-disk
+  spools rather than from a run's counters, so a second run cannot rewrite it to
+  zero. `class5` went **down**, 7 → 6.
+* **`regenerate_new_unsafe_writers`** names `1080_sec_gaming_facility_revenue.py`
+  (`FIG_COLS`, `TERM_COLS`). Not this pass. `1114` derives every header as the
+  union of the on-disk header and the rows being written (`derived_header`), the
+  correct read-modify-write idiom under 845 class3.
+* **`tier_A_ruled` 1,676 → 1,669**, `rulings_unapplied` 1,215 → 2,894,
+  `contract_violations` = 13, `contract_orphan_shippable` = 8, the
+  `ship_tables_*` / `tables_missing_*` family, and the three tables that stopped
+  shipping (`advocacy_passthrough_2026-08-07.csv`, `hearing_bill_links.csv`,
+  `native_bills_subject_sweep.csv`). **`1114` writes nothing in `data/clean/`,
+  no ledger row, no ruling and no dist manifest entry.** Its entire output is
+  `data/staging/capability_1114/`, one file in `review/`, one new doc, and two
+  marked blocks. Nothing it wrote can move a shipping metric.
+
+**What this pass owes the gate**, and it is paid: its own `verify` holds ten
+invariants and exits 1 on breach, `selftest` proves six of them fire on a
+synthetic violation and that a clean fixture exits 0, and **`verify` V7 fired on
+the real run** — `www.tyonek.com` returned the same md5 eleven times through
+eleven URL fragments. It was purged (187 document rows, 76 findings, all kept
+with their reason in `purged_duplicate_documents.csv`), not waived by raising
+the ceiling.
+
+**Not re-baselined.** `--baseline` is a floor, not an acknowledgement button.

@@ -2297,3 +2297,121 @@ this repo is named for — a check that measured something other than its own
 name. They are recorded in the report under `not_mechanically_detectable` so
 the next reader does not mistake their absence for a clean result.
 <!-- END ADR-029-DEFECT-SWEEP -->
+
+<!-- BEGIN ADR-027-CAPABILITY-1114 -->
+## ADR-027 — the capability-statement harvest owns nothing in `data/clean/`
+
+*2026-09-02. Owner: the capability-statement pass. Script:
+`code/1114_capability_statement_harvest.py`. Build log:
+`docs/CAPABILITY_STATEMENT_HARVEST_2026-09-02.md`. No commits.*
+
+### Files this workstream owns, in full
+
+| path | what is written |
+|---|---|
+| `code/1114_capability_statement_harvest.py` | the acquisition, its `purge`, its `verify` and its `selftest` |
+| `data/staging/capability_1114/*` | worklist, host probe log, document log, surfaces, findings, coverage, refusals, purge record, run summary |
+| `review/capability_statement_identifiers_1114_2026-09-02.csv` | the 145 distinct identifiers, one exhibit each |
+| `docs/CAPABILITY_STATEMENT_HARVEST_2026-09-02.md` | this pass's build log |
+
+**It writes NOTHING in `data/clean/` and rebuilds no shared table.** In
+particular it does not touch `cedar_identifier_ledger_final.csv`,
+`cedar_harvest_coverage_matrix.csv` or `cedar_harvest_coverage_evidence.csv` —
+the coverage matrix is `code/1112`'s and re-running 1112 is how its cells move.
+`data/staging/capability_1114/coverage_1114.csv` is a **parallel** measurement in
+1112's own six-value vocabulary, joinable on `cedar_uid` + `harvest_type`, and
+the integrator decides whether it merges.
+
+### The decision: a second source is only a second source if it is a different family
+
+The 53 corroborations this pass produced are worth having **only because the
+entity's own page and FPDS are different evidence families**. That is a design
+constraint, not a description, and it is enforced in the worklist rather than
+trusted: `THIRD_PARTY_TYPES` and `THIRD_PARTY_HOSTS` exclude ProPublica,
+`web.archive.org`, IRS, SAM, USAspending, GuideStar, `bia.gov`, `nigc.gov` and
+Wikipedia from ever being selected as "the entity's site". The first cut of the
+worklist did select them — `projects.propublica.org` was a "host" for several
+entities — and every identifier read there would have booked a corroboration
+that does not exist. `docs/ASSERTION_LAYER.md` already says a copy of a source
+is the same source; this is that rule made operational in a selection step.
+
+### Two conventions this pass adds, both narrow
+
+* **A released host is probed as itself.** The run dedupes on
+  **(cedar_uid, host)**, not on cedar_uid, because one entity can legitimately
+  have both a government site and a released host the ruling names by name.
+  Deduping on the entity skipped `colvilletribes.com` and `ctuir.org`.
+* **A publisher-stated host is exempt from the name check, and records that it
+  was.** The circular-evidence rule in `docs/HIDDEN_DATA_TECHNIQUES.md` is about
+  *guessed* domains. `nana.com` carries no class marker on its homepage and
+  gating on that would have recorded the released host as "not the entity". The
+  verdict is still written to the row, tagged `NOT GATED`, so a later gate can
+  read back exactly which rows were exempted and why.
+
+### Marker discipline
+
+This pass added `<!-- BEGIN CAPABILITY-1114 -->` to `docs/KNOWN_ISSUES.md` and
+this block to `docs/ARCHITECTURE_DECISIONS.md`, and appended one item to
+`review/OWNER_DECISION_QUEUE.md`. It edited no other workstream's block, added
+no `GRAIN_*` dict to `code/512`, and touched neither `62` nor `518`.
+<!-- END ADR-027-CAPABILITY-1114 -->
+
+<!-- BEGIN ADR-030-PLACE-IDS -->
+## ADR-030 — CLAIMED 2026-09-02 by place-id agent
+
+*Placeholder. Replace this line with the decision; keep the markers.*
+<!-- END ADR-030-PLACE-IDS -->
+
+<!-- BEGIN ADR-028-FORWARD-CONSTRUCTION -->
+## ADR-028 — forward construction on `contractors`, `subcontracting`, `funding` (2026-09-02)
+
+**Files this pass owns and edited.** No commit; no other workstream's marked
+block was rewritten.
+
+| file | what changed |
+|---|---|
+| `data/clean/prime_contracts.csv` | `1085 apply` over all nineteen archive attribute files. Four attribute columns filled on 592,925 rows. No money, entity, tier or provenance column touched. |
+| `data/clean/subawards.csv` | `121 match`/`append` (+2,632), then `910 rescan`/`apply`, `911 apply`, `871`, `1109 index`/`apply`. 87,177 → 89,809. |
+| `data/clean/native_passthrough.csv`, `native_passthrough_pairs.csv` | rebuilt by `81` (the declared projection) |
+| `code/121_pull_subawards_api.py` | ten `geo_subawardee_*` columns registered in `POST_PROMOTION_COLS`; the "after any promotion" order corrected to include `871`, `1085 apply` and `1109` |
+| `code/cedar_pipeline.py` | two `KNOWN_ORDERINGS` entries added (`121`→`1109`, `871`→`1085`). Nothing else in that file touched; `NEVER_RUN` unchanged at one entry. |
+| `code/1109_*`, `code/1085_*` | `backup()` now supersedes a stale same-day snapshot, per `871`'s incident rule |
+| docs | `methodology/{contractors,subcontracting,funding}.md`, `PRIME_ATTRIBUTE_REPULL_LOG_2026-09-02.md`, `SUBAWARD_API_PULL_LOG.md`, `FAADS_TRANSACTION_KEY_SETTLEMENT_2026-09-02.md`, `FAADS_ZIP_COLUMN_CENSUS.json` (regenerated), and one attributed correction inside `MONEY_TOTALLING_RULES.md`'s `DEEPEN-SUBAWARD-DENOMINATOR` block |
+
+### The decision this pass actually makes
+
+**A conservation proof is not a landing proof, and this repo now has three
+same-day instances to prove it costs work.** `1085`'s apply, `1079`'s five
+columns and `1109`'s ten all conserved every row and every cent, all reported
+exit 0, and all three were absent from the live file hours later. Every one of
+those checks was TRUE at the moment it ran. None of them asks the only question
+that catches a revert: **is the work in the live file, now?**
+
+So: **an in-place enricher must ship a check that fails when the work did NOT
+happen, not only one that fails when something moved.** For a column promotion
+that is one line — are the columns in the live header today — and it costs a
+`head -1`. It is not a substitute for conservation; it is the half that was
+missing.
+
+**Second, a stale baseline makes a conservation check lie in both directions.**
+`bak_<date>_pre_<stem>` embeds only the date, and `if not bak.exists()` keeps
+the first run's snapshot. `871` already earned this rule; `1085` and `1109` now
+carry it too. A same-day re-run supersedes a snapshot whose size does not match
+the live file and re-takes it. Where a correct baseline could not be
+reconstructed after the fact, `verify` prints **UNMEASURED** rather than a
+number — `1109`'s INV-SGEO-1 does exactly that for the 16:58Z run.
+
+**Third, a schema guard that blocks another workstream's landed columns must be
+answered by REGISTERING them, never by deleting them.** `121 match` refused at
+12:01:12Z naming `1109`'s ten columns as unfillable; by 12:03:54Z they were out
+of the table. The guard was right. The resolution was not. Both `121` and
+`cedar_pipeline` now know about those columns.
+
+**Not done, deliberately.** The FAADS 112-column re-pull of the 60
+FY2001–2006 agency-years is feasible and proven (see
+`docs/FAADS_TRANSACTION_KEY_SETTLEMENT_2026-09-02.md`) and was **not run**: it
+needs the same one-poller host that the subaward re-pull holds, and
+`docs/methodology/funding.md` §4b reason 3 — that a re-pull must merge by
+content or it re-points 29,594 position-keyed attributions — is an owner
+decision, not an agent's.
+<!-- END ADR-028-FORWARD-CONSTRUCTION -->

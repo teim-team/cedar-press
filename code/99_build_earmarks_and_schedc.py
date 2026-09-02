@@ -2800,6 +2800,66 @@ SCHEDC_COV_FIELDS = [
     "source_index_url", "built_date", "built_by_script",
 ]
 
+def schedc_coverage_basis(index_year, n_target, n_downloaded,
+                          corpus_target, corpus_downloaded):
+    """Derive `coverage_basis` FROM THIS YEAR'S OWN NUMBERS.
+
+    This column used to be one constant sentence stamped on every row, ending
+    "`not_downloaded` is this project's fetch backlog, NOT an absence at the
+    IRS." It said that on the year where `not_downloaded` is ZERO, and it said
+    it while 29,149 of the 32,218 indexed target returns were already sitting
+    in `data/raw/external/irs990_schedc/xml/`. `docs/AGENT_FIELD_GUIDE.md` §5
+    names that exact row as its worked instance of `ON_DISK_NOT_PROMOTED`
+    mislabelled as a fetch: the label sent readers to the network for files
+    already on the disk.
+
+    A basis is a sentence about a row. Stamping one sentence on ten rows makes
+    it a header, and a header cannot be true of every row it sits on. So this
+    is COMPUTED -- the same discipline as `574`'s denominator sentence -- and
+    the three states are named apart:
+
+      ON_DISK_COMPLETE   nothing is outstanding for this year
+      ON_DISK_MOSTLY     the majority is local; the remainder is a real fetch
+      NOT_ACQUIRED       nothing local for this year
+
+    Returns a single string; the caller writes it to `coverage_basis`.
+    """
+    n_target = int(n_target or 0)
+    n_downloaded = int(n_downloaded or 0)
+    missing = n_target - n_downloaded
+    pct = (100.0 * n_downloaded / n_target) if n_target else 0.0
+    cpct = (100.0 * corpus_downloaded / corpus_target) if corpus_target else 0.0
+    head = ("IRS e-file index for SUBMISSION year %s, filtered to the Cedar "
+            "Native-nonprofit EIN target list: %s indexed target returns, "
+            "%s (%.1f%%) already on this disk in "
+            "data/raw/external/irs990_schedc/xml/."
+            % (index_year, format(n_target, ","), format(n_downloaded, ","),
+               pct))
+    if n_target == 0:
+        state = ("STATE = NO_TARGET. The index names no return for a Cedar "
+                 "target EIN in this year, which is a fact about the index, "
+                 "not a Cedar deficiency.")
+    elif missing <= 0:
+        state = ("STATE = ON_DISK_COMPLETE. NOTHING IS OUTSTANDING FOR THIS "
+                 "YEAR -- there is no fetch backlog here and this row must "
+                 "never be read as one.")
+    elif n_downloaded == 0:
+        state = ("STATE = NOT_ACQUIRED. All %s are a real acquisition task; "
+                 "none is local." % format(missing, ","))
+    else:
+        state = ("STATE = ON_DISK_MOSTLY. %s return(s) are genuinely "
+                 "NOT_ACQUIRED for this year -- a real fetch, not a join -- "
+                 "and the %s already local are ON_DISK and need promoting, "
+                 "not downloading."
+                 % (format(missing, ","), format(n_downloaded, ",")))
+    tail = ("Absence here is Cedar's retrieval state and is NEVER an absence "
+            "at the IRS. Whole corpus: %s of %s indexed target returns local "
+            "(%.1f%%), %s genuinely un-downloaded."
+            % (format(corpus_downloaded, ","), format(corpus_target, ","),
+               cpct, format(corpus_target - corpus_downloaded, ",")))
+    return " ".join((head, state, tail))
+
+
 SCHEDC_RULE_BASIS = (
     "Retrieved fact only, transcribed from the filer's own IRS e-file XML. "
     "This row records what the organisation REPORTED on Schedule C for one "
@@ -3047,6 +3107,11 @@ def step_schedc_lobbying():
     write_csv(out, rows, SCHEDC_LOBBY_FIELDS)
 
     # ---- coverage, per index year, INCLUDING what was never downloaded ----
+    # `coverage_basis` used to be ONE CONSTANT STRING on every row, and it said
+    # `not_downloaded` is this project's fetch backlog even on the year where
+    # `not_downloaded` is 0. See schedc_coverage_basis() above: it is now
+    # DERIVED per row from that year's own numbers, so it cannot go stale in
+    # place and cannot describe a backlog that does not exist.
     on_disk = {p.stem for p in paths}
     cov = []
     by_year = defaultdict(list)
@@ -3079,10 +3144,10 @@ def step_schedc_lobbying():
             "not_downloaded": len(tgt) - dl,
             "coverage_status": ("FULL" if dl == len(tgt)
                                 else ("NONE" if dl == 0 else "PARTIAL")),
-            "coverage_basis":
-                "IRS e-file index for this SUBMISSION year, filtered to the "
-                "Cedar Native-nonprofit EIN target list. `not_downloaded` is "
-                "this project's fetch backlog, NOT an absence at the IRS.",
+            "coverage_basis": schedc_coverage_basis(
+                y, len(tgt), dl,
+                sum(len(v) for v in by_year.values()),
+                sum(1 for r2 in idx.values() if r2["object_id"] in on_disk)),
             "source_index_url": tgt[0].get("index_url") or "",
             "built_date": TODAY,
             "built_by_script": SCRIPT99,
@@ -3170,7 +3235,10 @@ def step_schedc_lobbying():
     log("distinct EINs parsed         %6d" % len({r["ein"] for r in rows}))
     log("distinct EINs spine-linked   %6d"
         % len({r["ein"] for r in rows if r["cedar_entity_id"]}))
-    log("NOT DOWNLOADED (fetch backlog) %4d of %d index targets"
+    log("ON DISK                      %6d of %d index targets (%.1f%%)"
+        % (len(on_disk & set(idx)), tot_idx,
+           100.0 * len(on_disk & set(idx)) / tot_idx if tot_idx else 0.0))
+    log("NOT_ACQUIRED (a real fetch)  %6d of %d index targets"
         % (tot_idx - len(on_disk & set(idx)), tot_idx))
     log("-" * 74)
     (LOGS / ("99_schedc_lobbying_%s.json" % TODAY)).write_text(json.dumps({
@@ -3277,10 +3345,19 @@ def _schedc_lobbying_codebook(rows, cov):
         "reported_any_lobbying_dollar": "Returns with a non-zero headline.",
         "distinct_eins_parsed": "Distinct EINs among parsed returns.",
         "distinct_eins_linked_to_spine": "Distinct EINs that resolve.",
-        "not_downloaded": "This project's fetch backlog for the year. NOT an "
-                          "absence at the IRS.",
+        "not_downloaded": "index_target_returns minus downloaded, for THIS "
+                          "year. Where it is 0 there is no backlog for this "
+                          "year; read coverage_basis, which names the state "
+                          "per row. NEVER an absence at the IRS.",
         "coverage_status": "FULL | PARTIAL | NONE, on download.",
-        "coverage_basis": "What the coverage claim rests on.",
+        "coverage_basis": "DERIVED PER ROW by schedc_coverage_basis() from "
+                          "that year's own counts: the year's index target, "
+                          "how much is already on this disk, which of the "
+                          "four missing-states applies (ON_DISK_COMPLETE / "
+                          "ON_DISK_MOSTLY / NOT_ACQUIRED / NO_TARGET) and the "
+                          "whole-corpus denominator. It was previously one "
+                          "constant string claiming a fetch backlog on every "
+                          "row, including the year with none.",
         "source_index_url": "The IRS index CSV for the year.",
     }
 

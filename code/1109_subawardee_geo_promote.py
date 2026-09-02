@@ -291,6 +291,25 @@ def cmd_apply(dry=False):
 
     bak = CLEAN.with_name(CLEAN.name + ".bak_%s_pre_%s"
                           % (datetime.now().strftime("%Y-%m-%d"), STEM))
+    # A SAME-DAY SECOND RUN MUST NOT REUSE THE FIRST RUN'S SNAPSHOT.
+    # Added 2026-09-02 after this exact hole bit twice in one day. `bak` embeds
+    # only the DATE, and the old test was `not bak.exists()`, so the second run
+    # kept a snapshot taken hours and several rebuilds earlier - and `verify`
+    # compares the live file against THAT. A conservation check against the
+    # wrong baseline is worse than none: it reports a breach that is somebody
+    # else's legitimate work, or hides one that is real. Same shape, same fix,
+    # as the incident note in `871_promote_geo_keys_contracts.py :: backup()`.
+    # Nothing is ever deleted - the stale snapshot is moved aside and kept.
+    if not dry and bak.exists() and bak.stat().st_size != CLEAN.stat().st_size:
+        n = 1
+        while bak.with_name(bak.name + ".superseded%d" % n).exists():
+            n += 1
+        stale = bak.stat().st_size
+        bak.replace(bak.with_name(bak.name + ".superseded%d" % n))
+        log("backup %s was STALE (%s bytes vs live %s); moved to "
+            ".superseded%d and re-taken"
+            % (bak.name, format(stale, ","),
+               format(CLEAN.stat().st_size, ","), n))
     if not dry and not bak.exists():
         shutil.copy2(CLEAN, bak)
         log("backup %s" % bak.name)

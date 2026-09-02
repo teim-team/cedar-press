@@ -187,7 +187,7 @@ def _artefact():
     Roadhouse' were both publishable=Y."""
     import re as _re
     BAD = _re.compile(r"^\s*,|^(enjoy|visit|book|explore|learn|read)\s|"
-                      r"earns|awarded?.*lodge", _re.I)
+                      r"\bearns\b|\bawarded?\b.*\blodge\b", _re.I)
     bad = [r.get("business_name_raw", "") for r in
            rows(CLEAN / "native_owned_businesses.csv")
            if (r.get("publishable") or "") == "Y"
@@ -288,7 +288,7 @@ def _split():
     p = CLEAN / "nagpra_notices.csv"
     if not p.exists():
         return (True, "table absent")
-    TAIL = _re.compile(r"\|\s*(Tourism|Recreation|Archaeology|Archeology)", _re.I)
+    TAIL = _re.compile(r"\|\s*(Tourism|Recreation|Archaeology|Archeology)\b", _re.I)
     bad = [r for r in rows(p) if TAIL.search(r.get("institution_names_all") or "")]
     return (not bad, f"{len(bad)} notice(s) split a department name mid-name")
 
@@ -354,7 +354,7 @@ def _denom():
     ph = [r for r in rs if "NO CASINO" in (r.get("facility_name") or "").upper()]
     def loose(x):
         x = _re.sub(r"[^A-Z0-9 ]", " ", (x or "").upper())
-        x = _re.sub(r"(CASINO|RESORT|HOTEL|AND|THE|LLC|INC|GAMING|CENTER|CENTRE)",
+        x = _re.sub(r"\b(CASINO|RESORT|HOTEL|AND|THE|LLC|INC|GAMING|CENTER|CENTRE)\b",
                     " ", x)
         return " ".join(x.split())
     g = _c.defaultdict(list)

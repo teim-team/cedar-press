@@ -836,8 +836,8 @@ def build():
             derivation_caveat=a.get("derivation_caveat", ""),
         ))
     annotate_restatements(figs)
-    write(OUT_FIG, FIG_COLS, figs)
-    write(OUT_TERMS, TERM_COLS, terms)
+    write(OUT_FIG, carry_live_columns(OUT_FIG, FIG_COLS), figs)
+    write(OUT_TERMS, carry_live_columns(OUT_TERMS, TERM_COLS), terms)
     out(f"accepted figures : {len(figs)} -> {OUT_FIG}")
     out(f"accepted terms   : {len(terms)} -> {OUT_TERMS}")
     out(f"rejected/held    : {n_reject}")
@@ -877,6 +877,28 @@ def annotate_restatements(figs):
             r["n_filings_stating_this_fact"] = str(len(rows))
             r["restated_in_accessions"] = "|".join(others) if i == 0 else rows[0]["accession"]
             r["restatements_agree"] = agree if len(rows) > 1 else ""
+
+
+def carry_live_columns(path, canonical):
+    """Canonical order first, then any column the LIVE file already carries.
+
+    Added 2026-09-02 by code/1129_place_ids.py, which promoted
+    `cedar_place_id` onto this table in place. A FIXED header on a wholesale
+    writer silently deletes an in-place enricher's work - class 6, and the
+    exact defect `code/845_regenerate_guard.py` names. A rebuilder cannot
+    REPOPULATE an enricher's column, so it writes it BLANK and the enricher
+    refills it: `py -3 code/1129_place_ids.py migrate --apply`. Blank keeps
+    the schema and every consumer's join; dropped breaks both.
+
+    A retired column stays retired, because it is not on disk."""
+    import csv as _csv
+    from pathlib import Path as _P
+    p = _P(path)
+    live = []
+    if p.exists():
+        with p.open(encoding="utf-8-sig", errors="replace", newline="") as _f:
+            live = next(_csv.reader(_f), [])
+    return list(canonical) + [c for c in live if c and c not in canonical]
 
 
 def write(path: Path, cols, rows):
@@ -1222,7 +1244,7 @@ def selftest():
         for inv, col, val in cases:
             mut = [dict(r) for r in rows]
             mut[0][col] = val
-            write(OUT_FIG, FIG_COLS, mut)
+            write(OUT_FIG, carry_live_columns(OUT_FIG, FIG_COLS), mut)
             p = subprocess.run([sys.executable, str(CEDAR / SCRIPT), "verify"],
                                capture_output=True, text=True)
             fired = p.returncode == 1 and inv in p.stdout

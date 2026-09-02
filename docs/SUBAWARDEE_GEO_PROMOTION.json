@@ -1,17 +1,16 @@
 {
  "script": "code/1109_subawardee_geo_promote.py",
- "when": "2026-09-02T10:37:13Z",
- "rows_in": 76859,
- "rows_out": 76859,
- "money_cents_in": 4730166081978,
- "money_cents_out": 4730166081978,
- "county_derived": 73388,
+ "when": "2026-09-02T16:58:15Z",
+ "rows_in": 89809,
+ "rows_out": 89809,
+ "money_cents_in": 5702055771047,
+ "money_cents_out": 5702055771047,
+ "county_derived": 85858,
  "by_basis": {
-  "subawardee_zip5_from_fsrs_extract_via_subaward_sam_report_id_1109": 73388,
-  "subawardee_address_from_fsrs_extract; source published no zip": 391,
-  "subawardee_address_from_fsrs_extract; zip5 not in the county crosswalk": 1986,
-  "no subaward_sam_report_id on this row, so no join to the FSRS extract is possible": 998,
-  "subaward_sam_report_id present but not found in any staged FSRS extract": 96
+  "subawardee_zip5_from_fsrs_extract_via_subaward_sam_report_id_1109": 85858,
+  "subawardee_address_from_fsrs_extract; source published no zip": 529,
+  "subawardee_address_from_fsrs_extract; zip5 not in the county crosswalk": 2424,
+  "no subaward_sam_report_id on this row, so no join to the FSRS extract is possible": 998
  },
  "columns_added": [
   "geo_subawardee_city",

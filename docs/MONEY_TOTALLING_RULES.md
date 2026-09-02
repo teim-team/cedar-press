@@ -1342,6 +1342,33 @@ countable  duplicate_status == 'primary'
 the money rule removes                         $21,436,663,691.59
 ```
 
+> **SUPERSEDED THE SAME DAY — re-measured 2026-09-02T17:00Z, cents-exact, by the
+> forward-construction pass. This block's own instruction is to update the four
+> figures together after any fold-in; two fold-ins have happened since it was
+> written, so the correction is stated here and the author's prose below is left
+> exactly as written.**
+>
+> ```
+> all 89,809 rows                              $57,020,557,710.47   <- never quote
+> countable  69,921 rows                       $34,906,694,737.65   <- the correct total
+> the money rule removes                       $22,113,862,972.82
+>    = 38.8% of the unfiltered figure
+>    = 63.4% MORE than the correct total
+> ```
+>
+> `121 append` added **10,318 rows at 12:09Z** (FY2023 Q3, FY2024 Q1–Q4) and
+> **2,632 at 16:49Z** (FY2023 Q4, re-pulled after the server returned a
+> header-only object). `duplicate_status` is now `primary` **70,597** ·
+> `exact_repeat_within_source` **18,366** · `superseded_by_primary_source` 846.
+>
+> **The overstatement FELL, from 82.9% to 63.4%, and the reason is worth
+> stating: the money a real year of coverage adds is overwhelmingly `primary`.**
+> A rising overstatement would have meant more re-filings; a falling one means
+> more distinct subawards. **Quote 63.4%, and name its base — the correct
+> $34.91B — in the same sentence.** Everything the block says below about WHICH
+> percentage to quote, and why a bare one is a coin flip, is unchanged and is
+> the reason this correction states both.
+
 **The removed amount is 82.9% of the correct total and 45.3% of the inflated
 one.** Both are true and they are not the same statement:
 
@@ -1538,3 +1565,58 @@ Re-derive every figure above:
 Gate: `py -3 code/1119_acquire_biamaps_arcgis.py verify` exits 1 on breach and
 `selftest` proves it fires on an injected short retrieval.
 <!-- END ACQUIRE-BIA-ACREAGE -->
+
+<!-- BEGIN GAMING-TOTAL -->
+
+## The annual total, with gaming in it -- and the boundary that keeps it honest (workstream GAMING-TOTAL, 2026-09-02)
+
+*Appended by `code/1126_annual_total_federal_and_gaming.py`. Every figure below is re-derived from the live files by `1126 build` and re-checked by `1126 verify` (exit 1 on breach); `1126 selftest` proves each check fires on an injected violation. The series itself is `data/clean/annual_indian_country_money_series.csv`, one row per (fiscal_year, series_id).*
+
+**The owner's question was whether the annual total is more accurate with NIGC's regional gaming numbers in it. It is -- and the reason is also the reason the two may not be added silently:**
+
+> **Federal obligations are transfers INTO Indian Country. Gaming revenue is Indian Country's OWN-SOURCE revenue.**
+
+A total that omits the largest own-source stream badly understates the economy. A total that adds them into one number claims they are the same kind of money. So both are published, side by side, with `money_class` on every row -- `FEDERAL_OBLIGATION_TRANSFERRED_INTO_INDIAN_COUNTRY` and `INDIAN_COUNTRY_OWN_SOURCE_REVENUE` -- and **no grand total is written anywhere in the table**. `verify` V3 fails if a row ever equals federal + gaming. The reader may add them; Cedar states what the sum would mean instead of doing it for them.
+
+Over the **25 fiscal years where both streams exist (FY2001-FY2025)**: federal obligations attributed to a nation total **$380,557,840,967**, and NIGC gross gaming revenue totals **$730,138,970,572**. Gaming is **1.9x** the federal stream over that window. That ratio is the whole argument for publishing both, and it is also why neither is the answer on its own.
+
+### What may be summed, and what may not
+
+| series | grain | additive with | never add to |
+|---|---|---|---|
+| `federal_prime_obligations` | fiscal year | `federal_assistance_obligations` | subawards (a subaward is a SLICE of a prime already counted), `native_passthrough.csv`, Schedule I, FAC expenditures, any gaming series |
+| `federal_assistance_obligations` | fiscal year | `federal_prime_obligations` | the same list, plus `faads_pre2008_assistance_attributed` in FY2007, where 11,063 transactions / $2.166B are the same transactions |
+| `federal_obligations_total` | fiscal year | **nothing** -- it already IS prime + assistance | its own components; anything above |
+| `faads_pre2008_assistance_attributed` | fiscal year, FY2001-06 | nothing | anything. **Tier B on every row** -- no DUNS or UEI exists on any pre-FY2007 FAADS row |
+| `nigc_regional_ggr_rolled_to_nation` | fiscal year | **nothing** | every federal series here; `gaming_revenue_bounds.csv` ceiling rows; SEC per-property figures; any self-published casino claim |
+| `sec_filed_per_property_net_revenues` | fiscal year | nothing | above all the NIGC row for the same year -- **the property is INSIDE the region and the regional figure already contains it** |
+
+### The double count a naive `GROUP BY fiscal_year` produces, and the column that stops it
+
+**Every NIGC report carries the current fiscal year AND the prior year, and three years are therefore present under TWO region systems.** Grouping `nigc_regional_ggr.csv` by `fiscal_year` alone doubles them:
+
+| fiscal year | naive `GROUP BY fiscal_year` | one region system | overstated by |
+|---|---:|---:|---:|
+| FY2002 | $29.213B | **$14.497B** | $14.716B |
+| FY2007 | $52.160B | **$26.016B** | $26.143B |
+| FY2016 | $62.600B | **$31.300B** | $31.300B |
+
+The discriminator was already in the table and nothing was reading it: **`figure_vintage`**. The rule is *sum only `own_year_report` rows within a fiscal year*, which is also NIGC's first publication of that year rather than its later restatement. **Four years have no own-year report on this disk -- FY2001, FY2011, FY2013, FY2021 -- and take their prior-year column, which the row says in its `basis`.** This is the same shape as the `extent_competed` two-vocabulary seam: the file was right, and the consumer had no way to see the seam.
+
+### A regional figure is never a property's money
+
+NIGC publishes GGR at the **region** level and nowhere else. `gaming_revenue_bounds.csv` is 13,803 rows of which **13,494 are one `REGIONAL_GGR_CEILING` repeated across 694 facilities**, and the largest single ceiling is carried by 162 of them. Apportioning it to facilities, or summing it across them, multiplies a region's entire GGR by its property count. This series therefore rolls NIGC up **only along the axis NIGC itself publishes** -- region to nation.
+
+**The denominator, computed rather than typed** (`code/846_session_audit.py::_denom`, the single gated ladder): 787 rows in `gaming_facilities.csv` - 16 whose name says *no casino* = 771 facility rows - 57 duplicate extras = **714 distinct properties**. **11 of those 714 carry an honest per-property revenue figure** (`SINGLE_PROPERTY_ATTRIBUTED` or `REPORTED_PROPERTY_REVENUE`). Every gaming row of the output states that denominator in `coverage_note`, and `verify` V7 fails if one does not.
+
+### Precision, and the years a chart will get wrong
+
+`figure_precision` rides on every gaming row. FY2001-FY2012 are exact thousands; **FY2013-FY2020 are rounded to $0.1B** because NIGC published only a distribution map in those years, so eight regions each rounded to $0.1B carry up to $0.4B of rounding in the national figure; FY2021-FY2025 are exact dollars. FY2020 is a COVID trough ($34.7B -> $27.8B -> $39.0B) and must not be smoothed or used as a growth base. And the two clocks are not the same clock: NIGC aggregates **each operation's own audited fiscal year**, so a fiscal-year GGR figure can include revenue earned up to 16 months before publication, while a federal fiscal year is the government's.
+
+### The federal side, stated with its denominator
+
+`federal_prime_obligations` is `sum(total_obligations)` over `attributed_flag='1'` -- **$229,441,298,847.35 across 789,360 rows**, which is 74.0% of the $310,005,258,660.75 the whole table holds. `attributed_flag` already excludes the 103,221 rows / $17.07B that `code/1079` moved to the unattributed pool on 2026-09-02. `federal_assistance_obligations` is `sum(obligated_usd)` over the same flag -- **$168,639,438,944.64 across 549,530 rows**. **Neither is ever summed with `subawards.csv`**, and `verify` V5 fails if a subaward figure ever reaches this table.
+
+**The federal total is complete only from FY2007**, where the modern assistance table begins. FY2000-06 carries prime only; the pre-2008 Native assistance slice is the separate `faads_pre2008_assistance_attributed` series, is **tier B throughout**, and overlaps the modern table in FY2007 by 11,063 transactions.
+
+<!-- END GAMING-TOTAL -->

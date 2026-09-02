@@ -92,6 +92,18 @@ PREFIXES = {
     # `CEDAR-NEST-000123-K7`: allocation is permanent and locked here,
     # transcription safety comes from 503.
     "CEDAR-NEST":    ("enterprise", 6),
+    # Added 2026-09-02 by code/1129_place_ids.py. ONE id for every PHYSICAL
+    # PLACE a Cedar entity operates - gaming property, BIE school, IHS
+    # facility, BIA office - distinguished by a `place_class` COLUMN and never
+    # by the prefix, because a place can change what it is used for and an
+    # identifier that encodes class must be rewritten the day the class
+    # changes. A place is a SUB-HUB of the entity that operates it
+    # (docs/IDENTIFIER_STANDARD.md §2), so it may not take a `CE-` uid; it is
+    # not an enterprise, so it may not take `CEDAR-NEST`. Rendered
+    # `CEDAR-PLACE-000123-K7`: the ordinal is allocated here under the lock,
+    # the two check characters come from 503_identity.check_chars, exactly as
+    # NEST does it - one check-character implementation in the project.
+    "CEDAR-PLACE":   ("place", 6),
     # RETIRED THE DAY IT WAS ADDED, UNISSUED. `CEDAR-HOLD` was the prefix for
     # the same collection under its working name `holdings`, for the few hours
     # before the owner named it NEST. Its counter in _id_registry.json stands

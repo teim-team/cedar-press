@@ -81,6 +81,9 @@ csv.field_size_limit(10_000_000)
 TODAY = date.today().isoformat()
 CLEAN = ROOT / "data" / "clean"
 OUT = ROOT / "dist" / "samples"
+# Captured at import, before any table is read, so a sample written by an
+# EARLIER run can never satisfy this run's completion check.
+_RUN_STARTED = __import__("time").time()
 CONTRACTS = ROOT / "docs" / "schema" / "dataset_contracts.json"
 N = 10
 
@@ -144,6 +147,19 @@ FLAGSHIP = {
     # buyer's first question - "which notices name my tribe?" - had 48,111
     # answers on disk and a sample that could not ask it.
     "nagpra":                   "nagpra_notices.csv",
+    # The FIFTEENTH collection, and the third time a dataset has reached
+    # READY with no sample behind it - which is Codex PR #29 finding 7, now
+    # three times over (`owned`'s id mismatch, `nest` landing mid-branch, and
+    # this). 760 emitted a descriptor for it and named it as needing copy; the
+    # sample had no such warning, because nothing checked. It does now: 760's
+    # flagship check reads this dict, so a collection with no entry here is
+    # visible from the other side.
+    #
+    # The corpus, not the coverage table: `tribal_newsletter_coverage.csv` is
+    # one row per entity PROBED (1,555) and answers "did we look?"; the corpus
+    # is one row per channel or absence and answers "what is published?",
+    # which is the buyer's question.
+    "newsletters":              "tribal_newsletter_corpus.csv",
     "_entity_layer":            "cedar_identity_register.csv",
     # 2026-09-02, workstream pr29. The `nest` collection landed while this
     # branch was open and 760 emitted a 14th descriptor for it, which would
@@ -438,7 +454,30 @@ SHOW = {
     # independent sources are different claims, and the table is honest about
     # which it holds. `uei` is on 102 of 1,482 rows and `uei_candidate` on 597;
     # both ship, and the candidate is a PROPOSAL that may not key a dollar.
-    "nest": ["enterprise_id", "enterprise_name", "owner_hub_cedar_uid",
+    # `relation_class` was ABSENT from this list until 2026-09-02, and it is
+    # the column the dataset exists to carry: NEST separates a STRUCTURE
+    # (ownership - nation, holding company, operating company) from a TIE (a
+    # published relationship that is not ownership, such as a joint venture).
+    # `500.COLLECTIONS` says in as many words that this is why `nest` is a
+    # different collection from `native-owned-businesses` and must not be
+    # merged with it - and the ten rows a customer saw could not show the
+    # difference. `relationship` alone is the verbatim source string, not the
+    # typed claim.
+    # `record_status` leads deliberately. 481 of 1,889 rows are
+    # `probe_absence` - a recorded "we looked and there is none" - and Cedar
+    # distinguishes that from "untouched" on purpose. A sample that showed
+    # only the 1,394 publication channels would hide the column that makes
+    # the dataset honest.
+    "newsletters": ["newsletter_id", "publisher_name", "cedar_uid",
+                    "entity_class", "state", "record_status",
+                    "publication_name", "channel_type", "channel_url",
+                    "format", "issue_cadence", "archive_earliest_year",
+                    "archive_latest_year", "archive_depth_n_issues",
+                    "back_issues_open", "business_content",
+                    "discovery_technique", "retrieved_date"],
+    "nest": ["enterprise_id", "enterprise_name", "relation_class",
+             "relationship_as_recorded", "hierarchy_level", "parent_name",
+             "owner_hub_cedar_uid",
              "owner_hub_name", "owner_class", "relationship", "sector",
              "status", "city", "state_province", "uei", "uei_candidate",
              "identifier_status", "in_federal_contracting", "assertion_class",
@@ -779,6 +818,34 @@ def sample(rows: list, cols: list, n: int) -> list:
     return [rich[int(i * step)] for i in range(n)]
 
 
+# A DECLARED GRAIN THAT THE DATA CONTRADICTS, ANNOTATED RATHER THAN REWRITTEN.
+#
+# Codex, PR #29 round 6 finding 4: the sample index still described all 787
+# gaming rows as "one row per gaming facility" after the same push established
+# that 8 of them are `No casino` placeholders. The reader is handed the exact
+# assertion the repair withdrew.
+#
+# The declared grain lives in `GRAIN_GAMING` in
+# `code/512_build_dataset_contracts.py`, which is integrator-owned and which
+# this workstream has declined to edit all branch. So the declaration ships
+# unchanged and a MEASURED note ships beside it, marked as measured. That is
+# the honest shape: Cedar's declaration and Cedar's measurement disagree, and
+# a customer should see both rather than have one silently overwritten by an
+# agent who does not own it.
+GRAIN_NOTE = {
+    "gaming": ("MEASURED: {GAMING_NON_PLACES} of {GAMING_ROWS} rows are "
+               "non-place records naming a nation that operates no casino, "
+               "so the facility grain holds for {GAMING_FACILITY_ROWS} rows, "
+               "not all of them"),
+}
+
+
+def _cell(s: str) -> str:
+    """Markdown-table-safe, and never truncated."""
+    return (str(s or "UNSTATED").replace("|", r"\|")
+            .replace("\r", " ").replace("\n", " ").strip())
+
+
 def _subaward_money(_cache={}):
     """(unfiltered, correct, removed, % of correct, % of unfiltered), measured.
 
@@ -812,6 +879,142 @@ def _subaward_money(_cache={}):
                    f"{100.0 * rem / max(rule, 1):.1f}%",
                    f"{100.0 * rem / max(tot, 1):.1f}%")
     return _cache["v"]
+
+
+# ONE MEASUREMENT, TWO ARTIFACTS. Codex, PR #29 round 6 finding 1: the
+# descriptor told customers the subaward overstatement was $45.62B unfiltered
+# against $24.41B correct (86.9%), while the README generated from the LIVE
+# table in the same push said $51.45B, $29.47B and 74.6%. Both shipped. The
+# descriptor's figures were hand-typed editorial copy and `subawards.csv` had
+# grown 76,859 -> 87,177 rows underneath them.
+#
+# Findings 1, 3 and 7 are all this: a number measured here and re-typed in
+# `docs/datasets/_descriptors.json`. So the copy carries `{{TOKENS}}` and 760
+# substitutes them from this file. A token with no measurement is a hard
+# failure in 760, not a silent passthrough - an unsubstituted `{{...}}`
+# reaching a customer is worse than a stale number, and a stale number is what
+# this exists to stop.
+_FACTS: dict = {}
+
+
+def write_measured_facts() -> dict:
+    tot, rule, rem, pct_correct, pct_unfiltered = _subaward_money()
+    facts = {
+        "SUBAWARD_UNFILTERED": tot,
+        "SUBAWARD_CORRECT": rule,
+        "SUBAWARD_REMOVED": rem,
+        "SUBAWARD_PCT_OF_CORRECT": pct_correct,
+        "SUBAWARD_PCT_OF_UNFILTERED": pct_unfiltered,
+    }
+    facts.update(_gaming_ladder())
+    facts.update(_nr_aggregation())
+    facts.update(_newsletter_facts())
+    _FACTS.clear()
+    _FACTS.update(facts)
+    (ROOT / "dist" / "measured_facts.json").write_text(
+        json.dumps(facts, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return facts
+
+
+def _gaming_ladder() -> dict:
+    """787 rows -> facility rows -> distinct properties, measured on every run.
+
+    Every rung of this has moved, and two of them moved twice in one day, so
+    none of it is typed anywhere.
+
+    Two corrections are baked in because both were got wrong first:
+
+    1. **The non-place test is a SET of spellings, not one string.** Matching
+       only `No casino` found 7 and missed `No casino currently`. Eight rows
+       assert that a nation does not operate a casino.
+    2. **Read the ADJUDICATED file, not the candidates file.**
+       `place_gaming_adjudication_2026-09-02.csv` carries a `verdict` per
+       group - MERGE 53, HOLD_OPEN 5 - and supersedes
+       `gaming_facility_duplicate_candidates_2026-09-02.csv`, whose 56 groups
+       were all still `verdict_needed`. Reporting the candidate count as
+       though it were settled overstated what Cedar knows; reporting it after
+       adjudication understates it.
+
+    The five HOLD_OPEN groups corroborate a call this loop made independently:
+    `7 CLANS FIRST COUNCIL` and `STABLES` are held as `P0_different_operators`
+    - the Miami/Modoc joint operation flagged in the Codex round-2 thread as
+    something that must never be collapsed.
+    """
+    src = CLEAN / "gaming_facilities.csv"
+    if not src.exists():
+        return {}
+    NON = {"no casino", "no casino currently", "none", "n/a", "no gaming",
+           "no facility"}
+    rows = list(csv.DictReader(src.open(encoding="utf-8-sig",
+                                        errors="replace", newline="")))
+    ph = [r for r in rows
+          if (r.get("facility_name") or "").strip().lower() in NON]
+    out = {"GAMING_ROWS": f"{len(rows):,}",
+           "GAMING_NON_PLACES": f"{len(ph):,}",
+           "GAMING_FACILITY_ROWS": f"{len(rows) - len(ph):,}"}
+    adj = ROOT / "review" / "place_gaming_adjudication_2026-09-02.csv"
+    if not adj.exists():
+        return out
+    g = list(csv.DictReader(adj.open(encoding="utf-8-sig",
+                                     errors="replace", newline="")))
+    merge = [x for x in g if (x.get("verdict") or "").strip() == "MERGE"]
+    hold = [x for x in g if (x.get("verdict") or "").strip() != "MERGE"]
+    extras = sum(int(x["n_rows"]) - 1 for x in merge if x.get("n_rows"))
+    out.update({
+        "GAMING_DUP_GROUPS": f"{len(g):,}",
+        "GAMING_DUP_MERGE": f"{len(merge):,}",
+        "GAMING_DUP_HOLD": f"{len(hold):,}",
+        "GAMING_DUP_EXTRAS": f"{extras:,}",
+        "GAMING_DISTINCT_PROPERTIES": f"{len(rows) - len(ph) - extras:,}",
+    })
+    return out
+
+
+def _newsletter_facts() -> dict:
+    src = CLEAN / "tribal_newsletter_corpus.csv"
+    cov = CLEAN / "tribal_newsletter_coverage.csv"
+    if not src.exists():
+        return {}
+    rows = list(csv.DictReader(src.open(encoding="utf-8-sig",
+                                        errors="replace", newline="")))
+    absent = [r for r in rows
+              if (r.get("record_status") or "").strip() == "probe_absence"]
+    with_ch = {(r.get("cedar_uid") or "").strip() for r in rows
+               if (r.get("channel_type") or "").strip() not in ("", "none_found")
+               and (r.get("cedar_uid") or "").strip()}
+    out = {"NEWS_ROWS": f"{len(rows):,}",
+           "NEWS_ABSENCE": f"{len(absent):,}",
+           "NEWS_CHANNELS": f"{len(rows) - len(absent):,}",
+           "NEWS_ENTITIES_WITH": f"{len(with_ch):,}"}
+    if cov.exists():
+        n = sum(1 for _ in csv.DictReader(
+            cov.open(encoding="utf-8-sig", errors="replace", newline="")))
+        out["NEWS_ENTITIES_PROBED"] = f"{n:,}"
+    return out
+
+
+def _nr_aggregation() -> dict:
+    """Publisher-aggregated share of `resource_revenue.csv`. 87% was typed
+    into the descriptor and 88.1% measured into the README; Codex round 6
+    finding 7."""
+    src = CLEAN / "resource_revenue.csv"
+    if not src.exists():
+        return {}
+    import collections as _c
+    c = _c.Counter()
+    n = 0
+    with src.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+        for r in csv.DictReader(fh):
+            n += 1
+            c[(r.get("aggregation_level") or "").strip()] += 1
+    if not n:
+        return {}
+    agg = c["national_aggregate"] + c["state_aggregate"]
+    return {"NR_ROWS": f"{n:,}",
+            "NR_NATIONAL_AGG": f"{c['national_aggregate']:,}",
+            "NR_STATE_AGG": f"{c['state_aggregate']:,}",
+            "NR_ENTITY_SPECIFIC": f"{c['entity_specific']:,}",
+            "NR_AGG_PCT": f"{100.0 * agg / n:.1f}%"}
 
 
 def main() -> int:
@@ -909,6 +1112,12 @@ def main() -> int:
                 stale.append(f.name)
 
     if not verify:
+        # BEFORE the README is built, not after: `GRAIN_NOTE` formats measured
+        # facts into the grain table, and the first version of this call sat
+        # below the table it was meant to feed. The note would have silently
+        # vanished through the KeyError guard - a fix that appears to work
+        # because its failure mode is to emit nothing.
+        write_measured_facts()
         L = ["# Cedar Press — sample extracts", "",
              f"*Built {TODAY} by `code/770_sample_extracts.py`. "
              f"{N} real rows per dataset, straight from the clean tables — "
@@ -936,8 +1145,27 @@ def main() -> int:
              "| dataset | table | rows shown | of | cols | one row is |",
              "|---|---|---:|---:|---:|---|"]
         for did, tbl, n, tot, nc, g in built:
+            # CODEX PR #29 ROUND 6, FINDING 8. This was `g[:110]`, a fixed
+            # slice, and it cut grain definitions mid-sentence - the
+            # `federal-register` cell ended at "an e" immediately after
+            # warning that `consultation_event_id` is not unique, so the
+            # composite grain a reader needs in order to de-duplicate the
+            # sample was the part that got cut. It also sliced through
+            # backtick spans and shipped unclosed code markup.
+            #
+            # The full text ships. A markdown cell only needs the pipe
+            # escaped and the newlines flattened; there is no width to
+            # respect, and truncating the one field whose whole purpose is
+            # to be precise was the wrong trade in every case.
+            note = GRAIN_NOTE.get(did)
+            if note:
+                try:
+                    note = note.format(**_FACTS)
+                except KeyError:
+                    note = None
             L.append(f"| `{did}` | `{tbl}` | {n} | {tot:,} | {nc} | "
-                     f"{g[:110]} |")
+                     f"{_cell(g)}"
+                     + (f" — **{_cell(note)}**" if note else "") + " |")
         L += ["", "## Before totalling any money column", "",
               "See `docs/MONEY_TOTALLING_RULES.md`. Two that bite hardest:", "",
               # THE THREE FIGURES ARE MEASURED, NOT TYPED (2026-09-02).
@@ -1126,6 +1354,37 @@ def main() -> int:
                   "raced, so the guard sits here as well.", ""]
         (OUT / "README.md").write_text("\n".join(L), encoding="utf-8")
 
+    # DID EVERY SAMPLE ACTUALLY GET WRITTEN THIS RUN?
+    #
+    # Earlier today this script died mid-run on a 1.46 GB table against 1.6 GB
+    # of free RAM, wrote ONE sample, and left a zero-byte log. Nothing noticed,
+    # because every downstream check reads the OUTPUT - and the output was the
+    # previous run's, which looks exactly like a good run's. **An unchanged
+    # sample file is not evidence of success; it is the most likely symptom of
+    # a failure.**
+    #
+    # So the run asserts its own completion against mtime, per dataset, and
+    # exits non-zero naming the ones that did not land. `verify` mode writes
+    # nothing and is exempt.
+    if not verify:
+        stale = []
+        for did in sorted(FLAGSHIP):
+            dst = OUT / f"{product_id(did)}__sample.csv"
+            if not dst.exists():
+                stale.append(f"{product_id(did)}: no file at all")
+            elif dst.stat().st_mtime < _RUN_STARTED:
+                age = _RUN_STARTED - dst.stat().st_mtime
+                stale.append(f"{product_id(did)}: not rewritten this run "
+                             f"({age / 60:.0f} min older than the run start)")
+        if stale:
+            print(f"  770 INCOMPLETE RUN - {len(stale)} of {len(FLAGSHIP)} "
+                  f"samples were not written:")
+            for s in stale:
+                print(f"    !! {s}")
+            print("    An unchanged sample is not proof of success. Do not "
+                  "publish this set.")
+            return 1
+
     print(f"  770 sample extracts   {len(built)} built   "
           f"{len(skipped)} skipped   {len(unsafe)} refused as unsafe")
     for f in stale:
@@ -1206,7 +1465,53 @@ def proveequal(tbl: str) -> int:
     return 0
 
 
+def guardtest() -> int:
+    """Prove the completion guard FIRES. A check that has never failed on
+    purpose is not known to work (field guide 3, habit 1).
+
+    The violation injected is the real one: a run whose samples all predate
+    it. Pushing `_RUN_STARTED` into the future makes every existing sample
+    stale by exactly the test the guard applies, without touching a file.
+    """
+    global _RUN_STARTED
+    import time
+    keep = _RUN_STARTED
+    try:
+        _RUN_STARTED = time.time() + 3600
+        stale = []
+        for did in sorted(FLAGSHIP):
+            dst = OUT / f"{product_id(did)}__sample.csv"
+            if not dst.exists() or dst.stat().st_mtime < _RUN_STARTED:
+                stale.append(product_id(did))
+        ok = len(stale) == len(FLAGSHIP)
+        print(f"  770 guardtest   injected: every sample predates the run")
+        print(f"    {'PASS' if ok else 'FAIL'}  guard sees "
+              f"{len(stale)} of {len(FLAGSHIP)} as not written this run")
+    finally:
+        _RUN_STARTED = keep
+    # And it must be QUIET on a run that really did write them. The clean
+    # case has to compare against a stamp taken BEFORE the writes - this
+    # process started AFTER them, so using its own `_RUN_STARTED` here would
+    # report every sample stale and call that a failure of the guard. The
+    # first version of this fixture did exactly that: a check measuring
+    # something other than its own name, inside the fixture written to prove
+    # a check measures its own name.
+    paths = [OUT / f"{product_id(d)}__sample.csv" for d in sorted(FLAGSHIP)]
+    if not all(x.exists() for x in paths):
+        print("    UNMEASURED  no complete sample set on disk to test the "
+              "clean case against")
+        return 1
+    before = min(x.stat().st_mtime for x in paths) - 1
+    fresh = [x for x in paths if x.stat().st_mtime >= before]
+    ok2 = len(fresh) == len(paths)
+    print(f"    {'PASS' if ok2 else 'FAIL'}  and stays quiet against a stamp "
+          f"taken before the writes ({len(fresh)} of {len(paths)} fresh)")
+    return 0 if (ok and ok2) else 1
+
+
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "guardtest":
+        sys.exit(guardtest())
     if len(sys.argv) > 2 and sys.argv[1] == "proveequal":
         sys.exit(proveequal(sys.argv[2]))
     sys.exit(main())

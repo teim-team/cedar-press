@@ -1,0 +1,57 @@
+{
+ "built_by": "code/1126_annual_total_federal_and_gaming.py",
+ "built_date": "2026-09-02",
+ "rows": 116,
+ "gaming_denominator_ladder": "787 rows - 16 placeholders = 771 facility rows - 57 duplicate extras = 714 distinct properties",
+ "gaming_denominator_source": "code/846_session_audit.py::_denom()",
+ "gaming_properties_with_an_honest_per_property_figure": 11,
+ "nigc_double_count_a_naive_group_by_would_have_produced": [
+  {
+   "fiscal_year": 2002,
+   "naive_group_by_fiscal_year_usd": 29213056000.0,
+   "one_region_system_usd": 14497000000.0,
+   "overstatement_usd": 14716056000.0,
+   "region_systems_present": [
+    "NIGC_R1_FY2001_FY2002",
+    "NIGC_R2_FY2003_FY2007"
+   ]
+  },
+  {
+   "fiscal_year": 2007,
+   "naive_group_by_fiscal_year_usd": 52159570000.0,
+   "one_region_system_usd": 26016098000.0,
+   "overstatement_usd": 26143472000.0,
+   "region_systems_present": [
+    "NIGC_R2_FY2003_FY2007",
+    "NIGC_R3_FY2008_FY2016"
+   ]
+  },
+  {
+   "fiscal_year": 2016,
+   "naive_group_by_fiscal_year_usd": 62600000000.0,
+   "one_region_system_usd": 31300000000.0,
+   "overstatement_usd": 31300000000.0,
+   "region_systems_present": [
+    "NIGC_R3_FY2008_FY2016",
+    "NIGC_R4_FY2017_present"
+   ]
+  }
+ ],
+ "sec_table": {
+  "table_rows": 67,
+  "first_filing_and_net_revenues_and_indian_lands": 13
+ },
+ "series": [
+  "faads_pre2008_assistance_attributed",
+  "federal_assistance_obligations",
+  "federal_obligations_total",
+  "federal_prime_obligations",
+  "nigc_regional_ggr_rolled_to_nation",
+  "sec_filed_per_property_net_revenues"
+ ],
+ "money_classes": [
+  "FEDERAL_OBLIGATION_TRANSFERRED_INTO_INDIAN_COUNTRY",
+  "INDIAN_COUNTRY_OWN_SOURCE_REVENUE"
+ ],
+ "note": "No grand total is written. Federal obligations are transfers INTO Indian Country; gaming revenue is Indian Country's OWN-SOURCE revenue. Both are published; the boundary is money_class and the reader may add if they choose."
+}
