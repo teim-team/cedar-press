@@ -112,6 +112,16 @@ const NonprofitsIcon = (
 );
 
 /** Stacked chips: the gaming floor and the money on it. */
+/** A parent node tied to two subsidiaries, and the tie between them: who owns whom. */
+const NestIcon = (
+  <svg {...glyph}>
+    <circle cx="14" cy="7" r="3.6" />
+    <circle cx="6.5" cy="21" r="3.1" />
+    <circle cx="21.5" cy="21" r="3.1" />
+    <path d="M12.3 10.2 8 18.2M15.7 10.2 20 18.2M9.6 21h8.8" />
+  </svg>
+);
+
 const GamingIcon = (
   <svg {...glyph}>
     <ellipse cx="14" cy="8" rx="9" ry="3.6" />
@@ -189,6 +199,7 @@ export const COLLECTION_ICONS = {
   "natural-resources": ResourcesIcon,
   owned: OwnedIcon,
   nonprofits: NonprofitsIcon,
+  nest: NestIcon,
   gaming: GamingIcon,
   census: CensusIcon,
   labor: LaborIcon,

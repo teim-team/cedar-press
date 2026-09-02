@@ -234,6 +234,18 @@ export const PRESS_CATALOG = Object.freeze([
       "Filers classified as Native-led, Native-serving or Native-focused, which are three different things and are labeled separately.",
   }),
   Object.freeze({
+    id: "nest",
+    short: "NEST",
+    name: "Native Enterprise Structures and Ties",
+    shelf: "pro",
+    standardFrom: 2026,
+    historyFrom: 2026,
+    blurb:
+      "Who owns whom across Indian Country's enterprises: parent nations and corporations, their subsidiaries, holding companies and joint ventures, and how those ties change as entities are created, renamed, acquired and wound down.",
+    linkage:
+      "This is the structure the rest of the record resolves against, published as a collection in its own right: every tie names the nation or corporation behind it.",
+  }),
+  Object.freeze({
     id: "gaming",
     short: "Gaming",
     name: "Gaming Intelligence",
