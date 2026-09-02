@@ -56,31 +56,81 @@ class ForbiddenScript(Exception):
 # ---------------------------------------------------------------------------
 
 NEVER_RUN = {
-    "01_build_entity_spine.py":
-        "A full rebuild DROPS EVERY APPENDED ENTITY - the village "
-        "corporations, NHOs, TCUs, CDFIs, BIE schools and UIOs added by "
-        "scripts 52, 61, 73 and 75. Safe to IMPORT, never to RUN. "
-        "Append-merge instead, re-reading the spine immediately before "
-        "writing so a concurrent agent is not clobbered.",
-    "09_import_rulings.py":
-        "Rebuilds cedar_identifier_ledger_final.csv FROM the stale "
-        "cedar_identifier_ledger_tiered.csv, which does not carry rows later "
-        "scripts appended directly to _final. Running it on 2026-08-08 "
-        "destroyed 1,327 ledger rows and 451 village-corporation links, 121 "
-        "of them tier A - lost, not moved. Use "
-        "124_apply_rulings_in_place.py.",
     "41_build_codebooks.py":
         "Writes codebook_master.csv in 'w' mode from a hardcoded 19-group "
         "DATASETS dict. Running it today DELETES 21 OF THE 43 dataset "
         "blocks, including every block registered on 2026-08-26. The single "
         "most destructive command in the repo, and its name does not say so. "
         "Use cedar_codebook.write_fragment() or cedar_register_codebook.py.",
-    "88_build_deals_taxonomy.py":
-        "Rebuilds the deals taxonomy. Its glob read deals_*_additions.csv "
-        "and never saw the 131 rows in the two root ledgers - the miscount "
-        "that propagated as '790 deals' for three weeks. The glob was "
-        "repaired at source, but a full taxonomy rebuild still discards the "
-        "party rulings 33/53/57/154 wrote in place.",
+}
+
+#: SCRIPTS THAT USED TO BE IN `NEVER_RUN` AND ARE NOT ANY MORE.
+#:
+#: They came off the list on 2026-09-01 (workstream C8) because the reason
+#: they were on it stopped being true - not because anyone decided the risk
+#: was acceptable. All three destroyed for one reason: they opened their
+#: output in `"w"` mode and wrote only what they had computed, so every row
+#: and column that reached the table from anywhere else was gone. All three
+#: now write through `merge_table` below, which cannot drop a row and raises
+#: rather than drop a column.
+#:
+#: THE ORDER MATTERS AND IT IS RECORDED HERE BECAUSE IT IS THE WHOLE POINT.
+#: `518_dataset_readiness.py` reads `NEVER_RUN` and reports C8 BLOCKED for any
+#: collection a listed script rebuilds - correctly. That gate could have been
+#: turned green at any point in the last month by deleting three dict entries,
+#: and doing so would have made `py -3 code/build.py run _entity_layer
+#: --execute` genuinely delete 868 of 1,555 entities. HUB refused it on
+#: 2026-09-01 and wrote down why. The guard came off only after the merge
+#: existed AND `812_c8_rebuild_proof.py` proved, by dry run against the live
+#: tables, that each rebuild reproduces the census with zero rows and zero
+#: columns lost.
+RETIRED_FROM_NEVER_RUN = {
+    "01_build_entity_spine.py": {
+        "was": "A full rebuild DROPPED EVERY APPENDED ENTITY - it built from "
+               "canonical_tribe_table.csv alone (687 rows, 12 columns) over a "
+               "live hub of 1,555 rows and 44, dropping 868 entities and 32 "
+               "columns including cedar_uid.",
+        "fixed": "Writes through merge_table keyed on tribe_id (unique on all "
+                 "1,555 live rows). Fills blank cells only and overwrites "
+                 "nothing - every column it computes is also written by a "
+                 "later enricher - so a disagreement is reported to "
+                 "review/spine_merge_drift_<date>.csv, not applied.",
+        "proof": "812_c8_rebuild_proof.py, 2026-09-01: 1,555 -> 1,555 rows, "
+                 "44 -> 44 columns, 0 lost, 512 drift cells held back "
+                 "(510 of them an alias separator).",
+        "retired": "2026-09-01",
+    },
+    "09_import_rulings.py": {
+        "was": "READ cedar_identifier_ledger_tiered.csv (19,232 rows) and "
+               "WROTE cedar_identifier_ledger_final.csv (20,577). Those are "
+               "not the same table: _final is _tiered plus 1,345 rows later "
+               "scripts appended, 18 of them tier-A owner adjudications - the "
+               "one class of fact that cannot be re-derived. A hardcoded "
+               "17-column header dropped 5 more columns on top.",
+        "fixed": "The base is now LIVE _final, unioned with any _tiered row "
+                 "not already in it, and the column set is read off the file "
+                 "instead of typed. The write refuses if a row or a column "
+                 "would be lost, and any tier-A adjudication that changes "
+                 "tier is named.",
+        "proof": "812_c8_rebuild_proof.py, 2026-09-01: 20,577 -> 20,577 rows, "
+                 "22 -> 22 columns, 0 lost, 269 tier-A adjudications carried "
+                 "in and 267 out (the 2 are a genuine ruling-vs-enricher "
+                 "disagreement, named in the log, not a loss).",
+        "retired": "2026-09-01",
+    },
+    "88_build_deals_taxonomy.py": {
+        "was": "Rebuilt deals_classified.csv in 'w' mode with a header taken "
+               "from list(out[0].keys()) - the FIRST row's keys. It dropped "
+               "nine columns: seven native_party_* written by 126, cedar_uid "
+               "written by 505, and Event_Quarter, which is absent from the "
+               "first input file and present in the additions files.",
+        "fixed": "merge_table keyed on Deal_ID; the header is the union of "
+                 "every row's keys; only the twelve taxonomy columns this "
+                 "script authors are refreshed.",
+        "proof": "812_c8_rebuild_proof.py, 2026-09-01: 935 -> 935 rows, "
+                 "52 -> 52 columns, 0 lost, 0 drift.",
+        "retired": "2026-09-01",
+    },
 }
 
 #: The one escape hatch, and it is deliberately awkward. A human who has read
@@ -296,7 +346,9 @@ KNOWN_ORDERINGS = [
     {"rebuild": "09_import_rulings.py",
      "enricher": "50_fix_kootenai_conflation.py",
      "file": "cedar_identifier_ledger_final.csv",
-     "cost": "09 reverts 50's patches; 09 is in NEVER_RUN for this and worse",
+     "cost": "09 reverted 50's patches by rebuilding _final from the stale "
+             "_tiered. Fixed 2026-09-01 (C8): 09 now re-tiers LIVE _final in "
+             "place, so it no longer reverts 50 - but 50 still runs after it",
      "enricher_columns": []},
     {"rebuild": "01_build_entity_spine.py",
      "enricher": "61_add_nho_intertribal_to_spine.py",
@@ -325,7 +377,8 @@ KNOWN_ORDERINGS = [
      "enricher": "503_identity.py",
      "file": "cedar_entity_spine.csv",
      "cost": "not yet paid - a spine rebuild drops cedar_uid, which every "
-             "dataset now materialises. 01 is NEVER_RUN; if it is ever forced, "
+             "dataset now materialises. 01 append-merges since 2026-09-01, so a "
+             "rerun no longer drops appended entities; even so, "
              "re-run 504 then 505",
      "enricher_columns": ["cedar_uid"]},
     {"rebuild": "114_pull_prime_archive.py",
@@ -572,7 +625,101 @@ KNOWN_ORDERINGS = [
      "file": "section_106_project_parties.csv",
      "cost": "not yet paid - declared on the pre505 receipt beside the table",
      "enricher_columns": ["cedar_uid"]},
+    # Declared 2026-09-01 by the GRAIN-HUB workstream, and the same shape as
+    # the 114 -> 430 entry above: a ONE-TIME BACKFILL, not a standing
+    # dependency, and saying so is the point.
+    {"rebuild": "169_build_identifier_graph.py",
+     "enricher": "741_hub_grain_and_rebuild.py",
+     "file": "cedar_identifier_graph_edges.csv",
+     "cost": "NONE. 169 now writes `asserting_row_ref` on BLOCK edges "
+             "itself, so a rebuild WRITES the column rather than dropping it. "
+             "741 is a one-time splice of the ruling-map BLOCK slice for the "
+             "rows built before that change - the 2,451 apparent literal "
+             "duplicates that were distinct applications of a negative ruling "
+             "to distinct target rows all along - and is a no-op on a fresh "
+             "169 build. 169 was deliberately NOT re-run: it also rebuilds "
+             "cedar_identifier_graph_nodes.csv and "
+             "cedar_identifier_propagation.csv, and 354 and 427 have written "
+             "to the graph since it last ran",
+     "enricher_columns": ["asserting_row_ref"]},
 ]
+
+
+# ---------------------------------------------------------------------------
+# DECLARED REPLAY ORDERS - the SEQUENCE, where KNOWN_ORDERINGS only has PAIRS
+# ---------------------------------------------------------------------------
+#: `KNOWN_ORDERINGS` says "B must run after A". That is enough to stop a
+#: rebuild reverting one enricher, and it is NOT enough to rebuild a table from
+#: nothing: for that you need the whole sequence, in order, and `plan_for`
+#: returns the enrichers LEXICOGRAPHICALLY (`50`, `503`, `51`, `52`, ...),
+#: which is not the order anything was applied in.
+#:
+#: That gap was the whole of the `_entity_layer` C8 blocker: not the backups -
+#: every spine enricher takes one, and as of 2026-09-01 so do `01` and `09` -
+#: but the fact that nobody could state what a replay must RUN, or prove that
+#: running it reproduces the 1,555 rows and 44 columns on disk.
+#:
+#: THE ORDER BELOW WAS NOT DECLARED FROM MEMORY. Every spine enricher writes a
+#: `cedar_entity_spine.csv.bak_<date>_pre<NN>` before it touches the file, so
+#: `data/spine` in modification-time order IS the applied order, and each
+#: backup's header is the column set as it stood immediately before that
+#: enricher ran. `741_hub_grain_and_rebuild.py census` reads that trail and
+#: emits the row-and-column genealogy to `docs/schema/hub_rebuild_census.json`
+#: - 687 rows / 12 columns at the earliest checkpoint, 1,555 / 44 live, with
+#: all 32 added columns attributed to a named stage.
+#:
+#: `two_of_these_mint`: 426 mints spine entities outright and 503 mints
+#: cedar_uids. 503 re-uses an existing uid keyed on the handle and `handle`
+#: equals `tribe_id` on all 1,555 of 1,555 rows, so it is safe to replay; 426
+#: must be checked against the append-only register FIRST, because a wrong
+#: replay cannot be undone by deleting rows from a register.
+REPLAY_ORDERS = {
+    "cedar_entity_spine.csv": {
+        "rebuild": "01_build_entity_spine.py",
+        "order": [
+            "51_add_anc_acronym_aliases.py",
+            "52_add_village_corporations.py",
+            "61_add_nho_intertribal_to_spine.py",
+            "66_build_entity_hierarchy.py",
+            "69_enrich_spine_from_federal_register.py",
+            "71_fix_known_defects.py",
+            "74_add_organization_acronyms.py",
+            "73_add_tcu_and_cdfi.py",
+            "75_add_bie_schools_and_uios.py",
+            "163_promote_nho_universe_in_place.py",
+            "241_promote_individual_native_firms_in_place.py",
+            "416_reconcile_spine_id_columns.py",
+            "426_mint_bristol_bay_spine_entities.py",
+            "503_identity.py",
+            "524_universe_gap.py",
+        ],
+        "mints": ["426_mint_bristol_bay_spine_entities.py",
+                  "503_identity.py"],
+        "gate": "the post-replay spine must have >= 1,555 rows and all 44 "
+                "columns listed in docs/schema/hub_rebuild_census.json. "
+                "Anything less is a partial restore wearing a green build log",
+        "evidence": "read off the cedar_entity_spine.csv.bak_<date>_pre<NN> "
+                    "trail in data/spine by "
+                    "741_hub_grain_and_rebuild.py census, 2026-09-01",
+        "no_checkpoint": ["08_build_review_page.py",
+                          "115_pull_assistance_archive.py"],
+        "warning": "01 came off NEVER_RUN on 2026-09-01 because it now "
+                   "append-merges: it still computes only 687 rows and 12 "
+                   "columns from canonical_tribe_table.csv, but it can no "
+                   "longer drop the other 868 entities or the other 32 "
+                   "columns - merge_table raises instead. This order is still "
+                   "how you REPLAY the hub after a restore; it is not a "
+                   "reason to take it apart",
+    },
+}
+
+
+def replay_order(table):
+    """The declared full replay sequence for `table`, or None.
+
+    Distinct from `all_orderings(table)`, which returns unordered PAIRS.
+    """
+    return REPLAY_ORDERS.get(Path(str(table)).name)
 
 
 LINT_REPORT = CEDAR / "docs" / "lint_bug_classes.json"
@@ -759,3 +906,240 @@ def clean_state(raw, own_uei=""):
     if len(v) == 12 and v.isalnum():
         return "", "REJECTED: looks like a UEI"
     return "", f"REJECTED: not a state ({v[:24]})"
+
+
+# =====================================================================
+# APPEND-MERGE - the C8 machinery, shared because three builders need it
+# =====================================================================
+# WHY THIS EXISTS, IN ONE PARAGRAPH
+# ---------------------------------
+# `NEVER_RUN` above named four scripts that destroy on rerun. Three of them
+# destroy for exactly ONE reason: they open their output in "w" mode and write
+# only what they themselves computed, so every row and every column that
+# reached the table from somewhere else is gone. That is not a property of
+# what they compute - 01's 687 canonical entities are all correct - it is a
+# property of HOW THEY WRITE. Fixing the write fixes all three, and a shared
+# implementation is the only way the three do not drift apart the way two
+# copies of a state validator would.
+#
+# THE CONTRACT merge_table ENFORCES (2026-09-01, workstream C8)
+# -------------------------------------------------------------
+#   1. NO ROW IS EVER LOST. Every live row survives, in its original order.
+#      A rebuilt row whose key is unseen is APPENDED after them.
+#   2. NO COLUMN IS EVER LOST. Live column order is preserved and columns the
+#      builder introduces are appended on the right. This is the project's
+#      single most repeated defect - it hit admin_appeal_positions.csv, two
+#      gaming tables and four Federal Register tables on 2026-08-31 alone -
+#      so it is an assertion here, not a convention.
+#   3. A BUILDER MAY NOT SILENTLY OVERWRITE. On a row that already exists it
+#      fills BLANK cells only. Where the live cell is non-blank and differs
+#      from what the rebuild computed, the LIVE value stands and the pair is
+#      recorded as drift. `refresh` names the columns the builder genuinely
+#      owns and may overwrite; naming a column there is a claim that no other
+#      script writes it, and that claim should be checked with a grep before
+#      it is made.
+#   4. DRIFT IS REPORTED, NEVER DISCARDED. MergeReport.drift carries every
+#      (key, column, live, rebuilt) triple the merge declined to apply. A
+#      rebuild that would have changed 4,000 cells and a rebuild that would
+#      have changed none must not look the same in the log.
+#
+# WHAT THIS DOES NOT DO. It does not make a builder correct, and it is not a
+# licence to rebuild casually. It makes a rebuild ADDITIVE, which is the
+# precondition C8 asks for: "ONE documented rebuild path reproduces the tables
+# without destroying later enrichment".
+
+import csv as _csv
+import shutil as _shutil
+from datetime import date as _date
+
+
+class MergeReport:
+    """What a merge did, in numbers a gate can assert on."""
+
+    def __init__(self, path):
+        self.path = str(path)
+        self.rows_before = 0
+        self.rows_after = 0
+        self.rows_appended = 0
+        self.rows_matched = 0
+        self.rows_lost = 0          # MUST be 0
+        self.cols_before = []
+        self.cols_after = []
+        self.cols_lost = []         # MUST be empty
+        self.cols_added = []
+        self.cells_filled = 0       # blank live cell -> rebuilt value
+        self.cells_refreshed = 0    # builder-owned column overwritten
+        self.drift = []             # (key, column, live_value, rebuilt_value)
+
+    @property
+    def ok(self):
+        return self.rows_lost == 0 and not self.cols_lost
+
+    def as_dict(self):
+        return {
+            "path": self.path,
+            "rows_before": self.rows_before,
+            "rows_after": self.rows_after,
+            "rows_appended": self.rows_appended,
+            "rows_matched": self.rows_matched,
+            "rows_lost": self.rows_lost,
+            "n_cols_before": len(self.cols_before),
+            "n_cols_after": len(self.cols_after),
+            "cols_lost": self.cols_lost,
+            "cols_added": self.cols_added,
+            "cells_filled": self.cells_filled,
+            "cells_refreshed": self.cells_refreshed,
+            "n_drift_cells": len(self.drift),
+            "ok": self.ok,
+        }
+
+    def __str__(self):
+        return (f"{Path(self.path).name}: "
+                f"{self.rows_before:,} -> {self.rows_after:,} rows "
+                f"(+{self.rows_appended:,} new, {self.rows_matched:,} matched, "
+                f"{self.rows_lost} lost), "
+                f"{len(self.cols_before)} -> {len(self.cols_after)} cols "
+                f"(lost {self.cols_lost or 'none'}), "
+                f"{self.cells_filled:,} blanks filled, "
+                f"{self.cells_refreshed:,} refreshed, "
+                f"{len(self.drift):,} drift cells held back")
+
+
+def read_table(path):
+    """(rows, fieldnames). A missing file is ([], []) - not an error."""
+    p = Path(path)
+    if not p.exists():
+        return [], []
+    with open(p, encoding="utf-8-sig", newline="") as fh:
+        rdr = _csv.DictReader(fh)
+        rows = [dict(r) for r in rdr]
+        return rows, list(rdr.fieldnames or [])
+
+
+def ordinal_key(key_cols):
+    """A key function that appends an occurrence ordinal.
+
+    Three rows of cedar_identifier_ledger.csv share (identifier_type,
+    identifier, tribe_id, source_file) and 86 (identifier_type, identifier)
+    pairs recur in cedar_identifier_ledger_final.csv. A merge keyed on a
+    non-unique tuple would collapse them, which is a row loss wearing the
+    word 'deduplication'. Ordinal-within-key makes the key total, and it is
+    the same repair HUB applied to the ruling map on 2026-09-01.
+    """
+    seen = {}
+
+    def kf(row):
+        base = tuple((row.get(c) or "").strip().upper() for c in key_cols)
+        seen[base] = seen.get(base, 0) + 1
+        return base + (seen[base],)
+
+    return kf
+
+
+def write_table(path, rows, fields, backup_tag=None):
+    """Backup-then-write. The backup is unconditional where a tag is given;
+    see .gitignore line 95 - data/spine/* is not in git and git cannot
+    restore it."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.exists() and backup_tag:
+        b = path.with_name(
+            f"{path.name}.bak_{_date.today().isoformat()}_{backup_tag}")
+        if not b.exists():
+            _shutil.copy2(path, b)
+    with open(path, "w", encoding="utf-8", newline="") as fh:
+        w = _csv.DictWriter(fh, fieldnames=fields, extrasaction="ignore")
+        w.writeheader()
+        w.writerows(rows)
+    return path
+
+
+def merge_table(path, rebuilt_rows, rebuilt_fields, key_cols,
+                refresh=(), dry_run=False, backup_tag=None,
+                drift_report=None):
+    """Append-merge `rebuilt_rows` into the live table at `path`.
+
+    Returns (merged_rows, merged_fields, MergeReport). Writes nothing when
+    `dry_run` is true, which is how 812_c8_rebuild_proof.py proves the merge
+    reproduces the census WITHOUT touching a live table.
+    """
+    path = Path(path)
+    rep = MergeReport(path)
+    refresh = set(refresh)
+
+    live_rows, live_fields = read_table(path)
+    rep.rows_before = len(live_rows)
+    rep.cols_before = list(live_fields)
+
+    # -- column union, live order first ---------------------------------
+    fields = list(live_fields)
+    for c in rebuilt_fields:
+        if c not in fields:
+            fields.append(c)
+    rep.cols_after = fields
+    rep.cols_added = [c for c in fields if c not in live_fields]
+    rep.cols_lost = [c for c in live_fields if c not in fields]   # always []
+
+    if not live_rows:
+        # First build. Nothing to preserve, nothing to protect.
+        out = [{c: (r.get(c) or "") for c in fields} for r in rebuilt_rows]
+        rep.rows_after = len(out)
+        rep.rows_appended = len(out)
+        if not dry_run:
+            write_table(path, out, fields, backup_tag=backup_tag)
+        return out, fields, rep
+
+    kf_live = ordinal_key(key_cols)
+    index = {}
+    out = []
+    for r in live_rows:
+        row = {c: (r.get(c) or "") for c in fields}
+        index[kf_live(r)] = row
+        out.append(row)
+
+    kf_new = ordinal_key(key_cols)
+    for r in rebuilt_rows:
+        k = kf_new(r)
+        tgt = index.get(k)
+        if tgt is None:
+            row = {c: (r.get(c) or "") for c in fields}
+            out.append(row)
+            index[k] = row
+            rep.rows_appended += 1
+            continue
+        rep.rows_matched += 1
+        for c in rebuilt_fields:
+            new = (r.get(c) or "")
+            if new == "":
+                continue                      # a rebuild never blanks a cell
+            cur = tgt.get(c, "")
+            if cur == "":
+                tgt[c] = new
+                rep.cells_filled += 1
+            elif cur != new:
+                if c in refresh:
+                    tgt[c] = new
+                    rep.cells_refreshed += 1
+                else:
+                    rep.drift.append((" | ".join(str(x) for x in k[:-1]),
+                                      c, cur, new))
+
+    rep.rows_after = len(out)
+    rep.rows_lost = rep.rows_before - sum(1 for r in out[:rep.rows_before]
+                                          if r is not None)
+
+    if rep.cols_lost:
+        raise RuntimeError(
+            f"merge_table would drop columns from {path.name}: {rep.cols_lost}")
+
+    if drift_report and rep.drift and not dry_run:
+        Path(drift_report).parent.mkdir(parents=True, exist_ok=True)
+        with open(drift_report, "w", encoding="utf-8", newline="") as fh:
+            w = _csv.writer(fh)
+            w.writerow(["key", "column", "live_value_kept",
+                        "rebuild_value_declined"])
+            w.writerows(rep.drift)
+
+    if not dry_run:
+        write_table(path, out, fields, backup_tag=backup_tag)
+    return out, fields, rep

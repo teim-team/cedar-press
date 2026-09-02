@@ -1825,8 +1825,8 @@
   },
   "cedar_identifier_graph_edges.csv": {
    "path": "data/clean/cedar_identifier_graph_edges.csv",
-   "rows": 46051,
-   "n_columns": 13,
+   "rows": 46820,
+   "n_columns": 14,
    "columns": [
     "edge_kind",
     "from_node",
@@ -1836,13 +1836,14 @@
     "edge_tier",
     "edge_tier_source",
     "asserting_source",
+    "asserting_row_ref",
     "n_asserting_sources",
     "method",
     "evidence",
     "built_by",
     "built_date"
    ],
-   "whole_row_duplicates": 2451,
+   "whole_row_duplicates": 0,
    "natural_key": [],
    "natural_key_duplicate_rows": null,
    "join_columns_present": [],
@@ -1854,9 +1855,10 @@
       "evidence"
      ],
      "unique": false,
-     "duplicate_rows": 2456,
+     "duplicate_rows": 3225,
      "null_rows": 0,
-     "example_duplicate": "UEI:KDGNQQAMNUD1 | BLOCKED: other_documented_exclusion"
+     "example_duplicate": "UEI:KDGNQQAMNUD1 | BLOCKED: other_documented_exclusion",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -1865,12 +1867,13 @@
       "to_node"
      ],
      "unique": false,
-     "duplicate_rows": 2451,
-     "null_rows": 12136,
-     "example_duplicate": "UEI:KDGNQQAMNUD1 | BLOCKED: other_documented_exclusion | "
+     "duplicate_rows": 3220,
+     "null_rows": 12905,
+     "example_duplicate": "UEI:KDGNQQAMNUD1 | BLOCKED: other_documented_exclusion | ",
+     "tested_date": "2026-09-01"
     }
    ],
-   "tested_date": "2026-08-29"
+   "tested_date": "2026-09-01"
   },
   "cedar_identifier_graph_nodes.csv": {
    "path": "data/clean/cedar_identifier_graph_nodes.csv",
@@ -2047,8 +2050,8 @@
   },
   "cedar_ruling_ledger_consolidated.csv": {
    "path": "data/clean/cedar_ruling_ledger_consolidated.csv",
-   "rows": 15587,
-   "n_columns": 15,
+   "rows": 43321,
+   "n_columns": 16,
    "columns": [
     "subject_key",
     "subject_name",
@@ -2061,12 +2064,13 @@
     "confidence_tier",
     "tier_source",
     "source_file",
+    "source_row_ordinal",
     "source_column",
     "source_kind",
     "ruling_date",
     "status"
    ],
-   "whole_row_duplicates": 6302,
+   "whole_row_duplicates": 0,
    "natural_key": [],
    "natural_key_duplicate_rows": null,
    "join_columns_present": [],
@@ -2075,12 +2079,48 @@
     {
      "key": [
       "subject_key",
+      "source_row_ordinal",
+      "source_file"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "source_row_ordinal",
+      "source_file",
+      "subject_key"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "subject_key",
+      "source_row_ordinal"
+     ],
+     "unique": false,
+     "duplicate_rows": 350,
+     "null_rows": 0,
+     "example_duplicate": "CAGE:4X1V0 | 0",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "subject_key",
       "source_file"
      ],
      "unique": false,
      "duplicate_rows": 6758,
      "null_rows": 0,
-     "example_duplicate": "UEI:KDGNQQAMNUD1 | data/clean/cross_dataset_ruling_map.csv"
+     "example_duplicate": "UEI:KDGNQQAMNUD1 | data/clean/cross_dataset_ruling_map.csv",
+     "tested_date": "2026-08-29"
     },
     {
      "key": [
@@ -2092,10 +2132,11 @@
      "unique": false,
      "duplicate_rows": 6302,
      "null_rows": 3123,
-     "example_duplicate": "UEI:KDGNQQAMNUD1 | data/clean/cross_dataset_ruling_map.csv |  | BLOCKED: other_documented_exclusion"
+     "example_duplicate": "UEI:KDGNQQAMNUD1 | data/clean/cross_dataset_ruling_map.csv |  | BLOCKED: other_documented_exclusion",
+     "tested_date": "2026-08-29"
     }
    ],
-   "tested_date": "2026-08-29"
+   "tested_date": "2026-09-01"
   },
   "compact_events.csv": {
    "path": "data/clean/compact_events.csv",
@@ -3099,24 +3140,74 @@
   },
   "cross_dataset_ruling_map.csv": {
    "path": "data/clean/cross_dataset_ruling_map.csv",
-   "rows": 7507,
-   "n_columns": 8,
+   "rows": 22936,
+   "n_columns": 11,
    "columns": [
     "identifier_type",
     "identifier",
     "dataset",
     "source_file",
+    "target_row_ordinal",
+    "target_row_key",
+    "target_row_hash",
     "channel",
     "ruling",
     "note",
     "applied_date"
    ],
-   "whole_row_duplicates": 2228,
+   "whole_row_duplicates": 0,
    "natural_key": [],
    "natural_key_duplicate_rows": null,
    "join_columns_present": [],
    "max_rows_per_join_key_value": {},
    "candidates_tested": [
+    {
+     "key": [
+      "target_row_ordinal",
+      "ruling",
+      "target_row_hash"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "target_row_ordinal",
+      "ruling",
+      "target_row_key"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "target_row_ordinal",
+      "ruling",
+      "dataset"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "target_row_ordinal",
+      "ruling"
+     ],
+     "unique": false,
+     "duplicate_rows": 29,
+     "null_rows": 0,
+     "example_duplicate": "64 | Arctic Slope Regional Corporation",
+     "tested_date": "2026-09-01"
+    },
     {
      "key": [
       "identifier",
@@ -3125,7 +3216,8 @@
      "unique": false,
      "duplicate_rows": 2300,
      "null_rows": 0,
-     "example_duplicate": "KDGNQQAMNUD1 | Federal funding (3)"
+     "example_duplicate": "KDGNQQAMNUD1 | Federal funding (3)",
+     "tested_date": "2026-08-29"
     },
     {
      "key": [
@@ -3136,10 +3228,11 @@
      "unique": false,
      "duplicate_rows": 2228,
      "null_rows": 0,
-     "example_duplicate": "KDGNQQAMNUD1 | Federal funding (3) | BLOCKED: other_documented_exclusion"
+     "example_duplicate": "KDGNQQAMNUD1 | Federal funding (3) | BLOCKED: other_documented_exclusion",
+     "tested_date": "2026-08-29"
     }
    ],
-   "tested_date": "2026-08-29"
+   "tested_date": "2026-09-01"
   },
   "deals_2000_2019_additions.csv": {
    "path": "data/clean/deals_2000_2019_additions.csv",
@@ -4856,8 +4949,9 @@
   "faads_entity_attribution.csv": {
    "path": "data/clean/faads_entity_attribution.csv",
    "rows": 29594,
-   "n_columns": 27,
+   "n_columns": 31,
    "columns": [
+    "faads_attribution_key",
     "faads_row_id",
     "fiscal_year",
     "action_date",
@@ -4884,10 +4978,14 @@
     "confidence_tier",
     "tier_rationale",
     "attributed_date",
-    "cedar_uid"
+    "cedar_uid",
+    "faads_row_id_2026_09_01",
+    "assistance_transaction_unique_key",
+    "faads_repoint_basis"
    ],
    "whole_row_duplicates": 0,
    "natural_key": [
+    "faads_attribution_key",
     "fiscal_year",
     "action_date",
     "agency",
@@ -4913,9 +5011,12 @@
     "confidence_tier",
     "tier_rationale",
     "attributed_date",
-    "cedar_uid"
+    "cedar_uid",
+    "faads_row_id_2026_09_01",
+    "assistance_transaction_unique_key",
+    "faads_repoint_basis"
    ],
-   "natural_key_duplicate_rows": 88,
+   "natural_key_duplicate_rows": 0,
    "join_columns_present": [
     "tribe_id",
     "cedar_uid"
@@ -4932,15 +5033,36 @@
      "unique": true,
      "duplicate_rows": 0,
      "null_rows": 0,
-     "example_duplicate": ""
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "faads_attribution_key"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "faads_row_id_2026_09_01"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
     }
    ],
-   "tested_date": "2026-08-29"
+   "tested_date": "2026-09-01"
   },
   "faads_transactions.csv": {
    "path": "data/clean/faads_transactions.csv",
    "rows": 60661,
-   "n_columns": 25,
+   "n_columns": 27,
    "columns": [
     "fiscal_year",
     "cfda_program",
@@ -4966,11 +5088,39 @@
     "record_type",
     "api_endpoint",
     "source_file",
-    "cedar_uid"
+    "cedar_uid",
+    "assistance_transaction_unique_key",
+    "modification_number"
    ],
-   "whole_row_duplicates": 1001,
-   "natural_key": [],
-   "natural_key_duplicate_rows": null,
+   "whole_row_duplicates": 0,
+   "natural_key": [
+    "fiscal_year",
+    "cfda_program",
+    "agency",
+    "recipient_name",
+    "recipient_type",
+    "recipient_city",
+    "recipient_state",
+    "recipient_zip",
+    "recipient_duns",
+    "obligated_usd",
+    "assistance_type",
+    "action_date",
+    "source_url",
+    "tribe_id",
+    "recipient_uei",
+    "recipient_type_description",
+    "cfda_title",
+    "assistance_type_description",
+    "awarding_sub_agency",
+    "award_id_fain",
+    "record_type",
+    "api_endpoint",
+    "source_file",
+    "cedar_uid",
+    "modification_number"
+   ],
+   "natural_key_duplicate_rows": 2,
    "join_columns_present": [
     "tribe_id",
     "cedar_uid"
@@ -4982,13 +5132,24 @@
    "candidates_tested": [
     {
      "key": [
+      "assistance_transaction_unique_key"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
       "source_url",
       "action_date"
      ],
      "unique": false,
      "duplicate_rows": 3713,
      "null_rows": 0,
-     "example_duplicate": "https://www.usaspending.gov/award/ASST_NON_H0001020002_014/ | 2004-06-30"
+     "example_duplicate": "https://www.usaspending.gov/award/ASST_NON_H0001020002_014/ | 2004-06-30",
+     "tested_date": "2026-08-29"
     },
     {
      "key": [
@@ -5002,15 +5163,16 @@
      "unique": false,
      "duplicate_rows": 3015,
      "null_rows": 1037,
-     "example_duplicate": "https://www.usaspending.gov/award/ASST_NON_H0001020002_014/ | 2004-06-30 | 15.AAR | STUDENT CONSERVATION ASSOCIATION | 05 | 03603"
+     "example_duplicate": "https://www.usaspending.gov/award/ASST_NON_H0001020002_014/ | 2004-06-30 | 15.AAR | STUDENT CONSERVATION ASSOCIATION | 05 | 03603",
+     "tested_date": "2026-08-29"
     }
    ],
-   "tested_date": "2026-08-29"
+   "tested_date": "2026-09-01"
   },
   "faads_transactions_all_agencies.csv": {
    "path": "data/clean/faads_transactions_all_agencies.csv",
    "rows": 2769748,
-   "n_columns": 25,
+   "n_columns": 27,
    "columns": [
     "fiscal_year",
     "cfda_program",
@@ -5036,9 +5198,11 @@
     "record_type",
     "api_endpoint",
     "source_file",
-    "cedar_uid"
+    "cedar_uid",
+    "assistance_transaction_unique_key",
+    "modification_number"
    ],
-   "whole_row_duplicates": 179259,
+   "whole_row_duplicates": 3441,
    "natural_key": [],
    "natural_key_duplicate_rows": null,
    "join_columns_present": [
@@ -5058,7 +5222,18 @@
      "unique": false,
      "duplicate_rows": 862875,
      "null_rows": 0,
-     "example_duplicate": "https://www.usaspending.gov/award/ASST_AGG_-NONE-_012/ | usda_fy2002.zip"
+     "example_duplicate": "https://www.usaspending.gov/award/ASST_AGG_-NONE-_012/ | usda_fy2002.zip",
+     "tested_date": "2026-08-29"
+    },
+    {
+     "key": [
+      "assistance_transaction_unique_key"
+     ],
+     "unique": false,
+     "duplicate_rows": 1943993,
+     "null_rows": 1943994,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -5072,10 +5247,11 @@
      "unique": false,
      "duplicate_rows": 795494,
      "null_rows": 376473,
-     "example_duplicate": "https://www.usaspending.gov/award/ASST_AGG_-NONE-_012/ | usda_fy2001.zip | 10.055 | MULTIPLE RECIPIENTS | 10 | "
+     "example_duplicate": "https://www.usaspending.gov/award/ASST_AGG_-NONE-_012/ | usda_fy2001.zip | 10.055 | MULTIPLE RECIPIENTS | 10 | ",
+     "tested_date": "2026-08-29"
     }
    ],
-   "tested_date": "2026-08-29"
+   "tested_date": "2026-09-01"
   },
   "fac_audit_gaming_disclosures.csv": {
    "path": "data/clean/fac_audit_gaming_disclosures.csv",
@@ -5942,9 +6118,10 @@
   "ferc_docket_filings.csv": {
    "path": "data/clean/ferc_docket_filings.csv",
    "rows": 102615,
-   "n_columns": 39,
+   "n_columns": 40,
    "columns": [
     "ferc_filing_id",
+    "filing_occurrence_seq",
     "docket_number",
     "subdocket",
     "accession_number",
@@ -5984,7 +6161,7 @@
     "entity_link_built_by_script",
     "cedar_uid"
    ],
-   "whole_row_duplicates": 822,
+   "whole_row_duplicates": 0,
    "natural_key": [],
    "natural_key_duplicate_rows": null,
    "join_columns_present": [
@@ -5994,6 +6171,17 @@
     "cedar_uid": 389
    },
    "candidates_tested": [
+    {
+     "key": [
+      "ferc_filing_id",
+      "filing_occurrence_seq"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
+    },
     {
      "key": [
       "accession_number"
@@ -6669,7 +6857,7 @@
      "duplicate_rows": 66,
      "null_rows": 3135,
      "example_duplicate": "DOI-2025-000045 | Assigned",
-     "tested_date": "2026-08-29"
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -6684,10 +6872,10 @@
      "duplicate_rows": 8,
      "null_rows": 5284,
      "example_duplicate": "DOI-ASIA-2024-000027 |  | https://www.bia.gov/sites/default/files/media_document/as-ia_foia_logs_august-december_2023.pdf |  | N | N",
-     "tested_date": "2026-08-29"
+     "tested_date": "2026-09-01"
     }
    ],
-   "tested_date": "2026-08-29"
+   "tested_date": "2026-09-01"
   },
   "fpds_uei_cage_map.csv": {
    "path": "data/clean/fpds_uei_cage_map.csv",
@@ -10192,7 +10380,7 @@
   },
   "hearing_bill_links.csv": {
    "path": "data/clean/hearing_bill_links.csv",
-   "rows": 465,
+   "rows": 464,
    "n_columns": 16,
    "columns": [
     "event_id",
@@ -10212,12 +10400,45 @@
     "source_url",
     "built_date"
    ],
-   "whole_row_duplicates": 1,
+   "whole_row_duplicates": 0,
    "natural_key": [],
    "natural_key_duplicate_rows": null,
    "join_columns_present": [],
    "max_rows_per_join_key_value": {},
    "candidates_tested": [
+    {
+     "key": [
+      "bill_id",
+      "event_id"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "bill_id",
+      "source_url"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "bill_id",
+      "hearing_title"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
+    },
     {
      "key": [
       "event_id",
@@ -10227,17 +10448,6 @@
      "duplicate_rows": 1,
      "null_rows": 0,
      "example_duplicate": "338549 | 119-s-3878",
-     "tested_date": "2026-09-01"
-    },
-    {
-     "key": [
-      "bill_id",
-      "event_id"
-     ],
-     "unique": false,
-     "duplicate_rows": 1,
-     "null_rows": 0,
-     "example_duplicate": "119-s-3878 | 338549",
      "tested_date": "2026-09-01"
     },
     {
@@ -11646,7 +11856,7 @@
   "lobbying_registrant_native_ownership_evidence.csv": {
    "path": "data/clean/lobbying_registrant_native_ownership_evidence.csv",
    "rows": 27,
-   "n_columns": 22,
+   "n_columns": 25,
    "columns": [
     "registrant_id",
     "registrant_name",
@@ -11662,6 +11872,9 @@
     "evidence_verbatim",
     "evidence_url",
     "evidence_source",
+    "identifier_type",
+    "identifier",
+    "asserted_by_source",
     "built_by_script",
     "built_date",
     "n_supporting_filings",
@@ -11671,7 +11884,7 @@
     "path_weakest_edge",
     "cedar_uid"
    ],
-   "whole_row_duplicates": 4,
+   "whole_row_duplicates": 0,
    "natural_key": [],
    "natural_key_duplicate_rows": null,
    "join_columns_present": [
@@ -11683,17 +11896,6 @@
    "candidates_tested": [
     {
      "key": [
-      "registrant_id",
-      "evidence_route"
-     ],
-     "unique": false,
-     "duplicate_rows": 7,
-     "null_rows": 0,
-     "example_duplicate": "301072 | R5_IDENTIFIER_ATTRIBUTED_IN_THE_LEDGER",
-     "tested_date": "2026-09-01"
-    },
-    {
-     "key": [
       "evidence_verbatim",
       "evidence_tier"
      ],
@@ -11701,6 +11903,17 @@
      "duplicate_rows": 5,
      "null_rows": 0,
      "example_duplicate": "Agent-researched 2026-08-06: firm-declared parent + retrieved document | B",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "registrant_id",
+      "evidence_route"
+     ],
+     "unique": false,
+     "duplicate_rows": 7,
+     "null_rows": 0,
+     "example_duplicate": "301072 | R5_IDENTIFIER_ATTRIBUTED_IN_THE_LEDGER",
      "tested_date": "2026-09-01"
     },
     {
@@ -12704,7 +12917,7 @@
   },
   "native_bills_subject_sweep.csv": {
    "path": "data/clean/native_bills_subject_sweep.csv",
-   "rows": 2414,
+   "rows": 2409,
    "n_columns": 21,
    "columns": [
     "bill_id",
@@ -12729,9 +12942,29 @@
     "sweep_basis",
     "build_date"
    ],
-   "whole_row_duplicates": 5,
-   "natural_key": [],
-   "natural_key_duplicate_rows": null,
+   "whole_row_duplicates": 0,
+   "natural_key": [
+    "congress",
+    "chamber",
+    "bill_type",
+    "number",
+    "title",
+    "policy_area",
+    "subjects",
+    "introduced_date",
+    "sponsor",
+    "sponsor_party",
+    "sponsor_state",
+    "cosponsor_count",
+    "latest_action_text",
+    "latest_action_date",
+    "subject_family",
+    "matched_phrase",
+    "matched_in",
+    "already_in_native_bills",
+    "sweep_basis"
+   ],
+   "natural_key_duplicate_rows": 0,
    "join_columns_present": [],
    "max_rows_per_join_key_value": {},
    "candidates_tested": [
@@ -12739,10 +12972,10 @@
      "key": [
       "bill_id"
      ],
-     "unique": false,
-     "duplicate_rows": 5,
+     "unique": true,
+     "duplicate_rows": 0,
      "null_rows": 0,
-     "example_duplicate": "107-hr-5108",
+     "example_duplicate": "",
      "tested_date": "2026-09-01"
     },
     {
@@ -13084,7 +13317,7 @@
   },
   "native_passthrough.csv": {
    "path": "data/clean/native_passthrough.csv",
-   "rows": 1262,
+   "rows": 1522,
    "n_columns": 18,
    "columns": [
     "subaward_number",
@@ -13106,7 +13339,7 @@
     "reliability_note",
     "built_date"
    ],
-   "whole_row_duplicates": 114,
+   "whole_row_duplicates": 116,
    "natural_key": [],
    "natural_key_duplicate_rows": null,
    "join_columns_present": [],
@@ -13118,9 +13351,23 @@
       "subaward_date"
      ],
      "unique": false,
-     "duplicate_rows": 378,
+     "duplicate_rows": 421,
      "null_rows": 0,
-     "example_duplicate": "01-01-410 | 2014-03-01"
+     "example_duplicate": "01-01-410 | 2014-03-01",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "subaward_number",
+      "subaward_date",
+      "to_firm",
+      "prime_award_id"
+     ],
+     "unique": false,
+     "duplicate_rows": 348,
+     "null_rows": 0,
+     "example_duplicate": "01-01-410 | 2014-03-01 | NAVAJO NATION TRIBAL GOVERNMENT, THE | U261IHS0083",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -13132,14 +13379,15 @@
      "unique": false,
      "duplicate_rows": 329,
      "null_rows": 0,
-     "example_duplicate": "01-01-410 | 2014-03-01 | U261IHS0083 | NAVAJO NATION TRIBAL GOVERNMENT, THE"
+     "example_duplicate": "01-01-410 | 2014-03-01 | U261IHS0083 | NAVAJO NATION TRIBAL GOVERNMENT, THE",
+     "tested_date": "2026-08-29"
     }
    ],
-   "tested_date": "2026-08-29"
+   "tested_date": "2026-09-01"
   },
   "native_passthrough_pairs.csv": {
    "path": "data/clean/native_passthrough_pairs.csv",
-   "rows": 212,
+   "rows": 307,
    "n_columns": 10,
    "columns": [
     "from_tribe_id",
@@ -13167,7 +13415,8 @@
      "unique": true,
      "duplicate_rows": 0,
      "null_rows": 0,
-     "example_duplicate": ""
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -13177,7 +13426,8 @@
      "unique": true,
      "duplicate_rows": 0,
      "null_rows": 0,
-     "example_duplicate": ""
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -13187,10 +13437,11 @@
      "unique": true,
      "duplicate_rows": 0,
      "null_rows": 0,
-     "example_duplicate": ""
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
     }
    ],
-   "tested_date": "2026-08-29"
+   "tested_date": "2026-09-01"
   },
   "nd_severance_allocation.csv": {
    "path": "data/clean/nd_severance_allocation.csv",
@@ -14778,7 +15029,7 @@
   "np_schedule_i_grants.csv": {
    "path": "data/clean/np_schedule_i_grants.csv",
    "rows": 58685,
-   "n_columns": 64,
+   "n_columns": 65,
    "columns": [
     "filer_ein",
     "filer_name_as_filed",
@@ -14790,6 +15041,7 @@
     "tax_period_end",
     "return_type",
     "object_id",
+    "schedule_i_line_seq",
     "recipient_name_as_filed",
     "recipient_ein",
     "recipient_address",
@@ -14845,7 +15097,7 @@
     "cedar_recipient_link_sources",
     "cedar_uid"
    ],
-   "whole_row_duplicates": 101,
+   "whole_row_duplicates": 0,
    "natural_key": [],
    "natural_key_duplicate_rows": null,
    "join_columns_present": [
@@ -14855,6 +15107,17 @@
     "cedar_uid": 46
    },
    "candidates_tested": [
+    {
+     "key": [
+      "object_id",
+      "schedule_i_line_seq"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
+    },
     {
      "key": [
       "object_id",
@@ -17211,21 +17474,57 @@
   "tcu_cdfi_ownership_evidence.csv": {
    "path": "data/clean/tcu_cdfi_ownership_evidence.csv",
    "rows": 130,
-   "n_columns": 6,
+   "n_columns": 7,
    "columns": [
     "institution",
     "layer",
     "pattern",
     "captured_owner",
     "quote",
-    "evidence_url"
+    "evidence_url",
+    "quote_char_offset"
    ],
-   "whole_row_duplicates": 4,
+   "whole_row_duplicates": 0,
    "natural_key": [],
    "natural_key_duplicate_rows": null,
    "join_columns_present": [],
    "max_rows_per_join_key_value": {},
    "candidates_tested": [
+    {
+     "key": [
+      "quote_char_offset",
+      "evidence_url",
+      "pattern"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "quote_char_offset",
+      "pattern",
+      "evidence_url"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "quote_char_offset",
+      "evidence_url"
+     ],
+     "unique": false,
+     "duplicate_rows": 2,
+     "null_rows": 0,
+     "example_duplicate": "1513 | http://nscdi.org",
+     "tested_date": "2026-09-01"
+    },
     {
      "key": [
       "quote",
@@ -17234,7 +17533,8 @@
      "unique": false,
      "duplicate_rows": 6,
      "null_rows": 0,
-     "example_duplicate": "The Winnebago Tribe of Nebraska chartered Little Priest Tribal College (LPTC) in May 1996. | http://www.littlepriest.edu"
+     "example_duplicate": "The Winnebago Tribe of Nebraska chartered Little Priest Tribal College (LPTC) in May 1996. | http://www.littlepriest.edu",
+     "tested_date": "2026-08-29"
     },
     {
      "key": [
@@ -17245,10 +17545,11 @@
      "unique": false,
      "duplicate_rows": 4,
      "null_rows": 0,
-     "example_duplicate": "The Winnebago Tribe of Nebraska chartered Little Priest Tribal College (LPTC) in May 1996. | http://www.littlepriest.edu | x_chartered_y"
+     "example_duplicate": "The Winnebago Tribe of Nebraska chartered Little Priest Tribal College (LPTC) in May 1996. | http://www.littlepriest.edu | x_chartered_y",
+     "tested_date": "2026-08-29"
     }
    ],
-   "tested_date": "2026-08-29"
+   "tested_date": "2026-09-01"
   },
   "tcu_roster.csv": {
    "path": "data/clean/tcu_roster.csv",
@@ -17883,7 +18184,8 @@
      "unique": true,
      "duplicate_rows": 0,
      "null_rows": 0,
-     "example_duplicate": ""
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -17893,10 +18195,11 @@
      "unique": false,
      "duplicate_rows": 22,
      "null_rows": 0,
-     "example_duplicate": "DOI-2025-000451 | PRIOR_REQUEST_FOR_CALENDAR_OR_VISITOR_RECORDS"
+     "example_duplicate": "DOI-2025-000451 | PRIOR_REQUEST_FOR_CALENDAR_OR_VISITOR_RECORDS",
+     "tested_date": "2026-08-29"
     }
    ],
-   "tested_date": "2026-08-29"
+   "tested_date": "2026-09-01"
   },
   "wa_machine_allocations.csv": {
    "path": "data/clean/wa_machine_allocations.csv",

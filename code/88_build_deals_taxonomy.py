@@ -54,25 +54,72 @@ Writes data/clean/deals_classified.csv
        data/clean/deals_taxonomy.csv      the vocabulary itself
        review/deals_unclassified_<date>.csv
 
-WARNING - THIS IS A FULL REBUILD AND IT DROPS THE ATTRIBUTION COLUMNS
---------------------------------------------------------------------
-`126_apply_deal_party_attribution.py` writes seven `native_party_*` columns
-into `deals_classified.csv` IN PLACE. This script rewrites the file from the
-source ledgers and does not carry them. **Always re-run 126 after running this,
-or the entity links are silently lost.** For adding rows without a rebuild, use
-`153_merge_base_ledgers_into_classified.py` instead.
+THIS SCRIPT APPEND-MERGES. IT USED TO REPLACE. (2026-09-01, workstream C8)
+==========================================================================
+The warning that stood here said "always re-run 126 after running this, or the
+entity links are silently lost", which put the safety of the deals dataset in
+a human's memory. It failed the C8 contract - "ONE documented rebuild path
+reproduces the tables without destroying later enrichment" - and it was the
+last blocker on `deals`.
+
+Measured 2026-09-01 WITHOUT running the script, by diffing what it writes
+against the live table: a rebuild produced 935 rows and 43 columns against a
+live `deals_classified.csv` of 935 rows and 52. **Nine columns, gone:**
+
+  * seven `native_party_*` columns written in place by
+    `126_apply_deal_party_attribution.py` - the entity attribution that makes
+    a deal joinable to the hub at all;
+  * `cedar_uid`, written by `505`;
+  * `Event_Quarter` - and this one was not even known. The header came from
+    `list(out[0].keys())`, the keys of the FIRST row only, so any column that
+    exists in an additions file but not in `deals_2026_ytd.csv` was dropped
+    from every row silently. A header taken from one row is not a schema.
+
+Both are fixed. The write is `cedar_pipeline.merge_table` keyed on `Deal_ID`
+(unique on all 935 live rows), and the header is the UNION of every row's
+keys. The taxonomy columns this script genuinely owns are refreshed; every
+other column is preserved, and a disagreement is recorded as drift rather than
+applied. `--dry-run` computes everything and writes nothing.
+
+Removed from `cedar_pipeline.NEVER_RUN` on 2026-09-01, after the fix.
+`153_merge_base_ledgers_into_classified.py` remains the narrower route for
+adding rows; this one is no longer a trap.
 """
 
 import csv
 import glob
 import re
-from collections import Counter, defaultdict
+import sys
+from collections import Counter
 from datetime import date
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).parent))
+from cedar_pipeline import merge_table, write_table  # noqa: E402
+
 CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
+REVIEW = CEDAR / "review"
 TODAY = date.today().isoformat()
+
+#: `Deal_ID` is unique on all 935 live rows and on all 936 source rows
+#: (checked 2026-09-01). It is the only honest key here: a deal has no other
+#: stable identity across the base ledgers and the nine additions files.
+DEALS_KEY = ["Deal_ID"]
+
+#: The columns THIS script owns and may overwrite on a row that already
+#: exists. Every one is computed deterministically from the source strings by
+#: the rule tables above, so refreshing them is how a corrected pattern
+#: reaches rows that were classified under the old one - which is the entire
+#: point of being able to re-run a classifier. Everything NOT in this list -
+#: the source columns, the seven `native_party_*` columns, `cedar_uid` - is
+#: preserved untouched.
+TAXONOMY_COLUMNS = (
+    "record_class", "sector", "transaction_type", "capital_source",
+    "native_party_role", "deal_status_std", "sector_raw",
+    "transaction_type_raw", "deal_category_raw", "value_type_raw",
+    "classified_date", "_source_file",
+)
 
 # (sector, ordered patterns). First match wins, so put the specific first.
 SECTOR = [
@@ -199,8 +246,9 @@ def classify(text, table):
     return ""
 
 
-def main():
-    print("=== Cedar Press 88: deals taxonomy ===\n")
+def main(dry_run=False):
+    print("=== Cedar Press 88: deals taxonomy (APPEND-MERGE) ===")
+    print("    DRY RUN - nothing will be written\n" if dry_run else "")
     rows = []
     drop = withdrawn_ids()
     # A count is not actionable and scrolls past; an identifier is a task.
@@ -286,15 +334,35 @@ def main():
                 "YOUR_RULING": "",
             })
 
+    # ---- MERGE, not replace ----------------------------------------------
+    # THE HEADER IS THE UNION OF EVERY ROW'S KEYS, NOT THE FIRST ROW'S.
+    # `list(out[0].keys())` dropped `Event_Quarter` from all 935 rows because
+    # it is absent from `deals_2026_ytd.csv` and present in the additions
+    # files. One row is not a schema.
+    rebuilt_fields = []
+    for r in out:
+        for c in r:
+            if c not in rebuilt_fields:
+                rebuilt_fields.append(c)
+
     p = CLEAN / "deals_classified.csv"
-    with open(p, "w", encoding="utf-8", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=list(out[0].keys()))
-        w.writeheader()
-        w.writerows(out)
-    print(f"  wrote {p.relative_to(CEDAR)}  ({len(out):,} rows, "
-          f"{len(out[0])} cols)")
+    merged, fields, rep = merge_table(
+        p, out, rebuilt_fields, DEALS_KEY, refresh=TAXONOMY_COLUMNS,
+        dry_run=dry_run, backup_tag="pre88",
+        drift_report=REVIEW / f"deals_merge_drift_{TODAY}.csv")
+    print(f"  {rep}")
+    if not rep.ok:
+        raise RuntimeError(f"merge refused: {rep.as_dict()}")
+    if rep.drift:
+        print(f"  {len(rep.drift):,} cells where the rebuild disagrees with a "
+              f"column it does not own - LIVE KEPT, written to "
+              f"review/deals_merge_drift_{TODAY}.csv")
 
     # ---- publish the vocabulary itself, so it can be joined and audited ----
+    # Counted over the MERGED table, not over `out`. A vocabulary whose counts
+    # describe only the rows this run happened to rebuild would understate any
+    # row that reached the table another way.
+    out = merged
     vocab = []
     for axis, table in (("sector", SECTOR), ("transaction_type", TXN_TYPE),
                         ("capital_source", CAPITAL),
@@ -306,23 +374,20 @@ def main():
     for axis in ("record_class",):
         for label in ("TRANSACTION", "PUBLIC_AWARD"):
             vocab.append({"axis": axis, "value": label,
-                          "n_deals": sum(1 for o in out if o[axis] == label),
+                          "n_deals": sum(1 for o in out if o.get(axis) == label),
                           "built_date": TODAY})
     p2 = CLEAN / "deals_taxonomy.csv"
-    with open(p2, "w", encoding="utf-8", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=["axis", "value", "n_deals",
-                                           "built_date"])
-        w.writeheader()
-        w.writerows(vocab)
-    print(f"  wrote {p2.relative_to(CEDAR)}  ({len(vocab)} vocabulary terms)")
+    if not dry_run:
+        # 88 is the sole author of the vocabulary - it IS the rule tables -
+        # so this one is written whole. The backup is taken anyway.
+        write_table(p2, vocab, ["axis", "value", "n_deals", "built_date"],
+                    backup_tag="pre88")
+        print(f"  wrote {p2.relative_to(CEDAR)}  ({len(vocab)} vocabulary terms)")
 
-    if unclassified:
-        p3 = CEDAR / "review" / f"deals_unclassified_{TODAY}.csv"
-        p3.parent.mkdir(exist_ok=True)
-        with open(p3, "w", encoding="utf-8", newline="") as fh:
-            w = csv.DictWriter(fh, fieldnames=list(unclassified[0].keys()))
-            w.writeheader()
-            w.writerows(unclassified)
+    if unclassified and not dry_run:
+        p3 = REVIEW / f"deals_unclassified_{TODAY}.csv"
+        write_table(p3, unclassified, list(unclassified[0].keys()),
+                    backup_tag="pre88")
         print(f"  wrote {p3.relative_to(CEDAR)}  ({len(unclassified)} for ruling)")
 
     print()
@@ -330,17 +395,17 @@ def main():
         print(f"   {stats[k]:5,}  {k}")
     print()
     for axis in ("record_class", "sector", "transaction_type", "capital_source"):
-        c = Counter(o[axis] for o in out)
+        c = Counter(o.get(axis, "") for o in out)
         print(f"  {axis}:")
         for k, v in c.most_common(8):
             print(f"     {v:5,}  {k}")
         print()
 
-    txn = [o for o in out if o["record_class"] == "TRANSACTION"]
+    txn = [o for o in out if o.get("record_class") == "TRANSACTION"]
     print(f"  THE HEADLINE NUMBER IS TWO NUMBERS: {len(txn):,} transactions "
           f"and {len(out)-len(txn):,} public awards.")
     print("  Never publish their sum as a deal count.")
 
 
 if __name__ == "__main__":
-    main()
+    main(dry_run="--dry-run" in sys.argv)
