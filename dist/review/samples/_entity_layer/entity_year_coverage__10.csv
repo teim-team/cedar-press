@@ -1,0 +1,11 @@
+component,year,in_source_window,source_window,n_entities_observed,total_usd_observed,interpretation
+prime,2000,1,2000-2022,57,422910877.23,observed
+prime,2004,1,2000-2022,202,2752594199.36,observed
+prime,2008,1,2000-2022,247,5567624653.71,observed
+prime,2012,1,2000-2022,244,8018093442.49,observed
+prime,2016,1,2000-2022,213,5054505279.68,observed
+prime,2020,1,2000-2022,245,11751247898.89,observed
+assistance,2009,1,2008-2023,506,3019993966.12,observed
+assistance,2013,1,2008-2023,557,4055289614.99,observed
+assistance,2017,1,2008-2023,558,5551465836.52,observed
+assistance,2021,1,2008-2023,592,34087346022.55,observed

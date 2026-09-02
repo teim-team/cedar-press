@@ -1,0 +1,11 @@
+vote_id,bill_id,bioguide_id,icpsr,party,party_code,state_abbrev,district,position,cosponsor_flag,position_simple,chamber,congress,rollnumber,cast_code,bioname,build_date
+H093-0390,93-hr-10717,A000216,226.0,R,200,IL,15.0,Yea,0,Yea,House,93,390,1,"ARENDS, Leslie Cornelius",2026-08-05
+H093-0390,93-hr-10717,B000550,789.0,D,100,MN,8.0,Not Voting,1,Not Voting,House,93,390,9,"BLATNIK, John Anton",2026-08-05
+H093-0390,93-hr-10717,B000778,986.0,R,200,IN,6.0,Yea,0,Yea,House,93,390,1,"BRAY, William Gilmer",2026-08-05
+H093-0390,93-hr-10717,B001092,1265.0,D,100,MA,11.0,Yea,0,Yea,House,93,390,1,"BURKE, James Anthony",2026-08-05
+H093-0390,93-hr-10717,C000275,1620.0,R,200,MI,6.0,Yea,0,Yea,House,93,390,1,"CHAMBERLAIN, Charles Ernest",2026-08-05
+H093-0390,93-hr-10717,D000041,2329.0,D,100,NJ,14.0,Yea,0,Yea,House,93,390,1,"DANIELS, Dominick Vincent",2026-08-05
+H093-0390,93-hr-10717,D000269,2525.0,R,200,IL,4.0,Yea,1,Yea,House,93,390,1,"DERWINSKI, Edward Joseph",2026-08-05
+H093-0390,93-hr-10717,D000419,2660.0,D,100,MA,3.0,Yea,0,Yea,House,93,390,1,"DONOHUE, Harold Daniel",2026-08-05
+H093-0390,93-hr-10717,E000273,3034.0,D,100,TN,4.0,Yea,0,Yea,House,93,390,1,"EVINS, Joseph Landon",2026-08-05
+H093-0390,93-hr-10717,F000229,3242.0,D,100,GA,6.0,Yea,0,Yea,House,93,390,1,"FLYNT, John James, Jr.",2026-08-05

@@ -1,0 +1,11 @@
+issue_family,filing_year,n_filings,n_filings_with_any_family,share_of_classified_filings,n_family_mentions_that_year,share_of_family_mentions,n_filings_total_that_year,preferred_series_for_trend
+agriculture,2000,0,3,0.0,5,0.0,451,share_of_family_mentions
+agriculture,2004,0,38,0.0,90,0.0,611,share_of_family_mentions
+agriculture,2008,12,895,0.0134,2263,0.0053,1344,share_of_family_mentions
+agriculture,2012,15,785,0.0191,2260,0.0066,1123,share_of_family_mentions
+agriculture,2016,29,844,0.0344,2655,0.0109,1205,share_of_family_mentions
+agriculture,2020,53,952,0.0557,3236,0.0164,1285,share_of_family_mentions
+agriculture,2024,88,904,0.0973,2821,0.0312,1269,share_of_family_mentions
+appropriations,2001,0,4,0.0,6,0.0,500,share_of_family_mentions
+appropriations,2005,38,79,0.481,208,0.1827,650,share_of_family_mentions
+appropriations,2009,305,789,0.3866,2057,0.1483,1210,share_of_family_mentions

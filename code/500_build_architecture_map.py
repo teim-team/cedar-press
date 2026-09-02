@@ -175,11 +175,23 @@ COLLECTIONS: list[dict] = [
     # not public figures. 990's invariant 7 fails the build on any field over
     # 1,200 characters, which is the shape body text would arrive in.
     #
-    # `shelf` is `standard`: this is a catalogue of what Indian Country
-    # publishes, and the product catalog (src/features/grove/pressCatalog.js)
-    # needs a matching entry before it is priced.
+    # OWNER RULING 2026-09-02 - NOT A CUSTOMER DATASET.
+    #
+    #   *"Newsletters isn't in there. Get rid of newsletters. I don't even know
+    #   why that's like us working on it and fact checking and stuff."*
+    #
+    # `shelf` was `standard`; it is now `withdrawn`, which keeps the collection
+    # addressable while removing it from every customer shelf. The customer
+    # count is TWELVE - six standard, six pro - and this is the collection that
+    # made it thirteen.
+    #
+    # WITHDRAWN IS NOT DELETED, deliberately. Flag, never delete, is the rule
+    # this project runs on, and the ruling was about what the storefront shows,
+    # not about destroying a collection. The tables stay on disk, keep their
+    # ids, and stay addressable to anything internal that already keys to them.
+    # What stops is fact-checking effort and any customer-facing slot.
     {"id": "newsletters", "name": "The Native Press: Tribal Newsletters and "
-     "Periodicals", "shelf": "standard", "prefixes": [],
+     "Periodicals", "shelf": "withdrawn", "prefixes": [],
      "tables": r"^tribal_newsletter_"},
     {"id": "natural-resources", "name": "Natural Resource Revenues", "shelf": "pro",
      "prefixes": ["12", "15"],

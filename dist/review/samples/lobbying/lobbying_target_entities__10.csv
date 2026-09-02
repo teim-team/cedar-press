@@ -1,0 +1,11 @@
+government_entity_as_filed,n_filings,normalized_department
+HOUSE OF REPRESENTATIVES,19568,Congress
+"Agriculture, Dept of (USDA)",1154,Agriculture
+"Justice, Dept of (DOJ)",1015,Justice
+"Energy, Dept of",663,Energy
+Bureau of Reclamation,551,Interior
+Executive Office of the President (EOP),419,White House / EOP
+"Defense, Dept of (DOD)",229,Defense
+"Labor, Dept of (DOL)",185,Labor
+"State, Dept of (DOS)",162,State
+Federal Energy Regulatory Commission (FERC),105,Energy
