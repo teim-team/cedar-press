@@ -188,8 +188,10 @@ legacy do-file key that literally contains `{234, 'haaku community academy',
 NM}`. It is not a Cedar name at all.
 
 **Re-measured 2026-09-02, and this file had stated the same quantity twice with
-two different values — 345,180 in the section above and 345,108 here.** Both
-are now dead. The method, so the next reader repeats it instead of trusting
+two different values** — 345,180 where the section above now reads 344,360,
+and 345,108 in this paragraph. **Both are dead**, and both are quoted here
+only so the correction is traceable; neither figure appears anywhere as a live
+claim. The method, so the next reader repeats it instead of trusting
 it: compare `canonical_name` in `data/clean/federal_funding_transactions.csv`
 against the `canonical_name` the identity register
 (`data/spine/cedar_identity_register.csv`, 1,555 entries) holds for that row's
