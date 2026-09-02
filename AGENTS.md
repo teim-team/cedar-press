@@ -5457,3 +5457,77 @@ py -3 -c "import csv; R=list(csv.DictReader(open('data/staging/tribe_web_map/sha
           assert len({r['tribe_id'] for r in R})==71; print('shard_a ok', len(R))"
   -> shard_a ok 221
 ```
+
+## GATE FAIL 2026-09-01 ~21:0x — grain workstreams. Owners named by the agents themselves.
+
+GRAIN-WS2 verified each failing line individually and could not edit this file
+(three agents were in `512` and several in `AGENTS.md`), so the attribution is
+recorded here by the integrator on its behalf:
+
+| line | owner |
+|---|---|
+| `lint_class7` +1 | `570_shard_l_vendor_list_hunt.py` (shard L) |
+| `lint_class5` +1 | `571_shard_m_vendor_list_sweep.py` (shard M) |
+| `code_duplicate_numbers` +1 | shards L and M both took **571** |
+| `contract_grain_unstated_shippable` 25 → 29 | arithmetic: 5 new shippable tables registered by siblings, minus WS2's 1 declaration |
+
+WS2 **improved** two metrics in the same pass: `contract_grain_stated_shippable`
+185 → 186 and `harvest_source_rows_read` +49,694.
+
+**Third number collision of the day** (532 twice, 547 twice, now 571 twice).
+`ls code/<n>_*` is not sufficient when agents choose numbers concurrently. The
+convention that has actually worked is a per-workstream floor assigned by the
+integrator at launch, and even that failed when two shards were given the same
+floor. Assign distinct floors.
+
+### THE HUB IS NOT IN GIT (WS2, measured 2026-09-01)
+
+`.gitignore:95` excludes `data/spine/*` except `cedar_identity_register.csv`
+and `cedar_handle_history.csv`. **Git cannot restore `cedar_entity_spine.csv`.**
+
+`01_build_entity_spine.py` fills the spine from `canonical_tribe_table.csv`
+alone — 687 rows, 12 columns — against a live hub of **1,555 rows and 44
+columns**. A direct invocation drops **868 entities (56%)**: 210 NHOs, 185 BIE
+schools, 173 ANC village corporations, 64 Native CDFIs — and **32 of 44
+columns, including `cedar_uid`**. `09_import_rulings.py` drops 1,345 ledger
+rows, **18 of them tier A** (`elijah_ruling`, `nho_verified_entities`) — owner
+adjudications, the one class of row that is not re-derivable.
+
+Neither builder takes a `.bak`. All 15 spine enrichers do.
+
+**Two things reduce the exposure.** `build.plan_for('_entity_layer')` already
+sorts both into a `blocked` phase, so `build.py run _entity_layer --execute` —
+the command 518 prints as the rebuild entry point — does not run them; the risk
+is a direct invocation. And `handle` in the register equals `tribe_id` in the
+spine for **all 1,555 rows**, so the uid binding survives inside a git-tracked
+file. (`cedar_entity_id` covers only 1,009, so that route alone would have
+recovered two thirds.)
+
+**What is genuinely missing: a dependency-correct enricher replay order.**
+`build.plan_for` returns them lexicographically (`50`, `503`, `51`, `52`…),
+which is not the order they were applied, so nobody can prove a replay
+reproduces 1,555 rows and 44 columns. Closing C8 needs exactly two changes:
+`01`/`09` take a `.bak`, and the replay order is recorded and exercised once
+against a census. Full write-up: `docs/WS2_GRAIN_AND_REBUILD.md` §5.
+
+### `NAN` IS A CAGE CODE IN 2,196 ROWS
+
+`fpds_uei_cage_map.csv` carries the **literal string `NAN`** — a stringified
+null — in `cage_code` on 2,196 rows spanning **2,193 distinct UEIs**. A join on
+`cage_code` that does not exclude it fuses 2,193 unrelated entities into one.
+
+Excluding it, the route is near-exact: of 6,843 real CAGE codes only **15** map
+to more than one UEI and none to more than two. That is the measured basis for
+shard E's ASRC result, whose seven codes are all real.
+
+### A TRIBAL GOVERNMENT IS NOT A NATURAL PERSON
+
+`contractor_ranking.csv`'s privacy guard blanks identity columns on 134 rows,
+and the withheld set includes **Nez Perce Tribe, Pueblo of Acoma, Rosebud Sioux
+Tribe, Ramah Navajo Chapter, Blackfeet Utilities and Wyandotte Net Tel** — one
+carrying $71.9M. The rule exists to protect natural persons and was never meant
+to reach governments. It is also why the table has no validated key: all 19
+non-measure columns still leave 6 duplicates, and **every collision is a
+withheld row** (0 among the 1,295 published). Fix proposed by WS2: `269` emits
+`operating_company_seq` (1..n within owner, existing sort order) — unique by
+construction, leaks nothing.
