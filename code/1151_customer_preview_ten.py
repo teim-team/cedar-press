@@ -76,13 +76,23 @@ csv.field_size_limit(10_000_000)
 TODAY = date.today().isoformat()
 SRC = ROOT / "dist" / "customer"
 OUT = ROOT / "dist" / "preview"
-N = 10
+N = 100        # was 10; the owner asked for a hundred so it reads as real
 
 from cedar_publication import (          # noqa: E402
     STOREFRONT_SHELVES, shelves, publishable_columns,
 )
 
 #: Curated, per dataset, in reading order. The Cedar id goes LAST.
+#:
+#: READ FROM THE REAL HEADERS, 2026-09-02, AFTER THE FIRST VERSION GUESSED.
+#: The first draft of this dict was written from what the columns SHOULD be
+#: called and was wrong on 8 of 13 datasets - `business_name` where the file
+#: says `business_name_raw`, `state` where it says `state_province`,
+#: `deal_value_usd` where it says `Announced_Value_USD`, `sub_awardee_name`
+#: where it says `sub_name`. A missing column is silently skipped, so the
+#: previews rendered narrow and nobody was told. On the one artifact a
+#: prospective customer opens first. Every name below now appears in the
+#: delivered file, and `verify` fails if one stops appearing.
 PREVIEW: dict[str, list[str]] = {
     "contractors": [
         "awardee_name", "canonical_name", "parent_name", "funding_agency",
@@ -94,41 +104,68 @@ PREVIEW: dict[str, list[str]] = {
         "obligated_usd", "recipient_city_name", "recipient_state_code",
         "award_id_fain", "cedar_uid"],
     "subcontracting": [
-        "sub_awardee_name", "prime_awardee_name", "subaward_amount",
-        "fiscal_year", "sub_place_of_perform_state", "prime_award_id",
-        "cedar_uid"],
+        "sub_name", "prime_name", "prime_parent_name", "subaward_amount",
+        "subaward_date", "fiscal_year", "naics_title", "sub_state",
+        "subaward_number", "cedar_uid"],
     "legislation": [
         "bill_id", "title", "congress", "chamber", "sponsor",
-        "introduced_date", "latest_action", "latest_action_date",
-        "policy_area"],
+        "introduced_date", "latest_action", "policy_area", "entity_names"],
     "federal-register": [
-        "tribe_name", "channel", "title", "publication_date", "agency",
-        "document_number", "cedar_uid"],
+        "tribe_name", "channel", "agency", "consultation_type", "topic",
+        "notice_date", "federal_register_citation", "cedar_uid"],
     "nagpra": [
-        "institution_name", "institution_state", "title", "publication_date",
-        "mni_total_stated", "document_number", "affiliated_entity_ids"],
+        "institution_name", "institution_city", "institution_state", "title",
+        "publication_date", "document_number", "affiliated_entity_ids"],
     "deals": [
-        "native_party_canonical_name", "counterparty_name", "deal_type",
-        "announced_date", "deal_value_usd", "state", "Deal_ID", "cedar_uid"],
+        "native_party_canonical_name", "Deal_Title", "Counterparty_or_Funder",
+        "Deal_Category", "Event_Date", "Announced_Value_USD", "State",
+        "Deal_ID", "cedar_uid"],
     "lobbying": [
-        "client_name", "registrant_name", "filing_year", "filing_type",
-        "amount_reported", "issue_areas", "cedar_uid"],
+        "canonical_name", "client_name", "registrant_name", "filing_year",
+        "filing_type_display", "spend_usd", "government_entities",
+        "cedar_uid"],
     "nonprofits": [
-        "org_name", "city", "state", "ntee_description", "ruling_year",
-        "total_revenue", "ein", "cedar_uid"],
+        "org_name", "city", "state", "ntee_code", "bmf_revenue_amt",
+        "classification_ruling", "EIN", "cedar_uid"],
     "natural-resources": [
-        "recipient_name", "commodity", "revenue_type", "fiscal_year",
-        "revenue_usd", "state", "cedar_uid"],
+        "recipient_entity_name", "payer_entity_name", "commodity",
+        "revenue_type", "period_start", "amount_usd", "aggregation_level",
+        "cedar_uid"],
     "native-owned-businesses": [
-        "business_name", "certifying_authority_name", "certification_type",
-        "city", "state", "naics_description", "business_source_id"],
+        "business_name_raw", "certifying_authority_name", "programme_name",
+        "service_category_raw", "city", "state_province", "harvest_date",
+        "business_source_id"],
     "nest": [
-        "enterprise_name", "owner_hub_canonical_name", "relation_class",
-        "uei", "cage_code", "state", "enterprise_id"],
+        "enterprise_name", "owner_hub_name", "relation_class", "owner_class",
+        "city", "state_province", "in_federal_contracting", "cedar_uid"],
     "gaming": [
         "facility_name", "tribe", "city", "state", "open_date",
         "gaming_class_iii_authorized", "n_operating_entities",
         "cedar_place_id"],
+}
+
+#: What makes two rows LOOK different, per dataset.
+#:
+#: A generic "find the entity column" test returned one entity for four
+#: datasets and the previews were all the same thing repeated. The reason is
+#: not a missing column - it is that the unit differs. A bill has no single
+#: tribe; a NAGPRA notice is about an institution; a NEST row IS an
+#: enterprise. Stating the unit per dataset is the honest version of a rule
+#: that cannot be generic.
+DIVERSITY: dict[str, str] = {
+    "contractors": "awardee_name",
+    "funding": "recipient_name",
+    "subcontracting": "sub_name",
+    "legislation": "title",
+    "federal-register": "tribe_name",
+    "nagpra": "institution_name",
+    "deals": "native_party_canonical_name",
+    "lobbying": "client_name",
+    "nonprofits": "org_name",
+    "natural-resources": "recipient_entity_name",
+    "native-owned-businesses": "business_name_raw",
+    "nest": "enterprise_name",
+    "gaming": "facility_name",
 }
 
 #: Columns that are never interesting in a preview even when well populated.
@@ -150,10 +187,18 @@ def score_fallback(hdr, rows):
     return cand[:12] or hdr[:12]
 
 
-def entity_of(r):
+def entity_of(r, coll=None):
+    """The value that makes this row distinct, for THIS dataset.
+
+    Falls back to a generic search only when the dataset has no declared key,
+    which `verify` reports rather than tolerating silently. The generic search
+    is what produced "1 distinct entity across 10 rows" on four datasets: it
+    looked for a tribe on a table whose rows are bills.
+    """
+    if coll and coll in DIVERSITY:
+        return (r.get(DIVERSITY[coll]) or "").strip()
     for c in ("canonical_name", "tribe", "tribe_name", "tribe_canonical_name",
-              "owner_hub_canonical_name", "native_party_canonical_name",
-              "cedar_uid", "tribe_id"):
+              "owner_hub_name", "native_party_canonical_name", "cedar_uid"):
         v = (r.get(c) or "").strip()
         if v:
             return v
@@ -171,7 +216,7 @@ def money_of(r, cols):
     return 0.0
 
 
-def pick(rows, cols, n=N):
+def pick(rows, cols, coll=None, n=N):
     """Maximise distinct entities; prefer complete rows and real money."""
     scored = sorted(
         rows,
@@ -179,7 +224,7 @@ def pick(rows, cols, n=N):
                        -money_of(r, cols)))
     seen, out = set(), []
     for r in scored:
-        e = entity_of(r)
+        e = entity_of(r, coll)
         if e and e in seen:
             continue
         seen.add(e)
@@ -211,14 +256,14 @@ def run(write: bool) -> int:
         with f.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
             rd = csv.DictReader(fh)
             hdr = publishable_columns(rd.fieldnames or [])
-            rows = [r for i, r in zip(range(4000), rd)]
+            rows = [r for i, r in zip(range(40000), rd)]
         curated = PREVIEW.get(coll)
         if curated:
             cols = [c for c in curated if c in hdr]
             missing = [c for c in curated if c not in hdr]
         else:
             cols, missing = score_fallback(hdr, rows), []
-        chosen = pick(rows, cols)
+        chosen = pick(rows, cols, coll)
         if write:
             with (OUT / f"{coll}.csv").open("w", encoding="utf-8", newline="") as fh:
                 w = csv.DictWriter(fh, fieldnames=cols, extrasaction="ignore")
@@ -228,7 +273,7 @@ def run(write: bool) -> int:
             "dataset": coll, "rows": len(chosen), "columns": len(cols),
             "curated": int(bool(curated)),
             "curated_columns_absent": "; ".join(missing),
-            "distinct_entities": len({entity_of(r) for r in chosen}),
+            "distinct_entities": len({entity_of(r, coll) for r in chosen}),
             "full_columns": len(hdr),
         })
         flag = "" if curated else "   <- FALLBACK, not curated"
@@ -265,11 +310,19 @@ def verify() -> int:
             bad.append(f"{coll}: {len(rows)} rows, expected {N}")
         if len(hdr) > 14:
             bad.append(f"{coll}: {len(hdr)} preview columns - too wide to read")
+        # A curated name that is not in the delivered file was silently
+        # skipped by the builder, which is how 8 of 13 lists shipped wrong.
+        for c in PREVIEW.get(coll, []):
+            if c not in hdr:
+                bad.append(f"{coll}: curated column {c} is missing from the "
+                           f"preview - it is not in the delivered file")
+        if coll not in DIVERSITY:
+            bad.append(f"{coll}: no declared diversity key")
         if coll not in PREVIEW:
             bad.append(f"{coll}: using the FALLBACK scorer, not a curated list")
         # a preview whose rows are all one entity understates the dataset
-        ents = len({entity_of(r) for r in rows})
-        if len(rows) >= N and ents < 3:
+        ents = len({entity_of(r, coll) for r in rows})
+        if len(rows) >= N and ents < max(3, N // 4):
             bad.append(f"{coll}: only {ents} distinct entities across {len(rows)} rows")
         # every cell must exist in the delivered file - no beautifying
         src = SRC / f"{coll}.csv"
