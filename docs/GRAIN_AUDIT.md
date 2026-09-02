@@ -20,14 +20,14 @@ Three honest outcomes, and they are three different jobs:
 
 | | count |
 |---|---:|
-| shippable tables | 229 |
-| **DECLARED_VALIDATED** | **221** |
+| shippable tables | 230 |
+| **DECLARED_VALIDATED** | **223** |
 | OPEN_WITH_EVIDENCE | 0 |
 | DEFECTIVE | 0 |
-| still unexplained | 8 |
-| ratchet `contract_grain_unstated_shippable` | **8** (was 207) |
+| still unexplained | 7 |
+| ratchet `contract_grain_unstated_shippable` | **7** (was 207) |
 
-A declaration that the data contradicts is release-blocking through `contract_violations`; there are **11**.
+A declaration that the data contradicts is release-blocking through `contract_violations`; there are **12**.
 
 ## Per collection
 
@@ -50,11 +50,10 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 
 ### Federal Register  (`federal-register`)
 
-22 of 22 shippable tables declared.
+21 of 21 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
-| `consultation_events.csv` | 11,402 | DECLARED_VALIDATED | `consultation_event_id` + `participant_name_as_published` | `cedar_uid`→170, `tribe_id`→170 |
 | `correspondence_foia_source_coverage.csv` | 124 | DECLARED_VALIDATED | `url` | — |
 | `federal_actions.csv` | 156,772 | DECLARED_VALIDATED | `document_number` | — |
 | `federal_actions_entity_bridge.csv` | 5,786 | DECLARED_VALIDATED | `document_number` + `tribe_id` | `cedar_uid`→165, `tribe_id`→165 |
@@ -109,7 +108,7 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 | `deals_classified.csv` | 935 | DECLARED_VALIDATED | `Deal_ID` | `cedar_uid`→39 |
 | `deals_federal_awards_additions.csv` | 594 | DECLARED_VALIDATED | `Deal_ID` | — |
 | `deals_historical_additions.csv` | 30 | DECLARED_VALIDATED | `Deal_ID` | — |
-| `deals_press_edgar_ancsa_additions.csv` | — | unexplained | — | — |
+| `deals_press_edgar_ancsa_additions.csv` | — | **DECLARATION FAILED** | `Deal_ID` | `Deal_ID`→1, `Native_Party`→9, `Source_1`→2 |
 | `deals_sec_2010_2017_additions.csv` | 16 | DECLARED_VALIDATED | `Deal_ID` | — |
 | `deals_source_index.csv` | 533 | DECLARED_VALIDATED | `native_party` | — |
 | `deals_tribal_debt_additions.csv` | 6 | DECLARED_VALIDATED | `Deal_ID` | — |
@@ -219,6 +218,15 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 |---|---:|---|---|---|
 | `nest_enterprise_relations.csv` | — | DECLARED_VALIDATED | `enterprise_edge_id` | `cedar_uid`→367, `enterprise_edge_id`→1, `enterprise_id`→15, `owner_hub_cedar_uid`→367 |
 | `nest_enterprises.csv` | — | DECLARED_VALIDATED | `enterprise_id` | `cedar_uid`→172, `enterprise_id`→1, `owner_hub_cedar_uid`→172, `parent_enterprise_id`→34 |
+
+### The Native Press: Tribal Newsletters and Periodicals  (`newsletters`)
+
+2 of 2 shippable tables declared.
+
+| table | rows | outcome | primary key | max rows per join-key value |
+|---|---:|---|---|---|
+| `tribal_newsletter_corpus.csv` | — | DECLARED_VALIDATED | `newsletter_id` | `cedar_uid`→25, `channel_host`→58, `newsletter_id`→1, `tribe_id`→25 |
+| `tribal_newsletter_coverage.csv` | — | DECLARED_VALIDATED | `cedar_uid` | `cedar_uid`→1, `tribe_id`→1 |
 
 ### Natural Resource Revenues  (`natural-resources`)
 

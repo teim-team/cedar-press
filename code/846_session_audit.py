@@ -264,6 +264,23 @@ def _robots():
                          else "no cached body from any of them"))
 
 
+@claim("no institution name is split mid-name in NAGPRA notices", critical=True)
+def _split():
+    """`institution_names_all` split on ` and `, turning ONE department into
+    two institutions: 'Louisiana Department of Culture, Recreation' plus
+    'Tourism, Division of Archaeology'. A fabricated institution shipped on 12
+    notices. Repaired 2026-09-02, leaving the 4 cases that ARE two institutions
+    (History Nebraska, the WSU Anthropology Museum) alone — rejoining those
+    would fabricate a merger, the same error inverted."""
+    import re as _re
+    p = CLEAN / "nagpra_notices.csv"
+    if not p.exists():
+        return (True, "table absent")
+    TAIL = _re.compile(r"\|\s*(Tourism|Recreation|Archaeology|Archeology)", _re.I)
+    bad = [r for r in rows(p) if TAIL.search(r.get("institution_names_all") or "")]
+    return (not bad, f"{len(bad)} notice(s) split a department name mid-name")
+
+
 # ---------------------------------------------------------------- CICD
 @claim("the CICD scheme is gone from every table and every reachable read")
 def _cicd():

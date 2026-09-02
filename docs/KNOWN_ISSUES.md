@@ -881,6 +881,22 @@ workstream's edit — 62 is integrator-owned — but every gate downstream of it
 is currently unrunnable, so it is recorded here rather than left to the next
 agent to rediscover. `293_lint_bug_classes.py` and `845_regenerate_guard.py`
 both run.
+
+> **RESOLVED** — see the `A5-RESOLUTION` block below. The loader now
+> derives its path from `__file__` and `62` imports clean. A failure observed
+> inside a live edit window is real but perishable.
+
+**A6. `docs/schema/dataset_contracts.json` may lag `512` by one run, and it is
+a write race right now.** `GRAIN_STALE_TAIL` is declared in
+`code/512_build_dataset_contracts.py` (verified: `entity_dated_public_facts.csv`
+is in `GRAIN` at import), but the artefact on disk still lists that table as
+`UNDOCUMENTED` — it was written by one of the **four concurrent `512`
+processes** running on 2026-09-02, at least one of which started before the
+dict was added. A third write was deliberately NOT started: `512` rewrites that
+JSON wholesale and racing it is how a contract silently loses a block. The next
+single run of `512` picks the declaration up. Verify with
+`python -c "import json;print('entity_dated_public_facts' in open('docs/schema/dataset_contracts.json').read())"`
+and then check the entry says `UNDOCUMENTED` no longer.
 <!-- END STALE-TAIL-1081 -->
 
 <!-- BEGIN QUARANTINE -->

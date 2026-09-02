@@ -1,8 +1,8 @@
 {
  "built_date": "2026-09-02",
  "derivation": "500.COLLECTIONS + cedar_codebook + cedar_pipeline; GRAIN declared, everything else derived",
- "n_collections": 14,
- "n_tables_claimed": 273,
+ "n_collections": 15,
+ "n_tables_claimed": 277,
  "n_orphan_shippable": 7,
  "orphans": [
   "native_owned_businesses.bak_2026-09-02_010526.csv",
@@ -13,11 +13,10 @@
   "regulations_gov_entity_coverage.csv",
   "sam_native_class_distributions.csv"
  ],
- "n_shippable": 229,
- "n_shippable_grain_stated": 221,
- "n_shippable_grain_unstated": 8,
+ "n_shippable": 230,
+ "n_shippable_grain_stated": 223,
+ "n_shippable_grain_unstated": 7,
  "shippable_grain_unstated": [
-  "deals_press_edgar_ancsa_additions.csv",
   "native_owned_businesses.bak_2026-09-02_010526.csv",
   "native_owned_businesses.bak_2026-09-02_010557.csv",
   "native_owned_businesses.csv",
@@ -28,11 +27,10 @@
  ],
  "n_shippable_grain_open_with_evidence": 0,
  "n_shippable_grain_defective": 0,
- "n_shippable_grain_unexplained": 8,
+ "n_shippable_grain_unexplained": 7,
  "shippable_grain_open_with_evidence": [],
  "shippable_grain_defective": [],
  "shippable_grain_unexplained": [
-  "deals_press_edgar_ancsa_additions.csv",
   "native_owned_businesses.bak_2026-09-02_010526.csv",
   "native_owned_businesses.bak_2026-09-02_010557.csv",
   "native_owned_businesses.csv",
@@ -59,12 +57,13 @@
   "subawards.csv": "10,770 LITERAL duplicate rows of 72,837. (subaward_number, subaward_date) collides 27,470 times, so even the natural key of a subaward is not unique here.",
   "native_passthrough.csv": "114 LITERAL duplicate rows of 1,262. This table is derived from subawards.csv and inherits its duplication; the passthrough dollars are therefore over-stated by an unmeasured amount."
  },
- "n_violations": 11,
+ "n_violations": 12,
  "violations": [
   "federal_funding_transactions.csv: declared join_cardinality names column(s) not in the header: ['tribe_id']",
   "federal_funding_tribe_year_panel.csv: declared primary_key names column(s) not in the header: ['tribe_id']",
   "federal_funding_tribe_year_panel.csv: declared join_cardinality names column(s) not in the header: ['tribe_id']",
   "federal_funding_tribe_year_panel.csv: declared primary_key ['fiscal_year'] is NOT unique - 5,480 duplicate row(s) of 5,496, e.g. ('2008',). A buyer joining on it gets rows we did not promise them.",
+  "deals_press_edgar_ancsa_additions.csv: declared join_cardinality names column(s) not in the header: ['cedar_uid']",
   "ORPHAN shippable table: native_owned_businesses.bak_2026-09-02_010526.csv - registered in the codebook but claimed by NO collection",
   "ORPHAN shippable table: native_owned_businesses.bak_2026-09-02_010557.csv - registered in the codebook but claimed by NO collection",
   "ORPHAN shippable table: native_owned_businesses.csv - registered in the codebook but claimed by NO collection",
@@ -686,7 +685,7 @@
    "name": "Federal Register",
    "shelf": "standard",
    "rebuild_command": "py -3 code/build.py run federal-register --execute",
-   "n_tables": 27,
+   "n_tables": 29,
    "tables": [
     {
      "table": "consultation_agency_coverage.csv",
@@ -709,7 +708,7 @@
     },
     {
      "table": "consultation_events.csv",
-     "status": "shippable",
+     "status": "UNDOCUMENTED",
      "key_columns": [
       "tribe_id",
       "cedar_uid"
@@ -748,6 +747,7 @@
       "96_build_consultation_events.py"
      ],
      "enriched_by": [
+      "1089_fr_consultation_overlap_and_event_parse.py",
       "503_identity.py"
      ],
      "never_run_warning": []
@@ -797,6 +797,62 @@
       ],
       "max_rows_per_join_key_value": {}
      },
+     "key_refused": {},
+     "population_scope": {},
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "dear_tribal_leader_letters.csv",
+     "status": "UNDOCUMENTED",
+     "key_columns": [],
+     "grain": "one row per DOCUMENT an agency published in its own Dear Tribal Leader letter series - `record_kind` says whether that document is the `letter`, an `enclosure` attached to one, or the publisher's own `publisher_index_page`. **Counting rows counts documents, not letters**; filter `record_kind = 'letter'` for a letter count. Where a publisher lists the same document under two dates (8 of 807), the row carries the EARLIEST and `also_listed_under_dates` carries the rest, so nothing the publisher said is discarded and the key stays one row per document.",
+     "primary_key": [
+      "letter_id"
+     ],
+     "join_cardinality": {
+      "letter_id": "one",
+      "document_url": "one",
+      "source_index_url": "many"
+     },
+     "grain_declared_by": "workstream FR-DTLL 2026-09-02: letter_id and document_url each confirmed 807 distinct / 0 blank on the FULL 807-row file, and INV-DTLL-DUP fails the build on a repeated document_url",
+     "grain_validated": true,
+     "measured_rows_per_join_key": {
+      "document_url": 1,
+      "letter_id": 1,
+      "source_index_url": 70
+     },
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "key_refused": {},
+     "population_scope": {},
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "dtll_source_coverage.csv",
+     "status": "internal-by-decision",
+     "key_columns": [],
+     "grain": "one row per (source host, series, index URL) PROBED for a Dear Tribal Leader letter series, carrying the HTTP status, how many sitemap shards were walked against how many exist, and a `coverage_status` in Cedar's absence vocabulary. A row is a fact about OUR probe and about a publisher's INDEX - never about whether the agency writes such letters. `NOT_CHECKED` is a refusal, `REPORTED_FLOOR_PARTIAL_INDEX` is an unwalked remainder, and neither may be read as zero.",
+     "primary_key": [
+      "coverage_id"
+     ],
+     "join_cardinality": {
+      "coverage_id": "one",
+      "source_host": "many"
+     },
+     "grain_declared_by": "workstream FR-DTLL 2026-09-02: coverage_id confirmed distinct / 0 blank on the full file",
+     "grain_validated": true,
+     "measured_rows_per_join_key": {
+      "coverage_id": 1,
+      "source_host": 27
+     },
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
      "key_refused": {},
      "population_scope": {},
      "rebuilt_by": [],
@@ -1701,6 +1757,7 @@
       "14_build_bills_votes.py"
      ],
      "enriched_by": [
+      "1093_bill_votes_majority_anomaly.py",
       "73_bills_votes_completion.py",
       "890_bill_votes_threshold_and_titles.py"
      ],
@@ -1973,6 +2030,7 @@
       "14_build_bills_votes.py"
      ],
      "enriched_by": [
+      "1092_bill_titles_residue_and_scope.py",
       "35_entity_harvest.py"
      ],
      "never_run_warning": []
@@ -2577,12 +2635,23 @@
      "table": "deals_press_edgar_ancsa_additions.csv",
      "status": "shippable",
      "key_columns": [],
-     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
-     "primary_key": [],
-     "join_cardinality": {},
-     "grain_declared_by": "",
+     "grain": "one row per DEAL EVENT admitted by code/1088_merge_staged_deals.py, keyed on Deal_ID. Four channels in one file, readable from the Deal_ID prefix: NLTR- tribal press, SECX- SEC EDGAR, ANCSA3- ANCSA annual reports filed under Alaska Statute 45.55.139, IDOBS- an ownership change Cedar OBSERVED in federal identifier data and that no source announced. The IDOBS rows carry a BLANK Event_Date on purpose: their evidence is a fiscal-year window and a window is not a date.",
+     "primary_key": [
+      "Deal_ID"
+     ],
+     "join_cardinality": {
+      "Deal_ID": "one",
+      "Native_Party": "many",
+      "cedar_uid": "many",
+      "Source_1": "many"
+     },
+     "grain_declared_by": "workstream DEALS-MERGE-1088 2026-09-02: Deal_ID confirmed 144 distinct / 0 blank on the FULL 144-row file with csv.DictReader; 0 literal duplicate rows; Source_1 non-blank on 144 of 144, which code/1088 `verify` re-asserts and exits 1 on",
      "grain_validated": false,
-     "measured_rows_per_join_key": {},
+     "measured_rows_per_join_key": {
+      "Deal_ID": 1,
+      "Native_Party": 9,
+      "Source_1": 2
+     },
      "grain_open_question": "",
      "grain_defect": "",
      "grain_evidence": {},
@@ -2967,7 +3036,8 @@
      "table": "nagpra_notice_entity_bridge.csv",
      "status": "shippable",
      "key_columns": [
-      "tribe_id"
+      "tribe_id",
+      "cedar_uid"
      ],
      "grain": "one row per (notice, relationship, named party) - docs/NAGPRA_BUILD_LOG.md. (document_number, party) alone collides 12,800 times because one party can hold several relationships to one notice. `relationship` is a LEGAL FINDING and the values are not interchangeable: consulted (25 U.S.C. 3003-3004) is not culturally_affiliated, and filtering to one is mandatory before any count. `tribe_id` is blank wherever the resolver was not certain - 3,467 rows - and `resolve_method` says why (`ambiguous_containment:N:...` names every candidate it would not choose between)",
      "primary_key": [
@@ -4374,6 +4444,7 @@
       "05_match_filings_v2.py"
      ],
      "enriched_by": [
+      "1091_lobby_amendment_supersession.py",
       "350_withdraw_false_lobbying_attributions.py",
       "65_lobbying_organization_type_guard.py"
      ],
@@ -4408,6 +4479,7 @@
      "table": "nonprofit_schedule_c_lobbying.csv",
      "status": "shippable",
      "key_columns": [
+      "cedar_uid",
       "ein"
      ],
      "grain": "one row per IRS 990 e-file RETURN parsed for Schedule C - one accepted return of one filer, identified by its IRS OBJECT_ID. NOT one row per organisation and NOT one row per tax year: an amended or short-period return for the same (ein, tax_year) is a second return and a second row (29 such pairs).",
@@ -4848,9 +4920,9 @@
      "grain_validated": true,
      "measured_rows_per_join_key": {
       "cage_code": 398840,
-      "cedar_uid": 111398,
+      "cedar_uid": 111364,
       "contract_number": 11700,
-      "tribe_id": 111398
+      "tribe_id": 111364
      },
      "grain_open_question": "",
      "grain_defect": "",
@@ -4869,19 +4941,12 @@
      "key_refused": {},
      "population_scope": {},
      "rebuilt_by": [
-      "40_build_prime_contracts.py",
-      "871_promote_geo_keys_contracts.py"
+      "40_build_prime_contracts.py"
      ],
      "enriched_by": [
       "1075_fix_old_harbor_attribution.py",
       "1076_clear_self_parent_piid.py",
-      "1085_prime_psc_desc_repull.py",
-      "114_pull_prime_archive.py",
-      "131_merge_archive_backfill.py",
-      "174_apply_rulings_to_source_tables.py",
       "207_normalize_extent_competed.py",
-      "366_courtlistener_ownership_adjudication.py",
-      "40_build_prime_contracts.py",
       "429_apply_asof_ownership_status.py",
       "430_restore_prime_transaction_key.py",
       "950_promote_contract_attributes.py"
@@ -4908,9 +4973,9 @@
      "grain_declared_by": "code/430_restore_prime_transaction_key.py, 2026-08-29 correctness pass: 631,507 rows, key unique on the FULL file, literal duplicate rows 60,919 -> 0 with no row and no dollar removed",
      "grain_validated": true,
      "measured_rows_per_join_key": {
-      "cedar_uid": 50208,
+      "cedar_uid": 50174,
       "contract_number": 7029,
-      "tribe_id": 50208
+      "tribe_id": 50174
      },
      "grain_open_question": "",
      "grain_defect": "",
@@ -4961,8 +5026,8 @@
      "grain_validated": true,
      "measured_rows_per_join_key": {
       "cage_code": 85976,
-      "cedar_uid": 55184,
-      "tribe_id": 55184
+      "cedar_uid": 55176,
+      "tribe_id": 55176
      },
      "grain_open_question": "",
      "grain_defect": "",
@@ -5082,8 +5147,8 @@
      "grain_validated": true,
      "measured_rows_per_join_key": {
       "cage_code": 85976,
-      "cedar_uid": 55184,
-      "tribe_id": 55184
+      "cedar_uid": 55176,
+      "tribe_id": 55176
      },
      "grain_open_question": "",
      "grain_defect": "",
@@ -5364,9 +5429,9 @@
      "grain_validated": true,
      "measured_rows_per_join_key": {
       "prime_award_unique_key": 1536,
-      "prime_cedar_uid": 6651,
-      "prime_uei": 2377,
-      "sub_cedar_uid": 2839,
+      "prime_cedar_uid": 8576,
+      "prime_uei": 2457,
+      "sub_cedar_uid": 2840,
       "sub_uei": 2766
      },
      "grain_open_question": "",
@@ -5385,10 +5450,10 @@
      "population_scope": {},
      "rebuilt_by": [
       "121_pull_subawards_api.py",
-      "20_build_subcontracts.py",
-      "871_promote_geo_keys_contracts.py"
+      "20_build_subcontracts.py"
      ],
      "enriched_by": [
+      "1109_subawardee_geo_promote.py",
       "121_pull_subawards_api.py",
       "250_demote_stale_tierA_subaward_rows.py",
       "45_promote_subawards.py",
@@ -5753,6 +5818,79 @@
    ]
   },
   {
+   "collection": "newsletters",
+   "name": "The Native Press: Tribal Newsletters and Periodicals",
+   "shelf": "standard",
+   "rebuild_command": "py -3 code/build.py run newsletters --execute",
+   "n_tables": 2,
+   "tables": [
+    {
+     "table": "tribal_newsletter_corpus.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "one row per (PUBLISHER, CHANNEL URL). A nation that prints a newspaper, posts PDF back issues to a WordPress media library and files shareholder reports with the State of Alaska has THREE rows, because those are three channels with three different archive depths. NOT one row per publisher, NOT one row per issue, and NOT one row per masthead. The file holds TWO record types under one schema and `record_status` is the discriminator: 1,394 `publication_channel` rows are the dataset; 481 `probe_absence` rows record an entity every machine-readable route reached and found nothing on; 1 is a signup form with no archive; 13 are shard-I place-name collisions kept flagged for their owner. Counting rows instead of filtering `record_status` overstates the channel count by 35%. Archive depth is a FLOOR read off the channel's own index - a paper printing since 1966 whose site indexes 2002 onward reads as 2002 - and no issue body text is stored, by policy and by invariant.",
+     "primary_key": [
+      "newsletter_id"
+     ],
+     "join_cardinality": {
+      "newsletter_id": "one",
+      "cedar_uid": "many",
+      "tribe_id": "many",
+      "channel_host": "many"
+     },
+     "grain_declared_by": "workstream newsletters 2026-09-02, code/1105: newsletter_id confirmed 1,889 distinct / 0 blank on the FULL 1,889-row file; 0 literal duplicate rows; the id is NLTR-<uid|EIN>-md5(channel_url)[:8], a hashlib digest and not Python's per-process-randomised hash(), so it is stable across rebuilds (defect class 7); cedar_uid is declared MANY because a publisher with three channels has three rows, which is the grain itself",
+     "grain_validated": true,
+     "measured_rows_per_join_key": {
+      "cedar_uid": 25,
+      "channel_host": 58,
+      "newsletter_id": 1,
+      "tribe_id": 25
+     },
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "key_refused": {},
+     "population_scope": {},
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "tribal_newsletter_coverage.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "grain": "one row per SPINE ENTITY - all 1,555, always, whether or not anything was found. This is the denominator, and 990's invariant 5 fails the build if it ever drifts from the spine. `probe_status` carries FOUR distinct claims that must not be collapsed: `found` (694), `attempted_none_found` (480, a real absence for the routes named in `probed_by`), `not_probed` (371, which is NOT_SEARCHED_MACHINE_READABLE and is NOT an absence) and `excluded_terms_stated_restrictive` (10, refused by every route, with the site URL withheld here too). Read `site_url_class` before computing any coverage rate: it is why 108 of 210 Native Hawaiian Organizations were never probed, and the answer is that they have no website, not that Cedar has a backlog.",
+     "primary_key": [
+      "cedar_uid"
+     ],
+     "join_cardinality": {
+      "cedar_uid": "one",
+      "tribe_id": "many"
+     },
+     "grain_declared_by": "workstream newsletters 2026-09-02, code/1105: cedar_uid confirmed 1,555 distinct / 0 blank on the FULL 1,555-row file and equal to the spine row count; tribe_id is declared MANY because compound and sub-hub handles repeat across an entity family and a 'one' here would be a promise about a join we do not control",
+     "grain_validated": true,
+     "measured_rows_per_join_key": {
+      "cedar_uid": 1,
+      "tribe_id": 1
+     },
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "key_refused": {},
+     "population_scope": {},
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    }
+   ]
+  },
+  {
    "collection": "natural-resources",
    "name": "Natural Resource Revenues",
    "shelf": "pro",
@@ -5973,7 +6111,7 @@
      "grain_validated": true,
      "measured_rows_per_join_key": {
       "cedar_uid": 518,
-      "entity_id": 518
+      "entity_id": 578
      },
      "grain_open_question": "",
      "grain_defect": "",

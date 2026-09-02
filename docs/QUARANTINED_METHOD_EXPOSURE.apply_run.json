@@ -1,5 +1,5 @@
 {
-  "mode": "verify",
+  "mode": "apply_run_log",
   "date": "2026-09-02",
   "script": "code/1079_quarantine_method_exposure.py",
   "quarantined_methods": [
@@ -7,10 +7,21 @@
     "need_v6",
     "sam_namematch_2026_05_06"
   ],
-  "withdrawn_rows": 103171,
+  "disposition_counts": {
+    "KEEP": 5224,
+    "WITHDRAW": 737,
+    "REPOINT": 67,
+    "HOLD": 764
+  },
+  "disposition_usd": {
+    "KEEP": 23028321289.34,
+    "WITHDRAW": 16997581754.88,
+    "REPOINT": 2443371845.81,
+    "HOLD": 6327484436.9
+  },
+  "applied_identifiers": 804,
   "withdrawn_usd": 16997581754.88,
-  "applied_withdraw_identifiers": 737,
-  "applied_repoint_identifiers": 67,
+  "repointed_usd": 2443371845.81,
   "before": {
     "rows": 1217768,
     "columns": 70,
@@ -146,6 +157,8 @@
     "TRBF-BIDWLL-00": -2530.24,
     "AKNF-QUNHGK-00-CALSTA-ASVCPR": -750.0,
     "AKNF-HAMLTN-00-CALSTA-ASVCPR": -1.0,
+    "ANVC-KSKKWM-00": 0.01,
+    "TRBF-COCHTI-00": 0.01,
     "CNSF-MINNCH-LL": 855035.0,
     "AKNF-KKTOVK-00-ARCSLO": 1028015.7,
     "TRBF-ONDAWI-00": 2424370.7,
@@ -157,6 +170,25 @@
     "ANRC-CKINLT-00": 821183874.88,
     "ANRC-BRBYCO-00": 904571914.65
   },
-  "entities_moved": 124,
-  "invariants_failed": []
+  "file_stats": {
+    "ledger": {
+      "ledger_withdrawn": 737,
+      "ledger_repointed": 67,
+      "written": 20577,
+      "cols_before": 26,
+      "cols_after": 29
+    },
+    "prime_contracts.csv": {
+      "rows": 1217768,
+      "withdrawn_rows": 103171,
+      "flagged_quarantined_rows": 227540,
+      "flagged_attributed_rows": 227540,
+      "repointed_rows": 6550,
+      "written": 1217768,
+      "withdrawn_usd": 16997581754.88,
+      "repointed_usd": 2443371845.81,
+      "cols_before": 70,
+      "cols_after": 75
+    }
+  }
 }
