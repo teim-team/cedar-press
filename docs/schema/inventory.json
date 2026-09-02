@@ -1217,7 +1217,7 @@
    "shelf": "",
    "status": "internal-by-decision",
    "internal_reason": "526's per-dataset punch list - the specific named actions between each dataset and clean. Internal because it describes OUR work queue, not the world; docs/datasets/_PUNCHLIST.md is the human view",
-   "rows": 337,
+   "rows": 340,
    "n_cols": 8,
    "grain_declared": false,
    "grain": "",
@@ -1363,7 +1363,7 @@
    "shelf": "",
    "status": "internal-by-decision",
    "internal_reason": "517's per-table verdict on whether a buyer may AGGREGATE a table or only read its rows. Internal ONLY because it needs a codebook block and a notes contract before it ships - it is otherwise exactly what a buyer should receive, and shipping it is the point. Until then it gates internally: see docs/EXPORT_SAFETY.md",
-   "rows": 222,
+   "rows": 225,
    "n_cols": 14,
    "grain_declared": false,
    "grain": "",
@@ -1383,7 +1383,7 @@
    "enriched_by": [],
    "never_run_in_chain": [],
    "enricher_backup_columns_lost": [],
-   "enricher_backup_newest": null,
+   "enricher_backup_newest": "cedar_export_safety.csv.bak_2026-09-02_pre_ship",
    "export_class": "",
    "aggregation_safe": "",
    "ships_in_db": false,
@@ -1433,7 +1433,7 @@
    "shelf": "",
    "status": "internal-by-decision",
    "internal_reason": "510's row-accounting ledger: for every source table the harvest reads, how many rows went in and the NAMED bucket each one landed in - emitted, duplicate, or a rejection with a stated reason. Internal because it describes OUR PROCESS, not the world, which is the same test that keeps the assertion store internal. It is kept and gated rather than printed and forgotten because it is the only thing that can say a source row was ever read: 12,489 of 20,577 identifier-ledger rows carry no cedar_uid and are dropped from the harvest, and until this table existed nothing counted them",
-   "rows": 178,
+   "rows": 181,
    "n_cols": 7,
    "grain_declared": false,
    "grain": "",
@@ -1927,7 +1927,7 @@
    "shelf": "",
    "status": "excluded-by-codebook",
    "internal_reason": "",
-   "rows": 5190,
+   "rows": 5196,
    "n_cols": 10,
    "grain_declared": false,
    "grain": "",
@@ -2261,7 +2261,7 @@
    "enricher_backup_newest": "congressional_correspondence_log.csv.bak_2026-08-28_pre505",
    "export_class": "",
    "aggregation_safe": "",
-   "ships_in_db": true,
+   "ships_in_db": false,
    "ships_notes_dir": "13_congressional_correspondence_log",
    "ship_fate": "INTERNAL_BY_DECISION",
    "unscanned": false
@@ -6676,12 +6676,12 @@
    "enriched_by": [],
    "never_run_in_chain": [],
    "enricher_backup_columns_lost": [],
-   "enricher_backup_newest": null,
+   "enricher_backup_newest": "gaming_web_harvest_coverage.csv.bak_2026-09-02_pre_termsscope",
    "export_class": "",
    "aggregation_safe": "",
    "ships_in_db": false,
    "ships_notes_dir": "",
-   "ship_fate": "",
+   "ship_fate": "NO_CODEBOOK",
    "unscanned": false
   },
   {
@@ -6716,7 +6716,7 @@
    "aggregation_safe": "",
    "ships_in_db": false,
    "ships_notes_dir": "",
-   "ship_fate": "",
+   "ship_fate": "NO_CODEBOOK",
    "unscanned": false
   },
   {
@@ -8168,11 +8168,11 @@
    "never_run_in_chain": [],
    "enricher_backup_columns_lost": [],
    "enricher_backup_newest": null,
-   "export_class": "",
-   "aggregation_safe": "",
-   "ships_in_db": false,
-   "ships_notes_dir": "",
-   "ship_fate": "",
+   "export_class": "SAFE_TO_AGGREGATE",
+   "aggregation_safe": "1",
+   "ships_in_db": true,
+   "ships_notes_dir": "11d_nagpra_notice_institutions",
+   "ship_fate": "NOTES_WRITTEN",
    "unscanned": false
   },
   {
@@ -8199,7 +8199,7 @@
    "keyed_pct": null,
    "latest_year": 2027,
    "last_modified": "2026-09-02",
-   "size_mb": 10.85,
+   "size_mb": 10.84,
    "built_by": [
     "77_build_nagpra_dataset.py"
    ],
@@ -8676,7 +8676,7 @@
    "shelf": "",
    "status": "shippable",
    "internal_reason": "",
-   "rows": 2393,
+   "rows": 2916,
    "n_cols": 58,
    "grain_declared": false,
    "grain": "",
@@ -8691,12 +8691,12 @@
    "keyed_pct": null,
    "latest_year": 2027,
    "last_modified": "2026-09-02",
-   "size_mb": 3.8,
+   "size_mb": 4.36,
    "built_by": [],
    "enriched_by": [],
    "never_run_in_chain": [],
    "enricher_backup_columns_lost": [],
-   "enricher_backup_newest": "native_owned_businesses.csv.bak_2026-09-02_pre_doyon",
+   "enricher_backup_newest": "native_owned_businesses.csv.bak_2026-09-02_pre_1070merge",
    "export_class": "",
    "aggregation_safe": "",
    "ships_in_db": true,
@@ -8980,8 +8980,8 @@
    "shelf": "pro",
    "status": "shippable",
    "internal_reason": "",
-   "rows": 3492,
-   "n_cols": 24,
+   "rows": 3789,
+   "n_cols": 25,
    "grain_declared": true,
    "grain": "one row per ASSERTION that a named source made about one parent->enterprise relationship: (enterprise, asserting source, document, edition). A wholly-owned subsidiary named in nine consecutive AS 45.55.139 audited annual reports is nine rows, and that is the point - the run of years is what dates the relationship and what `first_observed_year` / `last_observed_year` on the enterprise row are derived from. `relation_class` says whether the assertion is OWNERSHIP or AFFILIATION; summing or counting across this table without filtering it counts a joint venture as a subsidiary.",
    "primary_key": [
@@ -8993,21 +8993,21 @@
    "grain_evidence_rows": null,
    "grain_evidence_date": "",
    "entity_col": "cedar_uid",
-   "keyed_rows": 3492,
+   "keyed_rows": 3789,
    "keyed_pct": 100.0,
    "latest_year": 2026,
    "last_modified": "2026-09-02",
-   "size_mb": 3.45,
+   "size_mb": 3.73,
    "built_by": [],
    "enriched_by": [],
    "never_run_in_chain": [],
    "enricher_backup_columns_lost": [],
    "enricher_backup_newest": null,
-   "export_class": "",
-   "aggregation_safe": "",
-   "ships_in_db": false,
-   "ships_notes_dir": "",
-   "ship_fate": "NO_CODEBOOK",
+   "export_class": "SAFE_TO_AGGREGATE",
+   "aggregation_safe": "1",
+   "ships_in_db": true,
+   "ships_notes_dir": "18b_nest_enterprise_relations",
+   "ship_fate": "NOTES_WRITTEN",
    "unscanned": false
   },
   {
@@ -9017,8 +9017,8 @@
    "shelf": "pro",
    "status": "shippable",
    "internal_reason": "",
-   "rows": 1482,
-   "n_cols": 57,
+   "rows": 1610,
+   "n_cols": 59,
    "grain_declared": true,
    "grain": "one row per ENTERPRISE that a Native entity owns or has published a tie to - a sub-hub of its owner, never a spine entity in its own right (docs/IDENTIFIER_STANDARD.md \u00a72). Identity is the Cedar-minted `enterprise_id`; the owner is `owner_hub_cedar_uid`, which is always a spine entity. NOT one row per assertion - a firm named in ten annual reports is ONE row here and ten rows in nest_enterprise_relations.csv. NOT one row per legal entity either: the grain is (owner hub, enterprise), so a joint venture between two Native owners is correctly two rows, one per parent, which is what ENTITY_MATCH_RULES rule 11 says a JV is.",
    "primary_key": [
@@ -9030,21 +9030,21 @@
    "grain_evidence_rows": null,
    "grain_evidence_date": "",
    "entity_col": "cedar_uid",
-   "keyed_rows": 1482,
+   "keyed_rows": 1610,
    "keyed_pct": 100.0,
    "latest_year": 2026,
    "last_modified": "2026-09-02",
-   "size_mb": 1.44,
+   "size_mb": 1.57,
    "built_by": [],
    "enriched_by": [],
    "never_run_in_chain": [],
    "enricher_backup_columns_lost": [],
    "enricher_backup_newest": null,
-   "export_class": "",
-   "aggregation_safe": "",
-   "ships_in_db": false,
-   "ships_notes_dir": "",
-   "ship_fate": "NO_CODEBOOK",
+   "export_class": "SAFE_TO_AGGREGATE",
+   "aggregation_safe": "1",
+   "ships_in_db": true,
+   "ships_notes_dir": "18a_nest_enterprises",
+   "ship_fate": "NOTES_WRITTEN",
    "unscanned": false
   },
   {
@@ -10276,6 +10276,8 @@
     "871_promote_geo_keys_contracts.py"
    ],
    "enriched_by": [
+    "1075_fix_old_harbor_attribution.py",
+    "1076_clear_self_parent_piid.py",
     "114_pull_prime_archive.py",
     "131_merge_archive_backfill.py",
     "174_apply_rulings_to_source_tables.py",
@@ -10288,7 +10290,7 @@
    ],
    "never_run_in_chain": [],
    "enricher_backup_columns_lost": [],
-   "enricher_backup_newest": "prime_contracts.csv.bak_2026-09-02_pre_1076_clear_self_parent_piid",
+   "enricher_backup_newest": "prime_contracts.csv.bak_2026-09-02_pre_hochunk",
    "export_class": "SAFE_TO_AGGREGATE",
    "aggregation_safe": "1",
    "ships_in_db": true,
@@ -11730,7 +11732,7 @@
    "keyed_pct": 100.0,
    "latest_year": 2029,
    "last_modified": "2026-09-02",
-   "size_mb": 0.32,
+   "size_mb": 0.33,
    "built_by": [],
    "enriched_by": [],
    "never_run_in_chain": [],
@@ -12273,7 +12275,7 @@
    "shelf": "",
    "status": "spine",
    "internal_reason": "",
-   "rows": 1482,
+   "rows": 1610,
    "n_cols": 6,
    "grain_declared": false,
    "grain": "",
@@ -12288,7 +12290,7 @@
    "keyed_pct": null,
    "latest_year": null,
    "last_modified": "2026-09-02",
-   "size_mb": 0.33,
+   "size_mb": 0.36,
    "built_by": [],
    "enriched_by": [],
    "never_run_in_chain": [],
@@ -12822,8 +12824,8 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 13,
-   "mentioned_outside_history": 13,
+   "mentions": 12,
+   "mentioned_outside_history": 12,
    "oneoff_shaped": true,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
@@ -12877,8 +12879,8 @@
    "reads": [],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 17,
-   "mentioned_outside_history": 17,
+   "mentions": 16,
+   "mentioned_outside_history": 16,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
@@ -12902,8 +12904,8 @@
    "reads": [],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 20,
-   "mentioned_outside_history": 18,
+   "mentions": 19,
+   "mentioned_outside_history": 17,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
@@ -13214,7 +13216,7 @@
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
-   "lines": 1608
+   "lines": 1776
   },
   {
    "script": "1021_register_only_first_rows.py",
@@ -13246,7 +13248,7 @@
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
-   "lines": 1031
+   "lines": 1131
   },
   {
    "script": "102_build_coverage_profile.py",
@@ -13352,12 +13354,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 4,
-   "mentioned_outside_history": 3,
+   "mentions": 3,
+   "mentioned_outside_history": 2,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
-   "lines": 1209
+   "lines": 1247
   },
   {
    "script": "1032_stage_edgar_deal_candidates.py",
@@ -13389,7 +13391,7 @@
    "oneoff_shaped": true,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
-   "lines": 760
+   "lines": 867
   },
   {
    "script": "103_build_california_gaming.py",
@@ -13478,8 +13480,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 4,
-   "mentioned_outside_history": 3,
+   "mentions": 8,
+   "mentioned_outside_history": 7,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
@@ -13518,8 +13520,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 41,
-   "mentioned_outside_history": 29,
+   "mentions": 40,
+   "mentioned_outside_history": 28,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
@@ -13638,12 +13640,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 1,
-   "mentioned_outside_history": 1,
+   "mentions": 4,
+   "mentioned_outside_history": 3,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
-   "lines": 2230
+   "lines": 2248
   },
   {
    "script": "1071_identifier_driven_deal_sweep.py",
@@ -13693,7 +13695,7 @@
    "kind": "both",
    "evidence": [
     "writes in 'w' mode or builds from data/raw",
-    "read-modify-writes: cedar_harvest_conservation.csv, cedar_nest_id_register.csv, codebook_master.csv, held_rows.csv, nest_enterprise_relations.csv, nest_enterprises.csv"
+    "read-modify-writes: cedar_harvest_conservation.csv, cedar_nest_id_register.csv, codebook_master.csv, held_rows.csv, nest_enterprise_relations.csv, nest_enterprises.csv, sweep_1070_refused.csv"
    ],
    "never_run": false,
    "never_run_reason": "",
@@ -13702,10 +13704,12 @@
     "cedar_harvest_conservation.csv",
     "cedar_nest_id_register.csv",
     "codebook_master.csv",
+    "evidence_conflicts.csv",
     "fpds_uei_cage_map.csv",
     "held_rows.csv",
     "nest_enterprise_relations.csv",
-    "nest_enterprises.csv"
+    "nest_enterprises.csv",
+    "sweep_1070_refused.csv"
    ],
    "reads": [
     "anc_tribal_subsidiary_lookup.csv",
@@ -13714,12 +13718,14 @@
     "cedar_identity_register.csv",
     "cedar_nest_id_register.csv",
     "codebook_master.csv",
+    "held_for_nest_ownership.csv",
     "held_rows.csv",
     "native_owned_businesses.csv",
     "nest_enterprise_relations.csv",
     "nest_enterprises.csv",
     "prime_contracts.csv",
     "sba_dsbs_native_entities.csv",
+    "sweep_1070_refused.csv",
     "tribal_vendor_list_registry_2026-08-26.csv"
    ],
    "in_a_contract": false,
@@ -13729,7 +13735,7 @@
    "oneoff_shaped": false,
    "has_run_receipt": true,
    "last_modified": "2026-09-02",
-   "lines": 2004
+   "lines": 2254
   },
   {
    "script": "1073_ancsa_consolidation_subsidiaries.py",
@@ -13776,7 +13782,10 @@
    "never_run": false,
    "never_run_reason": "",
    "writes": [],
-   "reads": [],
+   "reads": [
+    "prime_contracts.csv",
+    "prime_contracts_archive_backfill.csv"
+   ],
    "in_a_contract": false,
    "in_an_ordering": false,
    "mentions": 1,
@@ -13784,7 +13793,7 @@
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
-   "lines": 327
+   "lines": 385
   },
   {
    "script": "1075_fix_old_harbor_attribution.py",
@@ -13803,14 +13812,14 @@
    "reads": [
     "cedar_identifier_ledger_final.csv"
    ],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 0,
-   "mentioned_outside_history": 0,
+   "in_a_contract": true,
+   "in_an_ordering": true,
+   "mentions": 4,
+   "mentioned_outside_history": 4,
    "oneoff_shaped": true,
    "has_run_receipt": true,
    "last_modified": "2026-09-02",
-   "lines": 536
+   "lines": 542
   },
   {
    "script": "1076_clear_self_parent_piid.py",
@@ -13828,10 +13837,10 @@
     "SELF_PARENT_PIID.json"
    ],
    "reads": [],
-   "in_a_contract": false,
-   "in_an_ordering": false,
-   "mentions": 3,
-   "mentioned_outside_history": 3,
+   "in_a_contract": true,
+   "in_an_ordering": true,
+   "mentions": 8,
+   "mentioned_outside_history": 8,
    "oneoff_shaped": false,
    "has_run_receipt": true,
    "last_modified": "2026-09-02",
@@ -13858,12 +13867,12 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 4,
-   "mentioned_outside_history": 4,
+   "mentions": 6,
+   "mentioned_outside_history": 6,
    "oneoff_shaped": false,
    "has_run_receipt": true,
    "last_modified": "2026-09-02",
-   "lines": 488
+   "lines": 499
   },
   {
    "script": "1078_gaming_joint_operators.py",
@@ -13894,6 +13903,26 @@
    "lines": 306
   },
   {
+   "script": "1079_quarantine_method_exposure.py",
+   "dir": "",
+   "number": "1079",
+   "duplicate_number": false,
+   "kind": "unknown",
+   "evidence": [],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [],
+   "reads": [],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 0,
+   "mentioned_outside_history": 0,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-09-02",
+   "lines": 15
+  },
+  {
    "script": "107_pull_remaining_states.py",
    "dir": "",
    "number": "107",
@@ -13918,8 +13947,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": true,
-   "mentions": 32,
-   "mentioned_outside_history": 28,
+   "mentions": 31,
+   "mentioned_outside_history": 27,
    "oneoff_shaped": false,
    "has_run_receipt": true,
    "last_modified": "2026-09-02",
@@ -13952,6 +13981,66 @@
    "has_run_receipt": false,
    "last_modified": "2026-08-29",
    "lines": 102
+  },
+  {
+   "script": "1080_sec_gaming_facility_revenue.py",
+   "dir": "",
+   "number": "1080",
+   "duplicate_number": false,
+   "kind": "unknown",
+   "evidence": [],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [],
+   "reads": [],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 0,
+   "mentioned_outside_history": 0,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-09-02",
+   "lines": 15
+  },
+  {
+   "script": "1081_stale_tail_dated_facts.py",
+   "dir": "",
+   "number": "1081",
+   "duplicate_number": false,
+   "kind": "unknown",
+   "evidence": [],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [],
+   "reads": [],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 0,
+   "mentioned_outside_history": 0,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-09-02",
+   "lines": 15
+  },
+  {
+   "script": "1082_tribal_debt_holdings_disclosure.py",
+   "dir": "",
+   "number": "1082",
+   "duplicate_number": false,
+   "kind": "unknown",
+   "evidence": [],
+   "never_run": false,
+   "never_run_reason": "",
+   "writes": [],
+   "reads": [],
+   "in_a_contract": false,
+   "in_an_ordering": false,
+   "mentions": 0,
+   "mentioned_outside_history": 0,
+   "oneoff_shaped": false,
+   "has_run_receipt": false,
+   "last_modified": "2026-09-02",
+   "lines": 15
   },
   {
    "script": "108_build_tribal_tax_bases.py",
@@ -14257,8 +14346,8 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 28,
-   "mentioned_outside_history": 27,
+   "mentions": 27,
+   "mentioned_outside_history": 26,
    "oneoff_shaped": false,
    "has_run_receipt": true,
    "last_modified": "2026-08-29",
@@ -14516,12 +14605,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 13,
-   "mentioned_outside_history": 13,
+   "mentions": 14,
+   "mentioned_outside_history": 14,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-08-29",
-   "lines": 176
+   "last_modified": "2026-09-02",
+   "lines": 208
   },
   {
    "script": "123_census_esm_raw.py",
@@ -14630,9 +14719,10 @@
    "dir": "",
    "number": "127",
    "duplicate_number": false,
-   "kind": "rebuild",
+   "kind": "both",
    "evidence": [
-    "writes in 'w' mode or builds from data/raw"
+    "writes in 'w' mode or builds from data/raw",
+    "names itself an in-place enricher"
    ],
    "never_run": false,
    "never_run_reason": "",
@@ -14645,12 +14735,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 4,
-   "mentioned_outside_history": 4,
+   "mentions": 5,
+   "mentioned_outside_history": 5,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-08-29",
-   "lines": 210
+   "last_modified": "2026-09-02",
+   "lines": 242
   },
   {
    "script": "128_build_review_page.py",
@@ -15317,8 +15407,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 9,
-   "mentioned_outside_history": 9,
+   "mentions": 8,
+   "mentioned_outside_history": 8,
    "oneoff_shaped": false,
    "has_run_receipt": true,
    "last_modified": "2026-09-02",
@@ -15625,12 +15715,12 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 10,
-   "mentioned_outside_history": 9,
+   "mentions": 11,
+   "mentioned_outside_history": 10,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-08-29",
-   "lines": 175
+   "last_modified": "2026-09-02",
+   "lines": 207
   },
   {
    "script": "152_build_assistance_id_crosswalk.py",
@@ -16164,8 +16254,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 15,
-   "mentioned_outside_history": 14,
+   "mentions": 14,
+   "mentioned_outside_history": 13,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
@@ -17774,8 +17864,8 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 17,
-   "mentioned_outside_history": 16,
+   "mentions": 16,
+   "mentioned_outside_history": 15,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
@@ -19223,8 +19313,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 60,
-   "mentioned_outside_history": 57,
+   "mentions": 61,
+   "mentioned_outside_history": 58,
    "oneoff_shaped": false,
    "has_run_receipt": true,
    "last_modified": "2026-08-29",
@@ -19308,8 +19398,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 21,
-   "mentioned_outside_history": 20,
+   "mentions": 20,
+   "mentioned_outside_history": 19,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
@@ -19865,8 +19955,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 11,
-   "mentioned_outside_history": 10,
+   "mentions": 10,
+   "mentioned_outside_history": 9,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
@@ -20183,8 +20273,8 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 14,
-   "mentioned_outside_history": 11,
+   "mentions": 13,
+   "mentioned_outside_history": 10,
    "oneoff_shaped": false,
    "has_run_receipt": true,
    "last_modified": "2026-09-02",
@@ -21192,8 +21282,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 10,
-   "mentioned_outside_history": 8,
+   "mentions": 9,
+   "mentioned_outside_history": 7,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
@@ -21891,8 +21981,8 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 91,
-   "mentioned_outside_history": 69,
+   "mentions": 90,
+   "mentioned_outside_history": 68,
    "oneoff_shaped": false,
    "has_run_receipt": true,
    "last_modified": "2026-09-02",
@@ -22034,8 +22124,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 39,
-   "mentioned_outside_history": 38,
+   "mentions": 40,
+   "mentioned_outside_history": 39,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
@@ -22222,8 +22312,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": true,
-   "mentions": 47,
-   "mentioned_outside_history": 46,
+   "mentions": 48,
+   "mentioned_outside_history": 47,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
@@ -22345,8 +22435,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 7,
-   "mentioned_outside_history": 7,
+   "mentions": 8,
+   "mentioned_outside_history": 8,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-01",
@@ -22465,8 +22555,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 8,
-   "mentioned_outside_history": 7,
+   "mentions": 7,
+   "mentioned_outside_history": 6,
    "oneoff_shaped": false,
    "has_run_receipt": true,
    "last_modified": "2026-09-02",
@@ -22552,8 +22642,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 3,
-   "mentioned_outside_history": 3,
+   "mentions": 4,
+   "mentioned_outside_history": 4,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-01",
@@ -23434,12 +23524,12 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 15,
-   "mentioned_outside_history": 14,
+   "mentions": 16,
+   "mentioned_outside_history": 15,
    "oneoff_shaped": false,
    "has_run_receipt": true,
-   "last_modified": "2026-08-29",
-   "lines": 209
+   "last_modified": "2026-09-02",
+   "lines": 241
   },
   {
    "script": "581_triage_review_backlog.py",
@@ -23709,9 +23799,10 @@
    "dir": "",
    "number": "58",
    "duplicate_number": false,
-   "kind": "rebuild",
+   "kind": "both",
    "evidence": [
-    "writes in 'w' mode or builds from data/raw"
+    "writes in 'w' mode or builds from data/raw",
+    "names itself an in-place enricher"
    ],
    "never_run": false,
    "never_run_reason": "",
@@ -23726,12 +23817,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 7,
-   "mentioned_outside_history": 6,
+   "mentions": 8,
+   "mentioned_outside_history": 7,
    "oneoff_shaped": true,
    "has_run_receipt": false,
-   "last_modified": "2026-08-29",
-   "lines": 213
+   "last_modified": "2026-09-02",
+   "lines": 245
   },
   {
    "script": "590_shard_f_org_slice.py",
@@ -24322,12 +24413,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 177,
-   "mentioned_outside_history": 158,
+   "mentions": 179,
+   "mentioned_outside_history": 160,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-09-01",
-   "lines": 2026
+   "last_modified": "2026-09-02",
+   "lines": 2115
   },
   {
    "script": "630_refresh_cadence.py",
@@ -24475,12 +24566,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 10,
-   "mentioned_outside_history": 10,
+   "mentions": 11,
+   "mentioned_outside_history": 11,
    "oneoff_shaped": false,
    "has_run_receipt": true,
-   "last_modified": "2026-08-29",
-   "lines": 238
+   "last_modified": "2026-09-02",
+   "lines": 270
   },
   {
    "script": "67_sam_entity_harvest.py",
@@ -25103,12 +25194,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 96,
-   "mentioned_outside_history": 43,
+   "mentions": 95,
+   "mentioned_outside_history": 42,
    "oneoff_shaped": false,
    "has_run_receipt": true,
    "last_modified": "2026-09-02",
-   "lines": 1489
+   "lines": 1490
   },
   {
    "script": "75_philanthropy_schedule_i.py",
@@ -25195,8 +25286,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 13,
-   "mentioned_outside_history": 12,
+   "mentions": 12,
+   "mentioned_outside_history": 11,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-08-29",
@@ -25245,6 +25336,7 @@
    "never_run": false,
    "never_run_reason": "",
    "writes": [
+    "*__sample.csv",
     "README.md",
     "__sample.csv"
    ],
@@ -25259,7 +25351,7 @@
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
-   "lines": 708
+   "lines": 724
   },
   {
    "script": "771_normalize_nboa_certification_dates.py",
@@ -25344,7 +25436,7 @@
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
-   "lines": 2446
+   "lines": 2479
   },
   {
    "script": "77_philanthropy_review_queue.py",
@@ -25518,12 +25610,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 10,
-   "mentioned_outside_history": 9,
+   "mentions": 9,
+   "mentioned_outside_history": 8,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
-   "lines": 233
+   "lines": 234
   },
   {
    "script": "80_build_instrument_taxonomy.py",
@@ -25679,12 +25771,12 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 13,
-   "mentioned_outside_history": 11,
+   "mentions": 15,
+   "mentioned_outside_history": 13,
    "oneoff_shaped": false,
    "has_run_receipt": false,
-   "last_modified": "2026-08-29",
-   "lines": 299
+   "last_modified": "2026-09-02",
+   "lines": 332
   },
   {
    "script": "830_entity_freshness.py",
@@ -25862,12 +25954,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 5,
-   "mentioned_outside_history": 4,
+   "mentions": 6,
+   "mentioned_outside_history": 5,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
-   "lines": 1061
+   "lines": 1477
   },
   {
    "script": "846_session_audit.py",
@@ -26489,8 +26581,8 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 13,
-   "mentioned_outside_history": 12,
+   "mentions": 12,
+   "mentioned_outside_history": 11,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
@@ -26630,8 +26722,8 @@
    ],
    "in_a_contract": true,
    "in_an_ordering": true,
-   "mentions": 10,
-   "mentioned_outside_history": 9,
+   "mentions": 9,
+   "mentioned_outside_history": 8,
    "oneoff_shaped": false,
    "has_run_receipt": true,
    "last_modified": "2026-09-02",
@@ -27570,7 +27662,7 @@
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
-   "lines": 784
+   "lines": 792
   },
   {
    "script": "991_newsletter_gap_sweep.py",
@@ -27595,7 +27687,7 @@
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
-   "lines": 691
+   "lines": 689
   },
   {
    "script": "992_newsletter_deal_candidates.py",
@@ -27615,6 +27707,7 @@
    "reads": [
     "cedar_entity_spine.csv",
     "deal_candidates.csv",
+    "deal_candidates_wp_posts_quarantined.csv",
     "tribal_newsletter_corpus.csv"
    ],
    "in_a_contract": false,
@@ -27624,7 +27717,7 @@
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
-   "lines": 689
+   "lines": 730
   },
   {
    "script": "993_newsletter_wp_posts_deals.py",
@@ -27633,17 +27726,19 @@
    "duplicate_number": false,
    "kind": "enricher",
    "evidence": [
-    "read-modify-writes: deal_candidates_wp_posts.csv"
+    "read-modify-writes: deal_candidates_wp_posts.csv, deal_candidates_wp_posts_quarantined.csv"
    ],
    "never_run": false,
    "never_run_reason": "",
    "writes": [
     "993_newsletter_wp_posts_deals.py; not merged into deals_classified.csv",
     "_wp_posts_state.json",
-    "deal_candidates_wp_posts.csv"
+    "deal_candidates_wp_posts.csv",
+    "deal_candidates_wp_posts_quarantined.csv"
    ],
    "reads": [
     "deal_candidates_wp_posts.csv",
+    "deal_candidates_wp_posts_quarantined.csv",
     "tribal_newsletter_corpus.csv"
    ],
    "in_a_contract": false,
@@ -27653,7 +27748,7 @@
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
-   "lines": 384
+   "lines": 438
   },
   {
    "script": "994_screen_newsletter_deal_candidates.py",
@@ -27679,12 +27774,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 2,
-   "mentioned_outside_history": 2,
+   "mentions": 4,
+   "mentioned_outside_history": 4,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
-   "lines": 467
+   "lines": 531
   },
   {
    "script": "995_write_newsletter_docs.py",
@@ -27713,7 +27808,7 @@
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
-   "lines": 327
+   "lines": 329
   },
   {
    "script": "99_build_earmarks_and_schedc.py",
@@ -27904,8 +27999,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 4,
-   "mentioned_outside_history": 4,
+   "mentions": 5,
+   "mentioned_outside_history": 5,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-08-29",
@@ -28700,8 +28795,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 25,
-   "mentioned_outside_history": 19,
+   "mentions": 29,
+   "mentioned_outside_history": 23,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
@@ -28783,8 +28878,8 @@
    "reads": [],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 444,
-   "mentioned_outside_history": 157,
+   "mentions": 446,
+   "mentioned_outside_history": 159,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-08-26",
@@ -28808,12 +28903,12 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 17,
-   "mentioned_outside_history": 15,
+   "mentions": 18,
+   "mentioned_outside_history": 16,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-09-02",
-   "lines": 1290
+   "lines": 1336
   },
   {
    "script": "cedar_prime_panel.py",
@@ -29027,8 +29122,8 @@
    ],
    "in_a_contract": false,
    "in_an_ordering": false,
-   "mentions": 4,
-   "mentioned_outside_history": 3,
+   "mentions": 7,
+   "mentioned_outside_history": 6,
    "oneoff_shaped": false,
    "has_run_receipt": false,
    "last_modified": "2026-08-05",
