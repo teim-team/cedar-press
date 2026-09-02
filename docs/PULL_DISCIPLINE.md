@@ -605,3 +605,62 @@ silently produced three newsletters that looked content-free: a cut-off PDF
 still opens and still reports a page count, but extracts zero text. Record
 `text_chars_extracted` per document and emit `text_not_extractable` — never a
 bare `false` — when extraction yields nothing.
+
+---
+
+## 2026-09-02: `files.usaspending.gov` and `api.usaspending.gov` SHARE AN EDGE
+
+*Measured by `code/1085_prime_psc_desc_repull.py`. Added because this file, and
+`logs/_HOSTLOCK_files.usaspending.gov.json`, both currently tell the next agent
+the opposite.*
+
+The host lock says, in its own coordination note:
+
+> "This is the STATIC S3 ARCHIVE host, a **DIFFERENT host** from
+> api.usaspending.gov"
+
+and `code/121_pull_subawards_api.py :: claim()` logs, correctly by that
+doctrine, *"NOTE peer on files.usaspending.gov (a DIFFERENT host, not rule 1)"*
+and proceeds. Two pullers therefore ran side by side all morning, one per host,
+each obeying rule 1.
+
+**They are different hostnames behind one rate limiter.**
+
+| time (UTC) | event |
+|---|---|
+| 10:10–10:36 | `1085` takes **eight** `FY*_All_Contracts_Full_*.zip` objects, ~9.4 GB, from `files.usaspending.gov` with **no inter-object pause** |
+| 10:36:24 | `1085` HEAD on `files.usaspending.gov` → instant `RemoteDisconnected` in <1s, all four stamp candidates |
+| **10:37:42** | **`121`'s status GET on `api.usaspending.gov` → instant `RemoteDisconnected` in 0.53s**, after 25 minutes of clean 200s on that same endpoint |
+| 10:46 | one request to `www.federalregister.gov` → **HTTP 200 in 0.66s** |
+
+The third line is the control. **The network is fine; both usaspending
+subdomains refused within 78 seconds of each other, and only the one that was
+hammered had been hammered.** `121` was issuing one cheap status GET every 150
+seconds and cannot have earned a block on its own.
+
+### The three rules this earns
+
+1. **Rate-limit by APEX DOMAIN, not by hostname.** `_HOSTLOCK_<host>.json` is
+   the right mechanism with the wrong key. Until the lock files are re-keyed,
+   an agent taking bulk objects from `files.usaspending.gov` must treat
+   `api.usaspending.gov` as busy, and say so to the peer rather than proceeding
+   past a "different host" note.
+2. **A big-object pull needs an inter-object pause, and the safe rate here is
+   slower than one object every three minutes.** Two independent measurements
+   now agree: six ~2 GB objects in twelve minutes blocked it (FINDING 6,
+   2026-08-08) and eight ~1.2 GB objects in twenty-six minutes blocked it
+   (today). `1085` now defaults to `INTER_OBJECT_PAUSE_S = 480`.
+3. **An instant disconnect must STOP THE RUN, not advance to the next item.**
+   `1085`'s first version logged the refusal, slept 30s, tried the next stamp,
+   recorded the year `stamp_unresolved` and **moved to the next fiscal year** —
+   four fresh requests per year against a host refusing us for request rate,
+   and a permanent record saying the year could not be resolved when what had
+   actually happened was that the host would not answer. Both are now fixed:
+   `resolve_stamp()` raises `EdgeBlocked` on a sub-second disconnect, `pull`
+   breaks out of the year loop, and the two mislabelled records were corrected
+   in `_state.json` to `edge_refused_not_an_absence`.
+
+**A refusal is a fact about the host. It is never a fact about the object you
+happened to be asking for**, and writing it down as one is how an edge block
+becomes a permanent false absence. This file already says that about `robots.txt`
+and about `api.sam.gov`; it is the same rule a third time.

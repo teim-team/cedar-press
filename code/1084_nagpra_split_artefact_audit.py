@@ -4,8 +4,8 @@
 # declared enricher of `nagpra_notices.csv` after a `77` rebuild. This script
 # is the SECOND enricher in that chain and adds five columns IN PLACE to the
 # bridge. A 1077 re-run drops them. Declared in
-# `cedar_pipeline.ENRICHER_ORDERING`; re-run 1084 after any 1077 run.
-# lint-ok: class6 - ordering declared above and in cedar_pipeline.ENRICHER_ORDERING; 1084 is the enricher and runs last.
+# `KNOWN_ORDERINGS` in code/cedar_pipeline.py; re-run 1084 after any 1077 run.
+# lint-ok: class6 - ordering declared above and in cedar_pipeline.KNOWN_ORDERINGS; 1084 is the enricher and runs last.
 """
 Cedar Press - 1084: HUNT EVERY SPLITTING ARTEFACT IN THE NAGPRA INSTITUTION
 BRIDGE. FLAG, NEVER DELETE.
@@ -113,8 +113,8 @@ exit 0. A check that has never failed on purpose is not known to work.
 WHAT IT DOES NOT TOUCH
 ----------------------
 `data/clean/nagpra_notices.csv` carries the SAME fabrications in
-`institution_name`, `institution_primary` and `institution_names_all` - 34
-rows of A1, measured and printed here. They are NOT repaired from this script:
+`institution_name`, `institution_primary` and `institution_names_all` on
+every notice this audit flags. They are NOT repaired from this script:
 that file is 1077's in-place output and a second writer on the same six
 columns is the class-6 hazard this project keeps paying for. The fix belongs
 in `77`'s parser and `1077`'s `split_institutions`, and the count is printed
@@ -550,6 +550,28 @@ def run(verify: bool, quiet: bool = False) -> int:
     global _BREACHES
     _BREACHES = list(breaches)
 
+    # ---- census: the numbers the docs disagree about, re-measured --------
+    def fold(x):
+        return re.sub(r"[^a-z0-9]", "", x.lower())
+    eff = [(r["institution_name_repaired"] or r["institution_name"])
+           for r in rows if r["repair_action"] != "merged_absorbed"]
+    census = {
+        "distinct_institution_name_as_shipped": len(
+            {r["institution_name"] for r in rows}),
+        "distinct_after_applying_the_repairs_in_this_file": len(set(eff)),
+        "distinct_under_case_and_punctuation_folding_only": len(
+            {fold(x) for x in eff}),
+        "rows_carrying_a_city": sum(1 for r in rows if r["institution_city"]),
+        "rows_carrying_a_state": sum(1 for r in rows
+                                     if r["institution_state"]),
+        # the SAME fabrications are still live on nagpra_notices.csv, which
+        # this script deliberately does not write. Counted so the debt has a
+        # size instead of a hint.
+        "nagpra_notices_rows_carrying_the_same_fabrication": len(
+            {r["document_number"] for r in rows
+             if r["split_artefact_suspected"] == "1"}),
+    }
+
     flagged = sum(1 for r in rows if r["split_artefact_suspected"] == "1")
     repaired = sum(1 for r in rows if r["institution_name_repaired"])
     acts = Counter(r["repair_action"] for r in rows
@@ -569,6 +591,9 @@ def run(verify: bool, quiet: bool = False) -> int:
               f"its own)")
         print(f"    repair_action on flagged rows: "
               f"{dict(sorted(acts.items()))}")
+        print("    ---- census, re-measured --------------------------------")
+        for _k, _v in census.items():
+            print(f"      {_k:<58} {_v:>7,}")
         for b in breaches:
             print(f"    BREACH {b}")
 
@@ -651,6 +676,7 @@ def run(verify: bool, quiet: bool = False) -> int:
         "repair_action_counts": dict(sorted(acts.items())),
         "row_conservation": {"before": n_before, "after": len(after),
                              "deleted": 0, "added": 0},
+        "census": census,
     }, indent=2) + "\n", encoding="utf-8")
     return 0
 

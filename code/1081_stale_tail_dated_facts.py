@@ -186,16 +186,49 @@ def tail_slice(rows=None):
             stale.add(u)
         if r["n_substantive_datasets_present_in"] == "0":
             nosub.add(u)
+    # A SLICE THAT SHRINKS BECAUSE OF ITS OWN OUTPUT IS NOT A SLICE.
+    #
+    # Fifth occurrence of this repo's self-reference defect, and it bit on the
+    # second run. 830 reads every table in data/clean, INCLUDING this one, so
+    # an entity this script dated leaves the tail -- and the next run then
+    # excludes it, deletes its row (a route owns and replaces its rows), and
+    # the entity returns to `no usable date`. The measure would oscillate and
+    # each run would look like progress.
+    #
+    # 830 hit the same shape three times on date COLUMNS and 1021 once on row
+    # PRESENCE. Here it is the SLICE. The fix is the same: exclude this
+    # script's own output from the thing it is measuring. Every entity already
+    # carried in `entity_dated_public_facts.csv` stays in the slice, so the
+    # population is monotone and a re-run can only correct a row, never
+    # withdraw one.
+    prior = set()
+    if os.path.exists(OUT):
+        with open(OUT, encoding="utf-8-sig", newline="") as fh:
+            for r in csv.DictReader(fh):
+                if r.get("cedar_uid"):
+                    prior.add(r["cedar_uid"])
+    if prior:
+        undated |= {u for u in prior if u not in stale}
     return ({r["cedar_uid"]: r for r in rows},
-            {"stale": stale, "undated": undated, "nosub": nosub})
+            {"stale": stale, "undated": undated - stale, "nosub": nosub,
+             "readmitted": prior})
 
 
 def measure(rows=None):
-    _, g = tail_slice(rows)
-    return {"untouched_over_a_year": len(g["stale"]),
-            "no_usable_date": len(g["undated"]),
-            "no_substantive_row": len(g["nosub"]),
-            "tail_union": len(g["stale"] | g["undated"] | g["nosub"])}
+    """The three headline numbers, read STRAIGHT off 830's ledger.
+
+    Deliberately does NOT use `tail_slice`, which widens the working
+    population to keep it monotone. Reporting the widened set would overstate
+    the tail; reporting the ledger is the measure the owner asked for.
+    """
+    rows = rows if rows is not None else read_freshness()
+    stale = sum(1 for r in rows if r["last_change"] and r["days_since_change"]
+                and int(r["days_since_change"]) > 365)
+    undated = sum(1 for r in rows if not r["last_change"])
+    nosub = sum(1 for r in rows
+                if r["n_substantive_datasets_present_in"] == "0")
+    return {"untouched_over_a_year": stale, "no_usable_date": undated,
+            "no_substantive_row": nosub, "tail_union": stale + undated}
 
 
 ISO = re.compile(r"^(19|20)\d\d-\d\d-\d\d")
@@ -1209,8 +1242,11 @@ def run(argv):
     names = want[0].split(",") if want else list(ROUTES)
     ents, g = tail_slice()
     tail = g["stale"] | g["undated"] | g["nosub"]
-    print("  tail: %d entities (stale %d, undated %d, no substantive row %d)"
-          % (len(tail), len(g["stale"]), len(g["undated"]), len(g["nosub"])))
+    print("  working slice: %d entities (stale %d, undated %d, no "
+          "substantive row %d; %d readmitted because this script already "
+          "dated them)"
+          % (len(tail), len(g["stale"]), len(g["undated"]), len(g["nosub"]),
+             len(g.get("readmitted") or ())))
     allrows = []
     for n in names:
         if n not in ROUTES:

@@ -341,14 +341,14 @@ def build(dry_run=False) -> int:
     out_fields = list(fields) + [c for c in NEW if c not in fields]
 
     for r in rows:
+        # plain assignment, not setdefault - this enricher recomputes its own
+        # columns every run and must not carry a stale disposition forward
         for c in NEW:
-            r.setdefault(c, "")
+            r[c] = ""
         r["name_match_support_measured_against"] = \
             (r.get("canonical_name_token_match") or "") or "(blank)"
         tid = (r.get("tribe_id") or "").strip()
         if not tid or tid not in spine:
-            for c in NEW[1:]:
-                r[c] = ""
             continue
         st["live_keyed"] += 1
         g = spine[tid]

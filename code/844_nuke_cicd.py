@@ -160,6 +160,16 @@ def scan_code():
             src = p.read_text(encoding="utf-8", errors="replace")
         except OSError:
             continue
+        # A VARIABLE NAMED `XWALK` IS NOT NECESSARILY THE CICD CROSSWALK.
+        # `1109_subawardee_geo_promote.py` binds XWALK to
+        # geo_place_county_crosswalk.csv, and this check reported its read as a
+        # CICD remnant. That is the third variant of the same mistake in this
+        # one file: first an unanchored pattern matched prose, then a missing
+        # word boundary matched XWALK_AWARD, now a name matched regardless of
+        # what it points at. Check the binding, not the identifier.
+        _bind = re.search(r"^XWALK\s*=.*$", src, re.M)
+        if _bind and "assistance_tribe_id_crosswalk" not in _bind.group(0):
+            continue
         guarded = _guarded_lines(src)
         for i, line in enumerate(src.splitlines(), 1):
             s = line.strip()

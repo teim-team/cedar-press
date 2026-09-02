@@ -1422,3 +1422,65 @@ Recorded because the field guide's section 3 is about exactly this shape.
    you think it does.*
 
 <!-- END ADR-021 -->
+
+<!-- BEGIN ADR-018 -->
+## ADR-018 — file ownership and rebuild ordering for the gaming/natural-resources deepening pass (workstream GAMING-DEEP / NR-DEEP, 2026-09-02)
+
+**Status:** accepted 2026-09-02, declared before editing, per AGENTS.md
+*Parallel agents*. This pass downloads seven hosts and nothing else; the rest is
+joins and typing against material already on this machine.
+
+**Explicit non-overlap with the two sibling gaming agents.** One owns SEC
+filings by public casino managers (`code/1080_sec_gaming_facility_revenue.py`,
+`SEC-GAMING` in `MONEY_TOTALLING_RULES.md`); one owns EMMA municipal bond
+disclosure. **This pass writes no SEC row, no EMMA row, no CUSIP and no bond
+date** — on `tribal_bond_issuances.csv` it writes `issuer_entity_id` and its
+five provenance columns and touches nothing else.
+
+| file | what is written | script |
+|---|---|---|
+| `data/clean/gaming_property_self_published_claims.csv` | 314 appended rows + 12 new columns | `code/1094_merge_web_harvest_into_gaming_claims.py` |
+| `data/clean/gaming_property_self_published_assertions.csv` | 861 appended rows + 5 new columns | `code/1094_...` |
+| `data/clean/gaming_revenue_bounds.csv` | **5 new columns only.** No dollar cell is read-modified | `code/1095_gaming_bounds_summability_and_seal_typing.py` |
+| `data/clean/gaming_facilities.csv` | **3 new columns only.** `960`'s two `state_revenue_disclosure_*` columns are read and NOT changed | `code/1095_...` |
+| `code/980_gaming_web_harvest.py` | the three restriction constants, plus `METHOD_RESTRICTED_HOSTS` and its three call sites | `code/1096_navajo_unexclude_and_harvest.py` |
+| `data/staging/gaming_web_harvest/{targets.csv,host_probe.jsonl}` | 7 rows flipped; 7 cached refusals MOVED to a dated sidecar | `code/1096_...` |
+| `data/clean/resource_revenue.csv` | 2 new columns, never blank | `code/1097_nr_bridge_bonds_and_thirteenth.py` |
+| `data/clean/resource_parties.csv` | 60 appended bridge rows | `code/1097_...` |
+| `data/clean/tribal_bond_issuances.csv` | `issuer_entity_id` + 5 provenance columns | `code/1097_...` |
+
+**THE REBUILD ORDERING, AND IT IS THE WHOLE RISK OF THIS PASS.** Four of these
+tables have a full-rebuild writer. Every script here is an in-place enricher and
+**must run LAST**:
+
+| rebuilt by | enricher that must run after |
+|---|---|
+| `588_promote_self_published_claims.py` | `1094` |
+| `106_build_revenue_bounds.py` | `1095` |
+| `23d_build_gaming_facilities.py` → `158` → `960` | `1095` |
+| `980_gaming_web_harvest.py build` | `1094` |
+| `83_build_resource_ledger.py` | `1097` |
+
+**All four enrichers are idempotent and were proven so by re-running them.**
+`1094 merge` run twice appended 309 then 0; run again after `980 build` grew the
+harvest 1,166 → 1,175 it appended exactly the 9 new rows and its 8 invariants
+still passed. That is the ordering working, not surviving.
+
+`cedar_pipeline.KNOWN_ORDERINGS` is shared and read-only for this pass, so those
+five pairs are **requested of the integrator**, not written here.
+
+**Every script has `verify` with a `--selftest` that injects the violation and
+asserts the NAMED invariant is the one that fires** — 8 + 7 + 4 + 9 = 28
+invariants, and each selftest also asserts the clean set fires nothing. All four
+exit 0.
+
+**Measured against the gates.** `293_lint_bug_classes.py` names **zero**
+instances in `1094`–`1097`. `cedar_pipeline.columns_lost_vs_backup` returns `[]`
+for all seven tables. `814_gaming_nr_grain_and_conservation.py verify` exits 0
+and still reconciles 421,590 readings → 11,305 published rows, and it
+re-validated `claim_id` and `assertion_id` as UNIQUE at their new counts.
+`62_no_regression_check.py` is red on 20 metrics; none of them is this pass's,
+and the evidence is the three measurements above plus the fact that every named
+lint site belongs to `1075`, `1077`, `1080`, `1081`, `1103`, `1104` or `1107` —
+concurrent higher-numbered work.
+<!-- END ADR-018 -->

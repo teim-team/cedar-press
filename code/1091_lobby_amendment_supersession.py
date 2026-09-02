@@ -434,14 +434,30 @@ def print_measure(hdr, rows, cls):
 
 
 # ---------------------------------------------------------------------------
-def do_apply(rows, hdr, path=TARGET, backup=True):
+# NOTE ON WHY THIS FUNCTION TAKES NO `path`. `cedar_pipeline.declared_io`
+# follows a bound name and reads a write verb off the LINES THAT MENTION IT.
+# The first draft wrote through a `path=TARGET` parameter, so no line
+# mentioning `TARGET` carried a write verb and `287_build_dependency_manifest`
+# filed 1091 under `readers/native_entity_lobbying_disclosures.csv` - a script
+# that rewrites the file, invisible to the manifest that exists to stop a
+# rebuild reverting an enricher. Same shape as the `845` finding in
+# AGENT_FIELD_GUIDE section 3. The write is named on a TARGET line now.
+def do_apply(rows, hdr, backup=True):
     cls = classify(rows)
     if backup:
-        b = path.with_name(path.name + BAK_TAG)
-        shutil.copy2(path, b)
-        print("   backup %s" % b.name)
+        b = TARGET.with_name(TARGET.name + BAK_TAG)
+        # NEVER overwrite an existing backup. `apply` is idempotent and will
+        # be re-run; a second run would otherwise replace the true pre-change
+        # state with an already-enriched copy and the only evidence of what
+        # the file looked like before would be gone.
+        if b.exists():
+            print("   backup %s already exists - kept, not overwritten"
+                  % b.name)
+        else:
+            shutil.copy2(TARGET, b)
+            print("   backup %s" % b.name)
     out_hdr = list(hdr) + [c for c in NEW_COLS if c not in hdr]
-    tmp = path.with_name(path.name + ".part")
+    tmp = TARGET.with_name(TARGET.name + ".part")
     with open(tmp, "w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=out_hdr, extrasaction="ignore")
         w.writeheader()
@@ -453,7 +469,7 @@ def do_apply(rows, hdr, path=TARGET, backup=True):
             o["is_superseded"] = i
             o["superseded_by_filing_uuid"] = by
             w.writerow(o)
-    tmp.replace(path)          # an interruption must never look like a finish
+    tmp.replace(TARGET)        # an interruption must never look like a finish
     return out_hdr
 
 
@@ -759,61 +775,75 @@ def cmd_codebook():
         "is_superseded": ("integer", "flag"),
         "superseded_by_filing_uuid": ("text", "code"),
     }
+    # CALLED ONCE PER FILE, BY NAME, ON PURPOSE. A `for path in (A, B)` loop
+    # is tidier and it made `287_build_dependency_manifest` file 1091 under
+    # `readers/` for two files it rewrites: `cedar_pipeline.declared_io`
+    # follows a bound name and looks for a write verb on the lines that
+    # mention it, and a loop variable hides the write. `write_codebook_block`
+    # is a real function that really writes and its name carries the verb.
     rc = 0
-    for path in (CODEBOOK_MASTER, CODEBOOK_FRAG):
-        f, cb = _cb_read(path)
-        if cb is None:
-            print("   !! %s absent - UNMEASURED, not clean" % path)
-            rc = 1
-            continue
-        before = len(cb)
-        bak = path.with_name(path.name + BAK_TAG)
-        if not bak.exists():
-            shutil.copy2(path, bak)
-        have = {(r["dataset"], r["variable"]) for r in cb}
-        touched = 0
-        for r in cb:
-            if r["dataset"] != CB_GROUP:
-                continue
-            if r["variable"] == "spend_usd" and r["description"] != SPEND_USD_DESC:
-                r["description"] = SPEND_USD_DESC
-                touched += 1
-            if (r["variable"] == "total_lobbying_spend_usd"
-                    and r["description"] != PANEL_TOTAL_DESC):
-                r["description"] = PANEL_TOTAL_DESC
-                touched += 1
-        added = 0
-        for c in NEW_COLS:
-            if (CB_GROUP, c) in have:
-                for r in cb:
-                    if r["dataset"] == CB_GROUP and r["variable"] == c:
-                        r["description"] = NEW_COL_DESC[c]
-                        r["pct_filled"] = fill[c]
-                        r["n_rows"] = n
-                continue
-            t, u = spec[c]
-            row = {k: "" for k in f}
-            row.update({"dataset": CB_GROUP, "variable": c, "type": t,
-                        "units": u, "pct_filled": fill[c], "n_rows": n,
-                        "published": "1", "access_tier": "public",
-                        "description": NEW_COL_DESC[c], "generated": TODAY})
-            cb.append(row)
-            added += 1
-        tmp = path.with_name(path.name + ".part")
-        with open(tmp, "w", newline="", encoding="utf-8") as fh:
-            w = csv.DictWriter(fh, fieldnames=f, extrasaction="ignore")
-            w.writeheader()
-            w.writerows(cb)
-        tmp.replace(path)
-        after = len(cb)
-        print("   %-34s %d -> %d rows  (+%d new, %d descriptions rewritten)"
-              % (path.name, before, after, added, touched))
-        if after - before != added:
-            print("   !! ROW CONSERVATION: %d - %d != %d"
-                  % (after, before, added))
-            rc = 1
+    rc |= write_codebook_block(CODEBOOK_MASTER, fill, n, spec)
+    rc |= write_codebook_block(CODEBOOK_FRAG, fill, n, spec)
     print("\n   These land in dist/04_lobbying/*.NOTES.md the next time "
           "code/87_build_dataset_notes.py runs.")
+    return rc
+
+
+def write_codebook_block(path, fill, n, spec):
+    """Rewrite ONE codebook file in place: add the four supersession
+    variables, replace the two money-column descriptions. Row-conserving
+    apart from the rows it says it added."""
+    f, cb = _cb_read(path)
+    if cb is None:
+        print("   !! %s absent - UNMEASURED, not clean" % path)
+        return 1
+    rc = 0
+    before = len(cb)
+    bak = path.with_name(path.name + BAK_TAG)
+    if not bak.exists():
+        shutil.copy2(path, bak)
+    have = {(r["dataset"], r["variable"]) for r in cb}
+    touched = 0
+    for r in cb:
+        if r["dataset"] != CB_GROUP:
+            continue
+        if r["variable"] == "spend_usd" and r["description"] != SPEND_USD_DESC:
+            r["description"] = SPEND_USD_DESC
+            touched += 1
+        if (r["variable"] == "total_lobbying_spend_usd"
+                and r["description"] != PANEL_TOTAL_DESC):
+            r["description"] = PANEL_TOTAL_DESC
+            touched += 1
+    added = 0
+    for c in NEW_COLS:
+        if (CB_GROUP, c) in have:
+            for r in cb:
+                if r["dataset"] == CB_GROUP and r["variable"] == c:
+                    r["description"] = NEW_COL_DESC[c]
+                    r["pct_filled"] = fill[c]
+                    r["n_rows"] = n
+            continue
+        t, u = spec[c]
+        row = {k: "" for k in f}
+        row.update({"dataset": CB_GROUP, "variable": c, "type": t,
+                    "units": u, "pct_filled": fill[c], "n_rows": n,
+                    "published": "1", "access_tier": "public",
+                    "description": NEW_COL_DESC[c], "generated": TODAY})
+        cb.append(row)
+        added += 1
+    tmp = path.with_name(path.name + ".part")
+    with open(tmp, "w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=f, extrasaction="ignore")
+        w.writeheader()
+        w.writerows(cb)
+    tmp.replace(path)
+    after = len(cb)
+    print("   %-34s %d -> %d rows  (+%d new, %d descriptions rewritten)"
+          % (path.name, before, after, added, touched))
+    if after - before != added:
+        print("   !! ROW CONSERVATION: %d - %d != %d"
+              % (after, before, added))
+        rc = 1
     return rc
 
 

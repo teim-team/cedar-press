@@ -33,5 +33,13 @@
     "after": 7234,
     "deleted": 0,
     "added": 0
+  },
+  "census": {
+    "distinct_institution_name_as_shipped": 1709,
+    "distinct_after_applying_the_repairs_in_this_file": 1699,
+    "distinct_under_case_and_punctuation_folding_only": 1636,
+    "rows_carrying_a_city": 7087,
+    "rows_carrying_a_state": 7087,
+    "nagpra_notices_rows_carrying_the_same_fabrication": 51
   }
 }

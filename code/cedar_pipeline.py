@@ -632,6 +632,26 @@ KNOWN_ORDERINGS = [
      "enricher_columns": ["institution_name", "institution_primary",
                           "institution_names_all", "institution_count",
                           "institution_city", "institution_state"]},
+    # Declared 2026-09-02 by the nagpra split-artefact pass. SECOND enricher in
+    # the same chain: 77 rebuilds the notices, 1077 rebuilds the institution
+    # bridge WHOLESALE, and 1084 adds five artefact columns to that bridge IN
+    # PLACE. Unlike the entry above, this one has NO fix at source - 1077's
+    # `split_institutions` still splits on `, and `, which is what fabricated
+    # "Tourism, Columbia, SC" - so a 1077 run DOES revert 1084's columns and
+    # the ordering is load-bearing, not documentary. 1084 is idempotent (two
+    # consecutive runs are byte-identical) and `verify` exits 1 when the
+    # shipped flags disagree with a fresh re-derivation.
+    {"rebuild": "1077_nagpra_institution_grain.py",
+     "enricher": "1084_nagpra_split_artefact_audit.py",
+     "file": "nagpra_notice_institutions.csv",
+     "cost": "NOT paid at source. 1077 writes the bridge wholesale from the "
+             "notice titles and knows nothing about these five columns, so "
+             "every 1077 run drops them. Re-run "
+             "`py -3 code/1084_nagpra_split_artefact_audit.py` after any 1077 "
+             "run; `verify` exits 1 if it was not re-run",
+     "enricher_columns": ["split_artefact_suspected",
+                          "split_artefact_detector", "split_artefact_basis",
+                          "institution_name_repaired", "repair_action"]},
     # Declared 2026-09-02 by workstream pr29, Codex PR #29 findings 2 and 4.
     # Both fixes are at source as well - 1075 corrects the identifier ledger
     # that 40 reads, and 1076 removes the self-parent fabrication from 114 and
@@ -954,6 +974,51 @@ REPLAY_ORDERS = {
                    "columns - merge_table raises instead. This order is still "
                    "how you REPLAY the hub after a restore; it is not a "
                    "reason to take it apart",
+    },
+    # --- newsletters, added 2026-09-02 (workstream newsletters, code/1105) --
+    # Declared because 293's io map classifies 990 as an ENRICHER of these two
+    # tables and it is not one - it is their only full rebuild, writing both
+    # in "w" mode from the shard JSONL. The detector looks for `open(path,
+    # "w")` and 990 writes `PATH.open("w", ...)`, so the rebuild reads as an
+    # in-place touch. Nothing is broken by that today, because there is
+    # exactly ONE writer and therefore no rebuild/enricher collision to get
+    # wrong - but "no enricher exists" is a fact worth stating in the
+    # authoritative place rather than leaving to be re-derived, and the empty
+    # `order` below IS that statement.
+    "tribal_newsletter_corpus.csv": {
+        "rebuild": "990_build_newsletter_corpus.py",
+        "order": [],
+        "mints": [],
+        "gate": "990 verify must exit 0 with 12 invariants held, and the "
+                "rebuilt corpus must carry >= 1,394 publication_channel rows "
+                "over a coverage table of exactly one row per spine entity. "
+                "A smaller channel count after a rebuild means a shard JSONL "
+                "moved, not that Indian Country stopped publishing.",
+        "evidence": "990 reads only data/staging/tribe_harvest/*/newsletters"
+                    "*.jsonl, the gap sweep JSONL, data/staging/np_harvest and "
+                    "cedar_web_map.csv, and writes both tables wholesale. "
+                    "Measured 2026-09-02 by code/1105_newsletter_corpus_ship.py.",
+        "no_checkpoint": [],
+        "warning": "991_newsletter_gap_sweep.py is a NETWORK sweep and is not "
+                   "part of a replay. It is resumable and additive: re-running "
+                   "it only probes entities the coverage table still calls "
+                   "not_probed. Run 991 to EXTEND coverage; run 990 to rebuild "
+                   "the tables from what 991 already wrote.",
+    },
+    "tribal_newsletter_coverage.csv": {
+        "rebuild": "990_build_newsletter_corpus.py",
+        "order": [],
+        "mints": [],
+        "gate": "row count must equal cedar_entity_spine.csv exactly - 990's "
+                "invariant 5. A coverage table that is not the whole spine is "
+                "not a denominator.",
+        "evidence": "same build as the corpus; the two are written in one "
+                    "pass and must not be rebuilt separately.",
+        "no_checkpoint": [],
+        "warning": "written by the same run as tribal_newsletter_corpus.csv. "
+                   "Rebuilding one without the other produces two files "
+                   "describing different universes - the failure mode that "
+                   "cost this project the FERC docket table.",
     },
 }
 

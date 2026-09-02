@@ -151,6 +151,7 @@
     "1072_tribally_owned_enterprises.py",
     "107_pull_remaining_states.py",
     "108_build_tribal_tax_bases.py",
+    "1091_lobby_amendment_supersession.py",
     "1105_newsletter_corpus_ship.py",
     "1107_punchlist_claim_verify.py",
     "111_build_advocacy_passthrough.py",
@@ -587,10 +588,12 @@
   },
   "native_entity_lobbying_disclosures.csv": {
    "enrichers": [
+    "1091_lobby_amendment_supersession.py",
     "350_withdraw_false_lobbying_attributions.py",
     "65_lobbying_organization_type_guard.py"
    ],
    "rebuilders": [
+    "1091_lobby_amendment_supersession.py",
     "350_withdraw_false_lobbying_attributions.py",
     "65_lobbying_organization_type_guard.py",
     "860_state2_acquisition.py"
@@ -778,7 +781,7 @@
   }
  },
  "generated": "2026-09-02",
- "generated_at": "2026-09-02T06:39:47",
+ "generated_at": "2026-09-02T06:53:19",
  "known_orderings": [
   {
    "cost": "the table loses fr_document_number - its only join key to the 156,897-row Federal Register corpus - and loses the measured NAGPRA overlap, so a buyer holding both federal-register and nagpra has nothing on the row telling them 95.8% of these rows describe a notice the other dataset also ships",
@@ -1026,6 +1029,19 @@
    ],
    "file": "nagpra_notices.csv",
    "rebuild": "77_build_nagpra_dataset.py"
+  },
+  {
+   "cost": "NOT paid at source. 1077 writes the bridge wholesale from the notice titles and knows nothing about these five columns, so every 1077 run drops them. Re-run `py -3 code/1084_nagpra_split_artefact_audit.py` after any 1077 run; `verify` exits 1 if it was not re-run",
+   "enricher": "1084_nagpra_split_artefact_audit.py",
+   "enricher_columns": [
+    "split_artefact_suspected",
+    "split_artefact_detector",
+    "split_artefact_basis",
+    "institution_name_repaired",
+    "repair_action"
+   ],
+   "file": "nagpra_notice_institutions.csv",
+   "rebuild": "1077_nagpra_institution_grain.py"
   },
   {
    "cost": "PAID AT SOURCE - the ledger rows 40 reads were corrected, so a rebuild re-derives the Old Harbor attribution rather than reverting it. Run `1075 verify` after any 40 build; it exits 1 if a disputed identifier is paired with Three Affiliated again",
@@ -1324,6 +1340,15 @@
   ],
   "1092_title_residue_targets.csv": [
    "1092_bill_titles_residue_and_scope.py"
+  ],
+  "1110_fetch_manifest.csv": [
+   "1110_tribal_debt_court_distress.py"
+  ],
+  "1110_search_hits.csv": [
+   "1110_tribal_debt_court_distress.py"
+  ],
+  "1110_targets.csv": [
+   "1110_tribal_debt_court_distress.py"
   ],
   "142_crawl_manifest.csv": [
    "142_build_property_site_observations.py",
@@ -1804,6 +1829,7 @@
    "62_no_regression_check.py"
   ],
   "_request_ledger.json": [
+   "1110_tribal_debt_court_distress.py",
    "366_courtlistener_ownership_adjudication.py"
   ],
   "_resolved_sites.json": [
@@ -2165,6 +2191,7 @@
    "1099_crosstribe_legalname_audit.py",
    "1101_np_keyed_name_support.py",
    "1105_newsletter_corpus_ship.py",
+   "1106_tribal_election_survey.py",
    "110_build_harmonized_views.py",
    "111_build_advocacy_passthrough.py",
    "112_pull_grantee_990s.py",
@@ -2575,6 +2602,7 @@
    "1092_bill_titles_residue_and_scope.py",
    "109_build_variable_registry.py",
    "1105_newsletter_corpus_ship.py",
+   "1108_codebook_fragment_repair.py",
    "111_build_advocacy_passthrough.py",
    "112_pull_grantee_990s.py",
    "113_build_nd_severance.py",
@@ -4436,11 +4464,17 @@
   "tribal_certification_sources_2026-08-26.csv": [
    "374_build_cedar_taxonomy_export.py"
   ],
+  "tribal_debt_court_events.csv": [
+   "1110_tribal_debt_court_distress.py"
+  ],
   "tribal_debt_distress_events.csv": [
    "1082_tribal_debt_holdings_disclosure.py"
   ],
   "tribal_debt_holdings.csv": [
    "1082_tribal_debt_holdings_disclosure.py"
+  ],
+  "tribal_debt_obligors.csv": [
+   "1110_tribal_debt_court_distress.py"
   ],
   "tribal_irs990_candidates_2026_04_29.csv": [
    "17_build_nonprofit_990.py"
@@ -4474,6 +4508,9 @@
   ],
   "tribal_irs990_verified_strict_2026_04_30.csv": [
    "17_build_nonprofit_990.py"
+  ],
+  "tribal_leader_terms_staged.csv": [
+   "1106_tribal_election_survey.py"
   ],
   "tribal_newsletter_corpus.csv": [
    "1105_newsletter_corpus_ship.py",
@@ -5738,7 +5775,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: QUARANTINED_METHOD_EXPOSURE.json, cedar_identifier_ledger_final.csv, deals_classified.csv"
    ],
-   "mtime": "2026-09-02T06:38:36",
+   "mtime": "2026-09-02T06:53:02",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -5828,7 +5865,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: sec_gaming_1080_candidates.csv, sec_gaming_financial_disclosures.csv, sec_gaming_management_contract_terms.csv"
    ],
-   "mtime": "2026-09-02T06:31:11",
+   "mtime": "2026-09-02T06:53:02",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -5869,7 +5906,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: ccd_%d.json, entity_dated_public_facts.csv"
    ],
-   "mtime": "2026-09-02T06:39:34",
+   "mtime": "2026-09-02T06:46:17",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -5963,7 +6000,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: nagpra_notice_institutions.csv, nagpra_notices.csv"
    ],
-   "mtime": "2026-09-02T06:37:03",
+   "mtime": "2026-09-02T06:52:17",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -6176,21 +6213,24 @@
    "classification": "both",
    "evidence": [
     "writes in 'w' mode or builds from data/raw",
-    "names itself an in-place enricher"
+    "read-modify-writes: native_entity_lobbying_disclosures.csv"
    ],
-   "mtime": "2026-09-02T06:37:39",
+   "mtime": "2026-09-02T06:52:47",
    "never_run": false,
    "never_run_reason": null,
-   "read_modify_write": [],
+   "read_modify_write": [
+    "native_entity_lobbying_disclosures.csv"
+   ],
    "reads": [
     "native_entity_lobbying_disclosures.csv"
    ],
    "templated": [],
-   "unknown": [
+   "unknown": [],
+   "writes": [
     "04_lobbying.csv",
-    "codebook_master.csv"
-   ],
-   "writes": []
+    "codebook_master.csv",
+    "native_entity_lobbying_disclosures.csv"
+   ]
   },
   "1092_bill_titles_residue_and_scope.py": {
    "classification": "both",
@@ -6364,7 +6404,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: entity_relationships.csv"
    ],
-   "mtime": "2026-09-02T06:16:08",
+   "mtime": "2026-09-02T06:48:26",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -6392,7 +6432,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: cedar_identifier_ledger_final.csv"
    ],
-   "mtime": "2026-09-02T06:22:47",
+   "mtime": "2026-09-02T06:45:26",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -6456,7 +6496,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: native_owned_businesses.csv"
    ],
-   "mtime": "2026-09-02T06:25:48",
+   "mtime": "2026-09-02T06:45:26",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -6479,7 +6519,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: np_orgs.csv"
    ],
-   "mtime": "2026-09-02T06:31:17",
+   "mtime": "2026-09-02T06:50:39",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -6655,16 +6695,28 @@
    ]
   },
   "1106_tribal_election_survey.py": {
-   "classification": "unknown",
-   "evidence": [],
-   "mtime": "2026-09-02T06:20:40",
+   "classification": "both",
+   "evidence": [
+    "writes in 'w' mode or builds from data/raw",
+    "read-modify-writes: tribal_leader_terms_staged.csv"
+   ],
+   "mtime": "2026-09-02T06:49:27",
    "never_run": false,
    "never_run_reason": null,
-   "read_modify_write": [],
-   "reads": [],
+   "read_modify_write": [
+    "tribal_leader_terms_staged.csv"
+   ],
+   "reads": [
+    "cedar_entity_spine.csv",
+    "tribal_leader_terms_staged.csv"
+   ],
    "templated": [],
    "unknown": [],
-   "writes": []
+   "writes": [
+    "TRIBAL_ELECTIONS_SOURCE_SURVEY.md",
+    "_state.json",
+    "tribal_leader_terms_staged.csv"
+   ]
   },
   "1107_punchlist_claim_verify.py": {
    "classification": "rebuild",
@@ -6693,16 +6745,44 @@
    ]
   },
   "1108_codebook_fragment_repair.py": {
-   "classification": "unknown",
-   "evidence": [],
-   "mtime": "2026-09-02T06:22:23",
+   "classification": "both",
+   "evidence": [
+    "writes in 'w' mode or builds from data/raw",
+    "names itself an in-place enricher"
+   ],
+   "mtime": "2026-09-02T06:49:21",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
-   "reads": [],
+   "reads": [
+    "codebook_master.csv"
+   ],
    "templated": [],
-   "unknown": [],
-   "writes": []
+   "unknown": [
+    "admin_appeal_positions.csv",
+    "anc_ceiling_roster.csv",
+    "ancsa_filings_index.csv",
+    "cedar_ruling_ledger_consolidated.csv",
+    "cross_dataset_ruling_map.csv",
+    "faads_transactions_all_agencies.csv",
+    "federal_funding_transactions.csv",
+    "foia_request_index.csv",
+    "gaming_ordinances.csv",
+    "hearing_appearances.csv",
+    "lobbying_registrant_client_relationships.csv",
+    "native_entity_lobbying_disclosures.csv",
+    "native_passthrough.csv",
+    "prime_contracts.csv",
+    "prime_contracts_awards.csv",
+    "prime_contracts_published.csv",
+    "resource_parties.csv",
+    "resource_revenue.csv",
+    "subawards.csv",
+    "tcu_cdfi_ownership_evidence.csv"
+   ],
+   "writes": [
+    "zz.csv"
+   ]
   },
   "1109_subawardee_geo_promote.py": {
    "classification": "both",
@@ -6766,16 +6846,44 @@
    ]
   },
   "1110_tribal_debt_court_distress.py": {
-   "classification": "unknown",
-   "evidence": [],
-   "mtime": "2026-09-02T06:36:41",
+   "classification": "both",
+   "evidence": [
+    "writes in 'w' mode or builds from data/raw",
+    "read-modify-writes: 1110_fetch_manifest.csv, 1110_search_hits.csv, 1110_targets.csv, _request_ledger.json, tribal_debt_court_events.csv, tribal_debt_obligors.csv"
+   ],
+   "mtime": "2026-09-02T06:52:49",
    "never_run": false,
    "never_run_reason": null,
-   "read_modify_write": [],
-   "reads": [],
+   "read_modify_write": [
+    "1110_fetch_manifest.csv",
+    "1110_search_hits.csv",
+    "1110_targets.csv",
+    "_request_ledger.json",
+    "tribal_debt_court_events.csv",
+    "tribal_debt_obligors.csv"
+   ],
+   "reads": [
+    "1110_fetch_manifest.csv",
+    "1110_search_hits.csv",
+    "1110_targets.csv",
+    "_request_ledger.json",
+    "tribal_debt_court_events.csv",
+    "tribal_debt_obligors.csv"
+   ],
    "templated": [],
    "unknown": [],
-   "writes": []
+   "writes": [
+    "1110_fetch_manifest.csv",
+    "1110_person_screen_held.csv",
+    "1110_rejected_hits.csv",
+    "1110_search_hits.csv",
+    "1110_targets.csv",
+    "1110_unreached_cases.csv",
+    "_request_ledger.json",
+    "tribal_debt_court_documents.csv",
+    "tribal_debt_court_events.csv",
+    "tribal_debt_obligors.csv"
+   ]
   },
   "111_build_advocacy_passthrough.py": {
    "classification": "both",
@@ -17026,7 +17134,7 @@
     "writes in 'w' mode or builds from data/raw",
     "names itself an in-place enricher"
    ],
-   "mtime": "2026-09-02T03:27:29",
+   "mtime": "2026-09-02T06:44:12",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -17567,7 +17675,7 @@
    "evidence": [
     "names itself an in-place enricher"
    ],
-   "mtime": "2026-09-02T02:11:08",
+   "mtime": "2026-09-02T06:48:22",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -17619,7 +17727,7 @@
     "writes in 'w' mode or builds from data/raw",
     "names itself an in-place enricher"
    ],
-   "mtime": "2026-09-02T02:55:00",
+   "mtime": "2026-09-02T06:47:43",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -19153,7 +19261,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: NEWSLETTER_CORPUS.md"
    ],
-   "mtime": "2026-09-02T03:26:18",
+   "mtime": "2026-09-02T06:51:29",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -19684,7 +19792,7 @@
     "writes in 'w' mode or builds from data/raw",
     "names itself an in-place enricher"
    ],
-   "mtime": "2026-09-02T06:39:47",
+   "mtime": "2026-09-02T06:52:17",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -19711,6 +19819,7 @@
     "gaming_facilities.csv",
     "lobbying_issue_families_filing.csv",
     "nagpra_notice_entity_bridge.csv",
+    "nagpra_notice_institutions.csv",
     "nagpra_notices.csv",
     "native_bills.csv",
     "native_entity_lobbying_disclosures.csv",
@@ -19722,6 +19831,8 @@
     "section_106_consultation_events.csv",
     "section_106_project_parties.csv",
     "subawards.csv",
+    "tribal_newsletter_corpus.csv",
+    "tribal_newsletter_coverage.csv",
     "tribe_year_lobbying_panel.csv"
    ],
    "writes": []
@@ -20122,6 +20233,9 @@
   "02m_tribal_certification_layer.md": [
    "322_build_tribal_certification_codebook.py"
   ],
+  "04_lobbying.csv": [
+   "1091_lobby_amendment_supersession.py"
+  ],
   "05_entities.csv": [
    "163_promote_nho_universe_in_place.py"
   ],
@@ -20224,6 +20338,24 @@
   ],
   "1097_thirteenth_regional_mint_proposal.csv": [
    "1097_nr_bridge_bonds_and_thirteenth.py"
+  ],
+  "1110_fetch_manifest.csv": [
+   "1110_tribal_debt_court_distress.py"
+  ],
+  "1110_person_screen_held.csv": [
+   "1110_tribal_debt_court_distress.py"
+  ],
+  "1110_rejected_hits.csv": [
+   "1110_tribal_debt_court_distress.py"
+  ],
+  "1110_search_hits.csv": [
+   "1110_tribal_debt_court_distress.py"
+  ],
+  "1110_targets.csv": [
+   "1110_tribal_debt_court_distress.py"
+  ],
+  "1110_unreached_cases.csv": [
+   "1110_tribal_debt_court_distress.py"
   ],
   "119_mi_footing.csv": [
    "119_build_digital_and_loyalty.py"
@@ -20679,6 +20811,9 @@
   "TCU_CDFI_BUILD_LOG.md": [
    "73_add_tcu_and_cdfi.py"
   ],
+  "TRIBAL_ELECTIONS_SOURCE_SURVEY.md": [
+   "1106_tribal_election_survey.py"
+  ],
   "TRIBAL_VENDOR_LIST_PAYOFF.json": [
    "318_measure_tribal_vendor_list_payoff.py"
   ],
@@ -21073,6 +21208,7 @@
    "531_shard_e_anc_report_mine.py"
   ],
   "_request_ledger.json": [
+   "1110_tribal_debt_court_distress.py",
    "366_courtlistener_ownership_adjudication.py"
   ],
   "_resolved_sites.json": [
@@ -21110,6 +21246,7 @@
   ],
   "_state.json": [
    "1085_prime_psc_desc_repull.py",
+   "1106_tribal_election_survey.py",
    "114_pull_prime_archive.py",
    "121_pull_subawards_api.py",
    "30_funding_pre2008.py",
@@ -21518,6 +21655,7 @@
    "1072_tribally_owned_enterprises.py",
    "107_pull_remaining_states.py",
    "108_build_tribal_tax_bases.py",
+   "1091_lobby_amendment_supersession.py",
    "1105_newsletter_corpus_ship.py",
    "1107_punchlist_claim_verify.py",
    "111_build_advocacy_passthrough.py",
@@ -22523,6 +22661,7 @@
    "1001_link_businesses_to_contracting.py"
   ],
   "native_entity_lobbying_disclosures.csv": [
+   "1091_lobby_amendment_supersession.py",
    "350_withdraw_false_lobbying_attributions.py",
    "65_lobbying_organization_type_guard.py",
    "860_state2_acquisition.py"
@@ -23159,6 +23298,12 @@
   "tribal_certification_rules_2026-08-28.csv": [
    "329_merge_white_earth_into_certification_facts.py"
   ],
+  "tribal_debt_court_documents.csv": [
+   "1110_tribal_debt_court_distress.py"
+  ],
+  "tribal_debt_court_events.csv": [
+   "1110_tribal_debt_court_distress.py"
+  ],
   "tribal_debt_distress_events.csv": [
    "1082_tribal_debt_holdings_disclosure.py"
   ],
@@ -23166,7 +23311,11 @@
    "1082_tribal_debt_holdings_disclosure.py"
   ],
   "tribal_debt_obligors.csv": [
-   "1082_tribal_debt_holdings_disclosure.py"
+   "1082_tribal_debt_holdings_disclosure.py",
+   "1110_tribal_debt_court_distress.py"
+  ],
+  "tribal_leader_terms_staged.csv": [
+   "1106_tribal_election_survey.py"
   ],
   "tribal_newsletter_corpus.csv": [
    "990_build_newsletter_corpus.py"
@@ -23266,6 +23415,9 @@
   ],
   "ws3_money_statements.csv": [
    "573_ws3_grain_and_money.py"
+  ],
+  "zz.csv": [
+   "1108_codebook_fragment_repair.py"
   ],
   "zz.md": [
    "1107_punchlist_claim_verify.py"

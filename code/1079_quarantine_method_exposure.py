@@ -904,16 +904,21 @@ def rewrite_prime_like(path: Path, ev, plan, spec):
     moved = [0.0]
 
     with open(path, newline="", encoding="utf-8-sig") as fh:
-        rd = csv.reader(fh)
-        hdr = next(rd)
-        ix = {c: i for i, c in enumerate(hdr)}
-        add = [c for c in NEW_PRIME_COLS if spec.get("visibility") and c not in hdr]
-        out_hdr = hdr + add
+        hdr = next(csv.reader(fh))
+    ix = {c: i for i, c in enumerate(hdr)}
+    add = [c for c in NEW_PRIME_COLS if spec.get("visibility") and c not in hdr]
+    out_hdr = hdr + add
 
-        def g(row, c):
-            return row[ix[c]] if c in ix else ""
+    def g(row, c):
+        return row[ix[c]] if c in ix else ""
 
-        def gen():
+    def gen():
+        # the generator owns the read handle so it is CLOSED before the
+        # rename; see the note above atomic_rows
+        fh2 = open(path, newline="", encoding="utf-8-sig")
+        rd = csv.reader(fh2)
+        next(rd)
+        try:
             for row in rd:
                 stat["rows"] += 1
                 u = (g(row, "awardee_uei") or "").strip().upper()
@@ -985,8 +990,11 @@ def rewrite_prime_like(path: Path, ev, plan, spec):
                             stat["flagged_attributed_rows"] += 1
                 yield row
 
-        backup(path)
-        stat["written"] = atomic_rows(path, out_hdr, gen())
+        finally:
+            fh2.close()
+
+    backup(path)
+    stat["written"] = atomic_rows(path, out_hdr, gen())
     stat["withdrawn_usd"] = round(lost[0], 2)
     stat["repointed_usd"] = round(moved[0], 2)
     stat["cols_before"] = len(hdr)
@@ -1001,11 +1009,14 @@ def rewrite_subawards(path: Path, plan):
     stat = collections.Counter()
     money = collections.defaultdict(float)
     with open(path, newline="", encoding="utf-8-sig") as fh:
-        rd = csv.reader(fh)
-        hdr = next(rd)
-        ix = {c: i for i, c in enumerate(hdr)}
+        hdr = next(csv.reader(fh))
+    ix = {c: i for i, c in enumerate(hdr)}
 
-        def gen():
+    def gen():
+        fh2 = open(path, newline="", encoding="utf-8-sig")
+        rd = csv.reader(fh2)
+        next(rd)
+        try:
             for row in rd:
                 stat["rows"] += 1
                 try:
@@ -1044,8 +1055,11 @@ def rewrite_subawards(path: Path, plan):
                         stat[f"{side}_repointed"] += 1
                 yield row
 
-        backup(path)
-        stat["written"] = atomic_rows(path, hdr, gen())
+        finally:
+            fh2.close()
+
+    backup(path)
+    stat["written"] = atomic_rows(path, hdr, gen())
     stat["cols_before"] = stat["cols_after"] = len(hdr)
     return stat, money
 

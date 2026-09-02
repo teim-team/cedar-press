@@ -414,10 +414,30 @@ def build(dry_run=False) -> int:
                 stats["nest_rung3_unique_name_under_owner"] += 1
             elif len(s) > 1:
                 stats["nest_refused_ambiguous_under_owner"] += 1
+                basis = (f"REFUSED_ambiguous: the normalised firm name matches "
+                         f"{len(s)} NEST enterprises under owner hub {owner} "
+                         f"({'|'.join(sorted(s))}). A name matching two "
+                         f"enterprises resolves to neither.")
         if not eid:
-            stats["nest_unresolved"] += 1
+            # NAME THE REFUSAL ON THE ROW. A counter that does not say what it
+            # dropped is 293 class 2c, and the house rule is that a refusal
+            # leaving no trace is indistinguishable from a row nobody noticed.
             if cp["ityp"] == "UEI" and len(cand.get(cp["ival"], ())) == 1:
                 stats["nest_would_resolve_via_nest_uei_candidate_REFUSED"] += 1
+                basis = (f"UNRESOLVED_candidate_only: this UEI matches the "
+                         f"`uei_candidate` of exactly one NEST enterprise "
+                         f"({next(iter(cand[cp['ival']]))}), which is an "
+                         f"exact-name proposal into the SBA DSBS extract and "
+                         f"NOT a published identifier. A candidate on one side "
+                         f"plus a candidate on the other is not evidence.")
+            elif not basis:
+                basis = (f"UNRESOLVED: no NEST enterprise carries the published "
+                         f"{cp['ityp'] or 'identifier'} {cp['ival']}, and none "
+                         f"under owner hub {owner} carries the normalised name "
+                         f"{norm(cp['name'])!r}. The firm is a registration "
+                         f"sub-hub Cedar has not otherwise recorded; the "
+                         f"identifier on this row is its identity.")
+            stats["nest_unresolved"] += 1
         r["counterparty_nest_enterprise_id"] = eid
         r["counterparty_nest_basis"] = basis
 

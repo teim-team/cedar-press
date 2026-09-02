@@ -950,3 +950,218 @@ distinct years (2000–2022), Graton for 5, Seneca Allegany for 3.
 `fee_percentage` is a rate. Nothing in that table may be totalled with anything.
 
 <!-- END SEC-GAMING -->
+
+<!-- BEGIN NEWSLETTERS -->
+## Newsletters — there is no money here, and one column is still not summable
+
+*Appended 2026-09-02 by workstream `newsletters` (`code/1105_newsletter_corpus_ship.py`).
+This file is written WHOLESALE by `574`, which preserves only marked blocks;
+this section lives inside `<!-- BEGIN NEWSLETTERS -->` / `<!-- END NEWSLETTERS -->`.*
+
+`tribal_newsletter_corpus.csv` and `tribal_newsletter_coverage.csv` **carry no
+dollar column of any kind.** There is nothing in either table that may be
+totalled as money, and 517 classifies both accordingly.
+
+The block is here anyway, because the mistake this file exists to prevent has a
+non-monetary form and this dataset has it:
+
+**1. `COUNT(*)` on the corpus is not the channel count.** The file holds
+**1,889 rows** and **1,394 publication channels**. The other 495 are recorded
+absences (481), one signup form with no archive, and 13 shard-I place-name
+collisions kept flagged for their owner. **Filter `record_status =
+'publication_channel'` before counting anything.** Counting rows overstates by
+36%. This is the same class of error as *"539 publishable coords"* — a number
+whose unit was never stated — and the answer here is the same one: the unit is
+declared per row in a column, and 990's invariants 8–10 fail the build if the
+column and the data it summarises ever disagree.
+
+**2. `archive_span_years` is a FLOOR and must never be summed or averaged into
+a claim about how long a paper has existed.** It is the span the channel's own
+index exposes. The *Cherokee Phoenix* has printed since 1828; this table says
+2000, because that is where its online index starts. Sum it and you get a
+number about websites, not about the Native press.
+
+**3. `n_channels` in the coverage table counts channels, not publications.** A
+nation whose newspaper is indexed at both `/newspaper` and
+`/newspaper/archive` has two channels and one masthead. Use
+`publication_name` for a masthead count — **286 named newsletter channels,
+365 distinct publication names across all channel types** — and expect it to be
+lower than the channel count by design.
+
+**4. Coverage rates need `site_url_class` in the denominator.** *Native Hawaiian
+Organizations publish at 5%* and *NHOs that have a website publish at 11%* are
+both true and they are different statements; 108 of 210 NHOs have no website
+of any kind. Quoting the first as a Cedar coverage gap is wrong — it is
+`SOURCE_DOES_NOT_PUBLISH`. See the coverage section of
+`docs/NEWSLETTER_CORPUS.md`, which derives both from the file.
+<!-- END NEWSLETTERS -->
+
+<!-- BEGIN GAMING-DEEP -->
+## `gaming_revenue_bounds.csv` — 97.76% of it is ONE number, repeated
+
+*Appended 2026-09-02 by workstream GAMING-DEEP
+(`code/1095_gaming_bounds_summability_and_seal_typing.py`). Re-measured on every
+`1095 apply`; enforced by `1095 verify`, whose selftest proves each invariant
+fires on an injected violation. **This file is written WHOLESALE by `574`, which
+preserves only marked blocks; this section lives inside the BEGIN/END comment
+markers named GAMING-DEEP, and nothing outside those markers belongs to this
+workstream.***
+
+| what | rows | measured |
+|---|---:|---|
+| `REGIONAL_GGR_CEILING` | 12,518 | NIGC's region-year total, written onto **every** property in that region-year |
+| `REGIONAL_GGR_CEILING_NET_OF_KNOWN` | 951 | the same, less the properties whose revenue is separately known |
+| `UNKNOWN_PROPERTIES_RESIDUAL_SUM` | 25 | the same residual, shared |
+| **a repeated regional ceiling** | **13,494 (97.76%)** | over **694 distinct facilities** |
+| `SINGLE_PROPERTY_TRIBE_LEVEL_GAMING_REVENUE` | 115 | honest, per property |
+| `TRIBE_LEVEL_NOT_ATTRIBUTABLE_TO_A_PROPERTY` | 133 | honest, per **tribe** |
+| `REPORTED_SLOT_WIN_IS_FLOOR_FOR_GGR` | 61 | honest, a floor |
+| **an honest figure** | **309** | over **11 facilities of 787** |
+
+**`SUM(revenue_upper_bound)` adds NIGC's regional total to itself once per
+property in the region.** The largest single ceiling is carried by **162
+facilities**. The table said this in a build log; it did not say it on the row,
+and a `GROUP BY` in a subscriber's warehouse never reads a build log.
+
+Five columns now say it per row, populated on all 13,803:
+
+- **`not_summable_with`** — and for a ceiling row the FIRST thing it names is
+  **`other_rows_of_gaming_revenue_bounds`**, because the trap is internal.
+- **`bound_is_a_repeated_regional_ceiling`** — `Y` on 13,494, `N` on 309.
+- **`n_facilities_sharing_this_ceiling`** — the repetition, counted.
+- **`aggregation_level`** — `regional_aggregate` /
+  `tribe_level_not_property_attributable` / `entity_specific`.
+- **`summability_basis`** — one sentence, including why the ceiling is **never
+  divided** by the operation count: NIGC's own FY2025 distribution has 8.6% of
+  operations holding 55.8% of GGR while 54.3% hold 4.8%. An even split would be
+  a fabrication with a plausible citation.
+
+**No dollar column was added and none was changed** — `1095` asserts the five
+money columns are byte-identical before and after, and refuses to write if they
+are not. The standing refusal to put a revenue column on `gaming_facilities` is
+untouched.
+
+### The self-published web harvest, merged 2026-09-02
+
+`code/1094_merge_web_harvest_into_gaming_claims.py` merged the 1,175 rows of
+`gaming_web_harvest_observations.csv` into the two tables that already hold
+self-published gaming evidence — **314 capacity signals into
+`gaming_property_self_published_claims.csv` (270 → 584)** and **861 identity
+assertions into `gaming_property_self_published_assertions.csv` (622 → 1,483)**.
+
+Three qualifiers travel on every merged row and each of them blocks a total:
+
+1. **152 of the 314 capacity figures are LOWER BOUNDS** ("500 + Slots").
+   `value_is_bounded = Y`, `bound_direction = LOWER_BOUND`, and
+   `bound_direction_as_harvested` keeps the source's own word. **A bound is not
+   a count and must not be summed as one.**
+2. **`measurement_scope = UNVERIFIED_SCOPE` on 309** — nothing in the sentence
+   says whether the figure is the whole property or one room. The column is new
+   on the destination table, and **blank on the 270 pre-existing rows means NOT
+   RECORDED BY THAT EXTRACTION, never "scope verified."**
+3. **712 of 1,175 rows carry NO `facility_id`**
+   (`TRIBE_LEVEL_MULTI_FACILITY_NOT_DISAMBIGUATED`) — a host serving several of
+   one tribe's properties where the page does not say which. The candidate list
+   rides in `tribe_facility_ids_not_disambiguated`. **Never distribute a
+   tribe-level claim across a tribe's facilities**; 463 rows key to 82
+   facilities and the rest do not key at all.
+
+**`not_summable_with` on every capacity row names four series and then names
+this table itself** — two sentences on one page counting the same floor are two
+claims about one thing, and adding them doubles the floor.
+
+**9 merged rows duplicate an existing claim on `(source_url, metric, value)` and
+16 also appear in `gaming_property_site_observations.csv`.** Both are FLAGGED
+(`duplicate_of_existing_claim_id`,
+`also_in_gaming_property_site_observations`), not dropped. **A count that
+appears in two Cedar tables is one fact, and a buyer who unions them counts it
+twice** — filter on the flag.
+
+### Which states seal revenue, and which never collected it
+
+174 facilities carry `state_revenue_disclosure_status =
+SEALED_BY_STATUTE_OR_COMPACT` across seven states. **They are not all the same
+legal fact**, and the new `state_revenue_disclosure_disposition` separates them
+from the recorded quote, never from an unquoted statute:
+
+| disposition | states | facilities |
+|---|---|---:|
+| `SEALED_HELD_BY_REGULATOR` | AZ 43 · WI 40 · ND 22 · KS 8 | 113 |
+| `NOT_COLLECTED_BY_THIS_BODY` | CO 3 | 3 |
+| `DISPOSITION_UNSUPPORTED_BY_RECORDED_QUOTE` | MN 48 · NV 10 | 58 |
+
+**Minnesota is the largest of the seven and its recorded quote is about compact
+renegotiation** — it states no confidentiality, no aggregation and no
+disclosure rule. Nevada's states a monthly *submission* requirement (NGC-31),
+not a seal. Neither is a claim that those states publish per-tribe revenue;
+both are a claim that **Cedar does not hold a quote that supports what the
+column says**, and that is a re-sourcing task rather than a finding about the
+state's law. `state_revenue_disclosure_quote_supports_status` is `N` on those
+58 rows and `Y` on the other 116.
+<!-- END GAMING-DEEP -->
+
+
+<!-- BEGIN DEALS-MERGE-1088 -->
+## deals — the 2026-09-02 staged merge, and the two sums that must stay apart
+
+*Appended 2026-09-02 by workstream DEALS-MERGE-1088
+(`code/1088_merge_staged_deals.py`). This file is written WHOLESALE by
+`code/574_ws1_money_and_conservation.py`, which preserves only marked blocks;
+this section is inside `<!-- BEGIN DEALS-MERGE-1088 -->` /
+`<!-- END DEALS-MERGE-1088 -->` and no other block was touched.*
+
+### The new totals
+
+| | before | after |
+|---|---:|---:|
+| `deals_classified.csv` rows | 935 | **1,079** |
+| `Announced_Value_USD` | $45,195,917,316 | **$47,880,355,533** |
+| added by the merge | — | **$2,684,438,217** |
+
+Conservation was proved row-for-row, not asserted: **0 of the 935 pre-merge
+`Deal_ID`s lost, 0 pre-merge values changed, 0 columns lost.** The merge runs
+through `88_build_deals_taxonomy.py`, which is an append-merge over
+`cedar_pipeline.merge_table` and cannot drop a row.
+
+### A CEILING IS NOT A VALUE, and this merge is where the rule earns its keep
+
+`Announced_Value_USD` is **consideration**. `Project_Total_Value_USD` is where
+everything that is a sum but not consideration is parked so it cannot
+double-count. They are DISJOINT by construction and **must never be added
+together.**
+
+Two staged rows named a facility ceiling in their own `value_basis` and were
+moved, $58,500,000 in total:
+
+* **Lytton Rancheria of California / Cadiz Inc.**, 2025-10-27 — an unsecured
+  term loan facility of **up to $51.0 million**. The maximum a borrower may
+  draw is not money that moved.
+* **Bristol Bay Industrial, LLC / Alaska Communications**, 2022-06-15 — a
+  secured delayed-draw term loan of **up to $7.5 million**. Same shape.
+
+Each keeps its number, in `Project_Total_Value_USD`, with `Value_Type` reading
+`NOT CONSIDERATION - moved out of Announced_Value_USD by code/1088 ceiling
+rule` followed by the source's own phrase. Nothing was discarded and the total
+does not lie.
+
+**The largest sum in the whole staging set — a $151,000,000,000 IDIQ ceiling on
+a multiple-award vehicle — never reached the value rule.** It was refused a step
+earlier as a federal contract award, which is what it is: the maximum the
+government may spend across every awardee on that vehicle, not money any one
+nation received. Had it been admitted it would have been **3.2x the entire
+deals dataset**.
+
+### Three sums in this dataset that a buyer can still get wrong
+
+1. **Never sum `deals_press_edgar_ancsa_additions.csv` alongside
+   `deals_classified.csv`.** All 144 of its rows ARE in the classified table —
+   it is their source, not an addition to it. This is the same rule already in
+   force for the other nine `deals_*_additions.csv` slices, which together hold
+   $22.67B of the classified table's own money.
+2. **Never sum `Announced_Value_USD` and `Project_Total_Value_USD`.** See above.
+   `Project_Total_Value_USD` across the whole table is $11,423,670,087 and it is
+   a different concept.
+3. **The four new `IDOBS-` rows and their kin carry no value on purpose.**
+   `Value_Type` reads *"No value published. Never inferred."* A blank there is
+   a fact about the source, not a gap in Cedar.
+<!-- END DEALS-MERGE-1088 -->

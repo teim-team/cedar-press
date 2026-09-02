@@ -38,6 +38,13 @@ of the 787 facilities (88%)**, each with a lower bound, an upper bound, a basis
 and an assumption note. That is a real answer to the question, and §5 explains
 exactly why those bounds must never be summed.
 
+**One narrow exception exists and it is 0.9% wide.** Where a *public SEC
+registrant* manages, develops or owns the property, its filings state the
+property's revenues or the fee it earned from them. That reaches **7 of 787
+facilities** and is held in `sec_gaming_financial_disclosures.csv` as its own
+assertion class - see "Rate inversion, third attempt" in §4. It does not make
+the sentence above less true.
+
 ---
 
 ## 1. Sources
@@ -359,6 +366,48 @@ Florida built 44 `BOUNDED_DERIVED_REVENUE` rows, published them in a draft, and
 then **withdrew all 44**: EDR publishes *receipts*, which lag the obligation by
 one fiscal year through a true-up, and the FY2013/14 test **violated its own
 bound** ($1.978bn implied ceiling against $2.098bn stated Net Win).
+
+<!-- BEGIN SEC-GAMING -->
+### Rate inversion, third attempt - and this one holds, but only twice
+
+*Added 2026-09-02 by workstream SEC-GAMING (`code/1080_sec_gaming_facility_revenue.py`).
+Read it against the two rejections directly above: this is the same manoeuvre,
+and the reason it survives here is the reason it failed there.*
+
+California's 795 candidates died because the compact rates are **marginal-base**;
+Florida's 44 died because the published series is **receipts on a one-year lag**.
+Both failures share a shape: the rate was real but the base was not what it
+looked like.
+
+A **management or relinquishment contract disclosed in an SEC filing** can escape
+that, and 8 distinct (property, rate) formulas were found across 51 statements in
+the cached EDGAR corpus. **Six were refused and two were inverted.**
+
+| contract | rate as filed | inverted? | why |
+|---|---|---|---|
+| Trading Cove Associates / **Mohegan Sun** | 5% of *Revenues* | **yes**, CY2000-2006 | flat rate, no threshold, and the same filing defines the base: *"gross gaming revenues (other than Class II gaming revenue) and all other facility revenues"* |
+| Red Rock / **Graton Resort** | 24% of net income years 1-4, **27% years 5-7** | **yes**, CY2018-2020 | flat within the tier, and those three calendar years sit wholly inside years 5-7 |
+| Lakes / **Four Winds** | 24% of net income *up to a threshold*, 19% above | no | **marginal-base, and the threshold is undisclosed** - the California failure exactly |
+| Lakes / **Cimarron** | 30% of net income *in excess of $4m* | no | the fee sits above a floor; inversion recovers only the excess |
+| Red Rock / **Gun Lake** | never stated | no | the "30% of the facility's net income" in the same 10-K belongs to the **North Fork** project |
+| Full House / **FireKeepers** | 30% of revenues | no | that is the **statutory NIGC ceiling** (25 U.S.C. 2711) recited in a regulatory-background section, not the contract's fee |
+| Nevada Gold / **Buena Vista** | 25% of net income | no | no fee dollars were ever disclosed against it - the casino had not opened |
+| Lakes / **Red Hawk** | 30% of net revenue *as defined* | no | the fee is subordinated and **deferred when operating results are insufficient**, so a year's recognised fee is not 30% of that year's base |
+
+**And the inverted figure is still not "revenue".** IGRA defines *net revenues*
+at 25 U.S.C. 2703(9) as gross gaming revenues less prizes and less
+gaming-related operating expenses excluding management fees - much closer to
+operating profit. So the two derived series are typed
+`DERIVED_FACILITY_GROSS_REVENUES_AS_DEFINED` (Mohegan Sun, where the contract's
+base genuinely is total facility revenue) and
+`DERIVED_FACILITY_NET_INCOME_AS_DEFINED` (Graton), never plain revenue.
+
+This does **not** soften the claim at the top of this document. The route
+reaches **7 of 787 facilities (0.9%)** and only where a public company's books
+ran through the property. `docs/SEC_GAMING_FACILITY_REVENUE_BUILD_LOG.md` is the
+full record; `docs/MONEY_TOTALLING_RULES.md` `<!-- BEGIN SEC-GAMING -->` is the
+fence, and it forbids summing any of it against `gaming_revenue_bounds.csv`.
+<!-- END SEC-GAMING -->
 
 ### Ordinances: the OCR merge
 

@@ -596,10 +596,22 @@ def mine():
                 fiscal_period_label="", period_end="", period_type="",
                 source_quote=re.sub(r"\s+", " ", ctx).strip())
 
-    for i, r in enumerate(sorted(rows, key=lambda z: (z["filing_date"], z["accession"],
-                                                      z["extraction_pattern"],
-                                                      str(z.get("alias", "")))), 1):
-        r["candidate_id"] = f"SECGF-{i:05d}"
+    # DEFECT CLASS 7 (a positional primary key). The first version numbered
+    # candidates 1..N in sort order. `review/sec_gaming_1080_adjudication.csv`
+    # keys on candidate_id, so a re-mine that found one extra hit would have
+    # shifted every id below it and silently re-pointed every hand ruling at a
+    # different figure. The id is now a digest of the candidate's own content:
+    # stable across re-mines, and a candidate that changes gets a NEW id rather
+    # than inheriting someone else's ruling.
+    for r in rows:
+        seed = "|".join(str(r.get(k, "")) for k in (
+            "accession", "extraction_pattern", "alias", "figure_type",
+            "value_verbatim", "fiscal_period_label", "period_end"))
+        r["candidate_id"] = "SECGF-" + hashlib.md5(seed.encode("utf-8")).hexdigest()[:10]
+    if len({r["candidate_id"] for r in rows}) != len(rows):
+        raise SystemExit("candidate_id digest collided - widen the seed tuple")
+    rows.sort(key=lambda z: (z["filing_date"], z["accession"], z["extraction_pattern"],
+                             str(z.get("alias", "")), z["candidate_id"]))
 
     cols = ["candidate_id", "extraction_pattern", "alias", "facility_name_as_filed",
             "facility_id", "tribe_name", "state", "on_indian_lands",
@@ -608,7 +620,6 @@ def mine():
             "derivation_stated_percentage", "derivation_percentage_base",
             "filer_name", "filer_cik", "filer_role", "form", "filing_date",
             "accession", "source_url", "local_file", "source_md5", "source_quote"]
-    rows.sort(key=lambda z: z["candidate_id"])
     CANDIDATES.parent.mkdir(parents=True, exist_ok=True)
     with CANDIDATES.open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=cols, extrasaction="ignore")

@@ -1,7 +1,15 @@
 # Methodology — Indian Country Deals
 
-**`deals`. `data/clean/deals_classified.csv`, 935 rows, 886 entity-linked
-(94.8%).** [measured 2026-09-02]
+**`deals`. `data/clean/deals_classified.csv`, 1,079 rows, 960 entity-linked
+(89.0%).** [measured 2026-09-02, after the staged merge in section 5b]
+
+> The figure was **935 rows / 886 linked (94.8%)** earlier the same day, and
+> that number appears throughout sections 1-5 below because those sections
+> describe how those 935 rows were made. `code/1088_merge_staged_deals.py`
+> added 144. **The link RATE fell while the link COUNT rose** - 74 of the 144
+> new parties resolve to the spine and 70 do not, which is what a new channel
+> looks like before its parties are ruled. `review/deals_party_unmatched_2026-09-02.csv`
+> holds the 87 distinct unmatched parties.
 
 *Written 2026-09-02. This is the methodology record: what was pulled and from
 where, how the rows were made, how entities were attributed, what was decided
@@ -458,6 +466,172 @@ Three of the eight bear on this dataset:
 > vendor/company directory, not to the corporation's published annual reports.
 > That is coherent, and it is stated in neither document.** It should be
 > settled explicitly rather than relied on.
+
+---
+
+## 5b. THE 2026-09-02 STAGED MERGE - 144 rows admitted, 168 refused
+
+*`code/1088_merge_staged_deals.py`. Disposition: `review/deals_1088_disposition.json`.
+Every refusal is kept WHOLE, with its evidence quote and a named reason, in
+`review/deals_1088_refusals.csv`. Nothing was deleted.*
+
+Three agents staged candidates across four channels and none had been merged,
+because each needed a read rather than a column mapping. **312 candidates in,
+144 admitted, 168 refused, and the arithmetic is asserted in the script rather
+than reported.**
+
+| channel | in | admitted |
+|---|---:|---:|
+| tribal press, tier A unique (`994` screen) | 258 | 106 |
+| SEC EDGAR (`1032`) | 21 | 22 |
+| ANCSA STAR portal, AS 45.55.139 (`1031`) | 24 | 24 |
+| EDGAR held on the terms question | 3 | **1** |
+| identifier-driven ownership changes (`1071`) | 6 | 2 |
+
+*(EDGAR admits 22 from 21 because the terms-released NANA row is minted in the
+same `SECX-` family.)*
+
+**Ledger: 935 -> 1,079 rows. `Announced_Value_USD` $45,195,917,316 ->
+$47,880,355,533, +$2,684,438,217. Conservation proved row-for-row: 0 of the 935
+pre-merge `Deal_ID`s lost, 0 pre-merge values changed, 0 columns lost.**
+
+### The refusals, and why each is a rule
+
+| reason | n | the rule |
+|---|---:|---|
+| `G7_DUPLICATE_INTERNAL` | 39 | one article reporting one dated event is one row |
+| `G3_FEDERAL_AWARD_NOT_A_DEAL` | 35 | a federal contract award is `prime_contracts`, not a deal |
+| `G5_PARTY_IS_PUBLISHER_NOT_TRANSACTOR` | 33 | the publisher is a prior, not a party |
+| `G2_PARENTAGE_STATEMENT_NOT_A_TRANSACTION` | 24 | "is a wholly owned subsidiary of" is a standing fact |
+| `G7_DUPLICATE_OF_LEDGER` | 17 | already in `deals_classified.csv` |
+| `G4_MILESTONE_NOT_A_TRANSACTION` | 7 | a groundbreaking transfers nothing |
+| `G1_DATE_NOT_IN_EVIDENCE` | 6 | the ledger's own bar |
+| `G0_NOT_INDIAN_COUNTRY` | 2 | a place name is not a nation |
+| `G6_INTRA_FAMILY_RELABELLING` | 2 | a move between sub-hubs of one nation |
+| `G8` / `G10` / `V1 carrying amount` | 3 | no transaction disclosed; a registration correction; a balance-sheet figure |
+
+### Four findings worth more than the rows
+
+**1. A place name is not a nation, and the screen let two through.**
+`FRIENDS OF SOUTH CONGAREE - PINE RIDGE LIBRARY` is a South Carolina library
+group; `FRIENDS OF TEN MILE CREEK AND LITTLE SENECA RESERVOIR` is a Montgomery
+County, Maryland watershed group published by `montgomeryplanning.org`. Both
+entered a tier-A Indian Country deal queue on a token.
+
+**2. The publisher-is-not-the-party test needs TWO conditions or it measures an
+abbreviation.** A pure name test flagged 105 of 258 rows - and it was wrong
+about most of them, because "ASRC Industrial Services Acquires Mavo Systems"
+shares no token with "Arctic Slope Regional Corporation". The gate that works
+requires the host to be a hand-classified third-party publisher AND the party
+to be absent from the sentence. Twenty-one hosts were classified by hand with a
+reason recorded for each. It keeps `oan.srpmic-nsn.gov` reporting Salt River's
+own Pavilions acquisition and drops the statewide aggregator that attributed
+Dell's $9.7B contract, Anthropic's $200M contract and the Coast Guard's $25B to
+the Alaska village of **Craig**.
+
+**3. A PRESENT-TENSE OWNERSHIP MAP INVERTS THE INTRA-FAMILY TEST ON A PAST
+ACQUISITION.** This is the generalisable one. Bering Straits bought Alaska Gold
+Company from NovaGold in 2012; Alaska Gold is a BSNC subsidiary today, so a
+shared-hub test calls the 2012 purchase an internal relabelling and destroys
+the very event that created the relationship. **A family map built from today's
+ownership refuses exactly the acquisitions that succeeded.** The gate went
+34 -> 24 -> 2 refusals across three versions; the 32 rows it stopped refusing
+are real transactions, including eleven ASRC Industrial acquisitions,
+UIC/Johansen Construction and Choggiung/Bristol Industries. The version that
+looks correct and is not - "does the sentence name an organisation outside the
+family?" - fails for the same reason: the target is inside the family by the
+time the map is built. What works is reading what the passage DOES: a transfer
+verb overrules the topology, a reorganisation verb confirms it, and an
+identifier flip with no sentence has only the topology to go on.
+
+**4. `cedar_constellation_edges.csv` IS NOT AN OWNERSHIP SOURCE.** All 3,153
+rows carry `is_ownership_claim = N`; its tiers are `registered_with` (2,365),
+`declares_service_to` (588), `managed_under_contract` (78), `located_within`
+(78) and `chartered_by` (44). `code/1071_identifier_driven_deal_sweep.py` builds
+its family closure from that file at every tier, and
+`nest_enterprise_relations.csv` - the file that actually carries 3,613 ownership
+edges - is not read by it at all. Within `nest`, `joint_venture` (157 edges) and
+`passive_investment` (10) are also excluded from a family here, because a joint
+venture between two families is the transaction this dataset exists to record.
+An `affiliation` edge in `nest` reading *"Doyon, Limited publishes these as its
+own operating companies"* makes **Huna Totem Corporation** - an independent
+Hoonah village corporation - a member of Doyon's family, and cost five real
+Doyon rows before it was caught.
+
+### The terms release yielded ONE row, not three
+
+`docs/PUBLICATION_POLICY.md` `TERMS-SCOPE`, 2026-09-02: a restriction binds what
+the restricted entity published, not a third party's SEC filing about them. The
+three held EDGAR families were released on that basis and the honest yield is
+**one deal**:
+
+- **NANA** - ADMITTED. Trilogy Metals' 10-K discloses Ambler Metals LLC, a
+  50/50 joint venture completed 2020-02-11 with a South32 subscription of
+  US$145,000,000. NANA's own consideration is a 1% net smelter royalty plus
+  $755/acre and is **not** a dollar figure.
+- **Southern Ute** - REFUSED, and not on terms. MACH Natural Resources carries a
+  "Southern Ute Right of Work Agreement" at a gross **carrying amount** of
+  $14,452 thousand. A carrying amount is not a purchase price and the filing
+  gives no transaction date.
+- **Chickasaw** - REFUSED. AP Gaming Holdco names the Nation in market context.
+  There is no transaction in the filing.
+
+**Say "three families released, one deal found."** Reporting the release as
+three rows would be the error the release exists to avoid.
+
+### The two unannounced ownership changes carry a WINDOW, not a date
+
+`IDOBS-2021-001` **WHPacific, Inc.** (UEI `PTJATEQ7Q873`) moves from NANA
+Regional Corporation to NV5 Global between FY2019 and FY2021, and
+`IDOBS-2019-001` **Clarus Fluid Intelligence, LLC** (UEI `F2BEQJNKFY83`) leaves
+its Koniag-side parent for Chestnut Park between FY2017 and FY2019. Neither is
+in any Cedar source as an announcement. Both are admitted with:
+
+- `Event_Date` **BLANK on purpose**, and `Date_Basis` saying
+  *"FISCAL-YEAR WINDOW, NOT A DATE"*. A run boundary is a gap, and
+  `code/1088 verify` exits 1 on a blank `Event_Date` whose `Date_Basis` does not
+  say so.
+- `Verification_Status` = *"UNVERIFIED AGAINST ANY PUBLISHED ANNOUNCEMENT -
+  this is an observation Cedar made, not a claim a source published"*.
+- `Announced_Value_USD` blank, `Value_Type` = *"No value published. Never
+  inferred."*
+
+A third identifier candidate was refused outright: UEI `H3Y4JTE3SRJ4` keeps its
+identifier while `awardee_name` goes from **Blackfeet Utilities** to
+**William Allen Talks About** - a personal name. An entity does not sell itself
+to a person and keep its UEI. That is a registration correction, which
+`docs/PUBLICATION_POLICY.md` already names as one of the three things a parent
+change can be instead of an acquisition.
+
+### 46 of `1071`'s 434 shared-brand rejections rest on a trade word
+
+Re-tested and written to `review/deals_1088_intra_family_retest.csv`.
+`INTRA_FAMILY_SHARED_BRAND` refused **Kansas State University -> George Mason
+University** on the shared token `university`, and eight more on the same word;
+`construction` (7), `international` (5), `industrial`, `services` and
+`enterprises` did the same work. Those are trades, never brands - the ANCSA
+stager's own note says *"services (a trade, never a name)"* and the brand test
+does not apply that list. The other 388 rest on a real brand token
+(`deloitte`, `honeywell`, `johnson|controls`, `bae|systems`) and are correct.
+**Yield of the re-test: zero deal rows.** Not one of the 46 has a side matching
+a Cedar spine entity by exact name, so the gate is defective and the
+consequence today is nil. Recorded because it will not stay nil.
+
+Two counts in `docs/DEALS_IDENTIFIER_SWEEP_2026-09-02.md` do not reproduce: it
+states **544** intra-family rejections; the three intra-family refusal codes in
+`review/1071_intra_family_rejections.csv` sum to **536** (`SHARED_BRAND` 434 +
+`SAME_HUB` 100 + `ACRONYM` 2).
+
+### The value rule, applied
+
+`Announced_Value_USD` is for CONSIDERATION. Two staged sums named a facility
+ceiling in their own `value_basis` and were **moved** to
+`Project_Total_Value_USD`, totalling $58,500,000 - Lytton Rancheria's $51.0M
+unsecured term facility to Cadiz Inc. and Bristol Bay Industrial's $7.5M
+delayed-draw facility to Alaska Communications. The row survives; the total does
+not lie. **The $151,000,000,000 IDIQ ceiling never reached the value gate at
+all** - it was refused a step earlier by `G3` as a federal contract award, which
+is what it is.
 
 ---
 

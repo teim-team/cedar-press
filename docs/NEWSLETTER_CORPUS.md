@@ -8,12 +8,15 @@ Owner, twice: *"Don't forget tribal newsletters, especially for deals"* and *"ev
 
 | | |
 |---|---:|
-| publication channels catalogued | 1195 |
-| entities publishing at least one | 650 |
-| named publications (a masthead, not just a news page) | 260 |
-| archives spanning 10 years or more | 102 |
+| publication channels catalogued | 1394 |
+| rows in the corpus file | 1889 |
+| entities publishing at least one | 694 |
+| named publications (a masthead, not just a news page) | 286 |
+| archives spanning 10 years or more | 140 |
 | deepest single archive | 57 years (United Keetoowah Band of Cherokee Indians in Oklahoma) |
 | spine entities in the coverage denominator | 1555 |
+
+**Filter `record_status` before you count anything.** The file holds 1889 rows and 1394 publication channels: 1394 `publication_channel`, 481 `probe_absence`, 13 `flagged_not_native_publisher`, 1 `contact_point_only`. A recorded absence keeps a row on purpose, so the negative sits beside the positives and `discovery_technique` can name which routes ran. Counting rows instead of filtering the column overstates the channel count by 36%.
 
 Grain is **(entity, channel URL)**. A nation that prints a newspaper, posts PDFs to a WordPress media library and files shareholder reports with the State of Alaska has three rows, because those are three channels with three different archive depths.
 
@@ -23,15 +26,15 @@ Grain is **(entity, channel URL)**. A nation that prints a newspaper, posts PDFs
 
 | entity class | in spine | found | attempted, none found | not probed | found rate of those probed |
 |---|---:|---:|---:|---:|---:|
-| Federally recognized tribe | 349 | 223 | 45 | 74 | 83% |
+| Federally recognized tribe | 349 | 264 | 70 | 8 | 79% |
 | Federally recognized Alaska Native Village | 228 | 130 | 53 | 45 | 71% |
-| Native Hawaiian Organization | 210 | 8 | 88 | 114 | 8% |
+| Native Hawaiian Organization | 210 | 11 | 102 | 97 | 10% |
 | BIE School | 185 | 0 | 0 | 183 | n/a |
 | Alaska Native Village Corporation | 173 | 54 | 119 | 0 | 31% |
 | State-recognized tribe | 64 | 17 | 45 | 2 | 27% |
 | Native Community Development Financial Institution | 64 | 47 | 13 | 4 | 78% |
 | Intertribal Organization | 56 | 43 | 10 | 3 | 81% |
-| Individually Native-owned business | 45 | 1 | 14 | 30 | 7% |
+| Individually Native-owned business | 45 | 1 | 15 | 29 | 6% |
 | Urban Indian Organization | 43 | 34 | 9 | 0 | 79% |
 | Tribal College or University | 37 | 31 | 6 | 0 | 84% |
 | Federal-level self-governance consortium | 29 | 22 | 7 | 0 | 76% |
@@ -40,7 +43,41 @@ Grain is **(entity, channel URL)**. A nation that prints a newspaper, posts PDFs
 | Alaska Native Regional Corporation | 12 | 11 | 0 | 0 | 100% |
 | ANCSA Group Corporation | 6 | 0 | 6 | 0 | 0% |
 | State-level constituency entity | 3 | 0 | 3 | 0 | 0% |
-| **all** | **1555** | **650** | **440** | **455** | **60%** |
+| **all** | **1555** | **694** | **480** | **371** | **59%** |
+
+## Read the coverage table with `site_url_class`, or you will read it wrong
+
+A single-digit found rate in the table above is not Cedar failing to look. `has_live_site` answers a narrower question than it appears to: it is `yes` whenever the web map holds ANY reachable URL for the entity, and for a large share of some classes that URL is a Wayback capture of a dead site, an IRS-derived profile page, or - found 2026-09-02 - a **federal ArcGIS API endpoint that returns data about the entity**, which the web map had recorded as 45 Alaska Native Villages' website. None of those can be probed for a newsletter. `site_url_class` states which it is, per row.
+
+**The honest denominator is entities that operate their own site.** Against it, the picture changes:
+
+| entity class | in spine | operates own site | found ON that site | found rate on its own site | found ANYWHERE | no site of any kind |
+|---|---:|---:|---:|---:|---:|---:|
+| Federally recognized tribe | 349 | 328 | 257 | 78% | 264 | 21 |
+| Federally recognized Alaska Native Village | 228 | 107 | 91 | 85% | 130 | 121 |
+| Native Hawaiian Organization | 210 | 102 | 11 | 11% | 11 | 108 |
+| BIE School | 185 | 176 | 0 | 0% | 0 | 9 |
+| Alaska Native Village Corporation | 173 | 38 | 33 | 87% | 54 | 135 |
+| State-recognized tribe | 64 | 58 | 16 | 28% | 17 | 6 |
+| Native Community Development Financial Institution | 64 | 60 | 47 | 78% | 47 | 4 |
+| Intertribal Organization | 56 | 10 | 10 | 100% | 43 | 46 |
+| Individually Native-owned business | 45 | 15 | 1 | 7% | 1 | 30 |
+| Urban Indian Organization | 43 | 11 | 11 | 100% | 34 | 32 |
+| Tribal College or University | 37 | 36 | 30 | 83% | 31 | 1 |
+| Federal-level self-governance consortium | 29 | 10 | 9 | 90% | 22 | 19 |
+| Native Financial Institution | 29 | 28 | 17 | 61% | 18 | 1 |
+| Federal-level constituency entity | 22 | 16 | 10 | 62% | 11 | 6 |
+| Alaska Native Regional Corporation | 12 | 12 | 11 | 92% | 11 | 0 |
+| ANCSA Group Corporation | 6 | 0 | 0 | n/a | 0 | 6 |
+| State-level constituency entity | 3 | 1 | 0 | 0% | 0 | 2 |
+
+**`found ANYWHERE` exceeding `found ON that site` is a finding, not an arithmetic error.** It counts entities whose only publication channel lives on someone else's host: a village corporation's statutory filing on the State of Alaska's portal, or a village government's news carried in its regional consortium's newsletter. Those rows say so - `served_tribe_id` names the nation served when the publisher is not it.
+
+Three findings this makes visible, each of which reads as a Cedar gap on the first table and is a fact about the world on this one:
+
+* **Native Hawaiian Organizations: 108 of 210 have no website at all.** Of the 102 that do, every one has now been probed on every machine-readable route and 11 publish. The class rate is 5%; the rate among NHOs with a site is 11%. `SOURCE_DOES_NOT_PUBLISH` is the honest state (`docs/AGENT_FIELD_GUIDE.md` section 5), and it is a finding about how this sector is organised - many NHOs are small homestead associations and civic clubs whose public presence is a Facebook page or an IRS filing - not a backlog.
+* **Village corporations look like a 31% class and are a 87% class.** Only 38 of 173 operate a website - but 54 publish, because 21 of them were found through the **State of Alaska DBS STAR portal**, where ANCSA corporations file shareholder communications by statute. A corporation with no website still has a statutory publication channel, and the channel is on the state's host, not theirs.
+* **The probeable frontier is closed.** 371 entities remain `not_probed`: 183 are BIE schools, excluded on purpose, and the other 188 have no site to probe. There is no entity left that operates a live site, is in scope, and has never been looked at - and that is not a claim, it is invariant 10 in `990_build_newsletter_corpus.py`, which fails the build if it stops being true.
 
 ## The deepest back runs
 
@@ -78,18 +115,18 @@ Archive depth is the span of years the channel's own index or media library expo
 
 | route | channels |
 |---|---:|
+| HIDDEN_DATA #3 wp-json media | 310 |
 | shard F org web probe | 193 |
-| HIDDEN_DATA #3 wp-json media | 162 |
 | cedar_web_map | 130 |
 | shard I nonprofit probe | 126 |
 | shard E ANC probe | 85 |
+| HIDDEN_DATA #3 wp-json search | 79 |
 | rendered page + hidden-endpoint sweep | 75 |
-| HIDDEN_DATA #3 wp-json search | 66 |
 | shard D web probe | 66 |
 | Alaska DBS STAR portal | 58 |
+| rendered homepage link | 48 |
+| HIDDEN_DATA #13 feeds | 48 |
 | HIDDEN_DATA_TECHNIQUES #3 WordPress REST API | 47 |
-| rendered homepage link | 35 |
-| HIDDEN_DATA #13 feeds | 33 |
 | rendered homepage links - fallback, nothing richer was exposed | 23 |
 | rendered page link | 22 |
 
@@ -99,25 +136,25 @@ Archive depth is the span of years the channel's own index or media library expo
 
 | | |
 |---|---:|
-| entities in scope | 79 |
-| attempted | 233 |
-| **newsletter channel found where none was known** | **104** |
-| absence confirmed across every route run | 129 |
+| entities in scope | 5 |
+| attempted | 317 |
+| **newsletter channel found where none was known** | **148** |
+| absence confirmed across every route run | 169 |
 | hosts quarantined for serving one body to many URLs | 0 |
-| total requests | 1123 |
+| total requests | 1516 |
 
 | technique that produced the finding | count |
 |---|---:|
-| HIDDEN_DATA #3 wp-json media | 162 |
-| HIDDEN_DATA #3 wp-json search | 66 |
-| rendered homepage link (last resort) | 35 |
-| HIDDEN_DATA #13 feeds | 33 |
-| HIDDEN_DATA #4 sitemap | 7 |
-| HIDDEN_DATA #4 sitemap (articles collapsed to the channel path) | 3 |
+| HIDDEN_DATA #3 wp-json media | 310 |
+| HIDDEN_DATA #3 wp-json search | 79 |
+| rendered homepage link (last resort) | 48 |
+| HIDDEN_DATA #13 feeds | 48 |
+| HIDDEN_DATA #4 sitemap | 16 |
+| HIDDEN_DATA #4 sitemap (articles collapsed to the channel path) | 4 |
 | HIDDEN_DATA #4 sitemap (nested) (articles collapsed to the channel pat | 1 |
 | HIDDEN_DATA #3 wp-json search (articles collapsed to the channel path) | 1 |
 
-Skipped, with the reason recorded rather than silently dropped: 183 deliberately_out_of_scope; 122 no_live_site; 71 site_url_is_a_wayback_snapshot.
+Skipped, with the reason recorded rather than silently dropped: 183 deliberately_out_of_scope; 122 no_live_site; 45 site_url_is_a_third_party_api_endpoint; 21 site_url_is_a_wayback_snapshot.
 
 ## Deals out of the tribal press
 

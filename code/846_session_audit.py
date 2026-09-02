@@ -219,7 +219,12 @@ def _markers():
     bad = []
     for d in sorted((ROOT / "docs").glob("*.md")):
         try:
-            names = _re.findall(r"<!--\s*BEGIN\s+([A-Za-z0-9_\-]+)\s*-->",
+            # LINE-ANCHORED. A marker QUOTED INSIDE PROSE is not a marker -
+            # MONEY_TOTALLING_RULES explains its own convention by naming
+            # `<!-- BEGIN FAADS -->` mid-sentence, and an unanchored pattern
+            # reads that as a second block. The 844 agent hit this exact bug
+            # and fixed it by anchoring; this reintroduced it.
+            names = _re.findall(r"(?m)^\s*<!--\s*BEGIN\s+([A-Za-z0-9_\-]+)\s*-->\s*$",
                                 d.read_text(encoding="utf-8", errors="replace"))
         except OSError:
             continue
@@ -228,6 +233,35 @@ def _markers():
                 bad.append(f"{d.name}: {n} x{k}")
     return (not bad, "; ".join(bad[:4]) or
             f"{sum(1 for _ in (ROOT / 'docs').glob('*.md'))} docs, every marker name unique")
+
+
+@claim("no cached body from a host that refuses this agent by name",
+       critical=True)
+def _robots():
+    """`can_fetch()` was being called with our OWN UA string, so a
+    `User-agent: ClaudeBot` Disallow never matched and 42 rows across shards
+    A-G fetched hosts that refuse us by name - six of the thirteen also
+    hard-listed TERMS_STATED_RESTRICTIVE. Bodies purged 2026-09-02; this fails
+    if any come back."""
+    import glob as _g, os as _os, json as _j
+    m = ROOT / "review" / "named_agent_robots_purge_2026-09-02.json"
+    if not m.exists():
+        return (True, "no purge manifest - nothing recorded to re-check")
+    hosts = set(_j.loads(m.read_text(encoding="utf-8"))["hosts"])
+    back = []
+    for root in ("data/staging", "data/raw"):
+        for f in _g.glob(str(ROOT / root / "**" / "*"), recursive=True):
+            if not _os.path.isfile(f):
+                continue
+            b = _os.path.basename(f).lower()
+            for h in hosts:
+                if h in b or h.replace(".", "_").replace("-", "_") in b:
+                    back.append(_os.path.basename(f)); break
+            if len(back) > 3:
+                break
+    return (not back, f"{len(hosts)} refusing hosts; "
+                      + (f"BODIES BACK: {', '.join(back[:3])}" if back
+                         else "no cached body from any of them"))
 
 
 # ---------------------------------------------------------------- CICD

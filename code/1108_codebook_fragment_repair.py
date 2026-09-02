@@ -5,6 +5,7 @@ Cedar Press - 1108: repair the codebook FRAGMENT system, then use it.
     py -3 code/1108_codebook_fragment_repair.py measure    # read-only
     py -3 code/1108_codebook_fragment_repair.py repair     # fragments <- master orphans
     py -3 code/1108_codebook_fragment_repair.py write      # add the derivable entries
+    py -3 code/1108_codebook_fragment_repair.py fix-licensed  # licensed cols -> internal
     py -3 code/1108_codebook_fragment_repair.py verify     # exit 1 on breach
     py -3 code/1108_codebook_fragment_repair.py selftest   # prove verify FIRES
 
@@ -584,8 +585,23 @@ def read(p):
 
 
 def write_rows(p, rows, fields):
+    """Write, deriving the header from the live file (ADR-017 / `845` rule 17).
+
+    The codebook schema is uniform today, so a fixed literal would work - and
+    that is exactly the argument that produced the regenerate defect. If a
+    fragment has gained a column, it survives.
+    """
     p = Path(p)
     p.parent.mkdir(parents=True, exist_ok=True)
+    if p.exists():
+        try:
+            with p.open(encoding="utf-8-sig", errors="replace",
+                        newline="") as fh:
+                live = next(csv.reader(fh), [])
+            fields = list(fields) + [c for c in live
+                                     if c and c not in fields]
+        except OSError:
+            pass
     tmp = p.with_suffix(p.suffix + ".part")
     with tmp.open("w", encoding="utf-8", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=fields, extrasaction="ignore")
@@ -761,6 +777,59 @@ def write(root=None, frag_dir=None, quiet=False):
 # --------------------------------------------------------------------------
 # verify
 # --------------------------------------------------------------------------
+
+def fix_licensed(frag_dir=None, quiet=False):
+    """Set every licensed / DUNS codebook row to published=0, internal.
+
+    NOT a judgment call - it is the written policy, and the data disagreed
+    with it. `START_HERE.md`: *"Casino City may be read for QA and never
+    published"*; *"D&B Open Data ... may not be disseminated in bulk"*.
+    `392_write_unshipped_codebook_fragments.py` states the same two as
+    invariants it will not cross.
+
+    Measured 2026-09-02, and NO gate caught either row:
+
+      07_gaming/casino_city_id        published=1, access_tier=PUBLIC.
+      03_federal_funding/recipient_duns  published=1, access_tier=internal -
+                                      a row that contradicts itself.
+
+    `62`'s `duns_marked_publishable` scores `access_tier != "internal"` and
+    never reads `published`, so the DUNS row passes it; and it greps the
+    variable name for "duns", so `casino_city_id` is invisible to it
+    altogether. This is the repo's signature defect in a licensing control:
+    the check's name claims more than its body measures.
+
+    The PUBLICATION layer is not affected - `dist/07_gaming/
+    gaming_facilities.notes.json` already lists `casino_city_id` under
+    `identity.licensed_columns_withheld`. What was wrong was the CODEBOOK,
+    which is the document a buyer reads to learn what they get.
+    """
+    import cedar_codebook as cc
+    frag_dir = Path(frag_dir or FRAG)
+    fixed = []
+    for p in sorted(frag_dir.glob("*.csv")):
+        rows = read(p)
+        touched = False
+        for r in rows:
+            if not cc.is_licensed_col(r.get("variable")):
+                continue
+            if (r.get("published") or "").strip() == "1" or \
+                    (r.get("access_tier") or "").strip() != "internal":
+                fixed.append((r.get("dataset"), r.get("variable"),
+                              r.get("published"), r.get("access_tier")))
+                r["published"] = "0"
+                r["access_tier"] = "internal"
+                touched = True
+        if touched:
+            shutil.copy2(p, str(p) + ".bak_" + TODAY + "_" + TAG + "_licensed")
+            write_rows(p, rows, FIELDS)
+    if not quiet:
+        for ds, v, pub, tier in fixed:
+            print("  licensed %-24s %-22s published=%s tier=%s -> 0/internal"
+                  % (ds, v, pub, tier))
+        print("  licensed %d row(s) corrected" % len(fixed))
+    return len(fixed)
+
 
 def verify(master=None, frag_dir=None, root=None, quiet=False):
     """Returns a list of breach strings. Empty = clean."""
@@ -954,6 +1023,9 @@ def main():
         return 0
     if mode == "write":
         write()
+        return 0
+    if mode == "fix-licensed":
+        fix_licensed()
         return 0
     if mode == "verify":
         bad = verify()

@@ -3794,7 +3794,8 @@ tribal claim was false). **Declare that drop in the correction register first or
 
 | file | by | reverted by |
 |---|---|---|
-| `native_entity_lobbying_disclosures.csv` | 350 | `code/lobbying_pull/05_match_filings_v2.py` — a FULL rebuild from `raw_filings.jsonl` that reverts **65 and 350 both**. If 05 is ever re-run: 65, then 350, then 351, then 353. |
+| `native_entity_lobbying_disclosures.csv` | 350 | `code/lobbying_pull/05_match_filings_v2.py` — a FULL rebuild from `raw_filings.jsonl` that reverts **65 and 350 both**. If 05 is ever re-run: 65, then 350, then 351, then 353, **then 1091**. |
+| `native_entity_lobbying_disclosures.csv` — the four `supersession_*` / `is_superseded` columns | **1091** (2026-09-02) | the same 05 rebuild, and anything else that rewrites the 40-column file. `1091` is **idempotent and recomputes rather than appends**, so the recovery is just `py -3 code/1091_lobby_amendment_supersession.py apply`; it refuses to overwrite an existing dated backup. `287`/`build.py plan lobbying` now list it in PHASE 2. **It had to be made visible to them:** the first draft wrote through a `path=TARGET` parameter, so no line naming `TARGET` carried a write verb and `cedar_pipeline.declared_io` filed 1091 under `readers/` for a file it rewrites — the same shape as the `845` finding. |
 | `tribe_year_lobbying_panel.csv` | 351 | the same 05 rebuild |
 | `foia_request_index.csv` | 352 | `136_build_congressional_correspondence_and_foia_index.py`. After any 136 rebuild: 168, then 352 — the enricher runs LAST. |
 | `lobbying_issue_families_filing.csv`, `lobbying_registrant_client_relationships.csv` | 353 | 180/182 (now patched so they cannot re-import) |

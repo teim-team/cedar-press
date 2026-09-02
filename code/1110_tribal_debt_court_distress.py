@@ -666,6 +666,74 @@ DEBT_WORDS = re.compile(
     r"forbearance|default|restructur|receiver|trustee|principal|interest|"
     r"amortiz|maturit|refinanc|acceleration|accelerate)\b", re.I)
 
+# A caption is evidence in itself.  `Wells Fargo Bank, N.A. v. Chukchansi
+# Economic Development Authority` is a debt case on its face and its snippet
+# happens to open on a procedural sentence with no debt word in it - the first
+# draft of this filter rejected it, and that is the single most important
+# Chukchansi opinion in the corpus.  A snippet is the first ~600 characters of
+# a document, not a summary of it, and filtering on it alone measures where the
+# opinion starts rather than what it is about.
+FINANCIAL_PARTY = re.compile(
+    r"\b(bank|bancorp|banco|trust co|trust company|trustee|indenture|"
+    r"bondholder|noteholder|capital|investors?|funding|finance|financial|"
+    r"credit|securities|savings|lender|mortgage|n\.a\.)\b", re.I)
+FINANCIAL_SUIT_NATURE = re.compile(
+    r"(contract|consumer credit|securities|bankruptcy|negotiable instrument|"
+    r"recovery of overpayment|foreclosure)", re.I)
+
+# WORD BOUNDARIES, not containment.  1082 admitted a South Carolina paper-mill
+# conduit issuer because `"nation"` is a substring of `"INTERnationAL"`.  The
+# same bug is available here and this is the same fix.
+TRIBAL_GENERIC = re.compile(
+    r"\b(tribe|tribes|tribal|nation|band|pueblo|rancheria|indian|indians|"
+    r"chippewa|sioux|apache|navajo|cherokee|creek|choctaw|seminole|"
+    r"reservation|ranchería|native village|community of|gaming authority)\b",
+    re.I)
+_TRIBAL_NAME_RX = None
+
+
+def tribal_name_lexicon():
+    """Distinctive spine name tokens, so a caption naming `Nooksack Business
+    Corp` reads as tribal even though it carries no generic tribal word."""
+    global _TRIBAL_NAME_RX
+    if _TRIBAL_NAME_RX is not None:
+        return _TRIBAL_NAME_RX
+    generic = {
+        "tribe", "tribes", "tribal", "nation", "band", "indian", "indians",
+        "pueblo", "rancheria", "village", "native", "community", "council",
+        "reservation", "corporation", "incorporated", "company", "authority",
+        "development", "economic", "enterprises", "enterprise", "gaming",
+        "casino", "resort", "united", "states", "america", "north", "south",
+        "eastern", "western", "northern", "southern", "upper", "lower",
+        "confederated", "federated", "association", "consortium", "district",
+        "county", "city", "town", "school", "health", "housing", "services",
+        "group", "holdings", "of", "the", "and", "for", "inc", "llc",
+    }
+    toks = set()
+    p = SPINE / "cedar_entity_spine.csv"
+    if p.exists():
+        for r in read_csv(p):
+            for t in re.findall(r"[A-Za-z']{6,}", r.get("canonical_name") or ""):
+                if t.lower() not in generic:
+                    toks.add(t.lower())
+    if not toks:
+        raise RuntimeError(
+            "the spine produced NO tribal name tokens - UNMEASURED, not empty. "
+            "Refusing to score every caption non-tribal.")
+    _TRIBAL_NAME_RX = re.compile(
+        r"\b(" + "|".join(sorted(re.escape(t) for t in toks)) + r")\b", re.I)
+    return _TRIBAL_NAME_RX
+
+
+def tribal_in_caption(caption):
+    m = TRIBAL_GENERIC.search(caption or "")
+    if m:
+        return f"generic tribal word {m.group(0)!r} in the caption"
+    m = tribal_name_lexicon().search(caption or "")
+    if m:
+        return f"spine entity name token {m.group(0)!r} in the caption"
+    return ""
+
 
 def shortlist(hits):
     """Which opinions are worth a whole-document request.
@@ -683,20 +751,58 @@ def shortlist(hits):
         if not h.get("sub_ids"):
             drop.append(dict(h, reject_reason="no opinion id on the cluster"))
             continue
-        text = " ".join([h.get("case_name", ""), h.get("snippet", ""),
-                         h.get("suit_nature", "")])
-        if not DEBT_WORDS.search(text):
-            drop.append(dict(h, reject_reason="no debt vocabulary in caption or snippet"))
+        cap_only = h.get("case_name", "")
+
+        # 1. the natural-person screen runs FIRST, so a held caption never
+        #    costs a request either.
+        pm = PERSON_SHAPE.search(cap_only)
+        if pm:
+            drop.append(dict(h, reject_reason=(
+                f"natural-person screen: caption carries {pm.group(0)!r}")))
             continue
-        if h["priority"] != "4_DOCTRINE":
+
+        # 2. SUBJECT.  A search hit is not a party (the code/219
+        #    Seminole-as-a-surname rule).
+        why = []
+        if h["priority"] == "4_DOCTRINE":
+            t = tribal_in_caption(cap_only)
+            if not t:
+                drop.append(dict(h, reject_reason=(
+                    "doctrine query, and no tribal party in the caption - "
+                    "Hexion Specialty Chemicals is not tribal debt")))
+                continue
+            why.append(t)
+            # the doctrine query's own terms ARE the debt test: the engine
+            # matched "indenture", "default", "receiver" in the DOCUMENT, which
+            # is a stronger statement than anything the snippet can make.
+            why.append("doctrine query matched debt terms in the full document text")
+        else:
             want = norm(h["query"])
-            cap = norm(h.get("case_name", ""))
+            cap = norm(cap_only)
             if want not in cap and norm(h.get("obligor_name", "")) not in cap:
                 drop.append(dict(h, reject_reason=(
                     "query name absent from the caption - a search hit is not "
                     "a party (the code/219 Seminole-as-a-surname rule)")))
                 continue
-        keep.append(h)
+            why.append("the queried obligor is named in the caption")
+
+            # 3. DEBT.  Only the name queries need it; a name query returns a
+            #    tribe's whole docket, most of which is torts and employment.
+            text = " ".join([cap_only, h.get("snippet", ""), h.get("suit_nature", "")])
+            debt = []
+            if DEBT_WORDS.search(text):
+                debt.append("debt vocabulary in caption/snippet/suitNature")
+            if FINANCIAL_PARTY.search(cap_only):
+                debt.append("a financial institution is a named party in the caption")
+            if FINANCIAL_SUIT_NATURE.search(h.get("suit_nature", "")):
+                debt.append("suitNature is a contract/credit/securities nature")
+            if not debt:
+                drop.append(dict(h, reject_reason=(
+                    "no debt vocabulary, no financial party in the caption and "
+                    "no contract-shaped suitNature")))
+                continue
+            why += debt
+        keep.append(dict(h, shortlist_basis="; ".join(why)))
     return keep, drop
 
 

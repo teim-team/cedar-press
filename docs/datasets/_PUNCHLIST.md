@@ -2,23 +2,24 @@
 
 *Generated 2026-09-02 by `code/526_dataset_standard.py`. Not an audit — every line is an action with a target. A dataset is clean when its list is empty.*
 
-**337 open items across 13 datasets.**
+**339 open items across 14 datasets.**
 
 | dataset | critical | high | medium | low | total |
 |---|---:|---:|---:|---:|---:|
-| `gaming` | 0 | 3 | 83 | 1 | **87** |
-| `_entity_layer` | 0 | 10 | 57 | 1 | **68** |
-| `lobbying` | 0 | 8 | 46 | 0 | **54** |
-| `funding` | 0 | 11 | 13 | 0 | **24** |
-| `contractors` | 0 | 5 | 12 | 0 | **17** |
-| `natural-resources` | 0 | 1 | 15 | 0 | **16** |
-| `nonprofits` | 0 | 1 | 15 | 0 | **16** |
+| `gaming` | 0 | 3 | 86 | 1 | **90** |
+| `_entity_layer` | 0 | 10 | 55 | 1 | **66** |
+| `lobbying` | 0 | 8 | 42 | 0 | **50** |
+| `funding` | 0 | 11 | 11 | 0 | **22** |
+| `nonprofits` | 0 | 1 | 16 | 0 | **17** |
+| `deals` | 0 | 4 | 12 | 0 | **16** |
 | `legislation` | 0 | 3 | 12 | 0 | **15** |
+| `contractors` | 0 | 5 | 10 | 0 | **15** |
+| `natural-resources` | 0 | 1 | 14 | 0 | **15** |
 | `federal-register` | 0 | 6 | 7 | 1 | **14** |
-| `deals` | 0 | 2 | 10 | 0 | **12** |
+| `nagpra` | 0 | 1 | 4 | 1 | **6** |
 | `subcontracting` | 0 | 1 | 4 | 1 | **6** |
-| `nagpra` | 0 | 1 | 2 | 1 | **4** |
 | `native-owned-businesses` | 0 | 1 | 2 | 1 | **4** |
+| `nest` | 0 | 2 | 1 | 0 | **3** |
 
 ## `gaming`
 
@@ -90,7 +91,7 @@
   *evidence:* no conservation coverage
 - **C5 / medium** · `gaming_employment_observations.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
-- **C11 / medium** · `gaming_facilities.csv` — write codebook entries for 13 column(s)  
+- **C11 / medium** · `gaming_facilities.csv` — write codebook entries for 16 column(s)  
   *evidence:* not in any codebook: open_date_source_value_verbatim, close_date_source_value_verbatim, gaming_class_ii_authorized, gaming_class_iii_authorized ...
 - **C5 / medium** · `gaming_facilities.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
@@ -114,8 +115,6 @@
   *evidence:* not in any codebook: text_layer_status_after, ocr_shard, ocr_chars_on_disk, ocr_chars_agreement
 - **C5 / medium** · `gaming_ordinance_ocr.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
-- **C11 / medium** · `gaming_ordinances.csv` — write codebook entries for 1 column(s)  
-  *evidence:* not in any codebook: tribe_id_as_built
 - **C5 / medium** · `gaming_ordinances.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
 - **C11 / medium** · `gaming_project_facilities.csv` — drop 4 always-empty column(s) with a correction-register row, or populate them  
@@ -134,8 +133,14 @@
   *evidence:* always empty in 43 rows: supersedes_observation_id
 - **C5 / medium** · `gaming_property_labor_demand.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
+- **C11 / medium** · `gaming_property_self_published_assertions.csv` — write codebook entries for 4 column(s)  
+  *evidence:* not in any codebook: facility_attribution_status, tribe_facility_ids_not_disambiguated, n_facilities_for_tribe, duplicate_within_source_page
 - **C5 / medium** · `gaming_property_self_published_assertions.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
+- **C11 / medium** · `gaming_property_self_published_claims.csv` — drop 1 always-empty column(s) with a correction-register row, or populate them  
+  *evidence:* always empty in 584 rows: duplicate_within_source_page
+- **C11 / medium** · `gaming_property_self_published_claims.csv` — write codebook entries for 10 column(s)  
+  *evidence:* not in any codebook: unit_as_harvested, value_verbatim, bound_direction_as_harvested, measurement_scope ...
 - **C5 / medium** · `gaming_property_self_published_claims.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
 - **C11 / medium** · `gaming_property_site_observations.csv` — drop 2 always-empty column(s) with a correction-register row, or populate them  
@@ -146,6 +151,8 @@
   *evidence:* always empty in 10 rows: link_anachronism_note
 - **C5 / medium** · `gaming_property_universe_events.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
+- **C11 / medium** · `gaming_revenue_bounds.csv` — write codebook entries for 3 column(s)  
+  *evidence:* not in any codebook: bound_is_a_repeated_regional_ceiling, n_facilities_sharing_this_ceiling, summability_basis
 - **C5 / medium** · `gaming_revenue_bounds.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
 - **C11 / medium** · `gaming_source_claims.csv` — drop 1 always-empty column(s) with a correction-register row, or populate them  
@@ -249,6 +256,8 @@
   *evidence:* no conservation coverage
 - **C5 / medium** · `cedar_identifier_graph_nodes.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
+- **C11 / medium** · `cedar_identifier_ledger_final.csv` — write codebook entries for 7 column(s)  
+  *evidence:* not in any codebook: crossgov_name_collision_flag, crossgov_name_collision_proposed_entity_id, crossgov_name_collision_disposition, crossgov_name_collision_basis ...
 - **C5 / medium** · `cedar_identifier_ledger_final.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
 - **C5 / medium** · `cedar_identifier_propagation.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
@@ -257,12 +266,8 @@
   *evidence:* always empty in 1,577 rows: exclusion_id, exclusion_evidence
 - **C5 / medium** · `cedar_publishable_identifiers.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
-- **C11 / medium** · `cedar_ruling_ledger_consolidated.csv` — write codebook entries for 1 column(s)  
-  *evidence:* not in any codebook: source_row_ordinal
 - **C5 / medium** · `cedar_ruling_ledger_consolidated.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
-- **C11 / medium** · `cross_dataset_ruling_map.csv` — write codebook entries for 3 column(s)  
-  *evidence:* not in any codebook: target_row_ordinal, target_row_key, target_row_hash
 - **C5 / medium** · `cross_dataset_ruling_map.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
 - **C11 / medium** · `entity_aliases.csv` — drop 1 always-empty column(s) with a correction-register row, or populate them  
@@ -271,6 +276,8 @@
   *evidence:* no conservation coverage
 - **C11 / medium** · `entity_relationships.csv` — drop 2 always-empty column(s) with a correction-register row, or populate them  
   *evidence:* always empty in 2,292 rows: start_date, end_date
+- **C11 / medium** · `entity_relationships.csv` — write codebook entries for 9 column(s)  
+  *evidence:* not in any codebook: counterparty_side, counterparty_kind, counterparty_name_as_recorded, counterparty_identifier_type ...
 - **C5 / medium** · `entity_relationships.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
 - **C11 / medium** · `entity_year_panel.csv` — drop 4 always-empty column(s) with a correction-register row, or populate them  
@@ -287,8 +294,6 @@
   *evidence:* no conservation coverage
 - **C11 / medium** · `foia_request_index.csv` — drop 1 always-empty column(s) with a correction-register row, or populate them  
   *evidence:* always empty in 20,001 rows: release_url
-- **C11 / medium** · `foia_request_index.csv` — write codebook entries for 6 column(s)  
-  *evidence:* not in any codebook: tribe_entity_id_withdrawn, tribe_entity_link_withdrawn, tribe_entity_link_withdrawn_reason, tribe_entity_link_withdrawn_evidence_verbatim ...
 - **C5 / medium** · `foia_request_index.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
 - **C11 / medium** · `intertribal_memberships.csv` — drop 1 always-empty column(s) with a correction-register row, or populate them  
@@ -313,12 +318,10 @@
   *evidence:* always empty in 36 rows: cedar_uid
 - **C5 / medium** · `nho_verified_entities.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
-- **C11 / medium** · `tcu_cdfi_added.csv` — drop 8 always-empty column(s) with a correction-register row, or populate them  
+- **C11 / medium** · `tcu_cdfi_added.csv` — drop 7 always-empty column(s) with a correction-register row, or populate them  
   *evidence:* always empty in 130 rows: bia_region, self_governance, cedar_entity_id, ultimate_parent_entity_id ...
 - **C5 / medium** · `tcu_cdfi_added.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
-- **C11 / medium** · `tcu_cdfi_ownership_evidence.csv` — write codebook entries for 1 column(s)  
-  *evidence:* not in any codebook: quote_char_offset
 - **C5 / medium** · `tcu_cdfi_ownership_evidence.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
 - **C5 / medium** · `tcu_roster.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
@@ -360,8 +363,6 @@
   *evidence:* no conservation coverage
 - **C5 / medium** · `admin_appeal_parties.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
-- **C11 / medium** · `admin_appeal_positions.csv` — write codebook entries for 2 column(s)  
-  *evidence:* not in any codebook: rederived_date, rederived_by_script
 - **C5 / medium** · `admin_appeal_positions.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
 - **C11 / medium** · `advocacy_passthrough.csv` — drop 1 always-empty column(s) with a correction-register row, or populate them  
@@ -394,8 +395,6 @@
   *evidence:* no conservation coverage
 - **C11 / medium** · `fr_ex_parte_parties.csv` — drop 5 always-empty column(s) with a correction-register row, or populate them  
   *evidence:* always empty in 116 rows: resolved_native_entity_id, resolved_native_entity_name, resolution_method, position_relative_to_native_interest ...
-- **C11 / medium** · `hearing_appearances.csv` — write codebook entries for 2 column(s)  
-  *evidence:* not in any codebook: promoted_by_script, promotion_basis
 - **C5 / medium** · `hearing_appearances.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
 - **C5 / medium** · `hearing_bill_links.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
@@ -408,8 +407,6 @@
   *evidence:* no conservation coverage
 - **C5 / medium** · `lobbying_issue_family_year.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
-- **C11 / medium** · `lobbying_registrant_client_relationships.csv` — write codebook entries for 4 column(s)  
-  *evidence:* not in any codebook: native_entity_id_withdrawn, native_entity_id_withdrawn_reason, native_entity_id_withdrawn_by_script, native_entity_id_withdrawn_date
 - **C5 / medium** · `lobbying_registrant_client_relationships.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
 - **C5 / medium** · `lobbying_registrant_concentration.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
@@ -426,8 +423,6 @@
   *evidence:* no conservation coverage
 - **C11 / medium** · `native_entity_lobbying_disclosures.csv` — drop 8 always-empty column(s) with a correction-register row, or populate them  
   *evidence:* always empty in 20,001 rows: expenses_usd, org_type_barred, org_type_reason, attribution_withdrawn ...
-- **C11 / medium** · `native_entity_lobbying_disclosures.csv` — write codebook entries for 5 column(s)  
-  *evidence:* not in any codebook: attribution_withdrawn, attribution_withdrawn_entity_id, attribution_withdrawn_reason, attribution_withdrawn_by_script ...
 - **C5 / medium** · `native_entity_lobbying_disclosures.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
 - **C5 / medium** · `nonprofit_schedule_c_coverage.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
@@ -479,12 +474,10 @@
   *evidence:* always empty in 20,001 rows: recipient_duns, tribe_id, recipient_uei, assistance_type_description ...
 - **C11 / medium** · `faads_transactions_all_agencies.csv` — drop 7 always-empty column(s) with a correction-register row, or populate them  
   *evidence:* always empty in 20,001 rows: recipient_duns, tribe_id, recipient_uei, assistance_type_description ...
-- **C11 / medium** · `faads_transactions_all_agencies.csv` — write codebook entries for 13 column(s)  
-  *evidence:* not in any codebook: geo_recipient_county_fips, geo_recipient_county_name, geo_recipient_state_fips, geo_recipient_place_dominance_share ...
+- **C11 / medium** · `faads_transactions_all_agencies.csv` — write codebook entries for 1 column(s)  
+  *evidence:* not in any codebook: assistance_award_unique_key_basis
 - **C11 / medium** · `federal_funding_transactions.csv` — drop 18 always-empty column(s) with a correction-register row, or populate them  
   *evidence:* always empty in 20,001 rows: face_value_of_loan, original_loan_subsidy_cost, total_face_value_of_loan, total_loan_subsidy_cost ...
-- **C11 / medium** · `federal_funding_transactions.csv` — write codebook entries for 19 column(s)  
-  *evidence:* not in any codebook: tribe_id_neid_proposed, tribe_id_neid_proposed_tier, tribe_id_neid_proposed_basis, source_vintage_basis ...
 - **C5 / medium** · `federal_funding_transactions.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
 - **C5 / medium** · `federal_funding_tribe_year_panel.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
@@ -493,81 +486,7 @@
   *evidence:* no conservation coverage
 - **C5 / medium** · `inflation_deflator.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
-- **C11 / medium** · `native_passthrough.csv` — write codebook entries for 1 column(s)  
-  *evidence:* not in any codebook: subaward_source_record_id
 - **C5 / medium** · `native_passthrough_pairs.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
-  *evidence:* no conservation coverage
-
-## `contractors`
-
-- **C12 / high** · `fpds_uei_cage_map.csv` — add an inclusion basis - a row must be able to say WHY it is in Cedar (ADR-013: named_entity / term_match / program_authority / geographic / subject_classification / human_ruling)  
-  *evidence:* no basis column of any kind
-- **C12 / high** · `fpds_uei_edges.csv` — add an inclusion basis - a row must be able to say WHY it is in Cedar (ADR-013: named_entity / term_match / program_authority / geographic / subject_classification / human_ruling)  
-  *evidence:* no basis column of any kind
-- **C12 / high** · `prime_contracts_published.csv` — add an inclusion basis - a row must be able to say WHY it is in Cedar (ADR-013: named_entity / term_match / program_authority / geographic / subject_classification / human_ruling)  
-  *evidence:* no basis column of any kind
-- **C9 / high** · `(dataset)` — write docs/datasets/contractors.md - fetch -> normalize -> resolve -> enrich -> validate -> build -> ship, executable by a session with no history  
-  *evidence:* no runbook
-- **C4 / high** · `(dataset)` — attach the unkeyed rows to the entity layer (dataset 13) - this dataset's subject IS an entity, so unkeyed is unresolved work, not scope  
-  *evidence:* 75% keyed keyed, scope=entity
-- **C5 / medium** · `fpds_uei_edges.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
-  *evidence:* no conservation coverage
-- **C11 / medium** · `prime_contracts.csv` — drop 10 always-empty column(s) with a correction-register row, or populate them  
-  *evidence:* always empty in 20,001 rows: contract_transaction_unique_key, contract_award_unique_key, naics_code, naics_description ...
-- **C11 / medium** · `prime_contracts.csv` — write codebook entries for 14 column(s)  
-  *evidence:* not in any codebook: geo_recipient_county_fips, geo_recipient_county_name, geo_recipient_state_fips, geo_recipient_place_dominance_share ...
-- **C5 / medium** · `prime_contracts.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
-  *evidence:* no conservation coverage
-- **C5 / medium** · `prime_contracts_archive_backfill.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
-  *evidence:* no conservation coverage
-- **C11 / medium** · `prime_contracts_awards.csv` — write codebook entries for 4 column(s)  
-  *evidence:* not in any codebook: first_award_fy, last_action_fy, max_award_value_usd, cumulative_snapshot_flag
-- **C5 / medium** · `prime_contracts_awards.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
-  *evidence:* no conservation coverage
-- **C5 / medium** · `prime_contracts_entity_year.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
-  *evidence:* no conservation coverage
-- **C11 / medium** · `prime_contracts_published.csv` — write codebook entries for 4 column(s)  
-  *evidence:* not in any codebook: first_award_fy, last_action_fy, max_award_value_usd, cumulative_snapshot_flag
-- **C5 / medium** · `prime_contracts_published.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
-  *evidence:* no conservation coverage
-- **C5 / medium** · `sam_prime_contracts_fy2000_2007.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
-  *evidence:* no conservation coverage
-- **C5 / medium** · `sam_prime_contracts_fy2000_2007_PUBLISHABLE.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
-  *evidence:* no conservation coverage
-
-## `natural-resources`
-
-- **C9 / high** · `(dataset)` — write docs/datasets/natural-resources.md - fetch -> normalize -> resolve -> enrich -> validate -> build -> ship, executable by a session with no history  
-  *evidence:* no runbook
-- **C11 / medium** · `anc_ceiling_roster.csv` — drop 2 always-empty column(s) with a correction-register row, or populate them  
-  *evidence:* always empty in 196 rows: uei, cage_code
-- **C11 / medium** · `anc_ceiling_roster.csv` — write codebook entries for 2 column(s)  
-  *evidence:* not in any codebook: cedar_uid_basis, entity_resolution_status
-- **C11 / medium** · `ancsa_filings_index.csv` — drop 1 always-empty column(s) with a correction-register row, or populate them  
-  *evidence:* always empty in 19,269 rows: filing_date
-- **C11 / medium** · `ancsa_filings_index.csv` — write codebook entries for 1 column(s)  
-  *evidence:* not in any codebook: cedar_uid_basis
-- **C5 / medium** · `nd_severance_allocation.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
-  *evidence:* no conservation coverage
-- **C11 / medium** · `resource_assets.csv` — drop 9 always-empty column(s) with a correction-register row, or populate them  
-  *evidence:* always empty in 35 rows: niogems_lease_id, niogems_tract_id, niogems_agreement_id, niogems_well_id ...
-- **C11 / medium** · `resource_assets.csv` — write codebook entries for 13 column(s)  
-  *evidence:* not in any codebook: legal_title_holder, beneficial_interest_class, area_acres, area_unit ...
-- **C5 / medium** · `resource_assets.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
-  *evidence:* no conservation coverage
-- **C11 / medium** · `resource_parties.csv` — write codebook entries for 1 column(s)  
-  *evidence:* not in any codebook: cedar_uid_basis
-- **C5 / medium** · `resource_parties.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
-  *evidence:* no conservation coverage
-- **C11 / medium** · `resource_revenue.csv` — drop 3 always-empty column(s) with a correction-register row, or populate them  
-  *evidence:* always empty in 11,305 rows: operator_entity_id, operator_entity_name, related_asset_ids
-- **C11 / medium** · `resource_revenue.csv` — write codebook entries for 1 column(s)  
-  *evidence:* not in any codebook: cedar_uid_basis
-- **C11 / medium** · `tribal_bond_issuances.csv` — drop 2 always-empty column(s) with a correction-register row, or populate them  
-  *evidence:* always empty in 29 rows: issuer_entity_id, cusip
-- **C5 / medium** · `tribal_bond_issuances.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
-  *evidence:* no conservation coverage
-- **C5 / medium** · `tribal_tax_bases.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
 
 ## `nonprofits`
@@ -600,10 +519,47 @@
   *evidence:* not in any codebook: api_status, n_filings_returned, n_filings_with_financials, latest_filing_year ...
 - **C5 / medium** · `np_org_scale.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
+- **C11 / medium** · `np_orgs.csv` — write codebook entries for 9 column(s)  
+  *evidence:* not in any codebook: name_match_support_measured_against, keyed_name_match_support, keyed_name_match_shared_tokens, keyed_name_match_residue ...
 - **C5 / medium** · `np_orgs.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
 - **C11 / medium** · `np_schedule_i_grants.csv` — write codebook entries for 12 column(s)  
   *evidence:* not in any codebook: schedule_i_line_seq, recipient_address, noncash_valuation_method, noncash_description ...
+
+## `deals`
+
+- **C1 / high** · `deals_press_edgar_ancsa_additions.csv` — declare grain + PK + join keys + cardinality in 512, validated on the full file  
+  *evidence:* grain UNSTATED
+- **C2 / high** · `deals_press_edgar_ancsa_additions.csv` — establish and declare a validated primary key  
+  *evidence:* no PK declared
+- **C12 / high** · `deals_source_index.csv` — add an inclusion basis - a row must be able to say WHY it is in Cedar (ADR-013: named_entity / term_match / program_authority / geographic / subject_classification / human_ruling)  
+  *evidence:* no basis column of any kind
+- **C9 / high** · `(dataset)` — write docs/datasets/deals.md - fetch -> normalize -> resolve -> enrich -> validate -> build -> ship, executable by a session with no history  
+  *evidence:* no runbook
+- **C11 / medium** · `deals_anc_reports_additions.csv` — drop 1 always-empty column(s) with a correction-register row, or populate them  
+  *evidence:* always empty in 28 rows: Project_Total_Value_USD
+- **C11 / medium** · `deals_ancsa_portal_v2_additions.csv` — drop 1 always-empty column(s) with a correction-register row, or populate them  
+  *evidence:* always empty in 42 rows: Project_Total_Value_USD
+- **C11 / medium** · `deals_classified.csv` — write codebook entries for 17 column(s)  
+  *evidence:* not in any codebook: _source_file, record_class, transaction_type, capital_source ...
+- **C11 / medium** · `deals_historical_additions.csv` — drop 1 always-empty column(s) with a correction-register row, or populate them  
+  *evidence:* always empty in 30 rows: Project_Total_Value_USD
+- **C11 / medium** · `deals_press_edgar_ancsa_additions.csv` — drop 2 always-empty column(s) with a correction-register row, or populate them  
+  *evidence:* always empty in 144 rows: Source_2, Source_2_Type
+- **C5 / medium** · `deals_press_edgar_ancsa_additions.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
+  *evidence:* no conservation coverage
+- **C5 / medium** · `deals_source_index.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
+  *evidence:* no conservation coverage
+- **C11 / medium** · `deals_tribal_debt_additions.csv` — drop 1 always-empty column(s) with a correction-register row, or populate them  
+  *evidence:* always empty in 6 rows: Project_Total_Value_USD
+- **C5 / medium** · `ownership_events.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
+  *evidence:* no conservation coverage
+- **C11 / medium** · `seminole_bond_disclosures.csv` — drop 3 always-empty column(s) with a correction-register row, or populate them  
+  *evidence:* always empty in 29 rows: filer_cik, measurement_type, source_page
+- **C5 / medium** · `seminole_bond_disclosures.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
+  *evidence:* no conservation coverage
+- **C11 / medium** · `tribal_resolution_financings.csv` — drop 9 always-empty column(s) with a correction-register row, or populate them  
+  *evidence:* always empty in 1 rows: instrument_number, borrower, principal_amount_text, interest_formula_text ...
 
 ## `legislation`
 
@@ -638,6 +594,72 @@
 - **C5 / medium** · `native_issue_litigation_positions.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
 
+## `contractors`
+
+- **C12 / high** · `fpds_uei_cage_map.csv` — add an inclusion basis - a row must be able to say WHY it is in Cedar (ADR-013: named_entity / term_match / program_authority / geographic / subject_classification / human_ruling)  
+  *evidence:* no basis column of any kind
+- **C12 / high** · `fpds_uei_edges.csv` — add an inclusion basis - a row must be able to say WHY it is in Cedar (ADR-013: named_entity / term_match / program_authority / geographic / subject_classification / human_ruling)  
+  *evidence:* no basis column of any kind
+- **C12 / high** · `prime_contracts_published.csv` — add an inclusion basis - a row must be able to say WHY it is in Cedar (ADR-013: named_entity / term_match / program_authority / geographic / subject_classification / human_ruling)  
+  *evidence:* no basis column of any kind
+- **C9 / high** · `(dataset)` — write docs/datasets/contractors.md - fetch -> normalize -> resolve -> enrich -> validate -> build -> ship, executable by a session with no history  
+  *evidence:* no runbook
+- **C4 / high** · `(dataset)` — attach the unkeyed rows to the entity layer (dataset 13) - this dataset's subject IS an entity, so unkeyed is unresolved work, not scope  
+  *evidence:* 71% keyed keyed, scope=entity
+- **C5 / medium** · `fpds_uei_edges.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
+  *evidence:* no conservation coverage
+- **C11 / medium** · `prime_contracts.csv` — drop 10 always-empty column(s) with a correction-register row, or populate them  
+  *evidence:* always empty in 20,001 rows: contract_transaction_unique_key, contract_award_unique_key, naics_code, naics_description ...
+- **C11 / medium** · `prime_contracts.csv` — write codebook entries for 5 column(s)  
+  *evidence:* not in any codebook: identifier_ruling_method, identifier_ruling_tier, identifier_ruling_quarantined, identifier_ruling_basis ...
+- **C5 / medium** · `prime_contracts.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
+  *evidence:* no conservation coverage
+- **C5 / medium** · `prime_contracts_archive_backfill.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
+  *evidence:* no conservation coverage
+- **C5 / medium** · `prime_contracts_awards.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
+  *evidence:* no conservation coverage
+- **C5 / medium** · `prime_contracts_entity_year.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
+  *evidence:* no conservation coverage
+- **C5 / medium** · `prime_contracts_published.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
+  *evidence:* no conservation coverage
+- **C5 / medium** · `sam_prime_contracts_fy2000_2007.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
+  *evidence:* no conservation coverage
+- **C5 / medium** · `sam_prime_contracts_fy2000_2007_PUBLISHABLE.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
+  *evidence:* no conservation coverage
+
+## `natural-resources`
+
+- **C9 / high** · `(dataset)` — write docs/datasets/natural-resources.md - fetch -> normalize -> resolve -> enrich -> validate -> build -> ship, executable by a session with no history  
+  *evidence:* no runbook
+- **C11 / medium** · `anc_ceiling_roster.csv` — drop 2 always-empty column(s) with a correction-register row, or populate them  
+  *evidence:* always empty in 196 rows: uei, cage_code
+- **C11 / medium** · `anc_ceiling_roster.csv` — write codebook entries for 4 column(s)  
+  *evidence:* not in any codebook: row_is_a_corporation, row_disposition, row_disposition_basis, row_disposition_date
+- **C11 / medium** · `ancsa_filings_index.csv` — drop 1 always-empty column(s) with a correction-register row, or populate them  
+  *evidence:* always empty in 19,269 rows: filing_date
+- **C5 / medium** · `nd_severance_allocation.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
+  *evidence:* no conservation coverage
+- **C11 / medium** · `resource_assets.csv` — drop 10 always-empty column(s) with a correction-register row, or populate them  
+  *evidence:* always empty in 35 rows: niogems_lease_id, niogems_tract_id, niogems_agreement_id, niogems_well_id ...
+- **C11 / medium** · `resource_assets.csv` — write codebook entries for 12 column(s)  
+  *evidence:* not in any codebook: legal_title_holder, beneficial_interest_class, area_acres, area_unit ...
+- **C5 / medium** · `resource_assets.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
+  *evidence:* no conservation coverage
+- **C5 / medium** · `resource_parties.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
+  *evidence:* no conservation coverage
+- **C11 / medium** · `resource_revenue.csv` — drop 3 always-empty column(s) with a correction-register row, or populate them  
+  *evidence:* always empty in 11,305 rows: operator_entity_id, operator_entity_name, related_asset_ids
+- **C11 / medium** · `resource_revenue.csv` — write codebook entries for 2 column(s)  
+  *evidence:* not in any codebook: entity_attribution_status, entity_attribution_basis
+- **C11 / medium** · `tribal_bond_issuances.csv` — drop 1 always-empty column(s) with a correction-register row, or populate them  
+  *evidence:* always empty in 29 rows: cusip
+- **C11 / medium** · `tribal_bond_issuances.csv` — write codebook entries for 6 column(s)  
+  *evidence:* not in any codebook: issuer_entity_id_rung, issuer_entity_id_subject, issuer_entity_id_subject_basis, issuer_entity_id_tier ...
+- **C5 / medium** · `tribal_bond_issuances.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
+  *evidence:* no conservation coverage
+- **C5 / medium** · `tribal_tax_bases.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
+  *evidence:* no conservation coverage
+
 ## `federal-register`
 
 - **C12 / high** · `correspondence_foia_source_coverage.csv` — add an inclusion basis - a row must be able to say WHY it is in Cedar (ADR-013: named_entity / term_match / program_authority / geographic / subject_classification / human_ruling)  
@@ -652,8 +674,8 @@
   *evidence:* no basis column of any kind
 - **C12 / high** · `section_106_source_coverage.csv` — add an inclusion basis - a row must be able to say WHY it is in Cedar (ADR-013: named_entity / term_match / program_authority / geographic / subject_classification / human_ruling)  
   *evidence:* no basis column of any kind
-- **C11 / medium** · `consultation_events.csv` — write codebook entries for 7 column(s)  
-  *evidence:* not in any codebook: topic, event_start_date, event_end_date, format ...
+- **C11 / medium** · `consultation_events.csv` — write codebook entries for 13 column(s)  
+  *evidence:* not in any codebook: topic, event_start_date, event_end_date, has_written_comments ...
 - **C11 / medium** · `federal_actions.csv` — drop 2 always-empty column(s) with a correction-register row, or populate them  
   *evidence:* always empty in 20,001 rows: comment_url, tribe_or_native_entity
 - **C11 / medium** · `federal_actions_raw.csv` — drop 1 always-empty column(s) with a correction-register row, or populate them  
@@ -669,32 +691,20 @@
 - **C9 / low** · `(dataset)` — have a DIFFERENT session execute the runbook from the document alone - written is not tested  
   *evidence:* runbook exists, execution never verified
 
-## `deals`
+## `nagpra`
 
-- **C12 / high** · `deals_source_index.csv` — add an inclusion basis - a row must be able to say WHY it is in Cedar (ADR-013: named_entity / term_match / program_authority / geographic / subject_classification / human_ruling)  
+- **C12 / high** · `fr_nagpra_title_index_year.csv` — add an inclusion basis - a row must be able to say WHY it is in Cedar (ADR-013: named_entity / term_match / program_authority / geographic / subject_classification / human_ruling)  
   *evidence:* no basis column of any kind
-- **C9 / high** · `(dataset)` — write docs/datasets/deals.md - fetch -> normalize -> resolve -> enrich -> validate -> build -> ship, executable by a session with no history  
-  *evidence:* no runbook
-- **C11 / medium** · `deals_anc_reports_additions.csv` — drop 1 always-empty column(s) with a correction-register row, or populate them  
-  *evidence:* always empty in 28 rows: Project_Total_Value_USD
-- **C11 / medium** · `deals_ancsa_portal_v2_additions.csv` — drop 1 always-empty column(s) with a correction-register row, or populate them  
-  *evidence:* always empty in 42 rows: Project_Total_Value_USD
-- **C11 / medium** · `deals_classified.csv` — write codebook entries for 17 column(s)  
-  *evidence:* not in any codebook: _source_file, record_class, transaction_type, capital_source ...
-- **C11 / medium** · `deals_historical_additions.csv` — drop 1 always-empty column(s) with a correction-register row, or populate them  
-  *evidence:* always empty in 30 rows: Project_Total_Value_USD
-- **C5 / medium** · `deals_source_index.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
+- **C11 / medium** · `nagpra_notice_institutions.csv` — write codebook entries for 5 column(s)  
+  *evidence:* not in any codebook: split_artefact_suspected, split_artefact_detector, split_artefact_basis, institution_name_repaired ...
+- **C5 / medium** · `nagpra_notice_institutions.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
   *evidence:* no conservation coverage
-- **C11 / medium** · `deals_tribal_debt_additions.csv` — drop 1 always-empty column(s) with a correction-register row, or populate them  
-  *evidence:* always empty in 6 rows: Project_Total_Value_USD
-- **C5 / medium** · `ownership_events.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
-  *evidence:* no conservation coverage
-- **C11 / medium** · `seminole_bond_disclosures.csv` — drop 3 always-empty column(s) with a correction-register row, or populate them  
-  *evidence:* always empty in 29 rows: filer_cik, measurement_type, source_page
-- **C5 / medium** · `seminole_bond_disclosures.csv` — add row-conservation: every source row into a NAMED bucket, merged into cedar_harvest_conservation.csv  
-  *evidence:* no conservation coverage
-- **C11 / medium** · `tribal_resolution_financings.csv` — drop 9 always-empty column(s) with a correction-register row, or populate them  
-  *evidence:* always empty in 1 rows: instrument_number, borrower, principal_amount_text, interest_formula_text ...
+- **C11 / medium** · `nagpra_notices.csv` — drop 1 always-empty column(s) with a correction-register row, or populate them  
+  *evidence:* always empty in 6,792 rows: fetched_date
+- **C11 / medium** · `nagpra_notices.csv` — write codebook entries for 1 column(s)  
+  *evidence:* not in any codebook: artifact_mtime
+- **C9 / low** · `(dataset)` — have a DIFFERENT session execute the runbook from the document alone - written is not tested  
+  *evidence:* runbook exists, execution never verified
 
 ## `subcontracting`
 
@@ -706,19 +716,8 @@
   *evidence:* no conservation coverage
 - **C11 / medium** · `subawards.csv` — drop 1 always-empty column(s) with a correction-register row, or populate them  
   *evidence:* always empty in 20,001 rows: pre_2000_flag
-- **C11 / medium** · `subawards.csv` — write codebook entries for 18 column(s)  
-  *evidence:* not in any codebook: subaward_sam_report_id, subaward_sam_report_month, subaward_sam_report_last_modified_date, geo_prime_award_recipient_county_fips ...
-- **C9 / low** · `(dataset)` — have a DIFFERENT session execute the runbook from the document alone - written is not tested  
-  *evidence:* runbook exists, execution never verified
-
-## `nagpra`
-
-- **C12 / high** · `fr_nagpra_title_index_year.csv` — add an inclusion basis - a row must be able to say WHY it is in Cedar (ADR-013: named_entity / term_match / program_authority / geographic / subject_classification / human_ruling)  
-  *evidence:* no basis column of any kind
-- **C11 / medium** · `nagpra_notices.csv` — drop 1 always-empty column(s) with a correction-register row, or populate them  
-  *evidence:* always empty in 6,792 rows: fetched_date
-- **C11 / medium** · `nagpra_notices.csv` — write codebook entries for 1 column(s)  
-  *evidence:* not in any codebook: artifact_mtime
+- **C11 / medium** · `subawards.csv` — write codebook entries for 10 column(s)  
+  *evidence:* not in any codebook: geo_subawardee_city, geo_subawardee_state_code, geo_subawardee_zip5, geo_subawardee_country_code ...
 - **C9 / low** · `(dataset)` — have a DIFFERENT session execute the runbook from the document alone - written is not tested  
   *evidence:* runbook exists, execution never verified
 
@@ -732,3 +731,12 @@
   *evidence:* always empty in 335 rows: self_description_sentence, self_description_url, self_description_fetch_date, self_description_http_status ...
 - **C9 / low** · `(dataset)` — have a DIFFERENT session execute the runbook from the document alone - written is not tested  
   *evidence:* runbook exists, execution never verified
+
+## `nest`
+
+- **C12 / high** · `nest_enterprise_relations.csv` — add an inclusion basis - a row must be able to say WHY it is in Cedar (ADR-013: named_entity / term_match / program_authority / geographic / subject_classification / human_ruling)  
+  *evidence:* no basis column of any kind
+- **C9 / high** · `(dataset)` — write docs/datasets/nest.md - fetch -> normalize -> resolve -> enrich -> validate -> build -> ship, executable by a session with no history  
+  *evidence:* no runbook
+- **C11 / medium** · `nest_enterprises.csv` — write codebook entries for 9 column(s)  
+  *evidence:* not in any codebook: fpds_parent_corroboration, fpds_parent_corroboration_route, fpds_declared_parent_uei, fpds_declared_parent_name ...

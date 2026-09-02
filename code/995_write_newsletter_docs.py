@@ -45,9 +45,12 @@ OUT = ROOT / "docs" / "NEWSLETTER_CORPUS.md"
 TODAY = date.today().isoformat()
 csv.field_size_limit(10_000_000)
 
-REAL = {"newsletter", "news_page", "press_release", "publications",
-        "annual_report", "shareholder_communication", "statutory_filings",
-        "wp_media_library", "newsletter_issue"}
+# THE CHANNEL FILTER IS A COLUMN NOW, NOT A SET HELD HERE. Until 2026-09-02
+# this file owned a `REAL` set of channel types and 990 owned the data, so the
+# published "1,195 channels" depended on two files agreeing about a vocabulary
+# with nothing checking that they did. `record_status` is written by 990,
+# validated by its invariants 8-10, and is the single definition.
+REAL_RECORD_STATUS = "publication_channel"
 
 
 def jload(p):
@@ -67,8 +70,7 @@ def build():
     s990, s991 = jload(S990), jload(S991)
     s992, s993, s994 = jload(S992), jload(S993), jload(S994)
 
-    real = [r for r in rows if r["channel_type"] in REAL
-            and not r["note"].startswith("FLAG_UPSTREAM")]
+    real = [r for r in rows if r.get("record_status") == REAL_RECORD_STATUS]
     bycls = defaultdict(lambda: [0, 0, 0, 0])  # found, attempted, not_probed, total
     for c in cover:
         b = bycls[c["entity_class"]]
@@ -103,6 +105,7 @@ def build():
     a("| | |")
     a("|---|---:|")
     a("| publication channels catalogued | %d |" % len(real))
+    a("| rows in the corpus file | %d |" % len(rows))
     a("| entities publishing at least one | %d |" % len(
         {r["cedar_uid"] for r in real if r["cedar_uid"]}))
     a("| named publications (a masthead, not just a news page) | %d |" % len(named))
@@ -111,6 +114,17 @@ def build():
     a("| deepest single archive | %s years (%s) |" % (
         deep[0]["archive_span_years"], deep[0]["publisher_name"]) if deep else "| - | - |")
     a("| spine entities in the coverage denominator | %d |" % len(cover))
+    a("")
+    a("**Filter `record_status` before you count anything.** The file holds "
+      "%d rows and %d publication channels: %s. A recorded absence keeps a "
+      "row on purpose, so the negative sits beside the positives and "
+      "`discovery_technique` can name which routes ran. Counting rows instead "
+      "of filtering the column overstates the channel count by %.0f%%."
+      % (len(rows), len(real),
+         ", ".join("%d `%s`" % (v, k) for k, v in sorted(
+             Counter(r.get("record_status", "") for r in rows).items(),
+             key=lambda kv: -kv[1])),
+         100.0 * (len(rows) - len(real)) / len(real) if real else 0))
     a("")
     a("Grain is **(entity, channel URL)**. A nation that prints a newspaper, "
       "posts PDFs to a WordPress media library and files shareholder reports "
@@ -133,6 +147,95 @@ def build():
     tn = sum(v[2] for v in bycls.values())
     a("| **all** | **%d** | **%d** | **%d** | **%d** | **%s** |"
       % (len(cover), tf, ta, tn, pct(tf, tf + ta)))
+    a("")
+    a("## Read the coverage table with `site_url_class`, or you will read it "
+      "wrong")
+    a("")
+    a("A single-digit found rate in the table above is not Cedar failing to "
+      "look. `has_live_site` answers a narrower question than it appears "
+      "to: it is `yes` whenever the web map holds ANY reachable URL for the "
+      "entity, and for a large share of some classes that URL is a Wayback "
+      "capture of a dead site, an IRS-derived profile page, or - found "
+      "2026-09-02 - a **federal ArcGIS API endpoint that returns data about "
+      "the entity**, which the web map had recorded as 45 Alaska Native "
+      "Villages' website. None of those can be probed for a newsletter. "
+      "`site_url_class` states which it is, per row.")
+    a("")
+    a("**The honest denominator is entities that operate their own site.** "
+      "Against it, the picture changes:")
+    a("")
+    a("| entity class | in spine | operates own site | found ON that site | "
+      "found rate on its own site | found ANYWHERE | no site of any kind |")
+    a("|---|---:|---:|---:|---:|---:|---:|")
+    own = defaultdict(lambda: [0, 0])
+    nosite = Counter()
+    for c in cover:
+        k = c["entity_class"]
+        if c.get("site_url_class") == "own_live_site":
+            own[k][1] += 1
+            if c["probe_status"] == "found":
+                own[k][0] += 1
+        else:
+            nosite[k] += 1
+    for k in sorted(bycls, key=lambda x: -bycls[x][3]):
+        f, at, npb, tot = bycls[k]
+        o_f, o_n = own[k]
+        # `found ANYWHERE` can EXCEED `found on that site`, and where it does
+        # that is the finding, not an error: the channel was located on
+        # somebody else's host - the State of Alaska DBS STAR portal, or a
+        # regional consortium's newsletter that carries the village's council
+        # news. Both columns are printed so the gap between them is readable.
+        a("| %s | %d | %d | %d | %s | %d | %d |"
+          % (k, tot, o_n, o_f, pct(o_f, o_n), f, nosite[k]))
+    a("")
+    a("**`found ANYWHERE` exceeding `found ON that site` is a finding, not an "
+      "arithmetic error.** It counts entities whose only publication channel "
+      "lives on someone else's host: a village corporation's statutory filing "
+      "on the State of Alaska's portal, or a village government's news "
+      "carried in its regional consortium's newsletter. Those rows say so - "
+      "`served_tribe_id` names the nation served when the publisher is not it.")
+    a("")
+    a("Three findings this makes visible, each of which reads as a Cedar gap "
+      "on the first table and is a fact about the world on this one:")
+    a("")
+    nho = [c for c in cover if c["entity_class"] == "Native Hawaiian Organization"]
+    nho_own = [c for c in nho if c.get("site_url_class") == "own_live_site"]
+    nho_found = [c for c in nho_own if c["probe_status"] == "found"]
+    a("* **Native Hawaiian Organizations: %d of %d have no website at all.** "
+      "Of the %d that do, every one has now been probed on every "
+      "machine-readable route and %d publish. The class rate is %s; the rate "
+      "among NHOs with a site is %s. `SOURCE_DOES_NOT_PUBLISH` is the honest "
+      "state (`docs/AGENT_FIELD_GUIDE.md` section 5), and it is a finding "
+      "about how this sector is organised - many NHOs are small homestead "
+      "associations and civic clubs whose public presence is a Facebook page "
+      "or an IRS filing - not a backlog."
+      % (len(nho) - len(nho_own), len(nho), len(nho_own), len(nho_found),
+         pct(len(nho_found), len(nho)), pct(len(nho_found), len(nho_own))))
+    vc = [c for c in cover
+          if c["entity_class"] == "Alaska Native Village Corporation"]
+    vc_own = [c for c in vc if c.get("site_url_class") == "own_live_site"]
+    vc_found = [c for c in vc if c["probe_status"] == "found"]
+    vc_own_found = [c for c in vc_own if c["probe_status"] == "found"]
+    a("* **Village corporations look like a %s class and are a %s class.** "
+      "Only %d of %d operate a website - but %d publish, because %d of them "
+      "were found through the **State of Alaska DBS STAR portal**, where "
+      "ANCSA corporations file shareholder communications by statute. A "
+      "corporation with no website still has a statutory publication channel, "
+      "and the channel is on the state's host, not theirs."
+      % (pct(len(vc_found), len(vc)), pct(len(vc_own_found), len(vc_own)),
+         len(vc_own), len(vc), len(vc_found),
+         len(vc_found) - len(vc_own_found)))
+    npb_bie = sum(1 for c in cover if c["probe_status"] == "not_probed"
+                  and c["entity_class"] == "BIE School")
+    npb_other = sum(1 for c in cover if c["probe_status"] == "not_probed"
+                    and c["entity_class"] != "BIE School")
+    a("* **The probeable frontier is closed.** %d entities remain "
+      "`not_probed`: %d are BIE schools, excluded on purpose, and the other "
+      "%d have no site to probe. There is no entity left that operates a live "
+      "site, is in scope, and has never been looked at - and that is not a "
+      "claim, it is invariant 10 in `990_build_newsletter_corpus.py`, which "
+      "fails the build if it stops being true."
+      % (npb_bie + npb_other, npb_bie, npb_other))
     a("")
     a("## The deepest back runs")
     a("")
