@@ -6691,16 +6691,23 @@ in its own source.
 
 ### Gate attribution
 
-`62` exits 1 and `293` exits 1. **Neither is owned by this pass.** `293` names
-every new instance per script: `1030`, `1031`, `1060`, `1086`, `1081`, `1107`,
-`1110`, `846`, `852`, `873`, `992`, `30`, `518`, `870`, `871`, plus the
-pre-existing `class6 1077`. `1084` and `1104` each contributed exactly one
-line and **both are waived with a reason on the line above**
-(`class7` a selftest fixture id; `class3` an exclusion of already-keyed rows,
-not a positive outcome read). `files_with_columns_lost_vs_backup = 2` is
+`62` exits 1 and `293` exits 1. **Neither is owned by this pass, and the
+measurement is that the word `nagpra` appears ZERO times in `62`'s output.**
+`62` names every new lint instance per script and the whole list is other
+workstreams: `1011` (class1), `1060` x3, `1085`, `1086`, `846`, `852`, `873`,
+`992` (class2c/class3), `1030`, `1031` (class4). `1084` and `1104` each
+contributed exactly one line and **both are waived with a reason on the line
+above** - `class7` a selftest fixture id, `class3` an exclusion of
+already-keyed rows rather than a positive-outcome read - and neither appears
+in `62`'s NEW-instance list. `files_with_columns_lost_vs_backup = 3` is
 `native_fi_roster.csv` and `cedar_entity_spine.csv` against
-`.bak_2026-09-02_pre844` - **script `844`**. `518` still reports `nagpra`
-**READY**, now 5 tables.
+`.bak_2026-09-02_pre844` (**script `844`**) and `prime_contracts.csv` against
+`.bak_2026-09-02_pre_1085_prime_psc_desc_repull` (**script `1085`**).
+`codebook_undocumented_public` is **0** - the five new columns were written to
+`data/clean/codebook/11d_nagpra_notice_institutions.csv` AND kept in step in
+`codebook_master.csv`, so `1108`'s K1 (master == fragments) stays true; 11 ->
+16 fragment rows, 5,444 -> 5,449 master rows, 0 replaced, and a re-run is a
+no-op. `518` still reports `nagpra` **READY**, now 5 tables.
 
 ### A fourth rule, found by auditing the script's OWN admitted output
 
@@ -7086,3 +7093,304 @@ pass wrote.** Naming the owners with the measurement, per standing rule 15:
 * **`docs/MONEY_TOTALLING_RULES.md` carries two `<!-- BEGIN FAADS -->` markers
   and one `<!-- END FAADS -->`.** Two blocks sharing a marker name are one
   block to `574`'s preserver (AGENT_FIELD_GUIDE §2). **FAADS workstream.**
+
+
+---
+
+## 2026-09-02 — workstream STANDARD: the punch list's own claims, the codebook fragment system, and rule 17
+
+Full write-up: `docs/ARCHITECTURE_DECISIONS.md` **ADR-023-STANDARD-GUARD**.
+Reader-facing warning: `docs/KNOWN_ISSUES.md` **STANDARD-PUNCHLIST-GUARD**.
+
+### The finding that mattered most
+
+`docs/datasets/_PUNCHLIST.md` is an INSTRUCTION SET — ten agents act on it —
+and **43 of 65 "always empty column" claims on the 13 capped tables are FALSE**.
+`526.scan()` stops at 20,000 rows and then asserts on that prefix.
+`prime_contracts.csv` carries the line *"drop 10 always-empty column(s)"*; all
+ten hold data, including `contract_transaction_unique_key` at **841,002**
+non-blank of 1,217,768 and `naics_code` at **838,229**. Doing what the line says
+would delete the contracting table's award keys and its NAICS.
+
+Corroborated independently: the promotion workstream documented
+`contract_award_unique_key` at **69.1%** filled and `naics_code` at **68.8%** in
+`codebook_master.csv` the same day — the exact columns 526 called empty.
+
+New guard, `code/1107_punchlist_claim_verify.py` (`verify` exits 1, `selftest`
+proves it fires both directions). `526` is integrator-owned, so it was NOT
+edited; the four-point patch is at the foot of
+`docs/datasets/_PUNCHLIST_CLAIM_AUDIT.md`. **`526 verify` also returns 0
+unconditionally today, so it is not a gate.**
+
+### A closed loop nobody could have escaped
+
+No `C11 … write codebook entries` punch item could close, whatever an agent did.
+The sanctioned path (392, 208) is: write a fragment, then
+`cedar_codebook.py build`. `build` was REFUSING — 14 rows sat in
+`codebook_master.csv` that no fragment carried — so the file 526 measures could
+not be rebuilt from the file the agent was told to write. Repaired by
+`code/1108_codebook_fragment_repair.py repair`.
+
+**It recurs.** 47 more rows were written straight to the master by five other
+blocks (`02m_native_owned_businesses`, `05e_identifier_ledger`,
+`05p_entity_relationships`, `06_nonprofit/np_orgs`, `18a_nest_enterprises`)
+while this pass was running. That is the lost-update race `cedar_codebook.py`
+exists to end. **Write the fragment, never the master, then run
+`py -3 code/cedar_codebook.py build`** — and run `1108 repair` first if it
+refuses.
+
+### A licensing control that measured the wrong thing
+
+`62`'s `duns_marked_publishable` reads `access_tier` and never `published`, and
+it greps the variable NAME for "duns". Two rows walked through it:
+`07_gaming/casino_city_id` at `published=1, access_tier=public`, and
+`03_federal_funding/recipient_duns` at `published=1, access_tier=internal` — a
+row that contradicts itself. Both now `0/internal`. `dist/` was never affected
+(it already withheld the column); the CODEBOOK was wrong, and that is what a
+buyer reads. **Suggested to the integrator: widen 62's metric to
+`cedar_codebook.is_licensed_col` and score both fields.**
+
+### 62, standing rule 15 — one line was mine, and it is closed
+
+`regenerate_new_unsafe_writers = 1` was **this pass's own new script**: 845
+flagged `1107` as a wholesale markdown writer minutes after it landed, which is
+the gate working. Settled the honest way —
+`845 regen docs/datasets/_PUNCHLIST_CLAIM_AUDIT.md`: generator exit 0, 1 removed
+/ 1 added, 0 unpaired, the moved line being the open-item count 334 → 333.
+Recorded in `MD_PROVEN_SAFE` with that result. **`845 verify` is green: 3 unsafe
+writers, 0 new since baseline, floor re-recorded 9 → 3 while GREEN.**
+
+Sharpening one attribution the entry above this one made generically:
+**`tables_undocumented_in_codebook` 3 → 21 is 18 tables created TODAY**, none of
+them this pass's — `geo_award_county_crosswalk`, `geo_place_county_crosswalk`,
+`geo_county_dim`, `geo_county_two_sums`, `geo_aiannh_dim`,
+`geo_aiannh_county_observed`, `geo_point_aiannh_assignment` (ADR-015 geography),
+`cedar_constellation_edges`, `cedar_constellation_refusals`,
+`cedar_entity_freshness`, `entity_dated_public_facts`,
+`native_business_contract_links`, `native_business_contracting_by_nation`,
+`native_business_identifier_crosswalk`, `sec_gaming_financial_disclosures`,
+`sec_gaming_management_contract_terms`, `gaming_web_harvest_observations`,
+`gaming_web_harvest_coverage`. The 3 that were there before are
+`consultation_agency_coverage.csv`, `gaming_property_locations.csv`,
+`wa_machine_transfers.csv`. Each new table's own workstream owns its codebook
+block; `codebook_variables` rose 4,614 → 5,444 in the same window, **+103 of
+that from this pass**.
+
+### Rule 17 writers fixed (all five lost `cedar_uid`, one root cause)
+
+`77_build_nagpra_dataset.py` (`write_csv`), `511_sam_entity_hierarchy.py`
+(`write_csv`), `110_build_harmonized_views.py` (class 3,
+`list(prof[0].keys())`), and `221_probe_regulations_gov_comments.py` — two
+sites. **221 needed the stricter form**: `_append_csv` appends, and a literal
+header on an append does not merely delete a column, it lands every field past
+the mismatch one column to the left. Its `_derive_append` uses the LIVE header
+verbatim and RAISES if the literal names a column the file does not have,
+because appending cannot add one.
+
+### Two artefacts of my own detectors, both removed rather than waived
+
+* `845`'s orphan-heading signal accused every heading carrying a computed count
+  — `"## The " + str(len(rows)) + " entities, by class"` can never be a literal.
+  `heading_reproducible` now splits on number runs and requires the fixed parts;
+  three selftest cases hold the line, including *a hand-authored heading that
+  merely contains a number must still fire*.
+* `293` class 6 paired `1107` with `cedar_harvest_conservation.csv` and
+  `codebook_master.csv` because its SELFTEST FIXTURE used those filenames beside
+  a `csv.writer`. The fixtures were renamed rather than waived — 526 reads
+  whatever the monkeypatched constant points at, so the live name was never
+  needed. 293 is now silent on 1107.
+
+---
+
+# WORKSTREAM FR-DTLL, 2026-09-02 — the `federal-register` consultation surface: the NAGPRA overlap, the letters, and the event parse
+
+Scope: deepen `federal-register`, which was already READY. Two new scripts,
+**1089** and **1090**, both claimed atomically through `1050_preflight.py claim`.
+`docs/ARCHITECTURE_DECISIONS.md` **ADR-023-FR-DTLL** carries the decisions and
+the ownership table; this entry carries the numbers and the gate state.
+
+## What moved
+
+| | before | after |
+|---|---:|---:|
+| `consultation_events.csv` rows | 11,402 | **11,402** (0 added; +8 columns) |
+| `event_start_date` non-blank | 93 | **190** |
+| `location` non-blank | 60 | **103** |
+| Dear Tribal Leader letters Cedar holds | **6** | **597** |
+| tables in the `federal-register` collection | 22 | 23 (+1 internal) |
+| `codebook_master.csv` rows | 5,351 | 5,415 (+37 `09c`, +27 `09d`) |
+
+## The three measurements worth carrying forward
+
+**1. "95.5% NAGPRA" is a ROW share and it was being read as a document share.**
+10,920 of 11,402 rows (95.8%) name a document `nagpra_notices.csv` also ships —
+but only **1,831 distinct notices**, against 6,792 in the NAGPRA dataset.
+**4,961 NAGPRA notices are absent from `consultation_events.csv` entirely.** The
+two tables are a 27.0% intersection built by two different extractions, not a
+duplicate pair. And the intersection is a WINDOW: **0 of 1,882 notices from
+1994–2010, 1,817 of 2,264 from 2011–2022, 14 of 2,646 from 2023–2026** —
+because revised 43 CFR 10 (effective 2024-01-12) replaced the *"in consultation
+with representatives of"* sentence `96`'s net keys on with a bulleted
+Determinations list. **The net stops catching notices exactly as NAGPRA volume
+triples.** All of it is now columns on the row plus codebook block
+`09c_consultation_events`, not prose.
+
+**2. A 406 was hiding a 27-year series.** `962` recorded `ihs.gov` as
+`NOT_CHECKED` on an HTTP 406. Re-probed with the full navigation header set —
+the header **shape**, per `docs/BLOCKED_SOURCE_BYPASS_2026-08-26.md`, not the UA
+string — `https://www.ihs.gov/robots.txt` returns **200** and reads
+`User-agent: * / Disallow:` (empty = allow all), and the sitemap enumerates
+**27 year indexes** of Dear Tribal Leader Letters back to 2000. 597 letters:
+**IHS 574, BIE 14, BIA 9**, 2000-01-10 to 2026-08-25, 0 with a date the
+publisher did not state.
+
+**3. `code/1050_preflight.py ondisk` was right again.** All 2,313 consultation
+notice texts were already in `data/raw/external/consultation/fr_text/`. The
+event date and place were a PARSE, not a fetch. Zero requests for task C.
+
+## Two defects this workstream found in its OWN first pass — both the repo's signature shape
+
+* **A `?page=N` sitemap loop that FAILS OPEN.** `bia.gov/sitemap.xml` is a
+  Drupal `simple_sitemap` INDEX; `?page=3` … `?page=20` return **the index
+  itself**, HTTP 200, two `<loc>`s each. The first pass reported *"2,412 URLs
+  over 20 pages"* — a plausible number about something else — and made 18
+  pointless requests. Same shape as FPDS `AGENCY_CODE:` in
+  `docs/PULL_DISCIPLINE.md`. It now walks the index's own children and refuses
+  any shard that hands back an index.
+* **An unanchored place regex that measured contact addresses.** Filling
+  `location` from any `City, State` near a date put **657** museum contact
+  addresses and excavation counties onto NAGPRA rows — *"Cambridge, MA"* out of
+  *"should contact Patricia Capone, Peabody Museum"*, *"Coconino County, AZ"*
+  out of where remains were removed in 1985. Both are places the notice prints;
+  neither is a consultation location. A location is now read only from a notice
+  that announces an event, and the fill fell **703 → 43**.
+
+Also corrected: the first pass keyed IHS letters on a `DTLL` filename prefix and
+dropped **462 of 836** PDFs, because pre-2010 letters are named
+`12-14-2000_Letter.pdf` and `Anthrax Summary For IHS Clinicians.pdf`. The rule
+is now the publisher's own `.../<year>_Letters/` folder. And the DTLL URL
+pattern missed `bia.gov/service/progress-act/dtll` — the tenth URL `962`
+counted — until it learned the abbreviation.
+
+## GATE STATE AT THE CLOSE OF WORKSTREAM FR-DTLL — named, not stepped around
+
+`py -3 code/62_no_regression_check.py` exits 1. Log `logs/1089_62b.log`.
+**Nothing red is FR-DTLL's**, and here is the evidence rather than the
+assertion.
+
+- `py -3 code/293_lint_bug_classes.py` exits 1 and names 23 new instances.
+  **`grep -E '(1089|1090)_'` over the full lint report returns nothing.**
+- `files_with_columns_lost_vs_backup = 2` names `native_fi_roster.csv`
+  (`in_cicd_nafi_map`) and `cedar_entity_spine.csv` (`cicd_verified`), both
+  against `.bak_2026-09-02_pre844`. **Owner: whoever ran `844`.**
+  `consultation_events.csv` is NOT among them — `1089` added eight columns and
+  removed none, and `287_build_dependency_manifest.py` agrees.
+- `regenerate_new_unsafe_writers = 1` is
+  `1107_punchlist_claim_verify.py -> docs/datasets/_PUNCHLIST_CLAIM_AUDIT.md`.
+- `contract_orphan_shippable = 7` is the same seven named in workstream
+  INT-READY's entry above (three `.bak_` files registered as tables, plus four
+  live-harvest tables). **Both FR-DTLL tables are owned**: `500.COLLECTIONS`
+  `federal-register` now matches `dear_tribal_leader|dtll_`, verified by
+  re-deriving the regex against both filenames.
+- `tables_undocumented_in_codebook = 21`. **Neither FR-DTLL table is one of
+  them** — `cedar_codebook.registered_tables()` returns
+  `dear_tribal_leader_letters.csv` as SHIPPABLE and lists neither it nor
+  `dtll_source_coverage.csv` as undocumented. `tables_missing_codebook_block`
+  fell 21 → 19 across the two runs, which is these two blocks landing.
+- The remaining lines — `rulings_unapplied` 2,894, `SHIPPING LOST:
+  advocacy_passthrough_2026-08-07.csv`, `hearing_bill_links.csv` 465→464,
+  `native_bills_subject_sweep.csv` 2,414→2,409, and the
+  `tables_missing_from_25/27` family — are the advocacy, legislation and
+  registry-lag lines already named in the INT-READY entry above. Unchanged by
+  this workstream.
+
+### One line that IS ours, and is deliberately left for the integrator
+
+`dear_tribal_leader_letters.csv (807 rows)` appears under **NEW TABLES AT A 0%
+SHIP RATIO**. It is documented and owned; it is simply not in `dist/` yet,
+because that needs `87 -> 25 -> 27` per `docs/SHIPPING_RUNBOOK.md`. **It was not
+run.** Fourteen other new tables from four other workstreams sit in the same
+state in the same list, `25_build_publication_layer.py` rewrites the whole
+publication layer, and six other agents were writing `data/clean` at the time —
+shipping now would ship their half-finished tables too. Named here so the next
+runbook pass picks it up rather than rediscovering it.
+
+### `512_build_dataset_contracts.py` could not be run to completion, and why
+
+Two attempts, neither of which produced a contract state. The first died on
+`PermissionError: data\clean\subawards.csv` — another agent holding the file
+open. The second produced no output in 50 minutes and was killed still running,
+against **six concurrent copies of `512` and seven of `62`** started by other
+agents; six copies of `512` were still live after it died, so a third attempt
+would have added load to the contention rather than measured through it. Rather than report
+an unmeasured contract state as green, the two new grain declarations were
+validated directly against the live files with `512`'s own `GRAIN` dict
+imported:
+
+```
+dear_tribal_leader_letters.csv  letter_id    807 distinct / 807 rows, 0 blank, 0 literal dups  -> VALIDATES
+dtll_source_coverage.csv        coverage_id   35 distinct /  35 rows, 0 blank, 0 literal dups  -> VALIDATES
+consultation_events.csv         (consultation_event_id, participant_name_as_published)
+                                             11,402 distinct / 11,402 rows, 0 literal dups     -> STILL VALIDATES after +8 columns
+```
+
+**`512`'s own run is therefore UNMEASURED for this pass, and that is stated
+rather than assumed green.** The declarations live in `GRAIN_FR_DTLL`, a new
+per-workstream dict; no other workstream's dict was touched.
+
+### The remaining DTLL surface, sized against what it was measured with
+
+| host | status | measured |
+|---|---|---|
+| `ihs.gov` | ENUMERATED_IN_FULL | 27 of 27 year indexes walked; 574 letters. The 13 `urbanleaderletters` year indexes are a DIFFERENT series and were not harvested. |
+| `bie.edu` | REPORTED_FLOOR | 1 of 1 sitemap shard; 14 DTLL URLs, 14 letters. |
+| `bia.gov` | REPORTED_FLOOR | 2 of 2 shards, 2,412 URLs, 10 DTLL URLs → 9 letters + 1 publisher index page that itself links **2 further letter PDFs not yet promoted**. |
+| `doi.gov` | REPORTED_FLOOR_PARTIAL_INDEX | 4 of 9 shards, 0 hits. **UNMEASURED beyond those four.** |
+| `epa.gov` | REPORTED_FLOOR_PARTIAL_INDEX | 6 of 38 shards, 0 hits. |
+| `usda.gov` | REPORTED_FLOOR_PARTIAL_INDEX | 6 of 8 shards, 0 hits. |
+| `ed.gov` | REPORTED_FLOOR_PARTIAL_INDEX | **0 of 2 shards.** `ed.gov/sitemap.xml` is an index whose children point at `http://vpvmwevapp001-lkg.azurewebsites.net/` — a private Azure hostname leaked into a public sitemap — which 403s. A publisher defect, not a refusal of Cedar. |
+| `hhs.gov` | NOT_CHECKED | `/sitemap.xml` HTTP **403**, and robots.txt names no `Sitemap:` directive to fall back to. |
+| `hud.gov` | NOT_CHECKED | `/sitemap.xml` HTTP **404**. robots.txt is `User-agent: * / Allow: /` — HUD is open — but see ADR-023 on its Cloudflare `Content-Signal: ai-train=no`. |
+
+**No row in `dtll_source_coverage.csv` says an agency does not publish Dear
+Tribal Leader letters.** The strongest statement any of them makes is
+`NOT_IN_PUBLISHED_INDEX`, which is a fact about a sitemap walked in full, and
+`INV-DTLL-ABSENCE` fails the build if that status appears on a non-200 or a
+partly-walked index. 89 requests across 10 hosts on the first pass, 17 on the
+last (the rest served from the on-disk cache).
+
+### RESTORED: 34 of 39 lines of the FAADS block in `docs/MONEY_TOTALLING_RULES.md`
+
+The entry above this one flagged *"two `<!-- BEGIN FAADS -->` markers and one
+`<!-- END FAADS -->`"*. Measured with a LINE-ANCHORED match, the live state was
+worse: **one BEGIN, zero END, and the body cut to 5 lines from 39.** Everything
+after *"so it survives.\*\*"* was gone — the FY2007 seam table, the stacking
+rule, and the sentence that prevents a **$2,165,856,969 double count** across
+the two faads tables.
+
+Traced by counting the block in every revision of the file:
+
+    83c7f00  39 lines, correctly closed
+    257b597   5 lines, END marker gone   <- lost here
+    ada1845   5
+    2b70db8   5  (HEAD)
+
+Restored **verbatim** from `83c7f00` — nothing authored, nothing edited, backup
+at `.bak_2026-09-02_pre_1107_faads_marker_restore`. Every marker in the file is
+now paired: 17 blocks, 0 unbalanced. **This was urgent for eight other
+workstreams, not just FAADS**: with no END, `574`'s preserver sees the FAADS
+block running to end of file, so `LOBBY-SUPERSESSION`, `SEC-GAMING`,
+`NEWSLETTERS`, `GAMING-DEEP`, `DEALS-MERGE-1088` and
+`DEEPEN-SUBAWARD-DENOMINATOR` were all inside it.
+
+**FAADS workstream: please confirm the restored text is current** — it is the
+2026-09-01 version and any measurement taken since needs re-applying INSIDE the
+markers.
+
+One method note, because I nearly published the wrong number. My first marker
+audit used an unanchored regex and reported `ARCHITECTURE_DECISIONS.md` as
+carrying three unbalanced markers. It does not — the regex was matching markers
+QUOTED INSIDE PROSE, including the ones in my own ADR. Anchoring to line start
+gives the true answer: that file is balanced and only `MONEY_TOTALLING_RULES.md`
+was broken. A marker audit must anchor, or it counts the documentation of
+markers as markers.

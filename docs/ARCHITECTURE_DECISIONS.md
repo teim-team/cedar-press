@@ -1937,3 +1937,9 @@ public debt file property-level operating data on EMMA, which is a parallel
 route to the same figure and belongs to the tribal-debt workstream. This pass
 stopped at the SEC boundary on purpose.
 <!-- END ADR-SEC-GAMING -->
+
+<!-- BEGIN ADR-025-STALE-TAIL-1081 -->
+## ADR-025 — CLAIMED 2026-09-02 by unnamed
+
+*Placeholder. Replace this line with the decision; keep the markers.*
+<!-- END ADR-025-STALE-TAIL-1081 -->

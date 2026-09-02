@@ -1986,9 +1986,22 @@ def main():
             nowd = dist_by_file.get(f)
             if nowd is None:
                 if was:
+                    # The message used to say "GONE from data/clean" while the
+                    # check reads the DIST manifest. On 2026-09-02
+                    # advocacy_passthrough_2026-08-07.csv was reported gone and
+                    # was sitting in data/clean with all 1,620 rows — it had
+                    # only dropped out of the shipping set. A failure that
+                    # names the wrong location sends the reader to the wrong
+                    # place; say which surface actually lost it.
+                    _live = (ROOT / "data" / "clean" / f).exists()
                     fails.append(
-                        f"SHIPPING LOST: {f} was shipping {was:,} rows and the "
-                        f"table is GONE from data/clean")
+                        f"SHIPPING LOST: {f} was shipping {was:,} rows and is "
+                        f"no longer in the dist manifest"
+                        + (" (the table IS still in data/clean — this is a "
+                           "shipping-set regression, not data loss; usually a "
+                           "missing codebook block, see "
+                           "tables_undocumented_in_codebook)" if _live
+                           else " AND the table is absent from data/clean too"))
                 continue
             if was and nowd < was:
                 # Same exact-accounting allowance as ship_dist_rows above.

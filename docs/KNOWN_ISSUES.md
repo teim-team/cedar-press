@@ -823,3 +823,100 @@ is what a buyer reads. Standing check: `py -3
 code/1108_codebook_fragment_repair.py verify` (K4 uses
 `cedar_codebook.is_licensed_col`, not a name grep).
 <!-- END STANDARD-PUNCHLIST-GUARD -->
+
+<!-- BEGIN STALE-TAIL-1081 -->
+## The stale-entity tail — what is left, and the one acquisition that would close it
+
+*Added 2026-09-02 by workstream STALE-TAIL (ADR-022). Full write-up and the
+regenerable before/after: `docs/STALE_TAIL_CLOSURE_1081.md`. Measure:
+`py -3 code/1081_stale_tail_dated_facts.py measure`.*
+
+| 830 measure | before | after |
+|---|---:|---:|
+| untouched over a year | 287 | 398 |
+| no usable date at all | 373 | **148** |
+| in no substantive Cedar row | 83 | **0** |
+| union of the first two | 660 | **546** |
+| p90 days since change | 3,627 | **1,365** |
+
+`untouched over a year` rose because 287 was an undercount — an entity with no
+date could not be counted as stale. 255 entities gained a first dated public
+fact and most of those dates are old, so they became visible rather than fresh.
+
+**A1. `www.commerce.alaska.gov` (Alaska DCCED corporations register) is
+`NOT_ACQUIRED` because the host refuses automation.** HTTP 403 with a DataDome
+CAPTCHA on `robots.txt`, on the entity search and on the bulk
+`CorporationsDownload.CSV`, measured 2026-09-02. This is the single source that
+would date **95** Alaska Native village and ANCSA-group corporations at once —
+every Alaska corporation has a stated registration date, status and
+biennial-report date there. It needs a human-driven or records-request route.
+It is **not** `SOURCE_DOES_NOT_PUBLISH`.
+
+**A2. The ANCSA annual-report corpus cannot substitute for A1.** The 358
+audited AS 45.55.139 reports in `data/interim/ancsa_txt_v3/` come from **41**
+corporations; exactly **one** of the 95 tail entities is among them. AS
+45.55.139 exempts the small village corporations, which is the whole tail.
+Do not re-open this as a mining task.
+
+**A3. 170 Native Hawaiian Organizations have no dated public record on any
+route tried.** A sibling established they do not publish on their own sites;
+this pass established that **258** of them return no organisation at all from
+the IRS Exempt Organizations file under their register name and state. Most are
+homestead associations and *hui* that are not 501(c)(3) filers. The SBA 8(a)
+register and the NHOA directory remain untried and are the next candidates.
+
+**A4. NCES cannot make a BIE school look fresh, by construction.** CCD's newest
+collection year for fips 59 is 2024 (count date 2024-10-01), and the BIE
+reporting universe is static — the same 174 schools in every year 2008-2024 —
+so "most recent year reported" is one shared date outside the 365-day bar. CCD
+is still what took *no substantive row* from 83 to 0: it supplies the NCES BIE
+school number, LEA, enrolment, teacher FTE, status and location.
+
+**A5. `code/62_no_regression_check.py` DOES NOT RUN as of 2026-09-02 03:5x.**
+`NameError: name 'ROOT' is not defined`, from `_load_declared_removals()` at
+line 131 being *called* at line 159, above where `ROOT` is bound. The 37 lines
+that introduce it are **uncommitted** (`git diff HEAD` = 1 file, +37) and
+postdate commit `ada1845`. Not this workstream's file and not this
+workstream's edit — 62 is integrator-owned — but every gate downstream of it
+is currently unrunnable, so it is recorded here rather than left to the next
+agent to rediscover. `293_lint_bug_classes.py` and `845_regenerate_guard.py`
+both run.
+<!-- END STALE-TAIL-1081 -->
+
+<!-- BEGIN QUARANTINE -->
+## The quarantine is now visible — and $10.9B of it is still open (workstream QUARANTINE, 2026-09-02)
+
+`code/1079_quarantine_method_exposure.py`, ADR-019, full write-up in
+`docs/QUARANTINE_EXPOSURE_LOG_2026-09-02.md`. CDR-11 and CDR-12 in
+`review/1011_cross_dataset_findings.csv` are closed. **These four are not.**
+
+**1. The CAGE leg of the quarantine was measured for the first time and NOT
+adjudicated — 508 identifiers, $3,608,856,488.** CDR-11 scoped on UEI ledger
+rows; `40_build_prime_contracts.py` keys on three legs. `cage_exact` on a
+quarantined CAGE row carries 14,149 prime rows and $7.25B, and `need_v6` —
+**6.5% accurate** — is 838 tier-B CAGE rows of it. It is flagged in
+`identifier_ruling_quarantined` and written to
+`review/1079_owner_holds_2026-09-02.csv`; it is not repaired. Adjudicating a
+population in the same pass that discovered it is the mistake this repo keeps
+paying for. **This is the largest single piece of unfinished attribution work
+in contracting.**
+
+**2. $6,327,484,436 across 764 identifiers is HELD, not decided.** Unresolved
+is a legitimate outcome (ADR-010), but it is a queue, not an answer. The
+biggest four are named in the log's §6.
+
+**3. A hub whose ENTIRE distinctive name is one ordinary English word is still
+unguarded.** The fragment rule needs a second token to be a fragment *of*, so
+it cannot fire for `Marshall`. `MARSHALL COMMUNICATIONS CORP` ($336.3M) is
+therefore KEPT on the Native Village of Marshall by rule 7's residue test,
+while its FPDS-declared parent is `MISSION SOLUTIONS GROUP INC` observed 1,050
+times and resolving to no hub. Defensible under the written rules, and probably
+wrong. Needs an owner ruling, not a wider automatic rule.
+
+**4. `1079` joins the enrichers that a rebuild reverts.**
+`40_build_prime_contracts.py` drops all five new columns, as it drops 207's
+two, 950's nine and 871's thirteen. 1079 must run **last** of those, because it
+reads `attribution_method`. The
+`.bak_2026-09-02_pre_1079_quarantine_method_exposure` files beside the five
+touched tables are the signal.
+<!-- END QUARANTINE -->

@@ -608,6 +608,12 @@ def main() -> int:
         asked = [c for c in SHOW.get(did, [])]
         absent = [c for c in asked if c not in cols]
         cols = want or cols
+        # Blank sentinels across the WHOLE table, not just the ten drawn
+        # rows, so the count reported is the real scale and so a row is never
+        # judged "complete" for holding the string `Nan`.  Only the shipped
+        # columns are measured; a sentinel in a column no sample shows cannot
+        # reach a customer and is 772's business, not this file's.
+        rows = desentinel(rows, cols, did)
         rs = sample(rows, cols, N)
         if not rs:
             skipped.append(f"{did}: no publishable rows")
@@ -718,17 +724,46 @@ def main() -> int:
               "finding 4, saw one of them.*",
               "- **`federal_funding_transactions.canonical_name`** is a legacy "
               "display label, not Cedar's name for the entity. Group on "
-              "**`cedar_uid`**, which is the key ADR-009 mandates. Measured "
-              "2026-09-01 in `docs/FAADS_TRANSACTION_KEY_LOG.md`: of 552,602 "
-              "rows carrying a uid, **345,108 disagree** with the register's "
-              "name for that uid, and **339,129 of those (98.3%, $94.0B) are "
-              "a right identity under a stale label** — `haaku community "
-              "academy` on rows correctly keyed to Pueblo of Acoma. Grouping "
-              "on the label credits a school; grouping on the uid credits the "
-              "nation. *(A re-count on 2026-09-02 returns 345,180 rather than "
-              "345,108 — the table was rebuilt between the two. The split is "
-              "the point, not the last two digits, and one measurement is "
-              "quoted everywhere rather than two.)*", ""]
+              "**`cedar_uid`**, which is the key ADR-009 mandates. `haaku "
+              "community academy` sits on rows correctly keyed to Pueblo of "
+              "Acoma: grouping on the label credits a school, grouping on the "
+              "uid credits the nation.",
+              "",
+              "  Re-measured 2026-09-02, and **this paragraph previously "
+              "carried the contradiction it was describing** — 345,108 in "
+              "one sentence and 345,180 in the next, with a parenthetical "
+              "calling the gap a rebuild artefact and the last two digits "
+              "unimportant. It was neither. Codex, PR #29 round 3, found the "
+              "stale pair still shipping here after the sibling README had "
+              "been corrected. The method, so the number is reproducible "
+              "rather than quoted: compare `canonical_name` against the "
+              "`canonical_name` the identity register holds for that row's "
+              "`cedar_uid`, **case-insensitive**, exact string.",
+              "",
+              "  | | rows |", "  |---|---:|",
+              "  | carry a `cedar_uid` | 552,602 |",
+              "  | …name disagrees with the register | **340,738** |",
+              "  | …`canonical_name` blank, uid present | 3,622 |",
+              "  | …`cedar_uid` absent from the register | **0** |",
+              "  | total not matching the register's label | **344,360** |",
+              "",
+              "  **340,653 of the 340,738 — 100.0%, $94,256,591,555.42 —** "
+              "carry a label appearing verbatim in the legacy do-file key "
+              "`lineageA_dta_corrtd_tribe_key.csv` (393 distinct name "
+              "strings): right identity, stale label, one known cause. The "
+              "85-row residue needs no repoint. 72 rows / $29,694,344.00 on "
+              "`CE-001GC-WN` are labelled `Forest County` while the register "
+              "calls that entity *Sonoma County Indian Health Project, "
+              "Inc.*, and **all 72 are `recipient_state_code = CA`** — the "
+              "key is right and only the label is wrong, and that label is "
+              "worse than stale because Forest County Potawatomi is a real "
+              "Wisconsin nation. The other 13 are a `Warms Springs` / `Warm "
+              "Springs` typo, all Oregon.",
+              "",
+              "  The comparison mode has to be stated or the figure is not "
+              "reproducible: **case-sensitive** the same measurement returns "
+              "364,754, which is 24,016 higher and is the likeliest origin of "
+              "the two numbers that used to sit here.", ""]
         if sparse or notincols:
             L += ["## Columns that are in the schema and empty in this sample",
                   "",
@@ -750,6 +785,47 @@ def main() -> int:
                          f"the schema): "
                          + ", ".join(f"`{c}`" for c in missing))
             L.append("")
+        if SENTINELS_SEEN:
+            L += ["## Null sentinels, stripped here and named rather than "
+                  "hidden", "",
+                  "Codex, PR #29 round 3, found `funding_agency = \"Nan\"` in "
+                  "the contractors sample — a stringified float any consumer "
+                  "would group and filter on as a real agency. **No sample "
+                  "ships one now.** A cell whose ENTIRE content is a null "
+                  "token (`nan`, `none`, `null`, `<na>`, `nat`, "
+                  "case-insensitive) is blanked before the rows are drawn, so "
+                  "a row is also never judged complete for holding one. "
+                  "Whole cell only: `NANA Regional Corporation` and "
+                  "`Nanakuli` are real values here and a substring rule would "
+                  "eat both. `NA` and `N/A` are deliberately left alone — "
+                  "`NA` is an abbreviation a human may have typed to mean "
+                  "*not applicable*, which is a statement, not a float.", "",
+                  "Counted across the **whole source table**, not the ten "
+                  "sampled rows, and only in the columns a sample ships:", ""]
+            for did in sorted(SENTINELS_SEEN):
+                seen = SENTINELS_SEEN[did]
+                L.append(f"- `{product_id(did)}` — "
+                         + ", ".join(f"`{c}` {n:,}" for c, n in
+                                     sorted(seen.items(), key=lambda x: -x[1]))
+                         + f"  (**{sum(seen.values()):,}** cells)")
+            L += ["",
+                  "**The source fix exists and lost a race, which is why this "
+                  "guard is here too.** `772_strip_nan_sentinels.py` had "
+                  "matched the sentinel case-SENSITIVELY, justified in its own "
+                  "docstring by `Nanticoke`, `Nanakuli` and `NANA` — every "
+                  "one of which is an argument against a substring rule, "
+                  "which it never was. A whole-cell test cannot match a 4- or "
+                  "8-character value with a 3-character token, so the "
+                  "case-sensitivity guarded nothing and hid 617,097 cells. "
+                  "Corrected, it cleared them; then a concurrent in-place "
+                  "enricher, which had read the table before 772 started, "
+                  "wrote back its own copy with five new `identifier_ruling_*` "
+                  "columns and every sentinel restored. 772's guard compares "
+                  "size and mtime across its own read and correctly saw "
+                  "nothing — the other writer's read predated it. **Two "
+                  "in-place enrichers on one table need a declared ordering "
+                  "and these two had none.** The product layer cannot be "
+                  "raced, so the guard sits here as well.", ""]
         (OUT / "README.md").write_text("\n".join(L), encoding="utf-8")
 
     print(f"  770 sample extracts   {len(built)} built   "
@@ -762,6 +838,11 @@ def main() -> int:
         print(f"    SKIP    {s}")
     for u in unsafe:
         print(f"    REFUSED {u}")
+    for did, seen in sorted(SENTINELS_SEEN.items()):
+        print(f"    SENTINELS  {product_id(did)}: {sum(seen.values()):,} "
+              f"cell(s) blanked -> "
+              + ", ".join(f"{c} {n:,}" for c, n in
+                          sorted(seen.items(), key=lambda x: -x[1])))
     for did, blank in sparse:
         print(f"    SPARSE  {product_id(did)}: blank on all {N} rows -> "
               f"{', '.join(blank)}")

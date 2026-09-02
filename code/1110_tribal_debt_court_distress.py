@@ -479,6 +479,25 @@ CASES = [
 ]
 
 
+def target_id(query, stype):
+    """DETERMINISTIC, derived from the QUESTION, never from its position.
+
+    The first draft used `f"T{i:02d}_{stype}"`. Adding the round-two targets
+    shifted every index after the doctrine block, so `T16_o` - the CONTROL in
+    round one - became `Lake of the Torches Economic Development Corporation`
+    in round two. The resume check saw the id already in the hits file, never
+    asked the new question, and the CONTROL's zero-result response was
+    attributed to it. **Two real questions were reported as NO_RESULT having
+    never been asked**: an absence of evidence printed as evidence of absence,
+    which is field-guide habit 4.
+
+    Caught by `code/293_lint_bug_classes.py` class 7 (a positional primary
+    key), on a table that had already been written twice.
+    """
+    slug = re.sub(r"[^a-z0-9]+", "_", (query or "").lower()).strip("_")[:48]
+    return f"{slug}__{stype}"
+
+
 def step_targets():
     rows = []
     for i, c in enumerate(CASES):
@@ -486,7 +505,7 @@ def step_targets():
             if stype not in c.get("types", "or"):
                 continue
             rows.append({
-                "target_id": f"T{i:02d}_{stype}",
+                "target_id": target_id(c["q"], stype),
                 "priority": c["priority"],
                 "search_type": stype,
                 "search_type_name": sname,
@@ -522,7 +541,12 @@ def cl_get(url):
 
 
 def cache_path(kind, key):
-    safe = re.sub(r"[^A-Za-z0-9]+", "_", str(key))[:80]
+    # KEEP the underscore. Collapsing `[^A-Za-z0-9]+` turned the target id
+    # `..._{}_o` into `..._o`, so a freshly written cache file no longer
+    # matched the id `remine` looks it up by, and four responses read as
+    # missing while sitting on disk. Character classes in a filename
+    # sanitiser have to agree with the key they are sanitising.
+    safe = re.sub(r"[^A-Za-z0-9_]+", "_", str(key))[:80]
     return RAW / f"{kind}_{safe}.json.gz"
 
 
@@ -556,6 +580,12 @@ def _metered(led, urls_and_keys, kind, note):
     """
     out, consec, stopped, sent = [], 0, None, 0
     for key, url in urls_and_keys:
+        # lint-ok: class4 - this deadline cannot mark anything COMPLETE. It
+        # stops the LOOP OVER TARGETS, never one target's own retrieval: a
+        # target is exactly one request, and its retrieved-vs-reported verdict
+        # is written per query by hit_rows() as `completeness`. A target the
+        # deadline never reached has NO ROW AT ALL, and `search` resumes on
+        # exactly those; `stopped` is logged and written to the host lock.
         if time.time() - START > RUN_DEADLINE_S:
             stopped = "RUN_DEADLINE"
             break
@@ -1132,11 +1162,42 @@ def classify_speaker(sentence):
 
 
 def load_holdings_index():
-    idx = {}
-    p = STAGING / "tribal_debt_obligors.csv"
-    for r in read_csv(p):
-        idx[r["obligor_label"]] = r
-    return idx
+    """1082's obligors, keyed BOTH ways.
+
+    The join to the holdings register runs on `obligor_cedar_uid`, not on the
+    obligor label: a label is what a fund's schedule of investments happened to
+    print, and a court caption will never match it. Keying on the entity is the
+    whole point of having an entity layer.
+    """
+    by_label, by_uid = {}, {}
+    for r in read_csv(STAGING / "tribal_debt_obligors.csv"):
+        by_label[r["obligor_label"]] = r
+        if r.get("obligor_cedar_uid"):
+            by_uid.setdefault(r["obligor_cedar_uid"], []).append(r)
+    return {"by_label": by_label, "by_uid": by_uid}
+
+
+def holdings_for(holdings, uid, label=""):
+    """Return (joined_flag, observations, cusips, labels) for one entity."""
+    rows = holdings["by_uid"].get(uid, []) if uid else []
+    if not rows and label:
+        r = holdings["by_label"].get(label)
+        rows = [r] if r else []
+    if not rows:
+        return "no", "", "", ""
+    obs = sum(int(r.get("observations") or 0) for r in rows)
+    cus = sorted({c.strip() for r in rows
+                  for c in (r.get("cusips") or "").split(" | ")
+                  if c.strip() and c.strip() not in ("N/A", "000000000")})
+    return ("yes", str(obs), " | ".join(cus),
+            " | ".join(sorted(r["obligor_label"] for r in rows)))
+
+
+def spine_canonical(uid):
+    for r in spine_rows():
+        if r.get("cedar_uid") == uid:
+            return r.get("canonical_name", ""), r.get("tribe_id", "")
+    return "", ""
 
 
 _SPINE_ROWS = None
@@ -1297,8 +1358,11 @@ def build_dockets(hits, holdings, event_captions=()):
             f" side of the court's own caption. DEFENDANT beside a lender is "
             f"the distress shape; PLAINTIFF is not, on its own, distress at all.")
 
+        canon, canon_handle = spine_canonical(ob_uid)
+        if canon:
+            ob_name, ob_handle = canon, canon_handle or ob_handle
         lbl = h.get("obligor_label_1082", "") if (in_party or in_caption) else ""
-        hold_row = holdings.get(lbl, {})
+        joined, obs, cus, lbls = holdings_for(holdings, ob_uid, lbl)
         seen.add(did)
         rows.append({
             "docket_row_id": f"TDCD-{h.get('court_id','')}-{did}",
@@ -1307,10 +1371,12 @@ def build_dockets(hits, holdings, event_captions=()):
             "obligor_cedar_handle": ob_handle,
             "obligor_entity_match_method": ob_method,
             "obligor_entity_tier": "B",
-            "obligor_label_1082": lbl,
-            "joins_1082_holdings": "yes" if hold_row else "no",
-            "holdings_observations_1082": hold_row.get("observations", ""),
-            "holdings_cusips_1082": hold_row.get("cusips", ""),
+            "obligor_label_1082": lbls or lbl,
+            "joins_1082_holdings": joined,
+            "joins_1082_basis": ("joined on obligor_cedar_uid against "
+                                 "data/staging/tribal_debt_obligors.csv"),
+            "holdings_observations_1082": obs,
+            "holdings_cusips_1082": cus,
             "event_type": "CASE_FILED_IN_A_COURT_OF_RECORD",
             "event_type_basis": ("the docket exists and carries a filing date; "
                                  "NOTHING about its outcome is asserted here"),
@@ -1483,7 +1549,10 @@ def step_build():
                 "passage": "", "built_by_script": f"code/{SCRIPT}",
                 "built_date": TODAY})
             continue
-        hold_row = holdings.get(obligor_label, {})
+        canon, canon_handle = spine_canonical(ob_uid)
+        if canon:
+            ob_name, ob_handle = canon, canon_handle or ob_handle
+        joined, obs, cus, lbls = holdings_for(holdings, ob_uid, obligor_label)
         for ev_name, rx in EVENT_RULES:
             sents = find_sentences(text, rx)
             if not sents:
@@ -1538,10 +1607,12 @@ def step_build():
                 "obligor_cedar_handle": ob_handle,
                 "obligor_entity_match_method": ob_method,
                 "obligor_entity_tier": ob_tier,
-                "obligor_label_1082": obligor_label,
-                "joins_1082_holdings": "yes" if hold_row else "no",
-                "holdings_observations_1082": hold_row.get("observations", ""),
-                "holdings_cusips_1082": hold_row.get("cusips", ""),
+                "obligor_label_1082": lbls or obligor_label,
+                "joins_1082_holdings": joined,
+                "joins_1082_basis": ("joined on obligor_cedar_uid against "
+                                     "data/staging/tribal_debt_obligors.csv"),
+                "holdings_observations_1082": obs,
+                "holdings_cusips_1082": cus,
                 "event_type": ev_name,
                 "event_type_basis": (
                     f"phrase rule matched: {(m.group(0) if m else '')[:160]!r}"),
@@ -1565,6 +1636,17 @@ def step_build():
                 "verbatim_quote": quote,
                 "verbatim_quote_scope": ("one whole sentence from the opinion, "
                                          "unedited except for whitespace"),
+                # U+FFFD is in COURTLISTENER's OWN text, not in our decoding:
+                # their PDF extraction drops curly quotes and em dashes. We do
+                # not repair it, because repairing a quote is editing evidence.
+                # We name it so nobody publishes a mangled quote unknowingly.
+                "verbatim_quote_lost_characters": str(quote.count("�")),
+                "verbatim_quote_lost_characters_basis": (
+                    "U+FFFD count. These are present in CourtListener's own "
+                    "extracted text (typically a curly quote or em dash) and "
+                    "are NOT repaired here - editing a verbatim quote to make "
+                    "it read better is editing evidence. Re-read the source "
+                    "document at source_url before publishing the quote."),
                 "document_id": f"CLOP-{oid}",
                 "source_authority": "CourtListener / Free Law Project REST API v4",
                 "source_document_type": "JUDICIAL_OPINION",

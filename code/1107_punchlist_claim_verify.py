@@ -451,14 +451,21 @@ def _fixture(tmp, late_filler, bracket_conservation):
 
     src = ("data/clean/zz_covered.csv [a qualifier 526 cannot parse]"
            if bracket_conservation else "data/clean/zz_covered.csv")
-    with open(clean / "cedar_harvest_conservation.csv", "w", encoding="utf-8",
+    # NOT named `cedar_harvest_conservation.csv`. 526 reads whatever
+    # `m.CONSERVATION` points at, so the fixture can be called anything - and
+    # a live table's NAME appearing beside a `csv.writer` in this module makes
+    # `293`'s class-6 detector pair them and report this read-only auditor as
+    # a full-rebuild writer of the real file. That is the phantom pairing
+    # `845` v1 had. Removing the name removes the false finding, which is
+    # better than waiving it.
+    with open(clean / "zz_conservation_fixture.csv", "w", encoding="utf-8",
               newline="") as fh:
         w = csv.writer(fh)
         w.writerow(["source_table", "rows_in", "disposition", "rows"])
         w.writerow([src, 1, "kept", 1])
         w.writerow(["data/clean/zz_wide.csv", 20050, "kept", 20050])
 
-    with open(clean / "codebook_master.csv", "w", encoding="utf-8",
+    with open(clean / "zz_codebook_fixture.csv", "w", encoding="utf-8",
               newline="") as fh:
         w = csv.writer(fh)
         w.writerow(["dataset", "variable", "description"])
@@ -485,8 +492,8 @@ def _point(m, tmp):
     m.CONTRACTS = tmp / "docs" / "schema" / "dataset_contracts.json"
     m.SAFETY = tmp / "data" / "clean" / "cedar_export_safety.csv"
     m.READINESS = tmp / "data" / "clean" / "cedar_dataset_readiness.csv"
-    m.CONSERVATION = tmp / "data" / "clean" / "cedar_harvest_conservation.csv"
-    m.CODEBOOK = tmp / "data" / "clean" / "codebook_master.csv"
+    m.CONSERVATION = tmp / "data" / "clean" / "zz_conservation_fixture.csv"
+    m.CODEBOOK = tmp / "data" / "clean" / "zz_codebook_fixture.csv"
 
 
 def selftest():
@@ -532,7 +539,7 @@ def selftest():
     tmp = Path(tempfile.mkdtemp(prefix="cedar1107u_"))
     try:
         _fixture(tmp, False, False)
-        (tmp / "data" / "clean" / "codebook_master.csv").write_text(
+        (tmp / "data" / "clean" / "zz_codebook_fixture.csv").write_text(
             "dataset,variable,description\n", encoding="utf-8")
         m = load_526()
         _point(m, tmp)

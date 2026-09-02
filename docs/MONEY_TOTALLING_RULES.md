@@ -319,7 +319,43 @@ money: the fix removes the false positives and not the true one.
 
 # The FY2007 seam, as an exact set — and what the two faads tables are
 
-*Appended 2026-09-01 by workstream FAADS (`code/791_faads_transaction_key_and_repoint.py`). Re-measured on every run of `791 seam`; enforced by `791 seam --verify`.* **This file is written WHOLESALE by `574`, which preserves only marked blocks; this section is inside `<!-- BEGIN FAADS -->` / `<!-- END FAADS -->
+*Appended 2026-09-01 by workstream FAADS (`code/791_faads_transaction_key_and_repoint.py`). Re-measured on every run of `791 seam`; enforced by `791 seam --verify`.* **This file is written WHOLESALE by `574`, which preserves only marked blocks; this section is inside `<!-- BEGIN FAADS -->` / `<!-- END FAADS -->` so it survives.**
+
+## The FY2007 overlap is no longer an estimate
+
+GRAIN-WS4 measured the seam at **98.9% of the modern table's FY2007 dollars** and could not do better, because neither side carried a transaction key. `30_funding_pre2008.to_out_row` dropped `assistance_transaction_unique_key`; the re-extract on 2026-09-01 restored it on every FY2007 row. Both sides now carry the same source identity, so the overlap is a **set intersection, not a ratio**:
+
+| | rows | obligations |
+|---|---:|---:|
+| `faads_transactions_all_agencies.csv` FY2007 | 774,755 | $475,359,703,131.83 |
+| …carrying `assistance_transaction_unique_key` | **774,755 (100%)** | |
+| `federal_funding_transactions.csv` FY2007 | 11,443 | $2,189,838,445.60 |
+| **…that are the SAME TRANSACTION as an archive row** | **11,063** | **$2,165,856,968.60** |
+| …present only in the modern table | 380 | $23,981,477.00 |
+
+WS4's dollar estimate was right to the cent; what is new is that the overlap is now **11,063 identified rows** a consumer can subtract by key, instead of a percentage they have to trust.
+
+## The rule, and what enforces it
+
+**Stack FY2001–2006 from `faads_transactions_all_agencies.csv` and FY2007 onward from `federal_funding_transactions.csv`.** The modern table is the attributed one, so the seam belongs on its side. Loading both files whole double-counts 11,063 FY2007 transactions and $2,165,856,969.
+
+No code can stop a buyer adding two files together. What **is** enforced, by `py -3 code/791_faads_transaction_key_and_repoint.py seam --verify` (exit 1 on breach), is the property that makes the rule checkable rather than advisory:
+
+1. **every FY2007 row of the archive table carries a transaction key**, so the overlap stays a set — if a future rebuild drops the column again this fails immediately and loudly instead of the seam quietly reverting to an estimate;
+2. **the overlap is exactly the recorded row count and dollar figure**, re-measured against `docs/schema/faads_fy2007_seam.json`, which is written for consumers to subtract programmatically.
+
+## Neither faads table is a Native table — restated, because the re-extract did not change it
+
+`faads_transactions_all_agencies.csv`: `tribe_id` blank on **all 2,769,748 rows**; its $1,830,639,317,708 is the whole federal assistance universe for FY2001–2007, every recipient in the country. `faads_transactions.csv`: 60,661 rows, $9,348,473,200, `tribe_id` blank on all of them — an **agency** filter (Interior), not a Native one, and carried verbatim into the all-agencies file, so **never add the two**. The Native attribution for these years lives outside both files, in `faads_entity_attribution.csv` (29,594 rows, FY2001–06, $4,721,685,550 carried verbatim off the transactions — a projection, never new money).
+
+## What a buyer may total, now that the grain is stated for one of the pair
+
+- **`faads_transactions.csv` — SAFE at transaction grain.** `assistance_transaction_unique_key` is unique on all 60,661 rows (0 collisions, 0 blanks) and the grain is declared in `512.GRAIN_FAADS`. The 1,001 rows it was blocked on as literal duplicates are **1,001 distinct source transactions**; the count is 0 now and **not one row was deleted**.
+- **`faads_transactions_all_agencies.csv` — still ROW-LEVEL ONLY, and by a knowable amount.** The key is present on 825,754 of 2,769,748 rows (29.8%: every FY2007 row, every Interior row) and unique where present. It is blank on the 1,943,994 FY2001–2006 rows of the other nine agencies because those staged objects were requested with a 20-column subset and **physically lack the column** — the USAspending Award Data Archive, the only full-column route, begins at FY2007. **3,441 rows** remain byte-identical to another row across all 27 columns, all of them inside that unkeyed region. `obligated_usd` is additive at transaction grain; the residual exposure a buyer carries is those 3,441 rows.
+
+**Nothing was de-duplicated.** Whole-row duplicates fell 179,259 → 3,441 on the all-agencies table and 1,001 → 0 on the Interior table by **restoring an identity column, not by deleting a row**. A de-dupe would have destroyed $8,291,124,113 of real obligations — `ed_fy2007_archive.zip` holds 344,401 rows and 344,401 distinct keys, and the worst apparent group (445 identical UC Irvine rows) is 740 real transactions carrying modification numbers 0001–0740, 592 of them $0.
+
+<!-- END FAADS -->
 
 <!-- BEGIN GAMING-NR -->
 
@@ -676,6 +712,72 @@ added to. `py -3 code/1082_tribal_debt_holdings_disclosure.py verify` fails
 (exit 1) on invariant `I3_no_holding_asserts_a_summable_total` if any row loses
 it, and `selftest` proves that check fires.
 <!-- END TRIBAL-DEBT -->
+
+<!-- BEGIN TRIBAL-DEBT-COURT -->
+## Tribal debt in the courts - `tribal_debt_court_events`, `tribal_debt_court_dockets`
+
+*Appended 2026-09-02 by `code/1110_tribal_debt_court_distress.py` (staged in
+`data/staging/`, not in `data/clean/`). Companion to the TRIBAL-DEBT block
+above, which covers the HOLDINGS side. This block has its own marker name so
+`574`'s wholesale rewrite preserves both. Do not edit another workstream's
+block.*
+
+### The one-line answer per table
+
+| table | additive measure | sum it at | what double-counts |
+|---|---|---|---|
+| `tribal_debt_court_events.csv` | **none** | one row = ONE EVENT TYPE in ONE COURT DOCUMENT | everything. Several sentences supporting one event type are ONE event; an appellate and a district opinion in one case are TWO documents about ONE dispute |
+| `tribal_debt_court_dockets.csv` | **none** | one row = ONE DOCKET in ONE COURT | an appeal and its district case are two dockets and one dispute. Counting dockets is not counting disputes |
+
+### `amount_as_recited` is not a debt figure
+
+It is whatever dollar amount appears **inside the quoted sentence**, exactly as
+the court wrote it. It is not normalised, not converted, not verified against
+the instrument, and frequently it is a figure a party alleged rather than one a
+court found. Never sum it, never chart it, and never place it beside
+`tribal_debt_holdings.principal_usd`, `deals_classified.Announced_Value_USD` or
+`tribal_bond_issuances.par_amount` - those describe an instrument, this
+describes a sentence about one. `not_summable_with` says so on every row.
+
+### AN EVENT IS NOT A RUNNING CONDITION
+
+Every row is dated and every row carries `currency_caution` in full. A 2013
+restructuring is a fact about 2013. **Nothing in this table says anything about
+any nation's finances today**, and the newest event in it is from **2017**.
+Presenting these rows without their date, or aggregating them into a per-nation
+"distress" score, misrepresents every one of them.
+
+### A DEFAULT IS NOT WHAT THIS TABLE MOSTLY CONTAINS
+
+The largest single `event_type` is
+`LITIGATION_OUTCOME_INSTRUMENT_HELD_VOID_OR_UNENFORCEABLE` (9 of 26). In
+*Wells Fargo v. Lake of the Torches*, 658 F.3d 684 (7th Cir. 2011), the bond
+indenture was held **void** as a management contract unapproved by the NIGC -
+and in *Stifel v. Lac du Flambeau*, 807 F.3d 184 (7th Cir. 2015), on the same
+paper, the resolutions were held **not** void. **A tribal obligor is a
+sovereign and a tribal default is not a corporate default.** Read
+`event_type`, `assertion_or_finding` and `verbatim_quote` together, or do not
+use the row.
+
+### A FILING IS A PARTY'S ASSERTION; A JUDGMENT IS A FINDING
+
+`assertion_or_finding` is `ALLEGATION_BY_A_PARTY` (3), `COURT_FINDING` (2) or
+`PROCEDURAL_RECORD` (21), with the cue that decided it in
+`assertion_or_finding_basis`. **Only two rows in the whole table are a court
+holding something.** Quoting a `PROCEDURAL_RECORD` or an
+`ALLEGATION_BY_A_PARTY` row as though a court had found it is the single
+easiest way to misuse this dataset.
+
+### The join to the holdings register is on the ENTITY, never on the label
+
+`joins_1082_holdings` is computed against `obligor_cedar_uid`, not against the
+obligor label a fund's schedule of investments happened to print. Three of
+`1082`'s fourteen obligors are reached. **Zero EVENT rows join** - the entities
+with opinions and the entities with fund holdings are almost disjoint, and the
+two tables' year ranges (opinions end 2017, N-PORT begins 2019) do not overlap
+by a single year. Do not present them as one series.
+<!-- END TRIBAL-DEBT-COURT -->
+
 
 <!-- BEGIN LOBBY-SUPERSESSION -->
 ## The LDA amendment double-count, closed 2026-09-02 — and the FOURTH lobbying number that now exists
@@ -1281,3 +1383,50 @@ count of filings**. Say "filings" or filter to `primary`; never say
 "subawards" over the unfiltered row count.
 
 <!-- END DEEPEN-SUBAWARD-DENOMINATOR -->
+
+<!-- BEGIN QUARANTINE -->
+## The quarantined-method exposure, and the $16.998B that left the attributed total
+
+*Appended 2026-09-02 by workstream QUARANTINE
+(`code/1079_quarantine_method_exposure.py`, ADR-019). Re-measured on every run
+of `1079 verify`; the authority is `docs/QUARANTINED_METHOD_EXPOSURE.json`,
+which that command regenerates. This section is inside
+`<!-- BEGIN QUARANTINE -->` / `<!-- END QUARANTINE -->`; this file is written
+WHOLESALE by `574` and preserves only marked blocks.*
+
+**`prime_contracts.csv` still totals `$310,005,258,660.75` and still holds
+1,217,768 rows.** Nothing was created or destroyed. What changed is how much of
+that total Cedar claims to have attributed to a nation:
+
+| | rows | obligations |
+|---|---:|---:|
+| attributed, before 2026-09-02 | 888,958 | $245,035,411,233.42 |
+| attributed, after | 785,787 | **$228,037,829,478.54** |
+| moved to the honestly-unattributed pool | 103,171 | **$16,997,581,754.88** |
+
+**Anyone quoting "$244.77B attributed / 79.0%" from `START_HERE.md` is quoting
+a superseded figure.** The current attributed total is $228.04B, and the
+unattributed pool it publishes as a virtue grew by $16.998B.
+
+**Three new rules for anyone summing this table.**
+
+1. **`identifier_ruling_quarantined = 'Y'` marks money that rests on a
+   discredited method.** 227,540 rows carry it, $28.93B of them still
+   attributed. It is legitimate to publish, and it is not legitimate to publish
+   *silently*: any per-entity total should be able to state how much of itself
+   sits on a quarantined ruling.
+2. **`identifier_ruling_method` is the RULING; `attribution_method` is the
+   JOIN.** They answer different questions and neither substitutes for the
+   other. Filtering on `attribution_method = 'uei_exact'` selects rows whose
+   identifiers matched exactly — it says nothing about whether the identifier
+   belongs to that nation.
+3. **The repointed $2,443,371,845.81 is a MOVE, not new money.** 126 entities
+   changed total; the gains and the losses net to zero. Never add
+   `review/1079_entity_ledger_2026-09-02.csv` to anything — it is a delta
+   table, and the levels it deltas are already in `prime_contracts.csv`.
+
+**Subaward dollars are reported separately and may not be added to any of the
+above.** On the sub side 1,971 rows lost a `sub_native_tribe_id` and 114 were
+repointed; on the prime side 517 and 117. Those are subaward amounts, a
+different money column in a different file.
+<!-- END QUARANTINE -->

@@ -957,6 +957,13 @@ MD_PROVEN_SAFE = {
     "docs/datasets/_PUNCHLIST.md":
         "2026-09-02 regen: 4 removed / 14 added, 0 unpaired removals - open "
         "item counts moved, nothing was lost.",
+    "docs/datasets/_PUNCHLIST_CLAIM_AUDIT.md":
+        "2026-09-02 regen: 1 removed / 1 added, 0 unpaired within a hunk - the "
+        "open-item count moved 334 -> 333 while the fleet landed work, and "
+        "nothing else changed. The 12 orphan headings are `### `table` - "
+        "dataset - invariant`, built by concatenation from the finding, which "
+        "is why the whole-string signal cannot see them. 1107 makes no network "
+        "call in its default mode; it re-reads the clean tables.",
 }
 
 

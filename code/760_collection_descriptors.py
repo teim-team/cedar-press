@@ -176,6 +176,62 @@ def _flagship_map() -> tuple[dict, set]:
     return flag, spine
 
 
+# CODEX PR #29 ROUND 3, FINDING 5. The only published blocker described the
+# row count, and the same investigation had measured two harder failures on
+# the same table and left them in prose. A consumer reading `cedar.blockers`
+# as instructed would conclude that reconciling the count makes the dataset
+# ready. It does not. So the flagship's OWN readiness failures are measured
+# here and published beside the count mismatch.
+#
+# Measured, not asserted: the identity column is whichever of the candidates
+# below the table actually carries, and if it carries none the check says
+# UNMEASURED rather than reporting a fill rate for a column that is absent -
+# field guide section 3, habit 2 and habit 4.
+IDENTITY_CANDIDATES = ("cedar_uid", "business_entity_id", "entity_id",
+                       "recipient_cedar_uid", "owner_hub_cedar_uid")
+
+
+def flagship_readiness(tbl: str, tables_of_all: dict) -> list:
+    """Contract failures measured ON the flagship table itself."""
+    src = ROOT / "data" / "clean" / tbl
+    if not src.exists():
+        return [f"UNMEASURED: {tbl} not readable at {src}"]
+    out = []
+    with src.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+        rd = csv.DictReader(fh)
+        cols = list(rd.fieldnames or [])
+        idcol = next((c for c in IDENTITY_CANDIDATES if c in cols), None)
+        n = 0
+        filled = 0
+        for row in rd:
+            n += 1
+            if idcol and (row.get(idcol) or "").strip():
+                filled += 1
+    if not n:
+        return [f"UNMEASURED: {tbl} has no rows"]
+    if idcol is None:
+        out.append(f"C4 identity path: {tbl} carries none of "
+                   f"{', '.join(IDENTITY_CANDIDATES)} - the customer-facing "
+                   f"table has no entity key column at all")
+    else:
+        pct = 100.0 * filled / n
+        if pct < 95.0:
+            out.append(f"C4 identity path: {idcol} is filled on "
+                       f"{filled:,} of {n:,} rows ({pct:.1f}%) in {tbl}, the "
+                       f"table the sample is drawn from - the dataset's "
+                       f"headline '100% keyed' is measured on the contract "
+                       f"tables, which exclude it")
+    # C1 grain: declared in the contract, and the contract does not claim this
+    # table, so by construction there is none. Stated as measured rather than
+    # inferred: it is absent from every collection's table list.
+    claimed_anywhere = any(tbl in v for v in tables_of_all.values())
+    if not claimed_anywhere:
+        out.append(f"C1 grain: UNSTATED on {tbl} - no collection contract "
+                   f"claims it, so it carries no declared grain and no "
+                   f"validated primary key")
+    return out
+
+
 def flagship_violations(tables_of: dict, nrows_of: dict) -> list:
     """One entry per collection whose descriptor row count is contradicted by
     the sample it ships. Returns [(collection, flagship, flagship_rows,
@@ -362,25 +418,45 @@ def main() -> int:
         c["status"] = "BLOCKED"
         c["flagship_table"] = tbl
         c["flagship_rows"] = frows
-        # The union of both Cedar-side declarations of what this collection
-        # holds. Stated, not assumed: neither half was ratified, and printing
-        # the smaller of two disagreeing measurements is the failure this
-        # check exists to stop.
-        c["n_rows"] = drows + frows
-        c["n_rows_basis"] = (f"{drows:,} rows over {c['n_tables']} contract "
-                             f"tables + {frows:,} in the unclaimed flagship "
-                             f"{tbl}")
+        c["blockers"] += flagship_readiness(tbl, tables_of)
+        # CODEX PR #29 ROUND 3, FINDING 1, AND IT IS RIGHT.
+        #
+        # This published the SUM, 1,657 + 2,916 = 4,573, as `rows_label`. That
+        # assumed the six contract tables and the flagship are disjoint rows
+        # of one dataset and NOTHING ESTABLISHES THAT - the README describes
+        # them as different relations (firms certified by a nation vs firms
+        # owned by individual people), which is an argument they are disjoint
+        # and not a measurement that they are. Worse, the qualification lived
+        # in `n_rows_basis` in the SIBLING file, and `rows_label` is the field
+        # the product renders: a consumer sees "4,573 rows" as an exact count
+        # of a dataset that does not exist in that shape.
+        #
+        # A fabricated number with a footnote nobody renders is still a
+        # fabricated number, and this file's own docstring already says the
+        # rule - "an empty field a human fills is honest; a generated sentence
+        # that reads like a claim is not". So NO COUNT IS STATED. The two
+        # component measurements ship separately, each labelled with the table
+        # set it came from, and neither is added to the other.
+        c["n_rows"] = None
+        c["n_rows_contract_tables"] = drows
+        c["n_rows_flagship"] = frows
+        c["n_rows_basis"] = (
+            f"NOT SUMMED. {drows:,} rows over the {c['n_tables']} tables the "
+            f"collection contract claims, and {frows:,} in {tbl}, the "
+            f"unclaimed table the sample is drawn from. Whether these are "
+            f"disjoint rows of one dataset is undetermined, so no total is "
+            f"published.")
         for d in out:
             if d["id"] == c["product_id"]:
-                d["rows_label"] = f"{c['n_rows']:,} rows"
+                d["rows_label"] = "row count unresolved"
     if fviol:
         print(f"  760 FLAGSHIP MISMATCH - {len(fviol)} of {len(out)} "
               f"collections publish a row count their own sample contradicts:")
         for cid, tbl, frows, drows, reason in fviol:
             print(f"    !! {cid}: {reason}")
             print(f"       sample source {tbl} = {frows:,} rows; "
-                  f"contract sum = {drows:,}; shipping the union "
-                  f"{drows + frows:,} and marking BLOCKED")
+                  f"contract tables = {drows:,}; NOT summed, no count "
+                  f"published, marking BLOCKED")
 
     # ---- THE CONTRACT CHECK THAT SHOULD HAVE EXISTED IN ROUND 1 --------
     # `CollectionDataset(**descriptor)` is the call the README advertises, so

@@ -331,10 +331,32 @@ def plan(fields, rows, idx):
         have = [i for i in members if (rows[i].get(ID_COL) or "").strip()]
         for i in have:
             r = rows[i]
+            # AN EXISTING BASIS IS A FACT ABOUT HOW THIS ROW GOT ITS ID, AND A
+            # RE-RUN MUST NOT OVERWRITE IT.  (2026-09-02)
+            #
+            # `carried_by_121` means "121 append supplied this id". After a
+            # first `apply`, EVERY row has an id, so on the second run every
+            # row lands in `have` and would be re-labelled `carried_by_121` -
+            # including the 71,839 whose id this script itself recovered. That
+            # is not a re-classification, it is a false provenance claim, and
+            # the I3 guard below correctly refused the whole run because of it
+            # ("row 0 column 'subaward_sam_report_id_basis' changed
+            # 'recovered_unique' -> 'carried_by_121'").
+            #
+            # The consequence was worse than a refusal: after `121 append`
+            # added 10,318 rows, `apply` could not run AT ALL, so those rows
+            # kept a blank `subaward_sam_report_id_basis` and a blank
+            # `subaward_source_record_id` - which is half the declared primary
+            # key. The table went from 0 rows with a blank key to 10,318.
+            #
+            # Preserving the recorded basis makes `apply` idempotent, which is
+            # what the fold-in cycle needs, and it keeps the true one.
+            prior = (r.get(BASIS_COL) or "").strip()
             assign[i] = ((r.get(ID_COL) or "").strip(),
                          (r.get(MONTH_COL) or "").strip(),
-                         (r.get(MOD_COL) or "").strip(), "carried_by_121")
-            st["carried_by_121"] += 1
+                         (r.get(MOD_COL) or "").strip(),
+                         prior or "carried_by_121")
+            st[prior or "carried_by_121"] += 1
         claimed = {(rows[i].get(ID_COL) or "").strip() for i in have}
         free = [t for t in idx.get(gk, []) if t[0] not in claimed]
 
@@ -510,7 +532,19 @@ def do_apply():
 
     # I3: every pre-existing cell in every pre-existing column byte-identical,
     # except the three the recovery is allowed to FILL (never to change).
-    fillable = {ID_COL, MONTH_COL, MOD_COL}
+    # The three id columns, PLUS the three columns this script owns outright.
+    # Extended 2026-09-02. `fillable` permits a change only where the old cell
+    # was EMPTY (`b[j] == ""` below), so widening it cannot mask a real edit -
+    # a value changing to a different value is still refused, which is exactly
+    # what caught the `recovered_unique -> carried_by_121` regression above.
+    #
+    # It had to be widened because `121 append` adds rows with these three
+    # BLANK, and the guard as written refused the fill: after the 2026-09-02
+    # fold-in, 10,318 of 87,177 rows carried a blank `subaward_source_record_id`
+    # - half the declared primary key - and `apply` could not fix them because
+    # fixing them was the thing being refused. A guard that blocks the repair
+    # of the state it is meant to protect is inverted.
+    fillable = {ID_COL, MONTH_COL, MOD_COL, BASIS_COL, SRC_ID_COL, SRC_ID_BASIS}
     for i, (b, r) in enumerate(zip(before_cells, out)):
         for j, c in enumerate(fields):
             if (r.get(c) or "") != b[j]:

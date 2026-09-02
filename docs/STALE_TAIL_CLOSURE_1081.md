@@ -6,16 +6,16 @@
 
 | measure | before | after |
 |---|---:|---:|
-| untouched over a year | 287 | **398** |
+| untouched over a year | 287 | **397** |
 | no usable date at all | 373 | **148** |
 | in no substantive Cedar row | 83 | **0** |
-| *the union of the first two* | 660 | **546** |
-| median days since change | 112 | 134 |
+| *the union of the first two* | 660 | **545** |
+| median days since change | 112 | 133 |
 | p90 days | 3,627 | 1,365 |
 
 Before is `docs/ENTITY_FRESHNESS.md` as generated 2026-09-02 before this workstream; that file is kept at `docs/ENTITY_FRESHNESS.md.bak_2026-09-02_pre_1081_stale_tail_dated_facts`.
 
-**`untouched over a year` went UP, and that is the instrument working rather than a regression.** 287 was an undercount: an entity with no date at all could not be counted as stale, because there was nothing to compare against. 255 entities gained a first real date here and most of those dates are old, so they moved out of the invisible bucket and into the visible one. The figure that cannot move in that way is the union of the two, and it fell by 114. So did p90, by 2,262 days — the extreme tail is shorter.
+**`untouched over a year` went UP, and that is the instrument working rather than a regression.** 287 was an undercount: an entity with no date at all could not be counted as stale, because there was nothing to compare against. 255 entities gained a first real date here and most of those dates are old, so they moved out of the invisible bucket and into the visible one. The figure that cannot move in that way is the union of the two, and it fell by 115. So did p90, by 2,262 days — the extreme tail is shorter.
 
 ## What was acquired, and from where
 
@@ -56,7 +56,7 @@ Before is `docs/ENTITY_FRESHNESS.md` as generated 2026-09-02 before this workstr
 | Native Hawaiian Organization | 88 | 82 |
 | BIE School | 103 | 13 |
 | Alaska Native Village Corporation | 78 | 14 |
-| Individually Native-owned business | 37 | 5 |
+| Individually Native-owned business | 36 | 5 |
 | Native Community Development Financial Institution | 26 | 10 |
 | State-recognized tribe | 28 | 3 |
 | Native Financial Institution | 6 | 13 |

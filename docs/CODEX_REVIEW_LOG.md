@@ -584,3 +584,145 @@ it.
 
 **The dist-vs-repo diff was run AFTER the push, per the rule earned last
 round, and came back in sync.**
+
+### Codex answered — five findings on `caf7438`, all P2, **all five right**
+
+Triggered by the `@codex review` comment, which is the mechanic recorded at
+the top of this section. Enumerated across all three endpoints: 5 new review
+comments, 0 new issue comments beyond the refreshed summary, latest Codex
+review now on `caf7438`.
+
+| # | file | finding | verdict | what it did not show |
+|---|---|---|---|---|
+| 1 | `collection_descriptors.json` | do not publish the unverified sum 4,573 as the row count | **Right, and further than it knew** | the *other* half, 1,657, is not a row count either — five grains added together |
+| 2 | `contractors__sample.csv` | `funding_agency = "Nan"` is a fictitious agency | **Right** | 1 cell sampled; **617,097 cells, 8 columns**; and the source fix then lost a race |
+| 3 | `README.md` | `samples/README.md` still publishes both stale figures | **Right, and it is generated** | the sibling was fixed at its generator, not by hand |
+| 4 | `README.md` | the overview still says every blocker list is empty | **Right** | same defect shape as the two row counts, one file apart |
+| 5 | `collection_descriptors.cedar.json` | blockers omit the flagship's own readiness failures | **Right** | a consumer would conclude fixing the count makes `owned` ready |
+
+#### Finding 1 — the refusal was correct, and it holds against the fix's own reasoning
+
+The first fix published the union, 1,657 + 2,916 = 4,573. Codex: *"nothing
+establishes that these are disjoint rows in one shipped dataset."* True, and
+the argument against it was already in the text doing the publishing — the
+README describes the two as **different relations**, which is a reason to
+believe they are disjoint, not a measurement that they are. Worse, the
+qualification lived in `n_rows_basis` in the sibling `.cedar.json` while
+`rows_label` is the field the product renders. **A fabricated number with a
+footnote nobody renders is still a fabricated number**, and 760's own
+docstring already carried the rule it broke: *"an empty field a human fills is
+honest; a generated sentence that reads like a claim is not."*
+
+`rows_label` is now `row count unresolved`; `n_rows` is `null`;
+`n_rows_contract_tables` (1,657) and `n_rows_flagship` (2,916) ship
+separately, each labelled with the table set it came from, and are not added.
+
+**Then the measurement Codex's objection provoked found the worse half.**
+Across all six contract tables there are **10** shared firm names against the
+directory's 2,738 — so the two sets are nearly disjoint after all. But inside
+the contract set:
+
+| table | rows | what a row is |
+|---|---:|---|
+| `individual_native_firm_register.csv` | 45 | a firm |
+| `individual_native_firm_contracts.csv` | 324 | a **firm-year**, 38 distinct firms |
+| `individual_native_ownership_verification.csv` | 335 | a firm's verification |
+| `individual_native_verification_candidates.csv` | 335 | **the same 335 firms again** — all 335 `(name, uei)` keys shared, identical column set |
+| `individual_native_firm_contracts_published.csv` | 613 | **not a firm** — `cell_type`, `dimension_1`, `dimension_2`, `n_firms`: a cross-tabulation |
+| `individual_native_exclusion_pairs.csv` | 5 | a pair |
+| **sum** | **1,657** | **five grains added together** |
+
+**Neither number in the original contradiction was a count of a dataset.**
+1,657 counts 335 firms twice and adds 613 aggregate cells to a firm count.
+The de-duplication problem Codex asked to see resolved was inside the half
+nobody was questioning — including this side, which had spent the whole round
+treating 1,657 as the trustworthy figure and 2,916 as the one it contradicted.
+
+#### Finding 2 — one sampled cell, 617,097 in the table, and the reason is a good one
+
+`772_strip_nan_sentinels.py` matched **case-sensitively**, justified in its own
+docstring by *"never a substring — `Nanticoke`, `Nanakuli` and `NANA` are real
+values"*. Every one of those is an argument against a SUBSTRING rule, and it
+was never a substring rule: it is whole-cell equality, and a 3-character token
+cannot equal a 4- or 8-character value. **The case-sensitivity guarded nothing
+the whole-cell rule was not already guarding.** Hidden by it:
+
+    cage_code               398,840   32.75%   'NAN'
+    place_of_perform_city    88,269    7.25%   'NAN'
+    place_of_perform_state   87,068    7.15%   'NAN'
+    funding_agency           33,263    2.73%   'Nan'
+    extent_competed           9,411    0.77%   'NAN'
+    recipient_state_code        202            'NAN'
+    parent_uei                   22            'NAN'
+    recipient_city_name          22            'NAN'
+                            -------
+                            617,097
+
+`extent_competed` is the worst: START_HERE warns it holds two vocabularies and
+must be read through `extent_competed_normalized`; a phantom `NAN` is a third.
+
+**Scope measured in both directions: one table.** The same case-insensitive
+sweep over the eleven other flagship tables returns **0** cells. The token set
+was deliberately **not** widened — `NA` (6 cells) and `N/A` (7) stay, because
+`NA` is an abbreviation a human may have typed to mean *not applicable*, which
+is a statement rather than a stringified float. Named, not swept.
+
+**AND THE SOURCE FIX LOST A RACE, WHICH IS THE DURABLE PART.** 772 corrected
+and run: 617,097 cleared, 1,217,768 rows in and out, `$310,005,258,660.75`
+unchanged to the cent. Re-measured minutes later: **all 617,097 back.** A
+concurrent in-place enricher had read the table *before* 772 started and wrote
+back its own copy, with five new `identifier_ruling_*` columns and every
+sentinel restored. **772's guard compares size and mtime across its own READ
+and correctly saw nothing** — the other writer's read predated it, so there
+was nothing for that guard to see. The live file's mtime (07:57:20) is
+*earlier* than 772's write (08:02:03), which is the tell.
+
+**The rule this earns, beside "the enricher runs LAST": a mtime guard around
+your own read cannot detect a writer whose read predates yours. Two in-place
+enrichers on one table need a declared ordering, and these two had none.** It
+is reported rather than fought — re-running 772 against a live job is a write
+war, and the ordering is an integrator decision.
+
+So the guard now sits in **two** places, and the second cannot be raced. `770`
+blanks any whole-cell null token across the **whole source table** before the
+ten rows are drawn — which also stops a row being scored "complete", and so
+preferentially sampled, for holding the string `Nan`. Counts are printed per
+column and published in `samples/README.md`, so the guard surfaces the
+upstream defect instead of concealing it.
+
+#### Findings 3, 4 — the same defect shape as the one this round opened with
+
+Both are a corrected statement and its uncorrected copy. Finding 3: the
+sibling `samples/README.md` still carried **both** stale figures and a
+parenthetical calling the gap a rebuild artefact whose last two digits did not
+matter. It was not an artefact — the two numbers are the same measurement run
+**case-sensitively (364,754) and case-insensitively (340,738)**, a 24,016-row
+difference, which is why the comparison mode now ships with the figure. That
+file is **generated by 770**, so it was fixed at the generator, not by hand.
+Finding 4: the contract overview still said every blocker list was empty after
+the status section had been changed to name two.
+
+**Three instances in one branch of one thing: a number corrected in one place
+and left standing in another.** It is the same failure as `owned`'s two row
+counts, and the same failure as `345,180` / `345,108`. The field guide's
+"numbers go stale in place" is usually read as *old documents rot*. These
+three rotted **within a single edit**.
+
+#### Finding 5 — blockers are an interface, and prose is not
+
+The measurement existed and sat in prose. A consumer following this project's
+own instruction to read `cedar.blockers` would have concluded that reconciling
+the count makes `owned` ready. All three now ship, **measured on the table
+rather than asserted**: the flagship mismatch, `C4 identity path`
+(`business_entity_id` filled on 4 of 2,916 rows, 0.1%), and `C1 grain
+UNSTATED` with no validated primary key. The identity column is *found* among
+candidates rather than assumed, and a table carrying none of them reports
+**UNMEASURED** rather than a fill rate for a column that is not there.
+
+#### Gate state
+
+`293_lint_bug_classes.py`: **zero** findings name `760` or `770`; every new
+finding since baseline belongs to another workstream (1011, 1060, 1085, 1086,
+846, 852, 873, 992, 1030, 1031, 1110, 980, 1081, 1077, 1107, 30, 518, 870,
+871). `760 selftest` — three fixtures, all pass. `760 verify` — exits 1,
+correctly, on the named finding it exists to raise.

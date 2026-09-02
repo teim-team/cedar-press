@@ -2893,6 +2893,36 @@ GRAIN_NEST = {
 }
 GRAIN.update(GRAIN_NEST)
 
+# --- STALE-TAIL: dated public facts for the 830 freshness tail (ADR-022) ----
+GRAIN_STALE_TAIL = {
+    "entity_dated_public_facts.csv": _d(
+        "one row per (entity, route, source, fact_key, identifier) - an "
+        "OBSERVATION that a named public source states a dated fact about "
+        "this entity, NOT one row per entity and NOT a coverage ledger. An "
+        "entity with a UEI in the assistance file, an EIN at the IRS and an "
+        "NCES BIE school number is three rows, and each carries the date its "
+        "own source states in `as_of_date` with the field that states it in "
+        "`as_of_date_basis`. NEGATIVES ARE ROWS TOO: a route that looked and "
+        "found nothing writes `match_method = NOT_MATCHED` with the reason "
+        "and NO date, so `attempted and found nothing` is distinguishable "
+        "from `never attempted`. Do NOT count rows as entities and do NOT "
+        "read `checked_date` as a fact about the entity - it is Cedar's "
+        "clock, and 830's NEVER regex excludes it by name.",
+        primary_key=["cedar_uid", "route", "source", "fact_key",
+                     "identifier_value"],
+        join_cardinality={"cedar_uid": "many"},
+        declared_by="workstream STALE-TAIL 2026-09-02 (ADR-022): the "
+                    "five-part key confirmed 632 distinct on the FULL 632-row "
+                    "file with csv.DictReader, 0 blank cedar_uid, 0 literal "
+                    "duplicate rows; two consecutive full runs of "
+                    "code/1081_stale_tail_dated_facts.py produced a "
+                    "byte-identical file (md5 8ae7abfd...). No single column "
+                    "is a key: one entity legitimately holds several "
+                    "identifiers, and one identifier legitimately yields a "
+                    "fact from more than one source"),
+}
+GRAIN.update(GRAIN_STALE_TAIL)
+
 # --- PR29: the NAGPRA institution bridge -----------------------------------
 # Workstream `pr29`, 2026-09-02, code/1077_nagpra_institution_grain.py. Own
 # dict, per the field guide - nobody else's is touched.

@@ -32,6 +32,8 @@ Indian Affairs publishes the Tribal Leaders Directory as an ArcGIS FeatureServer
 | resolved to the Cedar spine by exact normalised name | 587 (98%) |
 | carrying `date_elected` | 487 (81%) |
 | carrying `next_election` | 468 (78%) |
+| of those, parseable as an ISO date | 469 `date_elected`, 452 `next_election` |
+| free-text date values the BIA publishes instead | 18 and 16 |
 | rows flagged with an upstream BIA date defect | 1 |
 | HTTP requests the whole national pull cost | 2 |
 
@@ -56,35 +58,58 @@ Titles, which are themselves a governance finding — the office a nation puts a
 | Tribal President | 2 |
 | Vice-President | 2 |
 
-### Term starts, by year
+### The date fields are FREE TEXT, and that is the first thing to know about them
+
+`dateelected` and `nextelection` are strings in the source, not dates. Most are ISO, and **18 and 16 are not** — `09/2020`, `2021`, `July 2023`, `TBD`. Slicing the first four characters off those gives you year buckets called *July* and *9/20*, so the tables below count only ISO values and the rest are reported here rather than silently binned: `03/2022`, `04/2020`, `04/2024`, `05/2023`, `05/2027`, `08/2018`, `08/2022`, `09/2020`, `09/2021`, `09/2022`, `09/2023`, `10/2020`, `10/2022`, `11/2021`.
+
+### Term starts, by year (ISO values only, n=469)
 
 | year elected | leaders |
 |---|---:|
+| 1978 | 1 |
+| 1996 | 1 |
+| 2000 | 1 |
+| 2011 | 3 |
+| 2012 | 5 |
+| 2013 | 4 |
+| 2014 | 2 |
+| 2015 | 1 |
+| 2016 | 2 |
+| 2017 | 9 |
 | 2018 | 12 |
 | 2019 | 8 |
-| 2020 | 23 |
-| 2021 | 41 |
-| 2022 | 51 |
+| 2020 | 21 |
+| 2021 | 39 |
+| 2022 | 50 |
 | 2023 | 93 |
 | 2024 | 115 |
 | 2025 | 74 |
 | 2026 | 28 |
-| 9/20 | 1 |
-| July | 1 |
-| June | 1 |
 
-### Next election due, by year
+### Next election due, by year (ISO values only, n=452)
+
+A `next_election` in the past is not an error in this read — it is the BIA record going stale between a nation's election and its next notification to the agency, and it is a useful measure of how current the layer is.
 
 | year | nations |
 |---|---:|
+| 2013 | 1 |
+| 2015 | 3 |
+| 2016 | 1 |
+| 2017 | 1 |
+| 2019 | 2 |
+| 2020 | 3 |
+| 2021 | 5 |
+| 2022 | 5 |
+| 2023 | 12 |
+| 2024 | 48 |
+| 2025 | 80 |
+| 2026 | 137 |
+| 2027 | 82 |
 | 2028 | 52 |
 | 2029 | 15 |
 | 2030 | 5 |
-| 3/20 | 1 |
-| 9/20 | 1 |
-| July | 1 |
-| June | 1 |
-| TBD | 1 |
+
+**161 of 452 nations with an ISO `next_election` have one already in the past**, which is the honest freshness statistic for this layer.
 
 ### Entity classes it reaches
 

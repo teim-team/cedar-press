@@ -329,6 +329,26 @@ def classify(path):
 #: Ordering pairs that were paid for in lost work. `after` must run AFTER
 #: `before` whenever `before` runs, or `before`'s columns are gone.
 KNOWN_ORDERINGS = [
+    # --- contracting quarantine visibility, added 2026-09-02 by workstream
+    # QUARANTINE (ADR-019).  `40` rebuilds prime_contracts.csv; `1079` then
+    # writes five columns into it IN PLACE that carry the IDENTITY LEDGER's
+    # ruling - method, tier, quarantined Y/N, which identifier keyed the row,
+    # and this pass's disposition - alongside `attribution_method`, which
+    # records only the JOIN.  It also carries 103,171 withdrawals and 6,550
+    # repoints on the materialised rows.  **1079 must run LAST of the
+    # prime_contracts enrichers**, after 207, 950 and 871, because it reads
+    # `attribution_method` to work out which leg keyed each row.
+    {"rebuild": "40_build_prime_contracts.py",
+     "enricher": "1079_quarantine_method_exposure.py",
+     "file": "prime_contracts.csv",
+     "cost": "the table goes back to reading `uei_exact` on 227,540 rows that "
+             "a discredited method keyed, with nothing on the row saying so - "
+             "and 40 re-attributes nothing that 1079 withdrew only because "
+             "1079 also wrote tier X into the ledger, so the dollars stay "
+             "correct while the EVIDENCE of why disappears",
+     "enricher_columns": ["identifier_ruling_method", "identifier_ruling_tier",
+                          "identifier_ruling_quarantined",
+                          "identifier_ruling_basis", "identifier_ruling_review"]},
     # --- federal-register consultation, added 2026-09-02 by workstream FR-DTLL
     # `96` rebuilds consultation_events.csv from fr_consultation_notices.csv
     # and fr_consultation_referenced.csv. `1089` then writes eight columns

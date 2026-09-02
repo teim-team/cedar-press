@@ -2,7 +2,7 @@
 
 *Generated 2026-09-02 by `code/1107_punchlist_claim_verify.py`. It imports `code/526_dataset_standard.py` and re-measures its output against the live files with **no row cap**. `526` is integrator-owned; this file does not edit it.*
 
-**334 punch items. 12 carry a FALSE claim. 9 findings on the checks themselves.**
+**333 punch items. 12 carry a FALSE claim. 9 findings on the checks themselves.**
 
 | invariant | what it re-measures | false claims |
 |---|---|---:|

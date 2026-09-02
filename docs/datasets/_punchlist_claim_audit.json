@@ -1,6 +1,6 @@
 {
  "generated": "2026-09-02",
- "n_items": 334,
+ "n_items": 333,
  "breaches": [
   {
    "invariant": "V1",
@@ -264,7 +264,7 @@
   "V1_checked": 81,
   "V1_false": 10,
   "V1_false_columns": 47,
-  "V2_checked": 26,
+  "V2_checked": 25,
   "V4_checked": 8,
   "V3_false": 2,
   "tables_scored": 226,

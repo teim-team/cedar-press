@@ -1,8 +1,11 @@
 # Methodology — Federal Register, Indian Affairs
 
 **`federal-register`. `data/clean/federal_actions.csv`, 156,897 Federal
-Register documents, 1994-01-03 to 2026-09-01, across 22 customer tables.**
-[measured 2026-09-02]
+Register documents, 1994-01-03 to 2026-09-01, across 22 customer tables — 23
+from 2026-09-02, when `dear_tribal_leader_letters.csv` (807 documents, 597 of
+them letters, from IHS, BIE and BIA rather than from the Federal Register)
+joined the collection, with `dtll_source_coverage.csv` beside it as an internal
+coverage record.** [measured 2026-09-02]
 
 *Written 2026-09-02. This is the methodology record: what was pulled and from
 where, how the rows were made, how entities were attributed, what was decided

@@ -213,9 +213,26 @@ def do_apply():
         r[PRIME_U], r[SUB_U] = pu, su
         out.append(r)
 
+    # THE TWO COLUMNS THIS SCRIPT OWNS MAY BE FILLED WHERE THEY ARE BLANK,
+    # AND NOWHERE ELSE.  (2026-09-02)
+    #
+    # As written, this loop forbade ANY change to ANY pre-existing column, and
+    # that was right on the FIRST run, when `prime_cedar_uid` and
+    # `sub_cedar_uid` did not exist yet and so were not in `fields`. Once they
+    # exist, the same loop makes a second run a guaranteed no-op OR a
+    # guaranteed refusal - so after `121 append` added 10,318 rows on
+    # 2026-09-02 this script could not attach an identity to a single one of
+    # them, and exited 1 while doing it.
+    #
+    # `b[j] == ""` keeps the guard's real job intact: a value changing to a
+    # DIFFERENT value is still refused, on these columns as on every other.
+    # Only blank -> value is permitted, and only on the two columns 911 writes.
+    fillable = {PRIME_U, SUB_U}
     for i, (b, r) in enumerate(zip(before_cells, out)):
         for j, c in enumerate(fields):
             if (r.get(c) or "") != b[j]:
+                if c in fillable and b[j] == "":
+                    continue
                 sys.exit(f"REFUSED: row {i} column {c!r} changed "
                          f"{b[j]!r} -> {r.get(c)!r}")
     after_money = money(out)

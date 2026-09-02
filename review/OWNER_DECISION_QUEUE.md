@@ -2002,3 +2002,139 @@ with the measurement in `cedar.blockers`. `verify` exits 1 and `selftest`
 carries three fixtures that prove the check fires. **The status reverts by
 itself the moment the collection is settled** — whichever way it is settled —
 so this item blocks nothing except the dataset's own READY flag.
+
+---
+
+## TD-2 — PACER: buy the filings behind eight named tribal-debt dockets?
+*Appended 2026-09-02 by the tribal-debt court workstream (`code/1110_tribal_debt_court_distress.py`). Full evidence: `docs/TRIBAL_DEBT_COURT_DISTRESS_BUILD_LOG.md`.*
+
+**Decision:** the free CourtListener corpus gives us the *existence* of these
+cases and, where an opinion was published, the court's own words. It does not
+give us the **complaints, the indentures filed as exhibits, or the settlement
+terms**. Those are on PACER at $0.10/page, capped at $3.00 per document.
+
+**This is not a repeat of TD-1.** EMMA is closed by its terms at any price
+short of a licence negotiation. PACER is simply **priced**, it is a federal
+government service, and there is no terms problem at all with a document
+obtained from it — `docs/PUBLICATION_POLICY.md` `TERMS-SCOPE`, *"the
+distinction is authorship, not subject matter"*: a court filing is the court's
+record.
+
+**What it would buy, against named docket numbers.** These are the eight
+dockets already staged in `data/staging/tribal_debt_court_dockets.csv`; the
+first three are the ones that would move the dataset:
+
+| docket | court | filed | why it matters |
+|---|---|---|---|
+| `1:21-cv-00177` | D.R.I. | 2021-04-20 | `U.S. Bank v. Mashantucket Pequot Gaming Enterprise` — **the only court record anywhere in Cedar of the Foxwoods obligor**, and Mashantucket is a `1082` holdings obligor. No opinion was published |
+| `1:14-cv-01044` | E.D. Cal. | 2014-07-02 | `Bank of The Sierra v. Picayune Rancheria of the Chukchansi Indians` — contemporaneous with the Chukchansi noteholder distress, and the only federal docket on it |
+| `5:12-cv-01278` | C.D. Cal. | 2012-08-01 | `Wells Fargo Bank NA v. Cabazon Band of Mission Indians` — Cabazon is a `1082` holdings obligor and the party array names `East Valley Tourist Development Authority`, its borrowing instrumentality |
+| `3:01-cv-04125` | N.D. Cal. | 2001-11-05 | `Sonoma Falls Developers v. Dry Creek Rancheria` — Dry Creek is River Rock's nation, a `1082` obligor |
+| `3:09-cv-00768` · `3:12-cv-00255` · `3:13-cv-00372` | W.D. Wis. | 2009–2013 | the Lake of the Torches trio. We already hold the published opinions; the filings would add the indenture itself |
+| `1:20-cv-00183` | E.D. Cal. | 2020-02-04 | `Picayune Rancheria v. Goldenwise Capital Management` — the nation as **plaintiff**; lower value |
+
+**If BUY:** budget is small and boundable — a docket sheet plus the complaint
+and a handful of exhibits is single-digit dollars per case, so the whole list is
+plausibly under $100. PACER also waives fees below $30/quarter, which may cover
+a first pass at zero. The gain is the **instrument** — an indenture or credit
+agreement filed as an exhibit is the document this whole workstream keeps saying
+to quote, and we currently quote courts describing instruments rather than the
+instruments themselves.
+
+**If DON'T:** the table stays as it is, which is honest but thin: **26 events,
+8 dockets, nothing after 2017, and only two rows that are a court holding
+anything.** Say so once here so a later session does not re-derive the same
+gap.
+
+**A cheaper half-measure worth knowing about.** RECAP is crowd-sourced: buying a
+document through the RECAP browser extension contributes it to the free archive,
+so the purchase is not only ours. That is a reason to prefer PACER-via-RECAP
+over a bare PACER account if this is approved.
+
+### Also recorded here, because it cost time this session
+
+**The mandate for this pass said `COURTLISTENER_API_TOKEN` "has never been
+used." It had been** — `code/366` spent **112 requests on 2026-08-27**. The rate
+limit (5/min, 50/hr, 125/day) is **per token, not per script**, so `1110` now
+appends to `366`'s ledger rather than opening its own. Any third script on
+CourtListener must do the same, or all three will collect 429s while each
+believes it has a full budget.
+
+<!-- BEGIN QM-QUARANTINE -->
+---
+
+## QM-1. The CAGE leg of the quarantine — $3.61B, measured for the first time and deliberately NOT touched
+
+**Decision:** may an agent adjudicate the `cage_exact` leg the way `1079`
+adjudicated the UEI leg, or does it wait for you?
+
+**What is there.** CDR-11 measured UEI ledger rows. `40_build_prime_contracts.py`
+keys on three legs. The two nobody had measured:
+
+| leg | prime rows | obligations |
+|---|---:|---:|
+| `cage_exact` on a quarantined CAGE ledger row | 14,149 | $7,252,015,101 |
+| `parent_uei` on a quarantined UEI ledger row | 41,055 | $489,839,872 |
+
+`need_v6` — the method START_HERE records at **6.5% accuracy** — lives almost
+entirely on this leg: 838 tier-B CAGE rows. It put 60+ CAGE codes on
+`TRBF-LUMBEE-00`, the Lumbee Tribe of **North** Carolina, whose registered
+names include `NORTH WIND …` ×30, `GSI NORTH AMERICA`, `MERCEDES-BENZ RESEARCH
+& DEVELOPMENT NORTH AMERICA`, `KATMAI NORTH AMERICA`, `NORTH ISLAND CORP`,
+`NORTH VALLEY CARING SERVICES`, `TDX NORTH SLOPE GENERATING` and `CAROLINA
+PLACE APARTMENTS`. The token is `north`.
+
+508 of those identifiers, $3,608,856,488, ran the full seven-rung ladder and
+came back WITHDRAW or REPOINT. They were downgraded to HOLD **only** because
+the CAGE leg was outside the declared scope of that pass. They are in
+`review/1079_owner_holds_2026-09-02.csv` with their evidence and their basis.
+
+**Consequence of each answer.** *Go* — another ~$3.6B moves from a discredited
+attribution to honestly unattributed or to a repointed owner, on evidence that
+is already gathered and already written down. *Wait* — the flag
+(`identifier_ruling_quarantined = 'Y'`) means no consumer can mistake it for a
+verified attribution in the meantime, so nothing is being published as true
+that isn't. Cost of waiting is zero; cost of going is one more pass.
+
+---
+
+## QM-2. Three big holds that one look at an address or a website would settle
+
+All three survived the ladder and are attributed **today**. Each is one rung-1
+or rung-2 check away (`docs/ENTITY_MATCH_RULES.md` rule 13).
+
+| firm | keyed to | $ | why it is held |
+|---|---|---:|---|
+| `GREAT HILL SOLUTIONS, LLC` | Golden Hill Paugussett | $549.8M | the only shared word is `hill` |
+| `ARCTIC SLOPE MISSION SERVICES LLC` | **Iñupiat** (`AKNF-INPTAS-00-ARCSLO`, the Native Village) | $480.3M | the `ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION` family — rule 12 says suspect the PARENT row: this is almost certainly Arctic Slope Regional Corporation, not the village |
+| `AMERICAN EAGLE PROTECTIVE SERVICES CORP` | Native Village of Eagle | $450.5M | a Texas security firm on the trap token `eagle`; held only because it declares itself as its own parent |
+| `KUPONO GOVERNMENT SERVICES, LLC` | Barrow | $351.0M | an NHO caught by the `government` token in *Native Village of Barrow Inupiat Traditional **Government*** |
+
+**Consequence.** These four alone are $1.83B currently attributed on evidence
+Cedar itself calls no evidence.
+
+---
+
+## QM-3. A hub whose whole name is one ordinary English word is still unguarded
+
+**Decision:** should a single-token hub be barred from winning a name-only
+match at all?
+
+`MARSHALL COMMUNICATIONS CORP` — $336.3M — is **KEPT** on the Native Village of
+Marshall, because rule 7's residue test accepts it (`marshall` is the hub's
+entire distinctive name) and the new fragment rule cannot fire, needing a
+second token to be a fragment of. Meanwhile the firm's FPDS-declared parent is
+`MISSION SOLUTIONS GROUP INC`, observed **1,050 times**, resolving to no hub at
+all.
+
+It is defensible under Cedar's written rules and it is probably wrong. A wider
+automatic rule would also strike `CHUGACH TECHNICAL SOLUTIONS` → Chugach and
+`KONIAG MANAGEMENT SOLUTIONS` → Koniag, which are right — the difference is
+that `chugach` and `koniag` are Alutiiq words and `marshall` is a surname, and
+that difference is exactly rule 14's *"the names carry language"*, which no
+structural predicate in this repo can currently express.
+
+**Consequence.** *Rule it by hand* — one ruling, $336.3M, and the class stays
+small. *Automate it* — needs a language signal Cedar does not have yet, and it
+would break correct ANC links on the way.
+<!-- END QM-QUARANTINE -->

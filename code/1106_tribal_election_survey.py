@@ -95,6 +95,7 @@ LAYER = ("https://services1.arcgis.com/UxqqIfhng71wUT9x/arcgis/rest/services/"
 UA = ("CedarPress-research/1.0 (tribal governance survey; "
       "contact elijahsamsonmoreno@gmail.com)")
 PAGE = 1000
+ISO = re.compile(r"^\d{4}-\d{2}-\d{2}")
 
 # Personal contact details of a named individual. The office is public; these
 # are not ours to redistribute, and carrying them would make an internal
@@ -415,8 +416,18 @@ def stage_survey(_argv) -> int:
         print("  run `pull` then `resolve` first")
         return 1
     ec = Counter(r["entity_class"] for r in rows if r["entity_class"])
-    yrs = Counter((r["date_elected"] or "")[:4] for r in rows if r["date_elected"])
-    nxt = Counter((r["next_election"] or "")[:4] for r in rows if r["next_election"])
+    # THE DATE FIELDS ARE FREE TEXT, NOT DATES. Measured 2026-09-02: 18 of 487
+    # `date_elected` and 16 of 468 `next_election` values are not ISO -
+    # `09/2020`, `2021`, `July 2023`, `TBD`. Slicing [:4] off those yields
+    # year buckets called "July" and "9/20", which is a number produced about
+    # something other than its own name. Anything not ISO is EXCLUDED from the
+    # year tables and COUNTED beside them instead.
+    yrs = Counter(r["date_elected"][:4] for r in rows if ISO.match(r["date_elected"] or ""))
+    nxt = Counter(r["next_election"][:4] for r in rows if ISO.match(r["next_election"] or ""))
+    nonis_e = [r["date_elected"] for r in rows
+               if r["date_elected"].strip() and not ISO.match(r["date_elected"])]
+    nonis_n = [r["next_election"] for r in rows
+               if r["next_election"].strip() and not ISO.match(r["next_election"])]
     titles = Counter(r["leader_title"] for r in rows if r["leader_title"])
     res = sum(1 for r in rows if r["identity_resolved"] == "yes")
 
@@ -493,6 +504,10 @@ def stage_survey(_argv) -> int:
     a("| carrying `next_election` | %d (%.0f%%) |"
       % (st.get("next_election_filled", 0),
          100.0 * st.get("next_election_filled", 0) / len(rows)))
+    a("| of those, parseable as an ISO date | %d `date_elected`, %d "
+      "`next_election` |" % (sum(yrs.values()), sum(nxt.values())))
+    a("| free-text date values the BIA publishes instead | %d and %d |"
+      % (len(nonis_e), len(nonis_n)))
     a("| rows flagged with an upstream BIA date defect | %d |"
       % sum(1 for r in rows if (r.get("source_defect") or "").strip()))
     a("| HTTP requests the whole national pull cost | %d |"
@@ -514,19 +529,41 @@ def stage_survey(_argv) -> int:
     for k, v in titles.most_common(12):
         a("| %s | %d |" % (k, v))
     a("")
-    a("### Term starts, by year")
+    a("### The date fields are FREE TEXT, and that is the first thing to know "
+      "about them")
+    a("")
+    a("`dateelected` and `nextelection` are strings in the source, not dates. "
+      "Most are ISO, and **%d and %d are not** — `09/2020`, `2021`, "
+      "`July 2023`, `TBD`. Slicing the first four characters off those gives "
+      "you year buckets called *July* and *9/20*, so the tables below count "
+      "only ISO values and the rest are reported here rather than silently "
+      "binned: %s."
+      % (len(nonis_e), len(nonis_n),
+         ", ".join("`%s`" % v for v in sorted(set(nonis_e + nonis_n))[:14])))
+    a("")
+    a("### Term starts, by year (ISO values only, n=%d)" % sum(yrs.values()))
     a("")
     a("| year elected | leaders |")
     a("|---|---:|")
-    for k in sorted(yrs)[-12:]:
+    for k in sorted(yrs):
         a("| %s | %d |" % (k, yrs[k]))
     a("")
-    a("### Next election due, by year")
+    a("### Next election due, by year (ISO values only, n=%d)" % sum(nxt.values()))
+    a("")
+    a("A `next_election` in the past is not an error in this read — it is the "
+      "BIA record going stale between a nation's election and its next "
+      "notification to the agency, and it is a useful measure of how current "
+      "the layer is.")
     a("")
     a("| year | nations |")
     a("|---|---:|")
-    for k in sorted(nxt)[-8:]:
+    for k in sorted(nxt):
         a("| %s | %d |" % (k, nxt[k]))
+    a("")
+    past = sum(v for k, v in nxt.items() if k < TODAY[:4])
+    a("**%d of %d nations with an ISO `next_election` have one already in the "
+      "past**, which is the honest freshness statistic for this layer."
+      % (past, sum(nxt.values())))
     a("")
     a("### Entity classes it reaches")
     a("")

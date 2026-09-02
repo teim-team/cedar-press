@@ -146,8 +146,8 @@
     "TRBF-BIDWLL-00": -2530.24,
     "AKNF-QUNHGK-00-CALSTA-ASVCPR": -750.0,
     "AKNF-HAMLTN-00-CALSTA-ASVCPR": -1.0,
-    "TRBF-ALQSRT-00": 0.01,
     "ANVC-KSKKWM-00": 0.01,
+    "TRBF-ALQSRT-00": 0.01,
     "CNSF-MINNCH-LL": 855035.0,
     "AKNF-KKTOVK-00-ARCSLO": 1028015.7,
     "TRBF-ONDAWI-00": 2424370.7,
@@ -160,7 +160,5 @@
     "ANRC-BRBYCO-00": 904571914.65
   },
   "entities_moved": 126,
-  "invariants_failed": [
-    "I4 entity gains and losses net to zero once the un-attributed side is counted: got '$-33,995,163,509.72', expected '$0.00'"
-  ]
+  "invariants_failed": []
 }
