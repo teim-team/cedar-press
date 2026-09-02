@@ -37,6 +37,7 @@ is honest; a generated sentence that reads like a claim about method is not.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import Any
 
 from cedar_press import press_catalog
@@ -167,7 +168,7 @@ def _catalog_profile(dataset_id: str) -> dict[str, Any] | None:
         "collection_id": entry["id"],
         "shelf": entry["shelf"],
         "description": entry["blurb"],
-        "coverage_from": str(entry["coverageFrom"]),
+        **_coverage_fields(entry),
         "coverage_end": None,
         "update_frequency": None,
         "record_count_label": None,
@@ -205,7 +206,6 @@ def profile_for(dataset_id: str) -> dict[str, Any] | None:
     # else stays absent: a unit of observation nobody wrote is not a field this
     # module is entitled to fill.
     catalog = _catalog_entry(dataset_id) or {}
-    coverage_from = _str_or_none(catalog.get("coverageFrom"))
     figure = _figure_for(dataset_id)
     headline = (
         {
@@ -227,10 +227,10 @@ def profile_for(dataset_id: str) -> dict[str, Any] | None:
         # One depth, because there is one axis. This used to be a pair --
         # a 2010 window for Cedar Press and the archive behind it for
         # Cedar Press+ -- and the pair is retired (see `pressCatalog.js`).
-        # The number comes from the catalog and nowhere else: it is a claim
+        # The value comes from the catalog and nowhere else: it is a claim
         # to a paying subscriber and it is measured against the delivered
         # file, so a second hand-written copy could only drift from it.
-        "coverage_from": coverage_from,
+        **_coverage_fields(catalog),
         "coverage_end": dataset.vintage,
         # Honest until a cadence is a commitment, not a plan.
         "update_frequency": None,
@@ -257,6 +257,25 @@ def profile_for(dataset_id: str) -> dict[str, Any] | None:
 
 def _str_or_none(value: Any) -> str | None:
     return None if value is None else str(value)
+
+
+def _coverage_fields(catalog: Mapping[str, Any]) -> dict[str, Any]:
+    """The catalog's coverage declaration, flattened onto a profile.
+
+    Two shapes, because two of these collections are rosters rather than
+    series: their sources publish who is certified or exempt now and archive
+    nothing behind it, so they have a capture date and no first year. A
+    profile field that were always a year would force one of them to invent
+    one, which is the defect this shape exists to prevent. ``coverage_from``
+    is therefore ``None`` on a roster, and every reader of it has to cope.
+    """
+    coverage = catalog.get("coverage") or {}
+    kind = coverage.get("kind")
+    return {
+        "coverage_kind": kind,
+        "coverage_from": _str_or_none(coverage.get("from")),
+        "coverage_captured": coverage.get("captured"),
+    }
 
 
 def _fmt(value: Any) -> str:
@@ -338,18 +357,19 @@ def _changes_sentence(profile: dict[str, Any], asked: str) -> str:
 
 
 def _coverage_sentence(profile: dict[str, Any]) -> str | None:
-    """Coverage, which is one sentence for every tier.
+    """Coverage, which is one sentence for every tier and two for every shape.
 
-    It used to be three, and took a ``full_archive`` flag to pick between
-    them: Cedar Press opened a collection from 2010 and Cedar Press+ opened
-    the archive behind it, so Cedar had to know who was asking before it
-    could say what a collection covered. The window was retired on
-    2026-09-02, so the year is a fact about the collection and the reader
+    It used to be three sentences chosen by a ``full_archive`` flag: Cedar
+    Press opened a collection from 2010 and Cedar Press+ opened the archive
+    behind it, so Cedar had to know who was asking before it could say what a
+    collection covered. The window was retired on 2026-09-02, so the reader
     does not enter into it.
+
+    What does enter into it is whether the collection is a series or a
+    roster. Answering "coverage from 1992 to present" for a list of live TERO
+    certifications would be Cedar stating a 34-year span that no certifying
+    office keeps, which is the failure this module exists to prevent.
     """
-    coverage_from = profile.get("coverage_from")
-    if not coverage_from:
-        return None
     # A catalog-only profile has no release, so no vintage to date it by.
     dated = profile.get("vintage") and profile.get("last_updated")
     tail = (
@@ -357,6 +377,18 @@ def _coverage_sentence(profile: dict[str, Any]) -> str | None:
         if dated
         else ""
     )
+    if profile.get("coverage_kind") == "roster":
+        captured = profile.get("coverage_captured")
+        if not captured:
+            return None
+        return (
+            "This is a current roster rather than a series: it states who is "
+            f"on the list as of {captured}, and the sources behind it do not "
+            f"publish the superseded lists.{tail}"
+        )
+    coverage_from = profile.get("coverage_from")
+    if not coverage_from:
+        return None
     return f"Coverage from {coverage_from} to present.{tail}"
 
 

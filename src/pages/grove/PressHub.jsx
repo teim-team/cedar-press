@@ -68,11 +68,13 @@ function sections(user) {
       to: PRESS_DATA_PATH,
       icon: DataIcon,
       meta: `${collections.length} collections`,
-      // No fallback year. Every collection states a measured coverage start,
-      // so an empty list here would mean the catalog is empty, and printing a
-      // year in that case would be inventing one.
+      // "reaching back as far as", never "<year> to present". The minimum is
+      // one collection's floor — Legislation's 1973 — and eleven of the twelve
+      // start later, two of them being rosters with no start at all. A
+      // shelf-wide sentence cannot carry a per-collection fact, and the tiles
+      // below give each collection its own.
       what: `Coverage, method and the release for every collection${
-        earliest.length ? `, ${Math.min(...earliest)} to present,` : ","
+        earliest.length ? `, reaching back as far as ${Math.min(...earliest)},` : ","
       } downloadable with your subscription.`,
     },
     {

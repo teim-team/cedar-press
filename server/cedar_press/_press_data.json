@@ -387,7 +387,10 @@
       "short": "Federal Funding",
       "name": "Federal Funding to Indian Country",
       "shelf": "standard",
-      "coverageFrom": 2007,
+      "coverage": {
+        "kind": "series",
+        "from": 2007
+      },
       "blurb": "Every award the federal government reports sending into Indian Country: grants, loans, direct payments and insurance. Trace a program's reach, a recipient's funding history or a year's totals, award by award.",
       "linkage": "Recipients resolved to the Native entity behind them, so an award to a subsidiary, a housing authority or a consortium is attributed to the nation or organization it belongs to."
     },
@@ -396,7 +399,10 @@
       "short": "Federal Register",
       "name": "Federal Register",
       "shelf": "standard",
-      "coverageFrom": 1994,
+      "coverage": {
+        "kind": "series",
+        "from": 1994
+      },
       "blurb": "The Federal Register is the government's daily record of proposed and final agency action. Catch every notice, rule and comment window touching tribes, lands, water or recognition while there is still time to respond.",
       "linkage": "Notices matched to the tribes, lands and organizations they name, including entities that appear under former or variant names."
     },
@@ -405,7 +411,10 @@
       "short": "Legislation",
       "name": "Congressional Votes and Proposed Legislation",
       "shelf": "standard",
-      "coverageFrom": 1973,
+      "coverage": {
+        "kind": "series",
+        "from": 1973
+      },
       "blurb": "Bills, resolutions and roll-call votes from both chambers of Congress, the House and the Senate. Follow a measure from introduction to the floor and see who sponsored it, who voted and how.",
       "linkage": "Bills and votes tied to the tribes and Native organizations they affect, not only to the sponsors who filed them."
     },
@@ -414,7 +423,10 @@
       "short": "Deals",
       "name": "Indian Country Deals",
       "shelf": "standard",
-      "coverageFrom": 2000,
+      "coverage": {
+        "kind": "series",
+        "from": 2000
+      },
       "blurb": "Announced transactions across Indian Country: acquisitions, property purchases, project financings, bond issuances and capital projects. See who bought, who financed, what closed and how a quarter compares with the last.",
       "linkage": "Buyers, sellers, borrowers and issuers resolved to tribal governments, tribally owned enterprises, ANCs and NHOs."
     },
@@ -423,7 +435,10 @@
       "short": "NAGPRA",
       "name": "NAGPRA",
       "shelf": "standard",
-      "coverageFrom": 1994,
+      "coverage": {
+        "kind": "series",
+        "from": 1994
+      },
       "blurb": "Activity under the Native American Graves Protection and Repatriation Act: notices, inventories and completed repatriations. Track an institution's progress or a nation's outstanding claims, item by item.",
       "linkage": "Notices matched to the tribes and Native Hawaiian organizations named in them, across the naming changes of three decades."
     },
@@ -432,7 +447,10 @@
       "short": "Lobbying",
       "name": "Lobbying",
       "shelf": "standard",
-      "coverageFrom": 1999,
+      "coverage": {
+        "kind": "series",
+        "from": 1999
+      },
       "blurb": "Federal lobbying registrations and the quarterly filings behind them. See who hired which firm, what they paid and which issues and bills the money is working.",
       "linkage": "Registrants and clients resolved to the tribes and Native organizations behind them, including firms retained on their behalf."
     },
@@ -441,7 +459,10 @@
       "short": "Prime Contracting",
       "name": "Federal Prime Contracting",
       "shelf": "pro",
-      "coverageFrom": 2000,
+      "coverage": {
+        "kind": "series",
+        "from": 2000
+      },
       "blurb": "A prime contract is an award the government makes directly to a vendor, whether a firm, a tribal enterprise or a tribal government itself. Every prime award here names the agency, the dollars, the industry and the set-aside path it came through.",
       "linkage": "Vendors resolved to tribally owned firms, ANC and NHO subsidiaries and 8(a) participants, then rolled up to the parent nation or corporation."
     },
@@ -450,7 +471,10 @@
       "short": "Subcontracting",
       "name": "Federal Subcontracting",
       "shelf": "pro",
-      "coverageFrom": 2001,
+      "coverage": {
+        "kind": "series",
+        "from": 2010
+      },
       "blurb": "A subaward is work a prime vendor passes down to another. Follow the dollars below the prime layer to see which vendors do the work, under whom and in which sectors.",
       "linkage": "Subawards matched to the same resolved entities as the prime contracts above them."
     },
@@ -459,7 +483,10 @@
       "short": "Natural Resources",
       "name": "Natural Resource Revenues",
       "shelf": "pro",
-      "coverageFrom": 1880,
+      "coverage": {
+        "kind": "series",
+        "from": 1880
+      },
       "blurb": "Energy and mineral activity on trust and restricted lands: production volumes, the royalties it owes and the disbursements that follow. See what a commodity produced, what it paid and where the money went.",
       "linkage": "Production and disbursements matched to the nations and allottees they belong to."
     },
@@ -468,7 +495,10 @@
       "short": "Native-Owned Businesses",
       "name": "Individually Owned Native Businesses",
       "shelf": "pro",
-      "coverageFrom": 1992,
+      "coverage": {
+        "kind": "roster",
+        "captured": "2026-09-01"
+      },
       "blurb": "Individually owned Native businesses, certified by their own nations' TERO and commerce offices and shared with the project office by office. The businesses no federal register counts: who they are, what trades they work and what preference status their nation certifies.",
       "linkage": "Every listing carries the nation whose office certified it, appears only under that nation's stated terms, and is credited to the issuing TERO or commerce office."
     },
@@ -477,7 +507,10 @@
       "short": "Native Nonprofits",
       "name": "Native Nonprofits",
       "shelf": "pro",
-      "coverageFrom": 1983,
+      "coverage": {
+        "kind": "roster",
+        "captured": "2026-04-29"
+      },
       "blurb": "Native-led and Native-serving nonprofits with their annual federal filings. Compare budgets, revenue mixes, program spending and how an institution's finances move year over year.",
       "linkage": "Filers classified as Native-led, Native-serving or Native-focused, which are three different things and are labeled separately."
     },
@@ -486,7 +519,10 @@
       "short": "NEST",
       "name": "Native Enterprise Structures and Ties",
       "shelf": "pro",
-      "coverageFrom": 2016,
+      "coverage": {
+        "kind": "series",
+        "from": 2016
+      },
       "blurb": "Who owns whom across Indian Country's enterprises: parent nations and corporations, their subsidiaries, holding companies and joint ventures, and how those ties change as entities are created, renamed, acquired and wound down.",
       "linkage": "This is the structure the rest of the record resolves against, published as a collection in its own right: every tie names the nation or corporation behind it."
     },
@@ -495,7 +531,10 @@
       "short": "Gaming",
       "name": "Gaming Intelligence",
       "shelf": "grove",
-      "coverageFrom": 1905,
+      "coverage": {
+        "kind": "series",
+        "from": 1979
+      },
       "blurb": "Facilities, ownership and affiliation over time, declination letters, environmental reviews, expansions, employment estimates and transaction history, cross-validated against Deals.",
       "preview": {
         "shows": [

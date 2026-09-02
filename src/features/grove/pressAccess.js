@@ -46,6 +46,9 @@
 
 import { resolveTier } from "../../workspaceTier.js";
 import { PRESS_CATALOG_BY_ID } from "./pressCatalog.js";
+// A date formatter, not release data: the roster line and the What's New
+// feed should not print the same date two different ways.
+import { formatUpdated } from "./pressReleases.js";
 
 /** The shelves, lowest first. A dataset declares exactly one. */
 export const SHELF = Object.freeze({
@@ -119,7 +122,7 @@ function shelfOf(dataset) {
 }
 
 /**
- * The earliest year a collection holds, or null if it does not state one.
+ * A collection's coverage declaration, or null if it states none.
  *
  * THERE IS NO SECOND AXIS
  * There used to be a `historyFor(user, dataset)` here, because Cedar Press
@@ -134,8 +137,37 @@ function shelfOf(dataset) {
  * does not reach it cannot open it at all — and that question is
  * `canOpenDataset`, which is where it always belonged.
  */
-export function coverageFrom(dataset) {
+function coverageOf(dataset) {
   if (!dataset) return null;
-  const value = dataset.coverageFrom ?? PRESS_CATALOG_BY_ID[dataset.id]?.coverageFrom;
-  return Number.isInteger(value) ? value : null;
+  return dataset.coverage ?? PRESS_CATALOG_BY_ID[dataset.id]?.coverage ?? null;
+}
+
+/**
+ * The first year of a collection's series, or null when it has no series.
+ *
+ * Null is the honest answer for a roster, not a missing value to fill in.
+ * Callers that reduce over collections — a shelf's earliest year, the hub's
+ * "reaching back as far as" — must drop the nulls rather than substitute a
+ * capture date, which is how a harvest date becomes a coverage claim.
+ */
+export function coverageFrom(dataset) {
+  const coverage = coverageOf(dataset);
+  if (coverage?.kind !== "series") return null;
+  return Number.isInteger(coverage.from) ? coverage.from : null;
+}
+
+/**
+ * Coverage as one line, in the shape the collection actually has.
+ *
+ * A series says the span. A roster says it is a roster and when it was taken,
+ * because "1992 to present" for a list of live TERO certifications is a
+ * promise of 34 years of history that nobody kept and no office archives.
+ */
+export function coverageLabel(dataset) {
+  const coverage = coverageOf(dataset);
+  if (!coverage) return "Coverage varies";
+  if (coverage.kind === "roster") {
+    return `Current roster, captured ${formatUpdated(coverage.captured)}`;
+  }
+  return `${coverage.from} to present`;
 }

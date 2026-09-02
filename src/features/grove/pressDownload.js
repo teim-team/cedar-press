@@ -30,6 +30,7 @@
 // alone, with no fetch, because a tile has to label itself before the click.
 
 import { collectionCitation, collectionCsv, hasSample, samplePath } from "./collection.js";
+import { coverageLabel } from "./pressAccess.js";
 
 const csvCell = (value) => `"${String(value ?? "").replace(/"/g, '""')}"`;
 
@@ -68,7 +69,10 @@ export async function csvFor(entry, fetchText = defaultFetchText) {
     ["field", "value"],
     ["collection", entry.name],
     ["shelf", entry.shelf || entry.kind || ""],
-    ["coverage_from", entry.coverageFrom || ""],
+    // The label, not the year: a roster has no year, and an empty
+    // coverage cell in a file that outlives the page reads as unknown
+    // rather than as "this is a roster".
+    ["coverage", coverageLabel(entry)],
     ["contents", entry.blurb || ""],
     ["entity_linkage", entry.linkage || ""],
     ["cite_as", citation],

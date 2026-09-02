@@ -46,7 +46,7 @@ const COARSE = typeof window !== "undefined" && !!window.matchMedia?.("(hover: n
 
 import { appUrl } from "../../features/grove/appLink.js";
 import { EVENT, track } from "../../features/grove/telemetry.js";
-import { canOpenDataset, coverageFrom } from "../../features/grove/pressAccess";
+import { canOpenDataset, coverageFrom, coverageLabel } from "../../features/grove/pressAccess";
 import { downloadAll, downloadCsv, hasReleaseFile } from "../../features/grove/pressDownload";
 import {
   GROVE_CAPABILITIES,
@@ -155,21 +155,6 @@ function Badge({ entry, open, onEnter, active, index, onLocked, onOpen }) {
   );
 }
 
-/**
- * Coverage, which is one sentence for every reader now.
- *
- * This used to be three, because a Cedar Press reader received the years from
- * 2010 and a Cedar Press+ reader received the archive behind them, so the
- * line had to name a window, a depth, or both. The window is gone: whoever
- * opens a collection opens all of it, and the only thing left to say is the
- * year Cedar's own file starts.
- */
-function coverageLine(entry) {
-  const from = coverageFrom(entry);
-  if (from == null) return "Coverage varies";
-  return `${from} to present`;
-}
-
 /** Whether Cedar has a profile to answer from for this collection. Every
  *  catalog collection has one now: the launch four answer from their releases
  *  and the rest from their catalog entries (collection_profiles.py), so only
@@ -195,7 +180,7 @@ function Detail({ entry, owned }) {
         </p>
       ) : null}
       <p className="cp-read__foot">
-        {coverageLine(entry)}
+        {coverageLabel(entry)}
         {" · "}
         {freshnessLine(entry.id) ||
           (owned
@@ -248,7 +233,8 @@ function Band({ tier, user, index }) {
   const owned = canOpenDataset(user, { shelf: tier.shelf });
   // The same years whether or not the reader owns the shelf: a locked band
   // shows what is inside it, and what is inside it does not shrink when it
-  // opens.
+  // opens. Rosters contribute nothing here — `coverageFrom` returns null for
+  // them, and a shelf's earliest year must not be a harvest date.
   const starts = entries.map((entry) => coverageFrom(entry)).filter(Boolean);
   const from = starts.length ? Math.min(...starts) : null;
   const active = entries.find((entry) => entry.id === hovered) || null;
@@ -443,7 +429,7 @@ function GroveTeaser({ tier }) {
           </h4>
           <p className="cp-gt__blurb">{gaming.blurb}</p>
           <p className="cp-gt__fresh">
-            {freshnessLine(gaming.id)} · {gaming.coverageFrom} to present
+            {freshnessLine(gaming.id)} · {coverageLabel(gaming)}
           </p>
           <a className="cp-gt__cta" href={appUrl("/app/grove")} target="_blank" rel="noreferrer">
             Explore Gaming Intelligence and more in Cedar Grove <span aria-hidden="true">&#8594;</span>

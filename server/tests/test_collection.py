@@ -44,8 +44,8 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
+from cedar_press import collection_profiles, press_catalog
 from cedar_press import collections as launch
-from cedar_press import press_catalog
 
 _REPO = Path(__file__).resolve().parents[2]
 _DUMP = _REPO / "scripts" / "dump-collection.mjs"
@@ -413,9 +413,9 @@ class TestPressCatalogSnapshot(unittest.TestCase):
                     with self.subTest(field=key):
                         self.assertEqual(_plain(python[key]), javascript[key])
 
-    # -- the coverage year, which is a claim to a paying subscriber --------
+    # -- coverage, which is a claim to a paying subscriber -----------------
 
-    def test_every_collection_states_one_coverage_year_on_both_sides(self) -> None:
+    def test_every_collection_states_its_coverage_on_both_sides(self) -> None:
         # The field this class was extended for. Coverage used to be a pair,
         # `standardFrom` and `historyFrom`, and a Cedar Press reader received
         # the first while Cedar Press+ opened the second. One axis replaced
@@ -423,28 +423,96 @@ class TestPressCatalogSnapshot(unittest.TestCase):
         # across the two languages.
         for python, javascript in zip(press_catalog.CATALOG, self.js["catalog"], strict=True):
             with self.subTest(collection=javascript["id"]):
-                self.assertIsInstance(python["coverageFrom"], int)
-                self.assertEqual(python["coverageFrom"], javascript["coverageFrom"])
+                self.assertEqual(_plain(python["coverage"]), javascript["coverage"])
+
+    def test_coverage_is_a_series_or_a_roster_and_never_both(self) -> None:
+        # The shape is the point. Two of these collections are rosters -- the
+        # TERO and commerce offices behind Owned publish who is certified now
+        # and archive nothing, and the IRS Business Master File behind
+        # Nonprofits states the organisations that exist now -- so a field
+        # that were always a year would force both to name one, and the only
+        # years available are accidents: one certification that started in
+        # 1992, one defunct filer whose last return was 1983. A roster
+        # carrying a `from` is that defect coming back.
+        for entry in press_catalog.CATALOG:
+            with self.subTest(collection=entry["id"]):
+                coverage = entry["coverage"]
+                self.assertIn(coverage["kind"], {"series", "roster"})
+                if coverage["kind"] == "series":
+                    self.assertIn("from", coverage)
+                    self.assertNotIn("captured", coverage)
+                else:
+                    self.assertIn("captured", coverage)
+                    self.assertNotIn("from", coverage)
+
+    def test_the_two_rosters_are_the_two_that_have_no_series(self) -> None:
+        rosters = {
+            entry["id"] for entry in press_catalog.CATALOG if entry["coverage"]["kind"] == "roster"
+        }
+        self.assertEqual(rosters, {"owned", "nonprofits"})
 
     def test_the_retired_pair_is_gone_rather_than_aliased(self) -> None:
-        # A `standardFrom` set equal to `coverageFrom` on every entry would
+        # A `standardFrom` set equal to the coverage year on every entry would
         # read to the next person as a live second axis, and would be one
         # edit away from being one again. It has to be absent.
         for entry in press_catalog.CATALOG:
             with self.subTest(collection=entry["id"]):
                 self.assertNotIn("standardFrom", entry)
                 self.assertNotIn("historyFrom", entry)
+                self.assertNotIn("coverageFrom", entry)
 
-    def test_no_coverage_year_is_a_placeholder_or_in_the_future(self) -> None:
-        # Every year here was measured against the file a subscriber
+    def test_no_coverage_value_is_a_placeholder_or_in_the_future(self) -> None:
+        # Every value here was measured against the file a subscriber
         # receives, `dist/customer/<id>.csv`. That file is not in this
         # repository, so this cannot re-measure -- what it can do is refuse
         # the shapes a measurement never produces.
         this_year = datetime.datetime.now(tz=datetime.timezone.utc).year
         for entry in press_catalog.CATALOG:
+            coverage = entry["coverage"]
             with self.subTest(collection=entry["id"]):
-                self.assertGreaterEqual(entry["coverageFrom"], 1800)
-                self.assertLessEqual(entry["coverageFrom"], this_year)
+                if coverage["kind"] == "series":
+                    self.assertIsInstance(coverage["from"], int)
+                    self.assertGreaterEqual(coverage["from"], 1800)
+                    self.assertLessEqual(coverage["from"], this_year)
+                else:
+                    captured = datetime.date.fromisoformat(coverage["captured"])
+                    self.assertLessEqual(captured.year, this_year)
+
+    def test_the_flag_corrected_floors_are_the_corrected_ones(self) -> None:
+        # min(year) is not coverage, and these are the two collections where
+        # the difference is a claim rather than a rounding error.
+        #
+        # subcontracting's unfiltered minimum is 2001, built entirely on 51
+        # rows the repository itself flags `action_date_precedes_ffata_flag`
+        # -- filer typos, every one filed in 2010 or later. FFATA dropped the
+        # subaward reporting threshold in October 2010, so FSRS holds nothing
+        # before FY2010 and 2001 would sell nine years that do not exist.
+        #
+        # gaming's unfiltered minimum is 1905, and it is Crosby Lodge, whose
+        # `open_date_event` is `not_gaming_commencement`. Four rows carry
+        # `open_date_predates_tribal_gaming_era` and each basis says the date
+        # precedes 1979, the first documented year of high-stakes tribal
+        # gaming. Excluding them lands on 1979 and keeps the pre-IGRA bingo
+        # halls, which are real gaming and must not be filtered at 1988.
+        by_id = {entry["id"]: entry for entry in press_catalog.CATALOG}
+        self.assertEqual(by_id["subcontracting"]["coverage"]["from"], 2010)
+        self.assertEqual(by_id["gaming"]["coverage"]["from"], 1979)
+
+    def test_a_roster_never_produces_a_coverage_from_in_a_profile(self) -> None:
+        # The Python surface, not the data: `profile_for` is what Cedar
+        # answers from, and a roster reaching it as a year is how a harvest
+        # date becomes a coverage claim in a sentence.
+        for dataset_id in ("owned", "nonprofits"):
+            profile = collection_profiles.profile_for(dataset_id)
+            with self.subTest(collection=dataset_id):
+                self.assertEqual(profile["coverage_kind"], "roster")
+                self.assertIsNone(profile["coverage_from"])
+                self.assertTrue(profile["coverage_captured"])
+                sentence = collection_profiles.answer_from_profile(
+                    "What does this collection cover?", dataset_id
+                )["answer"]
+                self.assertIn("current roster rather than a series", sentence)
+                self.assertNotIn("Coverage from", sentence)
 
     def test_the_ladder_is_six_collections_and_six_more(self) -> None:
         # The owner's ruling of 2026-09-02: Cedar Press is the standard

@@ -249,7 +249,7 @@ class TestCatalog(unittest.TestCase):
         # catalog's measured one rather than a literal here, so re-measuring
         # a collection does not have to be re-typed into a test.
         entry = next(c for c in press_catalog.CATALOG if c["id"] == "lobbying")
-        self.assertIn(f"Coverage from {entry['coverageFrom']} to present.", answer)
+        self.assertIn(f"Coverage from {entry['coverage']['from']} to present.", answer)
         self.assertNotIn("Cedar Press+ opens", answer)
         self.assertNotIn("full reconstructed archive", answer)
         ratelimit.reset_for_tests()

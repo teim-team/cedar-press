@@ -95,23 +95,53 @@ export const PRESS_TIERS = Object.freeze([
  *
  * `short` is the name on a badge, where a full title will not fit in a square.
  *
- * ONE COVERAGE FIELD, AND IT IS MEASURED
- * `coverageFrom` is the earliest year the collection actually holds — the
- * same number for every tier that opens the collection at all, because no
- * tier clips the years any more.
+ * ONE COVERAGE FIELD, AND IT IS NOT ALWAYS A YEAR
+ * `coverage` says what the collection covers, in one of two shapes:
  *
- * There used to be two fields, `standardFrom` (2010 on every Cedar Press
- * collection) and a deeper `historyFrom`. Collapsing them was not a rename:
- * `historyFrom` was hand-typed and three of its numbers were promises the
- * delivered data does not keep — funding said 2001 and starts in FY2007,
- * NAGPRA said 1990 and starts in 1994, lobbying said 1998 and starts in
- * 1999. Every number below was measured on 2026-09-02 against the file a
- * subscriber receives, `dist/customer/<id>.csv`, and the column measured is
- * named beside it so the next reader can re-run the check rather than trust
- * this comment. Where the old catalog and the data disagreed, the data won.
+ *   { kind: "series", from: 1994 }              a run of years
+ *   { kind: "roster", captured: "2026-09-01" }  who is on the list, as of
  *
- * A number here is a claim to a paying customer. It is not editable without
- * re-measuring.
+ * The same value for every tier that opens the collection at all, because no
+ * tier clips the years any more. There used to be two fields, `standardFrom`
+ * (2010 on every Cedar Press collection) and a deeper `historyFrom`, and the
+ * gap between them was the second thing an upgrade bought.
+ *
+ * WHY IT IS A SHAPE AND NOT A NUMBER
+ * Two of these collections are rosters. Their source publishes who is
+ * certified, or exempt, NOW, and archives nothing: the TERO and commerce
+ * offices behind Owned keep no superseded lists, and the IRS Business Master
+ * File behind Nonprofits states the organizations that exist today, not the
+ * ones that existed in 2004. A field that is always a year forces those two
+ * to name one, and the only years available are accidents — one live
+ * certification that started in 1992, one defunct filer whose last return was
+ * 1983. Neither is a span anybody is covered for. So a roster is a
+ * first-class value that states its capture date and no "from" at all.
+ *
+ * COVERAGE IS NOT min(year)
+ * This is the mistake this field has now made twice, in both directions. A
+ * minimum is the earliest row present; coverage is what the collection
+ * systematically holds, and the two differ whenever the earliest rows are a
+ * defect or the wrong kind of event:
+ *
+ *   subcontracting  min 2001, coverage 2010. The 51 pre-2010 rows are filer
+ *                   typos flagged `action_date_precedes_ffata_flag`; FFATA's
+ *                   reporting threshold makes 2010 a statutory floor.
+ *   gaming          min 1905, coverage 1979. 1905 is a lodge, flagged
+ *                   `open_date_event = not_gaming_commencement`.
+ *
+ * Where a dataset documents an exclusion flag, the floor is measured AFTER
+ * applying it and the comment names the flag, so the next person can re-run
+ * the measurement rather than trusting the number. The floors that need no
+ * flag say which column they are the minimum of, for the same reason.
+ *
+ * The other direction was the old hand-typed `historyFrom`, which promised
+ * three spans the delivered data does not hold: funding said 2001 and starts
+ * in FY2007, NAGPRA said 1990 (the statute) and starts in 1994, lobbying said
+ * 1998 (the first LDA year) and starts in 1999.
+ *
+ * Everything below was measured on 2026-09-02 against the file a subscriber
+ * receives, `dist/customer/<id>.csv`. A value here is a claim to a paying
+ * customer. It is not editable without re-measuring.
  */
 export const PRESS_CATALOG = Object.freeze([
   Object.freeze({
@@ -119,10 +149,11 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Federal Funding",
     name: "Federal Funding to Indian Country",
     shelf: "standard",
-    // Measured: min(fiscal_year) in dist/customer/funding.csv.
-    // The catalog claimed 2001. USAspending assistance plus the FAADS
-    // backfill begins at FY2007 in the delivered file; 2001 was never in it.
-    coverageFrom: 2007,
+    // Series. Floor: min(fiscal_year) in dist/customer/funding.csv, which is
+    // FY2007. The earliest action_date is in October 2006 and belongs to
+    // FY2007's first quarter, so 2006 would claim a calendar year Cedar has
+    // three months of. The old catalog claimed 2001, which is in no file.
+    coverage: Object.freeze({ kind: "series", from: 2007 }),
     blurb:
       "Every award the federal government reports sending into Indian Country: grants, loans, direct payments and insurance. Trace a program's reach, a recipient's funding history or a year's totals, award by award.",
     linkage:
@@ -133,8 +164,8 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Federal Register",
     name: "Federal Register",
     shelf: "standard",
-    // Measured: min(notice_date) in dist/customer/federal-register.csv.
-    coverageFrom: 1994,
+    // Series. Floor: min(notice_date) in dist/customer/federal-register.csv.
+    coverage: Object.freeze({ kind: "series", from: 1994 }),
     blurb:
       "The Federal Register is the government's daily record of proposed and final agency action. Catch every notice, rule and comment window touching tribes, lands, water or recognition while there is still time to respond.",
     linkage:
@@ -145,9 +176,11 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Legislation",
     name: "Congressional Votes and Proposed Legislation",
     shelf: "standard",
-    // Measured: min(introduced_date) in dist/customer/legislation.csv.
-    // Real bills of the 93rd Congress, not a stray date.
-    coverageFrom: 1973,
+    // Series. Floor: min(introduced_date) in dist/customer/legislation.csv:
+    // real bills of the 93rd Congress. Thin and gapped through the 1980s
+    // (docs/datasets/10_bills_votes.md records the interior gap at 1974), so
+    // this is the year the record opens, not a dense series from 1973.
+    coverage: Object.freeze({ kind: "series", from: 1973 }),
     blurb:
       "Bills, resolutions and roll-call votes from both chambers of Congress, the House and the Senate. Follow a measure from introduction to the floor and see who sponsored it, who voted and how.",
     linkage:
@@ -158,8 +191,8 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Deals",
     name: "Indian Country Deals",
     shelf: "standard",
-    // Measured: min(Event_Year) in dist/customer/deals.csv.
-    coverageFrom: 2000,
+    // Series. Floor: min(Event_Year) in dist/customer/deals.csv.
+    coverage: Object.freeze({ kind: "series", from: 2000 }),
     blurb:
       "Announced transactions across Indian Country: acquisitions, property purchases, project financings, bond issuances and capital projects. See who bought, who financed, what closed and how a quarter compares with the last.",
     linkage:
@@ -170,10 +203,10 @@ export const PRESS_CATALOG = Object.freeze([
     short: "NAGPRA",
     name: "NAGPRA",
     shelf: "standard",
-    // Measured: min(publication_year) in dist/customer/nagpra.csv.
-    // The catalog claimed 1990, the year NAGPRA was enacted. The notices
-    // Cedar carries start with the first ones published, in 1994.
-    coverageFrom: 1994,
+    // Series. Floor: min(publication_year) in dist/customer/nagpra.csv. The
+    // old catalog claimed 1990, which is when NAGPRA was enacted; the first
+    // notice under it published in 1994.
+    coverage: Object.freeze({ kind: "series", from: 1994 }),
     blurb:
       "Activity under the Native American Graves Protection and Repatriation Act: notices, inventories and completed repatriations. Track an institution's progress or a nation's outstanding claims, item by item.",
     linkage:
@@ -184,9 +217,10 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Lobbying",
     name: "Lobbying",
     shelf: "standard",
-    // Measured: min(filing_year) in dist/customer/lobbying.csv.
-    // The catalog claimed 1998, the first LDA year. Cedar's filings start in 1999.
-    coverageFrom: 1999,
+    // Series. Floor: min(filing_year) in dist/customer/lobbying.csv. The old
+    // catalog claimed 1998, the first year the LDA required filings; Cedar's
+    // earliest filing is 1999.
+    coverage: Object.freeze({ kind: "series", from: 1999 }),
     blurb:
       "Federal lobbying registrations and the quarterly filings behind them. See who hired which firm, what they paid and which issues and bills the money is working.",
     linkage:
@@ -197,8 +231,12 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Prime Contracting",
     name: "Federal Prime Contracting",
     shelf: "pro",
-    // Measured: min(fiscal_year) in dist/customer/contractors.csv.
-    coverageFrom: 2000,
+    // Series. Floor: min(fiscal_year) in dist/customer/contractors.csv, and
+    // it is a real boundary rather than the edge of a pull: FPDS carries the
+    // Native business-type flags on FY1985 records with false on all of them,
+    // so Native identification does not exist in the federal record before
+    // roughly FY2000 (docs/datasets/native-owned-businesses.md).
+    coverage: Object.freeze({ kind: "series", from: 2000 }),
     blurb:
       "A prime contract is an award the government makes directly to a vendor, whether a firm, a tribal enterprise or a tribal government itself. Every prime award here names the agency, the dollars, the industry and the set-aside path it came through.",
     linkage:
@@ -209,8 +247,17 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Subcontracting",
     name: "Federal Subcontracting",
     shelf: "pro",
-    // Measured: min(fiscal_year) in dist/customer/subcontracting.csv.
-    coverageFrom: 2001,
+    // Series. Floor: min(fiscal_year) in dist/customer/subcontracting.csv
+    // AFTER excluding action_date_precedes_ffata_flag = yes.
+    //
+    // The unfiltered minimum is 2001 and it is a defect, not coverage. FFATA
+    // dropped the subaward reporting threshold to $25,000 in October 2010, so
+    // FSRS holds nothing before FY2010; the 51 rows dated earlier are filer
+    // typos, every one of them filed in 2010 or later, and the flag exists to
+    // keep them out of exactly this claim. docs/datasets/02b_subcontracting.md:
+    // "They must never be counted as coverage." Excluding them moves the
+    // floor to 2010 on the nose, which is the statutory floor.
+    coverage: Object.freeze({ kind: "series", from: 2010 }),
     blurb:
       "A subaward is work a prime vendor passes down to another. Follow the dollars below the prime layer to see which vendors do the work, under whom and in which sectors.",
     linkage:
@@ -221,10 +268,10 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Natural Resources",
     name: "Natural Resource Revenues",
     shelf: "pro",
-    // Measured: min(period_start) in dist/customer/natural-resources.csv.
-    // Osage headright payments, published retrospectively by the Osage
-    // Minerals Council and carried as dated revenue events.
-    coverageFrom: 1880,
+    // Series. Floor: min(period_start) in dist/customer/natural-resources.csv.
+    // Osage headright payments, published retrospectively by the Osage Minerals
+    // Council and carried as dated revenue events with amounts.
+    coverage: Object.freeze({ kind: "series", from: 1880 }),
     blurb:
       "Energy and mineral activity on trust and restricted lands: production volumes, the royalties it owes and the disbursements that follow. See what a commodity produced, what it paid and where the money went.",
     linkage:
@@ -235,11 +282,16 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Native-Owned Businesses",
     name: "Individually Owned Native Businesses",
     shelf: "pro",
-    // Measured: min(certification_start) in dist/customer/native-owned-businesses.csv.
-    // The earliest certification a nation's office states, not the harvest
-    // date: this is a register of live certifications, and 2,044 of them
-    // were first seen by Cedar in 2026.
-    coverageFrom: 1992,
+    // Roster, not a series, so it states no year to be covered from. Every
+    // certifying office publishes who is certified NOW and none of them
+    // archives a superseded list, so the collection is a capture rather than
+    // a span: docs/datasets/native-owned-businesses.md, "A CURRENT SNAPSHOT,
+    // not a series."
+    //
+    // min(certification_start) is 1992, and it is not a coverage year: it is
+    // one live certification that happens to have started early. Captured:
+    // max(harvest_date) in dist/customer/native-owned-businesses.csv.
+    coverage: Object.freeze({ kind: "roster", captured: "2026-09-01" }),
     blurb:
       "Individually owned Native businesses, certified by their own nations' TERO and commerce offices and shared with the project office by office. The businesses no federal register counts: who they are, what trades they work and what preference status their nation certifies.",
     linkage:
@@ -250,15 +302,18 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Native Nonprofits",
     name: "Native Nonprofits",
     shelf: "pro",
-    // Measured: min(bmf_tax_period) in dist/customer/nonprofits.csv.
-    // The earliest BMF financial period in the delivered register, which is a
-    // current snapshot carrying one period per EIN rather than an annual
-    // panel, so 1983 is one defunct filer's last return and not the start of
-    // a series. The year-over-year filings the blurb promises live in the
-    // collection's np_financials table, whose earliest tax_year is 1996; that
-    // table is not folded into the delivered file. Whichever number the page
-    // should show, 1983 is the one measurable in what a subscriber receives.
-    coverageFrom: 1983,
+    // Roster, not a series. The delivered file is the IRS Business Master
+    // File register, one row per EIN, carrying each filer's LATEST period
+    // rather than a run of them: docs/datasets/06_nonprofit.md, "A monthly
+    // SNAPSHOT, not a series."
+    //
+    // min(bmf_tax_period) is 1983, and it is one defunct filer's last return,
+    // not the start of anything. The annual filings this collection's blurb
+    // describes live in np_financials (tax_year 1996-2025, thin to 2000) and
+    // are not folded into the delivered file; when they are, this becomes a
+    // series and this field should change shape with it. Captured:
+    // bmf_vintage_fetched, which is one value across all 12,764 rows.
+    coverage: Object.freeze({ kind: "roster", captured: "2026-04-29" }),
     blurb:
       "Native-led and Native-serving nonprofits with their annual federal filings. Compare budgets, revenue mixes, program spending and how an institution's finances move year over year.",
     linkage:
@@ -269,9 +324,11 @@ export const PRESS_CATALOG = Object.freeze([
     short: "NEST",
     name: "Native Enterprise Structures and Ties",
     shelf: "pro",
-    // Measured: min(first_observed_year) in dist/customer/nest.csv.
-    // The earliest source edition a published ownership tie was observed in.
-    coverageFrom: 2016,
+    // Series. Floor: min(first_observed_year) in dist/customer/nest.csv, which
+    // is the earliest year any source named an enterprise or a tie. The runs of
+    // source editions are what date a relationship, so this is an observation
+    // series with a left edge rather than a roster.
+    coverage: Object.freeze({ kind: "series", from: 2016 }),
     blurb:
       "Who owns whom across Indian Country's enterprises: parent nations and corporations, their subsidiaries, holding companies and joint ventures, and how those ties change as entities are created, renamed, acquired and wound down.",
     linkage:
@@ -282,11 +339,19 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Gaming",
     name: "Gaming Intelligence",
     shelf: "grove",
-    // Measured: min(open_date) in dist/customer/gaming.csv.
-    // A facility open date, and the earliest four are flagged
-    // `open_date_predates_tribal_gaming_era`. The earliest unflagged one is
-    // 1979; the catalog's old 1988 was IGRA's year, not the record's.
-    coverageFrom: 1905,
+    // Series. Floor: min(open_date) in dist/customer/gaming.csv AFTER excluding
+    // open_date_predates_tribal_gaming_era = 1.
+    //
+    // The unfiltered minimum is 1905, and it is Crosby Lodge, whose
+    // open_date_event is not_gaming_commencement: the row dates a lodge, not
+    // gaming. Three more rows carry the era flag and each one's basis says the
+    // same thing — the date "precedes 1979, the first documented year of
+    // high-stakes" tribal gaming. The filter is deliberately this flag and not
+    // the year 1988: the 50 pre-IGRA facilities are mostly the high-stakes
+    // bingo halls whose litigation produced IGRA, and dropping them would
+    // understate the record as badly as 1905 overstates it
+    // (docs/datasets/gaming.md).
+    coverage: Object.freeze({ kind: "series", from: 1979 }),
     blurb:
       "Facilities, ownership and affiliation over time, declination letters, environmental reviews, expansions, employment estimates and transaction history, cross-validated against Deals.",
     // A Grove-exclusive collection is shown on Cedar Press rather than hidden,
@@ -471,11 +536,18 @@ export const GROVE_PUBLIC_DATA = Object.freeze([
   }),
 ]);
 
-/** The earliest year any collection on a shelf reaches back to. */
+/**
+ * The earliest year any collection on a shelf reaches back to.
+ *
+ * Rosters are skipped rather than coerced: a roster states no year, and
+ * folding its capture date in here would make "as far back as" read off the
+ * date Cedar last harvested a list.
+ */
 function earliestOnShelf(shelf) {
-  return Math.min(
-    ...PRESS_CATALOG.filter((entry) => entry.shelf === shelf).map((entry) => entry.coverageFrom),
-  );
+  const years = PRESS_CATALOG.filter(
+    (entry) => entry.shelf === shelf && entry.coverage.kind === "series",
+  ).map((entry) => entry.coverage.from);
+  return years.length ? Math.min(...years) : null;
 }
 
 /**
@@ -496,7 +568,7 @@ export const GROVE_INCLUDES = Object.freeze([
   Object.freeze({
     id: "all-standard",
     short: "All of Press",
-    coverageFrom: earliestOnShelf("standard"),
+    reachesBackTo: earliestOnShelf("standard"),
     name: "Everything in Cedar Press",
     kind: "rollup",
     shelf: "standard",
@@ -507,7 +579,7 @@ export const GROVE_INCLUDES = Object.freeze([
   Object.freeze({
     id: "all-pro",
     short: "All of Press+",
-    coverageFrom: earliestOnShelf("pro"),
+    reachesBackTo: earliestOnShelf("pro"),
     name: "Everything in Cedar Press+",
     kind: "rollup",
     shelf: "pro",
