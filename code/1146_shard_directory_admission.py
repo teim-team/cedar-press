@@ -117,6 +117,7 @@ from __future__ import annotations
 import argparse
 import collections
 import csv
+import hashlib
 import importlib
 import json
 import re
@@ -530,20 +531,16 @@ def build_rows(verbose=True):
     by_key = collections.Counter(r["business_source_id"] for r in out)
     collided = {k for k, v in by_key.items() if v > 1}
     if collided:
-        seen_ord = collections.Counter()
         for r in out:
             k = r["business_source_id"]
             if k not in collided:
                 continue
-            disc = re.sub(r"[^A-Za-z0-9]+", "-",
-                          (r.get("business_license_number") or "")).strip("-")
-            if disc:
-                basis = "business_license_number"
-            else:
-                seen_ord[k] += 1
-                disc = f"n{seen_ord[k]}"
-                basis = ("ORDINAL - the source printed no licence number for "
-                         "this row; this suffix is Cedar's, not the source's")
+            disc, basis = _discriminator(r)
+            # lint-ok: class7 - `disc` is a function of the ROW, never of its
+            # position: `_discriminator` returns the source's own
+            # business_license_number, or a digest of the row's own content
+            # columns. The ordinal version this replaced WAS a class 7
+            # instance and is retired; V7 asserts the result is unique.
             r["business_source_id"] = f"{k}#{disc}"
             r["validation_flags"] = ";".join(
                 x for x in [r.get("validation_flags"),
@@ -633,6 +630,39 @@ def _summarise(rows, counts):
     print(f"    resolved to a spine entity            {res:,}")
 
 
+def _discriminator(r):
+    """The suffix that separates two rows sharing a staged key.
+
+    Defect class 7 is an id minted from OUTSIDE the row - a process hash, a
+    RANK or a POSITION. The first draft of this used an ordinal (`#n1`, `#n2`)
+    where the source printed no licence number, which is exactly that: it is
+    stable only while the file's row ORDER is, and a re-parse that reordered
+    the staging file would silently re-key those rows. Every input below comes
+    off the row itself, so the id is a function of the record and nothing
+    else.
+
+    First choice is the discriminator the SOURCE published - Pyramid Lake
+    prints `PL 2025-026` / `PL S2025-001` for the same firm's general and
+    towing licences. Where there is none, the fallback is a short digest of
+    the columns that actually differ between the colliding rows, and it SAYS
+    it is Cedar's rather than dressing up as a licence number.
+    """
+    lic = re.sub(r"[^A-Za-z0-9]+", "-",
+                 (r.get("business_license_number") or "")).strip("-")
+    if lic:
+        return lic, "business_license_number"
+    fields = ("service_category_raw", "certification_expiration",
+              "certification_start", "certification_tier", "city",
+              "state_province", "source_url")
+    payload = "||".join(str(r.get(f) or "") for f in fields)
+    return ("x" + hashlib.md5(payload.encode("utf-8")).hexdigest()[:8],
+            "CEDAR_CONTENT_DIGEST of "
+            + ",".join(fields)
+            + " - the source printed no licence number for this row, so this "
+              "suffix is Cedar's and is a function of the row, never of its "
+              "position in the file")
+
+
 def _repair_live_keys(dry_run=False):
     """One-shot, idempotent: apply the same disambiguation to rows ALREADY in
     the live table.
@@ -654,7 +684,6 @@ def _repair_live_keys(dry_run=False):
     collided = {k for k, v in cnt.items() if v > 1}
     if not collided:
         return 0
-    seen_ord = collections.Counter()
     n = 0
     for r in rows:
         if r["source_id"] not in ADMIT:
@@ -662,15 +691,9 @@ def _repair_live_keys(dry_run=False):
         k = r["business_source_id"]
         if k not in collided:
             continue
-        disc = re.sub(r"[^A-Za-z0-9]+", "-",
-                      (r.get("business_license_number") or "")).strip("-")
-        if disc:
-            basis = "business_license_number"
-        else:
-            seen_ord[k] += 1
-            disc = f"n{seen_ord[k]}"
-            basis = ("ORDINAL - the source printed no licence number for this "
-                     "row; this suffix is Cedar's, not the source's")
+        disc, basis = _discriminator(r)
+        # lint-ok: class7 - same rule as build_rows: `_discriminator` reads
+        # the row, not its position. See its docstring.
         r["business_source_id"] = f"{k}#{disc}"
         r["validation_flags"] = ";".join(
             x for x in [r.get("validation_flags"),

@@ -8394,3 +8394,51 @@ section.** Naming a file is not naming an owner, and `62`'s rule exists because
 "not mine" is how six sessions in a row hid everything else this gate could
 have said.
 
+
+---
+
+## 2026-09-02 — workstream NOB-DIRECTORIES: what I own in the red `62`, and what I do not
+
+*Standing rule 15: a red gate is not automatically yours, and "pre-existing, not
+mine" is not an answer — name the owner with a measurement, in writing. Measured
+2026-09-02 evening, after `code/1146_shard_directory_admission.py` and
+`code/1147_released_host_directories.py` landed.*
+
+`py -3 code/62_no_regression_check.py` is RED. It was already red when this
+workstream started. Here is every regression it names, with who owns it.
+
+**MINE, and both are now waived with a reason rather than left standing:**
+
+| metric | mine | what I did |
+|---|---|---|
+| `lint_class7` 42 -> 46 | **2 of the 4** | `1146` disambiguates a colliding `business_source_id`. The first cut used an ORDINAL, which is class 7 exactly — an id minted from a row's POSITION. Replaced with `_discriminator()`, which returns the source's own `business_license_number` or a digest of the row's own content columns, and the two call sites carry `# lint-ok: class7` naming why. **44 after the fix; the other 2 are not mine.** |
+| `lint_class4` 9 -> 15 | **1 of the 6** | `1147`'s `MAX_REQUESTS` cap. Waived with a reason that is also a code change: hitting the cap now sets `Fetcher.capped`, prints a named INCOMPLETE warning and makes `fetch` return non-zero, and every `verify` floor is derived from the STAGING FILES rather than a "done" flag, so a truncated fetch stages fewer rows and V1 goes RED. **The other 5 are not mine.** |
+
+**IMPROVED by this workstream, measured before and after:**
+
+- `contract_violations` **16 -> 15** and `contract_orphan_shippable` down one:
+  `native_owned_businesses.csv` — the FLAGSHIP table of the
+  `native-owned-businesses` collection — was an ORPHAN, claimed by no
+  collection, because `500.COLLECTIONS`' pattern for that collection read
+  `^(individual_native|tribal_certification)` and did not include it. Fixed.
+- `contract_grain_stated_shippable` **246 -> 247**: `512.GRAIN_NOB_DIRECTORIES`
+  declares the grain, primary key and join cardinality for
+  `native_owned_businesses.csv`, which had none.
+- `codebook`: `py -3 code/cedar_codebook.py check` said **20 rows would be
+  LOST** by a rebuild and now says **SAFE — a rebuild loses nothing**.
+
+**NOT MINE. Named here so the next agent does not re-derive it:**
+
+| regression | owner, by measurement |
+|---|---|
+| `lint_class1` 0 -> 1 | `1011_cross_dataset_reconciliation.py:430` — `glob(C("deals_*_additions.csv"))`, the additions-only glob. Deals workstream |
+| `lint_class2c` 60 -> 69, `lint_class3` 0 -> 2 | no instance in `1146_*`, `1147_*` or `330_build_*` — checked with `293 \| grep` |
+| `tier_A_ruled` 1,676 -> 1,669 | the identifier ledger. Nothing in this workstream writes a tier or a ruling |
+| `rulings_unapplied` 1,215 -> 2,894 | rulings layer |
+| `ship_tables_at_zero`, `tables_missing_*`, `tables_undocumented_in_codebook`, `SHIPPING LOST: advocacy_passthrough_2026-08-07.csv`, `hearing_bill_links.csv` 465 -> 464, `native_bills_subject_sweep.csv` 2,414 -> 2,409 | the shipping chain (`87` -> `25` -> `27`). This workstream shipped nothing and removed nothing from `dist/` |
+| `845 verify` FAIL, 1 new unsafe writer | `1139_linkage_coverage.py` -> `docs/LINKAGE_COVERAGE.md`. On the do-not-edit list for this workstream |
+
+`py -3 code/846_session_audit.py` was **2 fail / 2 critical** at HEAD
+(`git show HEAD:docs/SESSION_AUDIT.json`) and is 2 fail / 1 critical now. This
+workstream did not move it in either direction; the two failures it reports are
+`845 verify` (above) and `1137 verify rc=1`, both other agents' files.

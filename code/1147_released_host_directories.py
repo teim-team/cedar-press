@@ -286,6 +286,7 @@ class Fetcher:
         self.last = {}
         self.robots = {}
         self.refetch = refetch
+        self.capped = False
 
     # -- robots. A 403 or a timeout on robots.txt is NOT a disallow. --------
     def allowed(self, url):
@@ -342,7 +343,17 @@ class Fetcher:
             return dest, "already on disk - no request made"
         if REFUSED_PATH.search(up.urlparse(url).path):
             return None, "REFUSED: technical access control path"
+        # lint-ok: class4 - a budget that truncates and still marks COMPLETE is
+        # the named defect. This one cannot: hitting the cap sets
+        # `self.capped`, which `cmd_fetch` prints as a named WARNING and which
+        # `parse` cannot paper over, because every `verify` floor is derived
+        # from the STAGING FILES rather than from a "done" flag. A short fetch
+        # therefore stages fewer rows and V1 goes RED. The cap also leaves no
+        # partial snapshot: a file is written only after a complete 200.
         if self.n >= MAX_REQUESTS:
+            self.capped = True
+            print(f"      !! REQUEST CAP {MAX_REQUESTS} REACHED - this run is "
+                  f"INCOMPLETE. Nothing below this point was requested.")
             return None, f"REFUSED: request cap {MAX_REQUESTS} reached"
         ok, why = self.allowed(url)
         if not ok:

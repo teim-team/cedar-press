@@ -821,3 +821,95 @@ is 97.59% after this pass and the real residue is 2,164 rows. See
 `KNOWN_ISSUES` M3 before spending a pass there.
 
 <!-- END MONEY-RECON-1144 -->
+
+<!-- BEGIN MONEY-FED-2026-09-02 -->
+## Follow-ups left by workstream MONEY-FED (2026-09-02)
+
+*From `code/1145_cosponsor_harvest.py` and `code/1148_nagpra_nps_databases.py`.
+Build logs: `docs/COSPONSOR_HARVEST_LOG_2026-09-02.md`,
+`docs/NAGPRA_NPS_DATABASES_BUILD_LOG_2026-09-02.md`. Decisions: ADR-040.*
+
+Each item names its state in the four-way vocabulary
+(`SOURCE_DOES_NOT_PUBLISH` / `ON_DISK_NOT_PROMOTED` / `NOT_ACQUIRED` /
+`CONSTRAINED`) so the next reader does not open a socket for a join.
+
+| # | state | item | measurement |
+|---|---|---|---|
+| 1 | `NOT_ACQUIRED` | **49 Federal Register document numbers the National NAGPRA Program lists and `nagpra_notices.csv` does not hold.** Check each against the FR itself before calling it a Cedar gap — a mangled document number would look identical, and two already did | `nagpra_notice_source_corroboration.csv`, `corroboration_status = IN_NPS_ONLY` |
+| 2 | `ON_DISK_NOT_PROMOTED` | **315 notices where Cedar's MNI and the Program's MNI disagree**, both values on the row. Not a fetch. Some are ±1 (`00-25126` 491 vs 490) and read as an off-by-one in one reader; `00-19292` is 4 vs 99 and does not | same table, `corroboration_status = DISAGREE` |
+| 3 | `ON_DISK_NOT_PROMOTED` | **`nagpra_nps_summaries.tribes_listed_semicolon` is a list-valued column of tribe names, unresolved to `cedar_uid`.** 1,540 institutions. A name-resolution job on a list-valued field — the shape ADR-037 §2 describes for the NAGPRA bridge — not an acquisition | `nagpra_nps_summaries.csv`, `n_tribes_listed` |
+| 4 | open question | **`nagpra_nps_inventories.csv` has 4,118 byte-identical duplicate rows of 11,811 and the discriminator is not in the published grid.** Splitting on the source's own `InventoryType` took it from 4,139 to 4,118 and no further. Does the detail view behind the grid justify a per-row fetch, or does the table ship as a grid transcript with the duplication declared? Nothing was collapsed | `GRAIN_OPEN` in `code/512_build_dataset_contracts.py` |
+| 5 | integrator | **`cedar_publication.GATES["source_terms_status"]` has no public-domain member.** `PUBLIC_DOMAIN_US_GOVERNMENT_WORK` is accurate for a federal work and would silently withhold every row carrying it. 1148 publishes `TERMS_STATED_NO_REUSE_RESTRICTION` instead and carries the public-domain fact in `source_terms_basis`. `cedar_publication.py` is not agent-editable, so this is recorded, not fixed | ADR-040 decision 1 |
+| 6 | `NOT_ACQUIRED` | **Bill ACTIONS and COMMITTEES for the 3,069 Native bills.** Same host, same key, same shape as the cosponsor pull (`/bill/{c}/{t}/{n}/actions`), ~3,000 requests, ~1 hour under the 5,000/hr keyed budget. Not started — one poller per host, and the cosponsor run held `api.congress.gov` for this session | `logs/_HOSTLOCK_api.congress.gov.json` |
+| 7 | `SOURCE_DOES_NOT_PUBLISH` | **8 of the 3,069 bills are not on congress.gov's `/bill` endpoint at all** — `hre`, `hjr`, `treatydoc`, `treatydocno`. `code/1092` established this for titles; it holds for cosponsors. Not a Cedar deficiency | `native_bill_cosponsor_coverage.cosponsor_lookup_status` |
+
+### Confirmed ALREADY ON DISK — do not re-download
+
+Three leads carried into this session as acquisition tasks. All three are local.
+
+| lead as carried | measured 2026-09-02 |
+|---|---|
+| "a 5,087-row SBA 8(a) extract the spine builder already loaded" | **Confirmed.** `data/raw/external/sba_dsbs_native_entities.csv`, **5,087 rows**, 0.5 MB, read by `01_build_entity_spine.py` and by three more scripts (`08`, `1072`, `1130`) |
+| "an 807-letter corpus recorded as unacquired" | **Confirmed and it is in `data/clean`.** `dear_tribal_leader_letters.csv`, **807 rows**, IHS 783 · BIE 14 · BIA 10, letter dates **2000-2026**, already in the `federal-register` collection via the `dtll_` / `dear_tribal_leader` pattern |
+| "a 1.34 GB FAC bulk export" | **Confirmed present, measured smaller.** `data/raw/fac/` is **1.1 GB**, of which `bulk/general.csv` is **270 MB** (fetched 2026-09-02 14:00 by `code/1132`), plus `data/raw/fac_historical_census/` at 37 MB. Quote the measurement, not the 1.34 |
+
+Two figures carried into this session did **not** reproduce and were already
+corrected in `docs/LINKAGE_CLOSE_LOG_2026-09-02.md` before this workstream
+reached them: **"1,088 `FOUND_NOT_EXTRACTED` surfaces"** is 280 matrix cells over
+246 entities, and **"509 entities never checked for a CAGE or UEI"** is
+**1,439 of 1,555**. Neither was re-derived here; the linkage-close pass owns them.
+<!-- END MONEY-FED-2026-09-02 -->
+
+<!-- BEGIN NOB-DIRECTORIES-2026-09-02 -->
+# Native-owned businesses — what this pass left, measured
+
+*Added 2026-09-02 by workstream `NOB-DIRECTORIES` (`code/1146`, `code/1147`).
+The table went 2,916 -> 4,274 rows and 21 -> 42 certifying authorities; full
+account in `docs/NOB_DIRECTORY_EXPANSION_LOG_2026-09-02.md`. Every item below
+is a task with a measurement, not a feeling.*
+
+1. **Yakama and Stillaguamish — `ROUTE_NOT_FOUND`, not `CHECKED_ABSENT`.**
+   Two of the eight sources the 2026-09-02 terms ruling released. Both hosts
+   answer HTTP 200 (probed 2026-09-02, `yakama.com` 137,697 bytes,
+   `stillaguamish.com` 141,823) and neither publishes a business directory at
+   a route this pass located.
+   `review/tribal_vendor_list_registry_2026-08-26.csv` records **no
+   `list_url`** for either. This is a discovery task — read the site, find the
+   TERO or economic-development page — and it is small.
+
+2. **The registry has 40 rows at `harvest_status = NOT_SEARCHED_MACHINE_READABLE`
+   and 5 at `SITE_UNREACHABLE`.** Re-derive with:
+   `py -3 -c "import csv,collections;print(collections.Counter(r['harvest_status'] for r in csv.DictReader(open('review/tribal_vendor_list_registry_2026-08-26.csv',encoding='utf-8'))))"`
+   The 40 are the next cheapest yield in this dataset: each is a nation whose
+   site was found but whose machine-readable routes (WP REST, sitemap, a linked
+   PDF) were never tried. `docs/HIDDEN_DATA_TECHNIQUES.md` #3 is what found
+   Citizen Potawatomi's `/wp-json/wp/v2/enterprise` custom post type, which is
+   27 tribal enterprises nobody would have found by reading the page.
+
+3. **`native_owned_businesses.bak_2026-09-02_010526.csv` and `...010557.csv`
+   in `data/clean` are reported by `512` as ORPHAN SHIPPABLE TABLES.** They are
+   backups written with `.bak` INFIXED rather than suffixed, so the
+   codebook-side scan reads them as tables. Renaming them to the project's
+   `.csv.bak_<tag>` convention closes two of `512`'s eight remaining orphan
+   violations. **Not done here**: another agent's script wrote them during this
+   session and a rename mid-session is a collision risk. `prime_contracts.bak_*`
+   has the same shape, from `772`.
+
+4. **The 50 Akima operating companies are in the business directory and NOT in
+   NEST.** They are admitted exactly as ASRC Federal (TBD-056) and Doyon
+   (TBD-059) already are — `directory_type = subsidiary_directory`,
+   `identity_scope = parent_asserted_subsidiary`. Whether a
+   parent-asserted subsidiary should ALSO become a `nest_enterprises` row is
+   `1072_tribally_owned_enterprises.load_sources()`'s decision and this pass did
+   not open that file. If it should, these 50 are a ready-made source 8, and
+   `1130`'s reconciliation is the check that says whether they are already
+   there under another name.
+
+5. **`record_scope = entity` on 5 of 4,274 rows.** Resolution is exact
+   normalised name/alias only, by design (ADR-010; the loose gov-class token
+   path would resolve "Navajo Transitional Energy" to the Navajo Nation, which
+   is a false ownership claim). The 4,269 unresolved rows are an honest
+   outcome, not a gap — but `native_business_identifier_crosswalk.csv` runs the
+   join from the FEDERAL side and is the right instrument if anyone wants to
+   raise it.
+<!-- END NOB-DIRECTORIES-2026-09-02 -->

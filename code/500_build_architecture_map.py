@@ -142,7 +142,24 @@ COLLECTIONS: list[dict] = [
      # `refuses_tribal_link_not_native_ownership` - an absent tribal id here is
      # correct by design, not a gap. They join the spine on its 45
      # "Individually Native-owned business" rows.
-     "tables": r"^(individual_native|tribal_certification)"},
+     # CORRECTED 2026-09-02 by workstream NOB-DIRECTORIES (code/1146, 1147):
+     # this collection's own FLAGSHIP table was not in its pattern.
+     # `native_owned_businesses.csv` is registered in the codebook as
+     # `02m_native_owned_businesses` and 512 has been reporting it as an
+     # "ORPHAN shippable table - registered in the codebook but claimed by NO
+     # collection" - a table that would ship with no owner, no plan and no
+     # contract, inside the collection named after it. The alternation is
+     # anchored `$` on purpose and matched against the STEM (build.py's
+     # `collection_tables` does `rx.search(p.stem)`), so it claims exactly one
+     # file. Backups are excluded a second way by that same function's
+     # `".bak_" not in p.name`, which matters here because
+     # `native_owned_businesses.bak_*.csv` sits beside it in data/clean - a
+     # backup written with `.bak` INFIXED rather than suffixed, which 512's
+     # codebook-side scan still reads as a shippable table and reports as an
+     # orphan. Those two are a separate, pre-existing naming defect and are
+     # NOT claimed here.
+     "tables": r"^(individual_native|tribal_certification)"
+               r"|^native_owned_businesses$"},
     # Added 2026-09-02 by code/1072_tribally_owned_enterprises.py. The 14th
     # collection, and it is a DIFFERENT RELATION from
     # `native-owned-businesses`, not a bigger version of it:

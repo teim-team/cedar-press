@@ -3217,3 +3217,42 @@ two sovereigns.
 | **repoint `VP-0170` to `TRBF-OTOMSA-00`** | 6 rows across 5 tables change nation; the Ponca compact trace must be re-derived; the group then merges under rule P2 and 717 → **716** |
 | **leave it** | Cedar publishes a property asserting the Ponca Tribe operates a casino the Otoe-Missouria Tribe says is theirs |
 <!-- END GAMING-PLACE-RULINGS-1141-2026-09-02 -->
+
+<!-- BEGIN NOB-DIRECTORIES-2026-09-02 -->
+## NOB-1 — the terms ruling moved the HARVEST gate. Does it move the PUBLICATION gate?
+
+*Added 2026-09-02 by workstream `NOB-DIRECTORIES`
+(`code/1146_shard_directory_admission.py`, `code/1147_released_host_directories.py`).
+Full account: `docs/NOB_DIRECTORY_EXPANSION_LOG_2026-09-02.md`.*
+
+Your 2026-09-02 ruling released eight hard-listed tribal sources for harvest.
+Six of them are now harvested and in `data/clean/native_owned_businesses.csv` —
+**744 rows**, including the Chickasaw Business Directory (602 firms) that had
+been the single largest refusal in the dataset.
+
+**Every one of those 744 rows is `publishable = N`.** Not because of a new
+refusal — because `615_set_publishable_native_owned_businesses.PERMISSION_OK`
+is an ALLOW-list holding exactly `{SILENT, TERMS_STATED_NO_REUSE_RESTRICTION}`,
+and these rows honestly record `source_terms_status =
+TERMS_STATED_RESTRICTIVE`, which is what those publishers state. The ruling
+made that a recorded observation rather than a harvest gate; nobody has said
+what it means for publication, and no agent should decide that for you.
+
+Two smaller statuses are held by the same allow-list and are almost certainly
+over-exclusion:
+
+| status | rows | sources | the question |
+|---|---:|---|---|
+| `TERMS_STATED_RESTRICTIVE` | **1,090** | the six released hosts (744) + Navajo NBOA (346) | does the ruling reach publication, or only harvest? |
+| `TERMS_STATED_COPYRIGHT_ONLY` | 17 | Delaware Tribe, California Valley Miwok, Chehalis | **a copyright notice is not a reuse restriction.** Holding these looks like the "wrong in the quieter direction" defect |
+| `NOT_CHECKED` | 19 | Chitimacha, Kalispel | the terms page was never opened. Unmeasured, not refused — someone should open it |
+
+| answer | consequence |
+|---|---|
+| **the ruling reaches publication** | add `TERMS_STATED_RESTRICTIVE` to `615.PERMISSION_OK`; `publishable = Y` on 1,090 more rows, taking the table from 2,447 to 3,537 of 4,274 publishable. One line, one re-run, no re-harvest |
+| **harvest only; publication stays held** | the 744 rows stay internal evidence. They are still worth having — they are the only harmonized record of who these nations certify — but the Chickasaw directory does not ship |
+| **release the copyright-only three, hold the rest** | +17 rows; the narrow answer, and it settles the smaller principle without settling the big one |
+
+Nothing in this item is urgent for correctness: the data is harvested, keyed
+and provenanced either way. It decides only what ships.
+<!-- END NOB-DIRECTORIES-2026-09-02 -->

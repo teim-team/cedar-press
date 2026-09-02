@@ -6,13 +6,13 @@
     "class2b": 0,
     "class2c": 69,
     "class3": 2,
-    "class4": 15,
+    "class4": 14,
     "class5": 6,
     "class6": 27,
     "class7": 44,
     "class8": 0,
     "class9": 0,
-    "lint_bug_class_instances": 164
+    "lint_bug_class_instances": 163
   },
   "findings": [
     {
@@ -225,11 +225,11 @@
     {
       "class": "class4",
       "file": "1147_released_host_directories.py",
-      "line": 345,
+      "line": 353,
       "evidence": "if self.n >= MAX_REQUESTS:",
-      "why": "a budget (MAX_REQUESTS, PER_HOST_DELAY_S) exits a loop, the file writes a completion marker (['  OK  ']), and it never compares what it RETRIEVED against the total the SOURCE reported. That is the PER_DOCKET_BUDGET_S defect: four dockets written at 2,300-3,200 of 3,555-4,847 and marked `done`, so no resume would ever revisit them.",
-      "waived": false,
-      "waiver_reason": ""
+      "why": "a budget (MAX_REQUESTS, PER_HOST_DELAY_S) exits a loop, the file writes a completion marker (['  OK  ', 'OK']), and it never compares what it RETRIEVED against the total the SOURCE reported. That is the PER_DOCKET_BUDGET_S defect: four dockets written at 2,300-3,200 of 3,555-4,847 and marked `done`, so no resume would ever revisit them.",
+      "waived": true,
+      "waiver_reason": "a budget that truncates and still marks COMPLETE is"
     },
     {
       "class": "class2c",
@@ -1673,6 +1673,24 @@
     },
     {
       "class": "class7",
+      "file": "1146_shard_directory_admission.py",
+      "line": 697,
+      "evidence": "r[\"business_source_id\"] = f\"{k}#{disc}\"",
+      "why": "[WARN] POSITIONAL on target business_source_id -> codebook_master.csv, native_owned_businesses.csv. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
+      "waived": true,
+      "waiver_reason": "same rule as build_rows: `_discriminator` reads"
+    },
+    {
+      "class": "class7",
+      "file": "1146_shard_directory_admission.py",
+      "line": 544,
+      "evidence": "r[\"business_source_id\"] = f\"{k}#{disc}\"",
+      "why": "[WARN] POSITIONAL on target business_source_id -> codebook_master.csv, native_owned_businesses.csv. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
+      "waived": true,
+      "waiver_reason": "`disc` is a function of the ROW, never of its"
+    },
+    {
+      "class": "class7",
       "file": "118_build_gaming_ordinances.py",
       "line": 328,
       "evidence": "r[\"ordinance_id\"] = (f\"NIGC-ORD-{r['index_date'].replace('-', '')}\"",
@@ -1845,7 +1863,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 4679,
+      "line": 4727,
       "evidence": "h = hash(\"\\x1f\".join(parts))",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1854,7 +1872,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 4689,
+      "line": 4737,
       "evidence": "h = hash(\"\\x1f\".join(row))",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1863,7 +1881,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 4714,
+      "line": 4762,
       "evidence": "if hash(k) in collided[gj]:",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1872,7 +1890,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 4720,
+      "line": 4768,
       "evidence": "if hash(k) in row_collided:",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -3056,6 +3074,7 @@
       ],
       "native_owned_businesses.csv": [
         "1100_nob_crosswalk_promotion.py",
+        "1146_shard_directory_admission.py",
         "330_build_native_owned_businesses.py",
         "615_set_publishable_native_owned_businesses.py",
         "771_normalize_nboa_certification_dates.py",
@@ -3471,6 +3490,7 @@
       ],
       "native_owned_businesses.csv": [
         "1100_nob_crosswalk_promotion.py",
+        "1146_shard_directory_admission.py",
         "330_build_native_owned_businesses.py",
         "615_set_publishable_native_owned_businesses.py",
         "771_normalize_nboa_certification_dates.py",

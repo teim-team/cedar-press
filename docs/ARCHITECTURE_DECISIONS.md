@@ -3559,3 +3559,67 @@ two overlap and describe different things (award vs transaction). Both the
 docstring and `GRAIN_OPEN` now carry a **do-not-sum fence** instead of the
 withdrawn claim.
 <!-- END ADR-040-MONEY-FED-ACQUISITION -->
+
+<!-- BEGIN ADR-041-NOB-DIRECTORIES -->
+## ADR-041 — a certifying authority's admission is DATA, not a dict, and a directory is admitted twice or not at all (workstream NOB-DIRECTORIES, 2026-09-02)
+
+**Context.** `330_build_native_owned_businesses.py promote` is the one builder
+for `native_owned_businesses.csv` and it refuses any staging file whose source
+id it does not know, because promoting a file whose certifying authority,
+assertion class and terms status it cannot state is how a restricted source
+reaches `data/clean` by accident. That refusal is right and stays. But 330's
+`SIBLING` dict is a Python literal written on 2026-09-01, and three sibling
+passes wrote fifteen more directories into the shared staging folder
+afterwards. Result: fifteen nations' harvested, parsed, provenanced directories
+were invisible to the dataset, and the only way to admit them was to edit a
+file every one of those passes would also want to edit.
+
+**Decision, three parts.**
+
+1. **The admission decision is DATA.** A sibling pass writes
+   `data/staging/business_registry/_<slug>_dispositions.json` naming, per
+   source id, the certifying authority's spine id, the programme, the
+   assertion class, the disposition and the reasoning. `330 promote` globs
+   `_*_dispositions.json` and merges them into `SIBLING`. It **never overrides
+   a decision made in code** — a source id already in `SOURCES` or `SIBLING`
+   wins — so the file can only add. When no such file exists 330 prints a
+   named warning saying how many directories it is about to drop and which
+   commands produce them, because an absence must never print as a clean
+   result.
+
+2. **A directory is admitted TWICE or not at all.** The rows are APPENDED now
+   through `cedar_pipeline.merge_table`, *and* the disposition is written for
+   the rebuild. Appending alone is reverted by the next `330 promote` and the
+   revert looks like nothing happened; writing the disposition alone leaves the
+   rows non-existent until somebody dares run a rebuild that blanks five
+   in-place enrichers (`615`, `1070`, `953`, doyon, `1100`). Both halves, or
+   neither. `1146` V6 and `1147` V5 fail while the 330 hook is absent.
+
+3. **A vocabulary is not widened to fit a source; the source is adjudicated
+   into the vocabulary, and the source's own word is kept beside it.**
+   `570_shard_l` typed the Hoopa business-licence register `assertion_class =
+   LICENCE`. That value is not in this table's vocabulary (`OWNERSHIP` /
+   `RELATIONSHIP` / `JOINT_VENTURE_PARTICIPATION`). It is mapped to
+   `RELATIONSHIP` — 330's own definition, "the authority asserts the firm does
+   business with the tribe" — because the register says in its own words that
+   it carries *"NO ownership threshold, NO tribal membership requirement"*, and
+   the source's word is recorded in `validation_flags`. **The directory TYPE
+   does not decide the assertion CLASS**: the live table correctly types
+   Lummi's `business_licence` rows `OWNERSHIP`, because the Lummi list is
+   titled *Lummi-owned businesses*, and the Pyramid Lake licence list is
+   correctly `RELATIONSHIP`. The claim sentence decides.
+
+**Consequence.** 2,916 → **4,274** rows, 21 → **42** certifying authorities.
+614 rows from disk at zero network cost, 744 from the six hosts the
+2026-09-02 terms ruling released. Grain and primary key declared in
+`512.GRAIN_NOB_DIRECTORIES`; the table is claimed by the
+`native-owned-businesses` collection in `500.COLLECTIONS`, which it was not
+before. Full account: `docs/NOB_DIRECTORY_EXPANSION_LOG_2026-09-02.md`.
+
+**What this decision does NOT license.** It does not move the *publication*
+gate. All 744 released-host rows carry `source_terms_status =
+TERMS_STATED_RESTRICTIVE` and land `publishable = N`, because
+`615.PERMISSION_OK` is an allow-list and only 615 owns that column. The
+harvest gate and the publication gate are two gates and the owner has so far
+moved one.
+<!-- END ADR-041-NOB-DIRECTORIES -->
