@@ -88,6 +88,10 @@ CONTRACTS = ROOT / "docs" / "schema" / "dataset_contracts.json"
 
 GITHUB_BYTES = 95 * 1024 * 1024
 EXCEL_ROWS = 1_048_576
+# The workbook is a convenience copy, not the deliverable. Past this the
+# write costs more than the rest of the build and nobody opens the result
+# in a spreadsheet application. The CSV is always complete.
+WORKBOOK_MAX_ROWS = 200_000
 YEAR_COLS = ("fiscal_year", "fy", "action_date_fiscal_year", "award_fiscal_year",
              "year", "report_year", "filing_year")
 
@@ -225,7 +229,9 @@ def profile(cols, rows):
     out = []
     n = len(rows) or 1
     for c in cols:
-        vals = [(r.get(c) or "").strip() for r in rows]
+        # Coerce rather than assume. A single non-string cell anywhere in a
+        # 1.2M-row table crashed the whole build after six minutes of work.
+        vals = [str(r.get(c) or "").strip() for r in rows]
         filled = [v for v in vals if v]
         nums = []
         if filled and len(filled) > 20:
@@ -382,6 +388,16 @@ def workbook(coll, c, cols, rows, prof, fmeta):
     """
     if len(rows) + 1 > EXCEL_ROWS:
         return "", f"{len(rows):,} rows exceeds the XLSX ceiling"
+    # A PRACTICAL CAP BELOW THE FORMAT'S CAP. `funding` is 701,955 rows x 86
+    # columns - 60 million cells. XLSX will accept that and the write takes
+    # longer than the entire rest of the build, to produce a file no one opens
+    # in a spreadsheet application anyway. The workbook exists to be
+    # CONVENIENT; past this size it is neither convenient nor the deliverable.
+    # The CSV is always complete, so nothing is lost, and the manifest records
+    # the reason rather than leaving a silent gap where a workbook should be.
+    if len(rows) > WORKBOOK_MAX_ROWS:
+        return "", (f"{len(rows):,} rows over the {WORKBOOK_MAX_ROWS:,} "
+                    f"workbook cap - use {coll}.csv, which is complete")
     import xlsxwriter
     path = OUT / f"{coll}.xlsx"
     wb = xlsxwriter.Workbook(str(path), {"constant_memory": True})
@@ -512,7 +528,12 @@ def build(dry: bool) -> int:
                         cnt[(r.get(key) or "").strip()] += 1
                     col = f"n_{tpath.stem}"
                     for r in frows:
-                        r[col] = cnt.get((r.get(key) or "").strip(), 0)
+                        # str, not int. Every other cell in these dicts is a
+                        # string read out of a CSV, and a lone int made
+                        # `profile()` raise on `.strip()`. A row that is
+                        # str-typed everywhere except one column is a trap for
+                        # the next reader too.
+                        r[col] = str(cnt.get((r.get(key) or "").strip(), 0))
                     fhdr.append(col)
                     added_cols += 1
                     refused.append(f"{tpath.stem}(1:many on {key} -> {col})")
@@ -541,6 +562,16 @@ def build(dry: bool) -> int:
                     for c2 in new:
                         fhdr.remove(f"{pre}__{c2}")
                     joined.pop()
+
+        # SWEEP THE PRIOR BUILD FIRST. Nothing here removed old artifacts, so a
+        # dataset that stops qualifying for a workbook kept its old one for
+        # ever - `funding.xlsx` survived the introduction of the 200,000-row
+        # cap and sat on disk looking current at 701,955 rows. That is the same
+        # defect the freshness gate exists to catch, one file type over: a
+        # deliverable that no longer corresponds to anything.
+        if not dry:
+            for stale_f in list(OUT.glob(f"{coll}.csv")) +                     list(OUT.glob(f"{coll}__*.csv")) +                     list(OUT.glob(f"{coll}.xlsx")) +                     list(OUT.glob(f"{coll}__CODEBOOK.md")):
+                stale_f.unlink()
 
         files = size = 0
         kind = ""
@@ -669,6 +700,17 @@ def verify() -> int:
         # failure; the SIZE of the single file is not - that is a hosting fact,
         # recorded in the manifest. Failing on size would push the next writer
         # straight back to splitting, which the owner ruled out.
+        # A workbook the manifest says should not exist is an ORPHAN from an
+        # earlier build. It looks current and corresponds to nothing.
+        wb = OUT / f"{m['dataset']}.xlsx"
+        if wb.exists() and not (m.get("workbook") or "").strip():
+            bad.append(f"{m['dataset']}: {wb.name} on disk but the manifest "
+                       f"says no workbook ({m.get('workbook_absent_reason','')})"
+                       f" - orphan from an earlier build")
+        if (m.get("workbook") or "").strip() and not wb.exists():
+            bad.append(f"{m['dataset']}: manifest names {m['workbook']}, absent")
+        if (m.get("codebook") or "").strip() and not                 (OUT / m["codebook"]).exists():
+            bad.append(f"{m['dataset']}: manifest names {m['codebook']}, absent")
         leftover = list(OUT.glob(f"{m['dataset']}__*.csv"))
         if leftover:
             bad.append(f"{m['dataset']}: {len(leftover)} split file(s) still on "
