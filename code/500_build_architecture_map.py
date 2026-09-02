@@ -33,7 +33,7 @@ NOT A GATE
 This reports; it does not fail a build. `62_no_regression_check.py` is the gate.
 Keeping them separate is deliberate - a reporting tool that can block work gets
 routed around, and this one is meant to be read.
-"""
+
 RENAMED 2026-09-02, AND THE RENAME IS THE POINT
 -----------------------------------------------
 This wrote `docs/ARCHITECTURE.md` until the data workspace was merged into the
@@ -45,7 +45,7 @@ silently destroyed on the next build.
 Moving the FILE would not have fixed that; the generator had to be repointed,
 which is why the constant changed here rather than in a one-off rename. The
 output is `docs/DATA_ARCHITECTURE.md`.
-
+"""
 from __future__ import annotations
 
 import argparse
