@@ -1401,7 +1401,11 @@ def is_state_only(s):
 # ------------------------------------------------------------- institution ---
 
 TYPE_PREFIX_RE = re.compile(
-    r"^Notice of (?:Inventory Completion|Intent to Repatriate|"
+    # `Notice To Rescind a Notice of Inventory Completion: <institution>` is a
+    # real title form on 6 notices; without this lead the whole rescission
+    # phrase ends up inside institution_name.
+    r"^(?:Notice To Rescind an?\s+)?"
+    r"Notice of (?:Inventory Completion|Intent to Repatriate|"
     r"Intended Repatriation|Intended Disposition)\b", re.I)
 # THE 2015+ TITLE FORM PUTS AN OBJECT PHRASE BETWEEN THE NOTICE TYPE AND THE
 # COLON: "Notice of Intent To Repatriate Cultural Items: <institution>".
@@ -1412,7 +1416,8 @@ TYPE_PREFIX_RE = re.compile(
 # where there is no colon nothing is consumed and no institution name can be
 # eaten. See code/1077_nagpra_institution_grain.py.
 OBJECT_HEAD_RE = re.compile(
-    r"^\s*(?:of\s+)?(?:Cultural Items?|"
+    r"^\s*(?:of\s+)?(?:an?\s+|the\s+)?"
+    r"(?:Cultural Items?|"
     r"Human Remains(?:\s+and\s+(?:Associated\s+)?Funerary Objects)?|"
     r"Native American Human Remains[^:]{0,80})?"
     r"(?:\s*Amendment)?\s*(?=:)", re.I)
@@ -1485,6 +1490,20 @@ def institution_type(name):
 # Affairs and in the Possession of the Oshkosh Public Museum'. Counting the
 # joined string as one institution overstates the number of distinct holders
 # and hides both parties from a per-institution view.
+# SPLIT ON THE SEMICOLON FIRST. The Federal Register separates co-holders
+# with "; " and closes the list with "; and ". Splitting on ", and " first
+# cuts INSIDE ordinary organisation names: "South Carolina Department of
+# Parks, Recreation, and Tourism" became two institutions, one of them
+# "Tourism, Columbia, SC", which does not exist (Codex PR #29 finding 8). The
+# legacy rule is kept for the pre-2000 titles that carry no semicolon.
+INST_SEMI_RE = re.compile(r";")
+# SPLIT ON THE SEMICOLON FIRST. The Federal Register separates co-holders
+# with "; " and closes the list with "; and ". Splitting on ", and " first
+# cuts INSIDE ordinary organisation names: "South Carolina Department of
+# Parks, Recreation, and Tourism" became two institutions, one of them
+# "Tourism, Columbia, SC", which does not exist (Codex PR #29 finding 8). The
+# legacy rule is kept for the pre-2000 titles that carry no semicolon.
+INST_SEMI_RE = re.compile(r";")
 # SPLIT ON THE SEMICOLON FIRST. The Federal Register separates co-holders
 # with "; " and closes the list with "; and ". Splitting on ", and " first
 # cuts INSIDE ordinary organisation names: "South Carolina Department of

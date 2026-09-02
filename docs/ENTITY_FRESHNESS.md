@@ -1,6 +1,6 @@
 # Entity freshness — when was each entity last touched by anything
 
-*Generated 2026-09-02 by `code/830_entity_freshness.py` across 141 entity-bearing tables. An update is ANY change: a row appearing, a date advancing, an identifier landing. `built_date` and `fetched_date` are deliberately NOT counted — they say when Cedar ran, not when the entity changed, and 70 tables carry one.*
+*Generated 2026-09-02 by `code/830_entity_freshness.py` across 145 entity-bearing tables. An update is ANY change: a row appearing, a date advancing, an identifier landing. `built_date` and `fetched_date` are deliberately NOT counted — they say when Cedar ran, not when the entity changed, and 70 tables carry one.*
 
 This answers a question no other instrument can. Coverage says who has a website; cadence says which SOURCE is behind; readiness says which DATASET meets the contract. All three aggregate across entities, so an entity can sit untouched for two years while every one of them reads green.
 
@@ -11,6 +11,14 @@ This answers a question no other instrument can. Coverage says who has a website
 | (the old, unfixable measure: no row in ANY table, identity layer included) | 0 |
 | present but carrying no usable date | 290 |
 | last change more than a year ago | 287 |
+
+## Columns REFUSED as build stamps
+
+*A date column that supplies the newest date for 5%+ of the register while holding at most 3 distinct values freshened every one of those entities on the same day. That is what a build does. Refused and named here rather than silently dropped — if one of these is genuinely an entity date, say so and it comes back.*
+
+| table | column | would have won for | distinct values |
+|---|---|---:|---|
+| `gaming_web_harvest_observations.csv` | `as_of_date` | 191 | 2026-09-02 |
 
 Median days since last change: **112**. p90: **3,627**. Oldest: **15,715**.
 

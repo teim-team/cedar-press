@@ -1450,6 +1450,87 @@ MUST_NOT_FALL = {
     "ship_dist_rows", "ship_tables_shipping",
 }
 # Metrics that must stay at zero. These are the bugs themselves.
+# ===========================================================================
+# RULE 17 - THE REGENERATE DEFECT, ENFORCED WITHOUT ANYONE REMEMBERING
+# (added 2026-09-02, workstream REGEN / ADR-017)
+#
+# `cedar_pipeline.KNOWN_ORDERINGS` and lint `class6` already record this
+# class - a full rebuild reverting an in-place enricher - but both are
+# DECLARATIVE. They fire only where a human remembered to declare the pair,
+# and 51 unsafe CSV writers existed on the day class6 was green.
+#
+# `code/845_regenerate_guard.py` does not ask. It reads every writer and
+# compares what it would emit against what is on disk, and it covers the
+# markdown half of the same defect: a generator that rewrites a whole `.md`
+# over a paragraph a human wrote. 574 deleted exactly such a paragraph -
+# written to close a reviewer finding - within hours of it being written.
+#
+# `regenerate_unsafe_writers` is MUST_NOT_RISE, not MUST_BE_ZERO: the CSV half
+# is at 0 and the 9 markdown entries are pre-existing, each an UPPER BOUND
+# that needs `845 regen <doc>` to settle. Zeroing it by fiat would be a
+# waiver wearing a ratchet's clothes.
+# `regenerate_new_unsafe_writers` IS MUST_BE_ZERO and is answered from 845's
+# OWN baseline, the same arrangement as 293 - so a NEW instance fails the gate
+# the moment it lands, whatever the standing total happens to be.
+#
+# Importing 845 parses; it never executes what it scans and opens no socket.
+# ===========================================================================
+
+def measure_regenerate_guard():
+    mod = load_module(CODE / "845_regenerate_guard.py")
+    if mod is None:
+        # UNMEASURED is not zero.
+        return {"regenerate_unsafe_writers": "UNMEASURED",
+                "regenerate_new_unsafe_writers": "UNMEASURED"}
+    try:
+        live = mod.live_headers()
+        rows, memory = mod.collect_csv(live)
+        try:
+            mrows = mod.scan_md()
+        except RuntimeError as e:
+            # The markdown half needs git history and says so rather than
+            # scoring every doc clean. Report the CSV half and name the gap.
+            note(f"845 markdown half UNMEASURED: {e}")
+            mrows = None
+        now_keys = mod._key(rows, mrows or [])
+    except Exception as e:
+        note(f"845_regenerate_guard.py imported but scanning raised "
+             f"({type(e).__name__}: {e}) - the regenerate defect is "
+             f"UNMEASURED, NOT clean.")
+        return {"regenerate_unsafe_writers": "UNMEASURED",
+                "regenerate_new_unsafe_writers": "UNMEASURED"}
+    base = set()
+    if mod.BASELINE.exists():
+        try:
+            base = {tuple(x) for x in json.loads(
+                mod.BASELINE.read_text(encoding="utf-8"))}
+        except (ValueError, OSError):
+            base = set()
+        new = now_keys - base
+    else:
+        note("docs/schema/regenerate_guard_baseline.json ABSENT - a new "
+             "unsafe writer cannot be told from an old one. Record it: "
+             "py -3 code/845_regenerate_guard.py baseline")
+        new = set()
+    for s_, t_, v_ in sorted(new)[:12]:
+        note(f"NEW unsafe wholesale writer: {s_}  {v_} -> {t_}")
+    csv_n = len({(r[1], r[2], r[3]) for r in rows})
+    if mrows is None:
+        note("845 regenerate guard: %d unsafe CSV writer(s). The MARKDOWN "
+             "half is UNMEASURED, not clean - run "
+             "`py -3 code/845_regenerate_guard.py md` by hand." % csv_n)
+        return {"regenerate_unsafe_writers": "UNMEASURED",
+                "regenerate_new_unsafe_writers": "UNMEASURED"}
+    md_n = len(now_keys) - csv_n
+    note(f"845 regenerate guard: {csv_n} unsafe CSV writer(s), {md_n} "
+         f"markdown doc(s) a rebuild could overwrite, {len(memory)} writer(s) "
+         f"whose header is derived from the row this build just built rather "
+         f"than from the file on disk. THE FIX is to derive the header: "
+         f"cols = CANONICAL + [c for c in live if c not in CANONICAL].")
+    return {"regenerate_unsafe_writers": len(now_keys),
+            "regenerate_new_unsafe_writers": len(new)}
+
+
 MUST_BE_ZERO = {
     "sk_firms_on_idaho",
     "tierA_without_entity", "X_rows_naming_an_owner", "spine_duplicate_ids",
@@ -1463,6 +1544,9 @@ MUST_BE_ZERO = {
     # rule 16: a NEW instance of one of the six named defect classes, measured
     # against 293's own baseline. Fix it, or waive the line with a reason.
     "lint_new_defect_instances",
+    # rule 17: a NEW wholesale writer that would delete a column or a
+    # paragraph nobody declared. Answered from 845's own baseline.
+    "regenerate_new_unsafe_writers",
     # Phase 1 contracts (512): a violated contract is not a gap to burn down,
     # it is the world contradicting a promise. An ORPHAN shippable table
     # would ship with no owning collection, no plan and no contract - the
@@ -1502,6 +1586,9 @@ MUST_BE_ZERO = {
 # table lands in data/clean and nobody registers it - the last-mile failure
 # this project keeps repeating, and one whose fix is cheap and local.
 MUST_NOT_RISE = {
+    # rule 17: the standing total. The CSV half is 0; the markdown entries are
+    # upper bounds awaiting `845 regen <doc>`. It may fall, never rise.
+    "regenerate_unsafe_writers",
     # External review finding F3: identity-critical facts standing on a row
     # with no recorded provenance. A RISE is new unsupported exposure and is
     # the regression; a FALL is the pay-down F3 asked for.
@@ -1639,6 +1726,7 @@ def main():
     corr, stale_consumers, declared_removals = measure_corrections()
     now.update(corr)
     now.update(measure_lint_bug_classes())
+    now.update(measure_regenerate_guard())
     sem, sem_named, sem_snap = measure_semantic_diff()
     now.update(sem)
 

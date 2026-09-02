@@ -303,4 +303,29 @@ would let a single page on any tribal domain erase that nation from the dataset.
   stated terms — it is simply wrong in the quieter direction.
 
 `navajoeconomy.org` stays excluded. The Navajo gaming hosts do not.
+
+### And it does not bind a third party's filing
+
+**Same ruling, 2026-09-02, second application.** The EDGAR sweep held back real
+transactions naming **NANA**, **Southern Ute** and **Chickasaw** — all three
+hard-listed — and asked whether the exclusion reaches a filing those entities
+did not write.
+
+It does not. The restriction is a term **NANA set on NANA's website**. Trilogy
+Metals' 10-K disclosing the Ambler Metals joint venture is *Trilogy's*
+publication, filed with the SEC under a federal disclosure obligation; NANA has
+no terms over it and set none. Reading the exclusion as "no material about this
+entity from any source" would let a website footer suppress a public company's
+mandatory securities disclosure, which is neither what the publisher decided
+nor something they could decide.
+
+* Excluded: anything **taken from** a hard-listed source's own publication —
+  its site, its documents, its API, its Wayback captures, and any harmonized
+  derivative of those.
+* Not excluded: a **third party's** independent publication that happens to
+  name them — an SEC filing, a Federal Register notice, a counterparty's
+  annual report, a court record.
+* The distinction is authorship, not subject matter.
+
+The three held EDGAR families are releasable on that basis.
 <!-- END TERMS-SCOPE -->

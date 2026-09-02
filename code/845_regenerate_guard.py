@@ -719,6 +719,18 @@ def scan_md() -> list:
     """[(risk, doc, scripts, n_markers, note)] ranked."""
     gen = md_generators()
     commit_files = _commit_files()
+    if not commit_files:
+        # UNMEASURED IS NOT ZERO. If `git log` returns nothing - not on PATH,
+        # a shallow clone, a subprocess that timed out under load - then every
+        # doc scores 0 hand edits and the whole markdown half reports CLEAN.
+        # That is the repo's signature defect: a number was produced, it was
+        # plausible, and it was about something else. Measured 2026-09-02: the
+        # standalone run saw 9 at-risk docs and the same code called from
+        # `62_no_regression_check.py` saw 0, and this is why.
+        raise RuntimeError(
+            "git returned no commit history, so the markdown hand-edit signal "
+            "cannot be measured. Refusing to report 0 at-risk docs, which is "
+            "what silence looks like here.")
     rows = []
     for rel, scripts in sorted(gen.items()):
         path = ROOT / rel

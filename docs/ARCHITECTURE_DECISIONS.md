@@ -857,4 +857,82 @@ carried column is therefore written **BLANK and named on stdout**, which is
 strictly better than deleted: the schema survives, the consumer's join key
 survives, and `cedar_pipeline.enrichers_to_rerun(table)` still names who
 refills it. A rebuild still requires the enricher to run after it.
+### OUTCOME, recorded 2026-09-02 after the pass
+
+**CSV: `845` reports 0 unsafe writers, down from 51.** Not from 33 - that was
+the count v1 could see, and v1 was wrong in both directions.
+
+| | before | after |
+|---|---:|---:|
+| unsafe CSV writers (`845 csv`) | 51 | **0** |
+| of them, pairings that did not exist | 9 of v1's 29 | 0 |
+| tables proved to survive a rebuild (`1074 carry`) | - | **63** |
+| positional writers with header != row length (`1074 positional`) | 0 of 40 | 0 of 40 |
+| markdown docs a rebuild could overwrite | 21 (upper bound) | **9** |
+
+**What the detector got wrong, and why it matters more than the fixes.** v1
+paired a `fieldnames` literal with any `.csv` name mentioned ANYWHERE in the
+file. Its two worst-ranked findings were both imaginary: `910`'s "62 columns
+lost from subawards.csv" was an 11-column review file, and `76`'s "27 columns
+lost from federal_actions.csv" was a script that only READS that table. Nine
+of 29 findings were phantom pairings. Meanwhile it MISSED 26 real ones,
+because it could not see a literal passed as an argument to a `write_csv()`
+helper - the commonest writer shape in this repo. **A detector that is loud
+about nothing and silent about something teaches people to ignore it.**
+
+v2 resolves the output path through the module's own constants, flow-
+sensitively (`main()` in `503` binds `tmp` to four different files; a flat
+map let the last binding answer for the first writer and reported the
+handle-history writer as destroying the entity spine), scopes literals to the
+function that can see them, follows one interprocedural hop into the write
+helper, and stops at a parameter that has been re-derived. `845 selftest`
+proves all three: the detector FIRES on an injected violation, does NOT fire
+on the fix, and does NOT fire on a table the script merely names.
+
+**Two shapes remain, both reported and neither fixed:**
+
+1. **93 writers use `fieldnames=list(rows[0].keys())`.** That looks derived
+   and is not - it derives from the row this build just built, not from the
+   file on disk, so a rebuild drops an enricher's column exactly as a literal
+   would. Listed under the CSV report, not counted in it.
+2. **9 markdown docs** carry a generator plus hand-edit commits plus headings
+   the generator cannot emit. Every number there is an UPPER BOUND.
+   `845 regen <doc>` settles one by regenerating and diffing, and restores the
+   doc either way. Three were settled that way and are recorded in
+   `MD_PROVEN_SAFE` with their evidence: `REFRESH_CADENCE.md` (3 changed
+   lines, all measurements that moved - and `630` already splices into
+   `<!-- CEDAR:CADENCE-MEASURED START -->`, a second marker vocabulary the
+   check did not know), `ENTITY_FRESHNESS.md`, `DEPENDENCY_MANIFEST.md`.
+   `DOC_STALENESS.md` regenerates with one unpaired removal that is a row
+   which stopped qualifying, not prose.
+
+**What a fix costs, measured.** `114_pull_prime_archive.py` is the sharpest
+case. `PRIME_FIELDS` is 39 and `prime_contracts.csv` is 70, and index 38 is
+`contract_transaction_unique_key` in the literal against `ruling_status` in
+the file - so an APPEND under the literal misaligns every field past 38. The
+script did not do that: it refused, `sys.exit(5)`, unless the header matched
+exactly. Correct, and it also meant the script **could not run at all** once
+207 / 843 / 950 / 871 had enriched the table. It now writes the LIVE header
+and refuses only if a column it MAPS is missing. Rows it derives carry blanks
+in the 31 enricher columns and it names them on stdout; rows it keeps are
+untouched.
+
+**Amendments to the ownership table above, both honest rather than tidy:**
+
+1. **`code/503_identity.py` was NOT edited.** The ADR reserved a rename there.
+   Fixing the detector's rebound-name blindness was the better repair - it
+   clears 503 and every future use of the same pattern - so a shared
+   read-only file was left alone.
+2. **`code/76_build_recognition_history.py` was NOT edited either**, for the
+   same reason: scoping the literal lookup to the function that can see it
+   removed the phantom pairing at the source.
+3. **`code/62_no_regression_check.py` WAS edited**, additively, as rule 17:
+   `regenerate_unsafe_writers` (MUST_NOT_RISE) and
+   `regenerate_new_unsafe_writers` (MUST_BE_ZERO, answered from 845's own
+   baseline, the same arrangement as 293). The integrator should review this
+   edit first.
+
+**Baseline.** `docs/schema/regenerate_guard_baseline.json` was re-recorded
+AFTER the fixes and now holds **9 markdown entries and zero CSV entries**.
+Nothing of this workstream's making is grandfathered in it.
 <!-- END ADR-017 -->

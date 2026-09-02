@@ -252,6 +252,12 @@ def money_totals(rows, cols):
 def per_uid_money(rows, cols, uid_col="cedar_uid"):
     col = next((c for c in ("total_obligations", "subaward_amount") if c in cols),
                None)
+    # lint-ok: class5 - not an "already done" short-circuit. This is a
+    # READ-ONLY measurement helper: it writes no log and no file, and the
+    # guard only says "this table carries no money column and no uid column,
+    # so there is no per-entity total to compute". Returning {} makes the
+    # conservation check compare {} to {}, which is the correct no-op for the
+    # seven identity tables that carry no dollars.
     if not col or uid_col not in cols:
         return {}
     out = {}

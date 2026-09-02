@@ -144,6 +144,15 @@ FLAGSHIP = {
     # answers on disk and a sample that could not ask it.
     "nagpra":                   "nagpra_notices.csv",
     "_entity_layer":            "cedar_identity_register.csv",
+    # 2026-09-02, workstream pr29. The `nest` collection landed while this
+    # branch was open and 760 emitted a 14th descriptor for it, which would
+    # have shipped a dataset id with no sample behind it - the exact shape of
+    # Codex PR #29 finding 7, in the other direction. Enterprises, not
+    # relations: the relation table is one row per ASSERTION and a buyer's
+    # first question is which firms a nation owns, not how many sources said
+    # so. The curation below is provisional and belongs to the `nest`
+    # workstream to revise.
+    "nest":                     "nest_enterprises.csv",
 }
 SPINE = {"cedar_identity_register.csv"}
 
@@ -410,6 +419,19 @@ SHOW = {
     # BIE school, an ANCSA corporation - not on the BIA list by construction)
     # or NOT_IN_SOURCE (49 federally recognised entities with no roster entry
     # keyed to their uid, which IS unresolved work).
+    # `owner_hub_cedar_uid` leads because the whole point of the collection is
+    # the tie: an enterprise is a SUB-HUB of its owner and never a spine
+    # entity, so the owner's uid is the join and the enterprise's is not.
+    # `assertion_class` and `n_distinct_sources` travel with it because a tie
+    # asserted once by the owner's own website and a tie corroborated by three
+    # independent sources are different claims, and the table is honest about
+    # which it holds. `uei` is on 102 of 1,482 rows and `uei_candidate` on 597;
+    # both ship, and the candidate is a PROPOSAL that may not key a dollar.
+    "nest": ["enterprise_id", "enterprise_name", "owner_hub_cedar_uid",
+             "owner_hub_name", "owner_class", "relationship", "sector",
+             "status", "city", "state_province", "uei", "uei_candidate",
+             "identifier_status", "in_federal_contracting", "assertion_class",
+             "n_distinct_sources", "source_url"],
     "_entity_layer": ["cedar_uid", "canonical_name",
                       "federal_register_legal_name",
                       "federal_register_legal_name_basis",

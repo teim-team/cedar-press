@@ -110,13 +110,18 @@ BRIDGE = ROOT / "data" / "clean" / "nagpra_notice_institutions.csv"
 BUILDER = ROOT / "code" / "77_build_nagpra_dataset.py"
 
 TYPE_PREFIX_RE = re.compile(
-    r"^Notice of (?:Inventory Completion|Intent to Repatriate|"
+    # `Notice To Rescind a Notice of Inventory Completion: <institution>` is a
+    # real title form (6 notices) and the un-prefixed pattern skips it, so the
+    # whole rescission phrase used to sit inside institution_name.
+    r"^(?:Notice To Rescind an?\s+)?"
+    r"Notice of (?:Inventory Completion|Intent to Repatriate|"
     r"Intended Repatriation|Intended Disposition)\b", re.I)
 # The object phrase the 2015+ title form puts between the notice type and the
 # colon. Anchored on a lookahead for the colon so it can never eat an
 # institution name: if there is no colon after it, nothing is consumed.
 OBJECT_HEAD_RE = re.compile(
-    r"^\s*(?:of\s+)?(?:Cultural Items?|"
+    r"^\s*(?:of\s+)?(?:an?\s+|the\s+)?"
+    r"(?:Cultural Items?|"
     r"Human Remains(?:\s+and\s+(?:Associated\s+)?Funerary Objects)?|"
     r"Native American Human Remains[^:]{0,80})?"
     r"(?:\s*Amendment)?\s*(?=:)", re.I)
@@ -338,6 +343,12 @@ def main() -> int:
                 if v and v.lower() not in flat:
                     i3_breach += 1
             bridge.append({
+                # lint-ok: class7 - `i` is NOT the row's position in this
+                # file. It is the institution's ordinal in the notice's own
+                # Federal Register TITLE, which is a fixed published string,
+                # so the same document yields the same ids in every build on
+                # every machine. Re-sorting or re-filtering this file cannot
+                # change one. Verified by I4 (7,234 distinct, 0 blank).
                 "nagpra_notice_institution_id":
                     f"{r['document_number']}#{i:02d}",
                 "document_number": r["document_number"],

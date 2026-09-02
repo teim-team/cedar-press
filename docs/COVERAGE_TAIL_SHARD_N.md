@@ -8,25 +8,25 @@ Shard N's slice is derived, not listed: every register entity that no other shar
 
 | entity class | has a site of its own | site exists, we are refused or challenged | no site of its own; another party publishes about it | checked, no web presence located |
 |---|---|---|---|---|
-| Native Hawaiian Organization | 3 | 0 | 11 | 55 |
+| Native Hawaiian Organization | 4 | 0 | 11 | 54 |
 | Federally recognized tribe | 54 | 3 | 4 | 1 |
 | Individually Native-owned business | 0 | 0 | 1 | 7 |
-| **total** | **57** | **3** | **16** | **63** |
+| **total** | **58** | **3** | **16** | **62** |
 
-*`checked, no web presence located` is a FINDING. Every one of those entities carries a row naming the routes run and the date, and for 64 of the 69 Native Hawaiian Organizations the route that settled it was the organisation's own entry in the DOI Office of Native Hawaiian Relations notification list, which records `Website: None listed`. That is the organisation telling its registrar it has none — not us failing to find one.*
+*`checked, no web presence located` is a FINDING. Every one of those entities carries a row naming the routes run and the date. For **64 of the 69** Native Hawaiian Organizations here, the route that settled it was the organisation's own entry in the DOI Office of Native Hawaiian Relations notification list, which records `Website: None listed`. That is the organisation telling its registrar it has none — not us failing to find one.*
 
 ## Rows by type
 
 | url_type | n | meaning |
 |---|---:|---|
-| `none_established` | 61 | checked, nothing found at all |
+| `none_established` | 60 | checked, nothing found at all |
 | `government` | 54 | verified tribal government site |
-| `machine_readable_surface` | 52 | the host answers wp-json / sitemap / feed — a harvestable surface for the next agent |
+| `machine_readable_surface` | 53 | the host answers wp-json / sitemap / feed — a harvestable surface for the next agent |
 | `no_own_site_found` | 21 | checked; something was found but not a site of the entity's own |
 | `form_990` | 16 | IRS filing record ABOUT the entity; not its website |
 | `directory_profile` | 5 | a consortium or directory page about the entity, published in the BIA `website` field |
+| `organization` | 4 | verified organisation site |
 | `government_blocked_bot_protection` | 4 | site exists; 403 to research UA AND to browser headers |
-| `organization` | 3 | verified organisation site |
 | `parked_domain` | 2 |  |
 | `government_refused_robots` | 1 | site exists; robots.txt Disallow: / — refused by every route |
 | `unverified_organization` | 1 | URL published by DOI that did not answer |

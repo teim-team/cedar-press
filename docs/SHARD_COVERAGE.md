@@ -18,7 +18,7 @@
 | `shard_k` | Alaska Native Village governments | RUNNING_OR_DONE | 1,201 | 228 |
 | `shard_l` | vendor lists, unsurveyed federally recognized tribes, 1st half | NOT_STARTED | 0 | 0 |
 | `shard_m` | vendor lists, unsurveyed federally recognized tribes, 2nd half | NOT_STARTED | 0 | 0 |
-| `shard_n` | the coverage tail - every entity no other shard touched | RUNNING_OR_DONE | 220 | 139 |
+| `shard_n` | the coverage tail - every entity no other shard touched | RUNNING_OR_DONE | 221 | 139 |
 
 ## Coverage by entity class
 
@@ -28,7 +28,7 @@
 |---|---:|---:|---:|---:|
 | Federally recognized tribe | 349 | 332 | 17 | 0 |
 | Federally recognized Alaska Native Village | 228 | 228 | 0 | 0 |
-| Native Hawaiian Organization | 210 | 116 | 94 | 0 |
+| Native Hawaiian Organization | 210 | 117 | 93 | 0 |
 | BIE School | 185 | 183 | 2 | 0 |
 | Alaska Native Village Corporation | 173 | 38 | 135 | 0 |
 | Native Community Development Financial Institution | 64 | 61 | 3 | 0 |
@@ -43,7 +43,7 @@
 | Alaska Native Regional Corporation | 12 | 12 | 0 | 0 |
 | ANCSA Group Corporation | 6 | 0 | 6 | 0 |
 | State-level constituency entity | 3 | 2 | 1 | 0 |
-| **total** | **1,555** | **1,260** | **295** | **0** |
+| **total** | **1,555** | **1,261** | **294** | **0** |
 
 ## URL types harvested
 
@@ -55,7 +55,7 @@
 | corporate | 422 |
 | institution | 419 |
 | api_endpoint | 371 |
-| organization | 319 |
+| organization | 320 |
 | form_990 | 305 |
 | tribal_council | 254 |
 | regulator_record | 238 |
@@ -65,10 +65,10 @@
 | subsidiary_list | 101 |
 | gaming_authority | 90 |
 | annual_report | 71 |
-| none_established | 68 |
+| none_established | 67 |
 | recognition_record | 64 |
 | wp_media_pdf | 61 |
-| machine_readable_surface | 52 |
+| machine_readable_surface | 53 |
 | failed_government | 51 |
 | failed_casino | 48 |
 | membership_list | 46 |

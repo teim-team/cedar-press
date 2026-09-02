@@ -309,10 +309,26 @@ def cmd_extract(limit=None, ocr=True):
         except Exception as e:
             out(f"  OCR unavailable: {type(e).__name__}")
 
-    # A PDF that crashes MuPDF or tesseract takes the whole process down
-    # NATIVELY - no Python exception, no traceback, exit code 1 - and the run
-    # then restarts on the same document forever. Measured twice on this
-    # corpus at documents ~171 and ~164.
+    # THE CRASH, AND WHAT IT ACTUALLY WAS.
+    #
+    # Two runs died at ~171 and ~164 documents with exit code 1, no Python
+    # traceback and nothing in the log. The obvious reading was a PDF that
+    # crashes MuPDF or tesseract natively, and this marker was written for
+    # that. The marker NEVER FIRED: the third run, with only ONE process
+    # touching the manifest, extracted 358/358 with zero failures.
+    #
+    # So the cause was concurrency, not a poison document - two extractors
+    # were appending to the same CSV, which on Windows is a hard file-lock
+    # error inside a C-level write. The evidence was in the manifest all
+    # along: 174 rows for 114 distinct document ids, in pairs about 75
+    # seconds apart. PULL_DISCIPLINE's one-poller rule is about remote hosts;
+    # the same rule was needed for a local append-only file.
+    #
+    # The marker stays, because it costs one small write per document and it
+    # is the only thing that would convert a genuine native crash into one
+    # honest failed row instead of an infinite restart. It is a guard that
+    # has not yet had to fire, and this comment says so rather than claiming
+    # it caught something.
     #
     # So mark the document BEFORE opening it. If the marker survives, the
     # previous run died inside that document: record it as a crash, skip it,
@@ -621,6 +637,24 @@ def _deals_index():
 # distinctive, however short.
 GENERIC_AT = 5
 
+# Frequency is necessary and NOT sufficient. `roofing` appears in exactly one
+# deals row and still cannot distinguish a company: it matched `EP Roofing,
+# LLC` to BBNC's acquisition of Contracting Specialists, whose description
+# happens to say the target is a roofing contractor. A trade or an industry is
+# never a name, however rare the word is in the ledger, so those words are
+# removed BEFORE the frequency test rather than by it.
+_TRADE_WORDS = frozenset("""
+roofing environmental construction contracting equipment analysis development
+industries technologies technology systems solutions services service
+holdings holding group enterprises engineering electrical mechanical plumbing
+logistics staffing consulting security janitorial catering fuels fuel energy
+mining drilling marine seafood timber telecom broadband wireless healthcare
+medical dental pharmacy insurance realty properties property leasing rental
+manufacturing defense aerospace aviation federal government national
+international american alaska alaskan native corporation company limited
+partners associates management incorporated
+""".split())
+
 
 # A counterparty field can say the filing did not name one. That is prose,
 # not a name, and tokenising it produced a "check" on the words `unnamed`,
@@ -638,9 +672,12 @@ def _dupe_note(tx, deals, tokfreq):
                 "was made")
     tgt = re.sub(r"[^a-z0-9 ]", " ", tx["cp"].lower())
     raw = [t for t in tgt.split() if len(t) > 3]
+    trade = [t for t in raw if t in _TRADE_WORDS]
+    raw = [t for t in raw if t not in _TRADE_WORDS]
     toks = [t for t in raw if tokfreq.get(t, 0) <= GENERIC_AT]
     dropped = [f"{t} ({tokfreq.get(t, 0)} rows)" for t in raw
                if tokfreq.get(t, 0) > GENERIC_AT]
+    dropped += [f"{t} (a trade, never a name)" for t in trade]
     if not toks:
         why = (f"; dropped as generic: {', '.join(dropped)}" if dropped else "")
         return ("no distinctive target name in the filing - a duplicate check "
@@ -651,7 +688,8 @@ def _dupe_note(tx, deals, tokfreq):
     for did, ed, title, blob in deals:
         if all(t in blob for t in toks) and (not acq or
                                              any(a in blob for a in acq)):
-            return f"POSSIBLE DUPLICATE of {did} ({ed}): {title[:80]}"
+            return (f"POSSIBLE DUPLICATE of {did} ({ed}), matched on "
+                    f"{', '.join(toks)}: {title[:70]}")
     return (f"no - checked on {', '.join(toks)}"
             + (f"; dropped as generic: {', '.join(dropped)}" if dropped else ""))
 

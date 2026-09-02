@@ -112,18 +112,30 @@ to "Llc".
 
 | verdict | anc | intertribal | nho | tribal gov | total |
 |---|---:|---:|---:|---:|---:|
-| LIST_FOUND | 21 | 3 | 4 | 2 | **30** |
+| LIST_FOUND | 21 | 3 | 4 | 1 | **29** |
 | MENTION_ONLY | 12 | 12 | 16 | 24 | 64 |
-| NO_LIST_FOUND | 18 | 26 | 53 | 50 | 147 |
+| NO_LIST_FOUND | 18 | 26 | 53 | 51 | 148 |
 | NOT_SEARCHED_MACHINE_READABLE | 6 | 1 | 12 | 12 | 31 |
-| DOMAIN_NOT_THE_ENTITY | 19 | 2 | 21 | 86 | 128 |
+| DOMAIN_NOT_THE_ENTITY | 19 | 2 | 20 | 86 | 127 |
+| NAME_CHECK_INDETERMINATE | 0 | 0 | 0 | 1 | 1 |
 | HIJACKED_OR_WRONG_DOMAIN | 4 | 0 | 2 | 0 | 6 |
-| UNREACHABLE | 105 | 1 | 26 | 135 | 267 |
-| NO_HOST_KNOWN | 0 | 8 | 73 | 37 | 118 |
+| UNREACHABLE | 105 | 1 | 26 | 134 | 266 |
+| NO_HOST_KNOWN | 0 | 8 | 74 | 37 | 119 |
 | TERMS_STATED_RESTRICTIVE | 2 | 3 | 3 | 7 | 15 |
 | EXCLUDED_TERMS (refused before contact) | 1 | 0 | 0 | 10 | 11 |
 | ROBOTS_DISALLOW | 3 | 0 | 0 | 2 | 5 |
 | **total** | **191** | **56** | **210** | **365** | **822** |
+
+`NAME_CHECK_INDETERMINATE` is one entity and it is worth its own verdict.
+The village of **Council**'s web-map URL is `kawerak.org`, the Bering Strait
+regional consortium. The page-text name check passed it, because the word
+"council" is on every tribal website ever built — and six rows of navigation
+furniture were harvested under a tribal government's name before the guard
+existed. A canonical name that is nothing but stopwords once tribal and
+corporate furniture is removed (`Council`, `Eek`, `Ute`, `Koi` — 14 entities)
+**cannot establish identity from page text alone**; the domain now has to
+carry the name too. The guard fixed the verdict and the stage builder drops
+the rows the bad verdict produced.
 
 Rolled up:
 
@@ -132,10 +144,10 @@ Rolled up:
 | anc | 21 | 36 | 6 | 128 |
 | intertribal | 3 | 39 | 3 | 11 |
 | nho | 4 | 81 | 3 | 122 |
-| tribal_government | 2 | 86 | 19 | 258 |
-| **total** | **30** | **242** | **31** | **519** |
+| tribal_government | 1 | 87 | 19 | 258 |
+| **total** | **29** | **243** | **31** | **519** |
 
-**Hit rate among entities whose site actually answered: 30 of 272 = 11.0%.**
+**Hit rate among entities whose site actually answered: 29 of 272 = 10.7%.**
 
 Two findings in that table matter more than the hit rate.
 
@@ -330,7 +342,7 @@ is written verbatim and `business_name_is_person_name` is left undecided
   44 village corporations now certify rows, against 0 before this pass.
 - **The NHO class answered and published almost nothing.** 210 probed, 4
   `LIST_FOUND`, and every one of those four yielded only navigation furniture
-  once fetched. **Zero real NHO business rows came off NHO websites.** The
+  once fetched. **Zero NHO rows survive into the staged file.** The
   NHO business record lives in the SBA 8(a) register and in the NHOA member
   directory shard H already read — not on the members' own sites. Treating
   "NHOs 0 of 210" as a scraping backlog is the wrong model; it is
@@ -339,7 +351,8 @@ is written verbatim and `business_name_is_person_name` is left undecided
   harvest problem.** 86 of 225 served a page that does not name them.
 - **The best remaining web target is the intertribal class**: 3 of 42 that
   answered published a list, and one of those three (USET) was worth 468
-  staged rows on its own. Regional intertribal councils, tribal chambers of
+  staged rows on its own — 42% of everything staged in this pass came from
+  three intertribal bodies. Regional intertribal councils, tribal chambers of
   commerce and gaming associations aggregate what the individual nations do
   not publish. There are 56 in the spine and 8 have no host recorded.
 

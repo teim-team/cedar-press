@@ -287,6 +287,28 @@ def fetch(url, timeout=30, respect_robots=True, browser_headers=False,
         out["error"] = type(e).__name__ + ": " + str(e)[:120]
     finally:
         _last_host[p.netloc] = _last_any[0] = time.time()
+    # A REDIRECT CAN LAND ON A HOST THAT REFUSED US.
+    # `samishindiannation.org` has no robots.txt objection and 301s to
+    # `www.samishtribe.nsn.us`, whose robots.txt is `User-agent: * /
+    # Disallow: /`. The robots check ran against the host we ASKED FOR and
+    # passed; the body we received came from the host that had said no. That
+    # is not a technicality -- the Samish Indian Nation stated a refusal and
+    # this file recorded 200 and kept the page.
+    #
+    # The permission belongs to the host that serves the bytes, so it is
+    # re-checked there and the body is discarded if it was not granted. This
+    # is the same failure family as the robots false-block that cost a
+    # sibling shard 22 hosts, in the opposite and worse direction: that one
+    # refused an open site, this one read a closed one.
+    if respect_robots and out.get("final_url") \
+            and urllib.parse.urlsplit(out["final_url"]).netloc != p.netloc:
+        ok2, _n2 = robots_ok(out["final_url"])
+        if not ok2 or restricted(out["final_url"]):
+            return {"status": "REFUSED_ROBOTS_DISALLOW_AFTER_REDIRECT",
+                    "text": "", "final_url": out["final_url"],
+                    "error": "redirected to " + out["final_url"]
+                             + " whose robots.txt disallows us; body "
+                               "discarded, not parsed, not cached"}
     if save_as and out.get("text"):
         _write_raw(save_as, out["text"])
     return out
@@ -465,7 +487,7 @@ def probe_machine_readable(base_url, tag):
     NOT_SEARCHED_MACHINE_READABLE. <= 6 cheap requests."""
     p = urllib.parse.urlsplit(base_url)
     base = p.scheme + "://" + p.netloc
-    got = []
+    got, other = [], []
     for rung, path in RUNGS:
         r = fetch(base + path, timeout=25,
                   save_as=tag + "__" + rung if tag else None)
@@ -480,8 +502,13 @@ def probe_machine_readable(base_url, tag):
                     continue
             got.append(rung + ":200" + n)
         elif st != 404:
-            got.append(rung + ":" + str(st))
-    return got
+            other.append(rung + ":" + str(st))
+    # AN ANSWER THAT IS A REFUSAL IS NOT AN OPEN SURFACE.
+    # Samish's row read `machine_readable_surface ... 200` with every rung
+    # recorded as REFUSED_ROBOTS_DISALLOW inside it. Non-200 outcomes are
+    # still worth keeping -- they say what was tried -- but only alongside a
+    # rung that actually answered.
+    return got + other if got else []
 
 
 # ------------------------------------------------------------- registers
@@ -852,6 +879,20 @@ R8_HAND_SEARCH = {
                "(Motahkomikuk) tribal government site. Sipayik's "
                "wabanaki.com and passamaquoddypeople.com both answer 200 "
                "with a bot challenge and are NOT recorded as reached",
+    },
+    # DOI "None listed" for this one; the site is live and carries the whole
+    # name. The derivation rung could not reach it because the domain is the
+    # short form `makuu.org` while the legal name has five words -- a
+    # five-character label, below the floor a guess is allowed to use. The
+    # neighbouring register entity, Makuʻu Farmers Association, is a DIFFERENT
+    # organisation whose market this one hosts: makuufarmersassociation.org
+    # does not resolve, and its "None listed" stands.
+    "CE-000YG-PG": {          # ʻO Makuʻu Ke Kahua Community Center
+        "host": "makuu.org",
+        "how": "searched the community name 'Makuʻu' rather than the "
+               "organisation's registered name -- the lesson of SEARCHING "
+               "FOR THE INSTITUTION INSTEAD OF THE THING, applied to a "
+               "domain label rather than to a programme",
     },
     # Guidiville publishes admin@guidiville.net, so the DOMAIN is
     # publisher-stated -- but the domain serves a Sonic.net "future home of"
@@ -1344,14 +1385,23 @@ def write_doc():
         tot.update(grid[c])
     L.append("| **total** | " + " | ".join("**" + str(tot.get(o, 0)) + "**"
                                            for o in order) + " |")
+    # DERIVE THE NUMBER, DO NOT WRITE IT IN THE PROSE. A hand-typed "64 of
+    # 69" in a generated document is a claim that stops being true on the next
+    # run and never says so.
+    n_doi_none = sum(1 for u, rs in by.items()
+                     if cls[u] == "Native Hawaiian Organization"
+                     and any("Website: None listed" in x["evidence"]
+                             for x in rs))
+    n_nho = sum(1 for u in by if cls[u] == "Native Hawaiian Organization")
     L += ["", "*`checked, no web presence located` is a FINDING. Every one of "
               "those entities carries a row naming the routes run and the "
-              "date, and for 64 of the 69 Native Hawaiian Organizations the "
-              "route that settled it was the organisation's own entry in the "
-              "DOI Office of Native Hawaiian Relations notification list, "
-              "which records `Website: None listed`. That is the "
-              "organisation telling its registrar it has none — not us "
-              "failing to find one.*", "",
+              "date. For **" + str(n_doi_none) + " of the " + str(n_nho)
+              + "** Native Hawaiian Organizations here, the route that "
+                "settled it was the organisation's own entry in the DOI "
+                "Office of Native Hawaiian Relations notification list, which "
+                "records `Website: None listed`. That is the organisation "
+                "telling its registrar it has none — not us failing to find "
+                "one.*", "",
           "## Rows by type", "", "| url_type | n | meaning |", "|---|---:|---|"]
     mean = {
         "government": "verified tribal government site",
@@ -1473,6 +1523,9 @@ def check(path=WEBMAP):
     (7) a live site whose recorded body is under 700 bytes is refused. Two
         tribal sites were accepted on a 169-byte captcha interstitial that
         returned HTTP 200.
+    (8) no host that any row records as REFUSED may appear with a 2xx on any
+        other row. A redirect from an unrestricted domain onto a robots-
+        disallowed one produced exactly that for the Samish Indian Nation.
     """
     bad = []
     if not os.path.exists(path):
@@ -1480,7 +1533,30 @@ def check(path=WEBMAP):
     known = {r["cedar_uid"] for r in read_register() if r.get("cedar_uid")}
     seen = set()
     with open(path, encoding="utf-8-sig", errors="replace", newline="") as fh:
+        rows_all = list(csv.DictReader(fh))
+    # (8) A HOST THAT REFUSED US MAY NOT APPEAR WITH A 2xx ANYWHERE.
+    # samishindiannation.org 301s to www.samishtribe.nsn.us, whose robots.txt
+    # disallows everything. The robots check ran on the host asked for, the
+    # bytes came from the host that had said no, and the map ended up holding
+    # BOTH a `government_refused_robots` row for that host and a 200 for it.
+    # A refusal that another row contradicts is not a refusal that was
+    # honoured. Cross-row, because no single row can see this.
+    refused_hosts = set()
+    for r in rows_all:
+        if "REFUSED" in str(r.get("http_status") or ""):
+            h = urllib.parse.urlsplit(r.get("url") or "").netloc.lower()
+            if h:
+                refused_hosts.add(h[4:] if h.startswith("www.") else h)
+    with open(path, encoding="utf-8-sig", errors="replace", newline="") as fh:
         for i, r in enumerate(csv.DictReader(fh), 2):
+            _h = urllib.parse.urlsplit(r.get("url") or "").netloc.lower()
+            _h = _h[4:] if _h.startswith("www.") else _h
+            if _h and _h in refused_hosts \
+                    and str(r.get("http_status") or "").startswith("2"):
+                bad.append("line %d: %s carries a 2xx from %s, a host another "
+                           "row records as REFUSED -- a redirect landed on a "
+                           "host that had said no"
+                           % (i, r.get("cedar_uid"), _h))
             uid = (r.get("cedar_uid") or "").strip()
             ut = (r.get("url_type") or "").strip()
             url = (r.get("url") or "").strip()
@@ -1549,6 +1625,7 @@ def selftest():
         ("restricted host",
          [None, "x", "y", "government", "https://colvilletribes.com/", "200",
           TODAY, "TRIED: a | b | c"]),
+        ("2xx from a host that refused us", None),
         ("live site, 169-byte body",
          [None, "x", "y", "government", "https://a.example", "200", TODAY,
           "TRIED: a | b | c || verified 2xx, 169 bytes of body"]),
@@ -1563,6 +1640,23 @@ def selftest():
     real = next(r["cedar_uid"] for r in read_register() if r.get("cedar_uid"))
     fails = 0
     for label, row in cases:
+        if row is None:                       # two-row fixture
+            with open(p, "w", encoding="utf-8", newline="") as fh:
+                w = csv.writer(fh)
+                w.writerow(WEBMAP_COLS)
+                w.writerow([real, "x", "y", "government_refused_robots",
+                            "https://www.example-refused.org/",
+                            "REFUSED_ROBOTS_DISALLOW", TODAY,
+                            "TRIED: a | b | c"])
+                w.writerow([real, "x", "y", "government",
+                            "https://www.example-refused.org/", "200", TODAY,
+                            "TRIED: a | b | c"])
+            v = check(p)
+            print("    selftest %-22s -> %s"
+                  % (label, v[0] if v else "NOT CAUGHT"))
+            if not v:
+                fails += 1
+            continue
         row = list(row)
         if row[0] is None:
             row[0] = real

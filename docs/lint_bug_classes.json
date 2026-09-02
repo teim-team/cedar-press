@@ -710,7 +710,7 @@
     {
       "class": "class2c",
       "file": "77_build_nagpra_dataset.py",
-      "line": 2056,
+      "line": 2075,
       "evidence": "stats[\"containment_rejected\"] += 1",
       "why": "counter 'containment_rejected' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -728,7 +728,7 @@
     {
       "class": "class2c",
       "file": "77_build_nagpra_dataset.py",
-      "line": 2098,
+      "line": 2117,
       "evidence": "stats[\"guard_refusals\"] += 1",
       "why": "counter 'guard_refusals' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -755,7 +755,7 @@
     {
       "class": "class2c",
       "file": "846_session_audit.py",
-      "line": 331,
+      "line": 356,
       "evidence": "fails += 1",
       "why": "counter 'fails' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -1412,7 +1412,7 @@
     {
       "class": "class7",
       "file": "1031_ancsa_45_55_139_annual_reports.py",
-      "line": 518,
+      "line": 544,
       "evidence": "\"candidate_id\": f\"AS4555139-{n:05d}\",",
       "why": "[WARN] POSITIONAL on target candidate_id -> no clean table. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": false,
@@ -1457,7 +1457,7 @@
     {
       "class": "class7",
       "file": "1077_nagpra_institution_grain.py",
-      "line": 342,
+      "line": 347,
       "evidence": "f\"{r['document_number']}#{i:02d}\",",
       "why": "[WARN] POSITIONAL on target nagpra_notice_institution_id -> nagpra_notice_institutions.csv, nagpra_notices.csv. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": false,
@@ -1772,7 +1772,7 @@
     {
       "class": "class7",
       "file": "845_regenerate_guard.py",
-      "line": 447,
+      "line": 458,
       "evidence": "_k = id(_fn) if _fn is not None else 0",
       "why": "[BLOCKING] OBJECT_ADDRESS on target (unnamed) -> no clean table. builtin id() is a memory address, stable only within one process. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": false,
