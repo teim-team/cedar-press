@@ -2,7 +2,7 @@
  "built_date": "2026-09-02",
  "derivation": "500.COLLECTIONS + cedar_codebook + cedar_pipeline; GRAIN declared, everything else derived",
  "n_collections": 14,
- "n_tables_claimed": 271,
+ "n_tables_claimed": 273,
  "n_orphan_shippable": 7,
  "orphans": [
   "native_owned_businesses.bak_2026-09-02_010526.csv",
@@ -13,10 +13,11 @@
   "regulations_gov_entity_coverage.csv",
   "sam_native_class_distributions.csv"
  ],
- "n_shippable": 228,
+ "n_shippable": 229,
  "n_shippable_grain_stated": 221,
- "n_shippable_grain_unstated": 7,
+ "n_shippable_grain_unstated": 8,
  "shippable_grain_unstated": [
+  "deals_press_edgar_ancsa_additions.csv",
   "native_owned_businesses.bak_2026-09-02_010526.csv",
   "native_owned_businesses.bak_2026-09-02_010557.csv",
   "native_owned_businesses.csv",
@@ -27,10 +28,11 @@
  ],
  "n_shippable_grain_open_with_evidence": 0,
  "n_shippable_grain_defective": 0,
- "n_shippable_grain_unexplained": 7,
+ "n_shippable_grain_unexplained": 8,
  "shippable_grain_open_with_evidence": [],
  "shippable_grain_defective": [],
  "shippable_grain_unexplained": [
+  "deals_press_edgar_ancsa_additions.csv",
   "native_owned_businesses.bak_2026-09-02_010526.csv",
   "native_owned_businesses.bak_2026-09-02_010557.csv",
   "native_owned_businesses.csv",
@@ -2157,7 +2159,7 @@
    "name": "Indian Country Deals",
    "shelf": "standard",
    "rebuild_command": "py -3 code/build.py run deals --execute",
-   "n_tables": 19,
+   "n_tables": 20,
    "tables": [
     {
      "table": "deals_2000_2019_additions.csv",
@@ -2551,6 +2553,25 @@
     {
      "table": "deals_party_matches.csv",
      "status": "internal-by-decision",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "primary_key": [],
+     "join_cardinality": {},
+     "grain_declared_by": "",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "key_refused": {},
+     "population_scope": {},
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "deals_press_edgar_ancsa_additions.csv",
+     "status": "shippable",
      "key_columns": [],
      "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
      "primary_key": [],
@@ -4394,8 +4415,8 @@
      "grain_declared_by": "workstream INT-READY 2026-09-02: schedule_c_row_id and object_id each confirmed 6,870 distinct / 0 blank on the FULL 6,870-row file with csv.reader; 0 literal duplicate rows; (ein, tax_year) tested and REJECTED at 6,841",
      "grain_validated": true,
      "measured_rows_per_join_key": {
-      "cedar_entity_id": 82,
-      "ein": 10,
+      "cedar_entity_id": 339,
+      "ein": 13,
       "object_id": 1,
       "schedule_c_row_id": 1
      },
@@ -8386,11 +8407,11 @@
      "grain_validated": true,
      "measured_rows_per_join_key": {
       "assertion_id": 1,
-      "cedar_uid": 51,
+      "cedar_uid": 61,
       "facility_id": 51,
       "site_host": 51,
-      "source_url": 5,
-      "tribe_id": 51
+      "source_url": 11,
+      "tribe_id": 61
      },
      "grain_open_question": "",
      "grain_defect": "",
@@ -8425,13 +8446,13 @@
      "grain_declared_by": "workstream GAMING-NR 2026-09-01: grain asserted in code by code/588_promote_self_published_claims.py, which refuses to write on a duplicate key; confirmed unique with no blank component and 0 literal duplicate rows on the FULL 270-row file by code/814_gaming_nr_grain_and_conservation.py verify",
      "grain_validated": true,
      "measured_rows_per_join_key": {
-      "cedar_uid": 22,
+      "cedar_uid": 24,
       "claim_id": 1,
       "facility_id": 22,
       "site_host": 22,
       "source_claim_id": 1,
       "source_url": 7,
-      "tribe_id": 22
+      "tribe_id": 24
      },
      "grain_open_question": "",
      "grain_defect": "",
@@ -9316,7 +9337,7 @@
    "name": "Entity spine, identifiers and reference",
    "shelf": "infrastructure",
    "rebuild_command": "py -3 code/build.py run _entity_layer --execute",
-   "n_tables": 48,
+   "n_tables": 49,
    "tables": [
     {
      "table": "admin_region_assignments.csv",
@@ -10176,6 +10197,27 @@
     {
      "table": "entity_candidates_rejected.csv",
      "status": "internal-by-decision",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "primary_key": [],
+     "join_cardinality": {},
+     "grain_declared_by": "",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "key_refused": {},
+     "population_scope": {},
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "entity_dated_public_facts.csv",
+     "status": "UNDOCUMENTED",
      "key_columns": [
       "cedar_uid"
      ],

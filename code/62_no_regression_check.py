@@ -1465,9 +1465,19 @@ MUST_NOT_FALL = {
 # over a paragraph a human wrote. 574 deleted exactly such a paragraph -
 # written to close a reviewer finding - within hours of it being written.
 #
-# `regenerate_unsafe_writers` is MUST_NOT_RISE, not MUST_BE_ZERO: the CSV half
-# is at 0 and the 7 remaining markdown entries are pre-existing, each an
-# UPPER BOUND that needs `845 regen <doc>` to settle - five were settled that
+# It covers THREE classes, and the third is why the count is trustworthy:
+#   class1  a FIXED literal header, run after an enricher added a column
+#   class2  a generator rewriting a whole .md over a paragraph a human wrote
+#   class3  `fieldnames=list(rows[0].keys())` - looks derived, and is not: it
+#           derives from the row THIS BUILD built, not from the file on disk.
+#           114 sites, 10 that measurably lost a column. The other 104 build a
+#           table they own outright or are read-modify-write on the file being
+#           rewritten, which is the CORRECT idiom. Only the 10 are debt, and a
+#           blanket rewrite of 114 would have been 104 edits for nothing.
+#
+# `regenerate_unsafe_writers` is MUST_NOT_RISE, not MUST_BE_ZERO: classes 1 and
+# 3 are at 0 and the 4 remaining markdown entries are pre-existing, each an
+# UPPER BOUND that needs `845 regen <doc>` to settle - eight were settled that
 # way on 2026-09-02 and are recorded in 845's MD_PROVEN_SAFE with evidence. Zeroing it by fiat would be a
 # waiver wearing a ratchet's clothes.
 # `regenerate_new_unsafe_writers` IS MUST_BE_ZERO and is answered from 845's
@@ -1493,7 +1503,7 @@ def measure_regenerate_guard():
             # scoring every doc clean. Report the CSV half and name the gap.
             note(f"845 markdown half UNMEASURED: {e}")
             mrows = None
-        now_keys = mod._key(rows, mrows or [])
+        now_keys = mod._key(rows, mrows or [], memory)
     except Exception as e:
         note(f"845_regenerate_guard.py imported but scanning raised "
              f"({type(e).__name__}: {e}) - the regenerate defect is "
@@ -1516,6 +1526,7 @@ def measure_regenerate_guard():
     for s_, t_, v_ in sorted(new)[:12]:
         note(f"NEW unsafe wholesale writer: {s_}  {v_} -> {t_}")
     csv_n = len({(r[1], r[2], r[3]) for r in rows})
+    mem_bad = [m for m in memory if m[5] in ("LOSES", "UNDETERMINED")]
     if mrows is None:
         note("845 regenerate guard: %d unsafe CSV writer(s). The MARKDOWN "
              "half is UNMEASURED, not clean - run "
@@ -1523,11 +1534,14 @@ def measure_regenerate_guard():
         return {"regenerate_unsafe_writers": "UNMEASURED",
                 "regenerate_new_unsafe_writers": "UNMEASURED"}
     md_n = len(now_keys) - csv_n
-    note(f"845 regenerate guard: {csv_n} unsafe CSV writer(s), {md_n} "
-         f"markdown doc(s) a rebuild could overwrite, {len(memory)} writer(s) "
-         f"whose header is derived from the row this build just built rather "
-         f"than from the file on disk. THE FIX is to derive the header: "
-         f"cols = CANONICAL + [c for c in live if c not in CANONICAL].")
+    note(f"845 regenerate guard: class1 {csv_n} unsafe CSV writer(s) with a "
+         f"FIXED literal header; class2 {md_n} markdown doc(s) a rebuild could "
+         f"overwrite; class3 {len(mem_bad)} of {len(memory)} writer(s) whose "
+         f"header comes from the row this build just built rather than from "
+         f"the file on disk AND that measurably lose a column (the rest build "
+         f"a table they own outright, or are read-modify-write on the file "
+         f"being rewritten, which is correct). THE FIX for all three is to "
+         f"derive: cols = CANONICAL + [c for c in live if c not in CANONICAL].")
     return {"regenerate_unsafe_writers": len(now_keys),
             "regenerate_new_unsafe_writers": len(new)}
 

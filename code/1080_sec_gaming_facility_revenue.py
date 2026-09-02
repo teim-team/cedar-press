@@ -216,6 +216,16 @@ PERIOD_WORDS = (
 
 # --------------------------------------------------------------- mining --
 
+_ALIAS_LOOKUP = {}
+for _a in ALIASES:
+    _ALIAS_LOOKUP[re.sub(r"[\s\-]+", " ", _a).strip().lower()] = _a
+
+
+def canonical_alias(s: str) -> str:
+    """The regex matches the filer's spacing; the map is keyed on ours."""
+    return _ALIAS_LOOKUP.get(re.sub(r"[\s\-]+", " ", s or "").strip().lower(), "")
+
+
 def alias_regex():
     pats = []
     for alias in sorted(ALIASES, key=len, reverse=True):
@@ -224,32 +234,31 @@ def alias_regex():
     return pats
 
 
+# The optional "For Fiscal 2006, " prefix was originally part of this pattern.
+# It had to come OUT: consuming the period cue moved m.start() past it, so the
+# period lookback then searched the 300 characters BEFORE the cue and found
+# nothing. Six Seneca rows came out with a figure and no fiscal year. The
+# pattern now starts at the property and the cue is left in the lookback window.
 PAT_A = re.compile(
-    r"(?P<pre>(?:For\s+(?:the\s+)?(?:fiscal|Fiscal)?\s*(?:year\s+)?"
-    r"(?:ended\s+[A-Z][a-z]+\s+\d{1,2},\s*)?\d{4}[^.]{0,120})?)"
     r"(?P<prop>@@PROP@@)"
     r"[^.]{0,90}?\b(?:generated|produced|recorded|reported|had|achieved)\s+"
     r"(?P<label>net revenues?|gross revenues?|net gaming revenues?|"
     r"gross gaming revenues?|net win)\s+of\s+"
     r"\$\s?(?P<amt>[\d,]+(?:\.\d+)?)\s*(?P<scale>million|billion|thousand)?")
 
-PAT_B = re.compile(
-    r"(?P<prop>@@PROP@@)\s+Revenues?\s+"
-    r"(?P<label>Net revenues?|Gross revenues?)\s+"
-    r"(?:increased|decreased|declined|grew|rose|totaled|totalled|were|was)"
-    r"[^.]{0,160}?\btotaled\s+|"
-    r"(?P<prop2>@@PROP@@)\s+Revenues?\s+"
-    r"(?P<label2>Net revenues?|Gross revenues?)\s+"
-    r"(?:increased|decreased|declined|grew|rose)[^.]{0,120}?,?\s+to\s+"
-    r"\$\s?(?P<amt2>[\d,]+(?:\.\d+)?)\s*(?P<scale2>million|billion)\s+for\s+the\s+"
-    + PERIOD_WORDS + r"\s+ended\s+(?P<date2>[A-Z][a-z]+\s+\d{1,2},\s*\d{4})")
-
+# NOTE: the character class here is `.` and not `[^.]`. `[^.]` was the first
+# attempt and it matched NOTHING across 609 documents, because every dollar
+# figure in this prose carries a decimal point - "declined by $77.0 million, or
+# 7.2%, to $992.0 million". A pattern that cannot cross a decimal point cannot
+# read a financial statement. The anchor that keeps this safe is the tail:
+# "$N million for the <period> ended <date>", which does not occur by accident.
 PAT_B1 = re.compile(
     r"(?P<prop>@@PROP@@)\s+Revenues?\s+"
     r"(?P<label>Net revenues?|Gross revenues?)\s+"
-    r"(?:increased|decreased|declined|grew|rose|totaled|totalled)"
-    r"(?:[^.]{0,140}?,\s+or\s+[\d.]+%,)?\s*(?:to|totaled|totalled)\s+"
-    r"\$\s?(?P<amt>[\d,]+(?:\.\d+)?)\s*(?P<scale>million|billion)\s+for\s+the\s+"
+    r"(?:increased|decreased|declined|grew|rose|totaled|totalled|were|was)"
+    r"(?:.{0,170}?to)?\s+"
+    r"\$\s?(?P<amt>[\d,]+(?:\.\d+)?)\s*(?P<scale>million|billion)\s+"
+    r"(?:for|in)\s+the\s+"
     + PERIOD_WORDS + r"\s+ended\s+(?P<date>[A-Z][a-z]+\s+\d{1,2},\s*\d{4})")
 
 PAT_B2 = re.compile(
@@ -270,6 +279,130 @@ PAT_E = re.compile(
     r"gross\s+revenues?|net\s+win|revenues?)[^.]{0,180})", re.I)
 
 
+# ---------------------------------------------------------- PATTERN C --
+# The segment table. This is where the dense multi-year property revenue lives
+# (Mohegan reports Mohegan Sun, Mohegan Sun Pocono and MGE Niagara as separate
+# lines under one "Net revenues:" header, three fiscal years wide).
+#
+# It is a TABLE parser, not a regex, and it refuses rather than guesses:
+#   - it will not emit unless it found a year header with >= 2 four-digit years
+#     within 10 rows above the "Net revenues:" line;
+#   - it will not emit unless it found an explicit units statement
+#     ("in thousands" / "in millions") within 3,000 characters above;
+#   - it will not emit if the row carries fewer numeric cells than years.
+# Every refusal is counted and printed, because a table parser that silently
+# reads nothing looks exactly like a corpus that contains nothing.
+
+YEAR_RE = re.compile(r"\b(19[89]\d|20[0-4]\d)\b")
+NUMCELL_RE = re.compile(r"^\(?\$?\s*(\d[\d,]*(?:\.\d+)?)\s*\)?$")
+UNITS_RE = re.compile(r"\(?(?:amounts?\s+)?in\s+(thousands|millions)", re.I)
+SEGHDR_RE = re.compile(r"^\s*(?:Net revenues|Total net revenues|Revenues)\s*:\s*\|?\s*$", re.I)
+PERIOD_HDR_RE = re.compile(
+    r"(?:for\s+the\s+)?(?:fiscal\s+)?years?\s+ended\s+"
+    r"(?P<mon>January|February|March|April|May|June|July|August|September|"
+    r"October|November|December)\s+(?P<day>\d{1,2})\s*,?\s*(?:\||$)", re.I)
+# NOTE the trailing `(?:\||$)` rather than `$`. Mohegan's FY2022 10-K writes the
+# header as "For the Fiscal Years Ended September 30, | Variance 2022 vs. 2021 |",
+# and an end-of-line anchor refused it - three tables, six property-years, lost
+# to a trailing variance column.
+
+
+def parse_segment_tables(raw: str, form: str, refusals):
+    """Yield (alias, iso_period_end, value_usd, units, quote) from segment tables.
+
+    FOUR REFUSALS, and they are the point of this function.
+
+    The first version of this parser took any line holding two four-digit years
+    as a period header. On a 10-Q that is wrong in a way that looks right: the
+    columns are "Three Months Ended June 30, 2017 / 2016" and "Nine Months
+    Ended ...", and the parser stamped every one of them `fiscal year 2017`.
+    102 of the 132 rows it produced were quarterly figures wearing an annual
+    label, and one was 11,200 - a percentage cell read as dollars.
+
+    So: 10-K only, and the header must SAY "Years Ended <Month> <Day>". A table
+    that does not state its period in words does not get read. Every refusal is
+    counted by reason and printed by `mine`.
+    """
+    if form.upper() not in ("10-K", "10-K/A"):
+        refusals["not_an_annual_report"] += 1
+        return
+    lines = raw.split("\n")
+    offs, acc = [], 0
+    for ln in lines:
+        offs.append(acc)
+        acc += len(ln) + 1
+    for i, ln in enumerate(lines):
+        if not SEGHDR_RE.match(ln):
+            continue
+        years, mon, day = [], None, None
+        for j in range(max(0, i - 10), i):
+            ys = YEAR_RE.findall(lines[j])
+            if len(ys) >= 2 and len(re.sub(r"[^A-Za-z]", "", lines[j])) < 60:
+                years = [int(y) for y in ys]
+            mp = PERIOD_HDR_RE.search(lines[j].strip())
+            if mp:
+                mon, day = mp.group("mon"), int(mp.group("day"))
+        if not years:
+            refusals["no_year_header"] += 1
+            continue
+        if not mon:
+            refusals["header_states_no_period_in_words"] += 1
+            continue
+        back = raw[max(0, offs[i] - 3000):offs[i]]
+        mu = None
+        for mu in UNITS_RE.finditer(back):
+            pass
+        if mu is None:
+            refusals["no_units_statement"] += 1
+            continue
+        units = mu.group(1).lower()
+        mult = 1_000 if units == "thousands" else 1_000_000
+        emitted_here = 0
+        for k in range(i + 1, min(len(lines), i + 16)):
+            cells = [c.strip() for c in lines[k].split("|")]
+            cells = [c for c in cells if c != ""]
+            if not cells:
+                continue
+            alias = canonical_alias(cells[0])
+            if not alias:
+                if re.match(r"(?i)^\s*(income|loss|operating|adjusted|total)\b", cells[0]):
+                    break
+                continue
+            nums = [c for c in cells[1:] if NUMCELL_RE.match(c)]
+            if len(nums) < len(years):
+                refusals["row_short_of_years"] += 1
+                continue
+            hdr = " ".join(x.strip() for x in lines[max(0, i - 6):i + 1] if x.strip())
+            row = lines[k].strip()
+            quote = re.sub(r"\s+", " ", hdr + " || " + row).strip()
+            for y, cell in zip(years, nums[:len(years)]):
+                m = NUMCELL_RE.match(cell)
+                val = float(m.group(1).replace(",", "")) * mult
+                iso = "%04d-%02d-%02d" % (y, MONTHS[mon.capitalize()], day)
+                yield alias, iso, val, units, quote
+                emitted_here += 1
+        if emitted_here == 0:
+            refusals["header_matched_no_alias_row"] += 1
+
+
+# "... totaled $A and $B ... for the years ended December 31, 2018 and 2017,
+# respectively" is the densest single sentence shape in this corpus and it was
+# almost lost. The first version led with `(?P<lead>.{0,320}?)`, which made the
+# engine try 320 prefix lengths at every one of ~300,000 offsets per document -
+# the mine stage ran past ten minutes on one filer. ANCHOR FIRST: find the word
+# "respectively", then read a fixed window backwards. Same result, one pass.
+RESPECTIVELY_RE = re.compile(r"\brespectively\b", re.I)
+VAL_RE = re.compile(r"\$\s?([\d,]+(?:\.\d+)?)\s*(million|billion)?", re.I)
+YEARS_ENDED_RE = re.compile(
+    r"years?\s+ended\s+(?P<mon>[A-Z][a-z]+)\s+(?P<day>\d{1,2}),\s*"
+    r"(?P<ys>\d{4}(?:\s*(?:,|and)\s*\d{4}){1,4})", re.I)
+TAIL_VALS_RE = re.compile(
+    r"(?:totaled|totalled|were|was|of|to)\s+"
+    r"(?P<vals>\$\s?[\d,]+(?:\.\d+)?\s*(?:million|billion)?"
+    r"(?:\s*(?:,|and)\s*\$\s?[\d,]+(?:\.\d+)?\s*(?:million|billion)?){1,4})"
+    r"\s*,?\s*$", re.I)
+
+
 def build_pattern(p: re.Pattern, prop_alt: str) -> re.Pattern:
     return re.compile(p.pattern.replace("@@PROP@@", prop_alt), p.flags)
 
@@ -287,6 +420,8 @@ def mine():
 
     rows = []
     seen = set()
+    from collections import Counter as _C
+    refusals = _C()
     n_docs = 0
     n_read = 0
     for x in man:
@@ -300,7 +435,8 @@ def mine():
         if filer is None:
             continue
         n_read += 1
-        t = flat(totext(p))
+        raw = totext(p)
+        t = flat(raw)
         base = dict(
             filer_name=filer["name"], filer_cik=x["cik"], filer_role=filer["role"],
             form=x["form"], filing_date=x["file_date"], accession=x["accession"],
@@ -316,6 +452,9 @@ def mine():
             seen.add(key)
             r = dict(base)
             r.update(kw)
+            a = ALIASES.get(canonical_alias(kw.get("alias", "")))
+            if a:
+                r["facility_id"], r["tribe_name"], r["state"], r["on_indian_lands"] = a
             rows.append(r)
 
         # ---- PATTERN A: "<PROPERTY> generated net revenue of $X million"
@@ -378,6 +517,54 @@ def mine():
                 fiscal_period_label=per[0], period_end=per[1], period_type=per[2],
                 source_quote=q.strip())
 
+        # ---- PATTERN C: segment table (multi-year, property grain, 10-K only)
+        for alias, iso, val, units, quote in parse_segment_tables(raw, x["form"], refusals):
+            add(extraction_pattern="C_SEGMENT_TABLE", alias=alias,
+                facility_name_as_filed=alias,
+                figure_type="FACILITY_NET_REVENUES",
+                figure_type_note="segment net revenues, table stated in " + units,
+                value_verbatim="%s (segment table stated in %s)" % (format(val, ",.0f"), units),
+                value_scale_applied=units,
+                value_usd=val,
+                fiscal_period_label="fiscal year ended " + iso,
+                period_end=iso, period_type="FISCAL_YEAR",
+                source_quote=quote[:1600])
+
+        # ---- PATTERN D2: "... totaled $A and $B ... for the years ended X and Y, respectively"
+        for mr in RESPECTIVELY_RE.finditer(t):
+            lead = t[max(0, mr.start() - 420):mr.start()]
+            mt = TAIL_VALS_RE.search(lead)
+            if not mt:
+                continue
+            near = [a for a, pat in aliases if pat.search(lead)]
+            if not near:
+                continue
+            if not re.search(r"(?i)management fee|net revenue|gross revenue", lead):
+                continue
+            vals = VAL_RE.findall(mt.group("vals"))
+            my = YEARS_ENDED_RE.search(lead)
+            if not my:
+                continue
+            ys = re.findall(r"\d{4}", my.group("ys"))
+            if len(vals) != len(ys):
+                continue
+            ftype = ("MANAGEMENT_FEE_REVENUE"
+                     if re.search(r"(?i)management fee", lead) else "FACILITY_NET_REVENUES")
+            for (amt, sc), y in zip(vals, ys):
+                add(extraction_pattern="D2_RESPECTIVELY", alias=near[0],
+                    facility_name_as_filed=near[0],
+                    figure_type=ftype,
+                    figure_type_note=("management fee revenue earned by the filer from the "
+                                      "named property" if ftype == "MANAGEMENT_FEE_REVENUE"
+                                      else "property revenues as stated"),
+                    value_verbatim="$" + amt + " " + (sc or ""),
+                    value_scale_applied=(sc or "").lower(),
+                    value_usd=to_usd(amt, sc or ""),
+                    fiscal_period_label="year ended %s %s, %s" % (my.group("mon"), my.group("day"), y),
+                    period_end=parse_date("%s %s, %s" % (my.group("mon"), my.group("day"), y)),
+                    period_type="FISCAL_YEAR",
+                    source_quote=re.sub(r"\s+", " ", lead + " respectively").strip())
+
         # ---- PATTERN E: fee formula (contract TERM, no money)
         for m in PAT_E.finditer(t):
             ctx = t[max(0, m.start() - 700):m.end() + 200]
@@ -400,6 +587,7 @@ def mine():
         r["candidate_id"] = f"SECGF-{i:05d}"
 
     cols = ["candidate_id", "extraction_pattern", "alias", "facility_name_as_filed",
+            "facility_id", "tribe_name", "state", "on_indian_lands",
             "figure_type", "figure_type_note", "value_usd", "value_verbatim",
             "value_scale_applied", "fiscal_period_label", "period_type", "period_end",
             "derivation_stated_percentage", "derivation_percentage_base",
@@ -416,6 +604,9 @@ def mine():
     out(f"documents from a curated gaming filer  : {n_read}")
     out(f"candidates written                     : {len(rows)} -> {CANDIDATES}")
     from collections import Counter
+    out("segment-table refusals (a parser that reads nothing looks like an empty corpus):")
+    for k, v in sorted(refusals.items()):
+        out(f"    {k:36s} {v}")
     for k, v in Counter(r["extraction_pattern"] for r in rows).most_common():
         out(f"    {k:36s} {v}")
     for k, v in Counter(r["alias"] for r in rows).most_common(40):

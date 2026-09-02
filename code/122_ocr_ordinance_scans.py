@@ -185,8 +185,10 @@ def main():
     merged = [p for p in prior if p.get("ordinance_id") not in have] + done
     if merged:
         with open(OUT, "w", encoding="utf-8", newline="") as fh:
-            w = csv.DictWriter(fh, fieldnames=_carry_live_columns(OUT, list(done[0] if done else prior[0])),
-                           restval="", extrasaction="ignore")
+            _hdr = _carry_live_columns(
+                OUT, list(done[0] if done else prior[0]))
+            w = csv.DictWriter(fh, fieldnames=_hdr, restval="",
+                               extrasaction="ignore")
             w.writeheader()
             w.writerows(merged)
 

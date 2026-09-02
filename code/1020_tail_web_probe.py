@@ -149,18 +149,31 @@ NHO_PDF_URL = ("https://www.doi.gov/sites/default/files/documents/2025-04/"
                "nhol-complete-list-final-web.pdf")
 PP_SEARCH = "https://projects.propublica.org/nonprofits/api/v2/search.json"
 
-# docs/PULL_DISCIPLINE.md. Refused by EVERY route including Wayback. Matched on
-# the entity name, not only the host, because the refusal is the publisher's
-# decision about the organisation and not about one domain it happens to own.
-TERMS_RESTRICTED_NAMES = (
-    "colville", "umatilla", "ctuir", "yakama", "chickasaw", "nana",
-    "akima", "southern ute", "forest county potawatomi", "stillaguamish",
-)
+# A TERMS RESTRICTION ATTACHES TO A HOST, NOT TO A NATION.
+#
+# This file previously matched TERMS_STATED_RESTRICTIVE on the ENTITY NAME as
+# well as the host, with tokens like "colville" and "nana". Cedar ruled on
+# 2026-09-02 (docs/PUBLICATION_POLICY.md, TERMS-SCOPE) that a restriction
+# attaches to the host and path where the terms were found and does NOT
+# propagate to a nation's other hosts -- one restricted Navajo page had been
+# excluding four Navajo casinos on unrelated domains. Name matching is that
+# defect by construction, and "nana" as a substring would also have caught
+# `Nanakuli`, `Hanapepe` and any other name containing those four letters.
+#
+# So: hosts only. The eight hard-listed SOURCES are unchanged and remain
+# refused by every route including Wayback; what changes is that the refusal
+# no longer follows the entity onto domains whose publisher stated nothing.
 TERMS_RESTRICTED_HOSTS = (
     "colvilletribes.com", "ctuir.org", "umatilla.nsn.us", "yakama.com",
     "yakamanation-nsn.gov", "chickasaw.net", "nana.com", "akima.com",
     "southernute-nsn.gov", "southern-ute.nsn.us", "fcpotawatomi.com",
-    "stillaguamish.com",
+    "stillaguamish.com", "navajoeconomy.org",
+    # Named-agent robots refusals found by the vendor-list registry
+    # (review/tribal_vendor_list_registry_2026-08-26.csv): both carry
+    # `User-agent: ClaudeBot / Disallow: /`. The live robots check above now
+    # catches these on its own; they are listed so the refusal survives a
+    # robots.txt that stops being readable.
+    "penobscotnation.org", "elyshoshonetribe.com",
 )
 
 # Free-mail hosts carry no organisational domain. Deriving a site from one
@@ -192,14 +205,47 @@ def _write_raw(name, text):
         fh.write(text)
 
 
-def restricted(url_or_name: str) -> bool:
-    s = (url_or_name or "").lower()
-    return (any(h in s for h in TERMS_RESTRICTED_HOSTS)
-            or any(n in s for n in TERMS_RESTRICTED_NAMES))
+def restricted(url: str) -> bool:
+    """Host-scoped only. See TERMS_RESTRICTED_HOSTS for why not by name."""
+    h = urllib.parse.urlsplit(url if "//" in (url or "") else "//" + (url or "")).netloc.lower()
+    h = h.split(":")[0]
+    h = h[4:] if h.startswith("www.") else h
+    if not h:
+        return False
+    return any(h == d or h.endswith("." + d) for d in TERMS_RESTRICTED_HOSTS)
+
+
+# WE ARE CLAUDE, AND A HOST THAT NAMES CLAUDE IS TALKING TO US.
+#
+# `robots_ok` asked `can_fetch("CedarPress-research/1.0 ...", url)`. Two hosts
+# in this shard's own slice -- `penobscotnation.org` and
+# `elyshoshonetribe.com` -- carry `User-agent: ClaudeBot / Disallow: /`
+# (Penobscot alongside a permissive `User-agent: *` block, Ely Shoshone naming
+# `anthropic-ai` too). RobotFileParser matched the permissive wildcard block,
+# because our UA string contains none of those tokens, and returned ALLOWED.
+# Both were fetched.
+#
+# A named-agent rule is MORE SPECIFIC than the wildcard and therefore governs
+# us -- Cedar had already ruled exactly that on these two hosts on 2026-08-26
+# and excluded them from Wayback for the same reason. Declaring a custom UA is
+# a courtesy; it is not a way to not be the agent the publisher refused. The
+# check now evaluates every token that denotes this agent and takes the most
+# restrictive answer.
+#
+# This is the third member of the family in this file: the Samish redirect
+# (permission checked on the host we asked, bytes taken from the host that
+# said no) and the circular name evidence. Each was a check that ran, passed,
+# and was not measuring the thing its name claims.
+AGENT_TOKENS = ("ClaudeBot", "anthropic-ai", "Claude-User", "Claude-SearchBot",
+                "Claude-Web")
 
 
 def robots_ok(url):
-    """(allowed, note). Unreadable robots.txt -> ALLOWED, reason noted."""
+    """(allowed, note). Unreadable robots.txt -> ALLOWED, reason noted.
+
+    Evaluated for our declared UA AND for every token that means "Claude".
+    The most restrictive answer wins, and the token that refused is named.
+    """
     p = urllib.parse.urlsplit(url)
     base = p.scheme + "://" + p.netloc
     if base not in _robots:
@@ -218,7 +264,11 @@ def robots_ok(url):
     r = _robots[base]
     if isinstance(r, tuple):
         return True, "robots.txt unreadable (" + r[1] + ")"
-    return bool(r.can_fetch(UA, url)), ""
+    for tok in (UA,) + AGENT_TOKENS:
+        if not r.can_fetch(tok, url):
+            who = "our declared UA" if tok == UA else tok
+            return False, "robots.txt Disallow for " + who
+    return True, ""
 
 
 BROWSER_HEADERS = {
@@ -247,10 +297,10 @@ def fetch(url, timeout=30, respect_robots=True, browser_headers=False,
                 "final_url": url, "error": "publisher terms"}
     p = urllib.parse.urlsplit(url)
     if respect_robots:
-        ok, _note = robots_ok(url)
+        ok, rnote = robots_ok(url)
         if not ok:
             return {"status": "REFUSED_ROBOTS_DISALLOW", "text": "",
-                    "final_url": url, "error": "robots.txt Disallow"}
+                    "final_url": url, "error": rnote or "robots.txt Disallow"}
     _sleep_for(p.netloc)
     hdrs = dict(BROWSER_HEADERS) if browser_headers else {
         "User-Agent": UA,
@@ -985,6 +1035,25 @@ def try_host(host, name, tag, cls=""):
             if len(body) < 200 and not frames:
                 return (r["final_url"], st, "parked_domain",
                         "200 with under 200 characters of text")
+            # A NAME MADE ONLY OF STOPWORDS CANNOT BE IDENTITY-CHECKED FROM
+            # PAGE TEXT, AND MUST NOT BE GUESSED AT.
+            # The Alaska Native village of *Council* matched `kawerak.org` in a
+            # sibling sweep and produced six junk rows: strip the generic words
+            # and nothing distinctive is left, so "does this page name the
+            # entity" has no content to test. Five register entities have this
+            # shape -- Council, Council Native Corporation, Hawaiian Native
+            # Corporation, Ho Ohana, ʻOhana Lo -- two of them in this slice.
+            #
+            # This file already refused them, but only as a side effect of
+            # `if ntok and ...` being false. A safety that nobody wrote down is
+            # a safety that the next edit removes, so it is now stated, given
+            # its own verdict, and gated in `verify`.
+            if not ntok:
+                return (r["final_url"], st, "unverifiable_name",
+                        "the entity's name is entirely generic words, so no "
+                        "page-text identity check is possible; a derived or "
+                        "guessed host can NEVER be accepted for this entity. "
+                        "title=" + title[:70])
             marker = any(m in body.lower()[:20_000]
                          for m in CLASS_MARKERS.get(cls, ()))
             # ALL of the entity's distinctive tokens AND a class marker.
@@ -1032,12 +1101,6 @@ def run():
             wrote[0] += 1
             add_row(*args)
 
-        if restricted(name):
-            emit(uid, name, cls, "TERMS_RESTRICTED_DO_NOT_HARVEST", "",
-                    "REFUSED", "TRIED: none. docs/PULL_DISCIPLINE.md lists "
-                    "this publisher as TERMS_STATED_RESTRICTIVE; refused by "
-                    "every route including Wayback.")
-            continue
 
         # ---- R1 BIA Tribal Leaders Directory ----------------------------
         if cls == "Federally recognized tribe":
@@ -1073,6 +1136,15 @@ def run():
                                                   + str(len(r["text"]))
                                                   + " bytes of body")
                         got_url = True
+                    elif st == "REFUSED_TERMS_STATED_RESTRICTIVE":
+                        # NOT "did not answer". The publisher refused; we
+                        # never asked. Filing a stated refusal as a technical
+                        # failure misdescribes the nation's own decision.
+                        ut = "TERMS_RESTRICTED_DO_NOT_HARVEST"
+                        note = ("the site EXISTS and its publisher is "
+                                "TERMS_STATED_RESTRICTIVE for this host. Not "
+                                "fetched by any route, including Wayback. "
+                                "Not an absence; a publisher decision.")
                     elif st == "REFUSED_ROBOTS_DISALLOW":
                         # A SITE THAT EXISTS AND HAS TOLD US NOT TO FETCH IT.
                         # samishtribe.nsn.us serves `User-Agent: * / Disallow:
@@ -1378,7 +1450,8 @@ OUT_DOC = os.path.join(ROOT, "docs", "COVERAGE_TAIL_SHARD_N.md")
 # the coverage number counted.
 LIVE_TYPES = {"government", "organization", "corporate"}
 EXISTS_BUT_REFUSED = {"government_refused_robots",
-                      "government_blocked_bot_protection"}
+                      "government_blocked_bot_protection",
+                      "TERMS_RESTRICTED_DO_NOT_HARVEST"}
 NOT_THE_ENTITYS_SITE = {"directory_profile", "form_990"}
 
 
@@ -1472,7 +1545,10 @@ def write_doc():
         "none_established": "checked, nothing found at all",
         "no_own_site_found": "checked; something was found but not a site of "
                              "the entity's own",
-        "TERMS_RESTRICTED_DO_NOT_HARVEST": "publisher terms; not fetched",
+        "TERMS_RESTRICTED_DO_NOT_HARVEST": "site exists; the publisher's stated "
+                                       "terms or a robots rule naming this "
+                                       "agent refuse us. Not fetched by any "
+                                       "route",
     }
     for k, v in Counter(r["url_type"] for r in rows).most_common():
         L.append("| `%s` | %d | %s |" % (k, v, mean.get(k, "")))
@@ -1579,6 +1655,10 @@ def check(path=WEBMAP):
     (9) a `form_990` row's filer name must carry every distinctive token of
         the entity's name. Caught four tribes sharing one Hawaiian arts
         academy's EIN, from a loop variable that outlived its iteration.
+    (10) an entity whose name is only generic words may hold a live URL only
+        from a publisher-stated route. Nothing on a page can identify it --
+        the village of *Council* matched `kawerak.org` in a sibling sweep.
+    (11) no 2xx from a host on the terms/named-agent refusal list.
     """
     bad = []
     if not os.path.exists(path):
@@ -1617,9 +1697,19 @@ def check(path=WEBMAP):
             if uid not in known:
                 bad.append("line %d: cedar_uid %r is not in the register"
                            % (i, uid))
-            if url and restricted(url):
-                bad.append("line %d: %s is TERMS_STATED_RESTRICTIVE and must "
-                           "not be harvested by any route" % (i, url))
+            # RECORDING A REFUSAL IS NOT HARVESTING ONE.
+            # The first form of this rule rejected the row that SAYS a host
+            # refused us, which would force the refusal to be silent -- and a
+            # silent refusal is indistinguishable from an entity nobody tried,
+            # which is the conflation this whole shard exists to prevent. What
+            # must not exist is CONTENT from that host; invariant (11) covers
+            # the 2xx case, and this one covers everything except an explicit
+            # refusal row.
+            if url and restricted(url)                     and ut not in ("TERMS_RESTRICTED_DO_NOT_HARVEST",
+                                   "government_refused_robots"):
+                bad.append("line %d: %s is TERMS_STATED_RESTRICTIVE and may "
+                           "appear only on an explicit refusal row, not as "
+                           "`%s`" % (i, url, ut))
             if ut in ("none_established", "no_own_site_found"):
                 n = len([x for x in ev.split(" | ") if x.strip()])
                 if "TRIED:" not in ev or n < 3:
@@ -1669,6 +1759,26 @@ def check(path=WEBMAP):
                                    % (i, uid, mfl.group(1)[:44],
                                       ",".join(sorted(want - got))[:40]))
 
+            # (10) AN ENTITY WITH NO DISTINCTIVE TOKENS MAY NOT HOLD A
+            # PAGE-TEXT-VERIFIED URL. Nothing on a page can identify it, so
+            # any live URL it holds must be publisher-stated (R1 BIA, R2 DOI,
+            # R3 a domain from its own published email) and must say so.
+            if ut in ("government", "organization", "corporate")                     and not tokens(_deaccent(r.get("canonical_name", ""))):
+                if not any(t in ev for t in ("R1 BIA", "R2 DOI",
+                                             "R3 domain derived")):
+                    bad.append("line %d: %s has a name of only generic words "
+                               "and a live URL that is not publisher-stated "
+                               "-- no page-text check can identify it"
+                               % (i, uid))
+
+            # (11) A HOST WHOSE robots.txt NAMES THIS AGENT MAY NOT APPEAR
+            # WITH A 2xx. Held as a list here rather than re-fetched, so the
+            # gate is offline and deterministic.
+            if str(r.get("http_status") or "").startswith("2")                     and url and restricted(url):
+                bad.append("line %d: %s carries a 2xx from %s, a host whose "
+                           "publisher has refused this agent"
+                           % (i, uid, url[:60]))
+
             k = (uid, ut, url)
             if url and k in seen:
                 bad.append("line %d: duplicate row %s" % (i, str(k)))
@@ -1695,6 +1805,13 @@ def selftest():
          [None, "x", "y", "government", "https://colvilletribes.com/", "200",
           TODAY, "TRIED: a | b | c"]),
         ("2xx from a host that refused us", None),
+        ("generic name, guessed URL",
+         [None, "Council", "y", "government", "https://kawerak.org", "200",
+          TODAY, "TRIED: a | b | c || DERIVED domain, name-verified against "
+                 "the page; tokens ALL present"]),
+        ("2xx from a refused host",
+         [None, "x", "y", "government", "https://penobscotnation.org/", "200",
+          TODAY, "TRIED: a | b | c"]),
         ("990 filer with the wrong name",
          [None, "Potter Valley", "y", "form_990",
           "https://projects.propublica.org/nonprofits/organizations/1", "200",
@@ -1708,7 +1825,8 @@ def selftest():
           "TRIED: a | b | c || DERIVED domain, name-verified against the "
           "page; not published by the BIA directory."]),
         ("missing checked_date",
-         [None, "x", "y", "government", "https://a.example", "200", "",
+         [None, "Penobscot Nation", "y", "government", "https://a.example",
+          "200", "",
           "TRIED: a | b | c"]),
     ]
     real = next(r["cedar_uid"] for r in read_register() if r.get("cedar_uid"))

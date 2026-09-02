@@ -1011,7 +1011,7 @@ ten repairs as fresh defects.
 on an in-memory writer that drops a live column; it does NOT fire once wrapped
 in a carry-forward; and a read-modify-write on the same file reads as CORRECT.
 
-**Markdown, finished.** 21 (upper bound) → **4**. Eight docs settled by actually
+**Markdown, finished.** 21 (upper bound) → **3**. Ten docs settled by actually
 regenerating and diffing, recorded in `MD_PROVEN_SAFE` with their evidence.
 `docs/LOBBYING_BUILD_LOG_2026-08-05.md` — the one genuine candidate — is
 **"the generator is right and the prose is stale"**: 35 removed lines, 30 of
@@ -1021,10 +1021,42 @@ queue 361 → 5 because the rulings were applied). `regen` now counts removed
 lines containing no digit at all, which is the shape of a sentence somebody
 wrote, and reports zero here.
 
-**The four left are not mine to settle.** `DATASET_READINESS.md` (518),
+**The three left are not mine to settle.** `DATASET_READINESS.md` (518),
 `GRAIN_AUDIT.md` and `DATASET_CONTRACTS.md` (512) are written by
-integrator-owned generators and were not run. `INVENTORY.md` (521) is slow
-rather than owned.
+integrator-owned generators and were deliberately not run. `INVENTORY.md`
+(521) was slow rather than owned, and is now settled.
 
-**Baseline** re-recorded after the fixes: **0 CSV, 0 class 3, 4 markdown.**
+**Baseline** re-recorded after the fixes: **0 class 1, 0 class 3, 3 markdown** — `DATASET_READINESS.md` (518), `GRAIN_AUDIT.md` and `DATASET_CONTRACTS.md` (512). All three are written by integrator-owned generators, which this pass deliberately did not run. Every other doc was settled by measurement.
+
+`docs/INVENTORY.md` was the last one settled: **205 vanished lines and every one carries a number**, so the rebuild recomputes them and the LIVE doc is the stale one. It is also the case that produced the no-digit test's own counter-example — the 20 lines that test called prose were blank lines and repeated markdown table headers, all still present in the rebuild.
+### PART 3b — two more ways `regen` said SAFE without measuring anything
+
+Both found while closing class 3, both now in the field guide's section-3
+table, because the shape recurs far outside this workstream.
+
+**1. `regen` invoked every generator BARE.** `1020_tail_web_probe.py` writes
+`docs/COVERAGE_TAIL_SHARD_N.md` under its `doc` subcommand and runs a
+**network probe ladder** with no arguments. Regenerating that doc the obvious
+way would have opened sockets nobody asked for, in another workstream's
+territory. `845 regen <doc> [mode]` now takes the mode, and refuses to run
+bare **only** where the doc write sits behind a named subcommand — refusing on
+*any* subcommand was too blunt and blocked `527_doc_staleness.py`, which
+advertises `verify` and still writes its doc by default. Blocking the honest
+test on most generators is worse than the hazard it guards.
+
+**2. "a removed line with no digit is prose" was the wrong measure.**
+`docs/INVENTORY.md` reported 20 such lines; every one was a blank line or a
+repeated markdown table header. Replaced with the measure that is actually
+about deletion: **a removed line whose exact text appears NOWHERE in the
+regenerated document.** That is immune to reordering and to hunks that stop
+pairing when several adjacent measured lines all change at once, which is what
+produced 30 phantom "unpaired removals" on the lobbying log and 48 on the
+inventory.
+
+**And rule 17 caught a live one, from another workstream, the same hour.**
+`docs/COVERAGE_TAIL_SHARD_N.md` landed after the first baseline and `845
+verify` failed on it by name. It was settled by MEASURING — `845 regen
+docs/COVERAGE_TAIL_SHARD_N.md doc`, byte-identical — and **not** by
+re-baselining it away. That is the whole point of the gate, and it worked on
+its first live encounter with something nobody had declared.
 <!-- END ADR-017 -->

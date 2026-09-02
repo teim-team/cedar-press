@@ -1,0 +1,22 @@
+{
+ "script": "code/1086_faads_award_key_promote.py",
+ "when": "2026-09-02T10:18:05Z",
+ "stats": {
+  "narrow_objects": 60,
+  "wide_objects": 23,
+  "narrow_rows": 1943994,
+  "wide_rows": 874201,
+  "narrow_no_permalink": 0,
+  "narrow_bad_permalink": 0,
+  "wide_blank_award_key": 0,
+  "unreadable": []
+ },
+ "narrow_groups": 1493774,
+ "narrow_unambiguous": 1493774,
+ "narrow_ambiguous": 0,
+ "ambiguous_sample": {},
+ "live_rows": 2769748,
+ "hits_wide": 825754,
+ "hits_narrow": 1943994,
+ "uncovered": 0
+}

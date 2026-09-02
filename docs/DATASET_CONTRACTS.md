@@ -2,12 +2,13 @@
 
 *Generated 2026-09-02 by `code/512_build_dataset_contracts.py` (mission Phase 1). Regenerate rather than edit; `verify` exits 1 when the world breaks a contract, and 62 gates on it.*
 
-**14 collections, 271 tables claimed, 7 orphaned shippable tables, 11 violations.**
+**14 collections, 273 tables claimed, 7 orphaned shippable tables, 11 violations.**
 
-**Grain: 221 of 228 shippable tables declare and VALIDATE a row grain, a primary key and a join cardinality; 7 do not.** A declared grain the data contradicts is a release-blocking violation, listed below. An unstated grain is ratcheted by `62_no_regression_check.contract_grain_unstated_shippable`: the count may only fall, and a new shippable table that lands without one fails the gate that day.
+**Grain: 221 of 229 shippable tables declare and VALIDATE a row grain, a primary key and a join cardinality; 8 do not.** A declared grain the data contradicts is a release-blocking violation, listed below. An unstated grain is ratcheted by `62_no_regression_check.contract_grain_unstated_shippable`: the count may only fall, and a new shippable table that lands without one fails the gate that day.
 
-<details><summary>Shippable tables with an UNSTATED grain (7) - a buyer cannot join these safely</summary>
+<details><summary>Shippable tables with an UNSTATED grain (8) - a buyer cannot join these safely</summary>
 
+- `deals_press_edgar_ancsa_additions.csv`
 - `native_owned_businesses.bak_2026-09-02_010526.csv`
 - `native_owned_businesses.bak_2026-09-02_010557.csv`
 - `native_owned_businesses.csv`
@@ -263,7 +264,7 @@ Declared grain — validated against the file on every run:
 
 ## Indian Country Deals  (`deals`, shelf: standard)
 
-Rebuild: `py -3 code/build.py run deals --execute` — 19 tables.
+Rebuild: `py -3 code/build.py run deals --execute` — 20 tables.
 
 | table | status | keys | rebuilt by | enriched by |
 |---|---|---|---|---|
@@ -279,6 +280,7 @@ Rebuild: `py -3 code/build.py run deals --execute` — 19 tables.
 | `deals_party_attribution_agent.csv` | internal-by-decision | `tribe_id` `cedar_uid` `uei` `cage_code` | — | — |
 | `deals_party_autoresolved.csv` | internal-by-decision | `tribe_id` `cedar_uid` | `57_autoresolve_deal_parties.py` | `154_extend_autoresolved_parties_additive.py` |
 | `deals_party_matches.csv` | internal-by-decision | — | — | — |
+| `deals_press_edgar_ancsa_additions.csv` | shippable | — | — | — |
 | `deals_sec_2010_2017_additions.csv` | shippable | — | — | — |
 | `deals_source_index.csv` | shippable | — | — | — |
 | `deals_taxonomy.csv` | internal-by-decision | — | — | — |
@@ -526,7 +528,7 @@ Declared grain — validated against the file on every run:
   - declared by: workstream INT-READY 2026-09-02: index_year confirmed 10 distinct / 0 blank on the FULL 10-row file
 - `nonprofit_schedule_c_lobbying.csv` — one row per IRS 990 e-file RETURN parsed for Schedule C - one accepted return of one filer, identified by its IRS OBJECT_ID. NOT one row per organisation and NOT one row per tax year: an amended or short-period return for the same (ein, tax_year) is a second return and a second row (29 such pairs).
   - primary key: `schedule_c_row_id`  (validated unique)
-  - join cardinality: `cedar_entity_id` → many row(s) per value (measured max 82), `ein` → many row(s) per value (measured max 10), `object_id` → one row(s) per value (measured max 1), `schedule_c_row_id` → one row(s) per value (measured max 1)
+  - join cardinality: `cedar_entity_id` → many row(s) per value (measured max 339), `ein` → many row(s) per value (measured max 13), `object_id` → one row(s) per value (measured max 1), `schedule_c_row_id` → one row(s) per value (measured max 1)
   - declared by: workstream INT-READY 2026-09-02: schedule_c_row_id and object_id each confirmed 6,870 distinct / 0 blank on the FULL 6,870-row file with csv.reader; 0 literal duplicate rows; (ein, tax_year) tested and REJECTED at 6,841
 - `nrc_meeting_participants.csv` — one row per external participant in an NRC public meeting
   - primary key: `participant_id`  (validated unique)
@@ -1000,11 +1002,11 @@ Declared grain — validated against the file on every run:
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
 - `gaming_property_self_published_assertions.csv` — one SELF-PUBLISHED ASSERTION OCCURRENCE: one sentence on one page of a gaming property's OWN website making one claim about itself. Keyed by 382 as a digest of (site host, page URL, assertion kind, asserted value, first 120 characters of the quote), so the SAME claim on two pages of one host is two rows and the same sentence twice on one page is collapsed. THIS IS NOT A MEASUREMENT TABLE - every `assertion_class` is deliberately outside `cedar_domain.MeasurementType`, and the class is a first-class column because a buyer must be able to filter on it. NEVER SUM OR RECONCILE AGAINST A REGULATOR: not gaming_capacity_official.csv, not nigc_regional_ggr.csv, not nigc_revenue_bands.csv, not state_gaming_observations.csv, not wa_machine_allocations.csv. A casino's claim about its own floor and a regulator's count of that floor are TWO CLAIMS ABOUT ONE THING; adding them doubles the floor and preferring the larger turns marketing into a statistic. 2 rows are WITHDRAWN_NOT_SELF_PUBLISHED and are retained, labelled, rather than deleted
   - primary key: `assertion_id`  (validated unique)
-  - join cardinality: `assertion_id` → one row(s) per value (measured max 1), `cedar_uid` → many row(s) per value (measured max 51), `facility_id` → many row(s) per value (measured max 51), `site_host` → many row(s) per value (measured max 51), `source_url` → many row(s) per value (measured max 5), `tribe_id` → many row(s) per value (measured max 51)
+  - join cardinality: `assertion_id` → one row(s) per value (measured max 1), `cedar_uid` → many row(s) per value (measured max 61), `facility_id` → many row(s) per value (measured max 51), `site_host` → many row(s) per value (measured max 51), `source_url` → many row(s) per value (measured max 11), `tribe_id` → many row(s) per value (measured max 61)
   - declared by: workstream GAMING-NR 2026-09-01: grain asserted in code by code/588_promote_self_published_claims.py, which refuses to write on a duplicate key; confirmed unique with no blank component and 0 literal duplicate rows on the FULL 622-row file by code/814_gaming_nr_grain_and_conservation.py verify
 - `gaming_property_self_published_claims.csv` — one ADJUDICATED CLAIM OCCURRENCE - one numeric claim a gaming property publishes about itself, as the adjudicating script identified it, namespaced by `claim_family` (recovered_from_refusal_pile | first_pass_extraction). NOT one row per (source_url, metric, value): that triple collides 15 times and every collision is REAL - one page states the same number in two sentences about two different things, so collapsing it deletes a ballroom. True repetition of the SAME sentence is collapsed upstream and counted in `n_occurrences_collapsed`. THIS IS NOT A MEASUREMENT TABLE: `assertion_class` is SELF_PUBLISHED_OPERATOR_CLAIM on every row and never becomes one. NEVER SUM OR RECONCILE AGAINST A REGULATOR - the per-row `not_summable_with` column names the tables. Two further traps carried as columns: `value_is_bounded` = Y means the source said 'more than 1,000 slots' and a bound is not a count, and `also_in_gaming_property_site_observations` = Y means the row restates an observation that already ships in gaming_property_site_observations.csv, so stacking the two files double counts it
   - primary key: `claim_id`  (validated unique)
-  - join cardinality: `cedar_uid` → many row(s) per value (measured max 22), `claim_id` → one row(s) per value (measured max 1), `facility_id` → many row(s) per value (measured max 22), `site_host` → many row(s) per value (measured max 22), `source_claim_id` → one row(s) per value (measured max 1), `source_url` → many row(s) per value (measured max 7), `tribe_id` → many row(s) per value (measured max 22)
+  - join cardinality: `cedar_uid` → many row(s) per value (measured max 24), `claim_id` → one row(s) per value (measured max 1), `facility_id` → many row(s) per value (measured max 22), `site_host` → many row(s) per value (measured max 22), `source_claim_id` → one row(s) per value (measured max 1), `source_url` → many row(s) per value (measured max 7), `tribe_id` → many row(s) per value (measured max 24)
   - declared by: workstream GAMING-NR 2026-09-01: grain asserted in code by code/588_promote_self_published_claims.py, which refuses to write on a duplicate key; confirmed unique with no blank component and 0 literal duplicate rows on the FULL 270-row file by code/814_gaming_nr_grain_and_conservation.py verify
 - `gaming_property_site_observations.csv` — one row per metric observed on a property's own website at one retrieval
   - primary key: `observation_id`  (validated unique)
@@ -1083,7 +1085,7 @@ Declared grain — validated against the file on every run:
 
 ## Entity spine, identifiers and reference  (`_entity_layer`, shelf: infrastructure)
 
-Rebuild: `py -3 code/build.py run _entity_layer --execute` — 48 tables.
+Rebuild: `py -3 code/build.py run _entity_layer --execute` — 49 tables.
 
 | table | status | keys | rebuilt by | enriched by |
 |---|---|---|---|---|
@@ -1111,6 +1113,7 @@ Rebuild: `py -3 code/build.py run _entity_layer --execute` — 48 tables.
 | `entity_aliases.csv` | shippable | `cedar_uid` `entity_id` | `97_build_aliases_and_relationships.py` | `418_build_entity_alias_layer.py` |
 | `entity_candidates_new.csv` | internal-by-decision | `cedar_uid` | — | — |
 | `entity_candidates_rejected.csv` | internal-by-decision | `cedar_uid` | — | — |
+| `entity_dated_public_facts.csv` | UNDOCUMENTED | `cedar_uid` | — | — |
 | `entity_evidence_profile.csv` | internal-by-decision | — | `151_rebuild_entity_evidence_profile.py` | `110_build_harmonized_views.py` |
 | `entity_hierarchy.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
 | `entity_name_harvest.csv` | internal-by-decision | — | — | — |

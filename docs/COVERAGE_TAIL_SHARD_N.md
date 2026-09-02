@@ -9,9 +9,9 @@ Shard N's slice is derived, not listed: every register entity that no other shar
 | entity class | has a site of its own | site exists, we are refused or challenged | no site of its own; another party publishes about it | checked, no web presence located |
 |---|---|---|---|---|
 | Native Hawaiian Organization | 4 | 0 | 10 | 55 |
-| Federally recognized tribe | 54 | 4 | 3 | 1 |
+| Federally recognized tribe | 50 | 8 | 3 | 1 |
 | Individually Native-owned business | 0 | 0 | 0 | 8 |
-| **total** | **58** | **4** | **13** | **64** |
+| **total** | **54** | **8** | **13** | **64** |
 
 *`checked, no web presence located` is a FINDING. Every one of those entities carries a row naming the routes run and the date. For **64 of the 69** Native Hawaiian Organizations here, the route that settled it was the organisation's own entry in the DOI Office of Native Hawaiian Relations notification list, which records `Website: None listed`. That is the organisation telling its registrar it has none — not us failing to find one.*
 
@@ -20,29 +20,34 @@ Shard N's slice is derived, not listed: every register entity that no other shar
 | url_type | n | meaning |
 |---|---:|---|
 | `none_established` | 62 | checked, nothing found at all |
-| `government` | 54 | verified tribal government site |
-| `machine_readable_surface` | 53 | the host answers wp-json / sitemap / feed — a harvestable surface for the next agent |
-| `no_own_site_found` | 19 | checked; something was found but not a site of the entity's own |
+| `government` | 50 | verified tribal government site |
+| `machine_readable_surface` | 49 | the host answers wp-json / sitemap / feed — a harvestable surface for the next agent |
+| `no_own_site_found` | 23 | checked; something was found but not a site of the entity's own |
 | `form_990` | 10 | IRS filing record ABOUT the entity; not its website |
 | `directory_profile` | 5 | a consortium or directory page about the entity, published in the BIA `website` field |
 | `organization` | 4 | verified organisation site |
 | `government_blocked_bot_protection` | 4 | site exists; 403 to research UA AND to browser headers |
+| `government_refused_robots` | 3 | site exists; robots.txt Disallow: / — refused by every route |
 | `parked_domain` | 2 |  |
+| `TERMS_RESTRICTED_DO_NOT_HARVEST` | 2 | site exists; the publisher's stated terms or a robots rule naming this agent refuse us. Not fetched by any route |
 | `unverified_organization` | 1 | URL published by DOI that did not answer |
-| `government_refused_robots` | 1 | site exists; robots.txt Disallow: / — refused by every route |
 
-## Reached but not harvestable — 17
+## Reached but not harvestable — 21
 
 *These are not coverage gaps and they are not absences. Filing either one as `none found` would misreport a nation's own decision, or an edge WAF, as an empty web presence.*
 
 | entity | class | outcome | what was seen |
 |---|---|---|---|
+| Ely Shoshone | Federally recognized tribe | site exists, we are refused or challenged | `TERMS_RESTRICTED_DO_NOT_HARVEST` https://www.elyshoshonetribe.com/ |
 | Fort Bidwell | Federally recognized tribe | no site of its own; another party publishes about it | `directory_profile` https://caltribalfamilies.org/places/fort-bidwell-indian-community/ |
 | Guidiville | Federally recognized tribe | no site of its own; another party publishes about it | `directory_profile` https://caltribalfamilies.org/places/guidiville-rancheria/ |
 | Inaja | Federally recognized tribe | no site of its own; another party publishes about it | `directory_profile` https://sctca.net/inaja-cosmit-band-of-indians/ |
 | Koi | Federally recognized tribe | site exists, we are refused or challenged | `government_blocked_bot_protection` https://www.koinationsonoma.com/ |
+| Los Coyotes | Federally recognized tribe | site exists, we are refused or challenged | `government_refused_robots` https://www.loscoyotestribe.org/ |
 | Paiute of Utah | Federally recognized tribe | site exists, we are refused or challenged | `government_blocked_bot_protection` https://pitu.gov/ |
+| Penobscot | Federally recognized tribe | site exists, we are refused or challenged | `TERMS_RESTRICTED_DO_NOT_HARVEST` https://www.penobscotnation.org/ |
 | Potter Valley | Federally recognized tribe | site exists, we are refused or challenged | `government_blocked_bot_protection` https://pottervalleytribe.com/ |
+| Pueblo of San Ildefonso | Federally recognized tribe | site exists, we are refused or challenged | `government_refused_robots` https://sanipueblo.org/ |
 | Samish | Federally recognized tribe | site exists, we are refused or challenged | `government_refused_robots` https://www.samishtribe.nsn.us/ |
 | Ahonui Homestead Association | Native Hawaiian Organization | no site of its own; another party publishes about it | `form_990` https://projects.propublica.org/nonprofits/organizations/833506697 |
 | Kalama‘ula Homesteaders Association | Native Hawaiian Organization | no site of its own; another party publishes about it | `form_990` https://projects.propublica.org/nonprofits/organizations/990285067 |

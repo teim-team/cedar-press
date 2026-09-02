@@ -320,7 +320,95 @@ NAMED_OBLIGORS = {
     "muscogee": "Muscogee (Creek) Nation",
     "osage nation": "Osage Nation",
     "quapaw": "Quapaw Nation",
+    # ADDED 2026-09-02 after auditing review/1082_unmatched_issuer_names.csv
+    # against the Moody's tribal issuer census and the EMMA roster in
+    # docs/TRIBAL_DEBT_BUILD_LOG.md. Of 10,694 unmatched issuer names, exactly
+    # ONE was a real tribal obligor the matcher had missed - an initialism with
+    # no tribal word in it. Cedar already resolves PCI as Poarch Creek Indians
+    # (logs/_HOSTLOCK_www.pci-nsn.gov.json, and the tribe's own domain is
+    # pci-nsn.gov). 51 observations.
+    "pci gaming": "PCI Gaming Authority (Poarch Band of Creek Indians)",
+    # Funds abbreviate to fit a fixed-width field. These renderings were
+    # observed verbatim in the cached NPORT XML, not invented.
+    "sthrn ute": "Southern Ute Indian Tribe",
+    "mashantucket w": "Mashantucket (Western) Pequot Tribe",
     "peninsula pacific": None,
+}
+
+# The distinctive token that identified an obligor is also the best key for
+# finding that obligor in the spine, because the spine's canonical names are
+# short ("Quapaw", "Southern Ute") while a fund prints the full legal issuer.
+def obligor_keys_for(label):
+    """EVERY key that maps to this label, longest first. Returning only the
+    longest was a bug: the abbreviation key 'mashantucket w' outranked
+    'mashantucket' and then failed to match the spine's 'Mashantucket
+    Pequot'."""
+    n = norm(label)
+    keys = [k for k, lab in NAMED_OBLIGORS.items()
+            if lab and (lab == label or k in n)]
+    return sorted(set(keys), key=len, reverse=True)
+
+
+# A tribal ENTERPRISE is not its NATION, and no string match will bridge the
+# two: "Downstream Development Authority" shares no token with "Quapaw".
+# These are stated relationships, each with the source that states it, NOT
+# inferences. The link is to the NATION; the obligor stays named as filed.
+ENTERPRISE_OF = {
+    "Downstream Development Authority": (
+        "Quapaw Nation",
+        "the fund itself prints the full legal name \"Downstream Development "
+        "Authority of the Quapaw Tribe of Oklahoma\" - the relationship is in "
+        "the disclosure, not inferred"),
+    "Inn of the Mountain Gods Resort and Casino": (
+        "Mescalero Apache",
+        "chartered enterprise of the Mescalero Apache Tribe; recorded as a "
+        "tribal rated entity in the Moody's tribal issuer census, "
+        "docs/TRIBAL_DEBT_BUILD_LOG.md"),
+    "PCI Gaming Authority (Poarch Band of Creek Indians)": (
+        "Poarch",
+        "PCI = Poarch Creek Indians; the nation's own domain is pci-nsn.gov, "
+        "already recorded in Cedar (logs/_HOSTLOCK_www.pci-nsn.gov.json)"),
+    "Mohegan Tribal Gaming Authority": (
+        "Mohegan",
+        "instrumentality of the Mohegan Tribe of Indians of Connecticut, "
+        "named as such in its own SEC filings"),
+    "Chukchansi Economic Development Authority": (
+        "Picayune",
+        "economic development authority of the Picayune Rancheria of the "
+        "Chukchansi Indians; Cedar's spine holds that nation as 'Picayune'"),
+    "River Rock Entertainment Authority": (
+        "Dry Creek",
+        "instrumentality of the Dry Creek Rancheria Band of Pomo Indians; "
+        "EMMA lists the issuer as 'River Rock Entertainment Auth / Dry Creek "
+        "Rancheria CA' (docs/TRIBAL_DEBT_BUILD_LOG.md)"),
+    "Snoqualmie Entertainment Authority": (
+        "Snoqualmie", "instrumentality of the Snoqualmie Indian Tribe"),
+    "Shingle Springs Tribal Gaming Authority": (
+        "Shingle Springs",
+        "instrumentality of the Shingle Springs Band of Miwok Indians"),
+    "Cowlitz Tribal Gaming Authority": (
+        "Cowlitz", "instrumentality of the Cowlitz Indian Tribe"),
+    "Gun Lake Tribal Gaming Authority": (
+        "Match-e-be-nash-she-wish Band",
+        "instrumentality of the Match-e-be-nash-she-wish Band of Pottawatomi "
+        "Indians, known as the Gun Lake Tribe; Cedar's spine holds the "
+        "federally recognized name"),
+    "Kalispel Tribal Economic Authority": (
+        "Kalispel", "instrumentality of the Kalispel Tribe of Indians"),
+    "Jamul Indian Village Development Corporation": (
+        "Jamul", "development corporation of the Jamul Indian Village"),
+    "Tunica-Biloxi Gaming Authority": (
+        "Tunica-Biloxi",
+        "instrumentality of the Tunica-Biloxi Tribe of Louisiana"),
+    "Choctaw Resort Development Enterprise": (
+        "Mississippi Choctaw",
+        "enterprise of the Mississippi Band of Choctaw Indians"),
+    "Mashantucket (Western) Pequot Tribe": (
+        "Mashantucket Pequot",
+        "the same nation; Cedar's spine records the canonical name without "
+        "the statutory parenthetical"),
+    "Little Traverse Bay Bands of Odawa Indians": (
+        "Little Traverse", "the same nation, spine short name"),
 }
 
 # Measured false-positive classes. Source: docs/TRIBAL_DEBT_BUILD_LOG.md,
@@ -398,7 +486,11 @@ HOLDINGS_FORMS = {
 }
 # NPORT primary_doc.xml is structured; the rest are HTML/text and are queued
 # at lower priority because the mine stage can only read the XML today.
-XML_FORMS = {"NPORT-P", "NPORT-P/A", "NPORT-EX"}
+# MEASURED 2026-09-02, not assumed: only NPORT-P carries `primary_doc.xml`.
+# NPORT-EX ships an HTML exhibit instead (accession 0001752724-19-046565 ->
+# QTLY_2638_20190331.htm, index.json confirms no XML in the folder), so
+# constructing primary_doc.xml for it returns 404 every time.
+XML_FORMS = {"NPORT-P", "NPORT-P/A"}
 
 
 def cmd_plan():
@@ -527,7 +619,15 @@ def cmd_fetch(argv):
             except urllib.error.HTTPError as e:
                 rec["http_status"] = str(e.code)
                 rec["note"] = "HTTPError"
-                consecutive_refusals += 1
+                # STANDING RULE (START_HERE): only 404 and 403 are facts about
+                # an object. A 404 means this accession has no document at
+                # this path - it must NOT trip the refusal circuit breaker,
+                # which exists to detect the HOST turning us away.
+                if e.code in (404, 403):
+                    rec["note"] = "HTTP %d - fact about the object, not a refusal" % e.code
+                    consecutive_refusals = 0
+                else:
+                    consecutive_refusals += 1
                 lock.bump(requests_made=1,
                           refused_by_host=lock.state["refused_by_host"]
                           + ["%s: %s" % (r["accession"], e.code)])
@@ -667,6 +767,32 @@ def resolve_obligor(label, spine_idx):
         if re.search(r"\b" + re.escape(cname) + r"\b", n):
             return (r["cedar_uid"], r["handle"],
                     "spine_name_is_a_whole_token_run_inside_obligor_name", "B")
+    # Third pass: the distinctive obligor token against the spine. This is a
+    # CONTAINMENT match and AGENTS.md forbids containment from keying a
+    # dollar. It does not key one here: the money on these rows is the FUND's
+    # position and is attributed to the fund, not to the tribe. The entity
+    # link is descriptive, and tier B never publishes alone.
+    for key in obligor_keys_for(label):
+        if len(key) < 6:
+            continue
+        for cname, r in spine_idx:
+            if len(cname) < 5:
+                continue
+            if key in cname or cname in key:
+                return (r["cedar_uid"], r["handle"],
+                        "named_obligor_token_%r_matches_spine_name_%r_"
+                        "CONTAINMENT_descriptive_only_never_keys_a_dollar"
+                        % (key, cname), "B")
+    # Fourth pass: a STATED enterprise-to-nation relationship, each carrying
+    # the source that states it. Never an inference from a name - no string
+    # match can bridge "Downstream Development Authority" and "Quapaw".
+    if label in ENTERPRISE_OF:
+        nation, basis = ENTERPRISE_OF[label]
+        nn = norm(nation)
+        for cname, r in spine_idx:
+            if cname == nn:
+                return (r["cedar_uid"], r["handle"],
+                        "stated_enterprise_of_nation: %s" % basis, "B")
     return "", "", "no_spine_match", ""
 
 
@@ -846,6 +972,206 @@ def cmd_mine():
         % (linked, len(obligors)))
 
 
+# ================================================================ revenue ====
+# A tribal gaming authority that sold 144A notes with registration rights ends
+# up an SEC REPORTING COMPANY - and then files AUDITED financial statements
+# whose MD&A discusses each property by name. That is facility-level revenue
+# for an operation NIGC will only report inside a regional aggregate, and it
+# exists BECAUSE OF THE DEBT. It is squarely this workstream's material.
+#
+# Taken here rather than left for `code/1080_sec_gaming_facility_revenue.py`
+# (public casino MANAGERS' filings), on the coordinator's instruction: these
+# are the OBLIGOR's own filings, not a manager's, and 1080 is an unimplemented
+# placeholder whose agent was killed.
+#
+# WHAT THIS IS NOT: "net revenues" is TOTAL property revenue and INCLUDES
+# non-gaming (hotel, food, entertainment, retail). It is NOT gaming revenue and
+# NOT comparable to NIGC gross gaming revenue, which is gaming win only. Every
+# row says so in `measurement_type`.
+
+REVENUE_SOURCE_MANIFEST = REVIEW / "sec_edgar_1030_fetch_manifest.csv"
+REVENUE_OUT = STAGING / "tribal_obligor_property_revenue.csv"
+
+REVENUE_CIKS = {
+    "1005276": ("Mohegan Tribal Gaming Authority", "Mohegan", "CE-0016X-GY"),
+    "1296785": ("Seneca Gaming Corporation", "Seneca", "CE-001AC-YN"),
+    "1296784": ("Seneca Niagara Falls Gaming Corp", "Seneca", "CE-001AC-YN"),
+    "1296786": ("Seneca Erie Gaming Corp", "Seneca", "CE-001AC-YN"),
+    "1296783": ("Seneca Territory Gaming Corp", "Seneca", "CE-001AC-YN"),
+    "1141344": ("Choctaw Resort Development Enterprise",
+                "Mississippi Choctaw", ""),
+    "1430349": ("Cheyenne River Sioux Tribal Finance Corp",
+                "Cheyenne River Sioux Tribe", ""),
+}
+
+# Property heading -> Cedar facility_id, verified against
+# data/clean/gaming_facilities.csv on 2026-09-02. A blank id is NOT a failed
+# match; the reason is recorded in the value.
+REVENUE_PROPERTIES = {
+    "Mohegan Sun": ("CCP-45100", "Mohegan Sun", "CT"),
+    "Mohegan Sun Pocono": ("VP-0034", "Mohegan Pennsylvania", "PA"),
+    "Seneca Niagara Falls Casino": ("CCP-565900",
+                                    "Seneca Niagara Casino & Hotel", "NY"),
+    "Seneca Niagara": ("CCP-565900", "Seneca Niagara Casino & Hotel", "NY"),
+    "Seneca Allegany": ("CCP-635600", "Seneca Allegany Casino & Hotel", "NY"),
+    "Seneca Buffalo Creek": ("CCP-824100", "Seneca Buffalo Creek Casino", "NY"),
+    "MGE Niagara Resorts": ("", "OUT_OF_UNIVERSE_Ontario_Canada", ""),
+    "Niagara Resorts": ("", "OUT_OF_UNIVERSE_Ontario_Canada", ""),
+    "Inspire Entertainment Resort": ("", "OUT_OF_UNIVERSE_Incheon_Korea", ""),
+}
+
+# The sentence must carry a DIRECTION VERB and then "to $X" - that is what
+# makes the dollar the RESULTING figure. Without the verb the first draft
+# matched "the acquisition of the MGE Niagara Resorts, which contributed
+# $112.5 million TO net revenues" and would have booked a CONTRIBUTION as a
+# property total. The verb is the whole guard. Do not relax it.
+REV_PAT = re.compile(
+    r"Net revenues\s+(increased|declined|decreased|grew|rose|fell)\b"
+    r"[^|]{0,170}?\bto\s*\$\s?([\d,]+(?:\.\d+)?)\s*(million|billion)\s+"
+    r"for the (?:fiscal )?year ended\s+([A-Z][a-z]+\s*\d{1,2},?\s*\d{4})",
+    re.I)
+
+
+def _flatten(html):
+    t = re.sub(r"<[^>]+>", " | ", html)
+    t = re.sub(r"&#160;|&nbsp;", " ", t)
+    t = re.sub(r"&amp;", "&", t)
+    t = re.sub(r"[ \t]+", " ", t)
+    return re.sub(r"(\| )+", "|", t)
+
+
+def cmd_revenue():
+    out("=== 1082 revenue - per-property revenue from the OBLIGOR's own "
+        "audited SEC filings (zero network) ===\n")
+    man = read_csv(REVENUE_SOURCE_MANIFEST)
+    rows, docs, per_cik = [], 0, {}
+    for m in man:
+        cik = str(int(m["cik"])) if m["cik"].isdigit() else m["cik"]
+        if cik not in REVENUE_CIKS:
+            continue
+        if m["form"] not in ("10-K", "10-K/A", "S-4", "S-4/A", "10-Q", "424B3"):
+            continue
+        fp = CEDAR / m["local_file"]
+        if not fp.exists():
+            continue
+        docs += 1
+        per_cik[cik] = per_cik.get(cik, 0) + 1
+        plain = _flatten(fp.read_text(encoding="utf-8", errors="replace"))
+        obligor, nation, uid = REVENUE_CIKS[cik]
+        for mt in REV_PAT.finditer(plain):
+            pre = plain[max(0, mt.start() - 450):mt.start()]
+            best, bp = None, -1
+            for prop in REVENUE_PROPERTIES:
+                for cand in ("|" + prop + " |", "|" + prop + "|"):
+                    i = pre.rfind(cand)
+                    if i > bp:
+                        bp, best = i, prop
+            if best is None or bp < 0:
+                continue
+            amt = float(mt.group(2).replace(",", ""))
+            mult = 1e9 if mt.group(3).lower() == "billion" else 1e6
+            fid, fname, st = REVENUE_PROPERTIES[best]
+            rows.append({
+                "observation_id": "",
+                "property_as_published": best,
+                "facility_id": fid,
+                "facility_name_in_cedar": fname,
+                "state": st,
+                "obligor_name": obligor,
+                "obligor_nation": nation,
+                "obligor_cedar_uid": uid,
+                "fiscal_year_end_as_published": mt.group(4),
+                "fiscal_year": mt.group(4)[-4:],
+                "amount_usd": "%.0f" % (amt * mult),
+                "amount_as_published": "$%s %s" % (mt.group(2), mt.group(3)),
+                "measurement_type": "PROPERTY_NET_REVENUE_INCLUDES_NON_GAMING",
+                "measurement_type_basis": (
+                    "The filing's own words are \"net revenues\", which is "
+                    "TOTAL property revenue and includes hotel, food, "
+                    "beverage, entertainment and retail. It is NOT gaming "
+                    "revenue and is NOT comparable to NIGC gross gaming "
+                    "revenue, which is gaming win only."),
+                "assertion_class": "AUDITED_OBLIGOR_SEC_DISCLOSURE",
+                "evidence_class": (
+                    "the obligor's OWN mandatory SEC periodic report, audited. "
+                    "A third evidence class: stronger than a casino's own "
+                    "marketing page, and different in kind from an NIGC "
+                    "figure - this is a company reporting on itself under "
+                    "federal securities law."),
+                "not_summable_with": (
+                    "NEVER add to nigc_regional_ggr or to any row of "
+                    "gaming_revenue_bounds: a REGIONAL_GGR_CEILING is an upper "
+                    "bound on this very property, so adding the two adds a "
+                    "part to its own whole. NEVER add to a gaming-win figure - "
+                    "this number includes non-gaming revenue. NEVER add to "
+                    "tribal_debt_holdings.principal_usd or to any deal value."),
+                "sovereign_caution": (
+                    "The obligor is an instrumentality of a sovereign nation "
+                    "and files because of a securities registration, not "
+                    "because tribal finances are public. Report the figure, "
+                    "the filing and the date; do not characterise the "
+                    "nation's finances beyond them."),
+                "verbatim_quote": mt.group(0)[:400],
+                "source_authority":
+                    "U.S. Securities and Exchange Commission, EDGAR",
+                "source_document_type": m["form"],
+                "source_url": m["document_url"],
+                "filing_date": m["file_date"],
+                "accession": m["accession"],
+                "confidence_tier": "A",
+                "confidence_tier_basis": (
+                    "the figure is re-readable in the retrieved document and "
+                    "the verbatim sentence is carried on the row"),
+                "built_by_script": SCRIPT,
+                "built_date": TODAY,
+                "record_scope":
+                    "PROPERTY_REVENUE_OBSERVATION_FROM_AUDITED_FILING",
+            })
+
+    # The SAME figure restated in the following year's 10-K is a
+    # CORROBORATION, not a second observation. Collapse and count.
+    byk = {}
+    for r in rows:
+        k = (r["property_as_published"], r["fiscal_year"], r["amount_usd"])
+        if k in byk:
+            byk[k]["corroborating_filings"] = (
+                byk[k].get("corroborating_filings", "") + "; "
+                + r["accession"]).strip("; ")
+            byk[k]["n_independent_filings"] = str(
+                int(byk[k].get("n_independent_filings", "1")) + 1)
+        else:
+            r["corroborating_filings"] = ""
+            r["n_independent_filings"] = "1"
+            byk[k] = r
+    final = sorted(byk.values(),
+                   key=lambda r: (r["property_as_published"], r["fiscal_year"]))
+    for i, r in enumerate(final, 1):
+        r["observation_id"] = "TOPR-%04d" % i
+
+    write_csv(REVENUE_OUT, final, ["observation_id", "property_as_published",
+                                   "facility_id", "fiscal_year", "amount_usd"])
+    out("  %d obligor documents scanned across %d CIKs" % (docs, len(per_cik)))
+    for cik, n in sorted(per_cik.items()):
+        out("      %-9s %-42s %3d docs"
+            % (cik, REVENUE_CIKS[cik][0][:42], n))
+    missing = [c for c in REVENUE_CIKS if c not in per_cik]
+    if missing:
+        out("\n  NOT ON DISK (NOT_ACQUIRED, a real fetch task, not an absence "
+            "in the world):")
+        for c in missing:
+            out("      %-9s %s" % (c, REVENUE_CIKS[c][0]))
+    out("\n  %d distinct property-year revenue observations" % len(final))
+    for r in final:
+        out("      %-22s FY%s  $%15s  %-12s x%s filings"
+            % (r["property_as_published"], r["fiscal_year"],
+               format(int(r["amount_usd"]), ","),
+               r["facility_id"] or "(no facility)",
+               r["n_independent_filings"]))
+    ids = sorted({r["facility_id"] for r in final if r["facility_id"]})
+    out("\n  Cedar facilities reached: %d  -> %s" % (len(ids), ids))
+    out("  wrote %s" % REVENUE_OUT)
+
+
 # =================================================================== emma ====
 
 def cmd_emma():
@@ -881,25 +1207,77 @@ def cmd_emma():
             "facility-level gaming revenue - the figure NIGC does not publish."),
         "disposition": "CONSTRAINED",
         "disposition_basis": (
-            "MSRB Terms of Use prohibit \"any data mining, crawling, "
+            "Three independently binding clauses, re-read VERBATIM from "
+            "https://emma.msrb.org/AboutEmma/UserAgreement on 2026-09-02 and "
+            "cached at data/raw/external/tribal_debt_1082/"
+            "emma_user_agreement_2026-09-02.html. Any ONE of them is "
+            "sufficient on its own."),
+        "clause_1_bars_the_OUTPUT_not_only_the_method": (
+            "\"You agree that you will not: use Content or Services to "
+            "develop or create a database to be sold, leased, furnished, "
+            "licensed or otherwise exploited or made available (either "
+            "commercially or free of charge).\" Cedar Press is a paid "
+            "product, and note the parenthetical reaches a FREE release too - "
+            "so \"publish it for nothing\" is not a way round this clause."),
+        "clause_2_names_MANUAL_collection_too": (
+            "\"use or allow others to use any data mining, crawling, "
             "'scraping', robot or similar automated or data gathering or "
-            "extraction method\" AND prohibit using the content \"to develop "
-            "or create a database to be sold, leased, furnished, licensed or "
-            "otherwise exploited.\" Cedar Press is a paid product, so the "
-            "second clause bites even on a hand-collected figure. Recorded as "
-            "SK-TD-001 in docs/TRIBAL_DEBT_BUILD_LOG.md 2026-08-05 and "
-            "re-affirmed here."),
+            "extraction method, OR ANY MANUAL PROCESS, to access, acquire, "
+            "monitor or copy any portion of the Website, Content or Services, "
+            "or otherwise systematically download or store Content.\" "
+            "THIS IS NEW AGAINST THE 2026-08-05 RECORD, which quoted only the "
+            "automated half. docs/TRIBAL_DEBT_BUILD_LOG.md ranked \"resolve "
+            "the EMMA licence, then work the ~70-issuer roster\" second and "
+            "implied a human could read the documents in the meantime. The "
+            "clause says otherwise: hand-collection is named. There is no "
+            "hand-collection workaround."),
+        "clause_3_a_SECOND_licensor_sits_on_top": (
+            "\"The CUSIP Database and the information contained therein is "
+            "and shall remain valuable intellectual property owned by, or "
+            "licensed to, CUSIP Global Services ('CGS') and the American "
+            "Bankers Association ('ABA')... Any use by you outside of the "
+            "clearing and settlement of transactions requires a license from "
+            "CGS, along with an associated fee based on usage.\" EMMA's own "
+            "footer also credits ICE Data Pricing & Reference Data, LLC. So "
+            "an MSRB licence alone would NOT clear CUSIPs - a second licence "
+            "and a usage fee sit behind it. Anyone costing this must cost "
+            "both."),
         "robots_txt_as_measured": robots,
         "robots_is_not_the_blocker": (
-            "robots.txt disallows only /*.pdf$. The binding constraint is the "
-            "Terms of Use, not robots - do not read a permissive robots line "
-            "as permission."),
+            "robots.txt was re-measured 2026-09-02 and is unchanged: "
+            "\"User-agent: * / Disallow: /*.pdf$\". Only PDFs. A permissive "
+            "robots line is NOT permission - the Terms of Use are the binding "
+            "instrument and they are far broader than robots."),
         "the_clean_routes_back_in": (
-            "(a) an MSRB data licence - MSRB sells subscription feeds; "
-            "(b) sourcing the same official statements and continuing "
-            "disclosures from the ISSUERS and UNDERWRITERS directly, which is "
-            "a different author and therefore a different terms answer "
-            "(docs/PUBLICATION_POLICY.md, TERMS-SCOPE)."),
+            "(1) ASK. The agreement states its own exception - \"unless "
+            "otherwise authorized by the MSRB\" - and names where to write: "
+            "Municipal Securities Rulemaking Board, 1300 I Street NW, Suite "
+            "1000, Washington, DC 20005, Attention: External Relations, or "
+            "MSRBSupport. Cedar's standing principle is that asking is the "
+            "route back in and a cleverer scrape is not "
+            "(docs/PUBLICATION_POLICY.md). "
+            "(2) BUY. MSRB sells subscription data feeds; price CGS beside it. "
+            "(3) GO ROUND IT BY AUTHOR, not by route. The same official "
+            "statements and continuing disclosures are authored by the "
+            "ISSUER, the CONDUIT ISSUER and the UNDERWRITER. A document "
+            "obtained from one of THOSE publishers is that publisher's, and "
+            "MSRB's terms over its own website do not reach it "
+            "(docs/PUBLICATION_POLICY.md, TERMS-SCOPE: \"The distinction is "
+            "authorship, not subject matter\"). Caveat, and it cuts the other "
+            "way here: because a continuing-disclosure document is filed BY "
+            "the obligor, for the eight hard-listed sources their own filings "
+            "stay EXCLUDED by that same ruling."),
+        "what_is_forgone_measured": (
+            "docs/TRIBAL_DEBT_BUILD_LOG.md enumerated roughly 95 tribal "
+            "issuer records across ~70 distinct tribal governments on the "
+            "EMMA type-ahead, and found the roster is dominated by housing, "
+            "health, water and sewer, sales-tax and general governmental "
+            "purposes rather than gaming. For the subset that ARE gaming "
+            "authority obligors, the annual audited financial statements "
+            "would carry facility-level gaming revenue - the figure the "
+            "gaming dataset records as SOURCE_DOES_NOT_PUBLISH on 776 of 787 "
+            "facilities. That is what this refusal costs, stated plainly so "
+            "the owner can price the licence against it."),
         "owner_decision_required": "yes",
         "probed_by": SCRIPT, "probed_date": TODAY,
         "record_scope": "SOURCE_DISPOSITION_NOT_A_FACT_ABOUT_AN_ENTITY",
@@ -1022,6 +1400,24 @@ def cmd_verify():
     return 0
 
 
+def _named_invariant_fired(verify_output, invariant_name):
+    """Did `verify` report a BREACH against THIS invariant, by name?
+
+    THE BUG THIS REPLACES IS THIS REPO'S SIGNATURE DEFECT, committed in the
+    selftest that was supposed to catch it (docs/AGENT_FIELD_GUIDE.md section
+    3: "a check that does not measure its own name").
+
+    The first draft tested `"BREACH" in txt.split(name, 1)[1][:12]`. The
+    verify line is `"%-58s %s" % (name, verdict)`, so for a 50-character
+    invariant name the verdict starts at offset 59 - past the 12-character
+    window. The selftest printed "I6 ... DID NOT FIRE" while I6 was in fact
+    firing correctly, which would have sent the next reader to debug a working
+    invariant. It measured its own string arithmetic, not the invariant.
+
+    Reconstruct the exact line verify prints. Nothing to get wrong."""
+    return ("  %-58s %s" % (invariant_name, "BREACH")) in verify_output
+
+
 def cmd_selftest():
     """A check does not count until a fixture proves it FIRES.
     docs/AGENT_FIELD_GUIDE.md section 3."""
@@ -1065,9 +1461,7 @@ def cmd_selftest():
             with contextlib.redirect_stdout(buf):
                 rc = cmd_verify()
             txt = buf.getvalue()
-            fired_named = ("%-58s BREACH" % name) in txt or (
-                name in txt and "BREACH" in txt.split(name, 1)[1][:12])
-            ok = (rc == 1) and fired_named
+            ok = (rc == 1) and _named_invariant_fired(txt, name)
             out("  %-58s %s" % (name, "FIRES" if ok else "DID NOT FIRE"))
             if not ok:
                 failures.append(name)
@@ -1092,7 +1486,7 @@ def cmd_selftest():
         with contextlib.redirect_stdout(buf):
             rc = cmd_verify()
         txt = buf.getvalue()
-        ok = rc == 1 and name in txt and "BREACH" in txt.split(name, 1)[1][:12]
+        ok = (rc == 1) and _named_invariant_fired(txt, name)
         out("  %-58s %s" % (name, "FIRES" if ok else "DID NOT FIRE"))
         if not ok:
             failures.append(name)
@@ -1122,6 +1516,7 @@ USAGE = """usage: py -3 code/1082_tribal_debt_holdings_disclosure.py <stage>
   plan        build the fetch queue from 1030's candidate index (no network)
   fetch       fetch the queue  [--priority=1|2] [--limit=N]
   mine        parse the cache and stage the tables (no network)
+  revenue     per-property revenue from obligor SEC filings (no network)
   emma        re-probe and record the MSRB EMMA disposition (1 request)
   verify      invariants; exit 1 on breach
   selftest    prove verify fires on a synthetic violation
@@ -1139,6 +1534,8 @@ def main(argv):
         cmd_fetch(argv[1:])
     elif c == "mine":
         cmd_mine()
+    elif c == "revenue":
+        cmd_revenue()
     elif c == "emma":
         cmd_emma()
     elif c == "verify":

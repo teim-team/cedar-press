@@ -10,7 +10,8 @@ content it does not know about - a CSV column, or a paragraph of markdown.
                                                   # writer appears
     py -3 code/845_regenerate_guard.py baseline   # re-record, AFTER fixing
     py -3 code/845_regenerate_guard.py selftest   # prove the detectors FIRE
-    py -3 code/845_regenerate_guard.py regen <doc> # THE HONEST TEST: rebuild
+    py -3 code/845_regenerate_guard.py regen <doc> [mode]
+                                                  # THE HONEST TEST: rebuild
                                                   # that doc and diff it
 
 WHY
@@ -938,6 +939,10 @@ MD_PROVEN_SAFE = {
     "docs/REVIEW_BACKLOG_RULINGS.md":
         "2026-09-02 regen: byte-identical. 603 reproduces the whole doc, "
         "numbered doctrine sections included.",
+    "docs/INVENTORY.md":
+        "2026-09-02 regen: 205 line(s) vanish and EVERY one carries a number - table rows and counts the rebuild recomputes. The 20 lines the earlier no-digit test called prose were blank lines and repeated markdown table headers, all still present in the rebuild. The LIVE doc is the stale one.",
+    "docs/COVERAGE_TAIL_SHARD_N.md":
+        "2026-09-02 regen (mode `doc`): byte-identical. NOT settled by running the script bare - `1020` runs a network probe ladder with no arguments and writes this report only under `doc`. It landed after the first baseline and rule 17 caught it, which is the gate working.",
     "docs/ANCSA_PORTAL_BUILD_LOG.md":
         "2026-09-02 regen: byte-identical. build_log_doc.py reproduces the whole document, its 19 narrative headings included - they are f-string built, which is why the orphan-heading signal read 19 of 20.",
     "docs/DOC_STALENESS.md":
@@ -1302,7 +1307,7 @@ def _key(rows, mrows, mem=()):
     return k
 
 
-def regen_diff(docarg: str) -> int:
+def regen_diff(docarg: str, mode: str = None) -> int:
     """THE HONEST TEST, as one command: regenerate the doc and diff it.
 
         py -3 code/845_regenerate_guard.py regen docs/REFRESH_CADENCE.md
@@ -1349,9 +1354,36 @@ def regen_diff(docarg: str) -> int:
     path = ROOT / rel
     tmp = Path(tempfile.mkdtemp()) / path.name
     shutil.copy2(path, tmp)
-    print("  regenerating %s with code/%s ..." % (rel, script))
+    # RUNNING A GENERATOR'S DEFAULT MODE CAN DO FAR MORE THAN WRITE ITS DOC.
+    # `1020_tail_web_probe.py` writes this report under `doc` and runs a
+    # NETWORK PROBE LADDER with no arguments, so regenerating its markdown by
+    # calling it bare would have opened sockets nobody asked for.
+    #
+    # Refuse only where the doc write is itself behind a named subcommand,
+    # because then the bare mode is something else. Refusing on ANY
+    # subcommand was too blunt: `527_doc_staleness.py` advertises `verify`
+    # and still writes its doc by default, and blocking the honest test on
+    # most generators is worse than the hazard it guards against.
+    argv = [sys.executable, str(sp)]
+    if mode:
+        argv.append(mode)
+    else:
+        head = sp.read_text(encoding="utf-8", errors="replace")[:4000]
+        subs = sorted({m for m in re.findall(
+            r"py -3 code/" + re.escape(sp.name) + r"\s+([a-z][a-z_\-]{2,})",
+            head)})
+        doc_subs = [x for x in subs
+                    if x in ("doc", "docs", "report", "write", "md", "render")]
+        if doc_subs:
+            print("  REFUSING to run code/%s bare: its own docstring writes "
+                  "this doc under %s," % (script, doc_subs))
+            print("  so the default mode is something else. All subcommands: "
+                  "%s." % subs)
+            print("  Re-run as: 845 regen %s %s" % (rel, doc_subs[0]))
+            return 2
+    print("  regenerating %s with %s ..." % (rel, " ".join(argv[1:])))
     try:
-        r = subprocess.run([sys.executable, str(sp)], cwd=str(ROOT),
+        r = subprocess.run(argv, cwd=str(ROOT),
                            capture_output=True, text=True, timeout=1800)
         after = path.read_text(encoding="utf-8", errors="replace")
     finally:
@@ -1383,15 +1415,35 @@ def regen_diff(docarg: str) -> int:
     # showed 30 unpaired removals and every one of them carried a digit.
     # So: count the removed lines with NO number in them. That is the shape
     # of a sentence somebody wrote.
-    prose = [l for l in gone if not re.search(r"\d", l)]
-    print("  %d diff line(s): %d removed, %d added, %d removed WITHOUT a "
-          "replacement in the same hunk,\n  %d removed line(s) contain no "
-          "digit at all - the shape of hand-authored prose"
-          % (max(0, len(d) - 2), len(gone), len(add), unpaired, len(prose)))
+    # A REMOVED LINE THAT STILL APPEARS IN THE REBUILD IS NOT LOST - it moved.
+    # The digit test alone was too weak: `docs/INVENTORY.md` showed 20
+    # "prose-shaped" removals and every one was a blank line or a repeated
+    # markdown table header. This is the real measure of deleted content -
+    # exact line text absent from the regenerated document altogether -
+    # and it is immune to reordering and to hunks that stop pairing.
+    after_lines = set(after.splitlines())
+    prose = [l for l in gone
+             if l[1:] not in after_lines and l[1:].strip()
+             and not re.search(r"\d", l)]
+    vanished = [l for l in gone if l[1:] not in after_lines and l[1:].strip()]
+    print("  %d diff line(s): %d removed, %d added, %d unpaired within a "
+          "hunk,\n  %d line(s) whose exact text is ABSENT from the rebuild "
+          "entirely (%d of those carry no digit)"
+          % (max(0, len(d) - 2), len(gone), len(add), unpaired,
+             len(vanished), len(prose)))
     for line in d[:80]:
         print("    " + line)
     if len(d) > 80:
         print("    ... %d more" % (len(d) - 80))
+    # The prose-shaped removals are the only lines a human has to read, and
+    # they were being hidden past the 80-line print cap on any large diff.
+    if vanished:
+        print("  the %d line(s) the rebuild does not produce anywhere - "
+              "READ THESE:" % len(vanished))
+        for line in vanished[:25]:
+            print("    " + line)
+        if len(vanished) > 25:
+            print("    ... %d more" % (len(vanished) - 25))
     if r.returncode != 0:
         # A GENERATOR THAT DID NOT RUN LEAVES THE DOC BYTE-IDENTICAL, and
         # byte-identical is this command's strongest PASS. Measured 2026-09-02:
@@ -1411,14 +1463,18 @@ def regen_diff(docarg: str) -> int:
         print("\n  VERDICT: every removed line has a replacement - these are "
               "measurements that moved,\n  not hand-authored prose. A rebuild "
               "is safe.")
+    elif not vanished:
+        print("\n  VERDICT: %d unpaired removal(s), but every removed line "
+              "still appears in the\n  rebuild - they moved, they were not "
+              "deleted. A rebuild is safe." % unpaired)
     elif not prose:
-        print("\n  VERDICT: %d unpaired removal(s), but EVERY removed line "
-              "carries a number.\n  These are measurements the rebuild "
-              "recomputes, not prose. A rebuild is safe -\n  and the live doc "
-              "is the stale one." % unpaired)
+        print("\n  VERDICT: %d line(s) vanish, and EVERY one carries a "
+              "number.\n  These are measurements the rebuild recomputes, not "
+              "prose. A rebuild is safe -\n  and the LIVE doc is the stale "
+              "one." % len(vanished))
     else:
-        print("\n  VERDICT: %d line(s) disappear with nothing put in their "
-              "place. READ THEM before\n  concluding anything - a row that "
+        print("\n  VERDICT: %d line(s) vanish from the rebuild AND carry no "
+              "number. READ THEM before\n  concluding anything - a row that "
               "stopped qualifying looks the same as a deleted\n  paragraph. If "
               "any is genuinely hand-authored, prefer 574's repair: COMPUTE it"
               "\n  inside the generator; use a marker only where it cannot be "
@@ -1434,7 +1490,8 @@ def main() -> int:
         if len(sys.argv) < 3:
             print("  usage: 845_regenerate_guard.py regen <doc path>")
             return 2
-        return regen_diff(sys.argv[2])
+        return regen_diff(sys.argv[2],
+                          sys.argv[3] if len(sys.argv) > 3 else None)
 
     live = live_headers()
     rows, mem = ([], []) if mode == "md" else collect_csv(live)

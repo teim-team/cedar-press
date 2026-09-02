@@ -1,0 +1,1828 @@
+[
+  {
+    "zip": "data/raw/external/faads/_probe_doi_fy2003.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H19M03S20_1.csv",
+    "n_cols": 112,
+    "has_key": true,
+    "also": {
+      "modification_number": true,
+      "recipient_zip_code": true,
+      "recipient_county_name": true,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": true,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "assistance_transaction_unique_key",
+      "assistance_award_unique_key",
+      "award_id_fain",
+      "modification_number",
+      "award_id_uri"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/_control_doi_fy2007_archive.zip",
+    "member": "FY2007_014_Assistance_Full_20260707_1.csv",
+    "n_cols": 112,
+    "has_key": true,
+    "also": {
+      "modification_number": true,
+      "recipient_zip_code": true,
+      "recipient_county_name": true,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": true,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "assistance_transaction_unique_key",
+      "assistance_award_unique_key",
+      "award_id_fain",
+      "modification_number",
+      "award_id_uri"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/doc_fy2001.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H22M37S46_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/doc_fy2002.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H22M39S08_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/doc_fy2003.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H22M40S31_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/doc_fy2004.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H22M41S53_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/doc_fy2005.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H22M43S16_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/doc_fy2006.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H22M44S39_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/doc_fy2007_archive.zip",
+    "member": "FY2007_013_Assistance_Full_20260707_1.csv",
+    "n_cols": 112,
+    "has_key": true,
+    "also": {
+      "modification_number": true,
+      "recipient_zip_code": true,
+      "recipient_county_name": true,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": true,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "assistance_transaction_unique_key",
+      "assistance_award_unique_key",
+      "award_id_fain",
+      "modification_number",
+      "award_id_uri"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/doe_fy2001.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H22M29S31_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/doe_fy2002.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H22M30S53_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/doe_fy2003.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H22M32S16_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/doe_fy2004.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H22M33S38_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/doe_fy2005.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H22M35S01_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/doe_fy2006.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H22M36S24_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/doe_fy2007_archive.zip",
+    "member": "FY2007_089_Assistance_Full_20260707_1.csv",
+    "n_cols": 112,
+    "has_key": true,
+    "also": {
+      "modification_number": true,
+      "recipient_zip_code": true,
+      "recipient_county_name": true,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": true,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "assistance_transaction_unique_key",
+      "assistance_award_unique_key",
+      "award_id_fain",
+      "modification_number",
+      "award_id_uri"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/doj_fy2001.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M50S24_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/doj_fy2002.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M51S47_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/doj_fy2003.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M53S10_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/doj_fy2004.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M54S34_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/doj_fy2005.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M55S57_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/doj_fy2006.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M57S20_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/doj_fy2007_archive.zip",
+    "member": "FY2007_015_Assistance_Full_20260707_1.csv",
+    "n_cols": 112,
+    "has_key": true,
+    "also": {
+      "modification_number": true,
+      "recipient_zip_code": true,
+      "recipient_county_name": true,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": true,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "assistance_transaction_unique_key",
+      "assistance_award_unique_key",
+      "award_id_fain",
+      "modification_number",
+      "award_id_uri"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/dol_fy2001.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M58S42_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/dol_fy2002.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H21M00S05_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/dol_fy2003.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H21M01S27_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/dol_fy2004.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H21M02S49_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/dol_fy2005.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H21M04S13_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/dol_fy2006.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H21M05S35_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/dol_fy2007_archive.zip",
+    "member": "FY2007_1601_Assistance_Full_20260707_1.csv",
+    "n_cols": 112,
+    "has_key": true,
+    "also": {
+      "modification_number": true,
+      "recipient_zip_code": true,
+      "recipient_county_name": true,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": true,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "assistance_transaction_unique_key",
+      "assistance_award_unique_key",
+      "award_id_fain",
+      "modification_number",
+      "award_id_uri"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/dot_fy2001.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H21M15S35_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/dot_fy2002.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H22M22S35_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/dot_fy2003.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H22M23S58_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/dot_fy2004.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H22M25S21_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/dot_fy2005.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H22M26S44_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/dot_fy2006.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H22M28S07_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/dot_fy2007_archive.zip",
+    "member": "FY2007_069_Assistance_Full_20260707_1.csv",
+    "n_cols": 112,
+    "has_key": true,
+    "also": {
+      "modification_number": true,
+      "recipient_zip_code": true,
+      "recipient_county_name": true,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": true,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "assistance_transaction_unique_key",
+      "assistance_award_unique_key",
+      "award_id_fain",
+      "modification_number",
+      "award_id_uri"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/ed_fy2001.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M25S30_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/ed_fy2002.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M26S53_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/ed_fy2003.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M28S16_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/ed_fy2004.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M29S39_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/ed_fy2005.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M31S02_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/ed_fy2006.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M32S25_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/ed_fy2007_archive.zip",
+    "member": "FY2007_091_Assistance_Full_20260707_1.csv",
+    "n_cols": 112,
+    "has_key": true,
+    "also": {
+      "modification_number": true,
+      "recipient_zip_code": true,
+      "recipient_county_name": true,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": true,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "assistance_transaction_unique_key",
+      "assistance_award_unique_key",
+      "award_id_fain",
+      "modification_number",
+      "award_id_uri"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/epa_fy2001.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H21M06S58_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/epa_fy2002.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H21M08S20_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/epa_fy2003.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H21M09S43_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/epa_fy2004.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H21M11S06_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/epa_fy2005.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H21M12S29_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/epa_fy2006.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H21M14S12_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/epa_fy2007_archive.zip",
+    "member": "FY2007_068_Assistance_Full_20260707_1.csv",
+    "n_cols": 112,
+    "has_key": true,
+    "also": {
+      "modification_number": true,
+      "recipient_zip_code": true,
+      "recipient_county_name": true,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": true,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "assistance_transaction_unique_key",
+      "assistance_award_unique_key",
+      "award_id_fain",
+      "modification_number",
+      "award_id_uri"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/hhs_fy2001.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M17S10_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/hhs_fy2002.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M18S33_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/hhs_fy2003.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M19S56_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/hhs_fy2004.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M21S19_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/hhs_fy2005.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M22S43_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/hhs_fy2006.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M24S07_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/hhs_fy2007_archive.zip",
+    "member": "FY2007_075_Assistance_Full_20260707_1.csv",
+    "n_cols": 112,
+    "has_key": true,
+    "also": {
+      "modification_number": true,
+      "recipient_zip_code": true,
+      "recipient_county_name": true,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": true,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "assistance_transaction_unique_key",
+      "assistance_award_unique_key",
+      "award_id_fain",
+      "modification_number",
+      "award_id_uri"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/hud_fy2001.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M33S48_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/hud_fy2002.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M35S11_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/hud_fy2003.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M36S33_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/hud_fy2004.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M37S56_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/hud_fy2005.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M39S18_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/hud_fy2006.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M40S41_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/hud_fy2007_archive.zip",
+    "member": "FY2007_086_Assistance_Full_20260707_1.csv",
+    "n_cols": 112,
+    "has_key": true,
+    "also": {
+      "modification_number": true,
+      "recipient_zip_code": true,
+      "recipient_county_name": true,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": true,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "assistance_transaction_unique_key",
+      "assistance_award_unique_key",
+      "award_id_fain",
+      "modification_number",
+      "award_id_uri"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/usda_fy2001.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M42S05_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/usda_fy2002.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M43S28_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/usda_fy2003.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M44S52_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/usda_fy2004.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M46S15_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/usda_fy2005.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M47S38_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/usda_fy2006.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H20M49S01_1.csv",
+    "n_cols": 20,
+    "has_key": false,
+    "also": {
+      "modification_number": false,
+      "recipient_zip_code": true,
+      "recipient_county_name": false,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": false,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "action_date_fiscal_year",
+      "action_date",
+      "cfda_number",
+      "cfda_title",
+      "awarding_agency_name"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/agencies/usda_fy2007_archive.zip",
+    "member": "FY2007_012_Assistance_Full_20260707_1.csv",
+    "n_cols": 112,
+    "has_key": true,
+    "also": {
+      "modification_number": true,
+      "recipient_zip_code": true,
+      "recipient_county_name": true,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": true,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "assistance_transaction_unique_key",
+      "assistance_award_unique_key",
+      "award_id_fain",
+      "modification_number",
+      "award_id_uri"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/seam/doi_fy2001.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H19M06S27_1.csv",
+    "n_cols": 112,
+    "has_key": true,
+    "also": {
+      "modification_number": true,
+      "recipient_zip_code": true,
+      "recipient_county_name": true,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": true,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "assistance_transaction_unique_key",
+      "assistance_award_unique_key",
+      "award_id_fain",
+      "modification_number",
+      "award_id_uri"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/seam/doi_fy2002.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H19M06S29_1.csv",
+    "n_cols": 112,
+    "has_key": true,
+    "also": {
+      "modification_number": true,
+      "recipient_zip_code": true,
+      "recipient_county_name": true,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": true,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "assistance_transaction_unique_key",
+      "assistance_award_unique_key",
+      "award_id_fain",
+      "modification_number",
+      "award_id_uri"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/seam/doi_fy2003.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H19M03S20_1.csv",
+    "n_cols": 112,
+    "has_key": true,
+    "also": {
+      "modification_number": true,
+      "recipient_zip_code": true,
+      "recipient_county_name": true,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": true,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "assistance_transaction_unique_key",
+      "assistance_award_unique_key",
+      "award_id_fain",
+      "modification_number",
+      "award_id_uri"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/seam/doi_fy2004.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H19M06S33_1.csv",
+    "n_cols": 112,
+    "has_key": true,
+    "also": {
+      "modification_number": true,
+      "recipient_zip_code": true,
+      "recipient_county_name": true,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": true,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "assistance_transaction_unique_key",
+      "assistance_award_unique_key",
+      "award_id_fain",
+      "modification_number",
+      "award_id_uri"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/seam/doi_fy2005.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H19M06S36_1.csv",
+    "n_cols": 112,
+    "has_key": true,
+    "also": {
+      "modification_number": true,
+      "recipient_zip_code": true,
+      "recipient_county_name": true,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": true,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "assistance_transaction_unique_key",
+      "assistance_award_unique_key",
+      "award_id_fain",
+      "modification_number",
+      "award_id_uri"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/seam/doi_fy2006.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H19M06S38_1.csv",
+    "n_cols": 112,
+    "has_key": true,
+    "also": {
+      "modification_number": true,
+      "recipient_zip_code": true,
+      "recipient_county_name": true,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": true,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "assistance_transaction_unique_key",
+      "assistance_award_unique_key",
+      "award_id_fain",
+      "modification_number",
+      "award_id_uri"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/seam/doi_fy2007.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H19M06S40_1.csv",
+    "n_cols": 112,
+    "has_key": true,
+    "also": {
+      "modification_number": true,
+      "recipient_zip_code": true,
+      "recipient_county_name": true,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": true,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "assistance_transaction_unique_key",
+      "assistance_award_unique_key",
+      "award_id_fain",
+      "modification_number",
+      "award_id_uri"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/seam/doi_fy2008.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H19M06S43_1.csv",
+    "n_cols": 112,
+    "has_key": true,
+    "also": {
+      "modification_number": true,
+      "recipient_zip_code": true,
+      "recipient_county_name": true,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": true,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "assistance_transaction_unique_key",
+      "assistance_award_unique_key",
+      "award_id_fain",
+      "modification_number",
+      "award_id_uri"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/seam/doi_fy2009.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H19M06S45_1.csv",
+    "n_cols": 112,
+    "has_key": true,
+    "also": {
+      "modification_number": true,
+      "recipient_zip_code": true,
+      "recipient_county_name": true,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": true,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "assistance_transaction_unique_key",
+      "assistance_award_unique_key",
+      "award_id_fain",
+      "modification_number",
+      "award_id_uri"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/seam/doi_fy2010.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H19M06S47_1.csv",
+    "n_cols": 112,
+    "has_key": true,
+    "also": {
+      "modification_number": true,
+      "recipient_zip_code": true,
+      "recipient_county_name": true,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": true,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "assistance_transaction_unique_key",
+      "assistance_award_unique_key",
+      "award_id_fain",
+      "modification_number",
+      "award_id_uri"
+    ]
+  },
+  {
+    "zip": "data/raw/external/faads/seam/doi_fy2011.zip",
+    "member": "All_Assistance_PrimeTransactions_2026-08-05_H19M06S50_1.csv",
+    "n_cols": 112,
+    "has_key": true,
+    "also": {
+      "modification_number": true,
+      "recipient_zip_code": true,
+      "recipient_county_name": true,
+      "recipient_city_name": true,
+      "assistance_award_unique_key": true,
+      "federal_action_obligation": true
+    },
+    "note": "",
+    "first5": [
+      "assistance_transaction_unique_key",
+      "assistance_award_unique_key",
+      "award_id_fain",
+      "modification_number",
+      "award_id_uri"
+    ]
+  }
+]

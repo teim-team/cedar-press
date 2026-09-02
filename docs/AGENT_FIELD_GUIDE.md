@@ -101,7 +101,7 @@ One agent owns a central file per pass. The integrator owns `62`, `512`, `517`,
 
 ## 3. This repo's signature defect: a check that does not measure its own name
 
-Thirteen measured instances. They share one shape — *the number was produced, it
+Fifteen measured instances. They share one shape — *the number was produced, it
 was plausible, and it was about something else.*
 
 | the check | what it reported | what it was actually measuring |
@@ -119,8 +119,10 @@ was plausible, and it was about something else.*
 | a regen-and-diff check | `docs/LOBBYING_BUILD_LOG_2026-08-05.md` PROVEN SAFE, byte-identical | **the generator never ran.** `06_build_log_stats_v2.py` exited 2 - it lives in `code/lobbying_pull/`, not `code/` - and an untouched doc is that check's strongest PASS. **Any regenerate-and-diff anywhere in this repo has this hole: assert the exit code before you read the diff.** `845 regen` now refuses on a nonzero exit |
 | `845 scan_md` | 0 markdown docs at risk | **`git log` returned nothing**, so every doc scored 0 hand edits and the whole half printed clean. Seen from inside `62`, where the standalone run of the same code saw 9. It now RAISES rather than report a number it cannot measure, and `62` prints UNMEASURED |
 | `845` class 3, first run | 13 sites UNDETERMINED, 6 of them wrongly | **`awards, stats = [], Counter()`** - a tuple bound to a tuple. The key set was fully knowable and the analyser could not see through the unpacking, so it reported *unmeasured* where the honest answer was *clean*. Undetermined is the safe direction to be wrong in, and it is still wrong |
+| `845 regen`, "no digit = prose" | `docs/INVENTORY.md`, 20 hand-authored lines at risk | **blank lines and a repeated markdown table header.** A line with no digit in it is not a sentence somebody wrote. Replaced with the real measure - a removed line whose exact text appears NOWHERE in the rebuild - which is immune to reordering and to hunks that stop pairing |
+| `845 regen`, default mode | *(caught before it ran)* | it invokes the generator **bare**, and `1020_tail_web_probe.py` writes its doc under `doc` while running a **network probe ladder** with no arguments. Regenerating that markdown would have opened sockets nobody asked for. It now refuses when the doc write sits behind a named subcommand, and takes the mode as an argument |
 
-**The four habits that catch all thirteen:**
+**The four habits that catch all fifteen:**
 
 1. **A check does not count until a fixture proves it FIRES.** Inject the
    violation, assert exit 1 *and* that the NAMED invariant is what fired,

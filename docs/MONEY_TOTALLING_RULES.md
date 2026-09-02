@@ -597,3 +597,82 @@ before them leaves the appended rows with a blank key — and blank collides wit
 blank, which is how this table came to have no key in the first place.
 
 <!-- END SUBAWARD-FUNDING -->
+
+<!-- BEGIN TRIBAL-DEBT -->
+## Tribal debt — `tribal_debt_holdings`, `tribal_debt_obligors`, `tribal_debt_distress_events`
+
+*Appended 2026-09-02 by `code/1082_tribal_debt_holdings_disclosure.py` (staged
+in `data/staging/`, not yet in `data/clean/`). This block is inside
+a marked block named TRIBAL-DEBT (BEGIN/END comment markers, written
+without the literal syntax here so `574`'s scanner sees exactly ONE pair) so
+its wholesale rewrite preserves it. Do not edit another workstream's block.*
+
+### The one-line answer per table
+
+| table | additive measure | sum it at | what double-counts |
+|---|---|---|---|
+| `tribal_debt_holdings.csv` | **none — there is no additive measure** | one row = ONE FUND'S POSITION in one instrument, as of one `report_period_end` | everything: across funds, across report periods, and against every other money column in Cedar |
+| `tribal_debt_obligors.csv` | none. `max_single_fund_principal_usd` is a **maximum, not a total** | one row = one obligor | reading the max as a sum |
+| `tribal_debt_distress_events.csv` | none — it is an event table | one row = one as-filed default/arrears flag on one instrument at one date | counting an instrument once per fund that holds it and calling it several events |
+
+### Why `principal_usd` is the most dangerous column in this table
+
+It is a real, audited, machine-readable dollar figure, and it is **a fraction
+of an instrument, not the instrument**. Form N-PORT Item C reports what *this
+fund* holds. Seventy-two different registered funds report a position in
+Mohegan Tribal Gaming Authority paper; adding their balances produces a number
+that is not the par of anything, is not Mohegan's debt, and is not even a
+consistent slice of it, because the funds report on different period ends.
+
+Three specific prohibitions, each of which would produce a plausible wrong
+number:
+
+1. **Never sum across funds.** Fund A and Fund B may hold the same CUSIP; they
+   may also hold different tranches. Neither case makes their sum a par
+   amount.
+2. **Never sum across `report_period_end`.** The same position held for eight
+   quarters is one position, not eight.
+3. **Never add it to a deal value.** `deals_classified.Announced_Value_USD` and
+   `tribal_bond_issuances.par_amount` describe the *whole* instrument at
+   issuance. A holdings balance describes a slice of it years later. They are
+   the same money counted at different grains, and the correct relationship
+   between them is `<=`, not `+`.
+
+### A bond principal is not revenue. Neither is a management fee.
+
+There is no revenue column in any of these three tables, and that is not an
+omission — **this seam produces no revenue figure at all**. It answers "who
+holds the debt and on what terms", not "what does the property earn". Anyone
+joining these tables to `gaming_facility_metrics` or `gaming_revenue_bounds`
+must carry that distinction in the join, not in a footnote.
+
+### Revenue from an audited bond disclosure is a THIRD evidence class
+
+Where such a figure is ever obtained, it is not an NIGC figure and not a
+casino's own marketing claim. It carries its own `assertion_class` and it must
+**never** be summed against an NIGC regional ceiling: `gaming_revenue_bounds`
+already records that a region total is an *upper bound on any one operation
+inside it*, so adding a property figure to a regional figure adds a part to its
+own whole. As of this build the class is declared and **zero facilities carry a
+revenue figure through it** — see the coverage note in
+`docs/TRIBAL_DEBT_HOLDINGS_BUILD_LOG.md`.
+
+### `is_default_as_filed` is not a default
+
+The flag is Form N-PORT Item C.9, reported by **the fund**, about the security.
+It is the fund's characterisation for portfolio-reporting purposes. It is not a
+court finding, not an acceleration, and not a corporate insolvency — **a tribal
+obligor is a sovereign, and a tribal default is not a corporate default**. Any
+use of this column must quote the instrument and the filing, must name the fund
+as the speaker, and must not describe a nation's finances beyond what the
+document states. Every row in `tribal_debt_distress_events.csv` carries that
+caution in `sovereign_immunity_caution`.
+
+### `not_summable_with` is populated on every row
+
+Both `tribal_debt_holdings.csv` and `tribal_debt_obligors.csv` carry a
+`not_summable_with` string naming the specific columns this data must never be
+added to. `py -3 code/1082_tribal_debt_holdings_disclosure.py verify` fails
+(exit 1) on invariant `I3_no_holding_asserts_a_summable_total` if any row loses
+it, and `selftest` proves that check fires.
+<!-- END TRIBAL-DEBT -->
