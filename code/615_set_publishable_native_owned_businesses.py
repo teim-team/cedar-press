@@ -31,14 +31,43 @@ Conflating them is how this would go wrong, so they are computed separately.
    derivative of refused data is still refused data. `SILENT` (1,998) and
    `TERMS_STATED_NO_REUSE_RESTRICTION` (49) clear this gate.
 
-2. PRIVACY - a property of the ROW, and it does NOT track the source.
-   `business_name_is_person_name = 1` (280 rows) means the firm's legal name IS
-   a natural person's name. Publishing "Jane Doe Construction" publishes Jane
-   Doe. Cedar's standing rule is that a natural person is never published and a
-   firm whose legal name is a person's gets a privacy surrogate. Those stay N
-   until a surrogate exists - the row is not lost, it is withheld.
-   `= -1` (327) is UNDECIDABLE, and undecided means withheld. Silence is not
-   consent and a maybe is not a yes.
+2. PRIVACY - and the owner CORRECTED an over-withholding here on 2026-09-01.
+
+   The first version of this script withheld 521 rows because
+   `business_name_is_person_name` was 1 or undecidable - "Jane Doe
+   Construction" was treated as publishing Jane Doe. That was wrong, and the
+   owner said so:
+
+       "If a site is publicly accessible, it is part of the public domain and
+        therefore we can incorporate it. So if they have their names or
+        whatever, that's fine. It's not PII, it's not Social Security numbers.
+        But the firm is named after the owner - it's the name of the firm, and
+        of course we're going to include that."
+
+   He is right. **A firm's legal name is the firm's name.** A business listed
+   on a tribe's public vendor directory has been published by that tribe as a
+   business, and the certifying authority chose to list it. Suppressing the
+   business name would make the row useless while protecting nobody - the name
+   is already public, on the tribe's own site, precisely so people can hire
+   them.
+
+   The distinction that survives is NOT name-shaped-ness. It is: does the
+   column describe the FIRM, or a PERSON separate from the firm?
+
+     FIRM      legal name, DBA, city, state, NAICS, certification number,
+               licence number, identity_scope  ->  publish
+     PERSON    a home address, a personal email or phone, an owner's date of
+               birth, an SSN or TIN, anything a person holds apart from the
+               business  ->  never, and none of it is in this table anyway
+
+   The clean table was verified before this ran: it carries no
+   `owner_name_raw`, email, phone or street-address column at all.
+   `owner_name_present` and `n_owners_named` are counts. So there is nothing
+   left in it that the privacy gate needs to catch, and the gate is retired.
+
+   `business_name_is_person_name` is KEPT as a column. It is no longer a
+   suppression trigger, but it is a real property of the row and a downstream
+   consumer may want it.
 
 The clean table was already sanitized before this ran and that was verified:
 no `owner_name_raw`, email, phone, or street address column exists in it.
@@ -71,15 +100,15 @@ PERMISSION_OK = {"SILENT", "TERMS_STATED_NO_REUSE_RESTRICTION"}
 
 
 def decide(r: dict) -> tuple:
-    """(publishable, reason). Both gates, permission first."""
+    """(publishable, reason).
+
+    ONE gate: permission. The privacy gate was retired 2026-09-01 - see the
+    module docstring. A firm's legal name is the firm's name, and no
+    person-scoped column exists in this table to withhold.
+    """
     terms = (r.get("source_terms_status") or "").strip()
     if terms not in PERMISSION_OK:
         return "N", f"PERMISSION:{terms or 'UNKNOWN'}"
-    pn = (r.get("business_name_is_person_name") or "").strip()
-    if pn == "1":
-        return "N", "PRIVACY:legal_name_is_a_natural_person_needs_surrogate"
-    if pn != "0":
-        return "N", f"PRIVACY:person_name_undecidable({pn or 'blank'})"
     return "Y", "harmonized_publication_per_PUBLICATION_POLICY"
 
 

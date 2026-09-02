@@ -68,6 +68,54 @@ HISTORICAL_MARKERS = ("was ", "were ", "->", "→", "superseded",
                       "previously", "corrected", "stale", "before ",
                       "no longer", "used to", "at the time", "retracted")
 
+HEADING_RX = re.compile(r"^#{1,6}\s")
+
+
+def section_spans(lines: list[str]) -> list[tuple[int, int]]:
+    """For each line, the [start, end) of the markdown section it sits in.
+
+    THE CORRECTION IS RARELY ON THE SAME LINE AS THE OLD NUMBER.
+    The line-level test below already exempts a line that carries the current
+    value beside the old one. It did not exempt this, in `KNOWN_ISSUES.md`:
+
+        ## A7 · S3 · Four documents still quoted a grain figure the ratchet
+        ...
+        **What it was.** `207 of 210 shippable tables have no grain
+        declaration` was carried, as current, by ...
+
+        **Measured:** `contract_grain_unstated_shippable = 25`, ...
+
+    The correction is two lines down, under its own bold label, and the whole
+    section exists to record it. Flagging that is telling a register of fixed
+    issues to stop describing what it fixed.
+
+    The general shape is not "add `what it was` to HISTORICAL_MARKERS" - that
+    is another entry in a denylist that only recognises what somebody already
+    listed, which is the lesson `docs/ENTITY_MATCH_RULES.md` records. The
+    general shape is: **a correction is a unit of prose, not a line.** So the
+    correction test runs over the enclosing SECTION.
+
+    Bounded by the nearest heading of ANY level in both directions, so a
+    `###` scopes tightly and one long `##` cannot swallow a document. A
+    section with no heading above it is bounded by the file.
+    """
+    starts = [i for i, ln in enumerate(lines) if HEADING_RX.match(ln)]
+    spans = []
+    for i in range(len(lines)):
+        lo = 0
+        for s in starts:
+            if s <= i:
+                lo = s
+            else:
+                break
+        hi = len(lines)
+        for s in starts:
+            if s > i:
+                hi = s
+                break
+        spans.append((lo, hi))
+    return spans
+
 
 def rows_of(rel: str) -> int:
     p = ROOT / rel
@@ -116,8 +164,19 @@ def sweep():
                 checks.append((re.compile(r"\b" + re.escape(old) + r"\b"),
                                "entity count", f"{live['entities']:,}"))
     if live.get("edges", -1) > 0:
+        # A BARE NUMBER IS NOT A SUBJECT. This check used to match `2,901`
+        # anywhere and flagged `registration_name:CAGE` 2,901 in
+        # ASSERTION_LAYER.md - a CAGE attribution count that has nothing to do
+        # with ownership edges and merely collided with a superseded edge
+        # total. Two counts in one project WILL collide; the fix is to make
+        # the check say what it is about, the way the grain check already
+        # does, rather than to trust an unqualified integer.
+        near = r"(?=[^\n]{0,80}(edge|parent|spiderweb|fpds_uei))"
         for old in ("2,901", "2290", "2,290"):
-            checks.append((re.compile(r"\b" + re.escape(old) + r"\b"),
+            if old.replace(",", "") == str(live["edges"]):
+                continue
+            checks.append((re.compile(r"\b" + re.escape(old) + r"\b" + near,
+                                      re.I),
                            "ownership edges", f"{live['edges']:,}"))
     for old in ("29,718", "32,872", "23,310", "34,525"):
         if live.get("assertions", -1) > 0 and \
@@ -141,6 +200,7 @@ def sweep():
         except OSError:
             continue
         is_live = rel in LIVE_DOCS
+        spans = section_spans(lines)
         for i, line in enumerate(lines, 1):
             low = line.lower()
             if any(m in low for m in HISTORICAL_MARKERS):
@@ -174,6 +234,12 @@ def sweep():
                 if bare and bare in line:
                     break
                 if bare and bare.replace(",", "") in line.replace(",", ""):
+                    break
+                # ...AND SO IS A SECTION THAT CARRIES IT. See section_spans.
+                lo, hi = spans[i - 1]
+                sec = "\n".join(lines[lo:hi])
+                if bare and (bare in sec or
+                             bare.replace(",", "") in sec.replace(",", "")):
                     break
                 (live_hits if is_live else record_hits).append(
                     (rel, i, label, now, line.strip()[:90]))
