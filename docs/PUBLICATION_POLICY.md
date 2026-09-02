@@ -100,3 +100,72 @@ wording. Where a source shared data directly rather than publishing it, say so.
 
 This costs nothing and it is how a project that depends on tribal publication
 should behave.
+
+## Coverage thresholds — decide AFTER collation, and judge the pooled measure
+
+*Owner, 2026-09-01: "Just because we have data doesn't mean we need to publish
+it... if there's only data for like some threshold, don't need it because it's
+a really messy dataset... but that should be decided after we've kind of
+collated the data and cleaned it up."*
+
+Right on both counts, and the deferral is the important half. **This decision is
+not made now.** It is made once a category's sources are collated and cleaned,
+because until then you are judging an input, not the product.
+
+### The measured case that shows why
+
+The owner's own example was gaming employment — his recollection was Form 5500
+at about two thirds of tribes and OSHA at about nineteen. Measured
+2026-09-01, against the 284 tribes that operate a gaming facility:
+
+| source | rows | tribes | years | coverage |
+|---|---:|---:|---|---:|
+| DOL Form 5500 | 2,046 | 140 | 2009–2025 | **46%** |
+| OSHA ITA 300A | 502 | 86 | 2016–2025 | **30%** |
+| **`gaming_employment_observations` (pooled)** | **3,421** | **243** | **2008–2026** | **86%** |
+
+**No single source clears half. The pooled table clears six sevenths.**
+
+So the threshold applies to the **harmonized measure**, not to each input.
+Dropping OSHA at 30% would remove tribes Form 5500 never sees, and the union is
+the product. An input that is thin on its own but disjoint from the others
+earns its place; an input that is thin AND redundant does not.
+
+### What to record instead of dropping
+
+Where a measure is genuinely sparse, the honest move is to say so in the
+codebook and let the buyer filter — *this observation is absent for this tribe
+because the source does not cover it* is a fact, and Cedar already distinguishes
+"attempted, none found" from "untouched" for exactly this reason. That is fine
+at 20% of rows. At 80% it stops being a caveat and becomes the dataset's
+character, and the measure should not ship.
+
+There is no clean numeric rule and the owner did not pretend otherwise. What
+makes the call possible is having the coverage table in front of you, which is
+why every dataset doc carries one.
+
+## Affiliation, not ownership, is the safer claim
+
+*Owner, same conversation: "maybe every dataset we can tie to a tribe, so we
+can say that they're tribally owned — like, this is the tribe they're a member
+of, or something, or affiliated with. Affiliated with is better."*
+
+He is right that the weaker word is the correct one, and the reason is in the
+data. `native_owned_businesses.csv` records an `identity_scope` gradient
+straight from what each certifying authority actually asserts:
+
+```
+enrolled_member_100pct  ->  enrolled_member_cskt  ->  any_native_oodham_and_local
+  ->  any_native  ->  parent_asserted_subsidiary
+  ->  shareholder_descendant_or_spouse  ->  vendor_relationship
+```
+
+A firm on a list whose bar is *shareholder descendant or spouse* is not a
+tribally-owned firm, and a firm on a TERO **vendor** list may have no ownership
+relationship at all. Calling the whole column "tribally owned" would flatten a
+gradient the sources went to the trouble of stating.
+
+**So the relation Cedar publishes is `affiliated_with` a named tribe, and the
+`identity_scope` beside it says what the affiliation actually is.** The strong
+claim stays available to anyone who filters for it; the dataset does not assert
+it on rows that never supported it.
