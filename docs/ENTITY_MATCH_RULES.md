@@ -276,3 +276,111 @@ $2.82B** — a number that reads like 129 wrong attributions and is not:
 
 **So a contradiction sweep must classify before it acts.** Acting on the raw
 129 would have repointed 126 correct rows to chase 3 wrong ones.
+
+## Rule 13 — ADJUDICATING A NAME COLLISION: the owner's own method, in order
+
+*Recorded 2026-09-01 from the owner describing how he actually does it. This is
+the procedure for the hardest class of case, and it is reproducible.*
+
+### The exposure is larger than the famous pairs
+
+Measured in the register:
+
+| token | entities | why it is dangerous |
+|---|---:|---|
+| **Cherokee** | **45** | THREE federally recognized tribes — Cherokee Nation (OK), Eastern Cherokee (NC), United Keetoowah Band (OK) — plus **six state-recognized Cherokee groups** in Alabama and Georgia, plus ~30 businesses named `Cherokee <something>` |
+| Creek | 20 | Muscogee (Creek) Nation, four state-recognized Creek groups, and eight Alaska places that are literally creeks |
+| Choctaw | 11 | Choctaw Nation of Oklahoma, Mississippi Choctaw, five state-recognized Louisiana bands |
+| Seminole | 2 | Seminole (Florida) and The Seminole Nation of Oklahoma |
+| Ho-Chunk | 2 | Ho-Chunk (Wisconsin) and Ho-Chunk Inc, the **Winnebago Tribe of Nebraska's** holding company |
+
+A token match on `Cherokee` is not weak evidence. It is **no** evidence.
+
+### The ladder, in the owner's order. Stop at the first rung that answers.
+
+**1. The address.** *"Am I talking Oklahoma or Florida? I actually looked at the
+address."* State alone separates most of these pairs, and it is already on the
+record in FPDS, SAM and the 990. Cheapest rung; try it first.
+
+**2. The website says which tribe.** *"Go on the website, see what tribe... if
+you go to the website and it's headquartered in Oklahoma, that's it."* An
+organisation states its own affiliation plainly, and that statement outranks
+any inference. This is rule 3's evidence class and it usually ends the enquiry.
+
+**3. Search the address itself, and see what else is there.** This is the rung
+nobody would invent and it is the owner's sharpest move: *"does the address
+connect to other clearly owned things, or the headquarters? If you Google
+Ho-Chunk's addresses — are they all on the reservation for the Winnebago?"*
+A shared address with a known entity of the family is strong corroboration; an
+address on the reservation is close to decisive.
+
+**4. CAGE, as a pointer rather than an answer.** *"I don't think you can use
+CAGE… but what I'll do is go into CAGE, and oftentimes it'll say who the
+alternate number is, or a step below the alternate owner. Then I go to the
+website."* CAGE names a registration, not a hub — it hands you the next name to
+look up, and you resolve that name by rungs 1–3.
+
+**5. A news article or a newsletter.** For a real transaction there is usually
+coverage, and a link is the whole requirement.
+
+**6. STOP.** *"Sometimes you just can't find it. If you can't find it, you can't
+find it."* Unresolved is a legitimate outcome — ADR-010 provides for it and a
+wrong key is worse than no key. Do not descend to a weaker rung to force an
+answer.
+
+Most cases resolve on rung 1 or 2. Needing three or four rungs is the exception,
+not the standard.
+
+## Rule 14 — ANCs and NHOs are the EASY class, for two structural reasons
+
+*Owner: "Native, NHO, Native Hawaiian Organization, federal contractor — such
+distinct terms. It's very rare that an NHO won't say they're an NHO, because
+then they get unique contracting advantages."*
+
+**1. The incentive runs toward self-declaration.** An NHO or ANC subsidiary
+gets sole-source and 8(a) advantages *by being one*, and it must say so to
+claim them. Silence is therefore informative in a way it never is elsewhere:
+an entity with a real claim will make it, on its own site, in its own words.
+Self-declaration is normally weak evidence; here the incentive structure makes
+it strong.
+
+**2. The names carry language.** *"They always usually have distinct names,
+like Native Hawaiian, or Alaska Native languages — Iñupiaq or whatever. If you
+understand the syntax of those languages, that probably helps."*
+
+Cedar's own register bears this out — Ukpeaġvik, Kuukpik, Olgoonik, Tikigaq,
+Afognak, Koniag, Chenega, Calista, Ahtna, Sealaska; Papa Ola Lokahi, Hui Mālama
+Ola Nā ʻŌiwi, Ke Ola Mamo, Hoʻōla Lāhui Hawaiʻi. **Iñupiaq, Yupʻik, Alutiiq,
+Tlingit and Hawaiian orthography — the ʻokina, the macron, `ġ` and `ḵ` — is a
+positive identifying signal**, and one no generic-token guard would ever find.
+
+It cuts the other way too: a subsidiary named BROADLEAF or VISTRONIX carries no
+signal at all, which is exactly why the parent's own subsidiary list is the
+route (rule 11) and why shard E's 482 edges matter.
+
+**So the practical instruction: go to the ANC and NHO websites we have already
+mapped and take the subsidiary lists.** The owner: *"if you just went to all the
+ANC websites that we have identified, you would find all the subsidiaries, and
+subsidiaries' subsidiaries, very quickly."* Shard E did precisely that and
+returned 482 edges, 404 at depth 1 and 78 at depth 2, 355 of them from audited
+filings.
+
+**And a caution on the flag.** SAM's `native_hawaiian_organization_owned_firm`
+means owned **by** an NHO. It does not mean the firm **is** one. Shard H found
+two for-profit LLCs carrying it. A pipeline reading it as a class signal
+manufactures that error at scale.
+
+## Rule 15 — federal contracting should be the CLEANEST dataset, not the hardest
+
+*Owner: "the federal spending and contract data could be the cleanest — one, I
+already worked a lot of them, and two, even companies like ANCs or NHOs are
+pretty easy to find."*
+
+Every advantage lands in this one dataset: identifiers on every row (UEI, CAGE,
+often a declared parent), owner rulings already recorded against many of the
+large awardees, a strong published-subsidiary route for the ANC and NHO
+families that dominate the dollars, and a self-declaration incentive that makes
+those families announce themselves.
+
+Treat a hard case in contracting as a **signal that the ladder was not run**,
+rather than as an intrinsically ambiguous record.
