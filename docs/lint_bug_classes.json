@@ -1,17 +1,17 @@
 {
-  "scanned_files": 548,
+  "scanned_files": 553,
   "counts": {
     "class1": 1,
     "class2a": 0,
     "class2b": 0,
-    "class2c": 63,
-    "class3": 1,
+    "class2c": 65,
+    "class3": 2,
     "class4": 12,
     "class5": 6,
     "class6": 25,
-    "class7": 44,
+    "class7": 45,
     "class8": 0,
-    "lint_bug_class_instances": 152
+    "lint_bug_class_instances": 156
   },
   "findings": [
     {
@@ -56,6 +56,24 @@
       "line": 870,
       "evidence": "if len([w for w in hdr if w[\"text\"] == \"Receipts\"]) < 1 or \\",
       "why": "an 'already done' short-circuit (len([w for w in hdr if w['text'] == 'Receipts']) < 1 or len(hdr) < 2) skips the work, and this file still rewrites a log/summary artefact wholesale at line 2164. On a second run the counters are zero and the log says so - the 164 defect: 187 facilities rewritten to read '0 sources'. Re-running a build must not change its output; merge into the existing log or refuse to rewrite it.",
+      "waived": false,
+      "waiver_reason": ""
+    },
+    {
+      "class": "class2c",
+      "file": "1060_splink_pilot.py",
+      "line": 270,
+      "evidence": "drop_nc += 1",
+      "why": "counter 'drop_nc' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
+      "waived": false,
+      "waiver_reason": ""
+    },
+    {
+      "class": "class2c",
+      "file": "1060_splink_pilot.py",
+      "line": 273,
+      "evidence": "drop_ns += 1",
+      "why": "counter 'drop_ns' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
       "waiver_reason": ""
     },
@@ -1348,15 +1366,6 @@
     },
     {
       "class": "class7",
-      "file": "1030_sec_edgar_native_transactions.py",
-      "line": 779,
-      "evidence": "\"candidate_id\": f\"SEC1030-{n:06d}\",",
-      "why": "[WARN] POSITIONAL on target candidate_id -> no clean table. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
-      "waived": false,
-      "waiver_reason": ""
-    },
-    {
-      "class": "class7",
       "file": "1031_ancsa_45_55_139_annual_reports.py",
       "line": 442,
       "evidence": "\"candidate_id\": f\"AS4555139-{n:05d}\",",
@@ -1762,6 +1771,24 @@
     },
     {
       "class": "class7",
+      "file": "940_staleness_sweep.py",
+      "line": 259,
+      "evidence": "and id(n) not in doc_nodes):",
+      "why": "[BLOCKING] OBJECT_ADDRESS on target (unnamed) -> no clean table. builtin id() is a memory address, stable only within one process. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
+      "waived": false,
+      "waiver_reason": ""
+    },
+    {
+      "class": "class7",
+      "file": "940_staleness_sweep.py",
+      "line": 255,
+      "evidence": "doc_nodes.add(id(body[0].value))",
+      "why": "[BLOCKING] OBJECT_ADDRESS on target (unnamed) -> no clean table. builtin id() is a memory address, stable only within one process. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
+      "waived": false,
+      "waiver_reason": ""
+    },
+    {
+      "class": "class7",
       "file": "95_parse_compact_terms.py",
       "line": 1472,
       "evidence": "review_id=f\"CPU-{v['version_id']}-{n['term_field']}-{n['source_page']}\",",
@@ -1822,6 +1849,15 @@
       "why": "[BLOCKING] OBJECT_ADDRESS on target (unnamed) -> nonprofit_schedule_c_coverage.csv, nonprofit_schedule_c_lobbying.csv, np_financials.csv, np_orgs.csv. builtin id() is a memory address, stable only within one process. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
       "waiver_reason": "`id()` here is PYTHON OBJECT IDENTITY for an in-memory object,"
+    },
+    {
+      "class": "class3",
+      "file": "1060_splink_pilot.py",
+      "line": 250,
+      "evidence": "where l.identifier_type='UEI' and l.confidence_tier='A'",
+      "why": "a tier-A assignment sits within 6/3 lines of a ruling-method or status test, at 2 site(s), and this file has NO RECORDED DISPOSITION in 293's DISPOSITIONS table. A regex cannot decide this one - read the site and write the reason down. `attribution_method` says WHO decided; `confidence_tier` says WHAT was decided. Do NOT delete the entry to make this pass.",
+      "waived": false,
+      "waiver_reason": ""
     },
     {
       "class": "class3",
@@ -3190,6 +3226,16 @@
         "file": "09_import_rulings.py",
         "line": 373,
         "source": "row[\"confidence_tier\"] = \"A\""
+      },
+      {
+        "file": "1060_splink_pilot.py",
+        "line": 250,
+        "source": "where l.identifier_type='UEI' and l.confidence_tier='A'"
+      },
+      {
+        "file": "1060_splink_pilot.py",
+        "line": 261,
+        "source": "where l.identifier_type='UEI' and l.confidence_tier='A'"
       },
       {
         "file": "124_apply_rulings_in_place.py",

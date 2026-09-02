@@ -103,9 +103,9 @@ STAGE = [
   status="Signed", status_class="Announced",
   value="51000000", value_type="Maximum aggregate principal amount of the facility",
   state="CA", industry="Water infrastructure",
-  accession="0001213900-25-101318",
-  local_file="0001213900-25-101318__ea0263155-8k_cadizinc.htm",
-  url="https://www.sec.gov/Archives/edgar/data/727273/000121390025101318/ea0263155-8k_cadizinc.htm",
+  accession="0001213900-25-102822",
+  local_file="0001213900-25-102822__ea026235502ex10-1_cadiz.htm",
+  url="https://www.sec.gov/Archives/edgar/data/727273/000121390025102822/ea026235502ex10-1_cadiz.htm",
   quote="hereby unconditionally promises to pay to the order of LYTTON RANCHERIA OF CALIFORNIA , a federally recognized Indian tribe, a Tribal Government, having an address at 1500 Falling Oak Way, Windsor, CA 95492 (together with its successors and assigns, “ Lender ”), or at such other place as the Lender may from time to time designate in writing, the principal sum of FIFTY-ONE MILLION AND 00/100 DOLLARS ($51,000,000.00)",
   notes="A tribe acting as LENDER to a public company - the reverse of the usual direction in this dataset. $51,000,000 is the facility ceiling, not a drawn balance; the 424B5 says Lytton 'agreed to provide an unsecured term loan in an aggregate principal amount of up to $51,000,000'. Cadiz also issued Lytton fee shares, quantified in the 424B5, not counted here.",
   confidence="High"),
@@ -136,9 +136,9 @@ STAGE = [
   status="Signed", status_class="Announced",
   value="", value_type="",
   state="NV", industry="Cannabis",
-  accession="0001683168-23-005926",
-  local_file="0001683168-23-005926__clsholdings_i10k-053123.htm",
-  url="https://www.sec.gov/Archives/edgar/data/1522222/000168316823005926/clsholdings_i10k-053123.htm",
+  accession="0001185185-23-000917",
+  local_file="0001185185-23-000917__cls20230531_10k.htm",
+  url="https://www.sec.gov/Archives/edgar/data/1522222/000118518523000917/cls20230531_10k.htm",
   quote="On October 20, 2021, the Company entered into a management services agreement (the “Quinn River Joint Venture Agreement”) through its 50 % owned subsidiary, Kealii Okamalu, LLC (“Kealii Okamalu”), with CSI Health MCD LLC (“CSI”) and a commission established by the authority of the Tribal Council of the Fort McDermitt Paiute and Shoshone Tribe (the “Tribe”).",
   notes="No consideration is stated in the filing and none was inferred. The counterparty on the tribal side is a commission established by the Tribal Council, not the Tribe's general government.",
   confidence="High"),
@@ -153,9 +153,9 @@ STAGE = [
   status="Signed", status_class="Announced",
   value="", value_type="",
   state="CA", industry="Gaming",
-  accession="0001653653-24-000012",
-  local_file="0001653653-24-000012__rrr-20231231.htm",
-  url="https://www.sec.gov/Archives/edgar/data/1653653/000165365324000012/rrr-20231231.htm",
+  accession="0001653653-24-000004",
+  local_file="0001653653-24-000004__rrr-20231231.htm",
+  url="https://www.sec.gov/Archives/edgar/data/1653653/000165365324000004/rrr-20231231.htm",
   quote="The Company, the North Fork Rancheria of Mono Indians (the “Mono”), a federally recognized Native American tribe located near Fresno, California and the North Fork Rancheria Economic Development Authority (the “Authority”) have entered into a Third Amended and Restated Management Agreement (the “Management Agreement”) and a Third Amended and Restated Development Agreement (the “Development Agreement”), each dated as of November 7, 2023.",
   notes="No consideration figure. The reimbursable-advance series in the same filings ($31.5M at 2017-06-30 rising to $96.8M at 2024-12-31) is a CUMULATIVE balance, not a transaction value, and MUST NOT be summed across quarters; it is recorded as a separate observation row, not folded in here.",
   confidence="High"),
@@ -170,9 +170,9 @@ STAGE = [
   status="Completed", status_class="Completed",
   value="", value_type="",
   state="CA", industry="Gaming",
-  accession="0001653653-24-000012",
-  local_file="0001653653-24-000012__rrr-20231231.htm",
-  url="https://www.sec.gov/Archives/edgar/data/1653653/000165365324000012/rrr-20231231.htm",
+  accession="0001653653-24-000004",
+  local_file="0001653653-24-000004__rrr-20231231.htm",
+  url="https://www.sec.gov/Archives/edgar/data/1653653/000165365324000004/rrr-20231231.htm",
   quote="Management fee revenue represents fees earned from the Company’s three 50%-owned smaller properties, as well as management fees earned from the Company’s previous management agreement with Graton Resort & Casino (“Graton Resort”) which it managed on behalf of the Federated Indians of Graton Rancheria through February 5, 2021.",
   notes="An operator-side EXIT: the tribe takes over operation of its own property. Divestiture-class events are the scarcest and most valuable for the ownership ledger and a manager rarely announces one. The underlying instruments are the Amended and Restated Gaming Management Agreement dated July 27, 2012 and the Amended and Restated Non-Gaming Management Agreement dated August 6, 2012, both listed in the same 10-K exhibit index.",
   confidence="High"),
@@ -187,9 +187,9 @@ STAGE = [
   status="Completed", status_class="Completed",
   value="450000", value_type="Option exercise price, satisfied as a credit rather than in cash",
   state="AK", industry="Gold mining",
-  accession="0001502377-21-000010",
-  local_file="0001502377-21-000010__ctgo-20201231.htm",
-  url="https://www.sec.gov/Archives/edgar/data/1502377/000150237721000010/ctgo-20201231.htm",
+  accession="0001437749-21-002477",
+  local_file="0001437749-21-002477__conta20201231_10q.htm",
+  url="https://www.sec.gov/Archives/edgar/data/1502377/000143774921002477/conta20201231_10q.htm",
   quote="The Tetlin Tribal Council exercised the option to increase its production royalty by 0.75% by payment to the Joint Venture Company of $450,000 on December 30, 2020.",
   notes="The $450,000 was NOT paid in cash: the same filing says it 'will be credited against future production royalty and advance minimum royalty payments due by the Joint Venture Company to the Tetlin Tribal Council under the lease once production begins.' Value_Type records this. A Native government buying UP its royalty rate is an unusual and clean event class.",
   confidence="High"),
@@ -204,9 +204,9 @@ STAGE = [
   status="Signed", status_class="Announced",
   value="475000000", value_type="Aggregate principal amount of Old Notes held by the exchanging holders",
   state="CT", industry="Gaming",
-  accession="0001005276-22-000116",
-  local_file="0001005276-22-000116__mtga-20221129.htm",
-  url="https://www.sec.gov/Archives/edgar/data/1005276/000100527622000116/mtga-20221129.htm",
+  accession="0001193125-22-294931",
+  local_file="0001193125-22-294931__d430334d8k.htm",
+  url="https://www.sec.gov/Archives/edgar/data/1005276/000119312522294931/d430334d8k.htm",
   quote="On November 29, 2022, Mohegan Tribal Gaming Authority (“Mohegan” or the “Company”) entered into an agreement (the “Exchange Agreement”) with affiliates of Chatham Asset Management, LLC (collectively, “Chatham”) holding approximately $475 million in aggregate principal amount of the Company’s outstanding 7.875% senior notes due 2024 (the “Old Notes”).",
   notes="DOUBLE-COUNT HAZARD: this is the agreement, and SEC1032-008 is its initial settlement ten days later. They are one instrument at two stages and must never be summed. The $475M is the principal held by Chatham, not new money.",
   confidence="High"),
@@ -221,9 +221,9 @@ STAGE = [
   status="Closed", status_class="Closed",
   value="163913000", value_type="Aggregate principal amount issued on initial settlement",
   state="CT", industry="Gaming",
-  accession="0001005276-22-000121",
-  local_file="0001005276-22-000121__mtga-20221209.htm",
-  url="https://www.sec.gov/Archives/edgar/data/1005276/000100527622000121/mtga-20221209.htm",
+  accession="0001193125-22-301864",
+  local_file="0001193125-22-301864__d432686d8k.htm",
+  url="https://www.sec.gov/Archives/edgar/data/1005276/000119312522301864/d432686d8k.htm",
   quote="the Company has issued $163,913,000 in aggregate principal amount of New Notes under an indenture, dated as of December 9, 2022 (the “New Notes Indenture”), by and among the Company, The Mohegan Tribe of Indians of Connecticut (the “Tribe”), the subsidiaries of the Company party thereto as guarantors (the “Guarantors”) and U.S.",
   notes="Initial settlement only - the exchange settled in stages. Do not add to SEC1032-007; the two rows describe one instrument.",
   confidence="High"),
@@ -238,9 +238,9 @@ STAGE = [
   status="Signed", status_class="Announced",
   value="", value_type="",
   state="CT", industry="Gaming",
-  accession="0001005276-20-000104",
-  local_file="0001005276-20-000104__d71280dex101.htm",
-  url="https://www.sec.gov/Archives/edgar/data/1005276/000100527620000104/d71280dex101.htm",
+  accession="0001193125-20-318263",
+  local_file="0001193125-20-318263__d71280dex101.htm",
+  url="https://www.sec.gov/Archives/edgar/data/1005276/000119312520318263/d71280dex101.htm",
   quote="LOAN AGREEMENT (Main Street Priority Loan Facility) Dated as of December 1, 2020 among MOHEGAN TRIBAL GAMING AUTHORITY , as the Borrower, THE MOHEGAN TRIBE OF INDIANS OF CONNECTICUT , as an additional party with respect to certain representations, warranties and covenants, and LIBERTY BANK, as Lender",
   notes="A tribal government instrumentality using a Federal Reserve pandemic facility. The principal amount is not in the exhibit's opening page and was not inferred; a maintainer can read it from the same exhibit.",
   confidence="Medium"),
@@ -255,11 +255,45 @@ STAGE = [
   status="Signed", status_class="Announced",
   value="", value_type="",
   state="CT", industry="Gaming",
-  accession="0001193125-18-116540",
-  local_file="0001193125-18-116540__d575734dex101.htm",
-  url="https://www.sec.gov/Archives/edgar/data/1005276/000119312518116540/d575734dex101.htm",
+  accession="0001193125-18-116799",
+  local_file="0001193125-18-116799__d575734dex101.htm",
+  url="https://www.sec.gov/Archives/edgar/data/1005276/000119312518116799/d575734dex101.htm",
   quote="This INCREMENTAL JOINDER AND SECOND AMENDMENT TO CREDIT AGREEMENT (this “ Second Amendment ”), dated as of April 12, 2018 and effective as of the Effective Date (as hereinafter defined), is made and entered into by and among THE MOHEGAN TRIBE OF INDIANS OF CONNECTICUT, a federally recognized Indian Tribe and Native American sovereign nation (the “ Tribe ”), the MOHEGAN TRIBAL GAMING AUTHORITY, a governmental instrumentality of the Tribe (the “ Borrower ”)",
   notes="VALUE TRAP AVOIDED: the $300,000,000 in this amendment is an INVESTMENT BASKET CEILING for Inspire, not an amount raised or spent. Announced_Value_USD is blank. This amendment is the credit-agreement step that made the later INSPIRE financing possible and predates ND-2021-002.",
+  confidence="High"),
+
+ dict(
+  cid="SEC1032-011",
+  event_date="2021-08-24", date_basis="The CGSF Loan Agreement is dated 'as of the date hereof' in a Loan Agreement whose own first line reads 'dated as of August 24, 2021'",
+  title="Shinnecock Indian Nation and Little Beach Harvest LLC enter an Amended and Restated Loan Agreement with CGSF Group LLC to fund the Nation's cannabis dispensary",
+  native_party="Shinnecock Indian Nation", native_party_type="Federally recognized tribe",
+  counterparty="CGSF Group LLC (financed by SFNY Holdings, Inc. / TILT Holdings Inc.)", native_party_role="Borrower",
+  category="Debt financing", instrument="Amended and Restated Loan Agreement",
+  status="Signed", status_class="Announced",
+  value="", value_type="",
+  state="NY", industry="Cannabis",
+  accession="0001104659-22-047409",
+  local_file="0001104659-22-047409__tm221609d3_ex10-1.htm",
+  url="https://www.sec.gov/Archives/edgar/data/1761510/000110465922047409/tm221609d3_ex10-1.htm",
+  quote="by and between the Shinnecock Indian Nation, a federally recognized Indian tribe, and Little Beach Harvest LLC, a wholly-owned corporation of the Nation, as borrowers and Borrower, as lender.",
+  notes="VALUE TRAP: the $18,000,000 in this exhibit is what SFNY Holdings lends to CGSF Group so CGSF can fund its own commitment - it is NOT the amount of the Nation's facility, which this exhibit does not state. Announced_Value_USD is deliberately blank. FOLLOW-ON: TILT exited on 2023-09-01 through a Membership Interest Purchase Agreement (accession 0001558370-23-015525) whose recitals say the parties 'desire to terminate the CGSF Loan Agreement' - the Nation is not a party to that agreement but its financing was the subject.",
+  confidence="Medium"),
+
+ dict(
+  cid="SEC1032-012",
+  event_date="2024-12-31", date_basis="'Through December 31, 2024' in the Red Rock Resorts 10-K for FY2024",
+  title="Station Casinos' cumulative reimbursable advances to the North Fork Rancheria of Mono Indians reach approximately $96.8 million",
+  native_party="North Fork Rancheria of Mono Indians of California", native_party_type="Federally recognized tribe",
+  counterparty="Station Casinos LLC / Red Rock Resorts, Inc.", native_party_role="Recipient of developer advances",
+  category="Project financing", instrument="Reimbursable developer advances",
+  status="Operating", status_class="Announced",
+  value="", value_type="",
+  state="CA", industry="Gaming",
+  accession="0001653653-25-000004",
+  local_file="0001653653-25-000004__rrr-20241231.htm",
+  url="https://www.sec.gov/Archives/edgar/data/1653653/000165365325000004/rrr-20241231.htm",
+  quote="Through December 31, 2024, the Company has paid approximately $ 96.8 million of reimbursable advances to the Mono, primarily to complete the environmental impact study, purchase the North Fork Site and pay the costs of litigation and construction.",
+  notes="THIS IS A CUMULATIVE BALANCE, NOT A TRANSACTION VALUE, and Announced_Value_USD is deliberately blank so it can never be summed with SEC1032-004 or with any quarter of the same series. The whole series, read from 33 filings: $31.5M (2017-06-30), $32.1M, $32.6M, $32.7M, $32.8M, $33.4M, $33.7M, $33.8M (2019-09-30 and 2019-12-31), $34.2M, $34.3M, $34.6M, $37.2M (2020-12-31), $39.3M, $41.1M, $45.0M, $49.2M (2021-12-31), $50.3M, $51.9M, $55.7M, $56.8M (2022-12-31), $57.7M, $59.0M, $60.2M, $61.0M (2023-12-31), $96.8M (2024-12-31). The $35.8M jump in 2024 is the construction draw. Staged as an OBSERVATION so the series is on the record; the deals owner may prefer to hold it out of the ledger entirely.",
   confidence="High"),
 ]
 
@@ -429,19 +463,27 @@ def cmd_verify():
         if not v:
             continue
         q = norm(r["evidence_quote"])
-        digits = re.sub(r"\D", "", v)
+        try:
+            target = float(v.replace(",", ""))
+        except ValueError:
+            bad.append(r["candidate_id"])
+            continue
         found = False
-        for m in re.finditer(r"[\d][\d,\.]*", q):
-            if re.sub(r"\D", "", m.group(0)).lstrip("0") == digits.lstrip("0"):
+        # A figure in the quote may be written plainly ($51,000,000.00) or
+        # scaled ("approximately $475 million"). Compare NUMBERS, not digit
+        # strings: stripping punctuation makes $1.00 read as 100.
+        SCALE = {"thousand": 1e3, "million": 1e6, "billion": 1e9}
+        for m in re.finditer(
+                r"([\d][\d,]*(?:\.\d+)?)\s*(thousand|million|billion)?",
+                q, re.I):
+            try:
+                n = float(m.group(1).replace(",", ""))
+            except ValueError:
+                continue
+            n *= SCALE.get((m.group(2) or "").lower(), 1)
+            if abs(n - target) < 0.5:
                 found = True
                 break
-        # allow a written-out or abbreviated form ("approximately $475 million")
-        if not found and len(digits) > 3:
-            head = digits.rstrip("0")
-            if head and re.search(r"\$\s?" + re.escape(head)
-                                  + r"(?:[\.,]\d+)?\s?(million|billion|thousand)",
-                                  q, re.I):
-                found = True
         if not found:
             bad.append(r["candidate_id"])
     out(f"  I2 value appears in its own quote: {len(rows) - len(bad)}/{len(rows)}")

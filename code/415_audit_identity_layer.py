@@ -326,7 +326,6 @@ def main():
                 # RENAMED 2026-09-01 by 843; the old name made this audit
                 # report "(column absent)" on all 701,955 rows.
                 schemes[g(r, "attribution_status")
-                        or g(r, "tribe_id_scheme_resolved")
                         or "(column absent)"] += 1
         A["assistance_id_schemes"] = {
             "rows": n,

@@ -50,6 +50,23 @@ THE LADDER (docs/HIDDEN_DATA_TECHNIQUES.md; recorded per entity in `evidence`)
         NOT_SEARCHED_MACHINE_READABLE, a different claim.
     R6  NONE_ESTABLISHED. Only after >= 3 named routes are recorded in
         `evidence`. `verify` enforces that; it is not a convention.
+    R7  DOMAIN DERIVED FROM THE NAME. Last programmatic rung, reached only
+        when everything publisher-stated came up empty. A guess that answers
+        200 without carrying the entity's name is written as unverified or
+        discarded -- never as the entity's site.
+
+THREE THINGS THAT ARE NOT "NO WEBSITE"
+    `government_refused_robots`  the site exists and its robots.txt says
+        `Disallow: /` to every agent (samishtribe.nsn.us). A publisher
+        decision, refused by every route, and NOT our coverage gap.
+    `government_blocked_bot_protection`  the site exists and answers 403 to a
+        declared research UA and to full browser headers alike -- a JS
+        anti-bot challenge (koinationsonoma.com) or an edge WAF
+        (scottsvalley-nsn.gov). An access control; it stays unbypassed.
+    `directory_profile`  somebody else's page about this entity.
+    None of the three counts as the entity having a website, and none of them
+    is `none_established`. Collapsing any of them into "no website" would
+    report a refusal or a WAF as an absence.
 
 WHAT COUNTS AS THE ENTITY'S OWN SITE
     Three of the URLs the BIA publishes for California rancherias point at
@@ -624,6 +641,54 @@ def propublica(name, state=""):
 
 
 # ------------------------------------------------------------------ shape
+DOMAIN_WORDS = {"the", "of", "and", "a", "an", "inc", "llc", "indians",
+                "california", "nevada", "arizona", "utah", "oregon",
+                "washington", "montana", "oklahoma", "maine", "virginia",
+                "mexico", "new", "dakota", "south", "north", "minnesota",
+                "michigan", "wisconsin", "carolina", "island", "rhode",
+                "massachusetts", "york", "previously", "listed", "as"}
+
+
+def candidate_hosts(row):
+    """Guess the domain from the name -- R7, the last programmatic rung.
+
+    Deliberately narrow: a handful of shapes per tribe, each of which must
+    then survive `try_host`'s name test before it is written. Tribal
+    governments cluster hard on `.nsn.gov`, `-nsn.gov`, `.nsn.us` and plain
+    `.org`, so the shapes are not arbitrary; they are the observed pattern in
+    the 527 websites the BIA directory already publishes.
+
+    A guess that answers 200 and does NOT carry the tribe's name is recorded
+    as unverified or discarded, never as the tribe's site.
+    """
+    src = []
+    for f in ("canonical_name", "federal_register_legal_name"):
+        v = row.get(f) or ""
+        v = re.sub(r"\(.*?\)", " ", v)
+        v = re.sub(r"[^A-Za-z0-9 ]", " ", _deaccent(v)).lower()
+        t = [x for x in v.split()
+             if x and x not in DOMAIN_WORDS and len(x) > 1]
+        if t:
+            src.append(t)
+    stems = []
+    for t in src:
+        core = [x for x in t if x not in
+                ("tribe", "tribes", "band", "bands", "nation", "nations",
+                 "indian", "community", "rancheria", "reservation", "pueblo",
+                 "colony", "group", "town")]
+        for base in ({"".join(t), "".join(core), "".join(core[:2]),
+                      "".join(core[:1])} - {""}):
+            if 4 <= len(base) <= 30 and base not in stems:
+                stems.append(base)
+    out = []
+    for b in stems[:4]:
+        for suf in (".org", "-nsn.gov", ".nsn.gov", ".com", ".nsn.us"):
+            h = b + suf
+            if h not in out:
+                out.append(h)
+    return out[:12]
+
+
 def try_host(host, name, tag):
     """Fetch a candidate host and require the page to prove it is the entity's.
 
@@ -678,9 +743,14 @@ def run():
         cls = row.get("entity_class", "")
         tried = []
         got_url = False
+        wrote = [0]
+
+        def emit(*args):
+            wrote[0] += 1
+            add_row(*args)
 
         if restricted(name):
-            add_row(uid, name, cls, "TERMS_RESTRICTED_DO_NOT_HARVEST", "",
+            emit(uid, name, cls, "TERMS_RESTRICTED_DO_NOT_HARVEST", "",
                     "REFUSED", "TRIED: none. docs/PULL_DISCIPLINE.md lists "
                     "this publisher as TERMS_STATED_RESTRICTIVE; refused by "
                     "every route including Wayback.")
@@ -710,12 +780,34 @@ def run():
                     elif ok:
                         ut, note = "government", "verified 2xx"
                         got_url = True
+                    elif st == "REFUSED_ROBOTS_DISALLOW":
+                        # A SITE THAT EXISTS AND HAS TOLD US NOT TO FETCH IT.
+                        # samishtribe.nsn.us serves `User-Agent: * / Disallow:
+                        # /`. That is not "no website" and it is not our
+                        # effort gap -- it is the publisher's decision, and
+                        # filing it as an absence would both understate
+                        # coverage and misrepresent the nation.
+                        ut = "government_refused_robots"
+                        note = ("the site EXISTS and its robots.txt states "
+                                "Disallow: / for all agents. Refused by every "
+                                "route. Not an absence; a publisher decision.")
+                    elif st == 403:
+                        # Bot-protection, not an access control we may work
+                        # around. koinationsonoma.com serves a JS challenge
+                        # (sitedistrict) and scottsvalley-nsn.gov an Akamai
+                        # 403, to browser headers as well as ours. The site
+                        # exists; we could not fetch it politely.
+                        ut = "government_blocked_bot_protection"
+                        note = ("the site EXISTS; the host returns 403 to a "
+                                "declared research UA AND to full browser "
+                                "headers -- an anti-bot challenge, which is "
+                                "an access control and stays unbypassed.")
                     else:
                         ut = "unverified_government"
                         note = ("BIA-published URL did not answer; recovery "
                                 "rungs (browser headers, relaxed TLS) also "
                                 "failed: " + str(r.get("error"))[:80])
-                    add_row(uid, name, cls, ut, r.get("final_url") or u, st,
+                    emit(uid, name, cls, ut, r.get("final_url") or u, st,
                             "TRIED: " + " | ".join(tried) + " || " + note
                             + " || BIA record: " + (b.get("tribefullname")
                                                     or ""))
@@ -724,7 +816,7 @@ def run():
                             r["final_url"], uid + "__mr")
                         if mr:
                             n_open += 1
-                            add_row(uid, name, cls, "machine_readable_surface",
+                            emit(uid, name, cls, "machine_readable_surface",
                                     urllib.parse.urlsplit(
                                         r["final_url"]).scheme + "://"
                                     + urllib.parse.urlsplit(
@@ -756,7 +848,7 @@ def run():
                     r = fetch_with_recovery(u, save_as=uid + "__doi_site")
                     st = r["status"]
                     ok = isinstance(st, int) and 200 <= st < 400
-                    add_row(uid, name, cls,
+                    emit(uid, name, cls,
                             "organization" if ok else "unverified_organization",
                             r.get("final_url") or u, st,
                             "TRIED: " + " | ".join(tried)
@@ -768,7 +860,7 @@ def run():
                                                     uid + "__mr")
                         if mr:
                             n_open += 1
-                            add_row(uid, name, cls,
+                            emit(uid, name, cls,
                                     "machine_readable_surface",
                                     r["final_url"], 200,
                                     "TRIED: R5 machine-readable probe || "
@@ -785,13 +877,51 @@ def run():
                     tried.append("R3 domain derived from published email @"
                                  + d + " -> " + verdict)
                     if verdict == "verified":
-                        add_row(uid, name, cls, "organization", u2, st2,
+                        emit(uid, name, cls, "organization", u2, st2,
                                 "TRIED: " + " | ".join(tried) + " || " + note2)
                         got_url = True
             else:
                 tried.append("R2 DOI ONHR list: no entry matched this name "
                              "(register name may predate the April 2025 "
                              "revision)")
+
+        # ---- R7 candidate domains derived from the name -----------------
+        # Reached only when the publisher-stated routes gave nothing live.
+        # Eleven tribes came out of the first pass without a verified site:
+        # five where the BIA publishes a consortium profile instead of a
+        # tribal domain, three where the BIA `website` field is empty, and
+        # three where the site exists but refuses us. This rung is for the
+        # first two groups.
+        if not got_url and cls in ("Federally recognized tribe",
+                                   "Individually Native-owned business"):
+            n_try = 0
+            for h in candidate_hosts(row):
+                if got_url or n_try >= 12:
+                    break
+                if restricted(h):
+                    continue
+                n_try += 1
+                u2, st2, verdict, note2 = try_host(h, name, uid + "__cand_" + h)
+                if verdict == "no_response":
+                    continue
+                tried.append("R7 candidate domain " + h + " -> " + verdict)
+                if verdict == "verified":
+                    emit(uid, name, cls,
+                         "government" if cls == "Federally recognized tribe"
+                         else "corporate", u2, st2,
+                         "TRIED: " + " | ".join(tried) + " || " + note2
+                         + " || DERIVED domain, name-verified against the "
+                           "page; not published by the BIA directory.")
+                    got_url = True
+                    mr = probe_machine_readable(u2, uid + "__mr")
+                    if mr:
+                        n_open += 1
+                        emit(uid, name, cls, "machine_readable_surface", u2,
+                             200, "TRIED: R5 machine-readable probe || open: "
+                             + ", ".join(mr))
+            if n_try:
+                tried.append("R7 tried " + str(n_try) + " derived candidate "
+                             "domain(s) in total")
 
         # ---- R4 IRS / ProPublica Nonprofit Explorer ---------------------
         if not got_url and cls in ("Native Hawaiian Organization",
@@ -802,7 +932,7 @@ def run():
             tried.append("R4 ProPublica Nonprofit Explorer -> " + note)
             if o:
                 ein = o.get("strein") or str(o.get("ein"))
-                add_row(uid, name, cls, "form_990",
+                emit(uid, name, cls, "form_990",
                         "https://projects.propublica.org/nonprofits/"
                         "organizations/" + str(o.get("ein")), 200,
                         "TRIED: " + " | ".join(tried) + " || IRS EIN " + ein
@@ -815,15 +945,27 @@ def run():
 
         # ---- R6 the honest negative -------------------------------------
         if not got_url:
+            # THE NEGATIVE MUST NOT CONTRADICT THE ROWS BESIDE IT.
+            # The first pass wrote `none_established` for Samish, Koi and
+            # Scotts Valley -- each of which had just been written a row
+            # naming a live site we were refused or challenged on. "None
+            # found" beside "here is the URL" is not a mistake in wording, it
+            # is two different answers in one ledger, and the coverage table
+            # would have counted the wrong one. So the summary negative is
+            # `none_established` ONLY when nothing at all was found, and
+            # `no_own_site_found` when something was.
             if len(tried) < 3:
                 tried.append("R5 machine-readable probe not reached -- no "
                              "host to probe")
             if len(tried) < 3:
                 tried.append("R2/R3 not applicable to this entity class")
-            add_row(uid, name, cls, "none_established", "", "",
-                    "TRIED: " + " | ".join(tried)
-                    + " || CHECKED " + TODAY + ", none found. This is an "
-                    "attempted-and-none-found, NOT an untouched blank.")
+            ut = "none_established" if wrote[0] == 0 else "no_own_site_found"
+            emit(uid, name, cls, ut, "", "",
+                 "TRIED: " + " | ".join(tried) + " || CHECKED " + TODAY
+                 + ", no verified site of the entity's own. This is an "
+                   "attempted-and-none-found, NOT an untouched blank."
+                 + ("" if wrote[0] == 0 else
+                    " Other rows for this entity above record what WAS found."))
             n_none += 1
         else:
             n_url += 1
@@ -865,12 +1007,13 @@ def check(path=WEBMAP):
             if url and restricted(url):
                 bad.append("line %d: %s is TERMS_STATED_RESTRICTIVE and must "
                            "not be harvested by any route" % (i, url))
-            if ut == "none_established":
+            if ut in ("none_established", "no_own_site_found"):
                 n = len([x for x in ev.split(" | ") if x.strip()])
                 if "TRIED:" not in ev or n < 3:
-                    bad.append("line %d: %s recorded as none_established with "
+                    bad.append("line %d: %s recorded as %s with "
                                "only %d route(s) named -- a negative from "
-                               "search alone is not a negative" % (i, uid, n))
+                               "search alone is not a negative"
+                               % (i, uid, ut, n))
             k = (uid, ut, url)
             if url and k in seen:
                 bad.append("line %d: duplicate row %s" % (i, str(k)))

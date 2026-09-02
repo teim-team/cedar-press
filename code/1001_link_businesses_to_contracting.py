@@ -45,6 +45,13 @@ OUTPUTS (this script owns these files; it never rewrites the directory)
     data/clean/native_business_identifier_crosswalk.csv  (appended; 1000 seeds)
     review/native_business_link_holds_2026-09-02.csv     ambiguous / conflicted
 
+ORDER. `1000 web` (network) -> `1000 promote` (jsonl -> crosswalk) ->
+`1001 build`. Both scripts write the shared crosswalk with
+`open_crosswalk()`, which keeps the rows it did not author - but they must
+not run CONCURRENTLY, because two processes holding the same file open is a
+race no keep-the-other-rows logic can survive. Run them in order; `promote`
+makes the whole chain deterministic and re-runnable with no network.
+
 USAGE
     py -3 code/1001_link_businesses_to_contracting.py build
     py -3 code/1001_link_businesses_to_contracting.py verify
@@ -310,7 +317,9 @@ NATION_STATES_BASIS = (
 class FedEntity:
     __slots__ = ("uei", "cages", "names", "states", "cities", "prime_oblig",
                  "prime_rows", "sub_amount", "sub_rows", "sources",
-                 "first_fy", "last_fy", "restricted_name_only")
+                 "first_fy", "last_fy", "restricted_name_only",
+                 "sam_backfill_oblig", "sam_backfill_rows",
+                 "prime_oblig_already_attributed", "parents")
 
     def __init__(self, uei):
         self.uei = uei
@@ -320,6 +329,14 @@ class FedEntity:
         self.cities = Counter()
         self.prime_oblig = 0.0
         self.prime_rows = 0
+        self.sam_backfill_oblig = 0.0
+        self.sam_backfill_rows = 0
+        self.prime_oblig_already_attributed = 0.0
+        # The parent the FIRM ITSELF declares in FPDS. Independent of the
+        # tribal directory's claim and of Cedar's own attribution, so where
+        # the two agree it is a genuine second source (ASSERTION_LAYER: a
+        # copy of a source is not a corroboration; a different filer is).
+        self.parents = Counter()
         self.sub_amount = 0.0
         self.sub_rows = 0
         self.sources = set()
@@ -339,6 +356,10 @@ def _merge_entities(group):
         m.cities.update(e.cities)
         m.prime_oblig += e.prime_oblig
         m.prime_rows += e.prime_rows
+        m.sam_backfill_oblig += e.sam_backfill_oblig
+        m.sam_backfill_rows += e.sam_backfill_rows
+        m.prime_oblig_already_attributed += e.prime_oblig_already_attributed
+        m.parents.update(e.parents)
         m.sub_amount += e.sub_amount
         m.sub_rows += e.sub_rows
         m.sources |= e.sources
@@ -400,9 +421,22 @@ def build_federal_universe(verbose=True, want_contracts=frozenset()):
             if ct:
                 e.cities[ct] += 1
             try:
-                e.prime_oblig += float(row[ix["total_obligations"]] or 0)
+                v = float(row[ix["total_obligations"]] or 0)
             except ValueError:
-                pass
+                v = 0.0
+            e.prime_oblig += v
+            # Was this dollar ALREADY attributed to a Cedar entity before this
+            # join existed? The distinction decides what the headline means:
+            # money already keyed to Arctic Slope is not new revenue Cedar can
+            # see, it is money that can now also be seen THROUGH the firm and
+            # the nation that certified it. Money that was unattributed is new
+            # attribution surface.
+            if row[ix["attributed_flag"]].strip() == "1":
+                e.prime_oblig_already_attributed += v
+            pu = clean_uei(row[ix["parent_uei"]])
+            if pu and pu != uei:
+                pn = row[ix["parent_name"]].strip()
+                e.parents[(pu, pn)] += 1
             e.prime_rows += 1
             e.first_fy = _fy(e.first_fy, row[ix["fiscal_year"]], True)
             e.last_fy = _fy(e.last_fy, row[ix["fiscal_year"]], False)
@@ -495,21 +529,30 @@ def build_federal_universe(verbose=True, want_contracts=frozenset()):
                 ct = norm_city(row[ix["dnb_awardee_city"]])
                 if ct:
                     e.cities[ct] += 1
-                try:
-                    e.prime_oblig += float(row[ix["total_action_obligation"]]
-                                           or 0)
-                except ValueError:
-                    pass
-                e.prime_rows += 1
+                # DO NOT ADD THIS TO prime_oblig. `double_count_risk = 1` on
+                # 179,050 of 269,312 rows worth $750B - those PIID-FY pairs
+                # are ALREADY in prime_contracts.csv, and folding them in
+                # inflated the first draft of this build's headline by $5.7B.
+                # The backfill's genuinely new rows ride in their own column.
+                if row[ix["double_count_risk"]].strip() != "1":
+                    try:
+                        e.sam_backfill_oblig += float(
+                            row[ix["total_action_obligation"]] or 0)
+                    except ValueError:
+                        pass
+                    e.sam_backfill_rows += 1
                 e.first_fy = _fy(e.first_fy, row[ix["fiscal_year"]], True)
                 e.last_fy = _fy(e.last_fy, row[ix["fiscal_year"]], False)
     if verbose:
         print(f"  + sam_fy2000_07   {len(ents):6d} UEIs", flush=True)
 
     index = defaultdict(set)
+    cage_index = defaultdict(set)
     for uei, e in ents.items():
         for nm in e.names:
             index[nm].add(uei)
+        for cg in e.cages:
+            cage_index[cg].add(uei)
     if verbose:
         print(f"  name index        {len(index):6d} distinct normalized names",
               flush=True)
@@ -517,7 +560,7 @@ def build_federal_universe(verbose=True, want_contracts=frozenset()):
             print(f"  contract index    {len(contracts):6d} of "
                   f"{len(want_contracts)} directory contract numbers found",
                   flush=True)
-    return ents, index, contracts
+    return ents, index, contracts, cage_index
 
 
 # --------------------------------------------------------------------------
@@ -531,9 +574,12 @@ LINK_COLUMNS = [
     "n_candidate_ueis", "candidate_ueis",
     "corroboration", "directory_state", "directory_city",
     "federal_states", "federal_cities",
-    "prime_obligations_usd", "prime_transaction_rows",
+    "prime_obligations_usd", "prime_obligations_already_attributed_usd",
+    "prime_transaction_rows",
+    "sam_fy2000_2007_netnew_usd", "sam_fy2000_2007_netnew_rows",
     "subaward_amount_usd", "subaward_rows",
     "first_fiscal_year", "last_fiscal_year", "federal_sources",
+    "federal_declared_parent_uei", "federal_declared_parent_name",
     "business_name_is_person_name", "identifier_publish_gate",
     "identifier_publish_gate_basis",
     "evidence_licence", "directory_publishable", "source_terms_status",
@@ -572,6 +618,25 @@ def open_crosswalk(built_by):
     return fh, w
 
 
+def read_self_published_identifiers():
+    """What `code/1000` harvested from the firms' own websites.
+
+    Optional input. If 1000 has not run, this returns {} and the ladder is
+    unchanged - the two scripts are independent and either order works.
+    """
+    out = defaultdict(list)
+    if not CROSSWALK.exists():
+        return out
+    with open(CROSSWALK, encoding="utf-8-sig", newline="") as fh:
+        for r in csv.DictReader(fh):
+            if r.get("identifier_method") != "self_published_on_firm_website":
+                continue
+            out[r["business_source_id"]].append(
+                (r["identifier_type"], r["identifier_value"],
+                 r.get("identifier_source_url", "")))
+    return out
+
+
 def gate_for(name_is_person):
     """cedar_domain.may_publish_individual_native_field, inlined and named.
 
@@ -603,8 +668,12 @@ def build(argv):
         t for b in biz for t in contract_tokens(b["federal_contract_number"]))
 
     print("assembling the federal identifier universe", flush=True)
-    ents, index, contracts = build_federal_universe(
+    ents, index, contracts, cage_index = build_federal_universe(
         want_contracts=want_contracts)
+    self_pub = read_self_published_identifiers()
+    print(f"self-published identifiers harvested by 1000: "
+          f"{sum(len(v) for v in self_pub.values())} on {len(self_pub)} firms",
+          flush=True)
 
     truncated_sources = source_state_column_is_truncated(biz)
     if args.limit:
@@ -706,8 +775,32 @@ def build(argv):
                 cands |= hit
                 matched_form = matched_form or v
 
+        # ------------------------------------------------------------------
+        # RUNG -1 - THE FIRM PUBLISHED ITS OWN UEI OR CAGE.
+        # An identifier beats every name method (ENTITY_MATCH_RULES rule 4),
+        # and a firm's own capabilities page is the authority on its own
+        # identifiers. A published UEI is used directly; a published CAGE is
+        # resolved through `fpds_uei_cage_map` and accepted only where it
+        # points at ONE UEI.
+        # ------------------------------------------------------------------
+        sp_ueis, sp_evidence = set(), []
+        for typ, val, url in self_pub.get(b["business_source_id"], []):
+            if typ == "UEI" and val in ents:
+                sp_ueis.add(val)
+                sp_evidence.append(f"self_published_UEI={val} <{url}>")
+            elif typ == "CAGE":
+                hit = cage_index.get(val) or set()
+                if len(hit) == 1:
+                    sp_ueis |= hit
+                    sp_evidence.append(
+                        f"self_published_CAGE={val}->{next(iter(hit))} <{url}>")
+
         rung0 = None
-        if len(cn_unique) == 1:
+        if len(sp_ueis) == 1:
+            rung0 = ("-1_self_published_identifier",
+                     "self_published_identifier_resolved_in_contracting",
+                     sp_ueis)
+        elif len(cn_unique) == 1:
             rung0 = ("0a_published_federal_contract_number",
                      "published_federal_contract_number", cn_unique)
         elif cn_all and len(cn_all & cands) == 1:
@@ -717,9 +810,10 @@ def build(argv):
         if rung0:
             rung, method, cands = rung0
             tier = "A"
-            corrob = ["contract_number="
-                      + (";".join(cn_evidence[:3])
-                         or "intersects_the_name_match")]
+            corrob = (sp_evidence[:3] if rung[0] == "-" else
+                      ["contract_number="
+                       + (";".join(cn_evidence[:3])
+                          or "intersects_the_name_match")])
             merged, geo_note = False, ""
             group = sorted(cands, key=lambda x: -ents[x].prime_oblig)
             u = group[0]
@@ -727,7 +821,8 @@ def build(argv):
             rec["business_name_matched_form"] = matched_form
             rec["n_candidate_ueis"] = len(group)
             rec["candidate_ueis"] = ";".join(group)
-            stats["rung0_contract_number"] += 1
+            stats["rung_minus1_self_published"
+                  if rung[0] == "-" else "rung0_contract_number"] += 1
         else:
             if not usable:
                 rec["link_status"] = "NO_MATCH"
@@ -888,12 +983,20 @@ def build(argv):
             "federal_states": ",".join(s for s, _ in e.states.most_common(4)),
             "federal_cities": ",".join(c for c, _ in e.cities.most_common(3)),
             "prime_obligations_usd": f"{e.prime_oblig:.2f}",
+            "prime_obligations_already_attributed_usd":
+                f"{e.prime_oblig_already_attributed:.2f}",
             "prime_transaction_rows": e.prime_rows,
+            "sam_fy2000_2007_netnew_usd": f"{e.sam_backfill_oblig:.2f}",
+            "sam_fy2000_2007_netnew_rows": e.sam_backfill_rows,
             "subaward_amount_usd": f"{e.sub_amount:.2f}",
             "subaward_rows": e.sub_rows,
             "first_fiscal_year": e.first_fy,
             "last_fiscal_year": e.last_fy,
             "federal_sources": ";".join(sorted(e.sources)),
+            "federal_declared_parent_uei":
+                (e.parents.most_common(1)[0][0][0] if e.parents else ""),
+            "federal_declared_parent_name":
+                (e.parents.most_common(1)[0][0][1] if e.parents else ""),
             "evidence_licence": ("DNB_OPEN_DATA_RESTRICTED_NAME_EVIDENCE"
                                  if e.restricted_name_only else "OPEN"),
         })
@@ -916,6 +1019,8 @@ def build(argv):
                 if one not in linked_ueis:
                     linked_ueis.add(one)
                     money["prime"] += ents[one].prime_oblig
+                    money["prime_already_attributed"] +=                         ents[one].prime_oblig_already_attributed
+                    money["sam_netnew"] += ents[one].sam_backfill_oblig
                     money["sub"] += ents[one].sub_amount
             if b["publishable"] == "Y":
                 stats["linked_publishable_rows"] += 1
@@ -923,6 +1028,7 @@ def build(argv):
                     if one not in publishable_ueis:
                         publishable_ueis.add(one)
                         money["prime_publishable"] += ents[one].prime_oblig
+                        money["sam_netnew_publishable"] +=                             ents[one].sam_backfill_oblig
                         money["sub_publishable"] += ents[one].sub_amount
 
         # crosswalk rows - one per identifier, flushed per entity
@@ -980,12 +1086,9 @@ def build(argv):
                 if one and one not in seen_by_nation.setdefault(n, set()):
                     seen_by_nation[n].add(one)
                     d["distinct_ueis"] += 1
-            d["prime_obligations_usd"] += float(r["prime_obligations_usd"]
-                                                or 0) if len(
-                seen_by_nation[n]) else 0
-    # recompute money cleanly, per nation, per UEI
     for n in nat:
         nat[n]["prime_obligations_usd"] = 0.0
+        nat[n]["sam_fy2000_2007_netnew_usd"] = 0.0
         nat[n]["subaward_amount_usd"] = 0.0
     counted = {}
     for r in csv.DictReader(open(LINKS, encoding="utf-8-sig")):
@@ -997,10 +1100,12 @@ def build(argv):
                 continue
             counted[n].add(one)
             nat[n]["prime_obligations_usd"] += ents[one].prime_oblig
+            nat[n]["sam_fy2000_2007_netnew_usd"] += ents[one].sam_backfill_oblig
             nat[n]["subaward_amount_usd"] += ents[one].sub_amount
     cols = ["certifying_authority_name", "firms_certified", "publishable_rows",
             "firms_linked_to_contracting", "distinct_ueis",
-            "prime_obligations_usd", "subaward_amount_usd",
+            "prime_obligations_usd", "sam_fy2000_2007_netnew_usd",
+            "subaward_amount_usd",
             "status_no_match", "status_refused", "status_hold_ambiguous",
             "status_proposed", "link_rate_pct", "built_by", "built_date"]
     with open(BY_NATION, "w", encoding="utf-8", newline="") as fh:
@@ -1011,6 +1116,7 @@ def build(argv):
             row = {c: d.get(c, 0) for c in cols}
             row["certifying_authority_name"] = n
             row["prime_obligations_usd"] = f"{d['prime_obligations_usd']:.2f}"
+            row["sam_fy2000_2007_netnew_usd"] =                 f"{d['sam_fy2000_2007_netnew_usd']:.2f}"
             row["subaward_amount_usd"] = f"{d['subaward_amount_usd']:.2f}"
             row["link_rate_pct"] = round(
                 100.0 * d["firms_linked_to_contracting"]
@@ -1019,6 +1125,31 @@ def build(argv):
             row["built_date"] = BUILT_DATE
             w.writerow(row)
             fh.flush()
+
+    # ---- reconcile against the OTHER matcher ------------------------------
+    # `code/953_nob_federal_identifier_candidates.py` (the 950-959 agent) wrote
+    # `federal_uei_candidate` onto the directory itself, by a different method:
+    # name-only, no geography, refusing person names and ambiguity. Two
+    # matchers over the same evidence is not two SOURCES (ASSERTION_LAYER:
+    # evidence lineage), so agreement is not corroboration - but DISAGREEMENT
+    # is a finding, and it is the cheapest defect detector either pass has.
+    recon = Counter()
+    if "federal_uei_candidate" in (biz[0] if biz else {}):
+        mine = {r["business_source_id"]:
+                (r["matched_uei"] if r["link_status"] == "LINKED" else "")
+                for r in csv.DictReader(open(LINKS, encoding="utf-8-sig"))}
+        for b2 in biz:
+            a = (b2.get("federal_uei_candidate") or "").strip().upper()
+            m = mine.get(b2["business_source_id"], "")
+            if a and m:
+                recon["both_matched_agree" if a == m
+                      else "BOTH_MATCHED_DISAGREE"] += 1
+            elif a:
+                recon["only_953_matched"] += 1
+            elif m:
+                recon["only_1001_matched"] += 1
+            else:
+                recon["neither_matched"] += 1
 
     summary = {
         "built_by": BUILT_BY,
@@ -1029,14 +1160,26 @@ def build(argv):
         "distinct_ueis_linked": len(linked_ueis),
         "distinct_ueis_linked_publishable": len(publishable_ueis),
         "prime_obligations_exposed_usd": round(money["prime"], 2),
+        "prime_of_which_already_attributed_to_a_cedar_entity_usd":
+            round(money["prime_already_attributed"], 2),
+        "prime_of_which_previously_unattributed_usd":
+            round(money["prime"] - money["prime_already_attributed"], 2),
         "prime_obligations_exposed_publishable_usd":
             round(money["prime_publishable"], 2),
+        "sam_fy2000_2007_netnew_exposed_usd": round(money["sam_netnew"], 2),
+        "sam_fy2000_2007_netnew_exposed_publishable_usd":
+            round(money["sam_netnew_publishable"], 2),
         "subaward_amount_exposed_usd": round(money["sub"], 2),
         "subaward_amount_exposed_publishable_usd":
             round(money["sub_publishable"], 2),
         "dollar_grain": "summed once per distinct UEI, never per directory "
                         "row - 8 firms are certified by two nations and 3 "
                         "Navajo spellings resolve to one firm",
+        "reconciliation_vs_953_matcher": dict(recon),
+        "reconciliation_note": (
+            "two matchers over the SAME evidence - agreement is not "
+            "corroboration (docs/ASSERTION_LAYER.md, evidence lineage); "
+            "disagreement is a defect signal in one of them"),
         "nation_states_basis": NATION_STATES_BASIS,
     }
     SUMMARY.write_text(json.dumps(summary, indent=2), encoding="utf-8")

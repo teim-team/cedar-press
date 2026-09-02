@@ -463,6 +463,122 @@ def build():
       "would delete the ASCII-fold variants that exist to make matching work",
       "measured with csv.reader over the live files")
 
+    # ---- CDR-11 -------------------------------------------------------------
+    # `docs/CROSS_DATASET_LEARNING.md` channel 3: "a discredited method taints
+    # its output wherever it landed. Quarantined: cluster_v3, need_v6,
+    # sam_namematch_2026_05_06." Ask what those methods are still carrying.
+    QUAR = {"cluster_v3", "need_v6", "sam_namematch_2026_05_06"}
+    led_rows = list(rows(C("cedar_identifier_ledger_final.csv")))
+    quar_uei = {r["identifier"].strip().upper(): r for r in led_rows
+                if r["identifier_type"].upper() == "UEI" and r["attribution_method"] in QUAR}
+    quar_excluded = sum(1 for r in quar_uei.values() if r["exclusion_id"].strip())
+
+    def hubtoks(t):
+        e = spine.get(t)
+        if not e:
+            return set()
+        s = set(toks(e["canonical_name"])) | set(toks(e.get("fr_official_name")))
+        for a in (e.get("aliases") or "").split("|"):
+            s |= set(toks(a))
+        return {w for w in s if len(w) >= 3}
+
+    try:
+        sys.path.insert(0, os.path.join(ROOT, "code"))
+        import cedar_domain  # type: ignore
+        TRAPS = {w.lower() for w in cedar_domain.NAME_TRAPS}
+    except Exception:
+        TRAPS = set()
+
+    qrows = qusd = 0
+    pair = collections.defaultdict(float)
+    with open(C("prime_contracts.csv"), newline="", encoding="utf-8") as f:
+        rd = csv.reader(f)
+        hh = next(rd)
+        jx = {c: i for i, c in enumerate(hh)}
+        for row in rd:
+            u = row[jx["awardee_uei"]].strip().upper()
+            if u in quar_uei and row[jx["tribe_id"]]:
+                try:
+                    ob = float(row[jx["total_obligations"]] or 0)
+                except ValueError:
+                    ob = 0.0
+                qrows += 1
+                qusd += ob
+                pair[(u, row[jx["awardee_name"]], row[jx["tribe_id"]], row[jx["canonical_name"]])] += ob
+    no_tok, trap_tok = [], []
+    for (u, nm, t, cn), v in pair.items():
+        ft = {w for w in toks(nm) if len(w) >= 3}
+        sh = ft & hubtoks(t)
+        if not sh:
+            no_tok.append((v, u, nm, t, cn, ""))
+        elif sh <= TRAPS:
+            trap_tok.append((v, u, nm, t, cn, "|".join(sorted(sh))))
+    no_tok.sort(reverse=True)
+    trap_tok.sort(reverse=True)
+    F("CDR-11",
+      "three QUARANTINED attribution methods are still carrying $38.2B of attributed contracting",
+      f"{len(quar_uei)} UEI rows of cedar_identifier_ledger_final.csv carry attribution_method in "
+      f"{{cluster_v3, need_v6, sam_namematch_2026_05_06}} - the three methods "
+      f"docs/CROSS_DATASET_LEARNING.md quarantines - and {quar_excluded} of them carry an exclusion_id. "
+      f"They key {qrows:,} rows of prime_contracts.csv. Two risk slices inside that: "
+      f"{len(no_tok)} firm/hub pairs (${sum(x[0] for x in no_tok):,.0f}) share NO distinctive token with "
+      f"the hub at all, and {len(trap_tok)} pairs (${sum(x[0] for x in trap_tok):,.0f}) share only a token "
+      f"that is already on cedar_domain.NAME_TRAPS - `eagle`, `bristol`, `oneida`, `wind`. "
+      f"prime_contracts.attribution_method reads `uei_exact` on every one of them, because that column "
+      f"records HOW THE IDENTIFIER JOINED and not HOW THE IDENTIFIER WAS RULED, so the quarantine is "
+      f"invisible to anyone reading the contracting table.",
+      qusd, "identity layer + contractors",
+      "HIGHEST - General Dynamics Information Technology ($3.53B) is keyed to the Native "
+      "Village of Barrow and Blue Tech Inc ($3.51B) to Blue Lake Rancheria, both tier B, both "
+      "on a method the project has already discredited in writing",
+      "cedar_identifier_ledger_final.csv attribution_method vs prime_contracts.csv awardee_uei")
+    for v, u, nm, t, cn, sh in (no_tok[:150] + trap_tok[:150]):
+        D("CDR-11", key=u, name=nm,
+          detail=f"keyed to {t} ({cn}) by {quar_uei[u]['attribution_method']}, tier "
+                 f"{quar_uei[u]['confidence_tier']}; "
+                 + (f"only shared token is the NAME_TRAP `{sh}`" if sh else "no shared distinctive token"),
+          usd=round(v, 2))
+
+    # ---- CDR-12 -------------------------------------------------------------
+    nw = collections.defaultdict(lambda: [0, 0.0, set()])
+    with open(C("prime_contracts.csv"), newline="", encoding="utf-8") as f:
+        rd = csv.reader(f)
+        hh = next(rd)
+        jx = {c: i for i, c in enumerate(hh)}
+        for row in rd:
+            nm = row[jx["awardee_name"]].lower()
+            if nm.startswith("north wind") or " north wind" in nm or nm.startswith("lbyd"):
+                t = row[jx["tribe_id"]] or "(unattributed)"
+                a = nw[t]
+                a[0] += 1
+                try:
+                    a[1] += float(row[jx["total_obligations"]] or 0)
+                except ValueError:
+                    pass
+                a[2].add(row[jx["awardee_uei"]].strip().upper())
+    wrong = {k: v for k, v in nw.items() if k not in ("ANRC-CKINLT-00", "(unattributed)")}
+    F("CDR-12",
+      "one corporate family split across four nations, and Cedar's own deal ledger settles it",
+      "The North Wind / LBYD family is keyed to " + str(len(nw)) + " different hubs in "
+      "prime_contracts.csv: " + "; ".join(
+          f"{k} = {v[0]} rows / {len(v[2])} UEIs / ${v[1]:,.0f}" for k, v in
+          sorted(nw.items(), key=lambda kv: -kv[1][1])) +
+      ". The Cook Inlet Region rows were resolved by agent_research_two_leg; the Eastern Shoshone rows "
+      "were all resolved by the quarantined cluster_v3 on the token `wind`, which is on "
+      "cedar_domain.NAME_TRAPS. Cedar's OWN deal ledger contradicts the Eastern Shoshone reading twice: "
+      "ANCSA2-2017-003 'CIRI through its subsidiary North Wind purchased Portage' and MA2020-004 "
+      "'North Wind Group acquires LBYD Engineers'. Note that `Wind River Construction LLC` is NOT in "
+      "this set and may legitimately be Eastern Shoshone - Wind River is their reservation, which is "
+      "exactly why the token is a trap.",
+      sum(v[1] for v in wrong.values()), "identity layer + contractors",
+      "HIGHEST - two datasets Cedar publishes disagree about who owns a $2.8B contracting "
+      "family, and the tie-breaker is a third dataset Cedar also publishes",
+      "prime_contracts.csv awardee_name LIKE 'North Wind%' / 'LBYD%' grouped by tribe_id; "
+      "deals_classified.csv ANCSA2-2017-003 and MA2020-004")
+    for t, v in sorted(nw.items(), key=lambda kv: -kv[1][1]):
+        D("CDR-12", key=t, name=spine.get(t, {}).get("canonical_name", t),
+          detail=f"{v[0]} rows, {len(v[2])} UEIs", usd=round(v[1], 2))
+
     finds.sort(key=lambda r: (-{"HIGHEST": 4, "HIGH": 3, "MEDIUM": 2, "LOW": 1, "NONE": 0}
                               .get(r["embarrassment"].split(" -")[0], 0),
                               -r["dollars_reached_usd"]))
@@ -489,6 +605,13 @@ def build():
         "cdr10_alias_semantic_groups": len(asem),
         "cdr10_alias_blank_ids": len(blank_alias),
         "cdr10_additions_rows_already_in_classified": [add_in, add_tot],
+        "cdr11_quarantined_uei_ledger_rows": len(quar_uei),
+        "cdr11_quarantined_with_exclusion": quar_excluded,
+        "cdr11_prime_rows_keyed": qrows,
+        "cdr11_dollars": round(qusd, 2),
+        "cdr11_pairs_no_shared_token": len(no_tok),
+        "cdr11_pairs_trap_token_only": len(trap_tok),
+        "cdr12_north_wind_hubs": {k: [v[0], len(v[2]), round(v[1], 2)] for k, v in nw.items()},
     }
     return finds, detail, inv
 

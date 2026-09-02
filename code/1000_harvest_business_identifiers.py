@@ -47,9 +47,15 @@ OUTPUT
     data/staging/business_registry/1000_local_corpus_sweep.json
     data/staging/business_registry/1000_web_probe.jsonl   (per-request record)
 
+ORDER. `web` -> `promote` -> `code/1001 build`. `web` writes crosswalk rows
+live (flush per entity) but `promote` is the canonical, deduplicated,
+no-network writer. Never run `web` and `1001 build` at the same time: both
+hold the shared crosswalk open and the second flush wins.
+
 USAGE
     py -3 code/1000_harvest_business_identifiers.py sweep
     py -3 code/1000_harvest_business_identifiers.py web [--max-hosts N]
+    py -3 code/1000_harvest_business_identifiers.py promote   # jsonl -> crosswalk
     py -3 code/1000_harvest_business_identifiers.py verify [--synthetic]
 """
 
@@ -474,6 +480,67 @@ def open_crosswalk(built_by):
     return fh, w
 
 
+def promote(argv):
+    """Rebuild this script's crosswalk rows from the probe log. No network.
+
+    `web` writes as it goes - flush per entity, never at the end - which means
+    the same identifier is written once per page that printed it (a footer
+    block appears on every page of a site). This is the canonical writer:
+    one row per (business, identifier type, value), the shortest quote kept
+    as evidence, deterministic, and safe to re-run.
+    """
+    if not WEB_OUT.exists():
+        print("no probe log; run `web` first")
+        return 1
+    biz = {r["business_source_id"]: r for r in
+           csv.DictReader(open(DIRECTORY, encoding="utf-8-sig"))}
+    best = {}
+    for line in open(WEB_OUT, encoding="utf-8"):
+        if not line.strip():
+            continue
+        d = json.loads(line)
+        for h in d.get("identifiers") or []:
+            for k in d.get("business_source_ids") or []:
+                if k not in biz:
+                    continue
+                key = (k, h["identifier_type"], h["identifier_value"])
+                prev = best.get(key)
+                if prev is None or len(h["quote"]) < len(prev["quote"]):
+                    best[key] = {**h, "host": d["host"]}
+    xf, xw = open_crosswalk(BUILT_BY)
+    n = Counter()
+    for (k, typ, val), h in sorted(best.items()):
+        b = biz[k]
+        if b["source_terms_status"] == "TERMS_STATED_RESTRICTIVE":
+            continue                     # excluded by every route
+        xw.writerow({
+            "business_source_id": k,
+            "source_id": b["source_id"],
+            "certifying_authority_name": b["certifying_authority_name"],
+            "business_name_raw": b["business_name_raw"],
+            "identifier_type": typ,
+            "identifier_value": val,
+            "identifier_tier": "A",
+            "identifier_method": "self_published_on_firm_website",
+            "identifier_evidence": h["quote"][:300],
+            "identifier_source_url": h["source_url"],
+            "may_publish": ("N" if typ == "DUNS" or b["publishable"] != "Y"
+                            else "Y"),
+            "may_publish_basis": (
+                "DUNS_is_licensed_never_publishes" if typ == "DUNS"
+                else f"directory_publishable={b['publishable']}"),
+            "built_by": BUILT_BY, "built_date": BUILT_DATE,
+        })
+        xf.flush()
+        n[typ] += 1
+    xf.close()
+    print(json.dumps({"crosswalk_rows_written": sum(n.values()),
+                      "by_type": dict(n),
+                      "distinct_businesses": len({k for k, _, _ in best})},
+                     indent=2))
+    return 0
+
+
 def verify(argv):
     ap = argparse.ArgumentParser()
     ap.add_argument("--synthetic", action="store_true")
@@ -559,11 +626,12 @@ def _invariants(rows):
 
 
 def main():
-    if len(sys.argv) < 2 or sys.argv[1] not in {"sweep", "web", "verify"}:
+    if len(sys.argv) < 2 or sys.argv[1] not in {"sweep", "web", "promote",
+                                                "verify"}:
         print(__doc__)
         return 2
-    return {"sweep": sweep, "web": web, "verify": verify}[sys.argv[1]](
-        sys.argv[2:])
+    return {"sweep": sweep, "web": web, "promote": promote,
+            "verify": verify}[sys.argv[1]](sys.argv[2:])
 
 
 if __name__ == "__main__":

@@ -1,0 +1,65 @@
+{
+  "already_in_deals_classified": {
+    "NO": 52,
+    "YES": 40
+  },
+  "built_by": "code/1071_identifier_driven_deal_sweep.py",
+  "candidates_by_axis": {
+    "A1": 3,
+    "N1": 32,
+    "S1": 47,
+    "S2": 10
+  },
+  "candidates_new_axes": 92,
+  "consolidated_by_workstream": {
+    "1010/prime_parent_uei": 98,
+    "1032/sec_edgar": 12,
+    "1071/A1": 3,
+    "1071/N1": 32,
+    "1071/S1": 47,
+    "1071/S2": 10,
+    "992/tribal_newsletters": 23,
+    "993/tribal_wp_posts": 38
+  },
+  "consolidated_dropped_terms_restricted_source": {},
+  "consolidated_duplicates_suppressed": {
+    "992/tribal_newsletters": 22,
+    "993/tribal_wp_posts": 15
+  },
+  "consolidated_rows": 263,
+  "constellation_edges_used": 745,
+  "invariants": [
+    "I1_every_candidate_has_an_identifier",
+    "I2_no_nan_sentinel_in_identifier_columns",
+    "I3_every_candidate_has_an_evidence_note_naming_file_and_years",
+    "I4_no_contracting_candidate_carries_an_inferred_value",
+    "I5_refusals_actually_fired",
+    "I6_no_duplicate_dedup_key_in_consolidated",
+    "I7_no_candidate_is_intra_family"
+  ],
+  "rejections_by_axis_and_reason": {
+    "A1/INTRA_FAMILY_SAME_HUB": 6,
+    "A1/INTRA_FAMILY_SHARED_BRAND": 151,
+    "A1/NO_NATIVE_SIDE": 1,
+    "A1/SAME_DISTINCTIVE_TOKENS": 41,
+    "C1/INTRA_FAMILY_SAME_HUB": 1,
+    "C1/INTRA_FAMILY_SHARED_BRAND": 1,
+    "C1/SAME_DISTINCTIVE_TOKENS": 2,
+    "N1/INTRA_FAMILY_ACRONYM": 2,
+    "N1/INTRA_FAMILY_SAME_HUB": 200,
+    "N1/INTRA_FAMILY_SHARED_BRAND": 738,
+    "N1/NO_NATIVE_SIDE": 145,
+    "N1/SAME_DISTINCTIVE_TOKENS": 744,
+    "S1/INTRA_FAMILY_ACRONYM": 4,
+    "S1/INTRA_FAMILY_SAME_HUB": 55,
+    "S1/INTRA_FAMILY_SHARED_BRAND": 64,
+    "S1/NO_NATIVE_SIDE": 144,
+    "S1/SAME_DISTINCTIVE_TOKENS": 74,
+    "S2/INTRA_FAMILY_SAME_HUB": 38,
+    "S2/INTRA_FAMILY_SHARED_BRAND": 23,
+    "S2/NO_NATIVE_SIDE": 55,
+    "S2/SAME_DISTINCTIVE_TOKENS": 79
+  },
+  "rejections_intra_family_or_reregistration": 2223,
+  "rejections_total": 2568
+}

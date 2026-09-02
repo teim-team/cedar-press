@@ -187,6 +187,7 @@ find its row here and stop — you do not need to grep `docs/`.*
 | dataset (`data/clean/`) | current doc | companions / notes |
 |---|---|---|
 | `prime_contracts.csv` | `PRIME_ARCHIVE_PULL_LOG.md` | `USASPENDING_PROBLEM_BRIEF.md` ⚠ banner'd (says "not yet merged" — it merged) · `CICD_BENCHMARK.md` · `EXTENT_COMPETED_CROSSWALK.md` · `FPDS_HIERARCHY_BUILD_LOG_2026-08-05.md` |
+| *(cross-dataset)* `prime_contracts.csv`, `np_orgs.csv`, `native_owned_businesses.csv`, `deals_classified.csv` | **`COLUMN_PROMOTION_LOG_2026-09-02.md`** | the 2026-09-02 promotion of on-disk columns into the four READY datasets — 6-digit NAICS / PSC / award description onto contracting, a never-blank `disposition` onto nonprofits (and the 258-row Eastern Star false-positive family), candidate federal UEIs onto the business directory. Ownership: ADR-016 |
 | `federal_funding_transactions.csv` | `ASSISTANCE_ARCHIVE_PULL_LOG.md` | `FEDERAL_FUNDING_MERGE_LOG_2026-08-05.md` · `FEDERAL_FUNDING_RECONCILIATION_2026-08-05.md` · `FEDERAL_AWARD_LISTS_LOG.md` |
 | `faads_transactions_all_agencies.csv` | `FAADS_NAME_ATTRIBUTION_LOG.md` | `FAADS_FEASIBILITY_2026-08-05.md` · `FUNDING_PRE2008_BUILD_LOG.md` · `PRE2007_SPENDING_SOURCES.md` |
 | `subawards.csv` | `SUBAWARD_API_PULL_LOG.md` | `SUBAWARD_RAW_MATCH_LOG.md` · `SUBCONTRACTING_USASPENDING_PULL_2026-08-05.md` · `SUBCONTRACTING_BUILD_LOG_2026-08-05.md` ⚠ banner'd (its 998 is superseded) |

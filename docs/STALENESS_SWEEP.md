@@ -6,49 +6,25 @@
 
 | check | n |
 |---|---:|
-| notes contracts naming a column the file does not have | 4 |
+| notes contracts naming a column the file does not have | 0 |
 | notes contracts for a table that is not on disk | 0 |
-| source files still naming a retired identifier or moved path | 24 |
+| source files still naming a retired identifier or moved path | 9 |
 | backups shipped into `dist/` | 0 |
 | backups in `data/clean` named `.csv` last | 3 |
-
-## Shipped contracts naming a dead column
-
-| artefact | ghost columns |
-|---|---|
-| `dist\06_nonprofit\np_financials.notes.json` | EIN |
-| `dist\06_nonprofit\np_grantee_financials.notes.json` | EIN |
-| `dist\06_nonprofit\np_org_scale.notes.json` | EIN |
-| `dist\06_nonprofit\np_orgs.notes.json` | ein |
 
 ## Source files still naming a retired identifier
 
 | file | reference |
 |---|---|
-| `START_HERE.md` | tribe_id_scheme_resolved -> attribution_status |
-| `code/335_harmonize_assistance_seams_in_place.py` | tribe_id_scheme_resolved -> attribution_status |
-| `code/335_harmonize_assistance_seams_in_place.py` | tribe_id_scheme_resolved_basis -> attribution_basis |
-| `code/335_harmonize_assistance_seams_in_place.py` | data/clean/assistance_tribe_id_crosswalk.csv -> data/spine/legacy/assistance_tribe_id_crosswalk.csv |
-| `code/336_correct_scheme_resolution_by_spine_membership.py` | tribe_id_scheme_resolved -> attribution_status |
-| `code/336_correct_scheme_resolution_by_spine_membership.py` | tribe_id_scheme_resolved_basis -> attribution_basis |
-| `code/415_audit_identity_layer.py` | tribe_id_scheme_resolved -> attribution_status |
-| `code/416_reconcile_spine_id_columns.py` | tribe_id_scheme_resolved -> attribution_status |
-| `code/503_identity.py` | tribe_id_scheme_resolved -> attribution_status |
-| `code/cedar_ids.py` | tribe_id_scheme_resolved -> attribution_status |
-| `code/cedar_pipeline.py` | tribe_id_scheme_resolved -> attribution_status |
-| `code/cedar_pipeline.py` | tribe_id_scheme_resolved_basis -> attribution_basis |
-| `docs/ASSUMPTIONS_AND_LIMITATIONS.md` | tribe_id_scheme_resolved -> attribution_status |
-| `docs/CEDAR_TAXONOMY.md` | tribe_id_scheme_resolved -> attribution_status |
-| `docs/HANDOFF.md` | tribe_id_scheme_resolved -> attribution_status |
-| `docs/IDENTIFIER_STANDARD.md` | tribe_id_scheme_resolved -> attribution_status |
-| `docs/codebooks/03_federal_funding.md` | tribe_id_scheme_resolved -> attribution_status |
-| `docs/datasets/_PUNCHLIST.md` | tribe_id_scheme_resolved -> attribution_status |
-| `docs/datasets/_PUNCHLIST.md` | tribe_id_scheme_resolved_basis -> attribution_basis |
-| `docs/methodology/funding.md` | tribe_id_scheme_resolved -> attribution_status |
-| `docs/methodology/funding.md` | tribe_id_scheme_resolved_basis -> attribution_basis |
-| `docs/methodology/_entity_layer.md` | tribe_id_scheme_resolved -> attribution_status |
-| `docs/methodology/_entity_layer.md` | tribe_id_scheme_resolved_basis -> attribution_basis |
-| `dist/03_federal_funding/federal_funding_transactions.NOTES.md` | tribe_id_scheme_resolved -> attribution_status |
+| `code/415_audit_identity_layer.py` | live read of "tribe_id_scheme_resolved" -> attribution_status |
+| `code/cedar_pipeline.py` | live read of "tribe_id_scheme_resolved" -> attribution_status |
+| `code/cedar_pipeline.py` | live read of "tribe_id_scheme_resolved_basis" -> attribution_basis |
+| `docs/ASSUMPTIONS_AND_LIMITATIONS.md` | tribe_id_scheme_resolved -> attribution_status, with no mention of the replacement or of 843 |
+| `docs/CEDAR_TAXONOMY.md` | tribe_id_scheme_resolved -> attribution_status, with no mention of the replacement or of 843 |
+| `docs/HANDOFF.md` | tribe_id_scheme_resolved -> attribution_status, with no mention of the replacement or of 843 |
+| `docs/IDENTIFIER_STANDARD.md` | tribe_id_scheme_resolved -> attribution_status, with no mention of the replacement or of 843 |
+| `docs/datasets/_PUNCHLIST.md` | tribe_id_scheme_resolved -> attribution_status, with no mention of the replacement or of 843 |
+| `docs/datasets/_PUNCHLIST.md` | tribe_id_scheme_resolved_basis -> attribution_basis, with no mention of the replacement or of 843 |
 
 ## Derived artefacts and their age
 
@@ -66,7 +42,7 @@
 
 | gate | exit | last line |
 |---|---:|---|
-| `830_entity_freshness.py` | 1 |   830 verify   FAIL   1 problem(s) |
+| `830_entity_freshness.py` | 0 |   830 verify   ok   0 problem(s) |
 | `941_refresh_codebook_fragment.py` | 0 | 941 verify   ok   0 codebook(s) documenting a retired column |
 | `843_retire_cicd_scheme.py` | 0 | 843 verify   ok   0 CICD remnant(s) in the shipped tree |
 

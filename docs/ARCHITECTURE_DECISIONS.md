@@ -793,4 +793,31 @@ place, 950 is idempotent and re-runnable after it — the ordering is declared i
 columns, exactly as it reverts 207's two. 950 is an in-place enricher and must
 run after any rebuild. The `.bak_2026-09-02_pre_950_promote_contract_attributes`
 file beside the table is the signal.
+**OUTCOME, recorded 2026-09-02 after the pass.** All four datasets are still
+READY on `518_dataset_readiness.py`. Every promoted table conserved its rows
+and the md5 of its pre-existing fields exactly; each enricher has a `verify`
+and a `selftest` that proves the NAMED invariant fires on an injected
+violation, and all six exit 0. Full write-up:
+**`docs/COLUMN_PROMOTION_LOG_2026-09-02.md`**.
+
+Two amendments to the ownership table above, both honest rather than tidy:
+
+1. **`code/770_sample_extracts.py` was already under concurrent edit** by
+   workstream INT-READY when this pass reached it - it had fixed the
+   drop-blank-column defect and added `Announced_Value_USD`,
+   `parent_contract_number` and `funnel_stage` to `SHOW`. Ownership of that
+   file is therefore SHARED for this pass, not exclusive as claimed above.
+   This workstream made **additive** edits only, for the columns 950/952/953
+   created and that no other agent could have known about, re-reading the
+   file immediately before each edit.
+2. **The non-overlap with ADR-015 held under test.**
+   `871_promote_geo_keys_contracts.py` appended 13 `geo_*` columns to
+   `prime_contracts.csv` after 950 wrote its nine, and
+   `772_strip_nan_sentinels.py` rewrote `parent_contract_number` in the same
+   window. All nine promoted columns survived both, and 950 `verify` re-reads
+   all 841,002 archive rows to confirm every promoted value still equals its
+   source. A fourth script, `954_register_promoted_columns_codebook.py`,
+   registers the 17 new columns in the codebook and is not in the table above
+   because it writes only codebook FRAGMENTS, which cannot affect another
+   dataset's block.
 <!-- END ADR-016 -->

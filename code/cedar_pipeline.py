@@ -441,7 +441,9 @@ KNOWN_ORDERINGS = [
      "enricher_columns": ["cedar_uid"]},
     {"rebuild": "152_build_assistance_id_crosswalk.py",
      "enricher": "503_identity.py",
-     "file": "assistance_tribe_id_crosswalk.csv",
+     # MOVED 2026-09-01 by 843 out of data/clean/ - it is a build input,
+     # not a dataset.
+     "file": "data/spine/legacy/assistance_tribe_id_crosswalk.csv",
      "cost": "not yet paid - declared at creation, same day as the "
              "reconciliation it protects",
      "enricher_columns": ["proposed_cedar_tribe_id", "confidence_tier",
@@ -451,9 +453,15 @@ KNOWN_ORDERINGS = [
      "file": "federal_funding_transactions.csv",
      "cost": "not yet paid - declared at creation. A 24 rebuild reverts the "
              "owner-directed Cedar-ID reconciliation of 350,465 rows "
-             "(96.8% of lineageA dollars); re-run 335 -> 336 -> 503 after",
-     "enricher_columns": ["tribe_id_neid", "tribe_id_scheme_resolved",
-                          "tribe_id_scheme_resolved_basis"]},
+             "(96.8% of lineageA dollars). The recovery chain CHANGED on "
+             "2026-09-01: 843 dropped `tribe_id`, so 335 and 336 both derive "
+             "from a column that is gone and now REFUSE by design. Re-run "
+             "503 alone; 335/336 are retired for this file",
+     # Renamed 2026-09-01 by 843. The old names here meant the survival check
+     # was looking for two columns that cannot exist, so a 24 rebuild would
+     # have read as having lost them on every future run.
+     "enricher_columns": ["tribe_id_neid", "attribution_status",
+                          "attribution_basis"]},
     # Declared 2026-08-28, the last Type-A collision (two wholesale writers of
     # one table, no declared order). Not a v1/v2 pair: 40 BUILDS the panel from
     # the BGOV export, then 131 merges the 631,507-row USAspending archive

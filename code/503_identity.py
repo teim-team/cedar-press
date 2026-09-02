@@ -1095,9 +1095,28 @@ def phase_mint(argv) -> int:
 
     import shutil
     tmp = str(REGISTER) + ".part"
+    # THE CANONICAL NINE, PLUS WHATEVER ENRICHERS HAVE ADDED SINCE.
+    # `same_as_legacy_cicd` retired by 843 and correctly absent. But a FIXED
+    # list is the class-6 defect: a wholesale writer silently deleting an
+    # in-place enricher's work. On 2026-09-02 `961` promoted five columns onto
+    # the register - Federal Register legal names for 536 entities and `state`
+    # for 1,492 - and this list would have dropped all five on the next
+    # `503 mint --apply`, with no error and no diff anyone would read.
+    # So: canonical order first, then any column the live register already
+    # carries. A retired column stays retired because it is not on disk; a
+    # promoted column survives because it is.
     regcols = ["cedar_uid", "handle", "cedar_entity_id", "canonical_name",
                "entity_class", "class_since_basis", "former_names",
-               "minted", "register_status"]   # `same_as_legacy_cicd` retired by 843
+               "minted", "register_status"]
+    if REGISTER.exists():
+        with REGISTER.open(encoding="utf-8-sig", errors="replace") as _f:
+            _live = next(csv.reader(_f), [])
+        _extra = [c for c in _live if c and c not in regcols
+                  and c != "same_as_legacy_cicd"]
+        if _extra:
+            print(f"  carrying {len(_extra)} enricher column(s) through the "
+                  f"rebuild: {', '.join(_extra)}")
+            regcols = regcols + _extra
     with io.open(tmp, "w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=regcols, restval="",
                            extrasaction="ignore")

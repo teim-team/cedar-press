@@ -1,8 +1,8 @@
 {
   "script": "code/990_build_newsletter_corpus.py",
   "run_date": "2026-09-02",
-  "corpus_rows": 1214,
-  "corpus_entities": 857,
+  "corpus_rows": 1650,
+  "corpus_entities": 1090,
   "restrictive_rows_dropped": 16,
   "restrictive_hosts_seen": [
     "chickasawtimes.net",
@@ -17,15 +17,15 @@
   ],
   "spine_entities": 1555,
   "by_probe_status": {
-    "found": 546,
-    "not_probed": 690,
-    "attempted_none_found": 311,
+    "found": 650,
+    "attempted_none_found": 440,
+    "not_probed": 457,
     "excluded_terms_stated_restrictive": 8
   },
   "by_channel_type": {
-    "news_page": 187,
-    "newsletter": 436,
-    "none_found": 312,
+    "news_page": 225,
+    "newsletter": 705,
+    "none_found": 441,
     "statutory_filings": 58,
     "shareholder_communication": 11,
     "wp_media_library": 28,
@@ -39,6 +39,7 @@
     "shard_i": 139,
     "shard_h": 141,
     "shard_a": 22,
+    "gap_sweep": 436,
     "shard_f": 228,
     "shard_e": 268,
     "web_map:shard_k": 105,
@@ -50,10 +51,10 @@
     "web_map:shard_c": 4
   },
   "found_by_entity_class": {
-    "State-recognized tribe": 8,
-    "Federally recognized tribe": 160,
+    "State-recognized tribe": 17,
+    "Federally recognized tribe": 223,
+    "Federally recognized Alaska Native Village": 130,
     "Alaska Native Regional Corporation": 11,
-    "Federally recognized Alaska Native Village": 100,
     "Federal-level self-governance consortium": 22,
     "Federal-level constituency entity": 11,
     "Alaska Native Village Corporation": 54,
@@ -62,12 +63,20 @@
     "Native Community Development Financial Institution": 47,
     "Native Financial Institution": 18,
     "Urban Indian Organization": 34,
-    "Native Hawaiian Organization": 7
+    "Native Hawaiian Organization": 8,
+    "Individually Native-owned business": 1
   },
-  "not_probed_with_live_site": 486,
+  "not_probed_with_live_site": 253,
   "shard_i_place_name_collisions_flagged": 13,
-  "archive_depth_10y_plus": 102,
+  "archive_depth_10y_plus": 110,
   "deepest_archives": [
+    [
+      57,
+      "United Keetoowah Band of Cherokee Indians in Oklahoma",
+      "Giduwa News",
+      "1970-2026",
+      "https://www.ukb-nsn.gov/giduwa-cherokee-news"
+    ],
     [
       56,
       "Assiniboine and Sioux",
@@ -200,13 +209,6 @@
       "Partner News The cornerstone of our work is our network of partners and we\u2019re happy to uplift their announcements, surveys, events, and reports",
       "2006-2026",
       "https://nativephilanthropy.org/partner-news"
-    ],
-    [
-      20,
-      "Pueblo of Isleta",
-      "Pueblo of Isleta Newsletter",
-      "2007-2026",
-      "https://www.isletapueblo.com/newsletters/"
     ]
   ]
 }

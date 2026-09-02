@@ -150,25 +150,40 @@ def cmd_prep(args) -> int:
                coalesce(cage_code,'') cage,
                try_cast(total_obligations as double) d,
                coalesce(cedar_uid,'') cu,
-               coalesce(naics_description,'') naics
+               coalesce(naics_description,'') naics,
+               try_cast(fiscal_year as int) fy
         from pc where coalesce(awardee_uei,'') <> ''
       ),
       m as (
+        -- FY COMES FROM THE SAME AGGREGATE, NOT A SELF-JOIN.
+        -- The first draft did `from r left join (select awardee_uei, fiscal_year
+        -- from pc) on uei` to get the year range. That is a FANOUT: every row
+        -- of r was duplicated once per row that UEI has, so `sum(d)` was
+        -- multiplied by n_rows. The queue reported $2,880.88B of prime
+        -- obligations against a table whose whole content is $310.01B - a 9.3x
+        -- overstatement, and it looked like a plausible big number until it was
+        -- put next to the total. AGENT_FIELD_GUIDE section 3, exactly.
         select uei,
                mode(nm) nm, mode(st) st, mode(city) city,
                mode(cage) cage, mode(naics) naics,
                max(pn) parent_name, max(pu) parent_uei,
                sum(d) dollars, count(*) n_rows,
                max(cu) current_cedar_uid,
-               min(try_cast(fiscal_year as int)) fy_min,
-               max(try_cast(fiscal_year as int)) fy_max
-        from r left join (select awardee_uei u2, fiscal_year from pc) f
-             on f.u2 = r.uei
+               min(fy) fy_min, max(fy) fy_max
+        from r
         group by uei
       )
       select * from m""")
-    n_c = con.sql("select count(*) from contractors").fetchone()[0]
+    n_c, d_c = con.sql("select count(*), sum(dollars) from contractors").fetchone()
+    d_pc = con.sql("""select sum(try_cast(total_obligations as double))
+                      from pc where coalesce(awardee_uei,'')<>''""").fetchone()[0]
     log(f"  contractors: {n_c:,} distinct awardee_uei  ({time.time()-t0:.1f}s)")
+    # CONSERVATION CHECK, because the fanout above was caught by nothing else.
+    log(f"  dollars: aggregated ${d_c/1e9:,.2f}B vs source ${d_pc/1e9:,.2f}B  "
+        f"(delta {abs(d_c-d_pc):,.2f})")
+    if abs(d_c - d_pc) > 1.0:
+        log("  !! DOLLAR CONSERVATION BROKEN in the contractor aggregate")
+        return 1
 
     rows = con.sql("""select uei, nm, st, city, cage, naics, parent_name,
                       parent_uei, dollars, n_rows, current_cedar_uid,
@@ -429,8 +444,13 @@ def cmd_splink(args) -> int:
             lambda s: [t for t in s.split("|") if t])
         df["first_tok"] = df["tok_arr"].apply(lambda a: a[0] if a else "")
 
-    con_df = con_df.rename(columns={"unique_id": "unique_id"})
-    ent_df = ent_df.rename(columns={"unique_id": "unique_id"})
+    # Splink concatenates the two frames, so they must carry the SAME columns.
+    # Everything else stays in lookup dicts below - a column splink does not
+    # compare on has no business being in the model's input.
+    MODEL_COLS = ["unique_id", "name_raw", "name_norm", "state", "city",
+                  "tok_arr", "first_tok"]
+    con_model = con_df[MODEL_COLS].copy()
+    ent_model = ent_df[MODEL_COLS].copy()
 
     # --- comparisons ---
     # Name. Levels run strong -> weak. The bottom TWO levels are the ones the
@@ -445,17 +465,17 @@ def cmd_splink(args) -> int:
             cll.JaroWinklerLevel("name_norm", 0.95),
             cll.CustomLevel(
                 sql_condition=(
-                    "list_has_all(l.tok_arr, r.tok_arr) "
-                    "and len(r.tok_arr) >= 2 and len(l.tok_arr) > 0"),
+                    "list_has_all(tok_arr_l, tok_arr_r) "
+                    "and len(tok_arr_r) >= 2 and len(tok_arr_l) > 0"),
                 label_for_charts="entity tokens are a subset of filed, >=2 tokens"),
             cll.JaroWinklerLevel("name_norm", 0.88),
             cll.CustomLevel(
                 sql_condition=(
-                    "len(list_intersect(l.tok_arr, r.tok_arr)) >= 2"),
+                    "len(list_intersect(tok_arr_l, tok_arr_r)) >= 2"),
                 label_for_charts=">=2 distinctive tokens shared"),
             cll.CustomLevel(
                 sql_condition=(
-                    "len(list_intersect(l.tok_arr, r.tok_arr)) >= 1"),
+                    "len(list_intersect(tok_arr_l, tok_arr_r)) >= 1"),
                 label_for_charts="exactly 1 distinctive token shared"),
             cll.ElseLevel(),
         ],
@@ -463,7 +483,7 @@ def cmd_splink(args) -> int:
     state_cmp = cl.CustomComparison(
         output_column_name="state",
         comparison_levels=[
-            cll.CustomLevel(sql_condition="l.state='' or r.state=''",
+            cll.CustomLevel(sql_condition="state_l = '' or state_r = ''",
                             label_for_charts="state missing one side"),
             cll.ExactMatchLevel("state").configure(
                 tf_adjustment_column="state"),
@@ -473,49 +493,116 @@ def cmd_splink(args) -> int:
     city_cmp = cl.CustomComparison(
         output_column_name="city",
         comparison_levels=[
-            cll.CustomLevel(sql_condition="l.city='' or r.city=''",
+            cll.CustomLevel(sql_condition="city_l = '' or city_r = ''",
                             label_for_charts="city missing one side"),
             cll.ExactMatchLevel("city"),
             cll.ElseLevel(),
         ],
     )
 
+    # CITY IS DELIBERATELY NOT A MODEL FEATURE. Only 2,088 of 7,186 entity
+    # name records (29%) carry a city, so the "one side missing" level fires on
+    # nearly every pair and estimate_m_from_pairwise_labels observed the exact
+    # level zero times - splink said so, in a warning. A feature whose m cannot
+    # be estimated contributes a default, which is a number that looks trained
+    # and is not. City stays as EVIDENCE IN THE QUEUE ROW (the owner's rung 1
+    # and rung 3) rather than as a weight in the model.
+    #
+    # BLOCKING. The exploding rule on tok_arr pairs any contractor with any
+    # entity sharing ONE distinctive token. That is deliberately the widest
+    # useful net: a pair sharing no token and no name similarity can only reach
+    # the ElseLevel, so blocking it in would add cost and no recall. The
+    # 86.4% ceiling measured in the docstring is the same fact from the other
+    # side.
     settings = SettingsCreator(
         link_type="link_only",
-        comparisons=[name_cmp, state_cmp, city_cmp],
+        comparisons=[name_cmp, state_cmp],
         blocking_rules_to_generate_predictions=[
             block_on("name_norm"),
-            block_on("first_tok"),
-            {"blocking_rule":
-             "l.tok_arr && r.tok_arr", "arrays_to_explode": []}
-            if False else block_on("state", "first_tok"),
+            {"blocking_rule": "l.tok_arr = r.tok_arr",
+             "arrays_to_explode": ["tok_arr"]},
         ],
         retain_intermediate_calculation_columns=True,
         retain_matching_columns=True,
     )
 
+    # THE PRIOR IS SET, NOT ESTIMATED FROM A BLOCKING RULE.
+    #
+    # `estimate_probability_two_random_records_match([block_on("name_norm")],
+    # recall=0.5)` returned 8.69e-06 - one match in 115,077 pairs - and that is
+    # wrong by more than an order of magnitude for THIS task. It assumes the
+    # exact-name blocking rule catches half the true matches. It does not:
+    # a subsidiary almost never files under its owner's exact name, which is
+    # the whole reason this backlog exists. The under-estimate crushed every
+    # posterior; nothing scored above 0.95 and the top band was empty.
+    #
+    # Set it from the data instead. prime_contracts currently attributes 3,216
+    # of 12,491 UEIs; each attributed UEI's owner carries `names_per_owner`
+    # name records, so the expected number of TRUE record pairs is the sum of
+    # those, over the full cartesian. Note what this does and does not use:
+    # it is a SCALE parameter taken from how many contractors have an owner at
+    # all - it is not a label, and it says nothing about WHICH owner.
+    ent_by_uid = defaultdict(list)
+    for _, e in ent_df.iterrows():
+        ent_by_uid[e["cedar_uid"]].append(e["unique_id"])
+    attributed = con_df[con_df["current_cedar_uid"] != ""]["current_cedar_uid"]
+    expected_pairs = sum(len(ent_by_uid.get(u, [])) or 1 for u in attributed)
+    total_pairs = len(con_df) * len(ent_df)
+    prior = expected_pairs / total_pairs
+    log(f"  prior: {len(attributed):,} attributed UEIs -> {expected_pairs:,} "
+        f"expected true record pairs / {total_pairs:,} = {prior:.3e} "
+        f"(1 in {1/prior:,.0f})")
+
+    settings.probability_two_random_records_match = prior
     db_api = DuckDBAPI()
-    linker = Linker([con_df, ent_df], settings, db_api=db_api,
+    linker = Linker([con_model, ent_model], settings, db_api=db_api,
                     input_table_aliases=["contractor", "entity"])
 
     # --- training ---
     t0 = time.time()
-    linker.training.estimate_probability_two_random_records_match(
-        [block_on("name_norm")], recall=0.5)
-    linker.training.estimate_u_using_random_sampling(max_pairs=2_000_000,
+    linker.training.estimate_u_using_random_sampling(max_pairs=5_000_000,
                                                      seed=SEED)
     log(f"  u estimated in {time.time()-t0:.1f}s")
 
     # m from the owner's OWN adjudications, train half only.
+    #
+    # ONE LABEL PER (uei, owner), NOT ONE PER NAME RECORD. The first draft
+    # labelled the contractor against EVERY name its owner carries. For an
+    # owner with ten aliases that is one informative pair and nine pairs whose
+    # comparison vector is the bottom level - and estimate_m_from_pairwise_
+    # labels dutifully learned that "no distinctive token in common" is a
+    # frequent signature of a TRUE match. It is not; it is a signature of an
+    # alias that happens not to be the one the filer used. Label the name
+    # record the filer actually resembles: highest comparison level, ties
+    # broken by token overlap then by name length.
+    def level_of(cname, ctoks, ename, etoks):
+        if cname == ename:
+            return (5, 0, 0)
+        inter = len(set(ctoks) & set(etoks))
+        subset = 1 if (etoks and set(etoks) <= set(ctoks) and len(etoks) >= 2) else 0
+        return (4 if subset else (3 if inter >= 2 else (2 if inter else 0)),
+                inter, -abs(len(cname) - len(ename)))
+
+    cinfo = con_df.set_index("unique_id")
+    einfo = ent_df.set_index("unique_id")
     lab = []
-    ent_by_uid = defaultdict(list)
-    for _, e in ent_df.iterrows():
-        ent_by_uid[e["cedar_uid"]].append(e["unique_id"])
+    label_levels = Counter()
     for uei, uid in truth_train.items():
-        for eid in ent_by_uid.get(uid, []):
-            lab.append({"source_dataset_l": "contractor", "unique_id_l": uei,
-                        "source_dataset_r": "entity", "unique_id_r": eid,
-                        "clerical_match_score": 1.0})
+        cands = ent_by_uid.get(uid, [])
+        if not cands:
+            continue
+        c = cinfo.loc[uei]
+        best = max(cands, key=lambda e: level_of(
+            c["name_norm"], c["tok_arr"],
+            einfo.loc[e]["name_norm"], einfo.loc[e]["tok_arr"]))
+        label_levels[level_of(c["name_norm"], c["tok_arr"],
+                              einfo.loc[best]["name_norm"],
+                              einfo.loc[best]["tok_arr"])[0]] += 1
+        lab.append({"source_dataset_l": "contractor", "unique_id_l": uei,
+                    "source_dataset_r": "entity", "unique_id_r": best,
+                    "clerical_match_score": 1.0})
+    log(f"  label comparison-level census (5=exact .. 0=no shared token): "
+        f"{dict(sorted(label_levels.items(), reverse=True))}")
     lab_df = pd.DataFrame(lab)
     lab_df.to_csv(OUT / "labels_train.csv", index=False)
     log(f"  m-training labels: {len(lab_df):,} pairs from {len(truth_train):,} "
@@ -532,8 +619,21 @@ def cmd_splink(args) -> int:
         m_route = "expectation maximisation (label route failed)"
     log(f"  m estimated in {time.time()-t0:.1f}s via {m_route}")
 
-    (OUT / "model.json").write_text(
-        json.dumps(linker.misc.save_model_to_json(), indent=1), encoding="utf-8")
+    model = linker.misc.save_model_to_json()
+    (OUT / "model.json").write_text(json.dumps(model, indent=1),
+                                    encoding="utf-8")
+    # Print the learned weights. A model whose parameters are not on the record
+    # is a model nobody can argue with.
+    log("\n  --- learned parameters (m, u, Bayes factor per level) ---")
+    for c in model["comparisons"]:
+        log(f"  {c['output_column_name']}:")
+        for lv in c["comparison_levels"]:
+            m_, u_ = lv.get("m_probability"), lv.get("u_probability")
+            if m_ is None or u_ in (None, 0):
+                log(f"    {lv.get('label_for_charts'):<52} m={m_} u={u_}")
+            else:
+                log(f"    {lv.get('label_for_charts'):<52} "
+                    f"m={m_:.4g} u={u_:.4g} BF={m_/u_:>12,.1f}")
 
     # --- predict ---
     t0 = time.time()
@@ -616,6 +716,64 @@ def cmd_evaluate(args) -> int:
     c_test = curve(test, "SPLINK held-out TEST")
     c_train = curve(train, "SPLINK TRAIN (leakage reference, not a result)")
 
+    # TOP-K RECALL. Under the owner's reframe the queue shows CANDIDATES, so
+    # "the right entity is somewhere in the shortlist" is the metric that
+    # decides whether adjudication is cheap. Top-1 accuracy is the metric for
+    # an autonomous matcher, which is explicitly not what is wanted.
+    ranked = defaultdict(list)
+    for _, r in df.sort_values("match_probability", ascending=False).iterrows():
+        ranked[r["unique_id_l"]].append((r["cedar_uid"],
+                                         float(r["match_probability"])))
+    log("\n  === TOP-K RECALL, held-out test (is the true owner in the "
+        "shortlist at all?) ===")
+    topk = {}
+    for k in (1, 2, 3, 5, 10):
+        hit = sum(1 for u, g in test.items()
+                  if any(c == g for c, _ in ranked.get(u, [])[:k]))
+        topk[k] = round(100 * hit / len(test), 1)
+        log(f"  top-{k:<3} {hit:>4}/{len(test)}  {topk[k]:>5}%")
+    ceiling = sum(1 for u, g in test.items()
+                  if any(c == g for c, _ in ranked.get(u, [])))
+    log(f"  anywhere in candidate set: {ceiling}/{len(test)} "
+        f"{100*ceiling/len(test):.1f}%   <- the blocking ceiling")
+
+    # WHAT DO THE FALSE POSITIVES LOOK LIKE? A precision number cannot tell
+    # you whether the errors are UKB/Cherokee-class. The rows can.
+    log("\n  === top-1 FALSE POSITIVES at p>=0.5, held-out test ===")
+    con_df = None
+    import pandas as _pd
+    con_df = _pd.read_csv(OUT / "contractors.csv", dtype=str,
+                          keep_default_na=False).set_index("unique_id")
+    fps = []
+    for uei, gold in test.items():
+        if uei not in top.index:
+            continue
+        r = top.loc[uei]
+        if float(r["match_probability"]) >= 0.5 and r["cedar_uid"] != gold:
+            gold_rank = next((i + 1 for i, (c, _) in enumerate(ranked[uei])
+                              if c == gold), None)
+            fps.append({
+                "uei": uei,
+                "contractor": con_df.loc[uei]["name_raw"],
+                "state": con_df.loc[uei]["state"],
+                "p": round(float(r["match_probability"]), 4),
+                "splink_said": r["entity_name"],
+                "truth_is": gold,
+                "truth_rank_in_candidates": gold_rank or "ABSENT",
+                "dollars": con_df.loc[uei]["dollars"],
+            })
+    fps.sort(key=lambda x: -x["p"])
+    with (OUT / "false_positives.csv").open("w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(fps[0].keys()))
+        w.writeheader()
+        w.writerows(fps)
+    for x in fps[:25]:
+        log(f"  p={x['p']:<7} {x['contractor'][:40]:<40} {x['state']:<3} -> "
+            f"{x['splink_said'][:34]:<34} (truth rank "
+            f"{x['truth_rank_in_candidates']})")
+    log(f"  {len(fps)} false positives at p>=0.5 -> "
+        f"{OUT/'false_positives.csv'}")
+
     # negatives: what does splink do with UEIs the owner ruled NOT native
     nrows = []
     for thr in [0.999, 0.99, 0.95, 0.9, 0.8, 0.5, 0.1]:
@@ -627,12 +785,54 @@ def cmd_evaluate(args) -> int:
         log(f"  thr {r['threshold']:<7} would link {r['fired']:>3} / {r['n']}"
             f"  ({100*r['fired']/max(1,r['n']):.1f}%)")
 
-    json.dump({"test": c_test, "train": c_train, "negatives": nrows},
+    # HEAD TO HEAD, on the same held-out rows, plus the UNION - the question
+    # the reframe actually asks: does splink SURFACE anything the incumbent
+    # misses, at a confidence the owner could triage?
+    base = {r["uei"]: r for r in read(OUT / "baseline_truth.csv")
+            if r["split"] == "test"}
+    log("\n  === HEAD TO HEAD on the held-out test set ===")
+    b_prop = [u for u, r in base.items() if r["baseline_cedar_uid"]]
+    b_right = [u for u in b_prop if base[u]["baseline_correct"] == "1"]
+    log(f"  incumbent 503     : proposed {len(b_prop):>3}  correct "
+        f"{len(b_right):>3}  precision {100*len(b_right)/max(1,len(b_prop)):.1f}%"
+        f"  recall {100*len(b_right)/len(base):.1f}%")
+    h2h = []
+    for thr in (0.95, 0.5, 0.3, 0.1, 0.001):
+        s_prop = {u for u in test
+                  if u in top.index and float(top.loc[u]["match_probability"]) >= thr}
+        s_right = {u for u in s_prop if top.loc[u]["cedar_uid"] == test[u]}
+        # rows the incumbent declined that splink gets right
+        rescued = s_right - set(b_prop)
+        # rows the incumbent got right that splink would overwrite wrongly
+        broken = {u for u in s_prop - s_right if u in set(b_right)}
+        h2h.append({"threshold": thr, "splink_proposed": len(s_prop),
+                    "splink_correct": len(s_right),
+                    "rescued_from_incumbent_no_call": len(rescued),
+                    "would_break_an_incumbent_correct": len(broken)})
+        log(f"  splink p>={thr:<6}: proposed {len(s_prop):>3}  correct "
+            f"{len(s_right):>3}  RESCUED (503 said nothing) {len(rescued):>3}"
+            f"  WOULD BREAK a 503 correct {len(broken):>3}")
+
+    json.dump({"test": c_test, "train": c_train, "negatives": nrows,
+               "top_k_recall": topk, "head_to_head": h2h,
+               "n_false_positives_at_0.5": len(fps)},
               (OUT / "eval.json").open("w", encoding="utf-8"), indent=1)
     return 0
 
 
 # ===================== the three collision cases =====================
+
+# The three named pairs, keyed by cedar_uid -> the state that decides them.
+# Verified against data/spine/cedar_entity_spine.csv on 2026-09-02.
+COLLISION_PAIRS = [
+    {"CE-00150-XS": "WI",   # Ho-Chunk Nation of Wisconsin
+     "CE-001C8-GH": "NE"},  # Winnebago Tribe of Nebraska (owns Ho-Chunk Inc)
+    {"CE-0014B-TW": "NC",   # Eastern Cherokee (Eastern Band, NC)
+     "CE-00134-BX": "OK",   # Cherokee Nation (OK)
+     "CE-001BS-HA": "OK"},  # United Keetoowah Band (OK) - the $181.9M merge
+    {"CE-001A9-CA": "FL",   # Seminole Tribe of Florida
+     "CE-001AA-J3": "OK"},  # The Seminole Nation of Oklahoma
+]
 
 COLLISIONS = [
     ("Ho-Chunk Inc", "Ho-Chunk Nation of Wisconsin",
@@ -728,21 +928,38 @@ def cmd_verify(args) -> int:
     else:
         check("I3_truth_owner_in_spine", False, "entities.csv missing")
 
-    # I4. THE DISQUALIFIER. No auto-accept-band link may join a contractor
-    #     naming one side of a known collision to the other side.
+    # I4. THE DISQUALIFIER, stated by cedar_uid and not by word.
+    #     For each named collision pair, an AUTO_ACCEPT link may not send a
+    #     contractor to the member of the pair whose state DISAGREES with the
+    #     contractor's, when the other member's state agrees. That is exactly
+    #     the shape of the UKB/Cherokee merge and of Ho-Chunk Inc -> Wisconsin.
     if (OUT / "collisions.csv").exists():
-        bands = json.loads(BANDS_FILE.read_text()) if BANDS_FILE.exists() \
-            else {"accept": 0.99}
         bad = []
         for r in read(OUT / "collisions.csv"):
             if r["band"] != "AUTO_ACCEPT":
                 continue
-            top = r["top_candidates"].split(";")[0].upper()
-            nm = r["contractor"].upper()
-            for a, b in (("HO CHUNK", ("WISCONSIN", "HOCAK")),
-                         ("HO-CHUNK", ("WISCONSIN", "HOCAK"))):
-                if a in nm and any(x in top for x in b) and "WINNEBAGO" not in top:
-                    bad.append(r["contractor"])
+            top_uid = re.search(r"\[(CE-[0-9A-Z-]+)\]", r["top_candidates"])
+            if not top_uid:
+                continue
+            got, st = top_uid.group(1), r["state"]
+            for pair in COLLISION_PAIRS:
+                if got not in pair:
+                    continue
+                other = [u for u in pair if u != got]
+                if pair[got] != st and any(pair[o] == st for o in other):
+                    bad.append(f"{r['contractor']} ({st}) -> {got} "
+                               f"[{pair[got]}] while a same-state member exists")
+            # AND: state cannot separate Cherokee Nation from the United
+            # Keetoowah Band - both are Oklahoma. So the second clause is
+            # state-free: if the top TWO candidates are two different members
+            # of one collision pair, the model is choosing between two
+            # federally recognized tribes and may never auto-accept.
+            uids = re.findall(r"\[(CE-[0-9A-Z-]+)\]", r["top_candidates"])[:2]
+            if len(uids) == 2 and uids[0] != uids[1]:
+                for pair in COLLISION_PAIRS:
+                    if uids[0] in pair and uids[1] in pair:
+                        bad.append(f"{r['contractor']}: top-2 are two members "
+                                   f"of one collision pair ({uids[0]}/{uids[1]})")
         check("I4_no_autoaccept_collision_merge", not bad, f"{bad[:3]}")
     else:
         check("I4_no_autoaccept_collision_merge", False, "collisions.csv missing")
@@ -769,6 +986,31 @@ def cmd_verify(args) -> int:
             log("  !! restore did not clear the injected violation")
             fails.append("I5_restore_failed")
 
+        # I4 PASSES TRIVIALLY WHILE THE AUTO_ACCEPT BAND IS EMPTY, and an
+        # invariant that has never had anything to refuse is not known to work.
+        # Drop the accept cut to 0.5 - which the held-out curve says is NOT an
+        # auto-accept grade - rebuild the collision table, and require I4 to
+        # fire on the Cherokee Nation / United Keetoowah top-2 pairs.
+        log("\n  -- selftest: lowering the accept cut to 0.5 so I4 has "
+            "something to refuse --")
+        keep = BANDS_FILE.read_text(encoding="utf-8") if BANDS_FILE.exists() \
+            else '{"accept": 0.999, "reject": 0.1}'
+        BANDS_FILE.write_text('{"accept": 0.5, "reject": 0.1}', encoding="utf-8")
+        try:
+            cmd_collisions(argparse.Namespace())
+            rc3 = cmd_verify(argparse.Namespace(selftest=False))
+            if rc3 == 0:
+                log("  !! SELFTEST FAILED: I4 did not fire at accept=0.5")
+                fails.append("I5_I4_selftest_did_not_fire")
+            else:
+                log("  selftest OK: I4 fired at accept=0.5")
+        finally:
+            BANDS_FILE.write_text(keep, encoding="utf-8")
+            cmd_collisions(argparse.Namespace())
+        if cmd_verify(argparse.Namespace(selftest=False)) != 0:
+            log("  !! restore did not clear the I4 violation")
+            fails.append("I5_I4_restore_failed")
+
     if fails:
         log(f"\n  VERIFY FAILED: {', '.join(fails)}")
         return 1
@@ -793,7 +1035,6 @@ def main() -> int:
            "evaluate": cmd_evaluate, "collisions": cmd_collisions,
            "verify": cmd_verify}
     if args.cmd == "queue":
-        from importlib import import_module  # queue lives in 1061
         return cmd_queue(args)
     if args.cmd == "all":
         for k in ("prep", "baseline", "splink", "evaluate", "collisions"):

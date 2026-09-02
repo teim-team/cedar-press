@@ -37,6 +37,34 @@
       "np_ein_entity_hub": 0,
       "ownership_events": 0
     },
+    "cdr11_dollars": 38191057346.29,
+    "cdr11_pairs_no_shared_token": 183,
+    "cdr11_pairs_trap_token_only": 189,
+    "cdr11_prime_rows_keyed": 172338,
+    "cdr11_quarantined_uei_ledger_rows": 2142,
+    "cdr11_quarantined_with_exclusion": 0,
+    "cdr12_north_wind_hubs": {
+      "AKNF-NLSONL-00-ALEUTC-PRBLFA": [
+        1,
+        1,
+        4871.25
+      ],
+      "ANRC-CKINLT-00": [
+        7149,
+        24,
+        2220343149.23
+      ],
+      "TRBF-ESWNDR-00": [
+        1242,
+        16,
+        537610729.14
+      ],
+      "TRBF-LUMBEE-00": [
+        32,
+        6,
+        38228966.65
+      ]
+    },
     "prime_rows": 1217768
   }
 }

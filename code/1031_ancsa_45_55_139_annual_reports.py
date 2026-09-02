@@ -392,11 +392,40 @@ THOUSANDS_CUE = re.compile(
     r"\(in thousands\)|dollars in thousands)", re.I)
 
 CAND_COLS = ["candidate_id", "source_channel", "corporation_name",
-             "anc_class", "period_covered", "cue", "event_date_text",
-             "money_text", "thousands_convention_in_document", "quote",
+             "anc_class", "period_covered", "cue", "cue_class",
+             "event_date_text", "money_text",
+             "thousands_convention_in_document", "quote",
              "portal_document_id", "source_url", "local_file", "txt_file",
              "page_hint", "staged_by", "staged_date", "record_scope",
              "disposition"]
+
+# A cue alone does not say what KIND of sentence this is, and the difference
+# decides whether a figure could ever be a deal value. Measured on the first
+# 30 documents: `joint venture` overwhelmingly introduces an EQUITY-METHOD
+# CARRYING BALANCE ("investment in this Joint Venture was $2,971 and $12,195
+# (in thousands)"), which is a balance-sheet amount and never a price. The
+# same trap ANCSA_PORTAL_V2_LOG catalogues as goodwill-read-as-price.
+STRONG_CUE = re.compile(
+    r"\b(business combination|purchase price|consideration transferred|"
+    r"consideration paid|acquired (?:100|[0-9]{1,3}) ?percent|"
+    r"purchased (?:100|[0-9]{1,3})%|purchased 100 percent|"
+    r"acquired all of the|stock purchase agreement|asset purchase agreement|"
+    r"completed the sale of|sold its (?:entire )?(?:interest|ownership)|"
+    r"bargain purchase gain|acquisition of (?:the )?(?:stock|assets))\b",
+    re.I)
+BALANCE_CUE = re.compile(
+    r"\b(carrying value|investment (?:in|amount)|equity method|"
+    r"total assets|total liabilities|minimum lease|principal payments|"
+    r"notes receivable|long-term debt|accumulated|balance sheet|"
+    r"backlog|revenue|earnings from)\b", re.I)
+
+
+def classify_cue(sentence):
+    if STRONG_CUE.search(sentence):
+        return "BUSINESS_COMBINATION_OR_DISPOSITION"
+    if BALANCE_CUE.search(sentence):
+        return "BALANCE_OR_RESULT_NOT_A_PRICE"
+    return "UNCLASSIFIED"
 
 
 def sentences(text):
@@ -445,6 +474,7 @@ def cmd_mine(limit=None):
                     "anc_class": mrow.get("anc_class", ""),
                     "period_covered": r["period_covered"],
                     "cue": (ACQ_CUES.search(s).group(0) or "").lower(),
+                    "cue_class": classify_cue(s),
                     "event_date_text": "; ".join(d[:3]),
                     "money_text": "; ".join(m[:5]),
                     "thousands_convention_in_document": thou,
@@ -465,9 +495,18 @@ def cmd_mine(limit=None):
     out(f"  {len(rows):,} candidate passages from {len(ex):,} documents")
     out(f"  -> {CANDIDATES.relative_to(CEDAR)}")
     import collections
-    for k, v in collections.Counter(r["corporation_name"]
-                                    for r in rows).most_common(30):
+    out("")
+    out("  by cue class")
+    for k, v in collections.Counter(r["cue_class"]
+                                    for r in rows).most_common():
         out(f"    {v:5d}  {k}")
+    out("")
+    out("  by corporation")
+    for k, v in collections.Counter(r["corporation_name"]
+                                    for r in rows).most_common(60):
+        strong = sum(1 for r in rows if r["corporation_name"] == k
+                     and r["cue_class"] == "BUSINESS_COMBINATION_OR_DISPOSITION")
+        out(f"    {v:5d} ({strong:3d} strong)  {k}")
     return 0
 
 

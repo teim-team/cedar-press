@@ -5988,12 +5988,12 @@ them a seventh time.**
 | line | ours? | who |
 |---|---|---|
 | `lint_class7` NEW: `962…probe_id=f"FR-TERM-{i}"` | **YES — FIXED** | a loop index as a key. Now `stable_digest((host, phrase))`. 293 confirms the instance is gone. |
-| `lint_class2c` NEW ×2 | no | `852_extend_constellation_edges.py` (`dropped += 1`), `873_build_aiannh_crosswalk.py` (`nskip += 1`) |
-| `lint_class3` NEW ×1 | no | `992_newsletter_deal_candidates.py` |
-| `lint_class4` NEW ×3 | no | `1030_sec_edgar_native_transactions.py`, `1031_ancsa_45_55_139_annual_reports.py`, `992_newsletter_deal_candidates.py` |
-| `lint_class7` NEW ×2 | no | `1030_…`, `1031_…` (`candidate_id: f"…{n:06d}"`) |
+| `lint_class1` NEW ×1 | no | `1011_cross_dataset_reconciliation.py` — **`glob("deals_*_additions.csv")`, the exact additions-only glob that miscounted deals as 790 and is repaired at source in 88 and 57.** Third time this pattern has been re-typed. |
+| `lint_class2c` NEW ×4 | no | `1060_splink_pilot.py` (×2), `852_extend_constellation_edges.py`, `873_build_aiannh_crosswalk.py` |
+| `lint_class3` NEW ×2 | no | `1060_splink_pilot.py`, `992_newsletter_deal_candidates.py` |
+| `lint_class4` NEW ×2 | no | `1031_ancsa_45_55_139_annual_reports.py`, `992_newsletter_deal_candidates.py` |
 | `lint_class6` NEW ×3 | no | `518_dataset_readiness.py`, `870_build_geo_crosswalks.py`, `871_promote_geo_keys_contracts.py` |
-| `files_with_columns_lost_vs_backup = 2` | no | `entity_evidence_profile.csv` (505, already named above in this file) and **`federal_funding_tribe_year_panel.csv` — NEW: `tribe_id` and `tribe_id_scheme` lost against `.bak_2026-09-01_pre843`.** Owner: whoever ran 843. **Neither of our two enriched tables lost a column**; both gained only. |
+| `files_with_columns_lost_vs_backup` (2 on the first run, **1** on the second) | no | `entity_evidence_profile.csv` (505, already named above in this file) and `federal_funding_tribe_year_panel.csv` (`tribe_id`, `tribe_id_scheme` against `.bak_2026-09-01_pre843`) — the second was repaired between our two gate runs. **Neither of our two enriched tables lost a column**; both gained only. |
 | `tables_undocumented_in_codebook 3 → 17` | no | the 14 named in the gate output are `geo_*` (870/871), `cedar_constellation_*` (851/852), `tribal_newsletter_*` (992), `native_business_*`, `cedar_entity_freshness.csv` (830). Our one new table, `consultation_source_probe.csv`, is registered in `cedar_codebook.INTERNAL_TABLES` and is not in that list. |
 | `contract_orphan_shippable = 7` | **partly ours, downward** | we REMOVED two (`nonprofit_schedule_c_lobbying.csv`, `nonprofit_schedule_c_coverage.csv`) by claiming them for `lobbying` in `500.COLLECTIONS` and declaring their grain in `512.GRAIN_INT_READY`. The seven that remain are two `native_owned_businesses.bak_*.csv` and one `prime_contracts.bak_*.csv` **registered in the codebook as if they were tables** — that is a bug in whatever registered a `.bak` file — plus `native_owned_businesses.csv`, `regulations_gov_comments.csv`, `regulations_gov_entity_coverage.csv` (live harvest by `221`, pid 1556 at the time of writing — left alone deliberately) and `sam_native_class_distributions.csv`. |
 | `SHIPPING LOST: advocacy_passthrough_2026-08-07.csv` | no | **fifth workstream to stop on it.** Still on disk. Already explained above. |

@@ -732,4 +732,43 @@ available for *"263 of the 284 facility-bearing tribes (93%)"*. 263 is the
 count of facility-bearing tribes that have **any ordinance row**; the count
 that have a **stated class** on one is **256**. The distinction is small and it
 is the difference between a join that lands and a join that lands on a blank.
+
+## D3 · S1 · Four Ho-Chunk identifiers are keyed across two unrelated nations, one at tier A
+
+*Found 2026-09-02 by `code/963_flag_named_collision_families.py`, which the
+owner's own list asked for. **Nothing was changed.** The ledger's md5 is
+identical before and after the scan and no `cedar_uid` moved; the proposals sit
+in `review/named_collision_families_2026-09-02.csv` for a human ruling.*
+
+`Ho-Chunk` names two unrelated nations. **Ho-Chunk Nation of Wisconsin**
+(`CE-00150-XS`, WI) is a government. **Ho-Chunk, Inc.** is the economic
+development arm of the **Winnebago Tribe of Nebraska**, and its operating
+companies are Ho-Chunk Farms, Ho-Chunk Builders, Ho-Chunk Shared Services and
+Ho-Chunk Construction Management Services — all Nebraska.
+
+`cedar_identifier_ledger_final.csv` currently holds rows going **both ways**:
+
+| tier | id | legal business name | keyed to | suspected owner |
+|---|---|---|---|---|
+| **A** | CAGE `3VFL3` | `Ho-Chunk Nation` | **Winnebago Tribe of Nebraska (NE)** | Ho-Chunk Nation of Wisconsin |
+| B | UEI `DMA6EKCMAPB7` | `Ho Chunk Inc` | Ho-Chunk (WI) | Winnebago Tribe of Nebraska |
+| B | CAGE `7CE83` | `HO-CHUNK FARMS, INC.` | Ho-Chunk (WI) | Winnebago Tribe of Nebraska |
+| B | CAGE `8APB4` | `HO-CHUNK CONSTRUCTION MANAGEMENT SERVICES COMP` | Ho-Chunk (WI) | Winnebago Tribe of Nebraska |
+
+Winnebago separately and correctly holds `Ho-Chunk Inc` CAGE `52S22` at tier A,
+`Ho-Chunk Builders Company` and `Ho-Chunk Shared Services Company` — so the
+ledger holds the SAME firm family under both nations at once. Prime dollars on
+the four flagged rows total **$0.01M**, so the money at stake is negligible and
+the identity error is not: a tier-A CAGE is what a downstream join trusts.
+
+**One more, lower confidence, in the Cherokee family:** EIN `133844128`
+`NORTH EASTERN BAND OF CHEROKEE` is keyed to **Lumbee** (NC). Flagged as a
+suspicion, not a finding — a longer name can contain a shorter one and still be
+a third organisation.
+
+**The two other pairs the owner named came back clean.** Every decisive
+`Cherokee Nation` / `Eastern Band of Cherokee` / `Keetoowah` row (77) and every
+decisive Seminole row (12) is keyed to the right nation. The Keetoowah repair
+of 2026-09-01 is holding.
+
 <!-- END INT-READY -->

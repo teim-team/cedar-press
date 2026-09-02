@@ -116,6 +116,12 @@ BIZ = re.compile(
     r"business|employment|jobs|grant|award|construction|lease|"
     r"broadband|energy|opportunit\w+)\b")
 
+# A path segment, not a substring anywhere in the URL: /Stagingsite/ counts,
+# ".../administration-building.pdf" does not.
+FORBIDDEN_PATH = re.compile(
+    r"(?i)(^|/)(wp-admin|wp-login|admin|administrator|staging\w*|dev|test)(/|$)"
+    r"|/\.(env|git|svn)(/|$)|/(backup|backups|db_dump)(/|$)")
+
 _last, _robots_cache = {}, {}
 
 
@@ -242,7 +248,22 @@ def probe(ent, site):
     rec["route_coverage"].append("robots_txt")
 
     def add(kind, url, title="", depth="", technique="", extra=None):
-        if blocked(urlparse(url).path or "/", dis):
+        p = urlparse(url).path or "/"
+        if blocked(p, dis):
+            return
+        # A path segment named admin / staging / wp-admin is somebody's private
+        # infrastructure, even when the site's own media index links it and even
+        # when it answers 200. Middletown Rancheria's newsletter PDFs live under
+        # /Stagingsite/; that is a staging environment left reachable, which
+        # HIDDEN_DATA_TECHNIQUES calls an operator mistake and not an
+        # invitation. Recorded as refused, with the reason, rather than kept.
+        if FORBIDDEN_PATH.search(p):
+            rec.setdefault("refused_paths", []).append({
+                "url": url,
+                "reason": ("path segment names an admin or staging environment; "
+                           "not fetched and not recorded as a channel, per "
+                           "docs/HIDDEN_DATA_TECHNIQUES.md THE BOUNDARY"),
+            })
             return
         d = {"kind": kind, "url": url, "title": title[:180],
              "archive_depth": depth, "technique": technique}
@@ -526,6 +547,47 @@ def run(limit=None):
     return 0
 
 
+def rescreen():
+    """Re-apply the refusal screen to records already on disk. No network.
+
+    Needed once: the first full run recorded a set of newsletter PDFs served
+    from a /Stagingsite/ path before the screen existed. Re-fetching 233 hosts
+    to fix a filing decision would be rude and pointless.
+    """
+    recs = [json.loads(l) for l in OUT.read_text(encoding="utf-8").splitlines()
+            if l.strip()]
+    moved = 0
+    for r in recs:
+        keep, refused = [], r.get("refused_paths") or []
+        for d in r.get("found") or []:
+            if FORBIDDEN_PATH.search(urlparse(d["url"]).path or ""):
+                refused.append({"url": d["url"], "reason":
+                                "path segment names an admin or staging "
+                                "environment; not recorded as a channel, per "
+                                "docs/HIDDEN_DATA_TECHNIQUES.md THE BOUNDARY"})
+                moved += 1
+            else:
+                keep.append(d)
+        r["found"] = keep
+        if refused:
+            r["refused_paths"] = refused
+            if not keep and r["outcome"] == "FOUND":
+                r["outcome"] = "NONE_FOUND"
+                r["note"] = ((r.get("note") or "") + " every candidate on this "
+                             "host sat under a refused admin/staging path; "
+                             "recorded as no publishable channel found.").strip()
+    tmp = OUT.with_suffix(".jsonl.tmp")
+    with tmp.open("w", encoding="utf-8") as fh:
+        for r in recs:
+            fh.write(json.dumps(r, ensure_ascii=False) + "\n")
+            fh.flush()
+    tmp.replace(OUT)
+    print("rescreen: %d URLs moved to refused_paths" % moved)
+    st = summarize()
+    print(json.dumps({k: st[k] for k in ("attempted", "found", "none_found")}, indent=1))
+    return 0
+
+
 # ------------------------------------------------------------------ verify
 def verify(recs=None):
     if recs is None:
@@ -554,10 +616,9 @@ def verify(recs=None):
     if viol:
         f.append("ROBOTS_DISALLOW_FETCHED: %d, e.g. %s" % (len(viol), viol[0][1]))
 
-    # 3. no admin / staging / dotfile path was ever recorded
-    forb = re.compile(r"(?i)/(wp-admin|wp-login|admin|staging|\.env|\.git|backup)")
+    # 3. no admin / staging / dotfile path was ever recorded as a channel
     ap = [(r["cedar_uid"], d["url"]) for r in recs for d in (r.get("found") or [])
-          if forb.search(urlparse(d["url"]).path or "")]
+          if FORBIDDEN_PATH.search(urlparse(d["url"]).path or "")]
     if ap:
         f.append("FORBIDDEN_PATH_RECORDED: %d, e.g. %s" % (len(ap), ap[0][1]))
 
@@ -617,6 +678,8 @@ def main(argv):
         print("verify OK - %d attempted, %d found, 6 invariants held"
               % (st["attempted"], st["found"]))
         return 0
+    if "--rescreen" in argv:
+        return rescreen()
     lim = None
     if "--limit" in argv:
         lim = int(argv[argv.index("--limit") + 1])

@@ -373,7 +373,31 @@ def ccd_lookup(name, recs):
             best, best_note, best_year = r, note, y
     if best:
         return best, best_note
-    return None, "no CCD BIE-universe school name matched"
+    # NEAR MISSES ARE REPORTED, NOT RESOLVED.
+    # 'Shiprock Reservation Dormitory' sits beside CCD's 'SHIPROCK ALTERNATIVE
+    # DORMITORY'. They may be the same facility renamed, or two facilities.
+    # Guessing would mint a wrong NCES id onto an entity; saying nothing would
+    # hide a lead a human can settle in a minute. So the candidate is written
+    # with the mismatch stated and NO identifier claimed. Flag, never delete.
+    want = set(toks(name))
+    near = []
+    for r in recs:
+        got = set(toks(r.get("school_name", "")))
+        if want & got:
+            near.append((len(want & got), r.get("school_name", ""),
+                         r.get("ncessch", ""), r.get("year")))
+    near.sort(reverse=True)
+    seen_n, out = set(), []
+    for _s, nm, nid, _y in near:
+        if nm.lower() in seen_n:
+            continue
+        seen_n.add(nm.lower())
+        out.append(nm + " [NCES " + str(nid) + "]")
+        if len(out) == 3:
+            break
+    return None, ("no CCD BIE-universe school name passed the token test"
+                  + ("; NEAR MISSES (not resolved): " + "; ".join(out)
+                     if out else "; no near miss either"))
 
 
 # -------------------------------------------------------- route: 990/IRS

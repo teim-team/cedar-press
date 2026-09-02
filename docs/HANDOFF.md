@@ -241,7 +241,7 @@ Each folder has a `GRAVEYARD_INDEX.md` with the evidence and a restore command.
 Elijah's directive: one identification system — ours. `503_reconcile_assistance_
 to_cedar_ids.py` finished what the crosswalk started:
 
-| `tribe_id_scheme_resolved` | before | after |
+| `tribe_id_scheme_resolved` (renamed `attribution_status` 2026-09-01 by 843) | before | after |
 |---|---:|---:|
 | `cedar_neid` | 26.2% | **78.3%** (final) |
 | `lineageA_dofile_integer` (CICD) | 52.1% | **0.01%** — 44 rows: one researched EXCLUSION (Tuscarawas, an OH county agency) + stragglers |

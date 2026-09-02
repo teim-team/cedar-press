@@ -876,7 +876,8 @@ does not own it.
 **Proposal.** Do not remap in place — a rebuild would revert it and the blank
 10,908 would still be blank. Add `entity_class_scheme`
 (`SPINE` / `LEGACY_UPPER_SNAKE` / `PROVENANCE_NOT_A_CLASS` / `BLANK`) beside it,
-the same shape as `tribe_id_scheme_resolved` in the assistance table, so a
+the same shape as `attribution_status` in the assistance table (called
+`tribe_id_scheme_resolved` until 843 renamed it on 2026-09-01), so a
 consumer can see the seam instead of discovering it.
 
 ### GAP 8 — four absence vocabularies, two of them undeclared

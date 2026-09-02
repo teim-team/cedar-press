@@ -11,10 +11,11 @@ nine sets of column names:
 
     data/staging/tribe_harvest/shard_{a,b,c,d,e,f,g,h}/newsletters*.jsonl
     data/staging/np_harvest/newsletters_shard_i.jsonl
+    data/staging/tribe_harvest/newsletter_gap_sweep/gap_sweep.jsonl   (991)
     data/staging/cedar_web_map.csv          (url_type in newsletter/
                                              press_release/annual_report)
 
-This script reads all ten, normalizes them onto one schema, and writes two
+This script reads all eleven, normalizes them onto one schema, and writes two
 tables. It does NOT fetch anything - no network - so it is safe to re-run.
 
     data/clean/tribal_newsletter_corpus.csv     one row per publication channel
@@ -63,6 +64,8 @@ SPINE = ROOT / "data" / "spine" / "cedar_entity_spine.csv"
 HARVEST = ROOT / "data" / "staging" / "tribe_harvest"
 NPH = ROOT / "data" / "staging" / "np_harvest"
 WEBMAP = ROOT / "data" / "staging" / "cedar_web_map.csv"
+SWEEP = (ROOT / "data" / "staging" / "tribe_harvest" / "newsletter_gap_sweep"
+         / "gap_sweep.jsonl")
 CLEAN = ROOT / "data" / "clean"
 OUT_CORPUS = CLEAN / "tribal_newsletter_corpus.csv"
 OUT_COVER = CLEAN / "tribal_newsletter_coverage.csv"
@@ -454,6 +457,61 @@ def collect(spine_by_uid):
         r["channel_host"] = host_of(url)
         r["newsletter_id"] = nid("EIN%s" % d.get("EIN", ""), url)
         recs.append(r)
+
+    # ---------- the gap sweep (991): entities no shard ever probed ----------
+    # These are the 104 nations, villages and corporations whose newsletter was
+    # invisible to every earlier pass because every earlier pass read the
+    # rendered page. Most of these were found in `/wp-json/wp/v2/media`.
+    if SWEEP.exists():
+        for line in SWEEP.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            d = json.loads(line)
+            uid = d["cedar_uid"]
+            if d["outcome"] not in ("FOUND", "NONE_FOUND"):
+                probed[uid].add("gap_sweep")
+                continue
+            if not d.get("found"):
+                probed[uid].add("gap_sweep")
+                r = blank()
+                r["channel_type"] = "none_found"
+                r["entity_class"] = d["entity_class"]
+                r["discovery_technique"] = "; ".join(d.get("route_coverage") or [])
+                r["retrieved_date"] = d["checked_date"]
+                r["archive_depth_basis"] = ""
+                r["business_content"] = "unknown"
+                r["note"] = d.get("note", "")[:600]
+                recs.append(stamp(r, uid, "gap_sweep", ""))
+                continue
+            for f in d["found"]:
+                r = blank()
+                r["publication_name"] = f.get("title", "")
+                r["channel_type"] = {"issue_pdf": "newsletter",
+                                     "feed": "news_page",
+                                     "channel_index": "news_page"}.get(f["kind"], "newsletter")
+                r["entity_class"] = d["entity_class"]
+                r["format"] = {"issue_pdf": "PDF issue", "feed": "RSS/Atom XML"}.get(
+                    f["kind"], "HTML page")
+                lo, hi = years_from(d.get("archive_years") or [])
+                r["archive_earliest_year"], r["archive_latest_year"] = lo, hi
+                r["archive_depth_n_issues"] = str(d.get("wp_total_media") or "")
+                r["archive_depth_basis"] = f.get("archive_depth", "") or (
+                    "X-WP-Total on the media index" if d.get("wp_total_media") else
+                    "URL located; depth not measured")
+                terms = d.get("business_signal_terms") or []
+                r["business_content"] = "yes" if terms else "unknown"
+                r["business_content_terms"] = "; ".join(terms)
+                r["recent_issue_urls"] = " | ".join(f.get("example_item_urls") or [])
+                r["discovery_technique"] = f.get("technique", "")
+                r["http_status"] = "200"
+                r["retrieved_date"] = d["checked_date"]
+                note = d.get("attribution_caution", "")
+                if d.get("refused_paths"):
+                    note += (" %d further URLs on this host were REFUSED: they sit "
+                             "under an admin or staging path."
+                             % len(d["refused_paths"]))
+                r["note"] = note.strip()
+                recs.append(stamp(r, uid, "gap_sweep", f["url"]))
 
     # ---------- the web map, for entities no shard newsletter file reached ----
     seen_uid_url = {(r["cedar_uid"], r["channel_url"]) for r in recs}

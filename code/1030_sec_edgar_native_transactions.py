@@ -828,6 +828,287 @@ def cmd_mine(limit=None, min_evidence="all"):
     return 0
 
 
+# ================================================================== census ==
+# THE REGISTRANT UNIVERSE, IN ONE REQUEST.
+#
+# docs/DEALS_SEC_2010_2017_BUILD_LOG.md closed the registrant question for
+# 2010-2017 by downloading all 32 quarterly `company.idx` files - 1.2 GB - and
+# scanning them. That is the right answer and an expensive one, and it has to
+# be repeated for every new window.
+#
+# `https://www.sec.gov/Archives/edgar/cik-lookup-data.txt` is the complete
+# CIK <-> company-name list for EVERY filer that has ever registered with
+# EDGAR, in a single file of about 7 MB. One request replaces the whole index
+# sweep and covers all years at once, so the census can never again go stale
+# by a window.
+
+CIK_LOOKUP = "https://www.sec.gov/Archives/edgar/cik-lookup-data.txt"
+CIK_LOCAL = CACHE / "_cik-lookup-data.txt"
+CENSUS = REVIEW / "sec_edgar_1030_registrant_census.csv"
+
+# Patterns that make a FILER NAME worth a look. Deliberately recall-first:
+# this produces a candidate list a human reads, not an attribution.
+CENSUS_PAT = re.compile(
+    r"\b(TRIBAL|TRIBE|TRIBES|RANCHERIA|PUEBLO|NATION OF|INDIAN|"
+    r"NATIVE|ALASKA NATIVE|ANCSA|SHOSHONE|PAIUTE|NAVAJO|CHEROKEE|CHOCTAW|"
+    r"CHICKASAW|SEMINOLE|MUSCOGEE|OSAGE|POTAWATOMI|CHIPPEWA|OJIBWE|"
+    r"SIOUX|LAKOTA|DAKOTA|APACHE|MOHEGAN|MASHANTUCKET|PEQUOT|ONEIDA|"
+    r"SENECA|MOHAWK|CHEYENNE|ARAPAHO|BLACKFEET|CROW TRIBE|SALISH|KOOTENAI|"
+    r"YAKAMA|UMATILLA|WARM SPRINGS|COLVILLE|LUMMI|TULALIP|PUYALLUP|"
+    r"MUCKLESHOOT|SUQUAMISH|QUINAULT|MAKAH|CHEHALIS|COWLITZ|KALISPEL|"
+    r"SPOKANE TRIBE|COEUR D ALENE|NEZ PERCE|SHOALWATER|JAMESTOWN S|"
+    r"SEALASKA|DOYON|CALISTA|KONIAG|AHTNA|CHUGACH ALASKA|BRISTOL BAY|"
+    r"ARCTIC SLOPE|BERING STRAITS|COOK INLET REGION|ALEUT CORP|"
+    r"UKPEAGVIK|OLGOONIK|TIKIGAQ|AFOGNAK|KUUKPIK|SITNASUAK|HUNA TOTEM|"
+    r"GOLDBELT|KIKIKTAGRUK|OUZINKIE|KLAWOCK|CHOGGIUNG|TANADGUSIX|"
+    r"GANA-A|KOOTZNOOWOO|SHEE ATIKA|NANA REGIONAL|NANA DEVELOPMENT|"
+    r"HAWAIIAN HOMES|NATIVE HAWAIIAN|ALASKA NATIVE CORP)\b")
+
+
+def cmd_census(refresh=False):
+    """Every EDGAR registrant whose NAME suggests a Native entity."""
+    import collections
+    out("=== 1030 census - the whole EDGAR registrant universe, once ===")
+    out("")
+    CACHE.mkdir(parents=True, exist_ok=True)
+    if CIK_LOCAL.exists() and not refresh:
+        out(f"  cached: {CIK_LOCAL.relative_to(CEDAR)} "
+            f"({CIK_LOCAL.stat().st_size:,} bytes) - no request made")
+        body = CIK_LOCAL.read_bytes()
+    else:
+        with HostLock("www.sec.gov",
+                      "single request for the full CIK lookup file",
+                      "1030 registrant census") as lock:
+            time.sleep(GAP)
+            status, body = http_get(CIK_LOOKUP, ARCH_HDR, timeout=300)
+            lock.bump(downloaded_this_run=1, requests_made=1)
+        CIK_LOCAL.write_bytes(body)
+        out(f"  downloaded {len(body):,} bytes")
+
+    txt = body.decode("latin-1", "replace")
+    lines = [x for x in txt.splitlines() if x.strip()]
+    out(f"  {len(lines):,} registrant name/CIK pairs in the whole of EDGAR")
+
+    rows = []
+    for ln in lines:
+        # format is NAME:CIK: with the CIK last
+        parts = ln.rstrip(":").rsplit(":", 1)
+        if len(parts) != 2:
+            continue
+        name, cik = parts[0], parts[1]
+        m = CENSUS_PAT.search(name.upper())
+        if not m:
+            continue
+        rows.append({"filer_name": name, "cik": cik,
+                     "matched_token": m.group(0),
+                     "listed_by": SCRIPT, "listed_date": TODAY,
+                     "record_scope": "NAME_CANDIDATE_NOT_A_NATIVE_ENTITY"})
+    rows.sort(key=lambda r: r["filer_name"])
+    with open(CENSUS, "w", encoding="utf-8", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=["filer_name", "cik",
+                                           "matched_token", "listed_by",
+                                           "listed_date", "record_scope"])
+        w.writeheader()
+        w.writerows(rows)
+    out(f"  {len(rows):,} name candidates -> {CENSUS.relative_to(CEDAR)}")
+    out("")
+    out("  by matched token")
+    for k, v in collections.Counter(r["matched_token"]
+                                    for r in rows).most_common(40):
+        out(f"    {v:5d}  {k}")
+    out("")
+    out("  NOTE: a token match is a candidate, never an attribution -")
+    out("  ENTITY_MATCH_RULES rule 13. INDIAN alone reaches South Asian")
+    out("  diaspora organisations and Florida's Indian River County.")
+    return 0
+
+
+# ============================================================= submissions ==
+# For a CIK the census turned up, `data.sec.gov/submissions/CIK##########.json`
+# returns the registrant's WHOLE filing history in one request - form, date,
+# accession, primary document and 8-K item tags. That converts "is this a
+# registrant?" into "what did it file, and when", for one request per filer.
+
+SUBMISSIONS = "https://data.sec.gov/submissions/CIK{:010d}.json"
+SUBS_OUT = REVIEW / "sec_edgar_1030_registrant_filings.csv"
+SUBS_COLS = ["cik", "registrant_name", "entity_type", "sic_description",
+             "state_of_incorporation", "form", "filing_date",
+             "report_date", "accession", "primary_document", "items",
+             "filing_url", "pulled_by", "pulled_date", "record_scope"]
+
+
+def cmd_submissions(ciks=None):
+    """Pull the filing history for named CIKs. Flushes after every request."""
+    if not ciks:
+        raise SystemExit("pass --ciks=1234567,7654321")
+    want = [int(c) for c in str(ciks).split(",") if c.strip()]
+    out("=== 1030 submissions - filing history per registrant ===")
+    out("")
+    done = set()
+    if SUBS_OUT.exists():
+        with open(SUBS_OUT, encoding="utf-8-sig", newline="") as fh:
+            done = {int(r["cik"]) for r in csv.DictReader(fh)}
+    todo = [c for c in want if c not in done]
+    out(f"  {len(want)} asked, {len(done)} already held, {len(todo)} to pull")
+    first = not SUBS_OUT.exists()
+    hdr = {"User-Agent": UA, "Accept-Encoding": "gzip, deflate",
+           "Host": "data.sec.gov"}
+    with HostLock("data.sec.gov",
+                  "sequential, single stream, >=0.17s gap, 2h deadline",
+                  "1030 registrant filing histories") as lock:
+        for cik in todo:
+            try:
+                time.sleep(GAP)
+                status, body = http_get(SUBMISSIONS.format(cik), hdr,
+                                        timeout=90)
+                lock.bump(downloaded_this_run=1, requests_made=1)
+                d = json.loads(body.decode("utf-8", "replace"))
+            except Exception as e:
+                out(f"  CIK {cik}: {type(e).__name__}")
+                lock.state["refused_by_host"].append(f"{cik}: {type(e).__name__}")
+                continue
+            recent = (d.get("filings") or {}).get("recent") or {}
+            n = len(recent.get("accessionNumber") or [])
+            rows = []
+            for i in range(n):
+                acc = recent["accessionNumber"][i]
+                doc = (recent.get("primaryDocument") or [""] * n)[i]
+                rows.append([
+                    cik, d.get("name", ""), d.get("entityType", ""),
+                    d.get("sicDescription", ""),
+                    d.get("stateOfIncorporation", ""),
+                    recent["form"][i], recent["filingDate"][i],
+                    (recent.get("reportDate") or [""] * n)[i], acc, doc,
+                    (recent.get("items") or [""] * n)[i],
+                    f"https://www.sec.gov/Archives/edgar/data/{cik}/"
+                    f"{acc.replace('-', '')}/{doc}" if doc else
+                    f"https://www.sec.gov/Archives/edgar/data/{cik}/"
+                    f"{acc.replace('-', '')}/",
+                    SCRIPT, TODAY, "REGISTRANT_FILING_INDEX_NOT_A_DEAL"])
+            with open(SUBS_OUT, "w" if first else "a",
+                      encoding="utf-8", newline="") as fh:
+                w = csv.writer(fh)
+                if first:
+                    w.writerow(SUBS_COLS)
+                w.writerows(rows)
+                fh.flush()
+                os.fsync(fh.fileno())
+            first = False
+            out(f"  CIK {cik:>10d}  {d.get('name','')[:48]:48s} "
+                f"{n:5d} filings")
+    out("")
+    out(f"  -> {SUBS_OUT.relative_to(CEDAR)}")
+    return 0
+
+
+# ============================================================== fts-leads ==
+# The raw FTS hit file is a discovery index, not evidence, and most of its
+# volume comes from register SHORT names that are also US place names
+# (`Enterprise`, `Jackson`, `Bridgeport`, `Greenville`, `Las Vegas`), each of
+# which saturates the page ceiling with nothing. This turns the query log into
+# two usable things: a ranked lead list, and an explicit NEGATIVE result.
+#
+# "Attempted, none found" is a fact Cedar distinguishes from "untouched", and
+# it is most of what an entity-driven EDGAR sweep returns.
+
+LEAD_COLS = ["query_name", "query_kind", "cedar_uid", "owner_name",
+             "match_evidence_class", "advertised_total", "retrieved",
+             "distinct_accessions", "first_file_date", "last_file_date",
+             "top_forms", "example_accession", "example_url",
+             "lead_class", "why", "listed_by", "listed_date"]
+
+FTS_LEADS = REVIEW / "sec_edgar_1030_entity_fts_leads.csv"
+
+# Saturation ceiling: a name that advertises more than this is not a lead, it
+# is a common word. Measured: every name over it in this run is a place name
+# or a one-word generic, and every genuine ANC-subsidiary lead is far under.
+SATURATION = 400
+
+
+def cmd_fts_leads():
+    import collections
+    out("=== 1030 fts-leads - rank the entity sweep, and state the "
+        "negatives ===")
+    if not FTS_QUERYLOG.exists():
+        raise SystemExit("run `fts` first")
+    idx = build_name_index()
+    with open(FTS_QUERYLOG, encoding="utf-8-sig", newline="") as fh:
+        qlog = list(csv.DictReader(fh))
+    hits = collections.defaultdict(list)
+    if FTS_HITS.exists():
+        with open(FTS_HITS, encoding="utf-8-sig", newline="") as fh:
+            for r in csv.DictReader(fh):
+                hits[r["query_name"]].append(r)
+
+    rows = []
+    counts = collections.Counter()
+    for q in qlog:
+        name = q["query_name"]
+        adv = int(q["advertised_total"] or 0)
+        rec = idx.get(name.lower(), {})
+        ev = rec.get("evidence_class", "not_in_matcher")
+        h = hits.get(name, [])
+        accs = {x["accession"]: x for x in h}
+        dates = sorted(x["file_date"] for x in h if x["file_date"])
+        forms = collections.Counter(x["form"] for x in h)
+        if q["http_status"] and q["http_status"] != "200":
+            cls, why = "NOT_QUERIED", f"host refused: {q['http_status']}"
+        elif adv == 0:
+            cls, why = "NEGATIVE_ATTEMPTED_NONE_FOUND", (
+                "EDGAR full-text (2001+) returns no filing containing this "
+                "exact name. A real negative, not an untouched entity.")
+        elif adv > SATURATION:
+            cls, why = "SATURATED_NAME_NOT_A_LEAD", (
+                f"{adv:,} filings contain this string. The name is a common "
+                f"word or a US place name and cannot carry a match on its "
+                f"own (ENTITY_MATCH_RULES rule 1).")
+        elif ev == "single_distinctive_token":
+            cls, why = "WEAK_LEAD_SINGLE_TOKEN", (
+                "one distinctive token only; needs a second signal before "
+                "any attribution")
+        else:
+            cls, why = "LEAD", (
+                "a multi-token distinctive name with a bounded number of "
+                "EDGAR filings - read these")
+        counts[cls] += 1
+        ex = next(iter(accs.values()), {})
+        rows.append({
+            "query_name": name, "query_kind": q["query_kind"],
+            "cedar_uid": q["cedar_uid"], "owner_name": q["owner_name"],
+            "match_evidence_class": ev, "advertised_total": adv,
+            "retrieved": q["retrieved"],
+            "distinct_accessions": len(accs),
+            "first_file_date": dates[0] if dates else "",
+            "last_file_date": dates[-1] if dates else "",
+            "top_forms": "; ".join(f"{f}={c}" for f, c in forms.most_common(5)),
+            "example_accession": ex.get("accession", ""),
+            "example_url": ex.get("document_url", ""),
+            "lead_class": cls, "why": why,
+            "listed_by": SCRIPT, "listed_date": TODAY,
+        })
+    order = {"LEAD": 0, "WEAK_LEAD_SINGLE_TOKEN": 1,
+             "SATURATED_NAME_NOT_A_LEAD": 2,
+             "NEGATIVE_ATTEMPTED_NONE_FOUND": 3, "NOT_QUERIED": 4}
+    rows.sort(key=lambda r: (order[r["lead_class"]], -r["advertised_total"]))
+    with open(FTS_LEADS, "w", encoding="utf-8", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=LEAD_COLS)
+        w.writeheader()
+        w.writerows(rows)
+    out(f"  {len(rows):,} query names classified "
+        f"-> {FTS_LEADS.relative_to(CEDAR)}")
+    for k in order:
+        out(f"    {counts[k]:5d}  {k}")
+    out("")
+    out("  the LEAD class, ranked")
+    for r in rows:
+        if r["lead_class"] != "LEAD":
+            break
+        out(f"    {r['advertised_total']:5d}  {r['query_name'][:44]:44s} "
+            f"{r['first_file_date']}..{r['last_file_date']}  "
+            f"{r['top_forms'][:44]}")
+    return 0
+
+
 # ================================================================== verify ==
 
 def cmd_verify():
@@ -947,6 +1228,12 @@ def main(argv):
                        gap=kw.get("gap"))
     if cmd == "mine":
         return cmd_mine(limit=kw.get("limit"))
+    if cmd == "fts-leads":
+        return cmd_fts_leads()
+    if cmd == "census":
+        return cmd_census(refresh=bool(kw.get("refresh")))
+    if cmd == "submissions":
+        return cmd_submissions(ciks=kw.get("ciks"))
     if cmd == "verify":
         return cmd_verify()
     if cmd == "verify-synthetic":

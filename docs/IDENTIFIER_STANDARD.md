@@ -170,9 +170,14 @@ exactly one role: **evidence of which vintage a row came from**, the same role
 - Never join across it and Cedar IDs — the ranges overlap and *disagree*:
   `playground.do` says `307 → Stillaguamish`; the assistance lineage's `307` is
   `southern ute indian tribe`. A join across the seam silently mislabels.
-- `tribe_id_scheme_resolved` declares which scheme a row is on. It is never
-  blank. Read it before grouping by entity, or you will split one entity at the
-  boundary and double-count it in a distinct count.
+- `attribution_status` declares whether a row is attributed, unattributed or
+  ruled not Native. It is never blank. **Renamed 2026-09-01 from
+  `tribe_id_scheme_resolved` by `code/843_retire_cicd_scheme.py`, which also
+  dropped `tribe_id` and `tribe_id_scheme` from the table.** The
+  split-an-entity hazard this bullet warned about is CLOSED, not renamed:
+  measured 2026-09-02, there are zero `lineageA_dofile_integer` rows left
+  (cedar_neid 553,106 · unattributed 146,717 · excluded_not_native 2,119 ·
+  unresolved_native 13, over all 701,955 rows).
 
 **Retiring it is a promotion, not a deletion** — see §5.
 
@@ -288,8 +293,13 @@ adopted per-row, by match basis, never in one pass.
 | **no candidate** | spine gap. Mint the entity or record the refusal; do not force a match |
 
 **Keep the legacy value.** Promotion adds the Cedar ID and sets
-`tribe_id_scheme_resolved`; it does not overwrite the original. The legacy value
+`attribution_status`; it does not overwrite the original. The legacy value
 is the evidence of provenance and it is how a mis-promotion is ever found.
+**Superseded 2026-09-01 for the assistance table specifically:** the owner
+retired the CICD scheme outright, so the legacy integer is no longer kept on
+the row. It survives in
+`data/spine/legacy/assistance_tribe_id_crosswalk.csv`, which is where a
+mis-promotion is now found.
 
 ---
 
@@ -297,8 +307,8 @@ is the evidence of provenance and it is how a mis-promotion is ever found.
 
 Resolve an entity, in order. Stop at the first that succeeds:
 
-1. **Cedar ID already on the row** — use it. Check `tribe_id_scheme_resolved`
-   first; if it says a legacy scheme, you do not have a Cedar ID.
+1. **Cedar ID already on the row** — use it. Check `attribution_status`
+   first; if it says anything but `cedar_neid`, you do not have a Cedar ID.
 2. **Exact external identifier** — UEI, then CAGE, then EIN, via
    `cedar_identifier_ledger_final.csv`. Carry the row's tier forward; **do not
    upgrade it because the key was exact.**

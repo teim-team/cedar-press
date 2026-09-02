@@ -56,6 +56,7 @@ Zero network. Reads only; writes one document.
 """
 from __future__ import annotations
 
+import ast
 import csv
 import json
 import re
@@ -136,12 +137,30 @@ def check_notes(hdrs):
                              "detail": str(e)[:120]})
             continue
         named = set(re.findall(r'"variable":\s*"([^"]+)"', json.dumps(d)))
-        ghost = sorted(v for v in named if v not in live)
+        by_lower = {c.lower(): c for c in live}
+        # A COLUMN THAT DIFFERS ONLY IN CASE IS NOT MISSING, BUT IT IS NOT
+        # RIGHT EITHER. `np_orgs.csv` spells it `EIN` and its three siblings
+        # spell it `ein`; the shipped contract publishes ONE spelling for all
+        # four, so a buyer keying on the documented name fails on three files.
+        # Kept as its own, quieter finding rather than folded into "dead".
+        ghost, cased = [], []
+        for v in sorted(named):
+            if v in live:
+                continue
+            if v.lower() in by_lower:
+                cased.append(f"{v} -> {by_lower[v.lower()]}")
+            else:
+                ghost.append(v)
         if ghost:
             findings.append({"kind": "notes_names_a_dead_column",
                              "artefact": str(p.relative_to(ROOT)),
                              "detail": ", ".join(ghost[:8]),
                              "n": len(ghost)})
+        if cased:
+            findings.append({"kind": "notes_column_case_mismatch",
+                             "artefact": str(p.relative_to(ROOT)),
+                             "detail": ", ".join(cased[:8]),
+                             "n": len(cased)})
     return findings
 
 
@@ -210,6 +229,38 @@ def walk_sources():
         yield p
 
 
+def py_live_strings(txt: str):
+    """String literals a Python file actually USES, docstrings excluded.
+
+    NAMING A RETIRED COLUMN IN A COMMENT IS THE FIX, NOT THE DEFECT. A first
+    version of this check flagged 24 files and could never go green, because
+    every file that had just been corrected explains the correction in prose
+    and every explanation contains the dead name. Comments are not in the AST
+    at all; docstrings are, and are removed here. What is left is
+    `row["tribe_id_scheme_resolved"]` - a real read - which is the only thing
+    worth failing on.
+    """
+    try:
+        tree = ast.parse(txt)
+    except SyntaxError:
+        return set()
+    doc_nodes = set()
+    for n in ast.walk(tree):
+        if isinstance(n, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef,
+                          ast.ClassDef)):
+            body = getattr(n, "body", None)
+            if (body and isinstance(body[0], ast.Expr)
+                    and isinstance(body[0].value, ast.Constant)
+                    and isinstance(body[0].value.value, str)):
+                doc_nodes.add(id(body[0].value))
+    out = set()
+    for n in ast.walk(tree):
+        if (isinstance(n, ast.Constant) and isinstance(n.value, str)
+                and id(n) not in doc_nodes):
+            out.add(n.value)
+    return out
+
+
 def check_references():
     findings = []
     for p in walk_sources():
@@ -220,14 +271,24 @@ def check_references():
             txt = p.read_text(encoding="utf-8", errors="replace")
         except OSError:
             continue
-        for old, new in RENAMED.items():
-            if old in txt:
-                findings.append({"kind": "renamed_column",
-                                 "file": rel, "detail": f"{old} -> {new}"})
-        for old, new in MOVED_PATHS.items():
-            if old in txt:
-                findings.append({"kind": "moved_path",
-                                 "file": rel, "detail": f"{old} -> {new}"})
+        if p.suffix.lower() == ".py":
+            strings = py_live_strings(txt)
+            for o, n in RENAMED.items():
+                if o in strings:
+                    findings.append({"kind": "renamed_column", "file": rel,
+                                     "detail": f'live read of "{o}" -> {n}'})
+            for o, n in MOVED_PATHS.items():
+                if any(o in s2 for s2 in strings):
+                    findings.append({"kind": "moved_path", "file": rel,
+                                     "detail": f"{o} -> {n}"})
+            continue
+        # PROSE. A document that names the dead name AND the live one is
+        # explaining the change; one that names only the dead name is stale.
+        for o, n in list(RENAMED.items()) + list(MOVED_PATHS.items()):
+            if o in txt and n not in txt and "843" not in txt:
+                findings.append({"kind": "stale_prose", "file": rel,
+                                 "detail": f"{o} -> {n}, with no mention of "
+                                           f"the replacement or of 843"})
     return findings
 
 
@@ -282,12 +343,16 @@ def main() -> int:
     sib = check_siblings(run=True)
 
     dead_col_notes = [f for f in notes if f["kind"] == "notes_names_a_dead_column"]
+    cased_notes = [f for f in notes if f["kind"] == "notes_column_case_mismatch"]
     orphan_notes = [f for f in notes if f["kind"] == "notes_for_absent_table"]
 
     print(f"  940 staleness sweep   {TODAY}")
     print(f"    notes contracts naming a dead column   {len(dead_col_notes)}")
     for f in dead_col_notes[:8]:
         print(f"      {f['artefact']}   {f['n']} ghost: {f['detail']}")
+    print(f"    notes contracts with a CASE mismatch   {len(cased_notes)}")
+    for f in cased_notes[:8]:
+        print(f"      {f['artefact']}   {f['detail']}")
     print(f"    notes contracts for an absent table    {len(orphan_notes)}")
     for f in orphan_notes[:6]:
         print(f"      {f['artefact']}   {f['detail']}")

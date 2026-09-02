@@ -1823,7 +1823,7 @@ START_HERE and `docs/ASSISTANCE_SEAM_HARMONIZATION.json`.*
 
 | seam | column | what breaks | fixed? |
 |---|---|---|---|
-| **Identifier scheme** | `tribe_id` | INTEGER (365,535 rows, **$107.50B**) and Cedar NEID (183,995) in one column. Per-entity totals SPLIT; distinct-entity counts DOUBLE-COUNT. Nothing blank, nothing malformed. | **DECLARED, NOT MERGED** — read `tribe_id_scheme_resolved` (never blank) and **filter to one scheme before any per-entity aggregate** |
+| **Identifier scheme** | ~~`tribe_id`~~ **CLOSED 2026-09-01** | Was INTEGER (365,535 rows, **$107.50B**) and Cedar NEID (183,995) in one column. `code/843_retire_cicd_scheme.py` dropped `tribe_id` and `tribe_id_scheme`; measured 2026-09-02 there are **zero** `lineageA_dofile_integer` rows left. | **NO LONGER A CONFOUNDER.** Read `attribution_status` (renamed from `tribe_id_scheme_resolved`); every attributed row is on one scheme, so a per-entity aggregate no longer splits |
 | **Source vintage** | `source_archive_stamp` | Three vintages, year-aligned; 67.9% of rows carried no stamp at all | **YES** — `source_vintage` populated on all 701,955 rows |
 | **Flag rendering** | `business_types_description` | `AMERICANTRIBAL` / `FEDERALLY RECOGNIZED` vs `AMERICAN TRIBAL` / `FEDERALLY-RECOGNIZED`; an exact filter drops **7,160** Native recipients | **YES** — use `business_types_description_normalized` |
 
