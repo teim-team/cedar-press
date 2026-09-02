@@ -146,10 +146,38 @@ def sweep():
             if any(m in low for m in HISTORICAL_MARKERS):
                 continue
             for rx, label, now in checks:
-                if rx.search(line):
-                    (live_hits if is_live else record_hits).append(
-                        (rel, i, label, now, line.strip()[:90]))
+                if not rx.search(line):
+                    continue
+                # A LINE THAT CARRIES THE CURRENT VALUE TOO IS A CORRECTION.
+                #
+                # HISTORICAL_MARKERS is a denylist of phrasings, and a denylist
+                # only recognises what somebody already listed. It has "was",
+                # "->", "superseded"; it does not have "the queue said", or
+                # "apparent", or a markdown table cell putting old and new side
+                # by side. So it flagged three lines that are exactly right:
+                #
+                #   KNOWN_ISSUES.md   "prime_contracts has ZERO literal
+                #                      duplicate rows (the queue said 80,778)"
+                #   TWELVE_DATASET_PLAN.md
+                #                     "master list **1,536** entities | **1,555**
+                #                      - 19 IHS consortia promoted"
+                #
+                # Both state the correction. Nagging about them trains a reader
+                # to ignore this report, which is how the last contradictions
+                # register died.
+                #
+                # The structural test beats another phrase: if the CURRENT value
+                # is on the line, the line already knows. This is the same
+                # lesson as ENTITY_MATCH_RULES.md and the robots false-block -
+                # write the predicate, not a longer list of words.
+                bare = now.split(" ")[0].strip().rstrip(",.")
+                if bare and bare in line:
                     break
+                if bare and bare.replace(",", "") in line.replace(",", ""):
+                    break
+                (live_hits if is_live else record_hits).append(
+                    (rel, i, label, now, line.strip()[:90]))
+                break
     return live, live_hits, record_hits
 
 

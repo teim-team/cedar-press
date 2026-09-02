@@ -862,3 +862,230 @@ the codebook rather than being discovered by a reader with CICD's article open.
 Evidence: `data/staging/cicd_published/cedar_vs_cicd_by_year.csv`;
 `docs/datasets/02_contracting.md` §COVERAGE; `docs/PRE2007_SPENDING_SOURCES.md`
 Part 2. **Shard-N merged nothing and attributed nothing.**
+
+---
+
+# 16. THE `review/` BACKLOG, RANKED — first whole-directory sweep (int-3, 2026-09-01)
+
+*Full triage: `docs/REVIEW_BACKLOG.md`. Machine-readable: `data/staging/review_backlog_triage.csv`.*
+
+**364 CSV files, 138 MB, and no gate has ever counted them.** Swept whole for
+the first time today. The counts:
+
+| bucket | files | rows |
+|---|---:|---:|
+| PROMOTABLE NOW | 3 | 374 |
+| **NEEDS AN OWNER RULING** | **104** | **185,340** |
+| SUPERSEDED (flag, never delete) | 27 | 13,452 |
+| DIAGNOSTIC ONLY | 230 | 182,633 |
+
+**The finding is that `review/` is mostly NOT a backlog.** 63% of it is the
+project's evidence layer — refusal logs, coverage audits, series-break
+registers, probe outputs. Those are marked so nobody triages them again.
+
+What is left is **eleven questions**, below, in the order that disposes of the
+most rows per answer. **Nothing here was decided by an agent.** Every item is an
+attribution, a tier promotion or a scoping call, and Cedar's standing rule is
+that only tier A publishes and an owner ruling is the only path to it.
+
+---
+
+### 16.1 — THE IDENTIFIER-GRAPH SCOPING DOCTRINE · unblocks **102,051 rows** across eight `523_*` files
+
+**The question, asked once:** *how far down the unkeyed-identifier ranking does
+Cedar key, and on what evidence?*
+
+**The evidence.** `523_idgraph_q3_unkeyed_by_dataset_count.csv` ranks **90,539
+unkeyed identifier nodes carrying $506.5B observed**, by how many datasets see
+them. The distribution is extremely thin at the top: only **346 nodes appear in
+2+ datasets and 22 in 3+**, and the **top 100 alone carry $17.4B**. Alongside it
+sit 9,814 name clusters (q2), 708 split-entity suspects (q4), 200 co-occurrence
+rows (q1), 300 ownership candidates, 258 backfill candidates, 159 candidate
+firms and 73 suspect anchors.
+
+**Recommendation — a THREE-LINE doctrine, not 90,539 decisions:**
+
+1. **Key the top 100 by observed dollars, by hand.** $17.4B, one sitting.
+2. **Auto-key nothing below `n_datasets >= 2`** (346 nodes). One dataset seeing
+   an identifier is one source's spelling, not corroboration.
+3. **The rest are a stated coverage floor**, published in the codebook as
+   "N identifiers observed and not keyed", never as an implied zero.
+
+**A caution on the two candidate files inside this group.**
+`523_spiderweb_ownership_candidates.csv` (300 rows, $2.28B observed) rests on
+**SAM-declared parent/child edges** — an identifier relationship the registrant
+filed, which is the strong form, and 22 rows are both `rule_first` and
+`unambiguous`. `523_identifier_backfill_candidates.csv` (258 rows, $851.7M) does
+**not**: 216 of its rows rest on `identical_declared_name_on_the_same_edge` and
+42 on `matches_the_keyed_entitys_own_spine_name`. Both are name equality,
+narrowed by an edge but still name. **Rule the 300 before the 258, and rule them
+by different standards.**
+
+---
+
+### 16.2 — THE ADJUDICATION-HUB PARTY METHOD · unblocks **15,999 rows** across seven files
+
+**The question:** *may a party named in an IBIA/IBLA decision, a FERC docket or
+an ex parte filing be linked to a Cedar entity by the resolver's proposal alone,
+and if so at what tier?*
+
+**The evidence.** `168_link_adjudication_hubs.py` produced a proposed entity for
+every one of these and then correctly refused to write any of them:
+`168_admin_appeal_unresolved_parties` 4,642 · `168_ferc_unresolved_parties`
+4,058 · `168_ferc_ex_parte_unresolved` 2,419 · `admin_appeal_unresolved_organisations`
+4,289 · `admin_appeal_entity_link_candidates` 420 · `168_foia_link_audit` 166 ·
+`168_resource_revenue_ceiling` 5. Every one carries an empty `YOUR_RULING`.
+
+**Recommendation:** rule the METHOD, at **tier B**, and only where the party
+name matches a spine canonical name *and* the docket state matches the entity
+state. A docket party is a legal filing, so the name is the party's own — but it
+is still a name, and `UMATILLA ELECTRIC COOPERATIVE` resolved to a tribe by
+exactly this route until a guard went into `503_identity.py` today.
+**Start with `168_resource_revenue_ceiling` — 5 rows, and it tests the doctrine
+for the price of a coffee.**
+
+---
+
+### 16.3 — THE SELF-CERTIFICATION CEILING · unblocks **15,557 rows**
+
+**The question:** *does a SAM `awardeeBusinessTypeName` Native flag ever get a
+firm into the Cedar universe on its own, and at what tier?*
+
+**The evidence.** `esm_native_entity_candidates_2026-08-12.csv` holds **12,645**
+federal recipients carrying such a flag, with dollars, transaction counts and an
+`evidence_grade`; `sam_individual_native_candidates_2026-08-26.csv` holds a
+further **2,912**. `docs/INDIVIDUAL_NATIVE_CLASS_PROPOSAL.md` §4 already puts
+the ceiling at **tier C**, and tier C never publishes alone.
+
+**Recommendation:** **confirm tier C as a hard ceiling and close both files as
+a stated universe floor.** A self-certification is the registrant's claim about
+itself, and Cedar's premise is that it does not republish claims as facts. The
+promotable thing here is the *aggregate*, and that is now done — see
+`data/clean/sam_native_class_distributions.csv`, promoted today, which is
+aggregate-only and small-cell suppressed.
+
+---
+
+### 16.4 — DOES A TEXT MENTION MAKE IT THAT ENTITY'S COMMENT? · unblocks **4,806 rows**
+
+**The evidence.** `regulations_gov_comment_candidates.csv`: 4,806 regulations.gov
+comments where a Cedar entity is named in the comment TEXT but not in the title.
+`data/clean/regulations_gov_comments.csv` currently ships **172 rows, all
+`TITLE_NAMES_THE_ENTITY`** — the text-mention class is excluded on purpose.
+
+**Recommendation: NO — keep them out of the comment table**, and instead ship
+the count as a `mentions` measure on `regulations_gov_entity_coverage.csv`. A
+comment that criticises a tribe mentions it as loudly as one filed by it, and
+the table's unit of analysis is *the tribe speaking*.
+
+---
+
+### 16.5 — OSHA GAMBLING ESTABLISHMENTS · unblocks **711 establishments / 1,879 Form 300A filings**, plus 1,852 more
+
+**HANDED TO INT-1, who owns the labor promotion.**
+
+**The evidence.** `employment_osha_unmatched_2026-08-07.csv` — 711 establishments
+whose `n_filings` sum to exactly **1,879** — held because each *"shares a
+distinctive token with a Cedar property but no exact name+state match"*
+(e.g. `Pearl River Resort, Choctaw MS`, 3,233 employees, token `pearl`).
+`YOUR_RULING` filled on **zero** of 711. The later, wider
+`osha_gambling_unresolved_2026-08-26.csv` holds 4,560 rows of which **2,708
+already carry a blocking verdict** and **1,852 are genuinely open**.
+`data/clean/gaming_employment_observations.csv` already holds 874 OSHA rows, so
+this is an extension of a live table, not a new one.
+
+**Recommendation:** rule the two files TOGETHER — they overlap — and rule the
+*rule*, not the rows: **a shared distinctive token is not a match.** Accept only
+`name + state + NAICS 7132xx/7211xx` exact, and publish the remainder as a named
+coverage gap.
+
+---
+
+### 16.6 — THE MASTER QUEUE, NEVER OPENED · unblocks **6,559 rows, $82.1B at stake**
+
+**The evidence.** `MASTER_QUEUE_2026-08-07.csv` — 6,559 ranked entity questions,
+each with `dollars_at_stake`, an evidence URL and a written question.
+**`YOUR_RULING` is filled on ZERO of them.** Re-measured today: the 4,300 rows in
+`_already_ruled_removals/` overlap this file by exactly **1**, so these 6,559 are
+the genuinely unseen remainder, not a re-ask.
+
+**Recommendation:** do not attempt it as a queue. **Sort by `dollars_at_stake`
+and rule the top 50** — the ranking exists precisely so the tail never has to be
+read — then close the rest into 16.1's stated floor.
+
+---
+
+### 16.7 — 1,223 PROPOSED TIER B → TIER A PROMOTIONS
+
+**The evidence.** `entity_key_tierB_promotion_queue_2026-08-06.csv`: dataset,
+source name, proposed tribe, row count and basis, per row.
+
+**Recommendation: rule by BASIS, not by row.** Group the 1,223 by the `basis`
+column, rule each basis once, and let the ruling fan out. **THE FIVE THINGS
+THAT WILL BITE YOU #1 applies here in full:** the exactness of a key says
+nothing about the correctness of a link, and 821 tier-B `need_v6` rows are
+6.5% accurate.
+
+---
+
+### 16.8 — 1,049 NAGPRA ALIAS PROPOSALS
+
+**The evidence.** `nagpra_alias_proposals.csv`, written today by script 77 —
+proposed aliases harvested from NAGPRA notices, with notice counts and an
+example document. `YOUR_RULING` empty on all 1,049. Precedent: of the earlier
+recognition-alias pass, **76 of 228 proposals were dropped on review** — a 33%
+reject rate, so these cannot be auto-applied.
+
+**Recommendation:** rule only aliases seen in **3+ notices** and reject the
+long tail. An alias is an identity assertion about a tribe; a one-notice
+spelling is a typesetter, not a name.
+
+---
+
+### 16.9 — 6,796 UNRESOLVED CONGRESSIONAL EARMARK RECIPIENTS
+
+`earmark_unresolved_2026-08-07.csv`, with amount requested, amount enacted and a
+source URL per row. Recipient names are as printed in the committee table.
+**Recommendation:** same doctrine as 16.2 — name + state exact, nothing else,
+remainder published as a floor.
+
+---
+
+### 16.10 — 6,094 SUBAWARD PARTIES (2026-08-28 API route)
+
+`subaward_api_unresolved_2026-08-28.csv`, each with a proposed `tribe_id`,
+canonical name, `resolver_how` and confidence tier. **Supersedes** the 4,254-row
+`subaward_matches_2026-08-07.csv`, which is recommended for `graveyard/`.
+**Recommendation:** rule by `resolver_how`, one ruling per resolver.
+
+---
+
+### 16.11 — THE 62-TRIBE VENDOR-LIST REGISTRY: A CONSENT RULING, NOT AN EFFORT ONE
+
+**This one was nearly promoted and should not have been.** It reads like a
+finished registry of tribal vendor and ownership-certification lists — verdicts,
+URLs, entry counts, formats. Re-measured 2026-09-01:
+
+- **`publishable = N` on all 62 rows**
+- **`consent_status = UNRESOLVED` on all 62 rows**
+- 8 rows `TERMS_STATED_RESTRICTIVE`, 2 `ROBOTS_DISALLOW`
+- every row carries a `suppression_key`
+- and it is **live** — `570_shard_l` and `571_shard_m` wrote it today
+
+**The question:** may Cedar publish the *existence and location* of a tribe's
+own published vendor list — a fact about a public website — when the site terms
+are restrictive or silent and no tribe has consented?
+
+**Recommendation: split it.** Publish the *verdict* (`LIST_FOUND_PDF`,
+`NO_LIST_FOUND`, …) and the *URL*, which are facts about a public page; publish
+**no harvested list contents** from any of the 8 restrictive or 2
+robots-disallowed hosts without written consent. That converts 62 rows from
+`publishable = N` to a shippable coverage table without touching a single
+harvested record.
+
+---
+
+**Rows these eleven rulings would unblock, in total: ~155,000 of the 185,340
+sitting in the NEEDS AN OWNER RULING bucket.** The remaining ~30,000 sit in 93
+smaller files, each listed with its own one-line reason in
+`docs/REVIEW_BACKLOG.md`.
