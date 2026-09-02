@@ -2,7 +2,7 @@
  "built_by": "code/1126_annual_total_federal_and_gaming.py",
  "built_date": "2026-09-02",
  "rows": 116,
- "gaming_denominator_ladder": "787 rows - 16 placeholders = 771 facility rows - 57 duplicate extras = 714 distinct properties",
+ "gaming_denominator_ladder": "787 rows - 16 NOT_A_PLACE = 771 placed -> 717 distinct properties",
  "gaming_denominator_source": "code/846_session_audit.py::_denom()",
  "gaming_properties_with_an_honest_per_property_figure": 11,
  "nigc_double_count_a_naive_group_by_would_have_produced": [

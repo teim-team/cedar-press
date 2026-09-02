@@ -904,6 +904,48 @@ def load_sources() -> tuple:
                 identity_scope=r.get("identity_scope", "tribally_owned_entity"),
                 source_terms_status=terms))
             prov["business_registry_" + sid] += 1
+
+    # 7. THE OWNER'S OWN ENTERPRISE DATASET, v6 - staged by
+    #    `code/1133_nest_owner_v6_builder_input.py apply`.
+    #
+    #    18,110 rows the owner built on this machine. `1130` measured 4,786
+    #    net-new enterprises in it and deliberately did NOT append them,
+    #    because THIS function's build is a full rebuild and an in-place
+    #    append is reverted by it while printing a larger row count. This is
+    #    the fix: the file is an INPUT, so the rows come back on every
+    #    rebuild and their ids stay bound by `cedar_nest_id_register.csv`.
+    #
+    #    1133 owns the admission decisions and every one is registered with a
+    #    measured reason in `data/staging/nest/owner_v6_refused.csv`. The two
+    #    that matter here:
+    #      * 8,927 rows whose OWN `attribution_method` is `unmatched` are
+    #        refused. They are the owner's unattributed FPDS residue and they
+    #        include natural persons' names.
+    #      * 3,140 SBA-certified firms with no owner nation named are refused
+    #        and registered for `native-owned-businesses`. NEST's grain is
+    #        (owner hub, enterprise name); a row with no owner is not a NEST
+    #        row.
+    #
+    #    `relationship` ARRIVES AS `unspecified` ON PURPOSE. v6 has 31 columns
+    #    and none states a relationship word, so `canon_rel` classes these
+    #    `unspecified` / `affiliation` - the weaker reading. An affiliation
+    #    recorded as ownership is the defect this dataset is most exposed to.
+    #
+    #    IF THE FILE IS ABSENT THIS CONTRIBUTES NOTHING AND SAYS SO. An
+    #    absence must never print as a clean result (AGENT_FIELD_GUIDE rule
+    #    4), so the line below is emitted either way and `stage_assemble`
+    #    prints the per-source count.
+    _ov6 = CEDAR / "data/staging/nest/owner_v6_edges.jsonl"
+    _ov6_rows = read_jsonl(_ov6)
+    if not _ov6_rows:
+        print(f"  ! owner v6 builder input ABSENT or EMPTY ({_ov6}). "
+              f"Run `py -3 code/1133_nest_owner_v6_builder_input.py apply` "
+              f"first, or this build silently omits ~5,800 assertions.")
+        prov["_owner_v6_INPUT_ABSENT"] += 1
+    for r in _ov6_rows:
+        edges.append(_edge(**r))
+        prov["owner_v6_enterprise_dataset"] += 1
+
     return edges, prov, sweep_refused
 
 

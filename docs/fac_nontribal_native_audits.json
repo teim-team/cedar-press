@@ -1,0 +1,87 @@
+{
+ "built_by": "code/1132_fac_nontribal_native_audits.py",
+ "built_date": "2026-09-02",
+ "measured_at": "2026-09-02T18:37:15.423422+00:00",
+ "spine_entities": 1555,
+ "entities_147_reaches": 638,
+ "gap_entities": 917,
+ "gap_by_class": {
+  "Native Hawaiian Organization": 210,
+  "Alaska Native Village Corporation": 152,
+  "Federally recognized Alaska Native Village": 115,
+  "BIE School": 114,
+  "State-recognized tribe": 63,
+  "Native Community Development Financial Institution": 55,
+  "Individually Native-owned business": 45,
+  "Intertribal Organization": 37,
+  "Native Financial Institution": 29,
+  "Urban Indian Organization": 28,
+  "Federal-level self-governance consortium": 22,
+  "Federally recognized tribe": 19,
+  "Federal-level constituency entity": 12,
+  "Tribal College or University": 8,
+  "ANCSA Group Corporation": 6,
+  "State-level constituency entity": 2
+ },
+ "fac_general_records_scanned": 413762,
+ "filings_matched": 545,
+ "entities_reached": 99,
+ "filings_by_entity_class": {
+  "Urban Indian Organization": 164,
+  "Intertribal Organization": 91,
+  "Native Hawaiian Organization": 83,
+  "Federal-level self-governance consortium": 81,
+  "Native Community Development Financial Institution": 60,
+  "Federally recognized Alaska Native Village": 24,
+  "Tribal College or University": 18,
+  "Federally recognized tribe": 11,
+  "State-recognized tribe": 9,
+  "BIE School": 2,
+  "Native Financial Institution": 1,
+  "Federal-level constituency entity": 1
+ },
+ "entities_by_entity_class": {
+  "Urban Indian Organization": 22,
+  "Intertribal Organization": 14,
+  "Native Hawaiian Organization": 15,
+  "Federal-level self-governance consortium": 17,
+  "Native Community Development Financial Institution": 13,
+  "Federally recognized Alaska Native Village": 8,
+  "Tribal College or University": 2,
+  "Federally recognized tribe": 2,
+  "State-recognized tribe": 3,
+  "BIE School": 1,
+  "Native Financial Institution": 1,
+  "Federal-level constituency entity": 1
+ },
+ "is_public": {
+  "1": 545
+ },
+ "audit_years": [
+  "2016",
+  "2025"
+ ],
+ "audited_federal_expenditures_usd": 9779055684.0,
+ "sefa_rows": 7252,
+ "sefa_distinct_aln": 506,
+ "sefa_amount_expended_usd": 9779055684.0,
+ "tier": {
+  "A": 436,
+  "B": 109
+ },
+ "nets": {
+  "auditee_name": 384,
+  "ein_exact": 118,
+  "uei_exact": 43
+ },
+ "refused": {
+  "COVERED_COMPONENT_ONLY_NOT_THE_AUDITEE": 1,
+  "KEYS_DISAGREE_ON_ENTITY": 11,
+  "AMBIGUOUS_CEDAR_KEY_EIN": 15,
+  "REFUSED_NAME_METHOD_MAY_NOT_KEY_A_DOLLAR": 1,
+  "REFUSED_STATE_DISAGREEMENT": 1,
+  "REFUSED_SINGLE_TOKEN_CORE": 1
+ },
+ "disjoint_from_147": true,
+ "fac_tribal_rows_147": 6780
+}

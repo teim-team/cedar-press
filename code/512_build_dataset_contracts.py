@@ -2919,6 +2919,45 @@ GRAIN_NEST_DUAL = {
 }
 GRAIN.update(GRAIN_NEST_DUAL)
 
+# --- FAC NON-TRIBAL: the Single Audits 147's entity_type filter cannot see --
+GRAIN_FAC_NONTRIBAL = {
+    "fac_native_nontribal_single_audits.csv": _d(
+        "one row per (FAC report_id) - ONE SINGLE AUDIT FILING by a Native "
+        "entity that does NOT file as `entity_type = tribal`. NOT one row "
+        "per entity: an auditee files every year it expends the threshold, "
+        "so a 10-year run is 10 rows and `total_amount_expended` may never "
+        "be summed across years for one entity without saying so. DISJOINT "
+        "from `fac_tribal_single_audits.csv` on `report_id` - 147 owns every "
+        "row it reaches and this table owns none of them, so the two may be "
+        "UNIONed without double-counting a dollar, which is exactly why the "
+        "disjointness is an invariant and not a convention. "
+        "`total_amount_expended` is the AUDITEE'S OWN total federal awards "
+        "expended, not Cedar's attribution of it: where the auditee is a "
+        "consortium serving many nations the whole figure sits on one row.",
+        primary_key=["report_id"],
+        join_cardinality={"report_id": "one", "entity_id": "many"},
+        declared_by="workstream FAC-NONTRIBAL-1132 2026-09-02, "
+                    "code/1132_fac_nontribal_native_audits.py: report_id "
+                    "tested unique on the full file; disjointness from "
+                    "fac_tribal_single_audits.csv asserted by invariant V4, "
+                    "which a fixture proves fires"),
+    "fac_native_nontribal_sefa_programs.csv": _d(
+        "one row per (report_id, award_reference) - ONE SEFA LINE, i.e. one "
+        "federal programme (ALN/CFDA) an auditee drew on in one audit. NOT "
+        "one row per programme and NOT one per entity. The SEFA lines of a "
+        "report SUM to that report's `total_amount_expended`, measured "
+        "exactly on this build ($9,779,055,684.00 both ways), so summing "
+        "`amount_expended` here and `total_amount_expended` on the census "
+        "table together DOUBLE-COUNTS every dollar. Use one or the other.",
+        primary_key=["report_id", "award_reference"],
+        join_cardinality={"report_id": "many", "entity_id": "many"},
+        declared_by="workstream FAC-NONTRIBAL-1132 2026-09-02, "
+                    "code/1132_fac_nontribal_native_audits.py: award_reference "
+                    "is the FAC's own per-report SEFA line key, carried "
+                    "verbatim from the published federal_awards export"),
+}
+GRAIN.update(GRAIN_FAC_NONTRIBAL)
+
 # --- STALE-TAIL: dated public facts for the 830 freshness tail (ADR-022) ----
 GRAIN_STALE_TAIL = {
     "entity_dated_public_facts.csv": _d(

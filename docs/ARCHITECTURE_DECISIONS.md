@@ -2821,3 +2821,83 @@ family and the no-self-subsidiary line, and a fixture proves I11a fires.
 `nest_entity_dual_role`. Neither question is answered by a row that pretends
 to be the other.
 <!-- END ADR-032-NEST-DUAL-ROLE -->
+
+<!-- BEGIN ADR-033-FAC-NONTRIBAL -->
+## ADR-033 — `entity_type = tribal` is a fact about the FILING FORM, not about the filer. The FAC gets a second, disjoint table.
+
+**Decided 2026-09-02** by workstream `FAC-NONTRIBAL-1132`,
+`code/1132_fac_nontribal_native_audits.py`.
+
+**Context.** `code/147_build_fac_single_audits.py` discovers Single Audits with
+`api.fac.gov/general?entity_type=eq.tribal`. Measured on the live output:
+**6,774 of 6,780 rows arrive on that net, and the table reaches 638 of the
+1,555 entities in the spine.** The 917 it misses are not a random remainder —
+**210 Native Hawaiian Organizations, 152 ANCSA village corporations, 115 Alaska
+Native villages, 114 BIE schools, 63 state-recognized tribes, 55 Native
+CDFIs**, and so on down. An NHO 501(c)(3) files as `non-profit`; a BIE school
+files as `local` or `higher-ed`; a Native CDFI files as `non-profit`.
+`entity_type` is the auditee's self-typing on the SF-SAC. It describes the
+**form of the filing**, and Cedar was reading it as a statement about **who the
+filer is**.
+
+**Decision — a SECOND table, not a wider 147.** Two reasons, both structural.
+
+1. **`147 --all` is a full rebuild of `fac_tribal_single_audits.csv`.** An
+   in-place append into it is reverted by the next run while printing a larger
+   row count — the FERC rebuild/in-place collision in `START_HERE.md`, four
+   times over. A second table with its own builder is rebuild-safe on its own.
+2. **A file named `tribal` may not hold 83 Native Hawaiian filings.** Loading
+   them into it would be a correctness defect wearing the costume of coverage.
+
+**The two tables are DISJOINT ON `report_id`**, asserted by invariant **V4**,
+which a fixture proves fires. A row is 147's or it is 1132's, never both, so a
+consumer may UNION them without double-counting a dollar.
+
+**Consequence.** 545 further Single Audit filings on **99 entities Cedar could
+not previously reach**, `$9,779,055,684` of audited federal expenditures, and
+7,252 SEFA lines across 506 ALNs — an `audited_filing` evidence family
+independent of FPDS and FSRS. Registered in `500`'s `nonprofits` collection and
+in `512` as `GRAIN_FAC_NONTRIBAL`.
+<!-- END ADR-033-FAC-NONTRIBAL -->
+
+<!-- BEGIN ADR-034-OWNER-V6-BUILDER-INPUT -->
+## ADR-034 — The owner's enterprise dataset is an INPUT to the NEST builder, not an append to its output
+
+**Decided 2026-09-02** by workstream `NEST-OWNER-V6-INPUT-1133`,
+`code/1133_nest_owner_v6_builder_input.py`.
+
+**Context.** `1130` measured 4,786 net-new enterprises in the owner's
+18,110-row v6 file and deliberately did not append them, because `1072 build`
+is a full rebuild and the append would be reverted by the next run.
+
+**Decision.** The file becomes source **7** of `1072.load_sources()`, staged as
+`data/staging/nest/owner_v6_edges.jsonl` by `1133 apply`. The rows are
+therefore re-derived on every rebuild, and their ids stay bound by the
+append-only `cedar_nest_id_register.csv`. `1133` owns the admission decisions;
+`1072` owns the clustering, the guards and the ids. Nothing is post-processed.
+
+**Four admission decisions, each measured rather than assumed:**
+
+* **8,927 rows whose own `attribution_method` is `unmatched` are REFUSED.**
+  They are the owner's unattributed FPDS residue — `Merchen & Reed Gravel Inc`,
+  `Goldenlook Of San Antonio Inc`, and natural persons (`Benward, Ursula`,
+  `William Woolard`). `unmatched` is a NEGATIVE result and inheriting the row
+  while dropping its sign is the 148 defect at 8,927x scale.
+* **3,140 SBA-certified firms with no owner nation named are REFUSED to NEST**
+  and registered for `native-owned-businesses`. NEST's grain is (owner hub,
+  enterprise name); a row with no owner is not a NEST row.
+* **The 160 v3-only rows are NOT recovered.** 160 of 160 carry a UEI that IS in
+  v6 — they are the same registrations under a different name string, and
+  recovering them would have created up to 158 duplicate enterprises. Recorded
+  as observed name variants instead.
+* **`relationship` is emitted as the literal `unspecified`, never blank.** v6
+  states no relationship word, so `canon_rel` classes these
+  `unspecified`/`affiliation`. A BLANK is coerced by
+  `stage_build`'s `x.get("relationship") or "subsidiary"` and publishes as
+  `relation_class = ownership`; it did, on 3,189 rows, until invariant **W3**
+  caught it.
+
+**Consequence.** NEST 1,610 → **4,799 enterprises**, 3,190 ids minted, 472
+owner hubs. `1072 verify` PASS on all 8 invariants; `1102` (the enricher) must
+run LAST after any rebuild.
+<!-- END ADR-034-OWNER-V6-BUILDER-INPUT -->

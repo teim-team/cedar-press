@@ -205,7 +205,18 @@ COLLECTIONS: list[dict] = [
      "tables": r"^(resource_|tribal_tax|nd_severance|tribal_debt|tribal_bond|anc_ceiling|ancsa_)"},
     {"id": "nonprofits", "name": "Native Nonprofits", "shelf": "pro",
      "prefixes": ["06", "17"],
-     "tables": r"^(np_|grantmaker_|grantee_|fac_tribal)"},
+     # NOTE 2026-09-02 (workstream FAC-NONTRIBAL-1132): `fac_native_nontribal`
+     # added. `code/147_build_fac_single_audits.py` discovers Single Audits
+     # with `entity_type = eq.tribal` and reaches 638 of 1,555 spine
+     # entities; the 917 it misses are led by 210 NHOs, 152 ANCSA village
+     # corporations, 114 BIE schools and 55 Native CDFIs, none of which files
+     # as a tribe. `code/1132_fac_nontribal_native_audits.py` asks the same
+     # source without that filter and owns its OWN tables, DISJOINT from
+     # 147's on `report_id`, because 147 is a full rebuild and an append into
+     # its output is reverted by the next run. They belong here rather than
+     # in `gaming` (which claims `fac_audit_`) because the auditees are
+     # nonprofits, schools and CDFIs, and `fac_tribal` is already here.
+     "tables": r"^(np_|grantmaker_|grantee_|fac_tribal|fac_native_nontribal)"},
 
     # --- Cedar Grove -------------------------------------------------------
     {"id": "gaming", "name": "Gaming Intelligence", "shelf": "grove",

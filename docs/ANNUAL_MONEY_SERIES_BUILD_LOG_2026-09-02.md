@@ -80,7 +80,8 @@ Two more series ride in the table and are never part of that ratio:
 `faads_pre2008_assistance_attributed` ($4.722B, FY2001–06, **tier B on every
 row** — no DUNS or UEI exists on any pre-FY2007 FAADS row) and
 `sec_filed_per_property_net_revenues` ($8.720B across 11 fiscal years, which is
-7 properties out of 714 and sits **inside** the NIGC figure for the same year).
+7 properties out of the ~717 the gated ladder currently reports, and sits
+**inside** the NIGC figure for the same year).
 
 ---
 
@@ -149,18 +150,26 @@ facility-keyed join drops them silently.)
 `code/846_session_audit.py::_denom` is the single gated ladder:
 
 ```
-787 rows - 16 placeholders = 771 facility rows - 57 duplicate extras
-= 714 distinct properties
+787 rows - 16 NOT_A_PLACE = 771 placed -> 717 distinct properties
 ```
 
-**Of those 714, exactly 11 carry an honest per-property revenue figure** —
+**THE LADDER MOVED WHILE THIS WAS BEING WRITTEN — 714 in the morning, 717 by
+the evening**, after ADR-030 adjudicated three of the mechanical duplicate
+groups as genuinely distinct properties rather than merges. That is precisely
+why `1126` **imports the ladder and pastes both its number AND its sentence**
+into `coverage_note` and into the `GAMING-TOTAL` block at build time. Nothing
+in the output table types a denominator. Re-run `build` and the sentence
+updates itself; quote this paragraph and you will be wrong by evening.
+
+**Exactly 11 properties carry an honest per-property revenue figure** —
 `SINGLE_PROPERTY_ATTRIBUTED` (115 rows) or `REPORTED_PROPERTY_REVENUE` (61
 rows), counted as distinct properties rather than as rows. Every gaming row of
 the output states that denominator in `coverage_note`, and `verify` V7 fails if
 one does not.
 
 > **And importing it found the ladder BROKEN.** `_denom()` was returning
-> **771**, not 714, because the word-boundary escapes in its name-normalising
+> **771** as a *distinct-property* count with a shape-change warning attached,
+> because the word-boundary escapes in its name-normalising
 > regex were on disk as literal 0x08 backspace bytes, so the pattern matched
 > nothing and every facility name kept its `CASINO`/`GAMING` token. It failed
 > loudly — its own shape test appended *"shape changed, re-derive before

@@ -3,9 +3,11 @@
  "derivation": "500.COLLECTIONS + cedar_codebook + cedar_pipeline; GRAIN declared, everything else derived",
  "n_collections": 15,
  "n_tables_claimed": 294,
- "n_orphan_shippable": 9,
+ "n_orphan_shippable": 11,
  "orphans": [
   "annual_indian_country_money_series.csv",
+  "fac_native_nontribal_sefa_programs.csv",
+  "fac_native_nontribal_single_audits.csv",
   "native_owned_businesses.bak_2026-09-02_010526.csv",
   "native_owned_businesses.bak_2026-09-02_010557.csv",
   "native_owned_businesses.csv",
@@ -15,11 +17,13 @@
   "regulations_gov_entity_coverage.csv",
   "sam_native_class_distributions.csv"
  ],
- "n_shippable": 250,
+ "n_shippable": 252,
  "n_shippable_grain_stated": 241,
- "n_shippable_grain_unstated": 9,
+ "n_shippable_grain_unstated": 11,
  "shippable_grain_unstated": [
   "annual_indian_country_money_series.csv",
+  "fac_native_nontribal_sefa_programs.csv",
+  "fac_native_nontribal_single_audits.csv",
   "native_owned_businesses.bak_2026-09-02_010526.csv",
   "native_owned_businesses.bak_2026-09-02_010557.csv",
   "native_owned_businesses.csv",
@@ -31,11 +35,13 @@
  ],
  "n_shippable_grain_open_with_evidence": 0,
  "n_shippable_grain_defective": 0,
- "n_shippable_grain_unexplained": 9,
+ "n_shippable_grain_unexplained": 11,
  "shippable_grain_open_with_evidence": [],
  "shippable_grain_defective": [],
  "shippable_grain_unexplained": [
   "annual_indian_country_money_series.csv",
+  "fac_native_nontribal_sefa_programs.csv",
+  "fac_native_nontribal_single_audits.csv",
   "native_owned_businesses.bak_2026-09-02_010526.csv",
   "native_owned_businesses.bak_2026-09-02_010557.csv",
   "native_owned_businesses.csv",
@@ -63,7 +69,7 @@
   "subawards.csv": "10,770 LITERAL duplicate rows of 72,837. (subaward_number, subaward_date) collides 27,470 times, so even the natural key of a subaward is not unique here.",
   "native_passthrough.csv": "114 LITERAL duplicate rows of 1,262. This table is derived from subawards.csv and inherits its duplication; the passthrough dollars are therefore over-stated by an unmeasured amount."
  },
- "n_violations": 14,
+ "n_violations": 16,
  "violations": [
   "federal_funding_transactions.csv: declared join_cardinality names column(s) not in the header: ['tribe_id']",
   "federal_funding_tribe_year_panel.csv: declared primary_key names column(s) not in the header: ['tribe_id']",
@@ -71,6 +77,8 @@
   "federal_funding_tribe_year_panel.csv: declared primary_key ['fiscal_year'] is NOT unique - 5,480 duplicate row(s) of 5,496, e.g. ('2008',). A buyer joining on it gets rows we did not promise them.",
   "deals_press_edgar_ancsa_additions.csv: declared join_cardinality names column(s) not in the header: ['cedar_uid']",
   "ORPHAN shippable table: annual_indian_country_money_series.csv - registered in the codebook but claimed by NO collection",
+  "ORPHAN shippable table: fac_native_nontribal_sefa_programs.csv - registered in the codebook but claimed by NO collection",
+  "ORPHAN shippable table: fac_native_nontribal_single_audits.csv - registered in the codebook but claimed by NO collection",
   "ORPHAN shippable table: native_owned_businesses.bak_2026-09-02_010526.csv - registered in the codebook but claimed by NO collection",
   "ORPHAN shippable table: native_owned_businesses.bak_2026-09-02_010557.csv - registered in the codebook but claimed by NO collection",
   "ORPHAN shippable table: native_owned_businesses.csv - registered in the codebook but claimed by NO collection",
@@ -5975,7 +5983,7 @@
   {
    "collection": "newsletters",
    "name": "The Native Press: Tribal Newsletters and Periodicals",
-   "shelf": "standard",
+   "shelf": "withdrawn",
    "rebuild_command": "py -3 code/build.py run newsletters --execute",
    "n_tables": 2,
    "tables": [

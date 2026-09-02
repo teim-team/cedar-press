@@ -133,8 +133,24 @@ FLAGSHIP = {
     "native-owned-businesses":  "native_owned_businesses.csv",
     "nonprofits":               "np_orgs.csv",
     "deals":                    "deals_classified.csv",
-    "lobbying":                 "lobbying_registrants.csv",
-    "legislation":              "bill_votes.csv",
+    # 2026-09-02: was `lobbying_registrants.csv`, 653 rows - a REFERENCE LIST
+    # of who is registered, not the record of what they did. A buyer of
+    # "Lobbying" is asking which filings name their tribe and what was lobbied
+    # on, and that is `native_entity_lobbying_disclosures.csv`, 27,825 x 44,
+    # "one row per LDA filing attributed to a Native entity". Same defect the
+    # NAGPRA entry below was corrected for on this date: the buyer's first
+    # question had tens of thousands of answers on disk and the shipped table
+    # could not ask it.
+    "lobbying":                 "native_entity_lobbying_disclosures.csv",
+    # 2026-09-02: was `bill_votes.csv`, 423 rows. The collection is
+    # "Congressional Votes and Proposed Legislation" and the unit a buyer works
+    # in is the BILL - `native_bills.csv`, 3,069 x 29, "one row per
+    # Native-relevant bill". `member_positions.csv` has 136,119 rows and is the
+    # deeper table, but its grain is (roll-call vote, member of Congress),
+    # which is an analyst's join target, not the headline row. Picking by size
+    # would have chosen it, and picking by size is what 770 already warns
+    # against.
+    "legislation":              "native_bills.csv",
     "federal-register":         "consultation_events.csv",
     # 2026-09-02: was `fr_nagpra_title_index.csv`, a 10-column list of
     # document numbers and headline strings. The dataset descriptor promises

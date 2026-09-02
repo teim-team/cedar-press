@@ -25,6 +25,46 @@
 # 147 belongs to the gaming-puller workstream, so GAMING-NR did not make that
 # edit. Make it, and 814's carry becomes a no-op that can be retired.
 # lint-ok: class6 - ordering declared above; 814 is the enricher and runs last.
+#
+# COMPANION, DECLARED 2026-09-02 by workstream FAC-NONTRIBAL-1132 (comment
+# only; no logic in this file was changed).
+#
+# THIS SCRIPT ASKS THE FAC A NARROWER QUESTION THAN CEDAR NEEDS.
+# `stage_census` filters `general?entity_type=eq.tribal`, plus three
+# `auditee_name ilike` nets for gaming. Measured on the live output
+# 2026-09-02: 6,774 of 6,780 rows arrive on the tribal net and the table
+# reaches 638 of the 1,555 entities in `cedar_entity_spine.csv`. The 917 it
+# misses are led by 210 Native Hawaiian Organizations, 152 ANCSA village
+# corporations, 115 Alaska Native villages, 114 BIE schools and 55 Native
+# CDFIs - none of which files a Single Audit AS A TRIBE. `entity_type` is the
+# auditee's self-typing on the SF-SAC; it describes the FILER'S FORM, not who
+# the filer is.
+#
+# `code/1132_fac_nontribal_native_audits.py` asks it again without that
+# filter, keyed on EIN / UEI / name against those 917 only, and writes its own
+# tables:
+#     data/clean/fac_native_nontribal_single_audits.csv    (545 filings,
+#                                                           99 entities,
+#                                                           $9.78B)
+#     data/clean/fac_native_nontribal_sefa_programs.csv    (7,252 SEFA lines)
+#
+# THE TWO TABLES ARE DISJOINT ON `report_id` AND MUST STAY THAT WAY. A row is
+# 147's or it is 1132's, never both, so a consumer may UNION them without
+# double-counting a dollar. 1132's invariant V4 exits 1 on a single shared
+# report_id and a fixture proves it fires. There is no ordering requirement
+# between the two scripts - they write different files - but if you WIDEN
+# this script's discovery, re-run `py -3 code/1132_fac_nontribal_native_audits.py
+# apply` afterwards or the overlap it forbids becomes real.
+#
+# 1132 does NOT use the API. Measured 2026-09-02T17:52Z, every path on
+# api.fac.gov answered HTTP 404 "Requested route
+# (fac-production-postgrest.app.cloud.gov) does not exist" with
+# X-Ratelimit-Remaining 997 - the api.data.gov gateway took the key and the
+# FAC's own backend was unrouted. www.fac.gov carried a banner naming
+# scheduled maintenance 09:00-16:00 EDT that day. It is a state of the host,
+# not of the path, and not of the key. 1132 reads the FAC's own published
+# bulk export instead (https://www.fac.gov/data/download/current/), which
+# carries the same columns as these API tables and is one request per table.
 """147_build_fac_single_audits.py -- Gaming spec Step 12: the Single Audit exhaust.
 
 Match Cedar Native entities to Federal Audit Clearinghouse records, and read the

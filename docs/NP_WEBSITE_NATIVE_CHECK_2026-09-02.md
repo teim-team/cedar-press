@@ -77,12 +77,25 @@ assumed to be present.
 
 **The entity layer's web map was refused, and the refusal is the finding.**
 `np_orgs.cedar_uid` names the entity Cedar **keyed the nonprofit to** — the
-tribe or the corporation — not the nonprofit. 41 of the 293 have no 990 website
-field and a `cedar_uid` whose site sits in `cedar_web_map.csv`. Reading it would
-ask *Ahtna, Incorporated's* website whether **AHTNA INTERTRIBAL RESOURCE
-COMMISSION** is Native. **A tribe's own site is Native by construction**, so
-that route manufactures a "yes" on every row it touches and corroborates
-nothing. It is counted in `plan` and never fetched.
+tribe or the corporation — not the nonprofit. **26 of the 293** (218 of all
+697) have no filer-typed website field and a `cedar_uid` whose site sits in
+`cedar_web_map.csv`. Reading it would ask *Ahtna, Incorporated's* website
+whether **AHTNA INTERTRIBAL RESOURCE COMMISSION** is Native. **A tribe's own
+site is Native by construction**, so that route manufactures a "yes" on every
+row it touches and corroborates nothing. It is counted in `plan` and never
+fetched.
+
+> **A blank key is a key, and it cost a wrong label on 15 rows.** The first
+> pass keyed `cedar_web_map.csv` on a possibly-blank `cedar_uid`, so `"" in wm`
+> was True and 15 organisations for which Cedar holds **no URL at all** were
+> written as *"refused, we only hold the keyed entity's site"* — 41 instead of
+> 26. No page was wrongly fetched or wrongly skipped; both states are
+> `NOT_CHECKED`. But they are different facts, and one of them is a task while
+> the other is a fact about the world. **It was caught only because the refusal
+> list prints the organisations it refused and several of them had an empty
+> keyed entity printed beside them** — which is the entire argument for naming
+> what you dropped instead of counting it. Corrected at `build`, which
+> re-derives the no-URL reason from a web-map index that skips blank keys.
 
 ---
 

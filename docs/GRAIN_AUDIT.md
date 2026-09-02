@@ -20,14 +20,14 @@ Three honest outcomes, and they are three different jobs:
 
 | | count |
 |---|---:|
-| shippable tables | 250 |
+| shippable tables | 252 |
 | **DECLARED_VALIDATED** | **241** |
 | OPEN_WITH_EVIDENCE | 0 |
 | DEFECTIVE | 0 |
-| still unexplained | 9 |
-| ratchet `contract_grain_unstated_shippable` | **9** (was 207) |
+| still unexplained | 11 |
+| ratchet `contract_grain_unstated_shippable` | **11** (was 207) |
 
-A declaration that the data contradicts is release-blocking through `contract_violations`; there are **14**.
+A declaration that the data contradicts is release-blocking through `contract_violations`; there are **16**.
 
 ## Per collection
 

@@ -2,13 +2,15 @@
 
 *Generated 2026-09-02 by `code/512_build_dataset_contracts.py` (mission Phase 1). Regenerate rather than edit; `verify` exits 1 when the world breaks a contract, and 62 gates on it.*
 
-**15 collections, 294 tables claimed, 9 orphaned shippable tables, 14 violations.**
+**15 collections, 294 tables claimed, 11 orphaned shippable tables, 16 violations.**
 
-**Grain: 241 of 250 shippable tables declare and VALIDATE a row grain, a primary key and a join cardinality; 9 do not.** A declared grain the data contradicts is a release-blocking violation, listed below. An unstated grain is ratcheted by `62_no_regression_check.contract_grain_unstated_shippable`: the count may only fall, and a new shippable table that lands without one fails the gate that day.
+**Grain: 241 of 252 shippable tables declare and VALIDATE a row grain, a primary key and a join cardinality; 11 do not.** A declared grain the data contradicts is a release-blocking violation, listed below. An unstated grain is ratcheted by `62_no_regression_check.contract_grain_unstated_shippable`: the count may only fall, and a new shippable table that lands without one fails the gate that day.
 
-<details><summary>Shippable tables with an UNSTATED grain (9) - a buyer cannot join these safely</summary>
+<details><summary>Shippable tables with an UNSTATED grain (11) - a buyer cannot join these safely</summary>
 
 - `annual_indian_country_money_series.csv`
+- `fac_native_nontribal_sefa_programs.csv`
+- `fac_native_nontribal_single_audits.csv`
 - `native_owned_businesses.bak_2026-09-02_010526.csv`
 - `native_owned_businesses.bak_2026-09-02_010557.csv`
 - `native_owned_businesses.csv`
@@ -28,6 +30,8 @@
 - federal_funding_tribe_year_panel.csv: declared primary_key ['fiscal_year'] is NOT unique - 5,480 duplicate row(s) of 5,496, e.g. ('2008',). A buyer joining on it gets rows we did not promise them.
 - deals_press_edgar_ancsa_additions.csv: declared join_cardinality names column(s) not in the header: ['cedar_uid']
 - ORPHAN shippable table: annual_indian_country_money_series.csv - registered in the codebook but claimed by NO collection
+- ORPHAN shippable table: fac_native_nontribal_sefa_programs.csv - registered in the codebook but claimed by NO collection
+- ORPHAN shippable table: fac_native_nontribal_single_audits.csv - registered in the codebook but claimed by NO collection
 - ORPHAN shippable table: native_owned_businesses.bak_2026-09-02_010526.csv - registered in the codebook but claimed by NO collection
 - ORPHAN shippable table: native_owned_businesses.bak_2026-09-02_010557.csv - registered in the codebook but claimed by NO collection
 - ORPHAN shippable table: native_owned_businesses.csv - registered in the codebook but claimed by NO collection
@@ -746,7 +750,7 @@ Declared grain — validated against the file on every run:
   - join cardinality: `cedar_uid` → one row(s) per value (measured max 1)
   - declared by: workstream nest-owner-v6 2026-09-02, code/1130_nest_owner_v6_reconcile.py: cedar_uid tested unique and non-blank on the full file; every value checked present in data/spine/cedar_identity_register.csv by invariant I3, which a fixture proves fires
 
-## The Native Press: Tribal Newsletters and Periodicals  (`newsletters`, shelf: standard)
+## The Native Press: Tribal Newsletters and Periodicals  (`newsletters`, shelf: withdrawn)
 
 Rebuild: `py -3 code/build.py run newsletters --execute` — 2 tables.
 

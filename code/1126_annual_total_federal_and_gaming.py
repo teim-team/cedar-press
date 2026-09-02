@@ -44,8 +44,9 @@ THE FENCES THIS SERIES OBEYS
    `figure_vintage = own_year_report` within a fiscal year, and where a year has
    no own-year report, take its prior-year column and SAY SO.** Four years are
    in that state (FY2001, FY2011, FY2013, FY2021).
-4. **Only 11 of the 714 distinct gaming properties have an honest per-property
-   figure.** Said on every gaming row of the output, in `coverage_note`.
+4. **Only 11 distinct gaming properties have an honest per-property figure**,
+   against a denominator IMPORTED from the gated ladder. Said on every gaming
+   row of the output, in `coverage_note`.
 5. **The audited per-property SEC figures are their own class** and are carried
    as a separate series that may never be netted against a regional figure --
    the property is INSIDE the region and the regional figure already contains
@@ -53,10 +54,14 @@ THE FENCES THIS SERIES OBEYS
 
 THE DENOMINATOR, EVERY TIME
 ---------------------------
-The gated gaming ladder is `code/846_session_audit.py::_denom`:
-787 rows - 16 non-places = 771 facility rows - 57 duplicate extras = **714
-distinct properties**. This script IMPORTS it rather than retyping it; five
-denominators circulated on 2026-09-02 and all five were quoted as settled.
+The gated gaming ladder is `code/846_session_audit.py::_denom`, and this script
+IMPORTS it rather than retyping it -- both the number and the sentence that
+explains it. FIVE denominators circulated on the morning of 2026-09-02 and all
+five were quoted as settled (787, 780, 734, 727, 714); the ladder itself then
+moved 714 -> 717 the same evening. **Any figure typed into this file would
+already be stale.** If `_denom()` reports a shape change it refuses to stand
+behind its own number, and this script then records UNMEASURED rather than
+guessing.
 
 usage
   py -3 code/1126_annual_total_federal_and_gaming.py build
@@ -770,15 +775,22 @@ def doc(a):
       "by its property count. This series therefore rolls NIGC up **only along "
       "the axis NIGC itself publishes** -- region to nation.")
     A("")
+    # THE SENTENCE IS COMPUTED, not typed. The ladder moved 714 -> 717 within
+    # hours of this section first being written, which is exactly why it is
+    # imported from `846::_denom` and pasted here as a measurement rather than
+    # remembered as a number.
     A("**The denominator, computed rather than typed** "
-      "(`code/846_session_audit.py::_denom`, the single gated ladder): "
-      "787 rows in `gaming_facilities.csv` - 16 whose name says *no casino* = "
-      "771 facility rows - 57 duplicate extras = **714 distinct properties**. "
-      "**%s of those 714 carry an honest per-property revenue figure** "
-      "(`SINGLE_PROPERTY_ATTRIBUTED` or `REPORTED_PROPERTY_REVENUE`). Every "
-      "gaming row of the output states that denominator in `coverage_note`, "
-      "and `verify` V7 fails if one does not."
-      % meta["gaming_properties_with_an_honest_per_property_figure"])
+      "(`code/846_session_audit.py::_denom`, the single gated ladder, read at "
+      "build time and never retyped): **%s**. **%s of those carry an honest "
+      "per-property revenue figure** (`SINGLE_PROPERTY_ATTRIBUTED` or "
+      "`REPORTED_PROPERTY_REVENUE`, counted as distinct properties rather "
+      "than as rows). Every gaming row of the output states that denominator "
+      "in `coverage_note`, and `verify` V7 fails if one does not. **This "
+      "figure has moved twice in one day** - 714 on the morning of "
+      "2026-09-02, 717 by that evening - so import the ladder, do not quote "
+      "this paragraph."
+      % (meta["gaming_denominator_ladder"],
+         meta["gaming_properties_with_an_honest_per_property_figure"]))
     A("")
     A("### Precision, and the years a chart will get wrong")
     A("")

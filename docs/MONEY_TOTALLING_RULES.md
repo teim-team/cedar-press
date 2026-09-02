@@ -1609,7 +1609,7 @@ The discriminator was already in the table and nothing was reading it: **`figure
 
 NIGC publishes GGR at the **region** level and nowhere else. `gaming_revenue_bounds.csv` is 13,803 rows of which **13,494 are one `REGIONAL_GGR_CEILING` repeated across 694 facilities**, and the largest single ceiling is carried by 162 of them. Apportioning it to facilities, or summing it across them, multiplies a region's entire GGR by its property count. This series therefore rolls NIGC up **only along the axis NIGC itself publishes** -- region to nation.
 
-**The denominator, computed rather than typed** (`code/846_session_audit.py::_denom`, the single gated ladder): 787 rows in `gaming_facilities.csv` - 16 whose name says *no casino* = 771 facility rows - 57 duplicate extras = **714 distinct properties**. **11 of those 714 carry an honest per-property revenue figure** (`SINGLE_PROPERTY_ATTRIBUTED` or `REPORTED_PROPERTY_REVENUE`). Every gaming row of the output states that denominator in `coverage_note`, and `verify` V7 fails if one does not.
+**The denominator, computed rather than typed** (`code/846_session_audit.py::_denom`, the single gated ladder, read at build time and never retyped): **787 rows - 16 NOT_A_PLACE = 771 placed -> 717 distinct properties**. **11 of those carry an honest per-property revenue figure** (`SINGLE_PROPERTY_ATTRIBUTED` or `REPORTED_PROPERTY_REVENUE`, counted as distinct properties rather than as rows). Every gaming row of the output states that denominator in `coverage_note`, and `verify` V7 fails if one does not. **This figure has moved twice in one day** - 714 on the morning of 2026-09-02, 717 by that evening - so import the ladder, do not quote this paragraph.
 
 ### Precision, and the years a chart will get wrong
 
