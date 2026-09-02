@@ -1021,8 +1021,8 @@ CUE_WORDS = {
     "we", "casino", "floor", "than", "now", "boastsover", "some", "all",
 }
 QUALIFIER_HEAD = re.compile(
-    r"^\s*(more than|over|nearly|approximately|about|almost|up to)", re.I)
-DATE_NEAR = re.compile(r"(\d{1,2}/\d{1,2}/\d{2,4}|20\d\d)")
+    r"^\s*(more than|over|nearly|approximately|about|almost|up to)\b", re.I)
+DATE_NEAR = re.compile(r"(\d{1,2}/\d{1,2}/\d{2,4}|\b20\d\d\b)")
 
 
 def has_counting_cue(text, m):

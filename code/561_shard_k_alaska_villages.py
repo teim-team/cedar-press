@@ -554,10 +554,10 @@ def verify_site(url, entity_names):
     body = text_of(r["text"])
     low = (title + " " + body[:20000]).lower()
     hit = [n for n in entity_names if n and n.lower() in low]
-    hijack_markers = [r"slot gacor", r"situs", r"judi", r"togel",
-                      r"bandar", r"casino online", r"xnxx", r"porn",
-                      r"bokep", r"แทงบอล", r"บาคาร่า", r"pg soft",
-                      r"rtp live", r"maxwin"]
+    hijack_markers = [r"slot gacor", r"\bsitus\b", r"\bjudi\b", r"\btogel\b",
+                      r"\bbandar\b", r"casino online", r"\bxnxx\b", r"\bporn\b",
+                      r"\bbokep\b", r"แทงบอล", r"บาคาร่า", r"pg soft",
+                      r"\brtp live\b", r"\bmaxwin\b"]
     hj = [k for k in hijack_markers if re.search(k, low)]
     if hj:
         return (r["status"], "HIJACKED:" + ",".join(hj), title, body[:200])

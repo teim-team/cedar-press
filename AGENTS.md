@@ -7964,3 +7964,172 @@ artefact a gate failure.
 
 **`dist/` is clean.** No shipped table carries both an `identifier` and a
 `state` column with a contaminated row, so nothing reached a customer.
+
+---
+
+## A REGEX LITERAL IS THE ONE PLACE IN THIS CODEBASE WHERE A DEFECT IS INVISIBLE IN A TERMINAL (2026-09-02, ESCAPE-COLLAPSE-1125, `code/1136_control_byte_gate.py`)
+
+**The rule, first, because it is the part that generalises.**
+
+> **Before you believe a suspiciously clean zero out of a regex, look at the
+> BYTES.** `cat -A`, `xxd`, or `py -3 code/1136_control_byte_gate.py report`.
+> `cat`, `Read`, `git diff` and every editor in this environment render a
+> `0x08` backspace as nothing or as a cursor move, so a pattern whose word
+> boundary has collapsed into a control byte **reads on screen exactly as its
+> author wrote it** while matching no string that can exist. It does not raise.
+> It matches *less*, silently, and every count downstream of it looks like a
+> measurement.
+>
+> This is the tenth instance of the repo's signature failure — *a check that
+> does not measure its own name* — and it is the only one where reading the
+> source carefully is not enough to find it.
+
+**And the rule that stops you re-creating it:**
+
+> **This environment collapses a doubled backslash on its way into a shell
+> heredoc.** Never write a file containing a backslash with `cat <<EOF`. Use an
+> editor tool, or a Python script that builds the bytes explicitly
+> (`bytes([0x5C, 0x62])` for `\b`). Then **assert the remaining count is zero**
+> rather than trusting your own "replaced N occurrences" line. A prior repair
+> script authored as `.replace(bytes([8]), b'\\b')` arrived on disk as
+> `b'\b'` — which Python reads back as 0x08 — so it replaced the byte with
+> itself, reported success, and changed nothing. The same collapse ate a
+> `KNOWN_ISSUES.md` draft and a line-continuation in a patched source file:
+> three times in one session, in three file types.
+
+### The sweep
+
+Scanned `code/**/*.py`, `docs/**/*.md`, the root `*.md` and
+`docs/schema/**/*.{json,txt}` — 975 files — for **every** control byte a regex
+escape can collapse into: `0x00`–`0x08` (`\0`–`\8`, `\b`), `0x07` (`\a`),
+`0x0b` (`\v`), `0x0c` (`\f`), `0x0e`–`0x1f`, `0x7f`. Tab, newline and carriage
+return excluded.
+
+**41 bytes, 7 files, 15 lines.** Every one is `0x08` except a single `0x01`,
+and every one sits in a regex literal where a word boundary is the only
+sensible reading. **No legitimate literal control byte exists anywhere in
+scope** — no form-feed record splitter, no vertical-tab delimiter, nothing in a
+data-parsing path — so every one of the 41 is a defect. The prior pass recorded
+"41 bytes across 16 lines in 8 files"; the byte count reproduces exactly, the
+line and file counts do not, and the eighth file was `846_session_audit.py`,
+repaired separately by PLACE-IDS before this sweep ran.
+
+### Repairing a dead pattern is a DATA correction wherever the output moves
+
+Each site was run in **both** forms — the byte as it stood on disk, and the
+repaired escape — against the corpus the script actually reads. Three moved
+something. Four did not, and are repaired anyway, because a guard that cannot
+fire is not a guard.
+
+| site | corpus | broken → repaired |
+|---|---|---|
+| `503_identity.py:95` `clean()` | 18,506 names (spine, register, aliases, 9,098 distinct `recipient_name`) | **7 distinct names normalise differently.** The distinctive-token subset test — `resolve()`'s last resort — goes from NO MATCH to MATCH for two Native governments |
+| `1080…:275` `PAT_B1` | 609 SEC filings, 1080's own `totext`/`flat`/alias alternation | **6 → 28 matches.** 22 new per-facility revenue figures, Mohegan Sun (11) + Mohegan Sun Pocono (10) + MGE Niagara (1), FY2018–21, $5,756,300,000 as printed |
+| `1089…:254–5, 334–6` | all 2,313 FR consultation texts through the real `parse_notice()` | **7 documents move**, all place lists. **7 shipped `consultation_events.csv` rows carry a phantom street fragment as their `location`** |
+| `1104…:363–4` `FURNITURE` | 51,579 `nagpra_notice_entity_bridge.csv` rows | **1 → 5.** The audit's own D1 check now FIRES: `01-8989` keys *"NAGPRA coordinator for the Walker River Paiute Tribe…"* to `TRBF-WLKRRV-00` |
+| `142…:1024–5` | 1,749 cached pages, 2,519 metric candidates through real `has_counting_cue()` | **0 verdicts change** — `CUE_WORDS` already covers it |
+| `76…:836` | all 366 shipped `federal_recognition_events.csv` rows through real `classify_mechanism()` | **0 mechanism labels change**; 6 rows get a better `mechanism_basis` |
+| `561…:557–60` | 689 cached shard-K pages | **0 → 0** today, but 14 of 18 hijack markers were dead — a live-fetch guard whose value is in the next run |
+
+**The two worst, stated plainly.**
+
+**1. `503_identity.py` is the identity normaliser and it was inert.** One line
+was `re.sub(r"<0x08>MC ([A-Z])", r"MC<0x01>", s)` — *both* the boundary and the
+`\1` backreference collapsed, so it is the only site where the **replacement**
+was corrupt too: had it ever matched it would have written a control byte into
+an entity name. It never matched, so the 0x01 was latent, not live (measured:
+the broken form emitted a control byte 0 times across 18,506 names). Repaired,
+`clean("FT MC DOWELL YAVAPAI NATION")` and `clean("FORT MCDOWELL YAVAPAI
+NATION")` fold to one key for the first time, and:
+
+```
+FILED "MC GRATH NATIVE VILLAGE COUNCIL"
+   broken tokens {GRATH, MC}      vs spine AKNF-MCGRTH-00-…{MCGRATH}  -> no match
+   fixed  tokens {MCGRATH}        vs spine AKNF-MCGRTH-00-…{MCGRATH}  -> MATCH
+```
+
+**151 rows / $11,358,100.32 of federal assistance to the McGrath Native Village
+Council sit `attribution_status = unattributed` in the shipped
+`federal_funding_transactions.csv` today**, and neither loose-path refusal
+guard (G1 admin-geography, G2 civic form) refuses the name. *This is a
+PROPOSAL, not an applied attribution* — a dollar-keying link is a ruling, and
+`503` is a library, not the writer. It is in
+`review/collapsed_escape_flagged_rows_2026-09-02.csv` and the owner queue.
+
+**2. `1089`'s street-fragment refusal has never once fired**, and its own
+docstring names the exact defect it was written to stop: *"2401 M Street, NW,
+Washington, DC yields the phantom `NW, Washington`"*. With a collapsed boundary
+`STREET_TOKEN` is `<0x08>(Avenue|Ave|Street|…)<0x08>`, which matches nothing, so
+the guard was a no-op from the day it was written. Seven shipped rows carry the
+result, and `location_basis` shows **four of them were written by 1089 itself**:
+
+```
+CONS-FR-2014-03720   'M Street NW., Washington'                 -> no place
+CONS-FR-2016-10525   'E Street SW., Washington'                 -> no place
+CONS-FR-2012-5438    drops 'West Dunlap Avenue Phoenix, AZ'
+CONS-FR-2017-12494   drops 'Port Puget Sound Zone, WA'
+CONS-FR-00-27437 / 2011-18096 / 2019-17786   (basis blank -> written by 96)
+```
+
+**The repair does not self-heal them.** `1089` fills `location` only when it is
+blank, so re-running it leaves all seven exactly as they are. Flagged, never
+deleted, no `cedar_uid` touched.
+
+### The gate, because a repair with no gate regresses
+
+```
+py -3 code/1136_control_byte_gate.py report    # inventory, with cat -A rendering
+py -3 code/1136_control_byte_gate.py apply     # repair the adjudicated manifest
+py -3 code/1136_control_byte_gate.py verify    # EXIT 1 if any byte reappears
+py -3 code/1136_control_byte_gate.py selftest  # 7 fixtures prove it FIRES
+```
+
+`apply` refuses any file whose byte census does not match the manifest exactly
+— a changed census means the file moved and the adjudication no longer
+describes it — backs up to `.bak_2026-09-02_pre_1136_control_byte_gate`, writes
+through `.part`-then-rename, and **asserts zero remaining** rather than
+trusting its own report. A byte that is genuinely meant to be there goes in
+`ALLOWLIST` with a stated reason; nothing qualifies today.
+
+**Wired in two places, both of which run every session:**
+
+- **`293_lint_bug_classes.py` gained `class9`**, consumed from `1136.scan()`
+  and never re-derived there — the same contract `class7` has with `284`,
+  because two detectors for one class drift and a drifted detector is worse
+  than none. `--selftest` runs 1136's seven fixtures. Note that class 9 is the
+  one class `ast` cannot see: once the module parses, the byte is just a
+  character inside a string constant.
+- **`846_session_audit.py`** carries it as a CRITICAL claim. 846 is where this
+  started — nine of these bytes in its own source blinded `_denom` into
+  publishing "771 distinct properties" against a true 714.
+
+Current state: **class9 = 0**, `1136 verify` PASS over 975 files, `293
+--selftest` all green including class9.
+
+### `62_no_regression_check.py` was RED when ESCAPE-COLLAPSE-1136 landed, and none of it is that workstream's. Named here per standing rule 15.
+
+*Measured 2026-09-02, immediately after `1136 apply`. Recording it rather than
+stepping around it, and naming an owner with a measurement rather than writing
+"pre-existing, not mine".*
+
+**What ESCAPE-COLLAPSE-1136 changed, in full:** 41 bytes inside regex literals
+in 7 scripts, an additive `class9` detector in `293`, an additive claim in
+`846`, `AGENTS.md`, `docs/KNOWN_ISSUES.md`, one new script
+(`code/1136_control_byte_gate.py`) and one new review file. **It wrote no table
+in `data/` and no file in `dist/`, and it ran no builder.** `git status` over
+`data/` and `dist/` shows nothing from it. Its contribution to every lint
+metric is **0** — `class9 = 0` on a clean tree.
+
+| red metric | owner, with the evidence |
+|---|---|
+| `tier_A_ruled` FELL 1,676 → 1,669 | the ledger was rewritten twice in the last three hours by **`1122_ladder_repoints`** and **`1134_repair_ledger_state_uei_contamination`** — both `.bak_2026-09-02_pre_…` files sit beside `cedar_identifier_ledger_final.csv` |
+| `rulings_unapplied` ROSE 1,215 → 2,894 · `corrections_not_propagated` ROSE 2 → 4 | same two ledger rewrites |
+| `ship_tables_at_zero` 13 → 46 · `tables_missing_codebook_block` 3 → 27 · `tables_undocumented_in_codebook` 3 → 27 · `tables_missing_from_25_TABLES` 179 → 236 · `tables_missing_from_27_SPEC` 194 → 243 · `tables_missing_notes_contract` 14 → 47 | the **`1119`/`1120`/`1121` ACQUIRE wave** (`BIAMAPS_ACQUISITION_LOG_2026-09-02.md`, 358,336 rows) landed ~46 new clean tables without codebook blocks. `SHIPPING_RUNBOOK.md`: write the block, then `87 -> 25 -> 27` |
+| `contract_orphan_shippable` = 11 · `contract_violations` = 16 | `docs/schema/dataset_contracts.json` and `docs/DATASET_CONTRACTS.md` are modified in the working tree by another pass |
+| `SHIPPING LOST advocacy_passthrough_2026-08-07.csv` · `hearing_bill_links.csv` 465 → 464 · `native_bills_subject_sweep.csv` 2,414 → 2,409 | dist manifest, same shipping wave |
+| `lint_bug_class_instances` 146 → 163 (`class1` +1, `class2c` +9, `class3` +2, `class4` +5, `class7` +2) | **every named site belongs to another script**: `1011`, `1060` (×3), `1085`, `1086`, `852`, `873`, `992`, `1030` (×2), `1031` (×2), `1111`, `980`, `1077`, `30`, `518`, `870`, `99`. The one that looks like this workstream's — `class2c 846_session_audit.py: fails += 1` — is **in `HEAD`**: running `293.detect_class2c` against `git show HEAD:code/846_session_audit.py` returns the same finding at line 565, and against the working tree at line 589. Only the line number moved. 293's baseline predates HEAD |
+
+**`class9` is 0 and stays 0.** `1136 verify` PASSES over 976 files.
+**No baseline was re-recorded.** `--baseline` is a floor, not an
+acknowledgement button, and re-recording it here would have buried all of the
+above.

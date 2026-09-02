@@ -92,7 +92,7 @@ CANON_FIX = {"STE": "SAINTE", "ST": "SAINT", "MT": "MOUNT", "FT": "FORT"}
 def clean(s: str) -> str:
     s = (s or "").upper().replace("&", " AND ")
     s = re.sub(r"[^A-Z0-9 ]", " ", s)
-    s = re.sub(r"MC ([A-Z])", r"MC", s)      # FT MC DOWELL -> MCDOWELL
+    s = re.sub(r"\bMC ([A-Z])", r"MC\1", s)      # FT MC DOWELL -> MCDOWELL
     return " ".join(CANON_FIX.get(w, w) for w in s.split())
 
 

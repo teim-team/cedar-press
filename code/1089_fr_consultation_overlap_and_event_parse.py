@@ -251,8 +251,8 @@ STATE_CITY = re.compile(
     rf"\b({SN}),\s*([A-Z][A-Za-z.'\-]*(?:\s+[A-Z][A-Za-z.'\-]*){{0,3}})\b")
 
 MAIL_TO = re.compile(
-    r"(mail|send|submit|address(?:ed)? to|attention|attn|box|"
-    r"mail stop|fax|e-?mail|comments|telephone|suite|should contact|"
+    r"(mail|send|submit|address(?:ed)? to|attention|attn|\bbox\b|"
+    r"mail stop|fax|e-?mail|comments|telephone|\bsuite\b|should contact|"
     r"may contact|signed at|dated at|cancel|postpone|has been removed|"
     r"were removed from|repatriat)", re.I)
 # `\b(?!\d)` matters: without it "May 1997" reads as "May 19".
@@ -331,9 +331,9 @@ def iso_dates(text):
 # only refused STANDING ALONE or beside a street word, so `North Little Rock`
 # and `West Valley City` survive.
 STREET_TOKEN = re.compile(
-    r"(Avenue|Ave|Street|Road|Boulevard|Blvd|Drive|Suite|Floor|Room|"
+    r"\b(Avenue|Ave|Street|Road|Boulevard|Blvd|Drive|Suite|Floor|Room|"
     r"Parkway|Highway|Zone|Building|Plaza|Hotel|Resort|Hall|Center|Centre|"
-    r"NW|NE|SW|SE)", re.I)
+    r"NW|NE|SW|SE)\b", re.I)
 STATE_TO_AB = {
     "alabama": "AL", "alaska": "AK", "arizona": "AZ", "arkansas": "AR",
     "california": "CA", "colorado": "CO", "connecticut": "CT",

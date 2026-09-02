@@ -159,6 +159,8 @@ CLASS_TITLES = {
               "a position",
     "class8": "the absolute project root written as a literal instead of "
               "derived from __file__",
+    "class9": "a collapsed regex escape - a literal control byte where "
+              "\\b or a backreference belongs",
 }
 
 # Scripts that must never be executed. The linter never executes anything, but
@@ -1029,6 +1031,8 @@ def detect_class6(modules):
 
 _M284 = None
 _M284_ERROR = ""
+_M1136 = None
+_M1136_ERROR = ""
 
 
 def _load_284():
@@ -1053,6 +1057,74 @@ def _load_284():
                        f"({type(e).__name__}: {e}) - class 7 is UNMEASURED, "
                        f"which is not the same as zero")
     return _M284
+
+
+def _load_1136():
+    """The collapsed-escape gate, or None with the reason recorded.
+
+    CLASS 9 is consumed, never re-derived here, for the same reason CLASS 7 is
+    consumed from 284: two detectors for one class drift, and a drifted
+    detector is worse than none because it is trusted. 1136 owns the byte set,
+    the manifest and the allowlist; 293 reports what it finds.
+    """
+    global _M1136, _M1136_ERROR
+    if _M1136 is not None or _M1136_ERROR:
+        return _M1136
+    import importlib.util
+    p = CODE / "1136_control_byte_gate.py"
+    if not p.exists():
+        _M1136_ERROR = (f"{p.name} is ABSENT - class 9 is UNMEASURED, which "
+                        f"is not the same as zero")
+        return None
+    try:
+        sys.path.insert(0, str(CODE))
+        spec = importlib.util.spec_from_file_location("m1136_for_293", p)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        _M1136 = mod
+    except Exception as e:                       # noqa: BLE001
+        _M1136_ERROR = (f"{p.name} could not be imported "
+                        f"({type(e).__name__}: {e}) - class 9 is UNMEASURED, "
+                        f"which is not the same as zero")
+    return _M1136
+
+
+def detect_class9():
+    """(findings, note). One finding per collapsed-escape byte 1136 reports.
+
+    A collapsed escape is invisible to `ast`: by the time the module parses,
+    the byte is just a character inside a string constant, and it renders as
+    nothing in a terminal. So this class cannot be detected the way the other
+    eight are - it needs a byte-level read of the file, which is what 1136 is.
+    """
+    m = _load_1136()
+    if m is None:
+        return [], _M1136_ERROR
+    try:
+        raw, nfiles = m.scan()
+    except Exception as e:                       # noqa: BLE001
+        return [], (f"1136.scan() raised {type(e).__name__}: {e} - class 9 is "
+                    f"UNMEASURED, not clean")
+    out = []
+    for f in raw:
+        out.append(Finding(
+            "class9", f["file"], f["line"],
+            m._render(f["source"]),
+            f"byte 0x{f['byte']:02x} at offset {f['offset']}: "
+            f"{f['byte_name']}. A raw string cannot produce this byte, so "
+            f"something between the author and the file interpreted the "
+            f"escape. The pattern now matches no string that can exist and it "
+            f"does NOT raise - it matches less, silently, and every count "
+            f"downstream of it looks like a clean measurement. In "
+            f"846::_denom nine of these made 771 facility names all look "
+            f"distinct and published a sixth gaming denominator. Repair with "
+            f"`py -3 code/1136_control_byte_gate.py apply`, never through a "
+            f"shell heredoc - this environment collapses a doubled backslash "
+            f"on the way in, which is how the bytes got here."))
+    note = (f"1136 scanned {nfiles} files (code/*.py, docs/*.md, "
+            f"docs/schema/*, root *.md) for 0x00-0x08, 0x0b, 0x0c, 0x0e-0x1f, "
+            f"0x7f")
+    return out, note
 
 
 def detect_class7():
@@ -1377,9 +1449,17 @@ def scan(code_dir=CODE):
 
     # The tier-inheritance disposition table, folded in from 248. A site with
     # no recorded disposition becomes a class-3 finding.
+    # CLASS 9 - consumed from 1136, never re-derived. It reads BYTES, not the
+    # AST: a collapsed escape is invisible once the module has parsed.
+    c9, c9_note = detect_class9()
+    findings += c9
+    if c9_note and "UNMEASURED" in c9_note:
+        unparsed.append(f"[class9] {c9_note}")
+
     tier_hits = scan_tier_sites(modules)
     findings += disposition_findings(tier_hits, lines_by_file)
-    extras = {"class7_note": c7_note, "tier_sites": tier_hits}
+    extras = {"class7_note": c7_note, "class9_note": c9_note,
+              "tier_sites": tier_hits}
 
     # One defect, one finding. The AST is walked from several roots (module and
     # each function), so the same line can surface more than once.
@@ -1498,6 +1578,21 @@ def selftest():
         if not ok:
             bad.append("class7")
 
+    # CLASS 9's fixtures live with its detector, in 1136, for the same reason
+    # 284 holds class 7's. 293 is the single entry point, so `--selftest` must
+    # prove every class it reports on, including the two it consumes.
+    m9 = _load_1136()
+    if m9 is None:
+        print(f"  FAIL  class9   NOT LOADED - {_M1136_ERROR}")
+        bad.append("class9")
+    else:
+        rc = m9.selftest()
+        print(f"  {'PASS' if rc == 0 else 'FAIL'}  class9   "
+              f"1136's byte fixtures: a collapsed \\b, a collapsed "
+              f"backreference, a form-feed, and clean source left alone")
+        if rc != 0:
+            bad.append("class9")
+
     if bad:
         print(f"\nSELFTEST FAILED for {bad}. A detector was narrowed until it "
               f"stopped seeing the defect it was built for. That is worse than "
@@ -1546,6 +1641,8 @@ def main():
                "class7_source": "284_audit_nondeterministic_keys."
                                 "lint_key_stability()",
                "class7_note": extras.get("class7_note", ""),
+               "class9_source": "1136_control_byte_gate.scan()",
+               "class9_note": extras.get("class9_note", ""),
                "tier_inheritance": {
                    "sites": [{"file": f, "line": ln, "source": s}
                              for f, ln, s in tier_hits],
@@ -1645,6 +1742,11 @@ def main():
 
     if extras.get("class7_note"):
         print(f"CLASS 7 SOURCE: {extras['class7_note']}\n")
+    if extras.get("class9_note"):
+        print(f"CLASS 9 SOURCE: {extras['class9_note']}")
+        print("               a regex literal is the one place in this repo "
+              "where a defect is INVISIBLE IN A TERMINAL - `cat -A` or a byte "
+              "read is required before believing a clean zero.\n")
 
     total = counts["lint_bug_class_instances"]
     print(f"TOTAL (unwaived): {total}")

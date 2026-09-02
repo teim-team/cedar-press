@@ -1372,7 +1372,15 @@ ruling.** 1,943,994 rows can be keyed; the state is `NOT_ACQUIRED`, not
 <!-- END FWD-CONSTRUCTION-2026-09-02 -->
 
 <!-- BEGIN ESCAPE-COLLAPSE-1125 -->
-## OPEN — the collapsed-escape defect is not confined to `846`. SEVEN more live scripts carry it, and one of them is the identity normaliser
+## ~~OPEN~~ **RESOLVED 2026-09-02** — the collapsed-escape defect is not confined to `846`. SEVEN more live scripts carry it, and one of them is the identity normaliser
+
+> **RESOLVED 2026-09-02 by `code/1136_control_byte_gate.py`.** All 41 bytes in
+> all 7 files are repaired, every site was compared broken-vs-repaired on the
+> live data before the repair landed, and a standing gate now exits 1 if any
+> control byte reappears in source. **The resolution, with the measurements, is
+> the `ESCAPE-COLLAPSE-1136-RESOLUTION` block immediately below this one.**
+> Everything in this entry is kept because it is the reasoning; only the
+> "STILL OPEN" status is dead.
 
 *Found 2026-09-02 by `code/1126_annual_total_federal_and_gaming.py`, which
 tried to IMPORT the gated gaming denominator instead of retyping it and got
@@ -1401,7 +1409,13 @@ denominator into a session where five were already circulating.
 test green, and a full `846` run is 25/27 with the two remaining failures
 unrelated (`attribution_method` off-vocabulary from `ladder_1122`; `845 verify`).**
 
-### STILL OPEN — seven files, 41 bytes, 16 lines
+### ~~STILL OPEN~~ REPAIRED 2026-09-02 — seven files, 41 bytes, ~~16~~ **15** lines
+
+*Re-measured by `1136`: the 41-byte count reproduces exactly; the line count is
+**15**, not 16, and the file count is **7**, not 8 — the eighth was `846`,
+already repaired by PLACE-IDS before this sweep ran, and its nine bytes are not
+among the 41. Stated as measured, per the rule that a prior summary is not
+evidence.*
 
 Deliberately not repaired here: each one changes another workstream's matching
 behaviour, and that is an owner or integrator call rather than a passing
@@ -1456,6 +1470,182 @@ than trusting the success message. And treat any authoring path that passes
 source text through a shell as a place where `\b`, `\1`, `\n` and `\t` can
 silently become the bytes they name.
 <!-- END ESCAPE-COLLAPSE-1125 -->
+<!-- BEGIN ESCAPE-COLLAPSE-1136-RESOLUTION -->
+## RESOLVED — all 41 collapsed escapes repaired, every one measured before and after, and gated (2026-09-02, `code/1136_control_byte_gate.py`)
+
+*This block closes `ESCAPE-COLLAPSE-1125` above. That entry found the class and
+declined to repair it, correctly, because each site changes another
+workstream's matching behaviour. This block does the adjudication it was
+waiting for.*
+
+### The sweep was widened and the count is now measured, not inherited
+
+`1125` swept for `0x08` only. `1136` sweeps `code/**/*.py`, `docs/**/*.md`, the
+root `*.md` and `docs/schema/**/*.{json,txt}` — **975 files** — for every
+control byte a regex escape can collapse into: `0x00`–`0x08`, `0x0b`, `0x0c`,
+`0x0e`–`0x1f`, `0x7f`, excluding only tab, newline and CR.
+
+**41 bytes · 7 files · 15 lines.** Every one `0x08` but a single `0x01`.
+**Widening the byte set found nothing new** — no `\v`, no `\f`, no `\a`, no
+NUL, nothing outside the seven known files. **And no legitimate literal control
+byte exists in scope**: no form-feed record splitter, no vertical-tab
+delimiter, nothing in a data-parsing path. All 41 are defects, and each sits in
+a regex literal where a word boundary is the only sensible reading.
+
+`1125` said "41 bytes across 16 lines in 8 files". Bytes reproduce exactly;
+lines and files do not. The eighth file was `846_session_audit.py`, whose nine
+bytes PLACE-IDS had already repaired and which are not among the 41.
+
+### DID THE BEHAVIOUR CHANGE WHEN IT BROKE? Per site, on the live data.
+
+Every site was run in both forms against the corpus the script actually reads —
+not a fixture, and using each script's own machinery where it has any.
+
+| site | corpus | result |
+|---|---|---|
+| `503_identity.py:95` | 18,506 names: spine, register, `entity_aliases.csv`, 9,098 distinct `recipient_name` | **7 distinct names normalise differently** |
+| `1080…:275` `PAT_B1` | 609 SEC filings via 1080's own `totext`/`flat`/alias alternation | **6 → 28 matches** |
+| `1089…:254-5,334-6` | 2,313 FR texts through the real `parse_notice()` | **7 documents move**, all place lists; 0 date lists |
+| `1104…:363-4` | 51,579 `nagpra_notice_entity_bridge.csv` rows | **1 → 5 furniture rows** |
+| `142…:1024-5` | 1,749 cached pages / 2,519 candidates through real `has_counting_cue()` | **0 verdicts change** |
+| `76…:836` | 366 shipped `federal_recognition_events.csv` rows through real `classify_mechanism()` | **0 labels change**, 6 bases improve |
+| `561…:557-60` | 689 cached shard-K pages | **0 → 0** on cache; 14 of 18 markers were dead |
+
+**`503_identity.py` — the one to worry about, and it is worse than "inert".**
+The line was `re.sub(r"<0x08>MC ([A-Z])", r"MC<0x01>", s)`: the boundary AND the
+`\1` backreference collapsed. It is the only site where the **replacement** is
+corrupt, so the failure mode was not merely "matches nothing" but "would emit a
+control byte into an entity name". Measured: across 18,506 names the broken
+form emitted a control byte **0 times**, because it never matched — the 0x01
+was latent, not live. No name in Cedar carries a control byte from this.
+
+What it cost is the fold. Repaired, `FT MC DOWELL YAVAPAI NATION` and
+`FORT MCDOWELL YAVAPAI NATION` produce one key for the first time, and the
+distinctive-token subset test — `resolve()`'s last resort — flips:
+
+```
+"MC GRATH NATIVE VILLAGE COUNCIL"
+   broken {GRATH, MC}   vs  AKNF-MCGRTH-00-DOYONL-TNNACH {MCGRATH}  ->  no match
+   fixed  {MCGRATH}     vs  AKNF-MCGRTH-00-DOYONL-TNNACH {MCGRATH}  ->  MATCH
+"FT MC DOWELL YAVAPAI NATION"
+   broken {DOWELL, FORT, MC, YAVAPAI}  vs TRBF-FMCDWL-00 {FORT, MCDOWELL} -> no
+   fixed  {FORT, MCDOWELL, YAVAPAI}    vs TRBF-FMCDWL-00 {FORT, MCDOWELL} -> MATCH
+```
+
+**Fort McDowell is already attributed** (470 rows, $94,394,514.94,
+`attribution_status = cedar_neid`) — the repair only tightens the normaliser
+there. **McGrath is not: 151 rows / $11,358,100.32 of federal assistance sit
+`unattributed`**, and neither loose-path guard (G1 admin-geography, G2 civic
+form) refuses the name. **This is a PROPOSAL, not an applied attribution.** A
+link that keys a dollar is a ruling and `503` is a library, not a writer; it is
+in `review/collapsed_escape_flagged_rows_2026-09-02.csv` for the owner.
+
+**`1089` — a guard that has never once fired, and 7 shipped rows to show for
+it.** `STREET_TOKEN` is `<0x08>(Avenue|Ave|Street|…)<0x08>`, which matches
+nothing, so the refusal its own docstring describes — *"2401 M Street, NW,
+Washington, DC yields the phantom `NW, Washington`"* — was a no-op from the day
+it was written. Seven `consultation_events.csv` rows carry the result, and
+`location_basis` shows **four were written by 1089 itself**:
+
+```
+CONS-FR-2014-03720  'M Street NW., Washington'                 -> no place
+CONS-FR-2016-10525  'E Street SW., Washington'                 -> no place
+CONS-FR-2012-5438   drops 'West Dunlap Avenue Phoenix, AZ'
+CONS-FR-2017-12494  drops 'Port Puget Sound Zone, WA'
+CONS-FR-00-27437 / 2011-18096 / 2019-17786  (basis blank -> written by 96)
+```
+
+**The repair does not self-heal them**: `1089` fills `location` only when blank,
+so a re-run leaves all seven unchanged. Flagged, not deleted, no `cedar_uid`
+touched. MAIL_TO's two bytes change no `parse_notice` output at all.
+
+**`1104` — the audit could not see the thing it was auditing.** The `FURNITURE`
+filter goes 1 → 5 rows and the D1 check now FIRES: document `01-8989` keys
+*"NAGPRA coordinator for the Walker River Paiute Tribe of the Walker River
+Reservation, Nevada"* to `TRBF-WLKRRV-00`, tier C, `resolve_method =
+containment`. The source comment two lines above the broken regex says *"every
+one of them is unresolved, so none carries a tribe_id"* — **that sentence is
+false, and it is false because the detector was blind.** Flagged for a ruling.
+
+**`1080` — 22 per-facility revenue figures the pattern could not see.** The
+optional tail `(?:.{0,170}?\bto\b)?` is what reads *"declined by $11.0 million,
+or 1.0%, TO $1,069 million for the fiscal year ended September 30, 2018"*. With
+a collapsed boundary the group never matched, so `PAT_B1` saw only the
+`totaled $X` form. Repaired: **6 → 28 matches**, the 22 new ones being **Mohegan
+Sun (11) and Mohegan Sun Pocono (10)** plus one MGE Niagara, FY2018–FY2021,
+$5,756,300,000 read as printed — *a sum ACROSS fiscal periods, not a total; see
+`MONEY_TOTALLING_RULES.md`*. **Nothing shipped moves on its own**: `mine` writes
+candidates and `build` refuses without an adjudication row, and
+`sec_gaming_financial_disclosures.csv` holds **0** `B_MDNA_*` rows today. So
+this is 22 new candidates awaiting adjudication, not a silent correction — but
+it is worth noting that the two largest tribal gaming properties in the country
+were the ones the dead byte hid.
+
+**`142`, `76`, `561` move nothing measurable today** and were repaired anyway.
+`142`'s `QUALIFIER_HEAD` is redundant with `CUE_WORDS`, which already holds
+`over`/`than`/`nearly`/`about`/`up`, and `DATE_NEAR`'s surviving `m/d/y` branch
+catches every date in its 14-character window. `76`'s six changed rows are the
+Virginia tribes of `2018-15679`, whose `mechanism` stays `act_of_congress` while
+`mechanism_basis` improves from `matched_in_surrounding_text:Recognition Act` to
+`matched_in_quote:legislation` — strictly better, and exactly what
+`classify_mechanism`'s docstring argues for. `561`'s screen finds no hijacked
+page in the 689-page cache either way, but 14 of its 18 markers were dead, and
+its value is in the next live fetch, not in the cache.
+
+### The gate
+
+```
+py -3 code/1136_control_byte_gate.py report     # inventory, rendered like cat -A
+py -3 code/1136_control_byte_gate.py apply      # repair the adjudicated manifest
+py -3 code/1136_control_byte_gate.py verify     # EXIT 1 if any byte reappears
+py -3 code/1136_control_byte_gate.py selftest   # 7 fixtures prove it FIRES
+py -3 code/1136_control_byte_gate.py flag       # rewrite the flagged register
+```
+
+`apply` refuses any file whose byte census is not exactly what the manifest
+expects — a changed census means the file moved and the adjudication above no
+longer describes it. It backs up to
+`.bak_2026-09-02_pre_1136_control_byte_gate`, writes `.part`-then-rename, and
+**asserts zero remaining bytes** rather than trusting its own report. That
+assert is the step the earlier repair skipped, which is why it printed
+*"replaced 9 occurrences"* and changed nothing. A byte that genuinely belongs
+goes in `ALLOWLIST` with a stated purpose and an exact count; nothing qualifies
+today.
+
+Every replacement is built as `bytes([0x5C, 0x62])` / `bytes([0x5C, 0x31])`, and
+`1136` contains no backslash-escape literal of its own, so no authoring path
+through a shell can eat it.
+
+**Wired in two places, both of which run every session:**
+
+- **`293_lint_bug_classes.py` gained `class9`** — *"a collapsed regex escape — a
+  literal control byte where `\b` or a backreference belongs"* — **consumed**
+  from `1136.scan()` and never re-derived there, the same contract `class7` has
+  with `284`. `293 --selftest` runs 1136's seven fixtures. Class 9 is the one
+  class `ast` cannot detect: once the module parses, the byte is just a
+  character inside a string constant.
+- **`846_session_audit.py`** carries it as a **CRITICAL** claim. 846 is where
+  this began — nine of these bytes in its own source blinded `_denom` into
+  printing "771 distinct properties" against a true 714.
+
+**Current state: `1136 verify` PASS over 975 files, `293` class9 = 0,
+`293 --selftest` all green including class9, all seven repaired files compile.**
+
+### Flagged, not deleted
+
+`review/collapsed_escape_flagged_rows_2026-09-02.csv` — 8 rows. The 7
+`consultation_events.csv` locations the repaired `STREET_TOKEN` refuses (with
+`written_by` naming 1089 or 96 from `location_basis`), and the 1
+`nagpra_notice_entity_bridge.csv` row the repaired `FURNITURE` filter reaches.
+No row edited. No `cedar_uid` touched. Regenerate with `1136 flag`.
+
+### The rule, recorded in `AGENTS.md`
+
+*A regex literal is the one place in this codebase where a defect is invisible
+in a terminal.* `cat -A` or a byte inspection is required before believing a
+suspiciously clean zero.
+<!-- END ESCAPE-COLLAPSE-1136-RESOLUTION -->
+
 
 <!-- BEGIN PLACE-IDS-1129 -->
 ## PLACE IDS (ADR-030, `code/1129_place_ids.py`) — 2026-09-02

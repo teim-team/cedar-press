@@ -552,6 +552,30 @@ def _pkgs():
     return (not out, f"missing: {', '.join(out) or 'none'}")
 
 
+# ------------------------------------------------------------ source integrity
+@claim("no regex escape has collapsed into a literal control byte "
+       "(ESCAPE-COLLAPSE-1125)", critical=True)
+def _control_bytes():
+    """846 itself carried NINE of these and one blinded the gaming denominator.
+
+    A collapsed `\\b` is a 0x08 backspace byte: the pattern matches no string
+    that can exist, it does not raise, and it prints a confident zero. `cat`
+    and most editors render it as nothing, so the source reads exactly as the
+    author intended. This is the one defect class in this repo that is
+    INVISIBLE IN A TERMINAL, which is why it needs a byte-level gate rather
+    than a reader.
+    """
+    r = subprocess.run([sys.executable, str(ROOT / "code" /
+                        "1136_control_byte_gate.py"), "verify"],
+                       capture_output=True, text=True, cwd=str(ROOT))
+    blob = (r.stdout or "") + (r.stderr or "")
+    if "Traceback (most recent call last)" in blob:
+        return False, ("1136 crashed - UNMEASURED, which is not the same as "
+                       "zero: " + blob.strip().splitlines()[-1][:70])
+    line = ((r.stdout or "").strip().splitlines() or [""])[0].strip()
+    return r.returncode == 0, line or f"1136 verify exit {r.returncode}"
+
+
 def main() -> int:
     verify = len(sys.argv) > 1 and sys.argv[1] == "verify"
     fails = crit = 0

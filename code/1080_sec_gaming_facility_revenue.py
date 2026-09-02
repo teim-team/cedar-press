@@ -272,7 +272,7 @@ PAT_B1 = re.compile(
     r"(?P<prop>@@PROP@@)\s+Revenues?\s+"
     r"(?P<label>Net revenues?|Gross revenues?)\s+"
     r"(?:increased|decreased|declined|grew|rose|totaled|totalled|were|was)"
-    r"(?:.{0,170}?to)?\s+"
+    r"(?:.{0,170}?\bto\b)?\s+"
     r"\$\s?(?P<amt>[\d,]+(?:\.\d+)?)\s*(?P<scale>million|billion)\s+"
     r"(?:for|in)\s+the\s+"
     + PERIOD_WORDS + r"\s+ended\s+(?P<date>[A-Z][a-z]+\s+\d{1,2},\s*\d{4})")

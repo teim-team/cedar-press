@@ -833,7 +833,7 @@ MECHANISMS = [
                 r"enactment of|National Defense Authorization Act|"
                 r"Restoration Act|Recognition Act|Welfare Act|"
                 r"under federal statute|by (?:Federal )?statute|"
-                r"legislation|"
+                r"\blegislation\b|"
                 r"Titles? \d+ (?:and \d+ )?of the Act", re.I)),
     ("court_order",
      re.compile(r"court order|court-ordered|United States District Court|"

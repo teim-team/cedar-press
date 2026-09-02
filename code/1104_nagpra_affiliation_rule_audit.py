@@ -360,8 +360,8 @@ def audit(quiet=False):
     # the Federal Register itself publishes drafting placeholders and contact
     # furniture. Counted here rather than removed - the row is what the notice
     # printed, and every one of them is unresolved, so none carries a tribe_id.
-    FURNITURE = re.compile(r"(?i)(https?://|@|\{|email|telephone|"
-                           r"fax|nagpra coordinator)")
+    FURNITURE = re.compile(r"(?i)(https?://|@|\{|\bemail\b|\btelephone\b|"
+                           r"\bfax\b|\bnagpra coordinator\b)")
     furn = [r for r in bridge
             if FURNITURE.search(r.get("party_name_verbatim", ""))]
     out["R1"]["party_rows_that_are_federal_register_furniture"] = len(furn)
