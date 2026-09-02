@@ -20,14 +20,14 @@ Three honest outcomes, and they are three different jobs:
 
 | | count |
 |---|---:|
-| shippable tables | 259 |
-| **DECLARED_VALIDATED** | **247** |
-| OPEN_WITH_EVIDENCE | 4 |
+| shippable tables | 263 |
+| **DECLARED_VALIDATED** | **249** |
+| OPEN_WITH_EVIDENCE | 6 |
 | DEFECTIVE | 0 |
 | still unexplained | 8 |
-| ratchet `contract_grain_unstated_shippable` | **12** (was 207) |
+| ratchet `contract_grain_unstated_shippable` | **14** (was 207) |
 
-A declaration that the data contradicts is release-blocking through `contract_violations`; there are **15**.
+A declaration that the data contradicts is release-blocking through `contract_violations`; there are **13**.
 
 ## OPEN_WITH_EVIDENCE - the rulings a human must make
 
@@ -48,9 +48,19 @@ one Notice of Intended Disposition as the National NAGPRA Program records it - p
 one row per line of the National NAGPRA Program's published inventory grid: an institution's holding of human remains and associated funerary objects from one geographic origin, split by `cultural_affiliation_status` (CULTURALLY_AFFILIATED 454, CULTURALLY_UNIDENTIFIABLE 11,357 - a status under 43 CFR 10.11, not a label). NO UNIQUE KEY: 11,811 rows carry 7,693 distinct published tuples, so 4,118 rows are byte-identical to another row. Adding `cultural_affiliation_status` (the source's own `InventoryType`, which its grid defaults away) took the surplus from 4,139 to 4,118 and no further, so the remaining discriminator - most likely the claiming tribe or the submission - IS NOT IN THE PUBLISHED PROJECTION. NOTHING WAS COLLAPSED. QUESTION for the owner: is the detail view behind this grid worth a per-row fetch, or does the table ship as a grid transcript with the duplication declared? SEPARATELY MEASURED AND NOT REPAIRED: on the NotCulturallyAssociated request the source reports recordsTotal 11,358 and recordsFiltered 11,357, and start=11357 returns nothing - Cedar holds 11,811 and the 11,812th row is unreachable.
 
 
+### `nagpra_nps_notice_index.csv`
+
+one NAGPRA notice as the National NAGPRA Program's OWN register records it - a DIFFERENT OBSERVER from `nagpra_notices.csv`, which parses the Federal Register text. Joinable on `fr_document_number`; the two DISAGREE on 315 documents and `nagpra_notice_source_corroboration.csv` carries both values. `notice_type` is not cosmetic: the source's grid defaults to NIC and a pull that does not ask per type returns 4,810 of 6,818 rows while looking complete (NIC 4,810 + NIR 1,869 + NID 131 + NOT 8 = 6,818). The count columns are TYPE-SPECIFIC - `total_mni` and `total_associated_funerary_objects` belong to NIC and NID, while `unassociated_funerary_objects`, `sacred_objects` and `objects_of_cultural_patrimony` belong to NIR, so a blank is the wrong column for that notice type and NOT a missing value. NO UNIQUE KEY: (notice_type, fr_document_number) is 6,815 distinct over 6,818 rows. All three collisions are NIR and each was read row by row before this was written - Autry Museum E7-5977 is TWO GENUINE LINES of one notice (1 sacred object; 1 sacred-and-patrimony item), AMNH 2012-26223 is two lines (34 unassociated funerary objects; 0), and Field Museum 04-17582 is a BYTE-IDENTICAL DUPLICATE IN THE SOURCE. Nothing was collapsed. QUESTION for the owner: does an FR document number plus a line ordinal count as a key when the source publishes no ordinal, or does this table ship keyed on the document with the three named rows declared?
+
+
 ### `nagpra_nps_unclaimed_remains.csv`
 
 one listing of unclaimed human remains held by a federal agency, by county of origin. 15 rows, all distinct, but 15 rows cannot evidence a key: (institution_name, county) already collides 3 times. QUESTION: what distinguishes the three U.S. Forest Service, Santa Fe NF / Rio Arriba rows?
+
+
+### `native_bill_actions.csv`
+
+one published legislative ACTION on a Native bill - a referral, a committee report, a floor vote, a presidential signature - 31,936 rows over 3,061 bills, 1973-2026, from congress.gov `/bill/{c}/{t}/{n}/actions`. `action_type` runs Floor 10,324 / IntroReferral 9,775 / Committee 7,044 / ResolvingDifferences 1,685 / Calendars 1,089 / President 894 / BecameLaw 565 / Discharge 150 / Veto 33. 1,135 rows carry a recorded-vote reference. NO UNIQUE KEY, and the collision is in the SOURCE, not in the promotion. Measured on the FULL file: (bill_id, action_date, action_text) collides 4,131 times; adding action_code still leaves 398; the ENTIRE published tuple leaves 111 groups and 133 surplus rows - byte-identical repeats such as two `Conference held.` rows against 99-s-2638 on 1986-10-10. congress.gov publishes an action twice and gives no ordinal to tell them apart. NOTHING WAS COLLAPSED. QUESTION for the owner: does an action ordinal within a bill count as a key when the publisher supplies none, or does this ship keyed on the bill with the 133 declared?
 
 
 ## Per collection
@@ -108,7 +118,7 @@ one listing of unclaimed human remains held by a federal agency, by county of or
 
 ### Congressional Votes and Proposed Legislation  (`legislation`)
 
-11 of 11 shippable tables declared.
+14 of 15 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
@@ -117,6 +127,10 @@ one listing of unclaimed human remains held by a federal agency, by county of or
 | `bill_votes_official_verification.csv` | 305 | DECLARED_VALIDATED | `vote_id` | — |
 | `congressional_correspondence_systems.csv` | 257 | DECLARED_VALIDATED | `system_id` + `verbatim_quote` | — |
 | `member_positions.csv` | 136,119 | DECLARED_VALIDATED | `vote_id` + `bioguide_id` | — |
+| `native_bill_action_coverage.csv` | — | DECLARED_VALIDATED | `bill_id` | `bill_id`→1 |
+| `native_bill_actions.csv` | — | OPEN_WITH_EVIDENCE | — | — |
+| `native_bill_cosponsor_coverage.csv` | — | DECLARED_VALIDATED | `bill_id` | `bill_id`→1 |
+| `native_bill_cosponsors.csv` | — | DECLARED_VALIDATED | `bill_id` + `cosponsor_bioguide_id` + `sponsorship_date` | `bill_id`→240, `cosponsor_bioguide_id`→267 |
 | `native_bill_outcomes.csv` | 3,069 | DECLARED_VALIDATED | `bill_id` | — |
 | `native_bills.csv` | 3,069 | DECLARED_VALIDATED | `bill_id` | — |
 | `native_bills_entity_bridge.csv` | 676 | DECLARED_VALIDATED | `bill_id` + `tribe_id` | `cedar_uid`→41, `tribe_id`→41 |
@@ -148,7 +162,7 @@ one listing of unclaimed human remains held by a federal agency, by county of or
 
 ### NAGPRA  (`nagpra`)
 
-6 of 12 shippable tables declared.
+7 of 12 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
@@ -161,8 +175,8 @@ one listing of unclaimed human remains held by a federal agency, by county of or
 | `nagpra_nps_grant_awards.csv` | — | OPEN_WITH_EVIDENCE | — | — |
 | `nagpra_nps_intended_dispositions.csv` | — | OPEN_WITH_EVIDENCE | — | — |
 | `nagpra_nps_inventories.csv` | — | OPEN_WITH_EVIDENCE | — | — |
-| `nagpra_nps_notice_index.csv` | — | **DECLARATION FAILED** | `notice_type` + `fr_document_number` | `fr_document_number`→2 |
-| `nagpra_nps_summaries.csv` | — | **DECLARATION FAILED** | `institution_name` + `institution_state` | `institution_name`→2 |
+| `nagpra_nps_notice_index.csv` | — | OPEN_WITH_EVIDENCE | — | — |
+| `nagpra_nps_summaries.csv` | — | DECLARED_VALIDATED | `institution_name` + `institution_state` | `institution_name`→2 |
 | `nagpra_nps_unclaimed_remains.csv` | — | OPEN_WITH_EVIDENCE | — | — |
 
 ### Lobbying  (`lobbying`)

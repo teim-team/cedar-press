@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-1149_codebook_money_fed.py - codebook registry blocks for the nine tables
-`code/1145_cosponsor_harvest.py` and `code/1148_nagpra_nps_databases.py` built.
+1149_codebook_money_fed.py - codebook registry blocks for the eleven tables
+`code/1145_cosponsor_harvest.py`, `code/1148_nagpra_nps_databases.py` and
+`code/1150_bill_actions_promote.py` built.
 
     py -3 code/1149_codebook_money_fed.py            # write fragments, rebuild
     py -3 code/1149_codebook_money_fed.py verify     # exits 1 on breach
@@ -28,7 +29,7 @@ belong to the integrator.
 
 INVARIANTS
 ----------
-  CBM-1  every column of all nine tables has a registry row
+  CBM-1  every column of all eleven tables has a registry row
   CBM-2  no registry row has an empty description
   CBM-3  every recorded pct_filled matches the live table to 0.1pp
   CBM-4  the master never loses a row
@@ -165,6 +166,72 @@ BLOCKS: dict[str, tuple[str, dict[str, str]]] = {
                                       "endpoint and HTTP result, or the "
                                       "artefact the earlier pass left.",
             "source_url": "The endpoint that was, or would have been, called.",
+            "fetched_date": "Date this coverage row was derived.",
+        }),
+
+    "10g_native_bill_actions": ("native_bill_actions.csv", {
+        "bill_id": "Cedar's bill key, joining `native_bills.csv`.",
+        "congress": "The Congress the bill was introduced in.",
+        "chamber": "House or Senate, from the bill type.",
+        "bill_type": "congress.gov bill type slug.",
+        "bill_number": "The measure number.",
+        "action_date": "Date of the action, ISO. Never blank - 1150's BA-4 "
+                       "fails the build otherwise.",
+        "action_text": "The action as congress.gov publishes it, verbatim.",
+        "action_type": "congress.gov's classification: Floor, IntroReferral, "
+                       "Committee, ResolvingDifferences, Calendars, "
+                       "President, BecameLaw, Discharge, Veto, NotUsed. "
+                       "`NotUsed` is the publisher's own label for a slot it "
+                       "does not populate, not a Cedar placeholder.",
+        "action_code": "The publisher's action code where one is assigned. "
+                       "Blank on older Senate actions.",
+        "source_system": "Which chamber system recorded the action - House "
+                         "floor actions, Senate, Library of Congress. TWO "
+                         "SYSTEMS CAN RECORD ONE EVENT, which is why the same "
+                         "action text appears twice on some bills.",
+        "committee_names": "Committee(s) named on the action, as published.",
+        "recorded_vote_chamber": "Chamber of the roll call the action "
+                                 "references. Blank where no vote.",
+        "recorded_vote_number": "Roll call number. Blank where no vote.",
+        "recorded_vote_date": "Date of the roll call.",
+        "recorded_vote_url": "The publisher's URL for the roll call.",
+        "has_recorded_vote": "Y/N, derived from a non-blank "
+                             "`recorded_vote_number`. 1,135 rows are Y. This "
+                             "is the join surface to `bill_votes.csv`.",
+        "record_basis": "congress_gov_api_v3_actions_promoted_by_1150 on "
+                        "every row - promoted from `data/clean/_bill_actions."
+                        "csv`, fetched 2026-08-06, an orphan file matching no "
+                        "COLLECTIONS pattern.",
+        "source_url": "The congress.gov v3 actions endpoint for this bill.",
+        "fetched_date": "Date the source pass fetched this bill's actions.",
+    }),
+    "10h_native_bill_action_coverage": (
+        "native_bill_action_coverage.csv", {
+            "bill_id": "Cedar's bill key. ONE ROW FOR EVERY BILL IN "
+                       "`native_bills.csv` - the denominator table.",
+            "congress": "The Congress the bill was introduced in.",
+            "chamber": "House or Senate.",
+            "bill_type": "congress.gov bill type slug.",
+            "bill_number": "The measure number.",
+            "action_lookup_status": "`ok` (3,061) or "
+                                    "`SOURCE_DOES_NOT_PUBLISH_ON_BILL_ENDPOINT` "
+                                    "(8 - non-canonical slugs and treaty "
+                                    "documents, established by code/1092). "
+                                    "`NEVER_CHECKED` is 0.",
+            "n_actions_retrieved": "How many action rows Cedar holds for this "
+                                   "bill.",
+            "n_actions_reported_by_fetch_log": "The count the earlier fetch "
+                                               "pass recorded, independent of "
+                                               "how many rows were promoted.",
+            "first_action_date": "Earliest action on this bill.",
+            "last_action_date": "Latest action on this bill. NOT the same as "
+                                "`native_bills.latest_action_date`, which was "
+                                "written 2026-08-05 and does not move.",
+            "became_law": "Y where the bill has a `BecameLaw` action. "
+                          "**283 of 3,069** - the enactment rate for Native "
+                          "legislation, which no Cedar table stated before.",
+            "action_lookup_basis": "The artefact and route behind the status.",
+            "source_url": "The endpoint the actions came from.",
             "fetched_date": "Date this coverage row was derived.",
         }),
 
@@ -309,8 +376,9 @@ BLOCKS: dict[str, tuple[str, dict[str, str]]] = {
                                       "Register notice prose by "
                                       "code/77_build_nagpra_dataset.py.",
             "nps_total_mni": "The Program's MNI for the same repatriation.",
-            "corroboration_status": "AGREE 3,954 / DISAGREE 315 / "
-                                    "NOT_TESTABLE_NO_MNI_ONE_SIDE 2,492 / "
+            "corroboration_status": "AGREE 3,950 / DISAGREE 315 / "
+                                    "NOT_TESTABLE_NO_MNI_ONE_SIDE 2,488 / "
+                                    "NOT_TESTABLE_MULTIPLE_NPS_ROWS 8 / "
                                     "IN_NPS_ONLY 49 / IN_CEDAR_ONLY 31. **A "
                                     "DISAGREE ROW IS A FINDING, NOT AN ERROR "
                                     "TO RESOLVE** - both values are carried "

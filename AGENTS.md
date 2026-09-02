@@ -8442,3 +8442,49 @@ workstream started. Here is every regression it names, with who owns it.
 (`git show HEAD:docs/SESSION_AUDIT.json`) and is 2 fail / 1 critical now. This
 workstream did not move it in either direction; the two failures it reports are
 `845 verify` (above) and `1137 verify rc=1`, both other agents' files.
+
+<!-- BEGIN MONEY-FED-2026-09-02 -->
+## 2026-09-02, evening — workstream MONEY-FED: `62` is red, and here is every line I own
+
+*Per standing rule 15: a red gate is not automatically mine, and it is not
+automatically somebody else's either. Each line below was measured, not
+assumed. Scripts `code/1145`, `1148`, `1149`, `1150`; ADR-040; build logs
+`docs/COSPONSOR_HARVEST_LOG_2026-09-02.md` and
+`docs/NAGPRA_NPS_DATABASES_BUILD_LOG_2026-09-02.md`.*
+
+**What this workstream added:** 11 tables in `data/clean` — 4 to `legislation`,
+7 to `nagpra` — **85,560 rows** (legislation 57,061 + nagpra 28,499), all reached by existing `COLLECTIONS` patterns,
+all with a codebook block, all with a `verify` that FAILS when the work did not
+land and a `selftest` that proves it fires (6/6, 5/5, 5/5, 3/3).
+
+### Lines I own
+
+| line | mine, and what I did |
+|---|---|
+| `contract_grain_unstated_shippable` 13 → **14** | **MINE, +6 net.** Six of my tables have NO unique key in the publisher's own projection and are declared in `GRAIN_OPEN` with the collision measured and a question attached, rather than given a positional key (293 class 7) or collapsed. **The ratchet FLOOR is 25 and the metric is 14, so this is GREEN** — it fell 25 → 14 this session. Recorded because the number moved up within the session and the next reader will see it |
+| `contract_violations` 15 → **13** | **TWO OF THE 15 AT HEAD WERE MINE AND ARE FIXED.** `nagpra_nps_notice_index.csv` declared a primary key that is not unique (3 collisions, each read row by row — two are genuine second NIR lines, one is a byte-identical source duplicate) and moved to `GRAIN_OPEN`; `nagpra_nps_summaries.csv` declared `institution_name` as `one` when `Geneva Historical Society` exists in Illinois **and** New York, which is 512's silent-fan-out check doing exactly its job. The remaining 13 are `federal_funding_*` `tribe_id`, `deals_press_edgar_ancsa_additions`, and 8 orphan-shippable tables — none this workstream's |
+| `ship_tables_at_zero` 55 → **57**, `tables_missing_from_25_TABLES` 245 → **247**, `tables_missing_from_27_SPEC` 252 → **254**, `tables_missing_notes_contract` 56 → **58** | **+2 EACH IS MINE** (`native_bill_actions.csv`, `native_bill_action_coverage.csv`; the earlier +9 in the same run was my other nine). These four count membership of the **curated override list in `25_build_publication_layer.TABLES`**, which the ship chain (`87` → `25` → `27`) maintains and which ADR ownership assigns to the integrator, not an agent. The metrics' own failure text says so: *"This is not the shipping gate — see `tables_undocumented_in_codebook` for that."* **`tables_undocumented_in_codebook` did NOT move for my tables** — all 11 carry a codebook block (`code/1149`, `verify` OK, `selftest` PASS). **Action for the integrator: run the ship chain and these four fall by 11.** |
+
+### Lines that are NOT mine, with the measurement that says so
+
+| line | owner |
+|---|---|
+| `lint_bug_class_instances` 146 → 163, `lint_class1` / `2c` / `3` / `4` / `7` | **no instance in `1145_*`, `1148_*`, `1149_*` or `1150_*`** — checked with `py -3 code/293_lint_bug_classes.py \| grep -E "114[5-9]_\|1150_"`, which returns only other workstreams' files. One class-2c instance in `1150` WAS mine and is fixed: the drop counter now names every refused `bill_id` instead of counting them |
+| `contract_orphan_shippable` = 8 | `annual_indian_country_money_series.csv`, two `native_owned_businesses.bak_*`, two `prime_contracts.bak_*`, `regulations_gov_*`, `sam_native_class_distributions.csv`. **None of my 11 is an orphan** — verified in `docs/schema/dataset_contracts.json` |
+| `tier_A_ruled` 1,676 → 1,669, `rulings_unapplied` 1,215 → 2,894 | the identifier ledger and the rulings layer. Nothing in this workstream writes a tier, a ruling or a `cedar_uid` |
+| `SHIPPING LOST: advocacy_passthrough_2026-08-07.csv`, `hearing_bill_links.csv` 465 → 464, `native_bills_subject_sweep.csv` 2,414 → 2,409 | the shipping chain. This workstream shipped nothing and removed nothing from `dist/` |
+| `846` FAIL — *"13 datasets are built and current"*, `1137 verify rc=1` | **`contractors`: `prime_contracts.csv` is newer than the delivered spreadsheet.** `1137 verify` names only that dataset. `prime_contracts.csv` was written by `1140` at 16:45 and `1144` at 17:01, neither this workstream's, and `code/1137_*` is on this workstream's do-not-edit list. `846` was **2 fail / 1 critical** at HEAD and is **1 fail / 1 critical** now |
+
+### One thing I could not fix and did not work around
+
+`cedar_publication.GATES["source_terms_status"]` allows only
+`{SILENT, TERMS_STATED_NO_REUSE_RESTRICTION, ""}`. A federal public-domain work
+has no accurate member in that vocabulary, and writing the accurate
+`PUBLIC_DOMAIN_US_GOVERNMENT_WORK` would have **silently withheld all 21,658 NPS
+rows from the product** — no error, no count, a clean build and an empty shelf.
+I published `TERMS_STATED_NO_REUSE_RESTRICTION`, which the NPS disclaimer
+supports verbatim, and put the public-domain fact in `source_terms_url` +
+`source_terms_basis`. **`code/cedar_publication.py` was not edited** — it is on
+the do-not-edit list. The vocabulary gap is real and belongs to the integrator.
+ADR-040 decision 1; `review`/queue entry 5 in `docs/WORK_QUEUE.md`.
+<!-- END MONEY-FED-2026-09-02 -->

@@ -622,17 +622,29 @@ def cmd_apply() -> int:
             c = by_doc.get(doc)
             n = nps_by_doc.get(doc)
             cv = _norm_int(c.get(mcol, "")) if (c and mcol) else ""
+            # A SET WOULD SILENTLY DE-DUPLICATE TWO LINES OF ONE NOTICE.
+            # `{norm(x) for x in rows}` collapses two lines each reporting 5
+            # into one 5, and the sum then reads 5 instead of 10 - invisibly,
+            # and only on the rows where it matters. Sum the LIST.
+            # Three FR documents carry two NPS rows (Autry E7-5977, Field
+            # Museum 04-17582 - byte-identical, a source duplicate - and AMNH
+            # 2012-26223). All three are NIR with total_mni 0, so the sum is
+            # 0 either way today; the handling is written for the case where
+            # it is not, and such a document is reported
+            # NOT_TESTABLE_MULTIPLE_NPS_ROWS rather than quietly aggregated
+            # against a single Cedar figure.
             if n:
-                vals = {_norm_int(x.get("TotalMNI")) for x in n}
-                vals.discard("")
-                nv = (str(sum(int(v) for v in vals)) if len(vals) > 1
-                      else (list(vals)[0] if vals else ""))
+                vals = [_norm_int(x.get("TotalMNI")) for x in n]
+                vals = [v for v in vals if v != ""]
+                nv = str(sum(int(v) for v in vals)) if vals else ""
             else:
                 nv = ""
             if c is None:
                 status = "IN_NPS_ONLY"
             elif not n:
                 status = "IN_CEDAR_ONLY"
+            elif len(n) > 1:
+                status = "NOT_TESTABLE_MULTIPLE_NPS_ROWS"
             elif cv == "" or nv == "":
                 status = "NOT_TESTABLE_NO_MNI_ONE_SIDE"
             elif cv == nv:

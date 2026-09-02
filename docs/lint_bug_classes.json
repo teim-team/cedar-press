@@ -1,5 +1,5 @@
 {
-  "scanned_files": 638,
+  "scanned_files": 639,
   "counts": {
     "class1": 1,
     "class2a": 0,
@@ -1863,7 +1863,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 4727,
+      "line": 4764,
       "evidence": "h = hash(\"\\x1f\".join(parts))",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1872,7 +1872,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 4737,
+      "line": 4774,
       "evidence": "h = hash(\"\\x1f\".join(row))",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1881,7 +1881,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 4762,
+      "line": 4799,
       "evidence": "if hash(k) in collided[gj]:",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1890,7 +1890,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 4768,
+      "line": 4805,
       "evidence": "if hash(k) in row_collided:",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -3051,6 +3051,18 @@
       "nagpra_nps_grant_awards.csv": [
         "1148_nagpra_nps_databases.py"
       ],
+      "native_bill_action_coverage.csv": [
+        "1150_bill_actions_promote.py"
+      ],
+      "native_bill_actions.csv": [
+        "1150_bill_actions_promote.py"
+      ],
+      "native_bill_cosponsor_coverage.csv": [
+        "1145_cosponsor_harvest.py"
+      ],
+      "native_bill_cosponsors.csv": [
+        "1145_cosponsor_harvest.py"
+      ],
       "native_bills.csv": [
         "35_entity_harvest.py"
       ],
@@ -3579,7 +3591,7 @@
   "class7_source": "284_audit_nondeterministic_keys.lint_key_stability()",
   "class7_note": "284 fixture self-test PASS - 5 synthetic defect shapes re-found; of the 3 measured real instances 1 now recorded FIXED",
   "class9_source": "1136_control_byte_gate.scan()",
-  "class9_note": "1136 scanned 995 files (code/*.py, docs/*.md, docs/schema/*, root *.md) for 0x00-0x08, 0x0b, 0x0c, 0x0e-0x1f, 0x7f",
+  "class9_note": "1136 scanned 997 files (code/*.py, docs/*.md, docs/schema/*, root *.md) for 0x00-0x08, 0x0b, 0x0c, 0x0e-0x1f, 0x7f",
   "tier_inheritance": {
     "sites": [
       {

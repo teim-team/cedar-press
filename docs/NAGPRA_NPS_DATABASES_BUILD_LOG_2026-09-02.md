@@ -64,9 +64,10 @@ Joined on `fr_document_number`, 6,841 documents:
 
 | status | n |
 |---|---:|
-| `AGREE` | **3,954** |
+| `AGREE` | **3,950** |
 | `DISAGREE` | **315** |
-| `NOT_TESTABLE_NO_MNI_ONE_SIDE` | 2,492 |
+| `NOT_TESTABLE_NO_MNI_ONE_SIDE` | 2,488 |
+| `NOT_TESTABLE_MULTIPLE_NPS_ROWS` | 8 |
 | `IN_NPS_ONLY` | **49** |
 | `IN_CEDAR_ONLY` | 31 |
 
@@ -76,6 +77,22 @@ gap is not an aggregation artefact: `00-19292` Cedar 4 / NPS 99; `00-12852`
 Cedar 19 / NPS 11; `00-25126` Cedar 491 / NPS 490; `00-29811` Cedar 141 / NPS
 142. The ±1 cases look like an off-by-one in one reader or the other; the 4-vs-99
 case does not, and is the kind of row this table exists to surface.
+
+> **`NOT_TESTABLE_MULTIPLE_NPS_ROWS` is 8 and is a REFUSAL TO AGGREGATE, not a
+> gap.** Eight FR document numbers carry more than one NPS row. Five of the
+> eight are one document publishing **both** an NIC and an NIR — the NIR
+> contributes 0 MNI, correctly, because an NIR is about objects and not
+> remains. Three are two NIR lines (`E7-5977`, `2012-26223`, and
+> `04-17582`, whose two rows are **byte-identical** and are a duplicate in the
+> source). Cedar in fact matches exactly on four of the eight (37/37, 51/51,
+> 3/3, 2/2), so calling them untestable is the cautious direction — the
+> alternative was inventing a rule for when two lines of one notice may be
+> summed against one Cedar figure, and that is an owner's call.
+>
+> **The first draft of this comparison summed a SET.** `{norm(x) for x in rows}`
+> de-duplicates before it adds, so two lines each reporting 5 would have read
+> 5, not 10 — invisibly, and only on the rows where it matters. All eight
+> happen to be 0 today, which is precisely why it would not have been caught.
 
 **The 49 `IN_NPS_ONLY` documents are the actionable half** — FR document numbers
 the Program lists that Cedar's Federal Register sweep does not hold at all. They

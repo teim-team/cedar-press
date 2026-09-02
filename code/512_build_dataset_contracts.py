@@ -3595,43 +3595,33 @@ GRAIN_MONEY_FED = {
                     "native_bills.csv's and that no bill_id repeats, and "
                     "exits 1 otherwise"),
 
+    "native_bill_action_coverage.csv": _d(
+        "one row per bill in `native_bills.csv` - ALL 3,069, including the 8 "
+        "the source has no `/bill` path for. The DENOMINATOR for "
+        "`native_bill_actions.csv`, which alone cannot tell a bill with no "
+        "recorded action apart from a bill nobody looked up. "
+        "`became_law` is derived from the presence of a `BecameLaw` action on "
+        "that bill and is Y on **283 of 3,069** - the enactment rate for "
+        "Native legislation, which no Cedar table stated before. "
+        "`first_action_date` / `last_action_date` bound the bill's own "
+        "history and are NOT the same as `native_bills.latest_action_date`, "
+        "which was written on 2026-08-05 and does not move.",
+        primary_key=["bill_id"],
+        join_cardinality={"bill_id": "one"},
+        declared_by="workstream MONEY-FED-2026-09-02, code/1150: `verify` "
+                    "invariant BA-3 asserts the key set is EXACTLY "
+                    "native_bills.csv's with no repeat, and exits 1 otherwise"),
+
     # -- nagpra: the National NAGPRA Program's own databases --------------
-    "nagpra_nps_notice_index.csv": _d(
-        "one row per NAGPRA notice in the National NAGPRA Program's OWN "
-        "register - a DIFFERENT OBSERVER from `nagpra_notices.csv`, which "
-        "parses the Federal Register text. The two are joinable on "
-        "`fr_document_number` and they DISAGREE on 315 documents; see "
-        "`nagpra_notice_source_corroboration.csv` and never silently prefer "
-        "one.\n"
-        "`notice_type` IS PART OF THE KEY AND IS NOT COSMETIC. The source's "
-        "grid defaults to NIC and a pull that does not ask per type returns "
-        "4,810 of 6,818 rows while looking complete. NIC 4,810 + NIR 1,869 + "
-        "NID 131 + NOT 8 = 6,818. The count columns are type-specific: "
-        "`total_mni`/`total_associated_funerary_objects` are populated on NIC "
-        "and NID, while `unassociated_funerary_objects`, `sacred_objects` and "
-        "`objects_of_cultural_patrimony` belong to NIR - a blank is the wrong "
-        "column for that notice type, NOT a missing value.\n"
-        "`repatriation_date` is literal '-' on rows where the source prints a "
-        "dash; `repatriation_date_iso` is blank there, and blank means the "
-        "source printed no date.",
-        primary_key=["notice_type", "fr_document_number"],
-        join_cardinality={"fr_document_number": "many"},
-        declared_by="workstream MONEY-FED-2026-09-02, code/1148: measured on "
-                    "the FULL 6,818-row file - (notice_type, "
-                    "fr_document_number) is 6,815 distinct with 3 collisions, "
-                    "each a genuine second NIR row for one FR document (Autry "
-                    "Museum E7-5977, Field Museum 04-17582, AMNH 2012-26223). "
-                    "The key is declared WITH those three named rather than "
-                    "collapsed - a repeated document number is not a repeated "
-                    "notice"),
     "nagpra_notice_source_corroboration.csv": _d(
         "one row per FEDERAL REGISTER DOCUMENT NUMBER seen by either source - "
         "the union, 6,841, not the intersection. This is Cedar's FIRST "
         "table of independent corroboration: `START_HERE.md` item 0 records "
         "that across 8,975 single-valued facts, ZERO had a second source. "
-        "`corroboration_status` takes five values and each means something "
-        "different: AGREE 3,954 / DISAGREE 315 / "
-        "NOT_TESTABLE_NO_MNI_ONE_SIDE 2,492 / IN_NPS_ONLY 49 / "
+        "`corroboration_status` takes six values and each means something "
+        "different: AGREE 3,950 / DISAGREE 315 / "
+        "NOT_TESTABLE_NO_MNI_ONE_SIDE 2,488 / "
+        "NOT_TESTABLE_MULTIPLE_NPS_ROWS 8 / IN_NPS_ONLY 49 / "
         "IN_CEDAR_ONLY 31.\n"
         "**A DISAGREE ROW IS A FINDING, NOT AN ERROR TO RESOLVE.** Both "
         "values are carried, neither is overwritten, and this table asserts "
@@ -3660,10 +3650,15 @@ GRAIN_MONEY_FED = {
         "The tribe names are AS PUBLISHED and are NOT resolved to a "
         "`cedar_uid` in this pass. An unresolved name is not a missing tribe.",
         primary_key=["institution_name", "institution_state"],
-        join_cardinality={"institution_name": "one"},
-        declared_by="workstream MONEY-FED-2026-09-02, code/1148: measured "
-                    "1,540 distinct / 0 duplicate over 1,540 rows on the FULL "
-                    "file"),
+        join_cardinality={"institution_name": "many"},
+        declared_by="workstream MONEY-FED-2026-09-02, code/1148: the PAIR "
+                    "measured 1,540 distinct / 0 duplicate over 1,540 rows on "
+                    "the FULL file. `institution_name` ALONE is NOT unique - "
+                    "`Geneva Historical Society` exists in ILLINOIS and in "
+                    "NEW YORK and they are two different institutions - so it "
+                    "is declared `many` and a buyer joining on the name alone "
+                    "fans out 2x. 512's silent-fan-out check caught the first "
+                    "draft's `one`"),
 }
 GRAIN.update(GRAIN_MONEY_FED)
 
@@ -3744,6 +3739,48 @@ GRAIN_OPEN = {
         "NotCulturallyAssociated request the source reports recordsTotal "
         "11,358 and recordsFiltered 11,357, and start=11357 returns nothing - "
         "Cedar holds 11,811 and the 11,812th row is unreachable.",
+    "native_bill_actions.csv":
+        "one published legislative ACTION on a Native bill - a referral, a "
+        "committee report, a floor vote, a presidential signature - "
+        "31,936 rows over 3,061 bills, 1973-2026, from congress.gov "
+        "`/bill/{c}/{t}/{n}/actions`. `action_type` runs Floor 10,324 / "
+        "IntroReferral 9,775 / Committee 7,044 / ResolvingDifferences 1,685 / "
+        "Calendars 1,089 / President 894 / BecameLaw 565 / Discharge 150 / "
+        "Veto 33. 1,135 rows carry a recorded-vote reference. "
+        "NO UNIQUE KEY, and the collision is in the SOURCE, not in the "
+        "promotion. Measured on the FULL file: (bill_id, action_date, "
+        "action_text) collides 4,131 times; adding action_code still leaves "
+        "398; the ENTIRE published tuple leaves 111 groups and 133 surplus "
+        "rows - byte-identical repeats such as two `Conference held.` rows "
+        "against 99-s-2638 on 1986-10-10. congress.gov publishes an action "
+        "twice and gives no ordinal to tell them apart. NOTHING WAS "
+        "COLLAPSED. QUESTION for the owner: does an action ordinal within a "
+        "bill count as a key when the publisher supplies none, or does this "
+        "ship keyed on the bill with the 133 declared?",
+    "nagpra_nps_notice_index.csv":
+        "one NAGPRA notice as the National NAGPRA Program's OWN register "
+        "records it - a DIFFERENT OBSERVER from `nagpra_notices.csv`, which "
+        "parses the Federal Register text. Joinable on `fr_document_number`; "
+        "the two DISAGREE on 315 documents and "
+        "`nagpra_notice_source_corroboration.csv` carries both values. "
+        "`notice_type` is not cosmetic: the source's grid defaults to NIC and "
+        "a pull that does not ask per type returns 4,810 of 6,818 rows while "
+        "looking complete (NIC 4,810 + NIR 1,869 + NID 131 + NOT 8 = 6,818). "
+        "The count columns are TYPE-SPECIFIC - `total_mni` and "
+        "`total_associated_funerary_objects` belong to NIC and NID, while "
+        "`unassociated_funerary_objects`, `sacred_objects` and "
+        "`objects_of_cultural_patrimony` belong to NIR, so a blank is the "
+        "wrong column for that notice type and NOT a missing value. "
+        "NO UNIQUE KEY: (notice_type, fr_document_number) is 6,815 distinct "
+        "over 6,818 rows. All three collisions are NIR and each was read "
+        "row by row before this was written - Autry Museum E7-5977 is TWO "
+        "GENUINE LINES of one notice (1 sacred object; 1 sacred-and-patrimony "
+        "item), AMNH 2012-26223 is two lines (34 unassociated funerary "
+        "objects; 0), and Field Museum 04-17582 is a BYTE-IDENTICAL DUPLICATE "
+        "IN THE SOURCE. Nothing was collapsed. QUESTION for the owner: does "
+        "an FR document number plus a line ordinal count as a key when the "
+        "source publishes no ordinal, or does this table ship keyed on the "
+        "document with the three named rows declared?",
     "nagpra_nps_grant_awards.csv":
         "one NAGPRA grant award: (fiscal year, grant type, recipient, "
         "amount). 1,221 awards, FY1994-2025, $66,095,102.79. NO UNIQUE KEY: "

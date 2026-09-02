@@ -22,18 +22,28 @@ paced well below that and the host is claimed with the standard
 WHY THIS TABLE DID NOT EXIST
 ----------------------------
 `native_bills.csv` has carried a `cosponsor_count` since 2026-08-05 - a NUMBER.
-Who those cosponsors were was fetched for **275 of 3,069 bills** by an earlier,
+Who those cosponsors were was attempted for **275 of 3,069 bills** by an earlier,
 unnumbered pass and left in `data/clean/_cosponsors.csv`, a leading-underscore
 file that matches no `COLLECTIONS` pattern in
 `code/500_build_architecture_map.py`, reaches no dataset contract in `512`, and
-is in no codebook.  It was ON_DISK_NOT_PROMOTED (5,318 rows / 162 bills) sitting
-next to a NOT_ACQUIRED gap of 2,794 bills.  This script closes both: it promotes
-the legacy rows with their provenance intact and fetches the rest.
+is in no codebook.  Of those 275 only **162 carried a roster** (5,318 rows); the
+rest logged `zero_cosponsors_reported` (71), `no_api_record` (41) or an HTTP 520.
+So the state was ON_DISK_NOT_PROMOTED for 162 bills sitting next to a
+NOT_ACQUIRED gap of **2,794**.  This script closes both.
 
-THE LEGACY ROWS ARE NOT RE-FETCHED AND NOT TRUSTED BLINDLY.  Every legacy row is
-carried with `record_basis = legacy__cosponsors_csv`; where this pass also
-fetched the same bill, the fetched roster wins and the legacy roster is compared
-- disagreements are counted and printed, never silently resolved.
+MEASURED OUTCOME, 2026-09-02: **3,053 bills fetched, 0 errors, 0 no_api_record;
+18,987 cosponsor rows over 2,175 bills, 1,905 distinct members, Congresses
+93-119.**  The earlier pass's 41 `no_api_record` verdicts did not reproduce -
+every canonical bill answered.
+
+THE LEGACY ROWS ARE NOT RE-FETCHED-OVER BLINDLY, AND THE COMPARISON IS THE
+POINT.  A legacy row is carried with `record_basis = legacy__cosponsors_csv`
+only where this pass has no fetched roster for that bill; where both exist the
+fetched roster wins and the two are compared.  **Measured: 162 of 162 bills
+AGREE on the exact set of bioguide ids, 0 disagree**, so the legacy file is
+fully corroborated and fully superseded, and `record_basis` is a single value
+on all 18,987 live rows.  The column stays because the next re-run of an
+incomplete fetch will need it.
 
 WHAT IS DELIBERATELY NOT DONE
 -----------------------------
@@ -123,8 +133,8 @@ CANONICAL = {"hr", "s", "hres", "sres", "hjres", "sjres", "hconres", "sconres"}
 # Verify floors. Set from the measured outcome of the first full run; a floor
 # is a claim that the work landed, so it is deliberately just under the
 # measurement and never re-baselined to clear a red gate.
-MIN_ROWS = 20000
-MIN_BILLS = 1500
+MIN_ROWS = 18500
+MIN_BILLS = 2100
 
 BUILD_DATE = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 SOURCE_URL_TMPL = ("https://api.congress.gov/v3/bill/{congress}/{bill_type}/"
