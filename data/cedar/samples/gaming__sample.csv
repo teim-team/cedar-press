@@ -1,11 +1,11 @@
-facility_id,tribe,facility_name,city,state,property_status,open_date,close_date,gaming_machines,table_games,hotel_rooms,employees,cedar_uid
-CCP-686900,Organized Village of Kake,Keex Kwan Gaming – Bingo,Kake,AK,current,2003-01-01,2006-04,,,12,25,CE-0006Y-JE
-CCP-775700,Jamul Indian Village,Jamul Casino,Jamul,CA,current,2016-10-10,,1635,39,400,1000,CE-0015C-55
-CCP-336100,Iowa Tribe of Kansas and Nebraska,Casino White Cloud,White Cloud,KS,current,1998-12,,380,3,4,150,CE-00159-KT
-CCP-1186500,White Earth Band of Chippewa Indians,Shooting Star Casino - Bagley,,MN,current,2016-08-17,,174,,11,40,CE-000QH-SS
-CCP-1004300,Turtle Mountain Band of Chippewa Indians,Grand Treasure Casino,Trenton,ND,current,2012-05-29,,419,,,,CE-001BQ-5R
-CCP-635600,Seneca Nation of Indians,Seneca Allegany Casino & Hotel,Salamanca,NY,current,2004-05-01,,1334,27,413,1200,CE-001AC-YN
-CCP-408900,Choctaw Nation of Oklahoma,Choctaw Casino Resort - Pocola,Pocola,OK,current,1994,,1860,13,118,571,CE-0013Y-77
-CCP-675900,Kickapoo Tribe of Oklahoma,Kickapoo Casino - Harrah,McLoud,OK,current,2001,,635,6,,226,CE-0015R-DH
-CCP-943900,Pawnee Nation of Oklahoma,StoneWolf Casino,Pawnee,OK,current,2010,,318,4,,,CE-00186-GZ
-CCP-693900,Puyallup Tribe of Indians,Emerald Queen Hotel & Casino,Fife,WA,current,2004-12-13,,2367,,110,2000,CE-0018W-M5
+facility_id,tribe,facility_name,city,state,property_status,open_date,open_date_precision,close_date,gaming_machines,table_games,hotel_rooms,employees,gaming_class_ii_authorized,gaming_class_iii_authorized,has_revenue_bound,revenue_bound_strongest_status,state_revenue_disclosure_status,cedar_uid
+CCP-686900,Organized Village of Kake,Keex Kwan Gaming – Bingo,Kake,AK,current,2003-01-01,day,2006-04,,,12,25,1,,Y,REGIONAL_GGR_CEILING,,CE-0006Y-JE
+CCP-522600,Pauma-Yuima Band of Mission Indians,Casino Pauma,Pauma Valley,CA,current,2001-05,month,,1039,18,,437,1,1,Y,REGIONAL_GGR_CEILING,,CE-00185-A6
+CCP-36600,Ute Mountain Ute Tribe,Ute Mountain Casino Hotel,Towaoc,CO,,1992-09,month,,,,,,1,1,Y,REGIONAL_GGR_CEILING,SEALED_BY_STATUTE_OR_COMPACT,CE-001BZ-N0
+CCP-755400,White Earth Band of Chippewa Indians,Ice Cracking Lodge,Ponsford,MN,current,2002-11,month,2005-09,19,,15,,,,Y,REGIONAL_GGR_CEILING,SEALED_BY_STATUTE_OR_COMPACT,CE-000QH-SS
+CCP-668400,Confederated Salish & Kootenai Tribes,Morigeau's Restaurant and Four Star Bar,Ravalli,MT,current,,,2006-11,7,,,,1,1,Y,REGIONAL_GGR_CEILING,,CE-0013X-1E
+CCP-528800,Pueblo of Santa Clara,Santa Claran Hotel Casino,Espanola,NM,current,2001-06,month,,659,5,122,300,1,,Y,SINGLE_PROPERTY_ATTRIBUTED,,CE-0019Q-VR
+CCP-765400,Chickasaw Nation,Chickasaw Travel Stop - Davis Gaming,Davis,OK,current,1995,year,,69,,,26,1,1,Y,REGIONAL_GGR_CEILING,,CE-00135-HP
+CCP-676000,Kickapoo Tribe of Oklahoma,Kickapoo Conoco Station,Harrah,OK,current,2003-04-01,day,2009-11,32,,,10,1,1,Y,REGIONAL_GGR_CEILING,,CE-0015R-DH
+CCP-305300,Modoc Tribe of Oklahoma/Miami Tribe of Oklahoma,The Stables Casino,Miami,OK,current,1998,year,,486,4,,170,1,1,Y,REGIONAL_GGR_CEILING,,CE-0016Y-PQ
+CCP-513400,Kalispel Tribe of Indians,Northern Quest Resort & Casino,Airway Heights,WA,current,2000,year,,1651,37,250,2000,1,1,Y,REGIONAL_GGR_CEILING,,CE-0015K-FM
