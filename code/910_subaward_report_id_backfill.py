@@ -211,56 +211,70 @@ def read_clean():
         return rd.fieldnames, list(rd)
 
 
-def staged_zips():
+def staged_members():
+    """(label, opener) over every staged FSRS extract - zipped or loose."""
     out = []
     for d in RAW_DIRS:
         if not os.path.isdir(d):
             continue
         for fn in sorted(os.listdir(d)):
-            if fn.lower().endswith(".zip"):
-                out.append(os.path.join(d, fn))
+            p = os.path.join(d, fn)
+            low = fn.lower()
+            if low.endswith(".zip"):
+                out.append(("zip", p))
+            elif low.endswith(".csv") and "subaward" in low:
+                out.append(("csv", p))
     return out
 
 
 def build_index(wanted: set) -> dict:
     """identity_key -> sorted list of [report_id, month, last_modified].
 
-    Streams every staged zip. Only keys the clean file actually holds are
-    retained, so the 6.6M-row corpus costs time, not memory.
+    Streams every staged extract. Only keys the clean file actually holds are
+    retained, so the 8.5M-row corpus costs time, not memory.
     """
     idx = defaultdict(dict)          # key -> {report_id: (month, modified)}
-    n_rows = n_hit = n_norid = 0
-    for zp in staged_zips():
-        try:
-            z = zipfile.ZipFile(zp)
-        except (zipfile.BadZipFile, OSError) as e:
-            print(f"  WARN unreadable zip, skipped: {os.path.basename(zp)} ({e})")
-            continue
-        with z:
-            for m in z.namelist():
-                if not m.lower().endswith(".csv"):
-                    continue
-                with z.open(m) as fh:
-                    rd = csv.DictReader(io.TextIOWrapper(
-                        fh, encoding="utf-8-sig", newline=""))
-                    if ID_COL not in (rd.fieldnames or []):
-                        print(f"  NOTE {os.path.basename(zp)}::{m} has no "
-                              f"{ID_COL} - skipped")
+    counters = [0, 0, 0]             # rows, matched, matched-with-blank-id
+
+    def consume(rd, label):
+        if ID_COL not in (rd.fieldnames or []):
+            print(f"  NOTE {label} has no {ID_COL} - skipped")
+            return
+        for r in rd:
+            counters[0] += 1
+            k = raw_identity_key(r)
+            if k not in wanted:
+                continue
+            rid = (r.get(ID_COL) or "").strip()
+            if not rid:
+                counters[2] += 1
+                continue
+            counters[1] += 1
+            idx[k][rid] = ((r.get(MONTH_COL) or "").strip(),
+                           (r.get(MOD_COL) or "").strip())
+
+    for kind, p in staged_members():
+        base = os.path.basename(p)
+        if kind == "zip":
+            try:
+                z = zipfile.ZipFile(p)
+            except (zipfile.BadZipFile, OSError) as e:
+                print(f"  WARN unreadable zip, skipped: {base} ({e})")
+                continue
+            with z:
+                for m in z.namelist():
+                    if not m.lower().endswith(".csv"):
                         continue
-                    for r in rd:
-                        n_rows += 1
-                        k = raw_identity_key(r)
-                        if k not in wanted:
-                            continue
-                        rid = (r.get(ID_COL) or "").strip()
-                        if not rid:
-                            n_norid += 1
-                            continue
-                        n_hit += 1
-                        idx[k][rid] = ((r.get(MONTH_COL) or "").strip(),
-                                       (r.get(MOD_COL) or "").strip())
-        print(f"  scanned {os.path.basename(zp):58s} "
-              f"cumulative raw rows {n_rows:,}  matched {n_hit:,}")
+                    with z.open(m) as fh:
+                        consume(csv.DictReader(io.TextIOWrapper(
+                            fh, encoding="utf-8-sig", newline="")),
+                            f"{base}::{m}")
+        else:
+            with open(p, encoding="utf-8-sig", newline="") as fh:
+                consume(csv.DictReader(fh), base)
+        print(f"  scanned {base:58s} cumulative raw rows {counters[0]:,}  "
+              f"matched {counters[1]:,}")
+    n_rows, n_hit, n_norid = counters
     print(f"\n  raw rows read {n_rows:,}; rows matching a clean identity_key "
           f"{n_hit:,}; of those with a BLANK report id {n_norid:,}")
     # deterministic order within a group: (month, id)
@@ -275,45 +289,93 @@ def load_index() -> dict:
 
 
 def plan(fields, rows, idx):
-    """Decide an id for every row. Returns (assignment list, stats)."""
-    groups = defaultdict(list)
+    """Decide an id for every row. Returns (assignment list, stats).
+
+    THE POOL IS PER identity_key; THE ALLOCATION IS PER source_dataset.
+    Both halves were learned by getting one of them wrong.
+
+    Allocating one pool across the whole identity_key group refused 694 rows
+    on a count mismatch. 790 of those were 395 filings Cedar holds TWICE, once
+    from `usaspending_fsrs_pull` and once from `funding_forward_fill` - one
+    filing, ingested by two Cedar pulls, and the source published exactly one
+    id for it. Both rows must carry the SAME SAM UUID, because it IS the same
+    filing; what separates the two ROWS is the source that reported them, and
+    that is why `source_dataset` is half the published key.
+
+    THE DIRECTION OF THE INEQUALITY IS THE WHOLE RULE.
+      M rows, N source filings, M <  N   Cedar retains a SUBSET of the source's
+                                         filings. Assign M distinct real ids,
+                                         injectively, in (month, id) order.
+                                         Nothing is invented; which subset was
+                                         retained is simply not recorded, and
+                                         the N filings this arises from are
+                                         byte-identical in the source anyway.
+      M == N                             a bijection.
+      M >  N                             REFUSED, always. Cedar would have
+                                         more rows than the source published
+                                         filings, so some row could only be
+                                         given an id that is not its own. That
+                                         is the fabrication this refuses; it
+                                         fires on 0 partitions today and the
+                                         synthetic test in `selftest` proves
+                                         it still fires.
+    """
+    by_key = defaultdict(list)
     for i, r in enumerate(rows):
-        groups[_kstr(clean_identity_key(r))].append(i)
+        by_key[_kstr(clean_identity_key(r))].append(i)
 
     assign = [None] * len(rows)      # (report_id, month, modified, basis)
     st = Counter()
-    refused_groups = []
-    for gk, members in groups.items():
+    refused = []
+    for gk, members in by_key.items():
         have = [i for i in members if (rows[i].get(ID_COL) or "").strip()]
-        need = [i for i in members if not (rows[i].get(ID_COL) or "").strip()]
         for i in have:
             r = rows[i]
             assign[i] = ((r.get(ID_COL) or "").strip(),
                          (r.get(MONTH_COL) or "").strip(),
                          (r.get(MOD_COL) or "").strip(), "carried_by_121")
             st["carried_by_121"] += 1
-        if not need:
-            continue
-        pool = [t for t in idx.get(gk, [])
-                if t[0] not in {(rows[i].get(ID_COL) or "").strip()
-                                for i in have}]
-        if not pool:
-            for i in need:
-                st["unrecovered_no_source_row"] += 1
-            continue
-        if len(pool) != len(need):
-            # UNEQUAL. Refuse the whole group - an unequal bijection either
-            # invents a filing or destroys one.
-            refused_groups.append((gk, len(need), len(pool)))
-            for i in need:
-                st["unrecovered_count_mismatch"] += 1
-            continue
-        basis = ("recovered_unique" if len(need) == 1
-                 else "recovered_group_bijection")
-        for i, t in zip(sorted(need), pool):
-            assign[i] = (t[0], t[1], t[2], basis)
-            st[basis] += 1
-    return assign, st, refused_groups
+        claimed = {(rows[i].get(ID_COL) or "").strip() for i in have}
+        free = [t for t in idx.get(gk, []) if t[0] not in claimed]
+
+        per_src = defaultdict(list)
+        for i in members:
+            if i not in set(have):
+                per_src[(rows[i].get("source_dataset") or "").strip()].append(i)
+        for src in sorted(per_src):
+            need = sorted(per_src[src])
+            if not free:
+                for i in need:
+                    st["unrecovered_no_source_row"] += 1
+                continue
+            if len(need) > len(free):
+                refused.append((gk, src, len(need), len(free)))
+                for i in need:
+                    st["unrecovered_more_rows_than_source_filings"] += 1
+                continue
+            basis = ("recovered_unique" if len(need) == 1 == len(free)
+                     else "recovered_group_bijection" if len(need) == len(free)
+                     else "recovered_group_injection")
+            for i, t in zip(need, free):
+                assign[i] = (t[0], t[1], t[2], basis)
+                st[basis] += 1
+    return assign, st, refused
+
+
+def source_record_id(r, assigned_id):
+    """The SOURCE's own identifier for this record, and what names it.
+
+    Never minted. The SAM UUID where the source is SAM/FSRS; the HigherGov
+    per-subcontract permalink - already carried in `source_url`, 998 rows, 998
+    distinct values, 0 blank - where the source is HigherGov.
+    """
+    if assigned_id:
+        return assigned_id, "sam_subaward_report_id"
+    if (r.get("source_dataset") or "").strip() == "highergov_2023_export":
+        u = (r.get("source_url") or "").strip()
+        if u:
+            return u, "highergov_subcontract_permalink"
+    return "", "unrecovered"
 
 
 def money(rows):
@@ -329,42 +391,63 @@ def money(rows):
 
 def report(fields, rows, assign, st, refused):
     n = len(rows)
-    filled = sum(1 for a in assign if a and a[0])
     ids = [a[0] for a in assign if a and a[0]]
     print(f"\n  clean rows                          {n:,}")
     for k in ("carried_by_121", "recovered_unique",
-              "recovered_group_bijection", "unrecovered_no_source_row",
-              "unrecovered_count_mismatch"):
+              "recovered_group_bijection", "recovered_group_injection",
+              "unrecovered_no_source_row",
+              "unrecovered_more_rows_than_source_filings"):
         if st.get(k):
-            print(f"    {k:34s} {st[k]:,}")
-    print(f"  rows that would carry an id         {filled:,} "
-          f"({100.0*filled/n:.2f}%)")
-    print(f"  distinct ids                        {len(set(ids)):,}")
-    print(f"  COLLISIONS among written ids        "
+            print(f"    {k:44s} {st[k]:,}")
+    print(f"  rows carrying a SAM report id       {len(ids):,} "
+          f"({100.0*len(ids)/n:.2f}%)")
+    print(f"    distinct SAM report ids           {len(set(ids)):,}")
+    print(f"    repeats (one filing, two Cedar sources) "
           f"{len(ids) - len(set(ids)):,}")
-    print(f"  groups refused on count mismatch    {len(refused):,}")
-    for gk, a, b in refused[:5]:
-        s = gk.replace(chr(31), " | ")[:110]
+
+    # the PUBLISHED key: (source_dataset, subaward_source_record_id)
+    pk, blank = Counter(), 0
+    by_basis = Counter()
+    for r, a in zip(rows, assign):
+        v, b = source_record_id(r, a[0] if a else "")
+        by_basis[b] += 1
+        if not v:
+            blank += 1
+            continue
+        pk[((r.get("source_dataset") or "").strip(), v)] += 1
+    dup = sum(c - 1 for c in pk.values() if c > 1)
+    print(f"  PRIMARY KEY (source_dataset, {SRC_ID_COL})")
+    for b, c in by_basis.most_common():
+        print(f"    basis {b:36s} {c:,}")
+    print(f"    BLANK on                          {blank:,} rows")
+    print(f"    COLLISIONS                        {dup:,} rows")
+    print(f"  partitions refused (rows > source filings) {len(refused):,}")
+    for gk, src, a, b in refused[:5]:
+        s = f"{src} | {gk.replace(chr(31), ' | ')}"[:110]
         print(f"      need {a:3d} rows, source offers {b:3d} ids  "
               + s.encode("ascii", "replace").decode("ascii"))
-    return filled, len(ids) - len(set(ids))
+    return blank, dup
 
 
 def write_unrecovered(rows, assign):
     os.makedirs(REVIEW, exist_ok=True)
-    cols = ["row_index", "fiscal_year", "source_file", "prime_award_unique_key",
-            "subaward_number", "sub_uei", "subaward_date", "subaward_amount",
-            "duplicate_status", "reason"]
+    cols = ["row_index", "fiscal_year", "source_dataset", "source_file",
+            "prime_award_unique_key", "subaward_number", "sub_uei",
+            "subaward_date", "subaward_amount", "duplicate_status", "reason"]
+    n = 0
     with open(UNREC, "w", encoding="utf-8", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=cols)
         w.writeheader()
         for i, (r, a) in enumerate(zip(rows, assign)):
-            if a:
+            v, _ = source_record_id(r, a[0] if a else "")
+            if v:
                 continue
+            n += 1
             w.writerow({c: (r.get(c) or "") for c in cols[1:-1]}
                        | {"row_index": i, "reason": "no staged source row "
-                          "carries this identity_key, or the group's row "
-                          "count and the source's id count disagree"})
+                          "carries this identity_key, and the source is not "
+                          "one that publishes its own record id"})
+    return n
 
 
 def do_measure(rescan=True):
@@ -384,8 +467,8 @@ def do_measure(rescan=True):
               f"pass `rescan` to rebuild it from the zips")
     assign, st, refused = plan(fields, rows, idx)
     report(fields, rows, assign, st, refused)
-    write_unrecovered(rows, assign)
-    print(f"  unrecovered listed in {UNREC}")
+    n = write_unrecovered(rows, assign)
+    print(f"  {n:,} unrecovered rows listed in {UNREC}")
     return 0
 
 
@@ -399,9 +482,10 @@ def do_apply():
     before_cells = [tuple((r.get(c) or "") for c in fields) for r in rows]
 
     assign, st, refused = plan(fields, rows, idx)
-    filled, collisions = report(fields, rows, assign, st, refused)
+    blank, collisions = report(fields, rows, assign, st, refused)
     if collisions:
-        sys.exit("REFUSED: the assignment would write a duplicate report id")
+        sys.exit(f"REFUSED: the published key would collide on "
+                 f"{collisions:,} rows")
 
     newfields = list(fields) + [c for c in NEW_COLS if c not in fields]
     out = []
@@ -420,6 +504,8 @@ def do_apply():
             r[BASIS_COL] = a[3]
         else:
             r[BASIS_COL] = "unrecovered"
+        v, b = source_record_id(r, a[0] if a else "")
+        r[SRC_ID_COL], r[SRC_ID_BASIS] = v, b
         out.append(r)
 
     # I3: every pre-existing cell in every pre-existing column byte-identical,
@@ -458,31 +544,32 @@ def do_apply():
 
 
 def do_verify() -> int:
-    """The invariant: `subaward_sam_report_id` is a PRIMARY KEY on the live
-    file - non-blank on every row and unique across the whole file - and every
-    id it carries is one the staged source published for that row's
-    identity_key."""
+    """The invariant: (`source_dataset`, `subaward_source_record_id`) is a
+    PRIMARY KEY on the live file - non-blank on every row, unique across the
+    whole file - and every SAM id it carries is one the staged source actually
+    published for that row's identity_key."""
     fails = []
     fields, rows = read_clean()
-    if ID_COL not in fields:
-        fails.append(f"V1 {ID_COL} is not in the header")
-        rows = []
-    ids = [(r.get(ID_COL) or "").strip() for r in rows]
-    blank = sum(1 for v in ids if not v)
-    dup = len(ids) - len(set(ids))
+    for c in (ID_COL, SRC_ID_COL, SRC_ID_BASIS, "source_dataset"):
+        if c not in fields:
+            fails.append(f"V1 {c} is not in the header")
+            rows = []
+    key = [((r.get("source_dataset") or "").strip(),
+            (r.get(SRC_ID_COL) or "").strip()) for r in rows]
+    blank = sum(1 for _, v in key if not v)
+    dup = len(key) - len(set(key))
     if blank:
-        fails.append(f"V2 {ID_COL} is BLANK on {blank:,} of {len(rows):,} rows "
-                     f"- blank collides with blank, so this is not a key")
+        fails.append(f"V2 {SRC_ID_COL} is BLANK on {blank:,} of {len(rows):,} "
+                     f"rows - blank collides with blank, so this is not a key")
     if dup:
-        fails.append(f"V3 {ID_COL} collides on {dup:,} rows")
+        fails.append(f"V3 (source_dataset, {SRC_ID_COL}) collides on "
+                     f"{dup:,} rows")
     if os.path.exists(INDEX) and rows:
         idx = load_index()
         bad = 0
         for r in rows:
             v = (r.get(ID_COL) or "").strip()
-            if not v:
-                continue
-            if (r.get(BASIS_COL) or "") == "carried_by_121":
+            if not v or (r.get(BASIS_COL) or "") == "carried_by_121":
                 continue
             pool = {t[0] for t in idx.get(_kstr(clean_identity_key(r)), [])}
             if pool and v not in pool:
@@ -490,11 +577,62 @@ def do_verify() -> int:
         if bad:
             fails.append(f"V4 {bad:,} rows carry a report id the staged source "
                          f"never published for that identity_key")
-    print(f"  910 verify   {len(rows):,} rows   blank {blank:,}   "
-          f"collisions {dup:,}")
+    print(f"  910 verify   {len(rows):,} rows   key blank {blank:,}   "
+          f"key collisions {dup:,}")
     for f in fails:
         print(f"  FAIL  {f}")
     return 1 if fails else 0
+
+
+def do_selftest() -> int:
+    """PROVE THE REFUSAL FIRES, on a synthetic violation.
+
+    Two rows sharing one identity_key and one source_dataset, against a source
+    pool holding ONE filing. That is the M > N case: giving both rows an id
+    would put the same real id on two rows, or invent one. The planner must
+    refuse both and assign neither.
+    """
+    ok = True
+    base = {"prime_award_unique_key": "CONT_AWD_SELFTEST", "subaward_number": "1",
+            "sub_uei": "ZZZZZZZZZZZZ", "subaward_date": "2020-01-01",
+            "subaward_amount": "100.00", "description": "SELFTEST",
+            "source_dataset": "usaspending_fsrs_pull", "source_url": "",
+            ID_COL: "", MONTH_COL: "", MOD_COL: "",
+            "duplicate_status": "primary", "subaward_exceeds_prime_flag": ""}
+    rows = [dict(base), dict(base)]
+    gk = _kstr(clean_identity_key(rows[0]))
+    idx = {gk: [["THE-ONE-REAL-ID", "2020-02", "2020-02-01"]]}
+    assign, st, refused = plan(list(base), rows, idx)
+    if not refused or st.get("unrecovered_more_rows_than_source_filings") != 2:
+        print("  FAIL  S1 M>N was NOT refused - the guard does not fire")
+        ok = False
+    else:
+        print(f"  S1 M>N refused as designed: {len(refused)} partition, "
+              f"2 rows left unassigned")
+    if any(a for a in assign):
+        print("  FAIL  S2 a refused partition still got an id assigned")
+        ok = False
+
+    # and the control: one row, one filing -> assigned.
+    rows2 = [dict(base)]
+    assign2, st2, refused2 = plan(list(base), rows2, idx)
+    if refused2 or assign2[0][0] != "THE-ONE-REAL-ID":
+        print("  FAIL  S3 the guard is over-firing - a clean 1:1 was refused")
+        ok = False
+    else:
+        print("  S3 control passes: a 1:1 partition is still recovered")
+
+    # and the key derivation for a HigherGov row, which has no SAM id at all
+    hg = dict(base, source_dataset="highergov_2023_export",
+              source_url="https://www.highergov.com/subcontract/SELFTEST")
+    v, b = source_record_id(hg, "")
+    if b != "highergov_subcontract_permalink" or not v:
+        print("  FAIL  S4 HigherGov rows do not fall back to their permalink")
+        ok = False
+    else:
+        print("  S4 HigherGov permalink is used as the source record id")
+    print("  910 selftest " + ("PASS" if ok else "FAIL"))
+    return 0 if ok else 1
 
 
 def main() -> int:
@@ -507,6 +645,8 @@ def main() -> int:
         return do_apply()
     if cmd == "verify":
         return do_verify()
+    if cmd == "selftest":
+        return do_selftest()
     sys.exit(__doc__)
 
 

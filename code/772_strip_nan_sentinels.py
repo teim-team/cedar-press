@@ -2,9 +2,18 @@
 """
 Cedar Press - 772: the string `nan` is not a value. Strip it from clean tables.
 
-    py -3 code/772_strip_nan_sentinels.py                # write
-    py -3 code/772_strip_nan_sentinels.py verify         # exit 1 if any remain
-    py -3 code/772_strip_nan_sentinels.py <table.csv>    # one table
+    py -3 code/772_strip_nan_sentinels.py                # MEASURE only
+    py -3 code/772_strip_nan_sentinels.py write          # apply
+    py -3 code/772_strip_nan_sentinels.py write <t.csv>  # one named table
+
+MEASURE IS THE DEFAULT AND THAT IS DELIBERATE. `prime_contracts.csv` is 1.2 GB
+and other builders hold it: the first attempt to run this died on
+`WinError 32 - being used by another process` while `950_promote_contract_
+attributes` was mid-rewrite of the same file, and the table gained columns and
+340 MB between one pass and the next. A whole-file rewrite that fires by
+default is a way to lose another workstream's run. So the swap happens only on
+an explicit `write`, and it aborts if the file's size or mtime moved while this
+was reading it.
 
 HOW THIS WAS FOUND, WHICH IS THE POINT
 --------------------------------------
@@ -82,17 +91,17 @@ SENTINEL = "nan"
 DEFAULT_TABLES = ["prime_contracts.csv"]
 
 
-def sweep(path: Path, verify: bool) -> tuple[int, dict]:
+def sweep(path: Path, write: bool) -> tuple[int, dict, str]:
     per: dict[str, int] = {}
     tmp = path.with_suffix(path.suffix + ".772tmp")
     n = 0
+    st0 = path.stat()
     with path.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
         rd = csv.DictReader(fh)
         cols = list(rd.fieldnames or [])
-        out = None
+        out = tmp.open("w", encoding="utf-8", newline="") if write else None
         w = None
-        if not verify:
-            out = tmp.open("w", encoding="utf-8", newline="")
+        if out is not None:
             w = csv.DictWriter(out, fieldnames=cols, extrasaction="ignore")
             w.writeheader()
         for r in rd:
@@ -100,42 +109,59 @@ def sweep(path: Path, verify: bool) -> tuple[int, dict]:
                 if r.get(k) == SENTINEL:
                     per[k] = per.get(k, 0) + 1
                     n += 1
-                    if not verify:
+                    if write:
                         r[k] = ""
             if w is not None:
                 w.writerow(r)
         if out is not None:
             out.close()
 
-    if not verify:
-        stamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
-        bak = path.with_name(f"{path.stem}.bak_{stamp}{path.suffix}")
+    if not write:
+        return n, per, "measured"
+
+    # Another builder may hold or have replaced this table while we read it.
+    # Losing someone else's rewrite is much worse than leaving `nan` in place
+    # for one more run, so a moved file means abort, not overwrite.
+    st1 = path.stat()
+    if (st1.st_size, st1.st_mtime_ns) != (st0.st_size, st0.st_mtime_ns):
+        tmp.unlink(missing_ok=True)
+        return n, per, "ABORTED - the table changed on disk while reading it"
+    stamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+    bak = path.with_name(f"{path.stem}.bak_{stamp}_pre772{path.suffix}")
+    try:
         os.replace(path, bak)
-        os.replace(tmp, path)
-        print(f"    backup -> {bak.name}")
-    return n, per
+    except PermissionError as e:
+        tmp.unlink(missing_ok=True)
+        return n, per, f"ABORTED - another process holds the table ({e.winerror})"
+    os.replace(tmp, path)
+    print(f"    backup -> {bak.name}")
+    return n, per, "written"
 
 
 def main() -> int:
     args = sys.argv[1:]
-    verify = bool(args) and args[0] == "verify"
+    write = bool(args) and args[0] == "write"
     named = [a for a in args if a.endswith(".csv")]
     tables = named or DEFAULT_TABLES
 
-    total = 0
+    total, aborted = 0, 0
     for t in tables:
         p = CLEAN / t if not Path(t).is_absolute() else Path(t)
         if not p.exists():
             print(f"    MISSING {p}")
             continue
-        n, per = sweep(p, verify)
+        n, per, how = sweep(p, write)
         total += n
-        verb = "still carry" if verify else "cleared"
-        print(f"  772 {p.name}: {n:,} cell(s) {verb} the literal string "
-              f"{SENTINEL!r}")
+        aborted += how.startswith("ABORTED")
+        print(f"  772 {p.name}: {n:,} cell(s) hold the literal string "
+              f"{SENTINEL!r}  [{how}]")
         for k, v in sorted(per.items(), key=lambda x: -x[1]):
             print(f"    {k:<34} {v:>9,}")
-    return 1 if (verify and total) else 0
+    # Measure-only is a report, never a failure. `write` fails if it could not
+    # write, and fails if a clean table still carries the sentinel afterwards.
+    if not write:
+        return 0
+    return 1 if aborted else 0
 
 
 if __name__ == "__main__":

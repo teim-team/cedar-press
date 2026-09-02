@@ -1,0 +1,24 @@
+{
+  "built": "2026-09-02",
+  "script": "871_promote_geo_keys_contracts.py",
+  "award_xwalk_keys": 1050968,
+  "place_xwalk_city_state": 20727,
+  "bridge_pairs": 904282,
+  "prime_contracts": {
+    "rows": 1217768,
+    "cents": 31000525866121,
+    "tiers": {
+      "derived_place_modal": 963727,
+      "unkeyed": 6054,
+      "exact_award_summary": 247987
+    }
+  },
+  "subawards": {
+    "rows": 76859,
+    "cents": 4730166081978,
+    "tiers": {
+      "unkeyed": 64719,
+      "exact_award_summary": 12140
+    }
+  }
+}

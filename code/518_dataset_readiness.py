@@ -69,6 +69,84 @@ CONSERVATION = ROOT / "data" / "clean" / "cedar_harvest_conservation.csv"
 RESOLVED = ROOT / "data" / "clean" / "cedar_resolved_facts.csv"
 LINKS = ROOT / "data" / "spine" / "cedar_source_record_links.csv"
 RELEASES = ROOT / "docs" / "releases"
+REGISTER = ROOT / "data" / "spine" / "cedar_identity_register.csv"
+SPINE = ROOT / "data" / "spine" / "cedar_entity_spine.csv"
+
+# =====================================================================
+# C4 SCANNER, v2 - 2026-09-02. Four measurement defects, named.
+# =====================================================================
+# v1 counted a row as attached when any of FOUR hard-coded columns was
+# non-blank, over a denominator of every row in the file. Measured against the
+# live tables, that was wrong in four separate ways, and they pushed in
+# opposite directions - so the single percentage it printed was not an
+# under-read or an over-read, it was an unknown mixture of both.
+#
+#   (1) BLIND TO ROLE-PREFIXED ID COLUMNS. Cedar's own shape for an entity
+#       that appears in a role is `<role>_entity_id`, because one payment can
+#       involve a tribal government, allottees, an enterprise, an operator and
+#       a trust account at once. v1 looked only for `cedar_uid`, `tribe_id`,
+#       `entity_id`, `cedar_entity_id`, so 705 resolved recipients in
+#       `resource_revenue.csv` read as zero. A table whose only id column is
+#       role-prefixed (`tribal_bond_issuances.csv`) was skipped ENTIRELY -
+#       not scored 0%, not counted at all.
+#
+#   (2) A NON-BLANK STRING IS NOT A CEDAR ID. `prime_contracts.csv` carries
+#       the literal sentinel `owner_as_of_transaction_cedar_uid = "UNKNOWN"`
+#       on 47,877 rows and v1 counted every one of them as attached.
+#       `resource_revenue.payer_entity_id` carries `PAYER-US-BIA`,
+#       `PAYER-STATE-ND` and four more federal/state payer stubs on 1,418 rows
+#       - correctly NOT in the hub, and counting them as Native-entity
+#       attachment would be gaming the metric. v2 requires the value to
+#       resolve in `cedar_identity_register.csv` or `cedar_entity_spine.csv`.
+#       This is the literal text of C4: entity matching uses the CENTRAL
+#       identity system. It only ever LOWERS a score.
+#
+#   (3) THE DENOMINATOR IGNORED ADR-010, WHICH v1'S OWN COMMENT CITES.
+#       ADR-010 consequence 1, verbatim: "Coverage is measured against the
+#       resolvable denominator, not the row count." v1 deferred that because
+#       "the honest denominator is not yet derivable per row". It is derivable
+#       now wherever a table carries `record_scope`, so v2 uses it: rows scoped
+#       `indian_country`, `geographic` or `native_serving` leave the
+#       denominator; `entity`, `multi_entity` and `unresolved` stay, and
+#       `unresolved` is the work queue. **A table with no `record_scope`
+#       column is scored exactly as before**, so this changes nothing anywhere
+#       the honest denominator has not actually been derived.
+#
+#       Why this is not an escape hatch: 9,791 of 11,305 `resource_revenue`
+#       rows are `national_aggregate` because Interior publishes Native
+#       American revenue only in aggregate, BY LAW. An aggregate row has no
+#       entity to carry an id, so scoring it as unkeyed measured the statute.
+#       The scope column is itself gated - `901_nr_record_scope.py` refuses to
+#       write a non-entity scope onto a row that a Cedar entity stands behind.
+#
+#   (4) BLIND TO THE PARTY TABLE. Attribution in Cedar routes through a party
+#       bridge, not a single owner column. 508 Osage headright rows and 74
+#       ANCSA 7(i)/7(j) rows name their Native entity ONLY there. v2 reads a
+#       declared bridge and requires the bridge row to assert parentage, so a
+#       `serves_native_entities` counterparty never counts as ownership.
+#
+# Still not measured, and now printed rather than hidden: a table with NO id
+# column of any kind is skipped. `c4_unmeasured_tables` names them.
+# Also still sampled: SCAN_CAP rows per table. `c4_sampled_tables` names the
+# tables where the cap bit, so a sampled figure is never quoted as a census.
+
+SCAN_CAP = 50_000
+
+BARE_ID_COLS = ("cedar_uid", "tribe_id", "entity_id", "cedar_entity_id")
+
+# ADR-010: only these three leave the denominator.
+NON_ENTITY_SCOPES = {"indian_country", "geographic", "native_serving"}
+
+# table -> (bridge table, this table's key column, the bridge's key column,
+#           {bridge column: required value}, (bridge id columns...))
+PARTY_BRIDGES = {
+    "resource_revenue.csv": (
+        "resource_parties.csv", "resource_revenue_event_id", "object_id",
+        {"relationship": "parent_native_entity"}, ("entity_id", "cedar_uid")),
+    "resource_assets.csv": (
+        "resource_parties.csv", "resource_asset_id", "object_id",
+        {"relationship": "parent_native_entity"}, ("entity_id", "cedar_uid")),
+}
 
 # =====================================================================
 # NATURAL SCOPE per dataset - ADR-010.
@@ -112,11 +190,19 @@ OWNERS = {
     "funding":                  "grain-ws4",
     "deals":                    "grain-ws5",
     "gaming":                   "int-2-gaming",
-    "natural-resources":        "grain-ws3 (C5 banked, deliberately not merged)",
+    # 2026-09-02: C4 closed by 900_nr_hub_join.py + 901_nr_record_scope.py.
+    # 586 rows hub-joined, 19,465 rows lifted off the source-local `anc_id`
+    # scheme, and the aggregate-by-law rows scoped under ADR-010 instead of
+    # scored as unkeyed. 8/8 tables measured, 0 unmeasured.
+    "natural-resources":        "READY - maintain",
     "native-owned-businesses":  "enterprise (READY - extending)",
     "nonprofits":               "grain-ws5",
     "lobbying":                 "grain-ws4",
-    "legislation":              "grain-ws4",
+    # 2026-09-02: grain-legislation closed the last blocker by ruling
+    # congressional_correspondence_log.csv OUT OF SCOPE (4 candidate rows,
+    # all non-Native HHS OS FOIA requests) rather than declaring a grain the
+    # file could not evidence. 12 shippable tables -> 11.
+    "legislation":              "READY - maintain",
     "federal-register":         "READY - maintain",
     "nagpra":                   "READY - maintain",
 }
@@ -126,6 +212,8 @@ COLS = ["dataset", "status", "shelf", "n_customer_tables", "blockers",
         "c5_row_conservation", "c6_unresolved_conflicts", "c7_double_counting",
         "c8_rebuild_path", "c9_update_documented", "c10_gates",
         "natural_scope",
+        # C4 v2 honesty columns: what the percentage does NOT cover.
+        "c4_entity_scoped_rows", "c4_unmeasured_tables", "c4_sampled_tables",
         "tables_row_level_only", "duplicate_rows_total",
         "identity_model", "rebuild_entry", "destructive_rebuild",
         "enricher_ordering", "replay_status", "next_action", "measured_date"]
@@ -136,6 +224,81 @@ def read_csv(p: Path) -> list:
         return []
     with p.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
         return list(csv.DictReader(fh))
+
+
+def load_known_ids() -> set:
+    """Every identifier the CENTRAL identity system actually issues.
+
+    C4's own words are "entity matching uses the central identity system", so
+    a value that is not IN it is not attachment however non-blank it is. Two
+    real cases this catches, both measured 2026-09-02:
+      * `owner_as_of_transaction_cedar_uid = "UNKNOWN"` on 47,877
+        `prime_contracts.csv` rows - a sentinel string scored as an id;
+      * `PAYER-US-BIA` / `PAYER-STATE-ND` and four siblings on 1,418
+        `resource_revenue.csv` rows - federal and state payer stubs that are
+        correctly not Native entities and must never count as attachment.
+    Falls back to "any non-blank value" if the spine is unreadable, so a
+    missing register degrades to v1 behaviour rather than reporting 0%.
+    """
+    known = set()
+    for r in read_csv(REGISTER):
+        for k in ("handle", "cedar_uid", "cedar_entity_id"):
+            v = (r.get(k) or "").strip()
+            if v:
+                known.add(v)
+    sp = read_csv(SPINE)
+    for r in sp:
+        for k in r:
+            if k.endswith("entity_id") or k in ("cedar_uid", "neid", "tribe_id"):
+                v = (r.get(k) or "").strip()
+                if v:
+                    known.add(v)
+    return known
+
+
+class _AnyNonBlank(frozenset):
+    """Degraded mode: behaves as "every non-blank string is known"."""
+    def __contains__(self, v):        # noqa: D105
+        return bool(v)
+
+
+KNOWN_IDS = load_known_ids()
+if len(KNOWN_IDS) < 100:              # spine unreadable - do not report 0%
+    KNOWN_IDS = _AnyNonBlank()
+
+_BRIDGE_CACHE = {}
+
+
+def load_bridge(table: str):
+    """(key column on `table`, {key values that carry a Cedar entity}) | None.
+
+    Attribution in Cedar routes through a PARTY TABLE, not a single owner
+    column: one payment can involve the tribal government, allottees, an
+    enterprise, an operator and a trust account at once. A scanner that reads
+    only the row misses the 508 Osage headright rows and the 74 ANCSA
+    7(i)/7(j) rows whose Native entity is named only there.
+
+    The bridge row must ASSERT PARENTAGE - a `serves_native_entities`
+    counterparty is deliberately not ownership (ADR-010 `native_serving`), and
+    counting it would let a bridge launder a non-attachment into an
+    attachment.
+    """
+    if table in _BRIDGE_CACHE:
+        return _BRIDGE_CACHE[table]
+    spec = PARTY_BRIDGES.get(table)
+    out = None
+    if spec:
+        btab, key_col, bkey_col, require, id_cols = spec
+        hit = set()
+        for r in read_csv(ROOT / "data" / "clean" / btab):
+            if any((r.get(k) or "").strip() != v for k, v in require.items()):
+                continue
+            if any((r.get(c) or "").strip() in KNOWN_IDS for c in id_cols):
+                hit.add((r.get(bkey_col) or "").strip())
+        hit.discard("")
+        out = (key_col, hit) if hit else None
+    _BRIDGE_CACHE[table] = out
+    return out
 
 
 def measure():
@@ -201,32 +364,49 @@ def measure():
         # ---- C5 row conservation -------------------------------------
         covered = [n for n in names if n in cons_tables]
 
-        # ---- C4 IDENTITY ATTACHMENT (ADR-009: hub and spokes) --------
+        # ---- C4 IDENTITY ATTACHMENT (ADR-009 hub/spokes, ADR-010 scope) --
         # The entity layer is dataset 13 and the other twelve CONSUME it.
         # A spoke that re-derives identity locally, or that carries rows with
-        # no cedar_uid at all, is not attached to the hub however clean its
-        # own grain is. Measured, not assumed: what share of this dataset's
-        # entity-bearing rows actually carry a Cedar id.
+        # no Cedar id at all, is not attached to the hub however clean its own
+        # grain is. See the C4 SCANNER v2 block at the top of this file for
+        # the four measurement defects this replaces.
         keyed_rows = total_rows = 0
+        unmeasured, sampled = [], []
         for n in names:
             for d in ("data/clean", "data/spine"):
                 fp = ROOT / d / n
                 if not fp.exists():
                     continue
+                bridge = load_bridge(n)
                 try:
                     with fp.open(encoding="utf-8-sig", errors="replace",
                                  newline="") as fh:
                         rdr = csv.DictReader(fh)
-                        idc = [h for h in (rdr.fieldnames or [])
-                               if h in ("cedar_uid", "tribe_id", "entity_id",
-                                        "cedar_entity_id")]
-                        if not idc:
+                        head = rdr.fieldnames or []
+                        idc = [h for h in head
+                               if h in BARE_ID_COLS
+                               or h.endswith("_entity_id")
+                               or h.endswith("_cedar_uid")]
+                        if not idc and not bridge:
+                            # (still) not measured - but SAY SO, by name.
+                            unmeasured.append(n)
                             break
+                        has_scope = "record_scope" in head
+                        bkey = bridge[0] if bridge else None
+                        i = -1
                         for i, r in enumerate(rdr):
-                            if i >= 50000:
+                            if i >= SCAN_CAP:
+                                sampled.append(n)
                                 break
+                            if has_scope and (r.get("record_scope") or "").strip() \
+                                    in NON_ENTITY_SCOPES:
+                                continue           # ADR-010 consequence 1
                             total_rows += 1
-                            if any((r.get(c) or "").strip() for c in idc):
+                            if any((r.get(c) or "").strip() in KNOWN_IDS
+                                   for c in idc):
+                                keyed_rows += 1
+                            elif bridge and (r.get(bkey) or "").strip() \
+                                    in bridge[1]:
                                 keyed_rows += 1
                 except OSError:
                     pass
@@ -299,6 +479,9 @@ def measure():
                               + ("" if scope == "entity" else f" [{scope}]")
                               if keyed_pct is not None else "no id columns"),
             natural_scope=scope,
+            c4_entity_scoped_rows=total_rows,
+            c4_unmeasured_tables=";".join(sorted(set(unmeasured))) or "-",
+            c4_sampled_tables=";".join(sorted(set(sampled))) or "-",
             c5_row_conservation=f"{len(covered)}/{len(names)}",
             c6_unresolved_conflicts="0 shipped as definite",
             c7_double_counting="none" if not money_unsafe else f"{len(money_unsafe)} tables",

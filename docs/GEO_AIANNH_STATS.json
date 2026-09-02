@@ -1,0 +1,39 @@
+{
+  "built": "2026-09-02",
+  "script": "873_build_aiannh_crosswalk.py",
+  "tiger_source": "data/raw/external/tiger/tl_2024_us_aiannh.zip",
+  "aiannh_areas": 864,
+  "points_inside": 2164,
+  "points_outside": 731,
+  "point_sources": {
+    "gaming_property_locations.csv": {
+      "rows_read": 2212,
+      "points_emitted": 1498,
+      "rows_without_usable_coordinates": 714
+    },
+    "gaming_facilities.csv": {
+      "rows_read": 787,
+      "points_emitted": 689,
+      "rows_without_usable_coordinates": 98
+    },
+    "gaming_properties.csv": {
+      "rows_read": 784,
+      "points_emitted": 689,
+      "rows_without_usable_coordinates": 95
+    },
+    "nepa_eplanning_projects.csv": {
+      "rows_read": 312,
+      "points_emitted": 19,
+      "rows_without_usable_coordinates": 293
+    },
+    "resource_assets.csv": {
+      "rows_read": 35,
+      "points_emitted": 0,
+      "rows_without_usable_coordinates": 35
+    }
+  },
+  "overlap_pairs": 374,
+  "overlap_areas_covered": 261,
+  "bia_pairs_folded": 174,
+  "coverage_note": "PARTIAL. Observed from Cedar geocoded points only; county polygons are not on disk so this is not an exhaustive overlap. Absence of a pair is not evidence the areas do not overlap."
+}

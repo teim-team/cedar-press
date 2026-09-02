@@ -1,0 +1,39 @@
+{
+  "built_date": "2026-09-02",
+  "rows": 787,
+  "columns_before": 105,
+  "columns_after": 116,
+  "columns_gained": [
+    "gaming_class_ii_authorized",
+    "gaming_class_iii_authorized",
+    "gaming_class_basis",
+    "gaming_class_source_url",
+    "has_revenue_bound",
+    "n_revenue_bound_fiscal_years",
+    "revenue_bound_strongest_status",
+    "revenue_bound_basis",
+    "revenue_bound_absent_reason",
+    "state_revenue_disclosure_status",
+    "state_revenue_disclosure_basis"
+  ],
+  "columns_lost": [],
+  "original_field_md5": "e17ab74137e212a26d62bf15fb683601",
+  "stats": {
+    "class_from_ordinance": 684,
+    "class_ii_yes": 617,
+    "bound_present": 694,
+    "class_iii_yes": 545,
+    "bound_absent": 93,
+    "absent::NON_IGRA_TRIBALLY_OWNED": 21,
+    "class_no_ordinance": 101,
+    "state_sealed": 174,
+    "absent::IGRA_COVERAGE_UNKNOWN": 20,
+    "class_no_uid": 2,
+    "absent::NO_NIGC_REGION_ASSIGNED": 34,
+    "absent::PROPOSED_IGRA_OPERATION": 1,
+    "absent::REVIEW: IGRA-covered and region-assigned yet no bound row was produced": 2,
+    "absent::NO_ROW_IN_nigc_region_assignments": 15
+  },
+  "backup": "gaming_facilities.csv.bak_2026-09-02_pre960",
+  "script": "code/960_promote_gaming_facility_class_and_revenue_reach.py"
+}

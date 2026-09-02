@@ -41,7 +41,70 @@ row is only written where a retrieved record names a congressional
 office as a party. That absence is the finding, and it is what the
 systems registry exists to make actionable.
 
+> ### RULED OUT OF SCOPE 2026-09-02 — and the reason above is no longer the reason
+>
+> *Workstream GRAIN-LEGISLATION. This paragraph is kept exactly as written
+> because it was true when written; what follows supersedes it.*
+>
+> `congressional_correspondence_log.csv` was the last C1/C2 blocker on the
+> `legislation` dataset in `docs/DATASET_READINESS.md` — grain UNSTATED, no
+> validated primary key, on a table with zero rows. A 0-row table cannot be
+> waved through, so it was tested rather than declared, and **the test came
+> back different from what this log says.**
+>
+> **The population changed.** Re-measured with `csv.reader` on 2026-09-02, not
+> read off this page:
+>
+> | | when this log was written | 2026-09-02 |
+> |---|---:|---:|
+> | `foia_request_index.csv` rows | 9,481 | **20,102** |
+> | …with `requester_is_congressional_office = Y` | 0 | **4** |
+>
+> So "empty by construction" is dead. `136.build_correspondence_layer` would
+> emit four rows today. **The four rows are why the table is still not
+> shipped.** All four are HHS Office of the Secretary FOIA-log rows carrying
+> `native_related = N` and `native_basis = no_native_signal_in_this_row`:
+>
+> | control number | requester | subject |
+> |---|---|---|
+> | `2017 00237 FOIA OS` | Murray, Patty — United States Senate | correspondence from or regarding Tom Price |
+> | `2018-00358-FOIA-OS` | Murray, Patty — United States Senate | communications to and from Mr. Azar as HHS General Counsel |
+> | `2021-01759-FOIA-OS` | Barker, Kendal — Sen. Tuberville | abuse reports, Unaccompanied Alien Children |
+> | `2022-01226-FOIA-OS` | Paul, Rand — U.S. Senate | records pertaining to FOIA request 2021-00251-FOIA-OS |
+>
+> HHS is swept at all only because IHS sits under it. Shipping four rows of
+> non-Native noise inside an Indian-affairs collection is **worse than
+> shipping nothing** — a buyer reasonably reads their presence as a claim that
+> these are Indian-affairs records. And it would still not be declarable: WS4
+> measured `record_id` (`FOIAREQ-{agency_code}-{foia_request_id}`) colliding
+> **381 times over 9,100 distinct values** in its own source, because 136's
+> PDF layout solver recovers one control number for two different requests.
+>
+> **RULING: out of scope, removed from the shippable table list.** Declared in
+> `cedar_codebook.INTERNAL_TABLES` — the one registry
+> `512_build_dataset_contracts.status_of()` reads — and ruled `INTERNAL` in
+> `391_triage_unshipped_tables.VERDICTS` so the operational copy and the
+> authority cannot drift. The reasoning is in
+> `code/512_build_dataset_contracts.py` under `GRAIN_LEGISLATION`. Nothing was
+> deleted: the file, its 24-column header and the `GRAIN_OPEN` question all
+> stay where they are.
+>
+> **REVERSIBLE, and here is the trigger.** Delete one line from
+> `INTERNAL_TABLES` the day a controlled-correspondence log is actually
+> obtained — by FOIA, or by an agency posting one. Until then
+> `log_publicly_posted` is `NOT_FOUND` or `NO_ONLY_RELEASED_ON_REQUEST` on all
+> **257** rows of `congressional_correspondence_systems.csv`, which is the
+> table that carries the finding and **does** ship.
+
 ## Part B - the FOIA index
+
+> ⚠ **STALE COUNT, measured 2026-09-02: the file holds 20,102 rows, not
+> 9,481.** Every figure in this section is the 2026-08-12 vintage and every
+> one of them is now low. They are left in place — superseded numbers are
+> never overwritten here — but do not quote one without re-counting the CSV.
+> The per-agency and per-quality breakdowns below have not been re-derived;
+> only the row total and `requester_is_congressional_office` were, for the
+> scope ruling in Part A.
 
 **9481 requests** parsed from **89 retrieved log objects**, 1993-2026.
 

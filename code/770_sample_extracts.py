@@ -118,8 +118,18 @@ SHOW = {
     # NOT a key: 290,525 rows (23.9%) carry six characters or fewer and the
     # sample was shipping `0098`, `0006`, `0003`, `SBA0001` as if they were
     # contract identifiers. Those are FPDS modification PIIDs, meaningless
-    # without the IDV they reference - and `parent_contract_number` is
-    # populated on all 1,217,768 rows.
+    # without the IDV they reference.
+    #
+    # NEITHER COLUMN IS A KEY ALONE; THE PAIR ALWAYS IS. Adding the parent
+    # here is what exposed a second defect: it was documented as "populated on
+    # all 1,217,768 rows" and it was not - 262,773 rows (21.6%) held the
+    # literal string `nan`, a pandas float written through `str()`, which
+    # counts as present and means absent. `772_strip_nan_sentinels.py` cleared
+    # it. What is left is complementary, and the cross-tab has an empty cell
+    # where it matters: 664,470 rows carry a real parent and a full child PIID,
+    # 290,525 a real parent and a modification stub, 262,773 no parent and a
+    # full standalone PIID, and **zero** rows have neither. So a buyer keys on
+    # the pair, and the sample now shows both.
     "contractors": ["parent_contract_number", "contract_number", "fiscal_year",
                     "awardee_name", "awardee_uei", "parent_name",
                     "canonical_name", "total_obligations", "setaside",
@@ -178,8 +188,16 @@ SHOW = {
                  "n_native_clients", "n_distinct_native_entities",
                  "spend_reported_usd", "native_entity_classes",
                  "first_filing_year_corpus", "last_filing_year_corpus"],
+    # 2026-09-02, GRAIN-LEGISLATION: `bill_title` and `threshold_required`
+    # added, both from code/890. docs/WHAT_IS_MISSING.md names their absence
+    # as the two worst defects in this sample. Without the title the sample
+    # said `114-hr-360` and never what the bill was. Without the threshold,
+    # H105-0482 - 229 yea to 176 nay, **Failed** - sat in these ten rows
+    # reading as a data-entry error; it is a House suspension vote and needed
+    # two-thirds, and the column now says so on the row.
     "legislation": ["vote_id", "congress", "chamber", "date", "bill_id",
-                    "question", "result", "yea", "nay", "margin",
+                    "bill_title", "question", "result", "yea", "nay",
+                    "threshold_required", "margin",
                     "vehicle_type", "majority_side"],
     "federal-register": ["consultation_event_id", "notice_date", "agency",
                          "consultation_type", "topic", "tribe_name",
@@ -302,12 +320,21 @@ def main() -> int:
              "data against a rule; none of them checks whether thirty rows "
              "make sense to someone reading them.", "",
              "**What is excluded, and why the counts here are smaller than "
-             "the dataset:** rows marked `publishable = N`, any source marked "
-             "`TERMS_STATED_RESTRICTIVE` (Navajo's NBOA list, Colville, CTUIR "
-             "and five others), and any table carrying a natural person's "
-             "name, email, phone or address. Sampling prefers complete rows "
-             "and then spreads evenly across the file, so a sample is not the "
-             "first thirty rows of one agency in one year.", "",
+             "the dataset:** rows marked `publishable = N`, and any source "
+             "marked `TERMS_STATED_RESTRICTIVE` (Navajo's NBOA list, "
+             "Colville, CTUIR and five others). Sampling prefers complete "
+             "rows and then spreads evenly across the file, so a sample is "
+             "not the first ten rows of one agency in one year.", "",
+             "**On natural persons, narrowly.** A table is refused if it "
+             "carries a person's data held APART from a public role — home "
+             "address, personal email or phone, date of birth, SSN or TIN. "
+             "It is *not* refused for naming an individual who is the public "
+             "record: `lobbying_registrants.csv` publishes STEPHEN GRAHAM of "
+             "Boston MA, and that is correct, because an individual may "
+             "register as a lobbyist and the registration IS the disclosure "
+             "the LDA creates. Codex was right that the older blanket "
+             "wording — *any table carrying a natural person is refused* — "
+             "described neither what this enforces nor what it should.", "",
              "| dataset | table | rows shown | of | cols | one row is |",
              "|---|---|---:|---:|---:|---|"]
         for did, tbl, n, tot, nc, g in built:
@@ -328,7 +355,23 @@ def main() -> int:
               "because owner-grain attributes repeat on every operating-company "
               "row. `firm_*` is the additive family.",
               "- **A subaward is a slice of a prime award.** Never add "
-              "`subawards` to `prime_contracts`.", ""]
+              "`subawards` to `prime_contracts`.", "",
+              "## Two columns that look like keys and are not, alone", "",
+              "- **`prime_contracts.contract_number`** is the awarding PIID "
+              "and on 290,525 rows (23.9%) it is a modification stub — `0098`, "
+              "`0006`, `SBA0001` — meaningless without the IDV it references. "
+              "**`parent_contract_number` ships beside it and the pair is the "
+              "key.** They are complementary: 664,470 rows carry both, 290,525 "
+              "a parent plus a stub, 262,773 no parent and a complete "
+              "standalone PIID, and **no row has neither**.",
+              "- **`federal_funding_transactions.canonical_name`** is a legacy "
+              "display label, not Cedar's name for the entity. Group on "
+              "**`cedar_uid`**, which is the key ADR-009 mandates. On 345,180 "
+              "of 552,602 keyed rows the two disagree, and the overwhelming "
+              "majority of those are a right identity under a stale label — "
+              "`haaku community academy` on rows correctly keyed to Pueblo of "
+              "Acoma. Grouping on the label credits a school; grouping on the "
+              "uid credits the nation.", ""]
         if sparse or notincols:
             L += ["## Columns that are in the schema and empty in this sample",
                   "",

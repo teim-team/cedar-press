@@ -1,0 +1,203 @@
+{
+  "probed_date": "2026-09-02",
+  "script": "code/962_probe_dear_tribal_leader_letters.py",
+  "cedar_baseline": {
+    "consultation_events_rows": 11402,
+    "dear_tribal_leader_letter": 6,
+    "NAGPRA_consultation_reported": 10888
+  },
+  "probes": [
+    {
+      "probe_id": "FR-TERM-0",
+      "source_host": "www.federalregister.gov",
+      "source_name": "Federal Register API v1 full-text search",
+      "question": "FR documents whose text contains \"Dear Tribal Leader\"",
+      "url": "https://www.federalregister.gov/api/v1/documents.json?conditions%5Bterm%5D=%22Dear+Tribal+Leader%22&per_page=20&order=oldest&fields%5B%5D=document_number",
+      "http_status": 200,
+      "response_bytes": 944,
+      "n_results_reported": 46,
+      "coverage_status": "REPORTED_COUNT",
+      "verdict": "the Federal Register itself reports 46 document(s) carrying this phrase",
+      "evidence_quote": "",
+      "probed_date": "2026-09-02",
+      "probed_by_script": "code/962_probe_dear_tribal_leader_letters.py"
+    },
+    {
+      "probe_id": "FR-TERM-1",
+      "source_host": "www.federalregister.gov",
+      "source_name": "Federal Register API v1 full-text search",
+      "question": "FR documents whose text contains \"Dear Tribal Leader Letter\"",
+      "url": "https://www.federalregister.gov/api/v1/documents.json?conditions%5Bterm%5D=%22Dear+Tribal+Leader+Letter%22&per_page=20&order=oldest&fields%5B%5D=document_number",
+      "http_status": 200,
+      "response_bytes": 958,
+      "n_results_reported": 36,
+      "coverage_status": "REPORTED_COUNT",
+      "verdict": "the Federal Register itself reports 36 document(s) carrying this phrase",
+      "evidence_quote": "",
+      "probed_date": "2026-09-02",
+      "probed_by_script": "code/962_probe_dear_tribal_leader_letters.py"
+    },
+    {
+      "probe_id": "FR-TERM-DOI",
+      "source_host": "www.federalregister.gov",
+      "source_name": "Federal Register API v1, Interior only",
+      "question": "Interior FR documents containing \"Dear Tribal Leader\"",
+      "url": "https://www.federalregister.gov/api/v1/documents.json?conditions%5Bterm%5D=%22Dear+Tribal+Leader%22&conditions%5Bagencies%5D%5B%5D=interior-department&per_page=20&fields%5B%5D=document_number",
+      "http_status": 200,
+      "response_bytes": 591,
+      "n_results_reported": 14,
+      "coverage_status": "REPORTED_COUNT",
+      "verdict": "Interior publishes 14 such FR document(s)",
+      "evidence_quote": "",
+      "probed_date": "2026-09-02",
+      "probed_by_script": "code/962_probe_dear_tribal_leader_letters.py"
+    },
+    {
+      "probe_id": "IDX-www.bia.gov-0",
+      "source_host": "www.bia.gov",
+      "source_name": "Bureau of Indian Affairs",
+      "question": "does /dear-tribal-leader-letter enumerate Dear Tribal Leader letters",
+      "url": "https://www.bia.gov/dear-tribal-leader-letter",
+      "http_status": 404,
+      "response_bytes": 36321,
+      "n_results_reported": "",
+      "coverage_status": "NOT_IN_SOURCE",
+      "verdict": "404 - this path does not exist at this host",
+      "evidence_quote": "",
+      "probed_date": "2026-09-02",
+      "probed_by_script": "code/962_probe_dear_tribal_leader_letters.py"
+    },
+    {
+      "probe_id": "IDX-www.bia.gov-1",
+      "source_host": "www.bia.gov",
+      "source_name": "Bureau of Indian Affairs",
+      "question": "does /service/dear-tribal-leader-letters enumerate Dear Tribal Leader letters",
+      "url": "https://www.bia.gov/service/dear-tribal-leader-letters",
+      "http_status": 404,
+      "response_bytes": 36312,
+      "n_results_reported": "",
+      "coverage_status": "NOT_IN_SOURCE",
+      "verdict": "404 - this path does not exist at this host",
+      "evidence_quote": "",
+      "probed_date": "2026-09-02",
+      "probed_by_script": "code/962_probe_dear_tribal_leader_letters.py"
+    },
+    {
+      "probe_id": "IDX-www.bia.gov-2",
+      "source_host": "www.bia.gov",
+      "source_name": "Bureau of Indian Affairs",
+      "question": "does /tribal-leader-letters enumerate Dear Tribal Leader letters",
+      "url": "https://www.bia.gov/tribal-leader-letters",
+      "http_status": 404,
+      "response_bytes": 36313,
+      "n_results_reported": "",
+      "coverage_status": "NOT_IN_SOURCE",
+      "verdict": "404 - this path does not exist at this host",
+      "evidence_quote": "",
+      "probed_date": "2026-09-02",
+      "probed_by_script": "code/962_probe_dear_tribal_leader_letters.py"
+    },
+    {
+      "probe_id": "IDX-www.ihs.gov-0",
+      "source_host": "www.ihs.gov",
+      "source_name": "Indian Health Service",
+      "question": "does /newsroom/dtll/ enumerate Dear Tribal Leader letters",
+      "url": "https://www.ihs.gov/newsroom/dtll/",
+      "http_status": 404,
+      "response_bytes": 56638,
+      "n_results_reported": "",
+      "coverage_status": "NOT_IN_SOURCE",
+      "verdict": "404 - this path does not exist at this host",
+      "evidence_quote": "",
+      "probed_date": "2026-09-02",
+      "probed_by_script": "code/962_probe_dear_tribal_leader_letters.py"
+    },
+    {
+      "probe_id": "IDX-www.ihs.gov-1",
+      "source_host": "www.ihs.gov",
+      "source_name": "Indian Health Service",
+      "question": "does /dtll/ enumerate Dear Tribal Leader letters",
+      "url": "https://www.ihs.gov/dtll/",
+      "http_status": 404,
+      "response_bytes": 56638,
+      "n_results_reported": "",
+      "coverage_status": "NOT_IN_SOURCE",
+      "verdict": "404 - this path does not exist at this host",
+      "evidence_quote": "",
+      "probed_date": "2026-09-02",
+      "probed_by_script": "code/962_probe_dear_tribal_leader_letters.py"
+    }
+  ],
+  "request_ledger": [
+    {
+      "url": "https://www.federalregister.gov/robots.txt",
+      "http_status": 200,
+      "bytes": 320
+    },
+    {
+      "url": "https://www.federalregister.gov/api/v1/documents.json?conditions%5Bterm%5D=%22Dear+Tribal+Leader%22&per_page=20&order=oldest&fields%5B%5D=document_number",
+      "http_status": 200,
+      "bytes": 944
+    },
+    {
+      "url": "https://www.federalregister.gov/api/v1/documents.json?conditions%5Bterm%5D=%22Dear+Tribal+Leader+Letter%22&per_page=20&order=oldest&fields%5B%5D=document_number",
+      "http_status": 200,
+      "bytes": 958
+    },
+    {
+      "url": "https://www.federalregister.gov/api/v1/documents.json?conditions%5Bterm%5D=%22Dear+Tribal+Leader%22&conditions%5Bagencies%5D%5B%5D=interior-department&per_page=20&fields%5B%5D=document_number",
+      "http_status": 200,
+      "bytes": 591
+    },
+    {
+      "url": "https://www.bia.gov/robots.txt",
+      "http_status": 200,
+      "bytes": 2027
+    },
+    {
+      "url": "https://www.bia.gov/dear-tribal-leader-letter",
+      "http_status": 404,
+      "bytes": 36321
+    },
+    {
+      "url": "https://www.bia.gov/robots.txt",
+      "http_status": 200,
+      "bytes": 2027
+    },
+    {
+      "url": "https://www.bia.gov/service/dear-tribal-leader-letters",
+      "http_status": 404,
+      "bytes": 36312
+    },
+    {
+      "url": "https://www.bia.gov/robots.txt",
+      "http_status": 200,
+      "bytes": 2027
+    },
+    {
+      "url": "https://www.bia.gov/tribal-leader-letters",
+      "http_status": 404,
+      "bytes": 36313
+    },
+    {
+      "url": "https://www.ihs.gov/robots.txt",
+      "http_status": 406,
+      "bytes": 1346
+    },
+    {
+      "url": "https://www.ihs.gov/newsroom/dtll/",
+      "http_status": 404,
+      "bytes": 56638
+    },
+    {
+      "url": "https://www.ihs.gov/robots.txt",
+      "http_status": 406,
+      "bytes": 1346
+    },
+    {
+      "url": "https://www.ihs.gov/dtll/",
+      "http_status": 404,
+      "bytes": 56638
+    }
+  ]
+}

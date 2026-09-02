@@ -2,9 +2,9 @@
 
 *Generated 2026-09-02 by `code/518_dataset_readiness.py` from live artifacts. Three statuses only: **READY / BLOCKED / NOT_TESTED**. There is no 'mostly ready' — a dataset crosses the minimum shipping contract or it has named blockers.*
 
-## READY: 10 / 13
+## READY: 11 / 13
 
-BLOCKED 3 · NOT_TESTED 0
+BLOCKED 2 · NOT_TESTED 0
 
 | dataset | status | tables | grain | keys | duplicates | agg-unsafe | rebuild |
 |---|---|---:|---|---|---|---:|---|
@@ -17,16 +17,12 @@ BLOCKED 3 · NOT_TESTED 0
 | `lobbying` | **READY** | 33 | 33/33 | 33/33 | clean | 0 | declared |
 | `nagpra` | **READY** | 4 | 4/4 | 4/4 | clean | 0 | declared |
 | `native-owned-businesses` | **READY** | 6 | 6/6 | 6/6 | clean | 0 | declared |
+| `natural-resources` | **READY** | 8 | 8/8 | 8/8 | clean | 0 | declared |
 | `nonprofits` | **READY** | 10 | 10/10 | 10/10 | clean | 0 | declared |
-| `natural-resources` | **BLOCKED** | 8 | 8/8 | 8/8 | clean | 0 | declared |
 | `subcontracting` | **BLOCKED** | 3 | 2/3 | 2/3 | 10,770 rows | 1 | declared |
 | `funding` | **BLOCKED** | 10 | 8/10 | 8/10 | 3,557 rows | 2 | declared |
 
 ## Blockers, by dataset
-
-### `natural-resources` — BLOCKED
-
-- C4 only 25% of entity-bearing rows carry a Cedar id, and every record in this dataset HAS an entity subject - so this is unresolved work, not scope. See ADR-009 and ADR-010.
 
 ### `subcontracting` — BLOCKED
 

@@ -513,7 +513,15 @@ def verify(path: Path | None = None, skip_copy: bool = False) -> int:
 
 
 def selftest() -> int:
-    """Prove verify FIRES. Inject INV-SECTOR into a copy, expect exit 1."""
+    """Prove verify FIRES, and that the NAMED invariant is the one that fires.
+
+    A gate that goes red is not evidence; a gate that goes red for the stated
+    reason is. Two injections, each isolating one invariant:
+      B  `sector` moved  -> INV-SECTOR only (naics untouched, INV-COPY clean)
+      C  `award_type` moved -> INV-COPY only (sector untouched)
+    """
+    import contextlib
+
     if not MANIFEST.exists():
         print("  [950] selftest: run the enricher first")
         return 1
@@ -524,10 +532,12 @@ def selftest() -> int:
         rd = csv.reader(fh)
         hdr = next(rd)
         for i, row in enumerate(rd):
-            rows.append(row)
-            if i >= 4999:
+            if (row[hdr.index(KEY)] or "").strip():
+                rows.append(row)
+            if len(rows) >= 5000:
                 break
     isec, inc = hdr.index("sector"), hdr.index("naics_code")
+    iat = hdr.index("award_type")
 
     def write(rs):
         with fix.open("w", encoding="utf-8", newline="") as fh:
@@ -535,35 +545,60 @@ def selftest() -> int:
             w.writerow(hdr)
             w.writerows(rs)
 
+    def run():
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            code = verify(fix)
+        return code, buf.getvalue()
+
     man_rows = man["rows"]
     man["rows"] = len(rows)
     MANIFEST.write_text(json.dumps(man, indent=2), encoding="utf-8")
+    results = {}
     try:
         write(rows)
-        clean = verify(fix)
-        hit = None
-        for r in rows:
-            if r[inc].strip() and r[isec].strip().isdigit():
-                hit = r
-                break
+        results["A_clean"] = run()
+
+        hit = next((r for r in rows
+                    if r[inc].strip() and r[isec].strip().isdigit()), None)
         if hit is None:
-            print("  [950] selftest INCONCLUSIVE: no row in the first 5,000 "
-                  "carries both sector and naics_code")
+            print("  [950] selftest INCONCLUSIVE: no fixture row carries both")
             return 1
-        keep = hit[inc]
-        hit[inc] = ("99" if keep[:2] != "99" else "88") + keep[2:]
+        keep = hit[isec]
+        hit[isec] = "99" if keep != "99" else "88"
         write(rows)
-        dirty = verify(fix)
-        hit[inc] = keep
+        results["B_sector"] = run()
+        hit[isec] = keep
+
+        hit2 = next((r for r in rows if r[iat].strip()), None)
+        keep2 = hit2[iat]
+        hit2[iat] = keep2 + " XX-INJECTED"
+        write(rows)
+        results["C_copy"] = run()
+        hit2[iat] = keep2
     finally:
         man["rows"] = man_rows
         MANIFEST.write_text(json.dumps(man, indent=2), encoding="utf-8")
         fix.unlink(missing_ok=True)
-    ok = (clean == 0 and dirty == 1)
-    print(f"  [950] selftest  clean fixture exit {clean} (want 0)   "
-          f"INV-SECTOR violation exit {dirty} (want 1)   "
-          f"{'PASS' if ok else 'FAIL'}")
-    return 0 if ok else 1
+
+    def named(out: str) -> str:
+        """Only the FAILURE lines. The info line mentions every invariant."""
+        return "\n".join(ln for ln in out.splitlines() if "!!" in ln)
+
+    a, b, c = results["A_clean"], results["B_sector"], results["C_copy"]
+    checks = [
+        ("clean fixture exits 0", a[0] == 0),
+        ("no invariant named on the clean fixture", named(a[1]) == ""),
+        ("sector injection exits 1", b[0] == 1),
+        ("...and names INV-SECTOR", "INV-SECTOR" in named(b[1])),
+        ("...and does NOT name INV-COPY", "INV-COPY" not in named(b[1])),
+        ("award_type injection exits 1", c[0] == 1),
+        ("...and names INV-COPY", "INV-COPY" in named(c[1])),
+        ("...and does NOT name INV-SECTOR", "INV-SECTOR" not in named(c[1])),
+    ]
+    for label, ok in checks:
+        print(f"  [950] selftest  {'PASS' if ok else 'FAIL'}  {label}")
+    return 0 if all(ok for _, ok in checks) else 1
 
 
 if __name__ == "__main__":

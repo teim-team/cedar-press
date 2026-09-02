@@ -1,20 +1,8 @@
 {
- "measured_date": "2026-09-01",
+ "measured_date": "2026-09-02",
  "script": "code/621_dataset_coverage.py",
- "n_tables": 261,
+ "n_tables": 263,
  "tables": {
-  "assistance_tribe_id_crosswalk.csv": {
-   "exists": true,
-   "size": 124839,
-   "mtime": 1787973174,
-   "rows": 361,
-   "period_col": null,
-   "first_year": null,
-   "last_year": null,
-   "dated_rows": 0,
-   "years": [],
-   "year_counts": {}
-  },
   "bie_uio_dollars_by_entity.csv": {
    "exists": true,
    "size": 19906,
@@ -53,8 +41,8 @@
   },
   "faads_entity_attribution.csv": {
    "exists": true,
-   "size": 16317492,
-   "mtime": 1787975006,
+   "size": 23030194,
+   "mtime": 1788317168,
    "rows": 29594,
    "period_col": "action_date",
    "first_year": 2000,
@@ -82,7 +70,7 @@
   "faads_identifier_coverage_by_agency_year.csv": {
    "exists": true,
    "size": 6883,
-   "mtime": 1785970035,
+   "mtime": 1788317127,
    "rows": 77,
    "period_col": "fiscal_year",
    "first_year": 2001,
@@ -109,8 +97,8 @@
   },
   "faads_transactions.csv": {
    "exists": true,
-   "size": 23626188,
-   "mtime": 1787975006,
+   "size": 25926052,
+   "mtime": 1788317054,
    "rows": 60661,
    "period_col": "action_date",
    "first_year": 2000,
@@ -139,8 +127,8 @@
   },
   "faads_transactions_all_agencies.csv": {
    "exists": true,
-   "size": 1078238008,
-   "mtime": 1787975032,
+   "size": 1122292321,
+   "mtime": 1788317127,
    "rows": 2769748,
    "period_col": "action_date",
    "first_year": 2000,
@@ -179,8 +167,8 @@
   },
   "federal_funding_transactions.csv": {
    "exists": true,
-   "size": 578490937,
-   "mtime": 1787981539,
+   "size": 564927141,
+   "mtime": 1788320437,
    "rows": 701955,
    "period_col": "action_date",
    "first_year": 2006,
@@ -235,8 +223,8 @@
   },
   "federal_funding_tribe_year_panel.csv": {
    "exists": true,
-   "size": 800655,
-   "mtime": 1787975045,
+   "size": 648333,
+   "mtime": 1788320249,
    "rows": 5496,
    "period_col": "fiscal_year",
    "first_year": 2008,
@@ -439,13 +427,13 @@
   },
   "native_passthrough.csv": {
    "exists": true,
-   "size": 547985,
-   "mtime": 1787981540,
-   "rows": 1262,
+   "size": 662228,
+   "mtime": 1788314255,
+   "rows": 1522,
    "period_col": "fiscal_year",
    "first_year": 2010,
    "last_year": 2026,
-   "dated_rows": 1262,
+   "dated_rows": 1522,
    "years": [
     2010,
     2011,
@@ -477,19 +465,19 @@
     "2018": 120,
     "2019": 160,
     "2020": 64,
-    "2021": 28,
+    "2021": 292,
     "2022": 14,
     "2023": 40,
-    "2024": 54,
-    "2025": 211,
-    "2026": 76
+    "2024": 53,
+    "2025": 209,
+    "2026": 75
    }
   },
   "native_passthrough_pairs.csv": {
    "exists": true,
-   "size": 26449,
-   "mtime": 1786555853,
-   "rows": 212,
+   "size": 38633,
+   "mtime": 1788314255,
+   "rows": 307,
    "period_col": null,
    "first_year": null,
    "last_year": null,
@@ -603,13 +591,13 @@
   },
   "federal_actions.csv": {
    "exists": true,
-   "size": 255405367,
-   "mtime": 1787788445,
-   "rows": 156772,
+   "size": 255607449,
+   "mtime": 1788314475,
+   "rows": 156897,
    "period_col": "publication_date",
    "first_year": 1994,
    "last_year": 2026,
-   "dated_rows": 156772,
+   "dated_rows": 156897,
    "years": [
     1994,
     1995,
@@ -678,7 +666,7 @@
     "2023": 6295,
     "2024": 7068,
     "2025": 5283,
-    "2026": 3774
+    "2026": 3899
    }
   },
   "federal_actions_entity_bridge.csv": {
@@ -763,13 +751,13 @@
   },
   "federal_actions_raw.csv": {
    "exists": true,
-   "size": 246782154,
-   "mtime": 1787788440,
-   "rows": 156772,
+   "size": 246977678,
+   "mtime": 1788314471,
+   "rows": 156897,
    "period_col": "publication_date",
    "first_year": 1994,
    "last_year": 2026,
-   "dated_rows": 156772,
+   "dated_rows": 156897,
    "years": [
     1994,
     1995,
@@ -838,13 +826,13 @@
     "2023": 6295,
     "2024": 7068,
     "2025": 5283,
-    "2026": 3774
+    "2026": 3899
    }
   },
   "fr_abstract_availability_year.csv": {
    "exists": true,
    "size": 823,
-   "mtime": 1788297933,
+   "mtime": 1788318968,
    "rows": 33,
    "period_col": "publication_year",
    "first_year": 1994,
@@ -923,8 +911,8 @@
   },
   "fr_consultation_by_agency.csv": {
    "exists": true,
-   "size": 469,
-   "mtime": 1786051514,
+   "size": 471,
+   "mtime": 1788318967,
    "rows": 21,
    "period_col": null,
    "first_year": null,
@@ -935,13 +923,13 @@
   },
   "fr_consultation_notices.csv": {
    "exists": true,
-   "size": 159388,
-   "mtime": 1786051514,
-   "rows": 484,
+   "size": 159643,
+   "mtime": 1788318967,
+   "rows": 485,
    "period_col": "publication_date",
    "first_year": 1994,
    "last_year": 2026,
-   "dated_rows": 484,
+   "dated_rows": 485,
    "years": [
     1994,
     1995,
@@ -1010,13 +998,13 @@
     "2023": 27,
     "2024": 23,
     "2025": 7,
-    "2026": 6
+    "2026": 7
    }
   },
   "fr_consultation_referenced.csv": {
    "exists": true,
    "size": 488760,
-   "mtime": 1786051514,
+   "mtime": 1788318967,
    "rows": 1829,
    "period_col": "publication_year",
    "first_year": 2011,
@@ -1060,7 +1048,7 @@
   "fr_consultation_year.csv": {
    "exists": true,
    "size": 464,
-   "mtime": 1786051514,
+   "mtime": 1788318967,
    "rows": 33,
    "period_col": "publication_year",
    "first_year": 1994,
@@ -1139,13 +1127,13 @@
   },
   "fr_content_classification.csv": {
    "exists": true,
-   "size": 61625769,
-   "mtime": 1786051511,
-   "rows": 156452,
+   "size": 61803489,
+   "mtime": 1788318966,
+   "rows": 156897,
    "period_col": "publication_date",
    "first_year": 1994,
    "last_year": 2026,
-   "dated_rows": 156452,
+   "dated_rows": 156897,
    "years": [
     1994,
     1995,
@@ -1214,18 +1202,18 @@
     "2023": 6295,
     "2024": 7068,
     "2025": 5283,
-    "2026": 3454
+    "2026": 3899
    }
   },
   "fr_ex_parte_notices.csv": {
    "exists": true,
-   "size": 9285876,
-   "mtime": 1787779338,
-   "rows": 7820,
+   "size": 9295064,
+   "mtime": 1788314962,
+   "rows": 7828,
    "period_col": "publication_date",
    "first_year": 1994,
    "last_year": 2026,
-   "dated_rows": 7820,
+   "dated_rows": 7828,
    "years": [
     1994,
     1995,
@@ -1294,18 +1282,18 @@
     "2023": 218,
     "2024": 208,
     "2025": 164,
-    "2026": 139
+    "2026": 147
    }
   },
   "fr_ex_parte_parties.csv": {
    "exists": true,
-   "size": 125569,
-   "mtime": 1787975047,
-   "rows": 112,
+   "size": 129110,
+   "mtime": 1788316172,
+   "rows": 116,
    "period_col": "publication_date",
    "first_year": 1994,
    "last_year": 2026,
-   "dated_rows": 112,
+   "dated_rows": 116,
    "years": [
     1994,
     1996,
@@ -1364,13 +1352,13 @@
     "2022": 1,
     "2023": 5,
     "2024": 1,
-    "2026": 4
+    "2026": 8
    }
   },
   "fr_ex_parte_party_entity_links.csv": {
    "exists": true,
    "size": 2517,
-   "mtime": 1787975047,
+   "mtime": 1788316172,
    "rows": 9,
    "period_col": "publication_date",
    "first_year": 2014,
@@ -1420,7 +1408,7 @@
   "fr_relevance_tier_year.csv": {
    "exists": true,
    "size": 3643,
-   "mtime": 1786051511,
+   "mtime": 1788318966,
    "rows": 132,
    "period_col": "publication_year",
    "first_year": 1994,
@@ -1499,8 +1487,8 @@
   },
   "fr_theme_year.csv": {
    "exists": true,
-   "size": 21952,
-   "mtime": 1786051511,
+   "size": 21950,
+   "mtime": 1788318966,
    "rows": 627,
    "period_col": "publication_year",
    "first_year": 1994,
@@ -1627,13 +1615,13 @@
   },
   "section_106_consultation_events.csv": {
    "exists": true,
-   "size": 2278689,
-   "mtime": 1787975085,
-   "rows": 1363,
+   "size": 2285294,
+   "mtime": 1788316172,
+   "rows": 1367,
    "period_col": "notice_date",
    "first_year": 1994,
    "last_year": 2026,
-   "dated_rows": 1363,
+   "dated_rows": 1367,
    "years": [
     1994,
     1995,
@@ -1702,13 +1690,13 @@
     "2023": 56,
     "2024": 70,
     "2025": 44,
-    "2026": 43
+    "2026": 47
    }
   },
   "section_106_project_parties.csv": {
    "exists": true,
    "size": 48390,
-   "mtime": 1787975085,
+   "mtime": 1788316172,
    "rows": 51,
    "period_col": "notice_date",
    "first_year": 2002,
@@ -1756,7 +1744,7 @@
   "section_106_source_coverage.csv": {
    "exists": true,
    "size": 3907,
-   "mtime": 1786569316,
+   "mtime": 1788314852,
    "rows": 5,
    "period_col": null,
    "first_year": null,
@@ -1767,8 +1755,8 @@
   },
   "bill_votes.csv": {
    "exists": true,
-   "size": 343394,
-   "mtime": 1788295342,
+   "size": 531680,
+   "mtime": 1788325559,
    "rows": 423,
    "period_col": "date",
    "first_year": 1973,
@@ -2357,13 +2345,13 @@
   },
   "native_bills_subject_sweep.csv": {
    "exists": true,
-   "size": 1068942,
-   "mtime": 1786048445,
-   "rows": 2414,
+   "size": 1066730,
+   "mtime": 1788316974,
+   "rows": 2409,
    "period_col": "introduced_date",
    "first_year": 1993,
    "last_year": 2026,
-   "dated_rows": 2414,
+   "dated_rows": 2409,
    "years": [
     1993,
     1994,
@@ -2410,25 +2398,25 @@
     "1999": 83,
     "2000": 49,
     "2001": 89,
-    "2002": 44,
+    "2002": 43,
     "2003": 101,
     "2004": 53,
     "2005": 98,
     "2006": 44,
     "2007": 116,
-    "2008": 35,
+    "2008": 34,
     "2009": 88,
     "2010": 30,
     "2011": 73,
     "2012": 34,
     "2013": 80,
     "2014": 37,
-    "2015": 96,
+    "2015": 95,
     "2016": 43,
     "2017": 98,
     "2018": 37,
-    "2019": 122,
-    "2020": 75,
+    "2019": 121,
+    "2020": 74,
     "2021": 122,
     "2022": 71,
     "2023": 131,
@@ -3007,13 +2995,13 @@
   },
   "fr_nagpra_title_index.csv": {
    "exists": true,
-   "size": 2142488,
-   "mtime": 1788297933,
-   "rows": 6644,
+   "size": 2148740,
+   "mtime": 1788318967,
+   "rows": 6664,
    "period_col": "publication_date",
    "first_year": 1994,
    "last_year": 2026,
-   "dated_rows": 6644,
+   "dated_rows": 6664,
    "years": [
     1994,
     1995,
@@ -3082,13 +3070,13 @@
     "2023": 496,
     "2024": 670,
     "2025": 830,
-    "2026": 590
+    "2026": 610
    }
   },
   "fr_nagpra_title_index_year.csv": {
    "exists": true,
    "size": 645,
-   "mtime": 1788297933,
+   "mtime": 1788318967,
    "rows": 33,
    "period_col": "publication_year",
    "first_year": 1994,
@@ -3167,13 +3155,13 @@
   },
   "nagpra_notice_entity_bridge.csv": {
    "exists": true,
-   "size": 35897264,
-   "mtime": 1788297900,
-   "rows": 51521,
+   "size": 35927577,
+   "mtime": 1788315171,
+   "rows": 51579,
    "period_col": "publication_date",
    "first_year": 1994,
    "last_year": 2026,
-   "dated_rows": 51521,
+   "dated_rows": 51579,
    "years": [
     1994,
     1995,
@@ -3242,18 +3230,18 @@
     "2023": 2210,
     "2024": 3270,
     "2025": 4002,
-    "2026": 2409
+    "2026": 2467
    }
   },
   "nagpra_notices.csv": {
    "exists": true,
-   "size": 10878755,
-   "mtime": 1788297899,
-   "rows": 6772,
+   "size": 10908172,
+   "mtime": 1788314684,
+   "rows": 6792,
    "period_col": "publication_date",
    "first_year": 1994,
    "last_year": 2026,
-   "dated_rows": 6772,
+   "dated_rows": 6792,
    "years": [
     1994,
     1995,
@@ -3322,7 +3310,7 @@
     "2023": 496,
     "2024": 707,
     "2025": 900,
-    "2026": 613
+    "2026": 633
    }
   },
   "admin_appeal_decisions.csv": {
@@ -3797,8 +3785,8 @@
   },
   "ferc_docket_filings.csv": {
    "exists": true,
-   "size": 83464016,
-   "mtime": 1787975046,
+   "size": 83669344,
+   "mtime": 1788317196,
    "rows": 102615,
    "period_col": "filed_date",
    "first_year": 1990,
@@ -4135,13 +4123,13 @@
   },
   "hearing_bill_links.csv": {
    "exists": true,
-   "size": 222881,
-   "mtime": 1786141981,
-   "rows": 465,
+   "size": 222282,
+   "mtime": 1788317218,
+   "rows": 464,
    "period_col": "hearing_date",
    "first_year": 2013,
    "last_year": 2026,
-   "dated_rows": 465,
+   "dated_rows": 464,
    "years": [
     2013,
     2014,
@@ -4172,7 +4160,7 @@
     "2023": 48,
     "2024": 62,
     "2025": 45,
-    "2026": 31
+    "2026": 30
    }
   },
   "lobbying_client_attribution.csv": {
@@ -4437,8 +4425,8 @@
   },
   "lobbying_registrant_native_ownership_evidence.csv": {
    "exists": true,
-   "size": 17208,
-   "mtime": 1787975049,
+   "size": 17728,
+   "mtime": 1788316929,
    "rows": 27,
    "period_col": null,
    "first_year": null,
@@ -4450,7 +4438,7 @@
   "lobbying_registrants.csv": {
    "exists": true,
    "size": 641797,
-   "mtime": 1787783300,
+   "mtime": 1788316929,
    "rows": 653,
    "period_col": null,
    "first_year": null,
@@ -4485,13 +4473,13 @@
   },
   "native_entity_lobbying_disclosures.csv": {
    "exists": true,
-   "size": 18720767,
-   "mtime": 1787975050,
-   "rows": 27796,
+   "size": 18741697,
+   "mtime": 1788319451,
+   "rows": 27825,
    "period_col": "filing_year",
    "first_year": 1999,
    "last_year": 2026,
-   "dated_rows": 27796,
+   "dated_rows": 27825,
    "years": [
     1999,
     2000,
@@ -4550,7 +4538,7 @@
     "2023": 1242,
     "2024": 1269,
     "2025": 1377,
-    "2026": 643
+    "2026": 672
    }
   },
   "nrc_meeting_participants.csv": {
@@ -4753,13 +4741,13 @@
   },
   "tribe_year_lobbying_panel.csv": {
    "exists": true,
-   "size": 974457,
-   "mtime": 1787975087,
-   "rows": 4997,
+   "size": 975351,
+   "mtime": 1788319451,
+   "rows": 5001,
    "period_col": "filing_year",
    "first_year": 1999,
    "last_year": 2026,
-   "dated_rows": 4997,
+   "dated_rows": 5001,
    "years": [
     1999,
     2000,
@@ -4818,13 +4806,13 @@
     "2023": 197,
     "2024": 201,
     "2025": 201,
-    "2026": 197
+    "2026": 201
    }
   },
   "contractor_ranking.csv": {
    "exists": true,
-   "size": 802003,
-   "mtime": 1787786002,
+   "size": 845866,
+   "mtime": 1788314298,
    "rows": 1429,
    "period_col": null,
    "first_year": null,
@@ -4859,21 +4847,14 @@
   },
   "prime_contracts.csv": {
    "exists": true,
-   "size": 885873157,
-   "mtime": 1788017246,
+   "size": 1431123679,
+   "mtime": 1788326086,
    "rows": 1217768,
-   "period_col": "fiscal_year",
-   "first_year": 2000,
+   "period_col": "action_date",
+   "first_year": 2007,
    "last_year": 2026,
-   "dated_rows": 1217768,
+   "dated_rows": 841002,
    "years": [
-    2000,
-    2001,
-    2002,
-    2003,
-    2004,
-    2005,
-    2006,
     2007,
     2008,
     2009,
@@ -4896,33 +4877,26 @@
     2026
    ],
    "year_counts": {
-    "2000": 2505,
-    "2001": 3803,
-    "2002": 5966,
-    "2003": 9882,
-    "2004": 15324,
-    "2005": 17446,
-    "2006": 25808,
-    "2007": 28844,
-    "2008": 60446,
-    "2009": 59831,
-    "2010": 64092,
-    "2011": 65427,
-    "2012": 60177,
-    "2013": 50633,
-    "2014": 51780,
-    "2015": 54619,
-    "2016": 57574,
-    "2017": 61668,
-    "2018": 59355,
-    "2019": 59808,
-    "2020": 62115,
-    "2021": 61291,
-    "2022": 69879,
-    "2023": 45747,
-    "2024": 53056,
-    "2025": 48879,
-    "2026": 61813
+    "2007": 7184,
+    "2008": 41878,
+    "2009": 45375,
+    "2010": 46186,
+    "2011": 46251,
+    "2012": 39604,
+    "2013": 35697,
+    "2014": 37252,
+    "2015": 37552,
+    "2016": 37770,
+    "2017": 42328,
+    "2018": 42694,
+    "2019": 44493,
+    "2020": 45689,
+    "2021": 45097,
+    "2022": 43794,
+    "2023": 47585,
+    "2024": 51960,
+    "2025": 47599,
+    "2026": 55014
    }
   },
   "prime_contracts_archive_backfill.csv": {
@@ -5183,13 +5157,13 @@
   },
   "subawards.csv": {
    "exists": true,
-   "size": 60608133,
-   "mtime": 1787981543,
-   "rows": 72837,
+   "size": 93100570,
+   "mtime": 1788326172,
+   "rows": 76859,
    "period_col": "fiscal_year",
    "first_year": 2001,
    "last_year": 2026,
-   "dated_rows": 72837,
+   "dated_rows": 76859,
    "years": [
     2001,
     2002,
@@ -5235,9 +5209,9 @@
     "2018": 8589,
     "2019": 9373,
     "2020": 3884,
-    "2021": 9462,
+    "2021": 9504,
     "2022": 89,
-    "2023": 120,
+    "2023": 4100,
     "2024": 166,
     "2025": 7360,
     "2026": 3457
@@ -5389,8 +5363,8 @@
   },
   "anc_ceiling_roster.csv": {
    "exists": true,
-   "size": 40904,
-   "mtime": 1787789645,
+   "size": 93885,
+   "mtime": 1788325769,
    "rows": 196,
    "period_col": null,
    "first_year": null,
@@ -5401,8 +5375,8 @@
   },
   "ancsa_filings_index.csv": {
    "exists": true,
-   "size": 6996908,
-   "mtime": 1787789645,
+   "size": 9405559,
+   "mtime": 1788325769,
    "rows": 19269,
    "period_col": "filing_date",
    "first_year": null,
@@ -5437,8 +5411,8 @@
   },
   "resource_assets.csv": {
    "exists": true,
-   "size": 48835,
-   "mtime": 1787975085,
+   "size": 52118,
+   "mtime": 1788325769,
    "rows": 35,
    "period_col": "as_of_date",
    "first_year": 2004,
@@ -5469,8 +5443,8 @@
   },
   "resource_parties.csv": {
    "exists": true,
-   "size": 602905,
-   "mtime": 1788306371,
+   "size": 748819,
+   "mtime": 1788325769,
    "rows": 1938,
    "period_col": null,
    "first_year": null,
@@ -5481,8 +5455,8 @@
   },
   "resource_revenue.csv": {
    "exists": true,
-   "size": 13439186,
-   "mtime": 1788306371,
+   "size": 19339411,
+   "mtime": 1788325912,
    "rows": 11305,
    "period_col": "period_end",
    "first_year": 1880,
@@ -6103,8 +6077,8 @@
   },
   "np_orgs.csv": {
    "exists": true,
-   "size": 11185113,
-   "mtime": 1787975050,
+   "size": 13131894,
+   "mtime": 1788326180,
    "rows": 12764,
    "period_col": "ruling_date",
    "first_year": 2026,
@@ -6159,8 +6133,8 @@
   },
   "np_schedule_i_grants.csv": {
    "exists": true,
-   "size": 65839058,
-   "mtime": 1787981542,
+   "size": 66043449,
+   "mtime": 1788317216,
    "rows": 58685,
    "period_col": "tax_year",
    "first_year": 2015,
@@ -6195,8 +6169,8 @@
   },
   "ca_gaming_facilities_official.csv": {
    "exists": true,
-   "size": 130275,
-   "mtime": 1788310279,
+   "size": 136065,
+   "mtime": 1788313426,
    "rows": 245,
    "period_col": "as_of_date",
    "first_year": 2024,
@@ -6214,7 +6188,7 @@
   "ca_gaming_payments.csv": {
    "exists": true,
    "size": 51313720,
-   "mtime": 1788310279,
+   "mtime": 1788313426,
    "rows": 41758,
    "period_col": "period_end",
    "first_year": 2001,
@@ -6563,13 +6537,13 @@
   },
   "digital_gaming_revenue.csv": {
    "exists": true,
-   "size": 9792824,
-   "mtime": 1787975005,
-   "rows": 10661,
+   "size": 9890428,
+   "mtime": 1788319769,
+   "rows": 10766,
    "period_col": "period_end",
    "first_year": 2021,
    "last_year": 2026,
-   "dated_rows": 10660,
+   "dated_rows": 10765,
    "years": [
     2021,
     2022,
@@ -6584,7 +6558,7 @@
     "2023": 2276,
     "2024": 2364,
     "2025": 2364,
-    "2026": 1273
+    "2026": 1378
    }
   },
   "fac_audit_gaming_disclosures.csv": {
@@ -6625,8 +6599,8 @@
   },
   "fac_audit_sefa_gaming_programs.csv": {
    "exists": true,
-   "size": 944,
-   "mtime": 1787975032,
+   "size": 971,
+   "mtime": 1788319425,
    "rows": 1,
    "period_col": "audit_year",
    "first_year": 2021,
@@ -7127,8 +7101,8 @@
   },
   "gaming_facilities.csv": {
    "exists": true,
-   "size": 1188245,
-   "mtime": 1788310938,
+   "size": 1945984,
+   "mtime": 1788325812,
    "rows": 787,
    "period_col": "open_date",
    "first_year": 1905,
@@ -7322,7 +7296,7 @@
   "gaming_field_coverage.csv": {
    "exists": true,
    "size": 7531,
-   "mtime": 1788311388,
+   "mtime": 1788312885,
    "rows": 112,
    "period_col": null,
    "first_year": null,
@@ -7813,8 +7787,8 @@
   },
   "gaming_property_coverage.csv": {
    "exists": true,
-   "size": 191309,
-   "mtime": 1788311388,
+   "size": 200741,
+   "mtime": 1788312885,
    "rows": 787,
    "period_col": null,
    "first_year": null,
@@ -7858,6 +7832,38 @@
    "dated_rows": 0,
    "years": [],
    "year_counts": {}
+  },
+  "gaming_property_self_published_assertions.csv": {
+   "exists": true,
+   "size": 1060328,
+   "mtime": 1788311815,
+   "rows": 622,
+   "period_col": "as_of_date",
+   "first_year": 2026,
+   "last_year": 2026,
+   "dated_rows": 622,
+   "years": [
+    2026
+   ],
+   "year_counts": {
+    "2026": 622
+   }
+  },
+  "gaming_property_self_published_claims.csv": {
+   "exists": true,
+   "size": 551589,
+   "mtime": 1788311815,
+   "rows": 270,
+   "period_col": "as_of_date",
+   "first_year": 2026,
+   "last_year": 2026,
+   "dated_rows": 270,
+   "years": [
+    2026
+   ],
+   "year_counts": {
+    "2026": 270
+   }
   },
   "gaming_property_site_observations.csv": {
    "exists": true,
@@ -8589,9 +8595,21 @@
   },
   "cedar_correction_register.csv": {
    "exists": true,
-   "size": 88978,
-   "mtime": 1788310938,
+   "size": 89069,
+   "mtime": 1788312676,
    "rows": 178,
+   "period_col": null,
+   "first_year": null,
+   "last_year": null,
+   "dated_rows": 0,
+   "years": [],
+   "year_counts": {}
+  },
+  "cedar_entity_freshness.csv": {
+   "exists": true,
+   "size": 224795,
+   "mtime": 1788326170,
+   "rows": 1555,
    "period_col": null,
    "first_year": null,
    "last_year": null,
@@ -8623,9 +8641,9 @@
   },
   "cedar_identifier_graph_edges.csv": {
    "exists": true,
-   "size": 12837858,
-   "mtime": 1787781455,
-   "rows": 46051,
+   "size": 13648941,
+   "mtime": 1788315542,
+   "rows": 46820,
    "period_col": null,
    "first_year": null,
    "last_year": null,
@@ -8705,18 +8723,18 @@
   },
   "cedar_ruling_ledger_consolidated.csv": {
    "exists": true,
-   "size": 3309412,
-   "mtime": 1787781153,
-   "rows": 15587,
+   "size": 8184147,
+   "mtime": 1788314419,
+   "rows": 43321,
    "period_col": "ruling_date",
    "first_year": 2026,
    "last_year": 2026,
-   "dated_rows": 15587,
+   "dated_rows": 43321,
    "years": [
     2026
    ],
    "year_counts": {
-    "2026": 15587
+    "2026": 43321
    }
   },
   "cedar_rulings.csv": {
@@ -8731,9 +8749,9 @@
   },
   "cross_dataset_ruling_map.csv": {
    "exists": true,
-   "size": 940825,
-   "mtime": 1785961374,
-   "rows": 7507,
+   "size": 5099826,
+   "mtime": 1788314350,
+   "rows": 22936,
    "period_col": null,
    "first_year": null,
    "last_year": null,
@@ -9107,9 +9125,9 @@
   },
   "foia_request_index.csv": {
    "exists": true,
-   "size": 13745723,
-   "mtime": 1787975047,
-   "rows": 9481,
+   "size": 22276453,
+   "mtime": 1788320876,
+   "rows": 20102,
    "period_col": null,
    "first_year": null,
    "last_year": null,
@@ -9239,8 +9257,8 @@
   },
   "tcu_cdfi_ownership_evidence.csv": {
    "exists": true,
-   "size": 30387,
-   "mtime": 1786050741,
+   "size": 31041,
+   "mtime": 1788314752,
    "rows": 130,
    "period_col": null,
    "first_year": null,

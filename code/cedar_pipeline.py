@@ -477,6 +477,24 @@ KNOWN_ORDERINGS = [
              "prime_contracts.csv reverts it and 207 must be re-run",
      "enricher_columns": ["extent_competed_normalized",
                           "extent_competed_normalized_basis"]},
+    # Declared 2026-09-02 by workstream PROMOTE (ADR-016). Same shape as 207:
+    # nine columns written IN PLACE onto prime_contracts.csv from the local
+    # archive extract and gapfill corpus. A 40 rebuild reverts all nine.
+    # 950 is idempotent - it strips its own columns and rewrites them, and the
+    # md5 of the 47 base fields is asserted unchanged - so re-running it after
+    # any rebuild or after another in-place enricher is safe.
+    {"rebuild": "40_build_prime_contracts.py",
+     "enricher": "950_promote_contract_attributes.py",
+     "file": "prime_contracts.csv",
+     "cost": "not yet paid - declared before a rebuild could revert the "
+             "6-digit NAICS, PSC, award description and action_date that "
+             "prime_contracts.csv had never carried",
+     "enricher_columns": ["contract_award_unique_key", "naics_code",
+                          "naics_description", "action_date", "award_type",
+                          "product_or_service_code",
+                          "product_or_service_code_description",
+                          "award_base_description",
+                          "award_attributes_basis"]},
     # Declared 2026-08-29 by the `nagpra` closure pass, contract point C8.
     #
     # `build.py plan nagpra` printed "ENRICHER BACKUPS PRESENT on 2 table(s)

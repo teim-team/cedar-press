@@ -1,0 +1,47 @@
+{
+  "built": "2026-09-02",
+  "script": "952_nonprofit_disposition.py",
+  "table": "data/clean/np_orgs.csv",
+  "rows": 12764,
+  "base_columns": 53,
+  "md5_base_fields": "909911018d5260a498dca59fb91cd4a8",
+  "columns_added": [
+    "disposition",
+    "disposition_basis",
+    "name_match_support",
+    "name_match_shared_tokens"
+  ],
+  "disposition_counts": {
+    "NATIVE_VERIFIED_STRICT": 697,
+    "EXCLUDED_PLACE_NAME_COINCIDENCE": 279,
+    "NATIVE_PROPOSED_AWAITING_OWNER_RULING": 73,
+    "NATIVE_RULED_VERIFIED": 14,
+    "EXCLUDED_PRIOR_RULING": 4681,
+    "CANDIDATE_NAME_ONLY": 5082,
+    "CANDIDATE_NAME_MATCH_UNVERIFIED": 1573,
+    "CANDIDATE_NAME_MATCH_GENERIC_TOKEN_ONLY": 258,
+    "CANDIDATE_STATE_VALIDATED": 105,
+    "CONFLICT_EXCLUDED_AND_RULED_NATIVE": 2
+  },
+  "name_match_support_counts": {
+    "distinctive_token": 4638,
+    "no_shared_token_with_canonical_name": 2268,
+    "generic_token_only": 578,
+    "not_a_name_match": 5280
+  },
+  "generic_token_register": "review/np_generic_token_name_matches_2026-09-02.csv",
+  "generic_token_rows": 578,
+  "generic_token_rows_live_at_canonical_name_match": 258,
+  "vocabulary": [
+    "CANDIDATE_NAME_MATCH_GENERIC_TOKEN_ONLY",
+    "CANDIDATE_NAME_MATCH_UNVERIFIED",
+    "CANDIDATE_NAME_ONLY",
+    "CANDIDATE_STATE_VALIDATED",
+    "CONFLICT_EXCLUDED_AND_RULED_NATIVE",
+    "EXCLUDED_PLACE_NAME_COINCIDENCE",
+    "EXCLUDED_PRIOR_RULING",
+    "NATIVE_PROPOSED_AWAITING_OWNER_RULING",
+    "NATIVE_RULED_VERIFIED",
+    "NATIVE_VERIFIED_STRICT"
+  ]
+}
