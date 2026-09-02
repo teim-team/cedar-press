@@ -1757,6 +1757,73 @@ DESCRIPTIONS = {
     "latitude": ("Latitude of the facility.", "decimal degrees"),
     "longitude": ("Longitude of the facility.", "decimal degrees"),
     "gaming_machines": ("Number of gaming machines.", "integer"),
+    # --- the eleven columns code/960 appends to gaming_facilities.csv ------
+    # Written 2026-09-02 by workstream INT-READY at the same time as the
+    # columns, so the codebook is never behind the table.
+    "gaming_class_ii_authorized": (
+        "Whether the operating tribe's NIGC-approved gaming ordinance "
+        "authorises Class II gaming. 1 asserted, 0 explicitly not "
+        "authorised, blank no ordinance evidence. TRIBE GRAIN COPIED ONTO A "
+        "FACILITY ROW: the ordinance authorises the nation, so a tribe with "
+        "four casinos carries the same value on all four. Never inferred "
+        "from the presence of gaming devices.", "1 / 0 / blank"),
+    "gaming_class_iii_authorized": (
+        "Whether the operating tribe's NIGC-approved gaming ordinance "
+        "authorises Class III gaming. Same vocabulary and the same "
+        "tribe-grain caveat as `gaming_class_ii_authorized`.",
+        "1 / 0 / blank"),
+    "gaming_class_basis": (
+        "Never blank. Names the ordinance the class came from, its type and "
+        "approval date, how many ordinances the tribe has on file, whether "
+        "the value came from the instrument NIGC's index still calls current "
+        "or from the tribe's ordinance history, and the `classes_basis` the "
+        "ordinance parser recorded. Where there is no class, says whether "
+        "that is because the tribe has no ordinance on file or because the "
+        "facility carries no cedar_uid.", ""),
+    "gaming_class_source_url": (
+        "The NIGC URL of the ordinance that asserts the class.", "URL"),
+    "has_revenue_bound": (
+        "Y when at least one row of `gaming_revenue_bounds.csv` joins to this "
+        "facility_id. 694 of 787 facilities. NOT a statement that revenue is "
+        "known - most bounds are a regional ceiling; read "
+        "`revenue_bound_strongest_status`.", "Y / N"),
+    "n_revenue_bound_fiscal_years": (
+        "How many bound rows join to this facility_id. One row per "
+        "(facility, fiscal year, method), so this is usually a year count.",
+        "integer"),
+    "revenue_bound_strongest_status": (
+        "The strongest `measurement_status` present for this facility, "
+        "ranked REPORTED_PROPERTY_REVENUE > SINGLE_PROPERTY_ATTRIBUTED > "
+        "TRIBE_LEVEL_REVENUE > REGIONAL_GGR_CEILING. Only the first two are "
+        "this property's own money, and they reach 11 of 787 facilities. A "
+        "REGIONAL_GGR_CEILING bounds the whole NIGC region and says very "
+        "little about one casino.", ""),
+    "revenue_bound_basis": (
+        "Never blank. The join (`gaming_revenue_bounds.csv` on facility_id), "
+        "the number of bound rows, the fiscal-year span, the strongest "
+        "status, and the rule that bounds are never summed across "
+        "facilities.", ""),
+    "revenue_bound_absent_reason": (
+        "For the 93 facilities with no bound, WHY - taken from NIGC's own "
+        "universe rather than from Cedar's. NON_IGRA_TRIBALLY_OWNED means "
+        "the operation sits outside NIGC's regional total, so the regional "
+        "total says nothing about it; NO_NIGC_REGION_ASSIGNED and "
+        "IGRA_COVERAGE_UNKNOWN are NOT_CHECKED rather than absences; two "
+        "rows are FLAGGED for review as IGRA-covered and region-assigned "
+        "with no bound produced.", ""),
+    "state_revenue_disclosure_status": (
+        "SEALED_BY_STATUTE_OR_COMPACT where a documented_absence row in "
+        "`state_gaming_observations.csv` shows the state sealing tribe- or "
+        "property-level revenue. 174 facilities across AZ, CO, KS, MN, ND, "
+        "NV and WI. **A blank is NOT_ASSESSED, never evidence that the state "
+        "publishes** - and a state whose only absence record says 'all "
+        "tribal gaming' is a state with no tribal gaming to seal, which is "
+        "why it is not marked.", ""),
+    "state_revenue_disclosure_basis": (
+        "The statute or compact clause, quoted, with the authority that "
+        "published it and its URL. Where nothing is sealed, states that no "
+        "documented_absence row for that state names tribe- or "
+        "property-level revenue.", ""),
     "table_games": ("Number of table games.", "integer"),
     "poker_tables": ("Number of poker tables.", "integer"),
     "bingo_seats": ("Number of bingo seats.", "integer"),

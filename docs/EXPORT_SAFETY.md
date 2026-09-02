@@ -4,8 +4,9 @@
 
 **The rule that matters most:** unknown ownership may ship as unknown. **Contradicted ownership may never ship as a definite historical owner.**
 
-- **SAFE_TO_AGGREGATE**: 219
-- **ROW_LEVEL_ONLY**: 3 (of which **3 carry money columns** — the unsafe analysis is also the most likely one)
+- **SAFE_TO_AGGREGATE**: 221
+- **AGGREGATE_ONLY_NO_KEY**: 1 — total it at its declared grain; do **not** expect to address or join a single row. Granted only against a `key_refused` block that `512` re-measures against the file every run.
+- **ROW_LEVEL_ONLY**: 0 (of which **0 carry money columns** — the unsafe analysis is also the most likely one)
 
 ## Ownership as-of status
 
@@ -22,6 +23,3 @@
 
 | table | collection | money columns | why |
 |---|---|---|---|
-| `faads_transactions_all_agencies.csv` | funding | obligated_usd | grain UNSTATED; no validated primary key; 3441 literal duplicate rows |
-| `native_passthrough.csv` | funding | amount_usd | grain UNSTATED; no validated primary key; 116 literal duplicate rows |
-| `subawards.csv` | subcontracting | subaward_amount|prime_award_amount|subaward_amount_real2025 | grain UNSTATED; no validated primary key; 10770 literal duplicate rows |

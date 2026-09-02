@@ -73,6 +73,7 @@ DIRECTORY = CLEAN / "native_owned_businesses.csv"
 LINKS = CLEAN / "native_business_contract_links.csv"
 CROSSWALK = CLEAN / "native_business_identifier_crosswalk.csv"
 HOLDS = REVIEW / "native_business_link_holds_2026-09-02.csv"
+BY_NATION = CLEAN / "native_business_contracting_by_nation.csv"
 SUMMARY = CLEAN / "_1001_summary.json"
 
 BUILT_BY = "code/1001_link_businesses_to_contracting.py"
@@ -81,8 +82,12 @@ BUILT_DATE = "2026-09-02"
 # --------------------------------------------------------------------------
 # Structural identifier validation. Reject, never store, a malformed value.
 # --------------------------------------------------------------------------
-UEI_RE = re.compile(r"^[A-Z0-9]{12}$")
-CAGE_RE = re.compile(r"^[A-Z0-9]{5}$")
+# The letters I and O are never used in a CAGE code or a UEI (DLA / GSA both
+# exclude them), and a UEI never begins with 0. Verified against Cedar's own
+# `fpds_uei_cage_map.csv`: 8,886 CAGE codes and 34,601 UEIs, none containing
+# I or O, none starting 0. See code/1000 for what this rule caught.
+UEI_RE = re.compile(r"^(?!0)(?![A-Z0-9]*[IO])[A-Z0-9]{12}$")
+CAGE_RE = re.compile(r"^(?![A-Z0-9]*[IO])[A-Z0-9]{5}$")
 # Values that are present, well-formed-looking and mean nothing.
 NULL_TOKENS = {"", "NAN", "NONE", "NULL", "N/A", "NA", "UNKNOWN", "00000",
                "000000000000", "-", "--"}
@@ -513,6 +518,29 @@ CROSSWALK_COLUMNS = [
 ]
 
 
+def open_crosswalk(built_by):
+    """Open the shared crosswalk, dropping only THIS script's previous rows.
+
+    1000 (self-published identifiers) and 1001 (identifiers matched from the
+    federal side) both write here. A plain append duplicates on every re-run;
+    a plain overwrite lets whichever ran last delete the other's work - the
+    rebuild-reverts-the-enricher trap START_HERE records four separate times.
+    So each writer rewrites the file keeping every row it did not author.
+    """
+    kept = []
+    if CROSSWALK.exists():
+        with open(CROSSWALK, encoding="utf-8-sig", newline="") as fh:
+            kept = [r for r in csv.DictReader(fh)
+                    if r.get("built_by") != built_by]
+    fh = open(CROSSWALK, "w", encoding="utf-8", newline="")
+    w = csv.DictWriter(fh, fieldnames=CROSSWALK_COLUMNS)
+    w.writeheader()
+    for r in kept:
+        w.writerow({c: r.get(c, "") for c in CROSSWALK_COLUMNS})
+    fh.flush()
+    return fh, w
+
+
 def gate_for(name_is_person):
     """cedar_domain.may_publish_individual_native_field, inlined and named.
 
@@ -554,11 +582,7 @@ def build(argv):
     lf = open(LINKS, "w", encoding="utf-8", newline="")
     lw = csv.DictWriter(lf, fieldnames=LINK_COLUMNS)
     lw.writeheader()
-    xf = open(CROSSWALK, "a" if CROSSWALK.exists() else "w",
-              encoding="utf-8", newline="")
-    xw = csv.DictWriter(xf, fieldnames=CROSSWALK_COLUMNS)
-    if xf.tell() == 0:
-        xw.writeheader()
+    xf, xw = open_crosswalk(BUILT_BY)
     hf = open(HOLDS, "w", encoding="utf-8", newline="")
     hw = csv.DictWriter(hf, fieldnames=LINK_COLUMNS)
     hw.writeheader()
@@ -845,6 +869,66 @@ def build(argv):
     xf.close()
     hf.close()
 
+    # ---- the customer-facing rollup -------------------------------------
+    # One row per certifying authority. Dollars are per DISTINCT UEI within
+    # the nation, so a firm certified by two nations counts once in each
+    # nation's own figure and once in the project total - the two are
+    # different questions and the column names say which.
+    nat = {}
+    seen_by_nation = {}
+    for r in csv.DictReader(open(LINKS, encoding="utf-8-sig")):
+        n = r["certifying_authority_name"]
+        d = nat.setdefault(n, Counter())
+        d["firms_certified"] += 1
+        d["publishable_rows"] += 1 if r["directory_publishable"] == "Y" else 0
+        st = r["link_status"]
+        d[f"status_{st.lower()}"] += 1
+        if st == "LINKED":
+            d["firms_linked_to_contracting"] += 1
+            for one in (r["matched_uei_all"] or r["matched_uei"]).split(";"):
+                if one and one not in seen_by_nation.setdefault(n, set()):
+                    seen_by_nation[n].add(one)
+                    d["distinct_ueis"] += 1
+            d["prime_obligations_usd"] += float(r["prime_obligations_usd"]
+                                                or 0) if len(
+                seen_by_nation[n]) else 0
+    # recompute money cleanly, per nation, per UEI
+    for n in nat:
+        nat[n]["prime_obligations_usd"] = 0.0
+        nat[n]["subaward_amount_usd"] = 0.0
+    counted = {}
+    for r in csv.DictReader(open(LINKS, encoding="utf-8-sig")):
+        if r["link_status"] != "LINKED":
+            continue
+        n = r["certifying_authority_name"]
+        for one in (r["matched_uei_all"] or r["matched_uei"]).split(";"):
+            if not one or one in counted.setdefault(n, set()):
+                continue
+            counted[n].add(one)
+            nat[n]["prime_obligations_usd"] += ents[one].prime_oblig
+            nat[n]["subaward_amount_usd"] += ents[one].sub_amount
+    cols = ["certifying_authority_name", "firms_certified", "publishable_rows",
+            "firms_linked_to_contracting", "distinct_ueis",
+            "prime_obligations_usd", "subaward_amount_usd",
+            "status_no_match", "status_refused", "status_hold_ambiguous",
+            "status_proposed", "link_rate_pct", "built_by", "built_date"]
+    with open(BY_NATION, "w", encoding="utf-8", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=cols)
+        w.writeheader()
+        for n in sorted(nat, key=lambda k: -nat[k]["prime_obligations_usd"]):
+            d = nat[n]
+            row = {c: d.get(c, 0) for c in cols}
+            row["certifying_authority_name"] = n
+            row["prime_obligations_usd"] = f"{d['prime_obligations_usd']:.2f}"
+            row["subaward_amount_usd"] = f"{d['subaward_amount_usd']:.2f}"
+            row["link_rate_pct"] = round(
+                100.0 * d["firms_linked_to_contracting"]
+                / max(1, d["firms_certified"]), 1)
+            row["built_by"] = BUILT_BY
+            row["built_date"] = BUILT_DATE
+            w.writerow(row)
+            fh.flush()
+
     summary = {
         "built_by": BUILT_BY,
         "built_date": BUILT_DATE,
@@ -930,6 +1014,11 @@ def verify(argv):
                   [{"source_id": "X", "state_province": "Ariz"},
                    {"source_id": "Y", "state_province": "AZ"}]) == {"X"})
         check("'NAN' cage rejected", clean_cage("NAN") == "")
+        check("a CAGE containing O is rejected", clean_cage("JONES") == "")
+        check("a UEI containing I is rejected",
+              clean_uei("ABCDEFGHI234") == "")
+        check("a well-formed UEI survives",
+              clean_uei("HZN6BEYJP5G6") == "HZN6BEYJP5G6")
         return 1 if fails else 0
 
     if not LINKS.exists():

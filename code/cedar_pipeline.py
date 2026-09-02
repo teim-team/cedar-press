@@ -697,7 +697,7 @@ KNOWN_ORDERINGS = [
                           "threshold_agrees_with_official",
                           "result_reconciles_with_threshold"]},
     # WORKSTREAM INT-READY, 2026-09-02. Two enrichers declared at creation.
-    {"rebuild": "158_extend_gaming_facilities.py",
+    {"rebuild": "23d_build_gaming_facilities.py",
      "enricher": "960_promote_gaming_facility_class_and_revenue_reach.py",
      "file": "gaming_facilities.csv",
      "cost": "not yet paid - declared at creation. Any rebuild of the "

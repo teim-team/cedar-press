@@ -87,7 +87,7 @@ UA = ("CedarPress-research/1.0 (tribal newsletter corpus; "
       "contact elijahsamsonmoreno@gmail.com)")
 HOST_DELAY = 1.8
 RUN_DEADLINE = time.time() + 3 * 3600
-MAX_DOC_BYTES = 12_000_000
+MAX_DOC_BYTES = 45_000_000
 
 RESTRICTIVE_HOSTS = {
     "colvilletribes.com", "tribaltribune.com", "colvillecasinos.com",
@@ -451,6 +451,14 @@ def run(limit=None):
                     n_rows += len(rows)
                 else:
                     entry["note"] = "no extractable text (image-only PDF or empty body)"
+        elif status == 200 and not body:
+            # curl reports 200 and hands back nothing when --max-filesize trips
+            # or the transfer aborts. Recording that as a plain "http 200" would
+            # file a fetch failure as a success, which is the same lie as a 200
+            # with the wrong content.
+            entry["note"] = ("http 200 but EMPTY body - transfer aborted or over "
+                             "the %d-byte cap; counted as a FAILURE, not a "
+                             "document" % MAX_DOC_BYTES)
         else:
             entry["note"] = "http %s" % status
         flog.write(json.dumps(entry, ensure_ascii=False) + "\n")
@@ -579,6 +587,32 @@ def selftest():
              "http_status": 200, "candidates": 2, "note": ""} for i in range(3)]
     t.append(("repeatbody", any("MINED_A_REPEATED_BODY" in x
                                 for x in verify([dict(base)], docs))))
+
+    # POSITIVE CONTROL. A screen that rejects everything passes every negative
+    # invariant above and finds nothing, which is the failure mode this project
+    # calls a false absence. Prove the miner still fires on real deal language,
+    # and prove the private-life screen suppresses the same sentence when it is
+    # surrounded by community news.
+    tgt = {"cedar_uid": "CE-T", "tribe_id": "T", "publisher": "Test Nation",
+           "entity_class": "Federally recognized tribe", "state": "OK",
+           "publication": "Test News", "channel_url": "https://t.org/news",
+           "url": "https://t.org/news/1"}
+    good = ("The Nation announced this week that its economic development arm "
+            "has acquired a majority interest in Example Solutions LLC for "
+            "$4.2 million, a transaction the council approved on March 4, 2025. "
+            "The company will continue to operate from Tulsa.")
+    rows, _dp = mine(good, tgt, {}, "md5")
+    t.append(("miner_fires", len(rows) == 1 and rows[0]["Announced_Value_USD"] == "4200000"
+              and rows[0]["deal_status_std"] == "Closed"))
+    bad = ("Funeral services will be held Saturday. He is survived by four "
+           "children. In earlier years he acquired a majority interest in the "
+           "family store, which the family still runs.")
+    rows2, dp2 = mine(bad, tgt, {}, "md5")
+    t.append(("privacy_screen", rows2 == [] and dp2 == 1))
+    fam = {"test nation": "root corp", "example solutions llc": "root corp"}
+    rows3, _ = mine(good, tgt, fam, "md5")
+    t.append(("intra_family_screen",
+              len(rows3) == 1 and rows3[0]["deal_status_std"] == "NOT_A_TRANSACTION"))
     for name, fired in t:
         print("  selftest %-12s %s" % (name, "FIRES" if fired else "DID NOT FIRE"))
     return 0 if all(x for _n, x in t) else 1

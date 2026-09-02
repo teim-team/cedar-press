@@ -1,6 +1,47 @@
 # AGENTS.md — Native Deals & Native Entity Enterprise Data Project
 *Operating guide for AI-agent sessions. Written 2026-07-31 from the full Q3 build conversation. Owner: Elijah Moreno.*
 
+---
+
+## HOW TO READ THIS FILE (added 2026-09-02)
+
+**This file is 5,898 lines and it is not an onboarding document.** Everything below
+`CURRENT STATE (2026-08-06)` is an **append-only journal** — named gate failures,
+defect post-mortems, and hard-won findings, written as they happened. That journal is
+the most valuable thing in the repo and it should keep growing. It is also, read
+linearly, roughly 90,000 tokens of context an agent spends before writing a line.
+
+**Read this file in three parts:**
+
+1. **The two sections immediately below** — the Prime Directive and
+   `CURRENT STATE (2026-08-30)`. These are current and load-bearing. ~130 lines.
+2. **`docs/AGENT_FIELD_GUIDE.md`** — ~190 lines. The traps distilled: why a green
+   check here is often measuring something else, why four of five duplicate
+   allegations were phantom, why `ls code/<n>_*` cannot stop a script-number
+   collision, and which shared files destroy your work if you rewrite them.
+3. **Then grep this file** for the dataset, script number or defect class you are
+   actually touching. Do not read it front to back.
+
+**And before you write anything:**
+
+```
+py -3 code/1050_preflight.py
+```
+
+It claims a script number **atomically** (`O_CREAT|O_EXCL` — the OS refuses the
+second caller, which `ls` cannot), prints the shared files that need marker
+discipline, reads `NEVER_RUN` **live** out of `cedar_pipeline.py` instead of from
+prose that goes stale, and gives you `ondisk <term>` to check whether the thing you
+are about to download is already on this machine. 27 of 39 ranked "missing" items
+were already local.
+
+> **Adding to the journal?** Keep doing it — this is how the repo teaches. Two asks:
+> put the *rule* in the heading so a grep finds it, and if the finding is a trap the
+> next agent will hit blind, add a row to `docs/AGENT_FIELD_GUIDE.md` too. Nothing in
+> this file is ever deleted.
+
+---
+
 ## What this project is
 Three interlocking data assets, built to TEIM-grade evidentiary standards:
 1. **Deal ledger** — `native_deals_quarterly_factcheck_2026Q3.xlsx`: `Deals_2026_YTD` (76 records) + `Deals_Historical` 2020–2025 (56 records), every row source-linked.
@@ -1214,6 +1255,36 @@ is a rebuild revert wearing a different hat.** Restoring one file of a set to a
 pre-rebuild vintage while its siblings stay post-rebuild leaves the set
 mutually inconsistent, and no single file looks wrong. Restore the set or none
 of it, and re-run the enricher last.
+
+---
+
+## NAMED GATE FAILURE — not mine, owner identified (2026-09-02, GRAIN-LEGISLATION)
+
+Per standing rule 15 option 3. `62_no_regression_check.py` exits 1 on
+**fourteen** metrics. This workstream's changes are the `legislation` dataset:
+`bill_votes.csv` enriched in place by `code/890_bill_votes_threshold_and_titles.py`
+(60 → 68 columns, 423 → 423 rows) and `congressional_correspondence_log.csv`
+ruled out of scope. **Not one of the fourteen traces to either**, and each was
+checked individually rather than assumed:
+
+| failing metric | why it is not this workstream's |
+|---|---|
+| `files_with_columns_lost_vs_backup` = 2 | named: `entity_evidence_profile.csv` (`.bak_2026-08-28_pre505`, 3 columns) and `federal_funding_tribe_year_panel.csv` (`.bak_2026-09-01_pre843`, `tribe_id` + `tribe_id_scheme`). Owners: the identity pass (505) and grain-ws4/843. `bill_votes.csv` vs its own `.bak_2026-09-02_pre890` **gained 8 and lost 0** |
+| `tables_undocumented_in_codebook` = 16 · `tables_missing_codebook_block` = 16 | the 17 undocumented tables are constellation (`cedar_constellation_*`), geography (`geo_*`), `tribal_newsletter_*`, `native_business_*`, `consultation_*`, `wa_machine_transfers`, `gaming_property_locations`, `cedar_entity_freshness`. Owners: constellation 85x, geography 87x, and the gaming/nonprofit streams. 890 **added** 8 documented variables; `bill_votes.csv` matches `10_bills_votes` at **1.000** |
+| `lint_new_defect_instances` · `lint_class2c` · `lint_class4` · `lint_class7` · `lint_bug_class_instances` | 293's new-instance list names `873_build_aiannh_crosswalk.py`, `900_nr_hub_join.py`, `950_promote_contract_attributes.py`, `870_build_geo_crosswalks.py`, `871_promote_geo_keys_contracts.py`, `962_probe_dear_tribal_leader_letters.py`, `518_dataset_readiness.py`/`621`. Owners: geography 87x, natural-resources 9xx, contracts 95x |
+| `contract_violations` = 12 · `contract_orphan_shippable` = 7 | 512 names them: `federal_funding_transactions.csv`, `federal_funding_tribe_year_panel.csv`, `entity_aliases.csv`, and orphans `native_owned_businesses*.csv`, `nonprofit_schedule_c_*.csv`, `regulations_gov_*.csv`, `sam_native_class_distributions.csv`. **Zero legislation tables** — all 11 shippable legislation tables validate |
+| `rulings_unapplied` 1,215 → 2,894 | no ruling layer was touched here |
+| SHIPPING LOST `advocacy_passthrough_2026-08-07.csv` | lobbying/grain-ws3 — the table it names was ruled a duplicate vintage in `INTERNAL_TABLES` |
+| STOPPED SHIPPING `hearing_bill_links.csv` 465 → 464 and `native_bills_subject_sweep.csv` 2,414 → 2,409 | **these two ARE legislation-adjacent and are still not this workstream's.** Both are the UPSTREAM workstream's deliberate 2026-09-01 de-dupe, recorded in `512.GRAIN_UPSTREAM` with the reason: the Congress.gov payload for event 338549 lists 27 of its 64 `relatedItems.bills` twice, and `all_bill_intros.csv` repeats 595 `bill_id`s byte-identically. Both were deduped **at ingest**, and 512 records "ZERO bill_ids leaving the table". Owner: UPSTREAM. **Worth a second look by that owner anyway** — standing rule 11 says un-shipped is a regression, and a row leaving the shelf as a side effect of a correctness fix still needs the shelf metric moved deliberately, not silently |
+
+**One class-6 instance IS this workstream's and it was handled, not stepped
+around.** Declaring the true `14 → 73 → 890` ordering in
+`cedar_pipeline.KNOWN_ORDERINGS` made 293 see the collision it had been blind
+to. It carries a `# lint-ok: class6` waiver on `14_build_bills_votes.py` with
+the reason, which is the mechanism AGENTS.md asks for — the ordering written
+down by a person, plus something that checks the columns survived
+(`890 verify` exits 1 the moment one of its eight is missing).
+`lint_class6` is **25**, below its baseline of 29.
 
 ---
 

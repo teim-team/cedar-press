@@ -41,5 +41,10 @@
     "zip5": 21923
   },
   "place_multi_county": 16239,
-  "counties": 3438
+  "counties_named": 3438,
+  "county_codes_by_class": {
+    "state_wide_placeholder_not_a_county": 56,
+    "county": 3434,
+    "county_code_observed_without_a_name": 37
+  }
 }

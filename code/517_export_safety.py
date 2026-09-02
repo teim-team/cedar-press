@@ -81,7 +81,32 @@ ASOF = ROOT / "review" / "temporal_asof_ownership.csv"
 
 COLS = ["table", "collection", "export_class", "reason", "grain_status",
         "primary_key", "literal_duplicate_rows", "aggregation_safe",
+        "row_addressable", "duplicates_explained", "key_refusal",
         "money_columns", "blocking_evidence", "classified_date"]
+
+# A FOURTH CLASS, added 2026-09-02 by workstream SUBAWARD-FUNDING.
+#
+# The three classes above collapse two different questions into one:
+#
+#     can a buyer TOTAL this column?      (aggregation)
+#     can a buyer ADDRESS or JOIN a row?  (identity)
+#
+# For 224 of 225 shippable tables the answer is the same either way and the
+# collapse costs nothing. For `faads_transactions_all_agencies.csv` it is
+# wrong in a way that hurts: 2.77M rows and $1.83T of real, additive
+# transaction-grain obligations were classed ROW_LEVEL_ONLY - "a buyer may NOT
+# total a column" - purely because no unique key survives in the retained
+# 20-column source objects. The dollars are fine. The JOIN is what is
+# unavailable, and saying "do not total this" when the true statement is "do
+# not expect to address a single row of this" is a false warning, which
+# teaches a buyer to ignore the true ones.
+#
+# AGGREGATE_ONLY_NO_KEY is granted ONLY where the contract carries a
+# `key_refused` block that 512 re-measures against the file on every run -
+# reason, refused candidates that must still collide, a duplicate disposition
+# whose expected count must still match, and an additivity rule for every
+# money column. Miss any one and the table stays ROW_LEVEL_ONLY.
+CLASS_AGG_ONLY = "AGGREGATE_ONLY_NO_KEY"
 
 # A table carrying any of these is one a buyer will try to total.
 MONEY_HINTS = ("obligation", "amount", "dollar", "usd", "revenue", "spend",
@@ -174,12 +199,30 @@ def classify():
                         pass
                     break
 
+            # A DECLARED, RE-MEASURED KEY REFUSAL. 512 writes this only after
+            # re-testing every refused candidate against the full file and
+            # confirming the duplicate count still matches what the
+            # disposition accounts for; if either had drifted, 512 would have
+            # raised a contract violation and `grain_validated` would be
+            # false. So the gate here is: is the refusal DECLARED, is it
+            # COMPLETE, and did 512 accept it?
+            ref = t.get("key_refused") or {}
+            dup_ok = (bool((ref.get("duplicate_disposition") or "").strip())
+                      and ref.get("whole_row_duplicates_expected") == dups)
+            add = ref.get("additivity") or {}
+            money_covered = all(m in add for m in money)
+            refusal_ok = (bool((ref.get("reason") or "").strip())
+                          and bool(ref.get("candidates_refused"))
+                          and t.get("grain_validated")
+                          and (dup_ok or not dups)
+                          and money_covered)
+
             blocking = []
             if not stated:
                 blocking.append("grain UNSTATED")
-            if not pk:
+            if not pk and not refusal_ok:
                 blocking.append("no validated primary key")
-            if dups:
+            if dups and not refusal_ok:
                 blocking.append(f"{dups} literal duplicate rows")
 
             if blocking:
@@ -190,6 +233,18 @@ def classify():
                     reason += (f". This table carries money columns "
                                f"({', '.join(money[:3])}), so the unsafe "
                                f"analysis is also the most likely one.")
+            elif not pk:
+                cls = CLASS_AGG_ONLY
+                reason = ("grain declared and validated; a buyer MAY total "
+                          "this table at its declared grain and MUST NOT "
+                          "expect to address or join a single row of it - no "
+                          "primary key exists in the retained source and the "
+                          "refusal is re-measured on every run. "
+                          + " ".join(f"{k}: {v}" for k, v in add.items()))
+                if dups:
+                    reason += (f" {dups:,} byte-identical rows are RETAINED "
+                               f"and explained: "
+                               f"{ref.get('duplicate_disposition', '')[:400]}")
             else:
                 cls = "SAFE_TO_AGGREGATE"
                 reason = (f"grain declared and validated; primary key "
@@ -200,7 +255,11 @@ def classify():
                 table=name, collection=coll["collection"], export_class=cls,
                 reason=reason, grain_status="stated" if stated else "UNSTATED",
                 primary_key="+".join(pk), literal_duplicate_rows=dups,
-                aggregation_safe="1" if cls == "SAFE_TO_AGGREGATE" else "0",
+                aggregation_safe="1" if cls in ("SAFE_TO_AGGREGATE",
+                                                CLASS_AGG_ONLY) else "0",
+                row_addressable="1" if pk else "0",
+                duplicates_explained="1" if (dups and refusal_ok) else "0",
+                key_refusal=(ref.get("reason", "")[:600] if not pk else ""),
                 money_columns="|".join(money[:6]),
                 blocking_evidence="; ".join(blocking),
                 classified_date=TODAY))
@@ -251,6 +310,10 @@ def main() -> int:
              "historical owner.**", ""]
         cc = Counter(r["export_class"] for r in rows)
         L += [f"- **SAFE_TO_AGGREGATE**: {cc.get('SAFE_TO_AGGREGATE', 0)}",
+              f"- **{CLASS_AGG_ONLY}**: {cc.get(CLASS_AGG_ONLY, 0)} — total "
+              f"it at its declared grain; do **not** expect to address or "
+              f"join a single row. Granted only against a `key_refused` block "
+              f"that `512` re-measures against the file every run.",
               f"- **ROW_LEVEL_ONLY**: {cc.get('ROW_LEVEL_ONLY', 0)} "
               f"(of which **{len(unsafe_money)} carry money columns** — the "
               f"unsafe analysis is also the most likely one)", ""]

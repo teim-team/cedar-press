@@ -93,6 +93,9 @@ INVARIANTS (verify exits 1 on any failure)
      large shortfall means a zip failed to open and was skipped silently).
   I5 every county_name printed on a place row is the modal name of THAT row's
      county_fips in geo_county_dim.csv, and state_fips == county_fips[:2].
+  I6 geo_county_dim.csv carries EVERY county code the crosswalks reference --
+     including the SS000 state-wide placeholders and codes seen without a name.
+     A dimension that silently omits them makes a downstream join drop rows.
 """
 
 import csv
@@ -224,8 +227,17 @@ PLACE_FIELDS = [
     "n_distinct_counties", "ambiguous_flag", "runner_up_county_fips",
 ]
 
-CDIM_FIELDS = ["county_fips", "state_fips", "county_name",
+CDIM_FIELDS = ["county_fips", "state_fips", "county_name", "county_code_class",
                "n_observations", "n_name_variants"]
+
+# USAspending writes SS000 when it knows the state and not the county. It is a
+# PLACEHOLDER, not a county, and 01000 sitting unlabelled in a county dimension
+# would be read as one. Everything observed is kept -- flag, never delete -- but
+# the class travels with it so nothing downstream can mistake it.
+def county_code_class(fips, named):
+    if fips.endswith("000"):
+        return "state_wide_placeholder_not_a_county"
+    return "county" if named else "county_code_observed_without_a_name"
 
 
 def norm_fips(v, sfips=""):
@@ -337,6 +349,7 @@ def build():
     place_obs = defaultdict(Counter)  # (grain, place_key) -> Counter(county_fips)
     place_meta = {}                   # (grain, place_key) -> (state, city, zip5)
     county_names = defaultdict(Counter)   # county_fips -> Counter(county_name)
+    county_seen = Counter()               # county_fips -> observations, named or not
     corpus_stats = {}
 
     def observe(city, state, zip5, fips, cname):
@@ -344,6 +357,7 @@ def build():
         voted globally against the FIPS, never remembered against the place."""
         if not fips:
             return
+        county_seen[fips] += 1
         if cname:
             county_names[fips][cname] += 1
         if zip5:
@@ -399,6 +413,11 @@ def build():
             rz = norm_zip5(cell(row, g["rcp_zip"]))
             pz = norm_zip5(cell(row, g["pop_zip"]))
 
+            for _f, _n in ((rf, rcn), (pf, pcn)):
+                if _f:
+                    county_seen[_f] += 1
+                    if _n:
+                        county_names[_f][_n] += 1
             packed = (rf, rcn, rsf or rf[:2], rst, rct, rz,
                       pf, pcn, psf or pf[:2], pst, pct, pz)
             prev = awards.get(key)
@@ -471,15 +490,21 @@ def build():
     # Resolve one modal name per county fips FIRST; the place file then quotes
     # the name of the fips it actually chose.
     cname_of = {}
+    by_class = Counter()
     with open(OUT_CDIM, "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
         w.writerow(CDIM_FIELDS)
-        for fips in sorted(county_names):
-            c = county_names[fips]
-            nm, _nn = c.most_common(1)[0]
-            cname_of[fips] = nm
-            w.writerow([fips, fips[:2], nm, sum(c.values()), len(c)])
-    print(f"[870] wrote {os.path.relpath(OUT_CDIM, ROOT)}  counties {len(cname_of):,}")
+        for fips in sorted(set(county_seen) | set(county_names)):
+            c = county_names.get(fips) or Counter()
+            nm = c.most_common(1)[0][0] if c else ""
+            if nm:
+                cname_of[fips] = nm
+            klass = county_code_class(fips, bool(nm))
+            by_class[klass] += 1
+            w.writerow([fips, fips[:2], nm, klass,
+                        county_seen.get(fips, sum(c.values())), len(c)])
+    print(f"[870] wrote {os.path.relpath(OUT_CDIM, ROOT)}  "
+          f"codes {len(set(county_seen) | set(county_names)):,}  {dict(by_class)}")
 
     # ------------------------------------------------------------ award file
     n_rcp = n_pop = n_both = 0
@@ -496,8 +521,8 @@ def build():
             if rf and pf:
                 n_both += 1
             w.writerow([key, kind,
-                        rf, cname_of.get(rf, rcn) if rf else "", rf[:2], rst, rct, rz,
-                        pf, cname_of.get(pf, pcn) if pf else "", pf[:2], pst, pct, pz,
+                        rf, (cname_of.get(rf) or rcn) if rf else "", rf[:2], rst, rct, rz,
+                        pf, (cname_of.get(pf) or pcn) if pf else "", pf[:2], pst, pct, pz,
                         n, "1" if key in conflicts else "0",
                         ";".join(sorted(award_srcs[key]))])
     print(f"[870] wrote {os.path.relpath(OUT_AWARD, ROOT)}")
@@ -547,7 +572,8 @@ def build():
         "place_rows": n_place,
         "place_by_grain": dict(by_grain),
         "place_multi_county": n_amb,
-        "counties": len(cname_of),
+        "counties_named": len(cname_of),
+        "county_codes_by_class": dict(by_class),
     }
     with open(OUT_STATS, "w", encoding="utf-8") as fh:
         json.dump(stats, fh, indent=2)
@@ -609,9 +635,17 @@ def verify(award_path=None, place_path=None, cdim_path=None, quiet=False):
                      f"(ADR-015 measured 1,041,147) -- a zip probably failed to open")
 
     cname_of = {}
+    dim_codes = set()
     with open(cdim_path, newline="", encoding="utf-8") as fh:
         for row in csv.DictReader(fh):
             cname_of[row["county_fips"]] = row["county_name"]
+            dim_codes.add(row["county_fips"])
+    referenced = set()
+    with open(award_path, newline="", encoding="utf-8") as fh:
+        for row in csv.DictReader(fh):
+            for c in ("recipient_county_fips", "pop_county_fips"):
+                if row[c]:
+                    referenced.add(row[c])
 
     m = 0
     bad_share = bad_dist = bad_name = bad_sfips = 0
@@ -631,6 +665,7 @@ def verify(award_path=None, place_path=None, cdim_path=None, quiet=False):
             if nd < 1 or nn > tt:
                 bad_dist += 1
             f5 = row["county_fips"]
+            referenced.add(f5)
             if row["county_name"] and cname_of.get(f5, "") != row["county_name"]:
                 bad_name += 1
             if row["state_fips"] != f5[:2]:
@@ -645,12 +680,19 @@ def verify(award_path=None, place_path=None, cdim_path=None, quiet=False):
     if bad_name or bad_sfips:
         fails.append(f"I5 place row names a county its own fips does not carry: "
                      f"name {bad_name}, state_fips {bad_sfips}")
+    orphan = referenced - dim_codes
+    say(f"[870 verify] county codes referenced {len(referenced):,}  "
+        f"in dimension {len(dim_codes):,}  orphaned {len(orphan):,}")
+    if orphan:
+        fails.append(f"I6 {len(orphan)} county codes are referenced by a crosswalk "
+                     f"and absent from geo_county_dim.csv, e.g. "
+                     f"{sorted(orphan)[:5]}")
 
     if fails:
         for f in fails:
             say("FAIL:", f)
         return 1
-    say("[870 verify] OK -- I1 I2 I3 I4 I5 all hold")
+    say("[870 verify] OK -- I1 I2 I3 I4 I5 I6 all hold")
     return 0
 
 
@@ -665,7 +707,7 @@ def selftest():
     tmp = tempfile.mkdtemp(prefix="870_selftest_")
     a = os.path.join(tmp, "award.csv")
     pl = os.path.join(tmp, "place.csv")
-    cd = os.path.join(tmp, "cdim.csv")
+    cd = d = os.path.join(tmp, "cdim.csv")
     ok = True
 
     def reset():
@@ -728,12 +770,19 @@ def selftest():
         rr[1][rr[0].index("state_fips")] = "99"
         write(pl, rr)
 
+    def dim_drops_a_code():
+        keep = rows(pl)[1][rows(pl)[0].index("county_fips")]
+        rr = rows(d)
+        i = rr[0].index("county_fips")
+        write(d, [rr[0]] + [r for r in rr[1:] if r[i] != keep])
+
     case("I1 duplicate award_unique_key", dup_key)
     case("I2 county fips loses a leading digit", bad_fips)
     case("I4 award crosswalk truncated to 5,000 keys", truncate_award)
     case("I3 dominance_share no longer equals n/total", bad_share)
     case("I5 place quotes a name its fips does not carry", wrong_county_name)
     case("I5 state_fips diverges from county_fips[:2]", wrong_state_fips)
+    case("I6 dimension drops a code a crosswalk still references", dim_drops_a_code)
 
     shutil.rmtree(tmp, ignore_errors=True)
     print("[870 selftest] " + ("OK -- every invariant fired" if ok else "FAILED"))

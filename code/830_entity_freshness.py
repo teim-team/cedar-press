@@ -68,6 +68,42 @@ OUT_MD = ROOT / "docs" / "ENTITY_FRESHNESS.md"
 ID_COLS = ("cedar_uid", "tribe_id", "entity_id", "nation_id",
            "certifying_authority_entity_id", "recipient_entity_id")
 
+# THE IDENTITY LAYER IS NOT A DATASET, AND ONE OF THESE FILES IS THIS SCRIPT'S
+# OWN OUTPUT.
+#
+# FOURTH OCCURRENCE OF THE FAMILY, 2026-09-02, found by the coverage-tail
+# workstream (`code/1021_register_only_first_rows.py`). The three notes on
+# `NEVER` above are all about DATE columns that make every entity read as
+# fresh. This one is about the ROW COUNT that makes every entity read as
+# present.
+#
+# `absent` was `n_rows_across_cedar == 0` over every id-bearing csv in
+# data/clean. `cedar_entity_freshness.csv` is written by THIS SCRIPT, into
+# THAT DIRECTORY, with one row per register entity — so from the second run
+# onward every entity has "a Cedar row" and the headline
+# "appear in NO Cedar row at all" is pinned at 0 permanently. It printed 0 on
+# 2026-09-02 and had been printing 0 for exactly this reason: a check that
+# cannot fail cannot report. The honest number, excluding the identity layer,
+# was 104 — 83 BIE Schools, 18 self-governance consortia, 3 Urban Indian
+# Organizations, none of which had a single substantive row.
+#
+# The other three are Cedar's CLAIMS about an entity rather than observations
+# of it: an alias, an assertion and an adjudicated fact all exist for entities
+# no dataset has ever carried, which is the exact population being counted.
+#
+# Both numbers are now reported. The old one is kept so the correction is
+# visible and arguable instead of silent.
+IDENTITY_LAYER = {
+    "cedar_entity_freshness.csv",       # this script's own output
+    "cedar_assertions.csv",
+    "cedar_resolved_facts.csv",
+    "entity_aliases.csv",
+    "cedar_identity_register.csv",
+    "cedar_entity_relationships.csv",
+    "cedar_constellation_edges.csv",
+    "cedar_source_records.csv",
+}
+
 # Dates about CEDAR, never about the entity. Counting these reports every
 # entity as touched today and makes the ledger a mirror of the last build.
 # Dates about CEDAR's own activity. The first version missed `asserted_date`
@@ -236,6 +272,7 @@ def main() -> int:
     cand: dict = defaultdict(dict)
     seen_in: dict = defaultdict(set)
     rows_of: dict = defaultdict(int)
+    sub_rows_of: dict = defaultdict(int)   # rows OUTSIDE the identity layer
 
     tables = sorted(p for p in CLEAN.glob("*.csv")
                     if ".bak" not in p.name and not p.name.startswith("_"))
@@ -260,6 +297,8 @@ def main() -> int:
                         continue
                     seen_in[uid].add(p.name)
                     rows_of[uid] += 1
+                    if p.name not in IDENTITY_LAYER:
+                        sub_rows_of[uid] += 1
                     cu = cand[uid]
                     for c in dcols:
                         d = parse(r.get(c))
@@ -294,12 +333,19 @@ def main() -> int:
             "last_change_column": col,
             "n_datasets_present_in": len(seen_in.get(uid, ())),
             "n_rows_across_cedar": rows_of.get(uid, 0),
+            "n_rows_outside_identity_layer": sub_rows_of.get(uid, 0),
             "measured_date": TODAY.isoformat(),
         })
     out.sort(key=lambda x: (x["last_change"] or "0000", x["canonical_name"]))
 
     never = [x for x in out if not x["last_change"]]
-    absent = [x for x in out if x["n_rows_across_cedar"] == 0]
+    # SEE `IDENTITY_LAYER` ABOVE. The old test was `n_rows_across_cedar == 0`
+    # and it could never fire, because this script's own output file is one of
+    # the files it scans. The measure now runs on rows outside the identity
+    # layer; the unfixable old number is kept beside it so the correction is
+    # visible rather than silent.
+    absent = [x for x in out if x["n_rows_outside_identity_layer"] == 0]
+    absent_old = [x for x in out if x["n_rows_across_cedar"] == 0]
     aged = [x for x in out if isinstance(x["days_since_change"], int)]
     old365 = [x for x in aged if x["days_since_change"] > 365]
 
@@ -325,7 +371,9 @@ def main() -> int:
              "",
              "| | n |", "|---|---:|",
              f"| entities in the register | {len(out):,} |",
-             f"| **appear in NO Cedar row at all** | **{len(absent):,}** |",
+             f"| **appear in NO substantive Cedar row** | **{len(absent):,}** |",
+             f"| (the old, unfixable measure: no row in ANY table, identity "
+             f"layer included) | {len(absent_old):,} |",
              f"| present but carrying no usable date | {len(never) - len(absent):,} |",
              f"| last change more than a year ago | {len(old365):,} |", ""]
         if refused:
@@ -363,6 +411,11 @@ def main() -> int:
                   "These are the entities the owner has been asking about since "
                   "August: they exist in the identity layer and no Cedar dataset "
                   "has a single row for them.", "",
+                  "*Measured OUTSIDE the identity layer — see `IDENTITY_LAYER` "
+                  "in this script. Counting those files, one of which is this "
+                  "script's own output, pinned this number at zero and it had "
+                  "been reading zero ever since. `code/1021_register_only_"
+                  "first_rows.py` works this list.*", "",
                   "| entity | class |", "|---|---|"]
             for x in absent[:30]:
                 L.append(f"| {x['canonical_name'][:40]} | {x['entity_class']} |")
@@ -370,7 +423,9 @@ def main() -> int:
 
     print(f"  830 entity freshness   {len(out):,} entities   "
           f"{scanned} tables scanned")
-    print(f"    in NO Cedar row at all        {len(absent):,}")
+    print(f"    in NO substantive Cedar row   {len(absent):,}"
+          f"   (identity layer excluded; old all-tables measure: "
+          f"{len(absent_old):,})")
     print(f"    no usable date                {len(never) - len(absent):,}")
     print(f"    last change > 1 year ago      {len(old365):,}")
     if aged:

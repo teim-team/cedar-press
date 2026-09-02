@@ -1073,6 +1073,8 @@ def adjudicate_bie_navajo_field(b, edges, hubs):
                      from_cedar_uid=e["from_cedar_uid"], cand_uid=e["to_hub_cedar_uid"],
                      cand_name=e["to_hub_name"],
                      from_source_table=e["from_source_table"])
+            b.refusals[-1]["built_by_script"] = SCRIPT
+            b.refusals[-1]["asserted_date"] = BUILT_DATE
             continue
         kept.append(e)
     return kept, lines
@@ -1324,7 +1326,7 @@ def main(argv):
     M.src_native_owned_businesses(b, hubs, idx)
     M.src_nonprofit_missions(b, hubs, idx)
     M.src_refuse_wrong_instrument(b)
-    n851 = len(b.edges)
+    n851, r851 = len(b.edges), len(b.refusals)
 
     # ---- 852's sources --------------------------------------------------
     slice_by_name = {}
@@ -1338,6 +1340,13 @@ def main(argv):
     src_ihs_uio_register(b)
     src_org_membership_rosters(b, hubs, rs, holders, spine_by_uid)
     src_990_filer_name_probe(b, hubs, rs)
+
+    # Provenance. `Build.edge()` stamps 851's module constants on everything
+    # it is handed, so a row written by 852 would claim 851 wrote it. Restamp
+    # exactly the rows appended after 851's sources ran, and nothing else.
+    for row in b.edges[n851:] + b.refusals[r851:]:
+        row["built_by_script"] = SCRIPT
+        row["asserted_date"] = BUILT_DATE
 
     # ---- de-duplicate, then adjudicate ---------------------------------
     best = {}

@@ -80,9 +80,10 @@ figure in this script's output may be added to any other dataset
 OUTPUTS - this script writes ONLY its own files and never repairs another
 dataset's table in place:
 
-    review/1010_ownership_change_candidates.csv
-    review/1010_ownership_change_rejections.csv
-    docs/schema/ownership_change_invariants.json
+    review/1010_ownership_change_candidates.csv        leads, ranked by dollars
+    review/1010_ownership_change_rejections.csv        every intra-family refusal
+    review/1010_announced_deals_vs_contracting.csv     the reverse direction
+    docs/schema/ownership_change_invariants.json       what `verify` enforces
 """
 from __future__ import annotations
 
@@ -487,7 +488,10 @@ def reverse_check(series, cname, pname):
         # `chickasaw nation industries` and reported that CNI's own declared
         # parent never changed, which is true and is not a finding. Cutting the
         # title at the transaction verb leaves the company that was bought.
-        title_all = " ".join([r.get("Deal_Title") or "", r.get("Description") or ""])
+        # TITLE ONLY. Including `Description` matched `analytical services` and
+        # `sierra nevada` on prose that DESCRIBED the target rather than naming
+        # it - a sector descriptor is not a company.
+        title_all = r.get("Deal_Title") or ""
         cut = re.split(
             r"\b(?:acquires?|acquisition of|acquired|buys?|buy[- ]?out of|purchases?|"
             r"sells?|sale of|divests?|invests? in|agrees to acquire|takes? majority|"

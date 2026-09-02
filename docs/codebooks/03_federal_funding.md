@@ -1,6 +1,17 @@
 # Codebook — Federal Funding
 
-*3,252,168 rows across 3 file(s). Generated 2026-08-07.*
+*3,477,199 rows across 3 file(s). Generated 2026-08-07; **retired columns corrected 2026-09-02** by `code/941_refresh_codebook_fragment.py`.*
+
+> **CORRECTION 2026-09-02.** `tribe_id` and `tribe_id_scheme` were removed
+> from `federal_funding_transactions.csv` and the tribe-year panel on
+> 2026-09-01 by `code/843_retire_cicd_scheme.py`, and
+> `tribe_id_scheme_resolved` / `_resolved_basis` became `attribution_status`
+> / `attribution_basis`. This codebook still listed both retired columns, and
+> stated `tribe_id_neid` — Cedar's own handle — as type `empty`, 0% filled,
+> when it is filled on 552,602 rows. Both fixed. **38 live columns are still
+> undocumented here**, including every `geo_*` key added 2026-09-02; run
+> `py -3 code/941_refresh_codebook_fragment.py drift` for the list. They are
+> left blank rather than invented.
 
 Variables marked **internal** are retained for auditing and are not included in published extracts.
 
@@ -24,10 +35,10 @@ Variables marked **internal** are retained for auditing and are not included in 
 | `recipient_name` | text | text | 100% | Recipient name as reported. |
 | `recipient_city_name` | text | text | 100% | Name. |
 | `recipient_state_code` | text | 2-letter code | 100% | Recipient state. |
-| `tribe_id` | integer | code | 11% | Cedar Press permanent identifier for the Native entity. Stable across releases; use this to join datasets. |
-| `tribe_id_scheme` | text |  | 77% | One of: `lineageA_dofile_integer` |
-| `canonical_name` | text | text | 77% | Cedar Press standard name for the Native entity. |
-| `tribe_id_neid` | empty | code | 0% | Alternate entity key. Populated only where the source carried one. |
+| `canonical_name` | text | text | 16% | Cedar Press standard name for the Native entity. |
+| `tribe_id_neid` | text | code | 16% | Cedar Press entity handle (NEID form) for the Native entity this row is attributed to. Blank where the row is unattributed. |
+| `cedar_uid` | text | code | 16% | Cedar Press permanent identifier for the Native entity. Stable across releases and across renames; use this to join datasets. |
+| `attribution_status` | text | category | 20% | Whether this row is attributed to a Native entity, unattributed, or explicitly ruled not Native. One of: `cedar_neid`, `unattributed`, `excluded_not_native`, `unresolved_native`. Renamed 2026-09-01 from `tribe_id_scheme_resolved`; the field is unchanged. |
 | `attribution_method` *(internal)* | text |  | 100% | One of: `dofile_corrtd:prefix`, `unattributed`, `not_evaluated:ak_scope_line9`, `dofile_corrtd:exact`, `dofile_corrtd:prefix+city`, `dofile_corrtd:prefix (MR-2 Oneida 204=NY)`, `dofile_corrtd:exact (MR-2 Oneida 204=NY)` |
 | `attribution_source_line` *(internal)* | text |  | 77% |  |
 | `attribution_rule` *(internal)* | text |  | 77% |  |

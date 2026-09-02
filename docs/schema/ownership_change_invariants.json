@@ -2,9 +2,10 @@
   "built_by": "code/1010_ownership_change_from_contracting.py",
   "invariants": {
     "announced_deals_by_verdict": {
-      "CONFIRMED_BY_CONTRACTING": 9,
-      "NO_PARENT_CHANGE_IN_FPDS": 41,
-      "TARGET_NOT_A_FEDERAL_PRIME": 167
+      "CONFIRMED_BY_CONTRACTING": 8,
+      "NO_PARENT_CHANGE_IN_FPDS": 21,
+      "TARGET_NOT_A_FEDERAL_PRIME": 159,
+      "TARGET_NOT_NAMED_IN_TITLE": 29
     },
     "announced_deals_checked": 217,
     "candidate_prime_obligations_usd": 12241516363.46,

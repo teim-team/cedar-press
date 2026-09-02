@@ -672,3 +672,64 @@ grew by 4,620 rows between two runs minutes apart. Every count here is stamped
 2026-09-01 and is regenerable; **`docs/INVENTORY.md` is the live answer and
 this document is not**. Where they disagree, regenerate and believe the
 inventory.
+
+<!-- BEGIN INT-READY -->
+## D1 · S1 · `503_identity.py` would REINTRODUCE the retired CICD scheme on its next rebuild
+
+*Found 2026-09-02 by workstream INT-READY while enriching the identity
+register. Not repaired here: 503 is identity-critical and owned elsewhere, and
+an agent that cannot test every consumer should not edit its writer.*
+
+`code/843_retire_cicd_scheme.py` retired the legacy CICD identifier scheme on
+2026-09-01 and dropped `same_as_legacy_cicd` from
+`data/spine/cedar_identity_register.csv`. The column is gone from the data and
+the standing instruction is that it must not come back.
+
+**`503_identity.py` line 1090 still names it.** The register is written from a
+fixed list:
+
+```python
+regcols = ["cedar_uid", "handle", "cedar_entity_id", "canonical_name",
+           "entity_class", "class_since_basis", "former_names",
+           "same_as_legacy_cicd", "minted", "register_status"]
+```
+
+`503 --apply` therefore rewrites the register WITH a `same_as_legacy_cicd`
+column — empty, because the data is gone, but present and named, and line 1063
+still prints a count of it. A retired scheme returning as an empty column is
+worse than one that never left: it looks like a scheme with no data rather than
+a scheme that was withdrawn.
+
+**The same fixed list is why `961`'s five columns are declared as reverted in
+`cedar_pipeline.KNOWN_ORDERINGS`** — a 503 rebuild drops the Federal Register
+legal name for 536 entities along with it.
+
+**Fix:** delete `"same_as_legacy_cicd"` from `regcols` and the print at 1063,
+and add the five 961 columns to the list or re-run 961 after every 503. Both
+are one-line changes; neither should be made blind.
+
+## D2 · S2 · `docs/WHAT_IS_MISSING.md` carries two figures that do not reproduce
+
+*Measured 2026-09-02 with `csv.reader` against the live files, while acting on
+that document. Recorded because the document is being used as a work list and
+these two lines will be quoted.*
+
+| claim | where | measured 2026-09-02 |
+|---|---|---|
+| `spend_reported_usd` … "406 non-zero, **$645.1M**" | lobbying #1 | the total reproduces to the cent — **$645,052,868.51** — but **351** rows are greater than zero, not 406 |
+| `native_entity_lobbying_disclosures.csv` "(43,963 filing-grain rows…)" | lobbying, closing note | the file holds **27,825** rows × 40 columns |
+
+Neither changes a conclusion in that document — the money is right and the
+table exists — and both would be quoted as-is by the next reader.
+
+Two more figures in it were re-derived and are correct or nearly so: 694 of 787
+facilities carry a revenue bound (exact), and 509 register entities differ from
+their FR legal name (**510** on the current files, using `entry_kind = entity`
+as the pool).
+
+**One is a real overstatement of coverage.** gaming #2 says Class II/III is
+available for *"263 of the 284 facility-bearing tribes (93%)"*. 263 is the
+count of facility-bearing tribes that have **any ordinance row**; the count
+that have a **stated class** on one is **256**. The distinction is small and it
+is the difference between a join that lands and a join that lands on a blank.
+<!-- END INT-READY -->

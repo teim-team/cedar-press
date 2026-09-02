@@ -299,10 +299,126 @@ def units_for(col, t):
     return ""
 
 
+# ---------------------------------------------------------------------------
+# THE MINIMAL CORRECTION
+# ---------------------------------------------------------------------------
+# A full regeneration of 03_federal_funding would add 38 live columns, 22 of
+# them public-tier with NO description anybody has written yet - and
+# `codebook_undocumented_public` is MUST_BE_ZERO in 62. Shipping 22 blanks to
+# make the codebook "current" would trade a stale claim for a broken gate, and
+# inventing 22 descriptions would be fabrication. Neither is acceptable.
+#
+# So `retire-names` does only the part that is unambiguously WRONG rather than
+# merely incomplete: the two columns that no longer exist, and the two whose
+# fill rates the codebook states falsely. Everything measured with csv.reader
+# over the live files on 2026-09-02:
+#
+#   tribe_id         DROPPED from federal_funding_transactions and the panel by
+#                    843. Still documented at "integer, 11%".
+#   tribe_id_scheme  DROPPED by 843. Still documented at 77% with the value set
+#                    `lineageA_dofile_integer`.
+#   tribe_id_neid    documented as type `empty`, 0.0% filled. It is Cedar's own
+#                    handle and it is filled on 552,602 rows, 15.9%.
+#   canonical_name   documented at 76.9%. Measured 16.0%.
+#
+# The 38 undocumented columns are reported, not written. That work is owed and
+# it belongs to whoever authored the columns.
+RETIRE_ROWS = {
+    ("03_federal_funding", "tribe_id"): None,
+    ("03_federal_funding", "tribe_id_scheme"): None,
+}
+REPLACE_ROWS = [
+    dict(dataset="03_federal_funding", variable="attribution_status",
+         type="text", units="category", pct_filled="20.2", published="1",
+         access_tier="public",
+         description="Whether this row is attributed to a Native entity, "
+                     "unattributed, or explicitly ruled not Native. One of: "
+                     "`cedar_neid`, `unattributed`, `excluded_not_native`, "
+                     "`unresolved_native`. Renamed 2026-09-01 from "
+                     "`tribe_id_scheme_resolved` when the CICD id scheme was "
+                     "retired; the field is unchanged."),
+    dict(dataset="03_federal_funding", variable="cedar_uid",
+         type="text", units="code", pct_filled="16.1", published="1",
+         access_tier="public",
+         description="Cedar Press permanent identifier for the Native entity. "
+                     "Stable across releases and across renames; use this to "
+                     "join datasets."),
+]
+FIX_FILL = {
+    ("03_federal_funding", "tribe_id_neid"): (
+        "text", "15.9",
+        "Cedar Press entity handle (NEID form) for the Native entity this row "
+        "is attributed to. Blank where the row is unattributed."),
+    ("03_federal_funding", "canonical_name"): ("text", "16.0", None),
+}
+
+
+def retire_names(apply: bool) -> int:
+    targets = [CLEAN / "codebook_master.csv", FRAG / "03_federal_funding.csv"]
+    n_rows_now = "3477199"
+    for t in targets:
+        if not t.exists():
+            print(f"  absent, skipped: {t}")
+            continue
+        with t.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+            rd = csv.DictReader(fh)
+            fields = list(rd.fieldnames or [])
+            rows = list(rd)
+        out, dropped, fixed = [], [], []
+        have = {(r["dataset"], r["variable"]) for r in rows}
+        for r in rows:
+            k = (r.get("dataset"), r.get("variable"))
+            if k in RETIRE_ROWS:
+                dropped.append(r["variable"])
+                continue
+            if k in FIX_FILL:
+                ty, pct, desc = FIX_FILL[k]
+                fixed.append(f"{r['variable']} {r['pct_filled']}%->{pct}%"
+                             f" type {r['type']}->{ty}")
+                r["type"], r["pct_filled"] = ty, pct
+                if desc:
+                    r["description"] = desc
+            if r.get("dataset") == "03_federal_funding":
+                r["n_rows"] = n_rows_now
+            out.append(r)
+        added = []
+        for spec in REPLACE_ROWS:
+            k = (spec["dataset"], spec["variable"])
+            if k in have:
+                continue
+            row = {f: "" for f in fields}
+            row.update({f: v for f, v in spec.items() if f in fields})
+            row["n_rows"] = n_rows_now
+            row["generated"] = TODAY
+            out.append(row)
+            added.append(spec["variable"])
+        print(f"  {t.name}: {len(rows)} -> {len(out)} rows")
+        print(f"    dropped (retired by 843): {', '.join(dropped) or '-'}")
+        print(f"    added:                    {', '.join(added) or '-'}")
+        print(f"    fill/type corrected:      {'; '.join(fixed) or '-'}")
+        if apply:
+            bak = t.with_suffix(t.suffix + f".bak_{TODAY}_pre941")
+            if not bak.exists():
+                bak.write_bytes(t.read_bytes())
+            tmp = t.with_suffix(t.suffix + ".tmp941")
+            with tmp.open("w", encoding="utf-8", newline="") as fh:
+                w = csv.DictWriter(fh, fieldnames=fields, extrasaction="ignore")
+                w.writeheader()
+                w.writerows(out)
+            tmp.replace(t)
+            print(f"    wrote {t.relative_to(ROOT)} (backup {bak.name})")
+    if not apply:
+        print(chr(10) + "  nothing written. re-run with `--apply`.")
+    return 0
+
+
 def main() -> int:
     argv = sys.argv[1:]
     mode = argv[0] if argv else "drift"
     DS = datasets_map()
+
+    if mode == "retire-names":
+        return retire_names("--apply" in argv)
 
     if mode == "list":
         for ds, files in DS.items():

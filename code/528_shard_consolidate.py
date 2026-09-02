@@ -86,6 +86,13 @@ SHARDS = {
     "shard_k": "Alaska Native Village governments",
     "shard_l": "vendor lists, unsurveyed federally recognized tribes, 1st half",
     "shard_m": "vendor lists, unsurveyed federally recognized tribes, 2nd half",
+    # Added 2026-09-02 by code/1020_tail_web_probe.py, per the instruction the
+    # note above gives an unlisted shard: add it so its slice is described.
+    # Shard N's slice is DERIVED as "every register entity no other shard map
+    # has a row for", which is precisely the `untouched` column of the table
+    # below - so this shard's whole job is to drive that column to zero, and
+    # its slice shrinks automatically as siblings land.
+    "shard_n": "the coverage tail - every entity no other shard touched",
 }
 
 MAP_COLS = ["cedar_uid", "canonical_name", "entity_class", "url_type", "url",

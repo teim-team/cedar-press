@@ -1,7 +1,7 @@
 {
- "generated": "2026-09-01",
+ "generated": "2026-09-02",
  "method": "sample-generated candidates, FULL-FILE confirmation; hash uniqueness with exact re-read of every colliding hash. Produced by 512_build_dataset_contracts.py probe.",
- "n_tables": 208,
+ "n_tables": 215,
  "tables": {
   "admin_region_assignments.csv": {
    "path": "data/clean/admin_region_assignments.csv",
@@ -5172,7 +5172,7 @@
   "faads_transactions_all_agencies.csv": {
    "path": "data/clean/faads_transactions_all_agencies.csv",
    "rows": 2769748,
-   "n_columns": 27,
+   "n_columns": 40,
    "columns": [
     "fiscal_year",
     "cfda_program",
@@ -5200,7 +5200,20 @@
     "source_file",
     "cedar_uid",
     "assistance_transaction_unique_key",
-    "modification_number"
+    "modification_number",
+    "geo_recipient_county_fips",
+    "geo_recipient_county_name",
+    "geo_recipient_state_fips",
+    "geo_recipient_place_dominance_share",
+    "geo_recipient_place_ambiguous",
+    "geo_pop_county_fips",
+    "geo_pop_county_name",
+    "geo_pop_state_fips",
+    "geo_pop_place_dominance_share",
+    "geo_pop_place_ambiguous",
+    "geo_key_tier",
+    "geo_key_basis",
+    "geo_built_date"
    ],
    "whole_row_duplicates": 3441,
    "natural_key": [],
@@ -5233,7 +5246,7 @@
      "duplicate_rows": 1943993,
      "null_rows": 1943994,
      "example_duplicate": "",
-     "tested_date": "2026-09-01"
+     "tested_date": "2026-09-02"
     },
     {
      "key": [
@@ -5251,7 +5264,7 @@
      "tested_date": "2026-08-29"
     }
    ],
-   "tested_date": "2026-09-01"
+   "tested_date": "2026-09-02"
   },
   "fac_audit_gaming_disclosures.csv": {
    "path": "data/clean/fac_audit_gaming_disclosures.csv",
@@ -13317,9 +13330,13 @@
   },
   "native_passthrough.csv": {
    "path": "data/clean/native_passthrough.csv",
-   "rows": 1522,
-   "n_columns": 18,
+   "rows": 1663,
+   "n_columns": 22,
    "columns": [
+    "source_dataset",
+    "subaward_source_record_id",
+    "duplicate_status",
+    "subaward_exceeds_prime_flag",
     "subaward_number",
     "prime_award_id",
     "fiscal_year",
@@ -13339,12 +13356,34 @@
     "reliability_note",
     "built_date"
    ],
-   "whole_row_duplicates": 116,
+   "whole_row_duplicates": 0,
    "natural_key": [],
    "natural_key_duplicate_rows": null,
    "join_columns_present": [],
    "max_rows_per_join_key_value": {},
    "candidates_tested": [
+    {
+     "key": [
+      "subaward_source_record_id",
+      "source_dataset"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-02"
+    },
+    {
+     "key": [
+      "subaward_source_record_id",
+      "duplicate_status"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-02"
+    },
     {
      "key": [
       "subaward_number",
@@ -13383,7 +13422,7 @@
      "tested_date": "2026-08-29"
     }
    ],
-   "tested_date": "2026-09-01"
+   "tested_date": "2026-09-02"
   },
   "native_passthrough_pairs.csv": {
    "path": "data/clean/native_passthrough_pairs.csv",
@@ -17264,8 +17303,8 @@
   },
   "subawards.csv": {
    "path": "data/clean/subawards.csv",
-   "rows": 72837,
-   "n_columns": 53,
+   "rows": 76859,
+   "n_columns": 71,
    "columns": [
     "sub_uei",
     "sub_cage",
@@ -17319,16 +17358,34 @@
     "subaward_amount_real2025",
     "deflator_factor_2025",
     "inflation_base_year",
-    "cedar_uid"
+    "cedar_uid",
+    "subaward_sam_report_id",
+    "subaward_sam_report_month",
+    "subaward_sam_report_last_modified_date",
+    "geo_prime_award_recipient_county_fips",
+    "geo_prime_award_recipient_county_name",
+    "geo_prime_award_recipient_state_fips",
+    "geo_prime_award_pop_county_fips",
+    "geo_prime_award_pop_county_name",
+    "geo_prime_award_pop_state_fips",
+    "geo_key_tier",
+    "geo_key_basis",
+    "geo_subawardee_county_gap_reason",
+    "geo_built_date",
+    "subaward_sam_report_id_basis",
+    "subaward_source_record_id",
+    "subaward_source_record_id_basis",
+    "prime_cedar_uid",
+    "sub_cedar_uid"
    ],
-   "whole_row_duplicates": 10770,
+   "whole_row_duplicates": 0,
    "natural_key": [],
    "natural_key_duplicate_rows": null,
    "join_columns_present": [
     "cedar_uid"
    ],
    "max_rows_per_join_key_value": {
-    "cedar_uid": 6163
+    "cedar_uid": 6651
    },
    "candidates_tested": [
     {
@@ -17339,7 +17396,31 @@
      "unique": false,
      "duplicate_rows": 27470,
      "null_rows": 0,
-     "example_duplicate": "7500162063 | 2018-07-13"
+     "example_duplicate": "7500162063 | 2018-07-13",
+     "tested_date": "2026-08-29"
+    },
+    {
+     "key": [
+      "subaward_source_record_id",
+      "sub_parent_uei"
+     ],
+     "unique": false,
+     "duplicate_rows": 346,
+     "null_rows": 30422,
+     "example_duplicate": "83D11274-7D58-4BFC-92AE-B098777AB8E4 | XY4MRBMRTWL5",
+     "tested_date": "2026-09-02"
+    },
+    {
+     "key": [
+      "subaward_source_record_id",
+      "sub_parent_uei",
+      "subaward_number"
+     ],
+     "unique": false,
+     "duplicate_rows": 346,
+     "null_rows": 30422,
+     "example_duplicate": "83D11274-7D58-4BFC-92AE-B098777AB8E4 | XY4MRBMRTWL5 | 20-4803",
+     "tested_date": "2026-09-02"
     },
     {
      "key": [
@@ -17353,10 +17434,11 @@
      "unique": false,
      "duplicate_rows": 22211,
      "null_rows": 30892,
-     "example_duplicate": "0150-3073 | 2012-01-23 | https://www.usaspending.gov/award/ASST_NON_SH11001_086/ | WICHITA HABITAT FOR HUMANITY INC |  | NONPROFIT ORGANIZATION"
+     "example_duplicate": "0150-3073 | 2012-01-23 | https://www.usaspending.gov/award/ASST_NON_SH11001_086/ | WICHITA HABITAT FOR HUMANITY INC |  | NONPROFIT ORGANIZATION",
+     "tested_date": "2026-08-29"
     }
    ],
-   "tested_date": "2026-08-29"
+   "tested_date": "2026-09-02"
   },
   "tcu_cdfi_added.csv": {
    "path": "data/clean/tcu_cdfi_added.csv",
@@ -18284,6 +18366,770 @@
   "contractors": {
    "error": "not on disk",
    "tested_date": "2026-08-29"
+  },
+  "native_owned_businesses.bak_2026-09-02_010526.csv": {
+   "path": "data/clean/native_owned_businesses.bak_2026-09-02_010526.csv",
+   "rows": 2393,
+   "n_columns": 54,
+   "columns": [
+    "business_source_id",
+    "source_id",
+    "source_business_key",
+    "certifying_authority_entity_id",
+    "certifying_authority_name",
+    "nation_id",
+    "programme_name",
+    "business_name_raw",
+    "business_name_normalized",
+    "business_name_is_person_name",
+    "business_entity_id",
+    "business_entity_name",
+    "business_entity_class",
+    "resolution_method",
+    "record_scope",
+    "assertion_class",
+    "directory_type",
+    "identity_scope",
+    "identity_claim_text",
+    "inclusion_basis",
+    "ownership_percent",
+    "ownership_threshold_min",
+    "verification_basis",
+    "certification_number",
+    "certification_tier",
+    "certification_start",
+    "certification_expiration",
+    "business_license_number",
+    "federal_contract_number",
+    "service_category_raw",
+    "naics",
+    "city",
+    "state_province",
+    "owner_name_present",
+    "n_owners_named",
+    "withheld_fields",
+    "source_url",
+    "source_edition",
+    "source_last_updated",
+    "harvest_date",
+    "first_seen",
+    "last_seen",
+    "is_current",
+    "ingestion_method",
+    "ocr_mean_confidence",
+    "raw_snapshot_uri",
+    "source_terms_status",
+    "consent_status",
+    "suppression_key",
+    "publishable",
+    "validation_flags",
+    "record_hash",
+    "built_by_script",
+    "publishable_basis"
+   ],
+   "whole_row_duplicates": 0,
+   "natural_key": [
+    "business_source_id",
+    "source_id",
+    "source_business_key",
+    "certifying_authority_entity_id",
+    "certifying_authority_name",
+    "nation_id",
+    "programme_name",
+    "business_name_raw",
+    "business_name_normalized",
+    "business_name_is_person_name",
+    "business_entity_id",
+    "business_entity_name",
+    "business_entity_class",
+    "resolution_method",
+    "record_scope",
+    "assertion_class",
+    "directory_type",
+    "identity_scope",
+    "identity_claim_text",
+    "inclusion_basis",
+    "ownership_percent",
+    "ownership_threshold_min",
+    "verification_basis",
+    "certification_number",
+    "certification_tier",
+    "certification_start",
+    "certification_expiration",
+    "business_license_number",
+    "federal_contract_number",
+    "service_category_raw",
+    "naics",
+    "city",
+    "state_province",
+    "owner_name_present",
+    "n_owners_named",
+    "withheld_fields",
+    "source_url",
+    "source_edition",
+    "source_last_updated",
+    "harvest_date",
+    "first_seen",
+    "last_seen",
+    "is_current",
+    "ingestion_method",
+    "ocr_mean_confidence",
+    "raw_snapshot_uri",
+    "source_terms_status",
+    "consent_status",
+    "suppression_key",
+    "publishable",
+    "validation_flags",
+    "publishable_basis"
+   ],
+   "natural_key_duplicate_rows": 0,
+   "join_columns_present": [],
+   "max_rows_per_join_key_value": {},
+   "candidates_tested": [
+    {
+     "key": [
+      "record_hash"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-02"
+    },
+    {
+     "key": [
+      "business_source_id"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-02"
+    }
+   ],
+   "tested_date": "2026-09-02"
+  },
+  "native_owned_businesses.bak_2026-09-02_010557.csv": {
+   "path": "data/clean/native_owned_businesses.bak_2026-09-02_010557.csv",
+   "rows": 2393,
+   "n_columns": 54,
+   "columns": [
+    "business_source_id",
+    "source_id",
+    "source_business_key",
+    "certifying_authority_entity_id",
+    "certifying_authority_name",
+    "nation_id",
+    "programme_name",
+    "business_name_raw",
+    "business_name_normalized",
+    "business_name_is_person_name",
+    "business_entity_id",
+    "business_entity_name",
+    "business_entity_class",
+    "resolution_method",
+    "record_scope",
+    "assertion_class",
+    "directory_type",
+    "identity_scope",
+    "identity_claim_text",
+    "inclusion_basis",
+    "ownership_percent",
+    "ownership_threshold_min",
+    "verification_basis",
+    "certification_number",
+    "certification_tier",
+    "certification_start",
+    "certification_expiration",
+    "business_license_number",
+    "federal_contract_number",
+    "service_category_raw",
+    "naics",
+    "city",
+    "state_province",
+    "owner_name_present",
+    "n_owners_named",
+    "withheld_fields",
+    "source_url",
+    "source_edition",
+    "source_last_updated",
+    "harvest_date",
+    "first_seen",
+    "last_seen",
+    "is_current",
+    "ingestion_method",
+    "ocr_mean_confidence",
+    "raw_snapshot_uri",
+    "source_terms_status",
+    "consent_status",
+    "suppression_key",
+    "publishable",
+    "validation_flags",
+    "record_hash",
+    "built_by_script",
+    "publishable_basis"
+   ],
+   "whole_row_duplicates": 0,
+   "natural_key": [
+    "business_source_id",
+    "source_id",
+    "source_business_key",
+    "certifying_authority_entity_id",
+    "certifying_authority_name",
+    "nation_id",
+    "programme_name",
+    "business_name_raw",
+    "business_name_normalized",
+    "business_name_is_person_name",
+    "business_entity_id",
+    "business_entity_name",
+    "business_entity_class",
+    "resolution_method",
+    "record_scope",
+    "assertion_class",
+    "directory_type",
+    "identity_scope",
+    "identity_claim_text",
+    "inclusion_basis",
+    "ownership_percent",
+    "ownership_threshold_min",
+    "verification_basis",
+    "certification_number",
+    "certification_tier",
+    "certification_start",
+    "certification_expiration",
+    "business_license_number",
+    "federal_contract_number",
+    "service_category_raw",
+    "naics",
+    "city",
+    "state_province",
+    "owner_name_present",
+    "n_owners_named",
+    "withheld_fields",
+    "source_url",
+    "source_edition",
+    "source_last_updated",
+    "harvest_date",
+    "first_seen",
+    "last_seen",
+    "is_current",
+    "ingestion_method",
+    "ocr_mean_confidence",
+    "raw_snapshot_uri",
+    "source_terms_status",
+    "consent_status",
+    "suppression_key",
+    "publishable",
+    "validation_flags",
+    "publishable_basis"
+   ],
+   "natural_key_duplicate_rows": 0,
+   "join_columns_present": [],
+   "max_rows_per_join_key_value": {},
+   "candidates_tested": [
+    {
+     "key": [
+      "record_hash"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-02"
+    },
+    {
+     "key": [
+      "business_source_id"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-02"
+    }
+   ],
+   "tested_date": "2026-09-02"
+  },
+  "native_owned_businesses.csv": {
+   "path": "data/clean/native_owned_businesses.csv",
+   "rows": 2393,
+   "n_columns": 58,
+   "columns": [
+    "business_source_id",
+    "source_id",
+    "source_business_key",
+    "certifying_authority_entity_id",
+    "certifying_authority_name",
+    "nation_id",
+    "programme_name",
+    "business_name_raw",
+    "business_name_normalized",
+    "business_name_is_person_name",
+    "business_entity_id",
+    "business_entity_name",
+    "business_entity_class",
+    "resolution_method",
+    "record_scope",
+    "assertion_class",
+    "directory_type",
+    "identity_scope",
+    "identity_claim_text",
+    "inclusion_basis",
+    "ownership_percent",
+    "ownership_threshold_min",
+    "verification_basis",
+    "certification_number",
+    "certification_tier",
+    "certification_start",
+    "certification_expiration",
+    "business_license_number",
+    "federal_contract_number",
+    "service_category_raw",
+    "naics",
+    "city",
+    "state_province",
+    "owner_name_present",
+    "n_owners_named",
+    "withheld_fields",
+    "source_url",
+    "source_edition",
+    "source_last_updated",
+    "harvest_date",
+    "first_seen",
+    "last_seen",
+    "is_current",
+    "ingestion_method",
+    "ocr_mean_confidence",
+    "raw_snapshot_uri",
+    "source_terms_status",
+    "consent_status",
+    "suppression_key",
+    "publishable",
+    "validation_flags",
+    "record_hash",
+    "built_by_script",
+    "publishable_basis",
+    "federal_uei_candidate",
+    "federal_cage_candidate",
+    "federal_identifier_match_status",
+    "federal_identifier_match_basis"
+   ],
+   "whole_row_duplicates": 0,
+   "natural_key": [
+    "business_source_id",
+    "source_id",
+    "source_business_key",
+    "certifying_authority_entity_id",
+    "certifying_authority_name",
+    "nation_id",
+    "programme_name",
+    "business_name_raw",
+    "business_name_normalized",
+    "business_name_is_person_name",
+    "business_entity_id",
+    "business_entity_name",
+    "business_entity_class",
+    "resolution_method",
+    "record_scope",
+    "assertion_class",
+    "directory_type",
+    "identity_scope",
+    "identity_claim_text",
+    "inclusion_basis",
+    "ownership_percent",
+    "ownership_threshold_min",
+    "verification_basis",
+    "certification_number",
+    "certification_tier",
+    "certification_start",
+    "certification_expiration",
+    "business_license_number",
+    "federal_contract_number",
+    "service_category_raw",
+    "naics",
+    "city",
+    "state_province",
+    "owner_name_present",
+    "n_owners_named",
+    "withheld_fields",
+    "source_url",
+    "source_edition",
+    "source_last_updated",
+    "harvest_date",
+    "first_seen",
+    "last_seen",
+    "is_current",
+    "ingestion_method",
+    "ocr_mean_confidence",
+    "raw_snapshot_uri",
+    "source_terms_status",
+    "consent_status",
+    "suppression_key",
+    "publishable",
+    "validation_flags",
+    "publishable_basis",
+    "federal_uei_candidate",
+    "federal_cage_candidate",
+    "federal_identifier_match_status",
+    "federal_identifier_match_basis"
+   ],
+   "natural_key_duplicate_rows": 0,
+   "join_columns_present": [],
+   "max_rows_per_join_key_value": {},
+   "candidates_tested": [
+    {
+     "key": [
+      "record_hash"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-02"
+    },
+    {
+     "key": [
+      "business_source_id"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-02"
+    }
+   ],
+   "tested_date": "2026-09-02"
+  },
+  "prime_contracts.bak_2026-09-02_011205_pre772.csv": {
+   "path": "data/clean/prime_contracts.bak_2026-09-02_011205_pre772.csv",
+   "rows": 1217768,
+   "n_columns": 56,
+   "columns": [
+    "contract_number",
+    "parent_contract_number",
+    "fiscal_year",
+    "pre_2000_flag",
+    "awardee_name",
+    "awardee_uei",
+    "cage_code",
+    "parent_name",
+    "parent_uei",
+    "total_obligations",
+    "total_award_value",
+    "total_obligations_real2025",
+    "total_award_value_real2025",
+    "deflator_factor_2025",
+    "inflation_base_year",
+    "setaside",
+    "reported_8a",
+    "reported_buy_indian",
+    "reported_indian_business",
+    "reported_native_preference",
+    "setaside_reported",
+    "extent_competed",
+    "funding_agency",
+    "sector",
+    "supersector",
+    "defense",
+    "recipient_city_name",
+    "recipient_state_code",
+    "place_of_perform_city",
+    "place_of_perform_state",
+    "tribe_id",
+    "canonical_name",
+    "attribution_method",
+    "confidence_tier",
+    "attributed_flag",
+    "source_file",
+    "source_authority",
+    "built_date",
+    "ruling_status",
+    "ruling_source_file",
+    "ruling_applied_date",
+    "extent_competed_normalized",
+    "extent_competed_normalized_basis",
+    "cedar_uid",
+    "owner_attribution_status",
+    "owner_as_of_transaction_cedar_uid",
+    "contract_transaction_unique_key",
+    "contract_award_unique_key",
+    "naics_code",
+    "naics_description",
+    "action_date",
+    "award_type",
+    "product_or_service_code",
+    "product_or_service_code_description",
+    "award_base_description",
+    "award_attributes_basis"
+   ],
+   "whole_row_duplicates": 0,
+   "natural_key": [],
+   "natural_key_duplicate_rows": null,
+   "join_columns_present": [
+    "tribe_id",
+    "cedar_uid",
+    "cage_code"
+   ],
+   "max_rows_per_join_key_value": {
+    "tribe_id": 111398,
+    "cedar_uid": 111398,
+    "cage_code": 398840
+   },
+   "candidates_tested": [
+    {
+     "key": [
+      "contract_number",
+      "parent_contract_number"
+     ],
+     "unique": false,
+     "duplicate_rows": 630270,
+     "null_rows": 0,
+     "example_duplicate": "FA300216C0004 | nan",
+     "tested_date": "2026-09-02"
+    },
+    {
+     "key": [
+      "contract_number",
+      "parent_contract_number",
+      "awardee_name",
+      "sector",
+      "place_of_perform_state",
+      "extent_competed_normalized"
+     ],
+     "unique": false,
+     "duplicate_rows": 613918,
+     "null_rows": 6519,
+     "example_duplicate": "FA300216C0004 | nan | ASRC COMMUNICATIONS, LTD. | 56 | OK | FULL AND OPEN COMPETITION AFTER EXCLUSION OF SOURCES",
+     "tested_date": "2026-09-02"
+    }
+   ],
+   "tested_date": "2026-09-02"
+  },
+  "regulations_gov_comments.csv": {
+   "path": "data/clean/regulations_gov_comments.csv",
+   "rows": 4359,
+   "n_columns": 29,
+   "columns": [
+    "regulations_gov_comment_row_id",
+    "comment_id",
+    "agency_id",
+    "document_type",
+    "title",
+    "posted_date",
+    "posted_year",
+    "withdrawn",
+    "cedar_entity_id",
+    "cedar_entity_name",
+    "entity_class",
+    "query_name",
+    "query_name_source",
+    "attribution_class",
+    "attribution_basis",
+    "record_scope",
+    "record_scope_basis",
+    "inclusion_basis",
+    "matched_terms",
+    "highlighted_excerpt",
+    "event_class",
+    "channel",
+    "is_lobbying",
+    "rule_basis",
+    "comment_url",
+    "query_url",
+    "confidence_tier",
+    "retrieved_date",
+    "built_by_script"
+   ],
+   "whole_row_duplicates": 0,
+   "natural_key": [],
+   "natural_key_duplicate_rows": null,
+   "join_columns_present": [],
+   "max_rows_per_join_key_value": {},
+   "candidates_tested": [
+    {
+     "key": [
+      "title",
+      "posted_date"
+     ],
+     "unique": false,
+     "duplicate_rows": 469,
+     "null_rows": 5,
+     "example_duplicate": "Cheyenne and Arapaho Tribes of Oklahoma (57) - Comments | 2002-10-07",
+     "tested_date": "2026-09-02"
+    },
+    {
+     "key": [
+      "title",
+      "posted_date",
+      "highlighted_excerpt",
+      "query_url",
+      "agency_id",
+      "withdrawn"
+     ],
+     "unique": false,
+     "duplicate_rows": 304,
+     "null_rows": 850,
+     "example_duplicate": "Cheyenne and Arapaho Tribes of Oklahoma (57) - Comments | 2002-10-07 | Cheyenne and Arapaho Tribes of Oklahoma (57) - Comments | https://api.regulations.gov/v4/",
+     "tested_date": "2026-09-02"
+    }
+   ],
+   "tested_date": "2026-09-02"
+  },
+  "regulations_gov_entity_coverage.csv": {
+   "path": "data/clean/regulations_gov_entity_coverage.csv",
+   "rows": 974,
+   "n_columns": 23,
+   "columns": [
+    "cedar_entity_id",
+    "cedar_entity_name",
+    "entity_class",
+    "state",
+    "query_name",
+    "query_name_source",
+    "http_status",
+    "comments_matching_total",
+    "records_retrieved",
+    "pages_fetched",
+    "pages_available",
+    "page_budget_exhausted",
+    "title_attributed_rows",
+    "text_mention_rows",
+    "earliest_posted_date",
+    "latest_posted_date",
+    "distinct_agencies",
+    "top_agencies",
+    "coverage_status",
+    "coverage_basis",
+    "query_url",
+    "retrieved_date",
+    "built_by_script"
+   ],
+   "whole_row_duplicates": 0,
+   "natural_key": [
+    "cedar_entity_id",
+    "cedar_entity_name",
+    "entity_class",
+    "state",
+    "query_name",
+    "query_name_source",
+    "http_status",
+    "comments_matching_total",
+    "records_retrieved",
+    "pages_fetched",
+    "pages_available",
+    "page_budget_exhausted",
+    "title_attributed_rows",
+    "text_mention_rows",
+    "earliest_posted_date",
+    "latest_posted_date",
+    "distinct_agencies",
+    "top_agencies",
+    "coverage_status",
+    "coverage_basis"
+   ],
+   "natural_key_duplicate_rows": 0,
+   "join_columns_present": [],
+   "max_rows_per_join_key_value": {},
+   "candidates_tested": [
+    {
+     "key": [
+      "query_url"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-02"
+    },
+    {
+     "key": [
+      "query_name"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-02"
+    }
+   ],
+   "tested_date": "2026-09-02"
+  },
+  "sam_native_class_distributions.csv": {
+   "path": "data/clean/sam_native_class_distributions.csv",
+   "rows": 176,
+   "n_columns": 14,
+   "columns": [
+    "variant_class",
+    "dimension",
+    "value",
+    "n_firms",
+    "n_rows",
+    "action_obligation_usd",
+    "value_suppressed_small_cell",
+    "suppression_rule",
+    "universe",
+    "class_rule",
+    "generated",
+    "source_review_file",
+    "promoted_by",
+    "promoted_date"
+   ],
+   "whole_row_duplicates": 0,
+   "natural_key": [],
+   "natural_key_duplicate_rows": null,
+   "join_columns_present": [],
+   "max_rows_per_join_key_value": {},
+   "candidates_tested": [
+    {
+     "key": [
+      "value",
+      "variant_class",
+      "dimension"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-02"
+    },
+    {
+     "key": [
+      "value",
+      "dimension",
+      "variant_class"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-02"
+    },
+    {
+     "key": [
+      "dimension",
+      "variant_class",
+      "value"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-02"
+    },
+    {
+     "key": [
+      "value",
+      "variant_class"
+     ],
+     "unique": false,
+     "duplicate_rows": 4,
+     "null_rows": 0,
+     "example_duplicate": "NOT_RECORDED | ENTITY_OWNED",
+     "tested_date": "2026-09-02"
+    }
+   ],
+   "tested_date": "2026-09-02"
   }
  }
 }

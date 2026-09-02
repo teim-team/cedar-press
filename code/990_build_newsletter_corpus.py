@@ -127,6 +127,16 @@ CT = {
 }
 
 
+# Shard I built a "tribe-serving nonprofit" slice by name matching, and a city
+# called Peoria, a valley called Mohawk and a county called Fond du Lac all
+# match. An astronomical society is not a tribal publication.
+PLACE_COLLISION = re.compile(
+    r"(?i)\b(astronomical|cycling club|audubon|shakespeare|"
+    r"congress of parents|symphony|garden club|rotary|kiwanis|"
+    r"quilt|genealog\w+|historical society|humane society|little league|"
+    r"wastewater recycling)\b")
+
+
 def host_of(u):
     """Host, or the sentinel URL_MALFORMED when the string is not a URL.
 
@@ -494,6 +504,13 @@ def build():
         lo, hi = r["archive_earliest_year"], r["archive_latest_year"]
         r["archive_span_years"] = str(int(hi) - int(lo) + 1) if lo and hi else ""
         r["n_recent_issue_urls"] = str(len([x for x in r["recent_issue_urls"].split(" | ") if x]))
+        if r["source_shard"] == "shard_i" and PLACE_COLLISION.search(r["publisher_name"]):
+            r["note"] = ("FLAG_UPSTREAM: this publisher reached the corpus through "
+                         "shard I's tribe-serving-nonprofit slice, but its name is "
+                         "a PLACE-NAME COLLISION (Peoria IL, Wichita KS, Mohawk "
+                         "Valley NY, Seminole FL, Fond du Lac WI), not a Native "
+                         "organisation. Kept and flagged for the shard-I owner; it "
+                         "is not counted as a Native publication. " + r["note"])[:1100]
         if r["channel_host"] == "URL_MALFORMED":
             r["note"] = ("FLAG: channel_url is not a parseable URL as harvested "
                          "upstream; kept, not repaired. " + r["note"])[:1100]
@@ -581,6 +598,8 @@ def build():
             c["entity_class"] for c in cover if c["probe_status"] == "found")),
         "not_probed_with_live_site": sum(
             1 for c in cover if c["probe_status"] == "not_probed" and c["has_live_site"] == "yes"),
+        "shard_i_place_name_collisions_flagged": sum(
+            1 for r in recs if r["note"].startswith("FLAG_UPSTREAM")),
         "archive_depth_10y_plus": sum(
             1 for r in recs if r["archive_span_years"] and int(r["archive_span_years"]) >= 10),
         "deepest_archives": sorted(

@@ -2,8 +2,28 @@
 
 *Rewritten at the close of 2026-08-12. Dataset table re-verified 2026-08-26.*
 
-**Read order:** `README.md` → **this file** → `AGENTS.md` → `docs/PULL_DISCIPLINE.md` → the
-build log for whatever you are touching.
+> ## BEFORE YOU WRITE ANYTHING
+>
+> ```
+> py -3 code/1050_preflight.py
+> ```
+>
+> Claims your script number **atomically** (43 numbers already carry more than one
+> script; `ls code/<n>_*` cannot prevent the 44th because check-then-write is not
+> atomic), prints which shared files need marker discipline before you edit them,
+> reads `NEVER_RUN` live rather than from prose, and tells you how to check whether
+> the thing you are about to download is already on this machine.
+>
+> Then read **`docs/AGENT_FIELD_GUIDE.md`** — ~190 lines, the traps that have each
+> cost this project more than one session. Read it once, in full. It is the only
+> document here short enough that skimming it is not the failure mode.
+>
+> Do not commit. An integrator verifies claims against live data and commits.
+
+**Read order:** `README.md` → **this file** → **`docs/AGENT_FIELD_GUIDE.md`** →
+`AGENTS.md` (5,898 lines, mostly an append-only journal — read the top section and
+then grep it for your dataset; do not read it linearly) → `docs/PULL_DISCIPLINE.md`
+→ the build log for whatever you are touching.
 
 `README.md` (new, 2026-08-26) covers what Cedar Press is, the folder layout, how to run
 things, the hard safety rules, and **where the data actually goes** — the Collections
@@ -62,10 +82,20 @@ LINK.**
 > from `code/284_audit_nondeterministic_keys.py`. Full write-up in `AGENTS.md`
 > and `docs/CODE_HEALTH_AUDIT.md`.
 
-**2. `09_import_rulings.py` and `01_build_entity_spine.py` remain unsafe to
-RUN.** Both rebuild from a stale upstream and silently delete later work. They
-are safe to IMPORT — `124_apply_rulings_in_place.py` does that and is the
-correct tool for rulings.
+**2. ~~`09_import_rulings.py` and `01_build_entity_spine.py` remain unsafe to
+RUN.~~ CORRECTED 2026-09-02 — THIS WAS STALE, AND IT IS THE EXACT FAILURE MODE
+THIS DOCUMENT WARNS ABOUT.** Both came **off** `NEVER_RUN` on 2026-09-01
+(workstream C8), together with `88_build_deals_taxonomy.py`, because the reason
+they were on it stopped being true: all three now write through
+`cedar_pipeline.merge_table`, which cannot drop a row and raises rather than drop
+a column, and `code/812_c8_rebuild_proof.py` proved it by dry run against the live
+tables (spine 1,555 → 1,555 rows / 44 → 44 columns; ledger 20,577 → 20,577 rows /
+22 → 22 columns; deals 935 → 935 / 52 → 52; zero lost in each).
+**`NEVER_RUN` in `code/cedar_pipeline.py` is the only authority, and it currently
+holds ONE script: `41_build_codebooks.py`.** Never read a run-safety claim out of
+prose — `py -3 code/1050_preflight.py` prints the live dict, and
+`py -3 code/build.py plan <collection>` is still required before any rebuild.
+`124_apply_rulings_in_place.py` remains the correct tool for applying rulings.
 
 **3. `api.sam.gov` rejects a bad key with a STATUS THAT VARIES — 401 *and* 404
 have both been measured.** 401 `API_KEY_INVALID` on 2026-08-05 and again on
@@ -120,6 +150,8 @@ find its row here and stop — you do not need to grep `docs/`.*
 
 | file | what it is |
 |---|---|
+| **`docs/AGENT_FIELD_GUIDE.md`** | **new 2026-09-02. ~200 lines: the traps, each with the file that proves it. Script-number claiming, the shared files that need markers, the nine checks that measured something other than their own name, the four phantom duplicate allegations, and the four causes of "missing". Read once, in full, before writing anything.** |
+| **`code/1050_preflight.py`** | **new 2026-09-02. Run before you write. `claim` takes a script number atomically; `ondisk` says whether it is already local; `shared` says which files need marker discipline; `numbers` is the collision census. No network.** |
 | `docs/HANDOFF.md` | what was happening and what to do next. **Goes stale fastest of anything here.** |
 | `AGENTS.md` | the durable rules, defect classes, concurrency discipline, the NEVER-RUN list |
 | `START_HERE.md` (this file) | durable dataset state + this index |

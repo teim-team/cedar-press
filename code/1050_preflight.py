@@ -235,7 +235,15 @@ def cmd_release(args) -> int:
 # ---------------------------------------------------------------------------
 # shared files
 # ---------------------------------------------------------------------------
-MARKER_RE = re.compile(r"<!--\s*BEGIN ([A-Za-z0-9 _.-]+?)\s*-->")
+# ANCHORED TO THE WHOLE LINE, DELIBERATELY. The first version of this regex was
+# `<!--\s*BEGIN (...)\s*-->` unanchored, and it reported a duplicate `FAADS`
+# block in docs/MONEY_TOTALLING_RULES.md that does not exist - line 314 is prose
+# *quoting* the marker to explain the convention. That is this repo's signature
+# defect (a `tract` regex matching inside `contract_number`) reproduced inside
+# the tool written to warn about it. A marker only counts when it is the whole
+# line, which is also the only form `574`'s preserver acts on.
+MARKER_RE = re.compile(r"^[ \t]*<!--\s*BEGIN ([A-Za-z0-9 _.-]+?)\s*-->[ \t]*$",
+                       re.M)
 
 
 def cmd_shared(_args) -> int:
@@ -258,8 +266,14 @@ def cmd_shared(_args) -> int:
         names = MARKER_RE.findall(text)
         if names:
             found = True
+            dedup = list(dict.fromkeys(names))
             print(f"   docs/{md.name}")
-            print(f"       blocks in force: {', '.join(names)}")
+            print(f"       blocks in force: {', '.join(dedup)}")
+            if len(dedup) != len(names):
+                repeated = [n for n in dedup if names.count(n) > 1]
+                print(f"       !! marker name reused: "
+                      f"{', '.join(repeated)} - two blocks with one name are "
+                      f"one block to the preserver. Rename yours.")
     if not found:
         print("   (no marked files found - verify before trusting this)")
     print("\n   docs/MONEY_TOTALLING_RULES.md is written WHOLESALE by "
@@ -326,6 +340,8 @@ def cmd_ondisk(args) -> int:
         if not d.exists():
             continue
         for p in sorted(d.glob("*.csv")):
+            if ".bak_" in p.name:      # a backup is not a live column source
+                continue
             try:
                 with p.open(encoding="utf-8-sig", errors="replace",
                             newline="") as fh:

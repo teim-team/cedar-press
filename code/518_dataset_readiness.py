@@ -286,6 +286,46 @@ if len(KNOWN_IDS) < 100:              # spine unreadable - do not report 0%
 _BRIDGE_CACHE = {}
 
 
+_ATTACH_CACHE: dict = {}
+
+
+def _attachment_of(table: str):
+    """(rows carrying a KNOWN Cedar id, rows scanned) for one table, or None.
+
+    The same v2 test the main scanner applies, factored out so that a
+    `national_mirror` claim can be CHECKED rather than taken: the table a
+    mirror names as holding its Native attribution has to actually be
+    attached, or the claim is refused.
+    """
+    if table in _ATTACH_CACHE:
+        return _ATTACH_CACHE[table]
+    out = None
+    for d in ("data/clean", "data/spine"):
+        fp = ROOT / d / table
+        if not fp.exists():
+            continue
+        try:
+            with fp.open(encoding="utf-8-sig", errors="replace",
+                         newline="") as fh:
+                rdr = csv.DictReader(fh)
+                head = rdr.fieldnames or []
+                idc = [h for h in head if h in BARE_ID_COLS
+                       or h.endswith("_entity_id") or h.endswith("_cedar_uid")]
+                if idc:
+                    k = tot = 0
+                    for r in rdr:
+                        tot += 1
+                        if any((r.get(c) or "").strip() in KNOWN_IDS
+                               for c in idc):
+                            k += 1
+                    out = (k, tot)
+        except OSError:
+            out = None
+        break
+    _ATTACH_CACHE[table] = out
+    return out
+
+
 def load_bridge(table: str):
     """(key column on `table`, {key values that carry a Cedar entity}) | None.
 
@@ -361,16 +401,36 @@ def measure():
         # ---- C1 grain / C2 keys -------------------------------------
         unstated = [t["table"] for t in tables
                     if (t.get("grain") or "").startswith("UNSTATED")]
-        nokey = [t["table"] for t in tables if not (t.get("primary_key") or [])]
+        # C2 reads "primary keys and advertised join keys VALIDATE", not
+        # "every table has a primary key". A table that advertises no key,
+        # and carries a `key_refused` block that 512 re-measures against the
+        # file on every run - refused candidates that must still collide, a
+        # duplicate count that must still match, an additivity rule for every
+        # money column - has advertised nothing that can fail. Added
+        # 2026-09-02 (workstream SUBAWARD-FUNDING) for
+        # faads_transactions_all_agencies.csv, whose transaction key is not in
+        # the bytes of the retained source and cannot be recovered by any
+        # re-extract. An UNDECLARED missing key still blocks, and a refusal
+        # that has gone stale is a 512 violation, so this cannot be used to
+        # step around a key that exists.
+        nokey = [t["table"] for t in tables
+                 if not (t.get("primary_key") or [])
+                 and not (t.get("key_refused") or {}).get("reason")]
 
         # ---- C3 duplicates + C7 double counting ----------------------
+        # C3 is "literal duplicates removed OR INTENTIONALLY EXPLAINED". The
+        # `or` half had no implementation: any non-zero count blocked, which
+        # pushed toward de-duplicating files where a de-dupe destroys real
+        # money ($8,291,124,113 on the FAADS pair alone). 517 now sets
+        # `duplicates_explained` where the disposition is declared AND its
+        # expected count still matches the file exactly.
         dup_total, dup_tables, rowlevel = 0, [], []
         for n in names:
             s = safety.get(n)
             if not s:
                 continue
             d = int(s.get("literal_duplicate_rows") or 0)
-            if d:
+            if d and s.get("duplicates_explained") != "1":
                 dup_total += d
                 dup_tables.append(f"{n}({d:,})")
             if s.get("aggregation_safe") == "0":
@@ -387,9 +447,40 @@ def measure():
         # no Cedar id at all, is not attached to the hub however clean its own
         # grain is. See the C4 SCANNER v2 block at the top of this file for
         # the four measurement defects this replaces.
+        # (5) A VERBATIM NATIONAL SOURCE MIRROR IS NOT A DENOMINATOR.
+        #     Added 2026-09-02, workstream SUBAWARD-FUNDING, in the same
+        #     spirit as (3): defect (3) removed rows from the denominator
+        #     where the FILE can say, per row, that no entity is resolvable.
+        #     Some tables can only say it per TABLE.
+        #     `faads_transactions_all_agencies.csv` is 2,769,748 rows of every
+        #     federal assistance recipient in the United States, FY2001-2007,
+        #     held verbatim so the attribution layer has something to point
+        #     AT. 0 rows carry a Cedar id and 0 should: an NSF grant to a
+        #     university is not an unresolved Native link. Scoring it as one
+        #     told `funding` to go and invent 1.9M attributions.
+        #     THE CLAIM IS GATED THE SAME WAY 901's SCOPE COLUMN IS. A table
+        #     may only be excluded if its contract declares
+        #     `population_scope.scope == "national_mirror"` AND names the
+        #     table that carries its Native attribution AND that table exists
+        #     AND is itself >= 50% attached. Fail any of those and the mirror
+        #     is scored exactly as before, so this cannot clear C4 by
+        #     relabelling instead of resolving.
+        scope_decl = {t["table"]: (t.get("population_scope") or {})
+                      for t in tables}
+
         keyed_rows = total_rows = 0
-        unmeasured, sampled = [], []
+        unmeasured, sampled, mirrors = [], [], []
         for n in names:
+            ps = scope_decl.get(n) or {}
+            if ps.get("scope") == "national_mirror":
+                att = ps.get("native_attribution_table") or ""
+                a = _attachment_of(att) if att else None
+                if a and a[1] and (100.0 * a[0] / a[1]) >= 50:
+                    mirrors.append(f"{n}->{att} ({a[0]:,}/{a[1]:,} keyed)")
+                    continue
+                print(f"  NOTE {n}: national_mirror claim REFUSED - "
+                      f"{att or 'no attribution table named'} is missing or "
+                      f"is not itself attached. Scored as before.")
             for d in ("data/clean", "data/spine"):
                 fp = ROOT / d / n
                 if not fp.exists():
