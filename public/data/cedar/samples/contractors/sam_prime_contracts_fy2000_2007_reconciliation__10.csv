@@ -1,0 +1,7 @@
+generated,variant_class,grain_note,novelty,sam_rows,distinct_piid,distinct_piid_fy,distinct_uei,sam_action_obligation,rows_in_native_universe,rows_excluded_partial_match_trap,double_count_risk_rows,prime_contracts_rows_total
+2026-08-26,ENTITY_OWNED,SAM is TRANSACTION grain; prime_contracts FY2000-2007 is AWARD-YEAR-VENDOR grain. Row counts are NOT comparable across the seam.,PIID_FY_HELD,77703,37263,43341,3351,9074957943.33,56870,0,77703,1217768
+2026-08-26,ENTITY_OWNED,SAM is TRANSACTION grain; prime_contracts FY2000-2007 is AWARD-YEAR-VENDOR grain. Row counts are NOT comparable across the seam.,PIID_HELD_NEW_FY,4048,1905,2394,361,426033135.85,590,0,0,1217768
+2026-08-26,ENTITY_OWNED,SAM is TRANSACTION grain; prime_contracts FY2000-2007 is AWARD-YEAR-VENDOR grain. Row counts are NOT comparable across the seam.,PIID_NEW,82044,57660,63985,4210,8071100550.33,3660,87,0,1217768
+2026-08-26,INDIVIDUAL_NATIVE_OWNED,SAM is TRANSACTION grain; prime_contracts FY2000-2007 is AWARD-YEAR-VENDOR grain. Row counts are NOT comparable across the seam.,PIID_FY_HELD,101347,28928,42219,2843,22391603497.93,101347,0,101347,1217768
+2026-08-26,INDIVIDUAL_NATIVE_OWNED,SAM is TRANSACTION grain; prime_contracts FY2000-2007 is AWARD-YEAR-VENDOR grain. Row counts are NOT comparable across the seam.,PIID_HELD_NEW_FY,1481,383,600,151,242751230.02,1481,0,0,1217768
+2026-08-26,INDIVIDUAL_NATIVE_OWNED,SAM is TRANSACTION grain; prime_contracts FY2000-2007 is AWARD-YEAR-VENDOR grain. Row counts are NOT comparable across the seam.,PIID_NEW,2689,1406,1817,655,155345294.92,2689,0,0,1217768

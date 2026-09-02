@@ -16,11 +16,23 @@ Four levels, mirroring how a reader trusts a dataset:
 4. what changed         — the release notes, from the What's New history
 
 ``demonstration`` is carried per profile and every statistics answer for a
-demonstration collection says so: the three launch collections' numbers are
-placeholders until the first real releases, and Cedar repeating them as
-findings would be exactly the fabricated confidence this module exists to
-prevent. The Owned collection's aggregates are real (nation-supplied) and
-are marked accordingly.
+demonstration collection says so: the figure series are placeholders until the
+first real releases, and Cedar repeating them as findings would be exactly the
+fabricated confidence this module exists to prevent. It is read off the
+figure's own ``demonstration`` flag rather than a hand-kept list of ids, so the
+two cannot disagree. The Owned collection's aggregates are real
+(nation-supplied) and are marked accordingly.
+
+WHAT THE TWELVE HAVE AND WHAT THEY DO NOT
+Eight collections joined the shelf when Cedar's measured descriptors replaced
+the four hand-written ones. They carry real names, row counts, sources and
+methods, and they carry no figures -- Cedar publishes no figure series -- so a
+statistics question about them is answered with "no published figures yet"
+rather than a number. ``_CONSTRUCTION`` below is hand-written methods copy and
+still covers only the original four; the rest read coverage and linkage from
+the catalog, which states both for every collection on the ladder, and leave
+unit of observation and inclusion rules absent. An empty field a human fills
+is honest; a generated sentence that reads like a claim about method is not.
 """
 
 from __future__ import annotations
@@ -136,13 +148,13 @@ _CONSTRUCTION: dict[str, dict[str, Any]] = {
     },
 }
 
-#: The three launch collections' figures are demonstration data; the Owned
-#: aggregates come from a nation-supplied roster.
-_DEMONSTRATION: set[str] = {"deals", "contractors", "funding"}
-
-
 def _figure_for(dataset_id: str):
     return next((f for f in COLLECTION_FIGURES if f.id == dataset_id), None)
+
+
+def _catalog_entry(dataset_id: str) -> dict[str, Any] | None:
+    """The wider ladder's entry for a collection (``pressCatalog.js``)."""
+    return next((c for c in press_catalog.CATALOG if c["id"] == dataset_id), None)
 
 
 def _catalog_profile(dataset_id: str) -> dict[str, Any] | None:
@@ -155,7 +167,7 @@ def _catalog_profile(dataset_id: str) -> dict[str, Any] | None:
     it has no release, so every release-shaped field is ``None`` and the
     limitations say so. No number is invented for a collection with no data.
     """
-    entry = next((c for c in press_catalog.CATALOG if c["id"] == dataset_id), None)
+    entry = _catalog_entry(dataset_id)
     if entry is None:
         return None
     return {
@@ -194,6 +206,20 @@ def profile_for(dataset_id: str) -> dict[str, Any] | None:
         # answers from its catalog entry.
         return _catalog_profile(dataset_id)
     construction = _CONSTRUCTION.get(dataset_id, {})
+    # The eight collections that joined the shelf with Cedar's real descriptors
+    # have no construction entry: `_CONSTRUCTION` is hand-written methods copy
+    # and nothing measured it. Coverage and linkage are the exception, because
+    # the catalog already states both for every collection on the ladder, so
+    # they are read from there rather than left blank or guessed. Everything
+    # else stays absent: a unit of observation nobody wrote is not a field this
+    # module is entitled to fill.
+    catalog = _catalog_entry(dataset_id) or {}
+    coverage_standard = construction.get("coverage_standard_from") or _str_or_none(
+        catalog.get("standardFrom")
+    )
+    coverage_full = construction.get("coverage_full_from") or _str_or_none(
+        catalog.get("historyFrom")
+    )
     figure = _figure_for(dataset_id)
     headline = (
         {
@@ -216,24 +242,34 @@ def profile_for(dataset_id: str) -> dict[str, Any] | None:
         # from coverage_standard_from; Cedar Press+ opens the full archive
         # back to coverage_full_from. One number here flattened the tier
         # ladder and told a standard reader they had years they do not.
-        "coverage_standard_from": construction.get("coverage_standard_from"),
-        "coverage_full_from": construction.get("coverage_full_from"),
+        "coverage_standard_from": coverage_standard,
+        "coverage_full_from": coverage_full,
         "coverage_end": dataset.vintage,
         # Honest until a cadence is a commitment, not a plan.
         "update_frequency": None,
         "record_count_label": dataset.rows_label,
         "primary_sources": dataset.sources,
         "unit_of_observation": construction.get("unit_of_observation"),
-        "entity_resolution_method": construction.get("entity_resolution_method"),
+        "entity_resolution_method": construction.get("entity_resolution_method")
+        or catalog.get("linkage"),
         "inclusion_rules": construction.get("inclusion_rules"),
         "known_limitations": construction.get("known_limitations"),
         "method": dataset.method,
         "version": dataset.version,
         "vintage": dataset.vintage,
         "last_updated": dataset.updated,
-        "demonstration": dataset_id in _DEMONSTRATION,
+        # Read off the figure rather than a hand-kept id list. The list said
+        # which three collections were demonstration data and had to be edited
+        # by hand every time a figure's standing changed; the figure now
+        # carries its own answer, so the two cannot disagree. A collection with
+        # no figure has nothing to flag.
+        "demonstration": bool(figure and figure.demonstration),
         "headline_statistics": headline,
     }
+
+
+def _str_or_none(value: Any) -> str | None:
+    return None if value is None else str(value)
 
 
 def _fmt(value: Any) -> str:
@@ -361,13 +397,16 @@ def answer_from_profile(
     if profile is None:
         return None
     asked = question.lower()
-    # A released collection is cited by version and vintage; a catalog-only
-    # one has neither, and its basis says what it actually is.
-    basis = (
-        f"{profile['collection_name']} {profile['version']}, vintage {profile['vintage']}"
-        if profile.get("version")
-        else f"{profile['collection_name']}, Cedar Press catalog entry"
-    )
+    # A released collection is cited by version, and by vintage when it has
+    # one; a catalog-only collection has neither, and its basis says what it
+    # actually is. Vintage is appended only when present: no collection states
+    # one today, and "vintage None" was what unconditional interpolation
+    # printed -- a basis line naming a measurement that does not exist.
+    if profile.get("version"):
+        vintage = f", vintage {profile['vintage']}" if profile.get("vintage") else ""
+        basis = f"{profile['collection_name']} {profile['version']}{vintage}"
+    else:
+        basis = f"{profile['collection_name']}, Cedar Press catalog entry"
 
     if any(word in asked for word in _CHANGE_WORDS):
         return {"answer": _changes_sentence(profile, asked), "basis": basis}

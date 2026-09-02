@@ -288,6 +288,16 @@ def download(
         )
     csv = repository.collection_csv(collection_id)
     if csv is None:
+        # A collection on the shelf whose preview Cedar cannot produce is a
+        # named data problem, not a missing route, and the reader is told
+        # which. Answering both with "No such collection" is how a real
+        # unresolved question disappears into a routing message.
+        reason = repository.sample_unavailable_reason(collection_id)
+        if reason:
+            raise HTTPException(
+                status_code=409,
+                detail={"code": "NO_SAMPLE", "message": reason},
+            )
         raise HTTPException(status_code=404, detail="No such collection.")
     filename = repository.download_name(collection_id)
     return StreamingResponse(

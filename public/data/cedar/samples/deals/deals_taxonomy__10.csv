@@ -1,0 +1,11 @@
+axis,value,n_deals,built_date
+sector,Gaming,98,2026-09-02
+sector,Natural Resources,28,2026-09-02
+sector,Real Estate & Land,45,2026-09-02
+sector,Education,4,2026-09-02
+transaction_type,Divestiture,22,2026-09-02
+transaction_type,Financing (other),18,2026-09-02
+transaction_type,Land Transaction,6,2026-09-02
+capital_source,Tribal,0,2026-09-02
+native_party_role,Seller,19,2026-09-02
+native_party_role,Grantee,568,2026-09-02

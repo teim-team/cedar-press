@@ -36,6 +36,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 
 from cedar_press import (
     codes,  # noqa: E402
+    press_catalog,  # noqa: E402
     ratelimit,  # noqa: E402
 )
 from cedar_press import session as session_module  # noqa: E402
@@ -187,15 +188,39 @@ class TestCatalog(unittest.TestCase):
         self.assertEqual(client.get("/press/collections/nope/profile").status_code, 404)
 
     def test_a_catalog_collection_answers_from_its_catalog_entry(self) -> None:
-        # Lobbying has no release yet; its profile comes from the catalog.
+        # Gaming is the catalog-only collection: it sits on the Grove shelf and
+        # the storefront's twelve do not include it, so it has no descriptor
+        # and its profile comes from the catalog. This test asked about
+        # lobbying until lobbying became one of the twelve with a real
+        # descriptor behind it; the subject moved, the invariant did not.
+        response = client.post(
+            "/cedar/ask",
+            json={"question": "What does this collection cover?", "collectionId": "gaming"},
+        )
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        # Compared against the catalog's own blurb rather than a word the
+        # answer is expected to contain: the previous subject happened to
+        # repeat its own name in its blurb and gaming's does not, which would
+        # make this a test of the copy rather than of where the copy came from.
+        entry = next(c for c in press_catalog.CATALOG if c["id"] == "gaming")
+        self.assertIn(entry["blurb"], payload["answer"])
+        self.assertIn("catalog entry", payload["basis"])
+
+    def test_a_shipping_collection_answers_from_its_descriptor(self) -> None:
+        # The other half of the pair, and the one that changed: lobbying now
+        # carries Cedar's measured descriptor, so its basis names a version
+        # rather than the catalog. No vintage is stated by any collection, so
+        # the basis must not print one.
         response = client.post(
             "/cedar/ask",
             json={"question": "What does this collection cover?", "collectionId": "lobbying"},
         )
         self.assertEqual(response.status_code, 200)
         payload = response.json()
-        self.assertIn("lobbying", payload["answer"].lower())
-        self.assertIn("catalog entry", payload["basis"])
+        self.assertNotIn("catalog entry", payload["basis"])
+        self.assertIn("v0", payload["basis"])
+        self.assertNotIn("vintage", payload["basis"])
 
     def test_coverage_is_phrased_for_the_asking_tier(self) -> None:
         # A Cedar Press+ reader already opens the archive; Cedar must not
@@ -219,6 +244,18 @@ class TestCatalog(unittest.TestCase):
         # A quantity question about an unreleased collection is answered with
         # the honest state of the numbers, never a routing miss or a made-up
         # figure.
+        response = client.post(
+            "/cedar/ask",
+            json={"question": "How many records are in it?", "collectionId": "gaming"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("no published figures", response.json()["answer"])
+
+    def test_a_shipping_collection_without_a_figure_says_so_too(self) -> None:
+        # Eight of the twelve have real row counts and no figure series, which
+        # is a different state from "no release yet" and must not be answered
+        # with a number pulled from the row count. Cedar publishes no figures
+        # for them, so the answer says exactly that.
         response = client.post(
             "/cedar/ask",
             json={"question": "How many records are in it?", "collectionId": "lobbying"},
@@ -261,10 +298,13 @@ class TestCatalog(unittest.TestCase):
         self.assertIn("funding", {row["id"] for row in rows})
 
     def test_a_catalog_collection_profile_is_served(self) -> None:
-        response = client.get("/press/collections/lobbying/profile")
+        # Gaming, for the same reason as above: it is the collection the
+        # catalog carries and the storefront does not sell, so every
+        # release-shaped field is None.
+        response = client.get("/press/collections/gaming/profile")
         self.assertEqual(response.status_code, 200)
         profile = response.json()
-        self.assertEqual(profile["collection_id"], "lobbying")
+        self.assertEqual(profile["collection_id"], "gaming")
         self.assertIsNone(profile["version"])
         self.assertIsNone(profile["headline_statistics"])
 

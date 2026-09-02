@@ -137,14 +137,26 @@ test.describe("the subscriber's path", () => {
     if (await panelAction.isVisible().catch(() => false)) await panelAction.click();
     const file = await download;
 
+    // The sample rows, not the description fallback. This is the assertion
+    // that makes the test worth running in a browser at all: the rows are a
+    // static file the page fetches at click time, and `csvFor` falls back to
+    // the two-column collection description when that fetch fails. Checking
+    // only for "cedarpress.ai" passed either way, so a broken fetch would
+    // have shipped green — the filename is what tells the two apart.
     expect(file.suggestedFilename()).toMatch(/\.csv$/);
+    expect(file.suggestedFilename()).not.toContain("collection-description");
+
     const stream = await file.createReadStream();
     const csv = (await stream.toArray()).map(String).join("");
-    // Every release carries its provenance. A file that leaves without it is
+    // Ten sampled rows and a header, so the file is a table rather than the
+    // handful of metadata lines the fallback produces.
+    expect(csv.split("\n").length).toBeGreaterThan(10);
+    // Every download carries its provenance. A file that leaves without it is
     // the fabricated-provenance failure the citation register exists to
     // prevent, and it leaves the reader unable to say where a figure came
     // from.
     expect(csv.toLowerCase()).toContain("cedarpress.ai");
+    expect(csv).toContain("cite_as");
     expect(errors).toEqual([]);
   });
 });

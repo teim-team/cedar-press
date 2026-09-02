@@ -1,19 +1,113 @@
 # Cedar data → Cedar Press
 
 Real rows from the Cedar Press data project, in the shape this product already
-declares. **Nothing here is wired in yet** — this is the data side of the
-handshake, offered for review before anything replaces the demo series.
+declares. **This is wired in now.** It was not when the paragraph here said so,
+and the wiring is described below.
 
 ## Why this exists
 
-`server/cedar_press/collections.py` says it plainly:
+`server/cedar_press/collections.py` said it plainly:
 
 > **PROTOTYPE LIMITATIONS** — Every number in this file is demonstration data,
 > exactly like `prototype_data.py`: plausible values for the demo workspace,
 > never real published figures. **The real pilot datasets arrive as manifest +
 > data files and replace the inline series here.**
 
-These are those files.
+These are those files, and that is what happened.
+
+## What is wired, and how
+
+**`collections.manifest.json` is the single source both languages read.**
+`server/cedar_press/collections.py` and `src/features/grove/collection.js` used
+to hold two hand-written copies of the same literals, and the Python docstring
+claimed `tests/test_collection.py` compared them value for value. No such file
+existed, nothing compared them, and by the time anyone looked they had already
+drifted twice — Python carried `shelf` and JavaScript did not, and JavaScript
+resolved a citation's version through `pressReleases.js` while Python read the
+descriptor, so `deals` cited as v9.0 in the browser and v9 on the server. Both
+now read one file, and `server/tests/test_collection.py` — which exists, and
+runs in the same CI job as the rest of the Python suite — executes both
+implementations and compares every value they produce. A deliberate one-value
+edit to either side fails it.
+
+**`scripts/import_cedar_manifest.py` writes the manifest.** Point it at the
+Cedar data workspace and it reads three outputs and copies the sample rows:
+
+```
+py -3 scripts/import_cedar_manifest.py --workspace "<path to the data workspace>"
+```
+
+| input | produced by |
+|---|---|
+| `dist/collection_descriptors.json` | `code/760_collection_descriptors.py` |
+| `dist/collection_descriptors.cedar.json` | the same script |
+| `dist/review/MANIFEST.csv` | `code/1135_full_dataset_review_bundle.py` |
+| `dist/review/samples/<collection>/<table>__10.csv` | the same script |
+| `FLAGSHIP` (which table a customer opens first) | `code/770_sample_extracts.py`, read by text |
+
+Nothing is typed into the manifest by hand. The importer checks each
+descriptor's key set against the fourteen `CollectionDataset` fields in both
+directions and exits rather than writing, because that contract has broken
+twice on this interface already.
+
+**Twelve collections, and the other three named.** Cedar measures fifteen.
+`newsletters` is out by owner ruling (2026-09-02), `gaming` because it is a
+Cedar Grove collection, and `_entity_layer` because it is the identity spine
+rather than something sold. All three are listed in the manifest's `excluded`
+array with the reason, and a parity test asserts `newsletters` is excluded *by
+name* rather than merely absent. **None of their data is deleted** — the
+workspace keeps every collection and this repository keeps
+`samples/newsletters__sample.csv`. What the ruling withdrew is a storefront
+slot, not a dataset.
+
+**Downloads hand over ten rows, and say so.** Each collection's download button
+serves its flagship table's ten-row sample from
+`public/data/cedar/samples/<collection>/<table>__10.csv`, with a `cite_as` row
+appended. Every tile, label and filename says "sample": a button called
+"Download Federal Register" that hands over ten rows is the defect this whole
+exercise is about.
+
+**The full spreadsheets are referenced, never committed.** 1135 also writes
+`dist/review/spreadsheets/`, measured at **6.2 GB**, with single tables over
+GitHub's 100 MB limit. They are not here. Every table in the manifest carries
+its row count, its split (by fiscal year where the table has one), its file
+count and its largest file in MB, and `full_files.served` is `false`. That is
+what a serving layer needs to locate the real file, and the honest statement
+that no such layer exists yet. **When one does**, the files should be served
+from object storage behind the existing entitlement check in
+`server/cedar_press/app.py` — the route already refuses a collection the
+subscription does not include — and the manifest entry becomes the key rather
+than a description.
+
+### What is still not measured, and says so
+
+Two descriptor fields are `null` on every collection, and the manifest's
+`unmeasured_fields` carries the reason for each:
+
+- **`vintage`** — 760 emits an empty vintage for all fifteen collections; the
+  cadence measurement it derives the newest held period from produced nothing.
+  Absent rather than a plausible period, and citations omit it rather than
+  printing `vintage None`.
+- **`downloads`** — a platform metric. 760's own docstring: *"It lives in the
+  platform database and Cedar has no business inventing it."* Absent rather
+  than `0`, because a zero download count reads as a measurement. The function
+  that ranked the shelf by download count is now `figures_in_shelf_order`,
+  because ordering by "demonstrated use" was ranking on a number nobody had.
+
+One thing remains demonstration data and now says so in the data rather than
+only in a comment: `COLLECTION_FIGURES`. Cedar publishes no figure series, so
+the three pilot charts carry `demonstration: true`. The Owned chart carries
+`demonstration: false` — its aggregates are the roster White Earth Nation's
+TERO supplied on 2026-08-28. **No figure was invented for the eight
+collections that joined the shelf**; they have none, and Cedar answers a
+statistics question about them with "no published figures yet".
+
+`owned` is the one collection with **no preview file at all**, and the reason
+travels as data: 770 names `native_owned_businesses.csv` (2,916 rows) as its
+flagship, no collection contract claims that table, so 1135 built no sample for
+it and 760 withdrew the row count and marked the dataset BLOCKED. Substituting
+a different table would have resolved by choice a disagreement Cedar has not
+resolved. The tile falls back to the collection description and says so.
 
 ## The two sides already agree
 
@@ -35,6 +129,14 @@ named `owned__sample.csv`** — which it was not until today, because the
 mapping reached the descriptor and not the filename. See finding 7 below.
 
 ## What is here
+
+> **Which file the product reads:** `collections.manifest.json`. The two files
+> below are the review drop this started as, kept because they are what the
+> findings in this README were measured against and because deleting a
+> reviewed artifact to tidy up is how a correction loses its evidence. They are
+> not read by any code. `collections.manifest.json` covers the same descriptors
+> for the twelve the storefront sells, plus the per-table facts and sample
+> paths the downloads need.
 
 **`collection_descriptors.json`** — one object per dataset, carrying
 **exactly** the fourteen `CollectionDataset` fields and nothing else, so

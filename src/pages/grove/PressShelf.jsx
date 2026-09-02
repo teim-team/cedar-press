@@ -140,10 +140,15 @@ function Badge({ entry, open, onEnter, active, index, onLocked, onOpen }) {
       <button type="button" className={className} onClick={() => onOpen(entry)} {...watch}>
         {inner}
         <span className="cp-badge__cue" aria-hidden="true">&#8595;</span>
+        {/* "Sample", not the collection's name alone. What downloads is ten
+            real rows of the collection's flagship table, not the collection:
+            the full tables run to millions of rows and are not served yet. A
+            label promising more than the file contains is the one defect this
+            page cannot afford. */}
         <span className="cp-badge__sr">
           {released
-            ? `Download ${entry.name}`
-            : `Download the ${entry.name} collection description; the release file is pending`}
+            ? `Download a ten-row sample of ${entry.name}`
+            : `Download the ${entry.name} collection description; the sample file is pending`}
         </span>
       </button>
     </li>
@@ -198,8 +203,8 @@ function Detail({ entry, user, owned }) {
         {freshnessLine(entry.id) ||
           (owned
             ? hasReleaseFile(entry)
-              ? COARSE ? "Tap to download" : "Click to download"
-              : `Release pending; ${COARSE ? "tap" : "click"} for the collection description`
+              ? COARSE ? "Tap for a ten-row sample" : "Click for a ten-row sample"
+              : `Sample pending; ${COARSE ? "tap" : "click"} for the collection description`
             : "Locked")}
       </p>
       {/* On touch the tile's first tap lands here, so the panel carries the
@@ -207,7 +212,9 @@ function Detail({ entry, user, owned }) {
       {COARSE && owned ? (
         <button type="button" className="cp-read__act" onClick={() => downloadCsv(entry)}>
           <span aria-hidden="true">&#8595;</span>{" "}
-          {hasReleaseFile(entry) ? `Download ${entry.short || entry.name}` : "Download the description"}
+          {hasReleaseFile(entry)
+            ? `Download a ten-row sample of ${entry.short || entry.name}`
+            : "Download the description"}
         </button>
       ) : null}
       {/* Cedar, already scoped: the reader looking at this description is
@@ -347,7 +354,7 @@ function Band({ tier, user, index }) {
         {owned ? (
           <p className="cp-band__all">
             <button type="button" className="cp-band__allbtn" onClick={() => { track(EVENT.shelfDownloadedAll, { shelf: tier.shelf, count: entries.length }); downloadAll(entries); }}>
-              <span aria-hidden="true">&#8595;</span> Download all {entries.length}
+              <span aria-hidden="true">&#8595;</span> Download all {entries.length} samples
             </button>
           </p>
         ) : null}
