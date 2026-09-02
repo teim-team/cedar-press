@@ -73,6 +73,81 @@ diaspora organisations, Caribbean development bodies and Florida estate
 planners into Indian Country. Treat the token as **no signal at all** unless
 something else in the record carries the meaning.
 
+
+## Rule 7 — where the record has an address, geography is a LADDER, not a gate
+
+*Added 2026-09-01 by workstream INT-1, after ruling 711 held OSHA ITA
+establishments (`review/employment_osha_711_ruled_2026-09-01.csv`). It is the
+route that reliably settled them, and it is cheap to re-run.*
+
+The 711 were all held on one reason: *"shares a distinctive token with a Cedar
+property but no exact name+state match."* Pearl River Resort, 3,233 employees,
+held on the token `pearl`. **Holding was right** — a shared token is the
+Umatilla defect and rule 1 already refuses it. But the corroboration the hold
+was waiting for was sitting unused in the same file: the OSHA 300A carries a
+**street address and ZIP on 100% of rows** and an **EIN on 69%**, and the
+2026-08-07 pass used none of the three.
+
+So where a source record carries an address, rank the evidence and take the
+highest rung that fires:
+
+1. **An identifier.** EIN / UEI / CAGE against `cedar_identifier_ledger.csv`.
+   Rule 4 already says this; it stands alone.
+2. **Street address AND ZIP** both matching one row in the domain's own
+   facility/property table. Two independent geographic signals agreeing on one
+   site. This rung is strong enough to carry a **facility-level** key, not just
+   an entity-level one — 54 of the 115 filings promoted came this way.
+3. **The record's own words naming the entity** — every distinctive token of a
+   spine name present, plus a governmental word, plus state agreement, plus
+   uniqueness in that state.
+4. **A brand match against the domain's curated table**, equal-token or the
+   record's tokens as a strict SUPERSET of the facility's (the filer prints the
+   brand plus a qualifier: `HARRAH'S SOUTHERN CALIFORNIA RINCON` against
+   Cedar's `Harrah's Resort Southern California`). Require ≥2 distinctive
+   tokens so a one-word brand can never win this way.
+5. **ZIP + city** pointing at a facility of exactly one entity — the weakest
+   rung, and it needs the veto below.
+
+### The two things this rule exists to stop
+
+**A ZIP is a strong corroborator and a poor gate.** Run ZIP-first and it
+attributed `HARRAH'S SOUTHERN CALIFORNIA (RINCON)`, 1,400 employees, to **San
+Pasqual** — ZIP 92082, Valley Center CA, holds Rincon's Harrah's *and* San
+Pasqual's Valley View — and `Twenty Nine Palms Band of Mission Indians`, 720
+employees, to **Augustine**, because ZIP 92236 holds both Coachella casinos. In
+each case the establishment name PRINTS the right owner. Hence:
+
+> **VETO: the record's own words outrank geography. If the text names or brands
+> any entity other than the one the ZIP points at, the ZIP match is refused,
+> not reconciled.**
+
+The veto has to look for a *mention* without requiring a governmental word — a
+bare token may never AWARD a match, but it may always BLOCK one. Blocking on
+weak evidence is safe in a way awarding on it is not.
+
+### An entity class that cannot hold the thing cannot win the match
+
+Derive the allowed classes from the data, not from a list: the classes that
+actually own a row in `gaming_facilities.csv` are `Federally recognized tribe`,
+`Federal-level constituency entity` and `Federally recognized Alaska Native
+Village`. Without that gate a token-subset test hands *Yakama Nation Legends
+Casino Hotel* to the Yakama Nation **tribal school** and *Harrah's Cherokee* to
+an individually Native-owned business called *Cherokee Enterprises Inc* —
+because each beats the real tribe on uniqueness, the real tribe's spine name
+carrying a token (*Confederated* Yakama, *Eastern* Cherokee) the filing does not
+print. The codebook already called `entity_class` load-bearing as a guard; this
+is what that means in practice.
+
+### What it yielded, so the next pass can judge the cost
+
+Of 711 establishments: **66 had already been promoted** by later passes, **344
+were already ruled `blocked_commercial`**, and only **301 were genuinely open**
+— the headline backlog was 58% stale. Of the 720 filings behind those 301,
+**115 promoted** (54 on address+ZIP, 40 on brand, 12 on the filing naming the
+government, 9 on ZIP+city) and **605 stayed `unresolved`**, which ADR-010 makes
+an honest outcome. **Unresolved is the expected majority result** here, because
+NAICS 7132/721120 is the gambling industry and most of it is not tribal.
+
 ## The checklist for any new matcher
 
 1. **Compute the distinctive token set** — the name minus generic and
