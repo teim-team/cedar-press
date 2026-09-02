@@ -675,3 +675,190 @@ first measurement of the mechanism still being live in the resolver.
 **Recommendation: 3, with 2 as the fallback where no 990 exists.**
 Shard J did not touch `503` — it is another workstream's file and the guard
 belongs with its owner, exactly as the brand-alias fix did.
+
+---
+
+## 13. Wire CICD's published figures in as STANDING GATE ASSERTIONS (shard-N, 2026-09-01)
+
+**Decision:** approve (or amend) three checkable assertions so the CICD
+benchmark stops being re-derived every session and starts failing a build when
+Cedar silently loses data. `docs/CICD_BENCHMARK.md` already computes the
+comparison; what does not exist is a **gate** that goes red. A gate that knows
+Cedar's FY2000–2021 deflated prime total should sit near $190B catches a
+1.2M-row table losing a fiscal year, which no lint class can see.
+
+**Why now.** You measured Cedar against your own CICD benchmark and got
+"$164.9B against ~$200B". That comparison is invalid as stated and this session
+established why: three of the four axes differ. Deflated to 2021 dollars using
+the table's own `deflator_factor_2025`, Cedar's FY2000–2021 attributed prime is
+**$189.99B against CICD's $198B prime — −4.05%, inside the CORROBORATED band.**
+The nineteen missing fiscal years are worth roughly **$2B nominal**, not $35B.
+Full working and per-source coverage table: `docs/datasets/02_contracting.md`
+§COVERAGE.
+
+### Proposed assertions
+
+| id | assertion | source, with year | current value | proposed tolerance |
+|---|---|---|---|---|
+| `CICD-A1` | Cedar's attributed prime obligations for FY2000–FY2021, expressed in **2021 dollars**, are within 10% of **$198B** | CICD, *Federal contracting's expanding revenue role in Indian Country*, 2022-12-21 — *"$202 billion in revenue (in 2021 dollars) … $198 billion from prime contracts and $4 billion from subcontracts"*, 1981–2021 | **$189.99B** (−4.05%) | ±10%. A one-sided floor is wrong here: Cedar going far ABOVE $198B would mean the attribution has started over-claiming, which is the failure this project most needs to catch. |
+| `CICD-A2` | `prime_contracts.csv` holds **every fiscal year FY2000–FY2026 inclusive**, none with zero rows, and `min(fiscal_year) == 2000` | Cedar's own documented boundary — the FY2000 floor is now sourced, not accidental | FY2000–FY2026, 1,217,768 rows, no gaps | exact. This is the cheap one and it is the one that would have caught a lost year. |
+| `CICD-A3` | DoD share of Cedar's attributed FY2000–2021 obligations is within 10% of **67.6%** | CICD, *Native entities and the federal contracting landscape*, 2023-06-21 | 63.76% (−5.7%) | ±10%. Currently typed UNEXPLAINED at 5%; at 10% it is a gate rather than an open question, and the open question stays in `CICD_BENCHMARK.md` where it belongs. |
+
+**Deliberately NOT proposed as assertions:**
+
+- *"~$200 billion in the last decade"* (2026-08-24). It is prime **plus** sub,
+  and Cedar's subaward layer is a known floor — FY2021–24 hold 173/89/120/166
+  rows against ~5,000/yr either side. An assertion whose input is broken tests
+  the input, not the claim.
+- *"$26.6 billion in 2025."* CICD's 2025 is calendar-year and Cedar's is fiscal;
+  the quarter of difference falls in a rising series, and USAspending back-fills
+  obligations for months after year-end. Two moving parts, no signal.
+- Anything counting **contracts**. `SANITY-04` is still UNEXPLAINED: no Cedar
+  award key reproduces CICD's 50,167 (parent PIID 15,985 · PIID 173,716 ·
+  PIID+UEI 221,058) and CICD does not state its key. Do not gate on a number
+  whose grain is unknown on both sides.
+
+**If YES:** the three land in `docs/ASSERTION_LAYER.md` with source and year,
+and `62_no_regression_check.py` (or whichever gate you prefer) gains a class
+that goes red on a silent data loss. **If NO:** they stay as prose in
+`CICD_BENCHMARK.md` and every future session re-derives the comparison, which
+is how "$164.9B vs $200B" got stated as a shortfall in the first place.
+
+**Second question, and it is one only you can answer.** `CICD-A1` depends on a
+deflator. Cedar uses `deflator_factor_2025` (FY2000 = 1.77359, FY2021 =
+1.170557). **CICD's 2022 article does not state which index it used.** You
+built that dataset — was it CPI-U, the GDP implicit price deflator, or
+something else? If the two indices differ, the −4.05% is partly an artefact of
+the comparison itself and `CICD-A1`'s tolerance should widen.
+
+---
+
+## 14. The $65.2B unattributed pool — ranked, characterised, NOT attributed (shard-N, 2026-09-01)
+
+**Not a decision — a worklist**, filed here because the ranking materially
+changes what `503`/`510` should do next and because the headline number has
+been quoted without its decomposition.
+
+328,906 rows / **$65.24B** sit at tier C with `attributed_flag = 0`. Every row
+carries a UEI; 105,688 carry a CAGE. Split by `ruling_status`:
+
+| ruling_status | rows | obligations | distinct UEI | what it means |
+|---|---:|---:|---:|---|
+| **(never ruled)** | 262,079 | **$52.06B** | 9,160 | nobody has looked |
+| `RULED_NOT_NATIVE` | 34,140 | $5.80B | 139 | correctly excluded, will never attribute |
+| `RULED_CLASS_ONLY` | 28,940 | $5.46B | 34 | **Native, owner not in the spine** |
+| `RULED_HOLD` | 914 | $0.80B | 17 | held |
+| `RULED_OWNER_NOT_IN_SPINE` | 1,789 | $0.47B | 6 | owner identified, entity absent |
+| `RULED_TIER_UNSTATED` | 936 | $0.38B | 29 | tier missing on the ruling |
+| `RULED_TIER_C_NOT_ATTRIBUTED` | 96 | $0.27B | 1 | |
+| `RULING_CONFLICT` | 12 | $0.001B | 3 | |
+
+**79.8% of the money has never been ruled on. Only 8.9% has been ruled NOT
+Native.** "Unattributed" has been reading as "rejected"; it means "unexamined".
+
+**Where to start, and it is not the top of the dollar list.** The best signal is
+a never-ruled row that carries a **Native-preference set-aside**: $16.99B across
+65,492 rows. Inside that, **10,877 rows / $720M sit on Buy Indian or Indian
+Business set-asides, which are statutorily Native-only** — an unattributed row
+on one of those is a near-certain Native entity awaiting a name, and it is the
+cheapest yield per ruling in the whole pool.
+
+**It is a long tail.** 11,857 distinct never-ruled awardee names; the top 50 are
+only 22.1% of the money. There is no top-20 sweep that closes this.
+
+**Two cautions, both load-bearing.**
+
+1. The pool contains obvious non-Native rows. The single largest never-ruled
+   awardee is **`THE BAHRAIN PETROLEUM COMPANY BSC (CLOSED)`, 40 rows /
+   $990.8M**, with no Native set-aside on any of them. Do not read $65.2B as
+   latent Native dollars.
+2. `RULED_CLASS_ONLY` at $5.46B on **34 UEIs** is the concentrated, tractable
+   slice — Cedar already knows this money is Native and cannot name the owner.
+   34 owner determinations move $5.46B. That is the highest dollars-per-ruling
+   in the table and it needs entity work, not a filter.
+
+Ranking, ready to work: `data/staging/pre2000_probe/unattributed_ruling_dollars.json`
+(`never_ruled_top_50_awardees`) and `benchmark_reconciliation.json`
+(`top_60_awardees_by_obligation`). Produced by `code/564` and `code/565`, both
+read-only. **Shard-N attributed nothing and touched no ruling.**
+
+### AMENDMENT to item 13, same session — CICD publishes its series year by year, and it changes the assertions
+
+The 2022 article prints charts, not tables. **The complete year-by-year series
+is in the page's `__NEXT_DATA__` payload** — `docs/HIDDEN_DATA_TECHNIQUES.md`
+item 2, applied to a research article. `code/567` extracts it, validates it
+against the article's own headline (three entity series sum to **$197.987B**
+against the stated **$198B**, 0.007% off), and stages it at
+`data/staging/cicd_published/cicd_prime_series_1981_2021.csv`.
+
+That makes `CICD-A1` far sharper than a 41-year total, and it produces a
+finding worth more than the assertion:
+
+| window | CICD (2021$) | Cedar attributed (2021$) | delta |
+|---|---:|---:|---:|
+| 1981–1999 | **$0.354B** | $0 (Cedar holds no rows) | −$0.354B |
+| FY2000–2007 | $32.508B | $24.858B | **−$7.644B, −23.53%** |
+| FY2008–2021 | $165.124B | $165.131B | **+$0.007B, +0.004%** |
+| FY2000–2021 | $197.633B | $189.989B | −3.87% |
+
+**Two things follow and both matter more than the gate.**
+
+1. **CICD's own 1981–1999 total is $354M — 0.179% of its own $198B.** 1982–1987
+   and 1989 are literally zero in CICD's published data. The "nineteen missing
+   years" are not a hole worth chasing; they are a rounding error, and this is
+   the incumbent's own number saying so.
+2. **The entire −$7.6B is FY2000–FY2007.** From FY2008 the two builds agree to
+   four decimal places, which is the strongest external corroboration Cedar
+   Press has ever produced about itself.
+
+**Amended `CICD-A1`, proposed:** assert against **CICD's published FY2000–2021
+subtotal, $197.633B**, not the 41-year headline, and split it —
+`CICD-A1a` FY2008–2021 within **±3%** of $165.124B (currently +0.004%, so a 3%
+band is a real gate rather than a decorative one), and `CICD-A1b`
+FY2000–2007 within **±30%** of $32.508B (currently −23.53%, and tightened to
+±10% once item 15 lands). Splitting matters: on the combined window a fixed
+FY2000–2007 and a newly broken FY2008–2021 would cancel and the gate would stay
+green.
+
+---
+
+## 15. FY2000–FY2007 is short by 23.5% and the fix is a file already on disk (shard-N, 2026-09-01)
+
+**Decision:** authorise the **date-gated merge of HigherGov `Data Request
+4-5-2023 File 2.csv`**, or rule that it stays out and Cedar publishes
+FY2000–2007 as a known 23.5% floor.
+
+**The measurement.** Cedar is within ±7% of CICD in every fiscal year from
+FY2008 and short by **16–35% in every one of FY2001–FY2007**. FY2000–2007:
+Cedar $24.858B against CICD $32.508B, **−$7.644B in 2021 dollars**.
+
+**The cause is a selection-doctrine failure, and `docs/PULL_DISCIPLINE.md`
+predicts this exact shape.** FY2000–FY2007 has exactly one source:
+`master prime file.dta`, which is HigherGov **File 1 — the flag-at-award leg
+alone**. File 1's 78,267 pre-2007 keys match the clean table's 78,267 exactly,
+so nothing was lost in ingestion; the leg was simply never joined to its
+partner. **File 2, the SAM-registration leg, has never been merged into
+anything** and carries **26,240 net-new pre-2007 keys worth $7.93B nominal**
+against a measured shortfall of $7.65B in 2021 dollars. Those are not proven to
+be the same dollars and nothing here should be written as if they were — but
+one leg run alone for eight years, costing about a quarter of the money, is
+precisely what the selection doctrine says happens.
+
+**Why it has not been done, and why that is right.** File 2 matches on
+*current* registration. Its author flagged the defect unprompted in 2023:
+*"it will pick up awards for companies before they were acquired (e.g., it
+would pick up all of Vistronix's awards before ASRC Federal bought them)."*
+ASRC is also the largest tier-A net-new entity in the file at $1.32B. Merged
+naively, File 2 books a firm's pre-acquisition revenue to the tribe that later
+bought it — a false attribution that would look impeccably sourced. **File 2 is
+not a merge; it is a merge plus an adjudication**, date-gated against
+`ownership_events.csv`, with rows preceding an acquisition held at tier B or
+excluded and flagged.
+
+**If YES:** FY2000–2007 closes toward CICD and `CICD-A1b` tightens to ±10%.
+**If NO:** FY2000–2007 is published as a stated floor, and the −23.5% goes in
+the codebook rather than being discovered by a reader with CICD's article open.
+
+Evidence: `data/staging/cicd_published/cedar_vs_cicd_by_year.csv`;
+`docs/datasets/02_contracting.md` §COVERAGE; `docs/PRE2007_SPENDING_SOURCES.md`
+Part 2. **Shard-N merged nothing and attributed nothing.**
