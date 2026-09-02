@@ -19,6 +19,14 @@ from there and nothing in this file changes. Routes hold HTTP concerns —
 status codes, headers, the session — and no data access of their own, which
 is what keeps that swap to one module.
 
+A SECOND SURFACE, RENDERED HERE
+``GET /press/shelf`` returns HTML rather than JSON: the shelf page, composed
+by ``shelf.py`` from the same modules the JSON routes read and styled by the
+client's own stylesheets. It is the working half of
+``docs/PYTHON_FIRST_SITE.md`` — the demonstration that this service can
+render the site, not only feed it. The React client is untouched and still
+serves the same page; the two run side by side on purpose.
+
 RUNNING IT
     pip install -e server[dev]
     uvicorn cedar_press.app:app --reload --port 8000
@@ -26,20 +34,27 @@ RUNNING IT
 Then point the client at it::
 
     VITE_API_URL=http://localhost:8000 npm run dev
+
+or open the server-rendered shelf directly::
+
+    http://localhost:8000/press/shelf?tier=press_pro
 """
 
 from __future__ import annotations
 
 import io
 import os
+from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.exception_handlers import http_exception_handler
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
-from cedar_press import codes, ratelimit, repository
+from cedar_press import codes, ratelimit, repository, shelf
 from cedar_press.session import (
     Session,
     account_exists,
@@ -73,6 +88,27 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type"],
 )
+
+#: The repository root, from ``server/cedar_press/app.py``.
+_REPO = Path(__file__).resolve().parents[2]
+
+#: The client's own stylesheets and fonts, served to the server-rendered page.
+#:
+#: Mounted from the source tree rather than copied, which is the whole point:
+#: the Python page must go stale the moment a designer edits press.css, not
+#: keep serving a duplicate that agrees with nothing. A build would collect
+#: these the way Vite already does for ``dist/``; see
+#: ``docs/PYTHON_FIRST_SITE.md`` for what that step becomes.
+#:
+#: Missing directories are skipped rather than raised on: the package is
+#: installed with ``pip install -e server``, so a deployment that ships the
+#: wheel without the repository around it still answers on every JSON route.
+_STATIC = (("/styles", _REPO / "src" / "styles"), ("/fonts", _REPO / "public" / "fonts"))
+for _path, _directory in _STATIC:
+    if _directory.is_dir():
+        app.mount(_path, StaticFiles(directory=_directory), name=_path.lstrip("/"))
+
+_templates = Jinja2Templates(directory=Path(__file__).with_name("templates"))
 
 
 class Credentials(BaseModel):
@@ -256,6 +292,43 @@ def activate(
 def collections(session: Session = Depends(require_session)) -> dict[str, object]:
     """The catalog this subscription can see, with each entry's reach."""
     return {"collections": repository.collections_for(session.tier)}
+
+
+@app.get("/press/shelf", response_class=HTMLResponse)
+def press_shelf(
+    request: Request,
+    tier: str | None = None,
+    session: Session | None = Depends(current_session),
+) -> HTMLResponse:
+    """The shelf page, rendered as HTML by this service.
+
+    The one route here that returns a page rather than a payload, and the
+    working half of ``docs/PYTHON_FIRST_SITE.md``: the same collection
+    descriptors, access rule, catalog copy and release history the JSON routes
+    serve, composed by ``shelf.py`` and laid out by the client's own
+    ``press.css``. Nothing on it is read from a JavaScript module.
+
+    NO SESSION IS REQUIRED, AND NOTHING IS GIVEN AWAY
+    A signed-in reader's plan wins. Without a session the ``tier`` query
+    decides, defaulting to the cheapest plan, so a reviewer with a link can
+    see what each plan is shown without an account being made for them.
+
+    That is safe because this page renders descriptions and not records: the
+    names, blurbs and coverage years the public gate already carries. Every
+    download on it submits to ``/press/collections/{id}/download``, which
+    still requires a session and still asks ``repository.may_open``. The
+    query changes what is described. It cannot change what is served.
+    """
+    view = shelf.view_for(session.tier if session else shelf.resolve_tier(tier))
+    return _templates.TemplateResponse(
+        request,
+        "shelf.html",
+        {"view": view, "tiers": shelf.KNOWN_TIERS},
+        # Not indexed, and not cached by anything shared: the page differs per
+        # plan, and a proxy that kept one reader's shelf would hand it to the
+        # next.
+        headers={"X-Robots-Tag": "noindex", "Cache-Control": "private, no-store"},
+    )
 
 
 @app.get("/press/releases")
