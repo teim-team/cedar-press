@@ -400,7 +400,14 @@ def workbook(coll, c, cols, rows, prof, fmeta):
                     f"workbook cap - use {coll}.csv, which is complete")
     import xlsxwriter
     path = OUT / f"{coll}.xlsx"
-    wb = xlsxwriter.Workbook(str(path), {"constant_memory": True})
+    # `strings_to_urls: False` because xlsxwriter otherwise turns any
+    # URL-shaped cell into a live hyperlink, and Excel caps a sheet at 65,530
+    # of them. `funding` carries a usaspending.gov link on most rows, so the
+    # writer emitted thousands of warnings and SILENTLY DROPPED the link on
+    # every row past the cap. A data cell is text: it should never be
+    # reinterpreted as anything else on the way out.
+    wb = xlsxwriter.Workbook(str(path), {"constant_memory": True,
+                                         "strings_to_urls": False})
     bold = wb.add_format({"bold": True})
     wrap = wb.add_format({"text_wrap": True, "valign": "top"})
 
@@ -439,7 +446,11 @@ def workbook(coll, c, cols, rows, prof, fmeta):
         d.write(0, j, h, bold)
     for i, r in enumerate(rows, 1):
         for j, h in enumerate(cols):
-            d.write(i, j, r.get(h, ""))
+            # write_string, not write: `write` sniffs the value and would
+            # coerce "0123" to a number and drop the leading zero, which is how
+            # a zip code or a CAGE stops being itself. Every cell here came out
+            # of a CSV as text and leaves as text.
+            d.write_string(i, j, str(r.get(h, "")))
     wb.close()
     return path.name, ""
 

@@ -6,13 +6,13 @@
     "class2b": 0,
     "class2c": 69,
     "class3": 2,
-    "class4": 14,
+    "class4": 15,
     "class5": 6,
     "class6": 27,
     "class7": 44,
     "class8": 0,
     "class9": 0,
-    "lint_bug_class_instances": 163
+    "lint_bug_class_instances": 164
   },
   "findings": [
     {
@@ -214,6 +214,15 @@
       "waiver_reason": ""
     },
     {
+      "class": "class4",
+      "file": "1137_customer_dataset_combine.py",
+      "line": 398,
+      "evidence": "if len(rows) > WORKBOOK_MAX_ROWS:",
+      "why": "a budget (WORKBOOK_MAX_ROWS) exits a loop, the file writes a completion marker (['ok']), and it never compares what it RETRIEVED against the total the SOURCE reported. That is the PER_DOCKET_BUDGET_S defect: four dockets written at 2,300-3,200 of 3,555-4,847 and marked `done`, so no resume would ever revisit them.",
+      "waived": false,
+      "waiver_reason": ""
+    },
+    {
       "class": "class2c",
       "file": "114_pull_prime_archive.py",
       "line": 1723,
@@ -387,7 +396,7 @@
     {
       "class": "class2c",
       "file": "147_build_fac_single_audits.py",
-      "line": 694,
+      "line": 734,
       "evidence": "skipped += 1",
       "why": "counter 'skipped' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -1827,7 +1836,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 4443,
+      "line": 4482,
       "evidence": "h = hash(\"\\x1f\".join(parts))",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1836,7 +1845,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 4453,
+      "line": 4492,
       "evidence": "h = hash(\"\\x1f\".join(row))",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1845,7 +1854,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 4478,
+      "line": 4517,
       "evidence": "if hash(k) in collided[gj]:",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1854,7 +1863,7 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 4484,
+      "line": 4523,
       "evidence": "if hash(k) in row_collided:",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -2556,6 +2565,9 @@
       "source_coverage_fac.csv": [
         "147_build_fac_single_audits.py"
       ],
+      "source_coverage_fac_nontribal.csv": [
+        "1132_fac_nontribal_native_audits.py"
+      ],
       "source_coverage_nrc_meetings.csv": [
         "145_build_nrc_public_meetings.py"
       ],
@@ -2864,6 +2876,12 @@
       ],
       "fac_audit_sefa_gaming_programs.csv": [
         "814_gaming_nr_grain_and_conservation.py"
+      ],
+      "fac_native_nontribal_sefa_programs.csv": [
+        "1132_fac_nontribal_native_audits.py"
+      ],
+      "fac_native_nontribal_single_audits.csv": [
+        "1132_fac_nontribal_native_audits.py"
       ],
       "federal_funding_transactions.csv": [
         "1131_attribution_method_vocabulary.py",
@@ -3520,7 +3538,7 @@
   "class7_source": "284_audit_nondeterministic_keys.lint_key_stability()",
   "class7_note": "284 fixture self-test PASS - 5 synthetic defect shapes re-found; of the 3 measured real instances 1 now recorded FIXED",
   "class9_source": "1136_control_byte_gate.scan()",
-  "class9_note": "1136 scanned 976 files (code/*.py, docs/*.md, docs/schema/*, root *.md) for 0x00-0x08, 0x0b, 0x0c, 0x0e-0x1f, 0x7f",
+  "class9_note": "1136 scanned 977 files (code/*.py, docs/*.md, docs/schema/*, root *.md) for 0x00-0x08, 0x0b, 0x0c, 0x0e-0x1f, 0x7f",
   "tier_inheritance": {
     "sites": [
       {
