@@ -278,7 +278,20 @@ it. Corrections are recorded under the table, not silently applied.*
 | dataset | file (`data/clean/`) | rows | note |
 |---|---|---:|---|
 | Prime contracts | `prime_contracts.csv` | **1,217,768** ✅ | **$310.01B**, FY2000–2026 ✅ |
-| …attributed | ” | **$244.77B (79.0%)** ✅ | 498 entities ✅ · 888,803 rows |
+| …attributed | ” | **re-derive, do not read** | see the line below |
+
+> **These three numbers moved four times on 2026-09-02 and this row was wrong within the hour each time.** They are not a fact about Cedar, they are a snapshot of a table nine agents were writing. Re-derive before quoting:
+>
+> ```
+> py -3 -c "import duckdb;print(duckdb.sql(\"SELECT count(*) rows, "
+>   "count(*) FILTER (WHERE attributed_flag='1') attributed, "
+>   "count(DISTINCT cedar_uid) FILTER (WHERE cedar_uid<>'') entities, "
+>   "sum(total_obligations) FILTER (WHERE attributed_flag='1') attributed_usd "
+>   "FROM read_csv('data/clean/prime_contracts.csv', ignore_errors=true, "
+>   "sample_size=-1)\"))"
+> ```
+>
+> At 2026-09-02 11:0x it answered **1,217,768 rows · 789,360 attributed · 526 entities · $229,441,298,847.36 (74.0% of $310,005,258,660.75)**. The previous text here said $244.77B / 79.0% / 498 entities / 888,803 rows, which predated `1079` un-attributing $17.07B on quarantined methods and `1117`/`1122` moving $2.1B more.
 | Assistance | `federal_funding_transactions.csv` | **701,955** ⚠ | FY2007–2026 ✅ · *was written 684,923* · **3 source vintages, 2 id schemes — see below** |
 | FAADS (pre-2008) | `faads_transactions_all_agencies.csv` | 2,769,748 ✅ | unharmonised |
 | Subawards | `subawards.csv` | **76,859** ✅ | **FY2021 PROMOTED 2026-08-28: 173 → 9,462.** FY2022–24 still 89/120/166 — those three jobs failed server-side |

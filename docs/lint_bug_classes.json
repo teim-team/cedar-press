@@ -9,9 +9,9 @@
     "class4": 14,
     "class5": 7,
     "class6": 26,
-    "class7": 46,
+    "class7": 44,
     "class8": 0,
-    "lint_bug_class_instances": 165
+    "lint_bug_class_instances": 163
   },
   "findings": [
     {
@@ -845,7 +845,7 @@
     {
       "class": "class2c",
       "file": "846_session_audit.py",
-      "line": 506,
+      "line": 518,
       "evidence": "fails += 1",
       "why": "counter 'fails' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -1583,20 +1583,20 @@
     {
       "class": "class7",
       "file": "1115_defect_class_retro_sweep.py",
-      "line": 388,
+      "line": 392,
       "evidence": "if id(n) in docstrings:",
       "why": "[BLOCKING] OBJECT_ADDRESS on target (unnamed) -> no clean table. builtin id() is a memory address, stable only within one process. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
-      "waived": false,
-      "waiver_reason": ""
+      "waived": true,
+      "waiver_reason": "object identity of an in-memory AST node,"
     },
     {
       "class": "class7",
       "file": "1115_defect_class_retro_sweep.py",
-      "line": 385,
+      "line": 387,
       "evidence": "docstrings.add(id(first.value))",
       "why": "[BLOCKING] OBJECT_ADDRESS on target (unnamed) -> no clean table. builtin id() is a memory address, stable only within one process. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
-      "waived": false,
-      "waiver_reason": ""
+      "waived": true,
+      "waiver_reason": "object identity of an in-memory AST node,"
     },
     {
       "class": "class7",

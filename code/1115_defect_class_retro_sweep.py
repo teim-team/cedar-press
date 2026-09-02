@@ -382,9 +382,13 @@ def detect_C1(mods):
                               ast.ClassDef)) and n.body:
                 first = n.body[0]
                 if isinstance(first, ast.Expr) and                         isinstance(first.value, ast.Constant) and                         isinstance(first.value.value, str):
+                    # lint-ok: class7 - object identity of an in-memory AST node,
+                    # looked up in a within-process set. Never written down.
                     docstrings.add(id(first.value))
         claims = defaultdict(list)          # function NAME -> [(line, text)]
         for n in ast.walk(tree):
+            # lint-ok: class7 - object identity of an in-memory AST node,
+            # looked up in a within-process set. Never written down.
             if id(n) in docstrings:
                 continue
             txt = ""
