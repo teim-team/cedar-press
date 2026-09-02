@@ -140,11 +140,12 @@ from pathlib import Path
 
 CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
+LEGACY_DIR = CEDAR / "data" / "spine" / "legacy"
 DOCS = CEDAR / "docs"
 TODAY = date.today().isoformat()
 
 TARGET = CLEAN / "federal_funding_transactions.csv"
-XWALK = CLEAN / "assistance_tribe_id_crosswalk.csv"
+XWALK = LEGACY_DIR / "assistance_tribe_id_crosswalk.csv"
 
 csv.field_size_limit(min(sys.maxsize, 2**31 - 1))
 

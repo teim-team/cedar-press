@@ -61,7 +61,7 @@ from pathlib import Path
 
 SPINE = ROOT / "data" / "spine" / "cedar_entity_spine.csv"
 ALIASES = ROOT / "data" / "clean" / "entity_aliases.csv"
-XWALK = ROOT / "data" / "clean" / "assistance_tribe_id_crosswalk.csv"
+XWALK = ROOT / "data" / "spine" / "legacy" / "assistance_tribe_id_crosswalk.csv"
 TABLE = ROOT / "data" / "clean" / "federal_funding_transactions.csv"
 BASIS_TAG = "503_reconcile_assistance_to_cedar_ids"
 
@@ -702,7 +702,7 @@ from pathlib import Path
 
 SPINE = ROOT / "data" / "spine" / "cedar_entity_spine.csv"
 REGISTER = ROOT / "data" / "spine" / "cedar_identity_register.csv"
-XWALK = ROOT / "data" / "clean" / "assistance_tribe_id_crosswalk.csv"
+XWALK = ROOT / "data" / "spine" / "legacy" / "assistance_tribe_id_crosswalk.csv"
 
 # =====================================================================
 # THE HANDLE CONTRACT - external review 2026-08-30, finding F6.
@@ -903,7 +903,17 @@ def selftest() -> None:
 
 
 def legacy_map():
-    """handle -> comma-joined legacy CICD integers, from the crosswalk."""
+    """RETIRED 2026-09-01. handle -> legacy CICD integers, from the crosswalk.
+
+    The owner retired the CICD scheme outright: *"no one uses CICD data, so
+    it's not like we have to link ours to theirs. They should link ours to
+    ours."* Its `gov-class distinctive-token match` had merged United
+    Keetoowah Band into Cherokee Nation (820 rows, $181.9M) and filed an
+    Ohio county housing authority as a tribe.
+
+    Kept as a function because `152` still builds the crosswalk and the
+    rebuild path reads it - but the register no longer carries the result.
+    Nothing calls this. See `code/843_retire_cicd_scheme.py`."""
     out = {}
     if not XWALK.exists():
         return out
@@ -1012,7 +1022,6 @@ def phase_mint(argv) -> int:
                                  "retires the handle to an alias - the uid "
                                  "never changes",
             "former_names": FORMER.get(h, ""),
-            "same_as_legacy_cicd": lm.get(h, ""),
             "minted": existing.get(h) and "" or TODAY,
             "register_status": "active",
         })

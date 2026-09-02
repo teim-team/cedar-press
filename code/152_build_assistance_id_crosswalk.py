@@ -63,10 +63,11 @@ from pathlib import Path
 
 CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
+LEGACY_DIR = CEDAR / "data" / "spine" / "legacy"
 REVIEW = CEDAR / "review"
 SPINE = CEDAR / "data" / "spine" / "cedar_entity_spine.csv"
 SRC = CLEAN / "federal_funding_transactions.csv"
-OUT = CLEAN / "assistance_tribe_id_crosswalk.csv"
+OUT = LEGACY_DIR / "assistance_tribe_id_crosswalk.csv"
 TODAY = date.today().isoformat()
 
 csv.field_size_limit(min(sys.maxsize, 2**31 - 1))

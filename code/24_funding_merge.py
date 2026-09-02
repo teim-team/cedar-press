@@ -637,8 +637,7 @@ TX_COLS = [
     "recipient_name",
     "recipient_city_name",
     "recipient_state_code",
-    "tribe_id",
-    "tribe_id_scheme",
+    # tribe_id / tribe_id_scheme REMOVED 2026-09-01 - CICD scheme retired
     "canonical_name",
     "tribe_id_neid",
     "attribution_method",
@@ -734,6 +733,18 @@ def pass2_write(attr, tribe_names, limit=None):
             fy,
             partial,
             row[I["federal_action_obligation"]],
+            # ALIGNMENT FIX 2026-09-01. These two were added to TX_COLS
+            # (with the credit-programme note above) and never added
+            # here, so the writer emitted 30 values against a 32-column
+            # header and every field from index 7 on was shifted LEFT by
+            # two - `assistance_type` would have received the assistance
+            # type DESCRIPTION, and the last two columns nothing at all.
+            # Guarded because a source lacking the column is a blank, not
+            # a crash, and pre-2008 lineages do not carry them.
+            row[I["total_face_value_of_loan"]]
+            if "total_face_value_of_loan" in I else "",
+            row[I["original_loan_subsidy_cost"]]
+            if "original_loan_subsidy_cost" in I else "",
             atype,
             row[I["assistance_type_description"]],
             row[I["cfda_number"]],
@@ -745,8 +756,6 @@ def pass2_write(attr, tribe_names, limit=None):
             name,
             row[I["recipient_city_name"]],
             row[I["recipient_state_code"]],
-            "" if tid is None else tid,
-            "lineageA_dofile_integer" if tid is not None else "",
             tribe_names.get(tid, "") if tid is not None else "",
             "",                       # tribe_id_neid -- MR-4, awaiting rulings
             a["attribution_method"],
@@ -828,14 +837,14 @@ ATYPE_DESC = {
 
 def write_panel(acc, tribe_names, atypes_seen):
     codes = sorted(c for c in atypes_seen if c)
-    cols = (["tribe_id", "canonical_name", "tribe_id_scheme", "fiscal_year",
+    cols = (["canonical_name", "fiscal_year",
              "fy_partial_flag", "total_obligated_usd"]
             + [f"obl_type_{c}_{ATYPE_DESC.get(c, 'unknown')}" for c in codes]
             + ["n_transactions", "n_recipients"])
     rows = []
     for (tid, fy), cell in sorted(acc.items(),
                                   key=lambda kv: (kv[0][0], kv[0][1])):
-        rows.append([tid, tribe_names.get(tid, ""), "lineageA_dofile_integer",
+        rows.append([tribe_names.get(tid, ""),
                      fy, 1 if fy == "2023" else 0, round(cell["usd"], 2)]
                     + [round(cell["by_type"].get(c, 0.0), 2) for c in codes]
                     + [cell["n"], len(cell["ueis"])])
