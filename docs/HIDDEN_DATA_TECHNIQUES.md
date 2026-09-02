@@ -144,3 +144,41 @@ they published, stop and put it in `review/OWNER_DECISION_QUEUE.md` instead.
 
 `docs/PULL_DISCIPLINE.md` governs throughout and outranks this document wherever
 they touch.
+
+## A 200 with a valid file is not proof you fetched the right file
+
+*Added 2026-09-01 by the gaming workstream, which caught this three objects
+before it would have shipped.*
+
+A download endpoint of the shape `?wpdmdl=<id>` was called with an **empty**
+value. It returned **HTTP 200 and a valid, openable PDF — 302 times, the same
+PDF every time.** Every status code was green, every file passed a "is this a
+real PDF" check, and the corpus would have been 302 copies of one document
+filed under 302 different names.
+
+This is the download-side twin of the robots false-block in
+`PULL_DISCIPLINE.md`. There, a check failed closed for the wrong reason and
+silently stopped good work. Here, a check passed for the wrong reason and
+silently manufactured a fake corpus. **Both are checks that are not measuring
+what their name says**, and a green one is the more dangerous of the two
+because nothing prompts you to look.
+
+WordPress Download Manager, `?download=`, `?file=`, `?attachment_id=` and most
+CMS download shims behave this way: an unrecognised or empty id falls through
+to a default, an index, or the most recent upload rather than erroring.
+
+**Three guards, all cheap:**
+
+1. **Hash every object and count distinct hashes.** If `n_objects` and
+   `n_distinct_md5` diverge, stop. The gaming pull now carries an
+   `IDENTICAL_MD5_CEILING` for exactly this.
+2. **Match the download link to the slug you asked for.** Do not construct an
+   id and hope; take the href the page actually publishes for that document.
+3. **Canary before the run.** Fetch three objects, confirm three distinct
+   hashes and three distinct titles, and only then loop. Three wasted requests
+   beats 302 wasted ones and a poisoned table.
+
+Record the outcome honestly when it fires: this one was logged as
+`accepted_then_failed_server_side: 302` and all 302 objects were deleted. A
+fetch that returned 200 and the wrong content is a **failure**, and calling it
+anything else puts the lie in the provenance record.
