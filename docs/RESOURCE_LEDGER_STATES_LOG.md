@@ -1,5 +1,34 @@
 # Native Natural Resources Ledger — the state expansion
 
+> **SUPERSEDED IN PART, 2026-09-01 (workstream O). Read
+> `docs/datasets/natural_resources_sources.md` first** — it carries the
+> permanent per-source COVERAGE table.
+>
+> **Open lead 1, "OSMRE AML — the best-looking source not built", is BUILT**,
+> and this log's diagnosis of why it was held was itself wrong in an
+> instructive way. The one-row offset shown below was an artefact of
+> `pdftotext`, not a property of the document, and the de-skew this log
+> proposed would ALSO have been wrong: read with `pdfplumber` the FY2022 page
+> says Crow $229,617.11, Hopi $0, Navajo $557,275.46, and neither $799,809 nor
+> $776,388 has anything to do with any tribe — they are Utah's and Texas's
+> collections. **The refusal to publish an unproven de-skew is the only reason
+> a false attribution never shipped, and that judgement was right.**
+>
+> Also wrong below: *"These tables print no per-row check."* They do — it is
+> just spread over two pages. Each document prints the same figures in a
+> "TOTAL MANDATORY GRANT DISTRIBUTION" table and again in an
+> "AML … MANDATORY DISTRIBUTION" table, and the two must agree.
+>
+> **Built: FY2013-FY2026, 76 rows, Crow / Hopi / Navajo.** FY2018 and three
+> other tribe-years are held BY that gate (scanned OCR). FY2002-FY2015 were
+> recovered from web.archive.org in the same pass; FY2002-FY2012 are on disk
+> and still held. **A second stream, the IIJA AML distribution FY2022-FY2026,
+> had never been fetched at all** and is now built.
+>
+> The Osage headright series' 2000 floor has also gone: it now runs
+> **1880-2026**, 508 rows, the document's own full extent.
+
+
 *Second wave, 2026-08-06. Built by `code/83_build_resource_ledger.py --more-states`.
 Pairs with `docs/RESOURCE_LEDGER_BUILD_LOG.md`, which covers ONRR, ND, UT and MT.*
 

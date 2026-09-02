@@ -23,20 +23,20 @@ buckets:
 ## THE COUNTS
 
 
-**369 CSV files, 139 MB, swept 2026-09-01.**
+**372 CSV files, 139 MB, swept 2026-09-01.**
 
 | bucket | files | rows |
 |---|---:|---:|
 | Promotable Now | 3 | 374 |
-| Needs Owner Ruling | 104 | 185,342 |
+| Needs Owner Ruling | 104 | 185,491 |
 | Superseded | 28 | 13,658 |
-| Diagnostic Only | 234 | 182,852 |
-| **total** | **369** | **382,226** |
+| Diagnostic Only | 237 | 183,693 |
+| **total** | **372** | **383,216** |
 
 10 files carry a person-shaped column and are marked `privacy_risk=Y`. None of them is promotable.
 
 
-> **The directory is LIVE and grows while you read it.** The sweep opened on 364 CSVs and closed on 369 - 5 more landed from other workstreams inside the same session. That is the argument for a gate counting this directory rather than a one-off audit: an untracked pile that grows by several files an afternoon is not a backlog anyone can hold in their head. Re-run this script; it is cheap and idempotent.
+> **The directory is LIVE and grows while you read it.** The sweep opened on 364 CSVs and closed on 372 - 8 more landed from other workstreams inside the same session. That is the argument for a gate counting this directory rather than a one-off audit: an untracked pile that grows by several files an afternoon is not a backlog anyone can hold in their head. Re-run this script; it is cheap and idempotent.
 
 
 ---
@@ -92,7 +92,7 @@ how 2,146,673 accounted rows were destroyed on 2026-09-01.
 
 ## 2. NEEDS AN OWNER RULING
 
-104 files, 185,342 rows. The ranked, written-out questions are appended to `review/OWNER_DECISION_QUEUE.md`; the top of that ranking is reproduced here. Cedar's standing rule is that **only tier A publishes and an owner ruling is the only promotion path for an attribution** - no agent may shortcut any of these.
+104 files, 185,491 rows. The ranked, written-out questions are appended to `review/OWNER_DECISION_QUEUE.md`; the top of that ranking is reproduced here. Cedar's standing rule is that **only tier A publishes and an owner ruling is the only promotion path for an attribution** - no agent may shortcut any of these.
 
 | rows | file | written by | date | why |
 |---:|---|---|---|---|
@@ -110,7 +110,7 @@ how 2,146,673 accounted rows were destroyed on 2026-09-01.
 | 1,049 | `review/nagpra_alias_proposals.csv` | 24 | 2026-09-01 | 1,049 proposed aliases harvested from NAGPRA notices, YOUR_RULING empty. An alias is an identity assertion about a tribe and 76 of the 228 aliases in the 2026-08 pass were dropped on review. |
 | 6,559 | `review/MASTER_QUEUE_2026-08-07.csv` | 581 | 2026-08-26 | 6,559 ranked entity questions, $82.1B of dollars_at_stake, YOUR_RULING filled on ZERO. RE-MEASURED 2026-09-01: the 4,300 rows in _already_ruled_removals/ overlap this file on exactly 1 identifier, so all 6,559 are genuinely unseen - not, as the removal file's name suggests, a queue mostly already answered. |
 | 1,223 | `review/entity_key_tierB_promotion_queue_2026-08-06.csv` | 581 | 2026-08-06 | 1,223 proposed tier B -> tier A promotions. A tier promotion is the definitional owner ruling; nothing else may make one. |
-| 62 | `review/tribal_vendor_list_registry_2026-08-26.csv` | 316 | 2026-09-01 | STALE-PROMOTION TRAP. Reads like a finished 62-tribe registry, but re-measured 2026-09-01: publishable='N' on ALL 62 rows, consent_status='UNRESOLVED' on ALL 62, 8 rows source_terms_status=TERMS_STATED_RESTRICTIVE and 2 ROBOTS_DISALLOW, and every row carries a suppression_key. It is also LIVE - 570/571 (shards L and M) wrote it today. The owner ruling owed is the consent/terms one, not an effort one. |
+| 211 | `review/tribal_vendor_list_registry_2026-08-26.csv` | 316 | 2026-09-01 | STALE-PROMOTION TRAP. Reads like a finished 62-tribe registry, but re-measured 2026-09-01: publishable='N' on ALL 62 rows, consent_status='UNRESOLVED' on ALL 62, 8 rows source_terms_status=TERMS_STATED_RESTRICTIVE and 2 ROBOTS_DISALLOW, and every row carries a suppression_key. It is also LIVE - 570/571 (shards L and M) wrote it today. The owner ruling owed is the consent/terms one, not an effort one. |
 | 4,806 | `review/regulations_gov_comment_candidates.csv` | 221 | 2026-09-01 | 4,806 comments where a Cedar entity is named in the comment TEXT but not in the title. A SCOPING ruling, asked once: does a text mention make a comment that entity's comment? Answering it once disposes of all 4,806. |
 | 4,560 | `review/osha_gambling_unresolved_2026-08-26.csv` | 157 | 2026-08-26 | 4,560 rows, but 2,708 already carry a blocking verdict (2,551 blocked_commercial). The genuinely open remainder is 1,849 'unresolved' plus 3 'candidate_review'. Wider and later than the 711 file; the two overlap and should be ruled together. HANDED TO INT-1. |
 | 12,645 | `review/esm_native_entity_candidates_2026-08-12.csv` | 125 | 2026-08-12 | 12,645 federal recipients carrying a self-certified Native ownership or individual-Native flag, with dollars and an evidence_grade. A SAM socio-economic flag is a SELF-CERTIFICATION and tops out at tier C; the ruling owed is where the line falls, not 12,645 separate calls. |
@@ -182,7 +182,7 @@ A later file, table or ruling has overtaken these. **Nothing was deleted.** Reco
 
 ## 4. DIAGNOSTIC ONLY
 
-234 files, 182,852 rows - **the largest bucket, and that is the headline finding.** Most of `review/` is not a backlog at all. It is the project's evidence layer: refusal logs (C5 named dispositions), coverage audits, series-break registers, conflict registers, probe outputs and hand-validation samples. These were never meant to ship and they are marked so nobody triages them a second time. The 30 largest follow.
+237 files, 183,693 rows - **the largest bucket, and that is the headline finding.** Most of `review/` is not a backlog at all. It is the project's evidence layer: refusal logs (C5 named dispositions), coverage audits, series-break registers, conflict registers, probe outputs and hand-validation samples. These were never meant to ship and they are marked so nobody triages them a second time. The 30 largest follow.
 
 | rows | file | written by | date | why |
 |---:|---|---|---|---|
@@ -206,6 +206,7 @@ A later file, table or ruling has overtaken these. **Nothing was deleted.** Reco
 | 914 | `review/nigc_roster_diff_2026-08-06.csv` | 106 | 2026-08-06 | Coverage / reconciliation audit: compares two counts and reports the delta. Nothing in it is a new fact. |
 | 911 | `review/identifier_one_to_many_defects_2026-08-26.csv` | 169 | 2026-08-26 | Conflict register. It states that two sources disagree; resolving each disagreement is separate work, and the register is the standing evidence. |
 | 865 | `review/agent_identifier_rulings_applied.csv` | 173 | 2026-08-06 | Record of a change that was ALREADY made in place. Provenance for the edit, not a pending item. |
+| 711 | `review/employment_osha_711_ruled_2026-09-01.csv` | 589 | 2026-09-01 | 711 of 711 rows already carry an owner/agent verdict. The file is the record of a completed adjudication, not an open queue. |
 | 687 | `review/_already_ruled_removals/contract_spiderweb_candidates_2026-08-06_already_ruled_2026-08-26.csv` | ? | 2026-08-26 | Record of a change that was ALREADY made in place. Provenance for the edit, not a pending item. |
 | 622 | `review/agent_rulings_spiderweb_2026-08-06.csv` | 91 | 2026-08-06 | 622 of 622 rows already carry an owner/agent verdict. The file is the record of a completed adjudication, not an open queue. |
 | 594 | `review/federal_awards_fain_backfill_2026-08-05.csv` | 38 | 2026-08-05 | No owner-decision column, no promotion target named by its producer. Measurement output. |
@@ -215,7 +216,6 @@ A later file, table or ruling has overtaken these. **Nothing was deleted.** Reco
 | 549 | `review/agent_rulings_deals_2026-08-05.csv` | 53 | 2026-08-05 | 549 of 549 rows already carry an owner/agent verdict. The file is the record of a completed adjudication, not an open queue. |
 | 540 | `review/ancsa_adjacent_family_scan_2026-08-26.csv` | 193 | 2026-08-26 | No owner-decision column, no promotion target named by its producer. Measurement output. |
 | 540 | `review/fac_unresolved_auditees_2026-08-12.csv` | 129 | 2026-08-12 | Verification / audit output. Its value is the finding, which has been read; the rows are the working. |
-| 512 | `review/courtlistener_party_evidence_2026-08-26.csv` | 367 | 2026-08-26 | Harvested evidence / lead list feeding another script. Not a customer table. |
 
 ---
 
@@ -310,13 +310,38 @@ workstreams had landed unregistered the same afternoon. `check` printed **SAFE -
 a rebuild loses nothing** before the build, and the build reported
 `4,788 -> 4,961`, additive only.
 
-`tables_missing_from_25_TABLES` and `tables_missing_from_27_SPEC` rose 179 → 186
-and 194 → 201 across the same window, from **eight** new clean tables. Exactly
-one is this workstream's, and it is registered in both:
-`160_ship_gap_report.registry_25()` and `registry_27()` both return
-`sam_native_class_distributions.csv`. The other seven are named in the gate's own
-`NEW TABLES AT A 0% SHIP RATIO` list and belong to the gaming and NIGC
-workstreams.
+`tables_missing_from_25_TABLES` and `tables_missing_from_27_SPEC` rose across the
+same window from a batch of new clean tables. Exactly one is this workstream's,
+and it is registered in both: `160_ship_gap_report.registry_25()` and
+`registry_27()` both return `sam_native_class_distributions.csv`. The rest are
+named in the gate's own `NEW TABLES AT A 0% SHIP RATIO` list and belong to the
+gaming and NIGC workstreams.
+
+**One line IS this workstream's and is stated plainly.**
+`contract_orphan_shippable` went 5 → 6 and `contract_violations` 6 → 7 (a
+sibling took it to 8) because `sam_native_class_distributions.csv` became
+shippable without a **dataset collection claiming it**. Collections live in
+`code/512_build_dataset_contracts.py`, which three sibling workstreams are
+editing concurrently in their own `GRAIN_WS1/2/3` dicts and which this
+workstream is forbidden to touch. So the promotion is correct and **incomplete
+by one line**, and that line is handed over rather than forced:
+
+> add `sam_native_class_distributions.csv` to a collection in `512`, grain
+> `(variant_class, dimension, value)`, primary key the same triple, no join key
+> — the table names no entity and must never be joined to one.
+
+It is not a new mechanism. Four of the six orphans predate this workstream
+(`native_owned_businesses`, both `nonprofit_schedule_c_*`, both
+`regulations_gov_*`), and two of those are already in `25.TABLES` — so a
+shippable table with no collection is a standing systemic gap, not something
+this promotion invented.
+
+**A false alarm, measured and named.** The gate printed `SHIPPING LOST:
+advocacy_passthrough_2026-08-07.csv was shipping 1,620 rows and the table is
+GONE from data/clean`. **The table is not gone.** It is on disk at 2,012,716
+bytes and reads **1,620 rows, 28 columns** — exactly the count said to be lost.
+The gate raced a live sibling rewriting `data/clean`. Nothing was recovered
+because nothing was lost, and no one should spend a session on it.
 
 **Deliberately not run:** `87`, `25`, `27`. Runbook step 2 is the gate and a FAIL
 stops the chain, and rebuilding `dist/` while fourteen agents are writing is the

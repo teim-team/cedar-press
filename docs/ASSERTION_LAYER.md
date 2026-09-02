@@ -26,14 +26,30 @@ pair only because nobody has needed one yet.
 
 Measured before the layer existed:
 
-| | |
-|---|---|
-| spine rows with **no** `verification_route` and **no** `evidence_tier` | **1,279 of 1,536 (83.3%)** |
-| `.bak_*` copies of the spine in `data/spine/` | **20** — the de facto fact history, and unusable |
-| rows graded `TWO_INDEPENDENT_FEDERAL_SOURCES` | **2** |
+| | at the time | **re-measured 2026-09-01** |
+|---|---|---|
+| spine rows with **no** `verification_route` and **no** `evidence_tier` | **1,279 of 1,536 (83.3%)** | **1,279 of 1,555 (82.3%)** |
+| `.bak_*` copies of the spine in `data/spine/` | **20** — the de facto fact history, and unusable | **24** |
+| rows graded `TWO_INDEPENDENT_FEDERAL_SOURCES` | **2** | **0** — see below |
 
-That last number is the point. The independence idea was already right. It had
+That last number was the point. The independence idea was already right. It had
 just never been generalised past two rows.
+
+**Read the third column carefully; two of its cells are not what a
+find-and-replace would have written.**
+
+- The **numerator did not move.** 1,279 spine rows still carry no evidence
+  columns; the denominator grew from 1,536 to 1,555 when 19 IHS consortia were
+  promoted, and all 19 arrived WITH evidence. Substituting 1,555 into the
+  ratio and leaving 1,279 alone would have been arithmetically right by
+  accident; substituting into the *percentage* without recomputing would not.
+- `TWO_INDEPENDENT_FEDERAL_SOURCES` now grades **zero** rows because the
+  `evidence_tier` vocabulary in `cedar_entity_spine.csv` has since been
+  replaced by A/B/C — measured today: **A 81 · B 16 · C 179 · blank 1,279**.
+  The two rows were not demoted; the grade they held no longer exists in that
+  column. Independence is now recorded by the assertion layer instead, which
+  is the whole point of this document, and the live count is in *Where this
+  stands* below.
 
 ## What replaced it
 
@@ -249,14 +265,29 @@ That is the argument for the invariants, and it is not hypothetical.
 Stated plainly, because the mission spec forbids claiming unverified behaviour.
 
 ```
-29,718 assertions   29,356 resolved facts   331 refutations   0 conflicts
+34,615 assertions   34,275 resolved facts   338 refutations   0 conflicts
 ```
 
-| | |
-|---|---|
-| single-valued facts with **more than one source** | **0** |
-| facts with more than one **independent** evidence family | **38** (was 2) |
-| genuine disagreements between sources | **0** |
+Every figure in this section was re-measured from `data/clean/cedar_assertions.csv`
+and `data/clean/cedar_resolved_facts.csv` on **2026-09-01**.
+
+| | measured 2026-09-01 | previously recorded here |
+|---|---|---|
+| single-valued facts with **more than one source** | **30** | 0 |
+| facts with more than one **independent** evidence family | **4** | 38 (and 2 before that) |
+| genuine disagreements between sources (`conflict = 1`) | **0** | 0 |
+
+**The middle row went the wrong way and this pass could not explain it.**
+30 single-valued facts now draw on more than one `source_id` and on more than
+one `lineage_root_id`, but the layer counts only **4** of them as independent
+(`n_independent_families > 1`, and `support_status = corroborated` agrees at
+4). Twenty-six pairs of lineage roots are therefore being judged same-family —
+which is the correct behaviour when a copy of a source and the source itself
+both assert, and is exactly what the Federal Register case below describes. It
+is *not* obviously correct that this went 38 → 4. Nothing in this pass changed
+the resolver, so either the 38 was measured under a different definition or a
+lineage root was re-parented. **Do not quote 4 as an improvement and do not
+restore 38.** Filed as an open question below.
 
 The layer still has little to arbitrate, and that is the measured state of the
 evidence base rather than a failure to look. `entity.state`, `entity.class`,
@@ -270,10 +301,24 @@ as 565 new confirmations.
 
 Also open:
 
-- **`gaming_source_claims` contributes 0 assertions.** No `cedar_uid` column, and
-  only 10 of its 113 rows have a resolved subject.
-- **11,676 of 29,718 assertions are `unattributed_legacy`** — the row they came
-  from never recorded any evidence.
+- **Corroboration fell from 38 independent-family facts to 4 and nobody
+  measured why.** See the table above. The next pass on this layer should diff
+  `lineage_ancestry` against the run that produced 38 before either number is
+  quoted to a buyer.
+- **`gaming_source_claims` contributes 9 assertions** as of 2026-09-01, up from
+  the 0 recorded here. It still has **no `cedar_uid` column** and still holds
+  113 rows, so the harvest reaches it only through a resolved subject id. The
+  blocker is the missing key, not the count.
+- **5,428 of 34,615 assertions (15.7%) are `unattributed_legacy`** — the row
+  they came from never recorded any evidence. **This entry previously read
+  "11,676 of 29,718 … meaning half the store carries no evidence", and both
+  halves of that were wrong by 2026-09-01.** Re-measured, the unattributed
+  count *fell* by 6,248 in absolute terms while the store grew by 4,897, so the
+  share went 39.3% → 15.7%. Anyone who had updated only the denominator would
+  have published 11,676 of 34,615 (33.7%) — a ratio nobody ever measured.
+  Attribution is now dominated by named methods: `registration_name:UEI` 4,066,
+  `common` 2,904, `registration_name:CAGE` 2,901, `cluster_v3` 2,005,
+  `full_form_federal_filing` 1,798.
 - **Two dead authorities** — `bia_directory`/`entity.bia_region` and
   `org_self_statement`/`entity.website` — declared but never asserting, flagged
   by the layer's own I7 check on every run.
@@ -665,8 +710,10 @@ fails the build.
   exists for `entity.class` and `entity.canonical_name`, which is where the
   4,089 actually sit.
 - **`entity.city` is still effectively single-sourced.** The spine holds a
-  city on 229 of 1,536 rows, so the IRS mostly had nothing to agree or
-  disagree with.
+  city on **229 of 1,555 rows (14.7%)** — re-measured 2026-09-01 — so the IRS
+  mostly had nothing to agree or disagree with. As with the evidence-column
+  count above, the numerator is unchanged and only the denominator moved: none
+  of the 19 entities added since arrived with a city.
 - The **Delaware alias** and the **334 IRS link findings** are queue items,
   not corrections. Nothing in `cedar_identifier_ledger_final.csv` or
   `entity_aliases.csv` was changed.

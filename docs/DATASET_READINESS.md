@@ -2,23 +2,23 @@
 
 *Generated 2026-09-01 by `code/518_dataset_readiness.py` from live artifacts. Three statuses only: **READY / BLOCKED / NOT_TESTED**. There is no 'mostly ready' — a dataset crosses the minimum shipping contract or it has named blockers.*
 
-## READY: 2 / 13
+## READY: 3 / 13
 
-BLOCKED 11 · NOT_TESTED 0
+BLOCKED 10 · NOT_TESTED 0
 
 | dataset | status | tables | grain | keys | duplicates | agg-unsafe | rebuild |
 |---|---|---:|---|---|---|---:|---|
 | `_entity_layer` | **BLOCKED** | 35 | 29/35 | 29/35 | 10,985 rows | 6 | DESTRUCTIVE |
 | `federal-register` | **READY** | 22 | 22/22 | 22/22 | clean | 0 | declared |
 | `nagpra` | **READY** | 4 | 4/4 | 4/4 | clean | 0 | declared |
-| `native-owned-businesses` | **BLOCKED** | 6 | 6/6 | 6/6 | clean | 0 | declared |
+| `native-owned-businesses` | **READY** | 6 | 6/6 | 6/6 | clean | 0 | declared |
+| `contractors` | **BLOCKED** | 10 | 9/10 | 9/10 | clean | 1 | declared |
+| `natural-resources` | **BLOCKED** | 8 | 8/8 | 8/8 | clean | 0 | declared |
 | `legislation` | **BLOCKED** | 12 | 10/12 | 10/12 | 5 rows | 2 | declared |
-| `contractors` | **BLOCKED** | 10 | 8/10 | 8/10 | clean | 2 | declared |
-| `gaming` | **BLOCKED** | 46 | 44/46 | 44/46 | clean | 2 | declared |
+| `gaming` | **BLOCKED** | 52 | 45/52 | 45/52 | clean | 7 | declared |
 | `nonprofits` | **BLOCKED** | 10 | 9/10 | 9/10 | 101 rows | 1 | declared |
-| `lobbying` | **BLOCKED** | 34 | 29/34 | 29/34 | 827 rows | 5 | declared |
+| `lobbying` | **BLOCKED** | 33 | 30/33 | 30/33 | 827 rows | 3 | declared |
 | `deals` | **BLOCKED** | 14 | 12/14 | 12/14 | clean | 2 | DESTRUCTIVE |
-| `natural-resources` | **BLOCKED** | 8 | 7/8 | 7/8 | clean | 1 | declared |
 | `subcontracting` | **BLOCKED** | 3 | 2/3 | 2/3 | 10,770 rows | 1 | declared |
 | `funding` | **BLOCKED** | 10 | 7/10 | 7/10 | 180,374 rows | 3 | declared |
 
@@ -31,9 +31,16 @@ BLOCKED 11 · NOT_TESTED 0
 - C3 literal duplicates: cedar_identifier_graph_edges.csv(2,451), cedar_ruling_ledger_consolidated.csv(6,302), cross_dataset_ruling_map.csv(2,228)
 - C8 rebuild is DESTRUCTIVE (01_build_entity_spine.py, 09_import_rulings.py) - no safe documented rebuild path
 
-### `native-owned-businesses` — BLOCKED
+### `contractors` — BLOCKED
+
+- C1 grain UNSTATED on 1: contractor_ranking.csv
+- C2 no validated primary key on 1
+- C7 DOUBLE-COUNTING RISK - money tables a buyer cannot safely total: contractor_ranking.csv
+
+### `natural-resources` — BLOCKED
 
 - C5 no row-conservation coverage
+- C4 only 25% of entity-bearing rows carry a Cedar id, and every record in this dataset HAS an entity subject - so this is unresolved work, not scope. See ADR-009 and ADR-010.
 
 ### `legislation` — BLOCKED
 
@@ -42,18 +49,11 @@ BLOCKED 11 · NOT_TESTED 0
 - C3 literal duplicates: native_bills_subject_sweep.csv(5)
 - C5 no row-conservation coverage
 
-### `contractors` — BLOCKED
-
-- C1 grain UNSTATED on 2: contractor_ranking.csv, fpds_uei_cage_map.csv
-- C2 no validated primary key on 2
-- C7 DOUBLE-COUNTING RISK - money tables a buyer cannot safely total: contractor_ranking.csv
-- C5 no row-conservation coverage
-
 ### `gaming` — BLOCKED
 
-- C1 grain UNSTATED on 2: fac_audit_sefa_gaming_programs.csv, gaming_projections.csv
-- C2 no validated primary key on 2
-- C7 DOUBLE-COUNTING RISK - money tables a buyer cannot safely total: fac_audit_sefa_gaming_programs.csv, gaming_projections.csv
+- C1 grain UNSTATED on 7: fac_audit_sefa_gaming_programs.csv, nigc_action_parties.csv, nigc_document_surface.csv
+- C2 no validated primary key on 7
+- C7 DOUBLE-COUNTING RISK - money tables a buyer cannot safely total: fac_audit_sefa_gaming_programs.csv
 
 ### `nonprofits` — BLOCKED
 
@@ -65,8 +65,8 @@ BLOCKED 11 · NOT_TESTED 0
 
 ### `lobbying` — BLOCKED
 
-- C1 grain UNSTATED on 5: admin_appeal_positions.csv, ferc_docket_filings.csv, ferc_ex_parte_communications.csv
-- C2 no validated primary key on 5
+- C1 grain UNSTATED on 3: ferc_docket_filings.csv, hearing_bill_links.csv, lobbying_registrant_native_ownership_evidence.csv
+- C2 no validated primary key on 3
 - C3 literal duplicates: ferc_docket_filings.csv(822), hearing_bill_links.csv(1), lobbying_registrant_native_ownership_evidence.csv(4)
 
 ### `deals` — BLOCKED
@@ -77,21 +77,12 @@ BLOCKED 11 · NOT_TESTED 0
 - C5 no row-conservation coverage
 - C8 rebuild is DESTRUCTIVE (88_build_deals_taxonomy.py) - no safe documented rebuild path
 
-### `natural-resources` — BLOCKED
-
-- C1 grain UNSTATED on 1: tribal_bond_issuances.csv
-- C2 no validated primary key on 1
-- C7 DOUBLE-COUNTING RISK - money tables a buyer cannot safely total: tribal_bond_issuances.csv
-- C5 no row-conservation coverage
-- C4 only 28% of entity-bearing rows carry a Cedar id, and every record in this dataset HAS an entity subject - so this is unresolved work, not scope. See ADR-009 and ADR-010.
-
 ### `subcontracting` — BLOCKED
 
 - C1 grain UNSTATED on 1: subawards.csv
 - C2 no validated primary key on 1
 - C3 literal duplicates: subawards.csv(10,770)
 - C7 DOUBLE-COUNTING RISK - money tables a buyer cannot safely total: subawards.csv
-- C5 no row-conservation coverage
 - C4 only 42% of entity-bearing rows carry a Cedar id, and every record in this dataset HAS an entity subject - so this is unresolved work, not scope. See ADR-009 and ADR-010.
 
 ### `funding` — BLOCKED
@@ -100,5 +91,4 @@ BLOCKED 11 · NOT_TESTED 0
 - C2 no validated primary key on 3
 - C3 literal duplicates: faads_transactions.csv(1,001), faads_transactions_all_agencies.csv(179,259), native_passthrough.csv(114)
 - C7 DOUBLE-COUNTING RISK - money tables a buyer cannot safely total: faads_transactions.csv, faads_transactions_all_agencies.csv, native_passthrough.csv
-- C5 no row-conservation coverage
 - C4 only 40% of entity-bearing rows carry a Cedar id, and every record in this dataset HAS an entity subject - so this is unresolved work, not scope. See ADR-009 and ADR-010.

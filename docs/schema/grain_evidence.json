@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-29",
+ "generated": "2026-09-01",
  "method": "sample-generated candidates, FULL-FILE confirmation; hash uniqueness with exact re-read of every colliding hash. Produced by 512_build_dataset_contracts.py probe.",
  "n_tables": 208,
  "tables": {
@@ -531,8 +531,8 @@
   },
   "admin_appeal_positions.csv": {
    "path": "data/clean/admin_appeal_positions.csv",
-   "rows": 1,
-   "n_columns": 20,
+   "rows": 8,
+   "n_columns": 26,
    "columns": [
     "position_id",
     "organisation_id",
@@ -553,6 +553,12 @@
     "decision_pdf_url",
     "fetched_date",
     "confidence_tier",
+    "record_scope",
+    "record_scope_basis",
+    "inclusion_basis",
+    "derivation_basis",
+    "rederived_date",
+    "rederived_by_script",
     "cedar_uid"
    ],
    "whole_row_duplicates": 0,
@@ -574,6 +580,12 @@
     "source_record_id",
     "decision_pdf_url",
     "confidence_tier",
+    "record_scope",
+    "record_scope_basis",
+    "inclusion_basis",
+    "derivation_basis",
+    "rederived_date",
+    "rederived_by_script",
     "cedar_uid"
    ],
    "natural_key_duplicate_rows": 0,
@@ -591,16 +603,8 @@
      "unique": true,
      "duplicate_rows": 0,
      "null_rows": 0,
-     "example_duplicate": ""
-    },
-    {
-     "key": [
-      "cedar_uid"
-     ],
-     "unique": true,
-     "duplicate_rows": 0,
-     "null_rows": 0,
-     "example_duplicate": ""
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -609,7 +613,38 @@
      "unique": true,
      "duplicate_rows": 0,
      "null_rows": 0,
-     "example_duplicate": ""
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "source_record_id"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "decision_date"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "cedar_uid"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-08-29"
     },
     {
      "key": [
@@ -618,10 +653,22 @@
      "unique": true,
      "duplicate_rows": 0,
      "null_rows": 0,
-     "example_duplicate": ""
+     "example_duplicate": "",
+     "tested_date": "2026-08-29"
+    },
+    {
+     "key": [
+      "matter_id",
+      "organisation_id"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
     }
    ],
-   "tested_date": "2026-08-29"
+   "tested_date": "2026-09-01"
   },
   "admin_region_overlap_derived.csv": {
    "path": "data/clean/admin_region_overlap_derived.csv",
@@ -2750,8 +2797,19 @@
    "max_rows_per_join_key_value": {
     "cedar_uid": 0
    },
-   "candidates_tested": [],
-   "tested_date": "2026-08-29"
+   "candidates_tested": [
+    {
+     "key": [
+      "record_id"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
+    }
+   ],
+   "tested_date": "2026-09-01"
   },
   "congressional_correspondence_systems.csv": {
    "path": "data/clean/congressional_correspondence_systems.csv",
@@ -3240,8 +3298,19 @@
    "natural_key_duplicate_rows": null,
    "join_columns_present": [],
    "max_rows_per_join_key_value": {},
-   "candidates_tested": [],
-   "tested_date": "2026-08-29"
+   "candidates_tested": [
+    {
+     "key": [
+      "Deal_ID"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
+    }
+   ],
+   "tested_date": "2026-09-01"
   },
   "deals_anc_reports_additions.csv": {
    "path": "data/clean/deals_anc_reports_additions.csv",
@@ -5179,7 +5248,8 @@
      "unique": true,
      "duplicate_rows": 0,
      "null_rows": 0,
-     "example_duplicate": ""
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -5188,7 +5258,8 @@
      "unique": true,
      "duplicate_rows": 0,
      "null_rows": 0,
-     "example_duplicate": ""
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -5197,7 +5268,8 @@
      "unique": true,
      "duplicate_rows": 0,
      "null_rows": 0,
-     "example_duplicate": ""
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -5206,10 +5278,23 @@
      "unique": true,
      "duplicate_rows": 0,
      "null_rows": 0,
-     "example_duplicate": ""
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "report_id",
+      "federal_agency_prefix",
+      "federal_award_extension"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 0,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
     }
    ],
-   "tested_date": "2026-08-29"
+   "tested_date": "2026-09-01"
   },
   "fac_tribal_single_audits.csv": {
    "path": "data/clean/fac_tribal_single_audits.csv",
@@ -5911,13 +5996,45 @@
    "candidates_tested": [
     {
      "key": [
+      "accession_number"
+     ],
+     "unique": false,
+     "duplicate_rows": 18931,
+     "null_rows": 0,
+     "example_duplicate": "20060315-0144",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "ferc_filing_id"
+     ],
+     "unique": false,
+     "duplicate_rows": 989,
+     "null_rows": 0,
+     "example_duplicate": "FERCFIL-2ed56f529cf01ed9",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "docket_number",
+      "accession_number"
+     ],
+     "unique": false,
+     "duplicate_rows": 9570,
+     "null_rows": 0,
+     "example_duplicate": "P-1862 | 19990614-0566",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
       "ferc_filing_id",
       "filer_organization_as_recorded"
      ],
      "unique": false,
      "duplicate_rows": 822,
      "null_rows": 1127,
-     "example_duplicate": "FERCFIL-2ed56f529cf01ed9 | PORTLAND GENERAL ELECTRIC COMPANY"
+     "example_duplicate": "FERCFIL-2ed56f529cf01ed9 | PORTLAND GENERAL ELECTRIC COMPANY",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -5928,10 +6045,11 @@
      "unique": false,
      "duplicate_rows": 822,
      "null_rows": 1127,
-     "example_duplicate": "FERCFIL-2ed56f529cf01ed9 | PORTLAND GENERAL ELECTRIC COMPANY | 20050421-0109"
+     "example_duplicate": "FERCFIL-2ed56f529cf01ed9 | PORTLAND GENERAL ELECTRIC COMPANY | 20050421-0109",
+     "tested_date": "2026-09-01"
     }
    ],
-   "tested_date": "2026-08-29"
+   "tested_date": "2026-09-01"
   },
   "ferc_docket_parties.csv": {
    "path": "data/clean/ferc_docket_parties.csv",
@@ -6047,12 +6165,23 @@
    "candidates_tested": [
     {
      "key": [
+      "accession_number"
+     ],
+     "unique": false,
+     "duplicate_rows": 66,
+     "null_rows": 0,
+     "example_duplicate": "20031212-3061",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
       "ferc_ex_parte_id"
      ],
      "unique": false,
      "duplicate_rows": 56,
      "null_rows": 0,
-     "example_duplicate": "FERCXP-P-2232-407-20031014-3077"
+     "example_duplicate": "FERCXP-P-2232-407-20031014-3077",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -6062,7 +6191,8 @@
      "unique": false,
      "duplicate_rows": 56,
      "null_rows": 0,
-     "example_duplicate": "FERCXP-P-2232-407-20031014-3077 | 20031014-3077"
+     "example_duplicate": "FERCXP-P-2232-407-20031014-3077 | 20031014-3077",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -6073,7 +6203,8 @@
      "unique": false,
      "duplicate_rows": 56,
      "null_rows": 0,
-     "example_duplicate": "FERCXP-P-2232-407-20031014-3077 | 20031014-3077 | P-2232"
+     "example_duplicate": "FERCXP-P-2232-407-20031014-3077 | 20031014-3077 | P-2232",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -6083,10 +6214,22 @@
      "unique": false,
      "duplicate_rows": 56,
      "null_rows": 39,
-     "example_duplicate": "FERCXP-P-2232-407-20031014-3077 | E3-00073"
+     "example_duplicate": "FERCXP-P-2232-407-20031014-3077 | E3-00073",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "ferc_ex_parte_id",
+      "dockets_named_in_notice"
+     ],
+     "unique": false,
+     "duplicate_rows": 56,
+     "null_rows": 101,
+     "example_duplicate": "FERCXP-P-2232-407-20031014-3077 | EL03-132-000; ER03-583-000; Project No. 2342-000; CP03-302-000; Project No. 2232-407; Project Nos. 2000-000; 2216-000; CP03-75",
+     "tested_date": "2026-09-01"
     }
    ],
-   "tested_date": "2026-08-29"
+   "tested_date": "2026-09-01"
   },
   "ferc_ex_parte_parties.csv": {
    "path": "data/clean/ferc_ex_parte_parties.csv",
@@ -8878,7 +9021,8 @@
      "unique": true,
      "duplicate_rows": 0,
      "null_rows": 1,
-     "example_duplicate": ""
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -8889,7 +9033,8 @@
      "unique": true,
      "duplicate_rows": 0,
      "null_rows": 1,
-     "example_duplicate": ""
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -8900,7 +9045,8 @@
      "unique": true,
      "duplicate_rows": 0,
      "null_rows": 1,
-     "example_duplicate": ""
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -8912,7 +9058,8 @@
      "unique": false,
      "duplicate_rows": 8,
      "null_rows": 0,
-     "example_duplicate": "MENOM-KENOSHA | daily_vehicle_trips_new | area roadways | base year 2028"
+     "example_duplicate": "MENOM-KENOSHA | daily_vehicle_trips_new | area roadways | base year 2028",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -8922,7 +9069,8 @@
      "unique": false,
      "duplicate_rows": 1,
      "null_rows": 1,
-     "example_duplicate": "0 | 33"
+     "example_duplicate": "0 | 33",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -8935,10 +9083,56 @@
      "unique": false,
      "duplicate_rows": 5,
      "null_rows": 4,
-     "example_duplicate": "OSAGE-LAKEOZARK | trust_acquisition_acres | Project Site | at acquisition | "
+     "example_duplicate": "OSAGE-LAKEOZARK | trust_acquisition_acres | Project Site | at acquisition | ",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "project_id",
+      "metric",
+      "geography",
+      "time_period",
+      "alternative",
+      "derivation"
+     ],
+     "unique": false,
+     "duplicate_rows": 4,
+     "null_rows": 103,
+     "example_duplicate": "OSAGE-LAKEOZARK | trust_acquisition_acres | Project Site | at acquisition |  | ",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "project_id",
+      "metric",
+      "geography",
+      "time_period",
+      "alternative",
+      "reported_or_calculated"
+     ],
+     "unique": false,
+     "duplicate_rows": 5,
+     "null_rows": 4,
+     "example_duplicate": "OSAGE-LAKEOZARK | trust_acquisition_acres | Project Site | at acquisition |  | reported",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "project_id",
+      "metric",
+      "geography",
+      "time_period",
+      "alternative",
+      "source_document"
+     ],
+     "unique": false,
+     "duplicate_rows": 1,
+     "null_rows": 4,
+     "example_duplicate": "MENOM-KENOSHA | human_services_expenditure_reduction | Kenosha County, WI | stabilized annual | Alternative A - Casino and Hotel | Menominee Kenosha EA Appendix",
+     "tested_date": "2026-09-01"
     }
    ],
-   "tested_date": "2026-08-29"
+   "tested_date": "2026-09-01"
   },
   "gaming_properties.csv": {
    "path": "data/clean/gaming_properties.csv",
@@ -10026,13 +10220,25 @@
    "candidates_tested": [
     {
      "key": [
+      "event_id",
+      "bill_id"
+     ],
+     "unique": false,
+     "duplicate_rows": 1,
+     "null_rows": 0,
+     "example_duplicate": "338549 | 119-s-3878",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
       "bill_id",
       "event_id"
      ],
      "unique": false,
      "duplicate_rows": 1,
      "null_rows": 0,
-     "example_duplicate": "119-s-3878 | 338549"
+     "example_duplicate": "119-s-3878 | 338549",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -10043,10 +10249,11 @@
      "unique": false,
      "duplicate_rows": 1,
      "null_rows": 0,
-     "example_duplicate": "119-s-3878 | 338549 | A bill to establish the Grand Village of the Natchez Indians and Jefferson College as affiliated areas of the National Park System, and fo"
+     "example_duplicate": "119-s-3878 | 338549 | A bill to establish the Grand Village of the Natchez Indians and Jefferson College as affiliated areas of the National Park System, and fo",
+     "tested_date": "2026-09-01"
     }
    ],
-   "tested_date": "2026-08-29"
+   "tested_date": "2026-09-01"
   },
   "individual_native_exclusion_pairs.csv": {
    "path": "data/clean/individual_native_exclusion_pairs.csv",
@@ -11476,13 +11683,25 @@
    "candidates_tested": [
     {
      "key": [
+      "registrant_id",
+      "evidence_route"
+     ],
+     "unique": false,
+     "duplicate_rows": 7,
+     "null_rows": 0,
+     "example_duplicate": "301072 | R5_IDENTIFIER_ATTRIBUTED_IN_THE_LEDGER",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
       "evidence_verbatim",
       "evidence_tier"
      ],
      "unique": false,
      "duplicate_rows": 5,
      "null_rows": 0,
-     "example_duplicate": "Agent-researched 2026-08-06: firm-declared parent + retrieved document | B"
+     "example_duplicate": "Agent-researched 2026-08-06: firm-declared parent + retrieved document | B",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -11493,10 +11712,11 @@
      "unique": false,
      "duplicate_rows": 4,
      "null_rows": 0,
-     "example_duplicate": "Algorithmic name clustering, unreviewed | C | 301072"
+     "example_duplicate": "Algorithmic name clustering, unreviewed | C | 301072",
+     "tested_date": "2026-09-01"
     }
    ],
-   "tested_date": "2026-08-29"
+   "tested_date": "2026-09-01"
   },
   "lobbying_registrants.csv": {
    "path": "data/clean/lobbying_registrants.csv",
@@ -12517,13 +12737,35 @@
    "candidates_tested": [
     {
      "key": [
+      "bill_id"
+     ],
+     "unique": false,
+     "duplicate_rows": 5,
+     "null_rows": 0,
+     "example_duplicate": "107-hr-5108",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "bill_id",
+      "subject_family"
+     ],
+     "unique": false,
+     "duplicate_rows": 5,
+     "null_rows": 0,
+     "example_duplicate": "107-hr-5108 | Native American / American Indian (general)",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
       "bill_id",
       "number"
      ],
      "unique": false,
      "duplicate_rows": 5,
      "null_rows": 0,
-     "example_duplicate": "107-hr-5108 | 5108"
+     "example_duplicate": "107-hr-5108 | 5108",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -12534,10 +12776,24 @@
      "unique": false,
      "duplicate_rows": 5,
      "null_rows": 0,
-     "example_duplicate": "107-hr-5108 | 5108 | 2002-09-24"
+     "example_duplicate": "107-hr-5108 | 5108 | 2002-09-24",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "bill_id",
+      "subject_family",
+      "matched_phrase",
+      "matched_in"
+     ],
+     "unique": false,
+     "duplicate_rows": 5,
+     "null_rows": 0,
+     "example_duplicate": "107-hr-5108 | Native American / American Indian (general) | Native American | subjects_or_policy_area",
+     "tested_date": "2026-09-01"
     }
    ],
-   "tested_date": "2026-08-29"
+   "tested_date": "2026-09-01"
   },
   "native_entity_lobbying_disclosures.csv": {
    "path": "data/clean/native_entity_lobbying_disclosures.csv",
@@ -14607,7 +14863,36 @@
      "unique": false,
      "duplicate_rows": 860,
      "null_rows": 0,
-     "example_duplicate": "202122259349302447 | Alaska Native Tribal Health Consortium"
+     "example_duplicate": "202122259349302447 | Alaska Native Tribal Health Consortium",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "object_id",
+      "recipient_name_as_filed",
+      "recipient_ein",
+      "cash_grant_usd"
+     ],
+     "unique": false,
+     "duplicate_rows": 127,
+     "null_rows": 3370,
+     "example_duplicate": "202522689349301692 | CHEROKEE BOYS CLUB | 560819154 | ",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "object_id",
+      "recipient_name_as_filed",
+      "purpose_as_filed",
+      "recipient_address",
+      "irc_section_as_filed",
+      "recipient_zip"
+     ],
+     "unique": false,
+     "duplicate_rows": 509,
+     "null_rows": 12595,
+     "example_duplicate": "202330279349300223 | NEW MEXICO FOUNDATION | ECONOMIC DEVELOPMENT | 8 CALLE MEDICO | 501C3 | 87505",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -14621,10 +14906,11 @@
      "unique": false,
      "duplicate_rows": 517,
      "null_rows": 4170,
-     "example_duplicate": "202330279349300223 | NEW MEXICO FOUNDATION | ECONOMIC DEVELOPMENT | 8 CALLE MEDICO | 87505 | 850311210"
+     "example_duplicate": "202330279349300223 | NEW MEXICO FOUNDATION | ECONOMIC DEVELOPMENT | 8 CALLE MEDICO | 87505 | 850311210",
+     "tested_date": "2026-08-29"
     }
    ],
-   "tested_date": "2026-08-29"
+   "tested_date": "2026-09-01"
   },
   "nrc_meeting_participants.csv": {
    "path": "data/clean/nrc_meeting_participants.csv",
@@ -17084,7 +17370,32 @@
      "unique": true,
      "duplicate_rows": 0,
      "null_rows": 0,
-     "example_duplicate": ""
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "issuer_entity_id",
+      "par_amount",
+      "maturity"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 29,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "issuer",
+      "par_amount",
+      "instrument_type"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 1,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -17093,7 +17404,19 @@
      "unique": false,
      "duplicate_rows": 28,
      "null_rows": 29,
-     "example_duplicate": ""
+     "example_duplicate": "",
+     "tested_date": "2026-08-29"
+    },
+    {
+     "key": [
+      "issuer",
+      "use_of_proceeds"
+     ],
+     "unique": false,
+     "duplicate_rows": 13,
+     "null_rows": 21,
+     "example_duplicate": "Seminole Tribe of Florida | ",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -17104,10 +17427,11 @@
      "unique": false,
      "duplicate_rows": 19,
      "null_rows": 29,
-     "example_duplicate": "Seminole Tribe of Florida |  | "
+     "example_duplicate": "Seminole Tribe of Florida |  | ",
+     "tested_date": "2026-08-29"
     }
    ],
-   "tested_date": "2026-08-29"
+   "tested_date": "2026-09-01"
   },
   "tribal_resolution_financings.csv": {
    "path": "data/clean/tribal_resolution_financings.csv",
@@ -17198,7 +17522,8 @@
      "unique": true,
      "duplicate_rows": 0,
      "null_rows": 0,
-     "example_duplicate": ""
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -17207,7 +17532,8 @@
      "unique": true,
      "duplicate_rows": 0,
      "null_rows": 0,
-     "example_duplicate": ""
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -17216,7 +17542,8 @@
      "unique": true,
      "duplicate_rows": 0,
      "null_rows": 0,
-     "example_duplicate": ""
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
     },
     {
      "key": [
@@ -17225,10 +17552,21 @@
      "unique": true,
      "duplicate_rows": 0,
      "null_rows": 0,
-     "example_duplicate": ""
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
+    },
+    {
+     "key": [
+      "instrument_number"
+     ],
+     "unique": true,
+     "duplicate_rows": 0,
+     "null_rows": 1,
+     "example_duplicate": "",
+     "tested_date": "2026-09-01"
     }
    ],
-   "tested_date": "2026-08-29"
+   "tested_date": "2026-09-01"
   },
   "tribal_tax_bases.csv": {
    "path": "data/clean/tribal_tax_bases.csv",

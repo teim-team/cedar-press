@@ -219,6 +219,19 @@ unexplained. `GRAIN_AUDIT.md` was the one that had it right, and says
 README's cleared-contradictions table — each with the old figure, the new one
 and the date, so nobody re-derives the old number from a later document.
 
+**RE-MEASURED 2026-09-01, and it has moved again: `contract_grain_unstated_shippable`
+now reads 32**, against a ratchet floor of 25 in
+`data/clean/_regression_baseline.json`, and `62_no_regression_check.py` is
+failing on the rise. `n_shippable` grew 210 → 221 and
+`contract_grain_stated_shippable` grew 185 → 189, so most of the rise is new
+tables arriving without a grain declaration rather than an old declaration
+being lost. `docs/schema/dataset_contracts.json` names all 32.
+**The 25 above is what A7 measured when A7 was fixed and is correct as
+history; do not quote it as the current figure.** `527_doc_staleness.py` now
+reads this number from the contract JSON instead of carrying its own copy —
+the previous version hardcoded 25, which is the same defect this entry is
+about, in the script written to catch it.
+
 ## A8 · S1 · The keyed-identity headline contradicted the table printed beneath it
 
 **What it was.** `docs/TWELVE_DATASET_PLAN.md` — *"2,195,145 entity-bearing

@@ -123,7 +123,7 @@ reported; **the seasonal one is the correct one wherever the two disagree.**
 | assistance | 2 | **2** | 2026-05 at 66%, 2026-06 at 60% |
 | **990 Schedule I** | 6 | **1** | flat is an artifact; only 2025-12 is short — **at 12% of a December plateau** |
 | FAC single audits | 2 | **2** | |
-| CA gaming | 5 | **5** | five quarters short, and **2026-03 is missing outright** |
+| CA gaming | ~~5~~ **2** | ~~**5**~~ **2** | ⚠ **RE-DIAGNOSED 2026-09-01 — see 1.6. Not lag and not a hole: a PARSE DEFECT in `code/103`, now fixed. 2024-12 went 0 -> 468 rows and 2026-03 went 0 -> 445. Two quarters remain short and the reason is named per document.** |
 | resource revenue | 0 | **1** | |
 | Federal Register · NAGPRA · FERC · lobbying | 1 | **1** | the current month only, i.e. our staleness |
 | IBIA/IBLA · deals · gaming metrics · FAADS | 0 | **0** | no detectable fill |
@@ -302,9 +302,51 @@ fill it.
   through 2031. These are forward-dated compact *schedule* rows, not
   observations. `period_end` is the wrong freshness column for that collection
   and any "last data" claim built on it is wrong by five years.
-- **CA gaming is missing 2026-03 entirely**, and 2025-03 (112) / 2025-12 (110)
+- ~~**CA gaming is missing 2026-03 entirely**, and 2025-03 (112) / 2025-12 (110)
   are ~25% of a ~450-row quarter. The CCGC series has real holes at the edge; it
-  is not merely lagging.
+  is not merely lagging.~~
+
+  > **CORRECTED 2026-09-01, workstream INT-2. This entry was wrong in the way
+  > that costs the most: it described a PARSE DEFECT as a source gap, which
+  > sends the next agent to re-download documents already on disk.**
+  >
+  > Every one of those quarters was on disk in `data/raw/external/ca_gaming/`
+  > the whole time. Three separate defects in `code/103_build_california_gaming.py`
+  > were discarding them, all three now fixed and all three verified against
+  > the reports' OWN printed totals:
+  >
+  > 1. **A number split across two text spans.** Two of the 93rd report's 89
+  >    Exhibit-1 rows render `25,438,385.42` as `25,438` + `,385.42`, 2.74pt
+  >    apart. The tail is not money-shaped, so it fell into the row LABEL
+  >    ("Pinoleville Pomo Nation ,385.42") and the 2.74pt offset opened a
+  >    phantom fifth column holding two values. `metric_for` has no
+  >    five-column mapping, so **all five columns were refused as
+  >    `unmapped_column` and the entire 89-row exhibit produced nothing.**
+  >    Rejoined, the inception column foots to $1,826,037,694.56 against a
+  >    printed $1,826,037,694.56, exactly.
+  > 2. **All-or-nothing footing.** One column short by **$1.00 over 62 tribes**
+  >    (1.6e-8 of the total — the source's own per-row cent rounding) failed
+  >    the whole zone and threw away 62 good rows. Footing is now per column
+  >    with a stated relative tolerance, and a column accepted that way is
+  >    labelled `foots_within_rounding` on every row. The 95th report's
+  >    **$40,000** discrepancy is 2.4e-5 relative and is still refused.
+  > 3. **A column CGCC added.** From the 98th report on, Exhibit 1 carries
+  >    "Annual Distribution from Revenue Received" as a fifth column. No
+  >    five-column mapping existed, so the two newest reports produced almost
+  >    nothing.
+  >
+  > **And the 98th report is NOT an image-only scan.** `docs/datasets/gaming_sources.md`
+  > 1E said it had 0 characters and needed OCR. Measured 2026-09-01: **24,824
+  > characters across 13 pages**, Exhibit 1 parses to 89 rows and foots on all
+  > five columns. There is no OCR job here and there never was.
+  >
+  > **Result:** `ca_gaming_payments.csv` 40,164 -> **41,758**. 2024-12-31
+  > 0 -> **468**; 2026-03-31 0 -> **445**; 2026-06-30 167 -> **612**.
+  >
+  > **What is genuinely still short, and why, per document** — these are
+  > `CAPTURED_NOT_PARSED`, listed with their measured discrepancy in
+  > `review/ca_rstf_captured_not_parsed_2026-09-01.md`. No row is invented for
+  > any of them.
 - **`gaming_facility_metrics` is two series wearing one name.** Its monthly
   component is *only* Connecticut: `CT Dept of Consumer Protection /
   data.ct.gov`, **3,240 rows, 747 facility-months, 1993-01 → 2025-12**, Foxwoods
@@ -351,7 +393,7 @@ Each row: what the source says, then what we measured. Verified rows are marked.
 | **NIGC gaming revenue report** | **annual**, for the prior FY | our gaming series ends 2025-12 | annual |
 | **CT DCP** | **monthly per casino** | **747 facility-months, zero gaps, 1993-01 → 2025-12** | ✅ **the only true monthly gaming series Cedar holds** |
 | **CA CCGC** | quarterly | quarterly, **with 2026-03 missing and edge quarters short** | ⚠ holes, not just lag |
-| **other state regulators** | annual, mostly | NM & AZ 403 behind Cloudflare — `NOT_CHECKED`, **not** `NOT_FOUND` | |
+| **other state regulators** | annual, mostly | ~~NM & AZ 403 behind Cloudflare — `NOT_CHECKED`, **not** `NOT_FOUND`~~ **NM CORRECTED 2026-09-01: New Mexico was never a fetch problem for FY2023-2026Q2. Fourteen NMGCB quarterly releases were already extracted and footed 14/14 by `code/216` and sat in `review/`. Promoted 2026-09-01 through `code/92`; `gaming_capacity_official` NM went 1,090 -> 1,278 and now reaches 2026-06-30. AZ is unchanged.** | |
 | **ONRR / resource revenue** | monthly disbursement, monthly + annual statistics | monthly, flat, ends 2026-06-30 | ✅ |
 | **LODES** | annual, ~2-year lag | not re-probed | annual |
 | **QWI** | quarterly, ~2–3 quarter lag | not re-probed | quarterly |
@@ -420,8 +462,8 @@ incapable of catching that filing.** The refresh key must be `dt_posted`, not
 | **990 / nonprofits** | **semiannual** | annual | Feb and Aug | e-file index is 10 annual files, ~77 MB each | **nothing.** An 18-month structural lag makes any faster cadence theatre |
 | **FAC single audits** | **quarterly, with a 2-YEAR trailing window** | annual | ~3 weeks after each calendar quarter | api.data.gov key, 1,000/hr | ~31% of audits land late; a 9-month window silently drops them |
 | **CT gaming (monthly)** | **monthly** | n/a — 2 facilities | ~mid-month | trivial, one open-data endpoint | ~~currently 8 months behind; the cheapest win in the file~~ — **wrong: measured live 2026-08-26, the endpoint itself stops at 2025-12-31. Cedar holds every casino-month it serves. See PART 5.** |
-| **CA gaming (quarterly)** | **quarterly** | quarterly | ~6 weeks after quarter close | small | edge quarters are already short and 2026-03 is already missing |
-| **Other state gaming** | **annual** | annual | per state | varies; NM/AZ blocked at 403 | little |
+| **CA gaming (quarterly)** | **quarterly** | quarterly | ~6 weeks after quarter close | small | ~~edge quarters are already short and 2026-03 is already missing~~ **corrected 2026-09-01: that was a parse defect, fixed. 2026-03 is present (445 rows). What remains short is named per document in `review/ca_rstf_captured_not_parsed_2026-09-01.md`.** |
+| **Other state gaming** | **annual** | annual | per state | ~~varies; NM/AZ blocked at 403~~ **NM is quarterly and current to 2026-06-30 as of 2026-09-01; AZ still 403s an automated client** | little |
 | **NIGC gaming revenue** | **annual** | annual | on release | one report | a year |
 | **Resource revenue (ONRR)** | **monthly** | annual | ~6 weeks after month close | small | one month |
 | **Deals** | **weekly sweep, quarterly deep pass** | continuous — deals *are* discovery | any | manual + press | **link rot.** Backfill reverse-chronologically; this is the one collection where delay destroys evidence |
@@ -591,7 +633,7 @@ collections advertise.
 | **990 / Schedule I** | **almost nothing** | tax-year-2025 volume is **4,614 rows against 9,779 for 2024 — 47%**, and the split says why: **June-2025 fiscal-year ends are fully in, December-2025 ends are at 12% of a December plateau**, because their extended deadline is 2026-11-15. Maturity ~mid-2027. **A year-turn 990 refresh is not worth running.** Move it to the Feb cycle and describe the collection as 2024-complete / 2025-partial. |
 | **FAC single audits** | FY2025 audits (Dec-2025 year ends, due 2026-09-30) mostly land | **2027-01**, and *still* re-read two years back — 31% arrive late. FY2026 will not be presentable until 2027-09 at the earliest. |
 | **CT gaming** | 2026 monthly series completes | **~2027-01-15**, one month after December. This one is genuinely current if we pull it. |
-| **CA gaming** | 2026 Q4 | ~**2027-02-15**. Backfill 2025-03, 2025-12 and the missing **2026-03** in the same pass — those are holes, not lag. |
+| **CA gaming** | 2026 Q4 | ~**2027-02-15**. ~~Backfill 2025-03, 2025-12 and the missing **2026-03** in the same pass — those are holes, not lag.~~ **2026-03 needed no backfill: it was on disk and mis-parsed, fixed 2026-09-01. 2025-03 and 2025-12 are still short and the reason is a footing failure in the document, not an absent document — do not re-fetch them.** |
 | **NIGC** | FY2026 gaming revenue report | **mid-2027**. Nothing to do at the year turn. |
 | **Resource revenue** | 2026 months complete | ~**2027-02-15** |
 | **Federal Register / NAGPRA / FERC / appeals** | continuous; the year turn means nothing | any day — but **pull now**, they are 20–21 days stale |

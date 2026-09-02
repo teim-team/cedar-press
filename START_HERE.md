@@ -527,10 +527,10 @@ today: 85% x17, 70% x152, 55% x45, 40% x55.
 > check (see the new ownership section in `docs/NATIVE_ENTITY_NUANCES.md`).
 >
 > Also open, all recorded in `docs/ASSERTION_LAYER.md` under *Where this is honestly weak*:
-> `gaming_source_claims` contributes 0 assertions (no `cedar_uid`; 10 of 113 rows resolved);
-> **11,676 of 23,310 assertions are `unattributed_legacy`**, meaning half the store carries
-> no evidence because the row it came from never recorded any; and
-> `entity.is_federally_recognized` has no negative case.
+> `gaming_source_claims` contributes 9 assertions and still has no `cedar_uid` (113 rows);
+> **5,428 of 34,615 assertions (15.7%) are `unattributed_legacy`** — re-measured 2026-09-01,
+> down from the 11,676 of 23,310 (50.1%) this line used to carry, so "half the store carries
+> no evidence" is no longer true; and `entity.is_federally_recognized` has no negative case.
 
 1. **SAM FY2000–2007. BLOCKED ON A KEY — see the correction below.**
    Resets 00:00 UTC. Six variants, **one extract each covers all eight years** —

@@ -61,6 +61,24 @@ def resolve_tier(spec):
     return f"{SHELF_LABEL.get(c['shelf'], c['shelf'])} - {c['name']}"
 
 
+def _coverage_module():
+    """`code/621_dataset_coverage.py`, imported by path (leading digits mean
+    it is not a legal module name). Returns None if it is absent, so this
+    generator keeps working rather than failing on a missing sibling - but
+    the docs then lose their status block, which is loud enough to notice."""
+    import importlib.util
+    from pathlib import Path as _P
+    p = _P(__file__).resolve().parent / "621_dataset_coverage.py"
+    if not p.exists():
+        print("  WARNING: code/621_dataset_coverage.py missing - "
+              "generated docs will carry no readiness/coverage block")
+        return None
+    spec = importlib.util.spec_from_file_location("cedar621", p)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+
+
 def catalog_coverage():
     """(documented, undocumented) catalog collection ids."""
     cat = _catalog()
@@ -71,10 +89,83 @@ def catalog_coverage():
 OUT = CEDAR / "docs" / "datasets"
 TODAY = date.today().isoformat()
 
+# THE HONEST CELL FOR AN UPSTREAM NOBODY HAS PROBED.
+# Every `Years upstream` cell in a COVERAGE table below either cites the repo
+# document that established it or reads this. `512`'s docstring states the
+# standard - a wrong figure in a contract is worse than a missing one - and it
+# applies to prose: a guessed upstream year silently converts "we have not
+# looked" into "there is nothing there", which is the one claim a coverage
+# table must never make by accident.
+NP = "**NOT PROBED.** No upstream probe for this source is recorded in this repo."
+
 # key: everything an agent needs to maintain this dataset.
 SPEC = {
     "01_deals": {
         "collection": "deals",
+        # ------------------------------------------------------------------
+        # COVERAGE, added 2026-09-01 (workstream DOCS).
+        # The `Years Cedar holds` column is NOT here - 621 measures it from the
+        # live table on every generation. What is authored here is the upstream
+        # half, and every cell either cites a repo document that established it
+        # or says NOT PROBED. A guessed upstream year is worse than a missing
+        # one: it turns "we have not looked" into "there is nothing there".
+        # ------------------------------------------------------------------
+        "coverage_intro":
+            "Per source: what the SOURCE serves, and the gap against it. What CEDAR "
+            "holds is measured per table in the block near the top of this file and "
+            "is deliberately not repeated here, so the two can never disagree. "
+            "Deals is the only dataset built from press rather than an API, so its "
+            "upstream is not a schedule but a set of archives with different floors.",
+        "coverage": [
+            ("Newsroom / press sweep - the primary route",
+             "Continuous, and there is no schedule. `301_source_freshness_probe.py` "
+             "records the upstream cadence verbatim as *\"Continuous. Press releases "
+             "and filings; there is no schedule, only link rot.\"*",
+             "See the measured block above.",
+             "**Link rot, not a year range.** `docs/COVERAGE_EXPANSION_OPTIONS.md` "
+             "warns the 2000s will be materially sparser than the 2010s and that this "
+             "is a property of the archives, not of deal activity. Never read a thin "
+             "early year here as a quiet market."),
+            ("SEC EDGAR full-text search (`efts.sec.gov`)",
+             "**2001 onward only.** Stated twice in this repo: "
+             "`docs/UNTAPPED_FREE_SOURCES_2026-08-26.md` D and "
+             "`docs/DEALS_2000_2019_BUILD_LOG.md` - *\"EDGAR full-text search does "
+             "not reach before 2001\"*.",
+             "The 2010-2017 sweep, `docs/DEALS_SEC_2010_2017_BUILD_LOG.md`.",
+             "FY2001-2009 and FY2018-2026 are reachable by this route and **have not "
+             "been swept**. `docs/REFRESH_CADENCE.md` lists EDGAR full-text as "
+             "*reachable, not swept*."),
+            ("SEC EDGAR quarterly index - `Archives/edgar/full-index/<year>/<QTR>/company.idx`",
+             "The route used for anything before 2001, because full-text cannot reach "
+             "it. Its own earliest year is " + NP,
+             "Used for the 2010-2017 pass only.",
+             "Unknown until the index's floor is probed. That probe is one HTTP GET "
+             "per candidate year and has not been run."),
+            ("ANC annual reports",
+             NP + " The harvest is recorded in "
+             "`docs/DEALS_ANC_REPORTS_BUILD_LOG.md`; the publishers' own archive "
+             "depth was never enumerated.",
+             "See the measured block above.",
+             "Unquantified. This is the highest-value unmeasured upstream in the "
+             "dataset - ANC reports are the one source that states a transaction the "
+             "press did not cover."),
+            ("Federal Register land and trust actions",
+             "1994 onward via the API; earlier is scanned volumes on GovInfo "
+             "(`docs/COVERAGE_EXPANSION_OPTIONS.md`).",
+             "Reaches this dataset through the federal-register collection, not "
+             "through a deals-specific pull.",
+             "None at the source for 1994+."),
+        ],
+        "coverage_verdict": [
+            "**The floor here is archival, not statutory.** Nothing forbids a 1995 "
+            "deal row; what is missing is a source that reliably reports one. That "
+            "makes deals the one dataset where a coverage gap and a real absence of "
+            "activity are genuinely hard to tell apart, and it is why the ledger "
+            "carries `pre_2000_flag` rather than a hard cutoff.",
+            "**Two named, costed, unrun expansions exist** and both are cheap: the "
+            "EDGAR full-text years either side of the 2010-2017 sweep, and the ANC "
+            "annual-report archive depth. Neither needs a key.",
+        ],
         "title": "Dataset 1 — Indian Country Deals",
         "what": "Dated M&A, financing, land, and award events where a Native entity is a "
                 "principal. The only dataset built from press rather than an API, and "
@@ -406,6 +497,55 @@ SPEC = {
     },
     "02b_subcontracting": {
         "collection": "subcontracting",
+        # COVERAGE added 2026-09-01 (workstream DOCS). The authoritative
+        # long-form ledger is docs/datasets/subcontracting.md, which is HAND
+        # maintained; this is the short form that travels with the generated
+        # doc. Where they differ the hand ledger is the research and the
+        # measured block above is the data.
+        "coverage_intro":
+            "Per source. The full per-year ledger, including which fiscal years were "
+            "re-pulled and why, is `docs/datasets/subcontracting.md` - it is hand "
+            "maintained and is the authority on the upstream half.",
+        "coverage": [
+            ("USAspending FSRS - `POST /api/v2/bulk_download/awards/`, "
+             "`sub_award_types=[procurement, grant]`, no recipient filter",
+             "**FY2010 is a real floor, and it is statutory.** FFATA dropped the "
+             "subaward reporting threshold from $25M to $25,000 in October 2010, so "
+             "FSRS has nothing before then. Demonstrated rather than assumed: the "
+             "FY2001-FY2009 jobs returned 4,945 raw rows and every one carries "
+             "`subaward_sam_report_year >= 2010`.",
+             "See the measured block above.",
+             "**None at the floor.** The 51 rows in `subawards.csv` dated before "
+             "FY2010 are filer typos and are flagged `action_date_precedes_ffata_flag "
+             "= yes` - re-measured 2026-09-01, exactly 51 rows carry it. They must "
+             "never be counted as coverage."),
+            ("HigherGov 2023 export - `subcontract-05-09-23-22-23-37.csv`",
+             "FY2011-FY2023. The export is frozen and its query definition was never "
+             "preserved, so its sampling frame is unknown.",
+             "998 rows, all of it.",
+             "**None, and none possible.** Its absence after FY2023 is not a gap. No "
+             "share-of-market claim may rest on it."),
+            ("Federal-funding forward-fill - `Assistance_Subawards_*.csv`",
+             "FY2023-FY2026, as a by-product of the Dataset 3 pull.",
+             "608 rows, carried as `source_population=prime_tribal_filtered`.",
+             "**It is not a subaward source.** That pull filtered "
+             "`recipient_type_names=indian_native_american_tribal_government` on the "
+             "PRIME, so the prime is Native by construction and the file cannot "
+             "observe a Native SUBcontractor under a non-Native prime at all."),
+        ],
+        "coverage_verdict": [
+            "**An interior-gap check cannot see this dataset's worst defect.** "
+            "Measured 2026-09-01, `subawards.csv` holds 9,462 rows for FY2021 and "
+            "7,360 for FY2025, and 89 / 120 / 166 for FY2022 / FY2023 / FY2024 - none "
+            "of which came from `usaspending_fsrs_pull`. Those years are not zero, so "
+            "`35_coverage_audit.py` correctly reports no interior gap and the hole "
+            "stays invisible. `621_dataset_coverage.py` flags them as **thin** for "
+            "exactly this reason.",
+            "The cause is recorded in `docs/datasets/subcontracting.md` 2 - FY2022-24 "
+            "were never submitted in the original pull and the 2026-08-12 retry "
+            "failed server-side. Check the measured block above before quoting any "
+            "FY2022-24 subcontracting figure.",
+        ],
         "title": "Dataset 2b — Subcontracting",
         "what": "Subaward relationships in both directions: Native entities as SUBS under "
                 "non-Native primes (a revenue channel prime data misses entirely), and "
@@ -503,6 +643,52 @@ SPEC = {
     },
     "03_funding": {
         "collection": "funding",
+        # COVERAGE added 2026-09-01 (workstream DOCS).
+        "coverage_intro":
+            "Per source. This dataset has the single largest documented gap in Cedar "
+            "Press and the gap is a SEAM, not an absence: two different collection "
+            "systems meet at FY2008.",
+        "coverage": [
+            ("USAspending assistance - award archive + API",
+             "FY2007 onward in the archive; FY2001+ through the Custom Award Data "
+             "Download. FFATA 2 is explicit that the website carries *\"data for "
+             "fiscal year 2007, and each fiscal year thereafter\"*. Agencies submit "
+             "twice monthly and the archive replaces monthly (`301`).",
+             "See the measured block above.",
+             "Pre-FY2001 is not served by this source at any price."),
+            ("FAADS - the Census Bureau predecessor system",
+             "**CLOSED BY DESIGN.** `301` records it verbatim: *\"FAADS was retired "
+             "when USAspending took over; the series ends FY2007 and will never gain "
+             "a period.\"* Its own start year is " + NP,
+             "`faads_transactions.csv` and "
+             "`faads_transactions_all_agencies.csv`.",
+             "**None forward - FY2007 is the source's end, not ours.** The open "
+             "question is backwards and is about identifiers, not availability: "
+             "`docs/FAADS_FEASIBILITY_2026-08-05.md` finds that pre-2004 there was no "
+             "DUNS mandate and no UEI, so the join may be name-only, which is the "
+             "method this project has ruled against."),
+            ("USAspending advanced search API",
+             "**Will not accept a start date before 2007-10-01.** The API's own error "
+             "text is quoted in `docs/PRE2007_SPENDING_SOURCES.md` and "
+             "`docs/FAADS_FEASIBILITY_2026-08-05.md`: *\"start_date falls before the "
+             "earliest available search date of 2007-10-01.\"*",
+             "Not used for pre-FY2008.",
+             "A hard refusal, not a rate limit. Any pre-FY2008 route must go through "
+             "the archive or FAADS."),
+        ],
+        "coverage_verdict": [
+            "**FY2008 is a seam and must ship as one.** "
+            "`docs/COVERAGE_EXPANSION_OPTIONS.md` names it: FAADS to USAspending is a "
+            "change of collection system, possibly of assistance-type definitions and "
+            "program coding. A visible jump at 2008 would be indistinguishable from a "
+            "policy change to a reader. Any spliced series ships with a "
+            "`source_system` column and the seam documented in the method note.",
+            "**The forward edge is a promotion gap, not a source gap.** The SPEC's own "
+            "refresh note records that `federal_funding_transactions.csv` is still "
+            "spine-only and that the 2023-04-06 to 2026-07-31 fill is retrieved and "
+            "staged but NOT merged. The measured block above is the check on that: it "
+            "reads the live table, so the day the merge lands the doc says so.",
+        ],
         "title": "Dataset 3 — Federal Funding (Assistance)",
         "what": "Grants, direct payments and other assistance to Native entities, built as "
                 "an attribution LAYER over the raw transaction spine.",
@@ -650,6 +836,58 @@ SPEC = {
     },
     "04_lobbying": {
         "collection": "lobbying",
+        # COVERAGE added 2026-09-01 (workstream DOCS). The long-form
+        # per-channel ledger is docs/datasets/lobbying_sources.md 1.
+        "coverage_intro":
+            "Per source. The full per-channel table - 11 channels, each with earliest "
+            "available / earliest held / latest available / latest held - is "
+            "`docs/datasets/lobbying_sources.md` 1 and is the authority. This is the "
+            "short form.",
+        "coverage": [
+            ("Senate LDA - LD-2 quarterly, LD-203 semiannual",
+             "**1999 is a statutory floor.** The Lobbying Disclosure Act of 1995 "
+             "produced filings from 1999; nothing earlier exists to get "
+             "(`docs/COVERAGE_EXPANSION_OPTIONS.md`). LD-2 is due 20 days after "
+             "quarter end; before HLOGA (2008) it was SEMIANNUAL, which changes the "
+             "grain of the early years and not just their density.",
+             "See the measured block above.",
+             "**None, and none possible.** Publish the 1999 floor as a statutory "
+             "limit rather than as a gap that might close."),
+            ("regulations.gov - the rulemaking comment channel",
+             "Continuous. " + NP + " for its own floor.",
+             "The 2026 pass banked **51 of 1,712 query names (3.0%)** - "
+             "`docs/datasets/lobbying_sources.md` 4.",
+             "**97% of the query surface, and this is the largest open gap in the "
+             "collection.** It is a volume problem, not an availability one."),
+            ("OIRA / EO 12866 meetings - reginfo.gov",
+             "**2014 onward, measured.** Half-year probes across 1994-2026 return a "
+             "rendered result set only from 2014-01-01 forward; month probes for "
+             "2005, 2012 and 2013 fall back to the empty search form.",
+             "2014-09-30 to 2026-05-05.",
+             "**NONE at this source.** Earlier EO 12866 meetings happened; this "
+             "source will not serve them."),
+            ("FERC eLibrary",
+             "Indexes a filing within about one business day of acceptance; "
+             "continuous and event-driven (`301`).",
+             "See the measured block above.",
+             "None at the forward edge."),
+            ("IRS 990 Schedule C",
+             "The e-file era only - a return appears roughly 9-18 months after the "
+             "filer's fiscal year end (`301`).",
+             "`docs/datasets/lobbying_sources.md` 4b carries its own permanent "
+             "coverage table.",
+             "Pre-e-file paper filings are not digitised at scale. Structural."),
+        ],
+        "coverage_verdict": [
+            "**The LDA is the narrowest channel in the collection, not the widest.** "
+            "The per-channel reach table in `lobbying_sources.md` exists because a "
+            "buyer who reads only LDA rows will systematically under-count Native "
+            "advocacy - regulatory comments, ex parte contacts and OIRA meetings are "
+            "advocacy the LDA barely reflects.",
+            "**Two of the five sources above are CLOSED at their floor for statutory "
+            "or structural reasons** (LDA 1999, OIRA 2014). Say so plainly; do not "
+            "carry them as open gaps.",
+        ],
         "title": "Dataset 4 — Native Influence / Lobbying",
         "what": "Senate LDA filings by and about Native entities, including the "
                 "government-entities-contacted field at scale — the part almost nobody parses.",
@@ -679,6 +917,45 @@ SPEC = {
     },
     "06_nonprofit": {
         "collection": "nonprofits",
+        # COVERAGE added 2026-09-01 (workstream DOCS).
+        "coverage_intro":
+            "Per source. The binding limit on this dataset is the IRS e-file era, and "
+            "it is structural: it cannot be bought, scraped or worked around.",
+        "coverage": [
+            ("IRS Business Master File (BMF) - monthly regional extracts",
+             "A monthly SNAPSHOT, not a series. The BMF states the organisations that "
+             "exist now; it does not state the ones that existed in 2004.",
+             "See the measured block above.",
+             "**Vintages are the only history there is.** Keep every monthly snapshot: "
+             "organisations vanish from the BMF on revocation and a dropped vintage is "
+             "an unrecoverable loss, not a re-pullable one."),
+            ("IRS Form 990 e-file XML index",
+             "The e-file era only. A return appears roughly **9-18 months after the "
+             "filer's fiscal year end**, extensions push it further (`301`). The index "
+             "own start year is " + NP,
+             "See the measured block above.",
+             "**Pre-e-file 990s are not digitised at scale** - "
+             "`docs/COVERAGE_EXPANSION_OPTIONS.md` records this as a structural limit "
+             "to be published as such, not as work in progress."),
+            ("Federal Audit Clearinghouse single audits",
+             "Uniform Guidance 2 CFR 200.512(a): the reporting package is due within "
+             "the EARLIER of 30 days after the auditor's report or **9 months after "
+             "the audit period ends** (`301`). So a fiscal year is structurally "
+             "incomplete for the better part of a year.",
+             "See the measured block above.",
+             "The trailing 9-12 months of any FAC series is a filing lag, not a "
+             "coverage gap. Never read the newest year as a decline."),
+        ],
+        "coverage_verdict": [
+            "**The newest year is always wrong here, in a knowable direction.** Both "
+            "990 and FAC have long statutory or practical filing lags, so the most "
+            "recent one to two years will keep growing after every pull. A "
+            "year-over-year chart drawn off this dataset without stating the as-of "
+            "date will show a fall that is entirely an artefact.",
+            "**The e-file floor is structural and should be priced as such.** It is in "
+            "the same class as the LDA 1999 floor: publish the limit, do not carry it "
+            "as an open gap.",
+        ],
         "title": "Dataset 6 — Native Nonprofit & Philanthropic Economy",
         "what": "Native-controlled, tribally affiliated and Native-serving nonprofits from "
                 "IRS records. Adds EIN to the spine.",
@@ -706,6 +983,37 @@ SPEC = {
     },
     "09_federal_actions": {
         "collection": "federal-register",
+        # COVERAGE added 2026-09-01 (workstream DOCS).
+        "coverage_intro":
+            "Per source. This is the best-covered dataset in Cedar Press - the API is "
+            "free, keyless, complete on release, and reaches 1994. The one thing to "
+            "know is that 1994 is a metadata artefact as well as a floor.",
+        "coverage": [
+            ("federalregister.gov API",
+             "**1994 onward.** Publishes every federal business day and the public "
+             "inspection desk posts the day before; `301` grades the source "
+             "*\"Complete on release\"*. Free GET, no key.",
+             "See the measured block above.",
+             "**None at the forward edge.** `301` measured the newest period ending "
+             "0 days before our as-of."),
+            ("GovInfo scanned Federal Register volumes",
+             "**1936 onward**, as page images rather than as an API "
+             "(`docs/COVERAGE_EXPANSION_OPTIONS.md`).",
+             "Nothing.",
+             "1936-1993. Priced as its own effort: the valuable part is federal "
+             "acknowledgment and ANCSA histories, not bulk volume."),
+        ],
+        "coverage_verdict": [
+            "**Do not start a rulemaking series at 1994.** "
+            "`docs/COVERAGE_EXPANSION_OPTIONS.md` names this seam precisely: 1994 has "
+            "2,838 of 2,926 rows typed `Uncategorized Document`, so 1994 shows 39 "
+            "rulemakings against 1,287 in 1995. **That is not a policy shift.** Any "
+            "rulemaking series should start at 1995; the 1994 rows are still correct "
+            "as documents and only the TYPE is unreliable.",
+            "The 1936 extension is real and reachable, and it is a scanning project "
+            "rather than a pull. It is the only route to acknowledgment history and "
+            "should be quoted as a separate piece of work.",
+        ],
         "title": "Dataset 9 — Federal Actions Affecting Tribal Nations",
         "what": "Event-level log of formal federal actions involving Native entities, from "
                 "the Federal Register. Dates and cross-verifies every other dataset.",
@@ -735,6 +1043,38 @@ SPEC = {
     },
     "10_bills_votes": {
         "collection": "legislation",
+        # COVERAGE added 2026-09-01 (workstream DOCS).
+        "coverage_intro":
+            "Per source. This is the one dataset where going DEEPER is a filter "
+            "change rather than a build - the early rows are already in Cedar Press "
+            "carrying `pre_2000_flag = 1`.",
+        "coverage": [
+            ("congress.gov API - bills, actions, cosponsors",
+             "Bill text and metadata quality degrades going back; the SPEC's refresh "
+             "note records that action histories are the only part that goes stale. "
+             "The API's own earliest Congress is " + NP,
+             "See the measured block above.",
+             "Action histories must be re-run with `73 --actions --outcomes` after "
+             "any Congress closes."),
+            ("Voteview - roll-call votes",
+             "**Congress 1 (1789) onward.** `docs/COVERAGE_EXPANSION_OPTIONS.md` "
+             "grades the cost *Low - Voteview publishes the full series* and notes "
+             "roll-call quality does not degrade with age; these are archival "
+             "records, not web sourcing.",
+             "Congress 93 (1973) onward, flagged.",
+             "1789-1972 - **reachable cheaply and not taken.**"),
+        ],
+        "coverage_verdict": [
+            "**The strongest cheap expansion in the whole product.** The repo's own "
+            "recommended posture is explicit: *\"Bills & Votes deeper history is a "
+            "cheap yes - the data is already in hand and flagged; publishing it back "
+            "to 1973 (or earlier) is a filter change.\"*",
+            "**But the early years are genuinely thin and that is real.** Measured "
+            "2026-09-01, `native_bills.csv` spans 1973-2026 and `621` flags every "
+            "year from 1975 to 1992 as thin against the table median. Before "
+            "publishing deeper, decide whether that thinness is Congress or is the "
+            "subject-term sweep failing on older records - it has not been tested.",
+        ],
         "title": "Dataset 10 — Native Bills & Congressional Votes",
         "what": "Bills affecting Native entities, their roll calls, member positions and "
                 "cosponsors — AND, since 2026-08-06, what happened to the bills that never "
@@ -844,6 +1184,35 @@ SPEC = {
     },
     "compacts": {
         "collection": "gaming",
+        # COVERAGE added 2026-09-01 (workstream DOCS). Compacts share the
+        # `gaming` collection, so the measured block above lists the whole
+        # gaming contract; the sources below are the compact-specific ones.
+        "coverage_intro":
+            "Per source. Compacts have the cleanest floor in Cedar Press: IGRA is the "
+            "statute that creates the instrument, so nothing can exist before it.",
+        "coverage": [
+            ("BIA compact index + Federal Register approval notices",
+             "**1988 is the hard floor - IGRA was enacted that year and a "
+             "Class III compact cannot predate the statute that authorises it.**",
+             "See the measured block above.",
+             "`docs/COVERAGE_EXPANSION_OPTIONS.md` measures the reachable remainder "
+             "at **two years** (1988-1989) and grades the dataset *already "
+             "effectively complete; nothing exists before IGRA*."),
+            ("State gaming commissions - compact texts and amendments",
+             NP + " Each state publishes on its own terms and no cross-state "
+             "enumeration of archive depth has been run.",
+             "See the measured block above.",
+             "Unquantified, and this is where amendment history lives. A compact's "
+             "`compact_versions` chain is only as complete as the state that "
+             "published the amendments."),
+        ],
+        "coverage_verdict": [
+            "**Treat 1988 as complete, not as a gap.** This is the one dataset where "
+            "the answer to *\"are we missing years?\"* is a flat no.",
+            "**The open coverage question is versions, not years.** A compact is not a "
+            "row, it is a chain of amendments, and the chain's completeness depends on "
+            "a state's own publishing habits rather than on any federal index.",
+        ],
         "title": "Tribal-State Gaming Compacts",
         "what": "Class III compacts and amendments — who may operate what, until when, and "
                 "on what fiscal terms.",
@@ -878,6 +1247,61 @@ SPEC = {
     },
     "gaming": {
         "collection": "gaming",
+        # COVERAGE added 2026-09-01 (workstream DOCS). The long-form source
+        # surface, 8 parts, is docs/datasets/gaming_sources.md and is the
+        # authority on the upstream half.
+        "coverage_intro":
+            "Per source. Gaming is the widest collection in Cedar Press (46 customer "
+            "tables) and its coverage differs sharply BY LAYER - a decision index, a "
+            "facility directory and a revenue panel do not share a floor. The "
+            "long-form per-source table is `docs/datasets/gaming_sources.md` 1.",
+        "coverage": [
+            ("NIGC - decision index, declination letters, management contracts",
+             "**1990 onward for the decision index** "
+             "(`docs/COVERAGE_EXPANSION_OPTIONS.md`). Earlier Interior decisions are "
+             "paper-only (`35_coverage_audit.py` SOURCE_FLOORS).",
+             "See the measured block above.",
+             "Pre-1990 is a paper-records request, not a pull."),
+            ("NIGC gaming revenue report",
+             "**ANNUAL**, typically released mid-year for the prior fiscal year "
+             "(`301`).",
+             "See the measured block above.",
+             "The most recent one to two years always lag. `621` flags 2024 and 2025 "
+             "as thin in `gaming_facility_metrics.csv` and that is this lag, not a "
+             "decline in gaming."),
+            ("State regulators - per-casino series",
+             "**Cadence differs by state and the difference is structural**: "
+             "Connecticut is MONTHLY per casino, California QUARTERLY, several states "
+             "ANNUAL only (`301`). California Gambling Control Commission publishes "
+             "RSTF/SDF allocations quarterly with audited statements annual.",
+             "See the measured block above.",
+             "**A national panel built from these is not one grain.** Never total "
+             "across states without stating which cadence each contributed."),
+            ("Compacts - see `compacts.md`",
+             "1988, IGRA.",
+             "See the measured block above.",
+             "Two years reachable; effectively complete."),
+            ("NEPA environmental documents - project facilities, projections, "
+             "mitigation agreements",
+             "**Not a time series.** `35_coverage_audit.py` records these as a "
+             "TWO-PROJECT PILOT (Osage Lake Ozark 2025, Menominee Kenosha 2023-2026); "
+             "the observed range is the pilot's, not the source's.",
+             "See the measured block above.",
+             "**Do not read these three tables as coverage of anything.** A year range "
+             "on a two-project pilot describes the two projects."),
+        ],
+        "coverage_verdict": [
+            "**There is no single gaming coverage answer and a doc that gives one is "
+            "wrong.** The decision index reaches 1990, the capacity panel starts 2001, "
+            "the NEPA tables are a two-project pilot, and the revenue layer's floor is "
+            "whatever each state regulator publishes. The measured block above is "
+            "per-table for exactly this reason.",
+            "**Two tables carry dates past today and they are not errors to silently "
+            "clip**: `gaming_capacity_official.csv` reaches 2050 and "
+            "`fl_gaming_payments.csv` reaches 2031, because both carry scheduled "
+            "future obligations. Filter on as-of before charting, and never treat a "
+            "future-dated row as an observation.",
+        ],
         "title": "Tribal Gaming Development & Markets",
         "what": "Two layers: the current facility universe (directory core) and the "
                 "proposal-to-operation history reconstructed from federal decisions and "
@@ -1182,10 +1606,23 @@ def main():
              "refresh it, what is known to be wrong, and what must never be done to it.", "",
              "| Dataset | Tier | Doc |", "|---|---|---|"]
 
+    cov = _coverage_module()
+    covblob = cov.load() if cov else None
+
     for key, s in SPEC.items():
         lines = [f"# {s['title']}", "",
                  f"*Maintenance doc. Generated {TODAY}. Tier: **{resolve_tier(s)}***", "",
-                 "## What this is", "", s["what"], "", "## Files", ""]
+                 "## What this is", "", s["what"], ""]
+
+        # THE STATUS AND THE MEASURED YEAR SPANS ARE NOT AUTHORED HERE.
+        # 621 reads cedar_dataset_readiness.csv and the live tables, so a
+        # doc can no longer disagree with the scoreboard: there is nothing
+        # to disagree WITH, the number is read at generation time. The
+        # authored `coverage` table below still carries the upstream research,
+        # which is the half a measurement cannot supply.
+        if cov:
+            lines += [cov.render_block(s["collection"], covblob), ""]
+        lines += ["## Files", ""]
 
         lines.append("| File | Rows | Size |")
         lines.append("|---|---:|---:|")
@@ -1263,6 +1700,39 @@ def main():
         print(f"  {key:<22} {built}/{len(s['files'])} files built")
         index.append(f"| {s['title']} | {resolve_tier(s)} | [`{key}.md`]({key}.md) |")
 
+    # THE INDEX LISTED 11 DOCS AND THE SCOREBOARD COUNTS 13 COLLECTIONS.
+    # Three collections are documented by HAND and so were invisible here -
+    # including `_entity_layer`, the hub every other dataset joins through,
+    # which had no doc at all until 2026-09-01. An index that silently omits
+    # a dataset is the mechanism behind the owner's *"it seems like you're
+    # missing stuff for every dataset"*: the reader cannot miss what the
+    # index never mentions.
+    documented, undocumented = catalog_coverage()
+    index += ["", "## Hand-written docs — not generated by this script", "",
+              "These cover the collections with no SPEC entry above. Edit them "
+              "directly; their readiness and coverage blocks are refreshed by "
+              "`py -3 code/621_dataset_coverage.py inject`.", "",
+              "| Collection | Doc |", "|---|---|",
+              "| `_entity_layer` (the hub — infrastructure, not sold) | "
+              "[`_entity_layer.md`](_entity_layer.md) |",
+              "| `native-owned-businesses` | "
+              "[`native-owned-businesses.md`](native-owned-businesses.md) |",
+              "| `natural-resources` | "
+              "[`natural_resources_sources.md`](natural_resources_sources.md) |",
+              "", "Five more hand-written docs sit alongside a generated one "
+              "and carry the operational runbook or the long-form source "
+              "surface for their collection: "
+              "[`federal-register.md`](federal-register.md), "
+              "[`nagpra.md`](nagpra.md), "
+              "[`subcontracting.md`](subcontracting.md), "
+              "[`gaming_sources.md`](gaming_sources.md) and "
+              "[`lobbying_sources.md`](lobbying_sources.md).", "",
+              f"*Catalog coverage check: {len(documented)} sellable "
+              f"collections have a SPEC entry here"
+              + (f"; documented BY HAND instead: "
+                 f"{', '.join(f'`{u}`' for u in undocumented)} — listed above, "
+                 f"not missing"
+                 if undocumented else "; none outside the SPEC") + ".*"]
     (OUT / "README.md").write_text("\n".join(index), encoding="utf-8")
     print(f"\n  wrote {len(SPEC)} docs + index to docs/datasets/")
 

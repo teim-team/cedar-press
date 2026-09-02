@@ -142,6 +142,7 @@ def live_facts() -> dict:
                         "dataset_contracts.json").read_text(encoding="utf-8"))
         f["collections"] = d.get("n_collections", -1)
         f["contract_violations"] = d.get("n_violations", -1)
+        f["grain_unstated"] = d.get("n_shippable_grain_unstated", -1)
     except (OSError, ValueError):
         pass
     try:
@@ -185,8 +186,14 @@ def sweep():
                            "assertion count", f"{live['assertions']:,}"))
     checks.append((re.compile(r"\b80,778\b"), "prime_contracts duplicates",
                    "0 - they were distinct FPDS transactions"))
-    checks.append((re.compile(r"\b207\b(?=[^\n]{0,50}(grain|unstated))"),
-                   "grain unstated", "25"))
+    # THIS CHECK USED TO HARDCODE `25`, IN THE SCRIPT WHOSE JOB IS FINDING
+    # HARDCODED NUMBERS. It went stale the same way everything else does: the
+    # live contract JSON read 32 on 2026-09-01 while this line still offered
+    # 25 as the correction. Read it from the same file the gate reads.
+    grain = live.get("grain_unstated")
+    if isinstance(grain, int) and grain >= 0:
+        checks.append((re.compile(r"\b207\b(?=[^\n]{0,50}(grain|unstated))"),
+                       "grain unstated", str(grain)))
     checks.append((re.compile(r"\bnot a git repositor"), "repo status",
                    "it IS a git repository since 2026-08-29"))
 

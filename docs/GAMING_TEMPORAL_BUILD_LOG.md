@@ -1478,7 +1478,7 @@ it was available in the file the entire time.
 | Federal Register Class III compact approval | tribe | 450 |
 | Tribal-state compact index (BIA) | tribe | 672 |
 | BIA gaming-land decision = IGRA sec. 20 determination | tribe | 268 |
-| NIGC management contract approval | — | **0 — not held; see 10.6** |
+| NIGC management contract approval | — | **0 at property grain — but the FAMILY is now held: `nigc_management_contract_approvals.csv`, 68 approvals / 55 tribes, promoted 2026-09-01. The trace stays 0 because the source is keyed to the TRIBE and joining it to a property would attribute a contract to a building on the strength of its owner. See 10.6.** |
 | *(non-federal)* dated gaming-equipment observation | **property** | 429 |
 
 | `federal_trace_count` (property-level) | rows |
@@ -1558,6 +1558,38 @@ zero is a review queue, not a verdict, and that is what
 `INSUFFICIENT_TRACE_REVIEW` names.
 
 ### 10.6 NIGC management contract approvals — not held, and not asserted absent
+
+> **CLOSED 2026-09-01, workstream INT-2.** The family was fetched by
+> `code/344_pull_nigc_document_surface.py` and promoted by
+> `code/586_promote_nigc_gaming.py` to
+> **`data/clean/nigc_management_contract_approvals.csv` — 68 approvals across
+> 55 tribes**, one row per Chair-approved management contract document, with
+> the NIGC document URL, the retrieved PDF, its MD5 and a tribe key that
+> `code/585_factcheck_nigc_keys.py` re-derived rather than inherited.
+>
+> Three things this section predicted, and how they turned out:
+>
+> - *"once that build lands, fill the trace from the declination letters
+>   rather than a fresh pull"* — **that would have been wrong.** Declination
+>   letters and management-contract approvals are two different NIGC document
+>   categories (`declination-letters`, 329 documents; `approved-management-
+>   contracts`, 68) and neither contains the other. The join would have
+>   produced the wrong 68 rows. The pull was necessary.
+> - *"absence under a filter is a property of the filter"* — held exactly.
+>   Nobody had enumerated NIGC's document surface. It is **72 categories /
+>   4,071 documents** and Cedar held five of the 72. The enumeration is now
+>   itself a shipping table, `nigc_document_surface.csv`, 7,930
+>   (category, document) memberships.
+> - *the host-lock discipline that left this empty rather than half-fetched* —
+>   correct then and still correct. One poller per host.
+>
+> **What is still open.** `trace_nigc_management_contract` on the 774 property
+> rows is NOT filled by this promotion. The approvals table is keyed to the
+> TRIBE, not to a facility, and NIGC's index names no property — so joining it
+> onto a property row would be attributing a contract to a building on the
+> strength of its owner. `gaming_facilities.csv` has a stated grain of 787
+> rows / 786 facilities and one tribe routinely runs a dozen properties. The
+> trace stays 0 and the honest join is tribe-level.
 
 No retrieved NIGC management-contract file exists anywhere in `data/raw/`, and
 this session did not add one. `trace_nigc_management_contract` is 0 on all 774

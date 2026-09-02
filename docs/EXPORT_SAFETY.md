@@ -1,11 +1,11 @@
 # Export safety — which tables a buyer may total
 
-*Generated 2026-08-29 by `code/517_export_safety.py`. Derived from the grain contracts and the temporal layer; this file measures nothing new, it REFUSES on what they already know.*
+*Generated 2026-09-01 by `code/517_export_safety.py`. Derived from the grain contracts and the temporal layer; this file measures nothing new, it REFUSES on what they already know.*
 
 **The rule that matters most:** unknown ownership may ship as unknown. **Contradicted ownership may never ship as a definite historical owner.**
 
-- **SAFE_TO_AGGREGATE**: 189
-- **ROW_LEVEL_ONLY**: 25 (of which **11 carry money columns** — the unsafe analysis is also the most likely one)
+- **SAFE_TO_AGGREGATE**: 194
+- **ROW_LEVEL_ONLY**: 26 (of which **9 carry money columns** — the unsafe analysis is also the most likely one)
 
 ## Ownership as-of status
 
@@ -22,7 +22,6 @@
 
 | table | collection | money columns | why |
 |---|---|---|---|
-| `admin_appeal_positions.csv` | lobbying | — | grain UNSTATED; no validated primary key |
 | `cedar_identifier_graph_edges.csv` | _entity_layer | — | grain UNSTATED; no validated primary key; 2451 literal duplicate rows |
 | `cedar_ruling_ledger_consolidated.csv` | _entity_layer | — | grain UNSTATED; no validated primary key; 6302 literal duplicate rows |
 | `congressional_correspondence_log.csv` | legislation | — | grain UNSTATED; no validated primary key |
@@ -33,17 +32,19 @@
 | `faads_transactions_all_agencies.csv` | funding | obligated_usd | grain UNSTATED; no validated primary key; 179259 literal duplicate rows |
 | `fac_audit_sefa_gaming_programs.csv` | gaming | amount_expended | grain UNSTATED; no validated primary key |
 | `ferc_docket_filings.csv` | lobbying | — | grain UNSTATED; no validated primary key; 822 literal duplicate rows |
-| `ferc_ex_parte_communications.csv` | lobbying | — | grain UNSTATED; no validated primary key |
 | `foia_request_index.csv` | _entity_layer | — | grain UNSTATED; no validated primary key |
-| `fpds_uei_cage_map.csv` | contractors | — | grain UNSTATED; no validated primary key |
-| `gaming_projections.csv` | gaming | value | grain UNSTATED; no validated primary key |
 | `hearing_bill_links.csv` | lobbying | — | grain UNSTATED; no validated primary key; 1 literal duplicate rows |
 | `lobbying_registrant_native_ownership_evidence.csv` | lobbying | — | grain UNSTATED; no validated primary key; 4 literal duplicate rows |
 | `native_bills_subject_sweep.csv` | legislation | — | grain UNSTATED; no validated primary key; 5 literal duplicate rows |
 | `native_passthrough.csv` | funding | amount_usd|amount_countable | grain UNSTATED; no validated primary key; 114 literal duplicate rows |
+| `nigc_action_parties.csv` | gaming | — | grain UNSTATED; no validated primary key |
+| `nigc_document_surface.csv` | gaming | — | grain UNSTATED; no validated primary key |
+| `nigc_enforcement_actions.csv` | gaming | — | grain UNSTATED; no validated primary key |
+| `nigc_game_classification_opinions.csv` | gaming | — | grain UNSTATED; no validated primary key |
+| `nigc_indian_lands_opinions.csv` | gaming | — | grain UNSTATED; no validated primary key |
+| `nigc_management_contract_approvals.csv` | gaming | — | grain UNSTATED; no validated primary key |
 | `np_schedule_i_grants.csv` | nonprofits | cash_grant_usd|noncash_assistance_usd | grain UNSTATED; no validated primary key; 101 literal duplicate rows |
 | `subawards.csv` | subcontracting | subaward_amount|prime_award_amount|subaward_amount_real2025 | grain UNSTATED; no validated primary key; 10770 literal duplicate rows |
 | `tcu_cdfi_ownership_evidence.csv` | _entity_layer | — | grain UNSTATED; no validated primary key; 4 literal duplicate rows |
-| `tribal_bond_issuances.csv` | natural-resources | par_amount | grain UNSTATED; no validated primary key |
 | `tribal_resolution_financings.csv` | deals | principal_amount_text|pledged_revenues_text | grain UNSTATED; no validated primary key |
 | `visitor_record_foia_requests.csv` | _entity_layer | — | grain UNSTATED; no validated primary key |

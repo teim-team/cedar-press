@@ -119,8 +119,11 @@ does not become the seventh session to step around a red line.
    Needs a full re-extract of a 2.77M-row shipped table; do it deliberately,
    not unattended.
 6. **`69 → 514 → 510` chain** — a safe spine rebuild was measured (changes ONE
-   cell, complete no-op on 1,536 spine rows) but not run, because the agent
-   was not permitted `510 --apply`. Sequence is in
+   cell, complete no-op on the 1,536 spine rows that existed when the dry run
+   was taken) but not run, because the agent was not permitted `510 --apply`.
+   **The spine now holds 1,555 rows, so that dry run is out of date and must be
+   re-taken before the chain is trusted** — it was never re-measured against
+   the 19 IHS consortia promoted since. Sequence is in
    `docs/datasets/federal-register.md`.
 7. **7 federal-register tables gained `cedar_uid` after the last ship** — the
    advertised join key is live but not in the release. Closes on next ship.

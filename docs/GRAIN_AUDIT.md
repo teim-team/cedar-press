@@ -1,6 +1,6 @@
 # Grain audit - what one row IS, table by table
 
-*Generated 2026-08-29 by `code/512_build_dataset_contracts.py` (workstream E). Regenerate rather than edit. Measurements live in `docs/schema/grain_evidence.json`; re-measure with `py -3 code/512_build_dataset_contracts.py probe`.*
+*Generated 2026-09-01 by `code/512_build_dataset_contracts.py` (workstream E). Regenerate rather than edit. Measurements live in `docs/schema/grain_evidence.json`; re-measure with `py -3 code/512_build_dataset_contracts.py probe`.*
 
 ## Why this document exists
 
@@ -20,14 +20,14 @@ Three honest outcomes, and they are three different jobs:
 
 | | count |
 |---|---:|
-| shippable tables | 210 |
-| **DECLARED_VALIDATED** | **185** |
-| OPEN_WITH_EVIDENCE | 12 |
+| shippable tables | 221 |
+| **DECLARED_VALIDATED** | **189** |
+| OPEN_WITH_EVIDENCE | 7 |
 | DEFECTIVE | 13 |
-| still unexplained | 0 |
-| ratchet `contract_grain_unstated_shippable` | **25** (was 207) |
+| still unexplained | 12 |
+| ratchet `contract_grain_unstated_shippable` | **32** (was 207) |
 
-A declaration that the data contradicts is release-blocking through `contract_violations`; there are **0**.
+A declaration that the data contradicts is release-blocking through `contract_violations`; there are **8**.
 
 ## DEFECTIVE - data bugs found by the sweep
 
@@ -67,25 +67,25 @@ These are not declaration gaps. Each is a table a buyer can double-count today. 
 
 822 LITERAL duplicate rows of 102,615. docs/ANOMALY_REPORT.md already records 9,570 rows repeating (docket_number, accession_number); this measurement is the stricter one - 822 rows repeat in EVERY column.
 
-- measured 102,615 rows, 822 whole-row duplicate(s) on 2026-08-29
+- measured 102,615 rows, 822 whole-row duplicate(s) on 2026-09-01
 
 ### `hearing_bill_links.csv`
 
 1 LITERAL duplicate row of 465: (bill_id, event_id) = (119-s-3878, 338549) appears twice.
 
-- measured 465 rows, 1 whole-row duplicate(s) on 2026-08-29
+- measured 465 rows, 1 whole-row duplicate(s) on 2026-09-01
 
 ### `lobbying_registrant_native_ownership_evidence.csv`
 
 4 LITERAL duplicate rows of 27 - 15% of a table the build log describes as 'one row per evidence route'. Four evidence routes are recorded twice.
 
-- measured 27 rows, 4 whole-row duplicate(s) on 2026-08-29
+- measured 27 rows, 4 whole-row duplicate(s) on 2026-09-01
 
 ### `native_bills_subject_sweep.csv`
 
 5 LITERAL duplicate rows of 2,414.
 
-- measured 2,414 rows, 5 whole-row duplicate(s) on 2026-08-29
+- measured 2,414 rows, 5 whole-row duplicate(s) on 2026-09-01
 
 ### `native_passthrough.csv`
 
@@ -97,7 +97,7 @@ These are not declaration gaps. Each is a table a buyer can double-count today. 
 
 101 LITERAL duplicate rows of 58,685. (object_id, recipient_name_as_filed) collides 860 times - some legitimately (one filer can grant to the same recipient twice on one return), but the 101 whole-row repeats are not that.
 
-- measured 58,685 rows, 101 whole-row duplicate(s) on 2026-08-29
+- measured 58,685 rows, 101 whole-row duplicate(s) on 2026-09-01
 
 ### `subawards.csv`
 
@@ -115,16 +115,11 @@ These are not declaration gaps. Each is a table a buyer can double-count today. 
 
 Each is a question the DATA cannot answer, with what was tested attached. Declaring past one of these is the one way this file can lie.
 
-### `admin_appeal_positions.csv`  (1 row)
-
-the file has ONE row. `matter_id` and `cedar_uid` are unique, and so is every other column - one row proves nothing. QUESTION: is a row a POSITION taken by one organisation in one matter (in which case position_id is the key and it is empty of evidence), or one row per matter?
-
-- unique on the full file: (`matter_id`); (`cedar_uid`); (`position_id`); (`organisation_id`)
-
 ### `congressional_correspondence_log.csv`
 
 the file has ZERO rows. Every candidate key is vacuously unique, so the data cannot evidence a grain. QUESTION: is this table meant to ship empty, and what is one row when it fills?
 
+- unique on the full file: (`record_id`)
 
 ### `contractor_ranking.csv`  (1,429 rows)
 
@@ -135,38 +130,18 @@ the only unique keys over 1,429 rows require `firm_transaction_rows` - a MEASURE
 
 the file has ZERO rows (the build log records 1 row added, which is not what is on disk). QUESTION: was the YTD additions file consumed into deals_classified.csv and left as a stub, or did a rebuild empty it?
 
+- unique on the full file: (`Deal_ID`)
 
 ### `fac_audit_sefa_gaming_programs.csv`  (1 row)
 
 the file has ONE row. Uniqueness is vacuous. QUESTION: is a row a (report, federal program) line off the SEFA, so that report_id repeats once a second program is parsed?
 
-- unique on the full file: (`report_id`); (`entity_id`); (`cedar_uid`); (`is_loan`)
-
-### `ferc_ex_parte_communications.csv`  (713 rows)
-
-`ferc_ex_parte_id` has 56 collisions over 713 rows, and adding accession_number, docket_number or the FR document number removes none of them - the colliding rows differ somewhere else. QUESTION: what distinguishes two rows sharing a ferc_ex_parte_id? Until that is named the table has no key.
-
+- unique on the full file: (`report_id`); (`entity_id`); (`cedar_uid`); (`is_loan`); (`report_id`, `federal_agency_prefix`, `federal_award_extension`)
 
 ### `foia_request_index.csv`  (9,481 rows)
 
 no key was found at any arity up to 6 over 9,481 rows. `foia_request_id` REPEATS 381 times; adding `status` still leaves 66 collisions; adding source_url, received_date and both `seeks_*` flags still leaves 8. QUESTION: is a row one FOIA request - in which case the 381 repeats are a defect and the id must be made unique - or one (request, matched tribe mention), in which case the key needs the entity column and should be stated?
 
-
-### `fpds_uei_cage_map.csv`  (29,981 rows)
-
-a MAP that maps nothing uniquely: `uei` repeats 11,455 times over 29,981 rows and (uei, cage_code, source_file) still collides 4,680 times. The only unique key needs all six columns including first_year and last_year, and 22,518 rows have a blank cage_code. QUESTION: is a row a (UEI, CAGE) pair as OBSERVED in one source file and year-range - and if so should the year range be part of the published key - or is the table meant to be one row per UEI?
-
-
-### `gaming_projections.csv`  (116 rows)
-
-docs/GAMING_NEPA_PILOT_LOG.md states the grain as 'one row per project x metric x geography x period'. The data CONTRADICTS it: that key collides 8 times over 116 rows, and adding `alternative` leaves 5. The only unique keys contain `value`, a measure. QUESTION: which column separates two projections of the same metric for the same project, geography and period - alternative, reported_or_calculated, or the source document?
-
-
-### `tribal_bond_issuances.csv`  (29 rows)
-
-`cusip` is BLANK on all 29 rows, so the natural key of a bond table is absent, and the only unique column is `notes`. QUESTION: can CUSIPs be backfilled, and until then is a row one issuance (issuer, issue_date, series) or one disclosure document?
-
-- unique on the full file: (`notes`)
 
 ### `tribal_resolution_financings.csv`  (1 row)
 
@@ -281,21 +256,20 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 
 ### Lobbying  (`lobbying`)
 
-29 of 34 shippable tables declared.
+30 of 33 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
 | `admin_appeal_decisions.csv` | 15,613 | DECLARED_VALIDATED | `decision_id` | — |
 | `admin_appeal_parties.csv` | 20,027 | DECLARED_VALIDATED | `party_id` | `cedar_uid`→21 |
-| `admin_appeal_positions.csv` | 1 | OPEN_WITH_EVIDENCE | — | `cedar_uid`→1 |
+| `admin_appeal_positions.csv` | 8 | DECLARED_VALIDATED | `position_id` | `cedar_uid`→1 |
 | `advocacy_passthrough.csv` | 1,620 | DECLARED_VALIDATED | `passthrough_id` | `cedar_uid`→10 |
-| `advocacy_passthrough_2026-08-07.csv` | 1,620 | DECLARED_VALIDATED | `passthrough_id` | `cedar_uid`→10 |
 | `agency_attention_vs_advocacy.csv` | 22 | DECLARED_VALIDATED | `department` | — |
 | `agency_attention_vs_advocacy_year.csv` | 698 | DECLARED_VALIDATED | `department` + `year` | — |
 | `earmarks.csv` | 1,002 | DECLARED_VALIDATED | `earmark_id` | `cedar_uid`→42, `entity_id`→42 |
 | `ferc_docket_filings.csv` | 102,615 | DEFECTIVE | — | `cedar_uid`→389 |
 | `ferc_docket_parties.csv` | 11,563 | DECLARED_VALIDATED | `ferc_docket_party_id` | `cedar_uid`→14 |
-| `ferc_ex_parte_communications.csv` | 713 | OPEN_WITH_EVIDENCE | — | `cedar_uid`→2 |
+| `ferc_ex_parte_communications.csv` | 713 | DECLARED_VALIDATED | `ferc_ex_parte_id` + `filed_or_issued_by_as_recorded` | `cedar_uid`→2 |
 | `ferc_ex_parte_parties.csv` | 4,246 | DECLARED_VALIDATED | `ferc_ex_parte_party_id` + `table_row_quote` | `cedar_uid`→2 |
 | `ferc_tribal_dockets.csv` | 307 | DECLARED_VALIDATED | `docket_number` + `subdocket` | — |
 | `fr_ex_parte_notices.csv` | 7,820 | DECLARED_VALIDATED | `fr_ex_parte_notice_id` | — |
@@ -322,12 +296,12 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 
 ### Federal Prime Contracting  (`contractors`)
 
-8 of 10 shippable tables declared.
+9 of 10 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
 | `contractor_ranking.csv` | 1,429 | OPEN_WITH_EVIDENCE | — | — |
-| `fpds_uei_cage_map.csv` | 29,981 | OPEN_WITH_EVIDENCE | — | `cage_code`→6, `uei`→16 |
+| `fpds_uei_cage_map.csv` | 29,981 | DECLARED_VALIDATED | `uei` + `cage_code` + `legal_business_name` | `cage_code`→6, `uei`→16 |
 | `fpds_uei_edges.csv` | — | DECLARED_VALIDATED | `child_uei` + `parent_uei` + `edge_type` | — |
 | `prime_contracts.csv` | 1,217,768 | DECLARED_VALIDATED | `contract_transaction_unique_key` + `contract_number` + `parent_contract_number` + `fiscal_year` + `awardee_uei` | `cage_code`→398,840, `cedar_uid`→111,398, `tribe_id`→111,398 |
 | `prime_contracts_archive_backfill.csv` | 631,507 | DECLARED_VALIDATED | `contract_transaction_unique_key` | `cage_code`→398,840, `cedar_uid`→50,208, `tribe_id`→50,208 |
@@ -362,7 +336,7 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 
 ### Natural Resource Revenues  (`natural-resources`)
 
-7 of 8 shippable tables declared.
+8 of 8 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
@@ -372,7 +346,7 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 | `resource_assets.csv` | 35 | DECLARED_VALIDATED | `resource_asset_id` | `cedar_uid`→0 |
 | `resource_parties.csv` | 1,436 | DECLARED_VALIDATED | `party_link_id` + `entity_name` | `cedar_uid`→489, `entity_id`→489 |
 | `resource_revenue.csv` | 10,482 | DECLARED_VALIDATED | `resource_revenue_event_id` | `cedar_uid`→489 |
-| `tribal_bond_issuances.csv` | 29 | OPEN_WITH_EVIDENCE | — | — |
+| `tribal_bond_issuances.csv` | 29 | DECLARED_VALIDATED | `issuer` + `instrument_type` + `source_url` | — |
 | `tribal_tax_bases.csv` | 1,712 | DECLARED_VALIDATED | `tax_observation_id` | `cedar_uid`→660, `tribe_id`→660 |
 
 ### Native Nonprofits  (`nonprofits`)
@@ -394,11 +368,11 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 
 ### Gaming Intelligence  (`gaming`)
 
-44 of 46 shippable tables declared.
+44 of 52 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
-| `ca_gaming_facilities_official.csv` | 245 | DECLARED_VALIDATED | `record_id` | `cedar_uid`→7, `facility_id`→4, `tribe_id`→7 |
+| `ca_gaming_facilities_official.csv` | 245 | **DECLARATION FAILED** | `record_id` | `cedar_uid`→7, `facility_id`→4, `tribe_id`→7 |
 | `ca_gaming_payments.csv` | 40,164 | DECLARED_VALIDATED | `payment_id` | `cedar_uid`→534, `tribe_id`→534 |
 | `compact_events.csv` | 31 | DECLARED_VALIDATED | `event_id` | `cedar_uid`→2, `compact_id`→2, `entity_id`→2, `tribe_id`→2 |
 | `compact_obligation_tribal_agency_bridge.csv` | 927 | DECLARED_VALIDATED | `bridge_id` | `cedar_uid`→23, `compact_id`→15, `tribe_id`→23 |
@@ -427,7 +401,7 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 | `gaming_ordinance_ocr.csv` | 263 | DECLARED_VALIDATED | `ordinance_id` | `cedar_uid`→10, `tribe_id`→10 |
 | `gaming_ordinances.csv` | 1,155 | DECLARED_VALIDATED | `ordinance_id` | `cedar_uid`→23, `tribe_id`→23 |
 | `gaming_project_facilities.csv` | 19 | DECLARED_VALIDATED | `project_id` + `alternative` + `source_document` | `cedar_uid`→0, `entity_id`→0 |
-| `gaming_projections.csv` | 116 | OPEN_WITH_EVIDENCE | — | — |
+| `gaming_projections.csv` | 116 | DECLARED_VALIDATED | `project_id` + `metric` + `geography` + `time_period` + `alternative` + `source_document` + `unit` | — |
 | `gaming_properties.csv` | 784 | DECLARED_VALIDATED | `facility_id` | `cedar_uid`→28, `facility_id`→1, `tribe_id`→28 |
 | `gaming_property_federal_traces.csv` | 774 | DECLARED_VALIDATED | `facility_id` | `cedar_uid`→28, `compact_id`→28, `facility_id`→1, `tribe_id`→28 |
 | `gaming_property_labor_demand.csv` | 43 | DECLARED_VALIDATED | `observation_id` | `cedar_uid`→6, `entity_id`→6, `facility_id`→6, `tribe_id`→6 |
@@ -438,7 +412,13 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 | `gaming_vendor_tribal_licenses.csv` | 740 | DECLARED_VALIDATED | `vendor_name` + `tribal_gaming_regulator` + `source_url` | `cedar_uid`→287, `entity_id`→287 |
 | `loyalty_program_property.csv` | 48 | DECLARED_VALIDATED | `loyalty_program_id` + `facility_id` | `cedar_uid`→11, `entity_id`→11, `facility_id`→1, `tribe_id`→11 |
 | `loyalty_programs.csv` | 18 | DECLARED_VALIDATED | `loyalty_program_id` | `cedar_uid`→1, `entity_id`→1, `tribe_id`→1 |
+| `nigc_action_parties.csv` | — | unexplained | — | — |
 | `nigc_declination_letters.csv` | 327 | DECLARED_VALIDATED | `cedar_opinion_id` | `cedar_uid`→7 |
+| `nigc_document_surface.csv` | — | unexplained | — | — |
+| `nigc_enforcement_actions.csv` | — | unexplained | — | — |
+| `nigc_game_classification_opinions.csv` | — | unexplained | — | — |
+| `nigc_indian_lands_opinions.csv` | — | unexplained | — | — |
+| `nigc_management_contract_approvals.csv` | — | unexplained | — | — |
 | `nigc_region_assignments.csv` | 2,438 | DECLARED_VALIDATED | `facility_id` + `effective_start_year` | `administrative_region_id`→190, `cedar_uid`→81, `facility_id`→4, `tribe_id`→81 |
 | `nigc_regional_ggr.csv` | 198 | DECLARED_VALIDATED | `administrative_region_id` + `fiscal_year` | `administrative_region_id`→10 |
 | `nigc_revenue_bands.csv` | 20 | DECLARED_VALIDATED | `band_id` | — |
@@ -447,7 +427,7 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 
 ### Entity spine, identifiers and reference  (`_entity_layer`)
 
-29 of 35 shippable tables declared.
+28 of 35 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
@@ -466,7 +446,7 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 | `cedar_publishable_identifiers.csv` | 1,577 | DECLARED_VALIDATED | `identifier` | `cedar_uid`→35, `tribe_id`→35 |
 | `cedar_ruling_ledger_consolidated.csv` | 15,587 | DEFECTIVE | — | — |
 | `cross_dataset_ruling_map.csv` | 7,507 | DEFECTIVE | — | — |
-| `entity_aliases.csv` | 6,297 | DECLARED_VALIDATED | `alias_id` | `cedar_uid`→20, `entity_id`→20 |
+| `entity_aliases.csv` | 6,297 | **DECLARATION FAILED** | `alias_id` | `cedar_uid`→20, `entity_id`→20 |
 | `entity_hierarchy.csv` | 952 | DECLARED_VALIDATED | `tribe_id` | `cedar_uid`→1, `tribe_id`→1 |
 | `entity_relationships.csv` | 2,292 | DECLARED_VALIDATED | `relationship_id` | — |
 | `entity_year_panel.csv` | 12,534 | DECLARED_VALIDATED | `tribe_id` + `year` | `cedar_uid`→28, `tribe_id`→28 |

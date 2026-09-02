@@ -943,3 +943,133 @@ Concurrent activity observed during this audit: another agent added
 `data/staging/gaming_employment_form5500_staged.csv` (2,046) and
 `review/form5500_gaming_coverage_2026-08-26.csv`. Note the new `156_` prefix
 collision.*
+
+---
+
+## PART 8 — THE SOURCE SURFACE WAS ENUMERATED, 2026-09-01
+
+*Added by workstream M. This audit answered "why is what we built not
+shipping?" It never asked "what exists that we never collected?" — and nobody
+had. The answer is now a file:* **`docs/datasets/gaming_sources.md`**, *which
+carries a per-source COVERAGE table (earliest available / earliest held /
+latest available / latest held / gap / why) so the next session reads it
+instead of re-deriving it.*
+
+### 8.1 The NIGC document surface, measured for the first time
+
+Part 1 of this audit lists five NIGC families on disk. **The agency publishes
+72.**
+
+| | |
+|---|---:|
+| wpdm categories declared by `wp-sitemap-taxonomies-wpdmcategory-1.xml` | **72** |
+| distinct documents in `wp-sitemap-posts-wpdmpro-{1,2,3}.xml` | **4,071** |
+| (category, document) memberships enumerated | **7,930** |
+| categories Cedar held before this pass | **5** |
+| documents in the sitemap that no category listing surfaced | 3, carried as `_UNCATEGORISED_IN_LISTINGS` |
+
+Route, with the probes that killed each alternative
+(`docs/PULL_DISCIPLINE.md`): `robots.txt` disallows only `/wp-admin/` and
+`/wp-content/uploads/wpforms/` and declares a sitemap, so every path used is
+permitted. **`/wp-json/wp/v2/*` returns 401 `rest_not_logged_in`** — the same
+closed REST API script 155 measured on the map route, from WordPress's own
+`rest_authentication_errors` filter, not a nonce failure. The server-rendered
+`/downloads/<category>/[page/N/]` listings are the only public enumeration;
+they paginate at 24 with `rel="next"` and each item is a clean `<article
+class="wpdmpro">` carrying title, `/download/<slug>/` and a `datePublished`.
+
+**Two refresh signals fell out of the enumeration**, and neither was visible
+from any build log: NIGC's ordinance index now holds **1,162** documents
+against Cedar's **1,155**, and **329** declination letters against Cedar's
+**327**.
+
+### 8.2 Four families were never collected. All four were fetched.
+
+| family | what it is | outcome |
+|---|---|---|
+| **Indian lands opinions** | tribe × parcel × legal theory × **theory accepted Y/N** × date, as a structured index table | **102 rows, 1997-08-12 → 2026-05-18**, 98 keyed to the spine, 4 refused as `ambiguous_containment` and queued |
+| **Game classification opinions** | game × Class II/III × bingo / cards / pull-tabs / internet flags × date | **122 rows, 1992-09-14 → 2024-04-26** — the earliest-reaching gaming series Cedar holds |
+| **Enforcement actions** | NOVs, civil fine assessments, closure orders, settlement agreements | **362 documents indexed and fetched** |
+| **Approved management contracts** | Chair-approved management contracts, by tribe | **68 documents indexed and fetched** — this is `GAMING_TEMPORAL_BUILD_LOG.md` §10.6's named hole, where `trace_nigc_management_contract` was 0 on all 774 property rows and read `not_held_by_cedar_press_this_session` |
+
+The two opinion families are **fully structured in the index HTML**, so they
+are datasets before any PDF is opened. Everything is staged to
+`data/staging/`, not `data/clean/` — a new grain with no codebook block is
+exactly the failure this audit spent 945 lines documenting.
+
+### 8.3 THE FINDING THIS AUDIT'S METHOD WOULD NOT HAVE CAUGHT
+
+Part 1 measured **raw → clean** and found nothing lost. It never measured
+**raw vs clean for CURRENCY**, and on that axis two states are broken:
+
+* **New Mexico.** `gaming_capacity_official` NM `net_win` stops at **FY2022**.
+  `code/216` extracted **FY2023 – 2026Q2** on 2026-08-26, footed 14 of 14
+  quarters against the source's own printed totals, and wrote **188 rows** to
+  `review/nm_revshare_2023_2026_staged_2026-08-26.csv`. Four fiscal years of
+  the country's second-best per-tribe revenue series, never promoted.
+* **California.** `ca_gaming_payments` has **zero rows** for `period_end
+  2024-12-31` and **zero** for `2026-03-31`. Both RSTF reports are on disk.
+  The 93rd (2024Q4) has **37,974 characters of extractable text** — a parse
+  defect. The 98th (2026Q1) has **0 characters** — an image-only scan needing
+  the OCR path `code/122`/`150` already runs for ordinances.
+  **`REFRESH_CADENCE.md` records "CA gaming is missing 2026-03 entirely" as
+  lag. It is not lag. The document is on disk and it is a scan.**
+
+**A source audit that walks forward from `data/raw/` finds nothing wrong with
+either.** Both only appear when you walk *backwards* from the latest period in
+`data/clean/` and ask what the raw directory holds past it.
+
+### 8.4 And one measurement that closed a gap by proving it was not ours
+
+`data.ct.gov/resource/i6ts-ib7c`, probed live **2026-09-01**, one request:
+`min 1993-01-31, max 2025-12-31, count 748`. **Cedar holds every casino-month
+Connecticut serves.** The 238-day lag in `REFRESH_CADENCE.md` is the SOURCE's,
+confirming `code/343`'s 2026-08-26 finding six days later. Nothing to fetch.
+
+*Written by `code/344_pull_nigc_document_surface.py`. Host lock claimed and
+released with all four outcome fields. Full coverage table, exclusions and
+ranked backlog: `docs/datasets/gaming_sources.md`.*
+
+### 8.5 A 200, a valid PDF, and the wrong document — 302 times
+
+**Worth more than the data it nearly cost.** The first attempt at the document
+stage requested `https://www.nigc.gov/download/<slug>/?wpdmdl=` — the parameter
+**present and empty**. WP Download Manager answered **HTTP 200 with a valid PDF
+on every single request**, and it was **the same PDF every single time**:
+NIGC's generic *"Helpful Hints: Requesting a Game Classification Opinion"*,
+md5 `a917db80b6027b0ffd8a8b233eb8331a`.
+
+**302 enforcement actions were "downloaded". All 302 were that one file.**
+
+Nothing in the transport said so. Right status, right content type, right
+`%PDF` magic bytes, plausible 192,025-byte size, one file per requested slug on
+disk. A row count, a byte count, a manifest and an HTTP log would all have read
+as a clean pull. It surfaced only because several files shared an identical
+byte size, and `md5sum | sort | uniq -c` then returned **one line: `302`**.
+
+This is `PART`-2026-08-12's **"AN ACCEPTED TOKEN IS NOT A WORKING JOB"** in a
+new costume — the transport succeeded and the CONTENT was wrong — and it
+generalises past NIGC:
+
+> **A `?param=` with an empty value is not the same request as no parameter at
+> all.** A CMS plugin that would 404 on a bad id will happily serve a default
+> for a blank one. Where a URL carries an object id, either the id is present
+> and real or the request must not be made.
+
+The run was killed, all 302 objects deleted, and the host lock released with
+`accepted_then_failed_server_side: 302` and the cause named in it — the fourth
+lock field exists for exactly this and would otherwise have read as a clean
+run. Two guards now stand in `code/344`:
+
+1. **The download URL is read off the landing page and must contain the
+   package's own slug.** That is what excluded the trap: NIGC's site navigation
+   carries `https://www.nigc.gov/?wpdmdl=3974` links with **no slug**, which is
+   what makes a bare `?wpdmdl=` look like a reasonable shape in the first place.
+2. **`IDENTICAL_MD5_CEILING = 6`.** If one md5 comes back for more than six
+   distinct slugs the run raises and stops. Duplicates are normal in this
+   corpus — NIGC re-posts the same letter under two slugs — three hundred are
+   not.
+
+And a **canary before the fleet**, per the same rule: three objects, three
+distinct md5s, resolved filenames carrying three different dates, checked
+before re-committing to 430.

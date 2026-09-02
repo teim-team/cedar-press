@@ -1,5 +1,27 @@
 # Native Natural Resources Ledger — build log
 
+> **SUPERSEDED IN PART, 2026-09-01 (workstream O). Read
+> `docs/datasets/natural_resources_sources.md` first** — it carries the
+> permanent per-source COVERAGE table (upstream years vs held years) that this
+> log does not.
+>
+> Three statements below are now wrong and are corrected there, not here:
+>
+> * **"MMS CY1925-1995 … outside the 2000-2026 target"** — built.
+>   `Am_Ind_Coll.pdf` was already on disk; read by *coordinate* rather than by
+>   line it yields **CY1925-CY2000, 315 rows, $4,088,925,436**, passing a
+>   per-year cross-foot, a per-column printed total, and exact agreement with
+>   this log's own hand transcription of CY1996-2000. The 2000-2026 target the
+>   scoping decision rested on has been retired by the owner.
+> * **"ONRR … 2003-01 .. 2026-06"** — refreshed to **2026-07**. And the two
+>   grains no longer reconcile to $0.00: CY2024 differs by $25,202.49 and
+>   CY2025 by $1,302.57, filed as `RESOURCE:ONRR:GRAIN_DISAGREEMENT`.
+> * **"489 payments totalling $3,125,453,109.56"** (North Dakota) — now
+>   **492 payments, $3,144,235,826.73**, through 2026-08-21.
+>
+> The reasoning in this log is why those numbers can be trusted. It is kept.
+
+
 *Built 2026-08-06 by `code/83_build_resource_ledger.py`. Nothing on natural
 resources existed in Cedar Press before this.*
 
