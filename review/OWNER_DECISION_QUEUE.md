@@ -2490,3 +2490,155 @@ to the same URL — which they do not when a wire service re-hosts.
 **If it does not vote, the project total falls from 320 to about 290.** No data
 changes either way; it is one flag in `FAMILIES`.
 <!-- END CORROBORATION-1118-QUEUE -->
+
+<!-- BEGIN DEFECT-SWEEP-1115-QUEUE -->
+## DS-1 — one Cedar id is carrying two different nations. Which one owns these 21 rows?
+
+*From the retroactive defect sweep, `code/1115_defect_class_retro_sweep.py`
+class C6. Full context: `docs/KNOWN_ISSUES.md` → `DEFECT-SWEEP-1115`.
+**$101,976.57 and a sovereign misattribution.** Nothing was changed.*
+
+**The decision, in one line:** do the 21 `prime_contracts.csv` rows below
+belong to the **Winnebago Tribe of Nebraska** or to the **Ho-Chunk Nation of
+Wisconsin**?
+
+**Why it is a question at all.** `cedar_uid = CE-001C8-GH` appears in
+`prime_contracts.csv` against **two different `tribe_id` values**:
+
+| `tribe_id` | rows | what the rows are named |
+|---|---:|---|
+| `TRBF-WNNBGO-00` (Winnebago Tribe of Nebraska) | 17,259 | ALLNATIVE SOLUTIONS, FLATWATER SOLUTIONS, HCI MANAGEMENT SERVICES, HO-CHUNK SHARED SERVICES / BUILDERS |
+| `TRBF-HOCHNK-00` (Ho-Chunk Nation of Wisconsin) | **21** | HO CHUNK INC (15) · HO-CHUNK CONSTRUCTION MANAGEMENT SERVICES COMPANY (6) |
+
+The `canonical_name` on **all 17,280** of those rows is **`Winnebago`**. So
+the display column already says Winnebago while the keying column says
+Wisconsin on 21 of them. A consumer reading `canonical_name` and a consumer
+joining on `tribe_id` get different nations from the same row.
+
+**The two UEIs in dispute, with the expected answer stated so a check can
+refute it** (owner's protocol: `cage.dla.mil`, last hop tribe-side):
+
+| UEI | CAGE | name as recorded | rows | $ | currently on | expected |
+|---|---|---|---:|---:|---|---|
+| `S4LTC7CL8RW7` | **8APB4** | HO-CHUNK CONSTRUCTION MANAGEMENT SERVICES COMPANY | 6 | $100,758 | Wisconsin | **Winnebago NE** — the `…COMPANY` suffix is the Ho-Chunk Inc. house style, shared with HO-CHUNK SHARED SERVICES COMPANY (`JSCHHWMLJHA5`, CAGE 78WS1) and HO-CHUNK BUILDERS COMPANY (`WDZPLVXWVLJ3`), both already on Winnebago |
+| `DMA6EKCMAPB7` | *(none recorded)* | HO CHUNK INC | 15 | $1,219 | Wisconsin | **Winnebago NE** — *Ho-Chunk, Inc.* is the Winnebago Tribe of Nebraska's economic-development corporation, Winnebago NE. Note `CKLKWJSYK9T5` "HO-CHUNK, INC." is already on Winnebago, so this may be a **second UEI for the same firm** rather than a second firm |
+
+**The undisputed control, which is what makes the two above suspicious:**
+`E14CPCHZGAC3` — "HO-CHUNK NATION OF WISCONSIN" / "Ho Chunk Nation", 17 rows,
+$291,080. That one is on `TRBF-HOCHNK-00` and is plainly right. After a
+ruling, Wisconsin should hold **17 rows and $291,080**, not 38 and $393,057.
+
+**Why an agent did not rule it.** Two federally recognised nations share the
+endonym *Ho-Chunk*. A name test cannot separate them — it is precisely the
+class-4 trap ("one token of a multi-token hub name is not a name"). And the
+attribution on these rows is the START_HERE trap #1 shape:
+`attribution_method = cage_exact` (an exact identifier, so it reads as tier A)
+sitting beside `identifier_ruling_method = need_v6`, **the 6.5%-accurate
+method that never publishes alone**. The exactness of the key says nothing
+about the correctness of the link.
+
+**What happens on each answer.**
+
+- **Winnebago (expected).** 21 rows repoint `tribe_id` → `TRBF-WNNBGO-00`.
+  Wisconsin's prime total falls $393,057 → $291,080. `CE-001C8-GH` becomes
+  1:1 with a single nation and the largest C6 finding in the project closes.
+- **Wisconsin.** Then `canonical_name = "Winnebago"` is wrong on those 21 rows
+  and the display column is the thing to correct — and `CE-001C8-GH` is being
+  used for two nations, which is a spine defect, not a row defect.
+- **Split** (some each). Then `CE-001C8-GH` must be split into two ids before
+  either table can be published, because no single id can be both.
+
+**Nothing was changed.** `prime_contracts.csv` was not edited.
+
+## DS-2 — 1,066,926 prime rows say `UNKNOWN` where an owner should be. Blank them?
+
+*Class C14. `$264,459,736,746`. This is a policy call, not a bug fix.*
+
+`prime_contracts.owner_as_of_transaction_cedar_uid` holds the literal string
+**`UNKNOWN`** on **1,066,926 of 1,217,768 rows (87.6%)**, carrying
+**$264.5B** of `total_obligations`. `518`'s C4 check already learned this
+lesson on 47,877 rows — *"a populated cell is not a resolved identity"* — and
+the true scale is **22 times** what was measured then.
+
+The consequence is not hypothetical: any coverage figure computed as
+*non-blank ÷ total* on this column reports **100%** ownership attachment
+where the honest figure is **12.4%**.
+
+**The decision:** does `UNKNOWN` become **blank** (so every existing non-blank
+test is right by construction), or does it stay and get a **declared
+companion flag** (so the distinction between *asked and not answered* and
+*never asked* survives)?
+
+- **Blank it.** Every downstream non-blank test becomes correct with no code
+  change. Loses the information that the question was asked.
+- **Keep it, add `owner_as_of_transaction_status`.** Nothing downstream is
+  fixed until each consumer is edited, but the refusal stays visible — which
+  is this project's usual preference (*"this project counts what it drops, by
+  name"*).
+
+Same question, smaller, on `fac_tribal_single_audits.auditee_uei =
+`**`GSA_MIGRATION`** — 4,103 of 6,780 rows, **$62.0B** expended, in a column
+that is supposed to hold a UEI and is joined on.
+
+**Nothing was changed.** Neither table was edited.
+<!-- END DEFECT-SWEEP-1115-QUEUE -->
+
+<!-- BEGIN LADDER-1117-1122-QUEUE -->
+---
+
+## LAD-1. EL-1, QM-2 and the splink queue were ADJUDICATED, not asked. Four things still need you.
+
+*Appended 2026-09-02 by the ladder pass. Scripts `code/1117_ladder_adjudication.py`
+and `code/1122_ladder_repoints.py`; registers `review/ladder_adjudication_2026-09-02.csv`
+(252 rows) and `review/ladder_repoints_2026-09-02.csv` (36 rows). Applied, with
+`verify` green and `selftest` proving `verify` fires.*
+
+**What was decided without you**, because you said to: 96 of the 252 splink-queue
+UEIs keyed ($696.8M), 156 declined ($261.2M); 27 identifiers repointed and 8
+withdrawn across the Eastern Shawnee family, QM-2 and EL-1. **Every write is
+tier B** — rule 8 — so nothing here claims your grade.
+
+### LAD-1a. Confirm the seven EL-1 repoints back up to tier A, or say which rung refuses them
+
+They are listed in `docs/KNOWN_ISSUES.md` under `LADDER-1117-1122`. Until you do,
+`tier_A_ruled` sits at 1,669 against a 1,676 baseline and the gate — when it runs
+again — will read that as a fall.
+
+### LAD-1b. Ohkay Owingeh: add `San Juan Pueblo` as an alias?
+
+EL-1 already asked. Answering it stops the detector re-raising a $2.04M
+false positive every quarter. **`H1ZEEZK2D6B3` was CONFIRMED where it is**, not
+moved; the proposal `TRBF-SNJUAN-00` is the San Juan **Southern Paiute** Tribe of
+Arizona and acting on it would have been the largest single error available in
+that file.
+
+### LAD-1c. EL-2 is answered — Laulima's two owners are SEQUENTIAL, not a JV
+
+`beringalakaina.com` names nine companies (Ke'aki, **Laulima Government
+Solutions**, **Kūpono Government Services**, Kāpili, Po'okela, Kīkaha, Pololei,
+Alaka'ina Professional Services, Alaka'ina Technical Services), records that the
+**Alaka'ina Foundation** — a Native Hawaiian Organization certified 2004 —
+established and ran them from 2005, and states they *"were wholly acquired in
+June 2026 by BSNC"*.
+
+**Two consequences you should rule on.** (1) Kūpono's CAGE `5XMJ1` ($351.0M) is
+keyed here to the **Alaka'ina Foundation**, because effectively all the money
+predates June 2026 — is that right, or should the identifier follow the current
+owner with `owner_as_of_transaction` carrying the history? (2) **This is a deal
+Cedar can report**: a nine-company NHO family acquired by an ANC, June 2026,
+visible in the contracting record.
+
+### LAD-1d. Three firms the ladder could not settle, and what was tried
+
+| firm | $ | rung 1 | rung 2 | rung 3/4 |
+|---|---:|---|---|---|
+| `Hui O Ka Koa, Llc` (Honolulu) | $64.30M | HI, matches the proposal — and the proposal rests on the word `koa` | `huiokakoa.com` does not resolve | co-located UEIs are a generic Honolulu list |
+| `Friend Contractors - White Mountain Jv` (Kodiak AK) | $19.48M | **Kodiak, ~1,000 km from White Mountain**; its neighbours are a Kodiak/Alutiiq cluster | no site | — |
+| `Ascg Incorporated Of New Mexico` | $16.57M | Albuquerque only | `ascg.com` does not resolve | — |
+| `Sea Lion Security & Control` + `Sea Lion International` | $6.08M | both Anchorage, which discriminates nothing | — | **Cedar contradicts itself**: the register holds `Sea Lion Corporation` as a village corporation `CE-000BV-SK`, `nest_enterprises.csv` holds a `Sea Lion Corporation` under **Choggiung, Ltd.** `CE-00088-R8` |
+| `Indian Walk In Center` — **settled**, listed to show the route | $33.20M | — | uicsl.org names no former name; `indianwalkincenter.org` is a parked GoDaddy page | **the UEI carries BOTH names in `prime_contracts`** |
+
+The Sea Lion row is the only one that is Cedar's own fault. **Which record is
+right?**
+
+<!-- END LADDER-1117-1122-QUEUE -->

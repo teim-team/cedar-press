@@ -1435,10 +1435,14 @@ def independence(observations):
 # ===========================================================================
 # build
 # ===========================================================================
+# Read off docs/DATASET_READINESS.md. It was FOURTEEN rows when this pass
+# began and is FIFTEEN now - `newsletters` landed the same day (code/1105).
+# Hard-coding the list is deliberate: C8 must fail loudly when the scoreboard
+# grows, rather than silently measuring a shrinking denominator.
 SHIPPING_DATASETS = [
-    "_entity_layer", "contractors", "federal-register", "funding", "gaming",
-    "legislation", "lobbying", "nagpra", "native-owned-businesses",
-    "natural-resources", "nest", "nonprofits", "subcontracting", "deals",
+    "_entity_layer", "contractors", "deals", "federal-register", "funding",
+    "gaming", "legislation", "lobbying", "nagpra", "native-owned-businesses",
+    "natural-resources", "nest", "newsletters", "nonprofits", "subcontracting",
 ]
 # What this layer actually reached, and if not, WHY NOT - never a blank.
 CENSUS_REASON = {
@@ -1465,6 +1469,11 @@ CENSUS_REASON = {
         "unbuilt pair this pass found."),
     "nagpra": ("SINGLE_FAMILY_BY_CONSTRUCTION", "A NAGPRA notice IS the "
         "Federal Register record."),
+    "newsletters": ("SINGLE_FAMILY_BY_CONSTRUCTION", "A finding aid for what "
+        "an entity publishes. Every row IS the entity's own channel, so the "
+        "one family it can have is entity_self_published and there is no "
+        "second observer of a masthead. The 15th collection, added the same "
+        "day as this layer by code/1105."),
     "native-owned-businesses": ("NOT_REACHED_BY_THIS_PASS", "The directories "
         "publish no federal identifiers, so the crosswalk runs from the "
         "federal side and the two sides are one family by construction "

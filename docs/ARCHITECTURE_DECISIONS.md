@@ -2242,3 +2242,58 @@ per candidate would have caught it. Recommend that `1111`'s `report` call
 `ondisk` for every row it is about to rate ACQUIRE, so a survey cannot rate a
 fetch that has already happened.
 <!-- END ADR-028-ACQUIRE-1119-1121 -->
+
+<!-- BEGIN ADR-029-DEFECT-SWEEP -->
+## ADR-029 — the defect classes are swept RETROACTIVELY, and the sweep is one file (workstream DEFECT-SWEEP, 2026-09-02)
+
+**Decision.** `code/1115_defect_class_retro_sweep.py` is the single retroactive
+sweep for the named defect classes across **all** of `code/` and **all** of
+`data/clean` + `data/spine`. It does not duplicate an existing detector: class
+12 (marker names) reuses `845.MARKER_RE`, class 13 (positional writers)
+reports `845.collect_csv()` verbatim, and classes 1/2b/3/5/6/7 of `293` are
+untouched. **Two detectors for one class drift, and a drifted detector is
+worse than none** — the rule that retired `248`.
+
+**Why a new file rather than more of `293`.** `293` is a per-line AST linter
+over `code/` with a baseline ratchet consumed by `62`. Half of these classes
+are only visible in the **data** — a sentinel string, a broken functional
+dependency between a display column and a keying column, a token-match method
+keying a dollar. Putting a 10.5-million-row full-table pass inside the lint
+entry point would make `62` a five-minute gate.
+
+**File ownership taken this pass.** Only these, and each is the *named
+canonical instance* of its class rather than a sweep of everything found:
+
+| file | change | proof |
+|---|---|---|
+| `code/526_dataset_standard.py` | `scan(name, cap=20000)` → `cap=None`. The cap was a DEFAULT ARGUMENT, invisible at the call site, and `build()` recommended `drop N always-empty column(s)` on 20,000 rows of 1.2M-row tables | full pass over all 363 tables = 115 s, measured. Sibling `518` had already set `SCAN_CAP = None`. **Not run** — its output is another agent's input |
+| `code/1111_copper_river_attribution.py` | `verify` refuses below a 1,000-row floor instead of passing on an empty target set | re-run live: `ok  4,272 Copper River rows, 0 not on the hub`, exit 0 |
+| `docs/KNOWN_ISSUES.md` | new block `DEFECT-SWEEP-1115` only | — |
+| `review/OWNER_DECISION_QUEUE.md` | new block `DEFECT-SWEEP-1115-QUEUE` only (DS-1, DS-2) | — |
+| `docs/ARCHITECTURE_DECISIONS.md` | this block only | — |
+
+`docs/defect_class_retro_sweep.json` is generated; do not hand-edit.
+**`62`, `512`, `517` and `518` were not touched.** No commit.
+
+**PROPOSAL TO THE INTEGRATOR — rule 18, beside rule 17.** Rule 17 makes the
+regenerate defect permanent by importing `845`. Nothing yet makes the other
+twelve permanent. `1115` exposes `run_code()` and a per-class count in
+`docs/defect_class_retro_sweep.json`; the code half runs in **42 s** and opens
+no socket. The recommendation is deliberately narrow:
+
+- ratchet the **code-half** counts (C1, C2, C3, C5, C8, C9, C12, C12b) as
+  MUST_NOT_RISE, the same arrangement as `293`;
+- do **not** ratchet the data half from inside `62` — it is a 115-second full
+  pass and belongs on a cadence, not on every gate run;
+- import must follow rule 17's own discipline: a failure to import or to scan
+  is **UNMEASURED**, never zero. `1115` already emits `UNMEASURED` entries and
+  `all` runs its 11 fixtures first and says so if any failed.
+
+**What is deliberately NOT claimed.** Classes **C10** (a decision written
+where the asker cannot see) and **C11** (a present-tense map inverting a past
+event) have no detector and no number. Neither is derivable from code shape or
+column shape, and a count that pretended otherwise would be exactly the defect
+this repo is named for — a check that measured something other than its own
+name. They are recorded in the report under `not_mechanically_detectable` so
+the next reader does not mistake their absence for a clean result.
+<!-- END ADR-029-DEFECT-SWEEP -->

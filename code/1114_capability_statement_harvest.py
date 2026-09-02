@@ -861,6 +861,12 @@ def probe_entity(job):
         if not url or url.startswith("mailto:") or url.startswith("tel:"):
             return
         url = up.urljoin(root + "/", url)
+        # A FRAGMENT IS NOT A DOCUMENT. tyonek.com/capabilities,
+        # /capabilities/#services, /capabilities#manufacturing and
+        # /capabilities/#construction are one page; treating them as four
+        # spends four fetches, writes the same md5 four times and books the
+        # same NAICS code four times as if it had four sources.
+        url = up.urldefrag(url)[0]
         h = host_of(url)
         if h not in (host, "www." + host, host.replace("www.", "", 1)):
             return
@@ -1161,13 +1167,17 @@ def harvest(limit_per_entity=12, workers=10, only_job=None):
     hostrec = dict((h["cedar_uid"], h) for h in read_jsonl(HOSTLOG))
     wl = dict((r["cedar_uid"], r) for r in read_csv(WORKLIST))
 
-    by_ent = {}
+    by_ent, seen_urls = {}, set()
     for s in surfs:
-        u = s["surface_url"]
+        u = up.urldefrag(s["surface_url"])[0]
+        s = dict(s, surface_url=u)
         if s["vocabulary_family"] != "CAP":
             continue
         if NON_DOCUMENT_EXT.search(u) or u in already:
             continue
+        if u in seen_urls:
+            continue
+        seen_urls.add(u)
         if only_job and only_job not in (wl.get(s["cedar_uid"], {})
                                          .get("jobs", "")):
             continue

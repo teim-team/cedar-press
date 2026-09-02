@@ -7,11 +7,11 @@
     "class2c": 69,
     "class3": 2,
     "class4": 14,
-    "class5": 6,
+    "class5": 7,
     "class6": 26,
     "class7": 46,
     "class8": 0,
-    "lint_bug_class_instances": 164
+    "lint_bug_class_instances": 165
   },
   "findings": [
     {
@@ -193,6 +193,15 @@
       "why": "glob pattern 'staging' enumerates a derived/staged artefact. If a PROMOTED table holds the truth, this reads the additions and never the ledger (the 88/57/41/82/35 defect). If reading the staged file IS the job - a promoter, a stager, a diff - waive it with a reason.",
       "waived": true,
       "waiver_reason": "these are PROBE LOGS, not a staged copy of a promoted table. No"
+    },
+    {
+      "class": "class5",
+      "file": "1114_capability_statement_harvest.py",
+      "line": 1176,
+      "evidence": "if NON_DOCUMENT_EXT.search(u) or u in already:",
+      "why": "an 'already done' short-circuit (NON_DOCUMENT_EXT.search(u) or u in already) skips the work, and this file still rewrites a log/summary artefact wholesale at line 1621. On a second run the counters are zero and the log says so - the 164 defect: 187 facilities rewritten to read '0 sources'. Re-running a build must not change its output; merge into the existing log or refuse to rewrite it.",
+      "waived": false,
+      "waiver_reason": ""
     },
     {
       "class": "class5",
@@ -3035,8 +3044,8 @@
       "prime_contracts.csv": [
         "1079_quarantine_method_exposure.py",
         "1085_prime_psc_desc_repull.py",
-        "1111_copper_river_attribution.py",
         "1113_copper_river_complete_attribution.py",
+        "1123_copper_river_attribution.py",
         "114_pull_prime_archive.py",
         "131_merge_archive_backfill.py",
         "174_apply_rulings_to_source_tables.py",
@@ -3408,8 +3417,8 @@
       "prime_contracts.csv": [
         "1079_quarantine_method_exposure.py",
         "1085_prime_psc_desc_repull.py",
-        "1111_copper_river_attribution.py",
         "1113_copper_river_complete_attribution.py",
+        "1123_copper_river_attribution.py",
         "114_pull_prime_archive.py",
         "131_merge_archive_backfill.py",
         "174_apply_rulings_to_source_tables.py",
@@ -3662,7 +3671,5 @@
       "EIN": 317
     }
   },
-  "unparsed": [
-    "1121_acquire_nppes_corroboration.py: unterminated string literal (detected at line 175) (<unknown>, line 175)"
-  ]
+  "unparsed": []
 }

@@ -1097,4 +1097,189 @@ census separates the two reasons. The highest-value unbuilt pair is
 different definitions, different penalties, same spend, and both already on
 disk (`data/staging/np_mission/schedule_c_lobbying.csv`, 553 filers already in
 `np_orgs`).
+**6. GATE `62` IS CRASHING, IT IS NOT THIS WORKSTREAM'S, AND ITS FAILURE LOOKED
+LIKE A PASS.** `py -3 code/62_no_regression_check.py` raises
+`NameError: name 'ROOT' is not defined` at line 1996 and never reaches its
+summary. The module's root constant is `CEDAR`
+(`code/62_no_regression_check.py:161`); `ROOT` is not defined anywhere in the
+file. **One line: `ROOT` -> `CEDAR`.** This is NOT the `A5` instance above, which was at line 131/159 and is resolved; it is a SECOND, later occurrence of the same undefined name in a different function. The file's mtime is 2026-09-02 09:05:38
+and this workstream never opened it — `62` is integrator-owned
+(`docs/AGENT_FIELD_GUIDE.md` §2), so it is filed rather than fixed.
+
+The branch only executes when a table drops out of the dist manifest, which is
+why it can sit unnoticed: **the gate passes for as long as nothing is wrong,
+and crashes exactly when it has something to report.** Worse, the crash was
+first read here as a PASS, because the shell reported exit 0 while the
+traceback sat in the output — the field guide's habit 4 arriving from a
+direction it does not yet name. **Assert on the summary line, not on the exit
+code alone, when running `62` through a wrapper.**
 <!-- END CORROBORATION-1118 -->
+
+<!-- BEGIN DEFECT-SWEEP-1115 -->
+## The retroactive defect-class sweep, 2026-09-02 — 900 instances of 12 classes
+
+`code/1115_defect_class_retro_sweep.py`. Report:
+`docs/defect_class_retro_sweep.json`. Re-run:
+
+    py -3 code/1115_defect_class_retro_sweep.py selftest   # 11 detectors, fixtures
+    py -3 code/1115_defect_class_retro_sweep.py all        # code + data, ~5 min
+
+Every defect class this project has named was found ONCE and fixed THERE.
+Nobody asked whether it existed elsewhere. This is that question, asked once
+for all of them, across **612 python files** and **363 tables / 10,548,870
+rows** in `data/clean` + `data/spine`. **No data pass is sampled.** Every
+detector has a synthetic positive and a synthetic negative in `selftest`;
+`all` runs the selftest first and says so if it failed.
+
+| class | instances | at risk | worst instance |
+|---|---:|---|---|
+| C1 capped read then a whole-file claim | 70 | 140,112 row caps | **`526_dataset_standard.py` — FIXED.** `scan(name, cap=20000)` on 1.2M-row tables, then `drop N always-empty column(s)` |
+| C2 input glob matches own output | 9 | 10 outputs | `1108`, `516`, `860` |
+| C3 unanchored substring as identity/policy | 83 | 83 sites | `1082` `if key in cname or cname in key` on bond obligors |
+| C4 token/containment keying a dollar | 53 | **$1.34T gross** | `fac_tribal_single_audits` 2,864/6,780 rows (42.2%), $42.4B |
+| C5 invariance proved, occurrence not | 39 | 39 writers | **`1111` — FIXED.** 38 conservation-only writers remain |
+| C6 display column vs keying column | 57 | 55,525 rows split | **`prime_contracts`: one `cedar_uid` on two sovereigns, 17,280 rows** |
+| C7 prose in a controlled vocabulary | 232 | 170,749 rows | `native_entity_lobbying_disclosures.filing_type_display`, 50 values |
+| C8 a refusal cached as a completion | 6 | 7 sites | five `_robots_cache` dicts that store the failure |
+| C9 absence printed as evidence of absence | 44 | 44 subprocesses | `subprocess.run` whose `.returncode` is never read |
+| C12 duplicate marker name in one file | **0** | — | MEASURED zero. 3 cross-file reuses, none sharing a generator |
+| C12b bare-number backup tag | **157** | 569 files on disk | **34 sites on a COLLIDING number — the 163 incident, still loaded** |
+| C13 positional writers | 0 | — | delegated to `845`; enforced by `62` rule 17 |
+| C14 sentinel string in a live column | 147 | 2,935,686 rows | **`prime_contracts.owner_as_of_transaction_cedar_uid = "UNKNOWN"` on 1,066,926 rows / $264.5B** |
+
+**C10** (a decision written where the asker cannot see) and **C11** (a
+present-tense map inverting a past event) have **no detector here and no
+count**. They are not derivable from code shape or column shape, and a
+counter that pretended otherwise would be this project's signature defect.
+Recorded in the report under `not_mechanically_detectable`.
+
+### The five that should move first
+
+1. **`owner_as_of_transaction_cedar_uid = "UNKNOWN"` on 1,066,926 of
+   1,217,768 prime rows, $264.5B.** `518` C4 already learned this on 47,877
+   rows — *"a populated cell is not a resolved identity"*. The real figure is
+   **22x** that. Any consumer counting non-blank as attached overstates
+   ownership coverage from 12.4% to 100%.
+2. **`cage_code = "NAN"` (the literal string) on 398,840 prime rows,
+   $87.6B**, and `auditee_uei = "GSA_MIGRATION"` on 4,103 FAC rows carrying
+   $62.0B expended. Both are identity columns; both join.
+3. **One `cedar_uid` spans two sovereigns.** `CE-001C8-GH` carries
+   `canonical_name = "Winnebago"` and appears against **both**
+   `TRBF-WNNBGO-00` (17,259 rows) and `TRBF-HOCHNK-00` (21 rows, $101,977).
+   Ho-Chunk Nation of Wisconsin and the Winnebago Tribe of Nebraska are
+   different nations; *Ho-Chunk, Inc.* is Winnebago's enterprise. **The
+   display column already says the likely-correct answer and the keying
+   column disagrees with it.** Owner ruling: `review/OWNER_DECISION_QUEUE.md`
+   item **DS-1**. Not touched.
+4. **157 bare-number backup tags, 34 of them on a colliding number.** The
+   field guide's §1 rule (`.bak_<date>_pre_<stem>`) has never been measured.
+   `_pre163` alone has **13 files on disk** and 163 is two different scripts.
+   A restore by that tag still cannot tell whose backup it is.
+5. **38 writers still prove conservation without proving occurrence.** The
+   `1111` shape. Each writes, compares a before-total to an after-total, and
+   never gates on how many rows it changed.
+
+### What this workstream changed, and what it did not
+
+**Changed — two files, both the named canonical instance of their class:**
+
+- `code/526_dataset_standard.py` — `scan(name, cap=20000)` → `cap=None`, full
+  pass. The cap was a **default argument**, so no caller could see it, and the
+  C11 rule recommended dropping "always-empty" columns on the strength of the
+  first 20,000 rows. Sibling `518` had fixed the identical defect the same
+  week (`SCAN_CAP = None  # Do not reinstate a head-N cap.`). Cost measured:
+  a full pass over all 363 tables is 115 s. **Not run** — it writes punch
+  lists, and its output is another agent's input.
+- `code/1111_copper_river_attribution.py` — `verify` passed vacuously. Its
+  whole success condition was `not bad and not anc`; if the `COPPER RIVER`
+  filter ever stopped matching it printed `ok  0 Copper River rows` and
+  exited 0. Now refuses below a floor of 1,000 targets. **Re-run against live
+  data: `ok  4,272 Copper River rows, 0 not on the hub`, exit 0.**
+
+**Not changed, and handed on with an owner:**
+
+- the 5 `_robots_cache` refusal caches (`142`, `553`, `980`, `991`,
+  `1020`) — changing crawl behaviour is the crawl owners' call.
+- the 44 unchecked subprocesses and 83 containment sites — each needs its own
+  script's author to say whether the test is load-bearing.
+- `62` was **not** touched. It is integrator-owned. Making this sweep
+  permanent means a rule 18 beside rule 17; the proposal is in the ADR.
+
+### Three defects this detector had, in itself
+
+Recorded because the mandate predicted them and because the next person to
+extend the file will reproduce them.
+
+1. **C2 matched on the BASENAME and ignored the directory**, so
+   `data/raw/*_freshness.csv` and `data/clean/*_freshness.csv` were the same
+   pattern — the containment defect inside the containment detector. Caught
+   by its own synthetic negative, which is the only reason it was caught.
+2. **C12 returned 0 for a whole run** because a patch tool wrote a literal
+   **backspace byte** into its regex. Zero looked exactly like clean. It now
+   has a fixture, and it emits UNMEASURED when it finds no markers at all.
+3. **C5 read `ast.unparse` output with a regex.** `unparse` renders
+   `not bad and not anc` as `not bad and (not anc)`; the parentheses made the
+   pattern miss and the detector reported zero findings while looking like it
+   had run. Rewritten on the AST. It then found the `1111` instance by name.
+
+Also: `detect_C13` was **defined and never called**, and mis-unpacked 845's
+2-tuple return. Both fixed. A detector that is never invoked reports nothing
+and nothing says so.
+<!-- END DEFECT-SWEEP-1115 -->
+
+<!-- BEGIN LADDER-1117-1122 -->
+## `62_no_regression_check.py` DOES NOT RUN — `NameError: ROOT` — and it is not the caller's
+
+Measured 2026-09-02 while checking the gates after `code/1117` and `code/1122`:
+
+```
+py -3 code/62_no_regression_check.py
+  File "code/62_no_regression_check.py", line 1996, in main
+    _live = (ROOT / "data" / "clean" / f).exists()
+NameError: name 'ROOT' is not defined
+```
+
+`ROOT` is **never bound in that file** — `grep -n '^ROOT' code/62_no_regression_check.py`
+returns nothing; the module uses `CLEAN` and `BASELINE` (lines 168–170). The line
+was added by commit **`f274b01`** ("The punch list was telling agents to delete
+columns that hold 838,229 values") inside the SHIPPING-LOST message that was
+rewritten that day to say which surface lost the table. `git status --porcelain
+code/62_no_regression_check.py` is empty, so the breakage is committed, not a
+working-tree edit. **The project's main gate has been dark since that commit.**
+
+The integrator owns `62` (`docs/AGENT_FIELD_GUIDE.md` §2), so it is left
+unpatched here. The fix is one line: `CLEAN / f` in place of
+`ROOT / "data" / "clean" / f`, or bind `ROOT = CLEAN.parent.parent`.
+
+**A dark gate is worse than a red one**, and it is the field guide's own habit 4
+in a new place: the gate produced *no* number and every caller since has read
+that as nothing-to-report.
+
+## `tier_A_ruled` FALLS 1,676 → 1,669, deliberately, and here are the seven
+
+`tier_A_ruled` is in `MUST_NOT_FALL` and the baseline records **1,676**.
+`code/1122_ladder_repoints.py` takes it to **1,669**. The fall is seven rows,
+every one of them a tier-A row keyed to the WRONG SOVEREIGN, and each is
+itemised in `review/ladder_repoints_2026-09-02.csv`:
+
+| identifier | filed name | was (tier A) | now (tier B) |
+|---|---|---|---|
+| UEI `HLTFBD3FTDG8` | Confederated Tribes Of Warm Springs Reservation Of Oregon | Fort Sill-Chiricahua-Warm Springs-Apache (OK), `hand` | Warm Springs Tribe (OR) |
+| UEI `LWRAHAFNKQ13` | Flandreau Santee Sioux Tribe | Santee Sioux (NE), `hand` | Flandreau (SD) |
+| CAGE `50WN1` | Flandreau Santee Sioux Tribe | Santee Sioux (NE), `bgov_manual` | Flandreau (SD) |
+| CAGE `4AD60` | Flandreau Santee Sioux Tribe | `canonical_name` already said Flandreau while `tribe_id` said `TRBF-SANTSX-00` — the row disagreed with itself | Flandreau (SD) |
+| CAGE `3XGD7` | Sac & Fox Nation Of Missouri In Kansas And Nebraska | Sac and Fox Nation (OK), `bgov_manual` | Sac & Fox of Missouri (KS) |
+| CAGE `3VFL3` | Ho-Chunk Nation | Winnebago Tribe of Nebraska, `bgov_manual` | Ho-Chunk (WI) |
+| CAGE `4XH62` | Chignik Lagoon, Native Village Of | Yavapai-Apache Nation (AZ), `bgov_manual` | Chignik Lagoon (AK) |
+
+**It was not re-baselined and it must not be.** `ENTITY_MATCH_RULES` rule 8
+forbids an agent minting tier A, so a repoint an agent makes lands at tier B
+even when it corrects an owner-graded row. The metric is doing its job: it is
+reporting that seven owner-graded assertions were withdrawn. The way back to
+1,676 is the owner confirming the seven — which is exactly what
+`OWNER_DECISION_QUEUE` **EL-1** asks — not a new floor.
+
+`prime_entities` moves the other way, 498 → **526** distinct `cedar_uid` in
+`prime_contracts.csv`. Neither number is gate-verified, because the gate does
+not run.
+<!-- END LADDER-1117-1122 -->

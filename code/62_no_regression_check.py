@@ -1993,7 +1993,16 @@ def main():
                     # only dropped out of the shipping set. A failure that
                     # names the wrong location sends the reader to the wrong
                     # place; say which surface actually lost it.
-                    _live = (ROOT / "data" / "clean" / f).exists()
+                    # CEDAR, not ROOT — this module's root constant is CEDAR
+                    # (line 161). I wrote ROOT out of habit from other scripts
+                    # and crashed the whole gate at the one line that only runs
+                    # when a table stops shipping, so it sat latent until a
+                    # table did. The corroboration workstream found it, and
+                    # noted something worse: the SHELL REPORTED EXIT 0 WHILE THE
+                    # TRACEBACK SAT IN THE OUTPUT, so a crash reads as a pass to
+                    # anyone checking the return code. That is rule 9 — an
+                    # absence of evidence printing as evidence of absence.
+                    _live = (CEDAR / "data" / "clean" / f).exists()
                     fails.append(
                         f"SHIPPING LOST: {f} was shipping {was:,} rows and is "
                         f"no longer in the dist manifest"

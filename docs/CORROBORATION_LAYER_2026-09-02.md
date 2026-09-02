@@ -371,7 +371,7 @@ restores, and asserts exit 0. All nine fixtures pass.
 | **C5** | every disagreement quotes or links BOTH sides |
 | **C6** | source-row conservation — `rows_in == sum(named dispositions)`, and `other`/`unknown`/`misc`/`n/a` are refused by name |
 | **C7** | `CORROBORATED` requires ≥2 families **and** agreement under the predicate's own agreement test |
-| **C8** | the census names all fourteen shipping datasets, each with a non-blank reason |
+| **C8** | the census names every shipping dataset in `docs/DATASET_READINESS.md`, each with a non-blank reason |
 
 **Source-row conservation: 31,186 rows read across 13 inputs, 0 unaccounted,
 every rejection named.** It immediately surfaced the P4 denominator —
@@ -392,14 +392,20 @@ every rejection named.** It immediately surfaced the P4 denominator —
 | `federal-register` | SINGLE_FAMILY_BY_CONSTRUCTION | 0 | 0 | **Y** |
 | `funding` | SINGLE_FAMILY_BY_CONSTRUCTION | 0 | 0 | **Y** |
 | `nagpra` | SINGLE_FAMILY_BY_CONSTRUCTION | 0 | 0 | **Y** |
+| `newsletters` | SINGLE_FAMILY_BY_CONSTRUCTION | 0 | 0 | **Y** |
 | `subcontracting` | SINGLE_FAMILY_BY_CONSTRUCTION | 0 | 0 | **Y** |
 | `legislation` | NOT_REACHED_BY_THIS_PASS | 0 | 0 | **Y** |
 | `lobbying` | NOT_REACHED_BY_THIS_PASS | 0 | 0 | **Y** |
 | `native-owned-businesses` | NOT_REACHED_BY_THIS_PASS | 0 | 0 | **Y** |
 | `natural-resources` | NOT_REACHED_BY_THIS_PASS | 0 | 0 | **Y** |
 
-**Nine of fourteen shipping datasets are wholly single-sourced**, and the
+**Ten of fifteen shipping datasets are wholly single-sourced**, and the
 census distinguishes the two reasons rather than blurring them.
+
+*The scoreboard was FOURTEEN rows when this pass began and is FIFTEEN now —
+`newsletters` landed the same day (`code/1105`). `SHIPPING_DATASETS` is
+hard-coded on purpose so that **C8 fails loudly when the scoreboard grows**,
+rather than quietly measuring a shrinking denominator.*
 `SINGLE_FAMILY_BY_CONSTRUCTION` means the source *is* the fact — a NAGPRA
 notice is the Federal Register record, and a republication of it is the same
 family; `510` proved this by harvesting the FR roster and moving the

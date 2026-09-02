@@ -67,8 +67,20 @@ def rows(p: Path):
 
 
 def script_exit(*args) -> int:
+    """Return code AND output, because the return code alone lies.
+
+    On 2026-09-02 `62_no_regression_check.py` died with a NameError and **the
+    shell reported exit 0 with the traceback sitting in the output**. A checker
+    that trusts only the return code reads a crash as a pass — rule 9, an
+    absence of evidence printing as evidence of absence, inside the harness
+    that exists to catch it."""
     r = subprocess.run([sys.executable, str(ROOT / "code" / args[0])] + list(args[1:]),
                        capture_output=True, text=True, cwd=str(ROOT))
+    blob = (r.stdout or "") + (r.stderr or "")
+    for marker in ("Traceback (most recent call last)", "NameError:",
+                   "AttributeError:", "KeyError:", "ModuleNotFoundError:"):
+        if marker in blob:
+            return 99          # crashed, whatever it claimed
     return r.returncode
 
 
