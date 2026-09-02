@@ -270,27 +270,38 @@ The data is honest and the *schema* reads badly: one `close_date` column cannot
 distinguish "closed permanently" from "closed once, since reopened." Flagged on
 the data side.
 
-## Status of the fourteen
+## Status of the collections
 
-**11 of 14 are READY as regenerated for this push**, against 12 in the last
-one and 14 the one before. Both blocked datasets are named, with the contract point each one
-misses, in `collection_descriptors.cedar.json`:
+**There are fifteen now, and 14 of 15 are READY as regenerated for this
+push.** The fifteenth collection, `newsletters`, landed while this branch was
+open — see below. Readiness has read 14 of 14, then 12, then 11, and now 14
+of 15 inside one day, which is why **this line is not the source of truth**:
+regenerate it with `py -3 code/518_dataset_readiness.py`. There are three
+statuses and no fourth.
+
+**One dataset is blocked**, and it is named with the contract point it misses
+in `collection_descriptors.cedar.json`:
 
 | | | |
 |---|---|---|
-| `owned` | BLOCKED | its published row count is contradicted by its own sample — a check added on this branch, section below. Its count is **withdrawn** |
-| `federal-register` | BLOCKED | its sample is drawn from `consultation_events.csv`, which the contract marked **`UNDOCUMENTED`** rather than `shippable` at 09:23 today. Its 490,274-row count is **not** in dispute and still ships |
-| `deals` | BLOCKED | `C1 grain UNSTATED` and `C2 no validated primary key` on `deals_press_edgar_ancsa_additions.csv`, a table another workstream added to the collection while this branch was open |
+| `owned` | BLOCKED | its published row count is contradicted by its own sample — the section below. Its count is **withdrawn**; three measured blockers ship with it |
 
-**The blocks are not all treated the same, and that distinction is enforced
-in code.** An *arithmetic* violation — a published count smaller than
-one of the dataset's own tables — is provably wrong, so the count is
-withdrawn. A *membership* violation — the sample source is not a shippable
-member — leaves the count untouched, because nothing contradicts it.
-Collapsing them would have withheld `federal-register`'s 490,274 because a
-different table's codebook status lapsed, which is a remedy out of all
-proportion to the measurement. `deals` is a third case again — an ordinary
-readiness block from the scoreboard, owned by another workstream.
+*`federal-register` and `deals` were blocked in the previous push and are
+READY again in this one — the `consultation_events.csv` codebook registration
+and the `deals_press_edgar_ancsa_additions.csv` grain were both settled by the
+workstreams that owned them. Neither was this workstream's to fix and neither
+was absorbed; they are named here as resolved for the same reason they were
+named as blocked.*
+
+**Blocks are not all treated the same, and the distinction is enforced in
+code rather than applied by judgement.** An *arithmetic* violation — a
+published count smaller than one of the dataset's own tables — is provably
+wrong, so the count is withdrawn. A *membership* violation — the sample source
+is not a shippable member of the collection — leaves the count untouched,
+because nothing contradicts it. When `federal-register` tripped the second
+kind, collapsing the two would have withheld its 490,274 because a different
+table's codebook registration had lapsed that morning: a remedy out of all
+proportion to the measurement.
 
 **The `deals` block is not this workstream's and is named rather than
 absorbed.** It is also the honest illustration of why this section says
@@ -590,6 +601,113 @@ namely that a long mojibake description looked like a well-filled cell. 98.4%
 of subaward rows are unaffected and a ten-row showcase should not spend one of
 them on corruption. **No row is dropped from the dataset and no money column
 is touched.** The counts ship in `samples/README.md`.
+
+## Codex round 6: eight findings, eight right, and a fifteenth collection
+
+| # | finding | verdict |
+|---|---|---|
+| 1 | descriptor and generated README publish different subaward totals | **Right** — and the figures had moved twice more since |
+| 2 | READY datasets ship `blockers: ["-"]`, a sentinel that reads as a blocker | **Right** |
+| 3 | the gaming descriptor prescribes "divides by 780" then withholds a rate because ~727 | **Right** — self-contradictory in one string |
+| 4 | the sample index still calls all 787 rows "one row per gaming facility" | **Right** |
+| 5 | the status section says "Both" before listing three | **Right** — instance eleven |
+| 6 | the main README still shows the pre-correction mojibake totals | **Right when reviewed; already fixed in `f12ac41`** |
+| 7 | natural-resources descriptor still publishes 87% against a measured 88.1% | **Right** — instance twelve |
+| 8 | generated grain cells truncate mid-sentence, one leaving an unclosed code span | **Right** |
+
+**Findings 1, 3 and 7 are one defect, so they got one fix.** Each is a number
+that `770` measures and a human re-typed into the editorial copy. The
+subaward case shows why that can never hold: the descriptor said **$45.62B /
+$24.41B / 86.9%**, the generated README said **$51.45B / $29.47B / 74.6%** in
+the same push, and by the time this fix ran the live table said **$57.02B /
+$34.91B / 63.4%**. Three values for one quantity in one day, because
+`subawards.csv` went 76,859 → 87,177 → 90,479 rows underneath the typed copy.
+
+So the copy now carries `{{TOKENS}}` and `760` substitutes them from the facts
+`770` measured on that run. **An unknown token is a hard failure, not a
+passthrough** — shipping a literal `{{SUBAWARD_CORRECT}}` is worse than
+shipping a stale number, and a stale number is the thing this exists to stop.
+`760` also refuses if `770` has not run, because a descriptor built from last
+week's measurements is precisely the defect.
+
+**Finding 2** was a placeholder that reads as a value — the same class as the
+`nan` sentinel two rounds ago. Absence is `[]`. All 14 READY datasets now ship
+an empty array.
+
+**Finding 4** is annotated rather than rewritten. The declared grain lives in
+`GRAIN_GAMING` in `code/512_build_dataset_contracts.py`, which is
+integrator-owned and which this workstream has declined to edit all branch.
+The declaration ships unchanged and a **measured** note ships beside it:
+*"8 of 787 rows are non-place records naming a nation that operates no casino,
+so the facility grain holds for 779 rows, not all of them."* Cedar's
+declaration and Cedar's measurement disagree, and a customer should see both
+rather than have one quietly overwritten by an agent who does not own it.
+
+**Finding 8** was a fixed `[:110]` slice on the grain column — the one field
+whose entire purpose is to be precise. It cut `federal-register`'s definition
+off at "an e", immediately after the warning that `consultation_event_id` is
+not unique, so the composite key a reader needs in order to de-duplicate was
+exactly the part removed. Full text ships now, pipe-escaped.
+
+### The gaming ladder was stale again, and the adjudication had landed
+
+While fixing finding 3 the ladder was re-measured and **both of my earlier
+numbers were wrong**:
+
+    787   rows
+     -8   non-place rows   (7 `No casino` + 1 `No casino currently`,
+                            which an exact-string test had missed)
+    ---
+    779   facility rows
+    -54   extra rows across 53 adjudicated MERGE groups
+    ---
+    725   distinct properties
+
+`review/place_gaming_adjudication_2026-09-02.csv` now carries a **verdict per
+group** — MERGE 53, HOLD_OPEN 5 — superseding the candidates file whose 56
+groups were all still `verdict_needed`. Reporting the candidate count as
+settled overstated what Cedar knew; reporting it after adjudication understated
+it. The ladder is measured from the adjudicated file on every build now, so no
+rung is typed anywhere.
+
+**The five held-open groups corroborate a call this loop made independently.**
+`7 CLANS FIRST COUNCIL` and `STABLES` are held as `P0_different_operators` —
+the Miami/Modoc joint operation flagged three rounds ago as something that
+must never be collapsed. Two processes reached the same refusal separately.
+
+### The fifteenth collection: `newsletters`
+
+`760` emitted a descriptor for it and named it as needing copy. **Nothing
+warned that it had no sample** — which is Codex finding 7 from round 2, now
+three times over: `owned`'s id mismatch, `nest` landing mid-branch, and this.
+It ships now with a sample and copy.
+
+**1,889 rows, and 481 of them are `probe_absence`** — an entity that was
+searched and publishes nothing findable. That distinction is the dataset:
+a gap in a directory usually means nobody looked, and here it means somebody
+did. 1,555 entities probed, 694 with at least one channel, archives back to
+**1970**. `record_status` leads the sample's column list for that reason — a
+sample showing only the 1,394 publication channels would hide the column that
+makes the file honest.
+
+### And the generator now proves it finished
+
+The coordinator's warning was exact: earlier today `770` died mid-run on a
+1.46 GB table, wrote one sample, and left a zero-byte log, and nothing noticed
+because every downstream check reads the *output* — which was the previous
+run's, and looks identical to a good one. **An unchanged sample file is not
+evidence of success; it is the most likely symptom of a failure.**
+
+The run now asserts its own completion: a timestamp captured at import, before
+any table is read, and a per-dataset mtime check that exits non-zero naming
+every sample that did not land. `py -3 code/770_sample_extracts.py guardtest`
+proves it fires — it injects the real violation (a run whose samples all
+predate it), asserts the guard sees 15 of 15 as unwritten, and asserts it
+stays quiet against a stamp taken before the writes. *The first version of
+that fixture failed its own second assertion, because it compared against the
+test process's start time rather than the writes' — a check measuring
+something other than its name, inside the fixture written to prove checks
+measure their names.*
 
 ## The tenth instance, found by auditing for it instead of waiting
 

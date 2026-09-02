@@ -11,25 +11,26 @@ These exist so the finished shape can be judged before the datasets are finished
 | dataset | table | rows shown | of | cols | one row is |
 |---|---|---:|---:|---:|---|
 | `_entity_layer` | `cedar_identity_register.csv` | 10 | 1,555 | 6 | UNSTATED |
-| `contractors` | `prime_contracts.csv` | 10 | 1,217,768 | 18 | TWO populations under one schema, and the seam is real. Archive rows (FY2008-FY2026, source_file `FY*_All_Cont |
+| `contractors` | `prime_contracts.csv` | 10 | 1,217,768 | 18 | TWO populations under one schema, and the seam is real. Archive rows (FY2008-FY2026, source_file `FY*_All_Contracts_Full_*.zip`): one row per FPDS TRANSACTION, identified by `contract_transaction_unique_key`. BGOV rows (`master prime file.dta`): one row per (contract, parent vehicle, fiscal year, vendor) AGGREGATE, with an EMPTY transaction key because none exists for them. Both are additive in `total_obligations`; neither row count is comparable to the other |
 | `deals` | `deals_classified.csv` | 10 | 1,073 | 17 | one row per classified deal event - the merged deals ledger |
-| `federal-register` | `consultation_events.csv` | 10 | 11,402 | 15 | one row per (consultation event, participant as published). `consultation_event_id` alone is NOT unique - an e |
+| `federal-register` | `consultation_events.csv` | 10 | 11,402 | 15 | one row per (consultation event, participant as published). `consultation_event_id` alone is NOT unique - an event with several named participants has one row each, and 1,006 rows name no participant at all |
 | `funding` | `federal_funding_transactions.csv` | 10 | 701,955 | 12 | one row per federal assistance award TRANSACTION, across the union of the assistance and archive pulls |
-| `gaming` | `gaming_facilities.csv` | 10 | 787 | 21 | one row per gaming facility - the directory core, docs/GAMING_BUILD_LOG_2026-08-05.md |
+| `gaming` | `gaming_facilities.csv` | 10 | 787 | 21 | one row per gaming facility - the directory core, docs/GAMING_BUILD_LOG_2026-08-05.md — **MEASURED: 8 of 787 rows are non-place records naming a nation that operates no casino, so the facility grain holds for 779 rows, not all of them** |
 | `legislation` | `bill_votes.csv` | 10 | 423 | 15 | one row per roll-call vote on a Native-relevant bill |
 | `lobbying` | `lobbying_registrants.csv` | 10 | 653 | 15 | one row per Senate LDA registrant_id - docs/LOBBYING_REGISTRANT_BUILD_LOG.md |
-| `nagpra` | `nagpra_notices.csv` | 10 | 6,792 | 16 | one row per NAGPRA notice, keyed on the Federal Register document number - docs/NAGPRA_BUILD_LOG.md. A correct |
+| `nagpra` | `nagpra_notices.csv` | 10 | 6,792 | 16 | one row per NAGPRA notice, keyed on the Federal Register document number - docs/NAGPRA_BUILD_LOG.md. A correction notice is its own row (is_correction=1) and does not supersede the row it amends. The `*_entity_ids` columns are PIPE-DELIMITED LISTS, not join keys: join to entities through nagpra_notice_entity_bridge.csv. `mni_total_stated` is blank wherever the notice did not state one total, and must never be defaulted to 0 |
 | `owned` | `native_owned_businesses.csv` | 10 | 2,916 | 16 | UNSTATED |
 | `natural-resources` | `resource_revenue.csv` | 10 | 11,305 | 9 | one row per resource revenue event as recorded by its source system |
-| `nest` | `nest_enterprises.csv` | 10 | 1,610 | 17 | one row per ENTERPRISE that a Native entity owns or has published a tie to - a sub-hub of its owner, never a s |
+| `nest` | `nest_enterprises.csv` | 10 | 1,610 | 21 | one row per ENTERPRISE that a Native entity owns or has published a tie to - a sub-hub of its owner, never a spine entity in its own right (docs/IDENTIFIER_STANDARD.md §2). Identity is the Cedar-minted `enterprise_id`; the owner is `owner_hub_cedar_uid`, which is always a spine entity. NOT one row per assertion - a firm named in ten annual reports is ONE row here and ten rows in nest_enterprise_relations.csv. NOT one row per legal entity either: the grain is (owner hub, enterprise), so a joint venture between two Native owners is correctly two rows, one per parent, which is what ENTITY_MATCH_RULES rule 11 says a JV is. |
+| `newsletters` | `tribal_newsletter_corpus.csv` | 10 | 1,889 | 18 | one row per (PUBLISHER, CHANNEL URL). A nation that prints a newspaper, posts PDF back issues to a WordPress media library and files shareholder reports with the State of Alaska has THREE rows, because those are three channels with three different archive depths. NOT one row per publisher, NOT one row per issue, and NOT one row per masthead. The file holds TWO record types under one schema and `record_status` is the discriminator: 1,394 `publication_channel` rows are the dataset; 481 `probe_absence` rows record an entity every machine-readable route reached and found nothing on; 1 is a signup form with no archive; 13 are shard-I place-name collisions kept flagged for their owner. Counting rows instead of filtering `record_status` overstates the channel count by 35%. Archive depth is a FLOOR read off the channel's own index - a paper printing since 1966 whose site indexes 2002 onward reads as 2002 - and no issue body text is stored, by policy and by invariant. |
 | `nonprofits` | `np_orgs.csv` | 10 | 12,764 | 15 | one row per EIN considered for the Native nonprofit universe, ruled in or out |
-| `subcontracting` | `subawards.csv` | 10 | 87,177 | 17 | one row per SUBAWARD FILING AS INGESTED FROM ONE SOURCE - not one row per subaward. FFATA/FSRS requires the PR |
+| `subcontracting` | `subawards.csv` | 10 | 89,809 | 17 | one row per SUBAWARD FILING AS INGESTED FROM ONE SOURCE - not one row per subaward. FFATA/FSRS requires the PRIME to re-file an open subaward monthly, and every filing is a real reporting event, so one $57,500 subaward can be 93 rows spanning 2022-08 to 2025-01. Cedar RETAINS all of them and flags the repeats in `duplicate_status`; it does not delete them. A row is therefore (one SAM subaward report) x (the Cedar pull that ingested it). MONEY: `subaward_amount` is additive ONLY where `duplicate_status == 'primary'` AND `subaward_exceeds_prime_flag != 'yes'` - $25,864,997,128.19 correct against $47,301,660,819.78 unfiltered, so an unfiltered sum is 82.9% TOO HIGH as a share of the correct total (45.3% of the inflated one; say which denominator you mean). A SUBAWARD IS A SLICE OF A PRIME AWARD and must never be added to prime_contracts.csv - that double-counts the same federal dollar. The two entity legs are `prime_cedar_uid` and `sub_cedar_uid`; `cedar_uid` is the PRIME leg only and is legitimately blank on the 43,282 rows whose only Native party is the subawardee |
 
 ## Before totalling any money column
 
 See `docs/MONEY_TOTALLING_RULES.md`. Two that bite hardest:
 
-- **`subawards.subaward_amount`** summed unfiltered gives **$51.45B** against a correct **$29.47B**. The filter removes **$21.98B** — which is **74.6% of the correct total** and **42.7% of the unfiltered one**. *Both percentages are of that same amount; they differ only in denominator, and an overstatement is measured against the truth, so the number to quote is the first.* Filter to `duplicate_status = 'primary'` and `subaward_exceeds_prime_flag != 'yes'`.
+- **`subawards.subaward_amount`** summed unfiltered gives **$57.02B** against a correct **$34.91B**. The filter removes **$22.11B** — which is **63.4% of the correct total** and **38.8% of the unfiltered one**. *Both percentages are of that same amount; they differ only in denominator, and an overstatement is measured against the truth, so the number to quote is the first.* Filter to `duplicate_status = 'primary'` and `subaward_exceeds_prime_flag != 'yes'`.
 - **`contractor_ranking.owner_obligations_usd`** sums to $6,535.96B against a true $176.74B — a **36.98×** inflation, because owner-grain attributes repeat on every operating-company row. `firm_*` is the additive family.
 - **A subaward is a slice of a prime award.** Never add `subawards` to `prime_contracts`.
 
@@ -65,13 +66,13 @@ Codex, PR #29 round 4, found `2Â€? CONDUIT` in the subcontracting sample. It 
 
 In `subawards.csv` (87,177 rows) **1,433 cells** carry it: `description` 1,423 rows (1.63%), `subaward_number` 6, `sub_parent_name` 2, `sub_name` 2.
 
-**The obvious remedy only reaches 9.6% of it.** The repeated UTF-8-read-as-cp1252 chain is reversible and is reversed here — `Ã‚Â½` becomes `½`, `Ã‚Â°C` becomes `°C`. But **116 of 1,214 affected cells recover and 1,098 (90.4%) do not**, because they are not a pure re-encoding chain: characters have been substituted. Codex's own example is the clearest case — `2Â€?` holds a literal `?` where a character was destroyed upstream, and you cannot re-decode information that is gone.
+**The obvious remedy only reaches 9.3% of it.** The repeated UTF-8-read-as-cp1252 chain is reversible and is reversed here — `Ã‚Â½` becomes `½`, `Ã‚Â°C` becomes `°C`. But **117 of 1,256 affected cells recover and 1,139 (90.7%) do not**, because they are not a pure re-encoding chain: characters have been substituted. Codex's own example is the clearest case — `2Â€?` holds a literal `?` where a character was destroyed upstream, and you cannot re-decode information that is gone.
 
 So a cell that is still corrupt after repair scores as **empty** for sampling, and the sampler prefers a clean row. 98.4% of subaward rows are unaffected and a ten-row showcase should not spend one of them on corruption. **No row is dropped from the dataset and no money column is touched** — only the sample's choice is steered, and the counts are here so the guard surfaces the defect rather than hiding it.
 
 - `contractors` — `awardee_name` 1 repaired / 0 unrecoverable, `parent_name` 1 repaired / 0 unrecoverable
 - `nagpra` — `institution_name` 0 repaired / 2 unrecoverable
-- `subcontracting` — `description` 114 repaired / 1089 unrecoverable, `sub_name` 0 repaired / 1 unrecoverable, `subaward_number` 0 repaired / 6 unrecoverable
+- `subcontracting` — `description` 115 repaired / 1130 unrecoverable, `sub_name` 0 repaired / 1 unrecoverable, `subaward_number` 0 repaired / 6 unrecoverable
 
 ## Null sentinels, stripped here and named rather than hidden
 
@@ -79,7 +80,8 @@ Codex, PR #29 round 3, found `funding_agency = "Nan"` in the contractors sample 
 
 Counted across the **whole source table**, not the ten sampled rows, and only in the columns a sample ships:
 
-- `contractors` — `funding_agency` 33,263  (**33,263** cells)
+- `contractors` — `funding_agency` 33,263, `award_base_description` 17  (**33,280** cells)
+- `newsletters` — `business_content` 34, `back_issues_open` 33  (**67** cells)
 - `subcontracting` — `subaward_number` 1  (**1** cells)
 
 **The source fix exists and lost a race, which is why this guard is here too.** `772_strip_nan_sentinels.py` had matched the sentinel case-SENSITIVELY, justified in its own docstring by `Nanticoke`, `Nanakuli` and `NANA` — every one of which is an argument against a substring rule, which it never was. A whole-cell test cannot match a 4- or 8-character value with a 3-character token, so the case-sensitivity guarded nothing and hid 617,097 cells. Corrected, it cleared them; then a concurrent in-place enricher, which had read the table before 772 started, wrote back its own copy with five new `identifier_ruling_*` columns and every sentinel restored. 772's guard compares size and mtime across its own read and correctly saw nothing — the other writer's read predated it. **Two in-place enrichers on one table need a declared ordering and these two had none.** The product layer cannot be raced, so the guard sits here as well.

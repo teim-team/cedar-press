@@ -3,11 +3,9 @@
     "cedar_id": "_entity_layer",
     "product_id": "_entity_layer",
     "status": "READY",
-    "blockers": [
-      "-"
-    ],
-    "n_rows": 326899,
-    "n_tables": 35,
+    "blockers": [],
+    "n_rows": 363220,
+    "n_tables": 42,
     "sample_file": "samples/_entity_layer__sample.csv",
     "needs_copy": false
   },
@@ -15,42 +13,39 @@
     "cedar_id": "contractors",
     "product_id": "contractors",
     "status": "READY",
-    "blockers": [
-      "-"
-    ],
+    "blockers": [],
     "n_rows": 3345971,
     "n_tables": 10,
     "sample_file": "samples/contractors__sample.csv",
     "needs_copy": false
   },
+  "deals": {
+    "cedar_id": "deals",
+    "product_id": "deals",
+    "status": "READY",
+    "blockers": [],
+    "n_rows": 2662,
+    "n_tables": 15,
+    "sample_file": "samples/deals__sample.csv",
+    "needs_copy": false
+  },
   "federal-register": {
     "cedar_id": "federal-register",
     "product_id": "federal-register",
-    "status": "BLOCKED",
-    "blockers": [
-      "COLLECTION MEMBERSHIP: consultation_events.csv is the table the sample is drawn from and the federal-register contract marks it `UNDOCUMENTED`, not `shippable` - the customer is shown rows from a table Cedar does not currently consider publishable. The 490,274-row total over the 21 shippable tables is not in dispute and still ships; see ADR-018.",
-      "C4 identity path: cedar_uid is filled on 10,396 of 11,402 rows (91.2%) in consultation_events.csv, the table the sample is drawn from - the dataset's headline '100% keyed' is measured on the contract tables, which exclude it",
-      "C1 grain: UNSTATED on consultation_events.csv - the contract lists it as `UNDOCUMENTED` rather than `shippable`, so no grain and no primary key are declared for it"
-    ],
-    "n_rows": 490274,
-    "n_tables": 21,
+    "status": "READY",
+    "blockers": [],
+    "n_rows": 502483,
+    "n_tables": 23,
     "sample_file": "samples/federal-register__sample.csv",
-    "needs_copy": false,
-    "flagship_table": "consultation_events.csv",
-    "flagship_rows": 11402,
-    "n_rows_contract_tables": 490274,
-    "n_rows_flagship": 11402,
-    "n_rows_basis": "490,274 rows over the 21 shippable tables the contract claims; unchanged. The block concerns consultation_events.csv, the sample source, not this total."
+    "needs_copy": false
   },
   "funding": {
     "cedar_id": "funding",
     "product_id": "funding",
     "status": "READY",
-    "blockers": [
-      "-"
-    ],
-    "n_rows": 3573831,
-    "n_tables": 10,
+    "blockers": [],
+    "n_rows": 3646750,
+    "n_tables": 14,
     "sample_file": "samples/funding__sample.csv",
     "needs_copy": false
   },
@@ -58,11 +53,9 @@
     "cedar_id": "gaming",
     "product_id": "gaming",
     "status": "READY",
-    "blockers": [
-      "-"
-    ],
-    "n_rows": 128487,
-    "n_tables": 54,
+    "blockers": [],
+    "n_rows": 128561,
+    "n_tables": 56,
     "sample_file": "samples/gaming__sample.csv",
     "needs_copy": false
   },
@@ -70,9 +63,7 @@
     "cedar_id": "legislation",
     "product_id": "legislation",
     "status": "READY",
-    "blockers": [
-      "-"
-    ],
+    "blockers": [],
     "n_rows": 149293,
     "n_tables": 11,
     "sample_file": "samples/legislation__sample.csv",
@@ -82,9 +73,7 @@
     "cedar_id": "lobbying",
     "product_id": "lobbying",
     "status": "READY",
-    "blockers": [
-      "-"
-    ],
+    "blockers": [],
     "n_rows": 264478,
     "n_tables": 35,
     "sample_file": "samples/lobbying__sample.csv",
@@ -94,9 +83,7 @@
     "cedar_id": "nagpra",
     "product_id": "nagpra",
     "status": "READY",
-    "blockers": [
-      "-"
-    ],
+    "blockers": [],
     "n_rows": 72302,
     "n_tables": 5,
     "sample_file": "samples/nagpra__sample.csv",
@@ -125,11 +112,9 @@
     "cedar_id": "natural-resources",
     "product_id": "natural-resources",
     "status": "READY",
-    "blockers": [
-      "-"
-    ],
-    "n_rows": 34551,
-    "n_tables": 8,
+    "blockers": [],
+    "n_rows": 283716,
+    "n_tables": 9,
     "sample_file": "samples/natural-resources__sample.csv",
     "needs_copy": false
   },
@@ -137,21 +122,27 @@
     "cedar_id": "nest",
     "product_id": "nest",
     "status": "READY",
-    "blockers": [
-      "-"
-    ],
+    "blockers": [],
     "n_rows": 5399,
     "n_tables": 2,
     "sample_file": "samples/nest__sample.csv",
+    "needs_copy": false
+  },
+  "newsletters": {
+    "cedar_id": "newsletters",
+    "product_id": "newsletters",
+    "status": "READY",
+    "blockers": [],
+    "n_rows": 3444,
+    "n_tables": 2,
+    "sample_file": "samples/newsletters__sample.csv",
     "needs_copy": false
   },
   "nonprofits": {
     "cedar_id": "nonprofits",
     "product_id": "nonprofits",
     "status": "READY",
-    "blockers": [
-      "-"
-    ],
+    "blockers": [],
     "n_rows": 123293,
     "n_tables": 10,
     "sample_file": "samples/nonprofits__sample.csv",
@@ -161,25 +152,10 @@
     "cedar_id": "subcontracting",
     "product_id": "subcontracting",
     "status": "READY",
-    "blockers": [
-      "-"
-    ],
-    "n_rows": 87847,
+    "blockers": [],
+    "n_rows": 90479,
     "n_tables": 3,
     "sample_file": "samples/subcontracting__sample.csv",
-    "needs_copy": false
-  },
-  "deals": {
-    "cedar_id": "deals",
-    "product_id": "deals",
-    "status": "BLOCKED",
-    "blockers": [
-      "C1 grain UNSTATED on 1: deals_press_edgar_ancsa_additions.csv",
-      "C2 no validated primary key on 1"
-    ],
-    "n_rows": 2662,
-    "n_tables": 15,
-    "sample_file": "samples/deals__sample.csv",
     "needs_copy": false
   }
 }
