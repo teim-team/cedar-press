@@ -239,3 +239,50 @@ browser does to a server that is willing to serve you. **A `robots.txt`
 Disallow, a login wall, and a `TERMS_STATED_RESTRICTIVE` source remain
 refusals and stay refused.** Colville's TERO was not fetched by any route on
 this pass, including these.
+
+## SEARCHING FOR THE INSTITUTION INSTEAD OF THE THING
+
+*Added 2026-09-01. This invalidated a rate measured across 298 tribes.*
+
+Shards L and M swept all 297 unsurveyed federally recognized tribes and both
+independently returned **3.4%**. The number is real, replicated and honest — and
+it answers the wrong question, because both searched **TERO vocabulary**.
+
+The owner:
+
+> *"A tribe may not have TERO, or obviously has TERO but maintains member-owned
+> lists."*
+
+**A TERO office is an institution. A business list is an artifact.** They
+correlate; they are not the same thing. A tribe with no TERO programme can still
+publish a member-owned business directory, an enterprise register, a chamber
+roster or an economic-development portfolio — and a search for `tero`,
+`preference` and `certified vendor` finds none of them.
+
+The evidence was already in the sweep. Shard L's broader count was **11 of 149
+(7.4%)**, and the extra six were tribal-enterprise registers surfaced through
+WordPress custom post types literally named **`enterprise`** and
+**`tribalbusiness`**. No TERO term would ever have reached them.
+
+**The general rule:** when a search is built from the vocabulary of the
+programme rather than the vocabulary of the object, its negatives measure the
+programme's prevalence and nothing else. Before recording a rate, ask what the
+search terms were a proxy for, and whether the thing can exist without them.
+
+This is the same family as the false-negative rule above — a negative from a
+narrow route is not a negative — but a level up: there the route was narrow
+(rendered HTML instead of the media index), here the *concept* was narrow.
+Widening the route does not fix a search for the wrong noun, which is why
+shard L's 2.3× media-index re-sweep added exactly one list.
+
+**Vocabulary to run alongside the programme terms**, ordered by observed yield:
+`/wp-json/wp/v2/types` first — a custom post type name is the single highest-
+yield signal in this project — then `enterprise`, `enterprises`,
+`tribalbusiness`, `business-directory`, `member-owned`, `citizen-owned`,
+`tribally-owned`, `our-companies`, `subsidiaries`, `holdings`,
+`economic-development`, `chamber`, `commerce`, `entrepreneur`,
+`small-business`, `artisan`, `craft`.
+
+And an enterprise register is worth more than the vendor list that was being
+hunted: it is **parent-asserted ownership**, the strongest evidence class here,
+and it feeds the hub/sub-hub crosswalk rather than the vendor dataset.
