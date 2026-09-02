@@ -319,3 +319,73 @@ Never:
 **Related:** `docs/NATIVE_ENTITY_NUANCES.md` (the domain knowledge that resolves names — FR parentheticals, renames, enterprises, exclusions) ·  `docs/ARCHITECTURE.md` (what exists, generated) ·
 `docs/ENTITY_INVENTORY.md` (coverage per entity, generated) · `AGENTS.md` (the
 defect classes) · `docs/CEDAR_TAXONOMY.md` (entity classes).
+
+## HUB AND SUB-HUB — the model, with the worked example that proves it
+
+*Owner, 2026-09-01: "We just need the hub and sub-hubs. So Ho-Chunk means a
+sub-hub, or Winnebago casino is a sub-hub. And then the hub is Winnebago
+Tribe."*
+
+```
+HUB          Winnebago Tribe of Nebraska          TRBF-WNNBGO-00
+  SUB-HUB    Ho-Chunk, Inc.        (holding co)   CKLKWJSYK9T5
+    firm     All Native Services Company
+    firm     All Native Synergies Company
+    firm     Ho-Chunk Construction Management Services Co
+    firm     ... and the rest of the family
+  SUB-HUB    the tribe's casino    (facility)
+  SUB-HUB    each SAM registration (UEI / CAGE)
+```
+
+A sub-hub is never a hub. `cedar_entity_spine.csv`'s declared grain already
+says so — *"one row per canonical Native entity (hub). Sub-hubs (registrations,
+facilities) are NEVER rows here."* Ho-Chunk Inc is a sub-hub of the Winnebago
+Tribe, not a peer of it, and every dollar under it rolls up to the hub.
+
+### The defect this model catches, found 2026-09-01
+
+```
+HO-CHUNK, INC.               CKLKWJSYK9T5  parent WINNEBAGO TRIBE OF NEBRASKA
+                                           -> keyed Winnebago   uei_exact, 47 rows   CORRECT
+HO-CHUNK CONSTRUCTION MGMT   S4LTC7CL8RW7  parent HO-CHUNK, INC. (FY2025-26)
+                                           -> keyed Ho-Chunk    cage_exact, 6 rows   WRONG
+```
+
+**The subsidiary is keyed to a different nation than its own declared parent.**
+`Ho-Chunk` (`TRBF-HOCHNK-00`) is the Ho-Chunk Nation of Wisconsin — a separate
+federally recognized tribe that happens to share a name with the Winnebago
+Tribe of Nebraska's holding company. Two tribes, one word.
+
+Only $100,758 across 6 rows, so the money is trivial. **The shape is not.** It
+is a name match beating a declared ownership chain, which is rule 11 in
+`ENTITY_MATCH_RULES.md` inverted, and it is the exact confusion the owner
+warned about at the start of the day: *"the highest owner can sometimes be say
+Ho-Chunk Inc, not Winnebago Tribe — that's why the spiderweb approach is so
+important."*
+
+### Identifiers are the route to the hub, and they are messier than the theory
+
+*Owner: "In theory one company should have one CAGE code, but sometimes they
+could have multiple... they'll get a new CAGE technically as a new company for
+the 8(a) pass-through stuff, but it's literally the same company."*
+
+Measured in `fpds_uei_cage_map.csv`:
+
+```
+UEIs carrying a real CAGE                 6,840
+  with MORE THAN ONE CAGE                    18   0.3%, never more than two
+CAGE codes mapping to more than one UEI      15   never more than two
+plus: literal string NAN as a cage_code   2,196 rows across 2,193 UEIs
+```
+
+So the idiosyncrasy is real and **rare** — the crosswalk is near 1:1 in
+practice, which is why shard E's CAGE route linked seven ASRC subsidiaries
+cleanly. The `NAN` rows are a far bigger hazard than the genuine one-to-many
+cases, and they are a data-quality defect rather than a fact about the world.
+
+**The point of any identifier is that it names THIS entity**, and none of them
+names the hub directly. UEI and CAGE identify a registration; a registration is
+a sub-hub. Getting from a sub-hub to its hub is the crosswalking work, and the
+routes in order of strength are: the parent's own published subsidiary list
+(shard E's 482 edges, 355 of them from audited filings under Alaska Statute
+45.55.139), a declared parent UEI in FPDS, then anything name-based.
