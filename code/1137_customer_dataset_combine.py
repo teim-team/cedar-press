@@ -88,10 +88,10 @@ CONTRACTS = ROOT / "docs" / "schema" / "dataset_contracts.json"
 
 GITHUB_BYTES = 95 * 1024 * 1024
 EXCEL_ROWS = 1_048_576
-# The workbook is a convenience copy, not the deliverable. Past this the
-# write costs more than the rest of the build and nobody opens the result
-# in a spreadsheet application. The CSV is always complete.
-WORKBOOK_MAX_ROWS = 200_000
+# WORKBOOK_MAX_ROWS is gone. It capped workbooks at 200,000 rows on my
+# judgement about what someone would want to open, and the effect was that two
+# of twelve datasets silently had no workbook. XLSX caps a SHEET, not a
+# WORKBOOK; a big dataset spans several Data sheets in one file.
 YEAR_COLS = ("fiscal_year", "fy", "action_date_fiscal_year", "award_fiscal_year",
              "year", "report_year", "filing_year")
 
@@ -373,85 +373,131 @@ def codebook(coll, c, fname, fmeta, cols, rows, prof, joined, refused, held):
                                               encoding="utf-8")
 
 
-def workbook(coll, c, cols, rows, prof, fmeta):
-    """XLSX with the notes sheet FIRST, where the row count allows one.
+def _wrap(text, width=78):
+    import textwrap
+    return textwrap.wrap(text, width) or [""]
 
-    Owner, 2026-09-02: *"if you can have multiple sheets for CSVs, the first
-    sheet should say when it was last updated and notes and a codebook."*
 
-    CSV has no sheets and no row ceiling; XLSX has sheets and stops at
-    1,048,576 rows. Neither format does both, so the CSV is always the
-    complete deliverable and the workbook is written ALONGSIDE it whenever the
-    dataset fits — same data, notes sheet first. A dataset over the ceiling
-    gets the CSV and the markdown codebook, and the manifest says why there is
-    no workbook rather than leaving a silent gap.
+def notes(coll, c, fname, fmeta, cols, rows, prof, joined, refused, held):
+    """Plain-text and PDF notes beside the CSV. NO XLSX, deliberately.
+
+    Owner, 2026-09-02: *"if CSVs are less error prone because we can have as
+    much as we want rows wise, or also they don't do weird things with numbers
+    or dates, then we should just offer a CSV and then offer separately a text
+    file or PDF of the notes to the dataset."*
+
+    That is the right call and it retires the workbook entirely. Excel is not a
+    neutral container: it drops the leading zero from a zip code or a CAGE,
+    reads `3-10` as a date, renders a long identifier in scientific notation,
+    and converts URL-shaped cells to hyperlinks until it hits a 65,530-link cap
+    and silently stops. Every one of those had to be defended against by hand
+    in the version this replaces, and the last of them was found only because a
+    warning happened to be printed. CSV does none of them and has no row
+    ceiling, so the data ships as CSV and the notes ship as their own files.
+
+    Per dataset:
+        <id>.csv            the data - complete, no ceiling, no coercion
+        <id>__CODEBOOK.md   agent-facing note (sources, quirks, variables)
+        <id>__NOTES.txt     the same for a person, plain text
+        <id>__NOTES.pdf     the same, typeset, for someone sent a file
+
+    Not the methodology paper - that is a separate per-dataset document. This
+    is what a buyer wants open beside the spreadsheet.
     """
-    if len(rows) + 1 > EXCEL_ROWS:
-        return "", f"{len(rows):,} rows exceeds the XLSX ceiling"
-    # A PRACTICAL CAP BELOW THE FORMAT'S CAP. `funding` is 701,955 rows x 86
-    # columns - 60 million cells. XLSX will accept that and the write takes
-    # longer than the entire rest of the build, to produce a file no one opens
-    # in a spreadsheet application anyway. The workbook exists to be
-    # CONVENIENT; past this size it is neither convenient nor the deliverable.
-    # The CSV is always complete, so nothing is lost, and the manifest records
-    # the reason rather than leaving a silent gap where a workbook should be.
-    if len(rows) > WORKBOOK_MAX_ROWS:
-        return "", (f"{len(rows):,} rows over the {WORKBOOK_MAX_ROWS:,} "
-                    f"workbook cap - use {coll}.csv, which is complete")
-    import xlsxwriter
-    path = OUT / f"{coll}.xlsx"
-    # `strings_to_urls: False` because xlsxwriter otherwise turns any
-    # URL-shaped cell into a live hyperlink, and Excel caps a sheet at 65,530
-    # of them. `funding` carries a usaspending.gov link on most rows, so the
-    # writer emitted thousands of warnings and SILENTLY DROPPED the link on
-    # every row past the cap. A data cell is text: it should never be
-    # reinterpreted as anything else on the way out.
-    wb = xlsxwriter.Workbook(str(path), {"constant_memory": True,
-                                         "strings_to_urls": False})
-    bold = wb.add_format({"bold": True})
-    wrap = wb.add_format({"text_wrap": True, "valign": "top"})
+    L = []
+    A = L.append
+    title = c.get("name", coll)
+    A(title.upper())
+    A("=" * len(title))
+    A("")
+    A(f"Dataset id     {coll}")
+    A(f"Shelf          {c.get('shelf', '')}")
+    A(f"Last updated   {TODAY}")
+    A(f"Rows           {len(rows):,}")
+    A(f"Columns        {len(cols)}")
+    A(f"Data file      {coll}.csv")
+    A("")
+    A("WHAT ONE ROW IS")
+    A("-" * 15)
+    L.extend(_wrap(fmeta.get("grain") or "Grain not declared."))
+    A("")
+    A("WHERE IT COMES FROM")
+    A("-" * 19)
+    A(f"Flagship table: {fname}")
+    if joined:
+        A("")
+        A("Folded in one-to-one (cardinality measured, not assumed):")
+        for x in joined:
+            A(f"  - {x}")
+    if refused:
+        A("")
+        L.extend(_wrap("Counted but NOT joined. These are one-to-many on the "
+                       "shared key, so joining them would multiply the rows "
+                       "and inflate every money total. Each contributes a "
+                       "count column instead:"))
+        for x in refused:
+            A(f"  - {x}")
+    A("")
+    A("BEFORE YOU USE IT")
+    A("-" * 17)
+    if held:
+        L.extend(_wrap(f"{sum(held.values()):,} rows are withheld from "
+                       "publication ("
+                       + ", ".join(f"{k}={v:,}" for k, v in sorted(held.items()))
+                       + "). These are the standing publication gates, not a "
+                         "data-quality trim."))
+        A("")
+    sparse = [q["column"] for q in prof if q["filled"] == 0]
+    if sparse:
+        L.extend(_wrap(f"{len(sparse)} columns are empty on every row and are "
+                       "kept deliberately - dropping blank columns would make "
+                       "the schema depend on which rows shipped: "
+                       + ", ".join(sparse[:15])))
+        A("")
+    thin = [q["column"] for q in prof if 0 < q["fill_pct"] < 10]
+    if thin:
+        L.extend(_wrap(f"{len(thin)} columns are under 10% populated - real, "
+                       "but do not build a headline on them: "
+                       + ", ".join(thin[:12])))
+        A("")
+    L.extend(_wrap("A column total is the raw sum of that column. It is NOT "
+                   "necessarily this dataset's money answer - filters and "
+                   "de-duplication rules live in the methodology paper. The "
+                   "unfiltered subaward total runs 86.9% above the correct "
+                   "one."))
+    A("")
+    A("COLUMNS")
+    A("-" * 7)
+    A(f"{'column':<38}{'filled':>10}{'fill%':>8}{'distinct':>10}")
+    for q in prof:
+        A(f"{q['column'][:37]:<38}{q['filled']:>10,}{q['fill_pct']:>8}"
+          f"{q['distinct']:>10,}")
 
-    ws = wb.add_worksheet("README")
-    ws.set_column(0, 0, 26)
-    ws.set_column(1, 1, 96)
-    for i, (k, v) in enumerate([
-            ("Dataset", c.get("name", coll)), ("Dataset id", coll),
-            ("Shelf", c.get("shelf", "")), ("Last built", TODAY),
-            ("Rows", f"{len(rows):,}"), ("Columns", str(len(cols))),
-            ("What one row is", fmeta.get("grain") or "not declared"),
-            ("Full codebook", f"{coll}__CODEBOOK.md"),
-            ("Complete file", f"{coll}.csv  (CSV has no row limit; this "
-                              f"workbook is a convenience copy)"),
-            ("Money warning", "A column total here is the raw sum. Filters and "
-                              "de-duplication rules live in the methodology "
-                              "paper; the unfiltered subaward total runs 86.9% "
-                              "above the correct one."),
-    ]):
-        ws.write(i, 0, k, bold)
-        ws.write(i, 1, v, wrap)
+    (OUT / f"{coll}__NOTES.txt").write_text("\n".join(L) + "\n",
+                                            encoding="utf-8")
 
-    cb = wb.add_worksheet("Codebook")
-    heads = ["column", "filled", "fill_pct", "distinct", "example", "min",
-             "max", "sum"]
-    cb.set_column(0, 0, 34)
-    cb.set_column(4, 4, 40)
-    for j, h in enumerate(heads):
-        cb.write(0, j, h, bold)
-    for i, p in enumerate(prof, 1):
-        for j, h in enumerate(heads):
-            cb.write(i, j, p.get(h, ""))
+    try:
+        from reportlab.lib.pagesizes import LETTER
+        from reportlab.lib.units import inch
+        from reportlab.pdfgen import canvas as _canvas
+    except ImportError as e:
+        return "", f"reportlab unavailable ({e}); .txt and .md notes complete"
 
-    d = wb.add_worksheet("Data")
-    for j, h in enumerate(cols):
-        d.write(0, j, h, bold)
-    for i, r in enumerate(rows, 1):
-        for j, h in enumerate(cols):
-            # write_string, not write: `write` sniffs the value and would
-            # coerce "0123" to a number and drop the leading zero, which is how
-            # a zip code or a CAGE stops being itself. Every cell here came out
-            # of a CSV as text and leaves as text.
-            d.write_string(i, j, str(r.get(h, "")))
-    wb.close()
+    path = OUT / f"{coll}__NOTES.pdf"
+    cv = _canvas.Canvas(str(path), pagesize=LETTER)
+    W, H = LETTER
+    x, y, lead = 0.75 * inch, H - 0.85 * inch, 11.0
+    cv.setTitle(f"{title} - dataset notes")
+    for line in L:
+        if y < 0.8 * inch:
+            cv.showPage()
+            y = H - 0.85 * inch
+        heavy = (line and (set(line) <= {"=", "-"} or line == line.upper()
+                           and any(ch.isalpha() for ch in line)))
+        cv.setFont("Courier-Bold" if heavy else "Courier", 8)
+        cv.drawString(x, y, line[:112])
+        y -= lead
+    cv.save()
     return path.name, ""
 
 
@@ -591,7 +637,8 @@ def build(dry: bool) -> int:
             prof = profile(fhdr, frows)
             codebook(coll, c, fname, fmeta, fhdr, frows, prof, joined,
                      refused, fheld)
-            xlsx, xlsx_why = workbook(coll, c, fhdr, frows, prof, fmeta)
+            xlsx, xlsx_why = notes(coll, c, fname, fmeta, fhdr, frows,
+                                   prof, joined, refused, fheld)
         else:
             xlsx = xlsx_why = ""
 
@@ -608,7 +655,8 @@ def build(dry: bool) -> int:
             "sparse_columns": "; ".join(sparse),
             "files": files, "largest_mb": round(size / 1e6, 1), "split": kind,
             "codebook": f"{coll}__CODEBOOK.md" if not dry else "",
-            "workbook": xlsx, "workbook_absent_reason": xlsx_why,
+            "notes_pdf": xlsx, "notes_pdf_absent_reason": xlsx_why,
+            "notes_txt": f"{coll}__NOTES.txt" if not dry else "",
         })
         print(f"    {coll:<26} {len(frows):>9,} rows x {len(fhdr):>3} cols   "
               f"+{added_cols} joined   {files} file(s)")
@@ -617,8 +665,8 @@ def build(dry: bool) -> int:
     keys = ["dataset", "shelf", "name", "flagship", "grain", "rows",
             "rows_withheld", "withheld_why", "columns", "columns_added_by_join",
             "tables_folded_in", "tables_counted_not_joined", "sparse_columns",
-            "files", "largest_mb", "split", "codebook", "workbook",
-            "workbook_absent_reason", "note"]
+            "files", "largest_mb", "split", "codebook", "notes_txt",
+            "notes_pdf", "notes_pdf_absent_reason", "note"]
     with (OUT / "MANIFEST.csv").open("w", encoding="utf-8", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=keys, extrasaction="ignore")
         w.writeheader()
@@ -713,13 +761,17 @@ def verify() -> int:
         # straight back to splitting, which the owner ruled out.
         # A workbook the manifest says should not exist is an ORPHAN from an
         # earlier build. It looks current and corresponds to nothing.
-        wb = OUT / f"{m['dataset']}.xlsx"
-        if wb.exists() and not (m.get("workbook") or "").strip():
-            bad.append(f"{m['dataset']}: {wb.name} on disk but the manifest "
-                       f"says no workbook ({m.get('workbook_absent_reason','')})"
-                       f" - orphan from an earlier build")
-        if (m.get("workbook") or "").strip() and not wb.exists():
-            bad.append(f"{m['dataset']}: manifest names {m['workbook']}, absent")
+        # Every dataset ships notes in BOTH forms. XLSX is retired: Excel
+        # coerces leading zeros, dates and long identifiers, so it is not a
+        # safe container for this data - see notes().
+        for suffix, label in ((".txt", "notes text"), (".pdf", "notes PDF")):
+            f = OUT / f"{m['dataset']}__NOTES{suffix}"
+            if not f.exists():
+                bad.append(f"{m['dataset']}: no {label} ({f.name})")
+        orphan = OUT / f"{m['dataset']}.xlsx"
+        if orphan.exists():
+            bad.append(f"{m['dataset']}: {orphan.name} is a retired-format "
+                       f"leftover; XLSX is no longer produced")
         if (m.get("codebook") or "").strip() and not                 (OUT / m["codebook"]).exists():
             bad.append(f"{m['dataset']}: manifest names {m['codebook']}, absent")
         leftover = list(OUT.glob(f"{m['dataset']}__*.csv"))

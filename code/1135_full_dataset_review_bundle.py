@@ -86,6 +86,13 @@ from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+# `code/` on the path so `cedar_publication` imports whether this file is run
+# as a script or loaded by importlib from another module.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from cedar_publication import (          # noqa: E402
+    NEVER, GATES, DROP_COLS, YEAR_COLS, row_ok, publishable_columns,
+)
+
 csv.field_size_limit(10_000_000)
 TODAY = date.today().isoformat()
 CLEAN = ROOT / "data" / "clean"
@@ -98,54 +105,22 @@ EXCEL_ROWS = 1_048_576          # a piece bigger than this cannot be opened
 SPLIT_ROWS = 1_000_000          # fallback part size, under the ceiling
 GITHUB_BYTES = 95 * 1024 * 1024  # GitHub hard-refuses over 100 MB
 
-YEAR_COLS = ("fiscal_year", "fy", "action_date_fiscal_year", "award_fiscal_year",
-             "year", "report_year", "filing_year")
-
-# Proprietary identifiers: licensed internal-only, never shipped.
-DROP_COLS = ("casino_city_id", "duns", "duns_number", "dnb_duns",
-             "ultimate_duns", "parent_duns")
-
-
-def _from_770(name: str):
-    """Read a constant out of `770` by text.
-
-    Read rather than restated because a duplicated safety rule drifts, and the
-    copy that drifts is always the one that ships. A module whose name begins
-    with a digit is not importable - the same reason `770` reads `PRODUCT_ID`
-    out of `760` textually.
-    """
-    src = ROOT / "code" / "770_sample_extracts.py"
-    if not src.exists():
-        return None
-    txt = src.read_text(encoding="utf-8", errors="replace")
-    m = re.search(rf"^{name}\s*=\s*", txt, re.M)
-    if not m:
-        return None
-    i, depth, j = m.end(), 0, m.end()
-    while j < len(txt):
-        if txt[j] in "([{":
-            depth += 1
-        elif txt[j] in ")]}":
-            depth -= 1
-            if depth == 0:
-                j += 1
-                break
-        j += 1
-    try:
-        import ast
-        return ast.literal_eval(txt[i:j])
-    except Exception:
-        return None
+# `YEAR_COLS` (fiscal-year column names, in preference order) and `DROP_COLS`
+# (proprietary identifiers, dropped as COLUMNS not rows) are imported above
+# from `code/cedar_publication.py`. Both were literals here AND in 1137 -
+# unscraped, ungated, two hand-maintained copies of a licensing rule with
+# nothing comparing them.
 
 
-NEVER = _from_770("NEVER")
-GATES = _from_770("GATES")
-if NEVER is None or GATES is None:
-    print("  REFUSING TO BUILD: could not read NEVER/GATES out of 770.\n"
-          "  The publication rules live there. Restating them here would put a\n"
-          "  second copy of a safety rule in the tree, and the copy that\n"
-          "  drifts is always the one that ships.", file=sys.stderr)
-    raise SystemExit(2)
+# `NEVER` and `GATES` used to be read out of `770_sample_extracts.py` BY TEXT
+# here, on the reasoning that "a module whose name begins with a digit is not
+# importable". That is true of the `import` STATEMENT and false of
+# `importlib`: measured 2026-09-02, 770 imports in 0.04 s and does no file work
+# at import. So the scrape was never necessary, and it fails OPEN - a regex
+# that matches nothing returns `None` and the caller decides. The same pattern
+# in 1137 did exactly that, returning `{}` and reporting "0 customer shelves"
+# with exit 0. Both rules now come from `code/cedar_publication.py`, imported
+# at the top, which fails CLOSED with a traceback naming the missing symbol.
 
 
 def collections():
@@ -169,15 +144,9 @@ def find(name: str):
     return None
 
 
-def row_ok(r: dict):
-    """(publishable, reason). Row-level gates, 770's."""
-    for col, allowed in GATES.items():
-        if col in r and (r.get(col) or "").strip() not in allowed:
-            return False, col
-    for col in NEVER:
-        if col in r and (r.get(col) or "").strip():
-            return False, "personal:" + col
-    return True, ""
+# `row_ok(row) -> (publishable, reason)` is imported from
+# `cedar_publication`. It was reimplemented identically here and in 1137; a
+# safety rule with three bodies has three chances to be edited in two places.
 
 
 def spread(rows, n):
@@ -230,7 +199,7 @@ def build(mode: str) -> int:
                     hdr = list(rd.fieldnames or [])
                     if not hdr:
                         continue
-                    cols = [c for c in hdr if c.lower() not in DROP_COLS]
+                    cols = publishable_columns(hdr)
                     dropped = [c for c in hdr if c not in cols]
                     kept, held = [], defaultdict(int)
                     for r in rd:

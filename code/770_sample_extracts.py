@@ -77,6 +77,13 @@ from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+# `code/` on the path so `cedar_publication` imports whether this file is run
+# as a script or loaded by importlib from another module.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from cedar_publication import (          # noqa: E402
+    NEVER, GATES, PRODUCT_ID, SPINE, product_id, FLAGSHIP as _CANON_FLAGSHIP,
+)
+
 csv.field_size_limit(10_000_000)
 TODAY = date.today().isoformat()
 CLEAN = ROOT / "data" / "clean"
@@ -91,103 +98,61 @@ N = 10
 # descriptor emits `owned` and the sample shipped as
 # `native-owned-businesses__sample.csv`, so an id-based manifest consumer -
 # which is the only kind the descriptor invites - could not find the file for
-# the one dataset whose two sides disagree. The mapping is the SAME dict as
-# `PRODUCT_ID` in `code/760_collection_descriptors.py` and is duplicated here
-# rather than imported because a module name beginning with a digit is not
-# importable; `verify` fails if the two ever diverge.
-PRODUCT_ID = {
-    "native-owned-businesses": "owned",
-}
+# the one dataset whose two sides disagree.
+#
+# 2026-09-02: `PRODUCT_ID` and `product_id()` now come from
+# `code/cedar_publication.py`, which is the single copy. This file used to hold
+# its own literal plus `_760_product_id_map()`, a regex that read 760's copy
+# out of source text so "drift is a hard failure" - except the function was
+# never called from anywhere, so nothing was ever compared. A gate that is
+# defined and not invoked is not a gate. `py -3 code/cedar_publication.py
+# verify` is the one that runs.
 
-
-def product_id(did: str) -> str:
-    return PRODUCT_ID.get(did, did)
-
-
-def _760_product_id_map() -> dict:
-    """Read PRODUCT_ID out of 760 by text, so drift is a hard failure rather
-    than two files quietly disagreeing about a filename."""
-    src = (ROOT / "code" / "760_collection_descriptors.py")
-    if not src.exists():
-        return {}
-    txt = src.read_text(encoding="utf-8")
-    i = txt.find("PRODUCT_ID = {")
-    if i < 0:
-        return {}
-    body = txt[i + len("PRODUCT_ID = {"):txt.find("}", i)]
-    out = {}
-    for line in body.splitlines():
-        line = line.strip().rstrip(",")
-        if ":" in line and line.startswith('"'):
-            k, v = line.split(":", 1)
-            out[k.strip().strip('"')] = v.strip().strip('"')
-    return out
-
-# Curated: the table a CUSTOMER would open first. Not the largest.
+# THE FLAGSHIP CHOICE AND THE PUBLICATION RULES NOW LIVE IN ONE PLACE.
+# `FLAGSHIP`, `SPINE`, `NEVER`, `GATES` and `PRODUCT_ID` were all defined here
+# and read out of this file BY TEXT by four other scripts - 760, 1135, 1137 and
+# the product repo's `scripts/import_cedar_manifest.py`. One of those scrapers
+# had already failed open, returning `{}` and reporting "0 customer shelves"
+# with exit 0. They are canonical in `code/cedar_publication.py` as of
+# 2026-09-02 and imported at the top of this file; the curation reasoning for
+# each entry moved there with them.
+#
+# THE LITERAL BELOW IS GENERATED AND MUST STAY. The product repo's importer
+# lives on a branch that never merges with master, does
+# `text.find("FLAGSHIP = {")` against THIS file, and raises SystemExit when the
+# dict is absent. So the literal cannot be deleted - but it is no longer
+# maintained: `py -3 code/cedar_publication.py sync` writes it and `verify`
+# fails if it drifts. The assert below makes a hand-edit raise on the next run
+# rather than shipping the storefront a different flagship than the samples
+# were drawn from.
+# <<< BEGIN GENERATED FLAGSHIP COMPAT (cedar_publication.py sync)
+# Generated from `FLAGSHIP` in `code/cedar_publication.py`. DO NOT EDIT:
+# run `py -3 code/cedar_publication.py sync`. It exists because the
+# product repo's `scripts/import_cedar_manifest.py` reads this dict out of
+# THIS FILE by text, from a branch that never merges with master, so the
+# literal cannot be deleted. `verify` fails if it drifts from the module.
 FLAGSHIP = {
-    "contractors":              "prime_contracts.csv",
-    "subcontracting":           "subawards.csv",
-    "funding":                  "federal_funding_transactions.csv",
-    "gaming":                   "gaming_facilities.csv",
-    "natural-resources":        "resource_revenue.csv",
-    "native-owned-businesses":  "native_owned_businesses.csv",
-    "nonprofits":               "np_orgs.csv",
-    "deals":                    "deals_classified.csv",
-    # 2026-09-02: was `lobbying_registrants.csv`, 653 rows - a REFERENCE LIST
-    # of who is registered, not the record of what they did. A buyer of
-    # "Lobbying" is asking which filings name their tribe and what was lobbied
-    # on, and that is `native_entity_lobbying_disclosures.csv`, 27,825 x 44,
-    # "one row per LDA filing attributed to a Native entity". Same defect the
-    # NAGPRA entry below was corrected for on this date: the buyer's first
-    # question had tens of thousands of answers on disk and the shipped table
-    # could not ask it.
-    "lobbying":                 "native_entity_lobbying_disclosures.csv",
-    # 2026-09-02: was `bill_votes.csv`, 423 rows. The collection is
-    # "Congressional Votes and Proposed Legislation" and the unit a buyer works
-    # in is the BILL - `native_bills.csv`, 3,069 x 29, "one row per
-    # Native-relevant bill". `member_positions.csv` has 136,119 rows and is the
-    # deeper table, but its grain is (roll-call vote, member of Congress),
-    # which is an analyst's join target, not the headline row. Picking by size
-    # would have chosen it, and picking by size is what 770 already warns
-    # against.
-    "legislation":              "native_bills.csv",
-    "federal-register":         "consultation_events.csv",
-    # 2026-09-02: was `fr_nagpra_title_index.csv`, a 10-column list of
-    # document numbers and headline strings. The dataset descriptor promises
-    # notices "with the institutions and affiliated tribes named in each" and
-    # the title index carries neither - both are parsed out and on disk in
-    # `nagpra_notices.csv` (6,792 x 67; institution_name 6,792,
-    # institution_state 6,680, mni_total_stated 4,273, affiliated_entity_ids
-    # 5,022), with `nagpra_notice_entity_bridge.csv` holding 51,579
-    # notice->party links of which 48,111 resolve to a Cedar entity. The
-    # buyer's first question - "which notices name my tribe?" - had 48,111
-    # answers on disk and a sample that could not ask it.
-    "nagpra":                   "nagpra_notices.csv",
-    # The FIFTEENTH collection, and the third time a dataset has reached
-    # READY with no sample behind it - which is Codex PR #29 finding 7, now
-    # three times over (`owned`'s id mismatch, `nest` landing mid-branch, and
-    # this). 760 emitted a descriptor for it and named it as needing copy; the
-    # sample had no such warning, because nothing checked. It does now: 760's
-    # flagship check reads this dict, so a collection with no entry here is
-    # visible from the other side.
-    #
-    # The corpus, not the coverage table: `tribal_newsletter_coverage.csv` is
-    # one row per entity PROBED (1,555) and answers "did we look?"; the corpus
-    # is one row per channel or absence and answers "what is published?",
-    # which is the buyer's question.
-    "newsletters":              "tribal_newsletter_corpus.csv",
-    "_entity_layer":            "cedar_identity_register.csv",
-    # 2026-09-02, workstream pr29. The `nest` collection landed while this
-    # branch was open and 760 emitted a 14th descriptor for it, which would
-    # have shipped a dataset id with no sample behind it - the exact shape of
-    # Codex PR #29 finding 7, in the other direction. Enterprises, not
-    # relations: the relation table is one row per ASSERTION and a buyer's
-    # first question is which firms a nation owns, not how many sources said
-    # so. The curation below is provisional and belongs to the `nest`
-    # workstream to revise.
-    "nest":                     "nest_enterprises.csv",
+    "contractors": "prime_contracts.csv",
+    "subcontracting": "subawards.csv",
+    "funding": "federal_funding_transactions.csv",
+    "gaming": "gaming_facilities.csv",
+    "natural-resources": "resource_revenue.csv",
+    "native-owned-businesses": "native_owned_businesses.csv",
+    "nonprofits": "np_orgs.csv",
+    "deals": "deals_classified.csv",
+    "lobbying": "native_entity_lobbying_disclosures.csv",
+    "legislation": "native_bills.csv",
+    "federal-register": "consultation_events.csv",
+    "nagpra": "nagpra_notices.csv",
+    "newsletters": "tribal_newsletter_corpus.csv",
+    "_entity_layer": "cedar_identity_register.csv",
+    "nest": "nest_enterprises.csv",
 }
-SPINE = {"cedar_identity_register.csv"}
+# >>> END GENERATED FLAGSHIP COMPAT
+assert FLAGSHIP == _CANON_FLAGSHIP, (
+    "770: the generated FLAGSHIP compat block has been hand-edited and no "
+    "longer matches cedar_publication.FLAGSHIP. Run "
+    "`py -3 code/cedar_publication.py sync`.")
 
 # WHAT A CUSTOMER SAMPLE SHOWS. Curated per dataset, because the full internal
 # schema is not the product: gaming_facilities carries 105 columns, nine of them
@@ -504,14 +469,12 @@ SHOW = {
                       "entity_class", "state"],
 }
 
-# A row carrying any of these is withheld outright.
-NEVER = ("owner_name_raw", "email", "phone", "home_address", "personal_email",
-         "ssn", "tin", "date_of_birth", "officer_name", "contact_name")
-
-# Columns whose presence means the row is gated. Value -> keep only if match.
-GATES = {"publishable": {"Y", "y", "1", "true", "TRUE", ""},
-         "source_terms_status": {"SILENT", "TERMS_STATED_NO_REUSE_RESTRICTION",
-                                 ""}}
+# `NEVER` (a row carrying any of these is withheld outright) and `GATES`
+# (columns whose presence means the row is gated) are imported at the top of
+# this file from `code/cedar_publication.py`, which is the only copy. They were
+# defined here and text-scraped by 1135 and 1137; the reasoning for each -
+# including why an individual lobbyist registrant is NOT personal data held
+# apart from a public role - moved there with them.
 
 
 def load(path: Path):
