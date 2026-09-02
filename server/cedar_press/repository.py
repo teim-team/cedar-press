@@ -7,10 +7,15 @@ The shapes returned are the shapes the client already reads — see
 collection just moves the translation somewhere less visible.
 
 The catalog, the citation register and the CSV shaping live in
-``collections.py`` and ``press_catalog.py``, carried over from Cedar Grove's
-Python package. That is deliberate: those hold the inclusion rules and
-release bookkeeping, and a second implementation of them is a second set of
-numbers to keep in agreement.
+``collections.py`` and ``press_catalog.py``, ported from Cedar Grove's Python
+package rather than rewritten. That is deliberate: those hold the inclusion
+rules and release bookkeeping, and a second implementation of them is a second
+set of numbers to keep in agreement.
+
+It is also provenance and not a dependency. Cedar Press is a standalone
+product: nothing here imports a Cedar Grove module or calls a Grove service,
+and every value comes from ``data/cedar/collections.manifest.json``, generated
+from the Cedar data workspace in ``code/``.
 """
 
 from __future__ import annotations
@@ -21,9 +26,19 @@ from typing import Any
 from cedar_press import collection_profiles, press_catalog
 from cedar_press import collections as launch
 
-#: Which shelf each plan reaches. Mirrors ``features/grove/pressAccess.js``;
-#: the client decides what renders and this decides what is served, and the
-#: two are written to answer identically.
+#: Which shelf each plan reaches. Mirrors ``PLAN_REACH`` in
+#: ``features/grove/pressAccess.js``; the client decides what renders and this
+#: decides what is served, and the two are written to answer identically.
+#:
+#: They were not compared until ``tests/test_access.py``, and by then they had
+#: drifted: ``tree`` was here and missing there, so a Tree subscriber was
+#: served twelve collections by this module and shown none of them on the
+#: shelf. That test now compares the two maps key for key.
+#:
+#: ``grove`` reaches every shelf because Cedar Grove carries every dataset, and
+#: ``tree`` reaches every shelf because Tree includes Grove. Reaching a shelf
+#: is not the same as being sold the Cedar Press page -- neither tier is; that
+#: question is ``press_catalog.can_read_cedar_press``.
 SHELF_BY_TIER: dict[str, str] = {
     "press": "standard",
     "press_pro": "pro",

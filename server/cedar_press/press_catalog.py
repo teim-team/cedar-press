@@ -1,14 +1,32 @@
-"""Cedar Grove: Cedar Press, the published surface.
+"""Cedar Press: the tiers, the articles and the citation register.
 
 Ported from ``src/features/grove/pressAccess.js``, ``pressArticles.js`` and
 ``pressCitations.js``. Those three are one subject and are one module here,
 because none of them is large enough to earn its own file and a reader
 answering "what is Press?" should not have to open three.
 
-**Press is a Grove surface, not a sibling product.** It is how the launch
-collection gets published with a partner: the same shelves, the same figures,
-the reader price. That is why it lives in this package rather than beside it,
-and why the page and stylesheet sit under ``src/pages/grove``.
+**Cedar Press is a standalone product. Cedar Grove is a superset of it.**
+This module said the opposite three times, and one of those times was the file
+layout, so the correction is stated rather than quietly applied.
+
+The retired model was a pipeline: the Cedar data workspace fed Cedar Grove, and
+Cedar Grove published a slice of itself as Cedar Press. Press was therefore *a
+surface of* Grove -- "the same shelves, the same figures, the reader price" --
+and that is why this module sits in a package named for Grove and why the page
+and stylesheet sit under ``src/pages/grove``.
+
+The owner retired it on 2026-09-02: Cedar Press is a standalone product, and
+the only relationship left is one of content. Cedar Grove includes all the
+datasets Cedar Press sells, and adds a data library and other public data work
+that this repository neither builds nor describes. So Grove is a superset of
+Press by *content*, and nothing more: Press has no runtime dependency on Grove.
+Both products read the same upstream -- the Cedar data workspace, through
+``data/cedar/collections.manifest.json`` -- rather than one reading the other.
+
+The ``grove/`` directory names on the JavaScript side outlived the model that
+justified them. They are vestigial names, not a dependency; the rename and its
+measured cost are set out in ``docs/ARCHITECTURE.md`` under "Where the
+``grove/`` paths came from".
 
 **The article and citation data is transcribed, not retyped.**
 ``_press_data.json`` is written by ``scripts/dump-press.mjs`` from the
@@ -38,6 +56,18 @@ The three tiers below are a commercial decision, not a derived fact. ``press``
 exists only through the Tribal Business News subscription; ``grove`` is the
 standalone licence; ``tree`` is the full platform, which includes Grove. If the
 partnership changes what a reader tier buys, this set changes with it.
+
+That ruling answers two different questions and they must not be run together.
+Whether a plan is sold the Cedar Press *page* is ``can_read_cedar_press``, and
+only the two Press tiers are: a Grove or Tree licensee reaches the collections
+through Grove, not through this storefront. Which *collections* a plan opens is
+``repository.SHELF_BY_TIER``, and there Grove reaches every shelf because Grove
+carries every dataset, and Tree reaches every shelf because Tree includes
+Grove. The JavaScript went one way and the Python the other for exactly one
+tier -- ``tree`` was in ``SHELF_BY_TIER`` and missing from ``PLAN_REACH``, so a
+Tree subscriber was served twelve collections by the API and shown none of them
+in the browser -- because nothing compared the two maps.
+``server/tests/test_access.py`` compares them now, key for key.
 
 PROTOTYPE LIMITATIONS
 The three articles are demonstration placeholders, one per launch dataset,
@@ -126,7 +156,10 @@ REPORT_CITATION_HREF: str = _DATA["reportCitationHref"]
 
 #: The plans that include the Press page. A frozenset rather than a chain of
 #: comparisons so adding a tier is one edit in one place, and so the JavaScript
-#: and this can be compared as sets by the parity test.
+#: and this can be compared as sets by the parity test. That parity test did
+#: not exist when this comment first claimed it; ``server/tests/test_access.py``
+#: is it, and it compares this set against ``canReadCedarPress`` in
+#: ``src/features/grove/pressAccess.js`` tier by tier.
 PRESS_TIERS = frozenset({"press", "press_pro"})
 
 

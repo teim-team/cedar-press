@@ -5,6 +5,22 @@
  * The Cedar Press and Cedar Grove ladder: what each tier costs, what it
  * promises, and which collection sits where.
  *
+ * "Ladder" is the page's shape, not the products' relationship. Cedar Press is
+ * a standalone product and Cedar Grove is a separate one that happens to
+ * include all the datasets Press sells, plus a data library and other public
+ * data work — `GROVE_PUBLIC_DATA` below is that part of it. So the third band
+ * is a different product a reader may move to, not a higher rung of this one,
+ * which is why `upgradeFor` marks it `sameProduct: false`.
+ *
+ * The Press/Grove content split is stated in one vocabulary, the Cedar data
+ * workspace's: shelves `standard` and `pro` are what a Cedar Press customer
+ * sees (`CUSTOMER_SHELVES` in `code/cedar_publication.py`), and shelf `grove`
+ * is a Cedar collection Grove carries and Press does not. That is exactly one
+ * collection today, Gaming Intelligence, so the catalog holds thirteen and the
+ * storefront twelve. `server/tests/test_access.py` compares this file's shelf
+ * assignment against the workspace's, so the site cannot move a collection
+ * across the boundary on its own authority.
+ *
  * The organizing idea is that value is not spread evenly. Each rung carries
  * one or two things that make a particular reader say "obviously I need that
  * one", so the question at every boundary is concrete rather than a count of
