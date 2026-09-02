@@ -517,7 +517,7 @@ guard surfaces the upstream defect rather than concealing it.
 |---|---|---|
 | 1 | the blocker still described a whole-dataset count conflict after the count was withdrawn | **Right — and it is the fourth instance on this branch** |
 | 2 | topping up after a race publishes a mixed-version sample; restart instead | **Right, including the part I could not see** |
-| 3 | `2Â€? CONDUIT` is corrupt and should not ship | **Right that it is corrupt; the suggested remedy reaches 9.6% of it** |
+| 3 | `2Â€? CONDUIT` is corrupt and should not ship | **Right that it is corrupt; the suggested remedy reaches under a tenth of it** |
 
 ### Finding 1 — a stale number inside the very fix that made it stale
 
@@ -557,7 +557,7 @@ not, so the two chose different rows. `completeness()` now delegates to
 `_score()` — one ranking function, both paths. That is the check earning its
 keep on the exact thing it was written for.
 
-### Finding 3 — right about the corruption; the remedy only reaches 9.6%
+### Finding 3 — right about the corruption; the remedy reaches under a tenth
 
 Real in the bytes this time: `b"1. 2\xc3\x82\xe2\x82\xac? CONDUIT"`. Worth
 contrasting with the round-2 report of the same shape, which was a cp1252
@@ -569,9 +569,15 @@ rows (1.63%), `subaward_number` 6, `sub_parent_name` 2, `sub_name` 2.
 
 Codex asked to *"correct the source decoding/normalization and regenerate"*.
 The repeated UTF-8-read-as-cp1252 chain is reversible and is now reversed —
-`Ã‚Â½` → `½`, `Ã‚Â°C` → `°C`, `SELFÃ‚Â·` → `SELF·`. But **116 of 1,212
-affected cells recover and 1,096 (90.4%) do not**, because they are not a pure
-re-encoding chain: characters have been *substituted*. The dominant residue is
+`Ã‚Â½` → `½`, `Ã‚Â°C` → `°C`, `SELFÃ‚Â·` → `SELF·`. **Most of it does not
+recover**, because it is not a pure re-encoding chain: characters have been
+*substituted*. **The counts are not restated here** — they are measured on
+every run and published in `samples/README.md`, which is the one place they
+live. *(This paragraph said "116 of 1,212 ... and 1,096 (90.4%)" until the
+audit below found it: Codex round 5 corrected those totals to 116 of 1,214 and
+1,098, the generated file was fixed, and this hand-written copy was left
+standing — the tenth instance of the defect this section is about, committed
+in the commit that fixed the previous four.)* The dominant residue is
 `Ã¢Â‚¬Â„¢` standing for a single `'`, where the `â` of a well-formed triple
 mojibake has become `Â`. And Codex's own example is the clearest case: `2Â€?`
 carries a literal `?` where a character was destroyed upstream. **You cannot
@@ -584,6 +590,36 @@ namely that a long mojibake description looked like a well-filled cell. 98.4%
 of subaward rows are unaffected and a ten-row showcase should not spend one of
 them on corruption. **No row is dropped from the dataset and no money column
 is touched.** The counts ship in `samples/README.md`.
+
+## The tenth instance, found by auditing for it instead of waiting
+
+Codex has found a stale copy of a corrected number on **every one of the three
+passes** this document has had. Rather than wait for a fourth, the shipped
+files were swept for the pattern: **every figure asserted in more than one
+place.**
+
+    README.md + samples/README.md + collection_descriptors.json
+    figures appearing more than once:  50
+    of which spanning two or more files: 41
+
+Most are a true number restated, which is fine. One was not. `README.md` still
+read **"116 of 1,212 affected cells recover and 1,096 (90.4%) do not"** —
+the exact totals Codex's round-5 finding 4 corrected to 116 of 1,214 and
+1,098. The generated file was fixed; **this hand-written copy was left
+standing, in the same commit that fixed the previous four instances.**
+
+**The repair is not to write the right number here.** It is to stop asserting
+it in two places: the paragraph now says the counts are measured on every run
+and published in `samples/README.md`, which is the one place they live. Same
+rule as the top-up paragraph — *describe once, link elsewhere*.
+
+**The sweep found its own bug first, which is the part worth keeping.** The
+first version keyed occurrences by `Path.name`, and both files are called
+`README.md`, so it silently merged them and reported four duplicate figures
+instead of fifty. A check that collapses its own inputs reports a clean result
+for the reason that makes it useless — the same failure this project has
+catalogued fifteen times, produced here by the check written to catch a
+different instance of it.
 
 ## Two findings this side brought in round 4
 
