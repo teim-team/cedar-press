@@ -7479,3 +7479,107 @@ re-processes each table from its CURRENT state instead of restoring it, so the
 10:57 work was preserved rather than reverted. **Restoring your own backup is a
 write to every other agent's table; re-processing in place is not.**
 
+
+---
+
+## 2026-09-02 — GATE 62 IS RED. Workstream `ACQUIRE-1119-1121` attributing every line, per standing rule 15.
+
+*Standing rule 15 says: do not record a red gate as "pre-existing, not mine"
+and continue; if it is genuinely another agent's, **name it and its owner
+here** before moving on. This is that entry. Every attribution below is a
+measurement, not a judgement, and the command that reproduces it is given.*
+
+**What this workstream did:** acquired the eight ACQUIRE sources from
+`docs/SOURCE_EXPLORATION_2026-09-02.md`. 12 new tables, 323,134 rows, from
+`biamaps.geoplatform.gov`, `opendata.usac.org` and
+`npiregistry.cms.hhs.gov`. Scripts `1119`, `1120`, `1121`, `1124` and the new
+shared client `code/cedar_arcgis.py`. Full account:
+`docs/BIAMAPS_ACQUISITION_LOG_2026-09-02.md`. Model decision: **ADR-028**.
+Nothing committed.
+
+### MINE, and closed before this entry was written
+
+| ratchet | state | evidence |
+|---|---|---|
+| `tables_undocumented_in_codebook` | **all 12 of my tables are registered** | `py -3 code/1124_register_acquire_codebooks.py verify` — 49 checks, 0 failed. Every column of all 12 has a non-empty description and a `pct_filled` re-measured against the live file to 0.1pp. |
+| `contract_grain_unstated_shippable` | **all 12 declare and VALIDATE a grain** | `py -3 code/512_build_dataset_contracts.py` — all 12 appear under exactly one collection with a primary key that 512 confirmed unique and present in the header. Dict `GRAIN_ACQUIRE`; no other workstream's dict was touched. |
+| `contract_orphan_shippable` | **none of the 8 orphans is mine** | 500's patterns extended with `usac_`, `bia_` and `nppes_`; the mineral table is deliberately named `resource_*` so `natural-resources` claims it and `^bia_` does not. Verified: each of the 12 matches exactly one collection regex. |
+| `lint_bug_class_instances` and every `lint_classN` | **293 names no file of mine** | `py -3 code/293_lint_bug_classes.py | grep -E "1119|1120|1121|1124|cedar_arcgis"` returns nothing. |
+
+### MINE IN PART, and it is the ship chain, which no agent runs
+
+`tables_missing_from_25_TABLES` (179 → 230), `tables_missing_from_27_SPEC`
+(194 → 237), `tables_missing_notes_contract` (14 → 41) and
+`ship_tables_at_zero` (13 → 40).
+
+**12 of each increase are my tables.** Measured: none of the twelve appears as
+a literal in `code/25_build_publication_layer.py` or
+`code/27_build_dataset_manifests.py`.
+
+**They are not left there out of neglect.** 62's own text on these four says
+*"This is not the shipping gate — see `tables_undocumented_in_codebook` for
+that"*, and its scan line this run reads **`25 TABLES derives from the
+codebook: YES`** — so the twelve are reachable through the registry `1124`
+just wrote. Adding them to the curated override lists and running
+`87 → 25 → 27` is the ship chain, and `docs/ARCHITECTURE_DECISIONS.md` says
+in three consecutive ownership tables that **no agent runs it**.
+**INTEGRATOR ACTION**, with the codebook work already done.
+
+### NOT MINE — named, with the owner
+
+**`tables_undocumented_in_codebook` 3 → 26.** All 26 enumerated by
+`CB.registered_tables()`; **not one is a table this workstream created.**
+Reproduce: `py -3 -c "import importlib.util;..."` — or read the list in the
+62 output. Grouped by the workstream that appears to own them:
+
+| tables | apparent owner |
+|---|---|
+| `cedar_corroboration_census/_conservation/_disagreements/_observations`, `cedar_fact_corroboration` (5) | the corroboration workstream — `code/1118_corroboration_layer.py` |
+| `cedar_constellation_edges`, `cedar_constellation_refusals` (2) | `851`/`852` constellation edges |
+| `geo_aiannh_county_observed`, `geo_aiannh_dim`, `geo_award_county_crosswalk` (1,050,968 rows), `geo_county_dim`, `geo_county_two_sums`, `geo_place_county_crosswalk`, `geo_point_aiannh_assignment` (7) | the geo crosswalk workstream — `870_build_geo_crosswalks.py`, `873_build_aiannh_crosswalk.py` |
+| `cedar_harvest_coverage_evidence`, `cedar_harvest_coverage_matrix` (2) | `1112_harvest_coverage_matrix.py` |
+| `native_business_contract_links`, `native_business_contracting_by_nation`, `native_business_identifier_crosswalk` (3) | the Native-business crosswalk — `1000`/`1001` |
+| `gaming_web_harvest_coverage`, `gaming_web_harvest_observations`, `gaming_property_locations` (3) | the gaming web harvest — `980` |
+| `entity_dated_public_facts`, `cedar_entity_freshness` (2) | the stale-tail workstream — `1081`, `830` |
+| `consultation_agency_coverage`, `wa_machine_transfers` (2) | consultation / WA gaming |
+
+**`contract_violations = 12` and `contract_orphan_shippable = 8`.** All named
+in `docs/schema/dataset_contracts.json`; **none is mine.** They are the
+`tribe_id` columns dropped by `843_retire_cicd_scheme.py` and still named in
+three declarations, a `federal_funding_tribe_year_panel` primary key that is
+not unique (5,480 duplicates of 5,496), a `cedar_uid` named on a deals
+additions table that has no such column, and **five `.bak_*` files registered
+in the codebook as if they were tables** — `native_owned_businesses.bak_…`
+×2, `prime_contracts.bak_…` ×2. A backup registered as a shippable table is a
+registration bug, not a data one.
+
+**`lint_class1` 0→1, `class2c` 60→69, `class3` 0→2, `class4` 9→14,
+`class5` 6→7, `class7` 42→44** (total 146→163). 293 names the file for each
+and **none of the 17 new instances is in a file this workstream wrote.** They
+sit in `1060`, `1085`, `1086`, `1114`, `1115`, `846`, `852`, `873`, `992`,
+`1030`, `1031`, `1077`, `518`, `870`, `980`.
+
+**`rulings_unapplied` 1,215 → 2,894** and **`tier_A_ruled` 1,676 → 1,669.**
+This workstream applied no ruling, wrote no assertion, ran neither `510` nor
+`124`, and did not touch `cedar_identifier_ledger*`. Owner: the
+ruling-propagation workstream (`1116`, ADR-026).
+
+**`SHIPPING LOST: advocacy_passthrough_2026-08-07.csv`**, and
+`hearing_bill_links.csv` 465→464 and `native_bills_subject_sweep.csv`
+2,414→2,409. Nothing in this pass reads or writes any of the three.
+
+### The one thing worth carrying forward from this
+
+Nine of the twelve red ratchets are the **same event**: several workstreams
+landed new tables on the same day, and the gate reports each new table as
+several separate regressions across `codebook`, `25`, `27`, `notes` and
+`ship_tables_at_zero`. **A day of acquisition therefore reads as a day of
+regression**, and the honest reading of this run is "the warehouse grew, the
+shelf did not" — which is exactly what 62 itself prints under READ THESE:
+*"ship_ratio_pct fell 99.692% → 85.136% and shipped rows did NOT fall
+(8,461,252 → 8,612,513)."*
+
+That is a true and useful thing for the gate to say. It is also why the
+codebook registry is the metric to act on and the other four are downstream
+of it: registering a block is an agent's job, and the ship chain is the
+integrator's.

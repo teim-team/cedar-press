@@ -13,6 +13,20 @@
 NO NETWORK. The only thing it writes is the stub file `claim` creates, and the
 only thing it deletes is a stub `release` proves is untouched.
 
+RUN `ondisk` BEFORE YOU PROBE A NETWORK, NOT AFTER
+--------------------------------------------------
+A source-exploration pass on 2026-09-02 made ~200 network probes and ZERO
+`ondisk` checks, and rated the BIE Schools Directory ACQUIRE. It was already
+here: `data/raw/external/bie_uio/bie_schools_featureserver.json`, 187 features,
+fetched 2026-08-06 and re-fetched 2026-09-01. The acquisition agent that
+inherited the rating checked first and downloaded nothing.
+
+This is the state-2/state-3 confusion that has sent four sessions to re-fetch
+what was local, and it is the reason `ondisk` exists. 27 of 39 items a prior
+audit called "missing" were `ON_DISK_NOT_PROMOTED`. **A candidate is not
+ACQUIRE until `ondisk` has been run against its name AND its column
+vocabulary.**
+
 ------------------------------------------------------------------------------
 WHY `claim` EXISTS, AND WHY `ls code/<n>_*` WAS NEVER GOING TO BE ENOUGH
 ------------------------------------------------------------------------------

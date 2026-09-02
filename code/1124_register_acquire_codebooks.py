@@ -112,6 +112,176 @@ DEFAULTS = {
     "LONGITUDE": "WGS84 longitude.",
 }
 
+
+# Personal-data columns. Every one is `published = 0` / `access_tier =
+# internal` via HELD above; they still need a DEFINITION, because a column with
+# no entry is a column a reader guesses at - and here the guess would be about
+# whether it may be published.
+PERSONAL = {
+    "salutation": "The individual's salutation as published in the directory.",
+    "firstname": "The individual's given name.",
+    "middlename": "The individual's middle name.",
+    "lastname": "The individual's surname.",
+    "suffix": "Generational or professional suffix.",
+    "aka": "An also-known-as name the publisher records for the individual.",
+    "physicaladdress": "Street address recorded against the individual's entry.",
+    "mailingaddress": "Mailing address recorded against the entry.",
+    "phone": "Direct telephone number recorded against the individual.",
+    "fax": "Direct fax number recorded against the individual.",
+    "email": "Direct email address recorded against the individual.",
+    "first_name": "Given name of the tribal leader who signed the plan.",
+    "last_name": "Surname of the tribal leader who signed the plan.",
+    "CONTACTNAME": "Named contact for the office. SERVED AND 0% FILLED.",
+    "POCPREFIX": "Point of contact's prefix. SERVED AND 0% FILLED.",
+    "POCFIRSTNAME": "Point of contact's given name.",
+    "POCMIDDLENAME": "Point of contact's middle name. Carries the literal "
+                     "string `<Null>` on some rows, not a blank.",
+    "POCLASTNAME": "Point of contact's surname.",
+    "POCSUFFIX": "Point of contact's suffix. SERVED AND 0% FILLED.",
+    "POCEMAILADDRESS": "Point of contact's email. Carries the literal string "
+                       "`<Null>` on some rows, not a blank.",
+}
+_PERSONAL_NOTE = (" HELD, NOT PUBLISHED: a natural person's data apart from "
+                  "their public role (PUBLICATION_POLICY). The ROLE column on "
+                  "the same row publishes; this does not.")
+
+# The USAC source schemas. A federal extract is designed for the agency that
+# files it, not for a reader (ADR-011 C11), so every column gets a sentence.
+USAC_ERATE = {
+    "application_number": "FCC Form 471 application number. Part of the "
+                          "four-part primary key.",
+    "funding_request_number": "The FRN within the application. Part of the key.",
+    "form_471_line_item_number": "The line item within the FRN. Part of the key.",
+    "is_certified_in_window": "Whether the application was certified inside "
+                              "the filing window.",
+    "pending_reason": "Why a Pending FRN is pending. Blank where not pending.",
+    "is_school_library_independent": "USAC's flag for a school or library that "
+                                     "files independently of a district.",
+    "ros_subtype": "USAC sub-classification of the recipient of service.",
+    "ros_status": "Recipient status as filed.",
+    "ros_physical_address": "Recipient street address, line 1.",
+    "ros_physical_address_2": "Recipient street address, line 2.",
+    "ros_physical_city": "Recipient city.",
+    "ros_physical_state": "Recipient state. 36 states across the file.",
+    "ros_physical_zipcode": "Recipient ZIP.",
+    "ros_physical_zipcode_ext": "Recipient ZIP+4 extension.",
+    "ros_physical_county": "Recipient county as filed.",
+    "ros_latitude": "Recipient latitude as filed.",
+    "ros_longitude": "Recipient longitude as filed.",
+    "ros_urban_rural_status": "USAC's urban/rural classification of the "
+                              "recipient, which affects eligibility.",
+    "ros_square_footage": "Recipient building square footage as filed.",
+    "ros_number_of_full_time_students": "Full-time student count as filed by "
+                                        "the applicant. Self-reported to set "
+                                        "the discount rate, not a census "
+                                        "figure.",
+    "ros_total_number_of_part_time_students": "Part-time student count as filed.",
+    "ros_peak_number_of_part_time_students": "Peak part-time count as filed.",
+    "organization_name": "The BILLED ENTITY - usually the district or "
+                         "consortium that filed, NOT the recipient of service "
+                         "on the same row. Two different entities per row.",
+    "organization_entity_type_name": "The billed entity's type.",
+    "org_address1": "Billed entity street address.",
+    "org_city": "Billed entity city.",
+    "org_state": "Billed entity state.",
+    "org_zipcode": "Billed entity ZIP.",
+    "chosen_category_of_service": "E-Rate service category - Category 1 "
+                                  "connectivity vs Category 2 internal "
+                                  "connections. The two are funded under "
+                                  "different rules and different budgets.",
+    "form_471_service_type_name": "Service type as filed.",
+    "form_471_function_name": "The function the product performs.",
+    "form_471_product_name": "The product as filed.",
+    "form_471_frn_fiber_type_name": "Fibre type where the FRN is fibre.",
+    "form_471_frn_fiber_sub_type_name": "Fibre sub-type.",
+    "form_471_download_speed_unit_name": "THE UNIT for `download_speed`. "
+                                         "Without it the speed number is "
+                                         "meaningless.",
+    "form_471_upload_speed_unit_name": "THE UNIT for `upload_speed`.",
+    "months_of_service": "Months of service the recurring cost covers. A "
+                         "monthly recurring figure multiplied without this is "
+                         "wrong.",
+    "monthly_quantity": "Quantity of the recurring item per month.",
+    "monthly_recurring_unit_eligible_costs": "Eligible recurring cost per unit "
+                                             "per month.",
+    "monthly_recur_ineligible_cost": "INELIGIBLE portion of the monthly "
+                                     "recurring cost. Not federal money and "
+                                     "not part of any committed total.",
+    "total_monthly_cost": "Total monthly cost including ineligible amounts.",
+    "total_monthly_eligible_recurring_costs": "Eligible monthly recurring total.",
+    "total_eligible_recurring_costs": "Eligible recurring cost across all "
+                                      "months of service. A COMPONENT of the "
+                                      "pre-discount total, not an additional "
+                                      "sum.",
+    "one_time_quantity": "Quantity of the one-time item.",
+    "one_time_eligible_costs": "Eligible one-time cost per unit.",
+    "one_time_ineligible_cost": "INELIGIBLE portion of the one-time cost.",
+    "total_one_time_cost": "Total one-time cost including ineligible amounts.",
+    "total_eligible_one_time_costs": "Eligible one-time total. The other "
+                                     "COMPONENT of the pre-discount total - do "
+                                     "not add it to the post-discount columns.",
+    "original_allocation": "USAC's original allocation for the line item.",
+    "qty_allocation": "Quantity allocation for the line item.",
+}
+USAC_RHC = {
+    "program": "Which Rural Health Care programme - Telecom, or Healthcare "
+               "Connect Fund.",
+    "fund_type": "Fund type within the programme.",
+    "status": "FRN status as filed.",
+    "filing_hcp": "USAC health care provider number of the FILING provider. "
+                  "One of the two name columns the token sweep matched on.",
+    "filing_hcp_entity_type": "The filing provider's CLINICAL category. Twelve "
+                              "values and NONE OF THEM IS TRIBAL.",
+    "filing_hcp_street": "Filing provider street address.",
+    "filing_hcp_city": "Filing provider city.",
+    "filing_hcp_state": "Filing provider state.",
+    "filing_hcp_county": "Filing provider county.",
+    "filing_hcp_zip_code": "Filing provider ZIP.",
+    "participating_hcp": "HCP number of the PARTICIPATING provider - the site "
+                         "that receives the service, frequently not the filer. "
+                         "A consortium files for many sites.",
+    "participating_hcp_entity_type": "Participating provider's clinical "
+                                     "category.",
+    "participating_hcp_street": "Participating provider street address.",
+    "participating_hcp_city": "Participating provider city.",
+    "participating_hcp_state": "Participating provider state.",
+    "participating_hcp_county": "Participating provider county.",
+    "participating_hcp_zip_code": "Participating provider ZIP.",
+    "category_of_expense": "What the expense is for.",
+    "service_type": "Service type as filed.",
+    "eligible_service": "The eligible service as filed.",
+    "eligible_site": "The eligible site as filed.",
+    "bandwidth": "Bandwidth as filed.",
+    "download_speed": "Download speed as filed.",
+    "upload_speed": "Upload speed as filed.",
+    "number_of_bidders": "Bidders on the competitive bid. A COMPETITION "
+                         "measure, and one of very few in this file.",
+    "frequency_of_expense": "Whether the expense recurs.",
+    "multi_year_funding": "Whether the commitment spans several years. A "
+                          "multi-year row's amount is NOT a single-year figure.",
+    "quantity_of_item_invoiced": "Quantity invoiced.",
+    "monthly_urban_rate": "The urban benchmark rate. The Telecom programme pays "
+                          "the difference between the rural and urban rates.",
+    "monthly_rural_rate": "The rural rate charged.",
+    "funding_start_date": "Funding period start.",
+    "funding_end_date": "Funding period end.",
+    "funding_commitment_date": "When USAC committed. A DATED PUBLIC FACT.",
+    "funding_submission_date": "When the request was submitted.",
+    "invoice_deadline_date": "Invoice deadline.",
+    "filing_window": "The filing window the request landed in.",
+    "prorata_factor": "Proration applied when the fund is oversubscribed.",
+    "service_provider_id": "USAC service provider id. NOT a UEI, CAGE or EIN.",
+    "service_provider_name": "Service provider name as filed.",
+    "service_level_agreement": "SLA as filed.",
+    "packet_loss": "Contracted packet loss.",
+    "reliability": "Contracted reliability.",
+    "jitter": "Contracted jitter.",
+    "latency": "Contracted latency.",
+    "confidence_tier": "Blank on this table: it is a FULL-UNIVERSE DENOMINATOR "
+                       "and makes no attribution for anyone to adjudicate.",
+    "attribution_method": "Blank on this table. See `confidence_tier`.",
+}
+
 BLOCKS: dict[str, tuple[str, dict[str, str]]] = {
     # ---- 12g / natural-resources -----------------------------------------
     "12g_bia_mineral_acreage": ("resource_bia_mineral_acreage_tracts.csv", {
@@ -552,7 +722,11 @@ def build_rows() -> dict[str, list[dict]]:
         n, fill, cols = _measure(table)
         rows = []
         for c in cols:
-            desc = descs.get(c) or DEFAULTS.get(c) or ""
+            desc = (descs.get(c) or DEFAULTS.get(c)
+                    or PERSONAL.get(c) or USAC_ERATE.get(c)
+                    or USAC_RHC.get(c) or "")
+            if c.lower() in HELD and desc:
+                desc = desc.rstrip() + _PERSONAL_NOTE
             rows.append({
                 "dataset": ds, "variable": c,
                 "type": "text", "units": "",

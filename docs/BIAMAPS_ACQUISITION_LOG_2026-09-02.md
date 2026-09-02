@@ -22,11 +22,11 @@ Model decision: **ADR-028** in `docs/ARCHITECTURE_DECISIONS.md`.*
 | 1 | `biamaps.geoplatform.gov` — BIA ArcGIS, 6 layers | **250,284** | 6 | `natural-resources` (1) + `_entity_layer` (5) | `1119 verify` 37 checks, 0 failed |
 | 2 | BIE Schools Directory | **0 — already on disk** | 0 | — | see **CORRECTION 1** |
 | 3 | `opendata.usac.org` — E-Rate + RHC | **72,850** | 4 | `funding` | `1120 verify` 19 checks, 0 failed |
-| 4 | CMS NPPES | *(see the NPPES section)* | 2 | `_entity_layer` → `1118` | `1121 verify` |
+| 4 | CMS NPPES | **35,202** | 2 | `_entity_layer` → `1118` | `1121 verify` 12 checks, 0 failed |
 | 5 | CDFI Fund AMIS | **0** | 0 | — | closed as a measured dead end, **CORRECTION 4** |
 
-**Total new rows in `data/clean`: 323,134** across 12 tables, from 2 hosts,
-in 160 HTTP requests. Every page hashed; every table's row count reconciled
+**Total new rows in `data/clean`: 358,336** across 12 tables, from 3 hosts,
+in 840 HTTP requests. Every page hashed; every table's row count reconciled
 against a **fresh** count taken *after* the last page.
 
 ---
@@ -234,15 +234,62 @@ entities, name-seeded.
 > the file contains none.** A corroboration source that can only ever agree is
 > measuring itself.
 
-Outputs (live figures in `docs/nppes_acquisition_1121.json`):
+**1,555 spine entities queried — all of them, no sampling. 406 returned at
+least one hit; 1,149 returned none. 16,981 distinct NPIs retrieved in 680
+requests.**
 
-* `nppes_org_registrations.csv` — one row per NPI-2 organisation retrieved,
-  deduplicated on `npi`. Carries legal name, other names, mailing and
-  location address, taxonomy, enumeration and last-updated dates.
-* `nppes_spine_name_candidates.csv` — one row per (cedar_uid, npi) candidate
-  **plus one row per spine entity that matched nothing**, `match_method =
-  NOT_MATCHED`. Negatives are rows: *attempted and found nothing* must be
-  distinguishable from *never attempted*.
+| table | rows |
+|---|---:|
+| `nppes_org_registrations.csv` | **16,981** — one row per NPI-2 organisation, deduplicated on `npi` |
+| `nppes_spine_name_candidates.csv` | **18,221** — 17,072 candidate pairs + **1,149 `NOT_MATCHED` negatives** |
+
+Negatives are rows: *attempted and found nothing* must be distinguishable
+from *never attempted*, and `verify` asserts all 1,555 entities appear.
+**1,149 of 1,555 matching nothing is correct** — an Alaska Native village
+corporation, an ANCSA group corporation and a BIE school have no reason to
+hold an NPI.
+
+### ⚠ READ THE JACCARD BAND BEFORE THE AGREEMENT RATE
+
+| band | pairs | spine entities | AGREE | DISAGREE | agreement |
+|---|---:|---:|---:|---:|---:|
+| all pairs | 17,072 | 406 | 3,994 | 13,057 | **23.4%** |
+| jaccard ≥ 0.5 | 3,284 | 282 | 1,455 | 1,808 | 44.6% |
+| **jaccard ≥ 0.8** | **644** | **76** | **603** | **20** | **96.8%** |
+
+**The 23.4% headline is not a quality figure and must never be quoted as
+one.** `CHEROKEE NATION*` returns 33 organisations, most of them somebody
+else's; the raw pool is deliberately wide so the arbiter can see what was
+rejected. **At a real name match the source agrees with Cedar 96.8% of the
+time**, across 76 spine entities — mostly tribal health boards, clinics and
+Urban Indian Organizations, which is exactly the population an HHS
+enumeration can see.
+
+### ⚠ AND THE 20 EXACT-NAME DISAGREEMENTS ARE THE MOST VALUABLE ROWS IN THE FILE
+
+They are almost all **place-name collisions on single-word Alaska village
+names**, and the state comparison is the only thing that catches them:
+
+| spine entity | spine state | NPPES legal name | NPPES state |
+|---|---|---|---|
+| Circle | AK | `CIRCLE INC` | NC |
+| Pilot Point | AK | `PILOT POINT LLC` | TX |
+| Platinum | AK | `PLATINUM INC.` | CA |
+| Solomon | AK | `SOLOMON LLC` | MN |
+| Hoh | WA | `HOH, LLC` | OR |
+| Pine Ridge School | SD | `PINE RIDGE SCHOOL, INC.` | VT |
+
+**A pure name matcher would have booked every one of these as a match.**
+This is the design decision paying for itself twice: because the query never
+sent Cedar's `state`, the state column is free to refute. **For `1118`:
+`state_agrees = DISAGREE` at high `name_token_jaccard` is a REFUTATION
+signal, not a missing corroboration** — it is currently the only column in
+Cedar that can tell a name match from a name collision without a human.
+
+`city_agrees` is `NO_SPINE_VALUE` on **16,883 of 17,072** rows, because the
+spine carries a city on only 229 of 1,555 entities. That is Cedar having
+nothing to compare, **never** the two agreeing. Where Cedar did have one:
+**118 AGREE, 71 DISAGREE.**
 
 **Every row is tier C and nothing is attributed.** This script hands evidence
 to `code/1118_corroboration_layer.py`, which is the consumer that arbitrates —

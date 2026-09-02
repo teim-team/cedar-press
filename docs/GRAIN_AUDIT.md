@@ -20,20 +20,20 @@ Three honest outcomes, and they are three different jobs:
 
 | | count |
 |---|---:|
-| shippable tables | 230 |
-| **DECLARED_VALIDATED** | **223** |
+| shippable tables | 247 |
+| **DECLARED_VALIDATED** | **239** |
 | OPEN_WITH_EVIDENCE | 0 |
 | DEFECTIVE | 0 |
-| still unexplained | 7 |
-| ratchet `contract_grain_unstated_shippable` | **7** (was 207) |
+| still unexplained | 8 |
+| ratchet `contract_grain_unstated_shippable` | **8** (was 207) |
 
-A declaration that the data contradicts is release-blocking through `contract_violations`; there are **12**.
+A declaration that the data contradicts is release-blocking through `contract_violations`; there are **13**.
 
 ## Per collection
 
 ### Federal Funding to Indian Country  (`funding`)
 
-8 of 10 shippable tables declared.
+12 of 14 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
@@ -47,14 +47,20 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 | `inflation_deflator.csv` | 27 | DECLARED_VALIDATED | `year` | — |
 | `native_passthrough.csv` | 1,663 | DECLARED_VALIDATED | `source_dataset` + `subaward_source_record_id` | `from_tribe_id`→371, `to_tribe_id`→376 |
 | `native_passthrough_pairs.csv` | 307 | DECLARED_VALIDATED | `from_tribe_id` + `to_tribe_id` | — |
+| `usac_erate_tribal_commitments.csv` | — | DECLARED_VALIDATED | `application_number` + `funding_request_number` + `form_471_line_item_number` + `ros_entity_number` | `funding_year`→14,782, `ros_entity_number`→948 |
+| `usac_erate_tribal_entities.csv` | — | DECLARED_VALIDATED | `ros_entity_number` | `ros_physical_state`→1,324 |
+| `usac_rhc_hcp_directory.csv` | — | DECLARED_VALIDATED | `filing_hcp` + `filing_hcp_name` + `filing_hcp_city` + `filing_hcp_state` + `filing_hcp_county` + `filing_hcp_zip_code` + `filing_hcp_entity_type` | `filing_hcp`→2 |
+| `usac_rhc_native_candidate_lines.csv` | — | DECLARED_VALIDATED | `funding_request_number` + `frn_line_number` | `filing_hcp`→2,502 |
 
 ### Federal Register  (`federal-register`)
 
-21 of 21 shippable tables declared.
+23 of 23 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
+| `consultation_events.csv` | 11,402 | DECLARED_VALIDATED | `consultation_event_id` + `participant_name_as_published` | `cedar_uid`→170, `tribe_id`→170 |
 | `correspondence_foia_source_coverage.csv` | 124 | DECLARED_VALIDATED | `url` | — |
+| `dear_tribal_leader_letters.csv` | — | DECLARED_VALIDATED | `letter_id` | `document_url`→1, `letter_id`→1, `source_index_url`→70 |
 | `federal_actions.csv` | 156,772 | DECLARED_VALIDATED | `document_number` | — |
 | `federal_actions_entity_bridge.csv` | 5,786 | DECLARED_VALIDATED | `document_number` + `tribe_id` | `cedar_uid`→165, `tribe_id`→165 |
 | `federal_actions_raw.csv` | 156,772 | DECLARED_VALIDATED | `document_number` | — |
@@ -230,7 +236,7 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 
 ### Natural Resource Revenues  (`natural-resources`)
 
-8 of 8 shippable tables declared.
+9 of 9 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
@@ -238,6 +244,7 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 | `ancsa_filings_index.csv` | 19,269 | DECLARED_VALIDATED | `portal_document_id` | — |
 | `nd_severance_allocation.csv` | 7 | DECLARED_VALIDATED | `allocation_id` | `cedar_uid`→7, `tribe_id`→7 |
 | `resource_assets.csv` | 35 | DECLARED_VALIDATED | `resource_asset_id` | `cedar_uid`→0 |
+| `resource_bia_mineral_acreage_tracts.csv` | — | DECLARED_VALIDATED | `objectid` | `land_area_code`→13,387, `tract_id`→2 |
 | `resource_parties.csv` | 1,436 | DECLARED_VALIDATED | `party_link_id` + `entity_name` | `cedar_uid`→489, `entity_id`→489 |
 | `resource_revenue.csv` | 10,482 | DECLARED_VALIDATED | `resource_revenue_event_id` | `cedar_uid`→489 |
 | `tribal_bond_issuances.csv` | 29 | DECLARED_VALIDATED | `issuer` + `instrument_type` + `source_url` | — |
@@ -262,7 +269,7 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 
 ### Gaming Intelligence  (`gaming`)
 
-54 of 54 shippable tables declared.
+56 of 56 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
@@ -318,12 +325,14 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 | `nigc_region_assignments.csv` | 2,438 | DECLARED_VALIDATED | `facility_id` + `effective_start_year` | `administrative_region_id`→190, `cedar_uid`→81, `facility_id`→4, `tribe_id`→81 |
 | `nigc_regional_ggr.csv` | 198 | DECLARED_VALIDATED | `administrative_region_id` + `fiscal_year` | `administrative_region_id`→10 |
 | `nigc_revenue_bands.csv` | 20 | DECLARED_VALIDATED | `band_id` | — |
+| `sec_gaming_financial_disclosures.csv` | — | DECLARED_VALIDATED | `disclosure_id` | `accession`→6, `cedar_uid`→41, `facility_id`→29, `tribe_id`→41 |
+| `sec_gaming_management_contract_terms.csv` | — | DECLARED_VALIDATED | `term_id` | `accession`→2, `facility_id`→2 |
 | `state_gaming_observations.csv` | 494 | DECLARED_VALIDATED | `observation_id` | `cedar_uid`→78, `facility_id`→14, `tribe_id`→78 |
 | `wa_machine_allocations.csv` | 75 | DECLARED_VALIDATED | `allocation_id` | `cedar_uid`→3, `tribe_id`→3 |
 
 ### Entity spine, identifiers and reference  (`_entity_layer`)
 
-35 of 35 shippable tables declared.
+42 of 42 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
@@ -332,6 +341,11 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 | `admin_region_systems.csv` | 6 | DECLARED_VALIDATED | `region_system_code` | — |
 | `admin_regional_observations.csv` | 27 | DECLARED_VALIDATED | `observation_id` | `administrative_region_id`→4 |
 | `admin_regions.csv` | 155 | DECLARED_VALIDATED | `administrative_region_id` | `administrative_region_id`→1 |
+| `bia_aian_national_lar.csv` | — | DECLARED_VALIDATED | `LARID` | `REGION`→107 |
+| `bia_ofa_petitioners.csv` | — | DECLARED_VALIDATED | `petition_number` | `state`→5 |
+| `bia_offices.csv` | — | DECLARED_VALIDATED | `OBJECTID` | `OFFICEID`→2 |
+| `bia_pl102_477_plans.csv` | — | DECLARED_VALIDATED | `objectid` | `partner_name`→1, `region`→19 |
+| `bia_tribal_leaders_directory.csv` | — | DECLARED_VALIDATED | `objectid` | `biaagency`→177, `tribefullname`→1 |
 | `bie_uio_dollars_by_entity.csv` | 114 | DECLARED_VALIDATED | `tribe_id` | `cedar_uid`→1, `tribe_id`→1 |
 | `cedar_correction_register.csv` | 173 | DECLARED_VALIDATED | `correction_id` | `entity_id`→94 |
 | `cedar_entity_identity_crosswalk.csv` | 10,107 | DECLARED_VALIDATED | `crosswalk_id` | `cedar_uid`→160 |
@@ -357,6 +371,8 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 | `nho_ownership_changes.csv` | 9 | DECLARED_VALIDATED | `event_id` | `cedar_uid`→9 |
 | `nho_register.csv` | 218 | DECLARED_VALIDATED | `proposed_id` | `ein`→1 |
 | `nho_verified_entities.csv` | 36 | DECLARED_VALIDATED | `uei` | `cage_code`→1, `cedar_uid`→0, `uei`→1 |
+| `nppes_org_registrations.csv` | — | DECLARED_VALIDATED | `npi` | `location_state`→1,591 |
+| `nppes_spine_name_candidates.csv` | — | DECLARED_VALIDATED | `cedar_uid` + `npi` + `match_method` | `cedar_uid`→1,000, `npi`→2 |
 | `tcu_cdfi_added.csv` | 130 | DECLARED_VALIDATED | `tribe_id` | `cedar_uid`→1, `tribe_id`→1 |
 | `tcu_cdfi_ownership_evidence.csv` | 130 | DECLARED_VALIDATED | `institution` + `layer` + `pattern` + `evidence_url` + `quote_char_offset` | — |
 | `tcu_roster.csv` | 37 | DECLARED_VALIDATED | `name` | — |
