@@ -627,11 +627,38 @@ and two artefacts in it.** Stated rather than adopted.
 round 5 caught before it shipped further.** The `gaming` descriptor said
 *"one row per facility, with the single non-facility row named"* — there are
 seven — and advertised *"694 of 787 facilities carry a bounded revenue
-estimate ... which of the 93 it cannot bound"*. Re-measured against the 780
-real facilities: **694 of 780 (89.0%, not 88.2%) carry a bounded estimate, and
-86 cannot be bounded, not 93.** All seven placeholders sat in the unbounded
-group and inflated it. **The correction moves the coverage figure up** — the
-placeholder rows had been quietly making the dataset look worse than it is.
+estimate ... which of the 93 it cannot bound"*. Re-measured: **694 rows carry
+a bounded estimate and 86 facility rows do not, not 93** — all seven
+placeholders sat in the unbounded group and inflated it.
+
+**But swapping 787 for 780 is not the fix, and the first version of this
+correction did exactly that.** Two independent revisions are in flight on the
+same denominator and they compound:
+
+    787   rows in gaming_facilities.csv
+    -7    placeholder rows that say there is no casino
+    ---
+    780   facility rows
+    -53   the extra rows in 52 same-tribe duplicate groups, PROPOSED
+    ---
+    727   distinct properties, pending adjudication
+
+**They are independent** — measured, not assumed: **zero** of the seven
+placeholders appear in any of the 52 same-tribe groups (six appear in the
+cross-tribe groups, which is how the placeholders were found). So the two
+corrections do not overlap and both apply.
+
+**Which makes 734 a partial correction, not the answer.** 734 is 787 − 53: it
+removes the duplicates and leaves the placeholders in. The number it is
+offered as a replacement for, 787, is wrong in two ways, and 734 fixes one of
+them.
+
+Nothing is merged. `duplicate_of_facility_id` is blank on all but ten rows, a
+casino and its hotel can legitimately be two facilities, and four groups span
+different nations. **So the descriptor now publishes no percentage for revenue
+bounding at all** — a rate against a denominator under active revision in two
+directions is a number that will be wrong twice. It states the ladder instead:
+787 rows, 780 facility rows, ~727 distinct properties pending 56 groups.
 
 ### Claims re-measured against live data, and one that is already done
 
