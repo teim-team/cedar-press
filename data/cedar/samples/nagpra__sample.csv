@@ -1,0 +1,11 @@
+document_number,publication_date,title,agency_names,notice_kind,relevance_tier_from_tier_rule
+94-4238,1994-02-25,"Notice of Inventory Completion of Native American Human Remains from the Hawaiian Islands in the Collections of the Peabody Museum of Natural History, Yale University",Interior Department,inventory_completion,title_subject
+01-8681,2001-04-09,"Notice of Intent to Repatriate a Cultural Item in the Possession of the Peabody Museum of Archaeology and Ethnology, Harvard University, Cambridge, MA",Interior Department; National Park Service,intent_to_repatriate,body_only_unverifiable
+E7-11985,2007-06-21,"Notice of Inventory Completion: Anthropological Studies Center, Archaeological Collections Facility, Sonoma State University, Rohnert Park, CA",Interior Department; National Park Service,inventory_completion,body_only_unverifiable
+2011-18359,2011-07-21,"Notice of Inventory Completion: University of Colorado Museum, Boulder, CO",Interior Department; National Park Service,inventory_completion,abstract_subject
+2015-19264,2015-08-05,"Notice of Intent To Repatriate a Cultural Item: The University of Iowa Museum of Natural History, Iowa City, IA",Interior Department; National Park Service,intent_to_repatriate,abstract_subject
+2019-05995,2019-03-28,"Notice of Inventory Completion: University of Alabama Museums, Tuscaloosa, AL",Interior Department; National Park Service,inventory_completion,abstract_subject
+2022-24223,2022-11-07,"Notice of Inventory Completion: U.S. Department of the Interior, Bureau of Indian Affairs, Washington, DC",Interior Department; National Park Service,inventory_completion,title_subject
+2024-04090,2024-02-28,"Notice of Inventory Completion: University of California, Riverside, Riverside, CA",Interior Department; National Park Service,inventory_completion,abstract_subject
+2025-05227,2025-03-27,"Notice of Inventory Completion: U.S. Army Corps of Engineers, Mobile District, Mobile, AL",Interior Department; National Park Service,inventory_completion,abstract_subject
+2025-23204,2025-12-18,"Notice of Intended Repatriation: Maidu Museum & Historic Site, Roseville, CA",Interior Department; National Park Service,intent_to_repatriate,abstract_subject
