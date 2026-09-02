@@ -862,9 +862,15 @@ refills it. A rebuild still requires the enricher to run after it.
 **CSV: `845` reports 0 unsafe writers, down from 51.** Not from 33 - that was
 the count v1 could see, and v1 was wrong in both directions.
 
+Measured with the CORRECTED detector against the `.bak` copies of every file
+this pass touched, so the two columns are the same instrument:
+
 | | before | after |
 |---|---:|---:|
-| unsafe CSV writers (`845 csv`) | 51 | **0** |
+| unsafe CSV writer triples (`845 csv`) | **65** | **0** |
+| scripts carrying at least one | 48 | 0 |
+| columns a rebuild would have deleted | **355** | 0 |
+| writers whose header derives from the in-memory row, not the file | 93 | 93 (reported, unfixed) |
 | of them, pairings that did not exist | 9 of v1's 29 | 0 |
 | tables proved to survive a rebuild (`1074 carry`) | - | **63** |
 | positional writers with header != row length (`1074 positional`) | 0 of 40 | 0 of 40 |

@@ -1274,27 +1274,37 @@ def run():
         # NOT FOR TRIBES. A federally recognized tribe is a government, not
         # an exempt organisation; it does not file a 990, so every hit is
         # some other body that shares its place name -- six of them did.
+        # `o` IS RE-INITIALISED EVERY ENTITY, AND THAT IS NOT A STYLE POINT.
+        # When the tribe branch was added, `if o:` ended up inside it, so no
+        # NHO ever emitted a 990 row and four tribes emitted the LAST NHO's:
+        # Fort Bidwell, Koi, Potter Valley and Samish were each given the
+        # Royal Hawaiian Academy of Traditional Arts' EIN. A loop variable
+        # that survives an iteration will eventually be read on an iteration
+        # that never set it, and the value it carries looks exactly like a
+        # real answer.
+        o = None
         if not got_url and cls in ("Native Hawaiian Organization",
                                    "Individually Native-owned business"):
             o, note = propublica(name, (row.get("state") or "").strip())
             tried.append("R4 ProPublica Nonprofit Explorer -> " + note)
         elif not got_url and cls == "Federally recognized tribe":
+            # NOT FOR TRIBES. A federally recognized tribe is a government,
+            # not an exempt organisation; it does not file a 990, so every hit
+            # is some other body sharing its place name -- six of them were.
             tried.append("R4 IRS/990 NOT RUN: a federally recognized tribe is "
                          "a government and does not file a 990; every match "
                          "this route produced for a tribe was a different "
                          "local organisation sharing the place name")
-            if o:
-                ein = o.get("strein") or str(o.get("ein"))
-                emit(uid, name, cls, "form_990",
-                        "https://projects.propublica.org/nonprofits/"
-                        "organizations/" + str(o.get("ein")), 200,
-                        "TRIED: " + " | ".join(tried) + " || IRS EIN " + ein
-                        + " -- " + (o.get("name") or "") + ", "
-                        + (o.get("city") or "") + " "
-                        + (o.get("state") or "")
-                        + ". NOT a website: this is a filing record, and it "
-                        "is here because it is a first row for an entity "
-                        "that had none.")
+        if o:
+            ein = o.get("strein") or str(o.get("ein"))
+            emit(uid, name, cls, "form_990",
+                 "https://projects.propublica.org/nonprofits/organizations/"
+                 + str(o.get("ein")), 200,
+                 "TRIED: " + " | ".join(tried) + " || IRS EIN " + ein
+                 + " -- " + (o.get("name") or "") + ", "
+                 + (o.get("city") or "") + " " + (o.get("state") or "")
+                 + ". NOT a website: this is a filing record, and it is here "
+                   "because it is a first row for an entity that had none.")
 
         # ---- R8 hand search ---------------------------------------------
         if not got_url and uid in R8_HAND_SEARCH:
@@ -1566,6 +1576,9 @@ def check(path=WEBMAP):
     (8) no host that any row records as REFUSED may appear with a 2xx on any
         other row. A redirect from an unrestricted domain onto a robots-
         disallowed one produced exactly that for the Samish Indian Nation.
+    (9) a `form_990` row's filer name must carry every distinctive token of
+        the entity's name. Caught four tribes sharing one Hawaiian arts
+        academy's EIN, from a loop variable that outlived its iteration.
     """
     bad = []
     if not os.path.exists(path):
@@ -1640,6 +1653,22 @@ def check(path=WEBMAP):
                            "or a placeholder"
                            % (i, uid, ut, mb.group(1)))
 
+            # (9) A 990 ROW MUST NAME A FILER THAT CARRIES THE ENTITY'S NAME.
+            # Four tribes were written the same EIN, belonging to a Hawaiian
+            # arts academy, because a loop variable outlived its iteration.
+            # Nothing in the row itself looked wrong; only the relationship
+            # between the entity name and the filer name did.
+            if ut == "form_990":
+                mfl = re.search(r"IRS EIN [\d-]+ -- ([^,]+),", ev)
+                if mfl:
+                    want = set(tokens(_deaccent(r.get("canonical_name", ""))))
+                    got = set(tokens(_deaccent(mfl.group(1))))
+                    if want and not want.issubset(got):
+                        bad.append("line %d: %s is given the 990 of %r, which "
+                                   "does not carry its name (%s)"
+                                   % (i, uid, mfl.group(1)[:44],
+                                      ",".join(sorted(want - got))[:40]))
+
             k = (uid, ut, url)
             if url and k in seen:
                 bad.append("line %d: duplicate row %s" % (i, str(k)))
@@ -1666,6 +1695,11 @@ def selftest():
          [None, "x", "y", "government", "https://colvilletribes.com/", "200",
           TODAY, "TRIED: a | b | c"]),
         ("2xx from a host that refused us", None),
+        ("990 filer with the wrong name",
+         [None, "Potter Valley", "y", "form_990",
+          "https://projects.propublica.org/nonprofits/organizations/1", "200",
+          TODAY, "TRIED: a | b | c || IRS EIN 99-0339530 -- Royal Hawaiian "
+                 "Academy Of Traditional Arts, Honolulu HI."]),
         ("live site, 169-byte body",
          [None, "x", "y", "government", "https://a.example", "200", TODAY,
           "TRIED: a | b | c || verified 2xx, 169 bytes of body"]),

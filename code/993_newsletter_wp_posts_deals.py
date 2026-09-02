@@ -277,6 +277,58 @@ def run(limit=None):
     return 0
 
 
+def quarantine_untrusted():
+    """Move rows written before a host was caught ignoring ?search= .
+
+    The flag can only fire on the THIRD identical payload, so rows harvested
+    from the first two searches are already on disk when the host is unmasked.
+    They are not deleted - a fetch that happened, happened - they are moved to
+    `deal_candidates_wp_posts_quarantined.csv` with the reason, and the
+    candidates file is left holding only rows Cedar is willing to stand behind.
+    """
+    if not OUT.exists() or not HOSTLOG.exists():
+        print("nothing to quarantine")
+        return 0
+    logs = [json.loads(l) for l in HOSTLOG.read_text(encoding="utf-8").splitlines()
+            if l.strip()]
+    bad = {x["host"] for x in logs if x["identical_body_repeat"]}
+    rows = list(csv.DictReader(OUT.open(encoding="utf-8-sig")))
+    if not rows:
+        return 0
+    fn = list(rows[0].keys())
+    keep, moved = [], []
+    for r in rows:
+        if urlparse(r["Source_1"]).netloc.lower() in bad:
+            r = dict(r)
+            r["review_status"] = "QUARANTINED_HOST_IGNORED_SEARCH"
+            r["Notes"] = ("the host serving this article answered three different "
+                          "?search= terms with one identical payload, so what it "
+                          "returned is a default page of posts and not a response "
+                          "to the query; the row is retained as evidence and is "
+                          "not a candidate. " + r["Notes"])[:900]
+            moved.append(r)
+        else:
+            keep.append(r)
+    q = OUTD / "deal_candidates_wp_posts_quarantined.csv"
+    if moved:
+        exist = list(csv.DictReader(q.open(encoding="utf-8-sig"))) if q.exists() else []
+        seen = {x["candidate_id"] for x in exist}
+        with q.open("w", encoding="utf-8", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=fn, extrasaction="ignore")
+            w.writeheader()
+            for r in exist + [m for m in moved if m["candidate_id"] not in seen]:
+                w.writerow(r)
+                f.flush()
+    with OUT.open("w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=fn, extrasaction="ignore")
+        w.writeheader()
+        for r in keep:
+            w.writerow(r)
+            f.flush()
+    print("quarantined %d rows from %d hosts" % (len(moved), len(bad)))
+    return 0
+
+
 def summarize():
     rows = list(csv.DictReader(OUT.open(encoding="utf-8-sig"))) if OUT.exists() else []
     logs = [json.loads(l) for l in HOSTLOG.read_text(encoding="utf-8").splitlines()
@@ -374,6 +426,8 @@ def main(argv):
               % (st["hosts_probed"], st["candidates"]))
         return 0
     lim = None
+    if "--quarantine" in argv:
+        return quarantine_untrusted()
     if "--limit" in argv:
         lim = int(argv[argv.index("--limit") + 1])
     return run(lim)

@@ -66,6 +66,7 @@ from __future__ import annotations
 import csv
 import glob
 import hashlib
+import html
 import json
 import os
 import re
@@ -90,6 +91,10 @@ MINED = STAGE / "ancsa_consolidation_edges.jsonl"
 MINE_LOG = STAGE / "ancsa_mine_log.csv"
 EDGES_STAGED = STAGE / "ownership_edges_staged.jsonl"
 HELD = STAGE / "held_rows.csv"
+SWEEP_1070 = (CEDAR / "data" / "staging" / "native_business_sweep_1070"
+              / "held_for_nest_ownership.csv")
+SWEEP_REFUSED = STAGE / "sweep_1070_refused.csv"
+CONFLICTS = STAGE / "evidence_conflicts.csv"
 
 OUT_ENT = CLEAN / "nest_enterprises.csv"
 OUT_EDGE = CLEAN / "nest_enterprise_relations.csv"
@@ -621,7 +626,7 @@ def _edge(**kw):
         evidence_class="", source_id="", source_url="", source_document="",
         source_fy="", source_edition_date="", quote="", depth_hint=1,
         identity_scope="tribally_owned_entity", retrieved_date=BUILT,
-        source_terms_status="SILENT",
+        source_terms_status="SILENT", source_review_status="reviewed",
     )
     base.update(kw)
     return base
@@ -629,7 +634,7 @@ def _edge(**kw):
 
 def load_sources() -> tuple:
     """-> (edges, provenance Counter). Zero network; every input is on disk."""
-    edges, prov = [], Counter()
+    edges, prov, sweep_refused = [], Counter(), []
 
     # 1. AS 45.55.139 audited annual reports, mined by `mine` above.
     for r in read_jsonl(MINED):
@@ -727,6 +732,123 @@ def load_sources() -> tuple:
             identity_scope="parent_asserted_subsidiary"))
         prov["anc_tribal_subsidiary_lookup"] += 1
 
+    # 6a. THE 1070 ANC/NHO SWEEP's held OWNERSHIP rows.
+    #     `code/1070_anc_nho_business_sweep.py` swept 822 entities - all 191
+    #     ANCs, all 210 NHOs, 365 tribal governments script 701 never reached
+    #     and all 56 intertribal organisations - and staged 1,106 rows in the
+    #     58-column native_owned_businesses schema. The integrator merged the
+    #     523 `assertion_class = RELATIONSHIP` rows into that file, because
+    #     affiliation is its scope, and HELD the 583 OWNERSHIP rows for NEST,
+    #     because `relation_class` puts ownership here.
+    #
+    #     THIS IS A MERGE, NOT AN APPEND. 170 of the 583 are already NEST rows
+    #     by normalised name - 265 come from the same 358 audited AS 45.55.139
+    #     village-corporation reports this script mines itself. They are fed
+    #     through the SAME clustering as every other source, so a restatement
+    #     collapses onto the existing enterprise and raises its observation
+    #     count instead of creating a second row for one company.
+    #
+    #     THREE REFUSALS, each on the STAGED FILE'S OWN DECLARED CAVEAT rather
+    #     than on a judgement about the firm:
+    for r in read_csv(SWEEP_1070):
+        vb = r.get("verification_basis") or ""
+        vf = r.get("validation_flags") or ""
+        scope = (r.get("identity_scope") or "").strip()
+        dtype = (r.get("directory_type") or "").strip()
+        name = tidy(html.unescape(r.get("business_name_raw") or ""))
+
+        #     (a) THE ROW IS AN UNREVIEWED PROSE SCRAPE. The sweep flagged it
+        #     itself - `HEADING_SCRAPE_ON_A_DIRECTORY_INDEX`, and a
+        #     verification_basis ending "not a table; review before
+        #     resolving". It is right to distrust them: ASRC's block alone
+        #     yields `Blank`, `No Results Found`, `Employee Resources`,
+        #     `Software, Apps & Analytics` - and SEVEN NATURAL PERSONS' NAMES
+        #     scraped off a leadership page. A natural person's name may never
+        #     enter this dataset, so this refusal is a hard rule, not a
+        #     quality preference.
+        if "HTML heading/anchor scrape" in vb or "HEADING_SCRAPE" in vf:
+            prov["_1070_refused_unreviewed_heading_scrape"] += 1
+            sweep_refused.append({**r, "nest_refusal":
+                "unreviewed HTML heading/anchor scrape, flagged as such by the "
+                "sweep itself. ASRC's block alone carries `Blank`, `No Results "
+                "Found`, `Employee Resources` and seven natural persons' names "
+                "off a leadership page; a natural person may never enter this "
+                "dataset"})
+            continue
+
+        #     (b) A SHAREHOLDER-OWNED BUSINESS IS NOT A CORPORATION-OWNED ONE.
+        #     61 rows are Bering Straits' `shareholder-owned-businesses`
+        #     directory, `identity_scope = shareholder_descendant_or_spouse`.
+        #     That scope is an ownership claim about a PERSON, not about the
+        #     corporation, and admitting it would assert that Bering Straits
+        #     owns its shareholders' printing shops. Identical in shape to
+        #     Calista's shareholder directory, which this build already
+        #     refuses at source selection.
+        if dtype == "shareholder_vendor" or scope == "shareholder_descendant_or_spouse":
+            prov["_1070_refused_shareholder_owned_not_corporation_owned"] += 1
+            sweep_refused.append({**r, "nest_refusal":
+                "identity_scope is shareholder_descendant_or_spouse - owned by "
+                "a shareholder, NOT by the corporation. Belongs in "
+                "native_owned_businesses as affiliation; admitting it here "
+                "would assert the corporation owns its shareholders' firms"})
+            continue
+
+        #     (c) AN ASSOCIATION DOES NOT OWN ITS MEMBERS' COMPANIES. USET
+        #     lists Choctaw Fresh Produce, which IS tribally owned - by
+        #     MISSISSIPPI CHOCTAW, not by USET, the keyed authority. The hub
+        #     is the owning nation or the row does not exist. Neither scope
+        #     appears in the 583 held today; the guard is written now because
+        #     the sweep has declared both values and the next batch carries
+        #     them.
+        if scope in ("association_member",
+                     "tribally_owned_entity_of_a_member_nation"):
+            prov["_1070_refused_listing_association_is_not_the_owner"] += 1
+            sweep_refused.append({**r, "nest_refusal":
+                "identity_scope=" + repr(scope) + ": the keyed authority is "
+                "the LISTING association, not the owner. The hub must be the "
+                "owning nation, and this row does not name it"})
+            continue
+
+        if not name:
+            prov["_1070_refused_empty_name"] += 1
+            continue
+
+        #     The relation rides in `validation_flags` as `RELATION=...`,
+        #     because in the live business file `certification_tier` holds a
+        #     TERO preference priority and the sweep correctly refused to
+        #     overload it. Translate it into this dataset's vocabulary rather
+        #     than carrying the flag string: `equity_or_jv` is an AFFILIATION,
+        #     not ownership, and `canon_rel` classes it that way.
+        m = re.search(r"RELATION=([a-z_]+)", vf)
+        rel = {"wholly_owned": "wholly_owned",
+               "majority_owned": "majority_owned",
+               "equity_or_jv": "joint_venture",
+               "subsidiary_unspecified": "subsidiary"}.get(
+                   m.group(1) if m else "", "subsidiary")
+        audited = ((r.get("source_terms_status") or "")
+                   == "PUBLIC_STATE_FILING_AS_45_55_139")
+        edges.append(_edge(
+            parent_name=r.get("certifying_authority_name", ""),
+            parent_cedar_uid=r.get("certifying_authority_entity_id", ""),
+            hub_cedar_uid=r.get("certifying_authority_entity_id", ""),
+            hub_hint_name=r.get("certifying_authority_name", ""),
+            owner_class_hint="ANC", child_name_raw=name, relationship=rel,
+            child_city=r.get("city", ""), child_state=r.get("state_province", ""),
+            evidence_class=("audited_annual_report_as_45_55_139" if audited
+                            else "parent_self_published_company_list"),
+            source_id="SWEEP1070", source_url=r.get("source_url", ""),
+            source_edition_date=r.get("source_edition", ""),
+            quote=((r.get("identity_claim_text") or "") + " :: " + vb)[:900],
+            identity_scope=scope or "parent_asserted_subsidiary",
+            source_terms_status=r.get("source_terms_status", "SILENT"),
+            # Every staged row is `AUTO_RULED_NOT_HUMAN_REVIEWED`. Carried per
+            # row rather than dropped, so a reader can filter to the evidence
+            # a person has actually looked at.
+            source_review_status=("auto_ruled_not_human_reviewed"
+                                  if "AUTO_RULED_NOT_HUMAN_REVIEWED" in vf
+                                  else "reviewed")))
+        prov["sweep_1070_held_ownership"] += 1
+
     # 6. The business registry, SUBSIDIARY DIRECTORIES ONLY.
     #    The predicate is structural, not a hand-picked file list: a source
     #    qualifies when it declares `directory_type = subsidiary_directory`
@@ -782,13 +904,13 @@ def load_sources() -> tuple:
                 identity_scope=r.get("identity_scope", "tribally_owned_entity"),
                 source_terms_status=terms))
             prov["business_registry_" + sid] += 1
-    return edges, prov
+    return edges, prov, sweep_refused
 
 
 def stage_assemble(argv) -> int:
     STAGE.mkdir(parents=True, exist_ok=True)
     hubs = Hubs()
-    edges, prov = load_sources()
+    edges, prov, sweep_refused = load_sources()
     print(f"=== 1072 assemble - {len(edges)} raw ownership assertions ===")
     for k, v in sorted(prov.items()):
         print(f"    {k:<42} {v}")
@@ -935,6 +1057,14 @@ def stage_assemble(argv) -> int:
             fh.write(json.dumps(e, ensure_ascii=False) + "\n")
     hcols = sorted({k for h in held for k in h}) if held else ["hold_reason"]
     write_csv(HELD, hcols, held)
+    # The 1070 refusals are a REGISTER, not a deletion. Every refused row keeps
+    # its 58 staged columns plus `nest_refusal`, so the integrator can see
+    # exactly which of the 583 held rows NEST declined and on what stated
+    # ground - and reverse any of them without re-harvesting.
+    if sweep_refused:
+        scols = ["nest_refusal"] + [k for k in sweep_refused[0] if k != "nest_refusal"]
+        write_csv(SWEEP_REFUSED, scols, sweep_refused)
+        print(f"  1070 refused {len(sweep_refused)} -> {SWEEP_REFUSED}")
 
     print(f"\n  kept   {len(kept)}")
     print(f"  held   {len(held)}   {dict(Counter(h['hold_class'] for h in held))}")
@@ -1378,6 +1508,18 @@ def stage_build(argv) -> int:
             "evidence_class": best["evidence_class"],
             "n_source_observations": len(es),
             "n_distinct_sources": len({x["source_id"] for x in es}),
+            # An auto-ruled row is evidence a machine accepted and no person
+            # checked. Carried so a buyer can filter to what a human has
+            # actually looked at, rather than discovering the distinction in
+            # a build log. Y here means at least one observation behind this
+            # enterprise was human-reviewed.
+            "evidence_human_reviewed": (
+                "Y" if any(x.get("source_review_status", "reviewed")
+                           != "auto_ruled_not_human_reviewed" for x in es)
+                else "N"),
+            "n_auto_ruled_observations": sum(
+                1 for x in es if x.get("source_review_status", "")
+                == "auto_ruled_not_human_reviewed"),
             "first_observed_year": obs_years[0] if obs_years else "",
             "last_observed_year": obs_years[-1] if obs_years else "",
             "enterprise_existing_cedar_uid": next(
@@ -1429,6 +1571,7 @@ def stage_build(argv) -> int:
                 "depth_as_recorded": x.get("depth_hint", 1),
                 "ownership_percent_stated": x.get("ownership_percent", ""),
                 "evidence_class": x["evidence_class"],
+                "source_review_status": x.get("source_review_status", "reviewed"),
                 "source_id": x["source_id"],
                 "source_url": x["source_url"],
                 "source_document": x.get("source_document", ""),
@@ -1440,6 +1583,84 @@ def stage_build(argv) -> int:
                 "retrieved_date": x.get("retrieved_date", BUILT),
                 "built_by_script": SCRIPT,
             })
+
+    # ---- 5. WHERE THE WEB LIST DISAGREES WITH THE AUDITED FILING ---------
+    # Two independent evidence families now describe the same firms: the
+    # audited AS 45.55.139 consolidation note, and the parent's own website.
+    # `docs/ASSERTION_LAYER.md` measured that every fact in Cedar rests on
+    # exactly ONE source, so a second family is worth more than the rows it
+    # adds - it is the first thing here that can DISAGREE. Recorded rather
+    # than silently resolved; the audited filing wins the published value
+    # because EVID_RANK ranks it higher, and the conflict register says so.
+    # `relationship` CARRIES TWO ORTHOGONAL AXES IN ONE COLUMN, and a
+    # conflict check has to compare within an axis or it manufactures
+    # disagreements. Measured on the first two versions of this check:
+    #   v1 reported 37, of which 35 were `wholly_owned` vs `subsidiary` -
+    #      an unspecified word being refined by a specific one;
+    #   v2 reported 23, of which 21 were Calista's `wholly_owned` vs
+    #      `operating_company` - a SHARE and a ROLE, which cannot disagree
+    #      because a wholly-owned company is very often an operating one.
+    # Both numbers were produced, both were plausible, and both were about
+    # something other than their own name. Only same-axis differences count.
+    SHARE_AXIS = {"wholly_owned", "majority_owned"}
+    ROLE_AXIS = {"holding_company", "operating_company", "division"}
+    conflicts = []
+    for idx, (hub_uid, cname, es, _v) in enumerate(clusters):
+        fam = defaultdict(set)
+        for x in es:
+            fam["audited" if x["evidence_class"] ==
+                "audited_annual_report_as_45_55_139" else "web"].add(
+                    canon_rel(x.get("relationship") or "subsidiary")[0])
+        if len(fam) < 2:
+            continue
+        aud, web = fam["audited"], fam["web"]
+        if not (aud and web):
+            continue
+        # A LESS SPECIFIC WORD IS NOT A CONTRADICTION. The first version of
+        # this check reported 37 conflicts and 35 of them were the audited
+        # filing saying `wholly_owned` while the corporate site said
+        # `subsidiary`. `subsidiary` states the RELATION without stating the
+        # SHARE - it is the unspecified parent of `wholly_owned` and
+        # `majority_owned`, not a rival claim to it. Counting those as
+        # disagreements is a check that does not measure its own name, and it
+        # would have buried the two that are real under thirty-five that are
+        # not.
+        cls_a = {canon_rel(x)[1] for x in aud}
+        cls_w = {canon_rel(x)[1] for x in web}
+        disagree_on_class = bool(cls_a and cls_w and not (cls_a & cls_w))
+        share_a, share_w = aud & SHARE_AXIS, web & SHARE_AXIS
+        role_a, role_w = aud & ROLE_AXIS, web & ROLE_AXIS
+        disagree_on_share = bool(share_a and share_w and not (share_a & share_w))
+        disagree_on_role = bool(role_a and role_w and not (role_a & role_w))
+        if not (disagree_on_class or disagree_on_share or disagree_on_role):
+            continue
+        conflicts.append({
+            "conflict_kind": ("ownership_vs_affiliation" if disagree_on_class
+                              else "share_of_ownership_differs" if disagree_on_share
+                              else "role_in_the_chain_differs"),
+                "enterprise_id": ent_rows[idx]["enterprise_id"],
+                "enterprise_name": cname,
+                "owner_hub_name": hubs.by_uid.get(hub_uid, {}).get(
+                    "canonical_name", ""),
+                "audited_filing_says": "|".join(sorted(aud)),
+                "web_list_says": "|".join(sorted(web)),
+                "published_value": ent_rows[idx]["relationship"],
+                "resolution": "the audited AS 45.55.139 filing wins - it is a "
+                              "statutory filing signed off by an auditor, and "
+                              "a corporate site is marketing copy",
+                "built_by_script": SCRIPT})
+    if conflicts:
+        write_csv(CONFLICTS, list(conflicts[0].keys()), conflicts)
+    print(f"  evidence conflicts audited-vs-web (real disagreements only): "
+          f"{len(conflicts)}"
+          + (f" -> {CONFLICTS}" if conflicts else ""))
+    corroborated = sum(
+        1 for _h, _c, es, _v in clusters
+        if len({("audited" if x["evidence_class"] ==
+                 "audited_annual_report_as_45_55_139" else "web")
+                for x in es}) > 1)
+    print(f"  corroborated by BOTH an audited filing and a web list: "
+          f"{corroborated}")
 
     id_of_cluster = {i: r["enterprise_id"] for i, r in enumerate(ent_rows)}
     for i, r in enumerate(ent_rows):
