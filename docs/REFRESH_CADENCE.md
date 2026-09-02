@@ -53,7 +53,7 @@ at one end and a retired MMS series that stopped in 2000 at the other.
 
 # PART 0 — THE CADENCE TABLE, ONE ROW PER SOURCE
 
-*Generated 2026-09-02T01:51:54+00:00 by `code/630_refresh_cadence.py`. Every `cedar_holds_through` below was MEASURED from the file named beside it on this run. Re-run the script and the numbers update; do not hand-edit inside the markers.*
+*Generated 2026-09-02T02:35:39+00:00 by `code/630_refresh_cadence.py`. Every `cedar_holds_through` below was MEASURED from the file named beside it on this run. Re-run the script and the numbers update; do not hand-edit inside the markers.*
 
 **55 sources across 13 datasets.**
 
@@ -61,12 +61,12 @@ at one end and a retired MMS series that stopped in 2000 at the other.
 
 | state | sources | what it means |
 |---|---:|---|
-| ✅ CURRENT | 12 | Cedar holds everything the source offers |
+| ✅ CURRENT | 14 | Cedar holds everything the source offers |
 | ① the source has not published yet | 7 | nothing to do; the expected date is in the row |
-| ② **published and NOT PULLED** | 12 | an **acquisition** task |
+| ② **published and NOT PULLED** | 9 | an **acquisition** task |
 | ③ **pulled and NOT PROMOTED** | 1 | already on disk. **NOT an acquisition task.** |
 | ⛔ closed by design | 5 | the source ended, or is one-time |
-| ❓ source edge NOT ESTABLISHED | 18 | no key, no index, or no schedule exists to probe |
+| ❓ source edge NOT ESTABLISHED | 19 | no key, no index, or no schedule exists to probe |
 
 > **Read the ② / ③ split before planning any session.** They look identical in a staleness column and are completely different work. Three times this project has recorded a ③ as a ② and sent the next agent to re-download something already on disk: California RSTF, New Mexico gaming FY2023–2026Q2, and the staged NIGC set. All three were promotion jobs. All three are now resolved, and none of them was ever a fetch.
 
@@ -76,19 +76,16 @@ at one end and a retired MMS series that stopped in 2000 at the other.
 
 | # | dataset | source | Cedar holds | source has | gap | edge age | why |
 |---:|---|---|---|---|---:|---:|---|
-| 1 | `lobbying` | `fr_consultation` | 2026-05-20 | 2026-09-01 | 104d | 104d | the source offers 2026-09-01 and Cedar holds 2026-05-20. Check data/raw, data/staging and review/ before treating this as an acquisition task. |
-| 2 | `gaming` | `mi_mgcb` | 2026-06-30 | 2026-07-31 | 31d | 63d | the source offers 2026-07-31 and Cedar holds 2026-06-30. Check data/raw, data/staging and review/ before treating this as an acquisition task. |
-| 3 | `lobbying` | `lda` | 2026-08-04T15:47:06-04:00 | 2026-09-01 | 28d | 28d | the source offers 2026-09-01 and Cedar holds 2026-08-04T15:47:06-04:00. Check data/raw, data/staging and review/ before treating this as an acquisitio |
-| 4 | `lobbying` | `section_106` | 2026-08-11 | 2026-09-01 | 21d | 21d | the source offers 2026-09-01 and Cedar holds 2026-08-11. Check data/raw, data/staging and review/ before treating this as an acquisition task. |
-| 5 | `lobbying` | `fr_ex_parte` | 2026-08-24 | 2026-09-01 | 8d | 8d | the source offers 2026-09-01 and Cedar holds 2026-08-24. Check data/raw, data/staging and review/ before treating this as an acquisition task. |
-| 6 | `nagpra` | `nagpra_notices` | 2026-08-24 | 2026-09-01 | 8d | 8d | the source offers 2026-09-01 and Cedar holds 2026-08-24. Check data/raw, data/staging and review/ before treating this as an acquisition task. |
-| 7 | `federal-register` | `federal_register` | 2026-08-26 | 2026-09-01 | 6d | 6d | the source offers 2026-09-01 and Cedar holds 2026-08-26. Check data/raw, data/staging and review/ before treating this as an acquisition task. |
-| 8 | `deals` | `sec_edgar` | 2017-05-21 | — | 0d | 3390d | declared in the registry: NOT SWEPT — reachable, never swept past 2017 |
-| 9 | `legislation` | `congressional_correspondence` | 2026-01-27 | — | 0d | 217d | declared in the registry: NOT ESTABLISHED |
-| 10 | `lobbying` | `regulations_gov` | 2026-07-28 | — | 0d | 35d | declared in the registry: NOT ESTABLISHED as a date — the gap here is ENTITY coverage, not time: 51 of 1,712 query names banked (97% of the sweep un-r |
-| 11 | `lobbying` | `foia_logs` | 2026-08-12 | — | 0d | 20d | declared in the registry: NOT ESTABLISHED — the gap is AGENCY coverage: 3 of ~100 agencies publish here and are pulled; EPA, USDA, HHS, DOE, Corps and |
-| 12 | `lobbying` | `irs990_schedc` | 2026 | 2026 | 0d | 0d | declared in the registry: sibling: nonprofit_schedule_c_coverage.csv, built 2026-09-01 by code/99 from the IRS index itself |
-| 13 | `gaming` | `labor_form5500_osha` | — | 2025 | 0d | —d | declared in the registry: both corpora are held through CY2025 in data/raw; nothing newer is published |
+| 1 | `gaming` | `mi_mgcb` | 2026-06-30 | 2026-07-31 | 31d | 63d | the source offers 2026-07-31 and Cedar holds 2026-06-30. Check data/raw, data/staging and review/ before treating this as an acquisition task. |
+| 2 | `lobbying` | `lda` | 2026-08-04T15:47:06-04:00 | 2026-09-01 | 28d | 28d | the source offers 2026-09-01 and Cedar holds 2026-08-04T15:47:06-04:00. Check data/raw, data/staging and review/ before treating this as an acquisitio |
+| 3 | `lobbying` | `fr_consultation` | 2026-08-18 | 2026-09-01 | 14d | 14d | the source offers 2026-09-01 and Cedar holds 2026-08-18. Check data/raw, data/staging and review/ before treating this as an acquisition task. |
+| 4 | `lobbying` | `fr_ex_parte` | 2026-08-31 | 2026-09-01 | 1d | 1d | the source offers 2026-09-01 and Cedar holds 2026-08-31. Check data/raw, data/staging and review/ before treating this as an acquisition task. |
+| 5 | `deals` | `sec_edgar` | 2017-05-21 | — | 0d | 3390d | declared in the registry: NOT SWEPT — reachable, never swept past 2017 |
+| 6 | `legislation` | `congressional_correspondence` | 2026-01-27 | — | 0d | 217d | declared in the registry: NOT ESTABLISHED |
+| 7 | `lobbying` | `regulations_gov` | 2026-07-28 | — | 0d | 35d | declared in the registry: NOT ESTABLISHED as a date — the gap here is ENTITY coverage, not time: 51 of 1,712 query names banked (97% of the sweep un-r |
+| 8 | `lobbying` | `foia_logs` | 2026-08-12 | — | 0d | 20d | declared in the registry: NOT ESTABLISHED — the gap is AGENCY coverage: 3 of ~100 agencies publish here and are pulled; EPA, USDA, HHS, DOE, Corps and |
+| 9 | `lobbying` | `irs990_schedc` | 2026 | 2026 | 0d | 0d | declared in the registry: sibling: nonprofit_schedule_c_coverage.csv, built 2026-09-01 by code/99 from the IRS index itself |
+| 10 | `gaming` | `labor_form5500_osha` | — | 2025 | 0d | —d | declared in the registry: both corpora are held through CY2025 in data/raw; nothing newer is published |
 
 ## Where the source edge is NOT ESTABLISHED, and why
 
@@ -98,6 +95,7 @@ at one end and a retired MMS series that stopped in 2000 at the other.
 |---|---|---|---:|---|
 | `funding` | `bie_uio` | — | never | NOT ESTABLISHED, and neither agency states a schedule. BIE posts a school directory and IHS a UIO list; both are snapshots that change without notice. This is a change-detection source, not a calendar source. |
 | `subcontracting` | `fsrs_subawards` | 2026-08-03 | never | NOT ESTABLISHED — code/121_pull_subawards_api.py holds the host right now; one poller per host |
+| `nagpra` | `nagpra_notices` | 2026-08-31 | 0d | probe 2026-09-01: the FR corpus is same-day. Whether a NAGPRA notice published between 2026-08-24 and 2026-09-01 is a separate question the sweep answers, not the index |
 | `legislation` | `congress_gov_bills` | 2026-04-16 | 0d | NOT ESTABLISHED — **api.congress.gov requires a key and Cedar holds none** (checked 2026-09-01: CONGRESS_API_KEY, CONGRESS_GOV_API_KEY and DATA_GOV_API_KEY are all absent from the environment and .env.local). This is the |
 | `legislation` | `rollcall_votes` | 2025-05-06 | never | NOT PROBED. **And the naive reading is a trap:** this table holds only 423 NATIVE-RELEVANT roll calls since 1973 — roughly 8 a year. Its edge at 2025-05-06 is as likely to be the last Native-relevant vote as it is our st |
 | `deals` | `deals_press` | 2026-08-20 | never | NOT ESTABLISHABLE — there is no index to probe. A deal is current when someone looked. |
@@ -122,12 +120,12 @@ at one end and a retired MMS series that stopped in 2000 at the other.
 | `_entity_layer` | 3 | **annual** (`fr_recognition_notice`) | 2026-01-30 | ①1 · ⛔1 · ❓1 |
 | `contractors` | 4 | **continuous** (`sam_contract_awards`) | 2007 | ⛔1 · ✅2 · ❓1 |
 | `deals` | 4 | **continuous** (`deals_press`) | 2017-05-21 | ②1 · ✅1 · ❓2 |
-| `federal-register` | 2 | **daily** (`federal_register`) | 2026-08-12 | ②1 · ❓1 |
+| `federal-register` | 2 | **daily** (`federal_register`) | 2026-08-12 | ✅1 · ❓1 |
 | `funding` | 4 | **monthly** (`usaspending_assistance_archive`) | 2007-09-30 | ⛔2 · ✅1 · ❓1 |
 | `gaming` | 11 | **continuous** (`fac_sefa_gaming`) | 2021 | ①3 · ②1 · ③1 · ✅4 · ❓2 |
 | `legislation` | 3 | **continuous** (`congress_gov_bills`) | 2025-05-06 | ②1 · ❓2 |
-| `lobbying` | 10 | **continuous** (`regulations_gov`) | 2026 | ②7 · ❓3 |
-| `nagpra` | 1 | **daily** (`nagpra_notices`) | 2026-08-24 | ②1 |
+| `lobbying` | 10 | **continuous** (`regulations_gov`) | 2026 | ②6 · ✅1 · ❓3 |
+| `nagpra` | 1 | **daily** (`nagpra_notices`) | 2026-08-31 | ❓1 |
 | `native-owned-businesses` | 1 | **none** (`tribal_vendor_lists`) | 2026-09-01 | ❓1 |
 | `natural-resources` | 7 | **monthly** (`onrr_nrrd_monthly`) | 2000-12-31 | ①1 · ⛔1 · ✅4 · ❓1 |
 | `nonprofits` | 4 | **continuous** (`fac_single_audits`) | 2025-11-30 | ①2 · ❓2 |
@@ -345,16 +343,16 @@ at one end and a retired MMS series that stopped in 2000 at the other.
 
 | field | value |
 |---|---|
-| state | ② **NOT PULLED** |
+| state | ✅ CURRENT |
 | host | `www.federalregister.gov` |
 | publish_cadence | every federal business day; public inspection the day before |
 | publish_lag | 0 — same-day |
 | cadence basis | REFRESH_CADENCE 5.1 and probe 2026-09-01 |
-| **cedar_holds_through** | **2026-08-26** — measured from `data/clean/federal_actions.csv`, column `publication_date`, 156,772 rows in scope |
+| **cedar_holds_through** | **2026-09-01** — measured from `data/clean/federal_actions.csv`, column `publication_date`, 156,897 rows in scope |
 | **source_has_through** | **2026-09-01** — probe 2026-09-01: /api/v1/documents.json?order=newest -> publication_date 2026-09-01, HTTP 200 (established 2026-09-01) |
-| cedar_last_pulled | 2026-08-26 — max(fetched_date) in data/clean/federal_actions.csv |
-| **refresh_due** | **YES** — the source offers 2026-09-01 and Cedar holds 2026-08-26. Check data/raw, data/staging and review/ before treating this as an acquisition task. |
-| age | Cedar's edge is 6 days old; our knowledge of the SOURCE is 0 days old; measured gap behind the source 6 days |
+| cedar_last_pulled | 2026-09-01 — max(fetched_date) in data/clean/federal_actions.csv |
+| **refresh_due** | **no** — Cedar holds through 2026-09-01; the source offers 2026-09-01. Nothing is owed. |
+| age | Cedar's edge is 0 days old; our knowledge of the SOURCE is 0 days old; measured gap behind the source 0 days |
 | refresh_cost | minutes, ~1 API page/day of gap x 14 nets |
 | refresh_command | py -3 code/342_pull_federal_register_incremental.py — **never 10 (re-shards 1994..today) and never 11 (full rebuild; reverts 22's two in-place columns)** |
 | breaks_on_refresh | fr_content_classification.csv (78, which also rebuilds five LOBBYING tables), 130, 76, 98, 133, 136 — each a separate owner's build |
@@ -762,11 +760,11 @@ at one end and a retired MMS series that stopped in 2000 at the other.
 | publish_cadence | every federal business day |
 | publish_lag | 0-1 day |
 | cadence basis | rides the same request stream as dataset 9 |
-| **cedar_holds_through** | **2026-05-20** — measured from `data/clean/fr_consultation_notices.csv`, column `publication_date`, 484 rows in scope |
+| **cedar_holds_through** | **2026-08-18** — measured from `data/clean/fr_consultation_notices.csv`, column `publication_date`, 485 rows in scope |
 | **source_has_through** | **2026-09-01** — probe 2026-09-01: federalregister.gov newest publication_date = 2026-09-01, HTTP 200. **The FR corpus is same-day. Whether a tribal consultation notice actually published in the 104-day gap is a question only the sweep answers — but lobbying_sources.md, written today by the docs workstream, independently calls this leg '3 months stale; 29 agencies only'.** (established 2026-09-01) |
 | cedar_last_pulled | 2026-08-07 — max(fetched_date) in data/clean/consultation_events.csv |
-| **refresh_due** | **YES** — the source offers 2026-09-01 and Cedar holds 2026-05-20. Check data/raw, data/staging and review/ before treating this as an acquisition task. |
-| age | Cedar's edge is 104 days old; our knowledge of the SOURCE is 0 days old; measured gap behind the source 104 days |
+| **refresh_due** | **YES** — the source offers 2026-09-01 and Cedar holds 2026-08-18. Check data/raw, data/staging and review/ before treating this as an acquisition task. |
+| age | Cedar's edge is 14 days old; our knowledge of the SOURCE is 0 days old; measured gap behind the source 14 days |
 | refresh_cost | free — same requests as the FR pull |
 | refresh_command | ride code/342_pull_federal_register_incremental.py |
 | breaks_on_refresh | consultation_agency_coverage.csv, fr_consultation_year.csv |
@@ -775,16 +773,16 @@ at one end and a retired MMS series that stopped in 2000 at the other.
 
 | field | value |
 |---|---|
-| state | ② **NOT PULLED** |
+| state | ✅ CURRENT |
 | host | `www.federalregister.gov` |
 | publish_cadence | every federal business day |
 | publish_lag | 0-1 day |
 | cadence basis | docs/datasets/lobbying_sources.md row 5 |
-| **cedar_holds_through** | **2026-08-11** — measured from `data/clean/section_106_consultation_events.csv`, column `notice_date`, 1,363 rows in scope |
+| **cedar_holds_through** | **2026-09-01** — measured from `data/clean/section_106_consultation_events.csv`, column `notice_date`, 1,367 rows in scope |
 | **source_has_through** | **2026-09-01** — probe 2026-09-01: same FR corpus (established 2026-09-01) |
-| cedar_last_pulled | 2026-08-12 — max(fetched_date) in data/clean/section_106_consultation_events.csv |
-| **refresh_due** | **YES** — the source offers 2026-09-01 and Cedar holds 2026-08-11. Check data/raw, data/staging and review/ before treating this as an acquisition task. |
-| age | Cedar's edge is 21 days old; our knowledge of the SOURCE is 0 days old; measured gap behind the source 21 days |
+| cedar_last_pulled | 2026-09-01 — max(fetched_date) in data/clean/section_106_consultation_events.csv |
+| **refresh_due** | **no** — Cedar holds through 2026-09-01; the source offers 2026-09-01. Nothing is owed. |
+| age | Cedar's edge is 0 days old; our knowledge of the SOURCE is 0 days old; measured gap behind the source 0 days |
 | refresh_cost | free — same request stream |
 | refresh_command | code/130 after the FR pull |
 | breaks_on_refresh | section_106_project_parties.csv |
@@ -816,11 +814,11 @@ at one end and a retired MMS series that stopped in 2000 at the other.
 | publish_cadence | every federal business day |
 | publish_lag | 0-1 day |
 | cadence basis | docs/datasets/lobbying_sources.md row 10 — COMPLETE to the API floor (1994) |
-| **cedar_holds_through** | **2026-08-24** — measured from `data/clean/fr_ex_parte_notices.csv`, column `publication_date`, 7,820 rows in scope |
+| **cedar_holds_through** | **2026-08-31** — measured from `data/clean/fr_ex_parte_notices.csv`, column `publication_date`, 7,828 rows in scope |
 | **source_has_through** | **2026-09-01** — probe 2026-09-01: same FR corpus (established 2026-09-01) |
-| cedar_last_pulled | 2026-08-26 — max(built_date) in data/clean/fr_ex_parte_notices.csv |
-| **refresh_due** | **YES** — the source offers 2026-09-01 and Cedar holds 2026-08-24. Check data/raw, data/staging and review/ before treating this as an acquisition task. |
-| age | Cedar's edge is 8 days old; our knowledge of the SOURCE is 0 days old; measured gap behind the source 8 days |
+| cedar_last_pulled | 2026-09-01 — max(built_date) in data/clean/fr_ex_parte_notices.csv |
+| **refresh_due** | **YES** — the source offers 2026-09-01 and Cedar holds 2026-08-31. Check data/raw, data/staging and review/ before treating this as an acquisition task. |
+| age | Cedar's edge is 1 days old; our knowledge of the SOURCE is 0 days old; measured gap behind the source 1 days |
 | refresh_cost | free — same request stream |
 | refresh_command | ride the FR pull, then code/98 |
 | breaks_on_refresh | fr_ex_parte_parties.csv, fr_ex_parte_party_entity_links.csv |
@@ -905,16 +903,16 @@ at one end and a retired MMS series that stopped in 2000 at the other.
 
 | field | value |
 |---|---|
-| state | ② **NOT PULLED** |
+| state | ❓ edge not established |
 | host | `www.federalregister.gov` |
 | publish_cadence | every federal business day, event-driven arrival |
 | publish_lag | 0 — same-day, but the SOURCE's own gap between notices runs days |
 | cadence basis | REFRESH_CADENCE 5.2 |
-| **cedar_holds_through** | **2026-08-24** — measured from `data/clean/nagpra_notices.csv`, column `publication_date`, 6,772 rows in scope |
+| **cedar_holds_through** | **2026-08-31** — measured from `data/clean/nagpra_notices.csv`, column `publication_date`, 6,792 rows in scope |
 | **source_has_through** | **2026-09-01** — probe 2026-09-01: the FR corpus is same-day. Whether a NAGPRA notice published between 2026-08-24 and 2026-09-01 is a separate question the sweep answers, not the index (established 2026-09-01) |
 | cedar_last_pulled | 2026-08-26 — recorded in a build log |
-| **refresh_due** | **YES** — the source offers 2026-09-01 and Cedar holds 2026-08-24. Check data/raw, data/staging and review/ before treating this as an acquisition task. |
-| age | Cedar's edge is 8 days old; our knowledge of the SOURCE is 0 days old; measured gap behind the source 8 days |
+| **refresh_due** | **no** — EVENT-DRIVEN source: Cedar holds through 2026-08-31 and the source SYSTEM reaches 2026-09-01, but that comparison is a category error here - this source emits events sporadically, not continuously, and eleven historical gaps exceed the one being measured. Currency requires probing the event stream for an unpulled event of this class, not comparing to a calendar date. |
+| age | Cedar's edge is 1 days old; our knowledge of the SOURCE is 0 days old; measured gap behind the source 1 days |
 | refresh_cost | free — rides the FR request stream |
 | refresh_command | py -3 code/77_build_nagpra_dataset.py fetch && ... build |
 | breaks_on_refresh | nagpra_notice_entity_bridge.csv (51,521 bridge rows). **mni_total_stated MUST NEVER BE SUMMED.** The 2024 surge is the 43 CFR 10 regime change, bounded by the 2029-01-10 deadline — never publish it as behaviour. |

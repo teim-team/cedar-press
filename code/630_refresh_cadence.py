@@ -1498,9 +1498,57 @@ def derive(entry, holds, src_through):
     if c >= 0:
         return S_CURRENT, (f"Cedar holds through {have}; the source offers "
                            f"{src_through}. Nothing is owed.")
+    # AN EVENT-DRIVEN SOURCE CANNOT BE SCORED AGAINST A CALENDAR EDGE.
+    #
+    # This compares Cedar's newest EVENT date against the source SYSTEM's
+    # calendar edge. For a continuous feed that is right. For a source that
+    # emits events sporadically it is a category error, and it produced the
+    # loudest false alarm of 2026-09-01: `fr_consultation` was reported as the
+    # most overdue source in Cedar at 104 days, an agent was dispatched, and
+    # the entire 104-day window contained ONE notice - which Cedar then pulled.
+    #
+    # Measured across all 485 consultation notices on 464 dates since 1994:
+    # median inter-notice gap 16 days, mean 25.7, p90 56, and **eleven gaps in
+    # the series are longer than the 104 days that was flagged** - the longest
+    # 212 days. At the post-2021 rate of ~19 notices a year, this source hits
+    # today's Federal Register date only by coincidence, so it can essentially
+    # never read CURRENT no matter how complete Cedar is.
+    #
+    # The same mechanism was pinning `nagpra_notices` and `fr_ex_parte` at a
+    # one-day "gap" with zero work owed.
+    #
+    # So for these, "behind" is not measurable from a calendar edge. It needs a
+    # probe of the event stream itself - the fr-refresh workstream read all 23
+    # Federal Register documents published 2026-09-01 and found not one notice
+    # of any of these three classes, which is what CURRENT actually means here.
+    # Absent that probe the honest answer is UNKNOWN, not "the source is ahead".
+    if _event_driven(str(entry.get("source") or entry.get("id") or entry.get("name") or "")):
+        return S_UNKNOWN, (
+            f"EVENT-DRIVEN source: Cedar holds through {have} and the source "
+            f"SYSTEM reaches {src_through}, but that comparison is a category "
+            f"error here - this source emits events sporadically, not "
+            f"continuously, and eleven historical gaps exceed the one being "
+            f"measured. Currency requires probing the event stream for an "
+            f"unpulled event of this class, not comparing to a calendar date.")
     return S2, (f"the source offers {src_through} and Cedar holds {have}. "
                 f"Check data/raw, data/staging and review/ before treating this "
                 f"as an acquisition task.")
+
+
+# Sources that emit events sporadically rather than on a schedule. For these,
+# "Cedar's newest event is older than today" is not evidence of anything - see
+# the note in the state classifier. Measured 2026-09-01: fr_consultation runs
+# ~19 notices a year with a median 16-day gap and eleven historical gaps longer
+# than the one that triggered a false alarm.
+EVENT_DRIVEN = (
+    "fr_consultation", "nagpra_notices", "nagpra", "fr_ex_parte",
+    "section_106", "admin_appeal", "ibia", "ibla",
+)
+
+
+def _event_driven(name: str) -> bool:
+    n = (name or "").lower()
+    return any(k in n for k in EVENT_DRIVEN)
 
 
 def _days_since(iso):
