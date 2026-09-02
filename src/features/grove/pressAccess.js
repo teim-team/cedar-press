@@ -45,7 +45,7 @@
  */
 
 import { resolveTier } from "../../workspaceTier.js";
-import { PRESS_CATALOG_BY_ID, PRESS_HISTORY_FROM } from "./pressCatalog.js";
+import { PRESS_CATALOG_BY_ID } from "./pressCatalog.js";
 
 /** The shelves, lowest first. A dataset declares exactly one. */
 export const SHELF = Object.freeze({
@@ -118,41 +118,24 @@ function shelfOf(dataset) {
   return dataset.shelf || PRESS_CATALOG_BY_ID[dataset.id]?.shelf || SHELF.PRO;
 }
 
-/** A year field off the dataset, or off the catalog entry it names. */
-function yearOf(dataset, field) {
-  if (!dataset) return null;
-  const value = dataset[field] ?? PRESS_CATALOG_BY_ID[dataset.id]?.[field];
-  return Number.isInteger(value) ? value : null;
-}
-
 /**
- * How far back this reader can go in a dataset they can open.
+ * The earliest year a collection holds, or null if it does not state one.
  *
- * The second axis. Cedar Press carries most collections from
- * PRESS_HISTORY_FROM forward; Cedar Press+ unlocks the reconstructed series
- * behind them. So a reader can
- * be short of a collection or short of its history, and those are different
- * sentences on the page: one sells a shelf, the other sells depth.
+ * THERE IS NO SECOND AXIS
+ * There used to be a `historyFor(user, dataset)` here, because Cedar Press
+ * was capped at 2010 and Cedar Press+ sold the years behind the cap. Coverage
+ * was therefore a function of the reader as well as of the collection, and
+ * three of the page's sentences existed only to say which of the two an
+ * upgrade would fix. The cap was retired on 2026-09-02 (see
+ * `pressCatalog.js`), so coverage is now a property of the collection alone
+ * and takes no user: whoever can open a collection gets all of it.
  *
- * `deeper` is true only when upgrading would actually move the year. A
- * collection that begins after the Press window has no depth to sell, and
- * saying otherwise would be a promise the data cannot keep.
+ * A collection is still capped in the only sense left — a reader whose shelf
+ * does not reach it cannot open it at all — and that question is
+ * `canOpenDataset`, which is where it always belonged.
  */
-export function historyFor(user, dataset) {
-  const full = yearOf(dataset, "historyFrom");
-  // Declared per collection rather than derived, so a collection whose whole
-  // history starts after the Press window is not described as capped.
-  const standard = yearOf(dataset, "standardFrom") ?? (full == null ? null : Math.max(PRESS_HISTORY_FROM, full));
-  if (!canOpenDataset(user, dataset)) {
-    return { from: null, standard, full, capped: false, deeper: false };
-  }
-  const reach = shelfReach(user);
-  const wholeSeries = reach === SHELF.PRO || reach === SHELF.GROVE;
-  if (full == null) {
-    return { from: null, standard: null, full: null, capped: false, deeper: false };
-  }
-  if (wholeSeries) {
-    return { from: full, standard, full, capped: false, deeper: false };
-  }
-  return { from: standard, standard, full, capped: standard > full, deeper: standard > full };
+export function coverageFrom(dataset) {
+  if (!dataset) return null;
+  const value = dataset.coverageFrom ?? PRESS_CATALOG_BY_ID[dataset.id]?.coverageFrom;
+  return Number.isInteger(value) ? value : null;
 }

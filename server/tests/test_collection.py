@@ -35,29 +35,34 @@ above is then true again in the only sense that matters.
 from __future__ import annotations
 
 import dataclasses
+import datetime
 import json
 import shutil
 import subprocess
 import unittest
+from collections.abc import Mapping
 from pathlib import Path
+from typing import Any
 
 from cedar_press import collections as launch
+from cedar_press import press_catalog
 
 _REPO = Path(__file__).resolve().parents[2]
 _DUMP = _REPO / "scripts" / "dump-collection.mjs"
+_PRESS_DUMP = _REPO / "scripts" / "dump-press.mjs"
 
 #: The same fixed date the JavaScript dump uses. Neither implementation reads a
 #: clock, so this comparison cannot flap at midnight.
 ACCESSED = "1 January 2026"
 
 
-def _javascript() -> dict:
-    """Run the JavaScript implementation and read back everything it produces."""
+def _run(script: Path) -> dict:
+    """Run one of the dump scripts and read back everything it produces."""
     node = shutil.which("node")
     if node is None:
         raise AssertionError("node is not on PATH")
     result = subprocess.run(  # noqa: S603
-        [node, str(_DUMP)],
+        [node, str(script)],
         capture_output=True,
         text=True,
         encoding="utf-8",
@@ -66,9 +71,19 @@ def _javascript() -> dict:
     )
     if result.returncode != 0:
         raise AssertionError(
-            f"scripts/dump-collection.mjs exited {result.returncode}:\n{result.stderr}"
+            f"{script.name} exited {result.returncode}:\n{result.stderr}"
         )
     return json.loads(result.stdout)
+
+
+def _javascript() -> dict:
+    """The launch collection, as the JavaScript implementation produces it."""
+    return _run(_DUMP)
+
+
+def _javascript_press() -> dict:
+    """The Press ladder, as ``pressCatalog.js`` and its siblings produce it."""
+    return _run(_PRESS_DUMP)
 
 
 class TestCrossLanguageParity(unittest.TestCase):
@@ -343,6 +358,122 @@ class TestCrossLanguageParity(unittest.TestCase):
                 continue
             with self.subTest(dataset=dataset.id):
                 self.assertTrue(csv_text.split("\n")[-1].startswith("cite_as,"))
+
+
+class TestPressCatalogSnapshot(unittest.TestCase):
+    """The other cross-language pair: ``pressCatalog.js`` and ``CATALOG``.
+
+    Python does not re-implement the Press ladder; it reads a snapshot,
+    ``server/cedar_press/_press_data.json``, that ``scripts/dump-press.mjs``
+    writes from the JavaScript modules. That is a weaker coupling than the
+    launch collection's shared manifest and it fails in a quieter way: the
+    JavaScript changes, nobody re-runs the dump, and the API serves last
+    week's ladder while the browser renders this week's. Nothing checked it.
+
+    This does. It re-runs the dump and compares it to the committed snapshot,
+    so a stale ``_press_data.json`` fails a build instead of shipping.
+    """
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        if shutil.which("node") is None:
+            raise AssertionError(
+                "node is not on PATH, so the Press catalogue cannot be compared "
+                "against its snapshot. This fails rather than skips."
+            )
+        cls.js = _javascript_press()
+
+    def test_the_committed_snapshot_is_what_the_dump_writes(self) -> None:
+        # Everything, not just the catalogue: the articles and release notes
+        # in this file are transcribed editorial copy, and a stale one is a
+        # misquotation.
+        snapshot = json.loads(
+            (Path(press_catalog.__file__).with_name("_press_data.json")).read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual(
+            snapshot,
+            self.js,
+            "server/cedar_press/_press_data.json is stale: re-run "
+            "`node scripts/dump-press.mjs > server/cedar_press/_press_data.json`",
+        )
+
+    def test_the_same_collections_in_the_same_order(self) -> None:
+        self.assertEqual(
+            [entry["id"] for entry in press_catalog.CATALOG],
+            [entry["id"] for entry in self.js["catalog"]],
+        )
+
+    def test_every_catalog_field_matches_value_for_value(self) -> None:
+        for python, javascript in zip(press_catalog.CATALOG, self.js["catalog"], strict=True):
+            with self.subTest(collection=javascript["id"]):
+                self.assertEqual(set(python), set(javascript))
+                for key in javascript:
+                    with self.subTest(field=key):
+                        self.assertEqual(_plain(python[key]), javascript[key])
+
+    # -- the coverage year, which is a claim to a paying subscriber --------
+
+    def test_every_collection_states_one_coverage_year_on_both_sides(self) -> None:
+        # The field this class was extended for. Coverage used to be a pair,
+        # `standardFrom` and `historyFrom`, and a Cedar Press reader received
+        # the first while Cedar Press+ opened the second. One axis replaced
+        # the two on 2026-09-02, and nothing had ever compared either number
+        # across the two languages.
+        for python, javascript in zip(press_catalog.CATALOG, self.js["catalog"], strict=True):
+            with self.subTest(collection=javascript["id"]):
+                self.assertIsInstance(python["coverageFrom"], int)
+                self.assertEqual(python["coverageFrom"], javascript["coverageFrom"])
+
+    def test_the_retired_pair_is_gone_rather_than_aliased(self) -> None:
+        # A `standardFrom` set equal to `coverageFrom` on every entry would
+        # read to the next person as a live second axis, and would be one
+        # edit away from being one again. It has to be absent.
+        for entry in press_catalog.CATALOG:
+            with self.subTest(collection=entry["id"]):
+                self.assertNotIn("standardFrom", entry)
+                self.assertNotIn("historyFrom", entry)
+
+    def test_no_coverage_year_is_a_placeholder_or_in_the_future(self) -> None:
+        # Every year here was measured against the file a subscriber
+        # receives, `dist/customer/<id>.csv`. That file is not in this
+        # repository, so this cannot re-measure -- what it can do is refuse
+        # the shapes a measurement never produces.
+        this_year = datetime.datetime.now(tz=datetime.timezone.utc).year
+        for entry in press_catalog.CATALOG:
+            with self.subTest(collection=entry["id"]):
+                self.assertGreaterEqual(entry["coverageFrom"], 1800)
+                self.assertLessEqual(entry["coverageFrom"], this_year)
+
+    def test_the_ladder_is_six_collections_and_six_more(self) -> None:
+        # The owner's ruling of 2026-09-02: Cedar Press is the standard
+        # shelf at full depth, Cedar Press+ is that plus the pro shelf. The
+        # counts are what the tier copy promises, so they are pinned.
+        shelves: dict[str, set[str]] = {}
+        for entry in press_catalog.CATALOG:
+            shelves.setdefault(entry["shelf"], set()).add(entry["id"])
+        self.assertEqual(len(shelves["standard"]), 6)
+        self.assertEqual(
+            shelves["pro"],
+            {
+                "contractors",
+                "subcontracting",
+                "owned",
+                "nest",
+                "natural-resources",
+                "nonprofits",
+            },
+        )
+
+
+def _plain(value: Any) -> Any:
+    """A frozen snapshot value in the shape ``json`` produced it."""
+    if isinstance(value, Mapping):
+        return {key: _plain(item) for key, item in value.items()}
+    if isinstance(value, tuple):
+        return [_plain(item) for item in value]
+    return value
 
 
 def _listify_points(figure: dict) -> dict:

@@ -68,7 +68,7 @@ export async function csvFor(entry, fetchText = defaultFetchText) {
     ["field", "value"],
     ["collection", entry.name],
     ["shelf", entry.shelf || entry.kind || ""],
-    ["coverage_from", entry.historyFrom || ""],
+    ["coverage_from", entry.coverageFrom || ""],
     ["contents", entry.blurb || ""],
     ["entity_linkage", entry.linkage || ""],
     ["cite_as", citation],

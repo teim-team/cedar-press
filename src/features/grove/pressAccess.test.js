@@ -10,7 +10,6 @@ import {
   NATIVE_LINKAGE,
   PRESS_CATALOG,
   PRESS_CATALOG_BY_ID,
-  PRESS_HISTORY_FROM,
   PRESS_TIERS,
   collectionsOnShelf,
 } from "./pressCatalog.js";
@@ -18,7 +17,7 @@ import {
   SHELF,
   canOpenDataset,
   canReadCedarPress,
-  historyFor,
+  coverageFrom,
   shelfReach,
   upgradeFor,
 } from "./pressAccess.js";
@@ -149,39 +148,50 @@ test("the catalog spans all three shelves", () => {
   }
 });
 
-// The second axis. Standard carries the collection but not its whole series.
-test("Standard sees a Standard collection from the Press window forward", () => {
+// ONE AXIS. The year cap was retired on 2026-09-02, so coverage is a property
+// of the collection and of nothing else. These four tests are what is left of
+// the four that used to pin the second axis: they now pin its absence, which
+// is the thing a future edit is most likely to undo by accident.
+test("coverage is the collection's, not the reader's", () => {
   const lobbying = PRESS_CATALOG_BY_ID.lobbying;
-  const h = historyFor({ workspace_tier: "press" }, lobbying);
-  assert.equal(h.from, PRESS_HISTORY_FROM);
-  assert.equal(h.full, lobbying.historyFrom);
-  assert.equal(h.deeper, true);
+  assert.equal(coverageFrom(lobbying), lobbying.coverageFrom);
+  // No user is passed, because there is no user-shaped answer to give.
+  assert.equal(coverageFrom.length, 1);
 });
 
-test("Pro opens the reconstructed series behind a Standard collection", () => {
-  const lobbying = PRESS_CATALOG_BY_ID.lobbying;
-  const h = historyFor({ workspace_tier: "press_pro" }, lobbying);
-  assert.equal(h.from, lobbying.historyFrom);
-  assert.equal(h.deeper, false);
+test("no collection states a year that depends on a tier", () => {
+  for (const entry of PRESS_CATALOG) {
+    assert.equal(typeof entry.coverageFrom, "number", `${entry.id} states no coverage`);
+    // The retired pair, gone rather than aliased. A `standardFrom` equal to
+    // `coverageFrom` on every entry would read as a live second axis to the
+    // next person and would be one bad edit away from becoming one again.
+    assert.equal("standardFrom" in entry, false, `${entry.id} still carries standardFrom`);
+    assert.equal("historyFrom" in entry, false, `${entry.id} still carries historyFrom`);
+  }
 });
 
-// Selling depth that does not exist is a promise the data cannot keep. Deals
-// is the collection whose whole archive begins at the Press window itself, so
-// there is nothing behind it for Cedar Press+ to open.
-test("a collection with no archive behind the Press window offers no deeper history", () => {
-  const deals = PRESS_CATALOG_BY_ID.deals;
-  assert.ok(deals.historyFrom >= PRESS_HISTORY_FROM, "fixture assumption");
-  const h = historyFor({ workspace_tier: "press" }, deals);
-  assert.equal(h.from, deals.historyFrom);
-  assert.equal(h.deeper, false);
-  // Cedar Press+ reaches the same year, because that is all there is.
-  assert.equal(historyFor({ workspace_tier: "press_pro" }, deals).from, deals.historyFrom);
+// Every year on the shelf is a claim to a paying subscriber, so it has to be
+// a year rather than a placeholder or a date in the future.
+test("every coverage year is plausible and in the past", () => {
+  const thisYear = new Date().getUTCFullYear();
+  for (const entry of PRESS_CATALOG) {
+    assert.ok(entry.coverageFrom >= 1800, `${entry.id}: ${entry.coverageFrom}`);
+    assert.ok(entry.coverageFrom <= thisYear, `${entry.id}: ${entry.coverageFrom}`);
+  }
 });
 
-test("a capped collection reports no history for the reader", () => {
-  const h = historyFor({ workspace_tier: "press" }, PRESS_CATALOG_BY_ID.contractors);
-  assert.equal(h.from, null);
-  assert.equal(h.deeper, false);
+// A collection the reader cannot open still states its years: the shelf's
+// locked band shows what is inside it, and that is the argument for opening
+// it. What the reader cannot do is a `canOpenDataset` question.
+test("a collection outside the reader's shelf still states its coverage", () => {
+  const contractors = PRESS_CATALOG_BY_ID.contractors;
+  assert.equal(canOpenDataset({ workspace_tier: "press" }, contractors), false);
+  assert.equal(coverageFrom(contractors), contractors.coverageFrom);
+});
+
+test("an entry with no coverage year says so rather than guessing", () => {
+  assert.equal(coverageFrom(null), null);
+  assert.equal(coverageFrom({ id: "not-a-collection" }), null);
 });
 
 // Gaming is the reason to cross the second line, so what it may show without

@@ -46,7 +46,7 @@ const COARSE = typeof window !== "undefined" && !!window.matchMedia?.("(hover: n
 
 import { appUrl } from "../../features/grove/appLink.js";
 import { EVENT, track } from "../../features/grove/telemetry.js";
-import { canOpenDataset, historyFor } from "../../features/grove/pressAccess";
+import { canOpenDataset, coverageFrom } from "../../features/grove/pressAccess";
 import { downloadAll, downloadCsv, hasReleaseFile } from "../../features/grove/pressDownload";
 import {
   GROVE_CAPABILITIES,
@@ -156,21 +156,18 @@ function Badge({ entry, open, onEnter, active, index, onLocked, onOpen }) {
 }
 
 /**
- * Coverage, said the way this reader actually receives it.
+ * Coverage, which is one sentence for every reader now.
  *
- * A Cedar Press reader was being shown the full archive start, which
- * describes a series nobody sold them. Where the two differ, both are
- * named, without naming a tier: the band above already says which one this
- * is.
+ * This used to be three, because a Cedar Press reader received the years from
+ * 2010 and a Cedar Press+ reader received the archive behind them, so the
+ * line had to name a window, a depth, or both. The window is gone: whoever
+ * opens a collection opens all of it, and the only thing left to say is the
+ * year Cedar's own file starts.
  */
-function coverageLine(entry, user, owned) {
-  const history = historyFor(user, entry);
-  const standard = history.standard ?? entry.standardFrom;
-  const full = history.full ?? entry.historyFrom;
-  if (!standard) return "Coverage varies";
-  if (owned && history.from && history.from < standard) return `${history.from} to present`;
-  if (full != null && full < standard) return `${standard} to present · full archive from ${full}`;
-  return `${standard} to present`;
+function coverageLine(entry) {
+  const from = coverageFrom(entry);
+  if (from == null) return "Coverage varies";
+  return `${from} to present`;
 }
 
 /** Whether Cedar has a profile to answer from for this collection. Every
@@ -183,7 +180,7 @@ function hasCedarProfile(id) {
 }
 
 /** What the reader says about the collection under the cursor. */
-function Detail({ entry, user, owned }) {
+function Detail({ entry, owned }) {
   return (
     <div className="cp-read__on">
       <span className="cp-read__cap">
@@ -198,7 +195,7 @@ function Detail({ entry, user, owned }) {
         </p>
       ) : null}
       <p className="cp-read__foot">
-        {coverageLine(entry, user, owned)}
+        {coverageLine(entry)}
         {" · "}
         {freshnessLine(entry.id) ||
           (owned
@@ -249,10 +246,10 @@ function Band({ tier, user, index }) {
   // with the collections Cedar Press also carries, so asking about entry
   // zero told a Cedar Press reader that Cedar Grove was their shelf.
   const owned = canOpenDataset(user, { shelf: tier.shelf });
-  const starts = entries
-    .map((entry) => historyFor(user, entry))
-    .map((history) => (owned ? history.from : history.full))
-    .filter(Boolean);
+  // The same years whether or not the reader owns the shelf: a locked band
+  // shows what is inside it, and what is inside it does not shrink when it
+  // opens.
+  const starts = entries.map((entry) => coverageFrom(entry)).filter(Boolean);
   const from = starts.length ? Math.min(...starts) : null;
   const active = entries.find((entry) => entry.id === hovered) || null;
   const [ref, seen] = useReveal();
@@ -363,7 +360,7 @@ function Band({ tier, user, index }) {
             it never cuts in while someone is reading something else. */}
         <aside ref={readRef} className={`cp-read${pulse ? " is-pulse" : ""}`} aria-live="polite">
           {active ? (
-            <Detail entry={active} user={user} owned={owned} />
+            <Detail entry={active} owned={owned} />
           ) : (
             <div className="cp-read__idle">
               <span className="cp-read__cap">
@@ -446,7 +443,7 @@ function GroveTeaser({ tier }) {
           </h4>
           <p className="cp-gt__blurb">{gaming.blurb}</p>
           <p className="cp-gt__fresh">
-            {freshnessLine(gaming.id)} · {gaming.historyFrom} to present
+            {freshnessLine(gaming.id)} · {gaming.coverageFrom} to present
           </p>
           <a className="cp-gt__cta" href={appUrl("/app/grove")} target="_blank" rel="noreferrer">
             Explore Gaming Intelligence and more in Cedar Grove <span aria-hidden="true">&#8594;</span>

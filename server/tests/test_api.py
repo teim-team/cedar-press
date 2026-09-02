@@ -222,23 +222,37 @@ class TestCatalog(unittest.TestCase):
         self.assertIn("v0", payload["basis"])
         self.assertNotIn("vintage", payload["basis"])
 
-    def test_coverage_is_phrased_for_the_asking_tier(self) -> None:
-        # A Cedar Press+ reader already opens the archive; Cedar must not
-        # sell them the plan they are asking from. Lobbying's archive (1998)
-        # is deeper than its Press window (2010), so the two phrasings differ.
+    def test_coverage_is_the_same_sentence_for_every_tier(self) -> None:
+        # This test changed subject on 2026-09-02. It used to check that the
+        # coverage sentence was PHRASED for the asking tier, because Cedar
+        # Press opened lobbying from 2010 and Cedar Press+ opened the archive
+        # behind it, so the same question had two right answers. The year cap
+        # is retired: coverage is a fact about the collection, and a sentence
+        # that still varied by plan would be the old ladder surviving in the
+        # copy. So the check is now that the two readers hear the same thing.
+        question = {
+            "question": "What does this collection cover?",
+            "collectionId": "lobbying",
+        }
         ratelimit.reset_for_tests()
         sign_in("pro@example.org")
-        response = client.post(
-            "/cedar/ask",
-            json={"question": "What does this collection cover?", "collectionId": "lobbying"},
-        )
-        self.assertEqual(response.status_code, 200)
-        answer = response.json()["answer"]
-        self.assertNotIn("Cedar Press+ opens", answer)
-        self.assertIn("your plan opens", answer)
-        # Back to the standard reader for the rest of the class.
+        pro = client.post("/cedar/ask", json=question)
+        self.assertEqual(pro.status_code, 200)
         ratelimit.reset_for_tests()
         sign_in()
+        standard = client.post("/cedar/ask", json=question)
+        self.assertEqual(standard.status_code, 200)
+
+        answer = standard.json()["answer"]
+        self.assertEqual(pro.json()["answer"], answer)
+        # And it says one year, not a window and a depth. The year is the
+        # catalog's measured one rather than a literal here, so re-measuring
+        # a collection does not have to be re-typed into a test.
+        entry = next(c for c in press_catalog.CATALOG if c["id"] == "lobbying")
+        self.assertIn(f"Coverage from {entry['coverageFrom']} to present.", answer)
+        self.assertNotIn("Cedar Press+ opens", answer)
+        self.assertNotIn("full reconstructed archive", answer)
+        ratelimit.reset_for_tests()
 
     def test_a_catalog_collection_says_it_has_no_figures(self) -> None:
         # A quantity question about an unreleased collection is answered with

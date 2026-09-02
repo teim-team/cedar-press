@@ -11,7 +11,7 @@
  * datasets:
  *
  *   Cedar Press   what happened          lobbying, and a lot of current intelligence
- *   Cedar Press+  what drives it         federal contracting, and the deep history
+ *   Cedar Press+  what drives it         federal contracting, and the specialized record
  *   Cedar Grove   the whole environment  gaming intelligence, and the research tools
  *
  * THE BASE TIER IS THE PRODUCT
@@ -20,12 +20,21 @@
  * which of the two they are looking at. The upgrade is "Cedar Press+", and the
  * page sets that plus raised at display size only.
  *
- * TWO AXES, NOT ONE
- * A reader can be short of a collection, or short of its history. Cedar Press
- * carries most collections from 2010 forward; Cedar Press+ unlocks the
- * reconstructed series behind them. So "upgrade" has two distinct meanings and the page has
- * to say which one applies, which is why `historyFrom` is a property of the
- * collection rather than a sentence in the marketing copy.
+ * ONE AXIS: WHICH COLLECTIONS YOU GET
+ * A reader can be short of a collection. That is the only thing an upgrade
+ * fixes. Cedar Press carries its six collections for every year Cedar holds;
+ * Cedar Press+ adds six more, at the same depth.
+ *
+ * This used to be two axes. Cedar Press was capped at 2010 and Cedar Press+
+ * sold the years behind that cap as the other half of its value, so every
+ * collection carried both a `standardFrom` and a deeper `historyFrom` and the
+ * page had to work out which of the two meanings of "upgrade" applied. That
+ * was retired on the owner's ruling of 2026-09-02: the year cap was invented
+ * to give Cedar Press+ something to sell, it made the cheaper tier worse for
+ * no reason Cedar could point at in the data, and two axes made every
+ * coverage sentence on the site conditional on a tier. One axis is the
+ * cleaner promise and the honest one, so `coverageFrom` is now a single
+ * number per collection and no tier changes it.
  *
  * RECOGNITION IS NOT A COLLECTION HERE
  * Legal-status change is the spine every other collection joins on, and it
@@ -40,9 +49,6 @@
  * appears here, so the two cannot drift.
  */
 
-/** The window the downloadable Cedar Press versions open at. */
-export const PRESS_HISTORY_FROM = 2010;
-
 export const PRESS_TIERS = Object.freeze([
   Object.freeze({
     id: "press",
@@ -52,7 +58,10 @@ export const PRESS_TIERS = Object.freeze([
     question: "See what's happening.",
     promise:
       "Follow the money, policy, transactions, institutions and public actions across Indian Country.",
-    historyNote: `Generally ${PRESS_HISTORY_FROM} to present.`,
+    // No year in this note any more. Each collection reaches back a different
+    // distance and every one of those distances is measured and stated on the
+    // collection itself, so a single sentence here could only be wrong.
+    coverageNote: "Six collections, every year Cedar holds of each.",
   }),
   Object.freeze({
     id: "press_pro",
@@ -60,14 +69,14 @@ export const PRESS_TIERS = Object.freeze([
     name: "Cedar Press+",
     price: 1000,
     question: "Understand the systems behind it.",
-    // Both axes, said here rather than left to the question. "Systems"
-    // describes the five specialized collections and says nothing about the
-    // archive, and the archive is half of what this tier sells. The list
-    // names every pro-shelf collection: the Owned dataset joined the shelf,
-    // and a promise that omits a collection undersells the tier.
+    // The whole tier, said here rather than left to the question. "Systems"
+    // says nothing about which collections arrive, and which collections
+    // arrive is now the entire difference between this tier and the one
+    // below. All six pro-shelf collections are named: a promise that omits
+    // one undersells the tier, and there is no second axis left to carry it.
     promise:
-      "Federal contracting, subcontracting, resource revenue, individually owned Native businesses and the nonprofit sector, plus the full reconstructed archive behind every Cedar Press collection.",
-    historyNote: "Full reconstructed series wherever one exists.",
+      "Six more collections on top of Cedar Press: federal contracting, subcontracting, resource revenue, individually owned Native businesses, enterprise structures and the nonprofit sector.",
+    coverageNote: "Twelve collections, at the same depth as Cedar Press.",
   }),
   Object.freeze({
     id: "grove",
@@ -77,7 +86,7 @@ export const PRESS_TIERS = Object.freeze([
     question: "Investigate it yourself.",
     promise:
       "Every Cedar collection, every new one as it lands and the harmonized public data your work already runs on. Grove is where you visualize it, analyze it and put it in front of your whole organization.",
-    historyNote: "Everything, with the tools to query it.",
+    coverageNote: "Everything, with the tools to query it.",
   }),
 ]);
 
@@ -86,19 +95,23 @@ export const PRESS_TIERS = Object.freeze([
  *
  * `short` is the name on a badge, where a full title will not fit in a square.
  *
- * TWO COVERAGE FIELDS, NOT ONE MINUS A RULE
- * `standardFrom` is what a Cedar Press reader actually receives.
- * `historyFrom` is where the full reconstructed archive begins, which
- * Cedar Press+
- * opens. They are stored separately because the gap is not always the same
- * arithmetic: every Cedar Press collection starts at 2010, and how much
- * further back Cedar Press+ reaches is a property of the record rather than
- * of a rule. Deals is the case where the two are equal, because 2010 is all
- * the history there is, not because a window clipped it. Showing a Cedar
- * Press reader "1998 to present" for Lobbying describes an archive they were
- * not sold. When it is earlier than PRESS_HISTORY_FROM, Cedar Press+ unlocks
- * that depth for a collection Cedar Press already carries: the same shelf,
- * more years.
+ * ONE COVERAGE FIELD, AND IT IS MEASURED
+ * `coverageFrom` is the earliest year the collection actually holds — the
+ * same number for every tier that opens the collection at all, because no
+ * tier clips the years any more.
+ *
+ * There used to be two fields, `standardFrom` (2010 on every Cedar Press
+ * collection) and a deeper `historyFrom`. Collapsing them was not a rename:
+ * `historyFrom` was hand-typed and three of its numbers were promises the
+ * delivered data does not keep — funding said 2001 and starts in FY2007,
+ * NAGPRA said 1990 and starts in 1994, lobbying said 1998 and starts in
+ * 1999. Every number below was measured on 2026-09-02 against the file a
+ * subscriber receives, `dist/customer/<id>.csv`, and the column measured is
+ * named beside it so the next reader can re-run the check rather than trust
+ * this comment. Where the old catalog and the data disagreed, the data won.
+ *
+ * A number here is a claim to a paying customer. It is not editable without
+ * re-measuring.
  */
 export const PRESS_CATALOG = Object.freeze([
   Object.freeze({
@@ -106,8 +119,10 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Federal Funding",
     name: "Federal Funding to Indian Country",
     shelf: "standard",
-    standardFrom: 2010,
-    historyFrom: 2001,
+    // Measured: min(fiscal_year) in dist/customer/funding.csv.
+    // The catalog claimed 2001. USAspending assistance plus the FAADS
+    // backfill begins at FY2007 in the delivered file; 2001 was never in it.
+    coverageFrom: 2007,
     blurb:
       "Every award the federal government reports sending into Indian Country: grants, loans, direct payments and insurance. Trace a program's reach, a recipient's funding history or a year's totals, award by award.",
     linkage:
@@ -118,8 +133,8 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Federal Register",
     name: "Federal Register",
     shelf: "standard",
-    standardFrom: 2010,
-    historyFrom: 1994,
+    // Measured: min(notice_date) in dist/customer/federal-register.csv.
+    coverageFrom: 1994,
     blurb:
       "The Federal Register is the government's daily record of proposed and final agency action. Catch every notice, rule and comment window touching tribes, lands, water or recognition while there is still time to respond.",
     linkage:
@@ -130,8 +145,9 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Legislation",
     name: "Congressional Votes and Proposed Legislation",
     shelf: "standard",
-    standardFrom: 2010,
-    historyFrom: 1989,
+    // Measured: min(introduced_date) in dist/customer/legislation.csv.
+    // Real bills of the 93rd Congress, not a stray date.
+    coverageFrom: 1973,
     blurb:
       "Bills, resolutions and roll-call votes from both chambers of Congress, the House and the Senate. Follow a measure from introduction to the floor and see who sponsored it, who voted and how.",
     linkage:
@@ -142,8 +158,8 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Deals",
     name: "Indian Country Deals",
     shelf: "standard",
-    standardFrom: 2010,
-    historyFrom: 2010,
+    // Measured: min(Event_Year) in dist/customer/deals.csv.
+    coverageFrom: 2000,
     blurb:
       "Announced transactions across Indian Country: acquisitions, property purchases, project financings, bond issuances and capital projects. See who bought, who financed, what closed and how a quarter compares with the last.",
     linkage:
@@ -154,8 +170,10 @@ export const PRESS_CATALOG = Object.freeze([
     short: "NAGPRA",
     name: "NAGPRA",
     shelf: "standard",
-    standardFrom: 2010,
-    historyFrom: 1990,
+    // Measured: min(publication_year) in dist/customer/nagpra.csv.
+    // The catalog claimed 1990, the year NAGPRA was enacted. The notices
+    // Cedar carries start with the first ones published, in 1994.
+    coverageFrom: 1994,
     blurb:
       "Activity under the Native American Graves Protection and Repatriation Act: notices, inventories and completed repatriations. Track an institution's progress or a nation's outstanding claims, item by item.",
     linkage:
@@ -166,8 +184,9 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Lobbying",
     name: "Lobbying",
     shelf: "standard",
-    standardFrom: 2010,
-    historyFrom: 1998,
+    // Measured: min(filing_year) in dist/customer/lobbying.csv.
+    // The catalog claimed 1998, the first LDA year. Cedar's filings start in 1999.
+    coverageFrom: 1999,
     blurb:
       "Federal lobbying registrations and the quarterly filings behind them. See who hired which firm, what they paid and which issues and bills the money is working.",
     linkage:
@@ -178,8 +197,8 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Prime Contracting",
     name: "Federal Prime Contracting",
     shelf: "pro",
-    standardFrom: 2010,
-    historyFrom: 2000,
+    // Measured: min(fiscal_year) in dist/customer/contractors.csv.
+    coverageFrom: 2000,
     blurb:
       "A prime contract is an award the government makes directly to a vendor, whether a firm, a tribal enterprise or a tribal government itself. Every prime award here names the agency, the dollars, the industry and the set-aside path it came through.",
     linkage:
@@ -190,8 +209,8 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Subcontracting",
     name: "Federal Subcontracting",
     shelf: "pro",
-    standardFrom: 2010,
-    historyFrom: 2010,
+    // Measured: min(fiscal_year) in dist/customer/subcontracting.csv.
+    coverageFrom: 2001,
     blurb:
       "A subaward is work a prime vendor passes down to another. Follow the dollars below the prime layer to see which vendors do the work, under whom and in which sectors.",
     linkage:
@@ -202,8 +221,10 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Natural Resources",
     name: "Natural Resource Revenues",
     shelf: "pro",
-    standardFrom: 2010,
-    historyFrom: 2003,
+    // Measured: min(period_start) in dist/customer/natural-resources.csv.
+    // Osage headright payments, published retrospectively by the Osage
+    // Minerals Council and carried as dated revenue events.
+    coverageFrom: 1880,
     blurb:
       "Energy and mineral activity on trust and restricted lands: production volumes, the royalties it owes and the disbursements that follow. See what a commodity produced, what it paid and where the money went.",
     linkage:
@@ -214,8 +235,11 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Native-Owned Businesses",
     name: "Individually Owned Native Businesses",
     shelf: "pro",
-    standardFrom: 2026,
-    historyFrom: 2026,
+    // Measured: min(certification_start) in dist/customer/native-owned-businesses.csv.
+    // The earliest certification a nation's office states, not the harvest
+    // date: this is a register of live certifications, and 2,044 of them
+    // were first seen by Cedar in 2026.
+    coverageFrom: 1992,
     blurb:
       "Individually owned Native businesses, certified by their own nations' TERO and commerce offices and shared with the project office by office. The businesses no federal register counts: who they are, what trades they work and what preference status their nation certifies.",
     linkage:
@@ -226,8 +250,15 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Native Nonprofits",
     name: "Native Nonprofits",
     shelf: "pro",
-    standardFrom: 2010,
-    historyFrom: 2001,
+    // Measured: min(bmf_tax_period) in dist/customer/nonprofits.csv.
+    // The earliest BMF financial period in the delivered register, which is a
+    // current snapshot carrying one period per EIN rather than an annual
+    // panel, so 1983 is one defunct filer's last return and not the start of
+    // a series. The year-over-year filings the blurb promises live in the
+    // collection's np_financials table, whose earliest tax_year is 1996; that
+    // table is not folded into the delivered file. Whichever number the page
+    // should show, 1983 is the one measurable in what a subscriber receives.
+    coverageFrom: 1983,
     blurb:
       "Native-led and Native-serving nonprofits with their annual federal filings. Compare budgets, revenue mixes, program spending and how an institution's finances move year over year.",
     linkage:
@@ -238,8 +269,9 @@ export const PRESS_CATALOG = Object.freeze([
     short: "NEST",
     name: "Native Enterprise Structures and Ties",
     shelf: "pro",
-    standardFrom: 2026,
-    historyFrom: 2026,
+    // Measured: min(first_observed_year) in dist/customer/nest.csv.
+    // The earliest source edition a published ownership tie was observed in.
+    coverageFrom: 2016,
     blurb:
       "Who owns whom across Indian Country's enterprises: parent nations and corporations, their subsidiaries, holding companies and joint ventures, and how those ties change as entities are created, renamed, acquired and wound down.",
     linkage:
@@ -250,8 +282,11 @@ export const PRESS_CATALOG = Object.freeze([
     short: "Gaming",
     name: "Gaming Intelligence",
     shelf: "grove",
-    standardFrom: 1988,
-    historyFrom: 1988,
+    // Measured: min(open_date) in dist/customer/gaming.csv.
+    // A facility open date, and the earliest four are flagged
+    // `open_date_predates_tribal_gaming_era`. The earliest unflagged one is
+    // 1979; the catalog's old 1988 was IGRA's year, not the record's.
+    coverageFrom: 1905,
     blurb:
       "Facilities, ownership and affiliation over time, declination letters, environmental reviews, expansions, employment estimates and transaction history, cross-validated against Deals.",
     // A Grove-exclusive collection is shown on Cedar Press rather than hidden,
@@ -436,6 +471,13 @@ export const GROVE_PUBLIC_DATA = Object.freeze([
   }),
 ]);
 
+/** The earliest year any collection on a shelf reaches back to. */
+function earliestOnShelf(shelf) {
+  return Math.min(
+    ...PRESS_CATALOG.filter((entry) => entry.shelf === shelf).map((entry) => entry.coverageFrom),
+  );
+}
+
 /**
  * The shelves below, as one badge each.
  *
@@ -443,30 +485,35 @@ export const GROVE_PUBLIC_DATA = Object.freeze([
  * includes them, and Grove should not redraw eleven. Listing every collection
  * on the top tier made it the busiest band on the page, which reads as
  * clutter rather than as abundance.
+ *
+ * The years are derived, not typed. They used to be literals — 1978 on the
+ * standard rollup and 2000 on the pro one — and neither was the earliest year
+ * of anything: no collection on either shelf began in 1978. A summary of
+ * numbers stated elsewhere has to be computed from them or it is a fourth
+ * place for them to disagree.
  */
 export const GROVE_INCLUDES = Object.freeze([
   Object.freeze({
     id: "all-standard",
     short: "All of Press",
-    historyFrom: 1978,
+    coverageFrom: earliestOnShelf("standard"),
     name: "Everything in Cedar Press",
     kind: "rollup",
     shelf: "standard",
-    blurb:
-      "Every Cedar Press collection, at full history rather than the years Cedar Press opens.",
+    blurb: "Every Cedar Press collection, for every year Cedar holds of each.",
     linkage:
-      "The same entity resolution, with the whole reconstructed identity history behind it rather than the years Cedar Press opens.",
+      "The same entity resolution, with the whole reconstructed identity history behind it.",
   }),
   Object.freeze({
     id: "all-pro",
     short: "All of Press+",
-    historyFrom: 2000,
+    coverageFrom: earliestOnShelf("pro"),
     name: "Everything in Cedar Press+",
     kind: "rollup",
     shelf: "pro",
-    blurb: "The five specialized collections and the reconstructed archive behind every Cedar Press collection.",
+    blurb: "The six specialized collections Cedar Press does not carry.",
     linkage:
-      "Contracting, subcontracting, resources, individually owned Native businesses and nonprofits: awards roll up to the parent nation or corporation, and each owned business carries its certifying nation.",
+      "Contracting, subcontracting, resources, individually owned Native businesses, enterprise structures and nonprofits: awards roll up to the parent nation or corporation, and each owned business carries its certifying nation.",
   }),
 ]);
 

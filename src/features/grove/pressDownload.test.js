@@ -107,7 +107,7 @@ test("a shelf collection without release bookkeeping cites by name", async () =>
     id: "not-a-launch-dataset",
     name: "Example Shelf Collection",
     shelf: "standard",
-    historyFrom: "2015",
+    coverageFrom: "2015",
     blurb: "What it holds.",
     linkage: "Joined to the entity layer.",
   };
