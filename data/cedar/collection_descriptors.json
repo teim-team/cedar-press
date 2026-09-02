@@ -4,26 +4,16 @@
     "shelf": "infrastructure",
     "level": "entity",
     "origin": "lumecon",
-    "rows_label": "316,278 rows",
+    "rows_label": "363,220 rows",
     "vintage": "",
     "version": "v0",
-    "updated": "2026-09-01",
+    "updated": "2026-09-02",
     "downloads": 0,
     "name": "Cedar Entity Layer",
     "short_name": "Entities",
     "tracks": "The identity spine every Cedar dataset keys to: 1,555 Native entities across seventeen classes \u2014 federally recognised tribes and Alaska Native villages, ANCSA corporations, Native Hawaiian organisations, tribal colleges, CDFIs, BIE schools, intertribal organisations and more \u2014 with their identifiers, aliases and corporate relationships.",
     "sources": "The Federal Register list of federally recognised tribes; BIA and IHS registers; NCES and IPEDS; the CDFI Fund; SAM and FPDS identifiers; parent-published subsidiary disclosures.",
-    "method": "Each entity holds one permanent identifier that is never reused and never changes, separate from the human-readable handle, which retires when an entity is reclassified. Relationships are hub-and-sub-hub: a holding company and a casino are sub-hubs of the nation that owns them, never peers of it. Identity claims are append-only with their evidence attached, so a later correction is recorded as a correction rather than overwriting what was believed before.",
-    "cedar": {
-      "cedar_id": "_entity_layer",
-      "status": "BLOCKED",
-      "blockers": [
-        "C8 rebuild is DESTRUCTIVE (01_build_entity_spine.py, 09_import_rulings.py) - no safe documented rebuild path"
-      ],
-      "n_rows": 316278,
-      "n_tables": 35
-    },
-    "needs_copy": false
+    "method": "Each entity holds one permanent identifier that is never reused and never changes, separate from the human-readable handle, which retires when an entity is reclassified. Relationships are hub-and-sub-hub: a holding company and a casino are sub-hubs of the nation that owns them, never peers of it. Identity claims are append-only with their evidence attached, so a later correction is recorded as a correction rather than overwriting what was believed before. Each entity carries both the name people use and, for the 536 entities the BIA annual list names, the legally operative Federal Register name \u2014 510 of the two differ, so a buyer searching either string finds the same permanent identifier."
   },
   {
     "id": "contractors",
@@ -33,127 +23,77 @@
     "rows_label": "3,345,971 rows",
     "vintage": "",
     "version": "v0",
-    "updated": "2026-09-01",
+    "updated": "2026-09-02",
     "downloads": 0,
     "name": "Native Federal Contractors",
     "short_name": "Contractors",
     "tracks": "Federal prime contract transactions awarded to tribally owned firms, ANC and NHO subsidiaries and individually Native-owned businesses, FY2000 to current, matched to the Native entity that ultimately owns the awardee.",
     "sources": "FPDS via USAspending; SAM entity registrations; parent-published subsidiary disclosures, including ANCSA audited filings under Alaska Statute 45.55.139.",
-    "method": "Awardees are matched to a Native entity by identifier first (UEI, CAGE, declared parent UEI) and by name only with corroboration, because a subsidiary's legal name routinely shares no token with its owner \u2014 ASRC Federal's operating companies file as BROADLEAF, INUTEQ and VISTRONIX. Attribution tier is recorded on every row and a tier is never promoted by a name match alone. Known limits are published, not hidden: coverage begins at FY2000 because Native identification does not exist in the pre-2000 federal record at all, and $65.2B of candidate rows remain unattributed rather than being assigned to a plausible owner.",
-    "cedar": {
-      "cedar_id": "contractors",
-      "status": "READY",
-      "blockers": [
-        "-"
-      ],
-      "n_rows": 3345971,
-      "n_tables": 10
-    },
-    "needs_copy": false
-  },
-  {
-    "id": "federal-register",
-    "shelf": "standard",
-    "level": "entity_and_geography",
-    "origin": "lumecon",
-    "rows_label": "501,676 rows",
-    "vintage": "",
-    "version": "v0",
-    "updated": "2026-09-01",
-    "downloads": 0,
-    "name": "Federal Register \u2014 Indian Affairs",
-    "short_name": "Fed Register",
-    "tracks": "Federal Register documents affecting Indian Country since 1994 \u2014 consultation notices, land-into-trust decisions, recognition actions, rules and ex parte communications.",
-    "sources": "federalregister.gov, by agency and by subject, back to 1994.",
-    "method": "Scope is recorded per document because it genuinely varies: a notice can name one tribe, several, or all of Indian Country, and each is a different fact. Participants in consultation events are resolved to the entity layer where the notice names them and left unresolved where it does not, rather than inferred.",
-    "cedar": {
-      "cedar_id": "federal-register",
-      "status": "READY",
-      "blockers": [
-        "-"
-      ],
-      "n_rows": 501676,
-      "n_tables": 22
-    },
-    "needs_copy": false
-  },
-  {
-    "id": "nagpra",
-    "shelf": "standard",
-    "level": "entity",
-    "origin": "lumecon",
-    "rows_label": "65,068 rows",
-    "vintage": "",
-    "version": "v0",
-    "updated": "2026-09-01",
-    "downloads": 0,
-    "name": "NAGPRA Notices",
-    "short_name": "NAGPRA",
-    "tracks": "Notices of Inventory Completion and Intent to Repatriate published under the Native American Graves Protection and Repatriation Act, with the institutions and affiliated tribes named in each.",
-    "sources": "Federal Register NAGPRA notices, full text.",
-    "method": "Tribal affiliations are taken from the notice's own text, which is the legally operative statement of affiliation, and an alias is only accepted into the identity layer when it appears across at least three independent notices. Cultural detail beyond what the notice publishes is not extracted, and no inference is made about ancestral remains or objects beyond the notice's own words.",
-    "cedar": {
-      "cedar_id": "nagpra",
-      "status": "READY",
-      "blockers": [
-        "-"
-      ],
-      "n_rows": 65068,
-      "n_tables": 4
-    },
-    "needs_copy": false
-  },
-  {
-    "id": "owned",
-    "shelf": "pro",
-    "level": "entity",
-    "origin": "lumecon",
-    "rows_label": "1,657 rows",
-    "vintage": "",
-    "version": "v0",
-    "updated": "2026-09-01",
-    "downloads": 0,
-    "name": "Native-Owned Businesses",
-    "short_name": "Businesses",
-    "tracks": "Firms certified or listed as Native-owned by a tribal certifying authority \u2014 TERO vendor lists, Indian preference registers, tribal business licences and tribal enterprise registers \u2014 harmonised across nations into one schema.",
-    "sources": "Tribal TERO offices, business licensing departments and enterprise registers, harvested from each nation's own publication. Contributing authorities are acknowledged in every release.",
-    "method": "The strength of each certification is preserved rather than flattened, because the authorities do not mean the same thing: a firm certified at 100% enrolled-member ownership, one on an any-Native list, one qualifying through a shareholder's spouse or descendant, and a vendor with no ownership relation at all are recorded as different claims on the same scale. The relation published is affiliation with a named nation, not an ownership assertion the source never made. Sources whose terms forbid reuse are excluded by every route and named as excluded.",
-    "cedar": {
-      "cedar_id": "native-owned-businesses",
-      "status": "READY",
-      "blockers": [
-        "-"
-      ],
-      "n_rows": 1657,
-      "n_tables": 6
-    },
-    "needs_copy": false
+    "method": "Awardees are matched to a Native entity by identifier first (UEI, CAGE, declared parent UEI) and by name only with corroboration, because a subsidiary's legal name routinely shares no token with its owner \u2014 ASRC Federal's operating companies file as BROADLEAF, INUTEQ and VISTRONIX. Attribution tier is recorded on every row and a tier is never promoted by a name match alone. Known limits are published, not hidden: coverage begins at FY2000 because Native identification does not exist in the pre-2000 federal record at all, and $65.2B of candidate rows remain unattributed rather than being assigned to a plausible owner."
   },
   {
     "id": "deals",
     "shelf": "standard",
     "level": "entity",
     "origin": "lumecon",
-    "rows_label": "2,386 rows",
+    "rows_label": "2,662 rows",
     "vintage": "",
     "version": "v0",
-    "updated": "2026-09-01",
+    "updated": "2026-09-02",
     "downloads": 0,
     "name": "Indian Country Deals",
     "short_name": "Deals",
     "tracks": "Transactions involving Native entities \u2014 acquisitions, joint ventures, project financings, bond issuances and major capital projects \u2014 with the parties, the instrument and the announced value where one was published.",
     "sources": "Tribal newsletters and tribal press; trade and journalist coverage; ANCSA shareholder filings; and Cedar's own federal contracting record, cited as a source where a transaction is visible only there.",
-    "method": "This is the one Cedar dataset that does not exist elsewhere, so every row carries a source link. Announced and closed are labelled separately and a transaction enters totals only when its status is confirmed. Where an ownership change is visible in federal contracting but was never publicly announced, Cedar reports it and cites the contracting record with the identifier and years so a reader can re-run the check \u2014 and a change of reporting parent within one tribal corporate family is not treated as a transaction.",
-    "cedar": {
-      "cedar_id": "deals",
-      "status": "BLOCKED",
-      "blockers": [
-        "C8 rebuild is DESTRUCTIVE (88_build_deals_taxonomy.py) - no safe documented rebuild path"
-      ],
-      "n_rows": 2386,
-      "n_tables": 14
-    },
-    "needs_copy": false
+    "method": "This is the one Cedar dataset that does not exist elsewhere, so every row carries a source link. Announced and closed are labelled separately and a transaction enters totals only when its status is confirmed. Where an ownership change is visible in federal contracting but was never publicly announced, Cedar reports it and cites the contracting record with the identifier and years so a reader can re-run the check \u2014 and a change of reporting parent within one tribal corporate family is not treated as a transaction."
+  },
+  {
+    "id": "federal-register",
+    "shelf": "standard",
+    "level": "entity_and_geography",
+    "origin": "lumecon",
+    "rows_label": "502,483 rows",
+    "vintage": "",
+    "version": "v0",
+    "updated": "2026-09-02",
+    "downloads": 0,
+    "name": "Federal Register \u2014 Indian Affairs",
+    "short_name": "Fed Register",
+    "tracks": "Federal Register documents affecting Indian Country since 1994 \u2014 consultation notices, land-into-trust decisions, recognition actions, rules and ex parte communications.",
+    "sources": "federalregister.gov, by agency and by subject, back to 1994.",
+    "method": "Scope is recorded per document because it genuinely varies: a notice can name one tribe, several, or all of Indian Country, and each is a different fact. Participants in consultation events are resolved to the entity layer where the notice names them and left unresolved where it does not, rather than inferred. The consultation table's composition is stated rather than smoothed: 10,888 of its 11,402 rows (95.5%) are NAGPRA consultation reported inside a NAGPRA notice, because that is what the Federal Register carries at volume. Policy consultation is the smaller remainder and is typed separately. The Federal Register is not the ceiling for Dear Tribal Leader letters and this copy said it nearly was. Probed on 2026-09-02 the Register holds 46 documents carrying the phrase, and that reading was used here to call a thin count close to the source's limit, with the agencies' own websites recorded as not yet acquired. They have since been acquired and the surface is 17.5 times larger: 807 letters spanning 2000\u20132026 \u2014 Indian Health Service 783, Bureau of Indian Education 14, Bureau of Indian Affairs 10. What had looked like an absent source was a request that the host answered with 406 until its headers were shaped correctly, which is a fact about the request and not about the publisher."
+  },
+  {
+    "id": "funding",
+    "shelf": "standard",
+    "level": "entity",
+    "origin": "lumecon",
+    "rows_label": "3,646,750 rows",
+    "vintage": "",
+    "version": "v0",
+    "updated": "2026-09-02",
+    "downloads": 0,
+    "name": "Federal Funding to Indian Country",
+    "short_name": "Funding",
+    "tracks": "Federal financial assistance \u2014 grants, cooperative agreements, direct payments and loans \u2014 to tribes, tribal organisations and Native-serving entities.",
+    "sources": "USAspending assistance transactions; FAADS historical archives for the pre-2008 record.",
+    "method": "Recipients are matched to the entity layer and the basis for inclusion is carried on the row, so a payment to a tribal government, to an intertribal consortium acting for many tribes, and to a Native-serving non-Native organisation are distinguishable. Apparent duplicate transactions are retained: they are usually distinct modifications to one award that agree on every published field, and removing them would have destroyed $8.29B of real obligations."
+  },
+  {
+    "id": "gaming",
+    "shelf": "grove",
+    "level": "entity",
+    "origin": "lumecon",
+    "rows_label": "128,561 rows",
+    "vintage": "",
+    "version": "v0",
+    "updated": "2026-09-02",
+    "downloads": 0,
+    "name": "Tribal Gaming",
+    "short_name": "Gaming",
+    "tracks": "Tribal gaming facilities, their operators and regulatory record \u2014 NIGC ordinances, management contract approvals, enforcement actions, Indian lands and game classification opinions \u2014 plus state revenue sharing where states publish it.",
+    "sources": "NIGC's published document surface (73 categories, 4,071 documents); state gaming regulators in California, New Mexico, Oklahoma, Connecticut and others; tribal and operator disclosures.",
+    "method": "Facility records are keyed to the operating tribe, and the table holds 787 rows of which 780 are facilities: seven carry the facility name \u201cNo casino\u201d and record that a nation does not operate one \u2014 Havasupai, Hopi, Quartz Valley, Zuni, Zia, Cochiti and Picuris. That is deliberate negative evidence rather than a gap, and it is named here because no single denominator is correct for every per-facility rate. The ladder, measured on each build: 787 rows, less 8 non-place rows = 779 facility rows, less 54 extra rows across 53 adjudicated MERGE groups = 725 distinct properties, with 5 groups held open. Divide by the rung your question is about and say which. This copy previously said \u201cthe single non-facility row\u201d, then prescribed 780 for everything; both were wrong. Regulatory documents are indexed separately from the instruments they describe, so the index is never summed against the ordinance and declination tables it measures. No regulator publishes gross gaming revenue per operation, so Cedar bounds it instead \u2014 694 rows carry a bounded revenue estimate with its basis stated and 86 facility rows do not, with the reason recorded on each; all seven placeholders sit in the unbounded group rather than among the 86. **No percentage is published for this, deliberately, because the denominator is under revision in two independent ways at once.** 787 rows less the seven placeholders is 780 facility rows; a duplicate review then proposes 52 same-tribe groups covering 105 rows, which would collapse a further 53 and leave roughly 727 distinct properties \u2014 two source vintages describing one property, as with \u201cCasino Del Sol\u201d and \u201cCasino Del Sol Resort\u201d. Nothing is merged: `duplicate_of_facility_id` is blank on all but ten rows, a casino and its hotel can legitimately be two facilities, and four further groups span different nations and must not be collapsed at all. The figure circulating as the true count, 734, removes the duplicates but not the placeholders and so corrects only one of the two. Until the review is adjudicated the honest statement is the ladder: **787 rows, 780 facility rows, ~727 distinct properties pending 56 duplicate groups.** Where a state seals per-tribe revenue by statute or compact \u2014 Nevada, North Dakota, Kansas, Wisconsin, Arizona, Colorado and Minnesota \u2014 that is recorded as a legal boundary, quoted from the statute or the compact, and carried on every facility in that state rather than left as an unexplained gap. Class II and Class III authorisation comes from the tribe's NIGC-approved gaming ordinance and is labelled as tribe-grain, never inferred from the presence of gaming devices."
   },
   {
     "id": "legislation",
@@ -163,52 +103,109 @@
     "rows_label": "149,293 rows",
     "vintage": "",
     "version": "v0",
-    "updated": "2026-09-01",
+    "updated": "2026-09-02",
     "downloads": 0,
     "name": "Native Legislation and Votes",
     "short_name": "Legislation",
     "tracks": "Federal bills affecting Indian Country and the recorded votes on them, with sponsors, cosponsors and subject classification.",
     "sources": "Congress.gov API; Voteview roll-call records; committee and hearing records.",
-    "method": "Most legislation affecting Indian Country names no single tribe, so records are scoped to Indian Country as a whole rather than forced onto an entity \u2014 an unattached row here is the correct representation, not a gap. Subject classification is recorded with the basis on which a bill was judged Native-relevant.",
-    "cedar": {
-      "cedar_id": "legislation",
-      "status": "BLOCKED",
-      "blockers": [
-        "C1 grain UNSTATED on 2: congressional_correspondence_log.csv, native_bills_subject_sweep.csv",
-        "C2 no validated primary key on 2",
-        "C3 literal duplicates: native_bills_subject_sweep.csv(5)"
-      ],
-      "n_rows": 149293,
-      "n_tables": 12
-    },
-    "needs_copy": false
+    "method": "Most legislation affecting Indian Country names no single tribe, so records are scoped to Indian Country as a whole rather than forced onto an entity \u2014 an unattached row here is the correct representation, not a gap. Subject classification is recorded with the basis on which a bill was judged Native-relevant."
+  },
+  {
+    "id": "lobbying",
+    "shelf": "standard",
+    "level": "entity_and_geography",
+    "origin": "lumecon",
+    "rows_label": "264,478 rows",
+    "vintage": "",
+    "version": "v0",
+    "updated": "2026-09-02",
+    "downloads": 0,
+    "name": "Tribal Advocacy and Lobbying",
+    "short_name": "Advocacy",
+    "tracks": "Federal advocacy by tribes and Native organisations across twenty channels \u2014 LDA registrations and reports, tribal consultation, Section 106, agency dockets, administrative appeals, hearing testimony and nonprofit Schedule C.",
+    "sources": "Senate and House lobbying disclosure; Federal Register consultation and ex parte notices; FERC and NRC dockets; IBIA and IBLA appeals; regulations.gov; IRS Form 990 Schedule C.",
+    "method": "Built on the premise that the Lobbying Disclosure Act sees only a fraction of tribal advocacy: 300 entities appear in LDA filings, 669 appear in a non-LDA channel, and only 4 are visible to the LDA and nowhere else. Each channel is kept as its own record type rather than merged into a single misleading total, and organisations acting on behalf of many tribes are scoped as such rather than attributed to one."
+  },
+  {
+    "id": "nagpra",
+    "shelf": "standard",
+    "level": "entity",
+    "origin": "lumecon",
+    "rows_label": "72,302 rows",
+    "vintage": "",
+    "version": "v0",
+    "updated": "2026-09-02",
+    "downloads": 0,
+    "name": "NAGPRA Notices",
+    "short_name": "NAGPRA",
+    "tracks": "Notices of Inventory Completion and Intent to Repatriate published under the Native American Graves Protection and Repatriation Act, with the institutions and affiliated tribes named in each.",
+    "sources": "Federal Register NAGPRA notices, full text.",
+    "method": "Tribal affiliations are taken from the notice's own text, which is the legally operative statement of affiliation, and an alias is only accepted into the identity layer when it appears across at least three independent notices. Cultural detail beyond what the notice publishes is not extracted, and no inference is made about ancestral remains or objects beyond the notice's own words."
+  },
+  {
+    "id": "owned",
+    "shelf": "pro",
+    "level": "entity",
+    "origin": "lumecon",
+    "rows_label": "row count unresolved",
+    "vintage": "",
+    "version": "v0",
+    "updated": "2026-09-02",
+    "downloads": 0,
+    "name": "Native-Owned Businesses",
+    "short_name": "Businesses",
+    "tracks": "Firms certified or listed as Native-owned by a tribal certifying authority \u2014 TERO vendor lists, Indian preference registers, tribal business licences and tribal enterprise registers \u2014 harmonised across nations into one schema.",
+    "sources": "Tribal TERO offices, business licensing departments and enterprise registers, harvested from each nation's own publication. Contributing authorities are acknowledged in every release.",
+    "method": "The strength of each certification is preserved rather than flattened, because the authorities do not mean the same thing: a firm certified at 100% enrolled-member ownership, one on an any-Native list, one qualifying through a shareholder's spouse or descendant, and a vendor with no ownership relation at all are recorded as different claims on the same scale. The relation published is affiliation with a named nation, not an ownership assertion the source never made. Sources whose terms forbid reuse are excluded by every route and named as excluded."
   },
   {
     "id": "natural-resources",
     "shelf": "pro",
     "level": "entity",
     "origin": "lumecon",
-    "rows_label": "34,491 rows",
+    "rows_label": "283,716 rows",
     "vintage": "",
     "version": "v0",
-    "updated": "2026-09-01",
+    "updated": "2026-09-02",
     "downloads": 0,
     "name": "Tribal Natural Resource Revenue",
     "short_name": "Resources",
     "tracks": "Revenue reaching tribes and individual allottees from minerals, oil and gas, coal, timber and surface leases, 1880 to current.",
     "sources": "ONRR disbursements and monthly revenue; historical MMS American Indian collections; OSMRE Abandoned Mine Land distributions; state severance distributions; ANCSA section 7(i) and 7(j) filings; Osage Minerals Council payment history.",
-    "method": "Attribution routes through a party table rather than a single owner column, because one payment can involve the tribal government, allottees, an enterprise, an operator and a trust account at once. Where Interior suppresses the entity by law the row is published as an aggregate and labelled as one \u2014 87% of rows are aggregate for that reason, and none are unattributed for want of effort. Individual allottee detail is never published: Osage rows carry a class recipient at a per-headright rate, and the headright divisor is used as a check, never as a multiplier.",
-    "cedar": {
-      "cedar_id": "natural-resources",
-      "status": "BLOCKED",
-      "blockers": [
-        "C5 no row-conservation coverage",
-        "C4 only 25% of entity-bearing rows carry a Cedar id, and every record in this dataset HAS an entity subject - so this is unresolved work, not scope. See ADR-009 and ADR-010."
-      ],
-      "n_rows": 34491,
-      "n_tables": 8
-    },
-    "needs_copy": false
+    "method": "Attribution routes through a party table rather than a single owner column, because one payment can involve the tribal government, allottees, an enterprise, an operator and a trust account at once. Where Interior suppresses the entity by law the row is published as an aggregate and labelled as one \u2014 88.1% (9,791 national plus 167 state of 11,305 rows) of rows are aggregate for that reason, and none are unattributed for want of effort. Individual allottee detail is never published: Osage rows carry a class recipient at a per-headright rate, and the headright divisor is used as a check, never as a multiplier."
+  },
+  {
+    "id": "nest",
+    "shelf": "pro",
+    "level": "entity",
+    "origin": "lumecon",
+    "rows_label": "5,399 rows",
+    "vintage": "",
+    "version": "v0",
+    "updated": "2026-09-02",
+    "downloads": 0,
+    "name": "NEST: Native Enterprise Structures and Ties",
+    "short_name": "NEST",
+    "tracks": "Enterprise ownership and affiliation across tribes, Alaska Native corporations, Native Hawaiian organizations, and state-recognized Native entities \u2014 the parent, the holding company and the operating company, kept as a chain rather than a flat list.",
+    "sources": "What each owner publishes about itself: audited annual reports filed by ANCSA corporations with the Alaska Division of Banking and Securities under Alaska Statute 45.55.139, whose Principles of Consolidation note enumerates the subsidiaries by legal name; nations' own \u201cOur Companies\u201d and enterprise registers; ANC and NHO subsidiary directories. Publishers whose terms forbid reuse are excluded by every route and named as excluded.",
+    "method": "Two relations, declared per row and never conflated: a STRUCTURE is ownership \u2014 nation, holding company, operating company \u2014 and a TIE is a published relationship that is not ownership, such as a joint venture, which genuinely has two parents. Ownership is only ever recorded where a source asserted it; a shared name or a shared address is not evidence and does not create a row. An external identifier appears only where the owner published it, so the register is not padded with plausible matches. Where no external identifier exists the enterprise still gets a permanent, check-digited Cedar identifier and is carried as a sub-hub of its nation, which is what makes visible the enterprises federal contracting never sees."
+  },
+  {
+    "id": "newsletters",
+    "shelf": "standard",
+    "level": "entity",
+    "origin": "lumecon",
+    "rows_label": "3,444 rows",
+    "vintage": "",
+    "version": "v0",
+    "updated": "2026-09-02",
+    "downloads": 0,
+    "name": "Tribal Newsletters and Publications",
+    "short_name": "Newsletters",
+    "tracks": "What Native nations and organisations publish about themselves \u2014 tribal newsletters, news pages, press releases, publication archives and statutory filings \u2014 indexed per channel with its cadence, its archive depth and whether back issues are open to a reader. Archives reach back to 1970.",
+    "sources": "Each nation's or organisation's own website, probed directly. Nothing here is a republication of a third-party aggregator; the channel URL is the publisher's own. Where a publisher's terms forbid reuse the channel is excluded by every route and named as excluded.",
+    "method": "One row per channel, plus one row per recorded absence, and the difference is declared in `record_status` rather than left to be inferred from a missing row. Of 1,889 rows, 1,408 are publication channels and **481 are `probe_absence` \u2014 an entity that was searched and publishes nothing findable.** That distinction is the point of the dataset: a gap in a directory usually means nobody looked, and here it means somebody did. 1,555 entities were probed and 694 have at least one channel, so the absence rows are not a rounding error \u2014 they are roughly a quarter of the file. Archive depth is recorded as the publisher states it and is never inferred from the number of issues a crawl happened to reach; `back_issues_open` says whether a reader can actually retrieve the archive, which is a different question from whether it exists. Thirteen rows are flagged `flagged_not_native_publisher` and kept visible rather than silently dropped, because a wrong inclusion a reader can see is safer than one removed without trace."
   },
   {
     "id": "nonprofits",
@@ -218,141 +215,28 @@
     "rows_label": "123,293 rows",
     "vintage": "",
     "version": "v0",
-    "updated": "2026-09-01",
+    "updated": "2026-09-02",
     "downloads": 0,
     "name": "Native Nonprofits",
     "short_name": "Nonprofits",
     "tracks": "Native-controlled, tribally affiliated and Native-serving nonprofit organisations, with EIN, financial scale and filing status.",
     "sources": "IRS Business Master File; Form 990 e-file returns; the 990-N e-Postcard corpus; ProPublica Nonprofit Explorer.",
-    "method": "Native status is established from what an organisation says about itself in its own filing, never from an NTEE code and never from a name. A mission statement naming a specific nation is a stronger claim than one describing Native-serving work generally, and the two are recorded separately. The dataset states plainly what it cannot see: tribal instrumentalities largely do not file 990s under IRC section 7871, so the largest tribal institutions can be absent by law, and place-named organisations that are not Native are actively identified and excluded rather than left to inflate the totals.",
-    "cedar": {
-      "cedar_id": "nonprofits",
-      "status": "BLOCKED",
-      "blockers": [
-        "C1 grain UNSTATED on 1: np_schedule_i_grants.csv",
-        "C2 no validated primary key on 1",
-        "C3 literal duplicates: np_schedule_i_grants.csv(101)",
-        "C7 DOUBLE-COUNTING RISK - money tables a buyer cannot safely total: np_schedule_i_grants.csv"
-      ],
-      "n_rows": 123293,
-      "n_tables": 10
-    },
-    "needs_copy": false
-  },
-  {
-    "id": "lobbying",
-    "shelf": "standard",
-    "level": "entity_and_geography",
-    "origin": "lumecon",
-    "rows_label": "235,286 rows",
-    "vintage": "",
-    "version": "v0",
-    "updated": "2026-09-01",
-    "downloads": 0,
-    "name": "Tribal Advocacy and Lobbying",
-    "short_name": "Advocacy",
-    "tracks": "Federal advocacy by tribes and Native organisations across twenty channels \u2014 LDA registrations and reports, tribal consultation, Section 106, agency dockets, administrative appeals, hearing testimony and nonprofit Schedule C.",
-    "sources": "Senate and House lobbying disclosure; Federal Register consultation and ex parte notices; FERC and NRC dockets; IBIA and IBLA appeals; regulations.gov; IRS Form 990 Schedule C.",
-    "method": "Built on the premise that the Lobbying Disclosure Act sees only a fraction of tribal advocacy: 300 entities appear in LDA filings, 669 appear in a non-LDA channel, and only 4 are visible to the LDA and nowhere else. Each channel is kept as its own record type rather than merged into a single misleading total, and organisations acting on behalf of many tribes are scoped as such rather than attributed to one.",
-    "cedar": {
-      "cedar_id": "lobbying",
-      "status": "BLOCKED",
-      "blockers": [
-        "C1 grain UNSTATED on 3: ferc_docket_filings.csv, hearing_bill_links.csv, lobbying_registrant_native_ownership_evidence.csv",
-        "C2 no validated primary key on 3",
-        "C3 literal duplicates: ferc_docket_filings.csv(822), hearing_bill_links.csv(1), lobbying_registrant_native_ownership_evidence.csv(4)"
-      ],
-      "n_rows": 235286,
-      "n_tables": 33
-    },
-    "needs_copy": false
-  },
-  {
-    "id": "gaming",
-    "shelf": "grove",
-    "level": "entity",
-    "origin": "lumecon",
-    "rows_label": "127,207 rows",
-    "vintage": "",
-    "version": "v0",
-    "updated": "2026-09-01",
-    "downloads": 0,
-    "name": "Tribal Gaming",
-    "short_name": "Gaming",
-    "tracks": "Tribal gaming facilities, their operators and regulatory record \u2014 NIGC ordinances, management contract approvals, enforcement actions, Indian lands and game classification opinions \u2014 plus state revenue sharing where states publish it.",
-    "sources": "NIGC's published document surface (73 categories, 4,071 documents); state gaming regulators in California, New Mexico, Oklahoma, Connecticut and others; tribal and operator disclosures.",
-    "method": "Facility records are keyed to the operating tribe and the grain is stated: one row per facility, with the single non-facility row named. Regulatory documents are indexed separately from the instruments they describe, so the index is never summed against the ordinance and declination tables it measures. Where a state seals per-tribe revenue by statute or compact \u2014 Nevada, North Dakota, Kansas, Wisconsin, Arizona \u2014 that is recorded as a legal boundary rather than left as an unexplained gap.",
-    "cedar": {
-      "cedar_id": "gaming",
-      "status": "BLOCKED",
-      "blockers": [
-        "C1 grain UNSTATED on 3: fac_audit_sefa_gaming_programs.csv, gaming_property_self_published_assertions.csv, gaming_property_self_published_claims.csv",
-        "C2 no validated primary key on 3",
-        "C7 DOUBLE-COUNTING RISK - money tables a buyer cannot safely total: fac_audit_sefa_gaming_programs.csv, gaming_property_self_published_assertions.csv, gaming_property_self_published_claims.csv"
-      ],
-      "n_rows": 127207,
-      "n_tables": 54
-    },
-    "needs_copy": false
+    "method": "Native status is established from what an organisation says about itself in its own filing, never from an NTEE code and never from a name. A mission statement naming a specific nation is a stronger claim than one describing Native-serving work generally, and the two are recorded separately. The dataset states plainly what it cannot see: tribal instrumentalities largely do not file 990s under IRC section 7871, so the largest tribal institutions can be absent by law, and place-named organisations that are not Native are identified and excluded rather than left to inflate the totals \u2014 4,651 of 12,764 rows are excluded by a prior ruling. The disposition of a row is carried in `funnel_stage`, not in `classification_ruling`, which holds an explicit ruling for only 398 rows; 1,831 rows sit at `canonical_name_match` as unruled candidates, and the token the match turned on ships with each so a reader can see the ones that are wrong rather than take the tier on trust."
   },
   {
     "id": "subcontracting",
     "shelf": "pro",
     "level": "entity",
     "origin": "lumecon",
-    "rows_label": "77,529 rows",
+    "rows_label": "90,479 rows",
     "vintage": "",
     "version": "v0",
-    "updated": "2026-09-01",
+    "updated": "2026-09-02",
     "downloads": 0,
     "name": "Native Federal Subcontracting",
     "short_name": "Subcontracting",
     "tracks": "Subaward transactions where a Native entity is the prime, the subcontractor, or both, drawn from federal subaward reporting.",
     "sources": "FSRS subaward reporting via USAspending, keyed to the prime award.",
-    "method": "Both sides of every subaward are resolved independently, so a Native prime paying a non-Native sub and the reverse are distinguishable rather than collapsed. Repeat monthly filings of one subaward are retained and flagged in-band rather than deleted, because the filings are real events: summing without that filter overstates the total by 86.9%. A subaward is a slice of a prime award and must never be added to the prime contracting dataset \u2014 the totalling rules ship with the data.",
-    "cedar": {
-      "cedar_id": "subcontracting",
-      "status": "BLOCKED",
-      "blockers": [
-        "C1 grain UNSTATED on 1: subawards.csv",
-        "C2 no validated primary key on 1",
-        "C3 literal duplicates: subawards.csv(10,770)",
-        "C7 DOUBLE-COUNTING RISK - money tables a buyer cannot safely total: subawards.csv",
-        "C4 only 42% of entity-bearing rows carry a Cedar id, and every record in this dataset HAS an entity subject - so this is unresolved work, not scope. See ADR-009 and ADR-010."
-      ],
-      "n_rows": 77529,
-      "n_tables": 3
-    },
-    "needs_copy": false
-  },
-  {
-    "id": "funding",
-    "shelf": "standard",
-    "level": "entity",
-    "origin": "lumecon",
-    "rows_label": "3,544,079 rows",
-    "vintage": "",
-    "version": "v0",
-    "updated": "2026-09-01",
-    "downloads": 0,
-    "name": "Federal Funding to Indian Country",
-    "short_name": "Funding",
-    "tracks": "Federal financial assistance \u2014 grants, cooperative agreements, direct payments and loans \u2014 to tribes, tribal organisations and Native-serving entities.",
-    "sources": "USAspending assistance transactions; FAADS historical archives for the pre-2008 record.",
-    "method": "Recipients are matched to the entity layer and the basis for inclusion is carried on the row, so a payment to a tribal government, to an intertribal consortium acting for many tribes, and to a Native-serving non-Native organisation are distinguishable. Apparent duplicate transactions are retained: they are usually distinct modifications to one award that agree on every published field, and removing them would have destroyed $8.29B of real obligations.",
-    "cedar": {
-      "cedar_id": "funding",
-      "status": "BLOCKED",
-      "blockers": [
-        "C1 grain UNSTATED on 3: faads_transactions.csv, faads_transactions_all_agencies.csv, native_passthrough.csv",
-        "C2 no validated primary key on 3",
-        "C3 literal duplicates: faads_transactions.csv(1,001), faads_transactions_all_agencies.csv(179,259), native_passthrough.csv(116)",
-        "C7 DOUBLE-COUNTING RISK - money tables a buyer cannot safely total: faads_transactions.csv, faads_transactions_all_agencies.csv, native_passthrough.csv",
-        "C4 only 40% of entity-bearing rows carry a Cedar id, and every record in this dataset HAS an entity subject - so this is unresolved work, not scope. See ADR-009 and ADR-010."
-      ],
-      "n_rows": 3544079,
-      "n_tables": 9
-    },
-    "needs_copy": false
+    "method": "Both sides of every subaward are resolved independently, so a Native prime paying a non-Native sub and the reverse are distinguishable rather than collapsed. Repeat monthly filings of one subaward are retained and flagged in-band rather than deleted, because the filings are real events: summing without that filter lands 63.4% above the correct total ($57.02B unfiltered against $34.91B correct, a $22.11B difference), and the denominator is stated because the same difference is 38.8% of the unfiltered figure and quoting the two without saying which is which makes an honest warning look like an arithmetic error. A subaward is a slice of a prime award and must never be added to the prime contracting dataset \u2014 the totalling rules ship with the data."
   }
 ]
