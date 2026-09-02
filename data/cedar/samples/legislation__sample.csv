@@ -1,0 +1,11 @@
+vote_id,congress,chamber,date,bill_id,question,result,yea,nay,margin,vehicle_type,majority_side
+H093-0076,93,House,1973-05-07,93-hr-4967,TO SUSPEND THE RULES AND PASS H.R. 4967,Passed,336,8,328,bill,yea
+S099-0374,99,Senate,1985-12-13,99-s-1396,"TO TABLE THE MELCHER, MT) APPEAL OF THE CHAIR'S RULING THAT THE MELCHER AMENDMENT TO S 1396, TO GIVE LEGAL ADVISE TO PERSONS RECEIVING ALLOCATIONS OF LAND ON THE WHITE EARTH INDIAN RESERVATION WAS NOT GERMANE",Agreed to,56,36,20,bill,yea
+H102-0874,102,House,1992-10-03,102-s-2481,"SUSPEND THE RULES AND PASS, AS AMENDED",Passed,335,74,261,bill,yea
+H104-0682,104,House,1995-09-29,104-hr-1977,Motion to Recommit Conference Report with Instructions,Passed,277,147,130,bill,yea
+H105-0482,105,House,1997-10-01,105-hr-1476,On motion to suspend the rules and pass,Failed,229,176,53,bill,yea
+S108-0511,108,Senate,2004-03-11,108-sconres-95,On the Amendment,Amendment Rejected,42,54,-12,resolution_vehicle,nay
+S110-0474,110,Senate,2008-02-26,110-s-1200,On Passage of the Bill,Bill Passed,83,10,73,bill,yea
+H112-1331,112,House,2012-06-19,112-hr-2938,"On Motion to Suspend the Rules and Pass, as Amended",Passed,343,78,265,bill,yea
+H114-0129,114,House,2015-03-23,114-hr-360,"On Motion to Suspend the Rules and Pass, as Amended",Passed,297,98,199,bill,yea
+H116-0544,116,House,2019-09-25,116-hr-2203,On Motion to Recommit with Instructions,Failed,207,216,-9,bill,nay

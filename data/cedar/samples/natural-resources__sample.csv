@@ -1,0 +1,11 @@
+resource_revenue_event_id,period_start,recipient_entity_name,commodity,revenue_type,amount_usd,aggregation_level,source_system,confidence
+RRE-ANCSA-AHTNA-IN_7I_NET-2022,2022-01-01,"Ahtna, Incorporated",Timber and subsurface estate resources (ANCSA 7(i) shareable),ancsa_7i_revenue_sharing_net_of_7j,3472182.00,entity_specific,ANCSA_7i_7j_annual_reports,A
+RRE-ONRR-REV-000521,2004-10-01,,Gas,royalty,8.86,national_aggregate,ONRR_NRRD_monthly_revenue,A
+RRE-ONRR-REV-001636,2008-06-01,,Coal,royalty,9524385.22,national_aggregate,ONRR_NRRD_monthly_revenue,A
+RRE-ONRR-REV-002751,2011-11-01,,Natural gas liquids,royalty,2455430.14,national_aggregate,ONRR_NRRD_monthly_revenue,A
+RRE-ONRR-REV-003866,2015-02-01,,Oil,other_reported_revenue,-980.57,national_aggregate,ONRR_NRRD_monthly_revenue,A
+RRE-ONRR-REV-004981,2017-07-01,,Oil,other_reported_revenue,-3184.74,national_aggregate,ONRR_NRRD_monthly_revenue,A
+RRE-ONRR-REV-006095,2019-11-01,,Oil,royalty,-304911.14,national_aggregate,ONRR_NRRD_monthly_revenue,A
+RRE-ONRR-REV-007210,2022-04-01,,Oil,royalty,318091.24,national_aggregate,ONRR_NRRD_monthly_revenue,A
+RRE-ONRR-REV-008325,2024-08-01,,Copper,royalty,0.00,national_aggregate,ONRR_NRRD_monthly_revenue,A
+RRE-ND-00121,,Three Affiliated,Oil and gas,severance_tax_share,4567302.42,entity_specific,ND_State_Treasurer_tax_distribution_search,A
