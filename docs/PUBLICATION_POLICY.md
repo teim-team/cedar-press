@@ -243,3 +243,31 @@ contracting; contracting gains a date and a counterparty from deals.
 Keep the direction straight when recording: a candidate derived from a sibling
 dataset is an **observation Cedar made**, not a claim some source published,
 and its `inclusion_basis` should say so.
+
+### Tested: a new CAGE is NOT a reliable signal of a change of hands
+
+The owner's hypothesis, worth testing because it would have been a clean
+discriminator: *"when a company changes hands, it's a complicated process, so
+they do get issued a new CAGE code."*
+
+Measured against the one unambiguous acquisition in Cedar's data:
+
+```
+BROADLEAF, INC.   cage 5RWC4   uei DGA4AQ4DJYY9   2017-2026   1,962 obs
+```
+
+**Broadleaf keeps CAGE 5RWC4 straight through the ASRC acquisition.** A
+separate `BROADLEAF SERVICES, INC.` appears in 2025 on a different UEI and CAGE
+8JY35, but that is a different legal entity, not a reissue. Every All Native
+and Ho-Chunk company holds exactly one CAGE across its whole span too, which is
+consistent with the reporting-change reading but tells us nothing new.
+
+The hypothesis is plausible in DLA practice and probably turns on deal
+structure — a stock purchase leaves the legal entity intact and its CAGE with
+it, an asset purchase creates a new entity and a new CAGE. But **Cedar's data
+does not support using CAGE change as a discriminator**, and one confirmed
+counter-example is enough to keep it out of a rule.
+
+The ultimate-parent-family test above remains the discriminator. Note also that
+`fpds_uei_cage_map.csv` carries blank and literal-`NAN` CAGE values on the same
+UEIs, so any CAGE-based reasoning has to clean that first.
