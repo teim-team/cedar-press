@@ -213,7 +213,7 @@ find its row here and stop — you do not need to grep `docs/`.*
 | `foia_request_index.csv` | `CONGRESSIONAL_CORRESPONDENCE_FOIA_BUILD_LOG.md` | — |
 | `resource_revenue.csv` | `RESOURCE_LEDGER_BUILD_LOG.md` (ONRR, ND, UT, MT) | `RESOURCE_LEDGER_STATES_LOG.md` (the other 15 states) · `RESOURCE_RECIPIENT_SIDE_LOG.md` · `RESOURCE_ASSETS_BUILD_LOG.md` — **explicitly paired waves, not duplicates** |
 | `tribal_tax_bases.csv` | `TRIBAL_TAX_BUILD_LOG.md` | `ND_TRIBAL_TAX_LOG.md` · `ND_SEVERANCE_BUILD_LOG.md` · `TRIBAL_TAX_DECOMPOSITION.md` |
-| tribal debt / bonds | `TRIBAL_DEBT_BUILD_LOG.md` | — |
+| tribal debt / bonds | `TRIBAL_DEBT_BUILD_LOG.md` (issuer universe, 2026-08-05) | **three companions, none superseding another — each opens a different channel.** `TRIBAL_DEBT_HOLDINGS_BUILD_LOG.md` (2026-09-02, `code/1082`) = who HOLDS the paper, Form N-PORT, 1,585 fund-holdings / 14 obligors / **0 distress flags**. `TRIBAL_DEBT_COURT_DISTRESS_BUILD_LOG.md` (2026-09-02, `code/1110`) = what reached a COURT, CourtListener API, 26 events / 8 dockets / 8 entities, **nothing after 2017**. The two are exact complements: N-PORT begins 2019, the opinion record ends 2017, and they do not overlap by a single year. **EMMA stays CONSTRAINED** — its terms bar the output "either commercially or free of charge" and name "or any manual process"; owner decision **TD-1**. PACER is priced, not closed: **TD-2** |
 | bills & votes | `BILLS_VOTES_COMPLETION_LOG.md` | `BILLS_VOTES_BUILD_LOG_2026-08-05.md` · `VOTINGPATTERNS_BIA_INDEX_WARNING.md` |
 | OIRA / hearings | `OIRA_HEARINGS_BUILD_LOG.md` | — |
 | earmarks | `EARMARKS_SCHEDC_BUILD_LOG.md` | — |

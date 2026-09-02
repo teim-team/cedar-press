@@ -194,9 +194,62 @@ def load_bridge():
 
 
 def backup(src, dst):
+    """Snapshot `src` to `dst`, and REFUSE to reuse a stale snapshot.
+
+    ------------------------------------------------------------------
+    2026-09-02 INCIDENT. This function, plus two `open(BAK_*)` reads
+    further down, made this script a RESTORE dressed as an enricher, and
+    on 2026-09-02 it silently destroyed three other passes' work.
+
+    The mechanism, exactly:
+
+      * `BAK_*` embeds only the DATE, so a second run on the same day
+        addresses the FIRST run's snapshot.
+      * the old body returned early on `os.path.exists(dst)` - "exists,
+        kept" - so the snapshot was never refreshed.
+      * the two read sites then read **the snapshot**, not the live file.
+
+    So the second run of the day rebuilt the live table from a morning
+    snapshot. At 09:04 it took `subawards.csv` from **87,177 rows back to
+    76,859**, discarding a 10,318-row fold-in plus `910`'s primary-key
+    backfill and `911`'s identity attachment; and it took
+    `prime_contracts.csv` back to a 01:14 snapshot, discarding `1085`'s
+    326,166 PSC/description fills and **dropping five columns belonging
+    to `1079`** (`identifier_ruling_method`, `_tier`, `_quarantined`,
+    `_basis`, `_review`). Nothing errored. The run printed
+    `[871 verify] OK -- I1 I2 I3 I4 I5 all hold`, because every invariant
+    was checked against the same stale snapshot it had just restored.
+
+    **A verify that compares the output to the input it was rebuilt from
+    cannot see a revert.** That is this repo's signature defect - a check
+    that measures something other than its own name - in a new place.
+
+    Two changes, both required; neither is sufficient alone:
+      1. here - a snapshot that does not match the live file is STALE and
+         is superseded rather than reused, so the verify baseline is
+         always the state this run actually started from;
+      2. at the two read sites - read the LIVE file. Writing goes to
+         `.tmp871` and lands by `os.replace`, so reading the live file is
+         safe and was never the reason for reading the backup.
+    ------------------------------------------------------------------
+    """
     if os.path.exists(dst):
-        print(f"  [bak] {os.path.basename(dst)} exists, kept")
-        return
+        if os.path.getsize(dst) == os.path.getsize(src):
+            print(f"  [bak] {os.path.basename(dst)} matches live, kept")
+            return
+        # STALE. Keep it - nothing here is ever deleted - but move it
+        # aside under a distinct name and take a fresh one, so the
+        # baseline this run verifies against is the state it started in.
+        n = 1
+        while os.path.exists(f"{dst}.superseded{n}"):
+            n += 1
+        stale_bytes = os.path.getsize(dst)
+        os.replace(dst, f"{dst}.superseded{n}")
+        print(f"  [bak] {os.path.basename(dst)} was STALE "
+              f"({stale_bytes:,} bytes vs live {os.path.getsize(src):,}); "
+              f"moved to .superseded{n} and re-taken. A same-day re-run "
+              f"must NEVER reuse the earlier run's snapshot - see the "
+              f"incident note in backup().")
     shutil.copyfile(src, dst)
     print(f"  [bak] {os.path.basename(dst)}")
 
@@ -218,7 +271,10 @@ def promote_prime(xw, place, bridge):
     tier = Counter()
     n = 0
     cents = 0
-    with open(BAK_PRIME, newline="", encoding="utf-8") as fin, \
+    # READ THE LIVE FILE. Reading BAK_PRIME here is what turned a
+    # same-day re-run into a restore - see backup(). Output goes to
+    # `.tmp871` and lands by os.replace, so this is safe.
+    with open(PRIME, newline="", encoding="utf-8") as fin, \
          open(tmp, "w", newline="", encoding="utf-8") as fout:
         r = csv.reader(fin)
         hdr = next(r)
@@ -288,7 +344,8 @@ def promote_subs(xw):
     tier = Counter()
     n = 0
     cents = 0
-    with open(BAK_SUBS, newline="", encoding="utf-8") as fin, \
+    # READ THE LIVE FILE - see backup() and the PRIME site above.
+    with open(SUBS, newline="", encoding="utf-8") as fin, \
          open(tmp, "w", newline="", encoding="utf-8") as fout:
         r = csv.reader(fin)
         hdr = next(r)

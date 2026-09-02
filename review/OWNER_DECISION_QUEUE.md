@@ -1996,16 +1996,46 @@ describe.
 ### What is already in place, so nothing ships wrong while this waits
 
 `760_collection_descriptors.py` (ADR-018) now refuses to publish a row count
-its own sample contradicts. It emits the union of both declarations (4,573
-rows, with `n_rows_basis` naming both halves) and marks the dataset BLOCKED
-with the measurement in `cedar.blockers`. `verify` exits 1 and `selftest`
-carries three fixtures that prove the check fires. **The status reverts by
-itself the moment the collection is settled** — whichever way it is settled —
-so this item blocks nothing except the dataset's own READY flag.
+its own sample contradicts. It marks the dataset BLOCKED with three measured
+blockers in `cedar.blockers` — the count mismatch, `C4 identity path`
+(`business_entity_id` on 4 of 2,916 rows) and `C1 grain UNSTATED`. `verify`
+exits 1 and `selftest` carries three fixtures that prove the check fires.
+**The status reverts by itself the moment the collection is settled** —
+whichever way it is settled — so this item blocks nothing except the dataset's
+own READY flag.
+
+> **CORRECTED the same day, and the correction is evidence for this item.**
+> This paragraph first said 760 "emits the union of both declarations (4,573
+> rows)". Codex refused that on PR #29 round 3 and was right: summing 1,657
+> and 2,916 asserts the two sets are disjoint rows of one dataset, which
+> nothing establishes, and `rows_label` is the field the product renders while
+> the qualification sat in a sibling file. **No count is published now** —
+> `rows_label` reads `row count unresolved` and the two components ship
+> separately, unadded.
+>
+> **Measuring the disjointness then found the fact that should decide this
+> item.** Between the sets they are nearly disjoint — 10 shared firm names
+> against the directory's 2,738. But `1,657` is itself a sum over **five
+> different grains**: 45 firms, 324 firm-**years** (38 distinct firms), 335
+> verifications, **the same 335 firms again** in a candidates table sharing
+> all 335 `(name, uei)` keys and its full column set, 613 rows of a published
+> **cross-tabulation** (`cell_type`, `dimension_1`, `n_firms` — not firms at
+> all), and 5 pairs.
+>
+> **So the six tables now in this collection are not one dataset either.**
+> That reframes the decision: the question is not only whether to add the
+> directory, but whether a collection whose row count double-counts a table
+> and includes an aggregate cross-tab should be shipping as READY at all.
+> The third option below — three relations, three collections — gets stronger
+> with this measurement, and a fourth is now visible: the individual-firm set
+> may need to shed `individual_native_verification_candidates.csv` (a
+> superseded input, not a customer table) and
+> `individual_native_firm_contracts_published.csv` (an aggregate, not a row
+> grain).
 
 ---
 
-## TD-2 — PACER: buy the filings behind eight named tribal-debt dockets?
+## TD-2 — PACER: buy the filings behind nine named tribal-debt dockets?
 *Appended 2026-09-02 by the tribal-debt court workstream (`code/1110_tribal_debt_court_distress.py`). Full evidence: `docs/TRIBAL_DEBT_COURT_DISTRESS_BUILD_LOG.md`.*
 
 **Decision:** the free CourtListener corpus gives us the *existence* of these
@@ -2020,7 +2050,7 @@ obtained from it — `docs/PUBLICATION_POLICY.md` `TERMS-SCOPE`, *"the
 distinction is authorship, not subject matter"*: a court filing is the court's
 record.
 
-**What it would buy, against named docket numbers.** These are the eight
+**What it would buy, against named docket numbers.** These are the nine
 dockets already staged in `data/staging/tribal_debt_court_dockets.csv`; the
 first three are the ones that would move the dataset:
 
@@ -2031,6 +2061,7 @@ first three are the ones that would move the dataset:
 | `5:12-cv-01278` | C.D. Cal. | 2012-08-01 | `Wells Fargo Bank NA v. Cabazon Band of Mission Indians` — Cabazon is a `1082` holdings obligor and the party array names `East Valley Tourist Development Authority`, its borrowing instrumentality |
 | `3:01-cv-04125` | N.D. Cal. | 2001-11-05 | `Sonoma Falls Developers v. Dry Creek Rancheria` — Dry Creek is River Rock's nation, a `1082` obligor |
 | `3:09-cv-00768` · `3:12-cv-00255` · `3:13-cv-00372` | W.D. Wis. | 2009–2013 | the Lake of the Torches trio. We already hold the published opinions; the filings would add the indenture itself |
+| `1:10-cv-01039` | E.D. Wis. | 2010-11-19 | `Wells Fargo Bank NA v. Sokaogon Chippewa Community` — the Mole Lake sibling of Lake of the Torches, same trustee, same instrument shape |
 | `1:20-cv-00183` | E.D. Cal. | 2020-02-04 | `Picayune Rancheria v. Goldenwise Capital Management` — the nation as **plaintiff**; lower value |
 
 **If BUY:** budget is small and boundable — a docket sheet plus the complaint
@@ -2041,8 +2072,8 @@ agreement filed as an exhibit is the document this whole workstream keeps saying
 to quote, and we currently quote courts describing instruments rather than the
 instruments themselves.
 
-**If DON'T:** the table stays as it is, which is honest but thin: **26 events,
-8 dockets, nothing after 2017, and only two rows that are a court holding
+**If DON'T:** the table stays as it is, which is honest but thin: **32 events,
+9 dockets, nothing after 2017, and only two rows that are a court holding
 anything.** Say so once here so a later session does not re-derive the same
 gap.
 

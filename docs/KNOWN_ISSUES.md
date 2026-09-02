@@ -149,7 +149,7 @@ literal duplicates — the collapsed grain the correction declared.
 because it is the clearest worked example in the repo of a correctly named,
 correctly owned gate failure that got fixed instead of inherited.
 
-## A5 · S1 · The arbiter document of last resort had gone stale in 6 of 14 rows
+## A5 [RESOLVED 2026-09-02 — see note at end] · S1 · The arbiter document of last resort had gone stale in 6 of 14 rows
 
 **What it was.** `docs/DOC_CONTRADICTIONS_2026-08-26.md` exists to be the
 tie-breaker when two build logs disagree — *"before quoting any number from a
@@ -827,7 +827,7 @@ code/1108_codebook_fragment_repair.py verify` (K4 uses
 <!-- BEGIN STALE-TAIL-1081 -->
 ## The stale-entity tail — what is left, and the one acquisition that would close it
 
-*Added 2026-09-02 by workstream STALE-TAIL (ADR-022). Full write-up and the
+*Added 2026-09-02 by workstream STALE-TAIL (ADR-025). Full write-up and the
 regenerable before/after: `docs/STALE_TAIL_CLOSURE_1081.md`. Measure:
 `py -3 code/1081_stale_tail_dated_facts.py measure`.*
 
@@ -920,3 +920,9 @@ reads `attribution_method`. The
 `.bak_2026-09-02_pre_1079_quarantine_method_exposure` files beside the five
 touched tables are the signal.
 <!-- END QUARANTINE -->
+
+<!-- BEGIN A5-RESOLUTION -->
+### A5 resolved — `62` NameError was a two-minute window
+
+`_load_declared_removals()` was added at import time and used `ROOT`, which is bound further down the module. Reported by the stale-tail workstream, and true when it looked. The loader now derives its path from `__file__` instead, and `62` imports clean: `runpy` with `run_name='not_main'` raises no `NameError`, and a full run has completed since. **A failure observed inside a live edit window is real but perishable — re-measure before recording it as an issue.**
+<!-- END A5-RESOLUTION -->

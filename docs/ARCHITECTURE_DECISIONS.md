@@ -1622,40 +1622,7 @@ reason, and reversing the order would have reverted the attribution columns the
 way `133 build` reverted `168`'s links on 2026-08-26.
 <!-- END ADR-021-DEALS-MERGE -->
 
-<!-- BEGIN ADR-022-STALE-TAIL-1081 -->
-## ADR-022 — the stale-entity tail acquisition (workstream STALE-TAIL, 2026-09-02)
 
-**Status:** accepted 2026-09-02. Declared per AGENTS.md *Parallel agents*.
-
-**Files this workstream owns**
-
-| file | what is written | script |
-|---|---|---|
-| `code/1081_stale_tail_dated_facts.py` | the acquisition, its `verify` and its `selftest` | — |
-| `data/clean/entity_dated_public_facts.csv` | **new table.** One row per (entity, route, source, fact_key, identifier). Nothing else writes it. | `code/1081_*` |
-| `docs/STALE_TAIL_CLOSURE_1081.md` | **new doc.** The before/after and the honest negatives | `code/1081_*` |
-| `data/staging/stale_tail_1081/` | the CCD year cache and the ProPublica payload cache | `code/1081_*` |
-
-**Regenerated, not hand-edited:** `data/clean/cedar_entity_freshness.csv` and
-`docs/ENTITY_FRESHNESS.md` are 830's output and were refreshed by re-running
-`code/830_entity_freshness.py`, which is the documented way. Backed up first to
-`.bak_2026-09-02_pre_1081_stale_tail_dated_facts`.
-
-**Explicit non-overlap with the two live sibling workstreams.**
-`code/1020_tail_web_probe.py` owns the WEB tail (does an entity have a site);
-`code/1021_register_only_first_rows.py` owns the register-only slice's FIRST
-ROW, in `data/staging/`. This workstream writes no website, mints nothing, and
-its slice is the 830 freshness tail — a different population and a different
-question. It **imports** 1021's name-matching rather than copying it, so the
-school-level conflict refusal, the all-generic fallback and the Navaho/Navajo
-substitution tolerance cannot drift into two versions.
-
-**A UEI, an EIN and an NCES id are LOOKUP KEYS here, never links.** No tier is
-inherited. The ledger contributes only `confidence_tier == A` rows with an
-empty `exclusion_id`; every EIN is re-verified against the IRS's own name for
-it before a date is written; a name that fails is kept as `NOT_MATCHED` with
-what was seen.
-<!-- END ADR-022-STALE-TAIL-1081 -->
 
 
 <!-- BEGIN ADR-023-STANDARD-GUARD -->
@@ -1939,7 +1906,36 @@ stopped at the SEC boundary on purpose.
 <!-- END ADR-SEC-GAMING -->
 
 <!-- BEGIN ADR-025-STALE-TAIL-1081 -->
-## ADR-025 — CLAIMED 2026-09-02 by unnamed
+## ADR-025 — the stale-entity tail acquisition (workstream STALE-TAIL, 2026-09-02)
 
-*Placeholder. Replace this line with the decision; keep the markers.*
+**Status:** accepted 2026-09-02. Declared per AGENTS.md *Parallel agents*.
+
+**Files this workstream owns**
+
+| file | what is written | script |
+|---|---|---|
+| `code/1081_stale_tail_dated_facts.py` | the acquisition, its `verify` and its `selftest` | — |
+| `data/clean/entity_dated_public_facts.csv` | **new table.** One row per (entity, route, source, fact_key, identifier). Nothing else writes it. | `code/1081_*` |
+| `docs/STALE_TAIL_CLOSURE_1081.md` | **new doc.** The before/after and the honest negatives | `code/1081_*` |
+| `data/staging/stale_tail_1081/` | the CCD year cache and the ProPublica payload cache | `code/1081_*` |
+
+**Regenerated, not hand-edited:** `data/clean/cedar_entity_freshness.csv` and
+`docs/ENTITY_FRESHNESS.md` are 830's output and were refreshed by re-running
+`code/830_entity_freshness.py`, which is the documented way. Backed up first to
+`.bak_2026-09-02_pre_1081_stale_tail_dated_facts`.
+
+**Explicit non-overlap with the two live sibling workstreams.**
+`code/1020_tail_web_probe.py` owns the WEB tail (does an entity have a site);
+`code/1021_register_only_first_rows.py` owns the register-only slice's FIRST
+ROW, in `data/staging/`. This workstream writes no website, mints nothing, and
+its slice is the 830 freshness tail — a different population and a different
+question. It **imports** 1021's name-matching rather than copying it, so the
+school-level conflict refusal, the all-generic fallback and the Navaho/Navajo
+substitution tolerance cannot drift into two versions.
+
+**A UEI, an EIN and an NCES id are LOOKUP KEYS here, never links.** No tier is
+inherited. The ledger contributes only `confidence_tier == A` rows with an
+empty `exclusion_id`; every EIN is re-verified against the IRS's own name for
+it before a date is written; a name that fails is kept as `NOT_MATCHED` with
+what was seen.
 <!-- END ADR-025-STALE-TAIL-1081 -->

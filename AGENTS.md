@@ -7394,3 +7394,60 @@ QUOTED INSIDE PROSE, including the ones in my own ADR. Anchoring to line start
 gives the true answer: that file is balanced and only `MONEY_TOTALLING_RULES.md`
 was broken. A marker audit must anchor, or it counts the documentation of
 markers as markers.
+
+
+---
+
+## 2026-09-02 — workstream QUARANTINE (1079): CDR-11 / CDR-12 closed, and the 62 gate is RED with nothing of mine in it
+
+**What was done.** `code/1079_quarantine_method_exposure.py`, ADR-019, full
+write-up `docs/QUARANTINE_EXPOSURE_LOG_2026-09-02.md`. Five columns carrying
+the identity ledger's RULING onto `prime_contracts.csv`; 737 identifiers
+withdrawn ($16,997,581,754.88 across 103,171 rows); 67 repointed
+($2,443,371,845.81 across 6,550 rows); 126 entities moved; total obligations
+unchanged to the cent. `verify` PASS on all seven invariants, `selftest` PASS
+including the gate itself made to exit 1 three ways.
+
+**`62_no_regression_check.py` exits 1, and standing rule 15 says name the owner
+with a measurement rather than record it as "not mine" and continue.** Measured
+2026-09-02 with twelve other agent python processes live in this repo:
+
+| red line | owner, measured |
+|---|---|
+| `lint_class2c` 60 → 69 | nine NEW drop counters, named by 293: `1060_splink_pilot`, `1085`, `1086`, `846`, `852`, `873`, `104`, `106`, `107b`. **None is 1079** |
+| `lint_class3` 0 → 2 | `1060_splink_pilot.py`, `992_newsletter_deal_candidates.py` |
+| `lint_class4` 9 → 14 | `1030`, `1031`, `1110`, `980`, `992` — run-deadline patterns |
+| `lint_class7` 42 → 44 | `1030`, `1031`, `1110` — positional candidate ids |
+| `lint_class1` 0 → 1 | `1011_cross_dataset_reconciliation.py:430`, the additions glob |
+| `rulings_unapplied` 1,215 → 2,894 | measured off `cedar_ruling_ledger_consolidated.csv`, producer `173_consolidate_rulings_ledger.py`. 1079 does not write that file |
+| `contract_violations` = 11 | 4 are `federal_funding_transactions.csv` / `federal_funding_tribe_year_panel.csv` declaring a `tribe_id` that 843 removed; 7 are ORPHAN shippable `.bak_*.csv` files other passes left in `data/clean` |
+| `tables_*` 5 metrics rising, `ship_tables_at_zero` 13 → 21 | 19 NEW tables from the geo, constellation, gaming-harvest and business-crosswalk passes, none of them mine |
+| `SHIPPING LOST: advocacy_passthrough_2026-08-07.csv` | the table is gone from `data/clean`; not touched by this pass |
+
+**One line DID name my columns and it is a mid-flight read, not a loss.**
+`COLUMN LOSS ... prime_contracts.csv 75 -> 70 ... lost: identifier_ruling_*`.
+The live file carries **75** columns and 227,540 rows flagged
+`identifier_ruling_quarantined = 'Y'`; the gate was started while this pass's
+`.part` had not yet been renamed into place, so it read the 70-column
+pre-state. Re-measured after the rename: live 75, the `pre_1085` backup 75, and
+`product_or_service_code_description` filled on 247,987 rows in **both** —
+so agent 1085's repull was not lost either.
+
+**A real cross-agent hazard this pass created and then measured away.** To
+re-run the classifier from a clean pre-state, `1079` was rolled back by
+restoring six tables from its own `.bak_<TAG>` copies. That restore reverts
+anything another agent wrote to those tables in the window — the script-163
+incident in miniature. It was done from a **literal list of six files, never a
+glob**, and the one table another agent had touched in the window
+(`prime_contracts.csv`, by `1085`) was checked column-by-column afterwards and
+had lost nothing. The rule stands anyway: **restoring your own backup in a
+repo with twelve live agents is a write to every other agent's table too.**
+
+**And the reason a rollback was needed at all, which is the more useful
+lesson:** `mode(awardee_name)` in duckdb has no defined tie-break, so
+`MGKFVCKA3D73` came back as `MUSKOGEE TECHNOLOGY JOINT VENTURE` on one run and
+without the words `JOINT VENTURE` on the next. The fragment rule exempts joint
+ventures, so the same identifier was WITHDRAWN in one run and HELD in the next
+— 8 rows and $500,078 that reconciled against nothing. Defect class 7. Fixed
+with `first(nm ORDER BY c DESC, nm)`, and the joint-venture test now reads
+every name the registrant ever filed.

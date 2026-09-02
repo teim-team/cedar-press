@@ -1053,6 +1053,7 @@ ORG_MARKER = re.compile(
     r"united states|state of|people of|commonwealth|county|city of|"
     r"department|commission|board|bureau|secretary|university|"
     r"casino|resort|gaming|services|systems|management|capital|"
+    r"community|council|committee|agency|district|office of|"
     r"investors?|securities|financial|savings|credit union)\b", re.I)
 
 
@@ -1060,11 +1061,22 @@ def side_is_a_natural_person(side):
     """A caption side with no organisational marker and at most three tokens is
     almost certainly a person.  Deliberately conservative: it errs towards
     calling something a person, because the cost of that error is a held row
-    and the cost of the opposite error is publishing a private individual."""
+    and the cost of the opposite error is publishing a private individual.
+
+    BUT ERRING SAFE IS STILL ERRING, and this one cost a real case. The first
+    list had no `community` in it, so `Wells Fargo Bank, N.A. v. Sokaogon
+    Chippewa Community` - a Wells Fargo tribal bond action, the Mole Lake
+    sibling of Lake of the Torches - read as a bank suing a three-word person
+    and was held out of the table entirely. **A TRIBAL ENTITY IS NEVER A
+    NATURAL PERSON**, so the tribal test runs here too, and it is the same
+    word-boundary test used everywhere else in this script.
+    """
     s = re.sub(r"[,.]", " ", side or "").strip()
     if not s:
         return False
     if ORG_MARKER.search(side or ""):
+        return False
+    if tribal_in_caption(side or ""):
         return False
     return len(s.split()) <= 3
 
@@ -1299,9 +1311,34 @@ def build_dockets(hits, holdings, event_captions=()):
         # which box the filer ticked on a civil cover sheet, not whether
         # anybody lent anybody money: this repo's signature defect, a check
         # that does not measure its own name. Recorded so it is not re-added.
-        signal = ("a financial institution is a party: " + fin.group(0)) if fin \
-            else ("an opinion in this case is already staged as a debt "
-                  "event") if opinion_backed else ""
+        #
+        # AND THE FINANCIAL PARTY HAS TO BE AN ADVERSE PARTY, not an amicus.
+        # A bare "is a bank anywhere in the party array" test admitted
+        # `Blue Lake Rancheria v. Kalshi, Inc.` (62 parties) and
+        # `Mescalero Apache Tribe v. Kalshi, Inc.` (43 parties) - the sports
+        # prediction-market coalition cases, nothing to do with debt - on the
+        # strength of the **Native American Finance Officers Association**
+        # appearing among the amici. It also admitted a 10-party construction
+        # payment dispute on `Credit Provider Group LLC`.
+        #
+        # MEASURED, not guessed: the nine genuine debt dockets in this corpus
+        # carry 2-6 parties; the three false positives carry 10, 43 and 62.
+        # So the financial party must be IN THE CAPTION - where an adverse
+        # party is - or the docket must be a two-sided commercial case.
+        fin_in_caption = FINANCIAL_PARTY.search(cap)
+        small = len(parties) <= 6
+        if fin and not (fin_in_caption or small):
+            dropped.append(dict(h, reject_reason=(
+                f"the only financial name is {fin.group(0)!r}, and it is not in "
+                f"the caption of a {len(parties)}-party docket - an amicus or a "
+                f"bystander, not the counterparty")))
+            continue
+        signal = (("a financial institution is a party: " + fin.group(0)
+                   + (" (named in the caption)" if fin_in_caption
+                      else f" (in a {len(parties)}-party, two-sided docket)"))
+                  if fin else
+                  ("an opinion in this case is already staged as a debt "
+                   "event") if opinion_backed else "")
         if not signal:
             dropped.append(dict(h, reject_reason=(
                 "no financial institution among the parties and no staged "

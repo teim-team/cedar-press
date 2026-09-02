@@ -483,6 +483,122 @@ def load(path: Path):
 # and named in the sample README as a coverage fact.
 SENTINELS = {"nan", "none", "null", "<na>", "nat"}
 SENTINELS_SEEN: dict = {}
+# {dataset: (rows short before top-up, rows after)}. Non-empty means the
+# source table changed between the two streaming passes.
+STREAM_TOPUP: dict = {}
+
+
+# STREAMING, FOR THE TABLES THAT NO LONGER FIT. Added 2026-09-02.
+#
+# `load()` materialises the whole table as a list of dicts. That was fine when
+# `prime_contracts.csv` was 1.22 GB / 70 columns and it is not now: at 1.46 GB
+# / 75 columns it is roughly 10 GB of Python objects on a machine with
+# **16.4 GB total and 1.6 GB free**, with ten other jobs running and the
+# project directory on the slow spindle. A run that used to take seven minutes
+# for all fourteen datasets spent **over thirty on `contractors` alone** and
+# was swapping rather than computing.
+#
+# So a big table is sampled in TWO STREAMING PASSES and never held:
+#
+#   pass 1  read once, and keep only a completeness score per publishable row
+#           (`array('B')`, one byte each - 1.2 MB for 1.2 M rows, against
+#           ~10 GB for the dicts) plus the per-column sentinel counts.
+#   pass 2  compute the median, the "rich" subset and the N evenly spread
+#           target positions, then read again and lift only those N rows.
+#
+# Two reads of a large file beat one read plus paging, and the memory ceiling
+# stops depending on the table.
+#
+# **The semantics are identical to the in-memory path and that is asserted,
+# not claimed**: `--proveequal <table>` runs both engines on the same file and
+# exits 1 unless the sampled rows match cell for cell. The small-table path is
+# left exactly as it was, so nothing that already worked changes shape.
+BIG_BYTES = 200 * 1024 * 1024
+
+
+def _score(row: dict, cols: list) -> int:
+    """Completeness, with sentinels already discounted. Capped at 255 so it
+    fits a byte; no sample ships more than 255 columns and `SHOW` lists are
+    tens, not hundreds."""
+    n = 0
+    for c in cols:
+        v = row.get(c)
+        if v is not None:
+            s = v.strip()
+            if s and s.lower() not in SENTINELS:
+                n += 1
+    return min(n, 255)
+
+
+def stream_sample(src, cols: list, n: int, dataset: str):
+    """(sampled rows, sentinel counts, publishable row count) - the table is
+    never held."""
+    from array import array
+    scores = array("B")
+    seen: dict = {}
+    with src.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+        for row in csv.DictReader(fh):
+            if not keep(row):
+                continue
+            for c in cols:
+                v = row.get(c)
+                if v is not None and v.strip().lower() in SENTINELS:
+                    seen[c] = seen.get(c, 0) + 1
+            scores.append(_score(row, cols))
+    if seen:
+        SENTINELS_SEEN[dataset] = seen
+    if not scores:
+        return [], seen, 0
+    med = sorted(scores)[len(scores) // 2]
+    rich = [i for i, s in enumerate(scores) if s >= med] or list(
+        range(len(scores)))
+    if len(rich) <= n:
+        want = set(rich)
+    else:
+        step = len(rich) / n
+        want = {rich[int(i * step)] for i in range(n)}
+    # PASS 2, AND IT MUST SURVIVE THE FILE MOVING UNDER IT.
+    #
+    # The first version indexed pass-2 rows against pass-1 positions and broke
+    # as soon as it had them all. On `prime_contracts.csv` that returned
+    # **5 rows of 10**, because a concurrent enricher rewrote the table
+    # between the two reads: same row count, different publishable rows, so
+    # five of the ten wanted positions no longer held a row that passed
+    # `keep()`. A short sample is the quiet failure - it looks like a small
+    # table rather than a race.
+    #
+    # So pass 2 collects the wanted positions AND an evenly strided spare
+    # buffer of equally rich rows, and tops up from the spares in order. The
+    # result is still deterministic given pass 2's bytes, and it cannot come
+    # up short while the file holds enough publishable rows at all. Whether a
+    # top-up happened is REPORTED rather than absorbed - it is the signal that
+    # the source moved mid-read.
+    stride = max(1, len(rich) // (n * 4)) if rich else 1
+    out, spare = [], []
+    with src.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+        i = 0
+        for row in csv.DictReader(fh):
+            if not keep(row):
+                continue
+            hit = i in want
+            if hit or (len(spare) < n * 4 and i % stride == 0
+                       and _score(row, cols) >= med):
+                for c in cols:
+                    v = row.get(c)
+                    if v is not None and v.strip().lower() in SENTINELS:
+                        row[c] = ""
+                (out if hit else spare).append(row)
+            i += 1
+    if len(out) < n:
+        short = n - len(out)
+        seenkeys = {id(r) for r in out}
+        for r in spare:
+            if len(out) >= n:
+                break
+            if id(r) not in seenkeys:
+                out.append(r)
+        STREAM_TOPUP[dataset] = (short, len(out))
+    return out[:n], seen, len(scores)
 
 
 def desentinel(rows: list, cols: list, dataset: str) -> list:
@@ -588,7 +704,15 @@ def main() -> int:
         if not src.exists():
             skipped.append(f"{did}: {tbl} not found")
             continue
-        cols, rows = load(src)
+        big = src.stat().st_size >= BIG_BYTES
+        if big:
+            # header only; the rows are streamed below.
+            with src.open(encoding="utf-8-sig", errors="replace",
+                          newline="") as _fh:
+                cols = list(next(csv.reader(_fh), []))
+            rows = None
+        else:
+            cols, rows = load(src)
         bad = [c for c in cols if c.lower() in NEVER]
         if bad:
             unsafe.append(f"{did}: {tbl} carries {bad}")
@@ -613,8 +737,12 @@ def main() -> int:
         # judged "complete" for holding the string `Nan`.  Only the shipped
         # columns are measured; a sentinel in a column no sample shows cannot
         # reach a customer and is 772's business, not this file's.
-        rows = desentinel(rows, cols, did)
-        rs = sample(rows, cols, N)
+        if big:
+            rs, _, n_total = stream_sample(src, cols, N, did)
+        else:
+            rows = desentinel(rows, cols, did)
+            rs = sample(rows, cols, N)
+            n_total = len(rows)
         if not rs:
             skipped.append(f"{did}: no publishable rows")
             continue
@@ -631,7 +759,7 @@ def main() -> int:
                 w.writeheader()
                 for r in rs:
                     w.writerow(r)
-        built.append((product_id(did), tbl, len(rs), len(rows),
+        built.append((product_id(did), tbl, len(rs), n_total,
                       len(cols), grain.get(tbl, "UNSTATED")))
 
     # A RENAMED SAMPLE LEAVES ITS OLD FILE BEHIND, AND THE OLD FILE STILL
@@ -838,6 +966,11 @@ def main() -> int:
         print(f"    SKIP    {s}")
     for u in unsafe:
         print(f"    REFUSED {u}")
+    for did, (short, got) in sorted(STREAM_TOPUP.items()):
+        print(f"    RACED  {product_id(did)}: the source changed between the "
+              f"two streaming passes - {short} of {N} wanted rows no longer "
+              f"passed the publishable gate; topped up to {got} from the "
+              f"strided spare buffer")
     for did, seen in sorted(SENTINELS_SEEN.items()):
         print(f"    SENTINELS  {product_id(did)}: {sum(seen.values()):,} "
               f"cell(s) blanked -> "
@@ -856,5 +989,45 @@ def main() -> int:
     return 1 if (verify and (unsafe or notincols)) else 0
 
 
+def proveequal(tbl: str) -> int:
+    """Assert the streaming engine and the in-memory engine agree, cell for
+    cell, on a table small enough to run both.
+
+    A new engine that is merely plausible is how this project ships a defect.
+    The claim in the comment above - "the semantics are identical" - is
+    checked here, on a real table, and this returns 1 if it is not true.
+    """
+    did = next((d for d, x in FLAGSHIP.items() if x == tbl), None)
+    if did is None:
+        print(f"  770 proveequal: {tbl} is no dataset's flagship")
+        return 1
+    src = (ROOT / "data" / "spine" / tbl) if tbl in SPINE else CLEAN / tbl
+    if not src.exists():
+        print(f"  770 proveequal: {src} not found - UNMEASURED, not PASS")
+        return 1
+    cols, rows = load(src)
+    want = [c for c in SHOW.get(did, cols) if c in cols] or cols
+    SENTINELS_SEEN.clear()
+    a = sample(desentinel(rows, want, did), want, N)
+    SENTINELS_SEEN.clear()
+    b, _, _n = stream_sample(src, want, N, did)
+    if len(a) != len(b):
+        print(f"  770 proveequal FAIL {tbl}: in-memory {len(a)} rows, "
+              f"streaming {len(b)}")
+        return 1
+    for i, (ra, rb) in enumerate(zip(a, b)):
+        for c in want:
+            if (ra.get(c) or "") != (rb.get(c) or ""):
+                print(f"  770 proveequal FAIL {tbl}: row {i} column {c!r} "
+                      f"in-memory {ra.get(c)!r} vs streaming {rb.get(c)!r}")
+                return 1
+    print(f"  770 proveequal PASS {tbl}: both engines return the same "
+          f"{len(a)} rows across {len(want)} columns, cell for cell "
+          f"({src.stat().st_size / 1e6:,.1f} MB source)")
+    return 0
+
+
 if __name__ == "__main__":
+    if len(sys.argv) > 2 and sys.argv[1] == "proveequal":
+        sys.exit(proveequal(sys.argv[2]))
     sys.exit(main())

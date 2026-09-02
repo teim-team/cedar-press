@@ -44,23 +44,23 @@ own, and `spend` reports the shared total with the 1110 slice named.
 
 | output | rows | grain |
 |---|---:|---|
-| `data/staging/tribal_debt_court_events.csv` | **26** | ONE EVENT TYPE in ONE COURT DOCUMENT |
-| `data/staging/tribal_debt_court_dockets.csv` | **8** | ONE DOCKET in ONE COURT |
+| `data/staging/tribal_debt_court_events.csv` | **32** | ONE EVENT TYPE in ONE COURT DOCUMENT |
+| `data/staging/tribal_debt_court_dockets.csv` | **9** | ONE DOCKET in ONE COURT |
 | `data/staging/tribal_debt_court_documents.csv` | **20** | one retrieved judicial opinion |
-| `review/1110_targets.csv` | 62 | one query, one named question |
-| `review/1110_search_hits.csv` | 651 | every result the API returned |
-| `review/1110_rejected_hits.csv` | 262 | every opinion refused, with the reason |
-| `review/1110_rejected_dockets.csv` | 325 | every docket refused, with the reason |
+| `review/1110_targets.csv` | **62** | one query, one named question |
+| `review/1110_search_hits.csv` | **703** | every result the API returned |
+| `review/1110_rejected_hits.csv` | **288** | every opinion refused, with the reason |
+| `review/1110_rejected_dockets.csv` | **348** | every docket refused, with the reason |
 | `review/1110_rejected_events.csv` | 6 | events refused for naming no instrument |
-| `review/1110_person_screen_held.csv` | 4 | held by the natural-person screen |
-| `review/1110_unreached_cases.csv` | 19 | questions the corpus could not answer |
-| `review/1110_fetch_manifest.csv` | 83 | every request made |
-| `data/raw/external/tribal_debt_court_1110/*.json.gz` | 83 | the cache; every figure re-readable |
+| `review/1110_person_screen_held.csv` | **3** | held by the natural-person screen |
+| `review/1110_unreached_cases.csv` | **15** | questions the corpus could not answer |
+| `review/1110_fetch_manifest.csv` | **86** | every request made |
+| `data/raw/external/tribal_debt_court_1110/*.json.gz` | **83** | the cache; every figure re-readable |
 
 Stages: `targets` → `probe` → `search` → `opinions` → `remine` → `build` →
 `verify` → `selftest` → `spend`.
 
-**83 requests, all HTTP 200, zero refusals**, inside a shared 125/day budget.
+**87 requests, all HTTP 200, zero refusals**, inside a shared 125/day budget.
 `remine` re-derives every hit row from the cache with **zero** requests.
 
 ---
@@ -115,15 +115,16 @@ cannot quote an instrument for is a characterisation, not a record.
 
 ## What was found
 
-### 26 events, by type
+### 32 events, by type
 
 | event type | rows |
 |---|---:|
-| `LITIGATION_OUTCOME_INSTRUMENT_HELD_VOID_OR_UNENFORCEABLE` | 9 |
-| `LITIGATION_OUTCOME_SOVEREIGN_IMMUNITY_BARS_THE_CLAIM` | 6 |
-| `RECEIVERSHIP` | 4 |
-| `RESTRUCTURING_OR_EXCHANGE` | 4 |
-| `DEFAULT_ASSERTED_OR_FOUND` | 2 |
+| `LITIGATION_OUTCOME_INSTRUMENT_HELD_VOID_OR_UNENFORCEABLE` | 10 |
+| `LITIGATION_OUTCOME_SOVEREIGN_IMMUNITY_BARS_THE_CLAIM` | 7 |
+| `RECEIVERSHIP` | 5 |
+| `RESTRUCTURING_OR_EXCHANGE` | 5 |
+| `DEFAULT_ASSERTED_OR_FOUND` | 3 |
+| `LITIGATION_OUTCOME_WAIVER_OF_IMMUNITY_ENFORCED` | 1 |
 | `FORBEARANCE` | 1 |
 
 **The largest single category is an instrument held UNENFORCEABLE, not a
@@ -135,7 +136,7 @@ of what a "tribal debt distress" table would be assumed to contain.
 | year | rows |
 |---|---:|
 | 2010 | 4 |
-| 2011 | 3 |
+| 2011 | 9 |
 | 2013 | 11 |
 | 2015 | 4 |
 | 2017 | 4 |
@@ -148,37 +149,41 @@ do not overlap by a single year, and neither one alone would have shown that.
 
 | | rows |
 |---|---:|
-| `PROCEDURAL_RECORD` | 21 |
+| `PROCEDURAL_RECORD` | 27 |
 | `ALLEGATION_BY_A_PARTY` | 3 |
 | `COURT_FINDING` | 2 |
 
-**Only two rows are a court holding something.** That is the honest reading and
-it is why the column exists. The other 24 are the record reciting what happened
-or a party asserting it, and a consumer must not quote them as findings.
+**Only two rows in the whole table are a court holding something.** That is the
+honest reading and it is why the column exists. The other 30 are the record
+reciting what happened or a party asserting it, and a consumer must not quote
+them as findings.
 
-### Obligors resolved — 8 distinct Cedar entities
+### Obligors resolved — 9 distinct Cedar entities
 
-**Events (4 entities, 26 rows)**
+**Events (5 entities, 32 rows)**
 
-| entity | `cedar_uid` | rows | joins 1082 |
-|---|---|---:|---|
-| Lac du Flambeau | `CE-00166-6Z` | 15 | no |
-| Nooksack | `CE-0017M-ZD` | 6 | no |
-| Shingle Springs | `CE-001A1-W2` | 4 | no |
-| Rosebud | `CE-0019E-5Q` | 1 | no |
+| entity | rows | joins 1082 |
+|---|---:|---|
+| Lac du Flambeau | 15 | no |
+| Nooksack | 6 | no |
+| Sokaogon Chippewa Community | 6 | no |
+| Shingle Springs | 4 | no |
+| Rosebud | 1 | no |
 
-**Dockets (6 entities, 8 rows)**
+**Dockets (7 entities, 9 rows)** — the docket table is where the mandate's
+"court and docket number" actually lives.
 
-| entity | `cedar_uid` | court | docket | filed | role | joins 1082 |
-|---|---|---|---|---|---|---|
-| Lac du Flambeau | `CE-00166-6Z` | W.D. Wis. | 3:09-cv-00768 | 2009-12-21 | both/unclear | no |
-| Lac du Flambeau | `CE-00166-6Z` | W.D. Wis. | 3:12-cv-00255 | 2012-04-09 | both/unclear | no |
-| Lac du Flambeau | `CE-00166-6Z` | W.D. Wis. | 3:13-cv-00372 | 2013-05-24 | **defendant** | no |
-| Cabazon | `CE-0012P-JF` | C.D. Cal. | 5:12-cv-01278 | 2012-08-01 | **defendant** | **yes** (5 obs) |
-| Picayune Rancheria | `CE-0018X-TY` | E.D. Cal. | 1:14-cv-01044 | 2014-07-02 | **defendant** | no |
-| Picayune Rancheria | `CE-0018X-TY` | E.D. Cal. | 1:20-cv-00183 | 2020-02-04 | plaintiff | no |
-| Mashantucket Pequot | `CE-0017C-F5` | D.R.I. | 1:21-cv-00177 | 2021-04-20 | **defendant** | **yes** (8 obs) |
-| Dry Creek | `CE-00143-AM` | N.D. Cal. | 3:01-cv-04125 | 2001-11-05 | **defendant** | **yes** (22 obs) |
+| entity | court | docket | filed | tribal role | joins 1082 |
+|---|---|---|---|---|---|
+| Dry Creek | N.D. Cal. | 3:01-cv-04125 | 2001-11-05 | **defendant** | **yes** (22 obs) |
+| Lac du Flambeau | W.D. Wis. | 3:09-cv-00768 | 2009-12-21 | both/unclear | no |
+| Sokaogon Chippewa Community | E.D. Wis. | 1:10-cv-01039 | 2010-11-19 | **defendant** | no |
+| Lac du Flambeau | W.D. Wis. | 3:12-cv-00255 | 2012-04-09 | both/unclear | no |
+| Cabazon | C.D. Cal. | 5:12-cv-01278 | 2012-08-01 | **defendant** | **yes** (5 obs) |
+| Lac du Flambeau | W.D. Wis. | 3:13-cv-00372 | 2013-05-24 | **defendant** | no |
+| Picayune Rancheria | E.D. Cal. | 1:14-cv-01044 | 2014-07-02 | **defendant** | no |
+| Picayune Rancheria | E.D. Cal. | 1:20-cv-00183 | 2020-02-04 | plaintiff | no |
+| Mashantucket Pequot | D.R.I. | 1:21-cv-00177 | 2021-04-20 | **defendant** | **yes** (8 obs) |
 
 ### The join to `1082` — 3 of 14 obligors
 
@@ -198,9 +203,10 @@ entities and at no single row.** That is the finding, not a gap: the nations
 whose paper a registered fund still holds are largely not the nations whose
 paper produced a published opinion.
 
-### Four entities NEW to the tribal-debt workstream
+### Five entities NEW to the tribal-debt workstream
 
-Lac du Flambeau, Nooksack, Shingle Springs and Rosebud appear in no
+Lac du Flambeau, Nooksack, Sokaogon Chippewa Community, Shingle Springs and
+Rosebud appear in no
 tribal-debt table before this build. Three arrived through **doctrine queries**
 rather than name queries — see below.
 
@@ -208,7 +214,7 @@ rather than name queries — see below.
 
 ## The cases we could not reach, named
 
-`review/1110_unreached_cases.csv` holds 19 questions with an explicit state.
+`review/1110_unreached_cases.csv` holds 15 questions with an explicit state.
 The important ones:
 
 | case sought | result | state |
@@ -229,12 +235,13 @@ from published opinions will therefore always understate it, and this one does.
 
 ---
 
-## Four defects committed and caught, all of one shape
+## Eight defects committed and caught, all of one shape
 
 `docs/AGENT_FIELD_GUIDE.md` §3 names this repo's signature defect: *a check that
-does not measure its own name.* All four are instances, and **not one was found
-by a check** — all four were found by reading the output table end to end, which
-is field-guide habit 3.
+does not measure its own name.* Four of the six are instances of it, and **not one of those four was found by
+a check** — all four were found by reading the output table end to end, which
+is field-guide habit 3. The remaining two were found by the standing gates, and
+those two are the worst of the set.
 
 ### 1. The obligor was read off the QUERY, not off the DOCUMENT
 
@@ -300,6 +307,57 @@ no debt**. The `cause` field was tested separately and produces the same class
 (`28:1332 Diversity-Contract Dispute` on an **insurance** case). Both routes are
 refused, with the reason recorded inline in the code so they are not re-added.
 
+### 5. A POSITIONAL PRIMARY KEY, and it silently unasked two questions
+
+**Found by `py -3 code/293_lint_bug_classes.py` class 7**, after the table had
+already been written twice and read twice by a human who did not see it.
+
+`target_id` was `f"T{i:02d}_{stype}"` — the index of the case in a Python list.
+Adding the round-two targets shifted every index after the doctrine block, so
+`T16_o`, which in round one was the **CONTROL** query
+(`Kwithluk Sentinel Indenture Trustee Holdings`, built to return nothing), became
+`Lake of the Torches Economic Development Corporation` in round two. The resume
+check saw `T16_o` already present in the hits file, **never asked the new
+question**, and `remine` then attributed the control's zero-result response to
+it. The same happened to `Mashantucket Pequot Gaming Enterprise`.
+
+**Two real questions were published in `review/1110_unreached_cases.csv` as
+`NO_RESULT` having never been asked.** That is field-guide habit 4 exactly — an
+absence of evidence printing as evidence of absence — and the absence in
+question was about *Foxwoods*, the largest case in the mandate.
+
+Confirmed against the request ledger, which records the URL of every request
+and therefore what each id actually asked:
+
+```
+MISMATCH  T16_o | target: Lake of the Torches Economic Development Corporation
+                | ledger: Kwithluk Sentinel Indenture Trustee Holdings
+MISMATCH  T30_o | target: Mashantucket Pequot Gaming Enterprise
+                | ledger: Kwithluk Sentinel Indenture Trustee Holdings
+```
+
+Fixed: `target_id()` is now a slug of the **question**, so it cannot move. The
+58 cached responses were renamed from the ledger's own mapping — the ledger is
+the only authority for which id asked what, because the cached file does not
+carry its query. The four superseded duplicates are in
+`data/raw/external/tribal_debt_court_1110/_superseded_positional_ids/` with a
+README; nothing was deleted. The four unasked questions were then asked, and
+both recovered ones returned results.
+
+**`Lake of the Torches Economic Development Corporation` alone returned 7
+opinions and 9 dockets**, including `Godfrey & Kahn v. Lac Du Flambeau Band`
+(7th Cir. 14-2287) which no other query reached.
+
+### 6. A filename sanitiser that disagreed with the key it was sanitising
+
+Immediately downstream of the fix above. `cache_path()` collapsed
+`[^A-Za-z0-9]+` to a single `_`, so the new id `..._{}_o` was written to disk as
+`..._o`, and `remine` — which parses the id back out of the filename — could not
+find four responses **that were sitting on disk**. Fixed by keeping `_` in the
+character class. The lesson generalises: a sanitiser and the key it sanitises
+have to agree on the alphabet, or a round trip through a filename is lossy in a
+way nothing reports.
+
 ---
 
 ## The natural-person discipline
@@ -327,6 +385,51 @@ screens, applied before a request is spent where possible:
    Bankruptcy Code abrogating tribal immunity, not about tribal debt distress.
    Correctly out, and worth naming because it is the case a keyword sweep would
    most likely have published by mistake.
+
+### 7. The natural-person screen called a TRIBE a person, and lost a real case
+
+`side_is_a_natural_person` treats a caption side with no organisational marker
+and at most three tokens as a person. Its marker list had no `community` in it,
+so
+
+```
+Wells Fargo Bank, N.A. v. Sokaogon Chippewa Community
+```
+
+— a Wells Fargo tribal **bond** action, the Mole Lake sibling of Lake of the
+Torches — read as a bank suing a three-word individual and was **held out of
+the table entirely**. Erring safe is still erring: the screen exists to protect
+private individuals and it removed a nation.
+
+Fixed twice over: `community`, `council`, `committee`, `agency`, `district` and
+`office of` added to the organisational markers, and — the durable half — **the
+tribal test now runs inside the person test**, because a tribal entity is never
+a natural person. That is the same word-boundary tribal test used everywhere
+else here, rather than a second list to drift.
+
+**Recovered: 6 events, 1 docket, and a ninth Cedar entity.**
+
+### 8. An amicus is not a counterparty
+
+The docket debt test asked whether a financial institution was **anywhere** in
+the party array. That admitted
+
+```
+Blue Lake Rancheria, et al. v. Kalshi, Inc., et al.   62 parties
+Mescalero Apache Tribe v. Kalshi, Inc.                43 parties
+```
+
+— the sports prediction-market coalition cases, nothing whatever to do with
+debt — on the strength of the **Native American Finance Officers Association**
+appearing among the amici. A 10-party construction payment dispute came in the
+same way, on `Credit Provider Group LLC`.
+
+Fixed with a threshold that was **measured rather than asserted**: the nine
+genuine debt dockets in this corpus carry **2–6 parties**; the three false
+positives carry **10, 43 and 62**. A financial name now counts only if it is
+**in the caption**, where an adverse party is, or if the docket is a two-sided
+commercial case. All nine real dockets survive; all three false positives are
+refused with the reason written on the row.
 
 ---
 
@@ -400,6 +503,11 @@ Two smaller disciplines carried over from `1082` and `366`:
   check as broken in `1082`, and it is not available here.
 * **`404` and `403` do not trip the circuit breaker.** They are facts about an
   object, not the host turning us away (`START_HERE.md` standing rule).
+* **`293` class 4 is WAIVED with a reason, not silenced.** The `RUN_DEADLINE`
+  stops the loop over targets, never one target's own retrieval: a target is
+  exactly one request and carries its own retrieved-vs-reported `completeness`.
+  A target the deadline never reached has no row at all, and `search` resumes
+  on exactly those. `293` counts and names the waiver in its output.
 
 ### Two source properties recorded rather than repaired
 
@@ -420,7 +528,7 @@ Two smaller disciplines carried over from `1082` and `366`:
 
 | denominator | reached |
 |---|---:|
-| ~574 nations | **8** distinct Cedar entities |
+| ~574 nations | **9** distinct Cedar entities |
 | `1082`'s 14 obligors | **3** |
 | the 8 canonical cases in the mandate | **2 fully** (Lake of the Torches, Cabazon), **2 by docket only** (Mashantucket, River Rock/Dry Creek), **1 partially** (Chukchansi — appellate order and two dockets, no event), **3 not at all** (Mohegan, Santa Ysabel, Inn of the Mountain Gods) |
 | distress events after 2017 | **0** |

@@ -750,7 +750,7 @@ Presenting these rows without their date, or aggregating them into a per-nation
 ### A DEFAULT IS NOT WHAT THIS TABLE MOSTLY CONTAINS
 
 The largest single `event_type` is
-`LITIGATION_OUTCOME_INSTRUMENT_HELD_VOID_OR_UNENFORCEABLE` (9 of 26). In
+`LITIGATION_OUTCOME_INSTRUMENT_HELD_VOID_OR_UNENFORCEABLE` (10 of 32). In
 *Wells Fargo v. Lake of the Torches*, 658 F.3d 684 (7th Cir. 2011), the bond
 indenture was held **void** as a management contract unapproved by the NIGC -
 and in *Stifel v. Lac du Flambeau*, 807 F.3d 184 (7th Cir. 2015), on the same
@@ -762,7 +762,7 @@ use the row.
 ### A FILING IS A PARTY'S ASSERTION; A JUDGMENT IS A FINDING
 
 `assertion_or_finding` is `ALLEGATION_BY_A_PARTY` (3), `COURT_FINDING` (2) or
-`PROCEDURAL_RECORD` (21), with the cue that decided it in
+`PROCEDURAL_RECORD` (27), with the cue that decided it in
 `assertion_or_finding_basis`. **Only two rows in the whole table are a court
 holding something.** Quoting a `PROCEDURAL_RECORD` or an
 `ALLEGATION_BY_A_PARTY` row as though a court had found it is the single

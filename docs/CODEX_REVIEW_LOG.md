@@ -505,7 +505,10 @@ out of `770` **by text**, mirroring the discipline `770` already uses to read
 silent divergence. On a violation it does **not** quietly repair the number:
 it publishes the union of both Cedar-side declarations (1,657 + 2,916 =
 **4,573**, with `n_rows_basis` naming both halves) and marks the dataset
-BLOCKED with the measurement in `cedar.blockers`. The status reverts by itself
+BLOCKED with the measurement in `cedar.blockers`. *(**SUPERSEDED within the
+hour** — Codex round 3 finding 1 refused the union and was right. No count is
+published now. See the round-3 section below; this sentence is left standing
+because the retraction is the point.)* The status reverts by itself
 when the collection is fixed. `verify` exits 1; `selftest` carries **three**
 fixtures and all three pass — the undercount fires, a claimed flagship with a
 sufficient sum is clean, and an unclaimed flagship fires *even when the sum is
