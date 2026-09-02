@@ -29,6 +29,12 @@ because most of it is: FPDS product/service codes and award descriptions are
 re-pull for the other 79.6%. See `contractors` #2.
 
 ---
+> **GAMING-DENOMINATOR-2026-09-02 — the gaming denominator, re-derived from the live files.**
+> `gaming_facilities.csv` holds 787 ROWS. That is not a facility count and must not be a denominator. 7 of them are placeholders whose `facility_name` is literally `No casino`, recording that a nation operates none. 56 duplicate groups sit in `review/gaming_facility_duplicate_candidates_2026-09-02.csv`: 52 are same-tribe (`LIKELY_SAME_PROPERTY`) and hold 53 rows beyond one each, so collapsing them gives 787 - 53 = **734**; the other 4 are `DIFFERENT_TRIBES_CHECK_BOTH` and at least one of those - Stables Casino, Miami Tribe with Modoc Nation - is a JOINT OPERATION, not a duplicate. No verdict is applied: `duplicate_of_facility_id` is populated on 10 rows, not 53. So the honest range is **734 to 780** and the single thing every consumer must stop doing is dividing by 787 - it inflates the denominator by 7.2% and understates every coverage percentage in the gaming dataset by about 6.7%.
+>
+> Re-derive rather than quote: `py -3 code/1116_ruling_propagation_2026_09_02.py derive`.
+> `py -3 code/1116_ruling_propagation_2026_09_02.py verify` exits 1 while any
+> document in `docs/` or `review/` still states a superseded figure unmarked.
 
 ## READ THIS FIRST — the sample is a hand-curated column list, and that is where most of the loss happens
 
@@ -578,10 +584,17 @@ has no statement of when the nation last published it — for a list of
 certifications that expire, that is the difference between a live register and
 a rumour.
 
-*Correctly absent and correctly labelled:* Navajo's NBOA list, Colville, CTUIR
+~~*Correctly absent and correctly labelled:* Navajo's NBOA list, Colville, CTUIR
 and five others — **346 rows, `TERMS_STATED_RESTRICTIVE`, `publishable = N`** —
-are excluded by every route. `CONSTRAINED`, and the sample README names them.
-Owner and contact names are withheld as personal data; also correct.
+are excluded by every route. `CONSTRAINED`, and the sample README names them.~~
+
+**RE-CLASSIFIED 2026-09-02.** **SUPERSEDED 2026-09-02 by owner ruling** (`docs/PUBLICATION_POLICY.md`, `TERMS-OWNER-RULING-2026-09-02`): a tribal website's terms language no longer blocks harvest, and these are released for harvest of **their own public pages**. Keep recording `source_terms_status`; stop refusing on it. Still binding, none of them a terms question: technical access controls; a natural person's data apart from their public role (harvest the business row, never publish `owner_name_raw` / `email` / `phone` / `address_raw`); EMMA/MSRB + CUSIP Global Services; Casino City and D-U-N-S. These sources move out of
+`CONSTRAINED` and into `NOT_ACQUIRED` — a real acquisition task, not a fact
+about the world (`docs/AGENT_FIELD_GUIDE.md` §5). That is a **worse** state to be
+in, not a better one, and it should be counted as such.
+**Owner and contact names are withheld as personal data; that half is unchanged
+and is now the only bar on these rows** — it is a privacy line, not a licensing
+one, and the ruling explicitly left it standing.
 
 ---
 

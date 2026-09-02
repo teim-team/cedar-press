@@ -1,0 +1,1955 @@
+{
+ "generated": "2026-09-02T11:40:54",
+ "generated_by": "code/1115_defect_class_retro_sweep.py",
+ "not_mechanically_detectable": {
+  "C10": "a decision written somewhere the asker cannot see - 27,067 queue rows answered in sibling files. Needs a queue-vs-answer join, surveyed by hand.",
+  "C11": "a present-tense map inverting a past event - a 2012 acquisition reading as a relabelling because the firm is a subsidiary today. Needs event dates, surveyed by hand."
+ },
+ "unmeasured": [],
+ "findings": [
+  {
+   "class": "C1",
+   "where": "code/1020_tail_web_probe.py",
+   "line": 1121,
+   "what": "capped read `break at 12 rows` in `run` then a whole-population claim at line 1185: 'the site EXISTS and its robots.txt states Disallow: / for all agents. Refused by every route. Not an absence; a publisher decision.'",
+   "size": 12,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/102_build_coverage_profile.py",
+   "line": 162,
+   "what": "capped read `list()[:8]` in `main` then a whole-population claim at line 266: 'LICENSED - validates internally, never publishes'",
+   "size": 8,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/102_build_coverage_profile.py",
+   "line": 184,
+   "what": "capped read `list()[:8]` in `main` then a whole-population claim at line 266: 'LICENSED - validates internally, never publishes'",
+   "size": 8,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/1030_sec_edgar_native_transactions.py",
+   "line": 482,
+   "what": "capped read `break at 5 rows` in `cmd_fts` then a whole-population claim at line 497: 'total'",
+   "size": 5,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/1030_sec_edgar_native_transactions.py",
+   "line": 906,
+   "what": "capped read `break at 5 rows` in `cmd_fetch_leads` then a whole-population claim at line 857: 'FULL HOUSE RESORTS'",
+   "size": 5,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/1095_gaming_bounds_summability_and_seal_typing.py",
+   "line": 322,
+   "what": "capped read `list()[:4]` in `classify_quote` then a whole-population claim at line 302: 'Read the RECORDED quote. Never the statute Cedar does not hold.'",
+   "size": 4,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/1095_gaming_bounds_summability_and_seal_typing.py",
+   "line": 323,
+   "what": "capped read `list()[:3]` in `classify_quote` then a whole-population claim at line 302: 'Read the RECORDED quote. Never the statute Cedar does not hold.'",
+   "size": 3,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/118_build_gaming_ordinances.py",
+   "line": 384,
+   "what": "capped read `break at 1700 rows` in `_fetch` then a whole-population claim at line 424: 'WPDM link taken from inside tablepress-1 on the gaming-ordinances index; 302 resolved to the wp-content object; md5 checked against every file already written'",
+   "size": 1700,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/121_pull_subawards_api.py",
+   "line": 2325,
+   "what": "capped read `break at 20 rows` in `append` then a whole-population claim at line 2317: \"` at all. Run `py -3 code/503_identity.py stamp` to confirm against 503's own count.\"",
+   "size": 20,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/132_build_schedule_i_layer.py",
+   "line": 792,
+   "what": "capped read `list()[:5]` in `step_drift` then a whole-population claim at line 854: \"Position of this recipient line among the published recipient lines of this return, 1..n in the document order of Schedule I Part II's RecipientTable elements. \"",
+   "size": 5,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/132_build_schedule_i_layer.py",
+   "line": 794,
+   "what": "capped read `list()[:5]` in `step_drift` then a whole-population claim at line 854: \"Position of this recipient line among the published recipient lines of this return, 1..n in the document order of Schedule I Part II's RecipientTable elements. \"",
+   "size": 5,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/133_build_ferc_advocacy.py",
+   "line": 674,
+   "what": "capped read `break at 240 rows` in `stage_fetch` then a whole-population claim at line 720: 'per-docket time budget reached; row is truncated and says so'",
+   "size": 240,
+   "unit": "row cap",
+   "detail": "DESTRUCTIVE claim - the 526 shape"
+  },
+  {
+   "class": "C1",
+   "where": "code/142_build_property_site_observations.py",
+   "line": 1223,
+   "what": "capped read `list()[:6]` in `phase_extract` then a whole-population claim at line 1239: 'deliberately OUTSIDE cedar_domain.MeasurementType: a job posting or a preference policy measures nothing about capacity and must never join the count vocabulary'",
+   "size": 6,
+   "unit": "row cap",
+   "detail": "DESTRUCTIVE claim - the 526 shape"
+  },
+  {
+   "class": "C1",
+   "where": "code/147_build_fac_single_audits.py",
+   "line": 538,
+   "what": "capped read `page_all(cap=4000)` in `stage_census` then a whole-population claim at line 520: '  entity_type=tribal: %d total, %d public, %d non-public'",
+   "size": 4000,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/147_build_fac_single_audits.py",
+   "line": 625,
+   "what": "capped read `page_all(cap=2000)` in `stage_textsweep` then a whole-population claim at line 611: \"ilike across the API's text tables. Bounded and enumerated.\\n\\n    Absence under a filter is a property of the filter: a term swept with zero\\n    hits is recorded\"",
+   "size": 2000,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/14_build_bills_votes.py",
+   "line": 298,
+   "what": "capped read `read_csv(chunksize=4000000)` in `tally_votes` then a whole-population claim at line 287: 'Stream HSall_votes.csv, keep only rows for roll calls in `universe`, return\\n    (tally frame, member-level long frame).'",
+   "size": 4000000,
+   "unit": "row cap",
+   "detail": "DESTRUCTIVE claim - the 526 shape"
+  },
+  {
+   "class": "C1",
+   "where": "code/163_promote_nho_universe_in_place.py",
+   "line": 945,
+   "what": "capped read `list()[:10]` in `main` then a whole-population claim at line 905: '. Geographic mismatch, not proof - but every one of these arrived by an algorithmic method, and need_v6 is 6.5% accurate.'",
+   "size": 10,
+   "unit": "row cap",
+   "detail": "DESTRUCTIVE claim - the 526 shape"
+  },
+  {
+   "class": "C1",
+   "where": "code/16_federal_funding_recon.py",
+   "line": 219,
+   "what": "capped read `read_file_in_chunks(chunksize=200000)` in `profile_a_dta` then a whole-population claim at line 281: '   A_dta rows=  total=$  tribe_ids='",
+   "size": 200000,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/17_build_nonprofit_990.py",
+   "line": 273,
+   "what": "capped read `read_csv(chunksize=200000)` in `step2_bmf_slice` then a whole-population claim at line 264: '  candidate EIN universe: '",
+   "size": 200000,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/17_build_nonprofit_990.py",
+   "line": 394,
+   "what": "capped read `.head(15)` in `step3_exclusions` then a whole-population claim at line 392: '  recheck_candidate=1 (name reads like a tribal institution despite the drop):   -- these need a human ruling before the block list is treated as final'",
+   "size": 15,
+   "unit": "row cap",
+   "detail": "DESTRUCTIVE claim - the 526 shape"
+  },
+  {
+   "class": "C1",
+   "where": "code/17_build_nonprofit_990.py",
+   "line": 600,
+   "what": "capped read `.head(12)` in `step4_np_orgs` then a whole-population claim at line 515: 'survived place-name filter; dropped by v2 strict filter'",
+   "size": 12,
+   "unit": "row cap",
+   "detail": "DESTRUCTIVE claim - the 526 shape"
+  },
+  {
+   "class": "C1",
+   "where": "code/198_compare_fpds_extracts_vs_prime_clean.py",
+   "line": 230,
+   "what": "capped read `list()[:2]` in `main` then a whole-population claim at line 248: '\\n  TOTAL pre-2007 keys not in prime_contracts.csv:   ($ )'",
+   "size": 2,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/204_fac_historical_tribal_by_ein.py",
+   "line": 207,
+   "what": "capped read `list()[:8]` in `main` then a whole-population claim at line 203: '\\n=== census-  ==='",
+   "size": 8,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/204_fac_historical_tribal_by_ein.py",
+   "line": 215,
+   "what": "capped read `list()[:10]` in `main` then a whole-population claim at line 203: '\\n=== census-  ==='",
+   "size": 10,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/227_anomaly_sweep.py",
+   "line": 1600,
+   "what": "capped read `list()[:200]` in `derive` then a whole-population claim at line 1618: ' splits at  /  into two vocabularies of the SAME shape and SIMILAR size that only partly overlap:   distinct values before,   after,   shared, and   rows ( %) c'",
+   "size": 200,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/241_promote_individual_native_firms_in_place.py",
+   "line": 1208,
+   "what": "capped read `list()[:10]` in `main` then a whole-population claim at line 1192: '  guard: all   declared repoints fired (fail-closed)'",
+   "size": 10,
+   "unit": "row cap",
+   "detail": "DESTRUCTIVE claim - the 526 shape"
+  },
+  {
+   "class": "C1",
+   "where": "code/335_harmonize_assistance_seams_in_place.py",
+   "line": 453,
+   "what": "capped read `break at 5 rows` in `main` then a whole-population claim at line 467: '      rows re-read; every original column byte-identical'",
+   "size": 5,
+   "unit": "row cap",
+   "detail": "DESTRUCTIVE claim - the 526 shape"
+  },
+  {
+   "class": "C1",
+   "where": "code/336_correct_scheme_resolution_by_spine_membership.py",
+   "line": 247,
+   "what": "capped read `break at 5 rows` in `main` then a whole-population claim at line 258: '      rows re-read; every column except the 2 intended is identical'",
+   "size": 5,
+   "unit": "row cap",
+   "detail": "DESTRUCTIVE claim - the 526 shape"
+  },
+  {
+   "class": "C1",
+   "where": "code/33_nonprofit_financials.py",
+   "line": 572,
+   "what": "capped read `.head(40)` in `step_report` then a whole-population claim at line 580: 'top %2d = %s (%.1f%% of the 412-org total)'",
+   "size": 40,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/33_nonprofit_financials.py",
+   "line": 591,
+   "what": "capped read `.head(25)` in `step_report` then a whole-population claim at line 580: 'top %2d = %s (%.1f%% of the 412-org total)'",
+   "size": 25,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/33_nonprofit_financials.py",
+   "line": 638,
+   "what": "capped read `.head(30)` in `step_report` then a whole-population claim at line 580: 'top %2d = %s (%.1f%% of the 412-org total)'",
+   "size": 30,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/35_coverage_audit.py",
+   "line": 328,
+   "what": "capped read `list()[:10]` in `audit_file` then a whole-population claim at line 268: \"Count rows per year.\\n\\n    COLUMN CHOICE, IN PRIORITY ORDER (changed 2026-08-26 by script 337):\\n\\n      1. The table's own DECLARATION in `code/cedar_period_colum\"",
+   "size": 10,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/382_remine_property_site_corpus.py",
+   "line": 863,
+   "what": "capped read `list()[:8]` in `run` then a whole-population claim at line 885: 'deliberately OUTSIDE cedar_domain.MeasurementType: a date measures nothing about capacity or employment. It is a RE-SOURCING LEAD for the 415 gaming dates that '",
+   "size": 8,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/382_remine_property_site_corpus.py",
+   "line": 907,
+   "what": "capped read `list()[:6]` in `run` then a whole-population claim at line 885: 'deliberately OUTSIDE cedar_domain.MeasurementType: a date measures nothing about capacity or employment. It is a RE-SOURCING LEAD for the 415 gaming dates that '",
+   "size": 6,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/384_crawl_uncrawled_open_properties.py",
+   "line": 381,
+   "what": "capped read `break at 25 rows` in `cmd_discover` then a whole-population claim at line 362: '=== 384 discover: open properties 142 never reached ==='",
+   "size": 25,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/415_audit_identity_layer.py",
+   "line": 133,
+   "what": "capped read `list()[:5]` in `main` then a whole-population claim at line 103: 'Generated by `code/415_audit_identity_layer.py`. Every number in `docs/CEDAR_ID_SYSTEM.md` is re-derived here rather than transcribed.'",
+   "size": 5,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/415_audit_identity_layer.py",
+   "line": 254,
+   "what": "capped read `list()[:10]` in `main` then a whole-population claim at line 173: 'total'",
+   "size": 10,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/510_assertions.py",
+   "line": 2660,
+   "what": "capped read `list()[:3]` in `phase_verify` then a whole-population claim at line 2693: \"I11   deny veto(es) removed a value the predicate's resolution policy protects (R01 running ahead of R02 again - external review F10)\"",
+   "size": 3,
+   "unit": "row cap",
+   "detail": "DESTRUCTIVE claim - the 526 shape"
+  },
+  {
+   "class": "C1",
+   "where": "code/514_source_records.py",
+   "line": 911,
+   "what": "capped read `list()[:8]` in `phase_audit` then a whole-population claim at line 921: '\\n  ROWS THE OLD PATH DROPPED WITHOUT A TRACE ( ), now carried as rows:'",
+   "size": 8,
+   "unit": "row cap",
+   "detail": "DESTRUCTIVE claim - the 526 shape"
+  },
+  {
+   "class": "C1",
+   "where": "code/514_source_records.py",
+   "line": 914,
+   "what": "capped read `list()[:8]` in `phase_audit` then a whole-population claim at line 921: '\\n  ROWS THE OLD PATH DROPPED WITHOUT A TRACE ( ), now carried as rows:'",
+   "size": 8,
+   "unit": "row cap",
+   "detail": "DESTRUCTIVE claim - the 526 shape"
+  },
+  {
+   "class": "C1",
+   "where": "code/514_source_records.py",
+   "line": 917,
+   "what": "capped read `list()[:8]` in `phase_audit` then a whole-population claim at line 921: '\\n  ROWS THE OLD PATH DROPPED WITHOUT A TRACE ( ), now carried as rows:'",
+   "size": 8,
+   "unit": "row cap",
+   "detail": "DESTRUCTIVE claim - the 526 shape"
+  },
+  {
+   "class": "C1",
+   "where": "code/514_source_records.py",
+   "line": 708,
+   "what": "capped read `list()[:3]` in `phase_verify` then a whole-population claim at line 752: 'SR7   link(s) let SOURCE AUTHORITY cross into the MATCH. Authority applies to what the record says and never to which entity it means: '",
+   "size": 3,
+   "unit": "row cap",
+   "detail": "DESTRUCTIVE claim - the 526 shape"
+  },
+  {
+   "class": "C1",
+   "where": "code/515_temporal.py",
+   "line": 1369,
+   "what": "capped read `list()[:2]` in `_verify` then a whole-population claim at line 1286: '. This is a stale projection, not a defect in this layer - re-run `py -3 code/515_temporal.py observe --apply`, which rebuilds derived rows and NAMES every one '",
+   "size": 2,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/515_temporal.py",
+   "line": 1378,
+   "what": "capped read `list()[:2]` in `_verify` then a whole-population claim at line 1286: '. This is a stale projection, not a defect in this layer - re-run `py -3 code/515_temporal.py observe --apply`, which rebuilds derived rows and NAMES every one '",
+   "size": 2,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/518_dataset_readiness.py",
+   "line": 400,
+   "what": "capped read `list()[:4]` in `measure` then a whole-population claim at line 571: 'C7 DOUBLE-COUNTING RISK - money tables a buyer cannot safely total: '",
+   "size": 4,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/528_shard_consolidate.py",
+   "line": 163,
+   "what": "capped read `list()[:8]` in `collect` then a whole-population claim at line 137: 'Merge every shard map. Dedupe on (uid, url_type, url) - two shards\\n    finding the same URL is agreement, not duplication, and must not\\n    double-count in the '",
+   "size": 8,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/535_shard_e_match_candidates.py",
+   "line": 107,
+   "what": "capped read `list()[:6]` in `main` then a whole-population claim at line 1: 'SHARD-E: propose CANDIDATE matches from the ANC subsidiary edges to entities\\nCedar already knows, and to identifiers in data/clean/fpds_uei_edges.csv.\\n\\nTHIS SCR'",
+   "size": 6,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/581_triage_review_backlog.py",
+   "line": 714,
+   "what": "capped read `_bucket_table(limit=40)` in `write_md` then a whole-population claim at line 719: 'A later file, table or ruling has overtaken these. **Nothing was deleted.** Recommend a MOVE to `graveyard/`, owner to action.\\n'",
+   "size": 40,
+   "unit": "row cap",
+   "detail": "DESTRUCTIVE claim - the 526 shape"
+  },
+  {
+   "class": "C1",
+   "where": "code/581_triage_review_backlog.py",
+   "line": 732,
+   "what": "capped read `_bucket_table(limit=30)` in `write_md` then a whole-population claim at line 724: \" files,   rows - **the largest bucket, and that is the headline finding.** Most of `review/` is not a backlog at all. It is the project's evidence layer: refusa\"",
+   "size": 30,
+   "unit": "row cap",
+   "detail": "DESTRUCTIVE claim - the 526 shape"
+  },
+  {
+   "class": "C1",
+   "where": "code/596_shard_f_org_rosters.py",
+   "line": 262,
+   "what": "capped read `list()[:3]` in `tech_arcgis` then a whole-population claim at line 102: '((?:over|more than|nearly|approximately|about|all)?\\\\s*\\\\d{1,3})\\\\s+(member\\\\s+)?(federally recognized\\\\s+)?(tribes|tribal nations|nations|villages|member tribes|tri'",
+   "size": 3,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/599_shard_f_ein_990.py",
+   "line": 65,
+   "what": "capped read `break at 429 rows` in `main` then a whole-population claim at line 113: 'EIN was already in Cedar; this row CONFIRMS it against the IRS-derived record. Tier is inherited, never promoted.'",
+   "size": 429,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/73_add_tcu_and_cdfi.py",
+   "line": 1128,
+   "what": "capped read `break at 500 rows` in `cmd_add` then a whole-population claim at line 979: 'ABORT: the spine already carries TCU-/CDFI- rows. Re-running --add would mint a second identity for every institution. Restore data/spine/cedar_entity_spine.csv'",
+   "size": 500,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/77_build_nagpra_dataset.py",
+   "line": 674,
+   "what": "capped read `break at 20 rows` in `fetch_stage` then a whole-population claim at line 594: 'universe   notices; already cached  ; to fetch '",
+   "size": 20,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/791_faads_transaction_key_and_repoint.py",
+   "line": 223,
+   "what": "capped read `break at 5 rows` in `interior` then a whole-population claim at line 249: '  interior: every one of   rows verified against its seam row on 7 published fields'",
+   "size": 5,
+   "unit": "row cap",
+   "detail": "DESTRUCTIVE claim - the 526 shape"
+  },
+  {
+   "class": "C1",
+   "where": "code/83_build_resource_ledger.py",
+   "line": 1206,
+   "what": "capped read `list()[:8]` in `build_utah` then a whole-population claim at line 1275: 'Fund-level total for the whole fund; no well, tract or grantee is named.'",
+   "size": 8,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/83_build_resource_ledger.py",
+   "line": 1211,
+   "what": "capped read `list()[:12]` in `build_utah` then a whole-population claim at line 1275: 'Fund-level total for the whole fund; no well, tract or grantee is named.'",
+   "size": 12,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/88_gaming_property_federal_traces.py",
+   "line": 176,
+   "what": "capped read `break at 90 rows` in `fr_compact_traces` then a whole-population claim at line 2: 'Cedar Press 88 \u2014 how many independent federal traces does each property leave?\\n\\nElijah, 2026-08-06:\\n    \"if we cant link them to federal actions in registra and'",
+   "size": 90,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/cedar_period_columns.py",
+   "line": 186,
+   "what": "capped read `list()[:10]` in `resolve` then a whole-population claim at line 170: 'Return the period column this table declares, or None if it declares none.\\n\\n    Raises PeriodColumnMissing when a declaration exists and NONE of its\\n    columns'",
+   "size": 10,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/shard_g_build_crosswalk.py",
+   "line": 321,
+   "what": "capped read `list()[:2]` in `<module>` then a whole-population claim at line 338: 'full HD2023'",
+   "size": 2,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C2",
+   "where": "code/1108_codebook_fragment_repair.py",
+   "line": 670,
+   "what": "input glob `*.csv` matches this script's OWN output ['zz.csv']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
+   "size": 1,
+   "unit": "own outputs matched",
+   "detail": "written at line 1079; written at line 1090; written at line 1098; written at line 1114"
+  },
+  {
+   "class": "C2",
+   "where": "code/1108_codebook_fragment_repair.py",
+   "line": 685,
+   "what": "input glob `*.csv` matches this script's OWN output ['zz.csv']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
+   "size": 1,
+   "unit": "own outputs matched",
+   "detail": "written at line 1079; written at line 1090; written at line 1098; written at line 1114"
+  },
+  {
+   "class": "C2",
+   "where": "code/1108_codebook_fragment_repair.py",
+   "line": 728,
+   "what": "input glob `*.csv` matches this script's OWN output ['zz.csv']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
+   "size": 1,
+   "unit": "own outputs matched",
+   "detail": "written at line 1079; written at line 1090; written at line 1098; written at line 1114"
+  },
+  {
+   "class": "C2",
+   "where": "code/1108_codebook_fragment_repair.py",
+   "line": 840,
+   "what": "input glob `*.csv` matches this script's OWN output ['zz.csv']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
+   "size": 1,
+   "unit": "own outputs matched",
+   "detail": "written at line 1079; written at line 1090; written at line 1098; written at line 1114"
+  },
+  {
+   "class": "C2",
+   "where": "code/1108_codebook_fragment_repair.py",
+   "line": 906,
+   "what": "input glob `*.csv` matches this script's OWN output ['zz.csv']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
+   "size": 1,
+   "unit": "own outputs matched",
+   "detail": "written at line 1079; written at line 1090; written at line 1098; written at line 1114"
+  },
+  {
+   "class": "C2",
+   "where": "code/1108_codebook_fragment_repair.py",
+   "line": 942,
+   "what": "input glob `*.csv` matches this script's OWN output ['zz.csv']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
+   "size": 1,
+   "unit": "own outputs matched",
+   "detail": "written at line 1079; written at line 1090; written at line 1098; written at line 1114"
+  },
+  {
+   "class": "C2",
+   "where": "code/1115_defect_class_retro_sweep.py",
+   "line": 906,
+   "what": "input glob `*.csv` matches this script's OWN output ['neg.csv', 'pos.csv']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
+   "size": 2,
+   "unit": "own outputs matched",
+   "detail": "written at line 1364; written at line 1371"
+  },
+  {
+   "class": "C2",
+   "where": "code/117_build_gaming_devices.py",
+   "line": 1228,
+   "what": "input glob `*` matches this script's OWN output ['json']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
+   "size": 1,
+   "unit": "own outputs matched",
+   "detail": "written at line 437; written at line 437"
+  },
+  {
+   "class": "C2",
+   "where": "code/321_gate_tribal_source_restriction.py",
+   "line": 232,
+   "what": "input glob `*` matches this script's OWN output ['selftest.csv']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
+   "size": 1,
+   "unit": "own outputs matched",
+   "detail": "written at line 217"
+  },
+  {
+   "class": "C2",
+   "where": "code/512_build_dataset_contracts.py",
+   "line": 3614,
+   "what": "input glob `*/*` matches this script's OWN output ['docs/DATASET_CONTRACTS.md', 'docs/GRAIN_AUDIT.md', 'docs/schema/dataset_contracts.json', 'docs/schema/grain_evidence.json']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
+   "size": 4,
+   "unit": "own outputs matched",
+   "detail": "written at line 3816; written at line 4225; written at line 4372; written at line 4382"
+  },
+  {
+   "class": "C2",
+   "where": "code/516_release_manifest.py",
+   "line": 213,
+   "what": "input glob `*` matches this script's OWN output ['REPLAY_README.txt', 'adaptations.json', 'manifest.json']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
+   "size": 3,
+   "unit": "own outputs matched",
+   "detail": "written at line 1673; written at line 2206; written at line 2233"
+  },
+  {
+   "class": "C2",
+   "where": "code/516_release_manifest.py",
+   "line": 1722,
+   "what": "input glob `*` matches this script's OWN output ['REPLAY_README.txt', 'adaptations.json', 'manifest.json']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
+   "size": 3,
+   "unit": "own outputs matched",
+   "detail": "written at line 1673; written at line 2206; written at line 2233"
+  },
+  {
+   "class": "C2",
+   "where": "code/516_release_manifest.py",
+   "line": 2466,
+   "what": "input glob `*` matches this script's OWN output ['REPLAY_README.txt', 'adaptations.json', 'manifest.json']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
+   "size": 3,
+   "unit": "own outputs matched",
+   "detail": "written at line 1673; written at line 2206; written at line 2233"
+  },
+  {
+   "class": "C2",
+   "where": "code/516_release_manifest.py",
+   "line": 956,
+   "what": "input glob `*` matches this script's OWN output ['REPLAY_README.txt', 'adaptations.json', 'manifest.json']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
+   "size": 3,
+   "unit": "own outputs matched",
+   "detail": "written at line 1673; written at line 2206; written at line 2233"
+  },
+  {
+   "class": "C2",
+   "where": "code/516_release_manifest.py",
+   "line": 976,
+   "what": "input glob `*` matches this script's OWN output ['REPLAY_README.txt', 'adaptations.json', 'manifest.json']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
+   "size": 3,
+   "unit": "own outputs matched",
+   "detail": "written at line 1673; written at line 2206; written at line 2233"
+  },
+  {
+   "class": "C2",
+   "where": "code/516_release_manifest.py",
+   "line": 1958,
+   "what": "input glob `*` matches this script's OWN output ['REPLAY_README.txt', 'adaptations.json', 'manifest.json']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
+   "size": 3,
+   "unit": "own outputs matched",
+   "detail": "written at line 1673; written at line 2206; written at line 2233"
+  },
+  {
+   "class": "C2",
+   "where": "code/860_state2_acquisition.py",
+   "line": 979,
+   "what": "input glob `*` matches this script's OWN output ['_xml_fetch_log.csv']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
+   "size": 1,
+   "unit": "own outputs matched",
+   "detail": "written at line 872; written at line 889"
+  },
+  {
+   "class": "C3",
+   "where": "code/02_extract_exclusion_rulings.py",
+   "line": 43,
+   "what": "unanchored substring test decides an outcome: `'individual' in c` in `classify`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if \"individual\" in c:"
+  },
+  {
+   "class": "C3",
+   "where": "code/02_extract_exclusion_rulings.py",
+   "line": 56,
+   "what": "unanchored substring test decides an outcome: `'cage.dla.mil' in c` in `evidence_kind`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if \"cage.dla.mil\" in c:"
+  },
+  {
+   "class": "C3",
+   "where": "code/02_extract_exclusion_rulings.py",
+   "line": 62,
+   "what": "unanchored substring test decides an outcome: `'web.archive.org' in c` in `evidence_kind`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if \"web.archive.org\" in c:"
+  },
+  {
+   "class": "C3",
+   "where": "code/02_extract_exclusion_rulings.py",
+   "line": 41,
+   "what": "unanchored substring test decides an outcome: `'individual' in c` in `classify`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if \"individual\" in c and \"cherokee\" in c:"
+  },
+  {
+   "class": "C3",
+   "where": "code/1020_tail_web_probe.py",
+   "line": 1711,
+   "what": "unanchored substring test decides an outcome: `'REFUSED' in str(r.get('http_status') or '')` in `check`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if \"REFUSED\" in str(r.get(\"http_status\") or \"\"):"
+  },
+  {
+   "class": "C3",
+   "where": "code/103_build_california_gaming.py",
+   "line": 307,
+   "what": "unanchored substring test decides an outcome: `'/documents/' in url` in `_local_name`",
+   "size": 1,
+   "unit": "site",
+   "detail": "tail = url.split(\"/documents/\", 1)[-1] if \"/documents/\" in url else \\"
+  },
+  {
+   "class": "C3",
+   "where": "code/1050_preflight.py",
+   "line": 323,
+   "what": "unanchored substring test decides an outcome: `term in p.name.lower()` in `cmd_ondisk`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if p.is_file() and term in p.name.lower():"
+  },
+  {
+   "class": "C3",
+   "where": "code/106_build_revenue_bounds.py",
+   "line": 1548,
+   "what": "unanchored substring test decides an outcome: `'tribe_holds_no_gaming_property' in r['conditions_failed']` in `write_log`",
+   "size": 1,
+   "unit": "site",
+   "detail": "f\"{sum(1 for r in refusals if 'tribe_holds_no_gaming_property' in r['conditions_failed'])} |\")"
+  },
+  {
+   "class": "C3",
+   "where": "code/1070_anc_nho_business_sweep.py",
+   "line": 1383,
+   "what": "unanchored substring test decides an outcome: `'/wp-json/' in url` in `harvest_hit`",
+   "size": 1,
+   "unit": "site",
+   "detail": "elif \"/wp-json/\" in url:"
+  },
+  {
+   "class": "C3",
+   "where": "code/1075_fix_old_harbor_attribution.py",
+   "line": 368,
+   "what": "unanchored substring test decides an outcome: `' THREE ' in name` in `flag_not_moved`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if name.startswith(\"THREE \") or \" THREE \" in name:"
+  },
+  {
+   "class": "C3",
+   "where": "code/1075_fix_old_harbor_attribution.py",
+   "line": 370,
+   "what": "unanchored substring test decides an outcome: `' AFFILIATED' in name` in `flag_not_moved`",
+   "size": 1,
+   "unit": "site",
+   "detail": "elif name.startswith(\"AFFILIATED\") or \" AFFILIATED\" in name:"
+  },
+  {
+   "class": "C3",
+   "where": "code/1078_gaming_joint_operators.py",
+   "line": 170,
+   "what": "unanchored substring test decides an outcome: `SEP in tribe` in `main`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if SEP in tribe:"
+  },
+  {
+   "class": "C3",
+   "where": "code/1082_tribal_debt_holdings_disclosure.py",
+   "line": 796,
+   "what": "unanchored substring test decides an outcome: `cname in key` in `resolve_obligor`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if key in cname or cname in key:"
+  },
+  {
+   "class": "C3",
+   "where": "code/1084_nagpra_split_artefact_audit.py",
+   "line": 431,
+   "what": "unanchored substring test decides an outcome: `cand in title` in `detect`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if cand and cand in title and KW.search(cand):"
+  },
+  {
+   "class": "C3",
+   "where": "code/1105_newsletter_corpus_ship.py",
+   "line": 546,
+   "what": "unanchored substring test decides an outcome: `'/stagingsite/' in (r.get('channel_url') or '').lower()` in `verify`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if \"/stagingsite/\" in (r.get(\"channel_url\") or \"\").lower()]"
+  },
+  {
+   "class": "C3",
+   "where": "code/1110_tribal_debt_court_distress.py",
+   "line": 189,
+   "what": "unanchored substring test decides an outcome: `TOKEN in s` in `redact`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if TOKEN and TOKEN in s:"
+  },
+  {
+   "class": "C3",
+   "where": "code/1112_harvest_coverage_matrix.py",
+   "line": 879,
+   "what": "unanchored substring test decides an outcome: `k in r['contamination_flags']` in `report`",
+   "size": 1,
+   "unit": "site",
+   "detail": "ents = len({r[\"cedar_uid\"] for r in rows if k in r[\"contamination_flags\"]})"
+  },
+  {
+   "class": "C3",
+   "where": "code/111_build_advocacy_passthrough.py",
+   "line": 1253,
+   "what": "unanchored substring test decides an outcome: `e in D['np_fin_by_ein']` in `step_report`",
+   "size": 1,
+   "unit": "site",
+   "detail": "in_fin = {e for e in rec_eins if e in D[\"np_fin_by_ein\"]}"
+  },
+  {
+   "class": "C3",
+   "where": "code/119_build_digital_and_loyalty.py",
+   "line": 1262,
+   "what": "unanchored substring test decides an outcome: `fname.lower() in s.lower()` in `parse_loyalty`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if fname.lower() in s.lower():"
+  },
+  {
+   "class": "C3",
+   "where": "code/132_build_schedule_i_layer.py",
+   "line": 687,
+   "what": "unanchored substring test decides an outcome: `'TRIBE' in irc` in `step_build`",
+   "size": 1,
+   "unit": "site",
+   "detail": "or \"TRIBE\" in irc or \"TRIBAL\" in irc or \"GOVERNMENT\" in irc"
+  },
+  {
+   "class": "C3",
+   "where": "code/132_build_schedule_i_layer.py",
+   "line": 993,
+   "what": "unanchored substring test decides an outcome: `'TRIBE' in (g['irc_section_as_filed'] or '').upper()` in `step_report`",
+   "size": 1,
+   "unit": "site",
+   "detail": "f\"{sum(1 for g in grants if 'TRIBE' in (g['irc_section_as_filed'] or '').upper()):,}\")"
+  },
+  {
+   "class": "C3",
+   "where": "code/135_build_resource_assets.py",
+   "line": 1061,
+   "what": "unanchored substring test decides an outcome: `'red dog' in (r['beneficiary_note'] + r['source_record_id']).lower()` in `main`",
+   "size": 1,
+   "unit": "site",
+   "detail": "names_mine = \"red dog\" in ("
+  },
+  {
+   "class": "C3",
+   "where": "code/136_build_congressional_correspondence_and_foia_index.py",
+   "line": 1164,
+   "what": "unanchored substring test decides an outcome: `'request id' in joined` in `parse_xlsx_log`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if (\"case number\" in joined or \"request id\" in joined"
+  },
+  {
+   "class": "C3",
+   "where": "code/13_build_fpds_hierarchy.py",
+   "line": 737,
+   "what": "unanchored substring test decides an outcome: `FED_STR in (parent_names.get(p, '') or '').upper()` in `build_report`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if FED_STR in (parent_names.get(p, \"\") or \"\").upper()),"
+  },
+  {
+   "class": "C3",
+   "where": "code/142_build_property_site_observations.py",
+   "line": 1430,
+   "what": "unanchored substring test decides an outcome: `k in s['hosts']` in `phase_extract`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if k in s[\"hosts\"]))"
+  },
+  {
+   "class": "C3",
+   "where": "code/152_build_assistance_id_crosswalk.py",
+   "line": 244,
+   "what": "unanchored substring test decides an outcome: `'constitu' in (sp_row.get('entity_class') or '').lower()` in `main`",
+   "size": 1,
+   "unit": "site",
+   "detail": "is_constituent = \"constitu\" in (sp_row.get(\"entity_class\") or \"\").lower()"
+  },
+  {
+   "class": "C3",
+   "where": "code/163_load_sam_contract_awards.py",
+   "line": 591,
+   "what": "unanchored substring test decides an outcome: `piid in pidx['piid']` in `normalise`",
+   "size": 1,
+   "unit": "site",
+   "detail": "piid_held = piid in pidx[\"piid\"]"
+  },
+  {
+   "class": "C3",
+   "where": "code/163_load_sam_contract_awards.py",
+   "line": 818,
+   "what": "unanchored substring test decides an outcome: `u in pidx['uei']` in `new_entities`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if not u or u in pidx[\"uei\"]:"
+  },
+  {
+   "class": "C3",
+   "where": "code/163_load_sam_contract_awards.py",
+   "line": 663,
+   "what": "unanchored substring test decides an outcome: `uei in pidx['uei']` in `normalise`",
+   "size": 1,
+   "unit": "site",
+   "detail": "\"recon_uei_held\": \"1\" if uei and uei in pidx[\"uei\"] else \"0\","
+  },
+  {
+   "class": "C3",
+   "where": "code/169_build_identifier_graph.py",
+   "line": 846,
+   "what": "unanchored substring test decides an outcome: `dsname.replace('federal_funding', 'federal_funding_transactions') in r['path']` in `<module>`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if r[\"hops\"] == 0 and dsname.replace(\"federal_funding\","
+  },
+  {
+   "class": "C3",
+   "where": "code/169_build_identifier_graph.py",
+   "line": 1045,
+   "what": "unanchored substring test decides an outcome: `'need_v6' in r['path']` in `<module>`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if \"need_v6\" in r[\"path\"] else \"\"),"
+  },
+  {
+   "class": "C3",
+   "where": "code/183_register_lobbying_registrant_layer.py",
+   "line": 526,
+   "what": "unanchored substring test decides an outcome: `'duns' in col.lower()` in `main`",
+   "size": 1,
+   "unit": "site",
+   "detail": "\"published\": \"0\" if \"duns\" in col.lower() else \"1\","
+  },
+  {
+   "class": "C3",
+   "where": "code/183_register_lobbying_registrant_layer.py",
+   "line": 528,
+   "what": "unanchored substring test decides an outcome: `'duns' in col.lower()` in `main`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if \"duns\" in col.lower() else \"public\","
+  },
+  {
+   "class": "C3",
+   "where": "code/191_apply_ancsa_ownership_ruling.py",
+   "line": 353,
+   "what": "unanchored substring test decides an outcome: `ident in (r.get('notes') or '').upper()` in `main`",
+   "size": 1,
+   "unit": "site",
+   "detail": "and ident in (r.get(\"notes\") or \"\").upper()):"
+  },
+  {
+   "class": "C3",
+   "where": "code/203_verify_fac_historical_bulk_tribal.py",
+   "line": 144,
+   "what": "unanchored substring test decides an outcome: `'AUDITHEADER' in nm.upper()` in `profile_zip`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if \"AUDITHEADER\" in nm.upper()), None)"
+  },
+  {
+   "class": "C3",
+   "where": "code/204_fac_historical_tribal_by_ein.py",
+   "line": 81,
+   "what": "unanchored substring test decides an outcome: `'ELECAUDITHEADER' in n.upper()` in `scan_year`",
+   "size": 1,
+   "unit": "site",
+   "detail": "hdr = next((n for n in names if \"ELECAUDITHEADER\" in n.upper()), None)"
+  },
+  {
+   "class": "C3",
+   "where": "code/221_probe_regulations_gov_comments.py",
+   "line": 172,
+   "what": "unanchored substring test decides an outcome: `str(pid) in low` in `_pid_is_live`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if str(pid) in low and any("
+  },
+  {
+   "class": "C3",
+   "where": "code/227_anomaly_sweep.py",
+   "line": 2201,
+   "what": "unanchored substring test decides an outcome: `'georgetown.edu' in blob` in `false_attribution_regressions`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if \"georgetown.edu\" in blob:"
+  },
+  {
+   "class": "C3",
+   "where": "code/242_build_individual_native_firm_contracts.py",
+   "line": 442,
+   "what": "unanchored substring test decides an outcome: `ident.upper() in blob.upper()` in `main`",
+   "size": 1,
+   "unit": "site",
+   "detail": "and ident and ident.upper() in blob.upper()):"
+  },
+  {
+   "class": "C3",
+   "where": "code/26_fix_sanity_failures.py",
+   "line": 88,
+   "what": "unanchored substring test decides an outcome: `FED_ROLLUP_NAME in (r.get(name_col) or '').upper()` in `fix_edges`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if FED_ROLLUP_NAME in (r.get(name_col) or \"\").upper():"
+  },
+  {
+   "class": "C3",
+   "where": "code/293_lint_bug_classes.py",
+   "line": 653,
+   "what": "unanchored substring test decides an outcome: `'status' in lname.lower()` in `detect_class3`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if \"status\" in lname.lower() and (vals & PROCESSED_STATUS) and \\"
+  },
+  {
+   "class": "C3",
+   "where": "code/30_funding_pre2008.py",
+   "line": 302,
+   "what": "unanchored substring test decides an outcome: `'columns' in detail.lower()` in `submit`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if e.code == 400 and \"columns\" in detail.lower():"
+  },
+  {
+   "class": "C3",
+   "where": "code/330_build_native_owned_businesses.py",
+   "line": 1113,
+   "what": "unanchored substring test decides an outcome: `tier.strip() in '123'` in `parse_mha`",
+   "size": 1,
+   "unit": "site",
+   "detail": "identity_scope=(\"any_native\" if tier.strip() in \"123\""
+  },
+  {
+   "class": "C3",
+   "where": "code/366_courtlistener_ownership_adjudication.py",
+   "line": 201,
+   "what": "unanchored substring test decides an outcome: `TOKEN in s` in `redact`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if TOKEN and TOKEN in s:"
+  },
+  {
+   "class": "C3",
+   "where": "code/392_write_unshipped_codebook_fragments.py",
+   "line": 255,
+   "what": "unanchored substring test decides an outcome: `'duns' in lc` in `build_rows`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if \"duns\" in lc or CB.is_licensed_col(c):"
+  },
+  {
+   "class": "C3",
+   "where": "code/46_pull_funding_credit_types.py",
+   "line": 218,
+   "what": "unanchored substring test decides an outcome: `os.path.basename(__file__).lower() in low` in `other_pullers`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if os.path.basename(__file__).lower() in low or \\"
+  },
+  {
+   "class": "C3",
+   "where": "code/503_identity.py",
+   "line": 492,
+   "what": "unanchored substring test decides an outcome: `state_of.get(tid) in st` in `resolve`",
+   "size": 1,
+   "unit": "site",
+   "detail": "h2 = {(tid, cn) for tid, cn in hits if state_of.get(tid) in st}"
+  },
+  {
+   "class": "C3",
+   "where": "code/510_assertions.py",
+   "line": 1025,
+   "what": "unanchored substring test decides an outcome: `'agent' in ml` in `harvest_identifiers`",
+   "size": 1,
+   "unit": "site",
+   "detail": "elif \"agent\" in ml:"
+  },
+  {
+   "class": "C3",
+   "where": "code/516_release_manifest.py",
+   "line": 1859,
+   "what": "unanchored substring test decides an outcome: `column in corpus.get(w, '')` in `attribute_stamp`",
+   "size": 1,
+   "unit": "site",
+   "detail": "strong = [w for w in writers if column in corpus.get(w, \"\")]"
+  },
+  {
+   "class": "C3",
+   "where": "code/519_closure_federal_register.py",
+   "line": 642,
+   "what": "unanchored substring test decides an outcome: `nid in got` in `led_ex_parte_parties`",
+   "size": 1,
+   "unit": "site",
+   "detail": "lg.note(\"emitted\" if nid in got else"
+  },
+  {
+   "class": "C3",
+   "where": "code/522_mine_rulings.py",
+   "line": 166,
+   "what": "unanchored substring test decides an outcome: `'agent' in r['source_file']` in `assemble`",
+   "size": 1,
+   "unit": "site",
+   "detail": "add(\"AGENT\" if \"agent\" in r[\"source_file\"] else \"MIXED\","
+  },
+  {
+   "class": "C3",
+   "where": "code/523_spiderweb_harvest.py",
+   "line": 144,
+   "what": "unanchored substring test decides an outcome: `FED_NAME in (r.get('parent_name') or '').upper()` in `federal_rollup_ueis`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if FED_NAME in (r.get(\"parent_name\") or \"\").upper():"
+  },
+  {
+   "class": "C3",
+   "where": "code/52_add_village_corporations.py",
+   "line": 120,
+   "what": "unanchored substring test decides an outcome: `'Regional Corp' in r.get('entity_class', '')` in `main`",
+   "size": 1,
+   "unit": "site",
+   "detail": "for r in spine if \"Regional Corp\" in r.get(\"entity_class\", \"\")}"
+  },
+  {
+   "class": "C3",
+   "where": "code/533_shard_e_build_subsidiary_edges.py",
+   "line": 476,
+   "what": "unanchored substring test decides an outcome: `pat.lower() in name.lower()` in `main`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if pat.lower() in name.lower():"
+  },
+  {
+   "class": "C3",
+   "where": "code/534_shard_e_build_web_map.py",
+   "line": 47,
+   "what": "unanchored substring test decides an outcome: `'web.archive.org' in r.get('url', '')` in `evidence_for`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if \"web.archive.org\" in r.get(\"url\", \"\"):"
+  },
+  {
+   "class": "C3",
+   "where": "code/594_shard_f_org_web_probe.py",
+   "line": 52,
+   "what": "unanchored substring test decides an outcome: `full_name.lower() in t` in `score`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if full_name.lower() in t:"
+  },
+  {
+   "class": "C3",
+   "where": "code/600_shard_f_service_area.py",
+   "line": 204,
+   "what": "unanchored substring test decides an outcome: `'constituency entity' in e['entity_class']` in `main`",
+   "size": 1,
+   "unit": "site",
+   "detail": "band = \"constituency entity\" in e[\"entity_class\"]"
+  },
+  {
+   "class": "C3",
+   "where": "code/67_sam_entity_harvest.py",
+   "line": 116,
+   "what": "unanchored substring test decides an outcome: `'API_KEY_INVALID' in body` in `get`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if code == 401 or \"API_KEY_INVALID\" in body:"
+  },
+  {
+   "class": "C3",
+   "where": "code/690_shard_m_vendor_list_sweep.py",
+   "line": 567,
+   "what": "unanchored substring test decides an outcome: `'web.archive.org' in u` in `sweep_host`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if not u.startswith(\"http\") or \"web.archive.org\" in u:"
+  },
+  {
+   "class": "C3",
+   "where": "code/690_shard_m_vendor_list_sweep.py",
+   "line": 2228,
+   "what": "unanchored substring test decides an outcome: `'web.archive.org' in u` in `pick_base`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if \"web.archive.org\" in u or not u.startswith(\"http\"):"
+  },
+  {
+   "class": "C3",
+   "where": "code/690_shard_m_vendor_list_sweep.py",
+   "line": 1308,
+   "what": "unanchored substring test decides an outcome: `'SSL' in str(r['status'])` in `reach_host`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if not r[\"ok\"] and \"SSL\" in str(r[\"status\"]):"
+  },
+  {
+   "class": "C3",
+   "where": "code/701_enterprise_and_business_list_sweep.py",
+   "line": 1595,
+   "what": "unanchored substring test decides an outcome: `'/wp-json/' in row['url']` in `harvest_page`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if \"/wp-json/\" in row[\"url\"]:"
+  },
+  {
+   "class": "C3",
+   "where": "code/701_enterprise_and_business_list_sweep.py",
+   "line": 438,
+   "what": "unanchored substring test decides an outcome: `'SSL' in str(r['status'])` in `reach`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if not r[\"ok\"] and \"SSL\" in str(r[\"status\"]):"
+  },
+  {
+   "class": "C3",
+   "where": "code/701_enterprise_and_business_list_sweep.py",
+   "line": 1430,
+   "what": "unanchored substring test decides an outcome: `'wp-json' in d.get('url', '')` in `stage_adjudicate`",
+   "size": 1,
+   "unit": "site",
+   "detail": "\"route\": (\"custom_post_type\" if \"wp-json\" in d.get(\"url\", \"\")"
+  },
+  {
+   "class": "C3",
+   "where": "code/701_enterprise_and_business_list_sweep.py",
+   "line": 1435,
+   "what": "unanchored substring test decides an outcome: `'wp-json' in d.get('url', '')` in `stage_adjudicate`",
+   "size": 1,
+   "unit": "site",
+   "detail": "\"n_items\": 99 if \"wp-json\" in d.get(\"url\", \"\") else 0,"
+  },
+  {
+   "class": "C3",
+   "where": "code/751_fr_refresh_promote.py",
+   "line": 269,
+   "what": "unanchored substring test decides an outcome: `'cedar_uid' in before['cols']` in `stage_restamp`",
+   "size": 1,
+   "unit": "site",
+   "detail": "+ (\"\" if \"cedar_uid\" in before[\"cols\"] else \"   <-- COLUMN RESTORED\"))"
+  },
+  {
+   "class": "C3",
+   "where": "code/76_build_recognition_history.py",
+   "line": 1894,
+   "what": "unanchored substring test decides an outcome: `'Lumbee' in e['entity_name']` in `write_log_doc`",
+   "size": 1,
+   "unit": "site",
+   "detail": "lum = next((e for e in events if \"Lumbee\" in e[\"entity_name\"]), None)"
+  },
+  {
+   "class": "C3",
+   "where": "code/77_philanthropy_review_queue.py",
+   "line": 453,
+   "what": "unanchored substring test decides an outcome: `'indigenous' in ' '.join(r['native_tokens']).lower()` in `main`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if \"indigenous\" in \" \".join(r[\"native_tokens\"]).lower()"
+  },
+  {
+   "class": "C3",
+   "where": "code/843_retire_cicd_scheme.py",
+   "line": 141,
+   "what": "unanchored substring test decides an outcome: `SONOMA_MARK in (r.get('recipient_name') or '').upper()` in `rewrite`",
+   "size": 1,
+   "unit": "site",
+   "detail": "and SONOMA_MARK in (r.get(\"recipient_name\") or \"\").upper()):"
+  },
+  {
+   "class": "C3",
+   "where": "code/85_build_admin_region_crosswalk.py",
+   "line": 520,
+   "what": "unanchored substring test decides an outcome: `'field office' in lab` in `office_type`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if \"field office\" in lab:"
+  },
+  {
+   "class": "C3",
+   "where": "code/94_rescan_universes.py",
+   "line": 273,
+   "what": "unanchored substring test decides an outcome: `tier in 'ABC'` in `<module>`",
+   "size": 1,
+   "unit": "site",
+   "detail": "tier if tier in \"ABC\" else \"C\","
+  },
+  {
+   "class": "C3",
+   "where": "code/94_rescan_universes.py",
+   "line": 1030,
+   "what": "unanchored substring test decides an outcome: `idv in LED['UEI']` in `do_faads`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if idt == \"UEI\" and idv in LED[\"UEI\"]:"
+  },
+  {
+   "class": "C3",
+   "where": "code/94_rescan_universes.py",
+   "line": 270,
+   "what": "unanchored substring test decides an outcome: `tier in 'ABC'` in `<module>`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if prev and \"ABC\".index(prev[2]) <= \"ABC\".index(tier if tier in \"ABC\" else \"C\"):"
+  },
+  {
+   "class": "C3",
+   "where": "code/980_gaming_web_harvest.py",
+   "line": 771,
+   "what": "unanchored substring test decides an outcome: `m in title` in `classify_page`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if m in low or m in title:"
+  },
+  {
+   "class": "C3",
+   "where": "code/980_gaming_web_harvest.py",
+   "line": 773,
+   "what": "unanchored substring test decides an outcome: `m in title` in `classify_page`",
+   "size": 1,
+   "unit": "site",
+   "detail": "in_title = [m for m in HIJACK_MARKERS if m in title]"
+  },
+  {
+   "class": "C3",
+   "where": "code/980_gaming_web_harvest.py",
+   "line": 428,
+   "what": "unanchored substring test decides an outcome: `'SSL' in type(e).__name__.upper()` in `fetch`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if (not relax_tls) and \"SSL\" in type(e).__name__.upper():"
+  },
+  {
+   "class": "C3",
+   "where": "code/ancsa_portal/download.py",
+   "line": 18,
+   "what": "unanchored substring test decides an outcome: `'video' in ct` in `fetch`",
+   "size": 1,
+   "unit": "site",
+   "detail": "ext=\".pdf\" if \"pdf\" in ct else (\".mp4\" if \"video\" in ct else \".bin\")"
+  },
+  {
+   "class": "C3",
+   "where": "code/parse_hud_awards.py",
+   "line": 104,
+   "what": "unanchored substring test decides an outcome: `'TOTAL' in name.upper()` in `ihbg_fy1819`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if not name or 'TOTAL' in name.upper():"
+  },
+  {
+   "class": "C8",
+   "where": "code/1071_identifier_driven_deal_sweep.py",
+   "line": 292,
+   "what": "resume guard `if ... in self._cache: skip` treats PRESENCE as completion, but `self` is also written on a refusal/error path (2 site(s)). A cached refusal makes the re-run skip the host silently.",
+   "size": 2,
+   "unit": "refusal-write sites",
+   "detail": "L403: self.denied.add((ident, tid)); L405: self.denied.add((k, tid))"
+  },
+  {
+   "class": "C8",
+   "where": "code/142_build_property_site_observations.py",
+   "line": 235,
+   "what": "resume guard `if ... in _robots_cache: skip` treats PRESENCE as completion, but `_robots_cache` is also written on a refusal/error path (1 site(s)). A cached refusal makes the re-run skip the host silently.",
+   "size": 1,
+   "unit": "refusal-write sites",
+   "detail": "L258: _robots_cache[scheme_host] = r"
+  },
+  {
+   "class": "C8",
+   "where": "code/547_shard_c_hidden_endpoint_sweep.py",
+   "line": 165,
+   "what": "resume guard `if ... in done: skip` treats PRESENCE as completion, but `done` is also written on a refusal/error path (1 site(s)). A cached refusal makes the re-run skip the host silently.",
+   "size": 1,
+   "unit": "refusal-write sites",
+   "detail": "L203: done.add((host, kind))"
+  },
+  {
+   "class": "C8",
+   "where": "code/553_shard_d_web_probe.py",
+   "line": 82,
+   "what": "resume guard `if ... in _robots_cache: skip` treats PRESENCE as completion, but `_robots_cache` is also written on a refusal/error path (1 site(s)). A cached refusal makes the re-run skip the host silently.",
+   "size": 1,
+   "unit": "refusal-write sites",
+   "detail": "L104: _robots_cache[host] = (st, rules)"
+  },
+  {
+   "class": "C8",
+   "where": "code/980_gaming_web_harvest.py",
+   "line": 340,
+   "what": "resume guard `if ... in _robots_cache: skip` treats PRESENCE as completion, but `_robots_cache` is also written on a refusal/error path (1 site(s)). A cached refusal makes the re-run skip the host silently.",
+   "size": 1,
+   "unit": "refusal-write sites",
+   "detail": "L356: _robots_cache[key] = (rp, note)"
+  },
+  {
+   "class": "C8",
+   "where": "code/991_newsletter_gap_sweep.py",
+   "line": 175,
+   "what": "resume guard `if ... in _robots_cache: skip` treats PRESENCE as completion, but `_robots_cache` is also written on a refusal/error path (1 site(s)). A cached refusal makes the re-run skip the host silently.",
+   "size": 1,
+   "unit": "refusal-write sites",
+   "detail": "L196: _robots_cache[base] = (dis, sm, how)"
+  },
+  {
+   "class": "C9",
+   "where": "code/1000_harvest_business_identifiers.py",
+   "line": 288,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run(cmd, capture_output=True, timeout=timeout + 15)"
+  },
+  {
+   "class": "C9",
+   "where": "code/100_finish_declinations_and_employment.py",
+   "line": 246,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run(cmd, capture_output=True)"
+  },
+  {
+   "class": "C9",
+   "where": "code/100_finish_declinations_and_employment.py",
+   "line": 241,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run(cmd, capture_output=True, text=True)"
+  },
+  {
+   "class": "C9",
+   "where": "code/103_build_california_gaming.py",
+   "line": 197,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run(cmd, capture_output=True)"
+  },
+  {
+   "class": "C9",
+   "where": "code/105_build_florida_gaming.py",
+   "line": 274,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run(cmd, capture_output=True)"
+  },
+  {
+   "class": "C9",
+   "where": "code/108_build_tribal_tax_bases.py",
+   "line": 234,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run("
+  },
+  {
+   "class": "C9",
+   "where": "code/113_build_nd_severance.py",
+   "line": 275,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run("
+  },
+  {
+   "class": "C9",
+   "where": "code/116_build_nd_tribal_taxes.py",
+   "line": 311,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run("
+  },
+  {
+   "class": "C9",
+   "where": "code/117_build_gaming_devices.py",
+   "line": 333,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run("
+  },
+  {
+   "class": "C9",
+   "where": "code/117_build_gaming_devices.py",
+   "line": 943,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run([\"pdftotext\", \"-layout\", str(path), \"-\"],"
+  },
+  {
+   "class": "C9",
+   "where": "code/118_build_gaming_ordinances.py",
+   "line": 221,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run(cmd, capture_output=True)"
+  },
+  {
+   "class": "C9",
+   "where": "code/118_build_gaming_ordinances.py",
+   "line": 216,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run(cmd, capture_output=True, text=True)"
+  },
+  {
+   "class": "C9",
+   "where": "code/118_build_gaming_ordinances.py",
+   "line": 240,
+   "what": "`subprocess.run(...)` -> `r`: stdout is consumed and `r.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "r = subprocess.run([\"tasklist\", \"/FI\", f\"PID eq {pid}\"],"
+  },
+  {
+   "class": "C9",
+   "where": "code/119_build_digital_and_loyalty.py",
+   "line": 342,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run(cmd, capture_output=True, timeout=timeout + 30)"
+  },
+  {
+   "class": "C9",
+   "where": "code/142_build_property_site_observations.py",
+   "line": 216,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run(cmd, capture_output=True)"
+  },
+  {
+   "class": "C9",
+   "where": "code/150_run_ocr_overnight.py",
+   "line": 75,
+   "what": "`subprocess.run(...)` -> `ps`: stdout is consumed and `ps.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "ps = subprocess.run("
+  },
+  {
+   "class": "C9",
+   "where": "code/155_pull_nigc_roster.py",
+   "line": 124,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run(cmd, capture_output=True)"
+  },
+  {
+   "class": "C9",
+   "where": "code/159_extend_gaming_metrics.py",
+   "line": 131,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run([\"curl\", \"-s\", \"--max-time\", \"120\","
+  },
+  {
+   "class": "C9",
+   "where": "code/217_pull_az_adg_report_archive.py",
+   "line": 120,
+   "what": "`subprocess.run(...)` -> `r`: stdout is consumed and `r.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "r = subprocess.run([\"curl\", \"-sS\", \"--compressed\", \"--max-time\", \"90\","
+  },
+  {
+   "class": "C9",
+   "where": "code/289_update_collection.py",
+   "line": 177,
+   "what": "`subprocess.run(...)` -> `r`: stdout is consumed and `r.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "r = subprocess.run(PY + [\"code/cedar_codebook.py\", \"check\"],"
+  },
+  {
+   "class": "C9",
+   "where": "code/343_refresh_ct_gaming_monthly.py",
+   "line": 130,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run([\"curl\", \"-s\", \"--max-time\", \"120\","
+  },
+  {
+   "class": "C9",
+   "where": "code/513_handoffs.py",
+   "line": 88,
+   "what": "`subprocess.run(...)` -> `r`: stdout is consumed and `r.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "r = subprocess.run([\"git\", \"rev-parse\", \"HEAD\"], cwd=str(ROOT),"
+  },
+  {
+   "class": "C9",
+   "where": "code/516_release_manifest.py",
+   "line": 224,
+   "what": "`subprocess.run(...)` -> `r`: stdout is consumed and `r.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "r = subprocess.run([\"git\", *args], cwd=str(cwd or ROOT),"
+  },
+  {
+   "class": "C9",
+   "where": "code/516_release_manifest.py",
+   "line": 1131,
+   "what": "`subprocess.run(...)` -> `r`: stdout is consumed and `r.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "r = subprocess.run([sys.executable, \"-m\", \"pip\", \"freeze\","
+  },
+  {
+   "class": "C9",
+   "where": "code/83_build_resource_ledger.py",
+   "line": 426,
+   "what": "`subprocess.run(...)` -> `r`: stdout is consumed and `r.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "r = subprocess.run([\"curl\", \"-sL\", \"--max-time\", \"300\", url,"
+  },
+  {
+   "class": "C9",
+   "where": "code/83_build_resource_ledger.py",
+   "line": 770,
+   "what": "`subprocess.run(...)` -> `r`: stdout is consumed and `r.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "r = subprocess.run([\"pdftotext\", \"-layout\", str(p), \"-\"],"
+  },
+  {
+   "class": "C9",
+   "where": "code/83_build_resource_ledger.py",
+   "line": 1343,
+   "what": "`subprocess.run(...)` -> `r`: stdout is consumed and `r.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "r = subprocess.run([\"pdftotext\", \"-layout\", str(p), \"-\"],"
+  },
+  {
+   "class": "C9",
+   "where": "code/85_build_admin_region_crosswalk.py",
+   "line": 312,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run("
+  },
+  {
+   "class": "C9",
+   "where": "code/860_state2_acquisition.py",
+   "line": 1257,
+   "what": "`subprocess.run(...)` -> `r`: stdout is consumed and `r.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "r = subprocess.run(cmd, capture_output=True, text=True)"
+  },
+  {
+   "class": "C9",
+   "where": "code/90_fetch_nigc_declinations.py",
+   "line": 100,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run(cmd, capture_output=True)"
+  },
+  {
+   "class": "C9",
+   "where": "code/90_fetch_nigc_declinations.py",
+   "line": 95,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run(cmd, capture_output=True, text=True)"
+  },
+  {
+   "class": "C9",
+   "where": "code/90_fetch_nigc_declinations.py",
+   "line": 125,
+   "what": "`subprocess.run(...)` -> `r`: stdout is consumed and `r.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "r = subprocess.run([\"tasklist\", \"/FI\", f\"PID eq {pid}\"],"
+  },
+  {
+   "class": "C9",
+   "where": "code/991_newsletter_gap_sweep.py",
+   "line": 147,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run(cmd, capture_output=True, timeout=timeout + 25)"
+  },
+  {
+   "class": "C9",
+   "where": "code/992_newsletter_deal_candidates.py",
+   "line": 198,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run(cmd, capture_output=True, timeout=timeout + 25)"
+  },
+  {
+   "class": "C9",
+   "where": "code/build.py",
+   "line": 312,
+   "what": "`subprocess.run(...)` -> `r`: stdout is consumed and `r.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "r = subprocess.run("
+  },
+  {
+   "class": "C9",
+   "where": "code/fetch_util.py",
+   "line": 27,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run(cmd, capture_output=True)"
+  },
+  {
+   "class": "C9",
+   "where": "code/shard_g_build_crosswalk.py",
+   "line": 585,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run([r\"C:\\Program Files\\7-Zip\\7z.exe\", \"e\", \"-so\", str(zf),"
+  },
+  {
+   "class": "C9",
+   "where": "code/shard_g_newsletters.py",
+   "line": 114,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run(cmd, capture_output=True)"
+  },
+  {
+   "class": "C9",
+   "where": "code/shard_g_newsletters.py",
+   "line": 88,
+   "what": "`subprocess.run(...)` -> `r`: stdout is consumed and `r.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "r = subprocess.run([\"curl\", \"-s\", \"-m\", \"15\", \"-A\", UA,"
+  },
+  {
+   "class": "C9",
+   "where": "code/shard_g_registry_pull.py",
+   "line": 187,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run([\"curl\", \"-sS\", \"-L\", \"--max-redirs\", \"5\", \"-A\", UA,"
+  },
+  {
+   "class": "C9",
+   "where": "code/shard_g_registry_pull.py",
+   "line": 122,
+   "what": "`subprocess.run(...)` -> `r`: stdout is consumed and `r.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "r = subprocess.run([\"curl\", \"-s\", \"-m\", \"20\", \"-A\", UA,"
+  },
+  {
+   "class": "C9",
+   "where": "code/shard_g_web_map.py",
+   "line": 287,
+   "what": "`subprocess.run(...)` -> `p`: stdout is consumed and `p.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "p = subprocess.run([\"curl\", \"-s\", \"-L\", \"--max-redirs\", \"5\", \"-A\", UA,"
+  },
+  {
+   "class": "C9",
+   "where": "code/shard_g_web_map.py",
+   "line": 262,
+   "what": "`subprocess.run(...)` -> `r`: stdout is consumed and `r.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "r = subprocess.run([\"curl\", \"-s\", \"-m\", \"15\", \"-A\", UA,"
+  },
+  {
+   "class": "C9",
+   "where": "code/shard_g_web_map.py",
+   "line": 394,
+   "what": "`subprocess.run(...)` -> `pr`: stdout is consumed and `pr.returncode` is NEVER read. A subprocess that did not run produces empty output, and empty output is this check's strongest PASS. (`845 scan_md`: a `git log` that returned nothing scored every doc 0 hand edits.)",
+   "size": 1,
+   "unit": "unchecked subprocess",
+   "detail": "pr = subprocess.run([\"curl\", \"-s\", \"-A\", UA, \"--max-time\", \"30\", q],"
+  },
+  {
+   "class": "C12",
+   "where": "docs/ARCHITECTURE_DECISIONS.md",
+   "line": 0,
+   "what": "marker name `ADR-014` appears in 2 file(s) / 2 marker line(s). Two blocks with one name are ONE block to the preserver.",
+   "size": 2,
+   "unit": "marker lines",
+   "detail": "docs/ARCHITECTURE_DECISIONS.md x1; docs/CONSTELLATION_EXTENSION_LOG.md x1"
+  },
+  {
+   "class": "C12",
+   "where": "docs/ARCHITECTURE_DECISIONS.md",
+   "line": 0,
+   "what": "marker name `ADR-020-SUBHUB-REGISTERS` appears in 2 file(s) / 2 marker line(s). Two blocks with one name are ONE block to the preserver.",
+   "size": 2,
+   "unit": "marker lines",
+   "detail": "docs/ARCHITECTURE_DECISIONS.md x1; docs/ENTITY_LAYER_DEEPENING_2026-09-02.md x1"
+  },
+  {
+   "class": "C12",
+   "where": "docs/ARCHITECTURE_DECISIONS.md",
+   "line": 0,
+   "what": "marker name `CADENCE-MEASURED` appears in 2 file(s) / 2 marker line(s). Two blocks with one name are ONE block to the preserver.",
+   "size": 2,
+   "unit": "marker lines",
+   "detail": "docs/ARCHITECTURE_DECISIONS.md x1; docs/REFRESH_CADENCE.md x1"
+  },
+  {
+   "class": "C12",
+   "where": "docs/datasets/01_deals.md",
+   "line": 0,
+   "what": "marker name `COVERAGE-MEASURED` appears in 19 file(s) / 19 marker line(s). Two blocks with one name are ONE block to the preserver.",
+   "size": 19,
+   "unit": "marker lines",
+   "detail": "docs/datasets/01_deals.md x1; docs/datasets/02_contracting.md x1; docs/datasets/02b_subcontracting.md x1; docs/datasets/03_funding.md x1; docs/datasets/04_lobbying.md x1; docs/datasets/06_nonprofit.md x1; docs/datasets/09_federal_actions.md x1; docs/datasets/10_bills_votes.md x1; docs/datasets/11_nagpra.md x1; docs/datasets/_entity_layer.md x1; docs/datasets/compacts.md x1; docs/datasets/federal-register.md x1; docs/datasets/gaming.md x1; docs/datasets/gaming_sources.md x1; docs/datasets/lobbying_sources.md x1; docs/datasets/nagpra.md x1; docs/datasets/native-owned-businesses.md x1; docs/datasets/natural_resources_sources.md x1; docs/datasets/subcontracting.md x1"
+  },
+  {
+   "class": "C12",
+   "where": "docs/ARCHITECTURE_DECISIONS.md",
+   "line": 0,
+   "what": "marker name `DEALS-MERGE-1088` appears in 2 file(s) / 4 marker line(s). Two blocks with one name are ONE block to the preserver.",
+   "size": 4,
+   "unit": "marker lines",
+   "detail": "docs/ARCHITECTURE_DECISIONS.md x2; docs/MONEY_TOTALLING_RULES.md x2"
+  },
+  {
+   "class": "C12",
+   "where": "docs/MONEY_TOTALLING_RULES.md",
+   "line": 0,
+   "what": "marker name `FAADS` appears in 2 file(s) / 4 marker line(s). Two blocks with one name are ONE block to the preserver.",
+   "size": 4,
+   "unit": "marker lines",
+   "detail": "docs/MONEY_TOTALLING_RULES.md x2; AGENTS.md x2"
+  },
+  {
+   "class": "C12",
+   "where": "docs/KNOWN_ISSUES.md",
+   "line": 0,
+   "what": "marker name `INT-READY` appears in 2 file(s) / 2 marker line(s). Two blocks with one name are ONE block to the preserver.",
+   "size": 2,
+   "unit": "marker lines",
+   "detail": "docs/KNOWN_ISSUES.md x1; docs/MONEY_TOTALLING_RULES.md x1"
+  },
+  {
+   "class": "C12",
+   "where": "docs/ARCHITECTURE_DECISIONS.md",
+   "line": 0,
+   "what": "marker name `NEWSLETTERS` appears in 2 file(s) / 3 marker line(s). Two blocks with one name are ONE block to the preserver.",
+   "size": 3,
+   "unit": "marker lines",
+   "detail": "docs/ARCHITECTURE_DECISIONS.md x1; docs/MONEY_TOTALLING_RULES.md x2"
+  },
+  {
+   "class": "C12",
+   "where": "docs/KNOWN_ISSUES.md",
+   "line": 0,
+   "what": "marker name `QUARANTINE` appears in 2 file(s) / 3 marker line(s). Two blocks with one name are ONE block to the preserver.",
+   "size": 3,
+   "unit": "marker lines",
+   "detail": "docs/KNOWN_ISSUES.md x1; docs/MONEY_TOTALLING_RULES.md x2"
+  },
+  {
+   "class": "C12",
+   "where": "docs/ARCHITECTURE_DECISIONS.md",
+   "line": 0,
+   "what": "marker name `SEC-GAMING` appears in 5 file(s) / 8 marker line(s). Two blocks with one name are ONE block to the preserver.",
+   "size": 8,
+   "unit": "marker lines",
+   "detail": "docs/ARCHITECTURE_DECISIONS.md x2; docs/methodology/gaming.md x2; docs/MONEY_TOTALLING_RULES.md x2; docs/SEC_GAMING_FACILITY_REVENUE_BUILD_LOG.md x1; START_HERE.md x1"
+  },
+  {
+   "class": "C12",
+   "where": "docs/PUBLICATION_POLICY.md",
+   "line": 0,
+   "what": "marker name `TERMS-OWNER-RULING-2026-09-02` appears in 1 file(s) / 3 marker line(s). Two blocks with one name are ONE block to the preserver.",
+   "size": 3,
+   "unit": "marker lines",
+   "detail": "docs/PUBLICATION_POLICY.md x3"
+  },
+  {
+   "class": "C12",
+   "where": "docs/PUBLICATION_POLICY.md",
+   "line": 0,
+   "what": "marker name `TERMS-SCOPE` appears in 2 file(s) / 2 marker line(s). Two blocks with one name are ONE block to the preserver.",
+   "size": 2,
+   "unit": "marker lines",
+   "detail": "docs/PUBLICATION_POLICY.md x1; docs/SEC_GAMING_FACILITY_REVENUE_BUILD_LOG.md x1"
+  }
+ ]
+}

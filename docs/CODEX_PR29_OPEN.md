@@ -19,6 +19,13 @@ Useful? React with 👍 / 👎.
 [3] id=3915763674  data/cedar/README.md  line 603
 **![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)  Propagate the corrected gaming denominator**
 
+> **GAMING-DENOMINATOR-2026-09-02 — the gaming denominator, re-derived from the live files.**
+> `gaming_facilities.csv` holds 787 ROWS. That is not a facility count and must not be a denominator. 7 of them are placeholders whose `facility_name` is literally `No casino`, recording that a nation operates none. 56 duplicate groups sit in `review/gaming_facility_duplicate_candidates_2026-09-02.csv`: 52 are same-tribe (`LIKELY_SAME_PROPERTY`) and hold 53 rows beyond one each, so collapsing them gives 787 - 53 = **734**; the other 4 are `DIFFERENT_TRIBES_CHECK_BOTH` and at least one of those - Stables Casino, Miami Tribe with Modoc Nation - is a JOINT OPERATION, not a duplicate. No verdict is applied: `duplicate_of_facility_id` is populated on 10 rows, not 53. So the honest range is **734 to 780** and the single thing every consumer must stop doing is dividing by 787 - it inflates the denominator by 7.2% and understates every coverage percentage in the gaming dataset by about 6.7%.
+>
+> Re-derive rather than quote: `py -3 code/1116_ruling_propagation_2026_09_02.py derive`.
+> `py -3 code/1116_ruling_propagation_2026_09_02.py verify` exits 1 while any
+> document in `docs/` or `review/` still states a superseded figure unmarked.
+
 This newly establishes that only 780 of the 787 rows are facilities, yet the shipped descriptor still claims “one row per facility, with the single non-facility row” and advertises `694 of 787 facilities` with 93 unbounded; `samples/README.md` likewise labels all 787 as gaming facilities, and later prose on lines 751–767 repeats facility-denominator claims. Those customer-facing coverage and grain statements remain false after discovering the seven `No casino` placeholders, so recalculate them using real facilities and explicitly account for the placeholder rows.
 
 Useful? React with 👍 / 👎.

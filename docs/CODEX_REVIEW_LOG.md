@@ -10,6 +10,12 @@ the product repo are two different repositories and neither one's history tells
 the whole story on its own.
 
 ---
+> **GAMING-DENOMINATOR-2026-09-02 — the gaming denominator, re-derived from the live files.**
+> `gaming_facilities.csv` holds 787 ROWS. That is not a facility count and must not be a denominator. 7 of them are placeholders whose `facility_name` is literally `No casino`, recording that a nation operates none. 56 duplicate groups sit in `review/gaming_facility_duplicate_candidates_2026-09-02.csv`: 52 are same-tribe (`LIKELY_SAME_PROPERTY`) and hold 53 rows beyond one each, so collapsing them gives 787 - 53 = **734**; the other 4 are `DIFFERENT_TRIBES_CHECK_BOTH` and at least one of those - Stables Casino, Miami Tribe with Modoc Nation - is a JOINT OPERATION, not a duplicate. No verdict is applied: `duplicate_of_facility_id` is populated on 10 rows, not 53. So the honest range is **734 to 780** and the single thing every consumer must stop doing is dividing by 787 - it inflates the denominator by 7.2% and understates every coverage percentage in the gaming dataset by about 6.7%.
+>
+> Re-derive rather than quote: `py -3 code/1116_ruling_propagation_2026_09_02.py derive`.
+> `py -3 code/1116_ruling_propagation_2026_09_02.py verify` exits 1 while any
+> document in `docs/` or `review/` still states a superseded figure unmarked.
 
 ## HOW TO ENUMERATE A CODEX REVIEW, AND THE MISTAKE THAT MAKES YOU MISS IT
 
@@ -1022,3 +1028,158 @@ were checked and are correct UTF-8 (`\xe2\x80\x93`, `\xe2\x80\x94`); no
 descriptor contains mojibake; all 14 still construct against the real
 `CollectionDataset` read from `origin/main`. The round-2 false alarm and the
 round-4 real one are told apart by reading bytes, every time.
+
+---
+
+## PR #29 — ROUND 5, answered and pushed as `feec881` then `14a2ab4`
+
+Codex reviewed `caa0d3f` and left **four** findings, all P2. **All four right,
+and all four are the same defect: a correction applied where it was found and
+not propagated to the other places that assert it.**
+
+That brings this branch to **nine instances of one failure**:
+
+| # | the stale copy |
+|---|---|
+| 1 | `owned` published 1,657 while `samples/README.md` said 2,916 |
+| 2 | `345,180` and `345,108` for the same measurement, 18 lines apart |
+| 3 | the blockers overview said "every list is empty" after two were named |
+| 4 | a blocker described a count conflict inside the commit that withdrew the count |
+| 5 | a retraction pointed at a figure no longer on the page |
+| 6 | the overview said "two" after `federal-register` made three |
+| 7 | the top-up described as current two screens from the text replacing it |
+| 8 | the gaming denominator corrected in prose, not in the shipped descriptor |
+| 9 | a mojibake summary hardcoded beside a computed breakdown |
+
+**The rule this branch wrote two rounds ago — "grep for the old number before
+you commit" — does not catch most of these**, and that is the useful finding.
+It catches a repeated *literal*. It does not catch a **count of things named
+elsewhere** (6), a **behaviour described twice** (7), or a **hardcoded summary
+beside a computed one** (9). The structural fixes are different for each:
+
+- **Name, do not count.** The overview now lists `owned`, `federal-register`
+  and `deals` instead of saying "three". A count drifts silently; a missing
+  name is visible next to the table.
+- **Describe once, link elsewhere.** The obsolete top-up paragraph is rewritten
+  as history and points at the current description rather than restating it —
+  restating it in two places is how they diverged.
+- **Compute, never type.** The mojibake summary is derived from the same dict
+  as its breakdown and cannot disagree with it again.
+
+### Finding 3 — and the half neither Codex nor I had
+
+Codex found that the gaming denominator had not propagated: the descriptor
+still said *"one row per facility, with the single non-facility row named"*
+(there are seven) and *"694 of 787 facilities ... which of the 93 it cannot
+bound"*.
+
+**The first repair swapped 787 for 780 and kept the percentage. That was still
+wrong**, and a concurrent audit caught it. Two independent revisions are in
+flight on the same denominator and they **compound**:
+
+    787   rows in gaming_facilities.csv
+     -7   placeholder rows whose facility_name is `No casino`
+    ---
+    780   facility rows
+    -53   extra rows in 52 same-tribe duplicate groups, PROPOSED not applied
+    ---
+    727   distinct properties, pending adjudication
+
+**Independence measured rather than assumed: zero of the seven placeholders
+appear in any of the 52 same-tribe groups.** Six appear in the four
+cross-tribe groups, which is how the placeholders were found. Both corrections
+apply; neither absorbs the other.
+
+**So 734 is a partial correction too.** It is 787 − 53 — it removes the
+duplicates and leaves the placeholders in, fixing one of the two ways 787 is
+wrong. It was circulating as the true count and would have shipped.
+
+The descriptor now publishes **no percentage** for revenue bounding. 694 rows
+carry a bounded estimate and 86 facility rows do not. **A rate against a
+denominator under revision in two directions is a number that will be wrong
+twice**, so the ladder ships instead, with the reason each rung exists.
+
+Still not merged, and should not be: `duplicate_of_facility_id` is blank on
+all but ten rows, a casino and its hotel can legitimately be two facilities,
+and `Stables Casino` pairs the Miami Tribe with Modoc Nation as a **joint
+operation** — Codex's own round-2 finding 5 arriving from the opposite
+direction.
+
+### Finding 4 — the fix was to stop typing the number
+
+`1,096 of 1,212` against a breakdown printing `1,098 of 1,214` directly
+beneath it. The summary had been written from the `subcontracting`
+measurement and never counted `nagpra`'s two cells. **Not repaired by typing
+1,098** — `_moji_fixed()`, `_moji_left()` and `_moji_total()` now derive it
+from the same dict the breakdown uses.
+
+**And it caught my own prose.** The examples in that paragraph demonstrating
+mojibake contained `` — a C1 control character — where `U+201A` was
+meant, so **the strings illustrating corruption were themselves malformed and
+matched the regex documented three lines above them.** The generated README
+now holds zero C1 control characters; the two remaining pattern matches are
+the deliberate examples, correctly formed.
+
+### One more instance, in the reply itself
+
+The follow-up reply on the gaming thread was posted through an inline shell
+command and **its code block was eaten by backtick expansion** — the
+787/780/727 ladder arrived as the words `No casino`. Repaired by `PATCH
+/pulls/comments/{id}` and labelled as a repost. Every other comment was posted
+from a file and survived; all were audited afterwards and none is short or
+mangled.
+
+It is a trivial mechanical fault and it belongs in this list anyway, because
+it is the same shape as the nine above: **a correction that did not arrive
+intact where the reader is.** Post message bodies from a file, never from an
+inline double-quoted shell string.
+
+### Instance ten, found by auditing for the pattern instead of waiting for round 6
+
+Codex has found a stale copy of a corrected number on **every one of the three
+passes** this README has had. Rather than wait for a fourth, the three shipped
+files were swept for the pattern behind all of them: **every figure asserted
+in more than one place.**
+
+    README.md + samples/README.md + collection_descriptors.json
+    figures appearing more than once:     50
+    of which spanning two or more files:  41
+
+One was stale, and it was an hour old. `README.md` still read **"116 of 1,212
+affected cells recover and 1,096 (90.4%) do not"** — the exact totals round-5
+finding 4 corrected to 116 of 1,214 and 1,098. **The generated file was fixed
+and the hand-written copy was left standing, in the same commit that fixed
+instances six through nine.**
+
+The repair is not to write the right number there. It is to stop asserting it
+twice: that paragraph now states that the counts are measured on every run and
+live in `samples/README.md`, and the two headings hardcoding `9.6%` say "under
+a tenth". *Describe once, link elsewhere* — the same rule the top-up paragraph
+earned.
+
+**THE SWEEP FOUND ITS OWN BUG FIRST, AND THAT IS THE ENTRY THAT BELONGS IN THE
+FIELD GUIDE.** The first version keyed occurrences by `Path.name`. Both files
+are called `README.md`, so it silently merged them and reported **four**
+duplicate figures instead of fifty — a clean-looking result produced by
+collapsing its own inputs. That is section 3's defect class exactly, produced
+by the check written to catch a *different* instance of it, within minutes of
+writing it. **The habit that caught it was the one already in the guide: print
+the denominator. Four was implausible on its face for two files that restate
+each other constantly.**
+
+### Where the loop stands
+
+PR **#29 open**, head `f12ac41`, branch `cedar-data-samples`, mergeable.
+**Five Codex rounds, 20 findings, every one answered in its own thread and
+every one right on the facts.** Three needed a different repair from the one
+suggested and each was declined with a measurement rather than an argument:
+the `STEPHEN GRAHAM` narrowing (PR #26), the C4 stale-README half (round 2),
+the 1-of-787 bridge (round 2), and the mojibake decode that reaches under a
+tenth (round 4).
+
+Findings this side brought that Codex could not see: the `owned` two-count
+contradiction, 617,097 case-blind sentinels, the generator that could no
+longer run, the seven `No casino` placeholder rows, the compounding gaming
+denominator, the `federal-register` UNDOCUMENTED sample source, the 807 Dear
+Tribal Leader letters against copy calling that surface unacquired, and
+instance ten.

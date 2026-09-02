@@ -143,11 +143,12 @@ foundations, see §5.
   Foundation, 13-6068340) and `DONORS TRUST` EIN 26-2515785 (Nebraska — not
   DonorsTrust Inc of Alexandria VA, 52-2166327). Both are recorded in
   `review/grantmaker_name_trap_exclusions_2026-08-12.csv`.
-- **Sources whose terms forbid reuse are excluded by every route** — Colville,
+- ~~**Sources whose terms forbid reuse are excluded by every route** — Colville,
   CTUIR/Umatilla, Yakama, Chickasaw, NANA/Akima, Southern Ute, Forest County
-  Potawatomi. The exclusion bites elsewhere in Cedar more than here, but it is
-  absolute: harmonising changes what Cedar publishes, not what Cedar was
-  allowed to take.
+  Potawatomi.~~ **RELEASED 2026-09-02.** **SUPERSEDED 2026-09-02 by owner ruling** (`docs/PUBLICATION_POLICY.md`, `TERMS-OWNER-RULING-2026-09-02`): a tribal website's terms language no longer blocks harvest, and all eight are released for harvest of **their own public pages**. The exclusions below are kept as the *observation* of what each publisher stated - and as the worklist the ruling creates. Still binding, none of them a terms question: technical access controls; a natural person's data apart from their public role (the business row may be harvested, `owner_name_raw` / `email` / `phone` / `address_raw` may not be published); EMMA/MSRB + CUSIP Global Services, a third-party licensor; Casino City and D-U-N-S. The second half of
+  the struck sentence is still true and is why the ruling was the owner's to
+  make: harmonising changes what Cedar publishes, not what Cedar was allowed to
+  take — so the permission question had to be answered, not designed around.
 
 ---
 

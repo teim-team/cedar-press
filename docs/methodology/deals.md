@@ -447,7 +447,9 @@ drops the row from the fixed-label rollups.
 
 ## 5. What was excluded on purpose
 
-Sources marked `TERMS_STATED_RESTRICTIVE` are excluded by **every** route,
+> **SUPERSEDED 2026-09-02 by owner ruling** (`docs/PUBLICATION_POLICY.md`, `TERMS-OWNER-RULING-2026-09-02`): a tribal website's terms language no longer blocks harvest, and all eight are released for harvest of **their own public pages**. The exclusions below are kept as the *observation* of what each publisher stated - and as the worklist the ruling creates. Still binding, none of them a terms question: technical access controls; a natural person's data apart from their public role (the business row may be harvested, `owner_name_raw` / `email` / `phone` / `address_raw` may not be published); EMMA/MSRB + CUSIP Global Services, a third-party licensor; Casino City and D-U-N-S.
+
+~~Sources marked `TERMS_STATED_RESTRICTIVE` are excluded by **every** route,~~
 including a harmonised derivative: **Confederated Colville**, **CTUIR /
 Umatilla**, **Yakama**, **Chickasaw** (its terms name company directories
 specifically, ~622 firms), **NANA / Akima** (forbids automated use, scraping
@@ -475,6 +477,14 @@ Three of the eight bear on this dataset:
 > vendor/company directory, not to the corporation's published annual reports.
 > That is coherent, and it is stated in neither document.** It should be
 > settled explicitly rather than relied on.
+>
+> **SETTLED 2026-09-02, and in the wider direction.** Two rulings closed it on
+> the same day. `TERMS-SCOPE` settled the narrow question the paragraph asks -
+> a restriction attaches to the host and path where the terms were found, and
+> it does **not** bind a third party's independent publication, so NANA's
+> vendor directory and NANA's own annual reports were never one object. The
+> owner ruling then released the eight outright for their own public pages.
+> The apparent incoherence was real and it is now moot in both directions.
 
 ---
 

@@ -393,7 +393,8 @@ caution:
 | `SINGLE_PROPERTY_ATTRIBUTED` | 115 | yes |
 | `REPORTED_PROPERTY_REVENUE` | 61 | yes |
 
-**The two honest per-property statuses reach 11 of 787 facilities (1.4%).** A
+**The two honest per-property statuses reach 11 of 787 ROWS (1.4%).**
+*(Correction appended 2026-09-02 from outside this block, no other line touched: 787 is a row count. See `GAMING-DENOMINATOR-2026-09-02` at the foot of this file — the facility denominator is 734–780, so this is nearer 1.5%.)* A
 dollar column on the facility table would therefore be 98.6% blank, and the
 cells a buyer *could* see would mostly be a regional ceiling — which, summed
 across that region's properties, multiplies the region's entire GGR by its
@@ -411,7 +412,7 @@ not across facilities, not across years, and above all not across
 `facility_id`; a facility-keyed join silently drops them.
 
 `state_revenue_disclosure_status = SEALED_BY_STATUTE_OR_COMPACT` is on **174 of
-787 facilities across seven states — AZ, CO, KS, MN, ND, NV, WI** — each with
+787 rows across seven states — AZ, CO, KS, MN, ND, NV, WI** — each with
 the statute or compact clause quoted in `state_revenue_disclosure_basis`. A
 blank there is `NOT_ASSESSED`, **not** evidence that the state publishes.
 
@@ -1163,7 +1164,7 @@ workstream.***
 | `SINGLE_PROPERTY_TRIBE_LEVEL_GAMING_REVENUE` | 115 | honest, per property |
 | `TRIBE_LEVEL_NOT_ATTRIBUTABLE_TO_A_PROPERTY` | 133 | honest, per **tribe** |
 | `REPORTED_SLOT_WIN_IS_FLOOR_FOR_GGR` | 61 | honest, a floor |
-| **an honest figure** | **309** | over **11 facilities of 787** |
+| **an honest figure** | **309** | over **11 facilities of 787 ROWS** *(correction appended 2026-09-02 from outside this block: the facility denominator is 734–780, `GAMING-DENOMINATOR-2026-09-02` at the foot of this file)* |
 
 **`SUM(revenue_upper_bound)` adds NIGC's regional total to itself once per
 property in the region.** The largest single ceiling is carried by **162
@@ -1225,6 +1226,8 @@ appears in two Cedar tables is one fact, and a buyer who unions them counts it
 twice** — filter on the flag.
 
 ### Which states seal revenue, and which never collected it
+
+*(Correction appended 2026-09-02 from outside this block, nothing else altered: **174 is the count of the ASSERTION, not of the evidence.** 113 carry `SEALED_HELD_BY_REGULATOR`; 58 carry `DISPOSITION_UNSUPPORTED_BY_RECORDED_QUOTE` (MN 48, NV 10) and 3 carry `NOT_COLLECTED_BY_THIS_BODY` (CO). Full derivation in `GAMING-DENOMINATOR-2026-09-02` at the foot of this file.)*
 
 174 facilities carry `state_revenue_disclosure_status =
 SEALED_BY_STATUTE_OR_COMPACT` across seven states. **They are not all the same
@@ -1430,3 +1433,23 @@ above.** On the sub side 1,971 rows lost a `sub_native_tribe_id` and 122 were
 repointed; on the prime side 517 and 186. Those are subaward amounts, a
 different money column in a different file.
 <!-- END QUARANTINE -->
+
+<!-- BEGIN GAMING-DENOMINATOR-2026-09-02 -->
+## The gaming denominator, and the sealed-revenue disposition
+
+*Appended 2026-09-02 by `code/1116_ruling_propagation_2026_09_02.py`'s pass, inside its own marked block so `574` preserves it. **No other block in this file was rewritten**; where a figure inside another workstream's block is superseded, a single attributed correction line was appended beside it and the surrounding prose left exactly as its author wrote it.*
+
+### The denominator
+
+`gaming_facilities.csv` holds 787 ROWS. That is not a facility count and must not be a denominator. 7 of them are placeholders whose `facility_name` is literally `No casino`, recording that a nation operates none. 56 duplicate groups sit in `review/gaming_facility_duplicate_candidates_2026-09-02.csv`: 52 are same-tribe (`LIKELY_SAME_PROPERTY`) and hold 53 rows beyond one each, so collapsing them gives 787 - 53 = **734**; the other 4 are `DIFFERENT_TRIBES_CHECK_BOTH` and at least one of those - Stables Casino, Miami Tribe with Modoc Nation - is a JOINT OPERATION, not a duplicate. No verdict is applied: `duplicate_of_facility_id` is populated on 10 rows, not 53. So the honest range is **734 to 780** and the single thing every consumer must stop doing is dividing by 787 - it inflates the denominator by 7.2% and understates every coverage percentage in the gaming dataset by about 6.7%.
+
+### The sealed-revenue disposition
+
+174 facilities carry `state_revenue_disclosure_status = SEALED_BY_STATUTE_OR_COMPACT`, and **174 is not the number of facilities evidenced as sealed**. The disposition column says so on the same row: **113** are `SEALED_HELD_BY_REGULATOR` (AZ 43, KS 8, ND 22, WI 40); **58** are `DISPOSITION_UNSUPPORTED_BY_RECORDED_QUOTE` (MN 48, NV 10) - the status was asserted and the recorded quote does not support it; **3** are `NOT_COLLECTED_BY_THIS_BODY` (CO 3), which is a different fact entirely: the body does not hold the figure, so there is nothing sealed. Quote **113**, and quote the disposition beside it.
+
+**The rule both of these earn, and it is a totalling rule:** *a status column and a disposition column on the same row can disagree, and the status is the one that gets summed.* `SEALED_BY_STATUTE_OR_COMPACT` was asserted 174 times and the evidence recorded on the row supports it 113 times. Nothing was broken; nothing was lost; the count was simply about the assertion rather than about the evidence. **Sum the column that carries the evidence, and print the disposition beside the total.**
+
+Re-derive: `py -3 code/1116_ruling_propagation_2026_09_02.py derive`.
+Gate: `py -3 code/1116_ruling_propagation_2026_09_02.py verify` exits 1 while
+any document still states a superseded figure with nothing beside it.
+<!-- END GAMING-DENOMINATOR-2026-09-02 -->

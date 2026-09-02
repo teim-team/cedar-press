@@ -1,8 +1,21 @@
 # Methodology — Tribal Gaming
 
-**`gaming`. 54 customer tables; the spine is `gaming_facilities.csv`, 787
-facilities, and the regulatory record runs through NIGC's published document
-surface — 72 categories, 4,071 documents.** [measured 2026-09-02]
+**`gaming`. 54 customer tables; the spine is `gaming_facilities.csv`, **787
+ROWS — not 787 facilities** (see the denominator note immediately below), and the
+regulatory record runs through NIGC's published document surface — 72 categories,
+4,071 documents.** [measured 2026-09-02]
+
+> **GAMING-DENOMINATOR-2026-09-02 — the gaming denominator, re-derived from the live files.**
+> `gaming_facilities.csv` holds 787 ROWS. That is not a facility count and must not be a denominator. 7 of them are placeholders whose `facility_name` is literally `No casino`, recording that a nation operates none. 56 duplicate groups sit in `review/gaming_facility_duplicate_candidates_2026-09-02.csv`: 52 are same-tribe (`LIKELY_SAME_PROPERTY`) and hold 53 rows beyond one each, so collapsing them gives 787 - 53 = **734**; the other 4 are `DIFFERENT_TRIBES_CHECK_BOTH` and at least one of those - Stables Casino, Miami Tribe with Modoc Nation - is a JOINT OPERATION, not a duplicate. No verdict is applied: `duplicate_of_facility_id` is populated on 10 rows, not 53. So the honest range is **734 to 780** and the single thing every consumer must stop doing is dividing by 787 - it inflates the denominator by 7.2% and understates every coverage percentage in the gaming dataset by about 6.7%.
+>
+> Re-derive rather than quote: `py -3 code/1116_ruling_propagation_2026_09_02.py derive`.
+> `py -3 code/1116_ruling_propagation_2026_09_02.py verify` exits 1 while any
+> document in `docs/` or `review/` still states a superseded figure unmarked.
+
+**Every `of 787` below is arithmetically correct as a share of ROWS and is the
+wrong share of FACILITIES.** They are left as measured rather than rewritten,
+because the rows are what was counted; read each one against this note. The two
+places the noun is actually wrong are called out where they appear.
 
 *Written 2026-09-02. This is the methodology record: what was pulled and from
 where, how the rows were made, how entities were attributed, what was decided
@@ -40,8 +53,8 @@ exactly why those bounds must never be summed.
 
 **One narrow exception exists and it is 0.9% wide.** Where a *public SEC
 registrant* manages, develops or owns the property, its filings state the
-property's revenues or the fee it earned from them. That reaches **7 of 787
-facilities** and is held in `sec_gaming_financial_disclosures.csv` as its own
+property's revenues or the fee it earned from them. That reaches **7 of 787 rows
+(~0.96% of the 734–780 real facilities; see the denominator note in §1)**  ~~facilities** and is held in `sec_gaming_financial_disclosures.csv` as its own
 assertion class - see "Rate inversion, third attempt" in §4. It does not make
 the sentence above less true.
 
@@ -95,7 +108,7 @@ Fiscal Bureau, 7 biennial editions), New York (NYSGC), Arizona (ADG), Michigan
 | Wisconsin per-property revenue | Prohibited by compact confidentiality clauses |
 | Nevada / North Dakota / Kansas per-tribe revenue | Sealed by statute |
 | MSRB EMMA document layer | Terms of Use forbid scraping **and forbid using content "to develop or create a database to be sold."** Only the un-gated type-ahead was used, for issuer names only. Logged as a commercial blocker |
-| Terms-restricted tribal directories | Colville, CTUIR/Umatilla, Yakama, Chickasaw, NANA/Akima, Southern Ute, Forest County Potawatomi, Stillaguamish — excluded by every route. **See §6: the exclusion is source-scoped, and all eight nations are fully present here through federal and state records** |
+| Terms-restricted tribal directories | Colville, CTUIR/Umatilla, Yakama, Chickasaw, NANA/Akima, Southern Ute, Forest County Potawatomi, Stillaguamish — ~~excluded by every route~~ **RELEASED 2026-09-02 for their own public pages by owner ruling** (`PUBLICATION_POLICY.md`, `TERMS-OWNER-RULING-2026-09-02`); the logged refusals are now the harvest worklist. **See §6: the exclusion was source-scoped, and all eight nations were already fully present here through federal and state records** |
 
 ---
 
@@ -403,7 +416,7 @@ base genuinely is total facility revenue) and
 `DERIVED_FACILITY_NET_INCOME_AS_DEFINED` (Graton), never plain revenue.
 
 This does **not** soften the claim at the top of this document. The route
-reaches **7 of 787 facilities (0.9%)** and only where a public company's books
+reaches **7 facilities — 0.9% of the 787 ROWS, ~0.96% of the 734–780 real facilities (denominator note, §1)** and only where a public company's books
 ran through the property. `docs/SEC_GAMING_FACILITY_REVENUE_BUILD_LOG.md` is the
 full record; `docs/MONEY_TOTALLING_RULES.md` `<!-- BEGIN SEC-GAMING -->` is the
 fence, and it forbids summing any of it against `gaming_revenue_bounds.csv`.
@@ -489,7 +502,10 @@ they got better.
 
 ## 6. What was excluded on purpose
 
-Sources marked `TERMS_STATED_RESTRICTIVE` are excluded by **every** route,
+> **SUPERSEDED 2026-09-02 by owner ruling** (`docs/PUBLICATION_POLICY.md`, `TERMS-OWNER-RULING-2026-09-02`): a tribal website's terms language no longer blocks harvest, and all eight are released for harvest of **their own public pages**. The exclusions below are kept as the *observation* of what each publisher stated - and as the worklist the ruling creates. Still binding, none of them a terms question: technical access controls; a natural person's data apart from their public role (the business row may be harvested, `owner_name_raw` / `email` / `phone` / `address_raw` may not be published); EMMA/MSRB + CUSIP Global Services, a third-party licensor; Casino City and D-U-N-S. The two-layer enforcement described below still stands as
+> **machinery**; what changed is which hosts it holds.
+
+~~Sources marked `TERMS_STATED_RESTRICTIVE` are excluded by **every** route,~~
 including a harmonised derivative. Enforcement is two-layered: a
 `NAMED_RESTRICTIVE` host list in `code/701_enterprise_and_business_list_sweep.py`
 (mirrored in `code/690`), which is **unioned into** the registry verdicts and
@@ -538,7 +554,7 @@ come from federal and state records that are public by statute. [measured]
 | `property_status` | current **451** · **blank 334 (42.4%)** · approved 1 · closed 1. A reader of the shipped sample concludes the directory is a live-facility list; it is 57% status-known |
 | `open_date` precision | year 288 · day 188 · month 159 · **blank 151** · decade 1. `open_date_class`: exact 635 · bounded 90 · **absent 62** |
 | Facility source URLs | `open_date_source_url` on **192 of 787** |
-| Per-facility revenue | **does not exist publicly.** The best available is 13,803 bounds over **694 of 787 facilities**, and **0 region-years reduce to a single unknown operation** |
+| Per-facility revenue | **does not exist publicly.** The best available is 13,803 bounds over **694 of 787 rows**, and **0 region-years reduce to a single unknown operation** |
 | Region is not state | NIGC's Washington DC region spans AL, CT, FL, LA, MS, NC and NY. Connecticut is 2 of 46 operations in FY2025 |
 | Two NIGC universes disagree | 490 mapped locations against **545 FY2025 audited-statement operations** — one submitter can cover several properties, so a 1:1 correspondence is unreachable |
 | Geocoding on tribal land fails at ten times the national rate | **263 of 639 free-sourced addresses returned `No_Match` — 41%**, against single-digit national norms. A ZIP-only retry recovered **1 of 261** |
@@ -547,7 +563,7 @@ come from federal and state records that are public by statute. [measured]
 | `gaming_property_federal_traces` | **774 rows against a 787-row facility universe** — not rebuilt after the 2026-08-26 appends |
 | `digital_gaming_revenue` | clean **10,766**, dist **10,661** — the shipped copy is **105 rows behind** |
 | No gaming class on the facility record | Class II against Class III is the first regulatory fact about a tribal casino and there is no class column. `gaming_ordinances.csv` carries `class_ii_authorized` / `class_iii_authorized` for 301 tribes, and **263 of the 284 facility-bearing tribes (93%) have one** — tribe-grain, so it is a stated-caveat join, not a free one |
-| A column that cannot say what it needs to | `property_status = current` beside `close_date = 2006-04`. **113 of 787 facilities are in that state and every one is factually right** — the column simply cannot express "was current at the observation date" |
+| A column that cannot say what it needs to | `property_status = current` beside `close_date = 2006-04`. **113 of 787 rows are in that state and every one is factually right** — the column simply cannot express "was current at the observation date" |
 
 ---
 

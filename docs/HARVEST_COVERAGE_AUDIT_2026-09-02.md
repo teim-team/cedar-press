@@ -29,7 +29,7 @@ a number:
 | outcome | means |
 |---|---|
 | `HARVESTED` | content rows for this entity and this thing exist in a table on disk |
-| `REFUSED` | robots.txt bans the whole site, or the publisher states restrictive terms |
+| `REFUSED` | robots.txt bans the whole site, or the publisher states restrictive terms. **Narrowed 2026-09-02:** for a Native entity's own site the terms half no longer refuses (`PUBLICATION_POLICY.md`, `TERMS-OWNER-RULING-2026-09-02`), so the `REFUSED` counts in the headline table below are an **over-count** of what is still off limits and an **under-count** of the worklist. Re-run `code/1112` to re-derive them; do not hand-edit the numbers |
 | `FOUND_NOT_EXTRACTED` | the surface was located and reached; nothing was pulled into a table |
 | `CHECKED_ABSENT` | looked for, positively determined not published |
 | `ATTEMPTED_INCONCLUSIVE` | an attempt is on record and it could not decide — host unreachable, no host known, or the page does not name the entity |
@@ -134,7 +134,7 @@ refusal of a TERO page.
 | flag | cells | entities |
 |---|---:|---:|
 | `SITE_DOES_NOT_NAME_ENTITY` | 665 | 133 |
-| `SOURCE_REFUSES_THIS_AGENT_OR_STATES_RESTRICTIVE_TERMS` | 47 | 11 |
+| `SOURCE_REFUSES_THIS_AGENT_OR_STATES_RESTRICTIVE_TERMS` | 47 | 11 | *(the `STATES_RESTRICTIVE_TERMS` half of this flag stopped gating on 2026-09-02 - `PUBLICATION_POLICY.md`, `TERMS-OWNER-RULING-2026-09-02`. Keep the flag; it now records the publisher's stated preference rather than a refusal Cedar honours.)* |
 | `NAME_IS_ALL_STOPWORDS_identity_not_checkable_from_page_text` | 35 | 7 |
 
 **89 of those cells claim `HARVESTED` or `FOUND_NOT_EXTRACTED`** and are the ones to
@@ -212,7 +212,32 @@ saying so rather than counting it.
 
 ---
 
-## A TERMS FINDING THAT NEEDS AN OWNER RULING
+## A TERMS FINDING THAT NEEDED AN OWNER RULING - AND GOT ONE THE SAME DAY
+
+> **RULED 2026-09-02.** `docs/PUBLICATION_POLICY.md`,
+> `TERMS-OWNER-RULING-2026-09-02`: *"So tribal websites, I actually don't care
+> if they say it does scrape. Because if it's publicly available and you can
+> scrape it, scrape it."* Southern Ute's terms language **does not block the
+> harvest**. The proposed disposition at the foot of this section - move
+> `TBD-D01` to `graveyard/` and never promote it - is therefore **withdrawn as
+> to the business rows**, and the finding resolves as:
+>
+> * **The 21 business rows may be harvested and kept.** The exclusion that
+>   `TBD-055` records is now an observation of what southernute-nsn.gov states,
+>   not a gate.
+> * **`owner_name_raw`, `email`, `phone` and `address_raw` may not be
+>   published.** This is the privacy carve-out the ruling states explicitly and
+>   it is the *only* live bar on this file. It is not a licensing question and
+>   it did not move with the ruling.
+> * **The process defect this section found is untouched and is the durable
+>   part.** `TBD-D01` had no row in the vendor-list registry, so nothing
+>   connected the harvest back to the ruling that governed it. A ruling that
+>   lives in one artefact while the harvester reads another will be re-litigated
+>   every pass. Write the decision onto the row that asked for it.
+>
+> The section below is kept verbatim as the record of what was found.
+
+
 
 **`data/staging/business_registry/TBD-D01_southern_ute_indian_owned_business_list.jsonl`
 holds 21 rows extracted from a source the vendor-list registry had already ruled

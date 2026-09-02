@@ -363,7 +363,9 @@ described as $122M due 2014. **No row was written at either figure.**
 
 ## 6. What was excluded on purpose
 
-Sources marked `TERMS_STATED_RESTRICTIVE` are excluded by **every** route,
+> **SUPERSEDED 2026-09-02 by owner ruling** (`docs/PUBLICATION_POLICY.md`, `TERMS-OWNER-RULING-2026-09-02`): a tribal website's terms language no longer blocks harvest, and all eight are released for harvest of **their own public pages**. The exclusions below are kept as the *observation* of what each publisher stated - and as the worklist the ruling creates. Still binding, none of them a terms question: technical access controls; a natural person's data apart from their public role (the business row may be harvested, `owner_name_raw` / `email` / `phone` / `address_raw` may not be published); EMMA/MSRB + CUSIP Global Services, a third-party licensor; Casino City and D-U-N-S.
+
+~~Sources marked `TERMS_STATED_RESTRICTIVE` are excluded by **every** route,~~
 including a harmonised derivative: **Navajo, Confederated Colville,
 Confederated Yakama, CTUIR / Umatilla, The Chickasaw Nation, Forest County
 Potawatomi, Southern Ute, NANA Regional, Stillaguamish** — nine entries in

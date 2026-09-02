@@ -40,6 +40,13 @@ did not edit `gaming_property_self_published_assertions.csv` or
 | …whose sites **yielded data** | 190 |
 | …excluded, `TERMS_STATED_RESTRICTIVE` | 8 |
 | …still unreached | **3** |
+> **GAMING-DENOMINATOR-2026-09-02 — the gaming denominator, re-derived from the live files.**
+> `gaming_facilities.csv` holds 787 ROWS. That is not a facility count and must not be a denominator. 7 of them are placeholders whose `facility_name` is literally `No casino`, recording that a nation operates none. 56 duplicate groups sit in `review/gaming_facility_duplicate_candidates_2026-09-02.csv`: 52 are same-tribe (`LIKELY_SAME_PROPERTY`) and hold 53 rows beyond one each, so collapsing them gives 787 - 53 = **734**; the other 4 are `DIFFERENT_TRIBES_CHECK_BOTH` and at least one of those - Stables Casino, Miami Tribe with Modoc Nation - is a JOINT OPERATION, not a duplicate. No verdict is applied: `duplicate_of_facility_id` is populated on 10 rows, not 53. So the honest range is **734 to 780** and the single thing every consumer must stop doing is dividing by 787 - it inflates the denominator by 7.2% and understates every coverage percentage in the gaming dataset by about 6.7%.
+>
+> Re-derive rather than quote: `py -3 code/1116_ruling_propagation_2026_09_02.py derive`.
+> `py -3 code/1116_ruling_propagation_2026_09_02.py verify` exits 1 while any
+> document in `docs/` or `review/` still states a superseded figure unmarked.
+
 | facilities whose operating nation was reached | **736 of 787** |
 | hosts probed | 590 (355 gaming-surface, 235 tribe-surface) |
 | content requests made (excluding `robots.txt`) | **5,057** |
@@ -162,8 +169,21 @@ wrong:
 
 ## Terms restrictions — what was NOT taken
 
-Eight nations, 25 hosts, **45 facilities**, excluded by every route including the
-WordPress media API and Wayback. No request of any kind was made to them; the
+> **SUPERSEDED 2026-09-02 by owner ruling** (`docs/PUBLICATION_POLICY.md`, `TERMS-OWNER-RULING-2026-09-02`): a tribal website's terms language no longer blocks harvest, and these are released for harvest of **their own public pages**. Keep recording `source_terms_status`; stop refusing on it. Still binding, none of them a terms question: technical access controls; a natural person's data apart from their public role (harvest the business row, never publish `owner_name_raw` / `email` / `phone` / `address_raw`); EMMA/MSRB + CUSIP Global Services; Casino City and D-U-N-S.
+>
+> **This section is the single largest worklist the ruling creates in gaming:
+> eight nations, 25 hosts, 45 facilities that have never been requested even
+> once.** And note the trap that sits underneath it, proven on the Navajo hosts
+> by `code/1096`: **a cached refusal is not a completed fetch.** Each of these
+> 25 hosts carries an `EXCLUDED_TERMS_STATED_RESTRICTIVE` record in
+> `host_probe.jsonl`, and `980` builds its resume set from that file — so a
+> re-run skips all 25 **silently, printing nothing**. Retire the cached refusals
+> by MOVING them to a dated `host_probe_retired_*.jsonl` (never deleting: the
+> refusal happened, and the record of it is the evidence the correction was
+> needed) or the release never takes effect.
+
+~~Eight nations, 25 hosts, **45 facilities**, excluded by every route including the
+WordPress media API and Wayback.~~ No request of any kind was made to them; the
 exclusion is recorded per host in the probe log as
 `EXCLUDED_TERMS_STATED_RESTRICTIVE` with the registry row that justifies it.
 

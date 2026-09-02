@@ -96,9 +96,11 @@ by legal name.
   the firm *is* one — two for-profit LLCs carry it. [from the record]
 - **NTEE codes are never used to establish Native status.** See `nonprofits`.
 - **DUNS / D&B fields are held internally and never redistributed.**
-- **Sources whose terms forbid reuse are excluded by every route** — Colville,
+- ~~**Sources whose terms forbid reuse are excluded by every route** — Colville,
   CTUIR/Umatilla, Yakama, Chickasaw, NANA/Akima, Southern Ute, Forest County
-  Potawatomi, and Navajo's NBOA directory. See §5.
+  Potawatomi, and Navajo's NBOA directory.~~ **RELEASED 2026-09-02.** **SUPERSEDED 2026-09-02 by owner ruling** (`docs/PUBLICATION_POLICY.md`, `TERMS-OWNER-RULING-2026-09-02`): a tribal website's terms language no longer blocks harvest, and all eight are released for harvest of **their own public pages**. The exclusions below are kept as the *observation* of what each publisher stated - and as the worklist the ruling creates. Still binding, none of them a terms question: technical access controls; a natural person's data apart from their public role (the business row may be harvested, `owner_name_raw` / `email` / `phone` / `address_raw` may not be published); EMMA/MSRB + CUSIP Global Services, a third-party licensor; Casino City and D-U-N-S.
+  `navajoeconomy.org` (the NBOA directory) is released on the same basis — it is
+  the Nation's own page. See §5.
 
 ---
 

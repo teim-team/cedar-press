@@ -181,7 +181,9 @@ mints a spine entity.
 
 ## EXCLUDED, AND WHY - TERMS ARE A DECISION THE PUBLISHER MADE
 
-These stay excluded by **every** route, Wayback included. Two were already recorded restrictive; **four were found restrictive by the 2026-09-01 pass because nobody had opened the terms page** the 2026-08-26 survey recorded as SILENT.
+> **SUPERSEDED 2026-09-02 by owner ruling** (`docs/PUBLICATION_POLICY.md`, `TERMS-OWNER-RULING-2026-09-02`): a tribal website's terms language no longer blocks harvest, and these are released for harvest of **their own public pages**. Keep recording `source_terms_status`; stop refusing on it. Still binding, none of them a terms question: technical access controls; a natural person's data apart from their public role (harvest the business row, never publish `owner_name_raw` / `email` / `phone` / `address_raw`); EMMA/MSRB + CUSIP Global Services; Casino City and D-U-N-S. The table below is now the **worklist**, not the wall.
+
+~~These stay excluded by **every** route, Wayback included.~~ Two were already recorded restrictive; **four were found restrictive by the 2026-09-01 pass because nobody had opened the terms page** the 2026-08-26 survey recorded as SILENT.
 
 | authority | source | terms read at | the term |
 |---|---|---|---|
@@ -246,7 +248,7 @@ At the measured rate (~15 tribes per agent-day including the terms read), the re
 | `NO_LIST_TO_HARVEST` | 28 | the site was enumerated and publishes no list |
 | `HARVESTED` | 12 | in data/clean |
 | `NOT_PUBLISHED` | 7 | a list is REFERENCED in an ordinance or on a page but not published |
-| `EXCLUDED_TERMS_STATED_RESTRICTIVE` | 6 | the publisher stated a term; excluded by every route |
+| `EXCLUDED_TERMS_STATED_RESTRICTIVE` | 6 | the publisher stated a term. ~~excluded by every route~~ **As of 2026-09-02 this is a recorded observation, not a gate** — these 6 are harvest candidates |
 | `HARVESTED_2026-08-28` | 3 | harvested by the earlier pass, promoted by this one |
 | `SITE_UNREACHABLE` | 3 |  |
 | `BEHIND_LOGIN_OUT_OF_SCOPE` | 1 | Choctaw Nation - a directory behind a login is out of scope, and Wayback is not a route around a login |
@@ -274,11 +276,15 @@ On the first bar, essentially every tribal site is restricted, because
 essentially every website carries a copyright footer. On the second, four
 sources refused and the rest did not. **This build applied the second bar to
 its own findings and did not reverse the first bar's verdicts** - so Colville
-and CTUIR stay excluded, and Navajo stays in the table with the restrictive
+and CTUIR stayed excluded, and Navajo stayed in the table with the restrictive
 flag on every row and `publishable = N`.
 
-Someone has to pick one bar. Until then: **no row from any of these
-authorities publishes**, which is what `consent_status = UNRESOLVED` and
+**Someone did pick one bar: the owner, on 2026-09-02, and he picked the wider
+one.** **SUPERSEDED 2026-09-02 by owner ruling** (`docs/PUBLICATION_POLICY.md`, `TERMS-OWNER-RULING-2026-09-02`): a tribal website's terms language no longer blocks harvest, and these are released for harvest of **their own public pages**. Keep recording `source_terms_status`; stop refusing on it. Still binding, none of them a terms question: technical access controls; a natural person's data apart from their public role (harvest the business row, never publish `owner_name_raw` / `email` / `phone` / `address_raw`); EMMA/MSRB + CUSIP Global Services; Casino City and D-U-N-S. Colville, CTUIR and Navajo are all harvest candidates
+from that date. The `publishable = N` on the rows already collected is a
+**separate** question and does not move with it — it turns on the PII carve-out
+and on `consent_status`, not on the terms language. Until those are settled:
+**no row from any of these authorities publishes**, which is what `consent_status = UNRESOLVED` and
 `321_gate_tribal_source_restriction.py` are for.
 
 ### 2. Muscogee: is a "Vendor List" an ownership list?

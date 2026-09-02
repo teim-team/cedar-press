@@ -932,7 +932,7 @@ at one end and a retired MMS series that stopped in 2000 at the other.
 | **refresh_due** | **no** — declared in the registry: NOT ESTABLISHABLE ON A CALENDAR. See the CHANGE DETECTION section below — this source needs a trigger, not a schedule. |
 | age | Cedar's edge is 1 days old; our knowledge of the SOURCE is 1 days old; measured gap behind the source 0 days |
 | refresh_cost | ~15 tribes per agent-day including the terms read; the remaining 297 federally recognised tribes are ~20 agent-days |
-| refresh_command | code/570 / 588 (shards L and M) — **read robots.txt and the terms page FIRST; 6 publishers have stated restrictive terms and are excluded by every route** |
+| refresh_command | code/570 / 588 (shards L and M) — **read robots.txt and the terms page FIRST and RECORD what they say; ~~6 publishers have stated restrictive terms and are excluded by every route~~ as of 2026-09-02 a Native entity's own terms language is an observation, not a gate (`PUBLICATION_POLICY.md`, `TERMS-OWNER-RULING-2026-09-02`). Still read them: the read is what distinguishes a terms restriction from a technical access control, and only the latter still refuses.** |
 | breaks_on_refresh | **NOTHING HERE PUBLISHES.** Every row carries consent_status = UNRESOLVED and publishable = N. |
 | **measured backlog** | `kind` = entity_coverage · `rows` = 2393 · `entity_universe` = 1555 |
 | backlog reading | the gap here is ENTITY coverage, not time. An entity absent from the registry is NEVER_CHECKED, which is a different fact from NO_LIST_FOUND and must not be read as one. |
@@ -1199,7 +1199,7 @@ A three-tier trigger that replaces the calendar. Nothing below requires a new cr
 
 **Why this is the honest answer rather than a schedule.** A cadence column for a tribal vendor list would be a fabrication — the list changes when a tribal office remembers to update it, and no header, notice or index announces that. What CAN be established cheaply is whether the page moved, and that is a measurement rather than a guess. The observed cadences in the table above are exactly that: **derived from the dates of items the sites actually posted**, and they should be used to set each site's own check interval — a site posting monthly is worth checking monthly; one posting semiannually is not.
 
-**Two rules this inherits and must not lose.** Read `robots.txt` and the terms page before any check, not just before a harvest — six publishers have stated restrictive terms and are excluded by every route. And one poller per host, always: a change-detection sweep across 1,555 hosts is still 1,555 requests and must be paced.
+**Two rules this inherits and must not lose.** Read `robots.txt` and the terms page before any check, not just before a harvest — ~~six publishers have stated restrictive terms and are excluded by every route~~ **and record what they say. As of 2026-09-02 a Native entity's own terms language does not refuse the harvest** (`PUBLICATION_POLICY.md`, `TERMS-OWNER-RULING-2026-09-02`); the reason to read is that only the read tells you whether you are looking at a licensing restriction, which no longer gates, or a technical access control, which still does. And one poller per host, always: a change-detection sweep across 1,555 hosts is still 1,555 requests and must be paced.
 
 ---
 

@@ -1,17 +1,17 @@
 {
  "script": "code/1085_prime_psc_desc_repull.py",
- "when": "2026-09-02T10:45:40Z",
+ "when": "2026-09-02T15:38:36Z",
  "rows_in": 1217768,
  "rows_out": 1217768,
  "money_cents_in": 31000525866121,
  "money_cents_out": 31000525866121,
- "keys_available": 326166,
- "rows_filled": 326166,
+ "keys_available": 592925,
+ "rows_filled": 592925,
  "per_column_filled": {
-  "product_or_service_code": 326024,
-  "product_or_service_code_description": 326024,
-  "award_base_description": 325333,
-  "naics_description": 313549
+  "product_or_service_code": 592767,
+  "product_or_service_code_description": 592751,
+  "award_base_description": 592092,
+  "naics_description": 579871
  },
  "nonblank_left_untouched": 0,
  "backup": "prime_contracts.csv.bak_2026-09-02_pre_1085_prime_psc_desc_repull",
@@ -24,6 +24,17 @@
   "FY2012_attrs.csv",
   "FY2013_attrs.csv",
   "FY2014_attrs.csv",
-  "FY2015_attrs.csv"
+  "FY2015_attrs.csv",
+  "FY2016_attrs.csv",
+  "FY2017_attrs.csv",
+  "FY2018_attrs.csv",
+  "FY2019_attrs.csv",
+  "FY2020_attrs.csv",
+  "FY2021_attrs.csv",
+  "FY2022_attrs.csv",
+  "FY2023_attrs.csv",
+  "FY2024_attrs.csv",
+  "FY2025_attrs.csv",
+  "FY2026_attrs.csv"
  ]
 }

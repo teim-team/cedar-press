@@ -64,10 +64,18 @@ Tohono O'odham 17 · Poarch 13 · Doyon 8 · Menominee 4.
 ### What was deliberately not used
 
 **Six certifying authorities are EXCLUDED on their own stated terms and stay
-excluded by every route — the publisher's page, its WordPress media API, the
+~~excluded by every route — the publisher's page, its WordPress media API, the
 Wayback Machine, sitemap enumeration, browser-header retries, relaxed TLS, and
-any harmonised derivative.** Each is recorded with the verbatim quote and URL
-that justifies it, in `code/330`'s `EXCLUDED` constant:
+any harmonised derivative.~~**
+
+> **SUPERSEDED 2026-09-02 by owner ruling** (`docs/PUBLICATION_POLICY.md`, `TERMS-OWNER-RULING-2026-09-02`): a tribal website's terms language no longer blocks harvest, and all eight are released for harvest of **their own public pages**. The exclusions below are kept as the *observation* of what each publisher stated - and as the worklist the ruling creates. Still binding, none of them a terms question: technical access controls; a natural person's data apart from their public role (the business row may be harvested, `owner_name_raw` / `email` / `phone` / `address_raw` may not be published); EMMA/MSRB + CUSIP Global Services, a third-party licensor; Casino City and D-U-N-S.
+
+**This is the dataset the ruling moves most.** Each authority is recorded with
+the verbatim quote and URL that justified its exclusion, in `code/330`'s
+`EXCLUDED` constant — now read that constant as a **worklist**, and note that
+the PII carve-out lands here specifically: these are vendor rosters, and several
+of them publish an owner's name, home-adjacent address, phone and email beside
+the firm. Harvest the firm; do not publish the person.
 
 | authority | the term, quoted |
 |---|---|

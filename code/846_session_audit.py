@@ -326,6 +326,39 @@ def _attributed():
                        f"attributed_flag=1")
 
 
+@claim("the gaming denominator is the measured one, not one of its five variants")
+def _denom():
+    """787 / 780 / 734 / 727 / 714 all circulated on 2026-09-02, each from a
+    different definition of "facility", and every one was quoted as if settled.
+    Measured: 787 rows; 16 whose name says "no casino" (7 exactly, 9 more like
+    'Grand Canyon West - no casino'); 56 same-tribe duplicate groups worth 57
+    extra rows. So 771 facility rows and 714 distinct properties. This claim
+    fails if the file changes shape and nobody re-derives it."""
+    import re as _re, collections as _c
+    p = CLEAN / "gaming_facilities.csv"
+    if not p.exists():
+        return (True, "table absent")
+    rs = rows(p)
+    ph = [r for r in rs if "NO CASINO" in (r.get("facility_name") or "").upper()]
+    def loose(x):
+        x = _re.sub(r"[^A-Z0-9 ]", " ", (x or "").upper())
+        x = _re.sub(r"(CASINO|RESORT|HOTEL|AND|THE|LLC|INC|GAMING|CENTER|CENTRE)",
+                    " ", x)
+        return " ".join(x.split())
+    g = _c.defaultdict(list)
+    for r in rs:
+        if r in ph: continue
+        k = (loose(r.get("facility_name")), (r.get("state") or "").upper())
+        if k[0]: g[k].append(r)
+    extra = sum(len(v) - 1 for v in g.values() if len(v) > 1
+                and len({x.get("tribe_canonical_name") for x in v}) == 1)
+    rows_ = len(rs); fac = rows_ - len(ph); dist = fac - extra
+    ok = (rows_, len(ph), extra) == (787, 16, 57)
+    return (ok, f"{rows_} rows - {len(ph)} placeholders = {fac} facility rows "
+                f"- {extra} duplicate extras = {dist} distinct properties"
+                + ("" if ok else "  <- shape changed, re-derive before quoting"))
+
+
 # ---------------------------------------------------------------- CICD
 @claim("the CICD scheme is gone from every table and every reachable read")
 def _cicd():

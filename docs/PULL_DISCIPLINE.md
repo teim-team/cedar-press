@@ -582,9 +582,25 @@ succeeded.** It is the mirror image of the export-gate defect in `AGENTS.md`
 where a check read a key that never existed and therefore always passed. Both
 are checks that are not measuring what their name says.
 
-**None of this loosens a real refusal.** A genuine `Disallow` on your path, a
-`TERMS_STATED_RESTRICTIVE` source, or a host that blocks your declared UA is
-still a refusal and stays one. The point is only that the refusal must be real.
+**None of this loosens a real refusal.** A genuine `Disallow` on your path or a
+host that blocks your declared UA is still the publisher's operational
+preference: record it, rate-limit, identify honestly.
+
+> **NARROWED 2026-09-02.** `TERMS_STATED_RESTRICTIVE` was in that list and is
+> not any more. On a **Native entity's own site** a terms restriction is a
+> recorded observation, not a gate - `docs/PUBLICATION_POLICY.md`,
+> `TERMS-OWNER-RULING-2026-09-02`. What still refuses, and none of it is a
+> terms question: a **technical access control** (a login, an admin or staging
+> path, a misconfiguration), a **natural person's data apart from their public
+> role**, a **non-tribal licensor** (EMMA/MSRB with CUSIP Global Services), and
+> the proprietary identifiers Casino City and D-U-N-S.
+>
+> This document already carried the shape of that lesson one paragraph up: 22
+> sources read as "blocked" because a **403 on robots.txt** parsed as
+> `disallow_all`. Over-exclusion is a defect, not caution - it is simply wrong
+> in the quieter direction.
+
+The point is only that the refusal must be real.
 
 ### Two companions from the same shard, both the same class of error
 

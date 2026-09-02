@@ -21,7 +21,7 @@ discipline belong to `code/1030_sec_edgar_native_transactions.py`.
 NIGC publishes gross gaming revenue by region and in bands, never per operation. Cedar
 records that as `SOURCE_DOES_NOT_PUBLISH`. **13,494 of the 13,803 rows in
 `gaming_revenue_bounds.csv` are a `REGIONAL_GGR_CEILING`** — one ceiling for a whole NIGC
-region, repeated on every property in it — and only 176 rows across **11 of 787 facilities**
+region, repeated on every property in it — and only 176 rows across **11 of 787 rows**
 are an honest per-property figure.
 
 There is one route around the regulator, and it is narrow: **a company that manages,
