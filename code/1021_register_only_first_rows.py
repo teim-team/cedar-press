@@ -377,26 +377,63 @@ def ccd_lookup(name, recs):
 
 
 # -------------------------------------------------------- route: 990/IRS
+def _pp_once(query):
+    """-> (orgs|None, note). HTTP 404 IS PROPUBLICA'S EMPTY RESULT.
+
+    The first pass recorded `propublica:HTTP 404` on nine entities and those
+    read like transport failures in the evidence column. They are not: this
+    API answers a search with no hits by 404-ing. Saying so in the note is the
+    difference between a recorded negative and a recorded error, and a reader
+    who cannot tell them apart cannot trust either.
+    """
+    d, note = get_json(PP + "?" + urllib.parse.urlencode({"q": query}),
+                       timeout=45, tries=2)
+    if d is None:
+        if note == "HTTP 404":
+            return [], "zero_results(404 is this API's empty search)"
+        return None, note
+    return (d.get("organizations") or []), "ok"
+
+
 def propublica(name, state=""):
-    q = {"q": name}
-    url = PP + "?" + urllib.parse.urlencode(q)
-    if state:
-        url += "&state%5Bid%5D=" + state
-    d, note = get_json(url, timeout=45)
-    if not d:
-        return None, "propublica:" + note
-    orgs = d.get("organizations") or []
-    if not orgs:
-        return None, "propublica:0_results"
-    for o in orgs:
-        ok, mnote = name_matches(name, o.get("name", "")
-                                 or o.get("sub_name", ""))
-        if not ok and o.get("sub_name"):
-            ok, mnote = name_matches(name, o["sub_name"])
-        if ok:
-            return o, "propublica:" + mnote
-    return None, ("propublica:" + str(len(orgs))
-                  + "_results_none_passed_the_name_test")
+    """Full name, then the distinctive tokens alone.
+
+    `state` is accepted and DELIBERATELY IGNORED. Filtering on the register's
+    state killed Utah Navaho Health System -- 200 and a hit without the
+    filter, 404 with it -- because the state an organisation FILES in is not
+    always the state Cedar records it in. A filter that removes true positives
+    to save a name test is a bad trade when the name test is the real
+    discriminator.
+
+    The token retry is the same lesson as SEARCHING FOR THE INSTITUTION
+    INSTEAD OF THE THING: 'Juel Fairbanks Recovery Services' returns nothing
+    because the filer is 'Juel Fairbanks Chemical Dependency Services'. The
+    distinctive part of the name is the query; the rest is decoration.
+    """
+    queries = [name]
+    t = toks(name)
+    if t and " ".join(t[:3]) != name.lower():
+        queries.append(" ".join(t[:3]))
+    if len(t) > 1:
+        queries.append(" ".join(t[:2]))
+    notes = []
+    for q in queries:
+        orgs, note = _pp_once(q)
+        if orgs is None:
+            notes.append("q=%r %s" % (q, note))
+            continue
+        if not orgs:
+            notes.append("q=%r %s" % (q, note))
+            continue
+        for o in orgs:
+            ok, mnote = name_matches(name, o.get("name", ""))
+            if not ok and o.get("sub_name"):
+                ok, mnote = name_matches(name, o["sub_name"])
+            if ok:
+                return o, "propublica: q=%r %s" % (q, mnote)
+        notes.append("q=%r %d results, none passed the name test"
+                     % (q, len(orgs)))
+    return None, "propublica: " + "; ".join(notes)
 
 
 # ------------------------------------------------- route: federal awards
@@ -412,7 +449,11 @@ def usaspending(name, codes, start="2007-10-01"):
     first. Filtering here is the difference between a first row and a
     misattribution.
     """
-    payload = {"filters": {"keywords": [name], "award_type_codes": codes,
+    kw = [name]
+    t = toks(name)
+    if len(t) >= 2:
+        kw.append(" ".join(t[:3]))
+    payload = {"filters": {"keywords": kw, "award_type_codes": codes,
                            "time_period": [{"start_date": start,
                                             "end_date": TODAY}]},
                "fields": ["Award ID", "Recipient Name", "Award Amount",

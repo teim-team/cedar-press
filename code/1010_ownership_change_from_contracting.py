@@ -620,9 +620,14 @@ def build():
         # ownership fact - `ALEUT FACILITIES SUPPORT SERVICES` declaring NANA
         # Regional Corporation for four years is not obviously a NANA company.
         dc = hubs.distinctive(cn)
-        ov = ("BOTH" if (dc & da and dc & db) else
-              "PRIOR_PARENT" if dc & da else
-              "LATER_PARENT" if dc & db else "NONE")
+        if a == u or b == u:
+            # One side IS the firm declaring itself its own parent. The overlap
+            # is then trivially total and says nothing about mis-filing.
+            ov = "SELF_PARENT_SIDE"
+        else:
+            ov = ("BOTH" if (dc & da and dc & db) else
+                  "PRIOR_PARENT" if dc & da else
+                  "LATER_PARENT" if dc & db else "NONE")
         caution = ""
         if ov == "LATER_PARENT":
             caution = ("child name shares a distinctive token with the LATER parent only "

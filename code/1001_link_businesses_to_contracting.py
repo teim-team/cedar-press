@@ -717,157 +717,156 @@ def build(argv):
         if rung0:
             rung, method, cands = rung0
             tier = "A"
-            corrob = ["contract_number=" + ";".join(cn_evidence[:3])
-                      or "contract_number_intersects_name_match"]
-            merged = False
-            geo_note = ""
+            corrob = ["contract_number="
+                      + (";".join(cn_evidence[:3])
+                         or "intersects_the_name_match")]
+            merged, geo_note = False, ""
             group = sorted(cands, key=lambda x: -ents[x].prime_oblig)
             u = group[0]
             e = ents[u]
             rec["business_name_matched_form"] = matched_form
-            _emit(rec, e, u, group, cage_of(e), tier, method, rung, corrob,
-                  merged, geo_note, b, lw, hw, lf, hf, xw, xf, stats, money,
-                  linked_ueis, publishable_ueis, ents)
-            continue
+            rec["n_candidate_ueis"] = len(group)
+            rec["candidate_ueis"] = ";".join(group)
+            stats["rung0_contract_number"] += 1
+        else:
+            if not usable:
+                rec["link_status"] = "NO_MATCH"
+                rec["no_match_reason"] = f"name_cannot_found_a_match:{why_not}"
+                stats["refused_generic_name"] += 1
+                lw.writerow(rec)
+                lf.flush()
+                continue
+            if not cands:
+                rec["link_status"] = "NO_MATCH"
+                rec["no_match_reason"] = "no_federal_recipient_of_this_name"
+                stats["no_federal_name"] += 1
+                lw.writerow(rec)
+                lf.flush()
+                continue
 
-        if not usable:
-            rec["link_status"] = "NO_MATCH"
-            rec["no_match_reason"] = f"name_cannot_found_a_match:{why_not}"
-            stats["refused_generic_name"] += 1
-            lw.writerow(rec)
-            lf.flush()
-            continue
-        if not cands:
-            rec["link_status"] = "NO_MATCH"
-            rec["no_match_reason"] = "no_federal_recipient_of_this_name"
-            stats["no_federal_name"] += 1
-            lw.writerow(rec)
-            lf.flush()
-            continue
+            rec["business_name_matched_form"] = matched_form
+            rec["n_candidate_ueis"] = len(cands)
+            rec["candidate_ueis"] = ";".join(sorted(cands))
 
-        rec["business_name_matched_form"] = matched_form
-        rec["n_candidate_ueis"] = len(cands)
-        rec["candidate_ueis"] = ";".join(sorted(cands))
+            # THE VETO, before the ladder. The record's own geography outranks
+            # everything: if the directory says a state and a candidate is
+            # recorded in a DIFFERENT one, the name collision is with some other
+            # firm and the match is refused rather than reconciled.
+            #
+            # ABSENCE IS NOT DISAGREEMENT. A candidate Cedar knows only from
+            # `fpds_uei_cage_map.csv` carries no state at all, and an empty
+            # federal state read as a conflict refused 8 of the first 16
+            # refusals on evidence that did not exist. A silent candidate falls
+            # to a lower rung; it is never vetoed.
+            geo_note = ""
+            if dstates:
+                agreeing = {u for u in cands if dstates & set(ents[u].states)}
+                silent = {u for u in cands if not ents[u].states}
+                if agreeing:
+                    cands = agreeing
+                elif silent:
+                    cands = silent
+                    geo_note = "federal_side_records_no_state_for_this_uei"
+                else:
+                    rec["link_status"] = "REFUSED"
+                    rec["no_match_reason"] = (
+                        "state_conflict:directory="
+                        + "|".join(sorted(dstates)) + ";federal="
+                        + ",".join(sorted({s for u in cands
+                                           for s in ents[u].states}))[:80])
+                    stats["refused_state_conflict"] += 1
+                    lw.writerow(rec)
+                    hw.writerow(rec)
+                    lf.flush()
+                    hf.flush()
+                    continue
 
-        # THE VETO, before the ladder. The record's own geography outranks
-        # everything: if the directory says a state and a candidate is
-        # recorded in a DIFFERENT one, the name collision is with some other
-        # firm and the match is refused rather than reconciled.
-        #
-        # ABSENCE IS NOT DISAGREEMENT. A candidate Cedar knows only from
-        # `fpds_uei_cage_map.csv` carries no state at all, and an empty
-        # federal state read as a conflict refused 8 of the first 16
-        # refusals on evidence that did not exist. A silent candidate falls
-        # to a lower rung; it is never vetoed.
-        geo_note = ""
-        if dstates:
-            agreeing = {u for u in cands if dstates & set(ents[u].states)}
-            silent = {u for u in cands if not ents[u].states}
-            if agreeing:
-                cands = agreeing
-            elif silent:
-                cands = silent
-                geo_note = "federal_side_records_no_state_for_this_uei"
+            # Narrow on the city before deciding the name is ambiguous.
+            if len(cands) > 1 and dcity:
+                bycity = {u for u in cands if dcity in ents[u].cities}
+                if bycity:
+                    cands = bycity
+
+            # SUCCESSOR ENTITIES ARE ONE FIRM, NOT AN AMBIGUITY.
+            # cedar_ids.mapping_is_defect notes that MANY identifiers per entity
+            # is expected - "the 8(a) nine-year term mints successor entities
+            # sharing a name and an address." Elite Laundry & Dry Cleaners holds
+            # two UEIs, both Gallup NM, $11.2M and $19.0M. Holding that as
+            # "ambiguous" throws away $30.2M of a firm Cedar can see perfectly
+            # well. So: candidates that share BOTH a city and a state are merged
+            # into one link carrying every UEI. Candidates that do not - Arctic
+            # Slope Technical Services across NM, CO, AK, AL and MD - stay held.
+            merged = False
+            if len(cands) > 1:
+                common_city = set.intersection(*[set(ents[u].cities)
+                                                 for u in cands])
+                common_state = set.intersection(*[set(ents[u].states)
+                                                  for u in cands])
+                if common_city and common_state:
+                    merged = True
+
+            # THE LADDER
+            rung = tier = method = ""
+            corrob = []
+            if len(cands) == 1 or merged:
+                group = sorted(cands, key=lambda u: -ents[u].prime_oblig)
+                u = group[0]
+                e = _merge_entities([ents[x] for x in group]) if merged else ents[u]
+                agree = dstates & set(e.states)
+                if dcity and agree and dcity in e.cities:
+                    # Rung 1. Two independent geographic signals on one firm.
+                    # An ambiguous recorded state does not weaken this: the city
+                    # is doing the work and the state is only not contradicting.
+                    rung, tier, method = "1_city_and_state", "A", \
+                        "name_exact+city+state"
+                    corrob = [f"city={dcity}", "state=" + ",".join(sorted(agree))]
+                elif dcity and dcity in e.cities:
+                    rung, tier, method = "1b_city_only", "B", "name_exact+city"
+                    corrob = [f"city={dcity}"]
+                elif agree:
+                    # Rung 2. One geographic signal. An ambiguous recorded state
+                    # that happens to contain the federal state is weaker evidence
+                    # than an unambiguous one and is tiered accordingly.
+                    rung = "2_state" if not dstate_ambiguous \
+                        else "2b_state_ambiguous_recorded_value"
+                    tier = "A" if not dstate_ambiguous else "B"
+                    method = "name_exact+state" if not dstate_ambiguous \
+                        else "name_exact+state_from_truncated_value"
+                    corrob = ["state=" + ",".join(sorted(agree))
+                              + ("" if not dstate_ambiguous
+                                 else ";recorded_value_was_truncated")]
+                elif not dstates and nstates & set(e.states):
+                    rung, tier, method = "3_nation_home_state", "B", \
+                        "name_exact+certifying_nation_state"
+                    corrob = ["nation_state="
+                              + ",".join(sorted(nstates & set(e.states)))]
+                elif len(distinctive(matched_form)) >= 2:
+                    rung, tier, method = "4_unique_distinctive_name", "C", \
+                        "name_exact_unique_no_geography"
+                    corrob = ["unique_in_federal_universe"]
+                else:
+                    rung, tier, method = "5_stop", "X", "name_exact_uncorroborated"
+                    corrob = ["no_corroborating_signal"]
             else:
-                rec["link_status"] = "REFUSED"
+                # More than one federal entity answers to this name even after
+                # the state filter. mapping_is_defect(): one name over many
+                # entities is exactly the shape that must go to review, not to a
+                # dollar.
+                best = sorted(cands, key=lambda u: -ents[u].prime_oblig)
+                rec["link_status"] = "HOLD_AMBIGUOUS"
+                rec["link_tier"] = "X"
+                rec["link_method"] = "name_exact_multiple_federal_entities"
+                rec["link_rung"] = "5_stop"
                 rec["no_match_reason"] = (
-                    "state_conflict:directory="
-                    + "|".join(sorted(dstates)) + ";federal="
-                    + ",".join(sorted({s for u in cands
-                                       for s in ents[u].states}))[:80])
-                stats["refused_state_conflict"] += 1
+                    f"{len(cands)} federal entities share this name; "
+                    "identifier-first adjudication required")
+                rec["candidate_ueis"] = ";".join(best)
+                stats["hold_ambiguous"] += 1
                 lw.writerow(rec)
                 hw.writerow(rec)
                 lf.flush()
                 hf.flush()
                 continue
-
-        # Narrow on the city before deciding the name is ambiguous.
-        if len(cands) > 1 and dcity:
-            bycity = {u for u in cands if dcity in ents[u].cities}
-            if bycity:
-                cands = bycity
-
-        # SUCCESSOR ENTITIES ARE ONE FIRM, NOT AN AMBIGUITY.
-        # cedar_ids.mapping_is_defect notes that MANY identifiers per entity
-        # is expected - "the 8(a) nine-year term mints successor entities
-        # sharing a name and an address." Elite Laundry & Dry Cleaners holds
-        # two UEIs, both Gallup NM, $11.2M and $19.0M. Holding that as
-        # "ambiguous" throws away $30.2M of a firm Cedar can see perfectly
-        # well. So: candidates that share BOTH a city and a state are merged
-        # into one link carrying every UEI. Candidates that do not - Arctic
-        # Slope Technical Services across NM, CO, AK, AL and MD - stay held.
-        merged = False
-        if len(cands) > 1:
-            common_city = set.intersection(*[set(ents[u].cities)
-                                             for u in cands])
-            common_state = set.intersection(*[set(ents[u].states)
-                                              for u in cands])
-            if common_city and common_state:
-                merged = True
-
-        # THE LADDER
-        rung = tier = method = ""
-        corrob = []
-        if len(cands) == 1 or merged:
-            group = sorted(cands, key=lambda u: -ents[u].prime_oblig)
-            u = group[0]
-            e = _merge_entities([ents[x] for x in group]) if merged else ents[u]
-            agree = dstates & set(e.states)
-            if dcity and agree and dcity in e.cities:
-                # Rung 1. Two independent geographic signals on one firm.
-                # An ambiguous recorded state does not weaken this: the city
-                # is doing the work and the state is only not contradicting.
-                rung, tier, method = "1_city_and_state", "A", \
-                    "name_exact+city+state"
-                corrob = [f"city={dcity}", "state=" + ",".join(sorted(agree))]
-            elif dcity and dcity in e.cities:
-                rung, tier, method = "1b_city_only", "B", "name_exact+city"
-                corrob = [f"city={dcity}"]
-            elif agree:
-                # Rung 2. One geographic signal. An ambiguous recorded state
-                # that happens to contain the federal state is weaker evidence
-                # than an unambiguous one and is tiered accordingly.
-                rung = "2_state" if not dstate_ambiguous \
-                    else "2b_state_ambiguous_recorded_value"
-                tier = "A" if not dstate_ambiguous else "B"
-                method = "name_exact+state" if not dstate_ambiguous \
-                    else "name_exact+state_from_truncated_value"
-                corrob = ["state=" + ",".join(sorted(agree))
-                          + ("" if not dstate_ambiguous
-                             else ";recorded_value_was_truncated")]
-            elif not dstates and nstates & set(e.states):
-                rung, tier, method = "3_nation_home_state", "B", \
-                    "name_exact+certifying_nation_state"
-                corrob = ["nation_state="
-                          + ",".join(sorted(nstates & set(e.states)))]
-            elif len(distinctive(matched_form)) >= 2:
-                rung, tier, method = "4_unique_distinctive_name", "C", \
-                    "name_exact_unique_no_geography"
-                corrob = ["unique_in_federal_universe"]
-            else:
-                rung, tier, method = "5_stop", "X", "name_exact_uncorroborated"
-                corrob = ["no_corroborating_signal"]
-        else:
-            # More than one federal entity answers to this name even after
-            # the state filter. mapping_is_defect(): one name over many
-            # entities is exactly the shape that must go to review, not to a
-            # dollar.
-            best = sorted(cands, key=lambda u: -ents[u].prime_oblig)
-            rec["link_status"] = "HOLD_AMBIGUOUS"
-            rec["link_tier"] = "X"
-            rec["link_method"] = "name_exact_multiple_federal_entities"
-            rec["link_rung"] = "5_stop"
-            rec["no_match_reason"] = (
-                f"{len(cands)} federal entities share this name; "
-                "identifier-first adjudication required")
-            rec["candidate_ueis"] = ";".join(best)
-            stats["hold_ambiguous"] += 1
-            lw.writerow(rec)
-            hw.writerow(rec)
-            lf.flush()
-            hf.flush()
-            continue
 
         cage = e.cages.most_common(1)[0][0] if e.cages else ""
         if merged:

@@ -5969,3 +5969,66 @@ The generalisable point: a per-workstream block solves the concurrent-edit
 collision and creates an orphaning problem when a workstream ends. **When a
 workstream finishes, its block needs an heir** — otherwise the next agent to
 touch that dataset has measured declarations and no legal place to write them.
+
+---
+
+# WORKSTREAM INT-READY, 2026-09-02 — the five READY datasets, and the gate lines that are not ours
+
+Scope: promote what `docs/WHAT_IS_MISSING.md` found ON_DISK_NOT_PROMOTED in
+`gaming`, `lobbying`, `federal-register`, `nagpra` and `_entity_layer`. New
+scripts **960, 961, 962** (the 960–979 band). All five datasets are still
+READY; `lobbying` went 33 → 35 shippable tables.
+
+## Standing rule 15 — naming the gate lines, and whose they are
+
+`62_no_regression_check.py` fails. **One line was ours and is fixed; the rest
+are named here with their owner so the next workstream does not step around
+them a seventh time.**
+
+| line | ours? | who |
+|---|---|---|
+| `lint_class7` NEW: `962…probe_id=f"FR-TERM-{i}"` | **YES — FIXED** | a loop index as a key. Now `stable_digest((host, phrase))`. 293 confirms the instance is gone. |
+| `lint_class2c` NEW ×2 | no | `852_extend_constellation_edges.py` (`dropped += 1`), `873_build_aiannh_crosswalk.py` (`nskip += 1`) |
+| `lint_class3` NEW ×1 | no | `992_newsletter_deal_candidates.py` |
+| `lint_class4` NEW ×3 | no | `1030_sec_edgar_native_transactions.py`, `1031_ancsa_45_55_139_annual_reports.py`, `992_newsletter_deal_candidates.py` |
+| `lint_class7` NEW ×2 | no | `1030_…`, `1031_…` (`candidate_id: f"…{n:06d}"`) |
+| `lint_class6` NEW ×3 | no | `518_dataset_readiness.py`, `870_build_geo_crosswalks.py`, `871_promote_geo_keys_contracts.py` |
+| `files_with_columns_lost_vs_backup = 2` | no | `entity_evidence_profile.csv` (505, already named above in this file) and **`federal_funding_tribe_year_panel.csv` — NEW: `tribe_id` and `tribe_id_scheme` lost against `.bak_2026-09-01_pre843`.** Owner: whoever ran 843. **Neither of our two enriched tables lost a column**; both gained only. |
+| `tables_undocumented_in_codebook 3 → 17` | no | the 14 named in the gate output are `geo_*` (870/871), `cedar_constellation_*` (851/852), `tribal_newsletter_*` (992), `native_business_*`, `cedar_entity_freshness.csv` (830). Our one new table, `consultation_source_probe.csv`, is registered in `cedar_codebook.INTERNAL_TABLES` and is not in that list. |
+| `contract_orphan_shippable = 7` | **partly ours, downward** | we REMOVED two (`nonprofit_schedule_c_lobbying.csv`, `nonprofit_schedule_c_coverage.csv`) by claiming them for `lobbying` in `500.COLLECTIONS` and declaring their grain in `512.GRAIN_INT_READY`. The seven that remain are two `native_owned_businesses.bak_*.csv` and one `prime_contracts.bak_*.csv` **registered in the codebook as if they were tables** — that is a bug in whatever registered a `.bak` file — plus `native_owned_businesses.csv`, `regulations_gov_comments.csv`, `regulations_gov_entity_coverage.csv` (live harvest by `221`, pid 1556 at the time of writing — left alone deliberately) and `sam_native_class_distributions.csv`. |
+| `SHIPPING LOST: advocacy_passthrough_2026-08-07.csv` | no | **fifth workstream to stop on it.** Still on disk. Already explained above. |
+
+## Two enrichers declared in `cedar_pipeline.KNOWN_ORDERINGS`
+
+`23d_build_gaming_facilities.py → 960` (11 columns) and
+`503_identity.py → 961` (5 columns). Both "not yet paid".
+
+**And 503 carries a live landmine, recorded as `docs/KNOWN_ISSUES.md` D1:** its
+`regcols` list at line 1090 still names `same_as_legacy_cicd`, which `843`
+retired from the data on 2026-09-01. A 503 rebuild reintroduces a retired
+identifier scheme as an empty named column. Not fixed here — 503 is
+identity-critical and owned elsewhere — but it is a one-line change and someone
+who owns it should make it.
+
+## The lesson worth keeping: a guessed 404 is not a probe
+
+`docs/WHAT_IS_MISSING.md` said DOI posts *"dozens a year"* of Dear Tribal
+Leader letters against Cedar's 6, and its own Method section called that the
+weakest claim in the document. 962's first draft "probed" it by trying three
+guessed URL paths on bia.gov, collecting three 404s, and was about to record
+`NOT_IN_SOURCE` — **concluding from three guesses that a publisher does not
+publish**, which is the exact inversion of the rule in
+`docs/HIDDEN_DATA_TECHNIQUES.md`. The rewrite asks the publisher's own
+enumeration (`sitemap.xml`) instead, and the answer changed:
+
+- The **Federal Register itself** holds **46** documents containing the phrase,
+  **14** of them Interior's. Cedar's 6 is a thin reading of a source whose
+  ceiling is 46 — not evidence of a broken parser, and not "dozens a year".
+- **bia.gov enumerates 10 Dear Tribal Leader letters in its own sitemap**
+  (2,412 URLs), outside the Federal Register, under robots-allowed `/news/`.
+  A **FLOOR**, because a paginated Drupal sitemap need not carry every node.
+- **ihs.gov answered HTTP 406** and is recorded `NOT_CHECKED`, never as an
+  absence.
+
+So both halves of the original inference were half right, and neither could
+have been settled by counting rows.
