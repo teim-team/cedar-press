@@ -13,9 +13,9 @@ import { useState } from "react";
 import { Link } from "react-router";
 
 import { PRESS_ARTICLES, TBN_PLANS_URL } from "../../features/grove/pressArticles";
-import { canOpenDataset, historyFor } from "../../features/grove/pressAccess";
+import { canOpenDataset, coverageFrom } from "../../features/grove/pressAccess";
 import { EVENT, track } from "../../features/grove/telemetry.js";
-import { PRESS_CATALOG, PRESS_HISTORY_FROM } from "../../features/grove/pressCatalog";
+import { PRESS_CATALOG } from "../../features/grove/pressCatalog";
 import { formatUpdated, recentlyUpdated } from "../../features/grove/pressReleases";
 import {
   PRESS_ARTICLES_PATH,
@@ -45,10 +45,9 @@ function pressCollections(user) {
 
 function sections(user) {
   const collections = pressCollections(user);
-  // The reader's own reach, not the archive's: historyFor answers per plan.
-  const earliest = collections
-    .map((entry) => historyFor(user, entry).from)
-    .filter(Boolean);
+  // The collections this reader opens, at the depth Cedar holds them: one
+  // number per collection, the same for every plan that reaches it.
+  const earliest = collections.map((entry) => coverageFrom(entry)).filter(Boolean);
   // What the plans tile can honestly offer this reader: Cedar Press+ is an
   // upgrade only to someone who does not already have it; above that, the
   // next rung is Cedar Grove.
@@ -69,9 +68,14 @@ function sections(user) {
       to: PRESS_DATA_PATH,
       icon: DataIcon,
       meta: `${collections.length} collections`,
-      what: `Coverage, method and the release for every collection, ${
-        earliest.length ? Math.min(...earliest) : PRESS_HISTORY_FROM
-      } to present, downloadable with your subscription.`,
+      // "reaching back as far as", never "<year> to present". The minimum is
+      // one collection's floor — Legislation's 1973 — and eleven of the twelve
+      // start later, two of them being rosters with no start at all. A
+      // shelf-wide sentence cannot carry a per-collection fact, and the tiles
+      // below give each collection its own.
+      what: `Coverage, method and the release for every collection${
+        earliest.length ? `, reaching back as far as ${Math.min(...earliest)},` : ","
+      } downloadable with your subscription.`,
     },
     {
       id: "whats-new",

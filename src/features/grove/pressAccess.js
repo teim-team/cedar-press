@@ -45,7 +45,10 @@
  */
 
 import { resolveTier } from "../../workspaceTier.js";
-import { PRESS_CATALOG_BY_ID, PRESS_HISTORY_FROM } from "./pressCatalog.js";
+import { PRESS_CATALOG_BY_ID } from "./pressCatalog.js";
+// A date formatter, not release data: the roster line and the What's New
+// feed should not print the same date two different ways.
+import { formatUpdated } from "./pressReleases.js";
 
 /** The shelves, lowest first. A dataset declares exactly one. */
 export const SHELF = Object.freeze({
@@ -118,41 +121,53 @@ function shelfOf(dataset) {
   return dataset.shelf || PRESS_CATALOG_BY_ID[dataset.id]?.shelf || SHELF.PRO;
 }
 
-/** A year field off the dataset, or off the catalog entry it names. */
-function yearOf(dataset, field) {
+/**
+ * A collection's coverage declaration, or null if it states none.
+ *
+ * THERE IS NO SECOND AXIS
+ * There used to be a `historyFor(user, dataset)` here, because Cedar Press
+ * was capped at 2010 and Cedar Press+ sold the years behind the cap. Coverage
+ * was therefore a function of the reader as well as of the collection, and
+ * three of the page's sentences existed only to say which of the two an
+ * upgrade would fix. The cap was retired on 2026-09-02 (see
+ * `pressCatalog.js`), so coverage is now a property of the collection alone
+ * and takes no user: whoever can open a collection gets all of it.
+ *
+ * A collection is still capped in the only sense left — a reader whose shelf
+ * does not reach it cannot open it at all — and that question is
+ * `canOpenDataset`, which is where it always belonged.
+ */
+function coverageOf(dataset) {
   if (!dataset) return null;
-  const value = dataset[field] ?? PRESS_CATALOG_BY_ID[dataset.id]?.[field];
-  return Number.isInteger(value) ? value : null;
+  return dataset.coverage ?? PRESS_CATALOG_BY_ID[dataset.id]?.coverage ?? null;
 }
 
 /**
- * How far back this reader can go in a dataset they can open.
+ * The first year of a collection's series, or null when it has no series.
  *
- * The second axis. Cedar Press carries most collections from
- * PRESS_HISTORY_FROM forward; Cedar Press+ unlocks the reconstructed series
- * behind them. So a reader can
- * be short of a collection or short of its history, and those are different
- * sentences on the page: one sells a shelf, the other sells depth.
- *
- * `deeper` is true only when upgrading would actually move the year. A
- * collection that begins after the Press window has no depth to sell, and
- * saying otherwise would be a promise the data cannot keep.
+ * Null is the honest answer for a roster, not a missing value to fill in.
+ * Callers that reduce over collections — a shelf's earliest year, the hub's
+ * "reaching back as far as" — must drop the nulls rather than substitute a
+ * capture date, which is how a harvest date becomes a coverage claim.
  */
-export function historyFor(user, dataset) {
-  const full = yearOf(dataset, "historyFrom");
-  // Declared per collection rather than derived, so a collection whose whole
-  // history starts after the Press window is not described as capped.
-  const standard = yearOf(dataset, "standardFrom") ?? (full == null ? null : Math.max(PRESS_HISTORY_FROM, full));
-  if (!canOpenDataset(user, dataset)) {
-    return { from: null, standard, full, capped: false, deeper: false };
+export function coverageFrom(dataset) {
+  const coverage = coverageOf(dataset);
+  if (coverage?.kind !== "series") return null;
+  return Number.isInteger(coverage.from) ? coverage.from : null;
+}
+
+/**
+ * Coverage as one line, in the shape the collection actually has.
+ *
+ * A series says the span. A roster says it is a roster and when it was taken,
+ * because "1992 to present" for a list of live TERO certifications is a
+ * promise of 34 years of history that nobody kept and no office archives.
+ */
+export function coverageLabel(dataset) {
+  const coverage = coverageOf(dataset);
+  if (!coverage) return "Coverage varies";
+  if (coverage.kind === "roster") {
+    return `Current roster, captured ${formatUpdated(coverage.captured)}`;
   }
-  const reach = shelfReach(user);
-  const wholeSeries = reach === SHELF.PRO || reach === SHELF.GROVE;
-  if (full == null) {
-    return { from: null, standard: null, full: null, capped: false, deeper: false };
-  }
-  if (wholeSeries) {
-    return { from: full, standard, full, capped: false, deeper: false };
-  }
-  return { from: standard, standard, full, capped: standard > full, deeper: standard > full };
+  return `${coverage.from} to present`;
 }

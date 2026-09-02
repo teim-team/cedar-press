@@ -1,0 +1,10 @@
+{
+  "script": "1121_acquire_nppes_corroboration",
+  "built_at": "2026-09-02T16:30:03.470530+00:00",
+  "nppes_org_registrations_rows": 16981,
+  "candidate_pairs": 17072,
+  "not_matched_rows": 1149,
+  "state_agree": 3994,
+  "state_disagree": 13057,
+  "handoff": "code/1118_corroboration_layer.py - this script adjudicates nothing and writes no assertions."
+}

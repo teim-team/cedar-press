@@ -1,0 +1,240 @@
+{
+ "script": "code/1087_prime_naics_sector_conflict_resolve.py",
+ "when": "2026-09-02T10:22:01Z",
+ "stats": {
+  "archive_rows": 841002,
+  "sentinel_rows_whole_file": 19259,
+  "sentinel_rows_archive": 2773,
+  "archive_naics_blank": 2773
+ },
+ "merge_key": [
+  "contract_number",
+  "fiscal_year",
+  "awardee_uei"
+ ],
+ "distinct_merge_keys": 486889,
+ "groups_multi_row": 144420,
+ "rows_in_multi_row_groups": 498533,
+ "groups_multi_sector": 2813,
+ "rows_in_multi_sector_groups": 12911,
+ "conflicts_live": 22,
+ "conflicts_by_kind": {
+  "numeric_sector": 20,
+  "sentinel_sector": 2
+ },
+ "conflict_fiscal_years": [
+  "2008",
+  "2010"
+ ],
+ "multiset_conserved_groups": 10,
+ "multiset_not_conserved_groups": 0,
+ "multiset_detail": [
+  {
+   "group": [
+    "DABQ0303D0002",
+    "2008",
+    "VEBGB7SC4JP6"
+   ],
+   "n": 8,
+   "sectors": [
+    "23",
+    "23",
+    "23",
+    "56",
+    "56",
+    "56",
+    "56",
+    "56"
+   ],
+   "naics": [
+    "23",
+    "23",
+    "23",
+    "56",
+    "56",
+    "56",
+    "56",
+    "56"
+   ]
+  },
+  {
+   "group": [
+    "F4162202D0015",
+    "2008",
+    "QXTRFSWAHSB1"
+   ],
+   "n": 3,
+   "sectors": [
+    "62",
+    "81",
+    "81"
+   ],
+   "naics": [
+    "62",
+    "81",
+    "81"
+   ]
+  },
+  {
+   "group": [
+    "FA302004D0009",
+    "2008",
+    "DT6LV2ND4V36"
+   ],
+   "n": 2,
+   "sectors": [
+    "56",
+    "62"
+   ],
+   "naics": [
+    "56",
+    "62"
+   ]
+  },
+  {
+   "group": [
+    "HHSN29200017",
+    "2008",
+    "VEBGB7SC4JP6"
+   ],
+   "n": 7,
+   "sectors": [
+    "54",
+    "54",
+    "54",
+    "54",
+    "54"
+   ],
+   "naics": [
+    "54",
+    "54",
+    "54",
+    "54",
+    "54"
+   ]
+  },
+  {
+   "group": [
+    "N0003906C0014",
+    "2008",
+    "TVATQG758HM1"
+   ],
+   "n": 2,
+   "sectors": [
+    "33",
+    "42"
+   ],
+   "naics": [
+    "33",
+    "42"
+   ]
+  },
+  {
+   "group": [
+    "N4008506D7006",
+    "2008",
+    "NMHALEUTPL69"
+   ],
+   "n": 3,
+   "sectors": [
+    "54",
+    "54",
+    "56"
+   ],
+   "naics": [
+    "54",
+    "54",
+    "56"
+   ]
+  },
+  {
+   "group": [
+    "TIRNO06K00517",
+    "2010",
+    "YKBMG32J2LL5"
+   ],
+   "n": 4,
+   "sectors": [
+    "33",
+    "33"
+   ],
+   "naics": [
+    "33",
+    "33"
+   ]
+  },
+  {
+   "group": [
+    "W81XWH07P0469",
+    "2008",
+    "MDC5LDZKQAM4"
+   ],
+   "n": 2,
+   "sectors": [
+    "42",
+    "51"
+   ],
+   "naics": [
+    "42",
+    "51"
+   ]
+  },
+  {
+   "group": [
+    "W912CN06A2436",
+    "2008",
+    "THU3MAJ9Y1J6"
+   ],
+   "n": 8,
+   "sectors": [
+    "42",
+    "42",
+    "42",
+    "42",
+    "42",
+    "42",
+    "42",
+    "54"
+   ],
+   "naics": [
+    "42",
+    "42",
+    "42",
+    "42",
+    "42",
+    "42",
+    "42",
+    "54"
+   ]
+  },
+  {
+   "group": [
+    "W912CN06A6258",
+    "2008",
+    "FZYKN78D9LJ2"
+   ],
+   "n": 5,
+   "sectors": [
+    "42",
+    "42",
+    "42",
+    "54",
+    "54"
+   ],
+   "naics": [
+    "42",
+    "42",
+    "42",
+    "54",
+    "54"
+   ]
+  }
+ ],
+ "registered": 20,
+ "unregistered": [
+  "2050_9700_TIRNO06K00517_4_W912HZ05D0015_0",
+  "7529_7529_HHSN29200017_7_292020334_0"
+ ],
+ "healed_since_registration": [],
+ "proposed_repair": "set sector = substr(naics_code,1,2) on the 22 conflict rows; and give 131_merge_archive_backfill.py the unique key contract_transaction_unique_key so the 12,911 latent rows cannot be mis-paired at all. NOT APPLIED - 950 owns the INV-SECTOR gate and its register."
+}

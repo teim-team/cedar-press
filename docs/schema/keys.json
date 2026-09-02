@@ -1,0 +1,6397 @@
+{
+ "counts": {
+  "BLOCKED": 21,
+  "REFUSED_LICENSED": 2,
+  "UNSTABLE_KEY_NEEDS_SURROGATE": 28,
+  "deterministic_surrogate": 27,
+  "natural": 191,
+  "privacy_surrogate": 2
+ },
+ "generated": "2026-08-26",
+ "generated_at": "2026-08-26T19:37:47",
+ "max_key_columns": 4,
+ "note": "A sampled scan can prove a key is NOT unique. It can never prove that it is. Read the `scan` field on every claim.",
+ "produced_by": "284_audit_nondeterministic_keys.py",
+ "tables": {
+  "admin_appeal_decisions.csv": {
+   "evidence": "decision_id: 15,613 distinct over 15,613 rows, 0 blank, full scan",
+   "natural_key": [
+    "decision_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "decision_id"
+    ],
+    "evidence": "decision_id: 15,613 distinct over 15,613 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 15613,
+    "scan": "full"
+   },
+   "rows": 15613,
+   "scan": "full"
+  },
+  "admin_appeal_parties.csv": {
+   "evidence": "(party_id) unique over 20,027 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "party_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "party_id"
+    ],
+    "evidence": "(party_id) unique over 20,027 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 20027,
+    "scan": "full"
+   },
+   "rows": 20027,
+   "scan": "full"
+  },
+  "admin_appeal_positions.csv": {
+   "evidence": "position_id: 1 distinct over 1 rows, 0 blank, full scan",
+   "natural_key": [
+    "position_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "position_id"
+    ],
+    "evidence": "position_id: 1 distinct over 1 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 1,
+    "scan": "full"
+   },
+   "rows": 1,
+   "scan": "full"
+  },
+  "admin_region_assignments.csv": {
+   "evidence": "assignment_id: 2,124 distinct over 2,124 rows, 0 blank, full scan",
+   "natural_key": [
+    "assignment_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "assignment_id"
+    ],
+    "evidence": "assignment_id: 2,124 distinct over 2,124 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 2124,
+    "scan": "full"
+   },
+   "rows": 2124,
+   "scan": "full"
+  },
+  "admin_region_overlap_derived.csv": {
+   "evidence": "(administrative_region_id_a, administrative_region_id_b) unique over 28 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "administrative_region_id_a",
+    "administrative_region_id_b"
+   ],
+   "primary_key": {
+    "columns": [
+     "administrative_region_id_a",
+     "administrative_region_id_b"
+    ],
+    "evidence": "(administrative_region_id_a, administrative_region_id_b) unique over 28 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 28,
+    "scan": "full"
+   },
+   "rows": 28,
+   "scan": "full"
+  },
+  "admin_region_systems.csv": {
+   "evidence": "region_system_code: 6 distinct over 6 rows, 0 blank, full scan",
+   "natural_key": [
+    "region_system_code"
+   ],
+   "primary_key": {
+    "columns": [
+     "region_system_code"
+    ],
+    "evidence": "region_system_code: 6 distinct over 6 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 6,
+    "scan": "full"
+   },
+   "rows": 6,
+   "scan": "full"
+  },
+  "admin_regional_observations.csv": {
+   "evidence": "observation_id: 27 distinct over 27 rows, 0 blank, full scan",
+   "natural_key": [
+    "observation_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "observation_id"
+    ],
+    "evidence": "observation_id: 27 distinct over 27 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 27,
+    "scan": "full",
+    "unstable_because": "minted by 85_build_admin_region_crosswalk.py:743 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "observation_id"
+   },
+   "rows": 27,
+   "scan": "full"
+  },
+  "admin_regions.csv": {
+   "evidence": "administrative_region_id: 155 distinct over 155 rows, 0 blank, full scan",
+   "natural_key": [
+    "administrative_region_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "administrative_region_id"
+    ],
+    "evidence": "administrative_region_id: 155 distinct over 155 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 155,
+    "scan": "full"
+   },
+   "rows": 155,
+   "scan": "full"
+  },
+  "advocacy_passthrough.csv": {
+   "evidence": "passthrough_id: 1,620 distinct over 1,620 rows, 0 blank, full scan",
+   "natural_key": [
+    "passthrough_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "passthrough_id"
+    ],
+    "evidence": "passthrough_id: 1,620 distinct over 1,620 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 1620,
+    "scan": "full",
+    "unstable_because": "minted by 111_build_advocacy_passthrough.py:975 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "passthrough_id"
+   },
+   "rows": 1620,
+   "scan": "full"
+  },
+  "advocacy_passthrough_2026-08-07.csv": {
+   "evidence": "passthrough_id: 1,620 distinct over 1,620 rows, 0 blank, full scan",
+   "natural_key": [
+    "passthrough_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "passthrough_id"
+    ],
+    "evidence": "passthrough_id: 1,620 distinct over 1,620 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 1620,
+    "scan": "full",
+    "unstable_because": "minted by 111_build_advocacy_passthrough.py:975 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "passthrough_id"
+   },
+   "rows": 1620,
+   "scan": "full"
+  },
+  "agency_attention_vs_advocacy.csv": {
+   "evidence": "department: 22 distinct over 22 rows, 0 blank, full scan",
+   "natural_key": [
+    "department"
+   ],
+   "primary_key": {
+    "columns": [
+     "department"
+    ],
+    "evidence": "department: 22 distinct over 22 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 22,
+    "scan": "full"
+   },
+   "rows": 22,
+   "scan": "full"
+  },
+  "agency_attention_vs_advocacy_year.csv": {
+   "evidence": "(lobbying_filings_targeting, fr_documents, year, department) unique over 698 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "lobbying_filings_targeting",
+    "fr_documents",
+    "year",
+    "department"
+   ],
+   "primary_key": {
+    "caution": "WIDE KEY. Every column in it is an attribute, not an identifier, so this is an identity for the row's CONTENT. It changes when any of those values is corrected. Load and diff on it; do not make it a foreign-key target.",
+    "columns": [
+     "lobbying_filings_targeting",
+     "fr_documents",
+     "year",
+     "department"
+    ],
+    "evidence": "(lobbying_filings_targeting, fr_documents, year, department) unique over 698 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 698,
+    "scan": "full"
+   },
+   "rows": 698,
+   "scan": "full"
+  },
+  "anc_ceiling_roster.csv": {
+   "evidence": "anc_id: 196 distinct over 196 rows, 0 blank, full scan",
+   "natural_key": [
+    "anc_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "anc_id"
+    ],
+    "evidence": "anc_id: 196 distinct over 196 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 196,
+    "scan": "full",
+    "unstable_because": "minted by 07_parse_ancsa_ceiling.py:163 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "anc_id"
+   },
+   "rows": 196,
+   "scan": "full"
+  },
+  "ancsa_filings_index.csv": {
+   "evidence": "portal_url: 19,269 distinct over 19,269 rows, 0 blank, full scan",
+   "natural_key": [
+    "portal_url"
+   ],
+   "primary_key": {
+    "columns": [
+     "portal_url"
+    ],
+    "evidence": "portal_url: 19,269 distinct over 19,269 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 19269,
+    "scan": "full"
+   },
+   "rows": 19269,
+   "scan": "full"
+  },
+  "assistance_tribe_id_crosswalk.csv": {
+   "evidence": "legacy_tribe_id: 361 distinct over 361 rows, 0 blank, full scan",
+   "natural_key": [
+    "legacy_tribe_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "legacy_tribe_id"
+    ],
+    "evidence": "legacy_tribe_id: 361 distinct over 361 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 361,
+    "scan": "full"
+   },
+   "rows": 361,
+   "scan": "full"
+  },
+  "bie_uio_dollars_by_entity.csv": {
+   "evidence": "tribe_id: 114 distinct over 114 rows, 0 blank, full scan",
+   "natural_key": [
+    "tribe_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "tribe_id"
+    ],
+    "evidence": "tribe_id: 114 distinct over 114 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 114,
+    "scan": "full"
+   },
+   "rows": 114,
+   "scan": "full"
+  },
+  "bie_uio_identifier_links.csv": {
+   "evidence": "(tribe_id, obligations_usd) unique over 302 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "tribe_id",
+    "obligations_usd"
+   ],
+   "primary_key": {
+    "columns": [
+     "tribe_id",
+     "obligations_usd"
+    ],
+    "evidence": "(tribe_id, obligations_usd) unique over 302 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 302,
+    "scan": "full"
+   },
+   "rows": 302,
+   "scan": "full"
+  },
+  "bill_votes.csv": {
+   "evidence": "vote_id: 423 distinct over 423 rows, 0 blank, full scan",
+   "natural_key": [
+    "vote_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "vote_id"
+    ],
+    "evidence": "vote_id: 423 distinct over 423 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 423,
+    "scan": "full"
+   },
+   "rows": 423,
+   "scan": "full"
+  },
+  "bill_votes_entity_bridge.csv": {
+   "evidence": "(vote_id, bill_id, tribe_id) unique over 75 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "vote_id",
+    "bill_id",
+    "tribe_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "vote_id",
+     "bill_id",
+     "tribe_id"
+    ],
+    "evidence": "(vote_id, bill_id, tribe_id) unique over 75 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 75,
+    "scan": "full"
+   },
+   "rows": 75,
+   "scan": "full"
+  },
+  "bill_votes_official_verification.csv": {
+   "evidence": "vote_id: 305 distinct over 305 rows, 0 blank, full scan",
+   "natural_key": [
+    "vote_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "vote_id"
+    ],
+    "evidence": "vote_id: 305 distinct over 305 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 305,
+    "scan": "full"
+   },
+   "rows": 305,
+   "scan": "full"
+  },
+  "brand_family_proposals.csv": {
+   "evidence": "identifier: 609 distinct over 609 rows, 0 blank, full scan",
+   "natural_key": [
+    "identifier"
+   ],
+   "primary_key": {
+    "columns": [
+     "identifier"
+    ],
+    "evidence": "identifier: 609 distinct over 609 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 609,
+    "scan": "full"
+   },
+   "rows": 609,
+   "scan": "full"
+  },
+  "brand_family_registry.csv": {
+   "evidence": "brand: 106 distinct over 106 rows, 0 blank, full scan",
+   "natural_key": [
+    "brand"
+   ],
+   "primary_key": {
+    "columns": [
+     "brand"
+    ],
+    "evidence": "brand: 106 distinct over 106 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 106,
+    "scan": "full"
+   },
+   "rows": 106,
+   "scan": "full"
+  },
+  "ca_gaming_facilities_official.csv": {
+   "evidence": "record_id: 245 distinct over 245 rows, 0 blank, full scan",
+   "natural_key": [
+    "record_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "record_id"
+    ],
+    "evidence": "record_id: 245 distinct over 245 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 245,
+    "scan": "full"
+   },
+   "rows": 245,
+   "scan": "full"
+  },
+  "ca_gaming_payments.csv": {
+   "evidence": "(payment_id) unique over 40,164 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "payment_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "payment_id"
+    ],
+    "evidence": "(payment_id) unique over 40,164 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 40164,
+    "scan": "full"
+   },
+   "rows": 40164,
+   "scan": "full"
+  },
+  "cedar_cage_backfill.csv": {
+   "evidence": "(cage_code, uei) unique over 4,362 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "cage_code",
+    "uei"
+   ],
+   "primary_key": {
+    "columns": [
+     "cage_code",
+     "uei"
+    ],
+    "evidence": "(cage_code, uei) unique over 4,362 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 4362,
+    "scan": "full"
+   },
+   "rows": 4362,
+   "scan": "full"
+  },
+  "cedar_identifier_graph_edges.csv": {
+   "evidence": "no unique key found. Best candidate (from_node, evidence) still has 2,456 duplicate and 0 all-blank rows; the full row has 2,451 exact duplicates.",
+   "primary_key": {
+    "columns": [
+     "from_node",
+     "evidence",
+     "asserting_source",
+     "edge_tier_source"
+    ],
+    "full_row_duplicates": 2451,
+    "kind": "BLOCKED",
+    "reason": "no unique key found. Best candidate (from_node, evidence) still has 2,456 duplicate and 0 all-blank rows; the full row has 2,451 exact duplicates.",
+    "rows": 46051,
+    "scan": "full"
+   },
+   "rows": 46051,
+   "scan": "full"
+  },
+  "cedar_identifier_graph_nodes.csv": {
+   "evidence": "(node) unique over 115,471 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "node"
+   ],
+   "primary_key": {
+    "columns": [
+     "node"
+    ],
+    "evidence": "(node) unique over 115,471 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 115471,
+    "scan": "full"
+   },
+   "rows": 115471,
+   "scan": "full"
+  },
+  "cedar_identifier_ledger_final.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (20,577 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "CILF",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "identifier_type",
+     "identifier",
+     "tribe_id",
+     "canonical_name",
+     "legal_business_name",
+     "entity_class",
+     "attribution_method",
+     "confidence_tier",
+     "tier_rationale",
+     "is_authority",
+     "exclusion_id",
+     "exclusion_evidence",
+     "evidence_url",
+     "verified_date",
+     "state",
+     "prime_dollars_M",
+     "source_file",
+     "joint_ownership_flag",
+     "joint_ownership_note",
+     "evidence_source_file",
+     "evidence_url_integrity"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (20,577 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "prefix": "CILF",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 20577,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key",
+    "unstable_because": "minted by 02_extract_exclusion_rulings.py:116 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "exclusion_id"
+   },
+   "rows": 20577,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "identifier_type",
+    "identifier",
+    "tribe_id",
+    "canonical_name",
+    "legal_business_name",
+    "entity_class",
+    "attribution_method",
+    "confidence_tier",
+    "tier_rationale",
+    "is_authority",
+    "exclusion_id",
+    "exclusion_evidence",
+    "evidence_url",
+    "verified_date",
+    "state",
+    "prime_dollars_M",
+    "source_file",
+    "joint_ownership_flag",
+    "joint_ownership_note",
+    "evidence_source_file",
+    "evidence_url_integrity"
+   ]
+  },
+  "cedar_identifier_ledger_tiered.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (19,232 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "CILT",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "identifier_type",
+     "identifier",
+     "tribe_id",
+     "canonical_name",
+     "legal_business_name",
+     "entity_class",
+     "attribution_method",
+     "confidence_tier",
+     "tier_rationale",
+     "is_authority",
+     "exclusion_id",
+     "exclusion_evidence",
+     "evidence_url",
+     "verified_date",
+     "state",
+     "prime_dollars_M",
+     "source_file",
+     "joint_ownership_flag",
+     "joint_ownership_note",
+     "evidence_source_file",
+     "evidence_url_integrity"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (19,232 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "prefix": "CILT",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 19232,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key",
+    "unstable_because": "minted by 02_extract_exclusion_rulings.py:116 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "exclusion_id"
+   },
+   "rows": 19232,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "identifier_type",
+    "identifier",
+    "tribe_id",
+    "canonical_name",
+    "legal_business_name",
+    "entity_class",
+    "attribution_method",
+    "confidence_tier",
+    "tier_rationale",
+    "is_authority",
+    "exclusion_id",
+    "exclusion_evidence",
+    "evidence_url",
+    "verified_date",
+    "state",
+    "prime_dollars_M",
+    "source_file",
+    "joint_ownership_flag",
+    "joint_ownership_note",
+    "evidence_source_file",
+    "evidence_url_integrity"
+   ]
+  },
+  "cedar_identifier_propagation.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (1,157 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "CIP",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "dataset",
+     "identifier_type",
+     "identifier",
+     "observed_name",
+     "proposed_entity_id",
+     "derived_tier",
+     "derived_tier_rule",
+     "weakest_edge_source",
+     "path_through_low_accuracy_method",
+     "identity_hops",
+     "path",
+     "rows_unattributed_in_dataset",
+     "usd_unattributed_in_dataset",
+     "publishable",
+     "caveat",
+     "built_by",
+     "built_date"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (1,157 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "CIP",
+    "proven": true,
+    "rows": 1157,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 1157,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "dataset",
+    "identifier_type",
+    "identifier",
+    "observed_name",
+    "proposed_entity_id",
+    "derived_tier",
+    "derived_tier_rule",
+    "weakest_edge_source",
+    "path_through_low_accuracy_method",
+    "identity_hops",
+    "path",
+    "rows_unattributed_in_dataset",
+    "usd_unattributed_in_dataset",
+    "publishable",
+    "caveat",
+    "built_by",
+    "built_date"
+   ]
+  },
+  "cedar_inherited_from_rulings_2026-08-05.csv": {
+   "evidence": "(via_confirmed_uei, ultimate_parent_uei, identifier) unique over 80 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "via_confirmed_uei",
+    "ultimate_parent_uei",
+    "identifier"
+   ],
+   "primary_key": {
+    "columns": [
+     "via_confirmed_uei",
+     "ultimate_parent_uei",
+     "identifier"
+    ],
+    "evidence": "(via_confirmed_uei, ultimate_parent_uei, identifier) unique over 80 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 80,
+    "scan": "full"
+   },
+   "rows": 80,
+   "scan": "full"
+  },
+  "cedar_inherited_from_rulings_2026-08-06.csv": {
+   "evidence": "(via_confirmed_uei, ultimate_parent_uei, identifier) unique over 80 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "via_confirmed_uei",
+    "ultimate_parent_uei",
+    "identifier"
+   ],
+   "primary_key": {
+    "columns": [
+     "via_confirmed_uei",
+     "ultimate_parent_uei",
+     "identifier"
+    ],
+    "evidence": "(via_confirmed_uei, ultimate_parent_uei, identifier) unique over 80 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 80,
+    "scan": "full"
+   },
+   "rows": 80,
+   "scan": "full"
+  },
+  "cedar_inherited_from_rulings_2026-08-07.csv": {
+   "evidence": "(via_confirmed_uei, ultimate_parent_uei, identifier) unique over 100 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "via_confirmed_uei",
+    "ultimate_parent_uei",
+    "identifier"
+   ],
+   "primary_key": {
+    "columns": [
+     "via_confirmed_uei",
+     "ultimate_parent_uei",
+     "identifier"
+    ],
+    "evidence": "(via_confirmed_uei, ultimate_parent_uei, identifier) unique over 100 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 100,
+    "scan": "full"
+   },
+   "rows": 100,
+   "scan": "full"
+  },
+  "cedar_publishable_identifiers.csv": {
+   "evidence": "identifier: 1,577 distinct over 1,577 rows, 0 blank, full scan",
+   "natural_key": [
+    "identifier"
+   ],
+   "primary_key": {
+    "columns": [
+     "identifier"
+    ],
+    "evidence": "identifier: 1,577 distinct over 1,577 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 1577,
+    "scan": "full"
+   },
+   "rows": 1577,
+   "scan": "full"
+  },
+  "cedar_ruling_ledger_consolidated.csv": {
+   "evidence": "no unique key found. Best candidate (subject_key, ruling, source_file) still has 6,672 duplicate and 0 all-blank rows; the full row has 6,325 exact duplicates.",
+   "primary_key": {
+    "columns": [
+     "subject_key",
+     "ruling",
+     "source_file",
+     "outcome"
+    ],
+    "full_row_duplicates": 6325,
+    "kind": "BLOCKED",
+    "reason": "no unique key found. Best candidate (subject_key, ruling, source_file) still has 6,672 duplicate and 0 all-blank rows; the full row has 6,325 exact duplicates.",
+    "rows": 15587,
+    "scan": "full"
+   },
+   "rows": 15587,
+   "scan": "full"
+  },
+  "cedar_spiderweb_v2.csv": {
+   "evidence": "identifier: 79 distinct over 79 rows, 0 blank, full scan",
+   "natural_key": [
+    "identifier"
+   ],
+   "primary_key": {
+    "columns": [
+     "identifier"
+    ],
+    "evidence": "identifier: 79 distinct over 79 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 79,
+    "scan": "full"
+   },
+   "rows": 79,
+   "scan": "full"
+  },
+  "codebook_master.csv": {
+   "evidence": "no unique key found. Best candidate (variable, dataset) still has 39 duplicate and 0 all-blank rows; the full row has 1 exact duplicates.",
+   "primary_key": {
+    "columns": [
+     "variable",
+     "dataset"
+    ],
+    "full_row_duplicates": 1,
+    "kind": "BLOCKED",
+    "reason": "no unique key found. Best candidate (variable, dataset) still has 39 duplicate and 0 all-blank rows; the full row has 1 exact duplicates.",
+    "rows": 2798,
+    "scan": "full"
+   },
+   "rows": 2798,
+   "scan": "full"
+  },
+  "compact_events.csv": {
+   "evidence": "event_id: 31 distinct over 31 rows, 0 blank, full scan",
+   "natural_key": [
+    "event_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "event_id"
+    ],
+    "evidence": "event_id: 31 distinct over 31 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 31,
+    "scan": "full",
+    "unstable_because": "minted by 15b_build_compact_index.py:262 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "event_id"
+   },
+   "rows": 31,
+   "scan": "full"
+  },
+  "compact_obligation_tribal_agency_bridge.csv": {
+   "evidence": "bridge_id: 927 distinct over 927 rows, 0 blank, full scan",
+   "natural_key": [
+    "bridge_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "bridge_id"
+    ],
+    "evidence": "bridge_id: 927 distinct over 927 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 927,
+    "scan": "full"
+   },
+   "rows": 927,
+   "scan": "full"
+  },
+  "compact_required_reports.csv": {
+   "evidence": "report_id: 4,121 distinct over 4,121 rows, 0 blank, full scan",
+   "natural_key": [
+    "report_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "report_id"
+    ],
+    "evidence": "report_id: 4,121 distinct over 4,121 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 4121,
+    "scan": "full",
+    "unstable_because": "minted by 95_parse_compact_terms.py:1614 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "report_id"
+   },
+   "rows": 4121,
+   "scan": "full"
+  },
+  "compact_structured_terms.csv": {
+   "evidence": "term_id: 2,887 distinct over 2,887 rows, 0 blank, full scan",
+   "natural_key": [
+    "term_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "term_id"
+    ],
+    "evidence": "term_id: 2,887 distinct over 2,887 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 2887,
+    "scan": "full",
+    "unstable_because": "minted by 95_parse_compact_terms.py:1560 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "term_id"
+   },
+   "rows": 2887,
+   "scan": "full"
+  },
+  "compact_terms.csv": {
+   "evidence": "(version_id, compact_id, tribe_id, quote) unique over 1,311 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "version_id",
+    "compact_id",
+    "tribe_id",
+    "quote"
+   ],
+   "primary_key": {
+    "columns": [
+     "version_id",
+     "compact_id",
+     "tribe_id",
+     "quote"
+    ],
+    "evidence": "(version_id, compact_id, tribe_id, quote) unique over 1,311 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 1311,
+    "scan": "full"
+   },
+   "rows": 1311,
+   "scan": "full"
+  },
+  "compact_versions.csv": {
+   "evidence": "version_id: 1,158 distinct over 1,158 rows, 0 blank, full scan",
+   "natural_key": [
+    "version_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "version_id"
+    ],
+    "evidence": "version_id: 1,158 distinct over 1,158 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 1158,
+    "scan": "full"
+   },
+   "rows": 1158,
+   "scan": "full"
+  },
+  "compacts.csv": {
+   "evidence": "compact_id: 707 distinct over 707 rows, 0 blank, full scan",
+   "natural_key": [
+    "compact_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "compact_id"
+    ],
+    "evidence": "compact_id: 707 distinct over 707 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 707,
+    "scan": "full"
+   },
+   "rows": 707,
+   "scan": "full"
+  },
+  "congressional_correspondence_log.csv": {
+   "evidence": "no column is >=99% populated; every candidate carries blanks, so nothing can be NOT NULL",
+   "primary_key": {
+    "columns": [],
+    "kind": "BLOCKED",
+    "reason": "no column is >=99% populated; every candidate carries blanks, so nothing can be NOT NULL"
+   },
+   "rows": 0,
+   "scan": "full"
+  },
+  "congressional_correspondence_systems.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (257 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "CCS",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "system_id",
+     "agency",
+     "agency_code",
+     "bureau_or_office",
+     "system_name",
+     "system_number",
+     "system_named_terms",
+     "evidence_type",
+     "citation",
+     "fr_document_number",
+     "publication_date",
+     "verbatim_quote",
+     "source_url",
+     "fetched_date",
+     "log_publicly_posted",
+     "confidence_tier",
+     "notes",
+     "source_parse_quality"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (257 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "CCS",
+    "proven": true,
+    "rows": 257,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 257,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "system_id",
+    "agency",
+    "agency_code",
+    "bureau_or_office",
+    "system_name",
+    "system_number",
+    "system_named_terms",
+    "evidence_type",
+    "citation",
+    "fr_document_number",
+    "publication_date",
+    "verbatim_quote",
+    "source_url",
+    "fetched_date",
+    "log_publicly_posted",
+    "confidence_tier",
+    "notes",
+    "source_parse_quality"
+   ]
+  },
+  "consultation_agency_coverage.csv": {
+   "evidence": "agency: 66 distinct over 66 rows, 0 blank, full scan",
+   "natural_key": [
+    "agency"
+   ],
+   "primary_key": {
+    "columns": [
+     "agency"
+    ],
+    "evidence": "agency: 66 distinct over 66 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 66,
+    "scan": "full"
+   },
+   "rows": 66,
+   "scan": "full"
+  },
+  "consultation_events.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (11,402 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "CE",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "consultation_event_id",
+     "channel",
+     "agency",
+     "sub_agency",
+     "program",
+     "consultation_type",
+     "topic",
+     "notice_date",
+     "event_start_date",
+     "event_end_date",
+     "location",
+     "format",
+     "tribe_id",
+     "tribe_name",
+     "participant_name_as_published",
+     "participant_role",
+     "comment_deadline",
+     "has_written_comments",
+     "has_summary",
+     "has_transcript",
+     "federal_register_citation",
+     "source_url",
+     "source_quote",
+     "fetched_date",
+     "tier",
+     "confidence",
+     "built_date",
+     "match_method"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (11,402 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "CE",
+    "proven": true,
+    "rows": 11402,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 11402,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "consultation_event_id",
+    "channel",
+    "agency",
+    "sub_agency",
+    "program",
+    "consultation_type",
+    "topic",
+    "notice_date",
+    "event_start_date",
+    "event_end_date",
+    "location",
+    "format",
+    "tribe_id",
+    "tribe_name",
+    "participant_name_as_published",
+    "participant_role",
+    "comment_deadline",
+    "has_written_comments",
+    "has_summary",
+    "has_transcript",
+    "federal_register_citation",
+    "source_url",
+    "source_quote",
+    "fetched_date",
+    "tier",
+    "confidence",
+    "built_date",
+    "match_method"
+   ]
+  },
+  "content_analysis_accuracy.csv": {
+   "evidence": "classifier: 4 distinct over 4 rows, 0 blank, full scan",
+   "natural_key": [
+    "classifier"
+   ],
+   "primary_key": {
+    "columns": [
+     "classifier"
+    ],
+    "evidence": "classifier: 4 distinct over 4 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 4,
+    "scan": "full"
+   },
+   "rows": 4,
+   "scan": "full"
+  },
+  "content_audit_fr_relevance.csv": {
+   "evidence": "document_number: 120 distinct over 120 rows, 0 blank, full scan",
+   "natural_key": [
+    "document_number"
+   ],
+   "primary_key": {
+    "columns": [
+     "document_number"
+    ],
+    "evidence": "document_number: 120 distinct over 120 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 120,
+    "scan": "full"
+   },
+   "rows": 120,
+   "scan": "full"
+  },
+  "content_audit_fr_theme.csv": {
+   "evidence": "document_number: 110 distinct over 110 rows, 0 blank, full scan",
+   "natural_key": [
+    "document_number"
+   ],
+   "primary_key": {
+    "columns": [
+     "document_number"
+    ],
+    "evidence": "document_number: 110 distinct over 110 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 110,
+    "scan": "full"
+   },
+   "rows": 110,
+   "scan": "full"
+  },
+  "content_audit_lobbying_family.csv": {
+   "evidence": "filing_uuid: 120 distinct over 120 rows, 0 blank, full scan",
+   "natural_key": [
+    "filing_uuid"
+   ],
+   "primary_key": {
+    "columns": [
+     "filing_uuid"
+    ],
+    "evidence": "filing_uuid: 120 distinct over 120 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 120,
+    "scan": "full"
+   },
+   "rows": 120,
+   "scan": "full"
+  },
+  "contractor_ranking.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (1,429 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "CR",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "owner_rank",
+     "owner_entity_id",
+     "owner_name",
+     "owner_class",
+     "owner_entity_class_as_recorded",
+     "owner_state",
+     "owner_obligations_usd",
+     "owner_share_of_publishable_pct",
+     "owner_n_operating_companies",
+     "owner_n_identifiers",
+     "owner_n_uei_links",
+     "owner_first_fy",
+     "owner_last_fy",
+     "owner_native_setaside_usd",
+     "owner_8a_usd",
+     "owner_native_specific_setaside_usd",
+     "owner_no_setaside_usd_award_level",
+     "owner_no_setaside_share_pct",
+     "operating_company_name",
+     "operating_company_uei",
+     "publishable_operating_name",
+     "privacy_class",
+     "link_identifier_type",
+     "link_identifier",
+     "link_tier",
+     "link_join_route",
+     "link_ledger_method",
+     "link_is_ruling",
+     "link_tier_rationale",
+     "link_ledger_source_file",
+     "link_evidence_url",
+     "link_legal_business_name_internal_only",
+     "firm_obligations_usd",
+     "firm_transaction_rows",
+     "firm_first_fy",
+     "firm_last_fy",
+     "firm_native_setaside_usd",
+     "firm_carries_any_native_setaside",
+     "firm_8a_usd",
+     "measured_from",
+     "source_vintage",
+     "built_date",
+     "built_by"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (1,429 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "CR",
+    "proven": true,
+    "rows": 1429,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 1429,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "owner_rank",
+    "owner_entity_id",
+    "owner_name",
+    "owner_class",
+    "owner_entity_class_as_recorded",
+    "owner_state",
+    "owner_obligations_usd",
+    "owner_share_of_publishable_pct",
+    "owner_n_operating_companies",
+    "owner_n_identifiers",
+    "owner_n_uei_links",
+    "owner_first_fy",
+    "owner_last_fy",
+    "owner_native_setaside_usd",
+    "owner_8a_usd",
+    "owner_native_specific_setaside_usd",
+    "owner_no_setaside_usd_award_level",
+    "owner_no_setaside_share_pct",
+    "operating_company_name",
+    "operating_company_uei",
+    "publishable_operating_name",
+    "privacy_class",
+    "link_identifier_type",
+    "link_identifier",
+    "link_tier",
+    "link_join_route",
+    "link_ledger_method",
+    "link_is_ruling",
+    "link_tier_rationale",
+    "link_ledger_source_file",
+    "link_evidence_url",
+    "link_legal_business_name_internal_only",
+    "firm_obligations_usd",
+    "firm_transaction_rows",
+    "firm_first_fy",
+    "firm_last_fy",
+    "firm_native_setaside_usd",
+    "firm_carries_any_native_setaside",
+    "firm_8a_usd",
+    "measured_from",
+    "source_vintage",
+    "built_date",
+    "built_by"
+   ]
+  },
+  "correspondence_foia_source_coverage.csv": {
+   "evidence": "url: 124 distinct over 124 rows, 0 blank, full scan",
+   "natural_key": [
+    "url"
+   ],
+   "primary_key": {
+    "columns": [
+     "url"
+    ],
+    "evidence": "url: 124 distinct over 124 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 124,
+    "scan": "full"
+   },
+   "rows": 124,
+   "scan": "full"
+  },
+  "coverage_audit.csv": {
+   "evidence": "(rows, year, dataset) unique over 716 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "rows",
+    "year",
+    "dataset"
+   ],
+   "primary_key": {
+    "caution": "WIDE KEY. Every column in it is an attribute, not an identifier, so this is an identity for the row's CONTENT. It changes when any of those values is corrected. Load and diff on it; do not make it a foreign-key target.",
+    "columns": [
+     "rows",
+     "year",
+     "dataset"
+    ],
+    "evidence": "(rows, year, dataset) unique over 716 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 716,
+    "scan": "full"
+   },
+   "rows": 716,
+   "scan": "full"
+  },
+  "cross_dataset_ruling_map.csv": {
+   "evidence": "no unique key found. Best candidate (identifier, ruling, dataset) still has 2,228 duplicate and 0 all-blank rows; the full row has 2,228 exact duplicates.",
+   "primary_key": {
+    "columns": [
+     "identifier",
+     "ruling",
+     "dataset",
+     "source_file"
+    ],
+    "full_row_duplicates": 2228,
+    "kind": "BLOCKED",
+    "reason": "no unique key found. Best candidate (identifier, ruling, dataset) still has 2,228 duplicate and 0 all-blank rows; the full row has 2,228 exact duplicates.",
+    "rows": 7507,
+    "scan": "full"
+   },
+   "rows": 7507,
+   "scan": "full"
+  },
+  "deals_2000_2019_additions.csv": {
+   "evidence": "Deal_ID: 40 distinct over 40 rows, 0 blank, full scan",
+   "natural_key": [
+    "Deal_ID"
+   ],
+   "primary_key": {
+    "columns": [
+     "Deal_ID"
+    ],
+    "evidence": "Deal_ID: 40 distinct over 40 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 40,
+    "scan": "full"
+   },
+   "rows": 40,
+   "scan": "full"
+  },
+  "deals_2026_ytd_additions.csv": {
+   "evidence": "no column is >=99% populated; every candidate carries blanks, so nothing can be NOT NULL",
+   "primary_key": {
+    "columns": [],
+    "kind": "BLOCKED",
+    "reason": "no column is >=99% populated; every candidate carries blanks, so nothing can be NOT NULL"
+   },
+   "rows": 0,
+   "scan": "full"
+  },
+  "deals_anc_reports_additions.csv": {
+   "evidence": "Deal_ID: 28 distinct over 28 rows, 0 blank, full scan",
+   "natural_key": [
+    "Deal_ID"
+   ],
+   "primary_key": {
+    "columns": [
+     "Deal_ID"
+    ],
+    "evidence": "Deal_ID: 28 distinct over 28 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 28,
+    "scan": "full"
+   },
+   "rows": 28,
+   "scan": "full"
+  },
+  "deals_ancsa_portal_additions.csv": {
+   "evidence": "Deal_ID: 34 distinct over 34 rows, 0 blank, full scan",
+   "natural_key": [
+    "Deal_ID"
+   ],
+   "primary_key": {
+    "columns": [
+     "Deal_ID"
+    ],
+    "evidence": "Deal_ID: 34 distinct over 34 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 34,
+    "scan": "full"
+   },
+   "rows": 34,
+   "scan": "full"
+  },
+  "deals_ancsa_portal_v2_additions.csv": {
+   "evidence": "Deal_ID: 42 distinct over 42 rows, 0 blank, full scan",
+   "natural_key": [
+    "Deal_ID"
+   ],
+   "primary_key": {
+    "columns": [
+     "Deal_ID"
+    ],
+    "evidence": "Deal_ID: 42 distinct over 42 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 42,
+    "scan": "full"
+   },
+   "rows": 42,
+   "scan": "full"
+  },
+  "deals_classified.csv": {
+   "evidence": "Deal_ID: 935 distinct over 935 rows, 0 blank, full scan",
+   "natural_key": [
+    "Deal_ID"
+   ],
+   "primary_key": {
+    "columns": [
+     "Deal_ID"
+    ],
+    "evidence": "Deal_ID: 935 distinct over 935 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 935,
+    "scan": "full"
+   },
+   "rows": 935,
+   "scan": "full"
+  },
+  "deals_federal_awards_additions.csv": {
+   "evidence": "Deal_ID: 594 distinct over 594 rows, 0 blank, full scan",
+   "natural_key": [
+    "Deal_ID"
+   ],
+   "primary_key": {
+    "columns": [
+     "Deal_ID"
+    ],
+    "evidence": "Deal_ID: 594 distinct over 594 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 594,
+    "scan": "full"
+   },
+   "rows": 594,
+   "scan": "full"
+  },
+  "deals_historical_additions.csv": {
+   "evidence": "Deal_ID: 30 distinct over 30 rows, 0 blank, full scan",
+   "natural_key": [
+    "Deal_ID"
+   ],
+   "primary_key": {
+    "columns": [
+     "Deal_ID"
+    ],
+    "evidence": "Deal_ID: 30 distinct over 30 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 30,
+    "scan": "full"
+   },
+   "rows": 30,
+   "scan": "full"
+  },
+  "deals_party_attribution.csv": {
+   "evidence": "native_party: 56 distinct over 56 rows, 0 blank, full scan",
+   "natural_key": [
+    "native_party"
+   ],
+   "primary_key": {
+    "columns": [
+     "native_party"
+    ],
+    "evidence": "native_party: 56 distinct over 56 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 56,
+    "scan": "full"
+   },
+   "rows": 56,
+   "scan": "full"
+  },
+  "deals_party_attribution_agent.csv": {
+   "evidence": "native_party: 530 distinct over 530 rows, 0 blank, full scan",
+   "natural_key": [
+    "native_party"
+   ],
+   "primary_key": {
+    "columns": [
+     "native_party"
+    ],
+    "evidence": "native_party: 530 distinct over 530 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 530,
+    "scan": "full"
+   },
+   "rows": 530,
+   "scan": "full"
+  },
+  "deals_party_autoresolved.csv": {
+   "evidence": "native_party: 502 distinct over 502 rows, 0 blank, full scan",
+   "natural_key": [
+    "native_party"
+   ],
+   "primary_key": {
+    "columns": [
+     "native_party"
+    ],
+    "evidence": "native_party: 502 distinct over 502 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 502,
+    "scan": "full"
+   },
+   "rows": 502,
+   "scan": "full"
+  },
+  "deals_party_matches.csv": {
+   "evidence": "native_party: 481 distinct over 481 rows, 0 blank, full scan",
+   "natural_key": [
+    "native_party"
+   ],
+   "primary_key": {
+    "columns": [
+     "native_party"
+    ],
+    "evidence": "native_party: 481 distinct over 481 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 481,
+    "scan": "full"
+   },
+   "rows": 481,
+   "scan": "full"
+  },
+  "deals_sec_2010_2017_additions.csv": {
+   "evidence": "Deal_ID: 16 distinct over 16 rows, 0 blank, full scan",
+   "natural_key": [
+    "Deal_ID"
+   ],
+   "primary_key": {
+    "columns": [
+     "Deal_ID"
+    ],
+    "evidence": "Deal_ID: 16 distinct over 16 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 16,
+    "scan": "full"
+   },
+   "rows": 16,
+   "scan": "full"
+  },
+  "deals_source_index.csv": {
+   "evidence": "native_party: 533 distinct over 533 rows, 0 blank, full scan",
+   "natural_key": [
+    "native_party"
+   ],
+   "primary_key": {
+    "columns": [
+     "native_party"
+    ],
+    "evidence": "native_party: 533 distinct over 533 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 533,
+    "scan": "full"
+   },
+   "rows": 533,
+   "scan": "full"
+  },
+  "deals_taxonomy.csv": {
+   "evidence": "value: 48 distinct over 48 rows, 0 blank, full scan",
+   "natural_key": [
+    "value"
+   ],
+   "primary_key": {
+    "columns": [
+     "value"
+    ],
+    "evidence": "value: 48 distinct over 48 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 48,
+    "scan": "full"
+   },
+   "rows": 48,
+   "scan": "full"
+  },
+  "deals_tribal_debt_additions.csv": {
+   "evidence": "Deal_ID: 6 distinct over 6 rows, 0 blank, full scan",
+   "natural_key": [
+    "Deal_ID"
+   ],
+   "primary_key": {
+    "columns": [
+     "Deal_ID"
+    ],
+    "evidence": "Deal_ID: 6 distinct over 6 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 6,
+    "scan": "full"
+   },
+   "rows": 6,
+   "scan": "full"
+  },
+  "digital_gaming_relationships.csv": {
+   "evidence": "digital_gaming_id: 154 distinct over 154 rows, 0 blank, full scan",
+   "natural_key": [
+    "digital_gaming_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "digital_gaming_id"
+    ],
+    "evidence": "digital_gaming_id: 154 distinct over 154 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 154,
+    "scan": "full"
+   },
+   "rows": 154,
+   "scan": "full"
+  },
+  "digital_gaming_revenue.csv": {
+   "evidence": "revenue_id: 10,661 distinct over 10,661 rows, 0 blank, full scan",
+   "natural_key": [
+    "revenue_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "revenue_id"
+    ],
+    "evidence": "revenue_id: 10,661 distinct over 10,661 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 10661,
+    "scan": "full"
+   },
+   "rows": 10661,
+   "scan": "full"
+  },
+  "earmarks.csv": {
+   "evidence": "source_quote: 1,002 distinct over 1,002 rows, 0 blank, full scan",
+   "natural_key": [
+    "source_quote"
+   ],
+   "primary_key": {
+    "columns": [
+     "source_quote"
+    ],
+    "evidence": "source_quote: 1,002 distinct over 1,002 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 1002,
+    "scan": "full"
+   },
+   "rows": 1002,
+   "scan": "full"
+  },
+  "entity_aliases.csv": {
+   "evidence": "alias_id: 5,943 distinct over 5,943 rows, 0 blank, full scan",
+   "natural_key": [
+    "alias_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "alias_id"
+    ],
+    "evidence": "alias_id: 5,943 distinct over 5,943 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 5943,
+    "scan": "full"
+   },
+   "rows": 5943,
+   "scan": "full"
+  },
+  "entity_candidates_new.csv": {
+   "evidence": "DUPLICATE COLUMN NAMES (entity_category, parent_native_entity, parent_requirement, record_complete, roll_up_target, serves_basis, serves_native_entities). Every SQL dialect refuses the CREATE TABLE; the table cannot be ingested at all until the producing script disambiguates them.",
+   "primary_key": {
+    "columns": [],
+    "kind": "BLOCKED",
+    "reason": "DUPLICATE COLUMN NAMES (entity_category, parent_native_entity, parent_requirement, record_complete, roll_up_target, serves_basis, serves_native_entities). Every SQL dialect refuses the CREATE TABLE; the table cannot be ingested at all until the producing script disambiguates them."
+   },
+   "rows": 2874,
+   "scan": "full"
+  },
+  "entity_candidates_rejected.csv": {
+   "evidence": "DUPLICATE COLUMN NAMES (entity_category, parent_native_entity, parent_requirement, record_complete, roll_up_target, serves_basis, serves_native_entities). Every SQL dialect refuses the CREATE TABLE; the table cannot be ingested at all until the producing script disambiguates them.",
+   "primary_key": {
+    "columns": [],
+    "kind": "BLOCKED",
+    "reason": "DUPLICATE COLUMN NAMES (entity_category, parent_native_entity, parent_requirement, record_complete, roll_up_target, serves_basis, serves_native_entities). Every SQL dialect refuses the CREATE TABLE; the table cannot be ingested at all until the producing script disambiguates them."
+   },
+   "rows": 1045,
+   "scan": "full"
+  },
+  "entity_evidence_profile.csv": {
+   "evidence": "cedar_entity_id: 1,282 distinct over 1,282 rows, 0 blank, full scan",
+   "natural_key": [
+    "cedar_entity_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "cedar_entity_id"
+    ],
+    "evidence": "cedar_entity_id: 1,282 distinct over 1,282 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 1282,
+    "scan": "full"
+   },
+   "rows": 1282,
+   "scan": "full"
+  },
+  "entity_hierarchy.csv": {
+   "evidence": "tribe_id: 952 distinct over 952 rows, 0 blank, full scan",
+   "natural_key": [
+    "tribe_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "tribe_id"
+    ],
+    "evidence": "tribe_id: 952 distinct over 952 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 952,
+    "scan": "full"
+   },
+   "rows": 952,
+   "scan": "full"
+  },
+  "entity_name_harvest.csv": {
+   "evidence": "(raw_name) unique over 31,728 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "raw_name"
+   ],
+   "primary_key": {
+    "columns": [
+     "raw_name"
+    ],
+    "evidence": "(raw_name) unique over 31,728 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 31728,
+    "scan": "full"
+   },
+   "rows": 31728,
+   "scan": "full"
+  },
+  "entity_relationships.csv": {
+   "evidence": "relationship_id: 2,292 distinct over 2,292 rows, 0 blank, full scan",
+   "natural_key": [
+    "relationship_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "relationship_id"
+    ],
+    "evidence": "relationship_id: 2,292 distinct over 2,292 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 2292,
+    "scan": "full"
+   },
+   "rows": 2292,
+   "scan": "full"
+  },
+  "entity_year_coverage.csv": {
+   "evidence": "(n_entities_observed, year, component) unique over 196 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "n_entities_observed",
+    "year",
+    "component"
+   ],
+   "primary_key": {
+    "caution": "WIDE KEY. Every column in it is an attribute, not an identifier, so this is an identity for the row's CONTENT. It changes when any of those values is corrected. Load and diff on it; do not make it a foreign-key target.",
+    "columns": [
+     "n_entities_observed",
+     "year",
+     "component"
+    ],
+    "evidence": "(n_entities_observed, year, component) unique over 196 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 196,
+    "scan": "full"
+   },
+   "rows": 196,
+   "scan": "full"
+  },
+  "entity_year_panel.csv": {
+   "evidence": "(tribe_id, canonical_name, year) unique over 12,534 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "tribe_id",
+    "canonical_name",
+    "year"
+   ],
+   "primary_key": {
+    "columns": [
+     "tribe_id",
+     "canonical_name",
+     "year"
+    ],
+    "evidence": "(tribe_id, canonical_name, year) unique over 12,534 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 12534,
+    "scan": "full"
+   },
+   "rows": 12534,
+   "scan": "full"
+  },
+  "faads_attribution_audit_sample.csv": {
+   "evidence": "recipient_name: 2,287 distinct over 2,287 rows, 0 blank, full scan",
+   "natural_key": [
+    "recipient_name"
+   ],
+   "primary_key": {
+    "columns": [
+     "recipient_name"
+    ],
+    "evidence": "recipient_name: 2,287 distinct over 2,287 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 2287,
+    "scan": "full"
+   },
+   "rows": 2287,
+   "scan": "full"
+  },
+  "faads_entity_attribution.csv": {
+   "evidence": "(faads_row_id) unique over 29,594 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "faads_row_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "faads_row_id"
+    ],
+    "evidence": "(faads_row_id) unique over 29,594 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 29594,
+    "scan": "full"
+   },
+   "rows": 29594,
+   "scan": "full"
+  },
+  "faads_identifier_coverage_by_agency_year.csv": {
+   "evidence": "n_rows: 77 distinct over 77 rows, 0 blank, full scan",
+   "natural_key": [
+    "n_rows"
+   ],
+   "primary_key": {
+    "columns": [
+     "n_rows"
+    ],
+    "evidence": "n_rows: 77 distinct over 77 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 77,
+    "scan": "full"
+   },
+   "rows": 77,
+   "scan": "full"
+  },
+  "faads_transactions.csv": {
+   "evidence": "no unique key found. Best candidate (source_url, award_id_fain, obligated_usd, recipient_name) still has 2,831 duplicate and 0 all-blank rows; the full row has 1,001 exact duplicates.",
+   "primary_key": {
+    "columns": [
+     "source_url",
+     "award_id_fain",
+     "obligated_usd",
+     "recipient_name"
+    ],
+    "full_row_duplicates": 1001,
+    "kind": "BLOCKED",
+    "reason": "no unique key found. Best candidate (source_url, award_id_fain, obligated_usd, recipient_name) still has 2,831 duplicate and 0 all-blank rows; the full row has 1,001 exact duplicates.",
+    "rows": 60661,
+    "scan": "full"
+   },
+   "rows": 60661,
+   "scan": "full"
+  },
+  "faads_transactions_all_agencies.csv": {
+   "evidence": "no unique key found. Best candidate (source_url, award_id_fain, recipient_name, obligated_usd) still has 19,110 duplicate and 0 all-blank rows; the full row has 8,912 exact duplicates.",
+   "primary_key": {
+    "columns": [
+     "source_url",
+     "award_id_fain",
+     "recipient_name",
+     "obligated_usd"
+    ],
+    "full_row_duplicates": 8912,
+    "kind": "BLOCKED",
+    "reason": "no unique key found. Best candidate (source_url, award_id_fain, recipient_name, obligated_usd) still has 19,110 duplicate and 0 all-blank rows; the full row has 8,912 exact duplicates.",
+    "rows": 200000,
+    "scan": "sample:200000"
+   },
+   "rows": 300000,
+   "scan": "sample:300000"
+  },
+  "fac_audit_gaming_disclosures.csv": {
+   "evidence": "(source_url, report_id, verbatim_quote, source_page) unique over 1,521 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "source_url",
+    "report_id",
+    "verbatim_quote",
+    "source_page"
+   ],
+   "primary_key": {
+    "columns": [
+     "source_url",
+     "report_id",
+     "verbatim_quote",
+     "source_page"
+    ],
+    "evidence": "(source_url, report_id, verbatim_quote, source_page) unique over 1,521 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 1521,
+    "scan": "full"
+   },
+   "rows": 1521,
+   "scan": "full"
+  },
+  "fac_audit_sefa_gaming_programs.csv": {
+   "evidence": "report_id: 1 distinct over 1 rows, 0 blank, full scan",
+   "natural_key": [
+    "report_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "report_id"
+    ],
+    "evidence": "report_id: 1 distinct over 1 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 1,
+    "scan": "full"
+   },
+   "rows": 1,
+   "scan": "full"
+  },
+  "fac_tribal_single_audits.csv": {
+   "evidence": "report_id: 6,780 distinct over 6,780 rows, 0 blank, full scan",
+   "natural_key": [
+    "report_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "report_id"
+    ],
+    "evidence": "report_id: 6,780 distinct over 6,780 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 6780,
+    "scan": "full"
+   },
+   "rows": 6780,
+   "scan": "full"
+  },
+  "federal_actions.csv": {
+   "evidence": "(document_number) unique over 156,452 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "document_number"
+   ],
+   "primary_key": {
+    "columns": [
+     "document_number"
+    ],
+    "evidence": "(document_number) unique over 156,452 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 156452,
+    "scan": "full"
+   },
+   "rows": 156452,
+   "scan": "full"
+  },
+  "federal_actions_entity_bridge.csv": {
+   "evidence": "(document_number, tribe_id) unique over 5,786 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "document_number",
+    "tribe_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "document_number",
+     "tribe_id"
+    ],
+    "evidence": "(document_number, tribe_id) unique over 5,786 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 5786,
+    "scan": "full"
+   },
+   "rows": 5786,
+   "scan": "full"
+  },
+  "federal_actions_raw.csv": {
+   "evidence": "(document_number) unique over 156,452 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "document_number"
+   ],
+   "primary_key": {
+    "columns": [
+     "document_number"
+    ],
+    "evidence": "(document_number) unique over 156,452 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 156452,
+    "scan": "full"
+   },
+   "rows": 156452,
+   "scan": "full"
+  },
+  "federal_funding_transactions.csv": {
+   "evidence": "(assistance_transaction_unique_key) unique over 200,000 rows, 0 blank, 0 duplicate [sample:200000]",
+   "natural_key": [
+    "assistance_transaction_unique_key"
+   ],
+   "primary_key": {
+    "columns": [
+     "assistance_transaction_unique_key"
+    ],
+    "evidence": "(assistance_transaction_unique_key) unique over 200,000 rows, 0 blank, 0 duplicate [sample:200000]",
+    "kind": "natural",
+    "proven": false,
+    "rows": 200000,
+    "scan": "sample:200000"
+   },
+   "rows": 300000,
+   "scan": "sample:300000"
+  },
+  "federal_funding_tribe_year_panel.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (5,496 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "FFTYP",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "tribe_id",
+     "canonical_name",
+     "tribe_id_scheme",
+     "fiscal_year",
+     "fy_partial_flag",
+     "total_obligated_usd",
+     "obl_type_02_block_grant",
+     "obl_type_03_formula_grant",
+     "obl_type_04_project_grant",
+     "obl_type_05_cooperative_agreement",
+     "obl_type_06_direct_payment_specified_use",
+     "obl_type_10_direct_payment_unrestricted",
+     "obl_type_11_other_reimbursable_or_indirect",
+     "n_transactions",
+     "n_recipients"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (5,496 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "FFTYP",
+    "proven": true,
+    "rows": 5496,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 5496,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "tribe_id",
+    "canonical_name",
+    "tribe_id_scheme",
+    "fiscal_year",
+    "fy_partial_flag",
+    "total_obligated_usd",
+    "obl_type_02_block_grant",
+    "obl_type_03_formula_grant",
+    "obl_type_04_project_grant",
+    "obl_type_05_cooperative_agreement",
+    "obl_type_06_direct_payment_specified_use",
+    "obl_type_10_direct_payment_unrestricted",
+    "obl_type_11_other_reimbursable_or_indirect",
+    "n_transactions",
+    "n_recipients"
+   ]
+  },
+  "federal_funding_year_comparison_2026-08-05.csv": {
+   "evidence": "fiscal_year: 26 distinct over 26 rows, 0 blank, full scan",
+   "natural_key": [
+    "fiscal_year"
+   ],
+   "primary_key": {
+    "columns": [
+     "fiscal_year"
+    ],
+    "evidence": "fiscal_year: 26 distinct over 26 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 26,
+    "scan": "full"
+   },
+   "rows": 26,
+   "scan": "full"
+  },
+  "federal_recognition_events.csv": {
+   "evidence": "(entity_key, quote_url, fr_document_number) unique over 366 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "entity_key",
+    "quote_url",
+    "fr_document_number"
+   ],
+   "primary_key": {
+    "columns": [
+     "entity_key",
+     "quote_url",
+     "fr_document_number"
+    ],
+    "evidence": "(entity_key, quote_url, fr_document_number) unique over 366 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 366,
+    "scan": "full"
+   },
+   "rows": 366,
+   "scan": "full"
+  },
+  "federal_recognition_roster.csv": {
+   "evidence": "(fr_document_number, source_url, entry_raw_source, entry_raw) unique over 17,058 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "fr_document_number",
+    "source_url",
+    "entry_raw_source",
+    "entry_raw"
+   ],
+   "primary_key": {
+    "columns": [
+     "fr_document_number",
+     "source_url",
+     "entry_raw_source",
+     "entry_raw"
+    ],
+    "evidence": "(fr_document_number, source_url, entry_raw_source, entry_raw) unique over 17,058 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 17058,
+    "scan": "full"
+   },
+   "rows": 17058,
+   "scan": "full"
+  },
+  "ferc_docket_filings.csv": {
+   "evidence": "no unique key found. Best candidate (accession_number, source_url, document_description_verbatim, docket_number) still has 9,570 duplicate and 0 all-blank rows; the full row has 822 exact duplicates.",
+   "primary_key": {
+    "columns": [
+     "accession_number",
+     "source_url",
+     "document_description_verbatim",
+     "docket_number"
+    ],
+    "full_row_duplicates": 822,
+    "kind": "BLOCKED",
+    "reason": "no unique key found. Best candidate (accession_number, source_url, document_description_verbatim, docket_number) still has 9,570 duplicate and 0 all-blank rows; the full row has 822 exact duplicates.",
+    "rows": 102615,
+    "scan": "full"
+   },
+   "rows": 102615,
+   "scan": "full"
+  },
+  "ferc_docket_parties.csv": {
+   "evidence": "ferc_docket_party_id: 11,563 distinct over 11,563 rows, 0 blank, full scan",
+   "natural_key": [
+    "ferc_docket_party_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "ferc_docket_party_id"
+    ],
+    "evidence": "ferc_docket_party_id: 11,563 distinct over 11,563 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 11563,
+    "scan": "full",
+    "unstable_because": "minted by 168_link_adjudication_hubs.py:786 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "ferc_docket_party_id"
+   },
+   "rows": 11563,
+   "scan": "full"
+  },
+  "ferc_ex_parte_communications.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (713 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "FEPC",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "ferc_ex_parte_id",
+     "docket_number",
+     "subdocket",
+     "accession_number",
+     "filed_date",
+     "issued_date",
+     "event_class",
+     "channel",
+     "is_lobbying",
+     "filed_or_issued_by_as_recorded",
+     "filed_or_issued_by_type",
+     "communicating_parties_named_in_notice_text",
+     "communicating_parties_basis",
+     "resolved_native_entity_id",
+     "resolved_native_entity_name",
+     "ex_parte_quote",
+     "document_description_verbatim",
+     "rule_basis",
+     "source_url",
+     "fetched_date",
+     "confidence_tier",
+     "built_date",
+     "built_by_script",
+     "off_the_record_communications_in_notice",
+     "prohibited_communications_in_notice",
+     "exempt_communications_in_notice",
+     "dockets_named_in_notice",
+     "fr_document_number",
+     "fr_citation",
+     "fr_publication_date",
+     "fr_source_url",
+     "fr_notice_date_quote",
+     "fr_join_basis"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (713 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "FEPC",
+    "proven": true,
+    "rows": 713,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 713,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "ferc_ex_parte_id",
+    "docket_number",
+    "subdocket",
+    "accession_number",
+    "filed_date",
+    "issued_date",
+    "event_class",
+    "channel",
+    "is_lobbying",
+    "filed_or_issued_by_as_recorded",
+    "filed_or_issued_by_type",
+    "communicating_parties_named_in_notice_text",
+    "communicating_parties_basis",
+    "resolved_native_entity_id",
+    "resolved_native_entity_name",
+    "ex_parte_quote",
+    "document_description_verbatim",
+    "rule_basis",
+    "source_url",
+    "fetched_date",
+    "confidence_tier",
+    "built_date",
+    "built_by_script",
+    "off_the_record_communications_in_notice",
+    "prohibited_communications_in_notice",
+    "exempt_communications_in_notice",
+    "dockets_named_in_notice",
+    "fr_document_number",
+    "fr_citation",
+    "fr_publication_date",
+    "fr_source_url",
+    "fr_notice_date_quote",
+    "fr_join_basis"
+   ]
+  },
+  "ferc_ex_parte_parties.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (4,246 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "FEPP",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "ferc_ex_parte_party_id",
+     "linked_ferc_ex_parte_id",
+     "linked_accession_number",
+     "elibrary_link_basis",
+     "notice_date",
+     "fr_document_number",
+     "fr_citation",
+     "fr_publication_date",
+     "item_number",
+     "prohibited_or_exempt",
+     "docket_numbers_as_printed",
+     "primary_docket_number",
+     "communication_file_date",
+     "communication_file_date_as_printed",
+     "presenter_or_requester_as_printed",
+     "presenter_or_requester_type",
+     "natural_person_caution",
+     "footnote_markers",
+     "footnote_text_verbatim",
+     "footnote_reading",
+     "event_class",
+     "channel",
+     "is_lobbying",
+     "resolved_native_entity_id",
+     "resolved_native_entity_name",
+     "resolution_method",
+     "position_relative_to_native_interest",
+     "position_basis",
+     "table_row_quote",
+     "rule_basis",
+     "source_url",
+     "raw_text_url",
+     "retrieved_at",
+     "confidence_tier",
+     "built_date",
+     "built_by_script",
+     "party_role",
+     "party_role_basis",
+     "entity_link_tier",
+     "entity_link_refusal_reason",
+     "docket_native_party_ids",
+     "docket_native_party_names",
+     "docket_has_native_party",
+     "entity_link_built_by_script"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (4,246 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "FEPP",
+    "proven": true,
+    "rows": 4246,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 4246,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "ferc_ex_parte_party_id",
+    "linked_ferc_ex_parte_id",
+    "linked_accession_number",
+    "elibrary_link_basis",
+    "notice_date",
+    "fr_document_number",
+    "fr_citation",
+    "fr_publication_date",
+    "item_number",
+    "prohibited_or_exempt",
+    "docket_numbers_as_printed",
+    "primary_docket_number",
+    "communication_file_date",
+    "communication_file_date_as_printed",
+    "presenter_or_requester_as_printed",
+    "presenter_or_requester_type",
+    "natural_person_caution",
+    "footnote_markers",
+    "footnote_text_verbatim",
+    "footnote_reading",
+    "event_class",
+    "channel",
+    "is_lobbying",
+    "resolved_native_entity_id",
+    "resolved_native_entity_name",
+    "resolution_method",
+    "position_relative_to_native_interest",
+    "position_basis",
+    "table_row_quote",
+    "rule_basis",
+    "source_url",
+    "raw_text_url",
+    "retrieved_at",
+    "confidence_tier",
+    "built_date",
+    "built_by_script",
+    "party_role",
+    "party_role_basis",
+    "entity_link_tier",
+    "entity_link_refusal_reason",
+    "docket_native_party_ids",
+    "docket_native_party_names",
+    "docket_has_native_party",
+    "entity_link_built_by_script"
+   ]
+  },
+  "ferc_source_coverage.csv": {
+   "evidence": "source: 9 distinct over 9 rows, 0 blank, full scan",
+   "natural_key": [
+    "source"
+   ],
+   "primary_key": {
+    "columns": [
+     "source"
+    ],
+    "evidence": "source: 9 distinct over 9 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 9,
+    "scan": "full"
+   },
+   "rows": 9,
+   "scan": "full"
+  },
+  "ferc_tribal_dockets.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (307 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "FTD",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "docket_number",
+     "subdocket",
+     "docket_prefix",
+     "docket_program",
+     "applicant_or_licensee_as_recorded",
+     "documents_retrieved",
+     "total_hits_reported_by_source",
+     "date_window_queried",
+     "tribal_filer_documents",
+     "ex_parte_documents",
+     "comment_or_protest_documents",
+     "section_106_cross_ref",
+     "discovery_source",
+     "discovery_quote",
+     "seed_source_url",
+     "source_url",
+     "fetched_date",
+     "confidence_tier",
+     "built_date",
+     "built_by_script",
+     "applicant_resolved_native_entity_id",
+     "applicant_resolved_native_entity_name",
+     "applicant_entity_link_method",
+     "applicant_entity_link_tier",
+     "applicant_entity_link_refusal_reason",
+     "docket_native_party_ids",
+     "docket_native_party_names",
+     "docket_native_party_roles",
+     "docket_native_party_count",
+     "entity_link_built_by_script"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (307 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "FTD",
+    "proven": true,
+    "rows": 307,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 307,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "docket_number",
+    "subdocket",
+    "docket_prefix",
+    "docket_program",
+    "applicant_or_licensee_as_recorded",
+    "documents_retrieved",
+    "total_hits_reported_by_source",
+    "date_window_queried",
+    "tribal_filer_documents",
+    "ex_parte_documents",
+    "comment_or_protest_documents",
+    "section_106_cross_ref",
+    "discovery_source",
+    "discovery_quote",
+    "seed_source_url",
+    "source_url",
+    "fetched_date",
+    "confidence_tier",
+    "built_date",
+    "built_by_script",
+    "applicant_resolved_native_entity_id",
+    "applicant_resolved_native_entity_name",
+    "applicant_entity_link_method",
+    "applicant_entity_link_tier",
+    "applicant_entity_link_refusal_reason",
+    "docket_native_party_ids",
+    "docket_native_party_names",
+    "docket_native_party_roles",
+    "docket_native_party_count",
+    "entity_link_built_by_script"
+   ]
+  },
+  "fl_gaming_payments.csv": {
+   "evidence": "payment_id: 9,756 distinct over 9,756 rows, 0 blank, full scan",
+   "natural_key": [
+    "payment_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "payment_id"
+    ],
+    "evidence": "payment_id: 9,756 distinct over 9,756 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 9756,
+    "scan": "full"
+   },
+   "rows": 9756,
+   "scan": "full"
+  },
+  "foia_discovery_targets.csv": {
+   "evidence": "url: 122 distinct over 122 rows, 0 blank, full scan",
+   "natural_key": [
+    "url"
+   ],
+   "primary_key": {
+    "columns": [
+     "url"
+    ],
+    "evidence": "url: 122 distinct over 122 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 122,
+    "scan": "full"
+   },
+   "rows": 122,
+   "scan": "full"
+  },
+  "foia_request_index.csv": {
+   "evidence": "(foia_request_id, source_url, agency_code, request_description) unique over 9,481 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "foia_request_id",
+    "source_url",
+    "agency_code",
+    "request_description"
+   ],
+   "primary_key": {
+    "columns": [
+     "foia_request_id",
+     "source_url",
+     "agency_code",
+     "request_description"
+    ],
+    "evidence": "(foia_request_id, source_url, agency_code, request_description) unique over 9,481 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 9481,
+    "scan": "full"
+   },
+   "rows": 9481,
+   "scan": "full"
+  },
+  "fpds_uei_cage_map.csv": {
+   "evidence": "no unique key found. Best candidate (uei, legal_business_name, n_observations, first_year) still has 14 duplicate and 0 all-blank rows; the full row has 2 exact duplicates.",
+   "primary_key": {
+    "columns": [
+     "uei",
+     "legal_business_name",
+     "n_observations",
+     "first_year"
+    ],
+    "full_row_duplicates": 2,
+    "kind": "BLOCKED",
+    "reason": "no unique key found. Best candidate (uei, legal_business_name, n_observations, first_year) still has 14 duplicate and 0 all-blank rows; the full row has 2 exact duplicates.",
+    "rows": 24977,
+    "scan": "full"
+   },
+   "rows": 24977,
+   "scan": "full"
+  },
+  "fpds_uei_edges.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (2,290 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "FUE",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "child_uei",
+     "child_name",
+     "parent_uei",
+     "parent_name",
+     "edge_type",
+     "source_file",
+     "n_observations",
+     "first_year",
+     "last_year",
+     "pre_2000_flag",
+     "floor_basis_field",
+     "blocklisted_parent",
+     "blocklist_reason",
+     "blocklist_note"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (2,290 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "FUE",
+    "proven": true,
+    "rows": 2290,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 2290,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "child_uei",
+    "child_name",
+    "parent_uei",
+    "parent_name",
+    "edge_type",
+    "source_file",
+    "n_observations",
+    "first_year",
+    "last_year",
+    "pre_2000_flag",
+    "floor_basis_field",
+    "blocklisted_parent",
+    "blocklist_reason",
+    "blocklist_note"
+   ]
+  },
+  "fr_abstract_availability_year.csv": {
+   "evidence": "publication_year: 33 distinct over 33 rows, 0 blank, full scan",
+   "natural_key": [
+    "publication_year"
+   ],
+   "primary_key": {
+    "columns": [
+     "publication_year"
+    ],
+    "evidence": "publication_year: 33 distinct over 33 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 33,
+    "scan": "full"
+   },
+   "rows": 33,
+   "scan": "full"
+  },
+  "fr_consultation_by_agency.csv": {
+   "evidence": "no column prefix of length <= 2 is unique, but the FULL ROW is (21 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "FCBA",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "normalized_department",
+     "n_consultation_notices",
+     "share_of_notices"
+    ],
+    "evidence": "no column prefix of length <= 2 is unique, but the FULL ROW is (21 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "FCBA",
+    "proven": true,
+    "rows": 21,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 21,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "normalized_department",
+    "n_consultation_notices",
+    "share_of_notices"
+   ]
+  },
+  "fr_consultation_notices.csv": {
+   "evidence": "document_number: 484 distinct over 484 rows, 0 blank, full scan",
+   "natural_key": [
+    "document_number"
+   ],
+   "primary_key": {
+    "columns": [
+     "document_number"
+    ],
+    "evidence": "document_number: 484 distinct over 484 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 484,
+    "scan": "full"
+   },
+   "rows": 484,
+   "scan": "full"
+  },
+  "fr_consultation_referenced.csv": {
+   "evidence": "document_number: 1,829 distinct over 1,829 rows, 0 blank, full scan",
+   "natural_key": [
+    "document_number"
+   ],
+   "primary_key": {
+    "columns": [
+     "document_number"
+    ],
+    "evidence": "document_number: 1,829 distinct over 1,829 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 1829,
+    "scan": "full"
+   },
+   "rows": 1829,
+   "scan": "full"
+  },
+  "fr_consultation_year.csv": {
+   "evidence": "publication_year: 33 distinct over 33 rows, 0 blank, full scan",
+   "natural_key": [
+    "publication_year"
+   ],
+   "primary_key": {
+    "columns": [
+     "publication_year"
+    ],
+    "evidence": "publication_year: 33 distinct over 33 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 33,
+    "scan": "full"
+   },
+   "rows": 33,
+   "scan": "full"
+  },
+  "fr_content_classification.csv": {
+   "evidence": "(document_number) unique over 156,452 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "document_number"
+   ],
+   "primary_key": {
+    "columns": [
+     "document_number"
+    ],
+    "evidence": "(document_number) unique over 156,452 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 156452,
+    "scan": "full"
+   },
+   "rows": 156452,
+   "scan": "full"
+  },
+  "fr_ex_parte_notices.csv": {
+   "evidence": "fr_ex_parte_notice_id: 7,820 distinct over 7,820 rows, 0 blank, full scan",
+   "natural_key": [
+    "fr_ex_parte_notice_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "fr_ex_parte_notice_id"
+    ],
+    "evidence": "fr_ex_parte_notice_id: 7,820 distinct over 7,820 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 7820,
+    "scan": "full"
+   },
+   "rows": 7820,
+   "scan": "full"
+  },
+  "fr_ex_parte_parties.csv": {
+   "evidence": "fr_ex_parte_party_id: 112 distinct over 112 rows, 0 blank, full scan",
+   "natural_key": [
+    "fr_ex_parte_party_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "fr_ex_parte_party_id"
+    ],
+    "evidence": "fr_ex_parte_party_id: 112 distinct over 112 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 112,
+    "scan": "full"
+   },
+   "rows": 112,
+   "scan": "full"
+  },
+  "fr_ex_parte_party_entity_links.csv": {
+   "evidence": "link_id: 9 distinct over 9 rows, 0 blank, full scan",
+   "natural_key": [
+    "link_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "link_id"
+    ],
+    "evidence": "link_id: 9 distinct over 9 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 9,
+    "scan": "full"
+   },
+   "rows": 9,
+   "scan": "full"
+  },
+  "fr_nagpra_title_index.csv": {
+   "evidence": "document_number: 6,606 distinct over 6,606 rows, 0 blank, full scan",
+   "natural_key": [
+    "document_number"
+   ],
+   "primary_key": {
+    "columns": [
+     "document_number"
+    ],
+    "evidence": "document_number: 6,606 distinct over 6,606 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 6606,
+    "scan": "full"
+   },
+   "rows": 6606,
+   "scan": "full"
+  },
+  "fr_nagpra_title_index_year.csv": {
+   "evidence": "publication_year: 33 distinct over 33 rows, 0 blank, full scan",
+   "natural_key": [
+    "publication_year"
+   ],
+   "primary_key": {
+    "columns": [
+     "publication_year"
+    ],
+    "evidence": "publication_year: 33 distinct over 33 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 33,
+    "scan": "full"
+   },
+   "rows": 33,
+   "scan": "full"
+  },
+  "fr_recognized_entities.csv": {
+   "evidence": "fr_name: 575 distinct over 575 rows, 0 blank, full scan",
+   "natural_key": [
+    "fr_name"
+   ],
+   "primary_key": {
+    "columns": [
+     "fr_name"
+    ],
+    "evidence": "fr_name: 575 distinct over 575 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 575,
+    "scan": "full"
+   },
+   "rows": 575,
+   "scan": "full"
+  },
+  "fr_relevance_stratum_audit.csv": {
+   "evidence": "tier: 4 distinct over 4 rows, 0 blank, full scan",
+   "natural_key": [
+    "tier"
+   ],
+   "primary_key": {
+    "columns": [
+     "tier"
+    ],
+    "evidence": "tier: 4 distinct over 4 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 4,
+    "scan": "full"
+   },
+   "rows": 4,
+   "scan": "full"
+  },
+  "fr_relevance_tier_year.csv": {
+   "evidence": "(n_documents, publication_year) unique over 132 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "n_documents",
+    "publication_year"
+   ],
+   "primary_key": {
+    "columns": [
+     "n_documents",
+     "publication_year"
+    ],
+    "evidence": "(n_documents, publication_year) unique over 132 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 132,
+    "scan": "full"
+   },
+   "rows": 132,
+   "scan": "full"
+  },
+  "fr_theme_year.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (627 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "FTY",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "theme",
+     "publication_year",
+     "n_documents",
+     "n_classifiable_documents_that_year",
+     "share_of_classifiable"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (627 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "FTY",
+    "proven": true,
+    "rows": 627,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 627,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "theme",
+    "publication_year",
+    "n_documents",
+    "n_classifiable_documents_that_year",
+    "share_of_classifiable"
+   ]
+  },
+  "funding_identifier_harvest.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (37,704 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "FIH",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "recipient_uei",
+     "recipient_duns",
+     "recipient_ein",
+     "cage_code",
+     "recipient_name",
+     "recipient_state",
+     "recipient_city",
+     "recipient_zip",
+     "n_awards",
+     "first_year",
+     "last_year",
+     "total_obligated_usd",
+     "assistance_types",
+     "source_lineage",
+     "source_file",
+     "malformed_flag"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (37,704 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "FIH",
+    "proven": true,
+    "rows": 37704,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 37704,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "recipient_uei",
+    "recipient_duns",
+    "recipient_ein",
+    "cage_code",
+    "recipient_name",
+    "recipient_state",
+    "recipient_city",
+    "recipient_zip",
+    "n_awards",
+    "first_year",
+    "last_year",
+    "total_obligated_usd",
+    "assistance_types",
+    "source_lineage",
+    "source_file",
+    "malformed_flag"
+   ]
+  },
+  "funding_identifier_netnew_ueis.csv": {
+   "evidence": "recipient_uei: 4,249 distinct over 4,249 rows, 0 blank, full scan",
+   "natural_key": [
+    "recipient_uei"
+   ],
+   "primary_key": {
+    "columns": [
+     "recipient_uei"
+    ],
+    "evidence": "recipient_uei: 4,249 distinct over 4,249 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 4249,
+    "scan": "full"
+   },
+   "rows": 4249,
+   "scan": "full"
+  },
+  "gaming_capacity_official.csv": {
+   "evidence": "observation_id: 6,461 distinct over 6,461 rows, 0 blank, full scan",
+   "natural_key": [
+    "observation_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "observation_id"
+    ],
+    "evidence": "observation_id: 6,461 distinct over 6,461 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 6461,
+    "scan": "full",
+    "unstable_because": "minted by 92_build_gaming_capacity_official.py:382 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "observation_id"
+   },
+   "rows": 6461,
+   "scan": "full"
+  },
+  "gaming_decision_compact_join.csv": {
+   "evidence": "decision_id: 138 distinct over 138 rows, 0 blank, full scan",
+   "natural_key": [
+    "decision_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "decision_id"
+    ],
+    "evidence": "decision_id: 138 distinct over 138 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 138,
+    "scan": "full"
+   },
+   "rows": 138,
+   "scan": "full"
+  },
+  "gaming_decision_events.csv": {
+   "evidence": "event_id: 265 distinct over 265 rows, 0 blank, full scan",
+   "natural_key": [
+    "event_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "event_id"
+    ],
+    "evidence": "event_id: 265 distinct over 265 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 265,
+    "scan": "full",
+    "unstable_because": "minted by 23b_build_gaming_land_decisions.py:380 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "event_id"
+   },
+   "rows": 265,
+   "scan": "full"
+  },
+  "gaming_device_observations.csv": {
+   "evidence": "observation_id: 1,326 distinct over 1,326 rows, 0 blank, full scan",
+   "natural_key": [
+    "observation_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "observation_id"
+    ],
+    "evidence": "observation_id: 1,326 distinct over 1,326 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 1326,
+    "scan": "full"
+   },
+   "rows": 1326,
+   "scan": "full"
+  },
+  "gaming_employment_observations.csv": {
+   "evidence": "observation_id: 3,246 distinct over 3,246 rows, 0 blank, full scan",
+   "natural_key": [
+    "observation_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "observation_id"
+    ],
+    "evidence": "observation_id: 3,246 distinct over 3,246 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 3246,
+    "scan": "full",
+    "unstable_because": "minted by 100_finish_declinations_and_employment.py:1580 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "observation_id"
+   },
+   "rows": 3246,
+   "scan": "full"
+  },
+  "gaming_facilities.csv": {
+   "evidence": "facility_id: 787 distinct over 787 rows, 0 blank, full scan",
+   "natural_key": [
+    "facility_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "facility_id"
+    ],
+    "evidence": "facility_id: 787 distinct over 787 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 787,
+    "scan": "full"
+   },
+   "rows": 787,
+   "scan": "full"
+  },
+  "gaming_facility_metrics.csv": {
+   "primary_key": {
+    "columns": [],
+    "kind": "REFUSED_LICENSED",
+    "note": "Casino City Press derived - internal fact-checking only"
+   },
+   "rows": 68211
+  },
+  "gaming_field_coverage.csv": {
+   "evidence": "field_or_source: 109 distinct over 109 rows, 0 blank, full scan",
+   "natural_key": [
+    "field_or_source"
+   ],
+   "primary_key": {
+    "columns": [
+     "field_or_source"
+    ],
+    "evidence": "field_or_source: 109 distinct over 109 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 109,
+    "scan": "full"
+   },
+   "rows": 109,
+   "scan": "full"
+  },
+  "gaming_financing_events.csv": {
+   "evidence": "financing_event_id: 293 distinct over 293 rows, 0 blank, full scan",
+   "natural_key": [
+    "financing_event_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "financing_event_id"
+    ],
+    "evidence": "financing_event_id: 293 distinct over 293 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 293,
+    "scan": "full"
+   },
+   "rows": 293,
+   "scan": "full"
+  },
+  "gaming_game_finder_observations.csv": {
+   "evidence": "observation_id: 6,851 distinct over 6,851 rows, 0 blank, full scan",
+   "natural_key": [
+    "observation_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "observation_id"
+    ],
+    "evidence": "observation_id: 6,851 distinct over 6,851 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 6851,
+    "scan": "full"
+   },
+   "rows": 6851,
+   "scan": "full"
+  },
+  "gaming_game_finder_systems.csv": {
+   "evidence": "platform_id: 3 distinct over 3 rows, 0 blank, full scan",
+   "natural_key": [
+    "platform_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "platform_id"
+    ],
+    "evidence": "platform_id: 3 distinct over 3 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 3,
+    "scan": "full"
+   },
+   "rows": 3,
+   "scan": "full"
+  },
+  "gaming_land_decisions.csv": {
+   "evidence": "decision_id: 138 distinct over 138 rows, 0 blank, full scan",
+   "natural_key": [
+    "decision_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "decision_id"
+    ],
+    "evidence": "decision_id: 138 distinct over 138 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 138,
+    "scan": "full"
+   },
+   "rows": 138,
+   "scan": "full"
+  },
+  "gaming_manufacturer_facts.csv": {
+   "evidence": "fact_id: 62 distinct over 62 rows, 0 blank, full scan",
+   "natural_key": [
+    "fact_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "fact_id"
+    ],
+    "evidence": "fact_id: 62 distinct over 62 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 62,
+    "scan": "full",
+    "unstable_because": "minted by 117_build_gaming_devices.py:623 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "fact_id"
+   },
+   "rows": 62,
+   "scan": "full"
+  },
+  "gaming_mitigation_agreements.csv": {
+   "evidence": "(section_ref, source_url, project_id, service) unique over 24 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "section_ref",
+    "source_url",
+    "project_id",
+    "service"
+   ],
+   "primary_key": {
+    "columns": [
+     "section_ref",
+     "source_url",
+     "project_id",
+     "service"
+    ],
+    "evidence": "(section_ref, source_url, project_id, service) unique over 24 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 24,
+    "scan": "full"
+   },
+   "rows": 24,
+   "scan": "full"
+  },
+  "gaming_nigc_roster_link.csv": {
+   "evidence": "facility_id: 453 distinct over 453 rows, 0 blank, full scan",
+   "natural_key": [
+    "facility_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "facility_id"
+    ],
+    "evidence": "facility_id: 453 distinct over 453 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 453,
+    "scan": "full"
+   },
+   "rows": 453,
+   "scan": "full"
+  },
+  "gaming_ordinance_ocr.csv": {
+   "evidence": "ordinance_id: 263 distinct over 263 rows, 0 blank, full scan",
+   "natural_key": [
+    "ordinance_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "ordinance_id"
+    ],
+    "evidence": "ordinance_id: 263 distinct over 263 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 263,
+    "scan": "full",
+    "unstable_because": "minted by 118_build_gaming_ordinances.py:295 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "ordinance_id"
+   },
+   "rows": 263,
+   "scan": "full"
+  },
+  "gaming_ordinances.csv": {
+   "evidence": "ordinance_id: 1,155 distinct over 1,155 rows, 0 blank, full scan",
+   "natural_key": [
+    "ordinance_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "ordinance_id"
+    ],
+    "evidence": "ordinance_id: 1,155 distinct over 1,155 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 1155,
+    "scan": "full",
+    "unstable_because": "minted by 118_build_gaming_ordinances.py:295 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "ordinance_id"
+   },
+   "rows": 1155,
+   "scan": "full"
+  },
+  "gaming_project_facilities.csv": {
+   "evidence": "notes: 19 distinct over 19 rows, 0 blank, full scan",
+   "natural_key": [
+    "notes"
+   ],
+   "primary_key": {
+    "columns": [
+     "notes"
+    ],
+    "evidence": "notes: 19 distinct over 19 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 19,
+    "scan": "full"
+   },
+   "rows": 19,
+   "scan": "full"
+  },
+  "gaming_projections.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (116 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "GP",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "project_id",
+     "metric",
+     "value",
+     "unit",
+     "impact_type",
+     "geography",
+     "time_period",
+     "reported_or_calculated",
+     "source_document",
+     "page",
+     "table_ref",
+     "confidence",
+     "tribe",
+     "alternative",
+     "derivation",
+     "observation_status",
+     "modelling_basis",
+     "page_label",
+     "source_url",
+     "notes",
+     "source_document_date",
+     "source_document_date_basis"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (116 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "GP",
+    "proven": true,
+    "rows": 116,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 116,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "project_id",
+    "metric",
+    "value",
+    "unit",
+    "impact_type",
+    "geography",
+    "time_period",
+    "reported_or_calculated",
+    "source_document",
+    "page",
+    "table_ref",
+    "confidence",
+    "tribe",
+    "alternative",
+    "derivation",
+    "observation_status",
+    "modelling_basis",
+    "page_label",
+    "source_url",
+    "notes",
+    "source_document_date",
+    "source_document_date_basis"
+   ]
+  },
+  "gaming_properties.csv": {
+   "evidence": "facility_id: 784 distinct over 784 rows, 0 blank, full scan",
+   "natural_key": [
+    "facility_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "facility_id"
+    ],
+    "evidence": "facility_id: 784 distinct over 784 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 784,
+    "scan": "full"
+   },
+   "rows": 784,
+   "scan": "full"
+  },
+  "gaming_property_capacity_history.csv": {
+   "primary_key": {
+    "columns": [],
+    "kind": "REFUSED_LICENSED",
+    "note": "100% Casino City Press panel - internal fact-checking only"
+   },
+   "rows": 64181
+  },
+  "gaming_property_coverage.csv": {
+   "evidence": "facility_id: 784 distinct over 784 rows, 0 blank, full scan",
+   "natural_key": [
+    "facility_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "facility_id"
+    ],
+    "evidence": "facility_id: 784 distinct over 784 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 784,
+    "scan": "full"
+   },
+   "rows": 784,
+   "scan": "full"
+  },
+  "gaming_property_federal_traces.csv": {
+   "evidence": "facility_id: 774 distinct over 774 rows, 0 blank, full scan",
+   "natural_key": [
+    "facility_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "facility_id"
+    ],
+    "evidence": "facility_id: 774 distinct over 774 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 774,
+    "scan": "full"
+   },
+   "rows": 774,
+   "scan": "full"
+  },
+  "gaming_property_labor_demand.csv": {
+   "evidence": "observation_id: 43 distinct over 43 rows, 0 blank, full scan",
+   "natural_key": [
+    "observation_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "observation_id"
+    ],
+    "evidence": "observation_id: 43 distinct over 43 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 43,
+    "scan": "full"
+   },
+   "rows": 43,
+   "scan": "full"
+  },
+  "gaming_property_locations.csv": {
+   "evidence": "location_observation_id: 2,212 distinct over 2,212 rows, 0 blank, full scan",
+   "natural_key": [
+    "location_observation_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "location_observation_id"
+    ],
+    "evidence": "location_observation_id: 2,212 distinct over 2,212 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 2212,
+    "scan": "full",
+    "unstable_because": "minted by 143_build_gaming_property_locations.py:953 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "location_observation_id"
+   },
+   "rows": 2212,
+   "scan": "full"
+  },
+  "gaming_property_site_observations.csv": {
+   "evidence": "observation_id: 262 distinct over 262 rows, 0 blank, full scan",
+   "natural_key": [
+    "observation_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "observation_id"
+    ],
+    "evidence": "observation_id: 262 distinct over 262 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 262,
+    "scan": "full"
+   },
+   "rows": 262,
+   "scan": "full"
+  },
+  "gaming_property_universe_events.csv": {
+   "evidence": "event_id: 10 distinct over 10 rows, 0 blank, full scan",
+   "natural_key": [
+    "event_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "event_id"
+    ],
+    "evidence": "event_id: 10 distinct over 10 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 10,
+    "scan": "full"
+   },
+   "rows": 10,
+   "scan": "full"
+  },
+  "gaming_revenue_bounds.csv": {
+   "evidence": "bound_id: 13,803 distinct over 13,803 rows, 0 blank, full scan",
+   "natural_key": [
+    "bound_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "bound_id"
+    ],
+    "evidence": "bound_id: 13,803 distinct over 13,803 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 13803,
+    "scan": "full"
+   },
+   "rows": 13803,
+   "scan": "full"
+  },
+  "gaming_source_claims.csv": {
+   "evidence": "source_claim_id: 113 distinct over 113 rows, 0 blank, full scan",
+   "natural_key": [
+    "source_claim_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "source_claim_id"
+    ],
+    "evidence": "source_claim_id: 113 distinct over 113 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 113,
+    "scan": "full"
+   },
+   "rows": 113,
+   "scan": "full"
+  },
+  "gaming_vendor_tribal_licenses.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (740 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "GVTL",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "vendor_name",
+     "vendor_cik",
+     "vendor_is_native_entity",
+     "vendor_native_entity_id",
+     "tribal_gaming_regulator",
+     "tribal_gaming_regulator_tribe_string",
+     "entity_id",
+     "entity_name",
+     "entity_match_method",
+     "entity_tier",
+     "license_type",
+     "license_number",
+     "application_date",
+     "approval_date",
+     "dates_in_quote",
+     "status",
+     "status_basis",
+     "property_inference",
+     "property_inference_basis",
+     "measurement_type",
+     "measurement_type_basis",
+     "confidence_tier",
+     "source_authority",
+     "source_document_type",
+     "form_type",
+     "filed_date",
+     "source_url",
+     "retrieved_at",
+     "verbatim_quote",
+     "built_date"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (740 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "GVTL",
+    "proven": true,
+    "rows": 740,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 740,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "vendor_name",
+    "vendor_cik",
+    "vendor_is_native_entity",
+    "vendor_native_entity_id",
+    "tribal_gaming_regulator",
+    "tribal_gaming_regulator_tribe_string",
+    "entity_id",
+    "entity_name",
+    "entity_match_method",
+    "entity_tier",
+    "license_type",
+    "license_number",
+    "application_date",
+    "approval_date",
+    "dates_in_quote",
+    "status",
+    "status_basis",
+    "property_inference",
+    "property_inference_basis",
+    "measurement_type",
+    "measurement_type_basis",
+    "confidence_tier",
+    "source_authority",
+    "source_document_type",
+    "form_type",
+    "filed_date",
+    "source_url",
+    "retrieved_at",
+    "verbatim_quote",
+    "built_date"
+   ]
+  },
+  "grantmaker_funding_coverage.csv": {
+   "evidence": "funder_key: 27 distinct over 27 rows, 0 blank, full scan",
+   "natural_key": [
+    "funder_key"
+   ],
+   "primary_key": {
+    "columns": [
+     "funder_key"
+    ],
+    "evidence": "funder_key: 27 distinct over 27 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 27,
+    "scan": "full"
+   },
+   "rows": 27,
+   "scan": "full"
+  },
+  "grantmaker_funding_flows.csv": {
+   "evidence": "flow_id: 18,656 distinct over 18,656 rows, 0 blank, full scan",
+   "natural_key": [
+    "flow_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "flow_id"
+    ],
+    "evidence": "flow_id: 18,656 distinct over 18,656 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 18656,
+    "scan": "full"
+   },
+   "rows": 18656,
+   "scan": "full"
+  },
+  "grantmaker_funding_overlap.csv": {
+   "evidence": "(funder_key, funder_ein, cash_grant_usd_total, recipient_unit_identified_breakdown) unique over 69 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "funder_key",
+    "funder_ein",
+    "cash_grant_usd_total",
+    "recipient_unit_identified_breakdown"
+   ],
+   "primary_key": {
+    "columns": [
+     "funder_key",
+     "funder_ein",
+     "cash_grant_usd_total",
+     "recipient_unit_identified_breakdown"
+    ],
+    "evidence": "(funder_key, funder_ein, cash_grant_usd_total, recipient_unit_identified_breakdown) unique over 69 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 69,
+    "scan": "full"
+   },
+   "rows": 69,
+   "scan": "full"
+  },
+  "hearing_appearances.csv": {
+   "evidence": "hearing_appearance_id: 2,667 distinct over 2,667 rows, 0 blank, full scan",
+   "natural_key": [
+    "hearing_appearance_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "hearing_appearance_id"
+    ],
+    "evidence": "hearing_appearance_id: 2,667 distinct over 2,667 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 2667,
+    "scan": "full"
+   },
+   "rows": 2667,
+   "scan": "full"
+  },
+  "hearing_bill_links.csv": {
+   "evidence": "no unique key found. Best candidate (bill_id, event_id) still has 1 duplicate and 0 all-blank rows; the full row has 1 exact duplicates.",
+   "primary_key": {
+    "columns": [
+     "bill_id",
+     "event_id",
+     "source_url",
+     "bill_title"
+    ],
+    "full_row_duplicates": 1,
+    "kind": "BLOCKED",
+    "reason": "no unique key found. Best candidate (bill_id, event_id) still has 1 duplicate and 0 all-blank rows; the full row has 1 exact duplicates.",
+    "rows": 465,
+    "scan": "full"
+   },
+   "rows": 465,
+   "scan": "full"
+  },
+  "individual_native_exclusion_pairs.csv": {
+   "evidence": "firm_surrogate_entity_id: 5 distinct over 5 rows, 0 blank, full scan",
+   "natural_key": [
+    "firm_surrogate_entity_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "firm_surrogate_entity_id"
+    ],
+    "evidence": "firm_surrogate_entity_id: 5 distinct over 5 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 5,
+    "scan": "full"
+   },
+   "rows": 5,
+   "scan": "full"
+  },
+  "individual_native_firm_contracts.csv": {
+   "primary_key": {
+    "columns": [
+     "awardee_uei",
+     "piid",
+     "modification_number"
+    ],
+    "evidence": "same one-hop exposure; the contract facts publish, the identifier that resolves to a person does not",
+    "kind": "privacy_surrogate",
+    "prefix": "INF",
+    "published_as": "surrogate_entity_id"
+   },
+   "rows": 324
+  },
+  "individual_native_firm_contracts_published.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (613 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "INFCP",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "cell_type",
+     "dimension_1",
+     "dimension_2",
+     "entity_class",
+     "n_firms",
+     "n_contract_rows",
+     "total_obligations_usd",
+     "value_suppressed_small_cell",
+     "suppression_rule",
+     "note",
+     "built_date"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (613 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "INFCP",
+    "proven": true,
+    "rows": 613,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 613,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "cell_type",
+    "dimension_1",
+    "dimension_2",
+    "entity_class",
+    "n_firms",
+    "n_contract_rows",
+    "total_obligations_usd",
+    "value_suppressed_small_cell",
+    "suppression_rule",
+    "note",
+    "built_date"
+   ]
+  },
+  "individual_native_firm_register.csv": {
+   "primary_key": {
+    "columns": [
+     "awardee_uei"
+    ],
+    "evidence": "SAM's public entity search resolves a UEI to a legal name and a street address. For a firm whose legal name IS a person's name, publishing the UEI publishes the person by one hop. cedar_domain already withholds awardee_uei and cage_code for exactly this reason; the primary key must obey the same rule or it reintroduces what the field policy removed.",
+    "kind": "privacy_surrogate",
+    "prefix": "INF",
+    "published_as": "surrogate_entity_id"
+   },
+   "rows": 45
+  },
+  "individual_native_ownership_verification.csv": {
+   "evidence": "verification_id: 335 distinct over 335 rows, 0 blank, full scan",
+   "natural_key": [
+    "verification_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "verification_id"
+    ],
+    "evidence": "verification_id: 335 distinct over 335 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 335,
+    "scan": "full",
+    "unstable_because": "minted by 170_build_individual_native_candidates.py:482 (RANK_DERIVED) - unique in this build, not stable across builds",
+    "unstable_column": "verification_id"
+   },
+   "rows": 335,
+   "scan": "full"
+  },
+  "individual_native_prior_rulings.csv": {
+   "evidence": "identifier: 45 distinct over 45 rows, 0 blank, full scan",
+   "natural_key": [
+    "identifier"
+   ],
+   "primary_key": {
+    "columns": [
+     "identifier"
+    ],
+    "evidence": "identifier: 45 distinct over 45 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 45,
+    "scan": "full"
+   },
+   "rows": 45,
+   "scan": "full"
+  },
+  "individual_native_verification_candidates.csv": {
+   "evidence": "verification_id: 335 distinct over 335 rows, 0 blank, full scan",
+   "natural_key": [
+    "verification_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "verification_id"
+    ],
+    "evidence": "verification_id: 335 distinct over 335 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 335,
+    "scan": "full",
+    "unstable_because": "minted by 170_build_individual_native_candidates.py:482 (RANK_DERIVED) - unique in this build, not stable across builds",
+    "unstable_column": "verification_id"
+   },
+   "rows": 335,
+   "scan": "full"
+  },
+  "inflation_deflator.csv": {
+   "evidence": "year: 27 distinct over 27 rows, 0 blank, full scan",
+   "natural_key": [
+    "year"
+   ],
+   "primary_key": {
+    "columns": [
+     "year"
+    ],
+    "evidence": "year: 27 distinct over 27 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 27,
+    "scan": "full"
+   },
+   "rows": 27,
+   "scan": "full"
+  },
+  "instrument_taxonomy.csv": {
+   "evidence": "code: 17 distinct over 17 rows, 0 blank, full scan",
+   "natural_key": [
+    "code"
+   ],
+   "primary_key": {
+    "columns": [
+     "code"
+    ],
+    "evidence": "code: 17 distinct over 17 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 17,
+    "scan": "full"
+   },
+   "rows": 17,
+   "scan": "full"
+  },
+  "intertribal_memberships.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (989 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "IM",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "org_id",
+     "org_name",
+     "member_entity_name",
+     "member_entity_id",
+     "membership_status",
+     "year_observed",
+     "source_url"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (989 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "IM",
+    "proven": true,
+    "rows": 989,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 989,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "org_id",
+    "org_name",
+    "member_entity_name",
+    "member_entity_id",
+    "membership_status",
+    "year_observed",
+    "source_url"
+   ]
+  },
+  "intertribal_orgs.csv": {
+   "evidence": "proposed_id: 57 distinct over 57 rows, 0 blank, full scan",
+   "natural_key": [
+    "proposed_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "proposed_id"
+    ],
+    "evidence": "proposed_id: 57 distinct over 57 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 57,
+    "scan": "full"
+   },
+   "rows": 57,
+   "scan": "full"
+  },
+  "lobbying_client_attribution.csv": {
+   "evidence": "client_name: 458 distinct over 458 rows, 0 blank, full scan",
+   "natural_key": [
+    "client_name"
+   ],
+   "primary_key": {
+    "columns": [
+     "client_name"
+    ],
+    "evidence": "client_name: 458 distinct over 458 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 458,
+    "scan": "full"
+   },
+   "rows": 458,
+   "scan": "full"
+  },
+  "lobbying_disclosure_verbosity_year.csv": {
+   "evidence": "filing_year: 27 distinct over 27 rows, 0 blank, full scan",
+   "natural_key": [
+    "filing_year"
+   ],
+   "primary_key": {
+    "columns": [
+     "filing_year"
+    ],
+    "evidence": "filing_year: 27 distinct over 27 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 27,
+    "scan": "full"
+   },
+   "rows": 27,
+   "scan": "full"
+  },
+  "lobbying_issue_families_filing.csv": {
+   "evidence": "(filing_uuid) unique over 27,796 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "filing_uuid"
+   ],
+   "primary_key": {
+    "columns": [
+     "filing_uuid"
+    ],
+    "evidence": "(filing_uuid) unique over 27,796 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 27796,
+    "scan": "full"
+   },
+   "rows": 27796,
+   "scan": "full"
+  },
+  "lobbying_issue_family_year.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (476 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "LIFY",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "issue_family",
+     "filing_year",
+     "n_filings",
+     "n_filings_with_any_family",
+     "share_of_classified_filings",
+     "n_family_mentions_that_year",
+     "share_of_family_mentions",
+     "n_filings_total_that_year",
+     "preferred_series_for_trend"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (476 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "LIFY",
+    "proven": true,
+    "rows": 476,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 476,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "issue_family",
+    "filing_year",
+    "n_filings",
+    "n_filings_with_any_family",
+    "share_of_classified_filings",
+    "n_family_mentions_that_year",
+    "share_of_family_mentions",
+    "n_filings_total_that_year",
+    "preferred_series_for_trend"
+   ]
+  },
+  "lobbying_registrant_client_relationships.csv": {
+   "evidence": "client_id: 1,309 distinct over 1,309 rows, 0 blank, full scan",
+   "natural_key": [
+    "client_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "client_id"
+    ],
+    "evidence": "client_id: 1,309 distinct over 1,309 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 1309,
+    "scan": "full"
+   },
+   "rows": 1309,
+   "scan": "full"
+  },
+  "lobbying_registrant_concentration.csv": {
+   "evidence": "scope_value: 36 distinct over 36 rows, 0 blank, full scan",
+   "natural_key": [
+    "scope_value"
+   ],
+   "primary_key": {
+    "columns": [
+     "scope_value"
+    ],
+    "evidence": "scope_value: 36 distinct over 36 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 36,
+    "scan": "full"
+   },
+   "rows": 36,
+   "scan": "full"
+  },
+  "lobbying_registrant_identifiers.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (525 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "LRI",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "registrant_id",
+     "registrant_name",
+     "registrant_state",
+     "identifier_type",
+     "identifier",
+     "asserted_by_source",
+     "source_name_as_recorded",
+     "source_state",
+     "match_basis",
+     "confidence_tier",
+     "tier_rationale",
+     "tier_assigned_not_inherited",
+     "reading",
+     "built_by_script",
+     "built_date",
+     "n_asserting_sources",
+     "corroboration_note",
+     "irs_bmf_subsection",
+     "irs_bmf_filing_requirement",
+     "irs_bmf_ntee",
+     "irs_bmf_city",
+     "irs_bmf_ruling_yyyymm",
+     "irs_bmf_asset_amt",
+     "irs_bmf_revenue_amt",
+     "np_990_tax_year",
+     "np_990_form_type",
+     "np_990_filing_regime",
+     "np_990_total_revenue",
+     "np_990_total_expenses",
+     "np_990_lobbying_expenditure",
+     "np_990_lobbying_field_basis",
+     "np_990_schedc_total_lobbying",
+     "np_990_source_url",
+     "np_990_caveat",
+     "np_orgs_classification_ruling",
+     "np_orgs_confidence_tier",
+     "schedule_i_filer_ein",
+     "schedule_i_filer_name",
+     "graph_node_resolved_entity",
+     "graph_node_resolved_tier",
+     "graph_node_datasets",
+     "graph_node_usd_observed",
+     "prime_tribe_id",
+     "prime_confidence_tier",
+     "assistance_total_obligated_usd",
+     "subaward_total_usd",
+     "fpds_uei"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (525 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "LRI",
+    "proven": true,
+    "rows": 525,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 525,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "registrant_id",
+    "registrant_name",
+    "registrant_state",
+    "identifier_type",
+    "identifier",
+    "asserted_by_source",
+    "source_name_as_recorded",
+    "source_state",
+    "match_basis",
+    "confidence_tier",
+    "tier_rationale",
+    "tier_assigned_not_inherited",
+    "reading",
+    "built_by_script",
+    "built_date",
+    "n_asserting_sources",
+    "corroboration_note",
+    "irs_bmf_subsection",
+    "irs_bmf_filing_requirement",
+    "irs_bmf_ntee",
+    "irs_bmf_city",
+    "irs_bmf_ruling_yyyymm",
+    "irs_bmf_asset_amt",
+    "irs_bmf_revenue_amt",
+    "np_990_tax_year",
+    "np_990_form_type",
+    "np_990_filing_regime",
+    "np_990_total_revenue",
+    "np_990_total_expenses",
+    "np_990_lobbying_expenditure",
+    "np_990_lobbying_field_basis",
+    "np_990_schedc_total_lobbying",
+    "np_990_source_url",
+    "np_990_caveat",
+    "np_orgs_classification_ruling",
+    "np_orgs_confidence_tier",
+    "schedule_i_filer_ein",
+    "schedule_i_filer_name",
+    "graph_node_resolved_entity",
+    "graph_node_resolved_tier",
+    "graph_node_datasets",
+    "graph_node_usd_observed",
+    "prime_tribe_id",
+    "prime_confidence_tier",
+    "assistance_total_obligated_usd",
+    "subaward_total_usd",
+    "fpds_uei"
+   ]
+  },
+  "lobbying_registrant_native_ownership_evidence.csv": {
+   "evidence": "no unique key found. Best candidate (registrant_id, native_entity_id, evidence_verbatim) still has 7 duplicate and 0 all-blank rows; the full row has 4 exact duplicates.",
+   "primary_key": {
+    "columns": [
+     "registrant_id",
+     "native_entity_id",
+     "evidence_verbatim",
+     "match_basis"
+    ],
+    "full_row_duplicates": 4,
+    "kind": "BLOCKED",
+    "reason": "no unique key found. Best candidate (registrant_id, native_entity_id, evidence_verbatim) still has 7 duplicate and 0 all-blank rows; the full row has 4 exact duplicates.",
+    "rows": 27,
+    "scan": "full"
+   },
+   "rows": 27,
+   "scan": "full"
+  },
+  "lobbying_registrants.csv": {
+   "evidence": "registrant_id: 653 distinct over 653 rows, 0 blank, full scan",
+   "natural_key": [
+    "registrant_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "registrant_id"
+    ],
+    "evidence": "registrant_id: 653 distinct over 653 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 653,
+    "scan": "full"
+   },
+   "rows": 653,
+   "scan": "full"
+  },
+  "lobbying_target_entities.csv": {
+   "evidence": "government_entity_as_filed: 116 distinct over 116 rows, 0 blank, full scan",
+   "natural_key": [
+    "government_entity_as_filed"
+   ],
+   "primary_key": {
+    "columns": [
+     "government_entity_as_filed"
+    ],
+    "evidence": "government_entity_as_filed: 116 distinct over 116 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 116,
+    "scan": "full"
+   },
+   "rows": 116,
+   "scan": "full"
+  },
+  "lobbying_unmatched_clients.csv": {
+   "evidence": "client_name: 515 distinct over 515 rows, 0 blank, full scan",
+   "natural_key": [
+    "client_name"
+   ],
+   "primary_key": {
+    "columns": [
+     "client_name"
+    ],
+    "evidence": "client_name: 515 distinct over 515 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 515,
+    "scan": "full"
+   },
+   "rows": 515,
+   "scan": "full"
+  },
+  "loyalty_program_property.csv": {
+   "evidence": "facility_id: 48 distinct over 48 rows, 0 blank, full scan",
+   "natural_key": [
+    "facility_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "facility_id"
+    ],
+    "evidence": "facility_id: 48 distinct over 48 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 48,
+    "scan": "full"
+   },
+   "rows": 48,
+   "scan": "full"
+  },
+  "loyalty_programs.csv": {
+   "evidence": "loyalty_program_id: 18 distinct over 18 rows, 0 blank, full scan",
+   "natural_key": [
+    "loyalty_program_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "loyalty_program_id"
+    ],
+    "evidence": "loyalty_program_id: 18 distinct over 18 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 18,
+    "scan": "full"
+   },
+   "rows": 18,
+   "scan": "full"
+  },
+  "member_positions.csv": {
+   "evidence": "(bioguide_id, vote_id) unique over 136,119 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "bioguide_id",
+    "vote_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "bioguide_id",
+     "vote_id"
+    ],
+    "evidence": "(bioguide_id, vote_id) unique over 136,119 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 136119,
+    "scan": "full"
+   },
+   "rows": 136119,
+   "scan": "full"
+  },
+  "nagpra_notice_entity_bridge.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (51,338 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "NNEB",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "document_number",
+     "publication_date",
+     "notice_type",
+     "institution_name",
+     "relationship",
+     "party_name_verbatim",
+     "party_name_as_published",
+     "tribe_id",
+     "canonical_name",
+     "resolve_method",
+     "resolve_status",
+     "confidence_tier",
+     "source_span_label",
+     "source_span_text"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (51,338 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "NNEB",
+    "proven": true,
+    "rows": 51338,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 51338,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "document_number",
+    "publication_date",
+    "notice_type",
+    "institution_name",
+    "relationship",
+    "party_name_verbatim",
+    "party_name_as_published",
+    "tribe_id",
+    "canonical_name",
+    "resolve_method",
+    "resolve_status",
+    "confidence_tier",
+    "source_span_label",
+    "source_span_text"
+   ]
+  },
+  "nagpra_notices.csv": {
+   "evidence": "document_number: 6,729 distinct over 6,729 rows, 0 blank, full scan",
+   "natural_key": [
+    "document_number"
+   ],
+   "primary_key": {
+    "columns": [
+     "document_number"
+    ],
+    "evidence": "document_number: 6,729 distinct over 6,729 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 6729,
+    "scan": "full"
+   },
+   "rows": 6729,
+   "scan": "full"
+  },
+  "native_bill_outcomes.csv": {
+   "evidence": "bill_id: 3,069 distinct over 3,069 rows, 0 blank, full scan",
+   "natural_key": [
+    "bill_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "bill_id"
+    ],
+    "evidence": "bill_id: 3,069 distinct over 3,069 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 3069,
+    "scan": "full"
+   },
+   "rows": 3069,
+   "scan": "full"
+  },
+  "native_bills.csv": {
+   "evidence": "bill_id: 3,069 distinct over 3,069 rows, 0 blank, full scan",
+   "natural_key": [
+    "bill_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "bill_id"
+    ],
+    "evidence": "bill_id: 3,069 distinct over 3,069 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 3069,
+    "scan": "full"
+   },
+   "rows": 3069,
+   "scan": "full"
+  },
+  "native_bills_entity_bridge.csv": {
+   "evidence": "(bill_id, tribe_id) unique over 676 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "bill_id",
+    "tribe_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "bill_id",
+     "tribe_id"
+    ],
+    "evidence": "(bill_id, tribe_id) unique over 676 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 676,
+    "scan": "full"
+   },
+   "rows": 676,
+   "scan": "full"
+  },
+  "native_bills_entity_class.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (2,694 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "NBEC",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "bill_id",
+     "congress",
+     "bill_type",
+     "number",
+     "title",
+     "entity_class",
+     "entity_id_prefix",
+     "n_spine_entities_in_class",
+     "subject_family",
+     "matched_phrase",
+     "class_match_basis",
+     "named_entities_also_in_bridge",
+     "build_date"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (2,694 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "NBEC",
+    "proven": true,
+    "rows": 2694,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 2694,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "bill_id",
+    "congress",
+    "bill_type",
+    "number",
+    "title",
+    "entity_class",
+    "entity_id_prefix",
+    "n_spine_entities_in_class",
+    "subject_family",
+    "matched_phrase",
+    "class_match_basis",
+    "named_entities_also_in_bridge",
+    "build_date"
+   ]
+  },
+  "native_bills_subject_sweep.csv": {
+   "evidence": "no unique key found. Best candidate (bill_id) still has 5 duplicate and 0 all-blank rows; the full row has 5 exact duplicates.",
+   "primary_key": {
+    "columns": [
+     "bill_id",
+     "number",
+     "latest_action_date",
+     "title"
+    ],
+    "full_row_duplicates": 5,
+    "kind": "BLOCKED",
+    "reason": "no unique key found. Best candidate (bill_id) still has 5 duplicate and 0 all-blank rows; the full row has 5 exact duplicates.",
+    "rows": 2414,
+    "scan": "full"
+   },
+   "rows": 2414,
+   "scan": "full"
+  },
+  "native_entity_lobbying_disclosures.csv": {
+   "evidence": "(filing_uuid) unique over 27,796 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "filing_uuid"
+   ],
+   "primary_key": {
+    "columns": [
+     "filing_uuid"
+    ],
+    "evidence": "(filing_uuid) unique over 27,796 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 27796,
+    "scan": "full"
+   },
+   "rows": 27796,
+   "scan": "full"
+  },
+  "native_fi_roster.csv": {
+   "evidence": "name: 94 distinct over 94 rows, 0 blank, full scan",
+   "natural_key": [
+    "name"
+   ],
+   "primary_key": {
+    "columns": [
+     "name"
+    ],
+    "evidence": "name: 94 distinct over 94 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 94,
+    "scan": "full"
+   },
+   "rows": 94,
+   "scan": "full"
+  },
+  "native_issue_litigation_coverage.csv": {
+   "evidence": "source_or_forum: 8 distinct over 8 rows, 0 blank, full scan",
+   "natural_key": [
+    "source_or_forum"
+   ],
+   "primary_key": {
+    "columns": [
+     "source_or_forum"
+    ],
+    "evidence": "source_or_forum: 8 distinct over 8 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 8,
+    "scan": "full"
+   },
+   "rows": 8,
+   "scan": "full"
+  },
+  "native_issue_litigation_positions.csv": {
+   "evidence": "position_id: 197 distinct over 197 rows, 0 blank, full scan",
+   "natural_key": [
+    "position_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "position_id"
+    ],
+    "evidence": "position_id: 197 distinct over 197 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 197,
+    "scan": "full"
+   },
+   "rows": 197,
+   "scan": "full"
+  },
+  "native_passthrough.csv": {
+   "evidence": "no unique key found. Best candidate (subaward_number, prime_award_id, to_tribe_id) still has 469 duplicate and 0 all-blank rows; the full row has 121 exact duplicates.",
+   "primary_key": {
+    "columns": [
+     "subaward_number",
+     "prime_award_id",
+     "to_tribe_id",
+     "from_tribe_id"
+    ],
+    "full_row_duplicates": 121,
+    "kind": "BLOCKED",
+    "reason": "no unique key found. Best candidate (subaward_number, prime_award_id, to_tribe_id) still has 469 duplicate and 0 all-blank rows; the full row has 121 exact duplicates.",
+    "rows": 1262,
+    "scan": "full"
+   },
+   "rows": 1262,
+   "scan": "full"
+  },
+  "native_passthrough_pairs.csv": {
+   "evidence": "(to_tribe_id, from_tribe_id) unique over 212 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "to_tribe_id",
+    "from_tribe_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "to_tribe_id",
+     "from_tribe_id"
+    ],
+    "evidence": "(to_tribe_id, from_tribe_id) unique over 212 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 212,
+    "scan": "full"
+   },
+   "rows": 212,
+   "scan": "full"
+  },
+  "nd_severance_allocation.csv": {
+   "evidence": "allocation_id: 7 distinct over 7 rows, 0 blank, full scan",
+   "natural_key": [
+    "allocation_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "allocation_id"
+    ],
+    "evidence": "allocation_id: 7 distinct over 7 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 7,
+    "scan": "full"
+   },
+   "rows": 7,
+   "scan": "full"
+  },
+  "nepa_administrative_record_parties.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (36 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "NARP",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "party_id",
+     "nepa_number",
+     "eplanning_project_id",
+     "event_class",
+     "channel",
+     "is_lobbying",
+     "party_name_as_published",
+     "party_role",
+     "party_organization_type",
+     "resolved_native_entity_id",
+     "resolved_native_entity_name",
+     "resolution_method",
+     "administrative_record_position",
+     "administrative_record_position_quote",
+     "lobbying_position",
+     "lobbying_position_basis",
+     "supporting_quote",
+     "source_url",
+     "fetched_date",
+     "confidence_tier",
+     "built_date",
+     "built_by_script"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (36 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "NARP",
+    "proven": true,
+    "rows": 36,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 36,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "party_id",
+    "nepa_number",
+    "eplanning_project_id",
+    "event_class",
+    "channel",
+    "is_lobbying",
+    "party_name_as_published",
+    "party_role",
+    "party_organization_type",
+    "resolved_native_entity_id",
+    "resolved_native_entity_name",
+    "resolution_method",
+    "administrative_record_position",
+    "administrative_record_position_quote",
+    "lobbying_position",
+    "lobbying_position_basis",
+    "supporting_quote",
+    "source_url",
+    "fetched_date",
+    "confidence_tier",
+    "built_date",
+    "built_by_script"
+   ]
+  },
+  "nepa_eplanning_projects.csv": {
+   "evidence": "nepa_number: 312 distinct over 312 rows, 0 blank, full scan",
+   "natural_key": [
+    "nepa_number"
+   ],
+   "primary_key": {
+    "columns": [
+     "nepa_number"
+    ],
+    "evidence": "nepa_number: 312 distinct over 312 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 312,
+    "scan": "full"
+   },
+   "rows": 312,
+   "scan": "full"
+  },
+  "nepa_project_documents.csv": {
+   "evidence": "(nepa_number, eplanning_project_id, source_url, document_name_verbatim) unique over 789 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "nepa_number",
+    "eplanning_project_id",
+    "source_url",
+    "document_name_verbatim"
+   ],
+   "primary_key": {
+    "columns": [
+     "nepa_number",
+     "eplanning_project_id",
+     "source_url",
+     "document_name_verbatim"
+    ],
+    "evidence": "(nepa_number, eplanning_project_id, source_url, document_name_verbatim) unique over 789 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 789,
+    "scan": "full"
+   },
+   "rows": 789,
+   "scan": "full"
+  },
+  "nepa_source_coverage.csv": {
+   "evidence": "url: 5 distinct over 5 rows, 0 blank, full scan",
+   "natural_key": [
+    "url"
+   ],
+   "primary_key": {
+    "columns": [
+     "url"
+    ],
+    "evidence": "url: 5 distinct over 5 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 5,
+    "scan": "full"
+   },
+   "rows": 5,
+   "scan": "full"
+  },
+  "nho_doi_notification_roster.csv": {
+   "evidence": "nho_id: 190 distinct over 190 rows, 0 blank, full scan",
+   "natural_key": [
+    "nho_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "nho_id"
+    ],
+    "evidence": "nho_id: 190 distinct over 190 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 190,
+    "scan": "full",
+    "unstable_because": "minted by 05_parse_doi_nho_list.py:90 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "nho_id"
+   },
+   "rows": 190,
+   "scan": "full"
+  },
+  "nho_ito_spine_crosswalk.csv": {
+   "evidence": "proposed_id: 269 distinct over 269 rows, 0 blank, full scan",
+   "natural_key": [
+    "proposed_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "proposed_id"
+    ],
+    "evidence": "proposed_id: 269 distinct over 269 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 269,
+    "scan": "full"
+   },
+   "rows": 269,
+   "scan": "full"
+  },
+  "nho_ownership_changes.csv": {
+   "evidence": "event_id: 9 distinct over 9 rows, 0 blank, full scan",
+   "natural_key": [
+    "event_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "event_id"
+    ],
+    "evidence": "event_id: 9 distinct over 9 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 9,
+    "scan": "full",
+    "unstable_because": "minted by 61_add_nho_intertribal_to_spine.py:496 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "event_id"
+   },
+   "rows": 9,
+   "scan": "full"
+  },
+  "nho_parents.csv": {
+   "evidence": "parent_name: 21 distinct over 21 rows, 0 blank, full scan",
+   "natural_key": [
+    "parent_name"
+   ],
+   "primary_key": {
+    "columns": [
+     "parent_name"
+    ],
+    "evidence": "parent_name: 21 distinct over 21 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 21,
+    "scan": "full"
+   },
+   "rows": 21,
+   "scan": "full"
+  },
+  "nho_register.csv": {
+   "evidence": "proposed_id: 218 distinct over 218 rows, 0 blank, full scan",
+   "natural_key": [
+    "proposed_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "proposed_id"
+    ],
+    "evidence": "proposed_id: 218 distinct over 218 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 218,
+    "scan": "full"
+   },
+   "rows": 218,
+   "scan": "full"
+  },
+  "nho_verified_entities.csv": {
+   "evidence": "uei: 36 distinct over 36 rows, 0 blank, full scan",
+   "natural_key": [
+    "uei"
+   ],
+   "primary_key": {
+    "columns": [
+     "uei"
+    ],
+    "evidence": "uei: 36 distinct over 36 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 36,
+    "scan": "full"
+   },
+   "rows": 36,
+   "scan": "full"
+  },
+  "nigc_declination_letters.csv": {
+   "evidence": "cedar_opinion_id: 327 distinct over 327 rows, 0 blank, full scan",
+   "natural_key": [
+    "cedar_opinion_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "cedar_opinion_id"
+    ],
+    "evidence": "cedar_opinion_id: 327 distinct over 327 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 327,
+    "scan": "full",
+    "unstable_because": "minted by 90_fetch_nigc_declinations.py:209 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "cedar_opinion_id"
+   },
+   "rows": 327,
+   "scan": "full"
+  },
+  "nigc_region_assignments.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (2,438 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "NRA",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "facility_id",
+     "administrative_region_id",
+     "region_system_code",
+     "region_name",
+     "region_system_version",
+     "effective_start_year",
+     "effective_end_year",
+     "assignment_method",
+     "assignment_geography_basis",
+     "igra_coverage_status",
+     "nigc_operation_match_status",
+     "is_primary",
+     "confidence",
+     "facility_state",
+     "facility_city",
+     "tribe_id",
+     "nigc_marker_id",
+     "source_url",
+     "fetched_date",
+     "built_date"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (2,438 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "NRA",
+    "proven": true,
+    "rows": 2438,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 2438,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "facility_id",
+    "administrative_region_id",
+    "region_system_code",
+    "region_name",
+    "region_system_version",
+    "effective_start_year",
+    "effective_end_year",
+    "assignment_method",
+    "assignment_geography_basis",
+    "igra_coverage_status",
+    "nigc_operation_match_status",
+    "is_primary",
+    "confidence",
+    "facility_state",
+    "facility_city",
+    "tribe_id",
+    "nigc_marker_id",
+    "source_url",
+    "fetched_date",
+    "built_date"
+   ]
+  },
+  "nigc_regional_ggr.csv": {
+   "evidence": "(administrative_region_id, region_system_code, source_url, ggr_usd_real2025) unique over 198 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "administrative_region_id",
+    "region_system_code",
+    "source_url",
+    "ggr_usd_real2025"
+   ],
+   "primary_key": {
+    "columns": [
+     "administrative_region_id",
+     "region_system_code",
+     "source_url",
+     "ggr_usd_real2025"
+    ],
+    "evidence": "(administrative_region_id, region_system_code, source_url, ggr_usd_real2025) unique over 198 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 198,
+    "scan": "full"
+   },
+   "rows": 198,
+   "scan": "full"
+  },
+  "nigc_revenue_bands.csv": {
+   "evidence": "band_id: 20 distinct over 20 rows, 0 blank, full scan",
+   "natural_key": [
+    "band_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "band_id"
+    ],
+    "evidence": "band_id: 20 distinct over 20 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 20,
+    "scan": "full",
+    "unstable_because": "minted by 106_build_revenue_bounds.py:308 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "band_id"
+   },
+   "rows": 20,
+   "scan": "full"
+  },
+  "np_ein_entity_hub.csv": {
+   "evidence": "ein: 2,303 distinct over 2,303 rows, 0 blank, full scan",
+   "natural_key": [
+    "ein"
+   ],
+   "primary_key": {
+    "columns": [
+     "ein"
+    ],
+    "evidence": "ein: 2,303 distinct over 2,303 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 2303,
+    "scan": "full"
+   },
+   "rows": 2303,
+   "scan": "full"
+  },
+  "np_ein_uei_bridge.csv": {
+   "evidence": "ein: 28 distinct over 28 rows, 0 blank, full scan",
+   "natural_key": [
+    "ein"
+   ],
+   "primary_key": {
+    "columns": [
+     "ein"
+    ],
+    "evidence": "ein: 28 distinct over 28 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 28,
+    "scan": "full"
+   },
+   "rows": 28,
+   "scan": "full"
+  },
+  "np_financials.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (8,507 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "NF",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "ein",
+     "org_name",
+     "tax_year",
+     "form_type",
+     "total_revenue",
+     "total_expenses",
+     "total_assets",
+     "total_liabilities",
+     "program_service_revenue",
+     "contributions_grants",
+     "lobbying_expenditure",
+     "n_employees",
+     "pdf_url",
+     "source_url",
+     "retrieved_date",
+     "tax_period",
+     "form_type_raw",
+     "has_financial_data",
+     "pre_2000_flag",
+     "lobbying_indicator_990pf",
+     "propaganda_indicator_990pf",
+     "lobbying_field_basis",
+     "n_employees_basis",
+     "net_assets_end",
+     "officer_compensation",
+     "state",
+     "confidence_tier",
+     "bmf_990_tier",
+     "in_tier_a",
+     "in_recheck_candidate",
+     "in_placename_risk",
+     "source_dataset",
+     "filing_updated",
+     "filing_regime",
+     "schedc_expected",
+     "schedc_basis",
+     "schedc_source_url",
+     "schedc_object_id",
+     "schedc_present",
+     "schedc_501h_election",
+     "schedc_501h_basis",
+     "schedc_total_lobbying",
+     "schedc_direct_lobbying",
+     "schedc_grassroots_lobbying",
+     "schedc_nonelecting_total",
+     "schedc_lobbying_nontaxable",
+     "schedc_grassroots_nontaxable",
+     "schedc_exempt_purpose_expend",
+     "schedc_political_expenditure",
+     "schedc_527_amount",
+     "schedc_dues_lobbying_political",
+     "schedc_dues_received",
+     "schedc_used_volunteers",
+     "schedc_used_paid_staff",
+     "schedc_used_media",
+     "schedc_used_mailings",
+     "schedc_used_publications",
+     "schedc_used_grants",
+     "schedc_used_direct_contact",
+     "schedc_used_rallies",
+     "schedc_used_other",
+     "form990_lobbying_activities_ind",
+     "form990_political_activity_ind",
+     "form990_part9_lobbying_fees",
+     "form990pf_influence_legislation_ind",
+     "form990pf_legislative_political_ind",
+     "schedc_lobbying_usd",
+     "schedc_lobbying_basis",
+     "schedc_built_date",
+     "cedar_spine_entity_id",
+     "cedar_spine_canonical_name",
+     "cedar_spine_entity_class",
+     "cedar_native_entity_class",
+     "cedar_link_tier",
+     "cedar_link_basis",
+     "cedar_link_key",
+     "cedar_link_sources"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (8,507 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "NF",
+    "proven": true,
+    "rows": 8507,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 8507,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "ein",
+    "org_name",
+    "tax_year",
+    "form_type",
+    "total_revenue",
+    "total_expenses",
+    "total_assets",
+    "total_liabilities",
+    "program_service_revenue",
+    "contributions_grants",
+    "lobbying_expenditure",
+    "n_employees",
+    "pdf_url",
+    "source_url",
+    "retrieved_date",
+    "tax_period",
+    "form_type_raw",
+    "has_financial_data",
+    "pre_2000_flag",
+    "lobbying_indicator_990pf",
+    "propaganda_indicator_990pf",
+    "lobbying_field_basis",
+    "n_employees_basis",
+    "net_assets_end",
+    "officer_compensation",
+    "state",
+    "confidence_tier",
+    "bmf_990_tier",
+    "in_tier_a",
+    "in_recheck_candidate",
+    "in_placename_risk",
+    "source_dataset",
+    "filing_updated",
+    "filing_regime",
+    "schedc_expected",
+    "schedc_basis",
+    "schedc_source_url",
+    "schedc_object_id",
+    "schedc_present",
+    "schedc_501h_election",
+    "schedc_501h_basis",
+    "schedc_total_lobbying",
+    "schedc_direct_lobbying",
+    "schedc_grassroots_lobbying",
+    "schedc_nonelecting_total",
+    "schedc_lobbying_nontaxable",
+    "schedc_grassroots_nontaxable",
+    "schedc_exempt_purpose_expend",
+    "schedc_political_expenditure",
+    "schedc_527_amount",
+    "schedc_dues_lobbying_political",
+    "schedc_dues_received",
+    "schedc_used_volunteers",
+    "schedc_used_paid_staff",
+    "schedc_used_media",
+    "schedc_used_mailings",
+    "schedc_used_publications",
+    "schedc_used_grants",
+    "schedc_used_direct_contact",
+    "schedc_used_rallies",
+    "schedc_used_other",
+    "form990_lobbying_activities_ind",
+    "form990_political_activity_ind",
+    "form990_part9_lobbying_fees",
+    "form990pf_influence_legislation_ind",
+    "form990pf_legislative_political_ind",
+    "schedc_lobbying_usd",
+    "schedc_lobbying_basis",
+    "schedc_built_date",
+    "cedar_spine_entity_id",
+    "cedar_spine_canonical_name",
+    "cedar_spine_entity_class",
+    "cedar_native_entity_class",
+    "cedar_link_tier",
+    "cedar_link_basis",
+    "cedar_link_key",
+    "cedar_link_sources"
+   ]
+  },
+  "np_grantee_financials.csv": {
+   "evidence": "(source_url, ein) unique over 4,058 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "source_url",
+    "ein"
+   ],
+   "primary_key": {
+    "columns": [
+     "source_url",
+     "ein"
+    ],
+    "evidence": "(source_url, ein) unique over 4,058 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 4058,
+    "scan": "full"
+   },
+   "rows": 4058,
+   "scan": "full"
+  },
+  "np_org_scale.csv": {
+   "evidence": "ein: 1,157 distinct over 1,157 rows, 0 blank, full scan",
+   "natural_key": [
+    "ein"
+   ],
+   "primary_key": {
+    "columns": [
+     "ein"
+    ],
+    "evidence": "ein: 1,157 distinct over 1,157 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 1157,
+    "scan": "full"
+   },
+   "rows": 1157,
+   "scan": "full"
+  },
+  "np_orgs.csv": {
+   "evidence": "EIN: 12,764 distinct over 12,764 rows, 0 blank, full scan",
+   "natural_key": [
+    "EIN"
+   ],
+   "primary_key": {
+    "columns": [
+     "EIN"
+    ],
+    "evidence": "EIN: 12,764 distinct over 12,764 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 12764,
+    "scan": "full"
+   },
+   "rows": 12764,
+   "scan": "full"
+  },
+  "np_schedule_i_filers.csv": {
+   "evidence": "object_id: 10,314 distinct over 10,314 rows, 0 blank, full scan",
+   "natural_key": [
+    "object_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "object_id"
+    ],
+    "evidence": "object_id: 10,314 distinct over 10,314 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 10314,
+    "scan": "full"
+   },
+   "rows": 10314,
+   "scan": "full"
+  },
+  "np_schedule_i_grants.csv": {
+   "evidence": "no unique key found. Best candidate (recipient_name_as_filed, recipient_address, cash_grant_usd, object_id) still has 119 duplicate and 0 all-blank rows; the full row has 101 exact duplicates.",
+   "primary_key": {
+    "columns": [
+     "recipient_name_as_filed",
+     "recipient_address",
+     "cash_grant_usd",
+     "object_id"
+    ],
+    "full_row_duplicates": 101,
+    "kind": "BLOCKED",
+    "reason": "no unique key found. Best candidate (recipient_name_as_filed, recipient_address, cash_grant_usd, object_id) still has 119 duplicate and 0 all-blank rows; the full row has 101 exact duplicates.",
+    "rows": 58685,
+    "scan": "full"
+   },
+   "rows": 58685,
+   "scan": "full"
+  },
+  "nrc_meeting_participants.csv": {
+   "evidence": "participant_id: 407 distinct over 407 rows, 0 blank, full scan",
+   "natural_key": [
+    "participant_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "participant_id"
+    ],
+    "evidence": "participant_id: 407 distinct over 407 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 407,
+    "scan": "full"
+   },
+   "rows": 407,
+   "scan": "full"
+  },
+  "nrc_public_meetings.csv": {
+   "evidence": "nrc_meeting_id: 251 distinct over 251 rows, 0 blank, full scan",
+   "natural_key": [
+    "nrc_meeting_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "nrc_meeting_id"
+    ],
+    "evidence": "nrc_meeting_id: 251 distinct over 251 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 251,
+    "scan": "full"
+   },
+   "rows": 251,
+   "scan": "full"
+  },
+  "oira_federal_action_links.csv": {
+   "evidence": "(federal_action_document_number, oira_meeting_id) unique over 145 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "federal_action_document_number",
+    "oira_meeting_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "federal_action_document_number",
+     "oira_meeting_id"
+    ],
+    "evidence": "(federal_action_document_number, oira_meeting_id) unique over 145 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 145,
+    "scan": "full"
+   },
+   "rows": 145,
+   "scan": "full"
+  },
+  "oira_meeting_participants.csv": {
+   "evidence": "oira_participant_id: 1,128 distinct over 1,128 rows, 0 blank, full scan",
+   "natural_key": [
+    "oira_participant_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "oira_participant_id"
+    ],
+    "evidence": "oira_participant_id: 1,128 distinct over 1,128 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 1128,
+    "scan": "full"
+   },
+   "rows": 1128,
+   "scan": "full"
+  },
+  "oira_meetings.csv": {
+   "evidence": "oira_meeting_id: 72 distinct over 72 rows, 0 blank, full scan",
+   "natural_key": [
+    "oira_meeting_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "oira_meeting_id"
+    ],
+    "evidence": "oira_meeting_id: 72 distinct over 72 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 72,
+    "scan": "full"
+   },
+   "rows": 72,
+   "scan": "full"
+  },
+  "ownership_events.csv": {
+   "evidence": "event_id: 98 distinct over 98 rows, 0 blank, full scan",
+   "natural_key": [
+    "event_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "event_id"
+    ],
+    "evidence": "event_id: 98 distinct over 98 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 98,
+    "scan": "full"
+   },
+   "rows": 98,
+   "scan": "full"
+  },
+  "prime_contracts.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (200,000 rows, 0 duplicates) [sample:200000]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "PC",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "contract_number",
+     "parent_contract_number",
+     "fiscal_year",
+     "pre_2000_flag",
+     "awardee_name",
+     "awardee_uei",
+     "cage_code",
+     "parent_name",
+     "parent_uei",
+     "total_obligations",
+     "total_award_value",
+     "total_obligations_real2025",
+     "total_award_value_real2025",
+     "deflator_factor_2025",
+     "inflation_base_year",
+     "setaside",
+     "reported_8a",
+     "reported_buy_indian",
+     "reported_indian_business",
+     "reported_native_preference",
+     "setaside_reported",
+     "extent_competed",
+     "funding_agency",
+     "sector",
+     "supersector",
+     "defense",
+     "recipient_city_name",
+     "recipient_state_code",
+     "place_of_perform_city",
+     "place_of_perform_state",
+     "tribe_id",
+     "canonical_name",
+     "attribution_method",
+     "confidence_tier",
+     "attributed_flag",
+     "source_file",
+     "source_authority",
+     "built_date",
+     "ruling_status",
+     "ruling_source_file",
+     "ruling_applied_date",
+     "extent_competed_normalized",
+     "extent_competed_normalized_basis"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (200,000 rows, 0 duplicates) [sample:200000]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "PC",
+    "proven": false,
+    "rows": 200000,
+    "scan": "sample:200000",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 300000,
+   "scan": "sample:300000",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "contract_number",
+    "parent_contract_number",
+    "fiscal_year",
+    "pre_2000_flag",
+    "awardee_name",
+    "awardee_uei",
+    "cage_code",
+    "parent_name",
+    "parent_uei",
+    "total_obligations",
+    "total_award_value",
+    "total_obligations_real2025",
+    "total_award_value_real2025",
+    "deflator_factor_2025",
+    "inflation_base_year",
+    "setaside",
+    "reported_8a",
+    "reported_buy_indian",
+    "reported_indian_business",
+    "reported_native_preference",
+    "setaside_reported",
+    "extent_competed",
+    "funding_agency",
+    "sector",
+    "supersector",
+    "defense",
+    "recipient_city_name",
+    "recipient_state_code",
+    "place_of_perform_city",
+    "place_of_perform_state",
+    "tribe_id",
+    "canonical_name",
+    "attribution_method",
+    "confidence_tier",
+    "attributed_flag",
+    "source_file",
+    "source_authority",
+    "built_date",
+    "ruling_status",
+    "ruling_source_file",
+    "ruling_applied_date",
+    "extent_competed_normalized",
+    "extent_competed_normalized_basis"
+   ]
+  },
+  "prime_contracts_archive_backfill.csv": {
+   "evidence": "no unique key found. Best candidate (contract_number, total_award_value, total_award_value_real2025, total_obligations) still has 34,812 duplicate and 0 all-blank rows; the full row has 18,357 exact duplicates.",
+   "primary_key": {
+    "columns": [
+     "contract_number",
+     "total_award_value",
+     "total_award_value_real2025",
+     "total_obligations"
+    ],
+    "full_row_duplicates": 18357,
+    "kind": "BLOCKED",
+    "reason": "no unique key found. Best candidate (contract_number, total_award_value, total_award_value_real2025, total_obligations) still has 34,812 duplicate and 0 all-blank rows; the full row has 18,357 exact duplicates.",
+    "rows": 200000,
+    "scan": "sample:200000"
+   },
+   "rows": 300000,
+   "scan": "sample:300000"
+  },
+  "prime_contracts_awards.csv": {
+   "evidence": "(contract_number) unique over 200,000 rows, 0 blank, 0 duplicate [sample:200000]",
+   "natural_key": [
+    "contract_number"
+   ],
+   "primary_key": {
+    "columns": [
+     "contract_number"
+    ],
+    "evidence": "(contract_number) unique over 200,000 rows, 0 blank, 0 duplicate [sample:200000]",
+    "kind": "natural",
+    "proven": false,
+    "rows": 200000,
+    "scan": "sample:200000"
+   },
+   "rows": 300000,
+   "scan": "sample:300000"
+  },
+  "prime_contracts_entity_year.csv": {
+   "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (8,464 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+   "prefix": "PCEY",
+   "primary_key": {
+    "caution": "A full-row key changes whenever ANY cell changes, so it is an identity for a row's CONTENT, not for the thing the row describes. Use it to load and to diff; do not build a foreign key against it.",
+    "columns": [
+     "tribe_id",
+     "canonical_name",
+     "fiscal_year",
+     "confidence_tier",
+     "obligations_usd",
+     "n_contracts",
+     "built_date"
+    ],
+    "evidence": "no column prefix of length <= 4 is unique, but the FULL ROW is (8,464 rows, 0 duplicates) [full]. Key on a blake2b digest of every column, in header order.",
+    "kind": "deterministic_surrogate",
+    "prefix": "PCEY",
+    "proven": true,
+    "rows": 8464,
+    "scan": "full",
+    "surrogate_column": "cedar_row_key"
+   },
+   "rows": 8464,
+   "scan": "full",
+   "surrogate_column": "cedar_row_key",
+   "surrogate_from": [
+    "tribe_id",
+    "canonical_name",
+    "fiscal_year",
+    "confidence_tier",
+    "obligations_usd",
+    "n_contracts",
+    "built_date"
+   ]
+  },
+  "prime_contracts_published.csv": {
+   "evidence": "(contract_number) unique over 200,000 rows, 0 blank, 0 duplicate [sample:200000]",
+   "natural_key": [
+    "contract_number"
+   ],
+   "primary_key": {
+    "columns": [
+     "contract_number"
+    ],
+    "evidence": "(contract_number) unique over 200,000 rows, 0 blank, 0 duplicate [sample:200000]",
+    "kind": "natural",
+    "proven": false,
+    "rows": 200000,
+    "scan": "sample:200000"
+   },
+   "rows": 300000,
+   "scan": "sample:300000"
+  },
+  "prime_sub_network.csv": {
+   "evidence": "(prime_uei, sub_uei) unique over 220 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "prime_uei",
+    "sub_uei"
+   ],
+   "primary_key": {
+    "columns": [
+     "prime_uei",
+     "sub_uei"
+    ],
+    "evidence": "(prime_uei, sub_uei) unique over 220 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 220,
+    "scan": "full"
+   },
+   "rows": 220,
+   "scan": "full"
+  },
+  "resource_asset_source_coverage.csv": {
+   "evidence": "attribute: 18 distinct over 18 rows, 0 blank, full scan",
+   "natural_key": [
+    "attribute"
+   ],
+   "primary_key": {
+    "columns": [
+     "attribute"
+    ],
+    "evidence": "attribute: 18 distinct over 18 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 18,
+    "scan": "full"
+   },
+   "rows": 18,
+   "scan": "full"
+  },
+  "resource_assets.csv": {
+   "evidence": "resource_asset_id: 35 distinct over 35 rows, 0 blank, full scan",
+   "natural_key": [
+    "resource_asset_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "resource_asset_id"
+    ],
+    "evidence": "resource_asset_id: 35 distinct over 35 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 35,
+    "scan": "full"
+   },
+   "rows": 35,
+   "scan": "full"
+  },
+  "resource_parties.csv": {
+   "evidence": "(party_link_id, object_id, source_url, entity_id) unique over 1,436 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "party_link_id",
+    "object_id",
+    "source_url",
+    "entity_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "party_link_id",
+     "object_id",
+     "source_url",
+     "entity_id"
+    ],
+    "evidence": "(party_link_id, object_id, source_url, entity_id) unique over 1,436 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 1436,
+    "scan": "full"
+   },
+   "rows": 1436,
+   "scan": "full"
+  },
+  "resource_revenue.csv": {
+   "evidence": "resource_revenue_event_id: 10,482 distinct over 10,482 rows, 0 blank, full scan",
+   "natural_key": [
+    "resource_revenue_event_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "resource_revenue_event_id"
+    ],
+    "evidence": "resource_revenue_event_id: 10,482 distinct over 10,482 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 10482,
+    "scan": "full",
+    "unstable_because": "minted by 83_build_resource_ledger.py:441 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "resource_revenue_event_id"
+   },
+   "rows": 10482,
+   "scan": "full"
+  },
+  "sam_prime_contracts_fy2000_2007.csv": {
+   "evidence": "sam_transaction_key: 8,273 distinct over 8,273 rows, 0 blank, full scan",
+   "natural_key": [
+    "sam_transaction_key"
+   ],
+   "primary_key": {
+    "columns": [
+     "sam_transaction_key"
+    ],
+    "evidence": "sam_transaction_key: 8,273 distinct over 8,273 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 8273,
+    "scan": "full"
+   },
+   "rows": 8273,
+   "scan": "full"
+  },
+  "sam_prime_contracts_fy2000_2007_PUBLISHABLE.csv": {
+   "evidence": "sam_transaction_key: 8,273 distinct over 8,273 rows, 0 blank, full scan",
+   "natural_key": [
+    "sam_transaction_key"
+   ],
+   "primary_key": {
+    "columns": [
+     "sam_transaction_key"
+    ],
+    "evidence": "sam_transaction_key: 8,273 distinct over 8,273 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 8273,
+    "scan": "full"
+   },
+   "rows": 8273,
+   "scan": "full"
+  },
+  "sam_prime_contracts_fy2000_2007_reconciliation.csv": {
+   "evidence": "distinct_piid: 3 distinct over 3 rows, 0 blank, full scan",
+   "natural_key": [
+    "distinct_piid"
+   ],
+   "primary_key": {
+    "columns": [
+     "distinct_piid"
+    ],
+    "evidence": "distinct_piid: 3 distinct over 3 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 3,
+    "scan": "full"
+   },
+   "rows": 3,
+   "scan": "full"
+  },
+  "section_106_consultation_events.csv": {
+   "evidence": "consultation_event_id: 1,363 distinct over 1,363 rows, 0 blank, full scan",
+   "natural_key": [
+    "consultation_event_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "consultation_event_id"
+    ],
+    "evidence": "consultation_event_id: 1,363 distinct over 1,363 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 1363,
+    "scan": "full",
+    "unstable_because": "minted by 130_build_section_106_consultation.py:974 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "consultation_event_id"
+   },
+   "rows": 1363,
+   "scan": "full"
+  },
+  "section_106_project_parties.csv": {
+   "evidence": "party_id: 51 distinct over 51 rows, 0 blank, full scan",
+   "natural_key": [
+    "party_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "party_id"
+    ],
+    "evidence": "party_id: 51 distinct over 51 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 51,
+    "scan": "full",
+    "unstable_because": "minted by 130_build_section_106_consultation.py:830 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "party_id"
+   },
+   "rows": 51,
+   "scan": "full"
+  },
+  "section_106_source_coverage.csv": {
+   "evidence": "source: 5 distinct over 5 rows, 0 blank, full scan",
+   "natural_key": [
+    "source"
+   ],
+   "primary_key": {
+    "columns": [
+     "source"
+    ],
+    "evidence": "source: 5 distinct over 5 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 5,
+    "scan": "full"
+   },
+   "rows": 5,
+   "scan": "full"
+  },
+  "seminole_bond_disclosures.csv": {
+   "evidence": "disclosure_id: 29 distinct over 29 rows, 0 blank, full scan",
+   "natural_key": [
+    "disclosure_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "disclosure_id"
+    ],
+    "evidence": "disclosure_id: 29 distinct over 29 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 29,
+    "scan": "full"
+   },
+   "rows": 29,
+   "scan": "full"
+  },
+  "series_breaks.csv": {
+   "evidence": "what_changed: 24 distinct over 24 rows, 0 blank, full scan",
+   "natural_key": [
+    "what_changed"
+   ],
+   "primary_key": {
+    "columns": [
+     "what_changed"
+    ],
+    "evidence": "what_changed: 24 distinct over 24 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 24,
+    "scan": "full"
+   },
+   "rows": 24,
+   "scan": "full"
+  },
+  "source_coverage_admin_appeals.csv": {
+   "evidence": "(year, board) unique over 114 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "year",
+    "board"
+   ],
+   "primary_key": {
+    "columns": [
+     "year",
+     "board"
+    ],
+    "evidence": "(year, board) unique over 114 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 114,
+    "scan": "full"
+   },
+   "rows": 114,
+   "scan": "full"
+  },
+  "source_coverage_fac.csv": {
+   "evidence": "facet: 62 distinct over 62 rows, 0 blank, full scan",
+   "natural_key": [
+    "facet"
+   ],
+   "primary_key": {
+    "columns": [
+     "facet"
+    ],
+    "evidence": "facet: 62 distinct over 62 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 62,
+    "scan": "full"
+   },
+   "rows": 62,
+   "scan": "full"
+  },
+  "source_coverage_nrc_meetings.csv": {
+   "evidence": "source_url: 37 distinct over 37 rows, 0 blank, full scan",
+   "natural_key": [
+    "source_url"
+   ],
+   "primary_key": {
+    "columns": [
+     "source_url"
+    ],
+    "evidence": "source_url: 37 distinct over 37 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 37,
+    "scan": "full"
+   },
+   "rows": 37,
+   "scan": "full"
+  },
+  "source_coverage_tribal_legislative.csv": {
+   "evidence": "tribe: 17 distinct over 17 rows, 0 blank, full scan",
+   "natural_key": [
+    "tribe"
+   ],
+   "primary_key": {
+    "columns": [
+     "tribe"
+    ],
+    "evidence": "tribe: 17 distinct over 17 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 17,
+    "scan": "full"
+   },
+   "rows": 17,
+   "scan": "full"
+  },
+  "source_coverage_vendor_disclosure.csv": {
+   "evidence": "source: 2 distinct over 2 rows, 0 blank, full scan",
+   "natural_key": [
+    "source"
+   ],
+   "primary_key": {
+    "columns": [
+     "source"
+    ],
+    "evidence": "source: 2 distinct over 2 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 2,
+    "scan": "full"
+   },
+   "rows": 2,
+   "scan": "full"
+  },
+  "source_coverage_visitor_records.csv": {
+   "evidence": "note: 11 distinct over 11 rows, 0 blank, full scan",
+   "natural_key": [
+    "note"
+   ],
+   "primary_key": {
+    "columns": [
+     "note"
+    ],
+    "evidence": "note: 11 distinct over 11 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 11,
+    "scan": "full"
+   },
+   "rows": 11,
+   "scan": "full"
+  },
+  "state_gaming_observations.csv": {
+   "evidence": "observation_id: 494 distinct over 494 rows, 0 blank, full scan",
+   "natural_key": [
+    "observation_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "observation_id"
+    ],
+    "evidence": "observation_id: 494 distinct over 494 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 494,
+    "scan": "full",
+    "unstable_because": "minted by 107_pull_remaining_states.py:991 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "observation_id"
+   },
+   "rows": 494,
+   "scan": "full"
+  },
+  "subaward_entity_rollup.csv": {
+   "evidence": "tribe_id: 450 distinct over 450 rows, 0 blank, full scan",
+   "natural_key": [
+    "tribe_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "tribe_id"
+    ],
+    "evidence": "tribe_id: 450 distinct over 450 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 450,
+    "scan": "full"
+   },
+   "rows": 450,
+   "scan": "full"
+  },
+  "subaward_identifier_harvest.csv": {
+   "evidence": "uei: 304 distinct over 304 rows, 0 blank, full scan",
+   "natural_key": [
+    "uei"
+   ],
+   "primary_key": {
+    "columns": [
+     "uei"
+    ],
+    "evidence": "uei: 304 distinct over 304 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 304,
+    "scan": "full"
+   },
+   "rows": 304,
+   "scan": "full"
+  },
+  "subaward_identifier_netnew.csv": {
+   "evidence": "uei: 210 distinct over 210 rows, 0 blank, full scan",
+   "natural_key": [
+    "uei"
+   ],
+   "primary_key": {
+    "columns": [
+     "uei"
+    ],
+    "evidence": "uei: 210 distinct over 210 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 210,
+    "scan": "full"
+   },
+   "rows": 210,
+   "scan": "full"
+  },
+  "subawards.csv": {
+   "evidence": "no unique key found. Best candidate (subaward_number, subaward_amount, description, source_url) still has 16,088 duplicate and 0 all-blank rows; the full row has 9,662 exact duplicates.",
+   "primary_key": {
+    "columns": [
+     "subaward_number",
+     "subaward_amount",
+     "description",
+     "source_url"
+    ],
+    "full_row_duplicates": 9662,
+    "kind": "BLOCKED",
+    "reason": "no unique key found. Best candidate (subaward_number, subaward_amount, description, source_url) still has 16,088 duplicate and 0 all-blank rows; the full row has 9,662 exact duplicates.",
+    "rows": 63548,
+    "scan": "full"
+   },
+   "rows": 63548,
+   "scan": "full"
+  },
+  "tcu_cdfi_added.csv": {
+   "evidence": "tribe_id: 130 distinct over 130 rows, 0 blank, full scan",
+   "natural_key": [
+    "tribe_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "tribe_id"
+    ],
+    "evidence": "tribe_id: 130 distinct over 130 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 130,
+    "scan": "full"
+   },
+   "rows": 130,
+   "scan": "full"
+  },
+  "tcu_cdfi_ownership_evidence.csv": {
+   "evidence": "no unique key found. Best candidate (evidence_url, quote, institution, pattern) still has 4 duplicate and 0 all-blank rows; the full row has 4 exact duplicates.",
+   "primary_key": {
+    "columns": [
+     "evidence_url",
+     "quote",
+     "institution",
+     "pattern"
+    ],
+    "full_row_duplicates": 4,
+    "kind": "BLOCKED",
+    "reason": "no unique key found. Best candidate (evidence_url, quote, institution, pattern) still has 4 duplicate and 0 all-blank rows; the full row has 4 exact duplicates.",
+    "rows": 130,
+    "scan": "full"
+   },
+   "rows": 130,
+   "scan": "full"
+  },
+  "tcu_roster.csv": {
+   "evidence": "name: 37 distinct over 37 rows, 0 blank, full scan",
+   "natural_key": [
+    "name"
+   ],
+   "primary_key": {
+    "columns": [
+     "name"
+    ],
+    "evidence": "name: 37 distinct over 37 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 37,
+    "scan": "full"
+   },
+   "rows": 37,
+   "scan": "full"
+  },
+  "tribal_bond_issuances.csv": {
+   "evidence": "notes: 29 distinct over 29 rows, 0 blank, full scan",
+   "natural_key": [
+    "notes"
+   ],
+   "primary_key": {
+    "columns": [
+     "notes"
+    ],
+    "evidence": "notes: 29 distinct over 29 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 29,
+    "scan": "full"
+   },
+   "rows": 29,
+   "scan": "full"
+  },
+  "tribal_resolution_financings.csv": {
+   "evidence": "entity_id: 1 distinct over 1 rows, 0 blank, full scan",
+   "natural_key": [
+    "entity_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "entity_id"
+    ],
+    "evidence": "entity_id: 1 distinct over 1 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 1,
+    "scan": "full"
+   },
+   "rows": 1,
+   "scan": "full"
+  },
+  "tribal_tax_bases.csv": {
+   "evidence": "tax_observation_id: 1,712 distinct over 1,712 rows, 0 blank, full scan",
+   "natural_key": [
+    "tax_observation_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "tax_observation_id"
+    ],
+    "evidence": "tax_observation_id: 1,712 distinct over 1,712 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 1712,
+    "scan": "full"
+   },
+   "rows": 1712,
+   "scan": "full"
+  },
+  "tribe_year_lobbying_panel.csv": {
+   "evidence": "(entity_id, filing_year) unique over 5,051 rows, 0 blank, 0 duplicate [full]",
+   "natural_key": [
+    "entity_id",
+    "filing_year"
+   ],
+   "primary_key": {
+    "columns": [
+     "entity_id",
+     "filing_year"
+    ],
+    "evidence": "(entity_id, filing_year) unique over 5,051 rows, 0 blank, 0 duplicate [full]",
+    "kind": "natural",
+    "proven": true,
+    "rows": 5051,
+    "scan": "full"
+   },
+   "rows": 5051,
+   "scan": "full"
+  },
+  "variable_registry.csv": {
+   "evidence": "concept: 22 distinct over 22 rows, 0 blank, full scan",
+   "natural_key": [
+    "concept"
+   ],
+   "primary_key": {
+    "columns": [
+     "concept"
+    ],
+    "evidence": "concept: 22 distinct over 22 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 22,
+    "scan": "full"
+   },
+   "rows": 22,
+   "scan": "full"
+  },
+  "visitor_access_events.csv": {
+   "evidence": "visitor_access_event_id: 20 distinct over 20 rows, 0 blank, full scan",
+   "natural_key": [
+    "visitor_access_event_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "visitor_access_event_id"
+    ],
+    "evidence": "visitor_access_event_id: 20 distinct over 20 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 20,
+    "scan": "full"
+   },
+   "rows": 20,
+   "scan": "full"
+  },
+  "visitor_record_foia_requests.csv": {
+   "evidence": "request_description_verbatim: 667 distinct over 667 rows, 0 blank, full scan",
+   "natural_key": [
+    "request_description_verbatim"
+   ],
+   "primary_key": {
+    "columns": [
+     "request_description_verbatim"
+    ],
+    "evidence": "request_description_verbatim: 667 distinct over 667 rows, 0 blank, full scan",
+    "kind": "natural",
+    "proven": true,
+    "rows": 667,
+    "scan": "full"
+   },
+   "rows": 667,
+   "scan": "full"
+  },
+  "wa_machine_allocations.csv": {
+   "evidence": "allocation_id: 75 distinct over 75 rows, 0 blank, full scan",
+   "natural_key": [
+    "allocation_id"
+   ],
+   "primary_key": {
+    "columns": [
+     "allocation_id"
+    ],
+    "evidence": "allocation_id: 75 distinct over 75 rows, 0 blank, full scan",
+    "key_is_unstable": true,
+    "kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+    "proven": true,
+    "recommendation": "replace with cedar_keys.surrogate_id() over the source's own stated facts, the way the FERC workaround does; until then the table loads but must not be a foreign-key target",
+    "rows": 75,
+    "scan": "full",
+    "unstable_because": "minted by 104_build_wa_allocations.py:629 (POSITIONAL) - unique in this build, not stable across builds",
+    "unstable_column": "allocation_id"
+   },
+   "rows": 75,
+   "scan": "full"
+  },
+  "wa_machine_transfers.csv": {
+   "evidence": "no column is >=99% populated; every candidate carries blanks, so nothing can be NOT NULL",
+   "primary_key": {
+    "columns": [],
+    "kind": "BLOCKED",
+    "reason": "no column is >=99% populated; every candidate carries blanks, so nothing can be NOT NULL"
+   },
+   "rows": 0,
+   "scan": "full"
+  }
+ }
+}

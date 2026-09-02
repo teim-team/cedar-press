@@ -1,0 +1,11 @@
+cedar_uid,handle,canonical_name,entity_class,last_change,days_since_change,last_change_table,last_change_column,n_datasets_present_in,n_rows_across_cedar,n_substantive_datasets_present_in,measured_date
+CE-00087-JF,ANVC-CHFRNR-00,"Chefarnrmute, Inc.",Alaska Native Village Corporation,1983-08-24,15715,admin_appeal_parties.csv,decision_date,11,19,5,2026-09-02
+CE-001E2-PV,TRBS-PDMONT-00,Piedmont American Indian Association Lower Eastern Cherokee Nation,State-recognized tribe,2001-12-31,9011,faads_entity_attribution.csv,fiscal_year,13,26,7,2026-09-02
+CE-0009D-VN,ANVC-KGKKTL-00,"Kugkaktlik, Ltd.",Alaska Native Village Corporation,2004-04-26,8164,federal_actions_entity_bridge.csv,publication_date,11,19,5,2026-09-02
+CE-000PM-6M,CEDAR-ENT-000073,Cherokee Information Systems Limited Liability Company,Individually Native-owned business,2005-12-31,7550,individual_native_firm_contracts.csv,fiscal_year,9,21,4,2026-09-02
+CE-00096-H6,ANVC-HYLNGD-00,Hee-Yea-Lingde Corporation,Alaska Native Village Corporation,2006-08-31,7307,federal_actions_entity_bridge.csv,publication_date,11,19,5,2026-09-02
+CE-000AE-6Y,ANVC-LMVLLG-00,Lime Village Company,Alaska Native Village Corporation,2007-01-31,7154,federal_actions_entity_bridge.csv,publication_date,11,19,5,2026-09-02
+CE-000H9-BH,BIE-SHPRC1-00,Shiprock Reservation Dormitory,BIE School,2007-10-01,6911,entity_dated_public_facts.csv,as_of_date,7,35,1,2026-09-02
+CE-00094-5M,ANVC-HNGWTC-00,Hungwitchin Corporation,Alaska Native Village Corporation,2008-05-15,6684,federal_actions_entity_bridge.csv,publication_date,11,19,5,2026-09-02
+CE-000AK-4V,ANVC-MNDSCH-00,Mendas Cha-ag Native Corporation,Alaska Native Village Corporation,2008-08-01,6606,federal_actions_entity_bridge.csv,publication_date,12,20,6,2026-09-02
+CE-000D2-D2,ANVC-YKNTVS-00,"Uyak Natives, Inc.",Alaska Native Village Corporation,2008-11-25,6490,nagpra_notice_entity_bridge.csv,publication_date,12,23,6,2026-09-02

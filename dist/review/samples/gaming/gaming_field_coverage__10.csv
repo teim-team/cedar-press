@@ -1,0 +1,11 @@
+field_or_source,properties_covered,properties_total,pct_covered,licensed_internal_only,note,built_date
+official_capacity,109,787,13.9,0,,2026-09-01
+lodes_employment,0,787,0.0,0,,2026-09-01
+game_finder,4,787,0.5,0,,2026-09-01
+loyalty_program,48,787,6.1,0,,2026-09-01
+compact_terms,659,787,83.7,0,,2026-09-01
+source_claims,22,787,2.8,0,,2026-09-01
+gaming_properties.csv::facility_name,784,784,100.0,0,,2026-09-01
+gaming_properties.csv::ultimate_parent_entity,775,784,98.9,0,,2026-09-01
+gaming_properties.csv::state,783,784,99.9,0,,2026-09-01
+gaming_properties.csv::coords_basis,689,784,87.9,0,,2026-09-01

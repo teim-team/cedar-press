@@ -1,0 +1,14 @@
+{
+ "measured": "2026-09-01",
+ "rule": "stack FY2001-2006 from faads_transactions_all_agencies.csv and FY2007+ from federal_funding_transactions.csv; the modern table is the attributed one, so the seam belongs on its side",
+ "archive_fy2007_rows": 774755,
+ "archive_fy2007_rows_without_key": 0,
+ "archive_fy2007_obligated_usd": 475359703131.83,
+ "modern_fy2007_rows": 11443,
+ "modern_fy2007_obligated_usd": 2189838445.6,
+ "overlap_rows": 11063,
+ "overlap_obligated_usd": 2165856968.6,
+ "modern_only_rows": 380,
+ "modern_only_obligated_usd": 23981477.0,
+ "identified_by": "assistance_transaction_unique_key"
+}

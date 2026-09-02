@@ -1,0 +1,2122 @@
+{
+ "release_id": "subcontracting-6c92a41",
+ "generated_at": "2026-08-29T10:31:58+00:00",
+ "generated_by": "code/516_release_manifest.py",
+ "commit": "6c92a41f7b3275f3e4ee8edafd03cfb8e65be5ce",
+ "commit_subject": "Integrator: dollar-discrepancy reconciled; owner decision queue consolidated",
+ "tree_clean_at_capture": false,
+ "code_in_scope_matches_commit": true,
+ "dirty_paths": [
+  "GENTS.md",
+  "code/510_assertions.py",
+  "code/512_build_dataset_contracts.py",
+  "code/516_release_manifest.py",
+  "docs/ASSERTION_LAYER.md",
+  "docs/DATASET_CONTRACTS.md",
+  "docs/SOURCE_RECORD_LAYER.md",
+  "docs/lint_bug_classes.json",
+  "docs/schema/dataset_contracts.json",
+  "docs/GRAIN_AUDIT.md",
+  "docs/releases/_analysis/",
+  "docs/releases/nagpra-6c92a41/",
+  "docs/releases/native-owned-businesses-6c92a41/",
+  "docs/releases/natural-resources-6c92a41/",
+  "docs/releases/subcontracting-6c92a41/",
+  "docs/schema/grain_evidence.json"
+ ],
+ "retention_policy": {
+  "store": "data/_release_inputs",
+  "retain_max_bytes": 2147483648,
+  "release_budget_bytes": 12884901888,
+  "budget_remaining_bytes": 12884901888,
+  "addressing": "content-addressed by sha256; blobs deduplicate across releases"
+ },
+ "environment": {
+  "python_version": "3.14.7",
+  "python_implementation": "CPython",
+  "python_executable": "C:\\Users\\esm247\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "machine": "AMD64",
+  "filesystem_case_sensitive": false,
+  "cwd_at_capture": "C:\\Users\\esm247\\Desktop\\Cedar Press",
+  "packages": [
+   "Deprecated==1.3.1",
+   "Jinja2==3.1.6",
+   "MarkupSafe==3.0.3",
+   "PyMuPDF==1.27.2.2",
+   "PyYAML==6.0.3",
+   "Pygments==2.20.0",
+   "RapidFuzz==3.14.5",
+   "WMI==1.5.1",
+   "affine==2.4.0",
+   "annotated-doc==0.0.4",
+   "anyio==4.13.0",
+   "asttokens==3.0.1",
+   "attrs==26.1.0",
+   "babel==2.18.0",
+   "beautifulsoup4==4.14.3",
+   "brotli==1.2.0",
+   "browser-cookie3==0.20.1",
+   "certifi==2026.2.25",
+   "cffi==2.0.0",
+   "charset-normalizer==3.4.7",
+   "click==8.3.3",
+   "cligj==0.7.2",
+   "colorama==0.4.6",
+   "commonmark==0.9.1",
+   "contourpy==1.3.3",
+   "cryptography==46.0.7",
+   "curl_cffi==0.15.0",
+   "cycler==0.12.1",
+   "dbfread==2.0.7",
+   "decorator==5.2.1",
+   "duckdb==1.5.5",
+   "et_xmlfile==2.0.0",
+   "executing==2.2.1",
+   "faicons==0.2.2",
+   "filelock==3.29.0",
+   "flatbuffers==25.12.19",
+   "fonttools==4.62.1",
+   "formulaic==1.2.1",
+   "fsspec==2026.4.0",
+   "geopandas==1.1.3",
+   "great-tables==0.21.0",
+   "greenlet==3.4.0",
+   "h11==0.16.0",
+   "hf-xet==1.4.3",
+   "htmltools==0.6.1",
+   "httpcore==1.0.9",
+   "httplib2==0.31.2",
+   "httpx==0.28.1",
+   "huggingface_hub==1.12.2",
+   "idna==3.11",
+   "importlib_metadata==9.0.0",
+   "importlib_resources==7.1.0",
+   "inflate64==1.0.4",
+   "interface-meta==1.3.0",
+   "ipython==9.13.0",
+   "ipython_pygments_lexers==1.1.1",
+   "jedi==0.20.0",
+   "joblib==1.5.3",
+   "jsonschema-specifications==2025.9.1",
+   "jsonschema==4.26.0",
+   "kiwisolver==1.5.0",
+   "linearmodels==7.0",
+   "llvmlite==0.47.0",
+   "lxml==6.1.0",
+   "lz4==4.4.5",
+   "maketables==0.1.8",
+   "markdown-it-py==3.0.0",
+   "markdown_pdf==1.13.1",
+   "matplotlib-inline==0.2.2",
+   "matplotlib==3.10.8",
+   "mdurl==0.1.2",
+   "mpmath==1.3.0",
+   "multivolumefile==0.2.3",
+   "mypy_extensions==1.1.0",
+   "narwhals==2.19.0",
+   "networkx==3.6.1",
+   "numba==0.65.1",
+   "numpy==2.4.4",
+   "onnxruntime==1.28.0",
+   "opencv-python==5.0.0.93",
+   "openpyxl==3.1.5",
+   "packaging==26.1",
+   "pandas==3.0.2",
+   "parso==0.8.7",
+   "patool==4.0.4",
+   "patsy==1.0.2",
+   "pdf2image==1.17.0",
+   "pdfminer.six==20251230",
+   "pdfplumber==0.11.9",
+   "pikepdf==10.6.0",
+   "pillow-avif-plugin==1.5.5",
+   "pillow==12.2.0",
+   "pillow_heif==1.3.0",
+   "plantuml==0.3.0",
+   "playwright==1.58.0",
+   "prompt_toolkit==3.0.52",
+   "protobuf==7.35.1",
+   "psutil==7.2.2",
+   "pure_eval==0.2.3",
+   "py7zr==1.1.0",
+   "pyarrow==24.0.0",
+   "pybcj==1.0.7",
+   "pyclipper==1.4.0",
+   "pycparser==3.0",
+   "pycryptodome==3.23.0",
+   "pycryptodomex==3.23.0",
+   "pyee==13.0.1",
+   "pyfixest==0.50.1",
+   "pyhdfe==0.2.0",
+   "pyogrio==0.12.1",
+   "pyparsing==3.3.2",
+   "pypdf==6.10.2",
+   "pypdfium2==5.7.0",
+   "pyppmd==1.3.1",
+   "pyproj==3.7.2",
+   "pyreadstat==1.3.3",
+   "pyshp==3.0.3",
+   "pytesseract==0.3.13",
+   "python-dateutil==2.9.0.post0",
+   "python-docx==1.2.0",
+   "python-pptx==1.0.2",
+   "pywin32==311",
+   "rapidocr-onnxruntime==1.2.3",
+   "rarfile==4.2",
+   "rasterio==1.5.0",
+   "referencing==0.37.0",
+   "regex==2026.4.4",
+   "reportlab==4.4.10",
+   "requests==2.33.1",
+   "rich==15.0.0",
+   "rpds-py==2026.6.3",
+   "safetensors==0.7.0",
+   "scikit-learn==1.8.0",
+   "scipy==1.17.1",
+   "seaborn==0.13.2",
+   "sentencepiece==0.2.1",
+   "setuptools==81.0.0",
+   "shadowcopy==0.0.4",
+   "shapely==2.1.2",
+   "shellingham==1.5.4",
+   "six==1.17.0",
+   "soupsieve==2.8.3",
+   "stack-data==0.6.3",
+   "statsmodels==0.14.6",
+   "sympy==1.14.0",
+   "tabulate==0.10.0",
+   "texttable==1.7.0",
+   "threadpoolctl==3.6.0",
+   "tokenizers==0.22.2",
+   "torch==2.11.0",
+   "tqdm==4.67.3",
+   "traitlets==5.15.0",
+   "transformers==5.7.0",
+   "typer==0.25.0",
+   "typing_extensions==4.15.0",
+   "tzdata==2026.1",
+   "urllib3==2.6.3",
+   "wcwidth==0.7.0",
+   "wrapt==2.2.0rc10",
+   "xlrd==2.0.2",
+   "xlsxwriter==3.2.9",
+   "zipp==3.23.1"
+  ],
+  "packages_sha256": "fcffb05785cb1675b913df1fc7b1f737969106068b3ac53b236bd6eb5bd0affe",
+  "note": "The scripts in scope import only the standard library; the package lock is recorded so a future divergence is visible, not because a third-party version is currently load-bearing."
+ },
+ "collections": [
+  {
+   "collection": "subcontracting",
+   "name": "Federal Subcontracting",
+   "shelf": "pro",
+   "n_tables": 5,
+   "ambiguous_scripts": [],
+   "blocked_scripts": [],
+   "code": [
+    {
+     "script": "121_pull_subawards_api.py",
+     "sha256": "21441cac1f60cf9c59f590ee77de2eecf1022ccaf5ae070ee87e6406029caacb",
+     "git_blob_working": "cb156203ec6c8802181a28577a9f277efd0b8f58",
+     "git_blob_at_commit": "cb156203ec6c8802181a28577a9f277efd0b8f58",
+     "matches_commit": true,
+     "tracked": true,
+     "never_run": false,
+     "role": "phase2_enricher"
+    },
+    {
+     "script": "20_build_subcontracts.py",
+     "sha256": "29b51ac8065bb8d630960267f16506b562a79e6f19fedc55318ba7d231a16acf",
+     "git_blob_working": "d3228441cf58a96eeaaf5ce82bd280bb983125b3",
+     "git_blob_at_commit": "d3228441cf58a96eeaaf5ce82bd280bb983125b3",
+     "matches_commit": true,
+     "tracked": true,
+     "never_run": false,
+     "role": "phase1_rebuild"
+    },
+    {
+     "script": "250_demote_stale_tierA_subaward_rows.py",
+     "sha256": "ac093bc930fdf70e17b6bfea38dd35d8e7683106919cf79e7aef28d4f5d5c11d",
+     "git_blob_working": "cccb203636148a1b8e5e32d68299b27f970607b0",
+     "git_blob_at_commit": "cccb203636148a1b8e5e32d68299b27f970607b0",
+     "matches_commit": true,
+     "tracked": true,
+     "never_run": false,
+     "role": "phase2_enricher"
+    },
+    {
+     "script": "45_promote_subawards.py",
+     "sha256": "54060d3cfd7917ab807420aed6e211d738273765028ea6319b63905a28edf6f5",
+     "git_blob_working": "624601e6f962bed3109faa3ea17cbba41681bb41",
+     "git_blob_at_commit": "624601e6f962bed3109faa3ea17cbba41681bb41",
+     "matches_commit": true,
+     "tracked": true,
+     "never_run": false,
+     "role": "phase2_enricher"
+    },
+    {
+     "script": "cedar_codebook.py",
+     "sha256": "6561a8533f9b9c94ed7dfae0228ece4bc0f2492c5414ff21025beaf49b9459c4",
+     "git_blob_working": "b13eef103a55aec590d821d79a4a076932748628",
+     "git_blob_at_commit": "b13eef103a55aec590d821d79a4a076932748628",
+     "matches_commit": true,
+     "tracked": true,
+     "never_run": false,
+     "role": "imported"
+    },
+    {
+     "script": "cedar_domain.py",
+     "sha256": "77ce8e3b77cf12c7530ae73139699ffbb5e5bb0589d4cc9718b7f3ee38fe04f3",
+     "git_blob_working": "27504dc93362a0bff7287f668e7623cfd2bd34fe",
+     "git_blob_at_commit": "27504dc93362a0bff7287f668e7623cfd2bd34fe",
+     "matches_commit": true,
+     "tracked": true,
+     "never_run": false,
+     "role": "imported"
+    },
+    {
+     "script": "cedar_match_guard.py",
+     "sha256": "c7e9d947dfbd6254aa0ad51d3a9196001b2a2ecec9bfb0e613d387dfc0dc912b",
+     "git_blob_working": "ea7e4a9a6d17050fd4c30d2065e1e7231ec504ec",
+     "git_blob_at_commit": "ea7e4a9a6d17050fd4c30d2065e1e7231ec504ec",
+     "matches_commit": true,
+     "tracked": true,
+     "never_run": false,
+     "role": "imported"
+    }
+   ],
+   "inputs": [
+    {
+     "path": "data/clean/cedar_identifier_ledger_final.csv",
+     "how_found": [
+      "path_expression:os.path.join"
+     ],
+     "read_by": [
+      "20_build_subcontracts.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "62076592d4452f14422397906be267de32f30c4dcaf33c338097c0696409e2c9",
+     "bytes": 4911281,
+     "mtime": "2026-08-29T05:32:04+00:00",
+     "rows": 20577,
+     "n_columns": 22,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/62/62076592d4452f14422397906be267de32f30c4dcaf33c338097c0696409e2c9.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced by the `_entity_layer` collection; replay that collection's manifest first",
+      "producing_collection": "_entity_layer",
+      "confidence": "declared"
+     }
+    },
+    {
+     "path": "data/clean/codebook",
+     "how_found": [
+      "path_constant:FRAG",
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "cedar_codebook.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "directory",
+     "tree_sha256": "202e1aeaf64df1c46803f30ef82a76a2679b29f95b26b16507c0fa7449506cb1",
+     "n_files": 172,
+     "bytes": 1063521,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/20/202e1aeaf64df1c46803f30ef82a76a2679b29f95b26b16507c0fa7449506cb1.zip",
+      "deduplicated": true,
+      "form": "zip_of_tree_v2_mtime_preserved"
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced inside Cedar; no collection claims it in docs/schema/dataset_contracts.json",
+      "producing_collection": null,
+      "confidence": "none"
+     }
+    },
+    {
+     "path": "data/clean/codebook_master.csv",
+     "how_found": [
+      "declared_io"
+     ],
+     "read_by": [
+      "cedar_codebook.py"
+     ],
+     "written_in_scope": true,
+     "role": "intermediate_written_in_scope",
+     "kind": "file",
+     "sha256": "b12d1d35777dde1674df905e9bfd7bbc71eace141a2ee10efda1bee7b04dac9e",
+     "bytes": 860504,
+     "mtime": "2026-08-29T01:05:39+00:00",
+     "rows": 4600,
+     "n_columns": 10,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/b1/b12d1d35777dde1674df905e9bfd7bbc71eace141a2ee10efda1bee7b04dac9e.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced inside Cedar; no collection claims it in docs/schema/dataset_contracts.json",
+      "producing_collection": null,
+      "confidence": "none"
+     }
+    },
+    {
+     "path": "data/clean/fpds_uei_cage_map.csv",
+     "how_found": [
+      "path_expression:os.path.join"
+     ],
+     "read_by": [
+      "20_build_subcontracts.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "31a8b0914dbe5414dccc1a6c8279ef48adf34d0b089c8991fe66c24a3cf99559",
+     "bytes": 3745564,
+     "mtime": "2026-08-29T05:56:00+00:00",
+     "rows": 29981,
+     "n_columns": 7,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/31/31a8b0914dbe5414dccc1a6c8279ef48adf34d0b089c8991fe66c24a3cf99559.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced by the `contractors` collection; replay that collection's manifest first",
+      "producing_collection": "contractors",
+      "confidence": "declared"
+     }
+    },
+    {
+     "path": "data/clean/fpds_uei_edges.csv",
+     "how_found": [
+      "declared_io",
+      "path_expression:os.path.join"
+     ],
+     "read_by": [
+      "20_build_subcontracts.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "36567d35be940157fabc9c7d29f98dc79d5f60c85996009a3f83f46eaa6786bc",
+     "bytes": 573041,
+     "mtime": "2026-08-29T05:56:01+00:00",
+     "rows": 2901,
+     "n_columns": 12,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/36/36567d35be940157fabc9c7d29f98dc79d5f60c85996009a3f83f46eaa6786bc.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced by the `contractors` collection; replay that collection's manifest first",
+      "producing_collection": "contractors",
+      "confidence": "declared"
+     }
+    },
+    {
+     "path": "data/clean/inflation_deflator.csv",
+     "how_found": [
+      "path_expression:os.path.join"
+     ],
+     "read_by": [
+      "121_pull_subawards_api.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "e7d3aad98b73ca70462da33d838dcb92c7bd6c131b52821f21ecc325c6f41dc7",
+     "bytes": 2602,
+     "mtime": "2026-08-06T21:03:41+00:00",
+     "rows": 27,
+     "n_columns": 6,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/e7/e7d3aad98b73ca70462da33d838dcb92c7bd6c131b52821f21ecc325c6f41dc7.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced by the `funding` collection; replay that collection's manifest first",
+      "producing_collection": "funding",
+      "confidence": "declared"
+     }
+    },
+    {
+     "path": "data/clean/series_breaks.csv",
+     "how_found": [
+      "declared_io"
+     ],
+     "read_by": [
+      "cedar_codebook.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "f07bb3bf08de1bfbd15451cd687763701af101e6c2cc6d825c0a517af015a141",
+     "bytes": 13375,
+     "mtime": "2026-08-26T22:48:02+00:00",
+     "rows": 24,
+     "n_columns": 9,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/f0/f07bb3bf08de1bfbd15451cd687763701af101e6c2cc6d825c0a517af015a141.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced inside Cedar; no collection claims it in docs/schema/dataset_contracts.json",
+      "producing_collection": null,
+      "confidence": "none"
+     }
+    },
+    {
+     "path": "data/clean/subawards.csv",
+     "how_found": [
+      "declared_io"
+     ],
+     "read_by": [
+      "121_pull_subawards_api.py",
+      "250_demote_stale_tierA_subaward_rows.py",
+      "45_promote_subawards.py"
+     ],
+     "written_in_scope": true,
+     "role": "output_of_this_collection",
+     "kind": "file",
+     "sha256": "ae80c2aff2f3b8f0099a56a4f02a35a1ac229a032226b2de1a3016005aad128d",
+     "bytes": 60608133,
+     "mtime": "2026-08-29T05:32:23+00:00",
+     "rows": 72837,
+     "n_columns": 53,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/ae/ae80c2aff2f3b8f0099a56a4f02a35a1ac229a032226b2de1a3016005aad128d.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced by the `subcontracting` collection; replay that collection's manifest first",
+      "producing_collection": "subcontracting",
+      "confidence": "declared"
+     }
+    },
+    {
+     "path": "data/raw/esm_hci/ESM/clean/master sub file.dta",
+     "how_found": [
+      "path_expression:os.path.join"
+     ],
+     "read_by": [
+      "20_build_subcontracts.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "0db191a3b397f57432b1e836ac2f32e28ba26fd8eb44a532febc9b338d3f752d",
+     "bytes": 9255,
+     "mtime": "2023-05-13T00:47:56+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/0d/0db191a3b397f57432b1e836ac2f32e28ba26fd8eb44a532febc9b338d3f752d.dta",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "UNKNOWN",
+      "detail": "no source manifest entry and no fetch stage found",
+      "confidence": "none"
+     }
+    },
+    {
+     "path": "data/raw/esm_hci/ESM/clean/sub file.dta",
+     "how_found": [
+      "path_expression:os.path.join"
+     ],
+     "read_by": [
+      "20_build_subcontracts.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "dc9cc938c6a1ab95c2b3bf0d1d31485ce986c23070316f6960305676b0def3d9",
+     "bytes": 73775,
+     "mtime": "2023-03-26T20:32:44+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/dc/dc9cc938c6a1ab95c2b3bf0d1d31485ce986c23070316f6960305676b0def3d9.dta",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "UNKNOWN",
+      "detail": "no source manifest entry and no fetch stage found",
+      "confidence": "none"
+     }
+    },
+    {
+     "path": "data/raw/esm_hci/ESM/intermediate/sub hci.dta",
+     "how_found": [
+      "path_expression:os.path.join"
+     ],
+     "read_by": [
+      "20_build_subcontracts.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "2ad7ddaca3a7c13f3ef666fa5e04dd85f0af0665a89bc26f346b3dc6f967fdc9",
+     "bytes": 1915,
+     "mtime": "2023-03-26T20:33:14+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/2a/2ad7ddaca3a7c13f3ef666fa5e04dd85f0af0665a89bc26f346b3dc6f967fdc9.dta",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "UNKNOWN",
+      "detail": "no source manifest entry and no fetch stage found",
+      "confidence": "none"
+     }
+    },
+    {
+     "path": "data/raw/esm_hci/ESM/intermediate/sub.dta",
+     "how_found": [
+      "path_expression:os.path.join"
+     ],
+     "read_by": [
+      "20_build_subcontracts.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "e749ce8d61720195343ff71186865fc9abbe1835ed7210b4cee894d2d85db605",
+     "bytes": 1915,
+     "mtime": "2023-03-26T20:33:02+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/e7/e749ce8d61720195343ff71186865fc9abbe1835ed7210b4cee894d2d85db605.dta",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "UNKNOWN",
+      "detail": "no source manifest entry and no fetch stage found",
+      "confidence": "none"
+     }
+    },
+    {
+     "path": "data/raw/esm_hci/ESM/raw/subcontract-05-09-23-22-23-37.csv",
+     "how_found": [
+      "path_expression:os.path.join"
+     ],
+     "read_by": [
+      "20_build_subcontracts.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "432ad0f07714001ada734e2875a917d98beeea5810d3bf6a96d9bef91b7d3375",
+     "bytes": 1008778,
+     "mtime": "2023-05-11T06:47:28+00:00",
+     "rows": 998,
+     "n_columns": 49,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/43/432ad0f07714001ada734e2875a917d98beeea5810d3bf6a96d9bef91b7d3375.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "UNKNOWN",
+      "detail": "no source manifest entry and no fetch stage found",
+      "confidence": "none"
+     }
+    },
+    {
+     "path": "data/raw/external/subcontracts",
+     "how_found": [
+      "path_expression:os.path.join"
+     ],
+     "read_by": [
+      "20_build_subcontracts.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "directory",
+     "tree_sha256": "3b813a13e4046fe8b09095afb40cd213ea58b595dc1ea6f2bb1ea1b6c319623b",
+     "n_files": 7,
+     "bytes": 1098527,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/3b/3b813a13e4046fe8b09095afb40cd213ea58b595dc1ea6f2bb1ea1b6c319623b.zip",
+      "deduplicated": true,
+      "form": "zip_of_tree_v2_mtime_preserved"
+     },
+     "provenance": {
+      "kind": "UNKNOWN",
+      "detail": "no source manifest entry and no fetch stage found",
+      "confidence": "none"
+     }
+    },
+    {
+     "path": "data/raw/federal_funding/usaspending_2023_2026",
+     "how_found": [
+      "path_expression:os.path.join"
+     ],
+     "read_by": [
+      "45_promote_subawards.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "directory",
+     "tree_sha256": "c43d353cc8aafd89e6403898c1683ba2b405c769290e584f812d0f770b1b1193",
+     "n_files": 23,
+     "bytes": 364996773,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/c4/c43d353cc8aafd89e6403898c1683ba2b405c769290e584f812d0f770b1b1193.zip",
+      "deduplicated": true,
+      "form": "zip_of_tree_v2_mtime_preserved"
+     },
+     "provenance": {
+      "kind": "UNKNOWN",
+      "detail": "no source manifest entry and no fetch stage found",
+      "confidence": "none"
+     }
+    },
+    {
+     "path": "data/raw/subcontracts/usaspending_2026-08-12",
+     "how_found": [
+      "path_expression:os.path.join"
+     ],
+     "read_by": [
+      "121_pull_subawards_api.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "directory",
+     "tree_sha256": "f3fd2de0bfbe6604802303a6b934a1cdd9d1c7f7386052f77fd0b664f57b9849",
+     "n_files": 4,
+     "bytes": 178862095,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/f3/f3fd2de0bfbe6604802303a6b934a1cdd9d1c7f7386052f77fd0b664f57b9849.zip",
+      "deduplicated": true,
+      "form": "zip_of_tree_v2_mtime_preserved"
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "",
+      "urls": [
+       "https://api.usaspending.gov/api/v2/bulk_download/awards/",
+       "https://api.usaspending.gov/api/v2/download/status",
+       "https://api.usaspending.gov/api/v2/references/agency/456/"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/subcontracts/usaspending_subawards_2026-08-05",
+     "how_found": [
+      "path_expression:os.path.join"
+     ],
+     "read_by": [
+      "45_promote_subawards.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "directory",
+     "tree_sha256": "8a322d037e56effbd0f81a33275957aa70a47921b0241130eac5f27dec77c543",
+     "n_files": 26,
+     "bytes": 1210737537,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/8a/8a322d037e56effbd0f81a33275957aa70a47921b0241130eac5f27dec77c543.zip",
+      "deduplicated": true,
+      "form": "zip_of_tree_v2_mtime_preserved"
+     },
+     "provenance": {
+      "kind": "UNKNOWN",
+      "detail": "no source manifest entry and no fetch stage found",
+      "confidence": "none"
+     }
+    },
+    {
+     "path": "data/spine/cedar_entity_spine.csv",
+     "how_found": [
+      "declared_io",
+      "path_expression:os.path.join"
+     ],
+     "read_by": [
+      "121_pull_subawards_api.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "a3220efc1b2cd3190bbca6a1ae2b187c112f351515dfc022a74eabdd166cb8d4",
+     "bytes": 1394076,
+     "mtime": "2026-08-29T07:22:35+00:00",
+     "rows": 1536,
+     "n_columns": 44,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/a3/a3220efc1b2cd3190bbca6a1ae2b187c112f351515dfc022a74eabdd166cb8d4.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced by the `_entity_layer` collection; replay that collection's manifest first",
+      "producing_collection": "_entity_layer",
+      "confidence": "declared"
+     }
+    },
+    {
+     "path": "data/staging/subawards_api_2026-08-12",
+     "how_found": [
+      "path_expression:os.path.join"
+     ],
+     "read_by": [
+      "121_pull_subawards_api.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "directory",
+     "tree_sha256": "083f444d221c7300b01597c65d51fba28d94e625c0646a33f2af327e0ff9337d",
+     "n_files": 1,
+     "bytes": 7862351,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/08/083f444d221c7300b01597c65d51fba28d94e625c0646a33f2af327e0ff9337d.zip",
+      "deduplicated": true,
+      "form": "zip_of_tree_v2_mtime_preserved"
+     },
+     "provenance": {
+      "kind": "UNKNOWN",
+      "detail": "no source manifest entry and no fetch stage found",
+      "confidence": "none"
+     }
+    },
+    {
+     "path": "data/staging/subawards_usaspending_2026-08-05",
+     "how_found": [
+      "path_expression:os.path.join"
+     ],
+     "read_by": [
+      "45_promote_subawards.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "directory",
+     "tree_sha256": "58072789ee5c95a1f79d04c905f8851543705549033bc8a1907caef03e90728a",
+     "n_files": 6,
+     "bytes": 44490125,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/58/58072789ee5c95a1f79d04c905f8851543705549033bc8a1907caef03e90728a.zip",
+      "deduplicated": true,
+      "form": "zip_of_tree_v2_mtime_preserved"
+     },
+     "provenance": {
+      "kind": "UNKNOWN",
+      "detail": "no source manifest entry and no fetch stage found",
+      "confidence": "none"
+     }
+    }
+   ],
+   "undiscovered_inputs": [
+    {
+     "name": "_HOSTLOCK_api.usaspending.gov.json",
+     "referenced_by": "121_pull_subawards_api.py",
+     "resolves_on_disk": false,
+     "severity": "blocking",
+     "why": "an executed script names this read and no discovery channel resolved it to a retained input"
+    },
+    {
+     "name": "_state.json",
+     "referenced_by": "121_pull_subawards_api.py",
+     "resolves_on_disk": false,
+     "severity": "blocking",
+     "why": "an executed script names this read and no discovery channel resolved it to a retained input"
+    }
+   ],
+   "io_scan_unresolved_names": [
+    {
+     "name": "; superseded by cedar_identifier_ledger_final.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": false,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "Assistance_56G180126_TransactionHistory_1.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "assistance_tribe_id_crosswalk.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "bgov.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": false,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "bie_uio_identifier_links.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "brand_family_proposals.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "brand_family_registry.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "cedar_assertions.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "cedar_cage_backfill.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "cedar_fact_conflicts.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "cedar_harvest_conservation.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "cedar_identifier_ledger_tiered.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "cedar_inherited_from_rulings_2026-08-05.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "cedar_inherited_from_rulings_2026-08-06.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "cedar_inherited_from_rulings_2026-08-07.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "cedar_resolved_facts.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "cedar_spiderweb_v2.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "content_analysis_accuracy.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "content_audit_fr_relevance.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "content_audit_fr_theme.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "content_audit_lobbying_family.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "contract-03-18-23-19-40-24.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "coverage_audit.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "deals_*_additions.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": false,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "deals_2026_ytd.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": false,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "deals_classified.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "deals_historical_2020_2025.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": false,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "deals_party_attribution.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "deals_party_attribution_agent.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "deals_party_autoresolved.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "deals_party_matches.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "deals_taxonomy.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "entity_candidates_new.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "entity_candidates_rejected.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "entity_crosswalk_bgov.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": false,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "entity_evidence_profile.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "entity_master.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": false,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "entity_name_harvest.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "entity_year_coverage.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "faads_attribution_audit_sample.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "faads_identifier_coverage_by_agency_year.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "federal_funding_transactions.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "federal_funding_year_comparison_2026-08-05.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "ferc_source_coverage.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "fr_recognized_entities.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "fr_relevance_stratum_audit.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "funding_identifier_harvest.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "gaming_facility_metrics.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "gaming_facility_metrics.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "gaming_field_coverage.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "gaming_game_finder_systems.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "gaming_property_capacity_history.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "gaming_property_capacity_history.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "gaming_property_coverage.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "grantmaker_funding_coverage.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "individual_native_prior_rulings.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "instrument_taxonomy.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "lobbying_client_attribution.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "lobbying_unmatched_clients.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "native_issue_litigation_coverage.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "nepa_source_coverage.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "nho_ito_spine_crosswalk.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "nho_parents.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "np_ein_uei_bridge.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "resource_asset_source_coverage.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "sam_entity_connections.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "sam_prime_contracts_fy2000_2007_reconciliation.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "sam_subsidiary_candidates.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "source_coverage_admin_appeals.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "source_coverage_fac.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "source_coverage_nrc_meetings.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "source_coverage_tribal_legislative.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "source_coverage_vendor_disclosure.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "source_coverage_visitor_records.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "subaward_identifier_harvest.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "subaward_identifier_netnew.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "tribal_certification_facts_sample_2026-08-26.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "tribal_certification_joins_2026-08-26.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "tribal_certification_rules_2026-08-26.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "tribal_certification_sources_2026-08-26.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "variable_registry.csv",
+     "referenced_by": "cedar_codebook.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_codebook.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    }
+   ],
+   "manual_decision_inputs": [],
+   "configuration": {
+    "121_pull_subawards_api.py": {
+     "MAX_INFLIGHT": "5",
+     "FILES_BUSY_MAX_WAITS": "12"
+    },
+    "cedar_codebook.py": {
+     "MATCH_THRESHOLD": "0.60"
+    },
+    "cedar_domain.py": {
+     "INDIVIDUAL_NATIVE_MIN_CELL_FIRMS": "3"
+    }
+   },
+   "commands": [
+    {
+     "step": 1,
+     "argv": [
+      "py",
+      "-3",
+      "code/20_build_subcontracts.py"
+     ],
+     "phase": "rebuild",
+     "exists": true
+    },
+    {
+     "step": 2,
+     "argv": [
+      "py",
+      "-3",
+      "code/121_pull_subawards_api.py"
+     ],
+     "phase": "enrich",
+     "exists": true
+    },
+    {
+     "step": 3,
+     "argv": [
+      "py",
+      "-3",
+      "code/250_demote_stale_tierA_subaward_rows.py"
+     ],
+     "phase": "enrich",
+     "exists": true
+    },
+    {
+     "step": 4,
+     "argv": [
+      "py",
+      "-3",
+      "code/45_promote_subawards.py"
+     ],
+     "phase": "enrich",
+     "exists": true
+    }
+   ],
+   "outputs": [
+    {
+     "table": "prime_sub_network.csv",
+     "present": true,
+     "path": "data/clean/prime_sub_network.csv",
+     "sha256": "4cfc9e5fe98f90da937f208918f4157e69bdd07474be633d2388abce5deeecc6",
+     "bytes": 33730,
+     "rows": 220,
+     "columns": [
+      "prime_uei",
+      "sub_uei",
+      "n_subawards",
+      "total_usd",
+      "first_year",
+      "last_year",
+      "naics_modal",
+      "prime_name",
+      "sub_name",
+      "self_edge_flag",
+      "source_file",
+      "fetched_date"
+     ],
+     "primary_key": [
+      "prime_uei",
+      "sub_uei"
+     ],
+     "primary_key_kind": "natural",
+     "primary_key_proven": true,
+     "primary_key_evidence": "(prime_uei, sub_uei) unique over 220 rows, 0 blank, 0 duplicate [full]",
+     "codebook_block": "02b_subcontracting",
+     "documented": true,
+     "contract_status": "shippable",
+     "declared_grain": "one row per (prime UEI, sub UEI) edge, rolled up across subawards",
+     "contract_key_columns": [],
+     "mtime": "2026-08-05T18:40:36+00:00",
+     "run_stamp_columns": [
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-05"
+      }
+     ],
+     "enricher_backups": [],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 220,
+       "how": "full csv scan, header excluded"
+      }
+     ]
+    },
+    {
+     "table": "subaward_entity_rollup.csv",
+     "present": true,
+     "path": "data/clean/subaward_entity_rollup.csv",
+     "sha256": "61ac5d4781960831d8df285a2093cb3229a33880f9e155621c5973d9e979a23c",
+     "bytes": 56348,
+     "rows": 450,
+     "columns": [
+      "tribe_id",
+      "confidence_tier",
+      "n_as_prime_a",
+      "usd_as_prime_a",
+      "n_as_subawardee_b",
+      "usd_as_subawardee_b",
+      "n_both_sides",
+      "usd_both_sides",
+      "basis",
+      "cedar_uid"
+     ],
+     "primary_key": [
+      "tribe_id"
+     ],
+     "primary_key_kind": "natural",
+     "primary_key_proven": true,
+     "primary_key_evidence": "tribe_id: 450 distinct over 450 rows, 0 blank, full scan",
+     "codebook_block": null,
+     "documented": false,
+     "contract_status": "shippable",
+     "declared_grain": "one row per entity, rolled up across both sides of the subaward network",
+     "contract_key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "mtime": "2026-08-29T03:44:45+00:00",
+     "run_stamp_columns": [],
+     "enricher_backups": [
+      {
+       "backup": "data/clean/subaward_entity_rollup.csv.bak_2026-08-28_pre505",
+       "tag": "2026-08-28_pre505",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "503_identity.py"
+       ]
+      }
+     ],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 450,
+       "how": "full csv scan, header excluded"
+      },
+      {
+       "check": "distinct_cedar_uid",
+       "value": 450,
+       "blank": 0,
+       "how": "full scan"
+      },
+      {
+       "check": "distinct_tribe_id",
+       "value": 450,
+       "blank": 0,
+       "how": "full scan"
+      }
+     ]
+    },
+    {
+     "table": "subaward_identifier_harvest.csv",
+     "present": true,
+     "path": "data/clean/subaward_identifier_harvest.csv",
+     "sha256": "d3b8550ac859ae64e21338e3664a3f905044fb3f04eaa2ea8101cdb93e9228a4",
+     "bytes": 44809,
+     "rows": 304,
+     "columns": [
+      "uei",
+      "cage_code",
+      "duns",
+      "legal_business_name",
+      "role",
+      "state",
+      "n_subawards",
+      "first_year",
+      "last_year",
+      "total_subaward_usd",
+      "malformed_flag",
+      "source_file",
+      "total_usd_as_sub",
+      "total_usd_as_prime",
+      "n_name_variants",
+      "name_variants"
+     ],
+     "primary_key": [
+      "uei"
+     ],
+     "primary_key_kind": "natural",
+     "primary_key_proven": true,
+     "primary_key_evidence": "uei: 304 distinct over 304 rows, 0 blank, full scan",
+     "codebook_block": null,
+     "documented": false,
+     "contract_status": "internal-by-decision",
+     "declared_grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "contract_key_columns": [
+      "uei",
+      "cage_code"
+     ],
+     "mtime": "2026-08-05T18:40:36+00:00",
+     "run_stamp_columns": [],
+     "enricher_backups": [],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 304,
+       "how": "full csv scan, header excluded"
+      }
+     ]
+    },
+    {
+     "table": "subaward_identifier_netnew.csv",
+     "present": true,
+     "path": "data/clean/subaward_identifier_netnew.csv",
+     "sha256": "3cc3807156814c31beea779aa7fff05f91fcd6500899a7b0e384ba4672a35763",
+     "bytes": 45085,
+     "rows": 210,
+     "columns": [
+      "uei",
+      "cage_code",
+      "duns",
+      "legal_business_name",
+      "role",
+      "state",
+      "n_subawards",
+      "first_year",
+      "last_year",
+      "total_subaward_usd",
+      "malformed_flag",
+      "source_file",
+      "total_usd_as_sub",
+      "total_usd_as_prime",
+      "n_name_variants",
+      "name_variants",
+      "uei_new_vs_union",
+      "cage_new_vs_union",
+      "uei_new_vs_tiered_ledger",
+      "cage_new_vs_tiered_ledger",
+      "compared_against"
+     ],
+     "primary_key": [
+      "uei"
+     ],
+     "primary_key_kind": "natural",
+     "primary_key_proven": true,
+     "primary_key_evidence": "uei: 210 distinct over 210 rows, 0 blank, full scan",
+     "codebook_block": null,
+     "documented": false,
+     "contract_status": "internal-by-decision",
+     "declared_grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "contract_key_columns": [
+      "uei",
+      "cage_code"
+     ],
+     "mtime": "2026-08-05T18:40:36+00:00",
+     "run_stamp_columns": [],
+     "enricher_backups": [],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 210,
+       "how": "full csv scan, header excluded"
+      }
+     ]
+    },
+    {
+     "table": "subawards.csv",
+     "present": true,
+     "path": "data/clean/subawards.csv",
+     "sha256": "ae80c2aff2f3b8f0099a56a4f02a35a1ac229a032226b2de1a3016005aad128d",
+     "bytes": 60608133,
+     "rows": 72837,
+     "columns": [
+      "sub_uei",
+      "sub_cage",
+      "sub_name",
+      "sub_state",
+      "prime_uei",
+      "prime_cage",
+      "prime_name",
+      "prime_award_id",
+      "subaward_amount",
+      "subaward_date",
+      "fiscal_year",
+      "naics",
+      "psc",
+      "description",
+      "direction",
+      "source_file",
+      "fetched_date",
+      "subaward_number",
+      "source_url",
+      "sub_parent_uei",
+      "sub_parent_cage",
+      "sub_parent_name",
+      "prime_parent_uei",
+      "prime_parent_cage",
+      "prime_parent_name",
+      "naics_title",
+      "psc_title",
+      "prime_top_awarding_agency",
+      "prime_set_aside",
+      "pre_2000_flag",
+      "floor_basis_field",
+      "source_dataset",
+      "source_population",
+      "award_kind",
+      "subaward_type",
+      "prime_award_unique_key",
+      "prime_award_amount",
+      "subaward_to_prime_ratio",
+      "subaward_exceeds_prime_flag",
+      "action_date_precedes_ffata_flag",
+      "subaward_sam_report_year",
+      "prime_native_tribe_id",
+      "prime_native_tier",
+      "sub_native_tribe_id",
+      "sub_native_tier",
+      "sub_business_types",
+      "prime_awarding_sub_agency",
+      "duplicate_status",
+      "promoted_date",
+      "subaward_amount_real2025",
+      "deflator_factor_2025",
+      "inflation_base_year",
+      "cedar_uid"
+     ],
+     "primary_key": [
+      "subaward_number",
+      "subaward_amount",
+      "description",
+      "source_url"
+     ],
+     "primary_key_kind": "BLOCKED",
+     "primary_key_proven": null,
+     "primary_key_evidence": null,
+     "codebook_block": "02b_subcontracting",
+     "documented": true,
+     "contract_status": "shippable",
+     "declared_grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "contract_key_columns": [
+      "cedar_uid"
+     ],
+     "mtime": "2026-08-29T05:32:23+00:00",
+     "run_stamp_columns": [],
+     "enricher_backups": [
+      {
+       "backup": "data/clean/subawards.csv.bak_2026-08-05",
+       "tag": "2026-08-05",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "UNATTRIBUTED"
+       ]
+      },
+      {
+       "backup": "data/clean/subawards.csv.bak_2026-08-12_pre121",
+       "tag": "2026-08-12_pre121",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "121_pull_subawards_api.py"
+       ]
+      },
+      {
+       "backup": "data/clean/subawards.csv.bak_2026-08-26_pre_192_apply_ancsa_resolutions_in_place",
+       "tag": "2026-08-26_pre_192_apply_ancsa_resolutions_in_place",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "192_apply_ancsa_resolutions_in_place.py"
+       ]
+      },
+      {
+       "backup": "data/clean/subawards.csv.bak_2026-08-26_pre_250_demote_stale_tierA_subaward_rows",
+       "tag": "2026-08-26_pre_250_demote_stale_tierA_subaward_rows",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "250_demote_stale_tierA_subaward_rows.py"
+       ]
+      },
+      {
+       "backup": "data/clean/subawards.csv.bak_2026-08-28_pre121",
+       "tag": "2026-08-28_pre121",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "121_pull_subawards_api.py"
+       ]
+      },
+      {
+       "backup": "data/clean/subawards.csv.bak_2026-08-28_pre505",
+       "tag": "2026-08-28_pre505",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "503_identity.py"
+       ]
+      },
+      {
+       "backup": "data/clean/subawards.csv.bak_2026-08-28_pre_121_pull_subawards_api",
+       "tag": "2026-08-28_pre_121_pull_subawards_api",
+       "attribution": "numeric_prefix_in_tag",
+       "written_by": [
+        "121_pull_subawards_api.py"
+       ]
+      },
+      {
+       "backup": "data/clean/subawards.csv.bak_2026-08-29_pre354",
+       "tag": "2026-08-29_pre354",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "354_correction_register.py"
+       ]
+      }
+     ],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 72837,
+       "how": "full csv scan, header excluded"
+      },
+      {
+       "check": "distinct_cedar_uid",
+       "value": 155,
+       "blank": 41354,
+       "how": "full scan"
+      }
+     ]
+    }
+   ],
+   "rebuild_command": "py -3 code/build.py run subcontracting --execute",
+   "replayability": {
+    "verdict": "not_exactly_replayable",
+    "blocking_components": [
+     {
+      "component": "input discovery",
+      "class": "undiscovered_inputs",
+      "why": "2 read(s) by an EXECUTED script could not be resolved to a retained input",
+      "detail": [
+       {
+        "name": "_HOSTLOCK_api.usaspending.gov.json",
+        "referenced_by": "121_pull_subawards_api.py",
+        "resolves_on_disk": false,
+        "severity": "blocking",
+        "why": "an executed script names this read and no discovery channel resolved it to a retained input"
+       },
+       {
+        "name": "_state.json",
+        "referenced_by": "121_pull_subawards_api.py",
+        "resolves_on_disk": false,
+        "severity": "blocking",
+        "why": "an executed script names this read and no discovery channel resolved it to a retained input"
+       }
+      ]
+     },
+     {
+      "component": "released output predates a recorded input",
+      "class": "output_stale_vs_input",
+      "why": "5 output(s) were last written BEFORE an input this manifest records as consumed. The released bytes were not produced by those inputs, so a faithful replay CANNOT reproduce them and should not be expected to.",
+      "evidence_strength": "mtime only. A content-identical rewrite of an input moves its mtime without changing what it says, so this can flag a release that is in fact current. It stays blocking because the opposite error - shipping a stale table as replayable - is the one that costs money.",
+      "detail": [
+       {
+        "table": "prime_sub_network.csv",
+        "output_written": "2026-08-05T18:40:36+00:00",
+        "inputs_written_later": [
+         {
+          "input": "data/clean/cedar_identifier_ledger_final.csv",
+          "written": "2026-08-29T05:32:04+00:00"
+         },
+         {
+          "input": "data/clean/codebook_master.csv",
+          "written": "2026-08-29T01:05:39+00:00"
+         },
+         {
+          "input": "data/clean/fpds_uei_cage_map.csv",
+          "written": "2026-08-29T05:56:00+00:00"
+         },
+         {
+          "input": "data/clean/fpds_uei_edges.csv",
+          "written": "2026-08-29T05:56:01+00:00"
+         },
+         {
+          "input": "data/clean/inflation_deflator.csv",
+          "written": "2026-08-06T21:03:41+00:00"
+         },
+         {
+          "input": "data/clean/series_breaks.csv",
+          "written": "2026-08-26T22:48:02+00:00"
+         },
+         {
+          "input": "data/clean/subawards.csv",
+          "written": "2026-08-29T05:32:23+00:00"
+         },
+         {
+          "input": "data/spine/cedar_entity_spine.csv",
+          "written": "2026-08-29T07:22:35+00:00"
+         }
+        ]
+       },
+       {
+        "table": "subaward_entity_rollup.csv",
+        "output_written": "2026-08-29T03:44:45+00:00",
+        "inputs_written_later": [
+         {
+          "input": "data/clean/cedar_identifier_ledger_final.csv",
+          "written": "2026-08-29T05:32:04+00:00"
+         },
+         {
+          "input": "data/clean/fpds_uei_cage_map.csv",
+          "written": "2026-08-29T05:56:00+00:00"
+         },
+         {
+          "input": "data/clean/fpds_uei_edges.csv",
+          "written": "2026-08-29T05:56:01+00:00"
+         },
+         {
+          "input": "data/clean/subawards.csv",
+          "written": "2026-08-29T05:32:23+00:00"
+         },
+         {
+          "input": "data/spine/cedar_entity_spine.csv",
+          "written": "2026-08-29T07:22:35+00:00"
+         }
+        ]
+       },
+       {
+        "table": "subaward_identifier_harvest.csv",
+        "output_written": "2026-08-05T18:40:36+00:00",
+        "inputs_written_later": [
+         {
+          "input": "data/clean/cedar_identifier_ledger_final.csv",
+          "written": "2026-08-29T05:32:04+00:00"
+         },
+         {
+          "input": "data/clean/codebook_master.csv",
+          "written": "2026-08-29T01:05:39+00:00"
+         },
+         {
+          "input": "data/clean/fpds_uei_cage_map.csv",
+          "written": "2026-08-29T05:56:00+00:00"
+         },
+         {
+          "input": "data/clean/fpds_uei_edges.csv",
+          "written": "2026-08-29T05:56:01+00:00"
+         },
+         {
+          "input": "data/clean/inflation_deflator.csv",
+          "written": "2026-08-06T21:03:41+00:00"
+         },
+         {
+          "input": "data/clean/series_breaks.csv",
+          "written": "2026-08-26T22:48:02+00:00"
+         },
+         {
+          "input": "data/clean/subawards.csv",
+          "written": "2026-08-29T05:32:23+00:00"
+         },
+         {
+          "input": "data/spine/cedar_entity_spine.csv",
+          "written": "2026-08-29T07:22:35+00:00"
+         }
+        ]
+       },
+       {
+        "table": "subaward_identifier_netnew.csv",
+        "output_written": "2026-08-05T18:40:36+00:00",
+        "inputs_written_later": [
+         {
+          "input": "data/clean/cedar_identifier_ledger_final.csv",
+          "written": "2026-08-29T05:32:04+00:00"
+         },
+         {
+          "input": "data/clean/codebook_master.csv",
+          "written": "2026-08-29T01:05:39+00:00"
+         },
+         {
+          "input": "data/clean/fpds_uei_cage_map.csv",
+          "written": "2026-08-29T05:56:00+00:00"
+         },
+         {
+          "input": "data/clean/fpds_uei_edges.csv",
+          "written": "2026-08-29T05:56:01+00:00"
+         },
+         {
+          "input": "data/clean/inflation_deflator.csv",
+          "written": "2026-08-06T21:03:41+00:00"
+         },
+         {
+          "input": "data/clean/series_breaks.csv",
+          "written": "2026-08-26T22:48:02+00:00"
+         },
+         {
+          "input": "data/clean/subawards.csv",
+          "written": "2026-08-29T05:32:23+00:00"
+         },
+         {
+          "input": "data/spine/cedar_entity_spine.csv",
+          "written": "2026-08-29T07:22:35+00:00"
+         }
+        ]
+       },
+       {
+        "table": "subawards.csv",
+        "output_written": "2026-08-29T05:32:23+00:00",
+        "inputs_written_later": [
+         {
+          "input": "data/clean/fpds_uei_cage_map.csv",
+          "written": "2026-08-29T05:56:00+00:00"
+         },
+         {
+          "input": "data/clean/fpds_uei_edges.csv",
+          "written": "2026-08-29T05:56:01+00:00"
+         },
+         {
+          "input": "data/spine/cedar_entity_spine.csv",
+          "written": "2026-08-29T07:22:35+00:00"
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "component": "in-place enricher outside the collection's plan",
+      "class": "undeclared_enricher",
+      "why": "a script wrote these outputs AFTER the rebuilder and is not in the plan, so the manifest's command list does not reproduce the released columns. The evidence is the enricher's own .bak_ file, not an inference.",
+      "detail": [
+       {
+        "table": "subaward_entity_rollup.csv",
+        "script": "503_identity.py",
+        "evidence": "data/clean/subaward_entity_rollup.csv.bak_2026-08-28_pre505"
+       },
+       {
+        "table": "subawards.csv",
+        "script": "UNATTRIBUTED",
+        "evidence": "data/clean/subawards.csv.bak_2026-08-05"
+       },
+       {
+        "table": "subawards.csv",
+        "script": "192_apply_ancsa_resolutions_in_place.py",
+        "evidence": "data/clean/subawards.csv.bak_2026-08-26_pre_192_apply_ancsa_resolutions_in_place"
+       },
+       {
+        "table": "subawards.csv",
+        "script": "503_identity.py",
+        "evidence": "data/clean/subawards.csv.bak_2026-08-28_pre505"
+       },
+       {
+        "table": "subawards.csv",
+        "script": "354_correction_register.py",
+        "evidence": "data/clean/subawards.csv.bak_2026-08-29_pre354"
+       }
+      ]
+     },
+     {
+      "component": "run date stamped into output rows",
+      "class": "nondeterministic_output_column",
+      "why": "these columns hold one constant date - the day the build ran - so two faithful runs on two days produce different bytes. Compare with the column excluded, or make the column derive from the SOURCE's date rather than the clock.",
+      "detail": [
+       {
+        "table": "prime_sub_network.csv",
+        "columns": [
+         {
+          "column": "fetched_date",
+          "constant_value": "2026-08-05"
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "component": "absolute project root hardcoded in code",
+      "class": "code_not_relocatable",
+      "why": "3 script(s) in scope bind the project root to 'C:\\\\Users\\\\esm247\\\\Desktop\\\\Cedar Press', so a checkout at any other path reads and WRITES the live tree. A clean-room replay requires the documented root rewrite (see docs/RELEASE_REPLAY_LOG.md, adaptation A1).",
+      "detail": [
+       "20_build_subcontracts.py",
+       "250_demote_stale_tierA_subaward_rows.py",
+       "cedar_codebook.py"
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "release_verdict": "not_exactly_replayable",
+ "capture_integrity": {
+  "inputs_rechecked": 13,
+  "outputs_rechecked": 5,
+  "input_check": "sha256 + (mtime, size)",
+  "output_check": "(mtime, size) only - see the note in cmd_build",
+  "changed_during_capture": [],
+  "inputs_rewritten_same_content": [],
+  "outputs_changed_during_capture": [],
+  "quiescent": true,
+  "enforced": true
+ }
+}

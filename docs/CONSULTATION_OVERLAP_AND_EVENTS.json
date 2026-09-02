@@ -1,0 +1,49 @@
+{
+ "measured_date": "2026-09-02",
+ "script": "code/1089_fr_consultation_overlap_and_event_parse.py",
+ "rows": 11402,
+ "distinct_fr_documents": 2313,
+ "nagpra_overlap": {
+  "rows_whose_notice_is_a_nagpra_notice": 10920,
+  "rows_not_in_nagpra_notices": 482,
+  "distinct_documents_shared_with_nagpra": 1831,
+  "nagpra_notices_total": 6792,
+  "nagpra_notices_not_represented_here": 4961,
+  "bridge": {
+   "notice_not_in_nagpra_dataset": 482,
+   "same_notice_and_party_in_nagpra_bridge": 8788,
+   "same_notice_different_party": 1606,
+   "no_tribe_resolved_on_this_row": 526
+  },
+  "coverage_window": {
+   "inside_the_2011_2022_nagpra_window": 10882,
+   "after_the_2024_43_CFR_10_rewrite_broke_the_consultation_sentence_net": 38
+  }
+ },
+ "event_fields": {
+  "event_start_date": {
+   "before": 93,
+   "after": 190
+  },
+  "event_end_date": {
+   "before": 93,
+   "after": 190
+  },
+  "location": {
+   "before": 60,
+   "after": 103
+  }
+ },
+ "event_date_basis": {
+  "dates_field_of_a_notice_whose_own_ACTION_line_says_notice_of_meetings": 57,
+  "dates_field_sentence_with_an_event_verb": 14,
+  "supplementary_information_sentence_with_an_event_verb": 26
+ },
+ "location_basis": {
+  "addresses_field_segment_anchored_to_a_meeting": 27,
+  "dates_field_segment_anchored_to_a_meeting": 5,
+  "supplementary_information_segment_anchored_to_a_meeting": 11
+ },
+ "notice_texts_read": 2313,
+ "notice_texts_not_on_disk": 0
+}

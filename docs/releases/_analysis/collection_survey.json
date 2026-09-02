@@ -1,0 +1,369 @@
+{
+ "generated_at": "2026-08-29T10:33:36+00:00",
+ "commit": "6c92a41f7b3275f3e4ee8edafd03cfb8e65be5ce",
+ "note": "footprints are what the discovery channels can SEE; read them beside n_undiscovered_inputs",
+ "collections": [
+  {
+   "collection": "nagpra",
+   "shelf": "standard",
+   "n_tables": 4,
+   "n_tables_present": 4,
+   "n_scripts_to_run": 2,
+   "n_phase1": 2,
+   "n_phase2": 0,
+   "plan_scripts_missing": [],
+   "n_code_closure": 4,
+   "n_inputs": 8,
+   "n_directory_inputs": 1,
+   "input_bytes": 295425855,
+   "input_files": 6779,
+   "inputs_over_retain_max": [],
+   "n_undiscovered_inputs": 0,
+   "output_bytes": 48900815,
+   "blocked_scripts": [],
+   "ambiguous_scripts": []
+  },
+  {
+   "collection": "native-owned-businesses",
+   "shelf": "pro",
+   "n_tables": 7,
+   "n_tables_present": 7,
+   "n_scripts_to_run": 1,
+   "n_phase1": 0,
+   "n_phase2": 1,
+   "plan_scripts_missing": [],
+   "n_code_closure": 1,
+   "n_inputs": 4,
+   "n_directory_inputs": 0,
+   "input_bytes": 816383868,
+   "input_files": 4,
+   "inputs_over_retain_max": [
+    {
+     "path": "data/clean/prime_contracts.csv",
+     "bytes": 815967130
+    }
+   ],
+   "n_undiscovered_inputs": 0,
+   "output_bytes": 1112486,
+   "blocked_scripts": [],
+   "ambiguous_scripts": [
+    "241_promote_individual_native_firms_in_place.py"
+   ]
+  },
+  {
+   "collection": "federal-register",
+   "shelf": "standard",
+   "n_tables": 26,
+   "n_tables_present": 26,
+   "n_scripts_to_run": 7,
+   "n_phase1": 6,
+   "n_phase2": 1,
+   "plan_scripts_missing": [],
+   "n_code_closure": 10,
+   "n_inputs": 31,
+   "n_directory_inputs": 7,
+   "input_bytes": 842984567,
+   "input_files": 11429,
+   "inputs_over_retain_max": [],
+   "n_undiscovered_inputs": 6,
+   "output_bytes": 594258621,
+   "blocked_scripts": [],
+   "ambiguous_scripts": [
+    "130_build_section_106_consultation.py"
+   ]
+  },
+  {
+   "collection": "subcontracting",
+   "shelf": "pro",
+   "n_tables": 5,
+   "n_tables_present": 5,
+   "n_scripts_to_run": 4,
+   "n_phase1": 1,
+   "n_phase2": 3,
+   "plan_scripts_missing": [],
+   "n_code_closure": 7,
+   "n_inputs": 20,
+   "n_directory_inputs": 7,
+   "input_bytes": 1882315143,
+   "input_files": 252,
+   "inputs_over_retain_max": [
+    {
+     "path": "data/raw/subcontracts/usaspending_subawards_2026-08-05",
+     "bytes": 1210737537
+    }
+   ],
+   "n_undiscovered_inputs": 2,
+   "output_bytes": 60788105,
+   "blocked_scripts": [],
+   "ambiguous_scripts": []
+  },
+  {
+   "collection": "nonprofits",
+   "shelf": "pro",
+   "n_tables": 12,
+   "n_tables_present": 12,
+   "n_scripts_to_run": 11,
+   "n_phase1": 3,
+   "n_phase2": 8,
+   "plan_scripts_missing": [],
+   "n_code_closure": 13,
+   "n_inputs": 67,
+   "n_directory_inputs": 6,
+   "input_bytes": 2021403790,
+   "input_files": 11397,
+   "inputs_over_retain_max": [
+    {
+     "path": "data/raw/fac/pdf",
+     "bytes": 765156961
+    }
+   ],
+   "n_undiscovered_inputs": 24,
+   "output_bytes": 119724871,
+   "blocked_scripts": [],
+   "ambiguous_scripts": []
+  },
+  {
+   "collection": "legislation",
+   "shelf": "standard",
+   "n_tables": 13,
+   "n_tables_present": 13,
+   "n_scripts_to_run": 5,
+   "n_phase1": 2,
+   "n_phase2": 3,
+   "plan_scripts_missing": [],
+   "n_code_closure": 6,
+   "n_inputs": 54,
+   "n_directory_inputs": 6,
+   "input_bytes": 2138195553,
+   "input_files": 10801,
+   "inputs_over_retain_max": [
+    {
+     "path": "data/raw/external/votingpatterns/HSall_votes.csv",
+     "bytes": 679108702
+    }
+   ],
+   "n_undiscovered_inputs": 10,
+   "output_bytes": 22251973,
+   "blocked_scripts": [],
+   "ambiguous_scripts": []
+  },
+  {
+   "collection": "funding",
+   "shelf": "standard",
+   "n_tables": 17,
+   "n_tables_present": 17,
+   "n_scripts_to_run": 12,
+   "n_phase1": 8,
+   "n_phase2": 4,
+   "plan_scripts_missing": [],
+   "n_code_closure": 13,
+   "n_inputs": 27,
+   "n_directory_inputs": 4,
+   "input_bytes": 2412516131,
+   "input_files": 327,
+   "inputs_over_retain_max": [
+    {
+     "path": "data/clean/faads_transactions_all_agencies.csv",
+     "bytes": 1078238008
+    },
+    {
+     "path": "data/clean/federal_funding_transactions.csv",
+     "bytes": 578490937
+    }
+   ],
+   "n_undiscovered_inputs": 16,
+   "output_bytes": 1704565325,
+   "blocked_scripts": [],
+   "ambiguous_scripts": []
+  },
+  {
+   "collection": "_entity_layer",
+   "shelf": "infrastructure",
+   "n_tables": 47,
+   "n_tables_present": 47,
+   "n_scripts_to_run": 42,
+   "n_phase1": 10,
+   "n_phase2": 32,
+   "plan_scripts_missing": [],
+   "n_code_closure": 47,
+   "n_inputs": 112,
+   "n_directory_inputs": 7,
+   "input_bytes": 2938432644,
+   "input_files": 514,
+   "inputs_over_retain_max": [
+    {
+     "path": "data/clean/federal_funding_transactions.csv",
+     "bytes": 578490937
+    },
+    {
+     "path": "data/clean/prime_contracts.csv",
+     "bytes": 815967130
+    }
+   ],
+   "n_undiscovered_inputs": 56,
+   "output_bytes": 87274182,
+   "blocked_scripts": [
+    "01_build_entity_spine.py",
+    "09_import_rulings.py"
+   ],
+   "ambiguous_scripts": [
+    "36_cull_entity_candidates.py",
+    "85_build_admin_region_crosswalk.py"
+   ]
+  },
+  {
+   "collection": "contractors",
+   "shelf": "pro",
+   "n_tables": 11,
+   "n_tables_present": 11,
+   "n_scripts_to_run": 8,
+   "n_phase1": 3,
+   "n_phase2": 5,
+   "plan_scripts_missing": [],
+   "n_code_closure": 10,
+   "n_inputs": 13,
+   "n_directory_inputs": 2,
+   "input_bytes": 5954939783,
+   "input_files": 194,
+   "inputs_over_retain_max": [
+    {
+     "path": "data/clean/prime_contracts.csv",
+     "bytes": 815967130
+    },
+    {
+     "path": "data/raw/esm_hci/ESM/raw",
+     "bytes": 4828510074
+    }
+   ],
+   "n_undiscovered_inputs": 9,
+   "output_bytes": 1820887886,
+   "blocked_scripts": [],
+   "ambiguous_scripts": [
+    "114_pull_prime_archive.py",
+    "163_load_sam_contract_awards.py",
+    "40_build_prime_contracts.py"
+   ]
+  },
+  {
+   "collection": "gaming",
+   "shelf": "grove",
+   "n_tables": 53,
+   "n_tables_present": 53,
+   "n_scripts_to_run": 39,
+   "n_phase1": 16,
+   "n_phase2": 23,
+   "plan_scripts_missing": [],
+   "n_code_closure": 44,
+   "n_inputs": 103,
+   "n_directory_inputs": 19,
+   "input_bytes": 8045515322,
+   "input_files": 9919,
+   "inputs_over_retain_max": [
+    {
+     "path": "data/raw/external/compacts/pdf",
+     "bytes": 2093549850
+    },
+    {
+     "path": "data/raw/external/gaming_official",
+     "bytes": 1166569072
+    },
+    {
+     "path": "data/raw/external/nigc_ordinances/pdf",
+     "bytes": 3354567800
+    }
+   ],
+   "n_undiscovered_inputs": 39,
+   "output_bytes": 198650461,
+   "blocked_scripts": [],
+   "ambiguous_scripts": [
+    "102_build_coverage_profile.py",
+    "147_build_fac_single_audits.py",
+    "15e_finalize_terms.py"
+   ]
+  },
+  {
+   "collection": "natural-resources",
+   "shelf": "pro",
+   "n_tables": 9,
+   "n_tables_present": 9,
+   "n_scripts_to_run": 6,
+   "n_phase1": 2,
+   "n_phase2": 4,
+   "plan_scripts_missing": [
+    "update_index.py"
+   ],
+   "n_code_closure": 7,
+   "n_inputs": 44,
+   "n_directory_inputs": 5,
+   "input_bytes": 310501722,
+   "input_files": 230,
+   "inputs_over_retain_max": [],
+   "n_undiscovered_inputs": 3,
+   "output_bytes": 23281395,
+   "blocked_scripts": [],
+   "ambiguous_scripts": [
+    "135_build_resource_assets.py"
+   ]
+  },
+  {
+   "collection": "deals",
+   "shelf": "standard",
+   "n_tables": 19,
+   "n_tables_present": 19,
+   "n_scripts_to_run": 14,
+   "n_phase1": 9,
+   "n_phase2": 5,
+   "plan_scripts_missing": [
+    "build_v2.py"
+   ],
+   "n_code_closure": 15,
+   "n_inputs": 29,
+   "n_directory_inputs": 2,
+   "input_bytes": 1112451138,
+   "input_files": 1214,
+   "inputs_over_retain_max": [
+    {
+     "path": "data/clean/federal_funding_transactions.csv",
+     "bytes": 578490937
+    }
+   ],
+   "n_undiscovered_inputs": 18,
+   "output_bytes": 3750641,
+   "blocked_scripts": [
+    "88_build_deals_taxonomy.py"
+   ],
+   "ambiguous_scripts": [
+    "88_build_deals_taxonomy.py"
+   ]
+  },
+  {
+   "collection": "lobbying",
+   "shelf": "standard",
+   "n_tables": 37,
+   "n_tables_present": 37,
+   "n_scripts_to_run": 18,
+   "n_phase1": 9,
+   "n_phase2": 9,
+   "plan_scripts_missing": [
+    "05_match_filings_v2.py"
+   ],
+   "n_code_closure": 21,
+   "n_inputs": 70,
+   "n_directory_inputs": 8,
+   "input_bytes": 2270393051,
+   "input_files": 9119,
+   "inputs_over_retain_max": [
+    {
+     "path": "data/clean/prime_contracts.csv",
+     "bytes": 815967130
+    }
+   ],
+   "n_undiscovered_inputs": 20,
+   "output_bytes": 162318369,
+   "blocked_scripts": [],
+   "ambiguous_scripts": [
+    "182_rule_lobbying_registrant_native_ownership.py"
+   ]
+  }
+ ]
+}

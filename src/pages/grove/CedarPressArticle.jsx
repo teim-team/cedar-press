@@ -160,9 +160,13 @@ function DrawnFrom({ id, user }) {
         // is a download everywhere in the product, and this block keeps
         // that contract at the end of a piece.
         <button type="button" className="cp-ar__take" onClick={() => downloadCsv(entry)}>
-          {/* Same honesty as the shelf tiles: a collection without a release
-              bundle delivers its description, and the label says so. */}
-          {hasReleaseFile(entry) ? "Download the collection" : "Download the collection description"}{" "}
+          {/* Same honesty as the shelf tiles: what downloads is ten real rows
+              of the collection's flagship table, not the collection, and a
+              collection without even a sample delivers its description. The
+              label says which one is arriving. */}
+          {hasReleaseFile(entry)
+            ? "Download a ten-row sample"
+            : "Download the collection description"}{" "}
           <span aria-hidden="true">&#8595;</span>
         </button>
       ) : (

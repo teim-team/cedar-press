@@ -1,0 +1,189 @@
+{
+  "measured_date": "2026-09-02",
+  "notices": 6792,
+  "bridge_rows": 51579,
+  "cached_texts": 6792,
+  "R1": {
+    "bridge_rows_measured_against_own_full_text": 51579,
+    "rows_not_literally_verbatim_in_that_notice": 227,
+    "of_those_only_a_parser_punctuation_change": 226,
+    "of_those_only_whitespace_at_a_markup_boundary": 1,
+    "whitespace_examples": [
+      [
+        "2014-29904",
+        "{list tribes in alphabetical order per the BIA list: http://www.gpo.gov/fdsys/pkg/FR-2012-08-10/pdf/2012-19588.pdf{time}",
+        "aboriginal_land",
+        "no_spine_match",
+        "whitespace_at_a_markup_boundary"
+      ]
+    ],
+    "rows_whose_verbatim_name_is_absent_from_that_notice": 0,
+    "absent_examples": [],
+    "punctuation_examples": [
+      [
+        "01-25152",
+        "Te-Moak Tribes of Western Shoshone Indians of Nevada (Four constituent bands: Battle Mountain Band, Elko Band, South Fork Band and Wells Band)",
+        "consulted",
+        "containment",
+        "punctuation_changed_by_the_parser"
+      ],
+      [
+        "01-25152",
+        "Te-Moak Tribes of Western Shoshone Indians of Nevada (Four constituent bands: Battle Mountain Band, Elko Band, South Fork Band and Wells Band)",
+        "culturally_affiliated",
+        "containment",
+        "punctuation_changed_by_the_parser"
+      ],
+      [
+        "01-25152",
+        "Te-Moak Tribes of Western Shoshone Indians of Nevada (Four constituent bands: Battle Mountain Band, Elko Band, South Fork Band and Wells Band)",
+        "repatriation_recipient",
+        "containment",
+        "punctuation_changed_by_the_parser"
+      ]
+    ],
+    "rows_whose_verbatim_name_is_absent_from_its_own_span": 11962,
+    "of_those_explained_by_the_600_char_span_cap": 11940,
+    "of_those_NOT_explained_by_truncation": 22,
+    "span_cap_note": "source_span_text is capped at 600 characters by the builder, so it is NOT a complete evidence trail on a long consultation list. The full cached Federal Register text is, and is what R1 tests.",
+    "resolve_method_heads": {
+      "alias": 26126,
+      "containment": 11021,
+      "core": 5461,
+      "exact": 4007,
+      "no_spine_match": 2383,
+      "generic_reference": 863,
+      "conjunction_split+alias": 620,
+      "conjunction_split+containment": 391,
+      "conjunction_split+core": 356,
+      "ambiguous_containment": 219,
+      "conjunction_split+exact": 129,
+      "ambiguous_core": 3
+    },
+    "resolve_methods_naming_geography": [],
+    "party_rows_that_are_federal_register_furniture": 1,
+    "furniture_rows_carrying_a_tribe_id": 0,
+    "furniture_examples": [
+      [
+        "2014-29904",
+        "{list tribes in alphabetical order per the BIA list: http://www.gpo.gov/fdsys/pkg/FR-2012-08-10/pdf/2012-19588"
+      ]
+    ]
+  },
+  "R2": {
+    "identity_layer_alias_rows": 6298,
+    "identity_layer_rows_sourced_from_nagpra": 0,
+    "republication": {
+      "corrections_folded": 269,
+      "jaccard_pairs_folded": 4,
+      "notices": 6792,
+      "families": 6519
+    },
+    "distinct_unresolved_party_names": 1091,
+    "clearing_three_notices": 166,
+    "clearing_three_INDEPENDENT_notices": 166,
+    "demoted_across_the_three_notice_bar": 0,
+    "aliases_that_lost_at_least_one_notice_to_the_test": 16,
+    "independence_test_is_inert": false,
+    "nagpra_aliases_below_the_bar": 0
+  },
+  "R3": {
+    "columns_tested": [
+      "responsible_party_statement",
+      "mni_statements",
+      "removal_location_statements"
+    ],
+    "columns_excluded_as_not_free_text": [
+      "aboriginal_land_entity_ids",
+      "affiliated_entity_ids",
+      "agency_names",
+      "artifact_mtime",
+      "consulted_entity_ids",
+      "cultural_items_total_stated",
+      "culturally_unidentifiable",
+      "disposition_priority_entity_ids",
+      "document_number",
+      "fetched_date",
+      "full_text_url",
+      "has_resolved_entity",
+      "html_url",
+      "institution_city",
+      "institution_count",
+      "institution_name",
+      "institution_name_basis",
+      "institution_names_all",
+      "institution_primary",
+      "institution_state",
+      "institution_type_derived",
+      "is_correction",
+      "letter_of_support_entity_ids",
+      "lineal_descendant_determination",
+      "mni_basis",
+      "mni_statement_count",
+      "mni_total_stated",
+      "n_aboriginal_land_named",
+      "n_aboriginal_land_resolved",
+      "n_affiliated_named",
+      "n_affiliated_resolved",
+      "n_associated_funerary_objects_stated",
+      "n_consulted_named",
+      "n_consulted_resolved",
+      "n_disposition_priority_named",
+      "n_disposition_priority_resolved",
+      "n_entities_resolved",
+      "n_letter_of_support_named",
+      "n_letter_of_support_resolved",
+      "n_objects_of_cultural_patrimony_stated",
+      "n_parties_named",
+      "n_repatriation_recipient_named",
+      "n_repatriation_recipient_resolved",
+      "n_sacred_objects_stated",
+      "n_unassociated_funerary_objects_stated",
+      "notice_title_form",
+      "notice_type",
+      "object_categories",
+      "parent_dataset",
+      "parse_template",
+      "pdf_url",
+      "publication_date",
+      "publication_year",
+      "removal_counties",
+      "removal_location_basis",
+      "removal_states",
+      "repatriation_eligible_date",
+      "repatriation_recipient_entity_ids",
+      "response_deadline_date",
+      "source_url",
+      "spans_found",
+      "statute_stage",
+      "title",
+      "window_days_derived"
+    ],
+    "per_column": {
+      "responsible_party_statement": {
+        "non_blank": 3064,
+        "verbatim_in_source": 3064,
+        "not_verbatim": 0,
+        "first_example_not_verbatim": null
+      },
+      "mni_statements": {
+        "non_blank": 4435,
+        "verbatim_in_source": 4435,
+        "not_verbatim": 0,
+        "first_example_not_verbatim": null
+      },
+      "removal_location_statements": {
+        "non_blank": 5412,
+        "verbatim_in_source": 5408,
+        "not_verbatim": 4,
+        "first_example_not_verbatim": [
+          "E8-11569",
+          "Marin County, CA || CA-MRN-17, De Silva Island, Richardson Bay, Marin County, CA, by San Francisco State University staff under the direction of Gary "
+        ]
+      }
+    },
+    "cells_not_verbatim_in_source": 4
+  },
+  "unmeasured": [],
+  "defects": []
+}

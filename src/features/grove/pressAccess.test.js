@@ -8,9 +8,9 @@ import test from "node:test";
 import { LAUNCH_COLLECTION } from "./collection.js";
 import {
   NATIVE_LINKAGE,
+  GROVE_INCLUDES,
   PRESS_CATALOG,
   PRESS_CATALOG_BY_ID,
-  PRESS_HISTORY_FROM,
   PRESS_TIERS,
   collectionsOnShelf,
 } from "./pressCatalog.js";
@@ -18,7 +18,8 @@ import {
   SHELF,
   canOpenDataset,
   canReadCedarPress,
-  historyFor,
+  coverageFrom,
+  coverageLabel,
   shelfReach,
   upgradeFor,
 } from "./pressAccess.js";
@@ -149,39 +150,110 @@ test("the catalog spans all three shelves", () => {
   }
 });
 
-// The second axis. Standard carries the collection but not its whole series.
-test("Standard sees a Standard collection from the Press window forward", () => {
+// ONE AXIS. The year cap was retired on 2026-09-02, so coverage is a property
+// of the collection and of nothing else. These tests are what is left of the
+// four that used to pin the second axis: they pin its absence, which is the
+// thing a future edit is most likely to undo by accident.
+test("coverage is the collection's, not the reader's", () => {
   const lobbying = PRESS_CATALOG_BY_ID.lobbying;
-  const h = historyFor({ workspace_tier: "press" }, lobbying);
-  assert.equal(h.from, PRESS_HISTORY_FROM);
-  assert.equal(h.full, lobbying.historyFrom);
-  assert.equal(h.deeper, true);
+  assert.equal(coverageFrom(lobbying), lobbying.coverage.from);
+  // No user is passed, because there is no user-shaped answer to give.
+  assert.equal(coverageFrom.length, 1);
 });
 
-test("Pro opens the reconstructed series behind a Standard collection", () => {
-  const lobbying = PRESS_CATALOG_BY_ID.lobbying;
-  const h = historyFor({ workspace_tier: "press_pro" }, lobbying);
-  assert.equal(h.from, lobbying.historyFrom);
-  assert.equal(h.deeper, false);
+test("no collection states coverage that depends on a tier", () => {
+  for (const entry of PRESS_CATALOG) {
+    assert.ok(entry.coverage, `${entry.id} states no coverage`);
+    assert.ok(
+      entry.coverage.kind === "series" || entry.coverage.kind === "roster",
+      `${entry.id} coverage kind ${entry.coverage.kind}`,
+    );
+    // The retired pair, gone rather than aliased. A `standardFrom` equal to
+    // the coverage year on every entry would read as a live second axis to
+    // the next person and would be one bad edit away from becoming one again.
+    assert.equal("standardFrom" in entry, false, `${entry.id} still carries standardFrom`);
+    assert.equal("historyFrom" in entry, false, `${entry.id} still carries historyFrom`);
+  }
 });
 
-// Selling depth that does not exist is a promise the data cannot keep. Deals
-// is the collection whose whole archive begins at the Press window itself, so
-// there is nothing behind it for Cedar Press+ to open.
-test("a collection with no archive behind the Press window offers no deeper history", () => {
-  const deals = PRESS_CATALOG_BY_ID.deals;
-  assert.ok(deals.historyFrom >= PRESS_HISTORY_FROM, "fixture assumption");
-  const h = historyFor({ workspace_tier: "press" }, deals);
-  assert.equal(h.from, deals.historyFrom);
-  assert.equal(h.deeper, false);
-  // Cedar Press+ reaches the same year, because that is all there is.
-  assert.equal(historyFor({ workspace_tier: "press_pro" }, deals).from, deals.historyFrom);
+// Every year on the shelf is a claim to a paying subscriber, so it has to be
+// a year rather than a placeholder or a date in the future.
+test("every series states a plausible year and every roster a capture date", () => {
+  const thisYear = new Date().getUTCFullYear();
+  for (const entry of PRESS_CATALOG) {
+    const { kind, from, captured } = entry.coverage;
+    if (kind === "series") {
+      assert.equal(typeof from, "number", `${entry.id}: ${from}`);
+      assert.ok(from >= 1800, `${entry.id}: ${from}`);
+      assert.ok(from <= thisYear, `${entry.id}: ${from}`);
+      assert.equal(captured, undefined, `${entry.id} is a series with a capture date`);
+    } else {
+      assert.match(captured, /^\d{4}-\d{2}-\d{2}$/, `${entry.id}: ${captured}`);
+      // The whole point of the shape. A roster carrying a `from` would be the
+      // old always-a-year field wearing a new name, and the two collections
+      // that are rosters have no honest year to put in it.
+      assert.equal(from, undefined, `${entry.id} is a roster with a from year`);
+    }
+  }
 });
 
-test("a capped collection reports no history for the reader", () => {
-  const h = historyFor({ workspace_tier: "press" }, PRESS_CATALOG_BY_ID.contractors);
-  assert.equal(h.from, null);
-  assert.equal(h.deeper, false);
+// The two rosters, named. Both sources publish who is on the list now and
+// archive nothing behind it, so if either ever turns into a series it should
+// be because a dated table was folded in, not because somebody typed a year.
+test("the rosters are rosters, and nothing reduces them to a year", () => {
+  for (const id of ["owned", "nonprofits"]) {
+    const entry = PRESS_CATALOG_BY_ID[id];
+    assert.equal(entry.coverage.kind, "roster", id);
+    assert.equal(coverageFrom(entry), null, `${id} produced a coverage year`);
+    assert.match(coverageLabel(entry), /^Current roster, captured /, coverageLabel(entry));
+  }
+});
+
+// The floors that are measured after an exclusion flag, pinned by value.
+// These are the two the unfiltered minimum gets wrong, and getting them wrong
+// is not a rounding error: it sells nine years of filer typos, and it dates
+// gaming intelligence from a lodge.
+test("the flag-corrected floors are the corrected ones", () => {
+  assert.equal(PRESS_CATALOG_BY_ID.subcontracting.coverage.from, 2010);
+  assert.equal(PRESS_CATALOG_BY_ID.gaming.coverage.from, 1979);
+});
+
+// A collection the reader cannot open still states its coverage: the shelf's
+// locked band shows what is inside it, and that is the argument for opening
+// it. What the reader cannot do is a `canOpenDataset` question.
+test("a collection outside the reader's shelf still states its coverage", () => {
+  const contractors = PRESS_CATALOG_BY_ID.contractors;
+  assert.equal(canOpenDataset({ workspace_tier: "press" }, contractors), false);
+  assert.equal(coverageFrom(contractors), contractors.coverage.from);
+});
+
+test("an entry with no coverage says so rather than guessing", () => {
+  assert.equal(coverageFrom(null), null);
+  assert.equal(coverageFrom({ id: "not-a-collection" }), null);
+  assert.equal(coverageLabel({ id: "not-a-collection" }), "Coverage varies");
+});
+
+// The shelf rollups summarise the collections below them, so they have to be
+// computed from those collections and have to skip the rosters: "as far back
+// as 2026" on the Press+ shelf would be a harvest date wearing a coverage
+// year's clothes.
+test("a shelf rollup reaches back as far as its deepest series, and no roster", () => {
+  const byId = Object.fromEntries(GROVE_INCLUDES.map((entry) => [entry.id, entry]));
+  for (const [id, shelf] of [
+    ["all-standard", "standard"],
+    ["all-pro", "pro"],
+  ]) {
+    const years = collectionsOnShelf(shelf)
+      .filter((entry) => entry.coverage.kind === "series")
+      .map((entry) => entry.coverage.from);
+    assert.equal(byId[id].reachesBackTo, Math.min(...years), id);
+    const captures = collectionsOnShelf(shelf)
+      .filter((entry) => entry.coverage.kind === "roster")
+      .map((entry) => Number(entry.coverage.captured.slice(0, 4)));
+    for (const year of captures) {
+      assert.notEqual(byId[id].reachesBackTo, year, `${id} reduced a roster capture`);
+    }
+  }
 });
 
 // Gaming is the reason to cross the second line, so what it may show without

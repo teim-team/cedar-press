@@ -61,3 +61,22 @@ Please report vulnerabilities as described in [SECURITY.md](SECURITY.md).
 ## Contact
 
 [contact@lumecon.ai](mailto:contact@lumecon.ai)
+
+## The data workspace
+
+This repository also contains the Cedar data workspace, merged on 2026-09-02.
+It has its own entry points and its own conventions:
+
+| | |
+|---|---|
+| Start here | [`START_HERE.md`](START_HERE.md) |
+| Rules for agents working in it | [`AGENTS.md`](AGENTS.md) |
+| Measured map of the collections | [`docs/DATA_ARCHITECTURE.md`](docs/DATA_ARCHITECTURE.md) |
+| The thirteen built datasets | `dist/customer/` (CSV + codebook + notes) |
+| Rebuild the deliverables | `py -3 code/1137_customer_dataset_combine.py build` |
+| Audit | `py -3 code/846_session_audit.py` |
+
+The two trees were developed independently and share no history; the merge that
+brought them together is a deliberate `--allow-unrelated-histories` join, and
+only three paths collided. `docs/ARCHITECTURE.md` describes the **web client**;
+`docs/DATA_ARCHITECTURE.md` is the generated map of the **data collections**.

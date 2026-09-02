@@ -1,0 +1,26 @@
+{
+  "built_date": "2026-09-02",
+  "n_flagged": 5,
+  "prime_dollars_M_at_stake": 0.007,
+  "by_tier": {
+    "B": 4,
+    "A": 1
+  },
+  "stats": {
+    "ho-chunk::in_family": 17,
+    "ho-chunk::agrees": 10,
+    "ho-chunk::FLAGGED": 4,
+    "ho-chunk::name_not_decisive": 3,
+    "cherokee::in_family": 201,
+    "cherokee::agrees": 77,
+    "cherokee::name_not_decisive": 123,
+    "cherokee::FLAGGED": 1,
+    "seminole::in_family": 28,
+    "seminole::agrees": 12,
+    "seminole::name_not_decisive": 16
+  },
+  "ledger_md5_before": "de3522a0cd88d7b020bbe8055656e704",
+  "ledger_md5_after": "de3522a0cd88d7b020bbe8055656e704",
+  "output": "review\\named_collision_families_2026-09-02.csv",
+  "script": "code/963_flag_named_collision_families.py"
+}

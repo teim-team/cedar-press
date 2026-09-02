@@ -7,30 +7,58 @@
 // feed is the one place that tracks changes, because one tracker is
 // something a reader checks and eleven is something they don't.
 //
-// Three collections ship with a real figure extract. The rest hand over what
-// Cedar holds about the collection itself: coverage, shelf, contents and
-// what it is joined to. Every download is something true; none of it is
-// invented rows. Real release bundles replace these when the data layer's
-// serializers exist (see docs/cedar-grove-press-boundary.md).
+// Eleven of the twelve collections ship a real preview extract: ten rows of
+// the collection's flagship table, straight out of Cedar's review bundle
+// (code/1135_full_dataset_review_bundle.py). The twelfth, and any shelf entry
+// with no release behind it, hands over what Cedar holds about the collection
+// itself: coverage, shelf, contents and what it is joined to. Every download
+// is something true; none of it is invented rows.
+//
+// THE PREVIEW IS NOT THE RELEASE
+// Ten rows is a sample and the surface must never call it the dataset. The
+// full spreadsheets are 6.2 GB and single tables exceed GitHub's file limit,
+// so they are not in this repository at all: `collectionTables()` carries
+// every table's row count, split and file count so a serving layer can find
+// the real file, and the manifest's `full_files.served` is `false` until one
+// exists.
+//
+// WHY THESE ARE ASYNC
+// The sample rows are static files the built site serves, not bundled bytes:
+// 169 sample files across the twelve collections is 1.4 MB of CSV, and
+// inlining it would load every reader's page for a button most never press.
+// So the file is fetched at click time. `hasSample` answers from the manifest
+// alone, with no fetch, because a tile has to label itself before the click.
 
-import { collectionCitation, collectionCsv } from "./collection.js";
+import { collectionCitation, collectionCsv, hasSample, samplePath } from "./collection.js";
+import { coverageLabel } from "./pressAccess.js";
 
 const csvCell = (value) => `"${String(value ?? "").replace(/"/g, '""')}"`;
 
 /**
- * Whether a real release extract exists for this collection. Everything else
+ * Whether a real extract exists for this collection. Everything else
  * downloads a description of the collection, and the surface has to say so:
  * a tile labeled "Download Federal Register" that hands over two columns of
  * metadata is a broken promise to a paying reader.
+ *
+ * Answered from the manifest, synchronously: this decides a label, and a
+ * label that has to await a network round trip renders wrong first.
  */
 export function hasReleaseFile(entry) {
-  return Boolean(collectionCsv(entry?.id));
+  return hasSample(entry?.id);
 }
 
-/** The file for a collection: the shipped extract, or its own description. */
-export function csvFor(entry) {
-  const shipped = collectionCsv(entry.id);
-  if (shipped) return { csv: shipped, name: `${entry.id}.csv` };
+/**
+ * The file for a collection: the shipped extract, or its own description.
+ *
+ * `fetchText` is injectable so this can be exercised without a network and
+ * without a DOM; it defaults to fetching the sample the manifest names.
+ */
+export async function csvFor(entry, fetchText = defaultFetchText) {
+  if (hasSample(entry.id)) {
+    const text = await fetchText(samplePath(entry.id));
+    const shipped = text == null ? null : collectionCsv(entry.id, text);
+    if (shipped) return { csv: shipped, name: `${entry.id}.csv` };
+  }
   // The file outlives the page, so it carries its own citation. Launch
   // datasets cite with their version; the rest of the shelf has no release
   // bookkeeping yet and cites by name.
@@ -41,7 +69,10 @@ export function csvFor(entry) {
     ["field", "value"],
     ["collection", entry.name],
     ["shelf", entry.shelf || entry.kind || ""],
-    ["coverage_from", entry.historyFrom || ""],
+    // The label, not the year: a roster has no year, and an empty
+    // coverage cell in a file that outlives the page reads as unknown
+    // rather than as "this is a roster".
+    ["coverage", coverageLabel(entry)],
     ["contents", entry.blurb || ""],
     ["entity_linkage", entry.linkage || ""],
     ["cite_as", citation],
@@ -52,8 +83,24 @@ export function csvFor(entry) {
   };
 }
 
-export function downloadCsv(entry) {
-  const { csv, name } = csvFor(entry);
+/**
+ * Fetch a sample file's text, or `null` if it cannot be read.
+ *
+ * A failed fetch falls back to the collection description rather than
+ * throwing: a download button that does nothing is worse than one that hands
+ * over the honest smaller thing, and the filename says which one arrived.
+ */
+async function defaultFetchText(path) {
+  try {
+    const response = await fetch(path);
+    return response.ok ? await response.text() : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function downloadCsv(entry) {
+  const { csv, name } = await csvFor(entry);
   if (!csv) return;
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -136,10 +183,21 @@ function zipOf(files) {
  * Everything on a shelf, one click, ONE download: an archive. Spacing
  * separate downloads out does not preserve the user's transient activation,
  * so browsers that block automatic downloads delivered only the first file.
+ *
+ * The await before the anchor is new and is a known risk to that same
+ * transient activation: the samples are fetched rather than bundled, so the
+ * click that started this may have aged out by the time the archive exists.
+ * The fetches are parallel and the files are small (1.4 MB across all twelve),
+ * which keeps the window short, and one archive is still strictly better than
+ * a dozen downloads. If a blocker is seen swallowing it, the fix is to
+ * prefetch on hover, not to inline 1.4 MB of CSV into the page.
  */
-export function downloadAll(entries, archiveName = "cedar-press-collections.zip") {
-  const files = entries
-    .map((entry) => csvFor(entry))
+export async function downloadAll(entries, archiveName = "cedar-press-samples.zip") {
+  // Fetched together rather than one after another: a shelf is a dozen
+  // collections and a serial await per tile is a dozen round trips before
+  // the first byte of the archive exists.
+  const built = await Promise.all(entries.map((entry) => csvFor(entry)));
+  const files = built
     .filter((file) => file.csv)
     .map((file) => ({ name: file.name, text: file.csv }));
   if (!files.length) return;

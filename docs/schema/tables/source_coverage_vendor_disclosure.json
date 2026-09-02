@@ -1,0 +1,230 @@
+{
+ "codebook_block": null,
+ "codebook_match_score": 0.333,
+ "columns": [
+  {
+   "access_tier": "undeclared",
+   "codebook_declared_type": null,
+   "description": "",
+   "examples": [
+    "SEC EDGAR full-text search",
+    "State gaming regulator licensing APPLICATIONS"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 45,
+   "n_distinct": 2,
+   "name": "source",
+   "nullable": false,
+   "observed_type": "text",
+   "pct_filled": 100.0,
+   "postgres_type": "text",
+   "primary_key": true,
+   "published": "",
+   "sqlite_type": "TEXT",
+   "type": "text",
+   "units": ""
+  },
+  {
+   "access_tier": "undeclared",
+   "codebook_declared_type": null,
+   "description": "",
+   "examples": [
+    "efts.sec.gov",
+    "(multiple)"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 12,
+   "n_distinct": 2,
+   "name": "host",
+   "nullable": false,
+   "observed_type": "text",
+   "pct_filled": 100.0,
+   "postgres_type": "text",
+   "primary_key": false,
+   "published": "",
+   "sqlite_type": "TEXT",
+   "type": "text",
+   "units": ""
+  },
+  {
+   "access_tier": "undeclared",
+   "codebook_declared_type": null,
+   "description": "",
+   "examples": [
+    "supplier filings naming a tribal gaming regulator",
+    "an applicant's enumeration of licences held in other jurisdictions, including tr"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 84,
+   "n_distinct": 2,
+   "name": "facet",
+   "nullable": false,
+   "observed_type": "text",
+   "pct_filled": 100.0,
+   "postgres_type": "text",
+   "primary_key": false,
+   "published": "",
+   "sqlite_type": "TEXT",
+   "type": "text",
+   "units": ""
+  },
+  {
+   "access_tier": "undeclared",
+   "codebook_declared_type": null,
+   "description": "",
+   "examples": [
+    "PUBLISHES",
+    "NOT_CHECKED"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 11,
+   "n_distinct": 2,
+   "name": "status",
+   "nullable": false,
+   "observed_type": "text",
+   "pct_filled": 100.0,
+   "postgres_type": "text",
+   "primary_key": false,
+   "published": "",
+   "sqlite_type": "TEXT",
+   "type": "text",
+   "units": ""
+  },
+  {
+   "access_tier": "undeclared",
+   "codebook_declared_type": null,
+   "description": "",
+   "examples": [
+    "660",
+    "0"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 3,
+   "n_distinct": 2,
+   "name": "n",
+   "nullable": false,
+   "observed_type": "integer",
+   "pct_filled": 100.0,
+   "postgres_type": "bigint",
+   "primary_key": false,
+   "published": "",
+   "sqlite_type": "INTEGER",
+   "type": "integer",
+   "units": ""
+  },
+  {
+   "access_tier": "undeclared",
+   "codebook_declared_type": null,
+   "description": "",
+   "examples": [
+    "660 distinct documents surfaced by 10 phrase queries; 655 fetched and parsed.",
+    "Applications and multi-jurisdictional personal history disclosure forms are the "
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 241,
+   "n_distinct": 2,
+   "name": "evidence",
+   "nullable": false,
+   "observed_type": "text",
+   "pct_filled": 100.0,
+   "postgres_type": "text",
+   "primary_key": false,
+   "published": "",
+   "sqlite_type": "TEXT",
+   "type": "text",
+   "units": ""
+  },
+  {
+   "access_tier": "undeclared",
+   "codebook_declared_type": null,
+   "description": "",
+   "examples": [
+    "EDGAR full-text search indexes 2001 onward. A vendor relationship disclosed only"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 145,
+   "n_distinct": 1,
+   "name": "coverage_floor",
+   "nullable": true,
+   "observed_type": "text",
+   "pct_filled": 50.0,
+   "postgres_type": "text",
+   "primary_key": false,
+   "published": "",
+   "sqlite_type": "TEXT",
+   "type": "text",
+   "units": ""
+  },
+  {
+   "access_tier": "undeclared",
+   "codebook_declared_type": null,
+   "description": "",
+   "examples": [
+    "2026-08-12"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 10,
+   "n_distinct": 1,
+   "name": "retrieved_at",
+   "nullable": false,
+   "observed_type": "date",
+   "pct_filled": 100.0,
+   "postgres_type": "date",
+   "primary_key": false,
+   "published": "",
+   "sqlite_type": "TEXT",
+   "type": "date",
+   "units": ""
+  },
+  {
+   "access_tier": "undeclared",
+   "codebook_declared_type": null,
+   "description": "",
+   "examples": [
+    "https://efts.sec.gov/LATEST/search-index"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 40,
+   "n_distinct": 1,
+   "name": "source_url",
+   "nullable": true,
+   "observed_type": "text",
+   "pct_filled": 50.0,
+   "postgres_type": "text",
+   "primary_key": false,
+   "published": "",
+   "sqlite_type": "TEXT",
+   "type": "text",
+   "units": ""
+  }
+ ],
+ "columns_with_no_definition": [],
+ "documented": false,
+ "file": "source_coverage_vendor_disclosure.csv",
+ "generated": "2026-08-26",
+ "licensed_columns_dropped": [],
+ "primary_key": {
+  "columns": [
+   "source"
+  ],
+  "evidence": "source: 2 distinct over 2 rows, 0 blank, full scan",
+  "kind": "natural",
+  "proven": true,
+  "rows": 2,
+  "scan": "full"
+ },
+ "rows_scanned": 2,
+ "scan": "full",
+ "status": "READY",
+ "table": "source_coverage_vendor_disclosure",
+ "type_mismatches_codebook_vs_file": []
+}

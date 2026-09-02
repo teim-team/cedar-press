@@ -1,0 +1,269 @@
+{
+ "codebook_block": "04b_section_106_consultation",
+ "codebook_match_score": 1.0,
+ "columns": [
+  {
+   "access_tier": "public",
+   "codebook_declared_type": "text",
+   "description": "The source that was swept.",
+   "examples": [
+    "Federal Register full-text index + document text",
+    "Advisory Council on Historic Preservation - case records",
+    "BLM ePlanning national NEPA register",
+    "FERC eLibrary",
+    "Agency Section 106 project files (correspondence, telephone logs, emails, meetin"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 101,
+   "n_distinct": 5,
+   "name": "source",
+   "nullable": false,
+   "observed_type": "text",
+   "pct_filled": 100.0,
+   "postgres_type": "text",
+   "primary_key": true,
+   "published": "1",
+   "sqlite_type": "TEXT",
+   "type": "text",
+   "units": "text"
+  },
+  {
+   "access_tier": "public",
+   "codebook_declared_type": "text",
+   "description": "Host probed, where the source is a website.",
+   "examples": [
+    "www.federalregister.gov",
+    "www.achp.gov",
+    "eplanning.blm.gov",
+    "elibrary.ferc.gov"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 23,
+   "n_distinct": 4,
+   "name": "host",
+   "nullable": true,
+   "observed_type": "text",
+   "pct_filled": 80.0,
+   "postgres_type": "text",
+   "primary_key": false,
+   "published": "1",
+   "sqlite_type": "TEXT",
+   "type": "text",
+   "units": "text"
+  },
+  {
+   "access_tier": "public",
+   "codebook_declared_type": "text",
+   "description": "PUBLISHES, WITHHOLDS, NOT_FOUND (swept and not found, naming what was swept) or NOT_CHECKED (nobody looked). These are four different facts and are never collapsed.",
+   "examples": [
+    "PUBLISHES",
+    "NOT_FOUND",
+    "NOT_CHECKED"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 11,
+   "n_distinct": 3,
+   "name": "coverage_state",
+   "nullable": false,
+   "observed_type": "text",
+   "pct_filled": 100.0,
+   "postgres_type": "text",
+   "primary_key": false,
+   "published": "1",
+   "sqlite_type": "TEXT",
+   "type": "text",
+   "units": "text"
+  },
+  {
+   "access_tier": "public",
+   "codebook_declared_type": "text",
+   "description": "Documents considered for this source.",
+   "examples": [
+    "1422"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 4,
+   "n_distinct": 1,
+   "name": "records_swept",
+   "nullable": true,
+   "observed_type": "integer",
+   "pct_filled": 20.0,
+   "postgres_type": "bigint",
+   "primary_key": false,
+   "published": "1",
+   "sqlite_type": "INTEGER",
+   "type": "integer",
+   "units": "text"
+  },
+  {
+   "access_tier": "public",
+   "codebook_declared_type": "text",
+   "description": "Documents whose full text was retrieved.",
+   "examples": [
+    "1422"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 4,
+   "n_distinct": 1,
+   "name": "records_retrieved",
+   "nullable": true,
+   "observed_type": "integer",
+   "pct_filled": 20.0,
+   "postgres_type": "bigint",
+   "primary_key": false,
+   "published": "1",
+   "sqlite_type": "INTEGER",
+   "type": "integer",
+   "units": "text"
+  },
+  {
+   "access_tier": "public",
+   "codebook_declared_type": "text",
+   "description": "The literal paths and queries used, so the sweep can be repeated.",
+   "examples": [
+    "561 documents ALREADY ON DISK in data/clean/federal_actions.csv whose title/abst",
+    "https://www.achp.gov/ (HTTP 200, 50,104 bytes, all outbound links extracted and ",
+    "https://eplanning.blm.gov/ (HTTP 200, 536,023 bytes); /robots.txt (404); /eplann",
+    "https://elibrary.ferc.gov/eLibrary/search (HTTP 200, 22,464 bytes); /eLibrary/fi"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 322,
+   "n_distinct": 4,
+   "name": "what_was_swept",
+   "nullable": true,
+   "observed_type": "text",
+   "pct_filled": 80.0,
+   "postgres_type": "text",
+   "primary_key": false,
+   "published": "1",
+   "sqlite_type": "TEXT",
+   "type": "text",
+   "units": "text"
+  },
+  {
+   "access_tier": "public",
+   "codebook_declared_type": "text",
+   "description": "What the sweep returned, with HTTP statuses.",
+   "examples": [
+    "1,343 retrieved documents carry an explicit Section 106 statutory marker; 1,240 ",
+    "The host answers. Everything the front page links to under Section 106 is GUIDAN",
+    "The root answers HTTP 200 with a substantial page; every register and API path t",
+    "eLibrary is a JavaScript application shell. Two different queries return the SAM",
+    "The ACHP directs agencies to document consultation this way. None of it is centr"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 278,
+   "n_distinct": 5,
+   "name": "finding",
+   "nullable": false,
+   "observed_type": "text",
+   "pct_filled": 100.0,
+   "postgres_type": "text",
+   "primary_key": false,
+   "published": "1",
+   "sqlite_type": "TEXT",
+   "type": "text",
+   "units": "text"
+  },
+  {
+   "access_tier": "public",
+   "codebook_declared_type": "text",
+   "description": "What this source cannot tell you, stated so absence is never read as evidence.",
+   "examples": [
+    "The Federal Register publishes only the slice of the Section 106 record an agenc",
+    "This is NOT_FOUND, not WITHHOLDS: six paths and one link extraction were swept. ",
+    "A 404 on a guessed path is a fact about the path. This is a LIVE LEAD, not a clo",
+    "REFUSED in this run. Harvesting eLibrary requires its private JSON endpoint and ",
+    "This is the largest part of the Section 106 record and nobody has looked at it. "
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 447,
+   "n_distinct": 5,
+   "name": "limitation",
+   "nullable": false,
+   "observed_type": "text",
+   "pct_filled": 100.0,
+   "postgres_type": "text",
+   "primary_key": false,
+   "published": "1",
+   "sqlite_type": "TEXT",
+   "type": "text",
+   "units": "text"
+  },
+  {
+   "access_tier": "public",
+   "codebook_declared_type": "text",
+   "description": "Date the document text was retrieved.",
+   "examples": [
+    "2026-08-12"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 10,
+   "n_distinct": 1,
+   "name": "fetched_date",
+   "nullable": true,
+   "observed_type": "date",
+   "pct_filled": 80.0,
+   "postgres_type": "date",
+   "primary_key": false,
+   "published": "1",
+   "sqlite_type": "TEXT",
+   "type": "date",
+   "units": "YYYY-MM-DD"
+  }
+ ],
+ "columns_with_no_definition": [],
+ "documented": true,
+ "file": "section_106_source_coverage.csv",
+ "generated": "2026-08-26",
+ "licensed_columns_dropped": [],
+ "primary_key": {
+  "columns": [
+   "source"
+  ],
+  "evidence": "source: 5 distinct over 5 rows, 0 blank, full scan",
+  "kind": "natural",
+  "proven": true,
+  "rows": 5,
+  "scan": "full"
+ },
+ "rows_scanned": 5,
+ "scan": "full",
+ "status": "READY",
+ "table": "section_106_source_coverage",
+ "type_mismatches_codebook_vs_file": [
+  {
+   "codebook": "text",
+   "column": "records_swept",
+   "examples": [
+    "1422"
+   ],
+   "observed": "integer"
+  },
+  {
+   "codebook": "text",
+   "column": "records_retrieved",
+   "examples": [
+    "1422"
+   ],
+   "observed": "integer"
+  },
+  {
+   "codebook": "text",
+   "column": "fetched_date",
+   "examples": [
+    "2026-08-12"
+   ],
+   "observed": "date"
+  }
+ ]
+}

@@ -1,0 +1,40 @@
+{
+ "built_by": "code/1133_nest_owner_v6_builder_input.py",
+ "built_date": "2026-09-02",
+ "owner_v6_rows": 18110,
+ "edges_emitted": 5791,
+ "hubs": 643,
+ "evidence_class": {
+  "owner_research_dataset_hand_ruling": 527,
+  "parent_self_published_company_list": 660,
+  "owner_research_dataset_resolver_output": 2628,
+  "compiled_third_party_directory": 55,
+  "federal_certification_registry": 1921
+ },
+ "refused": {
+  "BLANK_ENTERPRISE_NAME": 4,
+  "UEI_ALREADY_HELD_BY_NEST_SAME_HUB": 20,
+  "UEI_ALREADY_HELD_BY_NEST_OTHER_HUB": 172,
+  "PARENT_UNRESOLVED_UNRESOLVED_NOT_IN_REGISTER": 26,
+  "PARENT_UNRESOLVED_UNRESOLVED_AMBIGUOUS": 12,
+  "APPLIED_CORRECTION_FA-01": 1,
+  "SBA_CERTIFIED_BUT_NO_OWNER_NAMED": 3140,
+  "OWNER_FILE_SAYS_UNMATCHED": 8927,
+  "NO_TRIBE_ID_ON_THE_ROW": 17
+ },
+ "uei_collisions": {
+  "SAME_HUB_CORROBORATION": 20,
+  "CROSS_HUB_OWNERSHIP_DISAGREEMENT": 172
+ },
+ "parent_crosswalk": {
+  "handle_exact": 5711,
+  "handle_stem_unique": 6,
+  "name_tokens_class_gated_unique": 74
+ },
+ "v3": {
+  "v3_name_also_in_v6": 19682,
+  "v3_only_name_uei_present_in_v6": 160,
+  "v3_blank_name": 4
+ },
+ "conservation_unaccounted": 0
+}

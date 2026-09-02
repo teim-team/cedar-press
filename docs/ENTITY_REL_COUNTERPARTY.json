@@ -1,0 +1,45 @@
+{
+  "built": "2026-09-02",
+  "script": "1098_entity_rel_counterparty.py",
+  "table": "data/clean/entity_relationships.csv",
+  "columns_added": [
+    "counterparty_side",
+    "counterparty_kind",
+    "counterparty_name_as_recorded",
+    "counterparty_identifier_type",
+    "counterparty_identifier",
+    "counterparty_identity_state",
+    "counterparty_nest_enterprise_id",
+    "counterparty_nest_basis",
+    "counterparty_extraction_basis"
+  ],
+  "base_fields_md5": "99a3417d670ede491557232c2be95619",
+  "rows": 2292,
+  "blank_endpoint_rows": 1772,
+  "unparsed": 0,
+  "kind": {
+    "brand_family": 106,
+    "firm_registration": 1462,
+    "federal_government": 56,
+    "tribal_designated_housing_entity": 148
+  },
+  "identifier_type": {
+    "CEDAR_ALIAS_ID": 106,
+    "UEI": 996,
+    "CAGE": 466,
+    "(none)": 204
+  },
+  "identity_state": {
+    "NAMED_NAME_FAMILY_NOT_A_LEGAL_PERSON": 106,
+    "NAMED_SUB_HUB_WITH_PUBLISHED_IDENTIFIER": 1462,
+    "DECLARED_NON_ENTITY_OUT_OF_SCOPE": 56,
+    "NAMED_SUB_HUB_NO_IDENTIFIER": 148
+  },
+  "nest_rung1_published_uei": 29,
+  "nest_rung2_published_cage": 0,
+  "nest_rung3_unique_name_under_owner": 233,
+  "nest_unresolved": 1200,
+  "nest_refused_ambiguous_under_owner": 0,
+  "nest_refused_owner_disagreement": 1,
+  "nest_would_resolve_via_nest_uei_candidate_REFUSED": 23
+}

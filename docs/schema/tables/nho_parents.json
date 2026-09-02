@@ -1,0 +1,129 @@
+{
+ "codebook_block": null,
+ "codebook_match_score": 0.25,
+ "columns": [
+  {
+   "access_tier": "undeclared",
+   "codebook_declared_type": null,
+   "description": "",
+   "examples": [
+    "Ho'omaka Foundation",
+    "NATIVE HAWAIIAN ORGANIZATION CHARITY",
+    "MANA'O NUI INC",
+    "Hoilina Ranch LLC",
+    "Ka Lama Kuhikuhi Foundation",
+    "THE MAKUA GROUP",
+    "BRISTOL BAY NATIVE CORPORATION",
+    "AHTNA, INCORPORATED",
+    "NA 'OIWI KANE",
+    "ST. MARY'S NATIVE CORPORATION",
+    "KE KUMU ULU",
+    "HO'OPALE FOUNDATION"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 49,
+   "n_distinct": 21,
+   "name": "parent_name",
+   "nullable": false,
+   "observed_type": "text",
+   "pct_filled": 100.0,
+   "postgres_type": "text",
+   "primary_key": true,
+   "published": "",
+   "sqlite_type": "TEXT",
+   "type": "text",
+   "units": ""
+  },
+  {
+   "access_tier": "undeclared",
+   "codebook_declared_type": null,
+   "description": "",
+   "examples": [
+    "NHO",
+    "ANC"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 3,
+   "n_distinct": 2,
+   "name": "parent_class",
+   "nullable": false,
+   "observed_type": "text",
+   "pct_filled": 100.0,
+   "postgres_type": "text",
+   "primary_key": false,
+   "published": "",
+   "sqlite_type": "TEXT",
+   "type": "text",
+   "units": ""
+  },
+  {
+   "access_tier": "undeclared",
+   "codebook_declared_type": null,
+   "description": "",
+   "examples": [
+    "7",
+    "4",
+    "2",
+    "1"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 1,
+   "n_distinct": 4,
+   "name": "n_subsidiaries",
+   "nullable": false,
+   "observed_type": "integer",
+   "pct_filled": 100.0,
+   "postgres_type": "bigint",
+   "primary_key": false,
+   "published": "",
+   "sqlite_type": "INTEGER",
+   "type": "integer",
+   "units": ""
+  },
+  {
+   "access_tier": "undeclared",
+   "codebook_declared_type": null,
+   "description": "",
+   "examples": [
+    "2026-08-05"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 10,
+   "n_distinct": 1,
+   "name": "first_ruled",
+   "nullable": false,
+   "observed_type": "date",
+   "pct_filled": 100.0,
+   "postgres_type": "date",
+   "primary_key": false,
+   "published": "",
+   "sqlite_type": "TEXT",
+   "type": "date",
+   "units": ""
+  }
+ ],
+ "columns_with_no_definition": [],
+ "documented": false,
+ "file": "nho_parents.csv",
+ "generated": "2026-08-26",
+ "licensed_columns_dropped": [],
+ "primary_key": {
+  "columns": [
+   "parent_name"
+  ],
+  "evidence": "parent_name: 21 distinct over 21 rows, 0 blank, full scan",
+  "kind": "natural",
+  "proven": true,
+  "rows": 21,
+  "scan": "full"
+ },
+ "rows_scanned": 21,
+ "scan": "full",
+ "status": "READY",
+ "table": "nho_parents",
+ "type_mismatches_codebook_vs_file": []
+}

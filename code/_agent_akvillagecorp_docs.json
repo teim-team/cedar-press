@@ -1,0 +1,47 @@
+{
+  "ANVC-STGRGT-00": {
+    "url": "https://www.tanaq.com/",
+    "quote": "Verbatim: 'St. George Tanaq, an Alaska Native Corporation, owned by shareholders of the Unangan Village of St. George Island' ... 'Founded in 1973 pursuant to the Alaska Native Claims Settlement Act' ... 'an Alaskan Native Corporation, with subsidiary companies participating in the U.S. Small Business Administration's 8(a) program.' The page does not enumerate subsidiaries individually, so this leg applies only to companies that carry the Tanaq name. Retrieved 2026-08-06.",
+    "names": ["tanaq"]
+  },
+  "ANVC-GANAAY-00": {
+    "url": "https://www.ganaayoo.com/",
+    "quote": "Verbatim: 'Gana-A'Yoo's Family of Companies have consistently delivered best-in-class services to government and commercial customers for more than 45 years.' The page enumerates the family as Gana-A'Yoo Construction Services JV, Gana-A'Yoo Services Corporation, Gana-A'Yoo Support Services JV, Kaiyuh Information Technologies, Kaiyuh Services, Khotol Services Corporation, Six Mile, SMN JV and Yukon Management. Retrieved 2026-08-06.",
+    "names": ["gana", "kaiyuh", "khotol", "six mile", "yukon management"]
+  },
+  "ANVC-KKKTGR-00": {
+    "url": "https://www.kikiktagruk.com/",
+    "quote": "The corporation's own site enumerates its operating companies as Midnight Sun AUS, LLC; Midnight Sun Global Services, LLC; Midnight Sun Professional Solutions, LLC; Midnight Sun Technologies, LLC; KIC Construction, LLC; KIC Facilities Management, LLC; and KIC Logistics, LLC. Retrieved 2026-08-06.",
+    "names": ["midnight sun", "kic ", "kikiktagruk"]
+  },
+  "ANVC-NTVSKD-00": {
+    "url": "https://www.komangs.com/about/",
+    "quote": "Verbatim on Koman Government Solutions' own site: 'The Natives of Kodiak, Inc. is an Alaska Native Corporation incorporated in 1973 under the Alaska Native Claims Settlement Act.' Retrieved 2026-08-06.",
+    "names": ["koman"]
+  },
+  "ANVC-KYTLTS-00": {
+    "url": "http://www.kcorpalaska.com/",
+    "quote": "Verbatim: 'K'oyitl'ots'ina, Limited (K Corp) is a leader in facility operations and maintenance, security, construction, and fire systems.' The corporation's own domain koyitlotsina.com issues a 301 redirect to this site, which is itself evidence that K Corp is K'oyitl'ots'ina, Limited's operating brand. The page does not name Brooks Range Contract Services or Control Contractors, so this leg applies only to the KCorp-named companies. Retrieved 2026-08-06.",
+    "names": ["kcorp", "k corp", "koyitl"]
+  },
+  "ANVC-LEISNO-00": {
+    "url": "https://www.leisnoi.com/",
+    "quote": "Leisnoi, Inc.'s own site names Leisnoi Diversified Services and Leisnoi Professional Services as its subsidiaries, alongside 'Our purpose is to provide shareholder benefits, manage our lands and preserve Alutiiq heritage.' Retrieved 2026-08-06.",
+    "names": ["leisnoi"]
+  },
+  "ANVC-HUNATO-00": {
+    "url": "https://hunatotem.com/",
+    "quote": "Huna Totem Corporation's own site lists HunaTek among its companies. Retrieved 2026-08-06.",
+    "names": ["hunatek"]
+  },
+  "ANVC-CAPEFO-00": {
+    "url": "https://capefoxcorp.com/",
+    "quote": "Verbatim: 'CFC now has several successful, thriving commercial businesses, and a growing federal contracting group.' The page does not enumerate the operating companies, so this leg applies only to companies carrying the Cape Fox name. Retrieved 2026-08-06.",
+    "names": ["cape fox"]
+  },
+  "ANVC-SITNAS-00": {
+    "url": "https://www.snc.org/",
+    "quote": "Sitnasuak Native Corporation's own site describes it as 'a successful corporation comprised of a family of businesses' and enumerates the divisions Fuel & Energy, Retail, Tactical Apparel & Services, Financial & Title Services, and Properties. It does not name the operating companies, so this leg applies only to companies carrying the Sitnasuak name. Retrieved 2026-08-06.",
+    "names": ["sitnasuak"]
+  }
+}

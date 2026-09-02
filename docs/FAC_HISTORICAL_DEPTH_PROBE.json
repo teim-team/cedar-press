@@ -1,0 +1,177 @@
+{
+ "generated_utc": "2026-08-26T22:37:39.742213+00:00",
+ "script": "code/200_probe_fac_historical_depth.py",
+ "host": "api.fac.gov",
+ "probes": [
+  {
+   "probe": "earliest audit_year, any entity_type",
+   "status": 200,
+   "content_range": "0-2/*",
+   "body": [
+    {
+     "audit_year": "2016",
+     "auditee_ein": "596000821",
+     "auditee_name": "PUTNAM COUNTY DISTRICT SCHOOL BOARD",
+     "entity_type": "local",
+     "fac_accepted_date": "2017-03-27"
+    },
+    {
+     "audit_year": "2016",
+     "auditee_ein": "952771715",
+     "auditee_name": "COMMUNITY SENIORSERV, INC.",
+     "entity_type": "non-profit",
+     "fac_accepted_date": "2016-12-13"
+    },
+    {
+     "audit_year": "2016",
+     "auditee_ein": "356001607",
+     "auditee_name": "FORT WAYNE HOUSING AUTHORITY",
+     "entity_type": "local",
+     "fac_accepted_date": "2017-03-02"
+    }
+   ]
+  },
+  {
+   "probe": "earliest audit_year, entity_type=tribal",
+   "status": 200,
+   "content_range": "0-4/*",
+   "body": [
+    {
+     "audit_year": "2016",
+     "auditee_ein": "850442632",
+     "auditee_name": "OHKAY OWINGEH BOARD OF EDUCATION",
+     "auditee_state": "NM",
+     "total_amount_expended": 1696262,
+     "is_public": false
+    },
+    {
+     "audit_year": "2016",
+     "auditee_ein": "920041461",
+     "auditee_name": "MANIILAQ ASSOCIATION",
+     "auditee_state": "AK",
+     "total_amount_expended": 54977959,
+     "is_public": false
+    },
+    {
+     "audit_year": "2016",
+     "auditee_ein": "010502197",
+     "auditee_name": "INDIAN TOWNSHIP PASSAMAQUODDY SCHOOL COMMITTEE",
+     "auditee_state": "ME",
+     "total_amount_expended": 3792428,
+     "is_public": true
+    },
+    {
+     "audit_year": "2016",
+     "auditee_ein": "920086578",
+     "auditee_name": "KWETHLUK IRA COUNCIL",
+     "auditee_state": "AK",
+     "total_amount_expended": 1374716,
+     "is_public": true
+    },
+    {
+     "audit_year": "2016",
+     "auditee_ein": "450223071",
+     "auditee_name": "TURTLE MOUNTAIN BAND OF CHIPPEWA INDIANS",
+     "auditee_state": "ND",
+     "total_amount_expended": 37404506,
+     "is_public": true
+    }
+   ]
+  },
+  {
+   "probe": "count of rows audit_year < 2016",
+   "status": 200,
+   "content_range": "*/0",
+   "body": "(list)"
+  },
+  {
+   "probe": "count tribal rows audit_year < 2016",
+   "status": 200,
+   "content_range": "*/0",
+   "body": "(list)"
+  },
+  {
+   "probe": "count tribal rows audit_year < 2007",
+   "status": 200,
+   "content_range": "*/0",
+   "body": "(list)"
+  }
+ ],
+ "earliest_audit_year_any": "2016",
+ "earliest_audit_year_tribal": "2016",
+ "count_all_before_2016": "*/0",
+ "count_tribal_before_2016": "*/0",
+ "count_tribal_before_2007": "*/0",
+ "tribal_rows_by_early_year": {
+  "1997": {
+   "status": 200,
+   "content_range": "*/0"
+  },
+  "1998": {
+   "status": 200,
+   "content_range": "*/0"
+  },
+  "1999": {
+   "status": 200,
+   "content_range": "*/0"
+  },
+  "2000": {
+   "status": 200,
+   "content_range": "*/0"
+  },
+  "2001": {
+   "status": 200,
+   "content_range": "*/0"
+  },
+  "2002": {
+   "status": 200,
+   "content_range": "*/0"
+  },
+  "2003": {
+   "status": 200,
+   "content_range": "*/0"
+  },
+  "2004": {
+   "status": 200,
+   "content_range": "*/0"
+  },
+  "2005": {
+   "status": 200,
+   "content_range": "*/0"
+  },
+  "2006": {
+   "status": 200,
+   "content_range": "*/0"
+  },
+  "2007": {
+   "status": 200,
+   "content_range": "*/0"
+  },
+  "2008": {
+   "status": 200,
+   "content_range": "*/0"
+  },
+  "2009": {
+   "status": 200,
+   "content_range": "*/0"
+  },
+  "2010": {
+   "status": 200,
+   "content_range": "*/0"
+  },
+  "2011": {
+   "status": 200,
+   "content_range": "*/0"
+  },
+  "2012": {
+   "status": 200,
+   "content_range": "*/0"
+  },
+  "2013": {
+   "status": 200,
+   "content_range": "*/0"
+  },
+  "2014": "BUDGET_EXHAUSTED"
+ },
+ "requests_issued": 22
+}

@@ -8,20 +8,26 @@
  * TWO MODES, ONE CONTRACT
  * Connected, the session is the platform's: `/me` on mount, `/auth/login`
  * to sign in, cookies carrying it, and the subscription's tier arriving
- * from the database. Standalone, the same contract is served from the
- * preview accounts so the service can be demonstrated and reviewed on its
- * own. Pages never learn which mode they are in — they read `user`,
- * `loading`, `login`, `logout` and `refreshSession` either way — so
- * connecting a deployment is configuration, not a rewrite.
+ * from the database. Standalone, the same contract is served by the demo
+ * gate in `features/grove/pressDemoGate.js` so the service can be
+ * demonstrated and reviewed on its own. Pages never learn which mode they
+ * are in — they read `user`, `loading`, `login`, `logout` and
+ * `refreshSession` either way — so connecting a deployment is configuration,
+ * not a rewrite.
+ *
+ * The two never run at once. `isConnected()` is the discriminator, here as
+ * everywhere: connected, the demo gate is not consulted and its accounts are
+ * not even active, so pointing a deployment at the API is what turns the
+ * demonstration gate off.
  */
 import { useCallback, useEffect, useState } from "react";
 
 import * as api from "../api.js";
 import { isConnected } from "../config.js";
+import { verifyPressDemoAccount } from "../features/grove/pressDemoGate.js";
 import { EVENT, identify, track, trackError } from "../features/grove/telemetry.js";
 import {
   AuthContext,
-  PREVIEW_ACCOUNTS,
   clearStoredSession,
   readSession,
   storeSession,
@@ -93,16 +99,17 @@ export function AuthProvider({ children }) {
         throw error;
       }
     }
-    const account = PREVIEW_ACCOUNTS.find(
-      (candidate) => candidate.email === normalized && candidate.password === password,
-    );
-    if (!account) {
+    // Standalone: the demo gate. It returns null for every failure, the
+    // unconfigured build included — a deployment provisioned with no account
+    // has nothing for any password to match, and this is where that becomes
+    // true rather than merely documented.
+    const session = await verifyPressDemoAccount({ email: normalized, password });
+    if (!session) {
       track(EVENT.signInFailed, { code: "INVALID_CREDENTIALS" });
       throw new Error(
         "That sign-in did not work. Check the address and password on your Cedar Press confirmation.",
       );
     }
-    const session = { email: account.email, workspace_tier: account.workspace_tier };
     storeSession(session);
     setUser(session);
     identify(session);

@@ -1,0 +1,1033 @@
+{
+ "built": "2026-09-01",
+ "built_by": "code/269_build_contractor_ranking.py",
+ "release_written_against": "prime_contracts.csv @ 2026-08-29T11:27:26",
+ "input_vintages": {
+  "data/clean/prime_contracts.csv": "2026-08-29T11:27:26",
+  "data/spine/cedar_entity_spine.csv": "2026-09-01T17:17:34",
+  "data/clean/cedar_identifier_ledger_final.csv": "2026-08-29T10:27:05",
+  "data/clean/individual_native_ownership_verification.csv": "2026-08-26T18:01:33"
+ },
+ "universe": {
+  "prime_rows": 1217768,
+  "prime_obligations_usd": 310005258660.76,
+  "attributed_rows": 888862,
+  "attributed_obligations_usd": 244765639853.98,
+  "attributed_share_pct": 78.96,
+  "attributed_entities": 498,
+  "attributed_operating_companies": 3218,
+  "tierA_rows": 586244,
+  "tierA_obligations_usd": 176743066195.73,
+  "tierA_share_of_attributed_pct": 72.21,
+  "tierA_share_of_all_pct": 57.01,
+  "tierA_entities": 283,
+  "tierA_operating_companies": 1429,
+  "note": "TIER A ONLY publishes. See rule 1 in the module docstring."
+ },
+ "attribution_rate_is_a_blend": {
+  "fy2023_2026_rows": 209495,
+  "fy2023_2026_attributed_rows": 209495,
+  "fy2023_2026_attributed_pct": 100.0,
+  "why": "identifier-seeded archive backfill: those years entered the clean file already filtered to Cedar's identifier population, so 100% is BY CONSTRUCTION and the headline attribution rate is a blend over two differently-built populations."
+ },
+ "setaside_instrument": {
+  "reported_native_preference_equals_union": true,
+  "reported_native_preference_usd": 118976861023.58,
+  "union_8a_buyindian_indianbusiness_usd": 118976861023.58,
+  "note": "the flag family INCLUDES 8(a), which is open to non-Native disadvantaged firms. The instrument is therefore generous, which is what makes the undercount a FLOOR."
+ },
+ "undercount_tierA": {
+  "row_level_no_setaside_usd": 103330334705.82,
+  "row_level_no_setaside_pct": 58.46,
+  "award_level_no_setaside_usd": 98394086152.03,
+  "award_level_no_setaside_pct": 55.67,
+  "award_level_no_setaside_rows": 345100,
+  "award_key": "(contract_number, awardee_uei) - matches docs/CICD_BENCHMARK.md UNDERCOUNT-01",
+  "robustness_piid_only_no_setaside_usd": 93222088353.84,
+  "robustness_piid_only_no_setaside_pct": 52.74,
+  "awards_total": 179488,
+  "awards_never_flagged": 121698,
+  "firms_total": 1429,
+  "firms_never_flagged": 499,
+  "firms_never_flagged_pct": 34.9,
+  "firms_never_flagged_usd": 21967261321.39,
+  "entities_never_flagged": 114,
+  "entities_total": 283,
+  "headline_measure": "award_level_no_setaside_usd",
+  "why_award_level": "the setaside column is blank on the majority of archive-era transactions and arrives as 'None reported'; forward-filling to the contract is required before any share is computed (docs/ANOMALY_REPORT.md seam register)."
+ },
+ "undercount_all_attributed_any_tier": {
+  "row_level_no_setaside_usd": 146238012578.09,
+  "row_level_no_setaside_rows": 585699,
+  "row_level_no_setaside_pct": 59.75,
+  "award_level_no_setaside_usd": 140003836181.83,
+  "award_level_no_setaside_pct": 57.2,
+  "firms_total": 3218,
+  "firms_never_flagged": 1367,
+  "firms_never_flagged_pct": 42.5,
+  "firms_never_flagged_usd": 27619358891.89,
+  "entities_never_flagged": 195,
+  "entities_total": 498,
+  "note": "REPORTED, NOT RANKED. Includes tier-B links that never publish alone."
+ },
+ "native_specific_setasides_tierA": {
+  "usd": 797078088.42,
+  "pct_of_tierA": 0.451,
+  "definition": "setaside in {Indian Business, Buy Indian}. Excludes 8(a), which is not Native-specific."
+ },
+ "one_owner_many_identifiers_tierA": {
+  "entities_with_2plus_uei_links": 133,
+  "entities_total": 283,
+  "max_uei_links_on_one_entity": 67,
+  "total_uei_links": 1248,
+  "note": "the publishable, attributed version of the 8(a) nine-year-term mechanism. The 267-name-cluster / $13.19B figure in docs/EDITORIAL_PIPELINE.md C3 is measured on UNATTRIBUTED rows and is a question, not a finding."
+ },
+ "privacy_guard": {
+  "rows_name_withheld": 5,
+  "rows_total": 1429,
+  "usd_on_withheld_rows": 1267755.14,
+  "rule": "code/171_build_individual_native_verification.py::privacy_class, verbatim, plus any UEI already ruled not-nameable in individual_native_ownership_verification.csv, MINUS rows carrying positive entity-class evidence",
+  "note": "contract facts publish on a withheld row; the name and the UEI do not. The rule is blunt on purpose.",
+  "entity_class_exemption": {
+   "rows_cleared": 129,
+   "usd_on_cleared_rows": 6076618794.19,
+   "by_basis": {
+    "governmental_or_institutional_token": 104,
+    "corporate_form_missed_by_171_regex": 14,
+    "shares_owner_entity_name_stem": 5,
+    "single_token_name_cannot_be_a_natural_persons_full_name": 6
+   },
+   "rule": "the personal-name guard protects a NATURAL PERSON, and a tribal government is not one. Applied only where no positive entity-class evidence exists; see entity_class_basis in the codebook fragment."
+  }
+ },
+ "primary_key": {
+  "columns": [
+   "owner_entity_id",
+   "operating_company_seq"
+  ],
+  "duplicate_rows": 0,
+  "rows": 1429,
+  "note": "operating_company_seq is a POSITION within the owner in descending firm_obligations_usd, not an identity. It is recomputed every build."
+ },
+ "class_totals_tierA": {
+  "ANC_REGIONAL": {
+   "entities": 12,
+   "usd": 85946540109.51,
+   "pct": 48.63
+  },
+  "ANC_VILLAGE": {
+   "entities": 24,
+   "usd": 48072498976.51,
+   "pct": 27.2
+  },
+  "TRIBE": {
+   "entities": 226,
+   "usd": 39994168682.98,
+   "pct": 22.63
+  },
+  "STATE_RECOGNIZED_TRIBE": {
+   "entities": 4,
+   "usd": 954899207.08,
+   "pct": 0.54
+  },
+  "ALASKA_NATIVE_VILLAGE_GOVERNMENT": {
+   "entities": 4,
+   "usd": 812935309.47,
+   "pct": 0.46
+  },
+  "NHO": {
+   "entities": 5,
+   "usd": 488162183.16,
+   "pct": 0.28
+  },
+  "OTHER_NATIVE_INSTITUTION": {
+   "entities": 8,
+   "usd": 473861727.02,
+   "pct": 0.27
+  }
+ },
+ "top25": [
+  {
+   "rank": 1,
+   "entity_id": "ANRC-ARCSLO-00",
+   "name": "Arctic Slope Regional Corporation",
+   "class": "ANC_REGIONAL",
+   "state": "AK",
+   "obligations_usd": 25165616365.17,
+   "n_operating_companies": 57,
+   "n_uei_links": 56,
+   "fy_span": "2000-2026",
+   "no_setaside_share_pct": 69.1,
+   "top_operating_companies": [
+    {
+     "name": "Petro Star, Inc.",
+     "usd": 3604736932.79,
+     "flagged": false
+    },
+    {
+     "name": "Asrc Management Services Incorporated",
+     "usd": 2110240518.41,
+     "flagged": true
+    },
+    {
+     "name": "ASRC FEDERAL SYSTEM SOLUTIONS LLC",
+     "usd": 1424444962.16,
+     "flagged": true
+    },
+    {
+     "name": "INUTEQ, LLC",
+     "usd": 1281638993.58,
+     "flagged": true
+    }
+   ]
+  },
+  {
+   "rank": 2,
+   "entity_id": "ANRC-NANARC-00",
+   "name": "NANA Regional Corporation, Incorporated",
+   "class": "ANC_REGIONAL",
+   "state": "AK",
+   "obligations_usd": 19894720266.42,
+   "n_operating_companies": 70,
+   "n_uei_links": 67,
+   "fy_span": "2000-2026",
+   "no_setaside_share_pct": 59.5,
+   "top_operating_companies": [
+    {
+     "name": "Tkc Integration Services Llc,",
+     "usd": 4123589040.43,
+     "flagged": true
+    },
+    {
+     "name": "AKIMA GLOBAL SERVICES, LLC",
+     "usd": 1240541832.04,
+     "flagged": true
+    },
+    {
+     "name": "AKIMA SUPPORT OPERATIONS, LLC",
+     "usd": 802533512.47,
+     "flagged": true
+    },
+    {
+     "name": "AKIMA FACILITIES OPERATIONS LLC",
+     "usd": 781374461.18,
+     "flagged": true
+    }
+   ]
+  },
+  {
+   "rank": 3,
+   "entity_id": "ANRC-CHGCCO-00",
+   "name": "Chugach Alaska Corporation",
+   "class": "ANC_REGIONAL",
+   "state": "AK",
+   "obligations_usd": 11012741124.11,
+   "n_operating_companies": 23,
+   "n_uei_links": 22,
+   "fy_span": "2000-2026",
+   "no_setaside_share_pct": 37.3,
+   "top_operating_companies": [
+    {
+     "name": "WOLF CREEK FEDERAL SERVICES LLC",
+     "usd": 1426498984.74,
+     "flagged": true
+    },
+    {
+     "name": "Chugach Industries Incorporated",
+     "usd": 1376726087.59,
+     "flagged": true
+    },
+    {
+     "name": "Chugach Management Services In",
+     "usd": 1362214825.26,
+     "flagged": true
+    },
+    {
+     "name": "CHUGACH FEDERAL SOLUTIONS LLC",
+     "usd": 1181123496.2,
+     "flagged": true
+    }
+   ]
+  },
+  {
+   "rank": 4,
+   "entity_id": "ANVC-CHENEG-00",
+   "name": "Chenega Corporation",
+   "class": "ANC_VILLAGE",
+   "state": "AK",
+   "obligations_usd": 10644188352.61,
+   "n_operating_companies": 53,
+   "n_uei_links": 52,
+   "fy_span": "2000-2026",
+   "no_setaside_share_pct": 48.2,
+   "top_operating_companies": [
+    {
+     "name": "Njvc,Llc",
+     "usd": 1119921136.0,
+     "flagged": false
+    },
+    {
+     "name": "Chenega Technology Services Co",
+     "usd": 1032023303.08,
+     "flagged": true
+    },
+    {
+     "name": "CHENEGA GLOBAL PROTECTION, LLC",
+     "usd": 728862917.91,
+     "flagged": true
+    },
+    {
+     "name": "Chenega Federal Systems Limited Liability Company",
+     "usd": 700500862.45,
+     "flagged": true
+    }
+   ]
+  },
+  {
+   "rank": 5,
+   "entity_id": "ANVC-AFOGNA-00",
+   "name": "Afognak Native Corporation",
+   "class": "ANC_VILLAGE",
+   "state": "AK",
+   "obligations_usd": 10301815555.26,
+   "n_operating_companies": 61,
+   "n_uei_links": 59,
+   "fy_span": "2001-2026",
+   "no_setaside_share_pct": 46.1,
+   "top_operating_companies": [
+    {
+     "name": "Fss Alutiiq Joint Venture",
+     "usd": 857324382.48,
+     "flagged": false
+    },
+    {
+     "name": "Alutiiq International Solutions Limited Liability Company",
+     "usd": 779551713.68,
+     "flagged": true
+    },
+    {
+     "name": "ALUTIIQ INFORMATION MANAGEMENT, LLC",
+     "usd": 712092456.34,
+     "flagged": true
+    },
+    {
+     "name": "ALUTIIQ COMMERCIAL ENTERPRISES LLC",
+     "usd": 654854480.93,
+     "flagged": true
+    }
+   ]
+  },
+  {
+   "rank": 6,
+   "entity_id": "TRBF-CHKNAT-00",
+   "name": "Cherokee Nation",
+   "class": "TRIBE",
+   "state": "OK",
+   "obligations_usd": 9924033401.3,
+   "n_operating_companies": 48,
+   "n_uei_links": 45,
+   "fy_span": "2000-2026",
+   "no_setaside_share_pct": 54.1,
+   "top_operating_companies": [
+    {
+     "name": "CHEROKEE NATION MANAGEMENT & CONSULTING, L.L.C..",
+     "usd": 1558906024.62,
+     "flagged": true
+    },
+    {
+     "name": "CHEROKEE NATION STRATEGIC PROGRAMS, L.L.C.",
+     "usd": 1306868936.23,
+     "flagged": true
+    },
+    {
+     "name": "CHEROKEE NATION SYSTEM SOLUTIONS LLC",
+     "usd": 539096518.12,
+     "flagged": true
+    },
+    {
+     "name": "Cherokee Nation Operational Solutions, L.L.C.",
+     "usd": 506163117.56,
+     "flagged": true
+    }
+   ]
+  },
+  {
+   "rank": 7,
+   "entity_id": "ANRC-CALSTA-00",
+   "name": "Calista Corporation",
+   "class": "ANC_REGIONAL",
+   "state": "AK",
+   "obligations_usd": 8828599381.61,
+   "n_operating_companies": 34,
+   "n_uei_links": 34,
+   "fy_span": "2000-2026",
+   "no_setaside_share_pct": 85.0,
+   "top_operating_companies": [
+    {
+     "name": "DEFENSE SYSTEMS AND SOLUTIONS",
+     "usd": 3269583705.68,
+     "flagged": false
+    },
+    {
+     "name": "WITHHELD_POSSIBLE_PERSONAL_NAME",
+     "usd": 2264959427.5,
+     "flagged": false
+    },
+    {
+     "name": "Y-TECH SERVICES, INC.",
+     "usd": 597274079.97,
+     "flagged": true
+    },
+    {
+     "name": "YULISTA SUPPORT SERVICES LLC",
+     "usd": 512615937.51,
+     "flagged": true
+    }
+   ]
+  },
+  {
+   "rank": 8,
+   "entity_id": "ANVC-KPVKPT-00",
+   "name": "Ukpea\u0121vik I\u00f1upiat Corporation",
+   "class": "ANC_VILLAGE",
+   "state": "AK",
+   "obligations_usd": 5761780268.2,
+   "n_operating_companies": 47,
+   "n_uei_links": 47,
+   "fy_span": "2000-2026",
+   "no_setaside_share_pct": 52.7,
+   "top_operating_companies": [
+    {
+     "name": "BOWHEAD SCIENCE AND TECHNOLOGY, LLC",
+     "usd": 578890166.19,
+     "flagged": true
+    },
+    {
+     "name": "BOWHEAD PROFESSIONAL SOLUTIONS LLC",
+     "usd": 573906077.2,
+     "flagged": true
+    },
+    {
+     "name": "BOWHEAD MISSION SOLUTIONS, LLC",
+     "usd": 566148164.38,
+     "flagged": true
+    },
+    {
+     "name": "BOWHEAD TOTAL ENTERPRISE SOLUTIONS, LLC",
+     "usd": 385764609.6,
+     "flagged": true
+    }
+   ]
+  },
+  {
+   "rank": 9,
+   "entity_id": "ANRC-BERSTR-00",
+   "name": "Bering Straits Native Corporation",
+   "class": "ANC_REGIONAL",
+   "state": "AK",
+   "obligations_usd": 4849353602.73,
+   "n_operating_companies": 26,
+   "n_uei_links": 26,
+   "fy_span": "2000-2026",
+   "no_setaside_share_pct": 59.2,
+   "top_operating_companies": [
+    {
+     "name": "PARAGON PROFESSIONAL SERVICES LLC",
+     "usd": 771616008.69,
+     "flagged": true
+    },
+    {
+     "name": "ARCTICOM, LLC",
+     "usd": 688314175.57,
+     "flagged": true
+    },
+    {
+     "name": "BERING GLOBAL SOLUTIONS, LLC",
+     "usd": 600163693.8,
+     "flagged": true
+    },
+    {
+     "name": "STAMPEDE VENTURES, INC.",
+     "usd": 462084946.46,
+     "flagged": true
+    }
+   ]
+  },
+  {
+   "rank": 10,
+   "entity_id": "ANRC-BRBYCO-00",
+   "name": "Bristol Bay Native Corporation",
+   "class": "ANC_REGIONAL",
+   "state": "AK",
+   "obligations_usd": 4316188533.87,
+   "n_operating_companies": 25,
+   "n_uei_links": 25,
+   "fy_span": "2006-2026",
+   "no_setaside_share_pct": 41.3,
+   "top_operating_companies": [
+    {
+     "name": "CCI UTILITY AND CONSTRUCTION SERVICES, LLC",
+     "usd": 940296711.58,
+     "flagged": true
+    },
+    {
+     "name": "CCI GROUP, LLC",
+     "usd": 638950303.69,
+     "flagged": true
+    },
+    {
+     "name": "Glacier Technologies Limited Liability Company",
+     "usd": 495460262.51,
+     "flagged": true
+    },
+    {
+     "name": "CCI CONSTRUCTION SERVICES, LLC",
+     "usd": 480601694.17,
+     "flagged": true
+    }
+   ]
+  },
+  {
+   "rank": 11,
+   "entity_id": "ANRC-KONIAG-00",
+   "name": "Koniag, Incorporated",
+   "class": "ANC_REGIONAL",
+   "state": "AK",
+   "obligations_usd": 4294354076.63,
+   "n_operating_companies": 24,
+   "n_uei_links": 23,
+   "fy_span": "2001-2026",
+   "no_setaside_share_pct": 50.2,
+   "top_operating_companies": [
+    {
+     "name": "TUKNIK GOVERNMENT SERVICES LLC",
+     "usd": 584383113.06,
+     "flagged": true
+    },
+    {
+     "name": "KADIAK LLC",
+     "usd": 572361991.46,
+     "flagged": true
+    },
+    {
+     "name": "EAGLE HARBOR SOLUTIONS LLC",
+     "usd": 485089103.49,
+     "flagged": true
+    },
+    {
+     "name": "PACARCTIC, LLC",
+     "usd": 418789518.85,
+     "flagged": true
+    }
+   ]
+  },
+  {
+   "rank": 12,
+   "entity_id": "ANRC-CKINLT-00",
+   "name": "Cook Inlet Region, Incorporated",
+   "class": "ANC_REGIONAL",
+   "state": "AK",
+   "obligations_usd": 4186032860.62,
+   "n_operating_companies": 36,
+   "n_uei_links": 34,
+   "fy_span": "2000-2026",
+   "no_setaside_share_pct": 78.2,
+   "top_operating_companies": [
+    {
+     "name": "WITHHELD_POSSIBLE_PERSONAL_NAME",
+     "usd": 1184528105.9,
+     "flagged": true
+    },
+    {
+     "name": "Paducah Remediation Services Limited Liability Company",
+     "usd": 451635780.82,
+     "flagged": false
+    },
+    {
+     "name": "Weldin Construction Inc",
+     "usd": 443795638.24,
+     "flagged": true
+    },
+    {
+     "name": "OSC TECHNICAL SOLUTIONS, LLC",
+     "usd": 330011594.25,
+     "flagged": true
+    }
+   ]
+  },
+  {
+   "rank": 13,
+   "entity_id": "ANVC-GLDBLT-00",
+   "name": "Goldbelt, Incorporated",
+   "class": "ANC_VILLAGE",
+   "state": "AK",
+   "obligations_usd": 3537432547.27,
+   "n_operating_companies": 19,
+   "n_uei_links": 17,
+   "fy_span": "2003-2026",
+   "no_setaside_share_pct": 43.8,
+   "top_operating_companies": [
+    {
+     "name": "GOLDBELT C6, LLC",
+     "usd": 434040950.96,
+     "flagged": true
+    },
+    {
+     "name": "GOLDBELT WOLF, LLC",
+     "usd": 417396253.49,
+     "flagged": true
+    },
+    {
+     "name": "GOLDBELT FRONTIER, LLC",
+     "usd": 392181203.61,
+     "flagged": true
+    },
+    {
+     "name": "Goldbelt Falcon Limited Liability Company",
+     "usd": 328148029.26,
+     "flagged": true
+    }
+   ]
+  },
+  {
+   "rank": 14,
+   "entity_id": "TRBF-CHKSWN-00",
+   "name": "The Chickasaw Nation",
+   "class": "TRIBE",
+   "state": "OK",
+   "obligations_usd": 3176021395.67,
+   "n_operating_companies": 26,
+   "n_uei_links": 21,
+   "fy_span": "2001-2026",
+   "no_setaside_share_pct": 42.4,
+   "top_operating_companies": [
+    {
+     "name": "Chickasaw Nation Industries, I",
+     "usd": 355222562.52,
+     "flagged": true
+    },
+    {
+     "name": "CNI GLOBAL SOLUTIONS, LLC",
+     "usd": 342534994.84,
+     "flagged": true
+    },
+    {
+     "name": "Cni Advantage, Llc",
+     "usd": 328612522.23,
+     "flagged": true
+    },
+    {
+     "name": "CHICKASAW STRATEGIC POINTE, LLC",
+     "usd": 273332088.04,
+     "flagged": true
+    }
+   ]
+  },
+  {
+   "rank": 15,
+   "entity_id": "TRBF-WNNBGO-00",
+   "name": "Winnebago Tribe of Nebraska",
+   "class": "TRIBE",
+   "state": "NE",
+   "obligations_usd": 3133695019.38,
+   "n_operating_companies": 35,
+   "n_uei_links": 33,
+   "fy_span": "2001-2026",
+   "no_setaside_share_pct": 54.1,
+   "top_operating_companies": [
+    {
+     "name": "HCI MANAGEMENT SERVICES COMPANY",
+     "usd": 877710336.35,
+     "flagged": true
+    },
+    {
+     "name": "ALL NATIVE SERVICES COMPANY",
+     "usd": 366821022.32,
+     "flagged": true
+    },
+    {
+     "name": "ALL NATIVE SYNERGIES COMPANY",
+     "usd": 343377053.15,
+     "flagged": true
+    },
+    {
+     "name": "ALL NATIVE, INC.",
+     "usd": 273414884.24,
+     "flagged": true
+    }
+   ]
+  },
+  {
+   "rank": 16,
+   "entity_id": "ANVC-TATITL-00",
+   "name": "The Tatitlek Corporation",
+   "class": "ANC_VILLAGE",
+   "state": "AK",
+   "obligations_usd": 2917019525.02,
+   "n_operating_companies": 14,
+   "n_uei_links": 14,
+   "fy_span": "2003-2026",
+   "no_setaside_share_pct": 50.2,
+   "top_operating_companies": [
+    {
+     "name": "TATITLEK TECHNOLOGIES, LLC",
+     "usd": 838595376.37,
+     "flagged": true
+    },
+    {
+     "name": "TATITLEK FEDERAL SERVICES LLC",
+     "usd": 605061063.19,
+     "flagged": true
+    },
+    {
+     "name": "TATITLEK TRAINING SERVICES, INC.",
+     "usd": 482598362.67,
+     "flagged": true
+    },
+    {
+     "name": "Tatitlek Support Services, Inc",
+     "usd": 335752541.82,
+     "flagged": true
+    }
+   ]
+  },
+  {
+   "rank": 17,
+   "entity_id": "TRBF-HLTNML-00",
+   "name": "Houlton Band of Maliseet Indians",
+   "class": "TRIBE",
+   "state": "ME",
+   "obligations_usd": 2479681499.04,
+   "n_operating_companies": 1,
+   "n_uei_links": 1,
+   "fy_span": "2005-2026",
+   "no_setaside_share_pct": 78.2,
+   "top_operating_companies": [
+    {
+     "name": "Tribalco, Llc",
+     "usd": 2479681499.04,
+     "flagged": true
+    }
+   ]
+  },
+  {
+   "rank": 18,
+   "entity_id": "TRBF-PSKNML-00",
+   "name": "Paskenta Band of Nomlaki Indians of California",
+   "class": "TRIBE",
+   "state": "CA",
+   "obligations_usd": 2454771616.82,
+   "n_operating_companies": 33,
+   "n_uei_links": 29,
+   "fy_span": "2007-2026",
+   "no_setaside_share_pct": 56.1,
+   "top_operating_companies": [
+    {
+     "name": "Tepa Ec Limited Liability Company",
+     "usd": 786493265.88,
+     "flagged": true
+    },
+    {
+     "name": "NOMLAKI TECHNOLOGIES, LLC",
+     "usd": 208040131.33,
+     "flagged": true
+    },
+    {
+     "name": "KOMADA LLC",
+     "usd": 185085919.32,
+     "flagged": true
+    },
+    {
+     "name": "Roundhouse Pbn, Llc",
+     "usd": 179654752.19,
+     "flagged": true
+    }
+   ]
+  },
+  {
+   "rank": 19,
+   "entity_id": "ANVC-EYAKXX-00",
+   "name": "Eyak Corporation",
+   "class": "ANC_VILLAGE",
+   "state": "AK",
+   "obligations_usd": 2317615521.34,
+   "n_operating_companies": 10,
+   "n_uei_links": 10,
+   "fy_span": "2002-2026",
+   "no_setaside_share_pct": 24.7,
+   "top_operating_companies": [
+    {
+     "name": "Eyak Technology, Llc",
+     "usd": 1490841461.37,
+     "flagged": true
+    },
+    {
+     "name": "NORTHTIDE GROUP LLC",
+     "usd": 245833913.39,
+     "flagged": true
+    },
+    {
+     "name": "Eg Solutions Limited Liability Company",
+     "usd": 206463510.14,
+     "flagged": false
+    },
+    {
+     "name": "SOLUTIONS71, LLC",
+     "usd": 114742005.62,
+     "flagged": true
+    }
+   ]
+  },
+  {
+   "rank": 20,
+   "entity_id": "ANVC-OUZINK-00",
+   "name": "Ouzinkie Native Corporation",
+   "class": "ANC_VILLAGE",
+   "state": "AK",
+   "obligations_usd": 2146738629.53,
+   "n_operating_companies": 13,
+   "n_uei_links": 13,
+   "fy_span": "2006-2026",
+   "no_setaside_share_pct": 44.6,
+   "top_operating_companies": [
+    {
+     "name": "Katmai Management Services, Llc",
+     "usd": 325416816.4,
+     "flagged": true
+    },
+    {
+     "name": "KATMAI TECHNICAL SERVICES, LLC",
+     "usd": 316538547.17,
+     "flagged": true
+    },
+    {
+     "name": "KATMAI HEALTH SERVICES LLC",
+     "usd": 267684173.86,
+     "flagged": true
+    },
+    {
+     "name": "KATMAI INTEGRATED SOLUTIONS, LLC",
+     "usd": 258705079.83,
+     "flagged": true
+    }
+   ]
+  },
+  {
+   "rank": 21,
+   "entity_id": "TRBF-SNCNAT-00",
+   "name": "Seneca Nation of Indians",
+   "class": "TRIBE",
+   "state": "NY",
+   "obligations_usd": 1844866505.53,
+   "n_operating_companies": 10,
+   "n_uei_links": 4,
+   "fy_span": "2003-2026",
+   "no_setaside_share_pct": 41.0,
+   "top_operating_companies": [
+    {
+     "name": "SENECA STRATEGIC PARTNERS, LLC",
+     "usd": 645668434.97,
+     "flagged": true
+    },
+    {
+     "name": "SENECA GLOBAL SERVICES LLC",
+     "usd": 532953586.89,
+     "flagged": true
+    },
+    {
+     "name": "WESTERN DOOR FEDERAL, LLC",
+     "usd": 322490528.0,
+     "flagged": true
+    },
+    {
+     "name": "SENECA TELECOMMUNICATIONS, LLC",
+     "usd": 288800332.92,
+     "flagged": true
+    }
+   ]
+  },
+  {
+   "rank": 22,
+   "entity_id": "TRBF-CSKTFR-00",
+   "name": "Confederated Salish and Kootenai Tribes of the Flathead Reservation",
+   "class": "TRIBE",
+   "state": "MT",
+   "obligations_usd": 1824976959.12,
+   "n_operating_companies": 10,
+   "n_uei_links": 10,
+   "fy_span": "2000-2026",
+   "no_setaside_share_pct": 68.6,
+   "top_operating_companies": [
+    {
+     "name": "S&K Technologies, Inc.",
+     "usd": 416146630.83,
+     "flagged": true
+    },
+    {
+     "name": "S & K AEROSPACE LLC",
+     "usd": 384789913.04,
+     "flagged": false
+    },
+    {
+     "name": "S&K Logistics Services Llc",
+     "usd": 358533386.23,
+     "flagged": true
+    },
+    {
+     "name": "S & K FEDERAL SERVICES LLC",
+     "usd": 156105155.79,
+     "flagged": true
+    }
+   ]
+  },
+  {
+   "rank": 23,
+   "entity_id": "ANVC-CHGGNG-00",
+   "name": "Choggiung, Ltd.",
+   "class": "ANC_VILLAGE",
+   "state": "AK",
+   "obligations_usd": 1686067498.37,
+   "n_operating_companies": 4,
+   "n_uei_links": 4,
+   "fy_span": "2000-2026",
+   "no_setaside_share_pct": 52.8,
+   "top_operating_companies": [
+    {
+     "name": "BRISTOL GENERAL CONTRACTORS, LLC",
+     "usd": 621060608.08,
+     "flagged": true
+    },
+    {
+     "name": "Bristol Design Build Services, Llc",
+     "usd": 427219967.85,
+     "flagged": true
+    },
+    {
+     "name": "Bristol Construction Services",
+     "usd": 345839895.27,
+     "flagged": true
+    },
+    {
+     "name": "Bristol Environmental & Engine",
+     "usd": 291947027.17,
+     "flagged": true
+    }
+   ]
+  },
+  {
+   "rank": 24,
+   "entity_id": "ANRC-DOYONL-00",
+   "name": "Doyon, Limited",
+   "class": "ANC_REGIONAL",
+   "state": "AK",
+   "obligations_usd": 1605005411.62,
+   "n_operating_companies": 13,
+   "n_uei_links": 13,
+   "fy_span": "2000-2026",
+   "no_setaside_share_pct": 50.5,
+   "top_operating_companies": [
+    {
+     "name": "DOYON MANAGEMENT SERVICES, LLC",
+     "usd": 372035966.82,
+     "flagged": true
+    },
+    {
+     "name": "DOYON PROJECT SERVICES, LLC",
+     "usd": 363488039.47,
+     "flagged": true
+    },
+    {
+     "name": "Cherokee General Corporation",
+     "usd": 262733576.66,
+     "flagged": true
+    },
+    {
+     "name": "DOYON / AKAL JV II",
+     "usd": 212161691.4,
+     "flagged": false
+    }
+   ]
+  },
+  {
+   "rank": 25,
+   "entity_id": "ANVC-OLGOON-00",
+   "name": "Olgoonik Corporation",
+   "class": "ANC_VILLAGE",
+   "state": "AK",
+   "obligations_usd": 1403360667.67,
+   "n_operating_companies": 14,
+   "n_uei_links": 13,
+   "fy_span": "2005-2026",
+   "no_setaside_share_pct": 63.9,
+   "top_operating_companies": [
+    {
+     "name": "OLGOONIK FEDERAL, LLC",
+     "usd": 474224920.34,
+     "flagged": true
+    },
+    {
+     "name": "OLGOONIK DIVERSIFIED SERVICES LLC",
+     "usd": 161619504.24,
+     "flagged": true
+    },
+    {
+     "name": "OLGOONIK GENERAL, LLC",
+     "usd": 158890346.47,
+     "flagged": true
+    },
+    {
+     "name": "OLGOONIK DIVERSIFIED SERVICES, LLC",
+     "usd": 134133654.7,
+     "flagged": true
+    }
+   ]
+  }
+ ],
+ "tierA_by_fiscal_year_usd": {
+  "2000": 326606523.23,
+  "2001": 434979219.94,
+  "2002": 769901070.85,
+  "2003": 1595512025.5,
+  "2004": 2039809075.45,
+  "2005": 2804188968.65,
+  "2006": 2975090409.79,
+  "2007": 3245854684.61,
+  "2008": 6747895063.6,
+  "2009": 7126212236.35,
+  "2010": 6885917613.13,
+  "2011": 6554959979.0,
+  "2012": 6323586983.02,
+  "2013": 5143665522.58,
+  "2014": 6116907561.36,
+  "2015": 6247068667.22,
+  "2016": 6890968889.21,
+  "2017": 7986877350.77,
+  "2018": 8839096489.9,
+  "2019": 10051037764.65,
+  "2020": 10721727937.85,
+  "2021": 12116080482.89,
+  "2022": 11863555145.42,
+  "2023": 12559879240.71,
+  "2024": 13001986457.88,
+  "2025": 11919654987.94,
+  "2026": 5454045844.22
+ },
+ "fy2025_last_complete_year": {
+  "tierA_usd": 11919654987.94,
+  "note": "FY2025 is the last publishable complete fiscal year for this dataset. FY2026 is cut at action_date 2026-07-03 - a nine-month partial - and every FY2026 figure is year-to-date."
+ },
+ "fy2026_partial": {
+  "tierA_usd": 5454045844.22,
+  "share_of_tierA_pct": 3.09,
+  "cut_at": "action_date 2026-07-03"
+ },
+ "final_vs_will_move": {
+  "FINAL": [
+   "FY2000-FY2025 obligations as recorded at this vintage (FPDS restates retroactively up to five years, so even closed years drift slightly)"
+  ],
+  "WILL_MOVE": [
+   "every FY2026 figure - the prime cut is at action_date 2026-07-03, a nine-month partial; these only ever grow",
+   "the tier-A total - it grows as links are ruled, never shrinks except by a negative ruling"
+  ]
+ }
+}

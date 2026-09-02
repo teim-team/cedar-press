@@ -1,0 +1,17 @@
+[
+ [
+  "512_build_dataset_contracts.py",
+  "docs/DATASET_CONTRACTS.md",
+  "markdown"
+ ],
+ [
+  "512_build_dataset_contracts.py",
+  "docs/GRAIN_AUDIT.md",
+  "markdown"
+ ],
+ [
+  "518_dataset_readiness.py",
+  "docs/DATASET_READINESS.md",
+  "markdown"
+ ]
+]

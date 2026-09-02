@@ -1,0 +1,729 @@
+{
+ "alias_layer": {
+  "alias_entities_not_in_the_spine": [],
+  "by_alias_type": {
+   "acronym": 142,
+   "brand": 104,
+   "common": 2901,
+   "diacritic_folded": 57,
+   "full_form_federal_filing": 1799,
+   "legal": 691,
+   "shortened": 226,
+   "source_specific": 23
+  },
+  "by_source_system": {
+   "CAGE": 34,
+   "EIN": 8,
+   "UEI": 157,
+   "cedar_brand_registry": 104,
+   "cedar_generated": 1879,
+   "cedar_spine": 3269,
+   "federal_register": 492
+  },
+  "by_verification_status": {
+   "FOLDED": 80,
+   "GENERATED_MUNICIPAL_LOOKALIKE": 330,
+   "GENERATED_UNCONFIRMED": 1469,
+   "OFFICIAL": 492,
+   "RECORDED": 1959,
+   "REGISTERED": 199,
+   "RULED": 104,
+   "SPINE_CANONICAL": 1310
+  },
+  "classes_with_no_alias_coverage": {
+   "Individually Native-owned business": 45,
+   "Native Hawaiian Organization": 179
+  },
+  "columns": [
+   "alias_id",
+   "entity_id",
+   "alias_name",
+   "normalized_alias",
+   "alias_type",
+   "source_system",
+   "start_date",
+   "end_date",
+   "first_observed_date",
+   "last_observed_date",
+   "verification_status",
+   "confidence",
+   "tier",
+   "source_id",
+   "created_at"
+  ],
+  "columns_entirely_blank": [
+   "start_date",
+   "end_date",
+   "first_observed_date",
+   "last_observed_date"
+  ],
+  "declared_alias_types_unused": [
+   "abbreviation",
+   "dba",
+   "former_legal",
+   "governmental_unit_variation",
+   "historical",
+   "informal",
+   "known_typo",
+   "operating_name",
+   "translated"
+  ],
+  "distinct_entities_covered": 1310,
+  "rows": 5943,
+  "spine_entities": 1534,
+  "spine_entities_with_NO_alias_row": 224
+ },
+ "assistance_id_schemes": {
+  "note": "The crosswalk is NOT applied. 152 and 24 decline in writing: 'the NEID crosswalk is a ruling, not a computation.' 122 of 344 candidates rest on the containment matcher AGENTS.md forbids from keying a dollar. Honoured here.",
+  "rows": 701955,
+  "tribe_id_scheme_resolved": {
+   "cedar_neid": 183995,
+   "lineageA_dofile_integer": 365535,
+   "unattributed": 152425
+  }
+ },
+ "built_by": "code/415_audit_identity_layer.py",
+ "built_date": "2026-08-26",
+ "constituent_bands": {
+  "derived_umbrella_agrees_with_declared_parent": 22,
+  "n": 25,
+  "rows": [
+   {
+    "band_id": "CNSF-MINNCH-BF",
+    "band_name": "Bois Forte",
+    "declared_parent": "TRBF-MINNCH-00",
+    "derived_umbrella_id": "TRBF-MINNCH-00",
+    "umbrella_in_spine": true
+   },
+   {
+    "band_id": "CNSF-CPTNGR-BA",
+    "band_name": "Capitan Grande",
+    "declared_parent": "TRBF-CPTNGR-00",
+    "derived_umbrella_id": "TRBF-CPTNGR-00",
+    "umbrella_in_spine": true
+   },
+   {
+    "band_id": "CNSF-MINNCH-FL",
+    "band_name": "Fond du Lac",
+    "declared_parent": "TRBF-MINNCH-00",
+    "derived_umbrella_id": "TRBF-MINNCH-00",
+    "umbrella_in_spine": true
+   },
+   {
+    "band_id": "CNSF-MINNCH-GP",
+    "band_name": "Grand Portage",
+    "declared_parent": "TRBF-MINNCH-00",
+    "derived_umbrella_id": "TRBF-MINNCH-00",
+    "umbrella_in_spine": true
+   },
+   {
+    "band_id": "CNSF-MINNCH-LL",
+    "band_name": "Leech Lake",
+    "declared_parent": "TRBF-MINNCH-00",
+    "derived_umbrella_id": "TRBF-MINNCH-00",
+    "umbrella_in_spine": true
+   },
+   {
+    "band_id": "CNSF-MINNCH-ML",
+    "band_name": "Mille Lacs",
+    "declared_parent": "TRBF-MINNCH-00",
+    "derived_umbrella_id": "TRBF-MINNCH-00",
+    "umbrella_in_spine": true
+   },
+   {
+    "band_id": "CNSF-PTTRUT-CD",
+    "band_name": "Paiute Indian Tribe of Utah \u2013 Cedar Band of Paiutes",
+    "declared_parent": "TRBF-PTTRUT-00",
+    "derived_umbrella_id": "TRBF-PTTRUT-00",
+    "umbrella_in_spine": true
+   },
+   {
+    "band_id": "CNSF-PTTRUT-IP",
+    "band_name": "Paiute Indian Tribe of Utah \u2013 Indian Peaks Band of Paiutes",
+    "declared_parent": "TRBF-PTTRUT-00",
+    "derived_umbrella_id": "TRBF-PTTRUT-00",
+    "umbrella_in_spine": true
+   },
+   {
+    "band_id": "CNSF-PTTRUT-KN",
+    "band_name": "Paiute Indian Tribe of Utah \u2013 Kanosh Band of Paiutes",
+    "declared_parent": "TRBF-PTTRUT-00",
+    "derived_umbrella_id": "TRBF-PTTRUT-00",
+    "umbrella_in_spine": true
+   },
+   {
+    "band_id": "CNSF-PTTRUT-KS",
+    "band_name": "Paiute Indian Tribe of Utah \u2013 Koosharem Band of Paiutes",
+    "declared_parent": "TRBF-PTTRUT-00",
+    "derived_umbrella_id": "TRBF-PTTRUT-00",
+    "umbrella_in_spine": true
+   },
+   {
+    "band_id": "CNSF-PTTRUT-SW",
+    "band_name": "Paiute Indian Tribe of Utah \u2013 Shivwits Band of Paiutes",
+    "declared_parent": "TRBF-PTTRUT-00",
+    "derived_umbrella_id": "TRBF-PTTRUT-00",
+    "umbrella_in_spine": true
+   },
+   {
+    "band_id": "CNSF-PSMQDY-IT",
+    "band_name": "Passamaquoddy Indian Township",
+    "declared_parent": "TRBF-PSMQDY-00",
+    "derived_umbrella_id": "TRBF-PSMQDY-00",
+    "umbrella_in_spine": true
+   },
+   {
+    "band_id": "CNSF-PSMQDY-PP",
+    "band_name": "Passamaquoddy Pleasant Point",
+    "declared_parent": "TRBF-PSMQDY-00",
+    "derived_umbrella_id": "TRBF-PSMQDY-00",
+    "umbrella_in_spine": true
+   },
+   {
+    "band_id": "CNSF-NAVAJO-RM",
+    "band_name": "Ramah Navajo Chapter",
+    "declared_parent": "TRBF-NAVAJO-00",
+    "derived_umbrella_id": "TRBF-NAVAJO-00",
+    "umbrella_in_spine": true
+   },
+   {
+    "band_id": "CNSS-SHGTCK-TR",
+    "band_name": "Schaghticoke Indian Tribe",
+    "declared_parent": "",
+    "derived_umbrella_id": "TRBF-SHGTCK-00",
+    "umbrella_in_spine": false
+   },
+   {
+    "band_id": "CNSS-SHGTCK-TN",
+    "band_name": "Schaghticoke Tribal Nation",
+    "declared_parent": "",
+    "derived_umbrella_id": "TRBF-SHGTCK-00",
+    "umbrella_in_spine": false
+   },
+   {
+    "band_id": "CNSF-FTHALL-BK",
+    "band_name": "Shoshone-Bannock Tribes of the Fort Hall Reservation \u2013 Fort Hall Bannock Band",
+    "declared_parent": "TRBF-FTHALL-00",
+    "derived_umbrella_id": "TRBF-FTHALL-00",
+    "umbrella_in_spine": true
+   },
+   {
+    "band_id": "CNSF-FTHALL-SH",
+    "band_name": "Shoshone-Bannock Tribes of the Fort Hall Reservation \u2013 Fort Hall Shoshone Band",
+    "declared_parent": "TRBF-FTHALL-00",
+    "derived_umbrella_id": "TRBF-FTHALL-00",
+    "umbrella_in_spine": true
+   },
+   {
+    "band_id": "CNSF-TEMOAK-BT",
+    "band_name": "Te-Moak Tribe of Western Shoshone Indians of Nevada \u2013 Battle Mountain Band",
+    "declared_parent": "TRBF-TEMOAK-00",
+    "derived_umbrella_id": "TRBF-TEMOAK-00",
+    "umbrella_in_spine": true
+   },
+   {
+    "band_id": "CNSF-TEMOAK-EK",
+    "band_name": "Te-Moak Tribe of Western Shoshone Indians of Nevada \u2013 Elko Band",
+    "declared_parent": "TRBF-TEMOAK-00",
+    "derived_umbrella_id": "TRBF-TEMOAK-00",
+    "umbrella_in_spine": true
+   },
+   {
+    "band_id": "CNSF-TEMOAK-SF",
+    "band_name": "Te-Moak Tribe of Western Shoshone Indians of Nevada \u2013 South Fork Band",
+    "declared_parent": "TRBF-TEMOAK-00",
+    "derived_umbrella_id": "TRBF-TEMOAK-00",
+    "umbrella_in_spine": true
+   },
+   {
+    "band_id": "CNSF-TEMOAK-WL",
+    "band_name": "Te-Moak Tribe of Western Shoshone Indians of Nevada \u2013 Wells Band",
+    "declared_parent": "TRBF-TEMOAK-00",
+    "derived_umbrella_id": "TRBF-TEMOAK-00",
+    "umbrella_in_spine": true
+   },
+   {
+    "band_id": "CNSS-TURTLM-TR",
+    "band_name": "Trenton Indian Service Area",
+    "declared_parent": "",
+    "derived_umbrella_id": "TRBF-TURTLM-00",
+    "umbrella_in_spine": true
+   },
+   {
+    "band_id": "CNSF-CPTNGR-VJ",
+    "band_name": "Viejas",
+    "declared_parent": "TRBF-CPTNGR-00",
+    "derived_umbrella_id": "TRBF-CPTNGR-00",
+    "umbrella_in_spine": true
+   },
+   {
+    "band_id": "CNSF-MINNCH-WE",
+    "band_name": "White Earth",
+    "declared_parent": "TRBF-MINNCH-00",
+    "derived_umbrella_id": "TRBF-MINNCH-00",
+    "umbrella_in_spine": true
+   }
+  ],
+  "umbrella_derivable_from_the_id_alone": 23
+ },
+ "entity_class_counts": {
+  "ANCSA Group Corporation": 6,
+  "Alaska Native Regional Corporation": 12,
+  "Alaska Native Village Corporation": 173,
+  "BIE School": 185,
+  "Federal-level constituency entity": 22,
+  "Federal-level self-governance consortium": 9,
+  "Federally recognized Alaska Native Village": 228,
+  "Federally recognized tribe": 349,
+  "Individually Native-owned business": 45,
+  "Intertribal Organization": 55,
+  "Native Community Development Financial Institution": 64,
+  "Native Financial Institution": 29,
+  "Native Hawaiian Organization": 210,
+  "State-level constituency entity": 3,
+  "State-recognized tribe": 64,
+  "Tribal College or University": 37,
+  "Urban Indian Organization": 43
+ },
+ "entity_classes_with_no_declared_prefix": [],
+ "external_identifiers": {
+  "by_method": {
+   "agent_research_one_leg": 326,
+   "agent_research_two_leg": 506,
+   "bgov_manual": 837,
+   "cluster_v3": 2007,
+   "cross_dataset_propagation:contracting": 1028,
+   "cross_dataset_propagation:funding": 293,
+   "elijah_ruling": 547,
+   "elijah_ruling_redirect": 110,
+   "hand": 522,
+   "institution_exact_name": 55,
+   "need_v6": 4650,
+   "sam_namematch_2026_05_06": 135,
+   "subsidiary_lookup": 114,
+   "unmatched": 9407,
+   "web_verified": 40
+  },
+  "by_tier": {
+   "A": 2286,
+   "B": 5448,
+   "C": 12382,
+   "X": 461
+  },
+  "by_type": {
+   "CAGE": 5966,
+   "EIN": 1104,
+   "UEI": 13507
+  },
+  "distinct_identifiers_keyed": 8067,
+  "entities_holding_MANY_identifiers_EXPECTED": 557,
+  "entity_class_blank_rows": 10908,
+  "entity_class_values": {
+   "": 10908,
+   "ANC_REGIONAL": 140,
+   "Alaska Native Regional Corporation": 473,
+   "Alaska Native Village Corporation": 53,
+   "BGOV tribal vendor": 878,
+   "FEDERAL_AK_VILLAGE": 341,
+   "FEDERAL_TRIBE_CONSTITUENCY": 9,
+   "FEDERAL_TRIBE_LOWER48": 1370,
+   "Federal-level constituency entity": 31,
+   "Federal-level self-governance consortium": 28,
+   "Federally recognized Alaska Native Village": 1049,
+   "Federally recognized tribe": 1838,
+   "INTERTRIBAL_ORG_AK_CONSORTIUM": 4,
+   "Individually Native-owned business": 42,
+   "Native Hawaiian Organization": 40,
+   "STATE_TRIBE": 96,
+   "STATE_TRIBE_CONSTITUENCY": 19,
+   "State-level constituency entity": 2,
+   "State-recognized tribe": 108,
+   "TRIBAL_COLLEGE": 15,
+   "TRIBAL_UNCROSSWALKED_SBA": 3133
+  },
+  "identifiers_resolving_to_MANY_entities_DEFECT": 0,
+  "ledger_rows": 20577,
+  "rows_with_no_entity": 12489,
+  "sample_one_identifier_many_entities": [],
+  "top_identifier_holders": [
+   {
+    "entity": "ANVC-CHENEG-00",
+    "n_identifiers": 159
+   },
+   {
+    "entity": "ANRC-BRBYCO-00",
+    "n_identifiers": 148
+   },
+   {
+    "entity": "ANRC-NANARC-00",
+    "n_identifiers": 129
+   },
+   {
+    "entity": "TRBF-NAVAJO-00",
+    "n_identifiers": 128
+   },
+   {
+    "entity": "TRBF-CHKNAT-00",
+    "n_identifiers": 120
+   },
+   {
+    "entity": "ANRC-AHTNAI-00",
+    "n_identifiers": 120
+   },
+   {
+    "entity": "ANRC-ARCSLO-00",
+    "n_identifiers": 115
+   },
+   {
+    "entity": "AKNF-VEAGLE-00-DOYONL-TNNACH",
+    "n_identifiers": 111
+   },
+   {
+    "entity": "TRBF-LUMBEE-00",
+    "n_identifiers": 109
+   },
+   {
+    "entity": "TRBF-CHKSWN-00",
+    "n_identifiers": 104
+   },
+   {
+    "entity": "ANVC-AFOGNA-00",
+    "n_identifiers": 104
+   },
+   {
+    "entity": "AKNF-INPTBW-00-ARCSLO",
+    "n_identifiers": 103
+   }
+  ]
+ },
+ "hierarchy_columns": {
+  "ancsa_region_entity_id": {
+   "distinct": 12,
+   "nonblank": 391,
+   "sample_not_a_spine_id": [],
+   "self_referential": 0,
+   "values_not_a_spine_id": 0
+  },
+  "parent_entity_id": {
+   "distinct": 35,
+   "nonblank": 52,
+   "sample_not_a_spine_id": [],
+   "self_referential": 0,
+   "values_not_a_spine_id": 0
+  },
+  "parent_native_entity": {
+   "distinct": 56,
+   "nonblank": 61,
+   "sample_not_a_spine_id": [
+    "Assiniboine and Gros Ventre Tribes",
+    "Assiniboine and Sioux",
+    "Bay Mills",
+    "Blackfeet",
+    "CNSF-MINNCH-FL|Fond du Lac",
+    "Chehalis",
+    "Chippewa-Cree",
+    "Confederated Salish"
+   ],
+   "self_referential": 0,
+   "values_not_a_spine_id": 56
+  },
+  "ultimate_parent_entity_id": {
+   "distinct": 1154,
+   "nonblank": 1176,
+   "sample_not_a_spine_id": [],
+   "self_referential": 1154,
+   "values_not_a_spine_id": 0
+  }
+ },
+ "legacy_register_id_coverage_by_class": {
+  "ANCSA Group Corporation": {
+   "total": 6,
+   "with_register_id": 6
+  },
+  "Alaska Native Regional Corporation": {
+   "total": 12,
+   "with_register_id": 9
+  },
+  "Alaska Native Village Corporation": {
+   "total": 173,
+   "with_register_id": 173
+  },
+  "BIE School": {
+   "total": 185,
+   "with_register_id": 0
+  },
+  "Federal-level constituency entity": {
+   "total": 22,
+   "with_register_id": 10
+  },
+  "Federal-level self-governance consortium": {
+   "total": 9,
+   "with_register_id": 0
+  },
+  "Federally recognized Alaska Native Village": {
+   "total": 228,
+   "with_register_id": 206
+  },
+  "Federally recognized tribe": {
+   "total": 349,
+   "with_register_id": 340
+  },
+  "Individually Native-owned business": {
+   "total": 45,
+   "with_register_id": 0
+  },
+  "Intertribal Organization": {
+   "total": 55,
+   "with_register_id": 55
+  },
+  "Native Community Development Financial Institution": {
+   "total": 64,
+   "with_register_id": 0
+  },
+  "Native Financial Institution": {
+   "total": 29,
+   "with_register_id": 0
+  },
+  "Native Hawaiian Organization": {
+   "total": 210,
+   "with_register_id": 210
+  },
+  "State-level constituency entity": {
+   "total": 3,
+   "with_register_id": 0
+  },
+  "State-recognized tribe": {
+   "total": 64,
+   "with_register_id": 0
+  },
+  "Tribal College or University": {
+   "total": 37,
+   "with_register_id": 0
+  },
+  "Urban Indian Organization": {
+   "total": 43,
+   "with_register_id": 0
+  }
+ },
+ "legacy_shortcode_value_scan": {
+  "distinct_legacy_values": 1009,
+  "files_scanned": 275,
+  "locations": [
+   {
+    "cells": 2033,
+    "column": "matched_entity_id",
+    "file": "entity_name_harvest.csv"
+   },
+   {
+    "file": "faads_transactions_all_agencies.csv",
+    "status": "SKIPPED_TOO_LARGE"
+   },
+   {
+    "file": "federal_actions.csv",
+    "status": "SKIPPED_TOO_LARGE"
+   },
+   {
+    "file": "federal_actions_raw.csv",
+    "status": "SKIPPED_TOO_LARGE"
+   },
+   {
+    "file": "federal_funding_transactions.csv",
+    "status": "SKIPPED_TOO_LARGE"
+   },
+   {
+    "cells": 891,
+    "column": "org_id",
+    "file": "intertribal_memberships.csv"
+   },
+   {
+    "cells": 55,
+    "column": "proposed_id",
+    "file": "intertribal_orgs.csv"
+   },
+   {
+    "cells": 265,
+    "column": "proposed_id",
+    "file": "nho_ito_spine_crosswalk.csv"
+   },
+   {
+    "cells": 210,
+    "column": "proposed_id",
+    "file": "nho_register.csv"
+   },
+   {
+    "file": "prime_contracts.csv",
+    "status": "SKIPPED_TOO_LARGE"
+   },
+   {
+    "file": "prime_contracts_archive_backfill.csv",
+    "status": "SKIPPED_TOO_LARGE"
+   },
+   {
+    "file": "prime_contracts_awards.csv",
+    "status": "SKIPPED_TOO_LARGE"
+   },
+   {
+    "file": "sam_prime_contracts_fy2000_2007.csv",
+    "status": "SKIPPED_TOO_LARGE"
+   },
+   {
+    "file": "sam_prime_contracts_fy2000_2007_PUBLISHABLE.csv",
+    "status": "SKIPPED_TOO_LARGE"
+   },
+   {
+    "cells": 1009,
+    "column": "cedar_entity_id",
+    "file": "cedar_entity_spine.csv"
+   }
+  ],
+  "note": "A rename of the spine column is only safe where this list is fully enumerated. 327 aborts a whole key migration on ONE undeclared location, and that discipline is inherited here."
+ },
+ "one_to_many_defect_register": {
+  "by_family": {
+   "": 37,
+   "ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION": 334,
+   "CONSTITUENT_BAND_VS_UMBRELLA_TRIBE": 42,
+   "INTERTRIBAL_ORGANISATION_VS_MEMBER_TRIBE": 9,
+   "MIXED_CLASS": 301,
+   "TWO_DIFFERENT_TRIBES_ON_ONE_IDENTIFIER": 188
+  },
+  "constituent_band_usd_observed": 1297812942.54,
+  "file": "review\\identifier_one_to_many_defects_2026-08-26.csv",
+  "rows": 911
+ },
+ "prefix_hint_drift_vs_cedar_ids": [],
+ "prefix_to_entity_class": {
+  "AKNF": {
+   "Federally recognized Alaska Native Village": 228,
+   "Federally recognized tribe": 1
+  },
+  "ANRC": {
+   "Alaska Native Regional Corporation": 12
+  },
+  "ANVC": {
+   "ANCSA Group Corporation": 6,
+   "Alaska Native Village Corporation": 173
+  },
+  "BIE": {
+   "BIE School": 185
+  },
+  "CDFI": {
+   "Native Community Development Financial Institution": 64,
+   "Native Financial Institution": 29
+  },
+  "CEDAR-ENT": {
+   "Individually Native-owned business": 45
+  },
+  "CNSF": {
+   "Federal-level constituency entity": 22
+  },
+  "CNSS": {
+   "State-level constituency entity": 3
+  },
+  "ITO": {
+   "Intertribal Organization": 55
+  },
+  "NHO": {
+   "Native Hawaiian Organization": 210
+  },
+  "SGVF": {
+   "Federal-level self-governance consortium": 9
+  },
+  "TCU": {
+   "Tribal College or University": 37
+  },
+  "TRBF": {
+   "Federally recognized tribe": 348
+  },
+  "TRBS": {
+   "State-recognized tribe": 64
+  },
+  "UIO": {
+   "Urban Indian Organization": 43
+  }
+ },
+ "prefixes_carrying_more_than_one_class": {
+  "AKNF": {
+   "Federally recognized Alaska Native Village": 228,
+   "Federally recognized tribe": 1
+  },
+  "ANVC": {
+   "ANCSA Group Corporation": 6,
+   "Alaska Native Village Corporation": 173
+  },
+  "CDFI": {
+   "Native Community Development Financial Institution": 64,
+   "Native Financial Institution": 29
+  }
+ },
+ "renames_available_from_federal_register": {
+  "distinct_entities": 172,
+  "distinct_former_names": 203,
+  "of_those_keyed_to_a_cedar_entity": 1399,
+  "roster_rows": 17058,
+  "rows_carrying_previously_listed_as": 1436,
+  "sample": [
+   {
+    "current": "Ho-Chunk Nation of Wisconsin",
+    "fr_citation": "60 FR 9250",
+    "previously": "Wisconsin Winnebago Tribe",
+    "tribe_id": "TRBF-HOCHNK-00"
+   },
+   {
+    "current": "Round Valley Indian Tribes of the Round Valley Reservation, California",
+    "fr_citation": "60 FR 9250",
+    "previously": "Covelo Indian Community",
+    "tribe_id": "TRBF-RNDVLY-00"
+   },
+   {
+    "current": "Tohono O'odham Nation of Arizona",
+    "fr_citation": "60 FR 9250",
+    "previously": "Papago Tribe of the Sells, Gila Bend & San Xavier Reservation, Arizona",
+    "tribe_id": "TRBF-THNODM-00"
+   },
+   {
+    "current": "Ho-Chunk Nation of Wisconsin",
+    "fr_citation": "61 FR 58211",
+    "previously": "Wisconsin Winnebago Tribe",
+    "tribe_id": "TRBF-HOCHNK-00"
+   },
+   {
+    "current": "Round Valley Indian Tribes of the Round Valley Reservation, California",
+    "fr_citation": "61 FR 58211",
+    "previously": "Covelo Indian Community",
+    "tribe_id": "TRBF-RNDVLY-00"
+   },
+   {
+    "current": "Tohono O'odham Nation of Arizona",
+    "fr_citation": "61 FR 58211",
+    "previously": "Papago Tribe of the Sells, Gila Bend & San Xavier Reservation, Arizona",
+    "tribe_id": "TRBF-THNODM-00"
+   }
+  ]
+ },
+ "the_two_spine_id_columns": {
+  "cedar_entity_id_blank": 525,
+  "cedar_entity_id_distinct": 1009,
+  "cedar_entity_id_duplicates": {},
+  "cedar_entity_id_matching_legacy_shortcode_shape": 1009,
+  "cedar_entity_id_that_is_a_canonical_cedar_id": 0,
+  "columns": 37,
+  "example_pairs": [
+   {
+    "cedar_entity_id": "T-0001",
+    "tribe_id": "TRBF-ASHAWN-00"
+   },
+   {
+    "cedar_entity_id": "T-0246",
+    "tribe_id": "AKNF-AFGNAK-00-KONIAG"
+   }
+  ],
+  "rows": 1534,
+  "rows_where_the_two_DIFFER": 1009,
+  "rows_where_the_two_are_EQUAL": 0,
+  "tribe_id_blank": 0,
+  "tribe_id_distinct": 1534,
+  "tribe_id_duplicates": {},
+  "verdict": "NOT TWO IDS FOR ONE CONCEPT. They are two DIFFERENT concepts sharing a misleading column name: `tribe_id` is the canonical Cedar id, and `cedar_entity_id` holds the upstream entity_master.csv register's `Entity_ID`. They are equal on 0 rows and differ on 1009."
+ }
+}

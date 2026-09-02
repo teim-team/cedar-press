@@ -1,0 +1,11 @@
+year,gdp_deflator_index,base_year,factor_to_base,source,retrieved
+1999,71.111,2025,1.81377,"BEA NIPA Table 1.1.9, implicit price deflator for GDP",2026-08-06
+2001,74.36,2025,1.734521,"BEA NIPA Table 1.1.9, implicit price deflator for GDP",2026-08-06
+2003,77.006,2025,1.674921,"BEA NIPA Table 1.1.9, implicit price deflator for GDP",2026-08-06
+2005,81.556,2025,1.581478,"BEA NIPA Table 1.1.9, implicit price deflator for GDP",2026-08-06
+2007,86.349,2025,1.493694,"BEA NIPA Table 1.1.9, implicit price deflator for GDP",2026-08-06
+2009,88.556,2025,1.456468,"BEA NIPA Table 1.1.9, implicit price deflator for GDP",2026-08-06
+2011,91.481,2025,1.409899,"BEA NIPA Table 1.1.9, implicit price deflator for GDP",2026-08-06
+2013,94.771,2025,1.360954,"BEA NIPA Table 1.1.9, implicit price deflator for GDP",2026-08-06
+2015,97.316,2025,1.325363,"BEA NIPA Table 1.1.9, implicit price deflator for GDP",2026-08-06
+2017,100.0,2025,1.28979,"BEA NIPA Table 1.1.9, implicit price deflator for GDP",2026-08-06

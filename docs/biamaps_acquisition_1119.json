@@ -1,0 +1,73 @@
+{
+  "script": "1119_acquire_biamaps_arcgis",
+  "host": "biamaps.geoplatform.gov",
+  "built_at": "2026-09-02T16:08:42.606469+00:00",
+  "tables": [
+    {
+      "table": "resource_bia_mineral_acreage_tracts.csv",
+      "rows": 249165,
+      "columns": 19,
+      "grain": "one row per (tract, resource, ownership type) as LTRO holds it",
+      "held_not_published": []
+    },
+    {
+      "table": "bia_tribal_leaders_directory.csv",
+      "rows": 587,
+      "columns": 51,
+      "grain": "one row per tribal-leaders directory entry",
+      "held_not_published": [
+        "aka",
+        "email",
+        "fax",
+        "firstname",
+        "lastname",
+        "mailingaddress",
+        "middlename",
+        "phone",
+        "physicaladdress",
+        "salutation",
+        "suffix"
+      ]
+    },
+    {
+      "table": "bia_aian_national_lar.csv",
+      "rows": 335,
+      "columns": 16,
+      "grain": "one row per BIA Land Area Record",
+      "held_not_published": []
+    },
+    {
+      "table": "bia_offices.csv",
+      "rows": 93,
+      "columns": 30,
+      "grain": "one row per BIA office",
+      "held_not_published": [
+        "CONTACTNAME",
+        "FAX",
+        "PHONE",
+        "POCEMAILADDRESS",
+        "POCFIRSTNAME",
+        "POCLASTNAME",
+        "POCMIDDLENAME",
+        "POCPREFIX",
+        "POCSUFFIX"
+      ]
+    },
+    {
+      "table": "bia_pl102_477_plans.csv",
+      "rows": 84,
+      "columns": 26,
+      "grain": "one row per PL 102-477 plan agreement",
+      "held_not_published": [
+        "email_bia_aotr"
+      ]
+    },
+    {
+      "table": "bia_ofa_petitioners.csv",
+      "rows": 20,
+      "columns": 17,
+      "grain": "one row per Office of Federal Acknowledgment petitioner",
+      "held_not_published": []
+    }
+  ]
+}

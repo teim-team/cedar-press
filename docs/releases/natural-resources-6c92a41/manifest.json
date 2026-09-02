@@ -1,0 +1,3629 @@
+{
+ "release_id": "natural-resources-6c92a41",
+ "generated_at": "2026-08-29T10:31:44+00:00",
+ "generated_by": "code/516_release_manifest.py",
+ "commit": "6c92a41f7b3275f3e4ee8edafd03cfb8e65be5ce",
+ "commit_subject": "Integrator: dollar-discrepancy reconciled; owner decision queue consolidated",
+ "tree_clean_at_capture": false,
+ "code_in_scope_matches_commit": true,
+ "dirty_paths": [
+  "GENTS.md",
+  "code/510_assertions.py",
+  "code/512_build_dataset_contracts.py",
+  "code/516_release_manifest.py",
+  "docs/ASSERTION_LAYER.md",
+  "docs/DATASET_CONTRACTS.md",
+  "docs/SOURCE_RECORD_LAYER.md",
+  "docs/lint_bug_classes.json",
+  "docs/schema/dataset_contracts.json",
+  "docs/GRAIN_AUDIT.md",
+  "docs/releases/_analysis/",
+  "docs/releases/nagpra-6c92a41/",
+  "docs/releases/native-owned-businesses-6c92a41/",
+  "docs/releases/natural-resources-6c92a41/",
+  "docs/releases/subcontracting-6c92a41/",
+  "docs/schema/grain_evidence.json"
+ ],
+ "retention_policy": {
+  "store": "data/_release_inputs",
+  "retain_max_bytes": 536870912,
+  "release_budget_bytes": 12884901888,
+  "budget_remaining_bytes": 12884901888,
+  "addressing": "content-addressed by sha256; blobs deduplicate across releases"
+ },
+ "environment": {
+  "python_version": "3.14.7",
+  "python_implementation": "CPython",
+  "python_executable": "C:\\Users\\esm247\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "machine": "AMD64",
+  "filesystem_case_sensitive": false,
+  "cwd_at_capture": "C:\\Users\\esm247\\Desktop\\Cedar Press",
+  "packages": [
+   "Deprecated==1.3.1",
+   "Jinja2==3.1.6",
+   "MarkupSafe==3.0.3",
+   "PyMuPDF==1.27.2.2",
+   "PyYAML==6.0.3",
+   "Pygments==2.20.0",
+   "RapidFuzz==3.14.5",
+   "WMI==1.5.1",
+   "affine==2.4.0",
+   "annotated-doc==0.0.4",
+   "anyio==4.13.0",
+   "asttokens==3.0.1",
+   "attrs==26.1.0",
+   "babel==2.18.0",
+   "beautifulsoup4==4.14.3",
+   "brotli==1.2.0",
+   "browser-cookie3==0.20.1",
+   "certifi==2026.2.25",
+   "cffi==2.0.0",
+   "charset-normalizer==3.4.7",
+   "click==8.3.3",
+   "cligj==0.7.2",
+   "colorama==0.4.6",
+   "commonmark==0.9.1",
+   "contourpy==1.3.3",
+   "cryptography==46.0.7",
+   "curl_cffi==0.15.0",
+   "cycler==0.12.1",
+   "dbfread==2.0.7",
+   "decorator==5.2.1",
+   "duckdb==1.5.5",
+   "et_xmlfile==2.0.0",
+   "executing==2.2.1",
+   "faicons==0.2.2",
+   "filelock==3.29.0",
+   "flatbuffers==25.12.19",
+   "fonttools==4.62.1",
+   "formulaic==1.2.1",
+   "fsspec==2026.4.0",
+   "geopandas==1.1.3",
+   "great-tables==0.21.0",
+   "greenlet==3.4.0",
+   "h11==0.16.0",
+   "hf-xet==1.4.3",
+   "htmltools==0.6.1",
+   "httpcore==1.0.9",
+   "httplib2==0.31.2",
+   "httpx==0.28.1",
+   "huggingface_hub==1.12.2",
+   "idna==3.11",
+   "importlib_metadata==9.0.0",
+   "importlib_resources==7.1.0",
+   "inflate64==1.0.4",
+   "interface-meta==1.3.0",
+   "ipython==9.13.0",
+   "ipython_pygments_lexers==1.1.1",
+   "jedi==0.20.0",
+   "joblib==1.5.3",
+   "jsonschema-specifications==2025.9.1",
+   "jsonschema==4.26.0",
+   "kiwisolver==1.5.0",
+   "linearmodels==7.0",
+   "llvmlite==0.47.0",
+   "lxml==6.1.0",
+   "lz4==4.4.5",
+   "maketables==0.1.8",
+   "markdown-it-py==3.0.0",
+   "markdown_pdf==1.13.1",
+   "matplotlib-inline==0.2.2",
+   "matplotlib==3.10.8",
+   "mdurl==0.1.2",
+   "mpmath==1.3.0",
+   "multivolumefile==0.2.3",
+   "mypy_extensions==1.1.0",
+   "narwhals==2.19.0",
+   "networkx==3.6.1",
+   "numba==0.65.1",
+   "numpy==2.4.4",
+   "onnxruntime==1.28.0",
+   "opencv-python==5.0.0.93",
+   "openpyxl==3.1.5",
+   "packaging==26.1",
+   "pandas==3.0.2",
+   "parso==0.8.7",
+   "patool==4.0.4",
+   "patsy==1.0.2",
+   "pdf2image==1.17.0",
+   "pdfminer.six==20251230",
+   "pdfplumber==0.11.9",
+   "pikepdf==10.6.0",
+   "pillow-avif-plugin==1.5.5",
+   "pillow==12.2.0",
+   "pillow_heif==1.3.0",
+   "plantuml==0.3.0",
+   "playwright==1.58.0",
+   "prompt_toolkit==3.0.52",
+   "protobuf==7.35.1",
+   "psutil==7.2.2",
+   "pure_eval==0.2.3",
+   "py7zr==1.1.0",
+   "pyarrow==24.0.0",
+   "pybcj==1.0.7",
+   "pyclipper==1.4.0",
+   "pycparser==3.0",
+   "pycryptodome==3.23.0",
+   "pycryptodomex==3.23.0",
+   "pyee==13.0.1",
+   "pyfixest==0.50.1",
+   "pyhdfe==0.2.0",
+   "pyogrio==0.12.1",
+   "pyparsing==3.3.2",
+   "pypdf==6.10.2",
+   "pypdfium2==5.7.0",
+   "pyppmd==1.3.1",
+   "pyproj==3.7.2",
+   "pyreadstat==1.3.3",
+   "pyshp==3.0.3",
+   "pytesseract==0.3.13",
+   "python-dateutil==2.9.0.post0",
+   "python-docx==1.2.0",
+   "python-pptx==1.0.2",
+   "pywin32==311",
+   "rapidocr-onnxruntime==1.2.3",
+   "rarfile==4.2",
+   "rasterio==1.5.0",
+   "referencing==0.37.0",
+   "regex==2026.4.4",
+   "reportlab==4.4.10",
+   "requests==2.33.1",
+   "rich==15.0.0",
+   "rpds-py==2026.6.3",
+   "safetensors==0.7.0",
+   "scikit-learn==1.8.0",
+   "scipy==1.17.1",
+   "seaborn==0.13.2",
+   "sentencepiece==0.2.1",
+   "setuptools==81.0.0",
+   "shadowcopy==0.0.4",
+   "shapely==2.1.2",
+   "shellingham==1.5.4",
+   "six==1.17.0",
+   "soupsieve==2.8.3",
+   "stack-data==0.6.3",
+   "statsmodels==0.14.6",
+   "sympy==1.14.0",
+   "tabulate==0.10.0",
+   "texttable==1.7.0",
+   "threadpoolctl==3.6.0",
+   "tokenizers==0.22.2",
+   "torch==2.11.0",
+   "tqdm==4.67.3",
+   "traitlets==5.15.0",
+   "transformers==5.7.0",
+   "typer==0.25.0",
+   "typing_extensions==4.15.0",
+   "tzdata==2026.1",
+   "urllib3==2.6.3",
+   "wcwidth==0.7.0",
+   "wrapt==2.2.0rc10",
+   "xlrd==2.0.2",
+   "xlsxwriter==3.2.9",
+   "zipp==3.23.1"
+  ],
+  "packages_sha256": "fcffb05785cb1675b913df1fc7b1f737969106068b3ac53b236bd6eb5bd0affe",
+  "note": "The scripts in scope import only the standard library; the package lock is recorded so a future divergence is visible, not because a third-party version is currently load-bearing."
+ },
+ "collections": [
+  {
+   "collection": "natural-resources",
+   "name": "Natural Resource Revenues",
+   "shelf": "pro",
+   "n_tables": 9,
+   "ambiguous_scripts": [
+    "135_build_resource_assets.py"
+   ],
+   "blocked_scripts": [],
+   "code": [
+    {
+     "script": "07_parse_ancsa_ceiling.py",
+     "sha256": "11251d9539363b52c340d51f34f5cceae3ab5d528173e3b50cc58b46f67174c4",
+     "git_blob_working": "67f0c9c7ad7fab450ee1f5004ec1a7b9d72b63cf",
+     "git_blob_at_commit": "67f0c9c7ad7fab450ee1f5004ec1a7b9d72b63cf",
+     "matches_commit": true,
+     "tracked": true,
+     "never_run": false,
+     "role": "phase1_rebuild"
+    },
+    {
+     "script": "108_build_tribal_tax_bases.py",
+     "sha256": "748e97ef2005db0de122087762dbe37d3e9fe1708d3dab8ea6fb1752bd1be0a7",
+     "git_blob_working": "860e75cbcbaf2355b5d1890ceea922624ff0812a",
+     "git_blob_at_commit": "860e75cbcbaf2355b5d1890ceea922624ff0812a",
+     "matches_commit": true,
+     "tracked": true,
+     "never_run": false,
+     "role": "phase1_rebuild"
+    },
+    {
+     "script": "113_build_nd_severance.py",
+     "sha256": "7ee6bae97380f1aa4fe0d55ff36a86e5be8eb2fac6ecbd2cc4c83c2eb79f63c0",
+     "git_blob_working": "b8065297033f6cd424e484ffb3c1e937eb50962e",
+     "git_blob_at_commit": "b8065297033f6cd424e484ffb3c1e937eb50962e",
+     "matches_commit": true,
+     "tracked": true,
+     "never_run": false,
+     "role": "phase2_enricher"
+    },
+    {
+     "script": "149_apply_resource_entity_links.py",
+     "sha256": "8ed79a4fa9be50847b8614f8c9258fcd07bb642ebf0d43e9f546d34c66ddf308",
+     "git_blob_working": "ccd6d11a2e67081fd5703e2ceaf61573eebdc14a",
+     "git_blob_at_commit": "ccd6d11a2e67081fd5703e2ceaf61573eebdc14a",
+     "matches_commit": true,
+     "tracked": true,
+     "never_run": false,
+     "role": "phase2_enricher"
+    },
+    {
+     "script": "83_build_resource_ledger.py",
+     "sha256": "30fef66c879d6834b8b27fdcc0b04f04267158b00e3d8d045e1e3ffa9c004f20",
+     "git_blob_working": "9a45de3677999c12ca647cbd61cbddebb1d90cbe",
+     "git_blob_at_commit": "9a45de3677999c12ca647cbd61cbddebb1d90cbe",
+     "matches_commit": true,
+     "tracked": true,
+     "never_run": false,
+     "role": "phase2_enricher"
+    },
+    {
+     "script": "cedar_domain.py",
+     "sha256": "77ce8e3b77cf12c7530ae73139699ffbb5e5bb0589d4cc9718b7f3ee38fe04f3",
+     "git_blob_working": "27504dc93362a0bff7287f668e7623cfd2bd34fe",
+     "git_blob_at_commit": "27504dc93362a0bff7287f668e7623cfd2bd34fe",
+     "matches_commit": true,
+     "tracked": true,
+     "never_run": false,
+     "role": "imported"
+    },
+    {
+     "script": "cedar_keys.py",
+     "sha256": "97fd9aa389641d3ca80af7a81dd1f323c902b47826a4e48831cb9d500373917b",
+     "git_blob_working": "2dbce2b7ee2d728a162e32bcef63dda0b082aace",
+     "git_blob_at_commit": "2dbce2b7ee2d728a162e32bcef63dda0b082aace",
+     "matches_commit": true,
+     "tracked": true,
+     "never_run": false,
+     "role": "imported"
+    }
+   ],
+   "inputs": [
+    {
+     "path": "data/clean/codebook_master.csv",
+     "how_found": [
+      "declared_io"
+     ],
+     "read_by": [
+      "108_build_tribal_tax_bases.py",
+      "113_build_nd_severance.py"
+     ],
+     "written_in_scope": true,
+     "role": "intermediate_written_in_scope",
+     "kind": "file",
+     "sha256": "b12d1d35777dde1674df905e9bfd7bbc71eace141a2ee10efda1bee7b04dac9e",
+     "bytes": 860504,
+     "mtime": "2026-08-29T01:05:39+00:00",
+     "rows": 4600,
+     "n_columns": 10,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/b1/b12d1d35777dde1674df905e9bfd7bbc71eace141a2ee10efda1bee7b04dac9e.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced inside Cedar; no collection claims it in docs/schema/dataset_contracts.json",
+      "producing_collection": null,
+      "confidence": "none"
+     }
+    },
+    {
+     "path": "data/clean/inflation_deflator.csv",
+     "how_found": [
+      "declared_io",
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "83_build_resource_ledger.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "e7d3aad98b73ca70462da33d838dcb92c7bd6c131b52821f21ecc325c6f41dc7",
+     "bytes": 2602,
+     "mtime": "2026-08-06T21:03:41+00:00",
+     "rows": 27,
+     "n_columns": 6,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/e7/e7d3aad98b73ca70462da33d838dcb92c7bd6c131b52821f21ecc325c6f41dc7.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced by the `funding` collection; replay that collection's manifest first",
+      "producing_collection": "funding",
+      "confidence": "declared"
+     }
+    },
+    {
+     "path": "data/clean/nd_severance_allocation.csv",
+     "how_found": [
+      "declared_io",
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "113_build_nd_severance.py"
+     ],
+     "written_in_scope": false,
+     "role": "output_of_this_collection",
+     "kind": "file",
+     "sha256": "9da15d95add91ad858575ef0cfcfbace69f23efc718f6ac59272e4b62ba4476a",
+     "bytes": 10202,
+     "mtime": "2026-08-29T03:44:10+00:00",
+     "rows": 7,
+     "n_columns": 18,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/9d/9da15d95add91ad858575ef0cfcfbace69f23efc718f6ac59272e4b62ba4476a.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced by the `natural-resources` collection; replay that collection's manifest first",
+      "producing_collection": "natural-resources",
+      "confidence": "declared"
+     }
+    },
+    {
+     "path": "data/clean/resource_assets.csv",
+     "how_found": [
+      "declared_io"
+     ],
+     "read_by": [
+      "83_build_resource_ledger.py"
+     ],
+     "written_in_scope": true,
+     "role": "output_of_this_collection",
+     "kind": "file",
+     "sha256": "6a83aa66ad216b3fdb5692d0946828f8ac210d6cd91dd17b3692624250cb4cd6",
+     "bytes": 48835,
+     "mtime": "2026-08-29T03:44:45+00:00",
+     "rows": 35,
+     "n_columns": 45,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/6a/6a83aa66ad216b3fdb5692d0946828f8ac210d6cd91dd17b3692624250cb4cd6.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced by the `natural-resources` collection; replay that collection's manifest first",
+      "producing_collection": "natural-resources",
+      "confidence": "declared"
+     }
+    },
+    {
+     "path": "data/clean/resource_parties.csv",
+     "how_found": [
+      "declared_io"
+     ],
+     "read_by": [
+      "83_build_resource_ledger.py"
+     ],
+     "written_in_scope": true,
+     "role": "output_of_this_collection",
+     "kind": "file",
+     "sha256": "7f09c3a15731090465f3ff484a6bfeae365ff2eb5c62c7fdd53f10b6dfe656ee",
+     "bytes": 417772,
+     "mtime": "2026-08-29T03:44:45+00:00",
+     "rows": 1436,
+     "n_columns": 15,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/7f/7f09c3a15731090465f3ff484a6bfeae365ff2eb5c62c7fdd53f10b6dfe656ee.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced by the `natural-resources` collection; replay that collection's manifest first",
+      "producing_collection": "natural-resources",
+      "confidence": "declared"
+     }
+    },
+    {
+     "path": "data/clean/resource_revenue.csv",
+     "how_found": [
+      "declared_io"
+     ],
+     "read_by": [
+      "149_apply_resource_entity_links.py",
+      "83_build_resource_ledger.py"
+     ],
+     "written_in_scope": true,
+     "role": "output_of_this_collection",
+     "kind": "file",
+     "sha256": "20ae209fb1e9e7299f6d620ab25f0edd34e07ee7e9df989146d323de01b4fbec",
+     "bytes": 11990611,
+     "mtime": "2026-08-29T03:44:45+00:00",
+     "rows": 10482,
+     "n_columns": 41,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/20/20ae209fb1e9e7299f6d620ab25f0edd34e07ee7e9df989146d323de01b4fbec.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced by the `natural-resources` collection; replay that collection's manifest first",
+      "producing_collection": "natural-resources",
+      "confidence": "declared"
+     }
+    },
+    {
+     "path": "data/clean/tribal_tax_bases.csv",
+     "how_found": [
+      "declared_io"
+     ],
+     "read_by": [
+      "113_build_nd_severance.py"
+     ],
+     "written_in_scope": true,
+     "role": "output_of_this_collection",
+     "kind": "file",
+     "sha256": "e05ea9df079c86e7ab78711851b63846f05cd3685e0b140992d72418652cacd5",
+     "bytes": 3746901,
+     "mtime": "2026-08-29T03:44:47+00:00",
+     "rows": 1712,
+     "n_columns": 23,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/e0/e05ea9df079c86e7ab78711851b63846f05cd3685e0b140992d72418652cacd5.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced by the `natural-resources` collection; replay that collection's manifest first",
+      "producing_collection": "natural-resources",
+      "confidence": "declared"
+     }
+    },
+    {
+     "path": "data/raw/external/ancsa_lbblawyers_native_corporations.html",
+     "how_found": [
+      "path_constant:SRC",
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "07_parse_ancsa_ceiling.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "84f3d7fb19adfdcb6758ca8a7f993263727e41b742350ac56eb17beb55e0e21b",
+     "bytes": 85649,
+     "mtime": "2026-08-05T16:39:43+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/84/84f3d7fb19adfdcb6758ca8a7f993263727e41b742350ac56eb17beb55e0e21b.html",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "",
+      "urls": [
+       "https://ancsa.lbblawyers.com/native-corporations.htm"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/external/nd_severance/legislative_council/tribal_state_relations_background_memo_27.9066.01000.pdf",
+     "how_found": [
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "113_build_nd_severance.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "c7a9323e9a83770447d560adc410c067e3f317ba0e013e566b8b2bdf6934248b",
+     "bytes": 300589,
+     "mtime": "2026-08-08T00:03:33+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/c7/c7a9323e9a83770447d560adc410c067e3f317ba0e013e566b8b2bdf6934248b.pdf",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "py -3 code/113_build_nd_severance.py fetch",
+      "urls": [
+       "https://apps.nd.gov/stn/inquiry/results.aspx",
+       "https://ndlegis.gov/assembly/60-2007/session-laws/documents/TAXES.pdf",
+       "https://ndlegis.gov/assembly/63-2013/session-laws/documents/TAXES.pdf",
+       "https://ndlegis.gov/assembly/64-2015/session-laws/documents/TAXES.pdf",
+       "https://ndlegis.gov/assembly/66-2019/regular/fiscal-notes/19-0820-03000-fn.pdf",
+       "https://ndlegis.gov/assembly/66-2019/session-laws/documents/TAXES.pdf"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/external/nd_severance/session_laws/2015_64th_TAXES.pdf",
+     "how_found": [
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "113_build_nd_severance.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "43536b99569182a9b003a5a0b7edc7db69af11d34a012648c35b0d17775b6a00",
+     "bytes": 1072485,
+     "mtime": "2026-08-08T00:03:29+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/43/43536b99569182a9b003a5a0b7edc7db69af11d34a012648c35b0d17775b6a00.pdf",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "py -3 code/113_build_nd_severance.py fetch",
+      "urls": [
+       "https://apps.nd.gov/stn/inquiry/results.aspx",
+       "https://ndlegis.gov/assembly/60-2007/session-laws/documents/TAXES.pdf",
+       "https://ndlegis.gov/assembly/63-2013/session-laws/documents/TAXES.pdf",
+       "https://ndlegis.gov/assembly/64-2015/session-laws/documents/TAXES.pdf",
+       "https://ndlegis.gov/assembly/66-2019/regular/fiscal-notes/19-0820-03000-fn.pdf",
+       "https://ndlegis.gov/assembly/66-2019/session-laws/documents/TAXES.pdf"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/external/nd_severance/statute/ndcc_t57c51-1_oil_extraction_tax.pdf",
+     "how_found": [
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "113_build_nd_severance.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "618027a62d658f19430dc13514fd1f3807869724370ceb5105ce72571f219c4d",
+     "bytes": 174273,
+     "mtime": "2026-08-08T00:03:23+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/61/618027a62d658f19430dc13514fd1f3807869724370ceb5105ce72571f219c4d.pdf",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "py -3 code/113_build_nd_severance.py fetch",
+      "urls": [
+       "https://apps.nd.gov/stn/inquiry/results.aspx",
+       "https://ndlegis.gov/assembly/60-2007/session-laws/documents/TAXES.pdf",
+       "https://ndlegis.gov/assembly/63-2013/session-laws/documents/TAXES.pdf",
+       "https://ndlegis.gov/assembly/64-2015/session-laws/documents/TAXES.pdf",
+       "https://ndlegis.gov/assembly/66-2019/regular/fiscal-notes/19-0820-03000-fn.pdf",
+       "https://ndlegis.gov/assembly/66-2019/session-laws/documents/TAXES.pdf"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/external/nd_severance/statute/ndcc_t57c51-2_tribal_oil_and_gas_agreements.pdf",
+     "how_found": [
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "113_build_nd_severance.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "c75bfef1f9cc4c8dc663149319f0a00ac0aa73efaabf737b6c0a850143912b5c",
+     "bytes": 62842,
+     "mtime": "2026-08-08T00:03:24+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/c7/c75bfef1f9cc4c8dc663149319f0a00ac0aa73efaabf737b6c0a850143912b5c.pdf",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "py -3 code/113_build_nd_severance.py fetch",
+      "urls": [
+       "https://apps.nd.gov/stn/inquiry/results.aspx",
+       "https://ndlegis.gov/assembly/60-2007/session-laws/documents/TAXES.pdf",
+       "https://ndlegis.gov/assembly/63-2013/session-laws/documents/TAXES.pdf",
+       "https://ndlegis.gov/assembly/64-2015/session-laws/documents/TAXES.pdf",
+       "https://ndlegis.gov/assembly/66-2019/regular/fiscal-notes/19-0820-03000-fn.pdf",
+       "https://ndlegis.gov/assembly/66-2019/session-laws/documents/TAXES.pdf"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/external/nd_severance/statute/ndcc_t57c51_gross_production_tax.pdf",
+     "how_found": [
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "113_build_nd_severance.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "5f3f7ef4d91c2bfab1a14da231164b7e287679076a2c16cb7e6955fec0b350b9",
+     "bytes": 139380,
+     "mtime": "2026-08-08T00:03:21+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/5f/5f3f7ef4d91c2bfab1a14da231164b7e287679076a2c16cb7e6955fec0b350b9.pdf",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "py -3 code/113_build_nd_severance.py fetch",
+      "urls": [
+       "https://apps.nd.gov/stn/inquiry/results.aspx",
+       "https://ndlegis.gov/assembly/60-2007/session-laws/documents/TAXES.pdf",
+       "https://ndlegis.gov/assembly/63-2013/session-laws/documents/TAXES.pdf",
+       "https://ndlegis.gov/assembly/64-2015/session-laws/documents/TAXES.pdf",
+       "https://ndlegis.gov/assembly/66-2019/regular/fiscal-notes/19-0820-03000-fn.pdf",
+       "https://ndlegis.gov/assembly/66-2019/session-laws/documents/TAXES.pdf"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/external/nd_severance/tax_commissioner/gas_tax_rate_table.html",
+     "how_found": [
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "113_build_nd_severance.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "43df724ee19e350d72e86b3ba596f72b010e2aa8f24955baf8587a5ae7cb08f0",
+     "bytes": 224151,
+     "mtime": "2026-08-08T00:03:35+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/43/43df724ee19e350d72e86b3ba596f72b010e2aa8f24955baf8587a5ae7cb08f0.html",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "py -3 code/113_build_nd_severance.py fetch",
+      "urls": [
+       "https://apps.nd.gov/stn/inquiry/results.aspx",
+       "https://ndlegis.gov/assembly/60-2007/session-laws/documents/TAXES.pdf",
+       "https://ndlegis.gov/assembly/63-2013/session-laws/documents/TAXES.pdf",
+       "https://ndlegis.gov/assembly/64-2015/session-laws/documents/TAXES.pdf",
+       "https://ndlegis.gov/assembly/66-2019/regular/fiscal-notes/19-0820-03000-fn.pdf",
+       "https://ndlegis.gov/assembly/66-2019/session-laws/documents/TAXES.pdf"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/external/tribal_tax/_SOURCE_MANIFEST.csv",
+     "how_found": [
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "108_build_tribal_tax_bases.py"
+     ],
+     "written_in_scope": true,
+     "role": "input",
+     "kind": "file",
+     "sha256": "09713e8681a96e3c949b4cf613b5315021ea7108822740b901d094594d702eb8",
+     "bytes": 5435,
+     "mtime": "2026-08-07T22:48:43+00:00",
+     "rows": 16,
+     "n_columns": 11,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/09/09713e8681a96e3c949b4cf613b5315021ea7108822740b901d094594d702eb8.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "py -3 code/108_build_tribal_tax_bases.py fetch",
+      "urls": [
+       "https://app.leg.wa.gov/RCW/default.aspx?cite=82.38.030",
+       "https://dol.wa.gov/media/pdf/3665/2024-tribal-fuel-tax-reportpdf",
+       "https://dor.wa.gov/sites/default/files/2025-07/DORARLTribalRSTaxCompact.pdf",
+       "https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/",
+       "https://revenue.mt.gov/files/DOR-Publications/Biennial-Reports/",
+       "https://www.michigan.gov/taxes/tribes/agreements/{_slug}"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/external/tribal_tax/mi/agreement_bay-mills-indian-community.html",
+     "how_found": [
+      "source_manifest_expansion:data/raw/external/tribal_tax/_SOURCE_MANIFEST.csv"
+     ],
+     "read_by": [
+      "108_build_tribal_tax_bases.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "7c41593d5f4f691d8a8598a54a5483b44384072f561c7bfe97998a2a23b993e1",
+     "bytes": 352059,
+     "mtime": "2026-08-07T22:48:42+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/7c/7c41593d5f4f691d8a8598a54a5483b44384072f561c7bfe97998a2a23b993e1.html",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "py -3 code/108_build_tribal_tax_bases.py fetch",
+      "urls": [
+       "https://app.leg.wa.gov/RCW/default.aspx?cite=82.38.030",
+       "https://dol.wa.gov/media/pdf/3665/2024-tribal-fuel-tax-reportpdf",
+       "https://dor.wa.gov/sites/default/files/2025-07/DORARLTribalRSTaxCompact.pdf",
+       "https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/",
+       "https://revenue.mt.gov/files/DOR-Publications/Biennial-Reports/",
+       "https://www.michigan.gov/taxes/tribes/agreements/{_slug}"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/external/tribal_tax/mi/agreement_grand-traverse-band-of-ottawa-and-chippewa-indians.html",
+     "how_found": [
+      "source_manifest_expansion:data/raw/external/tribal_tax/_SOURCE_MANIFEST.csv"
+     ],
+     "read_by": [
+      "108_build_tribal_tax_bases.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "6cb33d8611d0205b7b1110ae3a07b543cd87bd8f63392d984be402402b3d4c26",
+     "bytes": 352515,
+     "mtime": "2026-08-07T22:48:42+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/6c/6cb33d8611d0205b7b1110ae3a07b543cd87bd8f63392d984be402402b3d4c26.html",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "py -3 code/108_build_tribal_tax_bases.py fetch",
+      "urls": [
+       "https://app.leg.wa.gov/RCW/default.aspx?cite=82.38.030",
+       "https://dol.wa.gov/media/pdf/3665/2024-tribal-fuel-tax-reportpdf",
+       "https://dor.wa.gov/sites/default/files/2025-07/DORARLTribalRSTaxCompact.pdf",
+       "https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/",
+       "https://revenue.mt.gov/files/DOR-Publications/Biennial-Reports/",
+       "https://www.michigan.gov/taxes/tribes/agreements/{_slug}"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/external/tribal_tax/mi/agreement_hannahville-indian-community.html",
+     "how_found": [
+      "source_manifest_expansion:data/raw/external/tribal_tax/_SOURCE_MANIFEST.csv"
+     ],
+     "read_by": [
+      "108_build_tribal_tax_bases.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "54d9e62d6890048fb140701abb61c7d81a8219d0a663d9d4195355c2df90e45a",
+     "bytes": 352111,
+     "mtime": "2026-08-07T22:48:42+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/54/54d9e62d6890048fb140701abb61c7d81a8219d0a663d9d4195355c2df90e45a.html",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "py -3 code/108_build_tribal_tax_bases.py fetch",
+      "urls": [
+       "https://app.leg.wa.gov/RCW/default.aspx?cite=82.38.030",
+       "https://dol.wa.gov/media/pdf/3665/2024-tribal-fuel-tax-reportpdf",
+       "https://dor.wa.gov/sites/default/files/2025-07/DORARLTribalRSTaxCompact.pdf",
+       "https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/",
+       "https://revenue.mt.gov/files/DOR-Publications/Biennial-Reports/",
+       "https://www.michigan.gov/taxes/tribes/agreements/{_slug}"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/external/tribal_tax/mi/agreement_little-river-band-of-ottawa-indians.html",
+     "how_found": [
+      "source_manifest_expansion:data/raw/external/tribal_tax/_SOURCE_MANIFEST.csv"
+     ],
+     "read_by": [
+      "108_build_tribal_tax_bases.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "6076c04121e279d3d7b822082e33fcabcab2041866231a60324cd0019d268686",
+     "bytes": 352215,
+     "mtime": "2026-08-07T22:48:42+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/60/6076c04121e279d3d7b822082e33fcabcab2041866231a60324cd0019d268686.html",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "py -3 code/108_build_tribal_tax_bases.py fetch",
+      "urls": [
+       "https://app.leg.wa.gov/RCW/default.aspx?cite=82.38.030",
+       "https://dol.wa.gov/media/pdf/3665/2024-tribal-fuel-tax-reportpdf",
+       "https://dor.wa.gov/sites/default/files/2025-07/DORARLTribalRSTaxCompact.pdf",
+       "https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/",
+       "https://revenue.mt.gov/files/DOR-Publications/Biennial-Reports/",
+       "https://www.michigan.gov/taxes/tribes/agreements/{_slug}"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/external/tribal_tax/mi/agreement_little-traverse-bay-bands-of-odawa-indians.html",
+     "how_found": [
+      "source_manifest_expansion:data/raw/external/tribal_tax/_SOURCE_MANIFEST.csv"
+     ],
+     "read_by": [
+      "108_build_tribal_tax_bases.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "2d0f9ce9d2ec3e2012614e65ecf7ec1e1d6fe3b52e7ed42b89a934a4efa5edc1",
+     "bytes": 352366,
+     "mtime": "2026-08-07T22:48:42+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/2d/2d0f9ce9d2ec3e2012614e65ecf7ec1e1d6fe3b52e7ed42b89a934a4efa5edc1.html",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "py -3 code/108_build_tribal_tax_bases.py fetch",
+      "urls": [
+       "https://app.leg.wa.gov/RCW/default.aspx?cite=82.38.030",
+       "https://dol.wa.gov/media/pdf/3665/2024-tribal-fuel-tax-reportpdf",
+       "https://dor.wa.gov/sites/default/files/2025-07/DORARLTribalRSTaxCompact.pdf",
+       "https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/",
+       "https://revenue.mt.gov/files/DOR-Publications/Biennial-Reports/",
+       "https://www.michigan.gov/taxes/tribes/agreements/{_slug}"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/external/tribal_tax/mi/agreement_match-e-be-nash-she-wish-band-of-pottawatomi-indians.html",
+     "how_found": [
+      "source_manifest_expansion:data/raw/external/tribal_tax/_SOURCE_MANIFEST.csv"
+     ],
+     "read_by": [
+      "108_build_tribal_tax_bases.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "fb3cc3f293ba3fb363b85a38f729633f0690f35127b402c49a87cc4440020b40",
+     "bytes": 351978,
+     "mtime": "2026-08-07T22:48:42+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/fb/fb3cc3f293ba3fb363b85a38f729633f0690f35127b402c49a87cc4440020b40.html",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "py -3 code/108_build_tribal_tax_bases.py fetch",
+      "urls": [
+       "https://app.leg.wa.gov/RCW/default.aspx?cite=82.38.030",
+       "https://dol.wa.gov/media/pdf/3665/2024-tribal-fuel-tax-reportpdf",
+       "https://dor.wa.gov/sites/default/files/2025-07/DORARLTribalRSTaxCompact.pdf",
+       "https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/",
+       "https://revenue.mt.gov/files/DOR-Publications/Biennial-Reports/",
+       "https://www.michigan.gov/taxes/tribes/agreements/{_slug}"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/external/tribal_tax/mi/agreement_nottawaseppi-huron-band-of-potawatomi-indians.html",
+     "how_found": [
+      "source_manifest_expansion:data/raw/external/tribal_tax/_SOURCE_MANIFEST.csv"
+     ],
+     "read_by": [
+      "108_build_tribal_tax_bases.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "336c27fc2e8710c646e73f9f49f1d76ee4a545f3ac05f3cfd573beba939a3eb6",
+     "bytes": 352389,
+     "mtime": "2026-08-07T22:48:42+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/33/336c27fc2e8710c646e73f9f49f1d76ee4a545f3ac05f3cfd573beba939a3eb6.html",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "py -3 code/108_build_tribal_tax_bases.py fetch",
+      "urls": [
+       "https://app.leg.wa.gov/RCW/default.aspx?cite=82.38.030",
+       "https://dol.wa.gov/media/pdf/3665/2024-tribal-fuel-tax-reportpdf",
+       "https://dor.wa.gov/sites/default/files/2025-07/DORARLTribalRSTaxCompact.pdf",
+       "https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/",
+       "https://revenue.mt.gov/files/DOR-Publications/Biennial-Reports/",
+       "https://www.michigan.gov/taxes/tribes/agreements/{_slug}"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/external/tribal_tax/mi/agreement_pokagon-band-of-potawatomi-indians.html",
+     "how_found": [
+      "source_manifest_expansion:data/raw/external/tribal_tax/_SOURCE_MANIFEST.csv"
+     ],
+     "read_by": [
+      "108_build_tribal_tax_bases.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "b8258a9be6ac8b2951bb90b2c85f6aa16cff71d72a20debfe1fca0aa1b63beee",
+     "bytes": 352408,
+     "mtime": "2026-08-07T22:48:42+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/b8/b8258a9be6ac8b2951bb90b2c85f6aa16cff71d72a20debfe1fca0aa1b63beee.html",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "py -3 code/108_build_tribal_tax_bases.py fetch",
+      "urls": [
+       "https://app.leg.wa.gov/RCW/default.aspx?cite=82.38.030",
+       "https://dol.wa.gov/media/pdf/3665/2024-tribal-fuel-tax-reportpdf",
+       "https://dor.wa.gov/sites/default/files/2025-07/DORARLTribalRSTaxCompact.pdf",
+       "https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/",
+       "https://revenue.mt.gov/files/DOR-Publications/Biennial-Reports/",
+       "https://www.michigan.gov/taxes/tribes/agreements/{_slug}"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/external/tribal_tax/mi/agreement_saginaw-chippewa-indian-tribe-of-michigan.html",
+     "how_found": [
+      "source_manifest_expansion:data/raw/external/tribal_tax/_SOURCE_MANIFEST.csv"
+     ],
+     "read_by": [
+      "108_build_tribal_tax_bases.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "d4399a592d3f08910f934909b5763a707c132fda6ed142d04cf5421754737ea3",
+     "bytes": 351723,
+     "mtime": "2026-08-07T22:48:43+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/d4/d4399a592d3f08910f934909b5763a707c132fda6ed142d04cf5421754737ea3.html",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "py -3 code/108_build_tribal_tax_bases.py fetch",
+      "urls": [
+       "https://app.leg.wa.gov/RCW/default.aspx?cite=82.38.030",
+       "https://dol.wa.gov/media/pdf/3665/2024-tribal-fuel-tax-reportpdf",
+       "https://dor.wa.gov/sites/default/files/2025-07/DORARLTribalRSTaxCompact.pdf",
+       "https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/",
+       "https://revenue.mt.gov/files/DOR-Publications/Biennial-Reports/",
+       "https://www.michigan.gov/taxes/tribes/agreements/{_slug}"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/external/tribal_tax/mi/agreement_sault-ste--marie-tribe-of-chippewa-indians.html",
+     "how_found": [
+      "source_manifest_expansion:data/raw/external/tribal_tax/_SOURCE_MANIFEST.csv"
+     ],
+     "read_by": [
+      "108_build_tribal_tax_bases.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "d3b179a82ea3051ab16349f1cb42f406e266c359f111796afdaa350632adddf3",
+     "bytes": 352322,
+     "mtime": "2026-08-07T22:48:43+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/d3/d3b179a82ea3051ab16349f1cb42f406e266c359f111796afdaa350632adddf3.html",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "py -3 code/108_build_tribal_tax_bases.py fetch",
+      "urls": [
+       "https://app.leg.wa.gov/RCW/default.aspx?cite=82.38.030",
+       "https://dol.wa.gov/media/pdf/3665/2024-tribal-fuel-tax-reportpdf",
+       "https://dor.wa.gov/sites/default/files/2025-07/DORARLTribalRSTaxCompact.pdf",
+       "https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/",
+       "https://revenue.mt.gov/files/DOR-Publications/Biennial-Reports/",
+       "https://www.michigan.gov/taxes/tribes/agreements/{_slug}"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/external/tribal_tax/mt/mt_biennial_2022_2024_other_taxes.pdf",
+     "how_found": [
+      "source_manifest_expansion:data/raw/external/tribal_tax/_SOURCE_MANIFEST.csv"
+     ],
+     "read_by": [
+      "108_build_tribal_tax_bases.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "131ab44c772d453e1b80451a819758fa7fabd6aa13f683b0d51b9258f6c63933",
+     "bytes": 1492540,
+     "mtime": "2026-08-07T22:48:39+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/13/131ab44c772d453e1b80451a819758fa7fabd6aa13f683b0d51b9258f6c63933.pdf",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "py -3 code/108_build_tribal_tax_bases.py fetch",
+      "urls": [
+       "https://app.leg.wa.gov/RCW/default.aspx?cite=82.38.030",
+       "https://dol.wa.gov/media/pdf/3665/2024-tribal-fuel-tax-reportpdf",
+       "https://dor.wa.gov/sites/default/files/2025-07/DORARLTribalRSTaxCompact.pdf",
+       "https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/",
+       "https://revenue.mt.gov/files/DOR-Publications/Biennial-Reports/",
+       "https://www.michigan.gov/taxes/tribes/agreements/{_slug}"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/external/tribal_tax/nm/cigarette_tax_credit_stamp_listing.html",
+     "how_found": [
+      "source_manifest_expansion:data/raw/external/tribal_tax/_SOURCE_MANIFEST.csv"
+     ],
+     "read_by": [
+      "108_build_tribal_tax_bases.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "d735ef7c4f6cce390729a19beb87e6d7ec50996d14742fb028efa0d431e20d6b",
+     "bytes": 455962,
+     "mtime": "2026-08-07T22:48:42+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/d7/d735ef7c4f6cce390729a19beb87e6d7ec50996d14742fb028efa0d431e20d6b.html",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "py -3 code/108_build_tribal_tax_bases.py fetch",
+      "urls": [
+       "https://app.leg.wa.gov/RCW/default.aspx?cite=82.38.030",
+       "https://dol.wa.gov/media/pdf/3665/2024-tribal-fuel-tax-reportpdf",
+       "https://dor.wa.gov/sites/default/files/2025-07/DORARLTribalRSTaxCompact.pdf",
+       "https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/",
+       "https://revenue.mt.gov/files/DOR-Publications/Biennial-Reports/",
+       "https://www.michigan.gov/taxes/tribes/agreements/{_slug}"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/external/tribal_tax/ok/otc_revenue_and_apportionment_FY2025.pdf",
+     "how_found": [
+      "source_manifest_expansion:data/raw/external/tribal_tax/_SOURCE_MANIFEST.csv"
+     ],
+     "read_by": [
+      "108_build_tribal_tax_bases.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "e0e0b2af3ccca4d614b9571e35989eb2bc732975e03aaed917317077f6b48532",
+     "bytes": 3257334,
+     "mtime": "2026-08-07T22:48:39+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/e0/e0e0b2af3ccca4d614b9571e35989eb2bc732975e03aaed917317077f6b48532.pdf",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "py -3 code/108_build_tribal_tax_bases.py fetch",
+      "urls": [
+       "https://app.leg.wa.gov/RCW/default.aspx?cite=82.38.030",
+       "https://dol.wa.gov/media/pdf/3665/2024-tribal-fuel-tax-reportpdf",
+       "https://dor.wa.gov/sites/default/files/2025-07/DORARLTribalRSTaxCompact.pdf",
+       "https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/",
+       "https://revenue.mt.gov/files/DOR-Publications/Biennial-Reports/",
+       "https://www.michigan.gov/taxes/tribes/agreements/{_slug}"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/external/tribal_tax/wa/2024_tribal_fuel_tax_agreement_report.pdf",
+     "how_found": [
+      "source_manifest_expansion:data/raw/external/tribal_tax/_SOURCE_MANIFEST.csv"
+     ],
+     "read_by": [
+      "108_build_tribal_tax_bases.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "e9d940608c7922e3f87e468e601087bfb60e9acfe229475241848c69367d9e04",
+     "bytes": 168229,
+     "mtime": "2026-08-07T22:48:35+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/e9/e9d940608c7922e3f87e468e601087bfb60e9acfe229475241848c69367d9e04.pdf",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "py -3 code/108_build_tribal_tax_bases.py fetch",
+      "urls": [
+       "https://app.leg.wa.gov/RCW/default.aspx?cite=82.38.030",
+       "https://dol.wa.gov/media/pdf/3665/2024-tribal-fuel-tax-reportpdf",
+       "https://dor.wa.gov/sites/default/files/2025-07/DORARLTribalRSTaxCompact.pdf",
+       "https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/",
+       "https://revenue.mt.gov/files/DOR-Publications/Biennial-Reports/",
+       "https://www.michigan.gov/taxes/tribes/agreements/{_slug}"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/external/tribal_tax/wa/dor_tribal_retail_sales_tax_compact_revenue_sharing.pdf",
+     "how_found": [
+      "source_manifest_expansion:data/raw/external/tribal_tax/_SOURCE_MANIFEST.csv"
+     ],
+     "read_by": [
+      "108_build_tribal_tax_bases.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "ab8c3fbfc2b4bfcf8f590c41a1b3b1e6dd78eb388c78b6810f858675988e6310",
+     "bytes": 160018,
+     "mtime": "2026-08-07T22:48:36+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/ab/ab8c3fbfc2b4bfcf8f590c41a1b3b1e6dd78eb388c78b6810f858675988e6310.pdf",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "py -3 code/108_build_tribal_tax_bases.py fetch",
+      "urls": [
+       "https://app.leg.wa.gov/RCW/default.aspx?cite=82.38.030",
+       "https://dol.wa.gov/media/pdf/3665/2024-tribal-fuel-tax-reportpdf",
+       "https://dor.wa.gov/sites/default/files/2025-07/DORARLTribalRSTaxCompact.pdf",
+       "https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/",
+       "https://revenue.mt.gov/files/DOR-Publications/Biennial-Reports/",
+       "https://www.michigan.gov/taxes/tribes/agreements/{_slug}"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/external/tribal_tax/wa/rcw_82_38_030_fuel_tax_rate.html",
+     "how_found": [
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "108_build_tribal_tax_bases.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "ef7fb610f3c61eaa45b8d76ae1099d4bbc2b818936d93ebf37f89561cdd8f737",
+     "bytes": 132409,
+     "mtime": "2026-08-07T22:48:40+00:00",
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/ef/ef7fb610f3c61eaa45b8d76ae1099d4bbc2b818936d93ebf37f89561cdd8f737.html",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "py -3 code/108_build_tribal_tax_bases.py fetch",
+      "urls": [
+       "https://app.leg.wa.gov/RCW/default.aspx?cite=82.38.030",
+       "https://dol.wa.gov/media/pdf/3665/2024-tribal-fuel-tax-reportpdf",
+       "https://dor.wa.gov/sites/default/files/2025-07/DORARLTribalRSTaxCompact.pdf",
+       "https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/",
+       "https://revenue.mt.gov/files/DOR-Publications/Biennial-Reports/",
+       "https://www.michigan.gov/taxes/tribes/agreements/{_slug}"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/resources/_federal/osmre/aml",
+     "how_found": [
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "83_build_resource_ledger.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "directory",
+     "tree_sha256": "ff1c46448149a357511f7337b16da7f2b0b1aeab5fb3252e231ff4f20708efb3",
+     "n_files": 11,
+     "bytes": 2372020,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/ff/ff1c46448149a357511f7337b16da7f2b0b1aeab5fb3252e231ff4f20708efb3.zip",
+      "deduplicated": true,
+      "form": "zip_of_tree_v2_mtime_preserved"
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "",
+      "urls": [
+       "http://schemas.openxmlformats.org/spreadsheetml/2006/main}",
+       "http://www.mrm.mms.gov:80/Stats/pdfdocs/Indian/",
+       "https://archive.legmt.gov/content/Committees/Interim/",
+       "https://cobi-ws.utah.gov/api/fund/{fund_no}.json",
+       "https://le.utah.gov/xcode/Title59/Chapter5/",
+       "https://revenue.mt.gov/dor-publications/"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/resources/_state_mechanisms/cedar_state_mechanism_register.csv",
+     "how_found": [
+      "declared_io",
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "83_build_resource_ledger.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "c1b287061f8a8d1510738bed3dac88f88e9098900fab9f1ff1d1775ede673cd7",
+     "bytes": 39009,
+     "mtime": "2026-08-06T22:53:05+00:00",
+     "rows": 47,
+     "n_columns": 15,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/c1/c1b287061f8a8d1510738bed3dac88f88e9098900fab9f1ff1d1775ede673cd7.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "",
+      "urls": [
+       "http://schemas.openxmlformats.org/spreadsheetml/2006/main}",
+       "http://www.mrm.mms.gov:80/Stats/pdfdocs/Indian/",
+       "https://archive.legmt.gov/content/Committees/Interim/",
+       "https://cobi-ws.utah.gov/api/fund/{fund_no}.json",
+       "https://le.utah.gov/xcode/Title59/Chapter5/",
+       "https://revenue.mt.gov/dor-publications/"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/resources/montana",
+     "how_found": [
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "83_build_resource_ledger.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "directory",
+     "tree_sha256": "95100f40f086091457a9967778ec8490b02de58506ba7d3b18c9e0bf2791d211",
+     "n_files": 117,
+     "bytes": 20134696,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/95/95100f40f086091457a9967778ec8490b02de58506ba7d3b18c9e0bf2791d211.zip",
+      "deduplicated": true,
+      "form": "zip_of_tree_v2_mtime_preserved"
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "",
+      "urls": [
+       "http://schemas.openxmlformats.org/spreadsheetml/2006/main}",
+       "http://www.mrm.mms.gov:80/Stats/pdfdocs/Indian/",
+       "https://archive.legmt.gov/content/Committees/Interim/",
+       "https://cobi-ws.utah.gov/api/fund/{fund_no}.json",
+       "https://le.utah.gov/xcode/Title59/Chapter5/",
+       "https://revenue.mt.gov/dor-publications/"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/resources/new_mexico",
+     "how_found": [
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "83_build_resource_ledger.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "directory",
+     "tree_sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+     "n_files": 0,
+     "bytes": 0,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/01/01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b.zip",
+      "deduplicated": true,
+      "form": "zip_of_tree_v2_mtime_preserved"
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "",
+      "urls": [
+       "http://schemas.openxmlformats.org/spreadsheetml/2006/main}",
+       "http://www.mrm.mms.gov:80/Stats/pdfdocs/Indian/",
+       "https://archive.legmt.gov/content/Committees/Interim/",
+       "https://cobi-ws.utah.gov/api/fund/{fund_no}.json",
+       "https://le.utah.gov/xcode/Title59/Chapter5/",
+       "https://revenue.mt.gov/dor-publications/"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/resources/north_dakota/cedar_allocation_formula.csv",
+     "how_found": [
+      "declared_io",
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "83_build_resource_ledger.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "37a0147090b16624ea0eb2b0c16283a129cb9836ba5ed36d8e78bba9a0b07a48",
+     "bytes": 2969,
+     "mtime": "2026-08-06T22:06:53+00:00",
+     "rows": 3,
+     "n_columns": 7,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/37/37a0147090b16624ea0eb2b0c16283a129cb9836ba5ed36d8e78bba9a0b07a48.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "",
+      "urls": [
+       "http://schemas.openxmlformats.org/spreadsheetml/2006/main}",
+       "http://www.mrm.mms.gov:80/Stats/pdfdocs/Indian/",
+       "https://archive.legmt.gov/content/Committees/Interim/",
+       "https://cobi-ws.utah.gov/api/fund/{fund_no}.json",
+       "https://le.utah.gov/xcode/Title59/Chapter5/",
+       "https://revenue.mt.gov/dor-publications/"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/resources/oklahoma/omc_newsletters",
+     "how_found": [
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "83_build_resource_ledger.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "directory",
+     "tree_sha256": "eee8ad4c3e17f5f43de61720ce0a51564a218e155bc0b4385c28f6b2a8fd98d6",
+     "n_files": 12,
+     "bytes": 51753953,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/ee/eee8ad4c3e17f5f43de61720ce0a51564a218e155bc0b4385c28f6b2a8fd98d6.zip",
+      "deduplicated": true,
+      "form": "zip_of_tree_v2_mtime_preserved"
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "",
+      "urls": [
+       "http://schemas.openxmlformats.org/spreadsheetml/2006/main}",
+       "http://www.mrm.mms.gov:80/Stats/pdfdocs/Indian/",
+       "https://archive.legmt.gov/content/Committees/Interim/",
+       "https://cobi-ws.utah.gov/api/fund/{fund_no}.json",
+       "https://le.utah.gov/xcode/Title59/Chapter5/",
+       "https://revenue.mt.gov/dor-publications/"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/resources/onrr/calendar_year_revenue.csv",
+     "how_found": [
+      "declared_io"
+     ],
+     "read_by": [
+      "83_build_resource_ledger.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "766fa2504b466b7733da667fa3c8740766083b494fdc5fc88795df4f49d0b2f5",
+     "bytes": 5321140,
+     "mtime": "2026-08-06T21:34:42+00:00",
+     "rows": 52843,
+     "n_columns": 12,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/76/766fa2504b466b7733da667fa3c8740766083b494fdc5fc88795df4f49d0b2f5.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "",
+      "urls": [
+       "http://schemas.openxmlformats.org/spreadsheetml/2006/main}",
+       "http://www.mrm.mms.gov:80/Stats/pdfdocs/Indian/",
+       "https://archive.legmt.gov/content/Committees/Interim/",
+       "https://cobi-ws.utah.gov/api/fund/{fund_no}.json",
+       "https://le.utah.gov/xcode/Title59/Chapter5/",
+       "https://revenue.mt.gov/dor-publications/"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/resources/onrr/fiscal_year_disbursements.csv",
+     "how_found": [
+      "declared_io"
+     ],
+     "read_by": [
+      "83_build_resource_ledger.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "877bb8e91d6f3f88be209c511597d504392d9eeaeaf1fc7dbb3b97f9c8f7cf8f",
+     "bytes": 513058,
+     "mtime": "2026-08-06T21:34:57+00:00",
+     "rows": 8437,
+     "n_columns": 6,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/87/877bb8e91d6f3f88be209c511597d504392d9eeaeaf1fc7dbb3b97f9c8f7cf8f.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "",
+      "urls": [
+       "http://schemas.openxmlformats.org/spreadsheetml/2006/main}",
+       "http://www.mrm.mms.gov:80/Stats/pdfdocs/Indian/",
+       "https://archive.legmt.gov/content/Committees/Interim/",
+       "https://cobi-ws.utah.gov/api/fund/{fund_no}.json",
+       "https://le.utah.gov/xcode/Title59/Chapter5/",
+       "https://revenue.mt.gov/dor-publications/"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/resources/onrr/monthly_revenue.csv",
+     "how_found": [
+      "declared_io"
+     ],
+     "read_by": [
+      "83_build_resource_ledger.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "c59974aa93f7741c09bc3804aa06758b208c641d7b069aaa2c305761f5176667",
+     "bytes": 43691179,
+     "mtime": "2026-08-06T21:34:45+00:00",
+     "rows": 410586,
+     "n_columns": 12,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/c5/c59974aa93f7741c09bc3804aa06758b208c641d7b069aaa2c305761f5176667.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "",
+      "urls": [
+       "http://schemas.openxmlformats.org/spreadsheetml/2006/main}",
+       "http://www.mrm.mms.gov:80/Stats/pdfdocs/Indian/",
+       "https://archive.legmt.gov/content/Committees/Interim/",
+       "https://cobi-ws.utah.gov/api/fund/{fund_no}.json",
+       "https://le.utah.gov/xcode/Title59/Chapter5/",
+       "https://revenue.mt.gov/dor-publications/"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/resources/onrr_historical/cedar_transcribed_cy_1996_2000.csv",
+     "how_found": [
+      "declared_io"
+     ],
+     "read_by": [
+      "83_build_resource_ledger.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "47cd515358596a55e495468558b995e62c8a5ec198e3818df009ed303e5627ab",
+     "bytes": 1535,
+     "mtime": "2026-08-06T22:11:24+00:00",
+     "rows": 5,
+     "n_columns": 13,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/47/47cd515358596a55e495468558b995e62c8a5ec198e3818df009ed303e5627ab.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "",
+      "urls": [
+       "http://schemas.openxmlformats.org/spreadsheetml/2006/main}",
+       "http://www.mrm.mms.gov:80/Stats/pdfdocs/Indian/",
+       "https://archive.legmt.gov/content/Committees/Interim/",
+       "https://cobi-ws.utah.gov/api/fund/{fund_no}.json",
+       "https://le.utah.gov/xcode/Title59/Chapter5/",
+       "https://revenue.mt.gov/dor-publications/"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/raw/resources/utah",
+     "how_found": [
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "83_build_resource_ledger.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "directory",
+     "tree_sha256": "6a8bbe023ac1cf4f0b34377c1a08a07a8cfe3da0997d5f79cf2b07d94e44ecc0",
+     "n_files": 51,
+     "bytes": 156942946,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/6a/6a8bbe023ac1cf4f0b34377c1a08a07a8cfe3da0997d5f79cf2b07d94e44ecc0.zip",
+      "deduplicated": true,
+      "form": "zip_of_tree_v2_mtime_preserved"
+     },
+     "provenance": {
+      "kind": "fetch_stage",
+      "detail": "",
+      "urls": [
+       "http://schemas.openxmlformats.org/spreadsheetml/2006/main}",
+       "http://www.mrm.mms.gov:80/Stats/pdfdocs/Indian/",
+       "https://archive.legmt.gov/content/Committees/Interim/",
+       "https://cobi-ws.utah.gov/api/fund/{fund_no}.json",
+       "https://le.utah.gov/xcode/Title59/Chapter5/",
+       "https://revenue.mt.gov/dor-publications/"
+      ],
+      "confidence": "inferred_from_code",
+      "caveat": "a re-fetch gets TODAY's document, not the one this release consumed; only the retained blob is the release's input"
+     }
+    },
+    {
+     "path": "data/spine/cedar_entity_spine.csv",
+     "how_found": [
+      "declared_io",
+      "path_constant:SPINE",
+      "path_expression:path_div"
+     ],
+     "read_by": [
+      "108_build_tribal_tax_bases.py",
+      "113_build_nd_severance.py",
+      "149_apply_resource_entity_links.py",
+      "83_build_resource_ledger.py"
+     ],
+     "written_in_scope": false,
+     "role": "input",
+     "kind": "file",
+     "sha256": "a3220efc1b2cd3190bbca6a1ae2b187c112f351515dfc022a74eabdd166cb8d4",
+     "bytes": 1394076,
+     "mtime": "2026-08-29T07:22:35+00:00",
+     "rows": 1536,
+     "n_columns": 44,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/a3/a3220efc1b2cd3190bbca6a1ae2b187c112f351515dfc022a74eabdd166cb8d4.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "cedar_derived",
+      "detail": "produced by the `_entity_layer` collection; replay that collection's manifest first",
+      "producing_collection": "_entity_layer",
+      "confidence": "declared"
+     }
+    },
+    {
+     "path": "review/resource_ledger_unresolved.csv",
+     "how_found": [
+      "declared_io"
+     ],
+     "read_by": [
+      "83_build_resource_ledger.py"
+     ],
+     "written_in_scope": true,
+     "role": "input",
+     "kind": "file",
+     "sha256": "58c6bd09b72fb69ce0d0bdf25d3cdb4934cd80630ecd9d233d4de8c569bfc899",
+     "bytes": 4332,
+     "mtime": "2026-08-06T22:58:29+00:00",
+     "rows": 9,
+     "n_columns": 8,
+     "retention": {
+      "mode": "retained",
+      "blob": "data/_release_inputs/blobs/58/58c6bd09b72fb69ce0d0bdf25d3cdb4934cd80630ecd9d233d4de8c569bfc899.csv",
+      "deduplicated": true
+     },
+     "provenance": {
+      "kind": "manual_hand_coded",
+      "confidence": "declared",
+      "detail": "hand-coded ground truth; there is no source to re-fetch. Retention is the ONLY retrieval path.",
+      "regenerate_frame_with": []
+     },
+     "manual_decision_input": true
+    }
+   ],
+   "undiscovered_inputs": [
+    {
+     "name": "cedar_navajo_audited_actuals.csv",
+     "referenced_by": "83_build_resource_ledger.py",
+     "resolves_on_disk": false,
+     "severity": "blocking",
+     "why": "an executed script names this read and no discovery channel resolved it to a retained input"
+    },
+    {
+     "name": "cedar_transcribed_assets.csv",
+     "referenced_by": "83_build_resource_ledger.py",
+     "resolves_on_disk": false,
+     "severity": "blocking",
+     "why": "an executed script names this read and no discovery channel resolved it to a retained input"
+    },
+    {
+     "name": "cedar_transcribed_payments.csv",
+     "referenced_by": "83_build_resource_ledger.py",
+     "resolves_on_disk": false,
+     "severity": "blocking",
+     "why": "an executed script names this read and no discovery channel resolved it to a retained input"
+    }
+   ],
+   "io_scan_unresolved_names": [
+    {
+     "name": "Assistance_56G180126_TransactionHistory_1.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "bgov.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": false,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "cedar_identifier_ledger_final.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "contract-03-18-23-19-40-24.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "deals_*_additions.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": false,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "deals_2026_ytd.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": false,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "deals_classified.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "deals_historical_2020_2025.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": false,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "earmarks.csv",
+     "referenced_by": "cedar_keys.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_keys.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "entity_crosswalk_bgov.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": false,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "entity_master.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": false,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "federal_funding_transactions.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "ferc_docket_filings.csv",
+     "referenced_by": "cedar_keys.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_keys.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "fpds_uei_cage_map.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "gaming_facility_metrics.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "gaming_property_capacity_history.csv",
+     "referenced_by": "cedar_domain.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_domain.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "individual_native_firm_contracts.csv",
+     "referenced_by": "cedar_keys.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_keys.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "individual_native_firm_register.csv",
+     "referenced_by": "cedar_keys.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_keys.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    },
+    {
+     "name": "keys.json",
+     "referenced_by": "cedar_keys.py",
+     "resolves_on_disk": true,
+     "severity": "informational",
+     "why": "cedar_keys.py is IMPORTED, not executed; the io scanner cannot tell a table-name constant from a read"
+    }
+   ],
+   "manual_decision_inputs": [
+    "review/resource_ledger_unresolved.csv"
+   ],
+   "configuration": {
+    "cedar_domain.py": {
+     "INDIVIDUAL_NATIVE_MIN_CELL_FIRMS": "3"
+    }
+   },
+   "commands": [
+    {
+     "step": 1,
+     "argv": [
+      "py",
+      "-3",
+      "code/07_parse_ancsa_ceiling.py"
+     ],
+     "phase": "rebuild",
+     "exists": true
+    },
+    {
+     "step": 2,
+     "argv": [
+      "py",
+      "-3",
+      "code/108_build_tribal_tax_bases.py",
+      "build"
+     ],
+     "phase": "rebuild",
+     "exists": true,
+     "note": "this script is staged (fetch | build); the release runs the build stage against the retained cache"
+    },
+    {
+     "step": 3,
+     "argv": [
+      "py",
+      "-3",
+      "code/113_build_nd_severance.py",
+      "build"
+     ],
+     "phase": "enrich",
+     "exists": true,
+     "note": "this script is staged (fetch | build); the release runs the build stage against the retained cache"
+    },
+    {
+     "step": 4,
+     "argv": [
+      "py",
+      "-3",
+      "code/149_apply_resource_entity_links.py"
+     ],
+     "phase": "enrich",
+     "exists": true
+    },
+    {
+     "step": 5,
+     "argv": [
+      "py",
+      "-3",
+      "code/83_build_resource_ledger.py"
+     ],
+     "phase": "enrich",
+     "exists": true
+    },
+    {
+     "step": 6,
+     "argv": [
+      "py",
+      "-3",
+      "code/update_index.py"
+     ],
+     "phase": "enrich",
+     "note": "SCRIPT NOT ON DISK at this commit",
+     "exists": false
+    }
+   ],
+   "outputs": [
+    {
+     "table": "anc_ceiling_roster.csv",
+     "present": true,
+     "path": "data/clean/anc_ceiling_roster.csv",
+     "sha256": "61409f8a74838b6c35f08dcc1c5915ecd0da77fd0e231db3d5b5107463f2f41f",
+     "bytes": 40904,
+     "rows": 196,
+     "columns": [
+      "anc_id",
+      "corporation_name",
+      "anc_class",
+      "status",
+      "uei",
+      "cage_code",
+      "parent_entity_class",
+      "confidence_tier",
+      "note",
+      "source",
+      "source_url",
+      "fetched_date"
+     ],
+     "primary_key": [
+      "anc_id"
+     ],
+     "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+     "primary_key_proven": true,
+     "primary_key_evidence": "anc_id: 196 distinct over 196 rows, 0 blank, full scan",
+     "codebook_block": null,
+     "documented": false,
+     "contract_status": "shippable",
+     "declared_grain": "one row per Alaska Native Corporation on the ANCSA ceiling roster",
+     "contract_key_columns": [
+      "uei",
+      "cage_code"
+     ],
+     "mtime": "2026-08-27T00:14:05+00:00",
+     "run_stamp_columns": [
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-05"
+      }
+     ],
+     "enricher_backups": [
+      {
+       "backup": "data/clean/anc_ceiling_roster.csv.bak_2026-08-26_pre_327_migrate_class7_keys",
+       "tag": "2026-08-26_pre_327_migrate_class7_keys",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "327_migrate_class7_keys_to_digests.py"
+       ]
+      }
+     ],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 196,
+       "how": "full csv scan, header excluded"
+      }
+     ]
+    },
+    {
+     "table": "ancsa_filings_index.csv",
+     "present": true,
+     "path": "data/clean/ancsa_filings_index.csv",
+     "sha256": "53c48da9a30e8ba8c402ccf0055f60f482e7fec3157697ed73a7531d920f4f02",
+     "bytes": 6996908,
+     "rows": 19269,
+     "columns": [
+      "corporation_name",
+      "anc_id",
+      "document_type",
+      "filing_date",
+      "period_covered",
+      "portal_url",
+      "downloaded",
+      "retrieved_date",
+      "anc_class",
+      "roster_name",
+      "document_description",
+      "description_date_token",
+      "portal_document_id",
+      "corporation_attribution",
+      "local_file",
+      "bytes",
+      "sha256"
+     ],
+     "primary_key": [
+      "portal_url"
+     ],
+     "primary_key_kind": "natural",
+     "primary_key_proven": true,
+     "primary_key_evidence": "portal_url: 19,269 distinct over 19,269 rows, 0 blank, full scan",
+     "codebook_block": null,
+     "documented": false,
+     "contract_status": "shippable",
+     "declared_grain": "one row per document in the ANCSA portal index, downloaded or not - docs/ANCSA_PORTAL_BUILD_LOG.md",
+     "contract_key_columns": [],
+     "mtime": "2026-08-27T00:14:05+00:00",
+     "run_stamp_columns": [
+      {
+       "column": "retrieved_date",
+       "constant_value": "2026-08-05"
+      }
+     ],
+     "enricher_backups": [
+      {
+       "backup": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2",
+       "tag": "2026-08-05_v2",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "00_run_all.py",
+        "100_finish_declinations_and_employment.py",
+        "101_build_lodes_block_employment.py",
+        "114_pull_prime_archive.py",
+        "115_pull_assistance_archive.py",
+        "117_build_gaming_devices.py",
+        "121_pull_subawards_api.py",
+        "128_build_review_page.py",
+        "129_build_review_queue.py",
+        "142_build_property_site_observations.py",
+        "143_build_gaming_property_locations.py",
+        "14_copy_votingpatterns_sources.py",
+        "152_build_assistance_id_crosswalk.py",
+        "153_merge_base_ledgers_into_classified.py",
+        "15a_compacts_inventory.py",
+        "15d_terms_extract.py",
+        "160_ship_gap_report.py",
+        "169_build_identifier_graph.py",
+        "17_build_nonprofit_990.py",
+        "186_cicd_benchmark.py",
+        "18_spiderweb_v2_and_cage_backfill.py",
+        "207_normalize_extent_competed.py",
+        "208_register_extent_competed_codebook_fragment.py",
+        "227_anomaly_sweep.py",
+        "23c_copy_directory_core_sources.py",
+        "23d_build_gaming_facilities.py",
+        "30_funding_pre2008.py",
+        "30_probe_usaspending.py",
+        "319_load_tribal_vendor_list_verdicts.py",
+        "33_nonprofit_financials.py",
+        "350_withdraw_false_lobbying_attributions.py",
+        "351_rebuild_lobbying_panel_from_corrected_disclosures.py",
+        "36_build_nho_intertribal.py",
+        "37_contracts_gapfill.py",
+        "37_wait_then_pull.py",
+        "38_fain_backfill.py",
+        "391_triage_unshipped_tables.py",
+        "399_inventory_stranded_data.py",
+        "40_contracts_ledger_pass.py",
+        "40_pull_usaspending_subawards.py",
+        "42_write_subaward_source_doc.py",
+        "43_funding_forward_fill.py",
+        "449_verify_documented_api_quirks.py",
+        "44_pull_contracts_transactions.py",
+        "465_consolidation_inventory.py",
+        "46_pull_funding_credit_types.py",
+        "502_archive_candidates.py",
+        "512_build_dataset_contracts.py",
+        "54_reconcile_deals_duplicates.py",
+        "62_no_regression_check.py",
+        "72_fix_brand_and_government_misattribution.py",
+        "75_add_bie_schools_and_uios.py",
+        "75_philanthropy_schedule_i.py",
+        "84_build_nigc_regions.py",
+        "86_build_series_breaks.py",
+        "92_find_identifier_conflicts.py",
+        "94_extract_mi_mgcb_revshare.py",
+        "95_parse_compact_terms.py",
+        "97_build_aliases_and_relationships.py",
+        "98_build_oira_and_hearings.py",
+        "99_build_earmarks_and_schedc.py",
+        "cedar_codebook.py",
+        "cedar_domain.py",
+        "cedar_extent_competed.py",
+        "cedar_ids.py",
+        "cedar_match_guard.py",
+        "cedar_pipeline.py"
+       ]
+      },
+      {
+       "backup": "data/clean/ancsa_filings_index.csv.bak_2026-08-26_pre_327_migrate_class7_keys",
+       "tag": "2026-08-26_pre_327_migrate_class7_keys",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "327_migrate_class7_keys_to_digests.py"
+       ]
+      }
+     ],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 19269,
+       "how": "full csv scan, header excluded"
+      }
+     ]
+    },
+    {
+     "table": "nd_severance_allocation.csv",
+     "present": true,
+     "path": "data/clean/nd_severance_allocation.csv",
+     "sha256": "9da15d95add91ad858575ef0cfcfbace69f23efc718f6ac59272e4b62ba4476a",
+     "bytes": 10202,
+     "rows": 7,
+     "columns": [
+      "allocation_id",
+      "tribe_id",
+      "statute_cite",
+      "effective_start",
+      "effective_end",
+      "well_vintage_rule",
+      "trust_land_tribal_share",
+      "trust_land_state_share",
+      "fee_land_tribal_share",
+      "fee_land_state_share",
+      "superseded_by",
+      "source_url",
+      "source_quote",
+      "fetched_date",
+      "tier",
+      "confidence",
+      "built_date",
+      "cedar_uid"
+     ],
+     "primary_key": [
+      "allocation_id"
+     ],
+     "primary_key_kind": "natural",
+     "primary_key_proven": true,
+     "primary_key_evidence": "allocation_id: 7 distinct over 7 rows, 0 blank, full scan",
+     "codebook_block": null,
+     "documented": false,
+     "contract_status": "shippable",
+     "declared_grain": "one row per North Dakota severance-allocation rule in force over an interval",
+     "contract_key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "mtime": "2026-08-29T03:44:10+00:00",
+     "run_stamp_columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07"
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-07"
+      }
+     ],
+     "enricher_backups": [
+      {
+       "backup": "data/clean/nd_severance_allocation.csv.bak_2026-08-28_pre505",
+       "tag": "2026-08-28_pre505",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "503_identity.py"
+       ]
+      }
+     ],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 7,
+       "how": "full csv scan, header excluded"
+      },
+      {
+       "check": "distinct_cedar_uid",
+       "value": 1,
+       "blank": 0,
+       "how": "full scan"
+      },
+      {
+       "check": "distinct_tribe_id",
+       "value": 1,
+       "blank": 0,
+       "how": "full scan"
+      }
+     ]
+    },
+    {
+     "table": "resource_asset_source_coverage.csv",
+     "present": true,
+     "path": "data/clean/resource_asset_source_coverage.csv",
+     "sha256": "fc0d5f5405dd071c9456509b07a9975a7f46ae11d8c1892628e3cfda6d5d4596",
+     "bytes": 7690,
+     "rows": 18,
+     "columns": [
+      "source_system",
+      "publisher",
+      "attribute",
+      "coverage_state",
+      "what_was_swept",
+      "evidence",
+      "source_url",
+      "checked_date"
+     ],
+     "primary_key": [
+      "attribute"
+     ],
+     "primary_key_kind": "natural",
+     "primary_key_proven": true,
+     "primary_key_evidence": "attribute: 18 distinct over 18 rows, 0 blank, full scan",
+     "codebook_block": null,
+     "documented": false,
+     "contract_status": "internal-by-decision",
+     "declared_grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "contract_key_columns": [],
+     "mtime": "2026-08-12T20:51:33+00:00",
+     "run_stamp_columns": [],
+     "enricher_backups": [],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 18,
+       "how": "full csv scan, header excluded"
+      }
+     ]
+    },
+    {
+     "table": "resource_assets.csv",
+     "present": true,
+     "path": "data/clean/resource_assets.csv",
+     "sha256": "6a83aa66ad216b3fdb5692d0946828f8ac210d6cd91dd17b3692624250cb4cd6",
+     "bytes": 48835,
+     "rows": 35,
+     "columns": [
+      "resource_asset_id",
+      "asset_type",
+      "asset_name",
+      "source_system",
+      "source_asset_id",
+      "niogems_lease_id",
+      "niogems_tract_id",
+      "niogems_agreement_id",
+      "niogems_well_id",
+      "resource_type",
+      "commodity",
+      "state",
+      "county",
+      "fips_code",
+      "latitude",
+      "longitude",
+      "reservation_name",
+      "land_status",
+      "land_status_source_url",
+      "operator_name",
+      "operator_entity_id",
+      "status",
+      "first_production_date",
+      "spud_date",
+      "geometry_basis",
+      "confidence",
+      "source_url",
+      "fetched_date",
+      "built_date",
+      "legal_title_holder",
+      "beneficial_interest_class",
+      "ownership_basis",
+      "area_acres",
+      "area_unit",
+      "area_basis",
+      "as_of_date",
+      "asset_count_in_source",
+      "evidence_document",
+      "evidence_document_type",
+      "evidence_quote",
+      "quote_verified",
+      "revenue_coverage_state",
+      "production_coverage_state",
+      "coverage_note",
+      "cedar_uid"
+     ],
+     "primary_key": [
+      "resource_asset_id"
+     ],
+     "primary_key_kind": "natural",
+     "primary_key_proven": true,
+     "primary_key_evidence": "resource_asset_id: 35 distinct over 35 rows, 0 blank, full scan",
+     "codebook_block": "12_resources",
+     "documented": true,
+     "contract_status": "shippable",
+     "declared_grain": "one row per resource asset (lease, tract, agreement or well)",
+     "contract_key_columns": [
+      "cedar_uid"
+     ],
+     "mtime": "2026-08-29T03:44:45+00:00",
+     "run_stamp_columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-12"
+      }
+     ],
+     "enricher_backups": [
+      {
+       "backup": "data/clean/resource_assets.csv.bak_2026-08-28_pre505",
+       "tag": "2026-08-28_pre505",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "503_identity.py"
+       ]
+      }
+     ],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 35,
+       "how": "full csv scan, header excluded"
+      },
+      {
+       "check": "distinct_cedar_uid",
+       "value": 0,
+       "blank": 35,
+       "how": "full scan"
+      }
+     ]
+    },
+    {
+     "table": "resource_parties.csv",
+     "present": true,
+     "path": "data/clean/resource_parties.csv",
+     "sha256": "7f09c3a15731090465f3ff484a6bfeae365ff2eb5c62c7fdd53f10b6dfe656ee",
+     "bytes": 417772,
+     "rows": 1436,
+     "columns": [
+      "party_link_id",
+      "object_type",
+      "object_id",
+      "entity_id",
+      "entity_name",
+      "entity_is_native",
+      "party_role",
+      "relationship",
+      "interest_share_pct",
+      "basis",
+      "confidence",
+      "source_url",
+      "fetched_date",
+      "built_date",
+      "cedar_uid"
+     ],
+     "primary_key": [
+      "party_link_id",
+      "object_id",
+      "source_url",
+      "entity_id"
+     ],
+     "primary_key_kind": "natural",
+     "primary_key_proven": true,
+     "primary_key_evidence": "(party_link_id, object_id, source_url, entity_id) unique over 1,436 rows, 0 blank, 0 duplicate [full]",
+     "codebook_block": "12_resources",
+     "documented": true,
+     "contract_status": "shippable",
+     "declared_grain": "one row per (party link, entity as named). `party_link_id` alone has 1 collision and is not a key on its own",
+     "contract_key_columns": [
+      "cedar_uid",
+      "entity_id"
+     ],
+     "mtime": "2026-08-29T03:44:45+00:00",
+     "run_stamp_columns": [],
+     "enricher_backups": [
+      {
+       "backup": "data/clean/resource_parties.csv.bak_2026-08-28_pre505",
+       "tag": "2026-08-28_pre505",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "503_identity.py"
+       ]
+      }
+     ],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 1436,
+       "how": "full csv scan, header excluded"
+      },
+      {
+       "check": "distinct_cedar_uid",
+       "value": 18,
+       "blank": 495,
+       "how": "full scan"
+      }
+     ]
+    },
+    {
+     "table": "resource_revenue.csv",
+     "present": true,
+     "path": "data/clean/resource_revenue.csv",
+     "sha256": "20ae209fb1e9e7299f6d620ab25f0edd34e07ee7e9df989146d323de01b4fbec",
+     "bytes": 11990611,
+     "rows": 10482,
+     "columns": [
+      "resource_revenue_event_id",
+      "recipient_entity_id",
+      "recipient_entity_name",
+      "beneficiary_entity_id",
+      "beneficiary_entity_name",
+      "beneficiary_note",
+      "payer_entity_id",
+      "payer_entity_name",
+      "operator_entity_id",
+      "operator_entity_name",
+      "related_asset_ids",
+      "source_system",
+      "source_record_id",
+      "revenue_type",
+      "resource_type",
+      "commodity",
+      "product",
+      "mineral_lease_type",
+      "period_type",
+      "period_start",
+      "period_end",
+      "payment_date",
+      "amount_usd",
+      "amount_usd_real2025",
+      "deflator_factor_2025",
+      "inflation_base_year",
+      "measurement_status",
+      "aggregation_level",
+      "land_status",
+      "land_status_basis",
+      "allocation_formula",
+      "allocation_formula_effective_start",
+      "allocation_formula_effective_end",
+      "allocation_formula_source_url",
+      "amount_sign_meaning",
+      "geography_note",
+      "confidence",
+      "source_url",
+      "fetched_date",
+      "built_date",
+      "cedar_uid"
+     ],
+     "primary_key": [
+      "resource_revenue_event_id"
+     ],
+     "primary_key_kind": "UNSTABLE_KEY_NEEDS_SURROGATE",
+     "primary_key_proven": true,
+     "primary_key_evidence": "resource_revenue_event_id: 10,482 distinct over 10,482 rows, 0 blank, full scan",
+     "codebook_block": "12_resources",
+     "documented": true,
+     "contract_status": "shippable",
+     "declared_grain": "one row per resource revenue event as recorded by its source system",
+     "contract_key_columns": [
+      "cedar_uid"
+     ],
+     "mtime": "2026-08-29T03:44:45+00:00",
+     "run_stamp_columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-06"
+      }
+     ],
+     "enricher_backups": [
+      {
+       "backup": "data/clean/resource_revenue.csv.bak_2026-08-12_pre146",
+       "tag": "2026-08-12_pre146",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "149_apply_resource_entity_links.py"
+       ]
+      },
+      {
+       "backup": "data/clean/resource_revenue.csv.bak_2026-08-28_pre505",
+       "tag": "2026-08-28_pre505",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "503_identity.py"
+       ]
+      }
+     ],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 10482,
+       "how": "full csv scan, header excluded"
+      },
+      {
+       "check": "distinct_cedar_uid",
+       "value": 17,
+       "blank": 9748,
+       "how": "full scan"
+      }
+     ]
+    },
+    {
+     "table": "tribal_bond_issuances.csv",
+     "present": true,
+     "path": "data/clean/tribal_bond_issuances.csv",
+     "sha256": "2d07064ec374f7100b681caa194c84daad29b0dda8626ea41a8cc67acdd978d7",
+     "bytes": 21572,
+     "rows": 29,
+     "columns": [
+      "issuer",
+      "issuer_entity_id",
+      "cusip",
+      "issue_date",
+      "par_amount",
+      "instrument_type",
+      "maturity",
+      "use_of_proceeds",
+      "rating_at_issue",
+      "rating_agency",
+      "source_url",
+      "retrieved_date",
+      "date_basis",
+      "notes"
+     ],
+     "primary_key": [
+      "notes"
+     ],
+     "primary_key_kind": "natural",
+     "primary_key_proven": true,
+     "primary_key_evidence": "notes: 29 distinct over 29 rows, 0 blank, full scan",
+     "codebook_block": null,
+     "documented": false,
+     "contract_status": "shippable",
+     "declared_grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "contract_key_columns": [],
+     "mtime": "2026-08-05T21:40:24+00:00",
+     "run_stamp_columns": [
+      {
+       "column": "issue_date",
+       "constant_value": "2021-01-26"
+      },
+      {
+       "column": "retrieved_date",
+       "constant_value": "2026-08-05"
+      }
+     ],
+     "enricher_backups": [],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 29,
+       "how": "full csv scan, header excluded"
+      }
+     ]
+    },
+    {
+     "table": "tribal_tax_bases.csv",
+     "present": true,
+     "path": "data/clean/tribal_tax_bases.csv",
+     "sha256": "e05ea9df079c86e7ab78711851b63846f05cd3685e0b140992d72418652cacd5",
+     "bytes": 3746901,
+     "rows": 1712,
+     "columns": [
+      "tax_observation_id",
+      "tribe_id",
+      "tribe_name",
+      "state",
+      "tax_type",
+      "period_start",
+      "period_end",
+      "tax_remitted_usd",
+      "statutory_rate",
+      "rate_unit",
+      "derived_taxable_base",
+      "base_unit",
+      "rate_source_quote",
+      "amount_source_quote",
+      "agreement_or_statute_cite",
+      "measurement_status",
+      "bound_basis",
+      "source_url",
+      "fetched_date",
+      "tier",
+      "confidence",
+      "built_date",
+      "cedar_uid"
+     ],
+     "primary_key": [
+      "tax_observation_id"
+     ],
+     "primary_key_kind": "natural",
+     "primary_key_proven": true,
+     "primary_key_evidence": "tax_observation_id: 1,712 distinct over 1,712 rows, 0 blank, full scan",
+     "codebook_block": "15_tribal_tax",
+     "documented": true,
+     "contract_status": "shippable",
+     "declared_grain": "one row per (tribe, tax type, period) - docs/TRIBAL_TAX_DECOMPOSITION.md",
+     "contract_key_columns": [
+      "tribe_id",
+      "cedar_uid"
+     ],
+     "mtime": "2026-08-29T03:44:47+00:00",
+     "run_stamp_columns": [
+      {
+       "column": "built_date",
+       "constant_value": "2026-08-07"
+      },
+      {
+       "column": "fetched_date",
+       "constant_value": "2026-08-07"
+      }
+     ],
+     "enricher_backups": [
+      {
+       "backup": "data/clean/tribal_tax_bases.csv.bak_2026-08-07_pre113",
+       "tag": "2026-08-07_pre113",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "113_build_nd_severance.py"
+       ]
+      },
+      {
+       "backup": "data/clean/tribal_tax_bases.csv.bak_2026-08-07_pre116",
+       "tag": "2026-08-07_pre116",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "116_build_nd_tribal_taxes.py"
+       ]
+      },
+      {
+       "backup": "data/clean/tribal_tax_bases.csv.bak_2026-08-28_pre505",
+       "tag": "2026-08-28_pre505",
+       "attribution": "verbatim_tag_in_source",
+       "written_by": [
+        "503_identity.py"
+       ]
+      }
+     ],
+     "conservation": [
+      {
+       "check": "row_count",
+       "value": 1712,
+       "how": "full csv scan, header excluded"
+      },
+      {
+       "check": "distinct_cedar_uid",
+       "value": 57,
+       "blank": 26,
+       "how": "full scan"
+      },
+      {
+       "check": "distinct_tribe_id",
+       "value": 57,
+       "blank": 26,
+       "how": "full scan"
+      }
+     ]
+    }
+   ],
+   "rebuild_command": "py -3 code/build.py run natural-resources --execute",
+   "replayability": {
+    "verdict": "not_exactly_replayable",
+    "blocking_components": [
+     {
+      "component": "the collection's plan names a script that is not in the repository",
+      "class": "plan_script_missing",
+      "why": "the rebuild command cannot be run as planned at this commit, so the manifest's command list is not executable end to end.",
+      "detail": [
+       "update_index.py"
+      ]
+     },
+     {
+      "component": "input discovery",
+      "class": "undiscovered_inputs",
+      "why": "3 read(s) by an EXECUTED script could not be resolved to a retained input",
+      "detail": [
+       {
+        "name": "cedar_navajo_audited_actuals.csv",
+        "referenced_by": "83_build_resource_ledger.py",
+        "resolves_on_disk": false,
+        "severity": "blocking",
+        "why": "an executed script names this read and no discovery channel resolved it to a retained input"
+       },
+       {
+        "name": "cedar_transcribed_assets.csv",
+        "referenced_by": "83_build_resource_ledger.py",
+        "resolves_on_disk": false,
+        "severity": "blocking",
+        "why": "an executed script names this read and no discovery channel resolved it to a retained input"
+       },
+       {
+        "name": "cedar_transcribed_payments.csv",
+        "referenced_by": "83_build_resource_ledger.py",
+        "resolves_on_disk": false,
+        "severity": "blocking",
+        "why": "an executed script names this read and no discovery channel resolved it to a retained input"
+       }
+      ]
+     },
+     {
+      "component": "released output predates a recorded input",
+      "class": "output_stale_vs_input",
+      "why": "9 output(s) were last written BEFORE an input this manifest records as consumed. The released bytes were not produced by those inputs, so a faithful replay CANNOT reproduce them and should not be expected to.",
+      "evidence_strength": "mtime only. A content-identical rewrite of an input moves its mtime without changing what it says, so this can flag a release that is in fact current. It stays blocking because the opposite error - shipping a stale table as replayable - is the one that costs money.",
+      "detail": [
+       {
+        "table": "anc_ceiling_roster.csv",
+        "output_written": "2026-08-27T00:14:05+00:00",
+        "inputs_written_later": [
+         {
+          "input": "data/clean/codebook_master.csv",
+          "written": "2026-08-29T01:05:39+00:00"
+         },
+         {
+          "input": "data/clean/nd_severance_allocation.csv",
+          "written": "2026-08-29T03:44:10+00:00"
+         },
+         {
+          "input": "data/clean/resource_assets.csv",
+          "written": "2026-08-29T03:44:45+00:00"
+         },
+         {
+          "input": "data/clean/resource_parties.csv",
+          "written": "2026-08-29T03:44:45+00:00"
+         },
+         {
+          "input": "data/clean/resource_revenue.csv",
+          "written": "2026-08-29T03:44:45+00:00"
+         },
+         {
+          "input": "data/clean/tribal_tax_bases.csv",
+          "written": "2026-08-29T03:44:47+00:00"
+         },
+         {
+          "input": "data/spine/cedar_entity_spine.csv",
+          "written": "2026-08-29T07:22:35+00:00"
+         }
+        ]
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "output_written": "2026-08-27T00:14:05+00:00",
+        "inputs_written_later": [
+         {
+          "input": "data/clean/codebook_master.csv",
+          "written": "2026-08-29T01:05:39+00:00"
+         },
+         {
+          "input": "data/clean/nd_severance_allocation.csv",
+          "written": "2026-08-29T03:44:10+00:00"
+         },
+         {
+          "input": "data/clean/resource_assets.csv",
+          "written": "2026-08-29T03:44:45+00:00"
+         },
+         {
+          "input": "data/clean/resource_parties.csv",
+          "written": "2026-08-29T03:44:45+00:00"
+         },
+         {
+          "input": "data/clean/resource_revenue.csv",
+          "written": "2026-08-29T03:44:45+00:00"
+         },
+         {
+          "input": "data/clean/tribal_tax_bases.csv",
+          "written": "2026-08-29T03:44:47+00:00"
+         },
+         {
+          "input": "data/spine/cedar_entity_spine.csv",
+          "written": "2026-08-29T07:22:35+00:00"
+         }
+        ]
+       },
+       {
+        "table": "nd_severance_allocation.csv",
+        "output_written": "2026-08-29T03:44:10+00:00",
+        "inputs_written_later": [
+         {
+          "input": "data/clean/resource_assets.csv",
+          "written": "2026-08-29T03:44:45+00:00"
+         },
+         {
+          "input": "data/clean/resource_parties.csv",
+          "written": "2026-08-29T03:44:45+00:00"
+         },
+         {
+          "input": "data/clean/resource_revenue.csv",
+          "written": "2026-08-29T03:44:45+00:00"
+         },
+         {
+          "input": "data/clean/tribal_tax_bases.csv",
+          "written": "2026-08-29T03:44:47+00:00"
+         },
+         {
+          "input": "data/spine/cedar_entity_spine.csv",
+          "written": "2026-08-29T07:22:35+00:00"
+         }
+        ]
+       },
+       {
+        "table": "resource_asset_source_coverage.csv",
+        "output_written": "2026-08-12T20:51:33+00:00",
+        "inputs_written_later": [
+         {
+          "input": "data/clean/codebook_master.csv",
+          "written": "2026-08-29T01:05:39+00:00"
+         },
+         {
+          "input": "data/clean/nd_severance_allocation.csv",
+          "written": "2026-08-29T03:44:10+00:00"
+         },
+         {
+          "input": "data/clean/resource_assets.csv",
+          "written": "2026-08-29T03:44:45+00:00"
+         },
+         {
+          "input": "data/clean/resource_parties.csv",
+          "written": "2026-08-29T03:44:45+00:00"
+         },
+         {
+          "input": "data/clean/resource_revenue.csv",
+          "written": "2026-08-29T03:44:45+00:00"
+         },
+         {
+          "input": "data/clean/tribal_tax_bases.csv",
+          "written": "2026-08-29T03:44:47+00:00"
+         },
+         {
+          "input": "data/spine/cedar_entity_spine.csv",
+          "written": "2026-08-29T07:22:35+00:00"
+         }
+        ]
+       },
+       {
+        "table": "resource_assets.csv",
+        "output_written": "2026-08-29T03:44:45+00:00",
+        "inputs_written_later": [
+         {
+          "input": "data/clean/resource_parties.csv",
+          "written": "2026-08-29T03:44:45+00:00"
+         },
+         {
+          "input": "data/clean/resource_revenue.csv",
+          "written": "2026-08-29T03:44:45+00:00"
+         },
+         {
+          "input": "data/clean/tribal_tax_bases.csv",
+          "written": "2026-08-29T03:44:47+00:00"
+         },
+         {
+          "input": "data/spine/cedar_entity_spine.csv",
+          "written": "2026-08-29T07:22:35+00:00"
+         }
+        ]
+       },
+       {
+        "table": "resource_parties.csv",
+        "output_written": "2026-08-29T03:44:45+00:00",
+        "inputs_written_later": [
+         {
+          "input": "data/clean/resource_revenue.csv",
+          "written": "2026-08-29T03:44:45+00:00"
+         },
+         {
+          "input": "data/clean/tribal_tax_bases.csv",
+          "written": "2026-08-29T03:44:47+00:00"
+         },
+         {
+          "input": "data/spine/cedar_entity_spine.csv",
+          "written": "2026-08-29T07:22:35+00:00"
+         }
+        ]
+       },
+       {
+        "table": "resource_revenue.csv",
+        "output_written": "2026-08-29T03:44:45+00:00",
+        "inputs_written_later": [
+         {
+          "input": "data/clean/tribal_tax_bases.csv",
+          "written": "2026-08-29T03:44:47+00:00"
+         },
+         {
+          "input": "data/spine/cedar_entity_spine.csv",
+          "written": "2026-08-29T07:22:35+00:00"
+         }
+        ]
+       },
+       {
+        "table": "tribal_bond_issuances.csv",
+        "output_written": "2026-08-05T21:40:24+00:00",
+        "inputs_written_later": [
+         {
+          "input": "data/clean/codebook_master.csv",
+          "written": "2026-08-29T01:05:39+00:00"
+         },
+         {
+          "input": "data/clean/inflation_deflator.csv",
+          "written": "2026-08-06T21:03:41+00:00"
+         },
+         {
+          "input": "data/clean/nd_severance_allocation.csv",
+          "written": "2026-08-29T03:44:10+00:00"
+         },
+         {
+          "input": "data/clean/resource_assets.csv",
+          "written": "2026-08-29T03:44:45+00:00"
+         },
+         {
+          "input": "data/clean/resource_parties.csv",
+          "written": "2026-08-29T03:44:45+00:00"
+         },
+         {
+          "input": "data/clean/resource_revenue.csv",
+          "written": "2026-08-29T03:44:45+00:00"
+         },
+         {
+          "input": "data/clean/tribal_tax_bases.csv",
+          "written": "2026-08-29T03:44:47+00:00"
+         },
+         {
+          "input": "data/raw/external/nd_severance/legislative_council/tribal_state_relations_background_memo_27.9066.01000.pdf",
+          "written": "2026-08-08T00:03:33+00:00"
+         },
+         {
+          "input": "data/raw/external/nd_severance/session_laws/2015_64th_TAXES.pdf",
+          "written": "2026-08-08T00:03:29+00:00"
+         },
+         {
+          "input": "data/raw/external/nd_severance/statute/ndcc_t57c51-1_oil_extraction_tax.pdf",
+          "written": "2026-08-08T00:03:23+00:00"
+         },
+         {
+          "input": "data/raw/external/nd_severance/statute/ndcc_t57c51-2_tribal_oil_and_gas_agreements.pdf",
+          "written": "2026-08-08T00:03:24+00:00"
+         },
+         {
+          "input": "data/raw/external/nd_severance/statute/ndcc_t57c51_gross_production_tax.pdf",
+          "written": "2026-08-08T00:03:21+00:00"
+         },
+         {
+          "input": "data/raw/external/nd_severance/tax_commissioner/gas_tax_rate_table.html",
+          "written": "2026-08-08T00:03:35+00:00"
+         },
+         {
+          "input": "data/raw/external/tribal_tax/_SOURCE_MANIFEST.csv",
+          "written": "2026-08-07T22:48:43+00:00"
+         },
+         {
+          "input": "data/raw/external/tribal_tax/mi/agreement_bay-mills-indian-community.html",
+          "written": "2026-08-07T22:48:42+00:00"
+         },
+         {
+          "input": "data/raw/external/tribal_tax/mi/agreement_grand-traverse-band-of-ottawa-and-chippewa-indians.html",
+          "written": "2026-08-07T22:48:42+00:00"
+         },
+         {
+          "input": "data/raw/external/tribal_tax/mi/agreement_hannahville-indian-community.html",
+          "written": "2026-08-07T22:48:42+00:00"
+         },
+         {
+          "input": "data/raw/external/tribal_tax/mi/agreement_little-river-band-of-ottawa-indians.html",
+          "written": "2026-08-07T22:48:42+00:00"
+         },
+         {
+          "input": "data/raw/external/tribal_tax/mi/agreement_little-traverse-bay-bands-of-odawa-indians.html",
+          "written": "2026-08-07T22:48:42+00:00"
+         },
+         {
+          "input": "data/raw/external/tribal_tax/mi/agreement_match-e-be-nash-she-wish-band-of-pottawatomi-indians.html",
+          "written": "2026-08-07T22:48:42+00:00"
+         },
+         {
+          "input": "data/raw/external/tribal_tax/mi/agreement_nottawaseppi-huron-band-of-potawatomi-indians.html",
+          "written": "2026-08-07T22:48:42+00:00"
+         },
+         {
+          "input": "data/raw/external/tribal_tax/mi/agreement_pokagon-band-of-potawatomi-indians.html",
+          "written": "2026-08-07T22:48:42+00:00"
+         },
+         {
+          "input": "data/raw/external/tribal_tax/mi/agreement_saginaw-chippewa-indian-tribe-of-michigan.html",
+          "written": "2026-08-07T22:48:43+00:00"
+         },
+         {
+          "input": "data/raw/external/tribal_tax/mi/agreement_sault-ste--marie-tribe-of-chippewa-indians.html",
+          "written": "2026-08-07T22:48:43+00:00"
+         },
+         {
+          "input": "data/raw/external/tribal_tax/mt/mt_biennial_2022_2024_other_taxes.pdf",
+          "written": "2026-08-07T22:48:39+00:00"
+         },
+         {
+          "input": "data/raw/external/tribal_tax/nm/cigarette_tax_credit_stamp_listing.html",
+          "written": "2026-08-07T22:48:42+00:00"
+         },
+         {
+          "input": "data/raw/external/tribal_tax/ok/otc_revenue_and_apportionment_FY2025.pdf",
+          "written": "2026-08-07T22:48:39+00:00"
+         },
+         {
+          "input": "data/raw/external/tribal_tax/wa/2024_tribal_fuel_tax_agreement_report.pdf",
+          "written": "2026-08-07T22:48:35+00:00"
+         },
+         {
+          "input": "data/raw/external/tribal_tax/wa/dor_tribal_retail_sales_tax_compact_revenue_sharing.pdf",
+          "written": "2026-08-07T22:48:36+00:00"
+         },
+         {
+          "input": "data/raw/external/tribal_tax/wa/rcw_82_38_030_fuel_tax_rate.html",
+          "written": "2026-08-07T22:48:40+00:00"
+         },
+         {
+          "input": "data/raw/resources/_state_mechanisms/cedar_state_mechanism_register.csv",
+          "written": "2026-08-06T22:53:05+00:00"
+         },
+         {
+          "input": "data/raw/resources/north_dakota/cedar_allocation_formula.csv",
+          "written": "2026-08-06T22:06:53+00:00"
+         },
+         {
+          "input": "data/raw/resources/onrr/calendar_year_revenue.csv",
+          "written": "2026-08-06T21:34:42+00:00"
+         },
+         {
+          "input": "data/raw/resources/onrr/fiscal_year_disbursements.csv",
+          "written": "2026-08-06T21:34:57+00:00"
+         },
+         {
+          "input": "data/raw/resources/onrr/monthly_revenue.csv",
+          "written": "2026-08-06T21:34:45+00:00"
+         },
+         {
+          "input": "data/raw/resources/onrr_historical/cedar_transcribed_cy_1996_2000.csv",
+          "written": "2026-08-06T22:11:24+00:00"
+         },
+         {
+          "input": "data/spine/cedar_entity_spine.csv",
+          "written": "2026-08-29T07:22:35+00:00"
+         },
+         {
+          "input": "review/resource_ledger_unresolved.csv",
+          "written": "2026-08-06T22:58:29+00:00"
+         }
+        ]
+       },
+       {
+        "table": "tribal_tax_bases.csv",
+        "output_written": "2026-08-29T03:44:47+00:00",
+        "inputs_written_later": [
+         {
+          "input": "data/spine/cedar_entity_spine.csv",
+          "written": "2026-08-29T07:22:35+00:00"
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "component": "in-place enricher outside the collection's plan",
+      "class": "undeclared_enricher",
+      "why": "a script wrote these outputs AFTER the rebuilder and is not in the plan, so the manifest's command list does not reproduce the released columns. The evidence is the enricher's own .bak_ file, not an inference.",
+      "detail": [
+       {
+        "table": "anc_ceiling_roster.csv",
+        "script": "327_migrate_class7_keys_to_digests.py",
+        "evidence": "data/clean/anc_ceiling_roster.csv.bak_2026-08-26_pre_327_migrate_class7_keys"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "00_run_all.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "100_finish_declinations_and_employment.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "101_build_lodes_block_employment.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "114_pull_prime_archive.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "115_pull_assistance_archive.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "117_build_gaming_devices.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "121_pull_subawards_api.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "128_build_review_page.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "129_build_review_queue.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "142_build_property_site_observations.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "143_build_gaming_property_locations.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "14_copy_votingpatterns_sources.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "152_build_assistance_id_crosswalk.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "153_merge_base_ledgers_into_classified.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "15a_compacts_inventory.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "15d_terms_extract.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "160_ship_gap_report.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "169_build_identifier_graph.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "17_build_nonprofit_990.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "186_cicd_benchmark.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "18_spiderweb_v2_and_cage_backfill.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "207_normalize_extent_competed.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "208_register_extent_competed_codebook_fragment.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "227_anomaly_sweep.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "23c_copy_directory_core_sources.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "23d_build_gaming_facilities.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "30_funding_pre2008.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "30_probe_usaspending.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "319_load_tribal_vendor_list_verdicts.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "33_nonprofit_financials.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "350_withdraw_false_lobbying_attributions.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "351_rebuild_lobbying_panel_from_corrected_disclosures.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "36_build_nho_intertribal.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "37_contracts_gapfill.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "37_wait_then_pull.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "38_fain_backfill.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "391_triage_unshipped_tables.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "399_inventory_stranded_data.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "40_contracts_ledger_pass.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "40_pull_usaspending_subawards.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "42_write_subaward_source_doc.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "43_funding_forward_fill.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "449_verify_documented_api_quirks.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "44_pull_contracts_transactions.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "465_consolidation_inventory.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "46_pull_funding_credit_types.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "502_archive_candidates.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "512_build_dataset_contracts.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "54_reconcile_deals_duplicates.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "62_no_regression_check.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "72_fix_brand_and_government_misattribution.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "75_add_bie_schools_and_uios.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "75_philanthropy_schedule_i.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "84_build_nigc_regions.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "86_build_series_breaks.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "92_find_identifier_conflicts.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "94_extract_mi_mgcb_revshare.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "95_parse_compact_terms.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "97_build_aliases_and_relationships.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "98_build_oira_and_hearings.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "99_build_earmarks_and_schedc.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "cedar_codebook.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "cedar_domain.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "cedar_extent_competed.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "cedar_ids.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "cedar_match_guard.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "cedar_pipeline.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-05_v2"
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "script": "327_migrate_class7_keys_to_digests.py",
+        "evidence": "data/clean/ancsa_filings_index.csv.bak_2026-08-26_pre_327_migrate_class7_keys"
+       },
+       {
+        "table": "nd_severance_allocation.csv",
+        "script": "503_identity.py",
+        "evidence": "data/clean/nd_severance_allocation.csv.bak_2026-08-28_pre505"
+       },
+       {
+        "table": "resource_assets.csv",
+        "script": "503_identity.py",
+        "evidence": "data/clean/resource_assets.csv.bak_2026-08-28_pre505"
+       },
+       {
+        "table": "resource_parties.csv",
+        "script": "503_identity.py",
+        "evidence": "data/clean/resource_parties.csv.bak_2026-08-28_pre505"
+       },
+       {
+        "table": "resource_revenue.csv",
+        "script": "503_identity.py",
+        "evidence": "data/clean/resource_revenue.csv.bak_2026-08-28_pre505"
+       },
+       {
+        "table": "tribal_tax_bases.csv",
+        "script": "116_build_nd_tribal_taxes.py",
+        "evidence": "data/clean/tribal_tax_bases.csv.bak_2026-08-07_pre116"
+       },
+       {
+        "table": "tribal_tax_bases.csv",
+        "script": "503_identity.py",
+        "evidence": "data/clean/tribal_tax_bases.csv.bak_2026-08-28_pre505"
+       }
+      ]
+     },
+     {
+      "component": "run date stamped into output rows",
+      "class": "nondeterministic_output_column",
+      "why": "these columns hold one constant date - the day the build ran - so two faithful runs on two days produce different bytes. Compare with the column excluded, or make the column derive from the SOURCE's date rather than the clock.",
+      "detail": [
+       {
+        "table": "anc_ceiling_roster.csv",
+        "columns": [
+         {
+          "column": "fetched_date",
+          "constant_value": "2026-08-05"
+         }
+        ]
+       },
+       {
+        "table": "ancsa_filings_index.csv",
+        "columns": [
+         {
+          "column": "retrieved_date",
+          "constant_value": "2026-08-05"
+         }
+        ]
+       },
+       {
+        "table": "nd_severance_allocation.csv",
+        "columns": [
+         {
+          "column": "built_date",
+          "constant_value": "2026-08-07"
+         },
+         {
+          "column": "fetched_date",
+          "constant_value": "2026-08-07"
+         }
+        ]
+       },
+       {
+        "table": "resource_assets.csv",
+        "columns": [
+         {
+          "column": "built_date",
+          "constant_value": "2026-08-12"
+         }
+        ]
+       },
+       {
+        "table": "resource_revenue.csv",
+        "columns": [
+         {
+          "column": "built_date",
+          "constant_value": "2026-08-06"
+         }
+        ]
+       },
+       {
+        "table": "tribal_bond_issuances.csv",
+        "columns": [
+         {
+          "column": "issue_date",
+          "constant_value": "2021-01-26"
+         },
+         {
+          "column": "retrieved_date",
+          "constant_value": "2026-08-05"
+         }
+        ]
+       },
+       {
+        "table": "tribal_tax_bases.csv",
+        "columns": [
+         {
+          "column": "built_date",
+          "constant_value": "2026-08-07"
+         },
+         {
+          "column": "fetched_date",
+          "constant_value": "2026-08-07"
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "component": "absolute project root hardcoded in code",
+      "class": "code_not_relocatable",
+      "why": "6 script(s) in scope bind the project root to 'C:\\\\Users\\\\esm247\\\\Desktop\\\\Cedar Press', so a checkout at any other path reads and WRITES the live tree. A clean-room replay requires the documented root rewrite (see docs/RELEASE_REPLAY_LOG.md, adaptation A1).",
+      "detail": [
+       "07_parse_ancsa_ceiling.py",
+       "108_build_tribal_tax_bases.py",
+       "113_build_nd_severance.py",
+       "149_apply_resource_entity_links.py",
+       "83_build_resource_ledger.py",
+       "cedar_keys.py"
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "release_verdict": "not_exactly_replayable",
+ "capture_integrity": {
+  "inputs_rechecked": 39,
+  "outputs_rechecked": 9,
+  "input_check": "sha256 + (mtime, size)",
+  "output_check": "(mtime, size) only - see the note in cmd_build",
+  "changed_during_capture": [],
+  "inputs_rewritten_same_content": [],
+  "outputs_changed_during_capture": [],
+  "quiescent": true,
+  "enforced": true
+ }
+}

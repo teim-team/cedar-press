@@ -45,7 +45,20 @@ def _reaches(tier: str, dataset_shelf: str) -> bool:
 
 
 def _dataset_payload(dataset: Any) -> dict[str, Any]:
-    """One collection, in the shape the shelf reads."""
+    """One collection, in the shape the shelf reads.
+
+    ``vintage`` and ``downloads`` are ``null`` on every collection today and
+    are still sent: a client that receives the key and no value can render an
+    absence, while a client that receives no key at all cannot tell an absent
+    measurement from an older server. ``unmeasured`` names them and says why,
+    so nothing downstream has to decide on its own whether a null is a gap or
+    a zero.
+
+    ``sample`` and ``tables`` are what the download is actually backed by --
+    ten rows of the flagship table, and every table's row count and
+    full-file split -- so a client can say what it is handing over instead of
+    calling ten rows a collection.
+    """
     return {
         "id": dataset.id,
         "shelf": dataset.shelf,
@@ -59,6 +72,14 @@ def _dataset_payload(dataset: Any) -> dict[str, Any]:
         "updated": dataset.updated,
         "sources": dataset.sources,
         "method": dataset.method,
+        "cedar": launch.collection_cedar_facts(dataset.id),
+        "sample": launch.collection_sample(dataset.id),
+        "tables": list(launch.collection_tables(dataset.id)),
+        "unmeasured": {
+            field: reason
+            for field, reason in launch.UNMEASURED_FIELDS.items()
+            if getattr(dataset, field, None) in (None, "")
+        },
     }
 
 
@@ -85,8 +106,24 @@ def may_open(tier: str, collection_id: str) -> bool:
 
 
 def collection_csv(collection_id: str) -> str | None:
-    """The release file's rows, citation included."""
+    """The preview file's rows, citation included.
+
+    Ten rows of the collection's flagship table, not the collection. The full
+    tables are not served from this repository; ``collection_tables`` carries
+    what a serving layer needs to find them.
+    """
     return launch.collection_csv(collection_id)
+
+
+def sample_unavailable_reason(collection_id: str) -> str | None:
+    """Why a collection has no preview file, so a route can say which it is.
+
+    A collection the shelf shows and the file layer cannot serve is a
+    different failure from a collection that does not exist, and answering
+    both with "No such collection" hides a real, named data problem behind a
+    routing message.
+    """
+    return launch.sample_unavailable_reason(collection_id)
 
 
 def download_name(collection_id: str) -> str:
@@ -94,7 +131,10 @@ def download_name(collection_id: str) -> str:
         (item for item in launch.LAUNCH_COLLECTION if item.id == collection_id), None
     )
     version = dataset.version if dataset else "v0"
-    return f"{collection_id}-{version}.csv"
+    # The filename says it is a sample. A file called `deals-v0.csv` sitting in
+    # somebody's downloads folder a month later cannot be told apart from the
+    # release, and ten rows of a 2,662-row collection is not the release.
+    return f"{collection_id}-{version}-sample.csv"
 
 
 def releases() -> list[dict[str, Any]]:
@@ -132,16 +172,16 @@ def collection_profile(collection_id: str) -> dict[str, Any] | None:
     return collection_profiles.profile_for(collection_id)
 
 
-def cedar_answer(question: str, collection_id: str, tier: str) -> dict[str, str] | None:
+def cedar_answer(question: str, collection_id: str) -> dict[str, str] | None:
     """A profile-grounded answer, or ``None`` when the question needs more.
 
-    The tier travels with the question so coverage is phrased for the
-    reader: a plan that already opens the full archive is not told what
-    Cedar Press+ would open.
+    The tier used to travel with the question, because coverage was phrased
+    for the reader: a Cedar Press reader was told what Cedar Press+ would
+    open. Retiring the year cap (2026-09-02) removed the only thing the tier
+    decided here, and a parameter nothing reads is a parameter the next
+    caller will pass wrongly.
     """
-    return collection_profiles.answer_from_profile(
-        question, collection_id, full_archive=_reaches(tier, "pro")
-    )
+    return collection_profiles.answer_from_profile(question, collection_id)
 
 
 def articles() -> list[dict[str, Any]]:

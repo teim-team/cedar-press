@@ -1,0 +1,89 @@
+{
+ "assistance_rows_actually_naming_the_wrong_entity": 0,
+ "assistance_rows_on_wrong_entity": 554,
+ "assistance_usd_on_wrong_entity": 607260837.09,
+ "distinct_eins_in_fac": [
+  "920041473",
+  "920042041",
+  "920044965"
+ ],
+ "established_by_script": "425_establish_bristol_bay_entities.py",
+ "established_date": "2026-08-26",
+ "finding_id": "FA-04",
+ "hud_tdhe_member_villages": [
+  "Aleknagik",
+  "Bristol Bay Native Corporation",
+  "Chignik Lagoon",
+  "Chignik Lake",
+  "Chignik Native",
+  "Clarks Point",
+  "Curyung (Dillingham)",
+  "Ekuk",
+  "Ekwok",
+  "Igiugig",
+  "Iliamna",
+  "Ivanof Bay",
+  "Kanatak",
+  "King Salmon",
+  "Kokhanok",
+  "Koliganek",
+  "Levelock",
+  "Manokotak",
+  "Naknek",
+  "New Stuyahok",
+  "Newhalen",
+  "Perryville",
+  "Pilot Point",
+  "Port Heiden",
+  "Portage Creek (Ohgsenakale)",
+  "South Naknek",
+  "Togiak",
+  "Twin Hills",
+  "Ugashik"
+ ],
+ "ihs_title_v_sibling_entities_already_in_class": [
+  "Aleutian Pribilof Islands Association",
+  "Chugachmiut",
+  "Copper River Native Association",
+  "Council of Athabascan Tribal Governments",
+  "Maniilaq Association",
+  "Tanana Chiefs Conference"
+ ],
+ "open_question_for_the_owner": "The spine has no TDHE class and none was invented here. HUD's own list names 148 TDHEs and entity_relationships.csv records all 148 as `affiliated_with` with a blank target and the note 'pending a spine entity'. Bristol Bay Housing Authority is filed as Intertribal Organization because its members are tribes; whether TDHE should become the 18th class, and the other 147 minted with it, is the owner's call and is NOT answered here.",
+ "per_recipient": {
+  "BRISTOL BAY AREA HEALTH CORPORATION": {
+   "rows": 504,
+   "usd": 494305407.2
+  },
+  "BRISTOL BAY HOUSING AUTHORITY": {
+   "rows": 50,
+   "usd": 112955429.89
+  }
+ },
+ "subjects": {
+  "BBAHC": {
+   "canonical_name": "Bristol Bay Area Health Corporation",
+   "city": "Dillingham",
+   "class_reason": "IHS Alaska Area lists it under the verbatim heading 'Alaska Title V Compactors'; 244 of its 504 assistance rows are CFDA 93.210 'TRIBAL SELF-GOVERNANCE PROGRAM: IHS COMPACTS/FUNDING AGREEMENTS'. Six of the nine entities already carrying this class are on the same IHS list.",
+   "duns": "081488264",
+   "ein": "920044965",
+   "entity_class": "Federal-level self-governance consortium",
+   "is_tdhe": "0",
+   "state": "AK",
+   "uei": "NL5HNWNUFMK4"
+  },
+  "BBHA": {
+   "canonical_name": "Bristol Bay Housing Authority",
+   "city": "Dillingham",
+   "class_reason": "HUD ONAP's AK-Tribe-TDHE-Assignments list names 'Bristol Bay HA' as the tribally designated housing entity for 28 separate Alaska Native villages; 47 of its 50 assistance rows are CFDA 14.867 INDIAN HOUSING BLOCK GRANTS, the NAHASDA formula paid to a tribe or its TDHE. An organisation whose members are tribes.",
+   "duns": "019111558",
+   "ein": "",
+   "entity_class": "Intertribal Organization",
+   "is_tdhe": "1",
+   "state": "AK",
+   "uei": "KJKZSSS83DD9"
+  }
+ },
+ "wrong_entity_id": "ANRC-BRBYCO-00",
+ "wrong_entity_name": "Bristol Bay Native Corporation"
+}

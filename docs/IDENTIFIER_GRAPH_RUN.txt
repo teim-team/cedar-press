@@ -1,0 +1,84 @@
+=== Cedar identifier graph — built 2026-08-26 ===
+
+[1] identifier ledger       {'A': 2190, 'B': 5690, 'no_tribe_id': 12477, 'X': 197, 'C': 23}
+[1b] ruling-map exclusions  {'UEI': 2571, 'EIN': 4657}
+[2] fpds_uei_cage_map      7,456 UEI<->CAGE edges @ tier B
+[2b] cedar_cage_backfill   4,361 UEI<->CAGE edges @ tier B
+[2c] need_v6_geocoded       {'UEI-CAGE': 4059}  identity edges @ tier B
+[2d] funding_identifier_harvest.csv     {'UEI-DUNS': 7905}
+[2d] subaward_identifier_harvest.csv    {'UEI-CAGE': 271}
+[3] np_ein_uei_bridge       {'B': 28}  EIN<->UEI edges
+[3b] np_ein_entity_hub      {'B': 1799, 'A': 504}  EIN->ENTITY edges
+[3c] np_orgs                {'B': 1372, 'no_link': 6597, 'A': 84, 'X': 4711}  EIN->ENTITY edges
+[4] bie_uio_identifier_links {'UEI': 199, 'DUNS': 141, 'EIN': 28}
+[5] assistance legacy->cedar crosswalk: 344 legacy ids
+[6] prime_contracts        12,491 UEIs, 3,217 distinct UEI->entity attributions
+[6b] federal_funding       6,372 UEIs, 1,707 distinct UEI->entity attributions; legacy hop {'hit': 333382, 'miss': 13208}
+[6c] subawards             8,829 UEIs, 1,516 distinct UEI->entity attributions
+[6d] faads                 70,481 DUNS
+
+EDGES: identity 35,856 · attribution 18,471 · blocks 12,136
+[7] identifiers carrying >1 distinct entity (DIRECT): 381
+[7b] non-UEI identifiers shared by >1 UEI: 16
+
+[8] resolving 115,471 identifier nodes, max 3 identity hops
+    ambiguous hubs refused as through-paths: 16 (CAGE=16, DUNS=0, EIN=0)
+    resolved to exactly one entity : 12,086
+    ONE-TO-MANY DEFECTS (refused)   : 874
+    reachable ONLY through an ambiguous hub (refused, to review): 1
+
+=== LIFT PER DATASET (propagation only, no new human ruling) ===
+dataset                        ids  unatt ids  gain ids   unatt $B   gain $B  tiers
+prime_contracts             12,491      9,277        57      65.24      0.42  {'B': 57}
+federal_funding              6,372      4,870       207      48.18      6.04  {'B': 185, 'A': 22}
+subawards                    8,829      7,504        31      14.09      0.11  {'B': 23, 'A': 8}
+faads                       70,481     70,481       862     415.07      2.06  {'B': 862}
+
+[9b] parent-UEI route (REFUSED as an identity edge, sent to review): 20 identifiers, $0.926B
+
+[10] writing
+    wrote cedar_identifier_graph_edges.csv  46,051 rows
+    wrote cedar_identifier_graph_nodes.csv  115,471 rows
+    wrote cedar_identifier_propagation.csv  1,157 rows
+
+[9c] one-to-many defect families
+    ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION      334   $  24.518B observed
+    MIXED_CLASS                                           301   $   9.006B observed
+    TWO_DIFFERENT_TRIBES_ON_ONE_IDENTIFIER                188   $  10.360B observed
+    CONSTITUENT_BAND_VS_UMBRELLA_TRIBE                     42   $   1.298B observed
+    INTERTRIBAL_ORGANISATION_VS_MEMBER_TRIBE                9   $   0.663B observed
+    wrote identifier_one_to_many_defects_2026-08-26.csv  911 rows
+
+=== 11. THE IRS / EIN HYPOTHESIS ===
+
+(a) Does any spending dataset carry an EIN COLUMN at all?
+    prime_contracts.csv                      EIN columns: NONE
+    federal_funding_transactions.csv         EIN columns: NONE
+    subawards.csv                            EIN columns: NONE
+    faads_transactions_all_agencies.csv      EIN columns: NONE
+
+(b) Populations
+    np_orgs distinct EIN                     12,764
+    ...with a Native classification ruling   89
+    Schedule I distinct filer EIN            627
+    Schedule I distinct recipient EIN        18,708
+    distinct UEIs across the 3 UEI datasets  25,419
+
+(c) EIN -> UEI, through EVERY identity edge in the graph (3 hops, hub guard on)
+    EINs with ANY identity edge in the graph : 28
+    EINs reaching a SPENDING UEI             : 28
+      ...of which np_orgs EINs               : 28 of 12,764
+      ...of which Schedule I filer EINs      : 4 of 627
+      ...of which Schedule I recipient EINs  : 12 of 18,708
+    spending UEIs reached                    : 28
+    dollars on those UEIs                    : $2.967B
+
+(d) The reverse direction: spending UEIs reaching an IRS EIN
+    spending UEIs with ANY EIN edge          : 28 of 25,419 (0.11%)
+
+(e) The bridges that could carry it, and how big they actually are
+    np_ein_uei_bridge.csv rows               : 28
+    need_v6 rows with BOTH an EIN and a UEI  : 0
+    need_v6 rows with an EIN and NO UEI      : 1,104
+
+[12] codebook fragment 05b_identifier_graph.csv: 0 existing + 46 appended

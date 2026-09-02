@@ -1,0 +1,32 @@
+{
+  "built": "2026-09-02",
+  "script": "953_nob_federal_identifier_candidates.py",
+  "table": "data/clean/native_owned_businesses.csv",
+  "rows": 2393,
+  "base_columns": 54,
+  "md5_base_fields": "611ea0b0acaf51c15b8fb23daa2cc13b",
+  "columns_added": [
+    "federal_uei_candidate",
+    "federal_cage_candidate",
+    "federal_identifier_match_status",
+    "federal_identifier_match_basis"
+  ],
+  "status_counts": {
+    "no_match": 1707,
+    "unique_name_match": 220,
+    "refused_person_name_too_weak": 110,
+    "ambiguous_name_match_refused": 10,
+    "refused_source_terms_restrictive": 346
+  },
+  "cage_written": 169,
+  "restrictive_rows_that_would_have_matched": 58,
+  "universe_names": 31059,
+  "universe_sources": {
+    "prime_contracts.csv:awardee_name": 1217723,
+    "fpds_uei_cage_map.csv:legal_business_name": 34579,
+    "subawards.csv:sub_name": 76856,
+    "subawards.csv:prime_name": 76687,
+    "gapfill_recipient_universe.csv:recipient_name": 2396
+  },
+  "network_requests": 0
+}

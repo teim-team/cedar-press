@@ -1,0 +1,20 @@
+{
+ "generated": "2026-09-02",
+ "rows": 11305,
+ "money": {
+  "amount_usd": "50973259111.49",
+  "amount_usd_real2025": "58433978189.20"
+ },
+ "scopes": {
+  "entity": 1287,
+  "indian_country": 9791,
+  "native_serving": 118,
+  "geographic": 49,
+  "unresolved": 60
+ },
+ "attached": {
+  "entity:attached": 1287
+ },
+ "resolvable_denominator": 1347,
+ "attached_in_denominator": 1287
+}

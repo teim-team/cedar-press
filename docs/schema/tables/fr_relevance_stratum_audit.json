@@ -1,0 +1,150 @@
+{
+ "codebook_block": null,
+ "codebook_match_score": 0.2,
+ "columns": [
+  {
+   "access_tier": "undeclared",
+   "codebook_declared_type": null,
+   "description": "",
+   "examples": [
+    "title_subject",
+    "abstract_subject",
+    "weak_term_only",
+    "body_only_unverifiable"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 22,
+   "n_distinct": 4,
+   "name": "tier",
+   "nullable": false,
+   "observed_type": "text",
+   "pct_filled": 100.0,
+   "postgres_type": "text",
+   "primary_key": true,
+   "published": "",
+   "sqlite_type": "TEXT",
+   "type": "text",
+   "units": ""
+  },
+  {
+   "access_tier": "undeclared",
+   "codebook_declared_type": null,
+   "description": "",
+   "examples": [
+    "9523",
+    "12855",
+    "1110",
+    "132964"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 6,
+   "n_distinct": 4,
+   "name": "corpus_documents",
+   "nullable": false,
+   "observed_type": "integer",
+   "pct_filled": 100.0,
+   "postgres_type": "bigint",
+   "primary_key": false,
+   "published": "",
+   "sqlite_type": "INTEGER",
+   "type": "integer",
+   "units": ""
+  },
+  {
+   "access_tier": "undeclared",
+   "codebook_declared_type": null,
+   "description": "",
+   "examples": [
+    "40",
+    "15",
+    "25"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 2,
+   "n_distinct": 3,
+   "name": "sampled",
+   "nullable": false,
+   "observed_type": "integer",
+   "pct_filled": 100.0,
+   "postgres_type": "bigint",
+   "primary_key": false,
+   "published": "",
+   "sqlite_type": "INTEGER",
+   "type": "integer",
+   "units": ""
+  },
+  {
+   "access_tier": "undeclared",
+   "codebook_declared_type": null,
+   "description": "",
+   "examples": [
+    "38",
+    "19",
+    "5",
+    "1"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 2,
+   "n_distinct": 4,
+   "name": "hand_coded_tribal_subject",
+   "nullable": false,
+   "observed_type": "integer",
+   "pct_filled": 100.0,
+   "postgres_type": "bigint",
+   "primary_key": false,
+   "published": "",
+   "sqlite_type": "INTEGER",
+   "type": "integer",
+   "units": ""
+  },
+  {
+   "access_tier": "undeclared",
+   "codebook_declared_type": null,
+   "description": "",
+   "examples": [
+    "0.95",
+    "0.475",
+    "0.3333",
+    "0.04"
+   ],
+   "forbidden_join": false,
+   "licensed": false,
+   "max_length": 6,
+   "n_distinct": 4,
+   "name": "stratum_positive_rate",
+   "nullable": false,
+   "observed_type": "number",
+   "pct_filled": 100.0,
+   "postgres_type": "double precision",
+   "primary_key": false,
+   "published": "",
+   "sqlite_type": "REAL",
+   "type": "number",
+   "units": ""
+  }
+ ],
+ "columns_with_no_definition": [],
+ "documented": false,
+ "file": "fr_relevance_stratum_audit.csv",
+ "generated": "2026-08-26",
+ "licensed_columns_dropped": [],
+ "primary_key": {
+  "columns": [
+   "tier"
+  ],
+  "evidence": "tier: 4 distinct over 4 rows, 0 blank, full scan",
+  "kind": "natural",
+  "proven": true,
+  "rows": 4,
+  "scan": "full"
+ },
+ "rows_scanned": 4,
+ "scan": "full",
+ "status": "READY",
+ "table": "fr_relevance_stratum_audit",
+ "type_mismatches_codebook_vs_file": []
+}
