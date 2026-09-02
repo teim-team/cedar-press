@@ -1,4 +1,23 @@
 #!/usr/bin/env python3
+# lint-ok: class6 - THE ORDERING, WRITTEN DOWN BY A PERSON as AGENTS.md asks.
+# `faads_entity_attribution.csv` has ONE full-rebuild writer - this script -
+# and TWO in-place enrichers, and the enrichers run LAST, in this order:
+#
+#   73_faads_name_attribution.py                rebuild (wholesale)
+#   710_faads_attribution_content_key.py        enrich: faads_attribution_key
+#   791_faads_transaction_key_and_repoint.py    enrich: the transaction key,
+#                                               the re-pointed row id, and
+#                                               the codebook fragment
+#
+# A rebuild here REVERTS both, and that is not hypothetical. 710 exists
+# because `faads_row_id` is the ROW POSITION this script assigns in pass 1
+# (`for i, r in enumerate(rd)`), and 791 exists because the 2026-09-01
+# re-extract of faads_transactions_all_agencies.csv could have re-ordered
+# that file under all 29,594 of them without anything erroring. If you
+# re-run 73 you MUST re-run 710 --apply and then 791 (`snapshot` BEFORE any
+# re-extract, then `repoint --apply` and `codebook`), or the join key and
+# the transaction key both vanish and the table falls out of the codebook
+# match at 18/31 = 0.58 and out of the `funding` contract with it.
 """
 Cedar Press - 73: Attribute pre-FY2007 FAADS assistance transactions BY NAME.
 

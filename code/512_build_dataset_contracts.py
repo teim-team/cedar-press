@@ -1084,7 +1084,7 @@ GRAIN.update(GRAIN_SWEEP)
 #       in one line - the same shape as 430's fix for prime_contracts.
 #       NOTE FOR WHOEVER RUNS IT: `faads_entity_attribution.csv` keys 29,594
 #       attributions to `faads_row_id`, which is the ROW POSITION in
-#       faads_transactions_all_agencies.csv (73_faads_name_attribution.py:525
+#       faads_transactions_all_agencies.csv (73_faads_name_attribution.py:544
 #       `for i, r in enumerate(rd)`). A re-extract re-orders that file and
 #       silently re-points every one of them unless they move in the same pass.
 #   subawards.csv
@@ -1737,12 +1737,301 @@ GRAIN_WS4 = {}   # funding + lobbying + legislation - see the block above:
                  # so no key exists at any arity, and the eighth's id
                  # generator collides 381 times on its own input
 
+# ---------------------------------------------------------------------------
+# --- FAADS: the pre-2008 assistance pair. Workstream FAADS, 2026-09-01. ----
+#
+# WS1 and WS4 both left these two tables undeclared and both named the same
+# cause: "the source publishes `assistance_transaction_unique_key` and the
+# mapper dropped it ... when the re-extract runs, the key is
+# `assistance_transaction_unique_key` and both tables become declarable in one
+# line." The re-extract has now run. ONE of the two is declarable in one line.
+# The other is not, and the reason is a fact about the retained source object
+# rather than about the mapper - so it is stated here instead of forced.
+#
+# WHAT THE RE-EXTRACT DID. `py -3 code/30_funding_pre2008.py build`, with the
+# Interior slice keyed first from the seven full-column DOI seam zips by
+# `code/791_faads_transaction_key_and_repoint.py interior`:
+#
+#   faads_transactions_all_agencies.csv   2,769,748 rows before and after,
+#       25 -> 27 columns, NOTHING dropped, no row deleted, no dollar moved.
+#   faads_transactions.csv                60,661 rows before and after,
+#       25 -> 27 columns.
+#   faads_entity_attribution.csv          29,594 rows before and after,
+#       28 -> 31 columns. ALL 29,594 pointers re-verified against the
+#       transaction they addressed BEFORE the rebuild - see the note below.
+#
+# The duplicate allegation collapsed exactly as WS1 predicted, WITHOUT A
+# DELETION: whole-row duplicates on the all-agencies table fell 179,259 ->
+# 3,441, and on the Interior table 1,001 -> 0. The 175,818 that vanished were
+# never duplicates; they were distinct source transactions the mapper had made
+# indistinguishable by dropping their identity. Nothing was de-duplicated; a
+# de-dupe would have destroyed $8,291,124,113 of real obligations.
+#
+# WHY ONLY 29.8% OF THE ALL-AGENCIES TABLE IS KEYED, AND WHY THAT IS NOT A
+# MAPPER BUG. The three retained source groups are not the same object:
+#   * 7 DOI seam zips (FY2001-2007, Interior)  - 112 columns, key PRESENT
+#   * 10 `*_fy2007_archive.zip`                - 112 columns, key PRESENT
+#   * 60 `<agency>_fy200{1..6}.zip`            -  20 columns, key ABSENT
+# The third group was REQUESTED with a 20-column subset (`30.COLUMNS`), so the
+# key is not in the bytes on disk and no re-extract can recover it. The only
+# 112-column route for those years is the USAspending Award Data Archive,
+# whose own 4,631-key listing begins at FY2007. `30.COLUMNS` now asks for both
+# identity columns so this cannot recur. Re-pulling FY2001-2006 was decided
+# against and the reasoning is in 791's docstring: all 29,594 attributions
+# land on FY2001-2006 rows, so a re-pull would replace exactly the rows they
+# point at and destroy the proof that they still point at the same
+# transaction.
+#
+# THE POINTER MOVE, because this is the part that could have gone wrong
+# silently. `faads_entity_attribution.faads_row_id` is a ROW POSITION.
+# `791 snapshot` fingerprinted the 24 published source columns at all 29,594
+# target positions BEFORE the rebuild and gave each an occurrence ordinal
+# within its fingerprint group; `791 repoint` rebuilt that index afterwards
+# and re-found 29,594 of 29,594. All landed on the SAME position - the build
+# is order-stable - but that is now a MEASUREMENT, not an assumption, and the
+# script refuses rather than guesses if a group changes size. `faads_row_id`
+# is KEPT as the record of what the 2026 build saw.
+GRAIN_FAADS = {
+    # DECLARABLE IN ONE LINE, exactly as WS1 predicted. 60,661 rows, 60,661
+    # distinct `assistance_transaction_unique_key`, 0 collisions, 0 blanks -
+    # and every row was verified field-by-field against the seam object it was
+    # keyed from before the column was written. The 1,001 rows this table was
+    # blocked on as "literal duplicates" are 1,001 distinct source
+    # transactions; the count is 0 now and not one row was removed.
+    "faads_transactions.csv": _d(
+        "one row per FY2001-2007 assistance TRANSACTION awarded by the "
+        "Department of the Interior - an action on an award, not an award: "
+        "one FAIN carries many transactions, including $0 modifications, and "
+        "they are all real. This is an AGENCY filter, NOT a Native one: "
+        "`tribe_id` is blank on all 60,661 rows and the $9,348,473,200 here "
+        "is every Interior assistance recipient in the country, Native and "
+        "not. It must never be quoted as money reaching Indian Country. These "
+        "60,661 rows are also carried VERBATIM into "
+        "faads_transactions_all_agencies.csv, so the two files must never be "
+        "added together. `obligated_usd` is additive at this grain",
+        ["assistance_transaction_unique_key"],
+        {"assistance_transaction_unique_key": "one", "award_id_fain": "many"},
+        "workstream FAADS 2026-09-01: the key was restored from the seven "
+        "full-column DOI seam zips by "
+        "code/791_faads_transaction_key_and_repoint.py interior and confirmed "
+        "unique on the FULL 60,661-row file (0 collisions, 0 blanks); "
+        "re-measured by `py -3 code/791_faads_transaction_key_and_repoint.py "
+        "measure`"),
+
+    # faads_transactions_all_agencies.csv IS DELIBERATELY ABSENT.
+    #
+    # `assistance_transaction_unique_key` is now present on 825,754 of
+    # 2,769,748 rows (29.8%) - every FY2007 row and every Interior row - and
+    # where present it is unique with zero collisions. It is blank on the
+    # 1,943,994 FY2001-2006 rows of the other nine agencies because the staged
+    # objects for those years physically lack the column, and a primary key
+    # that is blank on 70% of a file is not a primary key: blank collides with
+    # blank. `validate_grain` would correctly turn that declaration into a
+    # release-blocking violation.
+    #
+    # The widest honest alternative also fails, and by a knowable amount:
+    # 3,441 rows remain byte-identical to another row across all 27 columns,
+    # ALL of them in the unkeyed FY2001-2006 non-Interior region. On the ed
+    # FY2007 evidence those are distinct transactions differing only by
+    # `modification_number`, which those objects do not carry either - so
+    # nothing in the file separates them and no composite key exists at any
+    # arity. Minting an occurrence ordinal would produce a unique column, and
+    # that is precisely the forcing this block declines: a surrogate ordinal
+    # on a source-mirror table is how `faads_row_id` rotted in the first
+    # place.
+    #
+    # WHAT WOULD SETTLE IT, exactly, and all-or-nothing: re-pull the 54
+    # non-Interior FY2001-2006 agency-years through
+    # `30_funding_pre2008.py pull` (COLUMNS now requests the key), then MERGE
+    # the key onto the existing rows by content rather than replacing them.
+    # All-or-nothing because any row left unmatched stays blank and blanks
+    # collide. Until then the honest statement of what this table is, and what
+    # a buyer may total from it, lives in docs/MONEY_TOTALLING_RULES.md
+    # between the FAADS markers.
+}
 GRAIN.update(GRAIN_GAMING)
 GRAIN.update(GRAIN_WS1)
 GRAIN.update(GRAIN_WS2)
 GRAIN.update(GRAIN_WS3)
 GRAIN.update(GRAIN_WS4)
 GRAIN.update(GRAIN_WS5)
+GRAIN.update(GRAIN_FAADS)
+
+# ===========================================================================
+# UPSTREAM - lobbying, nonprofits, legislation. Workstream UPSTREAM,
+# 2026-09-01. THE BLOCKERS WS4 DIAGNOSED AND COULD NOT REACH.
+# ===========================================================================
+# WS4's block above is the best statement of this problem anyone has written
+# and its arithmetic was correct: a file holding a whole row that repeats byte
+# for byte has no unique key at any arity, so those tables could not be
+# declared. It named the fix for each one and named the builder that owned it.
+# THE BUILDERS ARE NOW FIXED. This block declares what that made declarable.
+#
+# FIVE TABLES, FIVE ONE-LINE CAUSES, AND NOT ONE ROW DELETED TO CLOSE THEM.
+# Every count below was re-measured on the FULL file, before and after, by
+# `py -3 code/781_upstream_grain_columns.py --check`:
+#
+#   lobbying_registrant_native_ownership_evidence.csv   4 -> 0
+#       `182` walked lobbying_registrant_identifiers.csv - whose OWN declared
+#       key is (identifier, asserted_by_source) - and dropped the asserter.
+#       UEI CY16XXPHX213 (registrant 301072, Arctic Slope) is asserted by a
+#       graph node, a prime, a funding row and a subaward; two paths weaken to
+#       B and two to C, so the four rendered as two duplicated rows. THEY ARE
+#       FOUR INDEPENDENT CORROBORATIONS. Carrying the asserter cost three
+#       columns and 27 rows stayed 27.
+#   ferc_docket_filings.csv                           822 -> 0
+#       602 byte-identical groups AND 167 groups that differ only in the CASE
+#       of the filer name and are NOT duplicates. An ordinal keeps all 102,615
+#       rows and touches neither population.
+#   hearing_bill_links.csv                              1 -> 0
+#       the ONLY row removed anywhere in this block, and it is not a Cedar
+#       fact: Congress.gov event 338549 lists 27 of its 64 relatedItems.bills
+#       TWICE VERBATIM and `98` ingested both copies. Proved against the
+#       cached payload before the write; 465 -> 464.
+#   np_schedule_i_grants.csv                          101 -> 0
+#       NONE of the 101 was a duplicate. Every group sits in ONE return that
+#       np_schedule_i_filers.csv holds exactly once (0 object_id collisions
+#       over 10,314 rows), so the FILER listed the line twice - First Nations
+#       Development Institute's two $20,000 grants to the Seneca Nation on its
+#       FY2017 Schedule I. `132.parse_one` recorded no line ordinal.
+#       A DE-DUPE WOULD HAVE DELETED $2,089,185 OF REAL GRANTS.
+#   native_bills_subject_sweep.csv                      5 -> 0
+#       not the sweep's defect at all. all_bill_intros.csv repeats 595 bill
+#       ids byte-identically over 183,233 rows and `73` emitted one row per
+#       corpus row. Deduped ON THE CORPUS at ingest and re-swept; 2,414 ->
+#       2,409 with ZERO bill_ids leaving the table.
+#
+# `congressional_correspondence_log.csv` is NOT declared here and stays in
+# GRAIN_OPEN. WS4 tested it properly - `136`'s record_id generator collides
+# 381 times on the population it draws from - and nothing in this pass changes
+# that. An empty block would have been a legitimate result; a sixth entry
+# would have been a guess.
+GRAIN_UPSTREAM = {
+    # ---- lobbying ---------------------------------------------------------
+    "lobbying_registrant_native_ownership_evidence.csv": _d(
+        "one row per (registrant, evidence route, Native entity, identifier "
+        "assertion) - ONE PIECE OF EVIDENCE, not one registrant and not one "
+        "ruling. A registrant appears on up to 5 rows and the table is "
+        "deliberately allowed to contradict itself: two routes may name "
+        "different entities, and `182` refuses to pick when they are equally "
+        "strong. `identifier` and `asserted_by_source` are BLANK on the 16 "
+        "rows whose route is not an identifier route (R1/R2/R3), and blank is "
+        "a value of this key rather than a gap in it. The four rows sharing "
+        "UEI CY16XXPHX213 are four INDEPENDENT sources asserting one "
+        "identifier and must never be collapsed - collapsing them destroys "
+        "the corroboration that is the entire content of this table",
+        ["registrant_id", "evidence_route", "native_entity_id", "identifier",
+         "asserted_by_source"],
+        # cedar_uid and registrant_id both reach 5 rows. Neither is a lookup.
+        {"cedar_uid": "many", "registrant_id": "many",
+         "native_entity_id": "many"},
+        "workstream UPSTREAM 2026-09-01: `182` now carries identifier_type, "
+        "identifier and asserted_by_source from "
+        "lobbying_registrant_identifiers.csv onto the R4/R5 evidence rows, "
+        "and carries `cedar_uid` FORWARD from the previous output so the "
+        "rebuild cannot erase a minted column. Key confirmed unique on the "
+        "FULL 27-row file, literal duplicates 4 -> 0, rows 27 -> 27"),
+
+    "ferc_docket_filings.csv": _d(
+        "one row per OCCURRENCE of a document on a FERC docket as eLibrary "
+        "returns it: (content identity of the filing, occurrence ordinal). "
+        "`ferc_filing_id` is a blake2b digest of five columns eLibrary states "
+        "and IS NOT UNIQUE BY DESIGN - it collides on 769 groups, of which "
+        "602 are the same document published twice under one accession and "
+        "167 are two filings whose recorded filer name differs only in CASE "
+        "and are NOT the same filing. `filing_occurrence_seq` separates both "
+        "without deleting either, and is assigned by sorting each colliding "
+        "group on its own full content, so it is a function of the data and "
+        "not of fetch order. A COUNT OF ROWS IS NOT A COUNT OF DOCUMENTS: "
+        "102,615 rows carry 101,626 distinct content identities. This table "
+        "holds no money column",
+        ["ferc_filing_id", "filing_occurrence_seq"],
+        # docket_number reaches 5,270 rows, accession_number 1,515, and
+        # resolved_native_entity_id is BLANK on 101,506 of 102,615. None of
+        # them is a lookup and cedar_uid is blank on the same 101,506.
+        {"cedar_uid": "many", "docket_number": "many",
+         "accession_number": "many", "resolved_native_entity_id": "many"},
+        "workstream UPSTREAM 2026-09-01: ordinal added by "
+        "code/781_upstream_grain_columns.py because `133`'s own header states "
+        "that running it reverts `168`'s in-place enrichment; `133` was fixed "
+        "in the same pass so a future rebuild reproduces the column. Key "
+        "confirmed unique on the FULL 102,615-row file, whole-row duplicates "
+        "822 -> 0, rows 102,615 -> 102,615"),
+
+    "hearing_bill_links.csv": _d(
+        "one row per (committee meeting event, bill named in that event's "
+        "relatedItems and present in native_bills.csv). NOT one row per "
+        "hearing and NOT one row per bill: one event reaches 19 bills and one "
+        "bill reaches 4 events. The link is Congress.gov's own related-item "
+        "assertion - `link_basis` says so on every row - and it states that "
+        "the meeting CONCERNS the bill, never that the bill was marked up, "
+        "voted or reported. This table holds no money column",
+        ["event_id", "bill_id"],
+        {"event_id": "many", "bill_id": "many"},
+        "workstream UPSTREAM 2026-09-01: `98.dedupe_related_bills` now reads "
+        "each relatedItems.bills element ONCE, and the one row that existed "
+        "only because event 338549 lists 119-s-3878 twice verbatim was "
+        "un-ingested by code/781 after proving the repetition against the "
+        "cached payload. Key confirmed unique on the FULL 464-row file, "
+        "literal duplicates 1 -> 0"),
+
+    # ---- nonprofits -------------------------------------------------------
+    "np_schedule_i_grants.csv": _d(
+        "one row per RECIPIENT LINE of Form 990 Schedule I Part II on one "
+        "filed return: (object_id, schedule_i_line_seq). ONE FILER MAY LIST "
+        "ONE RECIPIENT TWICE and routinely does - 90 groups of rows are "
+        "identical on every other column and every one of them is two real "
+        "grant lines inside a single return, which is what Part II's "
+        "repeating RecipientTable is for. `schedule_i_line_seq` is the 1-based "
+        "position among the PUBLISHED lines of that return in document order; "
+        "on the 5 returns where a recipient line names nobody at all and is "
+        "held out to review/, it is a dense position among what ships rather "
+        "than the printed form line. "
+        "MONEY: `cash_grant_usd` and `noncash_assistance_usd` are additive "
+        "across rows and each is a DIFFERENT dollar - never add the two "
+        "columns to each other and then to a total. Summing by "
+        "`recipient_ein` is safe; summing by `recipient_entity_id` covers "
+        "only the 2,442 rows where it is populated. This is a FLOOR, not a "
+        "universe: Part II has a $5,000 floor, e-file coverage is partial "
+        "before tax year 2019, and Part III grants to individuals carry no "
+        "names by form design and are NOT in this table",
+        ["object_id", "schedule_i_line_seq"],
+        # filer_ein reaches 8,463 rows and object_id 1,165. recipient_entity_id
+        # and cedar_uid are blank on 56,243 of 58,685.
+        {"cedar_uid": "many", "object_id": "many", "filer_ein": "many",
+         "recipient_ein": "many", "recipient_entity_id": "many"},
+        "workstream UPSTREAM 2026-09-01: ordinal added by "
+        "code/781_upstream_grain_columns.py, which first PROVED no group is a "
+        "double-ingest (every colliding object_id appears exactly once in "
+        "np_schedule_i_filers.csv) and that object_id runs are still "
+        "contiguous, so file position is document order. `132` was fixed in "
+        "the same pass; it cannot be re-run today because both its XML caches "
+        "hold zero files. Key confirmed unique on the FULL 58,685-row file, "
+        "whole-row duplicates 101 -> 0, rows 58,685 -> 58,685, "
+        "$2,089,185 of real grants NOT deleted"),
+
+    # ---- legislation ------------------------------------------------------
+    "native_bills_subject_sweep.csv": _d(
+        "one row per BILL in the all_bill_intros corpus whose title, subjects "
+        "or policy area matched a Native subject-family phrase. A SWEEP HIT "
+        "IS NOT AN ADJUDICATED CLASSIFICATION - `sweep_basis` names the "
+        "phrase and where it matched, and `already_in_native_bills` says "
+        "whether the two-coder corpus had already reached the bill. The "
+        "corpus repeats 595 bill ids byte-identically and each is now read "
+        "once, so `bill_id` is unique here and a count of rows IS a count of "
+        "bills. This table holds no money column",
+        ["bill_id"],
+        {"subject_family": "many"},
+        "workstream UPSTREAM 2026-09-01: the de-dupe was applied to the "
+        "CORPUS in `73.stage_sweep`, not to this output - every one of the 595 "
+        "corpus repeats is byte-identical to its first occurrence on all 18 "
+        "columns, so nothing is lost by reading it once, and no Cedar row was "
+        "deleted. Re-swept: 2,414 -> 2,409 rows with ZERO bill_ids leaving "
+        "the table, literal duplicates 5 -> 0, key confirmed unique on the "
+        "FULL file"),
+}
+
+GRAIN.update(GRAIN_UPSTREAM)
 
 # ===========================================================================
 # _entity_layer - THE HUB. Workstream GRAIN-HUB, 2026-09-01.
@@ -1963,6 +2252,145 @@ GRAIN_HUB = {
 
 GRAIN.update(GRAIN_HUB)
 
+# ===========================================================================
+# GAMING-NR - the last three UNSTATED gaming tables. Workstream GAMING-NR,
+# 2026-09-01. Re-measured on every run by
+# `py -3 code/814_gaming_nr_grain_and_conservation.py verify`.
+# ===========================================================================
+# TWO OF THE THREE ARE MARKETING COPY, AND THAT IS THE WHOLE POINT OF THE
+# DECLARATION. `gaming_property_self_published_*` hold what a casino says
+# about ITSELF on its own website - machine counts, hotel rooms, square
+# footage, who owns it, when it opened. `code/383` adjudicated 231 of them as
+# RECOVERED from a refusal pile. Publishing them is right; publishing them
+# without saying what they are would be worse than the refusal, so the
+# prohibition is written into the grain prose itself, carried on every row in
+# `assertion_class`, and stated again in the GAMING-NR section of
+# docs/MONEY_TOTALLING_RULES.md. A self-published count and a regulator's
+# count of the same floor are TWO CLAIMS ABOUT ONE THING.
+#
+# THE THIRD ANSWERS A GRAIN_OPEN QUESTION WITH EVIDENCE RATHER THAN ARGUMENT.
+# GRAIN_OPEN asks of `fac_audit_sefa_gaming_programs.csv`: "the file has ONE
+# row. Uniqueness is vacuous. QUESTION: is a row a (report, federal program)
+# line off the SEFA, so that report_id repeats once a second program is
+# parsed?" YES, and the FAC says so itself. The `federal_awards` record
+# `code/147` cached at data/raw/fac/fac_sefa_gaming.json carries
+# `award_reference = AWARD-0068` - the FAC's own per-report line key - and 147
+# drops it on the way to the CSV. 147's own docstring measured 127
+# federal_awards rows on ONE Seminole report, so report_id repeats hard.
+#
+#   The key is therefore (report_id, award_reference), and it could not be
+#   validated because the column was not in the file. `code/814 apply` carries
+#   it in VERBATIM from 147's own cache - a carried column, the same fix shape
+#   as `operating_company_seq` in 269 and the `schedule_i_line_seq` that 132
+#   still needs. No row deleted, no value derived.
+#
+#   THE ONE-LINE FIX THAT BELONGS IN 147 AND WAS NOT MADE. 147 is a gaming
+#   puller and belongs to workstream M this pass. Its `sefa_rows.append({...})`
+#   needs `"award_reference": g.get("award_reference"),`. Until that lands a
+#   rebuild of 147 drops the column and validate_grain fires "declared
+#   primary_key names column(s) not in the header" - loudly, which is correct.
+#   `814 apply` restores it idempotently in the meantime.
+#
+# WHY NO NATURAL KEY IS DECLARED ON THE TWO SELF-PUBLISHED TABLES. Both keys
+# are surrogate digests and that is deliberate, not laziness. 588's own
+# comment records that the first draft of the claims table keyed on
+# (source_url, metric, value) and refused with 15 duplicates - every one of
+# them REAL. Kwataqnuk lists two ballrooms that each seat 200; Blue Lake
+# Casino says "500 slots" in three passages under three recovery rules.
+# Collapsing on that triple deletes a ballroom. Flag, never delete.
+GRAIN_GAMING_NR = {
+    "fac_audit_sefa_gaming_programs.csv": dict(
+        grain="one SEFA FEDERAL AWARD LINE - one `federal_awards` record of "
+              "one Single Audit reporting package - whose "
+              "`federal_program_name` names gaming or a casino, on a report "
+              "already in Cedar's tribal audit census. NOT one row per audit "
+              "and NOT one row per tribe: `report_id` REPEATS once a report "
+              "carries a second gaming line, which is why the key needs the "
+              "FAC's own `award_reference`. It ships at ONE row today and "
+              "that is a coverage fact, not a grain fact - it is the only "
+              "line of a WITHHELD tribal reporting package the FAC still "
+              "disseminates. `amount_expended` is a FEDERAL AWARD "
+              "EXPENDITURE and is NOT gaming revenue; it may not be summed "
+              "with any gaming money column",
+        primary_key=["report_id", "award_reference"],
+        # report_id is declared MANY on purpose. It is unique on today's
+        # one-row file and declaring it ONE would be a promise the next pull
+        # breaks - 147 measured 127 federal_awards rows on one report.
+        join_cardinality={"report_id": "many", "entity_id": "many",
+                          "cedar_uid": "many"},
+        declared_by="workstream GAMING-NR 2026-09-01: answers the GRAIN_OPEN "
+                    "question from the FAC's own cached record. Key confirmed "
+                    "unique with no blank component on the FULL file by "
+                    "code/814_gaming_nr_grain_and_conservation.py verify"),
+
+    "gaming_property_self_published_assertions.csv": dict(
+        grain="one SELF-PUBLISHED ASSERTION OCCURRENCE: one sentence on one "
+              "page of a gaming property's OWN website making one claim about "
+              "itself. Keyed by 382 as a digest of (site host, page URL, "
+              "assertion kind, asserted value, first 120 characters of the "
+              "quote), so the SAME claim on two pages of one host is two rows "
+              "and the same sentence twice on one page is collapsed. THIS IS "
+              "NOT A MEASUREMENT TABLE - every `assertion_class` is "
+              "deliberately outside `cedar_domain.MeasurementType`, and the "
+              "class is a first-class column because a buyer must be able to "
+              "filter on it. NEVER SUM OR RECONCILE AGAINST A REGULATOR: not "
+              "gaming_capacity_official.csv, not nigc_regional_ggr.csv, not "
+              "nigc_revenue_bands.csv, not state_gaming_observations.csv, not "
+              "wa_machine_allocations.csv. A casino's claim about its own "
+              "floor and a regulator's count of that floor are TWO CLAIMS "
+              "ABOUT ONE THING; adding them doubles the floor and preferring "
+              "the larger turns marketing into a statistic. 2 rows are "
+              "WITHDRAWN_NOT_SELF_PUBLISHED and are retained, labelled, "
+              "rather than deleted",
+        primary_key=["assertion_id"],
+        # entity_id is blank on 542 of 622 and cedar_uid on 57. A mostly-blank
+        # column is not a lookup and is not promised as one.
+        join_cardinality={"assertion_id": "one", "facility_id": "many",
+                          "tribe_id": "many", "cedar_uid": "many",
+                          "site_host": "many", "source_url": "many"},
+        declared_by="workstream GAMING-NR 2026-09-01: grain asserted in code "
+                    "by code/588_promote_self_published_claims.py, which "
+                    "refuses to write on a duplicate key; confirmed unique "
+                    "with no blank component and 0 literal duplicate rows on "
+                    "the FULL 622-row file by "
+                    "code/814_gaming_nr_grain_and_conservation.py verify"),
+
+    "gaming_property_self_published_claims.csv": dict(
+        grain="one ADJUDICATED CLAIM OCCURRENCE - one numeric claim a gaming "
+              "property publishes about itself, as the adjudicating script "
+              "identified it, namespaced by `claim_family` "
+              "(recovered_from_refusal_pile | first_pass_extraction). NOT one "
+              "row per (source_url, metric, value): that triple collides 15 "
+              "times and every collision is REAL - one page states the same "
+              "number in two sentences about two different things, so "
+              "collapsing it deletes a ballroom. True repetition of the SAME "
+              "sentence is collapsed upstream and counted in "
+              "`n_occurrences_collapsed`. THIS IS NOT A MEASUREMENT TABLE: "
+              "`assertion_class` is SELF_PUBLISHED_OPERATOR_CLAIM on every "
+              "row and never becomes one. NEVER SUM OR RECONCILE AGAINST A "
+              "REGULATOR - the per-row `not_summable_with` column names the "
+              "tables. Two further traps carried as columns: "
+              "`value_is_bounded` = Y means the source said 'more than 1,000 "
+              "slots' and a bound is not a count, and "
+              "`also_in_gaming_property_site_observations` = Y means the row "
+              "restates an observation that already ships in "
+              "gaming_property_site_observations.csv, so stacking the two "
+              "files double counts it",
+        primary_key=["claim_id"],
+        join_cardinality={"claim_id": "one", "source_claim_id": "one",
+                          "facility_id": "many", "tribe_id": "many",
+                          "cedar_uid": "many", "site_host": "many",
+                          "source_url": "many"},
+        declared_by="workstream GAMING-NR 2026-09-01: grain asserted in code "
+                    "by code/588_promote_self_published_claims.py, which "
+                    "refuses to write on a duplicate key; confirmed unique "
+                    "with no blank component and 0 literal duplicate rows on "
+                    "the FULL 270-row file by "
+                    "code/814_gaming_nr_grain_and_conservation.py verify"),
+}
+
+GRAIN.update(GRAIN_GAMING_NR)
+
 # A table whose grain is declared but whose PRIMARY KEY cannot be stated
 # without guessing. Recorded rather than left blank, so the gap is a task
 # with a name instead of a silence. These count as UNSTATED for the gate.
@@ -2117,16 +2545,28 @@ GRAIN_DEFECT = {
         "114 LITERAL duplicate rows of 1,262. This table is derived from "
         "subawards.csv and inherits its duplication; the passthrough dollars "
         "are therefore over-stated by an unmeasured amount.",
-    "np_schedule_i_grants.csv":
-        "101 LITERAL duplicate rows of 58,685. (object_id, "
-        "recipient_name_as_filed) collides 860 times - some legitimately "
-        "(one filer can grant to the same recipient twice on one return), "
-        "but the 101 whole-row repeats are not that.",
-    "ferc_docket_filings.csv":
-        "822 LITERAL duplicate rows of 102,615. docs/ANOMALY_REPORT.md "
-        "already records 9,570 rows repeating (docket_number, "
-        "accession_number); this measurement is the stricter one - 822 rows "
-        "repeat in EVERY column.",
+    # `np_schedule_i_grants.csv` WAS here at 101 literal duplicate rows of
+    # 58,685, with the note that "(object_id, recipient_name_as_filed)
+    # collides 860 times - some legitimately (one filer can grant to the same
+    # recipient twice on one return), but the 101 whole-row repeats are not
+    # that". CLOSED 2026-09-01, and THE SECOND HALF OF THAT NOTE WAS WRONG in
+    # the dangerous direction: the 101 ARE exactly that. Every colliding group
+    # sits inside ONE return, and `object_id` is unique on
+    # np_schedule_i_filers.csv - 0 collisions over 10,314 rows - so the return
+    # was read once and the filer listed the line twice. First Nations
+    # Development Institute reported two separate $20,000 grants to the Seneca
+    # Nation on its FY2017 Schedule I. `132.parse_one` walked RecipientTable
+    # in document order and recorded no line ordinal; it now writes
+    # `schedule_i_line_seq` and the count went 101 -> 0 with all 58,685 rows
+    # and $2,089,185 of real grants still on the file. Declared in
+    # GRAIN_UPSTREAM.
+    # `ferc_docket_filings.csv` WAS here at 822 literal duplicate rows of
+    # 102,615. CLOSED 2026-09-01. The 822 are real repeats - eLibrary
+    # publishes one document twice under one accession - and a further 167
+    # `ferc_filing_id` groups differ ONLY in the CASE of the filer name and
+    # are NOT duplicates at all. Deleting would have hit both populations.
+    # `filing_occurrence_seq` separates every group without removing a row;
+    # 822 -> 0 at 102,615 rows. Declared in GRAIN_UPSTREAM.
     # `cedar_ruling_ledger_consolidated.csv` WAS here at 6,302 literal
     # duplicate rows of 15,587 with the note "a ruling ledger that records the
     # same ruling twice cannot be counted". CLOSED 2026-09-01, and it never
@@ -2156,8 +2596,13 @@ GRAIN_DEFECT = {
     # 23 now writes target_row_ordinal / target_row_key / target_row_hash and
     # refuses to write when the key is not unique; 2,228 -> 0. Declared in
     # GRAIN_HUB.
-    "native_bills_subject_sweep.csv":
-        "5 LITERAL duplicate rows of 2,414.",
+    # `native_bills_subject_sweep.csv` WAS here at 5 literal duplicate rows of
+    # 2,414. CLOSED 2026-09-01, and the defect was never in this table: the
+    # CORPUS it sweeps, data/raw/external/votingpatterns/all_bill_intros.csv,
+    # repeats 595 bill ids byte-identically over 183,233 rows, and 73's sweep
+    # emits one row per corpus row. `73.stage_sweep` now reads each bill once;
+    # re-swept to 2,409 rows with ZERO bill_ids leaving the table and 5 -> 0.
+    # Declared in GRAIN_UPSTREAM.
     # `tcu_cdfi_ownership_evidence.csv` WAS here at 4 literal duplicate rows
     # of 130. CLOSED 2026-09-01, same class from a different builder: a page
     # states one sentence twice (First State Bank's service sentence, Little
@@ -2165,13 +2610,22 @@ GRAIN_DEFECT = {
     # the pattern and the URL but not WHERE on the page. `quote_char_offset`
     # is now written; a --reextract from the CACHED pages, no network, gave
     # 130 rows with a content multiset IDENTICAL to the backup and 4 -> 0.
-    "lobbying_registrant_native_ownership_evidence.csv":
-        "4 LITERAL duplicate rows of 27 - 15% of a table the build log "
-        "describes as 'one row per evidence route'. Four evidence routes are "
-        "recorded twice.",
-    "hearing_bill_links.csv":
-        "1 LITERAL duplicate row of 465: (bill_id, event_id) = "
-        "(119-s-3878, 338549) appears twice.",
+    # `lobbying_registrant_native_ownership_evidence.csv` WAS here at 4
+    # literal duplicate rows of 27, described as "four evidence routes
+    # recorded twice". CLOSED 2026-09-01 and they are not routes recorded
+    # twice - they are four INDEPENDENT SOURCES asserting one identifier, and
+    # WS3 had already said so. `182` walked
+    # lobbying_registrant_identifiers.csv, whose own key is (identifier,
+    # asserted_by_source), and dropped the asserter, so a graph node, a prime,
+    # a funding row and a subaward all rendered as the same row. Carrying
+    # `asserted_by_source` took 4 -> 0 at 27 rows and PRESERVED the
+    # corroboration a de-dupe would have destroyed. Declared in GRAIN_UPSTREAM.
+    # `hearing_bill_links.csv` WAS here at 1 literal duplicate row of 465,
+    # (bill_id, event_id) = (119-s-3878, 338549). CLOSED 2026-09-01 and the
+    # repetition is the SOURCE's: Congress.gov event 338549 lists 27 of its 64
+    # relatedItems.bills entries twice verbatim, and `98` ingested both
+    # copies. Reading each element once is not deleting a Cedar fact. Declared
+    # in GRAIN_UPSTREAM.
 }
 
 

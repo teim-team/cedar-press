@@ -346,3 +346,19 @@ No code can stop a buyer adding two files together. What **is** enforced, by `py
 **Nothing was de-duplicated.** Whole-row duplicates fell 179,259 → 3,441 on the all-agencies table and 1,001 → 0 on the Interior table by **restoring an identity column, not by deleting a row**. A de-dupe would have destroyed $8,291,124,113 of real obligations — `ed_fy2007_archive.zip` holds 344,401 rows and 344,401 distinct keys, and the worst apparent group (445 identical UC Irvine rows) is 740 real transactions carrying modification numbers 0001–0740, 592 of them $0.
 
 <!-- END FAADS -->
+
+<!-- BEGIN GAMING-NR -->
+
+## Gaming self-published claims — a marketing number is not a measurement (workstream GAMING-NR, 2026-09-01)
+
+`gaming_property_self_published_assertions.csv` (622 rows) and `gaming_property_self_published_claims.csv` (270 rows) hold what a casino says about ITSELF on its own website — machine counts, hotel rooms, square footage, ownership and opening dates. Every row carries `assertion_class`, and every class is deliberately OUTSIDE `cedar_domain.MeasurementType`.
+
+**A buyer may never sum either table against a regulator's figure.** Specifically, never against `gaming_capacity_official.csv` (regulator-reported capacity), `nigc_regional_ggr.csv` or `nigc_revenue_bands.csv` (NIGC), `state_gaming_observations.csv`, `wa_machine_allocations.csv`, or the Casino City vendor panel. A self-published count and a regulator count of the same floor are TWO CLAIMS ABOUT ONE THING, not two things; adding them doubles the floor, and preferring the larger is how a marketing number becomes a statistic.
+
+Three further measured cautions on the claims table: 162 of 270 values are BOUNDED ("more than 1,000 slots") and a bound is not a count; 9 rows restate an observation that is already in `gaming_property_site_observations.csv`, so stacking the two files double counts them; and 229 were RECOVERED from a refusal pile by `code/383` and are published because a refusal that hides the claim is worse than one that labels it, not because they got better.
+
+The grain is a claim occurrence, not a fact: two sentences on one page stating the same number about two different ballrooms are two rows, and collapsing them deletes a ballroom. See `512.GRAIN_GAMING_NR`.
+
+`fac_audit_sefa_gaming_programs.csv` (1 row) carries `amount_expended`, which is a FEDERAL AWARD EXPENDITURE and is not gaming revenue of any kind. It may not be summed with any gaming money column, and it is additive only at (report_id, award_reference) — one SEFA line of one Single Audit.
+
+<!-- END GAMING-NR -->

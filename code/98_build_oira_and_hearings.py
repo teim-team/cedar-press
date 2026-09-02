@@ -1692,6 +1692,43 @@ def load_committee_names(det, key, delay):
     return COMMITTEE_NAMES
 
 
+def dedupe_related_bills(d):
+    """`relatedItems.bills` for one Congress.gov event, read ONCE per bill.
+
+    THE SOURCE REPEATS ITSELF (workstream UPSTREAM, 2026-09-01). Measured over
+    all 17,859 cached meeting-detail records, three events list a related bill
+    more than once, VERBATIM - the whole JSON object, every field:
+
+        event 338549    64 entries,  37 distinct,  27 repeats
+        event 336261    80 entries,  79 distinct,   1 repeat
+        event 338011     3 entries,   2 distinct,   1 repeat
+
+    Only one of those repeats names a bill that is in `native_bills.csv`
+    (338549 / 119-s-3878), and it produced the SINGLE literal duplicate row in
+    `hearing_bill_links.csv` - the one thing standing between that table and a
+    declarable grain of (event_id, bill_id).
+
+    THE FIX IS NOT TO DELETE THE ROW. The house rule is flag, never delete,
+    and a Cedar row is a Cedar fact. But the second copy of an API array
+    element is not a second fact and never was: ingesting it twice is a
+    reading error, so it is corrected where the reading happens. Order is
+    preserved and the FIRST occurrence is the one kept, so the deduplication
+    cannot change which record any downstream column is derived from.
+    """
+    out, seen = [], set()
+    for b in (d.get("related_bills") or []):
+        try:
+            k = json.dumps(b, sort_keys=True)
+        except TypeError:
+            out.append(b)          # unhashable/odd payload: never dropped
+            continue
+        if k in seen:
+            continue
+        seen.add(k)
+        out.append(b)
+    return out
+
+
 def build_hearings(resolver, unresolved):
     det = read_jsonl(HEAR_DETAIL)
     print(f"  hearing detail records: {len(det):,}")
@@ -1728,7 +1765,7 @@ def build_hearings(resolver, unresolved):
         hdate = _iso_date((d.get("date") or "")[:10])
         wdocs = d.get("witness_documents") or []
 
-        for b in (d.get("related_bills") or []):
+        for b in dedupe_related_bills(d):
             bid = "%s-%s-%s" % (b.get("congress"),
                                 (b.get("type") or "").lower(), b.get("number"))
             if bid in bills:

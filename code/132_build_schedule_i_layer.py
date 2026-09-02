@@ -497,6 +497,47 @@ def step_parse():
 # ---------------------------------------------------------------------------
 # BUILD -- context, Native detection, provenance
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# THE LINE ORDINAL, AND WHY 101 "DUPLICATES" WERE NEVER DUPLICATES
+# Workstream UPSTREAM, 2026-09-01.
+#
+# `np_schedule_i_grants.csv` carried 101 excess rows over 90 byte-identical
+# groups and NOT ONE OF THEM IS A DUPLICATE. Every group sits inside ONE
+# return - `object_id` is unique on `np_schedule_i_filers.csv`, 0 collisions
+# over 10,314 rows, and all 90 groups are single-`object_id`. So the return
+# was read once and the FILER listed the same grant line twice: First Nations
+# Development Institute reported two separate $20,000 grants to the Seneca
+# Nation on its FY2017 Schedule I, which is a legal and ordinary thing for a
+# grantmaker to do and is exactly what Part II's repeating RecipientTable is
+# for.
+#
+# `parse_one` walks those RecipientTable elements in document order and
+# recorded NO ordinal, so two real grant lines rendered as one row twice.
+# De-duplicating would have deleted $2,089,185 of real grants.
+#
+# The ordinal is the 1-based position of this recipient line among the
+# PUBLISHED recipient lines of its return, in document order. Published, not
+# filed: 26 recipient rows across 5 returns name nobody at all (no name and no
+# EIN) and are held out to review/ above, so on those 5 returns the ordinal is
+# a dense position among what ships rather than the printed form line. None of
+# the 90 colliding groups is on one of those 5 returns.
+# ---------------------------------------------------------------------------
+SCHEDULE_I_LINE_SEQ_COL = "schedule_i_line_seq"
+
+
+def assign_schedule_i_line_seq(rows):
+    """Stamp the per-return line ordinal. Deletes nothing, reorders nothing."""
+    n = Counter()
+    for g in rows:
+        oid = g.get("object_id", "")
+        n[oid] += 1
+        g[SCHEDULE_I_LINE_SEQ_COL] = str(n[oid])
+    multi = sum(1 for v in n.values() if v > 1)
+    log(f"  {SCHEDULE_I_LINE_SEQ_COL}: {len(rows):,} grant rows over "
+        f"{len(n):,} returns ({multi:,} returns list more than one recipient "
+        f"line); 0 rows deleted")
+
+
 def step_build(heads, grants):
     log("=== 132 build ===")
     M = m111()
@@ -645,6 +686,7 @@ def step_build(heads, grants):
 
     named = [g for g in grants if names_someone(g)]
     unnamed = [g for g in grants if not names_someone(g)]
+    assign_schedule_i_line_seq(named)
     if unnamed:
         write_csv(REVIEW / f"np_schedule_i_unnamed_recipient_rows_{BUILT}.csv",
                   unnamed, GRANT_FIELDS)
@@ -656,7 +698,7 @@ def step_build(heads, grants):
 GRANT_FIELDS = [
     "filer_ein", "filer_name_as_filed", "filer_state", "filer_population",
     "filer_in_np_orgs", "filer_is_ruled_native", "tax_year",
-    "tax_period_end", "return_type", "object_id",
+    "tax_period_end", "return_type", "object_id", SCHEDULE_I_LINE_SEQ_COL,
     "recipient_name_as_filed", "recipient_ein", "recipient_address",
     "recipient_city", "recipient_state", "recipient_zip",
     "irc_section_as_filed", "cash_grant_usd", "noncash_assistance_usd",
@@ -776,6 +818,7 @@ CODEBOOK = {
     "tax_year": "Year of TaxPeriodEndDt on the return. Not the submission year.",
     "return_type": "990, 990EZ or 990PF as reported in ReturnHeader/ReturnTypeCd.",
     "object_id": "IRS e-file return object id. The primary key of the return in the IRS index and archives.",
+    "schedule_i_line_seq": "Position of this recipient line among the published recipient lines of this return, 1..n in the document order of Schedule I Part II's RecipientTable elements. With object_id it is the primary key of this table. It exists because ONE FILER MAY LIST ONE RECIPIENT TWICE and routinely does — First Nations Development Institute reported two separate $20,000 grants to the Seneca Nation on its FY2017 return — so two real grant lines would otherwise render as one row twice. On the 5 returns holding a recipient line that names nobody at all, and which is held out to review/, this is a dense position among what ships rather than the printed form line.",
     "recipient_name_as_filed": "Recipient organisation name exactly as the filer typed it on Schedule I Part II, both name lines joined. Never corrected.",
     "recipient_ein": "Recipient EIN as reported by the filer. Blank where the filer reported none.",
     "irc_section_as_filed": "IRC section of the recipient as stated by the filer. A filer writing TRIBE here is naming an entity outside the Form 990 universe under IRC 7871.",

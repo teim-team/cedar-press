@@ -173,6 +173,59 @@ def write_csv(path, rows, fields):
     os.replace(part, path)
 
 
+#: The columns this script MINTS. Anything else already on the output file was
+#: put there by a later in-place enricher (`505` mints `cedar_uid`), and a full
+#: rebuild here must carry it forward rather than silently erase it. That
+#: erasure is this project's single most repeated defect - it took `cedar_uid`
+#: off `admin_appeal_positions.csv` and two gaming tables on 2026-09-01, and it
+#: took it off THIS table the first time the asserted_by_source fix ran.
+#: Carried on (registrant_id, evidence_route, native_entity_id), which is
+#: constant-valued for `cedar_uid` on every group in the pre-fix file; a group
+#: that disagrees is left BLANK and reported rather than guessed at.
+CARRY_FORWARD_JOIN = ["registrant_id", "evidence_route", "native_entity_id"]
+
+
+def carry_forward_enriched_columns(path, rows, fields):
+    """Copy columns a later enricher added back onto a freshly built table.
+
+    Returns the (possibly extended) field list. Never invents a value: a join
+    key the old file does not hold, or holds with two different values, leaves
+    the cell blank and prints why.
+    """
+    old = read_csv(path)
+    if not old:
+        return fields
+    extra = [c for c in old[0] if c not in fields]
+    if not extra:
+        return fields
+    idx = defaultdict(lambda: defaultdict(set))
+    for o in old:
+        k = tuple(o.get(c, "") for c in CARRY_FORWARD_JOIN)
+        for c in extra:
+            if (o.get(c) or "").strip():
+                idx[k][c].add(o[c])
+    filled = Counter()
+    ambiguous = Counter()
+    for r in rows:
+        k = tuple(r.get(c, "") for c in CARRY_FORWARD_JOIN)
+        for c in extra:
+            vals = idx.get(k, {}).get(c, set())
+            if len(vals) == 1:
+                r[c] = next(iter(vals))
+                filled[c] += 1
+            else:
+                r.setdefault(c, "")
+                if len(vals) > 1:
+                    ambiguous[c] += 1
+    log(f"  carried forward {len(extra)} enricher column(s) from the previous "
+        f"{Path(path).name}: " + ", ".join(
+            f"{c} on {filled[c]}/{len(rows)} rows"
+            + (f" ({ambiguous[c]} left blank - two values on one join key)"
+               if ambiguous[c] else "")
+            for c in extra))
+    return fields + extra
+
+
 def norm_strict(s):
     """Normalization that PRESERVES the corporate form.
 
@@ -230,6 +283,24 @@ def main():
             "evidence_verbatim": quote,
             "evidence_url": url,
             "evidence_source": src,
+            # THE COLUMN THAT MAKES THIS TABLE KEYABLE (workstream UPSTREAM,
+            # 2026-09-01). The identifier routes R4 and R5 walk
+            # `lobbying_registrant_identifiers.csv`, whose OWN declared grain
+            # is "one row per identifier ASSERTION about a registrant, with
+            # its asserter" - key (identifier, asserted_by_source). Four
+            # sources asserting the same UEI produce FOUR evidence rows here,
+            # and this script dropped the asserter, so they rendered
+            # byte-identical: UEI CY16XXPHX213 (registrant 301072) reached
+            # this table from a graph node, a prime, a funding row and a
+            # subaward, as two B-paths and two C-paths, and looked like two
+            # duplicated rows. THEY ARE FOUR INDEPENDENT CORROBORATIONS and
+            # de-duplicating them deletes the corroboration. Carrying the
+            # asserter costs one column and makes the row say what it is.
+            # Blank on R1/R2/R3, which are not identifier routes - blank is a
+            # value of this key, not a gap in it.
+            "identifier_type": "",
+            "identifier": "",
+            "asserted_by_source": "",
             "built_by_script": SCRIPT,
             "built_date": TODAY,
         }
@@ -373,6 +444,9 @@ def main():
             rec.get("source_url") or "",
             "np_orgs.csv",
             {"inherited_confidence": rec.get("confidence_tier") or "",
+             "identifier_type": i["identifier_type"],
+             "identifier": i["identifier"],
+             "asserted_by_source": i.get("asserted_by_source") or "",
              "path_weakest_edge":
                  f"identifier assertion tier {i['confidence_tier']} "
                  f"({i['asserted_by_source']})"})
@@ -411,6 +485,9 @@ def main():
                 r.get("evidence_url") or "",
                 "cedar_identifier_ledger_final.csv",
                 {"inherited_confidence": tier,
+                 "identifier_type": i["identifier_type"],
+                 "identifier": i["identifier"],
+                 "asserted_by_source": i.get("asserted_by_source") or "",
                  "path_weakest_edge":
                      f"min(ledger {tier}, identifier assertion "
                      f"{i['confidence_tier']}) = {weakest}"})
@@ -547,6 +624,7 @@ def main():
     for r in ev:
         for k in ev_fields:
             r.setdefault(k, "")
+    ev_fields = carry_forward_enriched_columns(OUT, ev, ev_fields)
     write_csv(OUT, ev, ev_fields)
     log(f"\n  wrote {OUT.name}: {len(ev)} evidence rows")
     if queue:

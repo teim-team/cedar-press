@@ -61,6 +61,7 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 import sys
 from collections import Counter, defaultdict
 from datetime import date
@@ -85,6 +86,33 @@ COLS = ["table", "collection", "export_class", "reason", "grain_status",
 # A table carrying any of these is one a buyer will try to total.
 MONEY_HINTS = ("obligation", "amount", "dollar", "usd", "revenue", "spend",
                "payment", "value", "_dol", "total")
+
+# ...UNLESS THE COLUMN IS NOT MONEY. Substring matching on `amount` counted
+# `amount_countable` - a 0/1 FLAG on native_passthrough.csv - as a money
+# column, and two workstreams flagged it before anyone owned it. A flag, a
+# count, a date, a type, a URL or a prose basis is never a thing a buyer
+# totals, and calling one a money column inflates `export_unsafe_money_tables`
+# with columns that carry no dollars at all. Measured over every shippable
+# table's header on 2026-09-01: 202 column names matched MONEY_HINTS and 27 of
+# them were this - `amount_countable`, `payment_date`, `Value_Type`,
+# `obligation_type`, `principal_amount_text`, `revenue_note`, thirteen
+# `*_value_basis` columns, and the rest.
+#
+# THE ASYMMETRY IS DELIBERATE. A missed money column is a buyer double-counting
+# real dollars; a false one is a table wrongly flagged. So this list only
+# removes names whose SUFFIX or PREFIX says outright that the cell is not a
+# quantity of money, and never removes a bare `*_amount` or `*_usd`.
+MONEY_ANTI_HINTS = re.compile(
+    r"(?:^(?:is|has|n)_)"
+    r"|(?:_(?:countable|flag|ind|cnt|count|type|date|url|status|source|basis"
+    r"|method|reason|note|caveat|quote|text|desc|description)$)",
+    re.I)
+
+
+def is_money_column(name: str) -> bool:
+    n = (name or "").lower()
+    return (any(k in n for k in MONEY_HINTS)
+            and not MONEY_ANTI_HINTS.search(name or ""))
 
 
 def read_csv(p: Path) -> list:
@@ -125,8 +153,7 @@ def classify():
                 continue
             name = t["table"]
             hdr, path = header_of(name)
-            money = [h for h in hdr
-                     if any(k in h.lower() for k in MONEY_HINTS)]
+            money = [h for h in hdr if is_money_column(h)]
             grain = (t.get("grain") or "")
             stated = not grain.startswith("UNSTATED")
             pk = t.get("primary_key") or []

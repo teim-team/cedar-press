@@ -1192,6 +1192,43 @@ def stage_sweep():
           f"(Congresses {min(int(r['congress']) for r in corpus)}-"
           f"{max(int(r['congress']) for r in corpus)})")
 
+    # THE CORPUS REPEATS ITSELF, AND THE SWEEP INHERITED IT (workstream
+    # UPSTREAM, 2026-09-01). `all_bill_intros.csv` holds 183,233 rows and 595
+    # of them are BYTE-IDENTICAL repeats of a bill already in the file - all
+    # 595 groups identical on every one of the 18 columns, so no group carries
+    # a second fact. The sweep emits one row per corpus row, so five of those
+    # repeats matched a subject family and became the five literal duplicate
+    # rows in native_bills_subject_sweep.csv - the ONLY thing standing between
+    # `legislation` and a declarable grain.
+    #
+    # THE DE-DUPE BELONGS HERE, ON THE CORPUS, AND NOWHERE ELSE. Deleting a
+    # row from the swept output would be deleting a Cedar row (house rule:
+    # flag, never delete). Declining to read one source row twice is not a
+    # deletion, it is the same discipline `98` applies to a Congress.gov event
+    # that lists a related bill twice. A bill is one bill; the second copy of
+    # its metadata says nothing the first did not.
+    seen_corpus, deduped, repeats = set(), [], 0
+    for r in corpus:
+        try:
+            k = (int(r["congress"]), str(r["bill_type"]).lower(),
+                 int(float(r["bill_number"])))
+        except (TypeError, ValueError):
+            deduped.append(r)      # unparseable key: never silently dropped
+            continue
+        if k in seen_corpus:
+            repeats += 1
+            continue
+        seen_corpus.add(k)
+        deduped.append(r)
+    if repeats:
+        print(f"  corpus repeats itself {repeats:,} times on "
+              f"(congress, bill_type, bill_number); the FIRST occurrence of "
+              f"each is read and the repeats are NOT read a second time. "
+              f"Every repeat is byte-identical to its first occurrence - "
+              f"re-verified {TODAY}. No Cedar row is deleted by this.")
+    corpus = deduped
+    print(f"  corpus after source de-duplication: {len(corpus):,} bills")
+
     hits, stat, newstat, excl = [], Counter(), Counter(), Counter()
     for r in corpus:
         title = r.get("title") or ""
@@ -1249,6 +1286,7 @@ def stage_sweep():
                             "Congress.gov bill record"),
             "build_date": TODAY})
 
+    backup(CLEAN / "native_bills_subject_sweep.csv")
     wr(CLEAN / "native_bills_subject_sweep.csv", hits, SWEEP_COLS)
     print(f"  WROTE native_bills_subject_sweep.csv  rows={len(hits):,}")
     print("  by family (total / new to native_bills):")

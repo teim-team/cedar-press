@@ -212,6 +212,32 @@ FERC_FILING_KEY_COLUMNS = ["docket_number", "subdocket", "accession_number",
                            "filer_organization_as_recorded",
                            "document_description_verbatim"]
 
+#: THE SECOND HALF OF THE KEY, ADDED 2026-09-01 BY WORKSTREAM UPSTREAM.
+#: The note above is right that `ferc_filing_id` alone is not unique and was
+#: right to refuse to pretend otherwise. What it left the table with was NO
+#: key at any arity, because the widest candidate - the whole row - already
+#: collides. Re-measured on the full 102,615-row file, and the 769 colliding
+#: id groups split cleanly in two:
+#:
+#:     602 groups / 822 excess rows   BYTE-IDENTICAL on all 39 columns
+#:     167 groups                     differ ONLY in the CASE of the filer
+#:                                    name, and are NOT duplicates
+#:      0 groups                      differ in any other way
+#:
+#: Those 167 must not be touched, and the 822 must not be deleted - the house
+#: rule is flag, never delete, and eLibrary really does publish the same
+#: document twice under one accession. So the row gains a per-occurrence
+#: ORDINAL and `(ferc_filing_id, filing_occurrence_seq)` becomes unique with
+#: every row still on the file.
+#:
+#: The ordinal is assigned by SORTING each colliding group on its own full
+#: content, not by file position, so it is a function of the data and not of
+#: the order the fetch happened to return. Two byte-identical rows are
+#: interchangeable, so which one gets 1 is not a fact about the world; the two
+#: case-variant rows sort deterministically and keep the same ordinal on every
+#: rebuild.
+FERC_FILING_OCCURRENCE_COL = "filing_occurrence_seq"
+
 #: `section_106_cross_ref` holds a `;`-joined list of consultation event ids
 #: under a length cap. The cap must cut at a DELIMITER - see the call site.
 #: 400 until 2026-08-26. Raised because 400 was an arbitrary tidiness cap that
@@ -222,6 +248,34 @@ FERC_FILING_KEY_COLUMNS = ["docket_number", "subdocket", "accession_number",
 #: reaching it safe.
 S106_XREF_MAX_CHARS = 2000
 S106_XREF_SEP = ";"
+
+
+def assign_filing_occurrence_seq(rows, content_cols):
+    """Stamp `filing_occurrence_seq` on every row. Deletes nothing.
+
+    1 for a `ferc_filing_id` that appears once. For a group that collides,
+    1..n in the order the group's own full content sorts, so the assignment is
+    reproducible from the file alone. See FERC_FILING_OCCURRENCE_COL.
+    """
+    groups = defaultdict(list)
+    for r in rows:
+        groups[r.get("ferc_filing_id", "")].append(r)
+    n_groups = n_rows = 0
+    for members in groups.values():
+        if len(members) == 1:
+            members[0][FERC_FILING_OCCURRENCE_COL] = "1"
+            continue
+        n_groups += 1
+        n_rows += len(members)
+        ordered = sorted(members,
+                         key=lambda x: tuple(str(x.get(c, ""))
+                                             for c in content_cols))
+        for n, r in enumerate(ordered, 1):
+            r[FERC_FILING_OCCURRENCE_COL] = str(n)
+    print(f"  filing_occurrence_seq: {len(rows):,} rows, {n_groups:,} "
+          f"colliding ferc_filing_id group(s) covering {n_rows:,} rows, "
+          f"0 rows deleted")
+    return rows
 
 
 def _cap_list(items, limit=S106_XREF_MAX_CHARS, sep=S106_XREF_SEP):
@@ -2026,8 +2080,22 @@ def stage_build():
         "discovery_source", "discovery_quote", "seed_source_url",
         "source_url", "fetched_date", "confidence_tier", "built_date",
         "built_by_script"])
-    write_csv(CLEAN / "ferc_docket_filings.csv", filing_rows, [
+    FILING_CONTENT_COLS = [
         "ferc_filing_id", "docket_number", "subdocket", "accession_number",
+        "filed_date", "issued_date", "category", "instrument_type",
+        "instrument_quote", "event_class", "channel", "is_lobbying",
+        "filer_organization_as_recorded", "filer_organization_type",
+        "filer_is_tribal_entity", "resolved_native_entity_id",
+        "resolved_native_entity_name", "resolution_method",
+        "administrative_record_position",
+        "administrative_record_position_quote", "lobbying_position",
+        "lobbying_position_basis", "document_description_verbatim",
+        "source_url", "api_endpoint", "fetched_date", "confidence_tier",
+        "built_date", "built_by_script"]
+    assign_filing_occurrence_seq(filing_rows, FILING_CONTENT_COLS)
+    write_csv(CLEAN / "ferc_docket_filings.csv", filing_rows, [
+        "ferc_filing_id", FERC_FILING_OCCURRENCE_COL,
+        "docket_number", "subdocket", "accession_number",
         "filed_date", "issued_date", "category", "instrument_type",
         "instrument_quote", "event_class", "channel", "is_lobbying",
         "filer_organization_as_recorded", "filer_organization_type",

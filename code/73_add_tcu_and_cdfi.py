@@ -377,6 +377,33 @@ def sentences(blk):
     return [s.strip() for s in parts if s.strip()]
 
 
+def sentence_offsets(blk):
+    """`sentences(blk)` with each sentence's CHARACTER OFFSET in the page.
+
+    Added 2026-09-01. `tcu_cdfi_ownership_evidence.csv` carried 4 literal
+    duplicate rows of 130 and could not be keyed, and none of the four was a
+    duplicate FACT: a page states the same sentence twice - once in a nav or
+    banner block and once in the body - and each occurrence is a real, separate
+    occurrence of the evidence. `First State Bank` says "We serve customers and
+    community with candor, integrity, trust, fair dealing, and honor." twice on
+    /about; `Little Priest Tribal College` states its charter sentence twice on
+    its home page. The extractor recorded the sentence, the pattern and the URL
+    and dropped WHERE on the page it was found, which is the only thing that
+    separates them.
+
+    So the offset is written, nothing is de-duplicated, and
+    (institution, layer, pattern, evidence_url, quote_char_offset) becomes a
+    key. Same shape as the projection loss repaired in `23` and `173`.
+    """
+    cursor = 0
+    for s in sentences(blk):
+        i = blk.find(s, cursor)
+        if i < 0:                      # cannot happen for a stripped split,
+            i = cursor                 # but a wrong offset must not be a crash
+        cursor = i + len(s)
+        yield i, s
+
+
 def clean_owner(s):
     """Trim a captured owner string WITHOUT amputating the name.
 
@@ -427,7 +454,7 @@ def find_ownership(text, url):
     "established by" found earlier in the page. Never guesses: a hit is a
     verbatim sentence plus the substring the pattern captured."""
     out = []
-    for s in sentences(text):
+    for off, s in sentence_offsets(text):
         if len(s) > 600 or not OWNER_TRIGGER.search(s):
             continue
         for rank, (pat, kind) in enumerate(OWNER_PATTERNS):
@@ -441,7 +468,8 @@ def find_ownership(text, url):
             if not owner or len(owner) < 4 or not looks_like_proper_noun(owner):
                 continue
             out.append({"quote": s, "captured_owner": owner,
-                        "pattern": kind, "evidence_url": url, "_rank": rank})
+                        "pattern": kind, "evidence_url": url,
+                        "quote_char_offset": off, "_rank": rank})
             break
     out.sort(key=lambda e: e["_rank"])
     for e in out:
@@ -451,11 +479,12 @@ def find_ownership(text, url):
 
 def find_serves(text, url):
     out = []
-    for s in sentences(text):
+    for off, s in sentence_offsets(text):
         if len(s) > 600:
             continue
         if SERVES_TRIGGER.search(s):
-            out.append({"quote": s, "evidence_url": url})
+            out.append({"quote": s, "evidence_url": url,
+                        "quote_char_offset": off})
     return out[:3]
 
 
@@ -797,11 +826,23 @@ def cmd_reextract():
             for e in find_serves(body, url):
                 evid.append({"institution": name, "layer": kind,
                              "quote": e["quote"], "captured_owner": "",
-                             "pattern": "serves", "evidence_url": url})
+                             "pattern": "serves", "evidence_url": url,
+                             "quote_char_offset": e["quote_char_offset"]})
     print(f"cached pages read: {seen_files}")
+    # The declared key, checked here rather than only in 512: an evidence row
+    # with no distinct position is the defect this was repaired for.
+    from collections import Counter as _C
+    _k = _C((e["institution"], e["layer"], e["pattern"], e["evidence_url"],
+             e["quote_char_offset"]) for e in evid)
+    _d = sum(n - 1 for n in _k.values() if n > 1)
+    print(f"primary key (institution, layer, pattern, evidence_url, "
+          f"quote_char_offset): {_d:,} duplicate(s) of {len(evid):,}")
+    if _d:
+        raise SystemExit("REFUSED to write: the declared primary key is not "
+                         "unique.")
     write_csv(CLEAN / "tcu_cdfi_ownership_evidence.csv", evid,
               ["institution", "layer", "pattern", "captured_owner", "quote",
-               "evidence_url"])
+               "evidence_url", "quote_char_offset"])
 
 
 def cmd_fetch_org_pages():
