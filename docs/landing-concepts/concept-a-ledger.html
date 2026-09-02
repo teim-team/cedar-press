@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cedar Press — Concept A: The Ledger</title>
+<style>
+/* CONCEPT A — "THE LEDGER"
+   The record stream IS the page. Real rows from the collections drift up
+   behind one enormous cycling figure; when a release lands, the figure
+   rolls (odometer flutter) and a chip names what arrived. The pitch:
+   you are looking through a window at the ledger itself. */
+@font-face { font-family: 'Inter'; src: url('../../public/fonts/inter-400.woff2') format('woff2'); font-weight: 400; }
+@font-face { font-family: 'Inter'; src: url('../../public/fonts/inter-600.woff2') format('woff2'); font-weight: 600; }
+@font-face { font-family: 'Inter'; src: url('../../public/fonts/inter-800.woff2') format('woff2'); font-weight: 800; }
+@font-face { font-family: 'JetBrains Mono'; src: url('../../public/fonts/jetbrains-mono-400.woff2') format('woff2'); font-weight: 400; }
+@font-face { font-family: 'JetBrains Mono'; src: url('../../public/fonts/jetbrains-mono-700.woff2') format('woff2'); font-weight: 700; }
+:root { --teal:#0FB5A5; --dteal:#0A7F74; --ink:#0A0F26; --mono:'JetBrains Mono',monospace; --sans:'Inter',sans-serif; }
+* { box-sizing: border-box; margin: 0; }
+html,body { height: 100%; }
+body { background: #041b18; color: #fff; font-family: var(--sans); overflow: hidden; }
+
+/* ---- the record wall ---- */
+.wall { position: fixed; inset: 0; display: flex; gap: 4vw; padding: 0 3vw; opacity: 0.5;
+  mask-image: linear-gradient(180deg, transparent 0, #000 18%, #000 82%, transparent 100%); }
+.col { flex: 1; overflow: hidden; }
+.col ul { list-style: none; padding: 0; animation: drift linear infinite; }
+.col:nth-child(1) ul { animation-duration: 95s; }
+.col:nth-child(2) ul { animation-duration: 140s; animation-direction: reverse; }
+.col:nth-child(3) ul { animation-duration: 110s; }
+.col:nth-child(4) ul { animation-duration: 160s; animation-direction: reverse; }
+@keyframes drift { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+.col li { font-family: var(--mono); font-size: 0.66rem; line-height: 2.1; white-space: nowrap;
+  color: rgba(126, 216, 205, 0.34); }
+.col li b { color: rgba(190, 245, 238, 0.55); font-weight: 400; }
+.col li.hot { color: rgba(240, 255, 252, 0.95); text-shadow: 0 0 18px rgba(15,181,165,0.8); }
+
+/* ---- chrome ---- */
+.bar { position: fixed; inset: 0 0 auto 0; display: flex; align-items: center; justify-content: space-between;
+  padding: 1.4rem 2rem; z-index: 5; }
+.word { font-family: var(--mono); font-weight: 700; letter-spacing: 0.22em; font-size: 0.82rem; }
+.burger { background: none; border: 1px solid rgba(255,255,255,0.35); border-radius: 10px; padding: 0.55rem 0.7rem; cursor: pointer; }
+.burger span { display: block; width: 20px; height: 2px; background: #fff; margin: 4px 0; border-radius: 2px; }
+.menu { position: fixed; top: 0; right: 0; bottom: 0; width: min(22rem, 90vw); background: #062a26;
+  border-left: 1px solid rgba(15,181,165,0.4); z-index: 9; padding: 5.5rem 2rem 2rem; transform: translateX(102%);
+  transition: transform 0.3s cubic-bezier(0.2,0,0,1); }
+.menu.open { transform: none; }
+.menu a { display: block; color: #fff; text-decoration: none; font-weight: 600; font-size: 1.05rem;
+  padding: 1rem 0; border-bottom: 1px solid rgba(255,255,255,0.12); }
+.menu a small { display: block; font-weight: 400; font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-top: 0.2rem; }
+
+/* ---- the figure ---- */
+.stage { position: fixed; inset: 0; display: grid; place-items: center; z-index: 3; text-align: center; padding: 0 1.5rem; }
+.stage .inner { max-width: 68rem; }
+.kicker { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--teal); margin-bottom: 1.4rem; }
+.big { font-family: var(--mono); font-weight: 700; font-size: clamp(4rem, 13vw, 11.5rem); line-height: 0.95;
+  letter-spacing: -0.04em; font-variant-numeric: tabular-nums; display: inline-flex; }
+.big .digit { display: inline-block; transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.2, 1.2), opacity 0.4s; }
+.big .digit.flip { animation: flip 0.6s cubic-bezier(0.2, 0.9, 0.2, 1.2); }
+@keyframes flip { 0% { transform: translateY(0.9em); opacity: 0; filter: blur(3px); } 100% { transform: none; opacity: 1; filter: none; } }
+.what { font-size: clamp(1.05rem, 2vw, 1.5rem); color: rgba(255,255,255,0.9); margin-top: 1.1rem; font-weight: 400; }
+.what b { color: #fff; font-weight: 600; }
+.chip { display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1.6rem; font-family: var(--mono);
+  font-size: 0.72rem; color: #bef5ee; border: 1px solid rgba(15,181,165,0.5); background: rgba(15,181,165,0.12);
+  border-radius: 999px; padding: 0.45rem 1rem; opacity: 0; transform: translateY(8px); transition: 0.4s; }
+.chip.show { opacity: 1; transform: none; }
+.chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); animation: pulse 1.6s infinite; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 7px rgba(15,181,165,0.15); } }
+.dots { display: flex; gap: 0.55rem; justify-content: center; margin-top: 2.3rem; }
+.dots i { width: 26px; height: 3px; border-radius: 2px; background: rgba(255,255,255,0.25); transition: 0.3s; }
+.dots i.on { background: var(--teal); }
+
+/* ---- foot ---- */
+.foot { position: fixed; inset: auto 0 0 0; z-index: 5; display: flex; flex-direction: column; align-items: center;
+  gap: 1.1rem; padding: 0 2rem 2.2rem; }
+.ctas { display: flex; gap: 0.8rem; flex-wrap: wrap; justify-content: center; }
+.btn { font-family: var(--sans); font-weight: 600; font-size: 0.95rem; padding: 0.85rem 1.6rem; border-radius: 999px;
+  text-decoration: none; transition: 0.2s; }
+.btn-primary { background: var(--teal); color: #04211d; }
+.btn-primary:hover { background: #3ed3c4; }
+.btn-ghost { color: #fff; border: 1px solid rgba(255,255,255,0.45); }
+.btn-ghost:hover { border-color: #fff; }
+.cadence { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.55); }
+</style>
+</head>
+<body>
+
+<div class="wall" aria-hidden="true">
+  <div class="col"><ul id="c1"></ul></div>
+  <div class="col"><ul id="c2"></ul></div>
+  <div class="col"><ul id="c3"></ul></div>
+  <div class="col"><ul id="c4"></ul></div>
+</div>
+
+<header class="bar">
+  <span class="word">CEDAR&nbsp;PRESS</span>
+  <button class="burger" aria-label="Menu" onclick="document.getElementById('m').classList.toggle('open')">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+<nav class="menu" id="m">
+  <a href="#">Sign in<small>Already have Cedar Press</small></a>
+  <a href="#">Get Cedar Press<small>Through Tribal Business News</small></a>
+  <a href="#">Methods<small>How the collections are built</small></a>
+  <a href="#">Tribal data requests<small>No subscription required</small></a>
+</nav>
+
+<main class="stage">
+  <div class="inner">
+    <p class="kicker">The ledger of Indian Country · live record</p>
+    <div class="big" id="big"></div>
+    <p class="what" id="what"></p>
+    <span class="chip" id="chip"><i></i><span id="chiptext"></span></span>
+    <div class="dots" id="dots"></div>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="ctas">
+    <a class="btn btn-primary" href="#">Get Cedar Press through Tribal Business News →</a>
+    <a class="btn btn-ghost" href="#">Sign in</a>
+  </div>
+  <p class="cadence">8.5M records maintained · figures update weekly · as of Sep 1, 2026</p>
+</footer>
+
+<script>
+/* Real rows from the Cedar sample files — the wall is genuine data. */
+const ROWS = [
+  "<b>2023</b> · NTIA Tribal Broadband award · Santa Ynez Band of Chumash Indians",
+  "<b>$500.0M</b> credit facility · Mohegan Tribal Gaming Authority · 2000",
+  "<b>2020</b> · Chugach Commercial Holdings acquires All American Oilfield stake",
+  "<b>$1.1M</b> · Ahtna Development Corp · Dept of Defense · 8(a) · FY2000",
+  "<b>FY2023</b> · Bowhead Program Management · Ukpeaġvik Iñupiat Corporation",
+  "<b>FY2025</b> · ASRC Federal Facilities Logistics · Arctic Slope Regional Corp",
+  "<b>$63,845</b> · Forestry on Indian Lands · Yurok Tribe · Interior · 2020",
+  "<b>$47,686</b> · Tribal Self-Governance · Tolowa Dee-ni' Nation · 2018",
+  "Homeowner Assistance Fund · Southern Ute Indian Tribe · Treasury · <b>2023</b>",
+  "<b>$3.47M</b> · ANCSA 7(i) revenue sharing · Ahtna, Incorporated · 2022",
+  "<b>$9.5M</b> · coal royalty · ONRR monthly revenue · Jun 2008",
+  "Jamul Casino · Jamul Indian Village · opened <b>2016</b> · 1,635 machines",
+  "Casino White Cloud · Iowa Tribe of Kansas and Nebraska · <b>1998</b>",
+  "Keex Kwan Gaming · Organized Village of Kake · Alaska",
+  "<b>1994</b> · NAGPRA Notice of Inventory Completion · Peabody Museum",
+  "<b>2007</b> · Notice of Inventory Completion · Sonoma State University",
+  "gas royalty · ONRR national aggregate · Oct <b>2004</b>",
+  "<b>2001</b> · Notice of Intent to Repatriate · Harvard Peabody Museum",
+];
+for (const id of ["c1","c2","c3","c4"]) {
+  const ul = document.getElementById(id);
+  let pool = [...ROWS].sort(() => Math.random() - 0.5);
+  ul.innerHTML = (pool.map(r => `<li>${r}</li>`).join("")).repeat(2);
+}
+
+/* The cycling figure with odometer flutter. */
+const STATS = [
+  { fig: "$176.7B", what: "in <b>federal contracts</b> traced to Native-owned firms since 2000" },
+  { fig: "$24.4B",  what: "in <b>federal subawards</b> with a Native business as prime or sub" },
+  { fig: "3.5M",    what: "<b>grant and assistance payments</b> to Indian Country on record" },
+  { fig: "2,386",   what: "<b>deals tracked</b> — acquisitions, joint ventures, financings, bonds" },
+];
+const ARRIVALS = [
+  "+118 contract actions · just landed",
+  "+$41.2M in new awards this release",
+  "+3 deals confirmed · Aug release",
+  "+2,204 assistance payments added",
+];
+const big = document.getElementById("big"), what = document.getElementById("what"),
+      chip = document.getElementById("chip"), chiptext = document.getElementById("chiptext"),
+      dots = document.getElementById("dots");
+STATS.forEach((_, i) => { const d = document.createElement("i"); dots.appendChild(d); });
+let idx = 0;
+function show(i) {
+  const s = STATS[i];
+  big.innerHTML = [...s.fig].map(ch => `<span class="digit">${ch}</span>`).join("");
+  requestAnimationFrame(() => {
+    [...big.children].forEach((d, j) => setTimeout(() => d.classList.add("flip"), j * 45));
+  });
+  what.innerHTML = s.what;
+  [...dots.children].forEach((d, j) => d.classList.toggle("on", j === i));
+  chip.classList.remove("show");
+  setTimeout(() => { chiptext.textContent = ARRIVALS[i]; chip.classList.add("show"); }, 900);
+  /* one wall line lights up as the "arriving" record */
+  document.querySelectorAll(".col li.hot").forEach(li => li.classList.remove("hot"));
+  const lis = document.querySelectorAll(".col li");
+  lis[Math.floor(Math.random() * lis.length)].classList.add("hot");
+}
+show(0);
+setInterval(() => { idx = (idx + 1) % STATS.length; show(idx); }, 5200);
+</script>
+</body>
+</html>
