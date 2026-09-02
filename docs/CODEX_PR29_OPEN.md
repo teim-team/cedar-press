@@ -53,3 +53,48 @@ Useful? React with 👍 / 👎.
 The per-dataset counts immediately below add up to 116 repaired and 1,098 unrecoverable cells: contractors contributes 2 repaired, subcontracting contributes 114 repaired plus 1,096 unrecoverable, and NAGPRA contributes another 2 unrecoverable. This summary instead reports 1,096 unrecoverable out of 1,212, silently omitting the two NAGPRA cells even though they are handled by the same scoring guard; report 1,098 of 1,214 so the published coverage total agrees with its breakdown.
 
 Useful? React with 👍 / 👎.
+
+<!-- BEGIN GAMING-DENOMINATOR-717-CORRECTION -->
+
+## CORRECTION 2026-09-02 — the gaming property denominator is 717, not 714
+
+Appended by `code/1142_gaming_denominator_doc_sweep.py`. **No prose above this
+line was edited**, per the rule the `GAMING-DENOMINATOR-2026-09-02` banner set
+for itself.
+
+Any figure in this document that uses **714** as the count of distinct gaming
+properties is superseded. The settled figure is **717**:
+
+```
+787   rows in gaming_facilities.csv
+-16   carrying cedar_place_id_absent_reason = NOT_A_PLACE
+=771   rows that are a place
+-54   extras collapsed by the 53 ADJUDICATED merge groups
+=717   distinct properties        <- COUNT(DISTINCT cedar_place_id)
+```
+
+**Why the old ladder gave 714.** It subtracted **57** duplicate extras found by
+name normalisation. The adjudication found **54**. The three-property
+difference is three groups a mechanical duplicate test called the same property
+and a human verdict did not:
+
+| group | why it is two properties |
+|---|---|
+| `THREE RIVERS` (OR) | Coos Bay 97420 and Florence 97439 — **67 km apart**, two casinos |
+| `GLACIER PEAKS` (MT) | a casino and its hotel |
+| `CITIES OF GOLD` (NM) | a casino and its hotel |
+
+A duplicate count is an upper bound on merges; an adjudication is the answer.
+
+**Two groups remain genuinely open** and either ruling moves 717: `THE STABLES`
+(a real Miami/Modoc joint operation — one property, two sovereigns) and
+`7 CLANS FIRST COUNCIL` (OK). Both are in
+`review/OWNER_DECISION_QUEUE.md` as GP-1 and GP-2.
+
+**Do not re-derive this number.** Seven values circulated for it — 787, 780,
+734, 727, 725, 717, 714 — each from a correct-looking rule applied to an
+undefined question. `gaming_facilities.csv` now answers it itself: the 16
+non-places carry a reason column, and the merged properties share a
+`cedar_place_id`. Read `COUNT(DISTINCT cedar_place_id)`.
+
+<!-- END GAMING-DENOMINATOR-717-CORRECTION -->

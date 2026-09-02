@@ -115,6 +115,61 @@ count claimed, or when a withheld column appears in a shipped header. A
 conservation proof that nothing broke is not a proof that something happened -
 that error shipped a "$1.5B attributed" claim on a table that attributed
 nothing, and it is the error this project makes most.
+
+THE FOUR WAYS IT DID EXACTLY THAT - FOUND BY CODEX ON PR #35, FIXED 2026-09-02
+------------------------------------------------------------------------------
+Every claim in the paragraph above was false, in four separate places, and
+each is now covered by a test that FAILS on the old code and PASSES on the
+new. The measurements are from the live tree, not from the review text.
+
+1. **A SHARED TABLE WENT TO ONE COLLECTION AND VANISHED FROM THE OTHERS.**
+   `build()` deduplicated on the table NAME, process-wide, so the collection
+   that sorted first won it and the rest got no file, no sample and no
+   manifest row. The contracts declare **299 (collection, table) memberships
+   over 294 distinct tables**, so **five memberships were dropped**: Funding
+   lost both `bie_uio_*` tables to `_entity_layer` and Lobbying lost all three
+   `fr_ex_parte_*` tables to `federal-register`. A customer who bought Funding
+   did not receive tables their contract names. Deduplication is now scoped to
+   `(collection, table)`; a sandbox build of just those four collections
+   writes 10 manifest rows and 10 samples where it used to write 5.
+
+2. **A MISSING CONTRACTED TABLE PASSED THE GATE.** `verify` skipped every
+   manifest row carrying a `note`, which is precisely the row that says
+   "named in contracts, absent on disk". Tested: a contract naming a table
+   that does not exist gave `verify` **exit 0** with neither the table nor its
+   sample anywhere. A note is now a failure. (The live manifest carries 0 note
+   rows today, so this was latent, not active.)
+
+3. **GLOB PREFIX MATCHING COUNTED THE NEIGHBOURS.** `glob(f"{stem}*.csv")`
+   swept in every sibling table whose filename starts with this one's.
+   Measured across the live bundle, **11 of the 239 full-copied tables
+   miscounted**: `prime_contracts` reported 46 files against a manifest of 27
+   (the rest were `prime_contracts_archive_backfill__*`), `faads_transactions`
+   reported 27 against a manifest of 1. A correct Contractors full build could
+   not pass. Matching is now the exact single filename plus the documented
+   `__...` split suffixes - see `pieces_of()`.
+
+4. **VERIFICATION NEVER OPENED THE FILES.** It counted filenames and re-read
+   the manifest's own `largest_file_mb`. Tested: truncating a shipped piece
+   from 7,828 rows to 99, leaving the file count unchanged, gave **exit 0**.
+   Every piece is now parsed - headers compared across pieces and against
+   `columns_published`, rows summed against `rows_published`, bytes measured
+   rather than recalled. 8.26 GB parses in **54 s** at the 174 MB/s measured
+   on this machine.
+
+AND WHAT DEFECT 3 WAS HIDING - OPEN, NOT FIXED HERE
+----------------------------------------------------
+Ten of those eleven miscounts were pure prefix noise. The eleventh was real
+and the noise had been absorbing it: `faads_transactions_all_agencies` holds
+**26 pieces on disk summing to 5,539,496 rows against a manifest claiming
+2,769,748** - exactly double, plus a 523.2 MB piece the byte-derived cap was
+introduced to prevent. **`build()` writes into `dist/review/spreadsheets/` and
+never clears it**, so an earlier vintage's `__2007.csv` sits beside this
+vintage's `__2007_part1.csv` and both are served. Nothing is missing and
+nothing is corrupt; the table is published twice under two split schemes.
+Flagged, not deleted - see `docs/KNOWN_ISSUES.md`, marker
+`REVIEW-BUNDLE-1135`. The fix is a build-side sweep of the stale pieces into
+`graveyard/`, which is a deletion decision and belongs to the owner.
 """
 from __future__ import annotations
 
@@ -223,15 +278,38 @@ def build(mode: str) -> int:
     do_full = mode == "full"
     cols_map = collections()
     man = []
+    # DEDUPLICATION IS SCOPED TO (collection, table), NOT TO THE TABLE.
+    #
+    # This was a process-wide `seen` set of table names, and a table named by
+    # two contracts was therefore built for whichever collection sorted first
+    # and silently omitted from the other - no file, no manifest row, not even
+    # a note. Measured 2026-09-02 against `docs/schema/dataset_contracts.json`:
+    # 299 declared (collection, table) pairs over 294 distinct tables, so
+    # **five pairs were dropped**. `_entity_layer` beat `funding` to both
+    # `bie_uio_*` tables and `federal-register` beat `lobbying` to all three
+    # `fr_ex_parte_*` tables, which means a customer who bought Funding or
+    # Lobbying did not receive tables their contract names.
+    #
+    # A physical table belonging to two collections is a fact about the
+    # contracts, not a mistake to be collapsed: `status` is declared per
+    # contract, so the same file can be shippable in one collection and
+    # internal in another, and only a per-collection pass can honour that.
+    # The cost of building the five twice is 9.6 MB.
+    #
+    # `seen` survives, but ONLY as the distinct-table count the summary
+    # prints. It no longer gates anything.
     seen = set()
+    done = set()
 
     for coll, tbls in sorted(cols_map.items()):
         for tname, shippable in sorted(tbls.items()):
+            if (coll, tname) in done:
+                continue
+            done.add((coll, tname))
             p = find(tname)
-            if p is None or tname in seen:
-                if p is None:
-                    man.append({"collection": coll, "table": tname,
-                                "note": "named in contracts, absent on disk"})
+            if p is None:
+                man.append({"collection": coll, "table": tname,
+                            "note": "named in contracts, absent on disk"})
                 continue
             seen.add(tname)
             try:
@@ -239,6 +317,12 @@ def build(mode: str) -> int:
                     rd = csv.DictReader(fh)
                     hdr = list(rd.fieldnames or [])
                     if not hdr:
+                        # A `continue` here left NO manifest row at all, so a
+                        # contracted table that had been truncated to zero
+                        # bytes vanished from the bundle without a trace. Say
+                        # so; `verify` treats a note as a failure.
+                        man.append({"collection": coll, "table": tname,
+                                    "note": "on disk but has no header row"})
                         continue
                     cols = publishable_columns(hdr)
                     dropped = [c for c in hdr if c not in cols]
@@ -330,7 +414,13 @@ def build(mode: str) -> int:
     over = [m for m in man if (m.get("largest_file_mb") or 0) * 1e6 > GITHUB_BYTES]
     print(f"  1135 review bundle   mode={mode}")
     print(f"    collections           : {len(cols_map)}")
-    print(f"    tables                : {len(seen)}")
+    print(f"    tables                : {len(seen)} distinct")
+    # BOTH counts, always. The five silently-dropped memberships were
+    # invisible because only the distinct-table figure was ever printed, and
+    # 294 looks like a complete answer until you know the contracts declare
+    # 299 memberships.
+    print(f"    contract memberships  : {len(man)} rows "
+          f"({sum(len(v) for v in cols_map.values())} declared)")
     print(f"    rows published        : {pub:,}")
     print(f"    rows withheld         : {wit:,}  "
           f"({100*wit/max(pub+wit,1):.2f}%, counted per table in the manifest)")
@@ -346,8 +436,60 @@ def build(mode: str) -> int:
     return 0
 
 
+def pieces_of(base: Path, stem: str) -> list:
+    """Exactly the files a manifest row for `stem` accounts for.
+
+    A `glob(f"{stem}*.csv")` counted every SIBLING table whose name starts
+    with this one's. Measured 2026-09-02 on the live bundle, 11 of the 239
+    full-copied tables miscounted this way - `prime_contracts*` swept in
+    `prime_contracts_archive_backfill__*` (46 files against a manifest of 27),
+    `faads_transactions*` swept in all 26 pieces of
+    `faads_transactions_all_agencies` against a manifest of 1, and
+    `native_bills*` swept in three unrelated tables. Ten of the eleven were
+    pure prefix noise; the eleventh is a real conservation defect the noise
+    was hiding.
+
+    The three shapes `build()` writes, and nothing else:
+
+        <stem>.csv                    single
+        <stem>__<year>.csv            split by year
+        <stem>__<year>_part<n>.csv    an oversized year
+        <stem>__part<nn>.csv          numbered parts, no year column
+
+    All of them are `<stem>.csv` or `<stem>__...`, and a sibling table's name
+    continues with a single `_` or a letter, never `__`.
+    """
+    out = []
+    single = base / f"{stem}.csv"
+    if single.exists():
+        out.append(single)
+    out.extend(sorted(base.glob(f"{stem}__*.csv")))
+    return out
+
+
+def read_piece(path: Path):
+    """(header, data row count) - PARSED, not guessed from the filename."""
+    with path.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+        rd = csv.reader(fh)
+        hdr = next(rd, None)
+        if hdr is None:
+            return None, 0
+        return tuple(hdr), sum(1 for _ in rd)
+
+
 def verify() -> int:
-    """Re-read off disk. Fail when the work did not land."""
+    """Re-read off disk. Fail when the work did not land.
+
+    THIS OPENS THE SPREADSHEETS. It used to count filenames and re-print the
+    manifest's own `largest_file_mb`, which means a truncated, duplicated or
+    hand-replaced piece passed as long as the number of files stayed the same
+    - a conservation guarantee stated in the docstring and never tested. Every
+    matched piece is now parsed: its header is compared against the manifest's
+    `columns_published` and against the withheld-column rules, its rows are
+    counted, and the pieces must sum to `rows_published`. 7.7 GB parses in
+    about a minute at the 174 MB/s measured on this machine, and a gate that
+    reads nothing is not worth the minute it saves.
+    """
     bad = []
     mf = OUT / "MANIFEST.csv"
     if not mf.exists():
@@ -355,8 +497,15 @@ def verify() -> int:
         return 1
     with mf.open(encoding="utf-8-sig", errors="replace") as fh:
         man = list(csv.DictReader(fh))
+    checked_files = checked_rows = checked_bytes = 0
     for m in man:
         if m.get("note"):
+            # A NOTE IS A FAILURE, NOT AN EXEMPTION. This was a `continue`,
+            # so a table the contracts name and the build could not find left
+            # a manifest row saying "absent on disk" and `verify` skipped it -
+            # exiting 0 with neither the table nor its required sample
+            # anywhere, which is the exact guarantee the gate claims to make.
+            bad.append(f"{m['collection']}/{m['table']}: {m['note']}")
             continue
         stem = m["table"][:-4]
         s = OUT / "samples" / m["collection"] / f"{stem}__10.csv"
@@ -375,16 +524,62 @@ def verify() -> int:
         if int(m.get("rows_published") or 0) > 0 and nrows == 0:
             bad.append(f"{stem}: {m['rows_published']} publishable rows, EMPTY sample")
         k = int(m.get("files") or 0)
-        if k:
-            got = len(list((OUT / "spreadsheets" / m["collection"]).glob(f"{stem}*.csv")))
-            if got != k:
-                bad.append(f"{stem}: manifest claims {k} file(s), {got} on disk")
-            if float(m.get("largest_file_mb") or 0) * 1e6 > GITHUB_BYTES:
-                bad.append(f"{stem}: a piece is over the 95 MB GitHub ceiling")
+        if not k:
+            continue
+        where = f"{m['collection']}/{stem}"
+        got = pieces_of(OUT / "spreadsheets" / m["collection"], stem)
+        if len(got) != k:
+            bad.append(f"{where}: manifest claims {k} file(s), {len(got)} on disk")
+        if not got:
+            continue
+
+        # ---- open every piece: rows, header, and the bytes as MEASURED ----
+        want_rows = int(m.get("rows_published") or 0)
+        want_cols = int(m.get("columns_published") or 0)
+        total, heads, biggest = 0, set(), 0
+        for q in got:
+            checked_files += 1
+            checked_bytes += q.stat().st_size
+            biggest = max(biggest, q.stat().st_size)
+            hdr, n = read_piece(q)
+            if hdr is None:
+                bad.append(f"{where}: {q.name} is empty - no header")
+                continue
+            heads.add(hdr)
+            total += n
+        checked_rows += total
+        if len(heads) > 1:
+            bad.append(f"{where}: {len(heads)} different headers across "
+                       f"{len(got)} piece(s) - the split does not reassemble")
+        for hdr in heads:
+            if want_cols and len(hdr) != want_cols:
+                bad.append(f"{where}: manifest claims {want_cols} columns, "
+                           f"a piece ships {len(hdr)}")
+            for c in hdr:
+                if c.lower() in DROP_COLS:
+                    bad.append(f"{where}: full ships proprietary column {c}")
+                if c in NEVER:
+                    bad.append(f"{where}: full ships a withheld column {c}")
+        if total != want_rows:
+            bad.append(f"{where}: pieces hold {total:,} rows, manifest claims "
+                       f"{want_rows:,} ({total - want_rows:+,})")
+        # Measured, not re-read out of the manifest. Trusting the recorded
+        # size means the ceiling check re-states the build's own claim.
+        if biggest > GITHUB_BYTES:
+            bad.append(f"{where}: largest piece {biggest/1e6:.1f} MB, over the "
+                       f"{GITHUB_BYTES/1024/1024:.0f} MiB ceiling")
+        said = float(m.get("largest_file_mb") or 0)
+        if abs(round(biggest / 1e6, 1) - said) > 0.1:
+            bad.append(f"{where}: manifest records largest_file_mb={said}, "
+                       f"disk holds {biggest/1e6:.1f}")
     for b in bad[:25]:
         print("  FAIL " + b)
+    if len(bad) > 25:
+        print(f"  ... {len(bad) - 25} more")
+    # Say what was READ, so "ok" cannot mean "opened nothing".
     print(f"  1135 verify   {'FAIL' if bad else 'ok'}   {len(bad)} problem(s); "
-          f"{len(man)} rows in manifest")
+          f"{len(man)} rows in manifest; parsed {checked_files:,} full file(s), "
+          f"{checked_rows:,} rows, {checked_bytes/1e9:.2f} GB")
     return 1 if bad else 0
 
 

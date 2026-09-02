@@ -1622,3 +1622,48 @@ NIGC publishes GGR at the **region** level and nowhere else. `gaming_revenue_bou
 **The federal total is complete only from FY2007**, where the modern assistance table begins. FY2000-06 carries prime only; the pre-2008 Native assistance slice is the separate `faads_pre2008_assistance_attributed` series, is **tier B throughout**, and overlaps the modern table in FY2007 by 11,063 transactions.
 
 <!-- END GAMING-TOTAL -->
+
+<!-- BEGIN GAMING-DENOMINATOR-717-CORRECTION -->
+
+## CORRECTION 2026-09-02 — the gaming property denominator is 717, not 714
+
+Appended by `code/1142_gaming_denominator_doc_sweep.py`. **No prose above this
+line was edited**, per the rule the `GAMING-DENOMINATOR-2026-09-02` banner set
+for itself.
+
+Any figure in this document that uses **714** as the count of distinct gaming
+properties is superseded. The settled figure is **717**:
+
+```
+787   rows in gaming_facilities.csv
+-16   carrying cedar_place_id_absent_reason = NOT_A_PLACE
+=771   rows that are a place
+-54   extras collapsed by the 53 ADJUDICATED merge groups
+=717   distinct properties        <- COUNT(DISTINCT cedar_place_id)
+```
+
+**Why the old ladder gave 714.** It subtracted **57** duplicate extras found by
+name normalisation. The adjudication found **54**. The three-property
+difference is three groups a mechanical duplicate test called the same property
+and a human verdict did not:
+
+| group | why it is two properties |
+|---|---|
+| `THREE RIVERS` (OR) | Coos Bay 97420 and Florence 97439 — **67 km apart**, two casinos |
+| `GLACIER PEAKS` (MT) | a casino and its hotel |
+| `CITIES OF GOLD` (NM) | a casino and its hotel |
+
+A duplicate count is an upper bound on merges; an adjudication is the answer.
+
+**Two groups remain genuinely open** and either ruling moves 717: `THE STABLES`
+(a real Miami/Modoc joint operation — one property, two sovereigns) and
+`7 CLANS FIRST COUNCIL` (OK). Both are in
+`review/OWNER_DECISION_QUEUE.md` as GP-1 and GP-2.
+
+**Do not re-derive this number.** Seven values circulated for it — 787, 780,
+734, 727, 725, 717, 714 — each from a correct-looking rule applied to an
+undefined question. `gaming_facilities.csv` now answers it itself: the 16
+non-places carry a reason column, and the merged properties share a
+`cedar_place_id`. Read `COUNT(DISTINCT cedar_place_id)`.
+
+<!-- END GAMING-DENOMINATOR-717-CORRECTION -->

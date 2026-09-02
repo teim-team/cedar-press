@@ -110,7 +110,8 @@
         "sam_namematch_2026_05_06": 135,
         "subsidiary_lookup": 114,
         "unmatched": 9314,
-        "web_verified": 40
+        "web_verified": 40,
+        "fpds_uei_cage_bridge": 163
       }
     },
     "cedar_identifier_ledger_tiered.csv": {
@@ -150,7 +151,8 @@
         "ledger_uei_state_disagreement_withheld": 15878,
         "not_evaluated:ak_scope_line9": 55443,
         "uei_exact_archive": 183995,
-        "unattributed": 80205
+        "unattributed": 80205,
+        "agent_research_one_leg": 154
       }
     },
     "native_entity_lobbying_disclosures.csv": {
@@ -196,5 +198,23 @@
         "usac_rhc_name_token_candidate": 5109
       }
     }
-  }
+  },
+  "declarations": [
+    {
+      "declared": "2026-09-02",
+      "table": "cedar_identifier_ledger_final.csv",
+      "term": "fpds_uei_cage_bridge",
+      "rows": 163,
+      "why": "1140_linkage_close.py: identifiers recovered from fpds_uei_cage_map.csv, the highest-yield unswept source measured at 666 of 1,555 spine entities. A JOIN METHOD in this table's sense - it records that a UEI and a CAGE were bridged through the FPDS map, not that anyone ruled on ownership, so it is deliberately outside the RULED set.",
+      "kind": "new term"
+    },
+    {
+      "declared": "2026-09-02",
+      "table": "federal_funding_transactions.csv",
+      "term": "agent_research_one_leg",
+      "rows": 154,
+      "why": "1140_linkage_close.py: an EXISTING term reaching a new table - it has carried 978 rows in cedar_assertions since before this registry. One evidence leg found by agent research, which is tier B by ENTITY_MATCH_RULES rule 8 and correctly outside the RULED set. Declared per-table because the registry is per-table by design: the same word means a join method in prime_contracts and an evidence provenance here.",
+      "kind": "existing term reaching a new table"
+    }
+  ]
 }

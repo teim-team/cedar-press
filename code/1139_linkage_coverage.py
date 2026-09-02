@@ -652,6 +652,42 @@ def do_baseline():
     return 0
 
 
+def below_floor():
+    """[(metric, reason)] for everything under its floor.  62 calls this.
+
+    Returns a one-element list naming the missing baseline rather than an
+    empty one, because an absent floor is UNMEASURED and must never read as
+    clean (AGENT_FIELD_GUIDE rule 4).
+    """
+    if not FLOOR.exists():
+        return [("_no_baseline",
+                 "data/clean/_linkage_coverage_baseline.json is absent - "
+                 "linkage coverage has no floor recorded, so a fall cannot "
+                 "be told from a first run. Record it: "
+                 "py -3 code/1139_linkage_coverage.py baseline")]
+    base = json.loads(FLOOR.read_text(encoding="utf-8"))
+    tol = int(base.get("tolerance_bp", TOLERANCE_BP))
+    now = metrics()
+    out = []
+    for k, floor in sorted(base["metrics"].items()):
+        v = now.get(k)
+        if v is None:
+            out.append((k, "present at the baseline, ABSENT now - a dataset "
+                           "that stopped being measured is not one that "
+                           "improved"))
+            continue
+        if v == "UNMEASURED":
+            out.append((k, f"UNMEASURED now, {floor} at the baseline"))
+            continue
+        if not isinstance(floor, int):
+            continue
+        slack = tol if k.endswith("_bp") else 0
+        if v < floor - slack:
+            out.append((k, f"{v:,} is below its floor of {floor:,}"
+                           + (f" (tolerance {tol} bp)" if slack else "")))
+    return out
+
+
 def do_verify(quiet=False):
     if not FLOOR.exists():
         print("NO BASELINE ON FILE. Record one: "

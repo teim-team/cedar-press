@@ -1909,3 +1909,59 @@ address; the Otoe-Missouria Tribe's own casino listing names that address, and
 the wrong `tribe_id` has already propagated a PONCA tribal-state compact onto
 the property in `gaming_property_federal_traces.csv`). Either ruling moves 717.
 <!-- END GAMING-QUALITY-1141 -->
+
+<!-- BEGIN REVIEW-BUNDLE-1135 -->
+## `dist/review/spreadsheets/` publishes `faads_transactions_all_agencies` TWICE
+
+*Added 2026-09-02 by the Codex PR #35 fix pass on `code/1135_full_dataset_review_bundle.py`.
+Flagged, not deleted.*
+
+**Measured.** `1135 verify`, now that it opens the files instead of counting
+their names:
+
+| | |
+|---|---:|
+| pieces of `faads_transactions_all_agencies` on disk | **26** |
+| pieces the manifest declares | 19 |
+| rows the pieces hold | **5,539,496** |
+| rows the manifest declares (`rows_published`) | 2,769,748 |
+| difference | **+2,769,748 — exactly one whole copy** |
+| largest piece on disk | **523.2 MB** |
+| largest piece the manifest records | 122.4 MB |
+
+**Cause.** `build()` writes into `dist/review/spreadsheets/<collection>/` and
+never clears it, so pieces from an earlier vintage survive a rebuild that
+splits the same table differently. This table has been split two ways: an
+older by-year split (`__2007.csv`, 523.2 MB — the exact file 1135's own
+docstring says the byte-derived cap was introduced to prevent) and the current
+year-plus-sub-part split (`__2007_part1.csv`, …). Both sets are on disk and
+both would be served.
+
+**Not** data loss and **not** corruption: every row is present, the table is
+present twice under two naming schemes. A buyer who downloaded "all the
+pieces" would double-count FAADS by 2.77M rows.
+
+**Why it went unseen.** `verify` matched pieces with `glob(f"{stem}*.csv")`,
+which also swept in `prime_contracts_archive_backfill__*` for
+`prime_contracts` and 26 unrelated files for `faads_transactions`. Eleven
+tables miscounted, ten of them pure prefix noise, and the one real
+conservation break sat in the middle of the noise looking like more of it.
+Exact-suffix matching (`pieces_of()`) removed the ten and left this one.
+
+**Not fixed here, and why.** The fix is a build-side sweep of superseded
+pieces into `graveyard/` before writing. That is a deletion decision about
+8 GB of generated content and this project's rule is flag, never delete —
+`py -3 code/1135_full_dataset_review_bundle.py verify` now fails loudly until
+somebody rules on it. Whoever does: sweep the WHOLE table's directory entry
+for that stem, not the individual files, because a partial restore is a
+rebuild revert wearing a different hat.
+
+**Related, unfixed, and not this pass's finding.**
+`bia_tribal_leaders_directory` ships `phone` and `email` as COLUMNS in both
+its sample and its full copy. `NEVER` is applied by `row_ok()` as a ROW gate —
+a row is withheld when one of those columns is non-blank — so a column that is
+blank on every published row ships its header. `verify` catches it (it has
+caught the sample for as long as the check has existed); `build()` does not
+prevent it. Either the header should be dropped like `DROP_COLS`, or the
+check should be relaxed to say what it means. It is a live gate failure today.
+<!-- END REVIEW-BUNDLE-1135 -->

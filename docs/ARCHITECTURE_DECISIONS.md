@@ -3098,3 +3098,145 @@ removed and the first screen is readable.
 **Consequence.** 13 spreadsheets, 13 codebooks, 13 notes pairs. `846`'s
 CRITICAL claim now asserts 13 built / 12 storefront / 1 Grove.
 <!-- END ADR-036-BUILD-VS-STOREFRONT -->
+
+<!-- BEGIN GAMING-DENOMINATOR-717-CORRECTION -->
+
+## CORRECTION 2026-09-02 — the gaming property denominator is 717, not 714
+
+Appended by `code/1142_gaming_denominator_doc_sweep.py`. **No prose above this
+line was edited**, per the rule the `GAMING-DENOMINATOR-2026-09-02` banner set
+for itself.
+
+Any figure in this document that uses **714** as the count of distinct gaming
+properties is superseded. The settled figure is **717**:
+
+```
+787   rows in gaming_facilities.csv
+-16   carrying cedar_place_id_absent_reason = NOT_A_PLACE
+=771   rows that are a place
+-54   extras collapsed by the 53 ADJUDICATED merge groups
+=717   distinct properties        <- COUNT(DISTINCT cedar_place_id)
+```
+
+**Why the old ladder gave 714.** It subtracted **57** duplicate extras found by
+name normalisation. The adjudication found **54**. The three-property
+difference is three groups a mechanical duplicate test called the same property
+and a human verdict did not:
+
+| group | why it is two properties |
+|---|---|
+| `THREE RIVERS` (OR) | Coos Bay 97420 and Florence 97439 — **67 km apart**, two casinos |
+| `GLACIER PEAKS` (MT) | a casino and its hotel |
+| `CITIES OF GOLD` (NM) | a casino and its hotel |
+
+A duplicate count is an upper bound on merges; an adjudication is the answer.
+
+**Two groups remain genuinely open** and either ruling moves 717: `THE STABLES`
+(a real Miami/Modoc joint operation — one property, two sovereigns) and
+`7 CLANS FIRST COUNCIL` (OK). Both are in
+`review/OWNER_DECISION_QUEUE.md` as GP-1 and GP-2.
+
+**Do not re-derive this number.** Seven values circulated for it — 787, 780,
+734, 727, 725, 717, 714 — each from a correct-looking rule applied to an
+undefined question. `gaming_facilities.csv` now answers it itself: the 16
+non-places carry a reason column, and the merged properties share a
+`cedar_place_id`. Read `COUNT(DISTINCT cedar_place_id)`.
+
+<!-- END GAMING-DENOMINATOR-717-CORRECTION -->
+
+<!-- BEGIN ADR-037-LINKAGE-COVERAGE -->
+## ADR-037 - linkage coverage is a RATCHETED product metric, and a low figure is not automatically a defect
+
+*Decided 2026-09-02 by workstream LINKAGE. `code/1139_linkage_coverage.py`
+(measure, gate) and `code/1140_linkage_close.py` (close the gap). Fifteen
+minutes of reading `docs/LINKAGE_COVERAGE.md` replaces this section; what is
+here is the four decisions and why the obvious alternative to each is worse.*
+
+### 1. LINKED is the CONJUNCTION, never the key column alone
+
+Every flagship in this product has more than one column that looks like the
+answer, and on three of them the columns disagree by a named population:
+
+| table | key column says | gate column says | apart |
+|---|---:|---:|---:|
+| `prime_contracts` | `tribe_id` 791,490 | `attributed_flag` 791,394 | **96** |
+| `federal_funding_transactions` (before this pass) | `tribe_id_neid` 552,602 | `attribution_status` 553,106 | **504** |
+
+The 96 are `Nakupuna Solutions, Llc` at `RULED_TIER_C_NOT_ATTRIBUTED` -
+$269,771,379 of NEGATIVE ruling that the key column counts as coverage. The
+504 were `Bristol Bay Native Corporation`, keys cleared by the FA-01 unlink
+and status columns left claiming an attribution - $494,305,407.20. **A
+numerator that reads only the key column sells both.** So LINKED is the
+conjunction of every column a consumer branches on, which is always the
+smallest available reading, and each sibling column is published beside it
+with the disagreement stated in rows.
+
+**Rejected: pick the "right" column per table.** There is no right column
+while two of them disagree; there is a defect, and the disagreement is the
+thing worth publishing.
+
+### 2. A dataset declares WHICH ENTITY the link names
+
+`native_owned_businesses.business_entity_id` is populated on 4 of 2,916 rows.
+Read as the numerator that is 0.14% and it is a true statement about the
+wrong column: `identity_scope` says these firms are owned by PEOPLE
+(`any_native` 1,567, `citizen` 385, `shareholder_descendant_or_spouse` 98),
+280 rows' names ARE natural persons, and `resolution_method` shows the
+resolver already REFUSING loose-token matches on `Cherokee Nation`, `Navajo`
+and `Eagle`. A sole proprietor is not a spine entity and minting one would be
+fabrication. The Native entity the row is ABOUT is the certifying nation, at
+2,767 of 2,916 (94.87%).
+
+So every dataset carries a `role` sentence naming which entity the link
+identifies, and the numerator reads the column for that role.
+
+### 3. A LIST-VALUED key is declared, not inferred
+
+`nagpra_notices` has no `cedar_uid`, `tribe_id` or `entity_id`. It carries six
+pipe-delimited role columns, because one notice names many parties in many
+roles. **A scan looking for the three usual id names reports 0% on a dataset
+that is 90.83% linked**, and that scan was run on this product before it was
+caught. `list_keys` declares them and LINKED is their union. Verified against
+the table's own `has_resolved_entity`: 6,169 both ways, **0 rows disagreeing
+in either direction**. The structural predicate is used rather than the flag
+because it survives the flag being dropped.
+
+### 4. THREE denominators, all correct, and the ratchet runs on the rawest
+
+- **rows in `data/clean`** - the whole table.
+- **rows that are `publishable = Y`** - what the customer file holds.
+  `native_owned_businesses` is 2,916 and 2,044. Neither is wrong; a figure
+  quoted without saying which one is.
+- **rows that CAN name an individual entity.** `natural-resources` reads
+  **6.24%**, and 9,791 of its 10,600 unlinked rows are
+  `aggregate_suppressed_by_publisher` - ONRR and the state publishers report
+  Indian Country revenue in AGGREGATE and never name a recipient. That is
+  `SOURCE_DOES_NOT_PUBLISH`: a fact about the world, never a Cedar
+  deficiency, and keying those rows would be fabrication. Against the 957
+  rows a recipient CAN be named on, the same table is **73.67%**. Same shape
+  in `nonprofits` (11.15% raw, **18.23%** of 7,804 once the 4,960 EXCLUDED_*
+  rulings are removed) and in `contractors` (64.99% raw, **68.50%** of
+  1,153,140 once `RULED_NOT_NATIVE` and `RULED_CLASS_ONLY` are removed).
+
+**The exclusion must be a DECLARED, PER-ROW, source-side or ruled fact,
+never a judgement made by the measuring script**, and `RULED_OWNER_NOT_IN_
+SPINE` is deliberately NOT in any of these sets, because that one IS a Cedar
+gap. **And the ratchet runs on the RAW figure**, so the third denominator can
+never be used to make a real fall look like a change of definition.
+
+### 5. The ratchet lives with the measurement, not in `62`'s baseline
+
+`62_no_regression_check.py` carries ONE new MUST_BE_ZERO counter,
+`linkage_metrics_below_floor`, answered from `1139`'s OWN baseline - the same
+arrangement as `293` and `845`. Seeding twenty-eight new metrics into `62`'s
+baseline would have required re-recording it, which bakes in whatever else is
+red that day; standing rule 15 forbids it. This way the gate is live the
+moment it lands.
+
+Two counters per dataset. `linkage_<d>_bp` is the ratio, with a **25 basis
+point** tolerance, because several flagships are rebuilt by other workstreams
+and a rebuild that adds honest unlinked rows lowers a ratio without losing a
+link. `linkage_<d>_rows` is the absolute count of linked rows and has **no
+tolerance at all**, so links being lost while the ratio holds still fails.
+`1139 selftest` proves both fire.
+<!-- END ADR-037-LINKAGE-COVERAGE -->

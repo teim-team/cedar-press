@@ -1632,7 +1632,85 @@ def measure_regenerate_guard():
             "regenerate_new_unsafe_writers": len(new)}
 
 
+# ===========================================================================
+# LINKAGE COVERAGE - the product claim, ratcheted (added 2026-09-02, LINKAGE)
+#
+# Cedar's product claim is that a row can be attributed to a Native entity.
+# Until 2026-09-02 that had never been measured across all thirteen customer
+# datasets at once, so it could fall without anything noticing.
+#
+# The measurement lives in `code/1139_linkage_coverage.py` and is imported,
+# not restated - the same arrangement as 293 and 845, and for the same reason
+# that `248` is a retired stub: two detectors for one class drift, and the
+# drifted one is the one that gets trusted.
+#
+# Two counters per dataset:
+#   linkage_<d>_bp    the RATIO in basis points. MUST_NOT_FALL, with 1139's
+#                     own 25 bp tolerance applied there, because a rebuild
+#                     that adds honest unlinked rows lowers a ratio without
+#                     losing a link.
+#   linkage_<d>_rows  the ABSOLUTE count of linked rows. MUST_NOT_FALL with
+#                     NO tolerance. This is the one that catches links being
+#                     lost while the ratio holds.
+# ===========================================================================
+
+def measure_linkage_coverage():
+    mod = load_module(CODE / "1139_linkage_coverage.py")
+    if mod is None:
+        # UNMEASURED is not zero and it is not "fine". A measurement that
+        # could not run has found nothing.
+        return {"linkage_datasets_measured": "UNMEASURED"}
+    try:
+        m = mod.metrics()
+    except Exception as e:
+        note(f"1139_linkage_coverage.metrics() raised ({type(e).__name__}: "
+             f"{e}) - LINKAGE COVERAGE IS UNMEASURED, NOT CLEAN.")
+        return {"linkage_datasets_measured": "UNMEASURED"}
+    # ANSWERED FROM 1139'S OWN BASELINE, not from this gate's.
+    #
+    # A metric absent from 62's baseline is SKIPPED rather than failed, and
+    # re-recording 62's baseline to seed these thirteen would bake in
+    # whatever else is red that day - standing rule 15. So the ratchet lives
+    # where the measurement lives, exactly as 293 and 845 do, and 62 carries
+    # one MUST_BE_ZERO counter that is live the moment this lands.
+    try:
+        below = mod.below_floor()
+    except Exception as e:
+        note(f"1139.below_floor() raised ({type(e).__name__}: {e}) - the "
+             f"linkage ratchet is UNMEASURED, NOT clean.")
+        below = None
+    if below is None:
+        m["linkage_metrics_below_floor"] = "UNMEASURED"
+    else:
+        m["linkage_metrics_below_floor"] = len(below)
+        for k, why in below[:12]:
+            note(f"LINKAGE COVERAGE FELL: {k} - {why}")
+
+    unmeasured = [k for k, v in m.items() if v == "UNMEASURED"]
+    if unmeasured:
+        note("linkage coverage UNMEASURED for: " + ", ".join(
+            sorted({k.rsplit('_', 1)[0] for k in unmeasured})))
+    live = [k for k in m if k.endswith("_bp") and isinstance(m[k], int)]
+    if live:
+        worst = sorted(live, key=lambda k: m[k])[:3]
+        note("linkage coverage (share of rows carrying a resolved Cedar "
+             "entity, measured by 1139 with the denominator stated per "
+             "dataset in docs/LINKAGE_COVERAGE.md): "
+             + ", ".join(f"{k[8:-3]}={m[k] / 100:.2f}%" for k in worst)
+             + " are the three lowest. A LOW figure is not automatically a "
+               "defect - `natural-resources` reads 6.24% because ONRR "
+               "publishes Indian Country revenue in AGGREGATE, and against "
+               "the rows that CAN name a recipient it is 73.67%. Read the "
+               "third denominator in the doc before treating one as work.")
+    return m
+
+
 MUST_BE_ZERO = {
+    # LINKAGE. Answered from 1139's OWN baseline, the same arrangement as 293
+    # and 845, so it is live the moment it lands and needs no re-baselining
+    # of this gate. Any dataset whose share OR absolute count of rows
+    # carrying a resolved Cedar entity falls below its recorded floor.
+    "linkage_metrics_below_floor",
     "sk_firms_on_idaho",
     "tierA_without_entity", "X_rows_naming_an_owner", "spine_duplicate_ids",
     "codebook_undocumented_public", "duns_marked_publishable",
@@ -1835,6 +1913,7 @@ def main():
     now.update(measure_ledger_state_column())
     now.update(measure_lint_bug_classes())
     now.update(measure_regenerate_guard())
+    now.update(measure_linkage_coverage())
     sem, sem_named, sem_snap = measure_semantic_diff()
     now.update(sem)
 
