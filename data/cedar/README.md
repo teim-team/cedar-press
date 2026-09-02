@@ -340,6 +340,24 @@ anyone checked. On the full scan:
 | `subcontracting` | 42% | **100%** |
 | `funding` | 40% | **80%** |
 
+**Those are the figures as measured when the sampling cap was found, and the
+contracting one has since moved a long way down — which is the correction
+working, not a regression.** Re-measured on the live table today:
+
+| | then | now |
+|---|---:|---:|
+| `prime_contracts` rows carrying a `cedar_uid` | 888,958 (73.0%) | **789,456 (64.8%)** |
+| attributed obligations | $244.77B | **$229.71B** |
+| distinct attributed entities | 449 | **526** |
+
+**Attribution fell by 99,502 rows and $15.06B while the number of distinct
+entities rose by 77.** Those move in opposite directions because the work in
+between was *removing* wrong attributions, not adding right ones — the Old
+Harbor repoint in this branch is 4,947 rows of it, and the United Keetoowah /
+Cherokee Nation merge another 820. A coverage percentage that falls because
+bad links were withdrawn is a better number than the one it replaced, and
+reading it as a regression would push in exactly the wrong direction.
+
 So `subcontracting` is fully keyed, its C4 blocker was removed because it was
 measuring the wrong thing, and **the 42% in this file was the stale half of
 the pair.** `funding`'s number moved twice — the full scan first put it at
