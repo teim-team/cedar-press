@@ -20,14 +20,14 @@ Three honest outcomes, and they are three different jobs:
 
 | | count |
 |---|---:|
-| shippable tables | 221 |
-| **DECLARED_VALIDATED** | **189** |
+| shippable tables | 223 |
+| **DECLARED_VALIDATED** | **195** |
 | OPEN_WITH_EVIDENCE | 7 |
 | DEFECTIVE | 13 |
-| still unexplained | 12 |
-| ratchet `contract_grain_unstated_shippable` | **32** (was 207) |
+| still unexplained | 8 |
+| ratchet `contract_grain_unstated_shippable` | **28** (was 207) |
 
-A declaration that the data contradicts is release-blocking through `contract_violations`; there are **8**.
+A declaration that the data contradicts is release-blocking through `contract_violations`; there are **7**.
 
 ## DEFECTIVE - data bugs found by the sweep
 
@@ -368,11 +368,11 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 
 ### Gaming Intelligence  (`gaming`)
 
-44 of 52 shippable tables declared.
+51 of 54 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
-| `ca_gaming_facilities_official.csv` | 245 | **DECLARATION FAILED** | `record_id` | `cedar_uid`→7, `facility_id`→4, `tribe_id`→7 |
+| `ca_gaming_facilities_official.csv` | 245 | DECLARED_VALIDATED | `record_id` | `cedar_uid`→7, `facility_id`→4, `tribe_id`→7 |
 | `ca_gaming_payments.csv` | 40,164 | DECLARED_VALIDATED | `payment_id` | `cedar_uid`→534, `tribe_id`→534 |
 | `compact_events.csv` | 31 | DECLARED_VALIDATED | `event_id` | `cedar_uid`→2, `compact_id`→2, `entity_id`→2, `tribe_id`→2 |
 | `compact_obligation_tribal_agency_bridge.csv` | 927 | DECLARED_VALIDATED | `bridge_id` | `cedar_uid`→23, `compact_id`→15, `tribe_id`→23 |
@@ -405,6 +405,8 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 | `gaming_properties.csv` | 784 | DECLARED_VALIDATED | `facility_id` | `cedar_uid`→28, `facility_id`→1, `tribe_id`→28 |
 | `gaming_property_federal_traces.csv` | 774 | DECLARED_VALIDATED | `facility_id` | `cedar_uid`→28, `compact_id`→28, `facility_id`→1, `tribe_id`→28 |
 | `gaming_property_labor_demand.csv` | 43 | DECLARED_VALIDATED | `observation_id` | `cedar_uid`→6, `entity_id`→6, `facility_id`→6, `tribe_id`→6 |
+| `gaming_property_self_published_assertions.csv` | — | unexplained | — | — |
+| `gaming_property_self_published_claims.csv` | — | unexplained | — | — |
 | `gaming_property_site_observations.csv` | 262 | DECLARED_VALIDATED | `observation_id` | `cedar_uid`→25, `entity_id`→25, `facility_id`→13, `tribe_id`→25 |
 | `gaming_property_universe_events.csv` | 10 | DECLARED_VALIDATED | `event_id` | `cedar_uid`→1, `entity_id`→1, `facility_id`→1 |
 | `gaming_revenue_bounds.csv` | 13,803 | DECLARED_VALIDATED | `bound_id` | `cedar_uid`→466, `facility_id`→82, `tribe_id`→466 |
@@ -412,13 +414,13 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 | `gaming_vendor_tribal_licenses.csv` | 740 | DECLARED_VALIDATED | `vendor_name` + `tribal_gaming_regulator` + `source_url` | `cedar_uid`→287, `entity_id`→287 |
 | `loyalty_program_property.csv` | 48 | DECLARED_VALIDATED | `loyalty_program_id` + `facility_id` | `cedar_uid`→11, `entity_id`→11, `facility_id`→1, `tribe_id`→11 |
 | `loyalty_programs.csv` | 18 | DECLARED_VALIDATED | `loyalty_program_id` | `cedar_uid`→1, `entity_id`→1, `tribe_id`→1 |
-| `nigc_action_parties.csv` | — | unexplained | — | — |
+| `nigc_action_parties.csv` | — | DECLARED_VALIDATED | `record_id` + `tribe_entity_id` + `role` | `record_id`→2, `tribe_entity_id`→15 |
 | `nigc_declination_letters.csv` | 327 | DECLARED_VALIDATED | `cedar_opinion_id` | `cedar_uid`→7 |
-| `nigc_document_surface.csv` | — | unexplained | — | — |
-| `nigc_enforcement_actions.csv` | — | unexplained | — | — |
-| `nigc_game_classification_opinions.csv` | — | unexplained | — | — |
-| `nigc_indian_lands_opinions.csv` | — | unexplained | — | — |
-| `nigc_management_contract_approvals.csv` | — | unexplained | — | — |
+| `nigc_document_surface.csv` | — | DECLARED_VALIDATED | `nigc_category` + `document_slug` | `document_slug`→4 |
+| `nigc_enforcement_actions.csv` | — | DECLARED_VALIDATED | `action_id` | `action_id`→1, `tribe_entity_id`→15 |
+| `nigc_game_classification_opinions.csv` | — | DECLARED_VALIDATED | `opinion_id` | `opinion_id`→1 |
+| `nigc_indian_lands_opinions.csv` | — | DECLARED_VALIDATED | `opinion_id` | `opinion_id`→1 |
+| `nigc_management_contract_approvals.csv` | — | DECLARED_VALIDATED | `action_id` | `action_id`→1 |
 | `nigc_region_assignments.csv` | 2,438 | DECLARED_VALIDATED | `facility_id` + `effective_start_year` | `administrative_region_id`→190, `cedar_uid`→81, `facility_id`→4, `tribe_id`→81 |
 | `nigc_regional_ggr.csv` | 198 | DECLARED_VALIDATED | `administrative_region_id` + `fiscal_year` | `administrative_region_id`→10 |
 | `nigc_revenue_bands.csv` | 20 | DECLARED_VALIDATED | `band_id` | — |

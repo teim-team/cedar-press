@@ -2,11 +2,11 @@
 
 *Generated 2026-09-01 by `code/512_build_dataset_contracts.py` (mission Phase 1). Regenerate rather than edit; `verify` exits 1 when the world breaks a contract, and 62 gates on it.*
 
-**13 collections, 261 tables claimed, 6 orphaned shippable tables, 8 violations.**
+**13 collections, 263 tables claimed, 6 orphaned shippable tables, 7 violations.**
 
-**Grain: 189 of 221 shippable tables declare and VALIDATE a row grain, a primary key and a join cardinality; 32 do not.** A declared grain the data contradicts is a release-blocking violation, listed below. An unstated grain is ratcheted by `62_no_regression_check.contract_grain_unstated_shippable`: the count may only fall, and a new shippable table that lands without one fails the gate that day.
+**Grain: 195 of 223 shippable tables declare and VALIDATE a row grain, a primary key and a join cardinality; 28 do not.** A declared grain the data contradicts is a release-blocking violation, listed below. An unstated grain is ratcheted by `62_no_regression_check.contract_grain_unstated_shippable`: the count may only fall, and a new shippable table that lands without one fails the gate that day.
 
-<details><summary>Shippable tables with an UNSTATED grain (32) - a buyer cannot join these safely</summary>
+<details><summary>Shippable tables with an UNSTATED grain (28) - a buyer cannot join these safely</summary>
 
 - `cedar_identifier_graph_edges.csv`
 - `cedar_ruling_ledger_consolidated.csv`
@@ -19,17 +19,13 @@
 - `fac_audit_sefa_gaming_programs.csv` — the file has ONE row. Uniqueness is vacuous. QUESTION: is a row a (report, federal program) line off the SEFA, so that report_id repeats once a second program is parsed?
 - `ferc_docket_filings.csv`
 - `foia_request_index.csv` — no key was found at any arity up to 6 over 9,481 rows. `foia_request_id` REPEATS 381 times; adding `status` still leaves 66 collisions; adding source_url, received_date and both `seeks_*` flags still leaves 8. QUESTION: is a row one FOIA request - in which case the 381 repeats are a defect and the id must be made unique - or one (request, matched tribe mention), in which case the key needs the entity column and should be stated?
+- `gaming_property_self_published_assertions.csv`
+- `gaming_property_self_published_claims.csv`
 - `hearing_bill_links.csv`
 - `lobbying_registrant_native_ownership_evidence.csv`
 - `native_bills_subject_sweep.csv`
 - `native_owned_businesses.csv`
 - `native_passthrough.csv`
-- `nigc_action_parties.csv`
-- `nigc_document_surface.csv`
-- `nigc_enforcement_actions.csv`
-- `nigc_game_classification_opinions.csv`
-- `nigc_indian_lands_opinions.csv`
-- `nigc_management_contract_approvals.csv`
 - `nonprofit_schedule_c_coverage.csv`
 - `nonprofit_schedule_c_lobbying.csv`
 - `np_schedule_i_grants.csv`
@@ -45,7 +41,6 @@
 
 ## VIOLATIONS - the contract the world currently breaks
 
-- ca_gaming_facilities_official.csv: declared join_cardinality names column(s) not in the header: ['cedar_uid']
 - entity_aliases.csv: declared primary_key ['alias_id'] is NOT unique - 1 duplicate row(s) of 6,298, e.g. ('',). A buyer joining on it gets rows we did not promise them.
 - ORPHAN shippable table: native_owned_businesses.csv - registered in the codebook but claimed by NO collection
 - ORPHAN shippable table: nonprofit_schedule_c_coverage.csv - registered in the codebook but claimed by NO collection
@@ -64,7 +59,7 @@ Rebuild: `py -3 code/build.py run funding --execute` — 17 tables.
 | `bie_uio_dollars_by_entity.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
 | `bie_uio_identifier_links.csv` | internal-by-decision | `tribe_id` `cedar_uid` `uei` `ein` | — | — |
 | `faads_attribution_audit_sample.csv` | internal-by-decision | `tribe_id` `cedar_uid` | — | — |
-| `faads_entity_attribution.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
+| `faads_entity_attribution.csv` | shippable | `tribe_id` `cedar_uid` | `73_faads_name_attribution.py` | `710_faads_attribution_content_key.py` |
 | `faads_identifier_coverage_by_agency_year.csv` | internal-by-decision | — | — | — |
 | `faads_transactions.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
 | `faads_transactions_all_agencies.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
@@ -742,11 +737,11 @@ Declared grain — validated against the file on every run:
 
 ## Gaming Intelligence  (`gaming`, shelf: grove)
 
-Rebuild: `py -3 code/build.py run gaming --execute` — 59 tables.
+Rebuild: `py -3 code/build.py run gaming --execute` — 61 tables.
 
 | table | status | keys | rebuilt by | enriched by |
 |---|---|---|---|---|
-| `ca_gaming_facilities_official.csv` | shippable | `tribe_id` `facility_id` | `103_build_california_gaming.py` | `266_apply_gaming_hub_spillover_rulings.py` |
+| `ca_gaming_facilities_official.csv` | shippable | `tribe_id` `cedar_uid` `facility_id` | — | — |
 | `ca_gaming_payments.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
 | `compact_events.csv` | shippable | `tribe_id` `cedar_uid` `entity_id` `compact_id` | — | — |
 | `compact_obligation_tribal_agency_bridge.csv` | shippable | `tribe_id` `cedar_uid` `compact_id` | — | — |
@@ -781,10 +776,12 @@ Rebuild: `py -3 code/build.py run gaming --execute` — 59 tables.
 | `gaming_projections.csv` | shippable | — | — | — |
 | `gaming_properties.csv` | shippable | `tribe_id` `cedar_uid` `facility_id` | `82_build_gaming_property_dataset.py` | `160_sync_published_gaming_view.py` `175_sync_published_property_view_entities.py` `255_fix_gaming_property_deal_counts.py` |
 | `gaming_property_capacity_history.csv` | licensed-never-ships | `entity_id` `facility_id` | — | — |
-| `gaming_property_coverage.csv` | internal-by-decision | `tribe_id` `entity_id` `facility_id` | — | — |
+| `gaming_property_coverage.csv` | internal-by-decision | `tribe_id` `cedar_uid` `entity_id` `facility_id` | — | — |
 | `gaming_property_federal_traces.csv` | shippable | `tribe_id` `cedar_uid` `facility_id` `compact_id` | — | — |
 | `gaming_property_labor_demand.csv` | shippable | `tribe_id` `cedar_uid` `entity_id` `facility_id` | — | — |
 | `gaming_property_locations.csv` | UNDOCUMENTED | `property_id` | — | — |
+| `gaming_property_self_published_assertions.csv` | shippable | `tribe_id` `cedar_uid` `entity_id` `facility_id` | — | — |
+| `gaming_property_self_published_claims.csv` | shippable | `tribe_id` `cedar_uid` `facility_id` | — | — |
 | `gaming_property_site_observations.csv` | shippable | `tribe_id` `cedar_uid` `entity_id` `facility_id` | — | — |
 | `gaming_property_universe_events.csv` | shippable | `cedar_uid` `entity_id` `facility_id` | `89_nigc_map_wayback_universe.py` | `165_link_universe_events_to_hub.py` |
 | `gaming_revenue_bounds.csv` | shippable | `tribe_id` `cedar_uid` `facility_id` | — | — |
@@ -809,8 +806,8 @@ Rebuild: `py -3 code/build.py run gaming --execute` — 59 tables.
 Declared grain — validated against the file on every run:
 
 - `ca_gaming_facilities_official.csv` — one row per facility as it appears on ONE official California list at ONE as-of date - a facility on three lists has three rows
-  - primary key: `record_id`  (**VALIDATION FAILED — see violations**)
-  - join cardinality: `cedar_uid` → many row(s) per value, `facility_id` → many row(s) per value (measured max 4), `tribe_id` → many row(s) per value (measured max 7)
+  - primary key: `record_id`  (validated unique)
+  - join cardinality: `cedar_uid` → many row(s) per value (measured max 7), `facility_id` → many row(s) per value (measured max 4), `tribe_id` → many row(s) per value (measured max 7)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
 - `ca_gaming_payments.csv` — one row per published California gaming payment observation (fund x party x period x metric)
   - primary key: `payment_id`  (validated unique)
@@ -957,10 +954,34 @@ Declared grain — validated against the file on every run:
   - primary key: `loyalty_program_id`  (validated unique)
   - join cardinality: `cedar_uid` → one row(s) per value (measured max 1), `entity_id` → one row(s) per value (measured max 1), `tribe_id` → one row(s) per value (measured max 1)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
+- `nigc_action_parties.csv` — one row per (ACTION, PARTY, ROLE) - the ADR-010 party bridge for the two NIGC document tables. Roles respondent and tribal_party; 384 entity, 2 multi_entity
+  - primary key: `record_id` + `tribe_entity_id` + `role`  (validated unique)
+  - join cardinality: `record_id` → many row(s) per value (measured max 2), `tribe_entity_id` → many row(s) per value (measured max 15)
+  - declared by: code/586 assertion; INT-2 2026-09-01
 - `nigc_declination_letters.csv` — one row per NIGC declination opinion
   - primary key: `cedar_opinion_id`  (validated unique)
   - join cardinality: `cedar_uid` → many row(s) per value (measured max 7)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
+- `nigc_document_surface.csv` — one row per (CATEGORY, DOCUMENT) MEMBERSHIP - NOT one row per document. 7,930 memberships over 4,071 distinct documents in 73 categories; a document filed in three categories has three rows. NEVER SUM THIS AGAINST nigc_ordinances.csv (1,155) or nigc_declination_letters.csv (327): those are instrument tables at one row per instrument and this is the INDEX that measures them. NIGC's index carries 1,162 ordinance and 329 declination documents, so +7 and +2 are the REFRESH SIGNAL, not a double count
+  - primary key: `nigc_category` + `document_slug`  (validated unique)
+  - join cardinality: `document_slug` → many row(s) per value (measured max 4)
+  - declared by: code/586 assertion; INT-2 2026-09-01
+- `nigc_enforcement_actions.csv` — one row per published NIGC ENFORCEMENT DOCUMENT, 1995-2026. NOT one row per violation and NOT one row per tribe: a single matter routinely yields both an NOV and a settlement agreement - Squaxin Island NOV-06-07 and SA-06-07 are two documents and two rows
+  - primary key: `action_id`  (validated unique)
+  - join cardinality: `action_id` → one row(s) per value (measured max 1), `tribe_entity_id` → many row(s) per value (measured max 15)
+  - declared by: code/586 assertion; INT-2 2026-09-01
+- `nigc_game_classification_opinions.csv` — one row per published GAME CLASSIFICATION OPINION, 1992-09-14 to 2024-04-26. NO ENTITY COLUMN BY NATURE - the subject is a GAME, so record_scope = indian_country on all 122 (ADR-010) and this table must NOT be scored on entity attachment
+  - primary key: `opinion_id`  (validated unique)
+  - join cardinality: `opinion_id` → one row(s) per value (measured max 1)
+  - declared by: code/586 assertion; INT-2 2026-09-01
+- `nigc_indian_lands_opinions.csv` — one row per published INDIAN LANDS OPINION, 1997-08-12 to 2026-05-18. A tribe with four parcels has four rows
+  - primary key: `opinion_id`  (validated unique)
+  - join cardinality: `opinion_id` → one row(s) per value (measured max 1)
+  - declared by: code/586 assertion; INT-2 2026-09-01
+- `nigc_management_contract_approvals.csv` — one row per Chair-approved MANAGEMENT CONTRACT DOCUMENT, 55 tribes. A SNAPSHOT, not a history - NIGC posts the current roster only and publishes no retired contracts, so absence here is not evidence a contract never existed
+  - primary key: `action_id`  (validated unique)
+  - join cardinality: `action_id` → one row(s) per value (measured max 1)
+  - declared by: code/586 assertion; INT-2 2026-09-01
 - `nigc_region_assignments.csv` — one row per (facility, NIGC region assignment start year)
   - primary key: `facility_id` + `effective_start_year`  (validated unique)
   - join cardinality: `administrative_region_id` → many row(s) per value (measured max 190), `cedar_uid` → many row(s) per value (measured max 81), `facility_id` → many row(s) per value (measured max 4), `tribe_id` → many row(s) per value (measured max 81)

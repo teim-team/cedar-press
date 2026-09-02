@@ -53,7 +53,7 @@ at one end and a retired MMS series that stopped in 2000 at the other.
 
 # PART 0 — THE CADENCE TABLE, ONE ROW PER SOURCE
 
-*Generated 2026-09-02T01:36:05+00:00 by `code/630_refresh_cadence.py`. Every `cedar_holds_through` below was MEASURED from the file named beside it on this run. Re-run the script and the numbers update; do not hand-edit inside the markers.*
+*Generated 2026-09-02T01:51:54+00:00 by `code/630_refresh_cadence.py`. Every `cedar_holds_through` below was MEASURED from the file named beside it on this run. Re-run the script and the numbers update; do not hand-edit inside the markers.*
 
 **55 sources across 13 datasets.**
 
@@ -1102,7 +1102,7 @@ at one end and a retired MMS series that stopped in 2000 at the other.
 | **source_has_through** | **—** — NOT RE-PROBED this run. **The BMF is the fastest-moving source in the nonprofits dataset (monthly) and the 990 returns are the slowest (18 months) — this is the clearest case in Cedar of one dataset with two clocks.** (established 2026-08-12) |
 | cedar_last_pulled | 2026-08-12 — max(fetched_date) over 4 rows of data/raw/external/irs990/bmf_full_2026-08-12/_fetch_manifest.csv |
 | **refresh_due** | **no** — source_has_through is NOT ESTABLISHED — this source cannot be called current or stale on the evidence held |
-| age | Cedar's edge is — days old; our knowledge of the SOURCE is 20 days old; measured gap behind the source 0 days |
+| age | Cedar's edge is 154 days old; our knowledge of the SOURCE is 20 days old; measured gap behind the source 0 days |
 | refresh_cost | one monthly extract |
 | refresh_command | the BMF leg of code/112 |
 | breaks_on_refresh | np_ein_entity_hub.csv, np_ein_uei_bridge.csv |
@@ -1204,6 +1204,18 @@ A three-tier trigger that replaces the calendar. Nothing below requires a new cr
 **Why this is the honest answer rather than a schedule.** A cadence column for a tribal vendor list would be a fabrication — the list changes when a tribal office remembers to update it, and no header, notice or index announces that. What CAN be established cheaply is whether the page moved, and that is a measurement rather than a guess. The observed cadences in the table above are exactly that: **derived from the dates of items the sites actually posted**, and they should be used to set each site's own check interval — a site posting monthly is worth checking monthly; one posting semiannually is not.
 
 **Two rules this inherits and must not lose.** Read `robots.txt` and the terms page before any check, not just before a harvest — six publishers have stated restrictive terms and are excluded by every route. And one poller per host, always: a change-detection sweep across 1,555 hosts is still 1,555 requests and must be paced.
+
+---
+
+## The bounded probes that established the source edges above
+
+*3 requests, one per host, ≥6s apart, taken on **2026-09-01** and carried forward — this run issued none. Re-take them with `--probe-net`. Host locks respected: ['eaglemountaincasino.com'].*
+
+```
+{"host": "www.federalregister.gov", "url": "https://www.federalregister.gov/api/v1/documents.json?per_page=1&order=newest&fields[]=publication_date", "status": 200, "count": 10000, "publication_date": "2026-09-01"}
+{"host": "lda.gov", "url": "https://lda.gov/api/v1/filings/?page_size=1&ordering=-dt_posted", "status": 200, "count": 1976576, "dt_posted": "2026-09-01T20:53:39-04:00", "filing_year": 2026, "filing_period": "second_quarter", "filing_type_display": "2nd Quarter - Report (No Activity)"}
+{"host": "lda.gov", "url": "https://lda.gov/api/v1/filings/?page_size=1&ordering=dt_posted", "status": 200, "count": 1976576, "dt_posted": "1905-06-24T00:00:00-05:00", "filing_year": 1999, "filing_period": "mid_year", "filing_type_display": "Mid-Year Report"}
+```
 
 <!-- CEDAR:CADENCE-MEASURED END -->
 

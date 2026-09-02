@@ -2,7 +2,7 @@
  "built_date": "2026-09-01",
  "derivation": "500.COLLECTIONS + cedar_codebook + cedar_pipeline; GRAIN declared, everything else derived",
  "n_collections": 13,
- "n_tables_claimed": 261,
+ "n_tables_claimed": 263,
  "n_orphan_shippable": 6,
  "orphans": [
   "native_owned_businesses.csv",
@@ -12,9 +12,9 @@
   "regulations_gov_entity_coverage.csv",
   "sam_native_class_distributions.csv"
  ],
- "n_shippable": 221,
- "n_shippable_grain_stated": 189,
- "n_shippable_grain_unstated": 32,
+ "n_shippable": 223,
+ "n_shippable_grain_stated": 195,
+ "n_shippable_grain_unstated": 28,
  "shippable_grain_unstated": [
   "cedar_identifier_graph_edges.csv",
   "cedar_ruling_ledger_consolidated.csv",
@@ -27,17 +27,13 @@
   "fac_audit_sefa_gaming_programs.csv",
   "ferc_docket_filings.csv",
   "foia_request_index.csv",
+  "gaming_property_self_published_assertions.csv",
+  "gaming_property_self_published_claims.csv",
   "hearing_bill_links.csv",
   "lobbying_registrant_native_ownership_evidence.csv",
   "native_bills_subject_sweep.csv",
   "native_owned_businesses.csv",
   "native_passthrough.csv",
-  "nigc_action_parties.csv",
-  "nigc_document_surface.csv",
-  "nigc_enforcement_actions.csv",
-  "nigc_game_classification_opinions.csv",
-  "nigc_indian_lands_opinions.csv",
-  "nigc_management_contract_approvals.csv",
   "nonprofit_schedule_c_coverage.csv",
   "nonprofit_schedule_c_lobbying.csv",
   "np_schedule_i_grants.csv",
@@ -51,7 +47,7 @@
  ],
  "n_shippable_grain_open_with_evidence": 7,
  "n_shippable_grain_defective": 13,
- "n_shippable_grain_unexplained": 12,
+ "n_shippable_grain_unexplained": 8,
  "shippable_grain_open_with_evidence": [
   "congressional_correspondence_log.csv",
   "contractor_ranking.csv",
@@ -77,13 +73,9 @@
   "tcu_cdfi_ownership_evidence.csv"
  ],
  "shippable_grain_unexplained": [
+  "gaming_property_self_published_assertions.csv",
+  "gaming_property_self_published_claims.csv",
   "native_owned_businesses.csv",
-  "nigc_action_parties.csv",
-  "nigc_document_surface.csv",
-  "nigc_enforcement_actions.csv",
-  "nigc_game_classification_opinions.csv",
-  "nigc_indian_lands_opinions.csv",
-  "nigc_management_contract_approvals.csv",
   "nonprofit_schedule_c_coverage.csv",
   "nonprofit_schedule_c_lobbying.csv",
   "regulations_gov_comments.csv",
@@ -119,9 +111,8 @@
   "lobbying_registrant_native_ownership_evidence.csv": "4 LITERAL duplicate rows of 27 - 15% of a table the build log describes as 'one row per evidence route'. Four evidence routes are recorded twice.",
   "hearing_bill_links.csv": "1 LITERAL duplicate row of 465: (bill_id, event_id) = (119-s-3878, 338549) appears twice."
  },
- "n_violations": 8,
+ "n_violations": 7,
  "violations": [
-  "ca_gaming_facilities_official.csv: declared join_cardinality names column(s) not in the header: ['cedar_uid']",
   "entity_aliases.csv: declared primary_key ['alias_id'] is NOT unique - 1 duplicate row(s) of 6,298, e.g. ('',). A buyer joining on it gets rows we did not promise them.",
   "ORPHAN shippable table: native_owned_businesses.csv - registered in the codebook but claimed by NO collection",
   "ORPHAN shippable table: nonprofit_schedule_c_coverage.csv - registered in the codebook but claimed by NO collection",
@@ -287,8 +278,12 @@
        "cedar_uid": 536
       }
      },
-     "rebuilt_by": [],
-     "enriched_by": [],
+     "rebuilt_by": [
+      "73_faads_name_attribution.py"
+     ],
+     "enriched_by": [
+      "710_faads_attribution_content_key.py"
+     ],
      "never_run_warning": []
     },
     {
@@ -5956,13 +5951,14 @@
    "name": "Gaming Intelligence",
    "shelf": "grove",
    "rebuild_command": "py -3 code/build.py run gaming --execute",
-   "n_tables": 59,
+   "n_tables": 61,
    "tables": [
     {
      "table": "ca_gaming_facilities_official.csv",
      "status": "shippable",
      "key_columns": [
       "tribe_id",
+      "cedar_uid",
       "facility_id"
      ],
      "grain": "one row per facility as it appears on ONE official California list at ONE as-of date - a facility on three lists has three rows",
@@ -5975,8 +5971,9 @@
       "facility_id": "many"
      },
      "grain_declared_by": "workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json",
-     "grain_validated": false,
+     "grain_validated": true,
      "measured_rows_per_join_key": {
+      "cedar_uid": 7,
       "facility_id": 4,
       "tribe_id": 7
      },
@@ -5998,12 +5995,8 @@
        "facility_id": 4
       }
      },
-     "rebuilt_by": [
-      "103_build_california_gaming.py"
-     ],
-     "enriched_by": [
-      "266_apply_gaming_hub_spillover_rulings.py"
-     ],
+     "rebuilt_by": [],
+     "enriched_by": [],
      "never_run_warning": []
     },
     {
@@ -7486,6 +7479,7 @@
      "status": "internal-by-decision",
      "key_columns": [
       "tribe_id",
+      "cedar_uid",
       "entity_id",
       "facility_id"
      ],
@@ -7607,6 +7601,49 @@
      "status": "UNDOCUMENTED",
      "key_columns": [
       "property_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "primary_key": [],
+     "join_cardinality": {},
+     "grain_declared_by": "",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_property_self_published_assertions.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "entity_id",
+      "facility_id"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "primary_key": [],
+     "join_cardinality": {},
+     "grain_declared_by": "",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "gaming_property_self_published_claims.csv",
+     "status": "shippable",
+     "key_columns": [
+      "tribe_id",
+      "cedar_uid",
+      "facility_id"
      ],
      "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
      "primary_key": [],
@@ -7969,12 +8006,22 @@
      "key_columns": [
       "cedar_uid"
      ],
-     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
-     "primary_key": [],
-     "join_cardinality": {},
-     "grain_declared_by": "",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
+     "grain": "one row per (ACTION, PARTY, ROLE) - the ADR-010 party bridge for the two NIGC document tables. Roles respondent and tribal_party; 384 entity, 2 multi_entity",
+     "primary_key": [
+      "record_id",
+      "tribe_entity_id",
+      "role"
+     ],
+     "join_cardinality": {
+      "record_id": "many",
+      "tribe_entity_id": "many"
+     },
+     "grain_declared_by": "code/586 assertion; INT-2 2026-09-01",
+     "grain_validated": true,
+     "measured_rows_per_join_key": {
+      "record_id": 2,
+      "tribe_entity_id": 15
+     },
      "grain_open_question": "",
      "grain_defect": "",
      "grain_evidence": {},
@@ -8031,12 +8078,19 @@
      "table": "nigc_document_surface.csv",
      "status": "shippable",
      "key_columns": [],
-     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
-     "primary_key": [],
-     "join_cardinality": {},
-     "grain_declared_by": "",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
+     "grain": "one row per (CATEGORY, DOCUMENT) MEMBERSHIP - NOT one row per document. 7,930 memberships over 4,071 distinct documents in 73 categories; a document filed in three categories has three rows. NEVER SUM THIS AGAINST nigc_ordinances.csv (1,155) or nigc_declination_letters.csv (327): those are instrument tables at one row per instrument and this is the INDEX that measures them. NIGC's index carries 1,162 ordinance and 329 declination documents, so +7 and +2 are the REFRESH SIGNAL, not a double count",
+     "primary_key": [
+      "nigc_category",
+      "document_slug"
+     ],
+     "join_cardinality": {
+      "document_slug": "many"
+     },
+     "grain_declared_by": "code/586 assertion; INT-2 2026-09-01",
+     "grain_validated": true,
+     "measured_rows_per_join_key": {
+      "document_slug": 4
+     },
      "grain_open_question": "",
      "grain_defect": "",
      "grain_evidence": {},
@@ -8050,12 +8104,20 @@
      "key_columns": [
       "cedar_uid"
      ],
-     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
-     "primary_key": [],
-     "join_cardinality": {},
-     "grain_declared_by": "",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
+     "grain": "one row per published NIGC ENFORCEMENT DOCUMENT, 1995-2026. NOT one row per violation and NOT one row per tribe: a single matter routinely yields both an NOV and a settlement agreement - Squaxin Island NOV-06-07 and SA-06-07 are two documents and two rows",
+     "primary_key": [
+      "action_id"
+     ],
+     "join_cardinality": {
+      "action_id": "one",
+      "tribe_entity_id": "many"
+     },
+     "grain_declared_by": "code/586 assertion; INT-2 2026-09-01",
+     "grain_validated": true,
+     "measured_rows_per_join_key": {
+      "action_id": 1,
+      "tribe_entity_id": 15
+     },
      "grain_open_question": "",
      "grain_defect": "",
      "grain_evidence": {},
@@ -8067,12 +8129,18 @@
      "table": "nigc_game_classification_opinions.csv",
      "status": "shippable",
      "key_columns": [],
-     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
-     "primary_key": [],
-     "join_cardinality": {},
-     "grain_declared_by": "",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
+     "grain": "one row per published GAME CLASSIFICATION OPINION, 1992-09-14 to 2024-04-26. NO ENTITY COLUMN BY NATURE - the subject is a GAME, so record_scope = indian_country on all 122 (ADR-010) and this table must NOT be scored on entity attachment",
+     "primary_key": [
+      "opinion_id"
+     ],
+     "join_cardinality": {
+      "opinion_id": "one"
+     },
+     "grain_declared_by": "code/586 assertion; INT-2 2026-09-01",
+     "grain_validated": true,
+     "measured_rows_per_join_key": {
+      "opinion_id": 1
+     },
      "grain_open_question": "",
      "grain_defect": "",
      "grain_evidence": {},
@@ -8086,12 +8154,18 @@
      "key_columns": [
       "cedar_uid"
      ],
-     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
-     "primary_key": [],
-     "join_cardinality": {},
-     "grain_declared_by": "",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
+     "grain": "one row per published INDIAN LANDS OPINION, 1997-08-12 to 2026-05-18. A tribe with four parcels has four rows",
+     "primary_key": [
+      "opinion_id"
+     ],
+     "join_cardinality": {
+      "opinion_id": "one"
+     },
+     "grain_declared_by": "code/586 assertion; INT-2 2026-09-01",
+     "grain_validated": true,
+     "measured_rows_per_join_key": {
+      "opinion_id": 1
+     },
      "grain_open_question": "",
      "grain_defect": "",
      "grain_evidence": {},
@@ -8105,12 +8179,18 @@
      "key_columns": [
       "cedar_uid"
      ],
-     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
-     "primary_key": [],
-     "join_cardinality": {},
-     "grain_declared_by": "",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
+     "grain": "one row per Chair-approved MANAGEMENT CONTRACT DOCUMENT, 55 tribes. A SNAPSHOT, not a history - NIGC posts the current roster only and publishes no retired contracts, so absence here is not evidence a contract never existed",
+     "primary_key": [
+      "action_id"
+     ],
+     "join_cardinality": {
+      "action_id": "one"
+     },
+     "grain_declared_by": "code/586 assertion; INT-2 2026-09-01",
+     "grain_validated": true,
+     "measured_rows_per_join_key": {
+      "action_id": 1
+     },
      "grain_open_question": "",
      "grain_defect": "",
      "grain_evidence": {},

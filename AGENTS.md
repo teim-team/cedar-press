@@ -5864,3 +5864,35 @@ see.
 **Build order follows from this.** Declare a grain or validate a key only
 against a table that is not about to change. A key validated against a table
 that then gains 193 rows was validated against the wrong table.
+
+## GATE ATTRIBUTION 2026-09-01 ~22:0x — three lines the cadence workstream could not record
+
+It is not permitted to edit this file, so the integrator records its findings:
+
+- `lint_new_defect_instances = 2` → **`518_dataset_readiness.py`** and
+  **`73_faads_name_attribution.py`**, both class6, named by the gate itself.
+  The 518 instance is mine, from adding the OWNERS check.
+- `files_with_columns_lost_vs_backup = 1` → **`entity_evidence_profile.csv`**,
+  10 → 9 columns against `.bak_2026-08-28_pre505`, losing `in_spine`,
+  `rows_per_source` and `amounts_per_source_NEVER_SUM`. That last name is doing
+  work — a column literally called NEVER_SUM disappearing is the kind of loss
+  that turns into a double count downstream.
+- `SHIPPING LOST: advocacy_passthrough_2026-08-07.csv` → **already explained
+  above and still not a loss.** Fourth workstream to stop on it. The file is on
+  disk at 2,012,716 bytes; it left the shipping set because I deregistered it.
+
+## GAMING GRAIN ROUTED, AND THE ROUTING WAS THE BLOCKER
+
+INT-2 promoted six NIGC tables into `data/clean` and `dist/cedar_press.db`, and
+gaming's C1 count went **1 → 7**. Not because the work was bad — because grain
+lives in `512`, GRAIN-WS3 owned gaming's block, and WS3 had finished. Six
+freshly promoted tables sat UNSTATED with their declarations written out in
+`review/GRAIN_WS3_REQUEST_gaming_nigc_2026-09-01.md` and nowhere to put them.
+
+**Acquisition moved the scoreboard backwards because nobody could route a
+declaration.** Routed as `GRAIN_GAMING` in 512; gaming is now **UNSTATED on 3**.
+
+The generalisable point: a per-workstream block solves the concurrent-edit
+collision and creates an orphaning problem when a workstream ends. **When a
+workstream finishes, its block needs an heir** — otherwise the next agent to
+touch that dataset has measured declarations and no legal place to write them.

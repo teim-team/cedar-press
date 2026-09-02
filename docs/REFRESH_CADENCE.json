@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-02T01:36:05+00:00",
+ "generated": "2026-09-02T01:51:54+00:00",
  "script": "code/630_refresh_cadence.py",
  "n_sources": 55,
  "n_datasets": 13,
@@ -1310,7 +1310,7 @@
    "refresh_cost": "one monthly extract",
    "refresh_command": "the BMF leg of code/112",
    "breaks_on_refresh": "np_ein_entity_hub.csv, np_ein_uei_bridge.csv",
-   "cedar_edge_age_days": null,
+   "cedar_edge_age_days": 154,
    "source_knowledge_age_days": 20,
    "gap_days_behind_source": 0
   },
@@ -1718,5 +1718,42 @@
   "archive_depth_total": 3181,
   "archive_depth_median": 27,
   "newsletter_records": 1000
+ },
+ "net_probes": {
+  "probed": "2026-09-01",
+  "requests": 3,
+  "host_locks_respected": [
+   "eaglemountaincasino.com"
+  ],
+  "results": [
+   {
+    "host": "www.federalregister.gov",
+    "url": "https://www.federalregister.gov/api/v1/documents.json?per_page=1&order=newest&fields[]=publication_date",
+    "status": 200,
+    "count": 10000,
+    "publication_date": "2026-09-01"
+   },
+   {
+    "host": "lda.gov",
+    "url": "https://lda.gov/api/v1/filings/?page_size=1&ordering=-dt_posted",
+    "status": 200,
+    "count": 1976576,
+    "dt_posted": "2026-09-01T20:53:39-04:00",
+    "filing_year": 2026,
+    "filing_period": "second_quarter",
+    "filing_type_display": "2nd Quarter - Report (No Activity)"
+   },
+   {
+    "host": "lda.gov",
+    "url": "https://lda.gov/api/v1/filings/?page_size=1&ordering=dt_posted",
+    "status": 200,
+    "count": 1976576,
+    "dt_posted": "1905-06-24T00:00:00-05:00",
+    "filing_year": 1999,
+    "filing_period": "mid_year",
+    "filing_type_display": "Mid-Year Report"
+   }
+  ],
+  "carried_forward": true
  }
 }

@@ -1387,6 +1387,74 @@ GRAIN_WS3 = {
         "code/573_ws3_grain_and_money.py measure"),
 }
 
+# ---------------------------------------------------------------------------
+# GAMING, the six NIGC tables promoted 2026-09-01 by workstream INT-2.
+#
+# INT-2 could not write these itself: grain lives here and GRAIN-WS3 owned
+# gaming's block, but WS3 had finished. So six freshly promoted tables sat
+# UNSTATED and gaming's C1 count went 1 -> 7 - acquisition moving the
+# scoreboard BACKWARDS because nobody could route a declaration. Routed by the
+# integrator; the measurements are INT-2's, unchanged.
+#
+# Every grain below is asserted in code: `586_promote_nigc_gaming.py` refuses
+# to write if any of these keys duplicates, and all six passed on the run that
+# produced the files. Measured, not proposed.
+# ---------------------------------------------------------------------------
+GRAIN_GAMING = {
+    "nigc_enforcement_actions.csv": dict(
+        grain="one row per published NIGC ENFORCEMENT DOCUMENT, 1995-2026. "
+              "NOT one row per violation and NOT one row per tribe: a single "
+              "matter routinely yields both an NOV and a settlement agreement "
+              "- Squaxin Island NOV-06-07 and SA-06-07 are two documents and "
+              "two rows",
+        primary_key=["action_id"],
+        join_cardinality={"action_id": "one", "tribe_entity_id": "many"},
+        declared_by="code/586 assertion; INT-2 2026-09-01"),
+    "nigc_management_contract_approvals.csv": dict(
+        grain="one row per Chair-approved MANAGEMENT CONTRACT DOCUMENT, 55 "
+              "tribes. A SNAPSHOT, not a history - NIGC posts the current "
+              "roster only and publishes no retired contracts, so absence "
+              "here is not evidence a contract never existed",
+        primary_key=["action_id"],
+        join_cardinality={"action_id": "one"},
+        declared_by="code/586 assertion; INT-2 2026-09-01"),
+    "nigc_indian_lands_opinions.csv": dict(
+        grain="one row per published INDIAN LANDS OPINION, 1997-08-12 to "
+              "2026-05-18. A tribe with four parcels has four rows",
+        primary_key=["opinion_id"],
+        join_cardinality={"opinion_id": "one"},
+        declared_by="code/586 assertion; INT-2 2026-09-01"),
+    "nigc_game_classification_opinions.csv": dict(
+        grain="one row per published GAME CLASSIFICATION OPINION, 1992-09-14 "
+              "to 2024-04-26. NO ENTITY COLUMN BY NATURE - the subject is a "
+              "GAME, so record_scope = indian_country on all 122 (ADR-010) "
+              "and this table must NOT be scored on entity attachment",
+        primary_key=["opinion_id"],
+        join_cardinality={"opinion_id": "one"},
+        declared_by="code/586 assertion; INT-2 2026-09-01"),
+    "nigc_document_surface.csv": dict(
+        grain="one row per (CATEGORY, DOCUMENT) MEMBERSHIP - NOT one row per "
+              "document. 7,930 memberships over 4,071 distinct documents in "
+              "73 categories; a document filed in three categories has three "
+              "rows. NEVER SUM THIS AGAINST nigc_ordinances.csv (1,155) or "
+              "nigc_declination_letters.csv (327): those are instrument "
+              "tables at one row per instrument and this is the INDEX that "
+              "measures them. NIGC's index carries 1,162 ordinance and 329 "
+              "declination documents, so +7 and +2 are the REFRESH SIGNAL, "
+              "not a double count",
+        primary_key=["nigc_category", "document_slug"],
+        join_cardinality={"document_slug": "many"},
+        declared_by="code/586 assertion; INT-2 2026-09-01"),
+    "nigc_action_parties.csv": dict(
+        grain="one row per (ACTION, PARTY, ROLE) - the ADR-010 party bridge "
+              "for the two NIGC document tables. Roles respondent and "
+              "tribal_party; 384 entity, 2 multi_entity",
+        primary_key=["record_id", "tribe_entity_id", "role"],
+        join_cardinality={"record_id": "many", "tribe_entity_id": "many"},
+        declared_by="code/586 assertion; INT-2 2026-09-01"),
+}
+
+GRAIN.update(GRAIN_GAMING)
 GRAIN.update(GRAIN_WS1)
 GRAIN.update(GRAIN_WS2)
 GRAIN.update(GRAIN_WS3)
