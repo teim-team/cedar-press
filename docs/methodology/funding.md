@@ -149,8 +149,8 @@ basis].
 | `faads_transactions.csv` | **60,661** | the **Interior** slice of the above, carried verbatim into it |
 | `faads_entity_attribution.csv` | **29,594** | FY2001–2006, the only Native attribution for those years |
 | `federal_funding_tribe_year_panel.csv` | **5,496** | one (entity, fiscal year), FY2008–2023 |
-| `native_passthrough.csv` | **1,522** | a projection of `subawards.csv` |
-| `native_passthrough_pairs.csv` | **307** | one (paying entity, receiving entity) pair |
+| `native_passthrough.csv` | **1,663** | a projection of `subawards.csv`. *Was written 1,522; re-measured 2026-09-02 — the file grew with the FY2023 Q1/Q2 subaward promotion and is consistent with its parent* |
+| `native_passthrough_pairs.csv` | **324** | one (paying entity, receiving entity) pair. *Was written 307; re-measured 2026-09-02* |
 | `bie_uio_dollars_by_entity.csv` | **114** | a **cross-dataset roll-up** — see §5 |
 | `funding_identifier_harvest.csv` | 37,704 | identifiers harvested along the way |
 | `inflation_deflator.csv` | 27 | BEA NIPA 1.1.9, base 2025 |

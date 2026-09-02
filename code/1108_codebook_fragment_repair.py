@@ -5,6 +5,7 @@ Cedar Press - 1108: repair the codebook FRAGMENT system, then use it.
     py -3 code/1108_codebook_fragment_repair.py measure    # read-only
     py -3 code/1108_codebook_fragment_repair.py repair     # fragments <- master orphans
     py -3 code/1108_codebook_fragment_repair.py write      # add the derivable entries
+    py -3 code/1108_codebook_fragment_repair.py dedupe     # one row per (block, variable)
     py -3 code/1108_codebook_fragment_repair.py fix-licensed  # licensed cols -> internal
     py -3 code/1108_codebook_fragment_repair.py verify     # exit 1 on breach
     py -3 code/1108_codebook_fragment_repair.py selftest   # prove verify FIRES
@@ -778,6 +779,88 @@ def write(root=None, frag_dir=None, quiet=False):
 # verify
 # --------------------------------------------------------------------------
 
+def dedupe_owned(frag_dir=None, root=None, quiet=False):
+    """One row per (block, variable) for the entries THIS script owns.
+
+    THE DEFECT THIS REPAIRS, WHICH THIS SCRIPT CAUSED
+    -------------------------------------------------
+    The codebook's grain is (dataset, variable) - one row per variable per
+    BLOCK, not per table. Several blocks cover more than one table:
+    `03_federal_funding` covers `federal_funding_transactions.csv` AND
+    `faads_transactions_all_agencies.csv`; `02_prime_contracting` covers
+    `prime_contracts_awards.csv` AND `prime_contracts_published.csv`;
+    `12_resources` covers `resource_parties.csv` AND `resource_revenue.csv`.
+    The first `write` emitted one row per (block, TABLE, variable) and so
+    created 18 duplicate keys - 13 geography columns, the 4 award-rollup
+    columns and `cedar_uid_basis`.
+
+    A duplicate key is not cosmetic here: `match_group` scores a block by its
+    variable SET, `87` picks a file's best-overlapping block, and a reader
+    asking "what does this column mean" gets two answers with two different
+    fill rates and no rule for choosing.
+
+    The merge keeps ONE row, sums `n_rows` across the tables, recomputes
+    `pct_filled` against that combined denominator, and appends a
+    `Present on:` clause naming each table and its own fill - so the
+    per-table number is not lost, it is stated.
+
+    It touches ONLY keys that are (a) in `ENTRIES` and (b) written by this
+    script today. The 38 pre-existing `02_prime_contracting` duplicates dated
+    2026-08-07/2026-08-12 are somebody else's - `208`'s docstring already
+    records that the master "carries `02_prime_contracting` TWICE" - and are
+    reported by `verify` K5, not silently rewritten here.
+    """
+    frag_dir = Path(frag_dir or FRAG)
+
+    # (block, variable) -> [(table, n, pct)]
+    stats = defaultdict(list)
+    for (block, tbl), cols in ENTRIES.items():
+        p = table_path(tbl, root)
+        if p is None:
+            continue
+        n, pct = fill_stats(p, list(cols))
+        for var in cols:
+            if var in pct:
+                stats[(block, var.lower())].append((tbl, n, pct[var]))
+
+    merged = []
+    for p in sorted(frag_dir.glob("*.csv")):
+        rows = read(p)
+        seen, out, touched = {}, [], False
+        for r in rows:
+            k = (r.get("dataset"), (r.get("variable") or "").strip().lower())
+            owned = k in stats and len(stats[k]) > 1
+            if not owned or r.get("generated") != TODAY:
+                out.append(r)
+                continue
+            if k in seen:
+                touched = True          # drop the duplicate
+                continue
+            seen[k] = r
+            tabs = stats[k]
+            tot = sum(n for _, n, _ in tabs)
+            filled = sum(round(n * q / 100.0) for _, n, q in tabs)
+            r["n_rows"] = str(tot)
+            r["pct_filled"] = "%.1f" % (100.0 * filled / tot if tot else 0.0)
+            clause = ("  Present on: "
+                      + "; ".join("`%s` %.1f%% of %s" % (t, q, format(n, ","))
+                                  for t, n, q in sorted(tabs)) + ".")
+            if "Present on:" not in r.get("description", ""):
+                r["description"] = (r.get("description") or "") + clause
+            out.append(r)
+            merged.append(k)
+            touched = True
+        if touched:
+            shutil.copy2(p, str(p) + ".bak_" + TODAY + "_" + TAG + "_dedupe")
+            write_rows(p, out, FIELDS)
+    if not quiet:
+        for b, v in sorted(set(merged)):
+            print("  dedupe   %-24s %s" % (b, v))
+        print("  dedupe   %d owned key(s) merged to one row each"
+              % len(set(merged)))
+    return len(set(merged))
+
+
 def fix_licensed(frag_dir=None, quiet=False):
     """Set every licensed / DUNS codebook row to published=0, internal.
 
@@ -881,6 +964,21 @@ def verify(master=None, frag_dir=None, root=None, quiet=False):
                       "; ".join(r["dataset"] + "/" + r["variable"]
                                 for r in nodesc[:4])))
 
+    dup = Counter((r.get("dataset"), (r.get("variable") or "").lower())
+                  for r in m)
+    dup = {k: v for k, v in dup.items() if v > 1}
+    owned_keys = {(b, v.lower()) for (b, t), cols in ENTRIES.items()
+                  for v in cols}
+    owned_dup = sorted(k for k in dup if k in owned_keys)
+    other_dup = sorted(k for k in dup if k not in owned_keys)
+    if owned_dup:
+        bad.append("K5 %d duplicate (block, variable) key(s) among the "
+                   "entries this script owns - the codebook grain is one row "
+                   "per variable per BLOCK, and several blocks cover more "
+                   "than one table: %s"
+                   % (len(owned_dup), "; ".join("/".join(k)
+                                                for k in owned_dup[:4])))
+
     lic = [r for r in m if cc.is_licensed_col(r.get("variable"))
            and (r.get("published") or "").strip() == "1"]
     if lic:
@@ -894,6 +992,10 @@ def verify(master=None, frag_dir=None, root=None, quiet=False):
         print("                K1 divergence %d lost / %d gained   "
               "K2 absent %d   K3 no-description %d   K4 licensed-published %d"
               % (len(lost), len(gained), len(absent), len(nodesc), len(lic)))
+        print("                K5 duplicate keys: %d owned (breach), %d "
+              "pre-existing and NOT this pass's - 02_prime_contracting is "
+              "carried twice, dated 2026-08-07/08-12, recorded in 208's "
+              "docstring" % (len(owned_dup), len(other_dup)))
     return bad
 
 
@@ -1026,6 +1128,9 @@ def main():
         return 0
     if mode == "fix-licensed":
         fix_licensed()
+        return 0
+    if mode == "dedupe":
+        dedupe_owned()
         return 0
     if mode == "verify":
         bad = verify()

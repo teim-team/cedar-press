@@ -611,3 +611,79 @@ each) · `docs/datasets/_descriptors.json` (one descriptor) ·
 **Nothing was written to the spine's entity register, to
 `cedar_constellation_edges.csv`, or to `native_owned_businesses.csv`. Nothing
 was committed.**
+
+---
+
+## UPDATE 2026-09-02 — a fourth evidence family, the Chugach adjudication, and 25 companies held twice
+
+*`code/1102_nest_corroboration_adjudication.py`. Full write-up:
+**`docs/ENTITY_LAYER_DEEPENING_2026-09-02.md`** §3. Nothing above is superseded
+except where struck here.*
+
+**1. The second-source problem has an answer that needed no network call.**
+This log's next-pass item 2 named the Alaska Division of Corporations as the
+cheapest genuinely independent family. `data/clean/fpds_uei_edges.csv` is a
+cheaper one and it is already on disk: the parent a registrant declared **about
+itself** to the federal government, independent of both the parent's audited
+filing and the parent's website. Applying rule 11's measured 20-observation
+ownership floor, and requiring the declared parent to resolve through the
+identifier ledger to **the owner hub NEST already asserts**:
+
+```
+CORROBORATED             87      <- ~~60~~ two-family corroborations
+CONTRADICTED              8
+PARENT_UNRESOLVED       177
+PARENT_BELOW_JV_FLOOR    71
+NO_DECLARED_PARENT    1,267
+```
+
+Six of the eight contradictions are the LEDGER's defect, not NEST's — five
+Bowhead/UIC rows plus Rockford and UMIAQ resolve to
+`AKNF-INPTAS-00-ARCSLO`, the **village government**, which
+`ANCSA_OWNERSHIP_RULING` rule 2 forbids; `Goldbelt Eagle` and
+`Vista Defense Technologies` are collisions on `Eagle` and `Vista`. This is the
+`ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION` family reached from a fifth
+direction, with NEST on the correct side. Two stay open — `Nisga'a Tek LLC` and
+`Broadleaf, Inc` — in
+`review/nest_fpds_parent_contradictions_2026-09-02.csv`.
+
+**2. Chugach: the audited filing UPHELD, now on two of three sources.** Two
+facts this log did not have. (a) The web source is ONE page,
+`www.chugach.com/business/directory`, and on that same page it calls **Chugach
+Commercial Holdings a holding company** while calling CGS and CRD operating
+companies — so the site asserts a different role rather than omitting one, and
+the conflict is genuine. (b) A **third** source,
+`anc_tribal_subsidiary_lookup.csv`, lists CCH, CGS, CIH and CRD **identically**
+as `subsidiary` directly under the corporation: four parallel siblings at one
+tier, two of them named *Holdings*.
+
+**And `relationship` fuses THREE axes, not two.** This log found SHARE
+(`wholly_owned`) vs ROLE (`holding_company`). The third: a **consolidation note
+answers where an entity SITS**, a **business directory answers what a firm
+SELLS**, and both render into the same six words. The audited filing answers the
+question the column is asking. The adjudication is written onto
+`data/staging/nest/evidence_conflicts.csv` itself, in five new columns.
+
+**3. NEST holds 25 companies twice.** Clustering is on (owner hub, normalised
+name) and **a trailing parenthetical survives normalisation**:
+
+```
+CEDAR-NEST-000473-WH  Chugach Government Solutions, LLC    2 observations
+CEDAR-NEST-000474-2A  Chugach Government Solutions (CGS)   1 observation
+```
+
+**25 groups, 50 rows.** 24 are an acronym (`Ahtna Global LLC (AGL)`,
+`Yulista Aviation (YAI)`, `Eyak Technology LLC (EyakTek)`,
+`Bristol Bay Construction Holdings LLC (BBCH)`) and in every one of the 24 the
+acronym twin is the `ANC_TRIBE_LOOKUP` row at `n_distinct_sources = 1` while the
+plain row already carries 2 or 3; the 25th is a gloss, `Aan Hít (Village House)`.
+The cost is double — 25 rows of overstatement **and 25 lost corroborations**,
+because a restatement that fails to cluster raises nobody's source count, which
+is precisely what the "merged, not appended" design exists to do.
+
+**FLAGGED, NOT MERGED**: merging retires 25 ids out of an append-only register.
+`review/nest_name_variant_duplicates_2026-09-02.csv`.
+
+**The 60.7% headline does not move.** The 25 duplicates are ANC subsidiaries
+that ARE present in federal contracting, so collapsing them would raise the
+absent share, not lower it. The floor stays a floor.

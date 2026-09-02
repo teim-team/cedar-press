@@ -93,10 +93,11 @@ SPEC = {
                             "entity_tier = X is a negative ruling and is refused, not "
                             "carried.",
         "caveats": [
-            "ABSENT IS NOT ZERO. 6,395 of 6,870 returns attach no Schedule C at all - a "
+            "ABSENT IS NOT ZERO. 26,519 of 29,149 returns attach no Schedule C at all - a "
             "filer answering 'No' to Form 990 Part IV files none. That is different from "
-            "a filer that attached the schedule and entered $0 (330 returns). "
-            "reporting_regime distinguishes all four states per row.",
+            "a filer that attached the schedule and entered $0 (52 returns). "
+            "reporting_regime distinguishes all four states per row. "
+            "[re-measured 2026-09-02 after the corpus went 6,870 -> 29,149 returns]",
             "THE THREE REGIMES ARE NOT COMPARABLE. Part II-A (501(h) electing) splits "
             "grassroots from direct against a statutory ceiling; Part II-B (non-electing) "
             "reports one total and has no such split. A blank grassroots cell on a Part "
@@ -111,8 +112,15 @@ SPEC = {
             "THE 501(h) ELECTION IS DERIVED, NOT READ. Schedule C carries no election "
             "element; the value is inferred from which Part the filer completed and "
             "election_501h_basis records the inference.",
-            "COVERAGE IS A FETCH BACKLOG, NOT AN ABSENCE. 25,348 of 32,218 indexed "
-            "returns are not yet downloaded. See nonprofit_schedule_c_coverage.csv.",
+            "COVERAGE, RE-MEASURED 2026-09-02. 29,149 of 32,218 indexed returns are on "
+            "disk and parsed - 90.5%, up from 6,870 (21.3%). The 3,069 shortfall is NOT "
+            "a fetch backlog and must not be described as one: 775 are 990T (772) and "
+            "990PR (3) return types, which carry no Schedule C and are therefore "
+            "SOURCE_DOES_NOT_PUBLISH rather than un-fetched; the other 2,294 were "
+            "requested and are absent from every IRS ZIP archive that exists for their "
+            "year, logged as indexed_but_absent_from_archives in "
+            "data/raw/external/irs990_schedc/_xml_fetch_log.csv. 2017 (912 missing) and "
+            "2022 (1,430) carry nearly all of it. See nonprofit_schedule_c_coverage.csv.",
             FLOOR_CAVEAT,
         ],
     },

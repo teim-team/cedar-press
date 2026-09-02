@@ -507,3 +507,87 @@ An **allow-list of negatives** — the wrong polarity. Any new negative-ruling
 token silently becomes *ruled Native*. Writing `not_a_native_entity` here, the
 obvious value, would have done exactly that; `251` reuses the existing
 `place_name_coincidence` token instead. 169 belongs to its own pass.
+
+---
+
+## UPDATE 2026-09-02 — `name_match_support` was scored against a different tribe, and the EASTERN remedy is 13 redirects
+
+*`code/1101_np_keyed_name_support.py`. Full write-up:
+**`docs/ENTITY_LAYER_DEEPENING_2026-09-02.md`** section 5.*
+
+**1. The fourteenth instance of this repo's signature defect.** `code/952`
+documents `name_match_support` as *"the match shares NO token with the canonical
+name shown"* and computes it as
+`support(org_name, canonical_name_token_match)`. **That column holds the
+TOKEN-MATCH FUNNEL's candidate, not the tribe the row is keyed to.**
+
+```
+EIN 873791650  CAHUILLA ELEMENTARY PARENT TEACHER ORGANIZATION
+  tribe_id                    TRBF-CHLLAB-00   Cahuilla
+  canonical_name_token_match  Agua Caliente        <- scored against THIS
+  name_match_support          no_shared_token_with_canonical_name
+```
+
+Over the 1,423 live-keyed rows the two names disagree on 288 and
+`canonical_name_token_match` is blank on 585. Recomputed against the tribe
+actually cited: **1,421 of 1,423 share a token; 2 do not.**
+
+So ~~"2,268 rows share no token at all with the canonical name they cite (541
+live)"~~ is correct about the funnel and wrong about the live attributions —
+1,594 of the 2,268 are already `excluded_by_prior_ruling`, only **71 carry a
+live key**, and all 71 DO share a token with the tribe they cite. 952's column
+is **not overwritten**: it is right within its own slice, and the new
+`name_match_support_measured_against` says on the row which name it was scored
+against.
+
+**2. The 71 are not vindicated.** Every one shares a distinctive token that is a
+PLACE NAME — `OLD PROS OF LAGUNA WOODS VILLAGE`, `FIRST NATIONAL BANK IN
+WICHITA CHARITABLE TRUST`, `WESTERN DAKOTA ESTATE PLANNING COUNCIL INC`. The
+flag found the wrong rows for the wrong reason, and the rows it should have
+found were labelled `distinctive_token`, which reads as supported.
+
+**3. 461 of 1,423 live keys are the Umatilla defect.**
+
+```
+SUPPORTED                     888   62.4%
+HELD_STATE_DISAGREES          461   32.4%     50 of them NATIVE_VERIFIED_STRICT
+REFUSED_GENERIC_TOKEN_ONLY     61    4.3%
+REDIRECT_PROPOSED              13    0.9%
+```
+
+`ISLAMIC ASSOCIATION OF MID KANSAS AT WICHITA KANSAS` to Wichita (OK);
+`WINNEBAGO PORK PRODUCERS` (IL) to Winnebago (NE); `IRON CROW THEATRE COMPANY`
+(MD) to Crow (MT). Concentrated on six nations whose names are also American
+place names: Crow 63, Pueblo of Laguna 61, Fond du Lac 58, Seneca 53,
+Winnebago 26, Wichita 22. The existing `placename_risk_flag` reaches **160 of
+the 461** — 301 are newly flagged — and it fires on 202 rows this pass calls
+SUPPORTED, so neither measurement supersedes the other.
+
+**4. A redirect, not a block.** `EASTERN CHEROKEE SOUTHERN IROQUOIS AND UNITED
+TRIBES OF SOUTH CAROLIN` (SC) was keyed to **United South and Eastern Tribes**
+and redirects to **`TRBS-ECSIUT-00`**, which is in the spine, in SC, and
+accounts for every distinctive word — the filing's own truncation `CAROLIN` is
+handled by rule 7's existing spelling-variant allowance (`RESERVATI`). Twelve
+more redirects came with it, including all five Native Hawaiian organisations
+keyed to the junk `Hawaiian Native Corporation`, `AMERICAN INDIAN COUNCIL ON
+ALCOHOLISM INC` keyed to **Council Native Corporation** (an Alaska village
+corporation — the `code/610` defect, redirected instead of merely refused), and
+six tribal colleges, loan funds and clinics keyed to their NATION rather than to
+themselves.
+
+The other two EASTERN rows are **HELD with the spine gap stated** — no
+alternative exists in their state: `WIQUAPAUG EASTERN PEQUOT INDIAN TRIBE` (RI,
+keyed to the Eastern Pequot Tribal Nation of **CT**) and `EASTERN BAND OF
+CHICKASAW INDIANS FOUNDATION INC` (TN, keyed to The Chickasaw Nation of **OK**).
+Both keep their Native status: a refusal says only *this is not THAT entity*.
+
+**The rule the tightening earned.** The first version proposed **37** redirects
+and six were wrong the same way — one-way containment onto a longer name
+(`LUMBEE NATIONS INC` to Lumbee Guaranty Bank, `THE CHEHALIS FOUNDATION` to
+Chehalis Tribal Loan Fund, `ALASKA NATIVE TRIBAL HEALTH CONSORTIUM` to
+Southeast Alaska Regional Health Consortium). **Requiring the match to hold in
+BOTH directions killed all six and cost none of the 13.**
+
+Nothing was blanked (`code/610`'s convention): `tribe_id`, `cedar_uid` and
+`disposition` are untouched, asserted by an md5 over all 57 base fields.
+`review/np_live_key_review_2026-09-02.csv`.

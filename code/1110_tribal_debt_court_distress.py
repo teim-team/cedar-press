@@ -887,11 +887,46 @@ EVENT_RULES = [
 ]
 EVENT_RULES = [(n, re.compile(p, re.I | re.S)) for n, p in EVENT_RULES]
 
-# A caption shaped like an individual against a tribe is HELD, never staged.
+# A caption shaped like an individual matter is HELD, never staged.
 PERSON_SHAPE = re.compile(
     r"\b(per capita|disenroll|wrongful (death|termination|discharge)|"
     r"employment discrimination|personal injury|slip and fall|"
     r"habeas|in re marriage|adoption of|estate of|guardianship)\b", re.I)
+
+ORG_MARKER = re.compile(
+    r"\b(inc|incorporated|llc|l\.l\.c|corp|corporation|co|company|bank|n\.a|"
+    r"authority|nation|tribe|tribal|band|pueblo|rancheria|trust|association|"
+    r"lp|l\.p|llp|group|enterprises?|holdings?|partners|fund|funds|"
+    r"united states|state of|people of|commonwealth|county|city of|"
+    r"department|commission|board|bureau|secretary|university|"
+    r"casino|resort|gaming|services|systems|management|capital|"
+    r"investors?|securities|financial|savings|credit union)\b", re.I)
+
+
+def side_is_a_natural_person(side):
+    """A caption side with no organisational marker and at most three tokens is
+    almost certainly a person.  Deliberately conservative: it errs towards
+    calling something a person, because the cost of that error is a held row
+    and the cost of the opposite error is publishing a private individual."""
+    s = re.sub(r"[,.]", " ", side or "").strip()
+    if not s:
+        return False
+    if ORG_MARKER.search(side or ""):
+        return False
+    return len(s.split()) <= 3
+
+
+def caption_sides(caption):
+    parts = re.split(r"\s+v[\.s]?\.?\s+", caption or "", maxsplit=1, flags=re.I)
+    return (parts[0].strip(), parts[1].strip()) if len(parts) == 2 else (caption or "", "")
+
+
+INSTRUMENT_RX = re.compile(
+    r"\b(indentures?|bonds?|senior notes?|secured notes?|notes?|debentures?|"
+    r"credit agreements?|loan agreements?|term loans?|loans?|"
+    r"promissory notes?|forbearance agreements?|trust agreements?|"
+    r"security agreements?|guarant(?:y|ee|ies)|leases?|"
+    r"equipment financing|line of credit)\b", re.I)
 
 AMOUNT = re.compile(
     r"\$\s?([0-9][0-9,]*(?:\.[0-9]+)?)\s*(billion|million|thousand)?", re.I)
@@ -960,17 +995,64 @@ def load_holdings_index():
     return idx
 
 
+_SPINE_ROWS = None
+
+
+def spine_rows():
+    global _SPINE_ROWS
+    if _SPINE_ROWS is None:
+        _SPINE_ROWS = read_csv(SPINE / "cedar_entity_spine.csv")
+        if not _SPINE_ROWS:
+            raise RuntimeError("the spine is empty - UNMEASURED, not unresolved")
+    return _SPINE_ROWS
+
+
+def resolve_obligor_from_caption(caption):
+    """Whole-token-run containment of a spine canonical name in the caption.
+
+    TIER B, and DESCRIPTIVE ONLY.  `AGENTS.md` forbids containment from keying a
+    dollar and it keys none here: no money in this table is attributed to an
+    entity by this link.  The longest match wins so that `Lac du Flambeau Band
+    of Lake Superior Chippewa Indians` beats `Lac du Flambeau`.
+    """
+    cap = " " + norm(caption) + " "
+    best = None
+    for r in spine_rows():
+        nm = norm(r.get("canonical_name") or "")
+        if len(nm) < 6:
+            continue
+        if (" " + nm + " ") in cap:
+            if best is None or len(nm) > len(best[0]):
+                best = (nm, r)
+    if not best:
+        return "", "", "", ""
+    nm, r = best
+    return (r.get("cedar_uid", ""), r.get("tribe_id", ""),
+            r.get("canonical_name", ""),
+            f"spine_canonical_name_{nm!r}_is_a_whole_token_run_inside_the_"
+            f"court_caption_CONTAINMENT_descriptive_only_never_keys_a_dollar")
+
+
 def step_build():
     hits = read_csv(HITS)
     holdings = load_holdings_index()
+    # One opinion is returned by several queries.  Pick the hit whose QUERY is
+    # actually in the caption - first-wins handed `Saybrook Tax Exempt
+    # Investors, LLC v. Lake of Torches` to the Lac du Flambeau full-text
+    # query, which then failed the caption test and dropped a real case.
     by_opinion = {}
     for h in hits:
         for oid in (h.get("sub_ids") or "").split(" | "):
             oid = oid.strip()
-            if oid:
-                by_opinion.setdefault(oid, h)
+            if not oid:
+                continue
+            cur = by_opinion.get(oid)
+            named = norm(h.get("query", "")) in norm(h.get("case_name", ""))
+            if cur is None or (named and norm(cur.get("query", ""))
+                               not in norm(cur.get("case_name", ""))):
+                by_opinion[oid] = h
 
-    docs, events, held = [], [], []
+    docs, events, held, rejected_events = [], [], [], []
     n_text = 0
     for p in sorted(RAW.glob("opinion_*.json.gz")):
         oid = p.name[len("opinion_"):-len(".json.gz")]
@@ -1007,17 +1089,87 @@ def step_build():
         if not text:
             continue
 
-        if PERSON_SHAPE.search(caption):
+        pm = PERSON_SHAPE.search(caption)
+        if pm:
             held.append({
                 "opinion_id": oid, "case_name_as_captioned": caption,
                 "hold_reason": ("caption is shaped like an individual matter, "
                                 "not a debt matter - a natural person's data "
                                 "held apart from a public role is never staged"),
-                "matched_phrase": PERSON_SHAPE.search(caption).group(0),
+                "matched_phrase": pm.group(0),
                 "built_by_script": f"code/{SCRIPT}", "built_date": TODAY})
             continue
 
+        # THE DEBTOR-SIDE PERSON SCREEN.  `Mashantucket Pequot Gaming
+        # Enterprise v. Renzulli` is a tribal enterprise collecting from a
+        # PATRON.  The debt in that case is a private individual's, the
+        # obligor is not the nation, and it belongs in neither direction of
+        # this table.  A person on the PLAINTIFF side (a contractor suing a
+        # tribe) is a counterparty in a public commercial case and stays,
+        # flagged.
+        plaintiff, defendant = caption_sides(caption)
+        if side_is_a_natural_person(defendant) and not side_is_a_natural_person(plaintiff):
+            held.append({
+                "opinion_id": oid, "case_name_as_captioned": caption,
+                "hold_reason": ("the DEBTOR side of this caption is a natural "
+                                "person - the obligor is an individual, not a "
+                                "nation, and an individual's debt is never "
+                                "staged"),
+                "matched_phrase": defendant,
+                "built_by_script": f"code/{SCRIPT}", "built_date": TODAY})
+            continue
+        person_flag = ("yes" if (side_is_a_natural_person(plaintiff)
+                                 or side_is_a_natural_person(defendant)) else "no")
+        person_flag_basis = (
+            "a natural person appears in the court's own caption of a filed "
+            "commercial case, on the CREDITOR/claimant side. The caption is the "
+            "court's public record; nothing about this person is published "
+            "beyond it." if person_flag == "yes" else
+            "every side of the caption carries an organisational marker")
+
+        # THE OBLIGOR COMES FROM THE DOCUMENT, NEVER FROM THE QUERY THAT FOUND
+        # IT.  CourtListener searches FULL TEXT, so the query
+        # "Lac du Flambeau Band of Lake Superior Chippewa Indians" returns
+        # `Outsource Services Management, LLC v. Nooksack Business Corp.` and
+        # `Colombe v. Rosebud Sioux Tribe` - because those opinions CITE the
+        # Lake of the Torches decisions.  The first draft of this build read
+        # the obligor off the target row and attributed Nooksack's loan and
+        # Rosebud's to Lac du Flambeau.  A citation is not a party, exactly as
+        # a caption is not a party (code/219).  Caught by reading the
+        # twenty-five-row table end to end, not by any check.
         obligor_label = h.get("obligor_label_1082", "")
+        ob_uid = ob_handle = ob_name = ob_method = ob_tier = ""
+        ncap = norm(caption)
+        if (h.get("cedar_uid")
+                and (norm(h.get("query", "")) in ncap
+                     or norm(h.get("obligor_name", "")) in ncap)):
+            ob_uid = h["cedar_uid"]
+            ob_name = h.get("obligor_name", "")
+            ob_tier = "B"
+            ob_method = ("the obligor this case was sought for is NAMED IN THE "
+                         "CAPTION of this document")
+            for r in spine_rows():
+                if r.get("cedar_uid") == ob_uid:
+                    ob_handle = r.get("tribe_id", "")
+                    if not ob_name:
+                        ob_name = r.get("canonical_name", "")
+                    break
+        else:
+            obligor_label = ""      # a 1082 join follows the obligor, not the query
+            ob_uid, ob_handle, ob_name, ob_method = resolve_obligor_from_caption(caption)
+            if ob_uid:
+                ob_tier = "B"
+        if not ob_uid:
+            rejected_events.append({
+                "opinion_id": oid, "case_name_as_captioned": caption,
+                "would_be_event_type": "(all)",
+                "reject_reason": ("no Cedar entity is named in this caption. The "
+                                  "document reached the shortlist through a "
+                                  "full-text citation, not because a tribal "
+                                  "obligor is a party to it."),
+                "passage": "", "built_by_script": f"code/{SCRIPT}",
+                "built_date": TODAY})
+            continue
         hold_row = holdings.get(obligor_label, {})
         for ev_name, rx in EVENT_RULES:
             sents = find_sentences(text, rx)
@@ -1026,8 +1178,38 @@ def step_build():
             # ONE event row per (document, event_type).  Several sentences
             # supporting one type is one event with the strongest quote, not
             # several events - counting sentences would inflate the record.
-            sents.sort(key=len, reverse=True)
+            #
+            # "Strongest" is the COURT SPEAKING, then a sentence that names the
+            # instrument, then length.  Sorting by length alone picked
+            # recitations of the record over holdings and made
+            # `assertion_or_finding` read PROCEDURAL_RECORD on cases that
+            # plainly hold something.
+            sents.sort(key=lambda s: (bool(FINDING_CUE.search(s)),
+                                      bool(INSTRUMENT_RX.search(s)), len(s)),
+                       reverse=True)
             quote = sents[0][:1200]
+            # QUOTE THE INSTRUMENT.  If the sentence that fired does not name
+            # the instrument, widen the window once; if it still does not, the
+            # event is REFUSED rather than staged with a bare characterisation.
+            if not INSTRUMENT_RX.search(quote):
+                wider = find_sentences(text, rx, window=3)
+                wider.sort(key=len, reverse=True)
+                if wider and INSTRUMENT_RX.search(wider[0]):
+                    quote = wider[0][:1500]
+            instruments = sorted(set(
+                w.lower() for w in INSTRUMENT_RX.findall(quote)))
+            if not instruments:
+                rejected_events.append({
+                    "opinion_id": oid, "case_name_as_captioned": caption,
+                    "would_be_event_type": ev_name,
+                    "reject_reason": ("the passage that fired names no "
+                                      "instrument. The mandate is quote the "
+                                      "instrument and the court; an event we "
+                                      "cannot quote an instrument for is a "
+                                      "characterisation, not a record."),
+                    "passage": sents[0][:600],
+                    "built_by_script": f"code/{SCRIPT}", "built_date": TODAY})
+                continue
             m = rx.search(quote) or rx.search(text)
             speaker, speaker_basis = classify_speaker(quote)
             am = AMOUNT.search(quote)
@@ -1038,8 +1220,11 @@ def step_build():
                              "NOT verified against the instrument")
             events.append({
                 "event_id": f"TDCE-{oid}-{ev_name[:24]}",
-                "obligor_name": h.get("obligor_name", ""),
-                "obligor_cedar_uid": h.get("cedar_uid", ""),
+                "obligor_name": ob_name,
+                "obligor_cedar_uid": ob_uid,
+                "obligor_cedar_handle": ob_handle,
+                "obligor_entity_match_method": ob_method,
+                "obligor_entity_tier": ob_tier,
                 "obligor_label_1082": obligor_label,
                 "joins_1082_holdings": "yes" if hold_row else "no",
                 "holdings_observations_1082": hold_row.get("observations", ""),
@@ -1057,11 +1242,11 @@ def step_build():
                 "case_name_as_captioned": caption,
                 "citation": h.get("citation", ""),
                 "precedential_status": h.get("precedential_status", ""),
-                "instrument_as_described": " | ".join(sorted(set(
-                    w.lower() for w in re.findall(
-                        r"\b(indenture|bond[s]?|senior note[s]?|note[s]?|"
-                        r"credit agreement|term loan|debenture[s]?|"
-                        r"loan agreement|promissory note)\b", quote, re.I)))),
+                "instrument_as_described": " | ".join(instruments),
+                "instrument_basis": ("every word here appears in "
+                                     "verbatim_quote; nothing is inferred"),
+                "caption_names_a_natural_person": person_flag,
+                "caption_names_a_natural_person_basis": person_flag_basis,
                 "amount_as_recited": amt,
                 "amount_basis": amt_basis,
                 "verbatim_quote": quote,
@@ -1083,6 +1268,7 @@ def step_build():
     write_csv(DOCS, docs)
     write_csv(EVENTS, events)
     write_csv(HELD, held)
+    write_csv(REVIEW / "1110_rejected_events.csv", rejected_events)
 
     # what we could not reach, named rather than left as an absence
     unreached = []
@@ -1105,6 +1291,7 @@ def step_build():
     log(f"documents {len(docs)}  (with text {n_text})")
     log(f"events    {len(events)}")
     log(f"held by the natural-person screen  {len(held)}")
+    log(f"refused for naming no instrument   {len(rejected_events)}")
     log(f"unreached questions                {len(unreached)}")
     return 0
 
@@ -1119,6 +1306,8 @@ INVARIANTS = [
     "I6_no_event_asserts_a_summable_total",
     "I7_every_event_carries_a_verbatim_quote_that_is_present_in_the_cached_document",
     "I8_no_event_row_survives_the_natural_person_screen",
+    "I9_every_event_quotes_an_instrument_that_appears_in_its_own_quote",
+    "I10_entity_tier_is_blank_when_there_is_no_entity_link",
 ]
 
 
@@ -1156,8 +1345,19 @@ def _verify_rows():
                 cache[oid] = opinion_text(cache_read(p))[0]
             if q[:200] not in cache[oid]:
                 breaches[INVARIANTS[6]].append(eid)
-        if PERSON_SHAPE.search(e.get("case_name_as_captioned", "")):
+        cap = e.get("case_name_as_captioned", "")
+        pl, df = caption_sides(cap)
+        if (PERSON_SHAPE.search(cap)
+                or (side_is_a_natural_person(df) and not side_is_a_natural_person(pl))):
             breaches[INVARIANTS[7]].append(eid)
+        # I9 - quote the instrument.  Every word in instrument_as_described
+        # must be IN the quote, and there must be at least one.
+        inst = [w for w in (e.get("instrument_as_described") or "").split(" | ") if w]
+        if not inst or any(w.lower() not in q.lower() for w in inst):
+            breaches[INVARIANTS[8]].append(eid)
+        # I10 - a tier without a link is a tier about nothing (1082's I5).
+        if bool(e.get("obligor_entity_tier")) != bool(e.get("obligor_cedar_uid")):
+            breaches[INVARIANTS[9]].append(eid)
     return events, breaches
 
 
@@ -1203,21 +1403,27 @@ def step_selftest():
         return 2
 
     mutations = [
-        (INVARIANTS[0], "court", ""),
-        (INVARIANTS[1], "as_of_date", ""),
-        (INVARIANTS[2], "event_type_basis", "because it looked like one"),
-        (INVARIANTS[3], "assertion_or_finding", "PROBABLY_A_DEFAULT"),
-        (INVARIANTS[4], "sovereign_immunity_caution", ""),
-        (INVARIANTS[5], "not_summable_with", "total tribal debt"),
-        (INVARIANTS[6], "verbatim_quote",
-         "The tribe was insolvent and could not pay its bills."),
-        (INVARIANTS[7], "case_name_as_captioned", "Doe v. Tribe (per capita)"),
+        (INVARIANTS[0], {"court": ""}),
+        (INVARIANTS[1], {"as_of_date": ""}),
+        (INVARIANTS[2], {"event_type_basis": "because it looked like one"}),
+        (INVARIANTS[3], {"assertion_or_finding": "PROBABLY_A_DEFAULT"}),
+        (INVARIANTS[4], {"sovereign_immunity_caution": ""}),
+        (INVARIANTS[5], {"not_summable_with": "total tribal debt"}),
+        (INVARIANTS[6], {"verbatim_quote":
+                         "The tribe was insolvent and could not pay its bills."}),
+        (INVARIANTS[7], {"case_name_as_captioned": "Doe v. Tribe (per capita)"}),
+        (INVARIANTS[8], {"instrument_as_described": ""}),
+        # a tier asserted with no link, which is exactly 1082's I5 and the
+        # START_HERE trap-1 shape: the tier says WHAT was decided, and here
+        # nothing was.
+        (INVARIANTS[9], {"obligor_entity_tier": "A", "obligor_cedar_uid": ""}),
     ]
     ok = True
     try:
-        for name, col, val in mutations:
+        for name, cols in mutations:
             mut = [dict(r) for r in rows]
-            mut[0][col] = val
+            for col, val in cols.items():
+                mut[0][col] = val
             write_csv(EVENTS, mut)
             buf = io.StringIO()
             with contextlib.redirect_stdout(buf):

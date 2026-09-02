@@ -7,6 +7,7 @@ Cedar Press - 1089: `consultation_events.csv` in place -
 
     py -3 code/1089_fr_consultation_overlap_and_event_parse.py measure   # read-only
     py -3 code/1089_fr_consultation_overlap_and_event_parse.py apply
+    py -3 code/1089_fr_consultation_overlap_and_event_parse.py codebook
     py -3 code/1089_fr_consultation_overlap_and_event_parse.py verify
     py -3 code/1089_fr_consultation_overlap_and_event_parse.py --selftest
 
@@ -917,6 +918,207 @@ def verify():
     return 0
 
 
+# ===========================================================================
+# STAGE `codebook` - document all 37 columns, and STATE THE OVERLAP THERE
+# ===========================================================================
+# `consultation_events.csv` carried ZERO rows in `codebook_master.csv`. A clean
+# table no codebook block documents is invisible to `87_build_dataset_notes.py`
+# and to `512`'s shippable list. It is also why the NAGPRA overlap could only
+# ever be stated in prose: there was no codebook entry to state it in.
+#
+# Two writes, the same shape `1072` uses and for the same reason:
+#   * the FRAGMENT `data/clean/codebook/09c_consultation_events.csv`, owned by
+#     this dataset, which a future `cedar_codebook.py build` folds in;
+#   * an APPEND to `codebook_master.csv`, because `41_build_codebooks.py`
+#     rewrites the master wholesale and is the one script on NEVER_RUN.
+#     An append cannot shrink the master; a rewrite can.
+CB_FIELDS = ["dataset", "variable", "type", "units", "pct_filled", "n_rows",
+             "published", "access_tier", "description", "generated"]
+CB_BLOCK = "09c_consultation_events"
+
+OVERLAP_SENTENCE = (
+    "OVERLAP WITH THE `nagpra` DATASET, measured 2026-09-02 and stated here so "
+    "a buyer holding both cannot double-count: 10,920 of these 11,402 rows "
+    "(95.8%) describe a Federal Register notice that `nagpra_notices.csv` also "
+    "ships. Those 10,920 rows are only 1,831 DISTINCT notices, because this "
+    "file is one row per (notice, participant); and 4,961 of the 6,792 NAGPRA "
+    "notices appear here NOT AT ALL. Never add a count from this file to a "
+    "count from `nagpra_notices.csv`."
+)
+
+CB_DESC = {
+    "consultation_event_id":
+        "Identifier of the consultation EVENT, `CONS-FR-<FR document "
+        "number>`. NOT unique in this file: an event with several named "
+        "participants has one row each.",
+    "channel": "Always CONSULTATION. Consultation is a statutory "
+               "government-to-government obligation and is never lobbying.",
+    "agency": "The publishing agency as the Federal Register names it. 11,068 "
+              "of 11,402 rows are Interior, which is a property of the NAGPRA "
+              "notice series, not of federal consultation.",
+    "sub_agency": "The sub-agency as the Federal Register names it.",
+    "program": "The programme or institution named in the notice's own "
+               "abstract, verbatim up to the governing verb.",
+    "consultation_type":
+        "What kind of consultation record this is. 10,888 rows (95.5%) are "
+        "`NAGPRA_consultation_reported` - a NAGPRA notice REPORTING that "
+        "consultation was undertaken, not a notice of a meeting. "
+        + OVERLAP_SENTENCE,
+    "topic": "The Federal Register document title, verbatim.",
+    "notice_date": "The date the NOTICE published. This is NOT the date of the "
+                   "consultation; see event_start_date.",
+    "event_start_date":
+        "First date of the consultation event ITSELF, where the notice states "
+        "one. 190 of 11,402 rows. BLANK MEANS THE NOTICE DID NOT SAY - never "
+        "that no event happened. Where 1089 filled it, "
+        "`event_date_source_quote` prints the sentence it came from, and no "
+        "year is ever supplied that the notice did not print.",
+    "event_end_date": "Last such date, on the same basis as event_start_date.",
+    "location":
+        "Place of the consultation event, in the publisher's own word order "
+        "(the Federal Register's consultation tables print `State, City`). 103 "
+        "of 11,402 rows. A place is read as an event location only where the "
+        "notice announces an event: a NAGPRA notice's museum contact address, "
+        "and the county remains were removed from, are places the notice "
+        "prints and are NOT consultation locations.",
+    "format": "virtual / teleconference / in_person / written_comment, "
+              "semicolon-joined, from the notice's own words.",
+    "tribe_id": "Cedar entity id of the participant, where the resolver was "
+                "certain. Blank is unresolved, never 'no participant'.",
+    "tribe_name": "Cedar's canonical name for tribe_id.",
+    "participant_name_as_published":
+        "The participant's name EXACTLY as the notice printed it. This field "
+        "is authoritative; tribe_id is Cedar's reading of it.",
+    "participant_role":
+        "consulted / invited / invited_did_not_participate / not_enumerated, "
+        "assigned from the governing verb phrase in the SAME sentence as the "
+        "name list. `invited_did_not_participate` is a claim about a named "
+        "tribe's conduct and must never be shown without source_quote.",
+    "comment_deadline": "The comment deadline the notice states. NOT an event "
+                        "date.",
+    "has_written_comments": "1 where the notice's own text names written "
+                            "comments.",
+    "has_summary": "1 where the notice names a consultation summary or report.",
+    "has_transcript": "1 where the notice names a transcript.",
+    "federal_register_citation": "Volume and page, e.g. `81 FR 36952`.",
+    "source_url": "The Federal Register document URL. Every row has one.",
+    "source_quote": "The sentence the participant and role were read out of.",
+    "fetched_date": "When Cedar retrieved the notice text.",
+    "tier": "B on every row: an algorithmic match against published text, "
+            "never hand-ruled.",
+    "confidence": "The parser's own confidence in the participant match.",
+    "built_date": "When this row was built.",
+    "match_method": "How the participant name resolved to tribe_id.",
+    "cedar_uid": "Cedar universal id of the participant entity.",
+    "fr_document_number":
+        "THE JOIN KEY. The Federal Register document number, parsed from this "
+        "row's own source_url. Joins to `federal_actions.csv` (156,897 "
+        "documents), to `nagpra_notices.csv`, and to every other FR-keyed "
+        "table. Added 2026-09-02; this file previously had no join key at all.",
+    "nagpra_notice_overlap":
+        "`same_notice_in_nagpra_notices` (10,920 rows) or "
+        "`not_in_nagpra_notices` (482). " + OVERLAP_SENTENCE,
+    "nagpra_bridge_overlap":
+        "Whether this row's (notice, tribe) pair is ALSO a row in "
+        "`nagpra_notice_entity_bridge.csv`: "
+        "`same_notice_and_party_in_nagpra_bridge` 8,788, "
+        "`same_notice_different_party` 1,606, "
+        "`no_tribe_resolved_on_this_row` 526, "
+        "`notice_not_in_nagpra_dataset` 482. The 1,606 measure how far two "
+        "independent extractions disagree about who was consulted on the same "
+        "notice; they are a review queue, not an error count.",
+    "nagpra_coverage_window":
+        "Which part of this file's NAGPRA coverage the row falls in. The "
+        "coverage is a WINDOW, not a sample: 0 of 1,882 NAGPRA notices from "
+        "1994-2010, 1,817 of 2,264 from 2011-2022, 14 of 2,646 from 2023-2026. "
+        "Revised 43 CFR 10 took effect 2024-01-12 and replaced the 'in "
+        "consultation with representatives of' sentence this file's net keys "
+        "on with a bulleted Determinations list, so the net stops catching "
+        "notices exactly as NAGPRA volume triples.",
+    "event_date_basis":
+        "Which rule filled event_start_date. Blank where the date came from "
+        "the original build, or where there is no date.",
+    "event_date_source_quote":
+        "The notice's OWN sentence that prints the event date. Every date 1089 "
+        "wrote is a date this quote prints; the build fails otherwise "
+        "(INV-CE-NOGUESS).",
+    "location_basis": "Which rule filled location.",
+    "location_source_quote":
+        "The notice's OWN segment that prints the place. Every location 1089 "
+        "wrote is a place this quote prints.",
+}
+CB_GENERIC = ("Column of consultation_events.csv. See "
+              "docs/methodology/federal-register.md for how this table is "
+              "built and what it may be totalled on.")
+
+
+def _cb_type(vals):
+    v = [x for x in vals if (x or "").strip()]
+    if not v:
+        return "text"
+    if all(re.match(r"^-?\d+$", x) for x in v):
+        return "integer"
+    if all(re.match(r"^\d{4}-\d{2}-\d{2}$", x) for x in v):
+        return "date"
+    if all(re.match(r"^-?\d*\.?\d+$", x) for x in v):
+        return "numeric"
+    return "text"
+
+
+def stage_codebook():
+    rows, cols = read_table()
+    if not rows:
+        print("  ! consultation_events.csv has no rows")
+        return 1
+    if "nagpra_notice_overlap" not in cols:
+        print("  ! run `apply` first - the overlap columns are not on the file")
+        return 1
+    frag_dir = CLEAN / "codebook"
+    frag_dir.mkdir(parents=True, exist_ok=True)
+    frag = []
+    for col in cols:
+        vals = [r.get(col, "") for r in rows]
+        filled = sum(1 for x in vals if (x or "").strip())
+        frag.append({
+            "dataset": CB_BLOCK, "variable": col, "type": _cb_type(vals),
+            "units": "code" if col.endswith(("_id", "_uid", "_number"))
+                     else "date" if col.endswith(("_date", "_deadline"))
+                     else "text",
+            "pct_filled": round(100.0 * filled / len(rows), 1),
+            "n_rows": len(rows), "published": 1,
+            # Federal Register text and Cedar's own derivations from it. No
+            # licensed field and no terms-restricted source: every row here is
+            # a federal publication.
+            "access_tier": "public",
+            "description": CB_DESC.get(col, CB_GENERIC),
+            "generated": TODAY,
+        })
+    write_table(frag_dir / (CB_BLOCK + ".csv"), CB_FIELDS, frag)
+    master = CLEAN / "codebook_master.csv"
+    existing = list(csv.DictReader(
+        open(master, newline="", encoding="utf-8"))) if master.exists() else []
+    have = {(r["dataset"], r["variable"]) for r in existing}
+    new = [r for r in frag if (r["dataset"], r["variable"]) not in have]
+    if new:
+        bak = master.with_suffix(f".csv.bak_{TODAY}_pre_{STEM}")
+        if not bak.exists():
+            bak.write_bytes(master.read_bytes())
+        with master.open("a", encoding="utf-8", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=CB_FIELDS, extrasaction="ignore")
+            for r in new:
+                w.writerow(r)
+        print(f"  appended {len(new)} rows to codebook_master.csv "
+              f"({len(existing)} -> {len(existing) + len(new)}); "
+              f"backup {bak.name}")
+    else:
+        print("  codebook_master.csv already carries this block")
+    n_overlap = sum(1 for r in frag if "nagpra" in r["description"].lower())
+    print(f"  {CB_BLOCK}: {len(frag)} variables documented, {len(rows):,} rows")
+    print(f"  the NAGPRA overlap is stated on {n_overlap} of them, including "
+          f"consultation_type and nagpra_notice_overlap")
+    return 0
+
+
 if __name__ == "__main__":
     a = sys.argv[1:]
     if "--selftest" in a:
@@ -928,5 +1130,7 @@ if __name__ == "__main__":
         raise SystemExit(run(True))
     if cmd == "verify":
         raise SystemExit(verify())
+    if cmd == "codebook":
+        raise SystemExit(stage_codebook())
     raise SystemExit(f"unknown command {cmd!r}; "
-                     f"use measure | apply | verify | --selftest")
+                     f"use measure | apply | codebook | verify | --selftest")

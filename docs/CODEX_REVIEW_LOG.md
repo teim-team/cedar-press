@@ -431,3 +431,156 @@ were documented too (block score 0.857 → 0.882). The other reds —
 `hearing_bill_links.csv` 465 → 464, `native_bills_subject_sweep.csv`
 2,414 → 2,409, and `advocacy_passthrough_2026-08-07.csv` gone from
 `data/clean` — are legislation and advocacy tables this pass never opened.
+
+---
+
+## PR #29 — ROUND 3, pushed 2026-09-02 as `caf7438`
+
+**THE MECHANIC THAT WAS COSTING THE LOOP ITS ROUNDS, AND IT IS NOT AUTH.**
+Codex's own summary comment states its triggers: *"Reviews are triggered when
+you open a pull request for review, mark a draft as ready, or comment
+'@codex review'."* **A push is not a trigger.** The summary comment on #29
+still named `3fe58a5` as the last reviewed commit — so `6c4801f` (the eight
+round-2 replies) and `4c3ac3a` (the nest refresh) were **never reviewed by
+anything**, and pushing again would simply have produced a third unreviewed
+commit. The auth correction at the top of this file fixed *posting*; this
+fixes *getting reviewed*. **Every cycle must end with an `@codex review`
+comment on `/issues/29/comments`, not with a push.**
+
+All three endpoints were enumerated before concluding anything, per the rule
+at the top: 9 reviews (1 Codex on `3fe58a5`, 8 reply objects), 16 pull review
+comments (8 findings + 8 replies, every reply correctly threaded via
+`in_reply_to_id`), 1 issue comment (the Codex summary). Nothing new was
+waiting. **The absence of new findings was a property of the trigger, not of
+the code.**
+
+### The finding this side brought, and it was already visible in the repo
+
+Nothing Codex asked for. It came out of the standing instruction to re-check
+every claim against live data before pushing, and the two contradicting files
+were **both already pushed**, in one directory:
+
+    data/cedar/samples/README.md            owned -> native_owned_businesses.csv, 2,916 rows
+    data/cedar/collection_descriptors.json  owned -> "rows_label": "1,657 rows"
+
+**A sum over a dataset's tables cannot be smaller than one of its tables.**
+
+`770.FLAGSHIP` draws the customer's ten rows from `native_owned_businesses.csv`
+— 2,916 rows, **21** certifying authorities (`docs/PUBLICATION_POLICY.md` still
+says 18 and 2,393; both are stale), the table the dataset is named after.
+`760.rows_in()` sums only what the collection *contract* claims, and that is
+six `individual_native_*` tables totalling 1,657 — firms owned by individual
+people, a different relation. `500.COLLECTIONS` matches this collection with
+`^(individual_native|tribal_certification)` and the namesake table matches
+neither branch.
+
+**It was already a known orphan and the connection was never made.**
+`code/730_ws4_grain_money_conservation.py:852` lists it under
+`contract_orphan_shippable = 6`, attributed to "the workstreams that
+registered them". That attribution was correct and nobody owned the
+consequence, which is that the product publishes the number.
+
+**The row count is the smaller half of the cost.** `native-owned-businesses`
+is READY on `c4_identity_path = 100% keyed` and `c1_grain = 6/6`, measured
+across the six tables that exclude the directory. Measured on the directory:
+
+| | |
+|---|---:|
+| rows | 2,916 |
+| `business_entity_id` filled | **4 (0.1%)** |
+| `nation_id` filled | 2,725 (93.4%) |
+| `certifying_authority_entity_id` filled | 2,767 (94.9%) |
+| declared grain | **UNSTATED** |
+
+"100% keyed" is true of six tables the buyer never sees and false of the one
+they are shown. The dataset keys to a *nation*, not to a *business* — which is
+a defensible product, and is exactly the `affiliated_with` claim
+`PUBLICATION_POLICY.md` argues for, but it is not what READY was asserting.
+
+### What was fixed, and the line that was deliberately not crossed
+
+`760` now enforces the invariant (ADR-018). It reads `FLAGSHIP` and `SPINE`
+out of `770` **by text**, mirroring the discipline `770` already uses to read
+`760.PRODUCT_ID`, so a rename on either side is a hard failure rather than a
+silent divergence. On a violation it does **not** quietly repair the number:
+it publishes the union of both Cedar-side declarations (1,657 + 2,916 =
+**4,573**, with `n_rows_basis` naming both halves) and marks the dataset
+BLOCKED with the measurement in `cedar.blockers`. The status reverts by itself
+when the collection is fixed. `verify` exits 1; `selftest` carries **three**
+fixtures and all three pass — the undercount fires, a claimed flagship with a
+sufficient sum is clean, and an unclaimed flagship fires *even when the sum is
+large*, because an unclaimed table has no grain, no key and no rebuild path.
+
+**`500`, `512` and `518` were not run and not edited.** They are
+integrator-owned; ADR-017 records another workstream making the same refusal
+the same day. Widening the collection adds four tables with no declared grain
+and no declared key (`native_owned_businesses.csv` 2,916,
+`native_business_contract_links.csv` 2,393,
+`native_business_identifier_crosswalk.csv` 481,
+`native_business_contracting_by_nation.csv` 18) and moves a dataset's
+readiness. **Filed in `review/OWNER_DECISION_QUEUE.md` with the evidence.**
+
+**The invariant is 1 violation, not a class.** All fourteen were checked: 13
+flagship tables are claimed by their own collection and every other descriptor
+count exceeds its flagship. `_entity_layer` is **exempt from the membership
+half rather than passing by luck** — its flagship `cedar_identity_register.csv`
+lives in `data/spine/`, outside the contract by construction, and clears the
+arithmetic half at 1,555 against 326,899.
+
+### Claims re-measured, and two of them were wrong
+
+- **The README stated one quantity as two different numbers, 72 apart.**
+  `345,180` in the money-columns section and `345,108` in the Acoma
+  correction, for the same measurement. Today, with the method written down
+  (case-insensitive exact compare of `canonical_name` against the register's
+  name for that row's `cedar_uid`): **340,738** disagreements + **3,622**
+  blank labels of **552,602** keyed rows = 344,360. **0** rows carry a
+  `cedar_uid` absent from the register. Case-sensitive, for the record, is
+  364,754 — so the comparison mode has to be stated or the number is not
+  reproducible.
+- **The "98.3% explained" figure understated it.** `340,653 of 340,738 —
+  100.0%, $94,256,591,555.42` carry a label appearing verbatim in
+  `lineageA_dta_corrtd_tribe_key.csv` (393 distinct name strings).
+- **The 85-row residue needs no repoint, and one of the two labels is a
+  hazard.** 72 rows / $29,694,344.00 on `CE-001GC-WN` are labelled `Forest
+  County` while the register calls that entity *Sonoma County Indian Health
+  Project, Inc.* — and **all 72 are `recipient_state_code = CA`**, so the key
+  is right and only the label is wrong. It is worse than merely stale: Forest
+  County Potawatomi is a real Wisconsin nation and sits on the
+  `TERMS_STATED_RESTRICTIVE` list. The other 13 are a `Warms Springs` /
+  `Warm Springs` typo, all Oregon.
+- **Old Harbor held exactly.** `CE-000A9-81` 7,803 rows / $1,072,587,275.84 and
+  `CE-0016W-A5` 7,544 rows / $1,133,619,101.84, re-measured on the live table.
+- **The parent/child cross-tab is internally consistent.** 419,365 rows carry
+  no parent, which is the README's 419,359 plus the 6 that have neither, and
+  the parent-bearing total 798,403 reproduces exactly.
+- **Newsletter corpus, for whoever ships it:** 1,650 rows, **1,037 distinct
+  channel URLs**, 1,555 entities probed of which **650 carry at least one
+  channel**, 1,289 with a live site, archives back to **1970**. The
+  "1,195 channels / 650 entities" figure in circulation is stale on the first
+  half and right on the second.
+
+### A measurement retracted before it was reported
+
+Two consecutive runs of `770` produced different `legislation` samples, which
+would have meant a **non-deterministic sampler** — a class-7 defect and a
+serious one, because it would churn the branch diff on every rebuild. Re-run
+properly, with the input mtimes captured either side of both runs: **all
+fourteen samples byte-identical**, mtimes unchanged, and the first result was
+a concurrent job rewriting `bill_votes.csv` between run one and run two. **The
+check was measuring something other than its own name** — field guide section
+3, from the inside, in this workstream's own hands.
+
+### Concurrency, as it actually behaved
+
+Ten jobs write `data/clean` and it showed. Inside one hour: `deals_classified`
+935 → 1,079; the `deals` descriptor 2,386 → 2,674; `lobbying` 242,199 →
+264,478; `gaming` 127,312 → 128,487; and **`deals` flipped READY → BLOCKED**
+because another workstream added `deals_press_edgar_ancsa_additions.csv` with
+no grain and no key. READY went 14 → 13 → 12 while this branch was being
+prepared. It is named in the README as another workstream's, not absorbed, and
+that section now tells the reader to regenerate the count rather than quote
+it.
+
+**The dist-vs-repo diff was run AFTER the push, per the rule earned last
+round, and came back in sync.**

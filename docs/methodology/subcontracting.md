@@ -289,6 +289,52 @@ HigherGov export has no DUNS at all), sub-side city, ZIP and place of
 performance, congressional districts, CFDA numbers, and the five
 highly-compensated-officer pairs.
 
+> **RECOVERED 2026-09-02 — the subawardee's own geography.**
+> `code/1109_subawardee_geo_promote.py`. `ON_DISK_NOT_PROMOTED`, not a fetch:
+> zero network requests.
+>
+> `geo_subawardee_county_gap_reason` was populated on all 76,859 rows and read
+> *"subawards.csv carries sub_state and no sub city, zip or county column; the
+> subawardee's county is not derivable from this table. The county columns here
+> are the PRIME award's, not the subawardee's."* That is exactly right about the
+> clean table and wrong about the corpus — the staged FSRS extracts carry 118
+> columns including `subawardee_city_name`, `subawardee_state_code` and
+> **`subawardee_zip_code`**.
+>
+> The join is one exact identifier against one exact identifier:
+> `910_subaward_report_id_backfill.py` had already put `subaward_sam_report_id`
+> back on **75,861 of 76,859 rows (98.7%)**, and an index over all 62 CSV
+> members of the staged zips holds **8,480,914 distinct ids from 8,480,999
+> source rows** (85 seen twice; **52** of those disagree on the subawardee's
+> address between filings — first occurrence kept, since a re-filing may be
+> correcting it). ZIP → county uses the same
+> `data/clean/geo_place_county_crosswalk.csv` (`place_key_type = 'zip5'`,
+> 21,923 entries) and the same dominance/ambiguity discipline as `871`.
+>
+> | outcome | rows | share |
+> |---|---:|---:|
+> | **county derived from the subawardee's own ZIP** | **73,388** | **95.5%** |
+> | address recovered, ZIP not in the county crosswalk | 1,986 | 2.6% |
+> | no `subaward_sam_report_id`, so no join is possible | 998 | 1.3% |
+> | source published no ZIP | 391 | 0.5% |
+> | report id present, not found in any staged extract | 96 | 0.1% |
+>
+> Ten columns added, all prefixed `geo_subawardee_`, plus
+> `geo_subawardee_basis` which is **never blank** and says which of the five
+> outcomes a row is in. Rows 76,859 → 76,859 and $47,301,660,819.78 →
+> $47,301,660,819.78, **conserved to the cent**; `verify` and `selftest` both
+> exit 0, the latter proving all three invariants FIRE on injected violations.
+>
+> **`sub_state` and the `geo_prime_award_*` columns are untouched** — the
+> latter are and remain the PRIME award's geography, which is the distinction
+> the gap reason existed to protect. The gap sentence is now rewritten PER ROW
+> rather than left as one blanket claim that contradicts the columns beside it.
+>
+> **This is an IN-PLACE ENRICHER.** Anything that rebuilds or appends to
+> `subawards.csv` — `121 append`, `45`, `94` — leaves the new columns blank on
+> the rows it adds. Re-run 1109 (`index` only if the raw corpus changed, then
+> `apply`) as the LAST step of any refresh.
+
 ### An accepted token is not a working job
 
 On 2026-08-12 nine `bulk_download` jobs ran over 80 minutes, **all accepted
@@ -324,8 +370,13 @@ dead"* — the server reports `rows_so_far = 0` until the file is built.
   relationships running in opposite directions, and summing them double-counts
   the 1,667 `both_sides_native` rows.
 - **`native_passthrough.csv` is a PROJECTION of this table, not new money** —
-  1,522 rows / $2,972,389,900.81, of which only 1,135 rows /
-  $869,328,591.38 are `amount_countable = 1`. FSRS is self-reported by the
+  ~~1,522 rows / $2,972,389,900.81, of which only 1,135 rows /
+  $869,328,591.38 are `amount_countable = 1`~~ **RE-MEASURED 2026-09-02:
+  1,663 rows / $3,209,170,541.63, of which 1,259 rows / $1,050,719,668.88 are
+  `amount_countable = 1`.** The struck figures predate the FY2023 Q1/Q2
+  promotion; `81_build_passthrough_dataset.py` rebuilt the file at 01:20 on
+  2026-09-02 and it IS consistent with its parent. It was the documents that
+  were behind, not the file. FSRS is self-reported by the
   prime with no validation: **the RELATIONSHIP is the product; the AMOUNT
   carries a filter.**
 - **Never compute network leakage without filtering `self_edge_flag`** — 3 of

@@ -337,16 +337,61 @@ that reads both and writes neither.**
   and **11,068 of 11,402 come from Interior alone** (HHS 99, EPA 43, Commerce
   30, Energy 23). Actual policy consultation is `consultation_session` 212,
   `consultation_notice` 180, `listening_session` 37, `NHPA_section_106` 20,
-  `negotiated_rulemaking` 14 and **`dear_tribal_leader_letter` 6.** *Six Dear
-  Tribal Leader letters across the whole federal government since 1994 is not
-  the record* — DOI alone posts dozens a year outside the Federal Register.
-  Every cabinet department has an EO 13175 consultation policy; this file sees
-  one. `tier = B` on all 11,402.
-- **No date and no place for the consultation itself.** `notice_date` is when
-  the *notice* published. `event_start_date` is filled on **93 of 11,402 rows**
-  and `location` on **60** — so *"when and where is the consultation"* cannot
-  be answered for 99.2% of rows. The notice text usually states both; the parse
-  takes the notice metadata and stops.
+  `negotiated_rulemaking` 14 and **`dear_tribal_leader_letter` 6.**
+  `tier = B` on all 11,402.
+
+  **UPDATED 2026-09-02, workstream FR-DTLL** — three of the claims in this
+  bullet were re-measured and two of them moved.
+
+  1. **"A NAGPRA table" is right about ROWS and wrong about DOCUMENTS.** The
+     10,888 are one row per (notice, participant) and reduce to **1,831
+     distinct notices**; **10,920 of 11,402 rows (95.8%) name a document
+     `nagpra_notices.csv` also ships**, and **4,961 of the 6,792 NAGPRA
+     notices are not represented here at all.** So this file sees **27.0% of
+     the NAGPRA notice universe**, not a copy of it. The overlap is now
+     `nagpra_notice_overlap` and `nagpra_bridge_overlap`, **columns on the
+     row**, plus `fr_document_number` — the join key this table never had —
+     written by `code/1089_fr_consultation_overlap_and_event_parse.py` and
+     stated in codebook block `09c_consultation_events`, so a buyer holding
+     both datasets cannot double-count from prose alone.
+  2. **The NAGPRA coverage is a WINDOW and it is BROKEN AT THE HEAD.**
+     1994–2010: **0 of 1,882**. 2011–2022: **1,817 of 2,264 (80.3%)**.
+     2023–2026: **14 of 2,646 (0.5%)**. `96`'s universe is
+     `fr_consultation_referenced.csv`, which finds notices by the *"in
+     consultation with representatives of"* drafting convention — and revised
+     43 CFR 10, effective **2024-01-12**, replaced that sentence with the
+     bulleted "Determinations" list. **The net stops catching notices exactly
+     as NAGPRA volume triples.** Written on the row as
+     `nagpra_coverage_window`.
+  3. ***"DOI alone posts dozens a year outside the Federal Register"* was an
+     inference from a count of 6 and it was the wrong shape.** `962` measured
+     the Federal Register itself at **46** documents containing the phrase, so
+     the six is a faithful reading of the FR — the FR is simply the wrong
+     ceiling. `code/1090_dtll_agency_harvest.py` then went to the publishers:
+     **597 letters, 2000-01-10 to 2026-08-25 — IHS 574, BIE 14, BIA 9 —** in
+     the new table `dear_tribal_leader_letters.csv`. **The largest single
+     cause of the old six was an HTTP 406 on `ihs.gov` recorded as
+     `NOT_CHECKED`**; it was a request-header shape, and behind it sat IHS's
+     own 27-year `Dear Tribal Leader Letters` series. The letters are a
+     separate table, not appended rows, because `96` owns and rebuilds
+     `consultation_events.csv`.
+- **The consultation's own date and place are still mostly absent, and the
+  remaining absence is now sized.** `notice_date` is when the *notice*
+  published. `event_start_date` was filled on **93 of 11,402 rows** and
+  `location` on **60**; `1089` parsed the 2,313 notice texts already on disk
+  and took them to **190** and **103**. Both are still under 2% of rows, and
+  the reason is structural rather than parsing: **10,888 rows are NAGPRA
+  notices REPORTING that consultation happened, and such a notice states
+  neither when nor where.** Against the 484 non-NAGPRA documents the figure is
+  **190 of 484 documents dated**. Every filled cell carries the notice's own
+  sentence in `event_date_source_quote` / `location_source_quote`; a blank
+  still means the notice did not say. **A measured trap, recorded because it
+  fires silently:** an unanchored place regex filled 657 NAGPRA rows with
+  museum contact addresses and excavation counties — *"Cambridge, MA"* from
+  *"should contact Patricia Capone, Peabody Museum"*, *"Coconino County, AZ"*
+  from where remains were removed in 1985. Both are places the notice prints;
+  neither is where a consultation was held. A location is now read only from a
+  notice that announces an event.
 - **`participant_role` is an inference presented as a fact in the shipped
   sample.** `consulted` 9,110 · `invited_did_not_participate` 1,211 ·
   `not_enumerated` 1,006 · `invited` 75 — a real and useful distinction derived

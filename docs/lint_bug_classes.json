@@ -1,5 +1,5 @@
 {
-  "scanned_files": 597,
+  "scanned_files": 598,
   "counts": {
     "class1": 1,
     "class2a": 0,
@@ -809,7 +809,7 @@
     {
       "class": "class2c",
       "file": "846_session_audit.py",
-      "line": 382,
+      "line": 411,
       "evidence": "fails += 1",
       "why": "counter 'fails' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,

@@ -544,13 +544,78 @@ assume otherwise.
   entities, $70.96B.**
 - **Set-aside flags are self-reports**, and only 28.8%–58.4% of attributed
   dollars carry any Native preference in a given year.
-- **No NAICS, no PSC, no award description, no action date.** The table carries
-  `sector`, the **2-digit** NAICS prefix, and nothing finer. The 6-digit
-  `naics_code` is already local on 904,282 rows in the archive extract, and
-  PSC + description are reachable for **247,987 of 1,217,768 rows (20.4%)**
-  through the local gapfill zips with **zero downloads**; the other 79.6% is a
-  genuine re-pull, because `114::release()` deletes each archive zip after
-  filtering by design.
+- ~~**No NAICS, no PSC, no award description, no action date.**~~ **SUPERSEDED
+  2026-09-02, PARTLY — see `docs/PRIME_ATTRIBUTE_REPULL_LOG_2026-09-02.md`.**
+  The struck bullet said PSC + description were reachable for **247,987 of
+  1,217,768 rows (20.4%)** from the local gapfill zips and that "the other
+  79.6% is a genuine re-pull, because `114::release()` deletes each archive zip
+  after filtering by design." That was correct. The re-pull was then run:
+  `code/1085_prime_psc_desc_repull.py` re-fetched the archive objects (FY2008's
+  re-fetch is **byte-for-byte the size `_SOURCE_MANIFEST.csv` recorded**, so it
+  is provably the same object) and took four attribute columns off them.
+
+  | column | was | is [measured 2026-09-02, after 1085] |
+  |---|---:|---:|
+  | `product_or_service_code` | 247,987 (20.4%) | **574,011 (47.1%)** |
+  | `product_or_service_code_description` | 247,987 (20.4%) | **574,011 (47.1%)** |
+  | `award_base_description` | 247,987 (20.4%) | **573,320 (47.1%)** |
+  | `naics_description` | 247,987 (20.4%) | **561,536 (46.1%)** |
+  | `naics_code` (6-digit) | 838,229 (68.8%) | 838,229 (68.8%) — unchanged |
+
+  **FY2008–FY2015 are at ~100% on the archive stratum; FY2016–FY2026 are still
+  on the gapfill corpus alone** (FY2016 4.7%, FY2026 94.2%). The remaining
+  eleven objects are QUEUED behind an edge block this run caused — eight
+  objects, ~9.4 GB, in twenty-six minutes with no inter-object pause — and the
+  script now paces at 480s and STOPS on a sub-second disconnect instead of
+  advancing to the next year. Rows and money conserved to the cent; `verify`
+  and `selftest` both exit 0.
+
+  **The 68.8% NAICS figure is the structural ceiling for all four columns and
+  it is not laziness.** Only **841,002** rows carry
+  `contract_transaction_unique_key`. The other **376,766** are BGOV /
+  master-prime lineage and **never had one**, because a BGOV row is a
+  (contract, parent vehicle, fiscal year, vendor) *aggregate*, not an FPDS
+  transaction — there is no transaction for a transaction key to name. No
+  re-pull reaches them; that is a merge question, not a column question, and
+  `award_attributes_basis` distinguishes the two states per row.
+- **`sector` is not trustworthy at ROW grain on the archive stratum, and
+  `Not given` is a value it takes.** Added 2026-09-02 by
+  `code/1087_prime_naics_sector_conflict_resolve.py`;
+  `docs/PRIME_SECTOR_PAIRING_DIAGNOSIS.json` and
+  `review/prime_naics_sector_conflicts_2026-09-02_v2.csv` carry it row by row.
+
+  `docs/COLUMN_PROMOTION_LOG_2026-09-02.md` registered **20** rows where
+  `sector` disagrees with the archive's 6-digit `naics_code`, "all FY2008, all
+  pairing within one PIID with the sectors crossed". Re-measured today:
+
+  - **The pairing hypothesis is confirmed, and provably rather than by
+    example.** On every one of the **10** affected
+    `(contract_number, fiscal_year, awardee_uei)` groups, the MULTISET of
+    `sector` values equals the MULTISET of NAICS-derived 2-digit sectors —
+    **10 of 10, zero exceptions.** DABQ0303D0002 FY2008 carries
+    `23 23 23 56 56 56 56 56` on both sides, on different rows. So no sector
+    VALUE is wrong at contract level; the ROW each landed on is.
+  - **The cause is a non-unique merge key, and the exposure is 645× the
+    register.** `131_merge_archive_backfill.py` merges on
+    `(contract_number, fiscal_year, awardee_uei)`, which resolves **841,002
+    archive rows onto 486,889 distinct keys**. **498,533 rows (59.3%)** sit in
+    a group with more than one row, and **2,813 groups carrying 12,911 rows**
+    hold more than one distinct `sector` — inside those, the sector-to-row
+    assignment is arbitrary. **The 20 are the visible subset**, the ones where
+    the archive NAICS happens to contradict the assignment. The register is a
+    sample, not the set.
+  - **There are 22, not 20, and one is FY2010, not FY2008.** The two extra
+    carry `sector = 'Not given'` and the registering check compares two-digit
+    codes, so it could not see them.
+  - **`sector` holds the literal string `Not given` on 19,259 rows (1.58%)** —
+    the same sentinel class as `cage_code` holding `nan`. It groups as a
+    category. `supersector` carries the matching `Other services or Not given`
+    on 35,620 rows. **Filter it before any sector cut.**
+
+  **Nothing was changed.** The repair — `sector = substr(naics_code,1,2)` on
+  the 22, and a unique merge key for `131` — is written up and PROPOSED, not
+  applied: `950_promote_contract_attributes.py` owns the INV-SECTOR gate and
+  that gate fails by design if a registered conflict heals.
 - **`contract_number` is not a key.** `0001` alone appears on 11,700 rows and
   **290,525 rows (23.9%) carry a `contract_number` of six characters or
   fewer** — those are FPDS modification PIIDs, meaningless without the

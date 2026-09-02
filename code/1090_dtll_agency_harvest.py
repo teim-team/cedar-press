@@ -4,7 +4,7 @@ Cedar Press - 1090: HARVEST Dear Tribal Leader letters from the agencies that
 publish them, which is NOT the Federal Register.
 
     py -3 code/1090_dtll_agency_harvest.py harvest
-    py -3 code/1090_dtll_agency_harvest.py build      # parse cache -> data/clean
+    py -3 code/1090_dtll_agency_harvest.py codebook   # register the table
     py -3 code/1090_dtll_agency_harvest.py verify
     py -3 code/1090_dtll_agency_harvest.py --selftest # prove the invariants FIRE
 
@@ -1120,6 +1120,159 @@ def verify():
     return 0
 
 
+# ===========================================================================
+# STAGE `codebook` - register the table so it can ship
+# ===========================================================================
+# A clean table that no `codebook_master.csv` block documents is invisible to
+# `87_build_dataset_notes.py`, to `512`'s shippable list and therefore to
+# `518`'s scoreboard. Two writes, the shape `1072` established: the fragment
+# this dataset owns, and an APPEND to the master, because
+# `41_build_codebooks.py` rewrites the master wholesale and is the one script
+# on NEVER_RUN.
+CB_FIELDS = ["dataset", "variable", "type", "units", "pct_filled", "n_rows",
+             "published", "access_tier", "description", "generated"]
+CB_BLOCK = "09d_dear_tribal_leader_letters"
+
+CB_DESC = {
+    "letter_id": "THE KEY. `DTLL-` plus a stable digest of the document URL, "
+                 "so the same document keeps the same id across rebuilds and "
+                 "no id is ever positional.",
+    "channel": "Always CONSULTATION. A Dear Tribal Leader letter is an agency "
+               "discharging a government-to-government obligation, never "
+               "lobbying.",
+    "agency": "The agency that published the letter, in its own name.",
+    "agency_code": "HHS-IHS, DOI-BIA or DOI-BIE.",
+    "series": "The publisher's own name for the series this document sits in.",
+    "letter_date": "The date the PUBLISHER states for the letter. BLANK MEANS "
+                   "THE PUBLISHER DID NOT STATE ONE - never that the document "
+                   "is undated in reality.",
+    "letter_date_verbatim": "That date exactly as the publisher printed it "
+                            "(`January 7, 2025`, or an ISO date from JSON-LD). "
+                            "`letter_date` must reduce from this string or the "
+                            "build fails (INV-DTLL-DATE).",
+    "letter_date_basis": "Which element of the publisher's page the date came "
+                         "from.",
+    "index_listing_count": "How many times the publisher's own index lists "
+                           "this document. 799 of 807 rows are 1.",
+    "also_listed_under_dates": "Where the publisher listed the same document "
+                               "under more than one date, the other dates, "
+                               "verbatim. The row's own date is the earliest. "
+                               "Nothing the publisher said is discarded.",
+    "subject_as_published": "The publisher's own one-line description of the "
+                            "letter, verbatim from the index link text (IHS) "
+                            "or the page title (BIA/BIE). NOT Cedar's summary.",
+    "addressed_to": "`tribal_leaders`, or "
+                    "`tribal_leaders_and_urban_indian_organization_leaders` "
+                    "where the publisher's own filename says the letter also "
+                    "went to Urban Indian Organization leaders (DUIOLL / "
+                    "DTUIOLL). Letters addressed ONLY to urban leaders are a "
+                    "different series and are not in this table.",
+    "addressed_to_basis": "What said so - the index section, or the "
+                          "publisher's filename abbreviation.",
+    "document_url": "The letter itself, at the publisher. One row per URL; "
+                    "the build fails on a repeat (INV-DTLL-DUP).",
+    "document_format": "pdf or html, as the publisher serves it.",
+    "record_kind": "`letter` 597, `enclosure` 209, `publisher_index_page` 1. "
+                   "COUNTING ROWS COUNTS DOCUMENTS, NOT LETTERS - filter "
+                   "`record_kind = 'letter'` for a letter count. An enclosure "
+                   "is an attachment the publisher labelled as one; a "
+                   "publisher_index_page is a page that lists letters and is "
+                   "not itself one.",
+    "is_enclosure": "1 where record_kind is `enclosure`. Kept for consumers "
+                    "that only need the binary split.",
+    "linked_pdf_count": "For an HTML page, how many PDFs it links. On a "
+                        "`publisher_index_page` this is the measured, "
+                        "un-promoted remainder: that many letters the page "
+                        "names and this table does not yet carry as rows.",
+    "source_index_url": "The publisher's own index this row was enumerated "
+                        "from. Every row has one and it returned HTTP 200, or "
+                        "the build fails (INV-DTLL-URL).",
+    "source_index_http_status": "Always 200. A non-200 index yields a "
+                                "coverage row in `dtll_source_coverage.csv`, "
+                                "never a letter row.",
+    "source_index_year": "The year the publisher filed the letter under.",
+    "harvest_method": "`publisher_year_index` or "
+                      "`publisher_sitemap_enumeration`. Both are the "
+                      "publisher's OWN enumeration; no URL here was guessed. "
+                      "962's first draft tried three guessed bia.gov paths, "
+                      "collected three 404s and was about to record "
+                      "NOT_IN_SOURCE - concluding from three guesses that a "
+                      "publisher does not publish.",
+    "tier": "B on every row: a machine reading of a published index, never "
+            "hand-ruled.",
+    "confidence": "The harvester's confidence in the row.",
+    "fetched_date": "When Cedar retrieved the index page.",
+    "built_date": "When this row was built.",
+    "built_by_script": "code/1090_dtll_agency_harvest.py.",
+}
+CB_GENERIC = ("Column of dear_tribal_leader_letters.csv. See "
+              "docs/DEAR_TRIBAL_LEADER_HARVEST.json for the full request "
+              "ledger behind every row.")
+
+
+def _cb_type(vals):
+    v = [x for x in vals if str(x or "").strip()]
+    if not v:
+        return "text"
+    if all(re.match(r"^-?\d+$", str(x)) for x in v):
+        return "integer"
+    if all(re.match(r"^\d{4}-\d{2}-\d{2}$", str(x)) for x in v):
+        return "date"
+    return "text"
+
+
+def stage_codebook():
+    if not OUT_LETTERS.exists():
+        print("  ! run `harvest` first")
+        return 1
+    rows = list(csv.DictReader(open(OUT_LETTERS, newline="", encoding="utf-8")))
+    if not rows:
+        print("  ! dear_tribal_leader_letters.csv has no rows")
+        return 1
+    cols = list(rows[0].keys())
+    frag_dir = CLEAN / "codebook"
+    frag_dir.mkdir(parents=True, exist_ok=True)
+    frag = []
+    for col in cols:
+        vals = [r.get(col, "") for r in rows]
+        filled = sum(1 for x in vals if str(x or "").strip())
+        frag.append({
+            "dataset": CB_BLOCK, "variable": col, "type": _cb_type(vals),
+            "units": "code" if col.endswith(("_id", "_code", "_status"))
+                     else "date" if col.endswith(("_date",))
+                     else "text",
+            "pct_filled": round(100.0 * filled / len(rows), 1),
+            "n_rows": len(rows), "published": 1,
+            # Federal agency publications, every one. No licensed field and
+            # no terms-restricted source: docs/PUBLICATION_POLICY.md's eight
+            # hard-listed sources are tribal publishers and none is here.
+            "access_tier": "public",
+            "description": CB_DESC.get(col, CB_GENERIC),
+            "generated": TODAY,
+        })
+    write_csv(frag_dir / (CB_BLOCK + ".csv"), CB_FIELDS, frag)
+    master = CLEAN / "codebook_master.csv"
+    existing = list(csv.DictReader(
+        open(master, newline="", encoding="utf-8"))) if master.exists() else []
+    have = {(r["dataset"], r["variable"]) for r in existing}
+    new = [r for r in frag if (r["dataset"], r["variable"]) not in have]
+    if new:
+        bak = master.with_suffix(f".csv.bak_{TODAY}_pre_1090_dtll_agency_harvest")
+        if not bak.exists():
+            bak.write_bytes(master.read_bytes())
+        with master.open("a", encoding="utf-8", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=CB_FIELDS, extrasaction="ignore")
+            for r in new:
+                w.writerow(r)
+        print(f"  appended {len(new)} rows to codebook_master.csv "
+              f"({len(existing)} -> {len(existing) + len(new)}); "
+              f"backup {bak.name}")
+    else:
+        print("  codebook_master.csv already carries this block")
+    print(f"  {CB_BLOCK}: {len(frag)} variables documented, {len(rows):,} rows")
+    return 0
+
+
 if __name__ == "__main__":
     args = sys.argv[1:]
     if "--selftest" in args:
@@ -1131,5 +1284,7 @@ if __name__ == "__main__":
         raise SystemExit(run_harvest(probe_only=True))
     if cmd == "verify":
         raise SystemExit(verify())
+    if cmd == "codebook":
+        raise SystemExit(stage_codebook())
     raise SystemExit(f"unknown command {cmd!r}; "
-                     f"use harvest | probe | verify | --selftest")
+                     f"use harvest | probe | codebook | verify | --selftest")

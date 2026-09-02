@@ -408,3 +408,32 @@ Backups (nothing overwritten without one):
     code/851_build_constellation_edges.py.bak_2026-09-02_pre852
 
 Nothing was committed.
+
+---
+
+## UPDATE 2026-09-02 — do NOT mint the 2,408 unkeyed from-sides. Measured.
+
+*Measured by the `_entity_layer` deepening pass; the decision is **ADR-020** in
+`docs/ARCHITECTURE_DECISIONS.md`.*
+
+2,408 of 3,153 edges (76.4%) have a name-only from-side, and the standing
+proposal is to mint them because it "would most extend the deals and ownership
+sweeps." Three measurements say otherwise:
+
+1. **They are already identified.** 2,365 of the 2,408 come from
+   `native_owned_businesses` at tier `registered_with` (TERO certification), and
+   **all 2,365 join to `native_owned_businesses.business_source_id` through the
+   `from_record_key` already on the edge.** A stable directory-row key is not a
+   missing identity.
+2. **The sweep was extended by minting nothing.** After `code/1100` promoted the
+   `1001` crosswalk onto the directory, **186 of those from-sides now carry a
+   published federal UEI**. Carrying `from_record_key` and the federal link is
+   the whole extension.
+3. **278 of them carry `business_name_is_person_name = 1`.** Minting a
+   `cedar_uid` per unkeyed from-side would put **278 natural persons into the
+   entity register**, which `docs/PUBLICATION_POLICY.md` forbids outright.
+
+The remaining 43 are `np_mission` (39) and IHS self-governance compacts (4).
+
+**If a class of these is ever minted it is the `CEDAR-ENT-` individually
+Native-owned class, one reviewed row at a time, and never the 278.**

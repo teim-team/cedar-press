@@ -284,9 +284,18 @@ UEI_SENTINELS = {"GSA_MIGRATION", "NOT_AVAILABLE", "UNKNOWN", "NONE", "N/A"}
 
 
 def tail_ueis(tail):
-    """-> (UEI -> (uid, source), [rejected notes]).
+    """-> (UEI -> (uid, id_tier, source), [rejected notes]).
 
     TIER IS READ, NEVER INFERRED -- see the module docstring, R1.
+
+    AND THE TIER TRAVELS WITH THE IDENTIFIER. Only the identifier ledger's
+    own tier-A rows are tier A here. `bie_uio_identifier_links.uei` carries
+    UEIs whose own `tier_rationale` says "Tier B: the identifier is not
+    independently confirmed" -- it is a NAME match to the BIE roster. Reading
+    that UEI as an exact link would be START_HERE trap 1 in its purest form:
+    the key is exact, the link is a guess, and the join looks identical
+    either way. A tier-B UEI therefore earns a date only if the transaction's
+    own recipient name also matches the entity -- see `route_ondisk_uei`.
     """
     cand, src = defaultdict(set), {}
     led, _ = _rows_of(LEDGER)
@@ -298,7 +307,8 @@ def tail_ueis(tail):
             v = (r.get("identifier") or "").strip().upper()
             if v:
                 cand[v].add(r["cedar_uid"])
-                src.setdefault(v, LEDGER + " (confidence_tier=A, no exclusion_id)")
+                src.setdefault(v, ("A", LEDGER
+                                   + " (confidence_tier=A, no exclusion_id)"))
     for fn, ucol in UEI_SOURCES:
         rows, hdr = _rows_of(fn)
         if ucol not in hdr:
@@ -308,7 +318,7 @@ def tail_ueis(tail):
                 v = (r.get(ucol) or "").strip().upper()
                 if v and v.lower() not in ("nan", "none", "n/a"):
                     cand[v].add(r["cedar_uid"])
-                    src.setdefault(v, fn + " (" + ucol + ")")
+                    src.setdefault(v, ("B", fn + " (" + ucol + ")"))
     keep, dropped = {}, []
     for v, uids in cand.items():
         if v in UEI_SENTINELS or not UEI_SHAPE.match(v):
@@ -316,7 +326,7 @@ def tail_ueis(tail):
                            % ("sentinel" if v in UEI_SENTINELS else "shape",
                               v, len(uids)))
         elif len(uids) == 1:
-            keep[v] = (next(iter(uids)), src[v])
+            keep[v] = (next(iter(uids)),) + src[v]
         else:
             dropped.append("AMBIGUOUS " + v + " -> " + ",".join(sorted(uids)))
     return keep, dropped
@@ -365,8 +375,11 @@ def route_ondisk_uei(tail, ents):
     ueis, dropped = tail_ueis(tail)
     for d in dropped:
         print("    REJECTED  " + d[:160])
-    print("    %d exact UEI(s) covering %d tail entities"
-          % (len(ueis), len({v[0] for v in ueis.values()})))
+    print("    %d exact UEI(s) covering %d tail entities "
+          "(%d tier-A ledger, %d needing a recipient-name re-check)"
+          % (len(ueis), len({v[0] for v in ueis.values()}),
+             sum(1 for v in ueis.values() if v[1] == "A"),
+             sum(1 for v in ueis.values() if v[1] != "A")))
     best = {}
     for fn, ucol, dcol, label in FED_TABLES:
         p = os.path.join(CLEAN, fn)
@@ -387,16 +400,26 @@ def route_ondisk_uei(tail, ents):
                 d = sane_date(r.get(dcol))
                 if not d:
                     continue
+                uid, itier, isrc = ueis[v]
+                rname = (r.get("recipient_name")
+                         or r.get("awardee_name") or "").strip()
+                if itier != "A":
+                    # A TIER-B UEI IS A NAME GUESS WEARING AN EXACT KEY. Make
+                    # the transaction's own recipient name agree before the
+                    # date is allowed to be this entity's.
+                    nm = ents[uid]["canonical_name"]
+                    if not has_identity(nm):
+                        continue
+                    ok, _ = name_matches(nm, rname)
+                    if not ok:
+                        continue
                 hit += 1
-                uid, isrc = ueis[v]
                 k = (uid, fn)
                 if k not in best or d > best[k][0]:
-                    best[k] = (d, v, isrc, label, ucol,
-                               (r.get("recipient_name")
-                                or r.get("awardee_name") or "").strip())
+                    best[k] = (d, v, itier, isrc, label, ucol, rname)
         print("    %-38s %7d dated row(s) on a tail UEI" % (fn, hit))
     rows = []
-    for (uid, fn), (d, uei, isrc, label, ucol, rname) in sorted(best.items()):
+    for (uid, fn), (d, uei, itier, isrc, label, ucol, rname) in sorted(best.items()):
         r = _base(uid, ents, "ondisk_uei", label, "https://www.usaspending.gov/")
         r.update({
             "fact_key": "latest_award_action:" + fn,
@@ -410,8 +433,13 @@ def route_ondisk_uei(tail, ents):
                 "equals this entity's UEI. The date is the agency's, not "
                 "Cedar's."),
             "identifier_type": "UEI", "identifier_value": uei,
-            "match_method": "exact_uei",
-            "match_note": "UEI sourced from " + isrc,
+            "match_method": ("exact_uei_tierA_ledger" if itier == "A"
+                             else "exact_uei_plus_recipient_name_check"),
+            "match_note": ("UEI sourced from " + isrc
+                           + ("" if itier == "A" else
+                              "; that source's own link is tier B, so the "
+                              "transaction's recipient name '" + rname[:60]
+                              + "' was re-checked against the entity name")),
             "evidence": ("exact UEI join against data already on this "
                          "machine; the transaction row is UNATTRIBUTED in its "
                          "own attribution column, which is why no instrument "

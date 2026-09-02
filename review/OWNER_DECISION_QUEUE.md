@@ -1807,3 +1807,198 @@ in `publishable_before_1100`. Reversible by one column copy.
 by 523 and its person-name exposure goes to zero on this family.
 **If REVIEW:** the 87 the detector cleared are the cheapest re-entry, and USET's
 directory would need a table parse rather than a heading scrape.
+
+
+---
+
+<!-- BEGIN DEALS-MERGE-1088 -->
+## DM-1. Six real deals are sitting in the refusal register because the PARTY is wrong, not the deal
+
+**Decision:** authorise a party re-derivation pass on the 33
+`G5_PARTY_IS_PUBLISHER_NOT_TRANSACTOR` refusals, or leave them refused.
+
+`code/1088_merge_staged_deals.py` refused 33 tribal-press candidates because the
+`Native_Party` assigned by the screen is the PUBLISHER of the page, not the
+transactor. Most of those 33 are noise — a statewide news aggregator attributed
+Dell's $9.7B contract, Anthropic's $200M contract and the Coast Guard's $25B
+acquisition programme to the Alaska village of **Craig**, and a South Carolina
+library friends group reached a tier-A Indian Country deal queue on the token
+`Pine Ridge`.
+
+**But at least six carry a real Indian Country transaction under a wrong
+party**, and refusing them loses the deal along with the error:
+
+| the transaction, as the source states it | party the screen assigned | party the sentence names |
+|---|---|---|
+| Mille Lacs Corporate Ventures acquires 2020 Brand Solutions | Minnesota Indian Gaming Association | Mille Lacs Band of Ojibwe |
+| MG2 Tribal Energy, a JV with Geronimo Energy, signs a PPA | Minnesota Indian Gaming Association | Mesa Grande Band of Mission Indians |
+| Navajo Nation acquires Goulding's Lodge, Monument Valley | Coalition of Large Tribes | Navajo Nation |
+| Savoonga Reindeer Commercial Company EDA-funded meat plant | Brevig Mission | Savoonga / SRCC |
+| Kawerak Inc. EESS three-year ANEP grant | Brevig Mission | Kawerak Inc. |
+| Staraaya, a joint venture with KANA | Alaska Federation of Natives | KANA (Kodiak Area Native Association) |
+
+**If AUTHORISE:** each row's party is re-derived from the source sentence and
+re-run through the same gates; expect roughly 6 rows, none large, all with a
+live source link. The cost is that the party then rests on a sentence read
+rather than on the publisher prior — which is what the rest of this dataset
+already does.
+**If LEAVE:** all 33 stay whole in `review/deals_1088_refusals.csv` with their
+evidence quotes, and Cedar publishes 6 fewer real transactions rather than 6
+wrong parties. This is the safer answer and it is not obviously the right one.
+
+---
+
+## DM-2. Two ownership changes nobody announced carry a fiscal-year WINDOW, not a date
+
+**Decision:** ratify shipping them with a blank `Event_Date`, or hold them out
+of the ledger until a date is found.
+
+Merged as `IDOBS-2021-001` **WHPacific, Inc.** (NANA Regional Corporation ->
+NV5 Global, FY2019->FY2021) and `IDOBS-2019-001` **Clarus Fluid Intelligence,
+LLC** (Koniag side -> Chestnut Park, FY2017->FY2019). Neither appears in any
+Cedar source as an announcement. Both are visible only because the subawardee's
+UEI held constant while its declared parent did not — the route you described
+as *"an ownership change in the contracting data with no published deal is a
+deal Cedar can report."*
+
+The tension: `docs/methodology/deals.md` says **never write a row whose date is
+not in retrieved evidence**, and a run boundary is a gap, not a date. They are
+currently shipped with `Event_Date` **blank**, `Event_Year` set to the window's
+end, and `Date_Basis` reading *"FISCAL-YEAR WINDOW, NOT A DATE."*
+`Verification_Status` says in full: *"UNVERIFIED AGAINST ANY PUBLISHED
+ANNOUNCEMENT — this is an observation Cedar made, not a claim a source
+published."* Five rows in the ledger already carry a blank `Event_Date`.
+
+**If RATIFY:** Cedar reports two transactions nobody else has, and the ledger
+gains a small class of rows whose date is a window. `code/1088 verify` exits 1
+if such a row ever loses its `Date_Basis` explanation.
+**If HOLD:** they move to a candidate register and Cedar publishes nothing that
+carries a window where a buyer expects a date.
+
+---
+
+## DM-3. The terms release yielded ONE deal, not three — confirm the framing
+
+**Decision:** confirm, or say the release should be described differently.
+
+Your `TERMS-SCOPE` ruling (a restriction binds what the restricted entity
+published, not a third party's SEC filing about them) released three held EDGAR
+families. Worked through:
+
+* **NANA** — a real deal. Trilogy Metals' 10-K discloses Ambler Metals LLC, a
+  50/50 JV completed 2020-02-11, South32 subscribing US$145,000,000. **Merged.**
+* **Southern Ute** — refused, and **not on terms**. The $14,452 thousand is the
+  gross **carrying amount** of an amortising intangible on MACH Natural
+  Resources' balance sheet, not a purchase price, and the filing gives no
+  transaction date. The value and date rules refuse it; terms no longer do.
+* **Chickasaw** — refused. AP Gaming Holdco names the Nation in market context.
+  There is no transaction in the filing to release.
+
+The framing that matters: **"three families released, one deal found."** A
+report saying the ruling unblocked three deals would be wrong, and it is the
+kind of wrong that is hard to catch later.
+<!-- END DEALS-MERGE-1088 -->
+
+---
+
+## PR29-1. The `native-owned-businesses` collection does not contain `native_owned_businesses.csv` — and the product publishes the resulting row count
+
+*Appended 2026-09-02 by workstream PR29-LOOP (the standing Codex loop). Declared in ADR-018.
+Evidence: `docs/CODEX_REVIEW_LOG.md`, PR #29 round 3.*
+
+### The decision
+
+**Do we widen the `native-owned-businesses` collection to claim the four
+business-directory tables — and accept that the dataset stops being READY
+until they carry a grain and a key?**
+
+This is an owner/integrator call and not an agent's, because it moves a
+dataset's readiness and it touches `500_build_architecture_map.py`,
+`512_build_dataset_contracts.py` and `518_dataset_readiness.py`, all
+integrator-owned.
+
+### What is true today, measured 2026-09-02
+
+The product repo currently ships two numbers for one dataset, in two files in
+the same directory:
+
+    data/cedar/samples/README.md            owned -> native_owned_businesses.csv, 2,916 rows
+    data/cedar/collection_descriptors.json  owned -> "rows_label": "1,657 rows"
+
+`500.COLLECTIONS` matches this collection with
+`^(individual_native|tribal_certification)`. The namesake directory matches
+neither branch, so the contract claims six `individual_native_*` tables
+(1,657 rows — firms owned by individual *people*) and the customer's sample is
+drawn from the harmonised directory (2,916 rows, 21 certifying authorities —
+firms certified or listed by *nations*). **These are two different relations,
+and only one of them is in the contract.**
+
+It has been a known orphan since 2026-09-01 —
+`code/730_ws4_grain_money_conservation.py:852`, under
+`contract_orphan_shippable = 6`, attributed to "the workstreams that
+registered them". The attribution was right; nobody owned the consequence.
+
+**The readiness claim is the serious half.** `native-owned-businesses` is
+READY on `c4_identity_path = 100% keyed` and `c1_grain = 6/6`, both measured
+across the six tables that exclude the directory. On the directory itself:
+
+| | |
+|---|---:|
+| rows | 2,916 |
+| `business_entity_id` filled | **4 (0.1%)** |
+| `nation_id` filled | 2,725 (93.4%) |
+| `certifying_authority_entity_id` filled | 2,767 (94.9%) |
+| declared grain | **UNSTATED** |
+| declared primary key | **none** |
+
+The four tables that would join the collection:
+
+| table | rows | grain declared | key declared |
+|---|---:|---|---|
+| `native_owned_businesses.csv` | 2,916 | no | no |
+| `native_business_contract_links.csv` | 2,393 | no | no |
+| `native_business_identifier_crosswalk.csv` | 481 | no | no |
+| `native_business_contracting_by_nation.csv` | 18 | no | no |
+
+**Note a second defect visible in that table.**
+`docs/NATIVE_BUSINESS_IDENTIFIER_CROSSWALK_LOG.md` states
+`native_business_contract_links.csv` as **one row per directory row**. It has
+2,393 rows and the directory now has 2,916, so **523 directory rows have no
+link row** and the declared invariant is already broken by the directory's own
+growth. That is true whichever way this decision goes.
+
+### The consequences of each answer
+
+**WIDEN (claim all four).** The collection becomes what its name says and the
+product's row count stops contradicting its own sample. `native-owned-businesses`
+goes **READY → BLOCKED** until grain and keys are declared for four tables and
+`c4` is re-measured on a table whose business key is 0.1% filled — expect the
+`100% keyed` line to fall a long way. The `affiliated_with` relation
+`docs/PUBLICATION_POLICY.md` argues for keys to `nation_id` at 93.4%, so the
+honest C4 statement is probably about the nation, not the business, and that
+may need its own ruling.
+
+**DO NOT WIDEN (keep the six individual-firm tables).** Then the collection is
+misnamed and the sample is wrong: `770.FLAGSHIP` must be repointed away from
+`native_owned_businesses.csv`, and the directory needs its own collection —
+which is arguably the truer shape anyway, since it is the same
+certified-vs-owned distinction that already justified splitting `nest` out as
+a separate collection rather than merging it here.
+
+**A third option, and it may be the best one.** Make the directory its own
+collection (`certified-businesses` or similar) alongside `nest` and the
+individual-firm set, on exactly the `500.COLLECTIONS` reasoning that kept
+`nest` separate: *certified or listed by a nation* is a different relation
+from *owned by a nation* and from *owned by an individual person*. Three
+relations, three collections, no collection carrying a table it does not
+describe.
+
+### What is already in place, so nothing ships wrong while this waits
+
+`760_collection_descriptors.py` (ADR-018) now refuses to publish a row count
+its own sample contradicts. It emits the union of both declarations (4,573
+rows, with `n_rows_basis` naming both halves) and marks the dataset BLOCKED
+with the measurement in `cedar.blockers`. `verify` exits 1 and `selftest`
+carries three fixtures that prove the check fires. **The status reverts by
+itself the moment the collection is settled** — whichever way it is settled —
+so this item blocks nothing except the dataset's own READY flag.

@@ -259,3 +259,46 @@ nothing downstream keys on them yet.
 
 `code/62_no_regression_check.py`, before and after: **no regressions** both
 times.
+
+---
+
+## UPDATE 2026-09-02 — the 1,772 blank endpoints, promoted from prose
+
+*`code/1098_entity_rel_counterparty.py`. Full write-up:
+**`docs/ENTITY_LAYER_DEEPENING_2026-09-02.md`** section 1; the model decision is
+**ADR-020** in `docs/ARCHITECTURE_DECISIONS.md`.*
+
+1,772 of `entity_relationships.csv`'s 2,292 rows (77.3%) carry a blank endpoint.
+**Not one of them is unrecoverable**, and the standing read —
+*"996 recover a UEI only from prose; 466 recover nothing"* — is wrong on the
+466: **they recover a CAGE code.** All 1,462 `owned_by` rows parse on one
+anchored pattern, 996 UEI + 466 CAGE, 0 unparsed.
+
+The blank is CORRECT, and the rows say so: *"No spine entity for the firm and no
+intermediate holding layer invented."* A UEI or CAGE identifies a
+**registration**, and `IDENTIFIER_STANDARD` section 2 makes a registration a
+sub-hub, never a spine row. Minting would put 1,462 non-entities in the entity
+namespace.
+
+Nine columns now carry what the sentence carried —
+`counterparty_kind` (`firm_registration` 1,462, `tribal_designated_housing_entity`
+148, `brand_family` 106, `federal_government` 56),
+`counterparty_name_as_recorded`, `counterparty_identifier_type` and
+`_identifier`, `counterparty_identity_state`, and a
+`counterparty_nest_enterprise_id` bridge — under an **anti-fabrication
+invariant: every promoted value is a verbatim substring of that row's own
+`notes`**, proved to fire.
+
+262 of 1,462 firms (17.9%) bridge to a NEST enterprise sub-hub, and only where
+both sides agree on the owner (published UEI 29, published CAGE 0, unique name
+under the same hub 233). 23 more would resolve through NEST's own
+`uei_candidate` and are refused: a candidate on one side plus a candidate on the
+other is not evidence. Every unresolved row now records WHY.
+
+**One resolved on the identifier and disagreed about the owner** — the entity
+layer's first cross-source ownership disagreement. `Laulima Government
+Solutions, LLC` (UEI `QTJZT9K41S61`) is Bering Straits here at tier A and
+Alakaina Foundation in NEST, sourced from `beringalakaina.com` — a host naming
+both parents. Rule 11: a joint venture genuinely has two. **Refused, not
+reconciled.** `review/entity_rel_nest_owner_conflicts_2026-09-02.csv`, owner
+queue **EL-2**.

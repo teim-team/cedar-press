@@ -843,6 +843,51 @@ buyer's tooling reads before it reads any prose. Either `517` gains a notion of
 *additive under a stated predicate*, or the lobbying contract in `512` declares
 one. **Both files are the integrator's.** The measurement is here; the
 classification is not an agent's to change.
+
+---
+
+## Schedule C: the "21.3% fetch backlog" is closed, and two figures above it are now stale
+
+*Re-measured 2026-09-02. The `INT-READY` block earlier in this file is another
+workstream's and is not edited here; this is the correction beside it.*
+
+`INT-READY` states, correctly as of the day it was written: *"`coverage_status`
+is `PARTIAL` on all ten index years: **32,218 returns were indexed as targets
+and 6,870 were retrieved — 21.3%.** The 25,348 shortfall is Cedar's own fetch
+backlog."* **That is no longer the state of the disk.**
+
+| | 2026-09-01 | 2026-09-02 |
+|---|---:|---:|
+| indexed target returns | 32,218 | 32,218 |
+| XML on disk | 6,870 | **29,149** |
+| parsed into `nonprofit_schedule_c_lobbying.csv` | 6,870 | **29,149** |
+| coverage | 21.3% | **90.5%** |
+| `lobbying_usd_headline` | $3,325,511 over 132 returns | **$16,455,891 over 607 returns** |
+| 2019 | PARTIAL | **FULL** |
+
+Two things happened. `code/860`'s full-history pull extracted 21,807 returns
+overnight and never re-parsed them — they sat on disk, paid for, invisible,
+which is `ON_DISK_NOT_PROMOTED` and not a fetch at all. And 691 returns had
+been logged `indexed_but_absent_from_archives` when they were really
+**DEFLATE64-compressed members CPython's `zipfile` cannot decode**;
+`--steps irs-deflate64` recovered **472** of them with the system 7-Zip.
+
+**The 3,069 that remain are not a backlog and must never be reported as one:**
+
+```
+775   return_type 990T (772) and 990PR (3)   Schedule C does not exist on those
+                                             forms. SOURCE_DOES_NOT_PUBLISH.
+2,294 requested, and absent from every IRS ZIP archive published for their
+      year. Logged per object in _xml_fetch_log.csv. 2017 (912) and 2022
+      (1,430) carry 2,342 of the 3,069.
+```
+
+The union identity still holds on the larger corpus: `total_lobbying_usd`
+$5,725,829 (220 returns) + `nonelecting_lobbying_usd` $10,730,062 (387) =
+`lobbying_usd_headline` $16,455,891 (607), to the dollar. **Summing the
+headline with either part still double-counts.** And Schedule C is still not
+LDA lobbying — `is_lobbying = 0` on every row — so it never adds to any of the
+four LDA totals above.
 <!-- END LOBBY-SUPERSESSION -->
 
 <!-- BEGIN SEC-GAMING -->
@@ -1165,3 +1210,66 @@ deals dataset**.
    `Value_Type` reads *"No value published. Never inferred."* A blank there is
    a fact about the source, not a gap in Cedar.
 <!-- END DEALS-MERGE-1088 -->
+
+<!-- BEGIN DEEPEN-SUBAWARD-DENOMINATOR -->
+## The subaward overstatement — ALWAYS STATE THE DENOMINATOR
+
+*Added 2026-09-02 by the `deepen` pass. Owned by this marker; `code/574` will
+preserve it. Re-measure with `py -3 code/574_ws1_money_and_conservation.py`
+after any subaward fold-in, and update the four figures below together — they
+are one measurement, not four.*
+
+**Measured 2026-09-02 on `data/clean/subawards.csv`, 76,859 rows:**
+
+```
+all rows                                       $47,301,660,819.78   <- never quote
+countable  duplicate_status == 'primary'
+       AND subaward_exceeds_prime_flag != 'yes'
+           58,117 rows                         $25,864,997,128.19   <- the correct total
+the money rule removes                         $21,436,663,691.59
+```
+
+**The removed amount is 82.9% of the correct total and 45.3% of the inflated
+one.** Both are true and they are not the same statement:
+
+| phrasing | figure | what it means |
+|---|---:|---|
+| **"the unfiltered figure overstates by 82.9%"** | **82.9%** | removed ÷ **correct** ($25.86B). **This is the one to quote** — it is what a reader wants when they ask how wrong the big number is. |
+| "the money rule removes 45.3% of the raw total" | 45.3% | removed ÷ **inflated** ($47.30B). Correct, and answers a different question. |
+
+**Quote 82.9%, and name its base in the same sentence.** A bare percentage here
+has already cost this project credibility twice, and both times the arithmetic
+was fine:
+
+- `docs/WHAT_IS_MISSING.md` recorded that the shipped sample README says
+  *"46.5% overstatement"* while the dataset descriptor says *"86.9%"*, and
+  observed that a buyer who reads both concludes one of them is wrong. Neither
+  was. They were the same difference over two different denominators, on an
+  older vintage of the same three numbers.
+- An earlier generation of this very file said the rule removes
+  *"$21,210,637,456.80 — 86.9% of the unfiltered figure."* $21.21B ÷ $45.62B is
+  **46.5%**, not 86.9%; 86.9% was the overstatement, mislabelled as a share of
+  the raw. **The number was right and the noun was wrong**, which is the harder
+  error to catch because nothing fails.
+
+**The rule this earns: a percentage whose denominator is not named in the same
+sentence is not a measurement, it is a coin flip between two true answers.**
+
+### And the corrected total is still not additive with prime contracting
+
+A subaward is a slice of a prime award Cedar already publishes in
+`prime_contracts.csv`. Federal dollars obligated = primes. Subawards say where
+those dollars went **next**. Never add the two.
+
+### One row is one FILING, not one subaward
+
+FFATA requires monthly re-filing, so a single subaward appears once per month
+it is open. Proved rather than assumed on the FY2021 pull: **one group is 93
+re-filings of a single $57,500 subaward** running 2022-08 to 2025-01 — each
+with its own `subaward_sam_report_id`, one action date, one subaward number.
+That is why `duplicate_status` exists, why the duplicates are RETAINED and
+flagged rather than deleted, and why **any count of rows in this table is a
+count of filings**. Say "filings" or filter to `primary`; never say
+"subawards" over the unfiltered row count.
+
+<!-- END DEEPEN-SUBAWARD-DENOMINATOR -->

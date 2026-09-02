@@ -335,3 +335,68 @@ see. **29 crosswalk rows** are gated this way today, on **16 linked directory ro
   before it is built, and `verify` asserts that no crosswalk row from such a
   source is ever `may_publish = Y`. Navajo Nation's 346 rows are linked and
   measured, and every one is `may_publish = N`.
+
+---
+
+## UPDATE 2026-09-02 — the crosswalk is on the table now, and the other half of the 1070 split needed NEST's refusal
+
+*`code/1100_nob_crosswalk_promotion.py`. Full write-up:
+**`docs/ENTITY_LAYER_DEEPENING_2026-09-02.md`** section 4.*
+
+**1. Promoted.** `native_business_contract_links.csv` was a sidecar the table
+could not see — `business_entity_id` reaches 4 of 2,916 rows. Twelve declared
+`federal_link_*` columns now carry the crosswalk's own verdict on every row of
+`native_owned_businesses.csv`:
+
+```
+federal_link_status   NO_MATCH 2,115 · NOT_ATTEMPTED 523 · LINKED 203
+                      PROPOSED 59 · HOLD_AMBIGUOUS 8 · REFUSED 8
+UEI written 203 · CAGE written 156      (LINKED + gate = PUBLISH only)
+distinct UEIs 168        <- this log says 169; the live file measures 168
+```
+
+Three constraints, each with an invariant that fails if it is broken:
+
+- **A UEI does not go in `business_entity_id`.** `IDENTIFIER_STANDARD` section 2
+  — a UEI identifies a registration and a registration is a sub-hub. Putting one
+  in an entity column would make 203 registrations look like 203 Cedar entities.
+- **The publish gate is a policy, not a re-derivation** (I2): a UEI is written
+  only where the crosswalk's own `identifier_publish_gate` reads `PUBLISH`.
+- **The certification gradient is untouched and the relation stays
+  affiliation.** `federal_link_relation` states on every row that the link
+  identifies the FIRM in federal data and asserts nothing about ownership.
+  **No dollar is written onto a directory row** — `federal_link_detail_file`
+  points here instead, because a dollar on an affiliation row invites a roll-up
+  across the gradient.
+
+`code/953`'s `federal_uei_candidate` and this crosswalk **agree on 140 of 140**
+rows where both are populated, and I3 now fails if they ever stop agreeing.
+
+The 523 rows with no crosswalk row are `NOT_ATTEMPTED`, named as such: `1001`
+ran before they were merged in. An honest state (ADR-010), not a no-match.
+
+**2. The refusal that was applied to one half of a split.** `code/1070` staged
+1,106 rows; the 583 OWNERSHIP rows went to NEST and the 523 RELATIONSHIP rows
+came here. **NEST refused 229 of its 583 as an "unreviewed HTML heading/anchor
+scrape"** because the block yields page furniture and natural persons' names.
+That refusal was never applied to the 523. Measured before this pass:
+
+```
+carrying the scrape caveat in their own verification_basis   523
+business_name_is_person_name = -1 (UNDECIDABLE)              523
+   -> 1070 HARD-CODES the -1. code/330's detector never ran.
+publishable = Y                                              523
+```
+
+`looks_like_person()` was imported from `code/330` and run on exactly those 523:
+**178 ARE a natural person's name**, 87 are not, 258 undecidable. All 523 now
+carry `publish_hold = Y` and `publishable = N`, with the prior value preserved
+verbatim in `publishable_before_1100` (written once, so a re-run cannot capture
+the value this script changed). Reversible by one column copy.
+Owner queue item **EL-3**.
+
+**Unchanged:** NHO coverage on member websites is still
+`SOURCE_DOES_NOT_PUBLISH` (210 probed, 4 lists, all navigation furniture); the
+record is the SBA 8(a) register and the NHOA directory and that is
+`NOT_ACQUIRED`. The 221 rows in `candidates_for_review_2026-09-02.csv` were not
+touched.

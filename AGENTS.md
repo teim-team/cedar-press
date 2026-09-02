@@ -6567,3 +6567,83 @@ gone) predate this pass; `native_bills_subject_sweep` already read 2,409 in
 `docs/methodology/legislation.md` before it started. **Neither table this pass
 touched lost a row or a column: `bill_votes.csv` 423 → 423 and 68 → 71
 columns; `native_bills.csv` 3,069 → 3,069 and 29 → 29 columns.**
+
+---
+
+## 2026-09-02 — workstream DEALS-MERGE-1088: the staged deals merge, and who owns the red gate
+
+`code/1088_merge_staged_deals.py`. **312 staged candidates in, 144 admitted,
+168 refused with a named reason, every refusal kept whole in
+`review/deals_1088_refusals.csv`.** `deals_classified.csv` 935 -> 1,079 rows;
+`Announced_Value_USD` $45,195,917,316 -> $47,880,355,533. Conservation proved
+row-for-row: **0 pre-merge `Deal_ID`s lost, 0 pre-merge values changed, 0
+columns lost.** Full account in `docs/methodology/deals.md` section 5b.
+
+### Three standing rules this pass earned
+
+**1. A PRESENT-TENSE OWNERSHIP MAP INVERTS THE INTRA-FAMILY TEST ON A PAST
+ACQUISITION.** Bering Straits bought Alaska Gold Company from NovaGold in 2012;
+Alaska Gold is a BSNC subsidiary today, so a shared-hub test calls the 2012
+purchase an internal relabelling and destroys the event that created the
+relationship. **A family map built from today's ownership refuses exactly the
+acquisitions that succeeded.** The obvious repair — "does the sentence name an
+organisation outside the family?" — is circular for the same reason: the target
+is inside the family by the time the map is built. It still refused eleven ASRC
+Industrial acquisitions, UIC/Johansen Construction, Choggiung/Bristol
+Industries and Shee Atika/Eikon Research. What works is not topology but what
+the passage DOES: a transfer verb overrules the topology, a reorganisation verb
+confirms it, and an identifier flip with no sentence has only the topology to
+go on. The gate went **34 -> 24 -> 2** refusals across three versions.
+
+**2. `cedar_constellation_edges.csv` IS NOT AN OWNERSHIP SOURCE.** All 3,153
+rows carry `is_ownership_claim = N`; its tiers are `registered_with` (2,365),
+`declares_service_to` (588), `managed_under_contract` (78), `located_within`
+(78), `chartered_by` (44). **`code/1071_identifier_driven_deal_sweep.py` builds
+its family closure from that file at every tier and never reads
+`nest_enterprise_relations.csv`, which holds the 3,613 actual ownership edges.**
+Reported here, not repaired — `1071` is not this workstream's file.
+Related, in `nest_enterprise_relations.csv`: an `affiliation` /
+`shareholding_or_ancestry` edge (`NESTREL-291D0B2DBBCBD1`) records **Huna Totem
+Corporation** — an independent Hoonah village corporation — under **Doyon,
+Limited**, quoting Doyon's own *"Operating more than a dozen for-profit
+companies"*. It cost five real Doyon rows before it was caught. Owner: `1072`.
+
+**3. A MERGE SCRIPT THAT DE-DUPLICATES AGAINST ITS OWN PREVIOUS OUTPUT IS NOT
+IDEMPOTENT, IT IS SELF-ERASING.** Measured on the second run of `1088` before
+the guard existed: it saw its own 144 rows in `deals_classified.csv`, refused
+them all as duplicates, admitted 64, and would have rewritten the additions
+file at 64 rows — so the next rebuild would have silently lost 80. Every
+comparison now excludes rows whose `_source_file` is the script's own output,
+and the run prints that it is doing so.
+
+### Gate status, and who owns the red (standing rule 15)
+
+`62_no_regression_check.py` exits **1**. `293_lint_bug_classes.py` exits **1**.
+**Neither is owned by this workstream**, and here is the measurement:
+
+* `293`: `1088_merge_staged_deals.py` appears in **0** findings. It appeared in
+  one — a class-2c `skipped += 1` in `build_family_map` — and that was fixed by
+  naming every skipped edge class with a count and a worked example before this
+  entry was written.
+* `62` `shippable_grain_unstated` named `deals_press_edgar_ancsa_additions.csv`.
+  **Fixed**: `GRAIN_DEALS_MERGE` declared in `512_build_dataset_contracts.py`,
+  `Deal_ID` confirmed 144 distinct / 0 blank on the full file, 0 literal
+  duplicate rows.
+* Everything else red in `62` is other workstreams running concurrently in this
+  same session — the lint rises are named per script by `293` under
+  `NEW <class> instance` (`1098` x4, `1060` x3, `1030`, `1031`, `1086`, `873`,
+  `992`, `1107` x2 each, plus singles), and
+  `files_with_columns_lost_vs_backup = 2` is `native_fi_roster.csv` and
+  `cedar_entity_spine.csv` against `.bak_2026-09-02_pre844` — script `844`.
+* **No table this pass touched lost a row or a column.**
+  `deals_classified.csv` 935 -> 1,079 rows, 52 -> 52 columns.
+
+### Verify and selftest
+
+`py -3 code/1088_merge_staged_deals.py verify` reads the SHIPPED files, not the
+writer's own variables, and exits 1 on breach. `--selftest` injects one
+violation of each named invariant into a copy and asserts both that exit is 1
+AND that the named invariant is what fired, then asserts the untouched files
+still return 0. **5 of 5 invariants fire:** no source link; a ceiling in
+`Announced_Value_USD`; neither a date nor a year; a blank `Event_Date` whose
+`Date_Basis` does not say why; a refusal with no stated reason.

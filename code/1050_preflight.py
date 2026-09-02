@@ -428,6 +428,60 @@ def cmd_all(args) -> int:
     return 0
 
 
+def cmd_adr(args) -> int:
+    """Claim an ADR number the same way script numbers are claimed.
+
+    ADR-018 was taken by THREE separate workstreams on 2026-09-02 — PR29-LOOP,
+    TRIBAL-DEBT and GAMING-NR — each reading the file, each correctly seeing the
+    highest number, each writing. Two blocks sharing one marker name are ONE
+    block to any tool that preserves by marker, so the next wholesale regenerate
+    deletes one silently. That is the script-number collision in a new place,
+    and it has the same fix: **check-then-write is not atomic; O_EXCL is.**
+
+    The claim is a marker-shaped placeholder appended to the ADR file, so the
+    number is reserved by the same act that makes it visible.
+    """
+    import re as _re, time
+    adr = ROOT / "docs" / "ARCHITECTURE_DECISIONS.md"
+    who = args.by or os.environ.get("CEDAR_AGENT") or "unnamed"
+    slug = _re.sub(r"[^A-Z0-9-]", "-", (args.slug or "").upper()).strip("-")
+    if not slug:
+        print("  a slug is required, e.g. `adr GAMING-REVENUE`")
+        return 1
+    lock = ROOT / "logs" / "_ADR_CLAIM.lock"
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    for _ in range(60):
+        try:
+            fd = os.open(str(lock), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            os.write(fd, who.encode()); os.close(fd)
+            break
+        except FileExistsError:
+            time.sleep(0.25)
+    else:
+        print("  could not take the ADR lock; another claim is in flight")
+        return 1
+    try:
+        text = adr.read_text(encoding="utf-8", errors="replace")
+        used = {int(m) for m in _re.findall(r"^<!--\s*BEGIN\s+ADR-(\d+)", text, _re.M)}
+        n = max(used) + 1 if used else 1
+        name = f"ADR-{n:03d}-{slug}"
+        block = (f"\n\n<!-- BEGIN {name} -->\n"
+                 f"## {name.split('-' + slug)[0]} — CLAIMED {_dt.date.today()} by {who}\n\n"
+                 f"*Placeholder. Replace this line with the decision; keep the "
+                 f"markers.*\n"
+                 f"<!-- END {name} -->\n")
+        adr.write_text(text.rstrip() + block, encoding="utf-8")
+        print(f"  claimed {name}")
+        print(f"  {len(used)} ADR numbers already in use; highest was {max(used) if used else 0}")
+        print(f"  write between <!-- BEGIN {name} --> and <!-- END {name} -->")
+    finally:
+        try:
+            lock.unlink()
+        except OSError:
+            pass
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(
         description="Cedar pre-flight: claim a number, check shared files, "
@@ -439,6 +493,11 @@ def main() -> int:
     p.add_argument("--band", help="restrict to LO-HI, e.g. 1050-1059")
     p.add_argument("--by", help="who is claiming (or set CEDAR_AGENT)")
     p.set_defaults(fn=cmd_claim)
+
+    p = sub.add_parser("adr", help="atomically claim an ADR number")
+    p.add_argument("slug", help="SHORT-UPPER-NAME for the marker suffix")
+    p.add_argument("--by", help="who is claiming (or set CEDAR_AGENT)")
+    p.set_defaults(fn=cmd_adr)
 
     p = sub.add_parser("release", help="hand back an untouched placeholder")
     p.add_argument("filename")

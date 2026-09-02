@@ -329,3 +329,71 @@ nor something they could decide.
 
 The three held EDGAR families are releasable on that basis.
 <!-- END TERMS-SCOPE -->
+
+<!-- BEGIN TERMS-METHOD -->
+## A restriction can attach to the METHOD rather than to the source
+
+**Applied 2026-09-02 by `code/1096_navajo_unexclude_and_harvest.py`, while
+carrying out the TERMS-SCOPE ruling above.** Recorded here because the ruling
+could not be applied without inventing this state, and the next agent will hit
+it again.
+
+Cedar had exactly two dispositions for a source: **excluded by every route**, or
+**open**. Applying TERMS-SCOPE to the eight Navajo hosts produced a case that is
+neither, and forcing it into either one would have been wrong in a different
+direction each time.
+
+`navajo-nsn.gov/Terms` was READ, not assumed. It says:
+
+> "You may not obtain or attempt to obtain any materials or information through
+> any means not intentionally made available or provided for through the Navajo
+> Nation Web Sites."
+
+That sentence does not forbid reading the site, and it does not restrict any
+content. **It restricts the ROUTE.** A homepage the publisher links from its own
+navigation is intentionally made available. An unlinked `/wp-json/wp/v2/pages`
+index, a sitemap walk, a custom-post-type enumeration — techniques #3 and #4 in
+`docs/HIDDEN_DATA_TECHNIQUES.md` — are precisely what the clause describes.
+
+* Excluding the host entirely would be the over-compliance TERMS-SCOPE names as
+  a defect: it invents a prohibition on content the publisher did not state.
+* Harvesting it the way every other host is harvested would ignore a clause the
+  publisher did state, in writing, on the page.
+
+**The third state:** `980.METHOD_RESTRICTED_HOSTS`, keyed by host suffix, valued
+with the verbatim clause. The homepage is fetched; the hidden-endpoint probe,
+the sitemap/WP-REST page walk and the custom-post-type sweep are refused, and
+the refusal is written into `host_probe.jsonl` as
+`REFUSED_METHOD_RESTRICTED_BY_STATED_TERMS` carrying the quote — so the reason
+is auditable from the data and not only from the code.
+
+**The rule:**
+
+* Read the terms before deciding, per host. `1096` did this for all seven Navajo
+  hosts: four casino hosts return robots.txt 200 with **zero** Disallow
+  directives and carry no restrictive language, `nnooc.org` returns robots 404
+  (**allowed**, not blocked — `PULL_DISCIPLINE.md`'s 22 phantom blocks came from
+  reading a non-200 as `disallow_all`), and only the two `navajo-nsn.gov` hosts
+  state anything.
+* Ask what the clause restricts: the **source**, the **content**, or the
+  **method**. Only the first justifies excluding a host.
+* A method restriction is honoured by dropping the routes it names, not by
+  dropping the host.
+* **A cached refusal is not a completed fetch.** The seven hosts each carried an
+  `EXCLUDED_TERMS_STATED_RESTRICTIVE` record in `host_probe.jsonl`, and 980
+  builds its resume set from that file — so a re-run would have skipped all
+  seven silently, printing nothing. When a restriction is lifted, the cached
+  refusals have to be retired or the correction never takes effect. They were
+  MOVED to `host_probe_retired_navajo_exclusions_2026-09-02.jsonl`, not deleted:
+  the refusal happened, and the record of it is the evidence the correction was
+  needed.
+
+**Result:** `navajoeconomy.org` stays excluded. The other seven were harvested
+on 2026-09-02 — 37 requests, 20 pages, HTTP 200 throughout — and produced **9
+observations** for the Navajo Nation, its first rows in the web-harvest layer:
+gaming-machine counts published by Fire Rock (900), Northern Edge (750), the
+Nation's gaming enterprise (2,800) and Flowing Water, plus four operating-hours
+statements. All nine are `TRIBE_LEVEL_MULTI_FACILITY_NOT_DISAMBIGUATED`, because
+the Nation operates four facilities and 980 keys attribution by the tribe's
+facility count rather than by the host.
+<!-- END TERMS-METHOD -->
