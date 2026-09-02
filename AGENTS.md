@@ -5812,3 +5812,55 @@ recorded as restrictive, and it is read by `get()`, which is the one chokepoint
 every request in the script passes through. `TERMS_RESTRICTIVE_HOSTS` is
 referenced in exactly one place — inside `_blocked_hosts()`. A refusal that only
 some code paths honour is not a refusal.
+
+## MTIME ANSWERS FRESHNESS. IT SAYS NOTHING ABOUT COMPLETENESS.
+
+*Measured 2026-09-01 on `native_passthrough.csv`.*
+
+An earlier pass concluded that table was stale because `subawards.csv` had
+grown. A later pass concluded it was current because **both files carry the
+identical mtime, `08-29 01:32`.** Both readings were wrong, and the second was
+wrong in the more dangerous direction.
+
+The direct test:
+
+```
+subawards.csv primary rows                       55,316
+  both prime AND sub are Native                     952   distinct subaward_number
+    present in native_passthrough                   759
+    MISSING                                         193   = 20%
+passthrough keys orphaned (not in subawards)          0
+```
+
+**Zero orphans and 193 missing.** The projection is not pointing at rows that
+have gone; it never saw rows that arrived. A timestamp cannot distinguish those
+because both files were written in the same run — the builder simply read a
+`subawards.csv` that was still growing.
+
+And it is not a filter: the missing rows spread across **every** tier pair —
+A/A 34, A/B 24, B/A 85, B/B 71. A confidence rule would leave one pair complete
+and the rest absent.
+
+### The general rule
+
+> **Freshness is "was this rebuilt after its input changed" and mtime answers
+> it. Completeness is "does the output cover everything the input now
+> supports", and only a re-derivation answers that.**
+
+A derived table can be perfectly fresh and 20% incomplete. Test a projection by
+re-deriving its candidate set from the current source and diffing both ways:
+
+- **candidates missing from the output** → incomplete (this case)
+- **output keys absent from the source** → orphaned by a source change
+
+Neither shows up in a timestamp, a row count, or an interior-gap check. The
+docs workstream hit the same wall from the other side today: `subawards`
+FY2022–24 hold 89/120/166 rows against neighbours of 9,462 and 7,360, and
+`35_coverage_audit.py` correctly reports **no gap**, because those years are
+non-zero. That is why `621` now flags **thin** years at under 20% of a table's
+median — a different instrument for a defect a gap check structurally cannot
+see.
+
+**Build order follows from this.** Declare a grain or validate a key only
+against a table that is not about to change. A key validated against a table
+that then gains 193 rows was validated against the wrong table.
