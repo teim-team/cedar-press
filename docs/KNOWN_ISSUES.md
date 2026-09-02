@@ -1372,54 +1372,40 @@ ruling.** 1,943,994 rows can be keyed; the state is `NOT_ACQUIRED`, not
 <!-- END FWD-CONSTRUCTION-2026-09-02 -->
 
 <!-- BEGIN ESCAPE-COLLAPSE-1125 -->
-## OPEN — a regex escape reached SEVEN live scripts as a literal control byte, and the checks built on it match nothing
+## OPEN — the collapsed-escape defect is not confined to `846`. SEVEN more live scripts carry it, and one of them is the identity normaliser
 
-*Found 2026-09-02 by `code/1126_annual_total_federal_and_gaming.py`, which tried
-to IMPORT the gated gaming denominator instead of retyping it and could not get
-714 out of it. Re-measured the same hour; the scan below is reproducible.*
+*Found 2026-09-02 by `code/1126_annual_total_federal_and_gaming.py`, which
+tried to IMPORT the gated gaming denominator instead of retyping it and got
+771 instead of 714. **The `846` half of this was found and repaired
+independently the same evening by workstream PLACE-IDS — see
+the `PLACE-IDS-1129` block below, which owns that repair.** What is new
+here is that `846` is not special: a tree-wide scan finds the same corruption
+in seven other scripts, and it is a defect CLASS, not a typo.*
 
-**What happened.** `code/846_session_audit.py::_denom` — the single gated
-gaming-denominator ladder, the one `AGENT_FIELD_GUIDE` rule 15 names as the
-authority and forbids duplicating — returned
+### The shape, once, because both entries describe it
 
-```
-787 rows - 16 placeholders = 771 facility rows - 0 duplicate extras
-= 771 distinct properties   <- shape changed, re-derive before quoting
-```
+A word-boundary escape reached the file as a literal **backspace byte, 0x08**,
+sitting where `\b` belongs. A raw string cannot produce that byte, so something
+between the author and the file interpreted the escape. The pattern then
+matches no string that can exist — and it does not raise. It silently matches
+**less**, and every count downstream of it looks like a clean measurement.
 
-Its duplicate detector found **zero** groups, because the token-stripping regex
-in `loose()` was on disk as
+In `846::_denom` that meant the facility-name normaliser never stripped
+`CASINO` / `GAMING`, all 771 grouping keys came out unique, and the ladder
+reported **771 distinct properties** instead of 714. It failed loudly only
+because `_denom` compares `(rows, placeholders, extra)` against
+`(787, 16, 57)` and appends *"shape changed, re-derive before quoting"* — so it
+refused to stand behind its own figure rather than publishing a sixth
+denominator into a session where five were already circulating.
+**Repaired; `_denom()` now returns `787 - 16 = 771 - 57 = 714` with its shape
+test green, and a full `846` run is 25/27 with the two remaining failures
+unrelated (`attribution_method` off-vocabulary from `ladder_1122`; `845 verify`).**
 
-```
-_re.sub(r"<BS>(CASINO|RESORT|HOTEL|AND|THE|LLC|INC|GAMING|CENTER|CENTRE)<BS>", " ", x)
-```
+### STILL OPEN — seven files, 41 bytes, 16 lines
 
-where `<BS>` is a literal **backspace byte, 0x08**, sitting where a word-boundary
-escape belongs. A raw string cannot produce that byte; something between the
-author and the file interpreted the escape. The pattern therefore matched
-nothing, every facility name kept its `CASINO` / `GAMING` token, all 771
-grouping keys came out unique, and the ladder reported **771** where the
-measured answer is **714**.
-
-**It failed loudly, which is the only good news here.** `_denom` compares
-`(rows, placeholders, extra)` against `(787, 16, 57)` and appends *"shape
-changed, re-derive before quoting"* when they differ, so it refused to stand
-behind its own number rather than quietly publishing a sixth denominator into a
-session where five were already in circulation.
-
-**REPAIRED IN `846` ONLY.** The nine bytes were substituted for the escape. The
-live file now differs from
-`code/846_session_audit.py.bak_2026-09-02_pre_1126_annual_total_federal_and_gaming`
-by exactly that substitution and nothing else — proved byte-for-byte, not
-eyeballed — the file compiles, and `_denom()` now returns
-`787 rows - 16 placeholders = 771 facility rows - 57 duplicate extras = 714
-distinct properties` with its own shape test GREEN. A full `846` run is
-**25/27**, with the two pre-existing failures unchanged and unrelated
-(`attribution_method` off-vocabulary from `ladder_1122`; `845 verify`).
-
-**STILL OPEN — seven files, 41 bytes, 16 lines. Deliberately not repaired
-here**, because each one changes another workstream's matching behaviour, and
-that is an owner or integrator call rather than a passing agent's:
+Deliberately not repaired here: each one changes another workstream's matching
+behaviour, and that is an owner or integrator call rather than a passing
+agent's.
 
 | file | bytes | lines | what the dead pattern is for |
 |---|---:|---|---|
@@ -1429,31 +1415,46 @@ that is an owner or integrator call rather than a passing agent's:
 | `code/142_build_property_site_observations.py` | 3 | 1024–1025 | the bound-phrase prefix (`more than`, `over`, `nearly`) and a year matcher |
 | `code/1080_sec_gaming_facility_revenue.py` | 2 | 275 | a fiscal-range phrase matcher |
 | `code/76_build_recognition_history.py` | 2 | 836 | the `legislation` term in the recognition-instrument classifier |
-| `code/503_identity.py` | 1, **plus one 0x01** | 95 | `FT MC DOWELL -> MCDOWELL`. **Both the word boundary and the `\1` backreference collapsed** — 0x08 in the pattern, 0x01 in the replacement — so the normaliser is inert, and if it ever did match it would insert a control byte |
+| `code/503_identity.py` | 1, **plus one 0x01** | 95 | `FT MC DOWELL -> MCDOWELL`. **Both the word boundary and the `\1` backreference collapsed** — 0x08 in the pattern, 0x01 in the replacement — so the normaliser is inert, and if it ever did match it would write a control byte into a name |
 
-**Why this is a defect CLASS and not seven typos.** It is `AGENT_FIELD_GUIDE`
-§3 in a new costume: *the number was produced, it was plausible, and it was
-about something else.* A regex with a dead word boundary does not raise — it
-silently matches **less**, and every count downstream of it looks like a clean
-measurement. `503_identity.py` is the one to look at first: it is an identity
+**`503_identity.py` is the one to look at first.** It is an identity
 normaliser, and an identity normaliser that silently stops normalising is how
-two spellings of one entity become two entities.
+two spellings of one entity become two entities. It is also the only instance
+where the *replacement* is corrupted as well as the pattern, so the failure
+mode is not merely "matches nothing" — it is "would emit a control byte".
 
-**Reproduce — cheap, and it needs no backslash of its own:**
+### Reproduce — cheap, and it needs no backslash of its own
 
 ```
 py -3 -c "import os;print([(os.path.join(r,f), open(os.path.join(r,f),'rb').read().count(bytes([8]))) for r,d,fs in os.walk('code') if '__pycache__' not in r for f in fs if f.endswith('.py') and '.bak' not in f and open(os.path.join(r,f),'rb').read().count(bytes([8]))])"
 ```
 
-**A standing hazard for whoever fixes them, and it is how this defect is
-manufactured.** This environment collapses a doubled backslash on its way into
-a shell heredoc. A repair script authored as `replace(bytes([8]), b'\\b')`
-arrived on disk as `b'\b'`, which Python reads back as 0x08 — so the fix
-replaced the byte with itself, reported "replaced 9 occurrences", and changed
-nothing. **The same collapse ate the first draft of this very section.** Write
-the replacement as `bytes([0x5C, 0x62])`, or write the file with an editor
-rather than a heredoc, and **assert the remaining count is zero** instead of
-trusting the success message.
+### The data side, adjacent and NOT the same defect
+
+The same scan over `data/clean/*.csv` finds **483 control bytes in 7 tables** —
+`ca_gaming_payments.csv` (118 × 0x02 and 118 × 0x03),
+`section_106_consultation_events.csv` (192 NUL bytes across 87 lines),
+`subawards.csv`, `compact_structured_terms.csv`, `compact_required_reports.csv`,
+`compact_terms.csv`, `gaming_property_self_published_claims.csv`. These are
+almost certainly OCR and PDF-extraction artefacts rather than collapsed source
+escapes, and they are recorded here only so the next scanner does not conflate
+the two. A NUL byte in a shipped CSV is its own small problem.
+
+### HOW THE DEFECT IS MANUFACTURED, which is the part worth keeping
+
+**This environment collapses a doubled backslash on its way into a shell
+heredoc.** A repair script authored as `replace(bytes([8]), b'\\b')` arrived on
+disk as `b'\b'` — which Python reads back as 0x08 — so the "fix" replaced the
+byte with itself, printed *"replaced 9 occurrences"*, and changed nothing.
+**The same collapse ate the first draft of this very section, and a
+line-continuation backslash in a Python source file being patched the same
+way.** Three times in one session, in three different file types.
+
+So: write the replacement as `bytes([0x5C, 0x62])`, or write the file with an
+editor rather than a heredoc, and **assert the remaining count is zero** rather
+than trusting the success message. And treat any authoring path that passes
+source text through a shell as a place where `\b`, `\1`, `\n` and `\t` can
+silently become the bytes they name.
 <!-- END ESCAPE-COLLAPSE-1125 -->
 
 <!-- BEGIN PLACE-IDS-1129 -->

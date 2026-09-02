@@ -1,5 +1,5 @@
 {
-  "scanned_files": 620,
+  "scanned_files": 623,
   "counts": {
     "class1": 1,
     "class2a": 0,
@@ -202,24 +202,6 @@
       "why": "an 'already done' short-circuit (NON_DOCUMENT_EXT.search(u) or u in already) skips the work, and this file still rewrites a log/summary artefact wholesale at line 1824. On a second run the counters are zero and the log says so - the 164 defect: 187 facilities rewritten to read '0 sources'. Re-running a build must not change its output; merge into the existing log or refuse to rewrite it.",
       "waived": true,
       "waiver_reason": "this short-circuit is in `harvest`, which writes no"
-    },
-    {
-      "class": "class2c",
-      "file": "1125_np_website_native_check.py",
-      "line": 703,
-      "evidence": "refused += 1",
-      "why": "counter 'refused' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
-      "waived": true,
-      "waiver_reason": "nothing is dropped. The row is written"
-    },
-    {
-      "class": "class2c",
-      "file": "1125_np_website_native_check.py",
-      "line": 498,
-      "evidence": "src[\"REFUSED_only_url_is_the_KEYED_ENTITYS_site_not_the_orgs\"] += 1",
-      "why": "counter 'REFUSED_only_url_is_the_KEYED_ENTITYS_site_not_the_orgs' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
-      "waived": true,
-      "waiver_reason": "`plan` is a counting command; the refusal is"
     },
     {
       "class": "class5",
@@ -863,7 +845,7 @@
     {
       "class": "class2c",
       "file": "846_session_audit.py",
-      "line": 552,
+      "line": 565,
       "evidence": "fails += 1",
       "why": "counter 'fails' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,

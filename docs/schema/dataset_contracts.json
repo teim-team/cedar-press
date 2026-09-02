@@ -2,9 +2,10 @@
  "built_date": "2026-09-02",
  "derivation": "500.COLLECTIONS + cedar_codebook + cedar_pipeline; GRAIN declared, everything else derived",
  "n_collections": 15,
- "n_tables_claimed": 292,
- "n_orphan_shippable": 8,
+ "n_tables_claimed": 294,
+ "n_orphan_shippable": 9,
  "orphans": [
+  "annual_indian_country_money_series.csv",
   "native_owned_businesses.bak_2026-09-02_010526.csv",
   "native_owned_businesses.bak_2026-09-02_010557.csv",
   "native_owned_businesses.csv",
@@ -14,10 +15,11 @@
   "regulations_gov_entity_coverage.csv",
   "sam_native_class_distributions.csv"
  ],
- "n_shippable": 247,
- "n_shippable_grain_stated": 239,
- "n_shippable_grain_unstated": 8,
+ "n_shippable": 250,
+ "n_shippable_grain_stated": 241,
+ "n_shippable_grain_unstated": 9,
  "shippable_grain_unstated": [
+  "annual_indian_country_money_series.csv",
   "native_owned_businesses.bak_2026-09-02_010526.csv",
   "native_owned_businesses.bak_2026-09-02_010557.csv",
   "native_owned_businesses.csv",
@@ -29,10 +31,11 @@
  ],
  "n_shippable_grain_open_with_evidence": 0,
  "n_shippable_grain_defective": 0,
- "n_shippable_grain_unexplained": 8,
+ "n_shippable_grain_unexplained": 9,
  "shippable_grain_open_with_evidence": [],
  "shippable_grain_defective": [],
  "shippable_grain_unexplained": [
+  "annual_indian_country_money_series.csv",
   "native_owned_businesses.bak_2026-09-02_010526.csv",
   "native_owned_businesses.bak_2026-09-02_010557.csv",
   "native_owned_businesses.csv",
@@ -60,13 +63,14 @@
   "subawards.csv": "10,770 LITERAL duplicate rows of 72,837. (subaward_number, subaward_date) collides 27,470 times, so even the natural key of a subaward is not unique here.",
   "native_passthrough.csv": "114 LITERAL duplicate rows of 1,262. This table is derived from subawards.csv and inherits its duplication; the passthrough dollars are therefore over-stated by an unmeasured amount."
  },
- "n_violations": 13,
+ "n_violations": 14,
  "violations": [
   "federal_funding_transactions.csv: declared join_cardinality names column(s) not in the header: ['tribe_id']",
   "federal_funding_tribe_year_panel.csv: declared primary_key names column(s) not in the header: ['tribe_id']",
   "federal_funding_tribe_year_panel.csv: declared join_cardinality names column(s) not in the header: ['tribe_id']",
   "federal_funding_tribe_year_panel.csv: declared primary_key ['fiscal_year'] is NOT unique - 5,480 duplicate row(s) of 5,496, e.g. ('2008',). A buyer joining on it gets rows we did not promise them.",
   "deals_press_edgar_ancsa_additions.csv: declared join_cardinality names column(s) not in the header: ['cedar_uid']",
+  "ORPHAN shippable table: annual_indian_country_money_series.csv - registered in the codebook but claimed by NO collection",
   "ORPHAN shippable table: native_owned_businesses.bak_2026-09-02_010526.csv - registered in the codebook but claimed by NO collection",
   "ORPHAN shippable table: native_owned_businesses.bak_2026-09-02_010557.csv - registered in the codebook but claimed by NO collection",
   "ORPHAN shippable table: native_owned_businesses.csv - registered in the codebook but claimed by NO collection",
@@ -427,6 +431,7 @@
       "24_funding_merge.py"
      ],
      "enriched_by": [
+      "1131_attribution_method_vocabulary.py",
       "115_pull_assistance_archive.py",
       "335_harmonize_assistance_seams_in_place.py",
       "336_correct_scheme_resolution_by_spine_membership.py",
@@ -5940,16 +5945,22 @@
     },
     {
      "table": "nest_entity_dual_role.csv",
-     "status": "UNDOCUMENTED",
+     "status": "shippable",
      "key_columns": [
       "cedar_uid"
      ],
-     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
-     "primary_key": [],
-     "join_cardinality": {},
-     "grain_declared_by": "",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
+     "grain": "one row per REGISTER ENTITY for which there is evidence that the entity ITSELF trades - an ANCSA corporation or an NHO is not only a hub that owns, it is a corporation that sells, and NEST's model treated it only as a hub. This table RECORDS that second role; it does NOT duplicate the entity into nest_enterprises.csv, because NEST's key is (owner hub, normalised name) and a self-row would make the hub its own subsidiary - the exact thing 1072's build already refuses by testing the child against every deterministic rendering of the hub's name. NOT one row per enterprise owned (`n_nest_enterprises_owned` is a count, join nest_enterprises on owner_hub_cedar_uid for those) and NOT a roster of ANCs - an entity reaching none of the three evidence rungs is absent, and absence here means `no evidence was found`, never `it does not trade`.",
+     "primary_key": [
+      "cedar_uid"
+     ],
+     "join_cardinality": {
+      "cedar_uid": "one"
+     },
+     "grain_declared_by": "workstream nest-owner-v6 2026-09-02, code/1130_nest_owner_v6_reconcile.py: cedar_uid tested unique and non-blank on the full file; every value checked present in data/spine/cedar_identity_register.csv by invariant I3, which a fixture proves fires",
+     "grain_validated": true,
+     "measured_rows_per_join_key": {
+      "cedar_uid": 1
+     },
      "grain_open_question": "",
      "grain_defect": "",
      "grain_evidence": {},
@@ -9720,7 +9731,7 @@
    "name": "Entity spine, identifiers and reference",
    "shelf": "infrastructure",
    "rebuild_command": "py -3 code/build.py run _entity_layer --execute",
-   "n_tables": 56,
+   "n_tables": 58,
    "tables": [
     {
      "table": "admin_region_assignments.csv",
@@ -10469,6 +10480,52 @@
       ],
       "max_rows_per_join_key_value": {}
      },
+     "key_refused": {},
+     "population_scope": {},
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "cedar_place_id_register.csv",
+     "status": "unregistered",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "primary_key": [],
+     "join_cardinality": {},
+     "grain_declared_by": "",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "key_refused": {},
+     "population_scope": {},
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "cedar_places.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "one row per DISTINCT PHYSICAL PLACE a Cedar entity operates, across four classes declared in `place_class`: GAMING_PROPERTY (717), BIA_OFFICE (93), BIE_SCHOOL (187), IHS_FACILITY (0, NOT_ACQUIRED and declared UNPOPULATED rather than silently absent).\nIT IS NOT ONE ROW PER SOURCE RECORD. 771 gaming facility rows resolve to 717 places because 53 adjudicated groups are one property held under two source vintages (`CCP-` Casino City Press, `VP-`, `TPL-`, `CED-`); `source_keys` is the semicolon-joined list of every source key bound to the place, and `n_source_keys` is its length.\nA PLACE IS A SUB-HUB, NEVER A PEER OF ITS OPERATOR. `operator_cedar_uid` may be BLANK and blank is never 'no operator': for BIA_OFFICE the operator is a federal agency and is not a Cedar entity; for BIE_SCHOOL it is UNRESOLVED, because matching a school name to a nation by name is the containment defect. `operator_basis` states which, on every row.\nDO NOT COUNT PLACES AS A PROXY FOR ANYTHING ELSE. 714 is the MECHANICAL name-collision count gated in `846::_denom`; 717 is the adjudicated count, and the three-row difference is three groups the vendor itself minted two property ids for - a casino and its hotel twice, and two casinos 67 km apart sharing one brand. `code/1129_place_ids.py verify` V9 recomputes the reconciliation on every run and fails when it stops holding.",
+     "primary_key": [
+      "cedar_place_id"
+     ],
+     "join_cardinality": {
+      "cedar_place_id": "one",
+      "operator_cedar_uid": "many"
+     },
+     "grain_declared_by": "workstream PLACE-IDS 2026-09-02, ADR-030, code/1129: the id is minted once and bound APPEND-ONLY in data/spine/cedar_place_id_register.csv (one row per SOURCE KEY, several keys may share one id - that is what a merge IS), so a rebuild mints zero and reproduces identical keys; proven by a second `mint --apply` minting 0 over 1,051 bindings",
+     "grain_validated": true,
+     "measured_rows_per_join_key": {
+      "cedar_place_id": 1,
+      "operator_cedar_uid": 28
+     },
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
      "key_refused": {},
      "population_scope": {},
      "rebuilt_by": [],

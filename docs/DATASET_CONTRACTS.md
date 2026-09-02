@@ -2,12 +2,13 @@
 
 *Generated 2026-09-02 by `code/512_build_dataset_contracts.py` (mission Phase 1). Regenerate rather than edit; `verify` exits 1 when the world breaks a contract, and 62 gates on it.*
 
-**15 collections, 292 tables claimed, 8 orphaned shippable tables, 13 violations.**
+**15 collections, 294 tables claimed, 9 orphaned shippable tables, 14 violations.**
 
-**Grain: 239 of 247 shippable tables declare and VALIDATE a row grain, a primary key and a join cardinality; 8 do not.** A declared grain the data contradicts is a release-blocking violation, listed below. An unstated grain is ratcheted by `62_no_regression_check.contract_grain_unstated_shippable`: the count may only fall, and a new shippable table that lands without one fails the gate that day.
+**Grain: 241 of 250 shippable tables declare and VALIDATE a row grain, a primary key and a join cardinality; 9 do not.** A declared grain the data contradicts is a release-blocking violation, listed below. An unstated grain is ratcheted by `62_no_regression_check.contract_grain_unstated_shippable`: the count may only fall, and a new shippable table that lands without one fails the gate that day.
 
-<details><summary>Shippable tables with an UNSTATED grain (8) - a buyer cannot join these safely</summary>
+<details><summary>Shippable tables with an UNSTATED grain (9) - a buyer cannot join these safely</summary>
 
+- `annual_indian_country_money_series.csv`
 - `native_owned_businesses.bak_2026-09-02_010526.csv`
 - `native_owned_businesses.bak_2026-09-02_010557.csv`
 - `native_owned_businesses.csv`
@@ -26,6 +27,7 @@
 - federal_funding_tribe_year_panel.csv: declared join_cardinality names column(s) not in the header: ['tribe_id']
 - federal_funding_tribe_year_panel.csv: declared primary_key ['fiscal_year'] is NOT unique - 5,480 duplicate row(s) of 5,496, e.g. ('2008',). A buyer joining on it gets rows we did not promise them.
 - deals_press_edgar_ancsa_additions.csv: declared join_cardinality names column(s) not in the header: ['cedar_uid']
+- ORPHAN shippable table: annual_indian_country_money_series.csv - registered in the codebook but claimed by NO collection
 - ORPHAN shippable table: native_owned_businesses.bak_2026-09-02_010526.csv - registered in the codebook but claimed by NO collection
 - ORPHAN shippable table: native_owned_businesses.bak_2026-09-02_010557.csv - registered in the codebook but claimed by NO collection
 - ORPHAN shippable table: native_owned_businesses.csv - registered in the codebook but claimed by NO collection
@@ -49,7 +51,7 @@ Rebuild: `py -3 code/build.py run funding --execute` — 20 tables.
 | `faads_transactions.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
 | `faads_transactions_all_agencies.csv` | shippable | `tribe_id` `cedar_uid` | `30_funding_pre2008.py` | `1086_faads_award_key_promote.py` |
 | `federal_funding_rulings_from_dofile.csv` | unregistered | — | — | — |
-| `federal_funding_transactions.csv` | shippable | `cedar_uid` | `24_funding_merge.py` | `115_pull_assistance_archive.py` `335_harmonize_assistance_seams_in_place.py` `336_correct_scheme_resolution_by_spine_membership.py` `503_identity.py` |
+| `federal_funding_transactions.csv` | shippable | `cedar_uid` | `24_funding_merge.py` | `1131_attribution_method_vocabulary.py` `115_pull_assistance_archive.py` `335_harmonize_assistance_seams_in_place.py` `336_correct_scheme_resolution_by_spine_membership.py` `503_identity.py` |
 | `federal_funding_tribe_year_panel.csv` | shippable | `cedar_uid` | — | — |
 | `federal_funding_year_comparison_2026-08-05.csv` | internal-by-decision | — | — | — |
 | `funding_identifier_harvest.csv` | internal-by-decision | `cage_code` | — | — |
@@ -727,7 +729,7 @@ Rebuild: `py -3 code/build.py run nest --execute` — 3 tables.
 |---|---|---|---|---|
 | `nest_enterprise_relations.csv` | shippable | `cedar_uid` | — | — |
 | `nest_enterprises.csv` | shippable | `cedar_uid` `uei` `cage_code` | — | — |
-| `nest_entity_dual_role.csv` | UNDOCUMENTED | `cedar_uid` | — | — |
+| `nest_entity_dual_role.csv` | shippable | `cedar_uid` | — | — |
 
 Declared grain — validated against the file on every run:
 
@@ -739,6 +741,10 @@ Declared grain — validated against the file on every run:
   - primary key: `enterprise_id`  (validated unique)
   - join cardinality: `cedar_uid` → many row(s) per value (measured max 172), `enterprise_id` → one row(s) per value (measured max 1), `owner_hub_cedar_uid` → many row(s) per value (measured max 172), `parent_enterprise_id` → many row(s) per value (measured max 34)
   - declared by: workstream nest 2026-09-02: enterprise_id confirmed 1,610 distinct / 0 blank on the FULL 1,610-row file with csv.reader; 0 literal duplicate rows; (owner_hub_cedar_uid, enterprise_name_normalized) tested and also unique at 1,610, and is the key the append-only id register data/spine/cedar_nest_id_register.csv binds so that a rebuild re-uses the same enterprise_id instead of re-keying the dataset
+- `nest_entity_dual_role.csv` — one row per REGISTER ENTITY for which there is evidence that the entity ITSELF trades - an ANCSA corporation or an NHO is not only a hub that owns, it is a corporation that sells, and NEST's model treated it only as a hub. This table RECORDS that second role; it does NOT duplicate the entity into nest_enterprises.csv, because NEST's key is (owner hub, normalised name) and a self-row would make the hub its own subsidiary - the exact thing 1072's build already refuses by testing the child against every deterministic rendering of the hub's name. NOT one row per enterprise owned (`n_nest_enterprises_owned` is a count, join nest_enterprises on owner_hub_cedar_uid for those) and NOT a roster of ANCs - an entity reaching none of the three evidence rungs is absent, and absence here means `no evidence was found`, never `it does not trade`.
+  - primary key: `cedar_uid`  (validated unique)
+  - join cardinality: `cedar_uid` → one row(s) per value (measured max 1)
+  - declared by: workstream nest-owner-v6 2026-09-02, code/1130_nest_owner_v6_reconcile.py: cedar_uid tested unique and non-blank on the full file; every value checked present in data/spine/cedar_identity_register.csv by invariant I3, which a fixture proves fires
 
 ## The Native Press: Tribal Newsletters and Periodicals  (`newsletters`, shelf: standard)
 
@@ -1167,7 +1173,7 @@ Declared grain — validated against the file on every run:
 
 ## Entity spine, identifiers and reference  (`_entity_layer`, shelf: infrastructure)
 
-Rebuild: `py -3 code/build.py run _entity_layer --execute` — 56 tables.
+Rebuild: `py -3 code/build.py run _entity_layer --execute` — 58 tables.
 
 | table | status | keys | rebuilt by | enriched by |
 |---|---|---|---|---|
@@ -1193,6 +1199,8 @@ Rebuild: `py -3 code/build.py run _entity_layer --execute` — 56 tables.
 | `cedar_identifier_ledger_final.csv` | shippable | `tribe_id` `cedar_uid` | `09_import_rulings.py` | `50_fix_kootenai_conflation.py` |
 | `cedar_identifier_ledger_tiered.csv` | internal-by-decision | `tribe_id` `cedar_uid` | `03_apply_exclusions_and_tier.py` | `50_fix_kootenai_conflation.py` `64_fix_village_government_misattribution.py` |
 | `cedar_identifier_propagation.csv` | shippable | — | — | — |
+| `cedar_place_id_register.csv` | unregistered | — | — | — |
+| `cedar_places.csv` | shippable | — | — | — |
 | `cedar_publishable_identifiers.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
 | `cedar_ruling_ledger_consolidated.csv` | shippable | — | — | — |
 | `cedar_rulings.csv` | unregistered | `cage_code` | — | — |
@@ -1302,6 +1310,13 @@ HELD, NOT PUBLISHED: `firstname`, `lastname`, `middlename`, `salutation`, `suffi
 - `cedar_identifier_propagation.csv` — one row per (dataset, identifier) propagation proposal, with the path it travelled and the tier that path earns
   - primary key: `dataset` + `identifier`  (validated unique)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
+- `cedar_places.csv` — one row per DISTINCT PHYSICAL PLACE a Cedar entity operates, across four classes declared in `place_class`: GAMING_PROPERTY (717), BIA_OFFICE (93), BIE_SCHOOL (187), IHS_FACILITY (0, NOT_ACQUIRED and declared UNPOPULATED rather than silently absent).
+IT IS NOT ONE ROW PER SOURCE RECORD. 771 gaming facility rows resolve to 717 places because 53 adjudicated groups are one property held under two source vintages (`CCP-` Casino City Press, `VP-`, `TPL-`, `CED-`); `source_keys` is the semicolon-joined list of every source key bound to the place, and `n_source_keys` is its length.
+A PLACE IS A SUB-HUB, NEVER A PEER OF ITS OPERATOR. `operator_cedar_uid` may be BLANK and blank is never 'no operator': for BIA_OFFICE the operator is a federal agency and is not a Cedar entity; for BIE_SCHOOL it is UNRESOLVED, because matching a school name to a nation by name is the containment defect. `operator_basis` states which, on every row.
+DO NOT COUNT PLACES AS A PROXY FOR ANYTHING ELSE. 714 is the MECHANICAL name-collision count gated in `846::_denom`; 717 is the adjudicated count, and the three-row difference is three groups the vendor itself minted two property ids for - a casino and its hotel twice, and two casinos 67 km apart sharing one brand. `code/1129_place_ids.py verify` V9 recomputes the reconciliation on every run and fails when it stops holding.
+  - primary key: `cedar_place_id`  (validated unique)
+  - join cardinality: `cedar_place_id` → one row(s) per value (measured max 1), `operator_cedar_uid` → many row(s) per value (measured max 28)
+  - declared by: workstream PLACE-IDS 2026-09-02, ADR-030, code/1129: the id is minted once and bound APPEND-ONLY in data/spine/cedar_place_id_register.csv (one row per SOURCE KEY, several keys may share one id - that is what a merge IS), so a rebuild mints zero and reproduces identical keys; proven by a second `mint --apply` minting 0 over 1,051 bindings
 - `cedar_publishable_identifiers.csv` — one row per identifier Cedar may publish, with the entity it is attributed to and the evidence tier
   - primary key: `identifier`  (validated unique)
   - join cardinality: `cedar_uid` → many row(s) per value (measured max 35), `tribe_id` → many row(s) per value (measured max 35)

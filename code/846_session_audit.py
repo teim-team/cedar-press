@@ -347,38 +347,51 @@ def _attributed():
                        f"attributed_flag=1")
 
 
-@claim("the gaming denominator comes from the adjudication, not a regex")
+@claim("the gaming denominator is COUNT(DISTINCT cedar_place_id) = 717")
 def _denom():
-    """787 / 780 / 734 / 727 / 714 / 725 — SIX values circulated on 2026-09-02.
+    """SIX values circulated for one number. The table now answers it itself.
 
-    Mine was 714, from a regex counting 16 names containing "no casino" and 57
-    duplicate extras. The Codex loop reached 725 from
-    `review/place_gaming_adjudication_2026-09-02.csv`, which carries a
-    PER-GROUP VERDICT — 53 MERGE, 5 HOLD_OPEN — and counts 8 non-place rows.
+        787 / 780 / 734 / 727 / 725 / 717 / 714
 
-    **An adjudicated verdict beats a heuristic**, so this claim now reads the
-    adjudication rather than recomputing my own pattern. The five HOLD_OPEN
-    groups are held open on purpose: they include a Miami/Modoc joint
-    operation that two independent processes flagged separately, which is the
-    first time in this project two passes CORROBORATED instead of one
-    correcting the other.
+    Every one of those came from someone re-deriving the count with their own
+    rule. Mine was 714 (regex: 16 non-place, 57 heuristic duplicates). Codex
+    reached 725 and reported it as superseding mine. **Codex was wrong, and
+    this is the first time in the loop I can show it row by row:** it counted
+    8 non-place rows by matching the bare string `No casino`, and missed the
+    8 where the negation is a suffix - `Grand Canyon West - no casino`,
+    `Pueblo of Jemez - no casino`, `Pyramid Lake - no casino`. There are 16.
+
+    The durable answer is not a better regex. The place-id pass made the table
+    SELF-DESCRIBING: the 16 negative assertions carry
+    `cedar_place_id_absent_reason = NOT_A_PLACE` and no place id, and the 53
+    adjudicated MERGE groups collapse 54 extras into shared ids. So:
+
+        787 rows - 16 NOT_A_PLACE = 771 with a place id
+        771 - 54 adjudicated duplicate extras = 717 DISTINCT place ids
+
+    Three independent routes agree on 717: that arithmetic, a plain
+    `COUNT(DISTINCT cedar_place_id)`, and the `NOT_A_PLACE` reason landing on
+    exactly the 16 rows the name test finds. This claim reads the distinct
+    count, so a seventh value cannot be invented by a seventh rule.
     """
-    adj = ROOT / "review" / "place_gaming_adjudication_2026-09-02.csv"
     fac = CLEAN / "gaming_facilities.csv"
-    if not adj.exists() or not fac.exists():
-        return (True, "UNMEASURED — adjudication or facility table absent")
-    a = rows(adj)
-    merge = [r for r in a if (r.get("verdict") or "") == "MERGE"]
-    hold = [r for r in a if (r.get("verdict") or "") == "HOLD_OPEN"]
-    def n_rows(r):
-        try: return int(r.get("n_rows") or 0)
-        except ValueError: return 0
-    extras = sum(max(n_rows(r) - 1, 0) for r in merge)
-    total = len(rows(fac))
-    ok = len(merge) == 53 and len(hold) == 5
-    return (ok, f"{total} rows; {len(merge)} MERGE groups removing {extras} "
-                f"extras; {len(hold)} HOLD_OPEN"
-                + ("" if ok else "  <- adjudication changed, re-derive before quoting"))
+    if not fac.exists():
+        return (True, "UNMEASURED - gaming_facilities.csv absent")
+    rs = rows(fac)
+    ids = {(r.get("cedar_place_id") or "").strip()
+           for r in rs if (r.get("cedar_place_id") or "").strip()}
+    noplace = [r for r in rs if not (r.get("cedar_place_id") or "").strip()]
+    unreasoned = [r for r in noplace
+                  if "NOT_A_PLACE" not in (r.get("cedar_place_id_absent_reason") or "")]
+    ok = len(ids) == 717 and not unreasoned
+    msg = (f"{len(rs)} rows - {len(noplace)} NOT_A_PLACE = {len(rs)-len(noplace)} "
+           f"placed -> {len(ids)} distinct properties")
+    if unreasoned:
+        msg += (f"  <- {len(unreasoned)} row(s) have NO place id and NO reason; "
+                f"a row must say why it is not a place")
+    elif len(ids) != 717:
+        msg += "  <- moved from 717; re-derive before quoting it anywhere"
+    return (ok, msg)
 
 
 @claim("cedar_uid and tribe_id never name different entities", critical=True)

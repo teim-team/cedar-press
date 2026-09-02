@@ -7638,3 +7638,61 @@ with their reason in `purged_duplicate_documents.csv`), not waived by raising
 the ceiling.
 
 **Not re-baselined.** `--baseline` is a floor, not an acknowledgement button.
+
+
+---
+
+## 2026-09-02 — PLACE IDS (ADR-030, `code/1129_place_ids.py`): what this pass owns at the gate, and what it does not
+
+**What it wrote.** `data/spine/cedar_place_id_register.csv` (new, append-only,
+1,051 bindings), `data/clean/cedar_places.csv` (new, 997 rows, codebook block
+`20a_cedar_places` registered so it does not sit undocumented), two review files,
+one `GRAIN_PLACE` dict in `512`, one prefix in `cedar_ids.PREFIXES`, marked
+blocks in `ARCHITECTURE_DECISIONS`, `KNOWN_ISSUES` and `OWNER_DECISION_QUEUE`,
+and one additive column pair (`cedar_place_id`, `cedar_place_id_absent_reason`)
+on **27 tables**. Row and money conservation is asserted inside the write on
+every one: row count identical and every numeric column's sum identical to the
+cent, before and after. No row was added, removed or repointed anywhere.
+
+**What it FIXED that was already red.**
+
+1. **`846_session_audit.py` carried nine 0x08 BACKSPACE bytes where `\b` was
+   intended** — present in the committed blob, not a working-tree accident.
+   `_denom`, the gate for the gaming denominator this whole pass rests on, was
+   matching `\x08(CASINO|RESORT|…)\x08` and therefore matching nothing: it found
+   **0 duplicate groups** and reported *"771 distinct properties — shape
+   changed"*. Two other checks were blinded identically. **Repaired: 9 bytes.
+   `_denom` now PASSES at 787 − 16 − 57 = 714.** Word-boundary and unbounded
+   forms were compared on the live file and give identical results, so no
+   adjudication changed. `846` went 24/27 → **26/27**.
+2. **Three writers that this pass's own migration made unsafe** —
+   `1080_sec_gaming_facility_revenue.py` (`FIG_COLS`, `TERM_COLS`) and
+   `92_build_gaming_capacity_official.py` (`COLS`) — were flagged NEW by `845`
+   the moment the column landed, and were fixed with the `carry_live_columns`
+   repair `845` itself prescribes. **`845 verify`: 3 unsafe writers, 0 new since
+   baseline.** Not re-baselined.
+
+**`62` IS RED, AND THIS PASS IS NAMING WHAT IS NOT ITS OWN** — standing rule 15,
+which forbids recording a failure as "pre-existing" and walking away.
+Re-measured 2026-09-02 after this pass, with the owner of each line:
+
+| red line | measured | whose |
+|---|---|---|
+| `lint_class1` 0→1, `class2c` 60→69, `class3` 0→2, `class4` 9→14, `class7` 42→44, `lint_bug_class_instances` 146→163 | **`py -3 code/293_lint_bug_classes.py` names ZERO instances in `1129_place_ids.py`** — grep for the filename returns nothing. The named new instances are in `1011`, `1060`, `1085`, `1086`, `1125`, `1030`, `1031` and others. | other passes tonight. `1129` had two of its own (a `id(p)` in-memory key, class 7; a `miss += 1` drop counter that did not name what it dropped, class 2c) and **both were fixed rather than waived** — the ordinal replaced the memory address, and every unmapped key is now printed and named. |
+| `tables_undocumented_in_codebook` 3→27, `tables_missing_codebook_block` 3→27 | `1129`'s new table **is documented**: fragment `20a_cedar_places`, 19 of 19 columns described, and the metric fell 28→27 when it landed. The remaining 27 are other new tables and `.bak` files. | other passes; `62` globs `data/clean/*.csv`, so any new table raises this until its block is written. |
+| `tables_missing_from_25_TABLES` 179→233, `from_27_SPEC` 194→240, `missing_notes_contract` 14→44, `ship_tables_at_zero` 13→43 | `cedar_places.csv` is at most **+1** on each. Closing them means running `87` → `25` → `27`. | **the integrator.** `ARCHITECTURE_DECISIONS` says in three ownership tables that no agent runs the ship chain, and this pass did not. |
+| `rulings_unapplied` 1,215→2,894 | this pass applied no rulings and wrote no ruling ledger rows. | another pass. |
+| `tier_A_ruled` FELL 1,676→1,669, `contract_violations` 13, `contract_orphan_shippable` 8, the two `F-DELAWARE-ALIAS` ledger rows, `SHIPPING LOST advocacy_passthrough`, `hearing_bill_links` 465→464, `native_bills_subject_sweep` 2,414→2,409 | `1129` touched no ledger, no spine row, no bills table and no `dist/` manifest. | other passes. |
+| `846` `attribution_method holds only its controlled vocabulary` (CRITICAL) | on `prime_contracts.csv`, which this pass never opens for writing. | another pass. |
+
+**One new rule this earned, and it is not in the field guide yet:** *a regex
+literal is the one place in this repo where a defect is INVISIBLE IN A
+TERMINAL.* `cat`, `Read` and most editors render `0x08` as nothing, so `846`'s
+source read exactly as intended while matching no string that can exist, and the
+check reported a clean, plausible, entirely fictional number for as long as it
+has existed. **When a detector reports a suspiciously clean zero, run `cat -A`
+on its pattern before you believe it.** That is the twenty-fifth instance of
+this repo's signature defect and the first one where reading the code could not
+have caught it.
+
+**Not committed. Not re-baselined.**

@@ -20,14 +20,14 @@ Three honest outcomes, and they are three different jobs:
 
 | | count |
 |---|---:|
-| shippable tables | 247 |
-| **DECLARED_VALIDATED** | **239** |
+| shippable tables | 250 |
+| **DECLARED_VALIDATED** | **241** |
 | OPEN_WITH_EVIDENCE | 0 |
 | DEFECTIVE | 0 |
-| still unexplained | 8 |
-| ratchet `contract_grain_unstated_shippable` | **8** (was 207) |
+| still unexplained | 9 |
+| ratchet `contract_grain_unstated_shippable` | **9** (was 207) |
 
-A declaration that the data contradicts is release-blocking through `contract_violations`; there are **13**.
+A declaration that the data contradicts is release-blocking through `contract_violations`; there are **14**.
 
 ## Per collection
 
@@ -218,12 +218,13 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 
 ### NEST: Native Enterprise Structures and Ties  (`nest`)
 
-2 of 2 shippable tables declared.
+3 of 3 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
 | `nest_enterprise_relations.csv` | — | DECLARED_VALIDATED | `enterprise_edge_id` | `cedar_uid`→367, `enterprise_edge_id`→1, `enterprise_id`→15, `owner_hub_cedar_uid`→367 |
 | `nest_enterprises.csv` | — | DECLARED_VALIDATED | `enterprise_id` | `cedar_uid`→172, `enterprise_id`→1, `owner_hub_cedar_uid`→172, `parent_enterprise_id`→34 |
+| `nest_entity_dual_role.csv` | — | DECLARED_VALIDATED | `cedar_uid` | `cedar_uid`→1 |
 
 ### The Native Press: Tribal Newsletters and Periodicals  (`newsletters`)
 
@@ -332,7 +333,7 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 
 ### Entity spine, identifiers and reference  (`_entity_layer`)
 
-42 of 42 shippable tables declared.
+43 of 43 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
@@ -353,6 +354,7 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 | `cedar_identifier_graph_nodes.csv` | 115,471 | DECLARED_VALIDATED | `node` | — |
 | `cedar_identifier_ledger_final.csv` | — | DECLARED_VALIDATED | `identifier_type` + `identifier` + `tribe_id` + `attribution_method` + `evidence_url` + `verified_date` | `cedar_uid`→159, `identifier`→2, `tribe_id`→159 |
 | `cedar_identifier_propagation.csv` | 1,157 | DECLARED_VALIDATED | `dataset` + `identifier` | — |
+| `cedar_places.csv` | — | DECLARED_VALIDATED | `cedar_place_id` | `cedar_place_id`→1, `operator_cedar_uid`→28 |
 | `cedar_publishable_identifiers.csv` | 1,577 | DECLARED_VALIDATED | `identifier` | `cedar_uid`→35, `tribe_id`→35 |
 | `cedar_ruling_ledger_consolidated.csv` | 43,321 | DECLARED_VALIDATED | `subject_key` + `source_file` + `source_row_ordinal` | `resolved_tribe_id`→661, `subject_key`→2,778 |
 | `cross_dataset_ruling_map.csv` | 22,936 | DECLARED_VALIDATED | `source_file` + `target_row_ordinal` + `identifier_type` + `channel` | `identifier`→2,776 |

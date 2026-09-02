@@ -840,10 +840,97 @@ def doc(a):
     return 0
 
 
+# --------------------------------------------------------------------------
+# codebook -- a table with no registry block cannot ship, however good the
+# prose is. `62`'s `tables_undocumented_in_codebook` is the gate and it says so
+# in its own failure text. Built is not done; shipped is done.
+# --------------------------------------------------------------------------
+CB_DATASET = "05s_annual_indian_country_money_series"
+
+CB_DESC = {
+    "fiscal_year": "Federal fiscal year for the federal series; NIGC's own "
+                   "reporting fiscal year for the gaming series. THE TWO ARE "
+                   "NOT THE SAME CLOCK: NIGC aggregates each gaming "
+                   "operation's own audited fiscal year and says its figures "
+                   "may include revenue earned up to 16 months before "
+                   "publication.",
+    "series_id": "Which series this row measures. Half of the primary key.",
+    "money_class": "THE FENCE. FEDERAL_OBLIGATION_TRANSFERRED_INTO_INDIAN_"
+                   "COUNTRY is money moving IN; "
+                   "INDIAN_COUNTRY_OWN_SOURCE_REVENUE is money Indian Country "
+                   "earned. Never sum across this column. No row of this "
+                   "table is a grand total.",
+    "usd": "The figure, in nominal dollars of the stated fiscal year. Not "
+           "deflated; the source tables carry real-2025 columns.",
+    "n_source_rows": "How many source rows produced this figure. For the NIGC "
+                     "series it is the number of REGIONS summed, not "
+                     "facilities.",
+    "is_partial_fiscal_year": "Y where the fiscal year is incomplete in the "
+                              "source (FY2026 throughout; FY2023 assistance "
+                              "carries fy_partial_flag on 12,126 rows).",
+    "figure_precision": "As the publisher stated it. NIGC FY2013-FY2020 are "
+                        "rounded to $0.1B - eight regions each rounded carry "
+                        "up to $0.4B of rounding in the national figure.",
+    "additive_with": "The series this one may be added to. Blank means none.",
+    "never_add_to": "What this figure must never be summed with, named "
+                    "explicitly rather than left to a footnote.",
+    "source_table": "The data/clean table(s) this row was computed from.",
+    "basis": "The exact filter and rule. For NIGC it names the region system "
+             "and the figure_vintage, because a naive GROUP BY fiscal_year "
+             "doubles FY2002, FY2007 and FY2016.",
+    "coverage_note": "What the figure does and does not reach. Every gaming "
+                     "row states the property denominator here.",
+    "built_by": "Producer script.",
+    "built_date": "Build date.",
+}
+
+
+def codebook(a):
+    import importlib.util as _iu
+    spec = _iu.spec_from_file_location("cedar_codebook",
+                                       os.path.join(ROOT, "code",
+                                                    "cedar_codebook.py"))
+    cb = _iu.module_from_spec(spec)
+    spec.loader.exec_module(cb)
+    rows = rd(OUT)
+    if not rows:
+        raise SystemExit("UNMEASURED: build first.")
+    n = len(rows)
+    out = []
+    for c in COLS:
+        filled = sum(1 for r in rows if str(r.get(c, "")).strip() != "")
+        desc = CB_DESC.get(c)
+        if not desc:
+            raise SystemExit("UNMEASURED: column %r has no description. A "
+                             "column with no entry is a column a reader "
+                             "guesses at." % c)
+        out.append({
+            "dataset": CB_DATASET, "variable": c,
+            "type": "number" if c in ("fiscal_year", "usd", "n_source_rows")
+                    else "text",
+            "units": "usd" if c == "usd" else
+                     ("count" if c == "n_source_rows" else
+                      ("year" if c == "fiscal_year" else "text")),
+            # MEASURED off the live file, never typed.
+            "pct_filled": round(100.0 * filled / n, 1), "n_rows": n,
+            "published": 1, "access_tier": "public",
+            "description": desc, "generated": TODAY})
+    cb.write_fragment(CB_DATASET, out)
+    print("wrote fragment %s (%d columns, %d rows measured)"
+          % (CB_DATASET, len(out), n))
+    cb.build()
+    sh, lic, und = cb.registered_tables()
+    names = {p.name for p, _g, _s in sh}
+    ok = os.path.basename(OUT) in names
+    print("registered as shippable via the codebook: %s" % ok)
+    return 0 if ok else 1
+
+
 def main():
     ap = argparse.ArgumentParser()
     s = ap.add_subparsers(dest="cmd", required=True)
     s.add_parser("build").set_defaults(fn=build)
+    s.add_parser("codebook").set_defaults(fn=codebook)
     s.add_parser("verify").set_defaults(fn=verify)
     s.add_parser("selftest").set_defaults(fn=selftest)
     p = s.add_parser("doc"); p.add_argument("--write", action="store_true")

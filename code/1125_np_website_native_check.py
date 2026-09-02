@@ -41,8 +41,9 @@ fabrication with a status code next to it.
 
 THE ENTITY LAYER'S WEB MAP IS REFUSED AS A URL SOURCE, and the refusal is the
 point. `np_orgs.cedar_uid` names the entity Cedar KEYED THE NONPROFIT TO -- the
-tribe or corporation -- not the nonprofit. 41 of the 293 have no 990 website
-field and a `cedar_uid` whose site is in `cedar_web_map.csv`; reading it would
+tribe or corporation -- not the nonprofit. **26 of the 293** (and 218 of all
+697) have no filer-typed website field and a `cedar_uid` whose site sits in
+`cedar_web_map.csv`; reading it would
 ask the Ahtna corporation's website whether AHTNA INTERTRIBAL RESOURCE
 COMMISSION is Native. A tribe's own site is Native by construction, so that
 route manufactures a "yes" on every row it touches and corroborates nothing.
@@ -250,11 +251,19 @@ def shard_i_seed_index():
 
 
 def webmap_index():
+    """cedar_uid -> its web-map rows. A BLANK cedar_uid must never become a
+    key: `"" in wm` would then be True and every np_orgs row with no
+    `cedar_uid` at all would be misreported as "refused, we only hold the
+    keyed entity's site" when in fact Cedar holds no URL for it whatsoever.
+    Caught 2026-09-02 when the refusal list printed rows with an empty keyed
+    entity beside them - which is the whole argument for naming what you
+    dropped instead of counting it."""
     out = collections.defaultdict(list)
     if os.path.exists(WEBMAP):
         for r in rd(WEBMAP):
-            if (r.get("url") or "").strip():
-                out[(r.get("cedar_uid") or "").strip()].append(r)
+            uid = (r.get("cedar_uid") or "").strip()
+            if uid and (r.get("url") or "").strip():
+                out[uid].append(r)
     return out
 
 
@@ -766,12 +775,35 @@ def cmd_build(a):
         raise SystemExit("UNMEASURED: %s is empty. Run `fetch` first. An "
                          "absence of evidence must never print as evidence of "
                          "absence." % os.path.relpath(PROBE, ROOT))
-    seen, out, reclassified = set(), [], 0
+    # The no-URL basis is RE-DERIVED here too, from the corrected web-map
+    # index. The first fetch keyed `cedar_web_map.csv` on a possibly-blank
+    # `cedar_uid`, so `"" in wm` was True and 15 organisations for which Cedar
+    # holds no URL AT ALL were written as "refused, we only hold the keyed
+    # entity's site". Both are NOT_CHECKED, so no page was wrongly fetched or
+    # wrongly skipped -- but the two are different facts and the basis said
+    # the wrong one. Costs no network to correct.
+    wm = webmap_index()
+    seen, out, reclassified, rebased = set(), [], 0, 0
     for r in rows:
         if r["EIN"] in seen:
             continue
         seen.add(r["EIN"])
         o = dict(r)
+        if (o.get("verdict") or "") == "NOT_CHECKED_NO_URL_PUBLISHED":
+            uid = (o.get("cedar_uid") or "").strip()
+            want = ("REFUSED: the only URL Cedar holds for this row is the "
+                    "KEYED ENTITY's site (cedar_web_map.csv, cedar_uid %s), "
+                    "which is the tribe or corporation the nonprofit was "
+                    "matched to and not the nonprofit. A tribe's own site is "
+                    "Native by construction, so reading it would manufacture "
+                    "a yes and corroborate nothing." % uid) if (uid and uid in wm) \
+                else ("no Form 990 WebsiteAddressTxt, no IRS 990-N e-Postcard "
+                      "website field and no prior probe of one. Cedar holds "
+                      "NO url for this organisation. No domain was guessed.")
+            if (o.get("verdict_basis") or "") != want:
+                o["verdict_basis"] = want
+                o["url_source_basis"] = want
+                rebased += 1
         corpus, have = "", False
         for key in ("raw_home", "raw_about"):
             rel = o.get(key) or ""
@@ -798,8 +830,8 @@ def cmd_build(a):
         o["other_community_quote"] = redact(o.get("other_community_quote"))
         o["own_990_quote"] = redact(o.get("own_990_quote"))
         out.append({c: o.get(c, "") for c in COLS})
-    print("re-classified %d of %d rows from the saved bytes" %
-          (reclassified, len(out)))
+    print("re-classified %d of %d rows from the saved bytes; "
+          "re-based %d no-url reasons" % (reclassified, len(out), rebased))
     out.sort(key=lambda r: (r["verdict"], r["org_name"]))
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     tmp = OUT + ".part"

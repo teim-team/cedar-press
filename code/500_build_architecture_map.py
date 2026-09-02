@@ -216,7 +216,15 @@ COLLECTIONS: list[dict] = [
      #            entity.city / legal name, independent of both the FR roster
      #            and the IRS BMF. It is infrastructure, not a product: it
      #            exists to be arbitrated by code/1118_corroboration_layer.py.
-     "tables": (r"^(cedar_entity|cedar_identifier|cedar_publishable|cedar_ruling|cedar_correction|cross_dataset_ruling|entity_|identifier_|alias|"
+          # `cedar_place` added 2026-09-02 (workstream PLACE-IDS, ADR-030,
+     #   code/1129). `cedar_places.csv` is the directory of PHYSICAL
+     #   PLACES a Cedar entity operates - gaming property, BIE school,
+     #   IHS facility, BIA office - each carrying a permanent
+     #   `CEDAR-PLACE-nnnnnn-CC`. A place is a SUB-HUB of the entity
+     #   that operates it (IDENTIFIER_STANDARD SS2), never a peer, so it
+     #   is infrastructure in this collection rather than a row in the
+     #   gaming product - the same call `bie_`/`bia_` already got.
+"tables": (r"^(cedar_entity|cedar_place|cedar_identifier|cedar_publishable|cedar_ruling|cedar_correction|cross_dataset_ruling|entity_|identifier_|alias|"
                 r"nho_|tcu_|uio_|bie_|bia_|nppes_|native_fi|federal_recognition|intertribal|"
                 r"admin_region|foia_|visitor_|state_recognized)")},
 ]

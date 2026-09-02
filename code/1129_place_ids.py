@@ -1068,7 +1068,9 @@ def cmd_selftest(args):
 
 # ----------------------------------------------------------------- codebook
 
-CB_DATASET = "20a_cedar_places"
+CB_DATASET = "05t_cedar_places"  # 05* = the entity layer band; a
+# place is a SUB-HUB of an entity, so it belongs to the collection
+# `_entity_layer`, whose declared prefixes are 00/05/08/13.
 
 # `docs/codebooks/*.md` is the prose a human reads;
 # `data/clean/codebook/<dataset>.csv` is the REGISTRY the shipping gate reads.
