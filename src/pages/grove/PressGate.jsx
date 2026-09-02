@@ -57,7 +57,6 @@ import {
   CREDIBILITY_STRIP,
 } from "../../features/grove/pressMethod";
 import { NATIVE_LINKAGE, PRESS_CATALOG } from "../../features/grove/pressCatalog";
-import { PRESS_LEAD_NOTE, PRESS_LEAD_STATS } from "../../features/grove/pressStats";
 import { PressCedarFab } from "./PressCedarFab";
 
 // The Cedar Press shelves by name, for the door. Names only, from the
@@ -226,23 +225,6 @@ export default function PressGate({ user }) {
             Original collections built from fragmented records, connected through original
             research, and maintained as Indian Country changes.
           </p>
-          {/* The figures, before the pillars: a visitor deciding whether this
-              is real is answered by dollars, not adjectives. Each figure is
-              the data project's own published total (see pressStats.js for
-              the provenance and the totalling traps); they are static text
-              with a stated weekly cadence, never a live counter — the page
-              must not imply an updating feed it does not have. A dl, because
-              these are term/definition pairs, with the figure leading
-              visually. */}
-          <dl className="cp-lead cp-fade" aria-label="Cedar Press headline figures">
-            {PRESS_LEAD_STATS.map((stat) => (
-              <div className="cp-lead__stat" key={stat.id}>
-                <dt className="cp-lead__label">{stat.label}</dt>
-                <dd className="cp-lead__figure">{stat.figure}</dd>
-              </div>
-            ))}
-          </dl>
-          <p className="cp-lead__note cp-fade">{PRESS_LEAD_NOTE}</p>
           <ul className="cp-proof cp-fade">
             {PROOF_POINTS.map((point) => (
               <li className="cp-proof__item" key={point.id}>

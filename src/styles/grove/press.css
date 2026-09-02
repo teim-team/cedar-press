@@ -568,21 +568,6 @@
 .teim-rd .cp-hero2__headline { font-size: clamp(2.1rem, 3.2vw, 3.1rem); margin-bottom: 1rem; }
 .teim-rd .cp-hero2__lede { font-size: clamp(1rem, 1.2vw, 1.12rem); max-width: 34rem; margin-bottom: 2.2rem; }
 
-/* The headline figures. Numbers over hairlines, not tiles: the proof grid
- * below already spends the panel's card budget, and a second field of boxes
- * would bury both. The figure leads visually (column-reverse; the dt/dd
- * order in the DOM stays label-first for screen readers), set in the mono
- * at display size — the one place on the door the mono runs large, so the
- * numbers read as data, which is the product. Static text on purpose:
- * no counters, no tickers (see pressStats.js). */
-.teim-rd .cp-lead { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.1rem 1.6rem; margin: 0 auto 0.8rem; padding: 0; max-width: 30rem; }
-.teim-rd .cp-lead__stat { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 0.35rem; min-width: 0; padding-top: 0.7rem; border-top: 1px solid rgba(255, 255, 255, 0.34); }
-.teim-rd .cp-lead__figure { margin: 0; font-family: var(--mono); font-size: clamp(1.7rem, 2.6vw, 2.3rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1; color: #fff; font-variant-numeric: tabular-nums; }
-.teim-rd .cp-lead__label { font-family: var(--sans); font-size: 0.78rem; line-height: 1.45; color: rgba(255, 255, 255, 0.92); }
-/* The scale-and-cadence line: quiet, mono, under the figures — the honest
- * footnote that replaces any pretence of a live feed. */
-.teim-rd .cp-lead__note { font-family: var(--mono); font-weight: 600; font-size: 0.64rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255, 255, 255, 0.75); margin: 0 auto 2.2rem; max-width: 30rem; }
-
 /* Four pillars, 2x2. Not cards: a hairline rule over each one, so they read
  * as part of the panel rather than as a SaaS feature grid dropped onto it. */
 /* Every card is a hoverable panel, and every word on the teal is white:
@@ -661,9 +646,6 @@
   .teim-rd .cp-hero2__inner { max-width: 44rem; }
   .teim-rd .cp-hero2__lede { max-width: none; }
   .teim-rd .cp-proof { grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: none; }
-  /* The figures spread with the proofs: one row of four, the full measure. */
-  .teim-rd .cp-lead { grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: none; gap: 1.1rem 1.3rem; }
-  .teim-rd .cp-lead__note { max-width: none; }
   /* Actually square: the ratio rules and the height follows the column.
    * On hover the swap gives the whole zone to the paragraph — the kept
    * small icon was the height a square cannot spare. */
