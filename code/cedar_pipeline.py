@@ -642,6 +642,42 @@ KNOWN_ORDERINGS = [
              "cedar_identifier_propagation.csv, and 354 and 427 have written "
              "to the graph since it last ran",
      "enricher_columns": ["asserting_row_ref"]},
+    # Declared 2026-09-02 by the GRAIN-LEGISLATION workstream. `bill_votes.csv`
+    # had NO declared ordering at all - `enrichers_to_rerun('bill_votes.csv')`
+    # returned an empty list - while carrying TWO in-place enrichers against
+    # one wholesale writer. 14 does `v.to_csv(CLEAN / "bill_votes.csv")`, which
+    # is a full rewrite; 73 and 890 both read the live file and write it back.
+    # This is the ferc_docket_filings.csv shape exactly, and the only reason it
+    # has not cost anything yet is that 14 has not been re-run.
+    {"rebuild": "14_build_bills_votes.py",
+     "enricher": "73_bills_votes_completion.py",
+     "file": "bill_votes.csv",
+     "cost": "not yet paid - declared 2026-09-02 on discovering the file had "
+             "no ordering. 73 writes the official-verification join, the "
+             "anti-tribal direction fields and the pre-2000 floor back into "
+             "the live table in place (it backs up first, which is the "
+             "signal); a 14 rebuild reverts all of it",
+     "enricher_columns": ["bill_link_status", "official_source_url",
+                          "official_question", "official_result",
+                          "counts_agree_with_official", "question_family"]},
+    {"rebuild": "14_build_bills_votes.py",
+     "enricher": "890_bill_votes_threshold_and_titles.py",
+     "file": "bill_votes.csv",
+     "cost": "not yet paid - declared at creation. A rebuild drops "
+             "`threshold_required`, and the sixteen votes recorded as "
+             "failures on a majority tally go back to looking like data "
+             "errors - one of them, H105-0482 (229-176, Failed), sits in the "
+             "shipped 10-row sample. It also drops `bill_title`, which is the "
+             "only thing on the row that says what was voted on. 890 must run "
+             "AFTER 73, because it reads `question` and `result` as 73 leaves "
+             "them and cross-checks them against the official record 73 "
+             "joined",
+     "enricher_columns": ["bill_title", "bill_title_source",
+                          "threshold_required", "threshold_required_source",
+                          "threshold_required_basis",
+                          "threshold_derived_from_question",
+                          "threshold_agrees_with_official",
+                          "result_reconciles_with_threshold"]},
 ]
 
 

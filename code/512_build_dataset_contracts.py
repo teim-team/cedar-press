@@ -2391,6 +2391,79 @@ GRAIN_GAMING_NR = {
 
 GRAIN.update(GRAIN_GAMING_NR)
 
+# ===========================================================================
+# --- LEGISLATION. Workstream GRAIN-LEGISLATION, 2026-09-02. ---------------
+#
+# EMPTY, AND THE EMPTINESS IS THE RULING - the table this workstream owned was
+# taken OFF the shippable list rather than declared. Recorded here because
+# 512 is where a legislation grain question gets answered, and an answer of
+# "there is no longer a table to declare" has to be findable from the same
+# place as an answer of "here is its key".
+#
+# THE ONE BLOCKER. `518_dataset_readiness.py` reported `legislation` BLOCKED
+# on two counts, both of them the same table:
+#   C1 grain UNSTATED on 1: congressional_correspondence_log.csv
+#   C2 no validated primary key on 1
+# The other eleven shippable legislation tables were declared and validated.
+#
+# WHAT THE PRIOR RECORD SAID, AND WHY IT NO LONGER HOLDS. GRAIN_OPEN below
+# asks of this table "the file has ZERO rows ... is this table meant to ship
+# empty, and what is one row when it fills?" GRAIN_WS4 tested it properly and
+# refused to declare it, on the ground that `136.build_correspondence_layer`
+# mints `record_id = FOIAREQ-{agency_code}-{foia_request_id}` and that key
+# COLLIDES 381 TIMES over 9,100 distinct values in the population it draws
+# from - so a declaration would validate against zero rows today and break
+# the first time the table filled. That reasoning is still correct and is not
+# what changed.
+#
+# WHAT CHANGED IS THE POPULATION, and it was re-measured with csv.reader on
+# 2026-09-02 rather than read out of the build log:
+#
+#   foia_request_index.csv                       9,481 -> 20,102 rows
+#   ... requester_is_congressional_office = Y        0 -> 4
+#
+# So "empty by construction" is DEAD as a reason. Four rows now qualify, and
+# the honest test is no longer whether the generator can produce a row but
+# what the rows ARE. All four are HHS Office of the Secretary FOIA-log rows
+# carrying `native_related = N` and
+# `native_basis = no_native_signal_in_this_row`; their subjects are Tom
+# Price, Alex Azar, unaccompanied alien children, and a Rand Paul request
+# about another FOIA request. HHS is swept at all only because IHS sits under
+# it. A rebuilt table would put four rows of non-Native noise inside an
+# Indian-affairs collection, and a buyer would reasonably read their presence
+# as a claim that these are Indian-affairs records.
+#
+# AND THE THING THE TABLE PROMISES IS NOT OBTAINABLE. `log_publicly_posted`
+# is NOT_FOUND or NO_ONLY_RELEASED_ON_REQUEST on all 257 rows of
+# `congressional_correspondence_systems.csv`. No agency in scope publishes
+# its controlled-correspondence log; filling this table means filing FOIA
+# requests, not running a script.
+#
+# RULING: OUT OF SCOPE, declared in `cedar_codebook.INTERNAL_TABLES` (the one
+# registry `status_of` reads) with the reason above, and ruled INTERNAL in
+# `391_triage_unshipped_tables.VERDICTS` so the operational copy and the
+# authority cannot drift. It is REVERSIBLE by deleting one line the day a log
+# is actually obtained. The GRAIN_OPEN entry below is deliberately LEFT IN
+# PLACE: the question it asks is still the right question, and deleting it
+# would erase the only record that it was ever asked.
+#
+# WHAT STILL SHIPS, and it is the finding rather than a consolation:
+# `congressional_correspondence_systems.csv`, 257 rows - 8 correspondence
+# systems proved to EXIST from the agencies' own Privacy Act notices, quoted
+# verbatim with FR document numbers, plus 249 rows of FOIA-log evidence that
+# a third party has already located and reviewed such a log. Cedar's claim is
+# "these systems exist, here is where, and nobody publishes them", which is
+# true and stateable; it was never "here are the letters".
+#
+# THE OTHER LEGISLATION WORK THIS WORKSTREAM DID is an in-place enrichment of
+# `bill_votes.csv`, not a grain change - `vote_id` is unaffected, 423 rows in
+# and 423 out. `code/890_bill_votes_threshold_and_titles.py` adds `bill_title`
+# (390 of 423, verbatim from native_bills.csv) and `threshold_required` plus
+# six provenance columns. The ordering 14 -> 890 is declared in
+# `cedar_pipeline.KNOWN_ORDERINGS`; a rebuild by 14 drops all eight columns.
+GRAIN_LEGISLATION = {}
+GRAIN.update(GRAIN_LEGISLATION)
+
 # A table whose grain is declared but whose PRIMARY KEY cannot be stated
 # without guessing. Recorded rather than left blank, so the gap is a task
 # with a name instead of a silence. These count as UNSTATED for the gate.

@@ -1,6 +1,6 @@
 # Grain audit - what one row IS, table by table
 
-*Generated 2026-09-01 by `code/512_build_dataset_contracts.py` (workstream E). Regenerate rather than edit. Measurements live in `docs/schema/grain_evidence.json`; re-measure with `py -3 code/512_build_dataset_contracts.py probe`.*
+*Generated 2026-09-02 by `code/512_build_dataset_contracts.py` (workstream E). Regenerate rather than edit. Measurements live in `docs/schema/grain_evidence.json`; re-measure with `py -3 code/512_build_dataset_contracts.py probe`.*
 
 ## Why this document exists
 
@@ -20,14 +20,14 @@ Three honest outcomes, and they are three different jobs:
 
 | | count |
 |---|---:|
-| shippable tables | 223 |
+| shippable tables | 224 |
 | **DECLARED_VALIDATED** | **213** |
-| OPEN_WITH_EVIDENCE | 1 |
+| OPEN_WITH_EVIDENCE | 0 |
 | DEFECTIVE | 3 |
-| still unexplained | 6 |
-| ratchet `contract_grain_unstated_shippable` | **10** (was 207) |
+| still unexplained | 8 |
+| ratchet `contract_grain_unstated_shippable` | **11** (was 207) |
 
-A declaration that the data contradicts is release-blocking through `contract_violations`; there are **7**.
+A declaration that the data contradicts is release-blocking through `contract_violations`; there are **13**.
 
 ## DEFECTIVE - data bugs found by the sweep
 
@@ -51,21 +51,11 @@ These are not declaration gaps. Each is a table a buyer can double-count today. 
 
 - measured 72,837 rows, 10,770 whole-row duplicate(s) on 2026-08-29
 
-## OPEN_WITH_EVIDENCE - the rulings a human must make
-
-Each is a question the DATA cannot answer, with what was tested attached. Declaring past one of these is the one way this file can lie.
-
-### `congressional_correspondence_log.csv`
-
-the file has ZERO rows. Every candidate key is vacuously unique, so the data cannot evidence a grain. QUESTION: is this table meant to ship empty, and what is one row when it fills?
-
-- unique on the full file: (`record_id`)
-
 ## Per collection
 
 ### Federal Funding to Indian Country  (`funding`)
 
-8 of 10 shippable tables declared.
+6 of 10 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
@@ -73,8 +63,8 @@ the file has ZERO rows. Every candidate key is vacuously unique, so the data can
 | `faads_entity_attribution.csv` | 29,594 | DECLARED_VALIDATED | `faads_row_id` | `cedar_uid`→536, `tribe_id`→536 |
 | `faads_transactions.csv` | 60,661 | DECLARED_VALIDATED | `assistance_transaction_unique_key` | `cedar_uid`→0, `tribe_id`→0 |
 | `faads_transactions_all_agencies.csv` | 2,769,748 | DEFECTIVE | — | `cedar_uid`→0, `tribe_id`→0 |
-| `federal_funding_transactions.csv` | 701,955 | DECLARED_VALIDATED | `assistance_transaction_unique_key` | `cedar_uid`→18,574, `tribe_id`→12,764 |
-| `federal_funding_tribe_year_panel.csv` | 5,496 | DECLARED_VALIDATED | `tribe_id` + `fiscal_year` | `cedar_uid`→32, `tribe_id`→16 |
+| `federal_funding_transactions.csv` | 701,955 | **DECLARATION FAILED** | `assistance_transaction_unique_key` | `cedar_uid`→18,574, `tribe_id`→12,764 |
+| `federal_funding_tribe_year_panel.csv` | 5,496 | **DECLARATION FAILED** | `tribe_id` + `fiscal_year` | `cedar_uid`→32, `tribe_id`→16 |
 | `funding_identifier_netnew_ueis.csv` | 4,249 | DECLARED_VALIDATED | `recipient_uei` | — |
 | `inflation_deflator.csv` | 27 | DECLARED_VALIDATED | `year` | — |
 | `native_passthrough.csv` | 1,522 | DEFECTIVE | — | — |
@@ -111,14 +101,13 @@ the file has ZERO rows. Every candidate key is vacuously unique, so the data can
 
 ### Congressional Votes and Proposed Legislation  (`legislation`)
 
-11 of 12 shippable tables declared.
+11 of 11 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
 | `bill_votes.csv` | 423 | DECLARED_VALIDATED | `vote_id` | — |
 | `bill_votes_entity_bridge.csv` | 75 | DECLARED_VALIDATED | `vote_id` + `tribe_id` | `cedar_uid`→10, `tribe_id`→10 |
 | `bill_votes_official_verification.csv` | 305 | DECLARED_VALIDATED | `vote_id` | — |
-| `congressional_correspondence_log.csv` | 0 | OPEN_WITH_EVIDENCE | — | `cedar_uid`→0 |
 | `congressional_correspondence_systems.csv` | 257 | DECLARED_VALIDATED | `system_id` + `verbatim_quote` | — |
 | `member_positions.csv` | 136,119 | DECLARED_VALIDATED | `vote_id` + `bioguide_id` | — |
 | `native_bill_outcomes.csv` | 3,069 | DECLARED_VALIDATED | `bill_id` | — |

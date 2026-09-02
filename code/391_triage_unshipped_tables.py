@@ -372,6 +372,27 @@ VERDICTS = {
         "our own prior ledger"),
     "cedar_cage_backfill.csv": ("INTERNAL", None, HARVEST),
     "cedar_spiderweb_v2.csv": ("INTERNAL", None, HARVEST),
+    # Ruled 2026-09-02 by workstream GRAIN-LEGISLATION. THIS ONE IS NOT
+    # HARVEST SCRATCH - it is a table about the world that cannot be filled
+    # with anything in scope, and the distinction matters because the file
+    # reaching zero rows is NOT the reason. `already_shipping` will be True
+    # here: it holds a codebook block (13_congressional_correspondence_log)
+    # and was shippable until today, which is why it sat as the last C1
+    # blocker on the `legislation` dataset. Full reasoning, with the four
+    # rows named, in cedar_codebook.INTERNAL_TABLES and
+    # docs/CONGRESSIONAL_CORRESPONDENCE_FOIA_BUILD_LOG.md.
+    "congressional_correspondence_log.csv": (
+        "INTERNAL", None,
+        "OUT OF SCOPE. Its generator (136.build_correspondence_layer) would "
+        "today emit FOUR rows, not zero - the FOIA index grew 9,481 -> "
+        "20,102 - and all four are HHS Office of the Secretary requests "
+        "carrying native_related=N (Tom Price, Alex Azar, unaccompanied "
+        "alien children, a Rand Paul meta-FOIA). Four rows of non-Native "
+        "noise in an Indian-affairs collection is worse than nothing. No "
+        "agency in scope publishes the log itself: log_publicly_posted is "
+        "NOT_FOUND or NO_ONLY_RELEASED_ON_REQUEST on all 257 rows of "
+        "congressional_correspondence_systems.csv, which is the table that "
+        "carries the finding and does ship"),
     "np_ein_uei_bridge.csv": (
         "INTERNAL", None,
         HARVEST + "; match_evidence, funnel_stage and review_flag are the "

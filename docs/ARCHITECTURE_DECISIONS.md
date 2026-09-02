@@ -678,3 +678,39 @@ the missing PSC and award-description fields.
    `MONEY_TOTALLING_RULES.md` still governs. A shared county code is not
    permission to add a subaward to a prime.
 <!-- END ADR-015 -->
+
+<!-- BEGIN ADR-016 -->
+## ADR-016 — file ownership for the READY-four promotion pass (workstream PROMOTE, 2026-09-02)
+
+**Status:** accepted 2026-09-02. Declared BEFORE editing, per AGENTS.md
+*Parallel agents*.
+
+This pass promotes columns that are already on this machine into the four
+datasets `518_dataset_readiness.py` reports READY: `contractors`, `deals`,
+`nonprofits`, `native-owned-businesses`. It downloads nothing.
+
+**Files this workstream owns for the duration of the pass**
+
+| file | what is written | script |
+|---|---|---|
+| `data/clean/prime_contracts.csv` | **9 new columns only**, appended right of the existing 47. No existing column is read-modified. | `code/950_promote_contract_attributes.py` |
+| `data/clean/np_orgs.csv` | 3 new columns (`disposition`, `disposition_basis`, `generic_token_match_flag`) | `code/952_nonprofit_disposition.py` |
+| `data/clean/native_owned_businesses.csv` | 4 new columns (ISO date + basis, service-category promotion, identifier candidate) | `code/953_nob_normalize_and_key.py` |
+| `code/770_sample_extracts.py` | the `SHOW` lists for those four datasets only | — |
+
+**Explicit non-overlap with ADR-015 (workstream INT, geography).** ADR-015 draws
+recipient / place-of-performance county FIPS from the same
+`usaspending_gapfill_2026-08-05` corpus. `870_build_geo_crosswalks.py` states in
+its own header that *"it writes no key onto any transaction table"* and it was
+verified to write only `geo_award_county_crosswalk.csv`,
+`geo_place_county_crosswalk.csv` and `geo_county_dim.csv`. **This workstream
+therefore takes NAICS / PSC / award description / action date only and touches
+no geographic column**, and if INT later enriches `prime_contracts.csv` in
+place, 950 is idempotent and re-runnable after it — the ordering is declared in
+`cedar_pipeline.KNOWN_ORDERINGS`.
+
+**What a rebuild costs.** `40_build_prime_contracts.py` reverts all nine
+columns, exactly as it reverts 207's two. 950 is an in-place enricher and must
+run after any rebuild. The `.bak_2026-09-02_pre_950_promote_contract_attributes`
+file beside the table is the signal.
+<!-- END ADR-016 -->

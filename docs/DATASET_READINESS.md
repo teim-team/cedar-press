@@ -2,9 +2,9 @@
 
 *Generated 2026-09-02 by `code/518_dataset_readiness.py` from live artifacts. Three statuses only: **READY / BLOCKED / NOT_TESTED**. There is no 'mostly ready' — a dataset crosses the minimum shipping contract or it has named blockers.*
 
-## READY: 9 / 13
+## READY: 10 / 13
 
-BLOCKED 4 · NOT_TESTED 0
+BLOCKED 3 · NOT_TESTED 0
 
 | dataset | status | tables | grain | keys | duplicates | agg-unsafe | rebuild |
 |---|---|---:|---|---|---|---:|---|
@@ -13,21 +13,16 @@ BLOCKED 4 · NOT_TESTED 0
 | `deals` | **READY** | 14 | 14/14 | 14/14 | clean | 0 | declared |
 | `federal-register` | **READY** | 22 | 22/22 | 22/22 | clean | 0 | declared |
 | `gaming` | **READY** | 54 | 54/54 | 54/54 | clean | 0 | declared |
+| `legislation` | **READY** | 11 | 11/11 | 11/11 | clean | 0 | declared |
 | `lobbying` | **READY** | 33 | 33/33 | 33/33 | clean | 0 | declared |
 | `nagpra` | **READY** | 4 | 4/4 | 4/4 | clean | 0 | declared |
 | `native-owned-businesses` | **READY** | 6 | 6/6 | 6/6 | clean | 0 | declared |
 | `nonprofits` | **READY** | 10 | 10/10 | 10/10 | clean | 0 | declared |
-| `legislation` | **BLOCKED** | 12 | 11/12 | 11/12 | clean | 1 | declared |
 | `natural-resources` | **BLOCKED** | 8 | 8/8 | 8/8 | clean | 0 | declared |
 | `subcontracting` | **BLOCKED** | 3 | 2/3 | 2/3 | 10,770 rows | 1 | declared |
 | `funding` | **BLOCKED** | 10 | 8/10 | 8/10 | 3,557 rows | 2 | declared |
 
 ## Blockers, by dataset
-
-### `legislation` — BLOCKED
-
-- C1 grain UNSTATED on 1: congressional_correspondence_log.csv
-- C2 no validated primary key on 1
 
 ### `natural-resources` — BLOCKED
 

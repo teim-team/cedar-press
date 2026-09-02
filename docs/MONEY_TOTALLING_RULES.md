@@ -13,7 +13,9 @@
 
 ### The subaward trap, in dollars
 
-`subawards.csv` totals $45,624,073,879.27 across all 72,837 rows. **That figure must never be quoted.** The correct total is $24,413,436,422.47 over 54,719 rows. The money rule removes **$21,210,637,456.80** — 86.9% of the unfiltered figure.
+`subawards.csv` totals $45,624,073,879.27 across all 72,837 rows. **That figure must never be quoted.** The correct total is $24,413,436,422.47 over 54,719 rows. The money rule removes **$21,210,637,456.80**.
+
+**State the denominator, every time.** That same $21.21B is **46.5% of the unfiltered $45.62B** and **86.9% of the correct $24.41B**, and this line previously read "86.9% of the unfiltered figure", which is neither. Codex caught the pair of numbers loose in the handoff — the sample README said 46.5%, the product descriptor said 86.9% — and a buyer holding both correctly concluded that one of them had to be wrong. **An overstatement is measured against the truth, so the number to quote is 86.9%: summing unfiltered lands you 86.9% above the real total.** 46.5% is the share of the inflated figure that is spurious, which is a different and much less alarming-sounding sentence about the same error, and is not what a warning is for.
 
 And that corrected total is still **not additive with prime contracting**. A subaward is a slice of a prime award Cedar already publishes. Federal dollars obligated = primes. Subawards say where those dollars went next.
 

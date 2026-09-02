@@ -675,6 +675,62 @@ CORP = re.compile(
 PERSONISH = re.compile(r"^[A-Z][a-z'\-]+(?: [A-Z][a-z'\-]+){1,2}(?: (?:Jr|Sr|II|III|IV)\.?)?$")
 
 
+#: `certification_start` / `certification_expiration` are lifted verbatim off
+#: eighteen different certifying authorities' pages and PDFs, and until
+#: 2026-09-02 they reached the customer in whatever shape the source printed.
+#: Measured on the live table: 623 populated values in SIX formats -
+#: `####-##-##` (346), `##/##/####` (144), `#/##/####` (86), `#/#/####` (33),
+#: `##/#/####` (13), `#/##/##` (1). Nothing sorted and nothing parsed. Worse,
+#: the ISO plurality was entirely `publishable = N` (Navajo's NBOA list, which
+#: never ships), so **every date that actually reached a customer was in an
+#: un-normalised US format** - `04/29/2027` and `4/16/2027` two rows apart.
+#:
+#: US ORDER IS ASSUMED AND THAT ASSUMPTION IS SAFE HERE, because every
+#: contributing authority is a tribal government or TERO office inside the
+#: United States and prints US-order dates. Anything this cannot parse is left
+#: EXACTLY as the source printed it rather than guessed at - an unparseable
+#: date is a fact about the source, and inventing a reading of it would be the
+#: worse error.
+#: PRECISION IS PRESERVED, NOT INVENTED. 32 Cherokee Nation rows print a month
+#: and no day (`09/2020`). Those become `2020-09` - ISO 8601 month precision,
+#: which sorts and parses - and NOT `2020-09-01`, because a day the source did
+#: not print is a day this project does not know.
+_ISO_RE = re.compile(r"^(\d{4})-(\d{1,2})-(\d{1,2})$")
+_ISO_M_RE = re.compile(r"^(\d{4})-(\d{1,2})$")
+_US_RE = re.compile(r"^(\d{1,2})/(\d{1,2})/(\d{2}|\d{4})$")
+_US_M_RE = re.compile(r"^(\d{1,2})/(\d{4})$")
+
+
+def iso_date(v):
+    """Normalise a printed certification date to ISO. Unparseable -> verbatim."""
+    s = str(v or "").strip()
+    if not s:
+        return v
+    m = _US_M_RE.match(s) or _ISO_M_RE.match(s)
+    if m:
+        a, b = (int(x) for x in m.groups())
+        mo, y = (a, b) if _US_M_RE.match(s) else (b, a)
+        if not (1 <= mo <= 12 and 1900 <= y <= 2100):
+            return v
+        return f"{y:04d}-{mo:02d}"
+    m = _ISO_RE.match(s)
+    if m:
+        y, mo, d = (int(x) for x in m.groups())
+    else:
+        m = _US_RE.match(s)
+        if not m:
+            return v
+        mo, d, y = (int(x) for x in m.groups())
+        if y < 100:
+            # Two-digit years on a CERTIFICATION EXPIRY. 69 is the standard
+            # POSIX pivot and the one value in the table reading `#/##/##` is
+            # well inside the recent window either way.
+            y += 2000 if y < 69 else 1900
+    if not (1 <= mo <= 12 and 1 <= d <= 31 and 1900 <= y <= 2100):
+        return v
+    return f"{y:04d}-{mo:02d}-{d:02d}"
+
+
 def norm_name(s: str) -> str:
     s = html.unescape(s or "").strip()
     s = re.sub(r"[‘’“”]", "'", s)
@@ -1894,8 +1950,12 @@ def phase_promote(argv):
                     "verification_basis": r.get("verification_basis"),
                     "certification_number": r.get("certification_number"),
                     "certification_tier": r.get("certification_tier"),
-                    "certification_start": r.get("certification_start"),
-                    "certification_expiration": r.get("certification_expiration"),
+                    # ISO at the single write point, so no source parser has to
+                    # remember. See `iso_date` for why US order is assumed and
+                    # why an unparseable value is left verbatim.
+                    "certification_start": iso_date(r.get("certification_start")),
+                    "certification_expiration": iso_date(
+                        r.get("certification_expiration")),
                     "business_license_number": r.get("business_license_number"),
                     "federal_contract_number": r.get("federal_contract_number"),
                     "service_category_raw": r.get("service_category_raw"),

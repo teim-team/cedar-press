@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-02T03:33:32+00:00",
+ "generated": "2026-09-02T05:04:36+00:00",
  "script": "code/630_refresh_cadence.py",
  "n_sources": 55,
  "n_datasets": 13,
@@ -37,8 +37,8 @@
    "refresh_cost": "20 objects x ~1.2-2.0 GB; hours",
    "refresh_command": "probe the stamp PER YEAR on the 11th, then re-filter; do NOT run 41 or 88 (they rebuild from stale upstream)",
    "breaks_on_refresh": "`source_vintage` on all 701,955 rows (code/335); the notes vintage (code/87); federal_funding_tribe_year_panel.csv",
-   "cedar_edge_age_days": 63,
-   "source_knowledge_age_days": 6,
+   "cedar_edge_age_days": 64,
+   "source_knowledge_age_days": 7,
    "gap_days_behind_source": 0
   },
   {
@@ -67,7 +67,7 @@
    "refresh_command": "none",
    "breaks_on_refresh": "nothing; re-pulling would re-open the vintage-mixing defect 335 closed",
    "cedar_edge_age_days": null,
-   "source_knowledge_age_days": 6,
+   "source_knowledge_age_days": 7,
    "gap_days_behind_source": 0
   },
   {
@@ -95,8 +95,8 @@
    "refresh_cost": "zero",
    "refresh_command": "none \u2014 stamp it once and never touch it",
    "breaks_on_refresh": "nothing",
-   "cedar_edge_age_days": 6911,
-   "source_knowledge_age_days": 27,
+   "cedar_edge_age_days": 6912,
+   "source_knowledge_age_days": 28,
    "gap_days_behind_source": 0
   },
   {
@@ -153,8 +153,8 @@
    "refresh_cost": "20 objects; hours. **api.usaspending.gov and files.usaspending.gov share one rate-limit budget**",
    "refresh_command": "probe the stamp PER YEAR on the 11th, then re-filter",
    "breaks_on_refresh": "207 (extent_competed, in place), 269 (contractor_ranking), 168 (adjudication hubs) \u2014 enrichers run LAST",
-   "cedar_edge_age_days": 60,
-   "source_knowledge_age_days": 6,
+   "cedar_edge_age_days": 61,
+   "source_knowledge_age_days": 7,
    "gap_days_behind_source": 0
   },
   {
@@ -182,8 +182,8 @@
    "refresh_cost": "**10 requests/day** pending the org role request; extract mode only (1,000,000 records/request)",
    "refresh_command": "code/141_pull_sam_contract_awards.py \u2014 never casually",
    "breaks_on_refresh": "prime_contracts_archive_backfill.csv and its reconciliation",
-   "cedar_edge_age_days": 6819,
-   "source_knowledge_age_days": 6,
+   "cedar_edge_age_days": 6820,
+   "source_knowledge_age_days": 7,
    "gap_days_behind_source": 0
   },
   {
@@ -212,7 +212,7 @@
    "refresh_command": "code/562/563 probe it; no production pull",
    "breaks_on_refresh": "the pre-2000 Native-flag probe only",
    "cedar_edge_age_days": null,
-   "source_knowledge_age_days": 6,
+   "source_knowledge_age_days": 7,
    "gap_days_behind_source": 0
   },
   {
@@ -241,7 +241,7 @@
    "refresh_command": "none \u2014 a PUBLISHED benchmark, never merged as a Cedar measurement",
    "breaks_on_refresh": "nothing",
    "cedar_edge_age_days": null,
-   "source_knowledge_age_days": 0,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 0
   },
   {
@@ -269,7 +269,7 @@
    "refresh_cost": "~2,733 paginated calls",
    "refresh_command": "code/121_pull_subawards_api.py pull --sequential (ALREADY RUNNING \u2014 do not start a second)",
    "breaks_on_refresh": "prime_sub_network.csv, subaward_entity_rollup.csv; the FEMA key 1843-GR35056 is NOT unique (11 villages)",
-   "cedar_edge_age_days": 29,
+   "cedar_edge_age_days": 30,
    "source_knowledge_age_days": null,
    "gap_days_behind_source": 0
   },
@@ -298,8 +298,8 @@
    "refresh_cost": "15 req/min anonymous, 120 keyed \u2014 cheap",
    "refresh_command": "key on `dt_posted >= last_pull`, NEVER on filing_year + filing_period, and re-read the trailing 4 quarters",
    "breaks_on_refresh": "78_content_analysis.py rebuilds FIVE lobbying tables AND fr_content_classification.csv \u2014 run it when no other lobbying build is live",
-   "cedar_edge_age_days": 0,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": 1,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 0
   },
   {
@@ -312,10 +312,10 @@
    "cadence_basis": "docs/datasets/lobbying_sources.md \u00a74",
    "cedar_last_pulled": "2026-09-01",
    "cedar_last_pulled_basis": "max(retrieved_date) in data/clean/regulations_gov_comments.csv",
-   "cedar_holds_through": "2026-07-28",
+   "cedar_holds_through": "2026-09-01",
    "cedar_holds_measured_from": "data/clean/regulations_gov_comments.csv",
    "cedar_holds_period_col": "posted_date",
-   "cedar_holds_rows_in_scope": 298,
+   "cedar_holds_rows_in_scope": 4192,
    "cedar_holds_partition": null,
    "cedar_holds_note": null,
    "source_has_through": null,
@@ -327,8 +327,8 @@
    "refresh_cost": "1,712 query names at ~12 s/query = ~8 wall-clock hours; checkpoints per entity",
    "refresh_command": "code/221 \u2014 sweep DOCKET-first, never entity-first",
    "breaks_on_refresh": "regulations_gov_entity_coverage.csv (one row per entity, measured zeros included)",
-   "cedar_edge_age_days": 35,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": 1,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 0
   },
   {
@@ -356,8 +356,8 @@
    "refresh_cost": "free \u2014 same requests as the FR pull",
    "refresh_command": "ride code/342_pull_federal_register_incremental.py",
    "breaks_on_refresh": "consultation_agency_coverage.csv, fr_consultation_year.csv",
-   "cedar_edge_age_days": 14,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": 15,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 14
   },
   {
@@ -385,8 +385,8 @@
    "refresh_cost": "free \u2014 same request stream",
    "refresh_command": "code/130 after the FR pull",
    "breaks_on_refresh": "section_106_project_parties.csv",
-   "cedar_edge_age_days": 0,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": 1,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 0
   },
   {
@@ -414,8 +414,8 @@
    "refresh_cost": "year indices only; minutes",
    "refresh_command": "code/163 --year 2026",
    "breaks_on_refresh": "168_link_adjudication_hubs.py runs in place and 133 reverts it \u2014 this collision has bitten FERC four times",
-   "cedar_edge_age_days": 35,
-   "source_knowledge_age_days": 20,
+   "cedar_edge_age_days": 36,
+   "source_knowledge_age_days": 21,
    "gap_days_behind_source": 0
   },
   {
@@ -443,8 +443,8 @@
    "refresh_cost": "free \u2014 same request stream",
    "refresh_command": "ride the FR pull, then code/98",
    "breaks_on_refresh": "fr_ex_parte_parties.csv, fr_ex_parte_party_entity_links.csv",
-   "cedar_edge_age_days": 1,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": 2,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 1
   },
   {
@@ -472,8 +472,8 @@
    "refresh_cost": "~300 docket sheets; hours",
    "refresh_command": "code/133 build \u2014 then RE-RUN 168, which 133 reverts",
    "breaks_on_refresh": "**168's in-place links. 133 has destroyed them four times in one day. Enricher runs LAST.**",
-   "cedar_edge_age_days": 6,
-   "source_knowledge_age_days": 6,
+   "cedar_edge_age_days": 7,
+   "source_knowledge_age_days": 7,
    "gap_days_behind_source": 0
   },
   {
@@ -484,12 +484,12 @@
    "publish_cadence": "agency-dependent, typically annual or quarterly postings",
    "publish_lag": "months",
    "cadence_basis": "docs/datasets/lobbying_sources.md row 14",
-   "cedar_last_pulled": "2026-08-12",
+   "cedar_last_pulled": "2026-09-01",
    "cedar_last_pulled_basis": "max(fetched_date) in data/clean/foia_request_index.csv",
-   "cedar_holds_through": "2026-08-12",
+   "cedar_holds_through": "2026-09-01",
    "cedar_holds_measured_from": "data/clean/foia_request_index.csv",
    "cedar_holds_period_col": "fetched_date",
-   "cedar_holds_rows_in_scope": 9481,
+   "cedar_holds_rows_in_scope": 20102,
    "cedar_holds_partition": null,
    "cedar_holds_note": null,
    "source_has_through": null,
@@ -501,8 +501,8 @@
    "refresh_cost": "one parser per agency",
    "refresh_command": "code/136 \u2014 extend to the six named agencies first",
    "breaks_on_refresh": "correspondence_foia_source_coverage.csv",
-   "cedar_edge_age_days": 20,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": 1,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 0
   },
   {
@@ -531,7 +531,7 @@
    "refresh_command": "code/99_build_earmarks_and_schedc.py --steps irs-xml",
    "breaks_on_refresh": "nonprofit_schedule_c_coverage.csv must be rebuilt in the same pass or it reports a stale backlog",
    "cedar_edge_age_days": 0,
-   "source_knowledge_age_days": 0,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 0,
    "backlog": {
     "kind": "fetch_backlog",
@@ -568,8 +568,8 @@
    "refresh_cost": "small",
    "refresh_command": "code/98",
    "breaks_on_refresh": "agency_attention_vs_advocacy*.csv (written by 78)",
-   "cedar_edge_age_days": 19,
-   "source_knowledge_age_days": 20,
+   "cedar_edge_age_days": 20,
+   "source_knowledge_age_days": 21,
    "gap_days_behind_source": 0
   },
   {
@@ -597,8 +597,8 @@
    "refresh_cost": "minutes, ~1 API page/day of gap x 14 nets",
    "refresh_command": "py -3 code/342_pull_federal_register_incremental.py \u2014 **never 10 (re-shards 1994..today) and never 11 (full rebuild; reverts 22's two in-place columns)**",
    "breaks_on_refresh": "fr_content_classification.csv (78, which also rebuilds five LOBBYING tables), 130, 76, 98, 133, 136 \u2014 each a separate owner's build",
-   "cedar_edge_age_days": 0,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": 1,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 0
   },
   {
@@ -626,8 +626,8 @@
    "refresh_cost": "719 documents in the last pass; ~1 hour",
    "refresh_command": "the NEPA register step (see nepa_source_coverage.csv)",
    "breaks_on_refresh": "nepa_project_documents.csv, nepa_administrative_record_parties.csv",
-   "cedar_edge_age_days": 20,
-   "source_knowledge_age_days": 20,
+   "cedar_edge_age_days": 21,
+   "source_knowledge_age_days": 21,
    "gap_days_behind_source": 0
   },
   {
@@ -655,8 +655,8 @@
    "refresh_cost": "free \u2014 rides the FR request stream",
    "refresh_command": "py -3 code/77_build_nagpra_dataset.py fetch && ... build",
    "breaks_on_refresh": "nagpra_notice_entity_bridge.csv (51,521 bridge rows). **mni_total_stated MUST NEVER BE SUMMED.** The 2024 surge is the 43 CFR 10 regime change, bounded by the 2029-01-10 deadline \u2014 never publish it as behaviour.",
-   "cedar_edge_age_days": 1,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": 2,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 1
   },
   {
@@ -684,8 +684,8 @@
    "refresh_cost": "unknown until a key exists",
    "refresh_command": "code/14_build_bills_votes.py then code/73 --rollcalls --sweep --titles --actions --outcomes",
    "breaks_on_refresh": "native_bill_outcomes.csv, member_positions.csv (136,119 rows), the two entity bridges",
-   "cedar_edge_age_days": 138,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": 139,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 0
   },
   {
@@ -713,7 +713,7 @@
    "refresh_cost": "two chamber indices per Congress; minutes",
    "refresh_command": "code/73_bills_votes_completion.py --rollcalls",
    "breaks_on_refresh": "bill_votes_entity_bridge.csv, bill_votes_official_verification.csv",
-   "cedar_edge_age_days": 483,
+   "cedar_edge_age_days": 484,
    "source_knowledge_age_days": null,
    "gap_days_behind_source": 0
   },
@@ -742,7 +742,7 @@
    "refresh_cost": "one parser per office",
    "refresh_command": "code/136 (correspondence leg)",
    "breaks_on_refresh": "nothing \u2014 congressional_correspondence_log.csv is empty",
-   "cedar_edge_age_days": 217,
+   "cedar_edge_age_days": 218,
    "source_knowledge_age_days": null,
    "gap_days_behind_source": 0,
    "backlog": {
@@ -777,7 +777,7 @@
    "refresh_cost": "manual + press; a weekly sweep, a quarterly deep pass",
    "refresh_command": "code/54 / 153 additions merge; backfill REVERSE-CHRONOLOGICALLY",
    "breaks_on_refresh": "deals_party_attribution.csv and the autoresolver \u2014 an upsert must NEVER overwrite a human ruling",
-   "cedar_edge_age_days": 12,
+   "cedar_edge_age_days": 13,
    "source_knowledge_age_days": null,
    "gap_days_behind_source": 0
   },
@@ -806,8 +806,8 @@
    "refresh_cost": "full-text search is free; hours for a full sweep",
    "refresh_command": "the SEC leg of the deals additions chain",
    "breaks_on_refresh": "deals_classified.csv merge order",
-   "cedar_edge_age_days": 3390,
-   "source_knowledge_age_days": 6,
+   "cedar_edge_age_days": 3391,
+   "source_knowledge_age_days": 7,
    "gap_days_behind_source": 0
   },
   {
@@ -835,8 +835,8 @@
    "refresh_cost": "~80 documents; ~1 hour",
    "refresh_command": "code/531 / 532 (shard E)",
    "breaks_on_refresh": "the ANC subsidiary edge set (5,167 declared ownership edges)",
-   "cedar_edge_age_days": 204,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": 205,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 0
   },
   {
@@ -864,8 +864,8 @@
    "refresh_cost": "small",
    "refresh_command": "the tribal-debt additions leg",
    "breaks_on_refresh": "seminole_bond_disclosures.csv",
-   "cedar_edge_age_days": 2044,
-   "source_knowledge_age_days": 6,
+   "cedar_edge_age_days": 2045,
+   "source_knowledge_age_days": 7,
    "gap_days_behind_source": 0
   },
   {
@@ -893,8 +893,8 @@
    "refresh_cost": "one report",
    "refresh_command": "code/586_promote_nigc_gaming.py after the pull",
    "breaks_on_refresh": "gaming_revenue_bounds.csv \u2014 its vintage is a BARE YEAR (2025), never a fabricated 2025-12-31",
-   "cedar_edge_age_days": 244,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": 245,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 0
   },
   {
@@ -922,8 +922,8 @@
    "refresh_cost": "one index read + the new documents",
    "refresh_command": "code/344_pull_nigc_document_surface.py then code/586",
    "breaks_on_refresh": "the five nigc_* clean tables and their contracts (registered today; grain still UNSTATED on two)",
-   "cedar_edge_age_days": 0,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": 1,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 0,
    "backlog": {
     "kind": "staged_vs_clean",
@@ -993,8 +993,8 @@
    "refresh_cost": "two bounded requests",
    "refresh_command": "py -3 code/343_refresh_ct_gaming_monthly.py",
    "breaks_on_refresh": "nothing \u2014 `payout` and `hold` stay withheld on the recorded unit break (91.45 in 1993-01 vs 0.912 in 2025-12)",
-   "cedar_edge_age_days": 244,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": 245,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 0
   },
   {
@@ -1022,8 +1022,8 @@
    "refresh_cost": "small \u2014 a handful of PDFs",
    "refresh_command": "code/103_build_california_gaming.py. **DO NOT RE-FETCH the short quarters \u2014 see the backlog note.**",
    "breaks_on_refresh": "ca_gaming_facilities_official.csv",
-   "cedar_edge_age_days": 63,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": 64,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 0,
    "backlog": {
     "kind": "captured_not_parsed",
@@ -1057,8 +1057,8 @@
    "refresh_cost": "small",
    "refresh_command": "code/216 then code/92 \u2014 and NM was NEVER a fetch problem",
    "breaks_on_refresh": "gaming_capacity_official.csv row conservation",
-   "cedar_edge_age_days": 63,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": 64,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 0
   },
   {
@@ -1086,9 +1086,9 @@
    "refresh_cost": "Wayback CDX route; ~1 hour",
    "refresh_command": "code/217_pull_az_adg_report_archive.py",
    "breaks_on_refresh": "nothing",
-   "cedar_edge_age_days": 62,
-   "source_knowledge_age_days": 0,
-   "gap_days_behind_source": 62
+   "cedar_edge_age_days": 63,
+   "source_knowledge_age_days": 1,
+   "gap_days_behind_source": 63
   },
   {
    "dataset": "gaming",
@@ -1115,8 +1115,8 @@
    "refresh_cost": "one page per month",
    "refresh_command": "code/164 (digital gaming leg)",
    "breaks_on_refresh": "digital_gaming_relationships.csv entity links (168)",
-   "cedar_edge_age_days": 32,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": 33,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 0
   },
   {
@@ -1144,8 +1144,8 @@
    "refresh_cost": "one host per state, one poller each",
    "refresh_command": "code/107 / 217 per state",
    "breaks_on_refresh": "**fl_gaming_payments.period_end runs to 2031-06-30 \u2014 those are forward-dated compact SCHEDULE rows, not observations. Never read them as freshness.**",
-   "cedar_edge_age_days": 428,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": 429,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 0
   },
   {
@@ -1173,8 +1173,8 @@
    "refresh_cost": "1,151 documents held; incremental is small",
    "refresh_command": "the ordinance leg + OCR merge",
    "breaks_on_refresh": "the OCR merge (GAMING_ORDINANCE_OCR_MERGE_LOG.md)",
-   "cedar_edge_age_days": 91,
-   "source_knowledge_age_days": 20,
+   "cedar_edge_age_days": 92,
+   "source_knowledge_age_days": 21,
    "gap_days_behind_source": 0
   },
   {
@@ -1203,7 +1203,7 @@
    "refresh_command": "**NOT A PULL.** code/158_merge_staged_labor_employment.py \u2014 and it is BLOCKED ON TWO OWNER RULINGS (\u00a74 of LABOR_SOURCES_FOR_GAMING_2026-08-26.md), not on a fetch",
    "breaks_on_refresh": "gaming_employment_observations.csv. **A Form 5500 row keys to an EIN, never to a facility** \u2014 merging it as a property observation would be a grain error.",
    "cedar_edge_age_days": null,
-   "source_knowledge_age_days": 6,
+   "source_knowledge_age_days": 7,
    "gap_days_behind_source": 0,
    "backlog": {
     "kind": "staged_never_promoted",
@@ -1252,8 +1252,8 @@
    "refresh_cost": "api.data.gov key, 1,000/hr",
    "refresh_command": "code/147_build_fac_single_audits.py",
    "breaks_on_refresh": "fac_audit_gaming_disclosures.csv",
-   "cedar_edge_age_days": 1705,
-   "source_knowledge_age_days": 20,
+   "cedar_edge_age_days": 1706,
+   "source_knowledge_age_days": 21,
    "gap_days_behind_source": 0
   },
   {
@@ -1281,8 +1281,8 @@
    "refresh_cost": "10 annual index files, ~77 MB each",
    "refresh_command": "the 990 leg \u2014 SEMIANNUAL (Feb / Aug). A quarterly cadence on an 18-month lag manufactures churn.",
    "breaks_on_refresh": "np_schedule_i_filers.csv, np_financials.csv, np_org_scale.csv",
-   "cedar_edge_age_days": 244,
-   "source_knowledge_age_days": 6,
+   "cedar_edge_age_days": 245,
+   "source_knowledge_age_days": 7,
    "gap_days_behind_source": 0
   },
   {
@@ -1310,8 +1310,8 @@
    "refresh_cost": "one monthly extract",
    "refresh_command": "the BMF leg of code/112",
    "breaks_on_refresh": "np_ein_entity_hub.csv, np_ein_uei_bridge.csv",
-   "cedar_edge_age_days": 154,
-   "source_knowledge_age_days": 20,
+   "cedar_edge_age_days": 155,
+   "source_knowledge_age_days": 21,
    "gap_days_behind_source": 0
   },
   {
@@ -1339,8 +1339,8 @@
    "refresh_cost": "api.data.gov key, 1,000/hr",
    "refresh_command": "code/147_build_fac_single_audits.py \u2014 **with a TWO-YEAR trailing window, every time. A deadline the median hits and a third of filers miss is not a cadence.**",
    "breaks_on_refresh": "fac_audit_gaming_disclosures.csv, fac_audit_sefa_gaming_programs.csv",
-   "cedar_edge_age_days": 20,
-   "source_knowledge_age_days": 20,
+   "cedar_edge_age_days": 21,
+   "source_knowledge_age_days": 21,
    "gap_days_behind_source": 0
   },
   {
@@ -1368,8 +1368,8 @@
    "refresh_cost": "rides the 990 pull",
    "refresh_command": "code/113 (grantmaker leg)",
    "breaks_on_refresh": "grantmaker_funding_coverage.csv, grantmaker_funding_overlap.csv",
-   "cedar_edge_age_days": 275,
-   "source_knowledge_age_days": 6,
+   "cedar_edge_age_days": 276,
+   "source_knowledge_age_days": 7,
    "gap_days_behind_source": 31
   },
   {
@@ -1397,8 +1397,8 @@
    "refresh_cost": "small \u2014 one filtered portal export",
    "refresh_command": "code/83_build_resource_ledger.py (ONRR leg)",
    "breaks_on_refresh": "**87% of these dollars name no tribe, and that is the LAW (the collector may not publish below a national aggregate), not a backlog.**",
-   "cedar_edge_age_days": 32,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": 33,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 0
   },
   {
@@ -1426,8 +1426,8 @@
    "refresh_cost": "small",
    "refresh_command": "code/83 (ONRR FY leg)",
    "breaks_on_refresh": "the reconciliation check against the monthly series",
-   "cedar_edge_age_days": 336,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": 337,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 0
   },
   {
@@ -1455,8 +1455,8 @@
    "refresh_cost": "one spreadsheet",
    "refresh_command": "code/83 (Osage leg)",
    "breaks_on_refresh": "**the 30 pre-1907 rows carry no commodity \u2014 the Osage Mineral Estate did not exist yet. Whether they belong in this table is an OPEN SCOPING QUESTION with the owner.**",
-   "cedar_edge_age_days": 63,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": 64,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 0
   },
   {
@@ -1484,8 +1484,8 @@
    "refresh_cost": "one search per month",
    "refresh_command": "code/83 (ND leg)",
    "breaks_on_refresh": "**period_type is `payment_date_only` on all 492 rows \u2014 there is no period_end and none should be invented.**",
-   "cedar_edge_age_days": 11,
-   "source_knowledge_age_days": 25,
+   "cedar_edge_age_days": 12,
+   "source_knowledge_age_days": 26,
    "gap_days_behind_source": 0
   },
   {
@@ -1513,8 +1513,8 @@
    "refresh_cost": "small",
    "refresh_command": "code/83 (OSMRE leg)",
    "breaks_on_refresh": "**FY2010-FY2012 are scanned images, retrieved and held rather than guessed \u2014 do not re-fetch them.**",
-   "cedar_edge_age_days": -29,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": -28,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 0
   },
   {
@@ -1542,8 +1542,8 @@
    "refresh_cost": "zero",
    "refresh_command": "none",
    "breaks_on_refresh": "nothing",
-   "cedar_edge_age_days": 9375,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": 9376,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 0
   },
   {
@@ -1571,8 +1571,8 @@
    "refresh_cost": "four hosts, one poller each",
    "refresh_command": "code/83 (state legs)",
    "breaks_on_refresh": "**four cadences in one registry row. If any of these ever needs its own refresh date, split it out rather than averaging them.**",
-   "cedar_edge_age_days": 154,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": 155,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 0
   },
   {
@@ -1600,8 +1600,8 @@
    "refresh_cost": "~15 tribes per agent-day including the terms read; the remaining 297 federally recognised tribes are ~20 agent-days",
    "refresh_command": "code/570 / 588 (shards L and M) \u2014 **read robots.txt and the terms page FIRST; 6 publishers have stated restrictive terms and are excluded by every route**",
    "breaks_on_refresh": "**NOTHING HERE PUBLISHES.** Every row carries consent_status = UNRESOLVED and publishable = N.",
-   "cedar_edge_age_days": 0,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": 1,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 0,
    "backlog": {
     "kind": "entity_coverage",
@@ -1635,8 +1635,8 @@
    "refresh_cost": "one document",
    "refresh_command": "**TRIGGER THE SPINE REBUILD FROM THE NOTICE, NOT FROM A TIMER.** The FR daily pull is what sees it.",
    "breaks_on_refresh": "**everything.** And `01_build_entity_spine.py` / `09_import_rulings.py` are DESTRUCTIVE: a direct invocation drops 868 of 1,555 entities and 32 of 44 columns, and 09 drops 1,345 ledger rows, 18 of them tier A owner adjudications. Neither takes a .bak. `data/spine/cedar_entity_spine.csv` IS NOT IN GIT.",
-   "cedar_edge_age_days": 214,
-   "source_knowledge_age_days": 0,
+   "cedar_edge_age_days": 215,
+   "source_knowledge_age_days": 1,
    "gap_days_behind_source": 0
   },
   {
@@ -1664,8 +1664,8 @@
    "refresh_cost": "a handful of pages",
    "refresh_command": "code/05 / 591 / 592 \u2014 never 01 or 09",
    "breaks_on_refresh": "the 210 NHOs, 185 BIE schools, 173 ANC village corporations and 64 Native CDFIs in the hub",
-   "cedar_edge_age_days": 27,
-   "source_knowledge_age_days": 26,
+   "cedar_edge_age_days": 28,
+   "source_knowledge_age_days": 27,
    "gap_days_behind_source": 0
   },
   {
@@ -1676,7 +1676,7 @@
    "publish_cadence": "event-driven \u2014 whenever the owner rules",
    "publish_lag": "0",
    "cadence_basis": "the one class of row that is NOT re-derivable",
-   "cedar_last_pulled": "2026-09-01",
+   "cedar_last_pulled": "2026-09-02",
    "cedar_last_pulled_basis": "recorded in a build log",
    "cedar_holds_through": null,
    "cedar_holds_measured_from": "data/clean/cedar_correction_register.csv",
@@ -1686,7 +1686,7 @@
    "cedar_holds_note": null,
    "source_has_through": null,
    "source_basis": "not a source in the fetch sense",
-   "source_measured": "2026-09-01",
+   "source_measured": "2026-09-02",
    "state": "CLOSED_BY_DESIGN",
    "refresh_due": false,
    "refresh_due_why": "declared in the registry: not a source in the fetch sense",

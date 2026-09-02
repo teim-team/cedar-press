@@ -1,6 +1,6 @@
 # Shard coverage - the master list, and who has touched it
 
-*Generated 2026-09-01 by `code/528_shard_consolidate.py`. Merged map: `data/staging/cedar_web_map.csv`. This file does NOT write to the spine - promoting a harvested website to `entity_website` is an assertion and goes through 510.*
+*Generated 2026-09-02 by `code/528_shard_consolidate.py`. Merged map: `data/staging/cedar_web_map.csv`. This file does NOT write to the spine - promoting a harvested website to `entity_website` is an assertion and goes through 510.*
 
 ## Shard status
 

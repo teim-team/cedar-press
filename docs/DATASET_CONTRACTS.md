@@ -1,15 +1,16 @@
 # Dataset contracts - generated, do not hand-edit
 
-*Generated 2026-09-01 by `code/512_build_dataset_contracts.py` (mission Phase 1). Regenerate rather than edit; `verify` exits 1 when the world breaks a contract, and 62 gates on it.*
+*Generated 2026-09-02 by `code/512_build_dataset_contracts.py` (mission Phase 1). Regenerate rather than edit; `verify` exits 1 when the world breaks a contract, and 62 gates on it.*
 
-**13 collections, 264 tables claimed, 6 orphaned shippable tables, 7 violations.**
+**13 collections, 263 tables claimed, 8 orphaned shippable tables, 13 violations.**
 
-**Grain: 213 of 223 shippable tables declare and VALIDATE a row grain, a primary key and a join cardinality; 10 do not.** A declared grain the data contradicts is a release-blocking violation, listed below. An unstated grain is ratcheted by `62_no_regression_check.contract_grain_unstated_shippable`: the count may only fall, and a new shippable table that lands without one fails the gate that day.
+**Grain: 213 of 224 shippable tables declare and VALIDATE a row grain, a primary key and a join cardinality; 11 do not.** A declared grain the data contradicts is a release-blocking violation, listed below. An unstated grain is ratcheted by `62_no_regression_check.contract_grain_unstated_shippable`: the count may only fall, and a new shippable table that lands without one fails the gate that day.
 
-<details><summary>Shippable tables with an UNSTATED grain (10) - a buyer cannot join these safely</summary>
+<details><summary>Shippable tables with an UNSTATED grain (11) - a buyer cannot join these safely</summary>
 
-- `congressional_correspondence_log.csv` — the file has ZERO rows. Every candidate key is vacuously unique, so the data cannot evidence a grain. QUESTION: is this table meant to ship empty, and what is one row when it fills?
 - `faads_transactions_all_agencies.csv`
+- `native_owned_businesses.bak_2026-09-02_010526.csv`
+- `native_owned_businesses.bak_2026-09-02_010557.csv`
 - `native_owned_businesses.csv`
 - `native_passthrough.csv`
 - `nonprofit_schedule_c_coverage.csv`
@@ -23,7 +24,13 @@
 
 ## VIOLATIONS - the contract the world currently breaks
 
+- federal_funding_transactions.csv: declared join_cardinality names column(s) not in the header: ['tribe_id']
+- federal_funding_tribe_year_panel.csv: declared primary_key names column(s) not in the header: ['tribe_id']
+- federal_funding_tribe_year_panel.csv: declared join_cardinality names column(s) not in the header: ['tribe_id']
+- federal_funding_tribe_year_panel.csv: declared primary_key ['fiscal_year'] is NOT unique - 5,480 duplicate row(s) of 5,496, e.g. ('2008',). A buyer joining on it gets rows we did not promise them.
 - entity_aliases.csv: declared primary_key ['alias_id'] is NOT unique - 1 duplicate row(s) of 6,298, e.g. ('',). A buyer joining on it gets rows we did not promise them.
+- ORPHAN shippable table: native_owned_businesses.bak_2026-09-02_010526.csv - registered in the codebook but claimed by NO collection
+- ORPHAN shippable table: native_owned_businesses.bak_2026-09-02_010557.csv - registered in the codebook but claimed by NO collection
 - ORPHAN shippable table: native_owned_businesses.csv - registered in the codebook but claimed by NO collection
 - ORPHAN shippable table: nonprofit_schedule_c_coverage.csv - registered in the codebook but claimed by NO collection
 - ORPHAN shippable table: nonprofit_schedule_c_lobbying.csv - registered in the codebook but claimed by NO collection
@@ -33,11 +40,10 @@
 
 ## Federal Funding to Indian Country  (`funding`, shelf: standard)
 
-Rebuild: `py -3 code/build.py run funding --execute` — 17 tables.
+Rebuild: `py -3 code/build.py run funding --execute` — 16 tables.
 
 | table | status | keys | rebuilt by | enriched by |
 |---|---|---|---|---|
-| `assistance_tribe_id_crosswalk.csv` | internal-by-decision | — | `152_build_assistance_id_crosswalk.py` | `503_identity.py` |
 | `bie_uio_dollars_by_entity.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
 | `bie_uio_identifier_links.csv` | internal-by-decision | `tribe_id` `cedar_uid` `uei` `ein` | — | — |
 | `faads_attribution_audit_sample.csv` | internal-by-decision | `tribe_id` `cedar_uid` | — | — |
@@ -46,8 +52,8 @@ Rebuild: `py -3 code/build.py run funding --execute` — 17 tables.
 | `faads_transactions.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
 | `faads_transactions_all_agencies.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
 | `federal_funding_rulings_from_dofile.csv` | unregistered | — | — | — |
-| `federal_funding_transactions.csv` | shippable | `tribe_id` `cedar_uid` | `24_funding_merge.py` | `115_pull_assistance_archive.py` `335_harmonize_assistance_seams_in_place.py` `336_correct_scheme_resolution_by_spine_membership.py` `503_identity.py` |
-| `federal_funding_tribe_year_panel.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
+| `federal_funding_transactions.csv` | shippable | `cedar_uid` | `24_funding_merge.py` | `115_pull_assistance_archive.py` `335_harmonize_assistance_seams_in_place.py` `336_correct_scheme_resolution_by_spine_membership.py` `503_identity.py` |
+| `federal_funding_tribe_year_panel.csv` | shippable | `cedar_uid` | — | — |
 | `federal_funding_year_comparison_2026-08-05.csv` | internal-by-decision | — | — | — |
 | `funding_identifier_harvest.csv` | internal-by-decision | `cage_code` | — | — |
 | `funding_identifier_netnew_ueis.csv` | shippable | — | — | — |
@@ -70,12 +76,12 @@ Declared grain — validated against the file on every run:
   - join cardinality: `assistance_transaction_unique_key` → one row(s) per value (measured max 1), `award_id_fain` → many row(s) per value (measured max 317)
   - declared by: workstream FAADS 2026-09-01: the key was restored from the seven full-column DOI seam zips by code/791_faads_transaction_key_and_repoint.py interior and confirmed unique on the FULL 60,661-row file (0 collisions, 0 blanks); re-measured by `py -3 code/791_faads_transaction_key_and_repoint.py measure`
 - `federal_funding_transactions.csv` — one row per federal assistance award TRANSACTION, across the union of the assistance and archive pulls
-  - primary key: `assistance_transaction_unique_key`  (validated unique)
-  - join cardinality: `cedar_uid` → many row(s) per value (measured max 18574), `tribe_id` → many row(s) per value (measured max 12764)
+  - primary key: `assistance_transaction_unique_key`  (**VALIDATION FAILED — see violations**)
+  - join cardinality: `cedar_uid` → many row(s) per value (measured max 18574), `tribe_id` → many row(s) per value
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
 - `federal_funding_tribe_year_panel.csv` — one row per (entity, federal fiscal year). A join on tribe_id alone fans out across years
-  - primary key: `tribe_id` + `fiscal_year`  (validated unique)
-  - join cardinality: `cedar_uid` → many row(s) per value (measured max 32), `tribe_id` → many row(s) per value (measured max 16)
+  - primary key: `tribe_id` + `fiscal_year`  (**VALIDATION FAILED — see violations**)
+  - join cardinality: `cedar_uid` → many row(s) per value (measured max 32), `tribe_id` → many row(s) per value
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
 - `funding_identifier_netnew_ueis.csv` — one row per recipient UEI that the funding pull added and no other Cedar source had
   - primary key: `recipient_uei`  (validated unique)
@@ -200,10 +206,10 @@ Rebuild: `py -3 code/build.py run legislation --execute` — 13 tables.
 
 | table | status | keys | rebuilt by | enriched by |
 |---|---|---|---|---|
-| `bill_votes.csv` | shippable | — | — | — |
+| `bill_votes.csv` | shippable | — | `14_build_bills_votes.py` | `73_bills_votes_completion.py` `890_bill_votes_threshold_and_titles.py` |
 | `bill_votes_entity_bridge.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
 | `bill_votes_official_verification.csv` | shippable | — | — | — |
-| `congressional_correspondence_log.csv` | shippable | `cedar_uid` | — | — |
+| `congressional_correspondence_log.csv` | internal-by-decision | `cedar_uid` | — | — |
 | `congressional_correspondence_systems.csv` | shippable | — | — | — |
 | `member_positions.csv` | shippable | — | — | — |
 | `native_bill_outcomes.csv` | shippable | — | — | — |

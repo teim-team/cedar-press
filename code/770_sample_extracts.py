@@ -47,8 +47,25 @@ WHAT MAKES A SAMPLE HONEST
    arrives looks like the dataset.
 5. **A README that states the grain and the money rule.** The sample is
    useless, and worse than useless, without knowing what one row IS and which
-   columns may be summed - `subaward_amount` summed unfiltered overstates by
-   46.5%, and `owner_obligations_usd` by 36.98x.
+   columns may be summed - the unfiltered `subaward_amount` total runs **86.9%
+   above** the correct one, and `owner_obligations_usd` 36.98x above.
+
+   ON THAT PERCENTAGE, AND WHY IT NEEDS ITS DENOMINATOR PRINTED. This README
+   said 46.5% and the product descriptor said 86.9%, and a buyer holding both
+   concluded one of us could not do arithmetic. Both are right about different
+   denominators and neither said which. The filter removes $21.21B; that is
+   **46.5% of the unfiltered $45.62B** and **86.9% of the correct $24.41B**.
+   The number a warning wants is the second one - how far above the truth you
+   land if you skip the filter - so 86.9% is what ships, and the denominator
+   is now printed beside it everywhere it appears.
+
+6. **A STABLE COLUMN SET.** Until 2026-09-02 this script deleted any requested
+   column that happened to be blank across all ten sampled rows, so a rebuild
+   on different rows produced a different schema and a buyer diffing two
+   samples watched columns appear and vanish. Requested columns now always
+   ship, and the ones that are blank on every sampled row are NAMED in the
+   README as sparse - which is a fact about coverage the buyer should have,
+   not one to hide by dropping the column.
 """
 from __future__ import annotations
 
@@ -97,18 +114,31 @@ SHOW = {
                "property_status", "open_date", "close_date",
                "gaming_machines", "table_games", "hotel_rooms", "employees",
                "cedar_uid"],
-    "contractors": ["contract_number", "fiscal_year", "awardee_name",
-                    "awardee_uei", "parent_name", "canonical_name",
-                    "total_obligations", "setaside", "funding_agency",
-                    "confidence_tier", "cedar_uid"],
+    # `parent_contract_number` leads because `contract_number` on its own is
+    # NOT a key: 290,525 rows (23.9%) carry six characters or fewer and the
+    # sample was shipping `0098`, `0006`, `0003`, `SBA0001` as if they were
+    # contract identifiers. Those are FPDS modification PIIDs, meaningless
+    # without the IDV they reference - and `parent_contract_number` is
+    # populated on all 1,217,768 rows.
+    "contractors": ["parent_contract_number", "contract_number", "fiscal_year",
+                    "awardee_name", "awardee_uei", "parent_name",
+                    "canonical_name", "total_obligations", "setaside",
+                    "funding_agency", "confidence_tier", "cedar_uid"],
+    # `description` is what the subaward was FOR, populated on 76,813 of
+    # 76,859 rows, and a subcontracting sample without it is a list of amounts.
     "subcontracting": ["subaward_number", "fiscal_year", "subaward_date",
                        "prime_name", "sub_name", "sub_state",
-                       "subaward_amount", "duplicate_status", "direction",
-                       "naics", "prime_native_tribe_id", "sub_native_tribe_id"],
+                       "subaward_amount", "description", "duplicate_status",
+                       "direction", "naics", "prime_native_tribe_id",
+                       "sub_native_tribe_id"],
+    # `cedar_uid` is the KEY and `canonical_name` is a legacy display string.
+    # Showing the second without the first is what let Codex read a correctly
+    # attributed Acoma row as a misattribution: the uid says Pueblo of Acoma,
+    # the label says "haaku community academy", and only the uid is the join.
     "funding": ["award_id_fain", "fiscal_year", "action_date",
                 "recipient_name", "recipient_state_code", "obligated_usd",
                 "cfda", "cfda_title", "awarding_agency_name",
-                "assistance_type_description", "canonical_name"],
+                "assistance_type_description", "cedar_uid", "canonical_name"],
     "natural-resources": ["resource_revenue_event_id", "period_start",
                           "recipient_entity_name", "commodity", "revenue_type",
                           "amount_usd", "aggregation_level", "source_system",
@@ -118,17 +148,36 @@ SHOW = {
                                 "directory_type", "city", "state_province",
                                 "naics", "certification_expiration",
                                 "source_terms_status", "publishable"],
+    # `classification_ruling` carries a ruling for 398 of 12,764 rows (3.1%).
+    # The disposition for the other 96.9% lives in `funnel_stage`, and showing
+    # the empty column instead of the full one is why the sample read as a
+    # keyword search nobody checked: 4,651 rows are `excluded_by_prior_ruling`
+    # and every one of them still says `UNRULED`. `canonical_name_token_match`
+    # ships beside it so the buyer can see WHAT was matched, which is the only
+    # way to spot the collisions - ORDER OF THE EASTERN STAR OF SOUTH DAKOTA
+    # matched Chickahominy Indian Tribe - Eastern Division on the token EASTERN.
     "nonprofits": ["EIN", "org_name", "city", "state", "tier",
-                   "classification_ruling", "confidence_tier",
-                   "bmf_revenue_amt", "tribe_canonical_name", "cedar_uid"],
+                   "funnel_stage", "classification_ruling",
+                   "canonical_name_token_match", "placename_risk_flag",
+                   "confidence_tier", "bmf_revenue_amt",
+                   "tribe_canonical_name", "cedar_uid"],
+    # The descriptor promises "the parties, the instrument and the announced
+    # value where one was published." `Announced_Value_USD` is populated on
+    # 835 of 935 rows and was not shown, so the sample delivered two of three.
+    # `Value_Type` travels with it because the numbers are not comparable
+    # without it - an announced deal value and a project total are not the
+    # same quantity.
     "deals": ["Deal_ID", "Event_Date", "Deal_Title", "Native_Party",
               "Counterparty_or_Funder", "Deal_Category", "Industry",
-              "Event_Type", "Status", "Record_Scope"],
+              "Event_Type", "Status", "Announced_Value_USD", "Value_Type",
+              "Record_Scope"],
+    # A lobbying sample with no dollars invites exactly one conclusion.
+    # `spend_reported_usd` is on all 653 registrants, 406 of them non-zero.
     "lobbying": ["registrant_id", "registrant_name", "registrant_city",
                  "registrant_state", "n_filings_native_clients",
                  "n_native_clients", "n_distinct_native_entities",
-                 "native_entity_classes", "first_filing_year_corpus",
-                 "last_filing_year_corpus"],
+                 "spend_reported_usd", "native_entity_classes",
+                 "first_filing_year_corpus", "last_filing_year_corpus"],
     "legislation": ["vote_id", "congress", "chamber", "date", "bill_id",
                     "question", "result", "yea", "nay", "margin",
                     "vehicle_type", "majority_side"],
@@ -197,6 +246,7 @@ def main() -> int:
 
     OUT.mkdir(parents=True, exist_ok=True)
     built, skipped, unsafe = [], [], []
+    sparse, notincols = [], []
     for did, tbl in sorted(FLAGSHIP.items()):
         src = (ROOT / "data" / "spine" / tbl) if tbl in SPINE else CLEAN / tbl
         if not src.exists():
@@ -207,16 +257,31 @@ def main() -> int:
         if bad:
             unsafe.append(f"{did}: {tbl} carries {bad}")
             continue
-        # curate: keep only the columns a buyer needs, in the stated order,
-        # and never a column that is blank on every sampled row
+        # curate: keep only the columns a buyer needs, in the stated order.
+        #
+        # THE COLUMN SET IS FIXED BY `SHOW`, NOT BY THE ROWS THAT LAND. This
+        # block used to drop any requested column that came back blank across
+        # all ten sampled rows, which made the sample schema a function of the
+        # sample - `native-owned-businesses` asked for `naics` (filled on 34 of
+        # 2,393) and `federal-register` asked for `format` (180 of 11,402), and
+        # neither reached the shipped file though both were requested. A buyer
+        # diffing two rebuilds saw columns appear and disappear with no note.
+        # A requested column that is empty here is a COVERAGE FACT and it is
+        # reported as one, in the README, by name.
         want = [c for c in SHOW.get(did, cols) if c in cols]
+        asked = [c for c in SHOW.get(did, [])]
+        absent = [c for c in asked if c not in cols]
         cols = want or cols
         rs = sample(rows, cols, N)
-        cols = [c for c in cols
-                if any((r.get(c) or "").strip() for r in rs)]
         if not rs:
             skipped.append(f"{did}: no publishable rows")
             continue
+        blank = [c for c in cols
+                 if not any((r.get(c) or "").strip() for r in rs)]
+        if blank:
+            sparse.append((did, blank))
+        if absent:
+            notincols.append((did, absent))
         dst = OUT / f"{did}__sample.csv"
         if not verify:
             with dst.open("w", encoding="utf-8", newline="") as fh:
@@ -251,8 +316,12 @@ def main() -> int:
         L += ["", "## Before totalling any money column", "",
               "See `docs/MONEY_TOTALLING_RULES.md`. Two that bite hardest:", "",
               "- **`subawards.subaward_amount`** summed unfiltered gives "
-              "$45.62B against a correct **$24.41B** — a **46.5%** "
-              "overstatement. Filter to `duplicate_status = 'primary'` and "
+              "**$45.62B** against a correct **$24.41B**. The filter removes "
+              "**$21.21B** — which is **86.9% of the correct total** and "
+              "**46.5% of the unfiltered one**. *Both percentages are of that "
+              "same $21.21B; they differ only in denominator, and an "
+              "overstatement is measured against the truth, so the number to "
+              "quote is 86.9%.* Filter to `duplicate_status = 'primary'` and "
               "`subaward_exceeds_prime_flag != 'yes'`.",
               "- **`contractor_ranking.owner_obligations_usd`** sums to "
               "$6,535.96B against a true $176.74B — a **36.98×** inflation, "
@@ -260,6 +329,25 @@ def main() -> int:
               "row. `firm_*` is the additive family.",
               "- **A subaward is a slice of a prime award.** Never add "
               "`subawards` to `prime_contracts`.", ""]
+        if sparse or notincols:
+            L += ["## Columns that are in the schema and empty in this sample",
+                  "",
+                  "The column set of every sample is fixed by the curated "
+                  "`SHOW` list in `code/770_sample_extracts.py` and does not "
+                  "change with which rows are drawn. Where a requested column "
+                  "came back blank on all ten rows it is still shipped, and "
+                  "named here, because that is a coverage fact about the "
+                  "dataset rather than something to hide by dropping the "
+                  "column.", ""]
+            for did, blank in sparse:
+                L.append(f"- `{did}` — blank on all {N} sampled rows: "
+                         + ", ".join(f"`{c}`" for c in blank))
+            for did, missing in notincols:
+                L.append(f"- `{did}` — **requested but not present in the "
+                         f"source table** (a `SHOW` list that has drifted from "
+                         f"the schema): "
+                         + ", ".join(f"`{c}`" for c in missing))
+            L.append("")
         (OUT / "README.md").write_text("\n".join(L), encoding="utf-8")
 
     print(f"  770 sample extracts   {len(built)} built   "
@@ -270,7 +358,15 @@ def main() -> int:
         print(f"    SKIP    {s}")
     for u in unsafe:
         print(f"    REFUSED {u}")
-    return 1 if (verify and unsafe) else 0
+    for did, blank in sparse:
+        print(f"    SPARSE  {did}: blank on all {N} rows -> {', '.join(blank)}")
+    for did, missing in notincols:
+        print(f"    DRIFT   {did}: SHOW asks for a column the table does not "
+              f"have -> {', '.join(missing)}")
+    # A `SHOW` entry naming a column the source table does not carry is a real
+    # drift and `verify` fails on it. A column that is merely blank on the ten
+    # rows drawn is not - it ships and is reported.
+    return 1 if (verify and (unsafe or notincols)) else 0
 
 
 if __name__ == "__main__":

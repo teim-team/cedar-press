@@ -1,0 +1,20 @@
+{
+  "built": "2026-09-02",
+  "script": "870_build_geo_crosswalks.py",
+  "source": "data/raw/contracts/usaspending_gapfill_2026-08-05/",
+  "rows_read": 1124547,
+  "prime_rows": 1104403,
+  "sub_rows": 20144,
+  "award_keys": 1050968,
+  "award_keys_conflicting": 0,
+  "award_recipient_fips_filled": 1048925,
+  "award_pop_fips_filled": 1045468,
+  "award_both_filled": 1045397,
+  "place_rows": 10637,
+  "place_by_grain": {
+    "city_state": 4216,
+    "zip5": 6421
+  },
+  "place_multi_county": 519,
+  "counties": 1708
+}
