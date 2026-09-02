@@ -19,9 +19,9 @@ These exist so the finished shape can be judged before the datasets are finished
 | `legislation` | `bill_votes.csv` | 10 | 423 | 14 | one row per roll-call vote on a Native-relevant bill |
 | `lobbying` | `lobbying_registrants.csv` | 10 | 653 | 15 | one row per Senate LDA registrant_id - docs/LOBBYING_REGISTRANT_BUILD_LOG.md |
 | `nagpra` | `nagpra_notices.csv` | 10 | 6,792 | 16 | one row per NAGPRA notice, keyed on the Federal Register document number - docs/NAGPRA_BUILD_LOG.md. A correct |
-| `owned` | `native_owned_businesses.csv` | 10 | 2,393 | 16 | UNSTATED |
+| `owned` | `native_owned_businesses.csv` | 10 | 2,916 | 16 | UNSTATED |
 | `natural-resources` | `resource_revenue.csv` | 10 | 11,305 | 9 | one row per resource revenue event as recorded by its source system |
-| `nest` | `nest_enterprises.csv` | 10 | 1,482 | 17 | one row per ENTERPRISE that a Native entity owns or has published a tie to - a sub-hub of its owner, never a s |
+| `nest` | `nest_enterprises.csv` | 10 | 1,610 | 17 | one row per ENTERPRISE that a Native entity owns or has published a tie to - a sub-hub of its owner, never a s |
 | `nonprofits` | `np_orgs.csv` | 10 | 12,764 | 15 | one row per EIN considered for the Native nonprofit universe, ruled in or out |
 | `subcontracting` | `subawards.csv` | 10 | 76,859 | 17 | one row per SUBAWARD FILING AS INGESTED FROM ONE SOURCE - not one row per subaward. FFATA/FSRS requires the PR |
 

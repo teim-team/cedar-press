@@ -138,7 +138,7 @@
     "blockers": [
       "-"
     ],
-    "n_rows": 4974,
+    "n_rows": 5399,
     "n_tables": 2,
     "sample_file": "samples/nest__sample.csv",
     "needs_copy": false
