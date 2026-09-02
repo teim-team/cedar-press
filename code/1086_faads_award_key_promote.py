@@ -99,6 +99,37 @@ def log(m):
     print("[%s] %s" % (now(), m), flush=True)
 
 
+def atomic_replace(tmp, dest, tries=40, wait=15):
+    """os.replace, retried.
+
+    Windows denies a rename onto a file ANOTHER PROCESS HAS OPEN FOR READ.
+    Measured 2026-09-02: this exact call raised WinError 5 with 62, 512, 845,
+    830 and 503 all scanning `data/clean/` concurrently. The write itself had
+    completed and conservation was already proven, so failing here would have
+    thrown away a correct file. Retry, and NEVER delete the .part on give-up -
+    print how to finish it by hand.
+    """
+    import os
+    import time as _t
+    for i in range(tries):
+        try:
+            os.replace(str(tmp), str(dest))
+            if i:
+                log("rename succeeded after %d retries (%ds)" % (i, i * wait))
+            return True
+        except PermissionError as e:
+            if i == tries - 1:
+                log("RENAME STILL DENIED after %dm: %s" % (tries * wait // 60, e))
+                log("The .part is COMPLETE and conservation was proven. Do NOT "
+                    "re-run the whole pass; wait for the reader to finish and "
+                    "run `finish`:  %s -> %s" % (tmp, dest))
+                return False
+            log("rename denied (a peer holds the file open); retry %d/%d in %ds"
+                % (i + 1, tries, wait))
+            _t.sleep(wait)
+    return False
+
+
 def award_key_from_permalink(pl):
     """Last path segment of the permalink, percent-decoded. '' if unusable."""
     pl = (pl or "").strip()
@@ -265,7 +296,7 @@ def cmd_apply(dry=False):
     i_bas = new_header.index(BASIS_COL)
     pad = len(new_header) - len(header)
 
-    tmp = CLEAN.with_suffix(".part")
+    tmp = CLEAN.with_name(CLEAN.name + ".part_" + STEM.split("_")[0])
     n_in = n_out = f_n = f_w = 0
     money_in = money_out = 0
     with open(CLEAN, newline="", encoding="utf-8") as f, \
@@ -324,7 +355,7 @@ def cmd_apply(dry=False):
         tmp.unlink()
         log("DRY RUN - nothing written")
         return 0
-    tmp.replace(CLEAN)
+    atomic_replace(tmp, CLEAN)
     meas.update({"applied": now(), "filled_wide": f_w, "filled_narrow": f_n,
                  "rows_in": n_in, "rows_out": n_out,
                  "money_cents_in": money_in, "money_cents_out": money_out,
@@ -457,8 +488,40 @@ def cmd_selftest():
         shutil.rmtree(str(d), ignore_errors=True)
 
 
+def cmd_finish():
+    """Complete a write whose .part landed but whose rename was denied.
+
+    Only ever renames a .part this script wrote, and only after re-proving row
+    and money conservation against the live file. A .part that does not
+    conserve is REFUSED and left on disk as evidence.
+    """
+    cands = [CLEAN.with_name(CLEAN.name + ".part_" + STEM.split("_")[0]),
+             CLEAN.with_name(CLEAN.stem + ".part")]
+    tmp = next((c for c in cands if c.exists()), None)
+    if tmp is None:
+        print("nothing to finish: no .part on disk")
+        return 0
+    n, money, filled, bad, nobasis = _scan(tmp)
+    ln, lmoney, _, _, _ = _scan(CLEAN)
+    print("part: %s rows $%s  (%s filled, %d bad shape, %d no basis)"
+          % (format(n, ","), format(money / 100.0, ",.2f"),
+             format(filled, ","), bad, nobasis))
+    print("live: %s rows $%s" % (format(ln, ","), format(lmoney / 100.0, ",.2f")))
+    if n != ln or money != lmoney:
+        print("REFUSING: the .part does not conserve against the live file. "
+              "Left on disk as evidence.")
+        return 1
+    if bad or nobasis:
+        print("REFUSING: %d bad-shape / %d basis-less award keys in the .part"
+              % (bad, nobasis))
+        return 1
+    return 0 if atomic_replace(tmp, CLEAN) else 1
+
+
 def main():
     a = sys.argv[1:] or ["measure"]
+    if a[0] == "finish":
+        return cmd_finish()
     if a[0] == "measure":
         cmd_measure()
         return 0

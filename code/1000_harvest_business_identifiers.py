@@ -75,6 +75,24 @@ from collections import Counter
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
 
+def _derive(canonical, path):
+    """Canonical order first, then any column the live file already carries.
+
+    A FIXED literal header is the regenerate defect (ADR-017): a wholesale
+    writer silently deleting an in-place enricher's column. Added 2026-09-02
+    after `845` rule 17 flagged this writer as new since its baseline.
+    """
+    import csv as _csv, os as _os
+    if not _os.path.exists(path):
+        return list(canonical)
+    try:
+        with open(path, encoding="utf-8-sig", errors="replace") as _fh:
+            live = next(_csv.reader(_fh), [])
+    except OSError:
+        return list(canonical)
+    return list(canonical) + [c for c in live if c and c not in canonical]
+
+
 csv.field_size_limit(1 << 30)
 
 CEDAR = Path(__file__).resolve().parent.parent
@@ -489,7 +507,7 @@ def open_crosswalk(built_by):
             kept = [r for r in csv.DictReader(fh)
                     if r.get("built_by") != built_by]
     fh = open(CROSSWALK, "w", encoding="utf-8", newline="")
-    w = csv.DictWriter(fh, fieldnames=CROSSWALK_COLUMNS)
+    w = csv.DictWriter(fh, fieldnames=_derive(CROSSWALK_COLUMNS, CROSSWALK))
     w.writeheader()
     for r in kept:
         w.writerow({c: r.get(c, "") for c in CROSSWALK_COLUMNS})

@@ -304,6 +304,14 @@ NORTHWIND_TARGET = "ANRC-CKINLT-00"
 NORTHWIND_NAME_RE = re.compile(r"^(north wind|lbyd)\b", re.I)
 NORTHWIND_FROM_HUBS = {"TRBF-ESWNDR-00", "TRBF-LUMBEE-00"}
 
+# ENTITY_MATCH_RULES rule 7: a residue that is an INSTITUTION FORM means "a
+# body the nation created" and the disposition is HOLD, never ACCEPT.  A
+# regional corporation's annual report names these as customers and partners.
+INSTITUTION_FORM_RE = re.compile(
+    r"\b(authority|association|commission|consortium|school|schools|college|university|"
+    r"housing|utility|utilities|tribal council|health board|foundation|district)\b",
+    re.I)
+
 GENERIC = frozenset("""inc incorporated llc llp lp lc pllc corp corporation co company the of and
     a an group holdings holding ltd limited plc jv joint venture""".split())
 
@@ -527,17 +535,44 @@ class Evidence:
             self.report_hub[corp] = self.hub_from_name(corp.replace("_", " "))
 
     def report_owner(self, firm_name):
-        """(hub, corp, phrase) if EXACTLY ONE regional corporation's audited
-        annual report names this firm.  Requires >= REPORT_MIN_TOKENS
-        distinctive tokens, so an English phrase cannot win."""
-        w = [x for x in ntoks(firm_name)]
+        """(hub, corp, phrase, context, verdict) if EXACTLY ONE regional
+        corporation's audited annual report names this firm as its own.
+
+        Three guards, every one earned on a false positive found while building
+        this rung:
+
+        1. >= REPORT_MIN_TOKENS distinctive tokens, so an English phrase cannot
+           win.  Killed `REGIONAL SERVICES LTD` -> Bering Straits and
+           `INFORMATION TECHNOLOGY SOLUTIONS CORP` -> Koniag.
+        2. A NAMING is not an OWNING.  The +/-200 character window around the
+           hit must either read like a consolidated subsidiary LIST (three or
+           more corporate-form tokens: `... arctic holdings llc eagle medical
+           services llc petrocard inc eagle integrated services llc ...`) or
+           carry an explicit ownership verb (`subsidiary`, `acquired`,
+           `wholly owned`, `interest in`, `was formed`, `owns`).
+        3. An explicit VETO on `third party`.  Bering Straits reads *"tcc is a
+           joint venture operation between emi and a third party tanana
+           commercial company"* - that is naming somebody else's company.
+        """
         if len(distinctive(firm_name)) < REPORT_MIN_TOKENS:
-            return ("", "", "")
-        phrase = " " + " ".join(w) + " "
+            return ("", "", "", "", "too-few-distinctive-tokens")
+        phrase = " " + " ".join(ntoks(firm_name)) + " "
         hits = [c for c, t in self.reports.items() if phrase in t]
         if len(hits) != 1:
-            return ("", "", "")
-        return (self.report_hub.get(hits[0], ""), hits[0], phrase.strip())
+            return ("", "", "", "", "not-unique" if hits else "no-hit")
+        corp = hits[0]
+        t = self.reports[corp]
+        i = t.find(phrase)
+        win = t[max(0, i - 200): i + len(phrase) + 200]
+        if " third party " in win:
+            return ("", corp, phrase.strip(), win, "veto:third-party")
+        density = len(re.findall(r" (?:llc|inc|corporation|company|ltd) ", win))
+        verb = any(v in win for v in (" subsidiar", " acquired ", " wholly owned ",
+                                      " interest in ", " was formed ", " owns "))
+        if density < 3 and not verb:
+            return ("", corp, phrase.strip(), win, "veto:mention-not-ownership")
+        return (self.report_hub.get(corp, ""), corp, phrase.strip(), win,
+                f"ownership(density={density},verb={verb})")
 
     # -- prime ------------------------------------------------------------
     def _prime(self):
@@ -603,28 +638,46 @@ def dispose(ev, it, ident, lr, firm):
                     f"({NON_NATIVE_PARENTS[pn.strip().upper()]}); rule 11 - a declared parent "
                     f"outranks a name")
 
-    # R3 -- the owner's own AUDITED ANNUAL REPORT
-    rh, corp, phrase = ev.report_owner(fname)
-    if rh:
-        if rh == hub:
-            return ("KEEP", hub, f"audited annual report: {corp} names `{phrase}` in its own "
-                                 f"consolidated subsidiary list")
-        if rh in ev.region_of(hub):
-            rh = ""  # a regional report naming an entity IN ITS REGION is geography
-        elif is_jv(fname):
-            return ("HOLD", "", f"audited annual report: {corp} names `{phrase}`, but the "
-                                f"awardee is a JOINT VENTURE and an equity interest in a JV is "
-                                f"not sole ownership (rule 11). Owner ruling needed.")
-        else:
-            return ("REPOINT", rh, f"audited annual report: {corp} names `{phrase}` in its own "
-                                   f"consolidated subsidiary list, contradicting {hub}")
-
-    # R4 -- rule 7, the firm's own name IS the hub
+    # R3 -- rule 7, the firm's own name IS the hub.  This runs BEFORE the
+    # annual-report rung on purpose: an entity that IS a Cedar hub gets NAMED in
+    # its regional corporation's report as a matter of course, and moving it on
+    # that would hand `Bristol Bay Native Association` (a tribal consortium) to
+    # `Bristol Bay Native Corporation` (an ANC) because a photo caption reads
+    # "funded by the bristol bay housing authority bristol bay native
+    # association and bbnc".
     if nkey(fname) in ev.hub_names.get(hub, set()) or nkey(legal) in ev.hub_names.get(hub, set()):
         return ("KEEP", hub, "rule 7: exact whole-name match to the hub's own official name")
     if distinctive(fname) and not ev.residue(fname, hub):
         return ("KEEP", hub, "rule 7: residue empty - every distinctive word in the filed name "
                              "is accounted for by the hub's own names")
+    firm_is_a_hub = ev.hub_from_name(fname) or ev.hub_from_name(legal)
+
+    # R4 -- the owner's own AUDITED ANNUAL REPORT
+    rh, corp, phrase, win, verdict = ev.report_owner(fname)
+    if rh:
+        if rh == hub:
+            return ("KEEP", hub, f"audited annual report: {corp} names `{phrase}` in its own "
+                                 f"consolidated subsidiary list [{verdict}]")
+        if rh in ev.region_of(hub) or (firm_is_a_hub and rh in ev.region_of(firm_is_a_hub)):
+            pass          # a regional report naming an entity IN ITS REGION is geography
+        elif firm_is_a_hub:
+            return ("HOLD", "", f"audited annual report: {corp} names `{phrase}`, but the firm "
+                                f"is itself a Cedar entity ({firm_is_a_hub}) and a regional "
+                                f"report names the bodies in its region routinely. "
+                                f"Owner ruling needed.")
+        elif INSTITUTION_FORM_RE.search(fname):
+            return ("HOLD", "", f"audited annual report: {corp} names `{phrase}`, but the firm "
+                                f"carries an INSTITUTION FORM word (rule 7's HOLD row) and a "
+                                f"report naming a housing authority is usually naming a "
+                                f"customer. Owner ruling needed.")
+        elif is_jv(fname):
+            return ("HOLD", "", f"audited annual report: {corp} names `{phrase}`, but the "
+                                f"awardee is a JOINT VENTURE and an equity interest in a JV is "
+                                f"not sole ownership (rule 11). Owner ruling needed.")
+        else:
+            ctx = re.sub(r"\s+", " ", win)[:340]
+            return ("REPOINT", rh, f"audited annual report: {corp} names `{phrase}` as its own "
+                                   f"[{verdict}], contradicting {hub}. Context: ...{ctx}...")
 
     # R5 -- rule 11, the declared parent agrees, or names another hub
     for n, pu, pn, ph in parents:

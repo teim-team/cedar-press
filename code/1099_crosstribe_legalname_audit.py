@@ -90,21 +90,48 @@ unchanged. Two reasons, both house rules:
 So it FLAGS, additively, and files a one-minute ruling with the evidence
 attached. A flagged row can be reversed; a repointed one cannot be found again.
 
-MEASURED (see docs/CROSSTRIBE_LEGALNAME_AUDIT.json for the live numbers)
--------------------------------------------------------------------------
-The class the detector finds is small, tier-A-heavy, and concentrated in two
-source files. The loudest member is not the Ho-Chunk row:
+MEASURED 2026-09-02 - 13 collisions, $5.72M of prime obligations on 415 rows
+-----------------------------------------------------------------------------
+    government-keyed ledger rows scanned            5,836
+    skipped, a legal form in the name (I2 guard)    2,771
+    skipped, the KEYED entity explains the name       857
+    skipped, the name reaches >1 government             0
+    -----------------------------------------------------
+    cross-government name collisions                   13   9 tier A, 4 tier B
+      of which in cedar_publishable_identifiers.csv     8
 
-    UEI HLTFBD3FTDG8  keyed  TRBF-FSCWSA-00  Fort Sill-Chiricahua-Warm
-                             Springs-Apache Tribe          Oklahoma
-                      legal  "Confederated Tribes Of Warm Springs Reservation
-                             Of Oregon"      ->  TRBF-WRMSPR-00, Oregon
-                      tier A, attribution_method `hand`
-                      285 prime_contracts rows, $3,552,567,
-                      recipient_state_code = OR on 285 of 285
+  8 CONTRADICTED - the state on the record names the OTHER nation
+    UEI  HLTFBD3FTDG8  A hand        Fort Sill Apache OK -> Warm Springs  OR
+                       "Confederated Tribes Of Warm Springs Reservation Of
+                        Oregon"   285 rows $3,552,567, recipient_state_code
+                        = OR on 285 of 285.  PUBLISHED
+    UEI  LWRAHAFNKQ13  A hand        Santee Sioux  NE -> Flandreau  SD  $51,336
+    CAGE 50WN1         A bgov_manual Santee Sioux  NE -> Flandreau  SD  $51,336
+    CAGE 4AD60         A bgov_manual Santee Sioux  NE -> Flandreau  SD  $24,521
+    CAGE 3VFL3         A bgov_manual Winnebago     NE -> Ho-Chunk   WI  $0
+    CAGE 3XGD7         A bgov_manual Sac and Fox   OK -> Sac & Fox of Missouri
+    CAGE 4XH62         A bgov_manual Yavapai-Apache AZ -> Chignik Lagoon, an
+                       ALASKA NATIVE VILLAGE. `state` on the row reads AK.
+    UEI  PHLGX6MG6UK1  B cluster_v3  Shoshone-Paiute -> Ely Shoshone (both NV,
+                       so STATE_CANNOT_SEPARATE - held, not proposed)
 
-    The collision token is `Warm Springs`. Rung 1 answers it 285 times over and
-    nothing had ever asked.
+  1 the KEYED entity is right and the SPINE has the gap
+    UEI  H1ZEEZK2D6B3  A hand   "San Juan Pueblo Tribal Council" -> Ohkay
+                       Owingeh, NM.  113 of 113 awards are in NEW MEXICO, and
+                       Ohkay Owingeh IS the renamed San Juan Pueblo. The
+                       apparent rival, `TRBF-SNJUAN-00`, is the San Juan
+                       SOUTHERN PAIUTE Tribe of ARIZONA. Nothing is wrong with
+                       the attribution; `Ohkay Owingeh` simply does not carry
+                       `San Juan Pueblo` in `aliases`, so a former name reads
+                       as a foreign one. Disposition
+                       TRANSACTION_STATE_AGREES_WITH_KEYED_ENTITY and NO
+                       repoint is proposed. **A rename with no alias is
+                       indistinguishable from a collision until you look at the
+                       address** - which is why rung 1 runs on the transaction
+                       record too, not only on the registration.
+
+  4 tier B `need_v6` EIN rows with no state anywhere - flagged, not proposed.
+    `need_v6` is 6.5% accurate and never publishes alone.
 
 THE NAMED INVARIANTS
 --------------------

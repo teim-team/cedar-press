@@ -1,17 +1,17 @@
 {
-  "scanned_files": 591,
+  "scanned_files": 594,
   "counts": {
     "class1": 1,
-    "class2a": 1,
+    "class2a": 2,
     "class2b": 0,
     "class2c": 73,
-    "class3": 2,
+    "class3": 3,
     "class4": 13,
     "class5": 7,
     "class6": 27,
     "class7": 46,
     "class8": 0,
-    "lint_bug_class_instances": 170
+    "lint_bug_class_instances": 172
   },
   "findings": [
     {
@@ -125,7 +125,7 @@
     {
       "class": "class2c",
       "file": "1085_prime_psc_desc_repull.py",
-      "line": 475,
+      "line": 506,
       "evidence": "skipped_nonblank += 1",
       "why": "counter 'skipped_nonblank' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -134,7 +134,7 @@
     {
       "class": "class2c",
       "file": "1086_faads_award_key_promote.py",
-      "line": 218,
+      "line": 249,
       "evidence": "miss += 1",
       "why": "counter 'miss' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -143,7 +143,7 @@
     {
       "class": "class2c",
       "file": "1086_faads_award_key_promote.py",
-      "line": 210,
+      "line": 241,
       "evidence": "miss += 1",
       "why": "counter 'miss' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -191,6 +191,24 @@
       "line": 413,
       "evidence": "stats[\"nest_refused_ambiguous_under_owner\"] += 1",
       "why": "counter 'nest_refused_ambiguous_under_owner' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
+      "waived": false,
+      "waiver_reason": ""
+    },
+    {
+      "class": "class2a",
+      "file": "1099_crosstribe_legalname_audit.py",
+      "line": 412,
+      "evidence": "r.setdefault(c, \"\")",
+      "why": "`r` was filled with every key at line 417, so this setdefault is a NO-OP and the column ships EMPTY. This is the 119 defect: tier 154/154 blank, confidence_tier 10,661/10,661 blank. Use `x[k] = x.get(k) or DEFAULT`.",
+      "waived": false,
+      "waiver_reason": ""
+    },
+    {
+      "class": "class3",
+      "file": "1104_nagpra_affiliation_rule_audit.py",
+      "line": 343,
+      "evidence": "if r.get(\"resolve_status\") == \"resolved\":",
+      "why": "'resolve_status' is compared to a PROCESSED value (['resolved']) and the word 'outcome' appears nowhere in this file. `status` says the ruling was PROCESSED; `outcome` says what it DECIDED - one ruling read SETTLED while its outcome was 'HOLD - RETRACTION REQUIRED'.",
       "waived": false,
       "waiver_reason": ""
     },
@@ -944,7 +962,7 @@
     {
       "class": "class4",
       "file": "980_gaming_web_harvest.py",
-      "line": 344,
+      "line": 396,
       "evidence": "if time.time() - started > READ_BUDGET_S:",
       "why": "a budget (READ_BUDGET_S) exits a loop, the file writes a completion marker (['OK']), and it never compares what it RETRIEVED against the total the SOURCE reported. That is the PER_DOCKET_BUDGET_S defect: four dockets written at 2,300-3,200 of 3,555-4,847 and marked `done`, so no resume would ever revisit them.",
       "waived": false,
@@ -1072,7 +1090,7 @@
       "file": "14_build_bills_votes.py",
       "line": 1,
       "evidence": "bill_votes.csv",
-      "why": "`bill_votes.csv` has FULL-REBUILD writer(s) ['14_build_bills_votes.py'] and IN-PLACE enricher(s) ['890_bill_votes_threshold_and_titles.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
+      "why": "`bill_votes.csv` has FULL-REBUILD writer(s) ['14_build_bills_votes.py'] and IN-PLACE enricher(s) ['1093_bill_votes_majority_anomaly.py', '890_bill_votes_threshold_and_titles.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
       "waived": true,
       "waiver_reason": "bill_votes.csv has this full-rebuild writer and two in-place"
     },
@@ -1574,7 +1592,7 @@
     {
       "class": "class7",
       "file": "1080_sec_gaming_facility_revenue.py",
-      "line": 587,
+      "line": 599,
       "evidence": "r[\"candidate_id\"] = f\"SECGF-{i:05d}\"",
       "why": "[WARN] POSITIONAL on target candidate_id -> no clean table. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": false,
@@ -2609,6 +2627,7 @@
         "update_index.py"
       ],
       "bill_votes.csv": [
+        "1093_bill_votes_majority_anomaly.py",
         "890_bill_votes_threshold_and_titles.py"
       ],
       "brand_family_registry.csv": [
@@ -2676,6 +2695,7 @@
         "510_assertions.py"
       ],
       "cedar_identifier_ledger_final.csv": [
+        "1099_crosstribe_legalname_audit.py",
         "124_apply_rulings_in_place.py",
         "163_promote_nho_universe_in_place.py",
         "174_apply_rulings_to_source_tables.py",
@@ -3108,6 +3128,7 @@
         "update_index.py"
       ],
       "bill_votes.csv": [
+        "1093_bill_votes_majority_anomaly.py",
         "14_build_bills_votes.py",
         "890_bill_votes_threshold_and_titles.py"
       ],
@@ -3153,6 +3174,7 @@
         "510_assertions.py"
       ],
       "cedar_identifier_ledger_final.csv": [
+        "1099_crosstribe_legalname_audit.py",
         "124_apply_rulings_in_place.py",
         "163_promote_nho_universe_in_place.py",
         "174_apply_rulings_to_source_tables.py",
@@ -3629,5 +3651,7 @@
       "EIN": 317
     }
   },
-  "unparsed": []
+  "unparsed": [
+    "760_collection_descriptors.py: unterminated string literal (detected at line 167) (<unknown>, line 167)"
+  ]
 }

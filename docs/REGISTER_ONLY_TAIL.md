@@ -15,26 +15,26 @@
 | `cedar_resolved_facts.csv` | what Cedar has adjudicated |
 | `entity_aliases.csv` | names, one or more for every entity |
 
-Excluding the identity layer and any table that is a census of the register, **83** register entities have no row in any of the 140 substantive tables, and **31** more have exactly one.
+Excluding the identity layer and any table that is a census of the register, **0** register entities have no row in any of the 143 substantive tables, and **105** more have exactly one.
 
-The slice worked here is both — the thin tail, **114** entities. The line between the two groups moved while this was being written: the newsletter workstream landed `tribal_newsletter_corpus.csv` and 21 entities that had been register-only an hour earlier acquired one row apiece. Slicing on zero alone would have dropped them at the moment they became reachable. `n_substantive_tables` on every evidence row keeps the two states told apart.
+The slice worked here is both — the thin tail, **105** entities. The line between the two groups moved while this was being written: the newsletter workstream landed `tribal_newsletter_corpus.csv` and 21 entities that had been register-only an hour earlier acquired one row apiece. Slicing on zero alone would have dropped them at the moment they became reachable. `n_substantive_tables` on every evidence row keeps the two states told apart.
 
-## The 114 entities, by class
+## The 105 entities, by class
 
 | entity class | in the thin tail | of those, in ZERO tables | given a first row here |
 |---|---:|---:|---:|
-| BIE School | 87 | 83 | 85 |
+| BIE School | 78 | 0 | 76 |
 | Federal-level self-governance consortium | 18 | 0 | 18 |
 | Native Community Development Financial Institution | 3 | 0 | 3 |
 | Individually Native-owned business | 3 | 0 | 1 |
 | Urban Indian Organization | 3 | 0 | 1 |
-| **total** | **114** | **83** | **108** |
+| **total** | **105** | **0** | **99** |
 
 ## What was found
 
 | route | rows |
 |---|---:|
-| NCES_CCD | 85 |
+| NCES_CCD | 76 |
 | USASPENDING | 30 |
 | IRS_990 | 21 |
 | NONE | 6 |

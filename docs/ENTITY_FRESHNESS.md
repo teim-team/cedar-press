@@ -1,6 +1,6 @@
 # Entity freshness — when was each entity last touched by anything
 
-*Generated 2026-09-02 by `code/830_entity_freshness.py` across 146 entity-bearing tables. An update is ANY change: a row appearing, a date advancing, an identifier landing. `built_date` and `fetched_date` are deliberately NOT counted — they say when Cedar ran, not when the entity changed, and 70 tables carry one.*
+*Generated 2026-09-02 by `code/830_entity_freshness.py` across 147 entity-bearing tables. An update is ANY change: a row appearing, a date advancing, an identifier landing. `built_date` and `fetched_date` are deliberately NOT counted — they say when Cedar ran, not when the entity changed, and 70 tables carry one.*
 
 This answers a question no other instrument can. Coverage says who has a website; cadence says which SOURCE is behind; readiness says which DATASET meets the contract. All three aggregate across entities, so an entity can sit untouched for two years while every one of them reads green.
 
@@ -19,6 +19,7 @@ This answers a question no other instrument can. Coverage says who has a website
 | table | column | would have won for | distinct values |
 |---|---|---:|---|
 | `gaming_property_self_published_assertions.csv` | `as_of_date` | 182 | 2026-08-12, 2026-09-02 |
+| `anc_ceiling_roster.csv` | `row_disposition_date` | 190 | 2026-09-02 |
 | `gaming_property_self_published_claims.csv` | `as_of_date` | 109 | 2026-08-12, 2026-09-02 |
 | `gaming_web_harvest_observations.csv` | `as_of_date` | 87 | 2026-09-02 |
 

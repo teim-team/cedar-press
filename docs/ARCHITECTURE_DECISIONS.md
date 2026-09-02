@@ -1060,3 +1060,58 @@ docs/COVERAGE_TAIL_SHARD_N.md doc`, byte-identical — and **not** by
 re-baselining it away. That is the whole point of the gate, and it worked on
 its first live encounter with something nobody had declared.
 <!-- END ADR-017 -->
+
+<!-- BEGIN ADR-018 -->
+## ADR-018 — the product-descriptor flagship check (workstream PR29-LOOP, 2026-09-02)
+
+**Status:** accepted 2026-09-02. Declared BEFORE editing, per AGENTS.md
+*Parallel agents*.
+
+This workstream owns the Codex loop on `teim-team/cedar-press` PR #29 and the
+two generators that feed it.
+
+| file | what is written | script |
+|---|---|---|
+| `code/760_collection_descriptors.py` | the flagship-consistency check and its `selftest` | — |
+| `dist/collection_descriptors*.json`, `dist/samples/*` | regenerated, never hand-edited | 760 / 770 |
+| `docs/CODEX_REVIEW_LOG.md` | appended, one section per cycle | — |
+
+**Files this workstream deliberately does NOT run or edit:**
+`code/500_build_architecture_map.py`, `code/512_build_dataset_contracts.py`,
+`code/518_dataset_readiness.py`. They are integrator-owned (ADR-017 records the
+same refusal). The defect below **originates in 500** and is therefore
+escalated with its measurement rather than fixed here.
+
+### The defect this ADR exists to declare
+
+`dist/collection_descriptors.json` shipped `owned` as **`"1,657 rows"`** while
+`dist/samples/README.md`, in the same directory, states the same dataset as
+**2,916 rows** — because `770.FLAGSHIP` draws the customer's sample from
+`native_owned_businesses.csv` (2,916 rows, 21 certifying authorities) and
+`760.rows_in()` sums only the tables the collection *contract* claims, which
+are six `individual_native_*` tables totalling 1,657 and do not include the
+directory. `500.COLLECTIONS` matches this collection with
+`^(individual_native|tribal_certification)`; the namesake table matches
+neither. It has been a known orphan since 2026-09-01 —
+`code/730_ws4_grain_money_conservation.py:852` lists it under
+`contract_orphan_shippable = 6`, attributed to "the workstreams that
+registered them" — and nobody connected it to what the product publishes.
+
+**A sum over a dataset's tables can never be smaller than one of its tables.**
+That is the invariant 760 now enforces, and it is the cheapest possible
+statement of the bug.
+
+The consequence is larger than the row count. `native-owned-businesses` is
+reported READY with `c4_identity_path = 100% keyed` and `c1_grain = 6/6`,
+measured across the six tables that exclude the directory. Measured on the
+directory itself: `business_entity_id` is filled on **4 of 2,916 rows
+(0.1%)**; `nation_id` on 2,725 (93.4%); grain is `UNSTATED`. The dataset is
+not READY on the table the customer is shown.
+
+**Widening the collection is an integrator/owner decision**, because it moves
+a dataset's readiness and adds four tables (`native_owned_businesses.csv`
+2,916, `native_business_contract_links.csv` 2,393,
+`native_business_identifier_crosswalk.csv` 481,
+`native_business_contracting_by_nation.csv` 18) with no declared grain or key.
+Filed in `review/OWNER_DECISION_QUEUE.md`.
+<!-- END ADR-018 -->

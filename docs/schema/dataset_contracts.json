@@ -355,8 +355,12 @@
       "native_attribution_table": "faads_entity_attribution.csv",
       "basis": "verbatim mirror of the FY2001-2007 federal assistance record for ten agencies; 0 of 2,769,748 rows carry a Cedar id and none should. The Native slice is faads_entity_attribution.csv, 29,594 rows, 29,594 keyed (100%), which addresses rows of this file"
      },
-     "rebuilt_by": [],
-     "enriched_by": [],
+     "rebuilt_by": [
+      "30_funding_pre2008.py"
+     ],
+     "enriched_by": [
+      "1086_faads_award_key_promote.py"
+     ],
      "never_run_warning": []
     },
     {
@@ -2381,7 +2385,7 @@
      "grain_declared_by": "workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json",
      "grain_validated": true,
      "measured_rows_per_join_key": {
-      "cedar_uid": 39
+      "cedar_uid": 48
      },
      "grain_open_question": "",
      "grain_defect": "",
@@ -3198,7 +3202,7 @@
      "grain_declared_by": "workstream GRAIN-WS3 2026-09-01: declared from the build log in code/144_build_admin_appeals.py `stage_positions`, which states the id construction and refuses duplicates; key confirmed unique on the FULL 8-row file after the 1 -> 8 re-derivation. Re-measured by code/573_ws3_grain_and_money.py measure",
      "grain_validated": true,
      "measured_rows_per_join_key": {
-      "cedar_uid": 1,
+      "cedar_uid": 2,
       "matter_id": 1
      },
      "grain_open_question": "the file has ONE row. `matter_id` and `cedar_uid` are unique, and so is every other column - one row proves nothing. QUESTION: is a row a POSITION taken by one organisation in one matter (in which case position_id is the key and it is empty of evidence), or one row per matter?",

@@ -99,8 +99,8 @@ RESTRICTIVE_UIDS = {
 
 FIELDS = [
     "newsletter_id", "cedar_uid", "tribe_id", "publisher_name", "entity_class",
-    "state", "publication_name", "channel_type", "channel_url", "channel_host",
-    "format", "issue_cadence", "archive_earliest_year", "archive_latest_year",
+    "state", "publication_name", "record_status", "channel_type", "channel_url",
+    "channel_host", "format", "issue_cadence", "archive_earliest_year", "archive_latest_year",
     "archive_span_years", "archive_depth_n_issues", "archive_depth_basis",
     "back_issues_open", "business_content", "business_content_terms",
     "n_recent_issue_urls", "recent_issue_urls", "discovery_technique",
@@ -128,6 +128,41 @@ CT = {
     "email_signup": "email_signup",
     "none found": "none_found", "none_found": "none_found",
 }
+
+
+# `record_status` - THE DISCRIMINATOR. Added 2026-09-02.
+#
+# This file holds two record types under one schema and, until this column
+# existed, the only way to tell them apart was to parse `channel_type` against
+# a set held in a DIFFERENT script (995's `REAL`) and then string-match the
+# prefix of `note`. A reader counting rows got 1,650 "tribal newsletters"; the
+# real channel count is smaller, and this repo has already shipped one number
+# with no stated unit ("539 publishable coords") and paid for it.
+#
+# So the unit is declared IN the file, per row, and never blank:
+#
+#   publication_channel           a real, reachable publication channel. THE
+#                                 dataset. Filter to this and nothing else to
+#                                 count what Indian Country publishes.
+#   probe_absence                 a machine-readable probe ran against this
+#                                 entity and found no channel. Kept in the
+#                                 corpus so the negative is visible beside the
+#                                 positives; `discovery_technique` names WHICH
+#                                 routes ran, so it is an absence for THOSE
+#                                 routes and not a claim about the world.
+#   contact_point_only            an email-signup form with no archive and no
+#                                 issue. Evidence the entity publishes
+#                                 something; not a channel we can read.
+#   flagged_not_native_publisher  reached the corpus through shard I's
+#                                 tribe-serving-nonprofit slice on a PLACE-NAME
+#                                 collision (Peoria Audubon Society). Flagged,
+#                                 never deleted, and never counted as a Native
+#                                 publication.
+RS_CHANNEL = "publication_channel"
+RS_ABSENCE = "probe_absence"
+RS_CONTACT = "contact_point_only"
+RS_FLAGGED = "flagged_not_native_publisher"
+RECORD_STATUS_VOCAB = {RS_CHANNEL, RS_ABSENCE, RS_CONTACT, RS_FLAGGED}
 
 
 # Shard I built a "tribe-serving nonprofit" slice by name matching, and a city
@@ -562,6 +597,17 @@ def build():
         lo, hi = r["archive_earliest_year"], r["archive_latest_year"]
         r["archive_span_years"] = str(int(hi) - int(lo) + 1) if lo and hi else ""
         r["n_recent_issue_urls"] = str(len([x for x in r["recent_issue_urls"].split(" | ") if x]))
+        # THE DISCRIMINATOR, in precedence order. A flagged publisher is
+        # flagged whatever its channel_type says; an absence outranks a
+        # contact point; everything else is a channel.
+        if r["source_shard"] == "shard_i" and PLACE_COLLISION.search(r["publisher_name"]):
+            r["record_status"] = RS_FLAGGED
+        elif r["channel_type"] == "none_found":
+            r["record_status"] = RS_ABSENCE
+        elif r["channel_type"] == "email_signup":
+            r["record_status"] = RS_CONTACT
+        else:
+            r["record_status"] = RS_CHANNEL
         if r["source_shard"] == "shard_i" and PLACE_COLLISION.search(r["publisher_name"]):
             r["note"] = ("FLAG_UPSTREAM: this publisher reached the corpus through "
                          "shard I's tribe-serving-nonprofit slice, but its name is "
@@ -664,6 +710,9 @@ def build():
             c["entity_class"] for c in cover if c["probe_status"] == "found")),
         "not_probed_with_live_site": sum(
             1 for c in cover if c["probe_status"] == "not_probed" and c["has_live_site"] == "yes"),
+        "by_record_status": dict(Counter(r["record_status"] for r in recs)),
+        "publication_channels": sum(
+            1 for r in recs if r["record_status"] == RS_CHANNEL),
         "shard_i_place_name_collisions_flagged": sum(
             1 for r in recs if r["note"].startswith("FLAG_UPSTREAM")),
         "archive_depth_10y_plus": sum(
@@ -733,6 +782,29 @@ def verify(rows=None, cover=None):
     if longf:
         f.append("POSSIBLE_BODY_TEXT_IN_CORPUS: %d fields, e.g. %s"
                  % (len(longf), longf[0]))
+
+    # 8. `record_status` is never blank, is in the vocabulary, and AGREES with
+    #    the columns it summarises. A discriminator a consumer cannot trust is
+    #    worse than no discriminator, because they will filter on it.
+    bad_rs = [r["newsletter_id"] for r in rows
+              if (r.get("record_status") or "") not in RECORD_STATUS_VOCAB]
+    if bad_rs:
+        f.append("RECORD_STATUS_MISSING_OR_UNKNOWN: %d rows, e.g. %s"
+                 % (len(bad_rs), bad_rs[0]))
+    disagree = [r["newsletter_id"] for r in rows
+                if (r.get("record_status") == RS_ABSENCE)
+                != (r.get("channel_type") == "none_found")
+                and r.get("record_status") != RS_FLAGGED]
+    if disagree:
+        f.append("RECORD_STATUS_DISAGREES_WITH_CHANNEL_TYPE: %d rows, e.g. %s"
+                 % (len(disagree), disagree[0]))
+    # a publication_channel with no URL is not reachable and is not a channel
+    nourl = [r["newsletter_id"] for r in rows
+             if r.get("record_status") == RS_CHANNEL
+             and not (r.get("channel_url") or "").strip()]
+    if nourl:
+        f.append("PUBLICATION_CHANNEL_WITHOUT_A_URL: %d rows, e.g. %s"
+                 % (len(nourl), nourl[0]))
     return f
 
 
@@ -742,7 +814,8 @@ def selftest():
     base = dict.fromkeys(FIELDS, "")
     base.update(newsletter_id="NLTR-X-1", cedar_uid="CE-TEST", channel_url="https://a.org/n",
                 channel_host="a.org", archive_earliest_year="2001",
-                archive_latest_year="2020", channel_type="newsletter")
+                archive_latest_year="2020", channel_type="newsletter",
+                record_status=RS_CHANNEL)
     cov = [{"cedar_uid": "CE-TEST", "probe_status": "found", "canonical_name": "T"}]
     spine_n = sum(1 for _ in csv.DictReader(SPINE.open(encoding="utf-8-sig")))
     pad = [{"cedar_uid": "CE-%d" % i, "probe_status": "not_probed",
@@ -764,6 +837,17 @@ def selftest():
         + pad + [cov[0]]))))
     r = dict(base); r["note"] = "x" * 1300
     ok.append(("body_text", any("POSSIBLE_BODY_TEXT" in x for x in verify([r], cov + pad))))
+    r = dict(base); r["record_status"] = ""
+    ok.append(("record_status_blank", any("RECORD_STATUS_MISSING_OR_UNKNOWN" in x
+                                          for x in verify([r], cov + pad))))
+    r = dict(base); r.update(record_status=RS_CHANNEL, channel_type="none_found")
+    ok.append(("record_status_disagrees",
+               any("RECORD_STATUS_DISAGREES_WITH_CHANNEL_TYPE" in x
+                   for x in verify([r], cov + pad))))
+    r = dict(base); r.update(record_status=RS_CHANNEL, channel_url="",
+                             channel_host="")
+    ok.append(("channel_without_url", any("PUBLICATION_CHANNEL_WITHOUT_A_URL" in x
+                                          for x in verify([r], cov + pad))))
 
     for name, fired in ok:
         print("  selftest %-14s %s" % (name, "FIRES" if fired else "DID NOT FIRE"))
@@ -782,7 +866,7 @@ def main(argv):
                 print("FAIL", x)
             return 1
         rows = sum(1 for _ in csv.DictReader(OUT_CORPUS.open(encoding="utf-8-sig")))
-        print("verify OK - %d corpus rows, 7 invariants held" % rows)
+        print("verify OK - %d corpus rows, 10 invariants held" % rows)
         return 0
     return build()
 

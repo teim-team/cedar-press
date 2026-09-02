@@ -5,8 +5,11 @@
   "cached_texts": 6792,
   "R1": {
     "bridge_rows_measured_against_own_full_text": 51579,
-    "rows_whose_verbatim_name_is_absent_from_that_notice": 324,
+    "rows_whose_verbatim_name_is_absent_from_that_notice": 229,
     "rows_whose_verbatim_name_is_absent_from_its_own_span": 11964,
+    "of_those_explained_by_the_600_char_span_cap": 11942,
+    "of_those_NOT_explained_by_truncation": 22,
+    "span_cap_note": "source_span_text is capped at 600 characters by the builder, so it is NOT a complete evidence trail on a long consultation list. The full cached Federal Register text is, and is what R1 tests.",
     "resolve_method_heads": {
       "alias": 26126,
       "containment": 11021,
@@ -28,9 +31,9 @@
     "identity_layer_rows_sourced_from_nagpra": 0,
     "republication": {
       "corrections_folded": 269,
-      "jaccard_pairs_folded": 3,
+      "jaccard_pairs_folded": 4,
       "notices": 6792,
-      "families": 6520
+      "families": 6519
     },
     "distinct_unresolved_party_names": 1091,
     "clearing_three_notices": 166,
@@ -113,37 +116,30 @@
     "per_column": {
       "responsible_party_statement": {
         "non_blank": 3064,
-        "verbatim_in_source": 3059,
-        "not_verbatim": 5,
-        "first_example_not_verbatim": [
-          "01-9751",
-          "National Park Service unit that has control or possession of these Native American human remains and associated funerary objects"
-        ]
+        "verbatim_in_source": 3064,
+        "not_verbatim": 0,
+        "first_example_not_verbatim": null
       },
       "mni_statements": {
         "non_blank": 4435,
-        "verbatim_in_source": 0,
-        "not_verbatim": 4435,
-        "first_example_not_verbatim": [
-          "95-561",
-          "description:human remains of two individuals || description:human remains of twelve individuals || description:human remains of two individuals || des"
-        ]
+        "verbatim_in_source": 4435,
+        "not_verbatim": 0,
+        "first_example_not_verbatim": null
       },
       "removal_location_statements": {
         "non_blank": 5412,
-        "verbatim_in_source": 5285,
-        "not_verbatim": 127,
+        "verbatim_in_source": 5385,
+        "not_verbatim": 27,
         "first_example_not_verbatim": [
-          "97-15224",
-          "``under a fir tree'' by M || Othello Street on Lake Washington in Seattle, King County, WA during city street construction || an unknown location in t"
+          "99-21069",
+          "the Homolobi (Homolovi 4) site in Navajo County, AZ under unknown circumstances by person(s) unknown"
         ]
       }
     },
-    "cells_not_verbatim_in_source": 4567
+    "cells_not_verbatim_in_source": 27
   },
   "unmeasured": [],
   "defects": [
-    "D1 324 bridge rows name a party that is not in that notice's own text",
-    "D3 column `mni_statements` is non-verbatim on 4,435 of 4,435 non-blank cells (100.0%)"
+    "D1 229 bridge rows name a party that is not in that notice's own text"
   ]
 }

@@ -20,12 +20,12 @@ Three honest outcomes, and they are three different jobs:
 
 | | count |
 |---|---:|
-| shippable tables | 228 |
+| shippable tables | 229 |
 | **DECLARED_VALIDATED** | **221** |
 | OPEN_WITH_EVIDENCE | 0 |
 | DEFECTIVE | 0 |
-| still unexplained | 7 |
-| ratchet `contract_grain_unstated_shippable` | **7** (was 207) |
+| still unexplained | 8 |
+| ratchet `contract_grain_unstated_shippable` | **8** (was 207) |
 
 A declaration that the data contradicts is release-blocking through `contract_violations`; there are **11**.
 
@@ -97,7 +97,7 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 
 ### Indian Country Deals  (`deals`)
 
-14 of 14 shippable tables declared.
+14 of 15 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
@@ -109,6 +109,7 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 | `deals_classified.csv` | 935 | DECLARED_VALIDATED | `Deal_ID` | `cedar_uid`→39 |
 | `deals_federal_awards_additions.csv` | 594 | DECLARED_VALIDATED | `Deal_ID` | — |
 | `deals_historical_additions.csv` | 30 | DECLARED_VALIDATED | `Deal_ID` | — |
+| `deals_press_edgar_ancsa_additions.csv` | — | unexplained | — | — |
 | `deals_sec_2010_2017_additions.csv` | 16 | DECLARED_VALIDATED | `Deal_ID` | — |
 | `deals_source_index.csv` | 533 | DECLARED_VALIDATED | `native_party` | — |
 | `deals_tribal_debt_additions.csv` | 6 | DECLARED_VALIDATED | `Deal_ID` | — |
@@ -162,7 +163,7 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 | `lobbying_target_entities.csv` | 116 | DECLARED_VALIDATED | `government_entity_as_filed` | — |
 | `native_entity_lobbying_disclosures.csv` | 27,796 | DECLARED_VALIDATED | `filing_uuid` | `cedar_uid`→400, `entity_id`→400 |
 | `nonprofit_schedule_c_coverage.csv` | — | DECLARED_VALIDATED | `index_year` | `index_year`→1 |
-| `nonprofit_schedule_c_lobbying.csv` | — | DECLARED_VALIDATED | `schedule_c_row_id` | `cedar_entity_id`→82, `ein`→10, `object_id`→1, `schedule_c_row_id`→1 |
+| `nonprofit_schedule_c_lobbying.csv` | — | DECLARED_VALIDATED | `schedule_c_row_id` | `cedar_entity_id`→339, `ein`→13, `object_id`→1, `schedule_c_row_id`→1 |
 | `nrc_meeting_participants.csv` | 407 | DECLARED_VALIDATED | `participant_id` | `cedar_uid`→1 |
 | `nrc_public_meetings.csv` | 251 | DECLARED_VALIDATED | `nrc_meeting_id` | — |
 | `oira_federal_action_links.csv` | 145 | DECLARED_VALIDATED | `oira_meeting_id` + `federal_action_document_number` | — |
@@ -290,8 +291,8 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 | `gaming_properties.csv` | 784 | DECLARED_VALIDATED | `facility_id` | `cedar_uid`→28, `facility_id`→1, `tribe_id`→28 |
 | `gaming_property_federal_traces.csv` | 774 | DECLARED_VALIDATED | `facility_id` | `cedar_uid`→28, `compact_id`→28, `facility_id`→1, `tribe_id`→28 |
 | `gaming_property_labor_demand.csv` | 43 | DECLARED_VALIDATED | `observation_id` | `cedar_uid`→6, `entity_id`→6, `facility_id`→6, `tribe_id`→6 |
-| `gaming_property_self_published_assertions.csv` | — | DECLARED_VALIDATED | `assertion_id` | `assertion_id`→1, `cedar_uid`→51, `facility_id`→51, `site_host`→51, `source_url`→5, `tribe_id`→51 |
-| `gaming_property_self_published_claims.csv` | — | DECLARED_VALIDATED | `claim_id` | `cedar_uid`→22, `claim_id`→1, `facility_id`→22, `site_host`→22, `source_claim_id`→1, `source_url`→7, `tribe_id`→22 |
+| `gaming_property_self_published_assertions.csv` | — | DECLARED_VALIDATED | `assertion_id` | `assertion_id`→1, `cedar_uid`→61, `facility_id`→51, `site_host`→51, `source_url`→11, `tribe_id`→61 |
+| `gaming_property_self_published_claims.csv` | — | DECLARED_VALIDATED | `claim_id` | `cedar_uid`→24, `claim_id`→1, `facility_id`→22, `site_host`→22, `source_claim_id`→1, `source_url`→7, `tribe_id`→24 |
 | `gaming_property_site_observations.csv` | 262 | DECLARED_VALIDATED | `observation_id` | `cedar_uid`→25, `entity_id`→25, `facility_id`→13, `tribe_id`→25 |
 | `gaming_property_universe_events.csv` | 10 | DECLARED_VALIDATED | `event_id` | `cedar_uid`→1, `entity_id`→1, `facility_id`→1 |
 | `gaming_revenue_bounds.csv` | 13,803 | DECLARED_VALIDATED | `bound_id` | `cedar_uid`→466, `facility_id`→82, `tribe_id`→466 |

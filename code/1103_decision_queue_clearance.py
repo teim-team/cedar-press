@@ -77,8 +77,16 @@ ROSTER = ROOT / "data" / "clean" / "anc_ceiling_roster.csv"
 DISPO_TARGETS = {
     "review/earmark_unresolved_2026-08-07.csv":
         ["earmark_id", "recipient_name"],
-    "review/subaward_api_unresolved_2026-08-28.csv": ["record_name"],
-    "review/entity_key_tierB_promotion_queue_2026-08-06.csv": ["source_name"],
+    # the dispositions key subawards as `route::subject`; joining on the
+    # name alone collided 362 rows onto a sibling's disposition.
+    "review/subaward_api_unresolved_2026-08-28.csv":
+        ["route::record_name", "record_name"],
+    # keyed `dataset::source_name`; 145 of those keys carry more than one
+    # disposition because one (dataset, name) pair appears under several
+    # `basis` values, and the basis IS the ruling here. The disposition's
+    # reason opens with `basis=<value>`, so that is the tiebreaker.
+    "review/entity_key_tierB_promotion_queue_2026-08-06.csv":
+        ["dataset::source_name", "source_name"],
     "review/nagpra_alias_proposals.csv": ["proposed_alias"],
 }
 
@@ -573,61 +581,81 @@ def _apply_int3_dispositions():
             print("  SKIP  %s - no dispositions" % src)
             continue
 
-        # The dispositions carry `key` and `subject`. Try each candidate
-        # column MOST SPECIFIC FIRST and keep the one that reaches the most
-        # rows - then say so. Verify the join BEFORE trusting it: a blank
-        # join key is this repo's signature defect (16.6 finding 3) and it
-        # cost this script 477 rows on its first run.
-        by_key = {}
-        ambiguous = set()
-        for r in d_rows:
-            for k in ((r.get("key") or "").strip(),
-                      (r.get("subject") or "").strip()):
-                if not k:
-                    continue
-                if k in by_key and by_key[k].get("disposition") != \
-                        r.get("disposition"):
-                    ambiguous.add(k)
-                by_key.setdefault(k, r)
-        if not by_key:
+        # The dispositions carry `key` and `subject`. Build ONE index per
+        # disposition column and pick whichever candidate join reaches the
+        # most rows - then print which one won. Mixing the two indexes into
+        # one dict is what made 362 subaward rows look ambiguous when they
+        # were not: a `subject` collision poisoned a `key` that was unique.
+        # Verify the join BEFORE trusting it; a blank or collided join key is
+        # this repo's signature defect (16.6 finding 3) and it has now caught
+        # this script twice.
+        idx = {}
+        for col in ("key", "subject"):
+            d = collections.defaultdict(list)
+            for r in d_rows:
+                k = (r.get(col) or "").strip()
+                if k:
+                    d[k].append(r)
+            if d:
+                idx[col] = dict(d)
+        if not idx:
             print("  UNMEASURED  %s - every join key is blank; refusing"
                   % src)
             continue
 
-        best, best_hit = None, -1
+        def _key_of(row, spec):
+            return "::".join((row.get(c) or "").strip()
+                             for c in spec.split("::"))
+
+        best = None
+        best_hit = -1
         for c in namecols:
-            if c not in fields:
+            if not all(x in fields for x in c.split("::")):
                 continue
-            h = sum(1 for r in rows
-                    if (r.get(c) or "").strip() in by_key)
-            if h > best_hit:
-                best, best_hit = c, h
-        if best is None:
-            print("  UNMEASURED  %s - no candidate join column present"
-                  % src)
+            for col, d in idx.items():
+                h = sum(1 for r in rows if _key_of(r, c) in d)
+                if h > best_hit:
+                    best, best_hit = (c, col), h
+        if best is None or best_hit == 0:
+            print("  UNMEASURED  %s - no candidate join reached a single "
+                  "row; refusing to write a file that would look ruled and "
+                  "is not" % src)
             continue
+        joincol, dcol = best
+        by_key = idx[dcol]
 
         for c in ("YOUR_RULING", "ruling_reason", "ruled_by", "ruled_date"):
             if c not in fields:
                 fields.append(c)
         hit = amb = 0
         for r in rows:
-            k = (r.get(best) or "").strip()
-            d = by_key.get(k)
-            if d is None:
-                continue
-            if k in ambiguous:
-                # One key, two different dispositions. Never guess which.
-                amb += 1
-                r["YOUR_RULING"] = "HOLD"
-                r["ruling_reason"] = (
-                    "join key '%s' carries more than one disposition in the "
-                    "2026-09-01 dispositions; held rather than guessed" % k)
-                r["ruled_by"] = BY
-                r["ruled_date"] = TODAY
-                hit += 1
+            k = _key_of(r, joincol)
+            cands = by_key.get(k)
+            if not cands:
                 continue
             hit += 1
+            if len({c.get("disposition") for c in cands}) > 1:
+                # One key, several dispositions. Disambiguate on the row's
+                # own `basis`, which the disposition reason opens with; only
+                # HOLD when that fails. Never guess.
+                b = (r.get("basis") or "").strip()
+                narrowed = [c for c in cands
+                            if b and (c.get("reason") or "").startswith(
+                                "basis=" + b[:60])]
+                if len({c.get("disposition") for c in narrowed}) == 1:
+                    cands = narrowed
+                else:
+                    amb += 1
+                    r["YOUR_RULING"] = "HOLD"
+                    r["ruling_reason"] = (
+                        "join key '%s' carries %d different dispositions in "
+                        "the 2026-09-01 set and the row's own basis does not "
+                        "separate them; held rather than guessed"
+                        % (k, len({c.get("disposition") for c in cands})))
+                    r["ruled_by"] = BY
+                    r["ruled_date"] = TODAY
+                    continue
+            d = cands[0]
             r["YOUR_RULING"] = d.get("disposition", "")
             r["ruling_reason"] = d.get("reason", "")
             r["ruled_by"] = "int-3-review 2026-09-01, applied by " + BY
@@ -643,7 +671,8 @@ def _apply_int3_dispositions():
         after, _ = cp.read_table(path)
         assert len(after) == before, "%s row count moved" % src
         print("  16.x  %-52s %d of %d rows carry a ruling"
-              % (src.replace("review/", "") + " on " + best, hit, before))
+              % (src.replace("review/", "") + " on %s=%s" % (joincol, dcol),
+                 hit, before))
         total += hit
     return total
 

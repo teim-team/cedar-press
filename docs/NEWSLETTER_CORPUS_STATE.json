@@ -1,8 +1,8 @@
 {
   "script": "code/990_build_newsletter_corpus.py",
   "run_date": "2026-09-02",
-  "corpus_rows": 1650,
-  "corpus_entities": 1090,
+  "corpus_rows": 1884,
+  "corpus_entities": 1169,
   "restrictive_rows_dropped": 16,
   "restrictive_hosts_seen": [
     "chickasawtimes.net",
@@ -17,15 +17,15 @@
   ],
   "spine_entities": 1555,
   "by_probe_status": {
-    "found": 650,
-    "attempted_none_found": 440,
-    "not_probed": 455,
+    "found": 692,
+    "attempted_none_found": 477,
+    "not_probed": 376,
     "excluded_terms_stated_restrictive": 10
   },
   "by_channel_type": {
-    "news_page": 225,
-    "newsletter": 705,
-    "none_found": 441,
+    "news_page": 240,
+    "newsletter": 887,
+    "none_found": 478,
     "statutory_filings": 58,
     "shareholder_communication": 11,
     "wp_media_library": 28,
@@ -39,7 +39,7 @@
     "shard_i": 139,
     "shard_h": 141,
     "shard_a": 22,
-    "gap_sweep": 436,
+    "gap_sweep": 670,
     "shard_f": 228,
     "shard_e": 268,
     "web_map:shard_k": 105,
@@ -52,7 +52,7 @@
   },
   "found_by_entity_class": {
     "State-recognized tribe": 17,
-    "Federally recognized tribe": 223,
+    "Federally recognized tribe": 262,
     "Federally recognized Alaska Native Village": 130,
     "Alaska Native Regional Corporation": 11,
     "Federal-level self-governance consortium": 22,
@@ -63,12 +63,19 @@
     "Native Community Development Financial Institution": 47,
     "Native Financial Institution": 18,
     "Urban Indian Organization": 34,
-    "Native Hawaiian Organization": 8,
+    "Native Hawaiian Organization": 11,
     "Individually Native-owned business": 1
   },
-  "not_probed_with_live_site": 330,
+  "not_probed_with_live_site": 251,
+  "by_record_status": {
+    "publication_channel": 1392,
+    "probe_absence": 478,
+    "flagged_not_native_publisher": 13,
+    "contact_point_only": 1
+  },
+  "publication_channels": 1392,
   "shard_i_place_name_collisions_flagged": 13,
-  "archive_depth_10y_plus": 110,
+  "archive_depth_10y_plus": 148,
   "deepest_archives": [
     [
       57,

@@ -133,8 +133,20 @@ R3_NOT_FREE_TEXT = {
 }
 
 
+# GPO pagination markers are printer's furniture, not words. The FR plain
+# text drops `[[Page 48721]]` INSIDE a sentence and, at 96-23587, inside a
+# tribe's name: "caddo indian [[Page 48721]] tribe". A first run of R1
+# reported 324 bridge rows whose party name was "absent from the notice" and
+# every one of them was this. A check that measures typesetting is the defect
+# class this repo has thirteen instances of, so the marker is removed before
+# the comparison and the removal is named here.
+PAGE_MARK = re.compile(r"(?i)\[\[\s*page\s+[^\]]{0,20}\]\]")
+LABEL = re.compile(r"^[a-z_]{3,24}:\s*")
+
+
 def norm(s: str) -> str:
-    return re.sub(r"\s+", " ", (s or "")).strip().lower()
+    return re.sub(r"\s+", " ",
+                  PAGE_MARK.sub(" ", s or "")).strip().lower()
 
 
 def load_texts():
@@ -259,9 +271,16 @@ def audit(quiet=False):
         v = norm(r.get("party_name_verbatim", ""))
         if not v:
             continue
-        span = norm(r.get("source_span_text", ""))
+        raw_span = r.get("source_span_text", "")
+        span = norm(raw_span)
         if span and v not in span:
-            r1_span_fail.append((dn, r.get("party_name_verbatim", "")))
+            # `source_span_text` is CAPPED AT 600 CHARACTERS by the builder.
+            # A long consultation list therefore ends before the party the
+            # row is about. That is a truncation, not a missing evidence
+            # trail - separated here so the two are never reported as one.
+            r1_span_fail.append((dn, r.get("party_name_verbatim", ""),
+                                 "truncated_at_600" if len(raw_span) >= 600
+                                 else "NOT_TRUNCATED"))
         t = texts.get(dn)
         if t is None:
             continue
@@ -276,6 +295,14 @@ def audit(quiet=False):
             r1_text_fail),
         "rows_whose_verbatim_name_is_absent_from_its_own_span": len(
             r1_span_fail),
+        "of_those_explained_by_the_600_char_span_cap": sum(
+            1 for x in r1_span_fail if x[2] == "truncated_at_600"),
+        "of_those_NOT_explained_by_truncation": sum(
+            1 for x in r1_span_fail if x[2] != "truncated_at_600"),
+        "span_cap_note": "source_span_text is capped at 600 characters by "
+                         "the builder, so it is NOT a complete evidence "
+                         "trail on a long consultation list. The full cached "
+                         "Federal Register text is, and is what R1 tests.",
     }
     if r1_text_fail:
         problems.append(f"D1 {len(r1_text_fail)} bridge rows name a party "
@@ -369,7 +396,12 @@ def audit(quiet=False):
             n_nonblank += 1
             # multi-valued cells are pipe- or semicolon-joined; every part
             # must be in the source, not just the whole string.
-            parts = [p for p in re.split(r"\s*\|\s*", v) if p.strip()]
+            # multi-valued cells are `label:value || label:value`; the
+            # label is Cedar's, the value is the notice's, so the label is
+            # stripped before the verbatim test rather than counted as
+            # non-verbatim text.
+            parts = [LABEL.sub("", p.strip())
+                     for p in re.split(r"\s*\|\s*", v) if p.strip()]
             if all(norm(p) in t for p in parts):
                 n_verbatim += 1
             elif example is None:
@@ -406,6 +438,10 @@ def audit(quiet=False):
               f"       {len(r1_text_fail):,}")
         print(f"       party_name_verbatim absent from its own source_span    "
               f"       {len(r1_span_fail):,}")
+        print(f"         of those, explained by the 600-char span cap        "
+              f"       {out['R1']['of_those_explained_by_the_600_char_span_cap']:,}")
+        print(f"         of those, NOT explained by truncation               "
+              f"       {out['R1']['of_those_NOT_explained_by_truncation']:,}")
         print(f"       resolve_method values naming geography: "
               f"{geo_methods or 'NONE'}")
         for ex in r1_text_fail[:3]:

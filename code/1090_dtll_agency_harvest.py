@@ -167,6 +167,7 @@ MAX_REQ_PER_HOST = 60
 LETTER_COLS = [
     "letter_id", "channel", "agency", "agency_code", "series",
     "letter_date", "letter_date_verbatim", "letter_date_basis",
+    "index_listing_count", "also_listed_under_dates",
     "subject_as_published", "addressed_to", "addressed_to_basis",
     "document_url", "document_format", "is_enclosure",
     "source_index_url", "source_index_http_status", "source_index_year",
@@ -452,8 +453,10 @@ BIA_TIME_TEXT = re.compile(r"<time[^>]*>\s*([A-Z][a-z]+ \d{1,2}, \d{4})\s*<")
 TITLE_RE = re.compile(r"<title[^>]*>(.*?)</title>", re.S | re.I)
 
 
-def parse_bia_news_page(text, url):
-    """BIA news node. The date comes from the page's own structured markup."""
+def parse_bia_news_page(text, url, agency="Bureau of Indian Affairs",
+                        agency_code="DOI-BIA", series=None, index_url=None):
+    """Indian Affairs Drupal news node (bia.gov and bie.edu run the same CMS).
+    The date comes from the page's own structured markup, never from the URL."""
     iso, verbatim, basis = "", "", ""
     m = BIA_JSONLD.search(text)
     if m:
@@ -474,24 +477,27 @@ def parse_bia_news_page(text, url):
     tm = TITLE_RE.search(text)
     if tm:
         title = clean_text(tm.group(1))
-        title = re.sub(r"\s*\|\s*Indian Affairs\s*$", "", title)
+        title = re.sub(r"\s*\|\s*(Indian Affairs|Bureau of Indian Education)"
+                       r"\s*$", "", title)
     return {
         "letter_id": "DTLL-" + stable_digest((url,)),
         "channel": "CONSULTATION",
-        "agency": "Bureau of Indian Affairs",
-        "agency_code": "DOI-BIA",
-        "series": "BIA news: Dear Tribal Leader letters",
+        "agency": agency,
+        "agency_code": agency_code,
+        "series": series or "BIA news: Dear Tribal Leader letters",
         "letter_date": iso,
         "letter_date_verbatim": verbatim,
         "letter_date_basis": basis,
+        "index_listing_count": 1,
+        "also_listed_under_dates": "",
         "subject_as_published": title[:900],
         "addressed_to": "tribal_leaders",
-        "addressed_to_basis": "the phrase 'Dear Tribal Leader Letter' in the "
+        "addressed_to_basis": "the phrase 'Dear Tribal Leader'/'DTLL' in the "
                               "publisher's own URL slug",
         "document_url": url,
         "document_format": "html",
         "is_enclosure": 0,
-        "source_index_url": "https://www.bia.gov/sitemap.xml",
+        "source_index_url": index_url or "https://www.bia.gov/sitemap.xml",
         "source_index_http_status": 200,
         "source_index_year": iso[:4] if iso else "",
         "harvest_method": "publisher_sitemap_enumeration",
@@ -600,45 +606,42 @@ def harvest_ihs(sess, letters, coverage):
         release_host(host, "IHS DTLL year indexes", downloaded, skipped, refused)
 
 
-def harvest_bia(sess, letters, coverage):
-    host = "www.bia.gov"
-    if not claim_host(host, "BIA Dear Tribal Leader letters from its sitemap"):
-        coverage.append(cov_row(host, "Bureau of Indian Affairs",
-                                "BIA news: Dear Tribal Leader letters",
-                                "", "", "", "", "", "", "NOT_CHECKED",
+def harvest_indian_affairs_drupal(sess, host, agency, agency_code, series,
+                                  letters, coverage):
+    """bia.gov and bie.edu run the same Indian Affairs Drupal install and both
+    enumerate their Dear Tribal Leader letters in their own sitemap."""
+    if not claim_host(host, f"{agency} Dear Tribal Leader letters from its sitemap"):
+        coverage.append(cov_row(host, agency, series, "", "", "", "", "", "",
+                                "NOT_CHECKED",
                                 "host held by another poller; deferred"))
         return
     downloaded, skipped, refused = [], [], []
     try:
-        ok, why = robots_allows(sess, host, "/news/")
+        ok, why = robots_allows(sess, host, "/news")
         if not ok:
             coverage.append(cov_row(
-                host, "Bureau of Indian Affairs",
-                "BIA news: Dear Tribal Leader letters",
-                f"https://{host}/robots.txt", "", "", "", "", "",
-                "ROBOTS_FORBIDDEN", why))
+                host, agency, series, f"https://{host}/robots.txt", "", "", "",
+                "", "", "ROBOTS_FORBIDDEN", why))
             return
         st, sm, nb, cached = get(sess, f"https://{host}/sitemap.xml")
         if st != 200:
             coverage.append(cov_row(
-                host, "Bureau of Indian Affairs",
-                "BIA news: Dear Tribal Leader letters",
-                f"https://{host}/sitemap.xml", st, nb, "", "", "",
-                "NOT_CHECKED", f"HTTP {st} on the sitemap; NOT an absence"))
+                host, agency, series, f"https://{host}/sitemap.xml", st, nb,
+                "", "", "", "NOT_CHECKED",
+                f"HTTP {st} on the sitemap; NOT an absence"))
             return
         (skipped if cached else downloaded).append("sitemap.xml")
-        # bia.gov/sitemap.xml is a Drupal simple_sitemap INDEX naming its own
-        # children. THE ?page=N LOOP FAILS OPEN: page=3..20 return the INDEX
+        # THE ?page=N LOOP FAILS OPEN on this CMS: page=3..20 return the INDEX
         # itself, HTTP 200, two <loc>s each. The first pass of this script
-        # counted 2,448 URLs "over 20 pages" from exactly that - the same
-        # fail-open shape as FPDS `AGENCY_CODE:` in docs/PULL_DISCIPLINE.md.
+        # counted 2,448 bia.gov URLs "over 20 pages" from exactly that - the
+        # same fail-open shape as FPDS `AGENCY_CODE:` in docs/PULL_DISCIPLINE.md.
         # Walk the index's own children and nothing else.
         all_locs, shards = [], []
         if is_sitemap_index(sm):
             shards = sitemap_locs(sm)
             for c in shards:
                 st, txt, nb, cached = get(sess, c)
-                if st != 200 or is_sitemap_index(txt):
+                if st != 200 or txt is None or is_sitemap_index(txt):
                     refused.append(c)
                     continue
                 (skipped if cached else downloaded).append(c)
@@ -647,41 +650,37 @@ def harvest_bia(sess, letters, coverage):
             shards = [f"https://{host}/sitemap.xml"]
             all_locs += sitemap_locs(sm)
         hits = sorted({u for u in all_locs if DTLL_URL.search(u)})
-        n = len(shards) + 1
-        print(f"  [1090] bia.gov sitemap: {len(all_locs):,} URLs over "
+        print(f"  [1090] {host} sitemap: {len(all_locs):,} URLs over "
               f"{len(shards)} shard(s), {len(hits)} DTLL URL(s)")
         found = 0
         for u in hits:
             st, txt, nb, cached = get(sess, u)
-            if st != 200:
+            if st != 200 or txt is None:
                 refused.append(u)
                 continue
             (skipped if cached else downloaded).append(u)
-            letters.append(parse_bia_news_page(txt, u))
+            letters.append(parse_bia_news_page(
+                txt, u, agency=agency, agency_code=agency_code, series=series,
+                index_url=f"https://{host}/sitemap.xml"))
             found += 1
         coverage.append(cov_row(
-            host, "Bureau of Indian Affairs",
-            "BIA news: Dear Tribal Leader letters",
-            f"https://{host}/sitemap.xml", 200, nb, len(shards), len(shards),
-            found, "REPORTED_FLOOR",
+            host, agency, series, f"https://{host}/sitemap.xml", 200, nb,
+            len(shards), len(shards), found, "REPORTED_FLOOR",
             f"{found} letter(s) from {len(hits)} DTLL URL(s) across "
             f"{len(all_locs):,} sitemap URLs in {len(shards)} shard(s). "
-            f"A FLOOR: a Drupal sitemap need not carry every node, and BIA "
-            f"publishes letters under /news/ that its sitemap does not name"))
+            f"A FLOOR: a Drupal sitemap need not carry every node"))
     except EdgeRefusal as e:
         refused.append(str(e))
-        coverage.append(cov_row(
-            host, "Bureau of Indian Affairs",
-            "BIA news: Dear Tribal Leader letters", f"https://{host}/", 0, 0,
-            "", "", "", "NOT_CHECKED", f"edge refusal: {e}"))
+        coverage.append(cov_row(host, agency, series, f"https://{host}/", 0, 0,
+                                "", "", "", "NOT_CHECKED",
+                                f"edge refusal: {e}"))
     finally:
-        release_host(host, "BIA DTLL sitemap enumeration", downloaded, skipped,
-                     refused)
+        release_host(host, f"{agency} DTLL sitemap enumeration", downloaded,
+                     skipped, refused)
 
 
 PROBE_HOSTS = [
     ("www.doi.gov", "Department of the Interior"),
-    ("www.bie.edu", "Bureau of Indian Education"),
     ("www.hhs.gov", "Department of Health and Human Services"),
     ("www.hud.gov", "Department of Housing and Urban Development"),
     ("www.epa.gov", "Environmental Protection Agency"),
@@ -730,21 +729,41 @@ def probe_host(sess, host, agency, coverage):
                 f"refused or missing index says nothing about what the agency "
                 f"publishes"))
             return
+        # A sitemap index may be NESTED - doi.gov's /doi-news/sitemap.xml is
+        # itself an index. Counting a nested index as "walked" would report a
+        # shard measured that contributed nothing, so it is expanded instead,
+        # to a bounded depth and a bounded budget.
         hits, shards_total, shards_walked = set(), 1, 1
         if is_sitemap_index(sm):
-            children = sitemap_locs(sm)
-            shards_total = len(children)
-            pri = [c for c in children
-                   if re.search(r"news|press|page|node|content|document|letter",
-                                c, re.I)]
-            order = pri + [c for c in children if c not in pri]
+            frontier = [(c, 0) for c in sitemap_locs(sm)]
+            shards_total = len(frontier)
             shards_walked = 0
-            for c in order[:MAX_CHILD]:
+            budget = MAX_CHILD
+            seen_sm = {sm_url}
+            while frontier and budget > 0:
+                pri = [x for x in frontier
+                       if re.search(r"news|press|page|node|content|document"
+                                    r"|letter", x[0], re.I)]
+                nxt = (pri or frontier)[0]
+                frontier.remove(nxt)
+                c, depth = nxt
+                if c in seen_sm:
+                    continue
+                seen_sm.add(c)
+                budget -= 1
                 st, txt, nb, cached = get(sess, c)
-                # a shard that hands back the INDEX is the ?page fail-open
-                if st != 200 or txt is None or is_sitemap_index(txt):
+                # a shard that hands back the SAME index is the ?page fail-open
+                if st != 200 or txt is None:
                     continue
                 (skipped if cached else downloaded).append(c)
+                if is_sitemap_index(txt):
+                    if depth >= 2:
+                        continue
+                    kids = [(k, depth + 1) for k in sitemap_locs(txt)
+                            if k not in seen_sm]
+                    frontier += kids
+                    shards_total += len(kids)
+                    continue
                 shards_walked += 1
                 hits |= {u for u in sitemap_locs(txt) if DTLL_URL.search(u)}
         else:
@@ -847,6 +866,44 @@ def check_invariants(letters, coverage):
             break
         seen[u] = 1
     return bad
+
+
+def collapse_repeat_listings(letters):
+    """Grain is one row per DOCUMENT. A publisher may list the same document
+    under more than one date - IHS does it 8 times in 783 documents, mostly an
+    enclosure re-attached to a later letter, once a 2009 letter carried into
+    the 2010 index. Collapsing on `document_url` and DROPPING the other dates
+    would delete something the publisher said, so the earliest stated date is
+    the row's date and every other stated date is preserved verbatim in
+    `also_listed_under_dates`. Nothing is invented and nothing is discarded.
+    """
+    by_url = {}
+    order = []
+    for r in letters:
+        u = r["document_url"]
+        if u not in by_url:
+            by_url[u] = dict(r)
+            by_url[u]["index_listing_count"] = 1
+            by_url[u]["_dates"] = [r.get("letter_date_verbatim", "")]
+            order.append(u)
+            continue
+        keep = by_url[u]
+        keep["index_listing_count"] += 1
+        keep["_dates"].append(r.get("letter_date_verbatim", ""))
+        a, b = keep.get("letter_date", ""), r.get("letter_date", "")
+        if b and (not a or b < a):
+            keep["letter_date"] = b
+            keep["letter_date_verbatim"] = r.get("letter_date_verbatim", "")
+            keep["source_index_url"] = r.get("source_index_url", "")
+            keep["source_index_year"] = r.get("source_index_year", "")
+    out = []
+    for u in order:
+        r = by_url[u]
+        dates = [d for d in dict.fromkeys(r.pop("_dates")) if d]
+        others = [d for d in dates if d != r.get("letter_date_verbatim")]
+        r["also_listed_under_dates"] = "; ".join(others)
+        out.append(r)
+    return out
 
 
 def write_csv(path, cols, rows):
@@ -959,9 +1016,16 @@ def run_harvest(probe_only=False):
     sess = requests.Session()
     if not probe_only:
         harvest_ihs(sess, letters, coverage)
-        harvest_bia(sess, letters, coverage)
+        harvest_indian_affairs_drupal(
+            sess, "www.bia.gov", "Bureau of Indian Affairs", "DOI-BIA",
+            "BIA news: Dear Tribal Leader letters", letters, coverage)
+        harvest_indian_affairs_drupal(
+            sess, "www.bie.edu", "Bureau of Indian Education", "DOI-BIE",
+            "BIE news: Dear Tribal Leader letters", letters, coverage)
     for host, agency in PROBE_HOSTS:
         probe_host(sess, host, agency, coverage)
+
+    letters = collapse_repeat_listings(letters)
 
     bad = check_invariants(letters, coverage)
     if bad:

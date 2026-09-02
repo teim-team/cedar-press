@@ -5,32 +5,44 @@
   "consultation_events_dear_tribal_leader_letter": 6
  },
  "cedar_after": {
-  "dear_tribal_leader_letters_rows": 383,
-  "letters_excluding_enclosures": 321,
-  "enclosures": 62,
-  "letters_with_no_date_the_publisher_stated": 9,
+  "dear_tribal_leader_letters_rows": 807,
+  "letters_excluding_enclosures": 598,
+  "enclosures": 209,
+  "letters_with_no_date_the_publisher_stated": 1,
   "by_agency": {
-   "Indian Health Service": 312,
-   "Bureau of Indian Affairs": 9
+   "Indian Health Service": 574,
+   "Bureau of Indian Affairs": 10,
+   "Bureau of Indian Education": 14
   },
   "by_year": {
-   "2011": 1,
-   "2012": 1,
-   "2013": 2,
-   "2014": 5,
-   "2015": 1,
-   "2016": 19,
-   "2017": 6,
+   "2000": 7,
+   "2001": 28,
+   "2002": 13,
+   "2003": 24,
+   "2004": 17,
+   "2005": 9,
+   "2006": 3,
+   "2007": 4,
+   "2008": 1,
+   "2009": 10,
+   "2010": 19,
+   "2011": 16,
+   "2012": 31,
+   "2013": 17,
+   "2014": 19,
+   "2015": 16,
+   "2016": 40,
+   "2017": 25,
    "2018": 28,
-   "2019": 25,
+   "2019": 26,
    "2020": 29,
-   "2021": 33,
+   "2021": 49,
    "2022": 29,
-   "2023": 39,
-   "2024": 44,
+   "2023": 38,
+   "2024": 49,
    "2025": 31,
    "2026": 19,
-   "unkn": 9
+   "unkn": 1
   }
  },
  "coverage": [
@@ -44,9 +56,9 @@
    "response_bytes": 74323,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 0,
+   "letters_found": 11,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "0 letter(s) addressed to tribal leaders on the publisher's own 2000 index",
+   "verdict": "11 letter(s) addressed to tribal leaders on the publisher's own 2000 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -57,12 +69,12 @@
    "series": "IHS Dear Tribal Leader Letters 2001",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2001letters/",
    "http_status": 200,
-   "response_bytes": 82404,
+   "response_bytes": 83775,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 0,
+   "letters_found": 34,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "0 letter(s) addressed to tribal leaders on the publisher's own 2001 index",
+   "verdict": "34 letter(s) addressed to tribal leaders on the publisher's own 2001 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -73,12 +85,12 @@
    "series": "IHS Dear Tribal Leader Letters 2002",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2002letters/",
    "http_status": 200,
-   "response_bytes": 75940,
+   "response_bytes": 77221,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 0,
+   "letters_found": 17,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "0 letter(s) addressed to tribal leaders on the publisher's own 2002 index",
+   "verdict": "17 letter(s) addressed to tribal leaders on the publisher's own 2002 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -89,12 +101,12 @@
    "series": "IHS Dear Tribal Leader Letters 2003",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2003letters/",
    "http_status": 200,
-   "response_bytes": 78884,
+   "response_bytes": 80188,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 0,
+   "letters_found": 25,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "0 letter(s) addressed to tribal leaders on the publisher's own 2003 index",
+   "verdict": "25 letter(s) addressed to tribal leaders on the publisher's own 2003 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -105,12 +117,12 @@
    "series": "IHS Dear Tribal Leader Letters 2004",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2004letters/",
    "http_status": 200,
-   "response_bytes": 76283,
+   "response_bytes": 77576,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 0,
+   "letters_found": 17,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "0 letter(s) addressed to tribal leaders on the publisher's own 2004 index",
+   "verdict": "17 letter(s) addressed to tribal leaders on the publisher's own 2004 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -121,12 +133,12 @@
    "series": "IHS Dear Tribal Leader Letters 2005",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2005letters/",
    "http_status": 200,
-   "response_bytes": 73263,
+   "response_bytes": 74515,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 0,
+   "letters_found": 10,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "0 letter(s) addressed to tribal leaders on the publisher's own 2005 index",
+   "verdict": "10 letter(s) addressed to tribal leaders on the publisher's own 2005 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -137,12 +149,12 @@
    "series": "IHS Dear Tribal Leader Letters 2006",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2006letters/",
    "http_status": 200,
-   "response_bytes": 70194,
+   "response_bytes": 71411,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 0,
+   "letters_found": 3,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "0 letter(s) addressed to tribal leaders on the publisher's own 2006 index",
+   "verdict": "3 letter(s) addressed to tribal leaders on the publisher's own 2006 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -153,12 +165,12 @@
    "series": "IHS Dear Tribal Leader Letters 2007",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2007-letters/",
    "http_status": 200,
-   "response_bytes": 70515,
+   "response_bytes": 71740,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 0,
+   "letters_found": 4,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "0 letter(s) addressed to tribal leaders on the publisher's own 2007 index",
+   "verdict": "4 letter(s) addressed to tribal leaders on the publisher's own 2007 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -169,12 +181,12 @@
    "series": "IHS Dear Tribal Leader Letters 2008",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2008letters/",
    "http_status": 200,
-   "response_bytes": 69488,
+   "response_bytes": 70699,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 0,
+   "letters_found": 1,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "0 letter(s) addressed to tribal leaders on the publisher's own 2008 index",
+   "verdict": "1 letter(s) addressed to tribal leaders on the publisher's own 2008 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -185,12 +197,12 @@
    "series": "IHS Dear Tribal Leader Letters 2009",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2009letters/",
    "http_status": 200,
-   "response_bytes": 74048,
+   "response_bytes": 75297,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 0,
+   "letters_found": 11,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "0 letter(s) addressed to tribal leaders on the publisher's own 2009 index",
+   "verdict": "11 letter(s) addressed to tribal leaders on the publisher's own 2009 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -201,12 +213,12 @@
    "series": "IHS Dear Tribal Leader Letters 2010",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2010letters/",
    "http_status": 200,
-   "response_bytes": 77072,
+   "response_bytes": 78363,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 0,
+   "letters_found": 20,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "0 letter(s) addressed to tribal leaders on the publisher's own 2010 index",
+   "verdict": "20 letter(s) addressed to tribal leaders on the publisher's own 2010 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -217,12 +229,12 @@
    "series": "IHS Dear Tribal Leader Letters 2011",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2011letters/",
    "http_status": 200,
-   "response_bytes": 76574,
+   "response_bytes": 77845,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 1,
+   "letters_found": 16,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "1 letter(s) addressed to tribal leaders on the publisher's own 2011 index",
+   "verdict": "16 letter(s) addressed to tribal leaders on the publisher's own 2011 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -233,12 +245,12 @@
    "series": "IHS Dear Tribal Leader Letters 2012",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2012letters/",
    "http_status": 200,
-   "response_bytes": 86304,
+   "response_bytes": 87713,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 1,
+   "letters_found": 35,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "1 letter(s) addressed to tribal leaders on the publisher's own 2012 index",
+   "verdict": "35 letter(s) addressed to tribal leaders on the publisher's own 2012 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -249,12 +261,12 @@
    "series": "IHS Dear Tribal Leader Letters 2013",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2013letters/",
    "http_status": 200,
-   "response_bytes": 77820,
+   "response_bytes": 79089,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 2,
+   "letters_found": 20,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "2 letter(s) addressed to tribal leaders on the publisher's own 2013 index",
+   "verdict": "20 letter(s) addressed to tribal leaders on the publisher's own 2013 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -265,12 +277,12 @@
    "series": "IHS Dear Tribal Leader Letters 2014",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2014letters/",
    "http_status": 200,
-   "response_bytes": 78536,
+   "response_bytes": 79819,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 5,
+   "letters_found": 20,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "5 letter(s) addressed to tribal leaders on the publisher's own 2014 index",
+   "verdict": "20 letter(s) addressed to tribal leaders on the publisher's own 2014 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -281,12 +293,12 @@
    "series": "IHS Dear Tribal Leader Letters 2015",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2015letters/",
    "http_status": 200,
-   "response_bytes": 80460,
+   "response_bytes": 81773,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 2,
+   "letters_found": 27,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "2 letter(s) addressed to tribal leaders on the publisher's own 2015 index",
+   "verdict": "27 letter(s) addressed to tribal leaders on the publisher's own 2015 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -297,12 +309,12 @@
    "series": "IHS Dear Tribal Leader Letters 2016",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2016letters/",
    "http_status": 200,
-   "response_bytes": 101224,
+   "response_bytes": 102721,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 19,
+   "letters_found": 66,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "19 letter(s) addressed to tribal leaders on the publisher's own 2016 index",
+   "verdict": "66 letter(s) addressed to tribal leaders on the publisher's own 2016 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -313,12 +325,12 @@
    "series": "IHS Dear Tribal Leader Letters 2017",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2017letters/",
    "http_status": 200,
-   "response_bytes": 85506,
+   "response_bytes": 86829,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 6,
+   "letters_found": 33,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "6 letter(s) addressed to tribal leaders on the publisher's own 2017 index",
+   "verdict": "33 letter(s) addressed to tribal leaders on the publisher's own 2017 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -329,12 +341,12 @@
    "series": "IHS Dear Tribal Leader Letters 2018",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2018letters/",
    "http_status": 200,
-   "response_bytes": 93160,
+   "response_bytes": 94597,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 29,
+   "letters_found": 50,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "29 letter(s) addressed to tribal leaders on the publisher's own 2018 index",
+   "verdict": "50 letter(s) addressed to tribal leaders on the publisher's own 2018 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -345,12 +357,12 @@
    "series": "IHS Dear Tribal Leader Letters 2019",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2019letters/",
    "http_status": 200,
-   "response_bytes": 88060,
+   "response_bytes": 89417,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 28,
+   "letters_found": 38,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "28 letter(s) addressed to tribal leaders on the publisher's own 2019 index",
+   "verdict": "38 letter(s) addressed to tribal leaders on the publisher's own 2019 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -361,12 +373,12 @@
    "series": "IHS Dear Tribal Leader Letters 2020",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2020letters/",
    "http_status": 200,
-   "response_bytes": 92417,
+   "response_bytes": 93828,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 39,
+   "letters_found": 44,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "39 letter(s) addressed to tribal leaders on the publisher's own 2020 index",
+   "verdict": "44 letter(s) addressed to tribal leaders on the publisher's own 2020 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -377,12 +389,12 @@
    "series": "IHS Dear Tribal Leader Letters 2021",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2021letters/",
    "http_status": 200,
-   "response_bytes": 89834,
+   "response_bytes": 91157,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 36,
+   "letters_found": 40,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "36 letter(s) addressed to tribal leaders on the publisher's own 2021 index",
+   "verdict": "40 letter(s) addressed to tribal leaders on the publisher's own 2021 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -393,12 +405,12 @@
    "series": "IHS Dear Tribal Leader Letters 2022",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2022-letters/",
    "http_status": 200,
-   "response_bytes": 86981,
+   "response_bytes": 88336,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 32,
+   "letters_found": 41,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "32 letter(s) addressed to tribal leaders on the publisher's own 2022 index",
+   "verdict": "41 letter(s) addressed to tribal leaders on the publisher's own 2022 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -409,12 +421,12 @@
    "series": "IHS Dear Tribal Leader Letters 2023",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2023-letters/",
    "http_status": 200,
-   "response_bytes": 98066,
+   "response_bytes": 99529,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 52,
+   "letters_found": 64,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "52 letter(s) addressed to tribal leaders on the publisher's own 2023 index",
+   "verdict": "64 letter(s) addressed to tribal leaders on the publisher's own 2023 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -425,12 +437,12 @@
    "series": "IHS Dear Tribal Leader Letters 2024",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2024-letters/",
    "http_status": 200,
-   "response_bytes": 104041,
+   "response_bytes": 105516,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 56,
+   "letters_found": 70,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "56 letter(s) addressed to tribal leaders on the publisher's own 2024 index",
+   "verdict": "70 letter(s) addressed to tribal leaders on the publisher's own 2024 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -441,12 +453,12 @@
    "series": "IHS Dear Tribal Leader Letters 2025",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2025-letters/",
    "http_status": 200,
-   "response_bytes": 91965,
+   "response_bytes": 93343,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 45,
+   "letters_found": 47,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "45 letter(s) addressed to tribal leaders on the publisher's own 2025 index",
+   "verdict": "47 letter(s) addressed to tribal leaders on the publisher's own 2025 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -457,12 +469,12 @@
    "series": "IHS Dear Tribal Leader Letters 2026",
    "url": "https://www.ihs.gov/newsroom/triballeaderletters/2026-letters/",
    "http_status": 200,
-   "response_bytes": 82545,
+   "response_bytes": 83846,
    "index_shards_total": 1,
    "index_shards_walked": 1,
-   "letters_found": 21,
+   "letters_found": 27,
    "coverage_status": "ENUMERATED_IN_FULL",
-   "verdict": "21 letter(s) addressed to tribal leaders on the publisher's own 2026 index",
+   "verdict": "27 letter(s) addressed to tribal leaders on the publisher's own 2026 index",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -473,12 +485,28 @@
    "series": "BIA news: Dear Tribal Leader letters",
    "url": "https://www.bia.gov/sitemap.xml",
    "http_status": 200,
-   "response_bytes": 58983,
-   "index_shards_total": 20,
-   "index_shards_walked": 20,
-   "letters_found": 9,
+   "response_bytes": 43907,
+   "index_shards_total": 2,
+   "index_shards_walked": 2,
+   "letters_found": 10,
    "coverage_status": "REPORTED_FLOOR",
-   "verdict": "9 letter(s) from 9 DTLL URL(s) across 2,448 sitemap URLs. A FLOOR: a paginated Drupal sitemap need not carry every node",
+   "verdict": "10 letter(s) from 10 DTLL URL(s) across 2,412 sitemap URLs in 2 shard(s). A FLOOR: a Drupal sitemap need not carry every node",
+   "probed_date": "2026-09-02",
+   "probed_by_script": "code/1090_dtll_agency_harvest.py"
+  },
+  {
+   "coverage_id": "DTLLCOV-41930072adddae9e",
+   "source_host": "www.bie.edu",
+   "agency": "Bureau of Indian Education",
+   "series": "BIE news: Dear Tribal Leader letters",
+   "url": "https://www.bie.edu/sitemap.xml",
+   "http_status": 200,
+   "response_bytes": 58130,
+   "index_shards_total": 1,
+   "index_shards_walked": 1,
+   "letters_found": 14,
+   "coverage_status": "REPORTED_FLOOR",
+   "verdict": "14 letter(s) from 14 DTLL URL(s) across 1,585 sitemap URLs in 1 shard(s). A FLOOR: a Drupal sitemap need not carry every node",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -489,28 +517,12 @@
    "series": "agency DTLL series",
    "url": "https://www.doi.gov/sitemap.xml",
    "http_status": 200,
-   "response_bytes": 53678,
+   "response_bytes": 55505,
    "index_shards_total": 3,
-   "index_shards_walked": 3,
-   "letters_found": 0,
-   "coverage_status": "NOT_IN_SOURCE",
-   "verdict": "the publisher's own sitemap (3 of 3 shard(s), walked in full) enumerates 0 URL naming a Dear Tribal Leader letter",
-   "probed_date": "2026-09-02",
-   "probed_by_script": "code/1090_dtll_agency_harvest.py"
-  },
-  {
-   "coverage_id": "DTLLCOV-d737fe24ae18c52d",
-   "source_host": "www.bie.edu",
-   "agency": "Bureau of Indian Education",
-   "series": "agency DTLL series",
-   "url": "https://www.bie.edu/sitemap.xml",
-   "http_status": 200,
-   "response_bytes": 395127,
-   "index_shards_total": 1,
    "index_shards_walked": 1,
    "letters_found": 0,
-   "coverage_status": "NOT_IN_SOURCE",
-   "verdict": "the publisher's own sitemap (1 of 1 shard(s), walked in full) enumerates 0 URL naming a Dear Tribal Leader letter",
+   "coverage_status": "REPORTED_FLOOR_PARTIAL_INDEX",
+   "verdict": "0 DTLL URL(s) from 1 of 3 sitemap shard(s). UNMEASURED beyond those shards - this is NOT an absence and must never be read as one",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -526,7 +538,7 @@
    "index_shards_walked": "",
    "letters_found": "",
    "coverage_status": "NOT_CHECKED",
-   "verdict": "HTTP 403 on the sitemap. NOT an absence - only 404 and 403 are facts about an object, and neither is this",
+   "verdict": "no index served: https://www.hhs.gov/sitemap.xml -> HTTP 403. NOT an absence - a refused or missing index says nothing about what the agency publishes",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -542,7 +554,7 @@
    "index_shards_walked": "",
    "letters_found": "",
    "coverage_status": "NOT_CHECKED",
-   "verdict": "HTTP 404 on the sitemap. NOT an absence - only 404 and 403 are facts about an object, and neither is this",
+   "verdict": "no index served: https://www.hud.gov/sitemap.xml -> HTTP 404. NOT an absence - a refused or missing index says nothing about what the agency publishes",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -553,7 +565,7 @@
    "series": "agency DTLL series",
    "url": "https://www.epa.gov/sitemap.xml",
    "http_status": 200,
-   "response_bytes": 428143,
+   "response_bytes": 438148,
    "index_shards_total": 38,
    "index_shards_walked": 6,
    "letters_found": 0,
@@ -569,7 +581,7 @@
    "series": "agency DTLL series",
    "url": "https://www.usda.gov/sitemap.xml",
    "http_status": 200,
-   "response_bytes": 43120,
+   "response_bytes": 44125,
    "index_shards_total": 8,
    "index_shards_walked": 6,
    "letters_found": 0,
@@ -602,314 +614,9 @@
    "bytes": 69
   },
   {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2001letters/",
-   "http_status": 200,
-   "bytes": 82404
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2002letters/",
-   "http_status": 200,
-   "bytes": 75940
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2003letters/",
-   "http_status": 200,
-   "bytes": 78884
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2004letters/",
-   "http_status": 200,
-   "bytes": 76283
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2005letters/",
-   "http_status": 200,
-   "bytes": 73263
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2006letters/",
-   "http_status": 200,
-   "bytes": 70194
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2007-letters/",
-   "http_status": 200,
-   "bytes": 70515
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2008letters/",
-   "http_status": 200,
-   "bytes": 69488
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2009letters/",
-   "http_status": 200,
-   "bytes": 74048
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2010letters/",
-   "http_status": 200,
-   "bytes": 77072
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2011letters/",
-   "http_status": 200,
-   "bytes": 76574
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2012letters/",
-   "http_status": 200,
-   "bytes": 86304
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2013letters/",
-   "http_status": 200,
-   "bytes": 77820
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2014letters/",
-   "http_status": 200,
-   "bytes": 78536
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2015letters/",
-   "http_status": 200,
-   "bytes": 80460
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2016letters/",
-   "http_status": 200,
-   "bytes": 101224
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2017letters/",
-   "http_status": 200,
-   "bytes": 85506
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2018letters/",
-   "http_status": 200,
-   "bytes": 93160
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2019letters/",
-   "http_status": 200,
-   "bytes": 88060
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2020letters/",
-   "http_status": 200,
-   "bytes": 92417
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2021letters/",
-   "http_status": 200,
-   "bytes": 89834
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2022-letters/",
-   "http_status": 200,
-   "bytes": 86981
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2023-letters/",
-   "http_status": 200,
-   "bytes": 98066
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2024-letters/",
-   "http_status": 200,
-   "bytes": 104041
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2025-letters/",
-   "http_status": 200,
-   "bytes": 91965
-  },
-  {
-   "url": "https://www.ihs.gov/newsroom/triballeaderletters/2026-letters/",
-   "http_status": 200,
-   "bytes": 82545
-  },
-  {
    "url": "https://www.bia.gov/robots.txt",
    "http_status": 200,
    "bytes": 2027
-  },
-  {
-   "url": "https://www.bia.gov/sitemap.xml",
-   "http_status": 200,
-   "bytes": 548
-  },
-  {
-   "url": "https://www.bia.gov/sitemap.xml?page=1",
-   "http_status": 200,
-   "bytes": 407481
-  },
-  {
-   "url": "https://www.bia.gov/sitemap.xml?page=2",
-   "http_status": 200,
-   "bytes": 85819
-  },
-  {
-   "url": "https://www.bia.gov/sitemap.xml?page=3",
-   "http_status": 200,
-   "bytes": 548
-  },
-  {
-   "url": "https://www.bia.gov/sitemap.xml?page=4",
-   "http_status": 200,
-   "bytes": 548
-  },
-  {
-   "url": "https://www.bia.gov/sitemap.xml?page=5",
-   "http_status": 200,
-   "bytes": 548
-  },
-  {
-   "url": "https://www.bia.gov/sitemap.xml?page=6",
-   "http_status": 200,
-   "bytes": 548
-  },
-  {
-   "url": "https://www.bia.gov/sitemap.xml?page=7",
-   "http_status": 200,
-   "bytes": 548
-  },
-  {
-   "url": "https://www.bia.gov/sitemap.xml?page=8",
-   "http_status": 200,
-   "bytes": 548
-  },
-  {
-   "url": "https://www.bia.gov/sitemap.xml?page=9",
-   "http_status": 200,
-   "bytes": 548
-  },
-  {
-   "url": "https://www.bia.gov/sitemap.xml?page=10",
-   "http_status": 200,
-   "bytes": 548
-  },
-  {
-   "url": "https://www.bia.gov/sitemap.xml?page=11",
-   "http_status": 200,
-   "bytes": 548
-  },
-  {
-   "url": "https://www.bia.gov/sitemap.xml?page=12",
-   "http_status": 200,
-   "bytes": 548
-  },
-  {
-   "url": "https://www.bia.gov/sitemap.xml?page=13",
-   "http_status": 200,
-   "bytes": 548
-  },
-  {
-   "url": "https://www.bia.gov/sitemap.xml?page=14",
-   "http_status": 200,
-   "bytes": 548
-  },
-  {
-   "url": "https://www.bia.gov/sitemap.xml?page=15",
-   "http_status": 200,
-   "bytes": 548
-  },
-  {
-   "url": "https://www.bia.gov/sitemap.xml?page=16",
-   "http_status": 200,
-   "bytes": 548
-  },
-  {
-   "url": "https://www.bia.gov/sitemap.xml?page=17",
-   "http_status": 200,
-   "bytes": 548
-  },
-  {
-   "url": "https://www.bia.gov/sitemap.xml?page=18",
-   "http_status": 200,
-   "bytes": 548
-  },
-  {
-   "url": "https://www.bia.gov/sitemap.xml?page=19",
-   "http_status": 200,
-   "bytes": 548
-  },
-  {
-   "url": "https://www.bia.gov/sitemap.xml?page=20",
-   "http_status": 200,
-   "bytes": 548
-  },
-  {
-   "url": "https://www.bia.gov/news/american-rescue-plan-webpage-update-new-dear-tribal-leader-letter-and-form-now-available",
-   "http_status": 200,
-   "bytes": 44321
-  },
-  {
-   "url": "https://www.bia.gov/news/dear-tribal-leader-letter",
-   "http_status": 200,
-   "bytes": 60300
-  },
-  {
-   "url": "https://www.bia.gov/news/dear-tribal-leader-letter-announcing-tribal-enrollment-data-collection-form",
-   "http_status": 200,
-   "bytes": 50221
-  },
-  {
-   "url": "https://www.bia.gov/news/dear-tribal-leader-letter-bie-draft-policies-certificate-completion",
-   "http_status": 200,
-   "bytes": 50623
-  },
-  {
-   "url": "https://www.bia.gov/news/dear-tribal-leader-letter-bie-school-reopening",
-   "http_status": 200,
-   "bytes": 51548
-  },
-  {
-   "url": "https://www.bia.gov/news/dear-tribal-leader-letter-bie-state-assessment-waiver-consultations",
-   "http_status": 200,
-   "bytes": 54571
-  },
-  {
-   "url": "https://www.bia.gov/news/dear-tribal-leader-letter-indian-business-incubators-program-proposed-rule-consultation",
-   "http_status": 200,
-   "bytes": 49459
-  },
-  {
-   "url": "https://www.bia.gov/news/dear-tribal-leader-letter-non-federal-membership-nominations",
-   "http_status": 200,
-   "bytes": 54047
-  },
-  {
-   "url": "https://www.bia.gov/news/dear-tribal-leader-letter-not-invisible-act-commission-tribal-consultation",
-   "http_status": 200,
-   "bytes": 58983
-  },
-  {
-   "url": "https://www.doi.gov/robots.txt",
-   "http_status": 200,
-   "bytes": 2289
-  },
-  {
-   "url": "https://www.doi.gov/sitemap.xml",
-   "http_status": 200,
-   "bytes": 743
-  },
-  {
-   "url": "https://www.doi.gov/document-library/sitemap.xml",
-   "http_status": 200,
-   "bytes": 582
-  },
-  {
-   "url": "https://www.doi.gov/doi-news/sitemap.xml",
-   "http_status": 200,
-   "bytes": 828
-  },
-  {
-   "url": "https://www.doi.gov/default/sitemap.xml",
-   "http_status": 200,
-   "bytes": 53678
   },
   {
    "url": "https://www.bie.edu/robots.txt",
@@ -917,9 +624,79 @@
    "bytes": 2027
   },
   {
-   "url": "https://www.bie.edu/sitemap.xml",
+   "url": "https://www.bie.edu/news-article/dtll-2023-bie-special-education-policies-and-procedures-tribal-consultation",
    "http_status": 200,
-   "bytes": 395127
+   "bytes": 56417
+  },
+  {
+   "url": "https://www.bie.edu/news-article/dtll-bie-agency-plan-tribal-consultation",
+   "http_status": 200,
+   "bytes": 58631
+  },
+  {
+   "url": "https://www.bie.edu/news-article/dtll-bie-data-sovereignty-listening-session",
+   "http_status": 200,
+   "bytes": 56209
+  },
+  {
+   "url": "https://www.bie.edu/news-article/dtll-bie-strategic-direction-tribal-consultations",
+   "http_status": 200,
+   "bytes": 58770
+  },
+  {
+   "url": "https://www.bie.edu/news-article/dtll-indian-school-equalization-program-and-isep-transportation-tribal-listening",
+   "http_status": 200,
+   "bytes": 61310
+  },
+  {
+   "url": "https://www.bie.edu/news-article/dtll-indian-school-equalization-program-and-student-transportation-2021",
+   "http_status": 200,
+   "bytes": 54877
+  },
+  {
+   "url": "https://www.bie.edu/news-article/dtll-indian-school-equalization-program-eligibility-criteria",
+   "http_status": 200,
+   "bytes": 55269
+  },
+  {
+   "url": "https://www.bie.edu/news-article/dtll-invitation-tribal-consultation-south-dakota-education-resource-centers",
+   "http_status": 200,
+   "bytes": 51692
+  },
+  {
+   "url": "https://www.bie.edu/news-article/dtll-johnson-omalley-program-listening-sessions-2021",
+   "http_status": 200,
+   "bytes": 57164
+  },
+  {
+   "url": "https://www.bie.edu/news-article/dtll-progress-and-promotion-policy-and-certificate-completion-policy-2021",
+   "http_status": 200,
+   "bytes": 54801
+  },
+  {
+   "url": "https://www.bie.edu/news-article/dtll-re-listening-sessions-bie-strategic-direction-2018-2023-years-4-and-5",
+   "http_status": 200,
+   "bytes": 61320
+  },
+  {
+   "url": "https://www.bie.edu/news-article/dtll-school-reopening-plans-consultation-2021",
+   "http_status": 200,
+   "bytes": 59482
+  },
+  {
+   "url": "https://www.bie.edu/news-article/dtll-section-504-listening-session",
+   "http_status": 200,
+   "bytes": 52349
+  },
+  {
+   "url": "https://www.bie.edu/news-article/dtll-state-assessment-waiver-2020-21",
+   "http_status": 200,
+   "bytes": 58130
+  },
+  {
+   "url": "https://www.doi.gov/robots.txt",
+   "http_status": 200,
+   "bytes": 2289
   },
   {
    "url": "https://www.hhs.gov/robots.txt",
@@ -947,89 +724,14 @@
    "bytes": 2035
   },
   {
-   "url": "https://www.epa.gov/sitemap.xml",
-   "http_status": 200,
-   "bytes": 4969
-  },
-  {
-   "url": "https://www.epa.gov/sitemap.xml?page=1",
-   "http_status": 200,
-   "bytes": 404223
-  },
-  {
-   "url": "https://www.epa.gov/sitemap.xml?page=2",
-   "http_status": 200,
-   "bytes": 412307
-  },
-  {
-   "url": "https://www.epa.gov/sitemap.xml?page=3",
-   "http_status": 200,
-   "bytes": 419852
-  },
-  {
-   "url": "https://www.epa.gov/sitemap.xml?page=4",
-   "http_status": 200,
-   "bytes": 421443
-  },
-  {
-   "url": "https://www.epa.gov/sitemap.xml?page=5",
-   "http_status": 200,
-   "bytes": 426040
-  },
-  {
-   "url": "https://www.epa.gov/sitemap.xml?page=6",
-   "http_status": 200,
-   "bytes": 428143
-  },
-  {
    "url": "https://www.usda.gov/robots.txt",
    "http_status": 200,
    "bytes": 2027
   },
   {
-   "url": "https://www.usda.gov/sitemap.xml",
-   "http_status": 200,
-   "bytes": 1288
-  },
-  {
-   "url": "https://www.usda.gov/sitemap.xml?page=1",
-   "http_status": 200,
-   "bytes": 36260
-  },
-  {
-   "url": "https://www.usda.gov/sitemap.xml?page=2",
-   "http_status": 200,
-   "bytes": 44903
-  },
-  {
-   "url": "https://www.usda.gov/sitemap.xml?page=3",
-   "http_status": 200,
-   "bytes": 34924
-  },
-  {
-   "url": "https://www.usda.gov/sitemap.xml?page=4",
-   "http_status": 200,
-   "bytes": 36241
-  },
-  {
-   "url": "https://www.usda.gov/sitemap.xml?page=5",
-   "http_status": 200,
-   "bytes": 44348
-  },
-  {
-   "url": "https://www.usda.gov/sitemap.xml?page=6",
-   "http_status": 200,
-   "bytes": 43120
-  },
-  {
    "url": "https://www.ed.gov/robots.txt",
    "http_status": 404,
    "bytes": 200
-  },
-  {
-   "url": "https://www.ed.gov/sitemap.xml",
-   "http_status": 200,
-   "bytes": 594
   },
   {
    "url": "http://vpvmwevapp001-lkg.azurewebsites.net/sitemap.xml?page=1",
@@ -1043,15 +745,15 @@
   }
  ],
  "requests_by_host": {
-  "www.ihs.gov": 27,
-  "www.bia.gov": 31,
-  "www.doi.gov": 5,
-  "www.bie.edu": 2,
+  "www.ihs.gov": 1,
+  "www.bia.gov": 1,
+  "www.bie.edu": 15,
+  "www.doi.gov": 1,
   "www.hhs.gov": 2,
   "www.hud.gov": 2,
-  "www.epa.gov": 8,
-  "www.usda.gov": 8,
-  "www.ed.gov": 2,
+  "www.epa.gov": 1,
+  "www.usda.gov": 1,
+  "www.ed.gov": 1,
   "vpvmwevapp001-lkg.azurewebsites.net": 2
  }
 }

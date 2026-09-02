@@ -2,15 +2,15 @@
   "mode": "report",
   "date": "2026-09-02",
   "disposition_counts": {
-    "KEEP": 5310,
-    "WITHDRAW": 309,
-    "REPOINT": 69,
-    "HOLD": 1104
+    "KEEP": 5311,
+    "WITHDRAW": 310,
+    "REPOINT": 66,
+    "HOLD": 1105
   },
   "disposition_usd": {
-    "KEEP": 25164691456.58,
-    "WITHDRAW": 11120783735.27,
-    "REPOINT": 2196187868.6,
-    "HOLD": 10315096266.51
+    "KEEP": 25164625044.35,
+    "WITHDRAW": 11121497163.08,
+    "REPOINT": 2196040760.17,
+    "HOLD": 10314596359.33
   }
 }

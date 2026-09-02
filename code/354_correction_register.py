@@ -86,6 +86,24 @@ import os
 import sys
 from pathlib import Path
 
+def _derive(canonical, path):
+    """Canonical order first, then any column the live file already carries.
+
+    A FIXED literal header is the regenerate defect (ADR-017): a wholesale
+    writer silently deleting an in-place enricher's column. Added 2026-09-02
+    after `845` rule 17 flagged this writer as new since its baseline.
+    """
+    import csv as _csv, os as _os
+    if not _os.path.exists(path):
+        return list(canonical)
+    try:
+        with open(path, encoding="utf-8-sig", errors="replace") as _fh:
+            live = next(_csv.reader(_fh), [])
+    except OSError:
+        return list(canonical)
+    return list(canonical) + [c for c in live if c and c not in canonical]
+
+
 csv.field_size_limit(min(sys.maxsize, 2147483647))
 
 CEDAR = Path(__file__).resolve().parent.parent
@@ -197,7 +215,7 @@ def record(rows, script):
     out = existing + fresh
     part = REGISTER.with_suffix(REGISTER.suffix + ".part")
     with open(part, "w", newline="", encoding="utf-8") as fh:
-        w = csv.DictWriter(fh, fieldnames=FIELDS, extrasaction="ignore")
+        w = csv.DictWriter(fh, fieldnames=_derive(FIELDS, REGISTER), extrasaction="ignore")
         w.writeheader()
         for r in out:
             w.writerow({k: r.get(k, "") for k in FIELDS})

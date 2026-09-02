@@ -116,6 +116,37 @@ def log(m):
     print("[%s] %s" % (now(), m), flush=True)
 
 
+def atomic_replace(tmp, dest, tries=40, wait=15):
+    """os.replace, retried.
+
+    Windows denies a rename onto a file ANOTHER PROCESS HAS OPEN FOR READ.
+    Measured 2026-09-02: this exact call raised WinError 5 with 62, 512, 845,
+    830 and 503 all scanning `data/clean/` concurrently. The write itself had
+    completed and conservation was already proven, so failing here would have
+    thrown away a correct file. Retry, and NEVER delete the .part on give-up -
+    print how to finish it by hand.
+    """
+    import os
+    import time as _t
+    for i in range(tries):
+        try:
+            os.replace(str(tmp), str(dest))
+            if i:
+                log("rename succeeded after %d retries (%ds)" % (i, i * wait))
+            return True
+        except PermissionError as e:
+            if i == tries - 1:
+                log("RENAME STILL DENIED after %dm: %s" % (tries * wait // 60, e))
+                log("The .part is COMPLETE and conservation was proven. Do NOT "
+                    "re-run the whole pass; wait for the reader to finish and "
+                    "run `finish`:  %s -> %s" % (tmp, dest))
+                return False
+            log("rename denied (a peer holds the file open); retry %d/%d in %ds"
+                % (i + 1, tries, wait))
+            _t.sleep(wait)
+    return False
+
+
 def load_state():
     if STATE.exists():
         return json.loads(STATE.read_text(encoding="utf-8"))
@@ -437,7 +468,7 @@ def cmd_apply(dry=False):
         shutil.copy2(CLEAN, bak)
         log("backup %s" % bak.name)
 
-    tmp = CLEAN.with_suffix(".part")
+    tmp = CLEAN.with_name(CLEAN.name + ".part_" + STEM.split("_")[0])
     n_in = n_out = filled = skipped_nonblank = 0
     money_in = money_out = 0
     per_col = dict((t, 0) for t in TARGETS)
@@ -502,7 +533,7 @@ def cmd_apply(dry=False):
         tmp.unlink()
         log("DRY RUN - nothing written")
         return 0
-    tmp.replace(CLEAN)
+    atomic_replace(tmp, CLEAN)
     REPORT.write_text(json.dumps({
         "script": "code/%s.py" % STEM, "when": now(),
         "rows_in": n_in, "rows_out": n_out,

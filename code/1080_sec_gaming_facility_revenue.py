@@ -706,7 +706,39 @@ def build():
             continue
         c = cands.get(cid)
         if c is None:
-            raise SystemExit(f"adjudication names {cid}, which is not in {CANDIDATES}")
+            if not cid.startswith("MANUAL-"):
+                raise SystemExit(f"adjudication names {cid}, which is not in {CANDIDATES}")
+            # A MANUAL- row is a figure a human read out of a cached filing that
+            # no pattern caught. It is not an exemption from evidence: verify
+            # still demands an accession, an EDGAR archive URL and a verbatim
+            # quote, and `manual_read_basis` must say which cached file was read.
+            miss = [k for k in ("form", "filing_date", "accession", "source_url",
+                                "source_quote_final", "value_usd_final",
+                                "figure_type_final", "filer_name", "filer_cik",
+                                "filer_role", "manual_read_basis")
+                    if not a.get(k, "").strip()]
+            if miss:
+                raise SystemExit(f"{cid} is MANUAL- and is missing {miss}")
+            c = {
+                "form": a["form"], "filing_date": a["filing_date"],
+                "accession": a["accession"], "source_url": a["source_url"],
+                "source_quote": a["source_quote_final"],
+                "extraction_pattern": "MANUAL_READ",
+                "facility_name_as_filed": a.get("facility_name_as_filed", ""),
+                "filer_name": a["filer_name"], "filer_cik": a["filer_cik"],
+                "filer_role": a["filer_role"],
+                "figure_type": a["figure_type_final"],
+                "figure_type_note": a.get("figure_type_note_final", ""),
+                "value_usd": a["value_usd_final"],
+                "value_verbatim": a.get("value_verbatim", ""),
+                "value_scale_applied": "",
+                "fiscal_period_label": a.get("fiscal_period_label_final", ""),
+                "period_type": a.get("period_type_final", ""),
+                "period_end": a.get("period_end_final", ""),
+                "local_file": a.get("manual_read_basis", ""), "source_md5": "",
+                "derivation_stated_percentage": a.get("derivation_stated_percentage", ""),
+                "derivation_percentage_base": a.get("derivation_percentage_base", ""),
+            }
         fid = a.get("facility_id", "").strip()
         f = fac.get(fid, {})
         common = dict(
@@ -800,13 +832,28 @@ MONEY_TABLES_FORBIDDEN = (
     "gaming_property_self_published_assertions.csv",
     "gaming_property_self_published_claims.csv")
 
+# THE MANDATE SAID "the fee frequently implies the revenue". It implies
+# something, and that something is NOT revenue.
+#
+# IGRA defines "net revenues" at 25 U.S.C. 2703(9) as gross gaming revenues
+# LESS amounts paid out as prizes and LESS total gaming-related operating
+# expenses, excluding management fees. That is much closer to operating profit
+# than to revenue. And the contracts in this corpus do not even use one base:
+# Lakes' Red Hawk fee is "30% of net revenue (as defined by the development and
+# management agreement)"; Red Rock's Graton fee is "24% of Graton Resort's net
+# income (as defined in the management agreement)" in years 1-4 and 27% in
+# years 5-7. Dividing a fee by its percentage recovers the CONTRACT'S OWN BASE
+# and nothing else - so the derived types name that base and never say
+# "revenue" without saying "as defined".
 VALID_FIGURE_TYPES = {
     "FACILITY_NET_REVENUES", "FACILITY_GROSS_REVENUES",
     "FACILITY_NET_GAMING_REVENUE", "FACILITY_GROSS_GAMING_REVENUE",
     "MANAGEMENT_FEE_REVENUE", "RELINQUISHMENT_PAYMENT",
     "FACILITY_INCOME_FROM_OPERATIONS", "FACILITY_ADJUSTED_EBITDA",
-    "DERIVED_FACILITY_NET_REVENUES",
+    "DERIVED_FACILITY_NET_REVENUES_AS_DEFINED",
+    "DERIVED_FACILITY_NET_INCOME_AS_DEFINED",
 }
+DERIVED_FIGURE_TYPES = {t for t in VALID_FIGURE_TYPES if t.startswith("DERIVED_")}
 
 
 def verify():
@@ -861,7 +908,7 @@ def verify():
                     f"{i} is derived but no stated percentage is recorded")
             if not r["derivation_arithmetic"]:
                 bad("V9_DERIVATION_NEEDS_STATED_PCT", f"{i} is derived but shows no arithmetic")
-            if r["figure_type"] != "DERIVED_FACILITY_NET_REVENUES":
+            if r["figure_type"] not in DERIVED_FIGURE_TYPES:
                 bad("V10_DERIVED_LABELLED",
                     f"{i} derived_from_fee=Y but figure_type is {r['figure_type']!r} - a derived "
                     f"figure must not wear a reported figure's type")

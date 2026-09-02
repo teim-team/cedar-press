@@ -67,6 +67,7 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 import sys
 from datetime import date
 from pathlib import Path
@@ -131,6 +132,76 @@ LEVEL = {
     "mixed": "entity_and_geography",
     "indian_country": "geography",
 }
+
+
+# ---------------------------------------------------------------------------
+# THE FLAGSHIP CHECK. Added 2026-09-02 (ADR-018) after this file shipped
+# `owned` to the product as "1,657 rows" while `dist/samples/README.md`, in the
+# same directory, stated the same dataset as 2,916.
+#
+# `770_sample_extracts.FLAGSHIP` names the ONE table a customer opens first,
+# and 770 ships ten of its rows. `rows_in()` below sums only the tables the
+# COLLECTION CONTRACT claims. Nothing made those two agree, and for
+# `native-owned-businesses` they do not: the contract claims six
+# `individual_native_*` tables (1,657 rows) and the flagship is
+# `native_owned_businesses.csv` (2,916 rows), which `500.COLLECTIONS` matches
+# with neither branch of `^(individual_native|tribal_certification)`.
+#
+# The invariant is arithmetic and needs no judgement:
+#
+#     a sum over a dataset's tables cannot be SMALLER than one of its tables.
+#
+# 770 already reads this file's `PRODUCT_ID` by text so the two id maps cannot
+# drift. This is the same discipline in the other direction.
+def _flagship_map() -> tuple[dict, set]:
+    """`FLAGSHIP` and `SPINE` read out of 770 BY TEXT, so a rename there is a
+    hard failure here rather than a silent divergence. Importing 770 is not an
+    option - its module name starts with a digit and it does file work at
+    import time."""
+    src = ROOT / "code" / "770_sample_extracts.py"
+    txt = src.read_text(encoding="utf-8")
+    i = txt.find("FLAGSHIP = {")
+    if i < 0:
+        raise SystemExit("760: 770_sample_extracts.py has no FLAGSHIP dict - "
+                         "the sample source is unmeasurable, refusing to "
+                         "print a row count that nothing checks")
+    body = txt[i:txt.find(chr(10) + "}", i)]
+    flag = dict(re.findall(r'"([a-z0-9_\-]+)":\s*"([a-z0-9_]+\.csv)"', body))
+    if not flag:
+        raise SystemExit("760: FLAGSHIP dict parsed EMPTY - an absence of "
+                         "evidence is not evidence of absence (field guide 3)")
+    j = txt.find("SPINE = {")
+    spine = set(re.findall(r'"([a-z0-9_]+\.csv)"',
+                           txt[j:txt.find("}", j)])) if j >= 0 else set()
+    return flag, spine
+
+
+def flagship_violations(tables_of: dict, nrows_of: dict) -> list:
+    """One entry per collection whose descriptor row count is contradicted by
+    the sample it ships. Returns [(collection, flagship, flagship_rows,
+    descriptor_rows, reason)]."""
+    flag, spine = _flagship_map()
+    out = []
+    for cid, tbl in sorted(flag.items()):
+        if cid not in nrows_of:
+            continue
+        claimed = tbl in set(tables_of.get(cid, []))
+        # A spine-resident flagship is outside `data/clean` and so outside the
+        # contract by construction; only the arithmetic half applies to it.
+        # Measured 2026-09-02: `_entity_layer` flagship
+        # `cedar_identity_register.csv` holds 1,555 rows against a 326,899-row
+        # descriptor, so it passes the half that can be checked.
+        n = rows_in([tbl])
+        if n and n > nrows_of[cid]:
+            out.append((cid, tbl, n, nrows_of[cid],
+                        f"the sampled table alone holds {n:,} rows and the "
+                        f"descriptor claims {nrows_of[cid]:,} for the whole "
+                        f"dataset"))
+        elif not claimed and tbl not in spine:
+            out.append((cid, tbl, n, nrows_of[cid],
+                        f"{tbl} is the table the sample is drawn from and no "
+                        f"collection contract claims it"))
+    return out
 
 
 def rows_in(tables: list) -> int:
@@ -229,6 +300,44 @@ def main() -> int:
             missing.append(did)
         out.append(d)
 
+    # ---- THE FLAGSHIP CHECK (ADR-018) ---------------------------------
+    # Runs BEFORE the dataclass check so a contradicted row count can never be
+    # written, and so `verify` names it. A violation is not silently repaired:
+    # the descriptor is downgraded to BLOCKED with the measurement in
+    # `cedar.blockers`, because a dataset whose published row count is smaller
+    # than the table its own sample comes from is not ready to replace a demo
+    # record. The status reverts on its own the moment the contract is fixed.
+    nrows_of = {c["cedar_id"]: c["n_rows"] for c in cedar_side.values()}
+    fviol = flagship_violations(tables_of, nrows_of)
+    by_cedar_id = {c["cedar_id"]: c for c in cedar_side.values()}
+    for cid, tbl, frows, drows, reason in fviol:
+        c = by_cedar_id[cid]
+        c["blockers"] = [b for b in c["blockers"] if b != "-"] + [
+            f"FLAGSHIP MISMATCH: {reason} (500.COLLECTIONS does not claim "
+            f"{tbl} for {cid}; see ADR-018)"]
+        c["status"] = "BLOCKED"
+        c["flagship_table"] = tbl
+        c["flagship_rows"] = frows
+        # The union of both Cedar-side declarations of what this collection
+        # holds. Stated, not assumed: neither half was ratified, and printing
+        # the smaller of two disagreeing measurements is the failure this
+        # check exists to stop.
+        c["n_rows"] = drows + frows
+        c["n_rows_basis"] = (f"{drows:,} rows over {c['n_tables']} contract "
+                             f"tables + {frows:,} in the unclaimed flagship "
+                             f"{tbl}")
+        for d in out:
+            if d["id"] == c["product_id"]:
+                d["rows_label"] = f"{c['n_rows']:,} rows"
+    if fviol:
+        print(f"  760 FLAGSHIP MISMATCH - {len(fviol)} of {len(out)} "
+              f"collections publish a row count their own sample contradicts:")
+        for cid, tbl, frows, drows, reason in fviol:
+            print(f"    !! {cid}: {reason}")
+            print(f"       sample source {tbl} = {frows:,} rows; "
+                  f"contract sum = {drows:,}; shipping the union "
+                  f"{drows + frows:,} and marking BLOCKED")
+
     # ---- THE CONTRACT CHECK THAT SHOULD HAVE EXISTED IN ROUND 1 --------
     # `CollectionDataset(**descriptor)` is the call the README advertises, so
     # it is CHECKED here rather than asserted in prose. The dataclass lives in
@@ -278,7 +387,7 @@ def main() -> int:
               "short_name, tracks, sources, method.")
         print("  NOT generated here on purpose: `method` is a claim about how "
               "the data was built and a machine should not invent one.")
-    return 1 if (verify and missing) else 0
+    return 1 if (verify and (missing or fviol)) else 0
 
 
 if __name__ == "__main__":

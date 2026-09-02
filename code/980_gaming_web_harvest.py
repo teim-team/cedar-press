@@ -143,7 +143,12 @@ POPULATION_BASIS = "cedar_gaming_facilities_and_web_map"
 # from the standing list in the workstream mandate. Both are applied.
 # ---------------------------------------------------------------------------
 RESTRICTED_TRIBE_IDS = {
-    "TRBF-NAVAJO-00",   # navajoeconomy.org "All Rights Reserved"
+    # TRBF-NAVAJO-00 REMOVED 2026-09-02 by code/1096_navajo_unexclude_and_harvest.py.
+    # docs/PUBLICATION_POLICY.md <!-- BEGIN TERMS-SCOPE --> ruled that a terms
+    # restriction attaches to the HOST AND PATH that stated it and does not
+    # propagate to other hosts the same nation operates. The restriction was
+    # found on navajoeconomy.org/business-regulatory/; that host stays excluded
+    # below. The casinos sit on different hosts entirely and stated nothing.
     "TRBF-COLVLL-00",   # Confederated Colville
     "TRBF-YAKAMA-00",   # Yakama
     "TRBF-UMATLL-00",   # CTUIR / Umatilla
@@ -156,13 +161,21 @@ RESTRICTED_TRIBE_IDS = {
 RESTRICTED_NAME_TOKENS = (
     "colville", "yakama", "umatilla", "ctuir", "chickasaw", "nana ",
     "akima", "southern ute", "forest county potawatomi", "stillaguamish",
-    "navajo",
+    # "navajo" REMOVED 2026-09-02 (1096). A NAME token cannot express a
+    # host-scoped restriction: it excluded the whole nation, which is the
+    # over-exclusion the TERMS-SCOPE ruling names as a defect.
 )
 RESTRICTED_HOST_SUFFIXES = (
-    "navajoeconomy.org", "navajo-nsn.gov", "navajocasino.com", "navajocasinos.com",
-    "navajogaming.com", "navajogaming.org", "twinarrows.com", "twinarrows.net",
-    "twinarrowsnavajocasinoresort.com", "firerockcasino.com", "flowingwatercasino.com",
-    "northernedgecasino.com",
+    # NAVAJO, 2026-09-02 (code/1096_navajo_unexclude_and_harvest.py).
+    # navajoeconomy.org STAYS — its own terms were read and are restrictive.
+    # The seven other Navajo hosts came OFF this list: each was checked on its
+    # own, and the four casino hosts return robots.txt 200 with ZERO Disallow
+    # lines and carry no restrictive language on the page. See
+    # METHOD_RESTRICTED_HOSTS below for the two that DO state something.
+    "navajoeconomy.org",
+    "twinarrows.com", "twinarrows.net", "twinarrowsnavajocasinoresort.com",
+    # ^ Twin Arrows closed in 2020 and these domains were never in targets.csv;
+    #   left listed because an unchecked host is not a cleared host.
     # NOTE: dancingeaglecasino.com was in this list on the first pass and was
     # WRONG — Dancing Eagle is Pueblo of Laguna, not Navajo. Removed 2026-09-02.
     # An over-broad restriction costs a nation its coverage just as surely as a
@@ -176,6 +189,45 @@ RESTRICTED_HOST_SUFFIXES = (
     "nana.com", "akima.com",
     "stillaguamish.com", "angelofthewinds.com",
 )
+
+# ---------------------------------------------------------------------------
+# A RESTRICTION ON THE METHOD, NOT ON THE SOURCE.  Added 2026-09-02 by
+# code/1096_navajo_unexclude_and_harvest.py.
+#
+# navajo-nsn.gov/Terms was READ, not assumed, and it states:
+#
+#   "You may not obtain or attempt to obtain any materials or information
+#    through any means not intentionally made available or provided for
+#    through the Navajo Nation Web Sites."
+#
+# That sentence does not forbid reading the site. It forbids reaching content
+# by a route the publisher did not open — which is precisely what techniques
+# #3 (WP REST enumeration) and #4 (sitemap walking) in
+# docs/HIDDEN_DATA_TECHNIQUES.md are for. So this host is NOT excluded and is
+# NOT hidden-data harvested: the homepage and anything the site links from its
+# own navigation are intentionally made available; an unlinked REST endpoint
+# is not.
+#
+# This is a THIRD state, between "excluded by every route" and "open". Cedar
+# had only the two, and having only two is what produced the over-exclusion
+# the TERMS-SCOPE ruling corrected. Recording the middle state is the point.
+METHOD_RESTRICTED_HOSTS = {
+    "navajo-nsn.gov": (
+        "navajo-nsn.gov/Terms: \"You may not obtain or attempt to obtain any "
+        "materials or information through any means not intentionally made "
+        "available or provided for through the Navajo Nation Web Sites.\" "
+        "Read 2026-09-02. Homepage only; no hidden-endpoint enumeration, no "
+        "sitemap or WP-REST page walk."),
+}
+
+
+def method_restriction(host):
+    """The verbatim clause if this host restricts HOW, else ''."""
+    h = (host or "").lower()
+    for s, q in METHOD_RESTRICTED_HOSTS.items():
+        if h == s or h.endswith("." + s):
+            return q
+    return ""
 
 # Never requested. Not "hidden data" — someone's private infrastructure.
 # MATCHED BY PATH SEGMENT, NOT BY SUBSTRING. The substring form flagged
@@ -953,6 +1005,20 @@ def probe_one_host(host, r, done):
                 done.add((host, "home"))
 
         # ---- machine-readable endpoints (techniques 3,4,13) ----
+        # A METHOD restriction stops here and nowhere else: the homepage above
+        # is intentionally made available, an unlinked REST endpoint is not.
+        _mr = method_restriction(host)
+        if _mr:
+            if (host, "HIDDEN") not in done:
+                appendl(PROBE, {
+                    "tribe_id": r["tribe_id"], "cedar_uid": r["cedar_uid"],
+                    "tribe_name": r["tribe_name"], "host": host,
+                    "surface": r["surface"], "endpoint_kind": "HIDDEN", "url": "",
+                    "http_status": "REFUSED_METHOD_RESTRICTED_BY_STATED_TERMS",
+                    "note": _mr, "checked_date": TODAY})
+                done.add((host, "HIDDEN"))
+            return n_hosts, n_req, refused
+
         wp_alive = None
         for kind, path, tech in HIDDEN_ENDPOINTS:
             if (host, kind) in done:
@@ -1170,6 +1236,11 @@ def stage_pages(limit=None, deadline_min=110):
         t = targets[host]
         if t["terms_restricted"] == "Y" or is_restricted_host(host):
             continue
+        if method_restriction(host):
+            # The pages stage walks the sitemap and the WP REST page index -
+            # both "means not intentionally made available". Refused by the
+            # host's own stated terms, not by an inherited nation-wide rule.
+            continue
         work.append((host, t, recs))
     if limit:
         work = work[:limit]
@@ -1310,6 +1381,8 @@ def stage_cpt(limit=None, deadline_min=45):
         t = targets.get(host)
         if not t or t["terms_restricted"] == "Y" or is_restricted_host(host):
             continue
+        if method_restriction(host):
+            continue          # a custom post type is a REST route, not a link
         types = []
         for rec in recs:
             for pt in (rec.get("post_types") or []):

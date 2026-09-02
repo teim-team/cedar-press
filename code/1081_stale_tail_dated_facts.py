@@ -800,7 +800,7 @@ def register_states():
     return out
 
 
-def route_irs990_search(tail, ents, budget=320):
+def route_irs990_search(tail, ents, budget=900):
     """The entities with NO EIN anywhere on disk. Name search, STRICT accept.
 
     `same_organisation` is used, not `name_matches`: a search result is a
