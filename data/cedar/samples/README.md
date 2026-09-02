@@ -10,7 +10,7 @@ These exist so the finished shape can be judged before the datasets are finished
 
 | dataset | table | rows shown | of | cols | one row is |
 |---|---|---:|---:|---:|---|
-| `_entity_layer` | `cedar_identity_register.csv` | 10 | 1,555 | 7 | UNSTATED |
+| `_entity_layer` | `cedar_identity_register.csv` | 10 | 1,555 | 6 | UNSTATED |
 | `contractors` | `prime_contracts.csv` | 10 | 1,217,768 | 12 | TWO populations under one schema, and the seam is real. Archive rows (FY2008-FY2026, source_file `FY*_All_Cont |
 | `deals` | `deals_classified.csv` | 10 | 935 | 12 | one row per classified deal event - the merged deals ledger |
 | `federal-register` | `consultation_events.csv` | 10 | 11,402 | 15 | one row per (consultation event, participant as published). `consultation_event_id` alone is NOT unique - an e |
@@ -35,12 +35,11 @@ See `docs/MONEY_TOTALLING_RULES.md`. Two that bite hardest:
 ## Two columns that look like keys and are not, alone
 
 - **`prime_contracts.contract_number`** is the awarding PIID and on 290,525 rows (23.9%) it is a modification stub — `0098`, `0006`, `SBA0001` — meaningless without the IDV it references. **`parent_contract_number` ships beside it and the pair is the key.** They are complementary: 664,470 rows carry both, 290,525 a parent plus a stub, 262,773 no parent and a complete standalone PIID, and **no row has neither**.
-- **`federal_funding_transactions.canonical_name`** is a legacy display label, not Cedar's name for the entity. Group on **`cedar_uid`**, which is the key ADR-009 mandates. On 345,180 of 552,602 keyed rows the two disagree, and the overwhelming majority of those are a right identity under a stale label — `haaku community academy` on rows correctly keyed to Pueblo of Acoma. Grouping on the label credits a school; grouping on the uid credits the nation.
+- **`federal_funding_transactions.canonical_name`** is a legacy display label, not Cedar's name for the entity. Group on **`cedar_uid`**, which is the key ADR-009 mandates. Measured 2026-09-01 in `docs/FAADS_TRANSACTION_KEY_LOG.md`: of 552,602 rows carrying a uid, **345,108 disagree** with the register's name for that uid, and **339,129 of those (98.3%, $94.0B) are a right identity under a stale label** — `haaku community academy` on rows correctly keyed to Pueblo of Acoma. Grouping on the label credits a school; grouping on the uid credits the nation. *(A re-count on 2026-09-02 returns 345,180 rather than 345,108 — the table was rebuilt between the two. The split is the point, not the last two digits, and one measurement is quoted everywhere rather than two.)*
 
 ## Columns that are in the schema and empty in this sample
 
 The column set of every sample is fixed by the curated `SHOW` list in `code/770_sample_extracts.py` and does not change with which rows are drawn. Where a requested column came back blank on all ten rows it is still shipped, and named here, because that is a coverage fact about the dataset rather than something to hide by dropping the column.
 
-- `_entity_layer` — blank on all 10 sampled rows: `former_names`
 - `federal-register` — blank on all 10 sampled rows: `format`
 - `native-owned-businesses` — blank on all 10 sampled rows: `naics`
