@@ -551,3 +551,130 @@ and nothing is promoted.**
 tables and it depends on ADR-003's validity time to be worth anything — a
 separate legal person with no interval is still fused to its parent, just
 with an extra id. It is recorded as open rather than waved off.
+
+<!-- BEGIN ADR-014 -->
+## ADR-014 — the constellation: `serves` is an edge, not a category (workstream INT)
+
+**Status:** accepted 2026-09-01. Owner's framing, verbatim:
+
+> *"We have the concept of hub and sub hub, but there's also the idea that,
+> like, this tribal college might not literally be owned by the tribe, but
+> serve predominantly that tribal community. So we can see that they're
+> connected... if we have IHS facilities or something, the tribe's not
+> literally gonna own them. They might manage them... So we don't have to have
+> an all native category. We can have, like, serves this community."*
+
+**The problem this names.** Hub-and-sub-hub is an OWNERSHIP relation. It is
+exact and it is narrow: Ho-Chunk Inc is a sub-hub of the Winnebago Tribe
+because the Tribe owns it. Everything Cedar could not fit into that relation
+fell into a catch-all — and the catch-all is measurably where the data goes to
+die. `record_scope = native_serving` is declared in ADR-010 and used by
+**zero rows**, while **8,138 rows sit in `unresolved`**. "Native-serving" as a
+category says only *we could not tie this to anyone*. It is an admission
+wearing the costume of a fact.
+
+**The decision.** Affiliation becomes a second edge type alongside ownership,
+with its own evidence tier. A constellation is a hub plus everything that
+holds a `serves` edge to it, whoever owns those things.
+
+    OWNS       hub -> sub-hub      existing, unchanged
+    SERVES     any entity -> hub   new, tiered, many-to-many
+
+**`serves` is many-to-many and that is the point.** A regional Native nonprofit
+serving twelve tribes gets twelve edges. Forcing it onto one attribution is the
+error the catch-all was invented to avoid; the edge lets us stop choosing.
+
+**The tiers, strongest first.** Nothing is promoted a tier by resemblance:
+
+| tier | basis | example |
+|---|---|---|
+| `chartered_by` | the instrument names the nation | a tribally chartered college |
+| `managed_under_contract` | ISDEAA 638 / self-governance compact | a tribe operating an IHS facility it does not own |
+| `declares_service_to` | the entity's own words name the nation | a 990 mission statement |
+| `located_within` | geocoded inside a named AIANNH area | a nonprofit on the reservation |
+| `sole_entity_in_area` | exactly one Native entity in the geography | **inference — never alone** |
+
+**Three rules that keep this honest.**
+
+1. **A `serves` edge is never an ownership claim and never rolls into a
+   nation's money.** IHS hospital obligations do not become tribal revenue
+   because a tribe manages the hospital. Same fence as the gaming
+   self-published assertions: the edge travels, the dollars do not.
+2. **`sole_entity_in_area` never stands alone.** One tribe in a county is a
+   reason to look, not a finding. It may corroborate another tier; it may
+   never be the only evidence on an edge.
+3. **Geography is a ladder, not a gate** (ENTITY_MATCH_RULES rule 7). An
+   entity's own words about who it serves outrank a polygon it sits inside.
+
+**What this buys.** `native_serving` stops being a shrug. A row that today
+reads *unresolved* can read *serves the Navajo Nation, tier
+`declares_service_to`* — a specific, checkable, refutable claim. That is a
+product answer to "which organisations serve my community?", which no catch-all
+category can answer at all.
+<!-- END ADR-014 -->
+
+<!-- BEGIN ADR-015 -->
+## ADR-015 — geography is the second axis, and Cedar Grove owns the picture (workstream INT)
+
+**Status:** accepted 2026-09-02. Owner's framing:
+
+> *"Geography helps us identify the flow of money as a filter of who... we can
+> have it entity based and geography based. We don't have to have a fancy data
+> visualization in Cedar Press. That's what Cedar Grove is for. But then in
+> Cedar Grove, we could do fancier stuff of, like, here's the money flowing to
+> this area. Here's how much went to the entities in the area. So then you can
+> kinda subtract the difference."*
+
+**The division of labour, decided.** Cedar Press carries the **coding**; Cedar
+Grove renders the **picture**. Press ships a joinable geographic key on every
+row that can carry one and no charting code at all. This is a boundary, not a
+staging order — a map in Press would duplicate Grove and rot.
+
+**The measure this exists to make possible.** Two sums over the same geography:
+
+    money flowing TO an area      sum by PLACE OF PERFORMANCE
+    money reaching ENTITIES there sum by RECIPIENT, where recipient is a
+                                  Native entity in the constellation (ADR-014)
+    the difference                federal money landing in Indian Country
+                                  that does not reach Native entities
+
+That difference is a finding, not a byproduct. Nothing else Cedar builds
+answers it, and it is the natural pair to the constellation: ADR-014 says who
+serves a community, this says what reaches it.
+
+**Current state, measured 2026-09-02 across `data/clean/`:**
+
+| | rows | share |
+|---|---:|---:|
+| in tables carrying any location column | 7,501,882 | |
+| carry a PLACE (city / state / zip) | 7,399,905 | 99% |
+| carry a JOINABLE key (fips / geoid / aiannh) | **1,070** | **0.0%** |
+
+So the axis is, today, unbuilt: addresses on nearly everything and almost
+nothing to join them to. Two tables are joinable — `gaming_property_locations`
+(county_fips, census_tract) and `resource_assets` (fips_code).
+
+**The unlock is already on disk.** `data/raw/contracts/usaspending_gapfill_2026-08-05/`
+holds 1,110,938 rows over 1,041,147 distinct award keys carrying, at ~98.5% fill,
+both `prime_award_summary_recipient_county_fips_code` **and**
+`prime_award_summary_place_of_performance_county_fips_code`, plus state FIPS and
+county names. Zero downloads. This is the same corpus that was found to carry
+the missing PSC and award-description fields.
+
+**Four rules, because the obvious errors here are expensive.**
+
+1. **Place of performance is not recipient location.** The two FIPS columns
+   answer different questions and the difference measure needs both kept
+   apart. Collapsing them to one "county" column destroys the measure this
+   ADR exists for.
+2. **A county is not a reservation.** County FIPS is coarser than AIANNH:
+   reservations span counties and counties contain fractions of reservations.
+   A county-level difference is an approximation and must be published saying
+   so. AIANNH is the better key where it can be had.
+3. **The difference is not always positive or meaningful.** An entity
+   headquartered outside an area can perform work inside it. Publish the two
+   sums; let the difference be derived, labelled, and bounded.
+4. **Geographic keys never license cross-dataset summation.**
+   `MONEY_TOTALLING_RULES.md` still governs. A shared county code is not
+   permission to add a subaward to a prime.
+<!-- END ADR-015 -->
