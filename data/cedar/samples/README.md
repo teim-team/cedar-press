@@ -65,7 +65,7 @@ Codex, PR #29 round 4, found `2Â€? CONDUIT` in the subcontracting sample. It 
 
 In `subawards.csv` (87,177 rows) **1,433 cells** carry it: `description` 1,423 rows (1.63%), `subaward_number` 6, `sub_parent_name` 2, `sub_name` 2.
 
-**The obvious remedy only reaches 9.6% of it.** The repeated UTF-8-read-as-cp1252 chain is reversible and is reversed here — `ÃÂ½` becomes `½`, `ÃÂ°C` becomes `°C`. But **116 of 1,212 affected cells recover and 1,096 (90.4%) do not**, because they are not a pure re-encoding chain: characters have been substituted. Codex's own example is the clearest case — `2Â€?` holds a literal `?` where a character was destroyed upstream, and you cannot re-decode information that is gone.
+**The obvious remedy only reaches 9.6% of it.** The repeated UTF-8-read-as-cp1252 chain is reversible and is reversed here — `Ã‚Â½` becomes `½`, `Ã‚Â°C` becomes `°C`. But **116 of 1,214 affected cells recover and 1,098 (90.4%) do not**, because they are not a pure re-encoding chain: characters have been substituted. Codex's own example is the clearest case — `2Â€?` holds a literal `?` where a character was destroyed upstream, and you cannot re-decode information that is gone.
 
 So a cell that is still corrupt after repair scores as **empty** for sampling, and the sampler prefers a clean row. 98.4% of subaward rows are unaffected and a ten-row showcase should not spend one of them on corruption. **No row is dropped from the dataset and no money column is touched** — only the sample's choice is steered, and the counts are here so the guard surfaces the defect rather than hiding it.
 

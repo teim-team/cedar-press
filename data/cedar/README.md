@@ -65,12 +65,14 @@ mapping reached the descriptor and not the filename. See finding 7 below.
 - `blockers` (in the `.cedar.json` sibling) carries the **named** contract
   points rather than the bare word `BLOCKED`, so a consumer can tell a
   publication-rights block from an incomplete schema without opening an
-  external project. **Two lists are non-empty today** — `owned` carries three
-  named failures and `deals` two. See *Status of the fourteen*. *(This line
-  read "Today every dataset's list is empty" until Codex round 3 found it
-  still saying so after the status section below had been changed to name
-  two. An overview and the section it summarises going out of step is the
-  same defect as the two row counts, one directory apart.)*
+  external project. **Three lists are non-empty today** — `owned` carries
+  three named failures, `federal-register` three, and `deals` two. See
+  *Status of the fourteen*. *(This line has now been wrong twice in the same
+  way: it read "Today every dataset's list is empty" until Codex round 3, then
+  "Two lists" until round 5 found it still saying two after
+  `federal-register` was blocked. Both times the overview and the section it
+  summarises went out of step. The count is the problem — it is now the names,
+  which cannot drift without someone noticing which one is missing.)*
 - `rows_label` is a count **only when a count is established**. Where two
   Cedar-side declarations of a collection's membership disagree it reads
   `row count unresolved`, and the component measurements ship separately in
@@ -280,14 +282,15 @@ misses, in `collection_descriptors.cedar.json`:
 | `federal-register` | BLOCKED | its sample is drawn from `consultation_events.csv`, which the contract marked **`UNDOCUMENTED`** rather than `shippable` at 09:23 today. Its 490,274-row count is **not** in dispute and still ships |
 | `deals` | BLOCKED | `C1 grain UNSTATED` and `C2 no validated primary key` on `deals_press_edgar_ancsa_additions.csv`, a table another workstream added to the collection while this branch was open |
 
-**The two blocks are treated differently on purpose, and that distinction is
-enforced in code.** An *arithmetic* violation — a published count smaller than
+**The blocks are not all treated the same, and that distinction is enforced
+in code.** An *arithmetic* violation — a published count smaller than
 one of the dataset's own tables — is provably wrong, so the count is
 withdrawn. A *membership* violation — the sample source is not a shippable
 member — leaves the count untouched, because nothing contradicts it.
-Collapsing the two would have withheld `federal-register`'s 490,274 because a
+Collapsing them would have withheld `federal-register`'s 490,274 because a
 different table's codebook status lapsed, which is a remedy out of all
-proportion to the measurement.
+proportion to the measurement. `deals` is a third case again — an ordinary
+readiness block from the scoreboard, owned by another workstream.
 
 **The `deals` block is not this workstream's and is named rather than
 absorbed.** It is also the honest illustration of why this section says
@@ -620,6 +623,16 @@ should not be adopted yet, for three measured reasons:
 So: **787 ships, 780 are facilities, 734 is a proposal with four exceptions
 and two artefacts in it.** Stated rather than adopted.
 
+**And the denominator was already wrong in customer-facing copy, which Codex
+round 5 caught before it shipped further.** The `gaming` descriptor said
+*"one row per facility, with the single non-facility row named"* — there are
+seven — and advertised *"694 of 787 facilities carry a bounded revenue
+estimate ... which of the 93 it cannot bound"*. Re-measured against the 780
+real facilities: **694 of 780 (89.0%, not 88.2%) carry a bounded estimate, and
+86 cannot be bounded, not 93.** All seven placeholders sat in the unbounded
+group and inflated it. **The correction moves the coverage figure up** — the
+placeholder rows had been quietly making the dataset look worse than it is.
+
 ### Claims re-measured against live data, and one that is already done
 
 - **`nest`** — 1,610 enterprises, **977 (60.7%) with `in_federal_contracting =
@@ -658,9 +671,16 @@ out with 5 rows of 10, because pass two indexed against pass one's positions
 and a concurrent enricher rewrote `prime_contracts.csv` between the reads —
 same row count, different publishable rows, so five wanted positions no longer
 held a row that passed the gate. **A short sample is the quiet failure: it
-looks like a small table, not a race.** Pass two now also collects a strided
-spare buffer and tops up from it, and prints a `RACED` line naming how many
-rows were replaced, so a moving source is reported rather than absorbed.
+looks like a small table, not a race.**
+
+*The first repair for that was a strided spare buffer that topped the sample
+back up to ten and printed a `RACED` line. **That is no longer what happens
+and this paragraph described it as current until Codex round 5 caught it.***
+Codex round 4 showed the top-up was wrong in two ways — it produced a
+mixed-version sample, and it could not detect the case that matters — and it
+was replaced by stamp-and-retry. The current behaviour is described under
+*Codex round 4* above: both passes are discarded and re-drawn from a fresh
+snapshot, and after three attempts the generator raises rather than publish.
 
 **Widening the collection was not done here, on purpose.** It adds four tables
 with no declared grain and no declared key (`native_owned_businesses.csv`
