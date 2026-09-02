@@ -209,7 +209,7 @@ MEDIA_PAGE_CAP = 25
 # 10 workers, but PER_HOST_DELAY is enforced PER HOST inside 701's `_pace`,
 # so no single tribal server ever sees more than one request per 1.2 s no
 # matter how wide the pool is. The politeness bound is per host, not global.
-WORKERS = 10
+WORKERS = 16
 DEFAULT_HOURS = 2.5
 
 
@@ -313,7 +313,19 @@ SCOPE_BY_KIND = {
     "enterprise_register": "tribally_owned_entity",
     "anc_operating_companies": "parent_asserted_subsidiary",
     "nho_subsidiaries": "parent_asserted_subsidiary",
-    "nho_member_directory": "any_native",
+    # An ANC's own directory of businesses owned by its SHAREHOLDERS is the
+    # same fact Calista's 98 live rows carry, and the live file already has
+    # the right word for it: `shareholder_descendant_or_spouse`, with
+    # directory_type `shareholder_vendor`. Bering Straits' 58-row
+    # `wpbdp_listing` was going out as `any_native`, which is a STRONGER
+    # claim than the source makes — an ANC shareholder may be a descendant
+    # or an heir. Match the convention that is already in the table.
+    "anc_shareholder_directory": "shareholder_descendant_or_spouse",
+    # An NHO association's member list is a list of ORGANISATIONS that joined
+    # it. That is not an ownership claim of any strength, and none of the 14
+    # existing scopes says it, so it gets its own declared value rather than
+    # being flattened into `any_native`.
+    "nho_member_directory": "association_member",
     "member_business_list": "any_native",
     "licence_register": "unknown",
     "vendor_list": "vendor_relationship",
@@ -324,6 +336,7 @@ ASSERTION_BY_KIND = {
     "enterprise_register": "OWNERSHIP",
     "anc_operating_companies": "OWNERSHIP",
     "nho_subsidiaries": "OWNERSHIP",
+    "anc_shareholder_directory": "OWNERSHIP",
     "nho_member_directory": "RELATIONSHIP",
     "member_business_list": "OWNERSHIP",
     "licence_register": "RELATIONSHIP",
@@ -334,6 +347,7 @@ DIRECTORY_TYPE_BY_KIND = {
     "enterprise_register": "enterprise_register",
     "anc_operating_companies": "enterprise_register",
     "nho_subsidiaries": "enterprise_register",
+    "anc_shareholder_directory": "shareholder_vendor",
     "nho_member_directory": "member_directory",
     "member_business_list": "member_business_list",
     "licence_register": "business_licence_register",
@@ -1085,7 +1099,15 @@ def extract_html(html: str) -> tuple[list[dict], str]:
     if body is None:
         return [], "no body"
     got, seen = [], set()
-    for nd in body.css("h2,h3,h4,a,strong,dt,li>b"):
+    # selectolax rejects a child combinator inside a comma list
+    # ("Bad CSS Selectors: h2,h3,h4,a,strong,dt,li>b") and the ValueError
+    # killed every Goldbelt and Kijik page in the first harvest. One
+    # selector per call, and the parser's limits are respected rather than
+    # assumed.
+    nodes = []
+    for sel in ("h2", "h3", "h4", "a", "strong", "dt", "b"):
+        nodes.extend(body.css(sel))
+    for nd in nodes:
         t = _clean(nd.text())
         if not _firmish(t) or t.lower() in seen:
             continue
@@ -1337,6 +1359,8 @@ def harvest_hit(d: dict, h: dict) -> list[dict]:
             edition = m.group(2)[:10]
 
     kind = h["kind"]
+    if d["klass"] == "anc" and kind == "member_business_list":
+        kind = "anc_shareholder_directory"
     out = []
     for rec in rows:
         out.append({
@@ -1489,6 +1513,65 @@ def redact_quote(q: str) -> tuple[str, bool]:
     return b, b != (q or "")
 
 
+# ---------------------------------------------------------------------------
+# TWO TIERS, AND THE SECOND ONE IS NOT DELETED.
+#
+# Measured on the first 761 harvested rows: the CPT route (99), the table
+# route (5) and the sitemap-member route (13) were clean. The HTML
+# heading/anchor scrape (638) returned real subsidiaries — "ASRC Federal
+# Mission Services", "Aleut Patrick Mechanical" — mixed with
+# "NAICS Code: Healthcare", "Press Release", "Fairbanks", "Spring 2026",
+# "Shareholder Portal" and "What We Do". A heading on a marketing page is not
+# a company, and no denylist of words separates the two reliably.
+#
+# So: a row STAGES if the source route is structured (the entity's own record
+# of one listing per row), or the name itself carries a corporate signal.
+# Everything else goes to `candidates_for_review_*.csv` — kept, counted, with
+# its quote and URL, for a human to rule. "Flag, never delete."
+CORP_SIGNAL = re.compile(
+    r"\b(LLC|L\.L\.C|Inc|Incorporated|Corp|Corporation|Company|Co\.|Ltd|"
+    r"Limited|LP|LLP|PLLC|Holdings?|Group|Enterprises?|Services|Solutions|"
+    r"Systems|Technologies|Technology|Partners|Contracting|Contractors|"
+    r"Construction|Consulting|Logistics|Aviation|Marine|Transport|"
+    r"Industrial|Industries|Energy|Federal|Ventures?|Associates|"
+    r"Manufacturing|Engineering|Environmental|Security|Staffing|Supply|"
+    r"Trading|Fisheries|Seafoods?|Development)\b", re.I)
+
+STRUCTURED_NOTE = ("title.rendered", "HTML <table>", "member pages",
+                   "index page of the sitemap collection")
+
+
+def stages_or_reviews(r: dict) -> tuple[bool, str]:
+    """(stage?, why not). An address-shaped NAME never stages.
+
+    Bering Straits' shareholder directory publishes a firm called
+    "10 Editing Lane". It is almost certainly a video-editing company having
+    a joke, and it is also indistinguishable from a street address by any
+    rule this script can apply. The policy line is that no street address
+    ships from this table; the row is kept in the review file with its URL
+    so a human can rule it in.
+    """
+    nm = r.get("business_name_raw", "")
+    if ADDRESSISH.search(nm) or CONTACTISH.search(nm):
+        return False, ("name is address- or contact-shaped; kept out of the "
+                       "clean table by the no-street-address policy, not by "
+                       "a judgement that it is not a firm")
+    note = r.get("extraction_note", "") or ""
+    if note.startswith(STRUCTURED_NOTE):
+        return True, ""
+    if CORP_SIGNAL.search(nm):
+        return True, ""
+    return False, ("unstructured heading/anchor scrape and the name carries "
+                   "no corporate signal")
+
+
+REVIEW_CSV = OUT / "candidates_for_review_2026-09-02.csv"
+REVIEW_COLS = ["authority_name", "authority_cedar_uid", "klass",
+               "business_name_raw", "kind", "route", "extraction_note",
+               "source_url", "source_page_url", "why_not_staged",
+               "harvest_date"]
+
+
 def stage_build() -> None:
     cols = live_schema()
     # TWO producers, ONE merge candidate. `business_rows.jsonl` is the web
@@ -1517,11 +1600,28 @@ def stage_build() -> None:
                 se.add((_nk(d.get("parent_name", "")),
                         _nk(d.get("child_name_raw", ""))))
     out, seen, dropped = [], set(), {"dup_live_pair": 0, "dup_within": 0,
-                                     "no_name": 0, "dup_shard_e": 0}
+                                     "no_name": 0, "dup_shard_e": 0,
+                                     "to_review": 0}
+    review = []
     for r in rows:
         nk = _nk(r["business_name_raw"])
         if not nk:
             dropped["no_name"] += 1
+            continue
+        keep, why_not = stages_or_reviews(r)
+        if not keep:
+            review.append({
+                "authority_name": r["authority_name"],
+                "authority_cedar_uid": r["authority_cedar_uid"],
+                "klass": r.get("klass", ""),
+                "business_name_raw": r["business_name_raw"],
+                "kind": r["kind"], "route": r["route"],
+                "extraction_note": r["extraction_note"],
+                "source_url": r["source_url"],
+                "source_page_url": r["source_page_url"],
+                "why_not_staged": why_not,
+                "harvest_date": r["harvest_date"]})
+            dropped["to_review"] += 1
             continue
         auth = r["authority_name"].strip().lower()
         if (auth, nk) in pair:
@@ -1535,6 +1635,18 @@ def stage_build() -> None:
             dropped["dup_within"] += 1
             continue
         seen.add(key)
+        # RECOMPUTE the gradient here rather than trusting what the harvest
+        # process wrote. The harvest runs for hours and the mapping was
+        # corrected mid-run; a row written at 02:10 and a row written at
+        # 03:40 must not carry two different scopes for the same fact. The
+        # STAGE is the single authority on the vocabulary.
+        kind = r["kind"]
+        if r.get("klass") == "anc" and kind == "member_business_list":
+            kind = "anc_shareholder_directory"
+        r["kind"] = kind
+        r["identity_scope"] = SCOPE_BY_KIND[kind]
+        r["assertion_class"] = ASSERTION_BY_KIND[kind]
+        r["directory_type"] = DIRECTORY_TYPE_BY_KIND[kind]
         bid = hashlib.sha256(
             f"{r['authority_tribe_id']}|{nk}|{r['kind']}".encode()
         ).hexdigest()[:16]
@@ -1628,7 +1740,20 @@ def stage_build() -> None:
         w = csv.DictWriter(fh, fieldnames=cols)
         w.writeheader()
         w.writerows(out)
+    seenr = set()
+    uniq = []
+    for r in review:
+        k = (r["authority_name"].lower(), _nk(r["business_name_raw"]))
+        if k in seenr:
+            continue
+        seenr.add(k)
+        uniq.append(r)
+    with open(REVIEW_CSV, "w", encoding="utf-8", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=REVIEW_COLS)
+        w.writeheader()
+        w.writerows(uniq)
     print(f"[stage] {len(out)} rows -> {STAGED}")
+    print(f"[stage] {len(uniq)} candidates held for review -> {REVIEW_CSV}")
     print(f"        dropped: {dropped}")
 
 

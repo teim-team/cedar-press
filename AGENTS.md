@@ -133,6 +133,39 @@ When several agents run at once, file ownership is declared **before** editing i
 live data and commits. Only one agent may own a central file per pass. If two need
 incompatible changes to the same file, stage them; do not race.
 
+#### OPEN GATE FAILURE — RE-OPENED 2026-09-02 02:1x, measured by the staleness pass
+
+**`py -3 code/62_no_regression_check.py` exits 1.** It exited 1 at 01:15 too, on
+a shorter list; the list GREW during the pass because five other workstreams
+were writing to `data/clean/` at the same time. Named, with the owner each line
+points at, so nobody records this as "pre-existing, not mine":
+
+| line | owner named by the evidence |
+|---|---|
+| `lint_class1 0 -> 1`, `class2c 60 -> 65`, `class3 0 -> 2`, `class4 9 -> 12`, `lint_new_defect_instances = 17` | the NEW scripts 293 names: `1011_cross_dataset_reconciliation`, `1060_splink_pilot`, `992_newsletter_deal_candidates`, `1030_sec_edgar_native_transactions`, `1031_ancsa_45_55_139_annual_reports`, `852_extend_constellation_edges`, `873_build_aiannh_crosswalk` |
+| `class6`: `518_dataset_readiness`, `870_build_geo_crosswalks` | the readiness and geo-crosswalk workstreams |
+| `tables_undocumented_in_codebook 3 -> 18`, `tables_missing_codebook_block 3 -> 18`, `tables_missing_notes_contract 14 -> 18`, `ship_tables_at_zero 13 -> 17`, `tables_missing_from_25/27` | the ~12 `geo_*`, `regulations_gov_*` and constellation tables created 2026-09-02. **A table without a codebook block cannot ship.** `cedar_codebook.write_fragment`, then 87 → 25 → 27 |
+| `hearing_bill_links 465 -> 464`, `native_bills_subject_sweep 2,414 -> 2,409` STOPPED SHIPPING | the bills/votes workstream (`.bak_2026-09-02_pre890` on `bill_votes.csv`). Surfaced by an 87 re-run; the CAUSE is the tables shrinking, not the re-run |
+| `rulings_unapplied 1,215 -> 2,894` | the rulings-consolidation workstream. 2,894 `CONFLICT_NOT_APPLIED` in `cedar_ruling_ledger_consolidated.csv` |
+| `entity_evidence_profile.csv 10 -> 9 columns` (lost `in_spine`, `rows_per_source`, `amounts_per_source_NEVER_SUM`) | `505`. A rebuild reverted an in-place enricher; re-run the enricher |
+| `contract_violations 7 -> 12`, `contract_orphan_shippable 6 -> 7` | the new-table owners above; `docs/schema/dataset_contracts.json` names each |
+| `SHIPPING LOST: advocacy_passthrough_2026-08-07.csv` | pre-existing since 2026-09-01, unowned. The table is gone from `data/clean` and was shipping 1,620 rows |
+
+**Two lines that WERE on this list on 2026-09-01 and are NOT any more** —
+`files_with_columns_lost_vs_backup` fell 3 → 1 as the 843 backups aged out, and
+`lint_class6` fell 29 → 24.
+
+**Nothing here was waived and no baseline was re-recorded.** The staleness pass
+owned two class7 instances of its own (`id()` used as a key in
+`940_staleness_sweep.py`) and fixed them rather than adding a `# lint-ok`.
+
+**The ship chain is therefore correctly blocked.** `289_update_collection.py`
+stops at step 4 on a red 62, which is why `dist/collections/*.json` (2026-08-26),
+`dist/manifests/*.json`, `dist/schema.sql` and `dist/cedar_press.db` still carry
+`tribe_id_scheme` a day after 843 retired it. Those four cannot be legitimately
+rebuilt until 62 is green. `dist/*/notes.json` WAS rebuilt (87 alone,
+out of chain, deliberately) because it named a column that no longer exists.
+
 #### ~~OPEN GATE FAILURE~~ — CLOSED 2026-09-01. `62` exits 0.
 
 **Re-measured 2026-09-01 by workstream H: `py -3 code/62_no_regression_check.py`
@@ -6100,3 +6133,114 @@ scopes it to *"firms owned by PEOPLE, not nations"*, and
 over the same dataset. Widening the regex changes what an entire collection
 claims, which is that workstream's call and not a promotion pass's. **Owner:
 whoever owns 575 / the `owned` product collection.**
+
+---
+
+## 2026-09-02 — workstream SUBAWARD-FUNDING: gate state on close, and two things another workstream owns
+
+*Recorded per standing rule 15 option 3, which forbids writing "pre-existing,
+not mine" and continuing. This workstream took `subcontracting` and `funding`
+from BLOCKED to READY (`py -3 code/518_dataset_readiness.py` → **13/13 READY**).
+`62_no_regression_check.py` exits 1 on close and NONE of its failing lines is
+this workstream's. They are named below with their owners so the next reader
+can trace rather than guess.*
+
+### What this workstream changed
+
+| file | what |
+|---|---|
+| `code/910_subaward_report_id_backfill.py` | new. Recovers `subaward_sam_report_id` from staged zips (8.48M raw rows, zero network) and derives `subaward_source_record_id`. `subawards.csv` gets its first primary key: **(source_dataset, subaward_source_record_id)**, 0 blank, 0 collisions. Byte-identical rows 10,770 → 0 with **zero rows deleted** and money identical to the cent |
+| `code/911_subaward_sub_leg_cedar_uid.py` | new. `prime_cedar_uid` / `sub_cedar_uid`. C4 42% → 99.90%, because a subaward has two legs and only the prime one had an id |
+| `code/912_selftest_refusal_gates.py` | new. Proves the three new gates fire on synthetic violations |
+| `code/81_build_passthrough_dataset.py` | carries the parent's key + `duplicate_status` + `subaward_exceeds_prime_flag`; gained `verify`, a backup, and before/after conservation printing |
+| `code/512_build_dataset_contracts.py` | new block `GRAIN_SUBAWARD_FUNDING` + four side maps + `_validate_refusal`. **Own block only; nothing else touched.** UNSTATED 10 → 7 |
+| `code/517_export_safety.py` | fourth export class `AGGREGATE_ONLY_NO_KEY` |
+| `code/518_dataset_readiness.py` | C2 accepts a re-measured key refusal; C3 implements its own "or intentionally explained"; C4 defect (5), the national-mirror denominator |
+| `code/574_ws1_money_and_conservation.py` | "Why no primary key is declared" → "The keys — three of four declared, one REFUSED", measured from the live files |
+| `code/121_pull_subawards_api.py` | new `POST_PROMOTION_COLS` map (see below) |
+| `code/cedar_pipeline.py` | four `KNOWN_ORDERINGS` entries for subawards.csv / native_passthrough.csv |
+
+### A LESSON WORTH MORE THAN THE FIX: a correction that lives only in a generated file has a deletion date on it
+
+`docs/MONEY_TOTALLING_RULES.md` carried a hand-written paragraph — *"State the
+denominator, every time"* — added after Codex found the subaward overstatement
+quoted as **46.5%** in one shipped description and **86.9%** in another. The
+paragraph was correct and it was written into the **output**. `574` writes that
+file **wholesale**. The first re-run of 574 deleted it silently, and the
+document went back to quoting one denominator with no warning attached.
+
+It is now computed inside 574 from the same two totals as the sentence above
+it, so it cannot be deleted by a rebuild and cannot drift from the numbers it
+describes. **If you correct a generated document, correct the generator.**
+
+### `62_no_regression_check.py` FAILS on close. None of it is mine.
+
+Checked line by line against `293.new_since_baseline()`, whose finding key is
+`class|file|evidence` and therefore immune to the line-number shifts my edits
+caused:
+
+* **`lint_new_defect_instances = 17`** — named files are `1011`, `1072`, `1060`,
+  `852`, `873`, `992`, `1030`, `1031`, `980`, `870`, `871` and **`518`**. All
+  but the last belong to the constellation, geography, newsletter, EDGAR,
+  business-registry and splink workstreams. **The `518` one is a file this
+  workstream edited, so it was checked rather than waved past**, and it is not
+  ours: `class6|518_dataset_readiness.py|cedar_dataset_readiness.csv` fires
+  because `621_dataset_coverage.py` both READS and WRITES that table while 518
+  rebuilds it — a rebuild-vs-enricher pair. `621` was last changed in commit
+  `c82e9bd` (the C4-scanner-v2 workstream) and `518` does not read the table at
+  all; measured with `293.table_io` on both files. **Owner: whoever owns `621`
+  — either 621 should stop writing it, or the pair needs a
+  `cedar_pipeline.KNOWN_ORDERINGS` entry with 621 running LAST.** Every 518 run
+  in this workstream was checked against the previous header and lost no
+  column.
+* **`files_with_columns_lost_vs_backup = 1`** — `entity_evidence_profile.csv`
+  lost `in_spine`, `rows_per_source`, `amounts_per_source_NEVER_SUM` against
+  its `pre505` backup. Owner: `151_rebuild_entity_evidence_profile.py` /
+  `503_identity.py`.
+* **`contract_violations = 12` and `contract_orphan_shippable = 7`** — both
+  present at the same values before this workstream started (baseline snapshot
+  taken at 2026-09-02 before the first edit) and unchanged by it. Five of the
+  seven orphans are `.bak_*` files another workstream left in `data/clean/`.
+* **`rulings_unapplied 1,215 → 2,894`**, **`tables_undocumented_in_codebook
+  3 → 18`**, **`ship_tables_at_zero 13 → 17`**, the two "stopped shipping"
+  lines (`hearing_bill_links.csv` 465→464, `native_bills_subject_sweep.csv`
+  2,414→2,409, both the legislation workstream's deliberate corpus de-dupe) and
+  `advocacy_passthrough_2026-08-07.csv` — none is reachable from any file this
+  workstream touched.
+
+Metrics this workstream **improved**: `contract_grain_stated_shippable`
+185 → 218, `contract_grain_unstated_shippable` 25 → 7,
+`export_unsafe_money_tables` **11 → 0**.
+
+### GEOGRAPHY WORKSTREAM: `871` silently broke `121`, and I unblocked it on your behalf
+
+`871_promote_geo_keys_contracts.py` added ten `geo_*` columns to
+`subawards.csv` at 01:14 on 2026-09-02. `121_pull_subawards_api.py` has a
+schema guard that **raises SystemExit** on any column beyond the promoted
+schema that `append()` cannot fill, and all ten qualified — so the FY2022–24
+subaward promotion that is mid-flight **could not run at all**, and the failure
+would have read as a schema problem with the pull rather than as a column
+addition somewhere else.
+
+Registered in the new `POST_PROMOTION_COLS` map in 121 and in
+`cedar_pipeline.KNOWN_ORDERINGS`, on the reasoning that 871 is an in-place
+enricher keyed on `prime_award_unique_key` — a column every row already carries
+— so it recomputes cleanly for appended rows and must simply RUN AFTER the
+promotion. **Geography workstream: if that is wrong, the line to correct is
+named in 121's comment.**
+
+The full post-promotion order is now printed by the guard itself and registered
+in `cedar_pipeline`: `910 rescan → 910 apply → 911 apply → 871 → 81`.
+
+### The three new ways to satisfy the contract, and why each has its own gate
+
+A hole in a gate is only safe if the hole has its own gate — *"a check reading a
+key that does not exist passes for the same reason it is useless."*
+
+| the hole | the gate on the hole | proof it fires |
+|---|---|---|
+| a declared key **REFUSAL** substitutes for a primary key | `512._validate_refusal` re-measures every refused candidate on the FULL file each run; a candidate that has become unique is a **violation** — *a key we could publish and do not is a defect* | `912` T1 |
+| a declared **duplicate disposition** substitutes for removing duplicates | the disposition states an exact expected count; any drift, in either direction, breaks the declaration | `912` T2 |
+| a declared **`national_mirror`** scope leaves C4's denominator | the claim must name the table holding the Native attribution; that table must exist and be ≥50% attached, or the claim is refused and the mirror is scored as before | `912` T4 |
+
+Each has a matching control (C1–C4) proving it does not over-fire.

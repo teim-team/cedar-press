@@ -828,6 +828,163 @@ def cmd_mine(limit=None, min_evidence="all"):
     return 0
 
 
+# ================================================================ holdings ==
+# The triage sets 1,881 registered-investment-company reports aside because a
+# schedule of investments discloses no transaction. That is right, and it
+# throws away a second fact those filings DO carry: **the name of every
+# tribal entity whose debt is held by a US fund.** A tribe with rated,
+# fund-held paper has issued a bond, and the issuance is a Cedar deal even
+# when the offering itself was a Rule 144A placement that never touched
+# EDGAR - which docs/DEALS_SEC_2010_2017_BUILD_LOG.md names as the single
+# largest body of missing tribal transactions.
+#
+# NPORT-P and N-MFP2 carry structured XML, so the issuer names come out of the
+# `name` / `title` elements without reading prose.
+
+HOLDINGS_OUT = REVIEW / "sec_edgar_1030_tribal_debt_issuers.csv"
+HOLD_COLS = ["issuer_name", "matched_token", "issuer_class", "why",
+             "observations", "first_seen", "last_seen", "example_accession",
+             "example_filer", "example_url", "found_by", "found_date",
+             "record_scope"]
+
+# `NATION` is the token that makes this list dangerous. In one 60-filing
+# sample it reached Live Nation Entertainment, Fidelity National, First
+# Horizon National, Huntington National, Jackson National, Lincoln National
+# and a "Wabash Nation" - none of them Native, all of them big holdings in
+# every bond fund. ENTITY_MATCH_RULES rule 1, in a new place.
+_NATION_FALSE = re.compile(
+    r"\b(LIVE|FIDELITY|FIRST HORIZON|HUNTINGTON|JACKSON|LINCOLN|WABASH|"
+    r"FEDERAL|GOVERNMENT|CITIZENS|OLD NATIONAL|ZIONS|BANCORP|CARRIER|"
+    r"ALLIANT|AMERICAN|UNITED|GLOBAL|BRAZIL|DOWNSTREAM TRADING)\b")
+# Names Cedar can already tie to a known tribal issuing entity.
+_TRIBAL_ISSUER = re.compile(
+    r"\b(MOHEGAN|SOUTHERN UTE|NAVAJO NATION|CATAWBA|PCI GAMING|"
+    r"SEMINOLE (?:TRIBE|INDIAN TRIBE|HARD ROCK)|RIVER ROCK|CHUKCHANSI|"
+    r"SANTA YNEZ|CHUMASH|SHINGLE SPRINGS|INN OF THE MOUNTAIN|QUAPAW|"
+    r"CHOCTAW RESORT|AGUA CALIENTE|MORONGO|SAN MANUEL|PECHANGA|CABAZON|"
+    r"JAMUL|COWLITZ|ILANI|SAGINAW CHIPPEWA|POARCH|TRIBAL GAMING AUTHORITY|"
+    r"GAMING AUTHORITY|RANCHERIA|PUEBLO OF)\b")
+
+
+def classify_issuer(name):
+    u = name.upper()
+    if _TRIBAL_ISSUER.search(u):
+        return ("TRIBAL_ISSUER",
+                "matches a known tribal issuing entity or a tribal gaming "
+                "authority; the fund holds its paper, so the issuance is real")
+    if _NATION_FALSE.search(u):
+        return ("NOT_NATIVE_NATION_TOKEN",
+                "reached only through the token NATION or DOWNSTREAM, which "
+                "belongs to a large non-Native issuer - refused, not deleted")
+    return ("UNRESOLVED",
+            "the token fired and the issuer is not identifiable from the "
+            "holding line alone; needs a look at the security description")
+
+ISSUER_PAT = re.compile(
+    r"\b(TRIBAL|TRIBE|TRIBES|RANCHERIA|PUEBLO|INDIAN|NATION|NATIVE|"
+    r"MOHEGAN|MASHANTUCKET|SENECA GAMING|CHUKCHANSI|SANTA YNEZ|CHUMASH|"
+    r"SHINGLE SPRINGS|RIVER ROCK|INN OF THE MOUNTAIN|QUAPAW|DOWNSTREAM|"
+    r"CHOCTAW RESORT|AGUA CALIENTE|MORONGO|SAN MANUEL|PECHANGA|CABAZON|"
+    r"JAMUL|COWLITZ|ILANI|SOARING EAGLE|SAGINAW CHIPPEWA|TURNING STONE|"
+    r"ONEIDA|SEMINOLE HARD ROCK|WIND CREEK|PCI GAMING|POARCH)\b")
+
+XML_NAME = re.compile(
+    r"<(?:name|title|issuerName|nameOfIssuer)>([^<]{4,160})</", re.I)
+
+
+def cmd_holdings(limit=60):
+    """Sample the holdings class for the tribal issuers it names."""
+    import collections
+    out("=== 1030 holdings - which tribal entities have fund-held debt ===")
+    out("")
+    acc = read_candidate_index()
+    pool = [r for a, r in acc.items()
+            if (r["form"] in HOLDINGS_FORMS)
+            and r["document_url"].lower().endswith((".xml", ".htm"))]
+    # spread the sample across years so one fund family cannot dominate
+    pool.sort(key=lambda r: (r["file_date"], r["accession"]))
+    step = max(1, len(pool) // int(limit))
+    sample = pool[::step][:int(limit)]
+    out(f"  {len(pool):,} holdings filings in the triage NOISE class; "
+        f"sampling {len(sample)} evenly across {pool[0]['file_date'][:4]}"
+        f"-{pool[-1]['file_date'][:4]}")
+
+    CACHE.mkdir(parents=True, exist_ok=True)
+    found = {}
+    fetched = 0
+    with HostLock("www.sec.gov",
+                  "sequential, single stream, >=0.17s gap, 2h deadline",
+                  "1030 holdings sample") as lock:
+        for r in sample:
+            dest = CACHE / ("_holdings__" + r["accession"] + "_"
+                            + r["document_url"].rsplit("/", 1)[-1][:50])
+            try:
+                if dest.exists():
+                    body = dest.read_bytes()
+                    lock.bump(already_on_disk_skipped=1)
+                else:
+                    time.sleep(GAP)
+                    status, body = http_get(r["document_url"], ARCH_HDR,
+                                            timeout=120)
+                    dest.write_bytes(body)
+                    lock.bump(downloaded_this_run=1, requests_made=1)
+                    fetched += 1
+            except Exception as e:
+                lock.state["refused_by_host"].append(
+                    f'{r["accession"]}: {type(e).__name__}')
+                continue
+            txt = body.decode("utf-8", "replace")
+            names = set(XML_NAME.findall(txt))
+            if not names:
+                names = set(re.findall(
+                    r"([A-Z][A-Za-z&\.\'\- ]{6,70}(?:Authority|Nation|Tribe|"
+                    r"Rancheria|Enterprise|Corporation))", txt))
+            for n in names:
+                n = re.sub(r"\s+", " ", n).strip()
+                m = ISSUER_PAT.search(n.upper())
+                if not m:
+                    continue
+                k = n.upper()
+                e = found.setdefault(k, {
+                    "issuer_name": n, "matched_token": m.group(0),
+                    "observations": 0, "first_seen": r["file_date"],
+                    "last_seen": r["file_date"],
+                    "example_accession": r["accession"],
+                    "example_filer": r["filer_display_names"],
+                    "example_url": r["document_url"]})
+                e["observations"] += 1
+                e["first_seen"] = min(e["first_seen"], r["file_date"])
+                e["last_seen"] = max(e["last_seen"], r["file_date"])
+    rows = sorted(found.values(), key=lambda x: -x["observations"])
+    for x in rows:
+        x["issuer_class"], x["why"] = classify_issuer(x["issuer_name"])
+        x["found_by"] = SCRIPT
+        x["found_date"] = TODAY
+        x["record_scope"] = "ISSUER_NAME_CANDIDATE_NOT_A_DEAL"
+    rows.sort(key=lambda x: ({"TRIBAL_ISSUER": 0, "UNRESOLVED": 1,
+                              "NOT_NATIVE_NATION_TOKEN": 2}[x["issuer_class"]],
+                             -x["observations"]))
+    with open(HOLDINGS_OUT, "w", encoding="utf-8", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=HOLD_COLS)
+        w.writeheader()
+        w.writerows(rows)
+    out(f"  {fetched} filings fetched, {len(rows)} candidate issuer names "
+        f"-> {HOLDINGS_OUT.relative_to(CEDAR)}")
+    import collections as _c
+    for k, v in _c.Counter(x["issuer_class"] for x in rows).most_common():
+        out(f"    {v:4d}  {k}")
+    out("")
+    for x in rows:
+        if x["issuer_class"] != "TRIBAL_ISSUER":
+            continue
+        out(f"    {x['observations']:4d}  {x['issuer_name'][:70]}")
+    out("")
+    out("  A NAME HERE IS NOT A DEAL. It says a fund held paper of that "
+        "issuer, which is evidence the issuance happened and no evidence of "
+        "its date, size or terms.")
+    return 0
+
+
 # ================================================================== census ==
 # THE REGISTRANT UNIVERSE, IN ONE REQUEST.
 #
@@ -1234,6 +1391,8 @@ def main(argv):
         return cmd_census(refresh=bool(kw.get("refresh")))
     if cmd == "submissions":
         return cmd_submissions(ciks=kw.get("ciks"))
+    if cmd == "holdings":
+        return cmd_holdings(limit=kw.get("limit", 60))
     if cmd == "verify":
         return cmd_verify()
     if cmd == "verify-synthetic":

@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
-"""1072 - INDIAN COUNTRY HOLDINGS: enterprises a Native nation actually OWNS.
+"""1072 - NEST: Native Enterprise Structures and Ties.
 
-Collection id `holdings`. The 14th dataset, and it is DISTINCT from
+    Enterprise ownership and affiliation across tribes, Alaska Native
+    corporations, Native Hawaiian organizations, and state-recognized
+    Native entities.   -- the owner, 2026-09-02
+
+Collection id `nest`. The 14th dataset, and it is DISTINCT from
 `native-owned-businesses` by the relation it publishes:
 
     native-owned-businesses   a nation CERTIFIED or LISTED this firm
                               -> relation `affiliated_with`, identity_scope
                                  gradient down to `vendor_relationship`
-    holdings (this)           a nation, ANC or NHO OWNS this enterprise
+    nest (this)               a nation, ANC or NHO OWNS this enterprise
                               -> relation `owned_by`, and that is a CLAIM,
                                  so every row carries the source that asserts
                                  it and the evidence class of that source
@@ -40,9 +44,9 @@ STAGES
   assemble  zero network. Merges every staged ownership assertion Cedar
             already holds into one normalised edge set, with the ANCSA and
             named-collision guards applied.
-  build     writes data/clean/tribally_owned_enterprises.csv and
-            data/clean/tribally_owned_enterprise_ownership_edges.csv, minting
-            a Cedar sub-hub id per enterprise.
+  build     writes data/clean/nest_enterprises.csv and
+            data/clean/nest_enterprise_relations.csv, minting a Cedar sub-hub
+            id per enterprise.
   verify    invariants. Exits 1 when one breaks.
   selfcheck proves `verify` FIRES, by injecting each violation into a COPY.
 
@@ -77,7 +81,7 @@ BUILT = date.today().isoformat()
 CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 SPINE = CEDAR / "data" / "spine"
-STAGE = CEDAR / "data" / "staging" / "holdings"
+STAGE = CEDAR / "data" / "staging" / "nest"
 INTERIM = CEDAR / "data" / "interim"
 RAW = CEDAR / "data" / "raw"
 REVIEW = CEDAR / "review"
@@ -87,12 +91,12 @@ MINE_LOG = STAGE / "ancsa_mine_log.csv"
 EDGES_STAGED = STAGE / "ownership_edges_staged.jsonl"
 HELD = STAGE / "held_rows.csv"
 
-OUT_ENT = CLEAN / "tribally_owned_enterprises.csv"
-OUT_EDGE = CLEAN / "tribally_owned_enterprise_ownership_edges.csv"
+OUT_ENT = CLEAN / "nest_enterprises.csv"
+OUT_EDGE = CLEAN / "nest_enterprise_relations.csv"
 # Append-only binding of (owner hub, normalised name) -> enterprise_id.
 # Kept in data/spine because an identifier a customer joins on must
 # survive a staging wipe, and because it is identity, not output.
-IDREG = SPINE / "cedar_holdings_id_register.csv"
+IDREG = SPINE / "cedar_nest_id_register.csv"
 
 # ---------------------------------------------------------------------------
 # EXCLUSIONS. docs/PUBLICATION_POLICY.md - TERMS_STATED_RESTRICTIVE publishers
@@ -173,11 +177,30 @@ def read_jsonl(p) -> list:
 
 
 def write_csv(path: Path, cols: list, rows: list) -> None:
-    """`.part` then rename - an interruption must not look like a completion."""
+    """`.part` then rename, with the header DERIVED, never hardcoded.
+
+    Two defects this one function is written against:
+
+    1. **An interruption must not look like a completion.** Write `.part`,
+       then rename.
+    2. **A hardcoded `fieldnames` list DELETES every column added since the
+       writer was written.** `code/845_regenerate_guard.py` found 33 writers
+       in this repo holding one. So the header is the canonical list this
+       build produces UNIONED with whatever the live file already carries -
+       a column a sibling workstream added to a NEST table survives a
+       rebuild here, and is carried through with an empty value rather than
+       dropped.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
+    live = []
+    if path.exists():
+        with path.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+            live = next(csv.reader(fh), []) or []
+    header = list(cols) + [c for c in live if c not in cols]
     tmp = path.with_suffix(path.suffix + ".part")
     with tmp.open("w", encoding="utf-8", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=cols, extrasaction="ignore")
+        w = csv.DictWriter(fh, fieldnames=header, extrasaction="ignore",
+                           restval="")
         w.writeheader()
         for r in rows:
             w.writerow(r)
@@ -862,14 +885,22 @@ def stage_assemble(argv) -> int:
                 # Doyon's own page names Huna Totem and Klawock Heenya;
                 # reading it at face value would convert two independent
                 # ANCSA corporations into subsidiaries of a third.
-                held.append({**e, "hold_reason":
-                             f"both publisher ({row['handle']}) and named firm "
-                             f"({crow['handle']}) are ANCSA corporations - "
-                             f"ANCSA_OWNERSHIP_RULING forbids this ownership "
-                             f"edge; the relationship is shareholding, ancestry "
-                             f"or a joint venture",
-                             "hold_class": "ANCSA_CORP_TO_CORP"})
-                continue
+                # NOT dropped: DOWNGRADED. NEST is Structures AND Ties, and
+                # this is a real, published tie that is not ownership. The
+                # row survives with `relationship = shareholding_or_ancestry`
+                # so a reader can see the relationship without Cedar
+                # asserting the ownership the ruling forbids.
+                e = dict(e)
+                e["relationship"] = ("joint_venture"
+                                     if "joint" in (e.get("relationship") or "").lower()
+                                     else "shareholding_or_ancestry")
+                child_hub_uid = crow["cedar_uid"]
+                child_hub_note = (
+                    f"DOWNGRADED from ownership to a tie: publisher "
+                    f"{row['handle']} and named firm {crow['handle']} are both "
+                    f"ANCSA corporations, and ANCSA_OWNERSHIP_RULING rules 4/5 "
+                    f"make the regional/village and village/village link "
+                    f"shareholding or ancestry, never ownership")
             else:
                 # A CDFI, college or other non-government Cedar entity the
                 # publisher genuinely owns - Citizen Potawatomi Community
@@ -914,13 +945,64 @@ OWNER_CLASS = {
     "Federally recognized tribe": "tribal_government",
     "State-recognized tribe": "tribal_government",
     "Federally recognized Alaska Native Village": "tribal_government",
+    "Federal-level constituency entity": "tribal_government",
+    "State-level constituency entity": "tribal_government",
+    "Federal-level self-governance consortium": "tribal_government",
     "Alaska Native Regional Corporation": "alaska_native_corporation",
     "Alaska Native Village Corporation": "alaska_native_corporation",
     "Native Hawaiian Organization": "native_hawaiian_organization",
 }
 
+# ---------------------------------------------------------------------------
+# STRUCTURES AND TIES - the two relations NEST publishes, and the vocabulary
+# that keeps them apart.
+# ---------------------------------------------------------------------------
+# The dataset's name commits it to two relations, not one, and the row has to
+# say which it is. AN AFFILIATION RECORDED AS OWNERSHIP IS THE DEFECT THAT
+# MATTERS MOST HERE - it is the Doyon/Huna Totem error, the one that converts
+# independent ANCSA corporations into somebody's subsidiaries.
+#
+#   STRUCTURE  the ownership chain: nation -> holding company -> operating
+#              company. `relation_class = ownership`.
+#   TIE        a published relationship that is NOT ownership: a joint
+#              venture (which genuinely has two parents), a passive equity
+#              stake, ANCSA shareholding or ancestry. `relation_class =
+#              affiliation`.
+#
+# Sources write this half a dozen ways ("joint venture", "joint_venture",
+# "holding company", a schema.org `subOrganization`), so the vocabulary is
+# normalised once, here, and anything unrecognised lands in
+# `relationship_as_recorded` and is classed `affiliation` - the WEAKER
+# reading, because guessing upward is the direction that fabricates.
+REL_CANON = {
+    "wholly_owned": "wholly_owned", "wholly owned": "wholly_owned",
+    "majority_owned": "majority_owned", "majority owned": "majority_owned",
+    "subsidiary": "subsidiary", "division": "division",
+    "holding company": "holding_company", "holding_company": "holding_company",
+    "operating company": "operating_company",
+    "operating_company": "operating_company",
+    "declared_suborganization_schema_org": "declared_suborganization",
+    "joint_venture": "joint_venture", "joint venture": "joint_venture",
+    "passive_investment": "passive_investment",
+    "shareholding_or_ancestry": "shareholding_or_ancestry",
+}
+OWNERSHIP_RELS = {"wholly_owned", "majority_owned", "subsidiary", "division",
+                  "holding_company", "operating_company",
+                  "declared_suborganization"}
+
+
+def canon_rel(rel: str) -> tuple:
+    """-> (canonical relationship, relation_class)."""
+    r = REL_CANON.get((rel or "").strip().lower(), "")
+    if not r:
+        return ((rel or "").strip() or "unspecified", "affiliation")
+    return r, ("ownership" if r in OWNERSHIP_RELS else "affiliation")
+
+
 REL_RANK = {"wholly_owned": 5, "majority_owned": 4, "subsidiary": 3,
-            "division": 3, "joint_venture": 2, "passive_investment": 1}
+            "division": 3, "holding_company": 3, "operating_company": 3,
+            "declared_suborganization": 2, "joint_venture": 1,
+            "shareholding_or_ancestry": 1, "passive_investment": 1}
 EVID_RANK = {"audited_annual_report_as_45_55_139": 5,
              "nation_self_published_enterprise_register": 4,
              "parent_self_published_company_list": 3,
@@ -1000,10 +1082,22 @@ def stage_build(argv) -> int:
     for e in edges:
         by_hub[e["hub_cedar_uid"]].append(e)
 
+    # A hub is not its own subsidiary. `The Eyak Corporation` and the spine's
+    # `Eyak Corporation`, `Coushatta Tribe of Louisiana` and the spine's
+    # `Coushatta` - the leading article and the spine's deliberately short
+    # canonical names made a company the parent of itself, which then
+    # published as a level-2 chain that was really one company twice.
+    hub_keys = {}
+    for hub_uid in by_hub:
+        nm = hubs.by_uid.get(hub_uid, {}).get("canonical_name", "")
+        hub_keys[hub_uid] = {k for _m, k in name_keys(nm)}
+
     clusters = []          # (hub_uid, canonical_name, [edges], {variants})
     for hub_uid, group in sorted(by_hub.items()):
         buckets = {}       # norm-name -> list of edges
         for e in group:
+            if {k for _m, k in name_keys(e["child_name_raw"])} & hub_keys[hub_uid]:
+                continue   # the hub naming itself
             buckets.setdefault(norm(e["child_name_raw"]), []).append(e)
         keys = sorted(buckets)
         parent_of = {k: k for k in keys}
@@ -1044,9 +1138,15 @@ def stage_build(argv) -> int:
         name_to_cluster[(hub_uid, norm(cname))] = idx
     parent_idx = {}
     for idx, (hub_uid, cname, es, _v) in enumerate(clusters):
-        pnames = {norm(x["parent_name"]) for x in es if x.get("parent_name")}
-        pnames.discard(norm(hubs.by_uid.get(hub_uid, {}).get("canonical_name", "")))
-        for pn in sorted(pnames):
+        pnames = []
+        for x in es:
+            pn = x.get("parent_name") or ""
+            if not pn:
+                continue
+            if {k for _m, k in name_keys(pn)} & hub_keys[hub_uid]:
+                continue                    # the parent IS the hub: level 1
+            pnames.append(norm(pn))
+        for pn in sorted(set(pnames)):
             j = name_to_cluster.get((hub_uid, pn))
             if j is not None and j != idx:
                 parent_idx[idx] = j
@@ -1076,6 +1176,24 @@ def stage_build(argv) -> int:
             uei_of_cage.setdefault(c, u)
         if u:
             name_of_uei.setdefault(u, r.get("legal_business_name", ""))
+    # THE SCOPE SPLIT WITH THE CONSTELLATION, made explicit in the data.
+    # `data/clean/cedar_constellation_edges.csv` (ADR-014) records SERVICE
+    # relationships - who serves a community, including `registered_with` for
+    # a TERO-certified firm. NEST records OWNERSHIP AND CORPORATE AFFILIATION
+    # of enterprises. A TERO-certified firm is a constellation edge and is
+    # NOT a NEST row unless the nation also owns it, which is why this build
+    # takes only sources declaring `directory_type = subsidiary_directory`.
+    # The file is READ, never written, and where the two agree the
+    # constellation's own edge id is carried so the corroboration is visible
+    # instead of the same relationship being rebuilt under a second name.
+    con_edge = {}
+    for r in read_csv(CLEAN / "cedar_constellation_edges.csv"):
+        k = ((r.get("to_hub_cedar_uid") or "").strip(),
+             norm(r.get("from_name") or ""))
+        if k[0] and k[1]:
+            con_edge.setdefault(k, r.get("edge_id", ""))
+    print(f"  constellation edges read (never written): {len(con_edge)} keys")
+
     fed_names, fed_ueis, fed_cages = federal_contracting_index()
     print(f"  FPDS presence index: {len(fed_names)} names, "
           f"{len(fed_ueis)} UEIs, {len(fed_cages)} CAGE codes")
@@ -1094,8 +1212,8 @@ def stage_build(argv) -> int:
     need = [(h, norm(c)) for h, c, _e, _v in clusters
             if (h, norm(c)) not in idreg]
     if need:
-        got = cedar_ids.allocate("CEDAR-HOLD", len(need),
-                                 note="holdings enterprise sub-hubs, 1072")
+        got = cedar_ids.allocate("CEDAR-NEST", len(need),
+                                 note="NEST enterprise sub-hubs, 1072")
         for (h, nk), raw in zip(need, got):
             ordinal = int(raw.rsplit("-", 1)[1])
             eid = f"{raw}-{m503.check_chars(m503.encode(ordinal))}"
@@ -1118,11 +1236,19 @@ def stage_build(argv) -> int:
         hub = hubs.by_uid.get(hub_uid, {})
         eid = idreg[(hub_uid, norm(cname))]
 
-        rel = max((x.get("relationship") or "subsidiary" for x in es),
-                  key=lambda r: REL_RANK.get(r, 0))
+        rels = [canon_rel(x.get("relationship") or "subsidiary")[0] for x in es]
+        rel = max(rels, key=lambda r: REL_RANK.get(r, 0))
+        rel, rel_class = canon_rel(rel)
         best = max(es, key=lambda x: (EVID_RANK.get(x["evidence_class"], 0),
                                       str(x.get("source_fy") or "")))
         fys = sorted({str(x.get("source_fy") or "") for x in es} - {""})
+        # A source with no fiscal year still dates itself: the edition date
+        # the publisher put on the page. Without this, 801 of 1,483 rows read
+        # `status = unknown` because only the ANCSA filings carry an FY.
+        eds = sorted({str(x.get("source_edition_date") or "")[:4] for x in es}
+                     - {""})
+        eds = [y for y in eds if re.match(r"^(19|20)\d\d$", y)]
+        obs_years = sorted(set(fys) | set(eds))
         pct = next((x["ownership_percent"] for x in es if x.get("ownership_percent")), "")
         sector = next((x["sector"] for x in es if x.get("sector")), "")
 
@@ -1195,11 +1321,19 @@ def stage_build(argv) -> int:
             "parent_is_hub": "N" if pj is not None else "Y",
             "hierarchy_level": lvl,
             "relationship": rel,
+            "relation_class": rel_class,
+            "relationship_as_recorded": " | ".join(
+                sorted({(x.get("relationship") or "") for x in es} - {""})),
             "ownership_percent_stated": pct,
             "sector": sector,
-            "status": "operating" if fys and fys[-1] >= "2024" else "unknown",
-            "status_basis": (f"named in the owner's filing for FY{fys[-1]}"
-                             if fys else "the source states no period"),
+            "status": ("operating" if obs_years and obs_years[-1] >= "2024"
+                       else "last_seen_earlier" if obs_years else "unknown"),
+            "status_basis": (
+                f"named by its owner in a source dated {obs_years[-1]}"
+                + (f" and first seen {obs_years[0]}" if len(obs_years) > 1 else "")
+                if obs_years else
+                "no source for this enterprise states a period; status is not "
+                "asserted rather than assumed current"),
             "city": city, "state_province": state,
             "address_basis": addr_basis,
             "address_is_publishable": "Y" if city else "",
@@ -1215,8 +1349,19 @@ def stage_build(argv) -> int:
             "evidence_class": best["evidence_class"],
             "n_source_observations": len(es),
             "n_distinct_sources": len({x["source_id"] for x in es}),
-            "first_observed_fiscal_year": fys[0] if fys else "",
-            "last_observed_fiscal_year": fys[-1] if fys else "",
+            "first_observed_year": obs_years[0] if obs_years else "",
+            "last_observed_year": obs_years[-1] if obs_years else "",
+            "enterprise_existing_cedar_uid": next(
+                (x.get("enterprise_existing_cedar_uid", "") for x in es
+                 if x.get("enterprise_existing_cedar_uid")), ""),
+            "constellation_edge_id": con_edge.get(
+                (hub_uid, nk), ""),
+            "constellation_note": (
+                "the service constellation records a relationship between this "
+                "firm and this hub; cedar_constellation_edges.csv is SERVICE "
+                "(who serves whom), NEST is OWNERSHIP AND CORPORATE "
+                "AFFILIATION - the two corroborate, they do not duplicate"
+                if con_edge.get((hub_uid, nk)) else ""),
             "source_id": best["source_id"],
             "source_url": best["source_url"],
             "source_document": best["source_document"],
@@ -1233,17 +1378,24 @@ def stage_build(argv) -> int:
         })
         for x in es:
             edge_rows.append({
-                "enterprise_edge_id": "EDGE-" + sha(
-                    hub_uid, nk, x["source_id"], x.get("source_document", ""),
-                    x.get("source_url", ""), x.get("source_fy", ""),
-                    x.get("parent_name", ""))[:12].upper(),
+                # The RECORDED child name is part of the key, not just the
+                # cluster it collapsed into: one document can name two
+                # spellings of one company (`Ahtna Design Build, Inc` and
+                # `Ahtna Design-Build, Inc`), and those are two assertions.
+                # Without it, 10 of 3,494 edge ids collided.
+                "enterprise_edge_id": "NESTREL-" + sha(
+                    hub_uid, nk, norm(x["child_name_raw"]), x["source_id"],
+                    x.get("source_document", ""), x.get("source_url", ""),
+                    x.get("source_fy", ""), x.get("parent_name", ""))[:14].upper(),
                 "enterprise_id": eid,
                 "child_name_as_recorded": tidy(x["child_name_raw"]),
                 "parent_name_as_recorded": tidy(x.get("parent_name", "")),
                 "owner_hub_cedar_uid": hub_uid,
                 "owner_hub_handle": hub.get("handle", ""),
                 "owner_hub_name": hub.get("canonical_name", ""),
-                "relationship": x.get("relationship", "subsidiary"),
+                "relationship": canon_rel(x.get("relationship", "subsidiary"))[0],
+                "relation_class": canon_rel(x.get("relationship", "subsidiary"))[1],
+                "relationship_as_recorded": x.get("relationship", ""),
                 "depth_as_recorded": x.get("depth_hint", 1),
                 "ownership_percent_stated": x.get("ownership_percent", ""),
                 "evidence_class": x["evidence_class"],
@@ -1264,6 +1416,26 @@ def stage_build(argv) -> int:
         j = parent_idx.get(i)
         if j is not None:
             r["parent_enterprise_id"] = id_of_cluster[j]
+
+    # ONE SOURCE SAYING A THING TWICE IS ONE ASSERTION. Goldbelt's directory
+    # lists `CP Marine` and `CP Marine LLC`; BBCH lists `CCI Industrial
+    # Services LLC` and `... Inc`. Same page, same parent, same firm, two
+    # renderings - so they collapse onto one edge and the fuller rendering
+    # wins. Counting them twice would inflate `n_source_observations`, which
+    # is the field a reader uses to judge how well evidenced a row is.
+    dedup = {}
+    for e in edge_rows:
+        k = e["enterprise_edge_id"]
+        if k not in dedup or len(e["child_name_as_recorded"]) > len(
+                dedup[k]["child_name_as_recorded"]):
+            dedup[k] = e
+    collapsed = len(edge_rows) - len(dedup)
+    edge_rows = [dedup[k] for k in sorted(dedup)]
+    if collapsed:
+        print(f"  collapsed {collapsed} same-source restatements of one firm")
+    seen_per_ent = Counter(e["enterprise_id"] for e in edge_rows)
+    for r in ent_rows:
+        r["n_source_observations"] = seen_per_ent.get(r["enterprise_id"], 0)
 
     write_csv(OUT_ENT, list(ent_rows[0].keys()), ent_rows)
     write_csv(OUT_EDGE, list(edge_rows[0].keys()), edge_rows)
@@ -1322,7 +1494,7 @@ def stage_verify(argv) -> int:
     if len(set(ids)) != len(ids):
         fails.append(f"I1 duplicate enterprise_id ({len(ids) - len(set(ids))})")
     bad_ck = [i for i in ids
-              if not re.match(r"^CEDAR-HOLD-\d{6}-[0-9A-Z]{2}$", i)
+              if not re.match(r"^CEDAR-NEST-\d{6}-[0-9A-Z]{2}$", i)
               or m503.check_chars(m503.encode(int(i.split("-")[2]))) != i.split("-")[3]]
     if bad_ck:
         fails.append(f"I1 bad check characters on {len(bad_ck)}: {bad_ck[:3]}")
@@ -1428,7 +1600,7 @@ def stage_selfcheck(argv) -> int:
     mutate(lambda rs: rs[0].__setitem__("owner_hub_name", "Chickasaw Nation"),
            "I4 refused publisher fires", "I4 ")
     mutate(lambda rs: (rs[0].__setitem__("hierarchy_level", "2"),
-                       rs[0].__setitem__("parent_enterprise_id", "CEDAR-HOLD-999999-ZZ")),
+                       rs[0].__setitem__("parent_enterprise_id", "CEDAR-NEST-999999-ZZ")),
            "I5 dangling parent fires", "I5 ")
     mutate(lambda rs: rs[0].__setitem__("in_federal_contracting", ""),
            "I7 blank verdict fires", "I7 ")

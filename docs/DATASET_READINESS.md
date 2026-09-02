@@ -12,7 +12,7 @@ BLOCKED 0 · NOT_TESTED 0
 | `contractors` | **READY** | 10 | 10/10 | 10/10 | clean | 0 | declared |
 | `deals` | **READY** | 14 | 14/14 | 14/14 | clean | 0 | declared |
 | `federal-register` | **READY** | 22 | 22/22 | 22/22 | clean | 0 | declared |
-| `funding` | **READY** | 10 | 10/10 | 10/10 | clean | 0 | declared |
+| `funding` | **READY** | 10 | 10/10 | 9/10 (+1 REFUSED) | clean | 0 | declared |
 | `gaming` | **READY** | 54 | 54/54 | 54/54 | clean | 0 | declared |
 | `legislation` | **READY** | 11 | 11/11 | 11/11 | clean | 0 | declared |
 | `lobbying` | **READY** | 35 | 35/35 | 35/35 | clean | 0 | declared |

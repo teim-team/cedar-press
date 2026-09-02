@@ -41,7 +41,8 @@ WHY -- AND WHY 830 SAYS ZERO
     rows, one per register entity -- and the count went straight back to 0. A
     filename blacklist cannot see a file written after it, which is why
     `CENSUS_COVERAGE_MIN` below is a SHAPE test and not another name. With
-    both defences the count is 83 absent plus 35 in exactly one table.
+    both defences the count is 83 absent plus 31 in exactly one
+    table, and the slice worked here is the union of the two.
 
     This file computes that number properly, then does something about it.
 
@@ -730,8 +731,16 @@ def write_doc(rows, scanned, skipped):
                   newline="") as fh:
             for r in csv.DictReader(fh):
                 got[r["cedar_uid"]].append(r)
+    # SCORE THE SLICE, NOT THE FILE. The first version counted closed uids
+    # from the whole evidence csv, which includes entities a sibling table has
+    # since covered, and printed 115 closed out of 114 -- a total larger than
+    # its own denominator. A ratio whose numerator and denominator come from
+    # different populations is not a ratio.
+    inslice = {r["cedar_uid"] for r in rows}
     closed = [u for u, v in got.items()
-              if any(x["evidence_class"] != "NONE_FOUND" for x in v)]
+              if u in inslice
+              and any(x["evidence_class"] != "NONE_FOUND" for x in v)]
+    n_zero = sum(1 for r in rows if r["_n_tables"] == 0)
     L = ["# The register-only tail — entities with no substantive Cedar row",
          "",
          "*Generated " + TODAY + " by `code/1021_register_only_first_rows.py`."
@@ -760,25 +769,40 @@ def write_doc(rows, scanned, skipped):
          "| `cedar_resolved_facts.csv` | what Cedar has adjudicated |",
          "| `entity_aliases.csv` | names, one or more for every entity |",
          "",
-         "Excluding the identity layer, **" + str(len(rows)) + "** register "
-         "entities have no row in any of the " + str(len(scanned))
-         + " substantive tables.",
+         "Excluding the identity layer and any table that is a census of the "
+         "register, **" + str(n_zero) + "** register entities have no row in "
+         "any of the " + str(len(scanned)) + " substantive tables, and **"
+         + str(len(rows) - n_zero) + "** more have exactly one.",
+         "",
+         "The slice worked here is both — the thin tail, **" + str(len(rows))
+         + "** entities. The line between the two groups moved while this was "
+         "being written: the newsletter workstream landed "
+         "`tribal_newsletter_corpus.csv` and 21 entities that had been "
+         "register-only an hour earlier acquired one row apiece. Slicing on "
+         "zero alone would have dropped them at the moment they became "
+         "reachable. `n_substantive_tables` on every evidence row keeps the "
+         "two states told apart.",
          "",
          "## The " + str(len(rows)) + " entities, by class", "",
-         "| entity class | with no substantive row | given a first row here |",
-         "|---|---:|---:|"]
+         "| entity class | in the thin tail | of those, in ZERO tables | "
+         "given a first row here |",
+         "|---|---:|---:|---:|"]
     byc = Counter(r["entity_class"] for r in rows)
+    zeroc = Counter(r["entity_class"] for r in rows if r["_n_tables"] == 0)
     okc = Counter(r["entity_class"] for r in rows
-                  if r["cedar_uid"] in closed)
+                  if r["cedar_uid"] in set(closed))
     for k, v in byc.most_common():
-        L.append("| %s | %d | %d |" % (k, v, okc.get(k, 0)))
-    L += ["| **total** | **%d** | **%d** |" % (len(rows), len(closed)), "",
+        L.append("| %s | %d | %d | %d |"
+                 % (k, v, zeroc.get(k, 0), okc.get(k, 0)))
+    L += ["| **total** | **%d** | **%d** | **%d** |"
+          % (len(rows), n_zero, len(closed)), "",
           "## What was found", "",
           "| route | rows |", "|---|---:|"]
-    rc = Counter(x["route"] for v in got.values() for x in v)
+    rc = Counter(x["route"] for u, v in got.items() if u in inslice
+                 for x in v)
     for k, v in rc.most_common():
         L.append("| %s | %d |" % (k, v))
-    still = [r for r in rows if r["cedar_uid"] not in closed]
+    still = [r for r in rows if r["cedar_uid"] not in set(closed)]
     if still:
         L += ["", "## Checked, nothing located — " + str(len(still)), "",
               "*Every one of these has a row in "
@@ -896,6 +920,11 @@ def main():
     arg = sys.argv[1] if len(sys.argv) > 1 else ""
     if arg == "selftest":
         return selftest()
+    if arg == "doc":
+        rows, scanned, skipped = slice_rows()
+        write_doc(rows, scanned, skipped)
+        print("  wrote " + OUT_DOC)
+        return 0
     if arg == "verify":
         bad = check()
         for b in bad[:40]:

@@ -111,6 +111,7 @@ GLOBAL_DELAY = 0.30         # aggregate, across all hosts
 PER_HOST_DELAY = 2.5        # a single host never sees more than 1 req / 2.5s
 WORKERS = 6
 MAX_BYTES = 8 * 1024 * 1024
+READ_BUDGET_S = 40          # hard wall-clock cap on one response body
 
 TODAY = date.today().isoformat()
 NOW = datetime.now(timezone.utc).isoformat()
@@ -299,11 +300,25 @@ def fetch(url, accept=None):
     out = {"url": url, "http_status": "", "content_type": "", "bytes": 0,
            "final_url": "", "text": "", "content": b"", "note": ""}
     try:
-        r = requests.get(url, headers=hdr, timeout=TIMEOUT, allow_redirects=True,
+        r = requests.get(url, headers=hdr, timeout=(10, TIMEOUT), allow_redirects=True,
                          stream=True)
-        raw = r.raw.read(MAX_BYTES + 1, decode_content=True) or b""
-        truncated = len(raw) > MAX_BYTES
-        raw = raw[:MAX_BYTES]
+        # WALL-CLOCK BUDGET. requests' read timeout is PER SOCKET READ: a server
+        # that trickles a few bytes every 20s never trips it. On 2026-09-02 that
+        # hung a worker for seven minutes with no error and no output. A timeout
+        # that cannot bound the total is not a timeout.
+        started = time.time()
+        chunks, got, truncated, timed_out = [], 0, False, False
+        for chunk in r.iter_content(chunk_size=65536, decode_unicode=False):
+            if chunk:
+                chunks.append(chunk)
+                got += len(chunk)
+            if got > MAX_BYTES:
+                truncated = True
+                break
+            if time.time() - started > READ_BUDGET_S:
+                timed_out = True
+                break
+        raw = b"".join(chunks)[:MAX_BYTES]
         out["http_status"] = str(r.status_code)
         out["content_type"] = (r.headers.get("Content-Type") or "").split(";")[0].strip()
         out["bytes"] = len(raw)
@@ -315,6 +330,9 @@ def fetch(url, accept=None):
         if truncated:
             # A truncated read must report TRUNCATED, never "no content".
             out["note"] = f"TRUNCATED at {MAX_BYTES} bytes"
+        elif timed_out:
+            out["note"] = (f"READ_BUDGET_EXCEEDED after {READ_BUDGET_S}s; "
+                           f"{got} bytes received, body is PARTIAL")
         enc = r.encoding or "utf-8"
         try:
             out["text"] = raw.decode(enc, errors="replace")

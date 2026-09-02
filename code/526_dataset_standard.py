@@ -85,7 +85,7 @@ BASIS_RE = re.compile(
 NATURAL_SCOPE = {
     "contractors": "entity", "subcontracting": "entity", "funding": "entity",
     "deals": "entity", "gaming": "entity", "natural-resources": "entity",
-    "native-owned-businesses": "entity", "nagpra": "entity",
+    "native-owned-businesses": "entity", "nest": "entity", "nagpra": "entity",
     "_entity_layer": "hub", "legislation": "indian_country",
     "federal-register": "mixed", "lobbying": "mixed", "nonprofits": "mixed",
 }

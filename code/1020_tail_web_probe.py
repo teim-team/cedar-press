@@ -109,6 +109,7 @@ import csv
 import json
 import os
 import re
+import socket
 import ssl
 import sys
 import time
@@ -365,12 +366,34 @@ def name_evidence(name, html, url=""):
 # A registrar parking page is a 200 with plenty of text, none of it the
 # entity's. `fort.org` served 1.5 KB of Gandi boilerplate and sailed past a
 # "is there enough text on this page" test.
-PARKED = re.compile(
+#
+# SPLIT INTO STRONG AND WEAK, BECAUSE THE FIRST VERSION FAILED THE OTHER WAY.
+# One regex containing "coming soon" flagged the Quileute Tribe's live site as
+# parked: the front page announces "Quileute Days is coming soon!" A detector
+# that turns a working tribal website into "no web presence" is the same
+# false-absence defect as the one it was written to prevent, pointing the
+# other way. Strong phrases are things only a parking page says. Weak ones are
+# things a real page says too, so they count only on a page with almost no
+# content of its own.
+PARKED_STRONG = re.compile(
     r"(?i)(this domain (name )?(has been |is )?(registered|for sale|parked)"
     r"|domain (name )?is (for sale|available|parked)"
-    r"|buy this domain|godaddy|gandi|sedo|domain parking"
-    r"|future home of|coming soon|under construction"
-    r"|default web site page|apache2? ubuntu default)")
+    r"|buy this domain|domain parking|parked (free )?courtesy of"
+    r"|registered (with|at) (gandi|godaddy|namecheap|sedo)"
+    r"|default web site page|apache2? ubuntu default"
+    r"|welcome to nginx)")
+PARKED_WEAK = re.compile(
+    r"(?i)(future home of|coming soon|under construction|site is being "
+    r"(built|redesigned)|placeholder)")
+
+
+def is_parked(body, title):
+    """Strong markers anywhere; weak markers only on a near-empty page."""
+    head = (body or "")[:4000]
+    if PARKED_STRONG.search(head) or PARKED_STRONG.search(title or ""):
+        return True
+    return len(body or "") < 1200 and bool(PARKED_WEAK.search(head))
+
 
 # A 200 THAT IS A BOT CHALLENGE IS NOT THE SITE.
 # Two of the 51 tribal sites accepted on pass 1 -- Potter Valley Tribe and the
@@ -771,32 +794,41 @@ def try_host(host, name, tag, cls=""):
     recording one of those as the entity's website is worse than recording
     nothing, because nothing is visible in the ledger and a wrong URL is not.
     """
+    # RESOLVE BEFORE YOU KNOCK. Most derived candidates do not exist, and the
+    # first version spent a robots.txt fetch plus a page fetch, then the same
+    # two again for the www host -- four rate-limited HTTP requests to learn
+    # what one DNS lookup answers in milliseconds. It made the sweep roughly
+    # four times slower and put four times the load on other people's servers
+    # to discover nothing.
+    live = []
+    for h in (host, "www." + host):
+        try:
+            socket.getaddrinfo(h, 443, proto=socket.IPPROTO_TCP)
+            live.append(h)
+        except OSError:
+            continue
+    if not live:
+        return ("", "", "no_response",
+                "DNS: neither " + host + " nor www." + host + " resolves")
     for scheme in ("https://", "http://"):
-        for pre in ("", "www."):
-            url = scheme + pre + host
+        for h in live:
+            url = scheme + h
             r = fetch_with_recovery(url, save_as=tag)
             st = r["status"]
             if not (isinstance(st, int) and 200 <= st < 400):
-                # A HOST THAT DOES NOT RESOLVE WILL NOT RESOLVE ON HTTP EITHER.
-                # Four combinations per candidate host is three wasted DNS
-                # round trips on every guess that misses, and most guesses
-                # miss. Politeness is the point: the cheapest request is the
-                # one not sent.
-                if "NXDOMAIN" in str(r.get("error")) or \
-                        "getaddrinfo" in str(r.get("error")) or \
-                        "Name or service not known" in str(r.get("error")):
-                    if pre == "":
-                        continue          # try the www. host once
-                    return ("", "", "no_response", "DNS does not resolve")
                 continue
             hits, ntok = name_evidence(name, r["text"])
             body = text_of(r["text"])
             title = title_of(r["text"])
-            if PARKED.search(body[:3000]) or PARKED.search(title):
+            if is_parked(body, title):
                 return (r["final_url"], st, "parked_domain",
                         "200 from a registrar parking or placeholder page: "
                         + title[:60])
-            if len(body) < 200:
+            # A FRAMESET IS A SITE. Bridgeport Indian Colony serves a 1999-era
+            # `<frameset>`: 752 bytes, 24 characters of text, and a real
+            # website behind it. A pure length test calls that parked.
+            frames = bool(re.search(r"(?i)<frame(set)?\b", r["text"]))
+            if len(body) < 200 and not frames:
                 return (r["final_url"], st, "parked_domain",
                         "200 with under 200 characters of text")
             marker = any(m in body.lower()[:20_000]
@@ -956,7 +988,11 @@ def run():
                     st = r["status"]
                     ok = isinstance(st, int) and 200 <= st < 400
                     if ok and (is_challenge(r["text"])
-                               or len(text_of(r["text"])) < 200):
+                               or is_parked(text_of(r["text"]),
+                                            title_of(r["text"]))
+                               or (len(text_of(r["text"])) < 200
+                                   and not re.search(r"(?i)<frame(set)?\b",
+                                                     r["text"]))):
                         ok = False
                     emit(uid, name, cls,
                             "organization" if ok else "unverified_organization",

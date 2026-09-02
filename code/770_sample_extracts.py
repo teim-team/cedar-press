@@ -174,11 +174,27 @@ SHOW = {
                     "confidence_tier", "cedar_uid"],
     # `description` is what the subaward was FOR, populated on 76,813 of
     # 76,859 rows, and a subcontracting sample without it is a list of amounts.
-    "subcontracting": ["subaward_number", "fiscal_year", "subaward_date",
+    # 2026-09-02, workstream SUBAWARD-FUNDING. Two changes, both measured.
+    #  - THE KEY NOW EXISTS AND HAS TO BE IN THE SAMPLE. A row is one SAM
+    #    FILING, and until today nothing in the sample let a buyer tell two
+    #    filings of one subaward apart - which is precisely the mistake the
+    #    money rule exists to stop them making. `source_dataset` +
+    #    `subaward_source_record_id` is the primary key; both halves ship.
+    #  - THE SAMPLE SHOWED THE HANDLE AND NOT THE UID. `prime_native_tribe_id`
+    #    / `sub_native_tribe_id` are spine HANDLES, which are re-issued when an
+    #    entity is reclassified; `cedar_uid` is the permanent join key and is
+    #    the only thing IDENTIFIER_STANDARD.md lets a consumer join on. Same
+    #    defect the `funding` entry below records for canonical_name. The
+    #    handles stay - they are the readable label - and the uids lead.
+    #    A subaward has TWO legs, so it takes two uid columns; `cedar_uid`
+    #    alone is the PRIME's and is blank on 43,282 rows.
+    "subcontracting": ["source_dataset", "subaward_source_record_id",
+                       "subaward_number", "fiscal_year", "subaward_date",
                        "prime_name", "sub_name", "sub_state",
                        "subaward_amount", "description", "duplicate_status",
-                       "direction", "naics", "prime_native_tribe_id",
-                       "sub_native_tribe_id"],
+                       "direction", "naics",
+                       "prime_cedar_uid", "sub_cedar_uid",
+                       "prime_native_tribe_id", "sub_native_tribe_id"],
     # `cedar_uid` is the KEY and `canonical_name` is a legacy display string.
     # Showing the second without the first is what let Codex read a correctly
     # attributed Acoma row as a misattribution: the uid says Pueblo of Acoma,
@@ -384,6 +400,41 @@ def sample(rows: list, cols: list, n: int) -> list:
     return [rich[int(i * step)] for i in range(n)]
 
 
+def _subaward_money(_cache={}):
+    """(unfiltered, correct, removed, % of correct, % of unfiltered), measured.
+
+    Read from the LIVE `subawards.csv` on every run, because a hardcoded
+    percentage in a buyer-facing README is a number that goes wrong quietly.
+    Cached per process; the file is read once.
+    """
+    if _cache:
+        return _cache["v"]
+    tot = rule = 0.0
+    p = CLEAN / "subawards.csv"
+    with p.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+        rr = csv.reader(fh)
+        head = [h.strip() for h in next(rr, [])]
+        ia = head.index("subaward_amount")
+        idp = head.index("duplicate_status")
+        ix = head.index("subaward_exceeds_prime_flag")
+        for row in rr:
+            w = len(row)
+            try:
+                a = float(row[ia] or 0) if ia < w else 0.0
+            except ValueError:
+                a = 0.0
+            tot += a
+            if (idp < w and row[idp].strip() == "primary"
+                    and (ix >= w or row[ix].strip() != "yes")):
+                rule += a
+    rem = tot - rule
+    _cache["v"] = (f"${tot/1e9:,.2f}B", f"${rule/1e9:,.2f}B",
+                   f"${rem/1e9:,.2f}B",
+                   f"{100.0 * rem / max(rule, 1):.1f}%",
+                   f"{100.0 * rem / max(tot, 1):.1f}%")
+    return _cache["v"]
+
+
 def main() -> int:
     verify = len(sys.argv) > 1 and sys.argv[1] == "verify"
     doc = (json.loads(CONTRACTS.read_text(encoding="utf-8"))
@@ -476,13 +527,22 @@ def main() -> int:
                      f"{g[:110]} |")
         L += ["", "## Before totalling any money column", "",
               "See `docs/MONEY_TOTALLING_RULES.md`. Two that bite hardest:", "",
+              # THE THREE FIGURES ARE MEASURED, NOT TYPED (2026-09-02).
+              # They were hardcoded as $45.62B / $24.41B / 86.9% and went
+              # stale the moment the FY2023 quarters were promoted - the file
+              # is now $47.30B / $25.86B / 82.9%. A percentage a reader cannot
+              # reproduce from the shipped file is worse than no percentage,
+              # and this one had already confused a reviewer once.
               "- **`subawards.subaward_amount`** summed unfiltered gives "
-              "**$45.62B** against a correct **$24.41B**. The filter removes "
-              "**$21.21B** — which is **86.9% of the correct total** and "
-              "**46.5% of the unfiltered one**. *Both percentages are of that "
-              "same $21.21B; they differ only in denominator, and an "
-              "overstatement is measured against the truth, so the number to "
-              "quote is 86.9%.* Filter to `duplicate_status = 'primary'` and "
+              f"**{_subaward_money()[0]}** against a correct "
+              f"**{_subaward_money()[1]}**. The filter removes "
+              f"**{_subaward_money()[2]}** — which is "
+              f"**{_subaward_money()[3]} of the correct total** and "
+              f"**{_subaward_money()[4]} of the unfiltered one**. *Both "
+              "percentages are of that same amount; they differ only in "
+              "denominator, and an overstatement is measured against the "
+              "truth, so the number to quote is the first.* Filter to "
+              "`duplicate_status = 'primary'` and "
               "`subaward_exceeds_prime_flag != 'yes'`.",
               "- **`contractor_ranking.owner_obligations_usd`** sums to "
               "$6,535.96B against a true $176.74B — a **36.98×** inflation, "

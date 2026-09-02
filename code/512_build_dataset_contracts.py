@@ -2791,6 +2791,64 @@ GRAIN_INT_READY = {
 }
 GRAIN.update(GRAIN_INT_READY)
 
+# --- NEST: Native Enterprise Structures and Ties ---------------------------
+# Workstream `nest`, 2026-09-02, code/1072_tribally_owned_enterprises.py.
+# The 14th collection. Two tables, and the split between them is the point:
+# one row per ENTERPRISE in the first, one row per ASSERTION about it in the
+# second. Collapsing them would make `n_source_observations` unrecoverable,
+# and that column is how a reader judges whether a row rests on ten audited
+# filings or on one web page.
+GRAIN_NEST = {
+    "nest_enterprises.csv": _d(
+        "one row per ENTERPRISE that a Native entity owns or has published a "
+        "tie to - a sub-hub of its owner, never a spine entity in its own "
+        "right (docs/IDENTIFIER_STANDARD.md §2). Identity is the Cedar-minted "
+        "`enterprise_id`; the owner is `owner_hub_cedar_uid`, which is always "
+        "a spine entity. NOT one row per assertion - a firm named in ten "
+        "annual reports is ONE row here and ten rows in "
+        "nest_enterprise_relations.csv. NOT one row per legal entity either: "
+        "the grain is (owner hub, enterprise), so a joint venture between two "
+        "Native owners is correctly two rows, one per parent, which is what "
+        "ENTITY_MATCH_RULES rule 11 says a JV is.",
+        primary_key=["enterprise_id"],
+        join_cardinality={"enterprise_id": "one",
+                          "owner_hub_cedar_uid": "many",
+                          "parent_enterprise_id": "many",
+                          "cedar_uid": "many"},
+        declared_by="workstream nest 2026-09-02: enterprise_id confirmed "
+                    "1,482 distinct / 0 blank on the FULL 1,482-row file with "
+                    "csv.reader; 0 literal duplicate rows; "
+                    "(owner_hub_cedar_uid, enterprise_name_normalized) tested "
+                    "and also unique at 1,482, and is the key the append-only "
+                    "id register data/spine/cedar_nest_id_register.csv binds "
+                    "so that a rebuild re-uses the same enterprise_id instead "
+                    "of re-keying the dataset"),
+    "nest_enterprise_relations.csv": _d(
+        "one row per ASSERTION that a named source made about one "
+        "parent->enterprise relationship: (enterprise, asserting source, "
+        "document, edition). A wholly-owned subsidiary named in nine "
+        "consecutive AS 45.55.139 audited annual reports is nine rows, and "
+        "that is the point - the run of years is what dates the relationship "
+        "and what `first_observed_year` / `last_observed_year` on the "
+        "enterprise row are derived from. `relation_class` says whether the "
+        "assertion is OWNERSHIP or AFFILIATION; summing or counting across "
+        "this table without filtering it counts a joint venture as a "
+        "subsidiary.",
+        primary_key=["enterprise_edge_id"],
+        join_cardinality={"enterprise_edge_id": "one",
+                          "enterprise_id": "many",
+                          "owner_hub_cedar_uid": "many",
+                          "cedar_uid": "many"},
+        declared_by="workstream nest 2026-09-02: enterprise_edge_id confirmed "
+                    "3,492 distinct / 0 blank on the FULL 3,492-row file with "
+                    "csv.reader; 0 literal duplicate rows. Two same-source "
+                    "restatements of one firm (Goldbelt's `CP Marine` / `CP "
+                    "Marine LLC`; BBCH's `CCI Industrial Services LLC` / "
+                    "`... Inc`) collide by design and are collapsed in the "
+                    "build - one page saying a thing twice is one assertion"),
+}
+GRAIN.update(GRAIN_NEST)
+
 # A table whose grain is declared but whose PRIMARY KEY cannot be stated
 # without guessing. Recorded rather than left blank, so the gap is a task
 # with a name instead of a silence. These count as UNSTATED for the gate.

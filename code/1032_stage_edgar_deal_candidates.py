@@ -346,6 +346,23 @@ STAGE = [
   quote="Names of Reporting Persons. I.R.S. Identification Nos. of above persons (entities only) Spirit Lake Tribe",
   notes="A tribal government as a reporting 5%-plus holder of a NASDAQ-listed company is a rare record class and this one is unambiguous - the filer address is Fort Totten Community Center, Fort Totten, ND 58335. No dollar value is stated on a Schedule 13G and none was inferred. The tribe's holding fell to 346,446 shares (2.4%) at 2007-12-31 per the 13G/A (accession 0000950137-08-002003), which is a DISPOSITION of about 1,000,002 shares during 2007 and is staged as a lead because the 13G/A states no date, price or counterparty for the sale. Spirit Lake Tribe also filed Forms 3, 3/A, 4 and 5 in 2006-2008. CIK 1380976; the registrant census found it - the 2010-2017 registrant sweep could not, because every Spirit Lake filing predates that window.",
   confidence="High"),
+
+ dict(
+  cid="SEC1032-016",
+  event_date="2020-06-01", date_basis="'Fifth Amendment made as of June 1, 2020 between Canterbury Park Holding Corporation and Shakopee Mdewakanton Sioux Community, filed as Exhibit 10.1 to Form 8-K dated June 1, 2020'",
+  title="Shakopee Mdewakanton Sioux Community and Canterbury Park sign a Fifth Amendment to their cooperative marketing agreement",
+  native_party="Shakopee Mdewakanton Sioux Community", native_party_type="Federally recognized tribe",
+  counterparty="Canterbury Park Holding Corporation", native_party_role="Principal (funding party)",
+  category="Contract amendment", instrument="Fifth Amendment to the cooperative marketing agreement",
+  status="Signed", status_class="Announced",
+  value="", value_type="",
+  state="MN", industry="Gaming / horse racing",
+  accession="0001437749-21-006993",
+  local_file="0001437749-21-006993__cphc20201231_10k.htm",
+  url="https://www.sec.gov/Archives/edgar/data/1672909/000143774921006993/cphc20201231_10k.htm",
+  quote="Fifth Amendment made as of June 1, 2020 between Canterbury Park Holding Corporation and Shakopee Mdewakanton Sioux Community, filed as Exhibit 10.1 to Form 8-K dated June 1, 2020 and incorporated herein by reference.",
+  notes="A FIFTH amendment to the instrument Cedar already holds as ND-2012-002 (the 2012 ten-year cooperative marketing agreement, $75M plus $8.5M of commitments). The exhibit index establishes the date and the parties; the amendment's own terms are in the 8-K of the same date, which is not in this cache and should be read before any value is attached. NO VALUE IS ENTERED and the ND-2012-002 commitment must not be re-counted here. CAUTION recorded in the rejects file: `Shakopee` in these filings is usually the CITY of Shakopee, Minnesota (Shakopee EDA, Doran Shakopee LLC), not the Community.",
+  confidence="Medium"),
 ]
 
 # --------------------------------------------------------------------- HOLD
@@ -411,6 +428,11 @@ LEADS = [
       accession="0001437749-18-013297",
       url="https://www.sec.gov/Archives/edgar/data/15847/",
       settle="The 10-K gives the original and NIGC approval dates and no fee terms or value. The amendments are the interesting part and are not dated in the filing; NIGC management-contract approval letters are day-level and public."),
+ dict(lid="LEAD-1030-009", native_party="Jamul Indian Village",
+      what="Penn National Gaming began managing Hollywood Casino Jamul - San Diego on 2016-10-10 under a management agreement with the Jamul Indian Village, on the tribe's trust land in San Diego County.",
+      accession="0000921738-18-000024",
+      url="https://www.sec.gov/Archives/edgar/data/921738/",
+      settle="Cedar holds the Jamul arc as ND-2011-004 -> ND-2013-002 -> ND-2016-003 (development agreement, definitive agreements, $460M permanent financing). The COMMENCEMENT OF MANAGEMENT on 2016-10-10 is a distinct dated event and is not among them. Check ND-2016-003's date before adding, and never sum across the arc."),
  dict(lid="LEAD-1030-008", native_party="Bristol Bay Native Corporation",
       what="Alaska Growth Capital BIDCO, Inc. - a BBNC subsidiary and a licensed BIDCO - appears in 34 EDGAR filings 2010-03-11 to 2024-04-26, unread.",
       accession="", url="",
@@ -434,6 +456,10 @@ REJECT = [
  ("Douglas", 3, "99 Acquisition Group", "Douglas Lord, M.D. - a natural person's given name. The alias is for Douglas Indian Association, Alaska."),
  ("Mohegan (HMS Income Fund)", 20, "HMS Income Fund, Inc.", "A business development company listing Mohegan Tribal Gaming Authority secured debt in its portfolio schedule. A holding is not a transaction. Same class as the 1,881 NPORT/N-MFP filings the 1030 triage excluded up front."),
  ("Doyon (Northrim Bancorp)", 1, "Northrim BanCorp", "A director-appointment press release describing the Doyon CEO's record. Not a transaction, and the only party-specific content is a natural person's public role."),
+ ("Shakopee (the city)", 8, "Canterbury Park Holding Corp",
+  "PARTIAL reject: `Shakopee` is both the Shakopee Mdewakanton Sioux Community AND a city in Minnesota, and most hits are the city - the Shakopee EDA's tax increment financing district, Doran Shakopee LLC, and Lifestyle Communities' approvals with the City of Shakopee. The Community-specific content is staged as SEC1032-016, not rejected."),
+ ("NATION as a token, in fund holdings", 0, "registered investment companies",
+  "Recorded from the holdings sample rather than the candidate file. `NATION` reached Live Nation Entertainment, Fidelity National, First Horizon National, Huntington National, Jackson National, Lincoln National and a `Wabash Nation` - every one a large non-Native bond issuer held by the same funds that hold Mohegan paper. Classified in review/sec_edgar_1030_tribal_debt_issuers.csv as NOT_NATIVE_NATION_TOKEN and kept with the reason."),
  ("Ambler / Kobuk as place names", 0, "Trilogy Metals", "PARTIAL reject: most `Ambler` hits are the Ambler Mining District and the Ambler Road, a geography, not the Native Village of Ambler. The NANA-specific content is HELD, not rejected - see HOLD-1030-001."),
 ]
 

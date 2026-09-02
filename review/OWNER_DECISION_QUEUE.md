@@ -1491,28 +1491,40 @@ re-derivable rather than typed, and it refuses nothing that is unambiguous.
 ## 18. Is a graded score worth having on the rows 503 declines? (the splink verdict)
 
 `splink 4.0.16` was piloted against contractor→nation attribution on 690
-owner-ruled UEIs, 345 held out. **It loses to the incumbent everywhere**:
-89.9% precision / 41.2% recall at p≥0.5 against 503's 90.7% / 53.9%, and no
-operating point in the whole threshold × margin grid exceeds 93.2% precision.
-Recommendation is REJECT as a replacement. Full numbers:
-`docs/SPLINK_PILOT_2026-09-02.md`.
+owner-ruled UEIs, 345 held out. **It is dominated by the incumbent at every
+operating point**: 87.5% precision / 38.6% recall at p≥0.5 against 503's
+89.3% / 53.0%, and nothing in the whole threshold × margin grid exceeds 93.2%
+precision. Worse, `match_probability` is **not reproducible run to run** —
+precision at p≥0.95 moved over 80.8–88.5% on byte-identical input, and
+enlarging splink's `u` sample from 5M to 100M pairs did not fix it — so a fixed
+band does not mean the same thing next week. Recommendation is **REJECT as a
+matcher**. Full numbers: `docs/SPLINK_PILOT_2026-09-02.md`.
 
-The one configuration that comes close to earning its keep: **scored only on the
-140 held-out rows 503 declined, splink at p≥0.5 proposes 13 and gets 9 right
-(69.2%)** — about +2.6 points of recall, at a precision that is queue-grade and
-nowhere near apply-grade. The one thing it does better than 503 outright: it can
-be told to shut up. On your 116 tier-X refusals 503 would link 41.9% anyway,
-while splink links **0% above p=0.99 and 6% above p=0.95**.
+Two things it does do better than 503, both about *knowing what it does not
+know*: on your 116 tier-X refusals 503 would link 41.9% anyway while splink
+links **0% above p=0.99 and 6% above p=0.95**; and it passes all three of your
+collision cases by scoring them uncertain rather than by getting them right.
+
+The one configuration that could earn a place: **scored only on the 140 held-out
+rows 503 declined, splink at p≥0.5 proposes 9 and gets 6 right (66.7%)** —
++1.7 points of recall, queue-grade and nowhere near apply-grade. Note that as a
+straight replacement it is negative-sum: at p≥0.5 it rescues 6 rows 503 declined
+while breaking 11 rows 503 got right.
 
 **Decision:** do you want `review/splink_pilot_adjudication_queue_2026-09-02.csv`
-(710 rows, $6.39B, every row carrying address / website / co-located-UEI / CAGE
-for ladder rungs 1–4) as a standing queue that regenerates, or was this a
+(**252 rows, $0.96B**, every row carrying address / website / co-located-UEI /
+CAGE for ladder rungs 1–4) as a standing queue that regenerates, or was this a
 one-off measurement?
-**Recommendation:** keep the queue, drop the model as a matcher. Two caveats on
-the queue if you keep it: sort by `margin_over_runner_up` after dollars — of 16
-top-1 errors, 11 have the truth at rank 2 or 3 — and note that splink is **no
-use as a cross-check** on rows 503 got wrong: at p≥0.1 it agreed with the wrong
-answer 7 times and disagreed 8, a coin flip on exactly the rows that matter.
+**Recommendation:** keep the queue, drop the model as a matcher. Three caveats.
+(1) Sort by `margin_over_runner_up` after dollars — **15 of the 19 top-1 errors
+have the truth at rank 2 or 3**, so a thin margin is the signal, not noise.
+(2) The bottom cut is 0.5, not the 0.1 the recall curve argues for: at 0.1 the
+queue is 1,273 rows / $10.06B and its *highest-dollar* rows are junk
+(`All Cities Enterprises` → All **Pueblo** Council of Governors, on the token
+`ALL`). Regenerate the wider one with `queue --reject 0.1` if you want it.
+(3) Splink is **no use as a cross-check** on rows 503 got wrong: at p≥0.1 it
+agreed with the wrong answer 9 times and disagreed 10 — a coin flip on exactly
+the rows that matter.
 
 <!-- END SPLINK-PILOT-1060 -->
 

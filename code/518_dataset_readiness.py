@@ -188,6 +188,9 @@ NATURAL_SCOPE = {
     "gaming": "entity",               # a facility has an operator
     "natural-resources": "entity",    # a lease has a lessor
     "native-owned-businesses": "entity",
+    # NEST asserts an owner on every row by construction - an enterprise with
+    # no owner hub is not a NEST row - so its natural scope is `entity`.
+    "nest": "entity",
     "nagpra": "entity",               # notices name affiliated tribes
     "_entity_layer": "hub",
     "legislation": "indian_country",  # a bill's subject is usually general
@@ -223,6 +226,7 @@ OWNERS = {
     # scored as unkeyed. 8/8 tables measured, 0 unmeasured.
     "natural-resources":        "READY - maintain",
     "native-owned-businesses":  "enterprise (READY - extending)",
+    "nest":                     "nest (new 2026-09-02, code/1072)",
     "nonprofits":               "grain-ws5",
     "lobbying":                 "grain-ws4",
     # 2026-09-02: grain-legislation closed the last blocker by ruling
@@ -427,6 +431,9 @@ def measure():
         nokey = [t["table"] for t in tables
                  if not (t.get("primary_key") or [])
                  and not (t.get("key_refused") or {}).get("reason")]
+        refused_key = [t["table"] for t in tables
+                       if not (t.get("primary_key") or [])
+                       and (t.get("key_refused") or {}).get("reason")]
 
         # ---- C3 duplicates + C7 double counting ----------------------
         # C3 is "literal duplicates removed OR INTENTIONALLY EXPLAINED". The
@@ -591,7 +598,15 @@ def measure():
             n_customer_tables=len(names),
             blockers=" | ".join(blockers) or "-",
             c1_grain=f"{len(names)-len(unstated)}/{len(names)}",
-            c2_keys=f"{len(names)-len(nokey)}/{len(names)}",
+            # SAY WHEN A KEY IS REFUSED RATHER THAN PRESENT. Reporting
+            # `10/10` for a collection holding a table with NO primary key is
+            # exactly the collapse this scoreboard exists to prevent: the
+            # refusal satisfies C2 (nothing advertised, nothing to fail) and
+            # it is still not a key, and a buyer reading the column has to be
+            # able to see the difference.
+            c2_keys=(f"{len(names)-len(nokey)-len(refused_key)}/{len(names)}"
+                     + (f" (+{len(refused_key)} REFUSED)" if refused_key
+                        else "")),
             c3_duplicates="clean" if not dup_tables else f"{dup_total:,} rows",
             c4_identity_path=("HUB (dataset 13)" if cid == "_entity_layer"
                               else f"{keyed_pct:.0f}% keyed"

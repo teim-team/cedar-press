@@ -218,7 +218,7 @@ def main():
         raise SystemExit("REFUSED: the rebuilt table has no usable primary key")
 
     if prev:
-        shutil.copy2(p1, str(p1) + f".bak_{TODAY}_pre912")
+        shutil.copy2(p1, str(p1) + f".bak_{TODAY}_pre81")
         gained = [c for c in out[0] if c not in prev_cols]
         lost = [c for c in prev_cols if c not in out[0]]
         pt, pc = _usd(prev)

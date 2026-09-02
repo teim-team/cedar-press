@@ -6,25 +6,17 @@
 
 | check | n |
 |---|---:|
-| notes contracts naming a column the file does not have | 0 |
+| notes contracts naming a column the file does not have | 1 |
 | notes contracts for a table that is not on disk | 0 |
-| source files still naming a retired identifier or moved path | 9 |
+| source files still naming a retired identifier or moved path | 0 |
 | backups shipped into `dist/` | 0 |
 | backups in `data/clean` named `.csv` last | 3 |
 
-## Source files still naming a retired identifier
+## Shipped contracts naming a dead column
 
-| file | reference |
+| artefact | ghost columns |
 |---|---|
-| `code/415_audit_identity_layer.py` | live read of "tribe_id_scheme_resolved" -> attribution_status |
-| `code/cedar_pipeline.py` | live read of "tribe_id_scheme_resolved" -> attribution_status |
-| `code/cedar_pipeline.py` | live read of "tribe_id_scheme_resolved_basis" -> attribution_basis |
-| `docs/ASSUMPTIONS_AND_LIMITATIONS.md` | tribe_id_scheme_resolved -> attribution_status, with no mention of the replacement or of 843 |
-| `docs/CEDAR_TAXONOMY.md` | tribe_id_scheme_resolved -> attribution_status, with no mention of the replacement or of 843 |
-| `docs/HANDOFF.md` | tribe_id_scheme_resolved -> attribution_status, with no mention of the replacement or of 843 |
-| `docs/IDENTIFIER_STANDARD.md` | tribe_id_scheme_resolved -> attribution_status, with no mention of the replacement or of 843 |
-| `docs/datasets/_PUNCHLIST.md` | tribe_id_scheme_resolved -> attribution_status, with no mention of the replacement or of 843 |
-| `docs/datasets/_PUNCHLIST.md` | tribe_id_scheme_resolved_basis -> attribution_basis, with no mention of the replacement or of 843 |
+| `dist\05_entities\tcu_cdfi_added.notes.json` | cicd_verified |
 
 ## Derived artefacts and their age
 

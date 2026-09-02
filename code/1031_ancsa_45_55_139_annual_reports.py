@@ -309,8 +309,36 @@ def cmd_extract(limit=None, ocr=True):
         except Exception as e:
             out(f"  OCR unavailable: {type(e).__name__}")
 
+    # A PDF that crashes MuPDF or tesseract takes the whole process down
+    # NATIVELY - no Python exception, no traceback, exit code 1 - and the run
+    # then restarts on the same document forever. Measured twice on this
+    # corpus at documents ~171 and ~164.
+    #
+    # So mark the document BEFORE opening it. If the marker survives, the
+    # previous run died inside that document: record it as a crash, skip it,
+    # and carry on. That converts a poison pill into one honest failed row.
+    marker = REVIEW / "_ancsa_1031_extracting.txt"
     first = not EXTRACT_LOG.exists()
+    if marker.exists() and marker.read_text(encoding="utf-8").strip():
+        crashed = marker.read_text(encoding="utf-8").strip()
+        cid, _, cfile = crashed.partition("|")
+        out(f"  previous run died inside {cfile} - recording it as a native "
+            f"crash and skipping it")
+        with open(EXTRACT_LOG, "w" if first else "a",
+                  encoding="utf-8", newline="") as fh:
+            w = csv.writer(fh)
+            if first:
+                w.writerow(EX_COLS)
+            w.writerow([cid, "", "", cfile, "", 0, 0, 0, 0, 0, "",
+                        datetime.now(timezone.utc).isoformat(), SCRIPT,
+                        "NATIVE_CRASH_SKIPPED"])
+        first = False
+        marker.write_text("", encoding="utf-8")
+        todo = [t for t in todo if t["portal_document_id"] != cid]
+
     for i, r in enumerate(todo, 1):
+        marker.write_text(f'{r["portal_document_id"]}|{r["local_file"]}',
+                          encoding="utf-8")
         p = CEDAR / r["local_file"]
         rec = {"portal_document_id": r["portal_document_id"],
                "corporation_name": r["corporation_name"],
@@ -360,9 +388,11 @@ def cmd_extract(limit=None, ocr=True):
             w.writerow([rec.get(c, "") for c in EX_COLS])
             fh.flush()
         first = False
+        marker.write_text("", encoding="utf-8")
         if i % 10 == 0:
             out(f"  {i:,}/{len(todo):,}")
-    out(f"\n  extract log -> {EXTRACT_LOG.relative_to(CEDAR)}")
+    out("")
+    out(f"  extract log -> {EXTRACT_LOG.relative_to(CEDAR)}")
     return 0
 
 
@@ -550,7 +580,70 @@ TX_COLS = ["candidate_id", "event_date", "event_year", "deal_title",
            "status_class", "announced_value_usd", "value_type", "state",
            "industry", "date_basis", "notes", "confidence", "source_channel",
            "portal_document_id", "source_url", "txt_file", "evidence_quote",
-           "staged_by", "staged_date", "record_scope"]
+           "staged_by", "staged_date", "record_scope",
+           "already_in_deals_classified"]
+
+
+def _deals_index():
+    """Existing rows, for a conservative duplicate check on the TARGET name."""
+    p2 = CLEAN / "deals_classified.csv"
+    if not p2.exists():
+        return []
+    with open(p2, encoding="utf-8-sig", newline="") as fh:
+        return [(r["Deal_ID"], r["Event_Date"], r["Deal_Title"],
+                 " ".join([r["Deal_Title"], r["Native_Party"],
+                           r["Counterparty_or_Funder"],
+                           r["Description"]]).lower())
+                for r in csv.DictReader(fh)]
+
+
+# A token is generic if the LEDGER SAYS SO, not if a list says so.
+#
+# Two failures, both ENTITY_MATCH_RULES rule 1 reproduced inside a duplicate
+# checker: a single `environmental` matched `H&S Environmental, Inc.` to a
+# Sealaska row, and `estate` matched an unnamed Chapter 11 estate to a Mohegan
+# row. A word denylist then over-corrected and refused `aleyon`, `situk` and
+# `mobius`, which are unique proper nouns that happen to be short.
+#
+# The structural predicate: measure the token's FREQUENCY in the ledger it is
+# being checked against. A token appearing in more than GENERIC_AT rows cannot
+# distinguish a transaction, however long it is; one appearing in none is
+# distinctive, however short.
+GENERIC_AT = 5
+
+
+# A counterparty field can say the filing did not name one. That is prose,
+# not a name, and tokenising it produced a "check" on the words `unnamed`,
+# `chapter`, `estate`, `extracted` and `passage`.
+_NOT_A_NAME = re.compile(
+    r"^\s*(not named|not stated|an unnamed|unnamed|unknown|undisclosed)\b",
+    re.I)
+
+
+def _dupe_note(tx, deals, tokfreq):
+    """A duplicate needs the TARGET and the ACQUIRER, not either alone."""
+    if _NOT_A_NAME.search(tx["cp"] or "") or not (tx["cp"] or "").strip():
+        return ("the filing does not name the counterparty - a duplicate "
+                "check on the acquirer alone would be meaningless, so none "
+                "was made")
+    tgt = re.sub(r"[^a-z0-9 ]", " ", tx["cp"].lower())
+    raw = [t for t in tgt.split() if len(t) > 3]
+    toks = [t for t in raw if tokfreq.get(t, 0) <= GENERIC_AT]
+    dropped = [f"{t} ({tokfreq.get(t, 0)} rows)" for t in raw
+               if tokfreq.get(t, 0) > GENERIC_AT]
+    if not toks:
+        why = (f"; dropped as generic: {', '.join(dropped)}" if dropped else "")
+        return ("no distinctive target name in the filing - a duplicate check "
+                "on the acquirer alone would be meaningless, so none was "
+                "made" + why)
+    acq = [t for t in re.sub(r"[^a-z0-9 ]", " ", tx["corp"].lower()).split()
+           if len(t) > 4 and tokfreq.get(t, 0) <= 200]
+    for did, ed, title, blob in deals:
+        if all(t in blob for t in toks) and (not acq or
+                                             any(a in blob for a in acq)):
+            return f"POSSIBLE DUPLICATE of {did} ({ed}): {title[:80]}"
+    return (f"no - checked on {', '.join(toks)}"
+            + (f"; dropped as generic: {', '.join(dropped)}" if dropped else ""))
 
 # corporation, fiscal year -> the transaction. `quote` must be verbatim from
 # the extracted text of that document.
@@ -718,6 +811,11 @@ def cmd_stage():
     for r in ex:
         by_key.setdefault((r["corporation_name"], r["period_covered"]), r)
 
+    deals = _deals_index()
+    tokfreq = {}
+    for _, _, _, blob in deals:
+        for t in set(re.findall(r"[a-z0-9]{4,}", blob)):
+            tokfreq[t] = tokfreq.get(t, 0) + 1
     rows, missing = [], []
     for t in ANCSA_TX:
         src = by_key.get((t["corp"], t["fy"]))
@@ -743,6 +841,7 @@ def cmd_stage():
             "evidence_quote": t["quote"], "staged_by": SCRIPT,
             "staged_date": TODAY,
             "record_scope": "STAGED_CANDIDATE_NOT_MERGED",
+            "already_in_deals_classified": _dupe_note(t, deals, tokfreq),
         })
     with open(STAGED_TX, "w", encoding="utf-8", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=TX_COLS)

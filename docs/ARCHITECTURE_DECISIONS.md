@@ -821,3 +821,40 @@ Two amendments to the ownership table above, both honest rather than tidy:
    because it writes only codebook FRAGMENTS, which cannot affect another
    dataset's block.
 <!-- END ADR-016 -->
+
+<!-- BEGIN ADR-017 -->
+## ADR-017 — the regenerate-defect sweep (workstream REGEN, 2026-09-02)
+
+**Status:** accepted 2026-09-02. Declared BEFORE editing, per AGENTS.md
+*Parallel agents*.
+
+Owner, 2026-09-02: *"This whole regenerate business — make sure you update all
+the scripts so every code is up to date."* One defect class: a **wholesale
+writer** holding a hardcoded `fieldnames` literal, run after an **in-place
+enricher** added a column, silently deleting it.
+
+**Files this workstream owns for the duration of the pass** — every edit is to
+the writer's `fieldnames` expression and to nothing else. No row logic, no
+value logic, no path changes.
+
+| file | edit |
+|---|---|
+| `code/03_apply_exclusions_and_tier.py` `05_parse_doi_nho_list.py` `07_parse_ancsa_ceiling.py` `15e_finalize_terms.py` `20_build_subcontracts.py` `30_funding_pre2008.py` `75_add_bie_schools_and_uios.py` `79_build_award_level_contracts.py` `89_nigc_map_wayback_universe.py` `105_build_florida_gaming.py` `107_pull_remaining_states.py` `114_pull_prime_archive.py` `146_build_visitor_access_records.py` `330_build_native_owned_businesses.py` `351_rebuild_lobbying_panel_from_corrected_disclosures.py` `417_build_entity_identity_crosswalk.py` | derive the header from the live file instead of declaring it |
+| `code/76_build_recognition_history.py` | rename one local variable. No behaviour change. |
+| `code/845_regenerate_guard.py` | detector correctness (see below) |
+| `code/1074_regenerate_defect_sweep.py` | new, this workstream's triage aid |
+| `docs/schema/regenerate_guard_baseline.json` | re-baselined AFTER the fixes |
+
+**Two shared files are touched against the pass-2 read-only rule, both because
+the mandate names them.** `code/503_identity.py` — one variable RENAME so the
+already-correct carry-forward there is visible to the detector; no logic
+change. `code/62_no_regression_check.py` — `845 verify` added to the standing
+gate set, additively, in its own block. Both were re-read immediately before
+editing. **The integrator should review these two edits first.**
+
+**What a fix costs.** A rebuilder cannot repopulate an enricher's column. The
+carried column is therefore written **BLANK and named on stdout**, which is
+strictly better than deleted: the schema survives, the consumer's join key
+survives, and `cedar_pipeline.enrichers_to_rerun(table)` still names who
+refills it. A rebuild still requires the enricher to run after it.
+<!-- END ADR-017 -->

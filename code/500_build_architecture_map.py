@@ -130,6 +130,22 @@ COLLECTIONS: list[dict] = [
      # correct by design, not a gap. They join the spine on its 45
      # "Individually Native-owned business" rows.
      "tables": r"^(individual_native|tribal_certification)"},
+    # Added 2026-09-02 by code/1072_tribally_owned_enterprises.py. The 14th
+    # collection, and it is a DIFFERENT RELATION from
+    # `native-owned-businesses`, not a bigger version of it:
+    #   native-owned-businesses   a nation CERTIFIED or LISTED this firm
+    #                             -> affiliated_with
+    #   nest                      a nation, ANC or NHO OWNS this enterprise,
+    #                             or published a non-ownership tie to it
+    #                             -> owned_by / affiliated_with, declared per
+    #                                row in `relation_class`
+    # The two must not be merged. The `identity_scope` gradient in
+    # native_owned_businesses runs down to `vendor_relationship`, which is no
+    # ownership claim at all, and flattening it is what
+    # docs/PUBLICATION_POLICY.md refuses.
+    {"id": "nest", "name": "NEST: Native Enterprise Structures and Ties",
+     "shelf": "pro", "prefixes": [],
+     "tables": r"^nest_"},
     {"id": "natural-resources", "name": "Natural Resource Revenues", "shelf": "pro",
      "prefixes": ["12", "15"],
      "tables": r"^(resource_|tribal_tax|nd_severance|tribal_debt|tribal_bond|anc_ceiling|ancsa_)"},

@@ -286,3 +286,70 @@ yield signal in this project — then `enterprise`, `enterprises`,
 And an enterprise register is worth more than the vendor list that was being
 hunted: it is **parent-asserted ownership**, the strongest evidence class here,
 and it feeds the hub/sub-hub crosswalk rather than the vendor dataset.
+
+## THE URL IS THE GUESS. IT IS NEVER THE EVIDENCE.
+
+*Added 2026-09-02 by shard N, the coverage tail, which caught itself
+fabricating ten websites.*
+
+Shard N's last rung derives a candidate domain from an entity's name, fetches
+it, and requires the page to prove it belongs to that entity before recording
+it. The name-evidence check was written as:
+
+```python
+hay = text_of(html) + " " + url          # <-- the defect
+hits = sum(1 for t in name_tokens if t in hay)
+```
+
+The URL under test was in the haystack. Every candidate therefore proved
+itself: `capitan.org` "carried the name" of the Capitan Grande Band because the
+string `capitan` was in the URL being tested. On that reasoning the rung
+accepted, as verified tribal and business websites:
+
+| recorded as | actually |
+|---|---|
+| `fort.org` — Fort Bidwell Indian Community | a Gandi domain-parking page |
+| `biglagoon.org` — Big Lagoon Rancheria | Big Lagoon **Elementary School** |
+| `capitan.org`, `grindstone.org`, `laguna.org` | blank pages |
+| `cherokee.gov` — "Cherokee Unlimited, Inc" | **the Cherokee Nation** |
+| `sanjuan.com`, `tribalenergy.org`, `tallsalt.com` | unrelated |
+
+Ten rows, every one of which would have read in the coverage ledger as a
+**closed gap** — the most expensive kind of wrong, because a blank invites
+another attempt and a filled cell does not.
+
+**Circular evidence is not weak evidence. It is no evidence.** The test felt
+strict — it demanded name tokens on the page — and could not fail.
+
+### The four rules that came out of it
+
+1. **Never let the thing being tested into the evidence for the test.** The
+   URL, the filename, the search query you used: all of them contain the
+   answer you are looking for, which is exactly why they cannot corroborate it.
+2. **A 200 is not the site.** Two of shard N's tribal sites were 169 bytes of
+   SiteGround captcha redirect (`/.well-known/sgcaptcha/`) — HTTP 200, valid
+   HTML, none of it the tribe's website. Same family as the `?wpdmdl=`
+   incident above: a check that passes for the wrong reason. Detect
+   interstitials (`sgcaptcha`, `cf-browser-verification`, "Just a moment…")
+   and registrar parking boilerplate by their content, and record the body
+   size so a later gate can read it back.
+3. **A one-word domain guess belongs to somebody else.** `fort`, `capitan`,
+   `laguna`, `cherokee`, `grindstone`, `sanjuan` are all real organisations'
+   domains, none of them the entity being probed. Guess only labels that join
+   two or more of the entity's distinctive tokens, or one long one.
+4. **Require the class, not only the name.** A page can carry an entity's whole
+   name and be a different kind of thing entirely — `biglagoon.org` carries
+   "Big Lagoon" on every page and is a primary school. Demand a marker that the
+   page is the *kind* of organisation you are looking for.
+
+### And put it in the gate, not only in the code
+
+Each of the four is now a `verify` invariant in `code/1020_tail_web_probe.py`
+that exits 1 on a synthetic violation, and rerunning the gate over the
+already-written rows is what proved all ten were bad. **A guard that lives only
+in the writing path cannot tell you what it already let through.**
+
+A publisher-stated URL is exempt and should be: a domain the BIA publishes in
+its Tribal Leaders Directory, or one derived from an email address the
+organisation itself filed with DOI, is an assertion by the publisher and needs
+no page-text proof. The rule is about *guesses*.
