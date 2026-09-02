@@ -2337,3 +2337,85 @@ publish gate does the work it exists to do. *Leave staged* — every count off
 `native_owned_businesses.csv` keeps understating by 634 rows and 15 nations, and
 the next agent re-harvests sources already on this machine.
 <!-- END HARVEST-COVERAGE-1112 -->
+
+<!-- BEGIN SOURCE-EXPLORATION-1111 -->
+
+## SE-1. HUD publishes a `Content-Signal`, and Cedar has no rule for that kind of term
+
+**Appended 2026-09-02 by the `source-exploration` workstream.** Evidence:
+`docs/SOURCE_EXPLORATION_2026-09-02.md` §0; raw record in
+`data/staging/source_exploration_1111/probe_log.jsonl`.
+
+`www.hud.gov/robots.txt` allows every robot and then adds, verbatim:
+
+```
+User-agent: *
+Content-Signal: search=yes,ai-train=no,use=reference
+Allow: /
+```
+
+above a header stating *"ANY RESTRICTIONS EXPRESSED VIA CONTENT SIGNALS ARE
+EXPRESS RESERVATIONS OF RIGHTS UNDER ARTICLE 4 OF THE EUROPEAN UNION DIRECTIVE
+2019/790 ON COPYRIGHT AND RELATED RIGHTS IN THE DIGITAL SINGLE MARKET."*
+A separate group names `ClaudeBot` with `Disallow: /`.
+
+`docs/PUBLICATION_POLICY.md` `TERMS-METHOD` enumerates three things a clause can
+restrict — the **source**, the **content**, or the **method**. This restricts
+the **use**, which is a fourth, and it is the first one Cedar has met.
+
+**The question.** Is harmonising HUD's published per-tribe IHBG allocation
+figures into `federal_funding_transactions.csv` `use=reference` (permitted) or
+`ai-train` (forbidden)? Cedar's product is a harmonised dataset of published
+records, not a model — which reads as reference — but nobody has ruled it.
+
+**Consequence.** *Reference* — HUD's ONAP pages open up, including the IHBG
+**formula** allocation, which is the per-tribe entitlement and much larger than
+the IHBG-Competitive rounds already on disk. *Ai-train, or undecided* — HUD
+joins the restricted list and 16 IHBG objects already in
+`data/raw/external/federal_award_lists/` need a disposition too.
+
+## SE-2. NHOA's own robots.txt disallows exactly the page that holds the NHO member list
+
+**Same workstream, same date.** This is one of the two routes
+`docs/KNOWN_ISSUES.md` **A3** names for the 170 Native Hawaiian Organizations
+that have no dated public record.
+
+Measured: the origin is alive. `http://www.nhoassociation.org/robots.txt`
+returns 200 and says, verbatim:
+
+```
+User-agent: *
+Disallow: /ajax/
+Disallow: /apps/
+Disallow: /sba-private-session-with-nhoa-members.html
+Disallow: /nhoa-member-list.html
+Disallow: /businesssummit.html
+```
+
+`/membership.html` **is** allowed. It was fetched (36,863 bytes, saved to
+`data/staging/source_exploration_1111/nhoa_membership.html`) and it contains
+**no member names** — only the eligibility sentence Cedar already quotes and a
+contact address. Cedar's shard H used a **Wayback capture** of
+`/nhoa-member-list.html`.
+
+**The question.** Under `PUBLICATION_POLICY.md` `TERMS-METHOD`, a restriction
+attaches to the host and path that state it, and a method restriction is
+honoured by dropping the routes it names. Is the Internet Archive's copy of
+`/nhoa-member-list.html` **a different route to the publisher's own
+publication** (and therefore covered by the same refusal), or **a third
+party's independent publication** (and therefore not, by the `TERMS-SCOPE`
+authorship test)?
+
+**Consequence.** *Same refusal* — the existing shard-H rows sourced from that
+Wayback capture need re-examination, and the route back in is the email
+address NHOA publishes on the allowed page. *Different route* — the Wayback
+capture stands and can be refreshed, and A3's first named route reopens.
+
+**Note the other half of A3 is already answered and does not need a ruling:**
+"the SBA 8(a) register remains untried" is wrong.
+`data/raw/external/sba_dsbs_native_entities.csv` is a DSBS extract dated
+2026-04-30 holding 5,087 Native entities, 442 of them Hawaii, and
+`code/01_build_entity_spine.py` already loads it. It carries no date column, so
+it still cannot close A3 — but it is `ON_DISK_NOT_PROMOTED`, not
+`NOT_ACQUIRED`.
+<!-- END SOURCE-EXPLORATION-1111 -->

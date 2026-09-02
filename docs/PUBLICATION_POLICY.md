@@ -70,12 +70,24 @@ citation.
 
 ## THE ONE THING HARMONIZATION DOES NOT CURE
 
+> **SUPERSEDED IN PART, 2026-09-02 — read
+> `<!-- BEGIN TERMS-OWNER-RULING-2026-09-02 -->` at the foot of this file
+> before acting on anything in this section.** The owner ruled that a tribal
+> website's terms language does not block harvest, and the eight-source hard
+> list below is **released for harvest of those entities' own public pages**.
+> The section is kept because the *reasoning* — that harmonizing changes what
+> we publish and not what we were allowed to take — is still exactly right, and
+> because it names the four things the ruling did **not** touch. Read every
+> "stay excluded" sentence below as **"was excluded until 2026-09-02"**.
+
 Harmonizing changes what we publish. It does not change what we were allowed to
 take.
 
-Sources marked `TERMS_STATED_RESTRICTIVE` stay excluded by **every** route,
+~~Sources marked `TERMS_STATED_RESTRICTIVE` stay excluded by **every** route,
 including the WordPress media API, the Wayback Machine, and a harmonized
-derivative:
+derivative:~~ **Released 2026-09-02 for these entities' own public pages.** The
+list is retained as the worklist the ruling creates — each of these is now a
+harvest *candidate*, and the logged refusal is where to start:
 
 - **Confederated Colville** and **CTUIR / Umatilla** — long standing
 - **Chickasaw** — its terms name company directories specifically (~622 firms)
@@ -86,10 +98,22 @@ derivative:
 - **Southern Ute** (27 firms) and **Forest County Potawatomi** (18 firms)
 - **Yakama**
 
-This is a permission question, not a provenance question. The exclusions are
+~~This is a permission question, not a provenance question. The exclusions are
 recorded with the quote that justifies each, so the boundary is auditable and
 so a future OPT_IN request has something to point at. **Asking is the route
-back in; a cleverer scrape is not.**
+back in; a cleverer scrape is not.**~~
+
+**As ruled 2026-09-02:** it is a permission question, and the owner answered it
+— he carries the publication risk on publicly served tribal content. The
+recorded quotes keep their value: they are now the *observation* of what each
+publisher stated, not the gate. **What did NOT move, and none of it is a terms
+question:** technical access controls (nothing login-gated, no admin or staging
+path, no misconfiguration); **a natural person's data held apart from their
+public role** — the business rows may be harvested and `owner_name_raw`,
+`email`, `phone` and `address_raw` still may not be published; **EMMA / MSRB**
+with CUSIP Global Services as a second licensor, which is a third party's
+contract and not a tribal publisher's preference; and the proprietary
+identifiers **Casino City** and **D-U-N-S**, held internally and never shipped.
 
 ## Acknowledgment, concretely
 
@@ -293,11 +317,16 @@ would let a single page on any tribal domain erase that nation from the dataset.
 * It does **not** propagate to other hosts operated by the same entity.
 * It does **not** propagate from a subdomain to an apex, or the reverse, unless
   the terms themselves say so.
-* The eight hard-listed sources — Confederated Colville, CTUIR/Umatilla,
+* ~~The eight hard-listed sources — Confederated Colville, CTUIR/Umatilla,
   Yakama, Chickasaw, NANA/Akima, Southern Ute, Forest County Potawatomi,
   Stillaguamish — remain excluded **by every route**, including Wayback, the
   WordPress media API and any harmonized derivative. That list names sources,
-  and it is unchanged by this ruling.
+  and it is unchanged by this ruling.~~ **SUPERSEDED the same day** by the
+  owner ruling at `<!-- BEGIN TERMS-OWNER-RULING-2026-09-02 -->`: all eight are
+  released for harvest of their own public pages. *The rest of TERMS-SCOPE
+  survives intact* — host-and-path scoping and the authorship distinction are
+  what make the ruling applicable at all, and they still decide cases the
+  ruling does not reach (a non-Native licensor, a third party's filing).
 * Over-exclusion is recorded as a defect, not as caution. An entity absent for
   a restriction its publisher never stated is as wrong as one included against
   stated terms — it is simply wrong in the quieter direction.

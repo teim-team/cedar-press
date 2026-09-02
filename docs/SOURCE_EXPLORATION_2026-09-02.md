@@ -357,14 +357,17 @@ Stated so the next agent does not read silence as coverage.
   `bie_schools_directory`'s 183 is **stated by the publisher**, not counted, and
   `biamaps_bia_arcgis` is a folder count, not a row count. The CSV says so.
 * **`api.usaspending.gov` and `files.usaspending.gov` were not touched.**
-  `code/1085_prime_psc_desc_repull.py pull` was live on this machine throughout
-  (two PIDs, confirmed via `Win32_Process.CommandLine`, per `PULL_DISCIPLINE`
-  rule 1 — `ps aux` cannot answer this on Windows).
+  `code/1085_prime_psc_desc_repull.py pull` was live on this machine when this
+  pass began — two PIDs, confirmed via `Win32_Process.CommandLine`, per
+  `PULL_DISCIPLINE` rule 1, because `ps aux` cannot answer this on Windows —
+  and had finished by the time it ended. Neither host was contacted either way.
 * **No host lock was taken**, because no candidate was polled: every host got
   between one and six requests, once, with a 2-second gap, a declared UA and a
   90-minute run deadline. `MAX_PER_HOST = 6` is enforced in code.
 * **Per-facility gaming revenue was not solved.** It stands at **11 of 787
-  facilities (1.4%)**. Four state routes were probed; New York's tribal page
+  facilities (1.4%)** — of which only **7 are Indian-lands properties (0.9%)**,
+  which is the honest headline `SEC_GAMING_FACILITY_REVENUE_BUILD_LOG.md`
+  prints. Four state routes were probed; New York's tribal page
   answers 200 and was not parsed, Oklahoma's is **already on disk** as two HTML
   captures in `data/raw/external/gaming_official/`, Wisconsin's sitemap is 347
   bytes and is not a site index, Kansas was not enumerated. **The honest state

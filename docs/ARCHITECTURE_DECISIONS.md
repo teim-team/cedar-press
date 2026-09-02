@@ -1939,3 +1939,9 @@ empty `exclusion_id`; every EIN is re-verified against the IRS's own name for
 it before a date is written; a name that fails is kept as `NOT_MATCHED` with
 what was seen.
 <!-- END ADR-025-STALE-TAIL-1081 -->
+
+<!-- BEGIN ADR-026-RULING-PROPAGATION -->
+## ADR-026 — CLAIMED 2026-09-02 by unnamed
+
+*Placeholder. Replace this line with the decision; keep the markers.*
+<!-- END ADR-026-RULING-PROPAGATION -->
