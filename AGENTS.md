@@ -8133,3 +8133,115 @@ metric is **0** — `class9 = 0` on a clean tree.
 **No baseline was re-recorded.** `--baseline` is a floor, not an
 acknowledgement button, and re-recording it here would have buried all of the
 above.
+
+---
+
+## 2026-09-02 — workstream `CONSOLIDATE-PUBLICATION-RULES`: the safety rules had five copies, reconciled by regex, and two of the five were already broken
+
+**`code/cedar_publication.py` is now the ONE copy of `NEVER`, `GATES`,
+`FLAGSHIP`, `SPINE_TABLES`, `PRODUCT_ID`, `DROP_COLS`, `YEAR_COLS`, the shelf
+sets and `row_ok()`.** 760, 770, 1135 and 1137 import it. Full reasoning and
+the measurements: **ADR-035** in `docs/ARCHITECTURE_DECISIONS.md`.
+
+**The standing rule this earns: never read a constant out of another script's
+SOURCE TEXT.** Five scrapers did, all justified by the same false claim — *"a
+module whose name begins with a digit is not importable, and 770 does file work
+at import time."* Neither half is true. `importlib.util.spec_from_file_location`
+imports `770_sample_extracts.py` in **0.04 s**, and every file read in it is
+inside `main()`. **A regex over source text fails OPEN — `{}` or `None`, and
+the caller decides. An import fails CLOSED, with a traceback naming the missing
+symbol.**
+
+Two of the five were already broken and nothing had noticed:
+
+* **`1137._from()` failed open.** Its regex could not match the annotated
+  binding `COLLECTIONS: list[dict] = [`, so `shelves()` returned `{}`, every
+  collection failed the shelf test, and the build printed **"0 customer
+  shelves" and exited 0**.
+* **`770._760_product_id_map()` was never called.** It carried the comment *"so
+  drift is a hard failure rather than two files quietly disagreeing"* and had
+  no call site anywhere in the tree. **A gate that is defined and not invoked
+  is not a gate** — grep for the call, not the definition.
+* And `DROP_COLS` / `YEAR_COLS` were plain duplicated literals in 1135 **and**
+  1137, with no scraper and nothing comparing them at all.
+
+**A shared name has to say WHAT IT IS, and the new gate found the proof on its
+first run.** 770 used the bare name `SPINE` for a *set of table names*; 1135 and
+1137 both use `SPINE` for the `data/spine` *directory* `Path`. Three files, one
+name, two unrelated types, kept apart only because none of them imported
+another. The shared constant is `SPINE_TABLES`.
+
+**760's spine scrape was a live hazard.** It ended `if j >= 0 else set()`, so
+the day 770 stopped carrying a `SPINE = {` literal it would have silently
+returned an EMPTY set and reported every spine-resident flagship as an
+unclaimed table. That day was today.
+
+### The brief this workstream was given had the site consumer BACKWARDS
+
+It said *"`dist/samples/` is consumed by the SITE repo (PR #33 imports it)."*
+Measured: the product repo's `scripts/import_cedar_manifest.py` reads
+**`dist/review/MANIFEST.csv`** and **`dist/review/samples/<c>/<t>__10.csv`** —
+`1135`'s output — plus `dist/collection_descriptors*.json` from 760 and 770's
+`FLAGSHIP` **by text**. It never touches `dist/samples/`, which is 770's
+separate curated fifteen-file product. **The half of 1135 the brief nominated
+for retirement is the half with the live consumer.**
+
+That importer is the ONE text-scraper that survives, and it cannot be fixed
+from here: it lives on branch `claude/real-collections-manifest`, a tree
+disjoint from `master` that never merges. So 770 keeps a `FLAGSHIP = {...}`
+literal that is **generated** by `py -3 code/cedar_publication.py sync`,
+`assert`ed equal at 770's import, and gated by `verify` under **both** external
+scrapers' exact expressions.
+
+### 1135's `full` half is NOT superseded by 1137 — measured, not assumed
+
+| | |
+|---|---:|
+| tables 1135 publishes in full | 239 |
+| 1137 flagship tables (13 datasets) | 13 |
+| …also full-copied by 1135 | 12 |
+| **tables 1135 ships in full that 1137 never ships** | **227** |
+| `dist/review/spreadsheets` | 8.26 GB |
+| …duplicating a 1137 flagship | 2.44 GB (29.6%) |
+| …tables 1137 does not ship | 5.81 GB (70.4%) |
+
+So **nothing was retired.** The `full` half has no consumer today (the site
+importer sets `full_files.served = false` and declines to copy it), which makes
+it a retirement candidate *on that ground* — but not on supersession, which is
+false for 227 of 239 tables. The measurement and the conditions for retiring it
+are written into `1135`'s docstring.
+
+### Behaviour: proved, not asserted
+
+Old and new code run against the same live tables in two shadow trees (`code/`
+copied, `data/` `docs/` `review/` junctioned, `dist/` separate).
+**315 of 316 output files byte-identical**, across 770's 16, 1135's 295 and
+760's 2. The one difference is `dist/customer/MANIFEST.csv` and it is entirely
+the CONCURRENT `gaming`-as-13th-dataset workstream: 12 common datasets, **0
+cell differences outside the two columns that workstream added**, one extra row
+(`gaming`). `1137`'s constants are identical old-vs-new and `row_ok` agrees on
+**115,217 real rows, 0 disagreements**. The product repo's importer, run
+against both shadow trees, produces a **byte-identical** manifest and 169
+byte-identical sample files.
+
+### One behaviour changed deliberately: `1137 plan` no longer writes `MANIFEST.csv`
+
+It printed *"nothing written"* and then overwrote the manifest anyway, with
+dry-run values — no `files`, no `largest_mb`, no codebook, no join columns,
+because none of that work runs under `dry`. The manifest is the only record of
+what was DELIVERED and `verify` reads it to decide whether a spreadsheet on
+disk is an orphan, so one `plan` turned thirteen delivered datasets into
+thirteen apparent orphans while reporting it wrote nothing. **Found by doing
+it** — this workstream clobbered the live manifest that way. **A dry run that
+writes is not a dry run.**
+
+### Gate
+
+`py -3 code/cedar_publication.py verify` — seven checks — wired into
+`846_session_audit.py` as claim 30. **846 is 29/30**; the one FAIL is the
+pre-existing "twelve customer datasets are not stale", owned by the 1137
+workstream. `845 verify` ok. `293` adds no new finding on any file this
+workstream touched. `62` red metrics are the ones already owned in the table
+above — verified again here that the only one naming a file of ours,
+`class2c 846_session_audit.py: fails += 1`, is present in `HEAD` with 846
+stashed.

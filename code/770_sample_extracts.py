@@ -81,7 +81,11 @@ ROOT = Path(__file__).resolve().parent.parent
 # as a script or loaded by importlib from another module.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from cedar_publication import (          # noqa: E402
-    NEVER, GATES, PRODUCT_ID, SPINE, product_id, FLAGSHIP as _CANON_FLAGSHIP,
+    NEVER, GATES, PRODUCT_ID, product_id, FLAGSHIP as _CANON_FLAGSHIP,
+    # `SPINE_TABLES` there, `SPINE` here: 1135 and 1137 both use the bare
+    # name `SPINE` for the `data/spine` DIRECTORY, so the shared constant
+    # had to say which it is. This file's local name is unchanged.
+    SPINE_TABLES as SPINE,
 )
 
 csv.field_size_limit(10_000_000)

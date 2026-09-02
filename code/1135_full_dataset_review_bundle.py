@@ -66,6 +66,47 @@ Every withholding is COUNTED per table in `MANIFEST.csv`. A reviewer sees the
 size of what was held back instead of inferring it from a row count that does
 not match.
 
+WHAT `1137` SUPERSEDES HERE, AND WHAT IT DOES NOT - MEASURED 2026-09-02
+------------------------------------------------------------------------
+`1137_customer_dataset_combine.py` is the PRODUCT: thirteen combined
+spreadsheets, one per dataset, because the owner ruled that 294 internal tables
+is a filing cabinet and not a deliverable. It was reasonable to expect that
+`1137` had made this file's `full` half redundant. It has not, and the numbers
+say so rather than an opinion:
+
+  1135 tables published in full            239
+  1137 flagship tables (its 13 datasets)    13
+  ...of those, also full-copied here        12
+  tables 1135 ships in full that 1137
+  never ships at all                       227
+
+  dist/review/spreadsheets                8.26 GB
+  ...duplicating a 1137 flagship          2.44 GB  (29.6%)
+  ...tables 1137 does not ship            5.81 GB  (70.4%)
+
+So the two halves of this file have opposite standings and must not be retired
+together:
+
+  * **`samples` HAS A LIVE CONSUMER AND MUST NOT BE TOUCHED.** The product
+    repo's `scripts/import_cedar_manifest.py` reads `dist/review/MANIFEST.csv`
+    and copies `dist/review/samples/<collection>/<table>__10.csv` into the site
+    under `public/data/cedar/samples/`. It reads the manifest's `shippable`,
+    `split`, `files` and `largest_file_mb` columns too. It does NOT read
+    `dist/samples/` - that is `770`'s directory, a different, curated,
+    fifteen-file product - and any brief that says otherwise has them swapped.
+
+  * **`full` has NO consumer today.** The same importer states
+    `full_files.served = false` and declines to copy the spreadsheets
+    ("the set measures 6.2 GB ... this repository is the wrong home for the
+    data regardless"). Nothing else in either tree reads them. That makes the
+    `full` half a RETIREMENT CANDIDATE on the ground of no consumer - not on
+    the ground of supersession, which is false for 227 of 239 tables. It has
+    not been retired: 8.26 GB is the only full-table delivery path those 227
+    tables have, and removing the capability to answer a question nobody has
+    asked yet is not a saving. If it is retired, retire the WRITE, keep the
+    manifest columns the site reads, and say in `graveyard/` that 227 tables
+    lost their only full-copy route.
+
 THE THING THIS FILE MUST NOT DO
 -------------------------------
 Report success for work it did not do. `verify` re-reads the bundle off disk

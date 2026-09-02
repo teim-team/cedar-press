@@ -540,13 +540,15 @@ def _method():
                          f"{'; missing ' + ', '.join(sorted(missing)) if missing else ''}")
 
 
-@claim("the twelve customer datasets exist and are not stale", critical=True)
+@claim("13 datasets are built and current - 12 on the storefront, gaming to "
+       "Grove", critical=True)
 def _twelve():
-    """The product is twelve spreadsheets. This checks they are CURRENT.
+    """THIRTEEN deliverables. TWELVE of them are on the Cedar Press storefront.
 
     Owner, 2026-09-02: *"we always have a finished product we're building and
     all the cleaning and stuff gets updated and gets converted to the finished
-    product."*
+    product."* And, the same day: *"you're always working on thirteen datasets,
+    the twelve in Cedar Press, and then the gaming dataset."*
 
     The failure this catches is silent, which is why it has to be a gate: a
     cleaning pass rewrites `prime_contracts.csv`, and `contractors.csv` goes on
@@ -555,9 +557,27 @@ def _twelve():
     deliverable, so `1137 verify` exits 1 on it and this claim carries that
     through to the audit.
 
-    It also fails on a count other than twelve, because the shelf assignment in
-    `500` is what decides who is a customer dataset and a silent thirteenth is
-    how `newsletters` shipped before the owner withdrew it.
+    WHY THIS CLAIM SAID TWELVE AND WAS WRONG ABOUT A DIFFERENT THING. It read
+    `len(csvs) == 12`, and twelve was the right number for the STOREFRONT and
+    the wrong number for what gets BUILT. `gaming` is `shelf: grove` - sold
+    through Cedar Grove, on no Cedar Press shelf - and it is the largest
+    maintained collection in the project, 65 tables. One count answering two
+    questions meant the collection could go undelivered with the gate green.
+    The two counts are now separate, and both are asserted:
+
+        13   built    - a spreadsheet, a codebook and notes each
+        12   storefront - `standard` + `pro`, from `500`'s shelf map
+
+    THE PROPERTY THAT MUST NOT BE LOST is why the count was ever hard-coded:
+    **a silent extra dataset is a defect.** `newsletters` shipped as an
+    unwanted thirteenth storefront slot before the owner withdrew it on
+    2026-09-02, and nothing failed. That property now holds three ways, all
+    inside `1137 verify` and all carried here by its exit code: a thirteenth
+    STOREFRONT slot fails the storefront count, a fourteenth BUILT dataset
+    fails the build count, and a spreadsheet on disk that no manifest line
+    claims fails outright. The on-disk counts below are the fourth guard - they
+    catch a `verify` that passed because the manifest and the disk agreed with
+    each other about too few files.
     """
     rc = script_exit("1137_customer_dataset_combine.py", "verify")
     if rc == 99:
@@ -565,9 +585,19 @@ def _twelve():
     out = ROOT / "dist" / "customer"
     csvs = [f for f in out.glob("*.csv") if f.name != "MANIFEST.csv"]
     cbs = list(out.glob("*__CODEBOOK.md"))
-    ok = rc == 0 and len(csvs) == 12 and len(cbs) == 12
+    store = grove = 0
+    mf = out / "MANIFEST.csv"
+    if mf.exists():
+        for r in rows(mf):
+            if (r.get("storefront") or "").strip().upper() == "Y":
+                store += 1
+            elif (r.get("dataset") or "").strip():
+                grove += 1
+    ok = (rc == 0 and len(csvs) == 13 and len(cbs) == 13
+          and store == 12 and grove == 1)
     return (ok, f"{len(csvs)} spreadsheets, {len(cbs)} codebooks, "
-                f"1137 verify rc={rc}"
+                f"{store} on the Cedar Press storefront + {grove} through "
+                f"Cedar Grove, 1137 verify rc={rc}"
                 + ("" if ok else "  <- re-run `1137 build`"))
 
 
@@ -605,6 +635,33 @@ def _control_bytes():
                        "zero: " + blob.strip().splitlines()[-1][:70])
     line = ((r.stdout or "").strip().splitlines() or [""])[0].strip()
     return r.returncode == 0, line or f"1136 verify exit {r.returncode}"
+
+
+@claim("the publication rules have ONE copy and no consumer has diverged")
+def _publication_rules():
+    """`NEVER`, `GATES`, `FLAGSHIP`, `DROP_COLS` and the shelf sets used to be
+    restated across 770 / 760 / 1135 / 1137 and reconciled by REGEX OVER SOURCE
+    TEXT - five scrapers, one of which had already failed open, returning `{}`
+    so 1137 reported "0 customer shelves" and exited 0.
+
+    They are canonical in `code/cedar_publication.py` since 2026-09-02 and
+    imported. This runs its divergence gate, which checks that every consumer
+    resolves the shared names to the module's values, that no scraper has been
+    reintroduced, that the generated `FLAGSHIP` compat literal 770 keeps for the
+    product repo still parses to the same dict under BOTH external scrapers'
+    exact expressions, and that the storefront and build sets are still 12 and
+    13. A rule with one copy is only one rule while something checks it.
+    """
+    r = subprocess.run([sys.executable, str(ROOT / "code" /
+                        "cedar_publication.py"), "verify"],
+                       capture_output=True, text=True, cwd=str(ROOT))
+    blob = (r.stdout or "") + (r.stderr or "")
+    if "Traceback (most recent call last)" in blob:
+        return False, ("cedar_publication crashed - UNMEASURED, which is not "
+                       "the same as clean: " + blob.strip().splitlines()[-1][:70])
+    lines = [l.strip() for l in (r.stdout or "").splitlines() if l.strip()]
+    return r.returncode == 0, (lines[-1] if lines else
+                               f"cedar_publication verify exit {r.returncode}")
 
 
 def main() -> int:

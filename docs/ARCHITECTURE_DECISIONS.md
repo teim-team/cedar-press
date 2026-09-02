@@ -2911,3 +2911,190 @@ append-only `cedar_nest_id_register.csv`. `1133` owns the admission decisions;
 3,789 → 7,559. `1072 verify` PASS on all 8 invariants; `1102` (the enricher)
 must run LAST after any rebuild.
 <!-- END ADR-034-OWNER-V6-BUILDER-INPUT -->
+
+<!-- BEGIN ADR-035-PUBLICATION-RULES-ONE-MODULE -->
+
+## ADR-035 — the publication rules are ONE importable module, and text-scraping a rule out of another script is banned
+
+**Decided 2026-09-02** by workstream `CONSOLIDATE-PUBLICATION-RULES` (number
+1138 claimed and released), `code/cedar_publication.py`.
+
+**Context.** Owner, 2026-09-02: *"if we can consolidate files to process stuff
+to make it easier, fact check — this should be a well oiled machine, not
+running in circles over and over again."*
+
+Four scripts write customer-facing extracts — `760_collection_descriptors.py`,
+`770_sample_extracts.py`, `1135_full_dataset_review_bundle.py`,
+`1137_customer_dataset_combine.py` — and they agreed about the publication
+rules by **reading each other's source code with regular expressions**. Five
+such scrapers were live:
+
+| # | scraper | reads | out of |
+|---|---|---|---|
+| 1 | `770._760_product_id_map()` | `PRODUCT_ID` | 760 |
+| 2 | `760._flagship_map()` | `FLAGSHIP`, `SPINE` | 770 |
+| 3 | `1135._from_770()` | `NEVER`, `GATES` | 770 |
+| 4 | `1137._from()` | `NEVER`, `GATES`, `FLAGSHIP`; `COLLECTIONS` | 770; 500 |
+| 5 | the product repo's `scripts/import_cedar_manifest.py::_flagship_map()` | `FLAGSHIP` | 770 |
+
+Two of those were already broken and neither was noticed by anything:
+
+* **Scraper 4 failed OPEN.** Its regex could not match the annotated binding
+  `COLLECTIONS: list[dict] = [`, so `shelves()` returned `{}`, every collection
+  failed the shelf test, and `1137` printed **"0 customer shelves" and exited
+  0**. A confident report of nothing.
+* **Scraper 1 was never called.** `770` defined `_760_product_id_map()` with
+  the comment *"so drift is a hard failure rather than two files quietly
+  disagreeing"*, and no call site existed anywhere in the tree. A gate that is
+  defined and not invoked is not a gate.
+
+And `DROP_COLS` and `YEAR_COLS` were plain duplicated literals in **1135 and
+1137**, with no scraper and no comparison at all — two hand-maintained copies
+of a licensing rule, which is worse than the scraping because at least the
+scraping was trying.
+
+**THE STATED JUSTIFICATION WAS FALSE, AND IT IS MEASURED.** Every one of the
+five scrapers carries some version of *"a module whose name begins with a digit
+is not importable, and 770 does file work at import time."* **Both halves are
+wrong.** The `import` STATEMENT cannot name a digit-leading module;
+`importlib.util.spec_from_file_location` imports it without complaint. And
+importing `770_sample_extracts.py` takes **0.04 s** and reads no table — every
+file read is inside `main()`, behind `if __name__ == "__main__"`. The scraping
+was never necessary.
+
+**Decision.** `code/cedar_publication.py` — an importable name, alongside the
+existing `cedar_pipeline.py` / `cedar_extent_competed.py` precedents — is the
+single copy of `NEVER`, `GATES`, `FLAGSHIP`, `SPINE_TABLES`, `PRODUCT_ID`,
+`DROP_COLS`, `YEAR_COLS`, the shelf sets and `row_ok()`. 760, 770, 1135 and
+1137 IMPORT it. All five in-tree scrapers are gone.
+
+**A regex over source text fails OPEN; an import fails CLOSED.** That
+difference is the whole argument, and it is why the fix is not "a better
+regex."
+
+**`SPINE` had to be renamed, and the gate found it.** 770 used the bare name
+`SPINE` for a *set of table names*; 1135 and 1137 both use `SPINE` for the
+`data/spine` *directory* `Path`. Three files, one name, two unrelated types,
+kept apart only by the fact that none imported another. The shared constant is
+`SPINE_TABLES`; 770 imports it `as SPINE` so its local usage is unchanged. The
+divergence gate caught this on its first run — nothing else ever could have.
+
+**760's spine scrape was a live hazard, not just clutter.** It ended
+`if j >= 0 else set()`, so the day 770 stopped carrying a `SPINE = {` literal
+it would have returned an EMPTY set, silently, and every spine-resident
+flagship would have been reported as an unclaimed table. That day was
+2026-09-02.
+
+**THE ONE COPY THAT REMAINS, AND WHY.** Consumer 5 lives in the PRODUCT repo on
+branch `claude/real-collections-manifest`. That branch and `master` are
+disjoint trees in one repository and never merge, so a change here cannot reach
+it; it does `text.find("FLAGSHIP = {")` against `770_sample_extracts.py` and
+`raise SystemExit` when the dict is absent. Deleting 770's literal would break
+a live consumer. So `770` keeps a `FLAGSHIP = {...}` literal that is
+**generated, not maintained**: `py -3 code/cedar_publication.py sync` writes
+it between markers, 770 `assert`s it equals the module at import, and `verify`
+fails if it drifts. Two copies, one derived, with a runtime assert and a gate.
+
+**The gate.** `py -3 code/cedar_publication.py verify`, wired into
+`846_session_audit.py` as claim 30. Seven checks: every consumer resolves the
+shared names to the module's values; no scraper has been reintroduced; the
+generated compat literal parses to the same dict under **both** external
+scrapers' exact expressions; the storefront and build sets are 12 and 13; every
+built collection names a flagship; `DROP_COLS` is all lower case (every
+consumer compares `col.lower() in DROP_COLS`, so an upper-case entry could
+never match and would silently ship).
+
+**Behaviour is preserved and it was measured, not asserted.** Old and new code
+were run against the same live tables in two shadow trees (`code/` copied,
+`data/` `docs/` `review/` junctioned, `dist/` separate). `770` and `760`
+produce **byte-identical** stdout and outputs. `1135 samples` likewise. `1137`
+was run in `plan` only — a concurrent workstream owns its build — and its
+constants and gate function were proved equal instead.
+
+**One behaviour DID change, deliberately: `1137 plan` no longer writes
+`MANIFEST.csv`.** It printed "nothing written" and then overwrote the manifest
+anyway, with dry-run values — no `files`, no `largest_mb`, no codebook, no join
+columns, because none of that work runs under `dry`. The manifest is the only
+record of what was DELIVERED, and `verify` reads it to decide whether a
+spreadsheet on disk is an orphan, so a `plan` turned thirteen delivered
+datasets into thirteen apparent orphans while reporting that it wrote nothing.
+Found by doing it.
+
+**Consequence.** 5 in-tree scrapers → 0. `NEVER`/`GATES`/`FLAGSHIP` 3 copies →
+1. `DROP_COLS`/`YEAR_COLS` 2 copies → 1. `row_ok()` 3 bodies → 1.
+`846_session_audit` 29 claims → 30.
+<!-- END ADR-035-PUBLICATION-RULES-ONE-MODULE -->
+
+<!-- BEGIN ADR-036-BUILD-VS-STOREFRONT -->
+## ADR-036 — the BUILD set and the STOREFRONT set are different sets, and gaming is the thirteenth built dataset
+
+**Decided 2026-09-02** by workstream `GAMING-THIRTEENTH-1141`,
+`code/cedar_publication.py`, `code/1137_customer_dataset_combine.py`,
+`code/1141_gaming_quality_pass.py`.
+
+**Context.** Owner, 2026-09-02: *"you're always working on thirteen datasets,
+the twelve in Cedar Press, and then the gaming dataset. Those are the ones that
+you're always prioritizing."*
+
+`1137` decided membership with one tuple, `CUSTOMER_SHELVES = ("standard",
+"pro")`, and that tuple was answering two different questions at once: **where
+is this sold** and **is this delivered**. `gaming` is `shelf: grove` — it goes
+out through Cedar Grove and appears on no Cedar Press shelf — so the single
+test excluded it from the combined-product build as well. It is the **largest
+maintained collection in the project**: 65 tables, 56 of them shippable. It had
+no combined spreadsheet, no `gaming__CODEBOOK.md`, and no notes, and
+`846_session_audit`'s CRITICAL claim was green the whole time, because that
+claim also counted the storefront.
+
+**Decision.** Three named sets in `cedar_publication`, and every consumer says
+which it means:
+
+```
+STOREFRONT_SHELVES  = ("standard", "pro")           12   sold on Cedar Press
+GROVE_SHELVES       = ("grove",)                     1   sold through Grove
+BUILD_SHELVES       = STOREFRONT + GROVE            13   delivered
+```
+
+`CUSTOMER_SHELVES` survives as an alias for the storefront, because that is
+what it always meant. `MANIFEST.csv` gains `storefront` (Y/N) and
+`sold_through`, so a reader of the OUTPUT cannot re-conflate them either.
+
+**The property that could not be lost.** The count was hard-coded because **a
+silent extra dataset is a defect** — `newsletters` shipped as an unwanted
+thirteenth storefront slot before the owner withdrew it and nothing failed. It
+now holds three ways, all in `1137 verify`: a thirteenth STOREFRONT slot fails
+the storefront count; a fourteenth BUILT dataset fails the build count; and a
+spreadsheet on disk that no manifest line claims fails outright. The third is
+new and is the one the old check could not see. Proved by fixture: dropping
+`newsletters.csv` into `dist/customer/` turns `verify` red and names it.
+
+**Two defects the gaming build exposed in `1137` itself, both fixed generically
+for all thirteen.**
+
+1. **The shared join key was the first one DECLARED, not the finest one both
+   tables carry.** `gaming_facilities` declares `[tribe_id, cedar_uid,
+   entity_id, facility_id]` and its grain is the PROPERTY. Every one-to-many
+   count column therefore counted the property's whole NATION — Cherokee
+   Nation's ten casinos each reporting the tribe's total under a column named
+   for the property. Keys are now ranked by how finely they cut the flagship.
+   Effect on gaming: four more tables meet the one-to-one test at facility
+   grain and fold in properly, and every count means what its row means.
+2. **A `plan` run overwrote `MANIFEST.csv` while printing "nothing written".**
+   Fixed the same hour (independently, by the owner) — recorded here because
+   the manifest is what `verify` reads to decide whether a spreadsheet is an
+   orphan, so a dry run could turn twelve delivered datasets into twelve
+   apparent orphans.
+
+**Column ORDER, not column deletion.** `gaming` lands at 311 columns where the
+other twelve are 29–91. Most of that width is Cedar's provenance quartet per
+measured fact (`gaming_machines` · `_value_basis` · `_observation_status` ·
+`_observed_date`), which is the product's differentiator, and `770` rule 6
+already forbids dropping columns because it makes the schema depend on which
+rows shipped. So `order_columns()` bands every dataset's header — identity,
+substantive, provenance, then joined grouped by source table — as a **stable
+permutation that raises rather than lose or duplicate a column**. Nothing is
+removed and the first screen is readable.
+
+**Consequence.** 13 spreadsheets, 13 codebooks, 13 notes pairs. `846`'s
+CRITICAL claim now asserts 13 built / 12 storefront / 1 Grove.
+<!-- END ADR-036-BUILD-VS-STOREFRONT -->

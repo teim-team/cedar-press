@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """
-Cedar Press - 1137: TWELVE datasets, twelve spreadsheets. One each.
+Cedar Press - 1137: THIRTEEN datasets, thirteen spreadsheets. One each.
+Twelve of them are the Cedar Press storefront; the thirteenth is Cedar Grove's.
 
     py -3 code/1137_customer_dataset_combine.py            # plan, writes nothing
     py -3 code/1137_customer_dataset_combine.py build
+    py -3 code/1137_customer_dataset_combine.py build gaming   # one dataset
     py -3 code/1137_customer_dataset_combine.py verify
 
 WHY THIS EXISTS
@@ -18,14 +20,41 @@ a product. A customer buys **Federal Funding to Indian Country** and expects a
 spreadsheet called that, not twenty tables to join themselves. **The combining
 is the product.** If the buyer has to do it, we sold them a filing cabinet.
 
-The twelve, from `shelf` in `500_build_architecture_map.py`:
+THE BUILD SET AND THE STOREFRONT SET ARE DIFFERENT SETS
+-------------------------------------------------------
+Owner, 2026-09-02: *"you're always working on thirteen datasets, the twelve in
+Cedar Press, and then the gaming dataset. Those are the ones that you're always
+prioritizing."*
 
-    standard  funding · federal-register · legislation · deals · nagpra · lobbying
-    pro       contractors · subcontracting · native-owned-businesses · nest ·
-              natural-resources · nonprofits
+From `shelf` in `500_build_architecture_map.py`, via `cedar_publication`:
 
-`gaming` is shelf `grove` and belongs to Cedar Grove. `_entity_layer` is
-infrastructure. `newsletters` was withdrawn by owner ruling on 2026-09-02.
+    standard  funding · federal-register · legislation · deals · nagpra ·
+              lobbying                                     -- Cedar Press
+    pro       contractors · subcontracting ·
+              native-owned-businesses · nest ·
+              natural-resources · nonprofits               -- Cedar Press
+    grove     gaming                                       -- Cedar Grove
+
+    BUILD_SHELVES      = standard + pro + grove   13 datasets, all delivered
+    STOREFRONT_SHELVES = standard + pro           12 datasets, sold here
+
+Until 2026-09-02 those were one tuple and `gaming` was excluded from this build
+for the same test that keeps it off the Press storefront. It is the LARGEST
+maintained collection in the project - 65 tables, 56 shippable - and it was
+undelivered while the check that should have noticed was green, because that
+check counted the storefront. Where a dataset is SOLD and whether it is BUILT
+are two facts; the code now names both, and `MANIFEST.csv` carries
+`storefront` and `sold_through` columns so a reader of the output cannot
+re-conflate them either.
+
+`_entity_layer` is infrastructure - it is what the others join to, not a
+product. `newsletters` was withdrawn by owner ruling on 2026-09-02: shelf
+`withdrawn`, addressable, not sold, not built.
+
+**A silent extra dataset is a defect**, and `verify` holds that three ways: a
+thirteenth STOREFRONT slot fails the storefront count (this is how
+`newsletters` shipped), a fourteenth BUILT dataset fails the build count, and a
+spreadsheet on disk that no manifest line claims fails outright.
 
 THE ONE RULE THAT MAKES A JOIN SAFE
 ------------------------------------
@@ -79,6 +108,16 @@ from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+# `code/` on the path so `cedar_publication` imports whether this file is run
+# as a script or loaded by importlib from another module.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from cedar_publication import (          # noqa: E402
+    NEVER, GATES, FLAGSHIP, DROP_COLS, YEAR_COLS, CUSTOMER_SHELVES,
+    STOREFRONT_SHELVES, GROVE_SHELVES, BUILD_SHELVES,
+    N_STOREFRONT_EXPECTED, N_BUILT_EXPECTED,
+    row_ok, publishable_columns, shelves,
+)
+
 csv.field_size_limit(10_000_000)
 TODAY = date.today().isoformat()
 CLEAN = ROOT / "data" / "clean"
@@ -92,86 +131,35 @@ EXCEL_ROWS = 1_048_576
 # judgement about what someone would want to open, and the effect was that two
 # of twelve datasets silently had no workbook. XLSX caps a SHEET, not a
 # WORKBOOK; a big dataset spans several Data sheets in one file.
-YEAR_COLS = ("fiscal_year", "fy", "action_date_fiscal_year", "award_fiscal_year",
-             "year", "report_year", "filing_year")
-
-# Shelves a paying customer sees. `grove` goes to Cedar Grove, `infrastructure`
-# is the hub, `withdrawn` is the owner's newsletters ruling of 2026-09-02.
-CUSTOMER_SHELVES = ("standard", "pro")
-
-DROP_COLS = ("casino_city_id", "duns", "duns_number", "dnb_duns",
-             "ultimate_duns", "parent_duns")
+# `YEAR_COLS`, `CUSTOMER_SHELVES` and `DROP_COLS` are imported above from
+# `code/cedar_publication.py`. `DROP_COLS` and `YEAR_COLS` were literals here
+# AND in 1135 - two hand-maintained copies of a licensing rule with nothing
+# comparing them, which is worse than the text-scraping below because at least
+# the scraping was trying.
 
 
-def _from(mod: str, name: str):
-    """Read a constant out of another numbered script by text.
-
-    A module whose name begins with a digit is not importable, and restating a
-    safety rule creates a second copy that drifts - the drifting copy always
-    being the one that ships.
-    """
-    src = ROOT / "code" / mod
-    if not src.exists():
-        return None
-    txt = src.read_text(encoding="utf-8", errors="replace")
-    # `COLLECTIONS: list[dict] = [` - the annotation is part of the binding and
-    # the first version of this pattern did not allow for it, so `shelves()`
-    # returned {} and the build reported "0 customer shelves" instead of
-    # failing. A lookup that silently finds nothing is worse than one that
-    # raises, which is why the caller now refuses to build on an empty map.
-    m = re.search(rf"^{name}\s*(?::[^=\n]+)?=\s*", txt, re.M)
-    if not m:
-        return None
-    i, depth, j = m.end(), 0, m.end()
-    while j < len(txt):
-        if txt[j] in "([{":
-            depth += 1
-        elif txt[j] in ")]}":
-            depth -= 1
-            if depth == 0:
-                j += 1
-                break
-        j += 1
-    try:
-        import ast
-        return ast.literal_eval(txt[i:j])
-    except Exception:
-        return None
-
-
-NEVER = _from("770_sample_extracts.py", "NEVER")
-GATES = _from("770_sample_extracts.py", "GATES")
-FLAGSHIP = _from("770_sample_extracts.py", "FLAGSHIP")
-if not (NEVER and GATES and FLAGSHIP):
-    print("  REFUSING TO BUILD: could not read NEVER/GATES/FLAGSHIP out of 770.\n"
-          "  Those are the publication rules and the curated flagship choice.\n"
-          "  Restating them here would put a second copy in the tree.",
-          file=sys.stderr)
-    raise SystemExit(2)
+# `NEVER`, `GATES` and `FLAGSHIP` used to be read out of
+# `770_sample_extracts.py` here BY TEXT, and `COLLECTIONS` out of
+# `500_build_architecture_map.py`, on the reasoning that "a module whose name
+# begins with a digit is not importable". That is true of the `import`
+# STATEMENT and false of `importlib` - measured 2026-09-02, 770 imports in
+# 0.04 s and does no file work at import - so the scrape was never necessary.
+#
+# It was also the exact defect it claimed to prevent. The regex could not match
+# the annotated binding `COLLECTIONS: list[dict] = [`, so `shelves()` returned
+# `{}`, every collection failed the shelf test, and this build printed "0
+# customer shelves" and **exited 0**. A regex over source text fails OPEN. An
+# import fails CLOSED, with a traceback that names the missing symbol.
+#
+# All four now come from `code/cedar_publication.py`, imported at the top.
+# `shelves()` still reads 500 - 500 owns the collection map and duplicating it
+# here would be the same defect - but through `importlib`, and it raises on an
+# empty map rather than returning one.
 
 
 def contracts():
     d = json.loads(CONTRACTS.read_text(encoding="utf-8"))
     return {c["collection"]: c for c in d.get("contracts", [])}
-
-
-def shelves():
-    """collection -> shelf, read out of 500's declared map.
-
-    Refuses to return an empty map. The first version's regex could not match
-    the annotated binding `COLLECTIONS: list[dict] = [`, so this returned {},
-    every collection failed the shelf test, and the build printed "0 customer
-    shelves" and exited 0 - a clean, confident report of nothing. That is the
-    defect this project keeps paying for, so an empty map is now fatal.
-    """
-    cols = _from("500_build_architecture_map.py", "COLLECTIONS") or []
-    out = {c["id"]: c.get("shelf") for c in cols}
-    if not out:
-        print("  REFUSING TO BUILD: could not read COLLECTIONS out of 500.\n"
-              "  The shelf assignment decides which datasets a customer sees.\n"
-              "  Guessing it would ship the wrong storefront.", file=sys.stderr)
-        raise SystemExit(2)
-    return out
 
 
 def find(name):
@@ -182,20 +170,14 @@ def find(name):
     return None
 
 
-def row_ok(r):
-    for col, allowed in GATES.items():
-        if col in r and (r.get(col) or "").strip() not in allowed:
-            return False, col
-    for col in NEVER:
-        if col in r and (r.get(col) or "").strip():
-            return False, "personal:" + col
-    return True, ""
+# `row_ok(row) -> (publishable, reason)` is imported from
+# `cedar_publication`. It was reimplemented identically here and in 1135.
 
 
 def load(path, gate=True):
     with path.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
         rd = csv.DictReader(fh)
-        hdr = [c for c in (rd.fieldnames or []) if c.lower() not in DROP_COLS]
+        hdr = publishable_columns(rd.fieldnames or [])
         rows, held = [], defaultdict(int)
         for r in rd:
             if gate:
@@ -501,6 +483,127 @@ def notes(coll, c, fname, fmeta, cols, rows, prof, joined, refused, held):
     return path.name, ""
 
 
+# ---------------------------------------------------------------------------
+# COLUMN ORDER - the readability rule, and why it is ORDER and not DELETION
+# ---------------------------------------------------------------------------
+# Owner, 2026-09-02: *"make sure that we don't have any wonky columns, rows.
+# like, structurally, this spreadsheet is good."*
+#
+# `gaming` came out at 310 columns where the other twelve are 29-91, and the
+# obvious fix - drop some - is the wrong one twice over. Most of that width is
+# Cedar's PROVENANCE, four columns per measured fact:
+#
+#     gaming_machines · gaming_machines_value_basis
+#     gaming_machines_observation_status · gaming_machines_observed_date
+#
+# That quartet is the product's differentiator; a competitor ships the number
+# alone. And `770` rule 6 already settled the general case: dropping columns
+# makes the schema depend on which rows shipped, and a buyer diffing two
+# deliveries watches columns appear and vanish.
+#
+# So nothing is removed and the FIRST SCREEN is made readable instead. Four
+# bands, in this order, every column landing in exactly one:
+#
+#     1  IDENTITY      the keys you join on, then the names you read
+#     2  SUBSTANTIVE   what the row is: where, what kind, how big, whose
+#     3  PROVENANCE    how each of those is known - `*_basis`,
+#                      `*_observed_date`, `*_source_url`, `*_absent_reason`
+#     4  JOINED        everything folded in, grouped by the table it came from
+#
+# Within a band the original order is preserved, so this is a stable
+# permutation: run it twice and nothing moves. It is applied to ALL THIRTEEN,
+# not to gaming, because a rule that fires on one dataset is a special case
+# waiting to be forgotten.
+#
+# DO NOT reshuffle this into "nicest first" by hand. The bands are the
+# contract; a buyer scripting against column position is already wrong, but a
+# buyer scanning the first screen is the reader this serves.
+
+_ID_FIRST = ("cedar_uid", "cedar_place_id", "cedar_entity_id", "tribe_id",
+             "entity_id", "facility_id", "handle")
+_NAME_ISH = ("name", "canonical_name", "tribe_canonical_name", "facility_name",
+             "legal_name", "title", "tribe", "entity", "company")
+# A column is PROVENANCE when it describes how a neighbouring value is known,
+# rather than being a value itself. Suffix-matched, so it covers the per-metric
+# quartets without naming 90 columns.
+_PROV_SUFFIX = ("_basis", "_source_url", "_source_value_verbatim",
+                "_observed_date", "_observation_status", "_absent_reason",
+                "_evidence", "_evidence_url", "_evidence_quote", "_quote",
+                "_method", "_tier", "_precision", "_as_of", "_verbatim",
+                "_source_page", "_scheme", "_note", "_rung", "_md5",
+                "_as_published", "_literal", "_test")
+_PROV_EXACT = {"fetched_date", "built_date", "temporal_build_date",
+               "retrieved_at", "first_seen", "last_seen", "source_url",
+               "source_quote", "source_datasets", "source_page",
+               "source_authority", "source_document_type", "built_by_script",
+               "match_status", "match_basis", "coords_basis",
+               "entity_keyed_date", "checked_date", "built_by",
+               "observation_status", "value_completeness", "notes"}
+
+
+def _band(col: str, keys) -> int:
+    c = col.lower()
+    if c in _ID_FIRST or c in keys or (c.endswith("_id") and
+                                       not c.endswith("_absent_reason")):
+        return 0
+    if c in _NAME_ISH or c.endswith("_name"):
+        return 0
+    if c in _PROV_EXACT or c.endswith(_PROV_SUFFIX):
+        return 2
+    return 1
+
+
+def order_columns(cols, key_cols, own_cols):
+    """Stable four-band permutation. Returns EXACTLY the columns given.
+
+    `own_cols` is the flagship's own header, so anything outside it is a
+    joined column and lands in band 4 grouped by its source table. The
+    identity band is ordered by `_ID_FIRST`, then the contract's declared
+    key columns, then any remaining `*_id`, then the name-ish columns.
+    """
+    keys = {k.lower() for k in (key_cols or [])}
+    own = [c for c in cols if c in own_cols]
+    joined = [c for c in cols if c not in own_cols]
+
+    bands = {0: [], 1: [], 2: []}
+    for c in own:
+        bands[_band(c, keys)].append(c)
+
+    def id_rank(c):
+        lc = c.lower()
+        if lc in _ID_FIRST:
+            return (0, _ID_FIRST.index(lc))
+        if lc in keys:
+            return (1, 0)
+        if lc.endswith("_id"):
+            return (2, 0)
+        return (3, 0)
+
+    # POSITIONS ARE CAPTURED BEFORE THE SORT. `list.index()` inside a sort key
+    # reads the list as it is being reordered - the first version of this
+    # raised `x not in list` on the second comparison, which is the lucky
+    # outcome; the unlucky one is a silently unstable order.
+    pos0 = {c: i for i, c in enumerate(bands[0])}
+    bands[0].sort(key=lambda c: (id_rank(c), pos0[c]))
+
+    # Band 4: grouped by source table. `pre__col` names its table; `n_pre`
+    # is the count column for the same table and sorts with it.
+    def group(c):
+        return c.split("__", 1)[0] if "__" in c else (
+            c[2:] if c.startswith("n_") else c)
+    posj = {c: i for i, c in enumerate(joined)}
+    joined.sort(key=lambda c: (group(c), "__" not in c, posj[c]))
+
+    out = bands[0] + bands[1] + bands[2] + joined
+    # A permutation, or nothing. A reorder that loses or duplicates a column
+    # is a data loss wearing a formatting change, and it would be invisible in
+    # every row-count check in this file.
+    if sorted(out) != sorted(cols) or len(out) != len(cols):
+        raise SystemExit(f"order_columns is not a permutation: "
+                         f"{len(cols)} in, {len(out)} out")
+    return out
+
+
 def emit(coll, cols, rows, flag_path):
     """ONE dataset, ONE spreadsheet. No splitting, ever.
 
@@ -539,28 +642,85 @@ def emit(coll, cols, rows, flag_path):
     return 1, n_bytes, ("single" if not over else "single; " + "; ".join(over))
 
 
-def build(dry: bool) -> int:
+def build(dry: bool, only: tuple = ()) -> int:
+    """Build the THIRTEEN. `only` restricts the pass to named datasets.
+
+    THE BUILD SET AND THE STOREFRONT SET ARE DIFFERENT SETS, and this function
+    iterates the BUILD set. Owner, 2026-09-02: *"you're always working on
+    thirteen datasets, the twelve in Cedar Press, and then the gaming
+    dataset."* `gaming` is `shelf: grove` - it is sold through Cedar Grove and
+    appears on no Cedar Press shelf - and it is the largest maintained
+    collection in the project. One membership test used to answer both
+    questions, so "not on the storefront" silently meant "not built", and 65
+    tables went undelivered.
+
+    `only` exists because a full pass rewrites 1.2M-row deliverables and takes
+    a very long time. Rebuilding one dataset must not require rebuilding all
+    of them, and when the pass is restricted the manifest is MERGED rather
+    than replaced - a partial build that dropped the other twelve lines would
+    orphan twelve spreadsheets that are still on disk and still correct.
+    """
     cs, sh = contracts(), shelves()
-    customer = [c for c in cs if sh.get(c) in CUSTOMER_SHELVES]
+    built = [c for c in cs if sh.get(c) in BUILD_SHELVES]
+    unknown = [c for c in only if c not in built]
+    if unknown:
+        print(f"  REFUSING TO BUILD: not in the build set: "
+              f"{', '.join(sorted(unknown))}\n"
+              f"  the build set is: {', '.join(sorted(built))}", file=sys.stderr)
+        return 2
+    selected = [c for c in built if not only or c in only]
     man = []
     print(f"  1137 customer datasets   {'PLAN' if dry else 'BUILD'}")
-    print(f"    customer shelves : {len(customer)}  "
-          f"({', '.join(sorted(customer))})\n")
+    print(f"    build set        : {len(built)}  "
+          f"({len([c for c in built if sh.get(c) in STOREFRONT_SHELVES])} on the "
+          f"Cedar Press storefront, "
+          f"{len([c for c in built if sh.get(c) in GROVE_SHELVES])} through "
+          f"Cedar Grove)")
+    if only:
+        print(f"    restricted to    : {', '.join(sorted(selected))}")
+    print(f"    datasets         : {', '.join(sorted(selected))}\n")
 
-    for coll in sorted(customer):
+    for coll in sorted(selected):
         c = cs[coll]
         fname = FLAGSHIP.get(coll)
         fpath = find(fname) if fname else None
         if not fpath:
-            man.append({"dataset": coll, "note": f"flagship {fname} absent"})
+            man.append({"dataset": coll, "shelf": sh.get(coll),
+                        "storefront": "Y" if sh.get(coll) in STOREFRONT_SHELVES
+                                      else "N",
+                        "note": f"flagship {fname} absent"})
             print(f"    {coll:<26} FLAGSHIP MISSING ({fname})")
             continue
 
         fhdr, frows, fheld = load(fpath)
+        own_cols = set(fhdr)      # everything added after this is a join
         n0 = len(frows)
         meta = {t["table"]: t for t in c.get("tables", [])}
         fmeta = meta.get(fname, {})
         fkeys = [k for k in (fmeta.get("key_columns") or []) if k in fhdr]
+        # THE SHARED KEY MUST BE THE FINEST ONE BOTH TABLES CARRY, and this
+        # was taking the first one DECLARED instead - which is a different
+        # thing and it silently answers a different question.
+        #
+        # Measured on gaming, 2026-09-02. `gaming_facilities.csv` declares
+        # `key_columns = [tribe_id, cedar_uid, entity_id, facility_id]` and
+        # its grain is the PROPERTY: 787 rows, 787 distinct `facility_id`, 250
+        # distinct `tribe_id`. `gaming_revenue_bounds.csv` carries both. Taking
+        # the first declared key joined on `tribe_id`, so `n_gaming_revenue_bounds`
+        # on a property row was the count for that property's whole NATION -
+        # Cherokee Nation's ten casinos each reporting the tribe's total. The
+        # column is named for the property and counted for the tribe, which is
+        # this project's signature defect in one cell.
+        #
+        # So rank the shared keys by how finely they cut the FLAGSHIP - most
+        # distinct non-blank values wins - and fall back to declared order on a
+        # tie. `facility_id` (787 distinct) beats `tribe_id` (250), and the
+        # count means what its row means.
+        _fine = {}
+        for k in fkeys:
+            _fine[k] = len({(r.get(k) or "").strip() for r in frows
+                            if (r.get(k) or "").strip()})
+        fkeys = sorted(fkeys, key=lambda k: (-_fine[k], fkeys.index(k)))
 
         joined, refused, added_cols = [], [], 0
         if not dry:
@@ -630,6 +790,12 @@ def build(dry: bool) -> int:
             for stale_f in list(OUT.glob(f"{coll}.csv")) +                     list(OUT.glob(f"{coll}__*.csv")) +                     list(OUT.glob(f"{coll}.xlsx")) +                     list(OUT.glob(f"{coll}__CODEBOOK.md")):
                 stale_f.unlink()
 
+        # BAND THE COLUMNS BEFORE ANYTHING IS WRITTEN, so the CSV, the
+        # codebook and the notes all present the same order. Doing it inside
+        # `emit` alone would have shipped a spreadsheet whose columns ran in a
+        # different order from the codebook describing it.
+        fhdr = order_columns(fhdr, fmeta.get("key_columns"), own_cols)
+
         files = size = 0
         kind = ""
         if not dry:
@@ -645,7 +811,16 @@ def build(dry: bool) -> int:
         sparse = [c2 for c2 in fhdr
                   if not any((r.get(c2) or "") != "" for r in frows)]
         man.append({
-            "dataset": coll, "shelf": sh.get(coll), "name": c.get("name", ""),
+            "dataset": coll, "shelf": sh.get(coll),
+            # WHERE IT IS SOLD IS A COLUMN, not a thing the reader infers from
+            # the shelf string. `standard` and `pro` are Cedar Press shelves;
+            # `grove` is Cedar Grove. Both get built; only the first two are on
+            # the Press storefront, and a manifest that does not say so invites
+            # the next reader to count thirteen storefront slots.
+            "storefront": "Y" if sh.get(coll) in STOREFRONT_SHELVES else "N",
+            "sold_through": ("Cedar Press" if sh.get(coll) in STOREFRONT_SHELVES
+                             else "Cedar Grove"),
+            "name": c.get("name", ""),
             "flagship": fname, "grain": (fmeta.get("grain") or "")[:300],
             "rows": len(frows), "rows_withheld": sum(fheld.values()),
             "withheld_why": "; ".join(f"{k}={v}" for k, v in sorted(fheld.items())),
@@ -661,19 +836,45 @@ def build(dry: bool) -> int:
         print(f"    {coll:<26} {len(frows):>9,} rows x {len(fhdr):>3} cols   "
               f"+{added_cols} joined   {files} file(s)")
 
-    OUT.mkdir(parents=True, exist_ok=True)
-    keys = ["dataset", "shelf", "name", "flagship", "grain", "rows",
+    if not dry:
+        OUT.mkdir(parents=True, exist_ok=True)
+    keys = ["dataset", "shelf", "storefront", "sold_through", "name",
+            "flagship", "grain", "rows",
             "rows_withheld", "withheld_why", "columns", "columns_added_by_join",
             "tables_folded_in", "tables_counted_not_joined", "sparse_columns",
             "files", "largest_mb", "split", "codebook", "notes_txt",
             "notes_pdf", "notes_pdf_absent_reason", "note"]
+    if only and not dry:
+        # A RESTRICTED BUILD MERGES, IT DOES NOT REPLACE. Writing only the
+        # selected lines would leave the other datasets' spreadsheets on disk
+        # with no manifest line - which `verify` correctly reads as an orphan,
+        # and which is exactly the failure a partial pass must not manufacture.
+        keep = []
+        mf = OUT / "MANIFEST.csv"
+        if mf.exists():
+            with mf.open(encoding="utf-8-sig", errors="replace") as fh:
+                keep = [r for r in csv.DictReader(fh)
+                        if r.get("dataset") not in {m["dataset"] for m in man}]
+        man = sorted(keep + man, key=lambda r: r.get("dataset") or "")
+    # A DRY RUN THAT WRITES IS NOT A DRY RUN. `plan` printed "nothing written"
+    # and then overwrote `MANIFEST.csv` anyway, with dry-run values - no
+    # `files`, no `largest_mb`, no `codebook`, no notes, and no join columns,
+    # because none of that work ran under `dry`. The manifest is the only
+    # record of what was actually DELIVERED, and `verify` reads it to decide
+    # whether a spreadsheet on disk is an orphan - so replacing it with a plan
+    # turns twelve delivered datasets into twelve apparent orphans, while the
+    # command that did it reported writing nothing. Measured 2026-09-02, when a
+    # single `plan` invocation did exactly that to a manifest built by `build`.
+    if dry:
+        print(f"\n    {len(man)} dataset(s) planned. NOTHING WRITTEN - not the "
+              f"spreadsheets, and not {(OUT/'MANIFEST.csv').name}, which still "
+              f"describes the last real build. Re-run with `build`.")
+        return 0
     with (OUT / "MANIFEST.csv").open("w", encoding="utf-8", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=keys, extrasaction="ignore")
         w.writeheader()
         w.writerows(man)
     print(f"\n    manifest : {(OUT/'MANIFEST.csv').relative_to(ROOT)}")
-    if dry:
-        print("    nothing written. re-run with `build`.")
     return 0
 
 
@@ -713,7 +914,10 @@ def stale() -> list:
     cs, sh = contracts(), shelves()
     out = []
     for coll, c in cs.items():
-        if sh.get(coll) not in CUSTOMER_SHELVES:
+        # THE BUILD SET, not the storefront set. Gaming is delivered, so a
+        # stale gaming spreadsheet is a wrong deliverable in exactly the way a
+        # stale contractors spreadsheet is.
+        if sh.get(coll) not in BUILD_SHELVES:
             continue
         outs = list(OUT.glob(f"{coll}.csv"))
         if not outs:
@@ -736,19 +940,56 @@ def verify() -> int:
         return 1
     for coll, src, age in stale():
         if src == "NEVER BUILT":
-            bad.append(f"{coll}: NEVER BUILT - no customer spreadsheet exists")
+            bad.append(f"{coll}: NEVER BUILT - no spreadsheet exists")
         else:
             bad.append(f"{coll}: STALE - {src} is {age:.1f}h newer than the "
-                       f"delivered spreadsheet; re-run `1137 build`")
+                       f"delivered spreadsheet; re-run "
+                       f"`1137 build {coll}`")
     with mf.open(encoding="utf-8-sig", errors="replace") as fh:
         man = list(csv.DictReader(fh))
     sh = shelves()
-    want = {c for c, s in sh.items() if s in CUSTOMER_SHELVES}
+    # TWO SETS, TWO COUNTS, AND THEY ARE CHECKED SEPARATELY.
+    #
+    # Thirteen datasets are BUILT; twelve of them are on the Cedar Press
+    # storefront and one - `gaming` - is sold through Cedar Grove. The old
+    # single check asserted "12 customer datasets" and that one number was
+    # doing two jobs: it was the storefront's price list AND the delivery
+    # commitment. Under it, the project's largest collection was silently
+    # undelivered and the check was green.
+    #
+    # The property that must survive is the one that caught `newsletters`:
+    # A SILENT EXTRA DATASET IS A DEFECT. It survives twice over now - a
+    # thirteenth STOREFRONT slot fails the storefront count, and a fourteenth
+    # BUILT dataset fails the build count - plus a third way the old check
+    # could not see: a spreadsheet on disk that no manifest line claims.
+    want = {c for c, s in sh.items() if s in BUILD_SHELVES}
+    store = {c for c, s in sh.items() if s in STOREFRONT_SHELVES}
+    grove = want - store
     got = {m["dataset"] for m in man}
     for miss in sorted(want - got):
-        bad.append(f"{miss}: customer dataset with no manifest line")
-    if len(want) != 12:
-        bad.append(f"{len(want)} customer datasets on the shelves, expected 12")
+        bad.append(f"{miss}: built dataset with no manifest line")
+    for extra in sorted(got - want):
+        bad.append(f"{extra}: manifest line for a dataset on no built shelf "
+                   f"- a silent extra dataset is a defect")
+    if len(want) != N_BUILT_EXPECTED:
+        bad.append(f"{len(want)} datasets in the build set, expected "
+                   f"{N_BUILT_EXPECTED}: {', '.join(sorted(want))}")
+    if len(store) != N_STOREFRONT_EXPECTED:
+        bad.append(f"{len(store)} datasets on the Cedar Press storefront, "
+                   f"expected {N_STOREFRONT_EXPECTED}: "
+                   f"{', '.join(sorted(store))}")
+    # A DELIVERABLE THAT NO MANIFEST LINE CLAIMS. The manifest is the record of
+    # what was built; a `.csv` beside it that the record does not name is a
+    # leftover from a shelf change or a withdrawn dataset, and it looks exactly
+    # as finished as the real ones. `newsletters.csv` would sit here today.
+    for f in sorted(OUT.glob("*.csv")):
+        if f.name != "MANIFEST.csv" and f.stem not in got:
+            bad.append(f"{f.name}: on disk and in no manifest line - an "
+                       f"unclaimed deliverable; a silent extra dataset is a "
+                       f"defect")
+    # The storefront must be a subset of what is built.
+    for c in sorted(store - want):
+        bad.append(f"{c}: on a Cedar Press shelf but not in the build set")
     for m in man:
         if m.get("note"):
             bad.append(f"{m['dataset']}: {m['note']}")
@@ -792,7 +1033,12 @@ def main() -> int:
     mode = sys.argv[1] if len(sys.argv) > 1 else "plan"
     if mode == "verify":
         return verify()
-    return build(dry=(mode != "build"))
+    # `build <dataset> [<dataset> ...]` restricts the pass. Everything after
+    # the mode is a dataset id; a name that is not in the build set is refused
+    # rather than silently matching nothing, because a filter that quietly
+    # selects zero datasets prints a clean report of no work.
+    only = tuple(a for a in sys.argv[2:] if not a.startswith("-"))
+    return build(dry=(mode != "build"), only=only)
 
 
 if __name__ == "__main__":
