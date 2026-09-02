@@ -496,3 +496,51 @@ Four things are unchanged, and none of them is a terms question:
 * Every previously refused Native-entity host is now a **harvest candidate**,
   and the refusals already logged are the worklist.
 <!-- END TERMS-OWNER-RULING-2026-09-02 -->
+
+<!-- BEGIN TERMS-OWNER-RULING-PUBLISH-2026-09-02 -->
+
+## OWNER RULING 2026-09-02 (second) — the harvest ruling COVERS PUBLICATION
+
+The first ruling of 2026-09-02 released **harvesting** a Native entity's own
+public pages regardless of a terms statement. It did not say what that meant
+for **publishing** what was harvested, and the gap was real: 1,827 of 4,273
+`native_owned_businesses` rows sat `publishable = N` on terms grounds after
+being lawfully harvested under the first ruling. Asked directly, the owner
+ruled:
+
+> **Publish all harvested rows.** If a tribe puts its business directory on its
+> own public website, Cedar may republish the listing.
+
+So `PERMISSION:TERMS_STATED_RESTRICTIVE`, `PERMISSION:NO_TERMS_PAGE_SERVED` and
+`PERMISSION:TERMS_STATED_COPYRIGHT_ONLY` no longer withhold a row **whose
+source is the entity's own public page**. 1,090 + 175 + 17 rows are released.
+
+### WHAT THIS RULING DOES NOT TOUCH
+
+It moves one gate and no others. Every one of these still withholds, and a
+reader reaching for this ruling to justify one of them has misread it:
+
+1. **Technical access controls.** Login-gated content, admin or staging paths
+   (`/Stagingsite/` stays refused), anything reached by exploiting a
+   misconfiguration. The ruling is about a page a tribe chose to publish.
+2. **A natural person's data held apart from their public role** — home
+   address, personal email or phone, DOB, SSN/TIN. This is not theoretical
+   here: four directory parsers in this session produced plausible wrong
+   output, and the CTUIR one would have published the office's own phone
+   number, four named staff and five named TERO commissioners **as firms**.
+   `cedar_publication.NEVER` drops those as COLUMNS as of today.
+3. **A third party's terms.** EMMA/MSRB is a contract with MSRB and CUSIP
+   Global Services, not a tribal publisher, and stays refused. The ruling
+   reaches an entity's OWN publications, not a vendor's database about them.
+4. **Proprietary identifiers.** Casino City and D-U-N-S are licensed to Cedar
+   for internal use and never ship, in any dataset, at any tier.
+
+### THE DISTINCTION THAT MAKES THIS COHERENT
+
+A tribe publishing its own business directory has already decided that
+information is public. Cedar republishing it adds reach, not disclosure. That
+reasoning does not extend to a source that never made that choice — which is
+why 1 through 4 above are unaffected, and why the ruling is scoped to the
+entity's own pages rather than to "anything we managed to fetch".
+
+<!-- END TERMS-OWNER-RULING-PUBLISH-2026-09-02 -->

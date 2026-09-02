@@ -142,18 +142,18 @@ Rebuild: `py -3 code/build.py run federal-register --execute` — 29 tables.
 | `correspondence_foia_source_coverage.csv` | shippable | — | — | — |
 | `dear_tribal_leader_letters.csv` | shippable | — | — | — |
 | `dtll_source_coverage.csv` | internal-by-decision | — | — | — |
-| `federal_actions.csv` | shippable | — | `11_classify_federal_actions.py` | `22_apply_temporal_floor.py` |
-| `federal_actions_entity_bridge.csv` | shippable | `tribe_id` `cedar_uid` | `70_key_unjoined_datasets.py` | `503_identity.py` |
-| `federal_actions_raw.csv` | shippable | — | — | — |
+| `federal_actions.csv` | shippable | `document_number` | `11_classify_federal_actions.py` | `22_apply_temporal_floor.py` |
+| `federal_actions_entity_bridge.csv` | shippable | `tribe_id` `cedar_uid` `document_number` | `70_key_unjoined_datasets.py` | `503_identity.py` |
+| `federal_actions_raw.csv` | shippable | `document_number` | — | — |
 | `fr_abstract_availability_year.csv` | shippable | — | — | — |
 | `fr_consultation_by_agency.csv` | shippable | — | — | — |
-| `fr_consultation_notices.csv` | shippable | — | — | — |
-| `fr_consultation_referenced.csv` | shippable | — | — | — |
+| `fr_consultation_notices.csv` | shippable | `document_number` | — | — |
+| `fr_consultation_referenced.csv` | shippable | `document_number` | — | — |
 | `fr_consultation_year.csv` | shippable | — | — | — |
-| `fr_content_classification.csv` | shippable | — | — | — |
-| `fr_ex_parte_notices.csv` | shippable | — | — | — |
-| `fr_ex_parte_parties.csv` | shippable | `cedar_uid` | `154_build_fr_ex_parte_notices.py` | `503_identity.py` |
-| `fr_ex_parte_party_entity_links.csv` | shippable | `cedar_uid` | `154_build_fr_ex_parte_notices.py` | `503_identity.py` |
+| `fr_content_classification.csv` | shippable | `document_number` | — | — |
+| `fr_ex_parte_notices.csv` | shippable | `document_number` | — | — |
+| `fr_ex_parte_parties.csv` | shippable | `cedar_uid` `document_number` | `154_build_fr_ex_parte_notices.py` | `503_identity.py` |
+| `fr_ex_parte_party_entity_links.csv` | shippable | `cedar_uid` `document_number` | `154_build_fr_ex_parte_notices.py` | `503_identity.py` |
 | `fr_recognized_entities.csv` | internal-by-decision | — | — | — |
 | `fr_relevance_stratum_audit.csv` | internal-by-decision | — | — | — |
 | `fr_relevance_tier_year.csv` | shippable | — | — | — |
@@ -162,8 +162,8 @@ Rebuild: `py -3 code/build.py run federal-register --execute` — 29 tables.
 | `nepa_eplanning_projects.csv` | shippable | — | — | — |
 | `nepa_project_documents.csv` | shippable | — | — | — |
 | `nepa_source_coverage.csv` | internal-by-decision | — | — | — |
-| `section_106_consultation_events.csv` | shippable | `tribe_id` `cedar_uid` | `130_build_section_106_consultation.py` | `503_identity.py` |
-| `section_106_project_parties.csv` | shippable | `cedar_uid` | `130_build_section_106_consultation.py` | `503_identity.py` |
+| `section_106_consultation_events.csv` | shippable | `tribe_id` `cedar_uid` `document_number` | `130_build_section_106_consultation.py` | `503_identity.py` |
+| `section_106_project_parties.csv` | shippable | `cedar_uid` `document_number` | `130_build_section_106_consultation.py` | `503_identity.py` |
 | `section_106_source_coverage.csv` | shippable | — | — | — |
 
 Declared grain — validated against the file on every run:
@@ -254,21 +254,21 @@ Rebuild: `py -3 code/build.py run legislation --execute` — 17 tables.
 
 | table | status | keys | rebuilt by | enriched by |
 |---|---|---|---|---|
-| `bill_votes.csv` | shippable | — | `14_build_bills_votes.py` | `1093_bill_votes_majority_anomaly.py` `73_bills_votes_completion.py` `890_bill_votes_threshold_and_titles.py` |
-| `bill_votes_entity_bridge.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
+| `bill_votes.csv` | shippable | `bill_id` | `14_build_bills_votes.py` | `1093_bill_votes_majority_anomaly.py` `73_bills_votes_completion.py` `890_bill_votes_threshold_and_titles.py` |
+| `bill_votes_entity_bridge.csv` | shippable | `tribe_id` `cedar_uid` `bill_id` | — | — |
 | `bill_votes_official_verification.csv` | shippable | — | — | — |
 | `congressional_correspondence_log.csv` | internal-by-decision | `cedar_uid` | — | — |
 | `congressional_correspondence_systems.csv` | shippable | — | — | — |
-| `member_positions.csv` | shippable | — | — | — |
-| `native_bill_action_coverage.csv` | shippable | — | — | — |
-| `native_bill_actions.csv` | shippable | — | — | — |
-| `native_bill_cosponsor_coverage.csv` | shippable | — | — | — |
-| `native_bill_cosponsors.csv` | shippable | — | — | — |
-| `native_bill_outcomes.csv` | shippable | — | — | — |
-| `native_bills.csv` | shippable | — | `14_build_bills_votes.py` | `1092_bill_titles_residue_and_scope.py` `1140_linkage_close.py` `35_entity_harvest.py` |
-| `native_bills_entity_bridge.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
-| `native_bills_entity_class.csv` | shippable | — | — | — |
-| `native_bills_subject_sweep.csv` | shippable | — | — | — |
+| `member_positions.csv` | shippable | `bill_id` | — | — |
+| `native_bill_action_coverage.csv` | shippable | `bill_id` | — | — |
+| `native_bill_actions.csv` | shippable | `bill_id` | — | — |
+| `native_bill_cosponsor_coverage.csv` | shippable | `bill_id` | — | — |
+| `native_bill_cosponsors.csv` | shippable | `bill_id` | — | — |
+| `native_bill_outcomes.csv` | shippable | `bill_id` | — | — |
+| `native_bills.csv` | shippable | `bill_id` | `14_build_bills_votes.py` | `1092_bill_titles_residue_and_scope.py` `1140_linkage_close.py` `35_entity_harvest.py` |
+| `native_bills_entity_bridge.csv` | shippable | `tribe_id` `cedar_uid` `bill_id` | — | — |
+| `native_bills_entity_class.csv` | shippable | `bill_id` | — | — |
+| `native_bills_subject_sweep.csv` | shippable | `bill_id` | — | — |
 | `native_issue_litigation_coverage.csv` | internal-by-decision | — | — | — |
 | `native_issue_litigation_positions.csv` | shippable | — | `139_build_litigation_positions.py` | `140_build_grantmaker_funding_flows.py` |
 
@@ -413,12 +413,12 @@ Rebuild: `py -3 code/build.py run nagpra --execute` — 12 tables.
 
 | table | status | keys | rebuilt by | enriched by |
 |---|---|---|---|---|
-| `fr_nagpra_title_index.csv` | shippable | — | — | — |
+| `fr_nagpra_title_index.csv` | shippable | `document_number` | — | — |
 | `fr_nagpra_title_index_year.csv` | shippable | — | — | — |
-| `nagpra_notice_entity_bridge.csv` | shippable | `tribe_id` `cedar_uid` | `77_build_nagpra_dataset.py` | `1136_control_byte_gate.py` `503_identity.py` |
-| `nagpra_notice_institutions.csv` | shippable | — | `1077_nagpra_institution_grain.py` | `1084_nagpra_split_artefact_audit.py` |
+| `nagpra_notice_entity_bridge.csv` | shippable | `tribe_id` `cedar_uid` `document_number` | `77_build_nagpra_dataset.py` | `1136_control_byte_gate.py` `503_identity.py` |
+| `nagpra_notice_institutions.csv` | shippable | `document_number` | `1077_nagpra_institution_grain.py` | `1084_nagpra_split_artefact_audit.py` |
 | `nagpra_notice_source_corroboration.csv` | shippable | — | — | — |
-| `nagpra_notices.csv` | shippable | — | `77_build_nagpra_dataset.py` | `1077_nagpra_institution_grain.py` |
+| `nagpra_notices.csv` | shippable | `document_number` | `77_build_nagpra_dataset.py` | `1077_nagpra_institution_grain.py` |
 | `nagpra_nps_grant_awards.csv` | shippable | — | — | — |
 | `nagpra_nps_intended_dispositions.csv` | shippable | — | — | — |
 | `nagpra_nps_inventories.csv` | shippable | — | — | — |
@@ -480,11 +480,11 @@ Rebuild: `py -3 code/build.py run lobbying --execute` — 39 tables.
 | `ferc_ex_parte_parties.csv` | shippable | `cedar_uid` | `133_build_ferc_advocacy.py` | `168_link_adjudication_hubs.py` |
 | `ferc_source_coverage.csv` | internal-by-decision | — | — | — |
 | `ferc_tribal_dockets.csv` | shippable | — | `133_build_ferc_advocacy.py` | `168_link_adjudication_hubs.py` `175_restore_ferc_docket_table_after_rebuild_revert.py` |
-| `fr_ex_parte_notices.csv` | shippable | — | — | — |
-| `fr_ex_parte_parties.csv` | shippable | `cedar_uid` | `154_build_fr_ex_parte_notices.py` | `503_identity.py` |
-| `fr_ex_parte_party_entity_links.csv` | shippable | `cedar_uid` | `154_build_fr_ex_parte_notices.py` | `503_identity.py` |
+| `fr_ex_parte_notices.csv` | shippable | `document_number` | — | — |
+| `fr_ex_parte_parties.csv` | shippable | `cedar_uid` `document_number` | `154_build_fr_ex_parte_notices.py` | `503_identity.py` |
+| `fr_ex_parte_party_entity_links.csv` | shippable | `cedar_uid` `document_number` | `154_build_fr_ex_parte_notices.py` | `503_identity.py` |
 | `hearing_appearances.csv` | shippable | `cedar_uid` `entity_id` | `98_build_oira_and_hearings.py` | `400_promote_stranded_hearing_appearances.py` |
-| `hearing_bill_links.csv` | shippable | — | — | — |
+| `hearing_bill_links.csv` | shippable | `bill_id` | — | — |
 | `lobbying_client_attribution.csv` | internal-by-decision | `tribe_id` `cedar_uid` | — | — |
 | `lobbying_disclosure_verbosity_year.csv` | shippable | — | — | — |
 | `lobbying_issue_families_filing.csv` | shippable | `cedar_uid` `entity_id` | `78_content_analysis.py` | `353_propagate_lobbying_corrections_to_consumers.py` `503_identity.py` |
