@@ -67,6 +67,25 @@ SHARDS = {
     "shard_g": "BIE schools, tribal colleges, CDFIs, financial institutions",
     "shard_h": "Native Hawaiian orgs, state-recognized tribes, individuals",
     "shard_i": "Native nonprofits (np_orgs, not in register)",
+    # A SECOND WAVE WAS LAUNCHED AFTER THIS DICT WAS WRITTEN, AND THE DICT IS
+    # THE ONLY THING THAT MAKES A SHARD VISIBLE.
+    #
+    # Shard K finished 228/228 Alaska Native Villages - the largest untouched
+    # block in Cedar, 225 of them never touched by anyone - and wrote 1,237
+    # rows with `cedar_uid` populated on every one. The coverage ledger went on
+    # reporting "225 untouched" afterwards, because a hard-coded roster of nine
+    # cannot see a tenth.
+    #
+    # That is this project's own recurring defect turned on its own scoreboard:
+    # a check that silently measures a subset and reports it as the whole. Same
+    # family as the export gate reading a key nothing writes, and the robots
+    # parser calling an open site closed. The lesson each time is the same -
+    # derive the set, do not enumerate it - so `collect()` now unions this dict
+    # with whatever `shard_*.csv` files are actually on disk, and an unlisted
+    # shard is reported rather than ignored.
+    "shard_k": "Alaska Native Village governments",
+    "shard_l": "vendor lists, unsurveyed federally recognized tribes, 1st half",
+    "shard_m": "vendor lists, unsurveyed federally recognized tribes, 2nd half",
 }
 
 MAP_COLS = ["cedar_uid", "canonical_name", "entity_class", "url_type", "url",
@@ -99,7 +118,17 @@ def collect():
     status = {}
     problems = []
 
-    for shard in SHARDS:
+    # Derive the set, do not enumerate it. Any shard_*.csv on disk is read even
+    # if nobody added it to SHARDS - see the note in SHARDS above for why this
+    # matters. An unlisted one is reported so the roster gets fixed too.
+    found = sorted(p.stem for p in MAP_DIR.glob("shard_*.csv"))
+    unlisted = [s for s in found if s not in SHARDS]
+    for s in unlisted:
+        problems.append(s + ".csv is on disk but not named in SHARDS - it was "
+                        "still read; add it so its slice is described")
+    order = list(SHARDS) + unlisted
+
+    for shard in order:
         p = MAP_DIR / (shard + ".csv")
         if not p.exists():
             status[shard] = {"state": "NOT_STARTED", "rows": 0, "uids": 0}
@@ -165,8 +194,10 @@ def main() -> int:
              "## Shard status", "",
              "| shard | slice | state | map rows | entities touched |",
              "|---|---|---|---:|---:|"]
-        for s, desc in SHARDS.items():
-            st = status.get(s, {"state": "NOT_STARTED", "rows": 0, "uids": 0})
+        # `status` is keyed by every shard collect() considered, listed or not.
+        for s in status:
+            desc = SHARDS.get(s, "(not in roster - see problems)")
+            st = status[s]
             L.append("| `%s` | %s | %s | %s | %s |"
                      % (s, desc, st["state"], format(st["rows"], ","),
                         format(st["uids"], ",")))

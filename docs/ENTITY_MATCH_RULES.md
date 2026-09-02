@@ -170,3 +170,109 @@ NAICS 7132/721120 is the gambling industry and most of it is not tribal.
 6. **Unkeyed is an honest outcome.** ADR-010 makes `unresolved` a legitimate
    record scope. A wrong key is worse than no key, and the house rule stands:
    missing coverage is expandable, a wrong attribution is not.
+
+
+---
+
+# Rules 7–12 — added 2026-09-01 by `int-3-review`
+
+*Derived while deciding the `review/` backlog (`docs/REVIEW_BACKLOG_RULINGS.md`,
+`code/603_*`, `code/604_*`). Each one is here because it settled a class, not a
+row.*
+
+## 7. An entity's own official name is the arbiter of its own boundary
+
+When a filed name and a Cedar entity are being compared, the question is not
+"do they share tokens" but **"is every distinctive word in the filed name
+accounted for by that entity's own official name?"** Take the union of
+`canonical_name`, `fr_official_name` and `aliases` from the spine and subtract
+it from the filed name's distinctive tokens. What is left is the **residue**,
+and the residue decides:
+
+| residue | meaning | disposition |
+|---|---|---|
+| empty | the same entity | ACCEPT |
+| place or spelling variant — `PINE, RIDGE`; `LOUSIANA`; `RESERVATI` | still the entity | ACCEPT |
+| an institution form — `SCHOOL`, `AUTHORITY`, `COLLEGE`, `UTILITY`, `HOUSING` | a body the nation created | HOLD |
+| four or more distinctive words | a different name | HOLD |
+
+**Why this and not set equality.** Cedar's canonical names are deliberately
+short (`Rosebud` for the Rosebud Sioux Tribe), so requiring equality holds 280
+correct rows worth $23.4B. **Why this and not containment.** Containment in the
+other direction accepts `TURTLE MOUNTAIN COMMUNITY COLLEGE` as the Turtle
+Mountain Band, `MENOMINEE INDIAN SCHOOL DISTRICT` as the Menominee Tribe and
+`NAVAJO TRIBAL UTILITY AUTHORITY` as the Navajo Nation. A tribal college, a
+school district and a utility are real entities and they are not the nation.
+
+**The residue cap is empirical, not chosen.** Over 281 accepts, the largest
+residue on a correct one is three (`NAMBE PUEBLO GOVERNOR'S OFFICE`), and
+exactly one wrong accept carried no institution-form word at all:
+`LEECH LAKE BAND OF OJIBWE NATURAL WILD RICE` → the Band, residue
+`NATURAL, OJIBWE, RICE, WILD`. No denylist could have caught it — `RICE` is not
+an organisational form — and the structural fact that it adds four distinctive
+words is what separates it.
+
+## 8. A ruled METHOD is not a positive ruling, and an agent ruling may not mint tier A
+
+Already true of `attribution_method` (START_HERE 1b: all 317 `elijah_ruling`
+EIN rows are tier X, NEGATIVE). Extended here to propagation:
+`propagated_from_agent_ruling` may not carry a row to tier A. Tier A is an
+**identifier** grade. Measured: of 1,223 rows queued for tier B → tier A
+promotion, **not one carries an identifier**, so the correct number of
+promotions is zero.
+
+## 9. Containment never accepts alone
+
+Containment and token-subset are WEAK classes (checklist step 2) and need a
+second independent signal. With no corroborator, containment is REFUSED where a
+link would be created and HELD where one already exists at tier B. This is the
+class that produced 41 wrong links onto `Council Native Corporation`.
+
+## 10. An alias needs three independent observations
+
+One Federal Register notice spelling a name a particular way is a typesetter.
+Two is often the same notice reissued. **Three or more independent notices is
+corroboration.** Calibration: the earlier recognition-alias pass rejected
+**76 of 228** proposals on review — a 33% error rate, far too high to
+auto-apply at n=1. Applied to 1,049 NAGPRA proposals: 211 accept, 168 hold,
+670 refuse.
+
+## 11. A DECLARED PARENT UEI outranks a name, and 20 observations is the floor
+
+`fpds_uei_edges.csv` carries parent/child UEI relationships **the registrant
+filed about itself**. That is the identifier evidence rule 4 asks for and it is
+already on disk — no browser needed. Two thresholds make it usable:
+
+- **An edge observed 20+ times is ownership.** Below that it is a **joint
+  venture or a co-award**, and a JV genuinely has two parents. Measured: all 72
+  ledger rows whose declared parent disagrees on a sub-20 edge are JVs
+  (`WHH Nisqually Federal Services` declares TDX Quality exactly **once**),
+  while every real ownership case is observed 100+ times.
+- **The parent's tier does not transfer.** A link resolved through a tier-A
+  parent is proposed at **tier B**: the parent's tier describes the parent's
+  own link. A tier is inherited from the source row, never assigned by the
+  consumer.
+
+## 12. When a declared parent contradicts an attribution, suspect the PARENT row first
+
+The most valuable rule here, and the least obvious. Sweeping every tier A/B UEI
+in the ledger against its declared parent produced **129 contradictions on
+$2.82B** — a number that reads like 129 wrong attributions and is not:
+
+- **54 rows, $2.39B — the PARENT row is the defect.** Every Bowhead subsidiary
+  is correctly keyed to `ANVC-KPVKPT-00`, Ukpeaġvik Iñupiat Corporation, while
+  **the corporation's own UEI is keyed to `AKNF-INPTAS-00-ARCSLO`, the Native
+  Village**. `ANCSA_OWNERSHIP_RULING` RULE 2 and
+  `cedar_domain.village_government_owns_an_anc()` (always `False`) say that
+  link cannot exist. One bad parent row makes 54 good child rows look wrong.
+  Same shape at Olgoonik/Wainwright and St. George Tanaq/Pribilof. This is the
+  known `ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION` family (334 defects,
+  $24.52B) reached by an independent route.
+- **72 rows, $0.40B — rule 11's JV floor.** Ledger stands.
+- **3 rows, $0.03B — genuine.** The only non-ANCSA one:
+  `Tikigaq Technology Services` keyed to **Paiute of Utah**
+  (`TRBF-PTTRUT-00`) while declaring **TIKIGAQ CORPORATION** (Point Hope,
+  Alaska) as its parent **258 times**.
+
+**So a contradiction sweep must classify before it acts.** Acting on the raw
+129 would have repointed 126 correct rows to chase 3 wrong ones.
