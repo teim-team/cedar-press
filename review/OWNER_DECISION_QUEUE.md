@@ -3139,3 +3139,81 @@ not Pueblo of Santa Clara (NM).
 **No decision is required on this.** It is recorded here so it is not
 re-opened as an $8.2B question a fourth time.
 <!-- END LEDGER-STATE-1134-2026-09-02 -->
+
+---
+
+<!-- BEGIN GAMING-PLACE-RULINGS-1141-2026-09-02 -->
+# GP-1 and GP-2 — two gaming properties, each filed to two nations
+
+*Appended 2026-09-02 by workstream `GAMING-THIRTEENTH-1141`. Full evidence per
+group: `review/place_gaming_hold_open_disposition_2026-09-02.csv`. Write-up:
+`docs/GAMING_THIRTEENTH_DATASET_2026-09-02.md` §3.*
+
+`review/place_gaming_adjudication_2026-09-02.csv` held **five** groups open.
+**Three are now settled as genuinely separate places and need nothing from
+you** — Three Rivers (Coos Bay and Florence, 67 km apart), Glacier Peaks and
+Cities of Gold (a casino and its hotel, which the standing rule already treats
+as two places). None of the three moves any count.
+
+These two do need you, because each decides which sovereign a property belongs
+to, and **either answer moves the settled denominator of 717.**
+
+---
+
+## GP-1 — THE STABLES (Miami, Oklahoma). One property, two operators, both real.
+
+**The facts are settled.** `VP-0153` and `CCP-305300` are the same casino at
+530 H Street SE, Miami OK 74354 — same address, coordinates 1.1 km apart. It is
+a genuine **joint operation of the Miami Tribe of Oklahoma and the Modoc
+Nation**, and Casino City's own row says so in one string:
+`"Modoc Tribe of Oklahoma/Miami Tribe of Oklahoma"`, while keying it to
+`TRBF-MIAMIT-00`. The other vintage keys the same address to `TRBF-MODOCN-00`.
+
+**The decision.** A `cedar_place_id` is a SUB-HUB of the entity that OPERATES
+the place, and this place has two operators.
+
+| answer | consequence |
+|---|---|
+| **merge, hang it from both** | 717 → **716**. `gaming_facilities` already supports it: one row today carries `n_operating_entities = 2` with `operating_entity_basis = joint_operation_declared_in_source`. The place-id model gains its first two-parent place |
+| **merge, hang it from one** | 717 → **716**, and you name which nation |
+| **keep two** | 717 stands; the file keeps two ids for one building, and the review row stays open for ever |
+
+---
+
+## GP-2 — 7 CLANS FIRST COUNCIL (Newkirk, Oklahoma). One vintage names the wrong nation.
+
+**One property**: `VP-0170` and `CCP-843900`, both `7 Clans First Council
+Casino`, both at **12875 N Highway 77, Newkirk OK 74647**. `CCP-843900` files
+it to the **Otoe-Missouria Tribe of Oklahoma**; `VP-0170` files it to the
+**Ponca Tribe of Indians of Oklahoma**.
+
+**The evidence points one way.**
+
+1. The Otoe-Missouria Tribe's **own casino listing** —
+   `https://www.omtribe.org/who-we-are/enterprises/gaming/casino-listing/` —
+   names *"7 Clans First Council Casino, 12875 North Highway 77 Newkirk, OK
+   74647"* as its property. The operator publishing its own address.
+2. The **NIGC gaming location map** lists `7 Clans First Council Casino` at
+   `12875 North Highway 77, Newkirk OK 74647`. Cedar already carries that link
+   at **tier A** in `gaming_nigc_roster_link.csv`, `match_basis
+   exact_name_state`.
+3. Cedar's **other five `7 Clans` rows are all Otoe-Missouria** (Chilocco, Red
+   Rock, Paradise, Perry, Gasino Chilocco).
+4. The likely origin of the error: **two casinos sit on Highway 77 in Newkirk**
+   — First Council at 12875 (Otoe-Missouria) and Native Lights at 12375
+   (Tonkawa) — and the Ponca Tribe's own gaming is in Ponca City.
+
+**Why it was not just applied.** The wrong `tribe_id` has already PROPAGATED.
+`gaming_property_federal_traces.csv` attaches the **Ponca** tribal-state
+compact `CMP-OK-ponca-tribe-of-indians-of-oklahoma-20020208` to this property,
+and `nigc_region_assignments.csv` carries two rows keyed to `TRBF-PNCAOK-00`.
+Repointing the display columns and leaving the derived traces is the Copper
+River defect exactly. No dollars key off `VP-0170` — it appears in no revenue
+or money table — so this is a clean repoint, but it is still a repoint between
+two sovereigns.
+
+| answer | consequence |
+|---|---|
+| **repoint `VP-0170` to `TRBF-OTOMSA-00`** | 6 rows across 5 tables change nation; the Ponca compact trace must be re-derived; the group then merges under rule P2 and 717 → **716** |
+| **leave it** | Cedar publishes a property asserting the Ponca Tribe operates a casino the Otoe-Missouria Tribe says is theirs |
+<!-- END GAMING-PLACE-RULINGS-1141-2026-09-02 -->

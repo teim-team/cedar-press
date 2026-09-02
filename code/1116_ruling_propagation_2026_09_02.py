@@ -169,7 +169,28 @@ def d_gaming_denominator():
     extra = sum(len(v) - 1 for v in dupe_groups)
     rows = len(gf)
     fac = rows - len(ph)
-    dist = fac - extra
+    # THE SECOND LADDER DRIFTED, WHICH IS THE THING THE FIELD GUIDE SAYS ALWAYS
+    # HAPPENS. This block is headed "846's algorithm, reproduced" and it was,
+    # in the morning. `846::_denom` now reads `COUNT(DISTINCT cedar_place_id)`
+    # and answers **717**; this function went on computing `fac - extra` from
+    # its own name-cluster heuristic and answered **714**. So `1116 derive` -
+    # the tool whose entire job is to hand a writer a fresh measurement instead
+    # of a memory - was handing out a superseded number, and eight documents
+    # quote it. Corrected 2026-09-02 by `code/1141_gaming_quality_pass.py`.
+    #
+    # THE DIFFERENCE IS NOT A DISAGREEMENT ABOUT THE DATA. The mechanical
+    # sweep collapses 57 extras; the ADJUDICATION collapses 54, because three
+    # same-name groups are three genuinely different pairs of places - Three
+    # Rivers (Coos Bay and Florence, 67 km apart), and two casino-and-hotel
+    # pairs the vendor minted separate property ids for. `code/1129` V9 states
+    # that reconciliation and `review/place_gaming_hold_open_disposition_
+    # 2026-09-02.csv` carries the evidence for each of the three.
+    #
+    # `dist` is now READ, never derived. A seventh rule cannot invent an
+    # eighth value.
+    dist = len({(r.get("cedar_place_id") or "").strip() for r in gf
+                if (r.get("cedar_place_id") or "").strip()})
+    mech = fac - extra
     applied = sum(1 for r in gf if (r.get("duplicate_of_facility_id") or "").strip())
 
     if (rows, len(ph), extra) != (787, 16, 57):
@@ -191,24 +212,34 @@ def d_gaming_denominator():
         "{lo} more like\n"
         "      \"Grand Canyon West - no casino\", \"Tribal admin only - no casino\"\n"
         "={fac}   facility rows\n"
-        "-{extra:<3}  extra rows across the same-tribe duplicate groups\n"
-        "={dist}   distinct properties\n"
+        "-{adj:<3}  extras collapsed by the 53 ADJUDICATED merge groups\n"
+        "={dist}   distinct cedar_place_id - THE DENOMINATOR, read not derived\n"
         "```\n\n"
-        "**FIVE denominators circulated on 2026-09-02 and all five were quoted as "
-        "settled: 787, 780, 734, 727, 714.** Each came from a different definition "
+        "**Do not use the mechanical sweep's {mech}.** A same-name heuristic "
+        "collapses {extra} extras; the adjudication collapses {adj}, because "
+        "three same-name groups are genuinely different places - Three Rivers "
+        "Casino (Coos Bay, 97420) and Three Rivers Casino Resort (Florence, "
+        "97439) are 67 km apart, and two more are a casino and its hotel that "
+        "the vendor minted separate property ids for. Evidence per group: "
+        "`review/place_gaming_hold_open_disposition_2026-09-02.csv`; "
+        "reconciliation: `py -3 code/1129_place_ids.py verify` V9.\n\n"
+        "**SEVEN denominators circulated on 2026-09-02 and all seven were quoted "
+        "as settled: 787, 780, 734, 727, 725, 714, 717.** Each came from a different definition "
         "of \"facility\" and none said which. 787 is raw rows; 780 removes only the "
         "{ex} EXACT placeholders and misses the {lo} that say it in a longer name; "
         "734 is 787 minus duplicates with every placeholder left in; 727 is 780 "
-        "minus a duplicate count of 53. **None of them is wrong about the piece it "
-        "measured, and four of them are wrong as a denominator.** No verdict is "
-        "applied in the table itself - `duplicate_of_facility_id` is populated on "
-        "{app} rows, not {extra} - so {dist} is a measurement, not a state of the "
-        "file. Note also that the duplicate register carries "
+        "minus a duplicate count of 53; {mech} is the mechanical sweep, which "
+        "over-collapses three real pairs. **None of them is wrong about the "
+        "piece it measured, and six of them are wrong as a denominator.** The "
+        "collapse is recorded in `cedar_place_id`, not in the facility table's "
+        "own `duplicate_of_facility_id`, which is populated on "
+        "{app} rows - so read the place id. Note also that the duplicate register carries "
         "`DIFFERENT_TRIBES_CHECK_BOTH` groups that are **not** duplicates: Stables "
         "Casino pairs the Miami Tribe with Modoc Nation, which is a joint "
         "operation. Dividing by {rows} inflates the denominator by {infl} and "
         "understates every gaming coverage percentage by about {und}.".format(
             rows=rows, ph=len(ph), fac=fac, extra=extra, dist=dist, app=applied,
+            mech=mech, adj=fac - dist,
             ex=sum(1 for r in ph
                    if (r.get("facility_name") or "").strip().lower() == "no casino"),
             lo=len(ph) - sum(1 for r in ph

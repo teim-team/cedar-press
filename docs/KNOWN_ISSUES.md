@@ -1799,3 +1799,113 @@ something happened.
 - `62_no_regression_check.py` rule 18,
   `ledger_state_holds_own_identifier`, is in `MUST_BE_ZERO`.
 <!-- END LEDGER-STATE-1134 -->
+
+<!-- BEGIN GAMING-QUALITY-1141 -->
+## Gaming collection — 2026-09-02 quality pass (`code/1141_gaming_quality_pass.py`)
+
+`report` measures, `apply` writes, `verify` FAILS when the work has not landed,
+`selftest` proves each detector fires. **Every write is an in-place enricher: a
+rebuild of any table below reverts it and `1141 verify` is what tells you.**
+
+### Fixed
+
+| what | before | after |
+|---|---:|---:|
+| `gaming_project_facilities.cedar_uid` | 0 of 19 | **19 of 19** |
+| `state_gaming_observations` rows keyed to a tribe | 348 of 494 | **440 of 494** |
+| `gaming_property_site_observations` rows keyed to a tribe | 167 of 262 | **262 of 262** |
+| `gaming_properties.csv` rows | 784 | **787** (= `gaming_facilities.csv`) |
+| a column answering "how many fiscal years" | none | `n_revenue_bound_distinct_fiscal_years` |
+
+*(**GAMING-DENOMINATOR-2026-09-02**, restated correctly: `gaming_facilities.csv`
+holds **787 ROWS, not 787 facilities**. 16 rows' NAMES say no casino, leaving
+**771 facility rows**, and 54 extras collapse under the 53 ADJUDICATED merge
+groups, leaving **717 distinct `cedar_place_id`** — the denominator. Read it,
+never re-derive it: `COUNT(DISTINCT cedar_place_id)`. **The figure 714 that
+appears in seven other documents is the MECHANICAL sweep** and it
+over-collapses three real pairs. Authority: `code/846_session_audit.py::_denom`
+and `code/1129_place_ids.py` V9; derive the sentence with `py -3
+code/1116_ruling_propagation_2026_09_02.py derive`. Counts written "N of 787"
+below are ROW counts and are correct as such.)*
+
+**One root cause behind 92 of those links.** `cedar_identity_register.csv`
+carries `canonical_name` (a distinctive STEM — `Forest County`, `Saint Regis`,
+`Fort Mojave`) **and** `federal_register_legal_name` (the entity's actual
+name), and the state-observation matcher read only the first. Every refusal it
+recorded was answerable from the column beside the one it read:
+
+- **82 rows, Oneida, WI** — `refused_state_disagreement:spine=NY`. It found
+  Oneida (NY), saw Wisconsin, and refused **without asking whether a Wisconsin
+  candidate existed**. `Oneida Nation (Wisconsin)` was in the spine throughout.
+  *A state-disagreement refusal that never searched the observation's own state
+  is not a refusal, it is a miss.*
+- **8 rows, Potawatomi, WI** — `ambiguous_containment:3`, naming three OK/MI
+  Potawatomi entities and not the Forest County Potawatomi Community, whose
+  canonical name is the two words `Forest County`. The ambiguity was
+  manufactured by the right answer being invisible.
+- **1 row, St. Regis Mohawk Tribe, NY** — `no_spine_match`. The spine says
+  `Saint`.
+- **1 row, Fort Mojave Indian Tribe, NV** — `refused_state_disagreement:
+  spine=CA`. The entity's own FR legal name reads *"of Arizona, California &
+  Nevada"*. **A reservation that crosses a state line has one register `state`
+  and several states.**
+
+The other **54** unlinked state-observation rows are statewide aggregates and
+rows publishing no tribe name. They stay blank, and `1141 verify` FAILS if any
+`applies_to = state` row is ever keyed to a nation.
+
+### Still open
+
+- **`714` is quoted as "the gaming property denominator" in seven documents.**
+  It is the MECHANICAL sweep and it over-collapses three real pairs. The
+  settled figure is `COUNT(DISTINCT cedar_place_id)` = **717**.
+  `code/1116_ruling_propagation_2026_09_02.py derive` produced 714 for most of
+  2026-09-02 under a comment reading *"846's algorithm, reproduced"*; it now
+  reads the place id. The seven documents are listed in
+  `docs/AGENT_FIELD_GUIDE.md` §3, rule 15.
+- **`gaming_facilities.n_revenue_bound_fiscal_years` is a ROW count and its
+  name is not.** It equals the joining row count on 787 of 787 and the distinct
+  fiscal-year count on 732; the 55 that diverge are the biggest properties
+  (Foxwoods 82 against 32 years, Mohegan Sun 79 against 29), because one
+  facility-year can carry two bounds. The value is **not** changed — it is an
+  established column with consumers — and
+  `n_revenue_bound_distinct_fiscal_years` is added beside it.
+- **`gaming_facilities.company` is not a company.** It holds an alternate
+  property name from the vendor vintage: identical to `facility_name` on 334
+  rows, different on 109, blank on 344. Two of the 109 carry `?` where a
+  non-ASCII character was lost (`Keex Kwan Gaming ? Bingo`,
+  `Yaamava? Resort & Casino`), and `facility_name` has the right character on
+  both. Renaming a shipped column is an owner decision; flagged, not renamed.
+- **Cities of Gold: one street address, two coordinates 5.7 km apart.**
+  `CCP-841600` at 35.8891,-106.0196 is Pojoaque; `CCP-39300` at
+  35.8514,-106.0628 is toward Santa Fe and its `coords_basis` says
+  "hand-curated". One is wrong; replacing a coordinate needs a source, so it is
+  logged in
+  `review/place_gaming_hold_open_disposition_2026-09-02.csv`, not repaired.
+- **`gaming_vendor_tribal_licenses` has a parser defect.** 145 rows carry no
+  `entity_id` and the regulator strings show why: `Each TGA Gaming
+  Commission`, `These Tribal Gaming Commission`, `Tribe's Tribal Gaming
+  Commission`, `Indian Tribal Gaming Commission` — the extractor took the words
+  preceding "Tribal Gaming Commission" out of running prose. Roughly 60 of the
+  145 name a real regulator (Gun Lake 35, Barona 12, San Manuel 7, San Carlos
+  Apache 7) and are recoverable once the extractor is fixed; the rest are not
+  entities at all.
+- **`wa_machine_transfers.csv` ships zero rows** and has status `UNDOCUMENTED`
+  in `dataset_contracts.json`, as do `gaming_property_locations.csv`,
+  `gaming_web_harvest_coverage.csv` and `gaming_web_harvest_observations.csv`.
+  An undocumented grain means `1137` will not fold the table in.
+
+### Owner rulings queued
+
+`review/place_gaming_hold_open_disposition_2026-09-02.csv` — five HOLD_OPEN
+place groups, each with a disposition. **Three are SETTLED as separate places
+and no place id moves** (Three Rivers = Coos Bay and Florence, 67 km apart;
+Glacier Peaks and Cities of Gold = a casino and its hotel). **Two are genuine
+ownership rulings and are escalated with the evidence attached**: THE STABLES
+(a real Miami/Modoc joint operation — one property, two sovereigns, and a place
+id is a sub-hub of ONE operator) and 7 CLANS FIRST COUNCIL (one vintage files
+it to the Ponca Tribe, the other to the Otoe-Missouria, at the identical street
+address; the Otoe-Missouria Tribe's own casino listing names that address, and
+the wrong `tribe_id` has already propagated a PONCA tribal-state compact onto
+the property in `gaming_property_federal_traces.csv`). Either ruling moves 717.
+<!-- END GAMING-QUALITY-1141 -->
