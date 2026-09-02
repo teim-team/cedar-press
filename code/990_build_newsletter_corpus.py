@@ -604,7 +604,13 @@ def build():
     for e in spine:
         uid = e["cedar_uid"]
         mine = [r for r in by_ent.get(uid, []) if r["channel_type"] in REAL]
-        if uid in RESTRICTIVE_UIDS:
+        # The refusal is by HOST as well as by entity. Chickasaw Community Bank
+        # and Yakama Nation Tribal School are not on the eight-name list, but
+        # their sites are chickasaw.net and yakama.org, and a coverage row that
+        # republishes the URL of a source that told us not to scrape it is
+        # still carrying that source into Cedar.
+        site_is_restricted = restricted("", site_url.get(uid, ""))
+        if uid in RESTRICTIVE_UIDS or site_is_restricted:
             status = "excluded_terms_stated_restrictive"
         elif mine:
             status = "found"
@@ -621,13 +627,15 @@ def build():
             "canonical_name": e.get("canonical_name", ""),
             "entity_class": e.get("entity_class", ""), "state": e.get("state", ""),
             "has_live_site": "yes" if live_site.get(uid) else "no",
-            "site_url": site_url.get(uid, ""),
+            "site_url": ("" if status == "excluded_terms_stated_restrictive"
+                         else site_url.get(uid, "")),
             "probe_status": status, "n_channels": str(len(mine)),
             "best_channel_type": mine[0]["channel_type"] if mine else "",
             "best_channel_url": mine[0]["channel_url"] if mine else "",
             "archive_earliest_year": lo, "archive_latest_year": hi,
             "probed_by": ";".join(sorted(probed.get(uid, []))),
-            "note": ("TERMS_STATED_RESTRICTIVE - excluded by every route "
+            "note": ("TERMS_STATED_RESTRICTIVE - excluded by every route, and "
+                     "the site URL is withheld here too "
                      "(docs/PUBLICATION_POLICY.md)" if status ==
                      "excluded_terms_stated_restrictive" else
                      ("no machine-readable route run yet; this is "

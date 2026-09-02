@@ -2015,6 +2015,15 @@ CB_DESC = {
         "and not a NEST row unless the nation also owns it.",
     "constellation_note": "Why the constellation edge is a corroboration "
         "rather than the same fact twice.",
+    "evidence_human_reviewed": "Y where at least one assertion behind this "
+        "row was human-reviewed; N where every one is `AUTO_RULED_NOT_HUMAN_"
+        "REVIEWED`. The 1070 ANC/NHO sweep staged its rows auto-ruled and said "
+        "so, and that distinction belongs on the row rather than in a build "
+        "log - filter on it to get the evidence a person has looked at.",
+    "n_auto_ruled_observations": "How many of this row's assertions are "
+        "machine-accepted and unreviewed.",
+    "source_review_status": "Whether this single assertion was human-reviewed "
+        "or auto-ruled by the harvest that produced it.",
     "source_id": "The source that carried the strongest assertion.",
     "source_url": "Where that assertion was published.",
     "source_document": "The document that carried it, for filings.",
@@ -2173,6 +2182,25 @@ def stage_conserve(argv) -> int:
         + [(f"refused:{k.lower()}", v) for k, v in sorted(hold_groups.items())],
         ex)
 
+    # 1b. THE 1070 HANDOFF, accounted separately. 583 OWNERSHIP rows were
+    #     held for NEST by the integrator; a reader has to be able to see
+    #     where each one went without re-deriving it, because a refusal that
+    #     leaves no trace is indistinguishable from a row nobody noticed.
+    sweep_rows = read_csv(SWEEP_1070)
+    if sweep_rows:
+        refused = read_csv(SWEEP_REFUSED)
+        by_reason = Counter((r.get("nest_refusal") or "")[:70] for r in refused)
+        ingested = len(sweep_rows) - len(refused)
+        add("data/staging/native_business_sweep_1070/held_for_nest_ownership.csv",
+            len(sweep_rows),
+            [("emitted:ingested_into_nest_via_the_shared_clustering", ingested)]
+            + [(f"refused:{k}", v) for k, v in sorted(by_reason.items())],
+            {"emitted:ingested_into_nest_via_the_shared_clustering":
+             "fed through the same (owner hub, normalised name) clustering as "
+             "every other source, so a restatement of a firm NEST already "
+             "holds raises its observation count instead of creating a second "
+             "row"})
+
     # 2. THE ENTERPRISE TABLE, by what the row actually claims.
     rc = Counter(r["relation_class"] for r in ents)
     nosrc = sum(1 for r in ents
@@ -2195,7 +2223,8 @@ def stage_conserve(argv) -> int:
 
     prior = [r for r in read_csv(CONSERVATION)
              if not (r.get("source_table") or "").split("/")[-1].startswith("nest")
-             and "staging/nest" not in (r.get("source_table") or "")]
+             and "staging/nest" not in (r.get("source_table") or "")
+             and "held_for_nest_ownership" not in (r.get("source_table") or "")]
     bak = CONSERVATION.with_suffix(
         f".csv.bak_{BUILT}_pre_1072_tribally_owned_enterprises")
     if CONSERVATION.exists() and not bak.exists():

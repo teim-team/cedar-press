@@ -36,6 +36,11 @@ THE SCREEN, in three tiers
                        decides.
   `tier_C_rejected`    the object is an abstraction, a consumer good, or a
                        person-scale award. Kept, labelled, never counted.
+  `tier_D_ownership_fact`
+                       "X is a wholly owned subsidiary of Y" with no
+                       transaction verb. Not a deal - a standing statement of
+                       parentage, and the strongest ownership evidence class
+                       this project recognises. Routed to the hub crosswalk.
 
 Also applied here, because they are judgements and belong with the other ones:
   * DEDUPLICATION across the two extraction routes and across issues that
@@ -114,10 +119,28 @@ PERSONNEL = re.compile(
     r"(?i)\b(joins?|joined|appointed|named as|hired|promoted to|"
     r"has been named|served as (?:the )?(?:senior )?(?:vice )?president|"
     r"new (?:chief|president|director|manager|officer)\b|"
-    r"board of directors welcomes|retires? from|stepping down)\b")
+    r"board of directors welcomes|retires? from|stepping down|"
+    r"leadership transition|announces? (?:the )?(?:retirement|appointment)|succeeds? \w+ as)\b")
 PERSON_SCALE_AWARD = re.compile(
     r"(?i)\b(each|per)\s+(student|participant|elder|family|household|member|"
     r"applicant|recipient)s?\b")
+
+# "X is a wholly owned subsidiary of Y" is the boilerplate at the foot of a
+# press release. It is a STRUCTURAL FACT, not a transaction, and filing it as a
+# deal would count one acquisition once when it happened and again every time
+# the company describes itself. It is also PARENT-ASSERTED OWNERSHIP, which
+# docs/HIDDEN_DATA_TECHNIQUES.md calls the strongest evidence class in this
+# project - so it gets its own tier and belongs to the hub crosswalk, not to
+# `deals`.
+OWNERSHIP_FACT = re.compile(
+    r"(?i)\b(?:is|are|remains?|was|were)\s+(?:a|an|the)?\s*"
+    r"(?:wholly[- ]owned|majority[- ]owned|fully[- ]owned)?\s*"
+    r"subsidiar(?:y|ies)\s+of\b")
+# ...unless the same sentence also states that the ownership CHANGED.
+TRANSACTION_VERB = re.compile(
+    r"(?i)\b(acquir(?:e|es|ed|ing)|acquisition|purchas(?:e|ed|es)|"
+    r"merger|merged|divest\w*|sold|bought|formed|"
+    r"broke ground|groundbreaking|awarded|issued|refinanc\w+)\b")
 
 MATERIAL_USD = 500_000
 
@@ -154,6 +177,12 @@ def screen(r):
     # The disqualifying-object test runs only when NOTHING qualifies the row.
     # A sentence can name a real counterparty and a van in the same breath, and
     # rejecting it for the van would be the screen overreaching.
+    if OWNERSHIP_FACT.search(d) and not TRANSACTION_VERB.search(d):
+        return ("tier_D_ownership_fact",
+                "a standing statement of corporate parentage with no "
+                "transaction verb: this is parent-asserted OWNERSHIP evidence "
+                "for the hub crosswalk, not a deal",
+                org, noun, material)
     if PERSONNEL.search(d):
         return ("tier_C_rejected",
                 "personnel announcement: the sentence names people moving "
@@ -270,6 +299,8 @@ def write_proposal(prom, rows, st):
         "| candidates extracted (generous pass, both routes) | %d |" % st["candidates_in"],
         "| rejected by the precision screen (tier C) | %d |" % st["by_tier"].get("tier_C_rejected", 0),
         "| needs a human read (tier B) | %d |" % st["by_tier"].get("tier_B_review", 0),
+        "| corporate-parentage statements, not deals (tier D) | %d |"
+        % st["by_tier"].get("tier_D_ownership_fact", 0),
         "| **promotable (tier A), duplicates removed** | **%d** |" % len(prom),
         "| of those, not already matched by party+year in `deals_classified.csv` | %d |" % len(new),
         "",
@@ -295,7 +326,7 @@ def write_proposal(prom, rows, st):
         "| `Source_1_Type` | `Source_1_Type` | `Tribal newsletter / tribal press` |",
         "| `Description` | `Description` | the source sentence, verbatim |",
         "",
-        "## Three things the promoting agent must check first",
+        "## Four things the promoting agent must check first",
         "",
         "1. **The publisher is not always the party.** A tribal newspaper reports "
         "on other nations' deals. `Native_Party` here is the PUBLISHER, which is "
@@ -304,7 +335,15 @@ def write_proposal(prom, rows, st):
         "2. **A transaction enters totals only when its status is confirmed.** "
         "`UNCLASSIFIED` means the source sentence carried no status verb. It is "
         "not `Announced` and it is certainly not `Closed`.",
-        "3. **The intra-family rule.** Rows where both parties resolve to one "
+        "3. **A ceiling is not a value.** The single largest sum extracted in "
+        "this run is a **$151B IDIQ contract ceiling** on a multiple-award "
+        "vehicle - the maximum the government may spend across every awardee, "
+        "not money this nation received. `docs/MONEY_TOTALLING_RULES.md` "
+        "governs. Summing `Announced_Value_USD` across these rows without "
+        "separating ceilings from consideration produces a number that is "
+        "wrong by orders of magnitude, and `value_basis` quotes the source "
+        "phrase precisely so the difference is visible.",
+        "4. **The intra-family rule.** Rows where both parties resolve to one "
         "tribal corporate family are already `tier_C_rejected` with "
         "`intra_family_reporting_change = yes`. The screen uses the spine's "
         "ultimate-parent map, which is incomplete; a promoting agent with the "
@@ -326,6 +365,24 @@ def write_proposal(prom, rows, st):
                 r["Source_1"]))
     else:
         lines.append("*No tier-A candidate survived the screen in this run.*")
+    lines += ["", "## Tier D - ownership evidence, for the hub rather than for deals", "",
+              "These sentences state corporate parentage with no transaction "
+              "verb: *\"X is a wholly owned subsidiary of Y.\"* They are not "
+              "deals and must not be counted as any, but they are "
+              "parent-asserted ownership, which is the strongest evidence class "
+              "this project recognises. They belong to whoever owns the "
+              "hub / sub-hub crosswalk.", ""]
+    td = [r for r in rows if r["screen_tier"] == "tier_D_ownership_fact"
+          and not r["duplicate_of"]]
+    if td:
+        lines += ["| parent (publisher) | statement | source |", "|---|---|---|"]
+        for r in sorted(td, key=lambda x: x["Native_Party"].lower()):
+            lines.append("| %s | %s | [link](%s) |" % (
+                r["Native_Party"][:36].replace("|", "/"),
+                re.sub(r"\s+", " ", r["Description"])[:190].replace("|", "/"),
+                r["Source_1"]))
+    else:
+        lines.append("*None.*")
     lines += ["", "## Tier B - a human decides", ""]
     tb = [r for r in rows if r["screen_tier"] == "tier_B_review" and not r["duplicate_of"]]
     if tb:
@@ -350,7 +407,8 @@ def verify(rows=None):
     if rows is None:
         rows = list(csv.DictReader(OUT.open(encoding="utf-8-sig"))) if OUT.exists() else []
     f = []
-    tiers = {"tier_A_promotable", "tier_B_review", "tier_C_rejected"}
+    tiers = {"tier_A_promotable", "tier_B_review", "tier_C_rejected",
+             "tier_D_ownership_fact"}
     bad = [r for r in rows if r["screen_tier"] not in tiers]
     if bad:
         f.append("UNKNOWN_TIER: %d, e.g. %s" % (len(bad), bad[0]["screen_tier"]))
@@ -417,6 +475,12 @@ def selftest():
     r = mk(Description="The authority acquired Widget Solutions LLC along with "
                        "3,000 laptops in the deal.")
     t.append(("mixed_stays_A", screen(r)[0] == "tier_A_promotable"))
+    r = mk(Description="AIS is a wholly-owned subsidiary of Arctic Slope "
+                       "Regional Corporation.")
+    t.append(("tierD_ownership", screen(r)[0] == "tier_D_ownership_fact"))
+    r = mk(Description="Following the deal, Widget LLC is a wholly owned "
+                       "subsidiary of the Corporation, which acquired it in May.")
+    t.append(("tierD_not_when_verb", screen(r)[0] == "tier_A_promotable"))
     r = mk(Description="Cunningham joins BSNC from NANA Regional Corporation, "
                        "where she served as Senior Vice President and CFO.")
     t.append(("tierC_personnel", screen(r)[0] == "tier_C_rejected"))

@@ -1,5 +1,5 @@
 {
-  "scanned_files": 564,
+  "scanned_files": 566,
   "counts": {
     "class1": 1,
     "class2a": 0,
@@ -899,7 +899,7 @@
     {
       "class": "class3",
       "file": "992_newsletter_deal_candidates.py",
-      "line": 651,
+      "line": 692,
       "evidence": "and rows[0][\"deal_status_std\"] == \"Closed\"))",
       "why": "'deal_status_std' is compared to a PROCESSED value (['closed']) and the word 'outcome' appears nowhere in this file. `status` says the ruling was PROCESSED; `outcome` says what it DECIDED - one ruling read SETTLED while its outcome was 'HOLD - RETRACTION REQUIRED'.",
       "waived": false,
@@ -908,7 +908,7 @@
     {
       "class": "class4",
       "file": "992_newsletter_deal_candidates.py",
-      "line": 431,
+      "line": 437,
       "evidence": "if time.time() > RUN_DEADLINE:",
       "why": "a budget (RUN_DEADLINE) exits a loop, the file writes a completion marker (['OK']), and it never compares what it RETRIEVED against the total the SOURCE reported. That is the PER_DOCKET_BUDGET_S defect: four dockets written at 2,300-3,200 of 3,555-4,847 and marked `done`, so no resume would ever revisit them.",
       "waived": false,

@@ -76,10 +76,8 @@ SPINE = ROOT / "data" / "spine" / "cedar_entity_spine.csv"
 OUTD = ROOT / "data" / "staging" / "deals_from_newsletters"
 OUT = OUTD / "deal_candidates.csv"
 LEDGER = OUTD / "_documents.jsonl"
-RAW = OUTD / "raw"
 STATE = OUTD / "_state.json"
-for d in (OUTD, RAW):
-    d.mkdir(parents=True, exist_ok=True)
+OUTD.mkdir(parents=True, exist_ok=True)
 TODAY = date.today().isoformat()
 csv.field_size_limit(10_000_000)
 
@@ -126,8 +124,13 @@ DEAL = re.compile(
     r"completed the (?:acquisition|purchase|sale|merger)"
     r")\b")
 
+# "$151B" is one hundred fifty-one BILLION dollars, and the first version of
+# this pattern read it as $151 because the alternation carried `bn` and
+# `billion` but not a bare `b`. A 10^9 error on a contract ceiling is the kind
+# of number a customer notices.
 MONEY = re.compile(
-    r"\$\s?([\d,]+(?:\.\d+)?)\s*(billion|bn|million|m\b|thousand|k\b)?", re.I)
+    r"\$\s?([\d,]+(?:\.\d+)?)\s*"
+    r"(billion|bn\b|b\b|million|mm\b|m\b|thousand|k\b)?", re.I)
 
 CLOSED = re.compile(
     r"(?i)\b(completed|closed on|has acquired|have acquired|acquired|"
@@ -241,7 +244,8 @@ def money_usd(s):
         n = float(m.group(1).replace(",", ""))
     except ValueError:
         return "", ""
-    mult = {"billion": 1e9, "bn": 1e9, "million": 1e6, "m": 1e6,
+    mult = {"billion": 1e9, "bn": 1e9, "b": 1e9,
+            "million": 1e6, "mm": 1e6, "m": 1e6,
             "thousand": 1e3, "k": 1e3}.get((m.group(2) or "").lower().strip(), 1.0)
     return "%.0f" % (n * mult), "stated in the source sentence: %s" % m.group(0)
 
@@ -508,6 +512,41 @@ def summarize():
     return st
 
 
+def refresh_values(paths=None):
+    """Re-derive Announced_Value_USD from the stored source sentence.
+
+    Legitimate because `Description` IS the source sentence, verbatim: this
+    re-reads what was already captured rather than asserting anything new. Run
+    it after any fix to MONEY - which is how "$151B" stopped being a hundred
+    and fifty-one dollars.
+    """
+    from pathlib import Path as _P
+    paths = paths or [OUT, OUTD / "deal_candidates_wp_posts.csv",
+                      OUTD / "deal_candidates_wp_posts_quarantined.csv"]
+    for p in paths:
+        p = _P(p)
+        if not p.exists():
+            continue
+        rows = list(csv.DictReader(p.open(encoding="utf-8-sig")))
+        if not rows:
+            continue
+        fn = list(rows[0].keys())
+        changed = 0
+        for r in rows:
+            val, basis = money_usd(r["Description"])
+            if val != r.get("Announced_Value_USD", ""):
+                changed += 1
+            r["Announced_Value_USD"], r["value_basis"] = val, basis
+        with p.open("w", encoding="utf-8", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=fn, extrasaction="ignore")
+            w.writeheader()
+            for r in rows:
+                w.writerow(r)
+                f.flush()
+        print("refresh_values %s: %d changed" % (p.name, changed))
+    return 0
+
+
 def repair_ids(paths=None):
     """Make candidate_id unique in files written before the counter existed.
 
@@ -678,6 +717,8 @@ def main(argv):
         return 0
     if "--repair-ids" in argv:
         return repair_ids()
+    if "--refresh-values" in argv:
+        return refresh_values()
     lim = None
     if "--limit" in argv:
         lim = int(argv[argv.index("--limit") + 1])

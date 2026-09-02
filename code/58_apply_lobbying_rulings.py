@@ -59,6 +59,37 @@ IDPREFIX_RE = re.compile(r"^\s*(?P<tid>[A-Z]{4}-[A-Z0-9\-]+)\s+(?P<name>.+)$")
 PRIMARY_RE = re.compile(r"https?://", re.I)
 
 
+# --- REGENERATE GUARD (ADR-017, 2026-09-02) --------------------------------
+def _carry_live_columns(path, canonical):
+    """Derive this writer's header instead of declaring it.
+
+    A wholesale writer holding a FIXED `fieldnames` list deletes every column
+    an in-place enricher added since - no error, no exception, a diff nobody
+    reads. Canonical order first so column order stays stable, then whatever
+    the live file already carries. A retired column stays retired because it
+    is not on disk; a promoted column survives because it is.
+
+    THIS BUILD CANNOT REPOPULATE AN ENRICHER'S COLUMN. Carried columns are
+    written BLANK and NAMED on stdout, which is strictly better than deleted:
+    the schema survives and the enricher can refill them. Re-run the enricher
+    after this build - `cedar_pipeline.enrichers_to_rerun(<table>)` names it.
+    """
+    import csv as _csv
+    import os as _os
+    canonical = list(canonical)
+    _p = str(path)
+    if not _os.path.exists(_p):
+        return canonical
+    with open(_p, encoding="utf-8-sig", newline="", errors="replace") as _fh:
+        _live = next(_csv.reader(_fh), [])
+    _extra = [c for c in _live if c and c not in canonical]
+    if _extra:
+        print("  [regenerate guard] %s: carrying %d enricher column(s) through "
+              "this rebuild, BLANK - re-run the enricher: %s"
+              % (_os.path.basename(_p), len(_extra), ", ".join(_extra)))
+    return canonical + _extra
+
+
 def load_m33():
     spec = importlib.util.spec_from_file_location(
         "m33", CEDAR / "code" / "33_apply_party_rulings.py")
@@ -195,7 +226,8 @@ def main():
 
     p1 = CLEAN / "lobbying_client_attribution.csv"
     with open(p1, "w", encoding="utf-8", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=list(out[0].keys()))
+        w = csv.DictWriter(fh, fieldnames=_carry_live_columns(p1, list(out[0].keys())),
+                           restval="", extrasaction="ignore")
         w.writeheader()
         w.writerows(out)
     print(f"\n  wrote {p1.relative_to(CEDAR)}  ({len(out):,} clients)")

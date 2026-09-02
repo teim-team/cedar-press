@@ -266,6 +266,44 @@ def _close(x, y):
     return sum(1 for p, q in zip(x, y) if p != q) == 1
 
 
+def same_organisation(a, b):
+    """Are these two names the SAME organisation, not merely overlapping?
+
+    OVERLAP AGAINST THE SMALLER SIDE IS NOT IDENTITY, AND IT PRODUCED FOUR
+    WRONG EINs:
+
+        Southern Indian Health Council, Inc.  ->  Southern Exposure
+        Billings Urban Indian Health & Well.  ->  South Billings Urban Renewal
+        Tribal Energy Alternatives            ->  Energy Alternatives For The
+                                                  21st Century
+        Laguna Creek LLC                      ->  Laguna Creek Gridiron Club
+
+    In each, every token the entity has appears in the candidate -- and the
+    candidate has other distinctive tokens the entity does not, which is the
+    evidence that they are different bodies, and which measuring overlap
+    against the smaller set throws away.
+
+    So identity requires the distinctive token sets to be EQUAL (one
+    substitution tolerated per token, for Navaho/Navajo). Anything less is a
+    candidate, not a match, and is recorded as one. This deliberately demotes
+    two true positives -- Oklahoma City Indian Clinic files as Central
+    Oklahoma American Indian Health Council, and Juel Fairbanks Recovery
+    Services as Juel Fairbanks Aftercare Residence -- into the candidate
+    bucket where a human can confirm them. Two named candidates cost less
+    than four silent misattributions.
+    """
+    ta, tb = set(toks(a)), set(toks(b))
+    if not ta or not tb:
+        return False, "no tokens on one side"
+    ua = {x for x in ta if not any(_close(x, y) for y in tb)}
+    ub = {x for x in tb if not any(_close(x, y) for y in ta)}
+    if ua or ub:
+        return False, ("not the same name: only on the entity "
+                       + (",".join(sorted(ua)) or "-") + "; only on the "
+                       "candidate " + (",".join(sorted(ub)) or "-"))
+    return True, "distinctive token sets are equal: " + ",".join(sorted(ta))
+
+
 def name_matches(a, b, need=None):
     """Distinctive-token overlap, one substitution tolerated. -> (ok, note).
 
@@ -578,7 +616,7 @@ def usaspending(name, codes, start="2007-10-01"):
     kept, seen_names = [], set()
     for r in d.get("results", []):
         rn = r.get("Recipient Name") or ""
-        ok, mnote = name_matches(name, rn)
+        ok, mnote = same_organisation(name, rn)
         seen_names.add(rn)
         if ok:
             r["_match"] = mnote
@@ -688,6 +726,40 @@ def run():
         if not got or cls != "BIE School":
             o, note = propublica(name, st)
             tried.append("IRS/990 via ProPublica Nonprofit Explorer -> " + note)
+            strong, snote = (False, "")
+            if o:
+                strong, snote = same_organisation(name, o.get("name", ""))
+                if not strong and o.get("sub_name"):
+                    strong, snote = same_organisation(name, o["sub_name"])
+            if o and not strong:
+                # A NAMED CANDIDATE IS NOT A FIRST ROW. No identifier is
+                # claimed on this row and it does not count as closed; it
+                # exists so a human can settle it instead of the search being
+                # repeated from nothing.
+                add(**ctx, cedar_uid=uid, canonical_name=name,
+                    entity_class=cls, route="IRS_990",
+                    evidence_class="CANDIDATE_TAX_FILER",
+                    identifier_type="", identifier_value="",
+                    fact_label="possible_irs_filer_NOT_RESOLVED",
+                    fact_value=("EIN " + str(o.get("strein")
+                                             or o.get("ein")) + " "
+                                + (o.get("name") or "") + " | "
+                                + (o.get("city") or "") + " "
+                                + (o.get("state") or "")),
+                    source="ProPublica Nonprofit Explorer (IRS BMF / Form "
+                           "990)",
+                    source_url=("https://projects.propublica.org/nonprofits/"
+                                "organizations/" + str(o.get("ein"))),
+                    as_of=TODAY,
+                    match_method="NOT RESOLVED -- " + snote,
+                    checked_date=TODAY,
+                    evidence="TRIED: " + " | ".join(tried)
+                             + " || CANDIDATE ONLY. The names overlap but are "
+                               "not the same name, and overlap against the "
+                               "shorter name is what produced four wrong EINs "
+                               "on the first pass. Reported for adjudication, "
+                               "not recorded as this entity's filing.")
+                o = None
             if o:
                 got = True
                 n_first += 1
@@ -705,7 +777,7 @@ def run():
                     source_url=("https://projects.propublica.org/nonprofits/"
                                 "organizations/" + str(o.get("ein"))),
                     as_of=TODAY,
-                    match_method="distinctive_token_overlap: " + note,
+                    match_method="same_organisation: " + snote,
                     checked_date=TODAY,
                     evidence="TRIED: " + " | ".join(tried)
                              + " || FIRST ROW: an EIN ties this entity to the "
@@ -779,9 +851,13 @@ def write_doc(rows, scanned, skipped):
     # its own denominator. A ratio whose numerator and denominator come from
     # different populations is not a ratio.
     inslice = {r["cedar_uid"] for r in rows}
+    # A CANDIDATE IS NOT A CLOSED GAP. `CANDIDATE_TAX_FILER` rows name a
+    # possible filer that did NOT pass the identity test; counting them as
+    # first rows would report six adjudication questions as six answers.
+    FIRST_ROW = {"FACILITY_DIRECTORY", "FEDERAL_AWARD", "TAX_FILER"}
     closed = [u for u, v in got.items()
               if u in inslice
-              and any(x["evidence_class"] != "NONE_FOUND" for x in v)]
+              and any(x["evidence_class"] in FIRST_ROW for x in v)]
     n_zero = sum(1 for r in rows if r["_n_tables"] == 0)
     L = ["# The register-only tail — entities with no substantive Cedar row",
          "",
@@ -844,6 +920,18 @@ def write_doc(rows, scanned, skipped):
                  for x in v)
     for k, v in rc.most_common():
         L.append("| %s | %d |" % (k, v))
+    cand = sorted({(x["canonical_name"], x["fact_value"])
+                   for u, v in got.items() if u in inslice
+                   for x in v if x["evidence_class"] == "CANDIDATE_TAX_FILER"})
+    if cand:
+        L += ["", "## Named candidates, NOT resolved - " + str(len(cand)), "",
+              "*Names that overlap but are not the same name. Overlap against "
+              "the shorter name is what produced four wrong EINs on the first "
+              "pass, so these are reported for a human rather than recorded "
+              "as the entity's filing. No identifier is claimed on these "
+              "rows.*", "", "| entity | possible filer |", "|---|---|"]
+        for a_, b_ in cand:
+            L.append("| %s | %s |" % (a_[:44], b_[:70]))
     still = [r for r in rows if r["cedar_uid"] not in set(closed)]
     if still:
         L += ["", "## Checked, nothing located — " + str(len(still)), "",
@@ -876,8 +964,10 @@ def check(path=OUT):
         `fact_value` and must still pass. A note written by the matcher
         cannot audit the matcher.
     (8) a matched 990 filer must not sit in a different state from the
-        entity. Caught a North Carolina school matched to an Austin, Texas
-        nonprofit on two shared words.
+        entity, and its NAME must survive `same_organisation` -- token
+        equality, not overlap. Caught a North Carolina school matched to an
+        Austin, Texas nonprofit, and four filers whose names merely contained
+        the entity's.
     """
     bad = []
     if not os.path.exists(path):
@@ -932,6 +1022,12 @@ def check(path=OUT):
             # register records the entity's, so the gate can compare them
             # without re-querying anything.
             if ec == "TAX_FILER":
+                fname = (r.get("fact_value") or "").split(" | ")[0].strip()
+                okn, nnote = same_organisation(r.get("canonical_name", ""),
+                                               fname)
+                if fname and not okn:
+                    bad.append("line %d: %s is given the EIN of %r -- %s"
+                               % (i, uid, fname[:44], nnote[:90]))
                 want = (reg_state.get(uid) or "").upper()
                 mm = re.search(r"\|\s*[A-Za-z .'-]*\s([A-Z]{2})\s*\|",
                                r.get("fact_value") or "")
@@ -981,6 +1077,10 @@ def selftest():
               identifier_value="590002000149",
               canonical_name="Cherokee Central Middle School",
               fact_value="Cherokee Central Elementary School | LEA 1 | x")),
+        ("990 filer whose name only overlaps",
+         dict(base, evidence_class="TAX_FILER",
+              canonical_name="Southern Indian Health Council, Inc.",
+              fact_value="Southern Exposure | San Francisco CA | x")),
         ("990 filer in the wrong state",
          dict(base, evidence_class="TAX_FILER",
               cedar_uid=_STATE_UID,

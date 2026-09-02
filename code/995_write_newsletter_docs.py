@@ -213,6 +213,8 @@ def build():
         a("| rejected by the precision screen | %s |"
           % s994.get("by_tier", {}).get("tier_C_rejected"))
         a("| needing a human read | %s |" % s994.get("by_tier", {}).get("tier_B_review"))
+        a("| corporate-parentage statements routed to the hub, not to deals | %s |"
+          % s994.get("by_tier", {}).get("tier_D_ownership_fact"))
         a("| **promotable, duplicates removed** | **%s** |" % s994.get("promotable_unique"))
         a("| of those carrying a stated value | %s |" % s994.get("promotable_with_value"))
         a("| of those carrying a date | %s |" % s994.get("promotable_with_date"))

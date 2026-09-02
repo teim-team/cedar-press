@@ -6360,3 +6360,43 @@ tables that stopped shipping (`hearing_bill_links` 465 → 464,
 named, with owners, in the `1072` NEST entry immediately above — the new
 tables are the geography, constellation and NEST workstreams'. Recorded here
 so that reading this entry alone does not imply the gate was green.
+
+### ADDENDUM — the 1070 handoff, merged the same day
+
+`code/1070_anc_nho_business_sweep.py` staged **583 `assertion_class = OWNERSHIP`
+rows** for NEST (`data/staging/native_business_sweep_1070/held_for_nest_ownership.csv`),
+the integrator having merged the 523 `RELATIONSHIP` rows into
+`native_owned_businesses.csv`. NEST **merged** them rather than appending:
+
+```
+583 held -> 229 refused (unreviewed heading scrape) + 57 refused (shareholder-
+owned, not corporation-owned) + 297 ingested -> 167 merged onto enterprises
+NEST already held + 128 net new
+```
+
+`nest_enterprises.csv` 1,482 -> **1,610**; `nest_enterprise_relations.csv`
+3,492 -> **3,789**. `518` still reports **READY 14 / 14**, `293` still reports
+**zero findings in `1072_*`**, and `verify`/`selfcheck` are still 8/8.
+
+**The 229 refused prose scrapes contained SEVEN NATURAL PERSONS' NAMES** off
+ASRC's leadership page, alongside `Blank`, `No Results Found` and
+`Employee Resources`. The sweep had flagged them itself
+(`HEADING_SCRAPE_ON_A_DIRECTORY_INDEX`, *"review before resolving"*) and was
+right to. Every refusal keeps its full 58 staged columns plus a `nest_refusal`
+sentence in `data/staging/nest/sweep_1070_refused.csv` — flag, never delete —
+so any of them can be reversed without re-harvesting. **Whoever owns 1070
+should look at that file: the same scrape route also fed
+`native_owned_businesses.csv`, and nothing in this pass checked whether those
+person names reached it too.**
+
+**A conflict check produced a plausible wrong number twice before it produced
+the right one**, and the correction is a modelling fact about NEST's own
+schema: `relationship` carries two orthogonal axes in one column. `wholly_owned`
+/ `majority_owned` state the SHARE; `holding_company` / `operating_company` /
+`division` state the ROLE; `subsidiary` states neither. v1 reported 37
+audited-vs-web conflicts (35 were `wholly_owned` vs the *unspecified*
+`subsidiary`); v2 reported 23 (21 were Calista's SHARE vs ROLE); v3 compares
+within an axis and reports **2**, both Chugach, both real. **60 enterprises are
+now corroborated by two independent evidence families**, which is the first
+answer this project has to `ASSERTION_LAYER.md`'s finding that every fact rests
+on exactly one source.

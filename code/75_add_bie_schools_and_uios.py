@@ -1126,7 +1126,8 @@ def main():
         if links:
             lp = CLEAN / "bie_uio_identifier_links.csv"
             with open(lp, "w", encoding="utf-8", newline="") as fh:
-                w = csv.DictWriter(fh, fieldnames=list(links[0].keys()))
+                w = csv.DictWriter(fh, fieldnames=_carry_live_columns(lp, list(links[0].keys())),
+                           restval="", extrasaction="ignore")
                 w.writeheader()
                 w.writerows(links)
             print(f"\n  wrote {lp.relative_to(CEDAR)}  ({len(links)} links)")

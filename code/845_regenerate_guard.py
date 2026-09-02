@@ -445,6 +445,7 @@ def scan_csv(p: Path, live: dict):
         return [], []
     modlits = literal_lists(tree)
     modenv = const_env(tree)
+    carryfns = carry_forward_funcs(tree)
     found, memory = [], []
     _scope_cache = {}
 
@@ -481,10 +482,52 @@ def scan_csv(p: Path, live: dict):
         if fexpr is None:
             continue
 
-        # --- looks derived, is not: list(rows[0].keys()) -------------------
+        # --- CLASS 3: looks derived, is not --------------------------------
+        # `fieldnames=list(rows[0].keys())` derives from the row THIS BUILD
+        # just built, not from the file on disk, so a rebuild drops an
+        # enricher's column exactly as a literal would. Most instances are
+        # harmless - a script building a fresh table it owns outright loses
+        # nothing - so this measures rather than assumes: resolve the output
+        # path, infer the in-memory key set, and compare against the live
+        # header. Measured 2026-09-02: 114 sites, 7 that actually lose a
+        # column.
         s = _unparse(fexpr)
-        if re.fullmatch(r"list\(\w+\[0\]\.keys\(\)\)", s):
-            memory.append((node.lineno, s))
+        _outer = (getattr(fexpr.func, "id", "")
+                  or getattr(fexpr.func, "attr", "")) \
+            if isinstance(fexpr, ast.Call) else ""
+        mem_var = None if _outer in carryfns else _mem_base(s)
+        if mem_var is not None:
+            _fnode = _enclosing_func(tree, node.lineno)
+            _hist = local_hist(_fnode, modenv)
+            _spans, _bound = _open_targets(_fnode or tree, modenv, _hist)
+            _tgt = ""
+            if isinstance(fobj, ast.Name):
+                for _ln, _nm, _pp in _bound:
+                    if _nm == fobj.id and _ln <= node.lineno:
+                        _tgt = _pp
+            if not _tgt:
+                _c = [t for s0, e0, t, v in _spans
+                      if s0 <= node.lineno <= e0
+                      and (v is None or not isinstance(fobj, ast.Name)
+                           or v == fobj.id)]
+                _tgt = next((x for x in reversed(_c) if x), "")
+            _tables = _tables_in(_tgt, live)
+            if not _tables:
+                # writes a staging/review file, or a table that does not exist
+                # yet. Nothing on disk to preserve.
+                memory.append((node.lineno, s, _tgt or "?", [], "not-a-table"))
+            for _t in _tables:
+                _keys, _ok, _note = _rowlist_keys(tree, _fnode or tree,
+                                                  mem_var, modenv, _t)
+                _keys |= _extra_literals(s)
+                if _note.startswith("read-modify-write"):
+                    memory.append((node.lineno, s, _t, [], "read-modify-write"))
+                elif not _ok:
+                    memory.append((node.lineno, s, _t, [], "UNDETERMINED"))
+                else:
+                    _lost = [c for c in live[_t] if c and c not in _keys]
+                    memory.append((node.lineno, s, _t, _lost,
+                                   "LOSES" if _lost else "clean"))
 
         declared, ref = _literal_of(fexpr, lits)
 
@@ -561,6 +604,220 @@ def scan_csv(p: Path, live: dict):
                 if lost:
                     found.append((len(lost), t, ref, lost, "INFERRED"))
     return found, memory
+
+
+# ---------------------------------------------- class 3: derived from memory
+MEM_RE = re.compile(r"\b([A-Za-z_]\w*)\s*\[\s*0\s*\]")
+
+
+def _mem_base(expr_str: str):
+    """The row-list name behind a `fieldnames` expression, or None.
+
+    Covers every form measured in this repo on 2026-09-02, because a detector
+    that catches one spelling of a defect and misses four is the trap this
+    whole script exists to argue against:
+
+        list(rows[0].keys())            93 sites
+        list(rows[0])                   15   (iterating a dict yields keys)
+        list(rows[0].keys()) + [...]     3
+        list(ROWS[0].keys())             1
+        list(rows[0]) + ... rows[0]      1
+    """
+    if ".keys()" not in expr_str and "[0]" not in expr_str:
+        return None
+    m = MEM_RE.search(expr_str)
+    if m:
+        return m.group(1)
+    m2 = re.fullmatch(r"list\(\s*([A-Za-z_]\w*)\.keys\(\)\s*\)", expr_str)
+    return m2.group(1) if m2 else None
+
+
+def _extra_literals(expr_str: str) -> set:
+    """Keys added on the spot: `list(rows[0].keys()) + ["a", "b"]`."""
+    out = set()
+    try:
+        node = ast.parse(expr_str, mode="eval").body
+    except SyntaxError:
+        return out
+    for n in ast.walk(node):
+        if isinstance(n, ast.List):
+            for e in n.elts:
+                if isinstance(e, ast.Constant) and isinstance(e.value, str):
+                    out.add(e.value)
+    return out
+
+
+def _dict_keys(node):
+    """(keys, complete?) for a dict-literal-ish expression.
+
+    `**{f"latest_{m}": ... for m in CAPACITY}` is NOT complete - the names are
+    built at run time. `82_build_gaming_property_dataset.py` spreads exactly
+    that twice, and calling it complete would have reported 21 columns lost
+    where the truth is one.
+    """
+    if isinstance(node, ast.Dict):
+        ks, ok = set(), True
+        for k, v in zip(node.keys, node.values):
+            if k is None:
+                sub, sok = _dict_keys(v)
+                ks |= sub
+                ok = ok and sok
+            elif isinstance(k, ast.Constant) and isinstance(k.value, str):
+                ks.add(k.value)
+            else:
+                ok = False
+        return ks, ok
+    if isinstance(node, ast.Call) and getattr(node.func, "id", "") == "dict":
+        ks, ok = set(), True
+        for a in node.args:
+            sub, sok = _dict_keys(a)
+            ks |= sub
+            ok = ok and sok
+        for kw in node.keywords:
+            if kw.arg:
+                ks.add(kw.arg)
+            else:
+                sub, sok = _dict_keys(kw.value)
+                ks |= sub
+                ok = ok and sok
+        return ks, ok
+    if isinstance(node, ast.BinOp) and isinstance(node.op, ast.BitOr):
+        a, ao = _dict_keys(node.left)
+        b, bo = _dict_keys(node.right)
+        return a | b, ao and bo
+    return set(), False
+
+
+def _returns_at(fn, pos):
+    """Names returned by `fn` at tuple position `pos` (or the whole return)."""
+    out = []
+    for n in ast.walk(fn):
+        if not isinstance(n, ast.Return) or n.value is None:
+            continue
+        v = n.value
+        if isinstance(v, ast.Tuple):
+            if pos is not None and pos < len(v.elts):
+                e = v.elts[pos]
+                if isinstance(e, ast.Name):
+                    out.append(e.id)
+        elif isinstance(v, ast.Name) and pos in (None, 0):
+            out.append(v.id)
+    return out
+
+
+def carry_forward_funcs(tree) -> set:
+    """Names of functions that DERIVE a header from the file on disk.
+
+    Recognised STRUCTURALLY, not by name, so the next agent's own helper is
+    understood without registering it here: the function reads a csv header
+    (`next(csv.reader(...))`) and returns a list built by concatenation. That
+    is the fix for every class in this script, and a detector that flags its
+    own prescribed repair is worse than no detector - it teaches people that
+    fixing things makes the number go up.
+    """
+    out = set()
+    for fn in ast.walk(tree):
+        if not isinstance(fn, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        reads = concats = False
+        for n in ast.walk(fn):
+            if (isinstance(n, ast.Call) and getattr(n.func, "id", "") == "next"
+                    and n.args and isinstance(n.args[0], ast.Call)
+                    and getattr(n.args[0].func, "attr", "") == "reader"):
+                reads = True
+            if isinstance(n, ast.Return) and isinstance(n.value, ast.BinOp) \
+                    and isinstance(n.value.op, ast.Add):
+                concats = True
+        if reads and concats:
+            out.add(fn.name)
+    return out
+
+
+def _rowlist_keys(tree, scope, var, modenv, target, depth=0):
+    """(keys, complete?, note) for the in-memory row list named `var`.
+
+    `complete` false means UNDETERMINED, never clean. An unknown key set that
+    prints as "nothing lost" is the same failure as a check that measures
+    something other than its own name.
+    """
+    keys, complete, note = set(), None, ""
+    if depth > 2 or scope is None:
+        return keys, False, "not resolved (recursion limit)"
+    for n in ast.walk(scope):
+        # rows.append({...})
+        if (isinstance(n, ast.Call)
+                and getattr(n.func, "attr", "") == "append"
+                and getattr(getattr(n.func, "value", None), "id", "") == var
+                and n.args):
+            k, ok = _dict_keys(n.args[0])
+            keys |= k
+            complete = ok if complete is None else (complete and ok)
+        # r["x"] = ...  a row column added after the fact
+        if (isinstance(n, ast.Assign) and len(n.targets) == 1
+                and isinstance(n.targets[0], ast.Subscript)
+                and isinstance(n.targets[0].slice, ast.Constant)
+                and isinstance(n.targets[0].slice.value, str)):
+            keys.add(n.targets[0].slice.value)
+        if not isinstance(n, ast.Assign):
+            continue
+        # rows = ... / a, rows, b = f(...)
+        pos = None
+        hit = False
+        for t in n.targets:
+            if isinstance(t, ast.Name) and t.id == var:
+                hit, pos = True, None
+            elif isinstance(t, ast.Tuple):
+                for i, e in enumerate(t.elts):
+                    if isinstance(e, ast.Name) and e.id == var:
+                        hit, pos = True, i
+        if not hit:
+            continue
+        v = n.value
+        # `awards, stats = [], Counter()` binds a tuple to a tuple. Without
+        # this, the RHS is neither a List nor a Call and the whole key set
+        # reads UNDETERMINED - which is how six sites whose keys were fully
+        # knowable came back unmeasured on the first run.
+        if pos is not None and isinstance(v, ast.Tuple) and pos < len(v.elts):
+            v, pos = v.elts[pos], None
+        if isinstance(v, ast.List):
+            if not v.elts:
+                continue                      # rows = []
+            for e in v.elts:
+                k, ok = _dict_keys(e)
+                keys |= k
+                complete = ok if complete is None else (complete and ok)
+        elif isinstance(v, ast.ListComp):
+            k, ok = _dict_keys(v.elt)
+            keys |= k
+            complete = ok if complete is None else (complete and ok)
+        elif isinstance(v, ast.Call):
+            # READ-MODIFY-WRITE: the rows came from the very file being
+            # written, so `list(rows[0].keys())` IS the live header and the
+            # pattern is CORRECT. Five ledger/spine repair scripts do this.
+            env = env_at(modenv, local_hist(scope if isinstance(
+                scope, (ast.FunctionDef, ast.AsyncFunctionDef)) else None,
+                modenv), n.lineno)
+            for a in list(v.args) + [kw.value for kw in v.keywords]:
+                if target and _resolve(a, env).endswith(target):
+                    return set(), True, "read-modify-write on %s" % target
+            fname = getattr(v.func, "id", "") or getattr(v.func, "attr", "")
+            callee = next((f for f in ast.walk(tree)
+                           if isinstance(f, (ast.FunctionDef,
+                                             ast.AsyncFunctionDef))
+                           and f.name == fname), None)
+            if callee is not None:
+                for rn in _returns_at(callee, pos):
+                    k, ok, nt = _rowlist_keys(tree, callee, rn, modenv,
+                                              target, depth + 1)
+                    keys |= k
+                    complete = ok if complete is None else (complete and ok)
+                    note = note or ("via %s()" % fname)
+            else:
+                complete = False
+                note = note or ("built by %s(), not resolvable" % (fname or "?"))
+        else:
+            complete = False
+    return keys, bool(complete), note
 
 
 # --------------------------------------------------------- markdown scanning
@@ -681,6 +938,15 @@ MD_PROVEN_SAFE = {
     "docs/REVIEW_BACKLOG_RULINGS.md":
         "2026-09-02 regen: byte-identical. 603 reproduces the whole doc, "
         "numbered doctrine sections included.",
+    "docs/DOC_STALENESS.md":
+        "2026-09-02 regen: 5 removed / 4 added, 1 unpaired - a doc that stopped qualifying as stale, not a paragraph. Every removed line carries a number.",
+    "docs/LOBBYING_BUILD_LOG_2026-08-05.md":
+        "2026-09-02 regen: 35 removed / 34 added, 30 unpaired - and every "
+        "single removed line carries a number, with a numeric counterpart on "
+        "the added side (39,448 -> 40,968 raw filings; the ambiguous-ruling "
+        "queue 361 -> 5 because the rulings were applied). Not prose: the "
+        "LIVE doc is the stale one. Verdict of the three options - the "
+        "generator is right.",
     "docs/datasets/_PUNCHLIST.md":
         "2026-09-02 regen: 4 removed / 14 added, 0 unpaired removals - open "
         "item counts moved, nothing was lost.",
@@ -808,6 +1074,41 @@ SELFTEST_ELSEWHERE = (
 )
 
 
+SELFTEST_MEMORY = (
+    "import csv\n"
+    "rows = []\n"
+    "rows.append({\"a\": 1, \"b\": 2})\n"
+    "with open(\"data/clean/zz845_selftest.csv\", \"w\", newline=\"\") as fh:\n"
+    "    w = csv.DictWriter(fh, fieldnames=list(rows[0].keys()))\n"
+    "    w.writeheader()\n"
+)
+SELFTEST_MEMORY_FIXED = (
+    "import csv\n"
+    "def _carry(path, canonical):\n"
+    "    with open(path, encoding=\"utf-8-sig\", newline=\"\") as fh:\n"
+    "        live = next(csv.reader(fh), [])\n"
+    "    return list(canonical) + [c for c in live if c not in canonical]\n"
+    "rows = []\n"
+    "rows.append({\"a\": 1, \"b\": 2})\n"
+    "with open(\"data/clean/zz845_selftest.csv\", \"w\", newline=\"\") as fh:\n"
+    "    w = csv.DictWriter(fh, "
+    "fieldnames=_carry(\"data/clean/zz845_selftest.csv\", "
+    "list(rows[0].keys())))\n"
+    "    w.writeheader()\n"
+)
+SELFTEST_RMW = (
+    "import csv\n"
+    "def read_csv(p):\n"
+    "    with open(p, newline=\"\") as fh:\n"
+    "        return list(csv.DictReader(fh))\n"
+    "P = \"data/clean/zz845_selftest.csv\"\n"
+    "rows = read_csv(P)\n"
+    "with open(P, \"w\", newline=\"\") as fh:\n"
+    "    w = csv.DictWriter(fh, fieldnames=list(rows[0].keys()))\n"
+    "    w.writeheader()\n"
+)
+
+
 def selftest() -> int:
     """Inject a violation; assert the NAMED detector fires; restore.
 
@@ -851,6 +1152,33 @@ def selftest() -> int:
               % ("ok  " if not hit3 else "FAIL",
                  "SAFE" if not hit3 else "unsafe - PHANTOM PAIRING"))
         ok = ok and not hit3
+
+        # --- class 3: the header derived from the in-memory row ------------
+        scr.write_text(SELFTEST_MEMORY, encoding="utf-8")
+        _, mem = scan_csv(scr, live)
+        hit4 = [m for m in mem if m[4] == "LOSES"
+                and m[3] == ["c_added_by_an_enricher"]]
+        print("  %s a header built from `list(rows[0].keys())` that drops a "
+              "live column -> %s"
+              % ("ok  " if hit4 else "FAIL",
+                 "FIRED on the named column" if hit4 else "DID NOT FIRE"))
+        ok = ok and bool(hit4)
+
+        scr.write_text(SELFTEST_MEMORY_FIXED, encoding="utf-8")
+        _, mem = scan_csv(scr, live)
+        hit5 = [m for m in mem if m[4] in ("LOSES", "UNDETERMINED")]
+        print("  %s the same writer wrapped in a carry-forward reads as %s"
+              % ("ok  " if not hit5 else "FAIL",
+                 "SAFE" if not hit5 else "unsafe - the guard flags its own fix"))
+        ok = ok and not hit5
+
+        scr.write_text(SELFTEST_RMW, encoding="utf-8")
+        _, mem = scan_csv(scr, live)
+        hit6 = [m for m in mem if m[4] == "read-modify-write"]
+        print("  %s a read-modify-write on the SAME file reads as %s"
+              % ("ok  " if hit6 else "FAIL",
+                 "CORRECT" if hit6 else "a defect - false positive"))
+        ok = ok and bool(hit6)
     finally:
         for f in (tbl, scr):
             try:
@@ -882,9 +1210,10 @@ def collect_csv(live):
                 continue
             seen.add(k)
             rows.append((n, p.name, t, ref, lost, how))
-        for lineno, s in m:
-            mem.append((p.name, lineno, s))
+        for lineno, expr, table, lost, verdict in m:
+            mem.append((p.name, lineno, expr, table, lost, verdict))
     rows.sort(reverse=True)
+    mem.sort(key=lambda x: (-len(x[4]), x[0], x[1]))
     return rows, mem
 
 
@@ -903,13 +1232,34 @@ def _print_csv(rows, mem, limit=40):
         print("                     %s%s" % (", ".join(lost[:6]),
                                              " ..." if len(lost) > 6 else ""))
     if mem:
-        print("\n  NOT counted above, and not safe either - %d writer(s) whose "
-              "header is derived\n  from the row this build just built, not "
-              "from the file on disk:" % len(mem))
-        for s, ln, expr in mem[:15]:
-            print("    %s:%d  %s" % (s, ln, expr))
-        print("    A rebuild of the same table drops any column an enricher "
-              "added, exactly\n    as a literal would. Derive from the FILE.")
+        loses = [x for x in mem if x[5] == "LOSES"]
+        undet = [x for x in mem if x[5] == "UNDETERMINED"]
+        rmw = [x for x in mem if x[5] == "read-modify-write"]
+        clean = [x for x in mem if x[5] == "clean"]
+        nota = [x for x in mem if x[5] == "not-a-table"]
+        print("")
+        print("  CLASS 3   the header derived from the row THIS BUILD just "
+              "built, not from the file")
+        print("            %d site(s): %d LOSE a column, %d UNDETERMINED, %d "
+              "read-modify-write" % (len(mem), len(loses), len(undet), len(rmw)))
+        print("            (which is CORRECT - the rows came from the very "
+              "file being rewritten),")
+        print("            %d write a live table and lose nothing, %d write no "
+              "shipped table." % (len(clean), len(nota)))
+        print("            Most are harmless: a script building a fresh table "
+              "it owns outright loses")
+        print("            nothing. Only the two categories below are debt.")
+        print("")
+        for script, ln, expr, table, lost, _ in loses:
+            print("    %3d cols lost   %-42s %s -> %s"
+                  % (len(lost), script + ":" + str(ln), expr, table))
+            print("                     %s%s"
+                  % (", ".join(lost[:6]), " ..." if len(lost) > 6 else ""))
+        for script, ln, expr, table, lost, _ in undet:
+            print("    UNDETERMINED    %-42s %s -> %s"
+                  % (script + ":" + str(ln), expr, table))
+            print("                     the row keys are not statically "
+                  "knowable. UNDETERMINED IS NOT CLEAN.")
 
 
 def _print_md(mrows):
@@ -937,9 +1287,16 @@ def _print_md(mrows):
           "stale; a computed sentence cannot.")
 
 
-def _key(rows, mrows):
+def _key(rows, mrows, mem=()):
     k = {(r[1], r[2], r[3]) for r in rows}
     k |= {(r[2].split(",")[0].strip(), r[1], "markdown") for r in mrows if r[0]}
+    # Class 3 joins the baseline on the same terms as the other two:
+    # only the sites PROVED to lose a column, plus the ones whose key
+    # set could not be established. A site building a table it owns
+    # outright is not debt, and baselining all 114 would turn the list
+    # into noise nobody reads.
+    k |= {(m[0], m[3], "memory-derived") for m in mem
+          if m[5] in ("LOSES", "UNDETERMINED")}
     return k
 
 
@@ -1018,9 +1375,17 @@ def regen_diff(docarg: str) -> int:
             minus += 1
         elif line.startswith("+") and not line.startswith("+++"):
             plus += 1
+    # UNPAIRED IS NOT PROSE. When several adjacent measured lines all change,
+    # the hunks stop pairing line-for-line and the unpaired count climbs while
+    # nothing hand-authored is at stake. `LOBBYING_BUILD_LOG_2026-08-05.md`
+    # showed 30 unpaired removals and every one of them carried a digit.
+    # So: count the removed lines with NO number in them. That is the shape
+    # of a sentence somebody wrote.
+    prose = [l for l in gone if not re.search(r"\d", l)]
     print("  %d diff line(s): %d removed, %d added, %d removed WITHOUT a "
-          "replacement in the same hunk"
-          % (max(0, len(d) - 2), len(gone), len(add), unpaired))
+          "replacement in the same hunk,\n  %d removed line(s) contain no "
+          "digit at all - the shape of hand-authored prose"
+          % (max(0, len(d) - 2), len(gone), len(add), unpaired, len(prose)))
     for line in d[:80]:
         print("    " + line)
     if len(d) > 80:
@@ -1044,6 +1409,11 @@ def regen_diff(docarg: str) -> int:
         print("\n  VERDICT: every removed line has a replacement - these are "
               "measurements that moved,\n  not hand-authored prose. A rebuild "
               "is safe.")
+    elif not prose:
+        print("\n  VERDICT: %d unpaired removal(s), but EVERY removed line "
+              "carries a number.\n  These are measurements the rebuild "
+              "recomputes, not prose. A rebuild is safe -\n  and the live doc "
+              "is the stale one." % unpaired)
     else:
         print("\n  VERDICT: %d line(s) disappear with nothing put in their "
               "place. READ THEM before\n  concluding anything - a row that "
@@ -1072,7 +1442,7 @@ def main() -> int:
         base = set()
         if BASELINE.exists():
             base = {tuple(x) for x in json.loads(BASELINE.read_text())}
-        now = _key(rows, mrows)
+        now = _key(rows, mrows, mem)
         new = now - base
         for s, t, v in sorted(new):
             print("  FAIL new unsafe writer  %s  %s -> %s" % (s, v, t))
@@ -1089,7 +1459,7 @@ def main() -> int:
 
     if mode == "baseline":
         BASELINE.parent.mkdir(parents=True, exist_ok=True)
-        BASELINE.write_text(json.dumps(sorted(_key(rows, mrows)), indent=1),
+        BASELINE.write_text(json.dumps(sorted(_key(rows, mrows, mem)), indent=1),
                             encoding="utf-8")
         print("\n  baseline written to %s - `verify` now fails on a NEW one."
               % BASELINE.relative_to(ROOT))

@@ -26,20 +26,33 @@ The slice worked here is both — the thin tail, **114** entities. The line betw
 | BIE School | 87 | 83 | 85 |
 | Federal-level self-governance consortium | 18 | 0 | 18 |
 | Native Community Development Financial Institution | 3 | 0 | 3 |
-| Individually Native-owned business | 3 | 0 | 2 |
-| Urban Indian Organization | 3 | 0 | 3 |
-| **total** | **114** | **83** | **111** |
+| Individually Native-owned business | 3 | 0 | 1 |
+| Urban Indian Organization | 3 | 0 | 1 |
+| **total** | **114** | **83** | **108** |
 
 ## What was found
 
 | route | rows |
 |---|---:|
 | NCES_CCD | 85 |
-| USASPENDING | 32 |
+| USASPENDING | 30 |
 | IRS_990 | 21 |
-| NONE | 3 |
+| NONE | 6 |
 
-## Checked, nothing located — 3
+## Named candidates, NOT resolved - 6
+
+*Names that overlap but are not the same name. Overlap against the shorter name is what produced four wrong EINs on the first pass, so these are reported for a human rather than recorded as the entity's filing. No identifier is claimed on these rows.*
+
+| entity | possible filer |
+|---|---|
+| Billings Urban Indian Health and Wellness Ce | EIN 27-4681721 South Billings Urban Renewal Association | Billings MT |
+| Juel Fairbanks Recovery Services | EIN 41-0987441 Juel Fairbanks Aftercare Residence | St Paul MN |
+| Laguna Creek LLC | EIN 41-2035448 Laguna Creek Gridiron Club | Elk Grove CA |
+| Oklahoma City Indian Clinic | EIN 73-0955756 Central Oklahoma American Indian Health Council Inc | O |
+| Southern Indian Health Council, Inc. | EIN 93-1216297 Southern Exposure | San Francisco CA |
+| Tribal Energy Alternatives | EIN 26-3440182 Energy Alternatives For The 21st Century | Pelham NY |
+
+## Checked, nothing located — 6
 
 *Every one of these has a row in `register_only_first_rows.csv` naming the routes run and the date. That is a finding. It is not the same as unexamined, and the two must never be collapsed.*
 
@@ -48,3 +61,6 @@ The slice worked here is both — the thin tail, **114** entities. The line betw
 | Cherokee Central Middle School | BIE School |
 | Shiprock Reservation Dormitory | BIE School |
 | Tallsalt Advisors / Mette Associates | Individually Native-owned business |
+| Laguna Creek LLC | Individually Native-owned business |
+| Billings Urban Indian Health and Wellness Center | Urban Indian Organization |
+| Juel Fairbanks Recovery Services | Urban Indian Organization |

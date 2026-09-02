@@ -196,7 +196,8 @@ def main():
 
     p1 = CLEAN / "prime_contracts_awards.csv"
     with open(p1, "w", encoding="utf-8", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=list(awards[0].keys()))
+        w = csv.DictWriter(fh, fieldnames=_carry_live_columns(p1, list(awards[0].keys())),
+                           restval="", extrasaction="ignore")
         w.writeheader()
         w.writerows(awards)
     print(f"\n  wrote {p1.relative_to(CEDAR)}  ({len(awards):,} awards, "

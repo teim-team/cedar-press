@@ -65,8 +65,10 @@ SWEPT = {
         ["tribe_year_lobbying_panel.csv"],
     "417_build_entity_identity_crosswalk.py":
         ["cedar_entity_identity_crosswalk.csv"],
-    "75_add_bie_schools_and_uios.py": ["bie_uio_dollars_by_entity.csv"],
-    "79_build_award_level_contracts.py": ["prime_contracts_published.csv"],
+    "75_add_bie_schools_and_uios.py": ["bie_uio_dollars_by_entity.csv",
+                                      "bie_uio_identifier_links.csv"],
+    "79_build_award_level_contracts.py": ["prime_contracts_published.csv",
+                                         "prime_contracts_awards.csv"],
     "89_nigc_map_wayback_universe.py": ["gaming_property_universe_events.csv"],
     "100_finish_declinations_and_employment.py":
         ["gaming_employment_observations.csv"],
@@ -115,6 +117,20 @@ SWEPT = {
     "98_build_oira_and_hearings.py": ["oira_meetings.csv",
                                       "hearing_appearances.csv"],
     "99_build_earmarks_and_schedc.py": ["earmarks.csv"],
+
+    # --- class 3, added 2026-09-02: the ten `list(rows[0].keys())` writers
+    # that were measured to lose a column, out of 114 sites. The other 104
+    # build a fresh table they own outright, or are read-modify-write on the
+    # file being rewritten, which is the correct idiom.
+    "57_autoresolve_deal_parties.py": ["deals_party_autoresolved.csv"],
+    "58_apply_lobbying_rulings.py": ["lobbying_client_attribution.csv"],
+    "66_build_entity_hierarchy.py": ["entity_hierarchy.csv"],
+    "82_build_gaming_property_dataset.py": [
+        "gaming_property_capacity_history.csv", "gaming_properties.csv"],
+    "122_ocr_ordinance_scans.py": ["gaming_ordinance_ocr.csv"],
+    "127_bridge_compact_obligations_to_tribal_agency.py":
+        ["compact_obligation_tribal_agency_bridge.csv"],
+    "151_rebuild_entity_evidence_profile.py": ["entity_evidence_profile.csv"],
 }
 
 

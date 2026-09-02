@@ -15,13 +15,13 @@ directory they name; nothing here is copied from a prior report.*
 
 ## THE HEADLINE
 
-**872 of 1,482 enterprises (58.8%) that a Native nation, ANCSA corporation or
+**977 of 1,610 enterprises (60.7%) that a Native nation, ANCSA corporation or
 NHO owns do not appear in federal contracting at all.**
 
 That number is the reason the dataset exists. FPDS only ever sees the
 enterprises that pursue federal work; a nation's propane utility, gas stations,
 farm, radio station, casino management company and holding company are invisible
-to it. 872 rows here are firms with a named owner, a named source and a
+to it. 977 rows here are firms with a named owner, a named source and a
 permanent Cedar identifier that no federal procurement record contains.
 
 **Read it as a floor, not a point estimate.** The presence test is exact
@@ -31,10 +31,10 @@ look *present*, so the error runs against the count.
 
 | owner class | enterprises | absent from FPDS |
 |---|---:|---:|
-| Alaska Native corporation | 1,060 | 583 |
+| Alaska Native corporation | 1,188 | 688 |
 | Tribal government | 322 | 247 |
 | Native Hawaiian organization | 100 | 42 |
-| **total** | **1,482** | **872 (58.8%)** |
+| **total** | **1,610** | **977 (60.7%)** |
 
 ---
 
@@ -47,7 +47,7 @@ It is **not** a bigger `native-owned-businesses`. It is a different relation.
 | what a row says | a nation **certified or listed** this firm | a nation **owns** this enterprise, or published a **tie** to it |
 | relation published | `affiliated_with` | `owned_by` / `affiliated_with`, declared per row |
 | scope gradient | down to `vendor_relationship` — no ownership claim at all | `tribally_owned_entity` / `parent_asserted_subsidiary` only |
-| rows | 2,393 | 1,482 |
+| rows | 2,393 | 1,610 |
 
 The two must never be merged. Flattening `native_owned_businesses`'
 `identity_scope` gradient into an ownership claim is what
@@ -81,8 +81,8 @@ is. **An affiliation recorded as ownership is the defect this dataset is most
 exposed to.**
 
 ```
-relation_class = ownership     1,401   the corporate chain
-relation_class = affiliation      81   published, real, and NOT ownership
+relation_class = ownership     1,512   the corporate chain
+relation_class = affiliation      98   published, real, and NOT ownership
 ```
 
 | relationship | n | class |
@@ -124,7 +124,7 @@ HUB       Arctic Slope Regional Corporation  ANRC-ARCSLO-00
       L3      Sigma Science, Inc
 ```
 
-`hierarchy_level` 1 = 1,414 · 2 = 66 · 3 = 2. A sub-hub is never a peer of its
+`hierarchy_level` 1 = 1,542 · 2 = 66 · 3 = 2. A sub-hub is never a peer of its
 hub (`docs/IDENTIFIER_STANDARD.md` §2), so every row carries **both**
 `owner_hub_cedar_uid` — the nation at the top, always a spine entity — and
 `parent_enterprise_id`, the immediate owner, which may itself be an enterprise.
@@ -145,8 +145,8 @@ the residue is zero.
 
 | evidence class | enterprises | assertions |
 |---|---:|---:|
-| `audited_annual_report_as_45_55_139` | 760 | 2,523 |
-| `parent_self_published_company_list` | 429 | 568 |
+| `audited_annual_report_as_45_55_139` | 861 | 2,788 |
+| `parent_self_published_company_list` | 456 | 600 |
 | `nation_self_published_enterprise_register` | 193 | 301 |
 | `parent_declared_subsidiary_list` (NHO) | 100 | 100 |
 
@@ -226,6 +226,129 @@ dataset that would otherwise assert the corporation owns them.
 
 ---
 
+## THE 1070 HANDOFF — 583 held OWNERSHIP rows, merged not appended
+
+`code/1070_anc_nho_business_sweep.py` swept 822 entities — all 191 ANCs, all
+210 NHOs, 365 tribal governments script 701 never reached, and all 56
+intertribal organisations — and staged 1,106 rows in the 58-column
+`native_owned_businesses` schema. The integrator merged the 523
+`assertion_class = RELATIONSHIP` rows into that file and **held the 583
+OWNERSHIP rows for NEST**, because the `relation_class` split puts ownership
+here. The integrator measured **170 of the 583 already present in NEST by
+normalised name** before splitting them, so a plain append would have
+duplicated a third of the batch.
+
+**It was merged, not appended.** The rows are fed through the *same*
+(owner hub, normalised name) clustering as every other source, so a
+restatement of a firm NEST already holds raises that enterprise's
+`n_source_observations` instead of creating a second row for one company.
+
+```
+held for NEST                                        583
+  refused: unreviewed HTML heading/anchor scrape     229
+  refused: shareholder-owned, not corporation-owned   57
+  ingested                                           297
+    merged onto an enterprise NEST already held      167
+    net new enterprises                              128
+```
+
+`1,482 -> 1,610 enterprises`, `3,492 -> 3,789 assertions`. Every refusal keeps
+its full 58 staged columns plus a `nest_refusal` sentence in
+`data/staging/nest/sweep_1070_refused.csv`, so the integrator can see exactly
+what was declined and reverse any of it without re-harvesting. **A refusal that
+leaves no trace is indistinguishable from a row nobody noticed.**
+
+### The two refusals, each on the staged file's OWN declared caveat
+
+**229 unreviewed prose scrapes.** The sweep flagged them itself —
+`HEADING_SCRAPE_ON_A_DIRECTORY_INDEX`, with a `verification_basis` ending
+*"not a table; review before resolving"* — and it was right to. ASRC's block
+alone yields `Blank`, `No Results Found`, `Employee Resources`,
+`Software, Apps & Analytics`, `Infrastructure Ops` … **and seven natural
+persons' names scraped off a leadership page**. A natural person's name may
+never enter this dataset, so this is a hard rule rather than a quality
+preference, and it is the same prose-scrape defect
+`ENTERPRISE_REGISTER_BUILD_LOG.md` records for Doyon
+(*"Enjoy lunch at Kantishna Roadhouse"*).
+
+**57 shareholder-owned businesses.** Bering Straits'
+`shareholder-owned-businesses` directory, `identity_scope =
+shareholder_descendant_or_spouse`. That scope is an ownership claim about a
+**person**, not about the corporation, and admitting it would have NEST assert
+that Bering Straits owns its shareholders' printing shops and flooring
+businesses. Identical in shape to Calista's shareholder directory, which this
+build already refuses at source selection — the same trap arriving by a second
+route, which is why the refusal is written as a predicate on `identity_scope`
+and `directory_type` rather than as a note about one corporation.
+
+**A third guard is written and did not fire.** `association_member` and
+`tribally_owned_entity_of_a_member_nation` are legitimate new scopes the sweep
+declared, and neither appears in the 583 held today. USET lists *Choctaw Fresh
+Produce*, which **is** tribally owned — by **Mississippi Choctaw**, not by USET,
+the keyed authority. The guard refuses any such row outright, because the hub
+must be the owning nation and a row that does not name it cannot be repointed
+to one by guessing.
+
+### Auto-ruled evidence is carried on the row, not dropped
+
+Every one of the 583 is `AUTO_RULED_NOT_HUMAN_REVIEWED`. That belongs on the
+row rather than in a build log, so `nest_enterprises.csv` gained
+**`evidence_human_reviewed`** and **`n_auto_ruled_observations`**, and the
+relations table gained `source_review_status`. Measured: **1,482 Y / 128 N** —
+the 128 that rest solely on auto-ruled evidence are exactly the net-new
+enterprises, which is the honest result and is filterable.
+
+### The relation was translated, not inherited
+
+`certification_tier` is deliberately empty in the staged file — in the live
+business file it holds a TERO preference priority and the sweep refused to
+overload it. The ANCSA relation rides in `validation_flags` as
+`RELATION=wholly_owned|majority_owned|equity_or_jv|subsidiary_unspecified`.
+Translated into this dataset's vocabulary rather than carried as a flag string,
+and **`equity_or_jv` maps to `joint_venture`, which `canon_rel` classes as
+AFFILIATION, not ownership** — an equity stake is not a subsidiary.
+
+---
+
+## WHERE THE WEB LIST DISAGREES WITH THE AUDITED FILING — 2 rows, after two false answers
+
+This is the first thing in NEST that *can* disagree.
+`docs/ASSERTION_LAYER.md` measured that every fact in Cedar rests on exactly one
+source; **60 enterprises are now corroborated by two genuinely independent
+evidence families** — an audited AS 45.55.139 filing and the parent's own
+website — and 438 of 1,610 rest on more than one distinct source, up from 273.
+
+**Two versions of the conflict check produced a number that was about something
+other than its own name, and both would have shipped.**
+
+| version | reported | what it was actually measuring |
+|---|---:|---|
+| v1 | 37 conflicts | 35 were the filing saying `wholly_owned` where the site said `subsidiary` — **an unspecified word being refined by a specific one**, not a rival claim |
+| v2 | 23 conflicts | 21 were Calista's `wholly_owned` vs `operating_company` — **a SHARE and a ROLE**, which cannot disagree, because a wholly-owned company is very often an operating one |
+| v3 | **2 conflicts** | two values on the *same* axis |
+
+The fix is a modelling observation worth keeping: **`relationship` carries two
+orthogonal axes in one column.** `wholly_owned` / `majority_owned` state the
+SHARE; `holding_company` / `operating_company` / `division` state the ROLE;
+`subsidiary` and `declared_suborganization` state neither. A conflict check has
+to compare within an axis or it manufactures disagreements — and thirty-five
+manufactured ones would have buried the two that are real.
+
+The two that survive:
+
+| enterprise | owner | audited filing | web list | published |
+|---|---|---|---|---|
+| Chugach Government Solutions, LLC | Chugach Alaska Corporation | `holding_company` | `operating_company` | `holding_company` |
+| Chugach Regional Development, LLC | Chugach Alaska Corporation | `holding_company` | `operating_company` | `holding_company` |
+
+**The audited filing wins**, and `data/staging/nest/evidence_conflicts.csv`
+says so on the row: a statutory filing signed off by an auditor outranks
+marketing copy. Both are real and both are worth an owner's eye — a firm the
+filing treats as a holding company and the site presents as an operating one is
+either mid-reorganisation or two levels collapsed into one on the website.
+
+---
+
 ## THE FOUR GUARDS, AND WHAT EACH CAUGHT
 
 ### 1. Restricted publishers, refused by every route — **84 assertions**
@@ -288,7 +411,7 @@ resolving to anything at all (`ENTITY_MATCH_RULES` rule 13).
 
 ---
 
-## IDENTIFIERS — 107 external, 1,375 Cedar-minted
+## IDENTIFIERS — 107 external, 1,503 Cedar-minted
 
 **An identifier appears in `uei` or `cage_code` only where a source PUBLISHED
 it.** A name that happens to match a UEI in FPDS is a *candidate* and lives in
@@ -297,7 +420,7 @@ key says nothing about the correctness of the link.
 
 ```
 external_identifier   107     CAGE 107 · UEI 102
-cedar_minted_only   1,375
+cedar_minted_only   1,503
 uei_candidate         597     exact normalized name into the SBA DSBS extract
 ```
 
@@ -339,14 +462,14 @@ ids was written to any table. A prefix is never reused.
 
 ---
 
-## ADDRESSES — 698 of 1,482 (47.1%), and the basis says which lookup answered
+## ADDRESSES — 722 of 1,610 (44.8%), and the basis says which lookup answered
 
 | basis | n |
 |---|---:|
-| SBA DSBS, matched on a **candidate** UEI (an exact-name proposal) | 597 |
-| the parent's own subsidiary listing | 75 |
+| SBA DSBS, matched on a **candidate** UEI (an exact-name proposal) | 603 |
+| the parent's own subsidiary listing | 93 |
 | SBA DSBS, matched on a **published** UEI | 26 |
-| none | 784 |
+| none | 888 |
 
 **City and state only. No street address.** And the basis column had to be
 fixed before it could be believed: the first version labelled all 623 DSBS hits
@@ -365,14 +488,19 @@ the honest gap in this dataset** — see the next-pass list.
 ## ROW CONSERVATION
 
 ```
-data/staging/nest/raw_ownership_assertions          3,600 in
-  emitted: kept with a resolved owner and a named source   3,499   97.19%
-  refused: TERMS_STATED_RESTRICTIVE                           84    2.33%
-  refused: hub unresolved                                     17    0.47%
+data/staging/nest/raw_ownership_assertions          3,897 in
+  emitted: kept with a resolved owner and a named source   3,796   97.41%
+  refused: TERMS_STATED_RESTRICTIVE                           84    2.16%
+  refused: hub unresolved                                     17    0.44%
 
-data/clean/nest_enterprises.csv                     1,482 in
-  emitted: ownership asserted by the owner itself           1,401   94.53%
-  emitted: a published tie that is NOT ownership               81    5.47%
+.../native_business_sweep_1070/held_for_nest_ownership.csv  583 in
+  emitted: ingested into NEST via the shared clustering       297   50.94%
+  refused: unreviewed HTML heading/anchor scrape              229   39.28%
+  refused: shareholder-owned, not corporation-owned            57    9.78%
+
+data/clean/nest_enterprises.csv                     1,610 in
+  emitted: ownership asserted by the owner itself           1,512   93.91%
+  emitted: a published tie that is NOT ownership               98    6.09%
   rejected: ownership claim with no source                      0    0.00%
 ```
 
@@ -431,8 +559,9 @@ job and it reads every one.
    `usaddress` over the address prose already sitting in the annual reports
    (*Kootznoowoo: "Favorite Bay, LLC: Owns the Newport IX building located at
    2201 Buena Vista Drive, Albuquerque, New Mexico"*).
-2. **273 of 1,482 enterprises rest on more than one distinct source, and 1,209
-   rest on one.** `docs/ASSERTION_LAYER.md`'s finding — every fact in Cedar
+2. **438 of 1,610 enterprises rest on more than one distinct source, and 1,172
+   rest on one**, and 60 are now corroborated by two genuinely independent
+   evidence FAMILIES (an audited filing and a corporate site). `docs/ASSERTION_LAYER.md`'s finding — every fact in Cedar
    rests on exactly one source — is only partly untrue here. The cheapest second
    family is the Alaska Division of Corporations registry, which is genuinely
    independent of both the annual report and the corporate site.
@@ -456,12 +585,14 @@ job and it reads every one.
 code/1072_tribally_owned_enterprises.py         mine | assemble | build |
                                                 codebook | conserve | verify |
                                                 selfcheck
-data/clean/nest_enterprises.csv                 1,482 rows, 57 columns
-data/clean/nest_enterprise_relations.csv        3,492 rows, 24 columns
-data/spine/cedar_nest_id_register.csv           1,482 append-only id bindings
-data/clean/codebook/18a_nest_enterprises.csv    57 variables documented
-data/clean/codebook/18b_nest_enterprise_relations.csv   24 variables
+data/clean/nest_enterprises.csv                 1,610 rows, 59 columns
+data/clean/nest_enterprise_relations.csv        3,789 rows, 25 columns
+data/spine/cedar_nest_id_register.csv           1,610 append-only id bindings
+data/clean/codebook/18a_nest_enterprises.csv    59 variables documented
+data/clean/codebook/18b_nest_enterprise_relations.csv   25 variables
 data/staging/nest/ancsa_consolidation_edges.jsonl   2,168 mined assertions
+data/staging/nest/sweep_1070_refused.csv        286 refusals, full 58 columns
+data/staging/nest/evidence_conflicts.csv        2 real audited-vs-web conflicts
 data/staging/nest/ancsa_mine_log.csv            524 documents, per-doc outcome
 data/staging/nest/ownership_edges_staged.jsonl  3,499 normalised assertions
 data/staging/nest/held_rows.csv                 101 refusals, each with a reason

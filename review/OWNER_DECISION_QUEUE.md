@@ -1529,3 +1529,13 @@ which looks like the same collision inverted.
 **Verification protocol, your own (ENTITY_MATCH_RULES rule 13):** the addresses.
 Ho-Chunk, Inc. is Winnebago, Nebraska; the Ho-Chunk Nation is Black River Falls,
 Wisconsin. Rung 1 settles it.
+
+> **PARTLY CLOSED, same day.** The integrator applied the repoint in
+> `prime_contracts.csv`: **21 rows on UEIs `DMA6EKCMAPB7` and `S4LTC7CL8RW7`
+> moved to Winnebago**, each asserted to carry `recipient_city_name =
+> WINNEBAGO` before being touched, and Wisconsin keeps its 17 Black River Falls
+> rows — rung 1 run as a precondition rather than as a spot check. NEST and
+> `prime_contracts` now agree.
+> **Still open:** the ledger rows themselves (`cedar_identifier_ledger_final.csv`),
+> and the tier-A `Ho-Chunk Nation` CAGE `3VFL3` row keyed to Winnebago, which
+> looks like the same collision inverted and which no pass has yet examined.

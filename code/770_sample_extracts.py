@@ -573,6 +573,20 @@ def main() -> int:
         built.append((product_id(did), tbl, len(rs), len(rows),
                       len(cols), grain.get(tbl, "UNSTATED")))
 
+    # A RENAMED SAMPLE LEAVES ITS OLD FILE BEHIND, AND THE OLD FILE STILL
+    # LOOKS LIKE A SAMPLE. When `native-owned-businesses__sample.csv` became
+    # `owned__sample.csv` (Codex PR #29 finding 7) the first one stayed in
+    # dist/ with stale rows, and anything copying dist/samples/* would have
+    # shipped both - one of them silently out of date and belonging to no
+    # descriptor id. Anything here that this run did not write is retired.
+    stale = []
+    if not verify:
+        wrote = {f"{product_id(d)}__sample.csv" for d, *_ in built}
+        for f in sorted(OUT.glob("*__sample.csv")):
+            if f.name not in wrote:
+                f.rename(f.with_suffix(".csv.retired"))
+                stale.append(f.name)
+
     if not verify:
         L = ["# Cedar Press — sample extracts", "",
              f"*Built {TODAY} by `code/770_sample_extracts.py`. "
@@ -685,6 +699,8 @@ def main() -> int:
 
     print(f"  770 sample extracts   {len(built)} built   "
           f"{len(skipped)} skipped   {len(unsafe)} refused as unsafe")
+    for f in stale:
+        print(f"    RETIRED {f} -> .csv.retired (no descriptor id claims it)")
     for did, tbl, n, tot, nc, g in built:
         print(f"    {did:<24} {n:>3} of {tot:>9,}  {nc:>3} cols  {tbl}")
     for s in skipped:

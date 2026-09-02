@@ -4844,6 +4844,8 @@
       "871_promote_geo_keys_contracts.py"
      ],
      "enriched_by": [
+      "1075_fix_old_harbor_attribution.py",
+      "1076_clear_self_parent_piid.py",
       "114_pull_prime_archive.py",
       "131_merge_archive_backfill.py",
       "174_apply_rulings_to_source_tables.py",
@@ -5666,12 +5668,12 @@
       "owner_hub_cedar_uid": "many",
       "cedar_uid": "many"
      },
-     "grain_declared_by": "workstream nest 2026-09-02: enterprise_edge_id confirmed 3,492 distinct / 0 blank on the FULL 3,492-row file with csv.reader; 0 literal duplicate rows. Two same-source restatements of one firm (Goldbelt's `CP Marine` / `CP Marine LLC`; BBCH's `CCI Industrial Services LLC` / `... Inc`) collide by design and are collapsed in the build - one page saying a thing twice is one assertion",
+     "grain_declared_by": "workstream nest 2026-09-02: enterprise_edge_id confirmed 3,789 distinct / 0 blank on the FULL 3,789-row file with csv.reader; 0 literal duplicate rows. Two same-source restatements of one firm (Goldbelt's `CP Marine` / `CP Marine LLC`; BBCH's `CCI Industrial Services LLC` / `... Inc`) collide by design and are collapsed in the build - one page saying a thing twice is one assertion",
      "grain_validated": true,
      "measured_rows_per_join_key": {
       "cedar_uid": 367,
       "enterprise_edge_id": 1,
-      "enterprise_id": 14,
+      "enterprise_id": 15,
       "owner_hub_cedar_uid": 367
      },
      "grain_open_question": "",
@@ -5701,12 +5703,12 @@
       "parent_enterprise_id": "many",
       "cedar_uid": "many"
      },
-     "grain_declared_by": "workstream nest 2026-09-02: enterprise_id confirmed 1,482 distinct / 0 blank on the FULL 1,482-row file with csv.reader; 0 literal duplicate rows; (owner_hub_cedar_uid, enterprise_name_normalized) tested and also unique at 1,482, and is the key the append-only id register data/spine/cedar_nest_id_register.csv binds so that a rebuild re-uses the same enterprise_id instead of re-keying the dataset",
+     "grain_declared_by": "workstream nest 2026-09-02: enterprise_id confirmed 1,610 distinct / 0 blank on the FULL 1,610-row file with csv.reader; 0 literal duplicate rows; (owner_hub_cedar_uid, enterprise_name_normalized) tested and also unique at 1,610, and is the key the append-only id register data/spine/cedar_nest_id_register.csv binds so that a rebuild re-uses the same enterprise_id instead of re-keying the dataset",
      "grain_validated": true,
      "measured_rows_per_join_key": {
-      "cedar_uid": 168,
+      "cedar_uid": 172,
       "enterprise_id": 1,
-      "owner_hub_cedar_uid": 168,
+      "owner_hub_cedar_uid": 172,
       "parent_enterprise_id": 34
      },
      "grain_open_question": "",

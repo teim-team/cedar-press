@@ -73,8 +73,6 @@ TODAY = date.today().isoformat()
 csv.field_size_limit(10_000_000)
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from importlib import import_module  # noqa: E402
-_c = import_module("990_build_newsletter_corpus") if False else None  # doc only
 
 UA = ("CedarPress-research/1.0 (tribal newsletter corpus; "
       "contact elijahsamsonmoreno@gmail.com)")

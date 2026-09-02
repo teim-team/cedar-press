@@ -2816,10 +2816,10 @@ GRAIN_NEST = {
                           "parent_enterprise_id": "many",
                           "cedar_uid": "many"},
         declared_by="workstream nest 2026-09-02: enterprise_id confirmed "
-                    "1,482 distinct / 0 blank on the FULL 1,482-row file with "
+                    "1,610 distinct / 0 blank on the FULL 1,610-row file with "
                     "csv.reader; 0 literal duplicate rows; "
                     "(owner_hub_cedar_uid, enterprise_name_normalized) tested "
-                    "and also unique at 1,482, and is the key the append-only "
+                    "and also unique at 1,610, and is the key the append-only "
                     "id register data/spine/cedar_nest_id_register.csv binds "
                     "so that a rebuild re-uses the same enterprise_id instead "
                     "of re-keying the dataset"),
@@ -2840,7 +2840,7 @@ GRAIN_NEST = {
                           "owner_hub_cedar_uid": "many",
                           "cedar_uid": "many"},
         declared_by="workstream nest 2026-09-02: enterprise_edge_id confirmed "
-                    "3,492 distinct / 0 blank on the FULL 3,492-row file with "
+                    "3,789 distinct / 0 blank on the FULL 3,789-row file with "
                     "csv.reader; 0 literal duplicate rows. Two same-source "
                     "restatements of one firm (Goldbelt's `CP Marine` / `CP "
                     "Marine LLC`; BBCH's `CCI Industrial Services LLC` / "

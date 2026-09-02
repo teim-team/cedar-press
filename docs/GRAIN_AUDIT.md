@@ -216,8 +216,8 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
-| `nest_enterprise_relations.csv` | — | DECLARED_VALIDATED | `enterprise_edge_id` | `cedar_uid`→367, `enterprise_edge_id`→1, `enterprise_id`→14, `owner_hub_cedar_uid`→367 |
-| `nest_enterprises.csv` | — | DECLARED_VALIDATED | `enterprise_id` | `cedar_uid`→168, `enterprise_id`→1, `owner_hub_cedar_uid`→168, `parent_enterprise_id`→34 |
+| `nest_enterprise_relations.csv` | — | DECLARED_VALIDATED | `enterprise_edge_id` | `cedar_uid`→367, `enterprise_edge_id`→1, `enterprise_id`→15, `owner_hub_cedar_uid`→367 |
+| `nest_enterprises.csv` | — | DECLARED_VALIDATED | `enterprise_id` | `cedar_uid`→172, `enterprise_id`→1, `owner_hub_cedar_uid`→172, `parent_enterprise_id`→34 |
 
 ### Natural Resource Revenues  (`natural-resources`)
 
