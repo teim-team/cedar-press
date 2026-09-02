@@ -1,11 +1,11 @@
 vote_id,congress,chamber,date,bill_id,bill_title,question,result,yea,nay,threshold_required,margin,vehicle_type,majority_side
 H093-0076,93,House,1973-05-07,93-hr-4967,A bill to authorize appropriations for the Indian Claims Commission for fiscal year 1974.,TO SUSPEND THE RULES AND PASS H.R. 4967,Passed,336,8,TWO_THIRDS_OF_THOSE_VOTING,328,bill,yea
-H099-0841,99,House,1986-10-07,99-hr-2868,Gay Head Wampanoag Indian Claims Settlement Act of 1985,TO PASS HR 2868,Passed,217,172,SIMPLE_MAJORITY_OF_THOSE_VOTING,45,bill,yea
-H102-0807,102,House,1992-09-15,102-hr-3724,Indian Health Amendments of 1991,On Passage,Passed,330,36,SIMPLE_MAJORITY_OF_THOSE_VOTING,294,bill,yea
-H104-0497,104,House,1995-07-13,104-hr-1977,"Department of the Interior and Related Agencies Appropriations Act, 1996",On Agreeing to the Amendment,Agreed to,281,117,SIMPLE_MAJORITY_OF_THOSE_VOTING,164,bill,yea
-H105-0326,105,House,1997-07-25,105-hr-2203,"Energy and Water Development Appropriations Act, 1998",On Agreeing to the Substitute Amendment,Agreed to,223,201,SIMPLE_MAJORITY_OF_THOSE_VOTING,22,bill,yea
-S108-0362,108,Senate,2003-09-23,108-hr-2691,"Department of the Interior and Related Agencies Appropriations Act, 2004",On the Amendment,Amendment Rejected,43,52,SIMPLE_MAJORITY_OF_THOSE_VOTING,-9,bill,nay
-S110-0467,110,Senate,2008-02-14,110-s-1200,Indian Health Care Improvement Act Amendments of 2008,On the Amendment,Amendment Rejected,28,67,SIMPLE_MAJORITY_OF_THOSE_VOTING,-39,bill,nay
-H112-1196,112,House,2012-05-15,112-hr-205,HEARTH Act of 2012,"On Motion to Suspend the Rules and Pass, as Amended",Passed,400,0,TWO_THIRDS_OF_THOSE_VOTING,400,bill,yea
-S113-0504,113,Senate,2014-06-25,113-hr-803,Workforce Innovation and Opportunity Act,On the Amendment,Amendment Rejected,40,58,SIMPLE_MAJORITY_OF_THOSE_VOTING,-18,bill,nay
-H116-0238,116,House,2019-06-04,116-hr-6,American Dream and Promise Act of 2019,On Motion to Recommit with Instructions,Failed,202,221,SIMPLE_MAJORITY_OF_THOSE_VOTING,-19,bill,nay
+S099-0374,99,Senate,1985-12-13,99-s-1396,White Earth Reservation Land Settlement Act of 1985,"TO TABLE THE MELCHER, MT) APPEAL OF THE CHAIR'S RULING THAT THE MELCHER AMENDMENT TO S 1396, TO GIVE LEGAL ADVISE TO PERSONS RECEIVING ALLOCATIONS OF LAND ON THE WHITE EARTH INDIAN RESERVATION WAS NOT GERMANE",Agreed to,56,36,SIMPLE_MAJORITY_OF_THOSE_VOTING,20,bill,yea
+H102-0874,102,House,1992-10-03,102-s-2481,Indian Health Amendments of 1992,"SUSPEND THE RULES AND PASS, AS AMENDED",Passed,335,74,TWO_THIRDS_OF_THOSE_VOTING,261,bill,yea
+H104-0682,104,House,1995-09-29,104-hr-1977,"Department of the Interior and Related Agencies Appropriations Act, 1996",Motion to Recommit Conference Report with Instructions,Passed,277,147,SIMPLE_MAJORITY_OF_THOSE_VOTING,130,bill,yea
+H105-0482,105,House,1997-10-01,105-hr-1476,Miccosukee Settlement Act of 1997,On motion to suspend the rules and pass,Failed,229,176,TWO_THIRDS_OF_THOSE_VOTING,53,bill,yea
+S108-0511,108,Senate,2004-03-11,108-sconres-95,An original concurrent resolution setting forth the congressional budget for the United States Government for fiscal year 2005 and including the appropriate budgetary levels for fiscal years 2006 through 2009.,On the Amendment,Amendment Rejected,42,54,SIMPLE_MAJORITY_OF_THOSE_VOTING,-12,resolution_vehicle,nay
+S110-0474,110,Senate,2008-02-26,110-s-1200,Indian Health Care Improvement Act Amendments of 2008,On Passage of the Bill,Bill Passed,83,10,SIMPLE_MAJORITY_OF_THOSE_VOTING,73,bill,yea
+H112-1331,112,House,2012-06-19,112-hr-2938,Gila Bend Indian Reservation Lands Replacement Clarification Act,"On Motion to Suspend the Rules and Pass, as Amended",Passed,343,78,TWO_THIRDS_OF_THOSE_VOTING,265,bill,yea
+H114-0129,114,House,2015-03-23,114-hr-360,Native American Housing Assistance and Self-Determination Reauthorization Act of 2015,"On Motion to Suspend the Rules and Pass, as Amended",Passed,297,98,TWO_THIRDS_OF_THOSE_VOTING,199,bill,yea
+H116-0544,116,House,2019-09-25,116-hr-2203,Homeland Security Improvement Act,On Motion to Recommit with Instructions,Failed,207,216,SIMPLE_MAJORITY_OF_THOSE_VOTING,-9,bill,nay

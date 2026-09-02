@@ -157,9 +157,10 @@ them.
   at source.
 
 - **`federal_funding_transactions.canonical_name`** is a legacy display label,
-  not Cedar's name for the entity. **Group on `cedar_uid`.** On 345,180 of
-  552,602 keyed rows the two disagree, and the overwhelming majority of those
-  are a right identity wearing a stale label. See the correction below.
+  not Cedar's name for the entity. **Group on `cedar_uid`.** On 344,360 of
+  552,602 keyed rows the two disagree, and every one of those is a right
+  identity wearing a stale label — re-measured below, with the method, because
+  this file previously stated the same quantity as two different numbers.
 
 ## The Acoma finding, and the correction the data side owes this review
 
@@ -174,12 +175,42 @@ carries `cedar_uid = CE-0011W-HN`, which the identity register resolves to
 **Pueblo of Acoma**, a federally recognized tribe. What is wrong is only the
 free-text `canonical_name`, which `24_funding_merge` copies verbatim out of a
 legacy do-file key that literally contains `{234, 'haaku community academy',
-NM}`. It is not a Cedar name at all. Of 552,602 rows carrying a `cedar_uid`,
-345,108 disagree with the register's name, and **339,129 of those — 98.3%,
-$94.0B — are explained entirely by that legacy reconciliation: right identity,
-stale label.** The register even records the reconciliation, and it holds the
-real sub-hubs separately and uses them correctly when the recipient genuinely
-is the school (Blackfeet Community College, `CE-0010N-2P`, 312 rows).
+NM}`. It is not a Cedar name at all.
+
+**Re-measured 2026-09-02, and this file had stated the same quantity twice with
+two different values — 345,180 in the section above and 345,108 here.** Both
+are now dead. The method, so the next reader repeats it instead of trusting
+it: compare `canonical_name` in `data/clean/federal_funding_transactions.csv`
+against the `canonical_name` the identity register
+(`data/spine/cedar_identity_register.csv`, 1,555 entries) holds for that row's
+`cedar_uid`, case-insensitive, exact string.
+
+| | rows |
+|---|---:|
+| carry a `cedar_uid` | 552,602 |
+| …name disagrees with the register | **340,738** |
+| …`canonical_name` blank, uid present | 3,622 |
+| …`cedar_uid` absent from the register | **0** |
+| total not matching the register's label | **344,360** |
+
+**340,653 of the 340,738 — 100.0%, $94,256,591,555.42 of obligations — carry a
+label that appears verbatim in the legacy do-file key
+`lineageA_dta_corrtd_tribe_key.csv` (393 distinct name strings).** Right
+identity, stale label, one known cause.
+
+**The residue is 85 rows and neither needs a repoint, which is the part worth
+saying.** 72 rows / $29,694,344.00 on `CE-001GC-WN` are labelled `Forest
+County` while the register calls that entity *Sonoma County Indian Health
+Project, Inc.* — and **all 72 are `recipient_state_code = CA`**, so the key is
+right and only the label is wrong. That label is worse than merely stale: it
+names a Wisconsin county, and Forest County Potawatomi is a real nation whose
+published terms forbid reuse. The other 13 are `Warms Springs Tribe` for *Warm
+Springs Tribe*, all Oregon — a typo. **Zero of the 344,360 turned out to be a
+misattribution.**
+
+The register holds the real sub-hubs separately and uses them correctly when
+the recipient genuinely is the school (Blackfeet Community College,
+`CE-0010N-2P`, 312 rows).
 
 So entity-level grouping on `cedar_uid` — the key ADR-009 mandates — credits
 the tribe. Only grouping on the legacy display name credits the school. **The
@@ -227,11 +258,26 @@ the data side.
 
 ## Status of the fourteen
 
-**14 of 14 are READY** against the data project's production contract, up from
-4 when this branch first opened and 11 a day ago. The fourteenth, `nest`
-(tribally owned enterprises), landed while this branch was open and ships with
-a sample like the rest. Regenerate the scoreboard with
-`py -3 code/518_dataset_readiness.py`; there are three statuses and no fourth.
+**12 of 14 are READY as regenerated for this push**, against 14 of 14 in the
+last one. Both blocked datasets are named, with the contract point each one
+misses, in `collection_descriptors.cedar.json`:
+
+| | | |
+|---|---|---|
+| `owned` | BLOCKED | its published row count is contradicted by its own sample — a check added on this branch, section below |
+| `deals` | BLOCKED | `C1 grain UNSTATED` and `C2 no validated primary key` on `deals_press_edgar_ancsa_additions.csv`, a table another workstream added to the collection while this branch was open |
+
+**The `deals` block is not this workstream's and is named rather than
+absorbed.** It is also the honest illustration of why this section says
+"as regenerated" rather than a number: the count was 14, then 13, then 12
+inside one hour, because ten jobs write the underlying tables concurrently and
+`deals_classified.csv` itself moved 935 → 1,079 rows mid-branch. **Regenerate
+the scoreboard — `py -3 code/518_dataset_readiness.py` — rather than quote
+this line.** There are three statuses and no fourth.
+
+Otherwise unchanged: up from 4 when this branch first opened and 11 two days
+ago, with `nest` (tribally owned enterprises) the fourteenth collection,
+landed mid-branch and shipping a sample like the rest.
 
 **This section previously said 11 of 13, and named `subcontracting` at 42% of
 entity-bearing rows keyed and `funding` at 40%. Both figures were wrong, and
@@ -265,8 +311,88 @@ the pair.** `funding`'s number moved twice — the full scan first put it at
 argument for regenerating this section rather than typing it: a figure quoted
 by hand goes stale in place, and this one went stale twice in two days.
 
-A BLOCKED dataset would not be unusable; it would mean a specific contract
-point is unmet, and which one is printed. None is blocked today.
+A BLOCKED dataset is not unusable; it means a specific contract point is
+unmet, and which one is printed. Two are blocked today; the one this branch
+found is below.
+
+## The finding this side brought: `owned` shipped two row counts 1,259 apart
+
+Nothing Codex asked for. It came out of the instruction to re-check every
+claim in this directory against the live data before pushing, and the two
+contradicting files were **already both in this repo**, side by side:
+
+    data/cedar/samples/README.md          owned -> native_owned_businesses.csv, 2,916 rows
+    data/cedar/collection_descriptors.json  owned -> "rows_label": "1,657 rows"
+
+**A sum over a dataset's tables cannot be smaller than one of its tables.**
+That is the whole bug, and it needed no judgement to see once the two numbers
+were put next to each other — which nothing had ever done.
+
+**Cause.** `770_sample_extracts.FLAGSHIP` draws the customer's ten rows from
+`native_owned_businesses.csv` — the harmonised directory, **2,916 rows across
+21 certifying authorities**, and the table the dataset is named after.
+`760_collection_descriptors.rows_in()` sums only the tables the *collection
+contract* claims, and for this collection that is six `individual_native_*`
+tables totalling 1,657 — a different workstream, about firms owned by
+individual people rather than by nations. The collection's membership rule in
+the data project, `500.COLLECTIONS`, matches
+`^(individual_native|tribal_certification)`; the namesake table matches
+neither branch and is claimed by **no collection at all**. It has been a known
+orphan since 2026-09-01, listed under `contract_orphan_shippable = 6` and
+attributed to "the workstreams that registered them". Nobody had connected it
+to what the product publishes.
+
+**The row count is the smaller half of the cost.** `owned` was reported READY
+on `c4_identity_path = 100% keyed` and `c1_grain = 6/6` — both measured across
+the six tables that exclude the directory. Measured on the directory itself:
+
+| | |
+|---|---:|
+| rows | 2,916 |
+| `business_entity_id` filled | **4 (0.1%)** |
+| `nation_id` filled | 2,725 (93.4%) |
+| `certifying_authority_entity_id` filled | 2,767 (94.9%) |
+| declared grain | **UNSTATED** |
+
+So "100% keyed" is true of six tables the buyer is never shown and false of
+the one they are. The dataset keys reliably to a *nation*; it barely keys the
+*business*. That is a real and defensible product — `affiliated_with` a named
+nation is exactly what `docs/PUBLICATION_POLICY.md` says Cedar should claim —
+but it is not what READY was asserting.
+
+**What was done, and what deliberately was not.** `760` now enforces the
+arithmetic invariant, with three fixtures that prove the check fires
+(`py -3 code/760_collection_descriptors.py selftest`) and a `verify` that
+exits 1. On a violation it does not quietly repair the number: it publishes
+the union of both Cedar-side declarations — 1,657 + 2,916 = **4,573 rows**,
+with the basis stated in `collection_descriptors.cedar.json` — and marks the
+dataset BLOCKED with the measurement in `cedar.blockers`. The status reverts
+on its own the moment the collection is fixed.
+
+**Widening the collection was not done here, on purpose.** It adds four tables
+with no declared grain and no declared key (`native_owned_businesses.csv`
+2,916, `native_business_contract_links.csv` 2,393,
+`native_business_identifier_crosswalk.csv` 481,
+`native_business_contracting_by_nation.csv` 18) and it moves a dataset's
+readiness, which is an integrator and owner decision rather than this
+workstream's. It is filed with this evidence in the data project's decision
+queue, and declared in ADR-018.
+
+Two things checked and found clean while chasing it. The same invariant across
+all fourteen collections finds **1 violation, not a class**: 13 flagship
+tables are claimed by their own collection and every other row count exceeds
+its flagship. And `_entity_layer` is exempt from the membership half rather
+than passed by luck — its flagship `cedar_identity_register.csv` lives in
+`data/spine/`, outside the contract by construction, and clears the arithmetic
+half at 1,555 rows against 326,899.
+
+**One measurement retracted before it was reported.** Two consecutive runs of
+`770` first appeared to produce different `legislation` samples, which would
+have meant a non-deterministic sampler. Re-run with the input mtimes captured
+either side: **byte-identical across all fourteen samples**, and the input
+`bill_votes.csv` had been rewritten by a concurrent job between the first two
+runs. The sampler is deterministic; the first check was measuring something
+other than its own name.
 
 ## Codex round 2 (PR #29): eight findings, eight measured
 

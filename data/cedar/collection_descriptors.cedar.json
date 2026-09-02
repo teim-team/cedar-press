@@ -23,18 +23,6 @@
     "sample_file": "samples/contractors__sample.csv",
     "needs_copy": false
   },
-  "deals": {
-    "cedar_id": "deals",
-    "product_id": "deals",
-    "status": "READY",
-    "blockers": [
-      "-"
-    ],
-    "n_rows": 2386,
-    "n_tables": 14,
-    "sample_file": "samples/deals__sample.csv",
-    "needs_copy": false
-  },
   "federal-register": {
     "cedar_id": "federal-register",
     "product_id": "federal-register",
@@ -66,7 +54,7 @@
     "blockers": [
       "-"
     ],
-    "n_rows": 127312,
+    "n_rows": 128487,
     "n_tables": 54,
     "sample_file": "samples/gaming__sample.csv",
     "needs_copy": false
@@ -90,7 +78,7 @@
     "blockers": [
       "-"
     ],
-    "n_rows": 242199,
+    "n_rows": 264478,
     "n_tables": 35,
     "sample_file": "samples/lobbying__sample.csv",
     "needs_copy": false
@@ -110,14 +98,17 @@
   "owned": {
     "cedar_id": "native-owned-businesses",
     "product_id": "owned",
-    "status": "READY",
+    "status": "BLOCKED",
     "blockers": [
-      "-"
+      "FLAGSHIP MISMATCH: the sampled table alone holds 2,916 rows and the descriptor claims 1,657 for the whole dataset (500.COLLECTIONS does not claim native_owned_businesses.csv for native-owned-businesses; see ADR-018)"
     ],
-    "n_rows": 1657,
+    "n_rows": 4573,
     "n_tables": 6,
     "sample_file": "samples/owned__sample.csv",
-    "needs_copy": false
+    "needs_copy": false,
+    "flagship_table": "native_owned_businesses.csv",
+    "flagship_rows": 2916,
+    "n_rows_basis": "1,657 rows over 6 contract tables + 2,916 in the unclaimed flagship native_owned_businesses.csv"
   },
   "natural-resources": {
     "cedar_id": "natural-resources",
@@ -126,7 +117,7 @@
     "blockers": [
       "-"
     ],
-    "n_rows": 34491,
+    "n_rows": 34551,
     "n_tables": 8,
     "sample_file": "samples/natural-resources__sample.csv",
     "needs_copy": false
@@ -165,6 +156,19 @@
     "n_rows": 77529,
     "n_tables": 3,
     "sample_file": "samples/subcontracting__sample.csv",
+    "needs_copy": false
+  },
+  "deals": {
+    "cedar_id": "deals",
+    "product_id": "deals",
+    "status": "BLOCKED",
+    "blockers": [
+      "C1 grain UNSTATED on 1: deals_press_edgar_ancsa_additions.csv",
+      "C2 no validated primary key on 1"
+    ],
+    "n_rows": 2674,
+    "n_tables": 15,
+    "sample_file": "samples/deals__sample.csv",
     "needs_copy": false
   }
 }

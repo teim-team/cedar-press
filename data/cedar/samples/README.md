@@ -12,7 +12,7 @@ These exist so the finished shape can be judged before the datasets are finished
 |---|---|---:|---:|---:|---|
 | `_entity_layer` | `cedar_identity_register.csv` | 10 | 1,555 | 6 | UNSTATED |
 | `contractors` | `prime_contracts.csv` | 10 | 1,217,768 | 18 | TWO populations under one schema, and the seam is real. Archive rows (FY2008-FY2026, source_file `FY*_All_Cont |
-| `deals` | `deals_classified.csv` | 10 | 935 | 17 | one row per classified deal event - the merged deals ledger |
+| `deals` | `deals_classified.csv` | 10 | 1,079 | 17 | one row per classified deal event - the merged deals ledger |
 | `federal-register` | `consultation_events.csv` | 10 | 11,402 | 15 | one row per (consultation event, participant as published). `consultation_event_id` alone is NOT unique - an e |
 | `funding` | `federal_funding_transactions.csv` | 10 | 701,955 | 12 | one row per federal assistance award TRANSACTION, across the union of the assistance and archive pulls |
 | `gaming` | `gaming_facilities.csv` | 10 | 787 | 21 | one row per gaming facility - the directory core, docs/GAMING_BUILD_LOG_2026-08-05.md |
