@@ -52,6 +52,11 @@ THREE THINGS THAT MAKE A SCAN REPORT 0% ON A LINKED DATASET
 Each of these was measured on this product surface, and each one produced a
 wrong figure before it was fixed here.
 
+**The counts below are WORKED EXAMPLES from 2026-09-02 and they will rot** -
+these flagships are rebuilt by other workstreams and two of them moved while
+this file was being written.  Run `report` for live figures.  The SHAPES are
+what the code depends on, and the shapes are stable.
+
 **1. A LIST-VALUED KEY COLUMN.**  `nagpra_notices` has no `cedar_uid`.  It
 carries six pipe-delimited role columns - `consulted_entity_ids`,
 `affiliated_entity_ids`, `repatriation_recipient_entity_ids` and three more -
@@ -110,12 +115,20 @@ OUT = CLEAN / "_linkage_coverage.json"
 FLOOR = CLEAN / "_linkage_coverage_baseline.json"
 TODAY = date.today().isoformat()
 
-# A coverage figure may fall by this many BASIS POINTS (0.01 pp) without
+# A coverage RATIO may fall by this many BASIS POINTS (0.01 pp) without
 # failing.  Not zero: several flagships are rebuilt by other workstreams and a
 # rebuild that adds honest unlinked rows lowers the ratio without losing a
 # single link.  It is small enough that losing links cannot hide inside it -
-# 25 bp of prime_contracts is 3,044 rows - and the absolute
-# `linkage_<dataset>_rows` counter beside it has NO tolerance at all.
+# 25 bp of prime_contracts is 3,044 rows.
+#
+# The absolute counter `linkage_<dataset>_rows` gets no percentage tolerance
+# at all.  It gets a PRECISE allowance instead, from the denominator that
+# travels beside it: a link may fall by as many rows as the table itself lost,
+# and not one more.  A link cannot survive a row that does not exist; a link
+# lost from a row that STILL EXISTS is the defect.  That rule was earned
+# ninety seconds after the first baseline was recorded, when
+# native_owned_businesses went 4,274 -> 4,273 rows and 4,125 -> 4,124 links in
+# another workstream's rebuild and this gate could not say it was benign.
 TOLERANCE_BP = 25
 
 # SQL keywords and literal values that appear inside a predicate and are not
@@ -467,12 +480,24 @@ def coverage():
         con.close()
 
 
+_METRICS_CACHE = {}
+
+
 def metrics(cov=None):
     """62's shape: MUST_NOT_FALL scalars, in basis points and in rows.
 
     Basis points rather than a float, because a ratchet compares numbers and
     a float round-tripping through JSON is a source of spurious failures.
+
+    MEMOISED FOR THE LIFE OF THE PROCESS. `coverage()` scans thirteen
+    flagships including a 1.57 GB `prime_contracts.csv`, and `selftest` calls
+    `verify` five times to prove five cases - unmemoised that is five full
+    scans to answer a question about a JSON file. The cache is per-process
+    and the tables cannot change under a single run; anything that wants a
+    fresh measurement calls `coverage()`.
     """
+    if cov is None and "m" in _METRICS_CACHE:
+        return dict(_METRICS_CACHE["m"])
     cov = cov or coverage()
     m = {}
     for d in cov["datasets"]:
@@ -483,9 +508,20 @@ def metrics(cov=None):
             continue
         m[f"linkage_{k}_bp"] = int(round(10000.0 * d["linked"] / d["rows"]))
         m[f"linkage_{k}_rows"] = d["linked"]
+        # The DENOMINATOR travels with the numerator, and it is not decoration.
+        # A rebuild that removes rows legitimately removes their links, and a
+        # zero-tolerance counter on a flagship nine agents are rebuilding fires
+        # on that within the minute - measured: `native_owned_businesses` went
+        # 4,274 -> 4,273 rows and 4,125 -> 4,124 links while this file was
+        # being written. Without the denominator there is no way to tell that
+        # from a link being lost off a row that still exists, which is the
+        # defect the ratchet is for.
+        m[f"linkage_{k}_denom"] = d["rows"]
     live = [d for d in cov["datasets"] if d.get("linked") is not None]
     m["linkage_datasets_measured"] = len(live)
     m["linkage_linked_rows_total"] = sum(d["linked"] for d in live)
+    m["linkage_linked_rows_total_denom"] = sum(d["rows"] for d in live)
+    _METRICS_CACHE["m"] = dict(m)
     return m
 
 
@@ -635,13 +671,28 @@ def render(cov):
       f"`248` is a retired stub for exactly the reason that two detectors "
       f"for one class drift.")
     A("")
-    A(f"**The tolerance is not zero on purpose.** Several flagships are "
-      f"rebuilt by other workstreams, and a rebuild that adds honest "
+    A(f"**The ratio's tolerance is not zero on purpose.** Several flagships "
+      f"are rebuilt by other workstreams, and a rebuild that adds honest "
       f"unlinked rows lowers the ratio without losing a single link. Losing "
       f"links cannot hide inside it: {TOLERANCE_BP} bp of `prime_contracts` "
-      f"is more than 3,000 rows. **`linkage_<dataset>_rows` is carried "
-      f"beside it with NO tolerance at all**, so a fall in the absolute "
-      f"count of linked rows fails the gate even when the ratio holds.")
+      f"is more than 3,000 rows.")
+    A("")
+    A("**`linkage_<dataset>_rows` — the absolute count of linked rows — is "
+      "carried beside it, and the rule on it is exact:**")
+    A("")
+    A("> A link may fall by as many rows as the table itself lost, and not "
+      "one more.")
+    A("")
+    A("A link cannot survive a row that does not exist, so a rebuild that "
+      "removes rows legitimately removes their links; a link lost from a row "
+      "that still EXISTS is the defect, and it fails with no tolerance at "
+      "all. `linkage_<dataset>_denom` carries the row count so the two can "
+      "be told apart. The rule was earned ninety seconds after the first "
+      "baseline, when `native_owned_businesses` went 4,274 → 4,273 rows and "
+      "4,125 → 4,124 links in another workstream's rebuild and the gate "
+      "could not say that was benign. A percentage tolerance was rejected: "
+      "0.1% of `prime_contracts` is 791 rows, which is the hiding place zero "
+      "tolerance existed to close.")
     A("")
     A("---")
     A("")
@@ -752,12 +803,32 @@ def below_floor():
         if v == "UNMEASURED":
             out.append((k, f"UNMEASURED now, {floor} at the baseline"))
             continue
-        if not isinstance(floor, int):
+        if not isinstance(floor, int) or k.endswith("_denom"):
             continue
-        slack = tol if k.endswith("_bp") else 0
-        if v < floor - slack:
+        if k.endswith("_bp"):
+            if v < floor - tol:
+                out.append((k, f"{v:,} is below its floor of {floor:,} "
+                               f"(tolerance {tol} bp)"))
+            continue
+        # A ROW COUNTER. Zero tolerance for links lost, full allowance for
+        # rows that are simply no longer in the table: `shrank` is how many
+        # rows the flagship lost since the baseline, and a link cannot
+        # survive a row that does not exist.
+        dk = k[:-5] + "_denom" if k.endswith("_rows") else None
+        dk = "linkage_linked_rows_total_denom" if \
+            k == "linkage_linked_rows_total" else dk
+        shrank = 0
+        if dk and isinstance(base["metrics"].get(dk), int) \
+                and isinstance(now.get(dk), int):
+            shrank = max(0, base["metrics"][dk] - now[dk])
+        if v < floor - shrank:
             out.append((k, f"{v:,} is below its floor of {floor:,}"
-                           + (f" (tolerance {tol} bp)" if slack else "")))
+                           + (f", and the table only shrank by {shrank:,} "
+                              f"row(s) - so {floor - shrank - v:,} link(s) "
+                              f"were lost from rows that still exist"
+                              if shrank else
+                              " and the table did not shrink - links were "
+                              "lost from rows that still exist")))
     return out
 
 
@@ -769,26 +840,18 @@ def do_verify(quiet=False):
     base = json.loads(FLOOR.read_text(encoding="utf-8"))
     tol = int(base.get("tolerance_bp", TOLERANCE_BP))
     now = metrics()
-    fails = []
+    fails = [f"{k} - {why}" for k, why in below_floor()]
     for k, floor in sorted(base["metrics"].items()):
         v = now.get(k)
         if v is None:
             fails.append(f"{k}: present at the baseline, ABSENT now. A "
                          f"dataset that stopped being measured is not a "
                          f"dataset that improved.")
-            continue
-        if v == "UNMEASURED":
+        elif v == "UNMEASURED":
             fails.append(f"{k}: UNMEASURED now, {floor} at the baseline. "
                          f"An absence of evidence must never print as "
                          f"evidence of absence.")
-            continue
-        if not isinstance(floor, int):
-            continue
-        slack = tol if k.endswith("_bp") else 0
-        if v < floor - slack:
-            fails.append(f"{k} = {v:,}, below its floor of {floor:,}"
-                         + (f" (tolerance {tol} bp)" if slack else "")
-                         + " - LINKAGE COVERAGE FELL.")
+    fails = sorted(set(fails))
     if not DOC.exists():
         fails.append(f"{DOC.relative_to(ROOT)} is absent - run "
                      f"`py -3 code/1139_linkage_coverage.py apply`.")
@@ -801,18 +864,32 @@ def do_verify(quiet=False):
     if not quiet:
         n = len([k for k in base["metrics"] if k.endswith("_bp")])
         print(f"LINKAGE COVERAGE RATCHET: PASS - {n} datasets, none below "
-              f"floor (tolerance {tol} bp, 0 on the row counters).")
+              f"floor. Ratios carry {tol} bp; a linked-row count may fall "
+              f"only by as many rows as its table lost, and not one more.")
     return 0
 
 
 def do_selftest():
     """Prove verify FIRES.  A check that has never failed on purpose is not
-    known to work (AGENT_FIELD_GUIDE rule 1)."""
+    known to work (AGENT_FIELD_GUIDE rule 1).
+
+    THE REAL BASELINE IS NEVER WRITTEN TO.  The first version poisoned
+    `FLOOR` in place and restored it in a `finally`, which is correct right up
+    to the moment the process is killed - and one was, leaving a poisoned
+    floor on disk that then failed every subsequent `verify` for a reason
+    that had nothing to do with the data.  A `finally` is not a guarantee.
+    So the poisoned copies go to a sibling path and the module's FLOOR is
+    repointed at it for the duration; a kill leaves a stray temp file and an
+    untouched baseline.
+    """
+    global FLOOR
     if not FLOOR.exists():
         print("selftest needs a baseline on file first.", file=sys.stderr)
         return 2
-    orig = FLOOR.read_text(encoding="utf-8")
+    real = FLOOR
+    orig = real.read_text(encoding="utf-8")
     base = json.loads(orig)
+    FLOOR = real.with_name(real.stem + ".selftest_scratch.json")
     key = next((k for k in base["metrics"]
                 if k.endswith("_bp") and isinstance(base["metrics"][k], int)),
                None)
@@ -822,6 +899,7 @@ def do_selftest():
                    and base["metrics"][k] > 0), None)
     if key is None or rowkey is None:
         print("selftest: no numeric metric in the baseline.", file=sys.stderr)
+        FLOOR = real
         return 2
     ok = True
     try:
@@ -838,16 +916,52 @@ def do_selftest():
         FLOOR.write_text(json.dumps(p, indent=2), encoding="utf-8")
         rc = do_verify(quiet=True)
         print(f"  floor {rowkey} raised by 1 row  -> verify exit {rc} "
-              f"(expect 1 - the row counter has NO tolerance)")
+              f"(expect 1 - a lost link has NO tolerance)")
         ok &= rc == 1
+
+        # THE SHRINK ALLOWANCE, proven in BOTH directions. Raising the row
+        # floor by 1 AND the denominator floor by 1 says "the table lost one
+        # row and with it one link", which is not a regression and must PASS.
+        # Raising the row floor by 2 while the denominator floor moves 1 says
+        # a link was lost from a row that still exists, and must FAIL.
+        dk = (rowkey[:-5] + "_denom") if rowkey.endswith("_rows") else None
+        if dk and isinstance(base["metrics"].get(dk), int):
+            p = json.loads(orig)
+            p["metrics"][rowkey] = base["metrics"][rowkey] + 1
+            p["metrics"][dk] = base["metrics"][dk] + 1
+            FLOOR.write_text(json.dumps(p, indent=2), encoding="utf-8")
+            rc = do_verify(quiet=True)
+            print(f"  ... and its denominator by 1  -> verify exit {rc} "
+                  f"(expect 0 - a row that left took its link with it)")
+            ok &= rc == 0
+
+            p = json.loads(orig)
+            p["metrics"][rowkey] = base["metrics"][rowkey] + 2
+            p["metrics"][dk] = base["metrics"][dk] + 1
+            FLOOR.write_text(json.dumps(p, indent=2), encoding="utf-8")
+            rc = do_verify(quiet=True)
+            print(f"  2 links lost, 1 row lost     -> verify exit {rc} "
+                  f"(expect 1 - one link left a row that still exists)")
+            ok &= rc == 1
+        else:
+            print("  shrink-allowance case SKIPPED - no denominator on the "
+                  "baseline. Re-record it: `baseline`.")
+            ok = False
 
         FLOOR.write_text(orig, encoding="utf-8")
         rc = do_verify(quiet=True)
-        print(f"  baseline restored              -> verify exit {rc} "
+        print(f"  unpoisoned copy               -> verify exit {rc} "
               f"(expect 0)")
         ok &= rc == 0
     finally:
-        FLOOR.write_text(orig, encoding="utf-8")
+        scratch, FLOOR = FLOOR, real
+        try:
+            scratch.unlink()
+        except OSError:
+            pass
+    rc = do_verify(quiet=True)
+    print(f"  REAL baseline, never written  -> verify exit {rc} (expect 0)")
+    ok &= rc == 0
     print("selftest PASS" if ok else "selftest FAIL")
     return 0 if ok else 1
 

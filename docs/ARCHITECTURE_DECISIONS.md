@@ -3240,12 +3240,24 @@ baseline would have required re-recording it, which bakes in whatever else is
 red that day; standing rule 15 forbids it. This way the gate is live the
 moment it lands.
 
-Two counters per dataset. `linkage_<d>_bp` is the ratio, with a **25 basis
+Three counters per dataset. `linkage_<d>_bp` is the ratio, with a **25 basis
 point** tolerance, because several flagships are rebuilt by other workstreams
 and a rebuild that adds honest unlinked rows lowers a ratio without losing a
-link. `linkage_<d>_rows` is the absolute count of linked rows and has **no
-tolerance at all**, so links being lost while the ratio holds still fails.
-`1139 selftest` proves both fire.
+link. `linkage_<d>_rows` is the absolute count of linked rows, so links being
+lost while the ratio holds still fails. `linkage_<d>_denom` is the row count,
+and it is not decoration:
+
+> **A link may fall by as many rows as the table itself lost, and not one
+> more.**
+
+That rule was earned ninety seconds after the first baseline was recorded, by
+the gate failing on `native_owned_businesses` going 4,274 -> 4,273 rows and
+4,125 -> 4,124 links in another workstream's rebuild. A link cannot survive a
+row that does not exist. **The alternative — a percentage tolerance on the row
+counter — was rejected**: 0.1% of `prime_contracts` is 791 rows, which is
+precisely the hiding place zero tolerance existed to close. `1139 selftest`
+proves all three cases, including that losing two links while losing one row
+still fails.
 <!-- END ADR-037-LINKAGE-COVERAGE -->
 
 <!-- BEGIN ADR-038-PRIME-SUB-NEVER-COMBINED -->
@@ -3532,13 +3544,14 @@ Register into Cedar is the *same evidence family*.
 `nagpra_notice_source_corroboration.csv` is not that. Cedar's
 `mni_total_stated` is **read out of the notice's prose**; NPS's `TotalMNI` is
 **the Program's own record of the same repatriation**. Two observers. Joined on
-`fr_document_number`: **AGREE 3,954 · DISAGREE 315 · NOT_TESTABLE 2,492 ·
+`fr_document_number`: **AGREE 3,950 · DISAGREE 315 ·
+NOT_TESTABLE_NO_MNI_ONE_SIDE 2,488 · NOT_TESTABLE_MULTIPLE_NPS_ROWS 8 ·
 IN_NPS_ONLY 49 · IN_CEDAR_ONLY 31.**
 
 **Not one disagreement was resolved and not one value was overwritten.** The
 table asserts no verdict about which reader is right; it carries both numbers,
 both sources, and the sentence saying what the comparison does not decide. That
-is the whole point — a warehouse without lineage would have booked 3,954
+is the whole point — a warehouse without lineage would have booked 3,950
 "confirmations" and quietly discarded 315 rows to make the join clean.
 
 **One declared key repair, and it is scoped so it cannot generalise.** Two NPS

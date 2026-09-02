@@ -168,8 +168,8 @@
 | name as recorded | rows |
 |---|---:|
 | FARMERS EDUCATIONAL & COOPERATIVE UNION OF AMERICA NORTH DAKOTA DIV | 65 |
-| ASSOCIATION OF OLD CROWS | 41 |
 | SOUTH DAKOTA CONGRESS OF PARENTS AND TEACHERS | 41 |
+| ASSOCIATION OF OLD CROWS | 41 |
 | ORDER OF THE EASTERN STAR OF SOUTH DAKOTA | 28 |
 | VETERANS OF FOREIGN WARS OF THE UNITED STATES DEPT OF NORTH DAKOTA | 28 |
 
@@ -190,10 +190,10 @@
 | name as recorded | rows | amount |
 |---|---:|---:|
 | Tunica-Biloxi | 6 | $0.00 |
-| Shee Atika, Incorporated | 4 | $18,300,000.00 |
 | Mohegan Tribe of Indians of Connecticut (Mohegan Tribal Gaming Authori | 4 | $638,913,000.00 |
+| Shee Atika, Incorporated | 4 | $18,300,000.00 |
 | Seminole | 3 | $0.00 |
-| Cook Inlet Housing Authority | 3 | $17,000,000.00 |
+| Mohegan | 3 | $0.00 |
 
 ## `lobbying` - `native_entity_lobbying_disclosures.csv`
 
@@ -235,7 +235,7 @@
 | Tribal Adoption Parity Act | 12 |
 | Endangered Species Management Self-Determination Act | 9 |
 | Alaska Native Veterans Land Allotment Equity Act | 9 |
-| State, Tribal, and Local Species Transparency and Recovery Act | 8 |
+| Native American Indian Education Act | 8 |
 
 ## `federal-register` - `consultation_events.csv`
 
@@ -290,7 +290,13 @@
 
 `py -3 code/1139_linkage_coverage.py baseline` records the figures above as a floor in `data/clean/_linkage_coverage_baseline.json`, and `verify` exits 1 when any dataset falls more than 25 basis points (0.25 pp) below it. `code/62_no_regression_check.py` carries the same figures as `linkage_<dataset>_bp` (MUST_NOT_FALL) by importing `metrics()` from this file, so there is ONE measurement and not two - `248` is a retired stub for exactly the reason that two detectors for one class drift.
 
-**The tolerance is not zero on purpose.** Several flagships are rebuilt by other workstreams, and a rebuild that adds honest unlinked rows lowers the ratio without losing a single link. Losing links cannot hide inside it: 25 bp of `prime_contracts` is more than 3,000 rows. **`linkage_<dataset>_rows` is carried beside it with NO tolerance at all**, so a fall in the absolute count of linked rows fails the gate even when the ratio holds.
+**The ratio's tolerance is not zero on purpose.** Several flagships are rebuilt by other workstreams, and a rebuild that adds honest unlinked rows lowers the ratio without losing a single link. Losing links cannot hide inside it: 25 bp of `prime_contracts` is more than 3,000 rows.
+
+**`linkage_<dataset>_rows` — the absolute count of linked rows — is carried beside it, and the rule on it is exact:**
+
+> A link may fall by as many rows as the table itself lost, and not one more.
+
+A link cannot survive a row that does not exist, so a rebuild that removes rows legitimately removes their links; a link lost from a row that still EXISTS is the defect, and it fails with no tolerance at all. `linkage_<dataset>_denom` carries the row count so the two can be told apart. The rule was earned ninety seconds after the first baseline, when `native_owned_businesses` went 4,274 → 4,273 rows and 4,125 → 4,124 links in another workstream's rebuild and the gate could not say that was benign. A percentage tolerance was rejected: 0.1% of `prime_contracts` is 791 rows, which is the hiding place zero tolerance existed to close.
 
 ---
 

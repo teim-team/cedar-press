@@ -301,6 +301,46 @@ A rebuild REVERTS this pass and will look like pure progress while it happens.
 On `prime_contracts`, 1140 must run **after** 1079 — 1079's withdrawals are
 what stranded the rulings in the first place.
 
+### The ratchet fired within the hour, on a rebuild, and that taught it something
+
+The first shape of `linkage_<dataset>_rows` was a ZERO-TOLERANCE floor on the
+absolute count of linked rows, argued for on the grounds that a fall in links
+must never hide inside a ratio's tolerance. That is right. It is also
+insufficient on a flagship nine agents are rebuilding.
+
+Ninety seconds after the baseline was recorded, `verify` failed:
+
+```
+linkage_native_owned_businesses_rows = 4,124, below its floor of 4,125
+linkage_linked_rows_total            = 1,485,083, below its floor of 1,485,084
+```
+
+Measured: `native_owned_businesses.csv` was rewritten at 18:09 by another
+workstream, **4,274 -> 4,273 rows and 4,125 -> 4,124 links**. One row left the
+table and took its link with it. **That is not a linkage regression and the
+check could not say so**, because it watched the numerator with no sight of
+the denominator.
+
+**The fix is not a tolerance.** A blanket 0.1% slack would have been 791 rows
+on `prime_contracts`, which is exactly the hiding place the zero-tolerance
+argument was made against. The denominator now travels with the numerator as
+`linkage_<dataset>_denom`, and the rule is:
+
+> **A link may fall by as many rows as the table itself lost, and not one
+> more.** A link cannot survive a row that does not exist; a link lost from a
+> row that DOES still exist is the defect, and it fails with no tolerance at
+> all.
+
+`selftest` proves both halves: floor + 1 link with the denominator held
+FAILS; floor + 1 link with the denominator also + 1 PASSES; floor + 2 links
+with the denominator + 1 FAILS and names the one link that left a row which
+still exists.
+
+The baseline was re-recorded to carry the denominators, which is what the new
+shape needs to work at all. **It was not re-recorded to clear a red light** —
+the red light was measured first, its cause named and dated, and it is written
+down here rather than absorbed.
+
 ### One thing the verify got wrong before it shipped
 
 The first draft of `verify` asserted
