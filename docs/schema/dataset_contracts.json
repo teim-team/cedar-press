@@ -1,15 +1,21 @@
 {
- "built_date": "2026-08-29",
+ "built_date": "2026-09-01",
  "derivation": "500.COLLECTIONS + cedar_codebook + cedar_pipeline; GRAIN declared, everything else derived",
  "n_collections": 13,
- "n_tables_claimed": 255,
- "n_orphan_shippable": 0,
- "orphans": [],
- "n_shippable": 210,
- "n_shippable_grain_stated": 185,
- "n_shippable_grain_unstated": 25,
+ "n_tables_claimed": 261,
+ "n_orphan_shippable": 6,
+ "orphans": [
+  "native_owned_businesses.csv",
+  "nonprofit_schedule_c_coverage.csv",
+  "nonprofit_schedule_c_lobbying.csv",
+  "regulations_gov_comments.csv",
+  "regulations_gov_entity_coverage.csv",
+  "sam_native_class_distributions.csv"
+ ],
+ "n_shippable": 221,
+ "n_shippable_grain_stated": 189,
+ "n_shippable_grain_unstated": 32,
  "shippable_grain_unstated": [
-  "admin_appeal_positions.csv",
   "cedar_identifier_graph_edges.csv",
   "cedar_ruling_ledger_consolidated.csv",
   "congressional_correspondence_log.csv",
@@ -20,35 +26,38 @@
   "faads_transactions_all_agencies.csv",
   "fac_audit_sefa_gaming_programs.csv",
   "ferc_docket_filings.csv",
-  "ferc_ex_parte_communications.csv",
   "foia_request_index.csv",
-  "fpds_uei_cage_map.csv",
-  "gaming_projections.csv",
   "hearing_bill_links.csv",
   "lobbying_registrant_native_ownership_evidence.csv",
   "native_bills_subject_sweep.csv",
+  "native_owned_businesses.csv",
   "native_passthrough.csv",
+  "nigc_action_parties.csv",
+  "nigc_document_surface.csv",
+  "nigc_enforcement_actions.csv",
+  "nigc_game_classification_opinions.csv",
+  "nigc_indian_lands_opinions.csv",
+  "nigc_management_contract_approvals.csv",
+  "nonprofit_schedule_c_coverage.csv",
+  "nonprofit_schedule_c_lobbying.csv",
   "np_schedule_i_grants.csv",
+  "regulations_gov_comments.csv",
+  "regulations_gov_entity_coverage.csv",
+  "sam_native_class_distributions.csv",
   "subawards.csv",
   "tcu_cdfi_ownership_evidence.csv",
-  "tribal_bond_issuances.csv",
   "tribal_resolution_financings.csv",
   "visitor_record_foia_requests.csv"
  ],
- "n_shippable_grain_open_with_evidence": 12,
+ "n_shippable_grain_open_with_evidence": 7,
  "n_shippable_grain_defective": 13,
- "n_shippable_grain_unexplained": 0,
+ "n_shippable_grain_unexplained": 12,
  "shippable_grain_open_with_evidence": [
-  "admin_appeal_positions.csv",
   "congressional_correspondence_log.csv",
   "contractor_ranking.csv",
   "deals_2026_ytd_additions.csv",
   "fac_audit_sefa_gaming_programs.csv",
-  "ferc_ex_parte_communications.csv",
   "foia_request_index.csv",
-  "fpds_uei_cage_map.csv",
-  "gaming_projections.csv",
-  "tribal_bond_issuances.csv",
   "tribal_resolution_financings.csv",
   "visitor_record_foia_requests.csv"
  ],
@@ -67,7 +76,20 @@
   "subawards.csv",
   "tcu_cdfi_ownership_evidence.csv"
  ],
- "shippable_grain_unexplained": [],
+ "shippable_grain_unexplained": [
+  "native_owned_businesses.csv",
+  "nigc_action_parties.csv",
+  "nigc_document_surface.csv",
+  "nigc_enforcement_actions.csv",
+  "nigc_game_classification_opinions.csv",
+  "nigc_indian_lands_opinions.csv",
+  "nigc_management_contract_approvals.csv",
+  "nonprofit_schedule_c_coverage.csv",
+  "nonprofit_schedule_c_lobbying.csv",
+  "regulations_gov_comments.csv",
+  "regulations_gov_entity_coverage.csv",
+  "sam_native_class_distributions.csv"
+ ],
  "grain_open_questions": {
   "congressional_correspondence_log.csv": "the file has ZERO rows. Every candidate key is vacuously unique, so the data cannot evidence a grain. QUESTION: is this table meant to ship empty, and what is one row when it fills?",
   "deals_2026_ytd_additions.csv": "the file has ZERO rows (the build log records 1 row added, which is not what is on disk). QUESTION: was the YTD additions file consumed into deals_classified.csv and left as a stub, or did a rebuild empty it?",
@@ -97,8 +119,17 @@
   "lobbying_registrant_native_ownership_evidence.csv": "4 LITERAL duplicate rows of 27 - 15% of a table the build log describes as 'one row per evidence route'. Four evidence routes are recorded twice.",
   "hearing_bill_links.csv": "1 LITERAL duplicate row of 465: (bill_id, event_id) = (119-s-3878, 338549) appears twice."
  },
- "n_violations": 0,
- "violations": [],
+ "n_violations": 8,
+ "violations": [
+  "ca_gaming_facilities_official.csv: declared join_cardinality names column(s) not in the header: ['cedar_uid']",
+  "entity_aliases.csv: declared primary_key ['alias_id'] is NOT unique - 1 duplicate row(s) of 6,298, e.g. ('',). A buyer joining on it gets rows we did not promise them.",
+  "ORPHAN shippable table: native_owned_businesses.csv - registered in the codebook but claimed by NO collection",
+  "ORPHAN shippable table: nonprofit_schedule_c_coverage.csv - registered in the codebook but claimed by NO collection",
+  "ORPHAN shippable table: nonprofit_schedule_c_lobbying.csv - registered in the codebook but claimed by NO collection",
+  "ORPHAN shippable table: regulations_gov_comments.csv - registered in the codebook but claimed by NO collection",
+  "ORPHAN shippable table: regulations_gov_entity_coverage.csv - registered in the codebook but claimed by NO collection",
+  "ORPHAN shippable table: sam_native_class_distributions.csv - registered in the codebook but claimed by NO collection"
+ ],
  "contracts": [
   {
    "collection": "funding",
@@ -755,8 +786,7 @@
       "11_classify_federal_actions.py"
      ],
      "enriched_by": [
-      "22_apply_temporal_floor.py",
-      "519_closure_federal_register.py"
+      "22_apply_temporal_floor.py"
      ],
      "never_run_warning": []
     },
@@ -1161,8 +1191,7 @@
       "154_build_fr_ex_parte_notices.py"
      ],
      "enriched_by": [
-      "503_identity.py",
-      "519_closure_federal_register.py"
+      "503_identity.py"
      ],
      "never_run_warning": []
     },
@@ -1669,10 +1698,14 @@
      "grain_defect": "",
      "grain_evidence": {
       "rows": 0,
-      "tested_date": "2026-08-29",
+      "tested_date": "2026-09-01",
       "whole_row_duplicates": 0,
       "duplicate_claims_under_distinct_ids": null,
-      "unique_keys_measured": [],
+      "unique_keys_measured": [
+       [
+        "record_id"
+       ]
+      ],
       "max_rows_per_join_key_value": {
        "cedar_uid": 0
       }
@@ -1919,7 +1952,7 @@
      "grain_defect": "5 LITERAL duplicate rows of 2,414.",
      "grain_evidence": {
       "rows": 2414,
-      "tested_date": "2026-08-29",
+      "tested_date": "2026-09-01",
       "whole_row_duplicates": 5,
       "duplicate_claims_under_distinct_ids": null,
       "unique_keys_measured": [],
@@ -2042,10 +2075,14 @@
      "grain_defect": "",
      "grain_evidence": {
       "rows": 0,
-      "tested_date": "2026-08-29",
+      "tested_date": "2026-09-01",
       "whole_row_duplicates": 0,
       "duplicate_claims_under_distinct_ids": null,
-      "unique_keys_measured": [],
+      "unique_keys_measured": [
+       [
+        "Deal_ID"
+       ]
+      ],
       "max_rows_per_join_key_value": {}
      },
      "rebuilt_by": [],
@@ -2602,7 +2639,7 @@
      "grain_defect": "",
      "grain_evidence": {
       "rows": 1,
-      "tested_date": "2026-08-29",
+      "tested_date": "2026-09-01",
       "whole_row_duplicates": 0,
       "duplicate_claims_under_distinct_ids": 0,
       "unique_keys_measured": [
@@ -2842,12 +2879,8 @@
       ],
       "max_rows_per_join_key_value": {}
      },
-     "rebuilt_by": [
-      "144_build_admin_appeals.py"
-     ],
-     "enriched_by": [
-      "168_link_adjudication_hubs.py"
-     ],
+     "rebuilt_by": [],
+     "enriched_by": [],
      "never_run_warning": []
     },
     {
@@ -2884,12 +2917,8 @@
        "cedar_uid": 21
       }
      },
-     "rebuilt_by": [
-      "144_build_admin_appeals.py"
-     ],
-     "enriched_by": [
-      "168_link_adjudication_hubs.py"
-     ],
+     "rebuilt_by": [],
+     "enriched_by": [],
      "never_run_warning": []
     },
     {
@@ -2898,17 +2927,25 @@
      "key_columns": [
       "cedar_uid"
      ],
-     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
-     "primary_key": [],
-     "join_cardinality": {},
-     "grain_declared_by": "",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
+     "grain": "one row per (administrative appeal decision, organisation named opposite it, resolved Native entity) - the position ONE organisation is recorded in with respect to ONE Native entity in ONE matter. `position` is UNDETERMINED on all 8 rows BY DESIGN: the OHA chronological index publishes case name, date and citation, which establishes who appealed and never whether the Interior action favoured or harmed the Native entity",
+     "primary_key": [
+      "position_id"
+     ],
+     "join_cardinality": {
+      "cedar_uid": "many",
+      "matter_id": "many"
+     },
+     "grain_declared_by": "workstream GRAIN-WS3 2026-09-01: declared from the build log in code/144_build_admin_appeals.py `stage_positions`, which states the id construction and refuses duplicates; key confirmed unique on the FULL 8-row file after the 1 -> 8 re-derivation. Re-measured by code/573_ws3_grain_and_money.py measure",
+     "grain_validated": true,
+     "measured_rows_per_join_key": {
+      "cedar_uid": 1,
+      "matter_id": 1
+     },
      "grain_open_question": "the file has ONE row. `matter_id` and `cedar_uid` are unique, and so is every other column - one row proves nothing. QUESTION: is a row a POSITION taken by one organisation in one matter (in which case position_id is the key and it is empty of evidence), or one row per matter?",
      "grain_defect": "",
      "grain_evidence": {
-      "rows": 1,
-      "tested_date": "2026-08-29",
+      "rows": 8,
+      "tested_date": "2026-09-01",
       "whole_row_duplicates": 0,
       "duplicate_claims_under_distinct_ids": 0,
       "unique_keys_measured": [
@@ -2916,12 +2953,22 @@
         "matter_id"
        ],
        [
-        "cedar_uid"
-       ],
-       [
         "position_id"
        ],
        [
+        "source_record_id"
+       ],
+       [
+        "decision_date"
+       ],
+       [
+        "cedar_uid"
+       ],
+       [
+        "organisation_id"
+       ],
+       [
+        "matter_id",
         "organisation_id"
        ]
       ],
@@ -2973,7 +3020,7 @@
     },
     {
      "table": "advocacy_passthrough_2026-08-07.csv",
-     "status": "shippable",
+     "status": "internal-by-decision",
      "key_columns": [
       "cedar_uid"
      ],
@@ -3141,7 +3188,7 @@
      "grain_defect": "822 LITERAL duplicate rows of 102,615. docs/ANOMALY_REPORT.md already records 9,570 rows repeating (docket_number, accession_number); this measurement is the stricter one - 822 rows repeat in EVERY column.",
      "grain_evidence": {
       "rows": 102615,
-      "tested_date": "2026-08-29",
+      "tested_date": "2026-09-01",
       "whole_row_duplicates": 822,
       "duplicate_claims_under_distinct_ids": null,
       "unique_keys_measured": [],
@@ -3201,17 +3248,24 @@
      "key_columns": [
       "cedar_uid"
      ],
-     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
-     "primary_key": [],
-     "join_cardinality": {},
-     "grain_declared_by": "",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
+     "grain": "one row per (ex parte communication notice, party recorded as having filed or issued it). One notice names more than one such party and each is a row, so a count of ROWS is not a count of NOTICES: 713 rows carry 657 distinct notices. `filed_or_issued_by_as_recorded` is blank on 44 rows, where the notice names no filing party, and blank is a value of this key rather than a gap in it",
+     "primary_key": [
+      "ferc_ex_parte_id",
+      "filed_or_issued_by_as_recorded"
+     ],
+     "join_cardinality": {
+      "cedar_uid": "many"
+     },
+     "grain_declared_by": "workstream GRAIN-WS3 2026-09-01: the discriminator was found by diffing every colliding group column by column, then the key was confirmed unique on the FULL 713-row file. Re-measured by code/573_ws3_grain_and_money.py measure",
+     "grain_validated": true,
+     "measured_rows_per_join_key": {
+      "cedar_uid": 2
+     },
      "grain_open_question": "`ferc_ex_parte_id` has 56 collisions over 713 rows, and adding accession_number, docket_number or the FR document number removes none of them - the colliding rows differ somewhere else. QUESTION: what distinguishes two rows sharing a ferc_ex_parte_id? Until that is named the table has no key.",
      "grain_defect": "",
      "grain_evidence": {
       "rows": 713,
-      "tested_date": "2026-08-29",
+      "tested_date": "2026-09-01",
       "whole_row_duplicates": 0,
       "duplicate_claims_under_distinct_ids": null,
       "unique_keys_measured": [],
@@ -3451,8 +3505,7 @@
       "154_build_fr_ex_parte_notices.py"
      ],
      "enriched_by": [
-      "503_identity.py",
-      "519_closure_federal_register.py"
+      "503_identity.py"
      ],
      "never_run_warning": []
     },
@@ -3516,7 +3569,7 @@
      "grain_defect": "1 LITERAL duplicate row of 465: (bill_id, event_id) = (119-s-3878, 338549) appears twice.",
      "grain_evidence": {
       "rows": 465,
-      "tested_date": "2026-08-29",
+      "tested_date": "2026-09-01",
       "whole_row_duplicates": 1,
       "duplicate_claims_under_distinct_ids": null,
       "unique_keys_measured": [],
@@ -3805,7 +3858,7 @@
      "grain_defect": "4 LITERAL duplicate rows of 27 - 15% of a table the build log describes as 'one row per evidence route'. Four evidence routes are recorded twice.",
      "grain_evidence": {
       "rows": 27,
-      "tested_date": "2026-08-29",
+      "tested_date": "2026-09-01",
       "whole_row_duplicates": 4,
       "duplicate_claims_under_distinct_ids": null,
       "unique_keys_measured": [],
@@ -4250,12 +4303,22 @@
       "uei",
       "cage_code"
      ],
-     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
-     "primary_key": [],
-     "join_cardinality": {},
-     "grain_declared_by": "",
-     "grain_validated": false,
-     "measured_rows_per_join_key": {},
+     "grain": "one row per (UEI, CAGE code, legal business name as recorded) triple OBSERVED in the FPDS/USAspending extracts, rolled up across every extract that carried it: `source_file` is a ';'-joined LIST of source files and n_observations/first_year/last_year are that rollup, never a key. NOT one row per UEI (19,475 UEIs over 34,601 rows) and NOT one row per firm. A BLANK cage_code is a VALUE, not a gap - it means the extract recorded this UEI under this legal name with no CAGE at all, which is 23,510 of the 34,601 rows. JOIN WARNING, measured 2026-09-01: 2,196 rows carry the LITERAL STRING 'NAN' in cage_code - a pandas null stringified on export, not a CAGE - and they span 2,193 DISTINCT UEIs. Joining another table on cage_code without excluding 'NAN' fuses 2,193 unrelated entities into one. Excluding it, the route is near-exact: of 6,843 real CAGE codes only 15 map to more than one UEI and none maps to more than two.",
+     "primary_key": [
+      "uei",
+      "cage_code",
+      "legal_business_name"
+     ],
+     "join_cardinality": {
+      "uei": "many",
+      "cage_code": "many"
+     },
+     "grain_declared_by": "workstream GRAIN-WS2 2026-09-01; key confirmed unique on the FULL 34,601-row file and the 'NAN' hazard measured by code/572_ws2_contracts.py measure",
+     "grain_validated": true,
+     "measured_rows_per_join_key": {
+      "cage_code": 2196,
+      "uei": 16
+     },
      "grain_open_question": "a MAP that maps nothing uniquely: `uei` repeats 11,455 times over 29,981 rows and (uei, cage_code, source_file) still collides 4,680 times. The only unique key needs all six columns including first_year and last_year, and 22,518 rows have a blank cage_code. QUESTION: is a row a (UEI, CAGE) pair as OBSERVED in one source file and year-range - and if so should the year range be part of the published key - or is the table meant to be one row per UEI?",
      "grain_defect": "",
      "grain_evidence": {
@@ -4394,8 +4457,12 @@
        "cage_code": 398840
       }
      },
-     "rebuilt_by": [],
-     "enriched_by": [],
+     "rebuilt_by": [
+      "114_pull_prime_archive.py"
+     ],
+     "enriched_by": [
+      "430_restore_prime_transaction_key.py"
+     ],
      "never_run_warning": []
     },
     {
@@ -5284,8 +5351,8 @@
      "grain_declared_by": "workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json",
      "grain_validated": true,
      "measured_rows_per_join_key": {
-      "cedar_uid": 489,
-      "entity_id": 489
+      "cedar_uid": 43,
+      "entity_id": 518
      },
      "grain_open_question": "",
      "grain_defect": "",
@@ -5333,7 +5400,7 @@
      "grain_declared_by": "workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json",
      "grain_validated": true,
      "measured_rows_per_join_key": {
-      "cedar_uid": 489
+      "cedar_uid": 13
      },
      "grain_open_question": "",
      "grain_defect": "",
@@ -5362,17 +5429,21 @@
      "table": "tribal_bond_issuances.csv",
      "status": "shippable",
      "key_columns": [],
-     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
-     "primary_key": [],
+     "grain": "one row per debt instrument of one tribal issuer, as described in one retrieved rating action or disclosure document. NOT one row per issuer and NOT a time series: `issue_date` is blank on 28 of 29 rows BY DESIGN (the retrieved document states none and none is inferred), and `cusip` is blank on all 29, so the market key of a bond is absent. `par_amount` is the size AT ISSUE of a distinct instrument and is additive across rows; it is NOT debt outstanding, several rows say so in `instrument_type` ('amount outstanding at'), and refinancings of one facility appear as separate instruments",
+     "primary_key": [
+      "issuer",
+      "instrument_type",
+      "source_url"
+     ],
      "join_cardinality": {},
-     "grain_declared_by": "",
-     "grain_validated": false,
+     "grain_declared_by": "workstream GRAIN-WS3 2026-09-01: key confirmed unique on the FULL 29-row file with zero blank components; `issuer+par_amount+instrument_type` and `issuer+instrument_type+maturity` are also unique but each carries a blank, and `cusip` is blank on every row. Re-measured by code/573_ws3_grain_and_money.py measure",
+     "grain_validated": true,
      "measured_rows_per_join_key": {},
      "grain_open_question": "`cusip` is BLANK on all 29 rows, so the natural key of a bond table is absent, and the only unique column is `notes`. QUESTION: can CUSIPs be backfilled, and until then is a row one issuance (issuer, issue_date, series) or one disclosure document?",
      "grain_defect": "",
      "grain_evidence": {
       "rows": 29,
-      "tested_date": "2026-08-29",
+      "tested_date": "2026-09-01",
       "whole_row_duplicates": 0,
       "duplicate_claims_under_distinct_ids": 0,
       "unique_keys_measured": [
@@ -5866,7 +5937,7 @@
      "grain_defect": "101 LITERAL duplicate rows of 58,685. (object_id, recipient_name_as_filed) collides 860 times - some legitimately (one filer can grant to the same recipient twice on one return), but the 101 whole-row repeats are not that.",
      "grain_evidence": {
       "rows": 58685,
-      "tested_date": "2026-08-29",
+      "tested_date": "2026-09-01",
       "whole_row_duplicates": 101,
       "duplicate_claims_under_distinct_ids": null,
       "unique_keys_measured": [],
@@ -5885,14 +5956,13 @@
    "name": "Gaming Intelligence",
    "shelf": "grove",
    "rebuild_command": "py -3 code/build.py run gaming --execute",
-   "n_tables": 53,
+   "n_tables": 59,
    "tables": [
     {
      "table": "ca_gaming_facilities_official.csv",
      "status": "shippable",
      "key_columns": [
       "tribe_id",
-      "cedar_uid",
       "facility_id"
      ],
      "grain": "one row per facility as it appears on ONE official California list at ONE as-of date - a facility on three lists has three rows",
@@ -5905,9 +5975,8 @@
       "facility_id": "many"
      },
      "grain_declared_by": "workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json",
-     "grain_validated": true,
+     "grain_validated": false,
      "measured_rows_per_join_key": {
-      "cedar_uid": 7,
       "facility_id": 4,
       "tribe_id": 7
      },
@@ -5955,8 +6024,8 @@
      "grain_declared_by": "workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json",
      "grain_validated": true,
      "measured_rows_per_join_key": {
-      "cedar_uid": 534,
-      "tribe_id": 534
+      "cedar_uid": 554,
+      "tribe_id": 554
      },
      "grain_open_question": "",
      "grain_defect": "",
@@ -6500,7 +6569,7 @@
      "grain_defect": "",
      "grain_evidence": {
       "rows": 1,
-      "tested_date": "2026-08-29",
+      "tested_date": "2026-09-01",
       "whole_row_duplicates": 0,
       "duplicate_claims_under_distinct_ids": 0,
       "unique_keys_measured": [
@@ -6515,6 +6584,11 @@
        ],
        [
         "is_loan"
+       ],
+       [
+        "report_id",
+        "federal_agency_prefix",
+        "federal_award_extension"
        ]
       ],
       "max_rows_per_join_key_value": {
@@ -7307,17 +7381,25 @@
      "table": "gaming_projections.csv",
      "status": "shippable",
      "key_columns": [],
-     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
-     "primary_key": [],
+     "grain": "one row per PROJECTED figure: (project, metric, geography, time period, NEPA alternative, source document, unit). A PROJECTION IS NOT A REALISED FIGURE - 114 of 116 rows carry observation_status = 'proposed' - and it must never be summed into, or alongside, any table of actual gaming revenue, employment or payments. `value` is additive across rows ONLY within one unit and one alternative; summing across alternatives adds mutually exclusive futures of the same casino, and summing a two-row range adds its own low and high endpoints",
+     "primary_key": [
+      "project_id",
+      "metric",
+      "geography",
+      "time_period",
+      "alternative",
+      "source_document",
+      "unit"
+     ],
      "join_cardinality": {},
-     "grain_declared_by": "",
-     "grain_validated": false,
+     "grain_declared_by": "workstream GRAIN-WS3 2026-09-01: answers the GRAIN_OPEN question by measurement - `unit` is the third discriminator because a stated range is recorded as two endpoint rows. Key confirmed unique on the FULL 116-row file; re-measured by code/573_ws3_grain_and_money.py measure",
+     "grain_validated": true,
      "measured_rows_per_join_key": {},
      "grain_open_question": "docs/GAMING_NEPA_PILOT_LOG.md states the grain as 'one row per project x metric x geography x period'. The data CONTRADICTS it: that key collides 8 times over 116 rows, and adding `alternative` leaves 5. The only unique keys contain `value`, a measure. QUESTION: which column separates two projections of the same metric for the same project, geography and period - alternative, reported_or_calculated, or the source document?",
      "grain_defect": "",
      "grain_evidence": {
       "rows": 116,
-      "tested_date": "2026-08-29",
+      "tested_date": "2026-09-01",
       "whole_row_duplicates": 0,
       "duplicate_claims_under_distinct_ids": null,
       "unique_keys_measured": [],
@@ -7404,7 +7486,6 @@
      "status": "internal-by-decision",
      "key_columns": [
       "tribe_id",
-      "cedar_uid",
       "entity_id",
       "facility_id"
      ],
@@ -7883,6 +7964,25 @@
      "never_run_warning": []
     },
     {
+     "table": "nigc_action_parties.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "primary_key": [],
+     "join_cardinality": {},
+     "grain_declared_by": "",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
      "table": "nigc_declination_letters.csv",
      "status": "shippable",
      "key_columns": [
@@ -7925,6 +8025,97 @@
      "enriched_by": [
       "100_finish_declinations_and_employment.py"
      ],
+     "never_run_warning": []
+    },
+    {
+     "table": "nigc_document_surface.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "primary_key": [],
+     "join_cardinality": {},
+     "grain_declared_by": "",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "nigc_enforcement_actions.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "primary_key": [],
+     "join_cardinality": {},
+     "grain_declared_by": "",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "nigc_game_classification_opinions.csv",
+     "status": "shippable",
+     "key_columns": [],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "primary_key": [],
+     "join_cardinality": {},
+     "grain_declared_by": "",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "nigc_indian_lands_opinions.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "primary_key": [],
+     "join_cardinality": {},
+     "grain_declared_by": "",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "nigc_management_contract_approvals.csv",
+     "status": "shippable",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "primary_key": [],
+     "join_cardinality": {},
+     "grain_declared_by": "",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "rebuilt_by": [],
+     "enriched_by": [],
      "never_run_warning": []
     },
     {
@@ -8563,6 +8754,7 @@
       "426_mint_bristol_bay_spine_entities.py",
       "503_identity.py",
       "51_add_anc_acronym_aliases.py",
+      "524_universe_gap.py",
       "52_add_village_corporations.py",
       "61_add_nho_intertribal_to_spine.py",
       "66_build_entity_hierarchy.py",
@@ -8891,7 +9083,7 @@
       "entity_id": "many"
      },
      "grain_declared_by": "workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json",
-     "grain_validated": true,
+     "grain_validated": false,
      "measured_rows_per_join_key": {
       "cedar_uid": 20,
       "entity_id": 20
@@ -8962,9 +9154,7 @@
     {
      "table": "entity_evidence_profile.csv",
      "status": "internal-by-decision",
-     "key_columns": [
-      "cedar_uid"
-     ],
+     "key_columns": [],
      "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
      "primary_key": [],
      "join_cardinality": {},

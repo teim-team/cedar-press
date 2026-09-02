@@ -239,6 +239,15 @@ INTERNAL_TABLES = {
     "cedar_inherited_from_rulings_2026-08-07.csv":
         "a dated snapshot of ruling inheritance with NO producing script "
         "left in code/; superseded by cedar_identifier_ledger_final.csv",
+    "advocacy_passthrough_2026-08-07.csv":
+        "a dated snapshot of advocacy_passthrough.csv, and BOTH were "
+        "status=shippable in the lobbying collection. 1,620 rows each, the "
+        "same $193,592,975 in grant_amount_usd, so a reader totalling the "
+        "collection's pass-through got $387M. Same reasoning as "
+        "cedar_identifier_ledger_tiered.csv above: shipping two vintages of "
+        "one table lets a reader pick the stale one, and here it also doubles "
+        "the money. Found 2026-09-01 by GRAIN-WS3's C7 pass. The live file "
+        "keeps shipping; nothing is deleted",
     "cedar_spiderweb_v2.csv":
         "identifier/name harvest working set, assembled to feed the spine "
         "and the ledger; the grain is our resolution process, not an event "

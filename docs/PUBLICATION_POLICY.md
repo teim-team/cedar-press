@@ -169,3 +169,77 @@ gradient the sources went to the trouble of stating.
 `identity_scope` beside it says what the affiliation actually is.** The strong
 claim stays available to anyone who filters for it; the dataset does not assert
 it on rows that never supported it.
+
+## Thirteen clean datasets first; linkage later; cross-validation NOW
+
+*Owner, 2026-09-01. This is the architecture priority and it settles a
+recurring temptation.*
+
+> *"We just want thirteen clean datasets. And then you can combine them if you
+> want by Native entity. But the linkages we can improve over time... we can
+> use each dataset to fact check each other. If we see a deal that's published,
+> we should see the federal contracting company change owners in the federal
+> contracting data. Or if we see the federal contracting company change owners,
+> that's not something publicly available — it's a deal we can report."*
+
+### The priority
+
+**Do not build cross-dataset linkage infrastructure yet.** Every dataset keys
+to the entity layer (dataset 13); that is the only linkage required now.
+IRS ↔ lobbying ↔ contracting joins are a later product, and the owner is right
+that they get *easier* once each dataset is clean and its events are properly
+identified. Chasing them first would mean linking dirty data.
+
+### But cross-validation is not linkage, and it is available today
+
+Two different things share one word. Linkage is a *feature* — a customer
+joining datasets. Cross-validation is a *method*, and it runs on the data we
+already hold:
+
+- **A published deal implies an ownership change in the contracting data.** If
+  the deal is real and the contracting record does not move, one of them is
+  wrong. That is a free check on both.
+- **An ownership change in the contracting data with no published deal is a
+  deal Cedar can report.** This is the owner's sharpest point. FPDS parent
+  changes are a matter of public record and nobody assembles them; a
+  transaction visible only that way is genuinely new information, not a
+  restatement of someone else's reporting.
+
+### Measured 2026-09-01, as a first pass
+
+```
+attributed UEIs with >=2 years of parent data      2,807
+parent changed between first and last year           630
+  name overlaps a known deal in deals_classified     537   <- UPPER bound
+  no deal anywhere in Cedar                           93   <- LOWER bound
+deals_classified, entire dataset                     935
+```
+
+**Read those two bounds honestly.** The overlap test was a loose token match —
+precisely the weak method `ENTITY_MATCH_RULES.md` refuses for attribution. It
+will call a change "known" whenever any Ahtna deal shares a token with any
+Ahtna subsidiary. So 537 is inflated, 93 is a floor, and the true count of
+unexplained ownership changes sits between them.
+
+Also: **a `parent_uei` change is not always an acquisition.** It can be a
+re-registration, a data correction, or an internal reorganisation. 630 is a
+candidate list, not 630 deals. Working it means checking each against the
+parent's own filings — the route shard E proved, where an ANCSA corporation's
+audited *Principles of Consolidation* note enumerates its subsidiaries by legal
+name under Alaska Statute 45.55.139.
+
+One name in the unexplained set is `BROADLEAF, INC.` — an ASRC Federal
+operating company that only became visible at all because ASRC publishes its
+CAGE code. Its parent moved and no deal records it.
+
+### What this means for the datasets now
+
+Nothing changes about the order of work: clean the thirteen. But **each
+dataset's own consistency check should look sideways where a sibling can see
+the same event**, because it is cheaper than a new source and it generates
+rows rather than only validating them. The deals dataset gains candidates from
+contracting; contracting gains a date and a counterparty from deals.
+
+Keep the direction straight when recording: a candidate derived from a sibling
+dataset is an **observation Cedar made**, not a claim some source published,
+and its `inclusion_basis` should say so.
