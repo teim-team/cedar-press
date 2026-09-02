@@ -150,6 +150,13 @@ Cedar IDs are class-prefixed and readable on sight:
 | `SGVF` | Federal-level self-governance consortium |
 | `CEDAR-ENT-` | Individually Native-owned business and other minted entities |
 
+Those are ENTITY (hub) prefixes. Two prefixes name SUB-HUBS and are **not** entities — see §2:
+
+| prefix | what it names | register |
+|---|---|---|
+| `CEDAR-NEST-nnnnnn-CC` | an enterprise a nation, ANC or NHO owns | `data/spine/cedar_nest_id_register.csv` |
+| `CEDAR-PLACE-nnnnnn-CC` | a **physical place** an entity operates — gaming property, BIE school, IHS facility, BIA office, distinguished by a `place_class` COLUMN, never by the prefix | `data/spine/cedar_place_id_register.csv` |
+
 *Verified against the spine 2026-08-28: every prefix above is present, and no
 prefix in the spine is missing from this table. If you add a class, add its
 prefix here — an undocumented prefix is how a reader concludes a class does not
@@ -203,6 +210,14 @@ entity would lose the level at which most gaming facts are actually true.
 Implemented sub-hubs today: `facility_id` (gaming_facilities), `property_id`
 (gaming_property_locations, itself parent to `location_observation_id`),
 `np_ein_entity_hub`, and the FERC docket filer layer.
+
+**A PLACE IS A SUB-HUB, AND SINCE 2026-09-02 IT HAS ITS OWN CEDAR ID** — `CEDAR-PLACE-nnnnnn-CC`, ADR-030, minted by `code/1129_place_ids.py` into an append-only register. It exists because the source keys did not survive contact with a second source: `gaming_facilities.facility_id` is source-scoped (595 `CCP-`, 164 `VP-`, 15 `TPL-`, 13 `CED-`) and 26 clean tables inherit the split, and `bia_offices.OFFICEID` is **not unique** — `OFID0038` is both Salt River Agency and San Carlos Agency.
+
+Three rules go with it, and they are the general shape of a sub-hub id:
+
+1. **The source key is never overwritten.** Every migrated table keeps its `facility_id` / `OFFICEID` and gains `cedar_place_id` beside it. The source key is the evidence of where a row came from.
+2. **The place is a sub-hub of the OPERATOR, and the operator can change without the place changing** — the D-U-N-S property, in the owner's own words: *"it's like our own D-U-N-S number, basically."* Where the operator is not a Cedar entity (a BIA office is federal) or is unresolved (a BIE school), `operator_cedar_uid` is BLANK and `operator_basis` says which. **Blank is never "no operator".**
+3. **`place_class` is a column, never the prefix**, for the same reason `cedar_uid` encodes nothing: a gaming property that stops gaming must not have to be re-keyed.
 
 **Hierarchy is a relationship, not an identity.** Corporate parentage is
 genuinely ambiguous — a subsidiary is sometimes operated as a parent, ANCSA

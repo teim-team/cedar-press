@@ -2722,3 +2722,102 @@ needs the same one-poller host that the subaward re-pull holds, and
 content or it re-points 29,594 position-keyed attributions — is an owner
 decision, not an agent's.
 <!-- END ADR-028-FORWARD-CONSTRUCTION -->
+
+<!-- BEGIN ADR-031-NP-WEBSITE-AND-ANNUAL-TOTAL -->
+## ADR-031 - the nonprofit website check, and publishing two money classes without a grand total
+
+*Decided 2026-09-02. Scripts `code/1125_np_website_native_check.py`,
+`code/1126_annual_total_federal_and_gaming.py`,
+`code/1127_schedc_coverage_basis_fix.py`. Owner asks: "with the nonprofits, if
+they have a website, check the website too" and "I think we have a more
+accurate annual total of funding flowing to Indian Country when we include
+NIGC's regional gaming numbers."*
+
+**1. An organisation's own website is a genuine second evidence family; the
+entity layer's web map is NOT.** `np_orgs.cedar_uid` names the entity Cedar
+KEYED the nonprofit to, not the nonprofit. Reading `cedar_web_map.csv` for a
+row with no 990 website field asks the Ahtna corporation's site whether AHTNA
+INTERTRIBAL RESOURCE COMMISSION is Native, and a tribe's own site is Native by
+construction. That route is counted (41 of the 293) and refused, never fetched.
+URLs come only from a field the filer typed on its own IRS return.
+
+**2. Silence, a land acknowledgement, serving, and being are four different
+findings and get four different labels.** `CHECKED_NO_SIGNAL` is not a
+refutation and says so on every row. `WEBSITE_ACKNOWLEDGES_A_NATION_BUT_DOES_
+NOT_CLAIM_TO_BE_ONE` exists because the first classifier scored *"this land
+acknowledgement is one small step toward true allyship"* as a Native
+self-description - a sentence that names a nation in order to say the
+organisation is not it. `WEBSITE_SAYS_IT_SERVES_NATIVE_PEOPLE` is kept apart
+from `WEBSITE_SAYS_NATIVE` because the nonprofits methodology already refuses
+to infer control from service.
+
+**3. Verdicts are re-derived at `build` from the SAVED BYTES, never trusted
+from the fetch.** Sharpening the classifier then costs no network and no host
+is re-asked. It has already paid for itself once.
+
+**4. Federal obligations and gaming revenue are published side by side and
+never added.** `money_class` is `FEDERAL_OBLIGATION_TRANSFERRED_INTO_INDIAN_
+COUNTRY` or `INDIAN_COUNTRY_OWN_SOURCE_REVENUE` on every row of
+`annual_indian_country_money_series.csv`, no row is a grand total, and
+`1126 verify` V3 fails if one ever appears. The owner is right that the annual
+picture is more accurate with gaming in it; a single summed number would claim
+the two are the same kind of money.
+
+**5. `coverage_basis` is DERIVED, not stamped.** A basis is a sentence about a
+row; one sentence on ten rows is a header, and a header cannot be true of every
+row it sits on. Fixed at `code/99`, applied by importing 99's own function.
+<!-- END ADR-031-NP-WEBSITE-AND-ANNUAL-TOTAL -->
+
+<!-- BEGIN ADR-032-NEST-DUAL-ROLE -->
+## ADR-032 — An ANC or an NHO is BOTH a register entity and an enterprise, and the second role is RECORDED, not duplicated
+
+**Decided 2026-09-02** by workstream `nest-owner-v6`,
+`code/1130_nest_owner_v6_reconcile.py`. Owner's design correction:
+*"ANCs and NHOs are themselves entities, but they're also enterprises too. So
+they're a unique one."*
+
+**Context.** NEST modelled an ANCSA corporation only as an
+`owner_hub_cedar_uid` — a hub that owns subsidiaries. That is half of it.
+Arctic Slope Regional Corporation holds UEI `CY16XXPHX213`, is a federal
+contractor in its own right and sells; so do all eight regional corporations
+the owner's dataset reaches, and so do 13 NHOs registered as firms in the SBA
+certification register.
+
+**The obvious fix is wrong.** Adding the corporation to
+`nest_enterprises.csv` as a row hubbed on itself breaks the dataset's key,
+`(owner_hub_cedar_uid, enterprise_name_normalized)`, and makes a hub its own
+subsidiary. `1072` already refuses exactly that — `The Eyak Corporation` and
+`Coushatta Tribe of Louisiana` each published as a two-level chain that was
+one company twice, and the build now tests the child against every
+deterministic rendering of the hub's name.
+
+**The decision.** A new one-row-per-entity table,
+`data/clean/nest_entity_dual_role.csv`, keyed on `cedar_uid`.
+
+* The register keeps ONE row for the entity. NEST keeps ZERO rows for it.
+* The dual role is declared in its own table and joined to
+  `nest_enterprises.csv` on `owner_hub_cedar_uid`.
+* Three evidence rungs, recorded per row, never collapsed into a boolean:
+  `R1_DECLARED_BY_OWNER_DATASET`, `R2_ENTITY_HOLDS_ITS_OWN_IDENTIFIER`,
+  `R3_REGISTERED_AS_A_FIRM_IN_SBA_DSBS`.
+* **Absence means no evidence was found, never "it does not trade."** A row
+  exists only where a rung fired.
+* R3 is required because the owner's own file carries exactly one NHO parent
+  and therefore cannot evidence the NHO half of his own correction. R3 reads
+  the SBA DSBS extract already on disk, which is a `federal_registry`
+  observer rather than a restatement of his file. Uniqueness is required on
+  BOTH sides — 73 register entities were refused because their own name is
+  not unique in the register or in DSBS.
+
+**Grain declared** in `code/512_build_dataset_contracts.py` as its own
+`GRAIN_NEST_DUAL` dict. **Codebook** registered as
+`18c_nest_entity_dual_role` (27 variables), appended to
+`codebook_master.csv`, never rewritten. Invariants **I11a–I11d** and **I12**
+in `1130 verify` hold the ANC reach, the NHO reach, the second evidence
+family and the no-self-subsidiary line, and a fixture proves I11a fires.
+
+**Consequence.** A consumer asking "what does this ANC own" reads
+`nest_enterprises`; asking "does this ANC itself sell" reads
+`nest_entity_dual_role`. Neither question is answered by a row that pretends
+to be the other.
+<!-- END ADR-032-NEST-DUAL-ROLE -->

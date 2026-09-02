@@ -1578,7 +1578,9 @@ Gate: `py -3 code/1119_acquire_biamaps_arcgis.py verify` exits 1 on breach and
 
 A total that omits the largest own-source stream badly understates the economy. A total that adds them into one number claims they are the same kind of money. So both are published, side by side, with `money_class` on every row -- `FEDERAL_OBLIGATION_TRANSFERRED_INTO_INDIAN_COUNTRY` and `INDIAN_COUNTRY_OWN_SOURCE_REVENUE` -- and **no grand total is written anywhere in the table**. `verify` V3 fails if a row ever equals federal + gaming. The reader may add them; Cedar states what the sum would mean instead of doing it for them.
 
-Over the **25 fiscal years where both streams exist (FY2001-FY2025)**: federal obligations attributed to a nation total **$380,557,840,967**, and NIGC gross gaming revenue totals **$730,138,970,572**. Gaming is **1.9x** the federal stream over that window. That ratio is the whole argument for publishing both, and it is also why neither is the answer on its own.
+Over the **19 fiscal years where BOTH federal legs and the gaming series all exist (FY2007-FY2025)**: federal obligations attributed to a nation total **$367,602,232,832**, and NIGC gross gaming revenue totals **$618,977,205,572**. Gaming is **1.68x** the federal stream over that window. That ratio is the whole argument for publishing both, and it is also why neither is the answer on its own.
+
+**The window is FY2007 onward and not FY2001, deliberately.** The modern assistance table begins at FY2007, so a ratio taken across FY2001-2006 divides gaming by a federal figure that is missing one of its two legs - which is how FY2001 comes out at 22x and means nothing. The shape inside the window is the interesting part and it is not flat: gaming runs about 2x federal through the 2010s, **crosses below 1.0 in FY2020 and FY2021** when pandemic assistance more than doubled the federal stream while COVID closures took GGR from $34.7B to $27.8B, and settles near 1.5x from FY2022. Neither series explains Indian Country's year on its own.
 
 ### What may be summed, and what may not
 

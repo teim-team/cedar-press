@@ -687,3 +687,323 @@ is precisely what the "merged, not appended" design exists to do.
 **The 60.7% headline does not move.** The 25 duplicates are ANC subsidiaries
 that ARE present in federal contracting, so collapsing them would raise the
 absent share, not lower it. The floor stays a floor.
+
+---
+
+<!-- BEGIN NEST-OWNER-V6-2026-09-02 -->
+## UPDATE 2026-09-02 — THE OWNER'S OWN ENTERPRISE DATASET, RECONCILED
+
+*`code/1130_nest_owner_v6_reconcile.py`. `versions | build | codebook | verify |
+selftest`. Zero network requests. **Zero Cedar enterprise ids minted.** Nothing
+written into `nest_enterprises.csv`. Nothing committed. Every figure below is
+re-derivable with `py -3 code/1130_nest_owner_v6_reconcile.py build`.*
+
+The owner built an enterprise dataset on this machine months ago and nobody in
+this project had read it:
+
+    ~/Desktop/dissertation/data/tribal_federal_spending/clean/
+        native_entity_enterprise_dataset_v6_geocoded.csv
+
+**18,110 rows, 16,632 distinct normalised enterprise names, 658 distinct
+parents.** The largest `ON_DISK_NOT_PROMOTED` asset in the project
+(`AGENT_FIELD_GUIDE` section 5).
+
+### 1. WHICH FILE IS AUTHORITATIVE — v6, and the other four are BROKEN
+
+The task arrived saying *"v5 matches v6; compare all three rather than
+assuming."* They do not match, and the difference is a **column-shift defect**.
+
+| version | rows | distinct normalised names | parents | `hq_state` populated | `hq_state` cell **equals this row's own UEI** |
+|---|---:|---:|---:|---:|---:|
+| v1 | 19,763 | 16,718 | 641 | 18,291 | **12,127** |
+| v2 | 19,809 | 16,762 | 641 | 18,337 | **12,127** |
+| v3 | 19,846 | 16,774 | 641 | 18,374 | **12,127** |
+| v5 | 18,110 | 16,632 | 658 | 16,638 | **11,390** |
+| **v6** | **18,110** | **16,632** | **658** | **14,629** | **0** |
+
+v5 and v6 hold the identical 18,110 rows and the identical name universe. They
+differ in **four columns and only four** — `hq_city`, `hq_state`, `hq_zip`,
+`hq_county_geoid` — and in every one of them **v6 is the fix**. v5's `hq_state`
+is not a state: on 11,390 of its 16,638 populated cells it is a 12-character
+UEI, and on 11,935 it is *this row's own* `enterprise_uei`. v6 carries a
+two-letter code on all 14,629, adds `hq_zip` (5,074) and `hq_address_line`
+(12,114), and lifts `hq_city` from 5,178 to 15,556.
+
+**v6 is authoritative. v5 must not be read for geography.** Recorded as a
+measurement, not an assertion:
+`data/staging/nest_owner_v6/version_comparison.csv`, and invariants **I13a /
+I13b** exit 1 if either half stops being true.
+
+**But v6 is NOT a superset of v3, and that matters.** Under NEST's own `norm()`,
+**160 rows / 158 enterprise names present in v3 are absent from v6** — all 160
+carry a UEI, 84 from SBA DSBS and 76 from the master registry (`BOWHEAD
+PROTECTION & SECURITY SERVICES LLC`, `AKIMA FACILITIES MANAGEMENT, LLC`, `UMIAQ
+DESIGN, LLC`, `CHEROKEE SERVICES GROUP LLC`). Under a raw name compare it looks
+like 598 rows, and 438 of those are rendering variants v6 still holds — **which
+is why the loss has to be measured after normalisation and not before.** The 160
+are a recovery-candidate list, flagged and never deleted:
+`data/staging/nest_owner_v6/v3_recovery_candidates.csv`.
+
+### 2. THE THREE RECONCILIATION COUNTS
+
+His rows were put through **NEST's own clustering** — `(owner hub cedar_uid,
+normalised name)` — not appended. `norm()` is copied verbatim from `1072` and
+invariant **I0b** re-derives `enterprise_name_normalized` for all 1,610 live
+NEST rows on every verify, because two normalisers that drift are two
+clusterings and the comparison would be measuring the drift instead of the data.
+
+```
+owner enterprise clusters, hubbed                    5,226
+  1. ALREADY IN NEST                                   440
+  2. NET NEW TO NEST                                 4,786
+       of which a HUB DISAGREEMENT                     223
+  3. NEST HOLDS AND HIS FILE DOES NOT                1,170
+       absent from his file entirely                   614
+       present, but on a different hub or key          556
+
+owner rows that CANNOT be clustered (named, never folded in):
+  no tribe_id on the row                            12,084
+  tribe_id present but uncrosswalked                    38
+```
+
+**The third number is the one that says what our scraping added.** 614 NEST
+enterprises are in no form in his file: **462 ANC subsidiaries, 130 tribal, 22
+NHO**; 570 ownership and 44 affiliation; **592 of the 614 are absent from
+federal contracting altogether**, which is the 60.7% headline restated from the
+other side. 414 come from the AS 45.55.139 audited annual reports and 142 from a
+nation's own enterprise register — Tlingit and Haida's *One Stop Auto Shop*,
+*Smokehouse Catering*, *The Driftwood Lodge*, *Two Coppers Casino*. **A firm
+that never pursued a federal contract is invisible to every source his file is
+built from, and that is precisely the vein the ANCSA mine and the "Our
+Companies" sweep opened.**
+
+**What the 4,786 net-new bring:** 3,576 carry a UEI, 775 a CAGE, 775 are
+8(a)-certified, 2,632 carry a city and a state, 1,113 are nonprofits, and all
+4,786 carry a `verification_source`. Their evidence families are **2,338
+`cedar_inference`, 1,855 `federal_registry`, 474 `human_ruling`, 257
+`entity_self_published`, 46 `compiled_directory`** — so roughly half of the
+expansion rests on a resolver output rather than on an observer, and that has to
+survive into whatever ingests it.
+
+**The 440 already held are the corroboration**, not overlap to discard: 425 are
+`ownership` in NEST and 15 `affiliation`, 208 arrive with a UEI and 201 with a
+city and state NEST does not have.
+
+### 3. THE 223 HUB DISAGREEMENTS ARE MOSTLY ONE KNOWN DEFECT — IN HIS FILE
+
+A normalised name NEST holds under a *different* hub is not an absence, and
+classing them was the most valuable thing in this pass:
+
+```
+ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION   212
+ANC_TIER_DISAGREEMENT                               20
+UNADJUDICATED_HUB_DISAGREEMENT                      14
+```
+
+**212 of 223** hub the firm on an Alaska Native Village **government** while
+NEST hubs it on the ANCSA **corporation** — `Alutiiq LLC` and *Afognak
+Diversified Services* under `AKNF-AFGNAK-00-KONIAG` (the Native Village) rather
+than the Afognak Native Corporation; the same at Aleknagik, Agdaagux and Arctic
+Village. `ANCSA_OWNERSHIP_RULING` rule 2 and
+`cedar_domain.village_government_owns_an_anc()` (always `False`) settle every
+one, and **NEST is on the correct side of all 212**. This is the
+`ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION` family (334 defects, $24.52B)
+reached from a **sixth** independent direction. The correction belongs in his
+file, not in ours.
+
+### 4. THE PARENT CROSSWALK — 650 of 658, and his `tribe_id` IS a Cedar handle
+
+`tribe_id` is the same handle scheme at an earlier vintage, so no name matching
+was needed for 96% of it:
+
+| method | parents |
+|---|---:|
+| `handle_exact` — the id IS a live Cedar handle | **632** |
+| `name_tokens_class_gated_unique` | 17 |
+| `handle_stem_unique` | 1 |
+| `UNRESOLVED_NOT_IN_REGISTER` | 7 |
+| `UNRESOLVED_AMBIGUOUS` | 1 |
+
+The 17 are handles Cedar has since re-minted under a different mnemonic —
+`TRBF-CHKSAW-00` to `TRBF-CHKSWN-00` (The Chickasaw Nation), `TRBF-WBGNON-00` to
+`TRBF-WNNBGO-00` (Winnebago), `TRBF-PRCHCK-00` to `TRBF-POARCH-00`, plus twelve
+intertribal organisations. Each was resolved by **maximal distinctive-token
+subset, gated on the entity class the owner's own handle prefix declares, and
+required to be unique at that maximum** — the class gate is what keeps
+`INTERTRIBAL-ITCA-00` off `AKNF-COUNCL-00`, the Alaska Native Village of
+**Council**, which token-matches every "Inter-Tribal Council" in the file. The
+one stem route is `SGVF-TLNGHD-00` to `AKNF-TLNGHD-00-SEALSK`: Cedar's own
+mnemonic, unique in position 2 of the register, not a name guess.
+
+**The 8 unresolved are an honest outcome (ADR-010) and were not forced.**
+`TRBF-CSAKT-00` *Confederated Salish and Kootenai* is `UNRESOLVED_AMBIGUOUS`
+because Cedar's canonical name is the truncated `Confederated Salish` and
+`Kootenai` is a separate tribe — **the same entity `held_rows.csv` already
+names**, arrived at independently. `NHO-MANUKAI-00` *Manu Kai LLC* is also
+already in `held_rows.csv`. Six intertribal organisations (NAFOA, NAJA, ILTF,
+First Nations Development Institute, the Five Civilized Tribes council, IHS
+Tribal Self-Governance) are **spine gaps** and are the cheapest register
+additions on this page.
+
+### 5. HIS IDENTIFIERS ARE MOSTLY NOT A SECOND SOURCE — THEY ARE ALREADY OURS
+
+The brief said *"every Cedar UEI came from the federal side"*, so a UEI he
+verified independently would corroborate. **Measured before believing it
+(`AGENT_FIELD_GUIDE` rule 2), and it is not true.**
+
+`data/spine/cedar_identifier_ledger.csv` holds 19,232 rows. **13,191 of them
+come from `master_tribal_entity_registry.csv`, and 13,070 of those 13,191 UEIs
+are in his v6.** Cedar's identifier ledger *is* an earlier vintage of his own
+file. **A copy of a source sitting in our table does not corroborate that
+source** — exactly what `START_HERE` item 0 records about the Federal Register
+roster, arriving by a second route.
+
+**The proof is a defect that travelled with it.**
+`cedar_identifier_ledger.state` holds this row's own identifier on **12,127** of
+16,487 populated rows — the *identical* count to `hq_state` in his v1, v2 and
+v3. Two counts agreeing to the row is not a coincidence: **the ledger was built
+from a pre-v6 vintage and inherited the column shift.** Only 3,481 of 16,487
+`state` values are a real two-letter code. **Do not read `state` on that table
+as a state.** Flagged, not edited — the ledger is not this pass's to write:
+`data/staging/nest_owner_v6/ledger_shared_upstream_findings.csv`.
+
+**696 identifier pairs were handed to the corroboration workstream** in
+`1118.Store.observe()`'s exact keyword shape, so adopting them as a `P7` pair is
+a loop and not a translation
+(`data/staging/nest_owner_v6/corroboration_pairs.csv`). Both sides are emitted
+and the echo is flagged rather than booked:
+
+```
+ECHO  same SBA DSBS extract on both sides (1118 R-A)        388
+ECHO  UEI already in our ledger, from HIS own files         275
+INDEPENDENT  federal_registry against a self-published UEI   33
+```
+
+**33, not 696.** The 33 are NEST rows whose UEI the *parent published on its own
+site* and which the SBA certification register independently binds to the same
+firm — `entity_self_published` plus `federal_registry`, two observers. `1118`
+owns the arbitration; `1130` does not build a parallel layer and does not edit
+`1118`.
+
+**3,306 of his UEIs are in no Cedar table at all** — that, not corroboration, is
+the identifier value in his file.
+
+### 6. THE ANC/NHO DUAL ROLE — `data/clean/nest_entity_dual_role.csv`, 358 rows
+
+> *"ANCs and NHOs are themselves entities, but they're also enterprises too."*
+> — the owner
+
+He is right and NEST's model was wrong: an ANCSA corporation was only ever an
+`owner_hub_cedar_uid`, a hub that owns. It is also a corporation that **trades**.
+
+**It is RECORDED, not duplicated.** NEST's key is (owner hub, normalised name);
+a self-row would make the hub its own subsidiary — the exact thing the 1072
+build already refuses by testing the child against every deterministic rendering
+of the hub's name, after `The Eyak Corporation` and `Coushatta` each published
+as a two-level chain that was one company twice. So the second role lives in its
+own table keyed to `cedar_uid`, one row per entity, and a consumer joins it to
+`nest_enterprises` on `owner_hub_cedar_uid`. Invariant **I12** holds the
+no-self-subsidiary line.
+
+Three evidence rungs, recorded per row:
+
+| rung | what fires it | rows |
+|---|---|---:|
+| R1 `DECLARED_BY_OWNER_DATASET` | his file carries a row whose `enterprise_name` normalises to the parent's own name | 263 |
+| R2 `ENTITY_HOLDS_ITS_OWN_IDENTIFIER` | that row carries a UEI or CAGE on the entity's own legal name | 247 |
+| R3 `REGISTERED_AS_A_FIRM_IN_SBA_DSBS` | the entity's own legal name is a row in the SBA certification register, with its own UEI | 106 |
+
+**R3 exists because his file cannot evidence the NHO half of his own
+correction** — it carries exactly one NHO parent, and that one
+(`NHO-MANUKAI-00`) does not crosswalk. The SBA DSBS extract already on disk can,
+it is a `federal_registry` observer rather than a restatement of his file, and
+rule 14 is why it works: *an NHO says it is one, because the certification is
+the point.* Uniqueness is required on **both** sides — 73 register entities were
+refused because their own name is not unique in the register or in DSBS.
+
+```
+Federally recognized Alaska Native Village   127     Tribal College or University          9
+Federally recognized tribe                   105     Alaska Native Regional Corporation    8
+Alaska Native Village Corporation             45     Native CDFI                           8
+Intertribal Organization                      16     State-recognized tribe                8
+Native Hawaiian Organization                  13     other                                19
+Federal-level self-governance consortium      10
+```
+
+**All 8 ANCSA regional corporations his file reaches hold their own UEI and
+their own federal-contractor status** — Ahtna (`HM1PS6FAK6U7`, and 83 NEST
+subsidiaries beneath it), Arctic Slope (53), Calista (75, 8(a)), Chugach (17,
+8(a)), Bering Straits (41, 8(a)), Doyon (23), Sealaska (25), NANA. **53 ANCs and
+13 NHOs in total.** Invariants **I11a to I11d** exit 1 if the table stops
+reaching ANCs, stops reaching NHOs, becomes only those two, or loses the R3
+rung.
+
+### 7. WHAT THIS PASS DELIBERATELY DID NOT DO
+
+* **It did not append to NEST.** `1072 build` is a full rebuild; an in-place
+  append would be reverted by it while printing a larger row count and looking
+  like progress — the FERC collision, four times over. The 4,786 are a
+  **proposal for `1072` to ingest through its own clustering**, so the
+  append-only `cedar_nest_id_register.csv` stays the only place an id is minted.
+  Invariant **I6**: this script appears on **0** register rows.
+* **It proposed no `relation_class`.** His file states no relationship word, so
+  neither `structures` nor `ties` can be read off it. `relation_class_proposed`
+  is blank on all 5,226 rows and invariant **I7** exits 1 if any row fills it or
+  drops the `NO - provenance only` flag. **An affiliation recorded as ownership
+  is the defect this dataset is most exposed to**, and guessing upward
+  fabricates.
+* **It laundered no ownership.** `verification_source` is carried per row; where
+  it is blank (8,929 of 18,110 rows) there is no evidence, and that is what the
+  row says.
+
+### THE GATE
+
+```
+py -3 code/1130_nest_owner_v6_reconcile.py verify     -> exit 0, 31 invariants
+py -3 code/1130_nest_owner_v6_reconcile.py selftest   -> 6/6 fixtures FIRE
+py -3 code/293_lint_bug_classes.py                    -> 0 findings in 1130_*
+```
+
+Six invariants are proved to fire by injecting the violation into a copy of the
+live file, asserting exit 1, restoring, and asserting exit 0 again — including
+the one that matters most here: **an empty reconciliation reads as FAILURE, not
+success.** Every input table is accounted row-for-row in
+`data/staging/nest_owner_v6/conservation.csv`; **9 of 9 accounting rows balance
+to zero unaccounted.**
+
+Shared files touched, each additively and each with a backup:
+`code/512_build_dataset_contracts.py` (own `GRAIN_NEST_DUAL` dict) and
+`data/clean/codebook_master.csv` (**appended** 27 rows as
+`18c_nest_entity_dual_role`, never rewritten), plus this log inside its own
+marker. **Nothing was written to `nest_enterprises.csv`, to
+`nest_enterprise_relations.csv`, to the id register, to the spine, or to the
+identifier ledger. Nothing was committed.**
+
+### NEXT, IN ORDER OF VALUE PER HOUR
+
+1. **`1072` ingests the 4,786 through its own clustering** and mints their ids
+   from the register. Carry `verification_source` per row and set
+   `relation_class = affiliation` unless a source states ownership.
+2. **12,084 of his rows carry no `tribe_id`** — 3,140 typed
+   `TRIBAL_ENTITY_UNCROSSWALKED_SBA` and 8,928 blank, 12,068 of them carrying a
+   UEI. They are the SBA-derived rows Cedar has been trying to reach, and the
+   largest single block of unhubbed enterprise identity on this machine. The
+   route is the identifier, not the name.
+3. **The 212 village-government hubs** are a correction to hand back to the
+   owner with the ruling attached.
+4. **Six intertribal organisations are spine gaps.** Cheap.
+5. **`cedar_identifier_ledger.state` holds an identifier on 12,127 rows.** Not
+   this pass's table; it needs an owner.
+
+**One integrator step is deliberately left undone.**
+`nest_entity_dual_role.csv` has its grain contract (`GRAIN_NEST_DUAL` in
+`512`) and its codebook block (`18c_nest_entity_dual_role`, 27 variables),
+which are the two things that make a table shippable. It is **not** listed in
+`code/500_build_architecture_map.py`'s `nest` collection, so
+`518_dataset_readiness.py` still reports `nest` at 2 tables. That is one line
+in a file the integrator owns, and adding it is the integrator's call, not an
+agent's — `518` currently reads **READY 15 / 15** and a new table entering a
+collection can only move that number down. Measured after this pass:
+`518` READY 15/15 unchanged, `1116 verify` clean over 290 markdown files,
+`293` zero findings in `1130_*`.
+<!-- END NEST-OWNER-V6-2026-09-02 -->

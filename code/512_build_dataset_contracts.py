@@ -2893,6 +2893,32 @@ GRAIN_NEST = {
 }
 GRAIN.update(GRAIN_NEST)
 
+# --- NEST DUAL ROLE: an ANC/NHO is a hub AND an enterprise (1130) ----------
+GRAIN_NEST_DUAL = {
+    "nest_entity_dual_role.csv": _d(
+        "one row per REGISTER ENTITY for which there is evidence that the "
+        "entity ITSELF trades - an ANCSA corporation or an NHO is not only a "
+        "hub that owns, it is a corporation that sells, and NEST's model "
+        "treated it only as a hub. This table RECORDS that second role; it "
+        "does NOT duplicate the entity into nest_enterprises.csv, because "
+        "NEST's key is (owner hub, normalised name) and a self-row would "
+        "make the hub its own subsidiary - the exact thing 1072's build "
+        "already refuses by testing the child against every deterministic "
+        "rendering of the hub's name. NOT one row per enterprise owned "
+        "(`n_nest_enterprises_owned` is a count, join nest_enterprises on "
+        "owner_hub_cedar_uid for those) and NOT a roster of ANCs - an entity "
+        "reaching none of the three evidence rungs is absent, and absence "
+        "here means `no evidence was found`, never `it does not trade`.",
+        primary_key=["cedar_uid"],
+        join_cardinality={"cedar_uid": "one"},
+        declared_by="workstream nest-owner-v6 2026-09-02, "
+                    "code/1130_nest_owner_v6_reconcile.py: cedar_uid tested "
+                    "unique and non-blank on the full file; every value "
+                    "checked present in data/spine/cedar_identity_register.csv "
+                    "by invariant I3, which a fixture proves fires"),
+}
+GRAIN.update(GRAIN_NEST_DUAL)
+
 # --- STALE-TAIL: dated public facts for the 830 freshness tail (ADR-022) ----
 GRAIN_STALE_TAIL = {
     "entity_dated_public_facts.csv": _d(
@@ -3364,6 +3390,57 @@ GRAIN_ACQUIRE = {
 GRAIN.update(GRAIN_ACQUIRE)
 
 # --------------------------------------------------------------------------
+# workstream GAMING-TOTAL (ADR-031), code/1126_annual_total_federal_and_gaming.py,
+# 2026-09-02. Own dict, per the field guide; nobody else's is touched.
+# --------------------------------------------------------------------------
+GRAIN_ANNUAL_TOTAL = {
+    "annual_indian_country_money_series.csv": _d(
+        "one row per (fiscal_year, series_id). THE GRAIN IS DELIBERATELY LONG "
+        "AND NOT WIDE, because a wide table invites a row-sum and a row-sum "
+        "here would add two kinds of money.\n"
+        "**`money_class` IS THE FENCE AND IT IS ON EVERY ROW.** "
+        "FEDERAL_OBLIGATION_TRANSFERRED_INTO_INDIAN_COUNTRY is money moving "
+        "IN; INDIAN_COUNTRY_OWN_SOURCE_REVENUE is money Indian Country "
+        "earned. A total that omits the second badly understates the "
+        "economy; a total that adds them into one number claims they are the "
+        "same kind of money. **NO ROW OF THIS TABLE IS A GRAND TOTAL** and "
+        "`1126 verify` V3 fails if one ever appears - it recomputes "
+        "federal+gaming per year and refuses any row equal to it.\n"
+        "Additive: `federal_prime_obligations` + "
+        "`federal_assistance_obligations` = `federal_obligations_total`, "
+        "which is written for the reader and must therefore never be added "
+        "back to its own components. **SUBAWARDS ARE NOT IN THIS TABLE AT "
+        "ALL** - a subaward is a slice of a prime already counted - and V5 "
+        "fails if a subaward-sourced row appears.\n"
+        "`nigc_regional_ggr_rolled_to_nation` is that year's NIGC regions "
+        "summed to the nation WITHIN ONE REGION SYSTEM. A naive GROUP BY "
+        "fiscal_year over `nigc_regional_ggr.csv` DOUBLES FY2002, FY2007 and "
+        "FY2016, because every NIGC report restates the prior year and those "
+        "three sit under two region systems: $29.213B vs $14.497B, $52.160B "
+        "vs $26.016B, $62.600B vs $31.300B. The discriminator is "
+        "`figure_vintage`; sum only `own_year_report`, and where a year has "
+        "none (FY2001, FY2011, FY2013, FY2021) take its prior-year column "
+        "and say so in `basis`.\n"
+        "A REGIONAL FIGURE IS NEVER A PROPERTY'S MONEY. It is not "
+        "apportioned to facilities and not summed across them. Of the 714 "
+        "distinct gaming properties (the gated ladder in "
+        "code/846_session_audit.py::_denom, IMPORTED not retyped), 11 carry "
+        "an honest per-property revenue figure. Every gaming row states that "
+        "denominator in `coverage_note` and V7 fails if one does not.\n"
+        "`sec_filed_per_property_net_revenues` is a THIRD assertion class "
+        "and is INSIDE the NIGC regional figure for the same year - never "
+        "net one against the other. First-filing rows only; a 10-K restates "
+        "its two prior years.\n"
+        "`figure_precision` rides on every gaming row: FY2013-FY2020 are "
+        "rounded to $0.1B because NIGC published only a distribution map, so "
+        "eight regions carry up to $0.4B of rounding in the national figure. "
+        "And the two clocks differ - NIGC aggregates each operation's own "
+        "audited fiscal year, up to 16 months before publication.",
+        ["fiscal_year", "series_id"]),
+}
+GRAIN.update(GRAIN_ANNUAL_TOTAL)
+
+# --------------------------------------------------------------------------
 # workstream PLACE-IDS (ADR-030), code/1129_place_ids.py, 2026-09-02.
 # Do not edit another workstream's dict; this one is mine.
 # --------------------------------------------------------------------------
@@ -3372,21 +3449,18 @@ GRAIN_PLACE = {
         "one row per DISTINCT PHYSICAL PLACE a Cedar entity operates, across "
         "four classes declared in `place_class`: GAMING_PROPERTY (717), "
         "BIA_OFFICE (93), BIE_SCHOOL (187), IHS_FACILITY (0, NOT_ACQUIRED and "
-        "declared UNPOPULATED rather than silently absent).
-"
+        "declared UNPOPULATED rather than silently absent).\n"
         "IT IS NOT ONE ROW PER SOURCE RECORD. 771 gaming facility rows "
         "resolve to 717 places because 53 adjudicated groups are one property "
         "held under two source vintages (`CCP-` Casino City Press, `VP-`, "
         "`TPL-`, `CED-`); `source_keys` is the semicolon-joined list of every "
-        "source key bound to the place, and `n_source_keys` is its length.
-"
+        "source key bound to the place, and `n_source_keys` is its length.\n"
         "A PLACE IS A SUB-HUB, NEVER A PEER OF ITS OPERATOR. "
         "`operator_cedar_uid` may be BLANK and blank is never 'no operator': "
         "for BIA_OFFICE the operator is a federal agency and is not a Cedar "
         "entity; for BIE_SCHOOL it is UNRESOLVED, because matching a school "
         "name to a nation by name is the containment defect. "
-        "`operator_basis` states which, on every row.
-"
+        "`operator_basis` states which, on every row.\n"
         "DO NOT COUNT PLACES AS A PROXY FOR ANYTHING ELSE. 714 is the "
         "MECHANICAL name-collision count gated in `846::_denom`; 717 is the "
         "adjudicated count, and the three-row difference is three groups the "

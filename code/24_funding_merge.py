@@ -478,8 +478,15 @@ class Replay:
                 if op == "set_tribe":
                     self.tribe_id[i] = st["value"]
                     if st.get("mr2_oneida"):
+                        # MR-2 provenance goes in the SOURCE LINE, never in
+                        # the method. `attribution_method` is a controlled
+                        # vocabulary that 40/09/1079 switch on; a marker
+                        # appended here made 334 rows unreadable to them, and
+                        # the marker was WRONG on two of them - it hardcodes
+                        # "204=NY" while the statement it stamps also covers
+                        # the Wisconsin reassignment to 205. See 1131.
                         self.attr_line[i] = f"{line} (MR-2 re-applied)"
-                        self.attr_method[i] = method + " (MR-2 Oneida 204=NY)"
+                        self.attr_method[i] = method
                     else:
                         self.attr_line[i] = str(line)
                         self.attr_method[i] = method

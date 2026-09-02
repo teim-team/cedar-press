@@ -293,26 +293,35 @@ def _split():
     return (not bad, f"{len(bad)} notice(s) split a department name mid-name")
 
 
-@claim("attribution_method holds only its controlled vocabulary", critical=True)
+@claim("attribution_method matches its table's DECLARED vocabulary",
+       critical=True)
 def _vocab():
-    """`1111` wrote an English sentence into a field that `40` switches on, and
-    it broke a neighbouring pass's leg detection on 1,486 rows. The vocabulary
-    IS the interface; prose belongs in `attribution_source_line`."""
-    VOCAB = {"", "unattributed", "uei_exact", "cage_exact", "parent_uei",
-             "ruling_applied"}
-    import collections as _c
-    bad = _c.Counter()
-    p = CLEAN / "prime_contracts.csv"
-    if not p.exists():
-        return (True, "table absent")
-    with p.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
-        for r in csv.DictReader(fh):
-            v = (r.get("attribution_method") or "")
-            if v not in VOCAB:
-                bad[v[:40]] += 1
-    n = sum(bad.values())
-    return (n == 0, f"{n:,} row(s) off-vocabulary"
-                    + (f": {bad.most_common(1)[0][0]}" if bad else ""))
+    """This claim used to enforce a five-term vocabulary. There are 75 terms.
+
+    It read `prime_contracts.csv` and spoke for the whole tree, so it passed
+    for weeks while `cedar_assertions` carried 40 terms and the lobbying table
+    carried 9. The column is not one column: a JOIN METHOD in prime_contracts,
+    an EVIDENCE PROVENANCE in cedar_assertions, a NAME-MATCH ALGORITHM in the
+    lobbying table. One flat list could never have been right for all three,
+    and the term that finally tripped it - `ladder_1122` - was CORRECT, chosen
+    deliberately outside the ruled set so an agent ruling could not move
+    `tier_A_ruled`.
+
+    `1131` declares a vocabulary per table and owns the check. This claim now
+    calls it rather than re-deriving a rule it got wrong: a gate that disagrees
+    with the registry is worse than no gate.
+    """
+    import json
+    rc = script_exit("1131_attribution_method_vocabulary.py", "verify")
+    if rc == 99:
+        return (False, "1131 verify CRASHED - vocabulary unproven")
+    reg = ROOT / "docs" / "schema" / "attribution_method_vocabulary.json"
+    if not reg.exists():
+        return (False, "vocabulary registry absent - run 1131 apply")
+    d = json.loads(reg.read_text(encoding="utf-8"))
+    n = sum(len(t["terms"]) for t in d["tables"].values())
+    return (rc == 0, f"1131 verify rc={rc}; {n} declared term-uses across "
+                     f"{len(d['tables'])} tables (this claim once asserted 5)")
 
 
 @claim("an attributed row carries the columns the table attributes WITH",
@@ -338,37 +347,38 @@ def _attributed():
                        f"attributed_flag=1")
 
 
-@claim("the gaming denominator is the measured one, not one of its five variants")
+@claim("the gaming denominator comes from the adjudication, not a regex")
 def _denom():
-    """787 / 780 / 734 / 727 / 714 all circulated on 2026-09-02, each from a
-    different definition of "facility", and every one was quoted as if settled.
-    Measured: 787 rows; 16 whose name says "no casino" (7 exactly, 9 more like
-    'Grand Canyon West - no casino'); 56 same-tribe duplicate groups worth 57
-    extra rows. So 771 facility rows and 714 distinct properties. This claim
-    fails if the file changes shape and nobody re-derives it."""
-    import re as _re, collections as _c
-    p = CLEAN / "gaming_facilities.csv"
-    if not p.exists():
-        return (True, "table absent")
-    rs = rows(p)
-    ph = [r for r in rs if "NO CASINO" in (r.get("facility_name") or "").upper()]
-    def loose(x):
-        x = _re.sub(r"[^A-Z0-9 ]", " ", (x or "").upper())
-        x = _re.sub(r"\b(CASINO|RESORT|HOTEL|AND|THE|LLC|INC|GAMING|CENTER|CENTRE)\b",
-                    " ", x)
-        return " ".join(x.split())
-    g = _c.defaultdict(list)
-    for r in rs:
-        if r in ph: continue
-        k = (loose(r.get("facility_name")), (r.get("state") or "").upper())
-        if k[0]: g[k].append(r)
-    extra = sum(len(v) - 1 for v in g.values() if len(v) > 1
-                and len({x.get("tribe_canonical_name") for x in v}) == 1)
-    rows_ = len(rs); fac = rows_ - len(ph); dist = fac - extra
-    ok = (rows_, len(ph), extra) == (787, 16, 57)
-    return (ok, f"{rows_} rows - {len(ph)} placeholders = {fac} facility rows "
-                f"- {extra} duplicate extras = {dist} distinct properties"
-                + ("" if ok else "  <- shape changed, re-derive before quoting"))
+    """787 / 780 / 734 / 727 / 714 / 725 — SIX values circulated on 2026-09-02.
+
+    Mine was 714, from a regex counting 16 names containing "no casino" and 57
+    duplicate extras. The Codex loop reached 725 from
+    `review/place_gaming_adjudication_2026-09-02.csv`, which carries a
+    PER-GROUP VERDICT — 53 MERGE, 5 HOLD_OPEN — and counts 8 non-place rows.
+
+    **An adjudicated verdict beats a heuristic**, so this claim now reads the
+    adjudication rather than recomputing my own pattern. The five HOLD_OPEN
+    groups are held open on purpose: they include a Miami/Modoc joint
+    operation that two independent processes flagged separately, which is the
+    first time in this project two passes CORROBORATED instead of one
+    correcting the other.
+    """
+    adj = ROOT / "review" / "place_gaming_adjudication_2026-09-02.csv"
+    fac = CLEAN / "gaming_facilities.csv"
+    if not adj.exists() or not fac.exists():
+        return (True, "UNMEASURED — adjudication or facility table absent")
+    a = rows(adj)
+    merge = [r for r in a if (r.get("verdict") or "") == "MERGE"]
+    hold = [r for r in a if (r.get("verdict") or "") == "HOLD_OPEN"]
+    def n_rows(r):
+        try: return int(r.get("n_rows") or 0)
+        except ValueError: return 0
+    extras = sum(max(n_rows(r) - 1, 0) for r in merge)
+    total = len(rows(fac))
+    ok = len(merge) == 53 and len(hold) == 5
+    return (ok, f"{total} rows; {len(merge)} MERGE groups removing {extras} "
+                f"extras; {len(hold)} HOLD_OPEN"
+                + ("" if ok else "  <- adjudication changed, re-derive before quoting"))
 
 
 @claim("cedar_uid and tribe_id never name different entities", critical=True)

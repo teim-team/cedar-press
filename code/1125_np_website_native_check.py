@@ -480,6 +480,7 @@ def cmd_plan(a):
     wp = load_wp()
     src = collections.Counter()
     parse = collections.Counter()
+    refused_webmap = []
     for r in pool:
         ein = n9(r["EIN"])
         u, basis = website_from_990(ein, idx)
@@ -492,6 +493,10 @@ def cmd_plan(a):
             src["irs_990n_epostcard_website_field"] += 1
             u = ss[ein][0]
         elif (r.get("cedar_uid") or "").strip() in wm:
+            # A count is not actionable and scrolls past; a name is a task.
+            refused_webmap.append("%s (EIN %s) -> keyed entity %s"
+                                  % (r.get("org_name", ""), ein,
+                                     (r.get("cedar_uid") or "").strip()))
             src["REFUSED_only_url_is_the_KEYED_ENTITYS_site_not_the_orgs"] += 1
             continue
         else:
@@ -504,6 +509,13 @@ def cmd_plan(a):
     print("\npopulation chosen: %s  (%d organisations)" % (a.population, len(pool)))
     print("url source:", json.dumps(dict(src), indent=1))
     print("parseability:", json.dumps(dict(parse), indent=1))
+    if refused_webmap:
+        print("")
+        print("refused, only URL Cedar holds is the KEYED ENTITY's site "
+              "(%d) -- first 10 named, all of them are in the fetch output "
+              "with the reason on the row:" % len(refused_webmap))
+        for line in refused_webmap[:10]:
+            print("   " + line)
     print("\nProPublica cached payloads inspected: %d; carrying a website field: "
           "%d  -- MEASURED, so ProPublica is recorded as NOT a URL source here "
           "rather than assumed to be one." % (n, hits))
@@ -693,6 +705,11 @@ def cmd_fetch(a):
                 rec["evidence_source"] = ("about page + home page" if atxt
                                           else "home page")
             else:
+                # Name it. Nothing is dropped -- the row is written with its
+                # status and a NOT_CHECKED_* verdict -- but a bare counter
+                # scrolls past and a hostname is a task.
+                print("  no readable page: %s | %s | HTTP %s curl %s"
+                      % (rec["org_name"][:40], p.netloc, st, rc), flush=True)
                 refused += 1
                 rec["text_chars"] = 0
             thin = status_ok and len(corpus) < 400

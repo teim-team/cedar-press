@@ -1213,3 +1213,131 @@ longer run, the seven `No casino` placeholder rows, the compounding gaming
 denominator, the `federal-register` UNDOCUMENTED sample source, the 807 Dear
 Tribal Leader letters against copy calling that surface unacquired, and
 instance ten.
+
+---
+
+## PR #29 — ROUND 6, answered and pushed as `0b474bb` / `446b5fe`
+
+Codex reviewed `14a2ab4` and left **eight** findings, all P2. **All eight
+right.** One (finding 6) was already fixed in `f12ac41`, which landed after
+the reviewed commit — Codex's finding and this side's own duplicate-figure
+sweep found the same stale copy independently, forty minutes apart.
+
+| # | finding | verdict |
+|---|---|---|
+| 1 | descriptor and generated README publish different subaward totals | **Right**, and a third value existed by the time it was fixed |
+| 2 | READY datasets ship `blockers: ["-"]` | **Right** — a placeholder that reads as a value |
+| 3 | gaming descriptor prescribes 780 then withholds a rate because ~727 | **Right** — self-contradictory in one string |
+| 4 | sample index still calls all 787 rows "one row per gaming facility" | **Right** |
+| 5 | status section says "Both" before listing three | **Right** — instance eleven |
+| 6 | main README still shows pre-correction mojibake totals | **Right when reviewed; already fixed** |
+| 7 | natural-resources descriptor publishes 87% against a measured 88.1% | **Right** — instance twelve |
+| 8 | grain cells truncate mid-sentence, one leaving an unclosed code span | **Right** |
+
+### Findings 1, 3 and 7 are one defect, so they got one fix
+
+Each is a number `770` measures and a human re-typed into
+`docs/datasets/_descriptors.json`. The subaward case is the proof that hand
+copy cannot hold:
+
+| where | unfiltered | correct | overstatement |
+|---|---|---|---|
+| descriptor (typed) | $45.62B | $24.41B | 86.9% |
+| generated README, same push | $51.45B | $29.47B | 74.6% |
+| live table when the fix ran | **$57.02B** | **$34.91B** | **63.4%** |
+
+**Three values for one quantity inside one day**, because `subawards.csv` went
+76,859 → 87,177 → 90,479 rows underneath the typed copy.
+
+So the copy carries `{{TOKENS}}` and `760` substitutes them from
+`dist/measured_facts.json`, which `770` writes on each run. **Two refusals,
+both deliberate:** an unknown token is a hard failure rather than a
+passthrough — a literal `{{SUBAWARD_CORRECT}}` reaching a customer is worse
+than a stale number, and a stale number is what this prevents — and `760`
+refuses outright if the facts file is absent, because a descriptor built from
+last week's measurements is the same defect with a fresh timestamp.
+
+### The gaming ladder, third measurement, and the adjudication had landed
+
+    787   rows
+     -8   non-place rows  (7 `No casino` + 1 `No casino currently`)
+    ---
+    779   facility rows
+    -54   extra rows across 53 ADJUDICATED MERGE groups
+    ---
+    725   distinct properties
+
+**Both of the previous numbers were wrong.** The non-place test was an exact
+string and missed `No casino currently` — it is a set now. And
+`review/place_gaming_adjudication_2026-09-02.csv` carries a **verdict per
+group** (MERGE 53, HOLD_OPEN 5) and supersedes the candidates file whose 56
+groups were all `verdict_needed`. Reporting candidates as settled overstated
+what Cedar knew; reporting them after adjudication understated it. The ladder
+is measured from the adjudicated file on every build.
+
+**The five HOLD_OPEN groups corroborate this loop's own refusal.**
+`7 CLANS FIRST COUNCIL` and `STABLES` are held as `P0_different_operators` —
+the Miami/Modoc joint operation flagged three rounds ago as something that
+must never be collapsed. **First time on this branch that two independent
+processes agreed rather than one correcting the other.**
+
+### The fifteenth collection had a descriptor and no sample
+
+`newsletters`. That is Codex round-2 finding 7 for the **third** time —
+`owned`'s id mismatch, `nest` landing mid-branch, and now this. `760` named it
+as needing copy; **nothing warned that it had no sample**, because the check
+runs from the descriptor side only.
+
+**1,889 rows, 481 of them `probe_absence`** — an entity searched that
+publishes nothing findable. 1,555 entities probed, 694 with at least one
+channel, archives back to **1970**. `record_status` leads the sample's column
+list because a sample showing only the 1,394 publication channels would hide
+the column that makes the file honest.
+
+### The generator now proves it finished
+
+The warning was exact and it was this project's own: `770` died mid-run on a
+1.46 GB table, wrote one sample, left a zero-byte log, and **nothing noticed,
+because every downstream check reads the output — which was the previous
+run's, and looks identical to a good one.**
+
+A timestamp captured at import, before any table is read, plus a per-dataset
+mtime check that exits non-zero naming every sample that did not land.
+`py -3 code/770_sample_extracts.py guardtest` proves it fires in both
+directions.
+
+**The fixture failed its own second assertion first**, because it compared
+against the *test process's* start time rather than the writes' — reporting
+every sample stale and calling that a guard failure. A check measuring
+something other than its own name, inside the fixture written to prove checks
+measure their names.
+
+### Also fixed, unprompted
+
+- **`relation_class` was missing from the `nest` sample** — the column the
+  dataset exists to carry, separating a STRUCTURE (ownership) from a TIE (a
+  published non-ownership relationship). `500.COLLECTIONS` states in as many
+  words that this is why `nest` is not merged with `native-owned-businesses`,
+  and the ten rows a customer saw could not show the difference.
+- **Attribution fell and that is the fix working.** The C4 table shipped
+  `888,958 / 1,217,768 = 73.0%` as current. Live: **789,456 (64.8%)**,
+  **$229.71B** against $244.77B, and **526** distinct entities against 449.
+  Attribution fell by 99,502 rows and $15.06B while distinct entities **rose**
+  by 77, because the work between was *removing* wrong attributions — Old
+  Harbor is 4,947 rows of it, United Keetoowah another 820. **A coverage rate
+  that falls because bad links were withdrawn is better than the one it
+  replaces**, and a reader taking it as a regression would push the wrong way.
+
+### Claims in the brief that did not reproduce, with the measurement
+
+- **"NEST has no sample at all."** It has had one since the previous push:
+  `nest__sample.csv`, 10 rows, entries in both `FLAGSHIP` and `SHOW`, full
+  editorial copy, `sample_file` resolving. This is the **second** time that
+  item has arrived already closed.
+- **"787 − 16 non-places = 771 − 57 = 714."** Measured: **8** non-place rows,
+  **54** extras across 53 MERGE groups, **725** distinct properties. Neither
+  16 nor 57 nor 771 nor 714 reproduces against `gaming_facilities.csv` or the
+  adjudication file.
+- **`natural-resources` at 87%** — measured 88.1%, and the collection jumped
+  34,551 → **283,716** rows in this push as the BIA ArcGIS acquisition landed,
+  so the rate will move again. Tokenised for that reason.

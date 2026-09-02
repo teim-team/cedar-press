@@ -518,3 +518,109 @@ escape, a `+`, or a second extension. Every speculative repair added today is
 reported gap into a satisfied declaration and never the reverse — **a mistake in
 the fix cannot hide a real gap.** An earlier ungated version was measured at
 52 → 77 and reverted before it shipped.
+
+---
+
+<!-- BEGIN MASTER-LIST-SWEEP-2026-09-02 -->
+# THE REGISTER IS A SEARCH KEY — which sources to sweep next, measured
+
+*Added 2026-09-02 by workstream `nest-owner-v6`
+(`code/1130_nest_owner_v6_reconcile.py`). Every number below was measured on
+this machine with no network call. Owner:*
+
+> *"Our native entity master list is pretty comprehensive... it can be as
+> simple as keyword searching all of them, or building scrapers. That is a
+> source we're not using as much as I think we could."*
+
+**The principle, stated so it can be applied to a source nobody has looked at
+yet:** where a source carries a **Native flag**, use the flag. Where it does
+not, **sweep all 1,555 register names against it** — the register is the
+discovery leg. And where it *does* carry a flag, ask what the flag misses,
+because a flag is a self-declaration under one definition and the register is
+a different definition.
+
+**The method already has a proof.** `1130`'s R3 rung swept the register
+against the SBA DSBS extract already on disk and found **106 register
+entities registered as firms under their own legal name** — including 13
+NHOs, which is the only reason the ANC/NHO dual role could be evidenced at
+all (ADR-032). Zero network requests, one pass, one new fact class.
+Uniqueness was required on both sides and 73 candidates were refused for it.
+
+## Ranked, with the yield measured rather than guessed
+
+Exact normalised name, unique in the register and unique in the source. This
+is the FLOOR — a real sweep would add alias and identifier legs.
+
+| source | rows | register entities it names exactly | verdict |
+|---|---:|---:|---|
+| **`fpds_uei_cage_map.csv`** | 34,601 | **666 of 1,555 (42.8%)** | **sweep first.** On disk, no network, and it hands back a UEI/CAGE binding per hit — the identifier rung every other matcher wants |
+| **Federal Audit Clearinghouse** | 6,780 held | **638 reached today** | **the owner's own pick, and the gap is structural — see below** |
+| **NPPES organisational registrations** | 16,981 | **147** | on disk (`code/1121`, 2026-09-02), carries **no `cedar_uid` column at all**, and `nppes_spine_name_candidates.csv` (18,221 rows) is a candidate list nobody has resolved |
+| SBA DSBS extract | 5,087 | 106 (already done by `1130` R3) | done; extend to aliases |
+| IBIA / IBLA case names | 15,613 | 32 | thin on exact name because a case caption is *"X v. Acting Regional Director"*; needs a caption parser, not a sweep |
+| USAC RHC provider directory | 11,142 | 2 | **do not sweep.** Provider names are clinics, not nations |
+| NAGPRA institutions | 6,792 | 1 | **do not sweep.** The institution side is museums; the tribal side is already keyed |
+
+The last two rows are the point of measuring rather than proposing: two
+sources that look obviously sweepable return one and two hits, and an hour
+spent on either buys nothing.
+
+## FAC is the right pick, and the reason is sharper than "it is under-used"
+
+`code/147` pulls `entity_type = eq.tribal` from the FAC dissemination API.
+**6,774 of the 6,780 rows Cedar holds came in through that flag** (the other
+six are `local`). It reaches **638 of 1,555** register entities.
+
+**Look at what the flag misses.** Of the 917 entities FAC has never reached:
+
+```
+Native Hawaiian Organization                  210   <- every single one
+Alaska Native Village Corporation             152
+Federally recognized Alaska Native Village    115
+BIE School                                    114
+State-recognized tribe                         63
+Native Community Development Financial Inst.   55
+Individually Native-owned business             45
+Intertribal Organization                       37
+```
+
+**An NHO does not file a Single Audit as a tribe.** Neither does a tribal
+college, a Native CDFI, a BIE school or an intertribal health board — they
+file as `non-profit`, and `entity_type = tribal` cannot see one of them.
+Every organisation on that list that expends $750k of federal awards in a
+year **must** file, and Cedar is not looking for their filings. This is not a
+coverage shortfall in FAC; it is Cedar asking FAC the wrong question.
+
+**The sweep:** query the FAC `general` table by `auditee_name` (and by
+`auditee_ein` where the ledger holds one) for the 917 unreached register
+entities, with **no `entity_type` filter at all**, and resolve each hit
+through `147`'s existing single resolver. Then record what came back, and
+just as importantly record `CHECKED_ABSENT` for the entities that genuinely
+have no filing — `docs/SHARD_COVERAGE.md` distinguishes *attempted, none
+found* from *untouched* for exactly this reason, and today all 917 are
+untouched.
+
+**Two traps to carry into it, both already paid for elsewhere in this
+project.** The `is_public` opt-out is **not a bar** — `START_HERE`'s FAC
+correction and the 2,052 public rows of 6,780 say so; and a hit on
+`auditee_name` alone is a name match, so `ENTITY_MATCH_RULES` rule 7's
+residue test decides it, not containment. `NAVAJO TRIBAL UTILITY AUTHORITY`
+is not the Navajo Nation.
+
+## And the standing measurement that says how much of this is left
+
+`py -3 code/1112_harvest_coverage_matrix.py verify` — per entity, per thing,
+what was actually looked for. `NEVER_CHECKED` today:
+
+```
+identifiers          1,439 of 1,555   (92.5%)
+gaming               1,257            (80.8%)
+enterprises            455            (29.3%)
+individual_business    450            (28.9%)
+newsletter             373            (24.0%)
+```
+
+The register-as-search-key is the cheapest instrument that moves the first
+two, and `identifiers` is where it pays fastest, because
+`fpds_uei_cage_map.csv` is sitting on disk naming 666 of them already.
+<!-- END MASTER-LIST-SWEEP-2026-09-02 -->

@@ -1,0 +1,200 @@
+{
+  "declared": "2026-09-02",
+  "column": "attribution_method",
+  "why": "attribution_method is three different columns sharing a name - a join method, an evidence provenance, and a name-match algorithm. Each table is gated against its OWN vocabulary. A term listed here is FROZEN, not blessed: declaration records what shipped on this date so that a NEW term cannot appear silently.",
+  "ruled_terms": [
+    "elijah_ruling",
+    "elijah_ruling_redirect",
+    "ruling_applied"
+  ],
+  "ruled_authority": "code/62_no_regression_check.py",
+  "tables": {
+    "cedar_assertions.csv": {
+      "terms": {
+        "acronym": 143,
+        "agent_research_one_leg": 326,
+        "agent_research_two_leg": 506,
+        "bgov_manual": 831,
+        "bie_school_directory": 1353,
+        "brand": 104,
+        "cluster_v3": 2005,
+        "common": 2904,
+        "cross_dataset_propagation:contracting": 1026,
+        "cross_dataset_propagation:funding": 293,
+        "diacritic_folded": 40,
+        "doi_onhr_notification_list": 716,
+        "elijah_ruling": 695,
+        "elijah_ruling_redirect": 110,
+        "federal_register_rename": 15,
+        "federal_register_roster": 620,
+        "former_legal": 165,
+        "fr_tribal_list": 515,
+        "full_form_federal_filing": 1798,
+        "hand": 522,
+        "ihs_roster": 111,
+        "institution_exact_name": 52,
+        "irs_bmf_filed_name:EIN": 3,
+        "irs_bmf_filing_address": 102,
+        "irs_bmf_filing_address:EIN": 1526,
+        "legal": 872,
+        "need_v6": 1596,
+        "nhoa_member_directory": 100,
+        "nigc_ogc_declination_letter": 9,
+        "org_self_statement": 65,
+        "registration_address:CAGE": 1670,
+        "registration_address:UEI": 152,
+        "registration_name:CAGE": 2901,
+        "registration_name:EIN": 764,
+        "registration_name:UEI": 4066,
+        "sam_namematch_2026_05_06": 135,
+        "shortened": 225,
+        "subsidiary_lookup": 111,
+        "unattributed_legacy": 5428,
+        "web_verified": 40
+      }
+    },
+    "cedar_entity_identity_crosswalk.csv": {
+      "terms": {
+        "agent_research_one_leg": 326,
+        "agent_research_two_leg": 506,
+        "bgov_manual": 829,
+        "cluster_v3": 2005,
+        "cross_dataset_propagation:contracting": 1026,
+        "cross_dataset_propagation:funding": 293,
+        "distinctive spine token in the name": 15,
+        "elijah_ruling": 516,
+        "elijah_ruling_redirect": 110,
+        "hand": 522,
+        "institution_exact_name": 52,
+        "need_v6": 1596,
+        "sam_namematch_2026_05_06": 135,
+        "seeded_from_cicd_crosswalk": 687,
+        "spine resolver (alias)": 46,
+        "spine resolver (containment)": 122,
+        "spine resolver (core)": 134,
+        "spine resolver (exact)": 27,
+        "subsidiary_lookup": 111,
+        "upstream_register_join": 1009,
+        "web_verified": 40
+      }
+    },
+    "cedar_identifier_ledger.csv": {
+      "terms": {
+        "bgov_manual": 873,
+        "cluster_v3": 2670,
+        "hand": 530,
+        "ladder_1117": 96,
+        "ladder_1122": 35,
+        "need_v6": 5139,
+        "sam_namematch_2026_05_06": 137,
+        "subsidiary_lookup": 138,
+        "unmatched": 9569,
+        "web_verified": 45
+      }
+    },
+    "cedar_identifier_ledger_final.csv": {
+      "terms": {
+        "agent_research_one_leg": 326,
+        "agent_research_two_leg": 506,
+        "bgov_manual": 832,
+        "cluster_v3": 2003,
+        "cross_dataset_propagation:contracting": 1028,
+        "cross_dataset_propagation:funding": 293,
+        "elijah_ruling": 547,
+        "elijah_ruling_redirect": 110,
+        "hand": 520,
+        "institution_exact_name": 55,
+        "ladder_1117": 93,
+        "ladder_1122": 35,
+        "need_v6": 4626,
+        "sam_namematch_2026_05_06": 135,
+        "subsidiary_lookup": 114,
+        "unmatched": 9314,
+        "web_verified": 40
+      }
+    },
+    "cedar_identifier_ledger_tiered.csv": {
+      "terms": {
+        "bgov_manual": 873,
+        "cluster_v3": 2656,
+        "hand": 530,
+        "institution_exact_name": 50,
+        "ladder_1117": 93,
+        "ladder_1122": 35,
+        "need_v6": 5110,
+        "sam_namematch_2026_05_06": 135,
+        "subsidiary_lookup": 138,
+        "unmatched": 9567,
+        "web_verified": 45
+      }
+    },
+    "cedar_publishable_identifiers.csv": {
+      "terms": {
+        "bgov_manual": 878,
+        "hand": 532,
+        "subsidiary_lookup": 128,
+        "web_verified": 39
+      }
+    },
+    "cedar_spiderweb_v2.csv": {
+      "terms": {
+        "spiderweb_fpds_structural": 79
+      }
+    },
+    "federal_funding_transactions.csv": {
+      "terms": {
+        "dofile_corrtd:exact": 1450,
+        "dofile_corrtd:prefix": 363078,
+        "dofile_corrtd:prefix+city": 1007,
+        "ledger_exclusion": 899,
+        "ledger_uei_state_disagreement_withheld": 15878,
+        "not_evaluated:ak_scope_line9": 55443,
+        "uei_exact_archive": 183995,
+        "unattributed": 80205
+      }
+    },
+    "native_entity_lobbying_disclosures.csv": {
+      "terms": {
+        "contains_canonical": 1917,
+        "contains_subsidiary": 23,
+        "core_containment": 2120,
+        "core_token_set": 9427,
+        "core_token_set_plus_state_qualifier": 146,
+        "core_token_set_subsidiary": 14,
+        "exact_normalized": 12475,
+        "exact_normalized_skeleton": 1465,
+        "exact_subsidiary": 238
+      }
+    },
+    "nppes_spine_name_candidates.csv": {
+      "terms": {
+        "nppes_name_query_candidate": 17072,
+        "nppes_name_query_no_hit": 1149
+      }
+    },
+    "prime_contracts.csv": {
+      "terms": {
+        "cage_exact": 30445,
+        "ladder_1117": 1210,
+        "ladder_1122": 3771,
+        "parent_uei": 41841,
+        "ruling_applied": 4331,
+        "uei_exact": 707762,
+        "unattributed": 428408
+      }
+    },
+    "prime_contracts_archive_backfill.csv": {
+      "terms": {
+        "cage_exact": 13990,
+        "parent_uei": 2332,
+        "uei_exact": 528142,
+        "unattributed": 87043
+      }
+    },
+    "usac_rhc_native_candidate_lines.csv": {
+      "terms": {
+        "usac_rhc_name_token_candidate": 5109
+      }
+    }
+  }
+}

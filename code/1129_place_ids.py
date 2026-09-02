@@ -949,6 +949,20 @@ def _checks():
                    r["adjudicated_extras"], r["adjudicated_count"],
                    r["p1_held_extras"])))
 
+    # V9b the new clean table is DOCUMENTED. A table with no codebook block
+    # cannot ship, and it raises 62's tables_undocumented_in_codebook the
+    # moment it lands in data/clean.
+    fragp = CLEAN / "codebook" / (CB_DATASET + ".csv")
+    fr, _fc = read_rows(fragp)
+    documented = {r["variable"] for r in fr if (r.get("description") or "").strip()}
+    _pr, pcols = read_rows(PLACES)
+    undoc = [c for c in pcols if c not in documented]
+    out.append(("V9b cedar_places.csv has a codebook block covering every "
+                "column", bool(fr) and not undoc,
+                f"{len(documented)} of {len(pcols)} columns documented"
+                + (f"; missing {undoc[:3]}" if undoc else "")
+                + ("" if fr else "  UNMEASURED: no fragment on disk")))
+
     # V10 no non-place row was given an id
     _p, _s2, _g = gaming_groups()
     npl = {x["facility_id"] for x in _p}
@@ -1052,13 +1066,124 @@ def cmd_selftest(args):
     return 0
 
 
+# ----------------------------------------------------------------- codebook
+
+CB_DATASET = "20a_cedar_places"
+
+# `docs/codebooks/*.md` is the prose a human reads;
+# `data/clean/codebook/<dataset>.csv` is the REGISTRY the shipping gate reads.
+# `62_no_regression_check.tables_undocumented_in_codebook` globs
+# `data/clean/*.csv`, so a new clean table with no block RAISES that ratchet
+# the moment it lands. Writing the block is the difference between built and
+# done - standing rule 11.
+#
+# EVERY pct_filled AND n_rows BELOW IS MEASURED off the live table at run
+# time. None is typed. A codebook that states a fill rate it did not measure
+# is this repo's signature defect wearing a schema.
+CB_DESC = {
+    "cedar_place_id": "PRIMARY KEY. `CEDAR-PLACE-nnnnnn-CC`. Permanent, never "
+        "reused, check-digited (two characters from two independent "
+        "weightings, 503_identity.check_chars; O/I/L/U cannot appear). Bound "
+        "APPEND-ONLY in data/spine/cedar_place_id_register.csv, so a rebuild "
+        "mints zero and reproduces identical keys. ADR-030.",
+    "place_class": "GAMING_PROPERTY | BIA_OFFICE | BIE_SCHOOL | IHS_FACILITY. "
+        "A CONTROLLED VOCABULARY and an interface: prose in it is a breaking "
+        "change. The class lives here and NEVER in the id prefix, because a "
+        "place can change what it is used for and an identifier that encodes "
+        "class must be rewritten the day the class changes. IHS_FACILITY is "
+        "declared and has zero rows: NOT_ACQUIRED, no directory on disk.",
+    "place_name": "The place's name on its PRIMARY source record. A display "
+        "attribute, never an identity. Where a merge collapsed two vintages "
+        "the longer name wins, deterministically.",
+    "city": "City on the first member row that carries one.",
+    "state": "Two-letter state, from the source record.",
+    "postal_code": "Postal code as recorded. Vintages disagree on ZIP+4.",
+    "latitude": "As recorded. GEOCODED AT VARYING PRECISION AND NOT USABLE AS "
+        "AN IDENTITY TEST: measured across the duplicate groups, rows at an "
+        "IDENTICAL street address sit 519 m, 758 m and 1,583 m apart, while "
+        "the one pair 6 m apart is a casino and a hotel that are NOT one "
+        "place. A distance threshold here measures the geocoder.",
+    "longitude": "As recorded. See `latitude` - same caution.",
+    "operator_cedar_uid": "The Cedar entity that OPERATES this place. A place "
+        "is a SUB-HUB of its operator, never a peer, AND THE OPERATOR CAN "
+        "CHANGE WITHOUT THE PLACE CHANGING. BLANK IS NEVER 'no operator' - it "
+        "is 'not a Cedar entity' (a BIA office is federal) or 'unresolved' (a "
+        "BIE school). `operator_basis` says which, on every row.",
+    "operator_name": "The operator's name as recorded, or the agency where "
+        "the operator is federal. Display only.",
+    "operator_basis": "WHY `operator_cedar_uid` holds what it holds, "
+        "including why it is blank. Never blank itself.",
+    "source_scheme": "Which source key namespace `source_keys` is drawn from: "
+        "GAMING_FACILITY_ID, BIA_OFFICES_GLOBALID, BIE_SCHOOL_NAME_STATE. BIE "
+        "is keyed on a normalised name because the feature service publishes "
+        "only OBJECTID, an ArcGIS row ordinal that is not stable across a "
+        "republish.",
+    "source_keys": "Semicolon-joined list of EVERY source key bound to this "
+        "place. More than one means a merge: one property held under two "
+        "source vintages. The source keys are never overwritten in their own "
+        "tables - they are the evidence of where a row came from.",
+    "n_source_keys": "len(source_keys). 1 for a singleton; 2 or 3 for an "
+        "adjudicated merge.",
+    "adjudication_verdict": "Which rule produced this place: SINGLETON, "
+        "P2_one_operator_one_property_two_vintages (merged), or - where the "
+        "place was HELD APART - P0_different_operators or "
+        "P1_source_minted_two_property_ids.",
+    "adjudication_basis": "The evidence that decided it, in a sentence, "
+        "naming the operators or the vendor property ids involved.",
+    "minted": "Date this place id was first minted. Never changes.",
+    "built_by": "code/1129_place_ids.py",
+    "built_date": "Date this directory row was last rebuilt. The ID does not "
+        "move when this does.",
+}
+
+
+def cmd_codebook(args):
+    import importlib.util as _iu
+    spec = _iu.spec_from_file_location("cedar_codebook",
+                                       ROOT / "code" / "cedar_codebook.py")
+    cb = _iu.module_from_spec(spec)
+    spec.loader.exec_module(spec and cb)
+    rows, cols = read_rows(PLACES)
+    if not rows:
+        print("  REFUSING: cedar_places.csv is empty or absent. "
+              "Run `1129 mint --apply` first.")
+        return 1
+    frag = []
+    for c in cols:
+        n = sum(1 for r in rows if (r.get(c) or "").strip())
+        frag.append({
+            "dataset": CB_DATASET, "variable": c, "type": "text",
+            "units": "text",
+            "pct_filled": round(100.0 * n / len(rows), 1),
+            "n_rows": len(rows), "published": 1, "access_tier": "public",
+            "description": CB_DESC.get(c, ""), "generated": TODAY,
+        })
+    missing = [f["variable"] for f in frag if not f["description"]]
+    if missing:
+        print(f"  REFUSING: {len(missing)} column(s) have no description: "
+              f"{missing}. A block with a blank description documents nothing.")
+        return 1
+    if not args.apply:
+        print(f"  DRY RUN - would write {len(frag)} variable row(s) for "
+              f"{CB_DATASET} over {len(rows):,} places.")
+        print(f"  worked example: {frag[0]['variable']} "
+              f"{frag[0]['pct_filled']}% filled")
+        return 0
+    cb.write_fragment(CB_DATASET, frag)
+    print(f"  wrote data/clean/codebook/{CB_DATASET}.csv "
+          f"({len(frag)} variables, {len(rows):,} places)")
+    cb.build()
+    return 0
+
+
 # --------------------------------------------------------------------- main
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[1])
     sub = ap.add_subparsers(dest="cmd")
     for name, fn in [("adjudicate", cmd_adjudicate), ("mint", cmd_mint),
-                     ("migrate", cmd_migrate), ("verify", cmd_verify),
+                     ("migrate", cmd_migrate), ("codebook", cmd_codebook),
+                     ("verify", cmd_verify),
                      ("selftest", cmd_selftest)]:
         p = sub.add_parser(name)
         p.add_argument("--apply", action="store_true")
@@ -1070,7 +1195,8 @@ def main():
     if a.cmd is None:
         ap.print_help(); return 0
     if a.cmd == "all":
-        for fn in (cmd_adjudicate, cmd_mint, cmd_migrate, cmd_verify):
+        for fn in (cmd_adjudicate, cmd_mint, cmd_migrate, cmd_codebook,
+                   cmd_verify):
             print(f"\n== {fn.__name__} ==")
             rc = fn(a)
             if rc:

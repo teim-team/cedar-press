@@ -1370,3 +1370,149 @@ ruling.** 1,943,994 rows can be keyed; the state is `NOT_ACQUIRED`, not
 `SOURCE_DOES_NOT_PUBLISH`. See
 `docs/FAADS_TRANSACTION_KEY_SETTLEMENT_2026-09-02.md`, closing section.
 <!-- END FWD-CONSTRUCTION-2026-09-02 -->
+
+<!-- BEGIN ESCAPE-COLLAPSE-1125 -->
+## OPEN — a regex escape reached SEVEN live scripts as a literal control byte, and the checks built on it match nothing
+
+*Found 2026-09-02 by `code/1126_annual_total_federal_and_gaming.py`, which tried
+to IMPORT the gated gaming denominator instead of retyping it and could not get
+714 out of it. Re-measured the same hour; the scan below is reproducible.*
+
+**What happened.** `code/846_session_audit.py::_denom` — the single gated
+gaming-denominator ladder, the one `AGENT_FIELD_GUIDE` rule 15 names as the
+authority and forbids duplicating — returned
+
+```
+787 rows - 16 placeholders = 771 facility rows - 0 duplicate extras
+= 771 distinct properties   <- shape changed, re-derive before quoting
+```
+
+Its duplicate detector found **zero** groups, because the token-stripping regex
+in `loose()` was on disk as
+
+```
+_re.sub(r"<BS>(CASINO|RESORT|HOTEL|AND|THE|LLC|INC|GAMING|CENTER|CENTRE)<BS>", " ", x)
+```
+
+where `<BS>` is a literal **backspace byte, 0x08**, sitting where a word-boundary
+escape belongs. A raw string cannot produce that byte; something between the
+author and the file interpreted the escape. The pattern therefore matched
+nothing, every facility name kept its `CASINO` / `GAMING` token, all 771
+grouping keys came out unique, and the ladder reported **771** where the
+measured answer is **714**.
+
+**It failed loudly, which is the only good news here.** `_denom` compares
+`(rows, placeholders, extra)` against `(787, 16, 57)` and appends *"shape
+changed, re-derive before quoting"* when they differ, so it refused to stand
+behind its own number rather than quietly publishing a sixth denominator into a
+session where five were already in circulation.
+
+**REPAIRED IN `846` ONLY.** The nine bytes were substituted for the escape. The
+live file now differs from
+`code/846_session_audit.py.bak_2026-09-02_pre_1126_annual_total_federal_and_gaming`
+by exactly that substitution and nothing else — proved byte-for-byte, not
+eyeballed — the file compiles, and `_denom()` now returns
+`787 rows - 16 placeholders = 771 facility rows - 57 duplicate extras = 714
+distinct properties` with its own shape test GREEN. A full `846` run is
+**25/27**, with the two pre-existing failures unchanged and unrelated
+(`attribution_method` off-vocabulary from `ladder_1122`; `845 verify`).
+
+**STILL OPEN — seven files, 41 bytes, 16 lines. Deliberately not repaired
+here**, because each one changes another workstream's matching behaviour, and
+that is an owner or integrator call rather than a passing agent's:
+
+| file | bytes | lines | what the dead pattern is for |
+|---|---:|---|---|
+| `code/561_shard_k_alaska_villages.py` | 18 | 557–560 | the site-hijack marker list (`situs`, `judi`, `togel`, `bandar`, …) — **a spam-detection screen that currently detects nothing** |
+| `code/1104_nagpra_affiliation_rule_audit.py` | 8 | 363–364 | the `FURNITURE` filter (`email`, `telephone`, `fax`, `nagpra coordinator`) |
+| `code/1089_fr_consultation_overlap_and_event_parse.py` | 6 | 254–255, 334–336 | the contact-line detector and the street-suffix detector |
+| `code/142_build_property_site_observations.py` | 3 | 1024–1025 | the bound-phrase prefix (`more than`, `over`, `nearly`) and a year matcher |
+| `code/1080_sec_gaming_facility_revenue.py` | 2 | 275 | a fiscal-range phrase matcher |
+| `code/76_build_recognition_history.py` | 2 | 836 | the `legislation` term in the recognition-instrument classifier |
+| `code/503_identity.py` | 1, **plus one 0x01** | 95 | `FT MC DOWELL -> MCDOWELL`. **Both the word boundary and the `\1` backreference collapsed** — 0x08 in the pattern, 0x01 in the replacement — so the normaliser is inert, and if it ever did match it would insert a control byte |
+
+**Why this is a defect CLASS and not seven typos.** It is `AGENT_FIELD_GUIDE`
+§3 in a new costume: *the number was produced, it was plausible, and it was
+about something else.* A regex with a dead word boundary does not raise — it
+silently matches **less**, and every count downstream of it looks like a clean
+measurement. `503_identity.py` is the one to look at first: it is an identity
+normaliser, and an identity normaliser that silently stops normalising is how
+two spellings of one entity become two entities.
+
+**Reproduce — cheap, and it needs no backslash of its own:**
+
+```
+py -3 -c "import os;print([(os.path.join(r,f), open(os.path.join(r,f),'rb').read().count(bytes([8]))) for r,d,fs in os.walk('code') if '__pycache__' not in r for f in fs if f.endswith('.py') and '.bak' not in f and open(os.path.join(r,f),'rb').read().count(bytes([8]))])"
+```
+
+**A standing hazard for whoever fixes them, and it is how this defect is
+manufactured.** This environment collapses a doubled backslash on its way into
+a shell heredoc. A repair script authored as `replace(bytes([8]), b'\\b')`
+arrived on disk as `b'\b'`, which Python reads back as 0x08 — so the fix
+replaced the byte with itself, reported "replaced 9 occurrences", and changed
+nothing. **The same collapse ate the first draft of this very section.** Write
+the replacement as `bytes([0x5C, 0x62])`, or write the file with an editor
+rather than a heredoc, and **assert the remaining count is zero** instead of
+trusting the success message.
+<!-- END ESCAPE-COLLAPSE-1125 -->
+
+<!-- BEGIN PLACE-IDS-1129 -->
+## PLACE IDS (ADR-030, `code/1129_place_ids.py`) — 2026-09-02
+
+**FIXED THIS PASS, and both were load-bearing.**
+
+**1. `846_session_audit.py` carried NINE 0x08 BACKSPACE BYTES where `\b` was
+intended, and one of them blinded the gate for the gaming denominator.**
+`_denom`'s `loose()` read `\x08(CASINO|RESORT|HOTEL|...)\x08` — a pattern that
+matches no string that can exist — so the generic facility vocabulary was never
+stripped, every facility name stayed distinct, the check found **0 duplicate
+groups** and printed *"771 distinct properties — shape changed, re-derive before
+quoting"*. Two other checks were blinded identically: `\bearns\b` /
+`\bawarded?\b.*\blodge\b` in the business-name detector, and
+`(Tourism|Recreation|Archaeology|Archeology)\b` in the NAGPRA tail detector.
+The nine bytes are in the **committed** blob, so this is not a working-tree
+accident. **Repaired 2026-09-02: 9 bytes, `0x08` -> `\b`. `_denom` now PASSES at
+787 - 16 - 57 = 714.** Word-boundary and unbounded forms were compared on the
+live file and give identical results, so the repair changes no adjudication.
+
+*The general lesson, and it is new: a regex literal is the one place in this
+repo where a defect is INVISIBLE IN A TERMINAL.* `cat`, `Read` and most editors
+render `0x08` as nothing or as a cursor move, so the source reads exactly as
+intended while matching nothing. **When a detector reports a suspiciously clean
+zero, run `cat -A` on its pattern before you believe it.**
+
+**2. Three wholesale writers would have deleted `cedar_place_id` on their next
+rebuild** — `1080_sec_gaming_facility_revenue.py` (`FIG_COLS`, `TERM_COLS`) and
+`92_build_gaming_capacity_official.py` (`COLS`), all three flagged NEW by
+`845_regenerate_guard.py` the moment the migration landed. Fixed with the repair
+`845` prescribes and recognises structurally: `carry_live_columns(path,
+canonical)`. `845 verify` is green — 3 unsafe writers, 0 new since baseline.
+
+**OPEN, and deliberately so.**
+
+- **5 duplicate groups are HELD OPEN, not merged**, in
+  `review/place_gaming_adjudication_2026-09-02.csv`. Two are **operator
+  contradictions** that a duplicate sweep may not settle: `7 Clans First
+  Council` is filed to the Ponca Tribe (`VP-0170`) and the Otoe-Missouria
+  (`CCP-843900`) at one address; `The Stables` is filed to the Modoc Nation
+  (`VP-0153`) and the Miami Tribe of Oklahoma (`CCP-305300`) and is in fact
+  jointly owned. Three are groups where **the vendor itself minted two property
+  ids** (Cities of Gold casino/hotel, Glacier Peaks casino/hotel, and Three
+  Rivers Coos Bay vs Florence — 67 km apart). Each needs an owner ruling, not
+  another pass of the same name test.
+- **The adjudicated gaming count is 717; `846::_denom` measures 714.** Both are
+  right about what they measure and **neither is re-baselined**: 714 is the
+  mechanical name-collision count, 717 is the adjudication, and the difference
+  is exactly the three vendor-distinguished groups above.
+  `1129 verify` V9 recomputes the reconciliation from the live file on every run.
+- **`IHS_FACILITY` is a declared place class with ZERO rows.** There is no IHS
+  facility directory on this machine; it is NOT_ACQUIRED. `verify` prints it as
+  UNPOPULATED and does not count it as a pass.
+- **`cedar_places.csv` is not yet claimed by a collection**, so `512` does not
+  see it as shippable. Its grain IS declared (`GRAIN_PLACE`). Registering it is
+  an integrator decision.
+- **EVENTS pass the ID test and `Deal_ID` is source-scoped in exactly the way
+  `facility_id` was** — 15 channel prefixes across 1,073 rows. The recommendation
+  is to GENERALISE `Deal_ID` into a `CEDAR-EVENT` id rather than mint beside it.
+  Owner decision; see ADR-030 and `review/OWNER_DECISION_QUEUE.md`.
+<!-- END PLACE-IDS-1129 -->

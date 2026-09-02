@@ -4,6 +4,7 @@
 
     py -3 code/1130_nest_owner_v6_reconcile.py versions      # which file is authoritative
     py -3 code/1130_nest_owner_v6_reconcile.py build         # crosswalk + reconcile + dual role + pairs
+    py -3 code/1130_nest_owner_v6_reconcile.py codebook      # register the dual-role block so it can ship
     py -3 code/1130_nest_owner_v6_reconcile.py verify        # exits 1 on breach, and on a MISSING merge
     py -3 code/1130_nest_owner_v6_reconcile.py selftest      # proves verify FIRES
 
@@ -94,12 +95,14 @@ OUT_NESTONLY = os.path.join(STAGE, "nest_not_in_owner.csv")
 OUT_V3REC    = os.path.join(STAGE, "v3_recovery_candidates.csv")
 OUT_PAIRS    = os.path.join(STAGE, "corroboration_pairs.csv")
 OUT_CONSV    = os.path.join(STAGE, "conservation.csv")
+OUT_LEDGER   = os.path.join(STAGE, "ledger_shared_upstream_findings.csv")
 OUT_DUAL     = P("data", "clean", "nest_entity_dual_role.csv")
 
 NEST      = P("data", "clean", "nest_enterprises.csv")
 REGISTER  = P("data", "spine", "cedar_identity_register.csv")
 NEST_IDS  = P("data", "spine", "cedar_nest_id_register.csv")
 LEDGER    = P("data", "spine", "cedar_identifier_ledger.csv")
+DSBS      = P("data", "raw", "external", "sba_dsbs_native_entities.csv")
 
 
 # ---------------------------------------------------------------------------
@@ -552,12 +555,52 @@ def cmd_build():
         c["state"] = c["state"] or (r.get("hq_state") or "").strip()
         c["vdate"] = c["vdate"] or (r.get("verified_date") or "").strip()
 
+    # An owner hub that is an Alaska Native VILLAGE GOVERNMENT while NEST
+    # holds the same firm under an ANCSA CORPORATION is not a tie to break.
+    # `ANCSA_OWNERSHIP_RULING` rule 2 and
+    # `cedar_domain.village_government_owns_an_anc()` (always False) say the
+    # owner's side cannot be right.  This is the
+    # ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION family reached from a
+    # SIXTH direction, and NEST is on the correct side of every one.
+    ANC_CLASSES = {"Alaska Native Regional Corporation",
+                   "Alaska Native Village Corporation",
+                   "ANCSA Group Corporation"}
+    GOV_CLASSES = {"Federally recognized Alaska Native Village",
+                   "Federally recognized tribe"}
+    cls_of = {r["cedar_uid"]: r.get("entity_class", "") for r in reg}
+
     recon = []
     already = net_new = 0
     for k, c in sorted(clusters.items()):
         hit = nest_key.get(k)
         elsewhere = [x for x in nest_names.get(k[1], [])
                      if x["owner_hub_cedar_uid"] != k[0]]
+        hd_class, hd_basis = "", ""
+        if elsewhere:
+            a = cls_of.get(k[0], "")
+            bs = {cls_of.get(x["owner_hub_cedar_uid"], "") for x in elsewhere}
+            if a in GOV_CLASSES and bs <= ANC_CLASSES:
+                hd_class = "ALASKA_VILLAGE_GOVERNMENT_VS_VILLAGE_CORPORATION"
+                hd_basis = (
+                    "the owner's file hubs this firm on a %s; NEST hubs it "
+                    "on %s. A Native Village GOVERNMENT does not own an "
+                    "ANCSA corporation - ANCSA_OWNERSHIP_RULING rule 2, and "
+                    "cedar_domain.village_government_owns_an_anc() is "
+                    "always False. NEST is on the correct side; this is a "
+                    "correction to make in HIS file, not in ours."
+                    % (a, "; ".join(sorted(bs))))
+            elif a in ANC_CLASSES and bs <= ANC_CLASSES:
+                hd_class = "ANC_TIER_DISAGREEMENT"
+                hd_basis = ("both hubs are ANCSA corporations - a regional "
+                            "against a village corporation, or two levels "
+                            "of one chain collapsed. Needs the audited "
+                            "consolidation note to settle, not a name.")
+            else:
+                hd_class = "UNADJUDICATED_HUB_DISAGREEMENT"
+                hd_basis = ("owner hub class %r vs NEST hub class(es) %s. "
+                            "Neither side is refuted by a standing ruling; "
+                            "held for rule 13's ladder."
+                            % (a, sorted(bs)))
         if hit:
             already += 1
             status = "ALREADY_IN_NEST"
@@ -604,6 +647,8 @@ def cmd_build():
             owner_data_sources=";".join(sorted(x for x in c["dsrcs"] if x)),
             owner_attribution_methods=";".join(
                 sorted(x for x in c["methods"] if x)),
+            hub_disagreement_class=hd_class,
+            hub_disagreement_basis=hd_basis,
             relation_class_proposed="",
             relation_class_basis=(
                 "DELIBERATELY BLANK. The owner's file states no "
@@ -711,6 +756,71 @@ def cmd_build():
               required_first=("disposition", "enterprise_name"))
     account("owner v3 (%s)" % OWNER_FILES["v3"], len(v3), dict(v3b))
 
+    # ---- 4b. IS HIS UEI A SECOND SOURCE, OR IS IT ALREADY OURS? -----------
+    # The mandate arrived saying "every Cedar UEI came from the federal side",
+    # so a UEI he verified would corroborate.  MEASURE IT BEFORE BELIEVING IT
+    # (AGENT_FIELD_GUIDE rule 2).  It is not true: the spine's identifier
+    # ledger was BUILT FROM AN EARLIER VINTAGE OF THIS SAME FILE, and the
+    # proof is a column defect that travelled with it.
+    ledger = rd(LEDGER)
+    lfind, lb = [], collections.Counter()
+    owner_uei_all = {(r.get("enterprise_uei") or "").strip().upper()
+                     for r in owner} - {"", "NAN"}
+    v1_state_is_uei = int(next(
+        (r for r in vrows if r["version"] == "v1"),
+        {}).get("hq_state_cell_equals_this_rows_uei") or 0)
+    lstate_is_id = 0
+    lshared = collections.Counter()
+    for r in ledger:
+        st = (r.get("state") or "").strip()
+        if st and st == (r.get("identifier") or "").strip():
+            lstate_is_id += 1
+        src = (r.get("source_file") or "").strip() or "(blank)"
+        idv = (r.get("identifier") or "").strip().upper()
+        if (r.get("identifier_type") or "") == "UEI":
+            lb["uei_" + ("in_owner_v6" if idv in owner_uei_all
+                         else "not_in_owner_v6")] += 1
+            lshared[src + "|" + ("in_owner_v6" if idv in owner_uei_all
+                                 else "not_in_owner_v6")] += 1
+        else:
+            lb["not_a_uei_row"] += 1
+    for k, n in sorted(lshared.items()):
+        src, ldisp = k.split("|")
+        lfind.append(dict(
+            finding="LEDGER_UEI_PROVENANCE",
+            ledger_source_file=src, disposition=ldisp, rows=n,
+            finding_basis=(
+                "cedar_identifier_ledger.csv rows of this source_file whose "
+                "UEI is / is not also in the owner's v6. A UEI Cedar already "
+                "took from this same family is an ECHO, not a second "
+                "evidence family (1118 R-A)."),
+            built_by=BUILT_BY, built_date=BUILT_DATE))
+    lfind.append(dict(
+        finding="LEDGER_STATE_COLUMN_HOLDS_THE_IDENTIFIER",
+        ledger_source_file="data/spine/cedar_identifier_ledger.csv",
+        disposition="DEFECT_INHERITED_FROM_A_PRE_V6_VINTAGE",
+        rows=lstate_is_id,
+        finding_basis=(
+            "`state` holds this row's own identifier on %d of %d ledger "
+            "rows. The owner's v1/v2/v3 carry the identical defect in "
+            "`hq_state` at %d rows, and v6 FIXED it (0). The two counts "
+            "agreeing to the row is the evidence that the ledger was built "
+            "from a pre-v6 vintage of the owner's file and inherited the "
+            "column shift. Do not read `state` on this table as a state. "
+            "FLAGGED, NOT EDITED - the ledger is not this pass's to write."
+            % (lstate_is_id, len(ledger), v1_state_is_uei)),
+        built_by=BUILT_BY, built_date=BUILT_DATE))
+    write_csv(OUT_LEDGER, lfind, required_first=("finding",))
+    account("data/spine/cedar_identifier_ledger.csv", len(ledger), dict(lb))
+    ledger_uei = {(r.get("identifier") or "").strip().upper()
+                  for r in ledger
+                  if (r.get("identifier_type") or "") == "UEI"} - {"", "NAN"}
+    ledger_from_owner = {(r.get("identifier") or "").strip().upper()
+                         for r in ledger
+                         if (r.get("source_file") or "").strip()
+                         in ("master_tribal_entity_registry.csv",
+                             "need_v6_geocoded.csv")} - {"", "NAN"}
+
     # ---- 5. corroboration pairs, for 1118 ---------------------------------
     # Shape is 1118.Store.observe()'s keyword set exactly, so adopting them is
     # a loop and not a translation.  Both SIDES of each pair are emitted, and
@@ -766,11 +876,20 @@ def cmd_build():
             nest_side_column=col,
             nest_side_basis=(nr.get("identifier_basis") if col == "uei"
                              else nr.get("uei_candidate_basis")) or "",
-            echo_risk=("ECHO - same SBA DSBS extract on both sides; 1118 R-A "
-                       "collapses this to ONE observation"
-                       if col == "uei_candidate" and upstream.startswith(
-                           "sba_dsbs_extract:")
-                       else "INDEPENDENT - %s" % fam_note),
+            echo_risk=(
+                "ECHO - same SBA DSBS extract on both sides; 1118 R-A "
+                "collapses this to ONE observation"
+                if col == "uei_candidate" and upstream.startswith(
+                    "sba_dsbs_extract:")
+                else "ECHO - this UEI is ALREADY in "
+                     "cedar_identifier_ledger.csv from the owner's own "
+                     "master_tribal_entity_registry / need_v6 files. Cedar "
+                     "did not observe it independently; it took it from him."
+                if u in ledger_from_owner
+                else "INDEPENDENT - %s" % fam_note),
+            uei_already_in_cedar_ledger=("Y" if u in ledger_uei else "N"),
+            uei_in_ledger_from_the_owners_own_files=(
+                "Y" if u in ledger_from_owner else "N"),
             family_basis=fam_note,
             built_by=BUILT_BY, built_date=BUILT_DATE))
     write_csv(OUT_PAIRS, pairs,
@@ -806,6 +925,10 @@ def cmd_build():
     print("       of which a HUB DISAGREEMENT         %6d"
           % sum(1 for r in recon
                 if r["reconciliation_status"] == "NET_NEW_HUB_DISAGREEMENT"))
+    for cl, n in collections.Counter(
+            r["hub_disagreement_class"] for r in recon
+            if r["hub_disagreement_class"]).most_common():
+        print("         %-36s %6d" % (cl, n))
     print("    3. NEST HOLDS, OWNER DOES NOT          %6d" % len(nestonly))
     print("       absent from his file entirely       %6d"
           % nb["absent_from_owner_entirely"])
@@ -829,7 +952,7 @@ def cmd_build():
     print("  Cedar enterprise ids minted by this script: 0")
     print()
     for p in (OUT_VERSIONS, OUT_XWALK, OUT_RECON, OUT_NESTONLY, OUT_V3REC,
-              OUT_PAIRS, OUT_CONSV, OUT_DUAL):
+              OUT_PAIRS, OUT_LEDGER, OUT_CONSV, OUT_DUAL):
         print("  wrote %s" % os.path.relpath(p, ROOT))
 
 
@@ -849,10 +972,36 @@ def cmd_build():
 #      dataset itself says the entity trades.
 #   R2 ENTITY_HOLDS_ITS_OWN_IDENTIFIER - the entity's own name carries a UEI
 #      or CAGE.  An identifier beats every name method (rule 4).
-# A row that reaches neither is not written.
+#   R3 REGISTERED_AS_A_FIRM_IN_SBA_DSBS - the entity's own legal name is a
+#      row in the SBA certification register, with its own UEI.  This rung
+#      exists because the owner's file has ONE NHO parent and therefore
+#      cannot evidence the NHO half of his own correction; the DSBS extract
+#      already on disk can, and it is a `federal_registry` observer rather
+#      than a restatement of his file.  Rule 14: an NHO says it is one,
+#      because the certification is the point.
+# A row that reaches none of the three is not written.
 def build_dual_role(owner, nest, reg, tid2uid, live_uids, account):
     by_uid = {r["cedar_uid"]: r for r in reg}
     owns = collections.Counter(r["owner_hub_cedar_uid"] for r in nest)
+
+    # R3 index: SBA DSBS by exact normalised legal name.  Uniqueness is
+    # required on both sides - a name matching two DSBS firms, or two
+    # register entities, resolves to neither (rule 13).
+    dsbs_by_name, dsbs_dupe = {}, set()
+    for r in rd(DSBS):
+        k = norm(r.get("name_clean", ""))
+        if not k:
+            continue
+        if k in dsbs_by_name:
+            dsbs_dupe.add(k)
+        dsbs_by_name.setdefault(k, r)
+    reg_name_count = collections.Counter()
+    for r in reg:
+        for nm in (r.get("canonical_name"),
+                   r.get("federal_register_legal_name")):
+            k = norm(nm or "")
+            if k:
+                reg_name_count[k] += 1
 
     ev = collections.defaultdict(lambda: dict(
         rungs=set(), ueis=set(), cages=set(), srcs=collections.Counter(),
@@ -892,6 +1041,43 @@ def build_dual_role(owner, nest, reg, tid2uid, live_uids, account):
         if (r.get("is_federal_contractor") or "") == "True":
             e["fc"] = "Y"
     account("owner v6 rows tested for the dual role", len(owner), dict(b))
+
+    # R3.  Independent of the owner's file entirely.
+    d3 = collections.Counter()
+    for r in reg:
+        uid = r["cedar_uid"]
+        hit, refused = None, False
+        for nm in (r.get("canonical_name"),
+                   r.get("federal_register_legal_name")):
+            k = norm(nm or "")
+            if not k or not dtoks(nm or ""):
+                continue
+            if k in dsbs_dupe or reg_name_count.get(k, 0) != 1:
+                refused = True
+                continue
+            if k in dsbs_by_name:
+                hit = dsbs_by_name[k]
+                break
+        if not hit:
+            d3["name_not_unique_on_one_side_refused" if refused
+               else "no_dsbs_row_under_this_entitys_own_name"] += 1
+            continue
+        d3["registered_as_a_firm_in_dsbs"] += 1
+        e = ev[uid]
+        e["rungs"].add("R3_REGISTERED_AS_A_FIRM_IN_SBA_DSBS")
+        u = (hit.get("uei") or "").strip().upper()
+        c = (hit.get("cage_code") or "").strip().upper()
+        if u and u != "NAN":
+            e["ueis"].add(u)
+        if c and c != "NAN":
+            e["cages"].add(c)
+        if (hit.get("Active SBA certifications") or "").strip():
+            e["is8a"] = "Y"
+        e["fc"] = "Y"
+        e["srcs"]["https://search.certifications.sba.gov/"] += 1
+        e["names"][(hit.get("name_clean") or "").strip()] += 1
+    account("data/spine/cedar_identity_register.csv tested against the SBA "
+            "DSBS extract for R3", len(reg), dict(d3))
 
     out = []
     for uid, e in sorted(ev.items()):
@@ -937,20 +1123,121 @@ def build_dual_role(owner, nest, reg, tid2uid, live_uids, account):
                 "consumer joins it to nest_enterprises on "
                 "owner_hub_cedar_uid."),
             dual_role_basis=(
-                "the owner's own enterprise dataset carries %d row(s) whose "
-                "enterprise_name normalises to this entity's own name, "
-                "%s. Evidence rungs: %s."
-                % (e["rows"],
-                   ("carrying UEI %s" % ";".join(sorted(e["ueis"])))
-                   if e["ueis"] else "carrying no identifier",
+                "%s%sEvidence rungs: %s."
+                % (("the owner's own enterprise dataset carries %d row(s) "
+                    "whose enterprise_name normalises to this entity's own "
+                    "name. " % e["rows"]) if e["rows"] else "",
+                   ("The SBA certification register carries a firm under "
+                    "this entity's own legal name. "
+                    if "R3_REGISTERED_AS_A_FIRM_IN_SBA_DSBS" in e["rungs"]
+                    else ""),
                    ";".join(sorted(e["rungs"])))),
-            source_file=OWNER_FILES[AUTHORITATIVE],
+            source_file=";".join(
+                ([OWNER_FILES[AUTHORITATIVE]] if e["rows"] else []) +
+                (["data/raw/external/sba_dsbs_native_entities.csv"]
+                 if "R3_REGISTERED_AS_A_FIRM_IN_SBA_DSBS" in e["rungs"]
+                 else [])),
             record_scope="entity_attribute",
             publishable="Y",
             publishable_basis=("a business name and a federal identifier; no "
                                "natural person's data is present on this row"),
             built_by=BUILT_BY, built_date=BUILT_DATE))
     return out
+
+
+# ===========================================================================
+# CODEBOOK - a clean table no codebook block documents cannot ship
+# ===========================================================================
+# `87_build_dataset_notes.py` will not write a notes contract for a file whose
+# columns do not overlap a `codebook_master.csv` block by 60%, and
+# `62_no_regression_check.py` ratchets `tables_undocumented_in_codebook`.
+# The fragment is written whole; the master is APPENDED, never rewritten -
+# `41_build_codebooks.py` is the one script on NEVER_RUN because it rewrites
+# it from a hardcoded dict.  Same pattern as 1072's `codebook` stage.
+CB_BLOCK = "18c_nest_entity_dual_role"
+CB_FIELDS = ["dataset", "variable", "type", "units", "pct_filled", "n_rows",
+             "published", "access_tier", "description", "generated"]
+CB_DESC = {
+    "cedar_uid": "THE KEY. The register entity that holds BOTH roles. One "
+                 "row per entity; join nest_enterprises.csv on "
+                 "owner_hub_cedar_uid for what it owns.",
+    "dual_role": "Always Y. A row exists only where evidence was found; "
+                 "absence means no evidence, never `it does not trade`.",
+    "dual_role_class": "ANC_CORPORATION_AND_ENTERPRISE / "
+                       "NHO_ORGANISATION_AND_ENTERPRISE / "
+                       "REGISTER_ENTITY_AND_ENTERPRISE.",
+    "evidence_rungs": "Which of the three rungs fired, semicolon-joined. R3 "
+                      "is the SBA certification register and is a "
+                      "federal_registry observer, independent of the owner's "
+                      "file.",
+    "n_nest_enterprises_owned": "COUNT of nest_enterprises rows hubbed here. "
+                                "It is a count, not a key - do not sum it "
+                                "against anything.",
+    "representation_rule": "Why this entity is NOT also a nest_enterprises "
+                           "row. Constant by design.",
+}
+CB_GENERIC = ("Recorded by code/1130_nest_owner_v6_reconcile.py; see "
+              "docs/NEST_BUILD_LOG.md, the OWNER-V6 section.")
+
+
+def _cb_type(vals):
+    nn = [v for v in vals if (v or "").strip()]
+    if not nn:
+        return "text"
+    if all(re.fullmatch(r"-?\d+", v.strip()) for v in nn):
+        return "integer"
+    return "text"
+
+
+def cmd_codebook():
+    rows = rd(OUT_DUAL)
+    if not rows:
+        print("  ! nest_entity_dual_role.csv has no rows - run `build` first")
+        return 1
+    hdr = list(rows[0].keys())
+    frag = []
+    for col in hdr:
+        vals = [r.get(col, "") for r in rows]
+        filled = sum(1 for x in vals if (x or "").strip())
+        frag.append({
+            "dataset": CB_BLOCK, "variable": col, "type": _cb_type(vals),
+            "units": ("code" if col.endswith(("_id", "_uid", "_uei", "_cage",
+                                              "_code", "handle"))
+                      else "date" if col.endswith(("_date", "_year"))
+                      else "count" if col.startswith("n_")
+                      else "text"),
+            "pct_filled": round(100.0 * filled / len(rows), 1),
+            "n_rows": len(rows), "published": 1,
+            # Business names and federal identifiers only. No natural
+            # person's data, no DUNS, no D&B street address.
+            "access_tier": "public",
+            "description": CB_DESC.get(col, CB_GENERIC),
+            "generated": BUILT_DATE,
+        })
+    fragdir = P("data", "clean", "codebook")
+    os.makedirs(fragdir, exist_ok=True)
+    write_csv(os.path.join(fragdir, CB_BLOCK + ".csv"), frag,
+              required_first=tuple(CB_FIELDS))
+    master = P("data", "clean", "codebook_master.csv")
+    existing = rd(master)
+    have = {(r["dataset"], r["variable"]) for r in existing}
+    new = [r for r in frag if (r["dataset"], r["variable"]) not in have]
+    if new:
+        bak = master + ".bak_%s_pre_1130_nest_owner_v6_reconcile" % BUILT_DATE
+        if not os.path.exists(bak):
+            with open(master, "rb") as a, open(bak, "wb") as bfh:
+                bfh.write(a.read())
+        with open(master, "a", encoding="utf-8", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=CB_FIELDS,
+                               extrasaction="ignore")
+            for r in new:
+                w.writerow(r)
+        print("  %s: %d variables; appended %d rows to codebook_master.csv "
+              "(%d -> %d)" % (CB_BLOCK, len(frag), len(new), len(existing),
+                              len(existing) + len(new)))
+    else:
+        print("  codebook_master.csv already carries %s" % CB_BLOCK)
+    return 0
 
 
 # ===========================================================================
@@ -969,9 +1256,10 @@ FLOORS = dict(
 
 
 def cmd_verify(quiet=False):
-    fails = []
+    fails, ran = [], []
 
     def say(ok, name, msg):
+        ran.append(name)
         if not ok:
             fails.append("%s: %s" % (name, msg))
         if not quiet:
@@ -993,6 +1281,7 @@ def cmd_verify(quiet=False):
                             (OUT_NESTONLY, "nest_not_in_owner"),
                             (OUT_V3REC, "v3_recovery"),
                             (OUT_PAIRS, "corroboration_pairs"),
+                            (OUT_LEDGER, None),
                             (OUT_CONSV, None), (OUT_DUAL, "dual_role_rows")):
         rel = os.path.relpath(path, ROOT)
         if not os.path.exists(path):
@@ -1101,9 +1390,15 @@ def cmd_verify(quiet=False):
     nho = sum(1 for r in dual
               if r["dual_role_class"] == "NHO_ORGANISATION_AND_ENTERPRISE")
     say(anc > 0, "I11a_dual_role_reaches_ancs", "%d ANC rows" % anc)
-    say(len(dual) > anc, "I11b_dual_role_not_only_ancs",
+    say(nho > 0, "I11b_dual_role_reaches_nhos", "%d NHO rows" % nho)
+    say(len(dual) > anc + nho, "I11c_dual_role_not_only_anc_nho",
         "%d ANC + %d NHO + %d other = %d"
         % (anc, nho, len(dual) - anc - nho, len(dual)))
+    r3 = sum(1 for r in dual
+             if "R3_REGISTERED_AS_A_FIRM_IN_SBA_DSBS" in r["evidence_rungs"])
+    say(r3 > 0, "I11d_dual_role_has_a_second_family",
+        "%d rows carry the SBA DSBS rung, which is federal_registry and is "
+        "not a restatement of the owner's file" % r3)
 
     # I12 - the dual role does NOT duplicate a NEST row.  An entity may not
     # be its own subsidiary.
@@ -1133,7 +1428,7 @@ def cmd_verify(quiet=False):
         for f in fails:
             print("   " + f)
         return 1
-    print("VERIFY OK - %d invariants" % 22)
+    print("VERIFY OK - %d invariants" % len(ran))
     return 0
 
 
@@ -1211,6 +1506,8 @@ if __name__ == "__main__":
         cmd_versions()
     elif cmd == "build":
         cmd_build()
+    elif cmd == "codebook":
+        sys.exit(cmd_codebook())
     elif cmd == "verify":
         sys.exit(cmd_verify())
     elif cmd == "selftest":

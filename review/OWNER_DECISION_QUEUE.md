@@ -2759,3 +2759,279 @@ occurred."* — that is the point at which FY2022 stops being a scheduling
 problem and becomes a finding about the source, and it should be written down
 as one rather than re-submitted a fourth time.
 <!-- END FWD-CONSTRUCTION-QUEUE-2026-09-02 -->
+
+
+<!-- BEGIN PLACE-IDS-DECISIONS-1129 -->
+# PLACE IDS — three decisions, ADR-030, 2026-09-02
+
+*Built and gated: `py -3 code/1129_place_ids.py verify` (15 checks, exits 1 on
+breach) and `selftest` (proves four of them fire, including on an empty
+register). Nothing below blocks what shipped; each is a ruling only you can
+make.*
+
+## PL-1. Two casinos are filed to two different tribes each. Which tribe operates them?
+
+These are the only two duplicate groups where the SAME PLACE is filed to
+DIFFERENT SOVEREIGNS, so a duplicate sweep cannot settle them — merging would
+decide an ownership question by way of a de-duplication.
+
+| place | address | vintage A | vintage B |
+|---|---|---|---|
+| **7 Clans First Council Casino (Hotel)** | 12875 N Hwy 77, Newkirk OK 74647 | `VP-0170` -> **Ponca Tribe of Indians of Oklahoma** | `CCP-843900` -> **Otoe-Missouria** |
+| **(The) Stables Casino** | 530 H St SE, Miami OK 74354 | `VP-0153` -> **Modoc Nation** | `CCP-305300` -> **Miami Tribe of Oklahoma** (the `tribe` field says *"Modoc Tribe of Oklahoma/Miami Tribe of Oklahoma"*) |
+
+- **Answer "one operator, X"** and the pair merges into one `cedar_place_id`,
+  the gaming place count falls from 717 to 716 (or 715 for both), and the
+  loser's row keeps its `facility_id` as evidence.
+- **Answer "jointly operated"** — which is the documented history of The
+  Stables — and they stay ONE place with TWO operators, which
+  `gaming_facilities.operating_entity_cedar_uids` already has a column for.
+- **Say nothing** and they stay two places, which is the current state and is
+  the conservative direction: no dollar is keyed on the split.
+
+Evidence: `review/place_gaming_adjudication_2026-09-02.csv`, rows with
+`rule = P0_different_operators`.
+
+## PL-2. A casino and its hotel: one place or two?
+
+Three groups are held apart because **Casino City Press itself minted two
+distinct property ids** for them, and Cedar does not overrule a source's own
+property-level distinction with a name test. They are the entire difference
+between the adjudicated count (**717**) and the mechanical one gated in
+`846::_denom` (**714**).
+
+| group | the two records | our read |
+|---|---|---|
+| Cities of Gold, NM | `Cities of Gold Casino` (39300) / `Cities of Gold Hotel` (841600), both 10-B Cities of Gold Rd | a casino and its hotel |
+| Glacier Peaks, MT | `Glacier Peaks Casino` (406800) / `Glacier Peaks Hotel` (1005500), 6 m apart | a casino and its hotel |
+| Three Rivers, OR | `Three Rivers Casino` (1126400, Coos Bay **97420**) / `Three Rivers Casino Resort` (639700, Florence **97439**) | **two different casinos, 67 km apart. This one should never merge.** |
+
+**The question is only about the first two.** If a hotel attached to a casino is
+one place for Cedar's purposes, the count becomes 715 and the rule generalises
+to every future casino/hotel pair. If it is two, the current state stands and
+714 is simply the wrong denominator to quote.
+
+## PL-3. Generalise `Deal_ID` into a Cedar EVENT id? (recommended: yes)
+
+You said *"transactions or deals or events, and they need to be probably queued
+per dataset"*. Events **pass the ID test**: the Bristol Bay Industrial / GHEMM
+acquisition of 2022-06-15 is held twice — `ANCSA2-2022-003` from the ANCSA
+portal and, independently, in EDGAR — the deals merge had to refuse 36 internal
+duplicates by hand, and no external id survives the same transaction being
+reported twice (an SEC accession identifies a *filing*, a PIID identifies an
+*award*).
+
+**And `Deal_ID` has the same defect `facility_id` had: it is SOURCE-SCOPED.**
+1,073 rows, **15 channel prefixes** — `FA-NTI` 272, `FA-HUD` 222, `ND-202…` 154,
+`NLTR-2…` 90, `FA-EDA` 51, `FA-DOE` 49, `ANCSA2` 42, `ANCSA-` 34, `ANCSA3` 24,
+`SECX-2` 22, `MA2020` 14, `ACQ202` 8, `IDOBS-` 2. The prefix says which pipeline
+FOUND the event, exactly as `CCP-`/`VP-` say which vintage found the casino.
+
+- **Say yes** and `Deal_ID` stays on every row as the source key while a
+  `CEDAR-EVENT-nnnnnn-CC` is minted beside it — one concept, one id, one
+  append-only register, and it extends to ownership changes visible only in
+  contracting that were never reported as a deal. It needs the same
+  one-at-a-time adjudication the 58 gaming groups needed, which is why it was
+  not done unasked.
+- **Say no** and deals keep 15 channel-scoped keys, and the same event found in
+  two channels stays two rows until someone notices.
+
+**It was deliberately NOT minted tonight**: the mandate was one id and only one,
+and *"I don't want a billion IDs"* is best honoured by proposing the
+generalisation rather than shipping a second id in the same pass.
+<!-- END PLACE-IDS-DECISIONS-1129 -->
+
+
+<!-- BEGIN NP-WEBSITE-1125 -->
+# The nonprofit websites answered, and 26 rows now need one ruling — 2026-09-02
+
+*Appended by `code/1125_np_website_native_check.py`. Full evidence:
+**`docs/NP_WEBSITE_NATIVE_CHECK_2026-09-02.md`**; the row-level file is
+`review/np_website_native_check_2026-09-02.csv`, 697 rows.
+`1125 verify` exits 0, `1125 selftest` fires 7 of 7.*
+
+You asked us to check the nonprofits' own websites. We did — 697
+`NATIVE_VERIFIED_STRICT` organisations, every URL taken from a field the filer
+typed on its own IRS return, **no domain guessed**, 167 pages actually read.
+
+## The one decision
+
+**26 organisations whose own Form 990 says nothing Native, and whose own
+website describes a NON-Native community, place or institution type for
+itself.** Cedar currently labels every one of them
+`disposition = NATIVE_VERIFIED_STRICT` — its strongest nonprofit Native label —
+on the strength of a name match over an IRS BMF row. Four of the 26 also cross
+a state line and are the sharpest cases:
+
+| organisation | state | its own website says |
+|---|---|---|
+| KANSAS HUMANE SOCIETY OF WICHITA INC | KS | *"HILLSIDE, WICHITA, KANSAS 67219 … WELCOME TO THE KANSAS HUMANE SOCIETY!"* |
+| WAMPANOAG COUNTRY CLUB INC | CT | *"Premier Private Club in CT — Wampanoag Country Club … Dining Reservations Pool Paddle Tennis Golf"* |
+| CHICKASAW CIVIC THEATRE | AL | *"…the theater relocated to a former scout hut… between Paul Devine Park and Chickasaw E[lementary]"* |
+| CALIFORNIA CLUB OF LAGUNA WOODS VILLAGE | CA | *"Featuring dazzling costume changes, stellar live vocals… 28 Classic Hits"* |
+
+**Say DEMOTE** and those 26 move to a non-Native disposition with the quote and
+the saved page as the basis. The place-name families become visible as families
+— *Chickasaw* is a city in Alabama and a county in Iowa and Mississippi,
+*Mohegan* is a hamlet in Westchester County NY (five volunteer-fire and colony
+associations sit in this population), *Rosebud* is a town in four states,
+*Laguna* is in California, and `UNITED HABESHA COMMUNITY OF WICHITA` names the
+Ethiopian and Eritrean diaspora.
+
+**Say HOLD** and they keep Cedar's strongest Native label while two independent
+readings of their own words — a federal filing and a public website — both
+decline to support it.
+
+**Nothing was changed either way.** `np_orgs.csv` was not opened for writing.
+
+## Three things worth knowing before you rule
+
+**1. Silence is not refutation, and this pass refuses to let it read as one.**
+47 more of the 214 were read in full and simply say nothing Native. They are
+`CHECKED_NO_SIGNAL`, kept strictly apart from the 26, and they are **not** part
+of this proposal. The counter-example is on the record: **UTAH NAVAJO HEALTH
+SYSTEM** also scores `CHECKED_NO_SIGNAL` and is plainly Native — the instrument
+scored the page, not the organisation.
+
+**2. A land acknowledgement is not a self-description.** Two organisations name
+a nation in order to say they are *not* it (*"one small step toward true
+allyship"*; *"our Indigenous neighbours, the Lummi Nation"*). The first
+classifier scored both as Native self-description. They now have their own
+verdict and are excluded from every Native count here.
+
+**3. The website is a new observer of the IRS side, but it is NOT a second
+observer of the 990.** Eleven organisations' own sites say they are Native —
+the first eleven `org_self_statement` assertions this dataset has ever carried,
+against a `entity.website` authority that `START_HERE` records as *declared
+authoritative, asserts 0 times*. Seven of the eleven also have a Native signal
+in their own return. That is **one organisation saying the same thing twice, in
+two regimes** — worth having, and not two evidence families. A third-party
+observer for nonprofit Native status still does not exist.
+
+## What this costs if it is left
+
+The IRS never asserts that an organisation is Native, so **every one of the 697
+rests on Cedar's own inference and nothing else** unless a second reading is
+admitted. That is the measurement `docs/CORROBORATION_LAYER_2026-09-02.md` P4
+made, and this pass is the first thing to move it.
+<!-- END NP-WEBSITE-1125 -->
+
+---
+
+<!-- BEGIN OWNER-V6-NEST-2026-09-02 -->
+# Your own enterprise dataset, reconciled against NEST — four decisions
+
+*Added 2026-09-02 by `code/1130_nest_owner_v6_reconcile.py`. Evidence is in
+`data/staging/nest_owner_v6/`. Nothing was appended to NEST and no id was
+minted; these four answers decide what happens next.*
+
+**The headline, so the decisions have a size.** Your
+`native_entity_enterprise_dataset_v6_geocoded.csv` (18,110 rows, 658 parents)
+was put through NEST's own `(owner hub, normalised name)` clustering:
+**440 enterprises we already hold, 4,786 net new, and 1,170 NEST holds that
+your file does not** — 614 of those in no form at all, and 592 of the 614 are
+firms that appear in no federal contracting record, which is exactly what the
+scraping was for.
+
+---
+
+## OV6-1. Which of your five files is the record? (recommendation: v6, and
+## retire v5)
+
+**v6, and it is not close.** `hq_state` in v1, v2, v3 and v5 is **not a
+state** — it holds the row's own 12-character UEI on 12,127 / 12,127 / 12,127
+/ 11,390 rows respectively. v6 is the only file where that column is clean
+(0), and it also adds `hq_zip`, `hq_address_line`, and lifts `hq_city` from
+5,178 to 15,556. v5 and v6 hold the *same* 18,110 rows and differ in only
+four columns; v6 is the repair of them.
+
+**But v6 is not a superset of v3.** 160 rows / 158 firms present in v3
+survive normalisation and are absent from v6 — all 160 carry a UEI
+(`BOWHEAD PROTECTION & SECURITY SERVICES LLC`, `AKIMA FACILITIES MANAGEMENT,
+LLC`, `UMIAQ DESIGN, LLC`, `CHEROKEE SERVICES GROUP LLC`, …).
+
+> **The question:** do we carry those 160 forward, or did you drop them on
+> purpose? List: `data/staging/nest_owner_v6/v3_recovery_candidates.csv`.
+> **If you say carry**, they join the ingest in OV6-2. **If you say dropped
+> on purpose**, we record the reason so nobody re-adds them.
+
+---
+
+## OV6-2. 4,786 net-new enterprises: ingest at what relation? (recommendation:
+## `affiliation`, upgraded only where a source states ownership)
+
+They arrive with real identifier coverage — 3,576 UEIs, 775 CAGEs, 775 8(a)
+certifications, 2,632 with a city and state, 1,113 nonprofits. But your file
+records **no relationship word**, so nothing in it says whether a row is
+ownership (`structures`) or affiliation (`ties`). Their evidence families
+are 2,338 `cedar_inference` (a resolver output), 1,855 `federal_registry`,
+474 `human_ruling` (your hand file), 257 the entity's own website.
+
+`1130` refuses to propose a relation for any of them — an affiliation
+recorded as ownership is the defect NEST is most exposed to.
+
+> **The question:** ingest all 4,786 as `affiliation` and let a later pass
+> upgrade the ones a source actually supports? Or ingest only the 721 whose
+> evidence family is `human_ruling` or `entity_self_published` and hold the
+> rest?
+
+---
+
+## OV6-3. 212 of your rows hub an ANC subsidiary on a village GOVERNMENT
+## (recommendation: correct your file, ours is right)
+
+`Alutiiq LLC` and *Afognak Diversified Services* sit under
+`AKNF-AFGNAK-00-KONIAG` — the Native **Village** of Afognak — rather than the
+Afognak Native **Corporation**. Same at Aleknagik, Agdaagux and Arctic
+Village: 212 rows in all. `ANCSA_OWNERSHIP_RULING` rule 2 says a village
+government cannot own an ANCSA corporation, and Cedar's own
+`village_government_owns_an_anc()` returns `False` unconditionally. NEST is on
+the corporation side on all 212.
+
+> **The question:** confirm the ruling applies, and we hand you the list to
+> repoint in your file rather than us silently overriding it. Column
+> `hub_disagreement_class` in
+> `data/staging/nest_owner_v6/enterprise_reconciliation.csv`.
+
+---
+
+## OV6-4. Eight of your parents do not resolve. Six are spine gaps.
+## (recommendation: mint the six)
+
+650 of your 658 `tribe_id` values crosswalked (632 are already live Cedar
+handles). The eight that did not:
+
+* **Six intertribal organisations Cedar does not hold at all** — NAFOA, NAJA,
+  the Indian Land Tenure Foundation, First Nations Development Institute, the
+  Inter-Tribal Council of the Five Civilized Tribes, and IHS Tribal
+  Self-Governance. These are register additions, not matching failures.
+* **`TRBF-CSAKT-00` Confederated Salish & Kootenai** — held as ambiguous
+  because Cedar's canonical name is the truncated `Confederated Salish` and
+  `Kootenai` is a separate tribe. NEST's `held_rows.csv` already holds this
+  same entity for the same reason, so it is one ruling that clears two places.
+* **`NHO-MANUKAI-00` Manu Kai LLC** — also already in `held_rows.csv`; not in
+  the spine.
+
+> **The question:** mint the six intertribal organisations, and rule
+> `Confederated Salish & Kootenai` onto `TRBF-CSKTFR-00` (12 rows here, plus
+> the NEST holds).
+
+---
+
+## And one thing that is NOT a decision, only a finding you should see
+
+**Cedar's `data/spine/cedar_identifier_ledger.csv` is largely your own file
+already.** 13,191 of its 19,232 rows came from
+`master_tribal_entity_registry.csv`, and 13,070 of those UEIs are in v6. So
+your identifiers mostly **cannot** corroborate ours — they are ours. Of 696
+identifier pairs, only **33** are a genuine second observer.
+
+The proof: the ledger's `state` column holds the row's own identifier on
+**12,127** rows — the identical count to `hq_state` in your v1/v2/v3. The
+column-shift defect travelled into Cedar's spine with the file. Only 3,481 of
+16,487 `state` values are a real two-letter code. Flagged, not edited — it
+needs an owner.
+
+**3,306 of your UEIs are in no Cedar table at all.** That is the real
+identifier value in your file, and it is the ingest in OV6-2.
+<!-- END OWNER-V6-NEST-2026-09-02 -->

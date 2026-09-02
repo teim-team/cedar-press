@@ -45,7 +45,7 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 | `federal_funding_tribe_year_panel.csv` | 5,496 | **DECLARATION FAILED** | `tribe_id` + `fiscal_year` | `cedar_uid`→32, `tribe_id`→16 |
 | `funding_identifier_netnew_ueis.csv` | 4,249 | DECLARED_VALIDATED | `recipient_uei` | — |
 | `inflation_deflator.csv` | 27 | DECLARED_VALIDATED | `year` | — |
-| `native_passthrough.csv` | 1,663 | DECLARED_VALIDATED | `source_dataset` + `subaward_source_record_id` | `from_tribe_id`→371, `to_tribe_id`→376 |
+| `native_passthrough.csv` | 1,663 | DECLARED_VALIDATED | `source_dataset` + `subaward_source_record_id` | `from_tribe_id`→432, `to_tribe_id`→438 |
 | `native_passthrough_pairs.csv` | 307 | DECLARED_VALIDATED | `from_tribe_id` + `to_tribe_id` | — |
 | `usac_erate_tribal_commitments.csv` | — | DECLARED_VALIDATED | `application_number` + `funding_request_number` + `form_471_line_item_number` + `ros_entity_number` | `funding_year`→14,782, `ros_entity_number`→948 |
 | `usac_erate_tribal_entities.csv` | — | DECLARED_VALIDATED | `ros_entity_number` | `ros_physical_state`→1,324 |

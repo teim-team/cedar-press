@@ -666,7 +666,15 @@ def doc(a):
            if r["series_id"] == "federal_obligations_total"}
     gg = {int(r["fiscal_year"]): f(r["usd"]) for r in rows
           if r["series_id"] == "nigc_regional_ggr_rolled_to_nation"}
-    both = sorted(set(fed) & set(gg))
+    # THE HONEST WINDOW is where BOTH federal legs exist AND gaming exists.
+    # FY2001-2006 have prime but no modern assistance table, so a ratio taken
+    # across them divides gaming by a federal figure that is missing a leg --
+    # which is how FY2001 comes out at 22x and means nothing.
+    pmy = {int(r["fiscal_year"]) for r in rows
+           if r["series_id"] == "federal_prime_obligations"}
+    amy = {int(r["fiscal_year"]) for r in rows
+           if r["series_id"] == "federal_assistance_obligations"}
+    both = sorted(set(fed) & set(gg) & pmy & amy)
     lo, hi = both[0], both[-1]
     fsum = sum(fed[y] for y in both)
     gsum = sum(gg[y] for y in both)
@@ -698,13 +706,25 @@ def doc(a):
       "federal + gaming. The reader may add them; Cedar states what the sum "
       "would mean instead of doing it for them." % (TRANSFER, OWNSOURCE))
     A("")
-    A("Over the **%d fiscal years where both streams exist (FY%d-FY%d)**: "
-      "federal obligations attributed to a nation total **$%s**, and NIGC "
-      "gross gaming revenue totals **$%s**. Gaming is **%.1fx** the federal "
-      "stream over that window. That ratio is the whole argument for "
-      "publishing both, and it is also why neither is the answer on its own."
+    A("Over the **%d fiscal years where BOTH federal legs and the gaming "
+      "series all exist (FY%d-FY%d)**: federal obligations attributed to a "
+      "nation total **$%s**, and NIGC gross gaming revenue totals **$%s**. "
+      "Gaming is **%.2fx** the federal stream over that window. That ratio is "
+      "the whole argument for publishing both, and it is also why neither is "
+      "the answer on its own."
       % (len(both), lo, hi, "{:,.0f}".format(fsum), "{:,.0f}".format(gsum),
          gsum / fsum if fsum else 0))
+    A("")
+    A("**The window is FY%d onward and not FY2001, deliberately.** The modern "
+      "assistance table begins at FY2007, so a ratio taken across FY2001-2006 "
+      "divides gaming by a federal figure that is missing one of its two "
+      "legs - which is how FY2001 comes out at 22x and means nothing. The "
+      "shape inside the window is the interesting part and it is not flat: "
+      "gaming runs about 2x federal through the 2010s, **crosses below 1.0 in "
+      "FY2020 and FY2021** when pandemic assistance more than doubled the "
+      "federal stream while COVID closures took GGR from $34.7B to $27.8B, "
+      "and settles near 1.5x from FY2022. Neither series explains Indian "
+      "Country's year on its own." % (lo,))
     A("")
     A("### What may be summed, and what may not")
     A("")

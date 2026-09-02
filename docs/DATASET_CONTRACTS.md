@@ -2,7 +2,7 @@
 
 *Generated 2026-09-02 by `code/512_build_dataset_contracts.py` (mission Phase 1). Regenerate rather than edit; `verify` exits 1 when the world breaks a contract, and 62 gates on it.*
 
-**15 collections, 291 tables claimed, 8 orphaned shippable tables, 13 violations.**
+**15 collections, 292 tables claimed, 8 orphaned shippable tables, 13 violations.**
 
 **Grain: 239 of 247 shippable tables declare and VALIDATE a row grain, a primary key and a join cardinality; 8 do not.** A declared grain the data contradicts is a release-blocking violation, listed below. An unstated grain is ratcheted by `62_no_regression_check.contract_grain_unstated_shippable`: the count may only fall, and a new shippable table that lands without one fails the gate that day.
 
@@ -95,7 +95,7 @@ Declared grain — validated against the file on every run:
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
 - `native_passthrough.csv` — one row per NATIVE-TO-NATIVE SUBAWARD FILING - the `direction == 'both_sides_native'` slice of subawards.csv, 1:1, with both legs resolved to spine entities. It is a PROJECTION of subawards.csv and NOT new money: adding this table to subawards.csv, or to prime_contracts.csv, counts the same federal dollar twice. It inherits its parent's grain exactly, so a row is one FILING and repeat monthly filings of one pass-through are separate rows. MONEY: `amount_usd` is additive ONLY where `amount_countable == 1`, which is the parent's two filters (`duplicate_status == 'primary'` AND `subaward_exceeds_prime_flag != 'yes'`) computed on the parent row; both source columns are now carried so a subscriber can reproduce or disagree with the filter instead of taking the flag on trust. `amount_countable` is a 0/1 FLAG and is not a money column
   - primary key: `source_dataset` + `subaward_source_record_id`  (validated unique)
-  - join cardinality: `from_tribe_id` → many row(s) per value (measured max 371), `to_tribe_id` → many row(s) per value (measured max 376)
+  - join cardinality: `from_tribe_id` → many row(s) per value (measured max 432), `to_tribe_id` → many row(s) per value (measured max 438)
   - declared by: workstream SUBAWARD-FUNDING 2026-09-02: 81_build_passthrough_dataset.py now carries the parent's key plus `duplicate_status` and `subaward_exceeds_prime_flag` - the one-line fix GRAIN_WS4 named. Confirmed on the rebuilt 1,663-row file: 0 blank keys, 0 collisions, 0 byte-identical whole rows (was 116). Re-measure with `py -3 code/81_build_passthrough_dataset.py verify`
 - `native_passthrough_pairs.csv` — one row per (paying entity, receiving entity) pair, rolled up across their subawards
   - primary key: `from_tribe_id` + `to_tribe_id`  (validated unique)
@@ -454,7 +454,7 @@ Rebuild: `py -3 code/build.py run lobbying --execute` — 39 tables.
 | `lobbying_target_entities.csv` | shippable | — | — | — |
 | `lobbying_unmatched_clients.csv` | internal-by-decision | — | — | — |
 | `native_entity_lobbying_disclosures.csv` | shippable | `cedar_uid` `entity_id` | `05_match_filings_v2.py` | `1091_lobby_amendment_supersession.py` `350_withdraw_false_lobbying_attributions.py` `65_lobbying_organization_type_guard.py` |
-| `nonprofit_schedule_c_coverage.csv` | shippable | — | — | — |
+| `nonprofit_schedule_c_coverage.csv` | shippable | — | `99_build_earmarks_and_schedc.py` | `1127_schedc_coverage_basis_fix.py` |
 | `nonprofit_schedule_c_lobbying.csv` | shippable | `cedar_uid` `ein` | — | — |
 | `nrc_meeting_participants.csv` | shippable | `cedar_uid` | — | — |
 | `nrc_public_meetings.csv` | shippable | — | — | — |
@@ -679,7 +679,7 @@ Declared grain — validated against the file on every run:
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
 - `subawards.csv` — one row per SUBAWARD FILING AS INGESTED FROM ONE SOURCE - not one row per subaward. FFATA/FSRS requires the PRIME to re-file an open subaward monthly, and every filing is a real reporting event, so one $57,500 subaward can be 93 rows spanning 2022-08 to 2025-01. Cedar RETAINS all of them and flags the repeats in `duplicate_status`; it does not delete them. A row is therefore (one SAM subaward report) x (the Cedar pull that ingested it). MONEY: `subaward_amount` is additive ONLY where `duplicate_status == 'primary'` AND `subaward_exceeds_prime_flag != 'yes'` - $25,864,997,128.19 correct against $47,301,660,819.78 unfiltered, so an unfiltered sum is 82.9% TOO HIGH as a share of the correct total (45.3% of the inflated one; say which denominator you mean). A SUBAWARD IS A SLICE OF A PRIME AWARD and must never be added to prime_contracts.csv - that double-counts the same federal dollar. The two entity legs are `prime_cedar_uid` and `sub_cedar_uid`; `cedar_uid` is the PRIME leg only and is legitimately blank on the 43,282 rows whose only Native party is the subawardee
   - primary key: `source_dataset` + `subaward_source_record_id`  (validated unique)
-  - join cardinality: `prime_award_unique_key` → many row(s) per value (measured max 1536), `prime_cedar_uid` → many row(s) per value (measured max 8576), `prime_uei` → many row(s) per value (measured max 2457), `sub_cedar_uid` → many row(s) per value (measured max 2840), `sub_uei` → many row(s) per value (measured max 2766)
+  - join cardinality: `prime_award_unique_key` → many row(s) per value (measured max 1536), `prime_cedar_uid` → many row(s) per value (measured max 8902), `prime_uei` → many row(s) per value (measured max 2511), `sub_cedar_uid` → many row(s) per value (measured max 2846), `sub_uei` → many row(s) per value (measured max 2766)
   - declared by: workstream SUBAWARD-FUNDING 2026-09-02: `subaward_source_record_id` recovered from the staged FSRS extracts by code/910_subaward_report_id_backfill.py (75,861 SAM report ids + 998 HigherGov permalinks, 0 blank), and the pair confirmed unique on the FULL 76,859-row file - 0 collisions, 0 blanks, whole-row duplicates 10,770 -> 0 with zero rows removed. Re-measure with `py -3 code/910_subaward_report_id_backfill.py verify`; the recovery's own refusal is proved to fire by `... selftest`
 
 ## Native-Owned Businesses  (`native-owned-businesses`, shelf: pro)
@@ -721,12 +721,13 @@ Declared grain — validated against the file on every run:
 
 ## NEST: Native Enterprise Structures and Ties  (`nest`, shelf: pro)
 
-Rebuild: `py -3 code/build.py run nest --execute` — 2 tables.
+Rebuild: `py -3 code/build.py run nest --execute` — 3 tables.
 
 | table | status | keys | rebuilt by | enriched by |
 |---|---|---|---|---|
 | `nest_enterprise_relations.csv` | shippable | `cedar_uid` | — | — |
 | `nest_enterprises.csv` | shippable | `cedar_uid` `uei` `cage_code` | — | — |
+| `nest_entity_dual_role.csv` | UNDOCUMENTED | `cedar_uid` | — | — |
 
 Declared grain — validated against the file on every run:
 

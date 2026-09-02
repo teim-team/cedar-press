@@ -2,7 +2,7 @@
  "built_date": "2026-09-02",
  "derivation": "500.COLLECTIONS + cedar_codebook + cedar_pipeline; GRAIN declared, everything else derived",
  "n_collections": 15,
- "n_tables_claimed": 291,
+ "n_tables_claimed": 292,
  "n_orphan_shippable": 8,
  "orphans": [
   "native_owned_businesses.bak_2026-09-02_010526.csv",
@@ -608,8 +608,8 @@
      "grain_declared_by": "workstream SUBAWARD-FUNDING 2026-09-02: 81_build_passthrough_dataset.py now carries the parent's key plus `duplicate_status` and `subaward_exceeds_prime_flag` - the one-line fix GRAIN_WS4 named. Confirmed on the rebuilt 1,663-row file: 0 blank keys, 0 collisions, 0 byte-identical whole rows (was 116). Re-measure with `py -3 code/81_build_passthrough_dataset.py verify`",
      "grain_validated": true,
      "measured_rows_per_join_key": {
-      "from_tribe_id": 371,
-      "to_tribe_id": 376
+      "from_tribe_id": 432,
+      "to_tribe_id": 438
      },
      "grain_open_question": "",
      "grain_defect": "114 LITERAL duplicate rows of 1,262. This table is derived from subawards.csv and inherits its duplication; the passthrough dollars are therefore over-stated by an unmeasured amount.",
@@ -4587,8 +4587,12 @@
      "grain_evidence": {},
      "key_refused": {},
      "population_scope": {},
-     "rebuilt_by": [],
-     "enriched_by": [],
+     "rebuilt_by": [
+      "99_build_earmarks_and_schedc.py"
+     ],
+     "enriched_by": [
+      "1127_schedc_coverage_basis_fix.py"
+     ],
      "never_run_warning": []
     },
     {
@@ -5548,9 +5552,9 @@
      "grain_validated": true,
      "measured_rows_per_join_key": {
       "prime_award_unique_key": 1536,
-      "prime_cedar_uid": 8576,
-      "prime_uei": 2457,
-      "sub_cedar_uid": 2840,
+      "prime_cedar_uid": 8902,
+      "prime_uei": 2511,
+      "sub_cedar_uid": 2846,
       "sub_uei": 2766
      },
      "grain_open_question": "",
@@ -5864,7 +5868,7 @@
    "name": "NEST: Native Enterprise Structures and Ties",
    "shelf": "pro",
    "rebuild_command": "py -3 code/build.py run nest --execute",
-   "n_tables": 2,
+   "n_tables": 3,
    "tables": [
     {
      "table": "nest_enterprise_relations.csv",
@@ -5925,6 +5929,27 @@
       "owner_hub_cedar_uid": 172,
       "parent_enterprise_id": 34
      },
+     "grain_open_question": "",
+     "grain_defect": "",
+     "grain_evidence": {},
+     "key_refused": {},
+     "population_scope": {},
+     "rebuilt_by": [],
+     "enriched_by": [],
+     "never_run_warning": []
+    },
+    {
+     "table": "nest_entity_dual_role.csv",
+     "status": "UNDOCUMENTED",
+     "key_columns": [
+      "cedar_uid"
+     ],
+     "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
+     "primary_key": [],
+     "join_cardinality": {},
+     "grain_declared_by": "",
+     "grain_validated": false,
+     "measured_rows_per_join_key": {},
      "grain_open_question": "",
      "grain_defect": "",
      "grain_evidence": {},
