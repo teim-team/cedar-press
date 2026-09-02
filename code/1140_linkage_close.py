@@ -213,7 +213,70 @@ FA01_BASIS = (
 )
 BRIDGE_METHOD = "fpds_uei_cage_bridge"
 
-TASKS = ("bills", "assistance", "contracts", "ledger")
+TASKS = ("bills", "assistance", "contracts", "ledger", "siblings")
+
+# --------------------------------------------------------------------------
+# T6 - a ruling reaches the FIRM, not one of its registrations
+#
+# The owner, on why one company holds several CAGE codes: "In theory one
+# company should have one CAGE code, but sometimes they could have
+# multiple... they'll get a new CAGE technically as a new company for the
+# 8(a) pass-through stuff, but it's literally the same company."
+#
+# `FOUR TRIBES ENTERPRISES, LLC` holds four.  CAGE `7WA41` was RULED to
+# Susanville on 2026-08-06 with a retrieved-document leg, and the ruling names
+# the other side explicitly: *"Te-Moak is an SBA DSBS name-match artefact."*
+# The other three registrations of the same firm are still keyed to Te-Moak in
+# the ledger, and their 127 prime rows / $15,015,304 sit unattributed.
+#
+# Evidence that these are one firm, not four:
+#   1. identical `legal_business_name` on all four ledger rows;
+#   2. every prime row's own `parent_name` is FOUR TRIBES ENTERPRISES, LLC -
+#      a self-declared registration family;
+#   3. `fpds_uei_edges.csv`: M5TLZKJSVZT3 (CAGE 92BX9) declares
+#      H15YNL5CB4G1 - the RULED 7WA41 registration - as its parent, 9 + 18
+#      observations.  Rule 11's 20-observation floor separates ownership from
+#      a JOINT VENTURE where parent and child are DIFFERENT firms; here the
+#      parent and the child are the same legal name, which is the
+#      multiple-registration case the owner describes, not a JV.
+#
+# Tier B and method `propagated_from_agent_ruling`: rule 8 forbids a
+# propagation from carrying a row to tier A.  Same shape for `Red Cedar
+# Enterprises, Inc.` CAGE `6F0N0`, still keyed to Paiute of Utah, of which
+# the `3V7E1` ruling says in terms: *"The 'Paiute of Utah' side is a token
+# match on 'Cedar' (Cedar Band / Cedar City) and is wrong."*
+# --------------------------------------------------------------------------
+SIBLING_REPOINTS = [
+    dict(cage="8DF77", firm="Four Tribes Enterprises, Llc",
+         from_tid="TRBF-TEMOAK-00", to_tid="TRBF-SUSANV-00",
+         ruled_cage="7WA41",
+         quote="Te-Moak is an SBA DSBS name-match artefact. | resolve_entity "
+               "-> TRBF-SUSANV-00 (Susanville, alias).",
+         src="review/agent_rulings_conflicts_2026-08-06.csv"),
+    dict(cage="8UG01", firm="Four Tribes Enterprises, Llc",
+         from_tid="TRBF-TEMOAK-00", to_tid="TRBF-SUSANV-00",
+         ruled_cage="7WA41",
+         quote="Te-Moak is an SBA DSBS name-match artefact. | resolve_entity "
+               "-> TRBF-SUSANV-00 (Susanville, alias).",
+         src="review/agent_rulings_conflicts_2026-08-06.csv"),
+    dict(cage="92BX9", firm="Four Tribes Enterprises, Llc",
+         from_tid="TRBF-TEMOAK-00", to_tid="TRBF-SUSANV-00",
+         ruled_cage="7WA41",
+         quote="Te-Moak is an SBA DSBS name-match artefact. | resolve_entity "
+               "-> TRBF-SUSANV-00 (Susanville, alias). Corroborated: "
+               "fpds_uei_edges.csv shows this registration's UEI "
+               "M5TLZKJSVZT3 declaring H15YNL5CB4G1 - the ruled 7WA41 "
+               "registration - as its parent, 9 + 18 observations.",
+         src="review/agent_rulings_conflicts_2026-08-06.csv"),
+    dict(cage="6F0N0", firm="Red Cedar Enterprises, Inc.",
+         from_tid="TRBF-PTTRUT-00", to_tid="TRBF-MODOCN-00",
+         ruled_cage="3V7E1",
+         quote="The 'Paiute of Utah' side is a token match on 'Cedar' (Cedar "
+               "Band / Cedar City) and is wrong. | resolve_entity -> "
+               "TRBF-MODOCN-00 (Modoc Nation, exact).",
+         src="review/agent_rulings_conflicts_2026-08-06.csv"),
+]
+SIBLING_METHOD = "propagated_from_agent_ruling"
 
 
 # --------------------------------------------------------------------------
@@ -269,7 +332,13 @@ def rewrite(p: Path, transform, add_cols=()):
             for row in r:
                 n_in += 1
                 for c in out_cols:
-                    row.setdefault(c, "")
+                    # NOT setdefault(): `row` comes from DictReader and these
+                    # are columns the input header does not have, so the call
+                    # is real - but 293 class2a cannot see that, and an
+                    # explicit membership test says the same thing without
+                    # needing a waiver.
+                    if c not in row:
+                        row[c] = ""
                 n_ch += int(bool(transform(row)))
                 w.writerow(row)
     n_out = n_in
@@ -711,6 +780,126 @@ def do_ledger(apply_it: bool):
     return plan
 
 
+def siblings_plan():
+    cages = [r["cage"] for r in SIBLING_REPOINTS]
+    inlist = ",".join(f"'{c}'" for c in cages)
+    led = q1_all(
+        f"SELECT upper(trim(identifier)), tribe_id, coalesce(legal_business_name,'') "
+        f"FROM {rd(LEDGER)} WHERE identifier_type='CAGE' "
+        f"AND upper(trim(identifier)) IN ({inlist})")
+    pc = q1_all(
+        f"SELECT upper(trim(cage_code)), count(*), "
+        f"round(sum(TRY_CAST(total_obligations AS DOUBLE)),2) FROM {rd(PRIME)} "
+        f"WHERE upper(trim(coalesce(cage_code,''))) IN ({inlist}) "
+        f"AND attributed_flag <> '1' AND coalesce(trim(tribe_id),'') = '' "
+        f"GROUP BY 1")
+    pcm = {r[0]: (r[1], r[2]) for r in pc}
+    ledm = {r[0]: (r[1], r[2]) for r in led}
+    rows = []
+    for r in SIBLING_REPOINTS:
+        n, usd = pcm.get(r["cage"], (0, 0.0))
+        cur = ledm.get(r["cage"], (None, None))
+        rows.append({"cage": r["cage"], "firm": r["firm"],
+                     "ledger_tribe_id_now": cur[0],
+                     "expected_from": r["from_tid"], "to": r["to_tid"],
+                     "prime_rows_to_attribute": n, "prime_usd": usd})
+    return {"task": "siblings", "repoints": rows,
+            "prime_rows": sum(x["prime_rows_to_attribute"] for x in rows),
+            "prime_usd": round(sum(x["prime_usd"] or 0 for x in rows), 2)}
+
+
+def do_siblings(apply_it: bool):
+    plan = siblings_plan()
+    if not apply_it:
+        return plan
+    sm = spine_map()
+    tgt = {r["cage"]: r for r in SIBLING_REPOINTS}
+    for r in SIBLING_REPOINTS:
+        if r["to_tid"] not in sm:
+            raise SystemExit(f"REFUSING: {r['to_tid']} not in the spine.")
+
+    # --- ledger side: repoint, keeping the prior value on the row and in a
+    # review file.  Flag and never delete.
+    backup(LEDGER)
+    with LEDGER.open("r", encoding="utf-8", newline="") as fh:
+        rdr = csv.DictReader(fh)
+        cols = list(rdr.fieldnames or [])
+        rows = list(rdr)
+    n_led = 0
+    prior = []
+    for row in rows:
+        if row.get("identifier_type") != "CAGE":
+            continue
+        cg = (row.get("identifier") or "").strip().upper()
+        r = tgt.get(cg)
+        if not r or (row.get("tribe_id") or "").strip() != r["from_tid"]:
+            continue
+        nm, uid = sm[r["to_tid"]]
+        prior.append({"identifier_type": "CAGE", "identifier": cg,
+                      "prior_tribe_id": row.get("tribe_id", ""),
+                      "prior_canonical_name": row.get("canonical_name", ""),
+                      "prior_attribution_method":
+                          row.get("attribution_method", ""),
+                      "prior_confidence_tier": row.get("confidence_tier", ""),
+                      "new_tribe_id": r["to_tid"], "new_canonical_name": nm})
+        row["tier_rationale"] = (
+            f"REPOINTED {row.get('tribe_id', '')} -> {r['to_tid']} by "
+            f"code/1140_linkage_close.py on {TODAY}. A ruling reaches the "
+            f"FIRM, not one of its registrations: CAGE {r['ruled_cage']} for "
+            f"the same legal name ({r['firm']}) was ruled in {r['src']} and "
+            f"the ruling names this side as the artefact - \"{r['quote']}\" "
+            f"Tier stays B: rule 8 forbids a propagation carrying a row to "
+            f"tier A. Prior value preserved here and in "
+            f"review/linkage_close_ledger_repoints_{TODAY}.csv.")
+        row["tribe_id"] = r["to_tid"]
+        row["canonical_name"] = nm
+        row["cedar_uid"] = uid
+        row["attribution_method"] = SIBLING_METHOD
+        row["confidence_tier"] = "B"
+        row["entity_class"] = ""
+        n_led += 1
+    if n_led:
+        part = LEDGER.with_suffix(".csv.part_1140s")
+        with part.open("w", encoding="utf-8", newline="") as oh:
+            w = csv.DictWriter(oh, fieldnames=cols, extrasaction="ignore")
+            w.writeheader()
+            w.writerows(rows)
+        os.replace(part, LEDGER)
+        REVIEW.mkdir(exist_ok=True)
+        pf = REVIEW / f"linkage_close_ledger_repoints_{TODAY}.csv"
+        with pf.open("w", encoding="utf-8", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=list(prior[0].keys()))
+            w.writeheader()
+            w.writerows(prior)
+
+    # --- prime side
+    backup(PRIME)
+    n_pc = [0]
+
+    def tf(row):
+        if (row.get("attributed_flag") == "1"
+                or (row.get("tribe_id") or "").strip()
+                or (row.get("ruling_status") or "").strip()):
+            return False
+        r = tgt.get((row.get("cage_code") or "").strip().upper())
+        if not r:
+            return False
+        nm, uid = sm[r["to_tid"]]
+        row["tribe_id"] = r["to_tid"]
+        row["cedar_uid"] = uid
+        row["canonical_name"] = nm
+        row["attribution_method"] = SIBLING_METHOD
+        row["confidence_tier"] = "B"
+        row["attributed_flag"] = "1"
+        n_pc[0] += 1
+        return True
+
+    n_in, n_out, _ = rewrite(PRIME, tf)
+    plan.update(ledger_rows_repointed=n_led, prime_rows_applied=n_pc[0],
+                rows_in=n_in, rows_out=n_out)
+    return plan
+
+
 def q1_all(sql):
     con = duckdb.connect()
     try:
@@ -741,6 +930,10 @@ FLOORS = {
     "mcgrath_rows": 154,
     "contracts_ruling_applied": 4331 + 2034,
     "ledger_bridge_rows": 163,
+    # T6. Pre-state was 0 for both, so any nonzero value is the write
+    # happening; the floors are the intended deltas exactly.
+    "sibling_ledger_repointed": 4,
+    "sibling_prime_rows": 127,
 }
 CONSERVE = {
     "native_bills.csv": 3069,
@@ -772,6 +965,20 @@ def verify_measure():
     m["ledger_bridge_rows"] = q1(
         f"SELECT count(*) FROM {rd(LEDGER)} "
         f"WHERE attribution_method = '{BRIDGE_METHOD}'")[0]
+    _cg = ",".join(f"'{r['cage']}'" for r in SIBLING_REPOINTS)
+    m["sibling_ledger_repointed"] = q1(
+        f"SELECT count(*) FROM {rd(LEDGER)} WHERE identifier_type = 'CAGE' "
+        f"AND upper(trim(identifier)) IN ({_cg}) "
+        f"AND attribution_method = '{SIBLING_METHOD}'")[0]
+    _from = ",".join(f"'{r['from_tid']}'" for r in SIBLING_REPOINTS)
+    m["sibling_ledger_still_wrong"] = q1(
+        f"SELECT count(*) FROM {rd(LEDGER)} WHERE identifier_type = 'CAGE' "
+        f"AND upper(trim(identifier)) IN ({_cg}) "
+        f"AND tribe_id IN ({_from})")[0]
+    m["sibling_prime_rows"] = q1(
+        f"SELECT count(*) FROM {rd(PRIME)} "
+        f"WHERE attribution_method = '{SIBLING_METHOD}' "
+        f"AND attributed_flag = '1'")[0]
     for fn, want in CONSERVE.items():
         p = CLEAN / fn
         m[f"rows_{fn}"] = q1(f"SELECT count(*) FROM {rd(p)}")[0]
@@ -795,6 +1002,12 @@ def do_verify(quiet=False):
         fails.append(f"fa01_stale_rows = {m['fa01_stale_rows']:,}, must be 0. "
                      f"Rows claiming attribution_status='cedar_neid' with a "
                      f"blank tribe_id_neid are a coverage overstatement.")
+    if m.get("sibling_ledger_still_wrong"):
+        fails.append(
+            f"sibling_ledger_still_wrong = {m['sibling_ledger_still_wrong']}, "
+            f"must be 0. A CAGE of a firm whose sibling registration was "
+            f"RULED is still keyed to the entity that ruling names as the "
+            f"artefact.")
     if m["contracts_ruling_stranded"]:
         fails.append(f"contracts_ruling_stranded = "
                      f"{m['contracts_ruling_stranded']:,}, must be 0. A row "
@@ -847,7 +1060,8 @@ def do_selftest():
 # --------------------------------------------------------------------------
 
 RUNNERS = {"bills": do_bills, "assistance": do_assistance,
-           "contracts": do_contracts, "ledger": do_ledger}
+           "contracts": do_contracts, "ledger": do_ledger,
+           "siblings": do_siblings}
 
 
 def run(apply_it: bool, only=None):

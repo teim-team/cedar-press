@@ -180,12 +180,20 @@ def load(path, gate=True):
         hdr = publishable_columns(rd.fieldnames or [])
         rows, held = [], defaultdict(int)
         for r in rd:
+            # PROJECT BEFORE GATING. `hdr` is already `publishable_columns`,
+            # so projecting first removes the personal-contact fields; running
+            # `row_ok` on the RAW row instead fires its NEVER backstop on the
+            # very fields about to be dropped. Measured cost of the wrong
+            # order: 582 of 587 rows of the BIA tribal leaders directory,
+            # withheld whole for carrying a phone number that was never going
+            # to be published.
+            r = {c: r.get(c, "") for c in hdr}
             if gate:
                 ok, why = row_ok(r)
                 if not ok:
                     held[why] += 1
                     continue
-            rows.append({c: r.get(c, "") for c in hdr})
+            rows.append(r)
     return hdr, rows, held
 
 

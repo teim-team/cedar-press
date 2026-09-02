@@ -55,7 +55,13 @@ WHAT IS CANONICAL HERE, AND WHAT IS NOT
 ----------------------------------------
 Canonical (hand-maintained, this file is the only copy):
 
-  `NEVER`             row-level withholding: personal data held APART from a
+  `NEVER`             personal data held APART from a public role. Dropped
+                      as a COLUMN by `shipped_columns()` AND withheld at
+                      row level by `row_ok()` as a backstop. Row-only until
+                      2026-09-02, which cost 582 of 587 rows of the BIA
+                      tribal leaders directory while still shipping its
+                      `phone` and `email` headers. Originally: withholding
+                      of personal data held APART from a
                       public role
   `GATES`             row-level publication gates
   `FLAGSHIP`          the ONE table a customer opens first, per collection
@@ -296,9 +302,36 @@ def row_ok(r: dict) -> tuple[bool, str]:
 
 
 def publishable_columns(header) -> list:
-    """Header minus the proprietary identifiers. Case-insensitive, as every
-    consumer already compared them."""
-    return [c for c in header if c.lower() not in DROP_COLS]
+    """Header minus what may never be published.
+
+    TWO classes, both dropped as COLUMNS:
+
+      `DROP_COLS`  proprietary identifiers - licensed to Cedar, not ours to
+                   redistribute. Case-insensitive, as every consumer compared
+                   them.
+      `NEVER`      personal data held apart from a public role.
+
+    WHY `NEVER` IS HERE AND NOT ONLY IN `row_ok()`
+    ----------------------------------------------
+    It was only a row gate until 2026-09-02. Measured against the live tree,
+    that published **5 of the 587 rows** of
+    `bia_tribal_leaders_directory.csv` - every row carrying a phone or an
+    email was withheld whole - and shipped the `phone` and `email` HEADERS
+    anyway on the five survivors.
+
+    Both halves of that are wrong. A tribal leader's name and office is a
+    PUBLIC ROLE and belongs in the dataset; the phone number is the thing that
+    must not travel. Dropping the field keeps 587 rows and publishes no
+    contact data, where the row gate kept 5 rows and still advertised two
+    contact columns.
+
+    `row_ok()` keeps its `NEVER` check as a BACKSTOP, for a personal field
+    arriving under a name this list does not know.
+    """
+    lower_drop = {c.lower() for c in DROP_COLS}
+    never = set(NEVER)
+    return [c for c in (header or [])
+            if c.lower() not in lower_drop and c not in never]
 
 
 def _from_numbered(stem: str):

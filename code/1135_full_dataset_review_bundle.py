@@ -328,9 +328,18 @@ def build(mode: str) -> int:
                     dropped = [c for c in hdr if c not in cols]
                     kept, held = [], defaultdict(int)
                     for r in rd:
+                        # PROJECT BEFORE GATING. `row_ok`'s NEVER check is a
+                        # backstop for a personal field under a name the drop
+                        # list does not know; run it on the RAW row and it
+                        # fires on the very fields `publishable_columns` is
+                        # about to remove. That cost 582 of 587 rows of the BIA
+                        # tribal leaders directory - withheld whole for
+                        # carrying a phone number that was never going to be
+                        # published anyway.
+                        r = {c: r.get(c, "") for c in cols}
                         ok, why = row_ok(r)
                         if ok:
-                            kept.append({c: r.get(c, "") for c in cols})
+                            kept.append(r)
                         else:
                             held[why] += 1
             except OSError as e:
@@ -344,6 +353,23 @@ def build(mode: str) -> int:
             split_kind, pieces, biggest = "", 0, 0
             if do_full and shippable and kept:
                 base = OUT / "spreadsheets" / coll
+                # SWEEP THIS TABLE'S PRIOR PIECES FIRST.
+                #
+                # Nothing did, and two split GENERATIONS ended up coexisting:
+                # the by-year split, and the by-year-plus-byte-cap split that
+                # replaced it. `faads_transactions_all_agencies` was therefore
+                # published twice - 5,539,496 rows on disk against a manifest
+                # claiming 2,769,748 - and a buyer taking every piece
+                # double-counted FAADS. 7 files, 1,667 MB, one whole extra copy.
+                #
+                # Same defect class as the orphaned workbook in 1137: a build
+                # that writes without sweeping leaves deliverables that look
+                # current and correspond to nothing. `pieces_of` already knows
+                # exactly which files belong to this table, so the sweep reuses
+                # it rather than globbing a prefix - a prefix glob here would
+                # eat `prime_contracts_awards` while sweeping `prime_contracts`.
+                for old_piece in pieces_of(base, p.stem):
+                    old_piece.unlink()
                 ycol = next((c for c in YEAR_COLS if c in cols), None)
                 oversize = (len(kept) > EXCEL_ROWS
                             or p.stat().st_size > GITHUB_BYTES)

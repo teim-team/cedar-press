@@ -2,7 +2,7 @@
   "scanned_files": 631,
   "counts": {
     "class1": 1,
-    "class2a": 1,
+    "class2a": 0,
     "class2b": 0,
     "class2c": 69,
     "class3": 2,
@@ -12,7 +12,7 @@
     "class7": 44,
     "class8": 0,
     "class9": 0,
-    "lint_bug_class_instances": 164
+    "lint_bug_class_instances": 163
   },
   "findings": [
     {
@@ -210,15 +210,6 @@
       "line": 403,
       "evidence": "if y in done:",
       "why": "an 'already done' short-circuit (y in done) skips the work, and this file still rewrites a log/summary artefact wholesale at line 528. On a second run the counters are zero and the log says so - the 164 defect: 187 facilities rewritten to read '0 sources'. Re-running a build must not change its output; merge into the existing log or refuse to rewrite it.",
-      "waived": false,
-      "waiver_reason": ""
-    },
-    {
-      "class": "class2a",
-      "file": "1140_linkage_close.py",
-      "line": 272,
-      "evidence": "row.setdefault(c, \"\")",
-      "why": "`row` was filled with every key at line 418, so this setdefault is a NO-OP and the column ships EMPTY. This is the 119 defect: tier 154/154 blank, confidence_tier 10,661/10,661 blank. Use `x[k] = x.get(k) or DEFAULT`.",
       "waived": false,
       "waiver_reason": ""
     },
@@ -2734,6 +2725,7 @@
       ],
       "cedar_identifier_ledger_final.csv": [
         "1099_crosstribe_legalname_audit.py",
+        "1140_linkage_close.py",
         "124_apply_rulings_in_place.py",
         "163_promote_nho_universe_in_place.py",
         "174_apply_rulings_to_source_tables.py",
@@ -3254,6 +3246,7 @@
       ],
       "cedar_identifier_ledger_final.csv": [
         "1099_crosstribe_legalname_audit.py",
+        "1140_linkage_close.py",
         "124_apply_rulings_in_place.py",
         "163_promote_nho_universe_in_place.py",
         "174_apply_rulings_to_source_tables.py",
@@ -3547,7 +3540,7 @@
   "class7_source": "284_audit_nondeterministic_keys.lint_key_stability()",
   "class7_note": "284 fixture self-test PASS - 5 synthetic defect shapes re-found; of the 3 measured real instances 1 now recorded FIXED",
   "class9_source": "1136_control_byte_gate.scan()",
-  "class9_note": "1136 scanned 984 files (code/*.py, docs/*.md, docs/schema/*, root *.md) for 0x00-0x08, 0x0b, 0x0c, 0x0e-0x1f, 0x7f",
+  "class9_note": "1136 scanned 985 files (code/*.py, docs/*.md, docs/schema/*, root *.md) for 0x00-0x08, 0x0b, 0x0c, 0x0e-0x1f, 0x7f",
   "tier_inheritance": {
     "sites": [
       {
