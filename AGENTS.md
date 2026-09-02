@@ -5332,3 +5332,128 @@ that no word list reaches them. The strongest available rule is that where
 Cedar holds the organisation's own 990 and it states a non-Native purpose,
 that evidence outranks any name match; the corpus is already on disk for 4,296
 of the 12,764. Shard J did not touch `503`.
+
+## GATE FAIL 2026-09-01 (late) — WORKSTREAM SHARD-C handing off. My two lines are cleared; the rest are named.
+
+Shard C owns tribes 143–213 of the gaming slice. Two scripts were added:
+`code/546_shard_c_tribe_web_probe.py` and
+`code/547_shard_c_hidden_endpoint_sweep.py`. Everything else shard C wrote is
+under `data/staging/`, which the gate does not scan.
+
+### MINE, AND CLEARED IN THIS PASS
+
+`lint_class5` — both instances are the SAME shape and both are now waived on the
+line with a reason, per the gate's own instruction:
+
+| line | why it is not the defect |
+|---|---|
+| `546_…probe.py:187` `if key in done` | the resume guard CARRIES the prior row forward unchanged, so a resumed run reproduces the earlier result and re-requests nothing |
+| `547_…sweep.py:246` `if host in TERMS_RESTRICTIVE_HOSTS or (host, kind) in done` | `hidden_endpoints.jsonl` is append-only and `done` is rebuilt from it at startup; the TERMS half is a permanent, logged exclusion |
+
+Class 5 is *"a non-idempotent build that rewrites its own log."* Both lines are
+the opposite: remove them and the scripts become non-idempotent and re-hit every
+tribal host on resume, which is exactly what `docs/PULL_DISCIPLINE.md` rule 6
+exists to prevent. `293` counted `lint_class5` down 9 → 8 after the waivers.
+
+`546` was also renamed from `shard_c_tribe_web_probe.py` to take a numeric prefix
+above 545, as the naming convention expects. **546 and 547 are unique** — neither
+is part of `code_duplicate_numbers`.
+
+### NOT MINE — named, with owners
+
+| line | owner | note |
+|---|---|---|
+| `code_duplicate_numbers` 43 → 44 | `561_shard_k_alaska_villages.py` / `561_shard_m_vendor_list_sweep.py` (on top of the pre-existing `561_pre2000_coverage_probe.py`) | three scripts now share 561. Two shards picked it concurrently; per the 2026-09-01 16:45 entry, whoever is still running keeps it and the later finisher moves. |
+| `lint_class1` 0 → 1 | `570_shard_l_vendor_list_hunt.py:279` (shard L) | |
+| `lint_class2b` 0 → 1 | `shard_f_membership.py:1` (shard F) | also has no numeric prefix |
+| `lint_class2c` 60 → 61 | not attributable to a shard file by `293`'s listing; the 12 instances it names are all pre-existing `130`/`132`/`134` build scripts | the +1 is another workstream's; it is not in `546`/`547` |
+| `lint_class5` remaining 6 → 8 | `570_shard_l_vendor_list_hunt.py:540` (shard L), `shard_g_newsletters.py:368` (shard G) | same resume-guard shape as mine; both are waivable on the line with a reason |
+| `tables_missing_from_25_TABLES` 179 → 180, `tables_missing_from_27_SPEC` 194 → 195 | the new tables landing concurrently in `data/clean/` — `resource_parties.csv`, `resource_revenue.csv`, `native_owned_businesses.csv` (natural-resources and TERO-acquisition workstreams) | shard C created no table in `data/clean/`; every shard-C output is in `data/staging/`, which `62` does not scan |
+
+Per the 2026-08-26 19:10 entry and the 2026-09-01 shard-launch entry: **a gate
+reading a shared tree while fourteen workstreams write to it reports another
+agent's in-flight step as a regression.** Named here rather than shrugged at, so
+the next session does not re-diagnose them.
+
+### ONE THING WORTH KEEPING — two name-matching domains that are NOT the tribe
+
+`docs/NATIVE_ENTITY_NUANCES.md` says a place named for a tribe is not the tribe.
+Two live examples turned up in shard C's slice, both of which a name-match
+heuristic would have accepted:
+
+* **`rockyboy.org`** — a Thai-language consumer-electronics blog.
+* **`chippewacree.org`** — a link farm (`"Welcome to the family! - pbn"`).
+
+Both would have been recorded as the Chippewa Cree Tribe of the Rocky Boy's
+Reservation on a name match. The tribe's real host, `chippewacree-nsn.gov`, fails
+at the transport layer, so **`TRBF-ROCKYB-00` is recorded with no government site
+established** rather than with a plausible wrong one. That is the whole reason
+`546` requires a token the page itself prints before it will call a site
+established: a 200 is not evidence, and a matching domain name is not evidence.
+
+### Shard H, re-run of the same gate at ~20:35 — the set moved, still none of it shard H's
+
+The gate was re-run after shard H finished writing. Its failing set had changed
+again in the intervening hour, which is itself the point: **five consecutive
+runs of an unchanged gate produced five different regression sets**, because
+fourteen workstreams are writing to one tree. `293`'s own attribution, verbatim:
+
+```
+NEW class1  instance: 570_shard_l_vendor_list_hunt.py  - glob.glob(... tribe_harvest ...)
+NEW class2a instance: 570_shard_l_vendor_list_hunt.py  - row.setdefault("verdict", "")
+NEW class2b instance: shard_f_membership.py            - shard_f_membership.py
+NEW class5  instance: 570_shard_l_vendor_list_hunt.py  - if (host, kind) in done or not deadline_ok()
+NEW class5  instance: shard_g_newsletters.py           - if uid in done:
+```
+
+Owners: **shard L** (`570_shard_l_vendor_list_hunt.py`, three of the five),
+**shard F** (`shard_f_membership.py`), **shard G** (`shard_g_newsletters.py`).
+`code_duplicate_numbers` 43 → 44 is a script-number collision between two of
+the concurrently-launched shards, not a data defect — the rule from the 16:45
+entry applies: whoever is still running keeps the number, the integrator moves.
+`tables_missing_from_25_TABLES` / `_27_SPEC` are new `data/clean/` tables from
+other workstreams.
+
+Shard H's position is unchanged and re-verified: **zero files in `code/`**
+(its scripts are session-scratchpad only, which `293` does not scan), **zero
+tables in `data/clean/`**, four outputs all under `data/staging/`, and
+read-only access to the spine. Its own product check passes:
+
+```
+py -3 -c "import csv,json; ... assert len(P)==319; assert no row claims federal recognition"
+  -> shard_h ok 315 319 100 141
+```
+
+
+### Shard A, gate re-run ~19:5x — sixth different failing set, none of it shard A's
+
+`62` fails, and every named new defect belongs to another concurrently-running
+workstream. `293`'s own attribution across shard A's two runs of the gate:
+
+```
+NEW class2b instance: shard_f_membership.py                 - shard_f_membership.py
+NEW class2c instance: 344_pull_nigc_document_surface.py     - skipped += 1
+NEW class5  instance: 547_shard_c_hidden_endpoint_sweep.py  - if host in TERMS_RESTRICTIVE_HOSTS ...
+NEW class5  instance: shard_g_newsletters.py                - if uid in done:
+NEW class1/2a/5      : 570_shard_l_vendor_list_hunt.py      (three, per the shard H entry above)
+```
+
+Owners: **shard F** (`shard_f_membership.py`), **shard C**
+(`547_shard_c_hidden_endpoint_sweep.py`, `344_pull_nigc_document_surface.py`),
+**shard G** (`shard_g_newsletters.py`), **shard L**
+(`570_shard_l_vendor_list_hunt.py`). `contract_violations` 6,
+`contract_orphan_shippable` 5, `contract_grain_unstated_shippable` 25 -> 30 and
+`code_duplicate_numbers` 43 -> 44 all track new `data/clean/` tables and new
+`code/` scripts from other workstreams; shard A created neither.
+
+Shard A's position: **zero files in `code/`** (all of its scripts are
+session-scratchpad only, which `293` does not scan), **zero files in
+`data/clean/`**, **no write to the spine**, and every output under
+`data/staging/tribe_web_map/shard_a.csv` and `data/staging/tribe_harvest/shard_a/`
+- neither of which `62` scans. Its own product check passes:
+
+```
+py -3 -c "import csv; R=list(csv.DictReader(open('data/staging/tribe_web_map/shard_a.csv',encoding='utf-8')));
+          assert len({r['tribe_id'] for r in R})==71; print('shard_a ok', len(R))"
+  -> shard_a ok 221
+```

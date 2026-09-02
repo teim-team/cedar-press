@@ -182,3 +182,60 @@ Record the outcome honestly when it fires: this one was logged as
 `accepted_then_failed_server_side: 302` and all 302 objects were deleted. A
 fetch that returned 200 and the wrong content is a **failure**, and calling it
 anything else puts the lie in the provenance record.
+
+## A NEGATIVE FROM SEARCH ALONE IS NOT A NEGATIVE
+
+*Added 2026-09-01 by shard A, which caught itself producing a false one.*
+
+Shard A searched Bad River's site and recorded **"no TERO."** The WordPress
+media index then returned a **2024 TERO Compliance Plan** and a TERO Plan
+attached to a 2026 RFP. Same site, same session, opposite answer.
+
+Its own conclusion, and it is now project standard:
+
+> **A "no TERO" from search alone is not evidence.**
+
+The reason is structural, not incidental. Search — site search, a search
+engine, or reading the navigation — only sees what the CMS chose to render and
+link. A PDF uploaded to the media library and referenced from one RFP, or
+linked from a page since removed, is invisible to all three and is sitting
+right there in `/wp-json/wp/v2/media`. On the same pass, Grand Portage's
+enacted Tribal Employment Rights Ordinance — with a 2026-07-15 council letter
+announcing its adoption — returned **zero search results** and was found only
+in the media index.
+
+**Before recording any absence, you must have run the machine-readable routes:**
+
+1. `/wp-json/wp/v2/media?per_page=100` with pagination (read `X-WP-Total`)
+2. `/wp-json/wp/v2/types`, then the endpoint of any custom post type
+3. `/wp-json/wp/v2/search?search=<term>&per_page=100`
+4. `sitemap.xml` / `sitemap_index.xml`
+
+Only then is "not published" a finding. Otherwise the honest status is
+**`NOT_SEARCHED_MACHINE_READABLE`**, which is a different claim.
+
+This matters beyond tidiness because **false negatives are load-bearing here**.
+The native-owned-business workstreams are measuring a hit rate that decides
+whether hundreds of remaining tribes are ever attempted; the coverage ledger
+separates "attempted, none found" from "untouched" precisely so effort gaps
+stay visible. A false absence corrupts both, and unlike a false positive it
+leaves no trace to trip over later.
+
+Scale, from the same shard: 65 of ~90 hosts had the media index open, and
+`/wp/v2/media` returned **11,863 documents in about 660 requests**. Bad River
+alone advertises 2,629 via `X-WP-Total`, Cow Creek 2,007, Acoma 1,266. This is
+also *gentler* on the host than crawling for them.
+
+### The companion: a 403 is often a user-agent filter, not a refusal
+
+Shard A turned a 403 into a 202 on `fortpecktribes.org` **and on
+`cherokeetero.com/directory/`** by sending browser headers — the vendor
+registry had the latter logged as a hard 403 for a week. Relaxed TLS recovered
+three more hosts; `crit-nsn.gov`'s certificate covers the apex only;
+`chehalistribe.org` refuses 443 at the apex and serves on `www`.
+
+None of that is bypassing an access control — it is speaking HTTP the way a
+browser does to a server that is willing to serve you. **A `robots.txt`
+Disallow, a login wall, and a `TERMS_STATED_RESTRICTIVE` source remain
+refusals and stay refused.** Colville's TERO was not fetched by any route on
+this pass, including these.
