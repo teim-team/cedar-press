@@ -13,7 +13,10 @@
 
 # ---------------- product site ----------------
 node_modules
-dist
+# The web build's output. NOT `dist/`: the data workspace tracks 295 files
+# under that name, and vite empties its output directory before every build,
+# so the two cannot share one. See the note in vite.config.js.
+dist-site
 *.local
 .DS_Store
 

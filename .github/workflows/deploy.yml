@@ -40,9 +40,12 @@ jobs:
       - run: ruff check server
       - working-directory: server
         run: python -m unittest discover -s tests -t .
+      # `dist-site`, not `dist`: the data workspace tracks 295 files under
+      # `dist/` and vite empties its output directory before every build. The
+      # two must move together with `build.outDir` in vite.config.js.
       - uses: actions/upload-pages-artifact@v5
         with:
-          path: dist
+          path: dist-site
 
   deploy:
     needs: build

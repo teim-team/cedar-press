@@ -9,7 +9,9 @@ import { defineConfig, globalIgnores } from "eslint/config";
 // most here: a client that ships a reference to a name that does not exist
 // fails at the reader, not at the build.
 export default defineConfig([
-  globalIgnores(["dist"]),
+  // `dist-site` is the web build's output (vite.config.js); `dist` is the
+  // data workspace's tracked deliverables. Neither is source.
+  globalIgnores(["dist", "dist-site"]),
   {
     files: ["**/*.{js,jsx}"],
     extends: [

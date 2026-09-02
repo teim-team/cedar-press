@@ -7,7 +7,7 @@
     "dev": "vite",
     "lint": "eslint .",
     "test": "node --test \"src/features/grove/*.test.js\"",
-    "build": "vite build && cp dist/index.html dist/404.html",
+    "build": "vite build && cp dist-site/index.html dist-site/404.html",
     "preview": "vite preview",
     "test:smoke": "playwright test"
   },
