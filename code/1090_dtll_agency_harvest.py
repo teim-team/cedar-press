@@ -58,13 +58,26 @@ NOT HARVESTED, and each absence is a recorded state, never a silence:
     the date and the subject in the publisher's own words. Downloading ~400
     PDFs to re-read a date the index already states is not an acquisition, it
     is bandwidth. `document_url` is on every row for anyone who wants one.
-  * **Urban Indian Organization leader letters** (`DUIOLL`). A letter addressed
-    to Urban Indian Organizations is not a letter to tribal leaders. They are
-    COUNTED and reported as an adjacent series; rows are emitted only where
-    IHS's own filename says the letter went to tribal leaders too
-    (`DTLL_...`, `DTLL_DUIOLL_...`). `addressed_to` records which.
-  * **Enclosures.** `Enclosure_...pdf` is an attachment to a letter, not a
-    letter. Flagged `is_enclosure=1` and excluded from the letter count.
+  * **Urban Indian Organization leader letters** as a SERIES.
+    `/newsroom/urbanleaderletters/` carries 13 more year indexes and they are
+    NOT harvested: a letter addressed to Urban Indian Organizations is not a
+    letter to tribal leaders. Where IHS addressed BOTH - its own filename says
+    `DTLL_DUIOLL_` or `DTUIOLL_`, 154 of 597 letters - the row is kept and
+    `addressed_to` records it.
+  * **THE INCLUSION RULE IS THE PUBLISHER'S PATH, NOT THE FILENAME.** The first
+    pass keyed on a `DTLL` filename prefix and dropped 462 of 836 PDFs,
+    because IHS's pre-2010 letters are named `12-14-2000_Letter.pdf`,
+    `SDPI 01-25-2011 Letter.pdf`, `Anthrax Summary For IHS Clinicians.pdf`.
+    Every one of them sits in the publisher's own `.../<year>_Letters/`
+    folder, linked from a dated block on the publisher's own Tribal Leader
+    Letters index - which is IHS saying it is a tribal leader letter. The rule
+    is now that folder, and it still excludes the HIPAA notice PDF in the
+    footer of all 27 pages and the five govinfo Federal Register PDFs a letter
+    links to.
+  * **Enclosures.** `Enclosure_...pdf`, and any link IHS labels
+    "Enclosure"/"Attachment"/"Exhibit", is an attachment to a letter and not a
+    letter. It still SHIPS - the agency published it - but `record_kind` says
+    `enclosure` and the letter count excludes it. 209 of 807 rows.
   * **Other departments.** Probed only, at most `MAX_CHILD` sitemap shards per
     host, and recorded as `REPORTED_FLOOR_PARTIAL_INDEX` or `UNMEASURED` with
     the shard count. **A partly-walked index is not an absence** and this

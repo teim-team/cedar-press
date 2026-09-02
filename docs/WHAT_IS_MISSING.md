@@ -495,7 +495,7 @@ three.
 
 ## `federal-register` — `consultation_events.csv`, 11,402 rows
 
-**1. This is a NAGPRA table wearing a consultation label.** — `NOT_ACQUIRED`
+**1. This is a NAGPRA table wearing a consultation label.** — CLOSED 2026-09-02 by workstream FR-DTLL: the ROW share is right and the *duplicate* reading is wrong — **1,831 distinct notices here against 6,792 in `nagpra_notices.csv`, with 4,961 NAGPRA notices absent from this file entirely (27.0% intersection)**. The overlap is now three COLUMNS (`nagpra_notice_overlap`, `nagpra_bridge_overlap`, `nagpra_coverage_window`) plus the join key `fr_document_number`, written by `code/1089`, and it is stated in codebook block `09c_consultation_events`. The *"DOI alone posts dozens a year"* half was an inference from a count of 6: the **Federal Register itself holds only 46** documents containing the phrase, and `code/1090` went to the publishers instead and returned **597 letters, 2000-2026 (IHS 574, BIE 14, BIA 9)** in `dear_tribal_leader_letters.csv`. The single largest cause of the six was **an HTTP 406 on `ihs.gov` recorded `NOT_CHECKED`** — a request-header shape, behind which sat IHS's own 27-year letter series.
 All ten sampled rows are `NAGPRA_consultation_reported`, and that is a fair
 draw: **10,888 of 11,402 rows (95.5%)** are. Actual policy consultation is
 `consultation_session` 212, `consultation_notice` 180, `listening_session` 37,
@@ -507,7 +507,7 @@ year outside the Federal Register. Agency spread says the same:
 department has an EO 13175 consultation policy. **The federal-register dataset
 is READY and its consultation table is 95% one notice type.**
 
-**2. No date and no place for the consultation itself.** — `NOT_ACQUIRED`
+**2. No date and no place for the consultation itself.** — PARTLY CLOSED 2026-09-02 by workstream FR-DTLL, and it was **`ON_DISK_NOT_PROMOTED`, not `NOT_ACQUIRED`**: all 2,313 notice texts were already in `data/raw/external/consultation/fr_text/`. `code/1089` parsed them: **`event_start_date` 93 -> 190, `location` 60 -> 103**, every filled cell carrying the notice's own sentence. It stays under 2% of rows for a STRUCTURAL reason the original entry missed — **10,888 rows are NAGPRA notices reporting that consultation happened, and such a notice states neither when nor where.** Against the 484 non-NAGPRA documents the figure is 190 dated. Also measured: an unanchored place regex filled **657** NAGPRA rows with museum contact addresses and excavation counties before the event anchor was added.
 `notice_date` is when the notice published. `event_start_date` is filled on
 **93 of 11,402 rows** and `location` on **60**. A buyer asking "when and where
 is the consultation" cannot be answered for 99.2% of rows. The FR notice text

@@ -2,7 +2,7 @@
 
 *Generated 2026-09-02 by `code/1107_punchlist_claim_verify.py`. It imports `code/526_dataset_standard.py` and re-measures its output against the live files with **no row cap**. `526` is integrator-owned; this file does not edit it.*
 
-**339 punch items. 12 carry a FALSE claim. 9 findings on the checks themselves.**
+**334 punch items. 12 carry a FALSE claim. 9 findings on the checks themselves.**
 
 | invariant | what it re-measures | false claims |
 |---|---|---:|
@@ -37,10 +37,10 @@ V1 checked 81 items and found **47** individual column claims false.
   - `geo_award_unique_key` — **841,002** non-blank
   - `naics_code` — **838,229** non-blank
   - `award_type` — **769,868** non-blank
-  - `product_or_service_code` — **574,011** non-blank
-  - `product_or_service_code_description` — **574,011** non-blank
-  - `award_base_description` — **573,320** non-blank
-  - `naics_description` — **561,536** non-blank
+  - `naics_description` — **247,987** non-blank
+  - `product_or_service_code` — **247,987** non-blank
+  - `product_or_service_code_description` — **247,987** non-blank
+  - `award_base_description` — **247,987** non-blank
 
 ### `federal_actions.csv` — federal-register — V1
 

@@ -464,6 +464,51 @@ def load(path: Path):
         return list(rd.fieldnames or []), list(rd)
 
 
+# A SAMPLE MUST NEVER SHIP A NULL SENTINEL. Added 2026-09-02 after Codex, PR
+# #29 round 3, found `funding_agency = "Nan"` in the contractors sample - a
+# fictitious agency any consumer would group and filter on.
+#
+# `772_strip_nan_sentinels.py` is the SOURCE fix and it is the right one, but
+# it lost a race the same hour: it cleared 617,097 cells in
+# `prime_contracts.csv` at 08:02 and a concurrent in-place enricher, which had
+# read the table before 772 started, wrote back its own copy with five new
+# `identifier_ruling_*` columns and every sentinel restored. 772's guard
+# compares size and mtime across its own READ and correctly saw nothing; the
+# other writer's read predated it. **Two in-place enrichers on one table need
+# a declared ordering and these two had none.**
+#
+# So this guard sits in the PRODUCT layer, where it cannot be raced: whatever
+# the live table holds this minute, no sentinel reaches a customer. It does
+# not hide the upstream defect - the count is measured per column and printed,
+# and named in the sample README as a coverage fact.
+SENTINELS = {"nan", "none", "null", "<na>", "nat"}
+SENTINELS_SEEN: dict = {}
+
+
+def desentinel(rows: list, cols: list, dataset: str) -> list:
+    """Blank any cell whose ENTIRE content is a null sentinel, case-insensitive.
+
+    Whole cell only. `NANA Regional Corporation` and `Nanakuli` are real values
+    in this project and a substring rule would eat both; a 3-character token
+    cannot equal a 4- or 8-character value, which is exactly why the
+    case-sensitivity in 772 guarded nothing.
+
+    `NA` and `N/A` are deliberately NOT in the set: `NA` is a real abbreviation
+    a human may have typed to mean "not applicable", which is a statement
+    rather than a stringified float.
+    """
+    seen: dict = {}
+    for r in rows:
+        for c in cols:
+            v = r.get(c)
+            if v is not None and v.strip().lower() in SENTINELS:
+                seen[c] = seen.get(c, 0) + 1
+                r[c] = ""
+    if seen:
+        SENTINELS_SEEN[dataset] = seen
+    return rows
+
+
 def keep(r: dict) -> bool:
     for col, ok in GATES.items():
         if col in r and (r.get(col) or "").strip() not in ok:

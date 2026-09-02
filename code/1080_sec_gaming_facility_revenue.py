@@ -21,8 +21,9 @@ WHAT IT READS  (zero network - everything is already cached)
   review/sec_edgar_1030_fetch_manifest.csv   1,172 documents fetched by 1030
   data/raw/external/sec_edgar_1030/          the documents themselves (1.1 GB)
   data/clean/gaming_facilities.csv           to key a property to a facility_id
-  code/1080_facility_aliases.py              the curated alias -> facility map
-  review/sec_gaming_1080_adjudication.csv    hand rulings on mined candidates
+  code/_1080_facility_aliases.py             the curated alias -> facility map
+  review/sec_gaming_1080_adjudication.csv    hand rulings on mined candidates,
+                                             regenerate with code/_1080_adjudication.py
 
 WHAT IT WRITES
 --------------
@@ -54,17 +55,28 @@ net revenues, its gross revenues and its EBITDA are four different numbers about
 one property. `figure_type` says which. Summing across `figure_type` is the
 error this column exists to prevent.
 
-DERIVATION
-----------
-Revenue is derived from a fee ONLY where the same filing states the percentage
-and its base. `derived_from_fee = Y` rows show the arithmetic in
-`derivation_arithmetic` and carry `derivation_caveat`. A derived figure is never
-the same row as a reported one.
+DERIVATION - AND THE ONE CORRECTION THIS SCRIPT OWES ITS OWN PREMISE
+--------------------------------------------------------------------
+A fee does NOT imply revenue. IGRA defines "net revenues" at 25 U.S.C. 2703(9)
+as gross gaming revenues less prizes and less gaming-related operating expenses
+excluding management fees - nearer operating profit than revenue - and the
+contracts in this corpus variously use "net revenue as defined", "net income as
+defined", a threshold and a floor. Inverting a fee recovers THAT CONTRACT'S OWN
+BASE and nothing else.
+
+So: a figure is derived ONLY where the same registrant states the percentage and
+the base is flat over the period. `derived_from_fee = Y` rows show the arithmetic
+in `derivation_arithmetic`, name the rate's accession in
+`derivation_percentage_source_accession`, and are typed
+`DERIVED_FACILITY_*_AS_DEFINED` - never plain "revenue". V10 exits 1 if a derived
+figure wears a reported figure's figure_type. Two of the eight formulas found
+were invertible; six were refused, with reasons, in the adjudication file.
 
 RE-RUN
 ------
   py -3 code/1080_sec_gaming_facility_revenue.py mine
   py -3 code/1080_sec_gaming_facility_revenue.py build
+  py -3 code/1080_sec_gaming_facility_revenue.py codebook
   py -3 code/1080_sec_gaming_facility_revenue.py verify
   py -3 code/1080_sec_gaming_facility_revenue.py selftest
 """
@@ -94,6 +106,7 @@ OUT_FIG = CLEAN / "sec_gaming_financial_disclosures.csv"
 OUT_TERMS = CLEAN / "sec_gaming_management_contract_terms.csv"
 
 TODAY = datetime.now().strftime("%Y-%m-%d")
+START_T = datetime.now().timestamp()
 csv.field_size_limit(min(sys.maxsize, 2 ** 31 - 1))
 
 sys.path.insert(0, str(CODE))
@@ -1027,6 +1040,166 @@ def verify():
     return 0
 
 
+# --------------------------------------------------------------- codebook --
+#
+# `62_no_regression_check` ratchets `tables_undocumented_in_codebook`, and that
+# metric IS the shipping gate: `25_build_publication_layer` resolves curated
+# overrides first and then everything the codebook documents. A new table with
+# no codebook block is a table that cannot ship, which is exactly how the gaming
+# collection once shipped 912 of 104,412 rows. So 1080 writes its own fragments
+# rather than leaving two new undocumented tables behind it.
+
+CODEBOOK_FIG = {
+    "disclosure_id": "Primary key. Stable within a build; re-derived by `1080 build` in accepted order.",
+    "assertion_class": "Always SEC_FILED_FINANCIAL_DISCLOSURE. A THIRD class, outside cedar_domain.MeasurementType and outside the SELF_PUBLISHED_* family: stronger than a casino's marketing page (filed under a federal disclosure obligation), different in kind from an NIGC figure (the filer's own accounting, not a regulator's measurement).",
+    "assertion_class_note": "Prose statement of what that class means, carried on every row so it travels with the data.",
+    "not_summable_with": "The tables this row may NEVER be added to. Naming gaming_revenue_bounds.csv is the point: an SEC property figure summed against an NIGC REGIONAL_GGR_CEILING double-counts, because the property sits inside the region.",
+    "figure_type": "WHAT THE FIGURE IS. Six values, and they are four different quantities about one property. NEVER SUM ACROSS THIS COLUMN. FACILITY_NET_REVENUES / FACILITY_NET_GAMING_REVENUE / MANAGEMENT_FEE_REVENUE / RELINQUISHMENT_PAYMENT / DERIVED_FACILITY_GROSS_REVENUES_AS_DEFINED / DERIVED_FACILITY_NET_INCOME_AS_DEFINED.",
+    "figure_type_note": "The filer's own label for the figure, or a sentence saying what a derived figure is.",
+    "value_usd": "The figure in US dollars. Scale already applied where the filing stated one (value_scale_applied records it).",
+    "value_verbatim": "The figure as the filing writes it, before any scaling.",
+    "value_precision": "How exact the source is: EXACT_TO_THE_DOLLAR_AS_FILED, EXACT_AS_FILED_IN_THOUSANDS, ROUNDED_TO_TENTHS_OF_A_MILLION_AS_FILED, or a DERIVED_* value.",
+    "value_scale_applied": "thousands / millions / blank - the multiplier taken from the table header or the sentence.",
+    "fiscal_period_label": "The period as the filing names it. Where the filer's own label is ambiguous (Waterford's 'Relinquishment Fees earned 2000') the label is kept and not re-dated.",
+    "period_type": "FISCAL_YEAR (63) / NINE_MONTHS (2) / QUARTER (2). A nine-month figure is year-to-date and must never be added to a fiscal-year row for the same property.",
+    "period_end": "ISO date the period ends. Seneca Gaming's fiscal year ends September 30 and Lakes' is a 52/53-week year - the dates are the filers', not calendar defaults.",
+    "fiscal_year": "Year component of period_end, for convenience only.",
+    "facility_id": "Joins data/clean/gaming_facilities.csv. NOTE: that file carries the same property twice for many properties with duplicate_of_facility_id blank on both; this table keys to the CCP- row and lists the near-duplicates in code/_1080_facility_aliases.py NEAR_DUPLICATE_IDS.",
+    "facility_name_cedar": "The property's name in gaming_facilities.csv.",
+    "facility_name_as_filed": "The property's name as the REGISTRANT writes it, kept because it is the string the evidence actually contains.",
+    "tribe_name": "The tribe as Cedar writes it, from the curated alias map rather than from the filing.",
+    "tribe_id": "Spine id, joined from gaming_facilities.csv.",
+    "cedar_uid": "Cedar identity id, joined from gaming_facilities.csv.",
+    "state": "Two-letter state of the property.",
+    "facility_is_on_indian_lands": "Y or N. N on the twelve Mohegan Sun Pocono rows - a Pennsylvania racino the Mohegan Tribal Gaming Authority owns, which is tribal-owned but NOT Indian-lands gaming. Filter on this before any Indian Country total.",
+    "filer_name": "The SEC registrant that filed the document.",
+    "filer_cik": "Its CIK, zero-padded to ten.",
+    "filer_role": "OPERATOR_TRIBAL_INSTRUMENTALITY / MANAGER / DEVELOPER_MANAGER / RELINQUISHMENT_INTEREST_HOLDER. A tribal gaming authority reporting its own property is a different evidentiary position from a manager reporting its fee.",
+    "manager_name": "Who managed the property, where that differs from the filer.",
+    "form": "SEC form type. 10-K carries audited statements; a 10-Q does not.",
+    "filing_date": "Date the document was filed with the SEC.",
+    "accession": "EDGAR accession number - the citation.",
+    "source_url": "Direct link to the document on sec.gov/Archives. Verified by V6 to start https://www.sec.gov/.",
+    "local_file": "Path to the cached copy under data/raw/external/sec_edgar_1030/, or the file a MANUAL_READ row was read from.",
+    "source_md5": "Checksum recorded by 1030 at fetch time. Blank on MANUAL_READ rows.",
+    "source_quote": "VERBATIM text containing the figure. V5 refuses a blank. For a segment-table row it is the period header, the year header, the section header and the property row - the four lines that decided the reading.",
+    "derived_from_fee": "Y where value_usd was computed by dividing a stated fee by a stated percentage. 10 rows.",
+    "derivation_input_fee_usd": "The fee the derivation started from.",
+    "derivation_stated_percentage": "The rate, AS STATED BY THE REGISTRANT. Never inferred.",
+    "derivation_percentage_base": "What the rate is a percentage OF - and it is usually not revenue. IGRA net revenues (25 U.S.C. 2703(9)) is nearer operating profit.",
+    "derivation_percentage_source_accession": "The filing the RATE came from, which is not always the filing the dollars came from.",
+    "derivation_arithmetic": "The division, written out, so a reader can repeat it.",
+    "derivation_caveat": "What the derived figure is and is not. Required on every derived row.",
+    "is_first_filing_of_this_fact": "Y on the earliest filing to state a given (property, period, figure type). TOTAL ONLY THE Y SUBSET - 49 of 67. A 10-K restates its two prior fiscal years, so summing the whole table triples Mohegan Sun.",
+    "n_filings_stating_this_fact": "How many filings state it.",
+    "restated_in_accessions": "On a first-filing row, the later accessions that restate it; on a restatement, the accession that stated it first.",
+    "restatements_agree": "Y where every filing states the same value, N where they differ. 32 restatements, 0 disagreements - the only genuine internal corroboration this table has.",
+    "extraction_pattern": "Which miner pattern produced the candidate, or MANUAL_READ.",
+    "adjudication": "Always ACCEPT here; the 69 refusals and their reasons are in review/sec_gaming_1080_adjudication.csv.",
+    "adjudication_note": "Why this row was accepted, and any correction applied by hand to the mined period or value.",
+    "record_scope": "PUBLISHABLE on every row.",
+    "record_scope_basis": "The ruling that makes it publishable: a terms restriction attaches to the source that stated it, and an SEC filing is the registrant's publication.",
+    "built_by": "code/1080_sec_gaming_facility_revenue.py",
+    "built_date": "Build date.",
+}
+
+CODEBOOK_TERMS = {
+    "term_id": "Primary key.",
+    "assertion_class": "Always SEC_FILED_CONTRACT_TERM.",
+    "assertion_class_note": "What that class means.",
+    "not_summable_with": "Constant text saying this table carries no money.",
+    "manager_name": "The registrant holding the contract.",
+    "manager_cik": "Its CIK.",
+    "manager_role": "MANAGER / DEVELOPER_MANAGER / RELINQUISHMENT_INTEREST_HOLDER.",
+    "tribe_name": "The tribe, as Cedar writes it.",
+    "tribe_id": "Spine id from gaming_facilities.csv.",
+    "facility_id": "Joins gaming_facilities.csv.",
+    "facility_name_cedar": "Cedar's name for the property.",
+    "facility_name_as_filed": "The registrant's name for it.",
+    "state": "Two-letter state.",
+    "fee_formula_verbatim": "The formula in the registrant's own words. Read it before using fee_percentage - four of the seven are tiered or thresholded.",
+    "fee_percentage": "The headline rate. A RATE, NOT A DOLLAR. Nothing in this table may be totalled.",
+    "fee_percentage_base": "What the rate applies to, named precisely: NET_INCOME, NET_REVENUES, NET_REVENUE_AS_DEFINED_IN_THE_MANAGEMENT_AGREEMENT, NET_INCOME_FROM_OPERATIONS_IN_EXCESS_OF_4M, REVENUES_AS_DEFINED_IN_THE_RELINQUISHMENT_AGREEMENT. These are not interchangeable and only two of them support inverting a fee into a revenue.",
+    "fee_is_tiered": "Y where the rate changes with contract year or with a threshold; UNSTATED_IN_THIS_FILING where the filing gives one rate and other filings give tiers.",
+    "contract_term_years": "Length as stated, where stated.",
+    "contract_expiry_as_stated": "Expiry in the registrant's words.",
+    "form": "SEC form type.",
+    "filing_date": "Filing date.",
+    "accession": "EDGAR accession - the citation.",
+    "source_url": "Link to the document on sec.gov/Archives.",
+    "source_quote": "Verbatim passage containing the percentage.",
+    "extraction_pattern": "Always E_FEE_FORMULA.",
+    "adjudication": "ACCEPT.",
+    "adjudication_note": "Why, and what the formula's traps are.",
+    "record_scope": "PUBLISHABLE.",
+    "record_scope_basis": "Same terms-scope ruling as the figures table.",
+    "built_by": "code/1080_sec_gaming_facility_revenue.py",
+    "built_date": "Build date.",
+}
+
+# The codebook namespace has its own collision problem - `cedar_register_codebook.py`
+# records `07f` being claimed twice by two different scripts, "the script-number
+# collision problem reproduced inside the codebook namespace". The first attempt
+# here took `07p` and `07q`, both of which are ALREADY IN THE MASTER
+# (`07p_revenue_bounds`, `07q_gaming_game_finder_observations`) - the fragments
+# were written, spotted and deleted before any build folded them in. Keys below
+# were checked against BOTH data/clean/codebook/*.csv and the dataset column of
+# codebook_master.csv on 2026-09-02. The gaming series runs to `07zp`.
+CODEBOOK_DATASETS = [
+    ("07zq_sec_gaming_financial_disclosures", OUT_FIG, FIG_COLS, CODEBOOK_FIG),
+    ("07zr_sec_gaming_management_contract_terms", OUT_TERMS, TERM_COLS, CODEBOOK_TERMS),
+]
+
+
+def codebook():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("cedar_codebook", CODE / "cedar_codebook.py")
+    cb = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cb)
+    for name, path, cols, descs in CODEBOOK_DATASETS:
+        rows = list(csv.DictReader(path.open(encoding="utf-8")))
+        n = len(rows)
+        missing = [c for c in cols if c not in descs]
+        if missing:
+            raise SystemExit(f"{name}: no codebook description for {missing}. "
+                             f"An undescribed column is how a table ships a mystery.")
+        frag = []
+        for c in cols:
+            filled = sum(1 for r in rows if str(r.get(c, "")).strip() != "")
+            frag.append(dict(
+                dataset=name, variable=c,
+                type=("number" if c in ("value_usd", "derivation_input_fee_usd",
+                                        "n_filings_stating_this_fact", "fee_percentage",
+                                        "derivation_stated_percentage", "contract_term_years",
+                                        "fiscal_year") else "text"),
+                units=("usd" if c.endswith("_usd") else
+                       "date" if c.endswith(("_date", "period_end")) else
+                       "percent" if "percentage" in c or c == "fee_percentage" else "text"),
+                pct_filled=round(100.0 * filled / n, 1) if n else 0.0,
+                n_rows=n, published=1, access_tier="public",
+                description=descs[c],
+                generated=TODAY))
+        # Guard, because a codebook key collision is silent: two datasets under
+        # one key and the master keeps whichever fragment sorts last.
+        frag_path = CLEAN / "codebook" / f"{name}.csv"
+        master = CLEAN / "codebook_master.csv"
+        if frag_path.exists():
+            existing = {r["variable"] for r in csv.DictReader(frag_path.open(encoding="utf-8"))}
+            if existing and not existing <= set(cols):
+                raise SystemExit(
+                    f"codebook key {name} already documents a DIFFERENT table - it has "
+                    f"{sorted(existing - set(cols))[:4]}, which this table does not. Pick another "
+                    f"key. Two datasets under one key is the 07f incident (see "
+                    f"code/cedar_register_codebook.py).")
+        if master.exists():
+            taken = {r.get("dataset") for r in csv.DictReader(master.open(encoding="utf-8"))}
+            if name in taken:
+                raise SystemExit(f"codebook key {name} is already in codebook_master.csv")
+        cb.write_fragment(name, frag)
+        out(f"codebook fragment {name}: {len(frag)} variables over {n} rows")
+    out("run `py -3 code/cedar_codebook.py build` (integrator) to fold fragments into the master")
+
+
 def selftest():
     """Prove verify FIRES. Inject one violation of each of three named invariants."""
     import shutil
@@ -1079,6 +1252,8 @@ if __name__ == "__main__":
         build()
     elif stage == "verify":
         verify()
+    elif stage == "codebook":
+        codebook()
     elif stage == "selftest":
         selftest()
     else:

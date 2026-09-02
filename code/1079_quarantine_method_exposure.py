@@ -378,7 +378,11 @@ def is_jv(name):
 class Evidence:
     def __init__(self, need_prime=True):
         self.spine = {r["tribe_id"]: r for r in rows_of(SPINEDIR / "cedar_entity_spine.csv")}
-        self.led = list(rows_of(LEDGER))
+        pre_led = Path(str(LEDGER) + TAG)
+        if pre_led.exists():
+            print(f"  ledger read from {pre_led.name} (the pre-state; see the note in "
+                  f"Evidence.__init__)")
+        self.led = list(rows_of(pre_led if pre_led.exists() else LEDGER))
         self._name_index()
         self._hub_tokens()
         self._ledger_maps()
@@ -598,22 +602,38 @@ class Evidence:
         if pre.exists():
             print(f"  prime aggregates read from {pre.name} (the pre-state)")
         con = duckdb.connect()
-        q = """SELECT upper(trim(awardee_uei)) uei,
-                      mode(awardee_name) nm, count(*) n,
-                      sum(TRY_CAST(total_obligations AS DOUBLE)) usd,
-                      string_agg(DISTINCT recipient_state_code, '|') states
-               FROM read_csv_auto(?, all_varchar=true, sample_size=-1)
-               WHERE tribe_id <> '' AND attribution_method = 'uei_exact' GROUP BY 1"""
-        for uei, nm, n, usd, st in con.execute(q, [src]).fetchall():
-            self.prime_by_uei[uei] = dict(name=nm or "", n=n, usd=usd or 0.0, states=st or "")
-        q2 = """SELECT upper(trim(cage_code)) cage, count(*) n,
-                       sum(TRY_CAST(total_obligations AS DOUBLE)) usd,
-                       mode(awardee_name) nm, string_agg(DISTINCT recipient_state_code,'|') st
-                FROM read_csv_auto(?, all_varchar=true, sample_size=-1)
-                WHERE tribe_id <> '' AND attribution_method = 'cage_exact'
-                  AND upper(trim(cage_code)) <> 'NAN' GROUP BY 1"""
-        for cage, n, usd, nm, st in con.execute(q2, [src]).fetchall():
-            self.prime_by_cage[cage] = dict(name=nm or "", n=n, usd=usd or 0.0, states=st or "")
+        # DETERMINISTIC representative name: most frequently filed, ties broken
+        # alphabetically.  `mode()` has no defined tie-break and made this pass
+        # irreproducible; `allnames` carries every spelling the registrant filed.
+        q = """WITH s AS (SELECT upper(trim(awardee_uei)) uei, awardee_name nm,
+                                 recipient_state_code st,
+                                 TRY_CAST(total_obligations AS DOUBLE) ob
+                          FROM read_csv_auto(?, all_varchar=true, sample_size=-1)
+                          WHERE tribe_id <> '' AND attribution_method = 'uei_exact'),
+                    f AS (SELECT uei, nm, count(*) c FROM s GROUP BY 1, 2),
+                    pick AS (SELECT uei, first(nm ORDER BY c DESC, nm) nm FROM f GROUP BY 1)
+               SELECT s.uei, p.nm, count(*) n, sum(s.ob) usd,
+                      string_agg(DISTINCT s.st, '|') states,
+                      string_agg(DISTINCT s.nm, ' | ') allnames
+               FROM s JOIN pick p USING (uei) GROUP BY 1, 2"""
+        for uei, nm, n, usd, st, allnm in con.execute(q, [src]).fetchall():
+            self.prime_by_uei[uei] = dict(name=nm or "", n=n, usd=usd or 0.0, states=st or "",
+                                          allnames=allnm or "")
+        q2 = """WITH s AS (SELECT upper(trim(cage_code)) cage, awardee_name nm,
+                                  recipient_state_code st,
+                                  TRY_CAST(total_obligations AS DOUBLE) ob
+                           FROM read_csv_auto(?, all_varchar=true, sample_size=-1)
+                           WHERE tribe_id <> '' AND attribution_method = 'cage_exact'
+                             AND upper(trim(cage_code)) <> 'NAN'),
+                     f AS (SELECT cage, nm, count(*) c FROM s GROUP BY 1, 2),
+                     pick AS (SELECT cage, first(nm ORDER BY c DESC, nm) nm FROM f GROUP BY 1)
+                SELECT s.cage, count(*) n, sum(s.ob) usd, p.nm,
+                       string_agg(DISTINCT s.st, '|') states,
+                       string_agg(DISTINCT s.nm, ' | ') allnames
+                FROM s JOIN pick p USING (cage) GROUP BY 1, 4"""
+        for cage, n, usd, nm, st, allnm in con.execute(q2, [src]).fetchall():
+            self.prime_by_cage[cage] = dict(name=nm or "", n=n, usd=usd or 0.0, states=st or "",
+                                            allnames=allnm or "")
         q3 = """SELECT upper(trim(parent_uei)) pu, count(*) n,
                        sum(TRY_CAST(total_obligations AS DOUBLE)) usd
                 FROM read_csv_auto(?, all_varchar=true, sample_size=-1)
@@ -624,7 +644,7 @@ class Evidence:
 
 
 # =========================================================== DISPOSITION ====
-def dispose(ev, it, ident, lr, firm):
+def dispose(ev, it, ident, lr, firm, allnames=""):
     """(disposition, target_hub, basis).  Order IS the argument: a
     disqualifier that makes the pairing impossible outranks a corroborator, and
     a corroborator outranks a token test."""
@@ -633,6 +653,11 @@ def dispose(ev, it, ident, lr, firm):
     legal = lr.get("legal_business_name") or ""
     fname = firm or legal
     parents = ev.declared_parents(ident) if it == "UEI" else []
+    # A registrant that EVER filed as a joint venture is treated as one: a JV
+    # genuinely has two parents (rule 11) and must never be withdrawn on a
+    # name test. Reading only the representative name made the pass depend on
+    # which spelling the aggregate happened to return.
+    jv = is_jv(fname) or is_jv(allnames)
 
     # R0 -- Cedar's own deal ledger settles this family (CDR-12)
     if NORTHWIND_NAME_RE.match(fname or "") and hub in NORTHWIND_FROM_HUBS:
@@ -689,7 +714,7 @@ def dispose(ev, it, ident, lr, firm):
                                 f"carries an INSTITUTION FORM word (rule 7's HOLD row) and a "
                                 f"report naming a housing authority is usually naming a "
                                 f"customer. Owner ruling needed.")
-        elif is_jv(fname):
+        elif jv:
             return ("HOLD", "", f"audited annual report: {corp} names `{phrase}`, but the "
                                 f"awardee is a JOINT VENTURE and an equity interest in a JV is "
                                 f"not sole ownership (rule 11). Owner ruling needed.")
@@ -705,7 +730,7 @@ def dispose(ev, it, ident, lr, firm):
                                  f"resolves to this hub")
     for n, pu, pn, ph in parents:
         if ph and ph != hub:
-            if is_jv(fname):
+            if jv:
                 return ("HOLD", "", f"declared parent `{pn}` ({n}x) resolves to {ph}, but the "
                                     f"awardee is a JOINT VENTURE and a JV genuinely has two "
                                     f"parents (rule 11). Owner ruling needed.")
@@ -758,7 +783,7 @@ def dispose(ev, it, ident, lr, firm):
     # {blue|lake|california} and WOLFTEK MISSION GROUP on the Cabazon Band of
     # Mission Indians {cabazon|cahuilla|california|mission}.  Seven rungs of
     # corroboration have already failed by the time control reaches here.
-    if len(ht) >= 2 and len(shared_nontrap) == 1 and is_jv(fname):
+    if len(ht) >= 2 and len(shared_nontrap) == 1 and jv:
         return ("HOLD", "",
                 f"the firm matched a FRAGMENT of `{hubname}` "
                 f"(`{'|'.join(sorted(shared_nontrap))}` of {len(ht)} tokens) AND is a JOINT "
@@ -796,7 +821,8 @@ def triage(ev):
                                 f"ledger tier {tier or '(blank)'} - already non-attributing; "
                                 f"40_build_prime_contracts.py never keys it")
         else:
-            disp, tgt, basis = dispose(ev, it, ident, lr, firm)
+            disp, tgt, basis = dispose(ev, it, ident, lr, firm,
+                                       pa.get("allnames", ""))
 
         in_scope = (it == "UEI") or (
             it == "CAGE" and NORTHWIND_NAME_RE.match(firm or "")
@@ -1148,50 +1174,137 @@ def measure_prime(path=None):
                 by_entity=ent, has_new_cols=all(c in cols for c in NEW_PRIME_COLS))
 
 
-def verify(quiet=False):
-    if not PROOF.exists():
-        print("VERIFY: no proof file - run `apply` first.")
-        return 1
-    pf = json.load(open(PROOF))
-    if pf.get("mode") != "apply":
-        print("VERIFY: proof file records a report-only run; nothing to verify.")
+def _applied(date=None):
+    """The dispositions this pass applied, read from its own triage CSV."""
+    import glob as _g
+    pats = sorted(_g.glob(str(REVIEW / "1079_quarantine_triage_*.csv")))
+    if not pats:
+        return None
+    rows = [r for r in rows_of(Path(pats[-1])) if r["applied_in_this_pass"] == "Y"]
+    return dict(
+        path=Path(pats[-1]).name,
+        wd_uei={r["identifier"] for r in rows
+                if r["disposition"] == "WITHDRAW" and r["identifier_type"] == "UEI"},
+        wd_cage={r["identifier"] for r in rows
+                 if r["disposition"] == "WITHDRAW" and r["identifier_type"] == "CAGE"},
+        rp={r["identifier"]: r["repoint_to"] for r in rows if r["disposition"] == "REPOINT"},
+    )
+
+
+def _leg_census(path, wd_uei, wd_cage):
+    """rows and dollars, ATTRIBUTED, whose KEYING leg is a withdrawn identifier.
+
+    The keying leg and only the keying leg: a `uei_exact` row whose parent_uei
+    happens to be a withdrawn identifier was not keyed by it, and counting it
+    made the first version of this check report 8,352 phantom failures.
+    """
+    import duckdb
+    con = duckdb.connect()
+    con.execute("CREATE TABLE wdu(u VARCHAR); CREATE TABLE wdc(c VARCHAR)")
+    for u in wd_uei:
+        con.execute("INSERT INTO wdu VALUES (?)", [u])
+    for c in wd_cage:
+        con.execute("INSERT INTO wdc VALUES (?)", [c])
+    q = """SELECT count(*), coalesce(sum(TRY_CAST(total_obligations AS DOUBLE)), 0)
+           FROM read_csv_auto(?, all_varchar=true, sample_size=-1) t
+           WHERE t.tribe_id <> '' AND (
+              (t.attribution_method = 'uei_exact'
+                 AND upper(trim(t.awardee_uei)) IN (SELECT u FROM wdu))
+           OR (t.attribution_method = 'parent_uei'
+                 AND upper(trim(t.parent_uei)) IN (SELECT u FROM wdu))
+           OR (t.attribution_method = 'cage_exact'
+                 AND upper(trim(t.cage_code)) IN (SELECT c FROM wdc)))"""
+    out = con.execute(q, [str(path)]).fetchone()
+    con.close()
+    return out
+
+
+def verify(quiet=False, write_proof=True):
+    """Re-derive both sides and check the seven invariants.  Reads no number
+    that a previous run of this script wrote."""
+    pre = Path(str(PRIME) + TAG)
+    if not pre.exists():
+        print("VERIFY: no pre-state backup beside prime_contracts.csv - "
+              "this pass has not been applied. Nothing to verify.")
         return 0
-    cur = measure_prime()
+    ap = _applied()
+    if ap is None:
+        print("VERIFY: no triage CSV in review/ - run `report` or `apply` first.")
+        return 1
+    if not quiet:
+        print(f"  before = {pre.name}")
+        print(f"  decided = review/{ap['path']}  "
+              f"({len(ap['wd_uei'])} UEI + {len(ap['wd_cage'])} CAGE withdrawn, "
+              f"{len(ap['rp'])} repointed)")
+    before, after = measure_prime(pre), measure_prime()
     fails = []
 
     def chk(name, ok, got, want):
         if not ok:
             fails.append(f"{name}: got {got!r}, expected {want!r}")
         if not quiet:
-            print(f"  {'PASS' if ok else 'FAIL'}  {name}")
+            print(f"  {'PASS' if ok else 'FAIL'}  {name}   ({got} vs {want})")
 
-    b, a = pf["before"], pf["after"]
-    chk("I1 prime row count unchanged", cur["rows"] == b["rows"], cur["rows"], b["rows"])
-    chk("I2 new columns present and none dropped",
-        cur["has_new_cols"] and cur["columns"] == b["columns"] + len(NEW_PRIME_COLS),
-        cur["columns"], b["columns"] + len(NEW_PRIME_COLS))
+    chk("I1 prime row count unchanged", after["rows"] == before["rows"],
+        after["rows"], before["rows"])
+    chk("I2 the five new columns are present and none was dropped",
+        after["has_new_cols"] and after["columns"] == before["columns"] + len(NEW_PRIME_COLS),
+        after["columns"], before["columns"] + len(NEW_PRIME_COLS))
     chk("I3 total obligations unchanged to the cent",
-        abs(cur["total_obligations"] - b["total_obligations"]) < 0.005,
-        cur["total_obligations"], b["total_obligations"])
-    net = round(sum(pf["entity_delta"].values()), 2)
-    chk("I4 entity gains and losses net to zero", abs(net) < 0.005, net, 0.0)
-    exp = round(b["attributed_obligations"] - pf["withdrawn_usd"], 2)
-    chk("I5 attributed dollars fall by exactly the withdrawal",
-        abs(cur["attributed_obligations"] - exp) < 0.005,
-        cur["attributed_obligations"], exp)
-    chk("I6 quarantine flag reaches the attributed rows it should",
-        cur["flagged_attributed_rows"] == a["flagged_attributed_rows"],
-        cur["flagged_attributed_rows"], a["flagged_attributed_rows"])
+        abs(after["total_obligations"] - before["total_obligations"]) < 0.005,
+        f"${after['total_obligations']:,.2f}", f"${before['total_obligations']:,.2f}")
+
+    delta = {}
+    for t in set(before["by_entity"]) | set(after["by_entity"]):
+        d = round(after["by_entity"].get(t, 0.0) - before["by_entity"].get(t, 0.0), 2)
+        if abs(d) > 0.004:
+            delta[t] = d
+    # `unattr` is NEGATIVE - attributed dollars fell - so the amount that moved
+    # INTO the unattributed pool is -unattr, and conservation is
+    #     sum(per-entity deltas) + (-unattr) == 0.
+    # Writing `+ unattr` here double-counted the same $16.99B in the same
+    # direction and reported a $33.99B breach that was arithmetic, not data.
+    unattr = round(after["attributed_obligations"] - before["attributed_obligations"], 2)
+    net = round(sum(delta.values()) - unattr, 2)
+    chk("I4 entity gains and losses net to zero once the un-attributed side is counted",
+        abs(net) < 0.005, f"${net:,.2f}", "$0.00")
+
+    gone_n, gone_usd = _leg_census(pre, ap["wd_uei"], ap["wd_cage"])
+    chk("I5 attributed dollars fell by exactly what was withdrawn",
+        abs(-unattr - gone_usd) < 0.005, f"${-unattr:,.2f}", f"${gone_usd:,.2f}")
+    chk("I5b attributed rows fell by exactly the withdrawn rows",
+        before["attributed_rows"] - after["attributed_rows"] == gone_n,
+        before["attributed_rows"] - after["attributed_rows"], gone_n)
+    chk("I6 the quarantine flag reaches attributed rows",
+        (after["flagged_attributed_rows"] or 0) > 0,
+        after["flagged_attributed_rows"], "> 0")
     chk("I7 no withdrawn identifier still keys an attributed row",
-        cur["attributed_rows_still_withdrawn"] == 0,
-        cur["attributed_rows_still_withdrawn"], 0)
+        after["attributed_rows_still_withdrawn"] == 0,
+        after["attributed_rows_still_withdrawn"], 0)
+
+    if write_proof:
+        b2, a2 = dict(before), dict(after)
+        b2.pop("by_entity", None)
+        a2.pop("by_entity", None)
+        json.dump(dict(mode="verify", date=TODAY, script=f"code/{STEM}.py",
+                       quarantined_methods=sorted(QUARANTINED),
+                       withdrawn_rows=gone_n, withdrawn_usd=round(gone_usd, 2),
+                       applied_withdraw_identifiers=len(ap["wd_uei"]) + len(ap["wd_cage"]),
+                       applied_repoint_identifiers=len(ap["rp"]),
+                       before=b2, after=a2,
+                       entity_delta=dict(sorted(delta.items(), key=lambda kv: kv[1])),
+                       entities_moved=len(delta),
+                       invariants_failed=fails),
+                  open(PROOF, "w"), indent=2)
+        if not quiet:
+            print(f"  proof rewritten -> {PROOF.relative_to(ROOT)}")
     if fails:
         print("\nBREACH:")
         for f in fails:
             print("   " + f)
         return 1
     if not quiet:
-        print("\nall invariants hold.")
+        print("\nall seven invariants hold.")
     return 0
 
 
@@ -1285,17 +1398,10 @@ def main(mode):
         return verify()
 
     print(f"=== Cedar Press {STEM} - mode={mode} ===\n")
-    if mode == "apply":
-        lb = Path(str(LEDGER) + TAG)
-        if lb.exists():
-            hdr0 = next(csv.reader(open(LEDGER, newline="", encoding="utf-8-sig")))
-            if all(c in hdr0 for c in NEW_LEDGER_COLS):
-                print(f"RESUMING an earlier `apply`. Restoring {LEDGER.name} from "
-                      f"{lb.name} so the triage sees the PRE-state - a ledger already "
-                      f"carrying tier X on the withdrawn rows would classify them "
-                      f"'already non-attributing' and the downstream tables would never "
-                      f"get their withdrawals.")
-                shutil.copy2(lb, LEDGER)
+    if mode == "apply" and Path(str(LEDGER) + TAG).exists():
+        print("RESUMING an earlier `apply`: the ledger will be re-derived from this pass's "
+              "own backup, so the triage sees the PRE-state and the downstream tables get "
+              "the same dispositions the earlier run wrote.")
     print("loading evidence: spine, ledger, fpds edges, deals, "
           "166 ANCSA annual reports, prime aggregates ...")
     ev = Evidence()
@@ -1328,11 +1434,14 @@ def main(mode):
         print(f"wrote {p.relative_to(ROOT)}  ({len(rows):,} rows)")
 
     if mode == "report":
+        # NOT into PROOF: `verify` writes that, and a report-mode payload
+        # landing there once turned the gate into a no-op that exited 0.
+        rp = DOCS / "QUARANTINED_METHOD_EXPOSURE.report.json"
         json.dump({"mode": "report", "date": TODAY,
                    "disposition_counts": dict(cnt),
                    "disposition_usd": {k: round(v, 2) for k, v in usd.items()}},
-                  open(PROOF, "w"), indent=2)
-        print(f"\nREPORT ONLY - no dataset was modified.  {PROOF.relative_to(ROOT)}")
+                  open(rp, "w"), indent=2)
+        print(f"\nREPORT ONLY - no dataset was modified.  {rp.relative_to(ROOT)}")
         return 0
 
     if mode != "apply":
@@ -1417,7 +1526,7 @@ def main(mode):
     print(f"wrote {ep.relative_to(ROOT)}  ({len(ent)} entities moved)")
 
     proof = dict(
-        mode="apply", date=TODAY, script=f"code/{STEM}.py",
+        mode="apply_run_log", date=TODAY, script=f"code/{STEM}.py",
         quarantined_methods=sorted(QUARANTINED),
         disposition_counts=dict(cnt),
         disposition_usd={k: round(v, 2) for k, v in usd.items()},
@@ -1432,8 +1541,9 @@ def main(mode):
     )
     proof["before"].pop("by_entity", None)
     proof["after"].pop("by_entity", None)
-    json.dump(proof, open(PROOF, "w"), indent=2)
-    print(f"wrote {PROOF.relative_to(ROOT)}")
+    runlog = DOCS / "QUARANTINED_METHOD_EXPOSURE.apply_run.json"
+    json.dump(proof, open(runlog, "w"), indent=2)
+    print(f"wrote {runlog.relative_to(ROOT)}  (the run log; the PROOF is written by verify)")
 
     print("\n-- invariants -----------------------------------------------------")
     rc = verify()

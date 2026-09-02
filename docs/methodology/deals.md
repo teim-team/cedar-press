@@ -1,15 +1,24 @@
 # Methodology — Indian Country Deals
 
-**`deals`. `data/clean/deals_classified.csv`, 1,079 rows, 960 entity-linked
-(89.0%).** [measured 2026-09-02, after the staged merge in section 5b]
+**`deals`. `data/clean/deals_classified.csv`, 1,073 rows, 959 entity-linked
+(89.4%).** [measured 2026-09-02, after the staged merge in section 5b]
 
 > The figure was **935 rows / 886 linked (94.8%)** earlier the same day, and
 > that number appears throughout sections 1-5 below because those sections
 > describe how those 935 rows were made. `code/1088_merge_staged_deals.py`
-> added 144. **The link RATE fell while the link COUNT rose** - 74 of the 144
-> new parties resolve to the spine and 70 do not, which is what a new channel
-> looks like before its parties are ruled. `review/deals_party_unmatched_2026-09-02.csv`
-> holds the 87 distinct unmatched parties.
+> added 138. **The link RATE fell while the link COUNT rose** - most of the new
+> parties resolve to the spine and a minority do not, which is what a new
+> channel looks like before its parties are ruled.
+> `review/deals_party_unmatched_2026-09-02.csv` holds the 87 distinct unmatched
+> parties.
+>
+> **1,079 appears in `AGENTS.md` and in `docs/MONEY_TOTALLING_RULES.md` and is
+> the figure BEFORE gate G11 was added.** Six rows merged before G11 existed
+> were withdrawn WHOLE to `review/deals_withdrawn_duplicates.csv` (3 -> 9 rows)
+> rather than deleted, and they carried **$0** — so `Announced_Value_USD` is
+> unchanged at $47,880,355,533 either way. Named individually: `NLTR-2016-003`,
+> `NLTR-2018-009`, `NLTR-2020-003`, `NLTR-2021-008`, `NLTR-2024-010`,
+> `NLTR-2026-013`.
 
 *Written 2026-09-02. This is the methodology record: what was pulled and from
 where, how the rows were made, how entities were attributed, what was decided
@@ -469,7 +478,7 @@ Three of the eight bear on this dataset:
 
 ---
 
-## 5b. THE 2026-09-02 STAGED MERGE - 144 rows admitted, 168 refused
+## 5b. THE 2026-09-02 STAGED MERGE - 138 rows admitted, 174 refused
 
 *`code/1088_merge_staged_deals.py`. Disposition: `review/deals_1088_disposition.json`.
 Every refusal is kept WHOLE, with its evidence quote and a named reason, in
@@ -477,12 +486,12 @@ Every refusal is kept WHOLE, with its evidence quote and a named reason, in
 
 Three agents staged candidates across four channels and none had been merged,
 because each needed a read rather than a column mapping. **312 candidates in,
-144 admitted, 168 refused, and the arithmetic is asserted in the script rather
-than reported.**
+138 admitted, 174 refused, and the arithmetic is asserted in the script rather
+than reported** — `admitted + refused == in` is an `assert`, not a print.
 
 | channel | in | admitted |
 |---|---:|---:|
-| tribal press, tier A unique (`994` screen) | 258 | 106 |
+| tribal press, tier A unique (`994` screen) | 258 | 90 |
 | SEC EDGAR (`1032`) | 21 | 22 |
 | ANCSA STAR portal, AS 45.55.139 (`1031`) | 24 | 24 |
 | EDGAR held on the terms question | 3 | **1** |
@@ -491,19 +500,23 @@ than reported.**
 *(EDGAR admits 22 from 21 because the terms-released NANA row is minted in the
 same `SECX-` family.)*
 
-**Ledger: 935 -> 1,079 rows. `Announced_Value_USD` $45,195,917,316 ->
+**Ledger: 935 -> 1,073 rows. `Announced_Value_USD` $45,195,917,316 ->
 $47,880,355,533, +$2,684,438,217. Conservation proved row-for-row: 0 of the 935
 pre-merge `Deal_ID`s lost, 0 pre-merge values changed, 0 columns lost.**
+`record_class` is now **PUBLIC_AWARD 654 / TRANSACTION 419** — the merge is
+almost entirely transactions, which is the half of this dataset nobody else
+publishes.
 
 ### The refusals, and why each is a rule
 
 | reason | n | the rule |
 |---|---:|---|
-| `G7_DUPLICATE_INTERNAL` | 39 | one article reporting one dated event is one row |
+| `G7_DUPLICATE_INTERNAL` | 36 | one article reporting one dated event is one row |
 | `G3_FEDERAL_AWARD_NOT_A_DEAL` | 35 | a federal contract award is `prime_contracts`, not a deal |
 | `G5_PARTY_IS_PUBLISHER_NOT_TRANSACTOR` | 33 | the publisher is a prior, not a party |
 | `G2_PARENTAGE_STATEMENT_NOT_A_TRANSACTION` | 24 | "is a wholly owned subsidiary of" is a standing fact |
 | `G7_DUPLICATE_OF_LEDGER` | 17 | already in `deals_classified.csv` |
+| `G11_ARTICLE_DATE_IS_NOT_THE_TRANSACTION_DATE` | 9 | the post date is not when the deal happened |
 | `G4_MILESTONE_NOT_A_TRANSACTION` | 7 | a groundbreaking transfers nothing |
 | `G1_DATE_NOT_IN_EVIDENCE` | 6 | the ledger's own bar |
 | `G0_NOT_INDIAN_COUNTRY` | 2 | a place name is not a nation |
@@ -621,6 +634,35 @@ Two counts in `docs/DEALS_IDENTIFIER_SWEEP_2026-09-02.md` do not reproduce: it
 states **544** intra-family rejections; the three intra-family refusal codes in
 `review/1071_intra_family_rejections.csv` sum to **536** (`SHARED_BRAND` 434 +
 `SAME_HUB` 100 + `ACRONYM` 2).
+
+### G11 - the article date is not the transaction date
+
+Every tribal-press row is dated by the site's own REST-API post date. **That is
+the ARTICLE date**, and `docs/methodology/deals.md` has always said *never file
+a deal by announcement year when the transaction year differs* - the same rule
+that caught Paskenta/Mad River Brewery (presented as August 2026, actually March
+2024) and Blue North Fisheries (framed as 2025-26, actually effective
+2019-09-30).
+
+Measured on the admitted set: **14 of 96 press rows carried a sentence naming a
+year two or more before the year they were filed under.** But a retrospective
+year is not by itself a defect - *"Chugach Commercial Holdings: Established in
+2014"* inside a 2026 acquisition announcement is background, and refusing that
+row would lose a real 2026 transaction over a date that is not its date.
+
+**So the gate is narrow: it fires only when the earlier year sits within 60
+characters of a TRANSFER VERB**, which is where a transaction year lives in a
+sentence and where a founding year does not. It refuses 9. *"BSNC acquired the
+Alaska-grown company in August of 2015"*, filed 2020, is refused. The Chugach
+background year is kept, and its `Date_Basis` is extended to say the article
+date is **not known to be the transaction date** and to name the other year -
+so a blank is never mistaken for a confirmed date.
+
+Six of the nine had already been merged when G11 was written. They were
+**withdrawn WHOLE** to `review/deals_withdrawn_duplicates.csv`, which went 3 ->
+9 rows and which `88_build_deals_taxonomy.withdrawn_ids()` honours on every
+rebuild - the same route `MA2020-008` took, and for the same reason: *withdrawn
+is not deleted.* They carried **$0**, so no total moved.
 
 ### The value rule, applied
 

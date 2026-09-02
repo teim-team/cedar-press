@@ -125,6 +125,7 @@ REJECTED = REVIEW / "1110_rejected_hits.csv"
 UNREACHED = REVIEW / "1110_unreached_cases.csv"
 EVENTS = STAGING / "tribal_debt_court_events.csv"
 DOCS = STAGING / "tribal_debt_court_documents.csv"
+DOCKETS = STAGING / "tribal_debt_court_dockets.csv"
 
 CURRENCY_CAUTION = (
     "AN EVENT IS NOT A RUNNING CONDITION. This row is dated. It describes what "
@@ -373,6 +374,103 @@ CASES = [
          obligor_label="", cedar_uid="", obligor_name="",
          question="receivership over a tribal gaming operation"),
 
+    # ---- P5  ROUND TWO, added after reading round one.  Round one asked for
+    #      NATIONS; the paper is issued by their INSTRUMENTALITIES, and the
+    #      instrumentality's name is what a lender puts in a caption.
+    #      `Wells Fargo Bank NA v. Cabazon Band of Mission Indians` came back
+    #      with `East Valley Tourist Development Authority` in its party array
+    #      - a name no round-one query contained.
+    dict(priority="5_OBLIGOR_INSTRUMENTALITY", types="or",
+         q="Lake of the Torches Economic Development Corporation",
+         obligor_label="", cedar_uid="CE-00166-6Z",
+         obligor_name="Lac du Flambeau Band of Lake Superior Chippewa Indians",
+         question="the issuer itself, rather than the nation"),
+    dict(priority="5_OBLIGOR_INSTRUMENTALITY", types="or",
+         q="East Valley Tourist Development Authority",
+         obligor_label="Cabazon Band of Mission Indians", cedar_uid="CE-0012P-JF",
+         obligor_name="Cabazon Band of Mission Indians",
+         question="Cabazon's borrowing instrumentality, named in the Wells Fargo party array"),
+    dict(priority="5_OBLIGOR_INSTRUMENTALITY", types="or",
+         q="Chukchansi Gold Resort", obligor_label="", cedar_uid="CE-0018X-TY",
+         obligor_name="Picayune Rancheria of the Chukchansi Indians",
+         question="the property that secured the notes"),
+    dict(priority="5_OBLIGOR_INSTRUMENTALITY", types="or",
+         q="Mohegan Tribal Finance Authority",
+         obligor_label="Mohegan Tribal Gaming Authority", cedar_uid="CE-0016X-GY",
+         obligor_name="Mohegan Tribal Gaming Authority",
+         question="the financing entity rather than the gaming authority"),
+    dict(priority="5_OBLIGOR_INSTRUMENTALITY", types="or",
+         q="Mashantucket Western Pequot Tribal Nation",
+         obligor_label="Mashantucket (Western) Pequot Tribe", cedar_uid="CE-0017C-F5",
+         obligor_name="Mashantucket (Western) Pequot Tribe",
+         question="the nation's own legal name, as a bond obligor"),
+    dict(priority="5_OBLIGOR_INSTRUMENTALITY", types="or",
+         q="Foxwoods Resort Casino",
+         obligor_label="Mashantucket (Western) Pequot Tribe", cedar_uid="CE-0017C-F5",
+         obligor_name="Mashantucket (Western) Pequot Tribe",
+         question="the property behind the ~$2.3B restructuring"),
+    dict(priority="5_OBLIGOR_INSTRUMENTALITY", types="or",
+         q="Santa Ysabel Resort and Casino", obligor_label="", cedar_uid="CE-00156-1F",
+         obligor_name="Iipay Nation of Santa Ysabel",
+         question="the property that defaulted and closed"),
+    dict(priority="5_OBLIGOR_INSTRUMENTALITY", types="or",
+         q="Dry Creek Rancheria Band of Pomo Indians",
+         obligor_label="River Rock Entertainment Authority", cedar_uid="CE-00143-AM",
+         obligor_name="River Rock Entertainment Authority",
+         question="the nation behind River Rock's notes"),
+    dict(priority="5_OBLIGOR_INSTRUMENTALITY", types="or",
+         q="Mescalero Apache Tribe",
+         obligor_label="Inn of the Mountain Gods Resort and Casino",
+         cedar_uid="CE-0017A-3K", obligor_name="Inn of the Mountain Gods Resort and Casino",
+         question="the nation behind the Inn of the Mountain Gods notes"),
+    dict(priority="5_OBLIGOR_INSTRUMENTALITY", types="or",
+         q="Downstream Development Authority",
+         obligor_label="Downstream Development Authority", cedar_uid="CE-0018Z-6G",
+         obligor_name="Quapaw Nation",
+         question="Quapaw's 144A issuer, an obligor in 1082"),
+    dict(priority="5_OBLIGOR_INSTRUMENTALITY", types="or",
+         q="Catawba Nation Gaming Authority",
+         obligor_label="Catawba Nation Gaming Authority", cedar_uid="CE-0012V-GC",
+         obligor_name="Catawba Nation Gaming Authority",
+         question="a current 1082 obligor - any litigation at all?"),
+    dict(priority="5_OBLIGOR_INSTRUMENTALITY", types="or",
+         q="PCI Gaming Authority",
+         obligor_label="PCI Gaming Authority (Poarch Band of Creek Indians)",
+         cedar_uid="CE-0018H-JJ", obligor_name="PCI Gaming Authority (Poarch Band of Creek Indians)",
+         question="a current 1082 obligor - any litigation at all?"),
+    dict(priority="5_OBLIGOR_INSTRUMENTALITY", types="o",
+         q="tribal casino bond default indenture trustee foreclose gaming revenues",
+         obligor_label="", cedar_uid="", obligor_name="",
+         question="a second doctrine sweep on the enforcement side"),
+    dict(priority="5_OBLIGOR_INSTRUMENTALITY", types="o",
+         q="Indian tribe promissory note collateral casino revenues void NIGC approval",
+         obligor_label="", cedar_uid="", obligor_name="",
+         question="a second doctrine sweep on the void-instrument side"),
+
+    # ---- P6  ROUND THREE, from names the ROUND-TWO DOCKETS handed us.  The
+    #      RECAP party arrays are a name source in their own right:
+    #      `U.S. Bank v. Mashantucket Pequot Gaming Enterprise` and
+    #      `Sonoma Falls Developers, LLC v. Dry Creek Rancheria` are both
+    #      captions no query of ours contained.
+    dict(priority="6_FROM_A_DOCKET_PARTY_ARRAY", types="or",
+         q="Mashantucket Pequot Gaming Enterprise",
+         obligor_label="Mashantucket (Western) Pequot Tribe",
+         cedar_uid="CE-0017C-F5", obligor_name="Mashantucket (Western) Pequot Tribe",
+         question="the legal person U.S. Bank sued, rather than the nation"),
+    dict(priority="6_FROM_A_DOCKET_PARTY_ARRAY", types="or",
+         q="Sonoma Falls Developers",
+         obligor_label="River Rock Entertainment Authority", cedar_uid="CE-00143-AM",
+         obligor_name="River Rock Entertainment Authority",
+         question="the Dry Creek casino-development financing dispute"),
+    dict(priority="6_FROM_A_DOCKET_PARTY_ARRAY", types="o",
+         q="senior notes tribal economic development authority indenture event of default acceleration",
+         obligor_label="", cedar_uid="", obligor_name="",
+         question="acceleration on tribal senior notes"),
+    dict(priority="6_FROM_A_DOCKET_PARTY_ARRAY", types="o",
+         q="casino financing sole proprietary interest management contract NIGC chairman approval void",
+         obligor_label="", cedar_uid="", obligor_name="",
+         question="the sole-proprietary-interest test that voids a financing"),
+
     # ---- 0  CONTROL.  A case name built so that it cannot exist.  If this
     #      returns an opinion, every positive above is worthless.
     dict(priority="0_CONTROL_ABSENT", q="Kwithluk Sentinel Indenture Trustee Holdings",
@@ -402,7 +500,8 @@ def step_targets():
             })
     # the control is cheap; run it FIRST in both indexes.
     order = {"0_CONTROL_ABSENT": 0, "1_LEADING_CASE": 1, "2_JOINS_1082": 2,
-             "3_CANONICAL_NO_HOLDING": 3, "4_DOCTRINE": 4}
+             "3_CANONICAL_NO_HOLDING": 3, "4_DOCTRINE": 4,
+             "5_OBLIGOR_INSTRUMENTALITY": 5, "6_FROM_A_DOCKET_PARTY_ARRAY": 6}
     rows.sort(key=lambda r: (order[r["priority"]], r["target_id"]))
     write_csv(TARGETS, rows)
     log(f"{len(rows)} targets ({len(CASES)} questions x 2 indexes) -> {TARGETS.name}"
@@ -603,51 +702,9 @@ def step_search(max_requests):
                          "outcome": f"REQUEST_REFUSED {status}"})
             continue
         cache_write(cache_path("search", key), js)
-        results = js.get("results") or []
-        reported = js.get("count")
-        # class 4: retrieved-vs-reported, recorded on every query.
-        completeness = ("COMPLETE" if reported is not None
-                        and len(results) >= int(reported)
-                        else f"PARTIAL retrieved={len(results)} reported={reported}")
-        if not results:
-            hits.append({"target_id": key, "query": t["query"],
-                         "search_type": t["search_type"],
-                         "priority": t["priority"], "cedar_uid": t["cedar_uid"],
-                         "obligor_label_1082": t["obligor_label_1082"],
-                         "obligor_name": t["obligor_name"],
-                         "question": t["question"],
-                         "outcome": "NO_RESULT", "completeness": completeness,
-                         "reported_count": reported})
-            continue
-        for r in results:
-            hits.append({
-                "target_id": key, "query": t["query"],
-                "search_type": t["search_type"], "priority": t["priority"],
-                "cedar_uid": t["cedar_uid"],
-                "obligor_label_1082": t["obligor_label_1082"],
-                "obligor_name": t["obligor_name"], "question": t["question"],
-                "outcome": "RESULT", "completeness": completeness,
-                "reported_count": reported,
-                "cluster_id": r.get("cluster_id", ""),
-                "docket_id": r.get("docket_id", ""),
-                "case_name": r.get("caseName", ""),
-                "court": r.get("court", ""),
-                "court_id": r.get("court_id", ""),
-                "citation": " | ".join(r.get("citation") or []),
-                "date_filed": r.get("dateFiled", ""),
-                "docket_number": r.get("docketNumber", ""),
-                "precedential_status": r.get("status", ""),
-                "absolute_url": ("https://www.courtlistener.com" + r.get("absolute_url", ""))
-                                if r.get("absolute_url") else "",
-                "suit_nature": r.get("suitNature", ""),
-                "sub_ids": " | ".join(
-                    str(s.get("id")) for s in (r.get("opinions") or [])
-                    if s.get("id") is not None),
-                "party": " | ".join(r.get("party") or []),
-                "n_recap_documents": len(r.get("recap_documents") or []),
-                "snippet": ((((r.get("opinions") or r.get("recap_documents")
-                               or [{}]))[0]).get("snippet") or "")[:600],
-            })
+        # class 4: retrieved-vs-reported is recorded on every query, inside
+        # hit_rows, so the cache and the live pass cannot drift.
+        hits.extend(hit_rows(t, js))
     write_csv(HITS, hits)
     manifest_append(man)
     release_host(f"search complete; stopped={stopped}")
@@ -655,6 +712,72 @@ def step_search(max_requests):
     log(f"{len(res)} requests sent; {len(hits)} hit rows; budget now {d}/{PER_DAY} today")
     if stopped:
         log(f"STOPPED EARLY: {stopped}")
+    return 0
+
+
+def hit_rows(t, js):
+    """Turn one cached search response into hit rows.  Separate from the fetch
+    so `remine` can re-derive every field from the cache with ZERO requests -
+    `docket_absolute_url`, `cause`, `chapter` and `dateTerminated` were all
+    already on disk when the first pass wrote a blank `source_url`."""
+    key = t["target_id"]
+    results = js.get("results") or []
+    reported = js.get("count")
+    completeness = ("COMPLETE" if reported is not None and len(results) >= int(reported)
+                    else f"PARTIAL retrieved={len(results)} reported={reported}")
+    base = {"target_id": key, "query": t["query"],
+            "search_type": t["search_type"], "priority": t["priority"],
+            "cedar_uid": t["cedar_uid"],
+            "obligor_label_1082": t["obligor_label_1082"],
+            "obligor_name": t["obligor_name"], "question": t["question"],
+            "completeness": completeness, "reported_count": reported}
+    if not results:
+        return [dict(base, outcome="NO_RESULT")]
+    out = []
+    for r in results:
+        url = r.get("absolute_url") or r.get("docket_absolute_url") or ""
+        out.append(dict(
+            base, outcome="RESULT",
+            cluster_id=r.get("cluster_id", ""),
+            docket_id=r.get("docket_id", ""),
+            case_name=r.get("caseName", ""),
+            court=r.get("court", ""),
+            court_id=r.get("court_id", ""),
+            citation=" | ".join(r.get("citation") or []),
+            date_filed=r.get("dateFiled", ""),
+            date_terminated=r.get("dateTerminated") or "",
+            docket_number=r.get("docketNumber", ""),
+            precedential_status=r.get("status", ""),
+            cause=r.get("cause") or "",
+            bankruptcy_chapter=r.get("chapter") or "",
+            absolute_url=("https://www.courtlistener.com" + url) if url else "",
+            suit_nature=r.get("suitNature", ""),
+            sub_ids=" | ".join(str(s.get("id")) for s in (r.get("opinions") or [])
+                               if s.get("id") is not None),
+            party=" | ".join(r.get("party") or []),
+            n_recap_documents=len(r.get("recap_documents") or []),
+            snippet=((((r.get("opinions") or r.get("recap_documents")
+                        or [{}]))[0]).get("snippet") or "")[:600],
+        ))
+    return out
+
+
+def step_remine():
+    """Re-derive every hit row from the cached responses.  ZERO requests."""
+    targets = {t["target_id"]: t for t in read_csv(TARGETS)}
+    hits, n = [], 0
+    for p in sorted(RAW.glob("search_*.json.gz")):
+        key = p.name[len("search_"):-len(".json.gz")]
+        t = targets.get(key)
+        if not t:
+            log(f"  cached response {key} has no target row; skipped")
+            continue
+        hits.extend(hit_rows(t, cache_read(p)))
+        n += 1
+    if not n:
+        raise RuntimeError("no cached search responses - UNMEASURED, not empty")
+    write_csv(HITS, hits)
+    log(f"remined {n} cached responses -> {len(hits)} hit rows (0 requests)")
     return 0
 
 
@@ -916,6 +1039,27 @@ def side_is_a_natural_person(side):
     return len(s.split()) <= 3
 
 
+_CAP_STOP = {"co", "company", "inc", "incorporated", "llc", "lc", "lp", "llp",
+             "na", "n", "a", "national", "association", "assn", "ass", "corp",
+             "corporation", "the", "of", "and", "sc", "pc", "ltd", "limited",
+             "et", "al", "state"}
+
+
+def caption_key(caption):
+    """A caption written by a clerk and a caption written by a reporter of
+    decisions are the same case in different clothes: `Stifel, Nicolaus & Co.`
+    and `Stifel, Nicolaus & Company, Inc.`  Strip the clothes."""
+    toks = [t for t in norm(caption).split() if t not in _CAP_STOP]
+    return " ".join(toks)
+
+
+def caption_key_match(a, b):
+    a, b = caption_key(a), caption_key(b)
+    if not a or not b:
+        return False
+    return a == b or a.startswith(b[:45]) or b.startswith(a[:45])
+
+
 def caption_sides(caption):
     parts = re.split(r"\s+v[\.s]?\.?\s+", caption or "", maxsplit=1, flags=re.I)
     return (parts[0].strip(), parts[1].strip()) if len(parts) == 2 else (caption or "", "")
@@ -1031,6 +1175,175 @@ def resolve_obligor_from_caption(caption):
             r.get("canonical_name", ""),
             f"spine_canonical_name_{nm!r}_is_a_whole_token_run_inside_the_"
             f"court_caption_CONTAINMENT_descriptive_only_never_keys_a_dollar")
+
+
+def build_dockets(hits, holdings, event_captions=()):
+    """The docket index: court, docket number, date filed, party array.
+
+    This is where the mandate's "court and docket number" actually lives - a
+    published opinion frequently omits the district docket number, and the
+    RECAP index always carries it.  Zero extra requests: every field is already
+    in the search response.
+
+    THE PARTY ARRAY IS THE CLERK OF COURT, and it is the only verification that
+    counts (code/366): a name in a caption is not a party, and `code/219`'s
+    `Seminole v. Berkebile` is a prisoner case about a surname.
+
+    EVERY DOCKET WITH A NATURAL PERSON IN ITS PARTY ARRAY IS DROPPED.  The
+    Lake of the Torches query alone returns four consumer payday-lending
+    dockets - `Morgan v. West Side Lending`, `KNOTTS v. CRANE LENDING`,
+    `RANSOM v. GREATPLAINS FINANCE`, `Mee v. Clarity Services` - in which a
+    tribal lender is the CREDITOR and the borrower is a private individual.
+    That is neither tribal debt distress nor anything a private person's name
+    belongs in.
+    """
+    rows, dropped = [], []
+    seen = set()
+    for h in hits:
+        if h.get("search_type") != "r" or h.get("outcome") != "RESULT":
+            continue
+        did = h.get("docket_id", "")
+        if not did or did in seen:
+            continue
+        cap = h.get("case_name", "")
+        parties = [p.strip() for p in (h.get("party") or "").split(" | ") if p.strip()]
+
+        persons = [p for p in parties if side_is_a_natural_person(p)]
+        if persons or PERSON_SHAPE.search(cap):
+            dropped.append(dict(h, reject_reason=(
+                "a natural person is in the party array or the caption: "
+                + "; ".join(persons[:4] or [cap]))))
+            continue
+        if not parties:
+            dropped.append(dict(h, reject_reason=(
+                "no party array on this docket - a caption is not a party "
+                "(code/366), so there is nothing to verify against")))
+            continue
+
+        blob = cap + " | " + " | ".join(parties)
+        fin = FINANCIAL_PARTY.search(blob)
+        # A DOCKET WHOSE OPINION IS ALREADY STAGED IS A DEBT DOCKET, and the
+        # opinion is better evidence of that than any docket metadata.
+        # `Stifel, Nicolaus & Co. v. Lac du Flambeau` is docketed
+        # `950 Constitutional - State Statute` and is a bond case.
+        opinion_backed = any(caption_key_match(cap, c) for c in event_captions)
+        #
+        # THE NATURE-OF-SUIT CODE WAS TRIED AS A THIRD ROUTE AND IS REFUSED.
+        # It admitted `State of Wisconsin v. Ho-Chunk Nation`,
+        # `State of California v. Paskenta Band of Nomlaki Indians`,
+        # `California Valley Miwok Tribe v. California Gambling Control
+        # Commission` and three `... v. Iipay Nation of Santa Ysabel` dockets
+        # - all coded `Contract: Other`, every one a compact or regulatory
+        # dispute with no lender, no instrument and no debt. The code measures
+        # which box the filer ticked on a civil cover sheet, not whether
+        # anybody lent anybody money: this repo's signature defect, a check
+        # that does not measure its own name. Recorded so it is not re-added.
+        signal = ("a financial institution is a party: " + fin.group(0)) if fin \
+            else ("an opinion in this case is already staged as a debt "
+                  "event") if opinion_backed else ""
+        if not signal:
+            dropped.append(dict(h, reject_reason=(
+                "no financial institution among the parties and no staged "
+                "opinion - a docket of the tribe's, not a debt docket. "
+                "suitNature was deliberately NOT used as a signal: it admitted "
+                "six compact/regulatory dockets coded 'Contract: Other'.")))
+            continue
+
+        # THE OBLIGOR IS RESOLVED FROM THE DOCUMENT: the clerk's party array
+        # first, the caption second.  Never from the query that found it.
+        ob_uid, ob_handle, ob_name, ob_method = "", "", "", ""
+        for p in parties:
+            u, hd, nm, mth = resolve_obligor_from_caption(p)
+            if u and (not ob_name or len(nm) > len(ob_name)):
+                ob_uid, ob_handle, ob_name = u, hd, nm
+                ob_method = ("the CLERK OF COURT's party array names this "
+                             "entity: " + mth)
+        match_class = "VERIFIED_PARTY" if ob_uid else ""
+        if not ob_uid:
+            ob_uid, ob_handle, ob_name, ob_method = resolve_obligor_from_caption(cap)
+            if ob_uid:
+                match_class = "NAME_IN_CAPTION_ONLY"
+        want = norm(h.get("query", ""))
+        in_party = any(want and (want in norm(p) or norm(p) in want) for p in parties)
+        in_caption = bool(want) and want in norm(cap)
+        if not ob_uid and h.get("cedar_uid") and (in_party or in_caption):
+            ob_uid = h["cedar_uid"]
+            ob_name = h.get("obligor_name", "")
+            ob_method = ("the obligor this docket was sought for is named in "
+                         "its party array or caption")
+            match_class = "VERIFIED_PARTY" if in_party else "NAME_IN_CAPTION_ONLY"
+            for r in spine_rows():
+                if r.get("cedar_uid") == ob_uid:
+                    ob_handle = r.get("tribe_id", "")
+                    break
+        if not ob_uid:
+            dropped.append(dict(h, reject_reason=(
+                "no Cedar entity in the party array or the caption")))
+            continue
+
+        # WHICH SIDE IS THE NATION ON.  A nation sued BY a bank is the
+        # distress shape; a nation suing its own investment manager
+        # (`Picayune Rancheria v. Goldenwise Capital Management`) is not, and
+        # nothing in a docket number tells them apart.
+        pl_side, df_side = caption_sides(cap)
+        nname = norm(ob_name)
+        on_pl = bool(nname) and nname in norm(pl_side)
+        on_df = bool(nname) and nname in norm(df_side)
+        role = ("DEFENDANT" if on_df and not on_pl else
+                "PLAINTIFF" if on_pl and not on_df else "BOTH_OR_UNCLEAR")
+        role_basis = (
+            f"the resolved entity name {ob_name!r} appears on the "
+            f"{'defendant' if role == 'DEFENDANT' else 'plaintiff' if role == 'PLAINTIFF' else 'unclear'}"
+            f" side of the court's own caption. DEFENDANT beside a lender is "
+            f"the distress shape; PLAINTIFF is not, on its own, distress at all.")
+
+        lbl = h.get("obligor_label_1082", "") if (in_party or in_caption) else ""
+        hold_row = holdings.get(lbl, {})
+        seen.add(did)
+        rows.append({
+            "docket_row_id": f"TDCD-{h.get('court_id','')}-{did}",
+            "obligor_name": ob_name,
+            "obligor_cedar_uid": ob_uid,
+            "obligor_cedar_handle": ob_handle,
+            "obligor_entity_match_method": ob_method,
+            "obligor_entity_tier": "B",
+            "obligor_label_1082": lbl,
+            "joins_1082_holdings": "yes" if hold_row else "no",
+            "holdings_observations_1082": hold_row.get("observations", ""),
+            "holdings_cusips_1082": hold_row.get("cusips", ""),
+            "event_type": "CASE_FILED_IN_A_COURT_OF_RECORD",
+            "event_type_basis": ("the docket exists and carries a filing date; "
+                                 "NOTHING about its outcome is asserted here"),
+            "assertion_or_finding": "PROCEDURAL_RECORD",
+            "assertion_or_finding_basis": (
+                "a docket is the court's index of a case. A complaint on it "
+                "ALLEGES; only a judgment FINDS. Read the documents before "
+                "characterising anything."),
+            "as_of_date": h.get("date_filed", ""),
+            "as_of_date_basis": "the date the case was filed, per CourtListener/RECAP",
+            "court": h.get("court", ""),
+            "court_id": h.get("court_id", ""),
+            "docket_number": h.get("docket_number", ""),
+            "case_name_as_captioned": cap,
+            "parties_as_recorded_by_the_clerk": " | ".join(parties),
+            "debt_signal_basis": signal,
+            "tribal_party_role": role,
+            "tribal_party_role_basis": role_basis,
+            "match_class": match_class,
+            "n_recap_documents_indexed": h.get("n_recap_documents", ""),
+            "docket_id": did,
+            "source_authority": "CourtListener / Free Law Project RECAP index, REST API v4",
+            "source_document_type": "COURT_DOCKET_SHEET",
+            "source_url": h.get("absolute_url", ""),
+            "sovereign_immunity_caution": SOVEREIGN_CAUTION,
+            "currency_caution": CURRENCY_CAUTION,
+            "not_summable_with": NOT_SUMMABLE,
+            "assertion_class": "COURT_RECORD_DOCKET_INDEX",
+            "record_scope": "ONE DOCKET IN ONE COURT",
+            "built_by_script": f"code/{SCRIPT}",
+            "built_date": TODAY,
+        })
+    return rows, dropped
 
 
 def step_build():
@@ -1265,10 +1578,51 @@ def step_build():
                 "built_date": TODAY,
             })
 
+    dockets, docket_drops = build_dockets(
+        hits, holdings,
+        event_captions=[e["case_name_as_captioned"] for e in events])
+
+    # backfill the district docket number onto opinion events.  A published
+    # opinion often carries the appellate number or none at all; the RECAP
+    # index always carries the district one.  Matched on court + caption, and
+    # the source of the number is recorded so it is never mistaken for the
+    # opinion's own.
+    for e in events:
+        d = next((x for x in dockets
+                  if caption_key_match(e["case_name_as_captioned"],
+                                       x["case_name_as_captioned"])), None)
+        # TWO SOURCES DISAGREEING IS A FINDING, NOT A TIE-BREAK.  CourtListener
+        # files the district Lake of the Torches opinion under `wied` while its
+        # own RECAP docket for the same caption is `wiwd 3:09-cv-00768`
+        # (W.D. Wis. 09-cv-768). Both values are kept; neither is overwritten.
+        if d and d["court_id"] and e.get("court_id") and d["court_id"] != e["court_id"]:
+            e["court_disagreement"] = (
+                f"the opinion record files this under {e['court_id']!r} and the "
+                f"RECAP docket for the same caption under {d['court_id']!r} "
+                f"({d['docket_number']}). Both are CourtListener's. Neither is "
+                f"corrected here; check before citing the court.")
+        if d:
+            e["recap_docket_number"] = d["docket_number"]
+            e["recap_docket_url"] = d["source_url"]
+        if e.get("docket_number"):
+            e["docket_number_basis"] = "as carried by the opinion record"
+            continue
+        if d:
+            e["docket_number"] = d["docket_number"]
+            e["docket_number_basis"] = (
+                f"NOT from the opinion - taken from the RECAP docket index for "
+                f"the same caption in {d['court_id']} "
+                f"({d['source_url']})")
+        else:
+            e["docket_number_basis"] = ("the opinion record carries no docket "
+                                        "number and no RECAP docket matched")
+
     write_csv(DOCS, docs)
     write_csv(EVENTS, events)
+    write_csv(DOCKETS, dockets)
     write_csv(HELD, held)
     write_csv(REVIEW / "1110_rejected_events.csv", rejected_events)
+    write_csv(REVIEW / "1110_rejected_dockets.csv", docket_drops)
 
     # what we could not reach, named rather than left as an absence
     unreached = []
@@ -1290,6 +1644,7 @@ def step_build():
 
     log(f"documents {len(docs)}  (with text {n_text})")
     log(f"events    {len(events)}")
+    log(f"dockets   {len(dockets)}  ({len(docket_drops)} rejected, recorded)")
     log(f"held by the natural-person screen  {len(held)}")
     log(f"refused for naming no instrument   {len(rejected_events)}")
     log(f"unreached questions                {len(unreached)}")
@@ -1308,6 +1663,14 @@ INVARIANTS = [
     "I8_no_event_row_survives_the_natural_person_screen",
     "I9_every_event_quotes_an_instrument_that_appears_in_its_own_quote",
     "I10_entity_tier_is_blank_when_there_is_no_entity_link",
+]
+DOCKET_INVARIANTS = [
+    "D1_every_docket_names_a_court_a_docket_number_and_a_source_url",
+    "D2_every_docket_is_dated",
+    "D3_no_docket_names_a_natural_person_among_its_parties",
+    "D4_every_docket_carries_the_sovereign_and_currency_cautions",
+    "D5_every_docket_declares_which_side_of_the_caption_the_nation_is_on",
+    "D6_every_docket_records_how_the_entity_was_matched",
 ]
 
 
@@ -1361,10 +1724,39 @@ def _verify_rows():
     return events, breaches
 
 
+def _verify_dockets():
+    rows = read_csv(DOCKETS)
+    breaches = {k: [] for k in DOCKET_INVARIANTS}
+    for d in rows:
+        did = d.get("docket_row_id", "?")
+        if not (d.get("court") and d.get("docket_number") and d.get("source_url")):
+            breaches[DOCKET_INVARIANTS[0]].append(did)
+        if not d.get("as_of_date"):
+            breaches[DOCKET_INVARIANTS[1]].append(did)
+        parties = [p.strip() for p in
+                   (d.get("parties_as_recorded_by_the_clerk") or "").split(" | ")
+                   if p.strip()]
+        if (not parties or any(side_is_a_natural_person(p) for p in parties)
+                or PERSON_SHAPE.search(d.get("case_name_as_captioned", ""))):
+            breaches[DOCKET_INVARIANTS[2]].append(did)
+        if (SOVEREIGN_CAUTION[:40] not in d.get("sovereign_immunity_caution", "")
+                or CURRENCY_CAUTION[:40] not in d.get("currency_caution", "")
+                or "NEVER sum" not in d.get("not_summable_with", "")):
+            breaches[DOCKET_INVARIANTS[3]].append(did)
+        if d.get("tribal_party_role") not in ("DEFENDANT", "PLAINTIFF",
+                                              "BOTH_OR_UNCLEAR"):
+            breaches[DOCKET_INVARIANTS[4]].append(did)
+        if not d.get("obligor_entity_match_method") or not d.get("match_class"):
+            breaches[DOCKET_INVARIANTS[5]].append(did)
+    return rows, breaches
+
+
 def step_verify(quiet=False):
     events, breaches = _verify_rows()
+    dockets, dbreaches = _verify_dockets()
+    breaches.update(dbreaches)
     bad = 0
-    for name in INVARIANTS:
+    for name in INVARIANTS + DOCKET_INVARIANTS:
         n = len(breaches[name])
         verdict = "ok" if n == 0 else f"BREACH x{n}  e.g. {breaches[name][:3]}"
         if n:
@@ -1372,7 +1764,7 @@ def step_verify(quiet=False):
         if not quiet:
             log("%-70s %s" % (name, verdict))
     if not quiet:
-        log(f"rows checked: {len(events)}")
+        log(f"event rows checked: {len(events)}   docket rows checked: {len(dockets)}")
     return 1 if bad else 0
 
 
@@ -1397,10 +1789,22 @@ def step_selftest():
             "broken baseline proves nothing.")
         return 2
     original = EVENTS.read_bytes()
+    original_dk = DOCKETS.read_bytes() if DOCKETS.exists() else None
     rows = read_csv(EVENTS)
-    if not rows:
+    drows = read_csv(DOCKETS)
+    if not rows or not drows:
         log("no rows to mutate; selftest cannot prove anything")
         return 2
+
+    docket_mutations = [
+        (DOCKET_INVARIANTS[0], {"docket_number": ""}),
+        (DOCKET_INVARIANTS[1], {"as_of_date": ""}),
+        (DOCKET_INVARIANTS[2], {"parties_as_recorded_by_the_clerk":
+                                "Jane Doe | Wells Fargo Bank NA"}),
+        (DOCKET_INVARIANTS[3], {"not_summable_with": "total tribal debt"}),
+        (DOCKET_INVARIANTS[4], {"tribal_party_role": "PROBABLY_THE_BORROWER"}),
+        (DOCKET_INVARIANTS[5], {"obligor_entity_match_method": ""}),
+    ]
 
     mutations = [
         (INVARIANTS[0], {"court": ""}),
@@ -1420,20 +1824,29 @@ def step_selftest():
     ]
     ok = True
     try:
-        for name, cols in mutations:
-            mut = [dict(r) for r in rows]
-            for col, val in cols.items():
-                mut[0][col] = val
-            write_csv(EVENTS, mut)
-            buf = io.StringIO()
-            with contextlib.redirect_stdout(buf):
-                rc = step_verify()
-            fired = _named_invariant_fired(buf.getvalue(), name)
-            log("%-70s %s" % (name, "FIRES" if (rc == 1 and fired) else "DID NOT FIRE"))
-            if not (rc == 1 and fired):
-                ok = False
+        for target, base, muts in ((EVENTS, rows, mutations),
+                                   (DOCKETS, drows, docket_mutations)):
+            for name, cols in muts:
+                mut = [dict(r) for r in base]
+                for col, val in cols.items():
+                    mut[0][col] = val
+                write_csv(target, mut)
+                buf = io.StringIO()
+                with contextlib.redirect_stdout(buf):
+                    rc = step_verify()
+                fired = _named_invariant_fired(buf.getvalue(), name)
+                log("%-70s %s" % (name,
+                                  "FIRES" if (rc == 1 and fired) else "DID NOT FIRE"))
+                if not (rc == 1 and fired):
+                    ok = False
+            # restore this table before mutating the next one, so a docket
+            # mutation is never evaluated against a still-broken events file.
+            (EVENTS if target is EVENTS else DOCKETS).write_bytes(
+                original if target is EVENTS else original_dk)
     finally:
         EVENTS.write_bytes(original)
+        if original_dk is not None:
+            DOCKETS.write_bytes(original_dk)
     rc = step_verify(quiet=True)
     log(f"restored byte-for-byte; verify is {'GREEN' if rc == 0 else 'RED'}")
     return 0 if (ok and rc == 0) else 1
@@ -1453,14 +1866,16 @@ def step_spend():
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("stage", choices=["targets", "probe", "search", "opinions",
-                                      "build", "verify", "selftest", "spend"])
+    ap.add_argument("stage", choices=["targets", "probe", "search", "remine",
+                                      "opinions", "build", "verify", "selftest",
+                                      "spend"])
     ap.add_argument("--max", type=int, default=20)
     a = ap.parse_args()
     return {
         "targets": step_targets,
         "probe": step_probe,
         "search": lambda: step_search(a.max),
+        "remine": step_remine,
         "opinions": lambda: step_opinions(a.max),
         "build": step_build,
         "verify": step_verify,

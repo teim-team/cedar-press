@@ -6572,9 +6572,9 @@ columns; `native_bills.csv` 3,069 → 3,069 and 29 → 29 columns.**
 
 ## 2026-09-02 — workstream DEALS-MERGE-1088: the staged deals merge, and who owns the red gate
 
-`code/1088_merge_staged_deals.py`. **312 staged candidates in, 144 admitted,
-168 refused with a named reason, every refusal kept whole in
-`review/deals_1088_refusals.csv`.** `deals_classified.csv` 935 -> 1,079 rows;
+`code/1088_merge_staged_deals.py`. **312 staged candidates in, 138 admitted,
+174 refused with a named reason, every refusal kept whole in
+`review/deals_1088_refusals.csv`.** `deals_classified.csv` 935 -> 1,073 rows;
 `Announced_Value_USD` $45,195,917,316 -> $47,880,355,533. Conservation proved
 row-for-row: **0 pre-merge `Deal_ID`s lost, 0 pre-merge values changed, 0
 columns lost.** Full account in `docs/methodology/deals.md` section 5b.
@@ -6647,3 +6647,442 @@ AND that the named invariant is what fired, then asserts the untouched files
 still return 0. **5 of 5 invariants fire:** no source link; a ceiling in
 `Announced_Value_USD`; neither a date nor a year; a blank `Event_Date` whose
 `Date_Basis` does not say why; a refusal with no stated reason.
+
+## NAGPRA SPLIT-ARTEFACT PASS - the fabrication class was NOT fixed, only narrowed (2026-09-02)
+
+`code/1084_nagpra_split_artefact_audit.py` (new, `claim`ed) and
+`code/1104_nagpra_affiliation_rule_audit.py` (new, `claim`ed). Measurements in
+`docs/NAGPRA_SPLIT_ARTEFACTS.json`,
+`docs/NAGPRA_AFFILIATION_RULE_AUDIT.json`, `review/nagpra_alias_independence.csv`.
+
+**The headline, because the next agent must not read `1077` as closed.**
+`1077` fixed *"Tourism, Columbia, SC"* by splitting on `;` **where the title
+carries one**. Only **64 of 6,792** titles do. The other 6,728 still run
+`LEGACY_SPLIT_RE`, **328 of them split**, and the same fabrication is live:
+`02-7009`, `04-22830`, `2026-15500`..`2026-15524` (11 notices) each ship
+`Louisiana Department of Culture, Recreation` **and**
+`Tourism, Division of Archaeology`, from the single real name *Louisiana
+Department of Culture, Recreation, and Tourism, Division of Archaeology*.
+**The word `Tourism` is a fabricated institution in this dataset today.**
+The permanent fix is in `1077.split_institutions` / `77`'s
+`institution_parts`, and it is NOT made here.
+
+**77 of 7,234 bridge rows (1.06%) flagged; 0 rows deleted; 55 carry a
+verbatim-recoverable repair.** Row conservation 7,234 -> 7,234, ids identical,
+11 -> 16 columns, all five new. `provegates` proves **I1..I6 each FIRE** on an
+injected breach and are silent on the restored table.
+
+**`data/clean/nagpra_notices.csv` carries the SAME fabrication on 51 notices**
+in `institution_name` / `institution_primary` / `institution_names_all` and is
+deliberately NOT written by `1084` - a second writer on `1077`'s six in-place
+columns is the class-6 hazard. Declared in `cedar_pipeline.KNOWN_ORDERINGS`:
+`1077` rebuilds the bridge wholesale, `1084` enriches it, and **1084's five
+columns do NOT survive a 1077 run** - re-run it.
+
+**The three affiliation rules were audited and NOT relaxed. All three hold.**
+R1: all 51,579 bridge rows measured against their own cached FR full text,
+**0 absent**; 226 differ only by a `;` the parser turned into a `,` inside a
+parenthetical and 1 by a space where an HTML anchor closed. R2: **0** aliases
+in `entity_aliases.csv` are sourced from this dataset, so nothing entered the
+identity layer below the bar; the republication test folds 6,792 notices to
+**6,519 families** and demotes 16 alias candidates, 0 of them across the
+three-notice line. R3: every free-text notice column is **>= 99.9% verbatim**
+in its own source.
+
+### Gate attribution
+
+`62` exits 1 and `293` exits 1. **Neither is owned by this pass.** `293` names
+every new instance per script: `1030`, `1031`, `1060`, `1086`, `1081`, `1107`,
+`1110`, `846`, `852`, `873`, `992`, `30`, `518`, `870`, `871`, plus the
+pre-existing `class6 1077`. `1084` and `1104` each contributed exactly one
+line and **both are waived with a reason on the line above**
+(`class7` a selftest fixture id; `class3` an exclusion of already-keyed rows,
+not a positive outcome read). `files_with_columns_lost_vs_backup = 2` is
+`native_fi_roster.csv` and `cedar_entity_spine.csv` against
+`.bak_2026-09-02_pre844` - **script `844`**. `518` still reports `nagpra`
+**READY**, now 5 tables.
+
+### A fourth rule, found by auditing the script's OWN admitted output
+
+**AN ARTICLE DATE IS NOT A TRANSACTION DATE, AND EVERY PRESS ROW IN THIS
+PROJECT IS DATED BY ONE.** All 96 tribal-press rows the first pass admitted
+carried `Date_Basis = "post date published by the site's own REST API for this
+article"`. Auditing them against their own sentences found **14 that name a
+year two or more before the year they were filed under** — `BSNC acquired the
+Alaska-grown company in August of 2015`, filed 2020.
+
+The naive gate over-refuses: *"Chugach Commercial Holdings: Established in
+2014"* inside a genuine 2026 acquisition announcement is background, and
+refusing it loses a real transaction over a date that is not its date. **Gate
+G11 therefore fires only when the earlier year sits within 60 characters of a
+transfer verb** — where a transaction year lives in a sentence and where a
+founding year does not. 9 refused, 5 kept with an extended `Date_Basis` naming
+the other year and stating the article date is not known to be the transaction
+date.
+
+**Six of the nine had already been merged.** They were WITHDRAWN, not deleted:
+whole rows to `review/deals_withdrawn_duplicates.csv` (3 -> 9), which
+`88_build_deals_taxonomy.withdrawn_ids()` honours on every rebuild — the route
+`MA2020-008` took. Row and money conservation asserted:
+1,079 -> 1,073 rows, 52 -> 52 columns, `Announced_Value_USD` **unchanged**
+because all six carried $0. Named individually: `NLTR-2016-003`,
+`NLTR-2018-009`, `NLTR-2020-003`, `NLTR-2021-008`, `NLTR-2024-010`,
+`NLTR-2026-013`.
+
+**The habit this rewards is field-guide habit 3 applied to your own output:**
+the gate set was written, run, and then its ADMITTED rows were read next to
+their sources. Four of the five rules above came out of that reading, not out
+of the specification.
+
+---
+
+## 2026-09-02 — GATE 62 IS RED, AND THE `_entity_layer` DEEPENING PASS OWNS NONE OF IT. NAMED, WITH THE MEASUREMENT.
+
+*Standing rule 15 says a FAIL is stop-work and that "pre-existing, not mine" is
+not a disposition — name the owner with a measurement or fix it. This is the
+naming. Written by the `_entity_layer` / `nest` / `native-owned-businesses` /
+`nonprofits` deepening pass (`code/1098`–`1102`,
+`docs/ENTITY_LAYER_DEEPENING_2026-09-02.md`).*
+
+**What this pass touched, so the scope of the claim is checkable:** five tables,
+enriched in place, all rows conserved and no column lost —
+`entity_relationships.csv` (16→25 cols), `cedar_identifier_ledger_final.csv`
+(22→26), `native_owned_businesses.csv` (58→74), `np_orgs.csv` (57→66),
+`nest_enterprises.csv` (59→68) — plus `data/staging/nest/evidence_conflicts.csv`
+(9→14, 2 rows), an APPEND of 47 rows to `codebook_master.csv`, five `review/`
+registers, one marked ADR block, and five doc appends. **No table was created,
+no table was rebuilt, nothing was shipped, nothing was committed.**
+
+### The eleven red lines, and who owns each
+
+| red line | owner, measured |
+|---|---|
+| `files_with_columns_lost_vs_backup = 2` | **`code/844`.** The gate names both: `native_fi_roster.csv` 23→22 (lost `in_cicd_nafi_map`) and `cedar_entity_spine.csv` 44→43 (lost `cicd_verified`), each against its own `.bak_2026-09-02_pre844`. **This pass wrote to neither file.** Standing rule 12: re-run the enricher, then re-run the gate. |
+| `lint_new_defect_instances = 26`, and the `lint_class1/2c/3/4/5/7` rises | **not one named instance is from `1098`–`1102`.** `293` names them: `1011_cross_dataset_reconciliation.py` (class 1), `1060_splink_pilot.py` (2c ×2, class 3), `1085_prime_psc_desc_repull.py`, `1086_faads_award_key_promote.py`, `846_session_audit.py`, `852_extend_constellation_edges.py`, `873_build_aiannh_crosswalk.py` (2c), `992_newsletter_deal_candidates.py` (class 3), `1030_sec_edgar_native_transactions.py`, `1031_ancsa_45_55_139_annual_reports.py` (class 4). **Re-measured after this pass's last write: `py -3 code/293_lint_bug_classes.py` returns ZERO findings in `1098`, `1099`, `1100`, `1101` and `1102` across all seven classes.** Three class-2a and three class-2c findings WERE raised against this pass's first drafts and were **fixed, not waived** — the 2a by replacing `setdefault` with plain assignment (these enrichers recompute their own columns and must not carry a stale value forward), the 2c by writing the refusal reason onto the row rather than only into a counter. |
+| `regenerate_new_unsafe_writers = 1` | **`code/1107_punchlist_claim_verify.py`**, named by `845`: markdown → `docs/datasets/_PUNCHLIST_CLAIM_AUDIT.md`. All five scripts in this pass derive their header from the live file (`fields = list(live_fields) + [c for c in NEW if c not in fields]`) and `845` class 1 and class 3 are both **0**. |
+| `tables_missing_codebook_block 3→22`, `tables_undocumented_in_codebook 3→21`, `tables_missing_from_25_TABLES 179→211`, `tables_missing_from_27_SPEC 194→218`, `tables_missing_notes_contract 14→22`, `ship_tables_at_zero 13→21` | **new tables from other passes.** The gate lists them: `geo_award_county_crosswalk.csv` (1,050,968 rows), `geo_place_county_crosswalk.csv`, `geo_county_two_sums.csv`, `geo_county_dim.csv`, `geo_point_aiannh_assignment.csv`, `geo_aiannh_dim.csv`, `dear_tribal_leader_letters.csv`, `entity_dated_public_facts.csv`, `gaming_web_harvest_*`, `cedar_entity_freshness.csv`, `tribal_newsletter_*`. **This pass created no table in `data/clean`.** Its outputs are new COLUMNS on five already-registered tables, and all 47 of them were appended to `codebook_master.csv` with descriptions — `codebook_undocumented_public` is still **0** and `duns_marked_publishable` is still **0**. |
+| `contract_violations = 11`, `contract_orphan_shippable = 7` | same population as the row above — an unregistered new table has no owning collection and no contract. `py -3 code/518_dataset_readiness.py` run after this pass: **READY 13 / 14**, and all four datasets this pass touched (`_entity_layer`, `nest`, `native-owned-businesses`, `nonprofits`) are READY. The single BLOCKED is `deals`, on `C1 grain UNSTATED` for `deals_press_edgar_ancsa_additions.csv`. |
+| `rulings_unapplied 1,215 → 2,894` | **this pass applied no ruling and minted no tier.** Everything it found is FLAGGED and filed: 13 ledger collisions, 1 owner disagreement, 8 NEST parent contradictions, 25 duplicate groups, 535 nonprofit key reviews — all in `review/*_2026-09-02.csv`, with three items appended to `review/OWNER_DECISION_QUEUE.md` (EL-1, EL-2, EL-3). A proposal on a row is not an unapplied ruling; `cedar_rulings.csv` was not written. |
+| `SHIPPING LOST: advocacy_passthrough_2026-08-07.csv` gone from `data/clean`; `hearing_bill_links.csv` 465→464; `native_bills_subject_sweep.csv` 2,414→2,409 | none of the three was read or written by this pass. |
+
+### The one thing worth generalising from this
+
+**Eleven red lines, and the gate itself named the owner of every one.** That is
+what the per-metric naming in `62` bought: the six sessions that stepped around
+`codebook_undocumented_public = 45` had to guess whose it was, and this took one
+grep. The remaining cost is that a red gate is still stop-work for *everyone*,
+so a metric another agent broke blocks the agent who reads it next — which is
+the deadlock the `handoffs_failed_only_on_this_gate` split was written to break,
+one level up. Worth the integrator's attention: **`844`'s two lost columns are
+the cheapest of the eleven to clear**, and clearing them removes the only
+regression on this list that is a data loss rather than a registration gap.
+
+
+---
+
+## 2026-09-02 — workstream `newsletters`: the corpus taken to the shipping standard, and two web-map defects found by a new invariant
+
+*Scripts `990`, `991`, `995` (owned), `1105_newsletter_corpus_ship.py` and
+`1106_tribal_election_survey.py` (both claimed atomically via `1050 claim`).
+Nothing committed. Ownership and the shared-file edits are declared in
+`docs/ARCHITECTURE_DECISIONS.md` under ADR-023-NEWSLETTERS.*
+
+### What the corpus is now
+
+| | before this pass | after |
+|---|---:|---:|
+| rows in `tribal_newsletter_corpus.csv` | 1,650 | **1,889** |
+| **publication channels** (`record_status = publication_channel`) | 1,195 | **1,394** |
+| entities publishing at least one | 650 | **694** |
+| coverage found / attempted_none_found / not_probed | 650 / 440 / 455 | **694 / 480 / 371** |
+| federally recognized tribes found | 223 / 349 | **264 / 349** |
+| entities that operate a live site, are in scope, and were never probed | 79 | **0** |
+
+`991` was re-run to exhaustion: 312 entities attempted in total, 1,516 requests,
+**0 hosts quarantined** for serving one body to many URLs.
+
+### The blocker the builder named, measured rather than argued
+
+NHO coverage was 8% and the question was whether to run a second pass or write
+a caveat. **Both, and the measurement is what decided it.** All 102 NHOs that
+operate their own site have now been probed on every machine-readable route;
+11 publish. The other **108 of 210 have no website of any kind** — 81 no URL at
+all, 17 only a Wayback capture of a dead site, 10 only a ProPublica IRS profile.
+The class rate is 5%, the rate among NHOs with a site is 11%, and both are true
+statements about different denominators. `SOURCE_DOES_NOT_PUBLISH`, not a
+backlog.
+
+Village corporations were the mirror image, and the stated 31% was hiding the
+finding: only **38 of 173 operate a website**, but **54 publish**, because 21
+were found on the **State of Alaska DBS STAR portal**, where ANCSA corporations
+file shareholder communications by statute. A corporation with no website can
+still have a statutory publication channel — on somebody else's host.
+
+### THREE COLUMNS ADDED, BECAUSE THE ANSWER TO A CAVEAT IS A COLUMN
+
+* **`record_status`** on the corpus. The file held two record types under one
+  schema and the only way to tell them apart was a `channel_type` set held in a
+  DIFFERENT script plus a string-match on the prefix of `note`. A reader
+  counting rows got 1,889 "tribal newsletters"; the channel count is 1,394.
+* **`site_url_class`** on the coverage table — `own_live_site`,
+  `wayback_snapshot_only`, `propublica_irs_profile_only`, `social_media_only`,
+  `third_party_api_endpoint`, `no_url_anywhere`. This is the column that makes
+  every coverage rate above readable.
+* **`source_defect`** on the staged BIA leader table (see below).
+
+`995` now reads the channel count off `record_status` instead of holding its own
+copy of the vocabulary, so the published figure and the file cannot drift.
+
+### THE NEW INVARIANT, AND THE TWO DEFECTS IT FOUND ON ITS FIRST RUN
+
+`990` invariant 10, **PROBEABLE_FRONTIER_NOT_CLOSED**: fail the build if any
+in-scope entity operates a live site and has never been probed. "We finished
+the frontier" is now a check rather than a sentence in a document. It failed
+immediately, twice, and both were real:
+
+**1. A WAYBACK URL OUTRANKED A LIVE ONE.** 991's site preference ranked
+web-map URLs by `url_type` with no preference against `web.archive.org`, so an
+archive capture could win — and the wayback skip, which exists for entities
+whose ONLY known URL is a snapshot, then fired on entities whose FIRST-RANKED
+one was. **Fort Independence, Poarch, Pueblo of Pojoaque, Redding and Ute
+Mountain** all run live sites that no route had ever touched. Archive hosts now
+sort to the back of the preference order.
+
+**2. `has_live_site` WAS `yes` FOR 45 NATIONS WITH NO WEBSITE.** Once archive
+URLs were demoted, the next-ranked "website" for 45 Alaska Native Villages was
+the **BIA Tribal Leaders Directory ArcGIS FeatureServer query** that shard K had
+used to READ them — `services1.arcgis.com/.../FeatureServer/0/query?...f=json`.
+**A response about you is not a site you operate.** Probing it would have asked
+a federal API for a newsletter, 45 times. This is the field guide's signature
+defect in a new place: the check produced a number, the number was plausible,
+and it was about something else.
+
+### A CHECK OF MINE WAS WRONG AND FIRED ON 88 REAL ROWS BEFORE IT SHIPPED
+
+1105's privacy invariant first scanned `note` for private-life terms. It hit 88
+rows, every one of them **Cedar's own description of a source**: "The Council
+... carries member-village council news, obituaries and program notices." That
+is not an obituary. **Saying that a publication carries obituaries is not
+extracting one**, and a check that deleted those sentences would have made the
+corpus less truthful in the name of privacy. Rescoped to where a leak would
+actually land — `publication_name`, `channel_url`, `recent_issue_urls`, where a
+slug like `/2024/03/obituary-jane-doe/` would appear. 0 hits, and the selftest
+now asserts BOTH that a planted slug fires AND that a descriptive note does not.
+
+### Gates
+
+`990 verify --selftest`: **12 invariants, 12 selftests fire, exit 0.**
+`1105 verify --selftest`: **6 ship invariants plus a clean-fixture assertion,
+all fire, exit 0.** `1106 verify --selftest`: **5 invariants plus clean fixture,
+all fire, exit 0.**
+
+Codebook: `19a_tribal_newsletter_corpus` (29 variables) and
+`19b_tribal_newsletter_coverage` (16), appended to `codebook_master.csv`
+(5,199 → 5,244); both tables match their block at **1.000**, well over the 0.60
+threshold. Conservation: 18 rows in `cedar_harvest_conservation.csv`, three
+funnels, each asserting its dispositions sum to its input.
+
+### The deals out of the press are not this collection
+
+`1088_merge_staged_deals.py` (another agent, same day) merged the staged
+newsletter candidates into `deals_classified.csv`, 935 → 1,079. That is the
+right home for them. The `newsletters` collection regex `^tribal_newsletter_`
+deliberately cannot reach them.
+
+### Elections — a survey, not a dataset, per the owner's own scope
+
+`docs/TRIBAL_ELECTIONS_SOURCE_SURVEY.md`, written by `1106`.
+
+**The route the brief expected does not work today: the newsletter text was
+never retained.** `_documents.jsonl` holds url, host, md5, byte count and a
+candidate COUNT for all 1,077 fetched documents — no body. The
+`deal_candidates*.csv` files hold only sentences that matched a DEAL pattern.
+Extracting elections from the press means re-fetching everything, then OCR, then
+a per-document human read.
+
+**The route that does work was already half on this machine, one column deep.**
+Shard K had pulled the Alaska slice of the **BIA Tribal Leaders Directory**
+ArcGIS layer (227 records, one HTTP request per record) to read village
+addresses, and nobody had noticed the same layer carries **`dateelected` and
+`nextelection`**. The national layer is **602 records and two HTTP requests**.
+Staged at `data/staging/tribal_governance/tribal_leader_terms_staged.csv`:
+**587 of 602 resolved to the spine (98%)** by exact normalised name, 487 carry
+`date_elected`, 468 carry `next_election`. The 15 unresolved are 14 ambiguous
+name matches — recorded as ambiguous and **never keyed**, because the exactness
+of a name says nothing about the correctness of the link — and one with no
+match. Personal contact fields (email, phone, fax, physical and mailing
+address, coordinates) are dropped before anything is written: the office is
+public, the person's contact details are not ours to redistribute.
+
+**It is one leader, not a council, and a snapshot, not a history.** The BIA
+overwrites the layer in place, so `date_elected` is the current term only.
+Turnover exists only if we start snapshotting now. Council composition needs
+~200 per-consortium pages, each a different layout, with no national aggregator
+— the 31 Bristol Bay councils and 235 named officers already parsed in
+`shard_k/bbna_tribal_councils.jsonl` are the shape and the price of that work.
+
+**One upstream BIA defect, flagged not deleted:** Ottawa Tribe of Oklahoma is
+published with its chief elected `2026-05-27` and the next election
+`2026-05-02` — 25 days earlier. Both dates kept verbatim, `source_defect`
+names it, and 1106's E2 fires on any inverted pair that is NOT so flagged.
+
+---
+
+## LOBBYING — the amendment-supersession defect closed, and the Schedule C "backlog" measured away (2026-09-02, script 1091)
+
+**Scripts:** `code/1091_lobby_amendment_supersession.py` (new, claimed via
+`1050 claim`), plus three rows added to `code/86_build_series_breaks.py`'s
+`BREAKS` list and two caveat strings corrected in
+`code/27_build_dataset_manifests.py`. Ran `86`, `87`, `27`, `287`, `99 --steps
+irs-deflate64`, `99 --steps schedc-lobbying`. **No commits.**
+
+### A — the defect the methodology described and the file had never had
+
+`docs/METHODOLOGY_LOBBYING.md` said amendments were applied over the originals
+they replace. `native_entity_lobbying_disclosures.csv` did not do it.
+
+* **1,135** groups on the doc's own key
+  `(client_id, registrant_id, filing_year, filing_period)` hold an amendment
+  beside a non-amendment. **That count reproduces to the row.**
+* **The doc's "$28,961,112 — 4.0%" reproduces under nothing.** The string
+  appears in `docs/methodology/lobbying.md` twice and in no script. Eight
+  candidate definitions were measured: $33,218,483 / $36,347,996 /
+  $39,183,189 / $40,119,485 / $45,805,356 / $47,866,925, plus two filtered
+  variants that move further away. **Withdrawn and replaced with
+  $37,349,254.01 (5.15% of $725,743,974.52) over 1,064 rows.**
+* **The doc's key is unsafe as written.** It buckets a REGISTRATION with the
+  REPORT that follows it — group `('153096','43651','1999','mid_year')` holds
+  a $0 Registration, a $0 Registration-Amendment, and a $60,000 Mid-Year
+  Report. A naive "amendment wins" rule keeps the $0 row and deletes the
+  $60,000 one. The key therefore carries a fifth part, the form family, and
+  **still refuses** in the 294 groups holding more than one non-amendment row.
+
+**Resolved by implementing, as FLAGS.** Four columns, 40 → 44:
+`supersession_group_id`, `supersession_status`, `is_superseded`,
+`superseded_by_filing_uuid`. **Row conservation 27,825 → 27,825; money
+conservation on `income_usd` / `expenses_usd` / `spend_usd` to the cent**,
+printed before and after and re-provable with `verify`. **No row deleted, no
+existing cell changed, and no new money column created.** 129 rows carry an
+`AMBIGUOUS_*` status ($3,649,798) where which filing restates which is not
+knowable from the LDA fields Cedar holds: they stay **in** the total, flagged,
+never guessed.
+
+`selftest` proves **8 of 8** invariants FIRE — I1 row, I2 money, I3 cell, I4
+key, I5 superseder resolves, I6 one survivor per group, I7 the drop accounts
+exactly, each by injecting one synthetic violation, asserting the NAMED
+invariant among the failures, restoring and asserting clean. **The first draft
+of I6 printed SILENT on a real violation**: the fixture picked a superseded row
+out of a two-row group, so un-superseding it emptied the group of superseded
+rows and I6's precondition went false. AGENT_FIELD_GUIDE §3 habit 1, live.
+
+**A second §3 instance, caught by running the gate rather than trusting it.**
+`287_build_dependency_manifest` filed 1091 under
+`readers/native_entity_lobbying_disclosures.csv` — a script that *rewrites*
+that file, invisible to the manifest that exists to stop a rebuild reverting an
+enricher. Cause: `cedar_pipeline.declared_io` follows a bound name and looks
+for a write verb on the lines that mention it, and the write went through a
+`path=TARGET` parameter. Fixed by naming the write on `TARGET`'s own lines
+(and by calling `write_codebook_block(CODEBOOK_MASTER, …)` explicitly instead
+of looping over a tuple). 1091 now appears in `writers`, in `contested_files`,
+and in `build.py plan lobbying` PHASE 2. **Anyone adding an enricher in this
+repo should check the manifest actually sees it.**
+
+**The `aggregation_safe = 1` half is NOT closed and is the integrator's.**
+`517` classes the table `SAFE_TO_AGGREGATE` on a primary-key and
+literal-duplicate test, and both still pass — the classification is correct on
+its own terms and it is still the field a buyer's tooling reads first. Either
+`517` gains *additive under a stated predicate*, or the lobbying contract in
+`512` declares one. Both files are the integrator's; the measurement is in
+`docs/MONEY_TOTALLING_RULES.md` under `LOBBY-SUPERSESSION`.
+
+### B — the three totals hold, and the shipped surface did not warn about them
+
+All three re-measured 2026-09-02 and all three reproduce exactly:
+$645,052,868.51 (registrants, 653 rows) · $680,561,640.52 (panel, 5,001) ·
+$725,743,974.52 (filings, 27,825). **The documentation was right. The shipped
+files were not.** `dist/04_lobbying/native_entity_lobbying_disclosures.NOTES.md`
+described `spend_usd` as "Reported lobbying spend for the filing period" with
+no warning, and `tribe_year_lobbying_panel.NOTES.md` described
+`total_lobbying_spend_usd` as, in full, **"Amount."** Neither shipped note
+mentioned amendments or the other totals. A buyer could innocently sum to a
+wrong number, and could innocently add two tables.
+
+Fixed at the generator's inputs, not by hand-editing generated files:
+`data/clean/series_breaks.csv` **24 → 27 rows, zero pre-existing rows lost**
+(three rows added to `86`'s `BREAKS`; `86` rewrites that file wholesale from
+that list, so appending to the CSV would not have survived), and the
+`spend_usd` / `total_lobbying_spend_usd` descriptions rewritten in
+`codebook_master.csv` and `data/clean/codebook/04_lobbying.csv`. `87` then
+renders both as a `## Comparability` block and a codebook row in the shipped
+notes. **There is now a FOURTH figure** — $688,394,720.51, `WHERE
+is_superseded = 0`, the only additive one at filing grain — and it sits $7.8M
+from the panel's $680.6M by coincidence, which is the likeliest way someone
+gets this wrong. It is named as such everywhere it appears.
+
+Corroboration for the key: `lobbying_registrants.csv` has been doing
+supersession since 2026-08-26. Its shipped codebook says *"Deduplicated to one
+value per (registrant, client, year, reporting period), taken from the filing
+with the latest dt_posted, because an amendment supersedes what it amends."*
+**The rollup did it; the filing table it was built from did not.**
+
+### C — Schedule C: 21.3% was a stale number, not a backlog
+
+`512`, `27`, `132` and `MONEY_TOTALLING_RULES.md` all state **32,218 indexed /
+6,870 retrieved / 21.3%, "Cedar's own fetch backlog"**. Measured before opening
+a socket, per AGENT_FIELD_GUIDE §5: **28,677 XML were already on disk.**
+`code/860`'s full-history pull ran 2026-09-01 23:5x–2026-09-02 00:10, extracted
+21,807 returns, and nothing re-parsed them. `ON_DISK_NOT_PROMOTED`, not
+`NOT_ACQUIRED`.
+
+One real fetch was still owed and was run under one-poller discipline
+(`logs/_HOSTLOCK_apps.irs.gov.json` was released 04:10Z, no peer on that host,
+claimed and released again): **691 returns had been logged
+`indexed_but_absent_from_archives` when they were really DEFLATE64 members
+CPython's `zipfile` cannot decode.** `--steps irs-deflate64` downloaded the six
+affected archives one at a time, deleted each after extraction, and **recovered
+472**. 6 archives, ~1GB peak, 88GB free.
+
+```
+                        before        after
+XML on disk              6,870       29,149    (index 32,218 -> 90.5%)
+parsed into the table    6,870       29,149    (+22,279 rows)
+returns with a $         132          607
+lobbying_usd_headline    $3,325,511   $16,455,891
+2019 coverage            PARTIAL      FULL
+```
+
+**The 3,069 that remain are NOT a fetch backlog and must not be reported as
+one.** 775 are `990T` (772) and `990PR` (3) — Schedule C does not exist on
+those forms, `SOURCE_DOES_NOT_PUBLISH`, and `99` excludes them by design.
+2,294 were requested and are absent from every IRS ZIP published for their
+year, logged per object. 2017 (912) and 2022 (1,430) carry 2,342 of the 3,069.
+`27`'s caveat, which said "25,348 of 32,218 indexed returns are not yet
+downloaded", is corrected and the manifest regenerated.
+
+### Gates
+
+`518`: **lobbying READY, 35 tables** (was 33; the two Schedule C tables joined).
+`87`: `ship_tables_shipping` 197 → **227**, `tables_missing_notes_contract`
+24 → 22, ship rate 88.133% → 88.307%.
+`293`: exit 1, 166 unwaived instances, **0 of them in 1091** (grepped).
+`62`: exit 1. **None of its regressions name a lobbying table or any file this
+pass wrote.** Naming the owners with the measurement, per standing rule 15:
+
+| line | owner, measured |
+|---|---|
+| `files_with_columns_lost_vs_backup = 3` | `native_fi_roster.csv` 23→22 lost `in_cicd_nafi_map` and `cedar_entity_spine.csv` 44→43 lost `cicd_verified`, both vs `.bak_2026-09-02_pre844` — **script 844's owner**. `prime_contracts.csv` 75→70 lost the five `identifier_ruling_*` columns vs `.bak_2026-09-02_pre_1085_prime_psc_desc_repull` — **script 1085's owner, whose puller is live in this machine's process list right now** |
+| `lint_*` ROSE 146 → 166 | 293 names each instance; the largest movers are `class2c` (+9) and `class4` (+5) across `1030`, `1031`, `1060`, `1104`, `980`, `992`, `846`, `852`, `873`. **Zero in 1091** |
+| `rulings_unapplied` 1,215 → 2,894 | the rulings/adjudication workstream |
+| `ship_tables_at_zero`, `tables_missing_from_25_TABLES`, `tables_missing_from_27_SPEC`, `tables_undocumented_in_codebook` | all four move together as tables enter `data/clean` ahead of `25`'s curated override list. **The integrator owns `25`.** My own contribution moved the opposite way: `nonprofit_schedule_c_lobbying.csv` left the biggest-unshipped list when `87` gave it a notes contract at 29,149 rows |
+| `SHIPPING LOST: advocacy_passthrough_2026-08-07.csv` | already recorded in this file as a duplicate vintage ruled into `INTERNAL_TABLES` |
+| `hearing_bill_links.csv` 465→464, `native_bills_subject_sweep.csv` 2,414→2,409 | the bills/votes workstream |
+
+### Two stale things found in passing, not fixed, owners named
+
+* **`86_build_series_breaks.py` re-measures its own subawards figures on every
+  run and printed: `pre-FSRS count moved from 47 to 51`, FY2009 30→33, FY2010
+  113→141, FY2011 1,652→1,953, FY2012 2,679→3,106.** The prose in that break
+  row still quotes the old counts. **Subawards workstream.**
+* **`docs/MONEY_TOTALLING_RULES.md` carries two `<!-- BEGIN FAADS -->` markers
+  and one `<!-- END FAADS -->`.** Two blocks sharing a marker name are one
+  block to `574`'s preserver (AGENT_FIELD_GUIDE §2). **FAADS workstream.**

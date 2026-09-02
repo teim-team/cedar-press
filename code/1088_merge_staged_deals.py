@@ -405,6 +405,69 @@ def intra_family(party, counterparty, text, fam, hub_name, norm, members,
 
 
 # ------------------------------------------------------------------ gates ---
+
+# G11 - the article date is not the transaction date.
+#
+# `docs/methodology/deals.md`: "Never file a deal by announcement year when the
+# transaction year differs", and the two search-summary traps it records are
+# this exact shape - Paskenta/Mad River Brewery presented as August 2026 news
+# and actually March 2024, Blue North Fisheries framed as 2025-26 and actually
+# effective 2019-09-30.
+#
+# EVERY tribal-press row here is dated by the site's own REST API post date,
+# which is the ARTICLE date. Measured on the 96 admitted press rows, 14 carry a
+# sentence that names a year two or more before the one they are filed under.
+#
+# The gate is deliberately NARROW, because a retrospective year is not by
+# itself a defect. "Chugach Commercial Holdings: Established in 2014" inside a
+# 2026 acquisition announcement is background, and refusing that row would lose
+# a real 2026 transaction over a date that is not its date. So G11 fires only
+# when the earlier year sits WITHIN 60 CHARACTERS OF A TRANSFER VERB - which is
+# where a transaction year lives in a sentence and where a founding year does
+# not. Rows with a retrospective year that is only background keep their row
+# and get a Date_Basis that says the article date is not known to be the
+# transaction date.
+YEAR_IN_TEXT = re.compile(r"\b(19[5-9]\d|20[0-2]\d)\b")
+TRANSFER_NEAR = re.compile(
+    r"acquir\w*|purchas\w*|bought|\bsold\b|\bsells\b|\bsale\b|merg\w*|divest\w*", re.I)
+
+
+def retrospective_year(text, event_year):
+    """(year_named, adjacent_to_a_transfer_verb) or (None, False)."""
+    try:
+        ey = int(str(event_year).strip())
+    except (TypeError, ValueError):
+        return None, False
+    best, adjacent = None, False
+    for m in YEAR_IN_TEXT.finditer(text or ""):
+        y = int(m.group(1))
+        if y > ey - 2 or y > 2026:
+            continue
+        if best is None or y < best:
+            best = y
+        lo, hi = max(0, m.start() - 60), min(len(text), m.end() + 60)
+        if TRANSFER_NEAR.search(text[lo:hi]):
+            adjacent = True
+    return best, adjacent
+
+
+
+def date_basis_for(r):
+    """Disclose a retrospective year that G11 judged to be background.
+
+    The row keeps its article date because no transaction year is stated; the
+    basis says so rather than letting the article date read as an event date.
+    """
+    base = r.get("date_basis", "")
+    yr, adjacent = retrospective_year(r.get("Description"), r.get("Event_Year"))
+    if yr is not None and not adjacent:
+        return (f"{base}. NOT KNOWN TO BE THE TRANSACTION DATE: the sentence also "
+                f"names {yr}, not beside a transfer verb, so it reads as background "
+                f"rather than as this transaction's year. No transaction date is "
+                f"stated in the source and none was inferred.")
+    return base
+
+
 def gate_newsletter(r, fam, hub_name, norm, members):
     """Return (refusal_reason, refusal_basis) or ('', '')."""
     party = (r.get("Native_Party") or "").strip()
@@ -448,6 +511,16 @@ def gate_newsletter(r, fam, hub_name, norm, members):
                               fam, hub_name, norm, members)
     if hit:
         return "G6_INTRA_FAMILY_RELABELLING", basis
+
+    yr, adjacent = retrospective_year(desc, r.get("Event_Year"))
+    if yr is not None and adjacent:
+        return ("G11_ARTICLE_DATE_IS_NOT_THE_TRANSACTION_DATE",
+                f"the row is filed under {r.get('Event_Year')} because that is the "
+                f"site's post date for the article, but the sentence names {yr} "
+                f"beside a transfer verb - so the transaction year is {yr} and "
+                f"filing it under {r.get('Event_Year')} puts it in the wrong year. "
+                f"Recoverable: re-date to {yr} after reading the source, then "
+                f"re-admit.")
 
     return "", ""
 
@@ -618,7 +691,7 @@ def main(argv):
             "Verification_Status": "Single source (tribal press)",
             "Confidence": r.get("Confidence", ""),
             "Threshold_Exception": "Yes" if (money(av) or 0) < 1_000_000 else "",
-            "Date_Basis": r.get("date_basis", ""),
+            "Date_Basis": date_basis_for(r),
             "Notes": f"Staged by code/994; merged by code/{STEM}.py after gates G0-G7. "
                      f"deal_status_std from source: {r.get('deal_status_std','')}. "
                      f"{r.get('status_basis','')}",

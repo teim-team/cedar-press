@@ -1159,7 +1159,7 @@ this section is inside `<!-- BEGIN DEALS-MERGE-1088 -->` /
 
 | | before | after |
 |---|---:|---:|
-| `deals_classified.csv` rows | 935 | **1,079** |
+| `deals_classified.csv` rows | 935 | **1,073** |
 | `Announced_Value_USD` | $45,195,917,316 | **$47,880,355,533** |
 | added by the merge | — | **$2,684,438,217** |
 
@@ -1167,6 +1167,14 @@ Conservation was proved row-for-row, not asserted: **0 of the 935 pre-merge
 `Deal_ID`s lost, 0 pre-merge values changed, 0 columns lost.** The merge runs
 through `88_build_deals_taxonomy.py`, which is an append-merge over
 `cedar_pipeline.merge_table` and cannot drop a row.
+
+> The ledger reached **1,079** before gate `G11` (an article date is not a
+> transaction date) was added. Six rows merged before it existed were
+> **withdrawn WHOLE** to `review/deals_withdrawn_duplicates.csv`, never
+> deleted — 1,079 -> 1,073 rows, 52 -> 52 columns. **All six carried $0, so no
+> total in this table moved**, which is why the money row above is the same
+> either way. Named: `NLTR-2016-003`, `NLTR-2018-009`, `NLTR-2020-003`,
+> `NLTR-2021-008`, `NLTR-2024-010`, `NLTR-2026-013`.
 
 ### A CEILING IS NOT A VALUE, and this merge is where the rule earns its keep
 
@@ -1199,7 +1207,7 @@ deals dataset**.
 ### Three sums in this dataset that a buyer can still get wrong
 
 1. **Never sum `deals_press_edgar_ancsa_additions.csv` alongside
-   `deals_classified.csv`.** All 144 of its rows ARE in the classified table —
+   `deals_classified.csv`.** All 138 of its rows ARE in the classified table —
    it is their source, not an addition to it. This is the same rule already in
    force for the other nine `deals_*_additions.csv` slices, which together hold
    $22.67B of the classified table's own money.

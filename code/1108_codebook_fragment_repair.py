@@ -75,15 +75,28 @@ a plausible sentence, because a wrong definition is believed.
 
 VERIFY
 ------
-Four invariants, and `selftest` injects a violation of each and asserts the
+Five invariants, and `selftest` injects a violation of each and asserts the
 NAMED one fires:
 
   K1 master == concatenation of fragments. No row in one and not the other.
-     This is the invariant whose failure started this file.
+     This is the invariant whose failure started this file, and it RECURS:
+     47 more rows were written straight to the master while this pass ran,
+     by five other blocks. Run `repair` before `cedar_codebook.py build`.
   K2 every (block, variable) this script wrote is present in the master.
   K3 published == 1 implies a non-empty description (62's rule).
   K4 no DUNS spelling and no `casino_city_id` is marked publishable
      (`cedar_codebook.is_licensed_col`; 62's `duns_marked_publishable`).
+  K5 one row per (block, variable). The codebook grain is per BLOCK, not per
+     table, and several blocks cover two tables - see `dedupe_owned`.
+
+A NOTE ON `cedar_codebook.py build --force`
+-------------------------------------------
+`build` refuses a rebuild that reduces the ROW count, which is the right
+default and is what stopped a real lost update. `dedupe` reduces the row count
+on purpose - 18 duplicate rows collapse to 18 rows - and loses NO key. That was
+measured before forcing (master 5,462 -> 5,444 rows, 5,406 -> 5,406 keys,
+`keys lost by rebuild: 0`) and `--force` was used only on that evidence. Never
+force a shrink you have not counted keys on.
 """
 from __future__ import annotations
 
@@ -1077,6 +1090,33 @@ def selftest():
         write_rows(frag / "zz.csv", rows, FIELDS)
         check("K4 fires on a DUNS column marked publishable", master, frag,
               "K4", tmp)
+
+        # K5: two rows for one (block, variable).
+        rows = [r for r in read(master) if r["variable"] != "recipient_duns"]
+        rows.append(dict(rows[0]))
+        write_rows(master, rows, FIELDS)
+        write_rows(frag / "zz.csv", rows, FIELDS)
+        bad = verify(master, frag, tmp, quiet=True)
+        # `a` is not in ENTRIES, so K5's OWNED branch must stay silent and the
+        # duplicate must be counted as pre-existing - the check must not claim
+        # authorship of another block's debt.
+        good = not [b for b in bad if b.startswith("K5")]
+        print("  [%s] K5 does NOT claim a duplicate this script does not own"
+              % ("PASS" if good else "FAIL"))
+        ok = ok and good
+
+        # ...and DOES fire on one it owns.
+        owned_block, owned_var = next(
+            (b, v) for (b, t), cols in ENTRIES.items() for v in cols)
+        base = dict(rows[0], dataset=owned_block, variable=owned_var)
+        rows = read(master) + [base, dict(base)]
+        write_rows(master, rows, FIELDS)
+        write_rows(frag / "zz.csv", rows, FIELDS)
+        bad = verify(master, frag, tmp, quiet=True)
+        good = bool([b for b in bad if b.startswith("K5")])
+        print("  [%s] K5 fires on a duplicate (block, variable) it owns"
+              % ("PASS" if good else "FAIL"))
+        ok = ok and good
 
         # UNMEASURED: an empty master must raise a breach, never read clean.
         write_rows(master, [], FIELDS)

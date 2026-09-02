@@ -14,6 +14,7 @@ BRIDGE. FLAG, NEVER DELETE.
     py -3 code/1084_nagpra_split_artefact_audit.py verify     # read-only, exit 1 if stale
     py -3 code/1084_nagpra_split_artefact_audit.py selftest   # prove each detector FIRES
     py -3 code/1084_nagpra_split_artefact_audit.py provegates # prove I1..I6 FIRE
+    py -3 code/1084_nagpra_split_artefact_audit.py codebook   # document the 5 new columns
 
 WHY THIS EXISTS
 ---------------
@@ -483,7 +484,11 @@ def run(verify: bool, quiet: bool = False) -> int:
 
     flags, repairs, a8 = detect(by_doc, titles, m, name_freq)
 
-    det_rows = Counter()
+    # Seeded at zero so a detector that found NOTHING prints as a measured
+    # zero rather than vanishing from the report. It is proven to fire by
+    # `selftest`; an absent key would read as an unmeasured detector.
+    det_rows = Counter({d: 0 for d in
+                        ("A1", "A2", "A3", "A4", "A5", "A6", "A7")})
     det_notices = defaultdict(set)
     for r in rows:
         bid = r["nagpra_notice_institution_id"]
@@ -832,6 +837,90 @@ def selftest() -> int:
     return 0
 
 
+CODEBOOK_BLOCK = "11d_nagpra_notice_institutions"
+CODEBOOK_ROWS = [
+    ("split_artefact_suspected", "integer", "flag",
+     "1 where at least one splitting-artefact detector fired on this row: the "
+     "fragment in `institution_name` begins or ends mid-name because a "
+     "delimiter fell INSIDE a real institution's name. 77 of 7,234 rows. A "
+     "flag is not a deletion - the row and its published fragment are kept."),
+    ("split_artefact_detector", "text", "code",
+     "Which detectors fired, pipe-joined. A1 `, and ` inside an enumerated "
+     "name (the `Parks, Recreation, and Tourism` shape); A2 a delimiter "
+     "inside a parenthetical; A3 a Federal Register document-status word "
+     "(`Correction`, `Republication`) shipped as an institution; A4 the "
+     "fragment begins mid-sentence; A5 it still contains a possession "
+     "locution; A6 it is not bounded by a real delimiter in its own title; "
+     "A7 it is a hapax whose tokens are a subset of a sibling's. "
+     "code/1084_nagpra_split_artefact_audit.py."),
+    ("split_artefact_basis", "text", "text",
+     "Why, in prose, QUOTING the substring of the notice's own Federal "
+     "Register title that shows it, followed by the repair basis or the named "
+     "reason no repair was made."),
+    ("institution_name_repaired", "text", "text",
+     "The corrected institution name where it is recoverable VERBATIM from "
+     "the notice's own title, blank otherwise. Always a contiguous substring "
+     "of that title - asserted on every non-blank value. Blank is not "
+     "'no defect': it means no correction could be proven from the source."),
+    ("repair_action", "text", "code",
+     "`none`; `merged_primary` and `merged_absorbed` where two rows are "
+     "fragments of ONE institution and both carry the same "
+     "`institution_name_repaired` (use the primary, drop the absorbed, and "
+     "note the row count is deliberately unchanged); `trimmed` where an "
+     "object phrase was cut back to the institution; "
+     "`flagged_not_an_institution` where the fragment is a document-status "
+     "tag and no institution exists to recover."),
+]
+
+
+def codebook() -> int:
+    """Document the five columns this script adds, in the SANCTIONED place -
+    `data/clean/codebook/<block>.csv` - and keep `codebook_master.csv` in step
+    so `1108`'s K1 (master == concatenation of fragments) stays true. Both
+    writes are idempotent and both print row conservation."""
+    frag = ROOT / "data" / "clean" / "codebook" / f"{CODEBOOK_BLOCK}.csv"
+    master = ROOT / "data" / "clean" / "codebook_master.csv"
+    if not frag.exists() or not master.exists():
+        print("  1084 codebook UNMEASURED: fragment or master ABSENT - "
+              f"{frag.name} {frag.exists()}, {master.name} {master.exists()}")
+        return 1
+    _cols, brows = read_csv(BRIDGE)
+    n = len(brows)
+    filled = {c: sum(1 for r in brows if (r.get(c) or "").strip())
+              for c, *_ in CODEBOOK_ROWS}
+
+    def payload(fields):
+        out = []
+        for var, typ, unit, desc in CODEBOOK_ROWS:
+            out.append({"dataset": CODEBOOK_BLOCK, "variable": var,
+                        "type": typ, "units": unit,
+                        "pct_filled": f"{100.0 * filled[var] / n:.1f}",
+                        "n_rows": str(n), "published": "1",
+                        "access_tier": "public", "description": desc,
+                        "generated": TODAY})
+        return [{k: r.get(k, "") for k in fields} for r in out]
+
+    rc = 0
+    for path in (frag, master):
+        fields, rows = read_csv(path)
+        before = len(rows)
+        want = {(CODEBOOK_BLOCK, v) for v, *_ in CODEBOOK_ROWS}
+        kept = [r for r in rows
+                if (r.get("dataset"), r.get("variable")) not in want]
+        new = kept + payload(fields)
+        with path.open("w", newline="", encoding="utf-8") as fh:
+            w = csv.DictWriter(fh, fieldnames=fields, extrasaction="ignore")
+            w.writeheader()
+            w.writerows(new)
+        print(f"    {path.name}: {before:,} -> {len(new):,} rows "
+              f"({len(rows) - len(kept)} replaced, "
+              f"{len(new) - before:+d} net); 5 variables documented")
+        if len(new) - before not in (0, 5):
+            print(f"    BREACH unexpected row delta in {path.name}")
+            rc = 1
+    return rc
+
+
 def provegates() -> int:
     """Inject a synthetic breach of every named invariant, assert exit 1 AND
     that the NAMED invariant is the one that fired, restore, assert exit 0.
@@ -913,6 +1002,8 @@ def main() -> int:
     arg = sys.argv[1] if len(sys.argv) > 1 else ""
     if arg == "selftest":
         return selftest()
+    if arg == "codebook":
+        return codebook()
     if arg == "provegates":
         return provegates()
     return run(verify=(arg == "verify"))

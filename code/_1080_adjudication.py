@@ -208,6 +208,16 @@ for r in cands:
 # One TERM row per (registrant, property, formula). Later repetitions are the
 # same contract described again and are rejected as restatements.
 seen_terms = set()
+
+# ONE HAND-PINNED TERM. `('Red Hawk Casino', '30')` is claimed by whichever
+# candidate sorts first, which is the 2009-03-13 10-K - and the regex captured
+# "30% of net income" there, from a sentence about a DIFFERENT property. The
+# Red Hawk fee is 30% of net REVENUE as the management agreement defines it, and
+# the 2012-03-16 10-K states it in full including the tiering. The base and the
+# verbatim disagreed on the shipped row until this pin was added; a term row
+# whose `fee_percentage_base` and `fee_formula_verbatim` describe two different
+# formulas is worse than no row.
+PIN_TERM_TO_ACCESSION = {('Red Hawk Casino', '30'): '0001193125-12-120010'}
 TERM_META = {
     ('Mohegan Sun', '5'): dict(
         fee_formula_verbatim='a fee equal to 5% of Revenues, as defined in the Relinquishment '
@@ -228,7 +238,7 @@ TERM_META = {
         note='Development/management agreement for a casino that had not opened. No fee dollars '
              'were ever disclosed against it in this corpus, so nothing is derived.'),
     ('Four Winds Casino', '30'): dict(
-        fee_percentage='30', fee_percentage_base='NET_INCOME', fee_is_tiered='',
+        fee_percentage='30', fee_percentage_base='NET_INCOME', fee_is_tiered='UNSTATED_IN_THIS_FILING',
         note='Lakes/Pokagon Band, Four Winds.'),
     ('Four Winds Casino', '24'): dict(
         fee_percentage='24', fee_percentage_base='NET_INCOME',
@@ -240,7 +250,7 @@ TERM_META = {
              'threshold is unstated, a fee dollar CANNOT be divided by a percentage here - which '
              'is why no Four Winds revenue is derived anywhere in this build.'),
     ('Four Winds Casino Resort', '30'): dict(
-        fee_percentage='30', fee_percentage_base='NET_INCOME', fee_is_tiered='',
+        fee_percentage='30', fee_percentage_base='NET_INCOME', fee_is_tiered='UNSTATED_IN_THIS_FILING',
         contract_term_years='5',
         contract_expiry_as_stated='five years from August 2, 2007 (the opening date)',
         note='Lakes/Pokagon Band, Four Winds. Lakes describes the fee as 30% of net income in the '
@@ -265,6 +275,12 @@ TERM_META = {
              'so fee/0.30 recovers only the excess over $4m, not the base. Nothing is derived.'),
     ('Red Hawk Casino', '30'): dict(
         fee_percentage='30', fee_percentage_base='NET_REVENUE_AS_DEFINED_IN_THE_MANAGEMENT_AGREEMENT',
+        fee_formula_verbatim='a management fee equal to 30% of net revenue (as defined by the '
+                             'development and management agreement) ("Net Revenue") of the '
+                             'operations annually for the first five years. During years six and '
+                             'seven, Lakes will earn a fee equal to 25% of the first $90 million '
+                             'of Net Revenue per year, 15% of the next $60 million of Net Revenue '
+                             'per year and 5% of Net Revenue over $150 million per year',
         fee_is_tiered='Y', contract_term_years='7',
         contract_expiry_as_stated='seven years from the opening date (opened December 17, 2008)',
         note='TIERED. 30% of Net Revenue (as defined) for the first five years; in years six and '
@@ -299,6 +315,13 @@ for r in cands:
         continue
     if meta.get('fee_percentage') == '':
         rule(r['candidate_id'], 'REJECT_STATUTORY_CEILING_NOT_A_CONTRACT_TERM', meta['note'])
+        continue
+    pin = PIN_TERM_TO_ACCESSION.get(key)
+    if pin and r['accession'] != pin:
+        rule(r['candidate_id'], 'REJECT_AMBIGUOUS_FEE_BASE_IN_THIS_FILING',
+             'This (property, rate) term is pinned to accession %s, where the registrant states '
+             'the formula in full. The capture here took its base from an adjacent sentence about '
+             'another property.' % pin)
         continue
     if dedupe_key in seen_terms:
         rule(r['candidate_id'], 'REJECT_RESTATEMENT_SAME_EVIDENCE_FAMILY',

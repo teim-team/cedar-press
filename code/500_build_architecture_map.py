@@ -184,7 +184,7 @@ COLLECTIONS: list[dict] = [
     # --- Cedar Grove -------------------------------------------------------
     {"id": "gaming", "name": "Gaming Intelligence", "shelf": "grove",
      "prefixes": ["07", "14", "16"],
-     "tables": r"^(gaming_|nigc_|compact_|casino|loyalty_|digital_gaming|wa_machine|compacts|ca_gaming|fl_gaming|state_gaming|fac_audit_)"},
+     "tables": r"^(gaming_|sec_gaming_|nigc_|compact_|casino|loyalty_|digital_gaming|wa_machine|compacts|ca_gaming|fl_gaming|state_gaming|fac_audit_)"},
 
     # --- Infrastructure: not sold as a collection, but everything joins it --
     {"id": "_entity_layer", "name": "Entity spine, identifiers and reference", "shelf": "infrastructure",

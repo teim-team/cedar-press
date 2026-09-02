@@ -127,6 +127,37 @@ from collections import Counter
 from datetime import date
 from pathlib import Path
 
+
+def _load_declared_removals():
+    """{(file, column)} that a script removed ON PURPOSE, with a stated reason.
+
+    Added 2026-09-02. `files_with_columns_lost_vs_backup` compares a live table
+    to its newest `.bak_*` and cannot distinguish an intentional removal from
+    an accident. Without this the CICD retirement kept the metric red
+    permanently, and a permanently red metric is one nobody reads. A
+    declaration must name the removing script and the reason; it excuses only
+    that column on that file.
+    """
+    import json as _json
+    # Path derived from __file__, not ROOT: this loader runs at import
+    # time, before ROOT is bound further down the module.
+    p = (Path(__file__).resolve().parent.parent / "docs" / "schema"
+         / "declared_column_removals.json")
+    if not p.exists():
+        return set()
+    try:
+        d = _json.loads(p.read_text(encoding="utf-8"))
+    except ValueError:
+        return set()
+    out = set()
+    for r in d.get("declarations", []):
+        if r.get("file") and r.get("column") and r.get("removed_by") and r.get("why"):
+            out.add((r["file"], r["column"]))
+    return out
+
+
+_DECLARED_REMOVALS = _load_declared_removals()
+
 CEDAR = Path(__file__).resolve().parent.parent
 CODE = CEDAR / "code"
 CLEAN = CEDAR / "data" / "clean"
@@ -891,6 +922,12 @@ def measure_backups():
         if not lh or not bh:
             continue
         lost = [c for c in bh if c and c not in set(lh)]
+        # A DELIBERATE removal is not a regression, and without a way to say so
+        # this metric stays red forever and stops being read. A declaration is
+        # NOT a waiver: it names the script and the reason, and excuses only
+        # that column on that file. See docs/schema/declared_column_removals.json.
+        if lost:
+            lost = [c for c in lost if (live.name, c) not in _DECLARED_REMOVALS]
         if lost:
             losses.append({
                 "file": live.name, "backup": newest.name,

@@ -1,6 +1,6 @@
 {
  "generated": "2026-09-02",
- "n_items": 339,
+ "n_items": 334,
  "breaches": [
   {
    "invariant": "V1",
@@ -144,10 +144,10 @@
     "geo_award_unique_key": 841002,
     "naics_code": 838229,
     "award_type": 769868,
-    "product_or_service_code": 574011,
-    "product_or_service_code_description": 574011,
-    "award_base_description": 573320,
-    "naics_description": 561536
+    "naics_description": 247987,
+    "product_or_service_code": 247987,
+    "product_or_service_code_description": 247987,
+    "award_base_description": 247987
    },
    "evidence": "always empty in 20,001 rows: contract_transaction_unique_key, contract_award_unique_key, naics_code, naics_description ..."
   },
@@ -264,7 +264,7 @@
   "V1_checked": 81,
   "V1_false": 10,
   "V1_false_columns": 47,
-  "V2_checked": 31,
+  "V2_checked": 26,
   "V4_checked": 8,
   "V3_false": 2,
   "tables_scored": 226,

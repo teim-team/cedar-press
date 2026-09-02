@@ -87,6 +87,37 @@ CLEAN = ROOT / "data" / "clean"
 #: Exact, whole-cell, case-sensitive. See the docstring for why this is not a
 #: set of every sentinel spelling.
 SENTINEL = "nan"
+# CASE-INSENSITIVE, whole cell. Corrected 2026-09-02 after Codex, PR #29
+# round 3, saw `funding_agency = "Nan"` in the contractors sample.
+#
+# The docstring above justified case-sensitivity with `Nanticoke`, `Nanakuli`
+# and `NANA` - and every one of those is an argument against a SUBSTRING rule,
+# which this never was. A whole-cell equality test cannot match a 4- or
+# 8-character value with a 3-character token. The case-sensitivity guarded
+# nothing and hid this, measured on the live table before the change:
+#
+#     cage_code              398,840  (32.75%)  'NAN'
+#     place_of_perform_city   88,269  ( 7.25%)  'NAN'
+#     place_of_perform_state  87,068  ( 7.15%)  'NAN'
+#     funding_agency          33,263  ( 2.73%)  'Nan'
+#     extent_competed          9,411  ( 0.77%)  'NAN'
+#     recipient_state_code       202            'NAN'
+#     recipient_city_name         22            'NAN'
+#     parent_uei                  22            'NAN'
+#                            -------
+#                            617,097 cells the lowercase-only rule could not see
+#
+# `extent_competed` is the worst of them: START_HERE warns that the column
+# holds two vocabularies and must be read through
+# `extent_competed_normalized`, and a phantom `NAN` code is a third.
+#
+# The TOKEN SET is deliberately NOT widened. `NA` (6 cells in
+# `award_base_description`) and `N/A` (7 in `recipient_city_name`) stay as
+# they are: `NA` is a real abbreviation a human may have typed to mean "not
+# applicable", which is a statement, and stripping it would be a judgement
+# rather than a repair. They are named here instead of being swept.
+def is_sentinel(v: str) -> bool:
+    return v is not None and v.strip().lower() == SENTINEL
 
 DEFAULT_TABLES = ["prime_contracts.csv"]
 
@@ -106,7 +137,7 @@ def sweep(path: Path, write: bool) -> tuple[int, dict, str]:
             w.writeheader()
         for r in rd:
             for k in cols:
-                if r.get(k) == SENTINEL:
+                if is_sentinel(r.get(k)):
                     per[k] = per.get(k, 0) + 1
                     n += 1
                     if write:

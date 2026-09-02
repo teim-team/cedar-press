@@ -1872,3 +1872,68 @@ agent's.
 returns **HTTP 403**; both are recorded `NOT_CHECKED` and neither is an
 absence. HHS's robots.txt names no `Sitemap:` directive to fall back to.
 <!-- END ADR-023-FR-DTLL -->
+
+<!-- BEGIN ADR-SEC-GAMING -->
+## ADR-SEC-GAMING - an SEC filing is a THIRD class of gaming evidence (workstream SEC-GAMING, 2026-09-02)
+
+**Status:** accepted 2026-09-02, `code/1080_sec_gaming_facility_revenue.py`.
+File ownership declared here, per AGENTS.md *Parallel agents*. Nothing was
+committed.
+
+### The decision
+
+Gaming already fences a **regulator's** figure off from an **operator's
+self-published** claim. A figure a public company filed with the SEC about a
+tribal casino is **neither**, and it does not go in either bucket.
+
+* It is **stronger** than a marketing page: filed under a federal disclosure
+  obligation, and in a 10-K it sits inside or beside audited statements.
+* It is **different in kind** from an NIGC figure: it is the filer's own
+  accounting of its own contract or its own property, not a regulator's
+  measurement of the industry.
+
+So it gets `assertion_class = SEC_FILED_FINANCIAL_DISCLOSURE` (and
+`SEC_FILED_CONTRACT_TERM` for the no-money terms table), both deliberately
+outside `cedar_domain.MeasurementType` and outside the `SELF_PUBLISHED_*`
+family, with `not_summable_with` populated on every row.
+
+**The specific double-count this prevents:** an SEC-derived property revenue
+summed against an NIGC `REGIONAL_GGR_CEILING`. The property is inside the
+region and the ceiling already contains it. `1080 verify` V13 measures the
+overlap instead of asserting it away: 7 of the 8 facilities here also carry a
+regional-ceiling bound row.
+
+**A second decision, forced by the evidence:** a management fee does NOT imply
+revenue. IGRA's "net revenues" (25 U.S.C. 2703(9)) is nearer operating profit,
+and the contracts in this corpus variously use *net revenue as defined*, *net
+income as defined*, a *threshold*, and a *floor*. Inverting a fee recovers the
+contract's own base, so derived figures are typed
+`DERIVED_FACILITY_*_AS_DEFINED` and V10 exits 1 if a derived figure wears a
+reported figure's type. Two of eight formulas were invertible; six were refused.
+
+### Files this workstream owns for the duration of the pass
+
+| file | what is written | how |
+|---|---|---|
+| `data/clean/sec_gaming_financial_disclosures.csv` | **new file**, 67 rows | `code/1080 build` |
+| `data/clean/sec_gaming_management_contract_terms.csv` | **new file**, 7 rows | `code/1080 build` |
+| `review/sec_gaming_1080_candidates.csv` | **new file**, 123 mined candidates | `code/1080 mine` |
+| `review/sec_gaming_1080_adjudication.csv` | **new file**, 143 hand rulings | `code/_1080_adjudication.py` |
+| `code/1080_sec_gaming_facility_revenue.py`, `code/_1080_facility_aliases.py`, `code/_1080_adjudication.py` | **new** | - |
+| `docs/SEC_GAMING_FACILITY_REVENUE_BUILD_LOG.md` | **new** | - |
+| `docs/MONEY_TOTALLING_RULES.md` | **append only, inside `<!-- BEGIN SEC-GAMING -->`** | no other block touched |
+| `docs/methodology/gaming.md` | **one new section inside `<!-- BEGIN SEC-GAMING -->`, plus one added paragraph under "The thing a reader has to accept"** cross-referencing it. The headline claim itself is unchanged. Backup: `.bak_2026-09-02_pre_1080_sec_gaming_facility_revenue` | this file has no marker convention today; markers were used anyway |
+| `code/512_build_dataset_contracts.py` | **`GRAIN_SEC_GAMING` added; no other workstream's dict touched.** Backup: `.bak_2026-09-02_pre_1080_sec_gaming_facility_revenue` | per AGENT_FIELD_GUIDE section 2 |
+| `code/500_build_architecture_map.py` | **one token, `sec_gaming_`, added to the `gaming` collection's table regex.** Without it both tables are orphan shippables, because they deliberately do NOT wear the `gaming_` prefix - the different prefix is the different assertion class. Backup: `.bak_2026-09-02_pre_1080_sec_gaming_facility_revenue` | additive; cannot dislodge another table |
+| `data/clean/codebook/07zq_*.csv`, `07zr_*.csv` | **two new codebook fragments.** `codebook_master.csv` NOT touched - folding fragments into the master is `cedar_codebook.py build`, which is the integrator's call because it folds every agent's in-flight fragment at once. **Until that runs, both tables count against `tables_undocumented_in_codebook` in gate 62.** Keys were checked against both the fragment directory and the master's `dataset` column; `07p`/`07q` were taken and a first attempt at them was deleted before any build saw it | `code/1080 codebook`, which now refuses a key documenting a different table |
+| `START_HERE.md` | **one row added to the per-dataset index table**, in the gaming block | single-line insert |
+
+**Not touched:** `data/clean/gaming_facilities.csv`, `gaming_revenue_bounds.csv`,
+and every self-published gaming table. Nothing was written in place anywhere in
+the gaming universe; both outputs are new files beside it.
+
+**Not ours:** municipal continuing disclosure. Tribal gaming authorities with
+public debt file property-level operating data on EMMA, which is a parallel
+route to the same figure and belongs to the tribal-debt workstream. This pass
+stopped at the SEC boundary on purpose.
+<!-- END ADR-SEC-GAMING -->

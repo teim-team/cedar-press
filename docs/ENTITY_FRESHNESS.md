@@ -9,8 +9,8 @@ This answers a question no other instrument can. Coverage says who has a website
 | entities in the register | 1,555 |
 | **appear in NO substantive Cedar row** | **0** |
 | (the old, unfixable measure: no row in ANY table, identity layer included) | 0 |
-| present but carrying no usable date | 147 |
-| last change more than a year ago | 389 |
+| present but carrying no usable date | 148 |
+| last change more than a year ago | 398 |
 
 ## Columns REFUSED as build stamps
 
@@ -23,7 +23,7 @@ This answers a question no other instrument can. Coverage says who has a website
 | `gaming_property_self_published_claims.csv` | `as_of_date` | 106 | 2026-08-12, 2026-09-02 |
 | `gaming_web_harvest_observations.csv` | `as_of_date` | 87 | 2026-09-02 |
 
-Median days since last change: **132**. p90: **1,365**. Oldest: **15,715**.
+Median days since last change: **134**. p90: **1,365**. Oldest: **15,715**.
 
 ## The tail — 25 entities nobody has touched longest
 

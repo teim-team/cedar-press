@@ -212,11 +212,51 @@ reads a fixed window backwards — same 22 rows, one pass.
 
 ---
 
+## A finding about the denominator, handed to the gaming owner
+
+Keying eight properties to `gaming_facilities.csv` surfaced something that
+affects every "of 787" percentage in the gaming dataset, this document's
+included.
+
+**`gaming_facilities.csv` carries the same property twice for a large number of
+properties, and `duplicate_of_facility_id` is blank on both rows.** Measured
+2026-09-02 on the live file, grouping on (facility name with `casino`, `resort`,
+`hotel` stripped, state):
+
+| | |
+|---|---:|
+| name+state groups holding more than one row | **58** |
+| rows in those groups | **119** |
+| groups where `duplicate_of_facility_id` is blank on **every** row | **54** |
+| rows in those groups carrying `duplicate_risk = 1` | 60 |
+
+The pattern is consistent: a `CCP-` row from Casino City beside a `VP-` row from
+the voting-patterns canonical list - `CCP-565900` / `VP-0029` for Seneca
+Niagara, `CCP-635600` / `VP-0030` for Seneca Allegany, `CCP-639000` / `VP-0295`
+/ `CEDAR-FAC-000013` for Four Winds New Buffalo, `CCP-305300` / `VP-0153` for
+The Stables. `duplicate_risk` already flags 60 of the 119 rows, so the signal
+exists; what is missing is the pointer that would let a consumer collapse them.
+
+**Nothing here was written to `gaming_facilities.csv`** - that table belongs to
+the gaming universe workstream. This build keys to the `CCP-` row wherever one
+exists, because that is the row carrying `has_revenue_bound` and the capacity
+observations, and it lists the near-duplicates it knows about in
+`NEAR_DUPLICATE_IDS` in `code/_1080_facility_aliases.py` so no consumer counts
+one property as two.
+
+**Effect on this document's own headline:** if the true property universe is
+nearer 729 than 787, the 7 properties reached are **0.96%** rather than 0.9%.
+The claim does not move. It is stated here because a percentage whose
+denominator is under suspicion should say so.
+
+---
+
 ## Gates
 
 ```
 py -3 code/1080_sec_gaming_facility_revenue.py mine      # zero network, ~4 min over 609 docs
 py -3 code/1080_sec_gaming_facility_revenue.py build     # joins review/sec_gaming_1080_adjudication.csv
+py -3 code/1080_sec_gaming_facility_revenue.py codebook  # writes the two fragments
 py -3 code/1080_sec_gaming_facility_revenue.py verify    # exits 1 on breach
 py -3 code/1080_sec_gaming_facility_revenue.py selftest  # proves verify FIRES
 ```
@@ -232,6 +272,43 @@ All four pass. Two invariants are measurements rather than pass/fail:
 * **V15** counts restated facts and whether they agree — **32 restatements, 0 disagreements**.
   That is the only genuine internal corroboration this table has, and it is worth more than
   any of the flags: three separate Mohegan 10-Ks state the same FY2017 figure to the dollar.
+
+---
+
+## Gate 62, honestly
+
+`py -3 code/62_no_regression_check.py` was RED when this pass finished, with
+twenty-odd regressions. **Standing rule 15 says do not record that as
+"pre-existing, not mine" and walk on**, so here is the attribution, measured.
+
+**Not this workstream's.** Every `lint_class*` rise was checked against
+`293_lint_bug_classes.py` output filtered to `1080` and `_1080`: **no class
+carries an instance from any file this pass wrote.** The one class-7 instance
+1080 *did* create - a positional `candidate_id` - was found by 293 during the
+pass and fixed before the tables shipped (the id is now a content digest; see
+the comment at the site). `rulings_unapplied` 1,215 -> 2,894,
+`advocacy_passthrough_2026-08-07.csv` disappearing from `data/clean`, and the
+`hearing_bill_links` / `native_bills_subject_sweep` shipping drops belong to
+other workstreams running the same night and are untouched here.
+
+**This workstream's, and what closes them.** Two new tables in `data/clean`
+count against the codebook family of ratchets until the master learns about
+them:
+
+* `tables_undocumented_in_codebook`, `tables_missing_codebook_block`,
+  `tables_missing_notes_contract`, `ship_tables_at_zero`,
+  `tables_missing_from_25_TABLES`, `tables_missing_from_27_SPEC` - **2 of each
+  rise is ours.** `1080 codebook` has written the two fragments
+  (`07zq_sec_gaming_financial_disclosures`, `07zr_sec_gaming_management_contract_terms`,
+  51 and 31 variables, every column described). **The fold into
+  `codebook_master.csv` is `py -3 code/cedar_codebook.py build` and is the
+  integrator's call**, because it folds every agent's in-flight fragment at
+  once and `build()` refuses to shrink.
+* `contract_orphan_shippable` - both tables would have been orphans, because
+  they deliberately do not wear the `gaming_` prefix. `sec_gaming_` was added to
+  the `gaming` collection's table regex in `500_build_architecture_map.py`.
+
+Nothing was re-baselined. `--baseline` is a floor, not an acknowledgement button.
 
 ---
 

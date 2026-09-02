@@ -7,11 +7,11 @@
     "class2c": 69,
     "class3": 2,
     "class4": 14,
-    "class5": 7,
+    "class5": 6,
     "class6": 28,
     "class7": 45,
     "class8": 0,
-    "lint_bug_class_instances": 166
+    "lint_bug_class_instances": 165
   },
   "findings": [
     {
@@ -116,11 +116,11 @@
     {
       "class": "class5",
       "file": "1081_stale_tail_dated_facts.py",
-      "line": 304,
+      "line": 322,
       "evidence": "if ucol not in hdr:",
-      "why": "an 'already done' short-circuit (ucol not in hdr) skips the work, and this file still rewrites a log/summary artefact wholesale at line 452. On a second run the counters are zero and the log says so - the 164 defect: 187 facilities rewritten to read '0 sources'. Re-running a build must not change its output; merge into the existing log or refuse to rewrite it.",
-      "waived": false,
-      "waiver_reason": ""
+      "why": "an 'already done' short-circuit (ucol not in hdr) skips the work, and this file still rewrites a log/summary artefact wholesale at line 488. On a second run the counters are zero and the log says so - the 164 defect: 187 facilities rewritten to read '0 sources'. Re-running a build must not change its output; merge into the existing log or refuse to rewrite it.",
+      "waived": true,
+      "waiver_reason": "a SCHEMA guard, not an \"already done\""
     },
     {
       "class": "class2c",
@@ -161,7 +161,7 @@
     {
       "class": "class4",
       "file": "1110_tribal_debt_court_distress.py",
-      "line": 460,
+      "line": 535,
       "evidence": "if time.time() - START > RUN_DEADLINE_S:",
       "why": "a budget (RUN_DEADLINE_S) exits a loop, the file writes a completion marker (['COMPLETE', 'ok', 'retrieved']), and it never compares what it RETRIEVED against the total the SOURCE reported. That is the PER_DOCKET_BUDGET_S defect: four dockets written at 2,300-3,200 of 3,555-4,847 and marked `done`, so no resume would ever revisit them.",
       "waived": false,
@@ -1556,7 +1556,7 @@
     {
       "class": "class7",
       "file": "1084_nagpra_split_artefact_audit.py",
-      "line": 698,
+      "line": 703,
       "evidence": "rows = [{\"nagpra_notice_institution_id\": f\"X#{i+1:02d}\",",
       "why": "[WARN] POSITIONAL on target nagpra_notice_institution_id -> nagpra_notice_institutions.csv, nagpra_notices.csv. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1565,7 +1565,7 @@
     {
       "class": "class7",
       "file": "1110_tribal_debt_court_distress.py",
-      "line": 391,
+      "line": 465,
       "evidence": "\"target_id\": f\"T{i:02d}_{stype}\",",
       "why": "[WARN] POSITIONAL on target target_id -> no clean table. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": false,
