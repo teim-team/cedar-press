@@ -1014,6 +1014,31 @@ GRAIN_SWEEP = {
 
 GRAIN.update(GRAIN_SWEEP)
 
+# ---------------------------------------------------------------------------
+# PER-WORKSTREAM GRAIN BLOCKS, 2026-09-01.
+#
+# Three agents were retasked simultaneously onto the 22 tables that C1/C2 name
+# as UNSTATED. One shared dict would have had all three editing the same lines
+# at the same time, which is the collision this project has already paid for
+# more than once today (two agents independently claimed script number 532;
+# two more claimed 547). Each workstream gets its OWN dict and touches nothing
+# else in this file.
+#
+# Follows the GRAIN_SWEEP convention above. A table declared here must satisfy
+# the same bar as any other: the grain is what one row IS, the primary key is
+# validated against the data, and a declaration the data contradicts is a
+# release-blocking violation. UNSTATED is a legitimate outcome - "a wrong
+# grain in a contract is worse than a missing one" - and a table whose key
+# cannot be stated without guessing belongs in GRAIN_OPEN, not here.
+# ---------------------------------------------------------------------------
+GRAIN_WS1 = {}   # funding + subcontracting          (money, high duplicate counts)
+GRAIN_WS2 = {}   # _entity_layer hub + contractors   (identity-adjacent)
+GRAIN_WS3 = {}   # gaming, deals, resources, nonprofits, legislation, lobbying
+
+GRAIN.update(GRAIN_WS1)
+GRAIN.update(GRAIN_WS2)
+GRAIN.update(GRAIN_WS3)
+
 # A table whose grain is declared but whose PRIMARY KEY cannot be stated
 # without guessing. Recorded rather than left blank, so the gap is a task
 # with a name instead of a silence. These count as UNSTATED for the gate.

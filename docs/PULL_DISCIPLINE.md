@@ -548,3 +548,60 @@ laundering defect (`START_HERE.md` standing rule 1) with a new front door.
 with the date, the surface probed and the count. Absence under a filter is a
 property of the filter, and a sweep whose yield is never written down is
 indistinguishable from a sweep that never ran.
+
+## A FALSE "BLOCKED" IS A REAL LOSS — check robots.txt with YOUR user agent
+
+*Added 2026-09-01 by shard H, which lost 22 hosts to this before catching it.*
+
+`urllib.robotparser.RobotFileParser.read()` fetches `robots.txt` **with the
+default `Python-urllib` user agent**, not with yours. Hosts that block that UA
+return 403 for the robots file itself, and the parser interprets a 403 on
+robots.txt as `disallow_all`. The site then looks closed when it is open.
+
+Measured: `oha.org`, `nakupuna.com` and `papaolalokahi.org` all 403 the default
+UA while serving a permissive `Disallow:` to Cedar's declared UA. Twenty-two
+hosts in one shard's slice were recorded as robots-blocked and skipped, and
+none of them was.
+
+**The fix:** fetch `robots.txt` yourself with the same declared user agent you
+will use for the content, then hand the body to `RobotFileParser.parse()`.
+Never let `.read()` do the fetch.
+
+```python
+rp = RobotFileParser()
+body = fetch(robots_url, ua=OUR_UA)          # our UA, our headers
+rp.parse(body.splitlines() if body else [])  # 404/empty == allowed
+```
+
+A missing or empty `robots.txt` means **allowed**, not blocked. Only an actual
+`Disallow` matching your path is a refusal.
+
+This is the same shape as the `ps aux` lesson recorded above: **a check that
+fails closed for the wrong reason silently stops work that would have
+succeeded.** It is the mirror image of the export-gate defect in `AGENTS.md`
+where a check read a key that never existed and therefore always passed. Both
+are checks that are not measuring what their name says.
+
+**None of this loosens a real refusal.** A genuine `Disallow` on your path, a
+`TERMS_STATED_RESTRICTIVE` source, or a host that blocks your declared UA is
+still a refusal and stays one. The point is only that the refusal must be real.
+
+### Two companions from the same shard, both the same class of error
+
+**A guessed domain that returns 200 is fabrication with a status code next to
+it.** Bare token matching accepted a HugeDomains parking page, a Japanese blog,
+a sweepstakes-casino farm, an unrelated coaching consultancy, and two
+municipalities. Of 376 generated candidates only 8 survived a bar of: not
+parked, the page's own `canonical`/`og:url` on the same apex, and a distinctive
+name token in the `<title>`. Where a sourced URL already exists, do not guess at
+all. Three other shards independently hit hijacked tribal domains today —
+`jicarillaonline.com` (Thai casino), `lacvieuxdesert.com` (Indonesian slots),
+`wrpt.us` (adult video), `rockyboy.org` (electronics blog),
+`chippewacree.org` (link farm) — and one **Wayback capture that was already
+hijacked**. A domain name is never evidence.
+
+**A truncated read reports "no content" rather than "truncated."** A 1.6 MB cap
+silently produced three newsletters that looked content-free: a cut-off PDF
+still opens and still reports a page count, but extracts zero text. Record
+`text_chars_extracted` per document and emit `text_not_extractable` — never a
+bare `false` — when extraction yields nothing.
