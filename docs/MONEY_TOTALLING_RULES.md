@@ -1622,3 +1622,393 @@ NIGC publishes GGR at the **region** level and nowhere else. `gaming_revenue_bou
 **The federal total is complete only from FY2007**, where the modern assistance table begins. FY2000-06 carries prime only; the pre-2008 Native assistance slice is the separate `faads_pre2008_assistance_attributed` series, is **tier B throughout**, and overlaps the modern table in FY2007 by 11,063 transactions.
 
 <!-- END GAMING-TOTAL -->
+
+<!-- BEGIN GAMING-DENOMINATOR-717-CORRECTION -->
+
+## CORRECTION 2026-09-02 — the gaming property denominator is 717, not 714
+
+Appended by `code/1142_gaming_denominator_doc_sweep.py`. **No prose above this
+line was edited**, per the rule the `GAMING-DENOMINATOR-2026-09-02` banner set
+for itself.
+
+Any figure in this document that uses **714** as the count of distinct gaming
+properties is superseded. The settled figure is **717**:
+
+```
+787   rows in gaming_facilities.csv
+-16   carrying cedar_place_id_absent_reason = NOT_A_PLACE
+=771   rows that are a place
+-54   extras collapsed by the 53 ADJUDICATED merge groups
+=717   distinct properties        <- COUNT(DISTINCT cedar_place_id)
+```
+
+**Why the old ladder gave 714.** It subtracted **57** duplicate extras found by
+name normalisation. The adjudication found **54**. The three-property
+difference is three groups a mechanical duplicate test called the same property
+and a human verdict did not:
+
+| group | why it is two properties |
+|---|---|
+| `THREE RIVERS` (OR) | Coos Bay 97420 and Florence 97439 — **67 km apart**, two casinos |
+| `GLACIER PEAKS` (MT) | a casino and its hotel |
+| `CITIES OF GOLD` (NM) | a casino and its hotel |
+
+A duplicate count is an upper bound on merges; an adjudication is the answer.
+
+**Two groups remain genuinely open** and either ruling moves 717: `THE STABLES`
+(a real Miami/Modoc joint operation — one property, two sovereigns) and
+`7 CLANS FIRST COUNCIL` (OK). Both are in
+`review/OWNER_DECISION_QUEUE.md` as GP-1 and GP-2.
+
+**Do not re-derive this number.** Seven values circulated for it — 787, 780,
+734, 727, 725, 717, 714 — each from a correct-looking rule applied to an
+undefined question. `gaming_facilities.csv` now answers it itself: the 16
+non-places carry a reason column, and the merged properties share a
+`cedar_place_id`. Read `COUNT(DISTINCT cedar_place_id)`.
+
+<!-- END GAMING-DENOMINATOR-717-CORRECTION -->
+
+<!-- BEGIN MONEY-RECON-1144 -->
+
+## The three money datasets, measured together — and the prime-vs-sub answer
+
+*Workstream MONEY-RECON-1144, 2026-09-02. Every figure below is produced by
+`py -3 code/1144_money_reconciliation_prime_sub.py measure`, recorded in
+`docs/MONEY_RECONCILIATION_1144.json`, and re-checked by `verify`, which exits 1
+when one of the ten recorded numbers stops reproducing. `selftest` perturbs each
+of the ten and asserts the comparison rejects it (10/10) — so a PASS here is
+evidence the measurement happened, not evidence that nothing broke.*
+
+**Read method:** every file is read `all_varchar=true` + `TRY_CAST`.
+`ignore_errors=true` was deliberately NOT used. It drops malformed rows
+silently, and a money total over a silently-shortened table is the defect this
+section exists to prevent. Uncastable money cells: **0** in `funding`, **0** in
+`contractors`, **0** in `subcontracting`.
+
+### 0. A DELIVERY DEFECT: the largest money dataset is not in `dist/customer/`
+
+`dist/customer/MANIFEST.csv` declares **13** datasets. **12 CSVs are on disk.**
+
+```
+declared and absent:  contractors  (1,217,768 rows, manifest says 1,606.5 MB)
+```
+
+`contractors__CODEBOOK.md`, `contractors__NOTES.txt` and
+`contractors__NOTES.pdf` were all written at **16:24**, after the other twelve
+datasets landed at 16:10–16:11, and `dist/manifests/contractors.json` exists.
+So the combine ran for `contractors` and produced its paper; the CSV itself is
+not there. `C:` had **17 GB free** at measurement time against a declared
+1.6 GB output, so free space is not obviously the cause. **The flagship money
+dataset cannot ship in this state, and the manifest currently promises a file a
+buyer would not receive.** Nothing in the repo says the file is *missing*:
+`1137 verify` reports `contractors: STALE`, which reads as a refresh nag, and
+`512` validates the contract rather than the delivery. **An absent deliverable
+and a stale one are different problems and only one of them blocks a ship** —
+a manifest-to-disk gate is queued as `WORK_QUEUE` Q1. `contractors` figures below are therefore measured
+from the flagship source, `data/clean/prime_contracts.csv`, and 1144 records
+`contractors.measured_from_dist = false` so the substitution is never silent.
+
+### 1. The headline totals, as of 2026-09-02
+
+| dataset | file measured | rows | the total | attributed to a nation | entities |
+|---|---|---:|---:|---:|---:|
+| `funding` | `dist/customer/funding.csv` | 701,955 | `obligated_usd` **$219,689,020,478.59** | **$168,156,517,719.76** on 549,180 rows | 669 |
+| `contractors` | `data/clean/prime_contracts.csv` | 1,217,768 | `total_obligations` **$310,005,258,660.75** | **$230,259,821,658.99** on 791,521 rows | 526 |
+| `subcontracting` | `dist/customer/subcontracting.csv` | 89,809 | `subaward_amount` countable **$34,906,694,737.65** on 69,921 filings | — (see §3) | 656 sub / 163 prime |
+
+`contractors`' $310,005,258,660.75 reproduces the figure in the QUARANTINE block
+above to the cent. Its **attributed** total does not, and should not: that block
+recorded $227,965,023,146.82 / 785,737 rows immediately after `1079`, and
+`1140` and the rulings passes have since moved it to **$230,259,821,658.99 /
+791,521 rows**. Quote the live figure or re-derive; the QUARANTINE block's
+number is a correct record of a moment, not a current fact. The quarantined
+exposure moved with it: **227,540 rows carry
+`identifier_ruling_quarantined = 'Y'`, and $30,258,921,540.23 of the attributed
+total now rests on one** — the QUARANTINE block's $28,862,571,317.64 is the
+same measurement taken earlier in the day. Any per-entity total should still be
+able to state how much of itself sits on a quarantined ruling; it is now 13.1%
+of the attributed figure.
+
+**Columns that may be summed, restated for these three files only:**
+
+- `funding.obligated_usd` — freely, one row is one assistance transaction.
+- `contractors.total_obligations` — freely. **`total_award_value` is a
+  different measure and is 18.15× larger**: $5,625,791,120,828.75 across the
+  same 1,217,768 rows. It is a *ceiling on the award*, restated on every
+  transaction of that award, not money moved. Never add the two, never sum it
+  across transactions, and never let a chart labelled "obligations" be built
+  from it.
+- `subcontracting.subaward_amount` — **only** where
+  `duplicate_status = 'primary'` AND `subaward_exceeds_prime_flag != 'yes'`.
+- `contractors.total_obligations` **+** `subcontracting.subaward_amount` — see
+  §3. The answer is no.
+
+### 2. The subaward overstatement — the live figure, and the THREE vintages currently shipping
+
+Re-measured on the delivered file, 89,809 rows:
+
+```
+all rows                          $57,020,557,710.47   <- never quote
+countable, 69,921 filings         $34,906,694,737.65   <- the correct total
+the money rule removes            $22,113,862,972.82
+   = 63.4% of the correct total   <- the number to quote, with its base named
+   = 38.8% of the unfiltered one
+```
+
+`duplicate_status`: `primary` 70,597 · `exact_repeat_within_source` 18,366 ·
+`superseded_by_primary_source` 846. `subaward_exceeds_prime_flag = 'yes'` on
+836 rows / $7,581,669,521.78, of which 676 / $7,266,026,845.59 are also
+`primary` — that flag is doing real work and is the reason `primary` alone
+($42,172,721,583.24) is not the answer either.
+
+**This agrees exactly with the DEEPEN-SUBAWARD-DENOMINATOR correction above,
+with `dist/samples/README.md`, with `dist/collection_descriptors.json` and with
+`dist/measured_facts.json`. It agrees with nothing else that a buyer receives.**
+
+Measured across the delivered artifacts, **three generations of this one warning
+ship side by side**:
+
+| figure | where it ships | vintage |
+|---|---|---|
+| **63.4% · $57.02B · $34.91B · $22.11B** | `dist/samples/README.md`, `dist/collection_descriptors.json`, `dist/measured_facts.json` | **current, correct** |
+| 82.9% · $25,864,997,128.19 correct · $47,301,660,819.78 unfiltered | `dist/customer/subcontracting__NOTES.txt` L20–22, `subcontracting__CODEBOOK.md` L9 | the 76,859-row file, superseded |
+| "the unfiltered subaward total runs **86.9%** above the correct one" | the boilerplate footer of **all 13 `*__CODEBOOK.md` and all 13 `*__NOTES.txt`** | the oldest — the generation this file records as *"the number was right and the noun was wrong"* |
+
+**A buyer opening `subcontracting__NOTES.txt` reads 82.9% at line 21 and 86.9%
+at line 47.** Twenty-six lines apart, in one file, about one measurement. That
+is the precise failure `docs/WHAT_IS_MISSING.md` recorded when the sample README
+said 46.5% and the descriptor said 86.9%, and it has not been closed — it has
+been *tripled*, because the corrected figure was added alongside the two stale
+ones instead of replacing them.
+
+The same sentence in `subcontracting__NOTES.txt` carries a fourth stale number:
+it says `cedar_uid` is *"legitimately blank on the 43,282 rows whose only Native
+party is the subawardee."* The measured count is **47,561** (see §4).
+
+**Where these come from, and what was done:**
+
+| site | fixed here | why |
+|---|---|---|
+| `code/512_build_dataset_contracts.py` `GRAIN_SUBAWARD_FUNDING` L1905–1913 | **YES** — the four stale figures replaced with the measured ones | they are stale facts, not a design choice; the dict's key, cardinality and basis were not touched |
+| `code/1137_customer_dataset_combine.py` L65, **L361**, **L456** | **NO — NOT TOUCHED** | that file is owned by another live workstream (mtime 16:58, five minutes before this measurement). L361 and L456 are the boilerplate that stamps "86.9%" into all 26 delivered paper files |
+
+**The 1137 fix is one string in two places** and is the single highest-value
+customer-facing correction outstanding. Both should read: *"and the unfiltered
+subaward total runs 63.4% above the correct one."* Its owner should re-measure
+rather than paste — the four figures move on every subaward fold-in, which is
+exactly how they got out of step three times.
+
+### 3. Prime vs sub — the combined figure, and whether combining is defensible
+
+**It is not. There is no single defensible "prime + sub" total, and the chart
+that showed primes only was right.** Here is the arithmetic that settles it.
+
+Take the $34,906,694,737.65 of countable subaward dollars and ask, of each
+filing, whether its `prime_award_unique_key` is an award Cedar already publishes
+in `prime_contracts.contract_award_unique_key`:
+
+| | filings | USD | share of countable |
+|---|---:|---:|---:|
+| **the prime award IS in `prime_contracts.csv`** | 27,319 | **$13,612,271,637.21** | 39.0% |
+| the prime award is NOT | 42,602 | $21,294,423,100.44 | 61.0% |
+| *(543 countable filings carry no prime key at all)* | | | |
+
+Now decompose both halves by which leg is the Native party:
+
+| prime award in `prime_contracts`? | `direction` | filings | USD |
+|---|---|---:|---:|
+| **yes** | `a_native_as_prime` | 26,587 | $12,955,932,319.97 |
+| **yes** | `both_sides_native` | 699 | $639,083,134.11 |
+| **yes** | `b_native_as_subawardee` | 33 | $17,256,183.13 |
+| no | `b_native_as_subawardee` | 37,850 | **$19,317,140,197.29** |
+| no | `a_native_as_prime` | 3,944 | $1,439,559,118.53 |
+| no | `both_sides_native` | 766 | $499,305,405.62 |
+| no | `unknown` | 42 | $38,418,379.00 |
+
+And of the $13.61B overlap, **$13,500,614,272.77 (99.2%, 27,195 filings) sits on
+a prime row that is itself `attributed_flag = 1`** — already inside the
+$230,259,821,658.99 headline. Only $111,657,364.44 sits on an unattributed
+prime.
+
+**So a naive `primes + subs` = $310.01B + $34.91B does three wrong things at
+once:**
+
+1. **It double-counts $13.61B outright**, 99.2% of it already inside the
+   attributed prime figure. A subaward is a slice of a prime award; adding it
+   re-counts a dollar the federal government obligated once.
+2. **It mixes two epistemic objects.** FPDS primes are *government-recorded*.
+   FSRS subawards are *vendor self-reported by the prime, unvalidated*. A single
+   number cannot carry two evidentiary standards, and a reader has no way to
+   discount the half that is a filer's own claim.
+3. **It launders a coverage gap into growth.** The $1,439,559,118.53 of
+   `a_native_as_prime` on primes Cedar does NOT carry is not new money reaching
+   Indian Country — it is 3,944 filings pointing at prime awards missing from
+   `prime_contracts.csv`. Adding it patches the prime table's gaps from the sub
+   table on 3,944 awards and not on the rest, which is worse than either
+   consistent choice.
+
+**What may be said instead.** Two numbers, two labels, never one:
+
+> **Federal prime contract obligations, FPDS, government-recorded:**
+> $310,005,258,660.75 across 1,217,768 transactions FY2000–FY2026, of which
+> **$230,259,821,658.99 is attributed to a Native nation** (791,521 rows, 526
+> entities).
+>
+> **Federal subcontract dollars reaching Native firms as the SUBAWARDEE, on
+> prime awards Cedar does not otherwise carry — FSRS, vendor self-reported:**
+> **$19,317,140,197.29** across 37,850 countable filings.
+
+That second figure is the **only** slice of the subaward file that is neither a
+re-slice of a published prime nor a patch over a prime-table gap, and it is
+still a self-report. It may be presented **beside** the prime total. It may
+never be added into it, and the sentence that carries it must say
+"self-reported by the prime."
+
+**A ceiling, for anyone who wants the outer bound.** On the 7,305 prime awards
+where both sides are present, subawards total $13,612,271,637.21 against
+$41,120,683,994.44 of prime obligations on the same awards — contained at 33%.
+**444 of those awards have subawards exceeding their prime's obligations, by
+$1,737,942,789.89 in aggregate**, and they survive the
+`subaward_exceeds_prime_flag` filter because that flag is evaluated per filing
+against the source's own `prime_award_amount`, not per award against Cedar's
+summed obligations. This is not automatically a defect — obligations accrue over
+a contract's life and can trail an award's value — but it is a real ceiling on
+how tightly the two tables reconcile, and no product should claim they
+reconcile more tightly than that.
+
+### 4. `subcontracting`'s 44.8% linkage rate is measuring the PRIME leg
+
+**The `cedar_uid` column in `subcontracting.csv` is not "the Native party on
+this row." It is the prime leg.** Measured on all 89,809 rows:
+
+| | rows |
+|---|---:|
+| `cedar_uid` non-blank | 40,201 |
+| …equal to `prime_cedar_uid` | **39,567** |
+| …equal to `sub_cedar_uid` | 894 |
+| …equal to **neither** leg named on the row | **631** |
+| `cedar_uid` blank | 49,608 |
+| …but `sub_cedar_uid` IS populated | **47,561** |
+| …and neither leg is keyed — **the real gap** | **2,047** |
+
+So the coverage figure carried into this session — *"subcontracting 44.8%, the
+lowest rate of any large dataset"* — reproduces exactly as a measurement of
+`cedar_uid` (40,201 / 89,809 = 44.76%) **and it is not this dataset's linkage
+rate.** A subaward has two legs; the dataset's own majority population is
+`b_native_as_subawardee` (49,360 filings, $32.43B), and those are precisely the
+rows where `cedar_uid` is blank by design.
+
+**Measured on either leg, `subcontracting` is 87,355 of 89,809 rows —
+97.27% linked**, not 44.8%. That is the highest linkage rate of any money
+dataset in the project, not the lowest. Its true unlinked residue is **2,454
+rows / $1,662,416,606.58** with neither leg keyed — of which 1,852 carry no key
+in any of the three columns and 407 carry a `cedar_uid` matching neither leg.
+That residue is the number worth working, and §6 works part of it.
+
+Two consequences:
+
+1. **Do not spend a linkage pass closing the 49,608 blank `cedar_uid` rows.**
+   47,561 of them are already keyed on the leg that matters and closing them
+   would mean writing the *subawardee's* id into a column documented as the
+   prime's — which would silently corrupt every `GROUP BY cedar_uid` a customer
+   runs against this file.
+2. **The 631 rows whose `cedar_uid` matches neither leg are a genuine
+   inconsistency** and are flagged here, not changed. A row naming a Cedar
+   entity that is neither of its two named parties cannot be right; it is small,
+   and resolving it is an identity question, not an arithmetic one.
+
+### 5. A populated key is not an attribution — measured on both money tables
+
+`cedar_uid` being non-blank does **not** mean Cedar stands behind the
+attribution, in either table. Anyone computing a coverage rate or a per-entity
+total off key presence is including rows the pipeline deliberately withholds.
+
+**`contractors` — 96 rows / $269,771,379.45.** All 96 are *Nakupuna
+Foundation*, `attribution_method = 'unattributed'`, `confidence_tier = C`, key
+present, `attributed_flag = 0`. **This is correct behaviour** — tier C does not
+key a dollar — and it is why `rows_with_cedar_uid` (791,617) exceeds
+`rows_attributed_flag_1` (791,521). Quote the flag, never the key.
+
+**`funding` — 3,620 rows / $1,534,889,361.52 keyed but not attributed:**
+
+| `attribution_method` | rows | USD | reading |
+|---|---:|---:|---|
+| `ledger_uei_state_disagreement_withheld` | 2,051 | $586,605,621.55 | deliberate withhold. Correct, and the key's presence is what makes the withhold auditable |
+| `not_evaluated:ak_scope_line9` | 789 | $585,951,384.42 | Alaska scope, tier C, never evaluated. Correct |
+| `unattributed` (excl=0) | 524 | $208,029,567.40 | **inconsistent** — `attribution_method` says unattributed while `attribution_status` says `cedar_neid` and both keys are populated |
+| `unattributed` (excl=1) | 256 | $154,302,788.15 | excluded; the exclusion governs |
+
+**`funding` — 44 rows / $2,192,775.00 that claim an attribution they do not
+hold.** `attributed_flag = '1'` with `cedar_uid` AND `tribe_id_neid` both blank:
+
+| `attribution_status` | `canonical_name` | rows | USD |
+|---|---|---:|---:|
+| `excluded_not_native` | *(blank)* | 21 | $850,345.00 |
+| `unresolved_native` | `tuscarora tribe` | 13 | $940,847.00 |
+| `excluded_not_native` | `tuscarora tribe` | 10 | $401,583.00 |
+
+This is the residue of the same class `1140` closed at 504 rows (T5). Two
+things are wrong on the 23 Tuscarora rows and only one of them is arithmetic:
+the flag claims an attribution with no key, **and** ten rows are simultaneously
+`excluded_not_native` and named for a tribe. **The flag is a bug; the exclusion
+is a ruling.** Both are left in place and flagged here rather than patched,
+because `federal_funding_transactions.csv` was being written in place by another
+workstream during this pass and because "is Tuscarora excluded" is an identity
+question this pass has no standing to answer. It is $2.19M — 0.001% of the
+funding total — and it is recorded so the next pass does not re-derive it.
+
+
+### 6. What this pass ADDED: 290 rows keyed by exact-UEI self-consistency
+
+`py -3 code/1144_money_reconciliation_prime_sub.py apply --execute`, applied to
+`data/clean/subawards.csv` on 2026-09-02. Backup:
+`data/clean/subawards.csv.bak_2026-09-02_pre_1144_money_reconciliation_prime_sub`.
+Prior values for all 900 cells:
+`review/1144_subaward_uei_prior_values_2026-09-02.csv`. The applied rows, with
+their evidence: `review/1144_subaward_uei_self_consistency_2026-09-02.csv`.
+
+**The same UEI was keyed to a Cedar entity on some rows of this file and blank
+on others.** That is not a name match and it is not a new ruling — it is
+Cedar's own already-adjudicated key, on an exact federal registration
+identifier, applied consistently within one table. **The tier is INHERITED from
+the keyed rows** (`START_HERE` trap 1: a tier is never assigned by the
+consumer): 1 group tier A, 18 tier B, none minted.
+
+**290 rows / $98,041,089.48**, 300 target entries because 10 rows were
+recoverable on *both* legs. Largest: `Native Hawaiian Veterans`
+(`YGMHQFZH3YE5`, 26 rows, $32.54M, tier A), `STILLAGUAMISH TRIBE OF INDIANS`
+(`SCBFR3JUM1W3`, 60 rows across two name spellings, $15.80M),
+`CANKDESKA CIKANA COMMUNITY COLLEGE`, `SOUTHEAST ALASKA REGIONAL HEALTH
+CONSORTIUM`, `STONE CHILD COLLEGE`. Either-leg coverage on the clean table
+moves **87,355 → 87,645 (97.27% → 97.59%)** and the neither-leg residue
+**2,454 → 2,164 rows / $1,567,901,108.10**.
+
+**What it REFUSED, and why the refusal is the point.** 152 (leg, UEI) groups
+were skipped — 120 because the UEI carries a conflicting `tribe_id` or tier
+among its keyed rows, 32 because **one federal registration is keyed to two
+different Cedar entities**. Only 30 rows / $3,999,950.40 of unkeyed money was
+actually blocked by those refusals, so the rule costs almost nothing and the
+32 two-entity UEIs are a standing identity defect worth someone's attention.
+
+**And it deliberately left ~$1.0B on the table.** `WIND RIVER CONSTRUCTION LLC`
+is the single largest unkeyed subawardee in the file. It files under **three**
+UEIs: `VHSJFRQKMXG9` (3 rows) **is** keyed to `CE-0014C-0N`; `JWH3U659JTN1`
+(516 rows) and `XP6ZPHL3PN88` (5 rows) are not. **A different UEI of a
+same-named firm is not evidence** — a separate registration is a separate
+question, and answering it is an identity ruling this pass has no standing to
+make. The rule takes the identifier, never the name.
+
+**Ordering.** This is an IN-PLACE enricher on `data/clean/subawards.csv`. A
+rebuild by `94_*`/`121` reverts it and will look like pure progress.
+`py -3 code/1144_money_reconciliation_prime_sub.py linkage-verify` exits 1 when
+it has been reverted — and it is a row-level assertion, not a count floor:
+it names 300 specific `(source_dataset, subaward_source_record_id)` pairs and
+requires each to carry its expected key. Every one of them was blank before, so
+no prior state can satisfy it. **It was observed failing** on the first
+`apply`, which aborted on a conservation assertion before writing.
+
+**`dist/customer/subcontracting.csv` does not yet carry this** — it is
+generated, and the figures in §1–§5 above were measured on the delivered file
+as it stands. Regenerate before shipping.
+
+<!-- END MONEY-RECON-1144 -->

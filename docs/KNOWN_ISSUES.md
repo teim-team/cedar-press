@@ -1799,3 +1799,367 @@ something happened.
 - `62_no_regression_check.py` rule 18,
   `ledger_state_holds_own_identifier`, is in `MUST_BE_ZERO`.
 <!-- END LEDGER-STATE-1134 -->
+
+<!-- BEGIN GAMING-QUALITY-1141 -->
+## Gaming collection — 2026-09-02 quality pass (`code/1141_gaming_quality_pass.py`)
+
+`report` measures, `apply` writes, `verify` FAILS when the work has not landed,
+`selftest` proves each detector fires. **Every write is an in-place enricher: a
+rebuild of any table below reverts it and `1141 verify` is what tells you.**
+
+### Fixed
+
+| what | before | after |
+|---|---:|---:|
+| `gaming_project_facilities.cedar_uid` | 0 of 19 | **19 of 19** |
+| `state_gaming_observations` rows keyed to a tribe | 348 of 494 | **440 of 494** |
+| `gaming_property_site_observations` rows keyed to a tribe | 167 of 262 | **262 of 262** |
+| `gaming_properties.csv` rows | 784 | **787** (= `gaming_facilities.csv`) |
+| a column answering "how many fiscal years" | none | `n_revenue_bound_distinct_fiscal_years` |
+
+*(**GAMING-DENOMINATOR-2026-09-02**, restated correctly: `gaming_facilities.csv`
+holds **787 ROWS, not 787 facilities**. 16 rows' NAMES say no casino, leaving
+**771 facility rows**, and 54 extras collapse under the 53 ADJUDICATED merge
+groups, leaving **717 distinct `cedar_place_id`** — the denominator. Read it,
+never re-derive it: `COUNT(DISTINCT cedar_place_id)`. **The figure 714 that
+appears in seven other documents is the MECHANICAL sweep** and it
+over-collapses three real pairs. Authority: `code/846_session_audit.py::_denom`
+and `code/1129_place_ids.py` V9; derive the sentence with `py -3
+code/1116_ruling_propagation_2026_09_02.py derive`. Counts written "N of 787"
+below are ROW counts and are correct as such.)*
+
+**One root cause behind 92 of those links.** `cedar_identity_register.csv`
+carries `canonical_name` (a distinctive STEM — `Forest County`, `Saint Regis`,
+`Fort Mojave`) **and** `federal_register_legal_name` (the entity's actual
+name), and the state-observation matcher read only the first. Every refusal it
+recorded was answerable from the column beside the one it read:
+
+- **82 rows, Oneida, WI** — `refused_state_disagreement:spine=NY`. It found
+  Oneida (NY), saw Wisconsin, and refused **without asking whether a Wisconsin
+  candidate existed**. `Oneida Nation (Wisconsin)` was in the spine throughout.
+  *A state-disagreement refusal that never searched the observation's own state
+  is not a refusal, it is a miss.*
+- **8 rows, Potawatomi, WI** — `ambiguous_containment:3`, naming three OK/MI
+  Potawatomi entities and not the Forest County Potawatomi Community, whose
+  canonical name is the two words `Forest County`. The ambiguity was
+  manufactured by the right answer being invisible.
+- **1 row, St. Regis Mohawk Tribe, NY** — `no_spine_match`. The spine says
+  `Saint`.
+- **1 row, Fort Mojave Indian Tribe, NV** — `refused_state_disagreement:
+  spine=CA`. The entity's own FR legal name reads *"of Arizona, California &
+  Nevada"*. **A reservation that crosses a state line has one register `state`
+  and several states.**
+
+The other **54** unlinked state-observation rows are statewide aggregates and
+rows publishing no tribe name. They stay blank, and `1141 verify` FAILS if any
+`applies_to = state` row is ever keyed to a nation.
+
+### Still open
+
+- **`714` is quoted as "the gaming property denominator" in seven documents.**
+  It is the MECHANICAL sweep and it over-collapses three real pairs. The
+  settled figure is `COUNT(DISTINCT cedar_place_id)` = **717**.
+  `code/1116_ruling_propagation_2026_09_02.py derive` produced 714 for most of
+  2026-09-02 under a comment reading *"846's algorithm, reproduced"*; it now
+  reads the place id. The seven documents are listed in
+  `docs/AGENT_FIELD_GUIDE.md` §3, rule 15.
+- **`gaming_facilities.n_revenue_bound_fiscal_years` is a ROW count and its
+  name is not.** It equals the joining row count on 787 of 787 and the distinct
+  fiscal-year count on 732; the 55 that diverge are the biggest properties
+  (Foxwoods 82 against 32 years, Mohegan Sun 79 against 29), because one
+  facility-year can carry two bounds. The value is **not** changed — it is an
+  established column with consumers — and
+  `n_revenue_bound_distinct_fiscal_years` is added beside it.
+- **`gaming_facilities.company` is not a company.** It holds an alternate
+  property name from the vendor vintage: identical to `facility_name` on 334
+  rows, different on 109, blank on 344. Two of the 109 carry `?` where a
+  non-ASCII character was lost (`Keex Kwan Gaming ? Bingo`,
+  `Yaamava? Resort & Casino`), and `facility_name` has the right character on
+  both. Renaming a shipped column is an owner decision; flagged, not renamed.
+- **Cities of Gold: one street address, two coordinates 5.7 km apart.**
+  `CCP-841600` at 35.8891,-106.0196 is Pojoaque; `CCP-39300` at
+  35.8514,-106.0628 is toward Santa Fe and its `coords_basis` says
+  "hand-curated". One is wrong; replacing a coordinate needs a source, so it is
+  logged in
+  `review/place_gaming_hold_open_disposition_2026-09-02.csv`, not repaired.
+- **`gaming_vendor_tribal_licenses` has a parser defect.** 145 rows carry no
+  `entity_id` and the regulator strings show why: `Each TGA Gaming
+  Commission`, `These Tribal Gaming Commission`, `Tribe's Tribal Gaming
+  Commission`, `Indian Tribal Gaming Commission` — the extractor took the words
+  preceding "Tribal Gaming Commission" out of running prose. Roughly 60 of the
+  145 name a real regulator (Gun Lake 35, Barona 12, San Manuel 7, San Carlos
+  Apache 7) and are recoverable once the extractor is fixed; the rest are not
+  entities at all.
+- **`wa_machine_transfers.csv` ships zero rows** and has status `UNDOCUMENTED`
+  in `dataset_contracts.json`, as do `gaming_property_locations.csv`,
+  `gaming_web_harvest_coverage.csv` and `gaming_web_harvest_observations.csv`.
+  An undocumented grain means `1137` will not fold the table in.
+
+### Owner rulings queued
+
+`review/place_gaming_hold_open_disposition_2026-09-02.csv` — five HOLD_OPEN
+place groups, each with a disposition. **Three are SETTLED as separate places
+and no place id moves** (Three Rivers = Coos Bay and Florence, 67 km apart;
+Glacier Peaks and Cities of Gold = a casino and its hotel). **Two are genuine
+ownership rulings and are escalated with the evidence attached**: THE STABLES
+(a real Miami/Modoc joint operation — one property, two sovereigns, and a place
+id is a sub-hub of ONE operator) and 7 CLANS FIRST COUNCIL (one vintage files
+it to the Ponca Tribe, the other to the Otoe-Missouria, at the identical street
+address; the Otoe-Missouria Tribe's own casino listing names that address, and
+the wrong `tribe_id` has already propagated a PONCA tribal-state compact onto
+the property in `gaming_property_federal_traces.csv`). Either ruling moves 717.
+<!-- END GAMING-QUALITY-1141 -->
+
+<!-- BEGIN REVIEW-BUNDLE-1135 -->
+## `dist/review/spreadsheets/` publishes `faads_transactions_all_agencies` TWICE
+
+*Added 2026-09-02 by the Codex PR #35 fix pass on `code/1135_full_dataset_review_bundle.py`.
+Flagged, not deleted.*
+
+**Measured.** `1135 verify`, now that it opens the files instead of counting
+their names:
+
+| | |
+|---|---:|
+| pieces of `faads_transactions_all_agencies` on disk | **26** |
+| pieces the manifest declares | 19 |
+| rows the pieces hold | **5,539,496** |
+| rows the manifest declares (`rows_published`) | 2,769,748 |
+| difference | **+2,769,748 — exactly one whole copy** |
+| largest piece on disk | **523.2 MB** |
+| largest piece the manifest records | 122.4 MB |
+
+**Cause.** `build()` writes into `dist/review/spreadsheets/<collection>/` and
+never clears it, so pieces from an earlier vintage survive a rebuild that
+splits the same table differently. This table has been split two ways: an
+older by-year split (`__2007.csv`, 523.2 MB — the exact file 1135's own
+docstring says the byte-derived cap was introduced to prevent) and the current
+year-plus-sub-part split (`__2007_part1.csv`, …). Both sets are on disk and
+both would be served.
+
+**Not** data loss and **not** corruption: every row is present, the table is
+present twice under two naming schemes. A buyer who downloaded "all the
+pieces" would double-count FAADS by 2.77M rows.
+
+**Why it went unseen.** `verify` matched pieces with `glob(f"{stem}*.csv")`,
+which also swept in `prime_contracts_archive_backfill__*` for
+`prime_contracts` and 26 unrelated files for `faads_transactions`. Eleven
+tables miscounted, ten of them pure prefix noise, and the one real
+conservation break sat in the middle of the noise looking like more of it.
+Exact-suffix matching (`pieces_of()`) removed the ten and left this one.
+
+**Not fixed here, and why.** The fix is a build-side sweep of superseded
+pieces into `graveyard/` before writing. That is a deletion decision about
+8 GB of generated content and this project's rule is flag, never delete —
+`py -3 code/1135_full_dataset_review_bundle.py verify` now fails loudly until
+somebody rules on it. Whoever does: sweep the WHOLE table's directory entry
+for that stem, not the individual files, because a partial restore is a
+rebuild revert wearing a different hat.
+
+**Related, unfixed, and not this pass's finding.**
+`bia_tribal_leaders_directory` ships `phone` and `email` as COLUMNS in both
+its sample and its full copy. `NEVER` is applied by `row_ok()` as a ROW gate —
+a row is withheld when one of those columns is non-blank — so a column that is
+blank on every published row ships its header. `verify` catches it (it has
+caught the sample for as long as the check has existed); `build()` does not
+prevent it. Either the header should be dropped like `DROP_COLS`, or the
+check should be relaxed to say what it means. It is a live gate failure today.
+<!-- END REVIEW-BUNDLE-1135 -->
+
+<!-- BEGIN LINKAGE-2026-09-02 -->
+# Linkage — open items left by workstream LINKAGE, 2026-09-02
+
+*`code/1139_linkage_coverage.py` (measure + ratchet) · `code/1140_linkage_close.py`
+(close). Full account: `docs/LINKAGE_CLOSE_LOG_2026-09-02.md`. Model decision:
+**ADR-037**. Every figure below measured 2026-09-02 against the live files.*
+
+## L1 · S1 · 12,058 prime rows / $3.26B reachable by a ledger identifier, and REFUSED
+
+Unattributed, unruled, and reachable by an identifier already in
+`cedar_identifier_ledger_final.csv` at tier A/B, unquarantined, resolving to
+exactly one entity. **Every one is `attribution_method =
+cross_dataset_propagation:contracting`** and the residue is the one-token
+defect: `BLUE SKIES FURNITURE LLC` → Blue Lake Rancheria ($100.9M on `blue`),
+`CREEK GOVERNMENT SERVICES CO.` → Barrow ($1,097M), `EARTH FRIENDLY CHEMICALS`
+→ Minnesota Chippewa, `ROCKY MT SPORT OFFICIALS INC` → Rocky Boy, and two
+natural persons (`JACKSON D SUMMERS`, `PORTALATIN, MICHAEL`).
+
+**Not a backlog. A standing refusal.** Recorded so the next pass measuring
+"reachable but unlinked" does not read 12,058 as work waiting to be done. If
+this class is ever to be opened, it needs the ladder run per firm, not a join.
+
+## L2 · S2 · The McGrath hub's whole distinctive name is one common surname
+
+`AKNF-MCGRTH-00-DOYONL-TNNACH`'s `canonical_name` is **`Mcgrath`**. The ledger
+holds four UEIs on it, all `cluster_v3` tier B, all quarantined —
+`Mcgrath Contractors Llc` (**$316.7M prime**), `Northwest Mcgrath Jv`,
+`Htl Mcgrath B & B Llc`, `Mcgrath Light And Power` — and until this pass it
+held **none for the village government's own registration**, UEI
+`KC9WGEJJHED3`, which is now added at tier B.
+
+`Mcgrath Contractors Llc` sits at `quarantine_disposition = KEEP` on *"rule 7:
+residue empty — every distinctive word in the filed name (mcgrath) is accounted
+for by the hub's own names."* **That is what rule 7's residue test does when a
+hub's canonical name is a single common surname**, and it is the same shape as
+`BLUE TECH INC.` → Blue Lake Rancheria. Not overturned here; flagged. The
+$316.7M is not currently attributed on the strength of that row.
+
+`HOTEL MCGRATH, LLC` **is** keyed to the village government today
+(`uei_exact_archive`, from the quarantine-HOLD `Htl Mcgrath B & B Llc` row).
+Net obligation across its two rows is **$0.00**, so there is no money exposure
+and HOLD is the honest state. Not touched.
+
+## L3 · S2 · `Nakupuna Solutions, Llc` — $269,771,379 held at `RULED_TIER_C_NOT_ATTRIBUTED`
+
+96 prime rows carry `tribe_id = NHO-NAKUPUNA-00` and `cedar_uid = CE-000YS-CH`
+with `attributed_flag = 0`. **The row is internally consistent and the ruling
+is a NEGATIVE one**, so it is correctly excluded from LINKED — but it is also
+the reason `key_only:tribe_id` reads 96 higher than LINKED on that table, and
+any scan reading the key column alone sells it as coverage.
+
+Whether the ruling should stand is a separate question this pass did not open.
+`ENTITY_MATCH_RULES` rule 14 says an NHO-owned firm is the EASY class because
+the incentive runs toward self-declaration; the rung that would settle it is
+rung 2, the firm's own site. Left for a pass that can run it.
+
+## L4 · S3 · Two more ledger rows a ruling refutes and did not reach
+
+`1140` repointed four (`8DF77`, `8UG01`, `92BX9`, `6F0N0`). Two neighbours in
+the same families were left, because the ruling does not reach them:
+
+- `4SK42` `Collision Center Of Muskogee Inc` → `TRBS-LWRMSE-00` (Lower Muskogee
+  Creek Tribe), 7 prime rows / $40,960, unattributed. The Muskogee ruling is
+  about Muskogee Metal Works and Muskogee Technology, Poarch's Atmore AL
+  manufacturers. An auto body shop in **Muskogee, Oklahoma** is a match on the
+  CITY and is neither Poarch nor Lower Muskogee. Needs its own ladder run.
+- `3NFP3` `The Four Tribes Consortium Of Oklahoma` → `SGVF-CHGCMT-00`
+  (Chugachmiut, **Alaska**), 1 row / −$26,000, unattributed. Plainly wrong and
+  plainly cheap; it needs an Oklahoma entity that may not be in the spine.
+
+## L5 · S3 · `federal_funding_transactions`: 3,620 rows keyed and flagged off
+
+`tribe_id_neid` is populated and `attribution_status = 'cedar_neid'`, while
+`attributed_flag = '0'`. Composition: `ledger_uei_state_disagreement_withheld`
+2,051 ($586.6M — a deliberate withhold), `not_evaluated:ak_scope_line9` 789
+($586.0M, tier C), `unattributed` 780 (256 of them tier X with
+`excluded_flag = 1`). **The withholds are correct and the tier-X rows are
+correct**; what is not correct is that three columns on one row give three
+different answers with nothing saying which governs. `1139` resolves it by
+taking the conjunction, which is the conservative reading; the underlying
+column disagreement is unresolved.
+
+## L6 · S3 · `native_bills.affected_entities` is blank on all 3,069 rows
+
+Left alone. `1140` added `entity_tribe_ids` / `has_resolved_entity` beside it
+rather than filling a column whose intended semantics nobody could state. If
+`affected_entities` is dead, retire it by MOVE and say so; if it means
+something the new columns do not, it needs a definition.
+<!-- END LINKAGE-2026-09-02 -->
+
+<!-- BEGIN MONEY-RECON-1144 -->
+
+# Money reconciliation — 2026-09-02, workstream MONEY-RECON-1144
+
+*`code/1144_money_reconciliation_prime_sub.py` (`measure` / `verify` /
+`selftest`). Full write-up and every figure:
+`docs/MONEY_TOTALLING_RULES.md` `<!-- BEGIN MONEY-RECON-1144 -->`. Machine
+copy: `docs/MONEY_RECONCILIATION_1144.json`.*
+
+## M1 · OPEN, BLOCKING A SHIP · `dist/customer/contractors.csv` does not exist
+
+`dist/customer/MANIFEST.csv` declares 13 datasets and 12 CSVs are on disk.
+`contractors` — the largest money dataset, 1,217,768 rows, a declared
+1,606.5 MB — is **absent**, while its `__CODEBOOK.md`, `__NOTES.txt` and
+`__NOTES.pdf` were written at 16:24 and `dist/manifests/contractors.json`
+exists. The combine produced the paper and not the data. `C:` had 17 GB free,
+so space is not obviously the cause.
+
+**Nothing in `dist/customer/` should ship while the manifest promises a file a
+buyer will not receive.** Detection is one line and belongs in a gate:
+every `dataset` in `MANIFEST.csv` must have a matching `<dataset>.csv` beside
+it. `1144 measure` reports it under `delivery.declared_but_absent`.
+
+Owner: whoever owns `code/1137_customer_dataset_combine.py` (mtime 16:58 on
+2026-09-02 — actively held during this pass, so it was not touched here).
+
+## M2 · OPEN · "86.9%" ships in 26 customer files and is two vintages stale
+
+`code/1137_customer_dataset_combine.py` **L361** and **L456** hard-code
+*"the unfiltered subaward total runs 86.9% above the correct one"* into the
+boilerplate footer of every `*__CODEBOOK.md` and every `*__NOTES.txt`. The live
+figure is **63.4%**.
+
+The consequence is not an abstract staleness. **`subcontracting__NOTES.txt`
+says 82.9% at line 21 and 86.9% at line 47** — one file, twenty-six lines
+apart, one measurement, two answers, and a third (the correct 63.4%) in
+`dist/samples/README.md` in the same delivery. `docs/WHAT_IS_MISSING.md`
+recorded this exact failure at two vintages; it is now at three, because each
+correction was *added* rather than made at source.
+
+**The fix is one string in two places**, and both should read *"and the
+unfiltered subaward total runs 63.4% above the correct one."* NOT TOUCHED HERE
+— `1137` is another workstream's live file and this brief forbids editing it.
+
+The 82.9% half of the same contradiction **was** fixed, at source, in
+`code/512_build_dataset_contracts.py` `GRAIN_SUBAWARD_FUNDING` (four stale
+figures replaced with measured ones plus a re-measure instruction; the dict's
+key, cardinality and basis were not touched). Backup:
+`code/512_build_dataset_contracts.py.bak_2026-09-02_pre_1144_money_reconciliation_prime_sub`.
+**It only reaches a customer when the notes and codebooks are regenerated.**
+
+## M3 · CORRECTED · `subcontracting` is 97.27% linked, not 44.8%
+
+`cedar_uid` in `subawards.csv` is the **PRIME leg**: 39,567 of its 40,201
+non-blank values equal `prime_cedar_uid` and 894 equal `sub_cedar_uid`. The
+dataset's majority population is `b_native_as_subawardee` (49,360 filings,
+$32.43B), and on those rows `cedar_uid` is blank **by design**.
+
+Measured on either leg, coverage is **87,355 of 89,809 rows = 97.27%** — the
+highest of any money dataset here, not the lowest. The genuine residue is
+**2,454 rows / $1,662,416,606.58** with neither leg keyed. **1144 closed 290 of
+them / $98,041,089.48** on `data/clean/subawards.csv` by exact-UEI
+self-consistency with the tier inherited, taking either-leg coverage to
+**87,645 / 97.59%** and the residue to 2,164 rows / $1,567,901,108.10
+(`docs/MONEY_TOTALLING_RULES.md` MONEY-RECON-1144 §6). `dist/customer/` does
+not carry it until the combine is re-run.
+
+**Do not run a linkage pass at the 49,608 blank `cedar_uid` rows.** 47,561 are
+already keyed on `sub_cedar_uid`; writing the subawardee's id into a column
+documented as the prime's would silently corrupt every customer
+`GROUP BY cedar_uid`. `docs/LINKAGE_COVERAGE.md` and `code/1139` measure
+`cedar_uid` for this dataset and therefore understate it — flagged, not
+changed, because `1139`/`1140` are another workstream's.
+
+**Still open in that table:** **631 rows** whose `cedar_uid` matches *neither*
+leg named on the row; and **32 UEIs keyed to two different Cedar entities**,
+which is why 1144 refused them. One federal registration is one registrant.
+Both are identity questions rather than arithmetic ones.
+
+## M4 · OPEN, SMALL · 44 funding rows claim an attribution they do not hold
+
+`attributed_flag = '1'` with `cedar_uid` **and** `tribe_id_neid` both blank —
+21 rows `excluded_not_native` / blank name / $850,345.00; 13
+`unresolved_native` / `tuscarora tribe` / $940,847.00; 10
+`excluded_not_native` / `tuscarora tribe` / $401,583.00. $2,192,775.00 total.
+
+The residue of the class `1140` closed at 504 rows (T5). Two faults, and only
+one is arithmetic: the flag claims an unkeyed attribution, **and** ten rows are
+simultaneously `excluded_not_native` and named for a tribe. **The flag is a
+bug; the exclusion is a ruling.** Left in place — the table was being written
+by another workstream during this pass, and "is Tuscarora excluded" is not a
+question this pass has standing to answer.
+
+## M5 · NOT A DEFECT, BUT DO NOT COUNT IT AS LINKAGE
+
+A populated `cedar_uid` does **not** mean Cedar stands behind the attribution.
+`contractors`: 96 rows / $269,771,379.45 (all Nakupuna Foundation, tier C,
+`attribution_method = 'unattributed'`). `funding`: 3,620 rows /
+$1,534,889,361.52, led by `ledger_uei_state_disagreement_withheld` (2,051 rows
+/ $586,605,621.55) and `not_evaluated:ak_scope_line9` (789 / $585,951,384.42).
+Those withholds are correct and the key's presence is what makes them
+auditable. **Quote `attributed_flag`, never key presence.** The one genuine
+inconsistency inside that set is 524 rows / $208,029,567.40 where
+`attribution_method = 'unattributed'` sits beside
+`attribution_status = 'cedar_neid'` and two populated keys.
+
+<!-- END MONEY-RECON-1144 -->

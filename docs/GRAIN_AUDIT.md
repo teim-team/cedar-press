@@ -20,14 +20,48 @@ Three honest outcomes, and they are three different jobs:
 
 | | count |
 |---|---:|
-| shippable tables | 252 |
-| **DECLARED_VALIDATED** | **241** |
-| OPEN_WITH_EVIDENCE | 0 |
+| shippable tables | 263 |
+| **DECLARED_VALIDATED** | **249** |
+| OPEN_WITH_EVIDENCE | 6 |
 | DEFECTIVE | 0 |
-| still unexplained | 11 |
-| ratchet `contract_grain_unstated_shippable` | **11** (was 207) |
+| still unexplained | 8 |
+| ratchet `contract_grain_unstated_shippable` | **14** (was 207) |
 
-A declaration that the data contradicts is release-blocking through `contract_violations`; there are **16**.
+A declaration that the data contradicts is release-blocking through `contract_violations`; there are **13**.
+
+## OPEN_WITH_EVIDENCE - the rulings a human must make
+
+Each is a question the DATA cannot answer, with what was tested attached. Declaring past one of these is the one way this file can lie.
+
+### `nagpra_nps_grant_awards.csv`
+
+one NAGPRA grant award: (fiscal year, grant type, recipient, amount). 1,221 awards, FY1994-2025, $66,095,102.79. NO UNIQUE KEY: 1,212 distinct published tuples, 9 rows byte-identical to another. They are almost certainly REAL - two $15,000 FY2001 Repatriation grants to Cape Fox Corporation are two grants - and nothing was collapsed. QUESTION: does NPS publish a grant number anywhere (the award letters do), and is it worth acquiring as the key? MONEY FENCE: do NOT sum this against federal_funding_transactions CFDA 15.922 (696 rows, FY2007-2026, $11,215,956.86). They are two grains of one programme and they overlap from FY2013.
+
+
+### `nagpra_nps_intended_dispositions.csv`
+
+one Notice of Intended Disposition as the National NAGPRA Program records it - published in a NEWSPAPER, not the Federal Register, which is why `publication_as_recorded` is a free-text list of paper names and dates rather than a date column. NO UNIQUE KEY: 245 distinct published tuples over 253 rows. QUESTION: is a row one notice or one disposition, and what separates two rows carrying the same institution and the same newspaper run?
+
+
+### `nagpra_nps_inventories.csv`
+
+one row per line of the National NAGPRA Program's published inventory grid: an institution's holding of human remains and associated funerary objects from one geographic origin, split by `cultural_affiliation_status` (CULTURALLY_AFFILIATED 454, CULTURALLY_UNIDENTIFIABLE 11,357 - a status under 43 CFR 10.11, not a label). NO UNIQUE KEY: 11,811 rows carry 7,693 distinct published tuples, so 4,118 rows are byte-identical to another row. Adding `cultural_affiliation_status` (the source's own `InventoryType`, which its grid defaults away) took the surplus from 4,139 to 4,118 and no further, so the remaining discriminator - most likely the claiming tribe or the submission - IS NOT IN THE PUBLISHED PROJECTION. NOTHING WAS COLLAPSED. QUESTION for the owner: is the detail view behind this grid worth a per-row fetch, or does the table ship as a grid transcript with the duplication declared? SEPARATELY MEASURED AND NOT REPAIRED: on the NotCulturallyAssociated request the source reports recordsTotal 11,358 and recordsFiltered 11,357, and start=11357 returns nothing - Cedar holds 11,811 and the 11,812th row is unreachable.
+
+
+### `nagpra_nps_notice_index.csv`
+
+one NAGPRA notice as the National NAGPRA Program's OWN register records it - a DIFFERENT OBSERVER from `nagpra_notices.csv`, which parses the Federal Register text. Joinable on `fr_document_number`; the two DISAGREE on 315 documents and `nagpra_notice_source_corroboration.csv` carries both values. `notice_type` is not cosmetic: the source's grid defaults to NIC and a pull that does not ask per type returns 4,810 of 6,818 rows while looking complete (NIC 4,810 + NIR 1,869 + NID 131 + NOT 8 = 6,818). The count columns are TYPE-SPECIFIC - `total_mni` and `total_associated_funerary_objects` belong to NIC and NID, while `unassociated_funerary_objects`, `sacred_objects` and `objects_of_cultural_patrimony` belong to NIR, so a blank is the wrong column for that notice type and NOT a missing value. NO UNIQUE KEY: (notice_type, fr_document_number) is 6,815 distinct over 6,818 rows. All three collisions are NIR and each was read row by row before this was written - Autry Museum E7-5977 is TWO GENUINE LINES of one notice (1 sacred object; 1 sacred-and-patrimony item), AMNH 2012-26223 is two lines (34 unassociated funerary objects; 0), and Field Museum 04-17582 is a BYTE-IDENTICAL DUPLICATE IN THE SOURCE. Nothing was collapsed. QUESTION for the owner: does an FR document number plus a line ordinal count as a key when the source publishes no ordinal, or does this table ship keyed on the document with the three named rows declared?
+
+
+### `nagpra_nps_unclaimed_remains.csv`
+
+one listing of unclaimed human remains held by a federal agency, by county of origin. 15 rows, all distinct, but 15 rows cannot evidence a key: (institution_name, county) already collides 3 times. QUESTION: what distinguishes the three U.S. Forest Service, Santa Fe NF / Rio Arriba rows?
+
+
+### `native_bill_actions.csv`
+
+one published legislative ACTION on a Native bill - a referral, a committee report, a floor vote, a presidential signature - 31,936 rows over 3,061 bills, 1973-2026, from congress.gov `/bill/{c}/{t}/{n}/actions`. `action_type` runs Floor 10,324 / IntroReferral 9,775 / Committee 7,044 / ResolvingDifferences 1,685 / Calendars 1,089 / President 894 / BecameLaw 565 / Discharge 150 / Veto 33. 1,135 rows carry a recorded-vote reference. NO UNIQUE KEY, and the collision is in the SOURCE, not in the promotion. Measured on the FULL file: (bill_id, action_date, action_text) collides 4,131 times; adding action_code still leaves 398; the ENTIRE published tuple leaves 111 groups and 133 surplus rows - byte-identical repeats such as two `Conference held.` rows against 99-s-2638 on 1986-10-10. congress.gov publishes an action twice and gives no ordinal to tell them apart. NOTHING WAS COLLAPSED. QUESTION for the owner: does an action ordinal within a bill count as a key when the publisher supplies none, or does this ship keyed on the bill with the 133 declared?
+
 
 ## Per collection
 
@@ -84,7 +118,7 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 
 ### Congressional Votes and Proposed Legislation  (`legislation`)
 
-11 of 11 shippable tables declared.
+14 of 15 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
@@ -93,6 +127,10 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 | `bill_votes_official_verification.csv` | 305 | DECLARED_VALIDATED | `vote_id` | — |
 | `congressional_correspondence_systems.csv` | 257 | DECLARED_VALIDATED | `system_id` + `verbatim_quote` | — |
 | `member_positions.csv` | 136,119 | DECLARED_VALIDATED | `vote_id` + `bioguide_id` | — |
+| `native_bill_action_coverage.csv` | — | DECLARED_VALIDATED | `bill_id` | `bill_id`→1 |
+| `native_bill_actions.csv` | — | OPEN_WITH_EVIDENCE | — | — |
+| `native_bill_cosponsor_coverage.csv` | — | DECLARED_VALIDATED | `bill_id` | `bill_id`→1 |
+| `native_bill_cosponsors.csv` | — | DECLARED_VALIDATED | `bill_id` + `cosponsor_bioguide_id` + `sponsorship_date` | `bill_id`→240, `cosponsor_bioguide_id`→267 |
 | `native_bill_outcomes.csv` | 3,069 | DECLARED_VALIDATED | `bill_id` | — |
 | `native_bills.csv` | 3,069 | DECLARED_VALIDATED | `bill_id` | — |
 | `native_bills_entity_bridge.csv` | 676 | DECLARED_VALIDATED | `bill_id` + `tribe_id` | `cedar_uid`→41, `tribe_id`→41 |
@@ -124,7 +162,7 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 
 ### NAGPRA  (`nagpra`)
 
-5 of 5 shippable tables declared.
+7 of 12 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
@@ -132,7 +170,14 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 | `fr_nagpra_title_index_year.csv` | 33 | DECLARED_VALIDATED | `publication_year` | `publication_year`→1 |
 | `nagpra_notice_entity_bridge.csv` | 51,521 | DECLARED_VALIDATED | `document_number` + `relationship` + `party_name_verbatim` | `tribe_id`→900 |
 | `nagpra_notice_institutions.csv` | — | DECLARED_VALIDATED | `nagpra_notice_institution_id` | `document_number`→8, `nagpra_notice_institution_id`→1 |
+| `nagpra_notice_source_corroboration.csv` | — | DECLARED_VALIDATED | `fr_document_number` | `fr_document_number`→1 |
 | `nagpra_notices.csv` | 6,772 | DECLARED_VALIDATED | `document_number` | `document_number`→1 |
+| `nagpra_nps_grant_awards.csv` | — | OPEN_WITH_EVIDENCE | — | — |
+| `nagpra_nps_intended_dispositions.csv` | — | OPEN_WITH_EVIDENCE | — | — |
+| `nagpra_nps_inventories.csv` | — | OPEN_WITH_EVIDENCE | — | — |
+| `nagpra_nps_notice_index.csv` | — | OPEN_WITH_EVIDENCE | — | — |
+| `nagpra_nps_summaries.csv` | — | DECLARED_VALIDATED | `institution_name` + `institution_state` | `institution_name`→2 |
+| `nagpra_nps_unclaimed_remains.csv` | — | OPEN_WITH_EVIDENCE | — | — |
 
 ### Lobbying  (`lobbying`)
 
@@ -205,7 +250,7 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 
 ### Native-Owned Businesses  (`native-owned-businesses`)
 
-6 of 6 shippable tables declared.
+7 of 7 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
@@ -215,6 +260,7 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 | `individual_native_firm_register.csv` | 45 | DECLARED_VALIDATED | `surrogate_entity_id` | `cedar_uid`→1 |
 | `individual_native_ownership_verification.csv` | 335 | DECLARED_VALIDATED | `verification_id` | — |
 | `individual_native_verification_candidates.csv` | 335 | DECLARED_VALIDATED | `verification_id` | — |
+| `native_owned_businesses.csv` | 2,393 | DECLARED_VALIDATED | `business_source_id` | `business_entity_id`→1, `business_name_normalized`→10, `business_source_id`→1, `certifying_authority_entity_id`→836, `source_id`→836 |
 
 ### NEST: Native Enterprise Structures and Ties  (`nest`)
 
@@ -222,8 +268,8 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
-| `nest_enterprise_relations.csv` | — | DECLARED_VALIDATED | `enterprise_edge_id` | `cedar_uid`→367, `enterprise_edge_id`→1, `enterprise_id`→15, `owner_hub_cedar_uid`→367 |
-| `nest_enterprises.csv` | — | DECLARED_VALIDATED | `enterprise_id` | `cedar_uid`→172, `enterprise_id`→1, `owner_hub_cedar_uid`→172, `parent_enterprise_id`→34 |
+| `nest_enterprise_relations.csv` | — | DECLARED_VALIDATED | `enterprise_edge_id` | `cedar_uid`→444, `enterprise_edge_id`→1, `enterprise_id`→15, `owner_hub_cedar_uid`→444 |
+| `nest_enterprises.csv` | — | DECLARED_VALIDATED | `enterprise_id` | `cedar_uid`→197, `enterprise_id`→1, `owner_hub_cedar_uid`→197, `parent_enterprise_id`→34 |
 | `nest_entity_dual_role.csv` | — | DECLARED_VALIDATED | `cedar_uid` | `cedar_uid`→1 |
 
 ### The Native Press: Tribal Newsletters and Periodicals  (`newsletters`)
@@ -253,10 +299,12 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 
 ### Native Nonprofits  (`nonprofits`)
 
-10 of 10 shippable tables declared.
+12 of 12 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
+| `fac_native_nontribal_sefa_programs.csv` | — | DECLARED_VALIDATED | `report_id` + `award_reference` | `entity_id`→656, `report_id`→109 |
+| `fac_native_nontribal_single_audits.csv` | — | DECLARED_VALIDATED | `report_id` | `entity_id`→13, `report_id`→1 |
 | `fac_tribal_single_audits.csv` | 6,780 | DECLARED_VALIDATED | `report_id` | `cedar_uid`→32, `entity_id`→32 |
 | `grantmaker_funding_flows.csv` | 18,656 | DECLARED_VALIDATED | `flow_id` | `cedar_uid`→0 |
 | `grantmaker_funding_overlap.csv` | 69 | DECLARED_VALIDATED | `funder_key` + `recipient_resolved_target` | — |
@@ -352,7 +400,7 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 | `cedar_entity_identity_crosswalk.csv` | 10,107 | DECLARED_VALIDATED | `crosswalk_id` | `cedar_uid`→160 |
 | `cedar_identifier_graph_edges.csv` | 46,820 | DECLARED_VALIDATED | `edge_kind` + `from_node` + `to_node` + `asserting_source` + `asserting_row_ref` + `edge_tier` + `method` | `from_node`→1,095 |
 | `cedar_identifier_graph_nodes.csv` | 115,471 | DECLARED_VALIDATED | `node` | — |
-| `cedar_identifier_ledger_final.csv` | — | DECLARED_VALIDATED | `identifier_type` + `identifier` + `tribe_id` + `attribution_method` + `evidence_url` + `verified_date` | `cedar_uid`→159, `identifier`→2, `tribe_id`→159 |
+| `cedar_identifier_ledger_final.csv` | — | DECLARED_VALIDATED | `identifier_type` + `identifier` + `tribe_id` + `attribution_method` + `evidence_url` + `verified_date` | `cedar_uid`→162, `identifier`→2, `tribe_id`→162 |
 | `cedar_identifier_propagation.csv` | 1,157 | DECLARED_VALIDATED | `dataset` + `identifier` | — |
 | `cedar_places.csv` | — | DECLARED_VALIDATED | `cedar_place_id` | `cedar_place_id`→1, `operator_cedar_uid`→28 |
 | `cedar_publishable_identifiers.csv` | 1,577 | DECLARED_VALIDATED | `identifier` | `cedar_uid`→35, `tribe_id`→35 |

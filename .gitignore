@@ -160,3 +160,8 @@ _profile_cache.json
 # The consolidated owner-decision queue is a curated document, not scratch -
 # its history shows what was asked and when it was answered.
 !review/OWNER_DECISION_QUEUE.md
+
+# Agent worktrees are private scratch, never part of the tree. Committed as a
+# gitlink with no .gitmodules entry they become an unusable pseudo-submodule
+# and `git submodule status` fails on a fresh checkout.
+.claude/worktrees/

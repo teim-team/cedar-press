@@ -2911,3 +2911,760 @@ append-only `cedar_nest_id_register.csv`. `1133` owns the admission decisions;
 3,789 → 7,559. `1072 verify` PASS on all 8 invariants; `1102` (the enricher)
 must run LAST after any rebuild.
 <!-- END ADR-034-OWNER-V6-BUILDER-INPUT -->
+
+<!-- BEGIN ADR-035-PUBLICATION-RULES-ONE-MODULE -->
+
+## ADR-035 — the publication rules are ONE importable module, and text-scraping a rule out of another script is banned
+
+**Decided 2026-09-02** by workstream `CONSOLIDATE-PUBLICATION-RULES` (number
+1138 claimed and released), `code/cedar_publication.py`.
+
+**Context.** Owner, 2026-09-02: *"if we can consolidate files to process stuff
+to make it easier, fact check — this should be a well oiled machine, not
+running in circles over and over again."*
+
+Four scripts write customer-facing extracts — `760_collection_descriptors.py`,
+`770_sample_extracts.py`, `1135_full_dataset_review_bundle.py`,
+`1137_customer_dataset_combine.py` — and they agreed about the publication
+rules by **reading each other's source code with regular expressions**. Five
+such scrapers were live:
+
+| # | scraper | reads | out of |
+|---|---|---|---|
+| 1 | `770._760_product_id_map()` | `PRODUCT_ID` | 760 |
+| 2 | `760._flagship_map()` | `FLAGSHIP`, `SPINE` | 770 |
+| 3 | `1135._from_770()` | `NEVER`, `GATES` | 770 |
+| 4 | `1137._from()` | `NEVER`, `GATES`, `FLAGSHIP`; `COLLECTIONS` | 770; 500 |
+| 5 | the product repo's `scripts/import_cedar_manifest.py::_flagship_map()` | `FLAGSHIP` | 770 |
+
+Two of those were already broken and neither was noticed by anything:
+
+* **Scraper 4 failed OPEN.** Its regex could not match the annotated binding
+  `COLLECTIONS: list[dict] = [`, so `shelves()` returned `{}`, every collection
+  failed the shelf test, and `1137` printed **"0 customer shelves" and exited
+  0**. A confident report of nothing.
+* **Scraper 1 was never called.** `770` defined `_760_product_id_map()` with
+  the comment *"so drift is a hard failure rather than two files quietly
+  disagreeing"*, and no call site existed anywhere in the tree. A gate that is
+  defined and not invoked is not a gate.
+
+And `DROP_COLS` and `YEAR_COLS` were plain duplicated literals in **1135 and
+1137**, with no scraper and no comparison at all — two hand-maintained copies
+of a licensing rule, which is worse than the scraping because at least the
+scraping was trying.
+
+**THE STATED JUSTIFICATION WAS FALSE, AND IT IS MEASURED.** Every one of the
+five scrapers carries some version of *"a module whose name begins with a digit
+is not importable, and 770 does file work at import time."* **Both halves are
+wrong.** The `import` STATEMENT cannot name a digit-leading module;
+`importlib.util.spec_from_file_location` imports it without complaint. And
+importing `770_sample_extracts.py` takes **0.04 s** and reads no table — every
+file read is inside `main()`, behind `if __name__ == "__main__"`. The scraping
+was never necessary.
+
+**Decision.** `code/cedar_publication.py` — an importable name, alongside the
+existing `cedar_pipeline.py` / `cedar_extent_competed.py` precedents — is the
+single copy of `NEVER`, `GATES`, `FLAGSHIP`, `SPINE_TABLES`, `PRODUCT_ID`,
+`DROP_COLS`, `YEAR_COLS`, the shelf sets and `row_ok()`. 760, 770, 1135 and
+1137 IMPORT it. All five in-tree scrapers are gone.
+
+**A regex over source text fails OPEN; an import fails CLOSED.** That
+difference is the whole argument, and it is why the fix is not "a better
+regex."
+
+**`SPINE` had to be renamed, and the gate found it.** 770 used the bare name
+`SPINE` for a *set of table names*; 1135 and 1137 both use `SPINE` for the
+`data/spine` *directory* `Path`. Three files, one name, two unrelated types,
+kept apart only by the fact that none imported another. The shared constant is
+`SPINE_TABLES`; 770 imports it `as SPINE` so its local usage is unchanged. The
+divergence gate caught this on its first run — nothing else ever could have.
+
+**760's spine scrape was a live hazard, not just clutter.** It ended
+`if j >= 0 else set()`, so the day 770 stopped carrying a `SPINE = {` literal
+it would have returned an EMPTY set, silently, and every spine-resident
+flagship would have been reported as an unclaimed table. That day was
+2026-09-02.
+
+**THE ONE COPY THAT REMAINS, AND WHY.** Consumer 5 lives in the PRODUCT repo on
+branch `claude/real-collections-manifest`. That branch and `master` are
+disjoint trees in one repository and never merge, so a change here cannot reach
+it; it does `text.find("FLAGSHIP = {")` against `770_sample_extracts.py` and
+`raise SystemExit` when the dict is absent. Deleting 770's literal would break
+a live consumer. So `770` keeps a `FLAGSHIP = {...}` literal that is
+**generated, not maintained**: `py -3 code/cedar_publication.py sync` writes
+it between markers, 770 `assert`s it equals the module at import, and `verify`
+fails if it drifts. Two copies, one derived, with a runtime assert and a gate.
+
+**The gate.** `py -3 code/cedar_publication.py verify`, wired into
+`846_session_audit.py` as claim 30. Seven checks: every consumer resolves the
+shared names to the module's values; no scraper has been reintroduced; the
+generated compat literal parses to the same dict under **both** external
+scrapers' exact expressions; the storefront and build sets are 12 and 13; every
+built collection names a flagship; `DROP_COLS` is all lower case (every
+consumer compares `col.lower() in DROP_COLS`, so an upper-case entry could
+never match and would silently ship).
+
+**Behaviour is preserved and it was measured, not asserted.** Old and new code
+were run against the same live tables in two shadow trees (`code/` copied,
+`data/` `docs/` `review/` junctioned, `dist/` separate). `770` and `760`
+produce **byte-identical** stdout and outputs. `1135 samples` likewise. `1137`
+was run in `plan` only — a concurrent workstream owns its build — and its
+constants and gate function were proved equal instead.
+
+**One behaviour DID change, deliberately: `1137 plan` no longer writes
+`MANIFEST.csv`.** It printed "nothing written" and then overwrote the manifest
+anyway, with dry-run values — no `files`, no `largest_mb`, no codebook, no join
+columns, because none of that work runs under `dry`. The manifest is the only
+record of what was DELIVERED, and `verify` reads it to decide whether a
+spreadsheet on disk is an orphan, so a `plan` turned thirteen delivered
+datasets into thirteen apparent orphans while reporting that it wrote nothing.
+Found by doing it.
+
+**Consequence.** 5 in-tree scrapers → 0. `NEVER`/`GATES`/`FLAGSHIP` 3 copies →
+1. `DROP_COLS`/`YEAR_COLS` 2 copies → 1. `row_ok()` 3 bodies → 1.
+`846_session_audit` 29 claims → 30.
+<!-- END ADR-035-PUBLICATION-RULES-ONE-MODULE -->
+
+<!-- BEGIN ADR-036-BUILD-VS-STOREFRONT -->
+## ADR-036 — the BUILD set and the STOREFRONT set are different sets, and gaming is the thirteenth built dataset
+
+**Decided 2026-09-02** by workstream `GAMING-THIRTEENTH-1141`,
+`code/cedar_publication.py`, `code/1137_customer_dataset_combine.py`,
+`code/1141_gaming_quality_pass.py`.
+
+**Context.** Owner, 2026-09-02: *"you're always working on thirteen datasets,
+the twelve in Cedar Press, and then the gaming dataset. Those are the ones that
+you're always prioritizing."*
+
+`1137` decided membership with one tuple, `CUSTOMER_SHELVES = ("standard",
+"pro")`, and that tuple was answering two different questions at once: **where
+is this sold** and **is this delivered**. `gaming` is `shelf: grove` — it goes
+out through Cedar Grove and appears on no Cedar Press shelf — so the single
+test excluded it from the combined-product build as well. It is the **largest
+maintained collection in the project**: 65 tables, 56 of them shippable. It had
+no combined spreadsheet, no `gaming__CODEBOOK.md`, and no notes, and
+`846_session_audit`'s CRITICAL claim was green the whole time, because that
+claim also counted the storefront.
+
+**Decision.** Three named sets in `cedar_publication`, and every consumer says
+which it means:
+
+```
+STOREFRONT_SHELVES  = ("standard", "pro")           12   sold on Cedar Press
+GROVE_SHELVES       = ("grove",)                     1   sold through Grove
+BUILD_SHELVES       = STOREFRONT + GROVE            13   delivered
+```
+
+`CUSTOMER_SHELVES` survives as an alias for the storefront, because that is
+what it always meant. `MANIFEST.csv` gains `storefront` (Y/N) and
+`sold_through`, so a reader of the OUTPUT cannot re-conflate them either.
+
+**The property that could not be lost.** The count was hard-coded because **a
+silent extra dataset is a defect** — `newsletters` shipped as an unwanted
+thirteenth storefront slot before the owner withdrew it and nothing failed. It
+now holds three ways, all in `1137 verify`: a thirteenth STOREFRONT slot fails
+the storefront count; a fourteenth BUILT dataset fails the build count; and a
+spreadsheet on disk that no manifest line claims fails outright. The third is
+new and is the one the old check could not see. Proved by fixture: dropping
+`newsletters.csv` into `dist/customer/` turns `verify` red and names it.
+
+**Two defects the gaming build exposed in `1137` itself, both fixed generically
+for all thirteen.**
+
+1. **The shared join key was the first one DECLARED, not the finest one both
+   tables carry.** `gaming_facilities` declares `[tribe_id, cedar_uid,
+   entity_id, facility_id]` and its grain is the PROPERTY. Every one-to-many
+   count column therefore counted the property's whole NATION — Cherokee
+   Nation's ten casinos each reporting the tribe's total under a column named
+   for the property. Keys are now ranked by how finely they cut the flagship.
+   Effect on gaming: four more tables meet the one-to-one test at facility
+   grain and fold in properly, and every count means what its row means.
+2. **A `plan` run overwrote `MANIFEST.csv` while printing "nothing written".**
+   Fixed the same hour (independently, by the owner) — recorded here because
+   the manifest is what `verify` reads to decide whether a spreadsheet is an
+   orphan, so a dry run could turn twelve delivered datasets into twelve
+   apparent orphans.
+
+**Column ORDER, not column deletion.** `gaming` lands at 311 columns where the
+other twelve are 29–91. Most of that width is Cedar's provenance quartet per
+measured fact (`gaming_machines` · `_value_basis` · `_observation_status` ·
+`_observed_date`), which is the product's differentiator, and `770` rule 6
+already forbids dropping columns because it makes the schema depend on which
+rows shipped. So `order_columns()` bands every dataset's header — identity,
+substantive, provenance, then joined grouped by source table — as a **stable
+permutation that raises rather than lose or duplicate a column**. Nothing is
+removed and the first screen is readable.
+
+**Consequence.** 13 spreadsheets, 13 codebooks, 13 notes pairs. `846`'s
+CRITICAL claim now asserts 13 built / 12 storefront / 1 Grove.
+<!-- END ADR-036-BUILD-VS-STOREFRONT -->
+
+<!-- BEGIN GAMING-DENOMINATOR-717-CORRECTION -->
+
+## CORRECTION 2026-09-02 — the gaming property denominator is 717, not 714
+
+Appended by `code/1142_gaming_denominator_doc_sweep.py`. **No prose above this
+line was edited**, per the rule the `GAMING-DENOMINATOR-2026-09-02` banner set
+for itself.
+
+Any figure in this document that uses **714** as the count of distinct gaming
+properties is superseded. The settled figure is **717**:
+
+```
+787   rows in gaming_facilities.csv
+-16   carrying cedar_place_id_absent_reason = NOT_A_PLACE
+=771   rows that are a place
+-54   extras collapsed by the 53 ADJUDICATED merge groups
+=717   distinct properties        <- COUNT(DISTINCT cedar_place_id)
+```
+
+**Why the old ladder gave 714.** It subtracted **57** duplicate extras found by
+name normalisation. The adjudication found **54**. The three-property
+difference is three groups a mechanical duplicate test called the same property
+and a human verdict did not:
+
+| group | why it is two properties |
+|---|---|
+| `THREE RIVERS` (OR) | Coos Bay 97420 and Florence 97439 — **67 km apart**, two casinos |
+| `GLACIER PEAKS` (MT) | a casino and its hotel |
+| `CITIES OF GOLD` (NM) | a casino and its hotel |
+
+A duplicate count is an upper bound on merges; an adjudication is the answer.
+
+**Two groups remain genuinely open** and either ruling moves 717: `THE STABLES`
+(a real Miami/Modoc joint operation — one property, two sovereigns) and
+`7 CLANS FIRST COUNCIL` (OK). Both are in
+`review/OWNER_DECISION_QUEUE.md` as GP-1 and GP-2.
+
+**Do not re-derive this number.** Seven values circulated for it — 787, 780,
+734, 727, 725, 717, 714 — each from a correct-looking rule applied to an
+undefined question. `gaming_facilities.csv` now answers it itself: the 16
+non-places carry a reason column, and the merged properties share a
+`cedar_place_id`. Read `COUNT(DISTINCT cedar_place_id)`.
+
+<!-- END GAMING-DENOMINATOR-717-CORRECTION -->
+
+<!-- BEGIN ADR-037-LINKAGE-COVERAGE -->
+## ADR-037 - linkage coverage is a RATCHETED product metric, and a low figure is not automatically a defect
+
+*Decided 2026-09-02 by workstream LINKAGE. `code/1139_linkage_coverage.py`
+(measure, gate) and `code/1140_linkage_close.py` (close the gap). What is here
+is the five decisions and why the obvious alternative to each is worse.*
+
+> **Every count in this section is a WORKED EXAMPLE, measured 2026-09-02, and
+> it will rot** — these flagships are rebuilt by other workstreams and two of
+> them moved during the pass that wrote this. The live figures are
+> `docs/LINKAGE_COVERAGE.md`, regenerated by
+> `py -3 code/1139_linkage_coverage.py report`. **Quote the doc, never this
+> section.** The decisions below do not depend on the exact numbers; they
+> depend on the shapes, and the shapes are stable.
+
+### 1. LINKED is the CONJUNCTION, never the key column alone
+
+Every flagship in this product has more than one column that looks like the
+answer, and on three of them the columns disagree by a named population:
+
+| table | key column says | gate column says | apart |
+|---|---:|---:|---:|
+| `prime_contracts` | `tribe_id` 791,490 | `attributed_flag` 791,394 | **96** |
+| `federal_funding_transactions` (before this pass) | `tribe_id_neid` 552,602 | `attribution_status` 553,106 | **504** |
+
+The 96 are `Nakupuna Solutions, Llc` at `RULED_TIER_C_NOT_ATTRIBUTED` -
+$269,771,379 of NEGATIVE ruling that the key column counts as coverage. The
+504 were `Bristol Bay Native Corporation`, keys cleared by the FA-01 unlink
+and status columns left claiming an attribution - $494,305,407.20. **A
+numerator that reads only the key column sells both.** So LINKED is the
+conjunction of every column a consumer branches on, which is always the
+smallest available reading, and each sibling column is published beside it
+with the disagreement stated in rows.
+
+**Rejected: pick the "right" column per table.** There is no right column
+while two of them disagree; there is a defect, and the disagreement is the
+thing worth publishing.
+
+### 2. A dataset declares WHICH ENTITY the link names
+
+`native_owned_businesses.business_entity_id` is populated on 4 of 2,916 rows.
+Read as the numerator that is 0.14% and it is a true statement about the
+wrong column: `identity_scope` says these firms are owned by PEOPLE
+(`any_native` 1,567, `citizen` 385, `shareholder_descendant_or_spouse` 98),
+280 rows' names ARE natural persons, and `resolution_method` shows the
+resolver already REFUSING loose-token matches on `Cherokee Nation`, `Navajo`
+and `Eagle`. A sole proprietor is not a spine entity and minting one would be
+fabrication. The Native entity the row is ABOUT is the certifying nation, at
+2,767 of 2,916 (94.87%).
+
+So every dataset carries a `role` sentence naming which entity the link
+identifies, and the numerator reads the column for that role.
+
+### 3. A LIST-VALUED key is declared, not inferred
+
+`nagpra_notices` has no `cedar_uid`, `tribe_id` or `entity_id`. It carries six
+pipe-delimited role columns, because one notice names many parties in many
+roles. **A scan looking for the three usual id names reports 0% on a dataset
+that is 90.83% linked**, and that scan was run on this product before it was
+caught. `list_keys` declares them and LINKED is their union. Verified against
+the table's own `has_resolved_entity`: 6,169 both ways, **0 rows disagreeing
+in either direction**. The structural predicate is used rather than the flag
+because it survives the flag being dropped.
+
+### 4. THREE denominators, all correct, and the ratchet runs on the rawest
+
+- **rows in `data/clean`** - the whole table.
+- **rows that are `publishable = Y`** - what the customer file holds.
+  `native_owned_businesses` is 2,916 and 2,044. Neither is wrong; a figure
+  quoted without saying which one is.
+- **rows that CAN name an individual entity.** `natural-resources` reads
+  **6.24%**, and 9,791 of its 10,600 unlinked rows are
+  `aggregate_suppressed_by_publisher` - ONRR and the state publishers report
+  Indian Country revenue in AGGREGATE and never name a recipient. That is
+  `SOURCE_DOES_NOT_PUBLISH`: a fact about the world, never a Cedar
+  deficiency, and keying those rows would be fabrication. Against the 957
+  rows a recipient CAN be named on, the same table is **73.67%**. Same shape
+  in `nonprofits` (11.15% raw, **18.23%** of 7,804 once the 4,960 EXCLUDED_*
+  rulings are removed) and in `contractors` (64.99% raw, **68.50%** of
+  1,153,140 once `RULED_NOT_NATIVE` and `RULED_CLASS_ONLY` are removed).
+
+**The exclusion must be a DECLARED, PER-ROW, source-side or ruled fact,
+never a judgement made by the measuring script**, and `RULED_OWNER_NOT_IN_
+SPINE` is deliberately NOT in any of these sets, because that one IS a Cedar
+gap. **And the ratchet runs on the RAW figure**, so the third denominator can
+never be used to make a real fall look like a change of definition.
+
+### 5. The ratchet lives with the measurement, not in `62`'s baseline
+
+`62_no_regression_check.py` carries ONE new MUST_BE_ZERO counter,
+`linkage_metrics_below_floor`, answered from `1139`'s OWN baseline - the same
+arrangement as `293` and `845`. Seeding twenty-eight new metrics into `62`'s
+baseline would have required re-recording it, which bakes in whatever else is
+red that day; standing rule 15 forbids it. This way the gate is live the
+moment it lands.
+
+Three counters per dataset. `linkage_<d>_bp` is the ratio, with a **25 basis
+point** tolerance, because several flagships are rebuilt by other workstreams
+and a rebuild that adds honest unlinked rows lowers a ratio without losing a
+link. `linkage_<d>_rows` is the absolute count of linked rows, so links being
+lost while the ratio holds still fails. `linkage_<d>_denom` is the row count,
+and it is not decoration:
+
+> **A link may fall by as many rows as the table itself lost, and not one
+> more.**
+
+That rule was earned ninety seconds after the first baseline was recorded, by
+the gate failing on `native_owned_businesses` going 4,274 -> 4,273 rows and
+4,125 -> 4,124 links in another workstream's rebuild. A link cannot survive a
+row that does not exist. **The alternative — a percentage tolerance on the row
+counter — was rejected**: 0.1% of `prime_contracts` is 791 rows, which is
+precisely the hiding place zero tolerance existed to close. `1139 selftest`
+proves all three cases, including that losing two links while losing one row
+still fails.
+<!-- END ADR-037-LINKAGE-COVERAGE -->
+
+<!-- BEGIN ADR-038-PRIME-SUB-NEVER-COMBINED -->
+
+## ADR-038 — prime and sub are two numbers with two labels, never one
+
+**Status:** accepted, 2026-09-02, workstream MONEY-RECON-1144
+(`code/1144_money_reconciliation_prime_sub.py`).
+**Supersedes nothing. Settles a question that had been asserted and never
+measured.**
+
+### Context
+
+`docs/MONEY_TOTALLING_RULES.md` has said since 2026-09-01 that *"a subaward is
+a slice of a prime award Cedar already publishes… never add the two."* That was
+a correct instinct with no number behind it. A past article reported a combined
+prime+sub total while its chart showed primes only, and nobody could say by how
+much the article was wrong.
+
+### The measurement
+
+Of $34,906,694,737.65 in countable subaward dollars (69,921 filings), joined on
+`prime_award_unique_key` → `prime_contracts.contract_award_unique_key`:
+
+- **$13,612,271,637.21 (39.0%, 27,319 filings) sits on a prime award Cedar
+  already publishes**, and **$13,500,614,272.77 of that (99.2%) is on a prime
+  row that is itself `attributed_flag = 1`** — inside the published
+  $230,259,821,658.99 attributed prime total.
+- $21,294,423,100.44 does not, and it is **not one thing**:
+  $19,317,140,197.29 is `b_native_as_subawardee` (a non-Native prime paying a
+  Native sub), $1,439,559,118.53 is `a_native_as_prime` on awards missing from
+  the prime table, $499,305,405.62 is `both_sides_native`, $38,418,379.00 is
+  `unknown`.
+
+### Decision
+
+**Cedar publishes no combined prime+sub figure.** A naive sum fails three ways
+at once and only the first is a double-count:
+
+1. it re-counts $13.61B of federal dollars obligated once;
+2. it merges FPDS (**government-recorded**) with FSRS (**vendor self-reported
+   by the prime, unvalidated**) into one number a reader cannot discount;
+3. it launders a coverage gap into growth — the $1.44B of `a_native_as_prime`
+   on awards absent from `prime_contracts.csv` patches the prime table from the
+   sub table on 3,944 awards and nowhere else.
+
+**The permitted presentation is two labelled figures.** The only slice of the
+subaward file that is neither a re-slice of a published prime nor a patch over
+a prime-table gap is **`b_native_as_subawardee` on primes Cedar does not carry:
+$19,317,140,197.29 over 37,850 countable filings**. It may sit *beside* the
+prime total, never inside it, and its sentence must say "self-reported by the
+prime."
+
+### Consequences
+
+- Any product surface offering "total federal dollars" must pick FPDS or FSRS
+  and say which. A toggle is acceptable; an addition is not.
+- The reconciliation is a **ceiling, not an identity**: on the 7,305 awards
+  where both sides are present, subs total $13.61B inside $41.12B of prime
+  obligations, and **444 awards have subs exceeding their prime by
+  $1,737,942,789.89** — they pass `subaward_exceeds_prime_flag` because that
+  flag is per FILING against the source's `prime_award_amount`, not per AWARD
+  against Cedar's summed obligations. No product may claim the two tables
+  reconcile more tightly than that.
+- Re-derive, do not quote: `py -3 code/1144_money_reconciliation_prime_sub.py
+  measure`. `verify` exits 1 when any of ten recorded numbers stops
+  reproducing and `selftest` proves all ten fire on a perturbed value, so a
+  PASS is evidence the measurement ran rather than evidence nothing broke.
+
+<!-- END ADR-038-PRIME-SUB-NEVER-COMBINED -->
+
+<!-- BEGIN ADR-039-METHODOLOGY-GENERATED -->
+## ADR-039 - a methodology paper is GENERATED around a preserved editorial block, and it must be able to fail
+
+*Decided 2026-09-02 by workstream METHODOLOGY. `code/1143_methodology_papers.py`
+(`report` / `build` / `verify`). Twelve papers already existed and were good;
+this decides what they are made of from here.*
+
+### 1. The set is `BUILD_SHELVES`, and `_entity_layer` is not in it
+
+`docs/methodology/README.md` listed thirteen papers and reached thirteen by
+counting `_entity_layer`. The delivered set also reaches thirteen - twelve
+storefront datasets plus gaming through Cedar Grove - and the two thirteens are
+not the same thirteen. **`nest` had no paper and nothing noticed**, because a
+count that agrees is not a set that agrees. Exactly the conflation that let
+`newsletters` ship as an unwanted storefront slot.
+
+The set is now `cedar_publication.BUILD_SHELVES`, read live. `_entity_layer.md`
+is kept, is named as infrastructure, and is excluded from the count rather than
+deleted to satisfy it - it is 43 KB of correct shared-identity writing that the
+other papers lean on.
+
+### 2. Three blocks, and only the middle one is written by a human
+
+    <!-- BEGIN GENERATED:IDENTITY -->   what the dataset IS, measured
+    <!-- BEGIN EDITORIAL:<id> -->       the argument, PRESERVED byte-for-byte
+    <!-- BEGIN GENERATED:MEASURED -->   Appendix M, measured, eight sections
+
+The reasoning in a methodology paper - why a source was refused, what a regime
+change means, which of two disagreeing sources to believe - is not derivable
+and a generator that claimed to produce it would be lying. The figures are
+derivable and a human who types them cannot keep them true. So the paper is
+both, and the seam is declared.
+
+**A paper whose editorial block is under 400 bytes FAILS `verify`.** An
+all-generated methodology paper is a codebook with a different filename.
+
+### 3. Measured means measured from `dist/customer/<id>.csv`
+
+Not from `data/clean/`, not from a build log, not from `MANIFEST.csv`. The
+delivered spreadsheet is the artefact the customer is handed and it is the only
+thing Appendix M reads. duckdb over the whole file, `sample_size=-1`, never
+sampled; the 1.6 GB contracting file answers a count in under four seconds, so
+there was no performance argument for sampling and there is no excuse for one.
+
+`MANIFEST.csv` is still read, and only to be **cross-checked**: §M7 prints
+whether the manifest and the file agree and says which is right when they do
+not.
+
+### 4. The paper carries a fingerprint, and `verify` fails on it
+
+§M7 records `bytes`, `rows`, `columns` and the SHA-256 of the header line.
+`verify` re-measures all four and exits 1 on any difference. **A methodology
+paper is stale the moment its dataset is rebuilt**, and a stale paper that
+cannot say so is worse than no paper - this project has an entire register
+(`docs/DOC_CONTRADICTIONS_2026-08-26.md`) that exists because superseded
+figures sit in documents looking exactly as authoritative as current ones.
+
+`verify` also fails on: a built dataset with no paper; a paper with no
+editorial markers; a paper no built dataset claims; a delivered file that is
+not on disk; and a dataset carrying `attribution_method` with no declared sense
+in `1143.ATTRIBUTION_SENSE`.
+
+### 5. §M8 names a contradiction instead of resolving it silently
+
+Where the generated appendix and the paper's own hand-written body disagree on
+a figure that has actually drifted, §M8 prints both, says which was measured
+today, and **leaves the prose standing**. A superseded figure that is labelled
+is recoverable; one that has been overwritten is not, and the reasoning around
+it is usually still sound even when the number under it has moved.
+
+The two live instances on the day this was written, both measured from the
+delivered files:
+
+| paper | figure | prose says | measured |
+|---|---|---|---|
+| `gaming` | distinct properties, `COUNT(DISTINCT cedar_place_id)` | 714 | **717** |
+| `subcontracting` | rows | 76,859 | **89,809** |
+| `subcontracting` | row-summing `subaward_amount` overstates by | 82.9% / 86.9% | **63.4%** |
+
+The superseded values are DECLARED in `PROSE_CHECKS`, not inferred. A derived
+list of "numbers that look stale" would agree with whatever the prose happened
+to say, which is the failure it is meant to catch - the same reason
+`N_BUILT_EXPECTED` is stated rather than counted.
+
+### 6. A money column must clear a NAME test, a CONTENT test and a SHAPE test
+
+The first cut used a name pattern alone and printed **`$1,759.00`** as the
+total of `n_compact_obligation_tribal_agency_bridge`, which is a count of
+bridge rows. It also promoted `in_full_irs_bmf`, a 0/1 flag, to a dollar
+column. `517.MONEY_HINTS` had already made this exact mistake once on
+`principal_amount_text`.
+
+A column is money only if its name matches, **>=98% of its populated values
+parse as a number**, and it is not a count by name or a 0/1 flag by value.
+
+And a column that repeats is a PARENT's figure on a CHILD's row. The test is
+functional dependence, exactly - `count(DISTINCT (key, value)) == count(DISTINCT
+key)` - not a distinct-value heuristic. The heuristic version fired on
+`subaward_amount` (55,110 distinct over 89,809 rows) purely because contract
+amounts land on round numbers, and it would have published a "deduped total"
+for a genuinely row-grain column: a meaningless figure that looks
+authoritative. The exact version fires only on the three
+`subaward_entity_rollup__*` columns, which are constant within `cedar_uid` and
+row-sum to between 1,466x and 3,335x their once-per-entity totals.
+
+### 7. A marker a document is allowed to TALK ABOUT must be ANCHORED
+
+This one cost a paper and is the most portable thing here. The generated
+IDENTITY block tells the reader, in prose, to write between the BEGIN and END
+EDITORIAL markers - and names them. `txt.split(marker)` then finds that
+**sentence** first, and the "editorial body" recovered on the next build is the
+five characters between the two names inside it. `subcontracting.md` rebuilt
+from 58,874 bytes to 20,700 and 41,667 bytes of prose were gone. Caught on the
+second build, restored from git, fixed by matching only a marker that is
+**alone on its own line** (`_split_on_marker_line`).
+
+**Documentation of a delimiter is a legal occurrence of the delimiter, and `in`
+cannot tell the two apart.** Every marker consumer in this tree that uses a
+substring test has the same latent defect.
+
+### 8. A missing delivered file still produces a managed paper
+
+`build` used to skip a dataset whose spreadsheet was absent, which left the
+paper in its pre-1143 unmarked form and made `verify` report it as
+"unmanaged" - a true statement about the wrong problem. It now writes both
+generated blocks, states that the file is not on disk, states no figure at all,
+leaves the editorial body untouched, and records `file_absent: true` in the
+fingerprint so `verify` fails for the right reason. Flag, never delete.
+<!-- END ADR-039-METHODOLOGY-GENERATED -->
+
+<!-- BEGIN ADR-040-MONEY-FED-ACQUISITION -->
+## ADR-040 — two acquisitions on the federal/money side, and the three things they had to decide (workstream MONEY-FED, 2026-09-02)
+
+*Scripts `code/1145_cosponsor_harvest.py`, `code/1148_nagpra_nps_databases.py`,
+`code/1149_codebook_money_fed.py`, `code/1150_bill_actions_promote.py`. Build logs
+`docs/NAGPRA_NPS_DATABASES_BUILD_LOG_2026-09-02.md` and
+`docs/COSPONSOR_HARVEST_LOG_2026-09-02.md`.*
+
+### Files this pass owns and edited
+
+| file | what changed |
+|---|---|
+| `data/clean/native_bill_cosponsors.csv`, `native_bill_cosponsor_coverage.csv` | NEW, `legislation` |
+| `data/clean/native_bill_actions.csv`, `native_bill_action_coverage.csv` | NEW, `legislation`, promoted from an orphan with **zero network** |
+| `data/clean/nagpra_nps_{grant_awards,inventories,summaries,intended_dispositions,notice_index,unclaimed_remains}.csv` | NEW, `nagpra` |
+| `data/clean/nagpra_notice_source_corroboration.csv` | NEW, `nagpra` |
+| `code/1145_*`, `code/1148_*`, `code/1149_*`, `code/1150_*` | NEW, each claimed atomically via `1050_preflight.py claim` and written into the stub it created |
+| `code/512_build_dataset_contracts.py` | **`GRAIN_MONEY_FED` only**, a new dict, plus five entries prepended inside `GRAIN_OPEN`. No other workstream's dict read or written |
+| `data/clean/codebook/{10e,10f,10g,10h,11e,11f,11g,11h,11i,11j,11k}_*.csv` | NEW fragments; `codebook_master.csv` rebuilt through `cedar_codebook.build()`, which refuses to shrink |
+| `docs/ARCHITECTURE_DECISIONS.md` | **inside `<!-- BEGIN ADR-040-MONEY-FED-ACQUISITION -->` only** |
+| `docs/ARCHITECTURE.md` | regenerated by `code/500_build_architecture_map.py`; no hand edit |
+
+**No `COLLECTIONS` edit was required.** `nagpra_*` and `native_bill_*` are
+already reached by the existing patterns in `500`, so none of the eleven tables is
+an ORPHAN and `512` counts none of them as shippable-with-no-owner. That was
+checked by re-running `500` and reading `docs/ARCHITECTURE.md`, not assumed.
+
+**No table here has an in-place enricher**, so there is no rebuild/enrich
+ordering to declare and nothing to add to `KNOWN_ORDERINGS`. `apply` on both
+scripts is a full rebuild from a local cache and takes no network.
+
+### Decision 1 — a gate column is an INTERFACE, and an accurate value outside its vocabulary is a silent withholding
+
+`code/1148`'s first draft wrote `source_terms_status =
+PUBLIC_DOMAIN_US_GOVERNMENT_WORK` on all 21,658 NPS rows. That statement is
+**true**. It is also not in
+`cedar_publication.GATES["source_terms_status"] = {"SILENT",
+"TERMS_STATED_NO_REUSE_RESTRICTION", ""}`, so every row would have been withheld
+at publication time and **nothing anywhere would have said so** — no error, no
+count, a clean build and an empty shelf.
+
+This is `AGENT_FIELD_GUIDE` rule 7 in the publication layer rather than in
+`attribution_method`: *a controlled vocabulary is an interface, and prose in it
+is a breaking change.* The generalisation this pass adds is that **the harm runs
+in both directions** — 7 widened the vocabulary and broke a reader; this would
+have narrowed the population and broken the product. The rule is the same in
+both: **before writing a value into a column another module branches on, open
+that module and read the branch.**
+
+Resolution: publish `TERMS_STATED_NO_REUSE_RESTRICTION`, which the NPS
+disclaimer supports verbatim, and carry the public-domain fact in
+`source_terms_url` + `source_terms_basis`. **`cedar_publication.py` was not
+edited** — it is not agent-editable, and the observation that its vocabulary has
+no public-domain member is recorded for the integrator rather than acted on.
+
+### Decision 2 — the denominator is the one the SERVER states, not the one your loop computes
+
+Two hidden default filters on one host, each of which would have shipped a short
+table under HTTP 200s:
+
+* `getnotices` defaults to `NoticeType=NIC` → **4,810 of 6,818 rows, 70.6%**.
+* `getinventories` collapses `InventoryType` → 11,812 rows of which **4,139 are
+  byte-identical duplicates**, because culturally affiliated and culturally
+  **unidentifiable** holdings render as the same six columns.
+
+In both cases the paging loop's `got >= recordsTotal` test never fired.
+`recordsTotal` is the whole table; **`recordsFiltered` is what the request
+selects**, and it was the only witness. `1148` now reads `recordsFiltered`,
+prints both, and warns when the two disagree — which caught a third thing: the
+source's own two counters differ by one on
+`InventoryType=NotCulturallyAssociated` (11,358 vs 11,357) and `start=11357`
+returns nothing. Cedar holds 11,811 and says so. **Nothing was rounded up.**
+
+The stale caches from both short pulls were **retired by MOVE**, per field-guide
+rule 9, to `_retired_getnotices_default_NIC_filter_2026-09-02/` and
+`_retired_getinventories_no_InventoryType_2026-09-02/`.
+
+### Decision 3 — a second source that DISAGREES is the deliverable
+
+`START_HERE.md` item 0: across 8,975 single-valued facts, **0 had a second
+source**, and the earlier attempt failed because republishing the Federal
+Register into Cedar is the *same evidence family*.
+
+`nagpra_notice_source_corroboration.csv` is not that. Cedar's
+`mni_total_stated` is **read out of the notice's prose**; NPS's `TotalMNI` is
+**the Program's own record of the same repatriation**. Two observers. Joined on
+`fr_document_number`: **AGREE 3,950 · DISAGREE 315 ·
+NOT_TESTABLE_NO_MNI_ONE_SIDE 2,488 · NOT_TESTABLE_MULTIPLE_NPS_ROWS 8 ·
+IN_NPS_ONLY 49 · IN_CEDAR_ONLY 31.**
+
+**Not one disagreement was resolved and not one value was overwritten.** The
+table asserts no verdict about which reader is right; it carries both numbers,
+both sources, and the sentence saying what the comparison does not decide. That
+is the whole point — a warehouse without lineage would have booked 3,950
+"confirmations" and quietly discarded 315 rows to make the join clean.
+
+**One declared key repair, and it is scoped so it cannot generalise.** Two NPS
+rows write the FR document number with a literal `?` where the hyphen belongs.
+The repair fires only where substituting `-` yields a key Cedar actually holds;
+606 other non-canonical values are legitimate FR prefixes (`E8-`, `E9-`, `X94-`,
+`R7-`) and are untouched.
+
+### What was refused, and it was reachable
+
+`/nagprapublic/home/getcontacts` answers HTTP 200 with
+`FirstName, LastName, Company, Title, Phone, Email`. It was **not fetched**. No
+cache directory for it exists, and `1148`'s invariant **NPS-4** fails if one
+appears or if any output table grows a person-column. Reachable is not the test;
+`docs/PUBLICATION_POLICY.md` is.
+
+### Decision 4 — `ondisk` answers the question you ask it, and a queue entry is a belief
+
+`code/1150_bill_actions_promote.py` promoted **31,936 bill actions over 3,061
+bills** into `legislation` with **zero network requests**. Ninety minutes
+earlier this same workstream had written those actions into
+`docs/WORK_QUEUE.md` as `NOT_ACQUIRED`, *"~3,000 requests, ~1 hour"*.
+`data/clean/_bill_actions.csv` had held them since 2026-08-06.
+
+Both orphans — `_cosponsors.csv` and `_bill_actions.csv` — were invisible for
+one reason: **a leading underscore matches no `COLLECTIONS` pattern**, so the
+table reaches no collection, no contract, no codebook and no listing anyone
+reads. `py -3 code/1050_preflight.py ondisk cosponsor` found the first
+instantly. Nobody ran `ondisk actions`, because the queue entry had already
+decided actions were a fetch.
+
+**The sharpening of field-guide §5 this earns:** the four states are assigned
+per item, and an item is usually named by someone who already believes they know
+its state. `ondisk` cannot correct a belief it is never asked about. **Run
+`ondisk` on the noun in the row before writing `NOT_ACQUIRED` beside it, and run
+it on the naming convention the neighbours use** — one `ls data/clean/_*.csv`
+would have found both files, plus a third (`_bill_metadata_backfill.csv`, 128
+rows). A promotion that a queue calls an acquisition is an hour of traffic
+spent on data already paid for.
+
+### Where a claim was checked and had to be withdrawn
+
+`1148`'s first docstring said the NAGPRA grants "appear in no other Cedar
+table." **False.** `federal_funding_transactions.csv` holds 696 rows on CFDA
+15.922, FY2007–2026, $11,215,956.86. What it does not hold is the years:
+**736 of the 1,221 awards — $38,248,137 — are FY2012 or earlier, a window in
+which Cedar's assistance stream holds one $4,000 transaction.** From FY2013 the
+two overlap and describe different things (award vs transaction). Both the
+docstring and `GRAIN_OPEN` now carry a **do-not-sum fence** instead of the
+withdrawn claim.
+<!-- END ADR-040-MONEY-FED-ACQUISITION -->
+
+<!-- BEGIN ADR-041-NOB-DIRECTORIES -->
+## ADR-041 — a certifying authority's admission is DATA, not a dict, and a directory is admitted twice or not at all (workstream NOB-DIRECTORIES, 2026-09-02)
+
+**Context.** `330_build_native_owned_businesses.py promote` is the one builder
+for `native_owned_businesses.csv` and it refuses any staging file whose source
+id it does not know, because promoting a file whose certifying authority,
+assertion class and terms status it cannot state is how a restricted source
+reaches `data/clean` by accident. That refusal is right and stays. But 330's
+`SIBLING` dict is a Python literal written on 2026-09-01, and three sibling
+passes wrote fifteen more directories into the shared staging folder
+afterwards. Result: fifteen nations' harvested, parsed, provenanced directories
+were invisible to the dataset, and the only way to admit them was to edit a
+file every one of those passes would also want to edit.
+
+**Decision, three parts.**
+
+1. **The admission decision is DATA.** A sibling pass writes
+   `data/staging/business_registry/_<slug>_dispositions.json` naming, per
+   source id, the certifying authority's spine id, the programme, the
+   assertion class, the disposition and the reasoning. `330 promote` globs
+   `_*_dispositions.json` and merges them into `SIBLING`. It **never overrides
+   a decision made in code** — a source id already in `SOURCES` or `SIBLING`
+   wins — so the file can only add. When no such file exists 330 prints a
+   named warning saying how many directories it is about to drop and which
+   commands produce them, because an absence must never print as a clean
+   result.
+
+2. **A directory is admitted TWICE or not at all.** The rows are APPENDED now
+   through `cedar_pipeline.merge_table`, *and* the disposition is written for
+   the rebuild. Appending alone is reverted by the next `330 promote` and the
+   revert looks like nothing happened; writing the disposition alone leaves the
+   rows non-existent until somebody dares run a rebuild that blanks five
+   in-place enrichers (`615`, `1070`, `953`, doyon, `1100`). Both halves, or
+   neither. `1146` V6 and `1147` V5 fail while the 330 hook is absent.
+
+3. **A vocabulary is not widened to fit a source; the source is adjudicated
+   into the vocabulary, and the source's own word is kept beside it.**
+   `570_shard_l` typed the Hoopa business-licence register `assertion_class =
+   LICENCE`. That value is not in this table's vocabulary (`OWNERSHIP` /
+   `RELATIONSHIP` / `JOINT_VENTURE_PARTICIPATION`). It is mapped to
+   `RELATIONSHIP` — 330's own definition, "the authority asserts the firm does
+   business with the tribe" — because the register says in its own words that
+   it carries *"NO ownership threshold, NO tribal membership requirement"*, and
+   the source's word is recorded in `validation_flags`. **The directory TYPE
+   does not decide the assertion CLASS**: the live table correctly types
+   Lummi's `business_licence` rows `OWNERSHIP`, because the Lummi list is
+   titled *Lummi-owned businesses*, and the Pyramid Lake licence list is
+   correctly `RELATIONSHIP`. The claim sentence decides.
+
+**Consequence.** 2,916 → **4,273** rows, 21 → **42** certifying authorities.
+614 rows from disk at zero network cost, 744 from the six hosts the
+2026-09-02 terms ruling released. Grain and primary key declared in
+`512.GRAIN_NOB_DIRECTORIES`; the table is claimed by the
+`native-owned-businesses` collection in `500.COLLECTIONS`, which it was not
+before. Full account: `docs/NOB_DIRECTORY_EXPANSION_LOG_2026-09-02.md`.
+
+**What this decision does NOT license.** It does not move the *publication*
+gate. All 744 released-host rows carry `source_terms_status =
+TERMS_STATED_RESTRICTIVE` and land `publishable = N`, because
+`615.PERMISSION_OK` is an allow-list and only 615 owns that column. The
+harvest gate and the publication gate are two gates and the owner has so far
+moved one.
+<!-- END ADR-041-NOB-DIRECTORIES -->

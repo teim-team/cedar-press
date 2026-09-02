@@ -55,11 +55,17 @@ WHAT IS CANONICAL HERE, AND WHAT IS NOT
 ----------------------------------------
 Canonical (hand-maintained, this file is the only copy):
 
-  `NEVER`             row-level withholding: personal data held APART from a
+  `NEVER`             personal data held APART from a public role. Dropped
+                      as a COLUMN by `shipped_columns()` AND withheld at
+                      row level by `row_ok()` as a backstop. Row-only until
+                      2026-09-02, which cost 582 of 587 rows of the BIA
+                      tribal leaders directory while still shipping its
+                      `phone` and `email` headers. Originally: withholding
+                      of personal data held APART from a
                       public role
   `GATES`             row-level publication gates
   `FLAGSHIP`          the ONE table a customer opens first, per collection
-  `SPINE`             flagship tables that live in `data/spine`, not `clean`
+  `SPINE_TABLES`      flagship tables that live in `data/spine`, not `clean`
   `PRODUCT_ID`        Cedar id -> the product's id, where they differ
   `DROP_COLS`         proprietary identifiers, dropped as COLUMNS not rows
   `CUSTOMER_SHELVES`  which shelves a paying customer sees
@@ -155,11 +161,46 @@ YEAR_COLS = ("fiscal_year", "fy", "action_date_fiscal_year", "award_fiscal_year"
              "year", "report_year", "filing_year")
 
 # ---------------------------------------------------------------------------
-# THE STOREFRONT
+# THE STOREFRONT AND THE BUILD SET ARE DIFFERENT SETS
 # ---------------------------------------------------------------------------
-# Shelves a paying customer sees. `grove` goes to Cedar Grove, `infrastructure`
-# is the hub, `withdrawn` is the owner's newsletters ruling of 2026-09-02.
-CUSTOMER_SHELVES = ("standard", "pro")
+# Owner, 2026-09-02: *"you're always working on thirteen datasets, the twelve
+# in Cedar Press, and then the gaming dataset. Those are the ones that you're
+# always prioritizing."*
+#
+# Until this block those were ONE tuple, and the conflation had a cost: gaming
+# is the largest maintained collection in the project (65 tables, 56 of them
+# shippable) and it was excluded from the combined-product build for the same
+# reason it is excluded from the Cedar Press storefront - a single membership
+# test doing two different jobs. It ships through **Cedar Grove**, not the
+# Press storefront, and it is still a first-class maintained dataset.
+#
+# So there are now two sets, and every consumer has to say which one it means:
+#
+#   STOREFRONT_SHELVES   what a paying Cedar Press customer sees.        12
+#   GROVE_SHELVES        built to the same standard, sold through Grove.  1
+#   BUILD_SHELVES        everything that gets a combined spreadsheet,
+#                        a codebook and a workbook.                      13
+#
+# `infrastructure` (`_entity_layer`) is the hub and is in neither: it is what
+# the others join to, not a product. `withdrawn` is the owner's newsletters
+# ruling of 2026-09-02 - addressable, not sold, not built.
+STOREFRONT_SHELVES = ("standard", "pro")
+GROVE_SHELVES = ("grove",)
+BUILD_SHELVES = STOREFRONT_SHELVES + GROVE_SHELVES
+
+# The counts are STATED, not derived, and that is the point. A dataset that
+# quietly starts qualifying must be loud: `newsletters` shipped as an unwanted
+# thirteenth storefront slot before the owner withdrew it, and nothing failed.
+# A derived count cannot catch that, because a derived count agrees with
+# whatever the map happens to say. Change these deliberately, in the same
+# commit as the shelf change that moved them.
+N_STOREFRONT_EXPECTED = 12
+N_BUILT_EXPECTED = 13
+
+# Back-compatible alias. `CUSTOMER_SHELVES` always meant the storefront, and
+# the name is kept for any consumer outside this tree that still imports it.
+# New code should name the set it means.
+CUSTOMER_SHELVES = STOREFRONT_SHELVES
 
 # THE PRODUCT'S ID IS NOT ALWAYS CEDAR'S ID, and there is exactly one case.
 # `deals` and `contractors` match exactly, which is what made the assumption
@@ -172,7 +213,15 @@ PRODUCT_ID = {
 }
 
 # Flagship tables that live in `data/spine/`, not `data/clean/`.
-SPINE = {"cedar_identity_register.csv"}
+#
+# NAMED `SPINE_TABLES`, NOT `SPINE`, AND THE RENAME IS THE POINT. 770 called
+# this set `SPINE`; 1135 and 1137 both use the bare name `SPINE` for the
+# `data/spine` DIRECTORY. Three files, one name, two unrelated types - a set of
+# filenames and a `Path` - and the only thing that kept them apart was that no
+# file imported another. The moment they shared a module the collision became
+# reachable, and the divergence gate caught it on its first run. A shared name
+# has to say what it is.
+SPINE_TABLES = {"cedar_identity_register.csv"}
 
 # ---------------------------------------------------------------------------
 # THE FLAGSHIP CHOICE - curated, per collection, and stated rather than derived
@@ -252,10 +301,120 @@ def row_ok(r: dict) -> tuple[bool, str]:
     return True, ""
 
 
+#: The delivered subcontracting spreadsheet, and the fence that makes its money
+#: column summable. Both are named here so a caller cannot quietly use a
+#: different rule and report a different percentage - which is exactly how this
+#: figure came to ship in three values.
+SUBAWARD_FILE = "subcontracting.csv"
+SUBAWARD_FENCE = ("duplicate_status == 'primary'",
+                  "subaward_exceeds_prime_flag != 'yes'")
+
+
+def subaward_overstatement(dist_customer=None):
+    """Measure how far a naive sum of `subaward_amount` overshoots.
+
+    Returns a dict, or None when the delivered file is absent - never a
+    fallback constant, because a stale constant is what this replaces.
+
+    WHY THIS IS MEASURED AND NOT TYPED
+    -----------------------------------
+    The warning "the unfiltered subaward total runs N% above the correct one"
+    has shipped as 46.5%, 86.9%, 82.9% and 63.4%. Two of those were right when
+    written; all four were hardcoded, and the table underneath kept moving
+    (76,859 rows when the rules doc was regenerated, 89,809 today). A buyer
+    holding two Cedar documents saw two different numbers and reasonably
+    concluded one of us could not do arithmetic.
+
+    The denominator is the trap. `removed / countable` and `removed / unfiltered`
+    are both defensible and they differ by a factor of nearly two, so BOTH are
+    returned, each named for its denominator, and callers must print which one
+    they mean.
+    """
+    import csv as _csv
+    base = Path(dist_customer) if dist_customer else (ROOT / "dist" / "customer")
+    f = base / SUBAWARD_FILE
+    if not f.exists():
+        return None
+    _csv.field_size_limit(10_000_000)
+    rows = unf = cnt = 0
+    unf_sum = cnt_sum = 0.0
+    with f.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+        for r in _csv.DictReader(fh):
+            rows += 1
+            raw = (r.get("subaward_amount") or "").replace(",", "").replace("$", "").strip()
+            try:
+                v = float(raw)
+            except ValueError:
+                continue
+            unf += 1
+            unf_sum += v
+            if ((r.get("duplicate_status") or "") == "primary"
+                    and (r.get("subaward_exceeds_prime_flag") or "") != "yes"):
+                cnt += 1
+                cnt_sum += v
+    if cnt_sum <= 0:
+        return None
+    removed = unf_sum - cnt_sum
+    return {
+        "rows": rows,
+        "unfiltered_usd": unf_sum,
+        "countable_usd": cnt_sum,
+        "removed_usd": removed,
+        # Named for their denominators. They differ by nearly 2x and quoting
+        # one as though it were the other is the original defect.
+        "pct_of_countable": round(100.0 * removed / cnt_sum, 1),
+        "pct_of_unfiltered": round(100.0 * removed / unf_sum, 1),
+    }
+
+
+def subaward_warning(dist_customer=None) -> str:
+    """One sentence a document can print, with its denominator stated."""
+    m = subaward_overstatement(dist_customer)
+    if not m:
+        return ("A column total is the raw sum of that column and is not "
+                "necessarily this dataset's money answer; the filters live in "
+                "the methodology paper. (The subaward figure could not be "
+                "measured - dist/customer/subcontracting.csv is absent.)")
+    return (f"Summing `subaward_amount` over every row overstates the "
+            f"countable total by {m['pct_of_countable']}% "
+            f"(${m['unfiltered_usd']:,.2f} unfiltered against "
+            f"${m['countable_usd']:,.2f} countable; the rule removes "
+            f"${m['removed_usd']:,.2f}, which is "
+            f"{m['pct_of_unfiltered']}% of the unfiltered total). Measured "
+            f"from the delivered file, not quoted.")
+
+
 def publishable_columns(header) -> list:
-    """Header minus the proprietary identifiers. Case-insensitive, as every
-    consumer already compared them."""
-    return [c for c in header if c.lower() not in DROP_COLS]
+    """Header minus what may never be published.
+
+    TWO classes, both dropped as COLUMNS:
+
+      `DROP_COLS`  proprietary identifiers - licensed to Cedar, not ours to
+                   redistribute. Case-insensitive, as every consumer compared
+                   them.
+      `NEVER`      personal data held apart from a public role.
+
+    WHY `NEVER` IS HERE AND NOT ONLY IN `row_ok()`
+    ----------------------------------------------
+    It was only a row gate until 2026-09-02. Measured against the live tree,
+    that published **5 of the 587 rows** of
+    `bia_tribal_leaders_directory.csv` - every row carrying a phone or an
+    email was withheld whole - and shipped the `phone` and `email` HEADERS
+    anyway on the five survivors.
+
+    Both halves of that are wrong. A tribal leader's name and office is a
+    PUBLIC ROLE and belongs in the dataset; the phone number is the thing that
+    must not travel. Dropping the field keeps 587 rows and publishes no
+    contact data, where the row gate kept 5 rows and still advertised two
+    contact columns.
+
+    `row_ok()` keeps its `NEVER` check as a BACKSTOP, for a personal field
+    arriving under a name this list does not know.
+    """
+    lower_drop = {c.lower() for c in DROP_COLS}
+    never = set(NEVER)
+    return [c for c in (header or [])
+            if c.lower() not in lower_drop and c not in never]
 
 
 def _from_numbered(stem: str):
@@ -306,9 +465,28 @@ def shelves() -> dict:
 
 
 def customer_collections() -> list:
-    """The collections a paying customer sees, sorted. Twelve, today."""
+    """The collections on the Cedar Press STOREFRONT, sorted. Twelve, today.
+
+    This is the storefront set, not the build set. `gaming` is built to the
+    same standard and is deliberately NOT here - it is sold through Cedar
+    Grove. Use `built_collections()` if you want everything that gets a
+    spreadsheet.
+    """
     sh = shelves()
-    return sorted(c for c, s in sh.items() if s in CUSTOMER_SHELVES)
+    return sorted(c for c, s in sh.items() if s in STOREFRONT_SHELVES)
+
+
+def built_collections() -> list:
+    """Every collection that gets a combined spreadsheet, sorted. Thirteen.
+
+    The twelve on the storefront plus `gaming`, which ships through Cedar
+    Grove. Membership of this set says a dataset is MAINTAINED and DELIVERED;
+    membership of `customer_collections()` says where it is sold. Conflating
+    the two is what kept the project's largest collection out of the product
+    build.
+    """
+    sh = shelves()
+    return sorted(c for c, s in sh.items() if s in BUILD_SHELVES)
 
 
 # ---------------------------------------------------------------------------
@@ -385,7 +563,8 @@ CONSUMERS = ("770_sample_extracts.py",
 # all. A consumer that does not define one is fine; a consumer that defines a
 # DIFFERENT one is the failure this gate exists for.
 SHARED = ("NEVER", "GATES", "FLAGSHIP", "PRODUCT_ID", "DROP_COLS",
-          "CUSTOMER_SHELVES", "SPINE", "YEAR_COLS")
+          "CUSTOMER_SHELVES", "STOREFRONT_SHELVES", "GROVE_SHELVES",
+          "BUILD_SHELVES", "SPINE_TABLES", "YEAR_COLS")
 
 
 def verify() -> int:
@@ -463,21 +642,41 @@ def verify() -> int:
                 bad.append(f"770: 760's scrape yields {len(c760)} entries, "
                            f"FLAGSHIP has {len(FLAGSHIP)}")
 
-    # 5. The shelf map must resolve, and to the twelve the owner ruled.
+    # 5. The shelf map must resolve, to the TWELVE the owner ruled onto the
+    #    storefront and the THIRTEEN that get built. Both counts are checked,
+    #    separately, because they are different facts: a dataset appearing on
+    #    a customer shelf is a pricing change, and a dataset appearing in the
+    #    build set is a delivery commitment. `newsletters` was a silent
+    #    thirteenth STOREFRONT slot; `gaming` is a deliberate thirteenth BUILD
+    #    slot that is on no storefront. One count cannot tell those apart.
     try:
         cust = customer_collections()
     except SystemExit as e:
         bad.append(f"shelves(): {e}")
         cust = []
-    if cust and len(cust) != 12:
+    try:
+        built = built_collections()
+    except SystemExit:
+        built = []
+    if cust and len(cust) != N_STOREFRONT_EXPECTED:
         bad.append(f"{len(cust)} customer collections on shelves "
-                   f"{CUSTOMER_SHELVES}, expected 12: {cust}")
+                   f"{STOREFRONT_SHELVES}, expected {N_STOREFRONT_EXPECTED}: "
+                   f"{cust}")
+    if built and len(built) != N_BUILT_EXPECTED:
+        bad.append(f"{len(built)} built collections on shelves "
+                   f"{BUILD_SHELVES}, expected {N_BUILT_EXPECTED}: {built}")
+    # The storefront must be a strict subset of the build set. If it ever is
+    # not, something is being SOLD that is not being BUILT.
+    for c in sorted(set(cust) - set(built)):
+        bad.append(f"{c}: on a customer shelf but not in the build set - it "
+                   f"would be sold and never delivered")
 
-    # 6. Every collection on a customer shelf must name a flagship, or 1137
-    #    ships an empty dataset that looks finished.
-    for c in cust:
+    # 6. Every collection that gets BUILT must name a flagship, or 1137 ships
+    #    an empty dataset that looks finished. This is the build set, not the
+    #    storefront: gaming is delivered too, so it needs one too.
+    for c in built:
         if c not in FLAGSHIP:
-            bad.append(f"{c}: on a customer shelf and FLAGSHIP names no table")
+            bad.append(f"{c}: in the build set and FLAGSHIP names no table")
 
     # 7. DROP_COLS is compared case-insensitively by every consumer, so an
     #    upper-case entry could never match and would silently ship.
@@ -491,7 +690,9 @@ def verify() -> int:
         print("  FAIL " + b)
     print(f"  cedar_publication verify   {'FAIL' if bad else 'PASS'}   "
           f"{len(bad)} problem(s); {len(CONSUMERS)} consumers, "
-          f"{len(SHARED)} shared constants, {len(cust)} customer collections")
+          f"{len(SHARED)} shared constants, {len(built)} built "
+          f"({len(cust)} on the storefront, "
+          f"{len(set(built) - set(cust))} through Grove)")
     return 1 if bad else 0
 
 

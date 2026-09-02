@@ -959,6 +959,20 @@ MD_PROVEN_SAFE = {
     "docs/datasets/_PUNCHLIST.md":
         "2026-09-02 regen: 4 removed / 14 added, 0 unpaired removals - open "
         "item counts moved, nothing was lost.",
+    "docs/methodology/README.md":
+        "2026-09-02 regen (mode `build`, NOT bare - 1143's default mode is "
+        "`report`, which writes nothing, so a bare run would have 'proven' "
+        "safety by not running the writer at all; 845 refused the bare run and "
+        "was right to): **byte-identical. 0 diff lines, 0 removed, 0 added.** "
+        "The 7 orphan headings are the whole point of the design rather than a "
+        "risk: everything from 'How to read a figure in these papers' down "
+        "sits inside <!-- BEGIN EDITORIAL:README --> / <!-- END "
+        "EDITORIAL:README -->, which 1143 reads out of the live file and "
+        "writes back unchanged, so the generator has no string literal for any "
+        "of it and never will. The generated half above the rule is computed "
+        "from cedar_publication.BUILD_SHELVES, dist/customer/MANIFEST.csv and "
+        "docs/DATASET_READINESS.md - not typed - so a moved row count edits "
+        "itself.",
     "docs/datasets/_PUNCHLIST_CLAIM_AUDIT.md":
         "2026-09-02 regen: 1 removed / 1 added, 0 unpaired within a hunk - the "
         "open-item count moved 334 -> 333 while the fleet landed work, and "

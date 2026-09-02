@@ -329,6 +329,42 @@ def classify(path):
 #: Ordering pairs that were paid for in lost work. `after` must run AFTER
 #: `before` whenever `before` runs, or `before`'s columns are gone.
 KNOWN_ORDERINGS = [
+    # --- LINKAGE, added 2026-09-02 (ADR-037). `1140_linkage_close.py` is an
+    # IN-PLACE enricher on three flagships at once. Each rebuild below
+    # REVERTS its share of the work, and it will look like pure progress
+    # while it happens - the FERC collision, four times, in START_HERE.
+    # `py -3 code/1140_linkage_close.py verify` exits 1 when it has been
+    # reverted, which is what tells you to re-run `apply`.
+    {"rebuild": "14_build_bills_votes.py",
+     "enricher": "1140_linkage_close.py",
+     "file": "native_bills.csv",
+     "cost": "the legislation dataset goes back to shipping NO entity column "
+             "at all - 591 bills lose their named-entity link and 2,456 lose "
+             "the class-scope columns, and a customer can no longer join a "
+             "bill to any Native entity",
+     "enricher_columns": ["has_resolved_entity", "n_entities_resolved",
+                          "entity_tribe_ids", "entity_cedar_uids",
+                          "entity_names", "entity_link_tiers",
+                          "entity_link_basis", "entity_class_scope",
+                          "n_entity_classes", "entity_class_scope_basis"]},
+    {"rebuild": "24_funding_merge.py",
+     "enricher": "1140_linkage_close.py",
+     "file": "federal_funding_transactions.csv",
+     "cost": "154 rows / $11,384,182.32 of McGrath Native Village Council "
+             "assistance go back to `unattributed`, and 504 rows / "
+             "$494,305,407.20 go back to claiming "
+             "attribution_status=cedar_neid with a BLANK tribe_id_neid - a "
+             "coverage overstatement of half a billion dollars",
+     "enricher_columns": []},
+    {"rebuild": "40_build_prime_contracts.py",
+     "enricher": "1140_linkage_close.py",
+     "file": "prime_contracts.csv",
+     "cost": "2,034 rows / $803,507,507 stamped RULED_ATTRIBUTED go back to "
+             "carrying a ruling with no key - the Susanville, Chickasaw, "
+             "Modoc, Poarch and Hopi adjudications of 2026-08-26 stop being "
+             "visible on the rows that asked for them. 1140 must run AFTER "
+             "1079, because 1079 is the pass whose withdrawals stranded them",
+     "enricher_columns": []},
     # --- contracting quarantine visibility, added 2026-09-02 by workstream
     # QUARANTINE (ADR-019).  `40` rebuilds prime_contracts.csv; `1079` then
     # writes five columns into it IN PLACE that carry the IDENTITY LEDGER's
@@ -936,7 +972,13 @@ KNOWN_ORDERINGS = [
              "facility table drops the eleven columns 960 appends, and with "
              "them the only path from a facility to "
              "`gaming_revenue_bounds.csv` (694 of 787 ROWS - 787 is a row "
-             "count, and the property denominator is 714; see "
+             "count, and the property denominator is 717 - 787 rows, less 16 "
+             "carrying cedar_place_id_absent_reason = NOT_A_PLACE, less "
+             "54 extras collapsed by the 53 adjudicated MERGE groups. "
+             "The superseded 714 came from subtracting 57 mechanically "
+             "detected duplicates instead; the three-property gap is "
+             "Three Rivers (two casinos 67 km apart), Glacier Peaks and "
+             "Cities of Gold (each a casino and its hotel). See "
              "GAMING-DENOMINATOR-2026-09-02 in "
              "`docs/MONEY_TOTALLING_RULES.md`), the only statement of "
              "Class II / Class III on the record (684 of the same 787 rows), "

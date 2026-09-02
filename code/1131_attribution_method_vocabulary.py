@@ -162,8 +162,60 @@ def fix_prose(apply: bool) -> int:
     return n
 
 
+def declare(term: str, table: str, why: str) -> int:
+    """Add ONE term to ONE table's vocabulary, with a reason on the record.
+
+    Re-running `apply` would also turn the gate green, by re-snapshotting
+    whatever happens to be on disk. That is not the same thing, and the
+    difference is why this exists: a snapshot cannot tell a legitimate new
+    method from a typo, a prose fragment, or a term some pass invented at 3am.
+    It blesses all three and reports success — which is the failure mode this
+    whole registry was built to stop.
+
+    A declaration names the term, the table and WHY, so the next reader can
+    tell those apart. It refuses to declare a term the table does not actually
+    carry, because a vocabulary entry for something nothing writes is its own
+    kind of lie.
+    """
+    live = {q.name: c for q, c in survey().items()}
+    if table not in live:
+        print(f"  REFUSED: no shipped table named {table}")
+        return 1
+    if term not in live[table]:
+        print(f"  REFUSED: {table} does not carry the term {term!r}. A "
+              f"vocabulary entry for a term nothing writes is its own defect.")
+        return 1
+    reg = load_registry()
+    if reg is None:
+        print("  REFUSED: no registry yet - run `apply` first")
+        return 1
+    tab = reg["tables"].setdefault(table, {"terms": {}})
+    n = live[table][term]
+    spread = any(term in t.get("terms", {})
+                 for name, t in reg["tables"].items() if name != table)
+    tab["terms"][term] = n
+    reg.setdefault("declarations", []).append({
+        "declared": TODAY, "table": table, "term": term, "rows": n,
+        "why": why,
+        # An EXISTING term appearing in a NEW table is a different event from a
+        # brand-new term, and the per-table registry trips on both. Recording
+        # which it was keeps that legible.
+        "kind": "existing term reaching a new table" if spread else "new term",
+    })
+    REG.write_text(json.dumps(reg, indent=2) + "\n", encoding="utf-8")
+    print(f"  declared {term!r} on {table} ({n:,} rows)")
+    print(f"    kind: {'existing term, new table' if spread else 'NEW term'}")
+    print(f"    why : {why}")
+    return 0
+
+
 def main() -> int:
     mode = sys.argv[1] if len(sys.argv) > 1 else "report"
+    if mode == "declare":
+        if len(sys.argv) < 5:
+            print("  usage: declare <term> <table.csv> <why>")
+            return 1
+        return declare(sys.argv[2], sys.argv[3], " ".join(sys.argv[4:]))
     s = survey()
     reg = load_registry()
 

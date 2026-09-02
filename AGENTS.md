@@ -8133,3 +8133,358 @@ metric is **0** — `class9 = 0` on a clean tree.
 **No baseline was re-recorded.** `--baseline` is a floor, not an
 acknowledgement button, and re-recording it here would have buried all of the
 above.
+
+---
+
+## 2026-09-02 — workstream `CONSOLIDATE-PUBLICATION-RULES`: the safety rules had five copies, reconciled by regex, and two of the five were already broken
+
+**`code/cedar_publication.py` is now the ONE copy of `NEVER`, `GATES`,
+`FLAGSHIP`, `SPINE_TABLES`, `PRODUCT_ID`, `DROP_COLS`, `YEAR_COLS`, the shelf
+sets and `row_ok()`.** 760, 770, 1135 and 1137 import it. Full reasoning and
+the measurements: **ADR-035** in `docs/ARCHITECTURE_DECISIONS.md`.
+
+**The standing rule this earns: never read a constant out of another script's
+SOURCE TEXT.** Five scrapers did, all justified by the same false claim — *"a
+module whose name begins with a digit is not importable, and 770 does file work
+at import time."* Neither half is true. `importlib.util.spec_from_file_location`
+imports `770_sample_extracts.py` in **0.04 s**, and every file read in it is
+inside `main()`. **A regex over source text fails OPEN — `{}` or `None`, and
+the caller decides. An import fails CLOSED, with a traceback naming the missing
+symbol.**
+
+Two of the five were already broken and nothing had noticed:
+
+* **`1137._from()` failed open.** Its regex could not match the annotated
+  binding `COLLECTIONS: list[dict] = [`, so `shelves()` returned `{}`, every
+  collection failed the shelf test, and the build printed **"0 customer
+  shelves" and exited 0**.
+* **`770._760_product_id_map()` was never called.** It carried the comment *"so
+  drift is a hard failure rather than two files quietly disagreeing"* and had
+  no call site anywhere in the tree. **A gate that is defined and not invoked
+  is not a gate** — grep for the call, not the definition.
+* And `DROP_COLS` / `YEAR_COLS` were plain duplicated literals in 1135 **and**
+  1137, with no scraper and nothing comparing them at all.
+
+**A shared name has to say WHAT IT IS, and the new gate found the proof on its
+first run.** 770 used the bare name `SPINE` for a *set of table names*; 1135 and
+1137 both use `SPINE` for the `data/spine` *directory* `Path`. Three files, one
+name, two unrelated types, kept apart only because none of them imported
+another. The shared constant is `SPINE_TABLES`.
+
+**760's spine scrape was a live hazard.** It ended `if j >= 0 else set()`, so
+the day 770 stopped carrying a `SPINE = {` literal it would have silently
+returned an EMPTY set and reported every spine-resident flagship as an
+unclaimed table. That day was today.
+
+### The brief this workstream was given had the site consumer BACKWARDS
+
+It said *"`dist/samples/` is consumed by the SITE repo (PR #33 imports it)."*
+Measured: the product repo's `scripts/import_cedar_manifest.py` reads
+**`dist/review/MANIFEST.csv`** and **`dist/review/samples/<c>/<t>__10.csv`** —
+`1135`'s output — plus `dist/collection_descriptors*.json` from 760 and 770's
+`FLAGSHIP` **by text**. It never touches `dist/samples/`, which is 770's
+separate curated fifteen-file product. **The half of 1135 the brief nominated
+for retirement is the half with the live consumer.**
+
+That importer is the ONE text-scraper that survives, and it cannot be fixed
+from here: it lives on branch `claude/real-collections-manifest`, a tree
+disjoint from `master` that never merges. So 770 keeps a `FLAGSHIP = {...}`
+literal that is **generated** by `py -3 code/cedar_publication.py sync`,
+`assert`ed equal at 770's import, and gated by `verify` under **both** external
+scrapers' exact expressions.
+
+### 1135's `full` half is NOT superseded by 1137 — measured, not assumed
+
+| | |
+|---|---:|
+| tables 1135 publishes in full | 239 |
+| 1137 flagship tables (13 datasets) | 13 |
+| …also full-copied by 1135 | 12 |
+| **tables 1135 ships in full that 1137 never ships** | **227** |
+| `dist/review/spreadsheets` | 8.26 GB |
+| …duplicating a 1137 flagship | 2.44 GB (29.6%) |
+| …tables 1137 does not ship | 5.81 GB (70.4%) |
+
+So **nothing was retired.** The `full` half has no consumer today (the site
+importer sets `full_files.served = false` and declines to copy it), which makes
+it a retirement candidate *on that ground* — but not on supersession, which is
+false for 227 of 239 tables. The measurement and the conditions for retiring it
+are written into `1135`'s docstring.
+
+### Behaviour: proved, not asserted
+
+Old and new code run against the same live tables in two shadow trees (`code/`
+copied, `data/` `docs/` `review/` junctioned, `dist/` separate).
+**315 of 316 output files byte-identical**, across 770's 16, 1135's 295 and
+760's 2. The one difference is `dist/customer/MANIFEST.csv` and it is entirely
+the CONCURRENT `gaming`-as-13th-dataset workstream: 12 common datasets, **0
+cell differences outside the two columns that workstream added**, one extra row
+(`gaming`). `1137`'s constants are identical old-vs-new and `row_ok` agrees on
+**115,217 real rows, 0 disagreements**. The product repo's importer, run
+against both shadow trees, produces a **byte-identical** manifest and 169
+byte-identical sample files.
+
+### One behaviour changed deliberately: `1137 plan` no longer writes `MANIFEST.csv`
+
+It printed *"nothing written"* and then overwrote the manifest anyway, with
+dry-run values — no `files`, no `largest_mb`, no codebook, no join columns,
+because none of that work runs under `dry`. The manifest is the only record of
+what was DELIVERED and `verify` reads it to decide whether a spreadsheet on
+disk is an orphan, so one `plan` turned thirteen delivered datasets into
+thirteen apparent orphans while reporting it wrote nothing. **Found by doing
+it** — this workstream clobbered the live manifest that way. **A dry run that
+writes is not a dry run.**
+
+### Gate
+
+`py -3 code/cedar_publication.py verify` — seven checks — wired into
+`846_session_audit.py` as claim 30. **846 is 29/30**; the one FAIL is the
+pre-existing "twelve customer datasets are not stale", owned by the 1137
+workstream. `845 verify` ok. `293` adds no new finding on any file this
+workstream touched. `62` red metrics are the ones already owned in the table
+above — verified again here that the only one naming a file of ours,
+`class2c 846_session_audit.py: fails += 1`, is present in `HEAD` with 846
+stashed.
+
+---
+
+## GATE STATE AT THE CLOSE OF WORKSTREAM LINKAGE — 2026-09-02
+
+*`code/1139_linkage_coverage.py`, `code/1140_linkage_close.py`, ADR-037. Build
+log: `docs/LINKAGE_CLOSE_LOG_2026-09-02.md`.*
+
+**GREEN and new:** `62_no_regression_check.py` now carries
+`linkage_metrics_below_floor` (MUST_BE_ZERO), answered from `1139`'s own
+baseline — the 293/845 arrangement, so it needed no re-recording of 62's
+baseline. Measured **0**. Twenty-eight `linkage_*` counters print beside it.
+
+**GREEN:** `293_lint_bug_classes.py` reports **no finding in either new
+script**. One did land during the pass — `class2a` on `1140`'s
+`row.setdefault(c, "")` — and was fixed at source with an explicit `if c not
+in row` rather than waived; the call was genuinely not a no-op (the keys are
+new columns absent from the input header) but a detector that cannot see that
+is better answered with clearer code than with a waiver.
+
+**GREEN:** `1131_attribution_method_vocabulary.py verify` — **0 drifts**. This
+pass introduced `propagated_from_agent_ruling` on two tables and declared both
+through `1131 declare`, with the reason on the record. It is deliberately
+OUTSIDE `62`'s RULED set, the same choice `ladder_1122` made, so a propagation
+can never move `tier_A_ruled` — ENTITY_MATCH_RULES rule 8.
+
+**GREEN:** `1136_control_byte_gate.py verify` — 991 files, 0 control bytes.
+
+### The two `846_session_audit.py` failures are NAMED, MEASURED, and NOT THIS WORKSTREAM'S
+
+Standing rule: a red gate is not automatically yours, and saying so in writing
+is the price of walking past it.
+
+1. **`no NEW unsafe regenerating writer since the baseline`** —
+   `845_regenerate_guard.py verify` names exactly one new writer:
+   **`code/1143_methodology_papers.py`, markdown -> `docs/methodology/README.md`**.
+   Script number 1143 was claimed after 1140; it is not a file this workstream
+   wrote or touched. 3 of the 4 unsafe writers are pre-existing.
+2. **`13 datasets are built and current`** — `1137_customer_dataset_combine.py
+   verify` fails on *"contractors: NEVER BUILT - no spreadsheet exists"*.
+   `dist/customer/contractors.xlsx` was **already absent at the start of this
+   session** (as was `funding.xlsx`), because `1137.WORKBOOK_MAX_ROWS` is
+   200,000 and `prime_contracts` is 1,217,768 rows — the workbook is
+   deliberately not written and the verify asks for it anyway.
+   `1137` is the **gaming workstream's** file and this pass was instructed not
+   to edit it; it was not run either, because a build launched into another
+   agent's live edit is how a half-finished storefront ships.
+
+**Consequence that IS this workstream's to flag:** the ten new columns on
+`data/clean/native_bills.csv` are not yet in `dist/customer/legislation.csv`.
+A `1137 build` carries them through. Until then the storefront legislation
+file still has no way to reach a Native entity.
+
+## AGENTS THAT STALL, AND HOW TO TELL (2026-09-02)
+
+One agent slept **5.4 hours** waiting on a build that never finished, wrote
+nothing, and was killed with no result. Two rules came out of it, and the
+second is the one that nearly cost a healthy agent its work.
+
+### Rules every agent brief must carry
+
+- **Never sleep more than 120 seconds in one call.** Poll in short intervals
+  and print a progress line each time.
+- **Never spend more than 15 minutes on any single external thing** - a fetch,
+  a build, a subprocess. Abandon it, write down exactly where it stuck, move
+  on. A partial result with an honest account beats silence.
+- **Print progress every few minutes.** Silence is indistinguishable from
+  death from outside.
+- **Check whether the artifact already exists before waiting on it.** This
+  project has repeatedly "discovered" sources already on disk: a 5,087-row SBA
+  8(a) extract the spine builder already loaded, an 807-letter corpus recorded
+  as unacquired, a 1.34 GB FAC bulk export.
+
+### The liveness signal that LIES
+
+A subagent's `.output` file mtime is **not** a liveness signal. Measured on
+2026-09-02 with seven agents running: four showed 0.0 MB files and 20-41
+minutes of silence and **all four were working** - one had just written
+`code/1143_methodology_papers.py`, another `code/1148_nagpra_nps_databases.py`.
+Killing on that signal would have destroyed live work.
+
+**Use repo activity instead.** Files appearing under `code/`, `docs/` and
+`review/` are ground truth that an agent is alive:
+
+```python
+now = time.time()
+for p in list(Path("code").glob("*.py")) + list(Path("docs").glob("*.md")):
+    if (now - p.stat().st_mtime) / 60 < 45:
+        print(p)
+```
+
+The one unambiguous corpse had **322 minutes** of silence AND a zero-byte
+output AND no file anywhere in the tree bearing its claimed script number.
+Require all three before killing, and prefer sending the agent a message
+first - a message forces a tool round, and a live agent answers it.
+
+---
+
+## 2026-09-02 · `62` IS RED AND NONE OF IT IS MONEY-RECON-1144 — the rule-15 naming
+
+*Workstream MONEY-RECON-1144 ran `62_no_regression_check.py` at 17:33–17:41Z.
+It exited with **22 regression lines**. Standing rule 15 forbids recording a
+FAIL as "pre-existing, not mine" and walking away, and requires naming the line
+and its owner here instead. This is that naming. Nothing below is a claim that
+these are acceptable — it is a claim about **who can fix each one**.*
+
+**First, the one that WAS mine, and is fixed.** `293` flagged
+`class2c 1144_money_reconciliation_prime_sub.py: missing += 1` — a refusal
+counter that named no key. `linkage_verify` now collects and prints the
+offending `(source_dataset, subaward_source_record_id)` pairs instead of
+tallying them. Re-run of `293` no longer names `1144` in any class.
+
+**Second, the honest baseline.** `62` was **not green before this pass**, and
+the shape of the diff says so on its own: `ship_tables_shipping` rose 197 → 227
+and `harvest_source_rows_read` rose 2.1M → 13.2M in the same window. That is a
+large shipping and acquisition wave landing from several agents, not the
+footprint of one measurement pass that wrote 900 cells. `846` was already
+**2 fail / 2 critical at `HEAD` (`bff0ba8`)** before MONEY-RECON-1144 began;
+it is 2 fail / 1 critical now.
+
+| regression | named owner | evidence |
+|---|---|---|
+| `regenerate_new_unsafe_writers = 1` | **workstream LINKAGE (`1139`/`1140`)** | `845 verify` names it exactly: `1139_linkage_coverage.py markdown -> docs/LINKAGE_COVERAGE.md`. Committed in `75d178b`, before this pass |
+| `lint_class1` 0 → 1 | `1011_cross_dataset_reconciliation.py` | named by `293` |
+| `lint_class2c` 60 → 69 | `1060` (×2), `1085`, `1086`, `846`, `852`, `873` | named by `293`. `1144`'s instance was the tenth and is fixed |
+| `lint_class3` 0 → 2 | `1060_splink_pilot.py`, `992_newsletter_deal_candidates.py` | named by `293` |
+| `lint_class4` 9 → 15 | `1030`, `1031`, `1111`, `1147`, `980`, `992` | named by `293`. **`1147` appeared mid-pass** — it did not exist when this workstream started |
+| `lint_class6` (2 new sites despite the net fall) | `1077`, `30`, `518`, `870`, `99` | named by `293` |
+| `lint_class7` 42 → 44 | `1030`, `1031` | named by `293` |
+| `contract_violations = 16`, `contract_orphan_shippable = 11`, `tables_missing_from_25_TABLES` 179 → 243, `tables_missing_from_27_SPEC` 194 → 250, `tables_undocumented_in_codebook` 3 → 34, `tables_missing_codebook_block` 3 → 34, `tables_missing_notes_contract` 14 → 54, `ship_tables_at_zero` 13 → 53 | **workstream MONEY-FED-2026-09-02** (`1145_cosponsor_harvest.py`, `1147_released_host_directories.py`, `1148_nagpra_nps_databases.py`, `GRAIN_MONEY_FED` in `512`) | these are one event, not eight: a wave of new tables landed without codebook blocks. `512`'s working copy carries `GRAIN_MONEY_FED`, +131 lines, uncommitted at 17:35, and its own comment names the three scripts |
+| `SHIPPING LOST: advocacy_passthrough_2026-08-07.csv`; `hearing_bill_links.csv` 465 → 464; `native_bills_subject_sweep.csv` 2,414 → 2,409 | **same wave** — a shipping-set regression, and `62` itself points at `tables_undocumented_in_codebook` as the usual cause | |
+| `tier_A_ruled` FELL 1,676 → 1,669 | **NOT DETERMINED** | the metric reads `cedar_identifier_ledger_final.csv`, which MONEY-RECON-1144 never opened. Whoever wrote the ledger today owns it; this pass could not identify which of the nine concurrent agents that was, and says so rather than guessing |
+| `rulings_unapplied` ROSE 1,215 → 2,894 | **NOT DETERMINED** | same. A near-tripling in one day is a large event and deserves a named owner it does not yet have |
+
+**What MONEY-RECON-1144 touched, in full, so this table can be checked rather
+than believed:** `code/1144_*` (new), the four stale figures in `512`'s
+`GRAIN_SUBAWARD_FUNDING` descriptor string, marked blocks in
+`MONEY_TOTALLING_RULES.md` / `KNOWN_ISSUES.md` / `ARCHITECTURE_DECISIONS.md` /
+`WORK_QUEUE.md`, two `review/1144_*` files, and 900 cells on 290 rows of
+`data/clean/subawards.csv` (rows and columns unchanged, money unchanged to the
+cent, prior values retained). **It shipped nothing, registered no table, and
+minted no tier.** None of the eight shipping-set metrics can be reached from
+that surface.
+
+**The two lines above marked NOT DETERMINED are the real debt in this
+section.** Naming a file is not naming an owner, and `62`'s rule exists because
+"not mine" is how six sessions in a row hid everything else this gate could
+have said.
+
+
+---
+
+## 2026-09-02 — workstream NOB-DIRECTORIES: what I own in the red `62`, and what I do not
+
+*Standing rule 15: a red gate is not automatically yours, and "pre-existing, not
+mine" is not an answer — name the owner with a measurement, in writing. Measured
+2026-09-02 evening, after `code/1146_shard_directory_admission.py` and
+`code/1147_released_host_directories.py` landed.*
+
+`py -3 code/62_no_regression_check.py` is RED. It was already red when this
+workstream started. Here is every regression it names, with who owns it.
+
+**MINE, and both are now waived with a reason rather than left standing:**
+
+| metric | mine | what I did |
+|---|---|---|
+| `lint_class7` 42 -> 46 | **2 of the 4** | `1146` disambiguates a colliding `business_source_id`. The first cut used an ORDINAL, which is class 7 exactly — an id minted from a row's POSITION. Replaced with `_discriminator()`, which returns the source's own `business_license_number` or a digest of the row's own content columns, and the two call sites carry `# lint-ok: class7` naming why. **44 after the fix; the other 2 are not mine.** |
+| `lint_class4` 9 -> 15 | **1 of the 6** | `1147`'s `MAX_REQUESTS` cap. Waived with a reason that is also a code change: hitting the cap now sets `Fetcher.capped`, prints a named INCOMPLETE warning and makes `fetch` return non-zero, and every `verify` floor is derived from the STAGING FILES rather than a "done" flag, so a truncated fetch stages fewer rows and V1 goes RED. **The other 5 are not mine.** |
+
+**IMPROVED by this workstream, measured before and after:**
+
+- `contract_violations` **16 -> 15** and `contract_orphan_shippable` down one:
+  `native_owned_businesses.csv` — the FLAGSHIP table of the
+  `native-owned-businesses` collection — was an ORPHAN, claimed by no
+  collection, because `500.COLLECTIONS`' pattern for that collection read
+  `^(individual_native|tribal_certification)` and did not include it. Fixed.
+- `contract_grain_stated_shippable` **246 -> 247**: `512.GRAIN_NOB_DIRECTORIES`
+  declares the grain, primary key and join cardinality for
+  `native_owned_businesses.csv`, which had none.
+- `codebook`: `py -3 code/cedar_codebook.py check` said **20 rows would be
+  LOST** by a rebuild and now says **SAFE — a rebuild loses nothing**.
+
+**NOT MINE. Named here so the next agent does not re-derive it:**
+
+| regression | owner, by measurement |
+|---|---|
+| `lint_class1` 0 -> 1 | `1011_cross_dataset_reconciliation.py:430` — `glob(C("deals_*_additions.csv"))`, the additions-only glob. Deals workstream |
+| `lint_class2c` 60 -> 69, `lint_class3` 0 -> 2 | no instance in `1146_*`, `1147_*` or `330_build_*` — checked with `293 \| grep` |
+| `tier_A_ruled` 1,676 -> 1,669 | the identifier ledger. Nothing in this workstream writes a tier or a ruling |
+| `rulings_unapplied` 1,215 -> 2,894 | rulings layer |
+| `ship_tables_at_zero`, `tables_missing_*`, `tables_undocumented_in_codebook`, `SHIPPING LOST: advocacy_passthrough_2026-08-07.csv`, `hearing_bill_links.csv` 465 -> 464, `native_bills_subject_sweep.csv` 2,414 -> 2,409 | the shipping chain (`87` -> `25` -> `27`). This workstream shipped nothing and removed nothing from `dist/` |
+| `845 verify` FAIL, 1 new unsafe writer | `1139_linkage_coverage.py` -> `docs/LINKAGE_COVERAGE.md`. On the do-not-edit list for this workstream |
+
+`py -3 code/846_session_audit.py` was **2 fail / 2 critical** at HEAD
+(`git show HEAD:docs/SESSION_AUDIT.json`) and is 2 fail / 1 critical now. This
+workstream did not move it in either direction; the two failures it reports are
+`845 verify` (above) and `1137 verify rc=1`, both other agents' files.
+
+<!-- BEGIN MONEY-FED-2026-09-02 -->
+## 2026-09-02, evening — workstream MONEY-FED: `62` is red, and here is every line I own
+
+*Per standing rule 15: a red gate is not automatically mine, and it is not
+automatically somebody else's either. Each line below was measured, not
+assumed. Scripts `code/1145`, `1148`, `1149`, `1150`; ADR-040; build logs
+`docs/COSPONSOR_HARVEST_LOG_2026-09-02.md` and
+`docs/NAGPRA_NPS_DATABASES_BUILD_LOG_2026-09-02.md`.*
+
+**What this workstream added:** 11 tables in `data/clean` — 4 to `legislation`,
+7 to `nagpra` — **85,560 rows** (legislation 57,061 + nagpra 28,499), all reached by existing `COLLECTIONS` patterns,
+all with a codebook block, all with a `verify` that FAILS when the work did not
+land and a `selftest` that proves it fires (6/6, 5/5, 5/5, 3/3).
+
+### Lines I own
+
+| line | mine, and what I did |
+|---|---|
+| `contract_grain_unstated_shippable` 13 → **14** | **MINE, +6 net.** Six of my tables have NO unique key in the publisher's own projection and are declared in `GRAIN_OPEN` with the collision measured and a question attached, rather than given a positional key (293 class 7) or collapsed. **The ratchet FLOOR is 25 and the metric is 14, so this is GREEN** — it fell 25 → 14 this session. Recorded because the number moved up within the session and the next reader will see it |
+| `contract_violations` 15 → **13** | **TWO OF THE 15 AT HEAD WERE MINE AND ARE FIXED.** `nagpra_nps_notice_index.csv` declared a primary key that is not unique (3 collisions, each read row by row — two are genuine second NIR lines, one is a byte-identical source duplicate) and moved to `GRAIN_OPEN`; `nagpra_nps_summaries.csv` declared `institution_name` as `one` when `Geneva Historical Society` exists in Illinois **and** New York, which is 512's silent-fan-out check doing exactly its job. The remaining 13 are `federal_funding_*` `tribe_id`, `deals_press_edgar_ancsa_additions`, and 8 orphan-shippable tables — none this workstream's |
+| `ship_tables_at_zero` 55 → **57**, `tables_missing_from_25_TABLES` 245 → **247**, `tables_missing_from_27_SPEC` 252 → **254**, `tables_missing_notes_contract` 56 → **58** | **+2 EACH IS MINE** (`native_bill_actions.csv`, `native_bill_action_coverage.csv`; the earlier +9 in the same run was my other nine). These four count membership of the **curated override list in `25_build_publication_layer.TABLES`**, which the ship chain (`87` → `25` → `27`) maintains and which ADR ownership assigns to the integrator, not an agent. The metrics' own failure text says so: *"This is not the shipping gate — see `tables_undocumented_in_codebook` for that."* **`tables_undocumented_in_codebook` did NOT move for my tables** — all 11 carry a codebook block (`code/1149`, `verify` OK, `selftest` PASS). **Action for the integrator: run the ship chain and these four fall by 11.** |
+
+### Lines that are NOT mine, with the measurement that says so
+
+| line | owner |
+|---|---|
+| `lint_bug_class_instances` 146 → 163, `lint_class1` / `2c` / `3` / `4` / `7` | **no instance in `1145_*`, `1148_*`, `1149_*` or `1150_*`** — checked with `py -3 code/293_lint_bug_classes.py \| grep -E "114[5-9]_\|1150_"`, which returns only other workstreams' files. One class-2c instance in `1150` WAS mine and is fixed: the drop counter now names every refused `bill_id` instead of counting them |
+| `contract_orphan_shippable` = 8 | `annual_indian_country_money_series.csv`, two `native_owned_businesses.bak_*`, two `prime_contracts.bak_*`, `regulations_gov_*`, `sam_native_class_distributions.csv`. **None of my 11 is an orphan** — verified in `docs/schema/dataset_contracts.json` |
+| `tier_A_ruled` 1,676 → 1,669, `rulings_unapplied` 1,215 → 2,894 | the identifier ledger and the rulings layer. Nothing in this workstream writes a tier, a ruling or a `cedar_uid` |
+| `SHIPPING LOST: advocacy_passthrough_2026-08-07.csv`, `hearing_bill_links.csv` 465 → 464, `native_bills_subject_sweep.csv` 2,414 → 2,409 | the shipping chain. This workstream shipped nothing and removed nothing from `dist/` |
+| `846` FAIL — *"13 datasets are built and current"*, `1137 verify rc=1` | **`contractors`: `prime_contracts.csv` is newer than the delivered spreadsheet.** `1137 verify` names only that dataset. `prime_contracts.csv` was written by `1140` at 16:45 and `1144` at 17:01, neither this workstream's, and `code/1137_*` is on this workstream's do-not-edit list. `846` was **2 fail / 1 critical** at HEAD and is **1 fail / 1 critical** now |
+
+### One thing I could not fix and did not work around
+
+`cedar_publication.GATES["source_terms_status"]` allows only
+`{SILENT, TERMS_STATED_NO_REUSE_RESTRICTION, ""}`. A federal public-domain work
+has no accurate member in that vocabulary, and writing the accurate
+`PUBLIC_DOMAIN_US_GOVERNMENT_WORK` would have **silently withheld all 21,658 NPS
+rows from the product** — no error, no count, a clean build and an empty shelf.
+I published `TERMS_STATED_NO_REUSE_RESTRICTION`, which the NPS disclaimer
+supports verbatim, and put the public-domain fact in `source_terms_url` +
+`source_terms_basis`. **`code/cedar_publication.py` was not edited** — it is on
+the do-not-edit list. The vocabulary gap is real and belongs to the integrator.
+ADR-040 decision 1; `review`/queue entry 5 in `docs/WORK_QUEUE.md`.
+<!-- END MONEY-FED-2026-09-02 -->

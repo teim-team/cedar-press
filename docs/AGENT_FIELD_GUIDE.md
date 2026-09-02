@@ -132,7 +132,7 @@ the shapes; the rules under it are what you apply.
 | a hub-name token matcher | `BLUE TECH INC.` → Blue Lake Rancheria, tier B, **$3.51B** | the token **`blue`**. Same shape on `north` (60+ CAGE codes onto the Lumbee Tribe of *North* Carolina) and on `wind` (Wind River is the Eastern Shoshone reservation). `docs/QUARANTINE_EXPOSURE_LOG_2026-09-02.md` |
 | a shared-hub ownership test | the 2012 Alaska Gold purchase read as a **relabelling** | a **present-tense** ownership map. Alaska Gold is a BSNC subsidiary *today*, so both sides of a past acquisition resolve to one hub and the transaction disappears. `docs/methodology/deals.md` §5b |
 | `62_no_regression_check.py`, 2026-09-02 03:5x | `NameError: ROOT is not defined` — every gate unrunnable | **a live edit window.** The 37 lines were uncommitted and being written as it was observed. Real when seen, false forty minutes later. `docs/KNOWN_ISSUES.md` A5 / `A5-RESOLUTION` |
-| `1116`'s own first draft, 2026-09-02 evening | the gaming facility count is **734** | **`facility_name == "no casino"` exactly.** 7 rows match that string; **16 rows' names say it**, nine of them inside a longer name (`Grand Canyon West - no casino`, `Tribal admin only - no casino`, `No casino currently`). The script written to stop superseded numbers propagating produced one, and the gated ladder in `code/846_session_audit.py::_denom` is **771 facility rows / 714 distinct properties** |
+| `1116`'s own first draft, 2026-09-02 evening | the gaming facility count is **734** | **`facility_name == "no casino"` exactly.** 7 rows match that string; **16 rows' names say it**, nine of them inside a longer name (`Grand Canyon West - no casino`, `Tribal admin only - no casino`, `No casino currently`). The script written to stop superseded numbers propagating produced one, and the gated ladder in `code/846_session_audit.py::_denom` is 771 facility rows / ~~714 distinct properties~~ **717 distinct properties** — *corrected 2026-09-02 by `code/1141_gaming_quality_pass.py`, and the correction is itself an instance of this rule.* **`714` was the MECHANICAL sweep and it over-collapses three real pairs**; the settled figure is `COUNT(DISTINCT cedar_place_id)` = **717**, which is 771 minus the 54 extras collapsed by the 53 ADJUDICATED merge groups. `846::_denom` and `code/1129_place_ids.py` V9 both assert 717; **`1116 derive` went on computing 714 from its own name-cluster heuristic for most of the day**, under a comment reading *"846's algorithm, reproduced"* — which it was, in the morning. Two ladders for one number, and the second one drifted, exactly as §7 says. It now reads the place id instead of deriving anything. **`714` is still quoted as "the property denominator" in seven other documents** (`ARCHITECTURE_DECISIONS.md`, `CODEX_PR29_OPEN.md`, `DEPENDENCY_MANIFEST.md`, `MONEY_TOTALLING_RULES.md` ×3, `SEC_GAMING_FACILITY_REVENUE_BUILD_LOG.md`, `TRIBAL_DEBT_HOLDINGS_BUILD_LOG.md`, `WHAT_IS_MISSING.md`) — paste the sentence from `py -3 code/1116_ruling_propagation_2026_09_02.py derive` rather than retyping a number |
 
 **The rules that catch all twenty-four.** The first four were written on
 2026-09-02 from the first fifteen; the rest were added the same day from the
@@ -262,6 +262,28 @@ nine below them, and each is stated as a rule because each arrived twice.
     name nobody has, and where a tool can allocate it for you
     (`1050_preflight.py claim`, `adr`), let it.
 
+17. **A column that looks like the answer is not the answer, and three
+    of them can disagree on one row.** `prime_contracts.tribe_id` reads 96
+    rows higher than `attributed_flag` — $269,771,379 of
+    `RULED_TIER_C_NOT_ATTRIBUTED`, a NEGATIVE ruling counted as coverage.
+    `federal_funding_transactions` gave **three** answers to "how many rows
+    are attributed": 553,106 (`attribution_status`), 552,602
+    (`tribe_id_neid`), 549,530 (`attributed_flag`); 504 of the gap was the
+    FA-01 unlink clearing keys and leaving the status columns claiming an
+    attribution, half a billion dollars of it. **Take the CONJUNCTION of every
+    column the consumer branches on**, publish each sibling beside it with the
+    disagreement in rows, and name the ROLE the link fills —
+    `native_owned_businesses.business_entity_id` is 4 of 2,916 and reading it
+    as the numerator says 0.14% about a dataset that is 94.89% linked to its
+    certifying nation. `code/1139_linkage_coverage.py`, ADR-037.
+18. **A LIST-VALUED key column reads as zero to every scan that looks for
+    `cedar_uid`.** `nagpra_notices` has no single-id column at all: six
+    pipe-delimited role columns, because one notice names many parties. A scan
+    for the three usual id names reported **0% on a dataset that is 90.83%
+    linked**, and it was run on this product. Declare the list columns and
+    take their union; verified against the table's own `has_resolved_entity`
+    at 6,169 both ways, 0 disagreeing.
+
 **A standing gate for the rot these rules produce.**
 `py -3 code/1116_ruling_propagation_2026_09_02.py verify` scans every `.md` in
 `docs/` and `review/` for the superseded literals of 2026-09-02 and exits 1
@@ -389,6 +411,8 @@ were written, looking exactly as authoritative as current ones.
 | `py -3 code/518_dataset_readiness.py` | READY / BLOCKED / NOT_TESTED per dataset. **There is no fourth status** |
 | `py -3 code/287_build_dependency_manifest.py` | which script rebuilds a file another script enriches. The enricher runs LAST |
 | `py -3 code/1116_ruling_propagation_2026_09_02.py verify` | the 2026-09-02 corrections, still stated stale anywhere in `docs/` or `review/`. `derive` re-measures them from the live files; `selftest` proves the scanner fires and that an empty corpus reports UNMEASURED rather than clean |
+| `py -3 code/1139_linkage_coverage.py verify` | **linkage coverage per customer dataset, ratcheted.** The share of rows carrying a resolved Cedar entity, with the denominator stated per dataset in `docs/LINKAGE_COVERAGE.md`. `report` measures, `apply` writes the doc, `baseline` records the floor, `selftest` proves it fires. 62 carries it as `linkage_metrics_below_floor`. **A low figure is not automatically a defect** - `natural-resources` reads 6.24% because ONRR publishes in AGGREGATE, and is 73.67% of the rows that CAN name a recipient |
+| `py -3 code/1140_linkage_close.py verify` | the 2026-09-02 linkage closures - 591 bills, 154 McGrath rows, 2,034 stranded rulings, 163 bridged identifiers, 4 sibling repoints. **An IN-PLACE enricher on three flagships**: a rebuild of any of them reverts its share, and this is what tells you to re-run `apply` |
 | `py -3 code/1112_harvest_coverage_matrix.py verify` | what was actually looked for, per entity, per thing. **`untouched = 0` in `docs/SHARD_COVERAGE.md` is true and measures web-map membership, not harvest** — per thing, untouched runs 373 to **1,439 of 1,555 (92.5%) for CAGE / UEI / DUNS** |
 
 **Never re-baseline to clear a red gate.** `--baseline` records a floor while
