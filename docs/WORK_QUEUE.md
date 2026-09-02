@@ -770,3 +770,54 @@ rows; `fpds_uei_cage_map.csv` as "the highest-yield unused source" yields
 gated out; and the McGrath assistance figure is **154 rows / $11,384,182.32**,
 not 151 / $11,358,100.32.
 <!-- END LINKAGE-QUEUE-2026-09-02 -->
+
+<!-- BEGIN MONEY-RECON-1144 -->
+
+## Queued by MONEY-RECON-1144 (2026-09-02) — three items, all customer-facing
+
+*Evidence for every line: `docs/MONEY_TOTALLING_RULES.md`
+`<!-- BEGIN MONEY-RECON-1144 -->` and `docs/KNOWN_ISSUES.md` M1–M5. Re-measure
+with `py -3 code/1144_money_reconciliation_prime_sub.py measure`.*
+
+**Q1 · BLOCKS THE SHIP · `dist/customer/contractors.csv` does not exist.**
+The manifest declares 13 datasets; 12 CSVs are on disk. The largest money
+dataset (1,217,768 rows) has its codebook, notes and PDF — written at 16:24 —
+and no data file. `1137 verify` independently reports
+`contractors: STALE`. Owner: whoever holds `code/1137_customer_dataset_combine.py`
+(mtime 16:58 on 2026-09-02; not touched by this pass). **Add a delivery gate**
+while fixing it: every `dataset` row in `MANIFEST.csv` must have a matching
+`<dataset>.csv` beside it. **Nothing says the file is MISSING today.** `1137
+verify` says `contractors: STALE - prime_contracts.csv is 0.0h newer than the
+delivered spreadsheet`, which reads as a refresh nag rather than an absent
+deliverable; `846` reports it as one of thirteen datasets not current; and
+`512` validates the contract, not the delivery. A file that does not exist and
+a file that is out of date are different problems and only one of them blocks a
+ship.
+
+**Q2 · `code/1137_customer_dataset_combine.py` L361 and L456 stamp a
+two-vintages-stale "86.9%" into all 26 delivered codebooks and notes.**
+The live figure is **63.4%**. `subcontracting__NOTES.txt` currently says 82.9%
+at line 21 and 86.9% at line 47 — one file, one measurement, two answers, with
+the correct third in `dist/samples/README.md` in the same delivery. The 82.9%
+half was fixed at source in `512` by this pass; the 86.9% half is one string in
+two places and needs its owner. **Re-measure rather than paste** — these four
+figures move on every subaward fold-in, which is how they reached three
+simultaneous vintages.
+
+**Q3 · Two identity questions surfaced, neither ruled on here.**
+(a) **32 UEIs in `subawards.csv` are keyed to two different Cedar entities.**
+One federal registration is one registrant; this is why `1144` refused those
+groups. (b) **631 rows carry a `cedar_uid` that matches neither the
+`sub_cedar_uid` nor the `prime_cedar_uid` named on the same row.** Also open,
+and larger than both: **`WIND RIVER CONSTRUCTION LLC` files under three UEIs;
+one is keyed to `CE-0014C-0N` and the other two carry 521 rows / ~$1.0B
+unkeyed.** A separate registration is a separate question and `1144` left it
+alone deliberately — but it is the single largest unkeyed subawardee in the
+file and worth an owner ruling.
+
+**Do NOT queue "close subcontracting's 44.8% linkage gap."** That figure
+measures `cedar_uid`, which in this table is the PRIME leg. Either-leg coverage
+is 97.59% after this pass and the real residue is 2,164 rows. See
+`KNOWN_ISSUES` M3 before spending a pass there.
+
+<!-- END MONEY-RECON-1144 -->

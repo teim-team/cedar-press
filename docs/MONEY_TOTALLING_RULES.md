@@ -1700,7 +1700,11 @@ So the combine ran for `contractors` and produced its paper; the CSV itself is
 not there. `C:` had **17 GB free** at measurement time against a declared
 1.6 GB output, so free space is not obviously the cause. **The flagship money
 dataset cannot ship in this state, and the manifest currently promises a file a
-buyer would not receive.** `contractors` figures below are therefore measured
+buyer would not receive.** Nothing in the repo says the file is *missing*:
+`1137 verify` reports `contractors: STALE`, which reads as a refresh nag, and
+`512` validates the contract rather than the delivery. **An absent deliverable
+and a stale one are different problems and only one of them blocks a ship** —
+a manifest-to-disk gate is queued as `WORK_QUEUE` Q1. `contractors` figures below are therefore measured
 from the flagship source, `data/clean/prime_contracts.csv`, and 1144 records
 `contractors.measured_from_dist = false` so the substitution is never silent.
 

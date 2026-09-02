@@ -670,19 +670,30 @@ def linkage_verify():
     df = _load_subawards()
     key = ["source_dataset", "subaward_source_record_id"]
     idx = df.set_index(key)
-    missing, wrong = 0, 0
+    missing, wrong = [], []
     for _, r in prop.iterrows():
+        rec = "%s/%s" % (r["source_dataset"], r["subaward_source_record_id"])
         try:
             row = idx.loc[(r["source_dataset"], r["subaward_source_record_id"])]
         except KeyError:
-            missing += 1
+            # A count is not actionable; the key is. Named, not tallied.
+            missing.append(rec)
             continue
         if hasattr(row, "iloc") and getattr(row, "ndim", 1) > 1:
             row = row.iloc[0]
         if str(row[r["cedar_uid_col"]]).strip() != r["cedar_uid_new"]:
-            wrong += 1
+            wrong.append("%s %s expected=%s found=%r"
+                         % (rec, r["cedar_uid_col"], r["cedar_uid_new"],
+                            str(row[r["cedar_uid_col"]]).strip()))
     print("  proposal rows: %d | not found in the table: %d | not carrying the "
-          "expected key: %d" % (len(prop), missing, wrong), flush=True)
+          "expected key: %d" % (len(prop), len(missing), len(wrong)), flush=True)
+    for rec in missing[:20]:
+        print("    NOT FOUND  %s" % rec, flush=True)
+    for rec in wrong[:20]:
+        print("    NOT KEYED  %s" % rec, flush=True)
+    if len(missing) + len(wrong) > 40:
+        print("    (%d more not listed)"
+              % (len(missing) + len(wrong) - 40), flush=True)
     if missing or wrong:
         print("FAIL: the linkage write did not land (or was reverted by a "
               "rebuild of subawards.csv - re-run `apply --execute`)", flush=True)

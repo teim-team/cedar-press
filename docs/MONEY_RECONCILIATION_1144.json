@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-02T21:07:01Z",
+  "generated": "2026-09-02T21:32:20Z",
   "script": "code/1144_money_reconciliation_prime_sub.py",
   "delivery": {
     "declared_in_manifest": [
@@ -18,6 +18,7 @@
       "subcontracting"
     ],
     "csv_present": [
+      "contractors.csv",
       "deals.csv",
       "federal-register.csv",
       "funding.csv",
@@ -31,19 +32,17 @@
       "nonprofits.csv",
       "subcontracting.csv"
     ],
-    "declared_but_absent": [
-      "contractors"
-    ]
+    "declared_but_absent": []
   },
   "funding": {
     "file": "dist/customer/funding.csv",
     "rows": 701955,
-    "sum_obligated_usd_all_rows": 219689020478.59097,
+    "sum_obligated_usd_all_rows": 219689020478.591,
     "rows_obligated_usd_uncastable": 0,
     "rows_excluded_flag_1": 54090,
-    "sum_obligated_usd_not_excluded": 206995353246.7613,
+    "sum_obligated_usd_not_excluded": 206995353246.76108,
     "rows_attributed_flag_1": 549180,
-    "sum_obligated_usd_attributed": 168156517719.7614,
+    "sum_obligated_usd_attributed": 168156517719.76135,
     "distinct_cedar_uid": 669,
     "rows_with_cedar_uid": 552756,
     "linkage_rate_cedar_uid": 78.7452,
@@ -53,7 +52,7 @@
       {
         "status": "cedar_neid",
         "rows": 552756,
-        "usd": 169689214306.28134,
+        "usd": 169689214306.28156,
         "rows_cedar_uid": 552756,
         "rows_tribe_id_neid": 552756,
         "rows_attributed_flag": 549136
@@ -61,7 +60,7 @@
       {
         "status": "unattributed",
         "rows": 147067,
-        "usd": 49014214543.44996,
+        "usd": 49014214543.44995,
         "rows_cedar_uid": 0,
         "rows_tribe_id_neid": 0,
         "rows_attributed_flag": 0
@@ -96,14 +95,14 @@
         "attribution_status": "cedar_neid",
         "excluded_flag": "0",
         "rows": 789,
-        "usd": 585951384.42
+        "usd": 585951384.4200001
       },
       {
         "attribution_method": "unattributed",
         "attribution_status": "cedar_neid",
         "excluded_flag": "0",
         "rows": 524,
-        "usd": 208029567.39999998
+        "usd": 208029567.4
       },
       {
         "attribution_method": "unattributed",
@@ -135,13 +134,13 @@
     ]
   },
   "contractors": {
-    "file": "data/clean/prime_contracts.csv",
-    "measured_from_dist": false,
+    "file": "dist/customer/contractors.csv",
+    "measured_from_dist": true,
     "rows": 1217768,
-    "sum_total_obligations": 310005258660.75195,
+    "sum_total_obligations": 310005258660.75244,
     "rows_total_obligations_uncastable": 0,
     "rows_attributed_flag_1": 791521,
-    "sum_total_obligations_attributed": 230259821658.9923,
+    "sum_total_obligations_attributed": 230259821658.99316,
     "distinct_cedar_uid": 526,
     "rows_with_cedar_uid": 791617,
     "linkage_rate_cedar_uid": 65.0056,
@@ -149,7 +148,7 @@
     "sum_attributed_on_quarantined_ruling": 30258921540.225685,
     "fiscal_year_min": 2000,
     "fiscal_year_max": 2026,
-    "sum_total_award_value_DO_NOT_ADD_TO_OBLIGATIONS": 5625791120828.748,
+    "sum_total_award_value_DO_NOT_ADD_TO_OBLIGATIONS": 5625791120828.727,
     "keyed_but_not_attributed": [
       {
         "attribution_method": "unattributed",
@@ -162,11 +161,11 @@
   "subcontracting": {
     "file": "dist/customer/subcontracting.csv",
     "rows": 89809,
-    "sum_subaward_amount_ALL_ROWS_NEVER_QUOTE": 57020557710.46999,
+    "sum_subaward_amount_ALL_ROWS_NEVER_QUOTE": 57020557710.46996,
     "rows_subaward_amount_uncastable": 0,
     "countable_rows": 69921,
-    "sum_subaward_amount_countable": 34906694737.65002,
-    "money_rule_removes": 22113862972.819977,
+    "sum_subaward_amount_countable": 34906694737.650024,
+    "money_rule_removes": 22113862972.81994,
     "overstatement_pct_of_correct": 63.35,
     "removed_share_of_unfiltered_pct": 38.78,
     "fiscal_year_min": 2001,
@@ -175,12 +174,12 @@
       {
         "status": "primary",
         "rows": 70597,
-        "usd": 42172721583.24005
+        "usd": 42172721583.239944
       },
       {
         "status": "exact_repeat_within_source",
         "rows": 18366,
-        "usd": 14321862235.459984
+        "usd": 14321862235.460022
       },
       {
         "status": "superseded_by_primary_source",
@@ -190,39 +189,39 @@
     ],
     "exceeds_prime": {
       "rows": 836,
-      "usd": 7581669521.780006,
+      "usd": 7581669521.780001,
       "rows_that_are_also_primary": 676,
-      "usd_that_are_also_primary": 7266026845.590002
+      "usd_that_are_also_primary": 7266026845.59
     },
     "linkage": {
       "rows": 89809,
       "rows_cedar_uid": 40201,
-      "rows_sub_cedar_uid": 49404,
-      "rows_prime_cedar_uid": 39684,
-      "rows_either_leg": 87355,
-      "rows_both_legs": 1733,
+      "rows_sub_cedar_uid": 49684,
+      "rows_prime_cedar_uid": 39704,
+      "rows_either_leg": 87645,
+      "rows_both_legs": 1743,
       "distinct_sub_entities": 656,
       "distinct_prime_entities": 163,
-      "rows_sub_native_tribe_id": 49404,
-      "rows_prime_native_tribe_id": 39684,
+      "rows_sub_native_tribe_id": 49684,
+      "rows_prime_native_tribe_id": 39704,
       "rate_cedar_uid_pct": 44.7628,
-      "rate_either_leg_pct": 97.2675
+      "rate_either_leg_pct": 97.5904
     },
     "cedar_uid_semantics": {
       "nonblank_equal_to_prime_leg": 39567,
       "nonblank_equal_to_sub_leg": 894,
       "nonblank_equal_to_NEITHER_leg": 631,
       "blank": 49608,
-      "blank_but_sub_leg_is_keyed": 47561,
-      "blank_and_neither_leg_keyed_THE_REAL_GAP": 2047
+      "blank_but_sub_leg_is_keyed": 47746,
+      "blank_and_neither_leg_keyed_THE_REAL_GAP": 1852
     }
   },
   "prime_sub_reconciliation": {
     "countable_sub_rows": 69921,
     "countable_sub_rows_with_prime_award_unique_key": 69378,
     "countable_sub_rows_whose_prime_award_is_IN_prime_contracts": 27319,
-    "countable_sub_usd": 34906694737.65019,
-    "countable_sub_usd_whose_prime_award_is_IN_prime_contracts": 13612271637.210012,
+    "countable_sub_usd": 34906694737.65016,
+    "countable_sub_usd_whose_prime_award_is_IN_prime_contracts": 13612271637.21001,
     "distinct_prime_keys_cited_by_subs": 18335,
     "distinct_prime_keys_matched": 7305,
     "match_rate_rows_pct": 39.07,
@@ -232,13 +231,13 @@
         "prime_award_in_prime_contracts": false,
         "direction": "b_native_as_subawardee",
         "rows": 37850,
-        "usd": 19317140197.290142
+        "usd": 19317140197.290188
       },
       {
         "prime_award_in_prime_contracts": false,
         "direction": "a_native_as_prime",
         "rows": 3944,
-        "usd": 1439559118.5300002
+        "usd": 1439559118.53
       },
       {
         "prime_award_in_prime_contracts": false,
@@ -256,37 +255,37 @@
         "prime_award_in_prime_contracts": true,
         "direction": "a_native_as_prime",
         "rows": 26587,
-        "usd": 12955932319.97001
+        "usd": 12955932319.969997
       },
       {
         "prime_award_in_prime_contracts": true,
         "direction": "both_sides_native",
         "rows": 699,
-        "usd": 639083134.1099997
+        "usd": 639083134.1099999
       },
       {
         "prime_award_in_prime_contracts": true,
         "direction": "b_native_as_subawardee",
         "rows": 33,
-        "usd": 17256183.130000003
+        "usd": 17256183.13
       }
     ],
     "overlap_by_prime_attribution": [
       {
         "prime_row_attributed": false,
         "rows": 124,
-        "usd": 111657364.43999998
+        "usd": 111657364.44
       },
       {
         "prime_row_attributed": true,
         "rows": 27195,
-        "usd": 13500614272.770021
+        "usd": 13500614272.770004
       }
     ],
     "containment": {
       "matched_prime_awards": 7305,
-      "sub_usd_on_them": 13612271637.21,
-      "prime_obligations_on_the_same_awards": 41120683994.43999,
+      "sub_usd_on_them": 13612271637.210001,
+      "prime_obligations_on_the_same_awards": 41120683994.439964,
       "awards_where_subs_exceed_the_prime": 444,
       "excess_usd": 1737942789.8900003
     }
