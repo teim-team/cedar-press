@@ -620,8 +620,35 @@ def write_doc(dups, srcev, sm, pm, fm, cons):
         "move to different transactions.",
         "",
     ]
+    # PRESERVE EVERY MARKED SECTION THIS SCRIPT DOES NOT OWN.
+    #
+    # This wrote the file wholesale. MONEY_TOTALLING_RULES.md is SHARED - by
+    # 2026-09-01 evening it also carried INT-2's Gaming section and
+    # GRAIN-WS4's cross-table section between `<!-- BEGIN X -->` markers - so
+    # the next run of 574 would have deleted both without erroring. WS4 caught
+    # it and said so; WS4's own section is idempotently restorable by re-running
+    # 730, INT-2's is not.
+    #
+    # This is the class-6 shape for the third time today: a full-rebuild writer
+    # on a file other workstreams enrich. It destroyed 2,146,673 rows of
+    # cedar_harvest_conservation.csv this morning and erased cedar_uid from two
+    # gaming tables this afternoon. The fix is the same one 519 already used -
+    # keep what you do not own.
     OUT_MD.parent.mkdir(parents=True, exist_ok=True)
-    OUT_MD.write_text("\n".join(L), encoding="utf-8")
+    mine = "\n".join(L)
+    if OUT_MD.exists():
+        prev = OUT_MD.read_text(encoding="utf-8", errors="replace")
+        kept = []
+        for m in re.finditer(r"<!-- BEGIN ([A-Za-z0-9 _-]+) -->"
+                             r"(.*?)<!-- END \1 -->", prev, re.S):
+            kept.append(m.group(0))
+        if kept:
+            mine = mine.rstrip() + "\n\n" + "\n\n".join(kept) + "\n"
+            print(f"    preserved {len(kept)} section(s) owned by other "
+                  f"workstreams: "
+                  + ", ".join(re.search(r"BEGIN ([A-Za-z0-9 _-]+)",
+                                        k).group(1) for k in kept))
+    OUT_MD.write_text(mine, encoding="utf-8")
 
 
 # --------------------------------------------------------------------- main

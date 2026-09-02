@@ -1454,10 +1454,514 @@ GRAIN_GAMING = {
         declared_by="code/586 assertion; INT-2 2026-09-01"),
 }
 
+# ---------------------------------------------------------------------------
+# WS5 - contractors, nonprofits, deals. Three tables declared, one REFUSED.
+#
+# Every number below is re-measured on every run by
+# `py -3 code/731_ws5_grain_contractors_nonprofits_deals.py measure`, and
+# `verify` exits 1 when one of them stops being true.
+#
+# THE ONE THAT IS REFUSED, AND WHY IT IS THE MOST IMPORTANT ENTRY HERE.
+#
+#   np_schedule_i_grants.csv   58,685 rows, 101 literal duplicates in 90
+#       groups (191 rows sit inside a group). GRAIN-WS3 established, and this
+#       workstream re-measured, that THEY ARE NOT DUPLICATES. Every group is
+#       inside ONE return that `np_schedule_i_filers.csv` holds exactly once,
+#       so the return was parsed once and the FILER listed the same grant line
+#       twice - First Nations Development Institute, two $20,000 Economic
+#       Development grants to Seneca Nation of Indians on the FY2017 return.
+#       `132.parse_one` walks `RecipientTable` in document order and records
+#       NO LINE ORDINAL, and a line ordinal is the only thing that separates
+#       two identical grant lines. A de-dupe deletes $2,089,185 of real
+#       grants. The fix is one column in `132_build_schedule_i_layer.py`:
+#       `schedule_i_line_seq`, 1..n within `object_id` in the document order
+#       `parse_one` already walks. Then the key is
+#       (object_id, schedule_i_line_seq) and the 101 go to zero WITHOUT
+#       deleting a row - the same shape as 430's fix for prime_contracts and
+#       as `operating_company_seq` below. 132 is not this workstream's to
+#       edit, so the table stays UNSTATED and the task has a name.
+#
+# ---------------------------------------------------------------------------
+GRAIN_WS5 = {
+    # ---- contractors -------------------------------------------------------
+    # GRAIN_OPEN asked: "is a row an (owner, operating company, identifier
+    # link) triple, and if so what distinguishes the 30 collisions?" ANSWERED,
+    # and the answer is that the question had no answer on the columns that
+    # existed. 269 emits one row per `(tribe_id, firm_key)` where `firm_key`
+    # is the awardee UEI or a `NAME:` fallback, and IT NEVER WROTE firm_key TO
+    # THE FILE. The personal-name guard then blanked `operating_company_uei`
+    # and replaced `operating_company_name` with a constant on 134 of 1,429
+    # rows, so two operating companies of one owner became literally
+    # indistinguishable: all 19 non-measure columns together still left 6
+    # duplicate rows, and EVERY collision was a withheld row - zero among the
+    # 1,295 published. A key that needs `firm_transaction_rows`, a MEASURE, in
+    # it is not a grain.
+    #
+    # FIXED AT THE BUILDER, which is where WS2 said the fix belonged. 269 now
+    # emits `operating_company_seq`, 1..n within the owner in the sort order it
+    # already used, and `(owner_entity_id, operating_company_seq)` is unique on
+    # all 1,429 rows with 0 duplicates. It leaks nothing a redaction was
+    # protecting.
+    #
+    # THE SECOND HALF OF THE FIX, and it is the one that mattered. The privacy
+    # guard was ALSO conceptually wrong. Measured 2026-09-01, it fired on 134
+    # rows and exactly ONE was a natural person ("BARRETT, MICHAEL", $20,000).
+    # The other 133 were tribal governments and their instrumentalities - Nez
+    # Perce Tribe, Pueblo of Acoma, Rosebud Sioux Tribe, Ramah Navajo Chapter,
+    # Blackfeet Utilities, Wyandotte Net Tel ($71.9M), Yakama Power. A rule
+    # that exists to protect a natural person was suppressing the legal names
+    # of sovereign governments. 269 now exempts a row where there is POSITIVE
+    # evidence that the subject is an entity, records that evidence in
+    # `entity_class_basis`, and withholds 5 rows instead of 134 - $1.27M
+    # instead of $6.08B, and not one of the 5 is a government.
+    "contractor_ranking.csv": _d(
+        "one row per OPERATING COMPANY of one Native owner entity: the firm, "
+        "the entity that owns it, that entity's class, and the identifier "
+        "link that establishes the ownership, TIER A ONLY. An owner with nine "
+        "subsidiaries occupies nine rows carrying one `owner_rank`. "
+        "`operating_company_seq` is 1..n within the owner in DESCENDING "
+        "`firm_obligations_usd` - a POSITION, not an identity: it is "
+        "recomputed on every build and it moves when a firm's obligations "
+        "move, so join on `operating_company_uei` if you need something "
+        "stable across vintages. "
+        "THE ADDITIVE FAMILY IS `firm_*` AND ONLY `firm_*`. Every `owner_*` "
+        "column is an OWNER-grain attribute repeated on every "
+        "operating-company row of that owner: SUM(owner_obligations_usd) over "
+        "rows is $6,535.96B against a true $176.74B, a 36.98x inflation over "
+        "283 owners, and they may be totalled only after collapsing to "
+        "distinct `owner_entity_id`. `owner_rank` is an owner attribute, not "
+        "a row attribute. "
+        "AND THE WHOLE TABLE IS THE SAME MONEY AS `prime_contracts.csv`: "
+        "SUM(firm_obligations_usd) = $176.74B, equal to that file's tier-A "
+        "attributed obligations to within $0.04, so the ranking is a LOSSLESS "
+        "PARTITION of that slice. Summing the two together, or unioning them, "
+        "double-counts $176.74B.",
+        ["owner_entity_id", "operating_company_seq"],
+        # `operating_company_uei` is BLANK on the 5 withheld rows and on every
+        # firm whose transactions carry no UEI, and one UEI can appear under
+        # two owners where a subsidiary changed hands. It is the stable join
+        # route and it is still not a lookup.
+        {"owner_entity_id": "many", "operating_company_uei": "many"},
+        "workstream GRAIN-WS5 2026-09-01: `operating_company_seq` added to "
+        "code/269_build_contractor_ranking.py (the fix WS2 proposed and did "
+        "not make); key confirmed unique on the FULL 1,429-row file with 0 "
+        "duplicates on the run that wrote it. Re-measured by "
+        "code/731_ws5_grain_contractors_nonprofits_deals.py measure"),
+
+    # ---- deals -------------------------------------------------------------
+    # GRAIN_OPEN asked: "was the YTD additions file consumed into
+    # deals_classified.csv and left as a stub, or did a rebuild empty it?"
+    # ANSWERED, and the answer is CONSUMED. Measured 2026-09-01 across all
+    # eight non-empty additions files: 790 of 790 of their rows carry a
+    # `Deal_ID` that `deals_classified.csv` already holds - 100%, not one row
+    # left behind. Every additions file is a STAGING SLICE that has been
+    # folded in, and this one is the slice whose contents are entirely in the
+    # merged ledger. The header is on disk and carries `Deal_ID`; the eight
+    # siblings written by the same pass are all declared on `Deal_ID` in
+    # GRAIN_SWEEP above. So this is declared FROM THE WRITER AND ITS EIGHT
+    # SIBLINGS, not from a zero-row file's vacuous uniqueness - the same route
+    # `admin_appeal_positions.csv` was declared by in GRAIN_WS3.
+    "deals_2026_ytd_additions.csv": _d(
+        "one row per deal event added by the 2026 year-to-date pass - a "
+        "STAGING SLICE, identical in schema and key to the eight sibling "
+        "`deals_*_additions.csv` files. THE FILE IS EMPTY (0 rows, header "
+        "only) because its contents were folded into `deals_classified.csv`, "
+        "which is what happened to all nine slices: 790 of the 790 rows in "
+        "the eight non-empty slices carry a `Deal_ID` the classified ledger "
+        "already holds. NEVER SUM ANY ADDITIONS FILE ALONGSIDE "
+        "`deals_classified.csv` - that is the largest double-counting path in "
+        "the deals dataset, worth $22.67B against a $45.20B headline. All "
+        "nine tables are individually safe to aggregate and NO TWO OF THEM "
+        "ARE SAFE TOGETHER.",
+        ["Deal_ID"],
+        {"Deal_ID": "one"},
+        "workstream GRAIN-WS5 2026-09-01: declared from the writer and from "
+        "the eight sibling slices, which share this file's schema and are all "
+        "keyed on Deal_ID; the 790-of-790 fold-in was measured on the live "
+        "files. Re-measured by "
+        "code/731_ws5_grain_contractors_nonprofits_deals.py measure"),
+
+    # GRAIN_OPEN asked: "is a row one financing INSTRUMENT (instrument_number)
+    # or one tribal resolution?" ANSWERED, and it is NEITHER. The build log
+    # settles it where the one row on disk cannot. `149`'s sweep loop holds
+    # `doc_links` as a set of `(document_url, link_text, index_page,
+    # how_found)` tuples, de-duplicated with `dict.fromkeys`, and emits AT
+    # MOST ONE ROW PER TUPLE inside one nation's host loop. So a row is a
+    # RETRIEVED DOCUMENT whose own text (or, where the document did not
+    # retrieve, its link text) names a financing authorisation - and
+    # `instrument_title` is load-bearing in the key because one document
+    # reached under two different link texts is two rows by construction.
+    #
+    # `instrument_number` is BLANK on the only row there is, so the
+    # instrument key the question asks about is not merely unproven, it is
+    # absent. This declaration deliberately does not use it.
+    "tribal_resolution_financings.csv": _d(
+        "one row per RETRIEVED DOCUMENT from one nation's legislative archive "
+        "whose text names a financing authorisation - not one row per "
+        "instrument and not one row per resolution. `instrument_number` is "
+        "BLANK on the only row on disk, so the instrument key is absent, not "
+        "merely unproven. A ROW PROVES AUTHORISATION AND NOTHING FURTHER: "
+        "`financing_status` is AUTHORIZED on the whole table and the build's "
+        "own ladder is AUTHORIZED -> NIGC_REVIEWED -> EXECUTION_UNCONFIRMED "
+        "-> EXECUTED_CONFIRMED. A council resolution records that a governing "
+        "body voted to PERMIT an officer to enter a transaction; it does not "
+        "establish that the transaction was negotiated, executed or funded. "
+        "`principal_amount_text` and `pledged_revenues_text` are FREE TEXT "
+        "carrying whatever figures the quote held, are blank on the only row, "
+        "and are NOT money columns - they may not be totalled at all. And "
+        "`nigc_declination_cross_reference` exists precisely so a resolution "
+        "and an NIGC review of ONE transaction are never counted as two: "
+        "never sum this table with `nigc_declination_letters.csv`, "
+        "`gaming_financing_events.csv` or `tribal_bond_issuances.csv`.",
+        ["entity_id", "source_url", "source_index_url", "instrument_title"],
+        # `entity_id` reaches every row of one nation's sweep and `cedar_uid`
+        # is minted per entity, so neither is a lookup.
+        {"entity_id": "many", "cedar_uid": "many"},
+        "workstream GRAIN-WS5 2026-09-01: declared from the build log in "
+        "code/149_build_tribal_resolution_financings.py, whose `doc_links` "
+        "set de-duplicates on exactly (document_url, link_text, index_page) "
+        "within one nation's loop - the same route GRAIN-WS3 declared "
+        "admin_appeal_positions.csv by. Key confirmed unique with no blank "
+        "component on the FULL 1-row file. Re-measured by "
+        "code/731_ws5_grain_contractors_nonprofits_deals.py measure"),
+}
+
+# --- WS4: funding + lobbying + legislation ---------------------------------
+# EMPTY, AND IT IS ARITHMETIC, NOT A SHORTFALL. 2026-09-01, grain-ws4.
+#
+# WS4 owns the eight tables the readiness scoreboard names as C1-UNSTATED for
+# `funding`, `lobbying` and `legislation`:
+#
+#   funding      faads_transactions.csv, faads_transactions_all_agencies.csv,
+#                native_passthrough.csv
+#   lobbying     ferc_docket_filings.csv, hearing_bill_links.csv,
+#                lobbying_registrant_native_ownership_evidence.csv
+#   legislation  congressional_correspondence_log.csv,
+#                native_bills_subject_sweep.csv
+#
+# SEVEN OF THE EIGHT CARRY LITERAL DUPLICATE ROWS, and that settles them
+# without any judgement being exercised: a file holding a whole row that
+# repeats byte for byte has NO unique key at any arity, because the widest
+# candidate that exists is the whole row and it already collides. Every count
+# below was re-measured on the FULL file by
+# `py -3 code/730_ws4_grain_money_conservation.py`, not read off the probe:
+#
+#   faads_transactions_all_agencies.csv   179,259 of 2,769,748
+#   faads_transactions.csv                  1,001 of    60,661
+#   ferc_docket_filings.csv                   822 of   102,615
+#   native_passthrough.csv                    116 of     1,522  (post-rebuild)
+#   native_bills_subject_sweep.csv              5 of     2,414
+#   lobbying_registrant_native_ownership_evidence.csv  4 of 27
+#   hearing_bill_links.csv                      1 of       465
+#
+# `validate_grain` above turns a declaration with no usable key into a
+# release-blocking violation, correctly, so declaring past this would be the
+# one way this file can lie. AND NONE OF THEM MAY BE DE-DUPLICATED - the house
+# rule is flag, never delete, and GRAIN_DEFECT records what happens when it is
+# broken (prime_contracts.csv, 80,778 alleged duplicates, real answer ZERO).
+# WS3 has already proved that two of these duplicate counts are not duplicated
+# FACTS at all: the 4 in the lobbying evidence table are four INDEPENDENT
+# source assertions of one UEI, and de-duping them deletes the corroboration.
+#
+# THE EIGHTH IS THE INTERESTING ONE, and it was tested rather than waved past.
+# `congressional_correspondence_log.csv` holds ZERO rows, so every key is
+# vacuously unique and GRAIN_OPEN's entry ("the file cannot testify about
+# itself") is right that the FILE cannot settle it. But the GENERATOR can be
+# asked, which is the route GRAIN-WS3 used to declare admin_appeal_positions
+# .csv off a build log. `136.build_correspondence_layer` mints
+# `record_id = "FOIAREQ-{agency_code}-{foia_request_id}"` for every
+# foia_request_index.csv row whose requester is a congressional office.
+# Measured on that population, 2026-09-01:
+#
+#   foia_request_index.csv                              9,481 rows
+#   ... naming a congressional office as requester          0   <- why the
+#                                                                  table is
+#                                                                  empty
+#   (agency_code, foia_request_id) COLLISIONS              381 over 9,100
+#                                                          distinct values
+#
+# and the colliding rows say why themselves, in `parse_quality_reason`:
+# `control_number_appears_more_than_once` on every one of them, with
+# `description_begins_mid_sentence` / `no_date_recovered_from_this_layout`
+# alongside. The PDF layout solver in 136 recovers ONE control number for TWO
+# different requests - different requester, different description, different
+# official - and stamps both. So `record_id` is NOT unique on the population
+# it is drawn from; declaring it would validate today against zero rows and
+# break the first time the table fills. It stays in GRAIN_OPEN. THAT IS THE
+# DIFFERENCE between this table and admin_appeal_positions.csv, whose builder
+# actively REFUSES a second row under an id it has already written.
+#
+# WHAT EACH REFUSAL NEEDS, AND WHO OWNS IT - the useful half of an empty dict:
+#
+#   faads_transactions*.csv   the queued re-extract in
+#       review/OWNER_DECISION_QUEUE.md. `30_funding_pre2008.to_out_row` now
+#       carries `assistance_transaction_unique_key`; when it runs, both tables
+#       become declarable in one line. IT RE-ORDERS A 2.77M-ROW FILE and
+#       faads_entity_attribution.csv keys 29,594 attributions to ROW POSITION,
+#       so they must move in the same pass - `faads_attribution_key`
+#       (code/710) is the content key that lets them.
+#   native_passthrough.csv    `81` collapses subawards.duplicate_status and
+#       subaward_exceeds_prime_flag into one 0/1 `amount_countable` and drops
+#       both source columns, so the file cannot say WHICH filter failed.
+#       Carrying `duplicate_status` through makes the de-dupe key statable and
+#       costs one line. Owner: 81_build_passthrough_dataset.py.
+#   ferc_docket_filings.csv   822 byte-identical repeats of one (document,
+#       filer); a further 167 digest collisions differ only in filer-name CASE
+#       and are NOT duplicates. Needs a per-occurrence ordinal or an upstream
+#       fetch fix. Owner: 133_build_ferc_advocacy.py.
+#   hearing_bill_links.csv    source-side: Congress.gov event 338549 lists 27
+#       of its 64 relatedItems.bills entries TWICE, verbatim. De-duplicating
+#       the API payload per event is not deleting a Cedar fact, it is not
+#       ingesting an API repetition twice. Owner: 98_build_oira_and_hearings.py.
+#   lobbying_registrant_native_ownership_evidence.csv   ONE COLUMN. `182` does
+#       not carry `asserted_by_source` onto the output row; the sibling table
+#       lobbying_registrant_identifiers.csv already keys on
+#       (identifier, asserted_by_source). Carrying it makes this table
+#       declarable AND preserves the corroboration. Owner: 182.
+#   native_bills_subject_sweep.csv   the CORPUS repeats 595 bill_ids
+#       byte-identically over 183,233 rows of
+#       data/raw/external/votingpatterns/all_bill_intros.csv. 73's sweep emits
+#       one row per corpus row and inherits them. De-dupe key `bill_id`,
+#       applied to the corpus. Owner: the votingpatterns corpus.
+#   congressional_correspondence_log.csv   see above. Owner: 136.
+#
+# C7 and C5 for these datasets are in docs/MONEY_TOTALLING_RULES.md (between
+# the GRAIN-WS4 markers) and data/clean/cedar_harvest_conservation.csv, both
+# produced by code/730. The headline a buyer needs and nobody had measured:
+# faads_transactions_all_agencies.csv (FY2001-07) and
+# federal_funding_transactions.csv (FY2007-2026) BOTH HOLD FY2007, and 98.9%
+# of the modern table's FY2007 dollars sit on FAINs the archive table also
+# carries. Stacking the two files double-counts FY2007.
+GRAIN_WS4 = {}   # funding + lobbying + legislation - see the block above:
+                 # seven of the eight tables contain literal duplicate rows,
+                 # so no key exists at any arity, and the eighth's id
+                 # generator collides 381 times on its own input
+
 GRAIN.update(GRAIN_GAMING)
 GRAIN.update(GRAIN_WS1)
 GRAIN.update(GRAIN_WS2)
 GRAIN.update(GRAIN_WS3)
+GRAIN.update(GRAIN_WS4)
+GRAIN.update(GRAIN_WS5)
+
+# ===========================================================================
+# _entity_layer - THE HUB. Workstream GRAIN-HUB, 2026-09-01.
+# ===========================================================================
+# Dataset 13, the hub the other twelve key to, and the last blocked dataset
+# with nobody on it. Six shippable tables were UNSTATED with no validated key
+# and three of them carried literal duplicate rows. ALL SIX ARE DECLARED HERE,
+# and NOT ONE ROW WAS DELETED to do it.
+#
+# FOUR OF THE SIX WERE ONE DEFECT, WEARING THREE BLOCKER NAMES.
+# `23_cross_dataset_propagation.py` appended one row every time a ruled
+# identifier appeared in a target dataset row and wrote NOTHING NAMING THAT
+# TARGET ROW. UEI `KDGNQQAMNUD1` reached 860 target rows and produced 860
+# byte-identical map rows; `173` turned those into 860 identical ledger rows
+# and `169` into 860 identical `BLOCK` edges, each stamped
+# `n_asserting_sources = 1`. `73` had the same shape from a different source:
+# a page states one sentence twice and the extractor recorded the sentence,
+# the pattern and the URL but not WHERE on the page it was found.
+#
+# These were never duplicate FACTS. Each row is a real, distinct application
+# of a ruling to a real target row, and the count IS the measure of how far
+# the ruling reached - the entire purpose of `cross_dataset_ruling_map`.
+# De-duplicating would have deleted the reach, exactly as de-duplicating
+# `prime_contracts.csv` would have deleted 80,778 real transactions. So the
+# identity was written back instead, the same fix as `430`:
+#
+#   table                                 rows        literal duplicate rows
+#   cross_dataset_ruling_map.csv       7,507 -> 22,936   2,228 -> 0
+#   cedar_ruling_ledger_consolidated  15,587 -> 43,321   6,302 -> 0
+#   cedar_identifier_graph_edges      46,051 -> 46,820   2,451 -> 0
+#   tcu_cdfi_ownership_evidence          130 ->    130       4 -> 0
+#
+# The counts GREW because `23` had not been re-run since the ruling and
+# exclusion sets last did - 380 rulings and 4,779 exclusions reach further
+# than they did when the stale map was written. Nothing was removed at any
+# step, and `23`, `173`, `73 --reextract` and `741` each refuse to write if
+# their declared key is not unique.
+#
+# THE LEDGER'S DUPLICATION WAS NOT ONLY THE RULING MAP, which the diagnosis
+# handed to this workstream said it was. Measured before the repair: 2,572 of
+# the 6,302 surplus rows came from `cross_dataset_ruling_map.csv` and 3,561
+# came from `review/osha_gambling_unresolved_2026-08-26.csv`, whose 4,560 rows
+# are one per (OSHA establishment-year record, proposed tribe) and are
+# themselves distinct. `173` kept the subject, the verdict and the source FILE
+# and dropped which ROW said it, so the establishment, city, state and year
+# that separate them were thrown away. One column in `173` closes both.
+#
+# WHY THE ORDINAL IS IN THE KEY AND WHAT IT DOES NOT PROMISE. A target row's
+# own key would be the better key and several of the nine target tables do not
+# have one - `subawards.csv` collides 27,470 times on `subaward_number` and
+# carries 10,770 literal duplicate rows of its own from a different projection
+# loss. Importing someone else's defect into this table's key would be worse
+# than saying what the ordinal is: a POSITION in the target file at scan time,
+# unique by construction because the scanner visits each row once, valid for
+# the `applied_date` that stamped it. `target_row_hash` is written alongside
+# it so a row can be re-found after the target table is rebuilt and the
+# ordinals move.
+GRAIN_HUB = {
+    "cross_dataset_ruling_map.csv": _d(
+        "one row per APPLICATION of one ruling to ONE ROW of one target "
+        "dataset, per channel. NOT one row per ruling and NOT one row per "
+        "(ruling, dataset): a ruling that reaches 2,776 rows of "
+        "federal_funding_transactions.csv is 2,776 rows here, and that count "
+        "IS the reach this table exists to measure. `target_row_ordinal` is "
+        "the 0-based position of the target row inside `source_file` AT SCAN "
+        "TIME, not a durable identifier - `target_row_hash` (sha1-16 of the "
+        "target row's full content) is what survives a rebuild of the target "
+        "table. `target_row_key` quotes the target row's own key where that "
+        "table has one and is BLANK where it does not, which is a statement "
+        "about the target, not a gap here. This table carries no money and "
+        "must never be joined to a transaction table and summed: one target "
+        "row can appear under both an IDENTITY and an EXCLUSION channel and "
+        "under more than one identifier type",
+        ["source_file", "target_row_ordinal", "identifier_type", "channel"],
+        # `identifier` is the whole point of the table and it fans out
+        # massively - 5,030 distinct values over 22,936 rows, one of them
+        # reaching 2,776. Anyone who reads "one" here and joins on it
+        # multiplies whatever they are counting.
+        {"identifier": "many"},
+        "workstream GRAIN-HUB 2026-09-01: the key is unique by construction - "
+        "23 refuses to write if it is not - and confirmed unique on the FULL "
+        "22,936-row file. Re-measured by "
+        "code/741_hub_grain_and_rebuild.py verify"),
+
+    "cedar_ruling_ledger_consolidated.csv": _d(
+        "one row per (SUBJECT, source row that recorded a verdict about it). "
+        "NOT one row per ruling and NOT one row per subject: 13,440 subjects "
+        "over 43,321 rows, and one subject carries up to 2,778 rows because "
+        "that many distinct source rows assert something about it. Those "
+        "repeats are the CORROBORATION - N independent rows agreeing is the "
+        "evidence, and collapsing them would delete it. `source_row_ordinal` "
+        "is the 0-based data row index inside `source_file` as 173 swept it. "
+        "One source row appears once per SUBJECT it names, so a row carrying "
+        "two identifiers produces two rows under one ordinal and they differ "
+        "in `subject_key`. `outcome` and `status` are properties of the "
+        "SUBJECT repeated on every one of its rows, never of the row: "
+        "counting rows by `status` counts sources, not decisions, and "
+        "`status = CONFLICT_NOT_APPLIED` means NEITHER verdict was applied",
+        ["subject_key", "source_file", "source_row_ordinal"],
+        # resolved_tribe_id is blank on 36,519 of 43,321 rows and reaches 661
+        # on its commonest value. Neither a lookup nor safe to promise.
+        {"subject_key": "many", "resolved_tribe_id": "many"},
+        "workstream GRAIN-HUB 2026-09-01: key confirmed unique on the FULL "
+        "43,321-row file, 0 literal duplicate rows. Re-measured by "
+        "code/741_hub_grain_and_rebuild.py verify"),
+
+    "cedar_identifier_graph_edges.csv": _d(
+        "one row per ASSERTED EDGE: an IDENTITY edge (two identifiers are the "
+        "same entity), an ATTRIBUTION edge (an identifier belongs to a Native "
+        "entity), or a BLOCK edge (a tier-X negative ruling bars an "
+        "identifier, `to_node` empty by design). IDENTITY and ATTRIBUTION "
+        "edges are COLLAPSED to one row per pair by the builder, so their "
+        "`asserting_source` is a pipe-joined list and `n_asserting_sources` "
+        "is its length. BLOCK edges are NOT collapsed - each names the row "
+        "that asserted it in `asserting_row_ref`, and one identifier blocked "
+        "because it appears in 860 target rows is 860 edges, which is why "
+        "`n_asserting_sources` is 1 on every one of them and must NEVER be "
+        "read as agreement between sources. `asserting_row_ref` is blank on "
+        "IDENTITY and ATTRIBUTION edges, where the collapse already made the "
+        "pair unique. A DEGREE COUNT OVER THIS FILE IS NOT A COUNT OF "
+        "DISTINCT ASSERTIONS: collapse BLOCK edges to distinct `from_node` "
+        "first - 4,777 identifiers over 7,997 ruling-map block edges",
+        ["edge_kind", "from_node", "to_node", "asserting_source",
+         "asserting_row_ref", "edge_tier", "method"],
+        # from_node reaches 1,095 rows on one value. It is the graph's own
+        # fan-out and the reason a degree count needs the collapse above.
+        {"from_node": "many"},
+        "workstream GRAIN-HUB 2026-09-01: key confirmed unique on the FULL "
+        "46,820-row file, 0 literal duplicate rows, after "
+        "code/741_hub_grain_and_rebuild.py edges spliced the ruling-map BLOCK "
+        "slice with `asserting_row_ref`. 169 now writes the column itself, so "
+        "a rebuild reproduces it and the splice is a one-time backfill"),
+
+    "tcu_cdfi_ownership_evidence.csv": _d(
+        "one row per OCCURRENCE of one evidence sentence on one retrieved "
+        "page: (institution, layer, capture pattern, page URL, character "
+        "offset of the sentence in that page). A page that states the same "
+        "sentence twice - once in a nav or banner block and once in the body "
+        "- yields two rows, and both are real: First State Bank's service "
+        "sentence and Little Priest Tribal College's charter sentence are the "
+        "measured cases. `captured_owner` is BLANK on every `serves` row by "
+        "design, because 'we serve members of all tribes' names no owner; a "
+        "blank there is a refusal to infer ownership from service, not a gap. "
+        "This is EVIDENCE, not a roster: it is not one row per institution, "
+        "and counting rows counts quotes",
+        ["institution", "layer", "pattern", "evidence_url",
+         "quote_char_offset"],
+        {},
+        "workstream GRAIN-HUB 2026-09-01: `quote_char_offset` added to "
+        "73_add_tcu_and_cdfi.py find_ownership/find_serves and the table "
+        "re-extracted from the CACHED pages with no network. 130 rows before "
+        "and 130 after, content multiset IDENTICAL to the "
+        ".bak_2026-09-01_pre73, 4 literal duplicates to 0. 73 refuses to "
+        "write if the key is not unique"),
+
+    # -- the two FOIA indexes ------------------------------------------------
+    # GRAIN_OPEN asked of both whether the repeated `foia_request_id` is a
+    # defect or a grain. It is a DEFECT, the table says so itself, and that
+    # does not stop the table being keyed today.
+    #
+    # foia_request_index.csv: all 744 rows in a collision group carry
+    # `control_number_appears_more_than_once` in their own
+    # `parse_quality_reason`, and NO row outside a group does.
+    # `request_description` differs in 363 of 363 groups. One FOIA log entry
+    # was split across two rows by the parser and the table already names
+    # every instance. visitor_record_foia_requests.csv has the identical
+    # signature from a different builder - 22 collisions, 22 surplus rows,
+    # `request_description_verbatim` differing in 22 of 22. Two parsers, one
+    # class of defect, for 136 and 146 to repair at source.
+    #
+    # Until they do, the row that EXISTS is one parsed log entry as recorded,
+    # and (id, description) is unique on both full files. Declaring that is
+    # not endorsing the split - the declaration says in as many words that a
+    # row is a FRAGMENT where the flag fires, so a buyer counting requests
+    # knows to collapse on the id.
+    "foia_request_index.csv": _d(
+        "one row per FOIA log entry AS PARSED - which is one row per REQUEST "
+        "except where the parser split one entry in two, and the table names "
+        "every one of those itself: `foia_request_id` repeats 381 times over "
+        "9,481 rows and EVERY row in a collision group carries "
+        "`control_number_appears_more_than_once` in `parse_quality_reason` "
+        "while no row outside one does. So a COUNT OF ROWS IS NOT A COUNT OF "
+        "REQUESTS - 9,100 distinct ids - and a buyer counting requests must "
+        "collapse on `foia_request_id`. `request_description` is blank on 49 "
+        "rows, where the source log records none, and blank is a value of "
+        "this key. `tribe_entity_id` and `cedar_uid` are blank on 9,137 of "
+        "9,481 rows: a FOIA request usually names no tribe, which is scope, "
+        "not an unresolved link",
+        ["foia_request_id", "request_description"],
+        {"foia_request_id": "many", "tribe_entity_id": "many",
+         "cedar_uid": "many"},
+        "workstream GRAIN-HUB 2026-09-01: key confirmed unique on the FULL "
+        "9,481-row file, 0 literal duplicate rows. The 381 id collisions are "
+        "a PARSE DEFECT for the owner of "
+        "136_build_congressional_correspondence_and_foia_index.py, evidenced "
+        "by the table's own parse_quality_reason; the declaration records the "
+        "row that exists rather than pretending the id is unique"),
+
+    "visitor_record_foia_requests.csv": _d(
+        "one row per FOIA log entry AS PARSED, for requests seeking visitor "
+        "or calendar records. Same shape and same defect as "
+        "foia_request_index.csv from a different builder: `foia_request_id` "
+        "collides 22 times over 667 rows and `request_description_verbatim` "
+        "differs in 22 of the 22 groups, so a count of rows is not a count of "
+        "requests - 645 distinct ids. `tribe_entity_id` and `cedar_uid` are "
+        "blank on 654 of 667 rows: these are requests filed with an agency, "
+        "most of which name no tribe. `discovery_role` and `channel` describe "
+        "how Cedar FOUND the request, not anything the agency recorded",
+        ["foia_request_id", "request_description_verbatim"],
+        {"foia_request_id": "many", "tribe_entity_id": "many",
+         "cedar_uid": "many"},
+        "workstream GRAIN-HUB 2026-09-01: key confirmed unique on the FULL "
+        "667-row file with NO blank component and 0 literal duplicate rows. "
+        "The 22 id collisions are a parse defect for the owner of 146; "
+        "re-measured by code/741_hub_grain_and_rebuild.py verify"),
+}
+
+
+GRAIN.update(GRAIN_HUB)
 
 # A table whose grain is declared but whose PRIMARY KEY cannot be stated
 # without guessing. Recorded rather than left blank, so the gap is a task
@@ -1488,19 +1992,21 @@ GRAIN_OPEN = {
         "financing INSTRUMENT (instrument_number) or one tribal resolution?",
 
     # -- an id column that is not unique, and no key that is ---------------
-    "foia_request_index.csv":
-        "no key was found at any arity up to 6 over 9,481 rows. "
-        "`foia_request_id` REPEATS 381 times; adding `status` still leaves "
-        "66 collisions; adding source_url, received_date and both `seeks_*` "
-        "flags still leaves 8. QUESTION: is a row one FOIA request - in "
-        "which case the 381 repeats are a defect and the id must be made "
-        "unique - or one (request, matched tribe mention), in which case the "
-        "key needs the entity column and should be stated?",
-    "visitor_record_foia_requests.csv":
-        "the only unique key over 667 rows is `request_description_verbatim`, "
-        "a free-text field. `foia_request_id` has 22 collisions. QUESTION: "
-        "does one FOIA request legitimately appear once per agency or per "
-        "discovery role, or is the id supposed to be unique?",
+    # `foia_request_index.csv` ANSWERED 2026-09-01: the 381 repeats ARE a
+    # defect and the table says so itself - every row in a collision group
+    # carries `control_number_appears_more_than_once` in its own
+    # `parse_quality_reason` and no row outside one does. It is NOT
+    # (request, matched tribe mention): tribe_entity_id is blank on 9,137 of
+    # 9,481 rows. (foia_request_id, request_description) is unique on the
+    # full file and is declared in GRAIN_HUB with the row stated as a PARSED
+    # FRAGMENT, so a buyer counting requests knows to collapse on the id.
+    # The parse split remains for the owner of 136 to repair at source.
+    # `visitor_record_foia_requests.csv` ANSWERED 2026-09-01: neither per
+    # agency nor per discovery role - the id IS supposed to be unique, and the
+    # 22 collisions are the identical parse defect 136 has, from 146. The
+    # description differs in 22 of 22 groups, which is why it was the only
+    # unique column anyone found. (foia_request_id,
+    # request_description_verbatim) is declared in GRAIN_HUB.
     "ferc_ex_parte_communications.csv":
         "`ferc_ex_parte_id` has 56 collisions over 713 rows, and adding "
         "accession_number, docket_number or the FR document number removes "
@@ -1621,20 +2127,44 @@ GRAIN_DEFECT = {
         "already records 9,570 rows repeating (docket_number, "
         "accession_number); this measurement is the stricter one - 822 rows "
         "repeat in EVERY column.",
-    "cedar_ruling_ledger_consolidated.csv":
-        "6,302 LITERAL duplicate rows of 15,587 - 40% of the file. A ruling "
-        "ledger that records the same ruling twice cannot be counted, and "
-        "157 source files feed it.",
-    "cedar_identifier_graph_edges.csv":
-        "2,451 LITERAL duplicate rows of 46,051. A graph with duplicate "
-        "edges inflates `n_asserting_sources` and every degree count "
-        "computed from it.",
-    "cross_dataset_ruling_map.csv":
-        "2,228 LITERAL duplicate rows of 7,507 - 30% of the file.",
+    # `cedar_ruling_ledger_consolidated.csv` WAS here at 6,302 literal
+    # duplicate rows of 15,587 with the note "a ruling ledger that records the
+    # same ruling twice cannot be counted". CLOSED 2026-09-01, and it never
+    # recorded the same ruling twice: it recorded N DIFFERENT SOURCE ROWS
+    # asserting one verdict about one subject and dropped which row said it.
+    # 3,561 of the surplus came from review/osha_gambling_unresolved_
+    # 2026-08-26.csv, whose 4,560 rows are one per (OSHA establishment-year
+    # record, proposed tribe) - the establishment, city, state and year are
+    # exactly what the projection threw away - and 2,572 from
+    # cross_dataset_ruling_map.csv, which had the same defect upstream. `173`
+    # now writes `source_row_ordinal`; the count went 6,302 -> 0 and the file
+    # grew 15,587 -> 43,321 WITHOUT a row being removed. Declared in
+    # GRAIN_HUB.
+    # `cedar_identifier_graph_edges.csv` WAS here at 2,451 literal duplicate
+    # rows of 46,051. CLOSED 2026-09-01. All 2,451 were BLOCK edges asserted
+    # by cross_dataset_ruling_map.csv and all of them were REAL: one negative
+    # ruling reaching 860 target rows is 860 applications, and 169 wrote the
+    # asserting FILE without the asserting ROW. `169` now writes
+    # `asserting_row_ref` and 741 backfilled the existing slice; 2,451 -> 0
+    # with nothing deleted. The note about `n_asserting_sources` was right for
+    # the wrong reason - it is 1 on every BLOCK edge BY CONSTRUCTION and never
+    # meant agreement between sources, which the declaration now says.
+    # `cross_dataset_ruling_map.csv` WAS here at 2,228 literal duplicate rows
+    # of 7,507. CLOSED 2026-09-01 and this was the ROOT of the two entries
+    # above. 23 appended one row per (ruled identifier, target dataset ROW)
+    # and named no target row, so N distinct applications rendered identical.
+    # 23 now writes target_row_ordinal / target_row_key / target_row_hash and
+    # refuses to write when the key is not unique; 2,228 -> 0. Declared in
+    # GRAIN_HUB.
     "native_bills_subject_sweep.csv":
         "5 LITERAL duplicate rows of 2,414.",
-    "tcu_cdfi_ownership_evidence.csv":
-        "4 LITERAL duplicate rows of 130.",
+    # `tcu_cdfi_ownership_evidence.csv` WAS here at 4 literal duplicate rows
+    # of 130. CLOSED 2026-09-01, same class from a different builder: a page
+    # states one sentence twice (First State Bank's service sentence, Little
+    # Priest Tribal College's charter sentence) and 73 recorded the sentence,
+    # the pattern and the URL but not WHERE on the page. `quote_char_offset`
+    # is now written; a --reextract from the CACHED pages, no network, gave
+    # 130 rows with a content multiset IDENTICAL to the backup and 4 -> 0.
     "lobbying_registrant_native_ownership_evidence.csv":
         "4 LITERAL duplicate rows of 27 - 15% of a table the build log "
         "describes as 'one row per evidence route'. Four evidence routes are "
