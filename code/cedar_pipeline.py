@@ -577,8 +577,11 @@ KNOWN_ORDERINGS = [
     # not an enricher's backup. 342_pull_federal_register_incremental.py names
     # its own backups `pre_342_pull_federal_register_incremental`, never
     # mentions NAGPRA, and writes only federal_actions*.csv. nagpra_notices.csv
-    # carries no entity-id column either, so 503 skips it. Nothing enriches
-    # nagpra_notices.csv, and no ordering is declared for it.
+    # carries no entity-id column either, so 503 skips it.
+    #
+    # SUPERSEDED 2026-09-02, workstream pr29: this used to end "Nothing
+    # enriches nagpra_notices.csv, and no ordering is declared for it." Both
+    # halves are now false and the ordering is the entry immediately below.
     #
     # 78 is the other rebuilder in nagpra's plan and it writes 18 tables, only
     # three of which belong to this collection. A full 78 run rewrites
@@ -586,6 +589,49 @@ KNOWN_ORDERINGS = [
     # does not produce. The nagpra rebuild path therefore uses
     # `78_content_analysis.py --nagpra-only`, which holds those writes back;
     # the ordering below is what a FULL 78 run would owe.
+    # Declared 2026-09-02 by workstream pr29, answering Codex PR #29 findings
+    # 6 and 8. 1077 rewrites six institution columns IN PLACE and builds
+    # nagpra_notice_institutions.csv, which 77 does not produce at all.
+    #
+    # THE PARSER HALF IS FIXED AT SOURCE, so a 77 rebuild reproduces the six
+    # columns on its own and does NOT revert them - that is the difference
+    # between this entry and the one above it. What a rebuild still cannot
+    # produce is the BRIDGE TABLE, so 1077 must run after any 77 build or the
+    # bridge goes stale against the notices beside it, which is the FERC
+    # failure (102,615 filings described by a 183-row docket table) in a new
+    # place.
+    {"rebuild": "77_build_nagpra_dataset.py",
+     "enricher": "1077_nagpra_institution_grain.py",
+     "file": "nagpra_notices.csv",
+     "cost": "not yet paid - the parser fix is in 77 itself, so the six "
+             "in-place columns survive a rebuild. nagpra_notice_institutions."
+             "csv does NOT: re-run `1077_nagpra_institution_grain.py` after "
+             "any 77 build, and `verify` exits 1 if the notices have moved "
+             "under the bridge",
+     "enricher_columns": ["institution_name", "institution_primary",
+                          "institution_names_all", "institution_count",
+                          "institution_city", "institution_state"]},
+    # Declared 2026-09-02 by workstream pr29, Codex PR #29 findings 2 and 4.
+    # Both fixes are at source as well - 1075 corrects the identifier ledger
+    # that 40 reads, and 1076 removes the self-parent fabrication from 114 and
+    # the self-parent encoding from 40 - so a rebuild reproduces them. The
+    # entries exist so the next agent does not have to prove that again.
+    {"rebuild": "40_build_prime_contracts.py",
+     "enricher": "1075_fix_old_harbor_attribution.py",
+     "file": "prime_contracts.csv",
+     "cost": "PAID AT SOURCE - the ledger rows 40 reads were corrected, so a "
+             "rebuild re-derives the Old Harbor attribution rather than "
+             "reverting it. Run `1075 verify` after any 40 build; it exits 1 "
+             "if a disputed identifier is paired with Three Affiliated again",
+     "enricher_columns": ["tribe_id", "canonical_name", "cedar_uid"]},
+    {"rebuild": "40_build_prime_contracts.py",
+     "enricher": "1076_clear_self_parent_piid.py",
+     "file": "prime_contracts.csv",
+     "cost": "PAID AT SOURCE - 40 now blanks parent_contract_number where the "
+             "legacy .dta set it equal to contract_number, and 114 no longer "
+             "falls back to award_id_piid. Run `1076 verify` after either "
+             "build; it exits 1 on any surviving self-parent",
+     "enricher_columns": ["parent_contract_number"]},
     {"rebuild": "78_content_analysis.py",
      "enricher": "503_identity.py",
      "file": "lobbying_issue_families_filing.csv",

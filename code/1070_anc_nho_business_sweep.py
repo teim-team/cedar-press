@@ -1690,6 +1690,20 @@ DISQUALIFYING_VERDICTS = {
     "TERMS_STATED_RESTRICTIVE", "ROBOTS_DISALLOW",
 }
 
+# A RESTRICTED PUBLISHER'S NAME IS NOT THE SAME AS A RESTRICTED PUBLISHER'S
+# CONTENT — but the integrator gets to see the difference rather than have it
+# decided here. Two staged rows NAME a source Cedar refuses:
+#   Kuukpik Corporation  -> "Kuukpik / NANA Management Services, LLC"
+#                           (a joint venture named in KUUKPIK's own filing)
+#   ANCSA Regional Assn  -> "NANA Regional Corporation (NANA)"
+#                           (a member of the ASSOCIATION, on its page)
+# Neither came from nana.com or akima.com, both of which were refused before
+# a request was sent and appear nowhere in `raw/`. NANA is already a spine
+# entity. The rows are flagged, not withheld and not silently shipped.
+RESTRICTED_PUBLISHER_NAME = re.compile(
+    r"\b(colville|ctuir|umatilla|yakama|chickasaw|nana|akima|southern ute|"
+    r"forest county potawatomi|stillaguamish)\b", re.I)
+
 REVIEW_CSV = OUT / "candidates_for_review_2026-09-02.csv"
 REVIEW_COLS = ["authority_name", "authority_cedar_uid", "klass",
                "business_name_raw", "kind", "route", "extraction_note",
@@ -1885,6 +1899,10 @@ def stage_build() -> None:
                      and not (r.get("extraction_note", "")
                               .startswith(STRUCTURED_NOTE))
                      and not CORP_SIGNAL.search(r["business_name_raw"]))
+                 else ""),
+                ("NAMES_A_RESTRICTED_PUBLISHER_BUT_SOURCED_ELSEWHERE"
+                 if RESTRICTED_PUBLISHER_NAME.search(
+                     r["business_name_raw"] + " " + r["authority_name"])
                  else ""),
                 ("ADDRESS_OR_CONTACT_REDACTED_FROM_QUOTE"
                  if redact_quote(r["identity_claim_text"])[1] else ""),

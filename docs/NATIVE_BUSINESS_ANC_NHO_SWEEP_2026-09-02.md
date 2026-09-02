@@ -319,6 +319,18 @@ Two column decisions a merge must know about:
   `program_authority`. A directory row is that. An ANCSA row is not — it is
   `audited_filing_as_45_55_139`.
 
+### Two rows NAME a refused publisher, and neither came from one
+
+`Kuukpik / NANA Management Services, LLC` is a joint venture named in
+**Kuukpik's** own audited filing; `NANA Regional Corporation (NANA)` is a
+member listed on the **ANCSA Regional Association's** page. `nana.com` and
+`akima.com` were refused before a request was sent and appear nowhere in
+`raw/`. A restricted publisher's *content* is refused; its *name*, stated by
+somebody else, is a fact that publisher did not publish — and NANA is already
+a spine entity. Both rows carry
+`NAMES_A_RESTRICTED_PUBLISHER_BUT_SOURCED_ELSEWHERE` so the integrator decides
+rather than finding out later.
+
 ### Privacy
 
 No `owner_name_raw`, email, phone or street-address column is written.

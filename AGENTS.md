@@ -6304,3 +6304,59 @@ workstream's, with the measurement, per standing rule 15.
 here. Its instruction was followed anyway: `1072.write_csv` derives its header
 as `CANONICAL + [c for c in live if c not in CANONICAL]`, so a column another
 workstream adds to a NEST table survives a rebuild instead of being deleted.
+
+---
+
+## 2026-09-02 — WORKSTREAM NBOA-EXPAND (`code/1070`, `code/1073`), ANC / NHO / Alaska Native Village business directories
+
+Full record: **`docs/NATIVE_BUSINESS_ANC_NHO_SWEEP_2026-09-02.md`**.
+**Nothing was committed. Nothing was written to `data/clean/` or to the spine.**
+
+**What it did.** 822 entities probed — every Alaska Native Corporation (191),
+every Native Hawaiian Organization (210), every Alaska Native Village
+government and remaining tribe 701 never reached (365), every Intertribal
+Organization (56). Every one has a verdict in
+`data/staging/native_business_sweep_1070/verdicts.csv`; 29 published a list,
+243 answered and published none, 31 refused by terms or robots, 519 have no
+usable site. Plus a zero-network mine of all **358** AS 45.55.139 audited
+annual reports (`code/1073`), which shard E never saw — 41 village
+corporations, 34 with named subsidiaries.
+
+**1,106 rows staged** to
+`staged_native_owned_businesses_2026-09-02.csv` in the exact 58-column
+`native_owned_businesses.csv` schema, de-duplicated against the live file,
+against shard E's 482 hand-adjudicated ANC edges (156 dropped), and against
+itself. 221 further candidates are in `candidates_for_review_2026-09-02.csv`
+rather than deleted. Both scripts' `selftest` prove all 14 invariants fire on
+an injected violation; both `verify`s are clean.
+
+**THREE THINGS ANOTHER WORKSTREAM SHOULD TAKE.**
+
+1. **`cedar_web_map.csv` records 127 entities' URLs against a site that does
+   not name them** — 86 of them Alaska Native Village governments pointed at a
+   borough, a regional consortium or an ArcGIS FeatureServer — plus 6 hijacked
+   or parked domains. Named per entity in `verdicts.csv` with the route tried.
+   Not fixed here; that file is not this workstream's.
+2. **A name made only of stopwords cannot be identity-checked from page text.**
+   The village of **Council** was matched to `kawerak.org` because the word
+   "council" is on every tribal website, and it produced six rows of navigation
+   furniture before the guard existed. 14 entities in the spine have this shape
+   (`Council`, `Eek`, `Ute`, `Koi`, `ʻAi Noa Foundation` …). `1070` now
+   requires the domain to carry the name too, and records
+   `NAME_CHECK_INDETERMINATE`. **Any other workstream doing a name check
+   against page text has this hole.**
+3. **`review/tribal_vendor_list_registry_2026-08-26.csv` was deliberately NOT
+   appended to.** 701 owns it and its 359 rows are federally recognised tribes;
+   these 822 entities are a different population. Merging `verdicts.csv` into
+   it is an integrator decision, not an agent writing into another workstream's
+   shared file.
+
+**NOT OURS.** `code/62_no_regression_check.py` is RED and this workstream
+wrote **zero** files into `data/clean/`: `tables_undocumented_in_codebook
+3 → 20`, `tables_missing_from_27_SPEC 194 → 213`, `ship_tables_at_zero
+13 → 19`, `SHIPPING LOST: advocacy_passthrough_2026-08-07.csv`, and the two
+tables that stopped shipping (`hearing_bill_links` 465 → 464,
+`native_bills_subject_sweep` 2,414 → 2,409). The same failures are already
+named, with owners, in the `1072` NEST entry immediately above — the new
+tables are the geography, constellation and NEST workstreams'. Recorded here
+so that reading this entry alone does not imply the gate was green.

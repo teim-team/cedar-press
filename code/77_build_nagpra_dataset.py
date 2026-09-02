@@ -1,4 +1,18 @@
 #!/usr/bin/env python3
+# ORDERING, WRITTEN DOWN, as AGENTS.md asks. `nagpra_notices.csv` is rebuilt
+# wholesale here and enriched in place by
+# `1077_nagpra_institution_grain.py` (Codex PR #29 findings 6 and 8), declared
+# in `ENRICHER_ORDERING` in code/cedar_pipeline.py. The usual class-6 hazard -
+# a rebuild silently reverting the enricher - does NOT apply to the six
+# institution columns, because 1077's parser fix was made HERE, in
+# TYPE_PREFIX_RE, OBJECT_HEAD_RE and institution_parts, so this build
+# reproduces them rather than reverting them. What this build cannot produce
+# is `nagpra_notice_institutions.csv`, the one-row-per-(notice, institution)
+# bridge, which 1077 alone writes. RE-RUN 1077 AFTER ANY BUILD HERE, or the
+# bridge describes a different universe from the notices beside it - which is
+# exactly the FERC failure (102,615 filings, a 183-row docket table, neither
+# file wrong on its own).
+# lint-ok: class6 - ordering declared above and in cedar_pipeline.ENRICHER_ORDERING; 1077 is the enricher and runs last.
 """
 Cedar Press - 77: the NAGPRA repatriation notice dataset (subset of Dataset 9).
 

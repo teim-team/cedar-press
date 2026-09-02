@@ -77,7 +77,7 @@ SWEPT = {
     "108_build_tribal_tax_bases.py": ["tribal_tax_bases.csv"],
     "111_build_advocacy_passthrough.py": ["advocacy_passthrough.csv"],
     "113_build_nd_severance.py": ["nd_severance_allocation.csv"],
-    "116_build_nd_tribal_taxes.py": ["nd_tribal_tax_observations.csv"],
+    "116_build_nd_tribal_taxes.py": ["tribal_tax_bases.csv"],
     "117_build_gaming_devices.py": ["gaming_device_observations.csv"],
     "118_build_gaming_ordinances.py": ["gaming_ordinances.csv"],
     "119_build_digital_and_loyalty.py": ["loyalty_programs.csv",
@@ -175,9 +175,49 @@ def check_carry() -> int:
                 miss += 1
                 print("         DROPPED: %s"
                       % [c for c in live if c and c not in emitted])
+    # 114 carries through `_prime_header`, not the shared helper, because it
+    # must also REFUSE when a column it maps has left the file. Proved here
+    # rather than skipped - otherwise the writer with the worst blast radius
+    # in the whole sweep would be the one nothing checked.
+    ok2 = _check_114()
     print("\n    %d table(s) provably preserved, %d failure(s), %d script(s) "
           "fixed at the writer instead of via the helper" % (ok, miss, nofn))
-    return 1 if miss else 0
+    return 1 if (miss or not ok2) else 0
+
+
+def _check_114() -> bool:
+    s = CODE / "114_pull_prime_archive.py"
+    tree = ast.parse(s.read_text(encoding="utf-8", errors="replace"))
+    fn = next((n for n in tree.body if isinstance(n, ast.FunctionDef)
+               and n.name == "_prime_header"), None)
+    if fn is None:
+        print("    FAIL 114_pull_prime_archive.py has no _prime_header")
+        return False
+    lits = next((n for n in tree.body if isinstance(n, ast.Assign)
+                 and any(getattr(t, "id", "") == "PRIME_FIELDS"
+                         for t in n.targets)), None)
+    canonical = [e.value for e in lits.value.elts]
+    good_all = True
+    for tbl in ("prime_contracts.csv", "prime_contracts_archive_backfill.csv"):
+        p = ROOT / "data" / "clean" / tbl
+        if not p.exists():
+            print("    table absent    114_pull_prime_archive.py  %s" % tbl)
+            continue
+        live = _header(p)
+        missing = [c for c in canonical if c not in live]
+        emitted = canonical if missing else live
+        good = not missing
+        print("    %s %-52s %-42s live %2d -> emits %2d  (literal %d; %d "
+              "enricher col(s) BLANK)"
+              % ("ok  " if good else "FAIL", "114_pull_prime_archive.py", tbl,
+                 len(live), len(emitted), len(canonical),
+                 len([c for c in live if c not in canonical])))
+        if not good:
+            print("         PRIME_FIELDS names %d column(s) the file no longer "
+                  "carries, so 114 REFUSES rather than misaligns: %s"
+                  % (len(missing), missing))
+            good_all = False
+    return good_all
 
 
 def check_positional() -> int:

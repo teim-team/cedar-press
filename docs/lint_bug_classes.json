@@ -7,11 +7,11 @@
     "class2c": 66,
     "class3": 2,
     "class4": 13,
-    "class5": 7,
+    "class5": 6,
     "class6": 26,
-    "class7": 46,
+    "class7": 45,
     "class8": 0,
-    "lint_bug_class_instances": 161
+    "lint_bug_class_instances": 159
   },
   "findings": [
     {
@@ -98,11 +98,11 @@
     {
       "class": "class5",
       "file": "1075_fix_old_harbor_attribution.py",
-      "line": 255,
+      "line": 261,
       "evidence": "if not col or uid_col not in cols:",
-      "why": "an 'already done' short-circuit (not col or uid_col not in cols) skips the work, and this file still rewrites a log/summary artefact wholesale at line 481. On a second run the counters are zero and the log says so - the 164 defect: 187 facilities rewritten to read '0 sources'. Re-running a build must not change its output; merge into the existing log or refuse to rewrite it.",
-      "waived": false,
-      "waiver_reason": ""
+      "why": "an 'already done' short-circuit (not col or uid_col not in cols) skips the work, and this file still rewrites a log/summary artefact wholesale at line 487. On a second run the counters are zero and the log says so - the 164 defect: 187 facilities rewritten to read '0 sources'. Re-running a build must not change its output; merge into the existing log or refuse to rewrite it.",
+      "waived": true,
+      "waiver_reason": "not an \"already done\" short-circuit. This is a"
     },
     {
       "class": "class2c",
@@ -1457,11 +1457,11 @@
     {
       "class": "class7",
       "file": "1077_nagpra_institution_grain.py",
-      "line": 347,
-      "evidence": "f\"{r['document_number']}#{i:02d}\",",
+      "line": 353,
+      "evidence": "\"nagpra_notice_institution_id\": f\"{r['document_number']}#{i:02d}\",",
       "why": "[WARN] POSITIONAL on target nagpra_notice_institution_id -> nagpra_notice_institutions.csv, nagpra_notices.csv. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
-      "waived": false,
-      "waiver_reason": ""
+      "waived": true,
+      "waiver_reason": "ordinal within a published title, not a rank in this file"
     },
     {
       "class": "class7",

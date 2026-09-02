@@ -967,12 +967,23 @@ def regen_diff(docarg: str) -> int:
                                              ", ".join(scripts)))
         return 2
     script = scripts[0]
+    # `md_generators` keys on basename and scans `CODE.rglob`, so the script
+    # may not sit directly in `code/`. Resolving it as `CODE / name` made the
+    # subprocess exit 2 for "no such file" and the doc, untouched, then read
+    # as PROVEN SAFE.
+    sp = CODE / script
+    if not sp.exists():
+        found = sorted(CODE.rglob(script))
+        if not found:
+            print("  cannot locate code for %r" % script)
+            return 2
+        sp = found[0]
     path = ROOT / rel
     tmp = Path(tempfile.mkdtemp()) / path.name
     shutil.copy2(path, tmp)
     print("  regenerating %s with code/%s ..." % (rel, script))
     try:
-        r = subprocess.run([sys.executable, str(CODE / script)], cwd=str(ROOT),
+        r = subprocess.run([sys.executable, str(sp)], cwd=str(ROOT),
                            capture_output=True, text=True, timeout=1800)
         after = path.read_text(encoding="utf-8", errors="replace")
     finally:
@@ -1005,6 +1016,18 @@ def regen_diff(docarg: str) -> int:
         print("    " + line)
     if len(d) > 80:
         print("    ... %d more" % (len(d) - 80))
+    if r.returncode != 0:
+        # A GENERATOR THAT DID NOT RUN LEAVES THE DOC BYTE-IDENTICAL, and
+        # byte-identical is this command's strongest PASS. Measured 2026-09-02:
+        # `06_build_log_stats_v2.py` exited 2 and the run reported
+        # `docs/LOBBYING_BUILD_LOG_2026-08-05.md` as proven safe on the
+        # strength of a diff that never happened. An absence of evidence
+        # printed as evidence of absence - the shape this repo pays for most.
+        print("\n  VERDICT: UNMEASURED. The generator exited %d, so an "
+              "unchanged doc proves nothing.\n  Its stderr tail:" % r.returncode)
+        for line in (r.stderr or r.stdout or "").strip().splitlines()[-6:]:
+            print("    " + line)
+        return 1
     if not gone:
         print("\n  VERDICT: regenerates byte-identical. Nothing is at risk and "
               "wholesale is correct.")

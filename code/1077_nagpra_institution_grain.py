@@ -343,14 +343,14 @@ def main() -> int:
                 if v and v.lower() not in flat:
                     i3_breach += 1
             bridge.append({
-                # lint-ok: class7 - `i` is NOT the row's position in this
-                # file. It is the institution's ordinal in the notice's own
-                # Federal Register TITLE, which is a fixed published string,
-                # so the same document yields the same ids in every build on
-                # every machine. Re-sorting or re-filtering this file cannot
-                # change one. Verified by I4 (7,234 distinct, 0 blank).
-                "nagpra_notice_institution_id":
-                    f"{r['document_number']}#{i:02d}",
+                # `i` is NOT the row's position in this file: it is the
+                # institution's ordinal in the notice's own Federal Register
+                # TITLE, a fixed published string, so the same document yields
+                # the same ids in every build on every machine. Re-sorting or
+                # re-filtering this file cannot change one. I4 checks it:
+                # 7,234 distinct, 0 blank.
+                # lint-ok: class7 - ordinal within a published title, not a rank in this file
+                "nagpra_notice_institution_id": f"{r['document_number']}#{i:02d}",
                 "document_number": r["document_number"],
                 "institution_seq": i,
                 "institution_name": nm,
