@@ -20,6 +20,15 @@
 // Tribal Business News owns payment, renewals, upgrades and code issuance.
 // There is deliberately no "create account" here: an account exists because an
 // entitlement does.
+//
+// THREE STATES, AND THE COPY HAS TO MATCH
+// Connected, this form posts to the platform and the session is a signed,
+// HTTP-only cookie. Standalone with a preview account configured, the check
+// runs in the reader's browser and the panel says so in as many words — a
+// demonstration gate that let someone believe it was access control would be
+// the dishonest version of this. Standalone with nothing configured, there is
+// no form at all, because a form that can only fail is worse than a sentence
+// explaining why there is none.
 
 import { useState } from "react";
 import { Link } from "react-router";
@@ -33,6 +42,12 @@ import {
   PRESS_REQUEST_PATH,
   PRESS_RESEARCH_PATH,
 } from "../../features/grove/pressRoutes";
+import {
+  PRESS_DEMO_GATE_ACTIVE,
+  PRESS_DEMO_NOTICE,
+  PRESS_DEMO_UNCONFIGURED,
+  PRESS_SIGN_IN_AVAILABLE,
+} from "../../features/grove/pressDemoGate";
 import {
   PRESS_ACTIVATION_AVAILABLE,
   PRESS_STEP,
@@ -371,7 +386,11 @@ export default function PressGate({ user }) {
                   aria-labelledby="cp-tab-signin"
                   className="cp-tabpanel"
                 >
-                  {step === PRESS_STEP.SIGN_IN || !PRESS_ACTIVATION_AVAILABLE ? (
+                  {!PRESS_SIGN_IN_AVAILABLE ? (
+            // Standalone, provisioned with nothing. There is no account any
+            // password could match, so there is no form to offer one to.
+            <p className="cp-gate__fine" role="status">{PRESS_DEMO_UNCONFIGURED}</p>
+          ) : step === PRESS_STEP.SIGN_IN || !PRESS_ACTIVATION_AVAILABLE ? (
             <>
               <h3 className="cp-gate__sub">Log in with your email and password.</h3>
               <form className="cp-gate__form" onSubmit={submitSignIn}>
@@ -422,7 +441,16 @@ export default function PressGate({ user }) {
                   subscription, and your login details arrive by email.
                 </p>
               )}
-
+              {/* Said on the page, not only in the code. On a build with no
+                  server the password is checked in the reader's own browser,
+                  and everything the check reads is in the bundle they already
+                  downloaded — so this is a demonstration gate and the panel
+                  must not let anyone mistake it for access control. It
+                  disappears the moment the deployment connects, because the
+                  platform's session is what checks then. */}
+              {PRESS_DEMO_GATE_ACTIVE ? (
+                <p className="cp-gate__fine">{PRESS_DEMO_NOTICE}</p>
+              ) : null}
             </>
           ) : step === PRESS_STEP.SET_PASSWORD ? (
             <>

@@ -1,40 +1,34 @@
 # Cedar Press methodology papers
 
-*Written 2026-09-02.*
+*Index regenerated 2026-09-02 by `code/1143_methodology_papers.py`. Do not hand-edit above the rule — edit the script, or put prose inside the EDITORIAL block below.*
 
-One paper per dataset, thirteen in all. Each is the **methodology record** for
-its dataset: what was pulled and from where, how the rows were made, how
-entities were attributed, what was decided and why, what the known limits are,
-and how often it has to be re-pulled.
+One paper per **delivered** dataset. The set is `cedar_publication.BUILD_SHELVES` — the twelve on the Cedar Press storefront plus gaming, which ships through Cedar Grove — **13 papers**, and `N_BUILT_EXPECTED` is 13.
 
-| paper | dataset | shelf |
-|---|---|---|
-| [`contractors.md`](contractors.md) | Federal prime contracting | pro |
-| [`subcontracting.md`](subcontracting.md) | Federal subcontracting | pro |
-| [`funding.md`](funding.md) | Federal financial assistance | standard |
-| [`gaming.md`](gaming.md) | Tribal gaming | grove |
-| [`natural-resources.md`](natural-resources.md) | Natural resource revenue | pro |
-| [`native-owned-businesses.md`](native-owned-businesses.md) | Native-owned businesses | pro |
-| [`nonprofits.md`](nonprofits.md) | Native nonprofits | pro |
-| [`deals.md`](deals.md) | Indian Country deals | standard |
-| [`lobbying.md`](lobbying.md) | Tribal advocacy and lobbying | standard |
-| [`legislation.md`](legislation.md) | Native legislation and votes | standard |
-| [`federal-register.md`](federal-register.md) | Federal Register — Indian Affairs | standard |
-| [`nagpra.md`](nagpra.md) | NAGPRA notices | standard |
-| [`_entity_layer.md`](_entity_layer.md) | The entity spine (dataset 13) | infrastructure |
+| paper | dataset | shelf | sold through | delivered rows | readiness |
+|---|---|---|---|---:|---|
+| [`contractors.md`](contractors.md) | Federal Prime Contracting | `pro` | Cedar Press | 1,217,768 | READY |
+| [`deals.md`](deals.md) | Indian Country Deals | `standard` | Cedar Press | 1,073 | READY |
+| [`federal-register.md`](federal-register.md) | Federal Register | `standard` | Cedar Press | 11,402 | READY |
+| [`funding.md`](funding.md) | Federal Funding to Indian Country | `standard` | Cedar Press | 701,955 | READY |
+| [`gaming.md`](gaming.md) | Gaming Intelligence | `grove` | Cedar Grove | 787 | READY |
+| [`legislation.md`](legislation.md) | Congressional Votes and Proposed Legislation | `standard` | Cedar Press | 3,069 | READY |
+| [`lobbying.md`](lobbying.md) | Lobbying | `standard` | Cedar Press | 27,825 | READY |
+| [`nagpra.md`](nagpra.md) | NAGPRA | `standard` | Cedar Press | 6,792 | READY |
+| [`native-owned-businesses.md`](native-owned-businesses.md) | Native-Owned Businesses | `pro` | Cedar Press | 2,446 | READY |
+| [`natural-resources.md`](natural-resources.md) | Natural Resource Revenues | `pro` | Cedar Press | 11,305 | READY |
+| [`nest.md`](nest.md) | NEST: Native Enterprise Structures and Ties | `pro` | Cedar Press | 4,798 | READY |
+| [`nonprofits.md`](nonprofits.md) | Native Nonprofits | `pro` | Cedar Press | 12,764 | READY |
+| [`subcontracting.md`](subcontracting.md) | Federal Subcontracting | `pro` | Cedar Press | 89,809 | READY |
 
-**These are not the product copy and not the codebooks.** Customer-facing
-description lives in `docs/datasets/_descriptors.json`; field definitions live
-in `docs/codebooks/`.
+`_entity_layer.md` is kept and is **not** in that count. It is the shared identity chapter the other papers lean on — infrastructure, not a product, with no `dist/customer/` spreadsheet. Counting it as the thirteenth dataset is what hid the missing `nest` paper.
 
-**Each paper stands alone.** A reader who picks up `gaming.md` cold should not
-have to read `contractors.md` to follow it, so shared context is repeated
-inside each paper rather than cross-referenced. The duplication is deliberate.
-This README holds only the background that is genuinely common and genuinely
-not dataset-specific.
+**These are not the product copy and not the codebooks.** Customer-facing description lives in `docs/datasets/_descriptors.json`; field definitions, grain and per-column fill rates live in `dist/customer/<id>__CODEBOOK.md`.
+
+Each paper is three parts: a generated IDENTITY block, a hand-written EDITORIAL block preserved byte-for-byte across rebuilds, and a generated **Appendix M** measured from the delivered file. `py -3 code/1143_methodology_papers.py verify` fails when a paper is missing, has no editorial body, or has gone stale against its dataset.
 
 ---
 
+<!-- BEGIN EDITORIAL:README -->
 ## How to read a figure in these papers
 
 - **`[measured]`** — this document re-counted the figure from the live file in
@@ -234,3 +228,4 @@ be run at all.
 should ship until `dist/` is rebuilt" hold was read as live on 2026-08-28 and
 used to defer a ship chain — for a rebuild that had already happened two days
 earlier. When writing a warning, say what would make it false.
+<!-- END EDITORIAL:README -->

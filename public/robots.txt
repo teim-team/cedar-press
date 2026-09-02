@@ -8,6 +8,11 @@
 #
 # This governs indexing, not access. Entitlement is enforced by the service;
 # a crawler that ignores this file still gets the gate.
+#
+# One exception, stated so nobody relies on the wrong thing: the sampled rows
+# under /data/cedar/samples/ are static files on the host, so a request for
+# one by URL is answered whether or not anyone signed in. They are ten rows a
+# table and deliberately publishable. The collections themselves are not here.
 
 User-agent: *
 Allow: /$

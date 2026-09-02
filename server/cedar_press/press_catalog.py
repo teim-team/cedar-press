@@ -29,12 +29,18 @@ measured cost are set out in ``docs/ARCHITECTURE.md`` under "Where the
 ``grove/`` paths came from".
 
 **The article and citation data is transcribed, not retyped.**
-``_press_data.json`` is written by ``python/tools/dump_press.mjs`` from the
+``_press_data.json`` is written by ``scripts/dump-press.mjs`` from the
 JavaScript modules. Headlines and deks are editorial copy, so a retyped
 character is a misquotation rather than a crash, which is the failure that
 would survive review::
 
-    node python/tools/dump_press.mjs > python/grove/_press_data.json
+    node scripts/dump-press.mjs > server/cedar_press/_press_data.json
+
+The script and the destination are both named here because the docstring
+named neither correctly: it pointed at ``python/tools/dump_press.mjs``
+writing ``python/grove/_press_data.json``, and no such paths exist in this
+repository. ``TestPressCatalogSnapshot`` in ``server/tests/test_collection.py``
+re-runs the real script and fails if this file is behind it.
 
 ACCESS IS AN AFFORDANCE, NOT A CONTROL
 ``can_read_cedar_press`` decides what renders, in the same sense as

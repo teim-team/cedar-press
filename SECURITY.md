@@ -37,14 +37,31 @@ Out of scope:
 - Missing security headers without a demonstrated exploitable consequence.
 - Reports generated solely by automated scanners without a working
   reproduction.
+- **The standalone sign-in.** A build with no API configured checks its
+  password in the browser, against a salted digest that ships in the bundle.
+  That it can be bypassed from devtools is its documented character, not a
+  finding: it is a demonstration gate, it guards nothing confidential (see
+  below), and it is off entirely on a connected deployment. A collection or
+  record reachable through it that should not be public **is** in scope, and
+  we want to hear about it.
 
 ## Posture
 
 - **No third-party runtime.** Brand fonts are self-hosted and the build ships
   no analytics, tag managers or external scripts, so a page load makes no
   request off-origin.
-- **No secrets in the bundle.** The client holds no keys; the only build-time
-  value is `VITE_APP_URL`, a public origin.
+- **No secrets in the bundle.** The client holds no keys. Every build-time
+  value it carries is one that is safe to read: `VITE_APP_URL` and
+  `VITE_API_URL` are public origins, the Datadog client token is a
+  write-only ingest token, and `VITE_PRESS_DEMO_ACCOUNTS` is an email and a
+  salted SHA-256 digest, never a password. Until September 2026 this was not
+  true — two preview accounts were committed with their passwords in
+  plaintext and every build shipped them. They are gone; a standalone
+  deployment now takes its account from build-time configuration and, given
+  none, signs nobody in.
+- **A standalone build guards nothing confidential.** It carries the catalog,
+  the methods, the release history and ten sampled rows per table. The
+  collections themselves reach a reader only from the API, behind a session.
 - **Outbound links.** Every external link carries `rel="noreferrer"`.
 - **Storage.** Browser storage holds session and preference state only, and
   every access is guarded so a storage-denying policy degrades rather than

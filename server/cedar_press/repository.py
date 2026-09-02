@@ -187,16 +187,16 @@ def collection_profile(collection_id: str) -> dict[str, Any] | None:
     return collection_profiles.profile_for(collection_id)
 
 
-def cedar_answer(question: str, collection_id: str, tier: str) -> dict[str, str] | None:
+def cedar_answer(question: str, collection_id: str) -> dict[str, str] | None:
     """A profile-grounded answer, or ``None`` when the question needs more.
 
-    The tier travels with the question so coverage is phrased for the
-    reader: a plan that already opens the full archive is not told what
-    Cedar Press+ would open.
+    The tier used to travel with the question, because coverage was phrased
+    for the reader: a Cedar Press reader was told what Cedar Press+ would
+    open. Retiring the year cap (2026-09-02) removed the only thing the tier
+    decided here, and a parameter nothing reads is a parameter the next
+    caller will pass wrongly.
     """
-    return collection_profiles.answer_from_profile(
-        question, collection_id, full_archive=_reaches(tier, "pro")
-    )
+    return collection_profiles.answer_from_profile(question, collection_id)
 
 
 def articles() -> list[dict[str, Any]]:

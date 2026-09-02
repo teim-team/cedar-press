@@ -68,6 +68,7 @@
     "09_import_rulings.py",
     "1079_quarantine_method_exposure.py",
     "1099_crosstribe_legalname_audit.py",
+    "1140_linkage_close.py",
     "124_apply_rulings_in_place.py",
     "163_promote_nho_universe_in_place.py",
     "174_apply_rulings_to_source_tables.py",
@@ -80,6 +81,7 @@
     "09_import_rulings.py",
     "1079_quarantine_method_exposure.py",
     "1099_crosstribe_legalname_audit.py",
+    "1140_linkage_close.py",
     "124_apply_rulings_in_place.py",
     "163_promote_nho_universe_in_place.py",
     "174_apply_rulings_to_source_tables.py",
@@ -113,6 +115,7 @@
     "111_build_advocacy_passthrough.py",
     "112_pull_grantee_990s.py",
     "1130_nest_owner_v6_reconcile.py",
+    "1132_fac_nontribal_native_audits.py",
     "113_build_nd_severance.py",
     "132_build_schedule_i_layer.py",
     "140_build_grantmaker_funding_flows.py",
@@ -132,6 +135,7 @@
     "111_build_advocacy_passthrough.py",
     "112_pull_grantee_990s.py",
     "1130_nest_owner_v6_reconcile.py",
+    "1132_fac_nontribal_native_audits.py",
     "113_build_nd_severance.py",
     "132_build_schedule_i_layer.py",
     "140_build_grantmaker_funding_flows.py",
@@ -258,6 +262,15 @@
     "814_gaming_nr_grain_and_conservation.py"
    ]
   },
+  "fac_tribal_single_audits.csv": {
+   "enrichers": [
+    "1132_fac_nontribal_native_audits.py"
+   ],
+   "rebuilders": [
+    "1132_fac_nontribal_native_audits.py",
+    "147_build_fac_single_audits.py"
+   ]
+  },
   "federal_actions.csv": {
    "enrichers": [
     "70_key_unjoined_datasets.py"
@@ -270,12 +283,14 @@
   "federal_funding_transactions.csv": {
    "enrichers": [
     "1131_attribution_method_vocabulary.py",
+    "1140_linkage_close.py",
     "115_pull_assistance_archive.py",
     "335_harmonize_assistance_seams_in_place.py",
     "336_correct_scheme_resolution_by_spine_membership.py",
     "503_identity.py"
    ],
    "rebuilders": [
+    "1140_linkage_close.py",
     "115_pull_assistance_archive.py",
     "24_funding_merge.py",
     "335_harmonize_assistance_seams_in_place.py",
@@ -385,6 +400,7 @@
    "enrichers": [
     "1078_gaming_joint_operators.py",
     "1095_gaming_bounds_summability_and_seal_typing.py",
+    "1141_gaming_quality_pass.py",
     "143_build_gaming_property_locations.py",
     "158_extend_gaming_facilities.py",
     "162_resource_dates_from_cedar_evidence.py",
@@ -395,6 +411,7 @@
    ],
    "rebuilders": [
     "1095_gaming_bounds_summability_and_seal_typing.py",
+    "1141_gaming_quality_pass.py",
     "143_build_gaming_property_locations.py",
     "162_resource_dates_from_cedar_evidence.py",
     "172_key_unkeyed_gaming_facility_hubs.py",
@@ -428,6 +445,15 @@
     "91_build_nigc_declinations.py"
    ]
   },
+  "gaming_project_facilities.csv": {
+   "enrichers": [
+    "1141_gaming_quality_pass.py"
+   ],
+   "rebuilders": [
+    "1141_gaming_quality_pass.py",
+    "32b_build_gaming_nepa_pilot.py"
+   ]
+  },
   "gaming_projections.csv": {
    "enrichers": [
     "100_finish_declinations_and_employment.py"
@@ -439,15 +465,26 @@
   },
   "gaming_properties.csv": {
    "enrichers": [
+    "1141_gaming_quality_pass.py",
     "160_sync_published_gaming_view.py",
     "175_sync_published_property_view_entities.py",
     "255_fix_gaming_property_deal_counts.py"
    ],
    "rebuilders": [
+    "1141_gaming_quality_pass.py",
     "160_sync_published_gaming_view.py",
     "175_sync_published_property_view_entities.py",
     "255_fix_gaming_property_deal_counts.py",
     "82_build_gaming_property_dataset.py"
+   ]
+  },
+  "gaming_property_site_observations.csv": {
+   "enrichers": [
+    "1141_gaming_quality_pass.py"
+   ],
+   "rebuilders": [
+    "1141_gaming_quality_pass.py",
+    "142_build_property_site_observations.py"
    ]
   },
   "gaming_revenue_bounds.csv": {
@@ -514,6 +551,14 @@
     "78_content_analysis.py"
    ]
   },
+  "nagpra_notice_entity_bridge.csv": {
+   "enrichers": [
+    "1136_control_byte_gate.py"
+   ],
+   "rebuilders": [
+    "77_build_nagpra_dataset.py"
+   ]
+  },
   "nagpra_notice_institutions.csv": {
    "enrichers": [
     "1077_nagpra_institution_grain.py",
@@ -536,10 +581,12 @@
   "native_bills.csv": {
    "enrichers": [
     "1092_bill_titles_residue_and_scope.py",
+    "1140_linkage_close.py",
     "14_pull_cosponsors.py"
    ],
    "rebuilders": [
     "1092_bill_titles_residue_and_scope.py",
+    "1140_linkage_close.py",
     "14_build_bills_votes.py"
    ]
   },
@@ -672,6 +719,7 @@
     "1085_prime_psc_desc_repull.py",
     "1113_copper_river_complete_attribution.py",
     "1123_copper_river_attribution.py",
+    "1140_linkage_close.py",
     "114_pull_prime_archive.py",
     "131_merge_archive_backfill.py",
     "174_apply_rulings_to_source_tables.py",
@@ -692,6 +740,7 @@
     "1113_copper_river_complete_attribution.py",
     "1123_copper_river_attribution.py",
     "1126_annual_total_federal_and_gaming.py",
+    "1140_linkage_close.py",
     "114_pull_prime_archive.py",
     "131_merge_archive_backfill.py",
     "174_apply_rulings_to_source_tables.py",
@@ -742,10 +791,12 @@
   },
   "state_gaming_observations.csv": {
    "enrichers": [
+    "1141_gaming_quality_pass.py",
     "117_build_gaming_devices.py"
    ],
    "rebuilders": [
     "107_pull_remaining_states.py",
+    "1141_gaming_quality_pass.py",
     "117_build_gaming_devices.py"
    ]
   },
@@ -774,7 +825,7 @@
   }
  },
  "generated": "2026-09-02",
- "generated_at": "2026-09-02T13:38:34",
+ "generated_at": "2026-09-02T16:34:34",
  "known_orderings": [
   {
    "cost": "the table goes back to reading `uei_exact` on 227,540 rows that a discredited method keyed, with nothing on the row saying so - and 40 re-attributes nothing that 1079 withdrew only because 1079 also wrote tier X into the ledger, so the dollars stay correct while the EVIDENCE of why disappears",
@@ -1261,7 +1312,7 @@
    "rebuild": "14_build_bills_votes.py"
   },
   {
-   "cost": "not yet paid - declared at creation. Any rebuild of the facility table drops the eleven columns 960 appends, and with them the only path from a facility to `gaming_revenue_bounds.csv` (694 of 787 ROWS - 787 is a row count, and the property denominator is 714; see GAMING-DENOMINATOR-2026-09-02 in `docs/MONEY_TOTALLING_RULES.md`), the only statement of Class II / Class III on the record (684 of the same 787 rows), and the quoted statute or compact clause behind `state_revenue_disclosure_status = SEALED_BY_STATUTE_OR_COMPACT` on 174 rows in seven states - of which 113 are evidenced sealed (`SEALED_HELD_BY_REGULATOR`), 58 are `DISPOSITION_UNSUPPORTED_BY_RECORDED_QUOTE` (MN 48, NV 10) and 3 are `NOT_COLLECTED_BY_THIS_BODY` (CO), so 174 is the count of the ASSERTION and 113 the count of the evidence. Re-run 960 after any facility rebuild; the `.bak_<date>_pre960` beside the table is the signal",
+   "cost": "not yet paid - declared at creation. Any rebuild of the facility table drops the eleven columns 960 appends, and with them the only path from a facility to `gaming_revenue_bounds.csv` (694 of 787 ROWS - 787 is a row count, and the property denominator is 717 - 787 rows, less 16 carrying cedar_place_id_absent_reason = NOT_A_PLACE, less 54 extras collapsed by the 53 adjudicated MERGE groups. The superseded 714 came from subtracting 57 mechanically detected duplicates instead; the three-property gap is Three Rivers (two casinos 67 km apart), Glacier Peaks and Cities of Gold (each a casino and its hotel). See GAMING-DENOMINATOR-2026-09-02 in `docs/MONEY_TOTALLING_RULES.md`), the only statement of Class II / Class III on the record (684 of the same 787 rows), and the quoted statute or compact clause behind `state_revenue_disclosure_status = SEALED_BY_STATUTE_OR_COMPACT` on 174 rows in seven states - of which 113 are evidenced sealed (`SEALED_HELD_BY_REGULATOR`), 58 are `DISPOSITION_UNSUPPORTED_BY_RECORDED_QUOTE` (MN 48, NV 10) and 3 are `NOT_COLLECTED_BY_THIS_BODY` (CO), so 174 is the count of the ASSERTION and 113 the count of the evidence. Re-run 960 after any facility rebuild; the `.bak_<date>_pre960` beside the table is the signal",
    "enricher": "960_promote_gaming_facility_class_and_revenue_reach.py",
    "enricher_columns": [
     "gaming_class_ii_authorized",
@@ -1298,6 +1349,9 @@
  },
  "produced_by": "287_build_dependency_manifest.py",
  "readers": {
+  "%s.csv": [
+   "1132_fac_nontribal_native_audits.py"
+  ],
   "%s.json": [
    "119_build_digital_and_loyalty.py"
   ],
@@ -1309,6 +1363,9 @@
    "500_build_architecture_map.py",
    "521_inventory.py",
    "940_staleness_sweep.py"
+  ],
+  "*__CODEBOOK.md": [
+   "846_session_audit.py"
   ],
   "*_cpt.json": [
    "701_enterprise_and_business_list_sweep.py"
@@ -1548,6 +1605,20 @@
    "143_build_gaming_property_locations.py",
    "23d_build_gaming_facilities.py"
   ],
+  "KNOWN_ISSUES.md": [
+   "1137_customer_dataset_combine.py"
+  ],
+  "LEDGER_STATE_REPAIR_1134.json": [
+   "1134_repair_ledger_state_uei_contamination.py"
+  ],
+  "LINKAGE_COVERAGE.md": [
+   "1139_linkage_coverage.py"
+  ],
+  "MANIFEST.csv": [
+   "1135_full_dataset_review_bundle.py",
+   "1137_customer_dataset_combine.py",
+   "846_session_audit.py"
+  ],
   "MASTER_QUEUE_2026-08-07.csv": [
    "1103_decision_queue_clearance.py",
    "604_adjudicate_master_queue_by_identifier.py"
@@ -1721,6 +1792,9 @@
   "_SUMMARY.json": [
    "42_write_subaward_source_doc.py"
   ],
+  "__10.csv": [
+   "1135_full_dataset_review_bundle.py"
+  ],
   "__sample.csv": [
    "770_sample_extracts.py"
   ],
@@ -1851,6 +1925,9 @@
   "_ledger_rows.csv": [
    "114_pull_prime_archive.py"
   ],
+  "_linkage_coverage_baseline.json": [
+   "1139_linkage_coverage.py"
+  ],
   "_loader_state.json": [
    "163_load_sam_contract_awards.py",
    "358_measure_sam_individual_native_class_delta.py"
@@ -1966,6 +2043,12 @@
   "_zip_manifest_extra.csv": [
    "112_pull_grantee_990s.py",
    "140_build_grantmaker_funding_flows.py"
+  ],
+  "additional_eins.csv": [
+   "1132_fac_nontribal_native_audits.py"
+  ],
+  "additional_ueis.csv": [
+   "1132_fac_nontribal_native_audits.py"
   ],
   "admin_appeal_decisions.csv": [
    "168_link_adjudication_hubs.py"
@@ -2088,7 +2171,8 @@
    "846_session_audit.py"
   ],
   "attribution_method_vocabulary.json": [
-   "1131_attribution_method_vocabulary.py"
+   "1131_attribution_method_vocabulary.py",
+   "846_session_audit.py"
   ],
   "award_level_panel_research_ready_deduped.csv": [
    "24_funding_merge.py"
@@ -2137,6 +2221,7 @@
    "730_ws4_grain_money_conservation.py"
   ],
   "bie_uio_identifier_links.csv": [
+   "1132_fac_nontribal_native_audits.py",
    "167_link_nonprofit_family_via_ein_hub.py",
    "169_build_identifier_graph.py"
   ],
@@ -2241,6 +2326,7 @@
    "851_build_constellation_edges.py"
   ],
   "cedar_correction_register.csv": [
+   "1133_nest_owner_v6_builder_input.py",
    "354_correction_register.py",
    "587_gaming_facility_corrections.py"
   ],
@@ -2293,7 +2379,9 @@
    "1121_acquire_nppes_corroboration.py",
    "1122_ladder_repoints.py",
    "112_pull_grantee_990s.py",
+   "1132_fac_nontribal_native_audits.py",
    "113_build_nd_severance.py",
+   "1140_linkage_close.py",
    "115_pull_assistance_archive.py",
    "116_build_nd_tribal_taxes.py",
    "117_build_gaming_devices.py",
@@ -2494,6 +2582,8 @@
    "03_apply_exclusions_and_tier.py",
    "1122_ladder_repoints.py",
    "1130_nest_owner_v6_reconcile.py",
+   "1132_fac_nontribal_native_audits.py",
+   "1134_repair_ledger_state_uei_contamination.py",
    "510_assertions.py",
    "589_adjudicate_osha_711.py"
   ],
@@ -2510,6 +2600,7 @@
    "1114_capability_statement_harvest.py",
    "1118_corroboration_layer.py",
    "111_build_advocacy_passthrough.py",
+   "1140_linkage_close.py",
    "114_pull_prime_archive.py",
    "115_pull_assistance_archive.py",
    "124_apply_rulings_in_place.py",
@@ -2599,6 +2690,7 @@
    "1117_ladder_adjudication.py",
    "1122_ladder_repoints.py",
    "1130_nest_owner_v6_reconcile.py",
+   "1141_gaming_quality_pass.py",
    "503_identity.py",
    "510_assertions.py",
    "514_source_records.py",
@@ -2745,6 +2837,7 @@
    "1124_register_acquire_codebooks.py",
    "112_pull_grantee_990s.py",
    "1130_nest_owner_v6_reconcile.py",
+   "1132_fac_nontribal_native_audits.py",
    "113_build_nd_severance.py",
    "117_build_gaming_devices.py",
    "118_build_gaming_ordinances.py",
@@ -2837,6 +2930,7 @@
   "consultation_events.csv": [
    "1089_fr_consultation_overlap_and_event_parse.py",
    "1090_dtll_agency_harvest.py",
+   "1136_control_byte_gate.py",
    "130_build_section_106_consultation.py",
    "519_closure_federal_register.py",
    "962_probe_dear_tribal_leader_letters.py",
@@ -2887,6 +2981,8 @@
    "1073_ancsa_consolidation_subsidiaries.py"
   ],
   "dataset_contracts.json": [
+   "1135_full_dataset_review_bundle.py",
+   "1137_customer_dataset_combine.py",
    "517_export_safety.py",
    "518_dataset_readiness.py",
    "519_closure_federal_register.py",
@@ -3199,6 +3295,12 @@
   "fac_general_census.json": [
    "147_build_fac_single_audits.py"
   ],
+  "fac_native_nontribal_sefa_programs.csv": [
+   "1132_fac_nontribal_native_audits.py"
+  ],
+  "fac_native_nontribal_single_audits.csv": [
+   "1132_fac_nontribal_native_audits.py"
+  ],
   "fac_sefa_gaming.json": [
    "147_build_fac_single_audits.py",
    "573_ws3_grain_and_money.py",
@@ -3214,6 +3316,7 @@
    "147_build_fac_single_audits.py"
   ],
   "fac_tribal_single_audits.csv": [
+   "1132_fac_nontribal_native_audits.py",
    "167_link_nonprofit_family_via_ein_hub.py",
    "204_fac_historical_tribal_by_ein.py",
    "425_establish_bristol_bay_entities.py",
@@ -3260,6 +3363,7 @@
    "1103_decision_queue_clearance.py",
    "1126_annual_total_federal_and_gaming.py",
    "1131_attribution_method_vocabulary.py",
+   "1140_linkage_close.py",
    "115_pull_assistance_archive.py",
    "152_build_assistance_id_crosswalk.py",
    "169_build_identifier_graph.py",
@@ -3340,6 +3444,7 @@
   "fpds_uei_cage_map.csv": [
    "1001_link_businesses_to_contracting.py",
    "1118_corroboration_layer.py",
+   "1140_linkage_close.py",
    "169_build_identifier_graph.py",
    "181_enrich_lobbying_registrant_identifiers.py",
    "18_spiderweb_v2_and_cage_backfill.py",
@@ -3473,6 +3578,7 @@
    "1116_ruling_propagation_2026_09_02.py",
    "1118_corroboration_layer.py",
    "1129_place_ids.py",
+   "1141_gaming_quality_pass.py",
    "117_build_gaming_devices.py",
    "119_build_digital_and_loyalty.py",
    "142_build_property_site_observations.py",
@@ -3567,6 +3673,7 @@
   ],
   "gaming_project_facilities.csv": [
    "100_finish_declinations_and_employment.py",
+   "1141_gaming_quality_pass.py",
    "23f_gaming_temporal.py",
    "84_build_nigc_regions.py"
   ],
@@ -3577,6 +3684,7 @@
   ],
   "gaming_properties.csv": [
    "102_build_coverage_profile.py",
+   "1141_gaming_quality_pass.py",
    "160_sync_published_gaming_view.py",
    "175_sync_published_property_view_entities.py",
    "255_fix_gaming_property_deal_counts.py",
@@ -3616,6 +3724,7 @@
   ],
   "gaming_property_site_observations.csv": [
    "1094_merge_web_harvest_into_gaming_claims.py",
+   "1141_gaming_quality_pass.py",
    "588_promote_self_published_claims.py"
   ],
   "gaming_property_site_recovered_claims_%s.csv": [
@@ -3637,6 +3746,7 @@
    "1080_sec_gaming_facility_revenue.py",
    "1095_gaming_bounds_summability_and_seal_typing.py",
    "1126_annual_total_federal_and_gaming.py",
+   "1141_gaming_quality_pass.py",
    "960_promote_gaming_facility_class_and_revenue_reach.py"
   ],
   "gaming_source_claims.csv": [
@@ -3644,6 +3754,7 @@
    "510_assertions.py"
   ],
   "gaming_web_harvest_coverage.csv": [
+   "1141_gaming_quality_pass.py",
    "846_session_audit.py"
   ],
   "gaming_web_harvest_observations.csv": [
@@ -3652,6 +3763,9 @@
   ],
   "gapfill_recipient_universe.csv": [
    "13_build_fpds_hierarchy.py"
+  ],
+  "general.csv": [
+   "1132_fac_nontribal_native_audits.py"
   ],
   "geo_aiannh_county_observed.csv": [
    "874_geography_two_sums.py"
@@ -3904,7 +4018,8 @@
   ],
   "nagpra_notice_entity_bridge.csv": [
    "1089_fr_consultation_overlap_and_event_parse.py",
-   "1104_nagpra_affiliation_rule_audit.py"
+   "1104_nagpra_affiliation_rule_audit.py",
+   "1136_control_byte_gate.py"
   ],
   "nagpra_notice_institutions.csv": [
    "1084_nagpra_split_artefact_audit.py"
@@ -3924,6 +4039,7 @@
   ],
   "native_bills.csv": [
    "1092_bill_titles_residue_and_scope.py",
+   "1140_linkage_close.py",
    "14_pull_cosponsors.py",
    "26_fix_sanity_failures.py",
    "35_entity_harvest.py",
@@ -3934,7 +4050,11 @@
    "98_build_oira_and_hearings.py"
   ],
   "native_bills_entity_bridge.csv": [
+   "1140_linkage_close.py",
    "73_bills_votes_completion.py"
+  ],
+  "native_bills_entity_class.csv": [
+   "1140_linkage_close.py"
   ],
   "native_bills_subject_sweep.csv": [
    "573_ws3_grain_and_money.py",
@@ -3955,6 +4075,12 @@
   ],
   "native_business_identifier_proposals_2026-09-02.csv": [
    "1103_decision_queue_clearance.py"
+  ],
+  "native_entity_enterprise_dataset_v3.csv": [
+   "1133_nest_owner_v6_builder_input.py"
+  ],
+  "native_entity_enterprise_dataset_v6_geocoded.csv": [
+   "1133_nest_owner_v6_builder_input.py"
   ],
   "native_entity_lobbying_disclosures.csv": [
    "1091_lobby_amendment_supersession.py",
@@ -4017,6 +4143,7 @@
   "need_v6_geocoded.csv": [
    "01_build_entity_spine.py",
    "08_build_review_page.py",
+   "1134_repair_ledger_state_uei_contamination.py",
    "169_build_identifier_graph.py"
   ],
   "negatives.csv": [
@@ -4037,7 +4164,8 @@
    "1116_ruling_propagation_2026_09_02.py",
    "1118_corroboration_layer.py",
    "1128_cicd_benchmark_refresh_2026_09_02.py",
-   "1130_nest_owner_v6_reconcile.py"
+   "1130_nest_owner_v6_reconcile.py",
+   "1133_nest_owner_v6_builder_input.py"
   ],
   "nest_entity_dual_role.csv": [
    "1130_nest_owner_v6_reconcile.py"
@@ -4156,6 +4284,7 @@
    "99_build_earmarks_and_schedc.py"
   ],
   "np_ein_entity_hub.csv": [
+   "1132_fac_nontribal_native_audits.py",
    "169_build_identifier_graph.py",
    "524_universe_gap.py",
    "590_shard_f_org_slice.py",
@@ -4188,6 +4317,7 @@
    "111_build_advocacy_passthrough.py",
    "1125_np_website_native_check.py",
    "112_pull_grantee_990s.py",
+   "1132_fac_nontribal_native_audits.py",
    "132_build_schedule_i_layer.py",
    "167_link_nonprofit_family_via_ein_hub.py",
    "169_build_identifier_graph.py",
@@ -4264,6 +4394,12 @@
   "owner_rulings_cedar_recon_v1_2026-08-28.json": [
    "522_mine_rulings.py"
   ],
+  "owner_v6_conservation.csv": [
+   "1133_nest_owner_v6_builder_input.py"
+  ],
+  "owner_v6_refused.csv": [
+   "1133_nest_owner_v6_builder_input.py"
+  ],
   "ownership_change_invariants.json": [
    "1010_ownership_change_from_contracting.py"
   ],
@@ -4277,8 +4413,10 @@
    "23d_build_gaming_facilities.py"
   ],
   "place_gaming_adjudication_2026-09-02.csv": [
-   "770_sample_extracts.py",
-   "846_session_audit.py"
+   "770_sample_extracts.py"
+  ],
+  "place_gaming_hold_open_disposition_2026-09-02.csv": [
+   "1141_gaming_quality_pass.py"
   ],
   "pointer_snapshot.json": [
    "791_faads_transaction_key_and_repoint.py"
@@ -4298,6 +4436,7 @@
    "1122_ladder_repoints.py",
    "1123_copper_river_attribution.py",
    "1128_cicd_benchmark_refresh_2026_09_02.py",
+   "1140_linkage_close.py",
    "114_pull_prime_archive.py",
    "123_census_esm_raw.py",
    "131_merge_archive_backfill.py",
@@ -4602,6 +4741,7 @@
    "1070_anc_nho_business_sweep.py"
   ],
   "state_gaming_observations.csv": [
+   "1141_gaming_quality_pass.py",
    "117_build_gaming_devices.py",
    "960_promote_gaming_facility_class_and_revenue_reach.py"
   ],
@@ -4658,6 +4798,9 @@
   ],
   "synthetic_candidates.csv": [
    "1030_sec_edgar_native_transactions.py"
+  ],
+  "t.csv": [
+   "1134_repair_ledger_state_uei_contamination.py"
   ],
   "targets.csv": [
    "1112_harvest_coverage_matrix.py",
@@ -4934,7 +5077,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: cedar_identifier_ledger.csv"
    ],
-   "mtime": "2026-09-02T02:27:04",
+   "mtime": "2026-09-02T14:01:08",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -5781,7 +5924,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: cedar_harvest_conservation.csv, cedar_nest_id_register.csv, codebook_master.csv, held_rows.csv, nest_enterprise_relations.csv, nest_enterprises.csv, sweep_1070_refused.csv"
    ],
-   "mtime": "2026-09-02T03:21:09",
+   "mtime": "2026-09-02T14:33:13",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -6141,7 +6284,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: sec_gaming_1080_candidates.csv, sec_gaming_financial_disclosures.csv, sec_gaming_management_contract_terms.csv"
    ],
-   "mtime": "2026-09-02T13:15:21",
+   "mtime": "2026-09-02T14:18:12",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -6417,7 +6560,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: codebook_master.csv, consultation_events.csv"
    ],
-   "mtime": "2026-09-02T06:57:51",
+   "mtime": "2026-09-02T14:18:12",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -6933,7 +7076,7 @@
    "evidence": [
     "writes in 'w' mode or builds from data/raw"
    ],
-   "mtime": "2026-09-02T06:37:03",
+   "mtime": "2026-09-02T14:18:12",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -7323,7 +7466,7 @@
    "evidence": [
     "writes in 'w' mode or builds from data/raw"
    ],
-   "mtime": "2026-09-02T12:10:17",
+   "mtime": "2026-09-02T16:10:11",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -7602,7 +7745,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: _HOSTLOCK_1125_np_website_check.json, _ladder.json, np_website_native_check_2026-09-02.csv"
    ],
-   "mtime": "2026-09-02T13:25:09",
+   "mtime": "2026-09-02T13:49:18",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -7633,7 +7776,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: ANNUAL_INDIAN_COUNTRY_MONEY_SERIES.json, MONEY_TOTALLING_RULES.md, annual_indian_country_money_series.csv"
    ],
-   "mtime": "2026-09-02T13:35:11",
+   "mtime": "2026-09-02T14:01:47",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -7719,7 +7862,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: cedar_place_id_register.csv, cedar_places.csv"
    ],
-   "mtime": "2026-09-02T13:22:14",
+   "mtime": "2026-09-02T13:54:22",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -7791,7 +7934,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: codebook_master.csv, conservation.csv, corroboration_pairs.csv, enterprise_reconciliation.csv, nest_entity_dual_role.csv, nest_not_in_owner.csv, parent_crosswalk.csv, version_comparison.csv"
    ],
-   "mtime": "2026-09-02T13:37:24",
+   "mtime": "2026-09-02T14:54:42",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -7850,7 +7993,7 @@
    "evidence": [
     "read-modify-writes: attribution_method_vocabulary.json, federal_funding_transactions.csv"
    ],
-   "mtime": "2026-09-02T13:37:38",
+   "mtime": "2026-09-02T13:39:51",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -7866,6 +8009,225 @@
    "writes": [
     "attribution_method_vocabulary.json",
     "federal_funding_transactions.csv"
+   ]
+  },
+  "1132_fac_nontribal_native_audits.py": {
+   "classification": "both",
+   "evidence": [
+    "writes in 'w' mode or builds from data/raw",
+    "read-modify-writes: %s.csv, codebook_master.csv, fac_native_nontribal_sefa_programs.csv, fac_native_nontribal_single_audits.csv, fac_tribal_single_audits.csv"
+   ],
+   "mtime": "2026-09-02T14:43:45",
+   "never_run": false,
+   "never_run_reason": null,
+   "read_modify_write": [
+    "%s.csv",
+    "codebook_master.csv",
+    "fac_native_nontribal_sefa_programs.csv",
+    "fac_native_nontribal_single_audits.csv",
+    "fac_tribal_single_audits.csv"
+   ],
+   "reads": [
+    "%s.csv",
+    "additional_eins.csv",
+    "additional_ueis.csv",
+    "bie_uio_identifier_links.csv",
+    "cedar_entity_spine.csv",
+    "cedar_identifier_ledger.csv",
+    "codebook_master.csv",
+    "fac_native_nontribal_sefa_programs.csv",
+    "fac_native_nontribal_single_audits.csv",
+    "fac_tribal_single_audits.csv",
+    "general.csv",
+    "np_ein_entity_hub.csv",
+    "np_orgs.csv"
+   ],
+   "templated": [],
+   "unknown": [
+    "Federal Audit Clearinghouse (GSA), published bulk export federal_awards.csv",
+    "Federal Audit Clearinghouse (GSA), published bulk export general.csv",
+    "_HOSTLOCK_%s.json"
+   ],
+   "writes": [
+    "%s.csv",
+    "_manifest.json",
+    "codebook_master.csv",
+    "fac_native_nontribal_sefa_programs.csv",
+    "fac_native_nontribal_single_audits.csv",
+    "fac_nontribal_native_audits.json",
+    "fac_nontribal_refused_matches.csv",
+    "fac_tribal_single_audits.csv",
+    "source_coverage_fac_nontribal.csv"
+   ]
+  },
+  "1133_nest_owner_v6_builder_input.py": {
+   "classification": "both",
+   "evidence": [
+    "writes in 'w' mode or builds from data/raw",
+    "read-modify-writes: nest_enterprises.csv"
+   ],
+   "mtime": "2026-09-02T14:59:39",
+   "never_run": false,
+   "never_run_reason": null,
+   "read_modify_write": [
+    "nest_enterprises.csv"
+   ],
+   "reads": [
+    "cedar_correction_register.csv",
+    "native_entity_enterprise_dataset_v3.csv",
+    "native_entity_enterprise_dataset_v6_geocoded.csv",
+    "nest_enterprises.csv",
+    "owner_v6_conservation.csv",
+    "owner_v6_refused.csv"
+   ],
+   "templated": [],
+   "unknown": [
+    "owner_v3_name_variants.csv",
+    "owner_v6_uei_already_held.csv"
+   ],
+   "writes": [
+    "nest_enterprises.csv",
+    "nest_owner_v6_builder_input.json"
+   ]
+  },
+  "1134_repair_ledger_state_uei_contamination.py": {
+   "classification": "both",
+   "evidence": [
+    "writes in 'w' mode or builds from data/raw",
+    "read-modify-writes: LEDGER_STATE_REPAIR_1134.json, t.csv"
+   ],
+   "mtime": "2026-09-02T14:14:25",
+   "never_run": false,
+   "never_run_reason": null,
+   "read_modify_write": [
+    "LEDGER_STATE_REPAIR_1134.json",
+    "t.csv"
+   ],
+   "reads": [
+    "LEDGER_STATE_REPAIR_1134.json",
+    "cedar_identifier_ledger.csv",
+    "need_v6_geocoded.csv",
+    "t.csv"
+   ],
+   "templated": [],
+   "unknown": [
+    "cedar_identifier_ledger_final.csv",
+    "cedar_identifier_ledger_tiered.csv",
+    "cedar_publishable_identifiers.csv"
+   ],
+   "writes": [
+    "LEDGER_STATE_REPAIR_1134.json",
+    "ledger_state_repair_1134_cells.csv",
+    "t.csv",
+    "u.csv"
+   ]
+  },
+  "1135_full_dataset_review_bundle.py": {
+   "classification": "enricher",
+   "evidence": [
+    "read-modify-writes: __10.csv"
+   ],
+   "mtime": "2026-09-02T16:31:09",
+   "never_run": false,
+   "never_run_reason": null,
+   "read_modify_write": [
+    "__10.csv"
+   ],
+   "reads": [
+    "MANIFEST.csv",
+    "__10.csv",
+    "dataset_contracts.json"
+   ],
+   "templated": [],
+   "unknown": [
+    "*__10.csv"
+   ],
+   "writes": [
+    "__10.csv"
+   ]
+  },
+  "1136_control_byte_gate.py": {
+   "classification": "enricher",
+   "evidence": [
+    "read-modify-writes: nagpra_notice_entity_bridge.csv"
+   ],
+   "mtime": "2026-09-02T14:17:57",
+   "never_run": false,
+   "never_run_reason": null,
+   "read_modify_write": [
+    "nagpra_notice_entity_bridge.csv"
+   ],
+   "reads": [
+    "consultation_events.csv",
+    "nagpra_notice_entity_bridge.csv"
+   ],
+   "templated": [],
+   "unknown": [],
+   "writes": [
+    "nagpra_notice_entity_bridge.csv"
+   ]
+  },
+  "1137_customer_dataset_combine.py": {
+   "classification": "both",
+   "evidence": [
+    "writes in 'w' mode or builds from data/raw",
+    "read-modify-writes: KNOWN_ISSUES.md"
+   ],
+   "mtime": "2026-09-02T16:26:48",
+   "never_run": false,
+   "never_run_reason": null,
+   "read_modify_write": [
+    "KNOWN_ISSUES.md"
+   ],
+   "reads": [
+    "KNOWN_ISSUES.md",
+    "MANIFEST.csv",
+    "dataset_contracts.json"
+   ],
+   "templated": [],
+   "unknown": [],
+   "writes": [
+    "KNOWN_ISSUES.md",
+    "__CODEBOOK.md"
+   ]
+  },
+  "1139_linkage_coverage.py": {
+   "classification": "both",
+   "evidence": [
+    "writes in 'w' mode or builds from data/raw",
+    "read-modify-writes: LINKAGE_COVERAGE.md, _linkage_coverage_baseline.json"
+   ],
+   "mtime": "2026-09-02T16:22:16",
+   "never_run": false,
+   "never_run_reason": null,
+   "read_modify_write": [
+    "LINKAGE_COVERAGE.md",
+    "_linkage_coverage_baseline.json"
+   ],
+   "reads": [
+    "LINKAGE_COVERAGE.md",
+    "_linkage_coverage_baseline.json"
+   ],
+   "templated": [],
+   "unknown": [
+    "consultation_events.csv",
+    "deals_classified.csv",
+    "federal_funding_transactions.csv",
+    "gaming_facilities.csv",
+    "nagpra_notices.csv",
+    "native_bills.csv",
+    "native_entity_lobbying_disclosures.csv",
+    "native_owned_businesses.csv",
+    "nest_enterprises.csv",
+    "np_orgs.csv",
+    "prime_contracts.csv",
+    "resource_revenue.csv",
+    "subawards.csv"
+   ],
+   "writes": [
+    "LINKAGE_COVERAGE.md",
+    "_linkage_coverage.json",
+    "_linkage_coverage_baseline.json"
    ]
   },
   "113_build_nd_severance.py": {
@@ -7893,6 +8255,101 @@
     "_SOURCE_MANIFEST.csv",
     "codebook_master.csv"
    ]
+  },
+  "1140_linkage_close.py": {
+   "classification": "both",
+   "evidence": [
+    "writes in 'w' mode or builds from data/raw",
+    "read-modify-writes: cedar_identifier_ledger_final.csv, federal_funding_transactions.csv, native_bills.csv, prime_contracts.csv"
+   ],
+   "mtime": "2026-09-02T16:11:54",
+   "never_run": false,
+   "never_run_reason": null,
+   "read_modify_write": [
+    "cedar_identifier_ledger_final.csv",
+    "federal_funding_transactions.csv",
+    "native_bills.csv",
+    "prime_contracts.csv"
+   ],
+   "reads": [
+    "cedar_entity_spine.csv",
+    "cedar_identifier_ledger_final.csv",
+    "federal_funding_transactions.csv",
+    "fpds_uei_cage_map.csv",
+    "native_bills.csv",
+    "native_bills_entity_bridge.csv",
+    "native_bills_entity_class.csv",
+    "prime_contracts.csv"
+   ],
+   "templated": [],
+   "unknown": [],
+   "writes": [
+    "cedar_identifier_ledger_final.csv",
+    "federal_funding_transactions.csv",
+    "native_bills.csv",
+    "prime_contracts.csv"
+   ]
+  },
+  "1141_gaming_quality_pass.py": {
+   "classification": "both",
+   "evidence": [
+    "writes in 'w' mode or builds from data/raw",
+    "read-modify-writes: gaming_facilities.csv, gaming_project_facilities.csv, gaming_properties.csv, gaming_property_site_observations.csv, place_gaming_hold_open_disposition_2026-09-02.csv, state_gaming_observations.csv"
+   ],
+   "mtime": "2026-09-02T16:19:32",
+   "never_run": false,
+   "never_run_reason": null,
+   "read_modify_write": [
+    "gaming_facilities.csv",
+    "gaming_project_facilities.csv",
+    "gaming_properties.csv",
+    "gaming_property_site_observations.csv",
+    "place_gaming_hold_open_disposition_2026-09-02.csv",
+    "state_gaming_observations.csv"
+   ],
+   "reads": [
+    "cedar_identity_register.csv",
+    "gaming_facilities.csv",
+    "gaming_project_facilities.csv",
+    "gaming_properties.csv",
+    "gaming_property_site_observations.csv",
+    "gaming_revenue_bounds.csv",
+    "gaming_web_harvest_coverage.csv",
+    "place_gaming_hold_open_disposition_2026-09-02.csv",
+    "state_gaming_observations.csv"
+   ],
+   "templated": [],
+   "unknown": [
+    "place_gaming_adjudication_2026-09-02.csv"
+   ],
+   "writes": [
+    "gaming_facilities.csv",
+    "gaming_project_facilities.csv",
+    "gaming_properties.csv",
+    "gaming_property_site_observations.csv",
+    "place_gaming_hold_open_disposition_2026-09-02.csv",
+    "state_gaming_observations.csv"
+   ]
+  },
+  "1142_gaming_denominator_doc_sweep.py": {
+   "classification": "unknown",
+   "evidence": [],
+   "mtime": "2026-09-02T16:33:48",
+   "never_run": false,
+   "never_run_reason": null,
+   "read_modify_write": [],
+   "reads": [],
+   "templated": [],
+   "unknown": [
+    "ARCHITECTURE_DECISIONS.md",
+    "CODEX_PR29_OPEN.md",
+    "DEPENDENCY_MANIFEST.md",
+    "MONEY_TOTALLING_RULES.md",
+    "SEC_GAMING_FACILITY_REVENUE_BUILD_LOG.md",
+    "TRIBAL_DEBT_HOLDINGS_BUILD_LOG.md",
+    "WHAT_IS_MISSING.md"
+   ],
+   "writes": []
   },
   "114_pull_prime_archive.py": {
    "classification": "both",
@@ -8763,7 +9220,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: 142_crawl_manifest.csv, 142_gamefinder_manifest.csv, 142_property_domains.csv"
    ],
-   "mtime": "2026-08-12T20:37:20",
+   "mtime": "2026-09-02T14:18:12",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -8909,7 +9366,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: fac_sefa_gaming.json"
    ],
-   "mtime": "2026-09-01T23:16:22",
+   "mtime": "2026-09-02T14:33:13",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -11735,7 +12192,7 @@
     "writes in 'w' mode or builds from data/raw",
     "names itself an in-place enricher"
    ],
-   "mtime": "2026-09-01T23:42:59",
+   "mtime": "2026-09-02T13:39:51",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -12331,7 +12788,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: lint_bug_classes_baseline.json"
    ],
-   "mtime": "2026-08-29T07:06:22",
+   "mtime": "2026-09-02T14:22:22",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -14735,7 +15192,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: ARCHITECTURE.md"
    ],
-   "mtime": "2026-09-02T11:56:38",
+   "mtime": "2026-09-02T14:33:13",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -14797,7 +15254,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: assistance_legacy_state_map.json, assistance_tribe_id_crosswalk.csv, cedar_entity_spine.csv, cedar_handle_history.csv, cedar_identity_register.csv, federal_funding_transactions.csv"
    ],
-   "mtime": "2026-09-02T02:11:29",
+   "mtime": "2026-09-02T14:18:12",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -14940,7 +15397,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: grain_evidence.json"
    ],
-   "mtime": "2026-09-02T13:34:30",
+   "mtime": "2026-09-02T14:33:13",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -15051,6 +15508,8 @@
     "faads_transactions_all_agencies.csv",
     "fac_audit_gaming_disclosures.csv",
     "fac_audit_sefa_gaming_programs.csv",
+    "fac_native_nontribal_sefa_programs.csv",
+    "fac_native_nontribal_single_audits.csv",
     "fac_tribal_single_audits.csv",
     "federal_actions.csv",
     "federal_actions_entity_bridge.csv",
@@ -16049,7 +16508,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: shard_k.csv"
    ],
-   "mtime": "2026-09-01T22:53:04",
+   "mtime": "2026-09-02T14:18:12",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -17111,7 +17570,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: _regression_baseline.json, _regression_semantic_baseline.json"
    ],
-   "mtime": "2026-09-02T12:21:21",
+   "mtime": "2026-09-02T14:01:34",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -17978,7 +18437,7 @@
    "evidence": [
     "writes in 'w' mode or builds from data/raw"
    ],
-   "mtime": "2026-09-02T13:15:23",
+   "mtime": "2026-09-02T15:52:25",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -18006,7 +18465,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: RECOGNITION_HISTORY_LOG.md, _notice_manifest.csv"
    ],
-   "mtime": "2026-08-29T06:59:56",
+   "mtime": "2026-09-02T14:18:12",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -18063,7 +18522,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: __sample.csv"
    ],
-   "mtime": "2026-09-02T13:20:59",
+   "mtime": "2026-09-02T15:52:03",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -18081,13 +18540,13 @@
    ],
    "templated": [],
    "unknown": [
-    "bill_votes.csv",
     "cedar_identity_register.csv",
     "consultation_events.csv",
     "deals_classified.csv",
     "federal_funding_transactions.csv",
-    "lobbying_registrants.csv",
     "nagpra_notices.csv",
+    "native_bills.csv",
+    "native_entity_lobbying_disclosures.csv",
     "native_owned_businesses.csv",
     "nest_enterprises.csv",
     "np_orgs.csv",
@@ -18630,7 +19089,7 @@
     "writes in 'w' mode or builds from data/raw",
     "read-modify-writes: regenerate_guard_baseline.json"
    ],
-   "mtime": "2026-09-02T08:21:00",
+   "mtime": "2026-09-02T15:16:50",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [
@@ -18642,6 +19101,7 @@
    "templated": [],
    "unknown": [
     "ANCSA_PORTAL_BUILD_LOG.md",
+    "ARCHITECTURE.md",
     "COVERAGE_TAIL_SHARD_N.md",
     "DEPENDENCY_MANIFEST.md",
     "DOC_STALENESS.md",
@@ -18664,12 +19124,15 @@
     "writes in 'w' mode or builds from data/raw",
     "names itself an in-place enricher"
    ],
-   "mtime": "2026-09-02T13:29:38",
+   "mtime": "2026-09-02T16:01:09",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
    "reads": [
+    "*__CODEBOOK.md",
+    "MANIFEST.csv",
     "assistance_tribe_id_crosswalk.csv",
+    "attribution_method_vocabulary.json",
     "cedar_constellation_edges.csv",
     "cedar_dataset_readiness.csv",
     "cedar_identity_register.csv",
@@ -18678,7 +19141,6 @@
     "gaming_web_harvest_coverage.csv",
     "nagpra_notices.csv",
     "named_agent_robots_purge_2026-09-02.json",
-    "place_gaming_adjudication_2026-09-02.csv",
     "prime_contracts.csv"
    ],
    "templated": [],
@@ -20764,7 +21226,7 @@
     "writes in 'w' mode or builds from data/raw",
     "names itself an in-place enricher"
    ],
-   "mtime": "2026-09-02T13:38:21",
+   "mtime": "2026-09-02T16:34:34",
    "never_run": false,
    "never_run_reason": null,
    "read_modify_write": [],
@@ -20830,6 +21292,34 @@
    "writes": [
     "prime_contracts_entity_year.csv"
    ]
+  },
+  "cedar_publication.py": {
+   "classification": "unknown",
+   "evidence": [],
+   "mtime": "2026-09-02T15:52:03",
+   "never_run": false,
+   "never_run_reason": null,
+   "read_modify_write": [],
+   "reads": [],
+   "templated": [],
+   "unknown": [
+    "cedar_identity_register.csv",
+    "consultation_events.csv",
+    "deals_classified.csv",
+    "federal_funding_transactions.csv",
+    "gaming_facilities.csv",
+    "nagpra_notices.csv",
+    "native_bills.csv",
+    "native_entity_lobbying_disclosures.csv",
+    "native_owned_businesses.csv",
+    "nest_enterprises.csv",
+    "np_orgs.csv",
+    "prime_contracts.csv",
+    "resource_revenue.csv",
+    "subawards.csv",
+    "tribal_newsletter_corpus.csv"
+   ],
+   "writes": []
   },
   "cedar_register_codebook.py": {
    "classification": "rebuild",
@@ -21144,8 +21634,11 @@
    ]
   }
  },
- "tables_with_enricher_backup": 219,
+ "tables_with_enricher_backup": 220,
  "writers": {
+  "%s.csv": [
+   "1132_fac_nontribal_native_audits.py"
+  ],
   "%s.json": [
    "119_build_digital_and_loyalty.py",
    "33_nonprofit_financials.py"
@@ -21638,11 +22131,20 @@
   "INVENTORY.md": [
    "521_inventory.py"
   ],
+  "KNOWN_ISSUES.md": [
+   "1137_customer_dataset_combine.py"
+  ],
   "LADDER_ADJUDICATION_1117.json": [
    "1117_ladder_adjudication.py"
   ],
   "LADDER_REPOINTS_1122.json": [
    "1122_ladder_repoints.py"
+  ],
+  "LEDGER_STATE_REPAIR_1134.json": [
+   "1134_repair_ledger_state_uei_contamination.py"
+  ],
+  "LINKAGE_COVERAGE.md": [
+   "1139_linkage_coverage.py"
   ],
   "MASTER_QUEUE_2026-08-07.csv": [
    "1103_decision_queue_clearance.py"
@@ -22010,6 +22512,12 @@
   "_SUMMARY.json": [
    "41_match_subawards_to_ledger.py"
   ],
+  "__10.csv": [
+   "1135_full_dataset_review_bundle.py"
+  ],
+  "__CODEBOOK.md": [
+   "1137_customer_dataset_combine.py"
+  ],
   "__sample.csv": [
    "770_sample_extracts.py"
   ],
@@ -22132,13 +22640,20 @@
   "_ledger_rows.csv": [
    "114_pull_prime_archive.py"
   ],
+  "_linkage_coverage.json": [
+   "1139_linkage_coverage.py"
+  ],
+  "_linkage_coverage_baseline.json": [
+   "1139_linkage_coverage.py"
+  ],
   "_loader_state.json": [
    "163_load_sam_contract_awards.py"
   ],
   "_manifest.json": [
    "1119_acquire_biamaps_arcgis.py",
    "1120_acquire_usac_open_data.py",
-   "1121_acquire_nppes_corroboration.py"
+   "1121_acquire_nppes_corroboration.py",
+   "1132_fac_nontribal_native_audits.py"
   ],
   "_mine_crosswalk_cacheonly.csv": [
    "shard_g_slice_and_mine.py"
@@ -22585,6 +23100,7 @@
    "09_import_rulings.py",
    "1079_quarantine_method_exposure.py",
    "1099_crosstribe_legalname_audit.py",
+   "1140_linkage_close.py",
    "124_apply_rulings_in_place.py",
    "163_promote_nho_universe_in_place.py",
    "174_apply_rulings_to_source_tables.py",
@@ -22701,6 +23217,7 @@
    "111_build_advocacy_passthrough.py",
    "112_pull_grantee_990s.py",
    "1130_nest_owner_v6_reconcile.py",
+   "1132_fac_nontribal_native_audits.py",
    "113_build_nd_severance.py",
    "132_build_schedule_i_layer.py",
    "140_build_grantmaker_funding_flows.py",
@@ -23063,6 +23580,18 @@
    "147_build_fac_single_audits.py",
    "814_gaming_nr_grain_and_conservation.py"
   ],
+  "fac_native_nontribal_sefa_programs.csv": [
+   "1132_fac_nontribal_native_audits.py"
+  ],
+  "fac_native_nontribal_single_audits.csv": [
+   "1132_fac_nontribal_native_audits.py"
+  ],
+  "fac_nontribal_native_audits.json": [
+   "1132_fac_nontribal_native_audits.py"
+  ],
+  "fac_nontribal_refused_matches.csv": [
+   "1132_fac_nontribal_native_audits.py"
+  ],
   "fac_pdf_fetch_log.csv": [
    "147_build_fac_single_audits.py"
   ],
@@ -23073,6 +23602,7 @@
    "105_build_florida_gaming.py"
   ],
   "fac_tribal_single_audits.csv": [
+   "1132_fac_nontribal_native_audits.py",
    "147_build_fac_single_audits.py"
   ],
   "fac_unresolved_auditees_%s.csv": [
@@ -23105,6 +23635,7 @@
   ],
   "federal_funding_transactions.csv": [
    "1131_attribution_method_vocabulary.py",
+   "1140_linkage_close.py",
    "115_pull_assistance_archive.py",
    "24_funding_merge.py",
    "335_harmonize_assistance_seams_in_place.py",
@@ -23301,6 +23832,7 @@
   "gaming_facilities.csv": [
    "1078_gaming_joint_operators.py",
    "1095_gaming_bounds_summability_and_seal_typing.py",
+   "1141_gaming_quality_pass.py",
    "143_build_gaming_property_locations.py",
    "158_extend_gaming_facilities.py",
    "162_resource_dates_from_cedar_evidence.py",
@@ -23355,6 +23887,7 @@
    "266_apply_gaming_hub_spillover_rulings.py"
   ],
   "gaming_project_facilities.csv": [
+   "1141_gaming_quality_pass.py",
    "32b_build_gaming_nepa_pilot.py"
   ],
   "gaming_projections.csv": [
@@ -23362,6 +23895,7 @@
    "32b_build_gaming_nepa_pilot.py"
   ],
   "gaming_properties.csv": [
+   "1141_gaming_quality_pass.py",
    "160_sync_published_gaming_view.py",
    "175_sync_published_property_view_entities.py",
    "255_fix_gaming_property_deal_counts.py",
@@ -23401,6 +23935,7 @@
    "382_remine_property_site_corpus.py"
   ],
   "gaming_property_site_observations.csv": [
+   "1141_gaming_quality_pass.py",
    "142_build_property_site_observations.py"
   ],
   "gaming_property_site_recovered_claims_%s.csv": [
@@ -23580,6 +24115,9 @@
   "ledger_shared_upstream_findings.csv": [
    "1130_nest_owner_v6_reconcile.py"
   ],
+  "ledger_state_repair_1134_cells.csv": [
+   "1134_repair_ledger_state_uei_contamination.py"
+  ],
   "lint_bug_classes.json": [
    "293_lint_bug_classes.py"
   ],
@@ -23680,6 +24218,7 @@
    "77_build_nagpra_dataset.py"
   ],
   "nagpra_notice_entity_bridge.csv": [
+   "1136_control_byte_gate.py",
    "77_build_nagpra_dataset.py"
   ],
   "nagpra_notice_institutions.csv": [
@@ -23705,6 +24244,7 @@
   ],
   "native_bills.csv": [
    "1092_bill_titles_residue_and_scope.py",
+   "1140_linkage_close.py",
    "14_build_bills_votes.py",
    "14_pull_cosponsors.py"
   ],
@@ -23781,13 +24321,17 @@
   ],
   "nest_enterprises.csv": [
    "1072_tribally_owned_enterprises.py",
-   "1102_nest_corroboration_adjudication.py"
+   "1102_nest_corroboration_adjudication.py",
+   "1133_nest_owner_v6_builder_input.py"
   ],
   "nest_entity_dual_role.csv": [
    "1130_nest_owner_v6_reconcile.py"
   ],
   "nest_not_in_owner.csv": [
    "1130_nest_owner_v6_reconcile.py"
+  ],
+  "nest_owner_v6_builder_input.json": [
+   "1133_nest_owner_v6_builder_input.py"
   ],
   "nho_doi_notification_roster.csv": [
    "05_parse_doi_nho_list.py"
@@ -23952,6 +24496,9 @@
   "place_gaming_adjudication_2026-09-02.csv": [
    "1129_place_ids.py"
   ],
+  "place_gaming_hold_open_disposition_2026-09-02.csv": [
+   "1141_gaming_quality_pass.py"
+  ],
   "place_non_place_rows_2026-09-02.csv": [
    "1129_place_ids.py"
   ],
@@ -23980,6 +24527,7 @@
    "1113_copper_river_complete_attribution.py",
    "1123_copper_river_attribution.py",
    "1126_annual_total_federal_and_gaming.py",
+   "1140_linkage_close.py",
    "114_pull_prime_archive.py",
    "131_merge_archive_backfill.py",
    "174_apply_rulings_to_source_tables.py",
@@ -24289,6 +24837,9 @@
   "source_coverage_fac.csv": [
    "147_build_fac_single_audits.py"
   ],
+  "source_coverage_fac_nontribal.csv": [
+   "1132_fac_nontribal_native_audits.py"
+  ],
   "source_coverage_nrc_meetings.csv": [
    "145_build_nrc_public_meetings.py"
   ],
@@ -24309,6 +24860,7 @@
   ],
   "state_gaming_observations.csv": [
    "107_pull_remaining_states.py",
+   "1141_gaming_quality_pass.py",
    "117_build_gaming_devices.py"
   ],
   "stats.json": [
@@ -24374,6 +24926,7 @@
    "1030_sec_edgar_native_transactions.py"
   ],
   "t.csv": [
+   "1134_repair_ledger_state_uei_contamination.py",
    "871_promote_geo_keys_contracts.py",
    "872_promote_geo_keys_assistance.py"
   ],
@@ -24475,6 +25028,9 @@
   ],
   "two_sums.csv": [
    "874_geography_two_sums.py"
+  ],
+  "u.csv": [
+   "1134_repair_ledger_state_uei_contamination.py"
   ],
   "uei_hierarchy_graph.csv": [
    "04_spiderweb_expand.py"

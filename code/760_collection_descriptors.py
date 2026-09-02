@@ -74,6 +74,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "code"))
+
+from cedar_publication import (          # noqa: E402
+    PRODUCT_ID, FLAGSHIP, SPINE_TABLES,
+)
 csv.field_size_limit(10_000_000)
 TODAY = date.today().isoformat()
 
@@ -122,9 +126,11 @@ except Exception:
 # construction and API tests all call the owned-business collection `owned`.
 # Emitting `native-owned-businesses` would leave a READY dataset unable to
 # replace the demonstration record it is meant to replace, silently.
-PRODUCT_ID = {
-    "native-owned-businesses": "owned",
-}
+# `PRODUCT_ID` is imported above from `code/cedar_publication.py`. It was a
+# literal here and a second literal in 770, and 770 carried a
+# `_760_product_id_map()` regex to compare them - a function nothing ever
+# called. One copy now, and `py -3 code/cedar_publication.py verify` is the
+# comparison that actually runs.
 
 LEVEL = {
     "entity": "entity",
@@ -154,26 +160,26 @@ LEVEL = {
 # 770 already reads this file's `PRODUCT_ID` by text so the two id maps cannot
 # drift. This is the same discipline in the other direction.
 def _flagship_map() -> tuple[dict, set]:
-    """`FLAGSHIP` and `SPINE` read out of 770 BY TEXT, so a rename there is a
-    hard failure here rather than a silent divergence. Importing 770 is not an
-    option - its module name starts with a digit and it does file work at
-    import time."""
-    src = ROOT / "code" / "770_sample_extracts.py"
-    txt = src.read_text(encoding="utf-8")
-    i = txt.find("FLAGSHIP = {")
-    if i < 0:
-        raise SystemExit("760: 770_sample_extracts.py has no FLAGSHIP dict - "
-                         "the sample source is unmeasurable, refusing to "
-                         "print a row count that nothing checks")
-    body = txt[i:txt.find(chr(10) + "}", i)]
-    flag = dict(re.findall(r'"([a-z0-9_\-]+)":\s*"([a-z0-9_]+\.csv)"', body))
-    if not flag:
-        raise SystemExit("760: FLAGSHIP dict parsed EMPTY - an absence of "
-                         "evidence is not evidence of absence (field guide 3)")
-    j = txt.find("SPINE = {")
-    spine = set(re.findall(r'"([a-z0-9_]+\.csv)"',
-                           txt[j:txt.find("}", j)])) if j >= 0 else set()
-    return flag, spine
+    """`FLAGSHIP` and the spine-resident table set, from `cedar_publication`.
+
+    This used to read both out of `770_sample_extracts.py` BY TEXT, on the
+    reasoning that "importing 770 is not an option - its module name starts
+    with a digit and it does file work at import time". Neither half was true:
+    `importlib` imports a digit-leading module without complaint, and 770
+    imports in 0.04 s and touches no table. Both constants are now canonical in
+    `code/cedar_publication.py`, imported at the top of this file.
+
+    The scrape was also a live hazard, not just clutter. Its `SPINE` half was
+    `if j >= 0 else set()` - so the day 770 stopped carrying a `SPINE = {`
+    literal it would have returned an EMPTY set, silently, and every
+    spine-resident flagship would have been reported as an unclaimed table.
+    That day was 2026-09-02. A regex over source text fails OPEN; an import
+    fails CLOSED.
+
+    Kept as a function rather than inlined because two call sites use it and
+    the tuple shape is part of their contract.
+    """
+    return dict(FLAGSHIP), set(SPINE_TABLES)
 
 
 # CODEX PR #29 ROUND 3, FINDING 5. The only published blocker described the

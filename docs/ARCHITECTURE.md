@@ -160,19 +160,57 @@ and the API's own checks first. The custom domain is set in `public/CNAME`,
 and the build emits `404.html` alongside `index.html` so client-side routes
 resolve on a static host.
 
-Because that deployment is standalone — no `VITE_API_URL` — the gate there
-offers sign-in only. Activation needs an API to validate a code against, and
+The build output is **`dist-site/`**, not vite's default `dist/`. The data
+workspace tracks 295 files under `dist/` and vite empties its output directory
+before every build, so sharing the name meant every `npm run build` deleted
+them. `build.outDir` in `vite.config.js` and `upload-pages-artifact`'s `path:`
+in the workflow have to move together; changing one alone publishes the data
+bundle, or nothing.
+
+An operator sets exactly two things, both in repository settings rather than
+in code:
+
+| Setting | Effect |
+| --- | --- |
+| `vars.VITE_API_URL` (repository **variable**) | Unset is standalone. Set it and the deployment is connected: real sessions, activation, the database as the source of truth. |
+| `secrets.VITE_PRESS_DEMO_ACCOUNTS` (repository **secret**) | The standalone preview account, as a salted digest. Unset means the build signs nobody in. Ignored entirely once `VITE_API_URL` is set. |
+
+Because the Pages deployment is standalone by default, the gate there offers
+sign-in only. Activation needs an API to validate a code against, and
 `PRESS_ACTIVATION_AVAILABLE` follows `isConnected()` rather than a constant,
 so a build with nothing behind it cannot ask for a code it cannot check.
+
+## The standalone sign-in
+
+`features/grove/pressDemoGate.js` is the sign-in on a build with no API. It is
+a **demonstration gate, not access control**, and the module and the page copy
+both say so: a static site ships every byte it checks against, so a visitor
+who opens devtools can read the account record and delete the check. What it
+does is keep the preview shut to a casual visitor and let a named reviewer in.
+
+It is acceptable only because nothing behind it is confidential. The
+standalone bundle carries the catalog, the methods, the release history and
+ten sampled rows per table (`public/data/cedar/samples/*__10.csv`); the
+collections are not in it. If that stops being true the deployment has to
+connect.
+
+Two properties make it defensible on its own terms. The account arrives as a
+salted SHA-256 digest, so no password is committed or bundled — the same
+reason `server/cedar_press/session.py` reads `CEDAR_PRESS_ACCOUNTS` from the
+environment. And a build configured with nothing authenticates nobody:
+`PRESS_DEMO_GATE_ACTIVE` is false, the gate renders a sentence instead of a
+form, and `verifyPressDemoAccount` returns null for every password.
+
+`isConnected()` turns it off. Connected, `AuthProvider` never consults it and
+`POST /auth/login` with the signed, HTTP-only cookie takes over.
 
 ## Access
 
 `features/grove/pressAccess.js` resolves a session's tier to what the client
 renders — which shelves open, which collections download. Entitlement is
 authoritative on the server, and the client model is written to answer
-identically. The preview accounts in `context/authContext.js` are a
-standalone-only path: a connected deployment authenticates against the API
-and rejects them.
+identically. The demo gate's account is a standalone-only path: a connected
+deployment authenticates against the API and never reads it.
 
 ## Telemetry
 

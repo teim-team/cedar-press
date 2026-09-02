@@ -1,5 +1,20 @@
-# Methodology — Native Federal Subcontracting
+# Methodology — Federal Subcontracting
 
+<!-- BEGIN GENERATED:IDENTITY -->
+
+**`subcontracting` — Federal Subcontracting.** Delivered as `dist/customer/subcontracting.csv`: **89,809 rows × 90 columns, 120.7 MB**, built from the flagship table `data/clean/subawards.csv`. Shelf `pro`; sold through **Cedar Press**; on the Cedar Press storefront. Readiness **READY**. [measured 2026-09-02 from the delivered file]
+
+> **This block and Appendix M at the foot of this paper are GENERATED** by `code/1143_methodology_papers.py` from the delivered file itself, on every build — the same reason the codebooks are generated. Do not hand-edit either; the next build overwrites them.
+>
+> Everything between `<!-- BEGIN EDITORIAL:subcontracting -->` and `<!-- END EDITORIAL:subcontracting -->` is **hand-written and preserved byte-for-byte** across rebuilds. Put prose there and nowhere else.
+>
+> This paper is **not** the codebook. `dist/customer/subcontracting__CODEBOOK.md` carries the grain, the folded-in tables and the per-column fill rates, and `__NOTES.txt` carries the same for a person. This paper says how the dataset came to exist and why you should believe it.
+>
+> Generated 2026-09-02. `py -3 code/1143_methodology_papers.py verify` **fails** if the delivered file has moved since — see §M7.
+
+<!-- END GENERATED:IDENTITY -->
+
+<!-- BEGIN EDITORIAL:subcontracting -->
 **`subcontracting`. `data/clean/subawards.csv`, 89,809 rows.
 Unfiltered `subaward_amount` $57,020,557,710.47; the correct total is
 $34,906,694,737.65.** [re-measured 2026-09-02T17:00Z, cents-exact]
@@ -729,3 +744,274 @@ refresh.
    technicality.
 9. **`docs/datasets/subcontracting.md`'s §2 re-cites "the archive holds 4,631
    objects"** — the same issue, in the most current document of the family.
+<!-- END EDITORIAL:subcontracting -->
+
+<!-- BEGIN GENERATED:MEASURED -->
+
+---
+
+# Appendix M — measured from the delivered file
+
+*Generated 2026-09-02 by `code/1143_methodology_papers.py` from `dist/customer/subcontracting.csv`, read whole with duckdb and never sampled. Not from `data/clean/`, not from a build log, not from `MANIFEST.csv`. Where this appendix and a document disagree, **the delivered file is right** and `verify` prints the disagreement rather than smoothing it over.*
+
+*Grain, folded-in tables and per-column fill rates are in `dist/customer/subcontracting__CODEBOOK.md` and are deliberately not repeated here.*
+
+## M1 · Sources, as the delivered rows themselves record them
+
+**`source_file`** — 89,809 of 89,809 rows populated, 34 distinct values:
+
+| value | rows |
+|---|---:|
+| `usaspending_2026-08-12/fy2021` | 9,366 |
+| `fy2019` | 9,254 |
+| `fy2018` | 8,492 |
+| `fy2025` | 7,130 |
+| `fy2016` | 5,566 |
+| `fy2017` | 5,512 |
+| `fy2015` | 5,198 |
+| `fy2014` | 4,913 |
+| `fy2020` | 3,704 |
+| `fy2013` | 3,631 |
+| `fy2026` | 3,341 |
+| `fy2012` | 3,070 |
+| `usaspending_2026-08-12/fy2024_q1` | 2,641 |
+| `usaspending_2026-08-12/fy2024_q4` | 2,501 |
+| `usaspending_2026-08-12/fy2023_q4` | 2,407 |
+| `usaspending_2026-08-12/fy2023_q1` | 2,363 |
+| `usaspending_2026-08-12/fy2024_q2` | 2,064 |
+| `fy2011` | 1,939 |
+| `usaspending_2026-08-12/fy2023_q2` | 1,665 |
+| `usaspending_2026-08-12/fy2023_q3` | 1,661 |
+| `usaspending_2026-08-12/fy2024_q3` | 1,593 |
+| `subcontract-05-09-23-22-23-37.csv` | 998 |
+| `Assistance_Subawards_2026-08-05_H22M21S36_1.csv` | 230 |
+| `Assistance_Subawards_2026-08-05_H21M11S29_1.csv` | 166 |
+| `fy2010` | 141 |
+| `Assistance_Subawards_2026-08-05_H22M29S09_1.csv` | 116 |
+| `Assistance_Subawards_2026-08-05_H21M06S27_1.csv` | 96 |
+| `fy2009` | 33 |
+| `fy2002` | 7 |
+| `fy2008` | 7 |
+| `fy2003` | 1 |
+| `fy2004` | 1 |
+| `fy2001` | 1 |
+| `fy2007` | 1 |
+
+**`source_dataset`** — 89,809 of 89,809 rows populated, 5 distinct values:
+
+| value | rows |
+|---|---:|
+| `usaspending_fsrs_pull` | 84,538 |
+| `usaspending_fsrs_name_match` | 3,329 |
+| `highergov_2023_export` | 998 |
+| `funding_forward_fill` | 608 |
+| `usaspending_fsrs_parent_cluster` | 336 |
+
+**`source_population`** — 89,809 of 89,809 rows populated, 3 distinct values:
+
+| value | rows |
+|---|---:|
+| `full_federal_subaward_universe` | 88,203 |
+| `highergov_query_frame_unpreserved` | 998 |
+| `prime_tribal_filtered` | 608 |
+
+**`source_url`** — 89,809 of 89,809 rows carry one. Hosts, by row count:
+
+| host | rows |
+|---|---:|
+| `www.usaspending.gov` | 88,811 |
+| `www.highergov.com` | 998 |
+
+**`fetched_date`** — 89,809 of 89,809 rows populated, 4 distinct values:
+
+| value | rows |
+|---|---:|
+| `2026-08-05` | 63,548 |
+| `2026-09-02` | 16,895 |
+| `2026-08-12` | 9,289 |
+| `2026-08-27` | 77 |
+
+### The terms rulings that bind this dataset
+
+Quoted from `docs/PUBLICATION_POLICY.md`, which holds the rulings; this paper does not restate them from memory.
+
+- **Owner ruling, 2026-09-02** (`<!-- BEGIN TERMS-OWNER-RULING-2026-09-02 -->`): *"So tribal websites, I actually don't care if they say it does scrape. Because if it's publicly available and you can scrape it, scrape it."* A tribal entity's own public pages may be harvested regardless of a terms statement. `source_terms_status = TERMS_STATED_RESTRICTIVE` on a Native entity's own site is now **a recorded observation, not a gate**.
+- **Four things that ruling does NOT touch, and none is a terms question:** (1) technical access controls — nothing login-gated, no admin or staging paths, no exploiting a misconfiguration; (2) a natural person's data held apart from their public role — home address, personal email or phone, DOB, SSN/TIN; (3) non-tribal licensors — EMMA/MSRB bars redistribution of its output "sold or free of charge" and names "any manual process", with CUSIP Global Services as a second licensor; (4) proprietary identifiers — Casino City, D-U-N-S — held internally, never shipped.
+- **A terms restriction is scoped to the SOURCE that stated it, not to the nation** (`<!-- BEGIN TERMS-SCOPE -->`), and it does not bind a third party's filing of the same fact.
+
+## M2 · How the rows were built — the pipeline, in order
+
+**One documented rebuild:** `py -3 code/build.py run subcontracting --execute`. `py -3 code/build.py plan subcontracting` prints the ordering below live; it is reproduced here so the paper stands alone.
+
+The collection holds **5 tables**. Those with a named build stage, flagship first:
+
+| table | rebuilt by | then enriched by (must run LAST) | status |
+|---|---|---|---|
+| `subawards.csv` **(flagship)** | `121_pull_subawards_api.py`, `20_build_subcontracts.py` | `1109_subawardee_geo_promote.py`, `121_pull_subawards_api.py`, `250_demote_stale_tierA_subaward_rows.py`, `45_promote_subawards.py`, `871_promote_geo_keys_contracts.py`, `910_subaward_report_id_backfill.py`, `911_subaward_sub_leg_cedar_uid.py` | shippable |
+
+**A full rebuild and an in-place enricher on one file need an ordering, and the enricher must run LAST.** A `.bak_*_pre<script>` file sitting beside a table is the signal that an enricher has touched it since the last build. This has cost this project four reverts of one file in a single day.
+
+The delivered spreadsheet is then assembled by `code/1137_customer_dataset_combine.py`, which folds supporting tables onto the flagship **only where the measured cardinality on the shared key is one**, reverts any join that moved the row count, and prefixes every joined column with its source table's stem. One-to-many tables contribute a count column instead of rows, so a money total cannot be multiplied by a join.
+
+## M3 · How entities were attributed
+
+Cedar keys every dataset to one identity layer. `cedar_uid` is permanent and never reused; the human-readable handle retires when an entity is reclassified, so **join on `cedar_uid`, never on the handle**. A compound handle is canonical, not broken — stripping a suffix to make a join work turns joinable rows into unjoinable ones while looking like a normalisation.
+
+**Entity attachment in the delivered file:**
+
+| key column | rows carrying one | distinct values | coverage |
+|---|---:|---:|---:|
+| `cedar_uid` | 40,201 | 169 | 44.8% |
+
+**An unkeyed row is often the right answer, not a defect.** ADR-010 separates *"we could not identify the entity"* — a defect — from *"there is no single entity to identify"* — the correct representation. Coverage is measured against the *resolvable* denominator, not the row count.
+
+### What `attribution_method` means **in this dataset**
+
+`docs/schema/attribution_method_vocabulary.json`, declared 2026-09-02: *"`attribution_method` is three different columns sharing a name — a join method, an evidence provenance, and a name-match algorithm. Each table is gated against its OWN vocabulary."* Reading one table's sense into another is how a containment match came to key a dollar.
+
+**This dataset carries no `attribution_method` column.** The identity evidence it does carry is measured below. Do not import another dataset's term list to interpret it.
+
+**And a RULED METHOD IS NOT A POSITIVE RULING.** `attribution_method` says WHO decided; `confidence_tier` says WHAT was decided. All 317 `elijah_ruling` EIN rows in the ledger are tier **X** — *negative* — and a script that read "the method is in the RULED set" as "the answer was yes" published 317 owner *exclusions* as confident attributions. Standing detector: `py -3 code/293_lint_bug_classes.py`. [from the record — `START_HERE.md`, defect class 1b]
+
+### Every identity, tier and method column, measured
+
+- **`geo_key_tier`** — 1 distinct value: `(blank)` 71,615 · `exact_award_summary` 18,194
+- **`prime_native_tier`** — 3 distinct values: `(blank)` 49,906 · `A` 26,713 · `B` 12,991 · `source_filter` 199
+- **`sub_native_tier`** — 2 distinct values: `(blank)` 40,091 · `B` 30,440 · `A` 19,278
+- **`subaward_entity_rollup__confidence_tier`** — 2 distinct values: `(blank)` 53,792 · `A` 18,676 · `B` 17,341
+
+### The evidence tiers
+
+| tier | what it means |
+|---|---|
+| **A** | an identifier (UEI, CAGE, EIN, declared parent UEI), or a human ruling. The only grade a dollar may be keyed on without corroboration |
+| **B** | a strong name method with an independent corroborator, or inheritance from a tier-A parent |
+| **C** | a weak method — containment, token subset — held as a candidate, not published as a fact |
+| **X** | **refused.** A negative ruling. Never read as a confirmation |
+
+**A tier is INHERITED from the source row, never assigned by the consumer.** The exactness of the KEY says nothing about the correctness of the LINK: 873 of 1,104 EIN rows in the ledger sit on 52 entities carrying five or more EINs each, and 821 are tier B via `need_v6`, which is 6.5% accurate and never publishes alone. [from the record — `START_HERE.md`, defect class 1]
+
+## M4 · What is **not** in it, and why
+
+**No row was withheld from this delivery.** Every row that passed the collection's own inclusion test is in the spreadsheet. [measured — `dist/customer/MANIFEST.csv`, `rows_withheld = 0`]
+
+The row gate is `code/cedar_publication.row_ok`, applied identically by every publisher: a row is withheld if `publishable` is set to anything outside `{Y, y, 1, true, TRUE, blank}`, or if `source_terms_status` is outside `{SILENT, TERMS_STATED_NO_REUSE_RESTRICTION, blank}`. **A blank gate column means the gate was never evaluated for that row, not that it failed.**
+
+Two families are refused as **COLUMNS** rather than as rows, by `cedar_publication.publishable_columns`, because the row is ours and the field is not: the proprietary identifiers (`casino_city_id` — Casino City Press; the D-U-N-S family — Dun & Bradstreet), and personal data held apart from a public role (`owner_name_raw`, `email`, `phone`, `home_address`, `personal_email`, `ssn`, `tin`, `date_of_birth`, `officer_name`, `contact_name`).
+
+**The personal-data family became a column drop on 2026-09-02, and the change is worth understanding.** Until then it was a row gate only, and measured against the live tree that published **5 of the 587 rows** of `bia_tribal_leaders_directory.csv` — every row carrying a phone or an email was withheld whole — *and shipped the `phone` and `email` headers anyway on the five survivors*. Both halves of that were wrong. A tribal leader's name and office is a PUBLIC ROLE and belongs in the dataset; the phone number is the thing that must not travel. Dropping the field keeps 587 rows and publishes no contact data, where the row gate kept 5 rows and still advertised two contact columns. `row_ok` keeps its check as a **backstop**, for a personal field arriving under a name the list does not yet know. [from the record — the docstring of `cedar_publication.publishable_columns`, 2026-09-02]
+
+### Known gaps — every line in `docs/WHAT_IS_MISSING.md` that names this dataset or its flagship
+
+- **L74** *(under “READ THIS FIRST — the sample is a hand-curated column list, and that is where most of the loss happens”)* — - **`subcontracting` shows no `description`.** Populated on **76,813 of
+- **L242** *(under “`_entity_layer` — `cedar_identity_register.csv`, 1,555 rows, 6 columns shown”)* — is (`_entity_layer`, `native-owned-businesses`, `subcontracting`).
+- **L675** *(under “`subcontracting` — `subawards.csv`, 76,859 rows”)* — ## `subcontracting` — `subawards.csv`, 76,859 rows
+- **L747** *(under “THE SHORT LIST — what this week can fix without a single download”)* — | 5 | `subcontracting` | add `description`, `prime_award_amount`; swap tribe handle → `cedar_uid` | 76,813 / 73,057 / 33,503 |
+
+### Open issues — every line in `docs/KNOWN_ISSUES.md` that names this dataset or its flagship
+
+- **L164** *(under “A5 [RESOLVED 2026-09-02 — see note at end] · S1 · The arbiter document of last resort had gone stale in 6 of 14 rows”)* — | `subawards.csv` | 63,548 | **72,837** |
+- **L516** *(under “C2 · S1 · `subawards.csv` — 10,770 duplicate rows, same shape suspected, unproven”)* — ## C2 · S1 · `subawards.csv` — 10,770 duplicate rows, same shape suspected, unproven
+- **L523** *(under “C2 · S1 · `subawards.csv` — 10,770 duplicate rows, same shape suspected, unproven”)* — over-stated by an unmeasured amount. **Blocks `subcontracting` and `funding`.**
+- **L1451** *(under “The data side, adjacent and NOT the same defect”)* — `subawards.csv`, `compact_structured_terms.csv`, `compact_required_reports.csv`,
+- **L2110** *(under “M3 · CORRECTED · `subcontracting` is 97.27% linked, not 44.8%”)* — ## M3 · CORRECTED · `subcontracting` is 97.27% linked, not 44.8%
+- **L2112** *(under “M3 · CORRECTED · `subcontracting` is 97.27% linked, not 44.8%”)* — `cedar_uid` in `subawards.csv` is the **PRIME leg**: 39,567 of its 40,201
+- **L2120** *(under “M3 · CORRECTED · `subcontracting` is 97.27% linked, not 44.8%”)* — them / $98,041,089.48** on `data/clean/subawards.csv` by exact-UEI
+
+## M5 · The money rules — which columns may be summed
+
+Measured over the delivered file. **A sum printed here is the unfiltered arithmetic sum of the column and is NOT necessarily a figure a buyer may quote** — the fence below says which are and which are not.
+
+| column | rows populated | distinct values | sum (unfiltered) | min | max |
+|---|---:|---:|---:|---:|---:|
+| `prime_award_amount` | 86,007 | 17,533 | $16,518,182,158,970.31 | $-514,458,497.00 | $35,035,280,267.19 |
+| `subaward_amount` | 89,809 | 55,110 | $57,020,557,710.47 | $-24,530,372.00 | $4,501,612,694.00 |
+| `subaward_amount_real2025` | 86,352 | 57,727 | $67,761,377,946.46 | $-32,813,420.06 | $4,743,961,514.99 |
+| `subaward_entity_rollup__usd_as_prime_a` ⚠ **joined** | 36,020 | 100 | $26,496,699,783,572.80 | $0.00 | $1,740,005,674.45 |
+| `subaward_entity_rollup__usd_as_subawardee_b` ⚠ **joined** | 36,020 | 114 | $19,583,506,623,258.36 | $0.00 | $1,684,411,206.21 |
+| `subaward_entity_rollup__usd_both_sides` ⚠ **joined** | 36,020 | 66 | $1,806,176,548,444.73 | $0.00 | $544,639,166.45 |
+
+**⚠ A column carrying a folded-in table's stem prefix is that table's grain repeated onto flagship rows, and row-summing it multiplies.** `subaward_entity_rollup__usd_as_prime_a`, `subaward_entity_rollup__usd_as_subawardee_b`, `subaward_entity_rollup__usd_both_sides` came from a supporting table joined one-to-one onto the flagship; the figure belongs to the entity or award the supporting table keys on, not to the row it is printed on. Sum it once per that key, never down the column. This is the owner-grain trap that turns $176.74B into $6,535.96B — a 36.98× inflation — in `contractor_ranking.csv`. [from the record — `docs/MONEY_TOTALLING_RULES.md`, block `GRAIN-WS5`]
+
+**Which of these columns are a PARENT's figure printed on a CHILD's row — measured, not asserted.** A column appears below only where its value is *constant within* the key named, which is proof it belongs to that key and not to the row. The right-hand column is what it totals once per key, and the multiple is what row-summing costs you.
+
+| column | belongs to | row-summed | once per that key | row-summing inflates by |
+|---|---|---:|---:|---:|
+| `subaward_entity_rollup__usd_as_prime_a` | `cedar_uid` (123 keys) | $26,496,699,783,572.80 | $7,943,989,328.24 | 3335.44× |
+| `subaward_entity_rollup__usd_as_subawardee_b` | `cedar_uid` (123 keys) | $19,583,506,623,258.36 | $7,000,813,664.93 | 2797.32× |
+| `subaward_entity_rollup__usd_both_sides` | `cedar_uid` (123 keys) | $1,806,176,548,444.73 | $1,231,925,611.55 | 1466.14× |
+
+**The once-per-key figure is not automatically the figure to publish either.** It is the arithmetic that removes the repetition, nothing more; whether that total is meaningful is the fence's question, not this table's. A column absent from this table is *not* thereby declared summable — it is only declared not to be constant within any key this file carries.
+
+### The fence, quoted verbatim from `docs/MONEY_TOTALLING_RULES.md`
+
+That document is authoritative on which columns may be summed. It is **quoted here, never re-derived** — re-deriving a totalling rule from the data is precisely the error it exists to prevent.
+
+| table | additive measure | sum it at | what double-counts |
+|---|---|---|---|
+| `subawards.csv` | `subaward_amount` | **only** rows with `duplicate_status == 'primary'` AND `subaward_exceeds_prime_flag != 'yes'` | summing past the flag; and adding subawards to prime obligations — **a subaward is a slice of a prime award already counted in `prime_contracts.csv`** |
+
+Marked blocks in that document that name `subawards.csv`: `<!-- BEGIN GAMING-TOTAL -->`, `<!-- BEGIN GEO -->`, `<!-- BEGIN GRAIN-WS4 -->`, `<!-- BEGIN SUBAWARD-FUNDING -->`.
+
+### The overstatement, measured from the delivered file
+
+Summing `subaward_amount` over all 89,809 delivered rows gives **$57,020,557,710.47**. **That figure must never be quoted.** Applying the fence — `duplicate_status = 'primary'` AND `subaward_exceeds_prime_flag <> 'yes'` — leaves 69,921 rows and **$34,906,694,737.65**. The rule removes $22,113,862,972.82.
+
+**State the denominator, every time.** An overstatement is measured against the truth, so the number to quote is **63.4%** — summing unfiltered lands you that far above the correct total. The share-of-the-inflated-total figure is a different and much less alarming sentence about the same error, and is not what a warning is for. [measured 2026-09-02 from `dist/customer/subcontracting.csv`]
+
+And the corrected total is **still not additive with prime contracting**. A subaward is a slice of a prime award Cedar already publishes. Federal dollars obligated = primes; subawards say where those dollars went next.
+
+### Time span, measured
+
+| year column | min | max | rows with no parseable year |
+|---|---:|---:|---:|
+| `fiscal_year` | 2001 | 2026 | 0 |
+
+**Read a trend against the reporting regime, not as behaviour.** `docs/ASSUMPTIONS_AND_LIMITATIONS.md` registers the breaks; a rise that begins at a rule change is the rule operating.
+
+## M6 · Known limits, stated plainly
+
+**Readiness: READY.** [measured — `docs/DATASET_READINESS.md`, regenerated by `py -3 code/518_dataset_readiness.py`]
+
+| tables | grain | keys | duplicates | agg-unsafe | rebuild |
+|---|---|---|---|---|---|
+| 3 | 3/3 | 3/3 | clean | 0 | declared  |
+
+The twelve-point contract a dataset is held to — grain declared and validated; keys and cardinality measured, not guessed; duplicates removed or the distinguishing dimension declared; entity attachment where the subject is an entity; every harvested row in a named disposition bucket; unresolved identity conflicts never shipping as definite facts; no double-counting path; one documented rebuild that does not destroy later enrichment; an update runbook another session can execute from the document alone; regression and semantic-diff gates over the outputs; column hygiene; and an inclusion basis on every row.
+
+**1 column is blank on every delivered row** and is kept deliberately. Dropping them would make the schema depend on which rows shipped, and a buyer diffing two deliveries would watch columns appear and vanish. Sparsity is a coverage fact. They are named in the codebook.
+
+**Do not sell past the evidence.** Where this paper states a figure it was measured on the date stamped beside it, from the file named beside it. Where it states a decision it names who made it. Anything not stated here is not known.
+
+## M8 · Figures that have circulated in more than one value
+
+Each row below was re-measured from the delivered file just now. The superseded values are the ones this project has actually watched drift; where one still appears in this paper's own hand-written body it is named, and **the measured figure is the one that is right**.
+
+| figure | measured today | superseded values | still in this paper's prose? |
+|---|---:|---|---|
+| rows in the delivered file | **89,809** | 76,859, 76859 | ⚠ **yes** — 76,859, 76859 |
+| how far a row-summed `subaward_amount` lands above the fenced total | **63.4%** | 82.9%, 86.9%, 45.3% | ⚠ **yes** — 82.9%, 86.9%, 45.3% |
+| the unfiltered `subaward_amount` total | **$57,020,557,710.47** | $47,301,660,819.78, $45.62B, $47.30B | ⚠ **yes** — $47,301,660,819.78, $45.62B |
+| the fenced `subaward_amount` total | **$34,906,694,737.65** | $25,864,997,128.19, $24.41B, $25.86B | ⚠ **yes** — $25,864,997,128.19 |
+
+**Where the prose above and this appendix disagree, this appendix is right.** It was measured from `dist/customer/subcontracting.csv` on 2026-09-02; the prose was written against an earlier state of the same table. The prose is left standing rather than silently corrected, because a superseded figure that is *labelled* is recoverable and one that has been overwritten is not — and because the reasoning around it is usually still sound even when the number under it has moved.
+
+## M7 · Fingerprint — what makes this paper stale
+
+`verify` re-measures the four values below against `dist/customer/subcontracting.csv` and **exits 1 if any has moved**. A methodology paper is stale the moment its dataset is rebuilt, and a stale paper that cannot say so is worse than no paper.
+
+```json
+{
+  "dataset": "subcontracting",
+  "file": "dist/customer/subcontracting.csv",
+  "bytes": 120670845,
+  "rows": 89809,
+  "columns": 90,
+  "header_sha256": "707b8b05d0080ce8330b69cd79ad9274030c6cf8f90b4c45d96c513bcb975274",
+  "measured": "2026-09-02"
+}
+```
+
+Cross-check against `dist/customer/MANIFEST.csv`, which `code/1137_customer_dataset_combine.py` wrote at build time: it records **89809 rows × 90 columns**. The two agree.
+
+<!-- END GENERATED:MEASURED -->

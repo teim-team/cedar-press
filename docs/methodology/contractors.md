@@ -1,5 +1,20 @@
-# Methodology — Native Federal Prime Contracting
+# Methodology — Federal Prime Contracting
 
+<!-- BEGIN GENERATED:IDENTITY -->
+
+**`contractors` — Federal Prime Contracting.** Delivered as `dist/customer/contractors.csv`: **1,217,768 rows × 82 columns, 1,606.5 MB**, built from the flagship table `data/clean/prime_contracts.csv`. Shelf `pro`; sold through **Cedar Press**; on the Cedar Press storefront. Readiness **READY**. [measured 2026-09-02 from the delivered file]
+
+> **This block and Appendix M at the foot of this paper are GENERATED** by `code/1143_methodology_papers.py` from the delivered file itself, on every build — the same reason the codebooks are generated. Do not hand-edit either; the next build overwrites them.
+>
+> Everything between `<!-- BEGIN EDITORIAL:contractors -->` and `<!-- END EDITORIAL:contractors -->` is **hand-written and preserved byte-for-byte** across rebuilds. Put prose there and nowhere else.
+>
+> This paper is **not** the codebook. `dist/customer/contractors__CODEBOOK.md` carries the grain, the folded-in tables and the per-column fill rates, and `__NOTES.txt` carries the same for a person. This paper says how the dataset came to exist and why you should believe it.
+>
+> Generated 2026-09-02. `py -3 code/1143_methodology_papers.py verify` **fails** if the delivered file has moved since — see §M7.
+
+<!-- END GENERATED:IDENTITY -->
+
+<!-- BEGIN EDITORIAL:contractors -->
 **`contractors`. `data/clean/prime_contracts.csv`, 1,217,768 rows,
 $310,005,258,660.76 in obligations, FY2000–FY2026.** [measured 2026-09-02]
 
@@ -755,3 +770,210 @@ Ordered by how much damage acting on them would do.
 **$140,003,836,181.83 / 57.20%**; and every SAM figure in
 `docs/SAM_EXTRACTION_PLAN.md`'s 2026-08-26 section reproduced to the row and
 the cent.
+<!-- END EDITORIAL:contractors -->
+
+<!-- BEGIN GENERATED:MEASURED -->
+
+---
+
+# Appendix M — measured from the delivered file
+
+*Generated 2026-09-02 by `code/1143_methodology_papers.py` from `dist/customer/contractors.csv`, read whole with duckdb and never sampled. Not from `data/clean/`, not from a build log, not from `MANIFEST.csv`. Where this appendix and a document disagree, **the delivered file is right** and `verify` prints the disagreement rather than smoothing it over.*
+
+*Grain, folded-in tables and per-column fill rates are in `dist/customer/contractors__CODEBOOK.md` and are deliberately not repeated here.*
+
+## M1 · Sources, as the delivered rows themselves record them
+
+**`source_file`** — 1,217,768 of 1,217,768 rows populated, 20 distinct values:
+
+| value | rows |
+|---|---:|
+| `master prime file.dta` | 376,766 |
+| `FY2026_All_Contracts_Full_20260706.zip` | 61,813 |
+| `FY2024_All_Contracts_Full_20260706.zip` | 53,056 |
+| `FY2025_All_Contracts_Full_20260706.zip` | 48,879 |
+| `FY2011_All_Contracts_Full_20260806.zip` | 46,962 |
+| `FY2010_All_Contracts_Full_20260806.zip` | 45,749 |
+| `FY2023_All_Contracts_Full_20260706.zip` | 45,747 |
+| `FY2020_All_Contracts_Full_20260706.zip` | 45,713 |
+| `FY2022_All_Contracts_Full_20260706.zip` | 45,509 |
+| `FY2021_All_Contracts_Full_20260706.zip` | 44,127 |
+| `FY2019_All_Contracts_Full_20260706.zip` | 43,794 |
+| `FY2009_All_Contracts_Full_20260806.zip` | 43,359 |
+| `FY2018_All_Contracts_Full_20260706.zip` | 42,409 |
+| `FY2012_All_Contracts_Full_20260806.zip` | 42,322 |
+| `FY2017_All_Contracts_Full_20260706.zip` | 42,196 |
+| `FY2008_All_Contracts_Full_20260806.zip` | 41,527 |
+| `FY2016_All_Contracts_Full_20260806.zip` | 37,812 |
+| `FY2015_All_Contracts_Full_20260806.zip` | 37,309 |
+| `FY2013_All_Contracts_Full_20260806.zip` | 36,412 |
+| `FY2014_All_Contracts_Full_20260806.zip` | 36,307 |
+
+### The terms rulings that bind this dataset
+
+Quoted from `docs/PUBLICATION_POLICY.md`, which holds the rulings; this paper does not restate them from memory.
+
+- **Owner ruling, 2026-09-02** (`<!-- BEGIN TERMS-OWNER-RULING-2026-09-02 -->`): *"So tribal websites, I actually don't care if they say it does scrape. Because if it's publicly available and you can scrape it, scrape it."* A tribal entity's own public pages may be harvested regardless of a terms statement. `source_terms_status = TERMS_STATED_RESTRICTIVE` on a Native entity's own site is now **a recorded observation, not a gate**.
+- **Four things that ruling does NOT touch, and none is a terms question:** (1) technical access controls — nothing login-gated, no admin or staging paths, no exploiting a misconfiguration; (2) a natural person's data held apart from their public role — home address, personal email or phone, DOB, SSN/TIN; (3) non-tribal licensors — EMMA/MSRB bars redistribution of its output "sold or free of charge" and names "any manual process", with CUSIP Global Services as a second licensor; (4) proprietary identifiers — Casino City, D-U-N-S — held internally, never shipped.
+- **A terms restriction is scoped to the SOURCE that stated it, not to the nation** (`<!-- BEGIN TERMS-SCOPE -->`), and it does not bind a third party's filing of the same fact.
+
+## M2 · How the rows were built — the pipeline, in order
+
+**One documented rebuild:** `py -3 code/build.py run contractors --execute`. `py -3 code/build.py plan contractors` prints the ordering below live; it is reproduced here so the paper stands alone.
+
+The collection holds **11 tables**. Those with a named build stage, flagship first:
+
+| table | rebuilt by | then enriched by (must run LAST) | status |
+|---|---|---|---|
+| `prime_contracts.csv` **(flagship)** | `40_build_prime_contracts.py`, `871_promote_geo_keys_contracts.py` | `1075_fix_old_harbor_attribution.py`, `1076_clear_self_parent_piid.py`, `1079_quarantine_method_exposure.py`, `1085_prime_psc_desc_repull.py`, `207_normalize_extent_competed.py`, `429_apply_asof_ownership_status.py`, `430_restore_prime_transaction_key.py`, `950_promote_contract_attributes.py` | shippable |
+| `fpds_uei_edges.csv` | `13_build_fpds_hierarchy.py` | `26_fix_sanity_failures.py` | shippable |
+| `prime_contracts_archive_backfill.csv` | `114_pull_prime_archive.py` | `430_restore_prime_transaction_key.py` | shippable |
+| `prime_contracts_entity_year.csv` | `40_build_prime_contracts.py` | `131_merge_archive_backfill.py`, `428_rebuild_prime_entity_year.py` | shippable |
+
+**A full rebuild and an in-place enricher on one file need an ordering, and the enricher must run LAST.** A `.bak_*_pre<script>` file sitting beside a table is the signal that an enricher has touched it since the last build. This has cost this project four reverts of one file in a single day.
+
+The delivered spreadsheet is then assembled by `code/1137_customer_dataset_combine.py`, which folds supporting tables onto the flagship **only where the measured cardinality on the shared key is one**, reverts any join that moved the row count, and prefixes every joined column with its source table's stem. One-to-many tables contribute a count column instead of rows, so a money total cannot be multiplied by a join.
+
+## M3 · How entities were attributed
+
+Cedar keys every dataset to one identity layer. `cedar_uid` is permanent and never reused; the human-readable handle retires when an entity is reclassified, so **join on `cedar_uid`, never on the handle**. A compound handle is canonical, not broken — stripping a suffix to make a join work turns joinable rows into unjoinable ones while looking like a normalisation.
+
+**Entity attachment in the delivered file:**
+
+| key column | rows carrying one | distinct values | coverage |
+|---|---:|---:|---:|
+| `cedar_uid` | 791,617 | 526 | 65.0% |
+| `tribe_id` | 791,617 | 526 | 65.0% |
+
+**An unkeyed row is often the right answer, not a defect.** ADR-010 separates *"we could not identify the entity"* — a defect — from *"there is no single entity to identify"* — the correct representation. Coverage is measured against the *resolvable* denominator, not the row count.
+
+### What `attribution_method` means **in this dataset**
+
+`docs/schema/attribution_method_vocabulary.json`, declared 2026-09-02: *"`attribution_method` is three different columns sharing a name — a join method, an evidence provenance, and a name-match algorithm. Each table is gated against its OWN vocabulary."* Reading one table's sense into another is how a containment match came to key a dollar.
+
+A JOIN METHOD. The terms name WHICH IDENTIFIER carried the link - `uei_exact`, `cage_exact`, `parent_uei`, the two `ladder_*` adjudications and `ruling_applied` - and `unattributed` is a real value, not a blank. It says nothing about how strong the evidence was; that is `confidence_tier`, and the two are independent. Reading an exact key as an exact link is defect class 1 in `AGENTS.md`.
+
+**And a RULED METHOD IS NOT A POSITIVE RULING.** `attribution_method` says WHO decided; `confidence_tier` says WHAT was decided. All 317 `elijah_ruling` EIN rows in the ledger are tier **X** — *negative* — and a script that read "the method is in the RULED set" as "the answer was yes" published 317 owner *exclusions* as confident attributions. Standing detector: `py -3 code/293_lint_bug_classes.py`. [from the record — `START_HERE.md`, defect class 1b]
+
+### Every identity, tier and method column, measured
+
+- **`attribution_method`** — 8 distinct values: `uei_exact` 707,762 · `unattributed` 426,247 · `parent_uei` 41,841 · `cage_exact` 30,445 · `ruling_applied` 6,365 · `ladder_1122` 3,771 · `ladder_1117` 1,210 · `propagated_from_agent_ruling` 127
+- **`confidence_tier`** — 3 distinct values: `A` 586,225 · `C` 430,513 · `B` 201,030
+- **`geo_key_tier`** — 2 distinct values: `derived_place_modal` 963,727 · `exact_award_summary` 247,987 · `(blank)` 6,054
+- **`identifier_ruling_method`** — 14 distinct values: `(blank)` 328,966 · `agent_research_two_leg` 225,614 · `cluster_v3` 213,107 · `elijah_ruling` 153,966 · `hand` 108,364 · `agent_research_one_leg` 74,565 · `subsidiary_lookup` 64,155 · `web_verified` 17,122 · `bgov_manual` 15,448 · `need_v6` 14,149 · `elijah_ruling_redirect` 1,516 · `cross_dataset_propagation:funding` 349 · `sam_namematch_2026_05_06` 284 · `cross_dataset_propagation:contracting` 141 · `institution_exact_name` 22
+- **`identifier_ruling_tier`** — 2 distinct values: `A` 586,185 · `(blank)` 328,966 · `B` 302,617
+
+### The frozen term list for this dataset's flagship
+
+A term listed in the registry is **FROZEN, not blessed**: the declaration records what shipped on 2026-09-02 so a NEW term cannot appear silently.
+
+`prime_contracts.csv` — 8 terms: `cage_exact` 30,445 · `ladder_1117` 1,210 · `ladder_1122` 3,771 · `parent_uei` 41,841 · `propagated_from_agent_ruling` 127 · `ruling_applied` 4,331 · `uei_exact` 707,762 · `unattributed` 428,408
+
+### The evidence tiers
+
+| tier | what it means |
+|---|---|
+| **A** | an identifier (UEI, CAGE, EIN, declared parent UEI), or a human ruling. The only grade a dollar may be keyed on without corroboration |
+| **B** | a strong name method with an independent corroborator, or inheritance from a tier-A parent |
+| **C** | a weak method — containment, token subset — held as a candidate, not published as a fact |
+| **X** | **refused.** A negative ruling. Never read as a confirmation |
+
+**A tier is INHERITED from the source row, never assigned by the consumer.** The exactness of the KEY says nothing about the correctness of the LINK: 873 of 1,104 EIN rows in the ledger sit on 52 entities carrying five or more EINs each, and 821 are tier B via `need_v6`, which is 6.5% accurate and never publishes alone. [from the record — `START_HERE.md`, defect class 1]
+
+## M4 · What is **not** in it, and why
+
+**No row was withheld from this delivery.** Every row that passed the collection's own inclusion test is in the spreadsheet. [measured — `dist/customer/MANIFEST.csv`, `rows_withheld = 0`]
+
+The row gate is `code/cedar_publication.row_ok`, applied identically by every publisher: a row is withheld if `publishable` is set to anything outside `{Y, y, 1, true, TRUE, blank}`, or if `source_terms_status` is outside `{SILENT, TERMS_STATED_NO_REUSE_RESTRICTION, blank}`. **A blank gate column means the gate was never evaluated for that row, not that it failed.**
+
+Two families are refused as **COLUMNS** rather than as rows, by `cedar_publication.publishable_columns`, because the row is ours and the field is not: the proprietary identifiers (`casino_city_id` — Casino City Press; the D-U-N-S family — Dun & Bradstreet), and personal data held apart from a public role (`owner_name_raw`, `email`, `phone`, `home_address`, `personal_email`, `ssn`, `tin`, `date_of_birth`, `officer_name`, `contact_name`).
+
+**The personal-data family became a column drop on 2026-09-02, and the change is worth understanding.** Until then it was a row gate only, and measured against the live tree that published **5 of the 587 rows** of `bia_tribal_leaders_directory.csv` — every row carrying a phone or an email was withheld whole — *and shipped the `phone` and `email` headers anyway on the five survivors*. Both halves of that were wrong. A tribal leader's name and office is a PUBLIC ROLE and belongs in the dataset; the phone number is the thing that must not travel. Dropping the field keeps 587 rows and publishes no contact data, where the row gate kept 5 rows and still advertised two contact columns. `row_ok` keeps its check as a **backstop**, for a personal field arriving under a name the list does not yet know. [from the record — the docstring of `cedar_publication.publishable_columns`, 2026-09-02]
+
+### Known gaps — every line in `docs/WHAT_IS_MISSING.md` that names this dataset or its flagship
+
+- **L29** *(under “What is missing”)* — re-pull for the other 79.6%. See `contractors` #2.
+- **L246** *(under “`contractors` — `prime_contracts.csv`, 1,217,768 rows”)* — ## `contractors` — `prime_contracts.csv`, 1,217,768 rows
+- **L249** *(under “`contractors` — `prime_contracts.csv`, 1,217,768 rows”)* — `prime_contracts.csv` has no NAICS column at all; it carries `sector`, the
+- **L750** *(under “THE SHORT LIST — what this week can fix without a single download”)* — | 8 | `contractors` | promote 6-digit `naics_code` + `action_date` from the archive extract | 904,282 rows already local |
+- **L753** *(under “THE SHORT LIST — what this week can fix without a single download”)* — | 11 | `contractors` | add `parent_contract_number` and `total_award_value` | both 100% filled |
+- **L755** *(under “THE SHORT LIST — what this week can fix without a single download”)* — | 13 | `contractors` | join local gapfill PSC + award description through the archive bridge | 247,987 rows reachable, 0 downloads |
+
+### Open issues — every line in `docs/KNOWN_ISSUES.md` that names this dataset or its flagship
+
+- **L188** *(under “A6 · S1 · The owner queue asked for a ruling on a defect that no longer exists”)* — - `prime_contracts.csv` — 1,217,768 rows, **0 literal duplicate rows**
+- **L401** *(under “B1 · S1 · `517_export_safety.py` still counts `RESOLVED` as a definite owner”)* — already knows better — `prime_contracts.csv` carries the three-way split, of
+- **L411** *(under “B2 · S1 · `contractor_ranking.csv` carries no ownership status at all”)* — the transaction. `269_build_contractor_ranking.py` reads `prime_contracts.csv`,
+- **L544** *(under “C4 · S2 · Nine grain rulings only a human can make”)* — `contractors`, `gaming`, `lobbying`, `natural-resources`, `deals`,
+- **L578** *(under “D. Where two of our own documents disagreed, and which was right”)* — | **D1** literal duplicates in `prime_contracts.csv` | `OWNER_DECISION_QUEUE` §4b said 80,778; `GRAIN_AUDIT` omitted the table entirely | 1,217,768 rows, **0 duplicates** | **GRAIN_AUDIT.** `430` had already repaired it. The queue was still asking for a de-...
+- **L656** *(under “prime_contracts has ZERO literal duplicate rows (the queue said 80,778)”)* — r=csv.reader(open('data/clean/prime_contracts.csv',encoding='utf-8-sig',newline='')); next(r); \
+- **L787** *(under “STANDARD — do not act on these punch-list lines (2026-09-02)”)* — The one to see before anything else — `prime_contracts.csv` carries the line
+- **L1283** *(under “`tier_A_ruled` FALLS 1,676 → 1,669, deliberately, and here are the seven”)* — `prime_contracts.csv`. Neither number is gate-verified, because the gate does
+
+## M5 · The money rules — which columns may be summed
+
+Measured over the delivered file. **A sum printed here is the unfiltered arithmetic sum of the column and is NOT necessarily a figure a buyer may quote** — the fence below says which are and which are not.
+
+| column | rows populated | distinct values | sum (unfiltered) | min | max |
+|---|---:|---:|---:|---:|---:|
+| `total_obligations` | 1,217,768 | 647,371 | $310,005,258,660.75 | $-256,038,905.34 | $665,858,925.00 |
+| `total_obligations_real2025` | 1,155,955 | 735,549 | $384,984,370,260.82 | $-299,708,132.92 | $921,627,323.55 |
+
+**Which of these columns are a PARENT's figure printed on a CHILD's row — measured, not asserted.** A column appears below only where its value is *constant within* the key named, which is proof it belongs to that key and not to the row. The right-hand column is what it totals once per key, and the multiple is what row-summing costs you.
+
+| column | belongs to | row-summed | once per that key | row-summing inflates by |
+|---|---|---:|---:|---:|
+| `total_obligations` | `contract_transaction_unique_key` (841,002 keys) | $310,005,258,660.75 | $226,214,484,630.69 | 1.37× |
+| `total_obligations_real2025` | `contract_transaction_unique_key` (779,189 keys) | $384,984,370,260.82 | $267,554,413,685.71 | 1.44× |
+
+**The once-per-key figure is not automatically the figure to publish either.** It is the arithmetic that removes the repetition, nothing more; whether that total is meaningful is the fence's question, not this table's. A column absent from this table is *not* thereby declared summable — it is only declared not to be constant within any key this file carries.
+
+### The fence, quoted verbatim from `docs/MONEY_TOTALLING_RULES.md`
+
+That document is authoritative on which columns may be summed. It is **quoted here, never re-derived** — re-deriving a totalling rule from the data is precisely the error it exists to prevent.
+
+| table | additive measure | sum it at | what double-counts |
+|---|---|---|---|
+| `prime_contracts.csv`, tier-A attributed `total_obligations` | $176,743,066,195.73 |
+
+Marked blocks in that document that name `prime_contracts.csv`: `<!-- BEGIN DEEPEN-SUBAWARD-DENOMINATOR -->`, `<!-- BEGIN GEO -->`, `<!-- BEGIN GRAIN-WS4 -->`, `<!-- BEGIN GRAIN-WS5 -->`, `<!-- BEGIN MONEY-RECON-1144 -->`, `<!-- BEGIN QUARANTINE -->`, `<!-- BEGIN SUBAWARD-FUNDING -->`.
+
+### Time span, measured
+
+| year column | min | max | rows with no parseable year |
+|---|---:|---:|---:|
+| `fiscal_year` | 2000 | 2026 | 0 |
+
+**Read a trend against the reporting regime, not as behaviour.** `docs/ASSUMPTIONS_AND_LIMITATIONS.md` registers the breaks; a rise that begins at a rule change is the rule operating.
+
+## M6 · Known limits, stated plainly
+
+**Readiness: READY.** [measured — `docs/DATASET_READINESS.md`, regenerated by `py -3 code/518_dataset_readiness.py`]
+
+| tables | grain | keys | duplicates | agg-unsafe | rebuild |
+|---|---|---|---|---|---|
+| 10 | 10/10 | 10/10 | clean | 0 | declared  |
+
+The twelve-point contract a dataset is held to — grain declared and validated; keys and cardinality measured, not guessed; duplicates removed or the distinguishing dimension declared; entity attachment where the subject is an entity; every harvested row in a named disposition bucket; unresolved identity conflicts never shipping as definite facts; no double-counting path; one documented rebuild that does not destroy later enrichment; an update runbook another session can execute from the document alone; regression and semantic-diff gates over the outputs; column hygiene; and an inclusion basis on every row.
+
+**Do not sell past the evidence.** Where this paper states a figure it was measured on the date stamped beside it, from the file named beside it. Where it states a decision it names who made it. Anything not stated here is not known.
+
+## M7 · Fingerprint — what makes this paper stale
+
+`verify` re-measures the four values below against `dist/customer/contractors.csv` and **exits 1 if any has moved**. A methodology paper is stale the moment its dataset is rebuilt, and a stale paper that cannot say so is worse than no paper.
+
+```json
+{
+  "dataset": "contractors",
+  "file": "dist/customer/contractors.csv",
+  "bytes": 1606526558,
+  "rows": 1217768,
+  "columns": 82,
+  "header_sha256": "b2bde09bdbeebd220604e10e36d035665522edf23fd56e9c8941bc83b2ec36bd",
+  "measured": "2026-09-02"
+}
+```
+
+Cross-check against `dist/customer/MANIFEST.csv`, which `code/1137_customer_dataset_combine.py` wrote at build time: it records **1217768 rows × 82 columns**. The two agree.
+
+<!-- END GENERATED:MEASURED -->

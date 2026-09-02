@@ -16,9 +16,26 @@ with it.
 Every Notice of Inventory Completion, Notice of Intent to Repatriate / Intended
 Repatriation, and Notice of Intended Disposition published in the Federal
 Register 1994–2026, cut out of the 156,452-document Dataset 9 corpus and parsed
-into structure. `docs/SUBSET_DATASETS.md` records that no structured public
+into structure. ~~`docs/SUBSET_DATASETS.md` records that no structured public
 database of this exists; that is still true. The National NAGPRA Program
-publishes a notice *search*, not the notices as data.
+publishes a notice *search*, not the notices as data.~~
+
+> **SUPERSEDED 2026-09-02 — and this sentence is why nobody looked for
+> twenty-seven days.** The "search" at `apps.cr.nps.gov/nagprapublic` is a
+> server-side DataTables grid, and its JSON endpoints return the Program's
+> register **as data**, with the Program's own `TotalMNI` and `TotalAFO` on
+> each notice. `code/1148_nagpra_nps_databases.py` harvested six of those
+> databases — **28,499 rows** — and the notice half is now the FIRST genuinely
+> independent second source in Cedar: **3,950 notices AGREE with this file's
+> `mni_total_stated`, 315 DISAGREE, and 49 FR document numbers are in the
+> Program's register and not in this file.** Neither value is overwritten and
+> no disagreement was resolved.
+> `docs/NAGPRA_NPS_DATABASES_BUILD_LOG_2026-09-02.md`; decisions in ADR-040.
+>
+> **The rest of this document is unaffected and still current.** Everything
+> below describes `nagpra_notices.csv`, which is parsed from the Federal
+> Register text and is a **different observer** from the NPS register, not a
+> worse copy of it. That is exactly what makes the comparison worth anything.
 
 **These records are about ancestral human remains and funerary objects.** A
 wrong tribe on a row is not a mismatch; it is a false claim about whose

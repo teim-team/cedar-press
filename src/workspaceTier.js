@@ -120,7 +120,7 @@ export const WORKSPACE_TIERS = Object.freeze({
     accessLabel: "Cedar Press, with the whole Press collection",
     features: Object.freeze([
       "Everything in Cedar Press",
-      "Every dataset Cedar Press carries, with full history and comparisons",
+      "Six more collections: contracting, subcontracting, resource revenues, individually owned Native businesses, enterprise structures and nonprofits",
       "Versioned releases with documented methods",
     ]),
     setupFeatures: Object.freeze([
@@ -146,7 +146,7 @@ export const WORKSPACE_TIERS = Object.freeze({
     accessLabel: "The curated collection; platform results unlock on upgrade",
     features: Object.freeze([
       "Every dataset in the collection, including the ones Cedar Press does not carry",
-      "Full history, bulk export and benchmarks",
+      "Bulk export and benchmarks across every collection at once",
       "The public data reporting and compliance routinely need: Census, BLS, BEA and more",
       "New economic development datasets as they release",
       "Cedar, grounded in the collection",

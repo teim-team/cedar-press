@@ -13,7 +13,10 @@
 
 # ---------------- product site ----------------
 node_modules
-dist
+# The web build's output. NOT `dist/`: the data workspace tracks 295 files
+# under that name, and vite empties its output directory before every build,
+# so the two cannot share one. See the note in vite.config.js.
+dist-site
 *.local
 .DS_Store
 
@@ -160,3 +163,8 @@ _profile_cache.json
 # The consolidated owner-decision queue is a curated document, not scratch -
 # its history shows what was asked and when it was answered.
 !review/OWNER_DECISION_QUEUE.md
+
+# Agent worktrees are private scratch, never part of the tree. Committed as a
+# gitlink with no .gitmodules entry they become an unusable pseudo-submodule
+# and `git submodule status` fails on a fresh checkout.
+.claude/worktrees/

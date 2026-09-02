@@ -13,26 +13,19 @@
  * Subscriber accounts are provisioned through Tribal Business News; there is
  * deliberately no self-serve account creation here, because an account exists
  * because an entitlement does.
+ *
+ * NO ACCOUNTS LIVE HERE
+ * They used to: two preview accounts with their passwords in plaintext, which
+ * every build shipped into the bundle and every visitor could read. A
+ * standalone deployment now takes its account from
+ * `features/grove/pressDemoGate.js`, which reads a salted digest out of
+ * build-time configuration and, given none, signs nobody in.
  */
 import { createContext } from "react";
 
 export const AuthContext = createContext(null);
 
 export const SESSION_KEY = "cedar-press-session";
-
-/** Accounts provisioned for preview access, one per press tier. */
-export const PREVIEW_ACCOUNTS = Object.freeze([
-  Object.freeze({
-    email: "press@cedarpress.ai",
-    password: "cedar-demo-2026",
-    workspace_tier: "press",
-  }),
-  Object.freeze({
-    email: "press-plus@cedarpress.ai",
-    password: "cedar-demo-2026",
-    workspace_tier: "press_pro",
-  }),
-]);
 
 /** The stored session, or null when there is none to read. */
 export function readSession() {

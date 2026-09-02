@@ -12,9 +12,17 @@
 // What belongs here is the short list of things whose failure means the site
 // is broken for everyone: the gate, sign-in, the overview and its sections,
 // a download, and sign-out. Anything narrower belongs in a unit test.
+import { readdir, readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+
 import { expect, test } from "@playwright/test";
 
-const ACCOUNT = { email: "press@cedarpress.ai", password: "cedar-demo-2026" };
+import { EMAIL, HASH, PASSWORD } from "./demoAccount.js";
+
+// The throwaway account playwright.config.js provisions into the build it
+// starts. It is not a credential and it opens nothing that is deployed
+// anywhere; see tests/demoAccount.js.
+const ACCOUNT = { email: EMAIL, password: PASSWORD };
 
 /** The pages behind the gate, by the route a reader reaches them at. */
 const SECTIONS = [
@@ -73,6 +81,18 @@ test.describe("the gate", () => {
     await page.locator(".cp-gate__form").getByRole("button", { name: "Log in" }).click();
     await expect(page.getByRole("alert")).toBeVisible();
     await expect(page.locator(".cp-split")).toBeVisible();
+  });
+
+  // The copy is load-bearing, not decoration. This build has no server, so
+  // the password is checked in the visitor's own browser against a digest
+  // they already downloaded — and the panel has to say so, or the gate is
+  // pretending to be access control.
+  test("the standalone sign-in says it is a demonstration gate", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("tab", { name: "Log in" }).click();
+    const panel = page.locator("#cp-panel-signin");
+    await expect(panel).toContainText(/not access control/i);
+    await expect(panel).toContainText(/your own browser/i);
   });
 
   test("a deep link while signed out lands on the gate", async ({ page }) => {
@@ -220,6 +240,35 @@ test.describe("sponsorship", () => {
       expect(box.height).toBeGreaterThan(60);
     });
   }
+});
+
+test.describe("the bundle", () => {
+  // The standalone gate is a demonstration gate and everything it reads is
+  // public. That is survivable only while what it reads is a DIGEST. Until
+  // 2026-09, this repository committed two preview accounts with their
+  // passwords in plaintext and every build shipped them — grep the deployed
+  // JavaScript and there they were.
+  //
+  // Read off disk rather than over HTTP so the check covers every emitted
+  // chunk, including the lazily loaded ones no page in this suite opens.
+  test("carries the digest and not the password", async () => {
+    const dir = fileURLToPath(new URL("../dist-site/", import.meta.url));
+    const assets = await readdir(dir, { recursive: true, withFileTypes: true });
+    const text = assets.filter(
+      (entry) => entry.isFile() && /\.(js|css|html|json|map)$/.test(entry.name),
+    );
+    expect(text.length, "nothing was built to check").toBeGreaterThan(0);
+
+    let digestSeen = false;
+    for (const entry of text) {
+      const body = await readFile(`${entry.parentPath}/${entry.name}`, "utf8");
+      expect(body, `${entry.name} ships the plaintext password`).not.toContain(PASSWORD);
+      if (body.includes(HASH)) digestSeen = true;
+    }
+    // Without this the test would pass just as happily against a build with
+    // no account configured at all, which proves nothing about the digest.
+    expect(digestSeen, "the configured digest is not in the build").toBe(true);
+  });
 });
 
 test.describe("crawlers", () => {
