@@ -205,6 +205,39 @@ TREATY_TARGETS = [
      "date."),
 ]
 
+#: THE THREE UNLINKED VOTES. Of the 25 roll calls carrying no `bill_id`,
+#: 22 are votes on reservations to a resolution of ratification - 17 Panama
+#: Canal Treaty, 4 Neutrality Treaty, 1 US-UK tax treaty [measured]. There is
+#: no bill, so there is no bill title: SOURCE_DOES_NOT_PUBLISH, a fact about
+#: the world. The other THREE name a numbered measure inside their own
+#: question text, so a title does exist at congress.gov: NOT_ACQUIRED.
+#:
+#: Their titles are fetched into a SEPARATE staging file and are deliberately
+#: NOT promoted. Promoting one means giving the vote a `bill_id`, which means
+#: adding a row to `native_bills.csv` (100-hconres-331, 100-sres-386 and six
+#: committee-funding resolutions are none of them in the 3,069) and rebuilding
+#: `n_rollcalls`, `native_bill_outcomes.csv` and both entity bridges. That is
+#: a decision for `14_build_bills_votes.py`, not an enrichment. The evidence
+#: is staged so the next pass starts at ON_DISK_NOT_PROMOTED instead of
+#: NOT_ACQUIRED.
+UNLINKED_TARGETS = [
+    ("H100-0888", 100, "hconres", "331",
+     "question: 'TO SUSPEND THE RULES AND ADOPT H CON RES 331, IROQUOIS "
+     "CONFEDERACY OF NATIONS...'"),
+    ("S100-0452", 100, "sres", "386",
+     "question: 'TO ADOPT S RES 386, SOVIET WITHDRAWAL FROM AFGHANISTAN'"),
+    ("S100-0417", 100, "sres", "306",
+     "question: 'TO ADOPT EN BLOC S RES 306, S RES 311, S RES 319, S RES 321, "
+     "S RES 322, AND S RES 325' - SIX measures on ONE roll call, so no single "
+     "bill title is the right answer for this row"),
+    ("S100-0417", 100, "sres", "311", "en bloc, 2 of 6"),
+    ("S100-0417", 100, "sres", "319", "en bloc, 3 of 6"),
+    ("S100-0417", 100, "sres", "321", "en bloc, 4 of 6"),
+    ("S100-0417", 100, "sres", "322", "en bloc, 5 of 6"),
+    ("S100-0417", 100, "sres", "325", "en bloc, 6 of 6"),
+]
+STAGE_UNLINKED = RAW / "congress_gov" / "1092_title_residue_unlinked.csv"
+
 STAGE_FIELDS = ["cedar_bill_id", "vote_id", "endpoint", "url", "http_status",
                 "identifier_evidence", "accepted", "title_verbatim",
                 "title_field", "reject_reason", "fetched_utc"]
@@ -358,7 +391,7 @@ def pull() -> int:
 
     deadline = time.time() + RUN_DEADLINE_S
     dates = rollcall_dates()
-    staged, n_req = [], 0
+    staged, unlinked, n_req = [], [], 0
     try:
         # --- /bill targets: unambiguous, one request each ------------------
         for bid, cong, btype, num, why in BILL_TARGETS:
@@ -465,18 +498,47 @@ def pull() -> int:
                 print(f"    {bid:22s} UNRESOLVED_AMBIGUOUS_IDENTIFIER: "
                       f"{len(survivors)} candidate(s) survived - REFUSING to "
                       f"pick one")
+
+        # --- the three unlinked votes: EVIDENCE ONLY, never promoted -------
+        print("\n    the 3 votes with no bill_id whose question names a "
+              "measure (staged, NOT promoted):")
+        for vid, cong, btype, num, why in UNLINKED_TARGETS:
+            body, status, shown = api_get(f"/bill/{cong}/{btype}/{num}", key,
+                                          deadline)
+            n_req += 1
+            stage_raw(f"unlinked_{cong}_{btype}_{num}",
+                      {"url": shown, "status": status, "body": body})
+            title = ""
+            if body:
+                title = ((body.get("bill") or {}).get("title") or "").strip()
+            unlinked.append({
+                "cedar_bill_id": "", "vote_id": vid,
+                "endpoint": f"bill/{cong}/{btype}/{num}", "url": shown,
+                "http_status": status,
+                "identifier_evidence": "named_in_question_text: " + why,
+                "accepted": "STAGED_NOT_PROMOTED" if title else "N",
+                "title_verbatim": title, "title_field": "bill.title",
+                "reject_reason": "" if title else f"no title ({status})",
+                "fetched_utc": datetime.now(timezone.utc).isoformat()})
+            print(f"      {vid} {btype} {num:5s} {status:10s} "
+                  f"{title[:64]!r}")
     finally:
         release_hostlock(f"1092 title residue: {n_req} GET(s), "
                          f"{TODAY}; host free")
 
     STAGE_CSV.parent.mkdir(parents=True, exist_ok=True)
     write_csv_atomic(STAGE_CSV, STAGE_FIELDS, staged)
+    write_csv_atomic(STAGE_UNLINKED, STAGE_FIELDS, unlinked)
     acc = [s for s in staged if s["accepted"] == "Y"]
     print(f"\n  requests {n_req}   staged rows {len(staged)}   "
           f"accepted titles {len(acc)} for "
           f"{len({s['cedar_bill_id'] for s in acc})} bill_id(s)")
     print(f"  raw       {STAGE_DIR}")
     print(f"  targets   {STAGE_CSV}")
+    print(f"  unlinked  {STAGE_UNLINKED}  "
+          f"({sum(1 for u in unlinked if u['accepted'] == 'STAGED_NOT_PROMOTED')}"
+          f" title(s), evidence only - nothing is written to a clean table "
+          f"from this file)")
     return 0
 
 
@@ -867,10 +929,71 @@ def selftest() -> int:
     return 0 if ok else 1
 
 
+# ---------------------------------------------------------------------------
+# CODEBOOK REFRESH. 890 owns `bill_title` and `bill_title_source`; its
+# `register_codebook` only ADDS a variable that is absent and never corrects
+# one that is present. Filling the eight titles moved the two numbers those
+# rows state, so leaving them is exactly the "numbers go stale in place"
+# failure AGENT_FIELD_GUIDE.md sec.6 names. This refreshes the two rows 1092
+# invalidated - text and pct_filled - and nothing else. Row-conserving.
+# ---------------------------------------------------------------------------
+CB_DATASET = "10_bills_votes"
+CB_TARGETS = ("bill_title", "bill_title_source")
+
+
+def codebook() -> int:
+    import importlib.util as _il
+    spec = _il.spec_from_file_location(
+        "_m890", HERE / "890_bill_votes_threshold_and_titles.py")
+    m890 = _il.module_from_spec(spec)
+    spec.loader.exec_module(m890)
+    _, votes = read_csv(CLEAN / "bill_votes.csv")
+    n = len(votes)
+    if not n:
+        print("  UNMEASURED: bill_votes.csv has zero rows")
+        return 1
+    want = {v: m890.NEW_VARIABLES[v][2] for v in CB_TARGETS}
+    filled = {v: sum(1 for r in votes if (r.get(v) or "").strip())
+              for v in CB_TARGETS}
+    print()
+    print("  1092 codebook   bill_votes.csv %d rows; %s"
+          % (n, {v: filled[v] for v in CB_TARGETS}))
+    rc = 0
+    for path in (CLEAN / "codebook" / (CB_DATASET + ".csv"),
+                 CLEAN / "codebook_master.csv"):
+        fields, rows = read_csv(path)
+        before = len(rows)
+        changed = 0
+        for r in rows:
+            if r.get("dataset") != CB_DATASET or r["variable"] not in want:
+                continue
+            new_desc = want[r["variable"]]
+            new_pct = "%.1f" % (100.0 * filled[r["variable"]] / n)
+            if r["description"] != new_desc or r["pct_filled"] != new_pct:
+                r["description"], r["pct_filled"] = new_desc, new_pct
+                r["n_rows"], r["generated"] = str(n), TODAY
+                changed += 1
+        if not changed:
+            print(f"    {path.name}: already current")
+            continue
+        bak = path.with_suffix(path.suffix + f".bak_{TODAY}_pre_{STEM}")
+        if not bak.exists():
+            bak.write_bytes(path.read_bytes())
+        write_csv_atomic(path, fields, rows)
+        after = measure_rows(path)
+        print(f"    {path.name}: {changed} row(s) refreshed; rows "
+              f"{before} -> {after} "
+              f"{'CONSERVED' if before == after else 'ROW LOSS'}")
+        if before != after:
+            rc = 1
+    return rc
+
+
 def main() -> int:
     mode = sys.argv[1] if len(sys.argv) > 1 else "measure"
     return {"measure": measure, "pull": pull, "write": write,
-            "verify": verify, "selftest": selftest}.get(mode, measure)()
+            "verify": verify, "selftest": selftest,
+            "codebook": codebook}.get(mode, measure)()
 
 
 if __name__ == "__main__":

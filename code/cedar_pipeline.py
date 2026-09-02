@@ -794,6 +794,38 @@ KNOWN_ORDERINGS = [
                           "threshold_derived_from_question",
                           "threshold_agrees_with_official",
                           "result_reconciles_with_threshold"]},
+    # Declared 2026-09-02 by the GRAIN-LEGISLATION workstream, at creation.
+    # `native_bills.csv` had NO declared ordering either, while carrying two
+    # in-place enrichers. 1092 finishes the title backfill (8 rows) and, more
+    # importantly, is the ONLY thing that has ever run the bill_scope ruler
+    # over the 168 rows a previous enricher left unruled.
+    {"rebuild": "14_build_bills_votes.py",
+     "enricher": "1092_bill_titles_residue_and_scope.py",
+     "file": "native_bills.csv",
+     "cost": "not yet paid - declared at creation. A 14 rebuild reverts the "
+             "8 titles that only exist because congress.gov was asked with "
+             "the CORRECT bill_type slug (`hres` not `hre`, `hjres` not "
+             "`hjr`) and on the /treaty endpoint, and it re-opens the "
+             "168-row hole in `bill_scope` that 14's own ruler leaves "
+             "whenever a title arrives after it ran. 1092 must run AFTER 14 "
+             "and AFTER 73 --titles, and 890 must run AFTER 1092 or the 8 "
+             "titles never reach bill_votes.bill_title",
+     "enricher_columns": ["title", "record_basis", "bill_scope",
+                          "bill_scope_basis"]},
+    {"rebuild": "14_build_bills_votes.py",
+     "enricher": "1093_bill_votes_majority_anomaly.py",
+     "file": "bill_votes.csv",
+     "cost": "not yet paid - declared at creation. 1093 runs LAST in this "
+             "chain (14 -> 73 -> 1092 -> 890 -> 1093) because it reads 890's "
+             "`threshold_required`, `threshold_agrees_with_official` and "
+             "`result_reconciles_with_threshold`. A rebuild drops the only "
+             "column that tells a buyer WHICH sixteen rows will look like "
+             "data-entry errors and why - `result_reconciles_with_threshold` "
+             "reads Y on all 351 testable rows and cannot distinguish them. "
+             "`code/1093 verify` exits 1 the moment 890's columns are absent, "
+             "rather than reporting a clean result it did not measure",
+     "enricher_columns": ["result_contradicts_simple_majority",
+                          "result_anomaly_class", "result_anomaly_basis"]},
     # WORKSTREAM INT-READY, 2026-09-02. Two enrichers declared at creation.
     {"rebuild": "23d_build_gaming_facilities.py",
      "enricher": "960_promote_gaming_facility_class_and_revenue_reach.py",

@@ -130,7 +130,10 @@ FIG_COLS = [
     "form", "filing_date", "accession", "source_url", "local_file", "source_md5",
     "source_quote",
     "derived_from_fee", "derivation_input_fee_usd", "derivation_stated_percentage",
-    "derivation_percentage_base", "derivation_arithmetic", "derivation_caveat",
+    "derivation_percentage_base", "derivation_percentage_source_accession",
+    "derivation_arithmetic", "derivation_caveat",
+    "is_first_filing_of_this_fact", "n_filings_stating_this_fact",
+    "restated_in_accessions", "restatements_agree",
     "extraction_pattern", "adjudication", "adjudication_note",
     "record_scope", "record_scope_basis", "built_by", "built_date",
 ]
@@ -803,14 +806,53 @@ def build():
             derivation_input_fee_usd=a.get("derivation_input_fee_usd", ""),
             derivation_stated_percentage=a.get("derivation_stated_percentage", ""),
             derivation_percentage_base=a.get("derivation_percentage_base", ""),
+            derivation_percentage_source_accession=a.get(
+                "derivation_percentage_source_accession", ""),
             derivation_arithmetic=a.get("derivation_arithmetic", ""),
             derivation_caveat=a.get("derivation_caveat", ""),
         ))
+    annotate_restatements(figs)
     write(OUT_FIG, FIG_COLS, figs)
     write(OUT_TERMS, TERM_COLS, terms)
     out(f"accepted figures : {len(figs)} -> {OUT_FIG}")
     out(f"accepted terms   : {len(terms)} -> {OUT_TERMS}")
     out(f"rejected/held    : {n_reject}")
+
+
+def annotate_restatements(figs):
+    """A 10-K restates the two prior fiscal years. That is not new evidence.
+
+    Mohegan's FY2017 Mohegan Sun net revenues of $1,079,920 thousand appear in
+    the FY2017, FY2018 AND FY2019 10-Ks. All three rows are kept - each is a
+    real disclosure in a real filing - but only the FIRST one is safe to total,
+    and the flag says which. Without it, summing this table by facility-year
+    triples that property.
+
+    Also MEASURES whether the restatements agree with the original, because a
+    restatement that disagrees is a finding and a restatement that agrees is the
+    only genuine internal corroboration this table has.
+    """
+    from collections import defaultdict
+    groups = defaultdict(list)
+    for r in figs:
+        key = (r["facility_id"] or r["facility_name_as_filed"], r["period_end"],
+               r["period_type"], r["figure_type"], r["filer_cik"])
+        groups[key].append(r)
+    for key, rows in groups.items():
+        rows.sort(key=lambda z: (z["filing_date"], z["accession"]))
+        vals = set()
+        for r in rows:
+            try:
+                vals.add(round(float(r["value_usd"]), 2))
+            except (TypeError, ValueError):
+                vals.add(None)
+        agree = "Y" if len(vals) == 1 else "N"
+        others = [r["accession"] for r in rows[1:]]
+        for i, r in enumerate(rows):
+            r["is_first_filing_of_this_fact"] = "Y" if i == 0 else "N"
+            r["n_filings_stating_this_fact"] = str(len(rows))
+            r["restated_in_accessions"] = "|".join(others) if i == 0 else rows[0]["accession"]
+            r["restatements_agree"] = agree if len(rows) > 1 else ""
 
 
 def write(path: Path, cols, rows):
@@ -852,6 +894,7 @@ VALID_FIGURE_TYPES = {
     "FACILITY_INCOME_FROM_OPERATIONS", "FACILITY_ADJUSTED_EBITDA",
     "DERIVED_FACILITY_NET_REVENUES_AS_DEFINED",
     "DERIVED_FACILITY_NET_INCOME_AS_DEFINED",
+    "DERIVED_FACILITY_GROSS_REVENUES_AS_DEFINED",
 }
 DERIVED_FIGURE_TYPES = {t for t in VALID_FIGURE_TYPES if t.startswith("DERIVED_")}
 
@@ -923,6 +966,30 @@ def verify():
             bad("V12_TERMS_CLASS", f"{r['term_id']} carries {r['assertion_class']!r}")
         if not r["source_quote"].strip():
             bad("V5_QUOTE_PRESENT", f"{r['term_id']} has no verbatim quote")
+
+    # V14 - the safe-to-total subset must be unique on its own key.
+    firsts = {}
+    for r in figs:
+        if r["is_first_filing_of_this_fact"] != "Y":
+            continue
+        k = (r["facility_id"] or r["facility_name_as_filed"], r["period_end"],
+             r["period_type"], r["figure_type"], r["filer_cik"])
+        if k in firsts:
+            bad("V14_FIRST_FILING_UNIQUE",
+                f"{r['disclosure_id']} and {firsts[k]} are both flagged "
+                f"is_first_filing_of_this_fact=Y for {k}")
+        firsts[k] = r["disclosure_id"]
+    if figs and not any(r["is_first_filing_of_this_fact"] for r in figs):
+        bad("V14_FIRST_FILING_UNIQUE", "is_first_filing_of_this_fact is unpopulated")
+
+    # V15 - a restatement that disagrees with the original is a finding, not noise.
+    disagree = sorted({r["disclosure_id"] for r in figs if r["restatements_agree"] == "N"})
+    out(f"V15_RESTATEMENTS: {sum(1 for r in figs if r['n_filings_stating_this_fact'] not in ('', '1'))} "
+        f"row(s) are one fact stated in more than one filing; "
+        f"{len(disagree)} disagree with the first filing of that fact.")
+    for i in disagree:
+        bad("V15_RESTATEMENT_DISAGREES",
+            f"{i} restates a fact with a different value and carries no adjudication note")
 
     # V13 - the double-count guard, measured rather than asserted.
     bounds = CLEAN / "gaming_revenue_bounds.csv"

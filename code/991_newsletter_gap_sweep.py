@@ -432,12 +432,26 @@ def load_targets():
     # a better site URL than the coverage table's first-seen one
     pref = {"government": 0, "organization": 1, "institution": 2, "corporate": 3,
             "consortium": 4, "tribal_council": 5}
+    # A WAYBACK URL MUST NEVER OUTRANK A LIVE ONE. Found 2026-09-02 by 990's
+    # new PROBEABLE_FRONTIER_NOT_CLOSED invariant: this ranking picked a
+    # `web.archive.org` capture as "best" for Fort Independence and Ute
+    # Mountain, the wayback guard below then skipped them as unprobeable, and
+    # both nations run a live site (winnedumahwinns.com, utemountaincasino.com)
+    # that no route had ever touched. The skip is for entities whose ONLY
+    # known URL is a snapshot; it was firing on entities whose FIRST-RANKED one
+    # was. Archive hosts are now sorted to the back of the preference order, so
+    # a live URL always wins and the skip means what it says.
+    def _is_archive(u):
+        h = urlparse(u).netloc.lower()
+        return (h.endswith("archive.org") or h.endswith("archive-it.org")
+                or h == "archive.org" or h == "archive-it.org")
+
     best = {}
     for m in csv.DictReader(WEBMAP.open(encoding="utf-8-sig")):
         st = m.get("http_status", "")
         if not (st.isdigit() and 200 <= int(st) < 400):
             continue
-        rank = pref.get(m["url_type"], 9)
+        rank = (1 if _is_archive(m["url"]) else 0, pref.get(m["url_type"], 9))
         cur = best.get(m["cedar_uid"])
         if cur is None or rank < cur[0]:
             best[m["cedar_uid"]] = (rank, m["url"])
@@ -451,7 +465,7 @@ def load_targets():
         if c["entity_class"] in OUT_OF_SCOPE_CLASSES:
             skipped.append((c, "deliberately_out_of_scope"))
             continue
-        url = (best.get(c["cedar_uid"], (9, ""))[1] or c["site_url"]).strip()
+        url = (best.get(c["cedar_uid"], ((9, 9), ""))[1] or c["site_url"]).strip()
         if not url.startswith("http"):
             skipped.append((c, "no_live_site"))
             continue
@@ -462,6 +476,19 @@ def load_targets():
         # about this entity's own publishing.
         if h.endswith("archive.org") or h.endswith("archive-it.org"):
             skipped.append((c, "site_url_is_a_wayback_snapshot"))
+            continue
+        # AND AN API IS NOT A SITE. Same finding, same day: once archive URLs
+        # were demoted, the next-ranked "website" for 45 Alaska Native
+        # Villages was the BIA Tribal Leaders Directory ArcGIS FeatureServer
+        # query that shard K had used to READ them. Requesting /wp-json/ or
+        # /feed/ against a federal API is nonsense and it is traffic nobody
+        # asked for. Skipped by name, so the reason lands in the state file
+        # instead of the requests landing on api hosts.
+        low = url.lower()
+        if (h == "arcgis.com" or h.endswith(".arcgis.com")
+                or "/rest/services/" in low or "/featureserver/" in low
+                or "/mapserver/" in low):
+            skipped.append((c, "site_url_is_a_third_party_api_endpoint"))
             continue
         if any(h == d or h.endswith("." + d) for d in RESTRICTIVE_HOSTS):
             skipped.append((c, "TERMS_STATED_RESTRICTIVE_host"))

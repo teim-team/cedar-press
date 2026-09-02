@@ -169,7 +169,8 @@ LETTER_COLS = [
     "letter_date", "letter_date_verbatim", "letter_date_basis",
     "index_listing_count", "also_listed_under_dates",
     "subject_as_published", "addressed_to", "addressed_to_basis",
-    "document_url", "document_format", "is_enclosure",
+    "document_url", "document_format", "record_kind", "is_enclosure",
+    "linked_pdf_count",
     "source_index_url", "source_index_http_status", "source_index_year",
     "harvest_method", "tier", "confidence", "fetched_date", "built_date",
     "built_by_script",
@@ -432,8 +433,13 @@ def parse_ihs_year_page(text, index_url, year):
                 "addressed_to_basis": addr_basis,
                 "document_url": url,
                 "document_format": "pdf",
+                "record_kind": ("enclosure"
+                                if (ENCLOSURE_LABEL.match(lab)
+                                    or ENCLOSURE_FILE.match(fname))
+                                else "letter"),
                 "is_enclosure": int(bool(ENCLOSURE_LABEL.match(lab))
                                     or bool(ENCLOSURE_FILE.match(fname))),
+                "linked_pdf_count": "",
                 "source_index_url": index_url,
                 "source_index_http_status": 200,
                 "source_index_year": year,
@@ -473,6 +479,7 @@ def parse_bia_news_page(text, url, agency="Bureau of Indian Affairs",
             verbatim = m.group(1)
             iso = iso_from_words(verbatim)
             basis = "<time> element text"
+    n_pdf = len({h for h in re.findall(r'href="([^"]+\.[Pp][Dd][Ff])"', text)})
     title = ""
     tm = TITLE_RE.search(text)
     if tm:
@@ -496,7 +503,15 @@ def parse_bia_news_page(text, url, agency="Bureau of Indian Affairs",
                               "publisher's own URL slug",
         "document_url": url,
         "document_format": "html",
+        # A page with no date of its own that links letter PDFs is the
+        # publisher's INDEX of letters, not a letter. Counting an index as a
+        # letter would inflate the total by one and hide the N letters it
+        # names, so it is typed as what it is and its link count is recorded
+        # as the measured, un-promoted remainder.
+        "record_kind": ("publisher_index_page"
+                        if (not iso and n_pdf > 0) else "letter"),
         "is_enclosure": 0,
+        "linked_pdf_count": n_pdf,
         "source_index_url": index_url or "https://www.bia.gov/sitemap.xml",
         "source_index_http_status": 200,
         "source_index_year": iso[:4] if iso else "",
@@ -1038,7 +1053,8 @@ def run_harvest(probe_only=False):
     write_csv(OUT_LETTERS, LETTER_COLS, letters)
     write_csv(OUT_COVERAGE, COVERAGE_COLS, coverage)
 
-    real = [r for r in letters if not r["is_enclosure"]]
+    real = [r for r in letters if r["record_kind"] == "letter"]
+    by_kind = Counter(r["record_kind"] for r in letters)
     by_agency = Counter(r["agency"] for r in real)
     by_year = Counter((r["letter_date"] or "unknown")[:4] for r in real)
     no_date = sum(1 for r in real if not r["letter_date"])
@@ -1047,8 +1063,8 @@ def run_harvest(probe_only=False):
         "cedar_before": {"consultation_events_dear_tribal_leader_letter": before},
         "cedar_after": {
             "dear_tribal_leader_letters_rows": len(letters),
-            "letters_excluding_enclosures": len(real),
-            "enclosures": len(letters) - len(real),
+            "letters": len(real),
+            "by_record_kind": dict(by_kind),
             "letters_with_no_date_the_publisher_stated": no_date,
             "by_agency": dict(by_agency),
             "by_year": dict(sorted(by_year.items())),
@@ -1059,7 +1075,7 @@ def run_harvest(probe_only=False):
     }, indent=1), encoding="utf-8")
 
     print(f"[1090] AFTER : {len(letters)} row(s) -> {OUT_LETTERS.name} "
-          f"({len(real)} letters + {len(letters) - len(real)} enclosures)")
+          f"{dict(by_kind)}")
     for a, n in by_agency.most_common():
         print(f"           {a:38s} {n:5d}")
     print(f"[1090] letters with no date the publisher stated: {no_date} "
@@ -1092,9 +1108,9 @@ def verify():
         for inv, msg in bad:
             print(f"FAIL {inv}: {msg}")
         return 1
-    real = [r for r in letters if r["is_enclosure"] != "1"]
-    print(f"VERIFY OK  {len(letters)} rows, {len(real)} letters, "
-          f"{len(letters) - len(real)} enclosures, "
+    real = [r for r in letters if r["record_kind"] == "letter"]
+    print(f"VERIFY OK  {len(letters)} rows, "
+          f"{dict(Counter(r['record_kind'] for r in letters))}, "
           f"{len(set(r['document_url'] for r in letters))} distinct URLs")
     print(f"           agencies: {dict(Counter(r['agency'] for r in real))}")
     print(f"           date range: "

@@ -1077,11 +1077,16 @@ def selftest():
     with open(OUT, encoding="utf-8", newline="") as fh:
         original = fh.read()
     cols = live_header(OUT, CANONICAL)
-    real_uid = ""
-    with open(OUT, encoding="utf-8-sig", newline="") as fh:
+    # 120 DISTINCT REGISTER UIDS. The first version of this selftest injected
+    # 120 rows carrying ONE uid, so `n_ent` was 1 and the bulk-stamp check
+    # could not fire -- a fixture that proved nothing while printing a result.
+    # That is the same defect class the check itself guards against.
+    reg_uids = []
+    with open(REGISTER, encoding="utf-8-sig", newline="") as fh:
         for r in csv.DictReader(fh):
-            real_uid = r["cedar_uid"]
-            break
+            if r.get("cedar_uid"):
+                reg_uids.append(r["cedar_uid"])
+    real_uid = reg_uids[0]
     fails = []
 
     def stub(**patch):
@@ -1107,9 +1112,21 @@ def selftest():
                                   as_of_date_basis="x"),
                              stub(as_of_date="2020-01-01",
                                   as_of_date_basis="x")]),
+        # An UNDECLARED uniform date over 5% of the register.
         ("bulk stamp",
-         [stub(fact_key="stamp", identifier_value="S%03d" % n,
-               as_of_date="2026-01-01", as_of_date_basis="x")
+         [stub(cedar_uid=reg_uids[n], fact_key="stamp",
+               identifier_value="S%03d" % n,
+               as_of_date="2020-01-01", as_of_date_basis="x")
+          for n in range(120)]),
+        # AND THE EXEMPTION MUST NOT BE A LOOPHOLE. A route may declare its
+        # date uniform-by-source, but only outside the staleness bar. A
+        # RECENT uniform date is the actual cheat this job was warned about,
+        # and declaring it must not buy silence.
+        ("bulk stamp",
+         [stub(cedar_uid=reg_uids[n], fact_key="stamp_recent",
+               identifier_value="R%03d" % n, uniform_source_date="Y",
+               as_of_date=TODAY, as_of_date_basis="x",
+               checked_date="")
           for n in range(120)]),
     ]
     try:

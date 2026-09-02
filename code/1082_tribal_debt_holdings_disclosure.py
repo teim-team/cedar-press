@@ -432,11 +432,20 @@ NEGATIVE = [
     "pueblo county", "pueblo west", "colville, wa", "city of colville",
     "city of sisseton", "town of catawba", "indian head",
     "national finance authority", "united nations",
+    # Conduit-issuer families. A state or county development authority lends
+    # its name to a corporate project; the project, not the authority, is the
+    # obligor - and it is not tribal. Found by reading the obligor list.
+    "jobs-economic development authority", "international paper",
     "indian ocean", "asian", "indiana university", "indiana state",
     "indiana finance", "indiana municipal", "indiana bond",
 ]
 
 _ws = re.compile(r"\s+")
+
+# A conduit issuer is not a tribal obligor. These must match as WHOLE WORDS.
+TRIBAL_WORD = re.compile(
+    r"\b(tribal|tribe|tribes|indian|nation|nations|band|pueblo|rancheria|"
+    r"native|chippewa|ojibwe|sioux|apache|cherokee|choctaw|creek|seminole)\b")
 
 
 def norm(s):
@@ -467,9 +476,15 @@ def classify_issuer(name):
             if sig in ("economic development authority", "development authority",
                        "gaming authority", "gaming corporation",
                        "gaming enterprise"):
-                if not any(t in n for t in ("tribal", "tribe", "indian",
-                                            "nation", "band", "pueblo",
-                                            "rancheria", "native")):
+                # WORD BOUNDARIES, not substrings. The first draft used
+                # plain containment and "nation" matched inside
+                # "INTERnationAL", so "South Carolina Jobs-Economic
+                # Development Authority, International Paper Co. Project,
+                # Series 2023A" was admitted as a tribal obligor. One row,
+                # caught by reading the obligor list rather than its count.
+                # This is the containment defect AGENTS.md names, in the
+                # guard written to prevent it.
+                if not TRIBAL_WORD.search(n):
                     continue
             return ("TRIBAL_OBLIGOR", name.strip(),
                     "explicit tribal signal %r in the issuer name as the fund "

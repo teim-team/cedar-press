@@ -67,6 +67,7 @@ from __future__ import annotations
 import csv
 import glob
 import gzip
+import html
 import json
 import os
 import re
@@ -142,11 +143,31 @@ R3_NOT_FREE_TEXT = {
 # the comparison and the removal is named here.
 PAGE_MARK = re.compile(r"(?i)\[\[\s*page\s+[^\]]{0,20}\]\]")
 LABEL = re.compile(r"^[a-z_]{3,24}:\s*")
+TAG = re.compile(r"<[^>]{0,400}>")
+# The cache is stored "with GPO markup intact" on purpose, so the comparison
+# has to see through it. Three normalisations, each named, each measured:
+#   1. HTML tags and entities  - `[email&#160;protected]` is one token, and an
+#      <a> wrapper inside a tribe list broke `land claim map 74` at 2010-31284
+#   2. GPO page markers        - `caddo indian [[Page 48721]] tribe`
+#   3. line-break hyphenation  - `Te- Moak`
+# NOTHING ELSE. Punctuation is deliberately NOT folded here: a `;` that the
+# parser turned into a `,` is a real departure from verbatim and is reported
+# as its own tier below rather than normalised away.
+HYPHEN_WRAP = re.compile(r"-\s+")
 
 
 def norm(s: str) -> str:
-    return re.sub(r"\s+", " ",
-                  PAGE_MARK.sub(" ", s or "")).strip().lower()
+    t = TAG.sub(" ", s or "")
+    t = html.unescape(t)
+    t = PAGE_MARK.sub(" ", t)
+    t = HYPHEN_WRAP.sub("-", t)
+    return re.sub(r"\s+", " ", t).strip().lower()
+
+
+def punct_fold(s: str) -> str:
+    """norm(), plus `;` and `,` treated as one mark. Used ONLY to separate a
+    parser punctuation change from a name the notice never printed."""
+    return re.sub(r"\s+", " ", re.sub(r"[;,]", ",", s)).strip()
 
 
 def load_texts():
@@ -286,13 +307,30 @@ def audit(quiet=False):
             continue
         r1_measured += 1
         if v not in t:
+            if punct_fold(v) in punct_fold(t):
+                tier = "punctuation_changed_by_the_parser"
+            elif re.sub(r"\s", "", v) in re.sub(r"\s", "", t):
+                # one space gained or lost where an HTML tag was removed.
+                tier = "whitespace_at_a_markup_boundary"
+            else:
+                tier = "ABSENT_FROM_THE_NOTICE"
             r1_text_fail.append((dn, r.get("party_name_verbatim", ""),
                                  r.get("relationship", ""),
-                                 r.get("resolve_method", "")))
+                                 r.get("resolve_method", ""), tier))
+    r1_hard = [x for x in r1_text_fail if x[4] == "ABSENT_FROM_THE_NOTICE"]
+    r1_punct = [x for x in r1_text_fail
+                if x[4] == "punctuation_changed_by_the_parser"]
+    r1_ws = [x for x in r1_text_fail
+             if x[4] == "whitespace_at_a_markup_boundary"]
     out["R1"] = {
         "bridge_rows_measured_against_own_full_text": r1_measured,
-        "rows_whose_verbatim_name_is_absent_from_that_notice": len(
-            r1_text_fail),
+        "rows_not_literally_verbatim_in_that_notice": len(r1_text_fail),
+        "of_those_only_a_parser_punctuation_change": len(r1_punct),
+        "of_those_only_whitespace_at_a_markup_boundary": len(r1_ws),
+        "whitespace_examples": [list(x) for x in r1_ws[:3]],
+        "rows_whose_verbatim_name_is_absent_from_that_notice": len(r1_hard),
+        "absent_examples": [list(x) for x in r1_hard[:10]],
+        "punctuation_examples": [list(x) for x in r1_punct[:3]],
         "rows_whose_verbatim_name_is_absent_from_its_own_span": len(
             r1_span_fail),
         "of_those_explained_by_the_600_char_span_cap": sum(
@@ -304,9 +342,9 @@ def audit(quiet=False):
                          "trail on a long consultation list. The full cached "
                          "Federal Register text is, and is what R1 tests.",
     }
-    if r1_text_fail:
-        problems.append(f"D1 {len(r1_text_fail)} bridge rows name a party "
-                        f"that is not in that notice's own text")
+    if r1_hard:
+        problems.append(f"D1 {len(r1_hard)} bridge rows name a party that is "
+                        f"not in that notice's own text at all")
 
     # geography can never be the basis: no resolve_method may name one
     geo = Counter(r.get("resolve_method", "").split(":")[0] for r in bridge)
@@ -317,6 +355,24 @@ def audit(quiet=False):
     out["R1"]["resolve_methods_naming_geography"] = geo_methods
     if geo_methods:
         problems.append(f"D1 resolve_method names geography: {geo_methods}")
+
+    # A party string can be verbatim in the notice and STILL not be a party:
+    # the Federal Register itself publishes drafting placeholders and contact
+    # furniture. Counted here rather than removed - the row is what the notice
+    # printed, and every one of them is unresolved, so none carries a tribe_id.
+    FURNITURE = re.compile(r"(?i)(https?://|@|\{|email|telephone|"
+                           r"fax|nagpra coordinator)")
+    furn = [r for r in bridge
+            if FURNITURE.search(r.get("party_name_verbatim", ""))]
+    out["R1"]["party_rows_that_are_federal_register_furniture"] = len(furn)
+    out["R1"]["furniture_rows_carrying_a_tribe_id"] = sum(
+        1 for r in furn if (r.get("tribe_id") or "").strip())
+    out["R1"]["furniture_examples"] = [
+        [r["document_number"], r.get("party_name_verbatim", "")[:110]]
+        for r in furn[:5]]
+    if any((r.get("tribe_id") or "").strip() for r in furn):
+        problems.append("D1 a Federal Register furniture string is keyed to "
+                        "a tribe_id")
 
     # ---- R2 ------------------------------------------------------------
     acols, aliases = read_csv(ALIASES)
@@ -360,8 +416,13 @@ def audit(quiet=False):
     out["R2"]["distinct_unresolved_party_names"] = len(party_docs)
     out["R2"]["clearing_three_notices"] = clears_notices
     out["R2"]["clearing_three_INDEPENDENT_notices"] = clears_families
-    out["R2"]["demoted_by_the_independence_test"] = (clears_notices
-                                                     - clears_families)
+    out["R2"]["demoted_across_the_three_notice_bar"] = (clears_notices
+                                                       - clears_families)
+    out["R2"]["aliases_that_lost_at_least_one_notice_to_the_test"] = sum(
+        1 for r in rows_out
+        if r["n_independent_notice_families"] < r["n_notices"])
+    out["R2"]["independence_test_is_inert"] = (
+        out["R2"]["aliases_that_lost_at_least_one_notice_to_the_test"] == 0)
 
     if nag_aliases:
         below = []
@@ -434,8 +495,14 @@ def audit(quiet=False):
         print("    -- R1  affiliations come from the notice's own text ------")
         print(f"       DENOMINATOR rows measured against their own cached "
               f"full text   {r1_measured:,}")
-        print(f"       party_name_verbatim ABSENT from that notice's text     "
-              f"       {len(r1_text_fail):,}")
+        print(f"       party_name_verbatim not LITERALLY verbatim in that "
+              f"notice     {len(r1_text_fail):,}")
+        print(f"         of those, only a parser punctuation change ( ; -> , )"
+              f"       {len(r1_punct):,}")
+        print(f"         of those, one space at an HTML-tag boundary          "
+              f"       {len(r1_ws):,}")
+        print(f"         of those, ABSENT FROM THE NOTICE ALTOGETHER          "
+              f"       {len(r1_hard):,}")
         print(f"       party_name_verbatim absent from its own source_span    "
               f"       {len(r1_span_fail):,}")
         print(f"         of those, explained by the 600-char span cap        "
@@ -444,8 +511,17 @@ def audit(quiet=False):
               f"       {out['R1']['of_those_NOT_explained_by_truncation']:,}")
         print(f"       resolve_method values naming geography: "
               f"{geo_methods or 'NONE'}")
-        for ex in r1_text_fail[:3]:
-            print(f"         example  {ex}")
+        print(f"       party rows that are FR furniture (url/email/"
+              f"placeholder)   "
+              f"{out['R1']['party_rows_that_are_federal_register_furniture']}"
+              f"   of which keyed to a tribe_id: "
+              f"{out['R1']['furniture_rows_carrying_a_tribe_id']}")
+        for ex in out["R1"]["furniture_examples"]:
+            print(f"         furniture {ex[0]}  {ex[1]!r}")
+        for ex in r1_hard[:5]:
+            print(f"         absent   {ex[0]}  {ex[1][:96]!r}  {ex[2]}")
+        for ex in r1_punct[:2]:
+            print(f"         punct    {ex[0]}  {ex[1][:96]!r}")
         print("    -- R2  an alias needs THREE INDEPENDENT notices ----------")
         print(f"       identity-layer alias rows                    "
               f"{len(aliases):,}")
@@ -460,9 +536,12 @@ def audit(quiet=False):
         print(f"       clearing 3 NOTICES                           "
               f"{clears_notices:,}")
         print(f"       clearing 3 INDEPENDENT notices               "
-              f"{clears_families:,}   "
-              f"(demoted by the independence test: "
-              f"{clears_notices - clears_families:,})")
+              f"{clears_families:,}")
+        print(f"       aliases that LOST a notice to the test       "
+              f"{out['R2']['aliases_that_lost_at_least_one_notice_to_the_test']:,}"
+              f"   (the test is not inert)")
+        print(f"       aliases demoted ACROSS the 3-notice bar      "
+              f"{clears_notices - clears_families:,}")
         print(f"       identity-layer aliases below the bar         "
               f"{out['R2']['nagpra_aliases_below_the_bar']}")
         print("    -- R3  no cultural detail beyond what is published -------")

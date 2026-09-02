@@ -1115,3 +1115,127 @@ a dataset's readiness and adds four tables (`native_owned_businesses.csv`
 `native_business_contracting_by_nation.csv` 18) with no declared grain or key.
 Filed in `review/OWNER_DECISION_QUEUE.md`.
 <!-- END ADR-018 -->
+
+<!-- BEGIN ADR-018 -->
+## ADR-018 — tribal debt: the registered-fund holdings seam, and one boundary crossed on purpose (workstream TRIBAL-DEBT, 2026-09-02)
+
+**Status:** accepted 2026-09-02. Declared before editing, per AGENTS.md
+*Parallel agents*. Build record: `docs/TRIBAL_DEBT_HOLDINGS_BUILD_LOG.md`.
+
+**What this workstream owns:** `code/1082_tribal_debt_holdings_disclosure.py`
+(claimed atomically via `1050 claim`), the new staged tables
+`data/staging/tribal_debt_{holdings,obligors,distress_events}.csv` and
+`data/staging/tribal_obligor_property_revenue.csv`, everything under
+`review/1082_*`, and the cache `data/raw/external/tribal_debt_1082/`.
+
+**Shared files touched, each by the sanctioned route only:**
+
+| file | how |
+|---|---|
+| `docs/MONEY_TOTALLING_RULES.md` | APPENDED inside a new `TRIBAL-DEBT` marked block. No other block read or written. The block's own prose deliberately avoids writing the literal marker syntax a second time, because two pairs with one name are one block to `574`'s preserver. |
+| `review/OWNER_DECISION_QUEUE.md` | APPENDED item **TD-1** (the MSRB EMMA licence decision), per the append-only convention in `START_HERE.md`. |
+| `docs/ARCHITECTURE_DECISIONS.md` | this block. |
+
+**Not touched:** `data/clean/` (nothing edited — the deals and gaming tables are
+staged against, never written), `code/62`, `512`, `517`, `518` (integrator's),
+and `code/1030_sec_edgar_native_transactions.py` (another workstream's; 1082
+READS its manifest and candidate index and writes nothing back).
+
+### The boundary crossed, and why
+
+`code/1080_sec_gaming_facility_revenue.py` was claimed on 2026-09-02 for public
+casino **MANAGERS'** SEC filings. It is still an unimplemented placeholder and
+its agent was killed by a session limit.
+
+1082 takes **per-property revenue from tribal OBLIGORS' own SEC filings** —
+Mohegan Tribal Gaming Authority, Seneca Gaming Corporation and their
+per-property subsidiary registrants. The decision, on the coordinator's
+instruction:
+
+* These are **not managers**. They are the borrowers, and they file with the SEC
+  *because of the debt* — a 144A note with registration rights turns the issuer
+  into a reporting company. The revenue disclosure is a downstream consequence
+  of the financing, which is this workstream's subject.
+* 1080 remains free to take the manager side (Boyd, Penn, Churchill Downs and
+  the rest). The seam is split by **who filed**, not by which dataset the number
+  lands in, which is the same rule
+  `docs/PUBLICATION_POLICY.md` (`TERMS-SCOPE`) uses for terms: *the distinction
+  is authorship*.
+* If 1080's agent returns, the CIK list in `REVENUE_CIKS` is the exact boundary:
+  those seven registrants are 1082's, everything else is 1080's.
+
+### One rule this build earns, and it is not about tribal debt
+
+**A mutation without an assertion is a claim, not a change.** Two `str.replace`
+patches silently no-opped on a whitespace mismatch while the patch script
+printed `patched` both times, and a code path that had never been installed was
+then debugged as though it were failing. Every subsequent patch in this build
+asserts its target text is present before replacing it. This is the same shape
+as the nine entries in `docs/AGENT_FIELD_GUIDE.md` section 3 — a step that
+reported on itself rather than on its effect — and it belongs on that list.
+<!-- END ADR-018 -->
+
+<!-- BEGIN ADR-019-QUARANTINE -->
+## ADR-019 — the ledger's RULING must reach the transaction tables (workstream QUARANTINE, 2026-09-02)
+
+**Status:** accepted 2026-09-02. Declared BEFORE editing, per AGENTS.md
+*Parallel agents*. Closes `review/1011_cross_dataset_findings.csv` **CDR-11**
+and **CDR-12**.
+
+**The decision.** `prime_contracts.attribution_method` records the JOIN — which
+identifier column matched — and nothing anywhere records the RULING, which is
+how that identifier came to be attached to a nation. So a `cluster_v3` guess
+whose own `tier_rationale` reads *"Algorithmic name clustering, unreviewed"* is
+byte-identical, to every consumer, to an owner ruling. **A column that records
+the join while hiding the ruling is the defect.** From this pass on, the
+identity ledger's method and tier travel with the transaction:
+
+    identifier_ruling_method / _tier / _quarantined / _basis / _review
+
+`attribution_method` is NOT changed. It is the correct answer to its own
+question and the evidence of which leg the join came down.
+
+**Files this workstream owns for the duration of the pass**
+
+| file | what is written | script |
+|---|---|---|
+| `data/clean/cedar_identifier_ledger_final.csv` | 3 new columns; `confidence_tier` → `X` and `tier_rationale` rewritten on withdrawn rows; `tribe_id`/`canonical_name` on repointed rows | `code/1079_quarantine_method_exposure.py` |
+| `data/clean/prime_contracts.csv` | **5 new columns**, appended right of the existing 70; `tribe_id`/`canonical_name`/`attribution_method`/`confidence_tier`/`attributed_flag`/`cedar_uid`/`owner_*` on withdrawn and repointed rows only | ” |
+| `data/clean/prime_contracts_archive_backfill.csv` · `_awards.csv` · `_published.csv` | the same withdrawals and repoints, no new columns | ” |
+| `data/clean/subawards.csv` | `prime_native_tribe_id` / `sub_native_tribe_id` and their tiers and uids on withdrawn and repointed rows only | ” |
+
+**Non-overlap.** ADR-016 (workstream PROMOTE) appended nine columns to
+`prime_contracts.csv` and ADR-015 appended thirteen `geo_*` columns; both
+passes are recorded as complete. This pass appends five more to the right of
+all of them and **reads no column either pass wrote**, so 950 and 871 remain
+idempotent after it. `40_build_prime_contracts.py` reverts all 27 promoted
+columns on a rebuild, so 1079 joins 207, 950 and 871 in the enrichers that must
+re-run after one; the `.bak_2026-09-02_pre_1079_quarantine_method_exposure`
+file beside each table is the signal.
+
+**Three sub-decisions, each of which could have gone the other way.**
+
+1. **A withdrawal is not an exclusion, and this pass mints no `exclusion_id`.**
+   `data/spine/cedar_exclusion_rulings.csv` is the owner's register — every
+   one of its 123 rows reads `ruled_by = Elijah Moreno` — and rule 8 says an
+   agent ruling may not carry the owner's authority. The withdrawal is
+   recorded as `confidence_tier = X`, which `40_build_prime_contracts.py`
+   line 82 already honours (`tier not in ("A","B")` never attributes) so it
+   survives a rebuild, plus a `tier_rationale` that names this script and
+   states, in the row itself, that the refusal is of THIS PAIRING and is not a
+   claim that the firm is non-Native.
+2. **`cross_dataset_propagation` is not accepted as corroboration.** It has
+   already carried `cluster_v3`'s output onto CAGE codes at the same hubs
+   (`Blue Steel Company` at Blue Lake, `Eagle Butte Cooperative Assn` at Native
+   Village of Eagle, `Government & Industrial Supply` at Barrow). Counting it
+   would let the defect corroborate itself — the evidence-lineage trap
+   `docs/ASSERTION_LAYER.md` names, where two sources agreeing are one source
+   twice.
+3. **The CAGE leg is measured and flagged but not adjudicated.** CDR-11 scoped
+   on UEI rows; the same three methods key 14,149 more prime rows through
+   `cage_exact` ($7.25B) and 41,055 through `parent_uei` ($0.49B). All of it is
+   now visible in the new columns and written to
+   `review/1079_owner_holds_2026-09-02.csv`; only the UEI leg and the CDR-12
+   North Wind / LBYD CAGE rows are repaired here. Adjudicating a population in
+   the same pass that discovered it is the mistake this repo keeps paying for.
+<!-- END ADR-019-QUARANTINE -->

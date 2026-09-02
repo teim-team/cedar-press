@@ -6,12 +6,16 @@
  },
  "cedar_after": {
   "dear_tribal_leader_letters_rows": 807,
-  "letters_excluding_enclosures": 598,
-  "enclosures": 209,
-  "letters_with_no_date_the_publisher_stated": 1,
+  "letters": 597,
+  "by_record_kind": {
+   "enclosure": 209,
+   "letter": 597,
+   "publisher_index_page": 1
+  },
+  "letters_with_no_date_the_publisher_stated": 0,
   "by_agency": {
    "Indian Health Service": 574,
-   "Bureau of Indian Affairs": 10,
+   "Bureau of Indian Affairs": 9,
    "Bureau of Indian Education": 14
   },
   "by_year": {
@@ -41,8 +45,7 @@
    "2023": 38,
    "2024": 49,
    "2025": 31,
-   "2026": 19,
-   "unkn": 1
+   "2026": 19
   }
  },
  "coverage": [
@@ -501,7 +504,7 @@
    "series": "BIE news: Dear Tribal Leader letters",
    "url": "https://www.bie.edu/sitemap.xml",
    "http_status": 200,
-   "response_bytes": 58130,
+   "response_bytes": 59495,
    "index_shards_total": 1,
    "index_shards_walked": 1,
    "letters_found": 14,
@@ -517,12 +520,12 @@
    "series": "agency DTLL series",
    "url": "https://www.doi.gov/sitemap.xml",
    "http_status": 200,
-   "response_bytes": 55505,
-   "index_shards_total": 3,
-   "index_shards_walked": 1,
+   "response_bytes": 489351,
+   "index_shards_total": 9,
+   "index_shards_walked": 4,
    "letters_found": 0,
    "coverage_status": "REPORTED_FLOOR_PARTIAL_INDEX",
-   "verdict": "0 DTLL URL(s) from 1 of 3 sitemap shard(s). UNMEASURED beyond those shards - this is NOT an absence and must never be read as one",
+   "verdict": "0 DTLL URL(s) from 4 of 9 sitemap shard(s). UNMEASURED beyond those shards - this is NOT an absence and must never be read as one",
    "probed_date": "2026-09-02",
    "probed_by_script": "code/1090_dtll_agency_harvest.py"
   },
@@ -624,76 +627,6 @@
    "bytes": 2027
   },
   {
-   "url": "https://www.bie.edu/news-article/dtll-2023-bie-special-education-policies-and-procedures-tribal-consultation",
-   "http_status": 200,
-   "bytes": 56417
-  },
-  {
-   "url": "https://www.bie.edu/news-article/dtll-bie-agency-plan-tribal-consultation",
-   "http_status": 200,
-   "bytes": 58631
-  },
-  {
-   "url": "https://www.bie.edu/news-article/dtll-bie-data-sovereignty-listening-session",
-   "http_status": 200,
-   "bytes": 56209
-  },
-  {
-   "url": "https://www.bie.edu/news-article/dtll-bie-strategic-direction-tribal-consultations",
-   "http_status": 200,
-   "bytes": 58770
-  },
-  {
-   "url": "https://www.bie.edu/news-article/dtll-indian-school-equalization-program-and-isep-transportation-tribal-listening",
-   "http_status": 200,
-   "bytes": 61310
-  },
-  {
-   "url": "https://www.bie.edu/news-article/dtll-indian-school-equalization-program-and-student-transportation-2021",
-   "http_status": 200,
-   "bytes": 54877
-  },
-  {
-   "url": "https://www.bie.edu/news-article/dtll-indian-school-equalization-program-eligibility-criteria",
-   "http_status": 200,
-   "bytes": 55269
-  },
-  {
-   "url": "https://www.bie.edu/news-article/dtll-invitation-tribal-consultation-south-dakota-education-resource-centers",
-   "http_status": 200,
-   "bytes": 51692
-  },
-  {
-   "url": "https://www.bie.edu/news-article/dtll-johnson-omalley-program-listening-sessions-2021",
-   "http_status": 200,
-   "bytes": 57164
-  },
-  {
-   "url": "https://www.bie.edu/news-article/dtll-progress-and-promotion-policy-and-certificate-completion-policy-2021",
-   "http_status": 200,
-   "bytes": 54801
-  },
-  {
-   "url": "https://www.bie.edu/news-article/dtll-re-listening-sessions-bie-strategic-direction-2018-2023-years-4-and-5",
-   "http_status": 200,
-   "bytes": 61320
-  },
-  {
-   "url": "https://www.bie.edu/news-article/dtll-school-reopening-plans-consultation-2021",
-   "http_status": 200,
-   "bytes": 59482
-  },
-  {
-   "url": "https://www.bie.edu/news-article/dtll-section-504-listening-session",
-   "http_status": 200,
-   "bytes": 52349
-  },
-  {
-   "url": "https://www.bie.edu/news-article/dtll-state-assessment-waiver-2020-21",
-   "http_status": 200,
-   "bytes": 58130
-  },
-  {
    "url": "https://www.doi.gov/robots.txt",
    "http_status": 200,
    "bytes": 2289
@@ -747,7 +680,7 @@
  "requests_by_host": {
   "www.ihs.gov": 1,
   "www.bia.gov": 1,
-  "www.bie.edu": 15,
+  "www.bie.edu": 1,
   "www.doi.gov": 1,
   "www.hhs.gov": 2,
   "www.hud.gov": 2,

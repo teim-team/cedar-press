@@ -607,12 +607,49 @@ def _scope_for(entity_class):
             "is the filer.")
 
 
+def _derive_append(canonical, path):
+    """The header an APPEND must use: the LIVE file's, verbatim.
+
+    ADR-017 / `845` rule 17. A fixed literal header is bad enough in a
+    wholesale rewrite - it deletes an in-place enricher's column. In an
+    APPEND it is worse: the literal names 38 columns, the file carries 39,
+    and every appended field past the 38th lands one column to the left.
+    Nothing errors and the misalignment is invisible.
+
+    So when the file already exists, the live header WINS - order and all.
+    Extras the literal does not name (e.g. `cedar_uid`, added in place after
+    the first harvest) come out blank on the appended rows, which is honest:
+    the enricher runs last and will fill them. If the literal names a column
+    the file does NOT have, appending cannot add it, so this raises rather
+    than silently drop the values.
+    """
+    if not path.exists():
+        return list(canonical)
+    try:
+        with open(path, encoding="utf-8-sig", errors="replace") as fh:
+            live = next(csv.reader(fh), [])
+    except OSError:
+        return list(canonical)
+    if not live:
+        return list(canonical)
+    missing = [c for c in canonical if c not in live]
+    if missing:
+        raise SystemExit(
+            "REFUSING to append to %s: this run wants to write %d column(s) "
+            "the file does not have (%s). Appending cannot add a column, and "
+            "writing under the literal header would misalign every field past "
+            "the first mismatch. Rebuild the file instead."
+            % (path, len(missing), ", ".join(missing[:6])))
+    return list(live)
+
+
 def _append_csv(path, rows, fields):
     """Append-with-header. The harvest is resumable, so every write must be
     survivable by a process killed between entities."""
     if not rows:
         return
     new = not path.exists()
+    fields = _derive_append(fields, path)
     with open(path, "w" if new else "a", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
         if new:

@@ -108,7 +108,7 @@ FIELDS = [
 ]
 COVER_FIELDS = [
     "cedar_uid", "tribe_id", "canonical_name", "entity_class", "state",
-    "has_live_site", "site_url", "probe_status", "n_channels",
+    "has_live_site", "site_url", "site_url_class", "probe_status", "n_channels",
     "best_channel_type", "best_channel_url", "archive_earliest_year",
     "archive_latest_year", "probed_by", "note",
 ]
@@ -128,6 +128,87 @@ CT = {
     "email_signup": "email_signup",
     "none found": "none_found", "none_found": "none_found",
 }
+
+
+# `site_url_class` - WHY AN ENTITY WAS NEVER PROBED. Added 2026-09-02.
+#
+# `has_live_site` was answering a narrower question than anyone read it as.
+# It is `yes` whenever the web map holds ANY 2xx/3xx URL for the entity - and
+# for 108 of 210 Native Hawaiian Organizations that URL is a Wayback snapshot
+# of a dead page or a ProPublica IRS profile, neither of which is a site the
+# organisation operates and neither of which can be probed for a newsletter.
+# Reading "8% of NHOs publish" off that denominator states a Cedar deficiency
+# where the honest finding is SOURCE_DOES_NOT_PUBLISH (docs/AGENT_FIELD_GUIDE
+# section 5). The class is now declared per row so the denominator a reader
+# wants can be built from the file instead of asserted in prose.
+#
+#   own_live_site                the entity operates this host. Probeable.
+#   wayback_snapshot_only        only a web.archive.org capture is known. The
+#                                live site is gone; path-joining /wp-json/ onto
+#                                a /web/<ts>/ URL produces nonsense, and a
+#                                snapshot of a THIRD PARTY's page is not
+#                                evidence about this entity's publishing.
+#   propublica_irs_profile_only  only an IRS-derived nonprofit profile page is
+#                                known. That is a page ABOUT the entity.
+#   social_media_only            only a Facebook/Instagram presence is known.
+#   third_party_api_endpoint     the only known URL is a machine API that
+#                                RETURNS data about the entity - the BIA
+#                                Tribal Leaders Directory ArcGIS
+#                                FeatureServer, the State of Alaska DCCED
+#                                MapServer. Found 2026-09-02 by invariant 10:
+#                                the web map had recorded a
+#                                `services1.arcgis.com/.../FeatureServer/0/
+#                                query?...f=json` URL as the WEBSITE of 45
+#                                Alaska Native Villages, so `has_live_site`
+#                                said `yes` for 45 nations that have no site
+#                                at all. Probing it would have asked a federal
+#                                API for a newsletter. A response ABOUT you is
+#                                not a site you operate.
+#   no_url_anywhere              no URL of any kind. Not probeable at all.
+# Mirrors 991's OUT_OF_SCOPE_CLASSES. A school publishes a lunch menu and a
+# calendar; 183 extra hosts is a poor trade against the nations, villages and
+# corporations that publish economic content. Written down here so invariant
+# 10 excludes exactly what the sweep excludes and cannot drift from it.
+OUT_OF_SCOPE_COVERAGE_CLASSES = {"BIE School"}
+
+SITE_URL_CLASSES = ("own_live_site", "wayback_snapshot_only",
+                    "propublica_irs_profile_only", "social_media_only",
+                    "third_party_api_endpoint", "no_url_anywhere")
+
+
+def is_api_endpoint(u):
+    """A machine API that returns data ABOUT the entity, not a site it runs."""
+    u = (u or "").strip()
+    if not u:
+        return False
+    low = u.lower()
+    h = host_of(u)
+    if h == "arcgis.com" or h.endswith(".arcgis.com"):
+        return True
+    return ("/rest/services/" in low or "/featureserver/" in low
+            or "/mapserver/" in low
+            or ("outfields=" in low and "f=json" in low))
+
+
+def site_url_class(u):
+    h = host_of(u)
+    if not h:
+        return "no_url_anywhere"
+    if h == "URL_MALFORMED":
+        return "no_url_anywhere"
+    if is_api_endpoint(u):
+        return "third_party_api_endpoint"
+    if h == "archive.org" or h.endswith(".archive.org")             or h == "archive-it.org" or h.endswith(".archive-it.org"):
+        return "wayback_snapshot_only"
+    if h == "propublica.org" or h.endswith(".propublica.org"):
+        return "propublica_irs_profile_only"
+    if h in ("facebook.com", "instagram.com", "twitter.com", "x.com",
+             "linkedin.com", "youtube.com") or any(
+            h.endswith("." + d) for d in ("facebook.com", "instagram.com",
+                                          "twitter.com", "linkedin.com",
+                                          "youtube.com")):
+        return "social_media_only"
+    return "own_live_site"
 
 
 # `record_status` - THE DISCRIMINATOR. Added 2026-09-02.
@@ -675,6 +756,9 @@ def build():
             "has_live_site": "yes" if live_site.get(uid) else "no",
             "site_url": ("" if status == "excluded_terms_stated_restrictive"
                          else site_url.get(uid, "")),
+            # classified from the URL the probe would actually have used, so
+            # it stays true for the withheld-URL rows as well
+            "site_url_class": site_url_class(site_url.get(uid, "")),
             "probe_status": status, "n_channels": str(len(mine)),
             "best_channel_type": mine[0]["channel_type"] if mine else "",
             "best_channel_url": mine[0]["channel_url"] if mine else "",
@@ -708,6 +792,18 @@ def build():
         "by_source_shard": dict(Counter(r["source_shard"] for r in recs)),
         "found_by_entity_class": dict(Counter(
             c["entity_class"] for c in cover if c["probe_status"] == "found")),
+        "coverage_by_site_url_class": dict(Counter(
+            c["site_url_class"] for c in cover)),
+        "not_probed_by_site_url_class": dict(Counter(
+            c["site_url_class"] for c in cover
+            if c["probe_status"] == "not_probed")),
+        "found_rate_among_own_live_site": {
+            k: [sum(1 for c in cover if c["entity_class"] == k
+                    and c["site_url_class"] == "own_live_site"
+                    and c["probe_status"] == "found"),
+                sum(1 for c in cover if c["entity_class"] == k
+                    and c["site_url_class"] == "own_live_site")]
+            for k in sorted({c["entity_class"] for c in cover})},
         "not_probed_with_live_site": sum(
             1 for c in cover if c["probe_status"] == "not_probed" and c["has_live_site"] == "yes"),
         "by_record_status": dict(Counter(r["record_status"] for r in recs)),
@@ -805,6 +901,29 @@ def verify(rows=None, cover=None):
     if nourl:
         f.append("PUBLICATION_CHANNEL_WITHOUT_A_URL: %d rows, e.g. %s"
                  % (len(nourl), nourl[0]))
+
+    # 9. `site_url_class` is never blank and is in the vocabulary.
+    if cover and "site_url_class" in cover[0]:
+        badc = [c["cedar_uid"] for c in cover
+                if (c.get("site_url_class") or "") not in SITE_URL_CLASSES]
+        if badc:
+            f.append("SITE_URL_CLASS_MISSING_OR_UNKNOWN: %d rows, e.g. %s"
+                     % (len(badc), badc[0]))
+
+        # 10. THE FRONTIER INVARIANT. An entity that operates its own live
+        #     site, is in scope, and is not terms-restricted MUST have been
+        #     probed. `not_probed` is NOT_SEARCHED_MACHINE_READABLE, which is
+        #     honest exactly once - the second time it is a backlog nobody
+        #     closed. This turns "we finished the probeable frontier" from a
+        #     sentence in a doc into something that fails the build.
+        openf = [c["canonical_name"] for c in cover
+                 if c["probe_status"] == "not_probed"
+                 and c.get("site_url_class") == "own_live_site"
+                 and c["entity_class"] not in OUT_OF_SCOPE_COVERAGE_CLASSES]
+        if openf:
+            f.append("PROBEABLE_FRONTIER_NOT_CLOSED: %d entities operate a "
+                     "live site, are in scope, and were never probed - e.g. %s"
+                     % (len(openf), openf[0]))
     return f
 
 
@@ -816,10 +935,13 @@ def selftest():
                 channel_host="a.org", archive_earliest_year="2001",
                 archive_latest_year="2020", channel_type="newsletter",
                 record_status=RS_CHANNEL)
-    cov = [{"cedar_uid": "CE-TEST", "probe_status": "found", "canonical_name": "T"}]
+    cov = [{"cedar_uid": "CE-TEST", "probe_status": "found",
+            "canonical_name": "T", "entity_class": "Federally recognized tribe",
+            "site_url_class": "own_live_site"}]
     spine_n = sum(1 for _ in csv.DictReader(SPINE.open(encoding="utf-8-sig")))
     pad = [{"cedar_uid": "CE-%d" % i, "probe_status": "not_probed",
-            "canonical_name": "p"} for i in range(spine_n - 1)]
+            "canonical_name": "p", "entity_class": "BIE School",
+            "site_url_class": "no_url_anywhere"} for i in range(spine_n - 1)]
 
     r = dict(base); r.update(channel_url="https://www.sudrum.com/x", channel_host="sudrum.com")
     ok.append(("restrictive", any("RESTRICTIVE" in x for x in verify([r], cov + pad))))
@@ -849,8 +971,21 @@ def selftest():
     ok.append(("channel_without_url", any("PUBLICATION_CHANNEL_WITHOUT_A_URL" in x
                                           for x in verify([r], cov + pad))))
 
+    covc = [dict(c, site_url_class="own_live_site") for c in cov]
+    padc = [dict(c, site_url_class="no_url_anywhere") for c in pad]
+    r = dict(base)
+    bad = [dict(covc[0], site_url_class="")] + padc
+    ok.append(("site_url_class_blank",
+               any("SITE_URL_CLASS_MISSING_OR_UNKNOWN" in x
+                   for x in verify([r], bad))))
+    openf = [dict(covc[0], probe_status="not_probed",
+                  entity_class="Federally recognized tribe")] + padc
+    ok.append(("frontier_open",
+               any("PROBEABLE_FRONTIER_NOT_CLOSED" in x
+                   for x in verify([r], openf))))
+
     for name, fired in ok:
-        print("  selftest %-14s %s" % (name, "FIRES" if fired else "DID NOT FIRE"))
+        print("  selftest %-24s %s" % (name, "FIRES" if fired else "DID NOT FIRE"))
     return 0 if all(f for _, f in ok) else 1
 
 
@@ -866,7 +1001,7 @@ def main(argv):
                 print("FAIL", x)
             return 1
         rows = sum(1 for _ in csv.DictReader(OUT_CORPUS.open(encoding="utf-8-sig")))
-        print("verify OK - %d corpus rows, 10 invariants held" % rows)
+        print("verify OK - %d corpus rows, 12 invariants held" % rows)
         return 0
     return build()
 

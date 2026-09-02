@@ -312,14 +312,24 @@ def build_family_map():
         n = re.sub(r"\b(inc|llc|ltd|limited|corp|corporation|co|company|the|lp|llp|plc)\b", " ", n)
         return re.sub(r"\s+", " ", n).strip()
 
-    kept = skipped = 0
+    kept = 0
+    # CLASS 2C: a skip counter that does not name what it skipped is a defect
+    # class this repo has thirteen recorded instances of. Name them.
+    skipped = Counter()
+    eg = {}
     for r in read(CLEAN / "nest_enterprise_relations.csv", required=False):
         hub = r.get("owner_hub_cedar_uid") or ""
         if not hub:
+            skipped["no_owner_hub_cedar_uid"] += 1
+            eg.setdefault("no_owner_hub_cedar_uid",
+                          r.get("child_name_as_recorded", "?"))
             continue
-        if (r.get("relation_class") or "") != "ownership" or \
-           (r.get("relationship") or "") not in OWNED:
-            skipped += 1
+        rc, rel = (r.get("relation_class") or ""), (r.get("relationship") or "")
+        if rc != "ownership" or rel not in OWNED:
+            tag = f"{rc or 'blank'}/{rel or 'blank'}"
+            skipped[tag] += 1
+            eg.setdefault(tag, f"{r.get('child_name_as_recorded','?')} under "
+                               f"{r.get('owner_hub_name','?')}")
             continue
         kept += 1
         hub_name[hub] = r.get("owner_hub_name") or hub
@@ -329,8 +339,9 @@ def build_family_map():
             if norm(n):
                 fam[norm(n)].add(hub)
                 members[hub].add(norm(n))
-    print(f"  nest edges: {kept:,} ownership kept, {skipped:,} skipped "
-          f"(affiliation / joint_venture / passive_investment)")
+    print(f"  nest edges: {kept:,} ownership kept, {sum(skipped.values()):,} skipped:")
+    for tag, n in skipped.most_common():
+        print(f"      {n:>5}  {tag:<34} e.g. {eg[tag][:64]}")
     print("  cedar_constellation_edges.csv NOT USED as a family source: "
           "is_ownership_claim = N on all 3,153 rows")
     return fam, hub_name, norm, members
@@ -474,12 +485,28 @@ def apply_value_rule(value, basis_text):
 
 # ------------------------------------------------------------------- main ---
 def existing_ledger():
+    """The ledger AS IT WAS BEFORE THIS SCRIPT.
+
+    A merge script that de-duplicates against its own previous output is not
+    idempotent, it is self-erasing: the second run sees its own 144 rows in
+    `deals_classified.csv`, refuses them all as G7 duplicates, admits 64, and
+    REWRITES the additions file at 64 rows - so the next rebuild silently
+    loses 80. Measured on the second run of this script before the guard
+    existed. `_source_file` is the discriminator and it is exact.
+    """
     rows = read(CLEAN / "deals_classified.csv")
+    own = ADDITIONS.name
+    mine = [r for r in rows if r.get("_source_file") == own]
+    if mine:
+        print(f"  {len(mine)} row(s) in the ledger came from a previous run of this "
+              f"script ({own}) and are EXCLUDED from the duplicate index, so a "
+              f"re-run reproduces its own output instead of eroding it.")
+    prior = [r for r in rows if r.get("_source_file") != own]
     idx = defaultdict(list)
-    for r in rows:
+    for r in prior:
         key = (norm_party(r.get("Native_Party")), (r.get("Event_Year") or "").strip())
         idx[key].append(r)
-    return rows, idx
+    return rows, idx, prior
 
 
 def norm_party(n):
@@ -507,10 +534,12 @@ def main(argv):
     print(f"family map: {len(fam):,} names -> {len(hub_name):,} hubs "
           f"(nest_enterprise_relations, ownership edges only)")
 
-    ledger, lidx = existing_ledger()
-    known_ids = {r["Deal_ID"] for r in ledger}
-    ledger_money = sum(money(r.get("Announced_Value_USD")) or 0 for r in ledger)
-    print(f"ledger before: {len(ledger):,} rows, "
+    ledger, lidx, prior = existing_ledger()
+    # Every comparison is against the ledger MINUS this script's own prior
+    # output, so a re-run reproduces its result instead of colliding with it.
+    known_ids = {r["Deal_ID"] for r in prior}
+    ledger_money = sum(money(r.get("Announced_Value_USD")) or 0 for r in prior)
+    print(f"ledger before this script: {len(prior):,} rows, "
           f"Announced_Value_USD = ${ledger_money:,.0f}\n")
 
     admitted, refused = [], []
@@ -845,7 +874,7 @@ def main(argv):
     parked = sum(money(a["Project_Total_Value_USD"]) or 0 for a in admitted)
     print(f"\n  new Announced_Value_USD      ${new_money:,.0f}")
     print(f"  parked in Project_Total      ${parked:,.0f}  (ceilings, never summed as consideration)")
-    print(f"  ledger after (projected)     {len(ledger) + len(admitted):,} rows, "
+    print(f"  ledger after (projected)     {len(prior) + len(admitted):,} rows, "
           f"${ledger_money + new_money:,.0f}")
 
     dup_new = [a["Deal_ID"] for a in admitted if a["Deal_ID"] in known_ids]

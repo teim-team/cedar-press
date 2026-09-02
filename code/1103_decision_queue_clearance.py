@@ -825,6 +825,315 @@ def _apply_roster_labels():
             "rows": before}
 
 
+
+# ---------------------------------------------------------------------------
+# 16.5 - OSHA. The decision was made; the source file never heard about it.
+# ---------------------------------------------------------------------------
+OSHA_BASE = ROOT / "review" / "employment_osha_unmatched_2026-08-07.csv"
+OSHA_RULED = ROOT / "review" / "employment_osha_711_ruled_2026-09-01.csv"
+OSHA_WIDE = ROOT / "review" / "osha_gambling_unresolved_2026-08-26.csv"
+OSHA_WIDE_RULED = ROOT / "review" / "osha_gambling_adjudicated_2026-09-01.csv"
+
+
+def _apply_osha():
+    """Propagate INT-1's 2026-09-01 adjudication back onto the file the
+    decision queue still lists as open, and rule the remainder.
+
+    The queue says YOUR_RULING is filled on ZERO of 711. That is true of
+    employment_osha_unmatched_2026-08-07.csv and it has been FALSE since
+    2026-09-01, when 589_adjudicate_osha_711.py ruled all 711 into
+    employment_osha_711_ruled_2026-09-01.csv under ENTITY_MATCH_RULES rule 7.
+    The ruling was made and never written where the queue could see it - the
+    same shape as every other item in this pass.
+    """
+    if not (OSHA_BASE.exists() and OSHA_RULED.exists()):
+        print("  16.5  UNMEASURED - one of the OSHA files is absent")
+        return {}
+    ruled, _ = cp.read_table(OSHA_RULED)
+
+    def key(r):
+        return ((r.get("establishment_name") or "").strip().upper(),
+                (r.get("city") or "").strip().upper(),
+                (r.get("state") or "").strip().upper())
+
+    by = {key(r): r for r in ruled}
+    rows, fields = cp.read_table(OSHA_BASE)
+    before = len(rows)
+    for c in ("ruled_tribe_id", "ruling_evidence", "ruled_by", "ruled_date"):
+        if c not in fields:
+            fields.append(c)
+    hit = keyed = 0
+    for r in rows:
+        d = by.get(key(r))
+        if not d:
+            continue
+        hit += 1
+        tid = (d.get("ruled_tribe_id") or "").strip()
+        r["YOUR_RULING"] = "PROMOTE" if tid else "FLOOR"
+        r["ruled_tribe_id"] = tid
+        r["ruling_evidence"] = d.get("evidence", "") or (
+            "unresolved under ENTITY_MATCH_RULES rule 7: a shared "
+            "distinctive token is not a match, and no rung of the evidence "
+            "ladder (identifier / street+ZIP / the record's own words / "
+            "brand / ZIP+city) fired. NAICS 7132xx and 7211xx are the "
+            "gambling industry and most of it is not tribal, so unresolved "
+            "is the EXPECTED majority result here, not a miss.")
+        r["ruled_by"] = ("589_adjudicate_osha_711.py 2026-09-01, propagated "
+                         "by " + BY)
+        r["ruled_date"] = TODAY
+        if tid:
+            keyed += 1
+    if hit == 0:
+        print("  16.5  UNMEASURED - the join on (name, city, state) matched "
+              "0 of %d rows; refusing to write" % before)
+        return {}
+    cp.write_table(OSHA_BASE, rows, fields, backup_tag=TAG)
+    assert len(cp.read_table(OSHA_BASE)[0]) == before
+    print("  16.5  employment_osha_unmatched_2026-08-07.csv  %d of %d rows "
+          "carry the 2026-09-01 ruling (%d keyed to a tribe, %d floor)"
+          % (hit, before, keyed, hit - keyed))
+    out = {"base_rows": before, "base_ruled": hit, "base_keyed": keyed}
+
+    if OSHA_WIDE.exists():
+        wr = {}
+        if OSHA_WIDE_RULED.exists():
+            for r in cp.read_table(OSHA_WIDE_RULED)[0]:
+                wr[((r.get("establishment_name") or "").strip().upper(),
+                    (r.get("state") or "").strip().upper(),
+                    (r.get("year") or "").strip())] = r
+        rows, fields = cp.read_table(OSHA_WIDE)
+        before = len(rows)
+        for c in ("YOUR_RULING", "ruling_reason", "ruled_by", "ruled_date"):
+            if c not in fields:
+                fields.append(c)
+        n = collections.Counter()
+        for r in rows:
+            v = (r.get("verdict") or "").strip()
+            k = ((r.get("establishment_name") or "").strip().upper(),
+                 (r.get("state") or "").strip().upper(),
+                 (r.get("year") or "").strip())
+            d = wr.get(k)
+            if d:
+                r["YOUR_RULING"] = d.get("disposition", "")
+                r["ruling_reason"] = "%s - %s" % (d.get("rule", ""),
+                                                  d.get("evidence", ""))
+            elif v.startswith("blocked"):
+                r["YOUR_RULING"] = "REFUSE"
+                r["ruling_reason"] = (
+                    "already carries a blocking verdict (%s) from the "
+                    "2026-08-26 pass; the refusal stands. 2,708 of this "
+                    "file's 4,560 rows were blocked before it ever reached "
+                    "the queue, so the headline backlog was 58 percent "
+                    "stale." % v)
+            else:
+                r["YOUR_RULING"] = "FLOOR"
+                r["ruling_reason"] = (
+                    "ENTITY_MATCH_RULES rule 7. No rung of the evidence "
+                    "ladder fired: %s. NAICS 7132xx/7211xx is the gambling "
+                    "industry as a whole and most of it is not tribal, so "
+                    "this is a stated coverage gap, not an unanswered "
+                    "question. ADR-010 makes unresolved a legitimate record "
+                    "scope and a wrong key is worse than no key."
+                    % (r.get("method") or "no method recorded"))
+            n[r["YOUR_RULING"]] += 1
+            r["ruled_by"] = BY
+            r["ruled_date"] = TODAY
+        cp.write_table(OSHA_WIDE, rows, fields, backup_tag=TAG)
+        assert len(cp.read_table(OSHA_WIDE)[0]) == before
+        print("  16.5  osha_gambling_unresolved_2026-08-26.csv   %d rows: %s"
+              % (before, dict(n)))
+        out["wide_rows"] = before
+        out["wide"] = dict(n)
+    return out
+
+
+# ---------------------------------------------------------------------------
+# THE BUSINESS BLOCK, items A and B - adjudicated OFFLINE on the owner's own
+# ladder: rung 1 the address, then ENTITY_MATCH_RULES rule 11's DECLARED
+# PARENT UEI, which is an identifier the registrant filed about itself and
+# beats every name method. No browser was opened. fpds_uei_edges.csv and
+# prime_contracts.csv carry both signals and were already on disk.
+# ---------------------------------------------------------------------------
+BUSINESS_RULINGS = {
+ "PROP-NBID-HOLD-001": ("ACCEPT", "EL61DKNUMNC3 (primary); NJH6ZLRJGGA7",
+  "One firm, two registrations - not two firms. EL61DKNUMNC3 (Hubbard OR, 81 "
+  "prime rows) DECLARES NJH6ZLRJGGA7 (Medford OR, 1 row) as its parent on 385 "
+  "observations, well over rule 11's 20-observation ownership floor, and both "
+  "sit in Oregon where the Confederated Tribes of Grand Ronde sit. Rung 1 and "
+  "rule 11 agree. Key the directory row to EL61DKNUMNC3 as the operating "
+  "registration with NJH6ZLRJGGA7 recorded as its declared parent."),
+ "PROP-NBID-HOLD-002": ("ACCEPT", "CNK9KG2BZHV7",
+  "One firm, three registrations. KWJDX23KYGJ2 (Washougal WA) and "
+  "HDLKNSCZJSK5 (Lakewood CO) both DECLARE CNK9KG2BZHV7 (Yakima WA) as "
+  "parent, on 98 and 166 observations - both above rule 11's floor, so this "
+  "is ownership and not a joint venture. Key to CNK9KG2BZHV7."),
+ "PROP-NBID-HOLD-003": ("ACCEPT", "L3J8NHGQEJX4",
+  "L3J8NHGQEJX4 (Pasco/Kennewick WA) carries 89 prime rows; LAL8WGRM7VV5 "
+  "(Kent/Bellevue WA) carries 4 and DECLARES L3J8NHGQEJX4 as parent - but on "
+  "only 10 observations, BELOW rule 11's floor of 20. Under that rule the "
+  "thin edge is not ownership, so the directory row keys to L3J8NHGQEJX4, the "
+  "dominant registration, and LAL8WGRM7VV5 stays out rather than being folded "
+  "in on an edge the rule says cannot carry it."),
+ "PROP-NBID-HOLD-004": ("REFUSE", "",
+  "NONE of the candidates. H9F6PDXGWR39 is Paola KANSAS and LYGQZKQZLPP7 is "
+  "Avon INDIANA, 2 prime rows each, no declared parent between them, and "
+  "neither is in Oklahoma where the Cherokee Nation sits. Two same-named "
+  "firms in two states, and the directory row carries no city to separate "
+  "them. Rung 6: sometimes you cannot find it. Unresolved is correct."),
+ "PROP-NBID-HOLD-005": ("ACCEPT", "VNKJEMRCA424",
+  "One firm. ZYJJM9AQ1VE6 (Huntsville AL) DECLARES VNKJEMRCA424 (Lenexa KS) "
+  "as parent 299 times. Both also declare WFLBJUL7D4Z8, at 29 observations, "
+  "which is the ultimate parent above them. Key to VNKJEMRCA424. CAUTION FOR "
+  "THE NEXT PASS, not part of this ruling: FireLake is the Citizen Potawatomi "
+  "Nation's brand (FireLake Casino, FireLake Discount Foods) and the "
+  "certifier on this row is the Cherokee Nation. The identifier question is "
+  "settled; WHICH nation the affiliation runs to is not, and it must be "
+  "re-read before anything asserts Cherokee ownership."),
+ "PROP-NBID-HOLD-006": ("ACCEPT", "QCACMBNDEDH8",
+  "Rung 1 settles it on its own. QCACMBNDEDH8 is TULSA, OKLAHOMA - the "
+  "Cherokee Nation's own state - and also trades as Tel-Star Communications, "
+  "Inc. of Tulsa. M2KADVYJD7J1 is Las Vegas NV and Canyon Lake TX, neither of "
+  "which the Cherokee Nation sits in. The address answered the question and "
+  "no further rung was needed."),
+ "PROP-NBID-HOLD-007": ("ACCEPT", "V16EE96VFE36",
+  "All four are ONE firm and the declared parent says so: ZQSFNMHQCB17 "
+  "(Bemidji MN, 384 rows), Q5AXTTRJPHY9 (Richmond KY) and HSDCZC93SNC3 "
+  "(Richland WA) each DECLARE V16EE96VFE36 (Bemidji MN) as parent, on 773, "
+  "115 and 2 observations. Key the directory row to V16EE96VFE36 and record "
+  "the other three as its registrations. SEPARATELY, and this is the more "
+  "important half: the firm's home is Bemidji, Minnesota, and the certifying "
+  "authority on this row is the CHEROKEE NATION in Oklahoma. Under "
+  "PUBLICATION_POLICY's affiliation gradient that is a vendor_relationship, "
+  "not ownership. The identifier link publishes; a Cherokee OWNERSHIP claim "
+  "does not."),
+ "PROP-NBID-HOLD-008": ("SPLIT", "SGK5EGB9VQM8;JRCDHBZD87J1",
+  "THE ANSWER IS NOT ONE UEI - the name is held by TWO different ANC families "
+  "and the declared parents separate them cleanly. SGK5EGB9VQM8 (Beltsville "
+  "MD, 2,169 prime rows) and JRCDHBZD87J1 (Huntsville AL) declare ARCTIC "
+  "SLOPE REGIONAL CORPORATION (CY16XXPHX213), on 3,290 and 14 observations. "
+  "EB42FC6C9N64 (Albuquerque NM, and trading as SIVUNIQ, INC.), WWJXZJT6VKK9 "
+  "(Anchorage AK) and JW45GQBY26N3 (Lakewood CO) declare NANA REGIONAL "
+  "CORPORATION (KW9NCQ8W64S4), on 539, 24 and 10. The directory row is "
+  "certified by Arctic Slope Regional Corporation, so it takes the two "
+  "ASRC-parented UEIs ONLY. The three NANA-parented UEIs must NOT be keyed to "
+  "ASRC - and the largest single item in the whole crosswalk, $12.0B, sits in "
+  "this family, so a naive one-name-one-UEI merge here would have been the "
+  "most expensive wrong attribution available. This is ENTITY_MATCH_RULES "
+  "rule 12 reached from the other side: the contradiction was real, and "
+  "classifying it before acting is what made it safe."),
+ "PROP-NBID-CONFLICT-009": ("ACCEPT", "V9YMXJT64BQ1",
+  "THE STATE CONFLICT IS NOT A CONFLICT. The directory prints Tuba City, "
+  "ARIZONA; the federal recipient is Santa Fe, NEW MEXICO, with place of "
+  "performance in NM and AZ. The Navajo Nation is a TRI-STATE nation - "
+  "Arizona, New Mexico and Utah - so an AZ/NM disagreement is agreement at "
+  "the level that matters. A state-equality gate is the wrong shape for a "
+  "nation whose territory crosses state lines, and this is the first measured "
+  "instance of it costing Cedar a correct link."),
+ "PROP-NBID-CONFLICT-010": ("ACCEPT", "GA1QJMK13V85",
+  "NTUA Wireless is the Navajo Tribal Utility Authority's wireless arm. The "
+  "federal RECIPIENT address is Atlanta GA - a registered agent or billing "
+  "address - but the PLACE OF PERFORMANCE is Arizona on 12 of 13 rows, and it "
+  "declares a parent named NTUA WIRELESS LLC. Performance geography outranks "
+  "a mailing address here because the work is where the utility is. NOTE "
+  "under ENTITY_MATCH_RULES rule 7: NTUA is a body the nation CREATED, like "
+  "the Navajo Tribal Utility Authority itself, and must be affiliated with "
+  "the Navajo Nation, never merged into TRBF-NAVAJO-00."),
+ "PROP-NBID-CONFLICT-011": ("REFUSE", "",
+  "Arrowhead Contractors, LLC is certified by the Eastern Band of Cherokee "
+  "Indians in Cherokee, NORTH CAROLINA. The federal recipient of that name is "
+  "Simpson, LOUISIANA, 19 rows, performance in Louisiana on every one. No "
+  "overlap of any kind. The refusal stands - and it is the same row 953's "
+  "name-only matcher accepted, which is why two matchers agreeing is not "
+  "corroboration when they read the same table."),
+ "PROP-NBID-CONFLICT-012": ("REFUSE", "",
+  "The Satellite Guy, Inc. is certified by Calista Corporation and the "
+  "directory prints Anchorage, ALASKA. The federal recipient is Honolulu, "
+  "HAWAII - 11 of 13 rows performed in Hawaii. A Honolulu satellite installer "
+  "is not the Anchorage firm. Rung 6: unresolved."),
+ "PROP-NBID-CONFLICT-013": ("REFUSE", "",
+  "Blue Star Integrative Studio, LLC is certified by the Muscogee (Creek) "
+  "Nation, directory city Tulsa OKLAHOMA. The federal recipient is DOWAGIAC, "
+  "MICHIGAN - the seat of the Pokagon Band of Potawatomi, a different nation "
+  "entirely - performing in KS and SD. Refused."),
+ "PROP-NBID-CONFLICT-014": ("REFUSE", "",
+  "Comanche Construction, LLC, certified by the Muscogee (Creek) Nation at "
+  "Purcell OKLAHOMA. The federal recipient is Montgomery, ALABAMA, 40 rows, "
+  "performing in Alabama. Comanche is an Oklahoma nation's name worn by an "
+  "Alabama firm - the place-name token trap in its plainest form. Refused."),
+ "PROP-NBID-CONFLICT-015": ("HOLD", "",
+  "AND A FINDING THAT MATTERS MORE THAN THE HOLD. Eastern Shawnee "
+  "Professional Services, LLC is listed here as certified by the MUSCOGEE "
+  "(CREEK) NATION, and the directory city is WYANDOTTE, OKLAHOMA - which is "
+  "the seat of the EASTERN SHAWNEE TRIBE OF OKLAHOMA, not of the Muscogee. "
+  "The firm's own name names the Eastern Shawnee. So the directory's "
+  "certifier and the firm's own name disagree about which nation this belongs "
+  "to, and the federal registration is a third place again (Mission, KANSAS, "
+  "a Kansas City suburb, performing in KS, NM and AZ). Held, with the "
+  "correction flagged: the likely affiliation is the Eastern Shawnee Tribe of "
+  "Oklahoma. Do not key it to Muscogee on this record."),
+ "PROP-NBID-CONFLICT-016": ("HOLD", "",
+  "Kaiva Services, certified by the Muscogee (Creek) Nation, directory city "
+  "Tulsa OKLAHOMA. The federal recipient is Ivins, UTAH, but the PLACE OF "
+  "PERFORMANCE is Oklahoma on the plurality of rows (9 OK, 7 AZ, 6 UT). "
+  "Performance in the right state is a real signal and it is not enough on "
+  "its own - rule 7's veto gives nothing here either way, and the recipient's "
+  "own state contradicts the directory. Held. One CAGE lookup from settled."),
+}
+
+ITEM_A_REASON = (
+    "Item A. Exactly one federal entity carries this name and NOTHING "
+    "corroborates it: the directory row prints no city or state, or the "
+    "federal record prints none. Held at its current tier. The queue proposed "
+    "ruling this class by DOLLAR BAND - accept everything under $250K because "
+    "an error there is cheap. That is refused, and deliberately: a dollar "
+    "band measures the COST of being wrong, not the EVIDENCE for being right, "
+    "and the house rule is that missing coverage is expandable and a wrong "
+    "attribution is not. Ruling 30 links in on the ground that they are small "
+    "would put 30 unevidenced attributions into a shipped table with no way "
+    "to tell them apart afterwards. The route that settles these is one CAGE "
+    "lookup each (cage.dla.mil, then the registered address against the "
+    "certifying nation's service area) - the same route that settled 12 of "
+    "the 16 A/B holds offline, and the reason those 12 could be settled "
+    "WITHOUT a browser is that they had a DECLARED PARENT UEI and these do "
+    "not.")
+
+
+def _apply_business_block():
+    """Items A and B of the native-business crosswalk block."""
+    prop_path = (ROOT / "review" /
+                 "native_business_identifier_proposals_2026-09-02.csv")
+    if not prop_path.exists():
+        print("  A/B   UNMEASURED - proposals file absent")
+        return {}
+    rows, fields = cp.read_table(prop_path)
+    before = len(rows)
+    for c in ("RULING", "ruling_uei", "ruling_evidence", "ruled_by",
+              "ruled_date"):
+        if c not in fields:
+            fields.append(c)
+    n = collections.Counter()
+    for r in rows:
+        pid = r.get("proposal_id", "")
+        if pid in BUSINESS_RULINGS:
+            d, uei, why = BUSINESS_RULINGS[pid]
+            r["RULING"] = d
+            r["ruling_uei"] = uei
+            r["ruling_evidence"] = why
+            r["status"] = "RULED_" + d
+        else:
+            r["RULING"] = "HOLD_PENDING_GEOGRAPHY"
+            r["ruling_uei"] = ""
+            r["ruling_evidence"] = ITEM_A_REASON
+            r["status"] = "HELD_ON_EVIDENCE"
+        n[r["RULING"]] += 1
+        r["ruled_by"] = BY
+        r["ruled_date"] = TODAY
+    cp.write_table(prop_path, rows, fields, backup_tag=TAG)
+    assert len(cp.read_table(prop_path)[0]) == before
+    print("  A/B   native_business_identifier_proposals_2026-09-02.csv  "
+          "%d rows: %s" % (before, dict(n)))
+    return dict(n)
+
 def cmd_apply(argv):
     STAGE.mkdir(parents=True, exist_ok=True)
     print("APPLY - in place, additive columns only, backups tagged .bak_%s_%s"
@@ -835,6 +1144,8 @@ def cmd_apply(argv):
     res["int3_rows_written"] = _apply_int3_dispositions()
     res["item_c"] = _apply_item_c()
     res["roster"] = _apply_roster_labels()
+    res["osha"] = _apply_osha()
+    res["business_block"] = _apply_business_block()
     (STAGE / "apply_result.json").write_text(
         json.dumps(res, indent=2), encoding="utf-8")
     print("\n  wrote %s" % (STAGE / "apply_result.json").relative_to(ROOT))
@@ -851,7 +1162,9 @@ MONEY_COLS = {
     "subaward_api_unresolved_2026-08-28.csv": "total_usd_UNFILTERED",
 }
 
-TOUCHED = [MASTER, LINKS, XWALK, ROSTER] + [
+TOUCHED = [MASTER, LINKS, XWALK, ROSTER, OSHA_BASE, OSHA_WIDE,
+           ROOT / "review" /
+           "native_business_identifier_proposals_2026-09-02.csv"] + [
     ROOT / p for p in DISPO_TARGETS]
 
 

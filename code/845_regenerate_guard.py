@@ -973,6 +973,25 @@ def orphan_headings(doc_text: str, scripts) -> list:
     It is still a signal, not a proof: a generator that builds a heading by
     interpolation (`f"## {name}"`) produces headings this cannot match, so a
     doc of those reads as all-orphan. Read the two signals together.
+
+    COMPUTED-COUNT HEADINGS, added 2026-09-02
+    -----------------------------------------
+    The whole-string test alone accused every heading that carries a number
+    the generator computes. `1021_register_only_first_rows.py` writes
+
+        "## The " + str(len(rows)) + " entities, by class"
+
+    so `## The 105 entities, by class` can never appear as a literal, and the
+    doc read 3-of-6 orphan with nothing hand-written in it. Two earlier
+    instances of the same artefact are already recorded in `MD_PROVEN_SAFE`:
+    ANCSA_PORTAL_BUILD_LOG read 19 of 20, and it was clean.
+
+    So a heading also counts as reproducible when its FIXED PARTS are all
+    literals: split on the number runs and require every remaining fragment
+    of 8+ characters to appear in the generator's source. A hand-authored
+    heading has no such fragment and still fires - proven in `selftest`, both
+    directions. The 8-character floor is the same one the whole-heading test
+    already uses, so a short fragment can never carry a heading on its own.
     """
     lit = []
     for s in scripts:
@@ -992,9 +1011,30 @@ def orphan_headings(doc_text: str, scripts) -> list:
         core = h.strip("*_# ").strip()
         if len(core) < 8:
             continue
-        if core not in blob:
+        if not heading_reproducible(core, blob):
             out.append(core)
     return out
+
+
+#: A run of digits, with the separators a rendered count carries.
+NUM_RUN_RE = re.compile(r"\d[\d,.]*")
+
+
+def heading_reproducible(core: str, blob: str) -> bool:
+    """Can the generator emit this heading? See `orphan_headings`.
+
+    Whole-string first. Failing that, the heading is split on its number runs
+    and every remaining fragment of 8+ characters must be a literal in the
+    generator. A heading with no digits therefore reduces to the whole-string
+    test and cannot be excused by this path.
+    """
+    if core in blob:
+        return True
+    if not NUM_RUN_RE.search(core):
+        return False
+    parts = [p.strip(" -—–:·,|.\t") for p in NUM_RUN_RE.split(core)]
+    parts = [p for p in parts if len(p) >= 8]
+    return bool(parts) and all(p in blob for p in parts)
 
 
 def scan_md() -> list:
@@ -1186,6 +1226,35 @@ def selftest() -> int:
               % ("ok  " if hit6 else "FAIL",
                  "CORRECT" if hit6 else "a defect - false positive"))
         ok = ok and bool(hit6)
+
+        # --- the orphan-heading signal, both directions --------------------
+        # The generator's literals, as `1021` actually writes them.
+        gen_blob = ('"## The " + str(len(rows)) + " entities, by class"\n'
+                    '"## Named candidates, NOT resolved - " + str(len(cand))')
+        hit7 = not heading_reproducible(
+            "The 105 entities, by class", gen_blob)
+        print("  %s a heading whose only variable part is a COMPUTED COUNT "
+              "reads as %s"
+              % ("FAIL" if hit7 else "ok  ",
+                 "orphan - FALSE POSITIVE" if hit7 else "reproducible"))
+        ok = ok and not hit7
+
+        hit8 = not heading_reproducible(
+            "Why the ceiling is a research decision", gen_blob)
+        print("  %s a HAND-AUTHORED heading the generator cannot emit -> "
+              "detector %s"
+              % ("ok  " if hit8 else "FAIL",
+                 "FIRED" if hit8 else "DID NOT FIRE"))
+        ok = ok and hit8
+
+        hit9 = not heading_reproducible("The 105 plan items, revisited",
+                                        gen_blob)
+        print("  %s a hand-authored heading that merely CONTAINS a number -> "
+              "detector %s"
+              % ("ok  " if hit9 else "FAIL",
+                 "FIRED" if hit9 else "DID NOT FIRE - the number path is too "
+                 "permissive"))
+        ok = ok and hit9
     finally:
         for f in (tbl, scr):
             try:

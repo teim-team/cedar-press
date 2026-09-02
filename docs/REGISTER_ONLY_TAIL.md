@@ -15,44 +15,38 @@
 | `cedar_resolved_facts.csv` | what Cedar has adjudicated |
 | `entity_aliases.csv` | names, one or more for every entity |
 
-Excluding the identity layer and any table that is a census of the register, **0** register entities have no row in any of the 143 substantive tables, and **105** more have exactly one.
+Excluding the identity layer and any table that is a census of the register, **0** register entities have no row in any of the 145 substantive tables, and **82** more have exactly one.
 
-The slice worked here is both — the thin tail, **105** entities. The line between the two groups moved while this was being written: the newsletter workstream landed `tribal_newsletter_corpus.csv` and 21 entities that had been register-only an hour earlier acquired one row apiece. Slicing on zero alone would have dropped them at the moment they became reachable. `n_substantive_tables` on every evidence row keeps the two states told apart.
+The slice worked here is both — the thin tail, **82** entities. The line between the two groups moved while this was being written: the newsletter workstream landed `tribal_newsletter_corpus.csv` and 21 entities that had been register-only an hour earlier acquired one row apiece. Slicing on zero alone would have dropped them at the moment they became reachable. `n_substantive_tables` on every evidence row keeps the two states told apart.
 
-## The 105 entities, by class
+## The 82 entities, by class
 
 | entity class | in the thin tail | of those, in ZERO tables | given a first row here |
 |---|---:|---:|---:|
 | BIE School | 78 | 0 | 76 |
-| Federal-level self-governance consortium | 18 | 0 | 18 |
-| Native Community Development Financial Institution | 3 | 0 | 3 |
 | Individually Native-owned business | 3 | 0 | 1 |
-| Urban Indian Organization | 3 | 0 | 1 |
-| **total** | **105** | **0** | **99** |
+| Federal-level self-governance consortium | 1 | 0 | 1 |
+| **total** | **82** | **0** | **78** |
 
 ## What was found
 
 | route | rows |
 |---|---:|
 | NCES_CCD | 76 |
-| USASPENDING | 30 |
-| IRS_990 | 21 |
-| NONE | 6 |
+| NONE | 4 |
+| IRS_990 | 3 |
+| USASPENDING | 2 |
 
-## Named candidates, NOT resolved - 6
+## Named candidates, NOT resolved - 2
 
 *Names that overlap but are not the same name. Overlap against the shorter name is what produced four wrong EINs on the first pass, so these are reported for a human rather than recorded as the entity's filing. No identifier is claimed on these rows.*
 
 | entity | possible filer |
 |---|---|
-| Billings Urban Indian Health and Wellness Ce | EIN 27-4681721 South Billings Urban Renewal Association | Billings MT |
-| Juel Fairbanks Recovery Services | EIN 41-0987441 Juel Fairbanks Aftercare Residence | St Paul MN |
 | Laguna Creek LLC | EIN 41-2035448 Laguna Creek Gridiron Club | Elk Grove CA |
-| Oklahoma City Indian Clinic | EIN 73-0955756 Central Oklahoma American Indian Health Council Inc | O |
-| Southern Indian Health Council, Inc. | EIN 93-1216297 Southern Exposure | San Francisco CA |
 | Tribal Energy Alternatives | EIN 26-3440182 Energy Alternatives For The 21st Century | Pelham NY |
 
-## Checked, nothing located — 6
+## Checked, nothing located — 4
 
 *Every one of these has a row in `register_only_first_rows.csv` naming the routes run and the date. That is a finding. It is not the same as unexamined, and the two must never be collapsed.*
 
@@ -62,5 +56,3 @@ The slice worked here is both — the thin tail, **105** entities. The line betw
 | Shiprock Reservation Dormitory | BIE School |
 | Tallsalt Advisors / Mette Associates | Individually Native-owned business |
 | Laguna Creek LLC | Individually Native-owned business |
-| Billings Urban Indian Health and Wellness Center | Urban Indian Organization |
-| Juel Fairbanks Recovery Services | Urban Indian Organization |

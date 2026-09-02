@@ -2880,6 +2880,118 @@ GRAIN_PR29 = {
 }
 GRAIN.update(GRAIN_PR29)
 
+# ===========================================================================
+# --- NEWSLETTERS. Workstream newsletters, 2026-09-02, code/1105. -----------
+#
+# The 15th collection: a finding aid for the Native press. Two tables, and
+# the split between them is the product. The corpus alone is a list; the
+# coverage ledger is the DENOMINATOR, and a denominator is the thing no
+# published catalogue of tribal periodicals has ever carried.
+#
+# THE ONE THING A CONSUMER MUST DO: filter `record_status`. The corpus holds
+# 1,889 rows and 1,394 publication channels, because a recorded ABSENCE keeps
+# a row so the negative sits beside the positives. That is deliberate - a
+# negative from search alone is not a negative in this project, and
+# `discovery_technique` on an absence row names which routes ran, so the claim
+# is legible. It is also exactly the shape of the "539 publishable coords"
+# mistake this repo already paid for, so the unit is declared per row in a
+# column rather than in prose, and 990's invariants 8-10 fail the build if the
+# column and the data it summarises ever disagree.
+GRAIN_NEWSLETTER = {
+    "tribal_newsletter_corpus.csv": _d(
+        "one row per (PUBLISHER, CHANNEL URL). A nation that prints a "
+        "newspaper, posts PDF back issues to a WordPress media library and "
+        "files shareholder reports with the State of Alaska has THREE rows, "
+        "because those are three channels with three different archive "
+        "depths. NOT one row per publisher, NOT one row per issue, and NOT "
+        "one row per masthead. The file holds TWO record types under one "
+        "schema and `record_status` is the discriminator: 1,394 "
+        "`publication_channel` rows are the dataset; 481 `probe_absence` rows "
+        "record an entity every machine-readable route reached and found "
+        "nothing on; 1 is a signup form with no archive; 13 are shard-I "
+        "place-name collisions kept flagged for their owner. Counting rows "
+        "instead of filtering `record_status` overstates the channel count by "
+        "35%. Archive depth is a FLOOR read off the channel's own index - a "
+        "paper printing since 1966 whose site indexes 2002 onward reads as "
+        "2002 - and no issue body text is stored, by policy and by invariant.",
+        primary_key=["newsletter_id"],
+        join_cardinality={"newsletter_id": "one", "cedar_uid": "many",
+                          "tribe_id": "many", "channel_host": "many"},
+        declared_by="workstream newsletters 2026-09-02, code/1105: "
+                    "newsletter_id confirmed 1,889 distinct / 0 blank on the "
+                    "FULL 1,889-row file; 0 literal duplicate rows; the id is "
+                    "NLTR-<uid|EIN>-md5(channel_url)[:8], a hashlib digest and "
+                    "not Python's per-process-randomised hash(), so it is "
+                    "stable across rebuilds (defect class 7); cedar_uid is "
+                    "declared MANY because a publisher with three channels has "
+                    "three rows, which is the grain itself"),
+    "tribal_newsletter_coverage.csv": _d(
+        "one row per SPINE ENTITY - all 1,555, always, whether or not anything "
+        "was found. This is the denominator, and 990's invariant 5 fails the "
+        "build if it ever drifts from the spine. `probe_status` carries FOUR "
+        "distinct claims that must not be collapsed: `found` (694), "
+        "`attempted_none_found` (480, a real absence for the routes named in "
+        "`probed_by`), `not_probed` (371, which is "
+        "NOT_SEARCHED_MACHINE_READABLE and is NOT an absence) and "
+        "`excluded_terms_stated_restrictive` (10, refused by every route, with "
+        "the site URL withheld here too). Read `site_url_class` before "
+        "computing any coverage rate: it is why 108 of 210 Native Hawaiian "
+        "Organizations were never probed, and the answer is that they have no "
+        "website, not that Cedar has a backlog.",
+        primary_key=["cedar_uid"],
+        join_cardinality={"cedar_uid": "one", "tribe_id": "many"},
+        declared_by="workstream newsletters 2026-09-02, code/1105: cedar_uid "
+                    "confirmed 1,555 distinct / 0 blank on the FULL 1,555-row "
+                    "file and equal to the spine row count; tribe_id is "
+                    "declared MANY because compound and sub-hub handles repeat "
+                    "across an entity family and a 'one' here would be a "
+                    "promise about a join we do not control"),
+}
+GRAIN.update(GRAIN_NEWSLETTER)
+
+# ===========================================================================
+# --- SEC-GAMING. Workstream SEC-GAMING, 2026-09-02, code/1080. -------------
+#
+# TWO NEW TABLES, and the reason they are separate from every other gaming
+# table is the reason they exist: a management company's SEC filing is a THIRD
+# class of evidence, neither an NIGC regulator figure nor a casino's marketing
+# page. See docs/MONEY_TOTALLING_RULES.md <!-- BEGIN SEC-GAMING -->.
+GRAIN_SEC_GAMING = {
+    "sec_gaming_financial_disclosures.csv": dict(
+        grain="one FIGURE IN ONE FILING: a single dollar figure about a single "
+              "gaming property, for a single period, of a single kind, as "
+              "stated in one SEC filing by one registrant. NOT one row per "
+              "property-year - a 10-K restates the two prior fiscal years, so "
+              "the SAME property-year fact appears in up to three filings and "
+              "32 of the 67 rows are such a restatement. "
+              "`is_first_filing_of_this_fact` marks the original; TOTAL ONLY "
+              "THE `Y` SUBSET (49 rows). And never total across `figure_type`: "
+              "a management fee, a property's net revenues, a relinquishment "
+              "payment and a derived contract base are four different numbers "
+              "about one property",
+        primary_key=["disclosure_id"],
+        join_cardinality={"facility_id": "many", "cedar_uid": "many",
+                          "accession": "many", "tribe_id": "many"},
+        declared_by="workstream SEC-GAMING 2026-09-02, code/1080 verify: V1 "
+                    "proves disclosure_id unique, V14 proves the "
+                    "is_first_filing_of_this_fact=Y subset unique on "
+                    "(facility, period_end, period_type, figure_type, filer), "
+                    "V15 measures whether the restatements agree (0 of 32 "
+                    "disagree). selftest proves V3/V4/V5/V10 fire"),
+
+    "sec_gaming_management_contract_terms.csv": dict(
+        grain="one CONTRACT TERM AS ONE REGISTRANT DESCRIBED IT: one "
+              "(registrant, property, fee formula) triple, taken from the "
+              "earliest filing that states it. Later filings restating the "
+              "same formula are rejected in the adjudication file rather than "
+              "duplicated here. CARRIES NO MONEY - `fee_percentage` is a rate, "
+              "not a dollar, and nothing in this table may be totalled",
+        primary_key=["term_id"],
+        join_cardinality={"facility_id": "many", "accession": "many"},
+        declared_by="workstream SEC-GAMING 2026-09-02, code/1080 verify V12"),
+}
+GRAIN.update(GRAIN_SEC_GAMING)
+
 # A table whose grain is declared but whose PRIMARY KEY cannot be stated
 # without guessing. Recorded rather than left blank, so the gap is a task
 # with a name instead of a silence. These count as UNSTATED for the gate.

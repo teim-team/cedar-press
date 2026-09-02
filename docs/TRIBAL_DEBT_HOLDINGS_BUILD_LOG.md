@@ -49,22 +49,66 @@ instrument-level register.
 
 | output | rows | grain |
 |---|---:|---|
-| `data/staging/tribal_debt_holdings.csv` | see below | ONE FUND'S POSITION in one instrument at one `report_period_end` |
-| `data/staging/tribal_debt_obligors.csv` | 8 | one obligor |
-| `data/staging/tribal_debt_distress_events.csv` | 0 | one as-filed default/arrears flag |
-| `data/staging/tribal_obligor_property_revenue.csv` | 8 | one property-fiscal-year |
-| `review/1082_fetch_queue.csv` / `_fetch_manifest.csv` | 1,864 / 1,252 | the queue and every request made |
-| `review/1082_unmatched_issuer_names.csv` | ~29,000 | every issuer name REFUSED or unmatched, with the reason |
+| `data/staging/tribal_debt_holdings.csv` | **1,585** | ONE FUND'S POSITION in one instrument at one `report_period_end` |
+| `data/staging/tribal_debt_obligors.csv` | **14** | one obligor |
+| `data/staging/tribal_debt_distress_events.csv` | **0** | one as-filed default/arrears flag |
+| `data/staging/tribal_obligor_property_revenue.csv` | **8** | one property-fiscal-year |
+| `review/1082_fetch_queue.csv` / `_fetch_manifest.csv` | 1,864 / **1,252** | the queue and every request made |
+| `review/1082_unmatched_issuer_names.csv` | **38,655** | every issuer name REFUSED or unmatched, with the reason |
 | `review/1082_source_dispositions.csv` | 2 | EMMA and EDGAR, dispositioned |
-| `data/raw/external/tribal_debt_1082/*.xml.gz` | — | the cache; every figure is re-readable |
+| `data/raw/external/tribal_debt_1082/*.xml.gz` | 1,252 | the cache; every figure is re-readable |
 
 Stages: `plan` → `fetch` → `mine` → `revenue` → `emma` → `verify` → `selftest`.
+
+**The fetch: 1,252 of 1,252 NPORT documents at HTTP 200**, one host lock on
+`www.sec.gov`, >=0.20s gap, declared User-Agent with contact, manifest flushed
+after every request. Nine transient `503`s on the first pass were re-fetched
+and cleared. `mine` parsed all 1,252 with **0 parse failures**.
+
+### The register, measured
+
+| | |
+|---|---:|
+| fund-holding observations | **1,585** |
+| distinct obligors | **14** |
+| distinct Cedar entities reached | **13** (Downstream and Quapaw Nation are one nation under two obligor names) |
+| distinct registered funds holding tribal paper | **199** |
+| distinct CUSIPs | **28** |
+| report periods covered | **2019-09-30 to 2026-06-30** |
+| bonds (`DBT`) / loans (`LON`) | 1,336 / 249 |
+| rows flagged `isRestrictedSec = Y` (144A paper) | **300** |
+| rows with an as-filed default or arrears flag | **0** |
+
+| obligor | observations | funds holding it | Cedar entity | tier |
+|---|---:|---:|---|---|
+| Mohegan Tribal Gaming Authority | 1,382 | 188 | `CE-0016X-GY` | B |
+| PCI Gaming Authority (Poarch Band of Creek Indians) | 59 | 15 | `CE-0018H-JJ` | B |
+| Southern Ute Indian Tribe | 46 | 14 | `CE-001AX-4Y` | B |
+| River Rock Entertainment Authority | 22 | 7 | `CE-00143-AM` | B |
+| Catawba Nation Gaming Authority | 19 | 10 | `CE-0012V-GC` | B |
+| Navajo Nation | 13 | 4 | `CE-0017F-1G` | B |
+| Inn of the Mountain Gods Resort and Casino | 8 | 2 | `CE-0017A-3K` | B |
+| Mashantucket (Western) Pequot Tribe | 8 | 1 | `CE-0017C-F5` | B |
+| Oneida Indian Nation of New York | 8 | 3 | `CE-0017X-NE` | B |
+| Seminole Tribe of Florida | 8 | 3 | `CE-001A9-CA` | A |
+| Cabazon Band of Mission Indians | 5 | 1 | `CE-0012P-JF` | B |
+| Downstream Development Authority | 4 | 2 | `CE-0018Z-6G` | B |
+| Quapaw Nation | 2 | 1 | `CE-0018Z-6G` | A |
+| Oglala Sioux Tribe | 1 | 1 | `CE-0017T-33` | A |
+
+**300 rows are 144A restricted paper.** That is the direct answer to the
+question `docs/DEALS_SEC_2010_2017_BUILD_LOG.md` left open: Rule 144A tribal
+debt is *"invisible to EDGAR by construction"* from the ISSUER side, and it is
+perfectly visible from the HOLDER side, because the fund that bought it has its
+own disclosure obligation. **The instrument does not have to be registered for
+the position in it to be reported.**
 
 ---
 
 ## The obligors, and how many resolve to a Cedar entity
 
-**8 of 8 obligors resolve to a Cedar entity.** Four resolution passes, each
+**14 of 14 obligors resolve to a Cedar entity** (13 distinct entities). Four
+resolution passes, each
 weaker than the last and each labelled on the row:
 
 1. `exact_canonical_name` → tier **A**
@@ -119,8 +163,8 @@ court finding, not an acceleration, and not a corporate insolvency — **a triba
 obligor is a sovereign and a tribal default is not a corporate default.** Every
 distress row carries `sovereign_immunity_caution` saying exactly that.
 
-**Measured result: zero distress events.** Across every holding mined, `isDefault`
-and `areIntrstPmntsInArrs` are `N` on every row. That is a finding, not an empty
+**Measured result: zero distress events across all 1,585 holdings.**
+`isDefault` and `areIntrstPmntsInArrs` are `N` on every row. That is a finding, not an empty
 table: on this evidence, **no registered fund reported a tribal instrument in
 default or in arrears in the period covered**. It does not mean no tribal
 obligor has ever been distressed — the well-documented restructurings
@@ -293,8 +337,8 @@ open item in this workstream.
 |---|---:|---|
 | 787 gaming facilities | **2** (one new, one strengthened) | audited obligor SEC filings |
 | 787 gaming facilities | **0** | the NPORT holdings seam — it carries no revenue at all |
-| 284 gaming-operating tribes | **6** | obligors with a gaming instrument |
-| ~574 nations | **8 obligors → 8 Cedar entities** | of which 6 are gaming, 2 governmental |
+| ~574 nations | **13 distinct Cedar entities**, 14 obligors | a registered fund holds their paper |
+| 284 gaming-operating tribes | **9** | obligors whose instrument is a gaming instrument |
 | 11 facilities with an honest per-property number | **12 after this build** | +1 (`VP-0034`) |
 
 **This reaches a very small fraction of Indian Country and that is the correct
@@ -320,11 +364,27 @@ gaming authority — an initialism containing no tribal word. It was added, with
 the reason recorded inline. Everything else the audit surfaced was noise
 (`National Association`, `International`, `Indiana`).
 
-Six names were **refused** as measured false-positive classes, each one from the
-list `docs/TRIBAL_DEBT_BUILD_LOG.md` established against Moody's sitemaps:
+Names are **refused** against the measured false-positive classes
+`docs/TRIBAL_DEBT_BUILD_LOG.md` established against Moody's sitemaps:
 `INDIANA MICHIGAN POWER CO`, `DUKE ENERGY INDIANA LLC`, `INDIANAPOLIS PWR &
-LIGHT`, `MOHAWK INDUSTRIES INC`, and `Hard Rock Indiana Casino`. Invariant `I4`
+LIGHT`, `MOHAWK INDUSTRIES INC`, `Hard Rock Indiana Casino`. Invariant `I4`
 fails the build if any of them ever reaches the holdings table.
+
+### One false positive got through the guard, and it is worth the space
+
+The full-corpus run admitted **South Carolina Jobs-Economic Development
+Authority, International Paper Co. Project, Series 2023A** as a tribal obligor.
+
+The generic token `economic development authority` is only accepted when a
+tribal word appears in the same string, and the guard tested that with plain
+containment. `"nation"` is a substring of `"INTERnationAL"`. **The containment
+defect `AGENTS.md` forbids, committed inside the guard written to prevent it.**
+
+Caught by *reading the fourteen-row obligor list*, not by any check — a state
+conduit issuer financing a paper mill is obvious to a human and invisible to a
+count. Fixed with a word-boundary regex (`TRIBAL_WORD`), and the conduit-issuer
+family added to the refusal list. **The lesson is the review, not the regex:
+this table is small enough to read end to end, so read it.**
 
 ---
 
@@ -382,7 +442,9 @@ figure next to the source sentence before anything was written to a file** —
 which is field-guide habit 3, and it is the reason the error cost five minutes
 instead of appearing as a plausible number in a shipped table.
 
-A fourth, smaller: the fetch's circuit breaker counted `404` as a refusal and
+A fourth is the `nation`-inside-`International` containment bug above.
+
+A fifth, smaller: the fetch's circuit breaker counted `404` as a refusal and
 stopped after five. `404` is a **fact about the object** (`START_HERE.md`
 standing rule), not the host turning us away — here it meant `NPORT-EX` ships an
 HTML exhibit rather than `primary_doc.xml`, measured against `index.json` rather

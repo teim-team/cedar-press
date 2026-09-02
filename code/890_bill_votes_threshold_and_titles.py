@@ -16,12 +16,23 @@ WHY - TWO DEFECTS docs/WHAT_IS_MISSING.md NAMED, BOTH ON THE SAME 423 ROWS
 offers `114-hr-360` and "On Motion to Suspend the Rules and Pass, as Amended"
 and never says what the bill was. Measured 2026-09-02 with csv.reader, not
 from a manifest: `native_bills.csv` holds 3,069 rows keyed on `bill_id`, and
-**390 of the 423 votes join to a non-blank `title`** (92.2%). The other 33 are
-accounted for, not dropped: **25 votes carry no `bill_id` at all**
-(`vehicle_type = no_bill_number`) and **8 join to a row whose `title` is
-blank** - five treaty documents and three pre-1980 House resolutions. Each of
-the three states its own reason in `bill_title_source`, so a blank is a fact
-about the source rather than a silence.
+**398 of the 423 votes join to a non-blank `title`** (94.1%).
+
+> UPDATED 2026-09-02 by `code/1092_bill_titles_residue_and_scope.py`. This
+> figure was **390 of 423** when 890 was first written, with 8 votes joining
+> to a `native_bills.csv` row whose `title` was blank - five treaty documents
+> and three pre-1980 House resolutions. All eight were closed at the source:
+> the three House measures had been asked for with Voteview's `hre`/`hjr`
+> abbreviation instead of congress.gov's `hres`/`hjres`, and the five treaty
+> documents live on `/treaty/{congress}/{number}`, an endpoint nobody had
+> called. `TITLE_BLANK_IN_native_bills.csv` is now 0.
+
+The remaining 25 are accounted for, not dropped: they carry no `bill_id` at
+all (`vehicle_type = no_bill_number`). 22 of the 25 are votes on reservations
+to a resolution of ratification - 17 Panama Canal Treaty, 4 Neutrality Treaty,
+1 US-UK tax treaty - where there is no bill and therefore no bill title. Each
+states its own reason in `bill_title_source`, so a blank is a fact about the
+source rather than a silence.
 
 **2. Sixteen votes read as failures on a majority tally, and nothing said
 why.** WHAT_IS_MISSING named nine, all House suspensions. Re-measured on the
@@ -589,14 +600,27 @@ CB_MASTER = CLEAN / "codebook_master.csv"
 NEW_VARIABLES = {
     "bill_title": ("text", "text",
         "The bill's title, VERBATIM from native_bills.csv joined on bill_id. "
-        "Non-blank on 390 of 423 votes; bill_title_source states the reason "
-        "for every blank. Nothing here is paraphrased or reconstructed."),
+        "Non-blank on 398 of 423 votes [2026-09-02; was 390 before "
+        "code/1092 closed the eight]; bill_title_source states the reason for "
+        "every blank. Nothing here is paraphrased or reconstructed."),
     "bill_title_source": ("text", "code",
-        "Why bill_title holds what it holds: `native_bills.csv:title` (390), "
+        "Why bill_title holds what it holds: `native_bills.csv:title` (398), "
         "`NO_BILL_ID_ON_VOTE` (25 - vehicle_type=no_bill_number), "
-        "`TITLE_BLANK_IN_native_bills.csv` (8 - five treaty documents and "
-        "three pre-1980 House resolutions), "
-        "`BILL_ID_NOT_IN_native_bills.csv` (0 today)."),
+        "`TITLE_BLANK_IN_native_bills.csv` (0 since 2026-09-02; code/1092 "
+        "closed all eight at congress.gov), "
+        "`BILL_ID_NOT_IN_native_bills.csv` (0). A BLANK TITLE MEANS THE "
+        "SOURCE PUBLISHED NONE FOR THIS VOTE ROW: 22 of the 25 are votes on "
+        "reservations to a resolution of ratification (17 Panama Canal "
+        "Treaty, 4 Neutrality Treaty, 1 US-UK tax treaty) - there is no bill, "
+        "so there is no bill title, and that is a fact about the world rather "
+        "than a Cedar deficiency. The other 3 (H100-0888, S100-0417, "
+        "S100-0452) DO name a numbered measure inside their own question "
+        "text; their titles are on disk, unpromoted, at "
+        "data/raw/external/congress_gov/1092_title_residue_unlinked.csv, "
+        "because promoting one means minting a bill_id and a native_bills row "
+        "- a rebuild decision for 14_build_bills_votes.py, not an "
+        "enrichment. S100-0417 adopted SIX resolutions en bloc, so no single "
+        "bill title is the correct answer for that row at all."),
     "threshold_required": ("text", "code",
         "The vote threshold the question actually had to clear. One of "
         "SIMPLE_MAJORITY_OF_THOSE_VOTING, TWO_THIRDS_OF_THOSE_VOTING (House "

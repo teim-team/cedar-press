@@ -146,6 +146,28 @@ COLLECTIONS: list[dict] = [
     {"id": "nest", "name": "NEST: Native Enterprise Structures and Ties",
      "shelf": "pro", "prefixes": [],
      "tables": r"^nest_"},
+    # Added 2026-09-02 by code/1105_newsletter_corpus_ship.py. The 15th
+    # collection. It is a FINDING AID, not a text corpus: one row per
+    # publication channel a Native entity operates, with the archive depth its
+    # own index exposes, plus a coverage ledger whose denominator is the whole
+    # spine. Nobody publishes a cross-nation catalogue of tribal periodicals -
+    # the closest published things are single-nation mastheads and the Native
+    # American Journalists Association's membership list, neither of which is
+    # a denominator.
+    #
+    # WHAT IT DELIBERATELY IS NOT: the issues. Depth is measured from the
+    # index and the media library; back issues are not downloaded in bulk, and
+    # no issue body text enters Cedar, because a tribal newspaper carries
+    # obituaries, health notices and family announcements about people who are
+    # not public figures. 990's invariant 7 fails the build on any field over
+    # 1,200 characters, which is the shape body text would arrive in.
+    #
+    # `shelf` is `standard`: this is a catalogue of what Indian Country
+    # publishes, and the product catalog (src/features/grove/pressCatalog.js)
+    # needs a matching entry before it is priced.
+    {"id": "newsletters", "name": "The Native Press: Tribal Newsletters and "
+     "Periodicals", "shelf": "standard", "prefixes": [],
+     "tables": r"^tribal_newsletter_"},
     {"id": "natural-resources", "name": "Natural Resource Revenues", "shelf": "pro",
      "prefixes": ["12", "15"],
      "tables": r"^(resource_|tribal_tax|nd_severance|tribal_debt|tribal_bond|anc_ceiling|ancsa_)"},

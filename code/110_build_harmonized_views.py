@@ -61,6 +61,23 @@ TODAY = date.today().isoformat()
 
 csv.field_size_limit(min(sys.maxsize, 2**31 - 1))
 
+
+def _derive(canonical, path):
+    """Canonical order first, then any column the live file already carries.
+
+    ADR-017 / `845` rule 17. Added 2026-09-02. Same shape as
+    `code/354_correction_register.py`.
+    """
+    if not Path(path).exists():
+        return list(canonical)
+    try:
+        with open(path, encoding="utf-8-sig", errors="replace") as fh:
+            live = next(csv.reader(fh), [])
+    except OSError:
+        return list(canonical)
+    return list(canonical) + [c for c in live if c and c not in canonical]
+
+
 try:
     from cedar_domain import Tier
 except ImportError:
@@ -246,8 +263,14 @@ def main():
     prof.sort(key=lambda r: (-r["n_independent_sources"],
                              -r["total_amount_usd"]))
     p = CLEAN / "entity_evidence_profile.csv"
+    # ADR-017 / `845` rule 17, class 3. `list(prof[0].keys())` LOOKS derived
+    # and is not: it is derived from the row THIS build just built, so it
+    # deletes an in-place enricher's column exactly as a literal would. It was
+    # losing `cedar_uid`. Derive from the LIVE file as well, canonical first.
+    _canonical = list(prof[0].keys())
+    _fields = _derive(_canonical, p)
     with open(p, "w", encoding="utf-8", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=list(prof[0].keys()))
+        w = csv.DictWriter(fh, fieldnames=_fields, extrasaction="ignore")
         w.writeheader()
         w.writerows(prof)
 

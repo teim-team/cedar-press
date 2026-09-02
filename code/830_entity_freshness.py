@@ -105,8 +105,25 @@ IDENTITY_LAYER = {
 }
 
 # The shape test that backs up the name list above. Derived, not enumerated.
-CENSUS_COVERAGE_MIN = 0.98        # of the register
-CENSUS_ROWS_PER_UID_MAX = 1.05
+# THIRD LANDING IN ONE SESSION, AND THE THRESHOLD WAS THE PROBLEM.
+# `regulations_gov_entity_coverage.csv` arrived after the two above: 1,502 of
+# 1,555 entities (96.6%) at 1.14 rows each, one row per entity per query name,
+# with `coverage_status` and `coverage_basis` columns. It is a ledger of what
+# Cedar SEARCHED, not of anything about the entities -- and it slipped under a
+# 98%/1.05 shape test by a hair and drove the absence count back to 0.
+#
+# Two changes, because a single numeric edge will keep being missed by a hair:
+#   * the bounds widen to 90% coverage and 1.30 rows/entity. Measured against
+#     the live tree: at >=90% coverage the only tables are the three ledgers
+#     (1.00, 1.00, 1.14 rows/entity) and three named identity-layer files
+#     (4.22 and 22.x rows/entity). Nothing legitimate is inside the box.
+#   * a filename that DECLARES itself a coverage or freshness ledger is taken
+#     at its word. This is not the filename blacklist that failed twice -- that
+#     enumerated specific files and could not see a new one. This is a pattern
+#     the ledger's own author chose to write.
+CENSUS_COVERAGE_MIN = 0.90        # of the register
+CENSUS_ROWS_PER_UID_MAX = 1.30
+LEDGER_NAME = re.compile(r"(_coverage|_freshness|_probe_log|_sweep_log)\.csv$")
 
 # Dates about CEDAR, never about the entity. Counting these reports every
 # entity as touched today and makes the ledger a mirror of the last build.
@@ -327,9 +344,10 @@ def main() -> int:
     # register -- a real dataset covers what it has something to say about.
     census = sorted(
         t for t, u in tbl_uids.items()
-        if len(u) / max(1, len(known)) >= CENSUS_COVERAGE_MIN
-        and tbl_rows[t] / max(1, len(u)) <= CENSUS_ROWS_PER_UID_MAX
-        and t not in IDENTITY_LAYER)
+        if t not in IDENTITY_LAYER
+        and ((len(u) / max(1, len(known)) >= CENSUS_COVERAGE_MIN
+              and tbl_rows[t] / max(1, len(u)) <= CENSUS_ROWS_PER_UID_MAX)
+             or LEDGER_NAME.search(t)))
     not_substantive = IDENTITY_LAYER | set(census)
     sub_tables_of = {uid: (ts - not_substantive) for uid, ts in seen_in.items()}
 

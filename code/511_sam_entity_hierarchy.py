@@ -148,8 +148,27 @@ def read_csv(p: Path) -> list:
         return list(csv.DictReader(fh))
 
 
+def _derive(canonical, path) -> list:
+    """Canonical order first, then any column the live file already carries.
+
+    A FIXED literal header is the regenerate defect (ADR-017): a wholesale
+    writer silently deleting an in-place enricher's column. Added 2026-09-02
+    after `845` rule 17 flagged `CONN_COLS -> sam_entity_connections.csv` as
+    losing `cedar_uid`. Same shape as `code/354_correction_register.py`.
+    """
+    if not Path(path).exists():
+        return list(canonical)
+    try:
+        with open(path, encoding="utf-8-sig", errors="replace") as fh:
+            live = next(csv.reader(fh), [])
+    except OSError:
+        return list(canonical)
+    return list(canonical) + [c for c in live if c and c not in canonical]
+
+
 def write_csv(p: Path, rows, cols) -> None:
     p.parent.mkdir(parents=True, exist_ok=True)
+    cols = _derive(cols, p)
     with p.open("w", encoding="utf-8", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=cols, extrasaction="ignore")
         w.writeheader()

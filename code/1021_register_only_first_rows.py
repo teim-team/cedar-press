@@ -142,8 +142,26 @@ IDENTITY_LAYER = {
 # Measured against the live tree 2026-09-02: this refuses
 # `tribal_newsletter_coverage.csv` and `cedar_entity_freshness.csv` and nothing
 # else. Refused tables are NAMED in the output, never silently dropped.
-CENSUS_COVERAGE_MIN = 0.98      # of the register
-CENSUS_ROWS_PER_UID_MAX = 1.05
+# THIRD LANDING IN ONE SESSION, AND THE THRESHOLD WAS THE PROBLEM.
+# `regulations_gov_entity_coverage.csv` arrived after the two above: 1,502 of
+# 1,555 entities (96.6%) at 1.14 rows each, one row per entity per query name,
+# with `coverage_status` and `coverage_basis` columns. It is a ledger of what
+# Cedar SEARCHED, not of anything about the entities -- and it slipped under a
+# 98%/1.05 shape test by a hair and drove the absence count back to 0.
+#
+# Two changes, because a single numeric edge will keep being missed by a hair:
+#   * the bounds widen to 90% coverage and 1.30 rows/entity. Measured against
+#     the live tree: at >=90% coverage the only tables are the three ledgers
+#     (1.00, 1.00, 1.14 rows/entity) and three named identity-layer files
+#     (4.22 and 22.x rows/entity). Nothing legitimate is inside the box.
+#   * a filename that DECLARES itself a coverage or freshness ledger is taken
+#     at its word. This is not the filename blacklist that failed twice -- that
+#     enumerated specific files and could not see a new one. This is a pattern
+#     the ledger's own author chose to write.
+CENSUS_COVERAGE_MIN = 0.90      # of the register
+CENSUS_ROWS_PER_UID_MAX = 1.30
+LEDGER_NAME = re.compile(r"(_coverage|_freshness|_probe_log|_sweep_log)\.csv$")
+
 
 CCD = "https://educationdata.urban.org/api/v1/schools/ccd/directory/"
 CCD_YEARS = (2022, 2021, 2020, 2019, 2018, 2016, 2014, 2012, 2010, 2008,
@@ -397,9 +415,12 @@ def substantive_presence():
     for fn, (uids, n) in sorted(per_table.items()):
         cov = len(uids) / max(1, len(known))
         rpu = n / max(1, len(uids))
-        if cov >= CENSUS_COVERAGE_MIN and rpu <= CENSUS_ROWS_PER_UID_MAX:
+        if (cov >= CENSUS_COVERAGE_MIN and rpu <= CENSUS_ROWS_PER_UID_MAX)                 or LEDGER_NAME.search(fn):
             skipped.append("%s (census of the register: %.0f%% coverage, "
-                           "%.2f rows/entity)" % (fn, cov * 100, rpu))
+                           "%.2f rows/entity%s)"
+                           % (fn, cov * 100, rpu,
+                              "; name declares a ledger"
+                              if LEDGER_NAME.search(fn) else ""))
             continue
         scanned.append(fn)
         for uid in uids:

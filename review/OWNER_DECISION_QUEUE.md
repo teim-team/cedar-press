@@ -218,6 +218,54 @@ shipped table from staged zips, followed by re-running `503_identity.py stamp`.
 on the sibling table, and until it runs the readiness scoreboard is blocking
 `funding` on a defect that no longer exists in the code.
 
+> #### CORRECTION APPENDED 2026-09-02 — 8b IS SETTLED, AND ITS RECOMMENDATION IS NOW WRONG
+>
+> **Do not run `30_funding_pre2008.py build`.** The recommendation above rests
+> on two premises and both have since become false. Measured by
+> `code/1083_faads_zip_column_census.py` — every CSV member of every staged
+> object, header bytes only, **zero unmeasured** — and cross-checked against
+> the live table's own `source_file`, **77 of 77 objects with no exception in
+> either direction**:
+>
+> | | source objects | rows | keyed in the clean table | columns on disk |
+> |---|---:|---:|---|---:|
+> | wide | **17** | 825,754 | **100.0% each** | 112 |
+> | narrow | **60** | 1,943,994 | **0.0% each** | 20 |
+>
+> 1. **The duplication is already repaired, and not by a rebuild.**
+>    `code/791_faads_transaction_key_and_repoint.py` (2026-09-01) merged the key
+>    on **by content** and took 179,259 literal duplicates to **3,441**, with
+>    29,594 of 29,594 attributions re-found and 0 moved. The paragraph above
+>    predates that pass.
+> 2. **A re-extract would recover ZERO new keys.** The 17 objects that carry
+>    the key are already 100% keyed. The 60 that are not keyed are 20-column
+>    objects whose bytes never held the column, so there is nothing in them for
+>    a re-extract to take. Derivation is closed too: the key is
+>    `{sub_agency_code}_{fain}_{uri}_{cfda}_{modification_number}` and the
+>    narrow objects carry neither `awarding_sub_agency_code` nor
+>    `modification_number`.
+> 3. **It would cost the audit trail.** A rebuild re-points `faads_row_id`,
+>    which is a ROW POSITION and the anchor for all 29,594 attributions — the
+>    exact hazard `791` was built to defend against.
+>
+> **Recommendation, replacing the one above: leave the table as it stands and
+> close the item.** The residual 3,441 byte-identical rows are declared, in
+> band, inside the unkeyed FY2001–2006 region, and `cedar_export_safety.csv`
+> already books the table `ROW_LEVEL_ONLY / grain UNSTATED`.
+>
+> **What was done instead**, at zero risk to the row anchor:
+> `code/1086_faads_award_key_promote.py` promoted
+> **`assistance_award_unique_key` onto 2,769,748 of 2,769,748 rows (100.0%)** —
+> read from the 112-column objects' own column, and derived for the other
+> 1,943,994 from `usaspending_permalink`, which those 20 columns DO carry on
+> 100% of rows. 1,493,774 join groups, **0 ambiguous**, rows and money
+> conserved to the cent, `verify` exit 0. It is award grain and makes no grain
+> claim; what it buys is that a pre-2008 award can be followed into
+> `federal_funding_transactions.csv`.
+>
+> Full write-up: **`docs/FAADS_TRANSACTION_KEY_SETTLEMENT_2026-09-02.md`**.
+> Per-member evidence: `docs/FAADS_ZIP_COLUMN_CENSUS.json`.
+
 ### 8c. As-of ownership: 81.4% of prime dollars, and what the shelf should do
 
 `code/429_apply_asof_ownership_status.py` now carries the temporal verdict onto

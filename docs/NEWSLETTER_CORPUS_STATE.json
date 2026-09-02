@@ -1,8 +1,8 @@
 {
   "script": "code/990_build_newsletter_corpus.py",
   "run_date": "2026-09-02",
-  "corpus_rows": 1884,
-  "corpus_entities": 1169,
+  "corpus_rows": 1889,
+  "corpus_entities": 1174,
   "restrictive_rows_dropped": 16,
   "restrictive_hosts_seen": [
     "chickasawtimes.net",
@@ -17,15 +17,15 @@
   ],
   "spine_entities": 1555,
   "by_probe_status": {
-    "found": 692,
-    "attempted_none_found": 477,
-    "not_probed": 376,
+    "found": 694,
+    "attempted_none_found": 480,
+    "not_probed": 371,
     "excluded_terms_stated_restrictive": 10
   },
   "by_channel_type": {
-    "news_page": 240,
-    "newsletter": 887,
-    "none_found": 478,
+    "news_page": 241,
+    "newsletter": 888,
+    "none_found": 481,
     "statutory_filings": 58,
     "shareholder_communication": 11,
     "wp_media_library": 28,
@@ -39,7 +39,7 @@
     "shard_i": 139,
     "shard_h": 141,
     "shard_a": 22,
-    "gap_sweep": 670,
+    "gap_sweep": 675,
     "shard_f": 228,
     "shard_e": 268,
     "web_map:shard_k": 105,
@@ -52,7 +52,7 @@
   },
   "found_by_entity_class": {
     "State-recognized tribe": 17,
-    "Federally recognized tribe": 262,
+    "Federally recognized tribe": 264,
     "Federally recognized Alaska Native Village": 130,
     "Alaska Native Regional Corporation": 11,
     "Federal-level self-governance consortium": 22,
@@ -66,14 +66,98 @@
     "Native Hawaiian Organization": 11,
     "Individually Native-owned business": 1
   },
-  "not_probed_with_live_site": 251,
+  "coverage_by_site_url_class": {
+    "own_live_site": 1008,
+    "wayback_snapshot_only": 100,
+    "third_party_api_endpoint": 64,
+    "propublica_irs_profile_only": 102,
+    "no_url_anywhere": 274,
+    "social_media_only": 7
+  },
+  "not_probed_by_site_url_class": {
+    "wayback_snapshot_only": 66,
+    "no_url_anywhere": 125,
+    "own_live_site": 174,
+    "social_media_only": 6
+  },
+  "found_rate_among_own_live_site": {
+    "ANCSA Group Corporation": [
+      0,
+      0
+    ],
+    "Alaska Native Regional Corporation": [
+      11,
+      12
+    ],
+    "Alaska Native Village Corporation": [
+      33,
+      38
+    ],
+    "BIE School": [
+      0,
+      176
+    ],
+    "Federal-level constituency entity": [
+      10,
+      16
+    ],
+    "Federal-level self-governance consortium": [
+      9,
+      10
+    ],
+    "Federally recognized Alaska Native Village": [
+      91,
+      107
+    ],
+    "Federally recognized tribe": [
+      257,
+      328
+    ],
+    "Individually Native-owned business": [
+      1,
+      15
+    ],
+    "Intertribal Organization": [
+      10,
+      10
+    ],
+    "Native Community Development Financial Institution": [
+      47,
+      60
+    ],
+    "Native Financial Institution": [
+      17,
+      28
+    ],
+    "Native Hawaiian Organization": [
+      11,
+      102
+    ],
+    "State-level constituency entity": [
+      0,
+      1
+    ],
+    "State-recognized tribe": [
+      16,
+      58
+    ],
+    "Tribal College or University": [
+      30,
+      36
+    ],
+    "Urban Indian Organization": [
+      11,
+      11
+    ]
+  },
+  "not_probed_with_live_site": 246,
   "by_record_status": {
-    "publication_channel": 1392,
-    "probe_absence": 478,
+    "publication_channel": 1394,
+    "probe_absence": 481,
     "flagged_not_native_publisher": 13,
     "contact_point_only": 1
   },
-  "publication_channels": 1392,
+  "publication_channels": 1394,
   "shard_i_place_name_collisions_flagged": 13,
   "archive_depth_10y_plus": 148,
   "deepest_archives": [

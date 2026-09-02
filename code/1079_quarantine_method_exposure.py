@@ -562,13 +562,22 @@ class Evidence:
             return ("", "", "", "", "not-unique" if hits else "no-hit")
         corp = hits[0]
         t = self.reports[corp]
-        i = t.find(phrase)
-        win = t[max(0, i - 200): i + len(phrase) + 200]
-        if " third party " in win:
-            return ("", corp, phrase.strip(), win, "veto:third-party")
-        density = len(re.findall(r" (?:llc|inc|corporation|company|ltd) ", win))
-        verb = any(v in win for v in (" subsidiar", " acquired ", " wholly owned ",
-                                      " interest in ", " was formed ", " owns "))
+        wins, i = [], t.find(phrase)
+        while i != -1 and len(wins) < 12:
+            wins.append(t[max(0, i - 200): i + len(phrase) + 200])
+            i = t.find(phrase, i + 1)
+        # ANY occurrence calling it somebody else's vetoes ALL of them.
+        for w in wins:
+            if " third party " in w:
+                return ("", corp, phrase.strip(), w, "veto:third-party")
+        best = ("", "", 0, False)
+        for w in wins:
+            density = len(re.findall(r" (?:llc|inc|corporation|company|ltd) ", w))
+            verb = any(v in w for v in (" subsidiar", " acquired ", " wholly owned ",
+                                        " interest in ", " was formed ", " owns "))
+            if density > best[2] or (verb and not best[3]):
+                best = (w, w, max(density, best[2]), verb or best[3])
+        win, _, density, verb = best
         if density < 3 and not verb:
             return ("", corp, phrase.strip(), win, "veto:mention-not-ownership")
         return (self.report_hub.get(corp, ""), corp, phrase.strip(), win,
@@ -647,9 +656,11 @@ def dispose(ev, it, ident, lr, firm):
     # association and bbnc".
     if nkey(fname) in ev.hub_names.get(hub, set()) or nkey(legal) in ev.hub_names.get(hub, set()):
         return ("KEEP", hub, "rule 7: exact whole-name match to the hub's own official name")
-    if distinctive(fname) and not ev.residue(fname, hub):
-        return ("KEEP", hub, "rule 7: residue empty - every distinctive word in the filed name "
-                             "is accounted for by the hub's own names")
+    fd = distinctive(fname)
+    hd = ev.hub_tok.get(hub) or set()
+    if fd and not ev.residue(fname, hub) and (fd - TRAPS) and (len(fd) >= 2 or fd == hd):
+        return ("KEEP", hub, f"rule 7: residue empty - every distinctive word in the filed name "
+                             f"({'|'.join(sorted(fd))}) is accounted for by the hub's own names")
     firm_is_a_hub = ev.hub_from_name(fname) or ev.hub_from_name(legal)
 
     # R4 -- the owner's own AUDITED ANNUAL REPORT
@@ -658,9 +669,7 @@ def dispose(ev, it, ident, lr, firm):
         if rh == hub:
             return ("KEEP", hub, f"audited annual report: {corp} names `{phrase}` in its own "
                                  f"consolidated subsidiary list [{verdict}]")
-        if rh in ev.region_of(hub) or (firm_is_a_hub and rh in ev.region_of(firm_is_a_hub)):
-            pass          # a regional report naming an entity IN ITS REGION is geography
-        elif firm_is_a_hub:
+        if firm_is_a_hub:
             return ("HOLD", "", f"audited annual report: {corp} names `{phrase}`, but the firm "
                                 f"is itself a Cedar entity ({firm_is_a_hub}) and a regional "
                                 f"report names the bodies in its region routinely. "
@@ -729,6 +738,28 @@ def dispose(ev, it, ident, lr, firm):
                 f"no rung of the corroboration ladder reached and the only shared token is "
                 f"`{'|'.join(sorted(shared))}`, on cedar_domain.NAME_TRAPS - the trap register "
                 f"says a token match on a trap is NO evidence")
+    # THE FRAGMENT RULE.  Where the hub's name carries two or more distinctive
+    # tokens and the firm matched exactly ONE of them, the firm did not match
+    # the NAME; it matched a FRAGMENT of it.  `docs/ENTITY_MATCH_RULES.md`
+    # opens on this exact defect - *"104 alias_type='brand' rows, every one a
+    # single token - `cultural`, `indigenous`, `colorado`, `broadband`,
+    # `advantage`; the alias was a fragment of a company name, not a name"* -
+    # and it is what put BLUE TECH INC ($3.51B) on Blue Lake Rancheria
+    # {blue|lake|california} and WOLFTEK MISSION GROUP on the Cabazon Band of
+    # Mission Indians {cabazon|cahuilla|california|mission}.  Seven rungs of
+    # corroboration have already failed by the time control reaches here.
+    if len(ht) >= 2 and len(shared_nontrap) == 1 and is_jv(fname):
+        return ("HOLD", "",
+                f"the firm matched a FRAGMENT of `{hubname}` "
+                f"(`{'|'.join(sorted(shared_nontrap))}` of {len(ht)} tokens) AND is a JOINT "
+                f"VENTURE, which genuinely has two parents (rule 11) - one of them may be this "
+                f"hub. Held rather than withdrawn. Owner ruling needed.")
+    if len(ht) >= 2 and len(shared_nontrap) == 1:
+        return ("WITHDRAW", "",
+                f"no rung of the corroboration ladder reached and the firm matched a FRAGMENT: "
+                f"`{'|'.join(sorted(shared_nontrap))}` is one token of `{hubname}`'s "
+                f"{len(ht)}-token name ({'|'.join(sorted(ht))}). A fragment of a name is not a "
+                f"name (docs/ENTITY_MATCH_RULES.md, the opening defect table)")
     return ("HOLD", "",
             f"shares `{'|'.join(sorted(shared_nontrap))}` with the hub but no corroborating "
             f"identifier, audited filing, ruled sibling or deal row. Undecided - rule 13 rung 6.")

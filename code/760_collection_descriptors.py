@@ -222,6 +222,50 @@ def rows_in(tables: list) -> int:
     return n
 
 
+def selftest() -> int:
+    """A check that has never failed on purpose is not known to work.
+
+    Three fixtures. Each asserts the NAMED invariant fires, not merely that
+    something went wrong - field guide section 3, habit 1.
+    """
+    ok = True
+
+    def case(name, tables_of, nrows_of, want_n, want_sub):
+        nonlocal ok
+        got = flagship_violations(tables_of, nrows_of)
+        hit = len(got) == want_n and (want_n == 0 or
+                                      want_sub in got[0][4])
+        print(f"    {'PASS' if hit else 'FAIL'}  {name}")
+        if not hit:
+            ok = False
+            print(f"          got {got}")
+
+    flag, _ = _flagship_map()
+    tbl = flag["native-owned-businesses"]
+    real = rows_in([tbl])
+    if real <= 0:
+        print("    UNMEASURED  flagship table unreadable - refusing to "
+              "report PASS on an input I cannot read")
+        return 1
+    print(f"  760 selftest   fixture flagship {tbl} = {real:,} rows")
+
+    # 1. the live defect: contract sum smaller than the flagship alone.
+    case("undercount fires", {"native-owned-businesses": []},
+         {"native-owned-businesses": real - 1}, 1, "the sampled table alone")
+    # 2. the flagship claimed and the sum larger: clean.
+    case("claimed + sufficient sum is clean",
+         {"native-owned-businesses": [tbl]},
+         {"native-owned-businesses": real + 1}, 0, "")
+    # 3. sum large enough but the flagship claimed by nobody: still a finding,
+    #    because an unclaimed table has no grain, no key and no rebuild path.
+    case("unclaimed flagship fires even when the sum is large",
+         {"native-owned-businesses": []},
+         {"native-owned-businesses": real + 1}, 1, "no collection contract")
+
+    print(f"  760 selftest   {'all fixtures pass' if ok else 'FAILED'}")
+    return 0 if ok else 1
+
+
 def main() -> int:
     verify = len(sys.argv) > 1 and sys.argv[1] == "verify"
     if not READINESS.exists():
@@ -391,4 +435,6 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "selftest":
+        sys.exit(selftest())
     sys.exit(main())

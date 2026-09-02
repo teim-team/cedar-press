@@ -1,0 +1,283 @@
+{
+ "generated": "2026-09-02",
+ "n_items": 351,
+ "breaches": [
+  {
+   "invariant": "V1",
+   "dataset": "funding",
+   "table": "faads_transactions.csv",
+   "why": "'always empty' asserted from a 20,000-row sample of a 60,661-row file",
+   "claimed_rows": 20001,
+   "true_rows": 60661,
+   "claimed_empty": 5,
+   "actually_empty": 3,
+   "false_columns": {
+    "recipient_duns": 1,
+    "recipient_uei": 1
+   },
+   "evidence": "always empty in 20,001 rows: recipient_duns, tribe_id, recipient_uei, assistance_type_description ..."
+  },
+  {
+   "invariant": "V1",
+   "dataset": "funding",
+   "table": "faads_transactions_all_agencies.csv",
+   "why": "'always empty' asserted from a 20,000-row sample of a 2,769,748-row file",
+   "claimed_rows": 20001,
+   "true_rows": 2769748,
+   "claimed_empty": 7,
+   "actually_empty": 4,
+   "false_columns": {
+    "recipient_duns": 677035,
+    "recipient_uei": 604653,
+    "assistance_type_description": 594
+   },
+   "evidence": "always empty in 20,001 rows: recipient_duns, tribe_id, recipient_uei, assistance_type_description ..."
+  },
+  {
+   "invariant": "V1",
+   "dataset": "funding",
+   "table": "federal_funding_transactions.csv",
+   "why": "'always empty' asserted from a 20,000-row sample of a 701,955-row file",
+   "claimed_rows": 20001,
+   "true_rows": 701955,
+   "claimed_empty": 18,
+   "actually_empty": 2,
+   "false_columns": {
+    "face_value_of_loan": 225031,
+    "original_loan_subsidy_cost": 225031,
+    "total_face_value_of_loan": 225031,
+    "total_loan_subsidy_cost": 225031,
+    "credit_instrument_flag": 225031,
+    "business_types_code": 225031,
+    "source_archive_stamp": 225031,
+    "fetched_date": 225031,
+    "business_types_description": 223337,
+    "business_types_description_normalized": 223337,
+    "business_types_description_normalized_basis": 223337,
+    "state_agreement": 199873,
+    "geo_pop_county_fips": 92064,
+    "geo_pop_state_fips": 92064,
+    "geo_pop_county_name": 92054,
+    "ledger_proposed_tribe_id": 15878
+   },
+   "evidence": "always empty in 20,001 rows: face_value_of_loan, original_loan_subsidy_cost, total_face_value_of_loan, total_loan_subsidy_cost ..."
+  },
+  {
+   "invariant": "V1",
+   "dataset": "federal-register",
+   "table": "federal_actions.csv",
+   "why": "'always empty' asserted from a 20,000-row sample of a 156,897-row file",
+   "claimed_rows": 20001,
+   "true_rows": 156897,
+   "claimed_empty": 2,
+   "actually_empty": 1,
+   "false_columns": {
+    "comment_url": 1178
+   },
+   "evidence": "always empty in 20,001 rows: comment_url, tribe_or_native_entity"
+  },
+  {
+   "invariant": "V1",
+   "dataset": "federal-register",
+   "table": "federal_actions_raw.csv",
+   "why": "'always empty' asserted from a 20,000-row sample of a 156,897-row file",
+   "claimed_rows": 20001,
+   "true_rows": 156897,
+   "claimed_empty": 1,
+   "actually_empty": 0,
+   "false_columns": {
+    "comment_url": 1178
+   },
+   "evidence": "always empty in 20,001 rows: comment_url"
+  },
+  {
+   "invariant": "V1",
+   "dataset": "lobbying",
+   "table": "lobbying_issue_families_filing.csv",
+   "why": "'always empty' asserted from a 20,000-row sample of a 27,796-row file",
+   "claimed_rows": 20001,
+   "true_rows": 27796,
+   "claimed_empty": 4,
+   "actually_empty": 0,
+   "false_columns": {
+    "entity_id_withdrawn": 471,
+    "entity_id_withdrawn_reason": 471,
+    "entity_id_withdrawn_by_script": 471,
+    "entity_id_withdrawn_date": 471
+   },
+   "evidence": "always empty in 20,001 rows: entity_id_withdrawn, entity_id_withdrawn_reason, entity_id_withdrawn_by_script, entity_id_withdrawn_date"
+  },
+  {
+   "invariant": "V1",
+   "dataset": "lobbying",
+   "table": "native_entity_lobbying_disclosures.csv",
+   "why": "'always empty' asserted from a 20,000-row sample of a 27,825-row file",
+   "claimed_rows": 20001,
+   "true_rows": 27825,
+   "claimed_empty": 8,
+   "actually_empty": 0,
+   "false_columns": {
+    "org_type_barred": 841,
+    "org_type_reason": 841,
+    "attribution_withdrawn": 471,
+    "attribution_withdrawn_entity_id": 471,
+    "attribution_withdrawn_reason": 471,
+    "attribution_withdrawn_by_script": 471,
+    "attribution_withdrawn_date": 471,
+    "expenses_usd": 237
+   },
+   "evidence": "always empty in 20,001 rows: expenses_usd, org_type_barred, org_type_reason, attribution_withdrawn ..."
+  },
+  {
+   "invariant": "V1",
+   "dataset": "contractors",
+   "table": "prime_contracts.csv",
+   "why": "'always empty' asserted from a 20,000-row sample of a 1,217,768-row file",
+   "claimed_rows": 20001,
+   "true_rows": 1217768,
+   "claimed_empty": 10,
+   "actually_empty": 0,
+   "false_columns": {
+    "contract_transaction_unique_key": 841002,
+    "contract_award_unique_key": 841002,
+    "action_date": 841002,
+    "geo_award_unique_key": 841002,
+    "naics_code": 838229,
+    "award_type": 769868,
+    "naics_description": 247987,
+    "product_or_service_code": 247987,
+    "product_or_service_code_description": 247987,
+    "award_base_description": 247987
+   },
+   "evidence": "always empty in 20,001 rows: contract_transaction_unique_key, contract_award_unique_key, naics_code, naics_description ..."
+  },
+  {
+   "invariant": "V3",
+   "dataset": "nonprofits",
+   "table": "np_orgs.csv",
+   "why": "conservation IS recorded, under a bracket-qualified source_table that 526's split('/')[-1] cannot match",
+   "evidence": "no conservation coverage"
+  },
+  {
+   "invariant": "V1",
+   "dataset": "gaming",
+   "table": "ca_gaming_payments.csv",
+   "why": "'always empty' asserted from a 20,000-row sample of a 41,758-row file",
+   "claimed_rows": 20001,
+   "true_rows": 41758,
+   "claimed_empty": 4,
+   "actually_empty": 3,
+   "false_columns": {
+    "issue_date": 181
+   },
+   "evidence": "always empty in 20,001 rows: county, derived_tribe_revenue_value, derived_revenue_scope, issue_date"
+  },
+  {
+   "invariant": "V1",
+   "dataset": "_entity_layer",
+   "table": "cedar_identifier_graph_edges.csv",
+   "why": "'always empty' asserted from a 20,000-row sample of a 46,820-row file",
+   "claimed_rows": 20001,
+   "true_rows": 46820,
+   "claimed_empty": 1,
+   "actually_empty": 0,
+   "false_columns": {
+    "asserting_row_ref": 7997
+   },
+   "evidence": "always empty in 20,001 rows: asserting_row_ref"
+  },
+  {
+   "invariant": "V3",
+   "dataset": "_entity_layer",
+   "table": "cedar_identifier_ledger_final.csv",
+   "why": "conservation IS recorded, under a bracket-qualified source_table that 526's split('/')[-1] cannot match",
+   "evidence": "no conservation coverage"
+  }
+ ],
+ "findings": [
+  {
+   "finding": "F3",
+   "dataset": "funding",
+   "table": "faads_transactions.csv",
+   "why": "population_scope IS declared in dataset_contracts.json and C12 does not read it",
+   "detail": "{\"scope\": \"national_mirror\", \"native_attribution_table\": \"faads_entity_attribution.csv\", \"basis\": \"the Department of the Interior slice of faads_transactions_all_agencies.csv, carried verbatim. Its own declared grain already says it: 'This is an AGENCY filter, NOT a Native one: tribe_id is blank on "
+  },
+  {
+   "finding": "F4",
+   "dataset": "deals",
+   "table": "deals_2026_ytd_additions.csv",
+   "why": "shippable but INVISIBLE to the standard: zero rows - 526 skips every column check, so the table produces no punch items at all",
+   "detail": ""
+  },
+  {
+   "finding": "F2",
+   "dataset": "natural-resources",
+   "table": "tribal_bond_issuances.csv",
+   "why": "C12 PASSES only on a FIELD-level provenance basis, which is not an inclusion basis",
+   "detail": "date_basis"
+  },
+  {
+   "finding": "F2",
+   "dataset": "gaming",
+   "table": "compact_versions.csv",
+   "why": "C12 PASSES only on a FIELD-level provenance basis, which is not an inclusion basis",
+   "detail": "approval_date_basis"
+  },
+  {
+   "finding": "F2",
+   "dataset": "gaming",
+   "table": "gaming_decision_events.csv",
+   "why": "C12 PASSES only on a FIELD-level provenance basis, which is not an inclusion basis",
+   "detail": "event_date_basis"
+  },
+  {
+   "finding": "F1",
+   "dataset": "_entity_layer",
+   "table": "cedar_identifier_graph_nodes.csv",
+   "why": "C12 PASSES on a basis column that is mostly blank",
+   "detail": "resolved_tier filled 3072/20001"
+  },
+  {
+   "finding": "F1",
+   "dataset": "_entity_layer",
+   "table": "cedar_ruling_ledger_consolidated.csv",
+   "why": "C12 PASSES on a basis column that is mostly blank",
+   "detail": "confidence_tier filled 2607/20001, tier_source filled 2607/20001"
+  },
+  {
+   "finding": "F1",
+   "dataset": "_entity_layer",
+   "table": "entity_hierarchy.csv",
+   "why": "C12 PASSES on a basis column that is mostly blank",
+   "detail": "hierarchy_basis filled 413/952"
+  },
+  {
+   "finding": "F1",
+   "dataset": "_entity_layer",
+   "table": "native_fi_roster.csv",
+   "why": "C12 PASSES on a basis column that is mostly blank",
+   "detail": "alias_basis filled 9/94"
+  },
+  {
+   "finding": "F2",
+   "dataset": "_entity_layer",
+   "table": "nho_ownership_changes.csv",
+   "why": "C12 PASSES only on a FIELD-level provenance basis, which is not an inclusion basis",
+   "detail": "date_basis"
+  }
+ ],
+ "stats": {
+  "V3_checked": 164,
+  "V1_checked": 81,
+  "V1_false": 10,
+  "V1_false_columns": 47,
+  "V2_checked": 43,
+  "V4_checked": 8,
+  "V3_false": 2,
+  "tables_scored": 226,
+  "F3": 1,
+  "F4": 1,
+  "F2": 4,
+  "F1": 4
+ }
+}
