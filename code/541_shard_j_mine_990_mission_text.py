@@ -40,6 +40,7 @@ Usage
 -----
     py -3 code/541_shard_j_mine_990_mission_text.py            full pass
     py -3 code/541_shard_j_mine_990_mission_text.py --inventory-only
+    py -3 code/541_shard_j_mine_990_mission_text.py --resolver-exposure
 """
 
 from __future__ import annotations
@@ -825,12 +826,136 @@ def propose_class(blob_norm: str, matched_class: str) -> str:
 # main
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# resolver exposure - the mission text as an INDEPENDENT test of 503.resolve()
+# ---------------------------------------------------------------------------
+
+def resolver_exposure() -> int:
+    """Cross `503.resolve()` against what each filer says it does.
+
+    Why this is worth measuring separately. `503`'s loose path wins on
+    "the spine entity's distinctive tokens are a subset of the filed name",
+    and its two guards (`ADMIN_GEOGRAPHY`, `CIVIC_FORM`) are DENYLISTS of
+    words - COUNTY, YACHT, ROTARY, GOLF. A denylist can only refuse a civic
+    form somebody has already thought of. `FOND DU LAC YACHT CLUB` is caught;
+    `ENVISION GREATER FOND DU LAC`, `FOND DU LAC FESTIVALS` and
+    `FOND DU LAC ADULT LITERACY SERVICES` are not, because no word in them is
+    on either list.
+
+    The mission text is the ORTHOGONAL test, and it is positive rather than
+    negative: instead of asking whether the filed NAME looks civic, it asks
+    what the organisation says it does. A 990 that reads "we are a volunteer
+    fire company" contradicts a resolution to a tribe no matter which words
+    the name happens to contain.
+
+    This function READS `503_identity.py` and calls `resolve()`. It writes
+    nothing to it, never runs `--apply`, and writes only into
+    `data/staging/np_mission/`.
+    """
+    import importlib.util
+
+    log("== 541 --resolver-exposure ==")
+    src = ROOT / "code" / "503_identity.py"
+    spec = importlib.util.spec_from_file_location("cedar_id503", src)
+    if spec is None or spec.loader is None:
+        raise SystemExit(f"cannot load {src}")
+    m = importlib.util.module_from_spec(spec)
+    sys.modules["cedar_id503"] = m
+    spec.loader.exec_module(m)
+    exact, gov, state_of = m.build_index()
+    log(f"  503 index: {len(exact):,} exact keys, {len(gov):,} gov-class entities")
+
+    bpath = OUT / "inclusion_basis.jsonl"
+    if not bpath.exists():
+        raise SystemExit(f"{bpath} not found - run the full pass first")
+    basis = {}
+    with bpath.open(encoding="utf-8") as fh:
+        for line in fh:
+            r = json.loads(line)
+            basis[r["ein"]] = r
+
+    with (CLEAN / "np_orgs.csv").open(encoding="utf-8-sig", newline="") as fh:
+        rd = csv.DictReader(fh)
+        for req in ("EIN", "org_name", "state"):
+            if req not in (rd.fieldnames or []):
+                raise SystemExit(f"np_orgs.csv has no {req!r} column")
+        np_rows = list(rd)
+
+    cross = Counter()
+    rows = []
+    for r in np_rows:
+        ein = (r["EIN"] or "").strip().replace("-", "").zfill(9)
+        b = basis.get(ein)
+        if b is None:
+            continue
+        tid, why = m.resolve(r["org_name"], exact, gov, state_of,
+                             r.get("state", ""))
+        cross[(b["inclusion_basis"], tid is not None)] += 1
+        if tid is None:
+            continue
+        agree = "n/a"
+        if b["inclusion_basis"] == "named_entity" and b["candidate_cedar_uid"]:
+            agree = "mission_names_an_entity_too"
+        verdict = "REVIEW"
+        if b["inclusion_basis"] == "placename_only" and                 b["match_confidence"] == "high":
+            verdict = "CONTRADICTED_BY_FILING"
+        rows.append({
+            "ein": ein,
+            "org_name": r["org_name"],
+            "resolver_entity_id": tid,
+            "resolver_basis": why,
+            "mission_inclusion_basis": b["inclusion_basis"],
+            "mission_match_confidence": b["match_confidence"],
+            "mission_names_entity": b["matched_entity_name"],
+            "mission_agreement": agree,
+            "verdict": verdict,
+            "civic_purpose_term": "|".join(b.get("supporting_terms") or []),
+            "quote_from_filing": b["quote"],
+            "source_file": b["source_file"],
+            "evidence_basis": ("IRS Form 990 mission/program text as filed; "
+                               "503.resolve() called read-only"),
+            "built_date": TODAY,
+        })
+
+    rows.sort(key=lambda x: (x["verdict"] != "CONTRADICTED_BY_FILING",
+                             x["resolver_entity_id"], x["org_name"]))
+    out = OUT / "resolver_exposure.csv"
+    with out.open("w", encoding="utf-8", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=list(rows[0].keys()) if rows else
+                           ["ein", "org_name", "verdict"])
+        w.writeheader()
+        w.writerows(rows)
+
+    hard = [x for x in rows if x["verdict"] == "CONTRADICTED_BY_FILING"]
+    ents = Counter(x["resolver_entity_id"] for x in hard)
+    log(f"  wrote {out.name}: {len(rows):,} orgs that 503 keys and that have "
+        f"a local 990")
+    log("  --- 503 keys it x what the filing says ---")
+    for (b, keyed), n in sorted(cross.items()):
+        log(f"    {b:42s} keyed={str(keyed):5s} {n:6,}")
+    log(f"  CONTRADICTED BY THE FILING: {len(hard)} orgs over {len(ents)} "
+        f"spine entities")
+    for tid, n in ents.most_common(12):
+        log(f"    {n:3d}  {tid}")
+    for x in hard[:8]:
+        log(f"    {x['org_name'][:46]:46s} -> {x['resolver_entity_id']}  "
+            f"[{x['civic_purpose_term']}]")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--inventory-only", action="store_true",
                     help="measure the corpus and stop; write no jsonl")
+    ap.add_argument("--resolver-exposure", action="store_true",
+                    help="cross the mission-text evidence against 503.resolve() "
+                         "and write resolver_exposure.csv; reads 503, never "
+                         "writes to it and never runs --apply")
     args = ap.parse_args()
+
+    if args.resolver_exposure:
+        return resolver_exposure()
 
     OUT.mkdir(parents=True, exist_ok=True)
 

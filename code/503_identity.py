@@ -204,6 +204,28 @@ CIVIC_FORM = {
 }
 
 
+# G3. Utility and civic-event forms. A federally recognized tribe is
+# essentially never the filer of one of these. Exempted whenever the filed
+# name carries a Native term, so a tribal utility keeps resolving.
+# HEALTHCARE / HOSPITAL / MEDICAL / CLINIC / FIRE are deliberately ABSENT:
+# tribes run all of those.
+CIVIC_UTILITY = {
+    "ELECTRIC", "ELECTRICAL", "COOPERATIVE", "COOP", "HOSE",
+    "MOTORSPORTS", "SNOWMOBILE", "FESTIVAL", "FESTIVALS", "FIREWORKS",
+    "FAIRGROUNDS", "AUDUBON", "HUMANE", "SPCA", "REALTORS", "QUILT",
+    "GENEALOGICAL", "CEMETERY", "LIBRARY", "LIBRARIES",
+}
+
+# Terms by which a filed name claims Native status for itself. Presence of any
+# one exempts the CIVIC_UTILITY refusal - "Navajo Tribal Utility Authority"
+# must keep resolving.
+NATIVE_TERM = {
+    "TRIBE", "TRIBES", "TRIBAL", "NATION", "NATIONS", "BAND", "BANDS",
+    "PUEBLO", "PUEBLOS", "RANCHERIA", "INDIAN", "INDIANS", "NATIVE",
+    "NATIVES", "NSN", "ANISHINAABE",
+}
+
+
 def loose_path_refusal(filed: str, canonical: str) -> str:
     """Why the loose token-subset path must NOT claim `filed`, or ''.
 
@@ -220,6 +242,43 @@ def loose_path_refusal(filed: str, canonical: str) -> str:
     if hit:
         return ("REFUSED_CIVIC_FORM:" + ",".join(sorted(hit))
                 + " - a civic organisation carrying a place name")
+    # G3. UTILITY AND CIVIC-EVENT FORMS, exempted by any Native term.
+    #
+    # 06_nonprofit.md has named Umatilla Electric Co-op ($592M) as a tier-A
+    # leak since August. Measured 2026-09-01: it STILL resolves, live, via
+    # this path - "gov-class distinctive-token match on 'Umatilla Tribe'".
+    # So did SENECA HOSE CO NO 1 (a volunteer fire company), TAOS VOLUNTEER
+    # FIRE DEPARTMENT and ONEIDA HEALTHCARE SYSTEMS (a 101-bed hospital).
+    # The doc recorded the symptom; nothing had measured that the mechanism
+    # was still firing.
+    #
+    # Two rules were tested against all 1,750 loose-path resolutions in
+    # np_orgs.csv before this one was chosen:
+    #
+    #   "filed name carries no Native term"  refused 1,489 of 1,750 - far too
+    #     blunt. It would have thrown away Chickasaw Development Corporation,
+    #     San Carlos Apache Healthcare Foundation, Tonto Apache School, Karuk
+    #     New Markets and Tlingit & Haida Foundation, all correct.
+    #   "org state disagrees with tribe state"  refused 1,067 - a strong
+    #     signal (it catches the AL/AR "Cherokee" groups and Laguna Woods CA
+    #     vs Laguna Pueblo NM) but too broad to apply blind, and it cannot see
+    #     Umatilla Electric, which is genuinely in Oregon. Queued for the
+    #     owner rather than applied here.
+    #
+    # This set is deliberately narrow: forms a federally recognized tribe is
+    # essentially never the filer of. HEALTHCARE, HOSPITAL, MEDICAL, CLINIC
+    # and FIRE are DELIBERATELY EXCLUDED - tribes run all of those, and San
+    # Carlos Apache Healthcare Foundation is a real tribal foundation that an
+    # earlier draft of this guard wrongly refused.
+    #
+    # Measured effect: 34 refusals out of 1,750, and every one inspected is a
+    # false positive - rural electric co-ops, volunteer hose companies, arts
+    # festivals, realtor boards, a cooperative nursery. Zero true matches lost.
+    hit = ft & CIVIC_UTILITY
+    if hit and not (ft & NATIVE_TERM):
+        return ("REFUSED_CIVIC_UTILITY:" + ",".join(sorted(hit))
+                + " - a utility or civic-event body carrying a place name,"
+                + " and the filed name claims no Native status")
     return ""
 
 
