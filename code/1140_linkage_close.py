@@ -16,8 +16,13 @@ writes into the thing it scans has been the cause of five wrong "clean"
 results in this repo (AGENT_FIELD_GUIDE rule 10).
 
 ===========================================================================
-THE FIVE TASKS, AND WHY EACH IS EVIDENCE AND NOT A GUESS
+SIX TASKS OVER FIVE SUBCOMMANDS, AND WHY EACH IS EVIDENCE AND NOT A GUESS
 ===========================================================================
+`bills` `assistance` `contracts` `ledger` `siblings`.  T5 rides in the
+`assistance` pass because it rewrites the same 660 MB file, and rewriting a
+table twice to keep a numbering scheme tidy is not a reason.  T6 `siblings`
+is documented at its own constant, `SIBLING_REPOINTS`, because the evidence
+for it is per-row.
 
 T1 `bills` - `data/clean/native_bills.csv`
     The `legislation` dataset ships with **no entity column at all**, while
@@ -129,6 +134,10 @@ T5 `assistance` (same pass as T2) - 504 rows saying they are keyed and are not
     it.  This is not the pending BBAHC repoint (owner decision queue item 1)
     and does not pre-empt it: it makes the row say what is true today, which
     is that nothing is keyed.
+
+T6 `siblings` - a ruling reaches the FIRM, not one of its registrations
+    127 prime rows / $15,015,304 and 4 ledger rows.  Full reasoning and the
+    evidence per row at `SIBLING_REPOINTS` below.
 
 ===========================================================================
 WHAT THIS PASS REFUSED, AND WHY
