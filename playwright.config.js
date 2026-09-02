@@ -4,8 +4,10 @@
 // renamed export that the bundler happily ships, a stylesheet whose rules
 // stop applying, a route that 404s once it is a static file rather than a
 // dev-server rewrite. `vite dev` hides all three, so the web server below
-// builds first and serves `dist`.
+// builds first and serves the build (`dist-site`, per vite.config.js).
 import { defineConfig, devices } from "@playwright/test";
+
+import { ACCOUNTS_JSON } from "./tests/demoAccount.js";
 
 const PORT = 4180;
 
@@ -36,5 +38,17 @@ export default defineConfig({
     url: `http://localhost:${PORT}/`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    // The suite builds the deployment it means to test, rather than
+    // inheriting whatever the machine happens to have configured.
+    //
+    // Empty VITE_API_URL pins this to STANDALONE: with a developer's local
+    // API in the environment the same build would be CONNECTED, the gate
+    // would authenticate against a server these tests never started, and the
+    // failure would read as a broken page.
+    //
+    // The demo account is the suite's own throwaway (tests/demoAccount.js).
+    // Without one the standalone gate signs nobody in — correctly — and
+    // every test past the door would fail.
+    env: { VITE_API_URL: "", VITE_PRESS_DEMO_ACCOUNTS: ACCOUNTS_JSON },
   },
 });
