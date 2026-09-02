@@ -790,12 +790,12 @@ refresh.
 | `Assistance_Subawards_2026-08-05_H22M29S09_1.csv` | 116 |
 | `Assistance_Subawards_2026-08-05_H21M06S27_1.csv` | 96 |
 | `fy2009` | 33 |
-| `fy2008` | 7 |
 | `fy2002` | 7 |
-| `fy2004` | 1 |
-| `fy2007` | 1 |
+| `fy2008` | 7 |
 | `fy2003` | 1 |
+| `fy2004` | 1 |
 | `fy2001` | 1 |
+| `fy2007` | 1 |
 
 **`source_dataset`** — 89,809 of 89,809 rows populated, 5 distinct values:
 
@@ -876,8 +876,8 @@ Cedar keys every dataset to one identity layer. `cedar_uid` is permanent and nev
 ### Every identity, tier and method column, measured
 
 - **`geo_key_tier`** — 1 distinct value: `(blank)` 71,615 · `exact_award_summary` 18,194
-- **`prime_native_tier`** — 3 distinct values: `(blank)` 49,921 · `A` 26,712 · `B` 12,972 · `source_filter` 204
-- **`sub_native_tier`** — 2 distinct values: `(blank)` 40,371 · `B` 30,186 · `A` 19,252
+- **`prime_native_tier`** — 3 distinct values: `(blank)` 49,906 · `A` 26,713 · `B` 12,991 · `source_filter` 199
+- **`sub_native_tier`** — 2 distinct values: `(blank)` 40,091 · `B` 30,440 · `A` 19,278
 - **`subaward_entity_rollup__confidence_tier`** — 2 distinct values: `(blank)` 53,792 · `A` 18,676 · `B` 17,341
 
 ### The evidence tiers
@@ -895,7 +895,11 @@ Cedar keys every dataset to one identity layer. `cedar_uid` is permanent and nev
 
 **No row was withheld from this delivery.** Every row that passed the collection's own inclusion test is in the spreadsheet. [measured — `dist/customer/MANIFEST.csv`, `rows_withheld = 0`]
 
-The gate itself is `code/cedar_publication.row_ok`, applied identically by every publisher: a row is withheld if `publishable` is set to anything outside `{Y, y, 1, true, TRUE, blank}`, or if `source_terms_status` is outside `{SILENT, TERMS_STATED_NO_REUSE_RESTRICTION, blank}`. **A blank gate column means the gate was never evaluated for that row, not that it failed.** Separately, ten column names are refused outright wherever they appear — `owner_name_raw`, `email`, `phone`, `home_address`, `personal_email`, `ssn`, `tin`, `date_of_birth`, `officer_name`, `contact_name` — and the proprietary identifier families (Casino City, D-U-N-S) drop as **columns**, not rows: the row is ours, the identifier is not.
+The row gate is `code/cedar_publication.row_ok`, applied identically by every publisher: a row is withheld if `publishable` is set to anything outside `{Y, y, 1, true, TRUE, blank}`, or if `source_terms_status` is outside `{SILENT, TERMS_STATED_NO_REUSE_RESTRICTION, blank}`. **A blank gate column means the gate was never evaluated for that row, not that it failed.**
+
+Two families are refused as **COLUMNS** rather than as rows, by `cedar_publication.publishable_columns`, because the row is ours and the field is not: the proprietary identifiers (`casino_city_id` — Casino City Press; the D-U-N-S family — Dun & Bradstreet), and personal data held apart from a public role (`owner_name_raw`, `email`, `phone`, `home_address`, `personal_email`, `ssn`, `tin`, `date_of_birth`, `officer_name`, `contact_name`).
+
+**The personal-data family became a column drop on 2026-09-02, and the change is worth understanding.** Until then it was a row gate only, and measured against the live tree that published **5 of the 587 rows** of `bia_tribal_leaders_directory.csv` — every row carrying a phone or an email was withheld whole — *and shipped the `phone` and `email` headers anyway on the five survivors*. Both halves of that were wrong. A tribal leader's name and office is a PUBLIC ROLE and belongs in the dataset; the phone number is the thing that must not travel. Dropping the field keeps 587 rows and publishes no contact data, where the row gate kept 5 rows and still advertised two contact columns. `row_ok` keeps its check as a **backstop**, for a personal field arriving under a name the list does not yet know. [from the record — the docstring of `cedar_publication.publishable_columns`, 2026-09-02]
 
 ### Known gaps — every line in `docs/WHAT_IS_MISSING.md` that names this dataset or its flagship
 
@@ -920,11 +924,11 @@ Measured over the delivered file. **A sum printed here is the unfiltered arithme
 
 | column | rows populated | distinct values | sum (unfiltered) | min | max |
 |---|---:|---:|---:|---:|---:|
-| `prime_award_amount` | 86,007 | 17,533 | $16,518,182,158,970.29 | $-514,458,497.00 | $35,035,280,267.19 |
+| `prime_award_amount` | 86,007 | 17,533 | $16,518,182,158,970.31 | $-514,458,497.00 | $35,035,280,267.19 |
 | `subaward_amount` | 89,809 | 55,110 | $57,020,557,710.47 | $-24,530,372.00 | $4,501,612,694.00 |
 | `subaward_amount_real2025` | 86,352 | 57,727 | $67,761,377,946.46 | $-32,813,420.06 | $4,743,961,514.99 |
-| `subaward_entity_rollup__usd_as_prime_a` ⚠ **joined** | 36,020 | 100 | $26,496,699,783,573.18 | $0.00 | $1,740,005,674.45 |
-| `subaward_entity_rollup__usd_as_subawardee_b` ⚠ **joined** | 36,020 | 114 | $19,583,506,623,258.34 | $0.00 | $1,684,411,206.21 |
+| `subaward_entity_rollup__usd_as_prime_a` ⚠ **joined** | 36,020 | 100 | $26,496,699,783,572.80 | $0.00 | $1,740,005,674.45 |
+| `subaward_entity_rollup__usd_as_subawardee_b` ⚠ **joined** | 36,020 | 114 | $19,583,506,623,258.36 | $0.00 | $1,684,411,206.21 |
 | `subaward_entity_rollup__usd_both_sides` ⚠ **joined** | 36,020 | 66 | $1,806,176,548,444.73 | $0.00 | $544,639,166.45 |
 
 **⚠ A column carrying a folded-in table's stem prefix is that table's grain repeated onto flagship rows, and row-summing it multiplies.** `subaward_entity_rollup__usd_as_prime_a`, `subaward_entity_rollup__usd_as_subawardee_b`, `subaward_entity_rollup__usd_both_sides` came from a supporting table joined one-to-one onto the flagship; the figure belongs to the entity or award the supporting table keys on, not to the row it is printed on. Sum it once per that key, never down the column. This is the owner-grain trap that turns $176.74B into $6,535.96B — a 36.98× inflation — in `contractor_ranking.csv`. [from the record — `docs/MONEY_TOTALLING_RULES.md`, block `GRAIN-WS5`]
@@ -933,8 +937,8 @@ Measured over the delivered file. **A sum printed here is the unfiltered arithme
 
 | column | belongs to | row-summed | once per that key | row-summing inflates by |
 |---|---|---:|---:|---:|
-| `subaward_entity_rollup__usd_as_prime_a` | `cedar_uid` (123 keys) | $26,496,699,783,573.18 | $7,943,989,328.24 | 3335.44× |
-| `subaward_entity_rollup__usd_as_subawardee_b` | `cedar_uid` (123 keys) | $19,583,506,623,258.34 | $7,000,813,664.93 | 2797.32× |
+| `subaward_entity_rollup__usd_as_prime_a` | `cedar_uid` (123 keys) | $26,496,699,783,572.80 | $7,943,989,328.24 | 3335.44× |
+| `subaward_entity_rollup__usd_as_subawardee_b` | `cedar_uid` (123 keys) | $19,583,506,623,258.36 | $7,000,813,664.93 | 2797.32× |
 | `subaward_entity_rollup__usd_both_sides` | `cedar_uid` (123 keys) | $1,806,176,548,444.73 | $1,231,925,611.55 | 1466.14× |
 
 **The once-per-key figure is not automatically the figure to publish either.** It is the arithmetic that removes the repetition, nothing more; whether that total is meaningful is the fence's question, not this table's. A column absent from this table is *not* thereby declared summable — it is only declared not to be constant within any key this file carries.
@@ -1000,7 +1004,7 @@ Each row below was re-measured from the delivered file just now. The superseded 
 {
   "dataset": "subcontracting",
   "file": "dist/customer/subcontracting.csv",
-  "bytes": 120663224,
+  "bytes": 120670845,
   "rows": 89809,
   "columns": 90,
   "header_sha256": "707b8b05d0080ce8330b69cd79ad9274030c6cf8f90b4c45d96c513bcb975274",
