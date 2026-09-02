@@ -65,8 +65,18 @@ mapping reached the descriptor and not the filename. See finding 7 below.
 - `blockers` (in the `.cedar.json` sibling) carries the **named** contract
   points rather than the bare word `BLOCKED`, so a consumer can tell a
   publication-rights block from an incomplete schema without opening an
-  external project. Today every dataset's list is empty — see *Status of the
-  fourteen*.
+  external project. **Two lists are non-empty today** — `owned` carries three
+  named failures and `deals` two. See *Status of the fourteen*. *(This line
+  read "Today every dataset's list is empty" until Codex round 3 found it
+  still saying so after the status section below had been changed to name
+  two. An overview and the section it summarises going out of step is the
+  same defect as the two row counts, one directory apart.)*
+- `rows_label` is a count **only when a count is established**. Where two
+  Cedar-side declarations of a collection's membership disagree it reads
+  `row count unresolved`, and the component measurements ship separately in
+  the `.cedar.json` sibling, each labelled with the table set it came from and
+  **not added together**. Codex round 3 was right that publishing the sum
+  fabricated a dataset that does not exist in that shape.
 
 **`samples/*.csv`** — 10 real rows per dataset, 14 datasets. Not drafts of the
 full tables; proof of concept, so the finished shape can be judged before the
@@ -363,11 +373,158 @@ but it is not what READY was asserting.
 **What was done, and what deliberately was not.** `760` now enforces the
 arithmetic invariant, with three fixtures that prove the check fires
 (`py -3 code/760_collection_descriptors.py selftest`) and a `verify` that
-exits 1. On a violation it does not quietly repair the number: it publishes
-the union of both Cedar-side declarations — 1,657 + 2,916 = **4,573 rows**,
-with the basis stated in `collection_descriptors.cedar.json` — and marks the
-dataset BLOCKED with the measurement in `cedar.blockers`. The status reverts
-on its own the moment the collection is fixed.
+exits 1. On a violation it marks the dataset BLOCKED and publishes the
+measurement in `cedar.blockers`. The status reverts on its own the moment the
+collection is fixed.
+
+**It publishes no row count at all, and the first version of this fix did —
+Codex round 3 was right to refuse it.** That version shipped the *sum*,
+1,657 + 2,916 = 4,573, which assumes the six contract tables and the flagship
+are disjoint rows of one dataset. Nothing establishes that: this very section
+argues they are **different relations** — firms a nation certified, and firms
+owned by individual people — which is a reason to think they are disjoint, not
+a measurement that they are. And the qualification sat in `n_rows_basis` in
+the sibling `.cedar.json`, while `rows_label` is the field the product
+renders, so a consumer would have seen `4,573 rows` as an exact count of a
+dataset that does not exist in that shape. A fabricated number with a footnote
+nobody renders is still a fabricated number. `rows_label` now reads
+**`row count unresolved`**, and the two component measurements ship separately
+in the sibling file — `n_rows_contract_tables` 1,657 and `n_rows_flagship`
+2,916 — each labelled with the table set it came from and not added together.
+
+**And pulling on the refusal found that 1,657 was never a row count either.**
+Codex's objection was that nothing establishes the two table sets are disjoint
+rows of one dataset. Measured, they very nearly are — 10 shared firm names
+across all six contract tables against the directory's 2,738. But the same
+measurement exposed something worse **inside** the contract set, which neither
+side had looked at:
+
+| table | rows | what a row is |
+|---|---:|---|
+| `individual_native_firm_register.csv` | 45 | a firm |
+| `individual_native_firm_contracts.csv` | 324 | a **firm-year** — 38 distinct firms |
+| `individual_native_ownership_verification.csv` | 335 | a firm's verification |
+| `individual_native_verification_candidates.csv` | 335 | **the same 335 firms again** — all 335 `(name, uei)` keys shared, identical column set |
+| `individual_native_firm_contracts_published.csv` | 613 | **not a firm at all** — `cell_type`, `dimension_1`, `dimension_2`, `n_firms`: a published cross-tabulation |
+| `individual_native_exclusion_pairs.csv` | 5 | a pair |
+| **sum** | **1,657** | **five different grains added together** |
+
+So 1,657 counts 335 firms twice and adds 613 aggregate summary cells to a firm
+count. **Neither number in the original contradiction was a count of a
+dataset**, and adding them produced a third that was worse than both. Codex
+asked for the count to be left unstated until the membership and
+de-duplication semantics are resolved; the de-duplication problem turned out
+to be inside the half nobody was questioning.
+
+**The blockers carry the flagship's own contract failures, not just the count
+mismatch** — also Codex round 3, and also right: the earlier version left the
+harder failures in prose, where a consumer following the instruction to read
+`cedar.blockers` would have concluded that reconciling the count alone makes
+`owned` ready. All three now ship, measured on the table itself rather than
+asserted: the flagship mismatch, `C4 identity path` (`business_entity_id`
+filled on 4 of 2,916 rows, 0.1%), and `C1 grain UNSTATED` with no validated
+primary key. The identity column is *found* among candidates rather than
+assumed, and a table carrying none of them reports UNMEASURED rather than a
+fill rate for a column that is not there.
+
+## Codex round 3, finding 2: one `Nan` in one sampled row, 617,097 in the table
+
+Codex saw `funding_agency = "Nan"` on row 4 of the contractors sample and
+called it the same stringification failure the README says was cleared from
+`parent_contract_number`. It was, and the reason it survived is more useful
+than the row.
+
+`772_strip_nan_sentinels.py` matched the sentinel **case-sensitively**, and
+its own docstring gives the reason: *"never a substring — `Nanticoke`,
+`Nanakuli` and `NANA` are real values in this project and a substring rule
+would eat all three."* Every one of those is an argument against a **substring**
+rule, and this was never a substring rule — it is a whole-cell equality test,
+and a 3-character token cannot equal a 4- or 8-character value. **The
+case-sensitivity guarded nothing that the whole-cell rule was not already
+guarding, and it hid this:**
+
+| column | cells | share of table | rendering |
+|---|---:|---:|---|
+| `cage_code` | 398,840 | 32.75% | `NAN` |
+| `place_of_perform_city` | 88,269 | 7.25% | `NAN` |
+| `place_of_perform_state` | 87,068 | 7.15% | `NAN` |
+| `funding_agency` | 33,263 | 2.73% | `Nan` |
+| `extent_competed` | 9,411 | 0.77% | `NAN` |
+| `recipient_state_code` | 202 | | `NAN` |
+| `parent_uei` | 22 | | `NAN` |
+| `recipient_city_name` | 22 | | `NAN` |
+| **total** | **617,097** | | |
+
+`extent_competed` is the worst of the eight. Cedar's own guidance is that the
+column holds two vocabularies and must be read through
+`extent_competed_normalized`; a phantom `NAN` code is a third.
+
+**The scope is one table, measured in both directions.** The same
+case-insensitive sweep over the eleven other flagship tables — `subawards`,
+`np_orgs`, `deals_classified`, `gaming_facilities`, `nagpra_notices`,
+`native_owned_businesses`, `nest_enterprises`, `resource_revenue`,
+`lobbying_registrants`, `bill_votes`, `consultation_events` — returns **0
+cells**. This is `prime_contracts.csv` and nothing else.
+
+**The token set was deliberately not widened.** `NA` (6 cells in
+`award_base_description`) and `N/A` (7 in `recipient_city_name`) are left
+exactly as they are. `NA` is an abbreviation a human may have typed to mean
+*not applicable*, which is a statement; stripping it would be a judgement
+rather than a repair. They are named here instead of swept.
+
+### The source fix lost a race, so the guard is in two places
+
+772 was corrected and run: 617,097 cells cleared, 1,217,768 rows in and out,
+`$310,005,258,660.75` unchanged to the cent. Re-measured minutes later:
+**all 617,097 were back.** A concurrent in-place enricher had read the table
+before 772 started, and wrote back its own copy — with five new
+`identifier_ruling_*` columns and every sentinel restored. 772's guard
+compares size and mtime **across its own read** and correctly saw nothing
+change; the other writer's read predated it.
+
+That is this project's documented collision in a new place: **two in-place
+enrichers on one table need a declared ordering, and these two had none.** It
+is reported rather than fought — re-running 772 in a loop against another job
+is a write war, and the ordering is an integrator decision.
+
+So the second guard sits in the **product layer, where it cannot be raced**.
+`770` now blanks any whole-cell null token (`nan`, `none`, `null`, `<na>`,
+`nat`, case-insensitive) across the **whole source table** before the ten rows
+are drawn — which also stops a row being judged "complete", and so
+preferentially sampled, for holding the string `Nan`. Whatever the live table
+holds this minute, no sample ships a fictitious agency. The counts are printed
+per column and published in `samples/README.md` as a coverage fact, so the
+guard surfaces the upstream defect rather than concealing it.
+
+## Why the samples moved more than the fixes explain
+
+Fixing finding 2 needed the generator to run, and it could not. `770` loaded
+each source table whole; `prime_contracts.csv` is 1.46 GB across 75 columns,
+which is roughly 10 GB of Python objects on a machine with **16.4 GB of RAM
+and 1.6 GB free** with ten other jobs writing. A run that used to take seven
+minutes for all fourteen datasets spent **over thirty on `contractors` alone**
+and then died with an empty log — swapping, not computing.
+
+Large tables are now sampled in **two streaming passes** and never held: pass
+one keeps a one-byte completeness score per publishable row (1.2 MB for 1.2 M
+rows, against ~10 GB for the dicts); pass two lifts only the ten wanted rows.
+Small tables keep the original in-memory path unchanged, so nothing that
+already worked changed shape.
+
+**The claim that the two engines agree is asserted, not stated.**
+`py -3 code/770_sample_extracts.py proveequal <table>` runs both on the same
+file and exits 1 unless the sampled rows match cell for cell. It passes on
+`nest_enterprises` (1.9 MB), `native_owned_businesses` (6.0 MB), `np_orgs`
+(13.7 MB), `nagpra_notices` (10.8 MB) and `subawards` (82.7 MB).
+
+**And the first version of it shipped a five-row sample.** `contractors` came
+out with 5 rows of 10, because pass two indexed against pass one's positions
+and a concurrent enricher rewrote `prime_contracts.csv` between the reads —
+same row count, different publishable rows, so five wanted positions no longer
+held a row that passed the gate. **A short sample is the quiet failure: it
+looks like a small table, not a race.** Pass two now also collects a strided
+spare buffer and tops up from it, and prints a `RACED` line naming how many
+rows were replaced, so a moving source is reported rather than absorbed.
 
 **Widening the collection was not done here, on purpose.** It adds four tables
 with no declared grain and no declared key (`native_owned_businesses.csv`
