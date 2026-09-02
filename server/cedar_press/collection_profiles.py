@@ -37,6 +37,7 @@ is honest; a generated sentence that reads like a claim about method is not.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import Any
 
 from cedar_press import press_catalog
@@ -55,8 +56,6 @@ _CONSTRUCTION: dict[str, dict[str, Any]] = {
             "One documented transaction (acquisition, property purchase, "
             "project financing, bond issuance or major capital project)."
         ),
-        "coverage_standard_from": "2010",
-        "coverage_full_from": "2010",
         "entity_resolution_method": (
             "Buyers, sellers, borrowers and issuers are resolved to tribal "
             "governments, tribally owned enterprises, ANCs and NHOs, with "
@@ -80,8 +79,6 @@ _CONSTRUCTION: dict[str, dict[str, Any]] = {
         "unit_of_observation": (
             "One Native-owned contracting entity, with its federal award history."
         ),
-        "coverage_standard_from": "2010",
-        "coverage_full_from": "2000",
         "entity_resolution_method": (
             "Vendors are matched to parent entities so awards roll up to the "
             "owning tribe, ANC or NHO; provisional matches are labeled until "
@@ -103,8 +100,6 @@ _CONSTRUCTION: dict[str, dict[str, Any]] = {
             "One federal assistance award (grant, loan, direct payment or "
             "insurance) to a tribe or Native organization."
         ),
-        "coverage_standard_from": "2010",
-        "coverage_full_from": "2001",
         "entity_resolution_method": (
             "Recipients are resolved to the Native entity behind them, so an "
             "award to a subsidiary, a housing authority or a consortium is "
@@ -125,8 +120,6 @@ _CONSTRUCTION: dict[str, dict[str, Any]] = {
             "One individually owned Native business, certified by its nation's "
             "TERO or commerce office."
         ),
-        "coverage_standard_from": "2026",
-        "coverage_full_from": "2026",
         "entity_resolution_method": (
             "No inference: each business is exactly what its nation's office "
             "certifies it to be. Listings carry the certifying nation, and "
@@ -175,8 +168,7 @@ def _catalog_profile(dataset_id: str) -> dict[str, Any] | None:
         "collection_id": entry["id"],
         "shelf": entry["shelf"],
         "description": entry["blurb"],
-        "coverage_standard_from": str(entry["standardFrom"]),
-        "coverage_full_from": str(entry["historyFrom"]),
+        **_coverage_fields(entry),
         "coverage_end": None,
         "update_frequency": None,
         "record_count_label": None,
@@ -214,12 +206,6 @@ def profile_for(dataset_id: str) -> dict[str, Any] | None:
     # else stays absent: a unit of observation nobody wrote is not a field this
     # module is entitled to fill.
     catalog = _catalog_entry(dataset_id) or {}
-    coverage_standard = construction.get("coverage_standard_from") or _str_or_none(
-        catalog.get("standardFrom")
-    )
-    coverage_full = construction.get("coverage_full_from") or _str_or_none(
-        catalog.get("historyFrom")
-    )
     figure = _figure_for(dataset_id)
     headline = (
         {
@@ -238,12 +224,13 @@ def profile_for(dataset_id: str) -> dict[str, Any] | None:
         "collection_id": dataset.id,
         "shelf": dataset.shelf,
         "description": dataset.tracks,
-        # Two depths, deliberately: the standard shelf opens the collection
-        # from coverage_standard_from; Cedar Press+ opens the full archive
-        # back to coverage_full_from. One number here flattened the tier
-        # ladder and told a standard reader they had years they do not.
-        "coverage_standard_from": coverage_standard,
-        "coverage_full_from": coverage_full,
+        # One depth, because there is one axis. This used to be a pair --
+        # a 2010 window for Cedar Press and the archive behind it for
+        # Cedar Press+ -- and the pair is retired (see `pressCatalog.js`).
+        # The value comes from the catalog and nowhere else: it is a claim
+        # to a paying subscriber and it is measured against the delivered
+        # file, so a second hand-written copy could only drift from it.
+        **_coverage_fields(catalog),
         "coverage_end": dataset.vintage,
         # Honest until a cadence is a commitment, not a plan.
         "update_frequency": None,
@@ -270,6 +257,25 @@ def profile_for(dataset_id: str) -> dict[str, Any] | None:
 
 def _str_or_none(value: Any) -> str | None:
     return None if value is None else str(value)
+
+
+def _coverage_fields(catalog: Mapping[str, Any]) -> dict[str, Any]:
+    """The catalog's coverage declaration, flattened onto a profile.
+
+    Two shapes, because two of these collections are rosters rather than
+    series: their sources publish who is certified or exempt now and archive
+    nothing behind it, so they have a capture date and no first year. A
+    profile field that were always a year would force one of them to invent
+    one, which is the defect this shape exists to prevent. ``coverage_from``
+    is therefore ``None`` on a roster, and every reader of it has to cope.
+    """
+    coverage = catalog.get("coverage") or {}
+    kind = coverage.get("kind")
+    return {
+        "coverage_kind": kind,
+        "coverage_from": _str_or_none(coverage.get("from")),
+        "coverage_captured": coverage.get("captured"),
+    }
 
 
 def _fmt(value: Any) -> str:
@@ -350,17 +356,20 @@ def _changes_sentence(profile: dict[str, Any], asked: str) -> str:
     )
 
 
-def _coverage_sentence(profile: dict[str, Any], full_archive: bool = False) -> str | None:
-    """Coverage stated per tier, because the tiers buy different depths.
+def _coverage_sentence(profile: dict[str, Any]) -> str | None:
+    """Coverage, which is one sentence for every tier and two for every shape.
 
-    ``full_archive`` is whether the asking subscription already opens the
-    reconstructed archive: telling a Cedar Press+ reader that "Cedar Press+
-    opens the full archive" sells them the plan they are asking from.
+    It used to be three sentences chosen by a ``full_archive`` flag: Cedar
+    Press opened a collection from 2010 and Cedar Press+ opened the archive
+    behind it, so Cedar had to know who was asking before it could say what a
+    collection covered. The window was retired on 2026-09-02, so the reader
+    does not enter into it.
+
+    What does enter into it is whether the collection is a series or a
+    roster. Answering "coverage from 1992 to present" for a list of live TERO
+    certifications would be Cedar stating a 34-year span that no certifying
+    office keeps, which is the failure this module exists to prevent.
     """
-    std = profile.get("coverage_standard_from")
-    full = profile.get("coverage_full_from")
-    if not std:
-        return None
     # A catalog-only profile has no release, so no vintage to date it by.
     dated = profile.get("vintage") and profile.get("last_updated")
     tail = (
@@ -368,30 +377,31 @@ def _coverage_sentence(profile: dict[str, Any], full_archive: bool = False) -> s
         if dated
         else ""
     )
-    if full and full != std:
-        if full_archive:
-            return (
-                f"Coverage from {full}, the full reconstructed archive, "
-                f"which your plan opens.{tail}"
-            )
+    if profile.get("coverage_kind") == "roster":
+        captured = profile.get("coverage_captured")
+        if not captured:
+            return None
         return (
-            f"Coverage from {std} on Cedar Press; Cedar Press+ opens the full "
-            f"archive back to {full}.{tail}"
+            "This is a current roster rather than a series: it states who is "
+            f"on the list as of {captured}, and the sources behind it do not "
+            f"publish the superseded lists.{tail}"
         )
-    return f"Coverage from {std} to present.{tail}"
+    coverage_from = profile.get("coverage_from")
+    if not coverage_from:
+        return None
+    return f"Coverage from {coverage_from} to present.{tail}"
 
 
-def answer_from_profile(
-    question: str, dataset_id: str, full_archive: bool = False
-) -> dict[str, str] | None:
+def answer_from_profile(question: str, dataset_id: str) -> dict[str, str] | None:
     """A profile-grounded answer, or ``None`` when the question needs more.
 
     Deliberately narrow: this answers from the profile's own fields and never
     composes beyond them. A question about the records themselves is not
     answerable here and returns ``None`` so the route can refuse honestly.
-    ``full_archive`` says whether the asking subscription already opens the
-    reconstructed archive; the coverage sentence is phrased for the reader
-    it is answering.
+
+    It took a ``full_archive`` flag until 2026-09-02, when the year cap that
+    made coverage tier-dependent was retired. Nothing here varies by plan any
+    more, so nothing here needs to know the plan.
     """
     profile = profile_for(dataset_id)
     if profile is None:
@@ -442,7 +452,7 @@ def answer_from_profile(
             f"Unit of observation: {profile['unit_of_observation']}"
             if profile.get("unit_of_observation")
             else None,
-            _coverage_sentence(profile, full_archive),
+            _coverage_sentence(profile),
             f"Sources: {profile['primary_sources']}." if profile.get("primary_sources") else None,
         ]
         return {"answer": " ".join(p for p in parts if p), "basis": basis}

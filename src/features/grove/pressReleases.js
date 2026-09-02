@@ -79,7 +79,7 @@ export const PRESS_RELEASES = Object.freeze({
         date: "2026-06-04",
         kind: RELEASE_KIND.DATA,
         changed: Object.freeze([
-          "Extended the reconstructed archive back to 2001 using additional federal and archival sources.",
+          "Extended the funding record back to FY2007 using additional federal and archival sources.",
         ]),
       }),
       Object.freeze({

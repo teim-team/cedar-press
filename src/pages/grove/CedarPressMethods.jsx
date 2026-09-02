@@ -27,6 +27,7 @@ import {
   METHOD_COMMITMENTS,
 } from "../../features/grove/pressMethod";
 import { PRESS_CATALOG } from "../../features/grove/pressCatalog";
+import { coverageLabel } from "../../features/grove/pressAccess";
 import { LAUNCH_COLLECTION } from "../../features/grove/collection";
 import { releaseFor } from "../../features/grove/pressReleases";
 import { EcosystemDiagram, ProcessRail, EntityTimeline } from "./pressMethodSections";
@@ -121,9 +122,7 @@ export default function CedarPressMethods() {
                     <span className="cp-mbc__name">{entry.name}</span>
                     <span className="cp-mbc__meta">
                       {release ? `${release.version} · ` : ""}
-                      {entry.standardFrom === entry.historyFrom
-                        ? `${entry.standardFrom} to present`
-                        : `archive from ${entry.historyFrom}`}
+                      {coverageLabel(entry)}
                     </span>
                   </summary>
                   <div className="cp-mbc__body">
@@ -140,10 +139,7 @@ export default function CedarPressMethods() {
                     ) : null}
                     <p className="cp-mbc__facts">
                       {launch ? <>Sources: {launch.sources} &middot; </> : null}
-                      Coverage from {entry.standardFrom} on Cedar Press
-                      {entry.historyFrom !== entry.standardFrom
-                        ? `; full archive from ${entry.historyFrom} on Cedar Press+`
-                        : ""}
+                      {coverageLabel(entry)}
                       {release ? (
                         <>
                           {" "}&middot; {release.cadence} &middot; current release {release.version}
