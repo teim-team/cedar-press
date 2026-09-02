@@ -1,5 +1,20 @@
-# Methodology — NAGPRA Notices
+# Methodology — NAGPRA
 
+<!-- BEGIN GENERATED:IDENTITY -->
+
+**`nagpra` — NAGPRA.** Delivered as `dist/customer/nagpra.csv`: **6,792 rows × 67 columns, 10.8 MB**, built from the flagship table `data/clean/nagpra_notices.csv`. Shelf `standard`; sold through **Cedar Press**; on the Cedar Press storefront. Readiness **READY**. [measured 2026-09-02 from the delivered file]
+
+> **This block and Appendix M at the foot of this paper are GENERATED** by `code/1143_methodology_papers.py` from the delivered file itself, on every build — the same reason the codebooks are generated. Do not hand-edit either; the next build overwrites them.
+>
+> Everything between `<!-- BEGIN EDITORIAL:nagpra -->` and `<!-- END EDITORIAL:nagpra -->` is **hand-written and preserved byte-for-byte** across rebuilds. Put prose there and nowhere else.
+>
+> This paper is **not** the codebook. `dist/customer/nagpra__CODEBOOK.md` carries the grain, the folded-in tables and the per-column fill rates, and `__NOTES.txt` carries the same for a person. This paper says how the dataset came to exist and why you should believe it.
+>
+> Generated 2026-09-02. `py -3 code/1143_methodology_papers.py verify` **fails** if the delivered file has moved since — see §M7.
+
+<!-- END GENERATED:IDENTITY -->
+
+<!-- BEGIN EDITORIAL:nagpra -->
 **`nagpra`. `data/clean/nagpra_notices.csv`, 6,792 Federal Register notices,
 1994–2026, with `nagpra_notice_entity_bridge.csv` carrying 51,579 notice-to-party
 links, 48,111 of them resolved to a Cedar entity (93.3%).** [measured
@@ -468,3 +483,137 @@ names its tribes, which most Federal Register documents do not.
 5. **The Forest County Potawatomi county-guard defect is live**, not
    historical: 0 rows in the bridge today. It is described in
    `docs/NAGPRA_BUILD_LOG.md` and has not been fixed.
+<!-- END EDITORIAL:nagpra -->
+
+<!-- BEGIN GENERATED:MEASURED -->
+
+---
+
+# Appendix M — measured from the delivered file
+
+*Generated 2026-09-02 by `code/1143_methodology_papers.py` from `dist/customer/nagpra.csv`, read whole with duckdb and never sampled. Not from `data/clean/`, not from a build log, not from `MANIFEST.csv`. Where this appendix and a document disagree, **the delivered file is right** and `verify` prints the disagreement rather than smoothing it over.*
+
+*Grain, folded-in tables and per-column fill rates are in `dist/customer/nagpra__CODEBOOK.md` and are deliberately not repeated here.*
+
+## M1 · Sources, as the delivered rows themselves record them
+
+**`source_url`** — 6,792 of 6,792 rows carry one. Hosts, by row count:
+
+| host | rows |
+|---|---:|
+| `www.federalregister.gov` | 6,792 |
+
+**`fetched_date`** — present in the schema and **blank on every one of the 6,792 delivered rows**. That is a coverage fact, not a formatting one: this dataset does not record that piece of provenance per row. The column is kept rather than dropped so the schema does not depend on which rows shipped.
+
+### The terms rulings that bind this dataset
+
+Quoted from `docs/PUBLICATION_POLICY.md`, which holds the rulings; this paper does not restate them from memory.
+
+- **Owner ruling, 2026-09-02** (`<!-- BEGIN TERMS-OWNER-RULING-2026-09-02 -->`): *"So tribal websites, I actually don't care if they say it does scrape. Because if it's publicly available and you can scrape it, scrape it."* A tribal entity's own public pages may be harvested regardless of a terms statement. `source_terms_status = TERMS_STATED_RESTRICTIVE` on a Native entity's own site is now **a recorded observation, not a gate**.
+- **Four things that ruling does NOT touch, and none is a terms question:** (1) technical access controls — nothing login-gated, no admin or staging paths, no exploiting a misconfiguration; (2) a natural person's data held apart from their public role — home address, personal email or phone, DOB, SSN/TIN; (3) non-tribal licensors — EMMA/MSRB bars redistribution of its output "sold or free of charge" and names "any manual process", with CUSIP Global Services as a second licensor; (4) proprietary identifiers — Casino City, D-U-N-S — held internally, never shipped.
+- **A terms restriction is scoped to the SOURCE that stated it, not to the nation** (`<!-- BEGIN TERMS-SCOPE -->`), and it does not bind a third party's filing of the same fact.
+
+## M2 · How the rows were built — the pipeline, in order
+
+**One documented rebuild:** `py -3 code/build.py run nagpra --execute`. `py -3 code/build.py plan nagpra` prints the ordering below live; it is reproduced here so the paper stands alone.
+
+The collection holds **5 tables**. Those with a named build stage, flagship first:
+
+| table | rebuilt by | then enriched by (must run LAST) | status |
+|---|---|---|---|
+| `nagpra_notices.csv` **(flagship)** | `77_build_nagpra_dataset.py` | `1077_nagpra_institution_grain.py` | shippable |
+| `nagpra_notice_entity_bridge.csv` | `77_build_nagpra_dataset.py` | `503_identity.py` | shippable |
+| `nagpra_notice_institutions.csv` | `1077_nagpra_institution_grain.py` | `1084_nagpra_split_artefact_audit.py` | shippable |
+
+**A full rebuild and an in-place enricher on one file need an ordering, and the enricher must run LAST.** A `.bak_*_pre<script>` file sitting beside a table is the signal that an enricher has touched it since the last build. This has cost this project four reverts of one file in a single day.
+
+The delivered spreadsheet is then assembled by `code/1137_customer_dataset_combine.py`, which folds supporting tables onto the flagship **only where the measured cardinality on the shared key is one**, reverts any join that moved the row count, and prefixes every joined column with its source table's stem. One-to-many tables contribute a count column instead of rows, so a money total cannot be multiplied by a join.
+
+## M3 · How entities were attributed
+
+Cedar keys every dataset to one identity layer. `cedar_uid` is permanent and never reused; the human-readable handle retires when an entity is reclassified, so **join on `cedar_uid`, never on the handle**. A compound handle is canonical, not broken — stripping a suffix to make a join work turns joinable rows into unjoinable ones while looking like a normalisation.
+
+**The delivered file carries no `cedar_uid`, `tribe_id` or `owner_hub_cedar_uid` column.** Where a dataset names parties but keys none of them on the row, the link lives in a bridge table and the codebook says which. A pipe-delimited list of ids in a cell is **not** a join key; join through the bridge.
+
+### What `attribution_method` means **in this dataset**
+
+`docs/schema/attribution_method_vocabulary.json`, declared 2026-09-02: *"`attribution_method` is three different columns sharing a name — a join method, an evidence provenance, and a name-match algorithm. Each table is gated against its OWN vocabulary."* Reading one table's sense into another is how a containment match came to key a dollar.
+
+**This dataset carries no `attribution_method` column and no tier or method column of any kind.** Its rows are not entity attributions — they are records of a published event, and the entity link, where there is one, is made through a bridge table rather than carried on the row. Do not import another dataset's term list to interpret it.
+
+**And a RULED METHOD IS NOT A POSITIVE RULING.** `attribution_method` says WHO decided; `confidence_tier` says WHAT was decided. All 317 `elijah_ruling` EIN rows in the ledger are tier **X** — *negative* — and a script that read "the method is in the RULED set" as "the answer was yes" published 317 owner *exclusions* as confident attributions. Standing detector: `py -3 code/293_lint_bug_classes.py`. [from the record — `START_HERE.md`, defect class 1b]
+
+### The evidence tiers
+
+| tier | what it means |
+|---|---|
+| **A** | an identifier (UEI, CAGE, EIN, declared parent UEI), or a human ruling. The only grade a dollar may be keyed on without corroboration |
+| **B** | a strong name method with an independent corroborator, or inheritance from a tier-A parent |
+| **C** | a weak method — containment, token subset — held as a candidate, not published as a fact |
+| **X** | **refused.** A negative ruling. Never read as a confirmation |
+
+**A tier is INHERITED from the source row, never assigned by the consumer.** The exactness of the KEY says nothing about the correctness of the LINK: 873 of 1,104 EIN rows in the ledger sit on 52 entities carrying five or more EINs each, and 821 are tier B via `need_v6`, which is 6.5% accurate and never publishes alone. [from the record — `START_HERE.md`, defect class 1]
+
+## M4 · What is **not** in it, and why
+
+**No row was withheld from this delivery.** Every row that passed the collection's own inclusion test is in the spreadsheet. [measured — `dist/customer/MANIFEST.csv`, `rows_withheld = 0`]
+
+The gate itself is `code/cedar_publication.row_ok`, applied identically by every publisher: a row is withheld if `publishable` is set to anything outside `{Y, y, 1, true, TRUE, blank}`, or if `source_terms_status` is outside `{SILENT, TERMS_STATED_NO_REUSE_RESTRICTION, blank}`. **A blank gate column means the gate was never evaluated for that row, not that it failed.** Separately, ten column names are refused outright wherever they appear — `owner_name_raw`, `email`, `phone`, `home_address`, `personal_email`, `ssn`, `tin`, `date_of_birth`, `officer_name`, `contact_name` — and the proprietary identifier families (Casino City, D-U-N-S) drop as **columns**, not rows: the row is ours, the identifier is not.
+
+### Known gaps — every line in `docs/WHAT_IS_MISSING.md` that names this dataset or its flagship
+
+- **L107** *(under “THE FOUR THINGS THAT WOULD EMBARRASS US IN FRONT OF A CUSTOMER”)* — > `nagpra_notices.csv` left the old `SHOW` list behind and the sample fell to
+- **L520** *(under “`federal-register` — `consultation_events.csv`, 11,402 rows”)* — **1. This is a NAGPRA table wearing a consultation label.** — CLOSED 2026-09-02 by workstream FR-DTLL: the ROW share is right and the *duplicate* reading is wrong — **1,831 distinct notices here against 6,792 in `nagpra_notices.csv`, with 4,961 NAGPRA notic...
+- **L548** *(under “`nagpra` — sample flagship `fr_nagpra_title_index.csv`, 6,664 rows, 6 columns”)* — ## `nagpra` — sample flagship `fr_nagpra_title_index.csv`, 6,664 rows, 6 columns
+- **L558** *(under “`nagpra` — sample flagship `fr_nagpra_title_index.csv`, 6,664 rows, 6 columns”)* — | `nagpra_notices.csv` | 6,792 (**67 columns**) | `institution_name` 6,792 · `institution_state` 6,680 · `mni_total_stated` **4,273** · `affiliated_entity_ids` 5,022 · `removal_states` 4,433 · `repatriation_eligible_date` 2,782 · `html_url` 6,792 |
+- **L744** *(under “THE SHORT LIST — what this week can fix without a single download”)* — | 2 | `nagpra` | point `FLAGSHIP` at `nagpra_notices.csv` | 6,792 rows × 67 cols; bridge = 51,579 links |
+
+### Open issues — every line in `docs/KNOWN_ISSUES.md` that names this dataset or its flagship
+
+- **L292** *(under “A11 · S3 · `START_HERE.md` said READY 0 / 13”)* — Live: **READY 2 / 13** (`nagpra`, `federal-register`). The line sat inside the
+- **L358** *(under “A17 · S1 · A validated grain proof can silently expire, and four have”)* — `fr_nagpra_title_index.csv` is in `nagpra`, one of the two **READY** datasets.
+- **L620** *(under “E. Standing conditions — true, known, not defects”)* — list --unverified`) — `nagpra` closure, `federal-register` closure, the
+
+## M5 · The money rules — which columns may be summed
+
+**This dataset carries no numeric money column.** Nothing in it may be presented as a dollar total, and a reader who needs one has to go to the money dataset that holds it. A structure or directory table with no money column is not an incomplete money table.
+
+### The fence, quoted verbatim from `docs/MONEY_TOTALLING_RULES.md`
+
+That document is authoritative on which columns may be summed. It is **quoted here, never re-derived** — re-deriving a totalling rule from the data is precisely the error it exists to prevent.
+
+**`docs/MONEY_TOTALLING_RULES.md` states no one-line rule for `nagpra_notices.csv`.** Where this dataset carries a money column and the rules document does not fence it, treat that as an open item, not as permission.
+
+## M6 · Known limits, stated plainly
+
+**Readiness: READY.** [measured — `docs/DATASET_READINESS.md`, regenerated by `py -3 code/518_dataset_readiness.py`]
+
+| tables | grain | keys | duplicates | agg-unsafe | rebuild |
+|---|---|---|---|---|---|
+| 5 | 5/5 | 5/5 | clean | 0 | declared  |
+
+The twelve-point contract a dataset is held to — grain declared and validated; keys and cardinality measured, not guessed; duplicates removed or the distinguishing dimension declared; entity attachment where the subject is an entity; every harvested row in a named disposition bucket; unresolved identity conflicts never shipping as definite facts; no double-counting path; one documented rebuild that does not destroy later enrichment; an update runbook another session can execute from the document alone; regression and semantic-diff gates over the outputs; column hygiene; and an inclusion basis on every row.
+
+**1 column is blank on every delivered row** and is kept deliberately. Dropping them would make the schema depend on which rows shipped, and a buyer diffing two deliveries would watch columns appear and vanish. Sparsity is a coverage fact. They are named in the codebook.
+
+**Do not sell past the evidence.** Where this paper states a figure it was measured on the date stamped beside it, from the file named beside it. Where it states a decision it names who made it. Anything not stated here is not known.
+
+## M7 · Fingerprint — what makes this paper stale
+
+`verify` re-measures the four values below against `dist/customer/nagpra.csv` and **exits 1 if any has moved**. A methodology paper is stale the moment its dataset is rebuilt, and a stale paper that cannot say so is worse than no paper.
+
+```json
+{
+  "dataset": "nagpra",
+  "file": "dist/customer/nagpra.csv",
+  "bytes": 10843752,
+  "rows": 6792,
+  "columns": 67,
+  "header_sha256": "9c684d1df67f6b56d5b0816233206ab1f079df6c9a072228ab47312056eeaab8",
+  "measured": "2026-09-02"
+}
+```
+
+Cross-check against `dist/customer/MANIFEST.csv`, which `code/1137_customer_dataset_combine.py` wrote at build time: it records **6792 rows × 67 columns**. The two agree.
+
+<!-- END GENERATED:MEASURED -->

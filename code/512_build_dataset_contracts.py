@@ -1900,17 +1900,33 @@ GRAIN_SUBAWARD_FUNDING = {
         "RETAINS all of them and flags the repeats in `duplicate_status`; it "
         "does not delete them. A row is therefore (one SAM subaward report) x "
         "(the Cedar pull that ingested it). "
+        # MONEY-RECON-1144 2026-09-02: the four figures in this sentence were
+        # the 76,859-row vintage and had been superseded by two subaward
+        # fold-ins (121 append at 12:09Z and 16:49Z). They shipped to
+        # customers in subcontracting__NOTES.txt and __CODEBOOK.md while
+        # dist/samples/README.md carried the corrected ones, so a buyer held
+        # both. Re-measured on the live 89,809-row file by
+        # `py -3 code/1144_money_reconciliation_prime_sub.py measure`.
+        # UPDATE ALL FOUR TOGETHER after any subaward fold-in - they are one
+        # measurement, and the last three times they were not, they drifted
+        # apart into three simultaneous vintages.
         "MONEY: `subaward_amount` is additive ONLY where "
         "`duplicate_status == 'primary'` AND "
-        "`subaward_exceeds_prime_flag != 'yes'` - $25,864,997,128.19 correct "
-        "against $47,301,660,819.78 unfiltered, so an unfiltered sum is 82.9% "
-        "TOO HIGH as a share of the correct total (45.3% of the inflated one; "
+        "`subaward_exceeds_prime_flag != 'yes'` - $34,906,694,737.65 correct "
+        "against $57,020,557,710.47 unfiltered, so an unfiltered sum is 63.4% "
+        "TOO HIGH as a share of the correct total (38.8% of the inflated one; "
         "say which denominator you mean). "
         "A SUBAWARD IS A SLICE OF A PRIME AWARD and must never be added to "
-        "prime_contracts.csv - that double-counts the same federal dollar. "
+        "prime_contracts.csv - that double-counts the same federal dollar: "
+        "$13,612,271,637.21 of the countable subaward total sits on a prime "
+        "award prime_contracts.csv already carries, and 99.2% of that is on a "
+        "prime row that is itself Native-attributed. "
         "The two entity legs are `prime_cedar_uid` and `sub_cedar_uid`; "
         "`cedar_uid` is the PRIME leg only and is legitimately blank on the "
-        "43,282 rows whose only Native party is the subawardee",
+        "47,561 rows whose only Native party is the subawardee. MEASURE "
+        "LINKAGE ON EITHER LEG, NOT ON `cedar_uid`: either-leg coverage is "
+        "87,355 of 89,809 rows (97.27%), and only 2,047 rows have no Native "
+        "party keyed at all",
         ["source_dataset", "subaward_source_record_id"],
         {"prime_cedar_uid": "many", "sub_cedar_uid": "many",
          "prime_uei": "many", "sub_uei": "many",

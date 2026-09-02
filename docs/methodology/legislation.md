@@ -1,5 +1,20 @@
-# Methodology — Native Legislation and Votes
+# Methodology — Congressional Votes and Proposed Legislation
 
+<!-- BEGIN GENERATED:IDENTITY -->
+
+**`legislation` — Congressional Votes and Proposed Legislation.** Delivered as `dist/customer/legislation.csv`: **3,069 rows × 39 columns, 3.3 MB**, built from the flagship table `data/clean/native_bills.csv`. Shelf `standard`; sold through **Cedar Press**; on the Cedar Press storefront. Readiness **READY**. [measured 2026-09-02 from the delivered file]
+
+> **This block and Appendix M at the foot of this paper are GENERATED** by `code/1143_methodology_papers.py` from the delivered file itself, on every build — the same reason the codebooks are generated. Do not hand-edit either; the next build overwrites them.
+>
+> Everything between `<!-- BEGIN EDITORIAL:legislation -->` and `<!-- END EDITORIAL:legislation -->` is **hand-written and preserved byte-for-byte** across rebuilds. Put prose there and nowhere else.
+>
+> This paper is **not** the codebook. `dist/customer/legislation__CODEBOOK.md` carries the grain, the folded-in tables and the per-column fill rates, and `__NOTES.txt` carries the same for a person. This paper says how the dataset came to exist and why you should believe it.
+>
+> Generated 2026-09-02. `py -3 code/1143_methodology_papers.py verify` **fails** if the delivered file has moved since — see §M7.
+
+<!-- END GENERATED:IDENTITY -->
+
+<!-- BEGIN EDITORIAL:legislation -->
 **`legislation`. `data/clean/native_bills.csv`, 3,069 bills across Congresses
 93–119; `bill_votes.csv`, 423 roll calls; `member_positions.csv`, 136,119
 member-vote rows.** [measured 2026-09-02]
@@ -470,3 +485,138 @@ Native bill becomes invisible.** The commands are
    `no_specific_entity_matched`, which is vintage-safe in the only direction
    that matters** — a smaller spine cannot produce a match a larger one did
    not — so only the 16 `tribe-specific` rulings are vintage-sensitive.
+<!-- END EDITORIAL:legislation -->
+
+<!-- BEGIN GENERATED:MEASURED -->
+
+---
+
+# Appendix M — measured from the delivered file
+
+*Generated 2026-09-02 by `code/1143_methodology_papers.py` from `dist/customer/legislation.csv`, read whole with duckdb and never sampled. Not from `data/clean/`, not from a build log, not from `MANIFEST.csv`. Where this appendix and a document disagree, **the delivered file is right** and `verify` prints the disagreement rather than smoothing it over.*
+
+*Grain, folded-in tables and per-column fill rates are in `dist/customer/legislation__CODEBOOK.md` and are deliberately not repeated here.*
+
+## M1 · Sources, as the delivered rows themselves record them
+
+**`source_file`** — 3,069 of 3,069 rows populated, 3 distinct values:
+
+| value | rows |
+|---|---:|
+| `tribal_bill_intros.csv` | 2,809 |
+| `HSall_rollcalls.csv (via tribal roll-call classification)` | 228 |
+| `all_bill_intros.csv via 73_bills_votes_completion.py --sweep` | 32 |
+
+### The terms rulings that bind this dataset
+
+Quoted from `docs/PUBLICATION_POLICY.md`, which holds the rulings; this paper does not restate them from memory.
+
+- **Owner ruling, 2026-09-02** (`<!-- BEGIN TERMS-OWNER-RULING-2026-09-02 -->`): *"So tribal websites, I actually don't care if they say it does scrape. Because if it's publicly available and you can scrape it, scrape it."* A tribal entity's own public pages may be harvested regardless of a terms statement. `source_terms_status = TERMS_STATED_RESTRICTIVE` on a Native entity's own site is now **a recorded observation, not a gate**.
+- **Four things that ruling does NOT touch, and none is a terms question:** (1) technical access controls — nothing login-gated, no admin or staging paths, no exploiting a misconfiguration; (2) a natural person's data held apart from their public role — home address, personal email or phone, DOB, SSN/TIN; (3) non-tribal licensors — EMMA/MSRB bars redistribution of its output "sold or free of charge" and names "any manual process", with CUSIP Global Services as a second licensor; (4) proprietary identifiers — Casino City, D-U-N-S — held internally, never shipped.
+- **A terms restriction is scoped to the SOURCE that stated it, not to the nation** (`<!-- BEGIN TERMS-SCOPE -->`), and it does not bind a third party's filing of the same fact.
+
+## M2 · How the rows were built — the pipeline, in order
+
+**One documented rebuild:** `py -3 code/build.py run legislation --execute`. `py -3 code/build.py plan legislation` prints the ordering below live; it is reproduced here so the paper stands alone.
+
+The collection holds **13 tables**. Those with a named build stage, flagship first:
+
+| table | rebuilt by | then enriched by (must run LAST) | status |
+|---|---|---|---|
+| `native_bills.csv` **(flagship)** | `14_build_bills_votes.py` | `1092_bill_titles_residue_and_scope.py`, `35_entity_harvest.py` | shippable |
+| `bill_votes.csv` | `14_build_bills_votes.py` | `1093_bill_votes_majority_anomaly.py`, `73_bills_votes_completion.py`, `890_bill_votes_threshold_and_titles.py` | shippable |
+| `native_issue_litigation_positions.csv` | `139_build_litigation_positions.py` | `140_build_grantmaker_funding_flows.py` | shippable |
+
+**A full rebuild and an in-place enricher on one file need an ordering, and the enricher must run LAST.** A `.bak_*_pre<script>` file sitting beside a table is the signal that an enricher has touched it since the last build. This has cost this project four reverts of one file in a single day.
+
+The delivered spreadsheet is then assembled by `code/1137_customer_dataset_combine.py`, which folds supporting tables onto the flagship **only where the measured cardinality on the shared key is one**, reverts any join that moved the row count, and prefixes every joined column with its source table's stem. One-to-many tables contribute a count column instead of rows, so a money total cannot be multiplied by a join.
+
+## M3 · How entities were attributed
+
+Cedar keys every dataset to one identity layer. `cedar_uid` is permanent and never reused; the human-readable handle retires when an entity is reclassified, so **join on `cedar_uid`, never on the handle**. A compound handle is canonical, not broken — stripping a suffix to make a join work turns joinable rows into unjoinable ones while looking like a normalisation.
+
+**The delivered file carries no `cedar_uid`, `tribe_id` or `owner_hub_cedar_uid` column.** Where a dataset names parties but keys none of them on the row, the link lives in a bridge table and the codebook says which. A pipe-delimited list of ids in a cell is **not** a join key; join through the bridge.
+
+### What `attribution_method` means **in this dataset**
+
+`docs/schema/attribution_method_vocabulary.json`, declared 2026-09-02: *"`attribution_method` is three different columns sharing a name — a join method, an evidence provenance, and a name-match algorithm. Each table is gated against its OWN vocabulary."* Reading one table's sense into another is how a containment match came to key a dollar.
+
+**This dataset carries no `attribution_method` column and no tier or method column of any kind.** Its rows are not entity attributions — they are records of a published event, and the entity link, where there is one, is made through a bridge table rather than carried on the row. Do not import another dataset's term list to interpret it.
+
+**And a RULED METHOD IS NOT A POSITIVE RULING.** `attribution_method` says WHO decided; `confidence_tier` says WHAT was decided. All 317 `elijah_ruling` EIN rows in the ledger are tier **X** — *negative* — and a script that read "the method is in the RULED set" as "the answer was yes" published 317 owner *exclusions* as confident attributions. Standing detector: `py -3 code/293_lint_bug_classes.py`. [from the record — `START_HERE.md`, defect class 1b]
+
+### The evidence tiers
+
+| tier | what it means |
+|---|---|
+| **A** | an identifier (UEI, CAGE, EIN, declared parent UEI), or a human ruling. The only grade a dollar may be keyed on without corroboration |
+| **B** | a strong name method with an independent corroborator, or inheritance from a tier-A parent |
+| **C** | a weak method — containment, token subset — held as a candidate, not published as a fact |
+| **X** | **refused.** A negative ruling. Never read as a confirmation |
+
+**A tier is INHERITED from the source row, never assigned by the consumer.** The exactness of the KEY says nothing about the correctness of the LINK: 873 of 1,104 EIN rows in the ledger sit on 52 entities carrying five or more EINs each, and 821 are tier B via `need_v6`, which is 6.5% accurate and never publishes alone. [from the record — `START_HERE.md`, defect class 1]
+
+## M4 · What is **not** in it, and why
+
+**No row was withheld from this delivery.** Every row that passed the collection's own inclusion test is in the spreadsheet. [measured — `dist/customer/MANIFEST.csv`, `rows_withheld = 0`]
+
+The gate itself is `code/cedar_publication.row_ok`, applied identically by every publisher: a row is withheld if `publishable` is set to anything outside `{Y, y, 1, true, TRUE, blank}`, or if `source_terms_status` is outside `{SILENT, TERMS_STATED_NO_REUSE_RESTRICTION, blank}`. **A blank gate column means the gate was never evaluated for that row, not that it failed.** Separately, ten column names are refused outright wherever they appear — `owner_name_raw`, `email`, `phone`, `home_address`, `personal_email`, `ssn`, `tin`, `date_of_birth`, `officer_name`, `contact_name` — and the proprietary identifier families (Casino City, D-U-N-S) drop as **columns**, not rows: the row is ours, the identifier is not.
+
+### Known gaps — every line in `docs/WHAT_IS_MISSING.md` that names this dataset or its flagship
+
+- **L362** *(under “`legislation` — `bill_votes.csv`, 423 rows”)* — ## `legislation` — `bill_votes.csv`, 423 rows
+- **L371** *(under “`legislation` — `bill_votes.csv`, 423 rows”)* — > from `native_bills.csv`. `890 verify` refuses any title that is not
+- **L372** *(under “`legislation` — `bill_votes.csv`, 423 rows”)* — > byte-identical to the `native_bills.csv` value it cites.
+- **L376** *(under “`legislation` — `bill_votes.csv`, 423 rows”)* — > > `TITLE_BLANK_IN_native_bills.csv`. **All eight are closed and that
+- **L378** *(under “`legislation` — `bill_votes.csv`, 423 rows”)* — > > congress.gov bill_type slug in `native_bills.csv` is 100% titled and
+- **L400** *(under “`legislation` — `bill_votes.csv`, 423 rows”)* — > > `bill_id` and a `native_bills.csv` row — a decision for
+- **L462** *(under “`legislation` — `bill_votes.csv`, 423 rows”)* — as Amended"*. **`native_bills.csv` holds a title for 390 of the 423 votes
+- **L749** *(under “THE SHORT LIST — what this week can fix without a single download”)* — | 7 | `legislation` | join `native_bills.title` and `.outcome` on `bill_id` | DONE — 398 of 423 titles (was 390; `code/890` made the join, `code/1092` closed the last 8) |
+
+### Open issues — every line in `docs/KNOWN_ISSUES.md` that names this dataset or its flagship
+
+- **L1431** *(under “~~STILL OPEN~~ REPAIRED 2026-09-02 — seven files, 41 bytes, ~~16~~ **15** lines”)* — | `code/76_build_recognition_history.py` | 2 | 836 | the `legislation` term in the recognition-instrument classifier |
+
+## M5 · The money rules — which columns may be summed
+
+**This dataset carries no numeric money column.** Nothing in it may be presented as a dollar total, and a reader who needs one has to go to the money dataset that holds it. A structure or directory table with no money column is not an incomplete money table.
+
+### The fence, quoted verbatim from `docs/MONEY_TOTALLING_RULES.md`
+
+That document is authoritative on which columns may be summed. It is **quoted here, never re-derived** — re-deriving a totalling rule from the data is precisely the error it exists to prevent.
+
+**`docs/MONEY_TOTALLING_RULES.md` states no one-line rule for `native_bills.csv`.** Where this dataset carries a money column and the rules document does not fence it, treat that as an open item, not as permission.
+
+## M6 · Known limits, stated plainly
+
+**Readiness: READY.** [measured — `docs/DATASET_READINESS.md`, regenerated by `py -3 code/518_dataset_readiness.py`]
+
+| tables | grain | keys | duplicates | agg-unsafe | rebuild |
+|---|---|---|---|---|---|
+| 11 | 11/11 | 11/11 | clean | 0 | declared  |
+
+The twelve-point contract a dataset is held to — grain declared and validated; keys and cardinality measured, not guessed; duplicates removed or the distinguishing dimension declared; entity attachment where the subject is an entity; every harvested row in a named disposition bucket; unresolved identity conflicts never shipping as definite facts; no double-counting path; one documented rebuild that does not destroy later enrichment; an update runbook another session can execute from the document alone; regression and semantic-diff gates over the outputs; column hygiene; and an inclusion basis on every row.
+
+**1 column is blank on every delivered row** and is kept deliberately. Dropping them would make the schema depend on which rows shipped, and a buyer diffing two deliveries would watch columns appear and vanish. Sparsity is a coverage fact. They are named in the codebook.
+
+**Do not sell past the evidence.** Where this paper states a figure it was measured on the date stamped beside it, from the file named beside it. Where it states a decision it names who made it. Anything not stated here is not known.
+
+## M7 · Fingerprint — what makes this paper stale
+
+`verify` re-measures the four values below against `dist/customer/legislation.csv` and **exits 1 if any has moved**. A methodology paper is stale the moment its dataset is rebuilt, and a stale paper that cannot say so is worse than no paper.
+
+```json
+{
+  "dataset": "legislation",
+  "file": "dist/customer/legislation.csv",
+  "bytes": 3278007,
+  "rows": 3069,
+  "columns": 39,
+  "header_sha256": "b632f229223f329d2cedbb6737bc911917b5fb5087cd5ed36ff35e31a6affef3",
+  "measured": "2026-09-02"
+}
+```
+
+Cross-check against `dist/customer/MANIFEST.csv`, which `code/1137_customer_dataset_combine.py` wrote at build time: it records **3069 rows × 39 columns**. The two agree.
+
+<!-- END GENERATED:MEASURED -->

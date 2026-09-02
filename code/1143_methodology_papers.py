@@ -164,6 +164,53 @@ ATTRIBUTION_SENSE = {
     ),
 }
 
+# ---------------------------------------------------------------------------
+# FIGURES THAT HAVE CIRCULATED IN MORE THAN ONE VALUE - STATED, NOT DERIVED
+# ---------------------------------------------------------------------------
+# A generated appendix and a hand-written body can disagree, and when they do
+# the reader is left holding two numbers and no way to choose. These are the
+# figures this project has actually watched drift, each with the superseded
+# values it drifted through. `build` re-measures the true one and then searches
+# the EDITORIAL body for a superseded literal; where it finds one it prints a
+# contradiction in the paper itself rather than leaving both to stand.
+#
+# Declared rather than inferred, for the same reason `N_BUILT_EXPECTED` is: a
+# derived list of "numbers that look stale" would agree with whatever the prose
+# happened to say, which is the failure it is meant to catch.
+#
+# `value` is a callable over the measurement dict so the CORRECT figure is
+# always the measured one and never a literal in this file.
+PROSE_CHECKS = {
+    "gaming": [
+        ("distinct gaming properties, `COUNT(DISTINCT cedar_place_id)`",
+         lambda m: m.get("gaming_denominator"),
+         # SEVEN values circulated for this on 2026-09-02, each from a
+         # different definition of "facility" and none saying which.
+         ("714", "725", "727", "734", "780")),
+        ("rows in the delivered file (a row is NOT a property)",
+         lambda m: m.get("rows"), ()),
+    ],
+    "subcontracting": [
+        ("rows in the delivered file",
+         lambda m: m.get("rows"),
+         # `docs/MONEY_TOTALLING_RULES.md` and `START_HERE.md` both still carry
+         # the pre-growth count.
+         ("76,859", "76859")),
+        ("how far a row-summed `subaward_amount` lands above the fenced total",
+         lambda m: (f"{m['subaward_fence']['over_correct_pct']:.1f}%"
+                    if m.get("subaward_fence") else None),
+         ("82.9%", "86.9%", "45.3%")),
+        ("the unfiltered `subaward_amount` total",
+         lambda m: (f"${m['subaward_fence']['unfiltered_sum']:,.2f}"
+                    if m.get("subaward_fence") else None),
+         ("$47,301,660,819.78", "$45.62B", "$47.30B")),
+        ("the fenced `subaward_amount` total",
+         lambda m: (f"${m['subaward_fence']['filtered_sum']:,.2f}"
+                    if m.get("subaward_fence") else None),
+         ("$25,864,997,128.19", "$24.41B", "$25.86B")),
+    ],
+}
+
 # Column-name patterns. Curated rather than inferred: a pattern that matches
 # too widely turns the appendix into the codebook it is supposed not to be.
 SOURCE_COLS = ("source_file", "source_dataset", "source_datasets",
@@ -176,8 +223,25 @@ IDENTITY_COLS_EXACT = ("attribution_method", "confidence_tier",
                        "hub_resolution_method", "entity_tier",
                        "identifier_status", "identity_scope", "disposition")
 MONEY_RE = re.compile(
-    r"(_usd$|_usd_|^total_obligations$|amount$|_amount_|obligation|"
-    r"announced_value|principal|revenue_usd|expenditures)", re.I)
+    r"(_usd$|_usd_|^total_obligations$|amount$|_amount_|_amt$|_amt_|"
+    r"obligation|announced_value|_value_usd$|principal|revenue|expenditure|"
+    r"expenses|royalt)", re.I)
+# ...and a NAME is never enough on its own. Three name-only false positives
+# were caught on the first full build and each is a different failure:
+#   `n_compact_obligation_tribal_agency_bridge`  a COUNT column, rendered as
+#                                                "$1,759.00" - a count with a
+#                                                dollar sign in front of it
+#   `in_full_irs_bmf`                            a 0/1 FLAG that summed to a
+#                                                plausible-looking dollar total
+#   `amount_countable`                           the same, and `517.MONEY_HINTS`
+#                                                had already made this exact
+#                                                mistake once
+# So a column must clear a NAME test, a CONTENT test (>=98% of populated values
+# parse as a number) and a SHAPE test (not a count by name, not a 0/1 flag by
+# value) before this appendix will print a dollar sign in front of it.
+NOT_MONEY_RE = re.compile(
+    r"(^n_|^num_|_count$|^count_|_flag$|_pct$|_percent|_share$|_ratio$|"
+    r"_year$|_date$|_id$|_rank$|_seq$)", re.I)
 # Columns whose NAME looks like money and whose CONTENT is not. Each is a
 # measured false positive, kept by name so the appendix does not have to
 # re-litigate it every build.
@@ -371,7 +435,8 @@ def measure(did: str) -> dict:
                                 r"^enterprise_id$|^facility_id$)", c.lower())][:4]
     out["parent_keys"] = parent_keys
     for c in cols:
-        if c.lower() in MONEY_NAME_FALSE_POSITIVES or not MONEY_RE.search(c):
+        if (c.lower() in MONEY_NAME_FALSE_POSITIVES
+                or not MONEY_RE.search(c) or NOT_MONEY_RE.search(c)):
             continue
         e = esc(c)
         filled, numeric = q(
@@ -380,7 +445,17 @@ def measure(did: str) -> dict:
             f"FROM {rel}")[0]
         if filled == 0 or numeric / filled < 0.98:
             out["money"][c] = {"filled": filled, "numeric": numeric,
-                               "is_money": False}
+                               "is_money": False,
+                               "why": "does not parse as a number"}
+            continue
+        flagvals = q(f"SELECT count(DISTINCT trim({e})) FROM {rel} "
+                     f"WHERE nullif(trim({e}),'') IS NOT NULL "
+                     f"AND trim({e}) NOT IN ('0','1','0.0','1.0')")[0][0]
+        if flagvals == 0:
+            out["money"][c] = {"filled": filled, "numeric": numeric,
+                               "is_money": False,
+                               "why": "every populated value is 0 or 1 - this "
+                                      "is a FLAG, not a dollar column"}
             continue
         s, mn, mx, dv = q(f"SELECT sum(TRY_CAST(trim({e}) AS DOUBLE)), "
                           f"min(TRY_CAST(trim({e}) AS DOUBLE)), "
@@ -415,7 +490,7 @@ def measure(did: str) -> dict:
                 f"TRY_CAST(trim({e}) AS DOUBLE) v FROM {rel}) "
                 f"WHERE k IS NOT NULL AND v IS NOT NULL")[0]
             if not n_k or n_kc != n_k:
-                continue[0]
+                continue
             if d_s is not None and s and abs(d_s - s) / abs(s) > 0.01:
                 out["money"][c]["dedup"][pk] = {"sum": d_s, "keys": n_k}
 
@@ -562,6 +637,61 @@ def _usd(v):
     return "-" if v is None else f"${v:,.2f}"
 
 
+def render_absent(did: str, man: dict) -> tuple[str, str]:
+    """Both generated blocks, for a dataset whose spreadsheet is not on disk.
+
+    FLAG, NEVER DELETE. The paper is still written and still managed; what it
+    says is that the artefact every figure would have been measured from is
+    absent, so no figure is stated. `verify` then fails for the right reason.
+    """
+    row = man.get(did, {})
+    name = row.get("name", did)
+    flag = FLAGSHIP.get(did, row.get("flagship", ""))
+    ident = "\n".join([
+        MARK_ID_B, "",
+        f"**`{did}` — {name}.** "
+        f"**THE DELIVERED FILE `dist/customer/{did}.csv` IS NOT ON DISK.** "
+        f"`dist/customer/MANIFEST.csv` still claims it at "
+        f"{row.get('rows', '?')} rows x {row.get('columns', '?')} columns, "
+        f"written by `code/1137_customer_dataset_combine.py`, so the manifest "
+        f"and the directory disagree and the directory is the one a customer "
+        f"would be handed. [measured " + TODAY + "]", "",
+        "> **No figure in this paper's Appendix M could be measured**, because "
+        "the artefact every figure is measured *from* is absent. Nothing has "
+        "been estimated, carried over from a previous build, or read out of a "
+        "build log to fill the gap — a methodology paper that guesses its own "
+        "dataset's shape is worse than one that says it cannot see it.",
+        ">",
+        f"> The hand-written body between the EDITORIAL markers is untouched "
+        f"and is still the record of how `{flag}` was built. Re-run "
+        f"`py -3 code/1137_customer_dataset_combine.py build {did}`, then "
+        f"`py -3 code/1143_methodology_papers.py build {did}`.",
+        ">",
+        f"> Generated {TODAY}. "
+        "`py -3 code/1143_methodology_papers.py verify` **fails** while this "
+        "block is present.",
+        "", MARK_ID_E])
+    meas = "\n".join([
+        MARK_M_B, "", "---", "",
+        "# Appendix M — NOT MEASURED: the delivered file is absent", "",
+        f"`dist/customer/{did}.csv` was not on disk when this paper was "
+        f"generated on {TODAY}. Every section this appendix normally carries — "
+        "sources as the rows record them, the pipeline, the identity layer and "
+        "what `attribution_method` means here, what is withheld, the money "
+        "fence, and the fingerprint — is measured from that file and from "
+        "nothing else. None of it is stated.", "",
+        "## M7 · Fingerprint", "",
+        "```json",
+        json.dumps({"dataset": did, "file": f"dist/customer/{did}.csv",
+                    "file_absent": True, "measured": TODAY}, indent=2),
+        "```", "",
+        "`verify` exits 1 on this block. That is the intended behaviour: a "
+        "dataset with no spreadsheet has no methodology paper that can be "
+        "trusted, and the failure is the notification.", "",
+        MARK_M_E])
+    return ident, meas
+
+
 def render_identity(did: str, m: dict, man: dict, ready: dict, con: dict) -> str:
     row = man.get(did, {})
     name = row.get("name", did)
@@ -611,7 +741,7 @@ def render_identity(did: str, m: dict, man: dict, ready: dict, con: dict) -> str
 
 
 def render_measured(did: str, m: dict, man: dict, ready: dict, con: dict,
-                    vocab: dict, fences: dict) -> str:
+                    vocab: dict, fences: dict, editorial: str = "") -> str:
     row = man.get(did, {})
     flag = FLAGSHIP.get(did, row.get("flagship", ""))
     L = [MARK_M_B, "", "---", "", "# Appendix M — measured from the delivered file", ""]
@@ -887,18 +1017,38 @@ def render_measured(did: str, m: dict, man: dict, ready: dict, con: dict,
                  "spreadsheet. [measured — `dist/customer/MANIFEST.csv`, "
                  "`rows_withheld = 0`]")
     L.append("")
-    L.append("The gate itself is `code/cedar_publication.row_ok`, applied "
+    L.append("The row gate is `code/cedar_publication.row_ok`, applied "
              "identically by every publisher: a row is withheld if "
              "`publishable` is set to anything outside "
              "`{Y, y, 1, true, TRUE, blank}`, or if `source_terms_status` is "
              "outside `{SILENT, TERMS_STATED_NO_REUSE_RESTRICTION, blank}`. "
              "**A blank gate column means the gate was never evaluated for that "
-             "row, not that it failed.** Separately, ten column names are "
-             "refused outright wherever they appear — `owner_name_raw`, "
-             "`email`, `phone`, `home_address`, `personal_email`, `ssn`, `tin`, "
-             "`date_of_birth`, `officer_name`, `contact_name` — and the "
-             "proprietary identifier families (Casino City, D-U-N-S) drop as "
-             "**columns**, not rows: the row is ours, the identifier is not.")
+             "row, not that it failed.**")
+    L.append("")
+    L.append("Two families are refused as **COLUMNS** rather than as rows, by "
+             "`cedar_publication.publishable_columns`, because the row is ours "
+             "and the field is not: the proprietary identifiers "
+             "(`casino_city_id` — Casino City Press; the D-U-N-S family — Dun "
+             "& Bradstreet), and personal data held apart from a public role "
+             "(`owner_name_raw`, `email`, `phone`, `home_address`, "
+             "`personal_email`, `ssn`, `tin`, `date_of_birth`, `officer_name`, "
+             "`contact_name`).")
+    L.append("")
+    L.append("**The personal-data family became a column drop on 2026-09-02, "
+             "and the change is worth understanding.** Until then it was a row "
+             "gate only, and measured against the live tree that published "
+             "**5 of the 587 rows** of `bia_tribal_leaders_directory.csv` — "
+             "every row carrying a phone or an email was withheld whole — "
+             "*and shipped the `phone` and `email` headers anyway on the five "
+             "survivors*. Both halves of that were wrong. A tribal leader's "
+             "name and office is a PUBLIC ROLE and belongs in the dataset; the "
+             "phone number is the thing that must not travel. Dropping the "
+             "field keeps 587 rows and publishes no contact data, where the "
+             "row gate kept 5 rows and still advertised two contact columns. "
+             "`row_ok` keeps its check as a **backstop**, for a personal field "
+             "arriving under a name the list does not yet know. [from the "
+             "record — the docstring of "
+             "`cedar_publication.publishable_columns`, 2026-09-02]")
     L.append("")
     for docname, label in (("WHAT_IS_MISSING.md", "Known gaps"),
                            ("KNOWN_ISSUES.md", "Open issues")):
@@ -993,9 +1143,8 @@ def render_measured(did: str, m: dict, man: dict, ready: dict, con: dict,
         L.append("")
         for k, v in sorted(notmoney.items()):
             pct = 100.0 * v["numeric"] / v["filled"] if v["filled"] else 0
-            L.append(f"- `{k}` — {_n(v['filled'])} populated, only "
-                     f"{_n(v['numeric'])} ({pct:.1f}%) parse as a number. "
-                     f"Not summable.")
+            why = v.get("why") or f"only {_n(v['numeric'])} of {_n(v['filled'])} populated values ({pct:.1f}%) parse as a number"
+            L.append(f"- `{k}` — {why}. Not summable.")
         L.append("")
 
     fr = fences["rows"]
@@ -1126,6 +1275,41 @@ def render_measured(did: str, m: dict, man: dict, ready: dict, con: dict,
              "made it. Anything not stated here is not known.")
     L.append("")
 
+    # ---- M8 prose contradictions ------------------------------------------
+    checks = PROSE_CHECKS.get(did, [])
+    if checks:
+        L += ["## M8 · Figures that have circulated in more than one value", ""]
+        L.append("Each row below was re-measured from the delivered file just "
+                 "now. The superseded values are the ones this project has "
+                 "actually watched drift; where one still appears in this "
+                 "paper's own hand-written body it is named, and **the "
+                 "measured figure is the one that is right**.")
+        L.append("")
+        L.append("| figure | measured today | superseded values | still in this paper's prose? |")
+        L.append("|---|---:|---|---|")
+        for label, fn, stale in checks:
+            try:
+                val = fn(m)
+            except Exception:
+                val = None
+            found = [x for x in stale if x in editorial]
+            L.append(f"| {label} | **{_n(val) if isinstance(val, int) else (val or '—')}** | "
+                     f"{', '.join(stale) or '—'} | "
+                     f"{('⚠ **yes** — ' + ', '.join(found)) if found else 'no'} |")
+        L.append("")
+        anyfound = any(x in editorial for _, _, st in checks for x in st)
+        if anyfound:
+            L.append("**Where the prose above and this appendix disagree, this "
+                     "appendix is right.** It was measured from "
+                     f"`dist/customer/{did}.csv` on {TODAY}; the prose was "
+                     "written against an earlier state of the same table. The "
+                     "prose is left standing rather than silently corrected, "
+                     "because a superseded figure that is *labelled* is "
+                     "recoverable and one that has been overwritten is not — "
+                     "and because the reasoning around it is usually still "
+                     "sound even when the number under it has moved.")
+            L.append("")
+
     # ---- M7 fingerprint ---------------------------------------------------
     L += ["## M7 · Fingerprint — what makes this paper stale", ""]
     L.append("`verify` re-measures the four values below against "
@@ -1190,20 +1374,24 @@ def cmd_build(only: str | None) -> int:
                 "means — has not been written. Write it here, between the "
                 "EDITORIAL markers, and it will survive every rebuild.")
         m = measure(did)
-        if not m["exists"]:
-            print(f"  ! {did:26s} dist/customer/{did}.csv MISSING — skipped")
-            continue
         b, e = ed_markers(did)
+        if m["exists"]:
+            ident = render_identity(did, m, man, ready, con)
+            meas = render_measured(did, m, man, ready, con, vocab, fences,
+                                   prev["editorial"])
+        else:
+            ident, meas = render_absent(did, man)
         doc = "\n\n".join([
             _title(did, man),
-            render_identity(did, m, man, ready, con),
+            ident,
             b + "\n" + prev["editorial"] + "\n" + e,
-            render_measured(did, m, man, ready, con, vocab, fences),
+            meas,
         ]) + "\n"
         path.write_text(doc, encoding="utf-8")
         tag = "migrated" if not prev["had_markers"] else "rebuilt"
-        print(f"  + {did:26s} {tag:9s} {len(doc):>8,} bytes  "
-              f"{m['rows']:>9,} rows x {m['columns']:>3} cols")
+        shape = (f"{m['rows']:>9,} rows x {m['columns']:>3} cols"
+                 if m["exists"] else "  DELIVERED FILE ABSENT - not measured")
+        print(f"  + {did:26s} {tag:9s} {len(doc):>8,} bytes  {shape}")
     _write_readme(man, ready)
     return 0
 
@@ -1299,8 +1487,15 @@ def cmd_verify() -> int:
         fp = json.loads(mfp.group(1))
         live = measure(did)
         if not live["exists"]:
-            fails.append(f"{did}: dist/customer/{did}.csv is MISSING")
+            fails.append(f"{did}: dist/customer/{did}.csv IS NOT ON DISK. The "
+                         f"manifest claims {man.get(did, {}).get('rows', '?')} "
+                         f"rows. Re-run 1137 for this dataset, then 1143.")
+            print(f"  FAIL {did:26s} delivered file absent")
             continue
+        if fp.get("file_absent"):
+            fails.append(f"{did}: the paper records the delivered file as "
+                         f"absent, but it is present now "
+                         f"({live['rows']:,} rows). Re-run `build {did}`.")
         for k in ("bytes", "rows", "columns", "header_sha256"):
             if fp.get(k) != live.get(k):
                 fails.append(f"{did}: STALE — {k} recorded {fp.get(k)!r}, "

@@ -790,12 +790,12 @@ refresh.
 | `Assistance_Subawards_2026-08-05_H22M29S09_1.csv` | 116 |
 | `Assistance_Subawards_2026-08-05_H21M06S27_1.csv` | 96 |
 | `fy2009` | 33 |
-| `fy2002` | 7 |
 | `fy2008` | 7 |
+| `fy2002` | 7 |
 | `fy2004` | 1 |
-| `fy2001` | 1 |
-| `fy2003` | 1 |
 | `fy2007` | 1 |
+| `fy2003` | 1 |
+| `fy2001` | 1 |
 
 **`source_dataset`** — 89,809 of 89,809 rows populated, 5 distinct values:
 
@@ -910,6 +910,9 @@ The gate itself is `code/cedar_publication.row_ok`, applied identically by every
 - **L516** *(under “C2 · S1 · `subawards.csv` — 10,770 duplicate rows, same shape suspected, unproven”)* — ## C2 · S1 · `subawards.csv` — 10,770 duplicate rows, same shape suspected, unproven
 - **L523** *(under “C2 · S1 · `subawards.csv` — 10,770 duplicate rows, same shape suspected, unproven”)* — over-stated by an unmeasured amount. **Blocks `subcontracting` and `funding`.**
 - **L1451** *(under “The data side, adjacent and NOT the same defect”)* — `subawards.csv`, `compact_structured_terms.csv`, `compact_required_reports.csv`,
+- **L2110** *(under “M3 · CORRECTED · `subcontracting` is 97.27% linked, not 44.8%”)* — ## M3 · CORRECTED · `subcontracting` is 97.27% linked, not 44.8%
+- **L2112** *(under “M3 · CORRECTED · `subcontracting` is 97.27% linked, not 44.8%”)* — `cedar_uid` in `subawards.csv` is the **PRIME leg**: 39,567 of its 40,201
+- **L2120** *(under “M3 · CORRECTED · `subcontracting` is 97.27% linked, not 44.8%”)* — them / $98,041,089.48** on `data/clean/subawards.csv` by exact-UEI
 
 ## M5 · The money rules — which columns may be summed
 
@@ -917,34 +920,24 @@ Measured over the delivered file. **A sum printed here is the unfiltered arithme
 
 | column | rows populated | distinct values | sum (unfiltered) | min | max |
 |---|---:|---:|---:|---:|---:|
-| `prime_award_amount` | 86,007 | 17,533 | $16,518,182,158,970.31 | $-514,458,497.00 | $35,035,280,267.19 |
+| `prime_award_amount` | 86,007 | 17,533 | $16,518,182,158,970.29 | $-514,458,497.00 | $35,035,280,267.19 |
 | `subaward_amount` | 89,809 | 55,110 | $57,020,557,710.47 | $-24,530,372.00 | $4,501,612,694.00 |
 | `subaward_amount_real2025` | 86,352 | 57,727 | $67,761,377,946.46 | $-32,813,420.06 | $4,743,961,514.99 |
-| `subaward_entity_rollup__usd_as_prime_a` ⚠ **joined** | 36,020 | 100 | $26,496,699,783,572.33 | $0.00 | $1,740,005,674.45 |
-| `subaward_entity_rollup__usd_as_subawardee_b` ⚠ **joined** | 36,020 | 114 | $19,583,506,623,258.37 | $0.00 | $1,684,411,206.21 |
+| `subaward_entity_rollup__usd_as_prime_a` ⚠ **joined** | 36,020 | 100 | $26,496,699,783,573.18 | $0.00 | $1,740,005,674.45 |
+| `subaward_entity_rollup__usd_as_subawardee_b` ⚠ **joined** | 36,020 | 114 | $19,583,506,623,258.34 | $0.00 | $1,684,411,206.21 |
 | `subaward_entity_rollup__usd_both_sides` ⚠ **joined** | 36,020 | 66 | $1,806,176,548,444.73 | $0.00 | $544,639,166.45 |
 
 **⚠ A column carrying a folded-in table's stem prefix is that table's grain repeated onto flagship rows, and row-summing it multiplies.** `subaward_entity_rollup__usd_as_prime_a`, `subaward_entity_rollup__usd_as_subawardee_b`, `subaward_entity_rollup__usd_both_sides` came from a supporting table joined one-to-one onto the flagship; the figure belongs to the entity or award the supporting table keys on, not to the row it is printed on. Sum it once per that key, never down the column. This is the owner-grain trap that turns $176.74B into $6,535.96B — a 36.98× inflation — in `contractor_ranking.csv`. [from the record — `docs/MONEY_TOTALLING_RULES.md`, block `GRAIN-WS5`]
 
-**Measured, not asserted: what the same column totals once per parent key.** A gap here is proof the value repeats.
+**Which of these columns are a PARENT's figure printed on a CHILD's row — measured, not asserted.** A column appears below only where its value is *constant within* the key named, which is proof it belongs to that key and not to the row. The right-hand column is what it totals once per key, and the multiple is what row-summing costs you.
 
-| column | row-summed | once per | deduped total | inflation |
-|---|---:|---|---:|---:|
-| `prime_award_amount` | $16,518,182,158,970.31 | `cedar_uid` | $55,029,972,132.73 | 300.17× |
-| `prime_award_amount` | $16,518,182,158,970.31 | `prime_award_id` | $1,360,393,366,872.51 | 12.14× |
-| `prime_award_amount` | $16,518,182,158,970.31 | `prime_award_unique_key` | $1,360,393,366,872.51 | 12.14× |
-| `subaward_amount` | $57,020,557,710.47 | `cedar_uid` | $20,215,862,776.94 | 2.82× |
-| `subaward_amount` | $57,020,557,710.47 | `prime_award_id` | $41,177,137,956.40 | 1.38× |
-| `subaward_amount` | $57,020,557,710.47 | `prime_award_unique_key` | $40,591,848,215.40 | 1.40× |
-| `subaward_entity_rollup__usd_as_prime_a` | $26,496,699,783,572.33 | `cedar_uid` | $7,943,989,328.24 | 3335.44× |
-| `subaward_entity_rollup__usd_as_prime_a` | $26,496,699,783,572.33 | `prime_award_id` | $4,594,930,020,566.71 | 5.77× |
-| `subaward_entity_rollup__usd_as_prime_a` | $26,496,699,783,572.33 | `prime_award_unique_key` | $4,949,760,627,462.03 | 5.35× |
-| `subaward_entity_rollup__usd_as_subawardee_b` | $19,583,506,623,258.37 | `cedar_uid` | $7,000,813,664.93 | 2797.32× |
-| `subaward_entity_rollup__usd_as_subawardee_b` | $19,583,506,623,258.37 | `prime_award_id` | $3,336,116,815,534.16 | 5.87× |
-| `subaward_entity_rollup__usd_as_subawardee_b` | $19,583,506,623,258.37 | `prime_award_unique_key` | $3,540,325,384,467.58 | 5.53× |
-| `subaward_entity_rollup__usd_both_sides` | $1,806,176,548,444.73 | `cedar_uid` | $1,231,925,611.55 | 1466.14× |
-| `subaward_entity_rollup__usd_both_sides` | $1,806,176,548,444.73 | `prime_award_id` | $491,516,307,712.69 | 3.67× |
-| `subaward_entity_rollup__usd_both_sides` | $1,806,176,548,444.73 | `prime_award_unique_key` | $495,825,399,460.07 | 3.64× |
+| column | belongs to | row-summed | once per that key | row-summing inflates by |
+|---|---|---:|---:|---:|
+| `subaward_entity_rollup__usd_as_prime_a` | `cedar_uid` (123 keys) | $26,496,699,783,573.18 | $7,943,989,328.24 | 3335.44× |
+| `subaward_entity_rollup__usd_as_subawardee_b` | `cedar_uid` (123 keys) | $19,583,506,623,258.34 | $7,000,813,664.93 | 2797.32× |
+| `subaward_entity_rollup__usd_both_sides` | `cedar_uid` (123 keys) | $1,806,176,548,444.73 | $1,231,925,611.55 | 1466.14× |
+
+**The once-per-key figure is not automatically the figure to publish either.** It is the arithmetic that removes the repetition, nothing more; whether that total is meaningful is the fence's question, not this table's. A column absent from this table is *not* thereby declared summable — it is only declared not to be constant within any key this file carries.
 
 ### The fence, quoted verbatim from `docs/MONEY_TOTALLING_RULES.md`
 
@@ -985,6 +978,19 @@ The twelve-point contract a dataset is held to — grain declared and validated;
 **1 column is blank on every delivered row** and is kept deliberately. Dropping them would make the schema depend on which rows shipped, and a buyer diffing two deliveries would watch columns appear and vanish. Sparsity is a coverage fact. They are named in the codebook.
 
 **Do not sell past the evidence.** Where this paper states a figure it was measured on the date stamped beside it, from the file named beside it. Where it states a decision it names who made it. Anything not stated here is not known.
+
+## M8 · Figures that have circulated in more than one value
+
+Each row below was re-measured from the delivered file just now. The superseded values are the ones this project has actually watched drift; where one still appears in this paper's own hand-written body it is named, and **the measured figure is the one that is right**.
+
+| figure | measured today | superseded values | still in this paper's prose? |
+|---|---:|---|---|
+| rows in the delivered file | **89,809** | 76,859, 76859 | ⚠ **yes** — 76,859, 76859 |
+| how far a row-summed `subaward_amount` lands above the fenced total | **63.4%** | 82.9%, 86.9%, 45.3% | ⚠ **yes** — 82.9%, 86.9%, 45.3% |
+| the unfiltered `subaward_amount` total | **$57,020,557,710.47** | $47,301,660,819.78, $45.62B, $47.30B | ⚠ **yes** — $47,301,660,819.78, $45.62B |
+| the fenced `subaward_amount` total | **$34,906,694,737.65** | $25,864,997,128.19, $24.41B, $25.86B | ⚠ **yes** — $25,864,997,128.19 |
+
+**Where the prose above and this appendix disagree, this appendix is right.** It was measured from `dist/customer/subcontracting.csv` on 2026-09-02; the prose was written against an earlier state of the same table. The prose is left standing rather than silently corrected, because a superseded figure that is *labelled* is recoverable and one that has been overwritten is not — and because the reasoning around it is usually still sound even when the number under it has moved.
 
 ## M7 · Fingerprint — what makes this paper stale
 

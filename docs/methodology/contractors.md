@@ -1,5 +1,18 @@
-# Methodology — Native Federal Prime Contracting
+# Methodology — Federal Prime Contracting
 
+<!-- BEGIN GENERATED:IDENTITY -->
+
+**`contractors` — Federal Prime Contracting.** **THE DELIVERED FILE `dist/customer/contractors.csv` IS NOT ON DISK.** `dist/customer/MANIFEST.csv` still claims it at 1217768 rows x 82 columns, written by `code/1137_customer_dataset_combine.py`, so the manifest and the directory disagree and the directory is the one a customer would be handed. [measured 2026-09-02]
+
+> **No figure in this paper's Appendix M could be measured**, because the artefact every figure is measured *from* is absent. Nothing has been estimated, carried over from a previous build, or read out of a build log to fill the gap — a methodology paper that guesses its own dataset's shape is worse than one that says it cannot see it.
+>
+> The hand-written body between the EDITORIAL markers is untouched and is still the record of how `prime_contracts.csv` was built. Re-run `py -3 code/1137_customer_dataset_combine.py build contractors`, then `py -3 code/1143_methodology_papers.py build contractors`.
+>
+> Generated 2026-09-02. `py -3 code/1143_methodology_papers.py verify` **fails** while this block is present.
+
+<!-- END GENERATED:IDENTITY -->
+
+<!-- BEGIN EDITORIAL:contractors -->
 **`contractors`. `data/clean/prime_contracts.csv`, 1,217,768 rows,
 $310,005,258,660.76 in obligations, FY2000–FY2026.** [measured 2026-09-02]
 
@@ -755,3 +768,27 @@ Ordered by how much damage acting on them would do.
 **$140,003,836,181.83 / 57.20%**; and every SAM figure in
 `docs/SAM_EXTRACTION_PLAN.md`'s 2026-08-26 section reproduced to the row and
 the cent.
+<!-- END EDITORIAL:contractors -->
+
+<!-- BEGIN GENERATED:MEASURED -->
+
+---
+
+# Appendix M — NOT MEASURED: the delivered file is absent
+
+`dist/customer/contractors.csv` was not on disk when this paper was generated on 2026-09-02. Every section this appendix normally carries — sources as the rows record them, the pipeline, the identity layer and what `attribution_method` means here, what is withheld, the money fence, and the fingerprint — is measured from that file and from nothing else. None of it is stated.
+
+## M7 · Fingerprint
+
+```json
+{
+  "dataset": "contractors",
+  "file": "dist/customer/contractors.csv",
+  "file_absent": true,
+  "measured": "2026-09-02"
+}
+```
+
+`verify` exits 1 on this block. That is the intended behaviour: a dataset with no spreadsheet has no methodology paper that can be trusted, and the failure is the notification.
+
+<!-- END GENERATED:MEASURED -->

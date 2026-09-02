@@ -3309,3 +3309,133 @@ prime."
   PASS is evidence the measurement ran rather than evidence nothing broke.
 
 <!-- END ADR-038-PRIME-SUB-NEVER-COMBINED -->
+
+<!-- BEGIN ADR-039-METHODOLOGY-GENERATED -->
+## ADR-039 - a methodology paper is GENERATED around a preserved editorial block, and it must be able to fail
+
+*Decided 2026-09-02 by workstream METHODOLOGY. `code/1143_methodology_papers.py`
+(`report` / `build` / `verify`). Twelve papers already existed and were good;
+this decides what they are made of from here.*
+
+### 1. The set is `BUILD_SHELVES`, and `_entity_layer` is not in it
+
+`docs/methodology/README.md` listed thirteen papers and reached thirteen by
+counting `_entity_layer`. The delivered set also reaches thirteen - twelve
+storefront datasets plus gaming through Cedar Grove - and the two thirteens are
+not the same thirteen. **`nest` had no paper and nothing noticed**, because a
+count that agrees is not a set that agrees. Exactly the conflation that let
+`newsletters` ship as an unwanted storefront slot.
+
+The set is now `cedar_publication.BUILD_SHELVES`, read live. `_entity_layer.md`
+is kept, is named as infrastructure, and is excluded from the count rather than
+deleted to satisfy it - it is 43 KB of correct shared-identity writing that the
+other papers lean on.
+
+### 2. Three blocks, and only the middle one is written by a human
+
+    <!-- BEGIN GENERATED:IDENTITY -->   what the dataset IS, measured
+    <!-- BEGIN EDITORIAL:<id> -->       the argument, PRESERVED byte-for-byte
+    <!-- BEGIN GENERATED:MEASURED -->   Appendix M, measured, eight sections
+
+The reasoning in a methodology paper - why a source was refused, what a regime
+change means, which of two disagreeing sources to believe - is not derivable
+and a generator that claimed to produce it would be lying. The figures are
+derivable and a human who types them cannot keep them true. So the paper is
+both, and the seam is declared.
+
+**A paper whose editorial block is under 400 bytes FAILS `verify`.** An
+all-generated methodology paper is a codebook with a different filename.
+
+### 3. Measured means measured from `dist/customer/<id>.csv`
+
+Not from `data/clean/`, not from a build log, not from `MANIFEST.csv`. The
+delivered spreadsheet is the artefact the customer is handed and it is the only
+thing Appendix M reads. duckdb over the whole file, `sample_size=-1`, never
+sampled; the 1.6 GB contracting file answers a count in under four seconds, so
+there was no performance argument for sampling and there is no excuse for one.
+
+`MANIFEST.csv` is still read, and only to be **cross-checked**: §M7 prints
+whether the manifest and the file agree and says which is right when they do
+not.
+
+### 4. The paper carries a fingerprint, and `verify` fails on it
+
+§M7 records `bytes`, `rows`, `columns` and the SHA-256 of the header line.
+`verify` re-measures all four and exits 1 on any difference. **A methodology
+paper is stale the moment its dataset is rebuilt**, and a stale paper that
+cannot say so is worse than no paper - this project has an entire register
+(`docs/DOC_CONTRADICTIONS_2026-08-26.md`) that exists because superseded
+figures sit in documents looking exactly as authoritative as current ones.
+
+`verify` also fails on: a built dataset with no paper; a paper with no
+editorial markers; a paper no built dataset claims; a delivered file that is
+not on disk; and a dataset carrying `attribution_method` with no declared sense
+in `1143.ATTRIBUTION_SENSE`.
+
+### 5. §M8 names a contradiction instead of resolving it silently
+
+Where the generated appendix and the paper's own hand-written body disagree on
+a figure that has actually drifted, §M8 prints both, says which was measured
+today, and **leaves the prose standing**. A superseded figure that is labelled
+is recoverable; one that has been overwritten is not, and the reasoning around
+it is usually still sound even when the number under it has moved.
+
+The two live instances on the day this was written, both measured from the
+delivered files:
+
+| paper | figure | prose says | measured |
+|---|---|---|---|
+| `gaming` | distinct properties, `COUNT(DISTINCT cedar_place_id)` | 714 | **717** |
+| `subcontracting` | rows | 76,859 | **89,809** |
+| `subcontracting` | row-summing `subaward_amount` overstates by | 82.9% / 86.9% | **63.4%** |
+
+The superseded values are DECLARED in `PROSE_CHECKS`, not inferred. A derived
+list of "numbers that look stale" would agree with whatever the prose happened
+to say, which is the failure it is meant to catch - the same reason
+`N_BUILT_EXPECTED` is stated rather than counted.
+
+### 6. A money column must clear a NAME test, a CONTENT test and a SHAPE test
+
+The first cut used a name pattern alone and printed **`$1,759.00`** as the
+total of `n_compact_obligation_tribal_agency_bridge`, which is a count of
+bridge rows. It also promoted `in_full_irs_bmf`, a 0/1 flag, to a dollar
+column. `517.MONEY_HINTS` had already made this exact mistake once on
+`principal_amount_text`.
+
+A column is money only if its name matches, **>=98% of its populated values
+parse as a number**, and it is not a count by name or a 0/1 flag by value.
+
+And a column that repeats is a PARENT's figure on a CHILD's row. The test is
+functional dependence, exactly - `count(DISTINCT (key, value)) == count(DISTINCT
+key)` - not a distinct-value heuristic. The heuristic version fired on
+`subaward_amount` (55,110 distinct over 89,809 rows) purely because contract
+amounts land on round numbers, and it would have published a "deduped total"
+for a genuinely row-grain column: a meaningless figure that looks
+authoritative. The exact version fires only on the three
+`subaward_entity_rollup__*` columns, which are constant within `cedar_uid` and
+row-sum to between 1,466x and 3,335x their once-per-entity totals.
+
+### 7. A marker a document is allowed to TALK ABOUT must be ANCHORED
+
+This one cost a paper and is the most portable thing here. The generated
+IDENTITY block tells the reader, in prose, to write between the BEGIN and END
+EDITORIAL markers - and names them. `txt.split(marker)` then finds that
+**sentence** first, and the "editorial body" recovered on the next build is the
+five characters between the two names inside it. `subcontracting.md` rebuilt
+from 58,874 bytes to 20,700 and 41,667 bytes of prose were gone. Caught on the
+second build, restored from git, fixed by matching only a marker that is
+**alone on its own line** (`_split_on_marker_line`).
+
+**Documentation of a delimiter is a legal occurrence of the delimiter, and `in`
+cannot tell the two apart.** Every marker consumer in this tree that uses a
+substring test has the same latent defect.
+
+### 8. A missing delivered file still produces a managed paper
+
+`build` used to skip a dataset whose spreadsheet was absent, which left the
+paper in its pre-1143 unmarked form and made `verify` report it as
+"unmanaged" - a true statement about the wrong problem. It now writes both
+generated blocks, states that the file is not on disk, states no figure at all,
+leaves the editorial body untouched, and records `file_absent: true` in the
+fingerprint so `verify` fails for the right reason. Flag, never delete.
+<!-- END ADR-039-METHODOLOGY-GENERATED -->

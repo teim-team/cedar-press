@@ -1,5 +1,20 @@
 # Methodology — Indian Country Deals
 
+<!-- BEGIN GENERATED:IDENTITY -->
+
+**`deals` — Indian Country Deals.** Delivered as `dist/customer/deals.csv`: **1,073 rows × 55 columns, 1.8 MB**, built from the flagship table `data/clean/deals_classified.csv`. Shelf `standard`; sold through **Cedar Press**; on the Cedar Press storefront. Readiness **READY**. [measured 2026-09-02 from the delivered file]
+
+> **This block and Appendix M at the foot of this paper are GENERATED** by `code/1143_methodology_papers.py` from the delivered file itself, on every build — the same reason the codebooks are generated. Do not hand-edit either; the next build overwrites them.
+>
+> Everything between `<!-- BEGIN EDITORIAL:deals -->` and `<!-- END EDITORIAL:deals -->` is **hand-written and preserved byte-for-byte** across rebuilds. Put prose there and nowhere else.
+>
+> This paper is **not** the codebook. `dist/customer/deals__CODEBOOK.md` carries the grain, the folded-in tables and the per-column fill rates, and `__NOTES.txt` carries the same for a person. This paper says how the dataset came to exist and why you should believe it.
+>
+> Generated 2026-09-02. `py -3 code/1143_methodology_papers.py verify` **fails** if the delivered file has moved since — see §M7.
+
+<!-- END GENERATED:IDENTITY -->
+
+<!-- BEGIN EDITORIAL:deals -->
 **`deals`. `data/clean/deals_classified.csv`, 1,073 rows, 959 entity-linked
 (89.4%).** [measured 2026-09-02, after the staged merge in section 5b]
 
@@ -850,3 +865,148 @@ that states a transaction the press did not cover.
    method, not error — WS5 almost certainly counted `Source_1` only — but **the
    doc does not say which column it counted, so its figures are not
    reproducible as written.**
+<!-- END EDITORIAL:deals -->
+
+<!-- BEGIN GENERATED:MEASURED -->
+
+---
+
+# Appendix M — measured from the delivered file
+
+*Generated 2026-09-02 by `code/1143_methodology_papers.py` from `dist/customer/deals.csv`, read whole with duckdb and never sampled. Not from `data/clean/`, not from a build log, not from `MANIFEST.csv`. Where this appendix and a document disagree, **the delivered file is right** and `verify` prints the disagreement rather than smoothing it over.*
+
+*Grain, folded-in tables and per-column fill rates are in `dist/customer/deals__CODEBOOK.md` and are deliberately not repeated here.*
+
+## M1 · Sources, as the delivered rows themselves record them
+
+**No `source_*` column survives into the delivered file.** That is a coverage fact and a real limit: a buyer holding this spreadsheet cannot tell which upstream object a given row came from without going back to the build log. The narrative inventory of sources is in §1 of this paper.
+
+### The terms rulings that bind this dataset
+
+Quoted from `docs/PUBLICATION_POLICY.md`, which holds the rulings; this paper does not restate them from memory.
+
+- **Owner ruling, 2026-09-02** (`<!-- BEGIN TERMS-OWNER-RULING-2026-09-02 -->`): *"So tribal websites, I actually don't care if they say it does scrape. Because if it's publicly available and you can scrape it, scrape it."* A tribal entity's own public pages may be harvested regardless of a terms statement. `source_terms_status = TERMS_STATED_RESTRICTIVE` on a Native entity's own site is now **a recorded observation, not a gate**.
+- **Four things that ruling does NOT touch, and none is a terms question:** (1) technical access controls — nothing login-gated, no admin or staging paths, no exploiting a misconfiguration; (2) a natural person's data held apart from their public role — home address, personal email or phone, DOB, SSN/TIN; (3) non-tribal licensors — EMMA/MSRB bars redistribution of its output "sold or free of charge" and names "any manual process", with CUSIP Global Services as a second licensor; (4) proprietary identifiers — Casino City, D-U-N-S — held internally, never shipped.
+- **A terms restriction is scoped to the SOURCE that stated it, not to the nation** (`<!-- BEGIN TERMS-SCOPE -->`), and it does not bind a third party's filing of the same fact.
+
+## M2 · How the rows were built — the pipeline, in order
+
+**One documented rebuild:** `py -3 code/build.py run deals --execute`. `py -3 code/build.py plan deals` prints the ordering below live; it is reproduced here so the paper stands alone.
+
+The collection holds **20 tables**. Those with a named build stage, flagship first:
+
+| table | rebuilt by | then enriched by (must run LAST) | status |
+|---|---|---|---|
+| `deals_classified.csv` **(flagship)** | — | — | shippable |
+| `deals_ancsa_portal_additions.csv` | `build_deals.py` | `build_deals2.py` | shippable |
+| `deals_party_autoresolved.csv` | `57_autoresolve_deal_parties.py` | `154_extend_autoresolved_parties_additive.py` | internal-by-decision |
+
+**A full rebuild and an in-place enricher on one file need an ordering, and the enricher must run LAST.** A `.bak_*_pre<script>` file sitting beside a table is the signal that an enricher has touched it since the last build. This has cost this project four reverts of one file in a single day.
+
+The delivered spreadsheet is then assembled by `code/1137_customer_dataset_combine.py`, which folds supporting tables onto the flagship **only where the measured cardinality on the shared key is one**, reverts any join that moved the row count, and prefixes every joined column with its source table's stem. One-to-many tables contribute a count column instead of rows, so a money total cannot be multiplied by a join.
+
+## M3 · How entities were attributed
+
+Cedar keys every dataset to one identity layer. `cedar_uid` is permanent and never reused; the human-readable handle retires when an entity is reclassified, so **join on `cedar_uid`, never on the handle**. A compound handle is canonical, not broken — stripping a suffix to make a join work turns joinable rows into unjoinable ones while looking like a normalisation.
+
+**Entity attachment in the delivered file:**
+
+| key column | rows carrying one | distinct values | coverage |
+|---|---:|---:|---:|
+| `cedar_uid` | 959 | 331 | 89.4% |
+
+**An unkeyed row is often the right answer, not a defect.** ADR-010 separates *"we could not identify the entity"* — a defect — from *"there is no single entity to identify"* — the correct representation. Coverage is measured against the *resolvable* denominator, not the row count.
+
+### What `attribution_method` means **in this dataset**
+
+`docs/schema/attribution_method_vocabulary.json`, declared 2026-09-02: *"`attribution_method` is three different columns sharing a name — a join method, an evidence provenance, and a name-match algorithm. Each table is gated against its OWN vocabulary."* Reading one table's sense into another is how a containment match came to key a dollar.
+
+**This dataset carries no `attribution_method` column.** The identity evidence it does carry is measured below. Do not import another dataset's term list to interpret it.
+
+**And a RULED METHOD IS NOT A POSITIVE RULING.** `attribution_method` says WHO decided; `confidence_tier` says WHAT was decided. All 317 `elijah_ruling` EIN rows in the ledger are tier **X** — *negative* — and a script that read "the method is in the RULED set" as "the answer was yes" published 317 owner *exclusions* as confident attributions. Standing detector: `py -3 code/293_lint_bug_classes.py`. [from the record — `START_HERE.md`, defect class 1b]
+
+### Every identity, tier and method column, measured
+
+- **`Record_Scope`** — 35 distinct values: `2022 commitment` 186 · `2024 commitment` 175 · `2023 commitment` 112 · `TRANSACTION_CANDIDATE_TRIBAL_PRESS` 90 · `2025 commitment` 77 · `2019 commitment` 75 · `2026 commitment` 69 · `2021 commitment` 54 · `STAGED_CANDIDATE_NOT_MERGED` 45 · `2020 commitment` 34 · `2026 project milestone` 21 · `2016 commitment` 16 · `2018 commitment` 12 · `2015 commitment` 11 · `2017 commitment` 11 · `2010 commitment` 9 · `2013 commitment` 9 · `2014 commitment` 8 · `2003 commitment` 7 · `2004 commitment` 7 · `2005 commitment` 7 · `2012 commitment` 6 · `2011 commitment` 4 · `2001 commitment` 4 · `2000 commitment` 4 · `2009 commitment` 3 · `2002 commitment` 3 · `2006 commitment` 3 · `CEDAR_OBSERVATION_NOT_A_PUBLISHED_ANNOUNCEMENT` 2 · `2008 commitment` 2 · `2024 project milestone` 2 · `2007 commitment` 2 · `2023 project milestone` 1 · `Programme round covering several awards` 1 · `TRANSACTION` 1
+- **`native_party_attribution_method`** — 12 distinct values: `agent_ruling+alias` 248 · `agent_ruling+exact` 247 · `agent_ruling+core` 221 · `(blank)` 114 · `agent_ruling+containment` 96 · `elijah_ruling+exact` 32 · `elijah_ruling+containment` 27 · `deterministic_containment` 26 · `elijah_ruling+core` 24 · `deterministic_core` 19 · `deterministic_exact` 11 · `elijah_ruling+alias` 6 · `deterministic_alias` 2
+- **`native_party_attribution_tier`** — 2 distinct values: `A` 775 · `B` 184 · `(blank)` 114
+
+### The evidence tiers
+
+| tier | what it means |
+|---|---|
+| **A** | an identifier (UEI, CAGE, EIN, declared parent UEI), or a human ruling. The only grade a dollar may be keyed on without corroboration |
+| **B** | a strong name method with an independent corroborator, or inheritance from a tier-A parent |
+| **C** | a weak method — containment, token subset — held as a candidate, not published as a fact |
+| **X** | **refused.** A negative ruling. Never read as a confirmation |
+
+**A tier is INHERITED from the source row, never assigned by the consumer.** The exactness of the KEY says nothing about the correctness of the LINK: 873 of 1,104 EIN rows in the ledger sit on 52 entities carrying five or more EINs each, and 821 are tier B via `need_v6`, which is 6.5% accurate and never publishes alone. [from the record — `START_HERE.md`, defect class 1]
+
+## M4 · What is **not** in it, and why
+
+**No row was withheld from this delivery.** Every row that passed the collection's own inclusion test is in the spreadsheet. [measured — `dist/customer/MANIFEST.csv`, `rows_withheld = 0`]
+
+The gate itself is `code/cedar_publication.row_ok`, applied identically by every publisher: a row is withheld if `publishable` is set to anything outside `{Y, y, 1, true, TRUE, blank}`, or if `source_terms_status` is outside `{SILENT, TERMS_STATED_NO_REUSE_RESTRICTION, blank}`. **A blank gate column means the gate was never evaluated for that row, not that it failed.** Separately, ten column names are refused outright wherever they appear — `owner_name_raw`, `email`, `phone`, `home_address`, `personal_email`, `ssn`, `tin`, `date_of_birth`, `officer_name`, `contact_name` — and the proprietary identifier families (Casino City, D-U-N-S) drop as **columns**, not rows: the row is ours, the identifier is not.
+
+### Known gaps — every line in `docs/WHAT_IS_MISSING.md` that names this dataset or its flagship
+
+- **L66** *(under “READ THIS FIRST — the sample is a hand-curated column list, and that is where most of the loss happens”)* — - **`deals` shows no dollar value.** `Announced_Value_USD` is populated on
+- **L705** *(under “`deals` — `deals_classified.csv`, 935 rows”)* — ## `deals` — `deals_classified.csv`, 935 rows
+- **L743** *(under “THE SHORT LIST — what this week can fix without a single download”)* — | 1 | `deals` | add `Announced_Value_USD`, `Value_Type`, `Source_1`, `Description`, `cedar_uid` to `SHOW` | 835 / 935 / 931 / 935 / 886 rows |
+
+### Open issues — every line in `docs/KNOWN_ISSUES.md` that names this dataset or its flagship
+
+- **L84** *(under “A2 · S3 · Three collections were documented as planning a script "not in the repository" — all three scripts exist”)* — build plan names a script that is not in the repository"* — `deals` →
+- **L167** *(under “A5 [RESOLVED 2026-09-02 — see note at end] · S1 · The arbiter document of last resort had gone stale in 6 of 14 rows”)* — | `deals_classified.csv` | 921 / 874 linked | **935 / 886** |
+- **L544** *(under “C4 · S2 · Nine grain rulings only a human can make”)* — `contractors`, `gaming`, `lobbying`, `natural-resources`, `deals`,
+
+## M5 · The money rules — which columns may be summed
+
+Measured over the delivered file. **A sum printed here is the unfiltered arithmetic sum of the column and is NOT necessarily a figure a buyer may quote** — the fence below says which are and which are not.
+
+| column | rows populated | distinct values | sum (unfiltered) | min | max |
+|---|---:|---:|---:|---:|---:|
+| `Announced_Value_USD` | 861 | 589 | $47,880,355,533.49 | $1.00 | $2,300,000,000.00 |
+| `Project_Total_Value_USD` | 141 | 133 | $11,482,170,087.00 | $65,000.00 | $1,600,000,000.00 |
+
+### The fence, quoted verbatim from `docs/MONEY_TOTALLING_RULES.md`
+
+That document is authoritative on which columns may be summed. It is **quoted here, never re-derived** — re-deriving a totalling rule from the data is precisely the error it exists to prevent.
+
+| table | additive measure | sum it at | what double-counts |
+|---|---|---|---|
+| `deals_classified.csv` | `Announced_Value_USD` | one deal EVENT. Key `Deal_ID`, 935 rows | **any of the nine `deals_*_additions.csv` files.** 790 of their 790 rows are already in this table — $22.67B against a $45.20B headline. And 618 of 935 rows carry a `Value_Type` naming a FEDERAL award, $6.87B Cedar already ships in `funding` and `contractors` |
+
+Marked blocks in that document that name `deals_classified.csv`: `<!-- BEGIN DEALS-MERGE-1088 -->`, `<!-- BEGIN GRAIN-WS5 -->`.
+
+## M6 · Known limits, stated plainly
+
+**Readiness: READY.** [measured — `docs/DATASET_READINESS.md`, regenerated by `py -3 code/518_dataset_readiness.py`]
+
+| tables | grain | keys | duplicates | agg-unsafe | rebuild |
+|---|---|---|---|---|---|
+| 15 | 15/15 | 15/15 | clean | 0 | declared  |
+
+The twelve-point contract a dataset is held to — grain declared and validated; keys and cardinality measured, not guessed; duplicates removed or the distinguishing dimension declared; entity attachment where the subject is an entity; every harvested row in a named disposition bucket; unresolved identity conflicts never shipping as definite facts; no double-counting path; one documented rebuild that does not destroy later enrichment; an update runbook another session can execute from the document alone; regression and semantic-diff gates over the outputs; column hygiene; and an inclusion basis on every row.
+
+**Do not sell past the evidence.** Where this paper states a figure it was measured on the date stamped beside it, from the file named beside it. Where it states a decision it names who made it. Anything not stated here is not known.
+
+## M7 · Fingerprint — what makes this paper stale
+
+`verify` re-measures the four values below against `dist/customer/deals.csv` and **exits 1 if any has moved**. A methodology paper is stale the moment its dataset is rebuilt, and a stale paper that cannot say so is worse than no paper.
+
+```json
+{
+  "dataset": "deals",
+  "file": "dist/customer/deals.csv",
+  "bytes": 1820719,
+  "rows": 1073,
+  "columns": 55,
+  "header_sha256": "0e52f9f3918fd16e8355ef7a99b144c8cb710ac56fee0b5313981e8b691e2f3c",
+  "measured": "2026-09-02"
+}
+```
+
+Cross-check against `dist/customer/MANIFEST.csv`, which `code/1137_customer_dataset_combine.py` wrote at build time: it records **1073 rows × 55 columns**. The two agree.
+
+<!-- END GENERATED:MEASURED -->

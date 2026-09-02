@@ -1,5 +1,20 @@
 # Methodology — Federal Funding to Indian Country
 
+<!-- BEGIN GENERATED:IDENTITY -->
+
+**`funding` — Federal Funding to Indian Country.** Delivered as `dist/customer/funding.csv`: **701,955 rows × 86 columns, 677.5 MB**, built from the flagship table `data/clean/federal_funding_transactions.csv`. Shelf `standard`; sold through **Cedar Press**; on the Cedar Press storefront. Readiness **READY**. [measured 2026-09-02 from the delivered file]
+
+> **This block and Appendix M at the foot of this paper are GENERATED** by `code/1143_methodology_papers.py` from the delivered file itself, on every build — the same reason the codebooks are generated. Do not hand-edit either; the next build overwrites them.
+>
+> Everything between `<!-- BEGIN EDITORIAL:funding -->` and `<!-- END EDITORIAL:funding -->` is **hand-written and preserved byte-for-byte** across rebuilds. Put prose there and nowhere else.
+>
+> This paper is **not** the codebook. `dist/customer/funding__CODEBOOK.md` carries the grain, the folded-in tables and the per-column fill rates, and `__NOTES.txt` carries the same for a person. This paper says how the dataset came to exist and why you should believe it.
+>
+> Generated 2026-09-02. `py -3 code/1143_methodology_papers.py verify` **fails** if the delivered file has moved since — see §M7.
+
+<!-- END GENERATED:IDENTITY -->
+
+<!-- BEGIN EDITORIAL:funding -->
 **`funding`. `data/clean/federal_funding_transactions.csv`, 701,955 rows,
 $219,689,020,478.59 in obligations, FY2007–FY2026; plus the pre-2008 archive
 tables, 2,769,748 rows covering FY2001–2007.** [measured 2026-09-02]
@@ -670,3 +685,218 @@ appears, so a series built from a fresh pull understates its own newest points.
     `federal_funding_transactions.csv.bak_2026-09-01_pre820` exists and there
     is **no `code/820_*`**. Both are reproducibility gaps for anyone tracing
     provenance from a basis string.
+<!-- END EDITORIAL:funding -->
+
+<!-- BEGIN GENERATED:MEASURED -->
+
+---
+
+# Appendix M — measured from the delivered file
+
+*Generated 2026-09-02 by `code/1143_methodology_papers.py` from `dist/customer/funding.csv`, read whole with duckdb and never sampled. Not from `data/clean/`, not from a build log, not from `MANIFEST.csv`. Where this appendix and a document disagree, **the delivered file is right** and `verify` prints the disagreement rather than smoothing it over.*
+
+*Grain, folded-in tables and per-column fill rates are in `dist/customer/funding__CODEBOOK.md` and are deliberately not repeated here.*
+
+## M1 · Sources, as the delivered rows themselves record them
+
+**`source_file`** — 701,955 of 701,955 rows populated, 21 distinct values:
+
+| value | rows |
+|---|---:|
+| `Assistance_PrimeTransactions_2023-04-09_H19M53S53_1.csv` | 476,924 |
+| `FY2024_All_Assistance_Full_20260706.zip` | 50,686 |
+| `FY2025_All_Assistance_Full_20260706.zip` | 44,471 |
+| `FY2023_All_Assistance_Full_20260806.zip` | 34,511 |
+| `FY2026_All_Assistance_Full_20260706.zip` | 24,895 |
+| `FY2007_All_Assistance_Full_20260706.zip` | 11,443 |
+| `FY2022_All_Assistance_Full_20260806.zip` | 6,300 |
+| `FY2020_All_Assistance_Full_20260806.zip` | 5,921 |
+| `FY2021_All_Assistance_Full_20260806.zip` | 4,811 |
+| `FY2012_All_Assistance_Full_20260806.zip` | 4,713 |
+| `FY2018_All_Assistance_Full_20260806.zip` | 4,357 |
+| `FY2013_All_Assistance_Full_20260806.zip` | 4,023 |
+| `FY2011_All_Assistance_Full_20260806.zip` | 3,892 |
+| `FY2014_All_Assistance_Full_20260806.zip` | 3,600 |
+| `FY2019_All_Assistance_Full_20260806.zip` | 3,554 |
+| `FY2016_All_Assistance_Full_20260806.zip` | 3,512 |
+| `FY2017_All_Assistance_Full_20260806.zip` | 3,366 |
+| `FY2010_All_Assistance_Full_20260806.zip` | 3,361 |
+| `FY2015_All_Assistance_Full_20260806.zip` | 3,086 |
+| `FY2009_All_Assistance_Full_20260806.zip` | 3,017 |
+| `FY2008_All_Assistance_Full_20260806.zip` | 1,512 |
+
+**`source_vintage`** — 701,955 of 701,955 rows populated, 3 distinct values:
+
+| value | rows |
+|---|---:|
+| `usaspending_bulk_download_2023-04-09` | 476,924 |
+| `usaspending_award_archive_20260706` | 131,495 |
+| `usaspending_award_archive_20260806` | 93,536 |
+
+**`fetched_date`** — 225,031 of 701,955 rows populated, 3 distinct values:
+
+| value | rows |
+|---|---:|
+| `2026-08-07` | 131,495 |
+| `2026-08-12` | 76,504 |
+| `2026-08-26` | 17,032 |
+
+### The terms rulings that bind this dataset
+
+Quoted from `docs/PUBLICATION_POLICY.md`, which holds the rulings; this paper does not restate them from memory.
+
+- **Owner ruling, 2026-09-02** (`<!-- BEGIN TERMS-OWNER-RULING-2026-09-02 -->`): *"So tribal websites, I actually don't care if they say it does scrape. Because if it's publicly available and you can scrape it, scrape it."* A tribal entity's own public pages may be harvested regardless of a terms statement. `source_terms_status = TERMS_STATED_RESTRICTIVE` on a Native entity's own site is now **a recorded observation, not a gate**.
+- **Four things that ruling does NOT touch, and none is a terms question:** (1) technical access controls — nothing login-gated, no admin or staging paths, no exploiting a misconfiguration; (2) a natural person's data held apart from their public role — home address, personal email or phone, DOB, SSN/TIN; (3) non-tribal licensors — EMMA/MSRB bars redistribution of its output "sold or free of charge" and names "any manual process", with CUSIP Global Services as a second licensor; (4) proprietary identifiers — Casino City, D-U-N-S — held internally, never shipped.
+- **A terms restriction is scoped to the SOURCE that stated it, not to the nation** (`<!-- BEGIN TERMS-SCOPE -->`), and it does not bind a third party's filing of the same fact.
+
+## M2 · How the rows were built — the pipeline, in order
+
+**One documented rebuild:** `py -3 code/build.py run funding --execute`. `py -3 code/build.py plan funding` prints the ordering below live; it is reproduced here so the paper stands alone.
+
+The collection holds **20 tables**. Those with a named build stage, flagship first:
+
+| table | rebuilt by | then enriched by (must run LAST) | status |
+|---|---|---|---|
+| `federal_funding_transactions.csv` **(flagship)** | `24_funding_merge.py` | `1131_attribution_method_vocabulary.py`, `115_pull_assistance_archive.py`, `335_harmonize_assistance_seams_in_place.py`, `336_correct_scheme_resolution_by_spine_membership.py`, `503_identity.py` | shippable |
+| `faads_entity_attribution.csv` | `73_faads_name_attribution.py` | `710_faads_attribution_content_key.py`, `791_faads_transaction_key_and_repoint.py`, `874_geography_two_sums.py` | shippable |
+| `faads_transactions_all_agencies.csv` | `30_funding_pre2008.py` | `1086_faads_award_key_promote.py` | shippable |
+| `native_passthrough.csv` | `121_pull_subawards_api.py` | `81_build_passthrough_dataset.py` | shippable |
+
+**A full rebuild and an in-place enricher on one file need an ordering, and the enricher must run LAST.** A `.bak_*_pre<script>` file sitting beside a table is the signal that an enricher has touched it since the last build. This has cost this project four reverts of one file in a single day.
+
+The delivered spreadsheet is then assembled by `code/1137_customer_dataset_combine.py`, which folds supporting tables onto the flagship **only where the measured cardinality on the shared key is one**, reverts any join that moved the row count, and prefixes every joined column with its source table's stem. One-to-many tables contribute a count column instead of rows, so a money total cannot be multiplied by a join.
+
+## M3 · How entities were attributed
+
+Cedar keys every dataset to one identity layer. `cedar_uid` is permanent and never reused; the human-readable handle retires when an entity is reclassified, so **join on `cedar_uid`, never on the handle**. A compound handle is canonical, not broken — stripping a suffix to make a join work turns joinable rows into unjoinable ones while looking like a normalisation.
+
+**Entity attachment in the delivered file:**
+
+| key column | rows carrying one | distinct values | coverage |
+|---|---:|---:|---:|
+| `cedar_uid` | 552,756 | 669 | 78.7% |
+
+**An unkeyed row is often the right answer, not a defect.** ADR-010 separates *"we could not identify the entity"* — a defect — from *"there is no single entity to identify"* — the correct representation. Coverage is measured against the *resolvable* denominator, not the row count.
+
+### What `attribution_method` means **in this dataset**
+
+`docs/schema/attribution_method_vocabulary.json`, declared 2026-09-02: *"`attribution_method` is three different columns sharing a name — a join method, an evidence provenance, and a name-match algorithm. Each table is gated against its OWN vocabulary."* Reading one table's sense into another is how a containment match came to key a dollar.
+
+A JOIN METHOD, plus a DISPOSITION. `uei_exact_archive` and the three `dofile_corrtd:*` variants say which key joined; `ledger_exclusion`, `ledger_uei_state_disagreement_withheld`, `not_evaluated:ak_scope_line9` and `unattributed` say why a row has no entity, which is a decision rather than a method. The companion column `attribution_status` is never blank and is the one to filter on.
+
+**And a RULED METHOD IS NOT A POSITIVE RULING.** `attribution_method` says WHO decided; `confidence_tier` says WHAT was decided. All 317 `elijah_ruling` EIN rows in the ledger are tier **X** — *negative* — and a script that read "the method is in the RULED set" as "the answer was yes" published 317 owner *exclusions* as confident attributions. Standing detector: `py -3 code/293_lint_bug_classes.py`. [from the record — `START_HERE.md`, defect class 1b]
+
+### Every identity, tier and method column, measured
+
+- **`attribution_method`** — 9 distinct values: `dofile_corrtd:prefix` 363,078 · `uei_exact_archive` 183,491 · `unattributed` 80,682 · `not_evaluated:ak_scope_line9` 55,316 · `ledger_uei_state_disagreement_withheld` 15,878 · `dofile_corrtd:exact` 1,450 · `dofile_corrtd:prefix+city` 1,007 · `ledger_exclusion` 899 · `agent_research_one_leg` 154
+- **`attribution_status`** — 4 distinct values: `cedar_neid` 552,756 · `unattributed` 147,067 · `excluded_not_native` 2,119 · `unresolved_native` 13
+- **`confidence_tier`** — 4 distinct values: `A` 437,138 · `B` 111,106 · `C` 59,511 · `X` 54,090 · `(blank)` 40,110
+- **`geo_key_tier`** — 3 distinct values: `derived_place_modal` 514,061 · `exact_transaction` 139,553 · `(blank)` 38,782 · `exact_award_summary` 9,559
+- **`tribe_id_neid_proposed_tier`** — 2 distinct values: `B` 416,129 · `(blank)` 259,028 · `C` 26,798
+
+### The frozen term list for this dataset's flagship
+
+A term listed in the registry is **FROZEN, not blessed**: the declaration records what shipped on 2026-09-02 so a NEW term cannot appear silently.
+
+`federal_funding_transactions.csv` — 9 terms: `agent_research_one_leg` 154 · `dofile_corrtd:exact` 1,450 · `dofile_corrtd:prefix` 363,078 · `dofile_corrtd:prefix+city` 1,007 · `ledger_exclusion` 899 · `ledger_uei_state_disagreement_withheld` 15,878 · `not_evaluated:ak_scope_line9` 55,443 · `uei_exact_archive` 183,995 · `unattributed` 80,205
+
+### The evidence tiers
+
+| tier | what it means |
+|---|---|
+| **A** | an identifier (UEI, CAGE, EIN, declared parent UEI), or a human ruling. The only grade a dollar may be keyed on without corroboration |
+| **B** | a strong name method with an independent corroborator, or inheritance from a tier-A parent |
+| **C** | a weak method — containment, token subset — held as a candidate, not published as a fact |
+| **X** | **refused.** A negative ruling. Never read as a confirmation |
+
+**A tier is INHERITED from the source row, never assigned by the consumer.** The exactness of the KEY says nothing about the correctness of the LINK: 873 of 1,104 EIN rows in the ledger sit on 52 entities carrying five or more EINs each, and 821 are tier B via `need_v6`, which is 6.5% accurate and never publishes alone. [from the record — `START_HERE.md`, defect class 1]
+
+## M4 · What is **not** in it, and why
+
+**No row was withheld from this delivery.** Every row that passed the collection's own inclusion test is in the spreadsheet. [measured — `dist/customer/MANIFEST.csv`, `rows_withheld = 0`]
+
+The gate itself is `code/cedar_publication.row_ok`, applied identically by every publisher: a row is withheld if `publishable` is set to anything outside `{Y, y, 1, true, TRUE, blank}`, or if `source_terms_status` is outside `{SILENT, TERMS_STATED_NO_REUSE_RESTRICTION, blank}`. **A blank gate column means the gate was never evaluated for that row, not that it failed.** Separately, ten column names are refused outright wherever they appear — `owner_name_raw`, `email`, `phone`, `home_address`, `personal_email`, `ssn`, `tin`, `date_of_birth`, `officer_name`, `contact_name` — and the proprietary identifier families (Casino City, D-U-N-S) drop as **columns**, not rows: the row is ours, the identifier is not.
+
+### Known gaps — every line in `docs/WHAT_IS_MISSING.md` that names this dataset or its flagship
+
+- **L293** *(under “`funding` — `federal_funding_transactions.csv`, 701,955 rows”)* — ## `funding` — `federal_funding_transactions.csv`, 701,955 rows
+- **L751** *(under “THE SHORT LIST — what this week can fix without a single download”)* — | 9 | `funding` | add `cedar_uid` and `recipient_uei`; rebuild `canonical_name` from the register | 552,602 / 668,347; 341,486 drifted |
+
+### Open issues — every line in `docs/KNOWN_ISSUES.md` that names this dataset or its flagship
+
+- **L163** *(under “A5 [RESOLVED 2026-09-02 — see note at end] · S1 · The arbiter document of last resort had gone stale in 6 of 14 rows”)* — | `federal_funding_transactions.csv` | 684,923 | **701,955** |
+- **L513** *(under “C1 · S1 · `faads_transactions_all_agencies.csv` — 179,259 duplicate rows, diagnosed, not repaired”)* — plus a `503 stamp` re-run. **Blocks `funding`.** Queued deliberately rather
+- **L523** *(under “C2 · S1 · `subawards.csv` — 10,770 duplicate rows, same shape suspected, unproven”)* — over-stated by an unmeasured amount. **Blocks `subcontracting` and `funding`.**
+- **L585** *(under “D. Where two of our own documents disagreed, and which was right”)* — | **D8** rows in `federal_funding_transactions.csv` | `DOC_CONTRADICTIONS` ground truth said 684,923; `START_HERE` said 701,955 and flagged the other as stale | **701,955** | **START_HERE**, which had already caught it — the arbiter document had not |
+- **L1785** *(under “What stands, and what was deliberately not done”)* — `federal_funding_transactions.csv` were withheld against a corrupted state —
+- **L2150** *(under “M5 · NOT A DEFECT, BUT DO NOT COUNT IT AS LINKAGE”)* — `attribution_method = 'unattributed'`). `funding`: 3,620 rows /
+
+## M5 · The money rules — which columns may be summed
+
+Measured over the delivered file. **A sum printed here is the unfiltered arithmetic sum of the column and is NOT necessarily a figure a buyer may quote** — the fence below says which are and which are not.
+
+| column | rows populated | distinct values | sum (unfiltered) | min | max |
+|---|---:|---:|---:|---:|---:|
+| `obligated_usd` | 701,955 | 263,173 | $219,689,020,478.59 | $-167,234,595.00 | $1,861,554,458.43 |
+| `obligated_usd_real2025` | 677,060 | 419,411 | $250,172,759,769.41 | $-249,797,311.14 | $2,179,055,602.20 |
+
+**Columns whose NAME looks like money and whose CONTENT is not** — measured, not assumed, because a name test alone promotes a 0/1 flag and a free-text field into a dollar column, which is the mistake `517.MONEY_HINTS` made:
+
+- `bie_uio_dollars_by_entity__total_usd` — does not parse as a number. Not summable.
+- `bie_uio_dollars_by_entity__usd_faads_all_agencies` — does not parse as a number. Not summable.
+- `bie_uio_dollars_by_entity__usd_federal_funding` — does not parse as a number. Not summable.
+- `bie_uio_dollars_by_entity__usd_nonprofit_990` — does not parse as a number. Not summable.
+- `bie_uio_dollars_by_entity__usd_prime_contracts` — does not parse as a number. Not summable.
+- `bie_uio_dollars_by_entity__usd_subawards` — does not parse as a number. Not summable.
+
+### The fence, quoted verbatim from `docs/MONEY_TOTALLING_RULES.md`
+
+That document is authoritative on which columns may be summed. It is **quoted here, never re-derived** — re-deriving a totalling rule from the data is precisely the error it exists to prevent.
+
+| table | additive measure | sum it at | what double-counts |
+|---|---|---|---|
+| `federal_funding_transactions.csv` FY2007 | 11,443 | $2,189,838,446 |
+
+Marked blocks in that document that name `federal_funding_transactions.csv`: `<!-- BEGIN FAADS -->`, `<!-- BEGIN GEO -->`, `<!-- BEGIN GRAIN-WS4 -->`, `<!-- BEGIN GRAIN-WS5 -->`, `<!-- BEGIN MONEY-RECON-1144 -->`, `<!-- BEGIN UPSTREAM -->`.
+
+### Time span, measured
+
+| year column | min | max | rows with no parseable year |
+|---|---:|---:|---:|
+| `fiscal_year` | 2007 | 2026 | 0 |
+
+**Read a trend against the reporting regime, not as behaviour.** `docs/ASSUMPTIONS_AND_LIMITATIONS.md` registers the breaks; a rise that begins at a rule change is the rule operating.
+
+## M6 · Known limits, stated plainly
+
+**Readiness: READY.** [measured — `docs/DATASET_READINESS.md`, regenerated by `py -3 code/518_dataset_readiness.py`]
+
+| tables | grain | keys | duplicates | agg-unsafe | rebuild |
+|---|---|---|---|---|---|
+| 14 | 14/14 | 13/14 (+1 REFUSED) | clean | 0 | declared  |
+
+The twelve-point contract a dataset is held to — grain declared and validated; keys and cardinality measured, not guessed; duplicates removed or the distinguishing dimension declared; entity attachment where the subject is an entity; every harvested row in a named disposition bucket; unresolved identity conflicts never shipping as definite facts; no double-counting path; one documented rebuild that does not destroy later enrichment; an update runbook another session can execute from the document alone; regression and semantic-diff gates over the outputs; column hygiene; and an inclusion basis on every row.
+
+**15 columns are blank on every delivered row** and are kept deliberately. Dropping them would make the schema depend on which rows shipped, and a buyer diffing two deliveries would watch columns appear and vanish. Sparsity is a coverage fact. They are named in the codebook.
+
+**Do not sell past the evidence.** Where this paper states a figure it was measured on the date stamped beside it, from the file named beside it. Where it states a decision it names who made it. Anything not stated here is not known.
+
+## M7 · Fingerprint — what makes this paper stale
+
+`verify` re-measures the four values below against `dist/customer/funding.csv` and **exits 1 if any has moved**. A methodology paper is stale the moment its dataset is rebuilt, and a stale paper that cannot say so is worse than no paper.
+
+```json
+{
+  "dataset": "funding",
+  "file": "dist/customer/funding.csv",
+  "bytes": 677504819,
+  "rows": 701955,
+  "columns": 86,
+  "header_sha256": "58e89ea14cef540fb409acd1d417a242951cf4f97c4d2d242978644dce89a16e",
+  "measured": "2026-09-02"
+}
+```
+
+Cross-check against `dist/customer/MANIFEST.csv`, which `code/1137_customer_dataset_combine.py` wrote at build time: it records **701955 rows × 86 columns**. The two agree.
+
+<!-- END GENERATED:MEASURED -->

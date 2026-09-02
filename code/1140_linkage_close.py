@@ -16,13 +16,13 @@ writes into the thing it scans has been the cause of five wrong "clean"
 results in this repo (AGENT_FIELD_GUIDE rule 10).
 
 ===========================================================================
-SIX TASKS OVER FIVE SUBCOMMANDS, AND WHY EACH IS EVIDENCE AND NOT A GUESS
+SEVEN TASKS OVER SIX SUBCOMMANDS, AND WHY EACH IS EVIDENCE AND NOT A GUESS
 ===========================================================================
-`bills` `assistance` `contracts` `ledger` `siblings`.  T5 rides in the
-`assistance` pass because it rewrites the same 660 MB file, and rewriting a
-table twice to keep a numbering scheme tidy is not a reason.  T6 `siblings`
-is documented at its own constant, `SIBLING_REPOINTS`, because the evidence
-for it is per-row.
+`bills` `assistance` `contracts` `ledger` `siblings` `parents`.  T5 rides in
+the `assistance` pass because it rewrites the same 660 MB file, and rewriting
+a table twice to keep a numbering scheme tidy is not a reason.  T6 and T7 are
+documented at their own constants (`SIBLING_REPOINTS`, `parent_candidates()`)
+because the evidence for each is per-row.
 
 T1 `bills` - `data/clean/native_bills.csv`
     The `legislation` dataset ships with **no entity column at all**, while
@@ -135,6 +135,13 @@ T5 `assistance` (same pass as T2) - 504 rows saying they are keyed and are not
     and does not pre-empt it: it makes the row say what is true today, which
     is that nothing is keyed.
 
+T7 `parents` - the DECLARED ULTIMATE PARENT, on disk the whole time
+    318 prime rows / $88.0M through `fpds_uei_edges.csv`, at rule 11's
+    20-observation floor and tier B because a parent's tier does not
+    transfer.  The refusal is the interesting half - Nisga'A Tek, LLC, the
+    largest candidate at $167.8M, is excluded structurally.  Full reasoning
+    above `parent_candidates()`.
+
 T6 `siblings` - a ruling reaches the FIRM, not one of its registrations
     127 prime rows / $15,015,304 and 4 ledger rows.  Full reasoning and the
     evidence per row at `SIBLING_REPOINTS` below.
@@ -222,7 +229,7 @@ FA01_BASIS = (
 )
 BRIDGE_METHOD = "fpds_uei_cage_bridge"
 
-TASKS = ("bills", "assistance", "contracts", "ledger", "siblings")
+TASKS = ("bills", "assistance", "contracts", "ledger", "siblings", "parents")
 
 # --------------------------------------------------------------------------
 # T6 - a ruling reaches the FIRM, not one of its registrations
@@ -909,6 +916,143 @@ def do_siblings(apply_it: bool):
     return plan
 
 
+# --------------------------------------------------------------------------
+# T7 - the DECLARED ULTIMATE PARENT, which was on disk the whole time
+#
+# `data/clean/fpds_uei_edges.csv` carries parent/child UEI relationships the
+# registrant filed about ITSELF.  That is the identifier evidence rule 4 asks
+# for, and rule 11 sets the two thresholds that make it usable: an edge
+# observed 20+ times is ownership, and the parent's tier DOES NOT TRANSFER -
+# a link resolved through a tier-A parent is proposed at tier B.
+#
+# Gate here, and every clause of it is structural:
+#   * the child UEI is not already in the ledger, and the row is unattributed,
+#     unkeyed and unruled;
+#   * `edge_type = 'ultimate_parent_uei'` - see the refusal below;
+#   * `n_observations >= 20` - rule 11's floor;
+#   * `blocklisted_parent` is not set - 78 of 2,684 edges are registrant
+#     roll-ups like GOVERNMENT OF THE UNITED STATES;
+#   * the parent resolves, in the ledger, to exactly one entity at tier A or B,
+#     unquarantined;
+#   * the child declares exactly ONE ultimate parent. Two is a joint venture.
+#
+# THE REFUSAL IS THE INTERESTING HALF.  Nisga'A Tek, LLC - 64 rows, $167.8M,
+# the largest candidate by a factor of two - declares GOLDBELT HAWK L.L.C. as
+# its parent 70 times, comfortably over the floor, and Goldbelt Hawk is a
+# tier-A Goldbelt registration.  It is refused because that edge is
+# `parent_uei` and not `ultimate_parent_uei`, and the immediate level is
+# exactly where an 8(a) mentor-protege JOINT VENTURE declares its managing
+# venturer.  The Nisga'a are a British Columbia First Nation, so this reads as
+# a cross-border JV, and ENTITY_MATCH_RULES is explicit that an AGGREGATE
+# party must never resolve to one entity.  Requiring the ULTIMATE edge
+# excludes it structurally rather than by hand.
+#
+# What passes: Sage Systems Technologies -> Old Harbor Native Corporation
+# (1,204 observations, an ANCSA village corporation), and two firms declaring
+# a DIFFERENT REGISTRATION OF THEMSELVES as ultimate parent - Hal Hays
+# Construction, Inc. and Polu Kai Services, Llc, the multiple-registration
+# case again.
+# --------------------------------------------------------------------------
+EDGES = CLEAN / "fpds_uei_edges.csv"
+PARENT_MIN_OBS = 20
+
+
+def parent_candidates():
+    """child UEI -> (tribe_id, parent_uei, parent_name, n_observations)."""
+    con = duckdb.connect()
+    try:
+        con.sql("SET preserve_insertion_order=false")
+        con.sql(f"""CREATE VIEW live AS SELECT identifier_type,
+            upper(trim(identifier)) AS id, min(tribe_id) AS tid
+            FROM {rd(LEDGER)} WHERE coalesce(trim(tribe_id),'') <> ''
+              AND confidence_tier IN ('A','B')
+              AND coalesce(method_quarantined,'N') <> 'Y'
+              AND coalesce(quarantine_disposition,'') NOT IN ('WITHDRAW','HOLD')
+            GROUP BY 1,2 HAVING count(DISTINCT tribe_id) = 1""")
+        rows = con.sql(f"""
+            WITH ed AS (
+              SELECT upper(trim(child_uei)) AS c, upper(trim(parent_uei)) AS p,
+                     any_value(parent_name) AS pn,
+                     max(TRY_CAST(n_observations AS INT)) AS nobs
+              FROM {rd(EDGES)}
+              WHERE coalesce(trim(child_uei),'') <> ''
+                AND coalesce(trim(parent_uei),'') <> ''
+                AND upper(trim(child_uei)) <> upper(trim(parent_uei))
+                AND coalesce(edge_type,'') = 'ultimate_parent_uei'
+                AND coalesce(trim(CAST(blocklisted_parent AS VARCHAR)),'')
+                    NOT IN ('1','Y','TRUE','True','true')
+              GROUP BY 1,2)
+            SELECT ed.c, lp.tid, ed.p, ed.pn, ed.nobs
+            FROM ed JOIN live lp ON lp.identifier_type='UEI' AND lp.id = ed.p
+            LEFT JOIN live lc ON lc.identifier_type='UEI' AND lc.id = ed.c
+            WHERE ed.nobs >= {PARENT_MIN_OBS} AND lc.id IS NULL""").fetchall()
+    finally:
+        con.close()
+    by = {}
+    for c, tid, p_, pn, n in rows:
+        by.setdefault(c, []).append((tid, p_, pn, n))
+    return {c: v[0] for c, v in by.items() if len({x[0] for x in v}) == 1}
+
+
+def parents_plan():
+    cand = parent_candidates()
+    if not cand:
+        return {"task": "parents", "children_eligible": 0, "prime_rows": 0}
+    inlist = ",".join(f"'{c}'" for c in cand)
+    rows = q1_all(
+        f"SELECT upper(trim(coalesce(awardee_uei,''))), any_value(awardee_name), "
+        f"count(*), round(sum(TRY_CAST(total_obligations AS DOUBLE)),2) "
+        f"FROM {rd(PRIME)} WHERE upper(trim(coalesce(awardee_uei,''))) IN "
+        f"({inlist}) AND attributed_flag <> '1' "
+        f"AND coalesce(trim(tribe_id),'') = '' "
+        f"AND coalesce(ruling_status,'') = '' GROUP BY 1")
+    det = [{"child_uei": r[0], "firm": r[1], "to": cand[r[0]][0],
+            "parent_name": cand[r[0]][2], "n_observations": cand[r[0]][3],
+            "prime_rows": r[2], "usd": r[3]} for r in rows]
+    return {"task": "parents", "children_eligible": len(cand),
+            "children_with_unattributed_rows": len(det), "detail": det,
+            "prime_rows": sum(d["prime_rows"] for d in det),
+            "prime_usd": round(sum(d["usd"] or 0 for d in det), 2)}
+
+
+def do_parents(apply_it: bool):
+    plan = parents_plan()
+    if not apply_it:
+        return plan
+    cand = parent_candidates()
+    sm = spine_map()
+    backup(PRIME)
+    n_hit = [0]
+
+    def tf(row):
+        if (row.get("attributed_flag") == "1"
+                or (row.get("tribe_id") or "").strip()
+                or (row.get("ruling_status") or "").strip()):
+            return False
+        hit = cand.get((row.get("awardee_uei") or "").strip().upper())
+        if not hit:
+            return False
+        tid = hit[0]
+        nm, uid = sm.get(tid, ("", ""))
+        if not uid:
+            return False
+        row["tribe_id"] = tid
+        row["cedar_uid"] = uid
+        row["canonical_name"] = nm
+        row["attribution_method"] = "parent_uei"
+        # RULE 11: the parent's tier does not transfer. Tier B, always, even
+        # where the parent row is tier A - the parent's tier describes the
+        # parent's OWN link, not this one.
+        row["confidence_tier"] = "B"
+        row["attributed_flag"] = "1"
+        n_hit[0] += 1
+        return True
+
+    n_in, n_out, _ = rewrite(PRIME, tf)
+    plan.update(rows_in=n_in, rows_out=n_out, prime_rows_applied=n_hit[0])
+    return plan
+
+
 def q1_all(sql):
     con = duckdb.connect()
     try:
@@ -943,6 +1087,10 @@ FLOORS = {
     # happening; the floors are the intended deltas exactly.
     "sibling_ledger_repointed": 4,
     "sibling_prime_rows": 127,
+    # T7. The pre-state for `parent_uei` on prime was 41,841 and the intended
+    # delta is 318, so the floor is their sum and nothing but the write can
+    # meet it. A floor set at 318 alone would have passed on a no-op.
+    "parent_uei_rows": 41841 + 318,
 }
 CONSERVE = {
     "native_bills.csv": 3069,
@@ -984,6 +1132,9 @@ def verify_measure():
         f"SELECT count(*) FROM {rd(LEDGER)} WHERE identifier_type = 'CAGE' "
         f"AND upper(trim(identifier)) IN ({_cg}) "
         f"AND tribe_id IN ({_from})")[0]
+    m["parent_uei_rows"] = q1(
+        f"SELECT count(*) FROM {rd(PRIME)} "
+        f"WHERE attribution_method = 'parent_uei' AND attributed_flag = '1'")[0]
     m["sibling_prime_rows"] = q1(
         f"SELECT count(*) FROM {rd(PRIME)} "
         f"WHERE attribution_method = '{SIBLING_METHOD}' "
@@ -1070,7 +1221,7 @@ def do_selftest():
 
 RUNNERS = {"bills": do_bills, "assistance": do_assistance,
            "contracts": do_contracts, "ledger": do_ledger,
-           "siblings": do_siblings}
+           "siblings": do_siblings, "parents": do_parents}
 
 
 def run(apply_it: bool, only=None):

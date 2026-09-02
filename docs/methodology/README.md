@@ -14,7 +14,7 @@ One paper per **delivered** dataset. The set is `cedar_publication.BUILD_SHELVES
 | [`legislation.md`](legislation.md) | Congressional Votes and Proposed Legislation | `standard` | Cedar Press | 3,069 | READY |
 | [`lobbying.md`](lobbying.md) | Lobbying | `standard` | Cedar Press | 27,825 | READY |
 | [`nagpra.md`](nagpra.md) | NAGPRA | `standard` | Cedar Press | 6,792 | READY |
-| [`native-owned-businesses.md`](native-owned-businesses.md) | Native-Owned Businesses | `pro` | Cedar Press | 2,044 | READY |
+| [`native-owned-businesses.md`](native-owned-businesses.md) | Native-Owned Businesses | `pro` | Cedar Press | 2,446 | READY |
 | [`natural-resources.md`](natural-resources.md) | Natural Resource Revenues | `pro` | Cedar Press | 11,305 | READY |
 | [`nest.md`](nest.md) | NEST: Native Enterprise Structures and Ties | `pro` | Cedar Press | 4,798 | READY |
 | [`nonprofits.md`](nonprofits.md) | Native Nonprofits | `pro` | Cedar Press | 12,764 | READY |

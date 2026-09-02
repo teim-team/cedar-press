@@ -1,5 +1,20 @@
-# Methodology — Tribal Gaming
+# Methodology — Gaming Intelligence
 
+<!-- BEGIN GENERATED:IDENTITY -->
+
+**`gaming` — Gaming Intelligence.** Delivered as `dist/customer/gaming.csv`: **787 rows × 311 columns, 3.9 MB**, built from the flagship table `data/clean/gaming_facilities.csv`. Shelf `grove`; sold through **Cedar Grove**; NOT on the Cedar Press storefront. Readiness **READY**. [measured 2026-09-02 from the delivered file]
+
+> **This block and Appendix M at the foot of this paper are GENERATED** by `code/1143_methodology_papers.py` from the delivered file itself, on every build — the same reason the codebooks are generated. Do not hand-edit either; the next build overwrites them.
+>
+> Everything between `<!-- BEGIN EDITORIAL:gaming -->` and `<!-- END EDITORIAL:gaming -->` is **hand-written and preserved byte-for-byte** across rebuilds. Put prose there and nowhere else.
+>
+> This paper is **not** the codebook. `dist/customer/gaming__CODEBOOK.md` carries the grain, the folded-in tables and the per-column fill rates, and `__NOTES.txt` carries the same for a person. This paper says how the dataset came to exist and why you should believe it.
+>
+> Generated 2026-09-02. `py -3 code/1143_methodology_papers.py verify` **fails** if the delivered file has moved since — see §M7.
+
+<!-- END GENERATED:IDENTITY -->
+
+<!-- BEGIN EDITORIAL:gaming -->
 **`gaming`. 54 customer tables; the spine is `gaming_facilities.csv` — 787 ROWS,
 NOT 787 facilities (see the denominator note immediately below) — and the
 regulatory record runs through NIGC's published document surface: 72 categories,
@@ -670,3 +685,208 @@ set. **All three were promotions. None was ever a fetch.**
     BLOCKED** on C1 (grain unstated on 7 of 52 tables), C2 and C5 (row
     conservation 1/52). **The scoreboard regenerated 2026-09-02 rates gaming
     READY at 54/54 on grain and keys.** One day stale.
+<!-- END EDITORIAL:gaming -->
+
+<!-- BEGIN GENERATED:MEASURED -->
+
+---
+
+# Appendix M — measured from the delivered file
+
+*Generated 2026-09-02 by `code/1143_methodology_papers.py` from `dist/customer/gaming.csv`, read whole with duckdb and never sampled. Not from `data/clean/`, not from a build log, not from `MANIFEST.csv`. Where this appendix and a document disagree, **the delivered file is right** and `verify` prints the disagreement rather than smoothing it over.*
+
+*Grain, folded-in tables and per-column fill rates are in `dist/customer/gaming__CODEBOOK.md` and are deliberately not repeated here.*
+
+## M1 · Sources, as the delivered rows themselves record them
+
+**`source_datasets`** — 787 of 787 rows populated, 11 distinct values:
+
+| value | rows |
+|---|---:|
+| `casino_city_press|tribal_property_list` | 250 |
+| `votingpatterns_canonical` | 164 |
+| `casino_city_press|tribal_property_list|votingpatterns_canonical` | 92 |
+| `tribal_property_list|votingpatterns_canonical` | 73 |
+| `tribal_property_list` | 68 |
+| `casino_city_press|tribal_property_list|votingpatterns_canonical|indian_gaming_dataset` | 55 |
+| `casino_city_press|tribal_property_list|indian_gaming_dataset` | 43 |
+| `tribal_property_list|votingpatterns_canonical|indian_gaming_dataset` | 21 |
+| `NIGC_GAMING_LOCATION_MAP` | 10 |
+| `tribal_property_list|indian_gaming_dataset` | 8 |
+| `OSHA_ITA_300A` | 3 |
+
+**`fetched_date`** — 787 of 787 rows populated, 2 distinct values:
+
+| value | rows |
+|---|---:|
+| `2026-08-05` | 774 |
+| `2026-08-26` | 13 |
+
+### The terms rulings that bind this dataset
+
+Quoted from `docs/PUBLICATION_POLICY.md`, which holds the rulings; this paper does not restate them from memory.
+
+- **Owner ruling, 2026-09-02** (`<!-- BEGIN TERMS-OWNER-RULING-2026-09-02 -->`): *"So tribal websites, I actually don't care if they say it does scrape. Because if it's publicly available and you can scrape it, scrape it."* A tribal entity's own public pages may be harvested regardless of a terms statement. `source_terms_status = TERMS_STATED_RESTRICTIVE` on a Native entity's own site is now **a recorded observation, not a gate**.
+- **Four things that ruling does NOT touch, and none is a terms question:** (1) technical access controls — nothing login-gated, no admin or staging paths, no exploiting a misconfiguration; (2) a natural person's data held apart from their public role — home address, personal email or phone, DOB, SSN/TIN; (3) non-tribal licensors — EMMA/MSRB bars redistribution of its output "sold or free of charge" and names "any manual process", with CUSIP Global Services as a second licensor; (4) proprietary identifiers — Casino City, D-U-N-S — held internally, never shipped.
+- **A terms restriction is scoped to the SOURCE that stated it, not to the nation** (`<!-- BEGIN TERMS-SCOPE -->`), and it does not bind a third party's filing of the same fact.
+
+## M2 · How the rows were built — the pipeline, in order
+
+**One documented rebuild:** `py -3 code/build.py run gaming --execute`. `py -3 code/build.py plan gaming` prints the ordering below live; it is reproduced here so the paper stands alone.
+
+The collection holds **65 tables**. Those with a named build stage, flagship first:
+
+| table | rebuilt by | then enriched by (must run LAST) | status |
+|---|---|---|---|
+| `gaming_facilities.csv` **(flagship)** | `23d_build_gaming_facilities.py` | `960_promote_gaming_facility_class_and_revenue_reach.py` | shippable |
+| `digital_gaming_revenue.csv` | `119_build_digital_and_loyalty.py` | `174_backfill_digital_gaming_tiers.py`, `860_state2_acquisition.py` | shippable |
+| `fac_audit_sefa_gaming_programs.csv` | `147_build_fac_single_audits.py` | `814_gaming_nr_grain_and_conservation.py` | shippable |
+| `gaming_capacity_official.csv` | `92_build_gaming_capacity_official.py` | `106_build_revenue_bounds.py` | shippable |
+| `gaming_employment_observations.csv` | `100_finish_declinations_and_employment.py` | `158_merge_staged_labor_employment.py`, `262_repair_form5500_tribe_attribution.py`, `265_merge_osha_relift_rows.py` | shippable |
+| `gaming_financing_events.csv` | `91_build_nigc_declinations.py` | `100_finish_declinations_and_employment.py` | shippable |
+| `gaming_properties.csv` | `82_build_gaming_property_dataset.py` | `160_sync_published_gaming_view.py`, `175_sync_published_property_view_entities.py`, `255_fix_gaming_property_deal_counts.py` | shippable |
+| `gaming_property_universe_events.csv` | `89_nigc_map_wayback_universe.py` | `165_link_universe_events_to_hub.py` | shippable |
+| `gaming_source_claims.csv` | `91_build_nigc_declinations.py` | `100_finish_declinations_and_employment.py`, `510_assertions.py` | shippable |
+| `nigc_declination_letters.csv` | `91_build_nigc_declinations.py` | `100_finish_declinations_and_employment.py` | shippable |
+
+**A full rebuild and an in-place enricher on one file need an ordering, and the enricher must run LAST.** A `.bak_*_pre<script>` file sitting beside a table is the signal that an enricher has touched it since the last build. This has cost this project four reverts of one file in a single day.
+
+The delivered spreadsheet is then assembled by `code/1137_customer_dataset_combine.py`, which folds supporting tables onto the flagship **only where the measured cardinality on the shared key is one**, reverts any join that moved the row count, and prefixes every joined column with its source table's stem. One-to-many tables contribute a count column instead of rows, so a money total cannot be multiplied by a join.
+
+## M3 · How entities were attributed
+
+Cedar keys every dataset to one identity layer. `cedar_uid` is permanent and never reused; the human-readable handle retires when an entity is reclassified, so **join on `cedar_uid`, never on the handle**. A compound handle is canonical, not broken — stripping a suffix to make a join work turns joinable rows into unjoinable ones while looking like a normalisation.
+
+**Entity attachment in the delivered file:**
+
+| key column | rows carrying one | distinct values | coverage |
+|---|---:|---:|---:|
+| `cedar_uid` | 785 | 284 | 99.7% |
+| `tribe_id` | 785 | 284 | 99.7% |
+
+**An unkeyed row is often the right answer, not a defect.** ADR-010 separates *"we could not identify the entity"* — a defect — from *"there is no single entity to identify"* — the correct representation. Coverage is measured against the *resolvable* denominator, not the row count.
+
+### What `attribution_method` means **in this dataset**
+
+`docs/schema/attribution_method_vocabulary.json`, declared 2026-09-02: *"`attribution_method` is three different columns sharing a name — a join method, an evidence provenance, and a name-match algorithm. Each table is gated against its OWN vocabulary."* Reading one table's sense into another is how a containment match came to key a dollar.
+
+**This dataset carries no `attribution_method` column.** The identity evidence it does carry is measured below. Do not import another dataset's term list to interpret it.
+
+**And a RULED METHOD IS NOT A POSITIVE RULING.** `attribution_method` says WHO decided; `confidence_tier` says WHAT was decided. All 317 `elijah_ruling` EIN rows in the ledger are tier **X** — *negative* — and a script that read "the method is in the RULED set" as "the answer was yes" published 317 owner *exclusions* as confident attributions. Standing detector: `py -3 code/293_lint_bug_classes.py`. [from the record — `START_HERE.md`, defect class 1b]
+
+### Every identity, tier and method column, measured
+
+- **`entity_match_method`** — 6 distinct values: `containment` 291 · `core` 247 · `alias` 154 · `exact` 85 · `unanimous_city_operator` 7 · `(blank)` 2 · `corrected_by_regulator_roster` 1
+- **`entity_tier`** — 2 distinct values: `B` 557 · `A` 228 · `(blank)` 2
+- **`gaming_nigc_roster_link__link_tier`** — 2 distinct values: `A` 428 · `(blank)` 334 · `B` 25
+- **`loyalty_program_property__confidence_tier`** — 1 distinct value: `(blank)` 739 · `B` 48
+- **`loyalty_programs__confidence_tier`** — 1 distinct value: `(blank)` 656 · `B` 131
+
+### The evidence tiers
+
+| tier | what it means |
+|---|---|
+| **A** | an identifier (UEI, CAGE, EIN, declared parent UEI), or a human ruling. The only grade a dollar may be keyed on without corroboration |
+| **B** | a strong name method with an independent corroborator, or inheritance from a tier-A parent |
+| **C** | a weak method — containment, token subset — held as a candidate, not published as a fact |
+| **X** | **refused.** A negative ruling. Never read as a confirmation |
+
+**A tier is INHERITED from the source row, never assigned by the consumer.** The exactness of the KEY says nothing about the correctness of the LINK: 873 of 1,104 EIN rows in the ledger sit on 52 entities carrying five or more EINs each, and 821 are tier B via `need_v6`, which is 6.5% accurate and never publishes alone. [from the record — `START_HERE.md`, defect class 1]
+
+## M4 · What is **not** in it, and why
+
+**No row was withheld from this delivery.** Every row that passed the collection's own inclusion test is in the spreadsheet. [measured — `dist/customer/MANIFEST.csv`, `rows_withheld = 0`]
+
+The gate itself is `code/cedar_publication.row_ok`, applied identically by every publisher: a row is withheld if `publishable` is set to anything outside `{Y, y, 1, true, TRUE, blank}`, or if `source_terms_status` is outside `{SILENT, TERMS_STATED_NO_REUSE_RESTRICTION, blank}`. **A blank gate column means the gate was never evaluated for that row, not that it failed.** Separately, ten column names are refused outright wherever they appear — `owner_name_raw`, `email`, `phone`, `home_address`, `personal_email`, `ssn`, `tin`, `date_of_birth`, `officer_name`, `contact_name` — and the proprietary identifier families (Casino City, D-U-N-S) drop as **columns**, not rows: the row is ours, the identifier is not.
+
+### Known gaps — every line in `docs/WHAT_IS_MISSING.md` that names this dataset or its flagship
+
+- **L33** *(under “What is missing”)* — > **`gaming_facilities.csv` holds 787 ROWS, and a row is not a facility.** The ladder, owned and gated by `code/846_session_audit.py::_denom`:
+- **L36** *(under “What is missing”)* — > 787   rows in gaming_facilities.csv
+- **L59** *(under “READ THIS FIRST — the sample is a hand-curated column list, and that is where most of the loss happens”)* — only**. The curation is deliberate and mostly right — `gaming_facilities.csv`
+- **L323** *(under “`gaming` — `gaming_facilities.csv`, 787 rows”)* — ## `gaming` — `gaming_facilities.csv`, 787 rows
+- **L748** *(under “THE SHORT LIST — what this week can fix without a single download”)* — | 6 | `gaming` | join `gaming_revenue_bounds` and ordinance class onto the facility | 694 of 787 rows; 263 of 284 tribes |
+- **L810** *(under “CORRECTION 2026-09-02 — the gaming property denominator is 717, not 714”)* — 787   rows in gaming_facilities.csv
+- **L837** *(under “CORRECTION 2026-09-02 — the gaming property denominator is 717, not 714”)* — undefined question. `gaming_facilities.csv` now answers it itself: the 16
+
+### Open issues — every line in `docs/KNOWN_ISSUES.md` that names this dataset or its flagship
+
+- **L544** *(under “C4 · S2 · Nine grain rulings only a human can make”)* — `contractors`, `gaming`, `lobbying`, `natural-resources`, `deals`,
+- **L1817** *(under “Fixed”)* — | `gaming_properties.csv` rows | 784 | **787** (= `gaming_facilities.csv`) |
+- **L1820** *(under “Fixed”)* — *(**GAMING-DENOMINATOR-2026-09-02**, restated correctly: `gaming_facilities.csv`
+
+## M5 · The money rules — which columns may be summed
+
+**This dataset carries no numeric money column.** Nothing in it may be presented as a dollar total, and a reader who needs one has to go to the money dataset that holds it. A structure or directory table with no money column is not an incomplete money table.
+
+**Columns whose NAME looks like money and whose CONTENT is not** — measured, not assumed, because a name test alone promotes a 0/1 flag and a free-text field into a dollar column, which is the mistake `517.MONEY_HINTS` made:
+
+- `gaming_properties__revenue_note` — does not parse as a number. Not summable.
+- `has_revenue_bound` — does not parse as a number. Not summable.
+- `revenue_bound_absent_reason` — does not parse as a number. Not summable.
+- `revenue_bound_basis` — does not parse as a number. Not summable.
+- `revenue_bound_strongest_status` — does not parse as a number. Not summable.
+- `state_revenue_disclosure_basis` — does not parse as a number. Not summable.
+- `state_revenue_disclosure_disposition` — does not parse as a number. Not summable.
+- `state_revenue_disclosure_quote_supports_status` — does not parse as a number. Not summable.
+- `state_revenue_disclosure_quote_test` — does not parse as a number. Not summable.
+- `state_revenue_disclosure_status` — does not parse as a number. Not summable.
+
+### The fence, quoted verbatim from `docs/MONEY_TOTALLING_RULES.md`
+
+That document is authoritative on which columns may be summed. It is **quoted here, never re-derived** — re-deriving a totalling rule from the data is precisely the error it exists to prevent.
+
+**`docs/MONEY_TOTALLING_RULES.md` states no one-line rule for `gaming_facilities.csv`.** Where this dataset carries a money column and the rules document does not fence it, treat that as an open item, not as permission.
+
+Marked blocks in that document that name `gaming_facilities.csv`: `<!-- BEGIN GAMING-DENOMINATOR-2026-09-02 -->`, `<!-- BEGIN GAMING-DENOMINATOR-717-CORRECTION -->`, `<!-- BEGIN INT-READY -->`.
+
+### The property denominator, settled by the table itself
+
+**717** = `COUNT(DISTINCT cedar_place_id)` over the delivered file [measured 2026-09-02]. Seven values circulated for this before the table was made to answer it — 787, 780, 734, 727, 725, 717, 714. 787 is the ROW count, which is a different question: a facility row is not a property. Any share quoted about properties must use this denominator and say so.
+
+**The gaming revenue bounds must never be apportioned or summed across facilities.** A bound is a constraint on one facility's revenue, not a measurement of it, and the regulator layer, the self-published layer and the SEC-filed layer are three assertion classes that may never be added to each other. [from the record — `docs/MONEY_TOTALLING_RULES.md`, blocks `INT-2-GAMING`, `GAMING-NR` and `SEC-GAMING`]
+
+## M6 · Known limits, stated plainly
+
+**Readiness: READY.** [measured — `docs/DATASET_READINESS.md`, regenerated by `py -3 code/518_dataset_readiness.py`]
+
+| tables | grain | keys | duplicates | agg-unsafe | rebuild |
+|---|---|---|---|---|---|
+| 56 | 56/56 | 56/56 | clean | 0 | declared  |
+
+The twelve-point contract a dataset is held to — grain declared and validated; keys and cardinality measured, not guessed; duplicates removed or the distinguishing dimension declared; entity attachment where the subject is an entity; every harvested row in a named disposition bucket; unresolved identity conflicts never shipping as definite facts; no double-counting path; one documented rebuild that does not destroy later enrichment; an update runbook another session can execute from the document alone; regression and semantic-diff gates over the outputs; column hygiene; and an inclusion basis on every row.
+
+**10 columns are blank on every delivered row** and are kept deliberately. Dropping them would make the schema depend on which rows shipped, and a buyer diffing two deliveries would watch columns appear and vanish. Sparsity is a coverage fact. They are named in the codebook.
+
+**Do not sell past the evidence.** Where this paper states a figure it was measured on the date stamped beside it, from the file named beside it. Where it states a decision it names who made it. Anything not stated here is not known.
+
+## M8 · Figures that have circulated in more than one value
+
+Each row below was re-measured from the delivered file just now. The superseded values are the ones this project has actually watched drift; where one still appears in this paper's own hand-written body it is named, and **the measured figure is the one that is right**.
+
+| figure | measured today | superseded values | still in this paper's prose? |
+|---|---:|---|---|
+| distinct gaming properties, `COUNT(DISTINCT cedar_place_id)` | **717** | 714, 725, 727, 734, 780 | ⚠ **yes** — 714, 727, 734, 780 |
+| rows in the delivered file (a row is NOT a property) | **787** | — | no |
+
+**Where the prose above and this appendix disagree, this appendix is right.** It was measured from `dist/customer/gaming.csv` on 2026-09-02; the prose was written against an earlier state of the same table. The prose is left standing rather than silently corrected, because a superseded figure that is *labelled* is recoverable and one that has been overwritten is not — and because the reasoning around it is usually still sound even when the number under it has moved.
+
+## M7 · Fingerprint — what makes this paper stale
+
+`verify` re-measures the four values below against `dist/customer/gaming.csv` and **exits 1 if any has moved**. A methodology paper is stale the moment its dataset is rebuilt, and a stale paper that cannot say so is worse than no paper.
+
+```json
+{
+  "dataset": "gaming",
+  "file": "dist/customer/gaming.csv",
+  "bytes": 3933642,
+  "rows": 787,
+  "columns": 311,
+  "header_sha256": "c059e8c9a7daaa7ed60e6309f67bc1e979b4fd8e6edea60a9a2e55cebdaead6a",
+  "measured": "2026-09-02"
+}
+```
+
+Cross-check against `dist/customer/MANIFEST.csv`, which `code/1137_customer_dataset_combine.py` wrote at build time: it records **787 rows × 311 columns**. The two agree.
+
+<!-- END GENERATED:MEASURED -->

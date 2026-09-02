@@ -832,7 +832,6 @@ def build(dry: bool, only: tuple = ()) -> int:
                          f"{coll}__CODEBOOK.md", f"{coll}.xlsx"):
                 for stale_f in OUT.glob(_pat):
                     stale_f.unlink()
-                stale_f.unlink()
 
         # BAND THE COLUMNS BEFORE ANYTHING IS WRITTEN, so the CSV, the
         # codebook and the notes all present the same order. Doing it inside
