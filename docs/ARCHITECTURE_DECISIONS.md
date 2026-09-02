@@ -3616,7 +3616,7 @@ file every one of those passes would also want to edit.
    titled *Lummi-owned businesses*, and the Pyramid Lake licence list is
    correctly `RELATIONSHIP`. The claim sentence decides.
 
-**Consequence.** 2,916 → **4,274** rows, 21 → **42** certifying authorities.
+**Consequence.** 2,916 → **4,273** rows, 21 → **42** certifying authorities.
 614 rows from disk at zero network cost, 744 from the six hosts the
 2026-09-02 terms ruling released. Grain and primary key declared in
 `512.GRAIN_NOB_DIRECTORIES`; the table is claimed by the

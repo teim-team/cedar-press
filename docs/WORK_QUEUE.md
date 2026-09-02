@@ -871,7 +871,7 @@ reached them: **"1,088 `FOUND_NOT_EXTRACTED` surfaces"** is 280 matrix cells ove
 # Native-owned businesses — what this pass left, measured
 
 *Added 2026-09-02 by workstream `NOB-DIRECTORIES` (`code/1146`, `code/1147`).
-The table went 2,916 -> 4,274 rows and 21 -> 42 certifying authorities; full
+The table went 2,916 -> 4,273 rows and 21 -> 42 certifying authorities; full
 account in `docs/NOB_DIRECTORY_EXPANSION_LOG_2026-09-02.md`. Every item below
 is a task with a measurement, not a feeling.*
 
@@ -912,7 +912,7 @@ is a task with a measurement, not a feeling.*
    `1130`'s reconciliation is the check that says whether they are already
    there under another name.
 
-5. **`record_scope = entity` on 5 of 4,274 rows.** Resolution is exact
+5. **`record_scope = entity` on 5 of 4,273 rows.** Resolution is exact
    normalised name/alias only, by design (ADR-010; the loose gov-class token
    path would resolve "Navajo Transitional Energy" to the Navajo Nation, which
    is a false ownership claim). The 4,269 unresolved rows are an honest

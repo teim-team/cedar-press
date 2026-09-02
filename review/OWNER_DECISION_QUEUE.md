@@ -3249,7 +3249,7 @@ over-exclusion:
 
 | answer | consequence |
 |---|---|
-| **the ruling reaches publication** | add `TERMS_STATED_RESTRICTIVE` to `615.PERMISSION_OK`; `publishable = Y` on 1,090 more rows, taking the table from 2,447 to 3,537 of 4,274 publishable. One line, one re-run, no re-harvest |
+| **the ruling reaches publication** | add `TERMS_STATED_RESTRICTIVE` to `615.PERMISSION_OK`; `publishable = Y` on 1,090 more rows, taking the table from 2,446 to 3,536 of 4,273 publishable. One line, one re-run, no re-harvest |
 | **harvest only; publication stays held** | the 744 rows stay internal evidence. They are still worth having — they are the only harmonized record of who these nations certify — but the Chickasaw directory does not ship |
 | **release the copyright-only three, hold the rest** | +17 rows; the narrow answer, and it settles the smaller principle without settling the big one |
 

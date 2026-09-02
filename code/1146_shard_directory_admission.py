@@ -715,6 +715,91 @@ def _repair_live_keys(dry_run=False):
     return n
 
 
+def _retire_superseded_keys(valid_keys, dry_run=False):
+    """Retire a row whose KEY this build would never emit, when an identical
+    row under a key it DOES emit is sitting beside it.
+
+    This exists because a two-step key migration inside one session left one.
+    The ordinal suffixes (`#n1`) were stripped from the live table so the new
+    content-digest rule could re-derive them; stripping left a BARE key that
+    `_repair_live_keys` then saw as un-collided and left alone, and the merge
+    appended the correctly-keyed row beside it. One Pyramid Lake row, `JGFP
+    Group, LLC` / `Food Services Business`, ended up in the table twice: 74
+    rows against 73 in staging.
+
+    The bar for removing anything here is deliberately high and all four
+    conditions must hold, per row:
+
+      * the row's `source_id` is one this script admits;
+      * its `business_source_id` is NOT in the key set this build emits;
+      * a row IS present under a key this build emits;
+      * the two are identical in every column except `business_source_id` and
+        `validation_flags` - so nothing a source published is being dropped.
+
+    Anything that fails a condition is REPORTED and kept. The removed rows are
+    written to review/ before the table is rewritten, and the whole table is
+    backed up, because `flag, never delete` is the rule and this is the
+    narrowest possible exception: an artefact this script itself created
+    minutes earlier, not a source's record.
+    """
+    with CLEAN.open(encoding="utf-8", newline="") as fh:
+        rd = csv.DictReader(fh)
+        fields, rows = rd.fieldnames, list(rd)
+    ignore = {"business_source_id", "validation_flags"}
+
+    def sig(r):
+        return tuple((k, r.get(k, "")) for k in fields if k not in ignore)
+
+    good = {sig(r) for r in rows
+            if r["source_id"] in ADMIT and r["business_source_id"] in valid_keys}
+    # `keep` is built HERE, in the same pass that decides, so the rewrite
+    # below never has to re-identify a row. An earlier version marked the
+    # dropped rows with `id(r)`, which 293 correctly reads as an identity
+    # taken from outside the row.
+    drop, kept, keep = [], [], []
+    for r in rows:
+        if r["source_id"] not in ADMIT or r["business_source_id"] in valid_keys:
+            keep.append(r)
+            continue
+        if sig(r) in good:
+            drop.append(r)
+        else:
+            kept.append(r)
+            keep.append(r)
+    for r in kept:
+        print(f"  !! KEPT {r['business_source_id']}: this build does not emit "
+              f"that key and no identical row stands beside it. Investigate; "
+              f"nothing was removed.")
+    if not drop:
+        return 0
+    print(f"  retiring {len(drop)} superseded-key row(s), each an exact "
+          f"duplicate of a correctly-keyed row:")
+    for r in drop:
+        print(f"     {r['business_source_id']}  {r['business_name_raw'][:40]}"
+              f"  {r['service_category_raw'][:30]}")
+    if dry_run:
+        return len(drop)
+    out = ROOT / "review" / "native_owned_businesses_1146_retired_key_rows.csv"
+    with out.open("w", encoding="utf-8", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=fields, extrasaction="ignore")
+        w.writeheader()
+        w.writerows(drop)
+    print(f"     retired rows preserved at {out.relative_to(ROOT)}")
+    shutil.copy2(CLEAN, CLEAN.with_name(
+        CLEAN.name + ".bak_2026-09-02_pre_1146_key_retire"))
+    part = CLEAN.with_suffix(".csv.part_1146retire")
+    with part.open("w", encoding="utf-8", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=fields, extrasaction="ignore")
+        w.writeheader()
+        w.writerows(keep)
+    if len(keep) + len(drop) != len(rows):
+        raise RuntimeError(
+            f"row conservation: {len(keep)} kept + {len(drop)} retired != "
+            f"{len(rows)} read. Refusing to write.")
+    part.replace(CLEAN)
+    return len(drop)
+
+
 def cmd_apply(args):
     import cedar_pipeline as cp
 
@@ -746,6 +831,9 @@ def cmd_apply(args):
     if rep.rows_appended != len(rows):
         print(f"    !! {len(rows) - rep.rows_appended} row(s) collided with an "
               f"existing business_source_id and were merged, not appended.")
+
+    _retire_superseded_keys({r["business_source_id"] for r in rows},
+                            dry_run=args.dry_run)
 
     if not args.dry_run:
         _write_dispositions(counts)
@@ -907,6 +995,17 @@ def cmd_verify(args, table=None, floors=None):
     if dupes:
         bad.append(f"V7 business_source_id is not unique: {len(dupes)} key(s) "
                    f"over {sum(keys[k] for k in dupes)} rows, e.g. {dupes[:3]}")
+
+    # V8 - the live row count for each admitted source EQUALS its staging
+    # count. V1 is a floor and a floor cannot see a row too many: a two-step
+    # key migration inside one session left `TBD-M03` at 74 rows against 73 in
+    # staging, and V1 was green throughout. A floor and a ceiling are two
+    # different checks.
+    for sid, floor in sorted(floors.items()):
+        got = live.get(sid, 0)
+        if got > floor:
+            bad.append(f"V8 {sid}: {got} rows in the table, staging holds only "
+                       f"{floor}. A row too many is as wrong as a row too few")
 
     # V6 - 330 actually reads that file. A disposition nobody loads is inert.
     src = (ROOT / "code" / "330_build_native_owned_businesses.py").read_text(

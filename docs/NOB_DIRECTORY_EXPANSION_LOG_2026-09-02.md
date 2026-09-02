@@ -17,12 +17,12 @@ py -3 code/1147_released_host_directories.py plan | probe | fetch | parse | appl
 
 | | before | after |
 |---|---:|---:|
-| `data/clean/native_owned_businesses.csv` rows | 2,916 | **4,274** |
+| `data/clean/native_owned_businesses.csv` rows | 2,916 | **4,273** |
 | certifying authorities | 21 | **42** |
 | source ids | 21 | **42** |
 | distinct normalised firm names | — | 4,024 |
 
-**+1,358 rows and the authority count exactly doubled.** 614 of those rows cost
+**+1,357 rows and the authority count exactly doubled.** 614 of those rows cost
 zero network requests; 744 came off six hosts that were refused until the owner's
 2026-09-02 terms ruling released them.
 
@@ -148,7 +148,7 @@ neither script creates one.** Both `build_rows` functions raise rather than
 emit a column the live table does not already hold, and both assert
 `set(330.WITHHELD) & emitted == {}` before writing a byte. The contact channel
 stays in the staging JSONL; what ships is `owner_name_present` (1,421 rows),
-`n_owners_named`, and `withheld_fields` naming exactly what was held (3,285
+`n_owners_named`, and `withheld_fields` naming exactly what was held (3,284
 rows).
 
 A firm's name is the firm's name — that is settled, and the 2026-09-02 owner
@@ -215,8 +215,22 @@ the colliding rows, so the id is a function of the record and nothing else, and
 the one row that had taken an ordinal was re-keyed. **Invariant V7 in `1146
 verify` fails the build if `business_source_id` is ever non-unique again.**
 
-Measured now: **4,274 rows, 4,274 distinct `business_source_id`, 0 blank, 0
-literal duplicate rows.**
+Measured now: **4,273 rows, 4,273 distinct `business_source_id`, 0 blank, 0
+literal duplicate rows, and 0 sources where the live count differs from the
+staging count in either direction.**
+
+**The migration to that key left one row too many, and V1 could not see it.**
+Stripping the retired ordinal suffixes produced a BARE key, which
+`_repair_live_keys` then read as un-collided and left alone, so the merge
+appended the correctly-keyed row beside it: `TBD-M03` stood at 74 rows against
+73 in staging while every floor was green. **A floor cannot see a row too
+many.** `_retire_superseded_keys` removes a row only when all four of
+(admitted source, key this build does not emit, an identical row under a key it
+does, identical in every column but the key and the flags) hold - anything
+else is printed and KEPT - and the retired row is written to
+`review/native_owned_businesses_1146_retired_key_rows.csv` before the table is
+rewritten. **V8 is the ceiling V1 is the floor of**, and it fired on this exact
+row before the fix.
 
 ---
 
