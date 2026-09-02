@@ -343,4 +343,56 @@ class TestTheCatalogDriftIsClosed(unittest.TestCase):
             "the JavaScript catalog names a collection the service does not "
             "know; regenerate the snapshot")
 
+class TestUnsupportedTiersReachNothing(unittest.TestCase):
+    """A real but unsupported plan must not be shown a paid shelf.
 
+    Codex, PR #38. `view_for` called `resolve_tier` a second time - the caller
+    already sanitises the query-string path - and `resolve_tier` falls back to
+    `DEFAULT_TIER`, which is `press`, the entry PAID plan. So a signed-in
+    reader on `free`, `sprout` or `sapling`, none of which is in
+    `SHELF_BY_TIER`, saw six collections marked "yours to download" while
+    `repository.may_open` refused every one of them.
+
+    `resolve_tier`'s own docstring had already named this: *"Falling back to
+    the LOWEST plan matters -- the same defect in the other direction would
+    describe a paid shelf to anyone who guessed a tier name."* The fallback
+    was pointed at a paid plan, and it reached a signed-in session rather than
+    a guessed query string.
+
+    The page and the download route must agree, which is what the two
+    assertions below check together.
+    """
+
+    def test_a_supported_plan_reaches_its_own_shelf_and_below(self):
+        self.assertEqual(
+            [(b.shelf, b.reached) for b in shelf.view_for("press").bands],
+            [("standard", True), ("pro", False), ("grove", False)])
+        self.assertEqual(
+            [(b.shelf, b.reached) for b in shelf.view_for("press_pro").bands],
+            [("standard", True), ("pro", True), ("grove", False)])
+        self.assertEqual(
+            [(b.shelf, b.reached) for b in shelf.view_for("tree").bands],
+            [("standard", True), ("pro", True), ("grove", True)],
+            "tree is the full platform and includes Grove")
+
+    def test_an_unsupported_plan_reaches_nothing(self):
+        for tier in ("free", "sprout", "sapling", None, "nonsense"):
+            with self.subTest(tier=tier):
+                view = shelf.view_for(tier)
+                self.assertTrue(
+                    all(not b.reached for b in view.bands),
+                    f"{tier!r} was shown a shelf it cannot open")
+
+    def test_the_page_and_the_download_route_agree(self):
+        """The real invariant: nothing rendered open may be refused."""
+        for tier in ("press", "press_pro", "tree", "free", "sprout", None):
+            view = shelf.view_for(tier)
+            for band in view.bands:
+                for entry in band.entries:
+                    if not band.reached:
+                        continue
+                    with self.subTest(tier=tier, dataset=entry.id):
+                        self.assertTrue(
+                            repository.may_open(tier, entry.id),
+                            f"the shelf shows {entry.id} open to {tier!r} and "
+                            f"the download route refuses it")

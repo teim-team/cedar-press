@@ -227,11 +227,30 @@ def view_for(tier: str) -> ShelfView:
     descriptors' own ``shelf`` field, so the page cannot show a collection on a
     shelf the API would refuse it on: both read ``repository.may_open``.
     """
-    tier = resolve_tier(tier)
-    reach = repository.SHELF_BY_TIER[tier]
+    # DO NOT `resolve_tier` HERE. The caller already sanitises the query-string
+    # path (`session.tier if session else resolve_tier(tier)`); applying it a
+    # second time corrupts the SESSION path, which is the one that matters.
+    #
+    # Codex, PR #38: a signed-in reader on a real but unsupported plan -
+    # `free`, `sprout`, `sapling`, none of which is in `SHELF_BY_TIER` - was
+    # coerced to `DEFAULT_TIER`, and `DEFAULT_TIER` is "press", the entry PAID
+    # plan. The page then marked six collections "yours to download" while
+    # `repository.may_open` refused every one of them.
+    #
+    # `resolve_tier`'s own docstring convicts this: *"Falling back to the
+    # LOWEST plan matters -- the same defect in the other direction would
+    # describe a paid shelf to anyone who guessed a tier name."* Coercing an
+    # unsupported plan to `press` IS that defect, and it reached a signed-in
+    # reader rather than a guessed query string.
+    #
+    # An unsupported plan now reaches NOTHING, which is what `_reaches` has
+    # always returned for it and what the download route has always enforced.
+    reach = repository.SHELF_BY_TIER.get(tier)
     bands = []
     for shelf in repository.SHELF_ORDER:
-        reached = repository.SHELF_ORDER.index(shelf) <= repository.SHELF_ORDER.index(reach)
+        reached = (reach is not None
+                   and repository.SHELF_ORDER.index(shelf)
+                   <= repository.SHELF_ORDER.index(reach))
         entries = tuple(
             _entry_for(dataset, reached)
             for dataset in launch.LAUNCH_COLLECTION
