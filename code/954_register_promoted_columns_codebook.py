@@ -164,7 +164,15 @@ BLOCKS = {
          "resolves to exactly one UEI. The directory's own resolved-entity "
          "column, `business_entity_id`, is populated on 4 of 2,393 rows and "
          "is NOT written by this script. Adopt or refuse the candidate "
-         "explicitly."),
+         "explicitly. **A second, independent matcher exists and is the "
+         "richer authority**: `native_business_identifier_crosswalk.csv` "
+         "(`code/1001_link_businesses_to_contracting.py`) reaches 263 "
+         "business ids to this column's 220 and carries A/B/C/X tiers, a "
+         "self-published rung and a contract-number rung. Measured "
+         "2026-09-02, the two share 196 ids and agree on **196 of 196**, "
+         "which is a real corroboration because neither was derived from the "
+         "other; 953's `verify` fails if they ever disagree. Join the "
+         "crosswalk when you want the tier."),
         ("federal_cage_candidate", "text", "code", "subscriber",
          "The CAGE code for `federal_uei_candidate`, where "
          "`fpds_uei_cage_map.csv` holds exactly one for that UEI. Same "

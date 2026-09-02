@@ -317,3 +317,129 @@ was re-run against the widened file and returned **1,262 rows / 212 pairs /
 $712.3M / 166 entities — identical to before**, which is the correct outcome
 when no subaward row was added, and confirms the 52-column file still reads
 cleanly downstream.
+
+---
+
+## 2026-09-02 — `subawards.csv` has a primary key for the first time
+
+*Workstream SUBAWARD-FUNDING, `code/910_subaward_report_id_backfill.py` and
+`code/911_subaward_sub_leg_cedar_uid.py`. Zero network calls: every byte came
+from zips already on disk.*
+
+### What was blocking
+
+`docs/DATASET_READINESS.md` had `subcontracting` BLOCKED on five contract
+clauses, and four of them were one fact — **the file had no key at any arity**.
+Measured on the live 76,859-row file before any change:
+
+| candidate | duplicate rows |
+|---|---:|
+| `subaward_sam_report_id` | blank on 72,837 |
+| `45.identity_key` (5 cols) | 17,894 |
+| …+ `description` | 17,610 |
+| …+ `duplicate_status` | 13,053 |
+| …+ `source_file` | 17,264 |
+| **the whole 56-column row** | **10,770** |
+
+A file whose widest candidate — the entire row — collides has no key, and
+`512.validate_grain` correctly turns a declaration made anyway into a
+release-blocking violation. `GRAIN_WS1` and `GRAIN_WS4` both refused it, and on
+the evidence they had, both were right.
+
+### What changed the evidence
+
+`121` diagnosed on 2026-09-01 that the FSRS extract **has always carried**
+`subaward_sam_report_id` — one UUID per SAM filing, 765,109 of 765,109 distinct
+on FY2021 — and that `94.build_row` reads 26 of the extract's 118 columns and
+dropped it. 121 carried it on the 4,022 rows it appended. The other 72,837 were
+promoted before the column existed, **and the zips they came from are still on
+disk.**
+
+`910` streamed all of them: 8,482,363 raw rows across four staging directories,
+joined on `45.identity_key` (imported from 45, never restated), matching 76,668
+raw rows to the clean file's 59,228 distinct identity keys.
+
+    carried_by_121                 4,022
+    recovered_unique              51,191
+    recovered_group_bijection     20,644     N filings, N rows, N ids
+    recovered_group_injection          4     Cedar retains a SUBSET of the
+                                             source's filings; ids assigned
+                                             injectively in (month, id) order
+    no SAM id exists (HigherGov)     998     -> their own permalink instead
+    REFUSED (rows > source filings)    0     the guard, proved by `selftest`
+
+**The direction of the inequality is the whole rule.** M rows against N source
+filings: M ≤ N is an injective assignment of real ids and invents nothing;
+M > N is refused wholesale, because some row could only be given an id that is
+not its own. It fires on 0 partitions today and
+`910 ... selftest` proves it still fires.
+
+### One staging directory was the difference between 97.7% and 100%
+
+The first pass read only the two `data/raw/subcontracts/` folders and left
+1,788 rows unrecovered. 606 of them came from four **loose**
+`Assistance_Subawards_*.csv` extracts under `data/raw/federal_funding/` — the
+same FSRS object, staged by a different puller, never zipped. **A recovery that
+reads only the staging area it expected reports a source gap that is really a
+search gap.** `RAW_DIRS` now names all four and the loose CSVs are read too.
+
+### The published key, and why it is two columns
+
+    primary key   (source_dataset, subaward_source_record_id)
+
+`subaward_source_record_id` is the SOURCE's own id — the SAM UUID on 75,861
+rows, HigherGov's per-subcontract permalink (already in `source_url`, 998 of
+998 distinct, 0 blank) on the rest. `source_dataset` is the second half because
+**347 rows are one filing Cedar holds twice**, once from `usaspending_fsrs_pull`
+and once from `funding_forward_fill`. Both carry the same UUID because it IS
+one filing; the second is already flagged `superseded_by_primary_source` and
+already excluded from every money total.
+
+### Conservation, and the duplicate allegation
+
+| | before | after |
+|---|---:|---:|
+| rows | 76,859 | **76,859** |
+| `sum(subaward_amount)` | $47,301,660,819.78 | **$47,301,660,819.78** |
+| countable sum (`primary` ∧ not `exceeds_prime`) | $25,864,997,128.19 | **$25,864,997,128.19** |
+| byte-identical whole rows | 10,770 | **0** |
+| key blanks / collisions | — | **0 / 0** |
+| columns | 66 → 69 (910) → 71 (911) | gained 5, lost 0 |
+
+**Nothing was de-duplicated and no row was removed.** The 10,770 stopped being
+byte-identical because the column that always separated them was put back. That
+is the third time in this project: `prime_contracts.csv` (80,778 alleged, real
+answer zero), `faads_transactions.csv` (1,001 alleged, real answer zero), and
+now this.
+
+### `911` — the subawardee leg
+
+`cedar_uid` here is the PRIME's id, because `503_identity.py stamp` derives it
+from the first of its `ID_COLS` present in the header and for this table that
+is `prime_native_tribe_id`. 121's comment already said so and called the blanks
+legitimate. They are — but they are 43,282 rows, **56% of the file**, and the
+half that matters most for a Native-business dataset: a tribally owned firm
+winning work UNDER a non-Native prime.
+
+    prime_cedar_uid   33,503     (equals cedar_uid on every row — checked, V2)
+    sub_cedar_uid     44,945
+    at least one leg  76,785 / 76,859 = 99.90%
+
+Resolved with `503.register_map()`, imported. `cedar_uid` is untouched: 503
+owns it. **A handle the register does not know is left BLANK and listed in
+`review/subaward_unresolved_leg_handles.csv`, never guessed.**
+
+### What is still owed on the pull itself
+
+**The FY2024 quarters were NOT folded in, and this is why.** `_state.json` shows
+`fy2024_q1..q4` all `finished` with local files (210,619 / 156,690 / 131,921 /
+195,021 rows) and `fy2023_q3` **failed**, so FY2023 is incomplete. More
+immediately, `121`'s schema guard would have refused to run at all:
+`871_promote_geo_keys_contracts.py` added ten `geo_*` columns to
+`subawards.csv` at 01:14 on 2026-09-02 and they were in none of the guard's
+fillable maps. That is now fixed — see `POST_PROMOTION_COLS` in 121 — so the
+promotion can proceed. **Whoever runs it must run the enrichers afterwards**;
+they are registered in `cedar_pipeline.KNOWN_ORDERINGS` and printed by the
+guard itself:
+
+    910 rescan → 910 apply → 911 apply → 871 → 81

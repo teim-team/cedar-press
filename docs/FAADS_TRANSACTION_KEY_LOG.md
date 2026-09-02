@@ -259,3 +259,94 @@ relabel from the register wherever `cedar_uid` is present, and it changes no
 attribution. The Keetoowah/Cherokee merge is a **register** defect in
 `503_identity.py`'s reconcile phase (`same_as_legacy_cicd = '347,43'`) and
 must be fixed there, not patched over the output.
+
+---
+
+## 2026-09-02 — the key is REFUSED in the contract, not left unstated
+
+*Workstream SUBAWARD-FUNDING. Nothing in this section changes a byte of
+`faads_transactions_all_agencies.csv`. It changes what Cedar SAYS about it.*
+
+### The state this closes
+
+`GRAIN_FAADS` in `code/512_build_dataset_contracts.py` declared
+`faads_transactions.csv` and deliberately left `faads_transactions_all_agencies
+.csv` absent, with the right reason recorded in a comment: the transaction key
+is present on 825,754 of 2,769,748 rows and blank on the 1,943,994 FY2001–2006
+rows of the nine non-Interior agencies, because those 60 source objects were
+REQUESTED with `30.COLUMNS`, a 20-column subset that omits it. It is not in the
+bytes on disk. No re-extract can recover it.
+
+**An absent declaration is a silence, and a silence is not a refusal.** It told
+a buyer nothing about what a row is, nothing about whether `obligated_usd` may
+be summed, and nothing about the two files it must never be stacked with — and
+it left `funding` BLOCKED on C1 with no path that did not involve inventing a
+key.
+
+### What was declared instead
+
+    grain         one row per PRE-2008 FEDERAL ASSISTANCE TRANSACTION
+                  (an action on an award, not an award)
+    primary_key   [] — empty, and the emptiness is the declaration
+    key_refused   the reason, the candidates that must STILL fail, the exact
+                  duplicate count the disposition accounts for, and an
+                  additivity rule for every money column
+
+`512.validate_grain` now routes a declaration with an empty primary key to
+`_validate_refusal`, which **re-measures the refusal against the full file on
+every run**:
+
+| check | fires when |
+|---|---|
+| staleness | any refused candidate becomes unique and non-blank — *"a key we could publish and do not is a defect — declare it"* |
+| duplicate drift | the 3,441 byte-identical rows change count in either direction |
+| completeness | the refusal carries no reason, or names no candidates to re-test |
+
+`py -3 code/912_selftest_refusal_gates.py verify` proves all three fire on
+synthetic violations, with matching controls proving they do not over-fire.
+
+### Measured on the live file, 2026-09-02
+
+| | |
+|---|---:|
+| rows | 2,769,748 |
+| `assistance_transaction_unique_key` present | 825,754 (29.8%) |
+| …distinct, and collisions among them | 825,754 / **0** |
+| …blank | 1,943,994 |
+| `modification_number` blank | 2,203,034 |
+| byte-identical whole rows | 3,441 |
+| `obligated_usd` | $1,830,639,317,707.66 |
+| FY2001…FY2007 rows | 316,006 / 321,290 / 334,206 / 318,543 / 327,210 / 377,738 / 774,755 |
+
+### Consequences downstream
+
+* `517_export_safety.py` gained a fourth class, **`AGGREGATE_ONLY_NO_KEY`**.
+  The three existing classes collapsed two different questions — *can a buyer
+  total this?* and *can a buyer address a row of this?* — and answered both
+  with the join. Classing $1.83T of genuinely additive transaction-grain
+  obligations as "a buyer may NOT total a column" is a false warning, and false
+  warnings are how true ones get ignored. The class is granted ONLY against a
+  `key_refused` block that 512 has just re-measured.
+* `518_dataset_readiness.py` C2 reads its own words — "primary keys and
+  advertised join keys VALIDATE" — so a table that advertises none, and says
+  why in a re-checked block, has nothing to fail. An UNDECLARED missing key
+  still blocks.
+* C4: this table and `faads_transactions.csv` are declared
+  `population_scope = national_mirror` and leave C4's denominator, because they
+  are verbatim mirrors of the national assistance record and 0 of their
+  2,830,409 rows carry a Cedar id — correctly. The claim is gated: it must name
+  the table that DOES carry the Native attribution
+  (`faads_entity_attribution.csv`, 29,594 rows, 29,594 keyed), that table must
+  exist, and it must itself be ≥50% attached, or the claim is refused and the
+  mirror is scored exactly as before.
+
+### What would settle it, unchanged and still all-or-nothing
+
+Re-pull the 54 non-Interior FY2001–2006 agency-years through
+`30_funding_pre2008.py pull` (`COLUMNS` now asks for the key) and **merge the
+key onto the existing rows BY CONTENT rather than replacing them**. All 29,594
+rows of `faads_entity_attribution.csv` are keyed to ROW POSITION in this file;
+a replacing re-pull silently re-points every one of them.
+`code/710_faads_attribution_content_key.py` and `791 snapshot`/`791 repoint`
+are the tools that make a content merge checkable. Any row left unmatched stays
+blank, and blank collides with blank — which is why it is all-or-nothing.

@@ -154,6 +154,22 @@ def cmd_prep(args) -> int:
                try_cast(fiscal_year as int) fy
         from pc where coalesce(awardee_uei,'') <> ''
       ),
+      r2 as (
+        -- `mode()` IS NOT DETERMINISTIC ON A TIE, and that leaked into the
+        -- BASELINE. Two `prep` runs on the same bytes chose different modal
+        -- awardee_names for the same UEI, which changed what 503 was asked to
+        -- resolve, which moved the incumbent's own held-out score (205/186 on
+        -- one run, 204/190 on the next). A non-deterministic primary attribute
+        -- is class 7 in `293_lint_bug_classes.py`. Replaced with an explicit
+        -- ordering: most frequent, ties broken lexicographically.
+        select *,
+               count(*) over (partition by uei, nm)    c_nm,
+               count(*) over (partition by uei, st)    c_st,
+               count(*) over (partition by uei, city)  c_city,
+               count(*) over (partition by uei, cage)  c_cage,
+               count(*) over (partition by uei, naics) c_naics
+        from r
+      ),
       m as (
         -- FY COMES FROM THE SAME AGGREGATE, NOT A SELF-JOIN.
         -- The first draft did `from r left join (select awardee_uei, fiscal_year
@@ -164,13 +180,16 @@ def cmd_prep(args) -> int:
         -- overstatement, and it looked like a plausible big number until it was
         -- put next to the total. AGENT_FIELD_GUIDE section 3, exactly.
         select uei,
-               mode(nm) nm, mode(st) st, mode(city) city,
-               mode(cage) cage, mode(naics) naics,
+               (array_agg(nm    order by c_nm    desc, nm))[1]    nm,
+               (array_agg(st    order by c_st    desc, st))[1]    st,
+               (array_agg(city  order by c_city  desc, city))[1]  city,
+               (array_agg(cage  order by c_cage  desc, cage))[1]  cage,
+               (array_agg(naics order by c_naics desc, naics))[1] naics,
                max(pn) parent_name, max(pu) parent_uei,
                sum(d) dollars, count(*) n_rows,
                max(cu) current_cedar_uid,
                min(fy) fy_min, max(fy) fy_max
-        from r
+        from r2
         group by uei
       )
       select * from m""")
@@ -187,7 +206,8 @@ def cmd_prep(args) -> int:
 
     rows = con.sql("""select uei, nm, st, city, cage, naics, parent_name,
                       parent_uei, dollars, n_rows, current_cedar_uid,
-                      fy_min, fy_max from contractors""").fetchall()
+                      fy_min, fy_max from contractors
+                      order by uei""").fetchall()
     with (OUT / "contractors.csv").open("w", encoding="utf-8", newline="") as f:
         w = csv.writer(f)
         w.writerow(["unique_id", "name_raw", "name_norm", "name_tokens", "state",
@@ -289,6 +309,13 @@ def cmd_prep(args) -> int:
             continue
         kept.append((uei, uid, lbn, own, meth))
 
+    # SORT BEFORE YOU SHUFFLE. `kept` arrives in whatever order DuckDB's
+    # parallel hash aggregate emitted, which is NOT stable across runs, so a
+    # seeded shuffle of it produced a DIFFERENT train/test partition every time
+    # - and the incumbent's own held-out score moved with it (210/195 on one
+    # run, 208/191 on the next, same bytes). A seeded RNG over an unordered
+    # input is not reproducible; it only looks it.
+    kept.sort(key=lambda r: r[0])
     rnd = random.Random(SEED)
     rnd.shuffle(kept)
     cut = int(len(kept) * 0.5)
@@ -560,8 +587,28 @@ def cmd_splink(args) -> int:
 
     # --- training ---
     t0 = time.time()
-    linker.training.estimate_u_using_random_sampling(max_pairs=5_000_000,
+    # THIS MODEL IS NOT REPRODUCIBLE RUN TO RUN, AND ENLARGING THE SAMPLE DOES
+    # NOT FIX IT. Measured 2026-09-02 on byte-identical inputs:
+    #
+    #   max_pairs=5e6   (5 runs)  precision at p>=0.95: 79.2 - 85.4%
+    #                             top-1 recall:         51.6 - 55.1%
+    #   max_pairs=1e8   (3 runs)  precision at p>=0.95: 82.2 - 91.1%
+    #                             top-1 recall:         51.6 - 53.6%
+    #
+    # 1e8 exceeds the 89,760,326 pairs that exist, so "sample the whole space"
+    # is not available through this API - it still samples, and `seed=` does not
+    # determinise it. Cost of the larger sample: u estimation 1.7s -> 45s, for
+    # no reduction in spread. Default is therefore back to 5e6; override with
+    # CEDAR_SPLINK_U_PAIRS to re-measure.
+    #
+    # CONSEQUENCE, and it is the one that decides the verdict: a FIXED
+    # probability threshold does not mean the same thing tomorrow as today. Any
+    # confidence band cut on raw `match_probability` inherits a several-point
+    # swing that has nothing to do with the data.
+    u_pairs = int(os.environ.get("CEDAR_SPLINK_U_PAIRS", 5_000_000))
+    linker.training.estimate_u_using_random_sampling(max_pairs=u_pairs,
                                                      seed=SEED)
+    log(f"  u sampled over max_pairs={u_pairs:,}")
     log(f"  u estimated in {time.time()-t0:.1f}s")
 
     # m from the owner's OWN adjudications, train half only.

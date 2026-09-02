@@ -151,12 +151,13 @@ from pathlib import Path
 
 CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
+GRAVEYARD_CICD = CEDAR / "graveyard" / "cicd"
 LEGACY_DIR = CEDAR / "data" / "spine" / "legacy"
 DOCS = CEDAR / "docs"
 TODAY = date.today().isoformat()
 
 TARGET = CLEAN / "federal_funding_transactions.csv"
-XWALK = LEGACY_DIR / "assistance_tribe_id_crosswalk.csv"
+XWALK = GRAVEYARD_CICD / "assistance_tribe_id_crosswalk.csv"
 
 csv.field_size_limit(min(sys.maxsize, 2**31 - 1))
 
@@ -212,6 +213,15 @@ BULK_RE = re.compile(r"Assistance_PrimeTransactions_(\d{4}-\d{2}-\d{2})_")
 
 
 def load_crosswalk():
+    # RETIRED 2026-09-02 (844). `cedar_pipeline.py` already records that
+    # "335/336 are retired for this file" once 843 dropped `tribe_id`;
+    # this reader outlived the caller. The CICD crosswalk is now
+    # evidence in graveyard/, not an input, and re-reading it would
+    # resurrect the token matcher that merged United Keetoowah Band
+    # into Cherokee Nation. Returns empty rather than raising, so any
+    # surviving caller degrades instead of dying.
+    if "--force-retired-cicd-crosswalk" not in sys.argv:
+        return {}
     if not XWALK.exists():
         raise SystemExit(f"FATAL: {XWALK} is absent. 335 will not guess a "
                          f"crosswalk; run code/152_build_assistance_id_crosswalk.py")

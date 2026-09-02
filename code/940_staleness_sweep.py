@@ -244,20 +244,37 @@ def py_live_strings(txt: str):
         tree = ast.parse(txt)
     except SyntaxError:
         return set()
-    doc_nodes = set()
-    for n in ast.walk(tree):
-        if isinstance(n, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef,
-                          ast.ClassDef)):
-            body = getattr(n, "body", None)
-            if (body and isinstance(body[0], ast.Expr)
-                    and isinstance(body[0].value, ast.Constant)
-                    and isinstance(body[0].value.value, str)):
-                doc_nodes.add(id(body[0].value))
+
+    # NO `id()` KEYS. The first version keyed docstring nodes on `id(node)`,
+    # which `293 --class 7` correctly flags: an object address is a
+    # non-deterministic key, it is not stable across runs, and this project has
+    # already paid for that class once. Walk the tree by hand instead and drop
+    # each body's leading docstring positionally-in-the-BODY, which is what a
+    # docstring actually is.
     out = set()
-    for n in ast.walk(tree):
-        if (isinstance(n, ast.Constant) and isinstance(n.value, str)
-                and id(n) not in doc_nodes):
-            out.add(n.value)
+
+    def is_doc(node):
+        return (isinstance(node, ast.Expr)
+                and isinstance(node.value, ast.Constant)
+                and isinstance(node.value.value, str))
+
+    def visit(node):
+        body = getattr(node, "body", None)
+        if (isinstance(node, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef,
+                              ast.ClassDef))
+                and isinstance(body, list) and body and is_doc(body[0])):
+            children = body[1:] + [c for f, v in ast.iter_fields(node)
+                                   if f != "body"
+                                   for c in (v if isinstance(v, list) else [v])
+                                   if isinstance(c, ast.AST)]
+        else:
+            children = list(ast.iter_child_nodes(node))
+        for c in children:
+            if isinstance(c, ast.Constant) and isinstance(c.value, str):
+                out.add(c.value)
+            visit(c)
+
+    visit(tree)
     return out
 
 

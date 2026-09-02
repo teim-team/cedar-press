@@ -203,8 +203,18 @@ NATURAL_SCOPE = {
 OWNERS = {
     "_entity_layer":            "hub",
     "contractors":              "grain-ws5",
-    "subcontracting":           "subawards pull",
-    "funding":                  "grain-ws4",
+    # 2026-09-02: SUBAWARD-FUNDING closed all five blockers.
+    # subawards.csv got its first primary key (910: the SAM report
+    # UUID recovered from zips already on disk, 10,770 byte-identical
+    # rows -> 0 with zero rows deleted) and its subawardee leg got a
+    # Cedar id (911: C4 42% -> 99.9%). The FY2022-24 promotion is
+    # still owed and still belongs to the subaward pull.
+    "subcontracting":           "READY - maintain; FY2022-24 pull still owed",
+    # 2026-09-02: SUBAWARD-FUNDING closed the last two.
+    # native_passthrough.csv inherits its parent's new key;
+    # faads_transactions_all_agencies.csv is declared WITH ITS KEY
+    # REFUSED and the refusal re-measured on every run of 512.
+    "funding":                  "READY - maintain",
     "deals":                    "grain-ws5",
     "gaming":                   "int-2-gaming",
     # 2026-09-02: C4 closed by 900_nr_hub_join.py + 901_nr_record_scope.py.

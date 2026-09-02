@@ -42,7 +42,7 @@ Rebuild: `py -3 code/build.py run funding --execute` — 16 tables.
 | `bie_uio_dollars_by_entity.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
 | `bie_uio_identifier_links.csv` | internal-by-decision | `tribe_id` `cedar_uid` `uei` `ein` | — | — |
 | `faads_attribution_audit_sample.csv` | internal-by-decision | `tribe_id` `cedar_uid` | — | — |
-| `faads_entity_attribution.csv` | shippable | `tribe_id` `cedar_uid` | `73_faads_name_attribution.py` | `710_faads_attribution_content_key.py` `791_faads_transaction_key_and_repoint.py` |
+| `faads_entity_attribution.csv` | shippable | `tribe_id` `cedar_uid` | `73_faads_name_attribution.py` | `710_faads_attribution_content_key.py` `791_faads_transaction_key_and_repoint.py` `874_geography_two_sums.py` |
 | `faads_identifier_coverage_by_agency_year.csv` | internal-by-decision | — | — | — |
 | `faads_transactions.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
 | `faads_transactions_all_agencies.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
@@ -53,7 +53,7 @@ Rebuild: `py -3 code/build.py run funding --execute` — 16 tables.
 | `funding_identifier_harvest.csv` | internal-by-decision | `cage_code` | — | — |
 | `funding_identifier_netnew_ueis.csv` | shippable | — | — | — |
 | `inflation_deflator.csv` | shippable | — | — | — |
-| `native_passthrough.csv` | shippable | — | — | — |
+| `native_passthrough.csv` | shippable | — | `121_pull_subawards_api.py` | `81_build_passthrough_dataset.py` |
 | `native_passthrough_pairs.csv` | shippable | — | — | — |
 
 Declared grain — validated against the file on every run:
@@ -79,7 +79,7 @@ Declared grain — validated against the file on every run:
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
 - `federal_funding_tribe_year_panel.csv` — one row per (entity, federal fiscal year). A join on tribe_id alone fans out across years
   - primary key: `tribe_id` + `fiscal_year`  (**VALIDATION FAILED — see violations**)
-  - join cardinality: `cedar_uid` → many row(s) per value (measured max 32), `tribe_id` → many row(s) per value
+  - join cardinality: `cedar_uid` → many row(s) per value (measured max 19), `tribe_id` → many row(s) per value
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
 - `funding_identifier_netnew_ueis.csv` — one row per recipient UEI that the funding pull added and no other Cedar source had
   - primary key: `recipient_uei`  (validated unique)
@@ -617,7 +617,7 @@ Rebuild: `py -3 code/build.py run subcontracting --execute` — 5 tables.
 | `subaward_entity_rollup.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
 | `subaward_identifier_harvest.csv` | internal-by-decision | `uei` `cage_code` | — | — |
 | `subaward_identifier_netnew.csv` | internal-by-decision | `uei` `cage_code` | — | — |
-| `subawards.csv` | shippable | `cedar_uid` | `20_build_subcontracts.py` `871_promote_geo_keys_contracts.py` | `121_pull_subawards_api.py` `250_demote_stale_tierA_subaward_rows.py` `45_promote_subawards.py` `910_subaward_report_id_backfill.py` `911_subaward_sub_leg_cedar_uid.py` |
+| `subawards.csv` | shippable | `cedar_uid` | `121_pull_subawards_api.py` `20_build_subcontracts.py` `871_promote_geo_keys_contracts.py` | `121_pull_subawards_api.py` `250_demote_stale_tierA_subaward_rows.py` `45_promote_subawards.py` `871_promote_geo_keys_contracts.py` `910_subaward_report_id_backfill.py` `911_subaward_sub_leg_cedar_uid.py` |
 
 Declared grain — validated against the file on every run:
 
@@ -801,7 +801,7 @@ Rebuild: `py -3 code/build.py run gaming --execute` — 61 tables.
 | `gaming_decision_events.csv` | shippable | — | — | — |
 | `gaming_device_observations.csv` | shippable | `tribe_id` `cedar_uid` `entity_id` `facility_id` | — | — |
 | `gaming_employment_observations.csv` | shippable | `tribe_id` `cedar_uid` `entity_id` `facility_id` `ein` | `100_finish_declinations_and_employment.py` | `158_merge_staged_labor_employment.py` `262_repair_form5500_tribe_attribution.py` `265_merge_osha_relift_rows.py` |
-| `gaming_facilities.csv` | shippable | `tribe_id` `cedar_uid` `entity_id` `facility_id` | — | — |
+| `gaming_facilities.csv` | shippable | `tribe_id` `cedar_uid` `entity_id` `facility_id` | `23d_build_gaming_facilities.py` | `960_promote_gaming_facility_class_and_revenue_reach.py` |
 | `gaming_facility_metrics.csv` | licensed-never-ships | `entity_id` `facility_id` | — | — |
 | `gaming_field_coverage.csv` | internal-by-decision | — | — | — |
 | `gaming_financing_events.csv` | shippable | `cedar_uid` | `91_build_nigc_declinations.py` | `100_finish_declinations_and_employment.py` |

@@ -728,7 +728,7 @@ def cmd_parse():
     byc = {}
     for r in cd:
         byc[core(r["name"])] = {**r, "in_cdfi_fund_list": "1",
-                                "in_cicd_nafi_map": "0",
+                                # "in_cicd_nafi_map": "0",  # CICD nuked 2026-09-02 (844)
                                 "treasury_native_cdfi": "Y"}
     for r in nafi:
         alias = NAFI_ALIAS.get(r["name"])
@@ -743,7 +743,7 @@ def cmd_parse():
         if r["name"] in NAFI_CERT_DISCREPANCY:
             r = {**r, "cert_discrepancy": NAFI_CERT_DISCREPANCY[r["name"]]}
         if c in byc:
-            byc[c]["in_cicd_nafi_map"] = "1"
+            # byc[c]["in_cicd_nafi_map"] = "1"  # CICD nuked 2026-09-02 (844)
             byc[c]["nafi_name"] = r["name"]
             byc[c].setdefault("website", "")
             if not byc[c]["website"] or byc[c]["website"].lower() in (

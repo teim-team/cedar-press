@@ -329,6 +329,50 @@ def classify(path):
 #: Ordering pairs that were paid for in lost work. `after` must run AFTER
 #: `before` whenever `before` runs, or `before`'s columns are gone.
 KNOWN_ORDERINGS = [
+    # --- subcontracting, added 2026-09-02 by workstream SUBAWARD-FUNDING ----
+    # `subawards.csv` has a PRIMARY KEY for the first time -
+    # (source_dataset, subaward_source_record_id) - and both halves are
+    # written by enrichers that run AFTER the promotion, not by it. A
+    # promotion that stops before them leaves the new rows keyless, which
+    # `910 verify` and `512`'s primary-key validation both fail on. Registered
+    # here so `build.py`, `62`'s enricher check and `293` class6 all know the
+    # order instead of each rediscovering it.
+    {"rebuild": "121_pull_subawards_api.py",
+     "enricher": "910_subaward_report_id_backfill.py",
+     "file": "subawards.csv",
+     "cost": "a promotion that stops here leaves the appended rows with a "
+             "BLANK subaward_source_record_id, and blank collides with blank "
+             "- the table loses the only primary key it has ever had",
+     "enricher_columns": ["subaward_sam_report_id", "subaward_source_record_id",
+                          "subaward_source_record_id_basis",
+                          "subaward_sam_report_id_basis"]},
+    {"rebuild": "121_pull_subawards_api.py",
+     "enricher": "911_subaward_sub_leg_cedar_uid.py",
+     "file": "subawards.csv",
+     "cost": "the SUBAWARDEE leg loses its Cedar id on every appended row - "
+             "56% of this table's Native attachment lives on that leg and "
+             "nothing else in the file carries it",
+     "enricher_columns": ["prime_cedar_uid", "sub_cedar_uid"]},
+    {"rebuild": "121_pull_subawards_api.py",
+     "enricher": "871_promote_geo_keys_contracts.py",
+     "file": "subawards.csv",
+     "cost": "the ten geo_* columns are blank on every appended row. "
+             "Registered by workstream SUBAWARD-FUNDING on the geography "
+             "workstream's behalf: without it 121's schema guard classes all "
+             "ten as unfillable and refuses to run at all",
+     "enricher_columns": ["geo_prime_award_recipient_county_fips",
+                          "geo_prime_award_pop_county_fips", "geo_key_tier"]},
+    {"rebuild": "121_pull_subawards_api.py",
+     "enricher": "81_build_passthrough_dataset.py",
+     "file": "native_passthrough.csv",
+     "cost": "native_passthrough.csv is a 1:1 projection of the "
+             "both_sides_native slice of subawards.csv and inherits its key; "
+             "leaving it un-rebuilt after a promotion makes the two files "
+             "describe different universes, which is the shape of the FERC "
+             "102,615-filings-from-307-dockets-described-by-183 defect",
+     "enricher_columns": ["source_dataset", "subaward_source_record_id",
+                          "duplicate_status", "subaward_exceeds_prime_flag"]},
+    # -----------------------------------------------------------------------
     {"rebuild": "133_build_ferc_advocacy.py",
      "enricher": "168_link_adjudication_hubs.py",
      "file": "ferc_docket_filings.csv",
@@ -443,7 +487,7 @@ KNOWN_ORDERINGS = [
      "enricher": "503_identity.py",
      # MOVED 2026-09-01 by 843 out of data/clean/ - it is a build input,
      # not a dataset.
-     "file": "data/spine/legacy/assistance_tribe_id_crosswalk.csv",
+     "file": "graveyard/cicd/assistance_tribe_id_crosswalk.csv",
      "cost": "not yet paid - declared at creation, same day as the "
              "reconciliation it protects",
      "enricher_columns": ["proposed_cedar_tribe_id", "confidence_tier",

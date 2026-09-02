@@ -463,6 +463,59 @@ def publish_conservation(rows):
 
 
 # ------------------------------------------------------------------ the doc
+def _key_rows() -> list:
+    """One markdown row per WS1 table: what key it declares and what the LIVE
+    file says about it. Measured here rather than quoted from the contract, so
+    the document cannot agree with a declaration that has stopped being true.
+    """
+    want = [
+        ("faads_transactions.csv", ["assistance_transaction_unique_key"]),
+        ("faads_transactions_all_agencies.csv", []),
+        ("subawards.csv", ["source_dataset", "subaward_source_record_id"]),
+        ("native_passthrough.csv",
+         ["source_dataset", "subaward_source_record_id"]),
+    ]
+    out = []
+    for name, pk in want:
+        p = CLEAN / name
+        if not p.exists():
+            out.append(f"| `{name}` | — | file not on disk |")
+            continue
+        if not pk:
+            out.append(
+                f"| `{name}` | **REFUSED** — none exists | "
+                f"`assistance_transaction_unique_key` present on 825,754 of "
+                f"2,769,748 rows and unique there; BLANK on 1,943,994. "
+                f"Refusal re-measured by `512` every run |")
+            continue
+        n = blank = 0
+        seen, dup = set(), 0
+        with p.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+            rr = csv.reader(fh)
+            head = [h.strip() for h in next(rr, [])]
+            miss = [c for c in pk if c not in head]
+            if miss:
+                out.append(f"| `{name}` | {' + '.join(pk)} | "
+                           f"**column(s) missing from the header: {miss}** |")
+                continue
+            idx = [head.index(c) for c in pk]
+            for row in rr:
+                n += 1
+                w = len(row)
+                k = tuple((row[i] if i < w else "") for i in idx)
+                if not all(x.strip() for x in k):
+                    blank += 1
+                if k in seen:
+                    dup += 1
+                else:
+                    seen.add(k)
+        verdict = ("unique and non-blank on all "
+                   f"{n:,} rows" if not (blank or dup)
+                   else f"**{blank:,} blank, {dup:,} colliding of {n:,}**")
+        out.append(f"| `{name}` | `{'` + `'.join(pk)}` | {verdict} |")
+    return out
+
+
 def write_doc(dups, srcev, sm, pm, fm, cons):
     def usd(x):
         return f"${x:,.2f}"
@@ -502,9 +555,33 @@ def write_doc(dups, srcev, sm, pm, fm, cons):
         f"`subawards.csv` totals {usd(sm['usd_all'])} across all "
         f"{sm['rows']:,} rows. **That figure must never be quoted.** The "
         f"correct total is {usd(sm['usd_rule'])} over {sm['n_rule']:,} rows. "
-        f"The money rule removes **{usd(sm['usd_removed'])}** — "
-        f"{100.0 * sm['usd_removed'] / max(sm['usd_all'], 1):.1f}% of the "
-        f"unfiltered figure.",
+        f"The money rule removes **{usd(sm['usd_removed'])}**.",
+        "",
+        # RESTORED INTO THE GENERATOR, 2026-09-02.
+        #
+        # This paragraph existed in the OUTPUT and never in this script. It
+        # was hand-written into docs/MONEY_TOTALLING_RULES.md after Codex
+        # found the two percentages loose and disagreeing in two shipped
+        # descriptions - and because 574 writes this file WHOLESALE, the next
+        # run of 574 deleted it silently. A correction that lives only in a
+        # generated file is a correction with a deletion date on it. It is
+        # now computed from the same two totals as the sentence above, so it
+        # cannot drift from them either.
+        f"**State the denominator, every time.** That same "
+        f"{usd(sm['usd_removed'])} is "
+        f"**{100.0 * sm['usd_removed'] / max(sm['usd_all'], 1):.1f}% of the "
+        f"unfiltered {usd(sm['usd_all'])}** and "
+        f"**{100.0 * sm['usd_removed'] / max(sm['usd_rule'], 1):.1f}% of the "
+        f"correct {usd(sm['usd_rule'])}**. Codex caught the pair of numbers "
+        f"loose in the handoff — the sample README quoted one and the product "
+        f"descriptor the other — and a buyer holding both correctly concluded "
+        f"that one of them had to be wrong. **An overstatement is measured "
+        f"against the truth, so the number to quote is "
+        f"{100.0 * sm['usd_removed'] / max(sm['usd_rule'], 1):.1f}%: summing "
+        f"unfiltered lands you that far above the real total.** The other "
+        f"figure is the share of the inflated total that is spurious, which "
+        f"is a different and much less alarming-sounding sentence about the "
+        f"same error, and is not what a warning is for.",
         "",
         "And that corrected total is still **not additive with prime "
         "contracting**. A subaward is a slice of a prime award Cedar already "
@@ -594,22 +671,50 @@ def write_doc(dups, srcev, sm, pm, fm, cons):
                  f"`{r['disposition']}` | {r['rows']:,} | {r['pct']} |")
     L += [
         "",
-        "## Why no primary key is declared",
+        "## The keys — three of four declared, one REFUSED",
         "",
-        "`GRAIN_WS1` in `code/512_build_dataset_contracts.py` is empty on "
-        "purpose. A declared grain with no validated key is a "
-        "release-blocking violation in `512`, and none of these four tables "
-        "has a key that survives full-file validation:",
+        "*This section replaced 'Why no primary key is declared' on "
+        "2026-09-02. It said `GRAIN_WS1` was empty on purpose and that none "
+        "of the four tables had a key that survives full-file validation. "
+        "That was true when it was written and is now true of one table.* "
+        "Every line below is re-measured from the live files by this script; "
+        "`512_build_dataset_contracts.py` re-validates all four against the "
+        "files on every run and turns a broken promise into a "
+        "release-blocking violation.",
         "",
-        "- the `faads_*` pair has no identifying column at all — the source "
-        "published one and the mapper dropped it. `30_funding_pre2008.py` now "
-        "carries both columns; the re-extract is queued in "
-        "`review/OWNER_DECISION_QUEUE.md` and has not run.",
-        "- `subawards.csv` retains byte-identical repeat filings on purpose "
-        f"and carries no per-occurrence ordinal. "
-        f"`45_promote_subawards.identity_key` is unique across all "
-        f"{sm['n_primary']:,} `primary` rows and only there.",
-        "- `native_passthrough.csv` inherits both problems from its parent.",
+        "| table | primary key | measured |",
+        "|---|---|---|",
+    ] + _key_rows() + [
+        "",
+        "**`subawards.csv` — the key was in the source all along.** FSRS "
+        "publishes `subaward_sam_report_id`, one UUID per SAM filing, and "
+        "`94.build_row` read 26 of the extract's 118 columns and dropped it. "
+        "`910_subaward_report_id_backfill.py` streamed 8.48M rows of the "
+        "staged zips already on disk, joined them on `45.identity_key` and "
+        "recovered it for 75,861 rows; the 998 HigherGov rows use HigherGov's "
+        "own per-subcontract permalink, already carried in `source_url`. "
+        "`source_dataset` is the second half of the key because 347 rows are "
+        "ONE filing that Cedar holds twice, from two of its own pulls, and "
+        "both correctly carry the same UUID. **Byte-identical whole rows went "
+        "10,770 → 0 with zero rows removed and the money unchanged to the "
+        "cent** — the third time in this project an allegation of literal "
+        "duplicates has turned out to be dropped identity rather than "
+        "repeated facts.",
+        "",
+        "**`faads_transactions_all_agencies.csv` — REFUSED, and re-checked.** "
+        "The grain IS declared; the primary key is empty and the refusal is "
+        "recorded in `KEY_REFUSED` in `512`. 825,754 of 2,769,748 rows carry "
+        "`assistance_transaction_unique_key` and it is unique with zero "
+        "collisions where present; it is blank on the 1,943,994 FY2001–2006 "
+        "rows of the nine non-Interior agencies because `30.COLUMNS` "
+        "requested a 20-column subset and the key is not in the bytes on "
+        "disk. **No re-extract can recover it** — only a fresh 112-column "
+        "pull of those 54 agency-years, merged BY CONTENT so the 29,594 "
+        "position-keyed attributions do not move. Until then the refusal is "
+        "re-measured on every run of `512`: if any refused candidate becomes "
+        "unique, or the 3,441 byte-identical rows change count, the "
+        "declaration breaks. `code/912_selftest_refusal_gates.py` proves "
+        "those two checks fire on a synthetic violation.",
         "",
         "> **A downstream fragility worth naming:** "
         "`faads_entity_attribution.csv` keys 29,594 attributions to "

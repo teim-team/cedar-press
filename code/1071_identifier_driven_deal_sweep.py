@@ -373,17 +373,23 @@ class AwardHubs:
         self.nkey = nkey
         self.id2hub: dict[str, set] = collections.defaultdict(set)
         self.name2hub: dict[str, set] = collections.defaultdict(set)
+        self.block_id2hub: dict[str, set] = collections.defaultdict(set)
+        self.block_name2hub: dict[str, set] = collections.defaultdict(set)
         self.denied: set = set()
         self.tier_counts = collections.Counter()
+        self.paren_variants = 0
 
         for r in _rows(SPINE):
             tid = r.get("tribe_id")
             if not tid:
                 continue
             for f in ("canonical_name", "fr_official_name"):
-                k = self.nkey(r.get(f))
-                if k:
+                for k in self.variants(r.get(f)):
                     self.name2hub[k].add(tid)
+                    self.block_name2hub[k].add(tid)
+            for a in (r.get("aliases") or "").replace(";", "|").split("|"):
+                for k in self.variants(a):
+                    self.block_name2hub[k].add(tid)
 
         for r in _rows(LEDGER_PATH):
             tid = r.get("tribe_id") or ""
@@ -395,31 +401,91 @@ class AwardHubs:
             if tier == "X":
                 if ident:
                     self.denied.add((ident, tid))
-                k = self.nkey(r.get("legal_business_name"))
-                if k:
+                for k in self.variants(r.get("legal_business_name")):
                     self.denied.add((k, tid))
                 continue
+            # EVERY tier may BLOCK; only tier A may AWARD.
+            if ident:
+                self.block_id2hub[ident].add(tid)
+            for f in ("legal_business_name", "canonical_name"):
+                for k in self.variants(r.get(f)):
+                    self.block_name2hub[k].add(tid)
             if tier != "A":
                 continue
             if ident:
                 self.id2hub[ident].add(tid)
             for f in ("legal_business_name", "canonical_name"):
-                k = self.nkey(r.get(f))
-                if k:
+                for k in self.variants(r.get(f)):
                     self.name2hub[k].add(tid)
+
+    def variants(self, name: str) -> set:
+        """The recorded name, and the name with parentheticals removed.
+
+        THE SPINE PUTS AN ACRONYM INSIDE THE CANONICAL NAME. Measured
+        2026-09-02: `ANVC-TNDGSX-00` is recorded as `Tanadgusix Corporation
+        (TDX)`, which normalizes to `tanadgusix tdx` and therefore does NOT
+        equal the `TANADGUSIX CORPORATION` that FSRS prints. The consequence is
+        not a missed link, it is a WRONG REPORT: with the parent unresolvable,
+        four TDX subsidiaries whose reporting parent moved between two TDX
+        registrations looked like acquisitions out of nowhere. Indexing both
+        variants is what makes the owner's "All Native Group -> Ho-Chunk Inc"
+        warning testable at all. `docs/NATIVE_ENTITY_NUANCES.md` records the
+        same parenthetical hazard on the FR band names.
+        """
+        out = set()
+        n = (name or "").strip()
+        if not n:
+            return out
+        k = self.nkey(n)
+        if k:
+            out.add(k)
+        k2 = self.nkey(PAREN_RE.sub(" ", n))
+        if k2 and k2 not in out:
+            out.add(k2)
+            self.paren_variants += 1
+        return out
 
     def of(self, ident: str, name: str) -> set:
         out: set = set()
         i = clean_id(ident)
         if i:
             out |= {t for t in self.id2hub.get(i, ()) if (i, t) not in self.denied}
-        k = self.nkey(name)
-        if k:
+        for k in self.variants(name):
             out |= {t for t in self.name2hub.get(k, ()) if (k, t) not in self.denied}
+        return out
+
+    def block_of(self, ident: str, name: str) -> set:
+        """Every hub ANY tier of evidence associates with this side. BLOCK ONLY."""
+        out: set = set()
+        i = clean_id(ident)
+        if i:
+            out |= self.block_id2hub.get(i, set())
+        for k in self.variants(name):
+            out |= self.block_name2hub.get(k, set())
         return out
 
 
 LEDGER_PATH = os.path.join(CLEAN, "cedar_identifier_ledger_final.csv")
+PAREN_RE = re.compile(r"\([^)]*\)")
+
+# A UNIT OF GOVERNMENT DECLARED AS A COMPANY'S PARENT IS A FILING ARTEFACT.
+# FSRS `sub_parent_name` is free text typed by the reporting prime, and it is
+# routinely used to name the PASS-THROUGH rather than the owner: the first run
+# of this sweep proposed "Narragansett Indian Tribe -> STATE OF RHODE ISLAND",
+# "Crow Creek Sioux Tribe -> STATE OF SOUTH DAKOTA" and "Northwest Indian
+# Fisheries Commission -> STATE OF WASHINGTON" as ownership changes. A state
+# does not acquire a tribal government; what changed is which body the money
+# came through. Refusing is safe in the direction that matters - a state
+# genuinely buying a tribal enterprise is not a transaction that exists.
+GOV_PARENT_RE = re.compile(
+    r"\b(state of|commonwealth of|county of|city of|department of|"
+    r"bureau of|united states|u\s?s\s?department|federal government|"
+    r"board of regents|university of)\b", re.I)
+GOV_PARENT_EXACT = frozenset({
+    "doi bureau of indian affairs", "indian affairs bureau of",
+    "interior department of the", "health and human services department of",
+})
+
 
 
 def _fuzz():
@@ -457,12 +523,24 @@ class Refuser:
             if (v or "").strip().upper() == "NAN":
                 return "NAN_SENTINEL", set(), set(), "identifier is the literal string nan"
 
+        # AN ABSENT NAME IS NOT EVIDENCE OF A CHANGE OF FAMILY. Every refusal
+        # below needs a name to test; with one side blank the whole battery is
+        # inert and the row sails through as a false `LEFT_NATIVE_FAMILY` purely
+        # because the other side could not be resolved. Field guide 3, inverted:
+        # an EMPTY cell is not a resolved absence.
+        if not (a_name or "").strip() or not (b_name or "").strip():
+            return ("SIDE_NAME_MISSING", set(), set(),
+                    "one side of the transition carries no name; the intra-family "
+                    "battery cannot be run and absence is not evidence")
+
         ka, kb = self.h.nkey(a_name), self.h.nkey(b_name)
         # AWARD set: tier-gated. BLOCK set: everything, used only to refuse.
         ah = self.a.of(a_uei, a_name)
         bh = self.a.of(b_uei, b_name)
-        bah = self.h.of(a_uei, a_name) | self.f.hubs_for_name(a_name) | ah
-        bbh = self.h.of(b_uei, b_name) | self.f.hubs_for_name(b_name) | bh
+        bah = (self.h.of(a_uei, a_name) | self.f.hubs_for_name(a_name)
+               | self.a.block_of(a_uei, a_name) | ah)
+        bbh = (self.h.of(b_uei, b_name) | self.f.hubs_for_name(b_name)
+               | self.a.block_of(b_uei, b_name) | bh)
 
         if ka and ka == kb:
             return "SAME_DISTINCTIVE_TOKENS", ah, bh, ka
@@ -473,6 +551,14 @@ class Refuser:
                 return ("NEAR_IDENTICAL_NAME", ah, bh,
                         f"rapidfuzz token_sort_ratio={sim:.0f} >= {self.NEAR_IDENTICAL}: "
                         f"'{ka}' vs '{kb}'")
+
+        for side, nm in (("prior", a_name), ("later", b_name)):
+            n = (nm or "").strip()
+            if GOV_PARENT_RE.search(n) or self.h.nkey(n) in GOV_PARENT_EXACT:
+                return ("GOVERNMENT_BODY_AS_DECLARED_PARENT", ah, bh,
+                        f"the {side} side is a unit of government (\"{n}\"); a declared "
+                        f"parent naming a state, county or federal body is a "
+                        f"pass-through, not an owner")
 
         if a_vintage and b_vintage and a_vintage != b_vintage:
             return ("SOURCE_VINTAGE_SEAM", ah, bh,
@@ -555,10 +641,19 @@ def _series():
     return collections.defaultdict(lambda: collections.defaultdict(lambda: collections.defaultdict(lambda: [0, 0.0])))
 
 
-def scan(path, key_col, val_col, fy_col, usd_col, name_col=None, extra_cols=()):
-    """One streaming pass. Returns (series, val_names, key_names, extra)."""
+def scan(path, key_col, val_col, fy_col, usd_col, name_col=None, extra_cols=(),
+         vintage_col=None):
+    """One streaming pass. Returns (series, vintage, key_names, extra).
+
+    `vintage` is Counter per (key, value) over `vintage_col`. It exists because
+    START_HERE #5 records a column that HELD TWO VOCABULARIES across a source
+    seam, and the same hazard is live in `awardee_name`: measured 2026-09-02,
+    FY2000-2007 prime rows come only from the hand-checked master file in Title
+    Case and FY2008+ adds the USAspending archive in UPPER CASE. A "change"
+    that coincides with a change of SOURCE is not a change of OWNER.
+    """
     series = _series()
-    val_name = collections.defaultdict(collections.Counter)
+    vintage = collections.defaultdict(collections.Counter)
     key_name = collections.defaultdict(collections.Counter)
     extra = collections.defaultdict(lambda: collections.defaultdict(collections.Counter))
     with open(path, newline="", encoding="utf-8") as f:
@@ -572,6 +667,7 @@ def scan(path, key_col, val_col, fy_col, usd_col, name_col=None, extra_cols=()):
         ik, iv, ify = ix[key_col], ix[val_col], ix[fy_col]
         iu = ix.get(usd_col, -1)
         inm = ix.get(name_col, -1) if name_col else -1
+        ivt = ix.get(vintage_col, -1) if vintage_col else -1
         iex = {c: ix[c] for c in extra_cols if c in ix}
         for row in rd:
             k = clean_id(row[ik])
@@ -590,22 +686,32 @@ def scan(path, key_col, val_col, fy_col, usd_col, name_col=None, extra_cols=()):
             cell[1] += usd
             if inm >= 0 and row[inm]:
                 key_name[k][row[inm]] += 1
+            if ivt >= 0:
+                vintage[(k, v)][row[ivt]] += 1
             for c, i in iex.items():
                 if row[i]:
                     extra[k][c][row[i]] += 1
-    return series, val_name, key_name, extra
+    return series, vintage, key_name, extra
 
 
-def scan_names(path, key_col, name_col, fy_col, usd_col):
-    """Series keyed on identifier, VALUE = the normalized legal name."""
+def scan_names(path, key_col, name_col, fy_col, usd_col, nkey, vintage_col=None):
+    """Series keyed on identifier, VALUE = the entity's own NAME, normalized.
+
+    Normalisation is 1010's `nkey` - the same distinctive-token reduction the
+    refusal battery uses - after stripping periods, so `L.L.C.` reduces to `llc`
+    and is dropped as a corporate form rather than surviving as three tokens
+    `l l c` and manufacturing a rename out of punctuation.
+    """
     series = _series()
     raw = collections.defaultdict(collections.Counter)
+    vintage = collections.defaultdict(collections.Counter)
     with open(path, newline="", encoding="utf-8") as f:
         rd = csv.reader(f)
         head = next(rd)
         ix = {c: i for i, c in enumerate(head)}
         ik, inm, ify = ix[key_col], ix[name_col], ix[fy_col]
         iu = ix.get(usd_col, -1)
+        ivt = ix.get(vintage_col, -1) if vintage_col else -1
         for row in rd:
             k = clean_id(row[ik])
             if not k:
@@ -620,12 +726,16 @@ def scan_names(path, key_col, name_col, fy_col, usd_col):
                 usd = float(row[iu] or 0) if iu >= 0 else 0.0
             except ValueError:
                 usd = 0.0
-            nk = re.sub(r"[^a-z0-9]+", " ", nm.lower()).strip()
+            nk = nkey(nm.replace(".", ""))
+            if not nk:
+                continue
             cell = series[k][fy][nk]
             cell[0] += 1
             cell[1] += usd
             raw[(k, nk)][nm] += 1
-    return series, raw
+            if ivt >= 0:
+                vintage[(k, nk)][row[ivt]] += 1
+    return series, raw, vintage
 
 
 # --------------------------------------------------------------------------
@@ -636,7 +746,9 @@ CAND_COLS = [
     "later_rows", "transition_between_fy", "prior_hubs", "later_hubs", "direction",
     "native_side_present", "scale_obligations_usd_in_runs", "announced_value_usd",
     "deal_status_std", "terms_restricted_party", "already_in_deals_classified",
-    "deal_ledger_match", "source_file", "source_url", "evidence_note", "built_by",
+    "deal_ledger_match", "interpretation_caution", "source_vintage_both_runs",
+    "source_file", "source_url",
+    "evidence_note", "built_by",
 ]
 REJ_COLS = [
     "axis", "refusal", "identifier_type", "identifier", "child_name",
@@ -649,7 +761,7 @@ CONS_COLS = [
     "native_party", "counterparty_or_other_side", "identifier_type", "identifier",
     "event_year", "deal_status_std", "announced_value_usd", "already_in_deals_classified",
     "deal_ledger_match", "terms_restricted_source", "source_file", "source_url",
-    "evidence_note", "review_status",
+    "tierA_native_side_confirmed", "evidence_note", "review_status",
 ]
 
 
@@ -705,14 +817,41 @@ class Ledger:
         return "|".join(sorted(set(out))[:5])
 
 
+
+def cautions(a_name, b_name, a_span, b_span, ah, bh) -> list:
+    """What a reader must know before treating this lead as a transaction.
+
+    Printed on the row rather than left in a build log, because a lead that
+    travels without its caution becomes a claim.
+    """
+    out = []
+    gap = b_span[0] - a_span[1]
+    if gap > 1:
+        out.append(f"{gap} fiscal years separate the two runs - the boundary is a "
+                   f"GAP, not a date; the event lies somewhere in FY{a_span[1]}-FY{b_span[0]}")
+    FORMS = frozenset(
+        "inc llc corp corporation company co ltd limited lp llp incorporated tribe "
+        "tribes nation nations pueblo band community rancheria village authority "
+        "commission council university college association enterprises group "
+        "services solutions technologies holdings".split())
+    for side, nm in (("prior", a_name), ("later", b_name)):
+        toks = [w.lower().strip(".,") for w in re.sub(r"[^A-Za-z0-9.,]+", " ", nm or "").split()]
+        if len(toks) >= 2 and not (FORMS & set(toks)):
+            out.append(f"the {side} side name carries no corporate, governmental or "
+                       f"tribal form word - check it is a legal name and not free text")
+    if not ah and not bh:
+        out.append("no tier-A hub on either side")
+    return out
+
 # --------------------------------------------------------------------------
 def build():
     m1010 = _load_1010()
     hubs = m1010.Hubs()
     # 1010's Hubs does not expose nkey/toks as methods; bind the module fns.
     hubs.nkey = m1010.nkey
-    fams = Families()
-    ref = Refuser(hubs, fams)
+    fams = Families(nkey=m1010.nkey)
+    award = AwardHubs(m1010.nkey)
+    ref = Refuser(hubs, award, fams)
     ledger = Ledger(hubs)
 
     cands: list[dict] = []
@@ -721,8 +860,9 @@ def build():
     axis_counts = collections.Counter()
 
     def emit(axis, axis_desc, idtype, ident, child_name, a_id, a_name, a_span,
-             b_id, b_name, b_span, usd, source_file, evidence):
-        refusal, ah, bh, ev = ref.judge(a_id, a_name, b_id, b_name)
+             b_id, b_name, b_span, usd, source_file, evidence,
+             a_vintage="", b_vintage=""):
+        refusal, ah, bh, ev = ref.judge(a_id, a_name, b_id, b_name, a_vintage, b_vintage)
         if refusal:
             rej_counts[(axis, refusal)] += 1
             rejs.append({
@@ -762,7 +902,14 @@ def build():
             "deal_ledger_match": ledger.match(child_name or b_name, [a_span[1], b_span[0]], hubs),
             "source_file": source_file, "source_url": "",
             "evidence_note": evidence, "built_by": SCRIPT,
+            "interpretation_caution": "; ".join(cautions(
+                a_name, b_name, a_span, b_span, ah, bh)),
+            "source_vintage_both_runs": a_vintage if a_vintage == b_vintage else
+                                        f"{a_vintage} -> {b_vintage}",
         })
+
+    def dom(counter):
+        return counter.most_common(1)[0][0] if counter else ""
 
     # ---------------- S1 / S2 : the subaward surface -----------------------
     for axis, key_col, par_col, nm_col, desc in (
@@ -771,9 +918,10 @@ def build():
         ("S2", "prime_uei", "prime_parent_uei", "prime_name",
          "subawards.csv: declared parent of a fixed PRIME UEI changes"),
     ):
-        series, _vn, key_name, extra = scan(
+        series, vint, key_name, extra = scan(
             SUBAW, key_col, par_col, "fiscal_year", "subaward_amount", nm_col,
             extra_cols=(par_col.replace("_uei", "_name"),),
+            vintage_col="source_dataset",
         )
         pname_col = par_col.replace("_uei", "_name")
         # parent uei -> most common parent name, project-wide
@@ -793,11 +941,12 @@ def build():
             emit(axis, desc, "UEI", key, cn, a, an, aspan, b, bn, bspan,
                  aspan[3] + bspan[3], "data/clean/subawards.csv",
                  f"subawards.csv {key_col}={key}: {par_col}={a} FY{aspan[0]}-{aspan[1]} "
-                 f"({aspan[2]} rows), {par_col}={b} FY{bspan[0]}-{bspan[1]} ({bspan[2]} rows)")
+                 f"({aspan[2]} rows), {par_col}={b} FY{bspan[0]}-{bspan[1]} ({bspan[2]} rows)",
+                 dom(vint[(key, a)]), dom(vint[(key, b)]))
 
     # ---------------- C1 : a CAGE re-paired to a different UEI -------------
-    series, _vn, _kn, _ex = scan(PRIME, "cage_code", "awardee_uei", "fiscal_year",
-                                 "total_obligations")
+    series, cvint, _kn, _ex = scan(PRIME, "cage_code", "awardee_uei", "fiscal_year",
+                                   "total_obligations", vintage_col="source_authority")
     uei_names = collections.defaultdict(collections.Counter)
     with open(PRIME, newline="", encoding="utf-8") as f:
         rd = csv.reader(f)
@@ -818,20 +967,22 @@ def build():
              "CAGE", cage, "", a, an, aspan, b, bn, bspan, aspan[3] + bspan[3],
              "data/clean/prime_contracts.csv",
              f"prime_contracts.csv cage_code={cage}: awardee_uei={a} ({an}) FY{aspan[0]}-{aspan[1]} "
-             f"({aspan[2]} rows), awardee_uei={b} ({bn}) FY{bspan[0]}-{bspan[1]} ({bspan[2]} rows)")
+             f"({aspan[2]} rows), awardee_uei={b} ({bn}) FY{bspan[0]}-{bspan[1]} ({bspan[2]} rows)",
+             dom(cvint[(cage, a)]), dom(cvint[(cage, b)]))
 
     # ---------------- N1 / A1 : the legal name moved under a fixed id ------
-    for axis, path, key_col, nm_col, usd_col, srcname, desc in (
+    for axis, path, key_col, nm_col, usd_col, vcol, srcname, desc in (
         ("N1", PRIME, "awardee_uei", "awardee_name", "total_obligations",
-         "data/clean/prime_contracts.csv",
+         "source_authority", "data/clean/prime_contracts.csv",
          "prime_contracts.csv: a fixed awardee UEI whose LEGAL NAME changes corporate family "
          "- the relation a name search cannot reach, because the name is what moved"),
         ("A1", ASSIST, "recipient_uei", "recipient_name", "obligated_usd",
-         "data/clean/federal_funding_transactions.csv",
+         "source_vintage", "data/clean/federal_funding_transactions.csv",
          "federal_funding_transactions.csv: a fixed recipient UEI whose LEGAL NAME changes "
          "corporate family"),
     ):
-        series, raw = scan_names(path, key_col, nm_col, "fiscal_year", usd_col)
+        series, raw, nvint = scan_names(path, key_col, nm_col, "fiscal_year", usd_col,
+                                        m1010.nkey, vintage_col=vcol)
         for uei, a, aspan, b, bspan in transitions(series):
             if not a or not b:
                 continue
@@ -840,20 +991,22 @@ def build():
             emit(axis, desc, "UEI", uei, bn, uei + "#" + a[:40], an, aspan,
                  uei + "#" + b[:40], bn, bspan, aspan[3] + bspan[3], srcname,
                  f"{srcname} {key_col}={uei}: {nm_col}=\"{an}\" FY{aspan[0]}-{aspan[1]} "
-                 f"({aspan[2]} rows), {nm_col}=\"{bn}\" FY{bspan[0]}-{bspan[1]} ({bspan[2]} rows)")
+                 f"({aspan[2]} rows), {nm_col}=\"{bn}\" FY{bspan[0]}-{bspan[1]} ({bspan[2]} rows)",
+                 dom(nvint[(uei, a)]), dom(nvint[(uei, b)]))
 
     # ---------------- already in the ledger? -------------------------------
     for c in cands:
         c["already_in_deals_classified"] = "YES" if c["deal_ledger_match"] else "NO"
 
     cands.sort(key=lambda r: -float(r["scale_obligations_usd_in_runs"] or 0))
-    return cands, rejs, rej_counts, axis_counts, hubs, ledger, fams
+    return (cands, rejs, rej_counts, axis_counts, hubs, ledger, fams,
+            award.tier_counts, award.paren_variants, award)
 
 
 # --------------------------------------------------------------------------
 # CONSOLIDATION - fold in every other workstream's staged candidates
 # --------------------------------------------------------------------------
-def consolidate(cands, hubs, ledger):
+def consolidate(cands, hubs, ledger, award):
     out: list[dict] = []
     seen: dict[str, str] = {}
     folded = collections.Counter()
@@ -864,8 +1017,24 @@ def consolidate(cands, hubs, ledger):
         s = " ".join(re.sub(r"[^a-z0-9]+", " ", (p or "").lower()) for p in parts)
         return " ".join(sorted(set(s.split())))[:180]
 
+    retier = collections.Counter()
+
+    def tierA_check(ident, native, other):
+        """Re-run the AWARDING gate on a row another workstream produced.
+
+        `1010` resolves hubs from the WHOLE identifier ledger. That ledger holds
+        2,001 tier-B `cluster_v3` rows and they are not inert: measured here,
+        `cluster_v3` keys `Indian Affairs, Bureau Of` and `Computer Sciences
+        Corporation` to `AKNF-INPTBW-00-ARCSLO`. So every folded row is re-tested
+        against tier A only and the answer is CARRIED, not silently applied -
+        START_HERE trap 1 is that a consumer must never assign a tier, and the
+        counterpart is that a consumer must never HIDE one either.
+        """
+        hits = award.of(ident, native) | award.of("", other)
+        return "YES" if hits else "NO"
+
     def add(route, workstream, native, other, idtype, ident, year, status, value,
-            already, ledger_match, src_file, src_url, note):
+            already, ledger_match, src_file, src_url, note, tier_a=""):
         host = (src_url or "").lower()
         if any(h in host for h in TERMS_RESTRICTED_HOSTS):
             dropped_terms[workstream] += 1
@@ -886,7 +1055,10 @@ def consolidate(cands, hubs, ledger):
             "terms_restricted_source": terms_flag(native, other),
             "source_file": src_file, "source_url": src_url,
             "evidence_note": note, "review_status": "UNREVIEWED",
+            "tierA_native_side_confirmed": tier_a,
         })
+        if tier_a:
+            retier[f"{workstream}:{tier_a}"] += 1
 
     # -- route 1a: this script's five axes
     for c in cands:
@@ -894,7 +1066,7 @@ def consolidate(cands, hubs, ledger):
             c["later_side_name"] or c["child_name"], c["prior_side_name"],
             c["identifier_type"], c["identifier"], c["later_first_fy"],
             c["deal_status_std"], "", c["already_in_deals_classified"],
-            c["deal_ledger_match"], c["source_file"], "", c["evidence_note"])
+            c["deal_ledger_match"], c["source_file"], "", c["evidence_note"], "YES")
 
     # -- route 1b: 1010's prime parent_uei sweep, folded in, not re-derived
     p = os.path.join(REVIEW, "1010_ownership_change_candidates.csv")
@@ -906,7 +1078,9 @@ def consolidate(cands, hubs, ledger):
                 "OBSERVED_IN_FILINGS", "",
                 "YES" if r.get("deal_ledger_match") else "NO",
                 r.get("deal_ledger_match", ""), "review/1010_ownership_change_candidates.csv",
-                "", r.get("evidence_note", ""))
+                "", r.get("evidence_note", ""),
+                tierA_check(r.get("child_uei", ""), r.get("child_name", ""),
+                            r.get("prior_parent_name", "") + " " + r.get("later_parent_name", "")))
 
     # -- route 2: announced transactions staged by the adjacent agents
     for p, ws in (
@@ -952,7 +1126,7 @@ def consolidate(cands, hubs, ledger):
         r["deal_ledger_match"] = m
         r["already_in_deals_classified"] = "YES" if m else "NO"
 
-    return out, folded, dropped_terms, dup
+    return out, folded, dropped_terms, dup, retier
 
 
 # --------------------------------------------------------------------------
@@ -1027,7 +1201,7 @@ def verify(quiet=False):
         m1010 = _load_1010()
         hubs = m1010.Hubs()
         hubs.nkey = m1010.nkey
-        fams = Families()
+        fams = Families(nkey=m1010.nkey)
         for c in cands:
             ah = {h for h in (c.get("prior_hubs") or "").split("|") if h}
             bh = {h for h in (c.get("later_hubs") or "").split("|") if h}
@@ -1142,29 +1316,51 @@ def main(argv):
         print(__doc__)
         return 2
 
-    cands, rejs, rej_counts, axis_counts, hubs, ledger, fams = build()
-    cons, folded, dropped_terms, dup = consolidate(cands, hubs, ledger)
+    (cands, rejs, rej_counts, axis_counts, hubs, ledger, fams,
+     award_tiers, paren_variants, award_hubs) = build()
+    cons, folded, dropped_terms, dup, retier = consolidate(
+        cands, hubs, ledger, award_hubs)
 
     write_csv(OUT_CAND, CAND_COLS, cands)
     write_csv(OUT_REJ, REJ_COLS, rejs)
     write_csv(OUT_CONS, CONS_COLS, cons)
 
-    fam_refusals = sum(v for (a, r), v in rej_counts.items() if r.startswith("INTRA_FAMILY")
-                       or r == "SAME_DISTINCTIVE_TOKENS")
+    BUCKET = {
+        "INTRA_FAMILY_SAME_HUB": "intra_family_relabelling",
+        "INTRA_FAMILY_SHARED_BRAND": "intra_family_relabelling",
+        "INTRA_FAMILY_ACRONYM": "intra_family_relabelling",
+        "SAME_DISTINCTIVE_TOKENS": "same_entity_re_registration",
+        "NEAR_IDENTICAL_NAME": "same_entity_re_registration",
+        "SOURCE_VINTAGE_SEAM": "source_artefact_not_an_event",
+        "NAN_SENTINEL": "source_artefact_not_an_event",
+        "SIDE_NAME_MISSING": "untestable_one_side_unnamed",
+        "GOVERNMENT_BODY_AS_DECLARED_PARENT": "pass_through_not_an_owner",
+        "NO_NATIVE_SIDE_AT_TIER_A": "out_of_scope_no_tierA_native_side",
+    }
+    buckets = collections.Counter()
+    for (a, r), v in rej_counts.items():
+        buckets[BUCKET.get(r, r)] += v
     inv = {
         "built_by": SCRIPT,
         "candidates_new_axes": len(cands),
         "candidates_by_axis": {k: v for k, v in sorted(axis_counts.items())},
         "rejections_total": len(rejs),
-        "rejections_intra_family_or_reregistration": fam_refusals,
+        "rejections_by_bucket": dict(buckets),
+        "rejections_intra_family_relabelling": buckets["intra_family_relabelling"],
         "rejections_by_axis_and_reason": {f"{a}/{r}": v for (a, r), v in sorted(rej_counts.items())},
-        "constellation_edges_used": fams.n_edges,
+        "constellation_edges_total": fams.edges_with_from_uid + fams.edges_name_only,
+        "constellation_edges_with_a_from_cedar_uid": fams.edges_with_from_uid,
+        "constellation_edges_name_only_from_side": fams.edges_name_only,
+        "constellation_edges_used_in_uid_closure": fams.n_edges,
+        "identifier_ledger_tier_census": dict(award_tiers),
+        "spine_parenthetical_name_variants_indexed": paren_variants,
         "already_in_deals_classified": collections.Counter(
             c["already_in_deals_classified"] for c in cands),
         "consolidated_rows": len(cons),
         "consolidated_by_workstream": dict(folded),
         "consolidated_duplicates_suppressed": dict(dup),
         "consolidated_dropped_terms_restricted_source": dict(dropped_terms),
+        "folded_rows_retested_against_tierA_only": dict(retier),
         "invariants": INVARIANT_NAMES,
     }
     os.makedirs(os.path.dirname(OUT_INV), exist_ok=True)

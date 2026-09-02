@@ -45,7 +45,7 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 | `federal_funding_tribe_year_panel.csv` | 5,496 | **DECLARATION FAILED** | `tribe_id` + `fiscal_year` | `cedar_uid`→32, `tribe_id`→16 |
 | `funding_identifier_netnew_ueis.csv` | 4,249 | DECLARED_VALIDATED | `recipient_uei` | — |
 | `inflation_deflator.csv` | 27 | DECLARED_VALIDATED | `year` | — |
-| `native_passthrough.csv` | 1,522 | DECLARED_VALIDATED | `source_dataset` + `subaward_source_record_id` | `from_tribe_id`→371, `to_tribe_id`→376 |
+| `native_passthrough.csv` | 1,663 | DECLARED_VALIDATED | `source_dataset` + `subaward_source_record_id` | `from_tribe_id`→371, `to_tribe_id`→376 |
 | `native_passthrough_pairs.csv` | 307 | DECLARED_VALIDATED | `from_tribe_id` + `to_tribe_id` | — |
 
 ### Federal Register  (`federal-register`)
@@ -194,7 +194,7 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 |---|---:|---|---|---|
 | `prime_sub_network.csv` | 220 | DECLARED_VALIDATED | `prime_uei` + `sub_uei` | — |
 | `subaward_entity_rollup.csv` | 450 | DECLARED_VALIDATED | `tribe_id` | `cedar_uid`→1, `tribe_id`→1 |
-| `subawards.csv` | 72,837 | DECLARED_VALIDATED | `source_dataset` + `subaward_source_record_id` | `cedar_uid`→6,163 |
+| `subawards.csv` | 76,859 | DECLARED_VALIDATED | `source_dataset` + `subaward_source_record_id` | `cedar_uid`→6,651 |
 
 ### Native-Owned Businesses  (`native-owned-businesses`)
 

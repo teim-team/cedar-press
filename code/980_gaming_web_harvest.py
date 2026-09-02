@@ -1312,6 +1312,13 @@ def stage_build():
             for h in (pg.get("capacity_hits") or []):
                 unit = ("square_feet" if h["metric"].endswith("square_feet")
                         else "count")
+                # "450+ Slots" is a LOWER BOUND and the word-based detector misses
+                # it. A bound recorded as an exact value is the same defect as a
+                # self-published figure recorded as a regulator's.
+                if not h["value_is_bounded"] and "+" in (h.get("value_verbatim") or ""):
+                    h["value_is_bounded"] = True
+                    h["bound_direction"] = "at_least"
+                    h["bound_basis"] = "trailing '+' in the operator's own wording"
                 obs.append({
                     "observation_id": _oid(host, pg["url"], h["metric"], h["value"]),
                     "observation_kind": "CAPACITY_SIGNAL",

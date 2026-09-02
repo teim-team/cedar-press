@@ -13,8 +13,8 @@ THE OWNER'S FRAMING
      company change owners. Or if we see the federal contracting company change
      owners, that's not something publicly available - it's a deal we can report."
 
-`prime_contracts.csv` carries `parent_uei` / `parent_name` on 1,217,746 of
-1,217,768 rows and a `fiscal_year` on all of them. A firm whose DECLARED PARENT
+`prime_contracts.csv` carries `parent_uei` on 1,217,713 and `parent_name` on
+1,217,514 of its 1,217,768 rows and a `fiscal_year` on all of them. A firm whose DECLARED PARENT
 changes from one corporate family to another, and stays changed, has been
 bought or sold. FPDS does not update retroactively (AGENTS.md, and Elijah's own
 Dippel correspondence), so the change appears at the moment the new owner files,

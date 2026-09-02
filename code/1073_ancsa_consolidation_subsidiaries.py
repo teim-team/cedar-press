@@ -130,11 +130,16 @@ NAMED_SUB = re.compile(
     r"[^.]{0,300}\b(?:wholly[\s\-]*owned|majority[\s\-]*owned|"
     r"wholly[\s\-]*owned)\s+subsidiar(?:y|ies)[^.]{0,600}\.", re.I | re.S)
 
+# THE PARENT NAMED AFTER "of" MUST BE THIS DOCUMENT'S CORPORATION.
+# Gwitchyaa Zhee's report says "... Doyon Native Corporation is a subsidiary
+# of ...", about a THIRD party, and the first version of this attributed Doyon
+# to Gwitchyaa Zhee. Group 3 is the parent clause and is checked against the
+# filer's own name before anything is emitted.
 IS_A_SUB = re.compile(
     r"([A-Z][^.;()]{2,80}?(?:LLC|L\.L\.C\.|Inc\.|Incorporated|Corporation|"
     r"Corp\.|Company|Ltd\.|Limited|LP|LLP|Holdings?))\s*,?\s+is a "
-    r"(wholly[\s\-]*owned |majority[\s\-]*owned )?subsidiary of\b[^.]{0,120}\.",
-    re.S)
+    r"(wholly[\s\-]*owned |majority[\s\-]*owned )?subsidiary of\b"
+    r"([^.]{0,120})\.", re.S)
 
 EQUITY = re.compile(
     r"[^.]{0,200}\b(\d{1,3}(?:\.\d+)?)\s*%\s+(?:equity |ownership |membership |"
@@ -163,6 +168,18 @@ def _norm(n: str) -> str:
     return re.sub(r"[^a-z0-9]+", "", n.lower())
 
 
+def first_word(n: str) -> str:
+    """The name's first word WITHOUT punctuation.
+
+    The W2 containment test compared "Solutions71," against a source sentence
+    reading "Solutions71 LLC" and failed four real rows, because this script
+    inserts the comma the source did not print. Compare the word, not the
+    typography.
+    """
+    w = re.split(r"\s+", (n or "").strip())
+    return re.sub(r"[^\w&'\-]", "", w[0] if w else "")
+
+
 def clean_name(s: str) -> str:
     s = re.sub(r"\s+", " ", (s or "")).strip(" \t,;:.-–—()")
     s = re.sub(r"^(and|its|the|of|a)\s+", "", s, flags=re.I)
@@ -172,25 +189,78 @@ def clean_name(s: str) -> str:
     return s.strip()
 
 
+# A COMPANY NAME IS A RUN OF CAPITALISED TOKENS ENDING IN A CORPORATE SUFFIX.
+#
+# The first version split the note on `;` / `and` / `,` and kept any fragment
+# with a suffix at the end. Measured on the real corpus that produced:
+#
+#     "majority-owned subsidiaries , most of which are limited"
+#     "as well as one mineral development company"
+#     "2016 (3) Acquisitions On April 18, 2017, the Company"
+#     "o Bethel Builders LLC"            <- an OCR'd bullet
+#     "wholly owned subsidiary Azachorok Contract Services, LLC"
+#
+# Every one of those ends in a word that IS a corporate suffix — limited,
+# company, Company, LLC — which is exactly why a suffix test at the end of a
+# fragment does not work. The structural fact that separates a name from a
+# sentence is that the word BEFORE the suffix is capitalised: "Contract
+# Services, LLC" but "are limited". Match the run, and the lead-in clause,
+# the bullet and the sentence tail all fall off for free.
+_TOK = r"(?:[A-Z0-9][\w&'’\-\.]*|of|and|the|for|in|de|&)"
+NAME_RUN = re.compile(
+    r"\b([A-Z][\w&'’\-\.]*(?:\s+" + _TOK + r"){0,7}?)\s*,?\s+"
+    r"(LLC|L\.L\.C\.?|Inc\.?|Incorporated|Corporation|Corp\.?|Company|"
+    r"Companies|Ltd\.?|Limited|L\.P\.?|LP|LLP|PLLC|Holdings?|ehf)\b")
+
+# A run may still START on a word that is a heading or a connective.
+BAD_HEAD = re.compile(
+    r"^(The|A|An|Its|This|These|Those|Such|Company|Companies|Corporation|"
+    r"Subsidiar\w*|Note|Notes|Consolidated|Statements?|Schedule|Exhibit|"
+    r"Acquisitions?|Dispositions?|Management|Board|Report|Independent|"
+    r"Principles?|Basis|Significant|Accounting|Alaska Native Claims|"
+    r"December|January|February|March|April|May|June|July|August|September|"
+    r"October|November|On|In|At|As|And|Or|But|For|With|From)\b", re.I)
+
+# A GENERIC BUSINESS NOUN STANDING ALONE IS A FRAGMENT, NOT A NAME.
+# "Certified Company" is the tail of "8(a) Certified Company"; "Development,
+# Inc" is the tail of a name whose distinctive first word the OCR dropped.
+# Both are real measured outputs of the run matcher. A firm's name has a
+# proper noun in it, and two generic words are not one.
+GENERIC_HEAD = re.compile(
+    r"^(certified|development|services|solutions|holdings?|management|"
+    r"construction|properties|property|enterprises?|group|technologies|"
+    r"systems|partners|ventures?|investments?|contracting|consulting|"
+    r"operations|resources|industries|international|federal|government|"
+    r"commercial|native|alaska|alaskan|regional|village)\b", re.I)
+
+
 def split_names(tail: str) -> list[str]:
-    """Split the tail of a consolidation note into candidate company names."""
+    """Company names in the tail of a consolidation note. See NAME_RUN."""
     tail = re.sub(r"\(collectively[^)]*\)", " ", tail, flags=re.I)
     tail = re.sub(r"\s+", " ", tail)
-    parts = re.split(r";|\band\b|,(?=\s*[A-Z][a-z])", tail)
-    out = []
-    for p in parts:
-        p = clean_name(p)
-        # a name may still carry a trailing clause: keep up to the suffix
-        m = re.search(r"^(.{2,90}?\b(?:LLC|L\.L\.C\.?|Inc\.?|Incorporated|"
-                      r"Corporation|Corp\.?|Company|Ltd\.?|Limited|L\.P\.?|LP|"
-                      r"LLP|PLLC|Holdings?|ehf))\b", p, re.I)
-        if m:
-            p = clean_name(m.group(1))
-        if not p or len(p) < 5 or len(p) > 95:
+    out, seen = [], set()
+    for m in NAME_RUN.finditer(tail):
+        head, suf = m.group(1), m.group(2)
+        last = head.split()[-1]
+        if not (last[:1].isupper() or last[:1].isdigit()):
+            continue                       # "are limited", "the Company"
+        if BAD_HEAD.match(head):
             continue
-        if NOT_A_CHILD.match(p) or not SUFFIX.search(p):
+        if len(head.split()) <= 2 and GENERIC_HEAD.match(head):
             continue
-        out.append(p)
+        nm = clean_name(f"{head}, {suf}" if head.rstrip().endswith((",",))
+                        is False and suf.upper() in
+                        ("LLC", "L.L.C.", "INC", "INC.", "LP", "L.P.", "LLP",
+                         "PLLC") else f"{head} {suf}")
+        nm = re.sub(r"\s+,", ",", nm)
+        if not nm or len(nm) < 5 or len(nm) > 95:
+            continue
+        if NOT_A_CHILD.match(nm) or not SUFFIX.search(nm):
+            continue
+        k = _norm(nm)
+        if k and k not in seen:
+            seen.add(k)
+            out.append(nm)
     return out
 
 
@@ -252,7 +322,7 @@ def mine_doc(d: dict) -> tuple[list[dict], dict]:
         if not n or n == pnorm or n in seen:
             return
         q = re.sub(r"\s+", " ", quote).strip()
-        if name.split()[0].lower() not in q.lower():
+        if first_word(name).lower() not in q.lower():
             return                       # the quote must contain the name
         seen.add(n)
         names_stated = True
@@ -312,17 +382,26 @@ def mine_doc(d: dict) -> tuple[list[dict], dict]:
         for nm in split_names(after):
             emit(nm, rel, s, "named_subsidiary_sentence")
 
+    ptoks = [t for t in re.split(r"[^A-Za-z]+", parent)
+             if len(t) >= 4 and t.lower() not in
+             {"native", "corporation", "incorporated", "limited", "company",
+              "alaska", "inc", "corp", "village", "the"}]
     for m in IS_A_SUB.finditer(text):
         note_present = True
+        owner = (m.group(3) or "")
+        if ptoks and not any(t.lower() in owner.lower() for t in ptoks):
+            continue        # the parent named is a third party, not the filer
         rel = ("wholly_owned" if (m.group(2) or "").strip().lower()
                .startswith("wholly") else
                "majority_owned" if (m.group(2) or "").strip().lower()
                .startswith("majority") else "subsidiary_unspecified")
-        emit(m.group(1), rel, m.group(0), "is_a_subsidiary_of")
+        for nm in split_names(m.group(1)):
+            emit(nm, rel, m.group(0), "is_a_subsidiary_of")
 
     for m in EQUITY.finditer(text):
-        emit(m.group(2), "equity_or_jv", m.group(0), "equity_interest",
-             pct=m.group(1))
+        for nm in split_names(m.group(2)):
+            emit(nm, "equity_or_jv", m.group(0), "equity_interest",
+                 pct=m.group(1))
 
     outcome = ("NAMES_EXTRACTED" if names_stated else
                "NOTE_PRESENT_NAMES_NOT_STATED" if note_present else
@@ -409,7 +488,7 @@ def verify(rows_path: Path = ROWS, doclog: Path = DOCLOG,
         q = r.get("identity_claim_text", "")
         if not q:                                                      # W2
             bad.append(f"W2 no quote: {nm!r}")
-        elif nm.split()[0].lower() not in q.lower():                   # W2
+        elif first_word(nm).lower() not in q.lower():                  # W2
             bad.append(f"W2 name not in its own quote: {nm!r}")
         if _norm(nm) == _norm(r["authority_name"]):                    # W3
             bad.append(f"W3 child equals parent: {nm!r}")

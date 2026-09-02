@@ -69,8 +69,35 @@ What was missing is a gate: `330_build_native_owned_businesses.py` is a full
 rebuild and would reintroduce all six. **INV-ISO** is that gate, and it is
 checked here because this script runs after 771 in the same chain.
 
+A SECOND, INDEPENDENT MATCHER EXISTS AND THEY AGREE 196 OF 196
+---------------------------------------------------------------
+`code/1001_link_businesses_to_contracting.py` (a different workstream, running
+the same day) solves the same problem the other way round: it writes a TIERED
+sidecar, `data/clean/native_business_identifier_crosswalk.csv`, and states in
+its own header that *"this script owns these files; it never rewrites the
+directory."* This script writes on the row and does not write the crosswalk, so
+the two do not collide - but they could DRIFT, and two answers to one question
+is the `248`-versus-`293` lesson: a drifted second detector is worse than none,
+because it is trusted.
+
+Measured 2026-09-02: **196 business ids carry a UEI from both, and all 196
+agree. Zero disagree.** They were derived independently, over partly different
+source sets, so that is a real corroboration rather than a copy corroborating
+itself - the distinction `docs/ASSERTION_LAYER.md` exists to keep. The
+crosswalk reaches 263 ids to this script's 220 and carries A/B/C/X tiers, a
+self-published rung and a contract-number rung, so **it is the richer authority
+and a consumer wanting tiers should join it.**
+
+That agreement is now a STANDING check rather than a one-off measurement:
+INV-CROSSCHECK below fails if the two ever disagree on a shared id. This script
+does not read the crosswalk to produce its value - if it did, the agreement
+would prove nothing.
+
 THE NAMED INVARIANTS
 --------------------
+  INV-CROSSCHECK   where 1001's crosswalk holds a UEI for the same
+                   business_source_id, it equals this script's candidate.
+                   Skipped, and said so, when the crosswalk is absent.
   INV-RESTRICTIVE  no TERMS_STATED_RESTRICTIVE row carries a candidate
                    identifier, by any of the three columns
   INV-UNIQUE       a candidate UEI exists only with status unique_name_match,
@@ -100,6 +127,9 @@ TODAY = date.today().isoformat()
 CLEAN = ROOT / "data" / "clean"
 TABLE = CLEAN / "native_owned_businesses.csv"
 MANIFEST = ROOT / "docs" / "NOB_FEDERAL_IDENTIFIER_CANDIDATES.json"
+#: The other workstream's tiered sidecar. READ ONLY, and never read on the
+#: path that produces a value here - see INV-CROSSCHECK in the docstring.
+XWALK = CLEAN / "native_business_identifier_crosswalk.csv"
 BAK_TAG = f".bak_{TODAY}_pre_953_nob_federal_identifier_candidates"
 
 NEW = ["federal_uei_candidate", "federal_cage_candidate",
@@ -304,8 +334,22 @@ def verify(path: Path | None = None, skip_rederive: bool = False) -> int:
     uni, cage = (None, None)
     if not skip_rederive:
         uni, cage, _ = build_universe()
+    xw = {}
+    if XWALK.exists():
+        with XWALK.open(encoding="utf-8-sig", newline="") as fh:
+            rd = csv.DictReader(fh)
+            need = ("business_source_id", "identifier_type",
+                    "identifier_value")
+            if all(c in (rd.fieldnames or []) for c in need):
+                for r in rd:
+                    if (r["identifier_type"] or "").strip().upper() == "UEI" \
+                            and (r["identifier_value"] or "").strip():
+                        xw.setdefault(r["business_source_id"], set()).add(
+                            r["identifier_value"].strip())
     fails = []
     n = leak = badstatus = unique_bad = iso_bad = 0
+    xcheck = xdisagree = 0
+    xrows = []
     ex = []
     h = hashlib.md5()
     with p.open(encoding="utf-8-sig", newline="") as fh:
@@ -333,6 +377,15 @@ def verify(path: Path | None = None, skip_rederive: bool = False) -> int:
                 badstatus += 1
             if u and s != "unique_name_match":
                 unique_bad += 1
+            if u:
+                theirs = xw.get(row[i["business_source_id"]])
+                if theirs:
+                    xcheck += 1
+                    if u not in theirs:
+                        xdisagree += 1
+                        if len(xrows) < 5:
+                            xrows.append((row[i["business_source_id"]], u,
+                                          sorted(theirs)))
             if u and not skip_rederive:
                 hits = uni.get(norm(row[i["business_name_raw"]]))
                 if not hits or len(hits) != 1 or next(iter(hits)) != u:
@@ -358,10 +411,18 @@ def verify(path: Path | None = None, skip_rederive: bool = False) -> int:
         fails.append(f"INV-ISO {iso_bad} certification_expiration values are "
                      "not YYYY-MM-DD - 771 needs re-running after a 330 "
                      "rebuild")
+    if xdisagree:
+        fails.append(f"INV-CROSSCHECK {xdisagree} of {xcheck} shared business "
+                     f"ids disagree with {XWALK.name}; e.g. {xrows}")
     print(f"  [953] verify  rows {n:,}   restrictive leaks {leak}   "
           f"bad status {badstatus}   unique breaches {unique_bad}   "
           f"non-ISO dates {iso_bad}   md5(base) "
           f"{'unchanged' if digest == man['md5_base_fields'] else 'MOVED'}")
+    print(f"  [953]         INV-CROSSCHECK "
+          + (f"{xcheck} ids shared with {XWALK.name}, {xdisagree} disagree"
+             if xw else
+             f"SKIPPED - {XWALK.name} is not on disk, so there is no second "
+             "matcher to check against"))
     for f in fails:
         print(f"  [953] !! {f}")
     return 1 if fails else 0
@@ -430,6 +491,23 @@ def selftest() -> int:
         write()
         res["E_status"] = run()
         r4[i["federal_identifier_match_status"]] = k5
+
+        # F: perturb the OTHER workstream's crosswalk, not this table, so the
+        # only invariant that can fire is the cross-check.
+        write()
+        global XWALK
+        real, tmpx = XWALK, CLEAN / "_953_selftest_crosswalk.csv"
+        hdr2 = ["business_source_id", "identifier_type", "identifier_value"]
+        with tmpx.open("w", encoding="utf-8", newline="") as fh:
+            w = csv.writer(fh)
+            w.writerow(hdr2)
+            w.writerow([r2[i["business_source_id"]], "UEI", "QQQQQQQQQQQQ"])
+        XWALK = tmpx
+        try:
+            res["F_crosscheck"] = run()
+        finally:
+            XWALK = real
+            tmpx.unlink(missing_ok=True)
     finally:
         fix.unlink(missing_ok=True)
 
@@ -444,6 +522,12 @@ def selftest() -> int:
          res["D_iso"][0] == 1 and "INV-ISO" in res["D_iso"][1]),
         ("`other` as a status -> INV-STATUS",
          res["E_status"][0] == 1 and "INV-STATUS" in res["E_status"][1]),
+        ("a crosswalk that disagrees -> INV-CROSSCHECK",
+         res["F_crosscheck"][0] == 1
+         and "INV-CROSSCHECK" in res["F_crosscheck"][1]),
+        ("...and nothing else fires on that injection",
+         "INV-UNIQUE" not in res["F_crosscheck"][1]
+         and "INV-RESTRICTIVE" not in res["F_crosscheck"][1]),
     ]
     for label, ok in checks:
         print(f"  [953] selftest  {'PASS' if ok else 'FAIL'}  {label}")

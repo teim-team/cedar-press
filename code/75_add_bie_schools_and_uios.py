@@ -607,7 +607,7 @@ def build_rows(bie, uio_listings, spine):
             "aliases": "|".join(bie_aliases(s["name"])),
             "entity_website": s["website"],
             "bie_operation_type": s["operation_type"],
-            "cicd_verified": "0",
+            # "cicd_verified": "0",  # CICD nuked 2026-09-02 (844)
             "n_uei_tierA": "0", "n_uei_tierB": "0", "n_cage": "0", "n_ein": "0",
             "source_url": BIE_DIRECTORY_URL + " -> " + BIE_FS_URL,
             "source_quote": BIE_ITEM_QUOTE,
@@ -679,7 +679,7 @@ def build_rows(bie, uio_listings, spine):
             "city": "; ".join(locations),
             "aliases": "|".join(dict.fromkeys(aliases)),
             "entity_website": first["website"],
-            "cicd_verified": "0",
+            # "cicd_verified": "0",  # CICD nuked 2026-09-02 (844)
             "n_uei_tierA": "0", "n_uei_tierB": "0", "n_cage": "0", "n_ein": "0",
             "parent_native_entity": "",       # by rule: no tribe owns a UIO
             "serves_native_entities": (

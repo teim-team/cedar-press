@@ -82,6 +82,23 @@ PREFIXES = {
     "CEDAR-WELL":    ("resource_asset", 6),
     "CEDAR-LEASE":   ("resource_asset", 6),
     "CEDAR-ADMREG":  ("admin_region", 6),
+    # Added 2026-09-02 by code/1072_tribally_owned_enterprises.py (collection
+    # `nest` - Native Enterprise Structures and Ties). An enterprise a nation,
+    # ANC or NHO owns is a SUB-HUB of that entity, never a spine row -
+    # docs/IDENTIFIER_STANDARD.md §2 - so it may not take a `CE-` uid, and it
+    # is not an individually Native-owned firm so it may not take `CEDAR-ENT`.
+    # 1072 renders the ordinal this service allocates with
+    # 503_identity.check_chars() appended, so the id a customer sees is
+    # `CEDAR-NEST-000123-K7`: allocation is permanent and locked here,
+    # transcription safety comes from 503.
+    "CEDAR-NEST":    ("enterprise", 6),
+    # RETIRED THE DAY IT WAS ADDED, UNISSUED. `CEDAR-HOLD` was the prefix for
+    # the same collection under its working name `holdings`, for the few hours
+    # before the owner named it NEST. Its counter in _id_registry.json stands
+    # at 1483 and NOT ONE of those ids left this machine or was written to any
+    # table. The entry stays because a prefix is never reused and a reader who
+    # finds `CEDAR-HOLD` in a log should be able to learn what it was.
+    "CEDAR-HOLD":    ("enterprise", 6),
 }
 
 # Reserved so a concurrent build cannot collide with another agent's block.

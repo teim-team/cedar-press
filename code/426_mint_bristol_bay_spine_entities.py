@@ -282,7 +282,7 @@ def main():
         row["reconciliation_status"] = "MINTED_TO_DISCHARGE_FA-04"
         row["reconciliation_note"] = RECON_NOTE.format(today=TODAY,
                                                        script=SCRIPT)
-        row["cicd_verified"] = "0"
+        # row["cicd_verified"] = "0"  # CICD nuked 2026-09-02 (844)
         # cedar_entity_id is the upstream entity_master register code, NOT a
         # Cedar id (cedar_ids.ENTITY_ID_COLUMN_MEANINGS). These entities are
         # not in that register, so it stays blank rather than acquiring a

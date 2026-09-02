@@ -1,5 +1,5 @@
 {
-  "scanned_files": 553,
+  "scanned_files": 556,
   "counts": {
     "class1": 1,
     "class2a": 0,
@@ -9,9 +9,9 @@
     "class4": 12,
     "class5": 6,
     "class6": 25,
-    "class7": 45,
+    "class7": 46,
     "class8": 0,
-    "lint_bug_class_instances": 156
+    "lint_bug_class_instances": 157
   },
   "findings": [
     {
@@ -62,7 +62,7 @@
     {
       "class": "class2c",
       "file": "1060_splink_pilot.py",
-      "line": 270,
+      "line": 285,
       "evidence": "drop_nc += 1",
       "why": "counter 'drop_nc' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -71,7 +71,7 @@
     {
       "class": "class2c",
       "file": "1060_splink_pilot.py",
-      "line": 273,
+      "line": 288,
       "evidence": "drop_ns += 1",
       "why": "counter 'drop_ns' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
       "waived": false,
@@ -143,7 +143,7 @@
     {
       "class": "class4",
       "file": "121_pull_subawards_api.py",
-      "line": 1178,
+      "line": 1232,
       "evidence": "if time.time() > COLLECT_DEADLINE:",
       "why": "a budget (COLLECT_DEADLINE, SUBMIT_DEADLINE) exits a loop, the file writes a completion marker (['FINISHED', 'OK', 'RETRIEVED', 'finished']), and it never compares what it RETRIEVED against the total the SOURCE reported. That is the PER_DOCKET_BUDGET_S defect: four dockets written at 2,300-3,200 of 3,555-4,847 and marked `done`, so no resume would ever revisit them.",
       "waived": false,
@@ -152,9 +152,9 @@
     {
       "class": "class5",
       "file": "121_pull_subawards_api.py",
-      "line": 1118,
+      "line": 1172,
       "evidence": "if s == \"finished\":",
-      "why": "an 'already done' short-circuit (s == 'finished') skips the work, and this file still rewrites a log/summary artefact wholesale at line 1002. On a second run the counters are zero and the log says so - the 164 defect: 187 facilities rewritten to read '0 sources'. Re-running a build must not change its output; merge into the existing log or refuse to rewrite it.",
+      "why": "an 'already done' short-circuit (s == 'finished') skips the work, and this file still rewrites a log/summary artefact wholesale at line 1056. On a second run the counters are zero and the log says so - the 164 defect: 187 facilities rewritten to read '0 sources'. Re-running a build must not change its output; merge into the existing log or refuse to rewrite it.",
       "waived": false,
       "waiver_reason": ""
     },
@@ -872,7 +872,7 @@
     {
       "class": "class3",
       "file": "992_newsletter_deal_candidates.py",
-      "line": 606,
+      "line": 651,
       "evidence": "and rows[0][\"deal_status_std\"] == \"Closed\"))",
       "why": "'deal_status_std' is compared to a PROCESSED value (['closed']) and the word 'outcome' appears nowhere in this file. `status` says the ruling was PROCESSED; `outcome` says what it DECIDED - one ruling read SETTLED while its outcome was 'HOLD - RETRACTION REQUIRED'.",
       "waived": false,
@@ -881,7 +881,7 @@
     {
       "class": "class4",
       "file": "992_newsletter_deal_candidates.py",
-      "line": 424,
+      "line": 431,
       "evidence": "if time.time() > RUN_DEADLINE:",
       "why": "a budget (RUN_DEADLINE) exits a loop, the file writes a completion marker (['OK']), and it never compares what it RETRIEVED against the total the SOURCE reported. That is the PER_DOCKET_BUDGET_S defect: four dockets written at 2,300-3,200 of 3,555-4,847 and marked `done`, so no resume would ever revisit them.",
       "waived": false,
@@ -1366,8 +1366,17 @@
     },
     {
       "class": "class7",
+      "file": "1030_sec_edgar_native_transactions.py",
+      "line": 779,
+      "evidence": "\"candidate_id\": f\"SEC1030-{n:06d}\",",
+      "why": "[WARN] POSITIONAL on target candidate_id -> no clean table. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
+      "waived": false,
+      "waiver_reason": ""
+    },
+    {
+      "class": "class7",
       "file": "1031_ancsa_45_55_139_annual_reports.py",
-      "line": 442,
+      "line": 471,
       "evidence": "\"candidate_id\": f\"AS4555139-{n:05d}\",",
       "why": "[WARN] POSITIONAL on target candidate_id -> no clean table. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": false,
@@ -1853,7 +1862,7 @@
     {
       "class": "class3",
       "file": "1060_splink_pilot.py",
-      "line": 250,
+      "line": 265,
       "evidence": "where l.identifier_type='UEI' and l.confidence_tier='A'",
       "why": "a tier-A assignment sits within 6/3 lines of a ruling-method or status test, at 2 site(s), and this file has NO RECORDED DISPOSITION in 293's DISPOSITIONS table. A regex cannot decide this one - read the site and write the reason down. `attribution_method` says WHO decided; `confidence_tier` says WHAT was decided. Do NOT delete the entry to make this pass.",
       "waived": false,
@@ -3229,12 +3238,12 @@
       },
       {
         "file": "1060_splink_pilot.py",
-        "line": 250,
+        "line": 265,
         "source": "where l.identifier_type='UEI' and l.confidence_tier='A'"
       },
       {
         "file": "1060_splink_pilot.py",
-        "line": 261,
+        "line": 276,
         "source": "where l.identifier_type='UEI' and l.confidence_tier='A'"
       },
       {

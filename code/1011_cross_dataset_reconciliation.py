@@ -6,7 +6,7 @@ Cedar Press - 1011: WHERE THE THIRTEEN DATASETS DISAGREE WITH EACH OTHER.
     py -3 code/1011_cross_dataset_reconciliation.py verify     # exit 1 on breach
     py -3 code/1011_cross_dataset_reconciliation.py selftest   # prove verify fires
 
-The datasets share one identity spine, so they should agree. Ten checks ask
+The datasets share one identity spine, so they should agree. Twelve checks ask
 whether they do. Each one is re-measured from the live files on every run; none
 of them repairs anything. **This script writes only its own files.** Where a
 finding belongs to another dataset's owner it is written down with the
@@ -25,6 +25,8 @@ THE CHECKS
   CDR-08  gaming operator against the register - TESTED, NO DISAGREEMENT
   CDR-09  nonprofits whose own name is a spine entity and carry no hub link
   CDR-10  four duplicate allegations tested; all four phantom
+  CDR-11  three QUARANTINED attribution methods still carry $38.2B
+  CDR-12  one corporate family split across four nations
 
 RANKING. Findings are ranked on two axes the owner named: dollars, and how
 embarrassing it would be if a customer found it first. The second is recorded
@@ -610,7 +612,9 @@ def build():
         "cdr11_prime_rows_keyed": qrows,
         "cdr11_dollars": round(qusd, 2),
         "cdr11_pairs_no_shared_token": len(no_tok),
+        "cdr11_dollars_no_shared_token": round(sum(x[0] for x in no_tok), 2),
         "cdr11_pairs_trap_token_only": len(trap_tok),
+        "cdr11_dollars_trap_token_only": round(sum(x[0] for x in trap_tok), 2),
         "cdr12_north_wind_hubs": {k: [v[0], len(v[2]), round(v[1], 2)] for k, v in nw.items()},
     }
     return finds, detail, inv

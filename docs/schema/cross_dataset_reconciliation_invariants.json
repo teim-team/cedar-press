@@ -38,6 +38,8 @@
       "ownership_events": 0
     },
     "cdr11_dollars": 38191057346.29,
+    "cdr11_dollars_no_shared_token": 7668984929.66,
+    "cdr11_dollars_trap_token_only": 5065062423.37,
     "cdr11_pairs_no_shared_token": 183,
     "cdr11_pairs_trap_token_only": 189,
     "cdr11_prime_rows_keyed": 172338,

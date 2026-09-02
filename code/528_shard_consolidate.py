@@ -95,6 +95,23 @@ SHARDS = {
     "shard_n": "the coverage tail - every entity no other shard touched",
 }
 
+# `url_type` values that ARE a finding but are NOT a usable website.
+NOT_A_LIVE_SITE = {
+    "parked_domain", "placeholder_site", "closed_property",
+    "none_established", "government_candidate",
+    "DOMAIN_HIJACKED_DO_NOT_LINK", "TERMS_RESTRICTED_DO_NOT_HARVEST",
+    # Added 2026-09-02 with shard N, which writes these. Both are real
+    # findings about the entity and NEITHER is the entity having a website:
+    #   form_990          a ProPublica/IRS filing page ABOUT the entity
+    #   directory_profile somebody else's page about it - the BIA publishes
+    #                     caltribalfamilies.org and sctca.net consortium
+    #                     profiles in the `website` field for five rancherias
+    # Counting either would put another organisation's URL in this column,
+    # which is the same class of error as the parked-domain note above.
+    # `no_own_site_found` needs no entry: it carries no URL.
+    "form_990", "directory_profile",
+}
+
 MAP_COLS = ["cedar_uid", "canonical_name", "entity_class", "url_type", "url",
             "http_status", "checked_date", "evidence", "shard"]
 
@@ -182,7 +199,20 @@ def main() -> int:
         touched[cls].add(uid)
         url = (r.get("url") or "").strip()
         st = str(r.get("http_status") or "").strip()
-        if url and (st.startswith("2") or st == ""):
+        # A 200 FROM A PARKED DOMAIN IS STILL A 200. The status test alone
+        # counted 84 rows whose own `url_type` says the URL is not usable -
+        # `failed_government`, `parked_domain`, `placeholder_site`,
+        # `closed_property`, `DOMAIN_HIJACKED_DO_NOT_LINK`,
+        # `TERMS_RESTRICTED_DO_NOT_HARVEST`, and the `unverified_*` family the
+        # shards write precisely to say "found, not confirmed". Measured
+        # 2026-09-02: it moved 4 federally recognized tribes from "touched,
+        # none found" into "has a website", and "has a website" is the number
+        # this document exists to publish. The shard already told us; the
+        # consolidator was not listening.
+        ut = (r.get("url_type") or "").strip()
+        usable = not (ut.startswith(("failed_", "unverified_"))
+                      or ut in NOT_A_LIVE_SITE)
+        if url and usable and (st.startswith("2") or st == ""):
             with_url[cls].add(uid)
 
     if not verify:

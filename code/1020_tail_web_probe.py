@@ -6,6 +6,7 @@
     py -3 code/1020_tail_web_probe.py verify     # exit 1 if an invariant breaks
     py -3 code/1020_tail_web_probe.py selftest   # prove verify fires on a
                                                  # synthetic violation
+    py -3 code/1020_tail_web_probe.py doc        # rewrite the tail report
 
 SLICE -- DERIVED, NEVER ENUMERATED
     Every `cedar_uid` in data/spine/cedar_identity_register.csv that appears in
@@ -51,9 +52,14 @@ THE LADDER (docs/HIDDEN_DATA_TECHNIQUES.md; recorded per entity in `evidence`)
     R6  NONE_ESTABLISHED. Only after >= 3 named routes are recorded in
         `evidence`. `verify` enforces that; it is not a convention.
     R7  DOMAIN DERIVED FROM THE NAME. Last programmatic rung, reached only
-        when everything publisher-stated came up empty. A guess that answers
-        200 without carrying the entity's name is written as unverified or
-        discarded -- never as the entity's site.
+        when everything publisher-stated came up empty, and the most
+        dangerous one in the file -- its first version fabricated ten sites.
+        A candidate is accepted ONLY when the page text carries EVERY
+        distinctive token of the entity's name AND a marker that the page is
+        that kind of organisation; the URL itself is never evidence; parking
+        pages are detected by their boilerplate, not by length; and a
+        single-word domain label is never guessed. `verify` invariant (6)
+        enforces the first of those against the written rows.
 
 THREE THINGS THAT ARE NOT "NO WEBSITE"
     `government_refused_robots`  the site exists and its robots.txt says
@@ -330,18 +336,78 @@ def tokens(name):
 
 
 def name_evidence(name, html, url=""):
-    """Does this page actually belong to this entity? Guards against a
-    derived domain landing on a squatter or an unrelated business.
+    """Does this PAGE belong to this entity? -> (hits, n_tokens).
 
-    Returns (hits, n_tokens). A page is accepted only when it carries most of
-    the entity's distinctive tokens. Diacritics are stripped both sides --
-    'Laʻiʻopua' on the register and 'Laiopua' in the domain are one word.
+    THE URL IS THE GUESS. IT IS NEVER THE EVIDENCE.
+    The first version put `url` in the haystack, and every derived candidate
+    then matched itself: `capitan.org` "proved" it was the Capitan Grande
+    Band because the string `capitan` was in the URL being tested. On that
+    reasoning it accepted `fort.org` (a Gandi parking page), `grindstone.org`
+    and `laguna.org` (both blank), `biglagoon.org` (an elementary school) and
+    `cherokee.gov` -- the Cherokee Nation's own site -- as the website of a
+    company called Cherokee Unlimited, Inc.
+
+    Circular evidence is not weak evidence, it is no evidence, and it
+    produced the one outcome this project forbids outright: ten fabricated
+    rows, each of which would have read as a closed coverage gap. They were
+    caught by reading the titles of what had been accepted, which is the
+    check that should have been in the code. The `url` parameter is kept so
+    callers need not change, and is deliberately unused.
     """
+    del url                     # see above: the guess is never the evidence
     toks = tokens(_deaccent(name))
     if not toks:
         return 0, 0
-    hay = _deaccent(text_of(html)[:60_000] + " " + url).lower()
+    hay = _deaccent(text_of(html)[:60_000]).lower()
     return sum(1 for t in toks if t in hay), len(toks)
+
+
+# A registrar parking page is a 200 with plenty of text, none of it the
+# entity's. `fort.org` served 1.5 KB of Gandi boilerplate and sailed past a
+# "is there enough text on this page" test.
+PARKED = re.compile(
+    r"(?i)(this domain (name )?(has been |is )?(registered|for sale|parked)"
+    r"|domain (name )?is (for sale|available|parked)"
+    r"|buy this domain|godaddy|gandi|sedo|domain parking"
+    r"|future home of|coming soon|under construction"
+    r"|default web site page|apache2? ubuntu default)")
+
+# A 200 THAT IS A BOT CHALLENGE IS NOT THE SITE.
+# Two of the 51 tribal sites accepted on pass 1 -- Potter Valley Tribe and the
+# Paiute Indian Tribe of Utah -- returned HTTP 200 and 169 bytes of SiteGround
+# captcha redirect. Green status code, valid HTML, and not one byte of the
+# tribe's website. This is the same shape as the `?wpdmdl=` incident in
+# HIDDEN_DATA_TECHNIQUES: a check that passed for the wrong reason and would
+# have shipped. The site exists, so the honest record is
+# `government_blocked_bot_protection`, not `government` and not an absence.
+CHALLENGE = re.compile(
+    r"(?i)(sgcaptcha|cf-browser-verification|cf_chl|challenge-platform"
+    r"|just a moment\.\.\.|checking your browser|enable javascript and "
+    r"cookies|ddos protection by|incapsula incident|access denied"
+    r"|請開啟 javascript|attention required)")
+
+
+def is_challenge(html):
+    """True when a 200 body is an interstitial rather than the site."""
+    head = html[:4000]
+    return bool(CHALLENGE.search(head)) or (
+        len(html) < 700 and "http-equiv=\"refresh\"" in head.lower()
+        and "captcha" in head.lower())
+
+
+# For the page to be THIS KIND of organisation, not merely a page that
+# happens to contain the name.
+CLASS_MARKERS = {
+    "Federally recognized tribe": ("tribe", "tribal", "rancheria", "nation",
+                                   "band", "reservation", "pueblo",
+                                   "indian", "tribal council"),
+    "Native Hawaiian Organization": ("hawaii", "hawaiian", "ohana", "kanaka",
+                                     "homestead", "moku", "ahupua",
+                                     "nonprofit", "non-profit", "kupuna"),
+    "Individually Native-owned business": ("llc", " inc", "company",
+                                           "our services", "about us",
+                                           "contact us"),
+}
 
 
 def _deaccent(s):
@@ -676,9 +742,17 @@ def candidate_hosts(row):
                 ("tribe", "tribes", "band", "bands", "nation", "nations",
                  "indian", "community", "rancheria", "reservation", "pueblo",
                  "colony", "group", "town")]
-        for base in ({"".join(t), "".join(core), "".join(core[:2]),
-                      "".join(core[:1])} - {""}):
-            if 4 <= len(base) <= 30 and base not in stems:
+        # A ONE-WORD STEM IS SOMEBODY ELSE'S DOMAIN.
+        # `core[:1]` generated fort, capitan, grindstone, laguna, cherokee and
+        # sanjuan. Every one of those domains belongs to another party, and
+        # every one was accepted. A guess is only worth sending when the label
+        # carries enough of the name to be improbable by chance: two joined
+        # tokens, or a single long one.
+        cands = {"".join(t), "".join(core), "".join(core[:2])}
+        if len(core) == 1 and len(core[0]) >= 9:
+            cands.add(core[0])
+        for base in (cands - {""}):
+            if 9 <= len(base) <= 30 and base not in stems:
                 stems.append(base)
     out = []
     for b in stems[:4]:
@@ -689,7 +763,7 @@ def candidate_hosts(row):
     return out[:12]
 
 
-def try_host(host, name, tag):
+def try_host(host, name, tag, cls=""):
     """Fetch a candidate host and require the page to prove it is the entity's.
 
     Returns (url, status, verdict, note). A 200 is not enough: a derived
@@ -703,21 +777,44 @@ def try_host(host, name, tag):
             r = fetch_with_recovery(url, save_as=tag)
             st = r["status"]
             if not (isinstance(st, int) and 200 <= st < 400):
+                # A HOST THAT DOES NOT RESOLVE WILL NOT RESOLVE ON HTTP EITHER.
+                # Four combinations per candidate host is three wasted DNS
+                # round trips on every guess that misses, and most guesses
+                # miss. Politeness is the point: the cheapest request is the
+                # one not sent.
+                if "NXDOMAIN" in str(r.get("error")) or \
+                        "getaddrinfo" in str(r.get("error")) or \
+                        "Name or service not known" in str(r.get("error")):
+                    if pre == "":
+                        continue          # try the www. host once
+                    return ("", "", "no_response", "DNS does not resolve")
                 continue
-            hits, ntok = name_evidence(name, r["text"], r["final_url"])
+            hits, ntok = name_evidence(name, r["text"])
             body = text_of(r["text"])
-            if len(body) < 200 and hits == 0:
+            title = title_of(r["text"])
+            if PARKED.search(body[:3000]) or PARKED.search(title):
                 return (r["final_url"], st, "parked_domain",
-                        "200 but <200 chars of text and no name match")
-            if ntok and hits >= max(1, (ntok + 1) // 2):
+                        "200 from a registrar parking or placeholder page: "
+                        + title[:60])
+            if len(body) < 200:
+                return (r["final_url"], st, "parked_domain",
+                        "200 with under 200 characters of text")
+            marker = any(m in body.lower()[:20_000]
+                         for m in CLASS_MARKERS.get(cls, ()))
+            # ALL of the entity's distinctive tokens AND a class marker.
+            # "half the tokens" is what let an elementary school through for
+            # Big Lagoon Rancheria.
+            if ntok and hits == ntok and marker:
                 return (r["final_url"], st, "verified",
                         "name evidence " + str(hits) + "/" + str(ntok)
-                        + " tokens; title=" + title_of(r["text"])[:80]
+                        + " tokens ALL present in the page text, plus a "
+                        + "class marker; title=" + title[:80]
                         + "; rung=" + r.get("rung", ""))
             return (r["final_url"], st, "unverified",
-                    "200 but name evidence only " + str(hits) + "/"
-                    + str(ntok) + " tokens; title="
-                    + title_of(r["text"])[:80])
+                    "200 but name evidence " + str(hits) + "/" + str(ntok)
+                    + " tokens and class marker " + str(marker)
+                    + "; title=" + title[:80]
+                    + " -- NOT accepted as this entity's site")
     return ("", "", "no_response", "")
 
 
@@ -777,8 +874,18 @@ def run():
                                 "this tribe, not a tribal site. Recorded as a "
                                 "profile and NOT counted as the tribe having "
                                 "a website.")
+                    elif ok and is_challenge(r["text"]):
+                        ut = "government_blocked_bot_protection"
+                        note = ("HTTP " + str(st) + " but the body is a bot "
+                                "challenge interstitial, not the site -- "
+                                + str(len(r["text"])) + " bytes. A 200 is not "
+                                "proof you fetched the right thing. The site "
+                                "exists; we did not reach it.")
+                        ok = False
                     elif ok:
-                        ut, note = "government", "verified 2xx"
+                        ut, note = "government", ("verified 2xx, "
+                                                  + str(len(r["text"]))
+                                                  + " bytes of body")
                         got_url = True
                     elif st == "REFUSED_ROBOTS_DISALLOW":
                         # A SITE THAT EXISTS AND HAS TOLD US NOT TO FETCH IT.
@@ -848,6 +955,9 @@ def run():
                     r = fetch_with_recovery(u, save_as=uid + "__doi_site")
                     st = r["status"]
                     ok = isinstance(st, int) and 200 <= st < 400
+                    if ok and (is_challenge(r["text"])
+                               or len(text_of(r["text"])) < 200):
+                        ok = False
                     emit(uid, name, cls,
                             "organization" if ok else "unverified_organization",
                             r.get("final_url") or u, st,
@@ -872,8 +982,8 @@ def run():
                 for d in domains_from_emails(rec.get("emails") or [])[:2]:
                     if got_url:
                         break
-                    u2, st2, verdict, note2 = try_host(d, name,
-                                                       uid + "__mail_" + d)
+                    u2, st2, verdict, note2 = try_host(
+                        d, name, uid + "__mail_" + d, cls)
                     tried.append("R3 domain derived from published email @"
                                  + d + " -> " + verdict)
                     if verdict == "verified":
@@ -892,8 +1002,18 @@ def run():
         # tribal domain, three where the BIA `website` field is empty, and
         # three where the site exists but refuses us. This rung is for the
         # first two groups.
+        # NHOs ARE IN THIS RUNG TOO, AND THE REASON IS A CAUGHT FALSE NEGATIVE.
+        # Pass 1 closed Makuʻu Farmers Association on the DOI list's
+        # "Website: None listed". An independent check found makuu.org live and
+        # makuufarmersassociation.org claimed. The DOI field is what the
+        # organisation told its registrar, which is authoritative about the
+        # organisation's STATEMENT and only as current as the last time it
+        # updated the form. A publisher-stated negative is strong evidence; it
+        # is not the end of the ladder, and treating it as one reproduced
+        # exactly the false absence this workstream exists to prevent.
         if not got_url and cls in ("Federally recognized tribe",
-                                   "Individually Native-owned business"):
+                                   "Individually Native-owned business",
+                                   "Native Hawaiian Organization"):
             n_try = 0
             for h in candidate_hosts(row):
                 if got_url or n_try >= 12:
@@ -901,14 +1021,16 @@ def run():
                 if restricted(h):
                     continue
                 n_try += 1
-                u2, st2, verdict, note2 = try_host(h, name, uid + "__cand_" + h)
+                u2, st2, verdict, note2 = try_host(h, name,
+                                                   uid + "__cand_" + h, cls)
                 if verdict == "no_response":
                     continue
                 tried.append("R7 candidate domain " + h + " -> " + verdict)
                 if verdict == "verified":
                     emit(uid, name, cls,
-                         "government" if cls == "Federally recognized tribe"
-                         else "corporate", u2, st2,
+                         {"Federally recognized tribe": "government",
+                          "Native Hawaiian Organization": "organization"}
+                         .get(cls, "corporate"), u2, st2,
                          "TRIED: " + " | ".join(tried) + " || " + note2
                          + " || DERIVED domain, name-verified against the "
                            "page; not published by the BIA directory.")
@@ -975,7 +1097,186 @@ def run():
     print("  shard_n done: %d entities with a URL, %d checked-none-found, "
           "%d hosts with an open machine-readable surface"
           % (n_url, n_none, n_open))
+    write_doc()
     return 0
+
+
+# -------------------------------------------------------------------- doc
+OUT_DOC = os.path.join(ROOT, "docs", "COVERAGE_TAIL_SHARD_N.md")
+
+# What each url_type means for the question "does this entity have a website".
+# Kept here rather than inferred, because the whole point of the shard is that
+# these outcomes are DIFFERENT and a reader must not have to guess which ones
+# the coverage number counted.
+LIVE_TYPES = {"government", "organization", "corporate"}
+EXISTS_BUT_REFUSED = {"government_refused_robots",
+                      "government_blocked_bot_protection"}
+NOT_THE_ENTITYS_SITE = {"directory_profile", "form_990"}
+
+
+def write_doc():
+    from collections import Counter, defaultdict
+    reg = {r["cedar_uid"]: r for r in read_register() if r.get("cedar_uid")}
+    if not os.path.exists(WEBMAP):
+        return
+    with open(WEBMAP, encoding="utf-8-sig", errors="replace",
+              newline="") as fh:
+        rows = list(csv.DictReader(fh))
+    by = defaultdict(list)
+    for r in rows:
+        by[r["cedar_uid"]].append(r)
+
+    def state(rs):
+        t = {x["url_type"] for x in rs}
+        if t & LIVE_TYPES:
+            return "has a site of its own"
+        if t & EXISTS_BUT_REFUSED:
+            return "site exists, we are refused or challenged"
+        if t & NOT_THE_ENTITYS_SITE:
+            return "no site of its own; another party publishes about it"
+        return "checked, no web presence located"
+
+    st = {u: state(rs) for u, rs in by.items()}
+    cls = {u: (reg.get(u, {}).get("entity_class") or by[u][0]["entity_class"])
+           for u in by}
+    grid = defaultdict(Counter)
+    for u, s in st.items():
+        grid[cls[u]][s] += 1
+    order = ["has a site of its own",
+             "site exists, we are refused or challenged",
+             "no site of its own; another party publishes about it",
+             "checked, no web presence located"]
+
+    L = ["# The coverage tail — shard N", "",
+         "*Generated " + TODAY + " by `code/1020_tail_web_probe.py`. Map: "
+         "`data/staging/tribe_web_map/shard_n.csv`. STAGING — promoting any "
+         "URL here to `entity_website` is an assertion and goes through 510.*",
+         "",
+         "Shard N's slice is derived, not listed: every register entity that "
+         "no other shard map has a row for. That set was **" + str(len(by))
+         + "** when this ran, and it is exactly the `untouched` column of "
+           "`docs/SHARD_COVERAGE.md` — the column that says nobody tried.",
+         "",
+         "## Four outcomes, and none of them is the others", "",
+         "| entity class | " + " | ".join(order) + " |",
+         "|---" * (len(order) + 1) + "|"]
+    tot = Counter()
+    for c in sorted(grid, key=lambda k: -sum(grid[k].values())):
+        L.append("| " + c + " | "
+                 + " | ".join(str(grid[c].get(o, 0)) for o in order) + " |")
+        tot.update(grid[c])
+    L.append("| **total** | " + " | ".join("**" + str(tot.get(o, 0)) + "**"
+                                           for o in order) + " |")
+    L += ["", "*`checked, no web presence located` is a FINDING. Every one of "
+              "those entities carries a row naming the routes run and the "
+              "date, and for 64 of the 69 Native Hawaiian Organizations the "
+              "route that settled it was the organisation's own entry in the "
+              "DOI Office of Native Hawaiian Relations notification list, "
+              "which records `Website: None listed`. That is the "
+              "organisation telling its registrar it has none — not us "
+              "failing to find one.*", "",
+          "## Rows by type", "", "| url_type | n | meaning |", "|---|---:|---|"]
+    mean = {
+        "government": "verified tribal government site",
+        "organization": "verified organisation site",
+        "corporate": "verified company site",
+        "machine_readable_surface": "the host answers wp-json / sitemap / "
+                                    "feed — a harvestable surface for the "
+                                    "next agent",
+        "form_990": "IRS filing record ABOUT the entity; not its website",
+        "directory_profile": "a consortium or directory page about the "
+                             "entity, published in the BIA `website` field",
+        "government_refused_robots": "site exists; robots.txt Disallow: / — "
+                                     "refused by every route",
+        "government_blocked_bot_protection": "site exists; 403 to research UA "
+                                             "AND to browser headers",
+        "unverified_government": "URL published by the BIA that did not answer",
+        "unverified_organization": "URL published by DOI that did not answer",
+        "none_established": "checked, nothing found at all",
+        "no_own_site_found": "checked; something was found but not a site of "
+                             "the entity's own",
+        "TERMS_RESTRICTED_DO_NOT_HARVEST": "publisher terms; not fetched",
+    }
+    for k, v in Counter(r["url_type"] for r in rows).most_common():
+        L.append("| `%s` | %d | %s |" % (k, v, mean.get(k, "")))
+
+    hard = sorted((cls[u], reg.get(u, {}).get("canonical_name")
+                   or by[u][0]["canonical_name"], u)
+                  for u, s in st.items()
+                  if s in ("site exists, we are refused or challenged",
+                           "no site of its own; another party publishes "
+                           "about it"))
+    if hard:
+        L += ["", "## Reached but not harvestable — " + str(len(hard)), "",
+              "*These are not coverage gaps and they are not absences. Filing "
+              "either one as `none found` would misreport a nation's own "
+              "decision, or an edge WAF, as an empty web presence.*", "",
+              "| entity | class | outcome | what was seen |",
+              "|---|---|---|---|"]
+        for c, n, u in hard:
+            rs = by[u]
+            pick = next((x for x in rs if x["url_type"] in EXISTS_BUT_REFUSED
+                         or x["url_type"] in NOT_THE_ENTITYS_SITE), rs[0])
+            L.append("| %s | %s | %s | `%s` %s |"
+                     % (n, c, st[u], pick["url_type"], pick["url"][:70]))
+    with open(OUT_DOC, "w", encoding="utf-8") as fh:
+        fh.write("\n".join(L) + "\n")
+    print("  wrote " + OUT_DOC)
+    write_candidates(rows, reg)
+
+
+# THE CONSTELLATION AGENT OWNS `serves`. THIS FILE ONLY REPORTS.
+# A `directory_profile` is evidence of a real relationship -- the BIA's
+# `website` field for five California rancherias points at the California
+# Tribal Families Coalition or the Southern California Tribal Chairmen's
+# Association, which is those bodies serving those tribes. That is a `serves`
+# edge and it is not this shard's to write, so the candidates go to review
+# with the evidence and the constellation agent decides.
+SERVES_HOSTS = {
+    "caltribalfamilies.org": "California Tribal Families Coalition",
+    "sctca.net": "Southern California Tribal Chairmen's Association",
+}
+CAND = os.path.join(ROOT, "review",
+                    "1020_constellation_serves_candidates.csv")
+
+
+def write_candidates(rows, reg):
+    out = []
+    for r in rows:
+        if r["url_type"] != "directory_profile":
+            continue
+        host = urllib.parse.urlsplit(r["url"]).netloc.lower()
+        host = host[4:] if host.startswith("www.") else host
+        if host not in SERVES_HOSTS:
+            continue
+        out.append({
+            "served_cedar_uid": r["cedar_uid"],
+            "served_canonical_name": r["canonical_name"],
+            "served_entity_class": r["entity_class"],
+            "serving_organisation_name": SERVES_HOSTS[host],
+            "serving_organisation_host": host,
+            "evidence_url": r["url"],
+            "evidence": "the BIA Tribal Leaders Directory publishes THIS url "
+                        "in its `website` field for this tribe, i.e. the "
+                        "federal directory treats the consortium page as the "
+                        "tribe's public presence",
+            "proposed_edge": "serves",
+            "identity_resolved": "NO - the serving organisation is named, not "
+                                 "resolved to a cedar_uid; shard N does not "
+                                 "resolve identity",
+            "found_by": "code/1020_tail_web_probe.py (shard_n)",
+            "checked_date": TODAY,
+        })
+    if not out:
+        return
+    os.makedirs(os.path.dirname(CAND), exist_ok=True)
+    with open(CAND, "w", encoding="utf-8", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=list(out[0].keys()))
+        w.writeheader()
+        for x in out:
+            w.writerow(x)
+    print("  wrote %d serves candidate(s) for the constellation agent -> %s"
+          % (len(out), CAND))
 
 
 # ----------------------------------------------------------------- verify
@@ -989,6 +1290,12 @@ def check(path=WEBMAP):
         negative, enforced rather than intended
     (4) no duplicate (uid, url_type, url)
     (5) every row carries checked_date -- 'when' is half of the record
+    (6) a DERIVED domain typed as a live site must record that the page
+        carried ALL of the entity's tokens. Added after R7 wrote ten
+        fabricated sites on circular evidence; see `name_evidence`.
+    (7) a live site whose recorded body is under 700 bytes is refused. Two
+        tribal sites were accepted on a 169-byte captcha interstitial that
+        returned HTTP 200.
     """
     bad = []
     if not os.path.exists(path):
@@ -1014,6 +1321,32 @@ def check(path=WEBMAP):
                                "only %d route(s) named -- a negative from "
                                "search alone is not a negative"
                                % (i, uid, ut, n))
+            # (6) A DERIVED DOMAIN MAY NOT BE TYPED AS A LIVE SITE UNLESS THE
+            # PAGE CARRIED THE WHOLE NAME. This is the invariant the ten
+            # fabricated rows would have tripped. R1 and R2 rows are exempt:
+            # a URL the BIA or DOI publishes for an entity is publisher-stated
+            # and needs no page-text proof.
+            if ut in ("government", "organization", "corporate") \
+                    and "DERIVED domain" in ev \
+                    and "tokens ALL present" not in ev:
+                bad.append("line %d: %s is typed `%s` from a DERIVED domain "
+                           "without full name evidence on the page -- this is "
+                           "the circular-evidence defect of 2026-09-02"
+                           % (i, uid, ut))
+
+            # (7) A LIVE SITE WITH A BODY TOO SMALL TO BE ONE.
+            # Potter Valley and the Paiute Indian Tribe of Utah were recorded
+            # as `government` on a 200 carrying 169 bytes of SiteGround
+            # captcha. The byte count is now written into the evidence, so the
+            # gate can read it back and refuse the claim.
+            mb = re.search(r"verified 2xx, (\d+) bytes", ev)
+            if ut in ("government", "organization", "corporate") and mb \
+                    and int(mb.group(1)) < 700:
+                bad.append("line %d: %s typed `%s` on a %s-byte body -- too "
+                           "small to be a website; check for a bot challenge "
+                           "or a placeholder"
+                           % (i, uid, ut, mb.group(1)))
+
             k = (uid, ut, url)
             if url and k in seen:
                 bad.append("line %d: duplicate row %s" % (i, str(k)))
@@ -1039,6 +1372,13 @@ def selftest():
         ("restricted host",
          [None, "x", "y", "government", "https://colvilletribes.com/", "200",
           TODAY, "TRIED: a | b | c"]),
+        ("live site, 169-byte body",
+         [None, "x", "y", "government", "https://a.example", "200", TODAY,
+          "TRIED: a | b | c || verified 2xx, 169 bytes of body"]),
+        ("derived, no name proof",
+         [None, "x", "y", "government", "https://fort.org", "200", TODAY,
+          "TRIED: a | b | c || DERIVED domain, name-verified against the "
+          "page; not published by the BIA directory."]),
         ("missing checked_date",
          [None, "x", "y", "government", "https://a.example", "200", "",
           "TRIED: a | b | c"]),
@@ -1075,6 +1415,9 @@ def main():
     arg = sys.argv[1] if len(sys.argv) > 1 else ""
     if arg == "selftest":
         return selftest()
+    if arg == "doc":
+        write_doc()
+        return 0
     if arg == "verify":
         bad = check()
         for b in bad[:40]:

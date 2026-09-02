@@ -159,6 +159,9 @@ RAW = OUT / "raw"
 HOSTLOG = OUT / "host_log.jsonl"
 VERDICTS = OUT / "verdicts.csv"
 BIZ = OUT / "business_rows.jsonl"
+ANCSA_BIZ = OUT / "business_rows_ancsa.jsonl"      # written by code/1073
+DOCLOG_1073 = OUT / "ancsa_document_log.csv"       # written by code/1073
+SHARD_E = ROOT / "data" / "staging" / "anc_subsidiaries" / "shard_e.jsonl"
 STAGED = OUT / "staged_native_owned_businesses_2026-09-02.csv"
 STATE = OUT / "_state.json"
 
@@ -473,6 +476,21 @@ GOOD_URL_TYPE = {"government", "corporate", "organization", "institution",
                  "tribal_council", "consortium", "tero", "subsidiary_list",
                  "business_directory", "chamber"}
 
+# A PLATFORM IS NOT THE ENTITY'S HOST.
+# The web map carries `web.archive.org/.../malamamolokai.org` and Facebook
+# pages as an entity's "organization" URL. Probing those would run the terms
+# check, the robots check and the name check against ARCHIVE.ORG or META —
+# whose terms are not the nation's and whose robots file says nothing about
+# the nation's data. The Wayback route is a legitimate LATER rung when an
+# origin is gone; it is not the origin, and treating it as one would file a
+# platform's verdict under a Native entity's name.
+NOT_THE_ENTITYS_HOST = {
+    "web.archive.org", "archive.org", "archive.ph", "facebook.com",
+    "m.facebook.com", "twitter.com", "x.com", "instagram.com",
+    "linkedin.com", "youtube.com", "wixsite.com", "google.com",
+    "docs.google.com", "drive.google.com",
+}
+
 
 def spine_rows() -> list[dict]:
     with open(SPINE, encoding="utf-8-sig", newline="") as fh:
@@ -496,7 +514,7 @@ def targets() -> list[dict]:
             if r["url_type"] not in GOOD_URL_TYPE:
                 continue
             h = _bare(up.urlparse(r["url"]).netloc)
-            if not h:
+            if not h or h in NOT_THE_ENTITYS_HOST:
                 continue
             live = r["http_status"].startswith(("2", "3"))
             b = hosts.setdefault(r["cedar_uid"], [])
@@ -850,11 +868,21 @@ def stage_sweep(limit=None, only=None, hours=DEFAULT_HOURS) -> None:
             n[0] += 1
             s = sum(1 for h in log.get("hits", [])
                     if hit_strength(h) == "STRONG")
-            print(f"  [{n[0]:4d}/{len(todo)}] {log['klass'][:4]:4s} "
-                  f"{log['canonical_name'][:34]:34s} "
-                  f"{log.get('reached','N')} "
-                  f"hits={len(log.get('hits', [])):3d} strong={s:2d} "
-                  f"{log.get('host','')[:34]}", flush=True)
+            # cp1252 CANNOT ENCODE THIS CORPUS. `Ukpeaġvik Iñupiat
+            # Corporation` raised UnicodeEncodeError inside the worker, the
+            # exception propagated out of ex.map, and a 290-entity run died
+            # at the PRINT — not at the fetch. Every record was already on
+            # disk because the flush is per entity, which is the only reason
+            # this cost minutes instead of hours. Progress output is now
+            # ascii-safe and can never kill a run again.
+            line = (f"  [{n[0]:4d}/{len(todo)}] {log['klass'][:4]:4s} "
+                    f"{log['canonical_name'][:34]:34s} "
+                    f"{log.get('reached','N')} "
+                    f"hits={len(log.get('hits', [])):3d} strong={s:2d} "
+                    f"{log.get('host','')[:34]}")
+            sys.stdout.write(
+                line.encode("ascii", "replace").decode("ascii") + chr(10))
+            sys.stdout.flush()
 
     with ThreadPoolExecutor(max_workers=WORKERS) as ex:
         list(ex.map(run, todo))
@@ -939,7 +967,12 @@ def write_verdicts() -> None:
             "canonical_name": d.get("canonical_name", ""),
             "entity_class": d.get("entity_class", ""),
             "klass": d.get("klass", ""), "host": d.get("host", ""),
-            "probed": "Y", "reached": d.get("reached", ""),
+            # `probed` MUST mean a request was made. An excluded host is
+            # returned from before the first fetch, and writing Y here made
+            # V1 report "excluded host probed: akima.com" — the check was
+            # right and the label was the lie. NANA was never contacted.
+            "probed": ("N" if d.get("excluded_reason") else "Y"),
+            "reached": d.get("reached", ""),
             "reach_route": d.get("reach_route", ""),
             "names_entity": d.get("names_entity", ""),
             "robots_note": (d.get("robots_note", "") or "")[:200],
@@ -1391,8 +1424,11 @@ def stage_harvest(hours=DEFAULT_HOURS, limit=None) -> None:
             _flush(BIZ, r)                             # PER PAGE, not per run
         with _wlock:
             tot[0] += len(rows)
-            print(f"  {d['canonical_name'][:30]:30s} {len(rows):4d} names  "
-                  f"{h['url'][:66]}", flush=True)
+            line = (f"  {d['canonical_name'][:30]:30s} {len(rows):4d} names "
+                    f" {h['url'][:66]}")
+            sys.stdout.write(
+                line.encode("ascii", "replace").decode("ascii") + chr(10))
+            sys.stdout.flush()
 
     with ThreadPoolExecutor(max_workers=4) as ex:
         list(ex.map(run, jobs))
@@ -1428,16 +1464,60 @@ def existing_keys() -> tuple[set, set]:
     return pair, nameonly
 
 
+ADDRESSISH = re.compile(
+    r"\b\d{1,6}\s+[A-Za-z][^,;.]{0,30}?\b"
+    r"(street|st\.|avenue|ave\.|road|rd\.|drive|dr\.|lane|ln\.|"
+    r"boulevard|blvd)\b", re.I)
+CONTACTISH = re.compile(
+    r"[\w.+-]+@[\w-]+\.[\w.]+|\b\d{3}[-. ]\d{3}[-. ]\d{4}\b")
+
+
+def redact_quote(q: str) -> tuple[str, bool]:
+    """Strip address- and contact-shaped spans out of a verbatim quote.
+
+    Measured need, not a hypothetical: two ANCSA quotes carried "2201 Buena
+    Vista Drive" and "925 Park Avenue" — the street addresses of hotels the
+    corporation owns, printed in a public audited filing. They are almost
+    certainly not a natural person's home. But `identity_claim_text` ships,
+    the cost of dropping the two spans is nil, and the policy line is that a
+    STREET ADDRESS does not ship from this table at all. Keeping the
+    invariant strict and redacting is cheaper than arguing the exception,
+    and the unredacted quote survives in the staging JSONL.
+    """
+    a = ADDRESSISH.sub("[address withheld]", q or "")
+    b = CONTACTISH.sub("[contact withheld]", a)
+    return b, b != (q or "")
+
+
 def stage_build() -> None:
     cols = live_schema()
-    if not BIZ.exists():
-        print("[stage] no business_rows.jsonl")
+    # TWO producers, ONE merge candidate. `business_rows.jsonl` is the web
+    # sweep; `business_rows_ancsa.jsonl` is code/1073's offline mine of the
+    # AS 45.55.139 audited annual reports. They share a record shape on
+    # purpose so that a reviewer reads one staged CSV, not two.
+    rows = []
+    for src in (BIZ, ANCSA_BIZ):
+        if src.exists():
+            rows += [json.loads(l)
+                     for l in src.read_text(encoding="utf-8").splitlines()
+                     if l.strip()]
+    if not rows:
+        print("[stage] no harvested rows yet")
         return
-    rows = [json.loads(l) for l in BIZ.read_text(encoding="utf-8").splitlines()
-            if l.strip()]
     pair, nameonly = existing_keys()
+    # ALSO de-duplicate against shard E's hand-adjudicated ANC edges. Shard E
+    # is not in native_owned_businesses.csv, so the live-file check cannot
+    # see it, and re-emitting 482 edges someone adjudicated by hand would be
+    # the worst kind of duplicate: one that looks like corroboration.
+    se = set()
+    if SHARD_E.exists():
+        for l in SHARD_E.read_text(encoding="utf-8").splitlines():
+            if l.strip():
+                d = json.loads(l)
+                se.add((_nk(d.get("parent_name", "")),
+                        _nk(d.get("child_name_raw", ""))))
     out, seen, dropped = [], set(), {"dup_live_pair": 0, "dup_within": 0,
-                                     "no_name": 0}
+                                     "no_name": 0, "dup_shard_e": 0}
     for r in rows:
         nk = _nk(r["business_name_raw"])
         if not nk:
@@ -1446,6 +1526,9 @@ def stage_build() -> None:
         auth = r["authority_name"].strip().lower()
         if (auth, nk) in pair:
             dropped["dup_live_pair"] += 1
+            continue
+        if (_nk(r["authority_name"]), nk) in se:
+            dropped["dup_shard_e"] += 1
             continue
         key = (auth, nk, r["kind"])
         if key in seen:
@@ -1463,7 +1546,6 @@ def stage_build() -> None:
             "certifying_authority_entity_id": r["authority_cedar_uid"],
             "certifying_authority_name": r["authority_name"],
             "nation_id": r["authority_cedar_uid"],
-            "programme_name": r["directory_type"],
             "business_name_raw": r["business_name_raw"],
             "business_name_normalized": nk,
             "business_name_is_person_name": "-1",
@@ -1475,12 +1557,35 @@ def stage_build() -> None:
             "assertion_class": r["assertion_class"],
             "directory_type": r["directory_type"],
             "identity_scope": r["identity_scope"],
-            "identity_claim_text": r["identity_claim_text"][:300],
-            "inclusion_basis": (
-                f"listed by {r['authority_name']} "
-                f"({r['authority_entity_class']}) on its own "
-                f"{r['directory_type'].replace('_',' ')}"),
-            "verification_basis": f"{r['route']} :: {r['extraction_note']}",
+            "identity_claim_text": redact_quote(
+                r["identity_claim_text"])[0][:300],
+            # `inclusion_basis` is a CONTROLLED VOCABULARY: every one of the
+            # 2,393 live rows reads `program_authority`. A directory row is
+            # that same thing. An ANCSA row is NOT — it is a statutory
+            # filing, so it gets its own value and the merge is told a
+            # second value now exists in a column that had one.
+            "inclusion_basis": ("audited_filing_as_45_55_139"
+                                if r.get("route") in
+                                ("consolidation_note",
+                                 "named_subsidiary_sentence",
+                                 "is_a_subsidiary_of", "equity_interest")
+                                else "program_authority"),
+            "programme_name": (
+                f"{r['authority_name']} {r['directory_type'].replace('_',' ')}"),
+            "verification_basis": (
+                f"{r['route']} :: {r['extraction_note']}"
+                + (f" :: stated relation = {r['ownership_relation']}"
+                   if r.get("ownership_relation") else "")),
+            "ownership_percent": r.get("stated_ownership_pct", ""),
+            # `certification_tier` is DELIBERATELY LEFT EMPTY on these rows.
+            # In the live file it holds a TERO preference priority
+            # ("Priority 1", "Preference Level 1", 693 rows). An ANCSA
+            # ownership relation is a different fact in the same shape, and
+            # putting it here would give one column two vocabularies — the
+            # defect START_HERE.md §5 records for `extent_competed`, which
+            # cost a whole crosswalk to undo. The relation rides in
+            # `verification_basis` and in `validation_flags`, and the merge
+            # should give it a column of its own.
             "certification_number": r.get("certification_number", ""),
             "service_category_raw": r.get("service_category_raw", ""),
             "city": r.get("city", ""),
@@ -1499,8 +1604,14 @@ def stage_build() -> None:
             "source_terms_status": r.get("terms_status", ""),
             "consent_status": "UNRESOLVED",
             "publishable": "",
-            "validation_flags": ("AUTO_RULED_NOT_HUMAN_REVIEWED"
-                                 if r.get("auto_ruled") == "Y" else ""),
+            "validation_flags": ";".join(x for x in [
+                ("AUTO_RULED_NOT_HUMAN_REVIEWED"
+                 if r.get("auto_ruled") == "Y" else ""),
+                (f"RELATION={r['ownership_relation']}"
+                 if r.get("ownership_relation") else ""),
+                ("ADDRESS_OR_CONTACT_REDACTED_FROM_QUOTE"
+                 if redact_quote(r["identity_claim_text"])[1] else ""),
+            ] if x),
             "built_by_script": THIS,
             "publishable_basis": ("not decided by 1070 — 615 owns the "
                                   "publishing gate"),
@@ -1542,6 +1653,16 @@ def verify(staged: Path = STAGED, verdicts: Path = VERDICTS,
                        f"{set(cols) ^ set(got) or 'order differs'}")
 
     reached = set()
+    # code/1073's rows come from the Alaska DBS STAR portal, which is not a
+    # host this script ever probed and so is not in `verdicts`. V2 asks "did
+    # we actually retrieve this?", not "did the web sweep retrieve this?" —
+    # the ANCSA document log is the equivalent evidence for that route.
+    if DOCLOG_1073.exists():
+        with open(DOCLOG_1073, encoding="utf-8-sig", newline="") as fh:
+            for r in csv.DictReader(fh):
+                h = _bare(up.urlparse(r.get("portal_url", "")).netloc)
+                if h:
+                    reached.add(h)
     if verdicts.exists():
         with open(verdicts, encoding="utf-8-sig", newline="") as fh:
             vs = list(csv.DictReader(fh))

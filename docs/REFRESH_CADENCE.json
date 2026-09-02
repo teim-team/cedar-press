@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-02T05:20:48+00:00",
+ "generated": "2026-09-02T06:15:15+00:00",
  "script": "code/630_refresh_cadence.py",
  "n_sources": 55,
  "n_datasets": 13,
@@ -310,12 +310,12 @@
    "publish_cadence": "continuous \u2014 comment periods are the events",
    "publish_lag": "posting is near-immediate; the docket, not the entity, is the clock",
    "cadence_basis": "docs/datasets/lobbying_sources.md \u00a74",
-   "cedar_last_pulled": "2026-09-01",
+   "cedar_last_pulled": "2026-09-02",
    "cedar_last_pulled_basis": "max(retrieved_date) in data/clean/regulations_gov_comments.csv",
    "cedar_holds_through": "2026-09-01",
    "cedar_holds_measured_from": "data/clean/regulations_gov_comments.csv",
    "cedar_holds_period_col": "posted_date",
-   "cedar_holds_rows_in_scope": 4461,
+   "cedar_holds_rows_in_scope": 4656,
    "cedar_holds_partition": null,
    "cedar_holds_note": null,
    "source_has_through": null,
@@ -1700,7 +1700,7 @@
  ],
  "change_detection": {
   "entity_universe": 1555,
-  "web_map_rows": 5260,
+  "web_map_rows": 5368,
   "entities_with_any_url": 1090,
   "web_map_checked_span": [
    "2026-09-01",

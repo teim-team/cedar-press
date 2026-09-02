@@ -219,6 +219,34 @@ having been told.
 `tribe_id_neid_proposed` ships on the assistance table: a proposal a consumer
 adopts or refuses explicitly, with the basis on the row.
 
+### A second, independent matcher exists — and they agree 196 of 196
+
+`code/1001_link_businesses_to_contracting.py` (a different workstream, the same
+day) solves the same problem the other way round: a TIERED sidecar,
+`data/clean/native_business_identifier_crosswalk.csv`, and its header states
+*"this script owns these files; it never rewrites the directory."* So the two
+do not collide — but they could DRIFT, and two answers to one question is the
+`248`-versus-`293` lesson: a drifted second detector is worse than none,
+because it is trusted.
+
+**Measured: 196 business ids carry a UEI from both, and all 196 agree. Zero
+disagree.** Neither was derived from the other and the source sets differ, so
+this is a real corroboration rather than a copy corroborating itself — the
+distinction `docs/ASSERTION_LAYER.md` exists to keep, and the first genuine
+instance of it this pass produced.
+
+**The crosswalk is the richer authority** — 263 ids to this column's 220, with
+A/B/C/X tiers (A 134, B 73, C 45, X 14), a self-published rung and a
+contract-number rung, plus CAGE 220 and DUNS 10. A consumer who wants the tier
+should join it. The on-row column is the coarse convenience that makes the
+directory joinable without a second file.
+
+**The agreement is now a standing check, not a one-off measurement.**
+`953 verify` carries **INV-CROSSCHECK** and fails if the two ever disagree on a
+shared id; it says SKIPPED, out loud, when the crosswalk is absent. 953 does
+not read the crosswalk to produce its value — if it did, the agreement would
+prove nothing.
+
 **`no_match` is not evidence the firm holds no federal award.** The universe
 searched is Cedar's Native-attributed slice of FPDS, not all of FPDS. The
 column note says so.

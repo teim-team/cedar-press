@@ -311,6 +311,8 @@ def web(argv):
     ap.add_argument("--max-hosts", type=int, default=0)
     ap.add_argument("--max-requests", type=int, default=1400)
     ap.add_argument("--delay", type=float, default=1.0)
+    ap.add_argument("--refetch", action="store_true",
+                    help="probe hosts already in the log (default: skip them)")
     args = ap.parse_args(argv)
 
     biz = {r["business_source_id"]: r for r in
@@ -341,7 +343,19 @@ def web(argv):
                                       "businesses": []})
             targets[host]["businesses"].append(k)
 
-    hosts = sorted(targets)
+    # RESUME. A host already in the probe log is not fetched again: the
+    # request cap is a politeness budget, not a run length, and re-walking 71
+    # finished hosts to reach the 72nd would spend the whole budget on
+    # requests we have already made. `--refetch` overrides.
+    done = set()
+    if WEB_OUT.exists() and not args.refetch:
+        for line in open(WEB_OUT, encoding="utf-8"):
+            if line.strip():
+                done.add(json.loads(line)["host"])
+    hosts = [h for h in sorted(targets) if h not in done]
+    if done:
+        print(f"resuming: {len(done)} hosts already probed, "
+              f"{len(hosts)} to go", flush=True)
     if args.max_hosts:
         hosts = hosts[:args.max_hosts]
     print(f"{len(hosts)} hosts, {sum(len(targets[h]['businesses']) for h in hosts)}"
@@ -442,7 +456,10 @@ def web(argv):
 
     wf.close()
     xf.close()
-    print(json.dumps({"hosts_probed": hi, "requests": requests,
+    print(json.dumps({"hosts_probed": (hi if hosts else 0),
+                      "hosts_remaining": max(0, len(hosts) - (hi if hosts
+                                                              else 0)),
+                      "requests": requests,
                       "stats": dict(stats)}, indent=2))
     return 0
 

@@ -513,6 +513,60 @@ STAMPED_COLS = {"cedar_uid": "code/503_identity.py"}
 REPORT_COLS = ["subaward_sam_report_id", "subaward_sam_report_month",
                "subaward_sam_report_last_modified_date"]
 
+# COLUMNS AN ENRICHER FILLS **AFTER** THIS SCRIPT, NOT DURING IT.
+# Added 2026-09-02 by workstream SUBAWARD-FUNDING.
+#
+# `STAMPED_COLS` above means something precise - "append() computes this, using
+# the owning script's own register" - and these five are NOT that. `append()`
+# leaves them BLANK on a newly appended row and the owning script re-derives
+# them for the whole file afterwards. Putting them in STAMPED_COLS would have
+# been a lie inside a map, so they get their own.
+#
+# WHY THE GUARD MAY ACCEPT THEM ANYWAY, when its whole point is that a column
+# append() cannot fill must not be silently blanked: they are not silent. Two
+# gates catch a promotion that forgets them, both already wired:
+#   * `py -3 code/910_subaward_report_id_backfill.py verify` fails on any blank
+#     or colliding key;
+#   * `512_build_dataset_contracts.py` re-validates the declared primary key
+#     (source_dataset, subaward_source_record_id) against the FULL file on
+#     every run and turns a blank into a release-blocking violation.
+# The ordering is registered in `cedar_pipeline.KNOWN_ORDERINGS` so
+# `build.py` and `62`'s enricher check both know about it.
+#
+# AFTER ANY PROMOTION, IN THIS ORDER:
+#   py -3 code/910_subaward_report_id_backfill.py rescan   (index the new zips)
+#   py -3 code/910_subaward_report_id_backfill.py apply
+#   py -3 code/911_subaward_sub_leg_cedar_uid.py apply
+#   py -3 code/81_build_passthrough_dataset.py             (projection)
+POST_PROMOTION_COLS = {
+    "subaward_sam_report_id_basis": "code/910_subaward_report_id_backfill.py",
+    "subaward_source_record_id": "code/910_subaward_report_id_backfill.py",
+    "subaward_source_record_id_basis": "code/910_subaward_report_id_backfill.py",
+    "prime_cedar_uid": "code/911_subaward_sub_leg_cedar_uid.py",
+    "sub_cedar_uid": "code/911_subaward_sub_leg_cedar_uid.py",
+    # NOT MINE - registered here on the geography workstream's behalf,
+    # 2026-09-02, because without it THIS SCRIPT CANNOT RUN AT ALL.
+    # `871_promote_geo_keys_contracts.py` added ten `geo_*` columns to
+    # subawards.csv at 01:14 today. They are not in NEW_COLS, STAMPED_COLS or
+    # REPORT_COLS, so the guard above classed all ten as unfillable and
+    # `match` raised SystemExit - correctly, and fatally for the FY2022-24
+    # promotion that is mid-flight. 871 is an in-place enricher keyed on
+    # `prime_award_unique_key`, which every row already carries, so it
+    # recomputes cleanly for appended rows: it is a post-promotion enricher of
+    # exactly this kind and belongs in this map. Geography workstream: if that
+    # is wrong, this is the line to correct.
+    "geo_prime_award_recipient_county_fips": "code/871_promote_geo_keys_contracts.py",
+    "geo_prime_award_recipient_county_name": "code/871_promote_geo_keys_contracts.py",
+    "geo_prime_award_recipient_state_fips": "code/871_promote_geo_keys_contracts.py",
+    "geo_prime_award_pop_county_fips": "code/871_promote_geo_keys_contracts.py",
+    "geo_prime_award_pop_county_name": "code/871_promote_geo_keys_contracts.py",
+    "geo_prime_award_pop_state_fips": "code/871_promote_geo_keys_contracts.py",
+    "geo_key_tier": "code/871_promote_geo_keys_contracts.py",
+    "geo_key_basis": "code/871_promote_geo_keys_contracts.py",
+    "geo_subawardee_county_gap_reason": "code/871_promote_geo_keys_contracts.py",
+    "geo_built_date": "code/871_promote_geo_keys_contracts.py",
+}
+
 
 def log(msg: str) -> None:
     line = f"[{datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%SZ')}] {msg}"
@@ -1763,7 +1817,8 @@ def match(dry=False) -> int:
         extras = header[len(m45.COLS):]
         unfillable = [c for c in extras
                       if c not in NEW_COLS and c not in STAMPED_COLS
-                      and c not in REPORT_COLS]
+                      and c not in REPORT_COLS
+                      and c not in POST_PROMOTION_COLS]
         if header[:len(m45.COLS)] != m45.COLS or unfillable:
             raise SystemExit(
                 "subawards.csv header is not the promoted schema; refusing to "
@@ -1781,6 +1836,17 @@ def match(dry=False) -> int:
                     f"{sorted({STAMPED_COLS[c] for c in owned})} and are filled "
                     f"by append() through that script's OWN register, imported "
                     f"rather than re-implemented.")
+            post = [c for c in extras if c in POST_PROMOTION_COLS]
+            if post:
+                log(f"  and {post} are filled by an enricher that runs AFTER "
+                    f"this script - append() leaves them BLANK. RUN THESE "
+                    f"WHEN THIS FINISHES, in order: "
+                    f"910_subaward_report_id_backfill.py rescan; "
+                    f"910_subaward_report_id_backfill.py apply; "
+                    f"911_subaward_sub_leg_cedar_uid.py apply; "
+                    f"81_build_passthrough_dataset.py. Until they run, "
+                    f"subawards.csv has no primary key and "
+                    f"512_build_dataset_contracts.py will say so.")
 
     # per-job retrieval dates, read off the checkpointed state
     fetched_for = {}

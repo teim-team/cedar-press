@@ -97,14 +97,24 @@ CORPORATE_NOUN = re.compile(
 # a person is not a transaction between organisations.
 NOT_A_DEAL_OBJECT = re.compile(
     r"(?i)\b(?:acquir\w+|purchas\w+|awarded)\s+(?:a |an |the |new |additional )?"
-    # numbers carry commas and currency marks: "purchased 3,000 laptops"
-    r"(?:[\w,.$%-]+\s+){0,3}?"
+    # numbers carry commas and currency marks: "purchased 3,000 laptops".
+    # Six tokens, not three: "was awarded a Naval Reserve Officers Training
+    # Corps (NROTC) scholarship" needs the reach.
+    r"(?:[\w,.$%()-]+\s+){0,6}?"
     r"(skills?|knowledge|customers?|clients?|habits?|language|fluency|"
     r"citizenship|membership|experience|education|degree|diploma|certificate|"
     r"scholarship|stipend|medal|prize|trophy|award|ribbon|"
     r"van|vans|truck|trucks|car|cars|bus|buses|laptop|laptops|computer|"
     r"computers|tablet|tablets|printer|chromebook|furniture|uniforms?|"
     r"groceries|food|supplies|books|firewood|fuel|propane)\b")
+# A personnel announcement uses the same verbs. "Cunningham joins BSNC from
+# NANA Regional Corporation, where she served as CFO" names two corporations
+# and no transaction.
+PERSONNEL = re.compile(
+    r"(?i)\b(joins?|joined|appointed|named as|hired|promoted to|"
+    r"has been named|served as (?:the )?(?:senior )?(?:vice )?president|"
+    r"new (?:chief|president|director|manager|officer)\b|"
+    r"board of directors welcomes|retires? from|stepping down)\b")
 PERSON_SCALE_AWARD = re.compile(
     r"(?i)\b(each|per)\s+(student|participant|elder|family|household|member|"
     r"applicant|recipient)s?\b")
@@ -144,6 +154,11 @@ def screen(r):
     # The disqualifying-object test runs only when NOTHING qualifies the row.
     # A sentence can name a real counterparty and a van in the same breath, and
     # rejecting it for the van would be the screen overreaching.
+    if PERSONNEL.search(d):
+        return ("tier_C_rejected",
+                "personnel announcement: the sentence names people moving "
+                "between organisations, not a transaction between them",
+                org, noun, material)
     if (NOT_A_DEAL_OBJECT.search(d) or PERSON_SCALE_AWARD.search(d)) \
             and not (org or noun or material):
         return ("tier_C_rejected",
@@ -402,6 +417,12 @@ def selftest():
     r = mk(Description="The authority acquired Widget Solutions LLC along with "
                        "3,000 laptops in the deal.")
     t.append(("mixed_stays_A", screen(r)[0] == "tier_A_promotable"))
+    r = mk(Description="Cunningham joins BSNC from NANA Regional Corporation, "
+                       "where she served as Senior Vice President and CFO.")
+    t.append(("tierC_personnel", screen(r)[0] == "tier_C_rejected"))
+    r = mk(Description="I was awarded a Naval Reserve Officers Training Corps "
+                       "(NROTC) scholarship that paid for my tuition.")
+    t.append(("tierC_scholarship", screen(r)[0] == "tier_C_rejected"))
     r = mk(Description="Unit A acquired Unit B Inc.",
            intra_family_reporting_change="yes", intra_family_basis="same parent")
     t.append(("intra_family", screen(r)[0] == "tier_C_rejected"))

@@ -61,7 +61,7 @@ from pathlib import Path
 
 SPINE = ROOT / "data" / "spine" / "cedar_entity_spine.csv"
 ALIASES = ROOT / "data" / "clean" / "entity_aliases.csv"
-XWALK = ROOT / "data" / "spine" / "legacy" / "assistance_tribe_id_crosswalk.csv"
+XWALK = ROOT / "graveyard" / "cicd" / "assistance_tribe_id_crosswalk.csv"  # evidence only; legacy_map() is retired and nothing calls it
 TABLE = ROOT / "data" / "clean" / "federal_funding_transactions.csv"
 BASIS_TAG = "503_reconcile_assistance_to_cedar_ids"
 
@@ -566,6 +566,17 @@ def legacy_states():
 
 
 def phase_reconcile(argv) -> int:
+    # RETIRED 2026-09-02 (844). This phase existed to map lineage-A CICD
+    # integers onto Cedar ids. The owner nuked the scheme outright:
+    # "no one uses CICD data... they should link ours to ours." The
+    # mapping is DONE - 365,491 of 365,535 rows already carry a
+    # cedar_uid - and the crosswalk is now evidence in graveyard/,
+    # not an input. Re-running this would resurrect the matcher that
+    # merged United Keetoowah Band into Cherokee Nation.
+    if "--force-retired-cicd-reconcile" not in argv:
+        print("  503 reconcile: RETIRED with the CICD scheme (844). "
+              "The crosswalk is evidence in graveyard/, not an input.")
+        return 0
     apply = "--apply" in argv
     exact, gov, state_of = build_index()
     lstates = legacy_states()
@@ -709,7 +720,7 @@ from pathlib import Path
 
 SPINE = ROOT / "data" / "spine" / "cedar_entity_spine.csv"
 REGISTER = ROOT / "data" / "spine" / "cedar_identity_register.csv"
-XWALK = ROOT / "data" / "spine" / "legacy" / "assistance_tribe_id_crosswalk.csv"
+XWALK = ROOT / "graveyard" / "cicd" / "assistance_tribe_id_crosswalk.csv"  # evidence only; legacy_map() is retired and nothing calls it
 
 # =====================================================================
 # THE HANDLE CONTRACT - external review 2026-08-30, finding F6.
@@ -921,6 +932,13 @@ def legacy_map():
     Kept as a function because `152` still builds the crosswalk and the
     rebuild path reads it - but the register no longer carries the result.
     Nothing calls this. See `code/843_retire_cicd_scheme.py`."""
+    # RETIRED 2026-09-02 (844) and now CALLERLESS - `lm = legacy_map()`
+    # was removed from phase_mint when `same_as_legacy_cicd` left the
+    # register. Kept as the record of how the mapping was built, and
+    # guarded so it cannot quietly become live again.
+    import sys as _sys
+    if "--force-retired-cicd-legacy-map" not in _sys.argv:
+        return {}
     out = {}
     if not XWALK.exists():
         return out
@@ -979,7 +997,10 @@ def phase_mint(argv) -> int:
                       list(existing.values()) + list(hist_uid.values())),
                      default=0)
 
-    lm = legacy_map()
+    # `lm = legacy_map()` REMOVED 2026-09-02 (844). Its only consumer was
+    # the `same_as_legacy_cicd` field, dropped from the register by 843.
+    # The call survived the field by a day, opening the retired crosswalk
+    # on every mint to build a dict nothing read.
     register, minted = [], 0
     rebound, reused = [], []
     for r in sorted(rows, key=lambda x: (x.get("tribe_id") or x.get("cedar_entity_id") or "")):

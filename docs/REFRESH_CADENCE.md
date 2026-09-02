@@ -53,7 +53,7 @@ at one end and a retired MMS series that stopped in 2000 at the other.
 
 # PART 0 — THE CADENCE TABLE, ONE ROW PER SOURCE
 
-*Generated 2026-09-02T05:20:48+00:00 by `code/630_refresh_cadence.py`. Every `cedar_holds_through` below was MEASURED from the file named beside it on this run. Re-run the script and the numbers update; do not hand-edit inside the markers.*
+*Generated 2026-09-02T06:15:15+00:00 by `code/630_refresh_cadence.py`. Every `cedar_holds_through` below was MEASURED from the file named beside it on this run. Re-run the script and the numbers update; do not hand-edit inside the markers.*
 
 **55 sources across 13 datasets.**
 
@@ -740,9 +740,9 @@ at one end and a retired MMS series that stopped in 2000 at the other.
 | publish_cadence | continuous — comment periods are the events |
 | publish_lag | posting is near-immediate; the docket, not the entity, is the clock |
 | cadence basis | docs/datasets/lobbying_sources.md §4 |
-| **cedar_holds_through** | **2026-09-01** — measured from `data/clean/regulations_gov_comments.csv`, column `posted_date`, 4,461 rows in scope |
+| **cedar_holds_through** | **2026-09-01** — measured from `data/clean/regulations_gov_comments.csv`, column `posted_date`, 4,656 rows in scope |
 | **source_has_through** | **—** — NOT ESTABLISHED as a date — the gap here is ENTITY coverage, not time: 51 of 1,712 query names banked (97% of the sweep un-run) (established 2026-09-01) |
-| cedar_last_pulled | 2026-09-01 — max(retrieved_date) in data/clean/regulations_gov_comments.csv |
+| cedar_last_pulled | 2026-09-02 — max(retrieved_date) in data/clean/regulations_gov_comments.csv |
 | **refresh_due** | **YES** — declared in the registry: NOT ESTABLISHED as a date — the gap here is ENTITY coverage, not time: 51 of 1,712 query names banked (97% of the sweep un-run) |
 | age | Cedar's edge is 1 days old; our knowledge of the SOURCE is 1 days old; measured gap behind the source 0 days |
 | refresh_cost | 1,712 query names at ~12 s/query = ~8 wall-clock hours; checkpoints per entity |
@@ -1171,7 +1171,7 @@ Roughly **1,555 entity websites** have no publication schedule at all, and inven
 |---|---:|
 | entities in the hub | 1,555 |
 | entities with at least one mapped URL | 1,090 |
-| URL rows in `data/staging/tribe_web_map/` | 5,260 |
+| URL rows in `data/staging/tribe_web_map/` | 5,368 |
 | when those URLs were last checked | 2026-09-01 .. 2026-09-02 |
 | **`wp-json` endpoints already proven** | **307** across 188 entities |
 | of those, HTTP 200 | 279 |

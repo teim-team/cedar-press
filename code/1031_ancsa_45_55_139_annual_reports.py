@@ -443,6 +443,23 @@ def cmd_mine(limit=None):
     with open(MANIFEST, encoding="utf-8-sig", newline="") as fh:
         for r in csv.DictReader(fh):
             man[r["portal_document_id"]] = r
+
+    # The portal lists the SAME PDF under more than one document id: 358
+    # distinct ids resolve to 328 distinct sha256. Mining both copies emits
+    # every passage twice, which would inflate a count nobody could then
+    # reconcile. De-duplicate on the file's own hash, keeping the first id.
+    seen_sha, dedup, dropped = set(), [], 0
+    for r in ex:
+        sha = (man.get(r["portal_document_id"], {}) or {}).get("sha256", "")
+        if sha and sha in seen_sha:
+            dropped += 1
+            continue
+        if sha:
+            seen_sha.add(sha)
+        dedup.append(r)
+    out(f"  {dropped} byte-identical duplicate documents dropped "
+        f"(same PDF under a second portal id)")
+    ex = dedup
     if limit:
         ex = ex[:int(limit)]
 
@@ -510,6 +527,234 @@ def cmd_mine(limit=None):
     return 0
 
 
+# =================================================================== stage ==
+# Promote the BUSINESS_COMBINATION_OR_DISPOSITION class into TRANSACTIONS.
+#
+# Each row below was read in the extracted text of one AS 45.55.139 annual
+# report. `verify` re-opens that text file and asserts the quote is still in
+# it, and that any populated value appears inside the quote - the same
+# invariant code/1032 applies to EDGAR. A staged row cannot carry a figure its
+# own source does not state.
+#
+# Value discipline, from ANCSA_PORTAL_V2_LOG's catalogue of traps: goodwill is
+# not a price; a bargain purchase gain is not a price; a contingent earnout
+# maximum is not consideration; a noncontrolling interest inside "total
+# consideration transferred" was not bought; an equity-method carrying value
+# is a balance.
+
+STAGED_TX = REVIEW / "deals_ancsa_1031_staged.csv"
+
+TX_COLS = ["candidate_id", "event_date", "event_year", "deal_title",
+           "native_party", "native_party_type", "counterparty",
+           "native_party_role", "deal_category", "instrument", "status",
+           "status_class", "announced_value_usd", "value_type", "state",
+           "industry", "date_basis", "notes", "confidence", "source_channel",
+           "portal_document_id", "source_url", "txt_file", "evidence_quote",
+           "staged_by", "staged_date", "record_scope"]
+
+# corporation, fiscal year -> the transaction. `quote` must be verbatim from
+# the extracted text of that document.
+ANCSA_TX = [
+ dict(cid="AS4555139-TX-001", corp="Afognak Native Corporation", fy="2016",
+      date="2015-08-19",
+      basis="'a Stock Purchase Agreement (SPA) that was executed on August 19, 2015'",
+      title="Afognak Native Corporation sells Community Power Corporation to Syntech Bioenergy, LLC",
+      cls="Alaska Native Village Corporation", cp="Syntech Bioenergy, LLC",
+      role="Seller", cat="Divestiture", instr="Stock Purchase Agreement",
+      status="Completed", sclass="Completed", value="", vtype="",
+      quote="Discontinued Operations In August, 2015, the Corporation completed the sale of the Community Power Corporation to Syntech Bioenergy, LLC under the terms of a Stock Purchase Agreement (SPA) that was executed on August 19, 2015.",
+      notes="No sale price is stated. The FY2017 report records a note receivable of $5,810 thousand 'related to the sale of Community Power Corporation' - that is a RECEIVABLE BALANCE, not the consideration, and is not entered as a value. Afognak states amounts in thousands.",
+      conf="High"),
+ dict(cid="AS4555139-TX-002", corp="Afognak Native Corporation", fy="2016",
+      date="2017-01-01",
+      basis="'assuming management control on January 1, 2017'",
+      title="Afognak Native Corporation acquires 100 percent of the stock of Aleyon Inc.",
+      cls="Alaska Native Village Corporation", cp="Aleyon Inc.",
+      role="Acquirer", cat="Acquisition", instr="Stock purchase",
+      status="Completed", sclass="Completed", value="", vtype="",
+      quote="The Corporation acquired 100 percent of the stock of Aleyon Inc., assuming management control on January 1, 2017.",
+      notes="No consideration stated in this note. The FY2017 report carries a purchase-price allocation for the same target under the spelling 'Alcyon' (customer contracts $3,854 thousand and other assets) - an allocation is not a price and no value was taken from it. THE SPELLING DIFFERS BETWEEN THE TWO REPORTS, Aleyon and Alcyon, and neither was corrected.",
+      conf="Medium"),
+ dict(cid="AS4555139-TX-003", corp="K'oyitl'ots'ina, Limited", fy="2016",
+      date="2013-07-01",
+      basis="'effective July 1, 2013, the Corporation purchased a 100 percent ownership interest'",
+      title="K'oyitl'ots'ina, Limited purchases a 100 percent ownership interest in Yukon Fire Protection Services, Inc.",
+      cls="Alaska Native Village Corporation", cp="Yukon Fire Protection Services, Inc.",
+      role="Acquirer", cat="Acquisition", instr="Purchase of ownership interest",
+      status="Completed", sclass="Completed",
+      value="3839848", vtype="Total purchase price as stated",
+      quote="The purchase price totaled $3,839,848, included $3,423,685 for goodwill, which is the excess of the purchase price over the fair value of identifiable assets and liabilities.",
+      notes="VALUE TRAP AVOIDED: $3,423,685 of the $3,839,848 is GOODWILL, not a second payment. The price is $3,839,848 and goodwill is a component of its allocation. The effective date comes from the adjoining sentence in the same note: 'effective July 1, 2013, the Corporation purchased a 100 percent ownership interest in Yukon Fire Protection Services, Inc., a corporation located in Anchorage, Alaska.'",
+      conf="High"),
+ dict(cid="AS4555139-TX-004", corp="Yak-Tat Kwaan, Inc.", fy="2016",
+      date="2015-02-09",
+      basis="'a note payable in the amount of $270,000 on February 9, 2015'",
+      title="Yak-Tat Kwaan, Inc. purchases Situk Equipment, Inc. through a new subsidiary, Kwaan Leasing, LLC",
+      cls="Alaska Native Village Corporation", cp="Situk Equipment, Inc.",
+      role="Acquirer", cat="Acquisition", instr="Purchase of a company via a newly formed leasing subsidiary",
+      status="Completed", sclass="Completed",
+      value="249200", vtype="Stated value of the company purchased",
+      quote="Business Combination and Goodwill In 2015, the Company created a subsidiary called Kwaan Leasing, LLC and used this entity to purchase Situk Equipment, Inc. valued at $249,200 in exchange for $50,000 cash and a note payable in the amount of $270,000 on February 9, 2015.",
+      notes="ARITHMETIC FLAG, NOT RESOLVED: the filing says Situk was 'valued at $249,200' and paid for with $50,000 cash PLUS a $270,000 note, which totals $320,000 and exceeds the stated valuation. The filing is recorded as written; announced_value_usd carries the stated $249,200 and the discrepancy is disclosed here rather than reconciled.",
+      conf="Medium"),
+ dict(cid="AS4555139-TX-005", corp="The Kuskokwim Corporation", fy="2016",
+      date="2016-04-15",
+      basis="MONTH-LEVEL ONLY - 'In April, 2016'. Mid-month placeholder, per the ledger convention.",
+      title="The Kuskokwim Corporation's subsidiary PHS acquires the assets of an Arizona company out of Chapter 11 bankruptcy",
+      cls="Alaska Native Village Corporation", cp="an unnamed Arizona company (Chapter 11 estate)",
+      role="Acquirer", cat="Acquisition", instr="Asset purchase out of Chapter 11",
+      status="Completed", sclass="Completed",
+      value="1600000", vtype="Consideration as stated",
+      quote="Business Combination In April, 2016, PHS acquired the assets of an Arizona Company out of Chapter 11 Bankruptcy in exchange for consideration of $1,600,000.",
+      notes="THE TARGET IS NOT NAMED in the filing and was not inferred. Date is month-level; the day is a placeholder and is disclosed as such in date_basis.",
+      conf="Medium"),
+ dict(cid="AS4555139-TX-006", corp="Ouzinkie Native Corporation", fy="2016",
+      date="2015-01-01",
+      basis="'Effective January 1, 2015, the Company purchased 100% of the stock'",
+      title="Ouzinkie Native Corporation purchases 100% of the stock of Mobius Industries USA, Inc.",
+      cls="Alaska Native Village Corporation", cp="Mobius Industries USA, Inc.",
+      role="Acquirer", cat="Acquisition", instr="Stock Purchase Agreement",
+      status="Completed", sclass="Completed", value="", vtype="",
+      quote="Business Combination Effective January 1, 2015, the Company purchased 100% of the stock of Mobius Industries USA, Inc.",
+      notes="VALUE TRAP AVOIDED: the note goes on to say '$700,000 of the maximum purchase price is subject to a 3-year performance-based contingent earnout agreement based on the future performance of Mobius.' An earnout tranche is not the price and the price itself is not stated, so announced_value_usd is blank. Ouzinkie discloses the same structure for two other targets - $1,900,000 of a 10-year earnout on ITS and a 4-year earnout on CAS - which are separate transactions in earlier years.",
+      conf="High"),
+ dict(cid="AS4555139-TX-007", corp="Ouzinkie Native Corporation", fy="2016",
+      date="2016-01-01",
+      basis="'The Company sold its ownership in ITSS effective January 1, 2016.'",
+      title="Ouzinkie Native Corporation sells its ownership in ITSS",
+      cls="Alaska Native Village Corporation", cp="not named in the filing",
+      role="Seller", cat="Divestiture", instr="Sale of ownership interest",
+      status="Completed", sclass="Completed", value="", vtype="",
+      quote="The Company sold its ownership in ITSS effective January 1, 2016.",
+      notes="Neither the buyer nor the price is stated and neither was inferred. A divestiture is the scarcest class in this dataset and is worth the row even unpriced.",
+      conf="Medium"),
+ dict(cid="AS4555139-TX-008", corp="Gana-A'Yoo, Limited", fy="2016",
+      date="2015-06-15",
+      basis="MONTH-LEVEL ONLY - 'In June 2015'. Mid-month placeholder.",
+      title="Gana-A'Yoo, Limited sells its entire interest in Block 13 for $633,000",
+      cls="Alaska Native Village Corporation", cp="not named in the filing",
+      role="Seller", cat="Divestiture", instr="Sale of an equity interest",
+      status="Completed", sclass="Completed",
+      value="633000", vtype="Sale proceeds as stated",
+      quote="In June 2015, the Company sold its entire interest in Block 13 for $633,000 resulting in a loss of $46,946, which is included in earnings from unconsolidated affiliates in the consolidated statements of income.",
+      notes="VALUE TRAP AVOIDED: the $46,946 is the LOSS on disposal, not a second figure of consideration. Gana-A'Yoo's fiscal year ends September 30, but the transaction month is stated so the calendar year is not in doubt.",
+      conf="High"),
+ dict(cid="AS4555139-TX-009", corp="Azachorok Inc.", fy="2016",
+      date="2015-07-01",
+      basis="YEAR-LEVEL ONLY - 'During 2015'. Azachorok's fiscal year is the calendar year, so the calendar year is determined; the day and month are a placeholder and the date is Medium confidence.",
+      title="Azachorok Contract Services, LLC purchases 100% of the ownership shares of AMC Defense Technologies, Inc.",
+      cls="Alaska Native Village Corporation", cp="AMC Defense Technologies, Inc.",
+      role="Acquirer", cat="Acquisition", instr="Purchase of ownership shares",
+      status="Completed", sclass="Completed", value="", vtype="",
+      quote="Note 14: Business Combination and Goodwill During 2015, Azachorok Contract Services, LLC, a wholly owned subsidiary of Azachorok, Incorporated, and purchased 100% of the ownership shares of AMC",
+      notes="No price is stated in the passage as extracted. The $1,800,000 that the miner captured alongside it belongs to a lease schedule in the preceding paragraph and is NOT consideration. A maintainer should re-read the full Note 14 in the source PDF before assigning any value.",
+      conf="Medium"),
+ dict(cid="AS4555139-TX-010", corp="Tyonek Native Corporation", fy="2017",
+      date="2016-04-28",
+      basis="'Effective April 28, 2016 the Company purchased through an asset purchase agreement'",
+      title="Tyonek Native Corporation purchases a line of business from SELEX Galileo Inc.",
+      cls="Alaska Native Village Corporation", cp="SELEX Galileo Inc.",
+      role="Acquirer", cat="Acquisition", instr="Asset purchase agreement",
+      status="Completed", sclass="Completed", value="", vtype="",
+      quote="Business Combination Effective April 28, 2016 the Company purchased through an asset purchase agreement a line of business from SELEX Galileo Inc.",
+      notes="VALUE TRAP AVOIDED: the allocation table gives a 'Fair Value of Invested Capital' of $6,538,379 (property and equipment $5,171,516, other assets $408,379, goodwill $958,484). That is the fair value of what was ACQUIRED, not a stated purchase price, and it includes goodwill. announced_value_usd is blank and the allocation is recorded here.",
+      conf="High"),
+ dict(cid="AS4555139-TX-011", corp="Natives of Kodiak, Incorporated", fy="2017",
+      date="2016-07-01",
+      basis="YEAR-LEVEL ONLY - 'During 2016, the Company entered into a stock purchase agreement'. Natives of Kodiak's fiscal year is the calendar year, so the calendar year is determined; the day and month are a placeholder.",
+      title="Natives of Kodiak, Incorporated agrees to acquire 100% of H&S Environmental, Inc. for $4,000,000 cash plus long-term debt and an earnout of up to $3,800,000",
+      cls="Alaska Native Village Corporation", cp="H&S Environmental, Inc.",
+      role="Acquirer", cat="Acquisition", instr="Stock purchase agreement",
+      status="Completed", sclass="Completed",
+      value="4000000", vtype="Cash portion of the consideration as stated",
+      quote="During 2016, the Company entered into a stock purchase agreement to acquire 100% of the issued and outstanding shares of common stock of H&S Environmental, Inc., a Massachusetts corporation, for $4,000,000 cash, long-term debt and an earn out payment of up to $3,800,000 over a five-year period endin",
+      notes="VALUE TRAP: the $3,800,000 is an EARNOUT MAXIMUM over five years to 2020-12-31 and pays nothing unless the targets are met - it is not in announced_value_usd. The 'long-term debt' component is unquantified in this sentence. So $4,000,000 is a FLOOR on the consideration, not the whole of it, and value_type says so.",
+      conf="High"),
+ dict(cid="AS4555139-TX-012", corp="Choggiung Limited", fy="2017",
+      date="2016-09-30",
+      basis="'During the year ended September 30, 2016, the Corporation acquired various land and rental properties'. Fiscal-year-end date used because the note gives no other.",
+      title="Choggiung Limited acquires land and rental properties, recognising a bargain purchase gain of $354,868",
+      cls="Alaska Native Village Corporation", cp="not named in the filing",
+      role="Acquirer", cat="Acquisition", instr="Business combination (land and rental properties)",
+      status="Completed", sclass="Completed", value="", vtype="",
+      quote="Accordingly, the Corporation recognized a bargain purchase gain on the acquisition as follows: Excess of fair value over acquisition price $ 591,868 Recognition of deferred tax liability (237,000) Bargain purchase gain $ 354,868",
+      notes="VALUE TRAP AVOIDED, TWICE: $591,868 is the EXCESS OF FAIR VALUE OVER THE ACQUISITION PRICE and $354,868 is the resulting BARGAIN PURCHASE GAIN. Neither is a price - the price itself is not stated, and it is necessarily LOWER than the fair value by $591,868. announced_value_usd is blank. Same shape as the Sealaska/Blue Sea Food trap in ANCSA_PORTAL_V2_LOG.",
+      conf="Medium"),
+ dict(cid="AS4555139-TX-013", corp="Gana-A'Yoo, Limited", fy="2018",
+      date="2018-09-30",
+      basis="FISCAL-YEAR-END PLACEHOLDER. The note states a price and no date in the extracted passage; Gana-A'Yoo's fiscal year ends September 30, so the calendar year is NOT determined by the fiscal year alone and this row is Medium confidence on its date.",
+      title="Gana-A'Yoo, Limited completes an acquisition for $2,700,000 with a contingent increase of up to $300,000",
+      cls="Alaska Native Village Corporation", cp="not named in the extracted passage",
+      role="Acquirer", cat="Acquisition", instr="Acquisition with a contract-extension earn-up",
+      status="Completed", sclass="Completed",
+      value="2700000", vtype="Purchase price as stated",
+      quote="The purchase price of the acquisition was $2,700,000.",
+      notes="VALUE TRAP AVOIDED: the adjoining sentence says 'The purchase price may increase up to $300,000, calculated as $60,000 per year for each year a named contract extends past October 1, 2024, up to a maximum of five years.' That is a contingent increase and is not added. THE TARGET IS NOT NAMED in the extracted passage and the date is a placeholder - both should be settled from the source PDF before this row is merged.",
+      conf="Low"),
+ dict(cid="AS4555139-TX-014", corp="Alaska Peninsula Corporation", fy="2018",
+      date="2018-12-31",
+      basis="FISCAL-YEAR-END PLACEHOLDER - the extracted passage carries a price and no date.",
+      title="Alaska Peninsula Corporation completes a purchase for $454,000 in cash and a $390,000 note payable",
+      cls="Alaska Native Village Corporation", cp="not named in the extracted passage",
+      role="Acquirer", cat="Acquisition", instr="Purchase with cash and a seller note",
+      status="Completed", sclass="Completed",
+      value="844000", vtype="Cash of $454,000 plus a $390,000 note payable, both stated as consideration for the purchase",
+      quote="The purchase price recorded in cash was $454,000 and a $390,000 note payable for the purchase.",
+      notes="The two components are both stated as consideration FOR THE PURCHASE, so they sum: 454,000 + 390,000 = 844,000. This is the one place in this file where a value is a sum, and it is written out here so a reviewer can refuse it. TARGET NOT NAMED and DATE IS A PLACEHOLDER - both must be settled from the source PDF before merging.",
+      conf="Low"),
+]
+
+
+def cmd_stage():
+    out("=== 1031 stage - AS 45.55.139 transactions ===")
+    out("")
+    with open(EXTRACT_LOG, encoding="utf-8-sig", newline="") as fh:
+        ex = list(csv.DictReader(fh))
+    man = {}
+    with open(MANIFEST, encoding="utf-8-sig", newline="") as fh:
+        for r in csv.DictReader(fh):
+            man[r["portal_document_id"]] = r
+    by_key = {}
+    for r in ex:
+        by_key.setdefault((r["corporation_name"], r["period_covered"]), r)
+
+    rows, missing = [], []
+    for t in ANCSA_TX:
+        src = by_key.get((t["corp"], t["fy"]))
+        if not src:
+            missing.append(t["cid"])
+            continue
+        m = man.get(src["portal_document_id"], {})
+        rows.append({
+            "candidate_id": t["cid"], "event_date": t["date"],
+            "event_year": t["date"][:4], "deal_title": t["title"],
+            "native_party": t["corp"], "native_party_type": t["cls"],
+            "counterparty": t["cp"], "native_party_role": t["role"],
+            "deal_category": t["cat"], "instrument": t["instr"],
+            "status": t["status"], "status_class": t["sclass"],
+            "announced_value_usd": t["value"], "value_type": t["vtype"],
+            "state": "AK", "industry": "",
+            "date_basis": t["basis"], "notes": t["notes"],
+            "confidence": t["conf"],
+            "source_channel": "AS_45.55.139_annual_report",
+            "portal_document_id": src["portal_document_id"],
+            "source_url": m.get("portal_url", ""),
+            "txt_file": src["txt_file"],
+            "evidence_quote": t["quote"], "staged_by": SCRIPT,
+            "staged_date": TODAY,
+            "record_scope": "STAGED_CANDIDATE_NOT_MERGED",
+        })
+    with open(STAGED_TX, "w", encoding="utf-8", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=TX_COLS)
+        w.writeheader()
+        w.writerows(rows)
+    out(f"  {len(rows)} transactions -> {STAGED_TX.relative_to(CEDAR)}")
+    if missing:
+        out(f"  {len(missing)} not stageable - source document not yet "
+            f"extracted: {', '.join(missing)}")
+    return 0
+
+
 # ================================================================== verify ==
 
 def cmd_verify():
@@ -570,6 +815,60 @@ def cmd_verify():
             fails.append(f"I3 {len(bad)} candidates quote a figure their "
                          f"own quote does not contain")
 
+    # I5  every staged transaction's quote must still be in its own text file,
+    #     and any populated value must appear inside that quote
+    if STAGED_TX.exists():
+        with open(STAGED_TX, encoding="utf-8-sig", newline="") as fh:
+            tx = list(csv.DictReader(fh))
+        badq, badv = [], []
+        for r in tx:
+            tf = CEDAR / r["txt_file"]
+            if not tf.exists():
+                badq.append(r["candidate_id"])
+                continue
+            txt = re.sub(r"\s+", " ",
+                         tf.read_text(encoding="utf-8", errors="replace"))
+            q = re.sub(r"\s+", " ", r["evidence_quote"]).strip()
+            if q not in txt:
+                badq.append(r["candidate_id"])
+                continue
+            v = (r["announced_value_usd"] or "").strip()
+            if not v:
+                continue
+            try:
+                target = float(v.replace(",", ""))
+            except ValueError:
+                badv.append(r["candidate_id"])
+                continue
+            nums = []
+            for m2 in re.finditer(r"([\d][\d,]*(?:\.\d+)?)", q):
+                try:
+                    nums.append(float(m2.group(1).replace(",", "")))
+                except ValueError:
+                    pass
+            # a value is admissible if it is stated, or is the sum of exactly
+            # two stated figures (the Alaska Peninsula cash + note case, which
+            # the row itself writes out)
+            ok_v = any(abs(n - target) < 0.5 for n in nums)
+            if not ok_v:
+                for i in range(len(nums)):
+                    for j in range(i + 1, len(nums)):
+                        if abs(nums[i] + nums[j] - target) < 0.5:
+                            ok_v = True
+                            break
+                    if ok_v:
+                        break
+            if not ok_v:
+                badv.append(r["candidate_id"])
+        out(f"  I5 staged quote present in its own text file: "
+            f"{len(tx) - len(badq)}/{len(tx)}")
+        out(f"  I6 staged value derivable from its own quote: "
+            f"{len(tx) - len(badv)}/{len(tx)}")
+        if badq:
+            fails.append(f"I5 quote not found: {', '.join(badq)}")
+        if badv:
+            fails.append(f"I6 value not in quote: {', '.join(badv)}")
+
     # I4  ancsa_filings_index.csv must be UNTOUCHED by this script
     #     (another workstream owns it; 1031 stages its own manifest)
     idx_rows = read_index()
@@ -628,6 +927,8 @@ def main(argv):
                            ocr=kw.get("no_ocr") is not True)
     if cmd == "mine":
         return cmd_mine(limit=kw.get("limit"))
+    if cmd == "stage":
+        return cmd_stage()
     if cmd == "verify":
         return cmd_verify()
     if cmd == "verify-synthetic":

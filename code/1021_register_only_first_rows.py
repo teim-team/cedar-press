@@ -210,29 +210,73 @@ GENERIC = {"school", "schools", "community", "day", "elementary", "middle",
            "area", "regional", "native", "american", "llc", "phase"}
 
 
-def toks(name):
+MINIMAL_STOP = {"the", "of", "and", "inc", "incorporated", "llc", "corp"}
+
+
+def toks(name, allow_fallback=True):
+    """Distinctive words. Returns [] only if `allow_fallback` is off.
+
+    A NAME MADE ENTIRELY OF GENERIC WORDS HAS NO DISTINCTIVE TOKENS, AND THE
+    FIRST VERSION THEREFORE COULD NOT MATCH IT AT ALL. 'Indian Health
+    Council, Inc.' is `indian`+`health`+`council`, all three on the GENERIC
+    list, so `toks` returned nothing and every route recorded a negative for
+    an organisation that files a 990 every year. A test that cannot succeed
+    is not a strict test, it is a broken one. The fallback keeps the words;
+    `name_matches` compensates by demanding ALL of them instead of 60%.
+    """
     s = re.sub(r"[^a-z0-9 ]", " ", deacc(name).lower())
-    return [t for t in s.split() if len(t) > 2 and t not in GENERIC]
+    words = [t for t in s.split() if len(t) > 2 and t not in MINIMAL_STOP]
+    strong = [t for t in words if t not in GENERIC]
+    if strong or not allow_fallback:
+        return strong
+    return words
+
+
+def _close(x, y):
+    """Equal, or one substitution apart on a word of 5+ characters.
+
+    'Utah Navaho Health System' on the register is 'Utah Navajo Health
+    System' at the IRS. One letter. Requiring exact tokens recorded a
+    negative for a 638 contractor with an EIN and federal awards, which is a
+    false absence produced by a transliteration -- and false absences here
+    are load-bearing.
+    """
+    if x == y:
+        return True
+    if len(x) != len(y) or len(x) < 5:
+        return False
+    return sum(1 for p, q in zip(x, y) if p != q) == 1
 
 
 def name_matches(a, b, need=None):
-    """Distinctive-token overlap. Returns (ok, note).
+    """Distinctive-token overlap, one substitution tolerated. -> (ok, note).
 
     Generic words are stripped first, because 'Health Corporation' matches
     every health corporation in Alaska and 'Day School' matches ninety BIE
     schools. What is left is the part that identifies the organisation.
     """
-    ta, tb = set(toks(a)), set(toks(b))
+    sa, sb = toks(a, False), toks(b, False)
+    fallback = not sa
+    ta = set(sa or toks(a))
+    tb = set(sb or toks(b))
     if not ta or not tb:
-        return False, "no distinctive tokens"
-    inter = ta & tb
+        return False, "no tokens on one side"
+    inter = {x for x in ta if any(_close(x, y) for y in tb)}
     if need is None:
-        need = max(1, min(len(ta), len(tb)) - 0 if len(ta) <= 2 else
-                   max(1, int(round(min(len(ta), len(tb)) * 0.6))))
+        if fallback:
+            # Every word of an all-generic name must be present, or 'Indian
+            # Health Council' would match 'Indian Health Care Resource
+            # Center' on two shared generic words.
+            need = len(ta)
+        elif len(ta) <= 2:
+            need = min(len(ta), len(tb))
+        else:
+            need = max(1, int(round(min(len(ta), len(tb)) * 0.6)))
     ok = len(inter) >= need
-    return ok, ("tokens %d/%d shared (%s) need %d"
+    return ok, ("tokens %d/%d shared (%s) need %d%s"
                 % (len(inter), min(len(ta), len(tb)),
-                   ",".join(sorted(inter))[:60], need))
+                   ",".join(sorted(inter))[:60], need,
+                   "; all-generic name, ALL required" if fallback else ""))
 
 
 # ------------------------------------------------------------------ slice

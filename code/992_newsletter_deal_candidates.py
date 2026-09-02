@@ -342,6 +342,11 @@ def targets():
 def mine(doc_text, t, fam, md5):
     rows, dropped_private = [], 0
     pub = t["publisher"]
+    # An occurrence counter, because a PDF that prints the same sentence in a
+    # summary box and again in the body produced two rows with one id. The key
+    # has to be unique on its own terms; "it is almost always unique" is how a
+    # primary key stops being one.
+    seen_sent = Counter()
     for s in sentences(doc_text):
         m = DEAL.search(s)
         if not m:
@@ -365,8 +370,9 @@ def mine(doc_text, t, fam, md5):
             std = "NOT_A_TRANSACTION"
         dm = DATEPAT.search(window)
         rows.append({
-            "candidate_id": "NLDEAL-" + hashlib.md5(
-                (t["url"] + "|" + s[:160]).encode("utf-8")).hexdigest()[:12],
+            "candidate_id": "NLDEAL-%s%s" % (
+                hashlib.md5((t["url"] + "|" + s[:160]).encode("utf-8")).hexdigest()[:12],
+                "" if seen_sent[s[:160]] == 0 else "-%d" % (seen_sent[s[:160]] + 1)),
             "cedar_uid": t["cedar_uid"], "tribe_id": t["tribe_id"],
             "Native_Party": pub,
             "native_party_entity_class": t["entity_class"], "State": t["state"],
@@ -391,6 +397,7 @@ def mine(doc_text, t, fam, md5):
             "Notes": "staged by code/992_newsletter_deal_candidates.py; not "
                      "merged into deals_classified.csv",
         })
+        seen_sent[s[:160]] += 1
     return rows, dropped_private
 
 
@@ -499,6 +506,44 @@ def summarize():
     }
     STATE.write_text(json.dumps(st, indent=2), encoding="utf-8")
     return st
+
+
+def repair_ids(paths=None):
+    """Make candidate_id unique in files written before the counter existed.
+
+    A rename, not a deletion: the collided rows are distinct sentences-in-place
+    and both stay. Suffixes are assigned in file order so the repair is
+    deterministic and re-running it is a no-op.
+    """
+    from pathlib import Path as _P
+    paths = paths or [OUT, OUTD / "deal_candidates_wp_posts.csv"]
+    total = 0
+    for p in paths:
+        p = _P(p)
+        if not p.exists():
+            continue
+        rows = list(csv.DictReader(p.open(encoding="utf-8-sig")))
+        if not rows:
+            continue
+        fn = list(rows[0].keys())
+        seen, fixed = Counter(), 0
+        for r in rows:
+            base = re.sub(r"-\d+$", "", r["candidate_id"])
+            seen[base] += 1
+            if seen[base] > 1:
+                r["candidate_id"] = "%s-%d" % (base, seen[base])
+                fixed += 1
+            else:
+                r["candidate_id"] = base
+        with p.open("w", encoding="utf-8", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=fn, extrasaction="ignore")
+            w.writeheader()
+            for r in rows:
+                w.writerow(r)
+                f.flush()
+        print("repair_ids %s: %d renamed" % (p.name, fixed))
+        total += fixed
+    return 0
 
 
 # ------------------------------------------------------------------ verify
@@ -631,6 +676,8 @@ def main(argv):
         print("verify OK - %d documents, %d candidates, 7 invariants held"
               % (st["documents_fetched"], st["candidates"]))
         return 0
+    if "--repair-ids" in argv:
+        return repair_ids()
     lim = None
     if "--limit" in argv:
         lim = int(argv[argv.index("--limit") + 1])

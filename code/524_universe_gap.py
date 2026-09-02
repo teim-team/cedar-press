@@ -1130,7 +1130,7 @@ def phase_promote(apply_it):
             "state": p["state"],
             "bia_region": BIA_REGION.get(p["state"], ""),
             "aliases": "|".join(dict.fromkeys(aliases)),
-            "cicd_verified": "0",
+            # "cicd_verified": "0",  # CICD nuked 2026-09-02 (844)
             "serves_native_entities": "1",
             "ownership_basis":
                 "NO OWNER, and the blank is a RULING. A self-governance tribal "

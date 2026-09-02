@@ -295,6 +295,57 @@ STAGE = [
   quote="Through December 31, 2024, the Company has paid approximately $ 96.8 million of reimbursable advances to the Mono, primarily to complete the environmental impact study, purchase the North Fork Site and pay the costs of litigation and construction.",
   notes="THIS IS A CUMULATIVE BALANCE, NOT A TRANSACTION VALUE, and Announced_Value_USD is deliberately blank so it can never be summed with SEC1032-004 or with any quarter of the same series. The whole series, read from 33 filings: $31.5M (2017-06-30), $32.1M, $32.6M, $32.7M, $32.8M, $33.4M, $33.7M, $33.8M (2019-09-30 and 2019-12-31), $34.2M, $34.3M, $34.6M, $37.2M (2020-12-31), $39.3M, $41.1M, $45.0M, $49.2M (2021-12-31), $50.3M, $51.9M, $55.7M, $56.8M (2022-12-31), $57.7M, $59.0M, $60.2M, $61.0M (2023-12-31), $96.8M (2024-12-31). The $35.8M jump in 2024 is the construction draw. Staged as an OBSERVATION so the series is on the record; the deals owner may prefer to hold it out of the ledger entirely.",
   confidence="High"),
+
+ dict(
+  cid="SEC1032-013",
+  event_date="2022-06-15", date_basis="'On June 15, 2022, Alaska Communications Systems Holdings ... entered a secured lending arrangement with Bristol Bay Industrial, LLC.'",
+  title="Bristol Bay Industrial, LLC provides Alaska Communications Systems Holdings a secured delayed draw term loan of up to $7.5 million",
+  native_party="Bristol Bay Native Corporation (Bristol Bay Industrial, LLC)", native_party_type="Alaska Native Regional Corporation subsidiary",
+  counterparty="Alaska Communications Systems Holdings (ATN International, Inc.)", native_party_role="Lender",
+  category="Debt financing", instrument="Secured delayed draw term loan (the Alaska Term Facility)",
+  status="Signed", status_class="Announced",
+  value="7500000", value_type="Maximum aggregate principal amount of the facility",
+  state="AK", industry="Telecommunications",
+  accession="0001558370-23-003851",
+  local_file="_lead__atni-20221231x10k.htm",
+  url="https://www.sec.gov/Archives/edgar/data/879585/000155837023003851/atni-20221231x10k.htm",
+  quote="On June 15, 2022, Alaska Communications Systems Holdings, the parent company of Alaska Communications, entered a secured lending arrangement with Bristol Bay Industrial, LLC. (the “Alaska Term Facility”). The Alaska Term Facility provides for a secured delayed draw term loan in an aggregate principal amount of up to $7.5 million and the proceeds may be used to pay certain invoices from a contractor for work performed in connection with a fiber build.",
+  notes="A SECOND instance of the direction that makes this sweep worth running: an ANC subsidiary LENDING to a public company's operating subsidiary, at 4.0% fixed, maturing 2024-06-30. $7.5M is the facility ceiling, not a drawn balance. Bristol Bay Industrial, LLC is attributed to BBNC by shard E's published-subsidiary edge, not by name similarity - it shares no distinctive token with 'Bristol Bay Native Corporation' beyond the place name, so the edge is what carries it. DEDUPE FLAG CHECKED AND REFUSED: the automatic check flags ANCSA2-2022-002 because BBNC also acquired GHEMM Company, LLC on the SAME DAY, 2022-06-15. Two different transactions by one entity on one date - the ANCSA route caught the acquisition and the EDGAR route caught the loan, which is the two channels corroborating each other rather than repeating each other.",
+  confidence="High"),
+
+ dict(
+  cid="SEC1032-014",
+  event_date="2019-02-21", date_basis="Date of the earnings release exhibit (EX-99.1) in which the partnership is announced; the release does not date the agreement itself",
+  title="Norwegian Cruise Line Holdings partners with Huna Totem Corporation to build a second cruise pier at Icy Strait Point, Hoonah, Alaska",
+  native_party="Huna Totem Corporation", native_party_type="Alaska Native Village Corporation",
+  counterparty="Norwegian Cruise Line Holdings Ltd. / NCL Corporation Ltd.", native_party_role="Joint venture / development partner",
+  category="Joint venture", instrument="Pier development partnership with preferential berthing rights",
+  status="Announced", status_class="Announced",
+  value="", value_type="",
+  state="AK", industry="Cruise / tourism infrastructure",
+  accession="0001171843-19-001074",
+  local_file="_lead__nclh2019__exh_991.htm",
+  url="https://www.sec.gov/Archives/edgar/data/1513761/000117184319001074/exh_991.htm",
+  quote="The Company announced a partnership with Alaska Native-owned Huna Totem Corporation to develop a second cruise pier in Icy Strait Point, Huna Totem’s world-class cruise ship destination in Hoonah, Alaska.",
+  notes="No consideration is stated and none was inferred. The filer itself supplies the Native attribution - 'Alaska Native-owned Huna Totem Corporation' - so this needs no name inference at all. Two later Huna Totem transactions with the same counterparty are staged as leads rather than rows because NCLH's 10-K states neither a date nor a value: Glacier Creek Development, LLC (Whittier cruise terminal, operational 2025) and AAK'W Landing LLC (Juneau berthing facilities, operational 2027). Huna Totem's OWN AS 45.55.139 annual report names Icy Strait Point, Glacier Creek Development and Aak'w Landing among its consolidated subsidiaries - the ANCSA route supplies the ownership and EDGAR supplies the counterparty.",
+  confidence="High"),
+
+ dict(
+  cid="SEC1032-015",
+  event_date="2006-12-31", date_basis="'December 31, 2006 (Date of Event Which Requires Filing of this Statement)' on the Schedule 13G cover page",
+  title="Spirit Lake Tribe reports a 16.8% stake in Wireless Ronin Technologies, Inc. - 1,346,448 shares",
+  native_party="Spirit Lake Tribe", native_party_type="Federally recognized tribe",
+  counterparty="Wireless Ronin Technologies, Inc.", native_party_role="Equity holder",
+  category="Equity investment", instrument="Schedule 13G beneficial ownership report",
+  status="Reported", status_class="Completed",
+  value="", value_type="",
+  state="ND", industry="Digital signage technology",
+  accession="0001104659-07-009031",
+  local_file="_lead__spiritlake2007__a07-3941_1sc13g.htm",
+  url="https://www.sec.gov/Archives/edgar/data/1380976/000110465907009031/a07-3941_1sc13g.htm",
+  quote="Names of Reporting Persons. I.R.S. Identification Nos. of above persons (entities only) Spirit Lake Tribe",
+  notes="A tribal government as a reporting 5%-plus holder of a NASDAQ-listed company is a rare record class and this one is unambiguous - the filer address is Fort Totten Community Center, Fort Totten, ND 58335. No dollar value is stated on a Schedule 13G and none was inferred. The tribe's holding fell to 346,446 shares (2.4%) at 2007-12-31 per the 13G/A (accession 0000950137-08-002003), which is a DISPOSITION of about 1,000,002 shares during 2007 and is staged as a lead because the 13G/A states no date, price or counterparty for the sale. Spirit Lake Tribe also filed Forms 3, 3/A, 4 and 5 in 2006-2008. CIK 1380976; the registrant census found it - the 2010-2017 registrant sweep could not, because every Spirit Lake filing predates that window.",
+  confidence="High"),
 ]
 
 # --------------------------------------------------------------------- HOLD
@@ -318,6 +369,59 @@ HOLD = [
       url="https://www.sec.gov/Archives/edgar/data/1593548/",
       question="Chickasaw is on the TERMS_STATED_RESTRICTIVE list. Held for completeness; on the reading of the filing there is no transaction here to stage in any case."),
 ]
+
+# -------------------------------------------------------------------- LEADS
+# Real, named, and NOT rowable from the filing that revealed them - the filing
+# states no date, no value, or no consideration. Each says exactly what would
+# settle it, so the next pass starts from a question rather than a search.
+
+LEADS = [
+ dict(lid="LEAD-1030-001", native_party="Huna Totem Corporation",
+      what="Norwegian Cruise Line Holdings' agreement with Glacier Creek Development, LLC for construction and operation of a cruise terminal and berthing facilities in Whittier, Alaska. Glacier Creek Development is named as a consolidated subsidiary in Huna Totem's own AS 45.55.139 annual report.",
+      accession="0001558370-25-001743",
+      url="https://www.sec.gov/Archives/edgar/data/1513761/000155837025001743/nclh-20241231x10k.htm",
+      settle="NCLH's 10-K gives an operating season (2024 in the FY2022 10-K, 2025 in the FY2024 10-K) and no agreement date or value. Huna Totem's own AS 45.55.139 annual report for FY2023-FY2025 should carry the construction commitment."),
+ dict(lid="LEAD-1030-002", native_party="Huna Totem Corporation",
+      what="Norwegian Cruise Line Holdings' agreement with AAK'W Landing LLC for development of berthing facilities in Juneau, Alaska, expected operational 2027. Aak'w Landing is a Huna Totem consolidated subsidiary per its own AS 45.55.139 annual report.",
+      accession="0001558370-25-001743",
+      url="https://www.sec.gov/Archives/edgar/data/1513761/000155837025001743/nclh-20241231x10k.htm",
+      settle="No date and no value in the 10-K. Same route as LEAD-1030-001."),
+ dict(lid="LEAD-1030-003", native_party="Cook Inlet Region, Inc.",
+      what="CIRI Energy, LLC holds Class B preferred equity interests in Capistrano Wind Partners alongside TIAA Wind Investments LLC and AMP Capital Investors Limited. Capistrano Wind Partners owns 100% of five wind projects totalling 411 MW in Texas, Wyoming and Nebraska.",
+      accession="0001013871-15-000004",
+      url="https://www.sec.gov/Archives/edgar/data/1013871/000101387115000004/a201410-k.htm",
+      settle="NRG's 10-K names the holder and not CIRI's subscription date or amount. SunEdison filings from 2015 (accessions 0000945436-15-000036 and 0001193125-15-344813) also name CIRI Energy LLC and are unread."),
+ dict(lid="LEAD-1030-004", native_party="Spirit Lake Tribe",
+      what="Spirit Lake Tribe's holding in Wireless Ronin Technologies fell from 1,346,448 shares (16.8%) at 2006-12-31 to 346,446 shares (2.4%) at 2007-12-31 - a disposition of about 1,000,002 shares during 2007.",
+      accession="0000950137-08-002003",
+      url="https://www.sec.gov/Archives/edgar/data/1380976/000095013708002003/c23793sc13gza.htm",
+      settle="A Schedule 13G/A states a position, never a sale date or price. The tribe's Forms 4 and 5 (accessions 0001179110-06-022718 and 0001179110-08-001255) report transactions by date and are unread."),
+ dict(lid="LEAD-1030-005", native_party="Salish Coast Enterprises, Inc. - AFFILIATION UNVERIFIED",
+      what="Three Regulation D offerings by Salish Coast Enterprises, Inc. (CIK 1747861, Burlington WA, industry Agriculture): $3,500,000 offered / $2,351,743 sold, convertible notes, first sale 2018-07-13; $6,943,175 offered / $4,468,175 sold, Series A Preferred, first sale 2021-02-19; $2,000,000 offered / $288,105 sold, SAFE, first sale 2022-07-15.",
+      accession="0001747861-22-000001",
+      url="https://www.sec.gov/Archives/edgar/data/1747861/000174786122000001/xslFormDX01/primary_doc.xml",
+      settle="THE ENTITY IS NOT ESTABLISHED AS NATIVE. `Salish` is a language-family and place word and cannot carry a match on its own (ENTITY_MATCH_RULES rule 1); the census reached this filer on that token alone. Rung 2 of rule 13 settles it: the company's own site stating its affiliation. Until then this is three dated, valued offerings attached to no entity, and it must not enter deals."),
+ dict(lid="LEAD-1030-006", native_party="eight tribal governments and enterprises",
+      what="EDGAR carries REGDEX index entries - paper Regulation D filings made before electronic Form D became mandatory - for Jicarilla Apache Nation (2003-01-02 and 2003-12-31), Las Vegas Paiute Tribe (2002-11-25), Oglala Sioux Tribe (2007-11-05, CIK 850003; 2008-01-02 and 2008-04-28, CIK 1422871), Cheyenne River Sioux Tribal Finance Corp (2008-03-18), Squaxin Island Tribe (2008-05-19), Citizen Potawatomi Nation (2004-06-24) and the Confederated Tribes and Bands of the Yakama Nation (2002-01-23, HELD - restricted terms).",
+      accession="various REGDEX",
+      url="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=1212788&type=REGDEX",
+      settle="A REGDEX entry proves an exempt offering was filed on that date and carries NO document and NO amount - the paper Form D itself is not on EDGAR. The amounts would come from the SEC's paper records or from each state's blue-sky filing. Recorded here so a future sweep does not re-derive the list. NOTE: the 2010-2017 registrant census concluded Citizen Potawatomi was absent, which is true FOR THAT WINDOW and false for EDGAR as a whole."),
+ dict(lid="LEAD-1030-007", native_party="Modoc Nation (Modoc Tribe of Oklahoma)",
+      what="Butler National Service Corporation has managed The Stables Casino for the Modoc Tribe of Oklahoma since 1998 under a management agreement originally dated 1996-12-12 and approved by the NIGC on 1997-01-14, as subsequently amended. Butler National restates this in every 10-K.",
+      accession="0001437749-18-013297",
+      url="https://www.sec.gov/Archives/edgar/data/15847/",
+      settle="The 10-K gives the original and NIGC approval dates and no fee terms or value. The amendments are the interesting part and are not dated in the filing; NIGC management-contract approval letters are day-level and public."),
+ dict(lid="LEAD-1030-008", native_party="Bristol Bay Native Corporation",
+      what="Alaska Growth Capital BIDCO, Inc. - a BBNC subsidiary and a licensed BIDCO - appears in 34 EDGAR filings 2010-03-11 to 2024-04-26, unread.",
+      accession="", url="",
+      settle="A read of those 34 filings. A BIDCO makes loans and equity investments for a living, so this is the highest-density remaining source of BBNC transaction records in EDGAR."),
+]
+
+LEAD_COLS = ["lead_id", "native_party", "what_the_filing_says",
+             "sec_accession", "source_url", "what_would_settle_it",
+             "listed_by", "listed_date", "record_scope"]
+LEADS_OUT = REVIEW / "deals_sec_edgar_1032_leads.csv"
+
 
 # ------------------------------------------------------------------- REJECT
 REJECT = [
@@ -427,6 +531,20 @@ def cmd_stage():
             w.writerow([n, c, f, why, SCRIPT, TODAY])
     out(f"  {len(REJECT)} name classes rejected with reasons "
         f"-> {REJECTED.relative_to(CEDAR)}")
+
+    with open(LEADS_OUT, "w", encoding="utf-8", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=LEAD_COLS)
+        w.writeheader()
+        for L in LEADS:
+            w.writerow({"lead_id": L["lid"], "native_party": L["native_party"],
+                        "what_the_filing_says": L["what"],
+                        "sec_accession": L["accession"],
+                        "source_url": L["url"],
+                        "what_would_settle_it": L["settle"],
+                        "listed_by": SCRIPT, "listed_date": TODAY,
+                        "record_scope": "LEAD_NOT_A_DEAL"})
+    out(f"  {len(LEADS)} leads that a filing revealed but could not date or "
+        f"value -> {LEADS_OUT.relative_to(CEDAR)}")
     return 0
 
 

@@ -6032,3 +6032,71 @@ enumeration (`sitemap.xml`) instead, and the answer changed:
 
 So both halves of the original inference were half right, and neither could
 have been settled by counting rows.
+
+## GATE STATE AT THE CLOSE OF WORKSTREAM PROMOTE (2026-09-02) — named, not stepped around
+
+Standing rule 15 says a red gate is stop-work and that a failure belonging to
+another agent must be **named with its owner** before moving on. This is that
+naming. `py -3 code/62_no_regression_check.py` exits 1; the log is
+`logs/promote_62.log`.
+
+**Nothing red is workstream PROMOTE's.** Evidence, not assertion:
+
+- `py -3 code/293_lint_bug_classes.py` names **12 new instances and not one is
+  a `95x` script**. One was — `class2c 950_promote_contract_attributes.py:
+  orphan += 1`, a counter that did not name what it found — and it was fixed
+  (the orphan and malformed-NAICS counters now carry the offending
+  `contract_number` / `fiscal_year` / value). `grep -E '95[0-9]_'` over the
+  full lint report returns nothing.
+- `files_with_columns_lost_vs_backup` names `entity_evidence_profile.csv`
+  (`in_spine`, `rows_per_source`, `amounts_per_source_NEVER_SUM` lost vs
+  `.bak_2026-08-28_pre505`) and, earlier in the same session,
+  `federal_funding_tribe_year_panel.csv`. Neither is a PROMOTE table.
+- All three PROMOTE tables re-verify green **after** other agents wrote to
+  them: `950/952/953 verify` all exit 0, and 950's INV-COPY re-reads all
+  841,002 archive rows.
+
+**Named, with owners, in the order a reader will meet them in the log:**
+
+| red line | owner, by evidence |
+|---|---|
+| `lint_class1` 0→1 | `1011_cross_dataset_reconciliation.py` — globs `deals_*_additions.csv` |
+| `lint_class2c` 60→65 | `852_extend_constellation_edges.py`, `873_build_aiannh_crosswalk.py` and two later arrivals |
+| `lint_class3` 0→2 | `992_newsletter_deal_candidates.py` — `deal_status_std == "Closed"` read as a ruling |
+| `lint_class4` 9→11 | `1030_sec_edgar_native_transactions.py`, `1031_ancsa_45_55_139_annual_reports.py`, `992_*` — `RUN_DEADLINE_S` |
+| `lint_class7` 42→46 | `1030_*` (`SEC1030-{n:06d}`) and `1031_*` (`AS4555139-{n:05d}`) — positional ids |
+| `class6` (not itself red) | `871_promote_geo_keys_contracts.py` enriches `prime_contracts.csv` in place with **no declared ordering**. 950 does the same and is NOT flagged, because its `40 → 950` ordering is in `cedar_pipeline.KNOWN_ORDERINGS`. The fix for 871 is one entry in the same list. |
+| `contract_orphan_shippable = 7` | see the two sub-items below |
+| `tables_*` / `ship_tables_at_zero` all rising together | new tables landed in `data/clean` from several workstreams faster than `25_build_publication_layer.TABLES` and the codebook registry were updated. Not one table; a registry lag. |
+| `rulings_unapplied` 1,215→2,894 | a rulings-side workstream; no PROMOTE script reads or writes a ruling |
+| `SHIPPING LOST: advocacy_passthrough_2026-08-07.csv`; `hearing_bill_links.csv` 465→464; `native_bills_subject_sweep.csv` 2,414→2,409 | the advocacy and legislation workstreams |
+
+### Two of those seven orphans are a backup-naming breach, and one is a real defect
+
+**1. Three files are backups wearing a table's name.**
+`native_owned_businesses.bak_2026-09-02_010526.csv`,
+`native_owned_businesses.bak_2026-09-02_010557.csv` and
+`prime_contracts.bak_2026-09-02_011205_pre772.csv` are counted as ORPHAN
+SHIPPABLE TABLES by `512_build_dataset_contracts.py` — because the convention
+is `<file>.csv.bak_<date>_pre_<script>` and `.bak_` must fall AFTER the `.csv`,
+which is what `build.py :: collection_tables` filters on. These three put it
+before, so every scanner reads them as new tables in `data/clean`. Owner:
+whoever ran `772_strip_nan_sentinels.py` and the two 01:05 native-owned-business
+passes. **Renaming another agent's backup mid-pass is exactly what concurrency
+rule 2 forbids, so they are named here and left alone.** Three of the seven
+orphans disappear the moment they are renamed.
+
+**2. `native_owned_businesses.csv` — the flagship table of a READY collection —
+is claimed by NO collection.** Not a naming artefact. The `native-owned-
+businesses` collection in `code/500_build_architecture_map.py` matches
+`^(individual_native|tribal_certification)`, and `native_owned_businesses`
+matches neither. So the actual product table has no collection, no rebuild
+plan and no contract, while `518_dataset_readiness.py` reports the dataset
+READY on its other six tables. The one-line fix is to widen that regex.
+
+**It was NOT applied here, deliberately.** The collection's own comment block
+scopes it to *"firms owned by PEOPLE, not nations"*, and
+`575_closure_native_owned_businesses.py` is another workstream's closure pass
+over the same dataset. Widening the regex changes what an entire collection
+claims, which is that workstream's call and not a promotion pass's. **Owner:
+whoever owns 575 / the `owned` product collection.**

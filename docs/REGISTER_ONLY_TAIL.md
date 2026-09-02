@@ -15,41 +15,33 @@
 | `cedar_resolved_facts.csv` | what Cedar has adjudicated |
 | `entity_aliases.csv` | names, one or more for every entity |
 
-Excluding the identity layer, **118** register entities have no row in any of the 136 substantive tables.
+Excluding the identity layer, **114** register entities have no row in any of the 136 substantive tables.
 
-## The 118 entities, by class
+## The 114 entities, by class
 
 | entity class | with no substantive row | given a first row here |
 |---|---:|---:|
 | BIE School | 87 | 86 |
-| Federal-level self-governance consortium | 19 | 17 |
+| Federal-level self-governance consortium | 18 | 18 |
 | Native Community Development Financial Institution | 3 | 3 |
-| Native Financial Institution | 3 | 2 |
-| Individually Native-owned business | 3 | 0 |
-| Urban Indian Organization | 3 | 1 |
-| **total** | **118** | **109** |
+| Individually Native-owned business | 3 | 2 |
+| Urban Indian Organization | 3 | 3 |
+| **total** | **114** | **115** |
 
 ## What was found
 
 | route | rows |
 |---|---:|
 | NCES_CCD | 86 |
-| USASPENDING | 29 |
-| IRS_990 | 15 |
-| NONE | 9 |
+| USASPENDING | 32 |
+| IRS_990 | 21 |
+| NONE | 2 |
 
-## Checked, nothing located — 9
+## Checked, nothing located — 2
 
 *Every one of these has a row in `register_only_first_rows.csv` naming the routes run and the date. That is a finding. It is not the same as unexamined, and the two must never be collapsed.*
 
 | entity | class |
 |---|---|
 | Shiprock Reservation Dormitory | BIE School |
-| AllNations Bank | Native Financial Institution |
 | Tallsalt Advisors / Mette Associates | Individually Native-owned business |
-| Tribal Energy Alternatives | Individually Native-owned business |
-| Laguna Creek LLC | Individually Native-owned business |
-| Indian Health Council, Inc. | Federal-level self-governance consortium |
-| Utah Navaho Health System, Inc. | Federal-level self-governance consortium |
-| Billings Urban Indian Health and Wellness Center | Urban Indian Organization |
-| Juel Fairbanks Recovery Services | Urban Indian Organization |

@@ -14,6 +14,13 @@ written. **Neither script repairs another dataset's table.** Where a finding
 belongs to somebody else it is written down with the identifier and the count so
 that owner can act.
 
+**A reproducibility note.** `prime_contracts.csv` was rewritten during this
+session by `871_promote_geo_keys_contracts` — 56 columns to 70, 1.20 GB to
+1.43 GB, row count unchanged at 1,217,768. Every figure below was re-measured
+against the 70-column vintage and both `verify` runs pass on it. If the file
+moves again, re-run `measure`; a stale figure will fail `verify` rather than
+survive into prose.
+
 This file answers two questions the owner asked as one:
 
 > *"If we see a deal that's published, we should see the federal contracting
@@ -66,7 +73,8 @@ Of the 98, **72 have a Native side** and **71 of those are unrecorded**. The
 single match is `ENVIRONMENTAL QUALITY MANAGEMENT, INC` → `ANCSA-2019-004`.
 
 Matching against the deal ledger is deliberately strict: only rows whose
-category is itself an ownership change (315 of 935), and the deal row must
+category is itself an ownership change (217 of 935 in `deals_classified.csv`,
+plus all 98 rows of `ownership_events.csv`), and the deal row must
 contain the company's whole distinctive name as a **contiguous token run**. A
 set-intersection version matched `Rnb Technologies → Oasis Systems` to an
 unrelated ANCSA acquisition on the token `systems`. The window is ±5 years
@@ -109,9 +117,9 @@ Two more that are worth a look and sit lower on dollars:
 - `DD7KTEMDG6A5` **CORVID TECHNOLOGIES, LLC** — Corvid Technologies `VUBTVT9ADBD1` FY2023–24 → **CHICKASAW NATION** `KS8HLVMJEMW9` FY2025–26. The
   deal ledger's only Chickasaw/Corvid row is `ND-2019-001`, a different
   transaction (Rocus Networks).
-- `QN8KJZYUY6R5` **S & T SERVICES, LLC** — Tikigaq Corporation FY≤2010 →
-  **CEDAR BAND OF PAIUTES** FY2011. An Alaska village corporation's firm
-  appearing under a Utah band.
+- `R3GMNTDL7356` **S & T SERVICES, LLC** — Tikigaq Corporation FY2005–2010 →
+  **CEDAR BAND OF PAIUTES** FY2011–2023. An Alaska village corporation's firm
+  appearing under a Utah band, and it stuck for thirteen years.
 
 Two divestitures **out** of Native ownership, neither in the ledger:
 
@@ -120,15 +128,18 @@ Two divestitures **out** of Native ownership, neither in the ledger:
 - `F2BEQJNKFY83` **CLARUS FLUID INTELLIGENCE, LLC** — Koniag, Inc. FY2008–2017 →
   CHESTNUT PARK FY2019–20 → RELADYNE, INC. FY2021–24.
 
-### Fourteen candidates carry an explicit caution, and one class is not a deal at all
+### 22 candidates carry an explicit caution, and one class is not a deal at all
 
 Where the CHILD's own name shares a distinctive token with only ONE of the two
 parents, the other declaration is as likely a mis-filing as an ownership fact.
-`ALEUT FACILITIES SUPPORT SERVICES, LLC`, `ALEUT GLOBAL SOLUTIONS, LLC` and
-`ALEUT TECHNOLOGIES, LLC` all declare **NANA Regional Corporation** through
-FY2010 and **The Aleut Corporation** afterwards — $688M between them. The
-likelier reading is four years of wrong FPDS filings, not a portfolio sale.
-Each such row carries `interpretation_caution` naming the shared token.
+Four firms — `ALEUT FACILITIES SUPPORT SERVICES, LLC` `Q5VGLSJYBGQ8`,
+`ALEUT GLOBAL SOLUTIONS, LLC` `Y7KZVN5B74Q7`, `ALEUT TECHNOLOGIES, LLC`
+`ECHJVVDGGDL6` and `ALEUT VENTURES LLC` `N3T3ZMGMJ143` — all declare **NANA
+Regional Corporation** through FY2010 and **The Aleut Corporation** from FY2011
+or FY2012, $692,701,356 between them. Four Aleut-named companies do not move
+from NANA to Aleut in the same year; the likelier reading is that the earlier
+filings were wrong. Each such row carries `interpretation_caution` naming the
+shared token, and 42 of the 98 candidates carry a caution of some kind.
 
 ### The reverse direction: does a published deal show up in contracting?
 
@@ -236,8 +247,9 @@ River is their reservation, which is precisely why the token is a trap.
 
 ### CDR-06 · HIGHEST · $87,626,820,925 — a repair that is recorded as done and is 65% undone
 
-`prime_contracts.csv` still holds the literal three-character string `nan` in
-**617,097 cells**:
+`prime_contracts.csv` — re-measured on the 70-column vintage written by
+`871_promote_geo_keys_contracts` — still holds the literal three-character
+string `nan` in **617,097 cells**:
 
 | column | cells | share of rows |
 |---|---:|---:|
@@ -252,9 +264,11 @@ River is their reservation, which is precisely why the token is a trap.
 
 `code/772_strip_nan_sentinels.py` documents 953,785 such cells across twelve
 columns and a backup named **`prime_contracts.bak_2026-09-02_011205_pre772.csv`**
-sits beside the live file — so the repair reads as applied. Diffing the two:
-the live file is exactly 788,319 bytes smaller, which is 262,773 × 3 — the
-`parent_contract_number` column and nothing else.
+sits beside the live file — so the repair reads as applied. It was applied to
+one column. `parent_contract_number`, which `772`'s own docstring measures at
+262,773 sentinel cells, now measures **0**. Every other column `772` names still
+measures at or near the figure in that docstring. `award_type` (71,134) and
+`naics_code` (2,773) are also clear; the 617,097 above is what is left.
 
 Why this is the worst one on the list: `ENTITY_MATCH_RULES` rule 4 already warns
 that this exact sentinel in `fpds_uei_cage_map.csv` (2,196 rows, 2,193 UEIs)
@@ -326,7 +340,7 @@ consumer following the parent link will land on.
 
 ### CDR-04 · HIGH · $39,099,757 — lobbying clients the spine already names
 
-**60 of 515** rows in `lobbying_unmatched_clients.csv` resolve to **exactly one**
+**57 of 515** rows in `lobbying_unmatched_clients.csv` resolve to **exactly one**
 spine entity on an exact whole-name match against `canonical_name`,
 `fr_official_name` or a recorded alias. No containment, no token match. The
 commonest recorded reason for the miss is `no_alias_hit`.
@@ -341,7 +355,7 @@ commonest recorded reason for the miss is `no_alias_hit`.
 | ALASKA NATIVE TRIBAL HEALTH CONSORTIUM | $1,676,250 | 160 | `ITO-LSKHLT-00` |
 | ALASKA FEDERATION OF NATIVES | $1,490,000 | 97 | `ITO-LSKFDR-00` |
 
-All 60 are in `review/1011_cross_dataset_finding_rows.csv` under `CDR-04`.
+All 57 are in `review/1011_cross_dataset_finding_rows.csv` under `CDR-04`.
 
 > Owner: influence. These are alias-layer additions, not new rulings.
 
@@ -349,7 +363,7 @@ All 60 are in `review/1011_cross_dataset_finding_rows.csv` under `CDR-04`.
 
 Of 499 hubs with attributed prime contracting, 41 appear in **none** of funding,
 gaming, lobbying, nonprofits, deals, subawards or the FAADS attribution.
-**32 of the 41 are Alaska Native Village Corporations**, for which this is the
+**34 of the 41 are Alaska Native Village Corporations**, for which this is the
 expected shape — a village corporation holds no compact, files no tribal 990 and
 lobbies through its region. The finding is not that they are wrong; it is that
 each is a single-source attribution with no second dataset able to corroborate

@@ -227,7 +227,8 @@
      ],
      "enriched_by": [
       "710_faads_attribution_content_key.py",
-      "791_faads_transaction_key_and_repoint.py"
+      "791_faads_transaction_key_and_repoint.py",
+      "874_geography_two_sums.py"
      ],
      "never_run_warning": []
     },
@@ -315,7 +316,7 @@
      "grain_defect": "179,259 LITERAL duplicate rows of 2,769,748 (6.5%). DIAGNOSED 2026-08-29 and it is NOT a page fetched twice, which is what this entry used to say: 174,348 of the 179,259 - 97% - come from ONE staged object, ed_fy2007_archive.zip, and 174,957 of the surplus rows are FY2007, while 40 other agency-years are almost clean. A duplicated fetch does not concentrate like that. All 179,259 carry an award_id_fain, and the staged zip carries `assistance_transaction_unique_key` and `modification_number` among its 112 columns - `30_funding_pre2008.to_out_row` took neither. This is the same projection loss proved exactly for the prime contracting archive, where 80,778 apparent duplicates resolved to 80,778 distinct transactions and went to zero without deleting a row (see 430). `to_out_row` and OUT_COLS now carry both columns, so the next `py -3 code/30_funding_pre2008.py build` states a grain. That build re-extracts a 2.77M-row shipped table and is queued in review/OWNER_DECISION_QUEUE.md rather than run unattended. Until it runs the duplication is DIAGNOSED, not repaired.",
      "grain_evidence": {
       "rows": 2769748,
-      "tested_date": "2026-09-01",
+      "tested_date": "2026-09-02",
       "whole_row_duplicates": 3441,
       "duplicate_claims_under_distinct_ids": null,
       "unique_keys_measured": [],
@@ -443,7 +444,7 @@
      "grain_declared_by": "workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json",
      "grain_validated": false,
      "measured_rows_per_join_key": {
-      "cedar_uid": 32
+      "cedar_uid": 19
      },
      "grain_open_question": "",
      "grain_defect": "",
@@ -605,17 +606,30 @@
      "grain_open_question": "",
      "grain_defect": "114 LITERAL duplicate rows of 1,262. This table is derived from subawards.csv and inherits its duplication; the passthrough dollars are therefore over-stated by an unmeasured amount.",
      "grain_evidence": {
-      "rows": 1522,
-      "tested_date": "2026-09-01",
-      "whole_row_duplicates": 116,
+      "rows": 1663,
+      "tested_date": "2026-09-02",
+      "whole_row_duplicates": 0,
       "duplicate_claims_under_distinct_ids": null,
-      "unique_keys_measured": [],
+      "unique_keys_measured": [
+       [
+        "subaward_source_record_id",
+        "source_dataset"
+       ],
+       [
+        "subaward_source_record_id",
+        "duplicate_status"
+       ]
+      ],
       "max_rows_per_join_key_value": {}
      },
      "key_refused": {},
      "population_scope": {},
-     "rebuilt_by": [],
-     "enriched_by": [],
+     "rebuilt_by": [
+      "121_pull_subawards_api.py"
+     ],
+     "enriched_by": [
+      "81_build_passthrough_dataset.py"
+     ],
      "never_run_warning": []
     },
     {
@@ -5296,18 +5310,19 @@
      "grain_open_question": "",
      "grain_defect": "10,770 LITERAL duplicate rows of 72,837. (subaward_number, subaward_date) collides 27,470 times, so even the natural key of a subaward is not unique here.",
      "grain_evidence": {
-      "rows": 72837,
-      "tested_date": "2026-08-29",
-      "whole_row_duplicates": 10770,
+      "rows": 76859,
+      "tested_date": "2026-09-02",
+      "whole_row_duplicates": 0,
       "duplicate_claims_under_distinct_ids": null,
       "unique_keys_measured": [],
       "max_rows_per_join_key_value": {
-       "cedar_uid": 6163
+       "cedar_uid": 6651
       }
      },
      "key_refused": {},
      "population_scope": {},
      "rebuilt_by": [
+      "121_pull_subawards_api.py",
       "20_build_subcontracts.py",
       "871_promote_geo_keys_contracts.py"
      ],
@@ -5315,6 +5330,7 @@
       "121_pull_subawards_api.py",
       "250_demote_stale_tierA_subaward_rows.py",
       "45_promote_subawards.py",
+      "871_promote_geo_keys_contracts.py",
       "910_subaward_report_id_backfill.py",
       "911_subaward_sub_leg_cedar_uid.py"
      ],
@@ -7482,8 +7498,12 @@
      },
      "key_refused": {},
      "population_scope": {},
-     "rebuilt_by": [],
-     "enriched_by": [],
+     "rebuilt_by": [
+      "23d_build_gaming_facilities.py"
+     ],
+     "enriched_by": [
+      "960_promote_gaming_facility_class_and_revenue_reach.py"
+     ],
      "never_run_warning": []
     },
     {

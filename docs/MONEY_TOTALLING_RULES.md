@@ -1,6 +1,6 @@
 # What a buyer may total — `funding` and `subcontracting`
 
-*Generated 2026-09-01 by `code/574_ws1_money_and_conservation.py`. Every number below is re-measured from the live files and from the staged source objects on each run. Regenerate rather than edit.*
+*Generated 2026-09-02 by `code/574_ws1_money_and_conservation.py`. Every number below is re-measured from the live files and from the staged source objects on each run. Regenerate rather than edit.*
 
 ## The one-line answer per table
 
@@ -13,23 +13,24 @@
 
 ### The subaward trap, in dollars
 
-`subawards.csv` totals $45,624,073,879.27 across all 72,837 rows. **That figure must never be quoted.** The correct total is $24,413,436,422.47 over 54,719 rows. The money rule removes **$21,210,637,456.80**.
+`subawards.csv` totals $47,301,660,819.78 across all 76,859 rows. **That figure must never be quoted.** The correct total is $25,864,997,128.19 over 58,117 rows. The money rule removes **$21,436,663,691.59**.
 
-**State the denominator, every time.** That same $21.21B is **46.5% of the unfiltered $45.62B** and **86.9% of the correct $24.41B**, and this line previously read "86.9% of the unfiltered figure", which is neither. Codex caught the pair of numbers loose in the handoff — the sample README said 46.5%, the product descriptor said 86.9% — and a buyer holding both correctly concluded that one of them had to be wrong. **An overstatement is measured against the truth, so the number to quote is 86.9%: summing unfiltered lands you 86.9% above the real total.** 46.5% is the share of the inflated figure that is spurious, which is a different and much less alarming-sounding sentence about the same error, and is not what a warning is for.
+**State the denominator, every time.** That same $21,436,663,691.59 is **45.3% of the unfiltered $47,301,660,819.78** and **82.9% of the correct $25,864,997,128.19**. Codex caught the pair of numbers loose in the handoff — the sample README quoted one and the product descriptor the other — and a buyer holding both correctly concluded that one of them had to be wrong. **An overstatement is measured against the truth, so the number to quote is 82.9%: summing unfiltered lands you that far above the real total.** The other figure is the share of the inflated total that is spurious, which is a different and much less alarming-sounding sentence about the same error, and is not what a warning is for.
 
 And that corrected total is still **not additive with prime contracting**. A subaward is a slice of a prime award Cedar already publishes. Federal dollars obligated = primes. Subawards say where those dollars went next.
 
 ### The pass-through trap
 
-`native_passthrough.csv` totals $2,972,389,900.81 across 1,522 rows, of which only 1,135 rows / $869,328,591.38 are countable. FSRS is self-reported by the prime with no validation: **the RELATIONSHIP is the product, the AMOUNT carries a filter.**
+`native_passthrough.csv` totals $3,209,170,541.63 across 1,663 rows, of which only 1,259 rows / $1,050,719,668.88 are countable. FSRS is self-reported by the prime with no validation: **the RELATIONSHIP is the product, the AMOUNT carries a filter.**
 
 ## The duplicate allegations, re-measured
 
 | table | rows | literal duplicate rows | groups | worst group | surplus $ | surplus rows at $0 |
 |---|---:|---:|---:|---:|---:|---:|
-| `faads_transactions.csv` | 60,661 | 1,001 | 946 | 6× | $75,078,206.00 | 3 |
-| `native_passthrough.csv` | 1,522 | 116 | 20 | 44× | $123,621,558.43 | 0 |
-| `subawards.csv` | 72,837 | 10,770 | 2,933 | 22× | $9,829,436,042.38 | 555 |
+| `faads_transactions.csv` | 60,661 | 0 | 0 | 0× | $0.00 | 0 |
+| `faads_transactions_all_agencies.csv` | 2,769,748 | 3,441 | 3,027 | 10× | $7,427,641,526.00 | 65 |
+| `native_passthrough.csv` | 1,663 | 0 | 0 | 0× | $0.00 | 0 |
+| `subawards.csv` | 76,859 | 0 | 0 | 0× | $0.00 | 0 |
 
 **Every count matches the allegation exactly. Three of the four findings behind them do not.**
 
@@ -48,7 +49,7 @@ Asked of the SOURCE, not inferred from the output:
 | `doi_fy2006.zip` | 9,235 | 9,235 | every row is a distinct transaction |
 | `doi_fy2007.zip` | 9,662 | 9,662 | every row is a distinct transaction |
 
-Source rows and distinct transaction keys are EQUAL in every object measured. The mapper `30_funding_pre2008.to_out_row` never carried `assistance_transaction_unique_key` or `modification_number`, so distinct transactions render identical. **De-duplicating these two tables would destroy $75,078,206.00 of real obligations** — the same mistake `prime_contracts.csv` came within one commit of, where 80,778 apparent duplicates went to zero without a row being removed.
+Source rows and distinct transaction keys are EQUAL in every object measured. The mapper `30_funding_pre2008.to_out_row` never carried `assistance_transaction_unique_key` or `modification_number`, so distinct transactions render identical. **De-duplicating these two tables would destroy $7,427,641,526.00 of real obligations** — the same mistake `prime_contracts.csv` came within one commit of, where 80,778 apparent duplicates went to zero without a row being removed.
 
 ### `subawards.csv` — already flagged, never deleted
 
@@ -56,8 +57,8 @@ Every one of the literal duplicate rows carries `duplicate_status = 'exact_repea
 
 | duplicate_status | rows |
 |---|---:|
-| `primary` | 55,316 |
-| `exact_repeat_within_source` | 16,675 |
+| `primary` | 58,731 |
+| `exact_repeat_within_source` | 17,282 |
 | `superseded_by_primary_source` | 846 |
 
 These are monthly SAM re-filings of one subaward, not repeated subawards — `121_pull_subawards_api.py` proved it on the FY2021 pull (one group is 93 re-filings of a single $57,500 subaward running 2022-08 to 2025-01, each with its own `subaward_sam_report_id`). They are RETAINED and FLAGGED, per Cedar's flag-never-delete rule. The flag is the fix; the delete would be the defect.
@@ -68,21 +69,28 @@ These are monthly SAM re-filings of one subaward, not repeated subawards — `12
 |---|---:|---|---:|---:|
 | `faads_transactions.csv` | 60,661 | `emitted` | 60,661 | 100.0 |
 | `faads_transactions_all_agencies.csv` | 2,769,748 | `emitted` | 2,769,748 | 100.0 |
-| `subawards.csv` | 7,380,186 | `emitted:primary_the_countable_subaward_filing` | 55,316 | 0.75 |
-| `subawards.csv` | 7,380,186 | `retained:exact_repeat_within_source_flagged_never_deleted_not_countable` | 16,675 | 0.23 |
+| `subawards.csv` | 7,380,186 | `emitted:primary_the_countable_subaward_filing` | 58,731 | 0.8 |
+| `subawards.csv` | 7,380,186 | `retained:exact_repeat_within_source_flagged_never_deleted_not_countable` | 17,282 | 0.23 |
 | `subawards.csv` | 7,380,186 | `retained:superseded_by_primary_source_flagged_never_deleted_not_countable` | 846 | 0.01 |
-| `subawards.csv` | 7,380,186 | `rejected:no_native_party_on_either_side_of_the_subaward` | 7,307,349 | 99.01 |
-| `native_passthrough.csv` | 72,837 | `emitted` | 1,522 | 2.09 |
-| `native_passthrough.csv` | 72,837 | `rejected:direction_is_not_both_sides_native` | 71,311 | 97.9 |
-| `native_passthrough.csv` | 72,837 | `rejected:one_side_unresolved_to_a_cedar_entity` | 4 | 0.01 |
+| `subawards.csv` | 7,380,186 | `rejected:no_native_party_on_either_side_of_the_subaward` | 7,303,327 | 98.96 |
+| `native_passthrough.csv` | 76,859 | `emitted` | 1,663 | 2.16 |
+| `native_passthrough.csv` | 76,859 | `rejected:direction_is_not_both_sides_native` | 75,192 | 97.83 |
+| `native_passthrough.csv` | 76,859 | `rejected:one_side_unresolved_to_a_cedar_entity` | 4 | 0.01 |
 
-## Why no primary key is declared
+## The keys — three of four declared, one REFUSED
 
-`GRAIN_WS1` in `code/512_build_dataset_contracts.py` is empty on purpose. A declared grain with no validated key is a release-blocking violation in `512`, and none of these four tables has a key that survives full-file validation:
+*This section replaced 'Why no primary key is declared' on 2026-09-02. It said `GRAIN_WS1` was empty on purpose and that none of the four tables had a key that survives full-file validation. That was true when it was written and is now true of one table.* Every line below is re-measured from the live files by this script; `512_build_dataset_contracts.py` re-validates all four against the files on every run and turns a broken promise into a release-blocking violation.
 
-- the `faads_*` pair has no identifying column at all — the source published one and the mapper dropped it. `30_funding_pre2008.py` now carries both columns; the re-extract is queued in `review/OWNER_DECISION_QUEUE.md` and has not run.
-- `subawards.csv` retains byte-identical repeat filings on purpose and carries no per-occurrence ordinal. `45_promote_subawards.identity_key` is unique across all 55,316 `primary` rows and only there.
-- `native_passthrough.csv` inherits both problems from its parent.
+| table | primary key | measured |
+|---|---|---|
+| `faads_transactions.csv` | `assistance_transaction_unique_key` | unique and non-blank on all 60,661 rows |
+| `faads_transactions_all_agencies.csv` | **REFUSED** — none exists | `assistance_transaction_unique_key` present on 825,754 of 2,769,748 rows and unique there; BLANK on 1,943,994. Refusal re-measured by `512` every run |
+| `subawards.csv` | `source_dataset` + `subaward_source_record_id` | unique and non-blank on all 76,859 rows |
+| `native_passthrough.csv` | `source_dataset` + `subaward_source_record_id` | unique and non-blank on all 1,663 rows |
+
+**`subawards.csv` — the key was in the source all along.** FSRS publishes `subaward_sam_report_id`, one UUID per SAM filing, and `94.build_row` read 26 of the extract's 118 columns and dropped it. `910_subaward_report_id_backfill.py` streamed 8.48M rows of the staged zips already on disk, joined them on `45.identity_key` and recovered it for 75,861 rows; the 998 HigherGov rows use HigherGov's own per-subcontract permalink, already carried in `source_url`. `source_dataset` is the second half of the key because 347 rows are ONE filing that Cedar holds twice, from two of its own pulls, and both correctly carry the same UUID. **Byte-identical whole rows went 10,770 → 0 with zero rows removed and the money unchanged to the cent** — the third time in this project an allegation of literal duplicates has turned out to be dropped identity rather than repeated facts.
+
+**`faads_transactions_all_agencies.csv` — REFUSED, and re-checked.** The grain IS declared; the primary key is empty and the refusal is recorded in `KEY_REFUSED` in `512`. 825,754 of 2,769,748 rows carry `assistance_transaction_unique_key` and it is unique with zero collisions where present; it is blank on the 1,943,994 FY2001–2006 rows of the nine non-Interior agencies because `30.COLUMNS` requested a 20-column subset and the key is not in the bytes on disk. **No re-extract can recover it** — only a fresh 112-column pull of those 54 agency-years, merged BY CONTENT so the 29,594 position-keyed attributions do not move. Until then the refusal is re-measured on every run of `512`: if any refused candidate becomes unique, or the 3,441 byte-identical rows change count, the declaration breaks. `code/912_selftest_refusal_gates.py` proves those two checks fire on a synthetic violation.
 
 > **A downstream fragility worth naming:** `faads_entity_attribution.csv` keys 29,594 attributions to `faads_row_id`, which is the ROW POSITION in `faads_transactions_all_agencies.csv`. The queued rebuild that restores the transaction key will also re-order that file. The attributions must be re-pointed in the same pass or they silently move to different transactions.
 
@@ -311,43 +319,7 @@ money: the fix removes the false positives and not the true one.
 
 # The FY2007 seam, as an exact set — and what the two faads tables are
 
-*Appended 2026-09-01 by workstream FAADS (`code/791_faads_transaction_key_and_repoint.py`). Re-measured on every run of `791 seam`; enforced by `791 seam --verify`.* **This file is written WHOLESALE by `574`, which preserves only marked blocks; this section is inside `<!-- BEGIN FAADS -->` / `<!-- END FAADS -->` so it survives.**
-
-## The FY2007 overlap is no longer an estimate
-
-GRAIN-WS4 measured the seam at **98.9% of the modern table's FY2007 dollars** and could not do better, because neither side carried a transaction key. `30_funding_pre2008.to_out_row` dropped `assistance_transaction_unique_key`; the re-extract on 2026-09-01 restored it on every FY2007 row. Both sides now carry the same source identity, so the overlap is a **set intersection, not a ratio**:
-
-| | rows | obligations |
-|---|---:|---:|
-| `faads_transactions_all_agencies.csv` FY2007 | 774,755 | $475,359,703,131.83 |
-| …carrying `assistance_transaction_unique_key` | **774,755 (100%)** | |
-| `federal_funding_transactions.csv` FY2007 | 11,443 | $2,189,838,445.60 |
-| **…that are the SAME TRANSACTION as an archive row** | **11,063** | **$2,165,856,968.60** |
-| …present only in the modern table | 380 | $23,981,477.00 |
-
-WS4's dollar estimate was right to the cent; what is new is that the overlap is now **11,063 identified rows** a consumer can subtract by key, instead of a percentage they have to trust.
-
-## The rule, and what enforces it
-
-**Stack FY2001–2006 from `faads_transactions_all_agencies.csv` and FY2007 onward from `federal_funding_transactions.csv`.** The modern table is the attributed one, so the seam belongs on its side. Loading both files whole double-counts 11,063 FY2007 transactions and $2,165,856,969.
-
-No code can stop a buyer adding two files together. What **is** enforced, by `py -3 code/791_faads_transaction_key_and_repoint.py seam --verify` (exit 1 on breach), is the property that makes the rule checkable rather than advisory:
-
-1. **every FY2007 row of the archive table carries a transaction key**, so the overlap stays a set — if a future rebuild drops the column again this fails immediately and loudly instead of the seam quietly reverting to an estimate;
-2. **the overlap is exactly the recorded row count and dollar figure**, re-measured against `docs/schema/faads_fy2007_seam.json`, which is written for consumers to subtract programmatically.
-
-## Neither faads table is a Native table — restated, because the re-extract did not change it
-
-`faads_transactions_all_agencies.csv`: `tribe_id` blank on **all 2,769,748 rows**; its $1,830,639,317,708 is the whole federal assistance universe for FY2001–2007, every recipient in the country. `faads_transactions.csv`: 60,661 rows, $9,348,473,200, `tribe_id` blank on all of them — an **agency** filter (Interior), not a Native one, and carried verbatim into the all-agencies file, so **never add the two**. The Native attribution for these years lives outside both files, in `faads_entity_attribution.csv` (29,594 rows, FY2001–06, $4,721,685,550 carried verbatim off the transactions — a projection, never new money).
-
-## What a buyer may total, now that the grain is stated for one of the pair
-
-- **`faads_transactions.csv` — SAFE at transaction grain.** `assistance_transaction_unique_key` is unique on all 60,661 rows (0 collisions, 0 blanks) and the grain is declared in `512.GRAIN_FAADS`. The 1,001 rows it was blocked on as literal duplicates are **1,001 distinct source transactions**; the count is 0 now and **not one row was deleted**.
-- **`faads_transactions_all_agencies.csv` — still ROW-LEVEL ONLY, and by a knowable amount.** The key is present on 825,754 of 2,769,748 rows (29.8%: every FY2007 row, every Interior row) and unique where present. It is blank on the 1,943,994 FY2001–2006 rows of the other nine agencies because those staged objects were requested with a 20-column subset and **physically lack the column** — the USAspending Award Data Archive, the only full-column route, begins at FY2007. **3,441 rows** remain byte-identical to another row across all 27 columns, all of them inside that unkeyed region. `obligated_usd` is additive at transaction grain; the residual exposure a buyer carries is those 3,441 rows.
-
-**Nothing was de-duplicated.** Whole-row duplicates fell 179,259 → 3,441 on the all-agencies table and 1,001 → 0 on the Interior table by **restoring an identity column, not by deleting a row**. A de-dupe would have destroyed $8,291,124,113 of real obligations — `ed_fy2007_archive.zip` holds 344,401 rows and 344,401 distinct keys, and the worst apparent group (445 identical UC Irvine rows) is 740 real transactions carrying modification numbers 0001–0740, 592 of them $0.
-
-<!-- END FAADS -->
+*Appended 2026-09-01 by workstream FAADS (`code/791_faads_transaction_key_and_repoint.py`). Re-measured on every run of `791 seam`; enforced by `791 seam --verify`.* **This file is written WHOLESALE by `574`, which preserves only marked blocks; this section is inside `<!-- BEGIN FAADS -->` / `<!-- END FAADS -->
 
 <!-- BEGIN GAMING-NR -->
 
@@ -536,3 +508,92 @@ Three things that make a bare difference wrong:
 - `geo_county_two_sums.csv` — the two sums. Built by `874`, which proves the money and row partitions to the cent on every run.
 
 <!-- END GEO -->
+
+<!-- BEGIN SUBAWARD-FUNDING -->
+
+## The subaward key, the two legs, and the one refusal (workstream SUBAWARD-FUNDING, 2026-09-02)
+
+*Marked so it survives the wholesale rewrites `574` performs on this file. Every
+number is re-checkable by the command named beside it.*
+
+### `subawards.csv` now has a primary key, and it is two columns for a reason
+
+    primary key   (source_dataset, subaward_source_record_id)
+    check         py -3 code/910_subaward_report_id_backfill.py verify
+
+**A row is one SUBAWARD FILING as ingested from one source**, not one subaward.
+FFATA requires the prime to re-file an open subaward monthly; one $57,500
+subaward is 93 rows spanning 2022-08 to 2025-01, and all 93 are real reporting
+events. That is why the money rule is a filter and not a de-duplication.
+
+`subaward_source_record_id` is the SOURCE's own record id, recovered, never
+minted: the SAM filing UUID on 75,861 rows, HigherGov's per-subcontract
+permalink (already in `source_url`, 998 of 998 distinct) on the other 998.
+`source_dataset` is the second half because **347 rows are one filing Cedar
+holds twice**, from `usaspending_fsrs_pull` and from `funding_forward_fill`.
+Both carry the same UUID, correctly — it is one filing — and the second is
+already flagged `superseded_by_primary_source` and already excluded from every
+money total. **Do not read that pair as two subawards.**
+
+### The duplicate allegation that was phantom, for the third time
+
+| | before | after | rows deleted |
+|---|---:|---:|---:|
+| `subawards.csv` byte-identical whole rows | 10,770 | **0** | **0** |
+| `native_passthrough.csv` byte-identical whole rows | 116 | **0** | **0** |
+| `subawards.csv` `sum(subaward_amount)` | $47,301,660,819.78 | $47,301,660,819.78 | — |
+
+Nothing was de-duplicated. The rows stopped being byte-identical because the
+column that always separated them — the SAM report UUID the mapper dropped —
+was put back. This is the same shape as `prime_contracts.csv` (80,778 alleged,
+real answer zero) and `faads_transactions.csv` (1,001 alleged, real answer
+zero). **Measure before you collapse anything.**
+
+### A subaward has TWO legs and only one of them used to have a Cedar id
+
+`cedar_uid` on this table is the PRIME's entity id — `503_identity.py stamp`
+derives it from `prime_native_tribe_id`, the first of its preference columns
+present in the header — so it is blank on the 43,282 rows whose only Native
+party is the SUBAWARDEE. It is not wrong, it is half the table.
+
+    prime_cedar_uid   the prime leg          33,503 rows
+    sub_cedar_uid     the subawardee leg     44,945 rows
+    at least one leg                         76,785 of 76,859 (99.90%)
+    check   py -3 code/911_subaward_sub_leg_cedar_uid.py verify
+
+**Never sum a money column after joining on both legs at once** — a row where
+both legs are Native (1,663 of them, which is exactly `native_passthrough.csv`)
+would be counted under two entities. Group by ONE leg, and say which.
+
+### `faads_transactions_all_agencies.csv` — no key, and that is a declaration
+
+`obligated_usd` IS additive at transaction grain across this file
+($1,830,639,317,707.66, FY2001–2007). What is unavailable is the JOIN: no
+primary key exists at any arity, because `30.COLUMNS` requested a 20-column
+subset for 60 of the source objects and `assistance_transaction_unique_key` is
+not in the bytes on disk for 1,943,994 rows. The refusal is recorded in
+`KEY_REFUSED` in `512_build_dataset_contracts.py` and **re-measured against the
+file on every run**: if a refused candidate becomes unique, or the 3,441
+byte-identical rows change count, the declaration breaks and the table goes
+back to blocking. `py -3 code/912_selftest_refusal_gates.py verify` proves both
+checks fire on a synthetic violation.
+
+Its export class is `AGGREGATE_ONLY_NO_KEY` — a fourth class added the same
+day, because "a buyer may NOT total a column" was a false warning on $1.83T of
+genuinely additive obligations, and a false warning teaches a buyer to ignore
+the true ones.
+
+### After any subaward promotion, run these, in this order
+
+    py -3 code/121_pull_subawards_api.py ...            # the promotion
+    py -3 code/910_subaward_report_id_backfill.py rescan
+    py -3 code/910_subaward_report_id_backfill.py apply
+    py -3 code/911_subaward_sub_leg_cedar_uid.py apply
+    py -3 code/871_promote_geo_keys_contracts.py        # geography workstream
+    py -3 code/81_build_passthrough_dataset.py
+
+Registered in `cedar_pipeline.KNOWN_ORDERINGS`, because a promotion that stops
+before them leaves the appended rows with a blank key — and blank collides with
+blank, which is how this table came to have no key in the first place.
+
+<!-- END SUBAWARD-FUNDING -->
