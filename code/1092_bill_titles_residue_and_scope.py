@@ -765,8 +765,36 @@ def verify() -> int:
           f"{sum(1 for b in bills if not b['title'].strip())}")
     print(f"  bill_scope blank: "
           f"{sum(1 for b in bills if not b['bill_scope'].strip())}")
+    print(f"  rows ruled by 1092: "
+          f"{sum(1 for b in bills if SCOPE_STAMP in b['record_basis'])}")
+    report_drift(bills, rule)
     print("  all checks pass")
     return 0
+
+
+def report_drift(rows: list, rule) -> None:
+    """FLAGGED, NOT FIXED. Rows ruled before 1092 whose ruling today's spine
+    no longer reproduces - the spine gained names since 2026-08-05."""
+    if rule is None:
+        print("  UNMEASURED: scope drift not measured (ruler unavailable)")
+        return
+    d = scope_drift(rows, rule)
+    n_checked = sum(1 for r in rows
+                    if SCOPE_STAMP not in r["record_basis"]
+                    and (r["bill_scope_basis"].startswith("spine_name_match:")
+                         or r["bill_scope_basis"].startswith(
+                             "designator_pattern:")
+                         or r["bill_scope_basis"]
+                         == "no_specific_entity_matched"))
+    print(f"  PRE-1092 SCOPE DRIFT (flagged, not fixed): {len(d)} of "
+          f"{n_checked} rulings made before this script no longer reproduce "
+          f"under today's spine.")
+    for bid, s0, b0, s1, b1 in d[:3]:
+        print(f"    {bid:16s} on file ({s0!r}, {b0!r})  ->  today "
+              f"({s1!r}, {b1!r})")
+    if len(d) > 3:
+        print(f"    ... {len(d)-3} more. Re-ruling them is an owner decision: "
+              f"it moves the published tribe-specific count.")
 
 
 def selftest() -> int:

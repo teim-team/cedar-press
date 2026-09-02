@@ -445,16 +445,6 @@ class Evidence:
             k = (r.get("identifier") or "").strip().upper()
             if not k:
                 continue
-            (self.by_uei if it == "UEI" else self.by_cage if it == "CAGE" else []).append(r) \
-                if it in ("UEI", "CAGE") else None
-        # rebuild properly (the ternary above appends to the defaultdict LIST)
-        self.by_uei = collections.defaultdict(list)
-        self.by_cage = collections.defaultdict(list)
-        for r in self.led:
-            it = (r.get("identifier_type") or "").upper()
-            k = (r.get("identifier") or "").strip().upper()
-            if not k:
-                continue
             if it == "UEI":
                 self.by_uei[k].append(r)
             elif it == "CAGE":
@@ -1000,16 +990,16 @@ def measure_prime(path=None):
         "FROM read_csv_auto(?, all_varchar=true, sample_size=-1) WHERE tribe_id <> ''",
         [p]).fetchone()
     ent = {}
+    flagged = unflagged_withdrawn = None
     if "identifier_ruling_quarantined" in cols:
         flagged = con.execute(
             "SELECT count(*) FROM read_csv_auto(?, all_varchar=true, sample_size=-1) "
             "WHERE tribe_id <> '' AND identifier_ruling_quarantined = 'Y'", [p]).fetchone()[0]
+    if "identifier_ruling_review" in cols:
         unflagged_withdrawn = con.execute(
             "SELECT count(*) FROM read_csv_auto(?, all_varchar=true, sample_size=-1) "
             "WHERE tribe_id <> '' AND identifier_ruling_review = 'WITHDRAWN_BY_1079'",
             [p]).fetchone()[0]
-    else:
-        flagged, unflagged_withdrawn = None, None
     for t, v in con.execute(
             "SELECT tribe_id, sum(TRY_CAST(total_obligations AS DOUBLE)) "
             "FROM read_csv_auto(?, all_varchar=true, sample_size=-1) WHERE tribe_id <> '' "

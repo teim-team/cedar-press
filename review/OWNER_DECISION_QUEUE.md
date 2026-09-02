@@ -1539,3 +1539,51 @@ Wisconsin. Rung 1 settles it.
 > **Still open:** the ledger rows themselves (`cedar_identifier_ledger_final.csv`),
 > and the tier-A `Ho-Chunk Nation` CAGE `3VFL3` row keyed to Winnebago, which
 > looks like the same collision inverted and which no pass has yet examined.
+
+---
+
+## TD-1 — MSRB EMMA: buy the licence, ask for permission, or drop the source?
+*Appended 2026-09-02 by the tribal-debt workstream (`code/1082_tribal_debt_holdings_disclosure.py`). Full evidence: `docs/TRIBAL_DEBT_HOLDINGS_BUILD_LOG.md`.*
+
+**Decision:** EMMA is the largest unexploited source in this project and it is
+closed by its Terms of Use, not by robots. Pick one: (a) buy access, (b) write
+and ask, (c) record it as permanently out of scope and stop re-opening it.
+
+**This is not the same question as 2026-08-05, because the clause is worse than
+the record said.** Re-read verbatim today from
+`https://emma.msrb.org/AboutEmma/UserAgreement` (cached):
+
+1. **It bars the OUTPUT, not just the method** — *"you will not: use Content or
+   Services to develop or create a database to be sold, leased, furnished,
+   licensed or otherwise exploited or made available (either commercially **or
+   free of charge**)."* Releasing it free is not a way round.
+2. **It names MANUAL collection** — *"...or similar automated or data gathering
+   or extraction method, **or any manual process**..."* The August log quoted
+   only the automated half, which left the impression a human could read the
+   documents in the meantime. **There is no hand-collection workaround.**
+3. **A SECOND licensor sits on top** — CUSIP Global Services / ABA: *"Any use by
+   you outside of the clearing and settlement of transactions requires a license
+   from CGS, along with an associated fee based on usage."* An MSRB licence
+   alone does not clear CUSIPs. Cost both.
+
+**What it is worth.** ~95 tribal issuer records across ~70 tribal governments
+are already enumerated by name (`docs/TRIBAL_DEBT_BUILD_LOG.md`). For the
+gaming-authority subset, the **annual audited financials carry facility-level
+gaming revenue** — the figure `gaming` records as `SOURCE_DOES_NOT_PUBLISH` on
+776 of 787 facilities. Nothing else Cedar can reach moves that number at scale.
+
+**If (a) BUY:** the tribal bond-finance dataset becomes buildable and the gaming
+revenue gap starts closing. Two licences to price, not one.
+**If (b) ASK:** free, and the agreement states its own exception — *"unless
+otherwise authorized by the MSRB"* — naming where to write (MSRB, 1300 I Street
+NW, Suite 1000, Washington DC 20005, Attn: External Relations). Cedar's standing
+principle is that asking is the route back in. **Recommended first move**: it
+costs a letter and it makes (a) unnecessary if it lands.
+**If (c) DROP:** say so once, in `docs/PUBLICATION_POLICY.md`, so no fourth
+session re-derives the same refusal. Three have now.
+
+**Not a route, and worth writing down so nobody tries it:** the underwriter /
+conduit-issuer path is real under the TERMS-SCOPE ruling (a third party's filing
+is not the restricted entity's), but it **cuts the other way for EMMA
+continuing disclosure specifically**, because those documents are filed *by the
+obligor*. For the eight hard-listed sources their own filings stay excluded.

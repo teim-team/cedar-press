@@ -353,3 +353,80 @@ A publisher-stated URL is exempt and should be: a domain the BIA publishes in
 its Tribal Leaders Directory, or one derived from an email address the
 organisation itself filed with DOI, is an assertion by the publisher and needs
 no page-text proof. The rule is about *guesses*.
+
+## A CUSTOM USER-AGENT DOES NOT MAKE YOU A DIFFERENT AGENT
+
+*Added 2026-09-02 by shard N, which found it in its own output and then in
+seven other shards'.*
+
+Every scraper here declares a polite UA — `CedarPress-research/1.0 (…contact…)`
+— and hands `robots.txt` to `RobotFileParser`, then asks:
+
+```python
+rp.can_fetch(UA, url)          # UA = "CedarPress-research/1.0 (…)"
+```
+
+`penobscotnation.org` publishes:
+
+```
+User-agent: ClaudeBot
+Disallow: /
+...
+User-agent: *
+Allow: /
+```
+
+Our UA string contains no `ClaudeBot` token, so the parser matched the
+permissive wildcard block and returned **allowed**. The site was fetched.
+`elyshoshonetribe.com` names `ClaudeBot` and `anthropic-ai` and went the same
+way. Cedar had already ruled on both hosts on 2026-08-26 — *"the named-agent
+rule is more specific and therefore governs us"* — and excluded them from
+Wayback for it. The ruling was in the registry; the code never asked.
+
+**A named-agent disallow is aimed at us.** Declaring a project-specific UA is a
+courtesy that tells a server who is calling; it is not a way to stop being the
+agent the publisher refused. Reading the wildcard block instead of the block
+with our name on it is the same shape as every other defect in this document:
+a check that ran, passed, and was not measuring what its name says.
+
+**The fix, and it is three lines:**
+
+```python
+AGENT_TOKENS = ("ClaudeBot", "anthropic-ai", "Claude-User",
+                "Claude-SearchBot", "Claude-Web")
+for tok in (UA,) + AGENT_TOKENS:
+    if not rp.can_fetch(tok, url):
+        return False, "robots.txt Disallow for " + tok
+```
+
+Most restrictive answer wins, and name the token that refused so the row says
+who was being spoken to.
+
+### The exposure, measured
+
+Re-checking every host shard N had fetched found **two more** beyond the two
+from the registry — `sanipueblo.org` (Pueblo of San Ildefonso) and
+`loscoyotestribe.org` (Los Coyotes). All four were purged: cached bodies
+deleted, rows removed, entities re-run, and the outcome recorded as
+`TERMS_RESTRICTED_DO_NOT_HARVEST` / `government_refused_robots` — **a site that
+exists and refuses us, which is a finding and not an absence.**
+
+An offline cross-check of the merged `cedar_web_map.csv` against the
+`source_terms_status` column of
+`review/tribal_vendor_list_registry_2026-08-26.csv` then found **42 rows
+carrying a 2xx from a host already recorded as refusing this agent or stating
+restrictive terms**, spread across shards A, B, C, D, E, F, G and N. Shard N's
+four are cleared. The other 38 are listed per row, with the registry's own
+quotation of the terms, in **`review/1020_named_agent_robots_exposure.csv`**
+for the shards that own them.
+
+**Two standing lessons:**
+
+1. **Ask robots as every name that means you.** Anthropic's crawler tokens are
+   the ones publishers actually write.
+2. **When one workstream records a refusal, the others must be able to see
+   it.** The Penobscot and Ely Shoshone refusals were documented, quoted and
+   correctly reasoned in the vendor-list registry two weeks before four other
+   shards fetched a restricted host. A ruling that lives only in a CSV nobody
+   joins to is a ruling that gets re-broken. Read
+   `source_terms_status` before you fetch.

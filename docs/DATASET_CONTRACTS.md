@@ -348,7 +348,7 @@ Rebuild: `py -3 code/build.py run nagpra --execute` — 5 tables.
 | `fr_nagpra_title_index.csv` | shippable | — | — | — |
 | `fr_nagpra_title_index_year.csv` | shippable | — | — | — |
 | `nagpra_notice_entity_bridge.csv` | shippable | `tribe_id` | `77_build_nagpra_dataset.py` | `503_identity.py` |
-| `nagpra_notice_institutions.csv` | shippable | — | — | — |
+| `nagpra_notice_institutions.csv` | shippable | — | `1077_nagpra_institution_grain.py` | `1084_nagpra_split_artefact_audit.py` |
 | `nagpra_notices.csv` | shippable | — | `77_build_nagpra_dataset.py` | `1077_nagpra_institution_grain.py` |
 
 Declared grain — validated against the file on every run:
@@ -562,7 +562,7 @@ Rebuild: `py -3 code/build.py run contractors --execute` — 11 tables.
 | `contractor_ranking.csv` | shippable | — | — | — |
 | `fpds_uei_cage_map.csv` | shippable | `uei` `cage_code` | — | — |
 | `fpds_uei_edges.csv` | shippable | — | `13_build_fpds_hierarchy.py` | `26_fix_sanity_failures.py` |
-| `prime_contracts.csv` | shippable | `tribe_id` `cedar_uid` `cage_code` | `40_build_prime_contracts.py` `871_promote_geo_keys_contracts.py` | `1075_fix_old_harbor_attribution.py` `1076_clear_self_parent_piid.py` `114_pull_prime_archive.py` `131_merge_archive_backfill.py` `174_apply_rulings_to_source_tables.py` `207_normalize_extent_competed.py` `366_courtlistener_ownership_adjudication.py` `40_build_prime_contracts.py` `429_apply_asof_ownership_status.py` `430_restore_prime_transaction_key.py` `950_promote_contract_attributes.py` |
+| `prime_contracts.csv` | shippable | `tribe_id` `cedar_uid` `cage_code` | `40_build_prime_contracts.py` `871_promote_geo_keys_contracts.py` | `1075_fix_old_harbor_attribution.py` `1076_clear_self_parent_piid.py` `1085_prime_psc_desc_repull.py` `114_pull_prime_archive.py` `131_merge_archive_backfill.py` `174_apply_rulings_to_source_tables.py` `207_normalize_extent_competed.py` `366_courtlistener_ownership_adjudication.py` `40_build_prime_contracts.py` `429_apply_asof_ownership_status.py` `430_restore_prime_transaction_key.py` `950_promote_contract_attributes.py` |
 | `prime_contracts_archive_backfill.csv` | shippable | `tribe_id` `cedar_uid` `cage_code` | `114_pull_prime_archive.py` | `430_restore_prime_transaction_key.py` |
 | `prime_contracts_awards.csv` | shippable | `tribe_id` `cedar_uid` `cage_code` | — | — |
 | `prime_contracts_entity_year.csv` | shippable | `tribe_id` `cedar_uid` | `40_build_prime_contracts.py` | `131_merge_archive_backfill.py` `428_rebuild_prime_entity_year.py` |
@@ -1096,7 +1096,7 @@ Rebuild: `py -3 code/build.py run _entity_layer --execute` — 49 tables.
 | `admin_regions.csv` | shippable | `administrative_region_id` | — | — |
 | `bie_uio_dollars_by_entity.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
 | `bie_uio_identifier_links.csv` | internal-by-decision | `tribe_id` `cedar_uid` `uei` `ein` | — | — |
-| `cedar_correction_register.csv` | shippable | `entity_id` | — | — |
+| `cedar_correction_register.csv` | shippable | `cedar_uid` `entity_id` | — | — |
 | `cedar_entity_freshness.csv` | UNDOCUMENTED | `cedar_uid` | — | — |
 | `cedar_entity_identity_crosswalk.csv` | shippable | `cedar_uid` | — | — |
 | `cedar_entity_spine.csv` | unregistered | `tribe_id` `cedar_uid` | `01_build_entity_spine.py` | `503_identity.py` `61_add_nho_intertribal_to_spine.py` |
@@ -1114,10 +1114,10 @@ Rebuild: `py -3 code/build.py run _entity_layer --execute` — 49 tables.
 | `entity_candidates_new.csv` | internal-by-decision | `cedar_uid` | — | — |
 | `entity_candidates_rejected.csv` | internal-by-decision | `cedar_uid` | — | — |
 | `entity_dated_public_facts.csv` | UNDOCUMENTED | `cedar_uid` | — | — |
-| `entity_evidence_profile.csv` | internal-by-decision | — | `151_rebuild_entity_evidence_profile.py` | `110_build_harmonized_views.py` |
+| `entity_evidence_profile.csv` | internal-by-decision | `cedar_uid` | `151_rebuild_entity_evidence_profile.py` | `110_build_harmonized_views.py` |
 | `entity_hierarchy.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
 | `entity_name_harvest.csv` | internal-by-decision | — | — | — |
-| `entity_relationships.csv` | shippable | — | `97_build_aliases_and_relationships.py` | `310_correct_overstated_owned_by_edge_tiers.py` |
+| `entity_relationships.csv` | shippable | — | `97_build_aliases_and_relationships.py` | `1098_entity_rel_counterparty.py` `310_correct_overstated_owned_by_edge_tiers.py` |
 | `entity_year_coverage.csv` | internal-by-decision | — | — | — |
 | `entity_year_panel.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
 | `federal_recognition_events.csv` | shippable | `tribe_id` `cedar_uid` | — | — |

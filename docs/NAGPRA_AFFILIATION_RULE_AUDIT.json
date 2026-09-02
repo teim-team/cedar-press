@@ -1,0 +1,149 @@
+{
+  "measured_date": "2026-09-02",
+  "notices": 6792,
+  "bridge_rows": 51579,
+  "cached_texts": 6792,
+  "R1": {
+    "bridge_rows_measured_against_own_full_text": 51579,
+    "rows_whose_verbatim_name_is_absent_from_that_notice": 324,
+    "rows_whose_verbatim_name_is_absent_from_its_own_span": 11964,
+    "resolve_method_heads": {
+      "alias": 26126,
+      "containment": 11021,
+      "core": 5461,
+      "exact": 4007,
+      "no_spine_match": 2383,
+      "generic_reference": 863,
+      "conjunction_split+alias": 620,
+      "conjunction_split+containment": 391,
+      "conjunction_split+core": 356,
+      "ambiguous_containment": 219,
+      "conjunction_split+exact": 129,
+      "ambiguous_core": 3
+    },
+    "resolve_methods_naming_geography": []
+  },
+  "R2": {
+    "identity_layer_alias_rows": 6298,
+    "identity_layer_rows_sourced_from_nagpra": 0,
+    "republication": {
+      "corrections_folded": 269,
+      "jaccard_pairs_folded": 3,
+      "notices": 6792,
+      "families": 6520
+    },
+    "distinct_unresolved_party_names": 1091,
+    "clearing_three_notices": 166,
+    "clearing_three_INDEPENDENT_notices": 166,
+    "demoted_by_the_independence_test": 0,
+    "nagpra_aliases_below_the_bar": 0
+  },
+  "R3": {
+    "columns_tested": [
+      "responsible_party_statement",
+      "mni_statements",
+      "removal_location_statements"
+    ],
+    "columns_excluded_as_not_free_text": [
+      "aboriginal_land_entity_ids",
+      "affiliated_entity_ids",
+      "agency_names",
+      "artifact_mtime",
+      "consulted_entity_ids",
+      "cultural_items_total_stated",
+      "culturally_unidentifiable",
+      "disposition_priority_entity_ids",
+      "document_number",
+      "fetched_date",
+      "full_text_url",
+      "has_resolved_entity",
+      "html_url",
+      "institution_city",
+      "institution_count",
+      "institution_name",
+      "institution_name_basis",
+      "institution_names_all",
+      "institution_primary",
+      "institution_state",
+      "institution_type_derived",
+      "is_correction",
+      "letter_of_support_entity_ids",
+      "lineal_descendant_determination",
+      "mni_basis",
+      "mni_statement_count",
+      "mni_total_stated",
+      "n_aboriginal_land_named",
+      "n_aboriginal_land_resolved",
+      "n_affiliated_named",
+      "n_affiliated_resolved",
+      "n_associated_funerary_objects_stated",
+      "n_consulted_named",
+      "n_consulted_resolved",
+      "n_disposition_priority_named",
+      "n_disposition_priority_resolved",
+      "n_entities_resolved",
+      "n_letter_of_support_named",
+      "n_letter_of_support_resolved",
+      "n_objects_of_cultural_patrimony_stated",
+      "n_parties_named",
+      "n_repatriation_recipient_named",
+      "n_repatriation_recipient_resolved",
+      "n_sacred_objects_stated",
+      "n_unassociated_funerary_objects_stated",
+      "notice_title_form",
+      "notice_type",
+      "object_categories",
+      "parent_dataset",
+      "parse_template",
+      "pdf_url",
+      "publication_date",
+      "publication_year",
+      "removal_counties",
+      "removal_location_basis",
+      "removal_states",
+      "repatriation_eligible_date",
+      "repatriation_recipient_entity_ids",
+      "response_deadline_date",
+      "source_url",
+      "spans_found",
+      "statute_stage",
+      "title",
+      "window_days_derived"
+    ],
+    "per_column": {
+      "responsible_party_statement": {
+        "non_blank": 3064,
+        "verbatim_in_source": 3059,
+        "not_verbatim": 5,
+        "first_example_not_verbatim": [
+          "01-9751",
+          "National Park Service unit that has control or possession of these Native American human remains and associated funerary objects"
+        ]
+      },
+      "mni_statements": {
+        "non_blank": 4435,
+        "verbatim_in_source": 0,
+        "not_verbatim": 4435,
+        "first_example_not_verbatim": [
+          "95-561",
+          "description:human remains of two individuals || description:human remains of twelve individuals || description:human remains of two individuals || des"
+        ]
+      },
+      "removal_location_statements": {
+        "non_blank": 5412,
+        "verbatim_in_source": 5285,
+        "not_verbatim": 127,
+        "first_example_not_verbatim": [
+          "97-15224",
+          "``under a fir tree'' by M || Othello Street on Lake Washington in Seattle, King County, WA during city street construction || an unknown location in t"
+        ]
+      }
+    },
+    "cells_not_verbatim_in_source": 4567
+  },
+  "unmeasured": [],
+  "defects": [
+    "D1 324 bridge rows name a party that is not in that notice's own text",
+    "D3 column `mni_statements` is non-verbatim on 4,435 of 4,435 non-blank cells (100.0%)"
+  ]
+}

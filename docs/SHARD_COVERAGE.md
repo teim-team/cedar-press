@@ -18,7 +18,7 @@
 | `shard_k` | Alaska Native Village governments | RUNNING_OR_DONE | 1,201 | 228 |
 | `shard_l` | vendor lists, unsurveyed federally recognized tribes, 1st half | NOT_STARTED | 0 | 0 |
 | `shard_m` | vendor lists, unsurveyed federally recognized tribes, 2nd half | NOT_STARTED | 0 | 0 |
-| `shard_n` | the coverage tail - every entity no other shard touched | RUNNING_OR_DONE | 221 | 139 |
+| `shard_n` | the coverage tail - every entity no other shard touched | RUNNING_OR_DONE | 215 | 139 |
 
 ## Coverage by entity class
 
@@ -26,7 +26,7 @@
 
 | entity class | in register | with a URL | touched, none found | untouched |
 |---|---:|---:|---:|---:|
-| Federally recognized tribe | 349 | 332 | 17 | 0 |
+| Federally recognized tribe | 349 | 328 | 21 | 0 |
 | Federally recognized Alaska Native Village | 228 | 228 | 0 | 0 |
 | Native Hawaiian Organization | 210 | 117 | 93 | 0 |
 | BIE School | 185 | 183 | 2 | 0 |
@@ -43,20 +43,20 @@
 | Alaska Native Regional Corporation | 12 | 12 | 0 | 0 |
 | ANCSA Group Corporation | 6 | 0 | 6 | 0 |
 | State-level constituency entity | 3 | 2 | 1 | 0 |
-| **total** | **1,555** | **1,261** | **294** | **0** |
+| **total** | **1,555** | **1,257** | **298** | **0** |
 
 ## URL types harvested
 
 | type | n |
 |---|---:|
-| government | 603 |
+| government | 599 |
 | newsletter | 545 |
 | casino | 448 |
 | corporate | 422 |
 | institution | 419 |
 | api_endpoint | 371 |
 | organization | 320 |
-| form_990 | 305 |
+| form_990 | 299 |
 | tribal_council | 254 |
 | regulator_record | 238 |
 | consortium | 227 |
@@ -65,11 +65,11 @@
 | subsidiary_list | 101 |
 | gaming_authority | 90 |
 | annual_report | 71 |
-| none_established | 67 |
+| none_established | 69 |
 | recognition_record | 64 |
 | wp_media_pdf | 61 |
-| machine_readable_surface | 53 |
 | failed_government | 51 |
+| machine_readable_surface | 49 |
 | failed_casino | 48 |
 | membership_list | 46 |
 | wp_types | 44 |
@@ -79,7 +79,7 @@
 | failed_newsletter | 26 |
 | business_licence | 25 |
 | unverified_casino | 24 |
-| no_own_site_found | 21 |
+| no_own_site_found | 23 |
 | sitemap | 20 |
 | procurement | 20 |
 | certification | 19 |
@@ -90,13 +90,13 @@
 | unverified_newsletter | 5 |
 | directory_profile | 5 |
 | unverified_tero | 4 |
+| TERMS_RESTRICTED_DO_NOT_HARVEST | 4 |
 | government_blocked_bot_protection | 4 |
+| government_refused_robots | 3 |
 | closed_property | 2 |
-| TERMS_RESTRICTED_DO_NOT_HARVEST | 2 |
 | government_candidate | 1 |
 | placeholder_site | 1 |
 | unverified_business_licence | 1 |
 | DOMAIN_HIJACKED_DO_NOT_LINK | 1 |
 | leadership | 1 |
-| government_refused_robots | 1 |
 | unverified_organization | 1 |

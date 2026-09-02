@@ -3037,8 +3037,12 @@
      "grain_evidence": {},
      "key_refused": {},
      "population_scope": {},
-     "rebuilt_by": [],
-     "enriched_by": [],
+     "rebuilt_by": [
+      "1077_nagpra_institution_grain.py"
+     ],
+     "enriched_by": [
+      "1084_nagpra_split_artefact_audit.py"
+     ],
      "never_run_warning": []
     },
     {
@@ -4867,6 +4871,7 @@
      "enriched_by": [
       "1075_fix_old_harbor_attribution.py",
       "1076_clear_self_parent_piid.py",
+      "1085_prime_psc_desc_repull.py",
       "114_pull_prime_archive.py",
       "131_merge_archive_backfill.py",
       "174_apply_rulings_to_source_tables.py",
@@ -9626,6 +9631,7 @@
      "table": "cedar_correction_register.csv",
      "status": "shippable",
      "key_columns": [
+      "cedar_uid",
       "entity_id"
      ],
      "grain": "one row per recorded correction action - what was withdrawn or repointed, in which table, and why",
@@ -10239,7 +10245,9 @@
     {
      "table": "entity_evidence_profile.csv",
      "status": "internal-by-decision",
-     "key_columns": [],
+     "key_columns": [
+      "cedar_uid"
+     ],
      "grain": "UNSTATED - no owner ruling or build log has declared this table's grain",
      "primary_key": [],
      "join_cardinality": {},
@@ -10360,6 +10368,7 @@
       "97_build_aliases_and_relationships.py"
      ],
      "enriched_by": [
+      "1098_entity_rel_counterparty.py",
       "310_correct_overstated_owned_by_edge_tiers.py"
      ],
      "never_run_warning": []

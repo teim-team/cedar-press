@@ -771,10 +771,22 @@ def route_irs990(tail, ents, budget=300):
 
 
 # -------------------------------------------------- R4  IRS 990, by name
-PP_SEARCH = ("https://projects.propublica.org/nonprofits/api/v2/search.json"
-             "?q=%s&state%%5Bid%%5D=%s")
-PP_SEARCH_NOSTATE = ("https://projects.propublica.org/nonprofits/api/v2/"
-                     "search.json?q=%s")
+PP_SEARCH_BASE = "https://projects.propublica.org/nonprofits/api/v2/search.json"
+
+
+def pp_search_url(name, state):
+    """`urllib.parse.quote` LEAVES `/` ALONE, and that is a 404 here.
+
+    `quote()` defaults to safe="/", so "Baca /Dlo'Ay Azhi Community School"
+    became a query string containing a literal slash, ProPublica answered 404,
+    and the first three entities in the queue all had that shape -- which
+    tripped the host-refusing stop and ended the route after two rows. The
+    host was fine. `urlencode` escapes everything.
+    """
+    q = {"q": deacc(name)}
+    if state:
+        q["state[id]"] = state
+    return PP_SEARCH_BASE + "?" + urllib.parse.urlencode(q)
 
 same_organisation = _N.same_organisation
 
@@ -836,10 +848,25 @@ def route_irs990_search(tail, ents, budget=320):
             rows.append(r)
             continue
         st = states.get(u, "")
-        q = urllib.parse.quote(deacc(nm))
-        url = (PP_SEARCH % (q, st)) if st else (PP_SEARCH_NOSTATE % q)
+        url = pp_search_url(nm, st)
         spent += 1
         obj, note = get_json(url)
+        if obj is None and note == "HTTP 404":
+            # PROPUBLICA ANSWERS A ZERO-RESULT SEARCH WITH 404, NOT AN EMPTY
+            # LIST. Measured 2026-09-02: `q=alu+like` -> 200 with one
+            # organisation, `q=ahfachkee+school` -> 404, `q=school` -> 200.
+            # 404 here is a fact about the QUERY, not about the host -- which
+            # is exactly the distinction START_HERE draws -- and counting it
+            # as a refusal stopped this route after two rows on its first run.
+            r.update({"match_method": "NOT_MATCHED",
+                      "match_note": "NO_IRS_ORGANISATION_FOR_THIS_NAME",
+                      "as_of_date_basis": (
+                          "no date: the IRS Exempt Organizations file "
+                          "contains no organisation matching this name"
+                          + (" in " + st if st else "")
+                          + ". SOURCE_DOES_NOT_PUBLISH, not a Cedar gap.")})
+            rows.append(r)
+            continue
         if obj is None:
             refused.append(nm[:30] + ":" + note)
             if not any(x["as_of_date"] for x in rows) and len(refused) >= 3:

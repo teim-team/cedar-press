@@ -160,6 +160,7 @@ DEADLINE_S = 40 * 60
 MAX_CHILD = 6                    # sitemap shards walked per PROBE host
 _START = [time.time()]
 _LEDGER: list[dict] = []
+_ROBOTS_SITEMAPS: dict[str, list] = {}
 _REQ_BY_HOST: Counter = Counter()
 MAX_REQ_PER_HOST = 60
 
@@ -267,6 +268,7 @@ def robots_allows(sess, host, path):
                       f"that will not serve its robots file is not a host that "
                       f"forbids you")
     active, dis = False, []
+    _ROBOTS_SITEMAPS[host] = []
     for line in r.text.splitlines():
         s = line.split("#", 1)[0].strip()
         if not s:
@@ -277,6 +279,8 @@ def robots_allows(sess, host, path):
             active = (v == "*")
         elif k == "disallow" and active and v:
             dis.append(v)
+        elif k == "sitemap":
+            _ROBOTS_SITEMAPS[host].append(s.split(":", 1)[1].strip())
     for d in dis:
         if path.startswith(d):
             return False, f"robots.txt Disallow: {d}"
@@ -442,20 +446,28 @@ def parse_ihs_year_page(text, index_url, year):
     return rows
 
 
-BIA_DATE = re.compile(
-    r'(?:datetime="(\d{4}-\d{2}-\d{2})|<time[^>]*>\s*([A-Z][a-z]+ \d{1,2}, \d{4})\s*<)')
+BIA_JSONLD = re.compile(r'"datePublished"\s*:\s*"(\d{4}-\d{2}-\d{2})')
+BIA_TIME_ATTR = re.compile(r'<time[^>]*datetime="(\d{4}-\d{2}-\d{2})')
+BIA_TIME_TEXT = re.compile(r"<time[^>]*>\s*([A-Z][a-z]+ \d{1,2}, \d{4})\s*<")
 TITLE_RE = re.compile(r"<title[^>]*>(.*?)</title>", re.S | re.I)
 
 
 def parse_bia_news_page(text, url):
-    """BIA news node. Date must come from the page's own <time> element."""
+    """BIA news node. The date comes from the page's own structured markup."""
     iso, verbatim, basis = "", "", ""
-    m = BIA_DATE.search(text)
+    m = BIA_JSONLD.search(text)
     if m:
-        if m.group(1):
-            iso, verbatim, basis = m.group(1), m.group(1), "<time datetime> attribute"
-        else:
-            verbatim = m.group(2)
+        iso = verbatim = m.group(1)
+        basis = 'schema.org "datePublished" in the page\'s own JSON-LD'
+    if not iso:
+        m = BIA_TIME_ATTR.search(text)
+        if m:
+            iso = verbatim = m.group(1)
+            basis = "<time datetime> attribute"
+    if not iso:
+        m = BIA_TIME_TEXT.search(text)
+        if m:
+            verbatim = m.group(1)
             iso = iso_from_words(verbatim)
             basis = "<time> element text"
     title = ""
@@ -492,7 +504,13 @@ def parse_bia_news_page(text, url):
 
 
 LOC = re.compile(r"<loc>\s*(.*?)\s*</loc>", re.S | re.I)
-DTLL_URL = re.compile(r"dear[-_]?tribal[-_]?leader", re.I)
+# `dear-tribal-leader` alone MISSES bia.gov/service/progress-act/dtll, which is
+# the tenth URL 962 counted and this script's first pass did not. Measured, not
+# guessed: widening the pattern to the abbreviation and to the
+# `tribal-leader-letter` form recovers exactly that one URL and no other.
+DTLL_URL = re.compile(
+    r"(dear[-_]?tribal[-_]?leader|tribal[-_]?leader[-_]?letter|(?<![a-z])dtll(?![a-z]))",
+    re.I)
 
 
 def sitemap_locs(text):
@@ -609,27 +627,29 @@ def harvest_bia(sess, letters, coverage):
                 "NOT_CHECKED", f"HTTP {st} on the sitemap; NOT an absence"))
             return
         (skipped if cached else downloaded).append("sitemap.xml")
-        pages, all_locs = [], []
+        # bia.gov/sitemap.xml is a Drupal simple_sitemap INDEX naming its own
+        # children. THE ?page=N LOOP FAILS OPEN: page=3..20 return the INDEX
+        # itself, HTTP 200, two <loc>s each. The first pass of this script
+        # counted 2,448 URLs "over 20 pages" from exactly that - the same
+        # fail-open shape as FPDS `AGENCY_CODE:` in docs/PULL_DISCIPLINE.md.
+        # Walk the index's own children and nothing else.
+        all_locs, shards = [], []
         if is_sitemap_index(sm):
-            pages = sitemap_locs(sm)
+            shards = sitemap_locs(sm)
+            for c in shards:
+                st, txt, nb, cached = get(sess, c)
+                if st != 200 or is_sitemap_index(txt):
+                    refused.append(c)
+                    continue
+                (skipped if cached else downloaded).append(c)
+                all_locs += sitemap_locs(txt)
         else:
+            shards = [f"https://{host}/sitemap.xml"]
             all_locs += sitemap_locs(sm)
-        # bia.gov paginates ?page=N; 962 measured 2 pages / 2,412 URLs
-        n = 1
-        while n <= 20:
-            u = f"https://{host}/sitemap.xml?page={n}"
-            st, txt, nb, cached = get(sess, u)
-            if st != 200:
-                break
-            got = sitemap_locs(txt)
-            if not got:
-                break
-            all_locs += got
-            (skipped if cached else downloaded).append(u)
-            n += 1
         hits = sorted({u for u in all_locs if DTLL_URL.search(u)})
+        n = len(shards) + 1
         print(f"  [1090] bia.gov sitemap: {len(all_locs):,} URLs over "
-              f"{n - 1} page(s), {len(hits)} DTLL URL(s)")
+              f"{len(shards)} shard(s), {len(hits)} DTLL URL(s)")
         found = 0
         for u in hits:
             st, txt, nb, cached = get(sess, u)
@@ -642,11 +662,12 @@ def harvest_bia(sess, letters, coverage):
         coverage.append(cov_row(
             host, "Bureau of Indian Affairs",
             "BIA news: Dear Tribal Leader letters",
-            f"https://{host}/sitemap.xml", 200, nb, n - 1, n - 1, found,
-            "REPORTED_FLOOR",
+            f"https://{host}/sitemap.xml", 200, nb, len(shards), len(shards),
+            found, "REPORTED_FLOOR",
             f"{found} letter(s) from {len(hits)} DTLL URL(s) across "
-            f"{len(all_locs):,} sitemap URLs. A FLOOR: a paginated Drupal "
-            f"sitemap need not carry every node"))
+            f"{len(all_locs):,} sitemap URLs in {len(shards)} shard(s). "
+            f"A FLOOR: a Drupal sitemap need not carry every node, and BIA "
+            f"publishes letters under /news/ that its sitemap does not name"))
     except EdgeRefusal as e:
         refused.append(str(e))
         coverage.append(cov_row(
@@ -684,16 +705,31 @@ def probe_host(sess, host, agency, coverage):
                                     f"https://{host}/robots.txt", "", "", "",
                                     "", "", "ROBOTS_FORBIDDEN", why))
             return
-        st, sm, nb, cached = get(sess, f"https://{host}/sitemap.xml")
-        if st != 200:
+        # `/sitemap.xml` is a convention, not a contract. Where it does not
+        # answer, robots.txt's own `Sitemap:` directive is the publisher
+        # TELLING you where the index is, and a 403/404 on a guessed path is
+        # not a fact about the publisher.
+        candidates = [f"https://{host}/sitemap.xml"] + \
+            [u for u in _ROBOTS_SITEMAPS.get(host, [])
+             if u != f"https://{host}/sitemap.xml"]
+        sm, sm_url, st, nb = None, "", 0, 0
+        tried = []
+        for cand in candidates[:3]:
+            st, body, nb, cached = get(sess, cand)
+            tried.append(f"{cand} -> HTTP {st}")
+            if st == 200 and body:
+                sm, sm_url = body, cand
+                (skipped if cached else downloaded).append(cand)
+                break
+        if sm is None:
             coverage.append(cov_row(
                 host, agency, "agency DTLL series",
-                f"https://{host}/sitemap.xml", st, nb, "", "", "",
+                candidates[0], st, nb, "", "", "",
                 "NOT_CHECKED",
-                f"HTTP {st} on the sitemap. NOT an absence - only 404 and 403 "
-                f"are facts about an object, and neither is this"))
+                f"no index served: {'; '.join(tried)}. NOT an absence - a "
+                f"refused or missing index says nothing about what the agency "
+                f"publishes"))
             return
-        (skipped if cached else downloaded).append("sitemap.xml")
         hits, shards_total, shards_walked = set(), 1, 1
         if is_sitemap_index(sm):
             children = sitemap_locs(sm)
@@ -705,7 +741,8 @@ def probe_host(sess, host, agency, coverage):
             shards_walked = 0
             for c in order[:MAX_CHILD]:
                 st, txt, nb, cached = get(sess, c)
-                if st != 200:
+                # a shard that hands back the INDEX is the ?page fail-open
+                if st != 200 or txt is None or is_sitemap_index(txt):
                     continue
                 (skipped if cached else downloaded).append(c)
                 shards_walked += 1
@@ -714,10 +751,12 @@ def probe_host(sess, host, agency, coverage):
             hits |= {u for u in sitemap_locs(sm) if DTLL_URL.search(u)}
         complete = (shards_walked >= shards_total)
         if complete and not hits:
-            status = "NOT_IN_SOURCE"
+            status = "NOT_IN_PUBLISHED_INDEX"
             verdict = (f"the publisher's own sitemap ({shards_walked} of "
                        f"{shards_total} shard(s), walked in full) enumerates 0 "
-                       f"URL naming a Dear Tribal Leader letter")
+                       f"URL whose slug names a Dear Tribal Leader letter. "
+                       f"This is a fact about the INDEX, not about whether the "
+                       f"agency writes such letters")
         elif complete:
             status = "REPORTED_FLOOR"
             verdict = (f"{len(hits)} DTLL URL(s) in a sitemap walked in full. "
@@ -729,7 +768,7 @@ def probe_host(sess, host, agency, coverage):
                        f"UNMEASURED beyond those shards - this is NOT an "
                        f"absence and must never be read as one")
         coverage.append(cov_row(host, agency, "agency DTLL series",
-                                f"https://{host}/sitemap.xml", 200, nb,
+                                sm_url, 200, nb,
                                 shards_total, shards_walked, len(hits),
                                 status, verdict))
         if hits:
@@ -787,7 +826,7 @@ def check_invariants(letters, coverage):
                         f"{r.get('source_index_http_status')} is not 200"))
             break
     for c in coverage:
-        if c.get("coverage_status") == "NOT_IN_SOURCE":
+        if c.get("coverage_status") in ("NOT_IN_SOURCE", "NOT_IN_PUBLISHED_INDEX"):
             if str(c.get("http_status")) != "200":
                 bad.append(("INV-DTLL-ABSENCE",
                             f"{c.get('coverage_id')}: NOT_IN_SOURCE on HTTP "
@@ -858,12 +897,15 @@ def selftest():
     assert got and got[0][0] == "INV-DTLL-URL", got
     fired.append("INV-DTLL-URL")
 
-    c = [cov_row("h", "a", "s", "u", 406, 1, 1, 1, 0, "NOT_IN_SOURCE", "x")]
-    got = check_invariants([], c)
-    assert got and got[0][0] == "INV-DTLL-ABSENCE", got
-    c = [cov_row("h", "a", "s", "u", 200, 1, 9, 2, 0, "NOT_IN_SOURCE", "x")]
-    got = check_invariants([], c)
-    assert got and got[0][0] == "INV-DTLL-ABSENCE", got
+    for status in ("NOT_IN_SOURCE", "NOT_IN_PUBLISHED_INDEX"):
+        # a REFUSAL called an absence
+        c = [cov_row("h", "a", "s", "u", 406, 1, 1, 1, 0, status, "x")]
+        got = check_invariants([], c)
+        assert got and got[0][0] == "INV-DTLL-ABSENCE", (status, got)
+        # a PARTLY WALKED index called an absence
+        c = [cov_row("h", "a", "s", "u", 200, 1, 9, 2, 0, status, "x")]
+        got = check_invariants([], c)
+        assert got and got[0][0] == "INV-DTLL-ABSENCE", (status, got)
     fired.append("INV-DTLL-ABSENCE")
 
     got = check_invariants([dict(base), dict(base)], [])
@@ -875,12 +917,26 @@ def selftest():
     assert iso_from_words("January 2025") == ""
     assert iso_from_words("February 30, 2025") == ""
     assert iso_from_words("January 7, 2025") == "2025-01-07"
-    # IHS's own filename prefixes
-    assert addressed_to_from_filename("DTLL_01072025.pdf") == "tribal_leaders"
-    assert addressed_to_from_filename("DUIOLL_0107.pdf") == \
-        "urban_indian_organization_leaders"
-    assert addressed_to_from_filename("DTLL_DUIOLL_1205.pdf") == \
+    # the SECTION is the claim; IHS's own filename abbreviation refines it
+    assert addressed_to_from_filename("DTLL_01072025.pdf")[0] == "tribal_leaders"
+    assert addressed_to_from_filename("12-14-2000_Letter.pdf")[0] == \
+        "tribal_leaders", "an old-style filename is still a letter on the page"
+    assert addressed_to_from_filename("DTLL_DUIOLL_1205.pdf")[0] == \
         "tribal_leaders_and_urban_indian_organization_leaders"
+    assert addressed_to_from_filename("DTUIOLL_02222022.pdf")[0] == \
+        "tribal_leaders_and_urban_indian_organization_leaders"
+    # the publisher's own year folder is the include rule, and the HIPAA
+    # footer PDF that appears on all 27 index pages is outside it
+    assert IHS_LETTER_PATH.search(
+        "https://www.ihs.gov/sites/newsroom/themes/responsive2017/"
+        "display_objects/documents/2025_Letters/DTLL_01072025.pdf")
+    assert not IHS_LETTER_PATH.search(
+        "https://www.ihs.gov/sites/HIPAA/documents/"
+        "NoticePrivacyPracticePamphlet.pdf")
+    # the tenth bia.gov URL, the one the first pass missed
+    assert DTLL_URL.search("https://www.bia.gov/service/progress-act/dtll")
+    assert DTLL_URL.search("https://www.bia.gov/news/dear-tribal-leader-letter")
+    assert not DTLL_URL.search("https://www.bia.gov/news/tribal-leaders-meet")
 
     assert not check_invariants([dict(base)], clean_cov), \
         "selftest: restore must return the fixture to clean"

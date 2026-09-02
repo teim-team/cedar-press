@@ -335,13 +335,16 @@ def parse_segment_tables(raw: str, form: str, refusals):
         if not SEGHDR_RE.match(ln):
             continue
         years, mon, day = [], None, None
+        year_line = period_line = ""
         for j in range(max(0, i - 10), i):
             ys = YEAR_RE.findall(lines[j])
             if len(ys) >= 2 and len(re.sub(r"[^A-Za-z]", "", lines[j])) < 60:
                 years = [int(y) for y in ys]
+                year_line = lines[j].strip()
             mp = PERIOD_HDR_RE.search(lines[j].strip())
             if mp:
                 mon, day = mp.group("mon"), int(mp.group("day"))
+                period_line = lines[j].strip()
         if not years:
             refusals["no_year_header"] += 1
             continue
@@ -372,9 +375,18 @@ def parse_segment_tables(raw: str, form: str, refusals):
             if len(nums) < len(years):
                 refusals["row_short_of_years"] += 1
                 continue
-            hdr = " ".join(x.strip() for x in lines[max(0, i - 6):i + 1] if x.strip())
+            # THE ROW GOES FIRST. The first version put the header first and
+            # truncated at 1,600 characters, and on two Mohegan 10-Ks the
+            # "header" was 1,600 characters of MD&A prose - so the quote for a
+            # correct figure contained no figure at all. A quote that does not
+            # contain the number it is evidence for is not evidence.
+            # The quote is the three lines that actually decided the reading:
+            # the period header, the year header and the property row. An
+            # earlier version pasted six preceding lines of MD&A prose instead,
+            # and on two Mohegan 10-Ks the truncated result contained no number.
             row = lines[k].strip()
-            quote = re.sub(r"\s+", " ", hdr + " || " + row).strip()
+            quote = re.sub(r"\s+", " ", " || ".join(
+                x for x in (period_line, year_line, lines[i].strip(), row) if x)).strip()
             for y, cell in zip(years, nums[:len(years)]):
                 m = NUMCELL_RE.match(cell)
                 val = float(m.group(1).replace(",", "")) * mult
