@@ -98,12 +98,18 @@ RESTRICTIVE_HOSTS = {
 RESTRICTIVE_UIDS = {"CE-0013K-5M", "CE-001BT-Q3", "CE-001CC-8N", "CE-00135-HP",
                     "CE-0007G-30", "CE-001AX-4Y", "CE-0014H-YJ", "CE-001AY-AQ"}
 
+# Tight. The loose version matched every casino press release whose slug
+# contained "times" or "journal" and returned 25 marketing articles as if they
+# were 25 publications. A channel is a PUBLICATION, not an article about a spa.
 NEWSY = re.compile(
-    r"(?i)(news[-_ ]?letter|newsletter|e-?news\b|tribal[-_ ]?news|"
-    r"bulletin|gazette|tribune|herald|journal|times\b|messenger|smoke[-_ ]signals|"
-    r"drum\b|voice\b|crier|observer|sentinel|press[-_ ]?release|"
-    r"annual[-_ ]?report|quarterly|monthly[-_ ]?report|periodical|publication)")
-BODYNEWS = re.compile(r"(?i)(newsletter|annual report|tribal news|bulletin|gazette)")
+    r"(?i)(news[-_ ]?letters?|e-?news\b|tribal[-_ ]?news\b|"
+    r"smoke[-_ ]signals|bulletins?\b|gazette|periodical|"
+    r"press[-_ ]?releases?|annual[-_ ]?reports?|publications?\b)")
+# newspaper mastheads: accepted from ANCHOR TEXT, where a human wrote the name,
+# never from a URL slug, where the same words are ordinary English.
+MASTHEAD = re.compile(
+    r"(?i)\b(tribune|herald|crier|messenger|sentinel|observer|"
+    r"the\s+\w+\s+(?:times|journal|voice|drum|news|word|eagle|arrow))\b")
 BIZ = re.compile(
     r"(?i)\b(acquisition|acquired|merger|joint venture|contract award|"
     r"economic development|enterprise|subsidiary|casino|revenue|"
@@ -208,7 +214,9 @@ def probe(ent, site):
         "checked_date": TODAY, "route_coverage": [], "requests_made": 0,
         "found": [], "wp_total_media": None, "archive_years": [],
         "business_signal_terms": [], "identical_body_hashes": False,
+        "soft_404_catchall": False,
         "robots": "", "robots_disallow": [], "outcome": "", "note": "",
+        "attribution_caution": "",
     }
     hashes = Counter()
     budget = [REQ_BUDGET]
@@ -219,7 +227,10 @@ def probe(ent, site):
         budget[0] -= 1
         rec["requests_made"] += 1
         r = get(url, **kw)
-        if r["md5"]:
+        # Only 200s are hashed. A host that 404s four probes with one custom
+        # error page is not the ?wpdmdl= pathology; it is a normal 404 page,
+        # and quarantining it would throw away good absences.
+        if r["md5"] and r["status"] == 200:
             hashes[r["md5"]] += 1
         return r
 
@@ -313,30 +324,79 @@ def probe(ent, site):
             for href, txt in re.findall(
                     r'(?is)<a[^>]+href=["\']([^"\']+)["\'][^>]*>(.{0,120}?)</a>', r["body"]):
                 flat = re.sub(r"<[^>]+>", " ", txt).strip()
-                if NEWSY.search(href) or NEWSY.search(flat):
+                if NEWSY.search(href) or NEWSY.search(flat) or MASTHEAD.search(flat):
                     u = urljoin(base, href)
                     if urlparse(u).scheme in ("http", "https"):
                         add("page", u, flat, technique="rendered homepage link (last resort)")
             rec["business_signal_terms"] += sorted(set(
                 x.lower() for x in BIZ.findall(r["body"])))[:12]
 
-    # ---- the download-side trap
+    # ---- the download-side trap, in two halves.
+    # A host that answers three DIFFERENT 200 requests with one identical body
+    # is serving a default. If that host also produced findings, those findings
+    # are untrustworthy and are discarded. If it produced none, the same fact is
+    # merely a soft-404 catch-all router, which is worth recording and is not a
+    # reason to throw away a legitimate absence.
     if hashes and max(hashes.values()) >= 3:
         rec["identical_body_hashes"] = True
-        rec["found"] = []
-        rec["outcome"] = "QUARANTINED_IDENTICAL_BODY_HASHES"
-        rec["note"] = ("host returned the same body md5 for %d different URLs; "
-                       "findings discarded - a 200 with a valid body is not proof "
-                       "the right object was served" % max(hashes.values()))
-        return rec
+        if rec["found"]:
+            rec["found"] = []
+            rec["outcome"] = "QUARANTINED_IDENTICAL_BODY_HASHES"
+            rec["note"] = ("host returned the same 200 body md5 for %d different "
+                           "URLs; findings discarded - a 200 with a valid body is "
+                           "not proof the right object was served"
+                           % max(hashes.values()))
+            return rec
+        rec["soft_404_catchall"] = True
+        rec["identical_body_hashes"] = False
+        rec["note"] = ("host answers unknown paths with one identical 200 body "
+                       "(soft-404 catch-all); no finding was derived from it")
 
-    # de-duplicate found URLs
+    # de-duplicate, then COLLAPSE ARTICLES INTO THE CHANNEL THEY BELONG TO.
+    # A sitemap listing 25 press releases under /press-release/<slug>/ is one
+    # channel with 25 items, not 25 publications. Recording it the other way
+    # inflates the corpus with marketing copy and hides the archive depth.
     seen, ded = set(), []
     for d in rec["found"]:
         if d["url"] not in seen:
             seen.add(d["url"])
             ded.append(d)
-    rec["found"] = ded[:25]
+    groups = defaultdict(list)
+    singles = []
+    for d in ded:
+        p = urlparse(d["url"])
+        segs = [s for s in p.path.split("/") if s]
+        if d["kind"] == "page" and len(segs) >= 2 and NEWSY.search(segs[0]):
+            groups["%s://%s/%s/" % (p.scheme, p.netloc, segs[0])].append(d)
+        else:
+            singles.append(d)
+    collapsed = []
+    for idx, items in groups.items():
+        if len(items) >= 3:
+            collapsed.append({
+                "kind": "channel_index", "url": idx,
+                "title": items[0].get("title", ""),
+                "archive_depth": "%d item URLs under this path in the site's own "
+                                 "index" % len(items),
+                "technique": items[0]["technique"] + " (articles collapsed to the "
+                                                     "channel path)",
+                "example_item_urls": [i["url"] for i in items[:3]],
+            })
+        else:
+            collapsed.extend(items)
+    rec["found"] = (collapsed + singles)[:25]
+
+    # attribution caution: the site we probed may belong to a regional
+    # consortium or health corporation rather than to this entity. Flag, do not
+    # drop - the web map put the URL there for a reason and that reason is
+    # recorded upstream.
+    toks = [t for t in re.split(r"[^a-z]+", rec["canonical_name"].lower()) if len(t) > 4]
+    if toks and not any(t[:6] in host.replace("-", "") for t in toks):
+        rec["attribution_caution"] = (
+            "site host %s does not carry this entity's name; the channel found "
+            "here may be published by another organisation (a regional "
+            "consortium, health corporation or enterprise). Verify the publisher "
+            "before treating this as the entity's own newsletter." % host)
     rec["archive_years"] = sorted(set(rec["archive_years"]))
     rec["business_signal_terms"] = sorted(set(rec["business_signal_terms"]))[:15]
     rec["outcome"] = "FOUND" if rec["found"] else "NONE_FOUND"
@@ -377,6 +437,13 @@ def load_targets():
             skipped.append((c, "no_live_site"))
             continue
         h = urlparse(url).netloc.lower().lstrip("www.")
+        # A Wayback base is not a site. Path-joining /wp-json/ onto a
+        # /web/<ts>/ URL produces nonsense, and a snapshot of a THIRD PARTY's
+        # page (the entity's regional consortium, typically) is not evidence
+        # about this entity's own publishing.
+        if h.endswith("archive.org") or h.endswith("archive-it.org"):
+            skipped.append((c, "site_url_is_a_wayback_snapshot"))
+            continue
         if any(h == d or h.endswith("." + d) for d in RESTRICTIVE_HOSTS):
             skipped.append((c, "TERMS_STATED_RESTRICTIVE_host"))
             continue

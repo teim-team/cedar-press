@@ -1849,8 +1849,274 @@ GRAIN_FAADS = {
     # a buyer may total from it, lives in docs/MONEY_TOTALLING_RULES.md
     # between the FAADS markers.
 }
+# ---------------------------------------------------------------------------
+# --- SUBAWARD-FUNDING: the three tables WS1 and WS4 both left undeclared.
+#     Workstream SUBAWARD-FUNDING, 2026-09-02. Touches only this block and the
+#     four side maps below it.
+#
+# WS1 and WS4 refused `subawards.csv`, `native_passthrough.csv` and
+# `faads_transactions_all_agencies.csv` for the same stated reason - "no table
+# here has a validatable key" - and on the evidence they had, both were right.
+# TWO OF THE THREE NOW HAVE ONE, RECOVERED FROM THE RETAINED SOURCE. The third
+# does not and never will, and it is declared with the refusal attached rather
+# than left silent.
+#
+# WHAT CHANGED FOR subawards.csv. `121` diagnosed on 2026-09-01 that the FSRS
+# extract has always carried `subaward_sam_report_id` - one UUID per SAM
+# filing, 765,109 of 765,109 distinct on FY2021 - and that `94.build_row` read
+# 26 of the extract's 118 columns and dropped it. 121 carried it on the 4,022
+# rows it appended and left the other 72,837 blank.
+# `code/910_subaward_report_id_backfill.py` recovered the rest from the zips
+# already on disk: 8,482,363 raw rows streamed, joined on `45.identity_key`
+# (imported, not restated), 75,861 of 76,859 rows keyed, 0 rows added, 0 rows
+# removed, $47,301,660,819.78 before and after to the cent.
+#
+#   whole-row duplicates    10,770  ->  0      WITHOUT DELETING ONE ROW
+#
+# That is the `prime_contracts` story for the third time - 80,778 "duplicates"
+# that were distinct transactions whose identity the mapper had dropped - and
+# it is the reason GRAIN_DEFECT's warning is worth its length. The 10,770 were
+# real, distinct monthly re-filings all along.
+#
+# WHY THE KEY IS TWO COLUMNS AND NOT ONE. 998 rows come from
+# `highergov_2023_export`, which is not SAM and has no SAM id; their source
+# record id is HigherGov's own per-subcontract permalink, already carried in
+# `source_url` (998 rows, 998 distinct, 0 blank). And 347 rows are one SAM
+# filing that Cedar holds TWICE, once from `usaspending_fsrs_pull` and once
+# from `funding_forward_fill` - the second already flagged
+# `superseded_by_primary_source` and already excluded from every money total.
+# Both rows carry the same UUID because it is the same filing; what separates
+# the ROWS is which Cedar pull reported them. So the published key is
+# (`source_dataset`, `subaward_source_record_id`) and `911` additionally gives
+# the table `prime_cedar_uid` / `sub_cedar_uid`, because a subaward has two
+# legs and only one of them could previously be named.
+# ---------------------------------------------------------------------------
+GRAIN_SUBAWARD_FUNDING = {
+    "subawards.csv": _d(
+        "one row per SUBAWARD FILING AS INGESTED FROM ONE SOURCE - not one "
+        "row per subaward. FFATA/FSRS requires the PRIME to re-file an open "
+        "subaward monthly, and every filing is a real reporting event, so one "
+        "$57,500 subaward can be 93 rows spanning 2022-08 to 2025-01. Cedar "
+        "RETAINS all of them and flags the repeats in `duplicate_status`; it "
+        "does not delete them. A row is therefore (one SAM subaward report) x "
+        "(the Cedar pull that ingested it). "
+        "MONEY: `subaward_amount` is additive ONLY where "
+        "`duplicate_status == 'primary'` AND "
+        "`subaward_exceeds_prime_flag != 'yes'` - $25,864,997,128.19 correct "
+        "against $47,301,660,819.78 unfiltered, so an unfiltered sum is 82.9% "
+        "TOO HIGH as a share of the correct total (45.3% of the inflated one; "
+        "say which denominator you mean). "
+        "A SUBAWARD IS A SLICE OF A PRIME AWARD and must never be added to "
+        "prime_contracts.csv - that double-counts the same federal dollar. "
+        "The two entity legs are `prime_cedar_uid` and `sub_cedar_uid`; "
+        "`cedar_uid` is the PRIME leg only and is legitimately blank on the "
+        "43,282 rows whose only Native party is the subawardee",
+        ["source_dataset", "subaward_source_record_id"],
+        {"prime_cedar_uid": "many", "sub_cedar_uid": "many",
+         "prime_uei": "many", "sub_uei": "many",
+         "prime_award_unique_key": "many"},
+        "workstream SUBAWARD-FUNDING 2026-09-02: "
+        "`subaward_source_record_id` recovered from the staged FSRS extracts "
+        "by code/910_subaward_report_id_backfill.py (75,861 SAM report ids + "
+        "998 HigherGov permalinks, 0 blank), and the pair confirmed unique on "
+        "the FULL 76,859-row file - 0 collisions, 0 blanks, whole-row "
+        "duplicates 10,770 -> 0 with zero rows removed. Re-measure with "
+        "`py -3 code/910_subaward_report_id_backfill.py verify`; the "
+        "recovery's own refusal is proved to fire by "
+        "`... selftest`"),
+
+    "native_passthrough.csv": _d(
+        "one row per NATIVE-TO-NATIVE SUBAWARD FILING - the "
+        "`direction == 'both_sides_native'` slice of subawards.csv, 1:1, with "
+        "both legs resolved to spine entities. It is a PROJECTION of "
+        "subawards.csv and NOT new money: adding this table to subawards.csv, "
+        "or to prime_contracts.csv, counts the same federal dollar twice. "
+        "It inherits its parent's grain exactly, so a row is one FILING and "
+        "repeat monthly filings of one pass-through are separate rows. "
+        "MONEY: `amount_usd` is additive ONLY where `amount_countable == 1`, "
+        "which is the parent's two filters (`duplicate_status == 'primary'` "
+        "AND `subaward_exceeds_prime_flag != 'yes'`) computed on the parent "
+        "row; both source columns are now carried so a subscriber can "
+        "reproduce or disagree with the filter instead of taking the flag on "
+        "trust. `amount_countable` is a 0/1 FLAG and is not a money column",
+        ["source_dataset", "subaward_source_record_id"],
+        {"from_tribe_id": "many", "to_tribe_id": "many"},
+        "workstream SUBAWARD-FUNDING 2026-09-02: 81_build_passthrough_dataset"
+        ".py now carries the parent's key plus `duplicate_status` and "
+        "`subaward_exceeds_prime_flag` - the one-line fix GRAIN_WS4 named. "
+        "Confirmed on the rebuilt 1,663-row file: 0 blank keys, 0 collisions, "
+        "0 byte-identical whole rows (was 116). Re-measure with "
+        "`py -3 code/81_build_passthrough_dataset.py verify`"),
+
+    # ---------------------------------------------------------------------
+    # THE THIRD IS DECLARED WITH ITS KEY REFUSED, AND THE REFUSAL IS THE
+    # DECLARATION'S EVIDENCE.
+    #
+    # GRAIN_FAADS left this table deliberately absent and gave the right
+    # reason: `assistance_transaction_unique_key` is present on 825,754 of
+    # 2,769,748 rows (29.8%), unique with zero collisions where present, and
+    # BLANK on the 1,943,994 FY2001-2006 rows of the nine non-Interior
+    # agencies, because `30.COLUMNS` requested a 20-column subset and the key
+    # is not in the bytes on disk. Blank collides with blank, so that is not a
+    # primary key and declaring it would be a lie.
+    #
+    # BUT AN ABSENT DECLARATION SAYS NOTHING AT ALL, and a buyer holding this
+    # file needs to know three things that are all true and all currently
+    # unsaid: what one row IS, that `obligated_usd` IS additive at that grain,
+    # and which two files it must never be stacked with. C1 asks for a
+    # declared, validated grain - not for a key - and this table can give one.
+    # C2 asks that the keys a table ADVERTISES validate; a table that
+    # advertises none, and says why, has nothing to fail. So the grain is
+    # declared, the primary key is empty, and `KEY_REFUSED` below carries a
+    # reason that is RE-CHECKED on every run: if any refused candidate ever
+    # becomes unique, or the duplicate count ever moves off 3,441, the
+    # declaration breaks and this block has to be revisited. A refusal that
+    # cannot go stale silently is a fact; one that can is an excuse.
+    "faads_transactions_all_agencies.csv": _d(
+        "one row per PRE-2008 FEDERAL ASSISTANCE TRANSACTION - an action on "
+        "an award, not an award: one FAIN carries many transactions including "
+        "$0 modifications and they are all real. FY2001-2007, ten agencies, "
+        "$1,830,639,317,707.66. "
+        "THIS IS A NATIONAL SOURCE MIRROR AND NOT A NATIVE FILTER: `tribe_id` "
+        "and `cedar_uid` are blank on every row and the recipients are every "
+        "assistance recipient in the country, Native and not. It must never "
+        "be quoted as money reaching Indian Country - the Native attribution "
+        "for this table lives in `faads_entity_attribution.csv` (29,594 rows, "
+        "all keyed). "
+        "MONEY: `obligated_usd` IS additive at this grain. Two stacking "
+        "hazards, both measured: `faads_transactions.csv` (60,661 rows) is "
+        "the Interior slice of THIS file carried verbatim, so the two must "
+        "never be added; and this file's FY2007 (774,755 rows) overlaps "
+        "`federal_funding_transactions.csv`'s FY2007, where 98.9% of the "
+        "modern table's FY2007 dollars sit on FAINs this file also carries - "
+        "the identified seam is 11,063 rows and $2,165,856,968.60. "
+        "NO PRIMARY KEY EXISTS AND NONE IS CLAIMED - see key_refused",
+        [],
+        {},
+        "workstream SUBAWARD-FUNDING 2026-09-02: grain declared WITHOUT a "
+        "primary key, with the refusal recorded in `key_refused` and "
+        "re-checked against the file on every run of this script"),
+}
+
+# ---------------------------------------------------------------------------
+# THE FOUR SIDE MAPS. Kept OUT of the GRAIN entries on purpose: they attach to
+# tables other workstreams declared as well as to mine, and editing another
+# block's `_d(...)` call to add a field is exactly the concurrent-edit
+# collision the per-workstream split exists to prevent. Keyed by table name,
+# merged into the contract record by `build_contracts`.
+# ---------------------------------------------------------------------------
+
+# A DECLARED, RE-CHECKABLE REFUSAL TO PUBLISH A PRIMARY KEY.
+#
+#   reason              why no key exists, in words
+#   candidates_refused  column sets that MUST STILL FAIL. Re-measured on the
+#                       full file every run. If one becomes unique the
+#                       refusal is STALE and that is a violation, because a
+#                       key we could publish and do not is a defect too.
+#   whole_row_duplicates_expected
+#                       the exact count of byte-identical rows this refusal
+#                       accounts for. If the file's count moves, in either
+#                       direction, the declaration breaks.
+#   duplicate_disposition
+#                       C3's "or intentionally explained", stated.
+KEY_REFUSED = {
+    "faads_transactions_all_agencies.csv": dict(
+        reason=(
+            "The source publishes `assistance_transaction_unique_key` and the "
+            "retained objects for 1,943,994 of these rows do not contain it. "
+            "Three source groups, not one: the 7 DOI seam zips and the 10 "
+            "`*_fy2007_archive.zip` objects are full 112-column downloads and "
+            "DO carry the key (825,754 rows, 825,754 distinct, 0 collisions); "
+            "the 60 `<agency>_fy200{1..6}.zip` objects were REQUESTED with "
+            "`30.COLUMNS`, a 20-column subset that omitted it, so it is not in "
+            "the bytes on disk and NO RE-EXTRACT CAN RECOVER IT. The only "
+            "112-column route for those years is the USAspending Award Data "
+            "Archive, whose own key listing begins at FY2007. "
+            "`modification_number`, the field that separates the byte-identical "
+            "rows in the FY2007 evidence, is blank on 2,203,034 rows for the "
+            "same reason. WHAT WOULD SETTLE IT, all-or-nothing: re-pull the 54 "
+            "non-Interior FY2001-2006 agency-years through "
+            "`30_funding_pre2008.py pull` (COLUMNS now asks for the key) and "
+            "MERGE the key onto the existing rows BY CONTENT rather than "
+            "replacing them - all 29,594 rows of "
+            "`faads_entity_attribution.csv` are keyed to ROW POSITION in this "
+            "file and a replacing re-pull silently re-points every one. Until "
+            "then: no key, and no surrogate. Minting an occurrence ordinal "
+            "would produce a unique column and would be the same mistake that "
+            "made `faads_row_id` rot."),
+        candidates_refused=[
+            ["assistance_transaction_unique_key"],
+            ["assistance_transaction_unique_key", "modification_number"],
+            ["award_id_fain", "action_date", "obligated_usd",
+             "recipient_duns", "cfda_program"],
+        ],
+        whole_row_duplicates_expected=3441,
+        duplicate_disposition=(
+            "3,441 rows are byte-identical to another row across all 27 "
+            "columns, and ALL of them sit in the unkeyed FY2001-2006 "
+            "non-Interior region. They are RETAINED, deliberately. On the "
+            "`ed_fy2007_archive.zip` evidence - 344,401 rows, 344,401 distinct "
+            "transaction keys, whose worst apparent duplicate group is 740 "
+            "source transactions carrying modification numbers 0001..0740, 592 "
+            "of them $0 - rows that look identical in this projection are "
+            "distinct transactions differing by a field the 20-column objects "
+            "do not carry. The same allegation was made against "
+            "`prime_contracts.csv` (80,778 alleged, real answer ZERO), against "
+            "this table at 179,259 (fell to 3,441 when the key was restored, "
+            "with nothing deleted), and against `faads_transactions.csv` at "
+            "1,001 (fell to 0, nothing deleted). De-duplicating the pair would "
+            "have destroyed $8,291,124,113 of real obligations. Flag, never "
+            "delete."),
+        additivity={
+            "obligated_usd": (
+                "additive at transaction grain across this file. NEVER add "
+                "this file to faads_transactions.csv (60,661 rows carried "
+                "verbatim from here) and NEVER stack its FY2007 with "
+                "federal_funding_transactions.csv (seam: 11,063 rows, "
+                "$2,165,856,968.60)."),
+        }),
+}
+
+# A TABLE WHOSE POPULATION IS NOT NATIVE-SCOPED, and where its Native
+# attribution actually lives.
+#
+# ADR-009 scores C4 as "what share of a dataset's entity-bearing rows carry a
+# Cedar id" and ADR-010 already records that the honest denominator is not
+# derivable PER ROW. It is derivable per TABLE for these two: they are
+# verbatim mirrors of the national assistance record for FY2001-2007, held so
+# the attribution layer has something to point AT, and their recipients are
+# every assistance recipient in the United States. `tribe_id` and `cedar_uid`
+# are blank on all 2,830,409 of their rows and that is CORRECT - the National
+# Science Foundation's grant to a university is not an unresolved Native link.
+#
+# THIS IS NOT AN EXEMPTION HATCH. Declaring it REQUIRES naming the table that
+# does carry the Native attribution, and `518` checks that table exists and is
+# itself attached. Without that requirement this map would be the one way to
+# clear C4 by relabelling instead of resolving, which is the Prime Directive
+# violation ADR-010 was written to avoid.
+POPULATION_SCOPE = {
+    "faads_transactions_all_agencies.csv": dict(
+        scope="national_mirror",
+        native_attribution_table="faads_entity_attribution.csv",
+        basis=("verbatim mirror of the FY2001-2007 federal assistance record "
+               "for ten agencies; 0 of 2,769,748 rows carry a Cedar id and "
+               "none should. The Native slice is "
+               "faads_entity_attribution.csv, 29,594 rows, 29,594 keyed "
+               "(100%), which addresses rows of this file")),
+    "faads_transactions.csv": dict(
+        scope="national_mirror",
+        native_attribution_table="faads_entity_attribution.csv",
+        basis=("the Department of the Interior slice of "
+               "faads_transactions_all_agencies.csv, carried verbatim. Its "
+               "own declared grain already says it: 'This is an AGENCY "
+               "filter, NOT a Native one: tribe_id is blank on all 60,661 "
+               "rows and the $9,348,473,200 here is every Interior "
+               "assistance recipient in the country, Native and not.'")),
+}
+
 GRAIN.update(GRAIN_GAMING)
 GRAIN.update(GRAIN_WS1)
+GRAIN.update(GRAIN_SUBAWARD_FUNDING)
 GRAIN.update(GRAIN_WS2)
 GRAIN.update(GRAIN_WS3)
 GRAIN.update(GRAIN_WS4)
@@ -2798,6 +3064,75 @@ def _find(name):
     return None
 
 
+def _validate_refusal(name, ref, hdr, p):
+    """Re-measure a declared key REFUSAL against the file. Returns violations.
+
+    ONE PASS over the file, counting: every refused candidate's collisions and
+    blanks, and byte-identical whole rows. All three have to still hold.
+    """
+    v = []
+    if not (ref.get("reason") or "").strip():
+        v.append(f"{name}: key_refused carries no reason - a refusal without "
+                 f"a re-checkable reason is a silence with a label on it")
+    cands = [c for c in ref.get("candidates_refused", [])]
+    if not cands:
+        v.append(f"{name}: key_refused names no candidates_refused, so "
+                 f"nothing about the refusal can be re-tested")
+    live = [[c for c in cand if c in hdr] for cand in cands]
+    for cand, lv in zip(cands, live):
+        if not lv:
+            v.append(f"{name}: refused candidate {cand} names no column that "
+                     f"is in the header - it cannot have been tested")
+
+    seen = [set() for _ in live]
+    dup = [0] * len(live)
+    blank = [0] * len(live)
+    whole, wdup, n = set(), 0, 0
+    try:
+        with p.open(encoding="utf-8-sig", errors="replace", newline="") as fh:
+            rr = csv.reader(fh)
+            head = [h.strip() for h in next(rr, [])]
+            idxs = [[head.index(c) for c in lv if c in head] for lv in live]
+            for row in rr:
+                n += 1
+                w = len(row)
+                for j, ii in enumerate(idxs):
+                    if not ii:
+                        continue
+                    k = tuple((row[i] if i < w else "") for i in ii)
+                    if not all(x.strip() for x in k):
+                        blank[j] += 1
+                    if k in seen[j]:
+                        dup[j] += 1
+                    else:
+                        seen[j].add(k)
+                t = tuple(row)
+                if t in whole:
+                    wdup += 1
+                else:
+                    whole.add(t)
+    except Exception as e:
+        return [f"{name}: the key refusal could not be re-measured "
+                f"({type(e).__name__}: {e}) - UNVALIDATED IS NOT CLEAN"]
+
+    for cand, d, b in zip(cands, dup, blank):
+        if d == 0 and b == 0:
+            v.append(f"{name}: THE REFUSAL IS STALE. Candidate key {cand} is "
+                     f"now UNIQUE and non-blank on all {n:,} rows. A key we "
+                     f"could publish and do not is a defect - declare it.")
+    exp = ref.get("whole_row_duplicates_expected")
+    if exp is not None and wdup != exp:
+        v.append(f"{name}: the duplicate disposition accounts for {exp:,} "
+                 f"byte-identical rows and the file now has {wdup:,}. The "
+                 f"explanation no longer matches the file; re-measure and "
+                 f"restate it before shipping.")
+    if wdup and not (ref.get("duplicate_disposition") or "").strip():
+        v.append(f"{name}: {wdup:,} byte-identical rows and no "
+                 f"duplicate_disposition - C3 allows duplicates REMOVED or "
+                 f"INTENTIONALLY EXPLAINED, and this is neither")
+    return v
+
+
 def validate_grain(name, decl, hdr):
     """Check a DECLARED grain against the file. Returns a list of violation
     strings, plus the measured cardinality it observed.
@@ -2824,6 +3159,28 @@ def validate_grain(name, decl, hdr):
     live_pk = [c for c in pk if c in hdr]
     live_card = {c: k for c, k in card.items() if c in hdr}
     if not live_pk:
+        # A DECLARED REFUSAL IS A LEGITIMATE OUTCOME, and it is validated
+        # HARDER than a declaration, not softer. Added 2026-09-02 by
+        # workstream SUBAWARD-FUNDING for
+        # faads_transactions_all_agencies.csv, whose key cannot be recovered
+        # from the retained source at any arity.
+        #
+        # The rule the project already lives by is "a wrong grain in a
+        # contract is worse than a missing one". The corollary this adds is
+        # that a MISSING grain is worse than an honest refusal: an absent
+        # declaration tells a buyer nothing, while a refusal tells them what
+        # a row is, that the money column is still additive, which files it
+        # must never be stacked with, and exactly what would settle it.
+        #
+        # What stops this becoming a hatch: the refusal is RE-MEASURED here
+        # every run. Each `candidates_refused` column set must STILL fail on
+        # the full file, and the byte-identical row count must still equal the
+        # number the disposition accounts for. A refusal that has quietly
+        # become recoverable is a violation, because a key we could publish
+        # and do not is its own defect.
+        ref = KEY_REFUSED.get(name)
+        if ref:
+            return _validate_refusal(name, ref, hdr, p), {}
         v.append(f"{name}: no usable primary key - a SHIPPABLE table with no "
                  f"validated key cannot promise a buyer anything about a join")
         return v, {}
@@ -2968,6 +3325,12 @@ def build_contracts():
                 grain_open_question=GRAIN_OPEN.get(name, ""),
                 grain_defect=GRAIN_DEFECT.get(name, ""),
                 grain_evidence=_evidence_table(name),
+                # the four side maps - see the SUBAWARD-FUNDING block. Present
+                # only on the tables that declare them; absent everywhere else,
+                # so no other table's contract record changes shape in a way a
+                # consumer would notice.
+                key_refused=(KEY_REFUSED.get(name, {}) if decl else {}),
+                population_scope=POPULATION_SCOPE.get(name, {}),
                 rebuilt_by=rebuilds,
                 enriched_by=enrichers,
                 never_run_warning=[

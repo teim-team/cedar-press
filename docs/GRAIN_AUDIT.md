@@ -20,54 +20,32 @@ Three honest outcomes, and they are three different jobs:
 
 | | count |
 |---|---:|
-| shippable tables | 224 |
-| **DECLARED_VALIDATED** | **213** |
+| shippable tables | 225 |
+| **DECLARED_VALIDATED** | **218** |
 | OPEN_WITH_EVIDENCE | 0 |
-| DEFECTIVE | 3 |
-| still unexplained | 8 |
-| ratchet `contract_grain_unstated_shippable` | **11** (was 207) |
+| DEFECTIVE | 0 |
+| still unexplained | 7 |
+| ratchet `contract_grain_unstated_shippable` | **7** (was 207) |
 
-A declaration that the data contradicts is release-blocking through `contract_violations`; there are **13**.
-
-## DEFECTIVE - data bugs found by the sweep
-
-These are not declaration gaps. Each is a table a buyer can double-count today. Workstream E does not own these pipelines and has changed no data.
-
-### `faads_transactions_all_agencies.csv`
-
-179,259 LITERAL duplicate rows of 2,769,748 (6.5%). DIAGNOSED 2026-08-29 and it is NOT a page fetched twice, which is what this entry used to say: 174,348 of the 179,259 - 97% - come from ONE staged object, ed_fy2007_archive.zip, and 174,957 of the surplus rows are FY2007, while 40 other agency-years are almost clean. A duplicated fetch does not concentrate like that. All 179,259 carry an award_id_fain, and the staged zip carries `assistance_transaction_unique_key` and `modification_number` among its 112 columns - `30_funding_pre2008.to_out_row` took neither. This is the same projection loss proved exactly for the prime contracting archive, where 80,778 apparent duplicates resolved to 80,778 distinct transactions and went to zero without deleting a row (see 430). `to_out_row` and OUT_COLS now carry both columns, so the next `py -3 code/30_funding_pre2008.py build` states a grain. That build re-extracts a 2.77M-row shipped table and is queued in review/OWNER_DECISION_QUEUE.md rather than run unattended. Until it runs the duplication is DIAGNOSED, not repaired.
-
-- measured 2,769,748 rows, 3,441 whole-row duplicate(s) on 2026-09-01
-
-### `native_passthrough.csv`
-
-114 LITERAL duplicate rows of 1,262. This table is derived from subawards.csv and inherits its duplication; the passthrough dollars are therefore over-stated by an unmeasured amount.
-
-- measured 1,522 rows, 116 whole-row duplicate(s) on 2026-09-01
-
-### `subawards.csv`
-
-10,770 LITERAL duplicate rows of 72,837. (subaward_number, subaward_date) collides 27,470 times, so even the natural key of a subaward is not unique here.
-
-- measured 72,837 rows, 10,770 whole-row duplicate(s) on 2026-08-29
+A declaration that the data contradicts is release-blocking through `contract_violations`; there are **12**.
 
 ## Per collection
 
 ### Federal Funding to Indian Country  (`funding`)
 
-6 of 10 shippable tables declared.
+8 of 10 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
 | `bie_uio_dollars_by_entity.csv` | 114 | DECLARED_VALIDATED | `tribe_id` | `cedar_uid`→1, `tribe_id`→1 |
 | `faads_entity_attribution.csv` | 29,594 | DECLARED_VALIDATED | `faads_row_id` | `cedar_uid`→536, `tribe_id`→536 |
 | `faads_transactions.csv` | 60,661 | DECLARED_VALIDATED | `assistance_transaction_unique_key` | `cedar_uid`→0, `tribe_id`→0 |
-| `faads_transactions_all_agencies.csv` | 2,769,748 | DEFECTIVE | — | `cedar_uid`→0, `tribe_id`→0 |
+| `faads_transactions_all_agencies.csv` | 2,769,748 | DECLARED_VALIDATED | — | `cedar_uid`→0, `tribe_id`→0 |
 | `federal_funding_transactions.csv` | 701,955 | **DECLARATION FAILED** | `assistance_transaction_unique_key` | `cedar_uid`→18,574, `tribe_id`→12,764 |
 | `federal_funding_tribe_year_panel.csv` | 5,496 | **DECLARATION FAILED** | `tribe_id` + `fiscal_year` | `cedar_uid`→32, `tribe_id`→16 |
 | `funding_identifier_netnew_ueis.csv` | 4,249 | DECLARED_VALIDATED | `recipient_uei` | — |
 | `inflation_deflator.csv` | 27 | DECLARED_VALIDATED | `year` | — |
-| `native_passthrough.csv` | 1,522 | DEFECTIVE | — | — |
+| `native_passthrough.csv` | 1,522 | DECLARED_VALIDATED | `source_dataset` + `subaward_source_record_id` | `from_tribe_id`→371, `to_tribe_id`→376 |
 | `native_passthrough_pairs.csv` | 307 | DECLARED_VALIDATED | `from_tribe_id` + `to_tribe_id` | — |
 
 ### Federal Register  (`federal-register`)
@@ -151,7 +129,7 @@ These are not declaration gaps. Each is a table a buyer can double-count today. 
 
 ### Lobbying  (`lobbying`)
 
-33 of 33 shippable tables declared.
+35 of 35 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
@@ -182,6 +160,8 @@ These are not declaration gaps. Each is a table a buyer can double-count today. 
 | `lobbying_registrants.csv` | 653 | DECLARED_VALIDATED | `registrant_id` | — |
 | `lobbying_target_entities.csv` | 116 | DECLARED_VALIDATED | `government_entity_as_filed` | — |
 | `native_entity_lobbying_disclosures.csv` | 27,796 | DECLARED_VALIDATED | `filing_uuid` | `cedar_uid`→400, `entity_id`→400 |
+| `nonprofit_schedule_c_coverage.csv` | — | DECLARED_VALIDATED | `index_year` | `index_year`→1 |
+| `nonprofit_schedule_c_lobbying.csv` | — | DECLARED_VALIDATED | `schedule_c_row_id` | `cedar_entity_id`→82, `ein`→10, `object_id`→1, `schedule_c_row_id`→1 |
 | `nrc_meeting_participants.csv` | 407 | DECLARED_VALIDATED | `participant_id` | `cedar_uid`→1 |
 | `nrc_public_meetings.csv` | 251 | DECLARED_VALIDATED | `nrc_meeting_id` | — |
 | `oira_federal_action_links.csv` | 145 | DECLARED_VALIDATED | `oira_meeting_id` + `federal_action_document_number` | — |
@@ -208,13 +188,13 @@ These are not declaration gaps. Each is a table a buyer can double-count today. 
 
 ### Federal Subcontracting  (`subcontracting`)
 
-2 of 3 shippable tables declared.
+3 of 3 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
 | `prime_sub_network.csv` | 220 | DECLARED_VALIDATED | `prime_uei` + `sub_uei` | — |
 | `subaward_entity_rollup.csv` | 450 | DECLARED_VALIDATED | `tribe_id` | `cedar_uid`→1, `tribe_id`→1 |
-| `subawards.csv` | 72,837 | DEFECTIVE | — | `cedar_uid`→6,163 |
+| `subawards.csv` | 72,837 | DECLARED_VALIDATED | `source_dataset` + `subaward_source_record_id` | `cedar_uid`→6,163 |
 
 ### Native-Owned Businesses  (`native-owned-businesses`)
 

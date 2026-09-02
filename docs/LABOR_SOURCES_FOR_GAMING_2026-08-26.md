@@ -796,3 +796,75 @@ matching logic at all.
 - Outputs: `data/staging/gaming_employment_osha_tribe_staged.csv` (485),
   `review/osha_gambling_unresolved_2026-08-26.csv` (4,577),
   `logs/157_osha_tribe_2026-08-26.log`, `logs/158_merge_2026-08-26.log`.
+
+<!-- BEGIN INT-READY-LABOUR-DECISION -->
+## 19. THE PUBLICATION DECISION — both sources ship, and the owner's read is half right
+
+*Appended 2026-09-02 by workstream INT-READY. Re-measured with `csv.reader`
+against the live `gaming_employment_observations.csv` (3,421 rows) and
+`gaming_facilities.csv` (284 facility-bearing `cedar_uid`s). Every number below
+is from that run, not from an earlier section of this document.*
+
+### The question the owner asked
+
+> *"Form 5500 is a lot better than OSHA for casinos... and just because we have
+> data doesn't mean we publish it. Decide on coverage grounds after cleaning."*
+
+`docs/PUBLICATION_POLICY.md` says the threshold applies to the **harmonized
+measure**, not to each input, and that *"an input that is thin on its own but
+disjoint from the others earns its place; an input that is thin AND redundant
+does not."* That is the test, so it was measured.
+
+### Both sources ARE integrated, and here is what each one buys
+
+| source | `measurement_type` | rows | tribes | of the 284 with a facility | years |
+|---|---|---:|---:|---:|---|
+| DOL Form 5500 | `FORM5500_ACTIVE_PARTICIPANTS` | 1,956 | 142 | **137 (48%)** | 2009–2025 |
+| OSHA ITA 300A | `OSHA_*_REPORTED` | 1,060 | 87 | **86 (30%)** | 2016–2025 |
+| Census LEHD LODES | `LODES_BLOCK_WORKPLACE_JOBS` | 384 | 183 | **183 (64%)** | 2021–2022 |
+| projections / NEPA | — | 21 | 6 | 6 | 2008–2026 |
+| **pooled** | — | **3,421** | **239** | **232 (82%)** | **2008–2026** |
+
+### The decision: PUBLISH BOTH. OSHA is thin and it is not redundant.
+
+**29 facility-bearing tribes are visible to OSHA and to no Form 5500 filing.**
+Nine are visible to OSHA alone across all three sources. Dropping OSHA at 30%
+would delete those tribes from the measure entirely, and the union — 232 of 284
+— is the product. LODES adds a further 66 tribes neither payroll source
+reaches, which is why it stays too despite covering only two years.
+
+### Where the owner's read is right, and where it is not
+
+He is right on **coverage**: Form 5500 reaches 137 tribes to OSHA's 86, a
+sixty-percent advantage, and it runs from 2009 against OSHA's 2016.
+
+He is not right that it is the better **measure**, and the difference matters
+more than the coverage does. The row says so itself:
+
+- `FORM5500_ACTIVE_PARTICIPANTS` — *"ACTIVE PLAN PARTICIPANTS, NOT EMPLOYEES.
+  The count excludes employees below the plan's age/service threshold (pushing
+  it BELOW total employment) and includes part-timers…"* It is a benefit-plan
+  population, biased in a direction that varies with each plan's eligibility
+  rules, at `plan_sponsor` grain.
+- `OSHA_ESTABLISHMENT_REPORTED` — *"the establishment's OWN reported annual
+  average number of employees on its Form 300A"*, at `establishment` grain.
+  Thinner, and closer to the thing called employment.
+
+So the honest statement is: **Form 5500 has the better coverage and OSHA has
+the better measure, and neither is a headcount of casino staff.** Both ship,
+`measurement_type` is on every row and `measurement_note` carries the caveat
+verbatim, and a buyer who pools them without filtering on `measurement_type` is
+adding two different quantities. `plan_participants_all_plans_DO_NOT_SUM` is
+populated on all 1,956 Form 5500 rows for exactly that reason.
+
+### What was NOT done, and why
+
+**No facility-level employment column was written onto
+`gaming_facilities.csv`.** Only **804 of 3,421** observations carry a
+`facility_id` at all; the rest are `plan_sponsor`, `establishment_rolled_to_tribe`
+or `census_block_2020` grain. Copying a tribe-grain plan-participant count onto
+each of that tribe's four casinos would manufacture four facility measurements
+from one plan filing. The existing `employees` column on the facility table
+stays as it is, with its own basis, and `gaming_employment_observations.csv`
+remains the place where the grain is stated.
+<!-- END INT-READY-LABOUR-DECISION -->

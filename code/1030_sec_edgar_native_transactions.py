@@ -546,6 +546,282 @@ def cmd_fts(limit=None, kind="all", max_pages=3):
     return 0
 
 
+# ==================================================================== mine ==
+# Zero network. Reads the cache and stages candidates.
+#
+# ENTITY_MATCH_RULES rule 1: an entity whose entire distinctive token set is
+# generic may not win a name-only match. Applied here as a GATE on which names
+# may be searched for at all, and as an evidence class recorded on every hit so
+# a reviewer can filter - a two-token match on `Ukpeagvik Inupiat Corporation`
+# and a one-token match on `Doyon` are not the same claim.
+#
+# Rule 13: `Cherokee` is not weak evidence, it is NO evidence. NAME_TRAPS is
+# imported from cedar_domain rather than re-typed.
+
+ORG_WORDS = frozenset("""
+inc inc. incorporated corporation corp corp. company co co. llc l.l.c. lp l.p.
+llp limited ltd holdings holding group enterprises enterprise the of and a an
+tribe tribes tribal nation nations band bands pueblo pueblos rancheria
+community communities indians indian village villages native natives
+authority authorities council councils reservation reservations
+confederated federated associated association organization organisation
+corporation's development services service systems system solutions
+technologies technology industries industry partners partnership
+government governmental office offices agency
+""".split())
+
+
+def _norm(s):
+    s = re.sub(r"[‘’“”]", "'", s or "")
+    s = re.sub(r"[^A-Za-z0-9'&\- ]+", " ", s)
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def _tokens(s):
+    return [t for t in _norm(s).lower().split() if t]
+
+
+def _distinctive(name, traps):
+    return [t for t in _tokens(name)
+            if t not in ORG_WORDS and t not in traps and len(t) > 2]
+
+
+def build_name_index():
+    """Every Native name worth looking for, with its evidence class."""
+    sys.path.insert(0, str(CODE))
+    try:
+        import cedar_domain
+        traps = set(cedar_domain.NAME_TRAPS)
+    except Exception:
+        traps = set()
+
+    names = {}          # normalized name -> record
+
+    def add(name, uid, owner, source, cls):
+        n = _norm(name)
+        if len(n) < 5:
+            return
+        d = _distinctive(n, traps)
+        if not d:
+            return
+        if len(d) >= 2:
+            ev = "multi_distinctive_token"
+        elif len(d[0]) >= 5:
+            ev = "single_distinctive_token"
+        else:
+            return                     # rule 1: cannot support a name match
+        key = n.lower()
+        if key in names:
+            return
+        names[key] = {"name": n, "cedar_uid": uid, "owner": owner,
+                      "name_source": source, "entity_class": cls,
+                      "evidence_class": ev, "distinctive": " ".join(d)}
+
+    with open(SPINE / "cedar_identity_register.csv",
+              encoding="utf-8-sig", newline="") as fh:
+        for r in csv.DictReader(fh):
+            cls = r["entity_class"]
+            if cls in ("BIE School",):
+                continue
+            for fld, src in (("canonical_name", "register:canonical"),
+                             ("federal_register_legal_name", "register:fr_legal")):
+                if r.get(fld):
+                    add(r[fld], r["cedar_uid"], r["canonical_name"], src, cls)
+            for fn in (r.get("former_names") or "").split(";"):
+                if fn.strip():
+                    add(fn, r["cedar_uid"], r["canonical_name"],
+                        "register:former_name", cls)
+
+    ali = CLEAN / "entity_aliases.csv"
+    if ali.exists():
+        with open(ali, encoding="utf-8-sig", newline="") as fh:
+            for r in csv.DictReader(fh):
+                at = (r.get("alias_type") or "").strip()
+                if at in ("brand",):        # 104 single-token brand aliases
+                    continue                # ENTITY_MATCH_RULES opening case
+                add(r.get("alias_name", ""), r.get("cedar_uid", ""),
+                    r.get("entity_id", ""), f"alias:{at}", "alias")
+
+    for uid, owner, child in shard_e_children():
+        add(child, uid, owner, "shard_e:published_subsidiary",
+            "ANC published subsidiary")
+
+    return names
+
+
+TXN_CUES = re.compile(
+    r"\b(acquir\w+|acquisition\w*|purchase\w*|purchasing|sold|sale|sell\w*|"
+    r"divest\w+|disposition|disposed|merger|merged|joint venture|"
+    r"definitive agreement|asset purchase agreement|stock purchase agreement|"
+    r"membership interest purchase|letter of intent|term sheet|"
+    r"credit agreement|indenture|notes offering|senior notes|bond\w*|"
+    r"loan agreement|financing|refinanc\w+|management agreement|"
+    r"development agreement|equity interest|controlling interest|"
+    r"majority interest|minority interest|consideration)\b", re.I)
+
+MONEY_RE = re.compile(
+    r"\$\s?[\d,]+(?:\.\d+)?(?:\s?(?:thousand|million|billion))?", re.I)
+
+DATE_RE = re.compile(
+    r"\b(?:January|February|March|April|May|June|July|August|September|"
+    r"October|November|December)\s+\d{1,2},?\s+(?:19|20)\d{2}\b", re.I)
+
+TAG_RE = re.compile(r"(?s)<(script|style).*?</\1>|<[^>]+>")
+ENT_RE = re.compile(r"&(#\d+|#x[0-9a-fA-F]+|[a-zA-Z]+);")
+
+
+def html_to_text(b):
+    try:
+        s = b.decode("utf-8")
+    except UnicodeDecodeError:
+        s = b.decode("latin-1", "replace")
+    s = TAG_RE.sub(" ", s)
+    import html as _h
+    s = _h.unescape(s)
+    s = s.replace("\xa0", " ")
+    return re.sub(r"[ \t\r\f\v]+", " ", s)
+
+
+def split_sentences(text):
+    return re.split(r"(?<=[.;:])\s+(?=[A-Z(\"'“])", text)
+
+
+MINE_COLS = [
+    "candidate_id", "source_channel", "accession", "form", "file_date",
+    "cik", "filer_display_names", "native_name_matched", "cedar_uid",
+    "cedar_owner_name", "entity_class", "name_source", "match_evidence_class",
+    "txn_cue", "event_date_text", "money_text", "quote", "source_url",
+    "local_file", "staged_by", "staged_date", "record_scope", "disposition",
+]
+
+MAX_QUOTE = 1200
+
+
+def cmd_mine(limit=None, min_evidence="all"):
+    out("=== 1030 mine - Native entity + transaction language in the cache ===\n")
+    idx = build_name_index()
+    out(f"  {len(idx):,} distinct Native names admitted to the matcher")
+    import collections
+    ec = collections.Counter(v["evidence_class"] for v in idx.values())
+    for k, v in ec.most_common():
+        out(f"    {v:6,d}  {k}")
+    src = collections.Counter(v["name_source"] for v in idx.values())
+    for k, v in src.most_common():
+        out(f"    {v:6,d}  {k}")
+
+    # token -> names, so a document is pre-filtered by cheap set intersection
+    tok2names = collections.defaultdict(list)
+    for key, rec in idx.items():
+        for t in rec["distinctive"].split():
+            tok2names[t].append(key)
+
+    with open(FETCH_MANIFEST, encoding="utf-8-sig", newline="") as fh:
+        man = [r for r in csv.DictReader(fh) if r["local_file"]]
+    # de-duplicate: the manifest may carry a cached re-entry per accession
+    seen_acc, uniq_man = set(), []
+    for r in man:
+        if r["accession"] in seen_acc:
+            continue
+        seen_acc.add(r["accession"])
+        uniq_man.append(r)
+    man = uniq_man
+    if limit:
+        man = man[:int(limit)]
+    out(f"\n  {len(man):,} cached filings to scan")
+
+    pats = {}
+    rows = []
+    n = 0
+    for i, r in enumerate(man, 1):
+        p = CEDAR / r["local_file"]
+        if not p.exists():
+            continue
+        text = html_to_text(p.read_bytes())
+        doc_tokens = set(re.findall(r"[a-z0-9'\-]+", text.lower()))
+        cand_keys = set()
+        for t in doc_tokens & tok2names.keys():
+            cand_keys.update(tok2names[t])
+        hits = []
+        for key in cand_keys:
+            rec = idx[key]
+            if not all(t in doc_tokens for t in rec["distinctive"].split()):
+                continue
+            if key not in pats:
+                toks = [re.escape(w) for w in rec["name"].split()]
+                pats[key] = re.compile(
+                    r"\b" + r"[\s,\.\-]+".join(toks) + r"\b", re.I)
+            if pats[key].search(text):
+                hits.append(rec)
+        if not hits:
+            continue
+        sents = split_sentences(text)
+        for si, s in enumerate(sents):
+            if len(s) < 40 or len(s) > 4000:
+                continue
+            cue = TXN_CUES.search(s)
+            if not cue:
+                continue
+            money = MONEY_RE.findall(s)
+            dates = DATE_RE.findall(s)
+            if not money and not dates:
+                continue
+            for rec in hits:
+                if not pats[rec["name"].lower()].search(s):
+                    continue
+                n += 1
+                rows.append({
+                    "candidate_id": f"SEC1030-{n:06d}",
+                    "source_channel": "sec_edgar_filing",
+                    "accession": r["accession"], "form": r["form"],
+                    "file_date": r["file_date"], "cik": r["cik"],
+                    "filer_display_names": "",
+                    "native_name_matched": rec["name"],
+                    "cedar_uid": rec["cedar_uid"],
+                    "cedar_owner_name": rec["owner"],
+                    "entity_class": rec["entity_class"],
+                    "name_source": rec["name_source"],
+                    "match_evidence_class": rec["evidence_class"],
+                    "txn_cue": cue.group(0).lower(),
+                    "event_date_text": "; ".join(dates[:3]),
+                    "money_text": "; ".join(money[:5]),
+                    "quote": s.strip()[:MAX_QUOTE],
+                    "source_url": r["document_url"],
+                    "local_file": r["local_file"],
+                    "staged_by": SCRIPT, "staged_date": TODAY,
+                    "record_scope": "CANDIDATE_NOT_A_DEAL",
+                    "disposition": "",
+                })
+        if i % 50 == 0:
+            out(f"  {i:,}/{len(man):,}  candidates so far {len(rows):,}")
+
+    # fill filer names from the read queue
+    fq = {}
+    if READ_QUEUE.exists():
+        with open(READ_QUEUE, encoding="utf-8-sig", newline="") as fh:
+            for q in csv.DictReader(fh):
+                fq[q["accession"]] = q["filer_display_names"]
+    for row in rows:
+        row["filer_display_names"] = fq.get(row["accession"], "")
+
+    with open(CANDIDATES, "w", encoding="utf-8", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=MINE_COLS)
+        w.writeheader()
+        w.writerows(rows)
+    out(f"\n  {len(rows):,} candidate passages "
+        f"-> {CANDIDATES.relative_to(CEDAR)}")
+    out(f"  {len({r['accession'] for r in rows}):,} distinct filings, "
+        f"{len({r['native_name_matched'] for r in rows}):,} distinct names")
+    out("\n  by evidence class")
+    for k, v in collections.Counter(
+            r["match_evidence_class"] for r in rows).most_common():
+        out(f"    {v:6,d}  {k}")
+    out("\n  top names")
+    for k, v in collections.Counter(
+            r["native_name_matched"] for r in rows).most_common(30):
+        out(f"    {v:5d}  {k}")
+    return 0
+
+
 # ================================================================== verify ==
 
 def cmd_verify():
@@ -662,6 +938,8 @@ def main(argv):
         return cmd_fts(limit=int(kw["limit"]) if kw.get("limit") else None,
                        kind=kw.get("kind", "all"),
                        max_pages=int(kw.get("max_pages", 3)))
+    if cmd == "mine":
+        return cmd_mine(limit=kw.get("limit"))
     if cmd == "verify":
         return cmd_verify()
     if cmd == "verify-synthetic":

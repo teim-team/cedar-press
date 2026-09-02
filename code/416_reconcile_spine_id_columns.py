@@ -42,7 +42,7 @@ DOES (additive; no existing column is altered, reordered or removed):
                                      scripts dedupe on it.
   cedar_entity_id_scheme             per row: ENTITY_MASTER_REGISTER_FK /
                                      ABSENT. Same shape as
-                                     `tribe_id_scheme_resolved` in
+                                     `attribution_status` (was `tribe_id_scheme_resolved`) in
                                      federal_funding_transactions.csv, which
                                      is the precedent this follows.
   canonical_entity_id_column         the literal string "tribe_id" on every

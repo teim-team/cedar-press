@@ -11,7 +11,7 @@ THE FILES THIS BUILD TREATS AS THE TRUTH
 ----------------------------------------
     data/spine/cedar_entity_spine.csv               the entity universe
     data/clean/cedar_identifier_ledger_final.csv    UEI / CAGE / EIN
-    data/clean/assistance_tribe_id_crosswalk.csv    the legacy integer PROPOSAL
+    data/spine/legacy/assistance_tribe_id_crosswalk.csv  the legacy integer PROPOSAL
 Nothing here re-derives a mapping any of those already state.
 
 WHAT A ROW OF THE OUTPUT MEANS
@@ -82,7 +82,10 @@ from cedar_keys import surrogate_id                         # noqa: E402
 CEDAR = Path(__file__).resolve().parent.parent
 SPINE = CEDAR / "data" / "spine" / "cedar_entity_spine.csv"
 LEDGER = CEDAR / "data" / "clean" / "cedar_identifier_ledger_final.csv"
-ASSIST_XW = CEDAR / "data" / "clean" / "assistance_tribe_id_crosswalk.csv"
+# MOVED 2026-09-01 by 843 to data/spine/legacy/. `read()` returns [] for a
+# missing file, so this did not crash - it silently dropped every
+# LEGACY_ASSISTANCE_INT row from the identity crosswalk, which is worse.
+ASSIST_XW = CEDAR / "data" / "spine" / "legacy" / "assistance_tribe_id_crosswalk.csv"
 OUT = CEDAR / "data" / "clean" / "cedar_entity_identity_crosswalk.csv"
 TODAY = date.today().isoformat()
 REFUSED = CEDAR / "review" / f"identity_crosswalk_refused_{TODAY}.csv"
@@ -333,7 +336,7 @@ def main():
                          "- INHERITED verbatim",
              attribution_method=g(r, "match_basis"),
              asserting_authority="the Lineage A assistance build (pre-Cedar)",
-             source_file="data/clean/assistance_tribe_id_crosswalk.csv",
+             source_file="data/spine/legacy/assistance_tribe_id_crosswalk.csv",
              basis=ASSIST_BASIS,
              identifier_publishes="N",
              publish_restriction="internal legacy key",

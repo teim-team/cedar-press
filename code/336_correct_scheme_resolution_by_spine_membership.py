@@ -54,10 +54,16 @@ column - all 420 previously-classified NEIDs and all 231 previously-UNKNOWN -
 is in the spine, so after this patch `UNKNOWN_SCHEME` is empty and any future
 appearance of it is a genuine finding rather than a pattern that has drifted.
 
+RETIRED IN PRACTICE, 2026-09-01. This script re-derives the scheme FROM
+`tribe_id`, and `code/843_retire_cicd_scheme.py` dropped `tribe_id` from the
+table. Without it every row would fall into the first branch - "tribe_id is
+blank" -> `unattributed` - and 553,106 correctly attributed rows would be
+un-attributed in one pass. The guard added below refuses on exactly that.
+
 Rewrites TWO COLUMNS ONLY, both written by 335 earlier today and neither
-carrying any source value:
-    tribe_id_scheme_resolved
-    tribe_id_scheme_resolved_basis
+carrying any source value (RENAMED 2026-09-01 by 843):
+    attribution_status        (was tribe_id_scheme_resolved)
+    attribution_basis         (was tribe_id_scheme_resolved_basis)
 Every other column, including every source column, is carried through
 byte-identical and verified against the backup.
 
@@ -91,7 +97,10 @@ SPINE = CEDAR / "data" / "spine" / "cedar_entity_spine.csv"
 csv.field_size_limit(min(sys.maxsize, 2**31 - 1))
 
 INT_RE = re.compile(r"^\d+$")
-TOUCHED = ["tribe_id_scheme_resolved", "tribe_id_scheme_resolved_basis"]
+TOUCHED = ["attribution_status", "attribution_basis"]
+# What this script DERIVES FROM. Absent => it cannot run, and running it
+# anyway would blank the answer rather than correct it.
+REQUIRED_INPUTS = ["tribe_id", "tribe_id_scheme"]
 
 
 def load_spine_ids():
@@ -120,10 +129,11 @@ def main():
     print(f"  spine ids loaded: {len(spine):,}")
 
     mtime_before = TARGET.stat().st_mtime
+    # THE BACKUP MOVED BELOW THE GUARDS (2026-09-02). It ran before them, so a
+    # refusal still wrote a 659 MB duplicate of an untouched file - and that
+    # duplicate then becomes "the most recent backup" for standing rule 12,
+    # hiding a column another script drops later the same day.
     bak = TARGET.with_suffix(TARGET.suffix + f".bak_{TODAY}_pre336")
-    if not bak.exists():
-        print(f"  backing up -> {bak.name}")
-        shutil.copy2(TARGET, bak)
 
     part = TARGET.with_suffix(TARGET.suffix + ".part")
     stats = Counter()
@@ -134,11 +144,24 @@ def main():
     with open(TARGET, encoding="utf-8-sig", errors="replace", newline="") as fin:
         rd = csv.DictReader(fin)
         hdr = list(rd.fieldnames or [])
+        for c in REQUIRED_INPUTS:
+            if c not in hdr:
+                raise SystemExit(
+                    f"FATAL: '{c}' absent - RETIRED 2026-09-01 by "
+                    f"code/843_retire_cicd_scheme.py. This script derives the "
+                    f"scheme FROM {c}; without it every row would resolve to "
+                    f"`unattributed` and 553,106 correct attributions would be "
+                    f"destroyed. `attribution_status` already carries the "
+                    f"answer. Do not restore the column to make this run.")
         for c in TOUCHED:
             if c not in hdr:
                 raise SystemExit(
                     f"FATAL: '{c}' absent - run 335 first. "
                     f"336 corrects 335's output, it does not create it.")
+        # Guards passed: NOW take the backup.
+        if not bak.exists():
+            print(f"  backing up -> {bak.name}")
+            shutil.copy2(TARGET, bak)
         with open(part, "w", encoding="utf-8", newline="") as fout:
             w = csv.DictWriter(fout, fieldnames=hdr, extrasaction="ignore")
             w.writeheader()
@@ -146,7 +169,7 @@ def main():
                 n += 1
                 tid = (r.get("tribe_id") or "").strip()
                 sch = (r.get("tribe_id_scheme") or "").strip()
-                was = r.get("tribe_id_scheme_resolved") or ""
+                was = r.get("attribution_status") or ""
 
                 if not tid:
                     rs, rb = "unattributed", "tribe_id is blank"
@@ -171,8 +194,8 @@ def main():
 
                 if was != rs:
                     changed[f"{was} -> {rs}"] += 1
-                r["tribe_id_scheme_resolved"] = rs
-                r["tribe_id_scheme_resolved_basis"] = rb
+                r["attribution_status"] = rs
+                r["attribution_basis"] = rb
                 stats[f"scheme::{rs}"] += 1
                 by_fy[(r.get("fiscal_year") or "").strip()][rs] += 1
                 w.writerow(r)

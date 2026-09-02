@@ -323,10 +323,14 @@ def main():
                   newline="") as fh:
             for r in csv.DictReader(fh):
                 n += 1
-                schemes[g(r, "tribe_id_scheme_resolved") or "(column absent)"] += 1
+                # RENAMED 2026-09-01 by 843; the old name made this audit
+                # report "(column absent)" on all 701,955 rows.
+                schemes[g(r, "attribution_status")
+                        or g(r, "tribe_id_scheme_resolved")
+                        or "(column absent)"] += 1
         A["assistance_id_schemes"] = {
             "rows": n,
-            "tribe_id_scheme_resolved": dict(schemes.most_common()),
+            "attribution_status": dict(schemes.most_common()),
             "note": "The crosswalk is NOT applied. 152 and 24 decline in "
                     "writing: 'the NEID crosswalk is a ruling, not a "
                     "computation.' 122 of 344 candidates rest on the "

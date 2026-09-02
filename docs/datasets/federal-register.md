@@ -44,6 +44,7 @@ No open contract point. Next action: **maintain**.
 |---|---:|---|---|
 | `consultation_agency_coverage.csv` *(UNDOCUMENTED)* | 66 | — | no dated column |
 | `consultation_events.csv` | 11,402 | `notice_date` | 1994–2026 · **thin: 2006** |
+| `consultation_source_probe.csv` *(UNDOCUMENTED)* | 5 | — | no dated column |
 | `correspondence_foia_source_coverage.csv` | 124 | — | no dated column |
 | `federal_actions.csv` | 156,897 | `publication_date` | 1994–2026 |
 | `federal_actions_entity_bridge.csv` | 5,786 | `publication_date` | 1994–2026 |

@@ -452,7 +452,12 @@ say("[4] bie_uio_identifier_links", dict(n))
 # ---------------------------------------------------------------------------
 legacy2cedar = {}
 t, why = SOURCE_TIER["assistance_tribe_id_crosswalk.csv"]
-for r in rd(clean("assistance_tribe_id_crosswalk.csv")):
+# MOVED 2026-09-01 by 843: a retired scheme is not a dataset, so the crosswalk
+# left data/clean/ for data/spine/legacy/. This line still pointed at the old
+# path and `rd()` does not guard - 169 died with FileNotFoundError.
+LEGACY_XWALK = os.path.join(CEDAR, "data", "spine", "legacy",
+                            "assistance_tribe_id_crosswalk.csv")
+for r in (rd(LEGACY_XWALK) if os.path.exists(LEGACY_XWALK) else ()):
     lg = (r.get("legacy_tribe_id") or "").strip()
     cd = (r.get("proposed_cedar_tribe_id") or "").strip()
     if lg and cd:

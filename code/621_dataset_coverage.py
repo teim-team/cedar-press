@@ -134,6 +134,14 @@ HAND_DOCS = {
     "subcontracting": "docs/datasets/subcontracting.md",
     "gaming": "docs/datasets/gaming_sources.md",
     "lobbying": "docs/datasets/lobbying_sources.md",
+    # Added 2026-09-02 by GRAIN-LEGISLATION. docs/datasets/10_bills_votes.md
+    # ALREADY CARRIED the CEDAR:COVERAGE-MEASURED block and was not in this
+    # map, so the generator never touched it and the block froze at its
+    # 2026-09-01 vintage - still reading "Status: BLOCKED, 12 customer tables"
+    # after the dataset reached READY at 11. A generated block that no
+    # generator owns is worse than a hand-written one, because it carries a
+    # banner telling the reader not to edit it by hand.
+    "legislation": "docs/datasets/10_bills_votes.md",
 }
 
 

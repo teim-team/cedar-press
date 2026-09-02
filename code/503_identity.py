@@ -549,7 +549,12 @@ def legacy_states():
     out = {}
     with TABLE.open(encoding="utf-8", errors="replace", newline="") as f:
         for row in csv.DictReader(f):
-            if row.get("tribe_id_scheme_resolved") != "lineageA_dofile_integer":
+            # RENAMED 2026-09-01 by 843: tribe_id_scheme_resolved ->
+            # attribution_status. Reading the dead name returned None on every
+            # row, so this cache silently wrote {} and the state-agreement
+            # guard - the thing that stops CSKT/Oneida/Flandreau being matched
+            # across state lines - had no evidence at all.
+            if row.get("attribution_status") != "lineageA_dofile_integer":
                 continue
             t = (row.get("tribe_id") or "").strip()
             st = (row.get("recipient_state_code") or "").strip().upper()
@@ -638,17 +643,19 @@ def phase_reconcile(argv) -> int:
                         lr.get("attribution_method"))
         n_uei_a = n_uei_x = n_uei_prop = 0
         n_native = 0
+        legacy_col_present = "tribe_id" in (rdr.fieldnames or [])
         for row in rdr:
-            sch = row.get("tribe_id_scheme_resolved")
-            if sch == "lineageA_dofile_integer":
+            sch = row.get("attribution_status")
+            if sch == "lineageA_dofile_integer" and legacy_col_present:
                 hit = mapping.get((row.get("tribe_id") or "").strip())
                 if hit:
                     tid, basis = hit
                     row["tribe_id_neid"] = tid
-                    row["tribe_id_scheme_resolved"] = "cedar_neid"
-                    row["tribe_id_scheme_resolved_basis"] = f"{basis} [{BASIS_TAG} {TODAY}]"
+                    row["attribution_status"] = "cedar_neid"
+                    row["attribution_basis"] = f"{basis} [{BASIS_TAG} {TODAY}]"
                     n_upd += 1
-            elif sch == "cedar_neid" and not (row.get("tribe_id_neid") or "").strip():
+            elif (sch == "cedar_neid" and legacy_col_present
+                  and not (row.get("tribe_id_neid") or "").strip()):
                 # THE INVARIANT: scheme cedar_neid => tribe_id_neid holds the
                 # Cedar ID, on every row. The pre-503 rows kept theirs in
                 # tribe_id with tribe_id_neid blank; the 503-promoted rows keep
@@ -664,13 +671,13 @@ def phase_reconcile(argv) -> int:
                     tid, tier, method = hit
                     if tier == "A":
                         row["tribe_id_neid"] = tid
-                        row["tribe_id_scheme_resolved"] = "cedar_neid"
-                        row["tribe_id_scheme_resolved_basis"] = (
+                        row["attribution_status"] = "cedar_neid"
+                        row["attribution_basis"] = (
                             f"UEI {u} in ledger, tier A via {method} [{BASIS_TAG} {TODAY}]")
                         n_uei_a += 1
                     elif tier == "X":
-                        row["tribe_id_scheme_resolved"] = "excluded_not_native"
-                        row["tribe_id_scheme_resolved_basis"] = (
+                        row["attribution_status"] = "excluded_not_native"
+                        row["attribution_basis"] = (
                             f"UEI {u} owner-ruled NOT native (tier X via {method}) [{BASIS_TAG} {TODAY}]")
                         n_uei_x += 1
                     elif not (row.get("tribe_id_neid_proposed") or "").strip():
@@ -1060,7 +1067,10 @@ def phase_mint(argv) -> int:
     print(f"  sample: {register[0]['cedar_uid']} = {register[0]['handle']} "
           f"({register[0]['canonical_name'][:30]})")
     print(f"  with former names: {sum(1 for x in register if x['former_names'])}")
-    print(f"  with CICD same-as: {sum(1 for x in register if x['same_as_legacy_cicd'])}")
+    # `same_as_legacy_cicd` was dropped from the register by 843 on 2026-09-01.
+    # This line was still reading it and `503 mint` DIED HERE with a KeyError -
+    # the identity service's own mint phase, and therefore `503 all --apply`
+    # and the C8 rebuild path, could not run at all.
 
     if verify:
         by_handle = {x["handle"]: x["cedar_uid"] for x in register}
@@ -1087,7 +1097,7 @@ def phase_mint(argv) -> int:
     tmp = str(REGISTER) + ".part"
     regcols = ["cedar_uid", "handle", "cedar_entity_id", "canonical_name",
                "entity_class", "class_since_basis", "former_names",
-               "same_as_legacy_cicd", "minted", "register_status"]
+               "minted", "register_status"]   # `same_as_legacy_cicd` retired by 843
     with io.open(tmp, "w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=regcols, restval="",
                            extrasaction="ignore")
@@ -1185,14 +1195,17 @@ ID_COLS = ("cedar_uid_source", "tribe_id_neid", "tribe_id", "entity_id",
 
 
 def register_map():
-    """handle -> uid, INCLUDING the retired CICD integers.
+    """handle -> uid.
 
-    Two panels (federal_funding_tribe_year_panel, entity_evidence_profile) were
-    built before the reconciliation and still key on bare lineage-A integers.
-    The register carries `same_as_legacy_cicd` for exactly this reason: a
-    retired scheme still has to RESOLVE, or the old panels are orphaned from
-    the identity they belong to. The integer is never re-adopted as an identity
-    - it is only ever read.
+    UNTIL 2026-09-01 this also resolved the legacy CICD integers, because two
+    panels (federal_funding_tribe_year_panel, entity_evidence_profile) still
+    keyed on them. Both were re-measured on 2026-09-02 and NEITHER DOES: 843
+    dropped `tribe_id` from the panel, and entity_evidence_profile keys on
+    `cedar_entity_id` on all 1,313 rows. The register column the resolution
+    read (`same_as_legacy_cicd`) is gone too, so the block below was resolving
+    nothing while the docstring said it was load-bearing. Retired, not deleted:
+    the crosswalk still lives at data/spine/legacy/ if a legacy integer ever
+    has to be resolved by hand.
     """
     m, legacy = {}, {}
     # RETIRED HANDLES RESOLVE TOO (F6, rule 2). A dataset row or a buyer's
@@ -1209,12 +1222,7 @@ def register_map():
                 v = (r.get(k) or "").strip()
                 if v:
                     m[v] = uid
-            for old in (r.get("same_as_legacy_cicd") or "").split(","):
-                old = old.strip()
-                if old:
-                    # a legacy integer claimed by two entities is ambiguous and
-                    # is dropped rather than resolved by first-wins
-                    legacy.setdefault(old, set()).add(uid)
+            # legacy CICD integers: retired 2026-09-01, see the docstring
     contested = []
     for old, uids in legacy.items():
         if len(uids) == 1:

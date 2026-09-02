@@ -696,6 +696,45 @@ KNOWN_ORDERINGS = [
                           "threshold_derived_from_question",
                           "threshold_agrees_with_official",
                           "result_reconciles_with_threshold"]},
+    # WORKSTREAM INT-READY, 2026-09-02. Two enrichers declared at creation.
+    {"rebuild": "158_extend_gaming_facilities.py",
+     "enricher": "960_promote_gaming_facility_class_and_revenue_reach.py",
+     "file": "gaming_facilities.csv",
+     "cost": "not yet paid - declared at creation. Any rebuild of the "
+             "facility table drops the eleven columns 960 appends, and with "
+             "them the only path from a facility to "
+             "`gaming_revenue_bounds.csv` (694 of 787 facilities), the only "
+             "statement of Class II / Class III on the record (684 of 787), "
+             "and the quoted statute or compact clause that explains why 174 "
+             "facilities in seven states can never carry a revenue figure. "
+             "Re-run 960 after any facility rebuild; the "
+             "`.bak_<date>_pre960` beside the table is the signal",
+     "enricher_columns": ["gaming_class_ii_authorized",
+                          "gaming_class_iii_authorized",
+                          "gaming_class_basis", "gaming_class_source_url",
+                          "has_revenue_bound",
+                          "n_revenue_bound_fiscal_years",
+                          "revenue_bound_strongest_status",
+                          "revenue_bound_basis",
+                          "revenue_bound_absent_reason",
+                          "state_revenue_disclosure_status",
+                          "state_revenue_disclosure_basis"]},
+    {"rebuild": "503_identity.py",
+     "enricher": "961_promote_register_legal_names_and_state.py",
+     "file": "cedar_identity_register.csv",
+     "cost": "not yet paid - declared at creation. 503 rewrites the register "
+             "from a FIXED ten-column list and drops all five of 961's "
+             "columns, including the Federal Register legal name for 536 "
+             "entities that 510 buyers cannot otherwise search for. "
+             "SEPARATELY AND WORSE: that same fixed list still names "
+             "`same_as_legacy_cicd`, which 843 deliberately retired from the "
+             "data on 2026-09-01, so a 503 rebuild REINTRODUCES a retired "
+             "identifier scheme. Recorded in docs/KNOWN_ISSUES.md; not fixed "
+             "here because 503 is identity-critical and owned elsewhere",
+     "enricher_columns": ["federal_register_legal_name",
+                          "federal_register_legal_name_basis",
+                          "federal_register_legal_name_url",
+                          "state", "minted_basis"]},
 ]
 
 

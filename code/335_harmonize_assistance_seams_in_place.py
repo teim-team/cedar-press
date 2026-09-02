@@ -97,10 +97,13 @@ from `Federal Spending/code/fed_funding_do_file_corrtd.do`.
 
 COLUMNS ADDED
 -------------
-  tribe_id_scheme_resolved          never blank; one of
+  attribution_status                never blank; one of
                                     lineageA_dofile_integer | cedar_neid |
-                                    unattributed
-  tribe_id_scheme_resolved_basis    how that was determined, per row
+                                    unattributed | excluded_not_native
+                                    (RENAMED 2026-09-01 by 843 from
+                                    `tribe_id_scheme_resolved`)
+  attribution_basis                 how that was determined, per row
+                                    (was `tribe_id_scheme_resolved_basis`)
   tribe_id_neid_proposed            crosswalk candidate, integer rows only
   tribe_id_neid_proposed_tier       INHERITED from the crosswalk (B), never up
   tribe_id_neid_proposed_basis      the crosswalk's match_basis, so a consumer
@@ -119,8 +122,16 @@ THIS IS AN IN-PLACE ENRICHER. A rebuild of `federal_funding_transactions.csv`
 reverts it and 335 must be re-run. That collision has bitten FERC four times;
 the `.bak_<date>_pre335` file beside the table is the signal.
 
+SEAM 1 IS RETIRED (2026-09-01). `code/843_retire_cicd_scheme.py` dropped
+`tribe_id` and `tribe_id_scheme` from the table, so the scheme-resolution seam
+has nothing left to resolve - and it had nothing left to do anyway: the last
+44 `lineageA_dofile_integer` rows were the two county housing authorities 843
+names as false positives. The guard below refuses rather than half-running.
+Seams 2 and 3 (`source_vintage`, `business_types_description_normalized`) are
+unaffected and already applied.
+
 Reads   data/clean/federal_funding_transactions.csv
-        data/clean/assistance_tribe_id_crosswalk.csv
+        data/spine/legacy/assistance_tribe_id_crosswalk.csv
 Writes  data/clean/federal_funding_transactions.csv   (+9 columns, in place)
         data/clean/federal_funding_transactions.csv.bak_<date>_pre335
         docs/ASSISTANCE_SEAM_HARMONIZATION.json
@@ -150,8 +161,9 @@ XWALK = LEGACY_DIR / "assistance_tribe_id_crosswalk.csv"
 csv.field_size_limit(min(sys.maxsize, 2**31 - 1))
 
 NEW_COLS = [
-    "tribe_id_scheme_resolved",
-    "tribe_id_scheme_resolved_basis",
+    # RENAMED 2026-09-01 by 843.
+    "attribution_status",
+    "attribution_basis",
     "tribe_id_neid_proposed",
     "tribe_id_neid_proposed_tier",
     "tribe_id_neid_proposed_basis",
@@ -262,13 +274,11 @@ def main():
     print(f"  crosswalk   {len(xwalk)} legacy ids, {n_prop} with a proposal, "
           f"{len(xwalk) - n_prop} with none")
 
-    bak = TARGET.with_suffix(TARGET.suffix + f".bak_{TODAY}_pre335")
-    if not bak.exists():
-        print(f"  backing up -> {bak.name}")
-        shutil.copy2(TARGET, bak)
-    else:
-        print(f"  backup already present: {bak.name}")
-
+    # THE BACKUP USED TO HAPPEN HERE, BEFORE THE GUARDS BELOW. Every refusal
+    # therefore left a 659 MB duplicate of a file it had not touched - and, worse,
+    # that duplicate becomes "the most recent backup" for standing rule 12, so a
+    # column another script drops later today compares against a snapshot taken
+    # after the drop and the loss reads as zero. A refusal must cost nothing.
     part = TARGET.with_suffix(TARGET.suffix + ".part")
 
     stats = Counter()
@@ -292,9 +302,27 @@ def main():
                      "source_file", "business_types_description",
                      "fiscal_year"):
             if need not in hdr:
-                raise SystemExit(f"FATAL: column '{need}' absent; has {hdr[:10]} ...")
+                extra = ""
+                if need in ("tribe_id", "tribe_id_scheme"):
+                    extra = (" - RETIRED 2026-09-01 by "
+                             "code/843_retire_cicd_scheme.py. Seam 1 of this "
+                             "script resolved the CICD scheme and there is no "
+                             "longer a scheme to resolve; `attribution_status` "
+                             "already carries the answer on all 701,955 rows. "
+                             "Do not restore the column to make this run.")
+                raise SystemExit(f"FATAL: column '{need}' absent{extra}; "
+                                 f"has {hdr[:10]} ...")
 
-        out_hdr = hdr + NEW_COLS
+        # Guards passed: NOW take the backup, and not one byte sooner.
+        bak = TARGET.with_suffix(TARGET.suffix + f".bak_{TODAY}_pre335")
+        if not bak.exists():
+            print(f"  backing up -> {bak.name}")
+            shutil.copy2(TARGET, bak)
+        else:
+            print(f"  backup already present: {bak.name}")
+
+        # A second run must not append a column the table already carries.
+        out_hdr = hdr + [c for c in NEW_COLS if c not in hdr]
         with open(part, "w", encoding="utf-8", newline="") as fout:
             w = csv.DictWriter(fout, fieldnames=out_hdr, extrasaction="ignore")
             w.writeheader()
@@ -326,8 +354,8 @@ def main():
                 else:
                     rs, rb = "UNKNOWN_SCHEME", f"tribe_id matches no known form"
                     stats["unknown_scheme"] += 1
-                r["tribe_id_scheme_resolved"] = rs
-                r["tribe_id_scheme_resolved_basis"] = rb
+                r["attribution_status"] = rs
+                r["attribution_basis"] = rb
                 stats[f"scheme::{rs}"] += 1
                 scheme_by_fy[fy][rs] += 1
 
@@ -338,7 +366,9 @@ def main():
                     if got is None:
                         stats["integer_absent_from_crosswalk"] += 1
                         unresolved_ids[tid] += 1
-                        pbasis = "legacy id absent from assistance_tribe_id_crosswalk.csv"
+                        pbasis = ("legacy id absent from "
+                                  "data/spine/legacy/"
+                                  "assistance_tribe_id_crosswalk.csv")
                     else:
                         pid, ptier, pbasis = got
                         if pid:

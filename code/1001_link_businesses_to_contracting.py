@@ -304,6 +304,26 @@ class FedEntity:
         self.restricted_name_only = True   # cleared by any unrestricted name
 
 
+def _merge_entities(group):
+    """One firm's successor entities, added up. Never used to merge across a
+    geography disagreement - the caller has already proved a shared city."""
+    m = FedEntity(group[0].uei)
+    for e in group:
+        m.cages.update(e.cages)
+        m.names.update(e.names)
+        m.states.update(e.states)
+        m.cities.update(e.cities)
+        m.prime_oblig += e.prime_oblig
+        m.prime_rows += e.prime_rows
+        m.sub_amount += e.sub_amount
+        m.sub_rows += e.sub_rows
+        m.sources |= e.sources
+        m.first_fy = _fy(m.first_fy, e.first_fy, True)
+        m.last_fy = _fy(m.last_fy, e.last_fy, False)
+        m.restricted_name_only = m.restricted_name_only and             e.restricted_name_only
+    return m
+
+
 def _fy(cur, v, lo):
     v = (v or "").strip()[:4]
     if not v.isdigit():
@@ -471,7 +491,8 @@ LINK_COLUMNS = [
     "business_source_id", "source_id", "certifying_authority_name",
     "business_name_raw", "business_name_matched_form",
     "link_status", "link_tier", "link_method", "link_rung",
-    "matched_uei", "matched_cage", "n_candidate_ueis", "candidate_ueis",
+    "matched_uei", "matched_uei_all", "matched_cage",
+    "n_candidate_ueis", "candidate_ueis",
     "corroboration", "directory_state", "directory_city",
     "federal_states", "federal_cities",
     "prime_obligations_usd", "prime_transaction_rows",
@@ -522,9 +543,12 @@ def build(argv):
     ents, index = build_federal_universe()
 
     biz = list(csv.DictReader(open(DIRECTORY, encoding="utf-8-sig")))
+    truncated_sources = source_state_column_is_truncated(biz)
     if args.limit:
         biz = biz[:args.limit]
     print(f"directory rows: {len(biz)}", flush=True)
+    print(f"sources with a truncated state column: "
+          f"{sorted(truncated_sources)}", flush=True)
 
     REVIEW.mkdir(exist_ok=True)
     lf = open(LINKS, "w", encoding="utf-8", newline="")
@@ -542,11 +566,15 @@ def build(argv):
     stats = Counter()
     money = Counter()
     linked_ueis = set()
+    publishable_ueis = set()
+    linked_firm_rows = set()
 
     for b in biz:
         raw = b["business_name_raw"]
         variants = name_variants(raw)
-        dstate = norm_state(b["state_province"])
+        dstates = plausible_states(b["state_province"],
+                                   widen=b["source_id"] in truncated_sources)
+        dstate_ambiguous = len(dstates) > 1
         dcity = norm_city(b["city"])
         nation = b["certifying_authority_name"]
         nstates = NATION_STATES.get(nation, set())
@@ -558,7 +586,7 @@ def build(argv):
             "source_id": b["source_id"],
             "certifying_authority_name": nation,
             "business_name_raw": raw,
-            "directory_state": dstate,
+            "directory_state": "|".join(sorted(dstates)),
             "directory_city": dcity,
             "business_name_is_person_name": b["business_name_is_person_name"],
             "identifier_publish_gate": gate,
@@ -606,15 +634,29 @@ def build(argv):
         rec["candidate_ueis"] = ";".join(sorted(cands))
 
         # THE VETO, before the ladder. The record's own geography outranks
-        # everything: if the directory says a state and NO candidate is in
-        # it, the name collision is with some other firm and the match is
-        # refused rather than reconciled.
-        if dstate:
-            keep = {u for u in cands if dstate in ents[u].states}
-            if not keep:
+        # everything: if the directory says a state and a candidate is
+        # recorded in a DIFFERENT one, the name collision is with some other
+        # firm and the match is refused rather than reconciled.
+        #
+        # ABSENCE IS NOT DISAGREEMENT. A candidate Cedar knows only from
+        # `fpds_uei_cage_map.csv` carries no state at all, and an empty
+        # federal state read as a conflict refused 8 of the first 16
+        # refusals on evidence that did not exist. A silent candidate falls
+        # to a lower rung; it is never vetoed.
+        geo_note = ""
+        if dstates:
+            agreeing = {u for u in cands if dstates & set(ents[u].states)}
+            silent = {u for u in cands if not ents[u].states}
+            if agreeing:
+                cands = agreeing
+            elif silent:
+                cands = silent
+                geo_note = "federal_side_records_no_state_for_this_uei"
+            else:
                 rec["link_status"] = "REFUSED"
                 rec["no_match_reason"] = (
-                    f"state_conflict:directory={dstate};federal="
+                    "state_conflict:directory="
+                    + "|".join(sorted(dstates)) + ";federal="
                     + ",".join(sorted({s for u in cands
                                        for s in ents[u].states}))[:80])
                 stats["refused_state_conflict"] += 1
@@ -623,22 +665,62 @@ def build(argv):
                 lf.flush()
                 hf.flush()
                 continue
-            cands = keep
+
+        # Narrow on the city before deciding the name is ambiguous.
+        if len(cands) > 1 and dcity:
+            bycity = {u for u in cands if dcity in ents[u].cities}
+            if bycity:
+                cands = bycity
+
+        # SUCCESSOR ENTITIES ARE ONE FIRM, NOT AN AMBIGUITY.
+        # cedar_ids.mapping_is_defect notes that MANY identifiers per entity
+        # is expected - "the 8(a) nine-year term mints successor entities
+        # sharing a name and an address." Elite Laundry & Dry Cleaners holds
+        # two UEIs, both Gallup NM, $11.2M and $19.0M. Holding that as
+        # "ambiguous" throws away $30.2M of a firm Cedar can see perfectly
+        # well. So: candidates that share BOTH a city and a state are merged
+        # into one link carrying every UEI. Candidates that do not - Arctic
+        # Slope Technical Services across NM, CO, AK, AL and MD - stay held.
+        merged = False
+        if len(cands) > 1:
+            common_city = set.intersection(*[set(ents[u].cities)
+                                             for u in cands])
+            common_state = set.intersection(*[set(ents[u].states)
+                                              for u in cands])
+            if common_city and common_state:
+                merged = True
 
         # THE LADDER
         rung = tier = method = ""
         corrob = []
-        if len(cands) == 1:
-            u = next(iter(cands))
-            e = ents[u]
-            if dcity and dstate and dcity in e.cities and dstate in e.states:
+        if len(cands) == 1 or merged:
+            group = sorted(cands, key=lambda u: -ents[u].prime_oblig)
+            u = group[0]
+            e = _merge_entities([ents[x] for x in group]) if merged else ents[u]
+            agree = dstates & set(e.states)
+            if dcity and agree and dcity in e.cities:
+                # Rung 1. Two independent geographic signals on one firm.
+                # An ambiguous recorded state does not weaken this: the city
+                # is doing the work and the state is only not contradicting.
                 rung, tier, method = "1_city_and_state", "A", \
                     "name_exact+city+state"
-                corrob = [f"city={dcity}", f"state={dstate}"]
-            elif dstate and dstate in e.states:
-                rung, tier, method = "2_state", "A", "name_exact+state"
-                corrob = [f"state={dstate}"]
-            elif not dstate and nstates & set(e.states):
+                corrob = [f"city={dcity}", "state=" + ",".join(sorted(agree))]
+            elif dcity and dcity in e.cities:
+                rung, tier, method = "1b_city_only", "B", "name_exact+city"
+                corrob = [f"city={dcity}"]
+            elif agree:
+                # Rung 2. One geographic signal. An ambiguous recorded state
+                # that happens to contain the federal state is weaker evidence
+                # than an unambiguous one and is tiered accordingly.
+                rung = "2_state" if not dstate_ambiguous \
+                    else "2b_state_ambiguous_recorded_value"
+                tier = "A" if not dstate_ambiguous else "B"
+                method = "name_exact+state" if not dstate_ambiguous \
+                    else "name_exact+state_from_truncated_value"
+                corrob = ["state=" + ",".join(sorted(agree))
+                          + ("" if not dstate_ambiguous
+                             else ";recorded_value_was_truncated")]
+            elif not dstates and nstates & set(e.states):
                 rung, tier, method = "3_nation_home_state", "B", \
                     "name_exact+certifying_nation_state"
                 corrob = ["nation_state="
@@ -671,18 +753,22 @@ def build(argv):
             hf.flush()
             continue
 
-        u = next(iter(cands))
-        e = ents[u]
         cage = e.cages.most_common(1)[0][0] if e.cages else ""
+        if merged:
+            method += "+successor_entities_merged"
+            corrob.append(f"n_ueis={len(group)}")
+        if geo_note:
+            corrob.append(geo_note)
         rec.update({
             "link_status": "LINKED" if tier in {"A", "B"} else "PROPOSED",
             "link_tier": tier,
             "link_method": method,
             "link_rung": rung,
             "matched_uei": u,
+            "matched_uei_all": ";".join(group),
             "matched_cage": cage,
-            "n_candidate_ueis": 1,
-            "candidate_ueis": u,
+            "n_candidate_ueis": len(group),
+            "candidate_ueis": ";".join(group),
             "corroboration": ";".join(corrob),
             "federal_states": ",".join(s for s, _ in e.states.most_common(4)),
             "federal_cities": ",".join(c for c, _ in e.cities.most_common(3)),
@@ -704,15 +790,29 @@ def build(argv):
 
         stats[f"link_tier_{tier}"] += 1
         if tier in {"A", "B"}:
-            linked_ueis.add(u)
-            money["prime"] += e.prime_oblig
-            money["sub"] += e.sub_amount
+            stats["linked_rows"] += 1
+            # DOLLARS ARE SUMMED PER UEI, NEVER PER DIRECTORY ROW. Tiger
+            # Natural Gas is certified by BOTH Cherokee Nation and Muscogee
+            # (Creek) Nation and iina' ba' appears three times in the Navajo
+            # list under three spellings. Summing rows would report $908M
+            # twice and $19.7M three times - the double-count is invisible in
+            # a total and obvious in a per-UEI ledger.
+            for one in group:
+                if one not in linked_ueis:
+                    linked_ueis.add(one)
+                    money["prime"] += ents[one].prime_oblig
+                    money["sub"] += ents[one].sub_amount
             if b["publishable"] == "Y":
-                money["prime_publishable"] += e.prime_oblig
-                stats["linked_publishable"] += 1
+                stats["linked_publishable_rows"] += 1
+                for one in group:
+                    if one not in publishable_ueis:
+                        publishable_ueis.add(one)
+                        money["prime_publishable"] += ents[one].prime_oblig
+                        money["sub_publishable"] += ents[one].sub_amount
 
         # crosswalk rows - one per identifier, flushed per entity
-        for typ, val in (("UEI", u), ("CAGE", cage)):
+        for typ, val in ([("UEI", x) for x in group]
+                         + [("CAGE", cage)]):
             if not val:
                 continue
             xw.writerow({
@@ -752,10 +852,16 @@ def build(argv):
         "federal_ueis_indexed": len(ents),
         "stats": dict(stats),
         "distinct_ueis_linked": len(linked_ueis),
+        "distinct_ueis_linked_publishable": len(publishable_ueis),
         "prime_obligations_exposed_usd": round(money["prime"], 2),
         "prime_obligations_exposed_publishable_usd":
             round(money["prime_publishable"], 2),
         "subaward_amount_exposed_usd": round(money["sub"], 2),
+        "subaward_amount_exposed_publishable_usd":
+            round(money["sub_publishable"], 2),
+        "dollar_grain": "summed once per distinct UEI, never per directory "
+                        "row - 8 firms are certified by two nations and 3 "
+                        "Navajo spellings resolve to one firm",
         "nation_states_basis": NATION_STATES_BASIS,
     }
     SUMMARY.write_text(json.dumps(summary, indent=2), encoding="utf-8")
@@ -869,8 +975,10 @@ def _invariants(rows):
         tier = (r.get("link_tier") or "").strip()
         status = (r.get("link_status") or "").strip()
         sid = r.get("business_source_id", "?")
-        if u and not UEI_RE.match(u):
-            out.setdefault("malformed_uei", f"{sid}:{u}")
+        for one in [u] + (r.get("matched_uei_all") or "").split(";"):
+            one = one.strip()
+            if one and not UEI_RE.match(one):
+                out.setdefault("malformed_uei", f"{sid}:{one}")
         if c and not CAGE_RE.match(c):
             out.setdefault("malformed_cage", f"{sid}:{c}")
         if tier == "A" and status == "LINKED" and not (
@@ -881,7 +989,8 @@ def _invariants(rows):
                 n = int(r.get("n_candidate_ueis") or 0)
             except ValueError:
                 n = 0
-            if n > 1:
+            if n > 1 and "successor_entities_merged" not in (
+                    r.get("link_method") or ""):
                 out.setdefault("linked_with_multiple_candidates", sid)
             if not u:
                 out.setdefault("linked_without_identifier", sid)

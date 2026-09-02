@@ -1,11 +1,11 @@
 # Export safety — which tables a buyer may total
 
-*Generated 2026-09-01 by `code/517_export_safety.py`. Derived from the grain contracts and the temporal layer; this file measures nothing new, it REFUSES on what they already know.*
+*Generated 2026-09-02 by `code/517_export_safety.py`. Derived from the grain contracts and the temporal layer; this file measures nothing new, it REFUSES on what they already know.*
 
 **The rule that matters most:** unknown ownership may ship as unknown. **Contradicted ownership may never ship as a definite historical owner.**
 
-- **SAFE_TO_AGGREGATE**: 217
-- **ROW_LEVEL_ONLY**: 4 (of which **3 carry money columns** — the unsafe analysis is also the most likely one)
+- **SAFE_TO_AGGREGATE**: 219
+- **ROW_LEVEL_ONLY**: 3 (of which **3 carry money columns** — the unsafe analysis is also the most likely one)
 
 ## Ownership as-of status
 
@@ -22,7 +22,6 @@
 
 | table | collection | money columns | why |
 |---|---|---|---|
-| `congressional_correspondence_log.csv` | legislation | — | grain UNSTATED; no validated primary key |
 | `faads_transactions_all_agencies.csv` | funding | obligated_usd | grain UNSTATED; no validated primary key; 3441 literal duplicate rows |
 | `native_passthrough.csv` | funding | amount_usd | grain UNSTATED; no validated primary key; 116 literal duplicate rows |
 | `subawards.csv` | subcontracting | subaward_amount|prime_award_amount|subaward_amount_real2025 | grain UNSTATED; no validated primary key; 10770 literal duplicate rows |

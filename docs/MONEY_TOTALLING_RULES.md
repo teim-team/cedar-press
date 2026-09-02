@@ -364,3 +364,99 @@ The grain is a claim occurrence, not a fact: two sentences on one page stating t
 `fac_audit_sefa_gaming_programs.csv` (1 row) carries `amount_expended`, which is a FEDERAL AWARD EXPENDITURE and is not gaming revenue of any kind. It may not be summed with any gaming money column, and it is additive only at (report_id, award_reference) — one SEFA line of one Single Audit.
 
 <!-- END GAMING-NR -->
+
+<!-- BEGIN INT-READY -->
+## Gaming, lobbying and 990 Schedule C — three totals with one name, and one column family that carries no money at all
+
+*Appended 2026-09-02 by workstream INT-READY (`code/960`, `code/961`,
+`code/512`). Every figure re-measured with `csv.reader` from the live files on
+the date shown; nothing is quoted from a build log.*
+
+### `gaming_facilities.csv` gained eleven columns and NOT ONE DOLLAR — deliberately
+
+`code/960` put the class and the revenue-bound path on the facility record. It
+put **no money column there**, and the reason is a measurement rather than
+caution:
+
+| `measurement_status` in `gaming_revenue_bounds.csv` | rows | is it this property's money? |
+|---|---:|---|
+| `REGIONAL_GGR_CEILING` | 13,494 | **no** — a ceiling for the whole NIGC region, repeated on every property in it |
+| `TRIBE_LEVEL_REVENUE` | 133 | no — and these rows carry no `facility_id` at all |
+| `SINGLE_PROPERTY_ATTRIBUTED` | 115 | yes |
+| `REPORTED_PROPERTY_REVENUE` | 61 | yes |
+
+**The two honest per-property statuses reach 11 of 787 facilities (1.4%).** A
+dollar column on the facility table would therefore be 98.6% blank, and the
+cells a buyer *could* see would mostly be a regional ceiling — which, summed
+across that region's properties, multiplies the region's entire GGR by its
+property count. So the facility record carries `has_revenue_bound`,
+`n_revenue_bound_fiscal_years`, `revenue_bound_strongest_status` and a
+`revenue_bound_basis` that names the join and the rule, and the dollars stay
+where their grain is stated.
+
+**The rule for the bounds table itself:** `gaming_revenue_bounds.csv` is
+**(facility | tribe, fiscal year, bound method)** grain. `revenue_lower_bound`,
+`revenue_upper_bound`, `point_value`, `regional_total_usd` and
+`known_property_sum_usd` may be **read per row and never summed across rows** —
+not across facilities, not across years, and above all not across
+`measurement_status`. Every row is tier B. 158 of 13,803 rows carry no
+`facility_id`; a facility-keyed join silently drops them.
+
+`state_revenue_disclosure_status = SEALED_BY_STATUTE_OR_COMPACT` is on **174 of
+787 facilities across seven states — AZ, CO, KS, MN, ND, NV, WI** — each with
+the statute or compact clause quoted in `state_revenue_disclosure_basis`. A
+blank there is `NOT_ASSESSED`, **not** evidence that the state publishes.
+
+### Three tables answer "how much did tribal lobbying cost" and give three different numbers
+
+All three are correct about different questions. **Adding any two of them
+double-counts the same dollar.**
+
+| table | column | total, measured 2026-09-02 | what one row is |
+|---|---|---:|---|
+| `lobbying_registrants.csv` | `spend_reported_usd` | **$645,052,868.51** (351 of 653 rows > 0) | one Senate LDA **registrant** — the firm, rolled up |
+| `tribe_year_lobbying_panel.csv` | `total_lobbying_spend_usd` | **$680,561,640.52** | one (**entity**, filing year) |
+| `native_entity_lobbying_disclosures.csv` | `spend_usd` | **$725,743,974.52** | one LDA **filing** — and `spend_usd` is `income_usd` + `expenses_usd`, two different reporting regimes stacked in one column |
+
+Pick one and say which. The registrant rollup is the smallest because a
+registrant is a firm and a firm's Native work is one slice of its filings; the
+filing-grain total is the largest because a self-filer's `expenses_usd` and a
+retained firm's `income_usd` are both in it.
+
+**`spend_reported_usd` is not a measurement, it is a floor with a stated
+ceiling.** The LDA reports in period **bands**, not exact figures.
+`spend_sensitivity_percell_max_usd` totals **$650,383,870.30** and
+`spend_sensitivity_naive_sum_usd` totals **$685,798,224.52** on the same 653
+rows. Those three columns are the same money measured three ways and must
+never be added to one another. `n_filings_reporting_no_dollar` is non-zero on
+402 registrants: a $0 here often means *the filing reported no dollar figure*,
+not *no money moved*.
+
+### `nonprofit_schedule_c_lobbying.csv` — the headline already contains its parts
+
+Registered into `lobbying` on 2026-09-02 (it was an orphan). 6,870 rows, one
+per IRS 990 e-file **return**, keyed on `schedule_c_row_id`.
+
+```
+lobbying_usd_headline     $3,325,511   over 132 returns   <- the one to total
+  total_lobbying_usd      $1,029,249   over  43 returns   (501(h) electors, Part II-A)
+  nonelecting_lobbying_usd $2,296,262   over  89 returns   (Part II-B)
+                          ----------
+                          $3,325,511   exactly
+```
+
+**`lobbying_usd_headline` IS the union of the other two.** Summing the headline
+with either part double-counts; summing it with both counts every dollar twice.
+`direct_lobbying_usd` ($936,552) and `grassroots_lobbying_usd` ($92,697) are
+components of `total_lobbying_usd`, not additions to it.
+`political_expenditure_usd` ($1,277,338) is §527 political activity and is
+**not lobbying** — it is a different line on a different part of the schedule
+and never belongs in a lobbying total.
+
+**And no Schedule C total may be published without
+`nonprofit_schedule_c_coverage.csv` beside it.** `coverage_status` is `PARTIAL`
+on all ten index years: **32,218 returns were indexed as targets and 6,870 were
+retrieved — 21.3%.** The 25,348 shortfall is Cedar's own fetch backlog and the
+table says so verbatim ("NOT an absence at the IRS"). A buyer given $3.3M
+without that table reads a download queue as evidence about Native nonprofits.
+<!-- END INT-READY -->

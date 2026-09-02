@@ -127,10 +127,27 @@ SPINE = ROOT / "data" / "spine" / "cedar_entity_spine.csv"
 #
 # Still not measured, and now printed rather than hidden: a table with NO id
 # column of any kind is skipped. `c4_unmeasured_tables` names them.
-# Also still sampled: SCAN_CAP rows per table. `c4_sampled_tables` names the
-# tables where the cap bit, so a sampled figure is never quoted as a census.
+# SAMPLING REMOVED 2026-09-02, because head-N is not a sample.
+# C4 read the FIRST 50,000 rows of each table. That is not a random sample of a
+# file with any ordering, and the error was measured, not feared:
+#
+#     prime_contracts.csv   first 50,000 :  22,595 /    50,000 = 45.2%
+#                           FULL file    : 888,958 / 1,217,768 = 73.0%
+#                           error        : -27.8 percentage points
+#
+# The cap read 4.1% of prime_contracts and 1.8% of
+# faads_transactions_all_agencies, and understated the largest table in the
+# project by nearly thirty points - enough to block a dataset that passes.
+# `subawards.csv` was unaffected (-0.0pp) because the cap covered 65% of it,
+# which is exactly why the defect stayed invisible: it looked fine wherever
+# anyone happened to check.
+#
+# Naming the sampled tables (the previous fix) stopped the figure being quoted
+# as a census but left it wrong. A full scan costs seconds and is correct.
+# `c4_sampled_tables` is retained and now always reports `-`; a value there
+# means someone reintroduced a cap.
 
-SCAN_CAP = 50_000
+SCAN_CAP = None          # None = full scan. Do not reinstate a head-N cap.
 
 BARE_ID_COLS = ("cedar_uid", "tribe_id", "entity_id", "cedar_entity_id")
 
@@ -395,7 +412,7 @@ def measure():
                         bkey = bridge[0] if bridge else None
                         i = -1
                         for i, r in enumerate(rdr):
-                            if i >= SCAN_CAP:
+                            if SCAN_CAP is not None and i >= SCAN_CAP:
                                 sampled.append(n)
                                 break
                             if has_scope and (r.get("record_scope") or "").strip() \
@@ -536,6 +553,21 @@ def write_md(rows):
 
 def main() -> int:
     verify = len(sys.argv) > 1 and sys.argv[1] == "verify"
+
+    # C4 v2 depends on being able to read the central identity system. If it
+    # cannot, `load_known_ids` degrades to "every non-blank value is an id",
+    # which is v1 behaviour and OVER-REPORTS attachment - `UNKNOWN` and
+    # `PAYER-US-BIA` both count again. That must never happen quietly: a
+    # scoreboard reporting inflated coverage because a file was missing is
+    # worse than one that refuses to run.
+    if isinstance(KNOWN_IDS, _AnyNonBlank):
+        print("  !! C4 DEGRADED: the identity register and the entity spine "
+              "could not be read, so every non-blank string counts as an id "
+              "and every C4 figure below is an OVER-READ. Fix "
+              f"{REGISTER.name} / {SPINE.name} before quoting this run.")
+        if verify:
+            return 1
+
     rows = measure()
     if not verify:
         OUT.parent.mkdir(parents=True, exist_ok=True)

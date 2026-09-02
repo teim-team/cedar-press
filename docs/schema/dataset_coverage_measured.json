@@ -1,7 +1,7 @@
 {
  "measured_date": "2026-09-02",
  "script": "code/621_dataset_coverage.py",
- "n_tables": 263,
+ "n_tables": 266,
  "tables": {
   "bie_uio_dollars_by_entity.csv": {
    "exists": true,
@@ -576,6 +576,18 @@
     "2025": 8,
     "2026": 6
    }
+  },
+  "consultation_source_probe.csv": {
+   "exists": true,
+   "size": 2602,
+   "mtime": 1788326233,
+   "rows": 5,
+   "period_col": null,
+   "first_year": null,
+   "last_year": null,
+   "dated_rows": 0,
+   "years": [],
+   "year_counts": {}
   },
   "correspondence_foia_source_coverage.csv": {
    "exists": true,
@@ -4539,6 +4551,56 @@
     "2024": 1269,
     "2025": 1377,
     "2026": 672
+   }
+  },
+  "nonprofit_schedule_c_coverage.csv": {
+   "exists": true,
+   "size": 3587,
+   "mtime": 1788304825,
+   "rows": 10,
+   "period_col": null,
+   "first_year": null,
+   "last_year": null,
+   "dated_rows": 0,
+   "years": [],
+   "year_counts": {}
+  },
+  "nonprofit_schedule_c_lobbying.csv": {
+   "exists": true,
+   "size": 9400167,
+   "mtime": 1788304825,
+   "rows": 6870,
+   "period_col": "tax_year",
+   "first_year": 2015,
+   "last_year": 2026,
+   "dated_rows": 6870,
+   "years": [
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025,
+    2026
+   ],
+   "year_counts": {
+    "2015": 2,
+    "2016": 234,
+    "2017": 279,
+    "2018": 306,
+    "2019": 193,
+    "2020": 339,
+    "2021": 304,
+    "2022": 422,
+    "2023": 532,
+    "2024": 2086,
+    "2025": 2164,
+    "2026": 9
    }
   },
   "nrc_meeting_participants.csv": {

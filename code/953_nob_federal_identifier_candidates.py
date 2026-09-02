@@ -105,7 +105,8 @@ BAK_TAG = f".bak_{TODAY}_pre_953_nob_federal_identifier_candidates"
 NEW = ["federal_uei_candidate", "federal_cage_candidate",
        "federal_identifier_match_status", "federal_identifier_match_basis"]
 STATUSES = {"unique_name_match", "ambiguous_name_match_refused", "no_match",
-            "refused_source_terms_restrictive"}
+            "refused_source_terms_restrictive",
+            "refused_person_name_too_weak"}
 RESTRICTIVE = "TERMS_STATED_RESTRICTIVE"
 
 #: (path, name column, uei column). All local, all already in data/clean or
@@ -182,6 +183,17 @@ def resolve(row: dict, uni, cage):
             "source terms forbid reuse; a harmonized derivative is still a "
             "derivative. No identifier is attached to this row by any route.")
     n = norm(row.get("business_name_raw", ""))
+    # A person's name IS a firm name and it SHIPS - the privacy gate was
+    # retired and the owner was explicit about that. It is still a bad MATCH
+    # key: `NATHAN SMITH` at two tokens identifies nobody. Refused for
+    # matching only, at two tokens or fewer, and only where the build already
+    # flagged the name as a person's.
+    if (row.get("business_name_is_person_name") or "").strip() == "1" \
+            and len(n.split()) <= 2:
+        return "", "", "refused_person_name_too_weak", (
+            "the source name is flagged as a person's name and normalises to "
+            "two tokens or fewer, which does not identify a firm. The name "
+            "still ships; only the identifier match is refused.")
     hits = uni.get(n)
     if not hits:
         return "", "", "no_match", (

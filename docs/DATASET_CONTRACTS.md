@@ -2,23 +2,19 @@
 
 *Generated 2026-09-02 by `code/512_build_dataset_contracts.py` (mission Phase 1). Regenerate rather than edit; `verify` exits 1 when the world breaks a contract, and 62 gates on it.*
 
-**13 collections, 263 tables claimed, 8 orphaned shippable tables, 13 violations.**
+**13 collections, 266 tables claimed, 7 orphaned shippable tables, 12 violations.**
 
-**Grain: 213 of 224 shippable tables declare and VALIDATE a row grain, a primary key and a join cardinality; 11 do not.** A declared grain the data contradicts is a release-blocking violation, listed below. An unstated grain is ratcheted by `62_no_regression_check.contract_grain_unstated_shippable`: the count may only fall, and a new shippable table that lands without one fails the gate that day.
+**Grain: 218 of 225 shippable tables declare and VALIDATE a row grain, a primary key and a join cardinality; 7 do not.** A declared grain the data contradicts is a release-blocking violation, listed below. An unstated grain is ratcheted by `62_no_regression_check.contract_grain_unstated_shippable`: the count may only fall, and a new shippable table that lands without one fails the gate that day.
 
-<details><summary>Shippable tables with an UNSTATED grain (11) - a buyer cannot join these safely</summary>
+<details><summary>Shippable tables with an UNSTATED grain (7) - a buyer cannot join these safely</summary>
 
-- `faads_transactions_all_agencies.csv`
 - `native_owned_businesses.bak_2026-09-02_010526.csv`
 - `native_owned_businesses.bak_2026-09-02_010557.csv`
 - `native_owned_businesses.csv`
-- `native_passthrough.csv`
-- `nonprofit_schedule_c_coverage.csv`
-- `nonprofit_schedule_c_lobbying.csv`
+- `prime_contracts.bak_2026-09-02_011205_pre772.csv`
 - `regulations_gov_comments.csv`
 - `regulations_gov_entity_coverage.csv`
 - `sam_native_class_distributions.csv`
-- `subawards.csv`
 
 </details>
 
@@ -32,8 +28,7 @@
 - ORPHAN shippable table: native_owned_businesses.bak_2026-09-02_010526.csv - registered in the codebook but claimed by NO collection
 - ORPHAN shippable table: native_owned_businesses.bak_2026-09-02_010557.csv - registered in the codebook but claimed by NO collection
 - ORPHAN shippable table: native_owned_businesses.csv - registered in the codebook but claimed by NO collection
-- ORPHAN shippable table: nonprofit_schedule_c_coverage.csv - registered in the codebook but claimed by NO collection
-- ORPHAN shippable table: nonprofit_schedule_c_lobbying.csv - registered in the codebook but claimed by NO collection
+- ORPHAN shippable table: prime_contracts.bak_2026-09-02_011205_pre772.csv - registered in the codebook but claimed by NO collection
 - ORPHAN shippable table: regulations_gov_comments.csv - registered in the codebook but claimed by NO collection
 - ORPHAN shippable table: regulations_gov_entity_coverage.csv - registered in the codebook but claimed by NO collection
 - ORPHAN shippable table: sam_native_class_distributions.csv - registered in the codebook but claimed by NO collection
@@ -75,6 +70,9 @@ Declared grain — validated against the file on every run:
   - primary key: `assistance_transaction_unique_key`  (validated unique)
   - join cardinality: `assistance_transaction_unique_key` → one row(s) per value (measured max 1), `award_id_fain` → many row(s) per value (measured max 317)
   - declared by: workstream FAADS 2026-09-01: the key was restored from the seven full-column DOI seam zips by code/791_faads_transaction_key_and_repoint.py interior and confirmed unique on the FULL 60,661-row file (0 collisions, 0 blanks); re-measured by `py -3 code/791_faads_transaction_key_and_repoint.py measure`
+- `faads_transactions_all_agencies.csv` — one row per PRE-2008 FEDERAL ASSISTANCE TRANSACTION - an action on an award, not an award: one FAIN carries many transactions including $0 modifications and they are all real. FY2001-2007, ten agencies, $1,830,639,317,707.66. THIS IS A NATIONAL SOURCE MIRROR AND NOT A NATIVE FILTER: `tribe_id` and `cedar_uid` are blank on every row and the recipients are every assistance recipient in the country, Native and not. It must never be quoted as money reaching Indian Country - the Native attribution for this table lives in `faads_entity_attribution.csv` (29,594 rows, all keyed). MONEY: `obligated_usd` IS additive at this grain. Two stacking hazards, both measured: `faads_transactions.csv` (60,661 rows) is the Interior slice of THIS file carried verbatim, so the two must never be added; and this file's FY2007 (774,755 rows) overlaps `federal_funding_transactions.csv`'s FY2007, where 98.9% of the modern table's FY2007 dollars sit on FAINs this file also carries - the identified seam is 11,063 rows and $2,165,856,968.60. NO PRIMARY KEY EXISTS AND NONE IS CLAIMED - see key_refused
+  - primary key: —  (validated unique)
+  - declared by: workstream SUBAWARD-FUNDING 2026-09-02: grain declared WITHOUT a primary key, with the refusal recorded in `key_refused` and re-checked against the file on every run of this script
 - `federal_funding_transactions.csv` — one row per federal assistance award TRANSACTION, across the union of the assistance and archive pulls
   - primary key: `assistance_transaction_unique_key`  (**VALIDATION FAILED — see violations**)
   - join cardinality: `cedar_uid` → many row(s) per value (measured max 18574), `tribe_id` → many row(s) per value
@@ -89,18 +87,23 @@ Declared grain — validated against the file on every run:
 - `inflation_deflator.csv` — one row per year of the GDP deflator series
   - primary key: `year`  (validated unique)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
+- `native_passthrough.csv` — one row per NATIVE-TO-NATIVE SUBAWARD FILING - the `direction == 'both_sides_native'` slice of subawards.csv, 1:1, with both legs resolved to spine entities. It is a PROJECTION of subawards.csv and NOT new money: adding this table to subawards.csv, or to prime_contracts.csv, counts the same federal dollar twice. It inherits its parent's grain exactly, so a row is one FILING and repeat monthly filings of one pass-through are separate rows. MONEY: `amount_usd` is additive ONLY where `amount_countable == 1`, which is the parent's two filters (`duplicate_status == 'primary'` AND `subaward_exceeds_prime_flag != 'yes'`) computed on the parent row; both source columns are now carried so a subscriber can reproduce or disagree with the filter instead of taking the flag on trust. `amount_countable` is a 0/1 FLAG and is not a money column
+  - primary key: `source_dataset` + `subaward_source_record_id`  (validated unique)
+  - join cardinality: `from_tribe_id` → many row(s) per value (measured max 371), `to_tribe_id` → many row(s) per value (measured max 376)
+  - declared by: workstream SUBAWARD-FUNDING 2026-09-02: 81_build_passthrough_dataset.py now carries the parent's key plus `duplicate_status` and `subaward_exceeds_prime_flag` - the one-line fix GRAIN_WS4 named. Confirmed on the rebuilt 1,663-row file: 0 blank keys, 0 collisions, 0 byte-identical whole rows (was 116). Re-measure with `py -3 code/81_build_passthrough_dataset.py verify`
 - `native_passthrough_pairs.csv` — one row per (paying entity, receiving entity) pair, rolled up across their subawards
   - primary key: `from_tribe_id` + `to_tribe_id`  (validated unique)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
 
 ## Federal Register  (`federal-register`, shelf: standard)
 
-Rebuild: `py -3 code/build.py run federal-register --execute` — 26 tables.
+Rebuild: `py -3 code/build.py run federal-register --execute` — 27 tables.
 
 | table | status | keys | rebuilt by | enriched by |
 |---|---|---|---|---|
 | `consultation_agency_coverage.csv` | UNDOCUMENTED | — | — | — |
 | `consultation_events.csv` | shippable | `tribe_id` `cedar_uid` | `96_build_consultation_events.py` | `503_identity.py` |
+| `consultation_source_probe.csv` | internal-by-decision | — | — | — |
 | `correspondence_foia_source_coverage.csv` | shippable | — | — | — |
 | `federal_actions.csv` | shippable | — | `11_classify_federal_actions.py` | `22_apply_temporal_floor.py` |
 | `federal_actions_entity_bridge.csv` | shippable | `tribe_id` `cedar_uid` | `70_key_unjoined_datasets.py` | `503_identity.py` |
@@ -367,7 +370,7 @@ Declared grain — validated against the file on every run:
 
 ## Lobbying  (`lobbying`, shelf: standard)
 
-Rebuild: `py -3 code/build.py run lobbying --execute` — 37 tables.
+Rebuild: `py -3 code/build.py run lobbying --execute` — 39 tables.
 
 | table | status | keys | rebuilt by | enriched by |
 |---|---|---|---|---|
@@ -402,6 +405,8 @@ Rebuild: `py -3 code/build.py run lobbying --execute` — 37 tables.
 | `lobbying_target_entities.csv` | shippable | — | — | — |
 | `lobbying_unmatched_clients.csv` | internal-by-decision | — | — | — |
 | `native_entity_lobbying_disclosures.csv` | shippable | `cedar_uid` `entity_id` | `05_match_filings_v2.py` | `350_withdraw_false_lobbying_attributions.py` `65_lobbying_organization_type_guard.py` |
+| `nonprofit_schedule_c_coverage.csv` | shippable | — | — | — |
+| `nonprofit_schedule_c_lobbying.csv` | shippable | `ein` | — | — |
 | `nrc_meeting_participants.csv` | shippable | `cedar_uid` | — | — |
 | `nrc_public_meetings.csv` | shippable | — | — | — |
 | `oira_federal_action_links.csv` | shippable | — | — | — |
@@ -511,6 +516,14 @@ Declared grain — validated against the file on every run:
   - primary key: `filing_uuid`  (validated unique)
   - join cardinality: `cedar_uid` → many row(s) per value (measured max 401), `entity_id` → many row(s) per value (measured max 401)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
+- `nonprofit_schedule_c_coverage.csv` — one row per IRS e-file INDEX YEAR (submission year, not tax year), carrying how many returns that year's index held for Cedar's Native nonprofit EIN target list, how many were retrieved, and how many carried a Schedule C. `not_downloaded` is Cedar's fetch backlog, never an absence at the IRS.
+  - primary key: `index_year`  (validated unique)
+  - join cardinality: `index_year` → one row(s) per value (measured max 1)
+  - declared by: workstream INT-READY 2026-09-02: index_year confirmed 10 distinct / 0 blank on the FULL 10-row file
+- `nonprofit_schedule_c_lobbying.csv` — one row per IRS 990 e-file RETURN parsed for Schedule C - one accepted return of one filer, identified by its IRS OBJECT_ID. NOT one row per organisation and NOT one row per tax year: an amended or short-period return for the same (ein, tax_year) is a second return and a second row (29 such pairs).
+  - primary key: `schedule_c_row_id`  (validated unique)
+  - join cardinality: `cedar_entity_id` → many row(s) per value (measured max 82), `ein` → many row(s) per value (measured max 10), `object_id` → one row(s) per value (measured max 1), `schedule_c_row_id` → one row(s) per value (measured max 1)
+  - declared by: workstream INT-READY 2026-09-02: schedule_c_row_id and object_id each confirmed 6,870 distinct / 0 blank on the FULL 6,870-row file with csv.reader; 0 literal duplicate rows; (ein, tax_year) tested and REJECTED at 6,841
 - `nrc_meeting_participants.csv` — one row per external participant in an NRC public meeting
   - primary key: `participant_id`  (validated unique)
   - join cardinality: `cedar_uid` → many row(s) per value (measured max 1)
@@ -543,7 +556,7 @@ Rebuild: `py -3 code/build.py run contractors --execute` — 11 tables.
 | `contractor_ranking.csv` | shippable | — | — | — |
 | `fpds_uei_cage_map.csv` | shippable | `uei` `cage_code` | — | — |
 | `fpds_uei_edges.csv` | shippable | — | `13_build_fpds_hierarchy.py` | `26_fix_sanity_failures.py` |
-| `prime_contracts.csv` | shippable | `tribe_id` `cedar_uid` `cage_code` | `40_build_prime_contracts.py` | `207_normalize_extent_competed.py` `429_apply_asof_ownership_status.py` `430_restore_prime_transaction_key.py` |
+| `prime_contracts.csv` | shippable | `tribe_id` `cedar_uid` `cage_code` | `40_build_prime_contracts.py` `871_promote_geo_keys_contracts.py` | `114_pull_prime_archive.py` `131_merge_archive_backfill.py` `174_apply_rulings_to_source_tables.py` `207_normalize_extent_competed.py` `366_courtlistener_ownership_adjudication.py` `40_build_prime_contracts.py` `429_apply_asof_ownership_status.py` `430_restore_prime_transaction_key.py` `950_promote_contract_attributes.py` |
 | `prime_contracts_archive_backfill.csv` | shippable | `tribe_id` `cedar_uid` `cage_code` | `114_pull_prime_archive.py` | `430_restore_prime_transaction_key.py` |
 | `prime_contracts_awards.csv` | shippable | `tribe_id` `cedar_uid` `cage_code` | — | — |
 | `prime_contracts_entity_year.csv` | shippable | `tribe_id` `cedar_uid` | `40_build_prime_contracts.py` | `131_merge_archive_backfill.py` `428_rebuild_prime_entity_year.py` |
@@ -604,7 +617,7 @@ Rebuild: `py -3 code/build.py run subcontracting --execute` — 5 tables.
 | `subaward_entity_rollup.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
 | `subaward_identifier_harvest.csv` | internal-by-decision | `uei` `cage_code` | — | — |
 | `subaward_identifier_netnew.csv` | internal-by-decision | `uei` `cage_code` | — | — |
-| `subawards.csv` | shippable | `cedar_uid` | `20_build_subcontracts.py` | `121_pull_subawards_api.py` `250_demote_stale_tierA_subaward_rows.py` `45_promote_subawards.py` |
+| `subawards.csv` | shippable | `cedar_uid` | `20_build_subcontracts.py` `871_promote_geo_keys_contracts.py` | `121_pull_subawards_api.py` `250_demote_stale_tierA_subaward_rows.py` `45_promote_subawards.py` `910_subaward_report_id_backfill.py` `911_subaward_sub_leg_cedar_uid.py` |
 
 Declared grain — validated against the file on every run:
 
@@ -615,6 +628,10 @@ Declared grain — validated against the file on every run:
   - primary key: `tribe_id`  (validated unique)
   - join cardinality: `cedar_uid` → one row(s) per value (measured max 1), `tribe_id` → one row(s) per value (measured max 1)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
+- `subawards.csv` — one row per SUBAWARD FILING AS INGESTED FROM ONE SOURCE - not one row per subaward. FFATA/FSRS requires the PRIME to re-file an open subaward monthly, and every filing is a real reporting event, so one $57,500 subaward can be 93 rows spanning 2022-08 to 2025-01. Cedar RETAINS all of them and flags the repeats in `duplicate_status`; it does not delete them. A row is therefore (one SAM subaward report) x (the Cedar pull that ingested it). MONEY: `subaward_amount` is additive ONLY where `duplicate_status == 'primary'` AND `subaward_exceeds_prime_flag != 'yes'` - $25,864,997,128.19 correct against $47,301,660,819.78 unfiltered, so an unfiltered sum is 82.9% TOO HIGH as a share of the correct total (45.3% of the inflated one; say which denominator you mean). A SUBAWARD IS A SLICE OF A PRIME AWARD and must never be added to prime_contracts.csv - that double-counts the same federal dollar. The two entity legs are `prime_cedar_uid` and `sub_cedar_uid`; `cedar_uid` is the PRIME leg only and is legitimately blank on the 43,282 rows whose only Native party is the subawardee
+  - primary key: `source_dataset` + `subaward_source_record_id`  (validated unique)
+  - join cardinality: `prime_award_unique_key` → many row(s) per value (measured max 1536), `prime_cedar_uid` → many row(s) per value (measured max 6651), `prime_uei` → many row(s) per value (measured max 2377), `sub_cedar_uid` → many row(s) per value (measured max 2839), `sub_uei` → many row(s) per value (measured max 2766)
+  - declared by: workstream SUBAWARD-FUNDING 2026-09-02: `subaward_source_record_id` recovered from the staged FSRS extracts by code/910_subaward_report_id_backfill.py (75,861 SAM report ids + 998 HigherGov permalinks, 0 blank), and the pair confirmed unique on the FULL 76,859-row file - 0 collisions, 0 blanks, whole-row duplicates 10,770 -> 0 with zero rows removed. Re-measure with `py -3 code/910_subaward_report_id_backfill.py verify`; the recovery's own refusal is proved to fire by `... selftest`
 
 ## Native-Owned Businesses  (`native-owned-businesses`, shelf: pro)
 
@@ -659,8 +676,8 @@ Rebuild: `py -3 code/build.py run natural-resources --execute` — 9 tables.
 
 | table | status | keys | rebuilt by | enriched by |
 |---|---|---|---|---|
-| `anc_ceiling_roster.csv` | shippable | `uei` `cage_code` | — | — |
-| `ancsa_filings_index.csv` | shippable | — | `build_manifest_index.py` | `update_index.py` |
+| `anc_ceiling_roster.csv` | shippable | `cedar_uid` `uei` `cage_code` | — | — |
+| `ancsa_filings_index.csv` | shippable | `cedar_uid` | `build_manifest_index.py` | `update_index.py` |
 | `nd_severance_allocation.csv` | shippable | `tribe_id` `cedar_uid` | — | — |
 | `resource_asset_source_coverage.csv` | internal-by-decision | — | — | — |
 | `resource_assets.csv` | shippable | `cedar_uid` | — | — |
@@ -686,11 +703,11 @@ Declared grain — validated against the file on every run:
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
 - `resource_parties.csv` — one row per (party link, entity as named). `party_link_id` alone has 1 collision and is not a key on its own
   - primary key: `party_link_id` + `entity_name`  (validated unique)
-  - join cardinality: `cedar_uid` → many row(s) per value (measured max 43), `entity_id` → many row(s) per value (measured max 518)
+  - join cardinality: `cedar_uid` → many row(s) per value (measured max 518), `entity_id` → many row(s) per value (measured max 518)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
 - `resource_revenue.csv` — one row per resource revenue event as recorded by its source system
   - primary key: `resource_revenue_event_id`  (validated unique)
-  - join cardinality: `cedar_uid` → many row(s) per value (measured max 13)
+  - join cardinality: `cedar_uid` → many row(s) per value (measured max 492)
   - declared by: workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json
 - `tribal_bond_issuances.csv` — one row per debt instrument of one tribal issuer, as described in one retrieved rating action or disclosure document. NOT one row per issuer and NOT a time series: `issue_date` is blank on 28 of 29 rows BY DESIGN (the retrieved document states none and none is inferred), and `cusip` is blank on all 29, so the market key of a bond is absent. `par_amount` is the size AT ISSUE of a distinct instrument and is additive across rows; it is NOT debt outstanding, several rows say so in `instrument_type` ('amount outstanding at'), and refinancings of one facility appear as separate instruments
   - primary key: `issuer` + `instrument_type` + `source_url`  (validated unique)
@@ -775,7 +792,7 @@ Rebuild: `py -3 code/build.py run gaming --execute` — 61 tables.
 | `compact_versions.csv` | shippable | `compact_id` | — | — |
 | `compacts.csv` | shippable | `tribe_id` `cedar_uid` `entity_id` `compact_id` | — | — |
 | `digital_gaming_relationships.csv` | shippable | `tribe_id` `cedar_uid` `entity_id` `facility_id` | — | — |
-| `digital_gaming_revenue.csv` | shippable | `tribe_id` `cedar_uid` `entity_id` `facility_id` | `119_build_digital_and_loyalty.py` | `174_backfill_digital_gaming_tiers.py` |
+| `digital_gaming_revenue.csv` | shippable | `tribe_id` `cedar_uid` `entity_id` `facility_id` | `119_build_digital_and_loyalty.py` | `174_backfill_digital_gaming_tiers.py` `860_state2_acquisition.py` |
 | `fac_audit_gaming_disclosures.csv` | shippable | `cedar_uid` `entity_id` | — | — |
 | `fac_audit_sefa_gaming_programs.csv` | shippable | `cedar_uid` `entity_id` | `147_build_fac_single_audits.py` | `814_gaming_nr_grain_and_conservation.py` |
 | `fl_gaming_payments.csv` | shippable | `tribe_id` `cedar_uid` `facility_id` | — | — |

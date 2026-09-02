@@ -1,0 +1,38 @@
+{
+  "built_by": "code/1010_ownership_change_from_contracting.py",
+  "invariants": {
+    "announced_deals_by_verdict": {
+      "CONFIRMED_BY_CONTRACTING": 9,
+      "NO_PARENT_CHANGE_IN_FPDS": 41,
+      "TARGET_NOT_A_FEDERAL_PRIME": 167
+    },
+    "announced_deals_checked": 217,
+    "candidate_prime_obligations_usd": 12241516363.46,
+    "candidates_by_direction": {
+      "ACQUIRED_BY_NATIVE_OWNER": 8,
+      "ACQUIRED_INTO_A_PARENT": 19,
+      "MOVED_BETWEEN_NATIVE_FAMILIES": 8,
+      "NEITHER_SIDE_RESOLVES_TO_A_CEDAR_HUB": 12,
+      "PARENT_DECLARED": 24,
+      "SOLD_OUT_OF_NATIVE_OWNERSHIP": 6,
+      "SPUN_OUT_OF_PARENT": 21
+    },
+    "distinct_awardee_uei": 12491,
+    "n_candidates": 98,
+    "n_candidates_not_in_deal_ledger": 97,
+    "n_candidates_with_a_native_side": 72,
+    "n_rejected_intra_family_or_registry": 682,
+    "n_unannounced_with_a_native_side": 71,
+    "parent_uei_nan_rows": 22,
+    "parent_uei_nan_usd": 13910809.8,
+    "prime_rows_scanned": 1217768,
+    "rejections_by_reason": {
+      "INTRA_FAMILY_ACRONYM": 24,
+      "INTRA_FAMILY_SAME_HUB": 416,
+      "INTRA_FAMILY_SHARED_BRAND": 29,
+      "NAN_SENTINEL": 2,
+      "SAME_NAME_REREGISTRATION": 211
+    }
+  },
+  "source": "data/clean/prime_contracts.csv"
+}

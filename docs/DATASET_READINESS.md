@@ -14,7 +14,7 @@ BLOCKED 2 · NOT_TESTED 0
 | `federal-register` | **READY** | 22 | 22/22 | 22/22 | clean | 0 | declared |
 | `gaming` | **READY** | 54 | 54/54 | 54/54 | clean | 0 | declared |
 | `legislation` | **READY** | 11 | 11/11 | 11/11 | clean | 0 | declared |
-| `lobbying` | **READY** | 33 | 33/33 | 33/33 | clean | 0 | declared |
+| `lobbying` | **READY** | 35 | 35/35 | 35/35 | clean | 0 | declared |
 | `nagpra` | **READY** | 4 | 4/4 | 4/4 | clean | 0 | declared |
 | `native-owned-businesses` | **READY** | 6 | 6/6 | 6/6 | clean | 0 | declared |
 | `natural-resources` | **READY** | 8 | 8/8 | 8/8 | clean | 0 | declared |
@@ -37,4 +37,4 @@ BLOCKED 2 · NOT_TESTED 0
 - C2 no validated primary key on 2
 - C3 literal duplicates: faads_transactions_all_agencies.csv(3,441), native_passthrough.csv(116)
 - C7 DOUBLE-COUNTING RISK - money tables a buyer cannot safely total: faads_transactions_all_agencies.csv, native_passthrough.csv
-- C4 only 40% of entity-bearing rows carry a Cedar id, and every record in this dataset HAS an entity subject - so this is unresolved work, not scope. See ADR-009 and ADR-010.
+- C4 only 16% of entity-bearing rows carry a Cedar id, and every record in this dataset HAS an entity subject - so this is unresolved work, not scope. See ADR-009 and ADR-010.

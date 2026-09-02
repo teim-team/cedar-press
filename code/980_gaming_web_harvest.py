@@ -914,8 +914,41 @@ HOURS_RE = re.compile(
     r"hours[:\s]{1,3}(?:mon|sun|daily)[^.]{0,80})", re.I)
 
 
+# Ranked, not merely matched. The first pass ordered candidates by URL depth and
+# spent requests on /author-sitemap.xml and /careers/ while /casino/ waited.
+CAP_SCORE = [
+    (("fact-sheet", "factsheet", "fact_sheet", "press-kit", "media-kit"), 100),
+    (("/casino", "casino/", "gaming", "slots", "table-games", "poker", "bingo"), 80),
+    (("/about", "about-us", "our-story", "who-we-are"), 70),
+    (("hotel", "rooms", "suites", "accommodation", "stay/", "lodging"), 65),
+    (("meeting", "convention", "conference", "event-space", "banquet", "ballroom"), 60),
+    (("resort", "property", "amenities", "entertainment"), 40),
+]
+VEND_SCORE = [
+    (("tero", "tribal-employment-rights"), 100),
+    (("vendor", "supplier"), 90),
+    (("procure", "purchasing", "solicitation"), 85),
+    (("doing-business", "do-business", "dobusiness"), 80),
+    (("rfp", "rfq", "/bid", "bids"), 70),
+    (("business-license", "business-licence", "contracting"), 60),
+]
+NEGATIVE_TOKENS = ("sitemap", "/feed", "/tag/", "/category/", "/author/", "/wp-content/",
+                   ".xml", ".jpg", ".png", ".gif", ".css", ".js", "/page/", "?replytocom")
+
+
+def _score(url, table):
+    ul = url.lower()
+    best = 0
+    for toks, s in table:
+        if any(t in ul for t in toks):
+            best = max(best, s)
+    if best:
+        best -= min(20, 4 * max(0, ul.rstrip("/").count("/") - 3))
+    return best
+
+
 def pick_pages(host, probe_rows, max_per_host=6):
-    """Choose a small, bounded set of on-site pages worth a request."""
+    """Choose a small, bounded, RANKED set of on-site pages worth a request."""
     urls = {}
     for rec in probe_rows:
         for loc in (rec.get("sitemap_locs") or []):
@@ -929,15 +962,47 @@ def pick_pages(host, probe_rows, max_per_host=6):
         if forbidden_path(u):
             continue
         ul = u.lower()
-        depth = ul.rstrip("/").count("/") - 2
-        if any(t in ul for t in VENDOR_URL_TOKENS):
-            vend.append((depth, u, src, "vendor_procurement_tero"))
-        elif any(t in ul for t in CAPACITY_URL_TOKENS) and depth <= 2:
-            cap.append((depth, u, src, "capacity_identity"))
+        if any(t in ul for t in NEGATIVE_TOKENS):
+            continue
+        vs = _score(u, VEND_SCORE)
+        if vs:
+            vend.append((-vs, u, src, "vendor_procurement_tero"))
+            continue
+        cs = _score(u, CAP_SCORE)
+        if cs:
+            cap.append((-cs, u, src, "capacity_identity"))
     vend.sort()
     cap.sort()
-    out = [t[1:] for t in vend[:max(2, max_per_host // 2)]]
+    n_vend = min(len(vend), max(2, max_per_host // 2))
+    out = [t[1:] for t in vend[:n_vend]]
     out += [t[1:] for t in cap[:max_per_host - len(out)]]
+    return out
+
+
+def child_sitemaps(host, probe_rows, limit=3):
+    """A sitemap INDEX lists child sitemaps, not pages. Follow a bounded few."""
+    kids = []
+    for rec in probe_rows:
+        for loc in (rec.get("sitemap_locs") or []):
+            if not loc.lower().endswith(".xml"):
+                continue
+            if urllib.parse.urlparse(loc).netloc.lower() != host:
+                continue
+            ll = loc.lower()
+            if any(t in ll for t in ("author", "category", "tag", "-tax", "taxonom",
+                                     "image", "attachment", "product")):
+                continue
+            score = 2 if any(t in ll for t in ("page", "post-sitemap", "posts")) else 1
+            kids.append((-score, loc))
+    kids.sort()
+    seen, out = set(), []
+    for _, u in kids:
+        if u in seen:
+            continue
+        seen.add(u)
+        out.append(u)
+        if len(out) >= limit:
+            break
     return out
 
 
@@ -953,22 +1018,76 @@ def stage_pages(limit=None, deadline_min=110):
     done = load_done(PAGES, lambda r: r["url"])
     deadline = time.time() + deadline_min * 60
     lock = claim_lock(set(by_host), "pages")
-    n_req = n_hosts = 0
+
+    work = []
     for host, recs in sorted(by_host.items()):
         if not host or host not in targets:
             continue
         t = targets[host]
         if t["terms_restricted"] == "Y" or is_restricted_host(host):
             continue
-        if limit and n_hosts >= limit:
-            break
-        if time.time() > deadline:
-            log("RUN_DEADLINE reached; stopping cleanly.")
-            break
-        picks = pick_pages(host, recs)
-        if not picks:
-            continue
-        n_hosts += 1
+        work.append((host, t, recs))
+    if limit:
+        work = work[:limit]
+    buckets = [work[i::WORKERS] for i in range(WORKERS)]
+    counters = {"hosts": 0, "req": 0}
+    cl = threading.Lock()
+
+    def worker(bucket):
+        for host, t, recs in bucket:
+            if time.time() > deadline:
+                log("RUN_DEADLINE reached; stopping cleanly.")
+                return
+            try:
+                nr = pages_one_host(host, t, recs, done)
+            except Exception as e:
+                log(f"  worker error on {host}: {type(e).__name__}: {e}")
+                continue
+            with cl:
+                counters["hosts"] += 1
+                counters["req"] += nr
+                log(f"[{counters['hosts']:>4}/{len(work)}] pages {host:40} "
+                    f"total_req={counters['req']}")
+
+    threads = [threading.Thread(target=worker, args=(b,), daemon=True) for b in buckets]
+    for t_ in threads:
+        t_.start()
+    for t_ in threads:
+        t_.join()
+    release_lock(lock, downloaded_this_run=(counters["req"] > 0),
+                 n_hosts_done=counters["hosts"], n_requests=counters["req"], active=False)
+    log(f"pages done: hosts={counters['hosts']} requests={counters['req']}")
+
+
+def pages_one_host(host, t, recs, done):
+    n_req = 0
+    # A sitemap INDEX lists child sitemaps, not pages. Expand a bounded few
+    # first, so the ranked page picker has real URLs to choose from.
+    if len([1 for r in recs for _ in (r.get("page_links") or [])]) < 5:
+        for cs in child_sitemaps(host, recs):
+            if ("CS:" + cs) in done:
+                continue
+            ok, _rn = robots_ok(cs)
+            if not ok:
+                done.add("CS:" + cs)
+                continue
+            res = fetch(cs, accept="application/xml,text/xml,*/*")
+            n_req += 1
+            rec = {"tribe_id": t["tribe_id"], "cedar_uid": t["cedar_uid"],
+                   "tribe_name": t["tribe_name"], "host": host, "surface": t["surface"],
+                   "url": "CS:" + cs, "discovered_via": "sitemap_index",
+                   "page_class": "child_sitemap", "checked_date": TODAY,
+                   "http_status": res["http_status"], "bytes": res["bytes"],
+                   "technique": "docs/HIDDEN_DATA_TECHNIQUES.md #4 (sitemap index -> child)"}
+            if res["http_status"] == "200" and res["bytes"] > 40:
+                locs = re.findall(r"<loc>\s*([^<\s]+)\s*</loc>", res["text"])
+                rec["sitemap_locs"] = locs[:600]
+                rec["n_items"] = len(locs)
+                recs = recs + [{"sitemap_locs": locs[:600]}]
+            appendl(PAGES, rec)
+            done.add("CS:" + cs)
+    picks = pick_pages(host, recs)
+    if True:
         for url, src, page_class in picks:
             if url in done or forbidden_path(url):
                 continue
@@ -1003,10 +1122,7 @@ def stage_pages(limit=None, deadline_min=110):
                     rec["hours_quote"] = hh.group(1)[:200]
             appendl(PAGES, rec)
             done.add(url)
-        log(f"[{n_hosts:>4}] pages {host:40} req={n_req}")
-    release_lock(lock, downloaded_this_run=(n_req > 0), n_hosts_done=n_hosts,
-                 n_requests=n_req, active=False)
-    log(f"pages done: hosts={n_hosts} requests={n_req}")
+    return n_req
 
 
 def harvest_capacity(text):
@@ -1326,7 +1442,8 @@ def stage_build():
             "n_data_attr_keys": len(hid.get("data_attr_keys") or []),
             "ajax_endpoints_observed_not_fetched": ";".join(
                 [a for a in (hid.get("ajax_endpoints") or []) if "admin-ajax" in a.lower()])[:300],
-            "n_pages_fetched": len([p for p in pgs if p.get("http_status") == "200"]),
+            "n_pages_fetched": len([p for p in pgs if p.get("http_status") == "200"
+                                    and p.get("page_class") != "child_sitemap"]),
             "n_capacity_observations": n_cap, "n_identity_observations": n_ident,
             "vendor_tero_urls_found": ";".join(vendor_urls)[:1500],
             "checked_and_absent": ";".join(sorted(set(absent))),

@@ -282,6 +282,23 @@ llc company foundation association consortium project department agency
 office bureau institute fund coalition alliance commission
 """.split())
 
+# A nation's OWN organs of government. These are not "a body the nation
+# created" in rule 7's sense - they ARE the nation acting, and they are what a
+# charter sentence names: "the Oglala Sioux TRIBAL COUNCIL", "the Chippewa
+# Cree BUSINESS COMMITTEE", "the Menominee TRIBAL LEGISLATURE", "the White
+# Earth Reservation TRIBAL COUNCIL". Applying the institution-form veto to
+# them refused nine correct charter edges on the first run of 852, which is
+# how they came to be enumerated here rather than guessed.
+GOVERNING_BODY_WORDS = set("""
+council councils committee committees legislature legislatures government
+governing governor governors board boards business executive general
+assembly senate chapter chapters office act resolution ordinance authority
+""".split())
+CREATED_BODY_FORMS = INSTITUTION_FORMS - GOVERNING_BODY_WORDS
+
+MONTHS = set("""january february march april may june july august september
+october november december""".split())
+
 # The five Education Resource Centers the BIE routes its Navajo-region
 # schools through. Measured from the directory itself, not assumed: on 187
 # schools Navajo_Operation and this list agree 185 times.
@@ -302,9 +319,11 @@ ROSTER_SEGMENT = re.compile(
 # Belknap College" is why: the nation is in the college's own name, which is
 # the Turtle Mountain trap ENTITY_MATCH_RULES rule 7 exists to refuse.
 CHARTER_AGENT_AFTER = re.compile(
-    r"\b(?:chartered|founded|established|created|organi[sz]ed|incorporated)\b"
-    r"(?:[^.;]{0,45}?)\b(?:by|under (?:the )?(?:sovereign )?(?:governmental )?"
-    r"authority of|under a charter (?:from|of))\s+([^.;]{3,90})", re.I)
+    r"\b(?:charter(?:ed)?|found(?:ed)?|establish(?:ed)?|creat(?:ed)?|"
+    r"organi[sz]ed|incorporated)\b"
+    r"(?:[^.;]{0,45}?)\b(?:by|to the|under (?:the )?(?:sovereign )?"
+    r"(?:governmental )?authority of|under a charter (?:from|of))"
+    r"\s+([^.;]{3,90})", re.I)
 CHARTER_AGENT_BEFORE = re.compile(
     r"\b((?:[Tt]he\s+)?[A-Z][^.;]{3,80}?)\s+"
     r"(?:chartered|founded|established|created)\b")
@@ -313,6 +332,35 @@ CHARTER_AGENT_BEFORE = re.compile(
 GEO_QUALIFIER = (r"\s+(bay|county|river|valley|harbor|harbour|lake|township|"
                  r"area|region|hills?|creek|falls|springs|island|mountains?|"
                  r"sound|pass|trail|road|street|city|park)\b")
+
+
+_TRAIL = re.compile(r",| in (?:1[5-9]|20)\d\d| on (?:[A-Z][a-z]+ )?\d| with ")
+
+
+def charter_agent_candidates(agent, which):
+    """The capture window runs past the nation; cut it back before resolving.
+
+    `([^.;]{3,90})` after a charter verb reliably swallows the rest of the
+    sentence - "the Winnebago Tribal Council in 1996 to provide quality
+    education for members of the Winne" - and five correct edges were lost to
+    a residue made entirely of the trailing clause. The cut points are the
+    ones the prose actually uses: a comma, or a date. For the actor-BEFORE-verb
+    pattern the useful text is on the OTHER side of the comma ("In 1973, the
+    Standing Rock Sioux Tribal Council chartered"), so that one cuts from the
+    left instead. Both the cut string and the original are tried, cut first.
+    """
+    out = []
+    if which == "charter_verb_then_actor":
+        m = _TRAIL.search(agent)
+        if m and m.start() >= 3:
+            out.append(agent[:m.start()].strip())
+    else:
+        if "," in agent:
+            tail = agent.rsplit(",", 1)[1].strip()
+            if len(tail) >= 3:
+                out.append(tail)
+    out.append(agent.strip())
+    return [c for i, c in enumerate(out) if c and c not in out[:i]]
 
 
 def path_segments(url):
@@ -386,6 +434,21 @@ class Resolver(object):
             u2, _ = self.idx.resolve(text, state, allow_national_unique=True)
             if u2:
                 return u2, "unique_nationally_state_not_stated"
+        # F5: a hub has a SET of states and `resolve()` compares exactly one.
+        # HubIndex BUILDS `self.states` from every state word in the FR
+        # official name - "Navajo Nation, Arizona, New Mexico & Utah" - and
+        # its own docstring explains why ("a single-state gate refused true
+        # matches for every reservation that spans a line"). It then never
+        # reads the field: `resolve()` tests `hubs[uid]["state"] == state`
+        # against the single spine value. So Navajo Technical University,
+        # Crownpoint NM, is refused against Navajo (spine state AZ) - the
+        # exact failure the field was added to prevent. Accept when the
+        # requested state is IN the hub's own state set and the core is
+        # nationally unique.
+        if state and route == "REFUSED_state_mismatch":
+            u2, _ = self.idx.resolve(text, state, allow_national_unique=True)
+            if u2 and state in self.idx.states.get(u2, set()):
+                return u2, "unique_nationally_and_state_in_hub_state_set"
         # F2: rule 7 residue, gated on the state, for cores the prefix index
         # refuses to hold (a four-letter nation such as Crow).
         if state and route in ("no_match", "REFUSED_state_mismatch",
@@ -397,13 +460,49 @@ class Resolver(object):
         return None, route
 
     def award_ok(self, text, uid):
-        """The guard every name-derived award in 852 must pass."""
+        """The STRICT guard: zero residue, no institution form of any kind.
+
+        Used where the published string is supposed to BE the nation's name -
+        a membership roster entry, a certifying-authority field. Zero residue
+        because these strings are short and a leftover token there means a
+        different entity: `Grand Portage Band of Lake Superior Chippewa`
+        against Portage Creek, Alaska leaves `superior chippewa` behind, and
+        `Southern Indian Health Council, Inc.` against Southern Ute leaves
+        `health`.
+        """
         inst = self.has_institution_form(text)
         if inst:
             return False, ("rule7_institution_form_word", ", ".join(inst))
         res = self.residue(text, uid)
         if res:
             return False, ("rule7_residue_not_empty", ", ".join(res))
+        return True, ("", "")
+
+    def award_ok_charter(self, text, uid):
+        """The guard for a CHARTER AGENT, which is a different shape.
+
+        A charter sentence names the nation ACTING - through its council, its
+        business committee, its legislature - and it prints a date. So the
+        strict guard is wrong here twice over, and ENTITY_MATCH_RULES rule 7
+        already says what the right one is: an institution form the nation
+        CREATED is a HOLD, and the empirical residue cap over 281 correct
+        accepts is THREE (`NAMBE PUEBLO GOVERNOR'S OFFICE`). Governance words
+        and month names are stripped before counting rather than counted, and
+        the state gate on the resolver is doing the real work: this rung is
+        only ever reached through `idx.resolve`, which requires state
+        agreement or uniqueness within the state.
+        """
+        toks = [t for t in self.distinctive(text)
+                if t not in GOVERNING_BODY_WORDS and t not in MONTHS]
+        created = [t for t in toks if t in CREATED_BODY_FORMS]
+        if created:
+            return False, ("rule7_charter_agent_is_a_created_body",
+                           ", ".join(created))
+        res = [t for t in toks if t not in self.tokens[uid]
+               and t not in M.STATE_WORDS and t not in M.GENERIC_TOKENS]
+        if len(res) > 3:
+            return False, ("rule7_charter_agent_residue_over_cap_of_three",
+                           ", ".join(res))
         return True, ("", "")
 
 
@@ -513,22 +612,28 @@ def src_aihec_charter_profiles(b, hubs, rs, slice_by_name):
         for pat, which in ((CHARTER_AGENT_AFTER, "charter_verb_then_actor"),
                            (CHARTER_AGENT_BEFORE, "actor_then_charter_verb")):
             for mm in pat.finditer(blk):
-                agent = mm.group(1).strip()
-                uid, route = rs.resolve(agent, st)
-                if not uid or uid not in hubs:
-                    continue
-                ok, (why, detail) = rs.award_ok(agent, uid)
-                if not ok:
-                    b.refuse(name, why,
+                held = None
+                for agent in charter_agent_candidates(mm.group(1), which):
+                    uid, route = rs.resolve(agent, st)
+                    if not uid or uid not in hubs:
+                        continue
+                    ok, (why, detail) = rs.award_ok_charter(agent, uid)
+                    if not ok:
+                        held = (name, why, agent, uid, detail)
+                        continue
+                    got = (uid, route, which, mm.group(0).strip())
+                    break
+                if got:
+                    break
+                if held:
+                    nm, why, agent, uid, detail = held
+                    b.refuse(nm, why,
                              "charter agent %r against hub %s: %s"
                              % (agent, hubs[uid].get("canonical_name"), detail),
                              AIHEC_URL, "chartered_by",
                              from_cedar_uid=sp.get("cedar_uid", ""),
                              cand_uid=uid,
                              from_source_table="tcu_cdfi/aihec_tcu_roster")
-                    continue
-                got = (uid, route, which, mm.group(0).strip())
-                break
             if got:
                 break
         if not got:
@@ -640,7 +745,7 @@ def src_ihs_compact_programmes(b, hubs, rs):
                      "as %s" % (parent, route), src, "managed_under_contract",
                      from_source_table="shard_f/ihs_selfgov_compacts")
             continue
-        ok, (why, detail) = rs.award_ok(parent, uid)
+        ok, (why, detail) = rs.award_ok_charter(parent, uid)
         if not ok:
             b.refuse(prog, why, "compact parent %r against hub %s: %s"
                      % (parent, hubs[uid].get("canonical_name"), detail),
@@ -703,6 +808,7 @@ def src_org_membership_rosters(b, hubs, rs, compact_holders, spine_by_uid):
         return
     rows = [json.loads(x) for x in open(ROSTERS, encoding="utf-8")]
     page_ok = {}
+    awards = {}
     n_serve = n_contract = 0
     for r in rows:
         member = (r.get("member_name_raw") or "").strip()
@@ -756,39 +862,58 @@ def src_org_membership_rosters(b, hubs, rs, compact_holders, spine_by_uid):
                      src, "declares_service_to", from_cedar_uid=org_uid,
                      cand_uid=shard_uid, from_source_table="org_membership/shard_f")
             continue
-        compact = compact_holders.get(norm(org))
+        # ACCUMULATE, do not emit. A roster prints the same nation more than
+        # once - "Umatilla Tribes", "Umatilla Tribe" and the chrome-prefixed
+        # "Member Tribes Umatilla Tribes" are three rows and one relationship
+        # - and shard F corroborates some of those spellings and not others.
+        # Emitting per row wrote the corroboration into `evidence_basis`,
+        # which made the corroborated and uncorroborated spellings two
+        # different edge_ids and shipped Great Plains -> Flandreau twice. The
+        # edge is (organisation, nation); every spelling is evidence FOR it.
+        acc = awards.setdefault((org_uid, uid), {
+            "org": org, "src": src, "route": route,
+            "org_class": r.get("org_entity_class") or "",
+            "page_basis": r.get("page_is_roster_basis") or "n/a",
+            "strings": [], "corroborators": set()})
+        if member not in acc["strings"]:
+            acc["strings"].append(member)
+        if shard_uid == uid and shard_method:
+            acc["corroborators"].add(shard_method)
+
+    for (org_uid, uid), a in awards.items():
+        compact = compact_holders.get(norm(a["org"]))
         org_row = spine_by_uid.get(org_uid, {})
+        printed = "; ".join("%r" % s for s in a["strings"][:4])
+        corr_note = ("" if not a["corroborators"] else
+                     " Independently corroborated by shard F's own matcher (%s)."
+                     % ", ".join(sorted(a["corroborators"])))
         if compact:
             tier = "managed_under_contract"
             basis = ("isdeaa_title_v_selfgovernance_compact_holder__member_"
                      "nation_named_on_the_organisations_own_roster")
-            quote = ("%s publishes %r as a member on %s. The same "
+            quote = ("%s publishes %s as a member on %s. The same "
                      "organisation holds an IHS Title V ISDEAA "
                      "self-governance compact entered %s (%s Area), per %s: "
-                     "“%s”"
-                     % (org, member, src, compact["compact_year"],
+                     "“%s”.%s"
+                     % (a["org"], printed, a["src"], compact["compact_year"],
                         compact["ihs_area"], compact["source_url"],
-                        compact["authorizing_basis_quote"]))
+                        compact["authorizing_basis_quote"], corr_note))
             n_contract += 1
         else:
             tier = "declares_service_to"
             basis = "organisations_own_published_membership_roster"
-            quote = ("%s publishes %r on its own membership page. Shard F "
-                     "page test: %s"
-                     % (org, member, r.get("page_is_roster_basis") or "n/a"))
+            quote = ("%s publishes %s on its own membership page. Shard F "
+                     "page test: %s.%s"
+                     % (a["org"], printed, a["page_basis"], corr_note))
             n_serve += 1
-        corr = ""
-        if shard_uid == uid:
-            corr = ""   # not a TIER, so it does not belong in corroborating_tiers
-            basis += "__corroborated_by_shard_f_" + (shard_method or "match")
-        b.edge(org, uid, tier, basis, src, quote,
-               route + "__page_names_membership", hubs,
+        b.edge(a["org"], uid, tier, basis, a["src"], quote,
+               a["route"] + "__page_names_membership", hubs,
                from_cedar_uid=org_uid,
-               from_entity_class=r.get("org_entity_class") or "",
+               from_entity_class=a["org_class"],
                from_state=org_row.get("state") or "",
-               from_source_table="org_membership/shard_f",
-               corroborating_tiers=corr)
-    b.notes.append("rosters: %d declares_service_to + %d managed_under_contract"
+               from_source_table="org_membership/shard_f")
+    b.notes.append("rosters: %d declares_service_to + %d managed_under_contract "
+                   "(one edge per organisation-nation pair, not per spelling)"
                    % (n_serve, n_contract))
 
 
@@ -808,12 +933,14 @@ def src_990_filer_name_probe(b, hubs, rs):
     if os.path.exists(M.NP_ORGS):
         for r in read_csv(M.NP_ORGS):
             state_by_ein[r["EIN"]] = r.get("state") or ""
+    already = set(e["from_record_key"] for e in b.edges
+                  if e["from_source_table"] == "np_mission")
     seen = set()
     n = rows = 0
     for line in open(M.MISSION, encoding="utf-8"):
         d = json.loads(line)
         ein = d["ein"]
-        if ein not in unres_eins or ein in seen:
+        if ein not in unres_eins or ein in seen or ein in already:
             continue
         seen.add(ein)
         org = d.get("org_name") or ""
@@ -978,6 +1105,33 @@ def reconcile_conflict_flags(edges):
 
 
 # ------------------------------------------------------------------ checks
+
+def supersede_refusals_resolved_by_a_later_rung(edges, refusals):
+    """A refusal a later rung overturned is not a refusal; it is a stale note.
+
+    851 refuses all 149 blank-`certifying_authority_entity_id` rows as
+    `no_certifying_authority_on_the_row`, and 852's finding-A rung then
+    writes an edge for every one of them off the printed NAME. Leaving both
+    rows in place makes the two files contradict each other and breaks row
+    conservation on `native_owned_businesses` (2,393 source rows producing
+    2,542 dispositions). Dropped only when the refusal named NO candidate hub
+    - a refusal that held a specific candidate is a judgement about that
+    candidate and survives.
+    """
+    resolved = set()
+    for e in edges:
+        if e.get("from_record_key"):
+            resolved.add((e["from_source_table"], e["from_record_key"]))
+    kept, dropped = [], 0
+    for r in refusals:
+        k = (r.get("from_source_table"), r.get("from_record_key"))
+        if (k in resolved and r.get("from_record_key")
+                and not r.get("candidate_hub_cedar_uid")):
+            dropped += 1
+            continue
+        kept.append(r)
+    return kept, dropped
+
 
 def check_no_self_edge(rows):
     bad = []
@@ -1196,6 +1350,9 @@ def main(argv):
     edges, ruling_lines = adjudicate_bie_navajo_field(b, edges, hubs)
     flag_changes = reconcile_conflict_flags(edges)
 
+    b.refusals, superseded = supersede_refusals_resolved_by_a_later_rung(
+        edges, b.refusals)
+
     edges.sort(key=lambda e: (e["tier_rank"], e["to_hub_name"], e["from_name"]))
 
     fails = run_all_checks_852(edges, hubs, M.EDGE_COLUMNS)
@@ -1252,7 +1409,19 @@ def main(argv):
                    or e["from_name"]) for e in edges}),
              len({e["to_hub_cedar_uid"] for e in edges})))
 
-    print("\nrefusals written: %d" % len(b.refusals))
+    print("\n--- ROW CONSERVATION, per source ---")
+    disp = defaultdict(lambda: [0, 0])
+    for e in edges:
+        disp[e["from_source_table"]][0] += 1
+    for r in b.refusals:
+        disp[r["from_source_table"]][1] += 1
+    for t in sorted(disp):
+        n_e, n_r = disp[t]
+        print("    %-44s %5d edges + %5d refusals = %5d dispositions"
+              % (t, n_e, n_r, n_e + n_r))
+
+    print("\nrefusals written: %d   (%d superseded by a later rung and dropped)"
+          % (len(b.refusals), superseded))
     for k, v in Counter(r["refusal_reason"] for r in b.refusals).most_common(25):
         print("    %6d  %s" % (v, k))
 

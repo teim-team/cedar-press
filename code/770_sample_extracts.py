@@ -150,10 +150,28 @@ SHOW = {
     # 290,525 a real parent and a modification stub, 262,773 no parent and a
     # full standalone PIID, and **zero** rows have neither. So a buyer keys on
     # the pair, and the sample now shows both.
+    #
+    # 2026-09-02, PROMOTE (ADR-016): WHAT WAS BOUGHT, AND WHEN.
+    # `prime_contracts.csv` shipped no NAICS at all - only `sector`, the
+    # 2-digit prefix - and no product/service code, no description and no
+    # exact date. `950_promote_contract_attributes.py` put all of them on the
+    # table from data already on this machine: `naics_code` and `action_date`
+    # on 838,229 / 841,002 rows from the FY2008-26 archive extract, and PSC +
+    # `award_base_description` on 247,987 (20.4%) through the local gapfill
+    # corpus. **The PSC columns are blank on 79.6% of rows and that is the
+    # honest state** - the rest is a genuine re-pull, `award_attributes_basis`
+    # says so per row, and the README reports the fill rather than the sample
+    # hiding it. `total_award_value` (100%) is here because 265,491 rows
+    # obligate $0 and a buyer cannot read a $209 order against a $4B IDIQ
+    # without the ceiling.
     "contractors": ["parent_contract_number", "contract_number", "fiscal_year",
-                    "awardee_name", "awardee_uei", "parent_name",
-                    "canonical_name", "total_obligations", "setaside",
-                    "funding_agency", "confidence_tier", "cedar_uid"],
+                    "action_date", "awardee_name", "awardee_uei",
+                    "parent_name", "canonical_name", "naics_code",
+                    "product_or_service_code",
+                    "product_or_service_code_description",
+                    "award_base_description", "total_obligations",
+                    "total_award_value", "setaside", "funding_agency",
+                    "confidence_tier", "cedar_uid"],
     # `description` is what the subaward was FOR, populated on 76,813 of
     # 76,859 rows, and a subcontracting sample without it is a list of amounts.
     "subcontracting": ["subaward_number", "fiscal_year", "subaward_date",
@@ -173,10 +191,29 @@ SHOW = {
                           "recipient_entity_name", "commodity", "revenue_type",
                           "amount_usd", "aggregation_level", "source_system",
                           "confidence"],
-    "native-owned-businesses": ["business_name_raw", "certifying_authority_name",
+    # 2026-09-02, PROMOTE (ADR-016). Three changes, all measured.
+    #  - `service_category_raw` is filled on 2,043 of 2,393 rows (85%) and was
+    #    never requested, while `naics` (34 rows, 1.4%) was. A buyer opening a
+    #    Native-owned business directory is looking for a SUPPLIER; both stay,
+    #    but the one that says what the firm does leads.
+    #  - `federal_uei_candidate` + its status are the join to contracting the
+    #    dataset never had - `business_entity_id` is populated on 4 of 2,393.
+    #    220 rows now carry a candidate UEI derived from local FPDS data with
+    #    no download. It is a tier-B PROPOSAL and MAY NOT key a dollar; the
+    #    status column carries the refusals, including the 346 rows whose
+    #    source terms forbid it.
+    #  - `source_last_updated` (1,127 rows) is on the table and was not shown.
+    #    For a directory of certifications that EXPIRE, when the nation last
+    #    published it is the difference between a live register and a rumour.
+    "native-owned-businesses": ["business_source_id", "business_name_raw",
+                                "certifying_authority_name",
                                 "programme_name", "identity_scope",
-                                "directory_type", "city", "state_province",
-                                "naics", "certification_expiration",
+                                "directory_type", "service_category_raw",
+                                "naics", "city", "state_province",
+                                "certification_expiration",
+                                "source_last_updated",
+                                "federal_uei_candidate",
+                                "federal_identifier_match_status",
                                 "source_terms_status", "publishable"],
     # `classification_ruling` carries a ruling for 398 of 12,764 rows (3.1%).
     # The disposition for the other 96.9% lives in `funnel_stage`, and showing
@@ -186,21 +223,46 @@ SHOW = {
     # ships beside it so the buyer can see WHAT was matched, which is the only
     # way to spot the collisions - ORDER OF THE EASTERN STAR OF SOUTH DAKOTA
     # matched Chickahominy Indian Tribe - Eastern Division on the token EASTERN.
-    "nonprofits": ["EIN", "org_name", "city", "state", "tier",
+    #
+    # 2026-09-02, PROMOTE (ADR-016): `disposition` is the column that answers
+    # the question `classification_ruling` looked like it was answering.
+    # `952_nonprofit_disposition.py` derives it from funnel_stage +
+    # excluded_by_prior_ruling and it is NEVER blank: 4,681 EXCLUDED_PRIOR_
+    # RULING, 5,082 CANDIDATE_NAME_ONLY, 697 NATIVE_VERIFIED_STRICT, and so on
+    # through a ten-value vocabulary. `classification_ruling` stays on the
+    # table and stays in the sample because it means something different and
+    # narrower - a HAND ruling by a named authority, on 398 rows.
+    # `name_match_support` says whether the cited name match rests on a
+    # DISTINCTIVE token or only on a generic one; 258 live rows are
+    # `generic_token_only`, which is how ORDER OF THE EASTERN STAR reached
+    # Chickahominy Indians-Eastern Division (on EASTERN) and 55 VFW posts
+    # reached United Auburn (on UNITED).
+    "nonprofits": ["EIN", "org_name", "city", "state", "tier", "disposition",
                    "funnel_stage", "classification_ruling",
-                   "canonical_name_token_match", "placename_risk_flag",
-                   "confidence_tier", "bmf_revenue_amt",
-                   "tribe_canonical_name", "cedar_uid"],
+                   "canonical_name_token_match", "name_match_support",
+                   "placename_risk_flag", "confidence_tier",
+                   "bmf_revenue_amt", "tribe_canonical_name", "cedar_uid"],
     # The descriptor promises "the parties, the instrument and the announced
     # value where one was published." `Announced_Value_USD` is populated on
     # 835 of 935 rows and was not shown, so the sample delivered two of three.
     # `Value_Type` travels with it because the numbers are not comparable
     # without it - an announced deal value and a project total are not the
     # same quantity.
+    #
+    # 2026-09-02, PROMOTE (ADR-016). This is the one Cedar dataset that exists
+    # nowhere else, so the CITATION is the product: `Source_1` is on 931 of
+    # 935 rows and `Verification_Status` on all 935, and the sample showed
+    # neither. `Description` (935), `State` (805) and `cedar_uid` (886) join
+    # them. `Record_Scope` comes OUT - it reads `2000 commitment` / `2023
+    # commitment`, which is a year plus a word, and no buyer will guess it
+    # separates commitment-year from event-year. `Event_Type` stays because on
+    # the 282 TRANSACTION rows it says something `Status` does not
+    # (`100% stock acquisition`, `Asset acquisition`, `Notes issued`).
     "deals": ["Deal_ID", "Event_Date", "Deal_Title", "Native_Party",
               "Counterparty_or_Funder", "Deal_Category", "Industry",
               "Event_Type", "Status", "Announced_Value_USD", "Value_Type",
-              "Record_Scope"],
+              "Description", "State", "Source_1", "Source_1_Type",
+              "Verification_Status", "cedar_uid"],
     # A lobbying sample with no dollars invites exactly one conclusion.
     # `spend_reported_usd` is on all 653 registrants; re-measured 2026-09-02
     # with csv.reader, **351 are greater than zero and the column totals
@@ -438,12 +500,17 @@ def main() -> int:
               "standalone PIID, and **no row has neither**.",
               "- **`federal_funding_transactions.canonical_name`** is a legacy "
               "display label, not Cedar's name for the entity. Group on "
-              "**`cedar_uid`**, which is the key ADR-009 mandates. On 345,180 "
-              "of 552,602 keyed rows the two disagree, and the overwhelming "
-              "majority of those are a right identity under a stale label — "
-              "`haaku community academy` on rows correctly keyed to Pueblo of "
-              "Acoma. Grouping on the label credits a school; grouping on the "
-              "uid credits the nation.", ""]
+              "**`cedar_uid`**, which is the key ADR-009 mandates. Measured "
+              "2026-09-01 in `docs/FAADS_TRANSACTION_KEY_LOG.md`: of 552,602 "
+              "rows carrying a uid, **345,108 disagree** with the register's "
+              "name for that uid, and **339,129 of those (98.3%, $94.0B) are "
+              "a right identity under a stale label** — `haaku community "
+              "academy` on rows correctly keyed to Pueblo of Acoma. Grouping "
+              "on the label credits a school; grouping on the uid credits the "
+              "nation. *(A re-count on 2026-09-02 returns 345,180 rather than "
+              "345,108 — the table was rebuilt between the two. The split is "
+              "the point, not the last two digits, and one measurement is "
+              "quoted everywhere rather than two.)*", ""]
         if sparse or notincols:
             L += ["## Columns that are in the schema and empty in this sample",
                   "",

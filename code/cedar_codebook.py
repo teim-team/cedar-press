@@ -415,6 +415,15 @@ INTERNAL_TABLES = {
         "a self-measurement of Cedar's own collection - what we swept, what "
         "answered, how much we covered. A fact about us, not about Indian "
         "Country",
+    "consultation_source_probe.csv":
+        "962's Dear Tribal Leader probe: five rows recording what each "
+        "publisher answered when asked how many such letters it carries, so "
+        "the six in consultation_events.csv is explained by measurement "
+        "rather than by inference. A fact about OUR collection and about a "
+        "publisher's index, not an event in Indian Country; the customer-"
+        "facing form of the finding is one sentence in the federal-register "
+        "descriptor's method. Reversible: it needs a codebook fragment and a "
+        "notes contract, not a decision",
     "nho_ito_spine_crosswalk.csv":
         "a review by-product: it records what a human ruled, or has yet to "
         "rule, on a proposal. The ruling corpus is named proprietary and "
