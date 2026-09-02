@@ -930,6 +930,8 @@ MD_PROVEN_SAFE = {
         "2026-09-02 regen: 3 changed lines - a timestamp and two counts that "
         "genuinely moved (4,656->4,659 comment rows, 5,368->5,472 URL rows). "
         "630 also splices into <!-- CEDAR:CADENCE-MEASURED START -->.",
+    "docs/ARCHITECTURE.md":
+        "2026-09-02 regen: 3 diff lines and all three are ONE line - the generated-on timestamp. Flagged as new after the newsletters shelf ruling edited COLLECTIONS in 500 and the doc was regenerated in the same commit as hand edits elsewhere, which is what the hand-edit signal measures. 15 of 18 headings are absent from the generator's string literals because they are collection NAMES read out of the COLLECTIONS map, not prose - the orphan-heading signal is an upper bound and says so.",
     "docs/ENTITY_FRESHNESS.md":
         "2026-09-02 regen: 1 removed line, replaced in the same hunk. "
         "0 unpaired removals.",

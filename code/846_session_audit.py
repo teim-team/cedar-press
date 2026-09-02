@@ -540,6 +540,37 @@ def _method():
                          f"{'; missing ' + ', '.join(sorted(missing)) if missing else ''}")
 
 
+@claim("the twelve customer datasets exist and are not stale", critical=True)
+def _twelve():
+    """The product is twelve spreadsheets. This checks they are CURRENT.
+
+    Owner, 2026-09-02: *"we always have a finished product we're building and
+    all the cleaning and stuff gets updated and gets converted to the finished
+    product."*
+
+    The failure this catches is silent, which is why it has to be a gate: a
+    cleaning pass rewrites `prime_contracts.csv`, and `contractors.csv` goes on
+    sitting in `dist/customer/` looking finished. Nothing anywhere says the
+    deliverable no longer matches the data. A stale deliverable is a wrong
+    deliverable, so `1137 verify` exits 1 on it and this claim carries that
+    through to the audit.
+
+    It also fails on a count other than twelve, because the shelf assignment in
+    `500` is what decides who is a customer dataset and a silent thirteenth is
+    how `newsletters` shipped before the owner withdrew it.
+    """
+    rc = script_exit("1137_customer_dataset_combine.py", "verify")
+    if rc == 99:
+        return (False, "1137 verify CRASHED - deliverables unproven")
+    out = ROOT / "dist" / "customer"
+    csvs = [f for f in out.glob("*.csv") if f.name != "MANIFEST.csv"]
+    cbs = list(out.glob("*__CODEBOOK.md"))
+    ok = rc == 0 and len(csvs) == 12 and len(cbs) == 12
+    return (ok, f"{len(csvs)} spreadsheets, {len(cbs)} codebooks, "
+                f"1137 verify rc={rc}"
+                + ("" if ok else "  <- re-run `1137 build`"))
+
+
 @claim("the tooling the owner asked for is installed and importable")
 def _pkgs():
     out = []
