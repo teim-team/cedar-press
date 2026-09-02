@@ -17,7 +17,7 @@ never typed. Re-run after any of them.
 WHAT THE SECTION SAYS, IN ONE LINE
 ----------------------------------
 A geographic key is a GROUPING key, not a licence to add. ADR-015 rule 4 is the
-whole reason this section exists: county FIPS now appears on ~5.4M rows across
+whole reason this section exists: county FIPS now appears on 4.3M rows across
 four tables that were previously unjoinable to each other, which makes the
 cross-dataset sum that MONEY_TOTALLING_RULES already forbids much easier to
 perform by accident.
@@ -34,7 +34,10 @@ INVARIANTS (verify exits 1 on any failure)
   I2 every OTHER marked block in the file is byte-identical to the pre-run
      backup. This is the invariant that matters: the failure mode being guarded
      against is an agent rewriting someone else's section.
-  I3 the text outside all marked blocks is byte-identical to the backup.
+  I3 the text outside all marked blocks is byte-identical to the backup, once
+     the GEO block itself is removed from both sides. Comparing without removing
+     it can never pass on a first append -- the newly appended block IS outside
+     text that was not there before -- so the check would be theatre.
   I4 the GEO block names all four ADR-015 rules and the two column names that
      rule 1 turns on, so a future wholesale rewrite of the surrounding file
      cannot leave a GEO section that has quietly lost them.
@@ -99,19 +102,23 @@ def block():
     A("## Geography — a shared county code is NOT permission to sum "
       "(ADR-015 workstream INT)")
     A("")
+    # NB: never write the literal marker strings into the block body -- verify
+    # counts them, and a second pair inside the prose reads as two GEO sections.
     A(f"*Appended {STAMP} by `code/875_geo_money_rules_section.py`. Every figure "
       f"is re-read from the measurement JSONs that `870`–`874` write; regenerate "
       f"rather than edit.* **This file is written WHOLESALE by `574`, which "
-      f"preserves only marked blocks; this section is inside "
-      f"`{BEGIN}` / `{END}` so it survives.**")
+      f"preserves only marked blocks; this section sits inside a GEO marker pair "
+      f"so it survives that rewrite.**")
     A("")
     A("### What changed, and why it is a new hazard")
     A("")
     A("Before 2026-09-02, **1,070 rows** in `data/clean/` carried a joinable "
-      "geographic key. They now number roughly **5.4 million**, on the four "
-      "largest money tables Cedar publishes. Every one of those tables was "
-      "already non-additive with the others, and every one of them is now "
-      "trivially joinable to the others on `county_fips`.")
+      "geographic key. Across the same population of transaction and asset "
+      "tables they now number **4,295,674 of 4,768,577 (90.1%)**, "
+      "concentrated in the four largest money tables Cedar publishes. Every "
+      "one of those tables was already non-additive with the others, and "
+      "every one of them is now trivially joinable to the others on "
+      "`county_fips`.")
     A("")
     A("**That is the hazard this section exists for.** A county code makes the "
       "forbidden sum easy, not legal. Nothing above in this file is relaxed by "
@@ -280,12 +287,17 @@ def write():
 MARKER_RE = re.compile(r"<!-- BEGIN ([A-Z0-9\-]+) -->(.*?)<!-- END \1 -->", re.S)
 
 
+GEO_RE = re.compile(r"\n*<!-- BEGIN GEO -->.*?<!-- END GEO -->\n*", re.S)
+
+
 def blocks_of(text):
     return {m.group(1): m.group(2) for m in MARKER_RE.finditer(text)}
 
 
 def outside_of(text):
-    return MARKER_RE.sub("<<<BLOCK>>>", text)
+    """Everything that is NOT inside a marked block, with the GEO block excised
+    entirely rather than tokenised -- see I3 in the docstring."""
+    return MARKER_RE.sub("<<<BLOCK>>>", GEO_RE.sub("\n", text)).rstrip() + "\n"
 
 
 def verify(doc=None, bak=None, quiet=False):

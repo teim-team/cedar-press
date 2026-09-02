@@ -1,0 +1,42 @@
+{
+  "built_by": "code/1011_cross_dataset_reconciliation.py",
+  "invariants": {
+    "cdr01_owned_by_blank_source": 1462,
+    "cdr01_owned_by_edges": 1462,
+    "cdr01_owned_by_uei_only_in_prose": 996,
+    "cdr02_dollars": 175604584173.77,
+    "cdr02_operating_companies_absent": 1343,
+    "cdr03_dollars": 84515855455.03,
+    "cdr03_parent_ueis_absent_from_ledger": 287,
+    "cdr04_dollars": 39099756.66,
+    "cdr04_resolvable_unmatched_lobbying_clients": 57,
+    "cdr05_dollars": 7947217325.59,
+    "cdr05_hubs_only_in_contracting": 41,
+    "cdr06_cage_nan_dollars": 87626820925.05,
+    "cdr06_cage_nan_ueis": 2015,
+    "cdr06_nan_cells_remaining": 617097,
+    "cdr07_gaming_containment_keys": 291,
+    "cdr08_gaming_operator_disagreements": 0,
+    "cdr09_nonprofit_name_is_spine_entity": 17,
+    "cdr10_additions_rows_already_in_classified": [
+      790,
+      790
+    ],
+    "cdr10_alias_blank_ids": 2,
+    "cdr10_alias_semantic_groups": 73,
+    "cdr10_whole_row_duplicates": {
+      "cedar_constellation_edges": 0,
+      "cedar_identifier_ledger_final": 0,
+      "contractor_ranking": 0,
+      "deals_classified": 0,
+      "entity_aliases": 0,
+      "entity_relationships": 0,
+      "fpds_uei_edges": 0,
+      "gaming_facilities": 0,
+      "lobbying_registrant_client_relationships": 0,
+      "np_ein_entity_hub": 0,
+      "ownership_events": 0
+    },
+    "prime_rows": 1217768
+  }
+}

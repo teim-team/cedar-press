@@ -79,7 +79,11 @@ from pathlib import Path
 
 import requests
 
-ROOT = Path(__file__).resolve().parent.parent
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+from cedar_keys import stable_digest          # noqa: E402
+
+ROOT = HERE.parent
 LOGS = ROOT / "logs"
 csv.field_size_limit(10_000_000)
 TODAY = dt.date.today().isoformat()
@@ -240,7 +244,7 @@ def probe_federal_register(sess, rows):
                              verdict=f"refused by {why}", evidence_quote="",
                              probed_date=TODAY, probed_by_script=SCRIPT))
             return
-        for i, phrase in enumerate(PHRASES):
+        for phrase in PHRASES:
             q = urllib.parse.urlencode({
                 "conditions[term]": f'"{phrase}"',
                 "per_page": 20, "order": "oldest",
@@ -249,7 +253,8 @@ def probe_federal_register(sess, rows):
             st, js, nb = get(sess, url, want_json=True)
             n = js.get("count") if isinstance(js, dict) else None
             rows.append(dict(
-                probe_id=f"FR-TERM-{i}", source_host=host,
+                probe_id="FR-TERM-" + stable_digest((host, phrase)),
+                source_host=host,
                 source_name="Federal Register API v1 full-text search",
                 question=f'FR documents whose text contains "{phrase}"',
                 url=url, http_status=st, response_bytes=nb,

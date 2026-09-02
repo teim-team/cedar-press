@@ -351,10 +351,10 @@ def build():
                 e = s["cells"][cf]
                 w.writerow([
                     ds["name"], ds["period"], cf, cdim.get(cf, ("", ""))[0], cf[:2],
+                    cdim.get(cf, ("", "county_code_absent_from_dimension"))[1],
                     usd(e["pop_c"]), e["pop_n"], e["pop_x"],
                     usd(e["rcp_c"]), e["rcp_n"], e["rcp_x"],
                     usd(e["nat_c"]), e["nat_n"], e["nat_x"],
-                    cdim.get(cf, ("", "county_code_absent_from_dimension"))[1],
                     ";".join(sorted(aia.get(cf, ()))),
                     "observed_point_partial_see_geo_aiannh_county_observed.csv"
                     if cf in aia else "no_aiannh_area_observed_in_cedar_points",
@@ -528,7 +528,8 @@ def write_demo(stats):
     A("1. **The Native sum is a floor.** It counts only recipients Cedar has "
       "attributed. Attribution is name and UEI matching; it misses and never "
       "invents. Better matching moves the Native sum up and the difference down, "
-      "never the other way. " + FLOOR)
+      "never the other way, so the number above is a CEILING on the money that "
+      "did not reach Native entities.")
     A(f"2. **The two sums do not partition the same rows.** A recipient "
       f"headquartered outside the county can perform work inside it, and one "
       f"inside it can perform work elsewhere - ADR-015 rule 3 names this "
@@ -536,12 +537,16 @@ def write_demo(stats):
       f"total (${pop:,.2f}, {int(win['pop_rows']):,} rows) and its recipient "
       f"total (${float(win['all_recipient_sum_usd']):,.2f}, "
       f"{int(win['all_recipient_rows']):,} rows) is visible rather than implied.")
-    A("3. **A county is not a reservation.** " + NOT_A_RESERVATION
+    A("3. **A county is not a reservation (ADR-015 rule 2).** Reservations span "
+      "counties and counties contain fractions of reservations, so this is a "
+      "county-level APPROXIMATION of an area whose real boundary is elsewhere."
       + (" The AIANNH list above is itself a floor - observed from geocoded "
          "points Cedar happens to hold, not a census of overlap, because county "
          "polygons are not on disk to intersect against."
          if win["aiannh_geoids_observed"] else ""))
-    A("4. **Obligations are signed.** " + SIGNED)
+    A("4. **Obligations are signed.** A deobligation is a negative row, so a "
+      "county's Native sum can exceed its all-recipient sum with nothing wrong. "
+      "Only the ROW COUNTS are guaranteed to nest.")
     A(f"5. **Coverage, dataset-wide.** {int(ds['unallocated_pop_rows']):,} rows "
       f"carrying ${float(ds['unallocated_pop_usd']):,.2f} have NO "
       f"place-of-performance county key and sit in no county's POP sum; "

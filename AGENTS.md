@@ -5,7 +5,9 @@
 
 ## HOW TO READ THIS FILE (added 2026-09-02)
 
-**This file is 5,898 lines and it is not an onboarding document.** Everything below
+**This file is ~6,000 lines and growing, and it is not an onboarding document.**
+(Exact count: `wc -l AGENTS.md` — do not trust a figure typed here, including this
+one.) Everything below
 `CURRENT STATE (2026-08-06)` is an **append-only journal** — named gate failures,
 defect post-mortems, and hard-won findings, written as they happened. That journal is
 the most valuable thing in the repo and it should keep growing. It is also, read
@@ -15,7 +17,7 @@ linearly, roughly 90,000 tokens of context an agent spends before writing a line
 
 1. **The two sections immediately below** — the Prime Directive and
    `CURRENT STATE (2026-08-30)`. These are current and load-bearing. ~130 lines.
-2. **`docs/AGENT_FIELD_GUIDE.md`** — ~190 lines. The traps distilled: why a green
+2. **`docs/AGENT_FIELD_GUIDE.md`** — ~200 lines. The traps distilled: why a green
    check here is often measuring something else, why four of five duplicate
    allegations were phantom, why `ls code/<n>_*` cannot stop a script-number
    collision, and which shared files destroy your work if you rewrite them.

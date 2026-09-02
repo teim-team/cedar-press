@@ -432,6 +432,9 @@ def verify(path: Path | None = None, skip_copy: bool = False) -> int:
     registered = _registered_conflicts()
     fails = []
     n = sector_checked = orphan = bad_naics = 0
+    #: A count is not actionable; a key is a task. Both defect kinds name the
+    #: rows they found, so a reader can go and look at them.
+    orphan_rows, bad_naics_rows = [], []
     unregistered, healed = [], set(registered)
     promoted = {}
     with p.open(encoding="utf-8-sig", newline="") as fh:
@@ -454,8 +457,16 @@ def verify(path: Path | None = None, skip_copy: bool = False) -> int:
             if nc:
                 if not (len(nc) == 6 and nc.isdigit()):
                     bad_naics += 1
+                    if len(bad_naics_rows) < 20:
+                        bad_naics_rows.append(
+                            (r.get("contract_number"), r.get("fiscal_year"),
+                             nc))
                 if not k:
                     orphan += 1
+                    if len(orphan_rows) < 20:
+                        orphan_rows.append(
+                            (r.get("contract_number"), r.get("fiscal_year"),
+                             r.get("awardee_name"), nc))
                 if sec.isdigit() and len(nc) == 6 and nc.isdigit():
                     sector_checked += 1
                     if nc[:2] != sec:
@@ -486,10 +497,12 @@ def verify(path: Path | None = None, skip_copy: bool = False) -> int:
         fails.append(f"INV-ROWS {man['rows']:,} -> {n:,}")
     if bad_naics:
         fails.append(f"INV-SHAPE {bad_naics:,} naics_code values are not "
-                     "6 digits")
+                     f"6 digits, on (contract_number, fiscal_year, value): "
+                     f"{bad_naics_rows}")
     if orphan:
         fails.append(f"INV-ORPHAN {orphan:,} rows carry naics_code with no "
-                     f"{KEY}")
+                     f"{KEY}, on (contract_number, fiscal_year, awardee, "
+                     f"naics): {orphan_rows}")
     if unregistered:
         fails.append(f"INV-SECTOR {len(unregistered):,} NEW sector/naics "
                      f"conflicts not in {CONFLICTS.name}; "

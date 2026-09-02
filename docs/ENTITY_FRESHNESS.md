@@ -1,17 +1,18 @@
 # Entity freshness — when was each entity last touched by anything
 
-*Generated 2026-09-02 by `code/830_entity_freshness.py` across 139 entity-bearing tables. An update is ANY change: a row appearing, a date advancing, an identifier landing. `built_date` and `fetched_date` are deliberately NOT counted — they say when Cedar ran, not when the entity changed, and 70 tables carry one.*
+*Generated 2026-09-02 by `code/830_entity_freshness.py` across 141 entity-bearing tables. An update is ANY change: a row appearing, a date advancing, an identifier landing. `built_date` and `fetched_date` are deliberately NOT counted — they say when Cedar ran, not when the entity changed, and 70 tables carry one.*
 
 This answers a question no other instrument can. Coverage says who has a website; cadence says which SOURCE is behind; readiness says which DATASET meets the contract. All three aggregate across entities, so an entity can sit untouched for two years while every one of them reads green.
 
 | | n |
 |---|---:|
 | entities in the register | 1,555 |
-| **appear in NO Cedar row at all** | **0** |
-| present but carrying no usable date | 398 |
-| last change more than a year ago | 281 |
+| **appear in NO substantive Cedar row** | **83** |
+| (the old, unfixable measure: no row in ANY table, identity layer included) | 0 |
+| present but carrying no usable date | 290 |
+| last change more than a year ago | 287 |
 
-Median days since last change: **105**. p90: **3,898**. Oldest: **15,715**.
+Median days since last change: **112**. p90: **3,627**. Oldest: **15,715**.
 
 ## The tail — 25 entities nobody has touched longest
 
@@ -41,4 +42,43 @@ Median days since last change: **105**. p90: **3,898**. Oldest: **15,715**.
 | Kugkaktlik, Ltd. | Alaska Native Village Corp | 2004-04-26 | 8,164 | `federal_actions_entity_bridge.csv` |
 | Hui Mālama Ola Nā ‘Ōiwi | Native Hawaiian Organizati | 2004-10-12 | 7,995 | `nagpra_notice_entity_bridge.csv` |
 | Cherokee Integrated Technologi | Individually Native-owned  | 2004-12-31 | 7,915 | `individual_native_firm_contracts.csv` |
-| Maserculiq, Inc. | Alaska Native Village Corp | 2004-12-31 | 7,915 | `faads_entity_attribution.csv` |
+| Occaneechi Band of the Saponi Nati | State-recognized tribe | 2004-12-31 | 7,915 | `faads_entity_attribution.csv` |
+
+## Present in the register, absent from every dataset — 83
+
+These are the entities the owner has been asking about since August: they exist in the identity layer and no Cedar dataset has a single row for them.
+
+*Measured OUTSIDE the identity layer — see `IDENTITY_LAYER` in this script. Counting those files, one of which is this script's own output, pinned this number at zero and it had been reading zero ever since. `code/1021_register_only_first_rows.py` works this list.*
+
+| entity | class |
+|---|---|
+| Ahfachkee School | BIE School |
+| Atsá Biyáázh Community School | BIE School |
+| Baca /Dlo'Ay Azhi Community School | BIE School |
+| Beclabito Day School | BIE School |
+| Blackfeet Dormitory | BIE School |
+| Bogue Chitto Elementary | BIE School |
+| Bread Springs Day School | BIE School |
+| Cherokee Central Elementary School | BIE School |
+| Cherokee Central High School | BIE School |
+| Cherokee Central Middle School | BIE School |
+| Cheyenne-Eagle Butte High School | BIE School |
+| Chi Chil'tah Community School | BIE School |
+| Chickasaw Children's Village | BIE School |
+| Chitimacha Tribal School | BIE School |
+| Choctaw Central High School | BIE School |
+| Choctaw Central Middle School | BIE School |
+| Circle of Life Academy | BIE School |
+| Coeur d'Alene Tribal School | BIE School |
+| Conehatta Elemenatary School | BIE School |
+| Cottonwood Day School | BIE School |
+| Cove Day School | BIE School |
+| Crow Creek Reservation High School | BIE School |
+| Crow Creek Tribal Elementary School | BIE School |
+| Crystal Boarding School | BIE School |
+| Dunseith Indian Day School | BIE School |
+| Eufaula Dormitory | BIE School |
+| Flandreau Indian School | BIE School |
+| Fond du Lac Ojibwe School | BIE School |
+| Greyhills Academy High School | BIE School |
+| Havasupai Elementary School | BIE School |

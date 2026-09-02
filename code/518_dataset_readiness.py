@@ -231,6 +231,7 @@ COLS = ["dataset", "status", "shelf", "n_customer_tables", "blockers",
         "natural_scope",
         # C4 v2 honesty columns: what the percentage does NOT cover.
         "c4_entity_scoped_rows", "c4_unmeasured_tables", "c4_sampled_tables",
+        "c4_national_mirrors",
         "tables_row_level_only", "duplicate_rows_total",
         "identity_model", "rebuild_entry", "destructive_rebuild",
         "enricher_ordering", "replay_status", "next_action", "measured_date"]
@@ -590,6 +591,7 @@ def measure():
             c4_entity_scoped_rows=total_rows,
             c4_unmeasured_tables=";".join(sorted(set(unmeasured))) or "-",
             c4_sampled_tables=";".join(sorted(set(sampled))) or "-",
+            c4_national_mirrors=";".join(sorted(set(mirrors))) or "-",
             c5_row_conservation=f"{len(covered)}/{len(names)}",
             c6_unresolved_conflicts="0 shipped as definite",
             c7_double_counting="none" if not money_unsafe else f"{len(money_unsafe)} tables",

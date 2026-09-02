@@ -407,8 +407,18 @@ def main():
     index, stats = [], Counter()
     licensed_hits, undocumented, internal_hits = [], [], []
     for p in sorted(CLEAN.glob("*.csv")):
-        if p.name.startswith("_") or p.name in ("codebook_master.csv",
-                                                "series_breaks.csv"):
+        # A BACKUP IS NOT A DATASET. The house convention is
+        # `<name>.csv.bak_<date>_pre<n>`, which this loop never saw because the
+        # name does not end in `.csv`. Two agents wrote theirs the other way
+        # round on 2026-09-02 - `native_owned_businesses.bak_2026-09-02_010526.csv`,
+        # `prime_contracts.bak_2026-09-02_011205_pre772.csv` - and 87 issued
+        # each of them a SHIPPING CONTRACT, put them in `dist/`, and counted
+        # their rows in the ship rate. A buyer's bundle listing
+        # `prime_contracts.bak_...` is the kind of thing that gets noticed
+        # first and explained last.
+        if (p.name.startswith("_")
+                or ".bak" in p.name
+                or p.name in ("codebook_master.csv", "series_breaks.csv")):
             continue
 
         # ------------------------------------------------------------------

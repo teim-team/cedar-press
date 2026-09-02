@@ -1,19 +1,28 @@
 {
-  "scanned_files": 543,
+  "scanned_files": 548,
   "counts": {
-    "class1": 0,
+    "class1": 1,
     "class2a": 0,
     "class2b": 0,
-    "class2c": 64,
+    "class2c": 63,
     "class3": 1,
     "class4": 12,
     "class5": 6,
     "class6": 25,
-    "class7": 45,
+    "class7": 44,
     "class8": 0,
-    "lint_bug_class_instances": 153
+    "lint_bug_class_instances": 152
   },
   "findings": [
+    {
+      "class": "class1",
+      "file": "1011_cross_dataset_reconciliation.py",
+      "line": 428,
+      "evidence": "for pth in sorted(glob.glob(C(\"deals_*_additions.csv\"))):",
+      "why": "glob pattern 'deals_*_additions.csv' enumerates a derived/staged artefact. If a PROMOTED table holds the truth, this reads the additions and never the ledger (the 88/57/41/82/35 defect). If reading the staged file IS the job - a promoter, a stager, a diff - waive it with a reason.",
+      "waived": false,
+      "waiver_reason": ""
+    },
     {
       "class": "class4",
       "file": "1030_sec_edgar_native_transactions.py",
@@ -799,15 +808,6 @@
     },
     {
       "class": "class2c",
-      "file": "950_promote_contract_attributes.py",
-      "line": 458,
-      "evidence": "orphan += 1",
-      "why": "counter 'orphan' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
-      "waived": false,
-      "waiver_reason": ""
-    },
-    {
-      "class": "class2c",
       "file": "96_build_consultation_events.py",
       "line": 358,
       "evidence": "miss += 1",
@@ -1349,7 +1349,7 @@
     {
       "class": "class7",
       "file": "1030_sec_edgar_native_transactions.py",
-      "line": 773,
+      "line": 779,
       "evidence": "\"candidate_id\": f\"SEC1030-{n:06d}\",",
       "why": "[WARN] POSITIONAL on target candidate_id -> no clean table. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": false,
@@ -1784,15 +1784,6 @@
       "line": 1614,
       "evidence": "report_id=f\"CRR-{v['version_id']}-{j:04d}\",",
       "why": "[WARN] POSITIONAL on target report_id -> compact_required_reports.csv, compact_structured_terms.csv. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
-      "waived": false,
-      "waiver_reason": ""
-    },
-    {
-      "class": "class7",
-      "file": "962_probe_dear_tribal_leader_letters.py",
-      "line": 252,
-      "evidence": "probe_id=f\"FR-TERM-{i}\", source_host=host,",
-      "why": "[WARN] POSITIONAL on target probe_id -> consultation_source_probe.csv. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": false,
       "waiver_reason": ""
     },

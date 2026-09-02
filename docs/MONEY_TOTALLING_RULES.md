@@ -460,3 +460,79 @@ retrieved — 21.3%.** The 25,348 shortfall is Cedar's own fetch backlog and the
 table says so verbatim ("NOT an absence at the IRS"). A buyer given $3.3M
 without that table reads a download queue as evidence about Native nonprofits.
 <!-- END INT-READY -->
+
+<!-- BEGIN GEO -->
+
+## Geography — a shared county code is NOT permission to sum (ADR-015 workstream INT)
+
+*Appended 2026-09-02 by `code/875_geo_money_rules_section.py`. Every figure is re-read from the measurement JSONs that `870`–`874` write; regenerate rather than edit.* **This file is written WHOLESALE by `574`, which preserves only marked blocks; this section sits inside a GEO marker pair so it survives that rewrite.**
+
+### What changed, and why it is a new hazard
+
+Before 2026-09-02, **1,070 rows** in `data/clean/` carried a joinable geographic key. Across the same population of transaction and asset tables they now number **4,295,674 of 4,768,577 (90.1%)**, concentrated in the four largest money tables Cedar publishes. Every one of those tables was already non-additive with the others, and every one of them is now trivially joinable to the others on `county_fips`.
+
+**That is the hazard this section exists for.** A county code makes the forbidden sum easy, not legal. Nothing above in this file is relaxed by the geography axis; ADR-015 rule 4 restates it and this section makes it operational.
+
+### The four geography columns, and the one rule that governs them
+
+Each promoted table carries TWO county keys, never one:
+
+| column | answers |
+|---|---|
+| `geo_recipient_county_fips` | where the AWARDEE is |
+| `geo_pop_county_fips` | where the WORK WAS PERFORMED |
+
+**ADR-015 rule 1: these are not interchangeable and must never be coalesced.** They disagree on a large minority of awards, and that disagreement IS the measure the axis was built for. A query that `COALESCE`s them to a single `county` column has destroyed the product.
+
+On `subawards.csv` the columns are named `geo_prime_award_recipient_county_fips` and `geo_prime_award_pop_county_fips` because they are the PRIME award's geography, not the subawardee's. The subawardee's county is not derivable from that table — it carries `sub_state` and no sub city, zip or county column at all.
+
+### What may be totalled by county, per table
+
+| table | rows | keyed EXACT | keyed DERIVED | unkeyed | any key |
+|---|---:|---:|---:|---:|---:|
+| `prime_contracts.csv` | 1,217,768 | 247,987 | 963,727 | 6,054 | 99.5% |
+| `subawards.csv` | 76,859 | 12,140 | 0 | 64,719 | 15.8% |
+| `federal_funding_transactions.csv` | 701,955 | 149,112 | 514,061 | 38,782 | 94.5% |
+| `faads_transactions_all_agencies.csv` | 2,769,748 | 615,012 | 1,792,565 | 362,171 | 86.9% |
+
+**`exact` means a federal record named the county for that award or that transaction.** `derived` means the row's own zip5 or city+state was resolved to its MODAL county in `geo_place_county_crosswalk.csv`, and the row carries `geo_*_place_dominance_share` and `geo_*_place_ambiguous` so a consumer can set its own threshold. A derived key is a best guess with its confidence attached. **Do not publish a county figure built mostly on derived keys without saying so** — on `prime_contracts.csv` that is 79.1% of rows.
+
+### The additive rules, unchanged, restated for county grouping
+
+1. **Within one table, group freely.** Summing `total_obligations` by `geo_pop_county_fips` over `prime_contracts.csv` is a valid partition of that table and `874` proves it to the cent.
+2. **Across tables, never.** A county code does not make a subaward addable to a prime, `faads_transactions.csv` addable to `faads_transactions_all_agencies.csv`, or FY2007 addable across the seam between `faads_transactions_all_agencies.csv` and `federal_funding_transactions.csv`. Every rule above in this file still governs and county grouping changes none of them.
+3. **Unkeyed is not zero.** Rows with no county key are unallocated, not absent. A county-level total plus the unallocated residual equals the table total; a county-level total on its own does not. The residual per table is in `docs/GEO_TWO_SUMS_STATS.json` and is republished on every run.
+4. **A county is not a reservation (ADR-015 rule 2).** County FIPS is coarser than AIANNH: reservations span counties and counties contain fractions of reservations. Any county-level result about Indian Country ships labelled as an approximation. `geo_aiannh_dim.csv` carries all 864 TIGER 2024 AIANNH areas and `geo_aiannh_county_observed.csv` carries the 374 (AIANNH, county) pairs Cedar has actually observed — a floor, never a census, because county polygons are not on disk to intersect against.
+
+### The ADR-015 difference measure, and the one rule people will break
+
+`data/clean/geo_county_two_sums.csv` publishes, per (dataset, county), **two sums kept separate**:
+
+- `pop_sum_usd` — money flowing TO the area, by place of performance
+- `native_recipient_sum_usd` — money reaching Native entities there, by recipient county
+
+**It publishes no difference column, on purpose (ADR-015 rule 3).** The difference is derivable in one subtraction and is meaningless without its bounds, so the bounds ride on every row: `native_sum_is_a_floor`, `signed_money_note`, `universe_note`, `county_is_not_a_reservation`, `never_sum_across_datasets`.
+
+Three things that make a bare difference wrong:
+
+- **The Native sum is a FLOOR.** It counts only recipients Cedar has attributed. Better matching moves it up and the difference down, never the other way. The difference is therefore a CEILING.
+- **Obligations are SIGNED.** A deobligation is a negative row, so a county's Native sum can legitimately exceed its all-recipient sum. Only the ROW COUNTS nest.
+- **Two of the three datasets are not the federal universe.** `prime_contracts.csv` and `federal_funding_transactions.csv` are Native-CANDIDATE corpora — their recipient universe was pulled from Native entity lists — so their place-of-performance sum for a county is *Cedar's corpus performed there*, not *all federal money there*. Only `faads_transactions_all_agencies.csv` is unfiltered, and only for FY2001–2007. Reading a difference on the other two as 'money that bypassed Native entities' is the single most likely misuse of this table.
+
+| dataset | rows | obligations | Native rows | Native obligations | counties |
+|---|---:|---:|---:|---:|---:|
+| `faads_transactions_all_agencies.csv` | 2,769,748 | $1,830,639,317,707.66 | 29,594 | $4,721,685,550.00 | 3,501 |
+| `prime_contracts.csv` | 1,217,768 | $310,005,258,661.21 | 888,862 | $244,765,639,853.72 | 2,249 |
+| `federal_funding_transactions.csv` | 701,955 | $219,689,020,478.59 | 550,937 | $169,072,556,167.99 | 2,035 |
+
+**Read down that table, never across it.** Three universes, three periods, and two of the three overlap at FY2007.
+
+### Provenance
+
+- `geo_award_county_crosswalk.csv` — 1,050,968 award keys, 1,045,397 with both sides filled, from the USAspending gapfill prime award summaries. Built by `870`.
+- `geo_place_county_crosswalk.csv` — 42,650 places (zip5 and city+state) with modal county and dominance share, pooled over five local USAspending corpora. Built by `870`.
+- `geo_county_dim.csv` — every county code the crosswalks reference, including USAspending's `SS000` state-wide placeholders, each labelled by `county_code_class`. Built by `870`.
+- `geo_aiannh_dim.csv`, `geo_aiannh_county_observed.csv`, `geo_point_aiannh_assignment.csv` — TIGER/Line 2024 AIANNH and Cedar's geocoded points inside it. Built by `873`.
+- `geo_county_two_sums.csv` — the two sums. Built by `874`, which proves the money and row partitions to the cent on every run.
+
+<!-- END GEO -->

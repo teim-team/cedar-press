@@ -2,9 +2,9 @@
 
 *Generated 2026-09-02 by `code/518_dataset_readiness.py` from live artifacts. Three statuses only: **READY / BLOCKED / NOT_TESTED**. There is no 'mostly ready' — a dataset crosses the minimum shipping contract or it has named blockers.*
 
-## READY: 11 / 13
+## READY: 13 / 13
 
-BLOCKED 2 · NOT_TESTED 0
+BLOCKED 0 · NOT_TESTED 0
 
 | dataset | status | tables | grain | keys | duplicates | agg-unsafe | rebuild |
 |---|---|---:|---|---|---|---:|---|
@@ -12,6 +12,7 @@ BLOCKED 2 · NOT_TESTED 0
 | `contractors` | **READY** | 10 | 10/10 | 10/10 | clean | 0 | declared |
 | `deals` | **READY** | 14 | 14/14 | 14/14 | clean | 0 | declared |
 | `federal-register` | **READY** | 22 | 22/22 | 22/22 | clean | 0 | declared |
+| `funding` | **READY** | 10 | 10/10 | 10/10 | clean | 0 | declared |
 | `gaming` | **READY** | 54 | 54/54 | 54/54 | clean | 0 | declared |
 | `legislation` | **READY** | 11 | 11/11 | 11/11 | clean | 0 | declared |
 | `lobbying` | **READY** | 35 | 35/35 | 35/35 | clean | 0 | declared |
@@ -19,18 +20,6 @@ BLOCKED 2 · NOT_TESTED 0
 | `native-owned-businesses` | **READY** | 6 | 6/6 | 6/6 | clean | 0 | declared |
 | `natural-resources` | **READY** | 8 | 8/8 | 8/8 | clean | 0 | declared |
 | `nonprofits` | **READY** | 10 | 10/10 | 10/10 | clean | 0 | declared |
-| `subcontracting` | **BLOCKED** | 3 | 3/3 | 3/3 | 10,770 rows | 1 | declared |
-| `funding` | **BLOCKED** | 10 | 10/10 | 10/10 | 3,557 rows | 2 | declared |
+| `subcontracting` | **READY** | 3 | 3/3 | 3/3 | clean | 0 | declared |
 
 ## Blockers, by dataset
-
-### `subcontracting` — BLOCKED
-
-- C3 literal duplicates: subawards.csv(10,770)
-- C7 DOUBLE-COUNTING RISK - money tables a buyer cannot safely total: subawards.csv
-
-### `funding` — BLOCKED
-
-- C3 literal duplicates: faads_transactions_all_agencies.csv(3,441), native_passthrough.csv(116)
-- C7 DOUBLE-COUNTING RISK - money tables a buyer cannot safely total: faads_transactions_all_agencies.csv, native_passthrough.csv
-- C4 only 16% of entity-bearing rows carry a Cedar id, and every record in this dataset HAS an entity subject - so this is unresolved work, not scope. See ADR-009 and ADR-010.

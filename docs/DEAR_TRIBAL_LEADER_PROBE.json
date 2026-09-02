@@ -8,7 +8,7 @@
   },
   "probes": [
     {
-      "probe_id": "FR-TERM-0",
+      "probe_id": "FR-TERM-1f9f2656f62937c4",
       "source_host": "www.federalregister.gov",
       "source_name": "Federal Register API v1 full-text search",
       "question": "FR documents whose text contains \"Dear Tribal Leader\"",
@@ -23,7 +23,7 @@
       "probed_by_script": "code/962_probe_dear_tribal_leader_letters.py"
     },
     {
-      "probe_id": "FR-TERM-1",
+      "probe_id": "FR-TERM-e6faff8339b1fd9e",
       "source_host": "www.federalregister.gov",
       "source_name": "Federal Register API v1 full-text search",
       "question": "FR documents whose text contains \"Dear Tribal Leader Letter\"",
@@ -59,10 +59,10 @@
       "question": "how many Dear Tribal Leader letters does this agency enumerate in its own sitemap, outside the FR",
       "url": "https://www.bia.gov/sitemap.xml",
       "http_status": 200,
-      "response_bytes": 500188,
+      "response_bytes": 493300,
       "n_results_reported": 10,
       "coverage_status": "REPORTED_FLOOR",
-      "verdict": "10 DTLL URL(s) enumerated across 2 sitemap page(s) holding 2,414 URLs in total. A FLOOR: a paginated sitemap need not carry every node.",
+      "verdict": "10 DTLL URL(s) enumerated across 2 sitemap page(s) holding 2,412 URLs in total. A FLOOR: a paginated sitemap need not carry every node.",
       "evidence_quote": "https://www.bia.gov/news/american-rescue-plan-webpage-update-new-dear-tribal-leader-letter-and-form-now-available | https://www.bia.gov/news/dear-tribal-leader-letter | https://www.bia.gov/news/dear-tribal-leader-letter-announcing-tribal-enrollment-data-collection-form | https://www.bia.gov/news/dear-tribal-leader-letter-bie-draft-policies-certificate-completion",
       "probed_date": "2026-09-02",
       "probed_by_script": "code/962_probe_dear_tribal_leader_letters.py"
@@ -117,12 +117,12 @@
     {
       "url": "https://www.bia.gov/sitemap.xml?page=1",
       "http_status": 200,
-      "bytes": 409811
+      "bytes": 407481
     },
     {
       "url": "https://www.bia.gov/sitemap.xml?page=2",
       "http_status": 200,
-      "bytes": 90377
+      "bytes": 85819
     },
     {
       "url": "https://www.ihs.gov/robots.txt",

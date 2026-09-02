@@ -4,8 +4,8 @@
 that day; the file or script that proves each one is named. If you find one
 stale, fix it here — a field guide repeating a stale claim is worse than none.*
 
-**This is the short one.** `AGENTS.md` is 5,898 lines and is mostly an
-append-only journal of gate failures; `START_HERE.md` is 983. Read those for
+**This is the short one.** `AGENTS.md` is ~6,000 lines and is mostly an
+append-only journal of gate failures; `START_HERE.md` is ~1,000. Read those for
 the dataset you are actually touching. Read *this* before you write anything,
 once, in full. It is the set of traps that have each cost this project more
 than one session.
@@ -48,6 +48,13 @@ a second file.
 
 If you abandon the work: `py -3 code/1050_preflight.py release <n>_<slug>.py`.
 It refuses to delete anything that is not still an untouched placeholder.
+
+**Why the existing 43 are not being renamed** (measured 2026-09-02, so the next
+agent does not re-open it): 43 numbers cover **96 files**; **40 of the 43** are
+cited as "script N" in prose in `docs/` or the root `.md` files; and **417**
+`.bak_*` files on disk are tagged with a bare number. Renaming is an owner
+decision with a real blast radius, not an agent's cleanup. `claim` stops the
+44th; the existing 43 are grandfathered by the ratchet in `62`.
 
 **Backup tags carry the STEM, never the bare number.** `.bak_<date>_pre_1050_preflight`,
 not `.bak_<date>_pre1050`. On 2026-08-26 four scripts were numbered 163, all

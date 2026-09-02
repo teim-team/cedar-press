@@ -14,14 +14,14 @@
 > reads `NEVER_RUN` live rather than from prose, and tells you how to check whether
 > the thing you are about to download is already on this machine.
 >
-> Then read **`docs/AGENT_FIELD_GUIDE.md`** — ~190 lines, the traps that have each
+> Then read **`docs/AGENT_FIELD_GUIDE.md`** — ~200 lines, the traps that have each
 > cost this project more than one session. Read it once, in full. It is the only
 > document here short enough that skimming it is not the failure mode.
 >
 > Do not commit. An integrator verifies claims against live data and commits.
 
 **Read order:** `README.md` → **this file** → **`docs/AGENT_FIELD_GUIDE.md`** →
-`AGENTS.md` (5,898 lines, mostly an append-only journal — read the top section and
+`AGENTS.md` (~6,000 lines, mostly an append-only journal — read the top section and
 then grep it for your dataset; do not read it linearly) → `docs/PULL_DISCIPLINE.md`
 → the build log for whatever you are touching.
 
@@ -421,13 +421,29 @@ row. `87_build_dataset_notes.py` now cites the source edge (**2026-06-30**)
 instead of the build date, removing a 57-day overstatement, and ships the
 composition. Full reasoning in `docs/REFRESH_CADENCE.md` §1.3a and §4.0a.
 
+> **SUPERSEDED 2026-09-02 — READ THIS FIRST.** The paragraph below describes a
+> `tribe_id` column that **no longer exists**. `code/843_retire_cicd_scheme.py`
+> dropped `tribe_id` and `tribe_id_scheme` from
+> `federal_funding_transactions.csv` and the tribe-year panel on 2026-09-01,
+> renamed `tribe_id_scheme_resolved` → **`attribution_status`** and
+> `_resolved_basis` → **`attribution_basis`**, dropped `same_as_legacy_cicd`
+> from the register, and **moved the crosswalk to
+> `data/spine/legacy/assistance_tribe_id_crosswalk.csv`** — it is a build input,
+> not a dataset. Measured 2026-09-02 on the live file: `attribution_status` is
+> populated on all 701,955 rows — `cedar_neid` 553,106, `unattributed` 146,717,
+> `excluded_not_native` 2,119, `unresolved_native` 13. **There are no
+> `lineageA_dofile_integer` rows left**, so the two-scheme hazard the paragraph
+> warns about is closed, not merely renamed. The reasoning below is kept
+> because it is why the column exists; every column NAME and PATH in it is
+> dead. `py -3 code/843_retire_cicd_scheme.py verify` exits 0.
+
 **2. TWO IDENTIFIER SCHEMES IN `tribe_id`, worth $107.50B.** 365,535 rows carry
 Lineage A's own INTEGER ids; 183,995 carry Cedar NEIDs; 152,425 are
 unattributed. **Nothing is blank and nothing is malformed**, so a per-entity
 total SPLITS an entity at the boundary and a distinct-entity count
 DOUBLE-COUNTS it, invisibly. The scheme is now declared per row in
 `tribe_id_scheme_resolved` (never blank). **The crosswalk is NOT applied** —
-`data/clean/assistance_tribe_id_crosswalk.csv` already holds 344 of 361
+`data/spine/legacy/assistance_tribe_id_crosswalk.csv` (moved there 2026-09-01) already holds 344 of 361
 candidates, all tier B, **122 of them via the containment matcher that
 AGENTS.md forbids from keying a dollar**, and both
 `152_build_assistance_id_crosswalk.py` and `24_funding_merge.py` deliberately

@@ -168,8 +168,13 @@ def probe_host(h, fam, writer, fh):
         log["terms_run"].append(term)
         if st != 200 or not body:
             continue
+        # An EMPTY result array is byte-identical for every term, and counting
+        # it as a repeat marked six honest hosts as liars on the first canary.
+        # Only a non-empty payload can be evidence that ?search= is ignored.
+        stripped = body.strip()
         md5 = hashlib.md5(body).hexdigest()
-        hashes[md5] += 1
+        if stripped not in (b"[]", b"", b"{}"):
+            hashes[md5] += 1
         if hashes[md5] >= 3:
             # the same JSON for three different searches means the host is
             # ignoring ?search= and handing back a default page of posts

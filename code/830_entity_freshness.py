@@ -104,6 +104,10 @@ IDENTITY_LAYER = {
     "cedar_source_records.csv",
 }
 
+# The shape test that backs up the name list above. Derived, not enumerated.
+CENSUS_COVERAGE_MIN = 0.98        # of the register
+CENSUS_ROWS_PER_UID_MAX = 1.05
+
 # Dates about CEDAR, never about the entity. Counting these reports every
 # entity as touched today and makes the ledger a mirror of the last build.
 # Dates about CEDAR's own activity. The first version missed `asserted_date`
@@ -272,7 +276,8 @@ def main() -> int:
     cand: dict = defaultdict(dict)
     seen_in: dict = defaultdict(set)
     rows_of: dict = defaultdict(int)
-    sub_rows_of: dict = defaultdict(int)   # rows OUTSIDE the identity layer
+    tbl_uids: dict = defaultdict(set)      # table -> register uids it carries
+    tbl_rows: dict = defaultdict(int)      # table -> rows keyed to the register
 
     tables = sorted(p for p in CLEAN.glob("*.csv")
                     if ".bak" not in p.name and not p.name.startswith("_"))
@@ -297,8 +302,8 @@ def main() -> int:
                         continue
                     seen_in[uid].add(p.name)
                     rows_of[uid] += 1
-                    if p.name not in IDENTITY_LAYER:
-                        sub_rows_of[uid] += 1
+                    tbl_uids[p.name].add(uid)
+                    tbl_rows[p.name] += 1
                     cu = cand[uid]
                     for c in dcols:
                         d = parse(r.get(c))
@@ -311,6 +316,22 @@ def main() -> int:
             continue
 
     last, refused = resolve(cand, len(known))
+
+    # WHICH TABLES ARE A CENSUS OF THE REGISTER RATHER THAN A DATASET.
+    # The named IDENTITY_LAYER above is not enough on its own: a file written
+    # after that list cannot be in it, and one was, the same day (see the note
+    # on IDENTITY_LAYER). A table holding a row for essentially every register
+    # entity and essentially one row each is a ledger of OUR coverage, not
+    # observations of entities, whatever it is called. `entity_hierarchy.csv`
+    # is also one row per entity and is KEPT, because it reaches 61% of the
+    # register -- a real dataset covers what it has something to say about.
+    census = sorted(
+        t for t, u in tbl_uids.items()
+        if len(u) / max(1, len(known)) >= CENSUS_COVERAGE_MIN
+        and tbl_rows[t] / max(1, len(u)) <= CENSUS_ROWS_PER_UID_MAX
+        and t not in IDENTITY_LAYER)
+    not_substantive = IDENTITY_LAYER | set(census)
+    sub_tables_of = {uid: (ts - not_substantive) for uid, ts in seen_in.items()}
 
     out = []
     for uid, r in known.items():
@@ -333,7 +354,7 @@ def main() -> int:
             "last_change_column": col,
             "n_datasets_present_in": len(seen_in.get(uid, ())),
             "n_rows_across_cedar": rows_of.get(uid, 0),
-            "n_rows_outside_identity_layer": sub_rows_of.get(uid, 0),
+            "n_substantive_datasets_present_in": len(sub_tables_of.get(uid, ())),
             "measured_date": TODAY.isoformat(),
         })
     out.sort(key=lambda x: (x["last_change"] or "0000", x["canonical_name"]))
@@ -344,7 +365,7 @@ def main() -> int:
     # the files it scans. The measure now runs on rows outside the identity
     # layer; the unfixable old number is kept beside it so the correction is
     # visible rather than silent.
-    absent = [x for x in out if x["n_rows_outside_identity_layer"] == 0]
+    absent = [x for x in out if x["n_substantive_datasets_present_in"] == 0]
     absent_old = [x for x in out if x["n_rows_across_cedar"] == 0]
     aged = [x for x in out if isinstance(x["days_since_change"], int)]
     old365 = [x for x in aged if x["days_since_change"] > 365]
@@ -423,6 +444,9 @@ def main() -> int:
 
     print(f"  830 entity freshness   {len(out):,} entities   "
           f"{scanned} tables scanned")
+    for t in census:
+        print(f"    CENSUS OF THE REGISTER        {t} - a coverage ledger, "
+              f"not a dataset; excluded from the absence measure")
     print(f"    in NO substantive Cedar row   {len(absent):,}"
           f"   (identity layer excluded; old all-tables measure: "
           f"{len(absent_old):,})")

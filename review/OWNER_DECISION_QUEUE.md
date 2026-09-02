@@ -1341,3 +1341,58 @@ filings in Cedar and no money attached, so the mint is low-risk and can wait.
 Files: `data/clean/anc_ceiling_roster.csv` (new columns `cedar_uid`,
 `cedar_uid_basis`, `entity_resolution_status`),
 `review/nr_hub_join_unresolved_2026-09-02.csv`.
+
+---
+
+## Native-owned business ↔ contracting crosswalk — 3 decisions (appended 2026-09-02, band 1000–1009)
+
+Full write-up: `docs/NATIVE_BUSINESS_IDENTIFIER_CROSSWALK_LOG.md`.
+Row-level evidence: `review/native_business_identifier_proposals_2026-09-02.csv`
+(71 proposals, your inbox format, each with candidate UEIs and a `cage.dla.mil`
+protocol). Current state: **186 of 2,393 directory rows linked, 153 UEIs,
+$6.32B prime / $474.7M subawards**, up from `business_entity_id` populated on 4.
+
+### A. 55 tier-C promotions — a unique name with no geography behind it
+
+Exactly one federal entity carries the name, the directory row carries **no
+city and no state**, so nothing corroborates it. Held at tier C, published
+nowhere.
+**If PROMOTE (as a class):** 55 more firms link; a wrong one keys a dollar to
+the wrong firm.
+**If REFUSE (as a class):** they stay honest and empty.
+**Recommendation:** rule the *class* by dollar band — promote where the federal
+entity's obligations are under, say, $250K (the cost of an error is small and
+the volume is where the coverage is), adjudicate the handful above it one by
+one. 47 of the 55 are under $250K.
+
+### B. 8 ambiguous holds and 8 state conflicts — 16 named firms
+
+Each needs one CAGE lookup. The holds are one directory name over 2–5 federal
+UEIs that do **not** share a city (so they are not 8(a) successor entities —
+those are already merged automatically). The conflicts are a same-name federal
+recipient in a different state; the veto refused them and may be wrong where
+the directory printed a mailing address.
+**Biggest single item:** `Arctic Slope Technical Services, Inc.` (ASRC
+subsidiary directory) over 5 UEIs spanning NM, CO, AK, AL and MD, the largest
+carrying **$12.0B** — which also publishes under the name `SIVUNIQ`. Nothing is
+attributed until you rule.
+
+### C. THE POLICY ONE — a UEI on a firm named after a person
+
+`business_name_is_person_name` is `1` on 280 directory rows and unknown on 327.
+
+* **Your rule:** a firm's name is not PII even when the firm is named after its
+  owner. A prior pass wrongly withheld 521 rows on that ground.
+* **Cedar's coded policy** (`cedar_domain.INDIVIDUAL_NATIVE_WITHHELD_FIELDS`)
+  is about the **identifier**, not the name: SAM's public entity search resolves
+  a UEI to a name *and a street address*, so for a sole-proprietor firm the UEI
+  is a pointer to that person's front door.
+
+Both can be true, and this build did **not** decide between them. Every row
+carries its identifier plus `identifier_publish_gate`; **29 crosswalk rows on
+16 linked firms** are currently `WITHHOLD_PENDING_RULING`.
+**Decision:** does the UEI/CAGE of a firm whose legal name is a person's name
+publish (a) always, (b) never, or (c) only where the firm is demonstrably
+incorporated — an LLC/Inc suffix on the registered legal name?
+**Recommendation:** (c). It keeps your rule about names intact, and withholds
+only the one field that resolves to a home address.

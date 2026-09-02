@@ -275,8 +275,75 @@ Top attribution methods: `unmatched` 9,407 · `need_v6` 4,650 · `cluster_v3`
 
 `tier_A_ruled` — tier-A rows whose method is in the RULED set defined in
 `code/62_no_regression_check.py` — is a **different metric from tier A** and
-the distinction is the whole point of it. Quoting the tier-A total as "ruled"
-erases it.
+the distinction is the whole point of it. Computing that definition on the live
+file gives **1,676**, against a tier-A total of 2,286, with
+`tierA_without_entity = 0`. [measured] Quoting the tier-A total as "ruled"
+erases the distinction.
+
+By identifier type the ledger is **UEI 13,507 · CAGE 5,966 · EIN 1,104**,
+across **808 distinct entities**, with `is_authority = YES` on 1,892 rows and
+121 rows carrying an `exclusion_id`. [measured]
+
+### What may be published, and it is a separate table on purpose
+
+**`cedar_publishable_identifiers.csv` — 1,577 rows: CAGE 878 + UEI 699, with
+`confidence_tier = A` on every single row.** [measured]
+
+**EIN is deliberately excluded.** *"An EIN identifies a filer and reaches
+further into an organization's affairs than a procurement id does."*
+
+**Publish from that table. Do not re-derive a publishable set by filtering the
+full ledger** — the filter *is* the policy, and a second copy of it will drift.
+
+A further **42 crosswalk rows are hard-withheld** under
+`cedar_domain.may_publish_individual_native_field`: for a firm whose legal name
+IS a person's name, publishing the identifier publishes the person **by one
+hop**, through SAM's public entity search. **And a digest is not a fix** —
+SAM's entity space is enumerable, so a hashed UEI is reversible by hashing
+every UEI and comparing. 1,009 `ENTITY_MASTER` and 344 legacy-integer crosswalk
+rows are marked non-publishing as internal keys.
+
+### The other identity artefacts, measured
+
+| table | rows | note |
+|---|---:|---|
+| `cedar_ruling_ledger_consolidated.csv` | **43,321** over 59 source files | `verdict_kind` ENTITY 17,524 · CLASS 12,488 · NEGATIVE 10,344 · HOLD 2,965; `status` SETTLED 40,427 / **CONFLICT_NOT_APPLIED 2,894**; tier X on 10,106 |
+| `cross_dataset_ruling_map.csv` | **22,936** | **federal funding is the largest consumer at 9,436**; channels IDENTITY 14,939 / EXCLUSION 7,997 |
+| `data/spine/cedar_exclusion_rulings.csv` | 123 | all UEI; evidenced by CAGE registry lookup 76, narrative note 22, company website 18, OpenCorporates 3, archived site 3, GAO decision 1 |
+| `cedar_entity_identity_crosswalk.csv` | **10,107** | schemes UEI 4,074 · CAGE 2,905 · EIN 1,088 · ENTITY_MASTER 1,009 · CICD_NEID 687 · LEGACY_ASSISTANCE_INT 344. Status APPLIED 9,432 · **PROPOSED_NOT_APPLIED 344** · **NEGATIVE_RULING_DO_NOT_ATTRIBUTE 331** |
+| `cedar_identifier_ledger_tiered.csv` | 19,232 | A 1,575 · B 4,793 · C 12,721 · X 143. **19,232 is the documented signature of the unsafe `09` rebuild that destroyed 1,327 rows.** It ships as internal-by-decision |
+| identifier graph | 115,471 nodes / 46,820 edges | nodes DUNS 73,442 · UEI 29,212 · CAGE 9,903 · EIN 2,914; 149 blocked; **874 flagged `one_to_many_defect`**. Edges ATTRIBUTION 18,307 · IDENTITY 15,608 · **BLOCK 12,905** |
+
+[measured]
+
+### Relationships are typed, and the typing is worth $57 billion
+
+`entity_relationships.csv` — **2,292 rows** [measured]: `owned_by` 1,462 ·
+`associated_with_region` 391 · `affiliated_with` 148 · `brand_of` 106 ·
+`village_corporation_for` 77 · `operated_by` 56 · `chartered_by` 30 ·
+`constituent_band_of` 22. Tiers A 2,121 / B 169 / C 2; 2,271 direct, 21
+inferred.
+
+**The measured size of the thing this prevents: 174 non-ownership edges sit on
+entities holding $57,043,179,871 of prime obligations that a flat parent column
+would have rolled upward** — $32.87B along `associated_with_region`, $23.91B
+along `village_corporation_for`, $264M along `constituent_band_of`. **Zero
+dollars travel along any of them now, structurally**, because roll-up is
+defined as the sum over ownership-bearing edges only
+(`cedar_domain.bears_ownership()`).
+
+### The spiderweb counting trap
+
+`fpds_uei_edges.csv` holds 5,167 rows and **that is not the ownership figure**:
+`parent_uei` 2,726 + `ultimate_parent_uei` 1,891 = **4,617 ownership edges over
+2,725 registrants**, while `prime_to_sub` 550 is a *contracting* relationship
+and 99 rows carry `blocklisted_parent = 1`. **Quoting 5,167 books 550
+subcontracts as corporate parentage.**
+
+And the caveat that makes the spine necessary at all: **the declared
+highest-level owner in a federal database is the highest *incorporated* owner —
+Ho-Chunk, Inc., not the Winnebago Tribe of Nebraska. That last hop is Cedar's
+own edge, and no federal database supplies it.**
 
 ---
 
@@ -564,6 +631,42 @@ D&B fields attach to every base award dated before 2022-04-04.
 - **`gaming_source_claims` contributes 9 assertions and still has no
   `cedar_uid`** across 113 rows. [from the record]
 
+- **1,279 of 1,555 spine rows (82.3%) carry no `verification_route` and no
+  `evidence_tier`.** [measured — spine `evidence_tier`: blank 1,279 · C 179 ·
+  A 81 · B 16] The numerator has not moved; the denominator grew.
+
+- **Corroboration is effectively absent, and it is measured rather than
+  assumed.** `n_independent_families` on resolved facts: **1 → 21,762 · 0 →
+  12,509 · 2 → only 4.** [measured] `entity.city` is populated on **229 of
+  1,555 rows (14.7%)** and is therefore effectively single-sourced.
+
+- **DISCOVERY DRIFT, not refresh lag, is this dataset's real failure mode.**
+  *"A refresh that runs too slowly gives you stale numbers, which every reader
+  can see; a discovery pass that runs too slowly gives you confidently wrong
+  numbers, which no reader can see, because a missing entity leaves no hole in
+  the table."* Measured by `code/276_measure_discovery_gap.py` — the share of
+  rows a UEI-only pull would lose: FY2015 0.23% · FY2019 6.24% · FY2023 7.49% ·
+  FY2024 8.74% · **FY2025 12.66%, up 3.9 points in one year** against a prior
+  drift of about 1 point a year. And **9,719 entities carry a Native
+  business-type flag in FPDS prime data that the identifier route has never
+  seen — 76.9% of all flagged entities, $70.96B.** Discovery is a **quarterly**
+  job and is a different job from a refresh.
+
+- **An open, measurable defect this paper found, recorded in no document.** The
+  United Keetoowah Band / Cherokee Nation merge is **still live in
+  `federal_funding_transactions.csv`**: **820 rows carrying `cedar_uid =
+  CE-00134-BX` (Cherokee Nation) with `canonical_name = "united keetoowah band
+  of cherokee"`, summing to $181,881,441.37 exactly**, FY2008 onward.
+  [measured] The register already holds UKB separately as `CE-001BS-HA` /
+  `TRBF-UKEETW-00`, and the crosswalk was corrected on 2026-09-01 — **but
+  `code/843` did not repoint the transaction rows.** A further 407
+  Keetoowah-named rows *are* correctly keyed. **Any per-entity cut of federal
+  funding today over-credits Cherokee Nation and zeroes UKB by that amount.**
+  The register half of the defect is fixed; the data half is not.
+
+- **`code/503`'s zero-loss guarantee was measured against a 1,536-row spine**
+  and has not been re-measured against the 19 entities added since.
+
 - **The spine size moves, sometimes mid-session.** It went 1,536 → 1,555 while
   three workstreams were running on 2026-09-01. **Never quote the spine size
   from a document**; read `data/spine/cedar_identity_register.csv`, which is
@@ -651,3 +754,30 @@ never overwrite a human ruling.
 - **`docs/DATASET_READINESS.md` in `START_HERE.md` is quoted as "READY 2 / 13".**
   The scoreboard regenerated 2026-09-02 reads **READY 9 / 13**, with
   `_entity_layer` READY.
+- **`docs/datasets/_entity_layer.md`, generated 2026-09-01, reports this
+  collection BLOCKED** — 35 customer tables, C1 grain unstated on 6, C2 no
+  validated primary key on 6, C3 10,985 duplicate rows. The scoreboard
+  regenerated 2026-09-02 reports **READY, 35 tables, 35/35 grain, 35/35 keys,
+  duplicates clean.** One day stale.
+- **The same generated doc's coverage table is stale on four rows**:
+  `cedar_ruling_ledger_consolidated.csv` 15,587 → measured **43,321**;
+  `cross_dataset_ruling_map.csv` 7,507 → **22,936**;
+  `cedar_identifier_graph_edges.csv` 46,051 → **46,820**;
+  `foia_request_index.csv` 9,481 → **20,102**.
+- **`code/62_no_regression_check.py` gates `identity_facts_legacy_only` in the
+  wrong direction** — it sits under `MUST_NOT_FALL` and should be
+  `MUST_NOT_RISE`. A metric that is supposed to shrink is currently protected
+  against shrinking.
+
+---
+
+## Two rules that are easy to state and easy to break
+
+**Never treat an absent negative as a negative.**
+`entity.is_federally_recognized` asserts `yes` on the roster and asserts
+**nothing** off it. Absence from the roster is not a refutation.
+
+**Never re-mint a `cedar_uid`, never edit an assertion, never resolve a name
+outside `503.resolve()`, and never run `01` or `09` casually.** The first three
+corrupt identity silently; the fourth is the only one that announces itself,
+and only if someone is watching the row count.

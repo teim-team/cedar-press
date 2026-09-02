@@ -154,6 +154,25 @@ def name_variants(raw):
     return out
 
 
+CONTRACT_TOKEN = re.compile(r"^[A-Z0-9][A-Z0-9-]{6,}$")
+
+
+def contract_tokens(value):
+    """Contract numbers printed by the directory, as tokens.
+
+    `federal_contract_number` is free text: `47QTCA19D00FN; HHSN316201200127W`,
+    `HHSN316201200151W & HHSN316201200087W`,
+    `47QRCA25DU031, Domains: Management`. Split wide and keep only tokens that
+    look like a PIID; a word like `Domains` cannot survive the shape test.
+    """
+    out = []
+    for t in re.split(r"[;,&/\s]+", (value or "").upper()):
+        t = t.strip(".;,")
+        if CONTRACT_TOKEN.match(t) and not t.isalpha():
+            out.append(t)
+    return out
+
+
 def distinctive(norm_name):
     return [t for t in norm_name.split() if t not in GENERIC_TOKENS]
 
@@ -338,13 +357,16 @@ def _fy(cur, v, lo):
     return min(cur, v) if lo else max(cur, v)
 
 
-def build_federal_universe(verbose=True):
+def build_federal_universe(verbose=True, want_contracts=frozenset()):
     """Every (UEI -> names, geography, money) Cedar already holds.
 
     Entities with no UEI are keyed `NOUEI:<cage>` or dropped: a match that
     cannot hand back an identifier is not the thing this script is for.
     """
     ents = {}
+    # contract_number -> Counter(uei). Only the numbers the DIRECTORY printed,
+    # so this costs nothing on a 1.2M-row scan.
+    contracts = defaultdict(Counter)
 
     def ent(uei):
         e = ents.get(uei)
@@ -384,6 +406,11 @@ def build_federal_universe(verbose=True):
             e.prime_rows += 1
             e.first_fy = _fy(e.first_fy, row[ix["fiscal_year"]], True)
             e.last_fy = _fy(e.last_fy, row[ix["fiscal_year"]], False)
+            if want_contracts:
+                for col in ("contract_number", "parent_contract_number"):
+                    v = row[ix[col]].strip().upper()
+                    if v in want_contracts:
+                        contracts[v][uei] += 1
     if verbose:
         print(f"  prime_contracts   {len(ents):6d} UEIs  "
               f"{time.time() - t0:.0f}s", flush=True)
@@ -486,7 +513,11 @@ def build_federal_universe(verbose=True):
     if verbose:
         print(f"  name index        {len(index):6d} distinct normalized names",
               flush=True)
-    return ents, index
+        if want_contracts:
+            print(f"  contract index    {len(contracts):6d} of "
+                  f"{len(want_contracts)} directory contract numbers found",
+                  flush=True)
+    return ents, index, contracts
 
 
 # --------------------------------------------------------------------------
@@ -567,10 +598,14 @@ def build(argv):
     ap.add_argument("--limit", type=int, default=0)
     args = ap.parse_args(argv)
 
-    print("assembling the federal identifier universe", flush=True)
-    ents, index = build_federal_universe()
-
     biz = list(csv.DictReader(open(DIRECTORY, encoding="utf-8-sig")))
+    want_contracts = frozenset(
+        t for b in biz for t in contract_tokens(b["federal_contract_number"]))
+
+    print("assembling the federal identifier universe", flush=True)
+    ents, index, contracts = build_federal_universe(
+        want_contracts=want_contracts)
+
     truncated_sources = source_state_column_is_truncated(biz)
     if args.limit:
         biz = biz[:args.limit]
@@ -621,6 +656,39 @@ def build(argv):
             "built_date": BUILT_DATE,
         })
 
+        # ------------------------------------------------------------------
+        # RUNG 0 - THE DIRECTORY PRINTED A FEDERAL CONTRACT NUMBER.
+        #
+        # This is the only genuinely identifier-first route the directory
+        # side offers, and it is worth more than every name rung combined:
+        # it resolves BROADLEAF, VISTRONIX, INUTEQ and HIGHLAND TECHNOLOGY -
+        # the ASRC Federal operating companies the mandate names precisely
+        # because their legal names share no token with their owner and no
+        # name matcher can ever reach them.
+        #
+        # A contract number is only accepted when it resolves to EXACTLY ONE
+        # UEI in prime_contracts. A multi-award IDV lists many awardees under
+        # one parent PIID - `HC104719D2034` carries two - and taking the
+        # largest would be a guess. Two rungs:
+        #   0a  a token resolving to one UEI over >= 2 transaction rows
+        #   0b  the token's UEIs intersected with the name match, size 1
+        # 0a needs two rows because a single stray row under a shared IDV
+        # would otherwise look unique.
+        # ------------------------------------------------------------------
+        toks = contract_tokens(b["federal_contract_number"])
+        cn_unique, cn_all = set(), set()
+        cn_evidence = []
+        for t in toks:
+            hits = contracts.get(t)
+            if not hits:
+                continue
+            cn_all |= set(hits)
+            if len(hits) == 1:
+                only, n = next(iter(hits.items()))
+                if n >= 2:
+                    cn_unique.add(only)
+                    cn_evidence.append(f"{t}->{only}({n} rows)")
+
         # rule 1 - can this name found a match at all?
         usable = []
         why_not = ""
@@ -630,14 +698,6 @@ def build(argv):
                 usable.append(v)
             else:
                 why_not = why_not or reason
-        if not usable:
-            rec["link_status"] = "NO_MATCH"
-            rec["no_match_reason"] = f"name_cannot_found_a_match:{why_not}"
-            stats["refused_generic_name"] += 1
-            lw.writerow(rec)
-            lf.flush()
-            continue
-
         cands = set()
         matched_form = ""
         for v in usable:
@@ -645,6 +705,38 @@ def build(argv):
             if hit:
                 cands |= hit
                 matched_form = matched_form or v
+
+        rung0 = None
+        if len(cn_unique) == 1:
+            rung0 = ("0a_published_federal_contract_number",
+                     "published_federal_contract_number", cn_unique)
+        elif cn_all and len(cn_all & cands) == 1:
+            rung0 = ("0b_contract_number_and_name",
+                     "name_exact+published_federal_contract_number",
+                     cn_all & cands)
+        if rung0:
+            rung, method, cands = rung0
+            tier = "A"
+            corrob = ["contract_number=" + ";".join(cn_evidence[:3])
+                      or "contract_number_intersects_name_match"]
+            merged = False
+            geo_note = ""
+            group = sorted(cands, key=lambda x: -ents[x].prime_oblig)
+            u = group[0]
+            e = ents[u]
+            rec["business_name_matched_form"] = matched_form
+            _emit(rec, e, u, group, cage_of(e), tier, method, rung, corrob,
+                  merged, geo_note, b, lw, hw, lf, hf, xw, xf, stats, money,
+                  linked_ueis, publishable_ueis, ents)
+            continue
+
+        if not usable:
+            rec["link_status"] = "NO_MATCH"
+            rec["no_match_reason"] = f"name_cannot_found_a_match:{why_not}"
+            stats["refused_generic_name"] += 1
+            lw.writerow(rec)
+            lf.flush()
+            continue
         if not cands:
             rec["link_status"] = "NO_MATCH"
             rec["no_match_reason"] = "no_federal_recipient_of_this_name"

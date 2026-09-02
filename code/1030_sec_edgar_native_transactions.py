@@ -432,8 +432,11 @@ def _fts(q, frm=0, timeout=60):
     return getattr(r, "status", 200), json.loads(body.decode("utf-8", "replace"))
 
 
-def cmd_fts(limit=None, kind="all", max_pages=3):
-    out("=== 1030 entity-driven EDGAR full-text search ===\n")
+def cmd_fts(limit=None, kind="all", max_pages=3, gap=None):
+    global GAP
+    if gap:
+        GAP = float(gap)
+    out(f"=== 1030 entity-driven EDGAR full-text search (gap={GAP}s) ===\n")
     queries = []
     if kind in ("all", "subsidiary"):
         for uid, owner, child in shard_e_children():
@@ -484,9 +487,12 @@ def cmd_fts(limit=None, kind="all", max_pages=3):
             status = ""
             rows = []
             try:
+                # EDGAR FTS returns 100 hits per response, not 10. Stepping
+                # `from` by 10 (as the 860 sweep did) re-reads the same page
+                # with a ten-hit offset and never reaches hit 121.
                 for page in range(max_pages):
                     time.sleep(GAP)
-                    status, d = _fts(qn, frm=page * 10)
+                    status, d = _fts(qn, frm=page * 100)
                     lock.bump(requests_made=1)
                     tot = (d.get("hits") or {}).get("total") or {}
                     adv, rel = tot.get("value", 0), tot.get("relation", "")
@@ -507,7 +513,7 @@ def cmd_fts(limit=None, kind="all", max_pages=3):
                                      url, SCRIPT, TODAY,
                                      "SEARCH_HIT_CANDIDATE_NOT_A_DEAL"])
                     ret += len(hits)
-                    if len(hits) < 10 or ret >= adv:
+                    if len(hits) < 100 or ret >= adv:
                         break
                 consecutive_fail = 0
             except Exception as e:
@@ -937,7 +943,8 @@ def main(argv):
     if cmd == "fts":
         return cmd_fts(limit=int(kw["limit"]) if kw.get("limit") else None,
                        kind=kw.get("kind", "all"),
-                       max_pages=int(kw.get("max_pages", 3)))
+                       max_pages=int(kw.get("max_pages", 3)),
+                       gap=kw.get("gap"))
     if cmd == "mine":
         return cmd_mine(limit=kw.get("limit"))
     if cmd == "verify":

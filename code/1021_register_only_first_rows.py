@@ -36,6 +36,13 @@ WHY -- AND WHY 830 SAYS ZERO
     Organizations. Those are the entities the owner has been asking about, and
     they were invisible.
 
+    Then the name list failed too, an hour later and in the same session. The
+    newsletter workstream landed `tribal_newsletter_coverage.csv` -- 1,555
+    rows, one per register entity -- and the count went straight back to 0. A
+    filename blacklist cannot see a file written after it, which is why
+    `CENSUS_COVERAGE_MIN` below is a SHAPE test and not another name. With
+    both defences the count is 83 absent plus 35 in exactly one table.
+
     This file computes that number properly, then does something about it.
 
 WHAT "SOMETHING" MEANS
@@ -144,7 +151,8 @@ CCD_FIPS_BIE = 59            # the Bureau of Indian Education reporting unit
 PP = "https://projects.propublica.org/nonprofits/api/v2/search.json"
 USASPEND = "https://api.usaspending.gov/api/v2/search/spending_by_award/"
 
-COLS = ["cedar_uid", "canonical_name", "entity_class", "route",
+COLS = ["cedar_uid", "canonical_name", "entity_class",
+        "n_substantive_tables", "substantive_tables", "route",
         "evidence_class", "identifier_type", "identifier_value",
         "fact_label", "fact_value", "source", "source_url", "as_of",
         "match_method", "checked_date", "evidence"]
@@ -287,10 +295,37 @@ def substantive_presence():
     return seen, scanned, skipped
 
 
+# THE SLICE IS THE THIN TAIL, NOT ONLY THE EMPTY ONE.
+#
+# Measured 2026-09-02: 83 entities in ZERO substantive tables and 35 more in
+# exactly one. The line between them moved WHILE THIS FILE WAS BEING WRITTEN --
+# the newsletter workstream landed `tribal_newsletter_corpus.csv` and 21
+# entities that had been register-only an hour earlier acquired exactly one
+# row apiece. Slicing on == 0 would have dropped them on the floor at the
+# moment they became reachable, which is the wrong response to a sibling
+# landing.
+#
+# So the slice is <= 1, and `n_substantive_tables` is written on every row so
+# the two states stay TOLD APART: 0 is "no dataset has ever carried this
+# entity", 1 is "exactly one has". Collapsing them would repeat, one level up,
+# the untouched-vs-none-found conflation this whole workstream exists to fix.
+THIN_TAIL_MAX_TABLES = 1
+
+
 def slice_rows():
     seen, scanned, skipped = substantive_presence()
     reg = read_register()
-    out = [r for r in reg if r.get("cedar_uid") and not seen.get(r["cedar_uid"])]
+    out = []
+    for r in reg:
+        u = r.get("cedar_uid")
+        if not u:
+            continue
+        n = len(seen.get(u, ()))
+        if n <= THIN_TAIL_MAX_TABLES:
+            r = dict(r)
+            r["_n_tables"] = n
+            r["_tables"] = ";".join(sorted(seen.get(u, ())))
+            out.append(r)
     return out, scanned, skipped
 
 
@@ -434,7 +469,10 @@ def run():
     print("    %d substantive tables scanned; %d identity-layer files "
           "EXCLUDED and named: %s"
           % (len(scanned), len(skipped), ", ".join(sorted(skipped))))
-    print("    entities with NO substantive row: %d" % len(rows))
+    n0 = sum(1 for r in rows if r["_n_tables"] == 0)
+    print("    thin tail: %d entities in <= %d substantive table(s) "
+          "-- %d of them in ZERO"
+          % (len(rows), THIN_TAIL_MAX_TABLES, n0))
     from collections import Counter
     for k, v in Counter(r["entity_class"] for r in rows).most_common():
         print("      %-45s %d" % (k, v))
@@ -454,6 +492,8 @@ def run():
         uid, name = r["cedar_uid"], r.get("canonical_name", "")
         cls = r.get("entity_class", "")
         st = (r.get("state") or "").strip()
+        ctx = {"n_substantive_tables": r["_n_tables"],
+               "substantive_tables": r["_tables"]}
         tried, got = [], False
 
         if cls == "BIE School":
@@ -469,7 +509,7 @@ def run():
                                   rec.get("city_location"),
                                   rec.get("state_location"),
                                   str(rec.get("zip_location") or "")] if x)
-                add(cedar_uid=uid, canonical_name=name, entity_class=cls,
+                add(**ctx, cedar_uid=uid, canonical_name=name, entity_class=cls,
                     route="NCES_CCD", evidence_class="FACILITY_DIRECTORY",
                     identifier_type="NCES_SCHOOL_ID",
                     identifier_value=rec.get("ncessch", ""),
@@ -499,7 +539,7 @@ def run():
             if o:
                 got = True
                 n_first += 1
-                add(cedar_uid=uid, canonical_name=name, entity_class=cls,
+                add(**ctx, cedar_uid=uid, canonical_name=name, entity_class=cls,
                     route="IRS_990", evidence_class="TAX_FILER",
                     identifier_type="EIN",
                     identifier_value=o.get("strein") or str(o.get("ein")),
@@ -530,7 +570,7 @@ def run():
                     tot = sum(float(h.get("Award Amount") or 0) for h in hits)
                     top = sorted(hits, key=lambda h: -float(
                         h.get("Award Amount") or 0))[:3]
-                    add(cedar_uid=uid, canonical_name=name, entity_class=cls,
+                    add(**ctx, cedar_uid=uid, canonical_name=name, entity_class=cls,
                         route="USASPENDING",
                         evidence_class="FEDERAL_AWARD",
                         identifier_type="AWARD_ID",
@@ -555,7 +595,7 @@ def run():
                                  + " || FIRST ROW from federal award data.")
 
         if not got:
-            add(cedar_uid=uid, canonical_name=name, entity_class=cls,
+            add(**ctx, cedar_uid=uid, canonical_name=name, entity_class=cls,
                 route="NONE", evidence_class="NONE_FOUND",
                 identifier_type="", identifier_value="",
                 fact_label="no_public_record_located",
