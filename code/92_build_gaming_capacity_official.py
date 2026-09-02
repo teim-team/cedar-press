@@ -163,6 +163,18 @@ COLS = [
     "facility_match_method", "tribe_match_method", "corroborating_sources",
     "exclusion_flag", "exclusion_reason",
     "fetched_date", "built_date",
+    # THE HUB KEY. Added 2026-09-01 (workstream INT-2) because this build was
+    # a silent column-dropper: `data/clean/gaming_capacity_official.csv` held
+    # `cedar_uid` populated on 6,312 of 6,461 rows, this file's COLS did not
+    # list it, and every rebuild therefore ERASED it. C4 attachment is
+    # measured on `cedar_uid`, so a rebuild that added rows while dropping it
+    # is a hub-and-spoke regression wearing the costume of an upgrade -- the
+    # exact shape AGENTS.md records for `144_build_admin_appeals.py` on the
+    # same day. Verified before the change: `cedar_uid` on all 6,312 keyed
+    # rows equalled the spine's `cedar_uid` for that `tribe_id`, 0 mismatches,
+    # so it is DERIVED here from the spine rather than carried forward by
+    # hand. That keeps it resolver-sourced, which is what 503/510 require.
+    "cedar_uid",
 ]
 
 # Which metric names belong to which class. A metric that is not in this table
@@ -298,6 +310,7 @@ def main():
     _tribe_cache = {}
     _class_by_id = {r["tribe_id"]: r.get("entity_class", "") for r in spine}
     _name_by_id = {r["tribe_id"]: r.get("canonical_name", "") for r in spine}
+    _uid_by_id = {r["tribe_id"]: (r.get("cedar_uid") or "") for r in spine}
 
     # A gaming regulator's device count, casino payment or compact ceiling is
     # NEVER about a college, a school, a clinic or a lender. These classes exist
@@ -409,6 +422,9 @@ def main():
             except (TypeError, ValueError):
                 pass
         k["built_date"] = TODAY
+        # The hub key, derived from the spine rather than left to a later
+        # stamping pass that this rebuild would then erase. See COLS.
+        k["cedar_uid"] = _uid_by_id.get(k.get("tribe_id", ""), "")
         rows.append({c: k.get(c, "") for c in COLS})
 
     def stage(reason, **k):
@@ -664,10 +680,37 @@ def main():
         "https://gaming.az.gov/sites/default/files/Gaming%20Status%20Report%2007012026_0.pdf",
     }
 
+    # ---- NEW MEXICO FY2023 - 2026Q2, PROMOTED 2026-09-01 ------------------
+    # `docs/datasets/gaming_sources.md` 1E: the RAW CORPUS WAS AHEAD OF THE
+    # CLEAN TABLE. Fourteen NMGCB quarterly news releases were extracted by
+    # `code/216` and FOOTED against each release's own printed total, 14 of 14
+    # passing, and then sat in `review/` while this table stopped at FY2022
+    # and `REFRESH_CADENCE.md` recorded New Mexico as a coverage lag. It was
+    # never a lag. Nothing is fetched here; 188 rows are read off disk.
+    #
+    # It is read HERE, inside the build, and not appended to
+    # `data/clean/gaming_capacity_official.csv` by hand, because a hand-append
+    # is erased by the next rebuild -- which is exactly why the previous
+    # workstream left it staged rather than pasting it in.
+    #
+    # The file's schema is the agent-evidence schema this loop already reads:
+    # state, tribe_name_as_published, metric, value, unit, period_start,
+    # period_end, as_of_date, source_authority, source_url, source_quote. It
+    # therefore needs no special case, and gets none. `measurement_status` is
+    # left to STATUS_BY_CLASS, which gives `reported_revenue` -- identical to
+    # the FY2001-FY2022 New Mexico rows already in the file, so the series
+    # does not break at the join.
+    nm_promoted = sorted(
+        REVIEW.glob("nm_revshare_2023_2026_staged_*.csv"))
+
     agent_files = (sorted(RAW.glob("agent_*_2026-*.csv"))
                    + sorted(RAW.glob("az_adg_status_report_extracted_*.csv"))
                    + sorted(RAW.glob("mi_mgcb_revshare_extracted_*.csv"))
-                   + sorted(RAW.glob("az_status_archive_extracted_*.csv")))
+                   + sorted(RAW.glob("az_status_archive_extracted_*.csv"))
+                   + nm_promoted)
+    for f in nm_promoted:
+        print(f"  [AG] promoting {f.relative_to(CEDAR)} "
+              f"(footed 14/14 by code/216; see gaming_sources.md 1E)")
     ag_n = 0
     superseded_n = 0
     per_file = collections.Counter()

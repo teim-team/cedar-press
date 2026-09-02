@@ -429,6 +429,48 @@ BARE_INT_RE = re.compile(r"^\d{1,2}$")
 
 
 ZERO_FRAGMENT_RE = re.compile(r"^\.0{1,2}$")
+
+# A NUMBER SPLIT ACROSS TWO TEXT SPANS. Same family as ZERO_FRAGMENT_RE, and
+# the reason `docs/datasets/gaming_sources.md` 1E could say the CA RSTF 93rd
+# report "has 37,974 characters of extractable text and yields ZERO rows".
+#
+# MEASURED 2026-09-01 on that document. Two of its 89 Exhibit-1 rows render
+# `25,438,385.42` as the two words `25,438` and `,385.42`, 2.74pt apart. The
+# leading half is money-shaped so it lands in a column; the trailing half is
+# not, so it fell into the row LABEL ("Pinoleville Pomo Nation ,385.42"). The
+# 2.74pt offset then opened a FIFTH column holding exactly two values, and
+# `metric_for` has no five-column mapping - so all five columns were reported
+# `unmapped_column` and the entire 89-row exhibit produced nothing. The same
+# artifact accounts for 890 of the 1,189 rows in `data/interim/103_zone_log.csv`.
+#
+# The document verifies the repair, which is why it is a repair and not a
+# guess: rejoined, the inception-to-date column sums to $1,826,037,694.56
+# against a printed total of $1,826,037,694.56, exactly, where before it was
+# $50,876,770.84 short - twice the missing $25,438,385.42.
+#
+# The gap test is what keeps this from gluing two real numbers together. A
+# within-number split measures 2.74pt here; the narrowest gap BETWEEN columns
+# in these tables is over 30pt.
+SPLIT_MONEY_TAIL_RE = re.compile(r"^,\d{3}(\.\d{1,2})?$")
+SPLIT_MONEY_HEAD_RE = re.compile(r"^\(?\$?\s*-?\d{1,3}(,\d{3})*$")
+SPLIT_MONEY_MAX_GAP_PT = 6.0
+
+
+def rejoin_split_money(words):
+    """Glue `25,438` + `,385.42` back into one word. Returns a new list."""
+    out = []
+    for w in words:
+        if (out and SPLIT_MONEY_TAIL_RE.match(w["text"])
+                and SPLIT_MONEY_HEAD_RE.match(out[-1]["text"])
+                and 0 <= w["x0"] - out[-1]["x1"] < SPLIT_MONEY_MAX_GAP_PT):
+            p = dict(out[-1])
+            p["text"] = p["text"] + w["text"]
+            p["x1"] = max(p["x1"], w["x1"])
+            p["split_rejoined"] = True
+            out[-1] = p
+            continue
+        out.append(w)
+    return out
 # From the 2016 reports on, CGCC prints `--` with footnote 2 against several
 # tribes and reports their combined figure on one `Aggregate Total for Tribes`
 # line. That is SUPPRESSION, not absence, and the two must not be conflated: a
@@ -670,6 +712,10 @@ def parse_money_table(doc, link_text=""):
         # resolver the row.
         carry = ""
         for ln in lines:
+            # Repair numbers the text layer split before anything reads them.
+            ln["words"] = rejoin_split_money(ln["words"])
+            ln["text"] = re.sub(
+                r"\s+", " ", " ".join(w["text"] for w in ln["words"])).strip()
             txt = ln["text"]
             money = [w for w in ln["words"] if _is_money(w["text"])]
             dashes = [w for w in ln["words"] if _is_dash(w["text"])]
@@ -787,17 +833,44 @@ def foot_zone(z):
     tot = named[-1] if named else (z["totals"][-1] if z["totals"] else None)
     if tot is None:
         return "no_total", ""
-    detail, ok = [], True
+    # ROUNDING RESIDUE IS NOT A FAILED FOOTING, and refusing it discarded real
+    # data. The 93rd report's Exhibit 2 sums to $61,300,403.81 against a
+    # printed $61,300,404.81 over 62 tribes -- ONE DOLLAR, 1.6e-8 of the
+    # total. That is the source's own per-row cent rounding accumulating, and
+    # the strict test threw away all 62 payer rows for it.
+    #
+    # The relative test is what separates the two failure modes and it is why
+    # this is safe: cent rounding is O(n x $0.01) and vanishes against the
+    # total; a dropped row or a transposed digit does not. The 95th report's
+    # $40,000 discrepancy (1,660,891,048.19 vs 1,660,851,048.19 - a
+    # transposition) is 2.4e-5 relative and is STILL REFUSED, which is the
+    # behaviour we want. Both bounds must hold.
+    #
+    # A column accepted this way is labelled `foots_within_rounding` on every
+    # row it produces, so a subscriber can exclude it in one filter.
+    n = max(len(z["rows"]), 1)
+    detail, ok, used_tolerance = [], True, False
     for i in range(len(z["columns"])):
         s = round(sum(r["values"][i] or 0 for r in z["rows"]), 2)
         p = tot["values"][i] if i < len(tot["values"]) else None
         if p is None:
             detail.append(f"col{i}:no_printed_total")
             continue
-        match = abs(s - p) < 0.011
+        diff = abs(s - p)
+        match = diff < 0.011
+        near = (not match and diff <= 0.02 * n
+                and diff / max(abs(p), 1.0) < 1e-7)
+        if near:
+            used_tolerance = True
+            detail.append(f"col{i}:{s:,.2f}~={p:,.2f} "
+                          f"(rounding residue {diff:,.2f} over {n} rows, "
+                          f"{diff / max(abs(p), 1.0):.2e} of the total)")
+            continue
         ok = ok and match
         detail.append(f"col{i}:{s:,.2f}{'==' if match else '!='}{p:,.2f}")
-    return ("foots" if ok else "foot_failed"), "; ".join(detail)
+    status = ("foot_failed" if not ok else
+              "foots_within_rounding" if used_tolerance else "foots")
+    return status, "; ".join(detail)
 
 
 # --- column header -> metric -------------------------------------------------
@@ -811,6 +884,20 @@ def metric_for(zone_type, header_blob, col_idx, n_cols):
                 "rstf_distribution_from_shortfall_transfer",
                 "rstf_distribution_total",
                 "rstf_distribution_inception_to_date"]
+        # FIVE COLUMNS FROM THE 98th REPORT (quarter ended 2026-03-31) ON.
+        # CGCC added an "Annual Distribution from Revenue Received" column
+        # between the quarterly distribution and the shortfall. There was no
+        # five-column mapping, so every column of every such exhibit was
+        # refused as `unmapped_column` and the newest reports produced
+        # nothing. The test is on the HEADER TEXT, not on the count alone --
+        # a positional guess against an unrecognised five-column table is
+        # exactly what this function exists to refuse.
+        if n_cols == 5 and "annual distribution" in h:
+            return ["rstf_distribution_from_revenue_received",
+                    "rstf_distribution_annual_from_revenue_received",
+                    "rstf_distribution_from_shortfall_transfer",
+                    "rstf_distribution_total",
+                    "rstf_distribution_inception_to_date"][col_idx]
         if n_cols == 4:
             return cols[col_idx]
         if n_cols == 3:
@@ -1459,6 +1546,11 @@ def load_spine_view():
     return spine
 
 
+# tribe_id -> cedar_uid, read once. See the note on PAY_FIELDS.
+_UID_BY_TRIBE_ID = {r["tribe_id"]: (r.get("cedar_uid") or "")
+                    for r in _read(SPINE_PATH)}
+
+
 def _tokens(s):
     s = re.sub(r"\(.*?\)", " ", s or "")
     return {t for t in re.split(r"[^A-Za-z']+", s.lower()) if len(t) > 2}
@@ -1711,6 +1803,15 @@ class CompactRates:
 # ===========================================================================
 PAY_FIELDS = [
     "payment_id", "fund", "direction", "recipient_type",
+    # `cedar_uid` is THE HUB KEY and this build was erasing it. Measured
+    # 2026-09-01 (workstream INT-2): `data/clean/ca_gaming_payments.csv` held
+    # it populated on 35,730 rows, PAY_FIELDS did not list it, and this
+    # rebuild dropped all 35,730 -- the class-6 silent column loss AGENTS.md
+    # records for `144_build_admin_appeals.py` on the same day, in a second
+    # file. Verified before the change: every populated `cedar_uid` equalled
+    # the spine's `cedar_uid` for that row's `tribe_id`, 0 mismatches, so it
+    # is DERIVED from the spine here rather than carried forward by hand.
+    "cedar_uid",
     "tribe_id", "tribe_canonical_name", "party_name_as_published",
     "county", "metric", "value", "unit",
     "period_start", "period_end", "period_basis",
@@ -1728,6 +1829,14 @@ PAY_FIELDS = [
 
 FAC_FIELDS = [
     "record_id", "list_type", "as_of_date",
+    # `cedar_uid` was DECLARED in this table's dataset contract and had never
+    # been written. `62` reported it as a contract violation:
+    # "ca_gaming_facilities_official.csv: declared join_cardinality names
+    # column(s) not in the header: ['cedar_uid']". A contract that names a
+    # join key the file does not carry is a promise to a buyer that the file
+    # cannot keep. Added 2026-09-01 (INT-2), derived from the spine by
+    # `tribe_id` exactly as it is on `ca_gaming_payments.csv`.
+    "cedar_uid",
     "tribe_id", "tribe_canonical_name", "tribe_name_as_published",
     "facility_id", "facility_name", "facility_name_as_published",
     "facility_name_match_method", "casino_city", "casino_county",
@@ -1819,6 +1928,7 @@ def stage_build():
         if r["recipient_type"] == "tribe":
             res = tr.resolve(r["party_name_as_published"])
             row["tribe_id"] = res["tribe_id"]
+            row["cedar_uid"] = _UID_BY_TRIBE_ID.get(res["tribe_id"], "")
             row["tribe_canonical_name"] = res["tribe_canonical_name"]
             row["entity_match_method"] = res["match_method"]
             row["entity_tier"] = res["entity_tier"]
@@ -1904,6 +2014,7 @@ def stage_build():
         row.update(dict(
             record_id="CAFAC-%05d" % (i + 1), list_type=f["list_type"],
             as_of_date=f["as_of_date"],
+            cedar_uid=_UID_BY_TRIBE_ID.get(res["tribe_id"], ""),
             tribe_id=res["tribe_id"],
             tribe_canonical_name=res["tribe_canonical_name"],
             tribe_name_as_published=f["tribe_name_as_published"],
@@ -1973,9 +2084,38 @@ def stage_build():
         w = csv.DictWriter(f, fieldnames=PAY_FIELDS)
         w.writeheader()
         w.writerows(out)
+    # PRESERVE COLUMNS THIS BUILD DOES NOT KNOW ABOUT.
+    #
+    # AGENTS.md, 2026-09-01: "A rebuild writer on a table other scripts enrich
+    # must preserve unknown columns, or the gate's backup diff is the only
+    # thing standing between us and silent loss." Measured here the same day:
+    # `code/266_apply_gaming_hub_spillover_rulings.py` wrote
+    # `entity_tier_basis` and `entity_keyed_date` onto five Barona rows of this
+    # file on 2026-08-26 -- each carrying a paragraph of reasoning about why
+    # `resolve_entity` refuses that CGCC operator string -- and FAC_FIELDS does
+    # not list either column, so this rebuild deleted all of it. `62`'s
+    # `files_with_columns_lost_vs_backup` caught it.
+    #
+    # Carried on `record_id`, which is unique across all 245 rows, and only for
+    # columns this build does not itself write, so a fresh value never loses to
+    # a stale one.
     p2 = os.path.join(CLEAN, "ca_gaming_facilities_official.csv")
+    carried = []
+    if os.path.exists(p2):
+        with open(p2, encoding="utf-8-sig", newline="") as f:
+            prior = list(csv.DictReader(f))
+        if prior:
+            carried = [c for c in prior[0] if c not in FAC_FIELDS]
+            if carried:
+                pmap = {r.get("record_id", ""): r for r in prior}
+                for r in frows:
+                    src = pmap.get(r.get("record_id", ""), {})
+                    for c in carried:
+                        r.setdefault(c, src.get(c, ""))
+                print("  carried %d enricher column(s) forward on record_id: %s"
+                      % (len(carried), ", ".join(carried)))
     with open(p2, "w", encoding="utf-8", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=FAC_FIELDS)
+        w = csv.DictWriter(f, fieldnames=FAC_FIELDS + carried)
         w.writeheader()
         w.writerows(frows)
     ded, seenr = [], set()

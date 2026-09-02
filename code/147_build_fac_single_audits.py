@@ -1,4 +1,30 @@
 #!/usr/bin/env python3
+# ORDERING, WRITTEN DOWN BY A PERSON (class 6). Added 2026-09-01 by workstream
+# GAMING-NR, comment only - no logic in this file was changed.
+#
+# `data/clean/fac_audit_sefa_gaming_programs.csv` now has TWO writers:
+#     1. this script, which rebuilds it WHOLESALE from the FAC dissemination
+#        API (or from its own cache at data/raw/fac/fac_sefa_gaming.json)
+#     2. code/814_gaming_nr_grain_and_conservation.py, an IN-PLACE ENRICHER
+#        that takes a .bak, adds ONE carried column - `award_reference`,
+#        read verbatim out of the cache THIS SCRIPT wrote - and writes no
+#        other value
+# THE ENRICHER RUNS LAST: `py -3 code/814_gaming_nr_grain_and_conservation.py
+# apply` after any run of 147. It is idempotent and refuses on a row that does
+# not match exactly one cached federal_awards record.
+#
+# WHY THE ENRICHER EXISTS AT ALL, AND HOW TO DELETE IT. `award_reference` is
+# the FAC's own per-report SEFA line key. This script FETCHES it and drops it
+# on the way to the CSV, so the table shipped with no validatable primary key
+# and its grain stayed UNSTATED - `report_id` alone is not the grain, as this
+# file's own docstring measures (127 federal_awards rows on one Seminole
+# report). The permanent fix is ONE LINE in `main()`'s `sefa_rows.append({...})`:
+#
+#       "award_reference": g.get("award_reference"),
+#
+# 147 belongs to the gaming-puller workstream, so GAMING-NR did not make that
+# edit. Make it, and 814's carry becomes a no-op that can be retired.
+# lint-ok: class6 - ordering declared above; 814 is the enricher and runs last.
 """147_build_fac_single_audits.py -- Gaming spec Step 12: the Single Audit exhaust.
 
 Match Cedar Native entities to Federal Audit Clearinghouse records, and read the

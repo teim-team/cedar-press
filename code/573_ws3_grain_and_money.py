@@ -290,18 +290,26 @@ def measure_refusals(ev, fails):
     R["fac_audit_sefa_gaming_programs.csv"] = dict(
         rows=len(out), source_columns=len(src_cols),
         source_line_key_dropped_by_the_mapper=dropped,
-        verdict="grain ANSWERED, key REFUSED. A row is a (report, SEFA award "
-                "line); the Seminole report alone returns 127 of them, so "
-                "report_id repeats. The FAC's own per-report line key "
-                "`award_reference` is in the source and 147's SEFA mapper does "
-                "not take it, so no key can be promised. (report_id, "
-                "federal_agency_prefix, federal_award_extension) validates "
-                "only because the file holds ONE row and one report may carry "
-                "one ALN on more than one line.")
-    if "award_reference" in out_cols:
-        fails.append("fac_audit_sefa_gaming_programs.csv: `award_reference` is "
-                     "now on the table - the key this refusal was waiting for "
-                     "exists and the grain can be declared")
+        verdict="REFUSAL RETIRED 2026-09-01, on the exact condition it named. "
+                "It said: a row is a (report, SEFA award line); the Seminole "
+                "report alone returns 127 of them, so report_id repeats; the "
+                "FAC's own per-report line key `award_reference` is in the "
+                "source and 147's SEFA mapper does not take it, so no key can "
+                "be promised. Workstream GAMING-NR carried `award_reference` "
+                "onto the table VERBATIM from 147's own cache "
+                "(data/raw/fac/fac_sefa_gaming.json) and declared "
+                "(report_id, award_reference) in 512.GRAIN_GAMING_NR. The "
+                "alarm below is INVERTED rather than deleted: it now fires if "
+                "the column DISAPPEARS, which is what a rebuild of 147 would "
+                "do until 147 carries it itself. See "
+                "code/814_gaming_nr_grain_and_conservation.py.")
+    if out and "award_reference" not in out_cols:
+        fails.append("fac_audit_sefa_gaming_programs.csv: `award_reference` "
+                     "has GONE from the table - the declared key "
+                     "(report_id, award_reference) no longer validates. A "
+                     "rebuild of 147 reverted the enricher; re-run "
+                     "`py -3 code/814_gaming_nr_grain_and_conservation.py "
+                     "apply`, and put the one-line carry into 147.")
 
     # ---- 4. ferc_docket_filings.csv -------------------------------------
     fd = rd("ferc_docket_filings.csv")
