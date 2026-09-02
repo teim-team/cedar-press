@@ -127,8 +127,19 @@ C. `sole_entity_in_area` as written is unreachable from Cedar's data. It
    resolve to exactly one Cedar hub, used ONLY as corroboration, and it
    should probably be demoted from "tier" to "corroborator" in the ADR.
 
+SUPERSEDED AS THE BUILD ENTRYPOINT, 2026-09-02
+-----------------------------------------------
+`code/852_extend_constellation_edges.py` now builds the shipped file. It
+imports this module and runs every source function here unchanged, then adds
+four more (IHS Title V compacts, published membership rosters, the full AIHEC
+charter profiles, and the certifying-authority NAME this script refused when
+the ID column was blank) and adjudicates the Blackwater conflict. Running 851
+alone still works and still passes, but it writes a SMALLER file - it does not
+know about 852's sources. Run 852.
+
 USAGE
-    py -3 code/851_build_constellation_edges.py            # build
+    py -3 code/852_extend_constellation_edges.py           # build (use this)
+    py -3 code/851_build_constellation_edges.py            # 851's slice only
     py -3 code/851_build_constellation_edges.py verify     # invariants only
 Exits 1 when an invariant is broken.
 """
@@ -172,16 +183,22 @@ NP_ORGS = os.path.join(ROOT, "data", "clean", "np_orgs.csv")
 ADR014_TIERS = {
     "chartered_by": 1,
     "managed_under_contract": 2,
+    # ADOPTED 2026-09-02 by ADR-014 Amendment 1 (docs/ARCHITECTURE_DECISIONS.md,
+    # between the ADR-014 markers), on the proposal this script made below
+    # under "WHERE ADR-014 IS WRONG" (A). It ranks 3 - below a federal 638 /
+    # self-governance instrument, above the entity's own account of itself,
+    # because the sovereign's own office is the one body that can say who is
+    # certified with it. Rows carrying it now stamp `tier_is_adr014 = Y`.
+    "registered_with": 3,
     "declares_service_to": 4,
     "located_within": 5,
     "sole_entity_in_area": 6,
 }
-# Proposed amendment. Every row carrying one of these is flagged
-# `tier_is_adr014 = N` so the integrator can accept, rename or drop them
-# with one filter. See "WHERE ADR-014 IS WRONG" (A) in the module docstring.
-EXTENSION_TIERS = {
-    "registered_with": 3,
-}
+# Empty since the amendment landed. Kept, not deleted: the next tier that
+# arrives from implementation rather than design goes here first and is
+# flagged `tier_is_adr014 = N` until it is argued into the ADR, which is the
+# mechanism that got `registered_with` adopted instead of smuggled.
+EXTENSION_TIERS = {}
 TIER_RANK = dict(ADR014_TIERS)
 TIER_RANK.update(EXTENSION_TIERS)
 
@@ -1137,6 +1154,13 @@ def count_unresolved_universe():
     per = {}
     total = 0
     for p in sorted(glob.glob(os.path.join(ROOT, "data", "clean", "*.csv"))):
+        # A backup is not part of the universe. Concurrent workstreams leave
+        # `<table>.bak_<stamp>.csv` in data/clean, and globbing them in
+        # triple-counted native_owned_businesses and reported the universe as
+        # 12,916 rows instead of 8,138 - deflating this script's own headline.
+        base = os.path.basename(p)
+        if ".bak" in base or base.startswith("_"):
+            continue
         try:
             with open(p, encoding="utf-8-sig", newline="") as fh:
                 rd = csv.reader(fh)
@@ -1148,7 +1172,7 @@ def count_unresolved_universe():
         except (StopIteration, OSError, UnicodeDecodeError):
             continue
         if n:
-            per[os.path.basename(p)] = n
+            per[base] = n
             total += n
     return total, per
 

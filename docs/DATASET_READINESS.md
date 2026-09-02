@@ -30,7 +30,6 @@ BLOCKED 2 · NOT_TESTED 0
 - C2 no validated primary key on 1
 - C3 literal duplicates: subawards.csv(10,770)
 - C7 DOUBLE-COUNTING RISK - money tables a buyer cannot safely total: subawards.csv
-- C4 only 42% of entity-bearing rows carry a Cedar id, and every record in this dataset HAS an entity subject - so this is unresolved work, not scope. See ADR-009 and ADR-010.
 
 ### `funding` — BLOCKED
 

@@ -1522,7 +1522,16 @@ def derive(entry, holds, src_through):
     # Federal Register documents published 2026-09-01 and found not one notice
     # of any of these three classes, which is what CURRENT actually means here.
     # Absent that probe the honest answer is UNKNOWN, not "the source is ahead".
-    if _event_driven(str(entry.get("source") or entry.get("id") or entry.get("name") or "")):
+    # MATCH ON `source_id` FIRST. This read `entry["source"]` - the PROSE
+    # description - with fallbacks to `id` and `name`, and NEITHER OF THOSE
+    # KEYS EXISTS in the registry: the key is `source_id`. So every keyword in
+    # EVENT_DRIVEN below had to appear verbatim in an English sentence to
+    # match, and only `nagpra` and `ibia`/`ibla` ever did. Measured 2026-09-02,
+    # the guard was firing for 2 of the 5 sources it names, and the two it
+    # missed - `fr_consultation` and `fr_ex_parte` - are the exact two the
+    # comment above was written about. fr_consultation was again being
+    # published as 14 days behind its publisher and fr_ex_parte as 1.
+    if _event_driven(str(entry.get("source_id") or "")) or             _event_driven(str(entry.get("source") or "")):
         return S_UNKNOWN, (
             f"EVENT-DRIVEN source: Cedar holds through {have} and the source "
             f"SYSTEM reaches {src_through}, but that comparison is a category "

@@ -1295,3 +1295,49 @@ Shard I found that **every one of the 6,646 unkeyed `tribe_id_token_match` value
 
 Files: `data/staging/np_harvest/candidate_spine_matches_shard_i.csv` (4,362 rows, each with `corroboration` and a per-row recommendation), `shard_i.jsonl` (9,918 harvested rows), `README.md` (what is and is not a claim).
 
+
+### 10f. `anc_ceiling_roster.csv` carries 4 scraper artefacts and 1 duplicate corporation — delete, or keep and label?
+
+Found 2026-09-02 by `code/900_nr_hub_join.py` while joining the roster's
+source-local `anc_id` scheme to the hub. 190 of 196 rows resolved to an active
+`ANRC`/`ANVC` register entry. **Six did not, and four of them are not
+corporations at all** — they are page furniture scraped from
+`https://ancsa.lbblawyers.com/native-corporations.htm` (`confidence_tier = C`
+on every roster row, `source` names the page):
+
+| `corporation_name` as recorded | what it is |
+|---|---|
+| `A compilation of information about the Alaska Native Claims Settlement Act` | the page's own strapline |
+| `Alaska Native Claims Settlement Act (ANCSA)` | a heading |
+| `Native Corporations \| ANCSA Resource Center` | the page title |
+| `Village and Urban Corporations` | a section heading |
+
+The other two are **one corporation entered twice** — `The Thirteenth Regional
+Corporation` and `The 13th Regional Corporation` — and it is a real ANC that
+**Cedar's spine does not hold** (12 `ANRC` handles; the Thirteenth is not among
+them). It carries 0 rows in `ancsa_filings_index.csv`, so nothing downstream
+depends on it today.
+
+Nothing was deleted. All six carry `entity_resolution_status = unresolved` and
+a blank `cedar_uid`, and each is a row in
+`review/nr_hub_join_unresolved_2026-09-02.csv` with its reason.
+
+**Decision, and it is a row deletion so it is yours:**
+
+1. **Delete the 4 artefacts** and de-duplicate the Thirteenth to one row. The
+   roster is a shippable customer table whose grain is declared *"one row per
+   Alaska Native Corporation"*, and four rows that are not corporations
+   falsify that grain and inflate any per-ANC denominator by ~2%.
+   **Recommended**, with the deletion recorded in the correction register.
+2. **Keep all six and rely on the label.** Nothing is lost, but a buyer
+   counting ANCs off this table over-counts unless they filter on a column the
+   grain statement does not mention.
+
+Separately, and not a deletion: **mint the Thirteenth Regional Corporation into
+the spine** so the roster can key 191 of 192 real rows. It is an ANCSA
+regional corporation for Alaska Natives resident outside Alaska; it has no
+filings in Cedar and no money attached, so the mint is low-risk and can wait.
+
+Files: `data/clean/anc_ceiling_roster.csv` (new columns `cedar_uid`,
+`cedar_uid_basis`, `entity_resolution_status`),
+`review/nr_hub_join_unresolved_2026-09-02.csv`.

@@ -392,13 +392,8 @@ def probe() -> int:
           f"{base['consultation_events_rows']:,}")
 
     probe_federal_register(sess, rows)
-    probe_agency_index(
-        sess, "www.bia.gov", "Bureau of Indian Affairs",
-        ["/dear-tribal-leader-letter", "/service/dear-tribal-leader-letters",
-         "/tribal-leader-letters"], rows)
-    probe_agency_index(
-        sess, "www.ihs.gov", "Indian Health Service",
-        ["/newsroom/dtll/", "/dtll/"], rows)
+    probe_agency_sitemap(sess, "www.bia.gov", "Bureau of Indian Affairs", rows)
+    probe_agency_sitemap(sess, "www.ihs.gov", "Indian Health Service", rows)
 
     OUT_CSV.parent.mkdir(parents=True, exist_ok=True)
     with OUT_CSV.open("w", encoding="utf-8", newline="") as fh:

@@ -1,3 +1,14 @@
+# lint-ok: class6 - bill_votes.csv has this full-rebuild writer and two in-place
+# enrichers, 73_bills_votes_completion.py and
+# 890_bill_votes_threshold_and_titles.py. The collision is REAL and is not
+# waived away: it is DECLARED, by a person, in cedar_pipeline.KNOWN_ORDERINGS
+# (two entries, added 2026-09-02 with the columns each enricher owns named), so
+# `enrichers_to_rerun('bill_votes.csv')` now answers instead of returning an
+# empty list, and `build.py plan legislation` orders them. The ordering is
+# 14 -> 73 -> 890, enrichers LAST. Something also CHECKS the columns survived,
+# which is the other half class 6 asks for: `py -3 code/890_... verify` exits 1
+# the moment any of its eight columns is missing from the live file. Re-run 73
+# then 890 after every run of this script.
 """
 14_build_bills_votes.py
 Cedar Press Dataset 10 -- Native Bills & Congressional Votes.

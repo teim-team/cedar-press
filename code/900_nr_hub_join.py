@@ -301,6 +301,17 @@ def plan(by_handle, by_uid, corp_name):
             r["cedar_uid"] = ""
             r["cedar_uid_basis"] = ""
             st["unresolved"] += 1
+            # class2c: a count is not actionable, a key is. Every filing this
+            # join cannot key is named in the review file with its anc_id and
+            # the corporation name the portal recorded, so the residue is a
+            # task list and not a number that scrolls past.
+            unresolved.append(dict(
+                table="ancsa_filings_index.csv",
+                row_key=nz(r, "portal_document_id"),
+                column="anc_id", value=nz(r, "anc_id"),
+                reason=f"anc_id is unresolved in anc_ceiling_roster.csv "
+                       f"(corporation_name as recorded: "
+                       f"{nz(r, 'corporation_name')!r})"))
     out["ancsa_filings_index.csv"] = (fi, before, after, st)
 
     # -- 5. resource_assets: through the PARTY TABLE, which is where

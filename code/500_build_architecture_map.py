@@ -88,7 +88,16 @@ COLLECTIONS: list[dict] = [
      "tables": r"^(nagpra_|fr_nagpra)"},
     {"id": "lobbying", "name": "Lobbying", "shelf": "standard",
      "prefixes": ["04", "18"],
-     "tables": r"^(lobbying_|native_entity_lobbying|advocacy_|ferc_|admin_appeal|nrc_|oira_|hearing_|earmark|fr_ex_parte|agency_attention|tribe_year_lobbying)"},
+     # `nonprofit_schedule_c` added 2026-09-02 (workstream INT-READY). Both
+     # tables were ORPHANS - built, in dist/ with notes under the 04w_ prefix
+     # (the lobbying family), and claimed by no collection, so 512 counted
+     # them as shippable-with-no-owner and they reached no contract. This
+     # collection's own descriptor already promises them: "...hearing
+     # testimony and nonprofit Schedule C." The pattern is spelled out rather
+     # than folded into `^np_` because these are LOBBYING records that happen
+     # to come out of a 990 - the nonprofits collection owns the filer, this
+     # one owns what the filer reported spending on lobbying.
+     "tables": r"^(lobbying_|native_entity_lobbying|advocacy_|ferc_|admin_appeal|nrc_|oira_|hearing_|earmark|fr_ex_parte|agency_attention|tribe_year_lobbying|nonprofit_schedule_c)"},
 
     # --- Cedar Press+ (pro) ------------------------------------------------
     {"id": "contractors", "name": "Federal Prime Contracting", "shelf": "pro",

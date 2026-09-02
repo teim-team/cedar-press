@@ -1,15 +1,15 @@
 {
-  "scanned_files": 522,
+  "scanned_files": 530,
   "counts": {
     "class1": 0,
     "class2a": 0,
     "class2b": 0,
-    "class2c": 64,
+    "class2c": 63,
     "class3": 0,
     "class4": 9,
     "class5": 6,
-    "class6": 26,
-    "class7": 45,
+    "class6": 25,
+    "class7": 47,
     "class8": 0,
     "lint_bug_class_instances": 150
   },
@@ -727,15 +727,6 @@
     },
     {
       "class": "class2c",
-      "file": "900_nr_hub_join.py",
-      "line": 303,
-      "evidence": "st[\"unresolved\"] += 1",
-      "why": "counter 'unresolved' is incremented and NOTHING in the same block names the row, file or key it dropped. A count is not actionable and scrolls past; a filename is a task. This is the 87 defect - 'skipped: not a documented dataset', 20 days, no filename.",
-      "waived": false,
-      "waiver_reason": ""
-    },
-    {
-      "class": "class2c",
       "file": "94_rescan_universes.py",
       "line": 565,
       "evidence": "counts[\"excluded\"] += 1",
@@ -911,8 +902,8 @@
       "line": 1,
       "evidence": "bill_votes.csv",
       "why": "`bill_votes.csv` has FULL-REBUILD writer(s) ['14_build_bills_votes.py'] and IN-PLACE enricher(s) ['890_bill_votes_threshold_and_titles.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
-      "waived": false,
-      "waiver_reason": ""
+      "waived": true,
+      "waiver_reason": "bill_votes.csv has this full-rebuild writer and two in-place"
     },
     {
       "class": "class6",
@@ -1114,6 +1105,15 @@
     },
     {
       "class": "class6",
+      "file": "870_build_geo_crosswalks.py",
+      "line": 1,
+      "evidence": "geo_county_dim.csv",
+      "why": "`geo_county_dim.csv` has FULL-REBUILD writer(s) ['870_build_geo_crosswalks.py'] and IN-PLACE enricher(s) ['872_promote_geo_keys_assistance.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
+      "waived": false,
+      "waiver_reason": ""
+    },
+    {
+      "class": "class6",
       "file": "98_build_oira_and_hearings.py",
       "line": 1,
       "evidence": "hearing_appearances.csv",
@@ -1127,8 +1127,8 @@
       "line": 1,
       "evidence": "native_bills.csv",
       "why": "`native_bills.csv` has FULL-REBUILD writer(s) ['14_build_bills_votes.py'] and IN-PLACE enricher(s) ['35_entity_harvest.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
-      "waived": false,
-      "waiver_reason": ""
+      "waived": true,
+      "waiver_reason": "bill_votes.csv has this full-rebuild writer and two in-place"
     },
     {
       "class": "class6",
@@ -1189,7 +1189,7 @@
       "file": "20_build_subcontracts.py",
       "line": 1,
       "evidence": "subawards.csv",
-      "why": "`subawards.csv` has FULL-REBUILD writer(s) ['20_build_subcontracts.py', '871_promote_geo_keys_contracts.py'] and IN-PLACE enricher(s) ['121_pull_subawards_api.py', '250_demote_stale_tierA_subaward_rows.py', '45_promote_subawards.py', '910_subaward_report_id_backfill.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
+      "why": "`subawards.csv` has FULL-REBUILD writer(s) ['20_build_subcontracts.py', '871_promote_geo_keys_contracts.py'] and IN-PLACE enricher(s) ['121_pull_subawards_api.py', '250_demote_stale_tierA_subaward_rows.py', '45_promote_subawards.py', '910_subaward_report_id_backfill.py', '911_subaward_sub_leg_cedar_uid.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
       "waived": false,
       "waiver_reason": ""
     },
@@ -1556,38 +1556,38 @@
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 3329,
+      "line": 3390,
       "evidence": "h = hash(\"\\x1f\".join(parts))",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
-      "waived": true,
-      "waiver_reason": "this hash MINTS NOTHING. It is a"
+      "waived": false,
+      "waiver_reason": ""
     },
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 3339,
+      "line": 3400,
       "evidence": "h = hash(\"\\x1f\".join(row))",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
-      "waived": true,
-      "waiver_reason": "same within-process membership test,"
+      "waived": false,
+      "waiver_reason": ""
     },
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 3364,
+      "line": 3425,
       "evidence": "if hash(k) in collided[gj]:",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
-      "waived": true,
-      "waiver_reason": "the hash only decides whether to"
+      "waived": false,
+      "waiver_reason": ""
     },
     {
       "class": "class7",
       "file": "512_build_dataset_contracts.py",
-      "line": 3370,
+      "line": 3431,
       "evidence": "if hash(k) in row_collided:",
       "why": "[BLOCKING] PROCESS_HASH on target (unnamed) -> no clean table. builtin hash() on a string. PYTHONHASHSEED is randomised per process, so the id changes every build. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
-      "waived": true,
-      "waiver_reason": "as above: a filter in front of an"
+      "waived": false,
+      "waiver_reason": ""
     },
     {
       "class": "class7",
@@ -1735,24 +1735,6 @@
     },
     {
       "class": "class7",
-      "file": "962_probe_dear_tribal_leader_letters.py",
-      "line": 322,
-      "evidence": "probe_id=f\"IDX-{host}-{j}\", source_host=host,",
-      "why": "[WARN] POSITIONAL on target probe_id -> consultation_source_probe.csv. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
-      "waived": false,
-      "waiver_reason": ""
-    },
-    {
-      "class": "class7",
-      "file": "962_probe_dear_tribal_leader_letters.py",
-      "line": 304,
-      "evidence": "probe_id=f\"IDX-{host}-{j}\", source_host=host,",
-      "why": "[WARN] POSITIONAL on target probe_id -> consultation_source_probe.csv. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
-      "waived": false,
-      "waiver_reason": ""
-    },
-    {
-      "class": "class7",
       "file": "99_build_earmarks_and_schedc.py",
       "line": 2080,
       "evidence": "e = joined.get(id(s))",
@@ -1799,6 +1781,9 @@
   ],
   "class6_io_map": {
     "rebuilders": {
+      "_953_selftest_fixture.csv": [
+        "953_nob_federal_identifier_candidates.py"
+      ],
       "_cosponsor_fetch_log.csv": [
         "14_pull_cosponsors.py"
       ],
@@ -2182,9 +2167,6 @@
       ],
       "native_issue_litigation_positions.csv": [
         "139_build_litigation_positions.py"
-      ],
-      "native_passthrough.csv": [
-        "81_build_passthrough_dataset.py"
       ],
       "native_passthrough_pairs.csv": [
         "81_build_passthrough_dataset.py"
@@ -2643,6 +2625,9 @@
         "100_finish_declinations_and_employment.py",
         "510_assertions.py"
       ],
+      "geo_county_dim.csv": [
+        "872_promote_geo_keys_assistance.py"
+      ],
       "grantmaker_funding_coverage.csv": [
         "140_build_grantmaker_funding_flows.py"
       ],
@@ -2697,7 +2682,11 @@
       "native_owned_businesses.csv": [
         "330_build_native_owned_businesses.py",
         "615_set_publishable_native_owned_businesses.py",
-        "771_normalize_nboa_certification_dates.py"
+        "771_normalize_nboa_certification_dates.py",
+        "953_nob_federal_identifier_candidates.py"
+      ],
+      "native_passthrough.csv": [
+        "81_build_passthrough_dataset.py"
       ],
       "nd_severance_allocation.csv": [
         "113_build_nd_severance.py"
@@ -2732,6 +2721,7 @@
         "251_apply_np_ein_exclusions_to_np_orgs.py",
         "34_apply_nonprofit_rulings.py",
         "70_key_unjoined_datasets.py",
+        "952_nonprofit_disposition.py",
         "99_build_earmarks_and_schedc.py"
       ],
       "prime_contracts.csv": [
@@ -2784,7 +2774,8 @@
         "121_pull_subawards_api.py",
         "250_demote_stale_tierA_subaward_rows.py",
         "45_promote_subawards.py",
-        "910_subaward_report_id_backfill.py"
+        "910_subaward_report_id_backfill.py",
+        "911_subaward_sub_leg_cedar_uid.py"
       ],
       "tcu_cdfi_added.csv": [
         "73_add_tcu_and_cdfi.py"
@@ -2794,6 +2785,12 @@
       ],
       "tcu_roster.csv": [
         "73_add_tcu_and_cdfi.py"
+      ],
+      "tribal_newsletter_corpus.csv": [
+        "990_build_newsletter_corpus.py"
+      ],
+      "tribal_newsletter_coverage.csv": [
+        "990_build_newsletter_corpus.py"
       ],
       "tribe_year_lobbying_panel.csv": [
         "351_rebuild_lobbying_panel_from_corrected_disclosures.py"
@@ -3008,6 +3005,10 @@
         "510_assertions.py",
         "91_build_nigc_declinations.py"
       ],
+      "geo_county_dim.csv": [
+        "870_build_geo_crosswalks.py",
+        "872_promote_geo_keys_assistance.py"
+      ],
       "hearing_appearances.csv": [
         "400_promote_stranded_hearing_appearances.py",
         "98_build_oira_and_hearings.py"
@@ -3033,7 +3034,8 @@
       "native_owned_businesses.csv": [
         "330_build_native_owned_businesses.py",
         "615_set_publishable_native_owned_businesses.py",
-        "771_normalize_nboa_certification_dates.py"
+        "771_normalize_nboa_certification_dates.py",
+        "953_nob_federal_identifier_candidates.py"
       ],
       "nho_ito_spine_crosswalk.csv": [
         "163_promote_nho_universe_in_place.py",
@@ -3052,6 +3054,7 @@
         "251_apply_np_ein_exclusions_to_np_orgs.py",
         "34_apply_nonprofit_rulings.py",
         "70_key_unjoined_datasets.py",
+        "952_nonprofit_disposition.py",
         "99_build_earmarks_and_schedc.py"
       ],
       "prime_contracts.csv": [
@@ -3090,7 +3093,8 @@
         "250_demote_stale_tierA_subaward_rows.py",
         "45_promote_subawards.py",
         "871_promote_geo_keys_contracts.py",
-        "910_subaward_report_id_backfill.py"
+        "910_subaward_report_id_backfill.py",
+        "911_subaward_sub_leg_cedar_uid.py"
       ],
       "tribe_year_lobbying_panel.csv": [
         "05_match_filings_v2.py",

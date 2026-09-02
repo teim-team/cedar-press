@@ -2464,6 +2464,67 @@ GRAIN.update(GRAIN_GAMING_NR)
 GRAIN_LEGISLATION = {}
 GRAIN.update(GRAIN_LEGISLATION)
 
+# ---------------------------------------------------------------------------
+# WORKSTREAM INT-READY, 2026-09-02 - the two 990 Schedule C tables.
+#
+# Both were ORPHANS: built by `code/99_build_earmarks_and_schedc.py`, written
+# to `data/clean/`, given dist/ notes under the 04w_ prefix, and claimed by no
+# collection - so `512` counted them among its six shippable-with-no-owner and
+# they never reached a contract. `500.COLLECTIONS` now claims them for
+# `lobbying`, whose own descriptor already promised them.
+#
+# Registering a table with an UNSTATED grain would have flipped `lobbying`
+# from READY to BLOCKED on C1/C2, so the grain is declared here in the same
+# pass and both keys were confirmed unique on the FULL file first, with
+# csv.reader:
+#
+#   nonprofit_schedule_c_lobbying.csv   6,870 rows
+#       schedule_c_row_id     6,870 distinct, 0 blank   <- primary key
+#       object_id             6,870 distinct, 0 blank
+#       (ein, tax_year)       6,841 distinct - NOT a key. 29 collisions: an
+#                             organisation can file an amended or a
+#                             short-period return for the same tax year, and
+#                             both are real returns. This is exactly why the
+#                             key is the RETURN, not the org-year.
+#       literal duplicate rows: 0
+#
+#   nonprofit_schedule_c_coverage.csv      10 rows
+#       index_year               10 distinct, 0 blank   <- primary key
+#
+# WHAT THE COVERAGE TABLE IS FOR, and why it must ship beside the other:
+# `coverage_status` is PARTIAL on all ten years. 32,218 returns were indexed
+# as targets and 6,870 were retrieved - **21.3%**. `not_downloaded` is this
+# project's own fetch backlog and the column says so verbatim ("NOT an
+# absence at the IRS"). Shipping the lobbying figures without the coverage
+# table beside them would let a buyer read a fetch backlog as evidence that
+# Native nonprofits do not lobby.
+GRAIN_INT_READY = {
+    "nonprofit_schedule_c_lobbying.csv": _d(
+        "one row per IRS 990 e-file RETURN parsed for Schedule C - one "
+        "accepted return of one filer, identified by its IRS OBJECT_ID. NOT "
+        "one row per organisation and NOT one row per tax year: an amended or "
+        "short-period return for the same (ein, tax_year) is a second return "
+        "and a second row (29 such pairs).",
+        primary_key=["schedule_c_row_id"],
+        join_cardinality={"schedule_c_row_id": "one", "object_id": "one",
+                          "ein": "many", "cedar_entity_id": "many"},
+        declared_by="workstream INT-READY 2026-09-02: schedule_c_row_id and "
+                    "object_id each confirmed 6,870 distinct / 0 blank on the "
+                    "FULL 6,870-row file with csv.reader; 0 literal duplicate "
+                    "rows; (ein, tax_year) tested and REJECTED at 6,841"),
+    "nonprofit_schedule_c_coverage.csv": _d(
+        "one row per IRS e-file INDEX YEAR (submission year, not tax year), "
+        "carrying how many returns that year's index held for Cedar's Native "
+        "nonprofit EIN target list, how many were retrieved, and how many "
+        "carried a Schedule C. `not_downloaded` is Cedar's fetch backlog, "
+        "never an absence at the IRS.",
+        primary_key=["index_year"],
+        join_cardinality={"index_year": "one"},
+        declared_by="workstream INT-READY 2026-09-02: index_year confirmed 10 "
+                    "distinct / 0 blank on the FULL 10-row file"),
+}
+GRAIN.update(GRAIN_INT_READY)
+
 # A table whose grain is declared but whose PRIMARY KEY cannot be stated
 # without guessing. Recorded rather than left blank, so the gap is a task
 # with a name instead of a silence. These count as UNSTATED for the gate.

@@ -53,76 +53,31 @@
       "probed_by_script": "code/962_probe_dear_tribal_leader_letters.py"
     },
     {
-      "probe_id": "IDX-www.bia.gov-0",
+      "probe_id": "IDX-www.bia.gov",
       "source_host": "www.bia.gov",
       "source_name": "Bureau of Indian Affairs",
-      "question": "does /dear-tribal-leader-letter enumerate Dear Tribal Leader letters",
-      "url": "https://www.bia.gov/dear-tribal-leader-letter",
-      "http_status": 404,
-      "response_bytes": 36321,
-      "n_results_reported": "",
-      "coverage_status": "NOT_IN_SOURCE",
-      "verdict": "404 - this path does not exist at this host",
-      "evidence_quote": "",
+      "question": "how many Dear Tribal Leader letters does this agency enumerate in its own sitemap, outside the FR",
+      "url": "https://www.bia.gov/sitemap.xml",
+      "http_status": 200,
+      "response_bytes": 500188,
+      "n_results_reported": 10,
+      "coverage_status": "REPORTED_FLOOR",
+      "verdict": "10 DTLL URL(s) enumerated across 2 sitemap page(s) holding 2,414 URLs in total. A FLOOR: a paginated sitemap need not carry every node.",
+      "evidence_quote": "https://www.bia.gov/news/american-rescue-plan-webpage-update-new-dear-tribal-leader-letter-and-form-now-available | https://www.bia.gov/news/dear-tribal-leader-letter | https://www.bia.gov/news/dear-tribal-leader-letter-announcing-tribal-enrollment-data-collection-form | https://www.bia.gov/news/dear-tribal-leader-letter-bie-draft-policies-certificate-completion",
       "probed_date": "2026-09-02",
       "probed_by_script": "code/962_probe_dear_tribal_leader_letters.py"
     },
     {
-      "probe_id": "IDX-www.bia.gov-1",
-      "source_host": "www.bia.gov",
-      "source_name": "Bureau of Indian Affairs",
-      "question": "does /service/dear-tribal-leader-letters enumerate Dear Tribal Leader letters",
-      "url": "https://www.bia.gov/service/dear-tribal-leader-letters",
-      "http_status": 404,
-      "response_bytes": 36312,
-      "n_results_reported": "",
-      "coverage_status": "NOT_IN_SOURCE",
-      "verdict": "404 - this path does not exist at this host",
-      "evidence_quote": "",
-      "probed_date": "2026-09-02",
-      "probed_by_script": "code/962_probe_dear_tribal_leader_letters.py"
-    },
-    {
-      "probe_id": "IDX-www.bia.gov-2",
-      "source_host": "www.bia.gov",
-      "source_name": "Bureau of Indian Affairs",
-      "question": "does /tribal-leader-letters enumerate Dear Tribal Leader letters",
-      "url": "https://www.bia.gov/tribal-leader-letters",
-      "http_status": 404,
-      "response_bytes": 36313,
-      "n_results_reported": "",
-      "coverage_status": "NOT_IN_SOURCE",
-      "verdict": "404 - this path does not exist at this host",
-      "evidence_quote": "",
-      "probed_date": "2026-09-02",
-      "probed_by_script": "code/962_probe_dear_tribal_leader_letters.py"
-    },
-    {
-      "probe_id": "IDX-www.ihs.gov-0",
+      "probe_id": "IDX-www.ihs.gov",
       "source_host": "www.ihs.gov",
       "source_name": "Indian Health Service",
-      "question": "does /newsroom/dtll/ enumerate Dear Tribal Leader letters",
-      "url": "https://www.ihs.gov/newsroom/dtll/",
-      "http_status": 404,
-      "response_bytes": 56638,
+      "question": "does the site enumerate DTLLs",
+      "url": "https://www.ihs.gov/sitemap.xml",
+      "http_status": 406,
+      "response_bytes": 1346,
       "n_results_reported": "",
-      "coverage_status": "NOT_IN_SOURCE",
-      "verdict": "404 - this path does not exist at this host",
-      "evidence_quote": "",
-      "probed_date": "2026-09-02",
-      "probed_by_script": "code/962_probe_dear_tribal_leader_letters.py"
-    },
-    {
-      "probe_id": "IDX-www.ihs.gov-1",
-      "source_host": "www.ihs.gov",
-      "source_name": "Indian Health Service",
-      "question": "does /dtll/ enumerate Dear Tribal Leader letters",
-      "url": "https://www.ihs.gov/dtll/",
-      "http_status": 404,
-      "response_bytes": 56638,
-      "n_results_reported": "",
-      "coverage_status": "NOT_IN_SOURCE",
-      "verdict": "404 - this path does not exist at this host",
+      "coverage_status": "NOT_CHECKED",
+      "verdict": "HTTP 406 on the sitemap; NOT_CHECKED, and NOT an absence - a refused index says nothing about what the agency publishes",
       "evidence_quote": "",
       "probed_date": "2026-09-02",
       "probed_by_script": "code/962_probe_dear_tribal_leader_letters.py"
@@ -155,29 +110,19 @@
       "bytes": 2027
     },
     {
-      "url": "https://www.bia.gov/dear-tribal-leader-letter",
-      "http_status": 404,
-      "bytes": 36321
-    },
-    {
-      "url": "https://www.bia.gov/robots.txt",
+      "url": "https://www.bia.gov/sitemap.xml",
       "http_status": 200,
-      "bytes": 2027
+      "bytes": 548
     },
     {
-      "url": "https://www.bia.gov/service/dear-tribal-leader-letters",
-      "http_status": 404,
-      "bytes": 36312
-    },
-    {
-      "url": "https://www.bia.gov/robots.txt",
+      "url": "https://www.bia.gov/sitemap.xml?page=1",
       "http_status": 200,
-      "bytes": 2027
+      "bytes": 409811
     },
     {
-      "url": "https://www.bia.gov/tribal-leader-letters",
-      "http_status": 404,
-      "bytes": 36313
+      "url": "https://www.bia.gov/sitemap.xml?page=2",
+      "http_status": 200,
+      "bytes": 90377
     },
     {
       "url": "https://www.ihs.gov/robots.txt",
@@ -185,19 +130,9 @@
       "bytes": 1346
     },
     {
-      "url": "https://www.ihs.gov/newsroom/dtll/",
-      "http_status": 404,
-      "bytes": 56638
-    },
-    {
-      "url": "https://www.ihs.gov/robots.txt",
+      "url": "https://www.ihs.gov/sitemap.xml",
       "http_status": 406,
       "bytes": 1346
-    },
-    {
-      "url": "https://www.ihs.gov/dtll/",
-      "http_status": 404,
-      "bytes": 56638
     }
   ]
 }

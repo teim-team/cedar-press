@@ -96,7 +96,17 @@ FLAGSHIP = {
     "lobbying":                 "lobbying_registrants.csv",
     "legislation":              "bill_votes.csv",
     "federal-register":         "consultation_events.csv",
-    "nagpra":                   "fr_nagpra_title_index.csv",
+    # 2026-09-02: was `fr_nagpra_title_index.csv`, a 10-column list of
+    # document numbers and headline strings. The dataset descriptor promises
+    # notices "with the institutions and affiliated tribes named in each" and
+    # the title index carries neither - both are parsed out and on disk in
+    # `nagpra_notices.csv` (6,792 x 67; institution_name 6,792,
+    # institution_state 6,680, mni_total_stated 4,273, affiliated_entity_ids
+    # 5,022), with `nagpra_notice_entity_bridge.csv` holding 51,579
+    # notice->party links of which 48,111 resolve to a Cedar entity. The
+    # buyer's first question - "which notices name my tribe?" - had 48,111
+    # answers on disk and a sample that could not ask it.
+    "nagpra":                   "nagpra_notices.csv",
     "_entity_layer":            "cedar_identity_register.csv",
 }
 SPINE = {"cedar_identity_register.csv"}
@@ -110,9 +120,19 @@ SPINE = {"cedar_identity_register.csv"}
 # Anything not listed is dropped from the SAMPLE only. Nothing is removed from
 # the dataset.
 SHOW = {
+    # gaming, 2026-09-02: the first two regulatory facts about a tribal
+    # gaming operation are its CLASS and whether Cedar can bound its revenue,
+    # and neither was reachable from the facility record. Both are now
+    # columns, written by `code/960_...`. `open_date_precision` is shown
+    # because `open_date` mixes 1994 / 1998-12 / 2016-10-10 in one column and
+    # the precision column is the only thing that says which.
     "gaming": ["facility_id", "tribe", "facility_name", "city", "state",
-               "property_status", "open_date", "close_date",
-               "gaming_machines", "table_games", "hotel_rooms", "employees",
+               "property_status", "open_date", "open_date_precision",
+               "close_date", "gaming_machines", "table_games", "hotel_rooms",
+               "employees",
+               "gaming_class_ii_authorized", "gaming_class_iii_authorized",
+               "has_revenue_bound", "revenue_bound_strongest_status",
+               "state_revenue_disclosure_status",
                "cedar_uid"],
     # `parent_contract_number` leads because `contract_number` on its own is
     # NOT a key: 290,525 rows (23.9%) carry six characters or fewer and the
@@ -182,11 +202,24 @@ SHOW = {
               "Event_Type", "Status", "Announced_Value_USD", "Value_Type",
               "Record_Scope"],
     # A lobbying sample with no dollars invites exactly one conclusion.
-    # `spend_reported_usd` is on all 653 registrants, 406 of them non-zero.
+    # `spend_reported_usd` is on all 653 registrants; re-measured 2026-09-02
+    # with csv.reader, **351 are greater than zero and the column totals
+    # $645,052,868.51** (the "406 non-zero" in docs/WHAT_IS_MISSING.md counts
+    # something else and does not reproduce).
+    #
+    # 2026-09-02, INT-READY: issues and targets added. WHO lobbied WHOM about
+    # WHAT is the product; the sample showed only how many times. `issue_codes`
+    # is on 405 registrants and `government_entities_lobbied` on 388, both
+    # already on the table. `spend_sensitivity_percell_max_usd` travels with
+    # the money on purpose - the LDA reports in period BANDS, and the pair of
+    # a reported figure and its per-cell maximum is the honest form of it.
     "lobbying": ["registrant_id", "registrant_name", "registrant_city",
                  "registrant_state", "n_filings_native_clients",
                  "n_native_clients", "n_distinct_native_entities",
-                 "spend_reported_usd", "native_entity_classes",
+                 "spend_reported_usd", "spend_sensitivity_percell_max_usd",
+                 "n_filings_reporting_no_dollar",
+                 "issue_codes", "government_entities_lobbied",
+                 "native_entity_classes",
                  "first_filing_year_corpus", "last_filing_year_corpus"],
     # 2026-09-02, GRAIN-LEGISLATION: `bill_title` and `threshold_required`
     # added, both from code/890. docs/WHAT_IS_MISSING.md names their absence
@@ -199,15 +232,54 @@ SHOW = {
                     "bill_title", "question", "result", "yea", "nay",
                     "threshold_required", "margin",
                     "vehicle_type", "majority_side"],
+    # 2026-09-02, INT-READY: `participant_role` is an INFERENCE and the sample
+    # presented it as a fact. `invited_did_not_participate` (1,211 rows) is a
+    # claim about a named tribe's conduct, derived from notice language, and
+    # it must never ship without the language it was derived from. The four
+    # columns that support it - `match_method`, `confidence`, `tier`,
+    # `source_url` - are all on the table and none was shown.
     "federal-register": ["consultation_event_id", "notice_date", "agency",
                          "consultation_type", "topic", "tribe_name",
                          "participant_name_as_published", "participant_role",
+                         "match_method", "confidence", "tier",
                          "format", "comment_deadline",
-                         "federal_register_citation"],
-    "nagpra": ["document_number", "publication_date", "title",
-               "agency_names", "notice_kind", "relevance_tier_from_tier_rule"],
-    "_entity_layer": ["cedar_uid", "handle", "canonical_name", "entity_class",
-                      "minted", "register_status"],
+                         "federal_register_citation", "source_url"],
+    # 2026-09-02, INT-READY: the flagship moved from the title index to
+    # `nagpra_notices.csv` (see FLAGSHIP). These are the columns a NAGPRA
+    # buyer came for and every one of them was buried inside the `title`
+    # string before: the institution, where it is, how many individuals the
+    # notice states, where the remains were removed from, and how many
+    # affiliated tribes the notice names and Cedar resolved.
+    # `mni_total_stated` is the notice's OWN figure - Cedar states no count of
+    # its own and infers nothing beyond the notice's words.
+    "nagpra": ["document_number", "publication_date", "notice_type",
+               "institution_name", "institution_city", "institution_state",
+               "mni_total_stated", "mni_basis", "removal_states",
+               "n_affiliated_named", "n_affiliated_resolved",
+               "affiliated_entity_ids", "repatriation_eligible_date",
+               "agency_names", "html_url"],
+    # 2026-09-02, INT-READY: `minted` is 2026-09-01 on all 1,555 rows and
+    # `register_status` is `active` on all 1,555 - two of six columns carried
+    # no information at all, and `handle` is an internal key that RETIRES on
+    # reclassification, so teaching a buyer to join on it is teaching the
+    # wrong join. All three are out. In their place: the Federal Register
+    # legal name (536 entities, 510 of which differ from the stub - a buyer
+    # searching "Lovelock Paiute Tribe of the Lovelock Indian Colony, Nevada"
+    # now finds "Lovelock") and the state (1,492 of 1,555). Both written by
+    # `code/961_...`. `cedar_uid` stays first: it is the permanent key.
+    # Measured before choosing, because the defect being fixed is exactly
+    # this: `class_since_basis` is ONE distinct value across all 1,555 rows
+    # and `former_names` is filled on 12. Swapping two constants for a third
+    # would have been no fix at all. The basis column is shown instead - it
+    # varies, it names the FR notice each legal name came from, and where
+    # there is no legal name it says whether that is OUT_OF_SCOPE (an NHO, a
+    # BIE school, an ANCSA corporation - not on the BIA list by construction)
+    # or NOT_IN_SOURCE (49 federally recognised entities with no roster entry
+    # keyed to their uid, which IS unresolved work).
+    "_entity_layer": ["cedar_uid", "canonical_name",
+                      "federal_register_legal_name",
+                      "federal_register_legal_name_basis",
+                      "entity_class", "state"],
 }
 
 # A row carrying any of these is withheld outright.

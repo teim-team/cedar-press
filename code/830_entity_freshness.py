@@ -389,13 +389,22 @@ def main() -> int:
         if not OUT.exists():
             bad.append(f"{OUT.name} has never been written")
         else:
-            live = max((p.stat().st_mtime for p in tables), default=0)
-            if OUT.stat().st_mtime < live:
-                bad.append(f"{OUT.name} is older than the newest "
-                           f"entity-bearing table it claims to measure")
             with OUT.open(encoding="utf-8-sig", errors="replace") as fh:
-                held = {(r["last_change_table"], r["last_change_column"])
-                        for r in csv.DictReader(fh) if r.get("last_change_table")}
+                shipped = list(csv.DictReader(fh))
+            held = {(r["last_change_table"], r["last_change_column"])
+                    for r in shipped if r.get("last_change_table")}
+            # MEASURED TODAY, not measured-after-every-table. Cedar has
+            # concurrent writers; a byte-level "newer than any table" test can
+            # never be green and a gate that can never be green gets waived.
+            stamps = {r.get("measured_date", "") for r in shipped}
+            if stamps != {TODAY.isoformat()}:
+                bad.append(f"{OUT.name} was measured "
+                           f"{'/'.join(sorted(stamps)) or '(never)'}, not today")
+            newer = [p.name for p in tables
+                     if p.stat().st_mtime > OUT.stat().st_mtime]
+            if newer:
+                print(f"    note: {len(newer)} table(s) changed after the "
+                      f"ledger was written - {', '.join(newer[:4])}")
             for x in refused:
                 if (x["table"], x["column"]) in held:
                     bad.append(f"the shipped ledger still credits "

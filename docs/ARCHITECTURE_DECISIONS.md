@@ -590,9 +590,89 @@ error the catch-all was invented to avoid; the edge lets us stop choosing.
 |---|---|---|
 | `chartered_by` | the instrument names the nation | a tribally chartered college |
 | `managed_under_contract` | ISDEAA 638 / self-governance compact | a tribe operating an IHS facility it does not own |
+| `registered_with` | the NATION's own office attests the entity | a TERO certification (see Amendment 1) |
 | `declares_service_to` | the entity's own words name the nation | a 990 mission statement |
 | `located_within` | geocoded inside a named AIANNH area | a nonprofit on the reservation |
 | `sole_entity_in_area` | exactly one Native entity in the geography | **inference — never alone** |
+
+### Amendment 1 — `registered_with`, adopted 2026-09-02, at rank 3
+
+**This tier arrived from implementation, not from design.** It is recorded
+that way on purpose. The ADR was written with five tiers; the build that
+implemented it (`code/851_build_constellation_edges.py`, 2026-09-01) found
+that the single largest evidenced pool in the whole unresolved backlog fitted
+none of them, wrote those rows under a sixth name, and — instead of quietly
+widening the spec — flagged every one of them `tier_is_adr014 = N` so the
+decision would have to be taken deliberately. This is that decision.
+
+**What the evidence actually is.** 2,216 edges, and every one of them is a
+nation's OWN office publishing the entity's name: a TERO certification, a
+tribal business-licence register, an Indian-preference vendor list, an ANCSA
+shareholder business directory. TERO is the paradigm case — the Tribal
+Employment Rights Office of the nation itself certifies that a firm meets its
+Indian-preference standard and prints the firm on its list.
+
+**Why the original five could not hold it, and why the omission was
+structural rather than an oversight.** Four of the five tiers are evidenced by
+the ENTITY — its charter, its contract, its own words — and the fifth by a
+polygon. The ladder had no rung facing the other direction, for **the nation's
+own instrument naming the entity**. That is not a weaker kind of
+self-declaration. It is a stronger kind, and the omission would have kept
+recurring.
+
+**Why rank 3, between `managed_under_contract` and `declares_service_to`.**
+
+* Below `managed_under_contract` (rank 2). A 638 contract or a self-governance
+  compact is a *federal* instrument transferring the operation of a programme.
+  A TERO certificate is a *tribal* instrument recognising a relationship. Both
+  are real; the contract is the heavier one, and it is the one whose absence
+  ADR-014 was written to stop papering over.
+* Above `declares_service_to` (rank 4). This is the owner's own ordering:
+  *"affiliated with is better"* than a firm's account of itself. A 990 mission
+  statement is the entity talking about the entity. A TERO listing is the
+  sovereign talking about the entity, and only the sovereign can say who is
+  certified with it. When the two disagree, the nation's office wins.
+
+**What it is still not.** `registered_with` is a `serves` edge and rule 1
+binds it exactly as it binds the others: it is **not** an ownership claim and
+**no money rolls through it**. A firm on a nation's TERO list is not a
+subsidiary of that nation and its contract awards are not that nation's
+revenue. Note also that `directory_type = subsidiary_directory` rows are
+refused from this tier entirely and routed to the OWNS layer, because a parent
+asserting a subsidiary is ownership and belongs to the relation ADR-014 sits
+beside rather than replaces.
+
+### Amendment 1a — three things the extension found wrong here
+
+Recorded because ADR-014 is a specification, not scripture, and the next agent
+should not have to rediscover them. Full evidence in
+`code/852_extend_constellation_edges.py` and
+`docs/CONSTELLATION_EXTENSION_LOG.md`.
+
+1. **`sole_entity_in_area` should be demoted from tier to corroborator.** Two
+   builds have now computed it; 27 edges cite it and **zero** rest on it,
+   because rule 2 forbids that and the data never offered a case where it
+   would have been the honest answer anyway. Listing it as a tier invites
+   someone to try to use it as one.
+2. **The hub class list excludes nations that charter things.** `HUB_CLASSES`
+   does not admit `Federal-level constituency entity`, of which Cedar holds 22
+   — the six component bands of the Minnesota Chippewa Tribe, Ramah Navajo
+   Chapter, the Paiute Indian Tribe of Utah bands, the Te-Moak bands, both
+   Passamaquoddy reservations. AIHEC prints *"The White Earth Reservation
+   Tribal Council established the White Earth Tribal and Community College in
+   1997"*, which is the strongest evidence this ADR defines, and the edge
+   cannot be written because White Earth is not an allowed hub. Refused and
+   counted as `hub_class_excludes_constituency_entity` rather than widened,
+   because widening touches every route. **This is an owner decision.**
+3. **`declares_service_to` cannot be read off a filer's own legal name.** The
+   tier says "the entity's own words name the nation", and a 990 filer's legal
+   name is its own words — so the route was built and measured against the
+   unresolved Schedule C backlog. It resolves 281 EINs and awards ONONDAGA
+   GOLF AND COUNTRY CLUB, CAYUGA WINE TRAIL INC and WEST SENECA SOCCER CLUB.
+   In upstate New York, Oklahoma and Florida the nation's name is also the
+   county's name, and a legal name cannot separate them. The route is refused
+   wholesale, with all 281 written to the refusals file so the experiment is
+   not repeated.
 
 **Three rules that keep this honest.**
 

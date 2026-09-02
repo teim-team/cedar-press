@@ -55,13 +55,21 @@ Writes data/clean/native_passthrough.csv
 """
 
 import csv
+import shutil
+import sys
 from collections import Counter, defaultdict
 from datetime import date
 from pathlib import Path
 
+csv.field_size_limit(1 << 27)
+
 CEDAR = Path(__file__).resolve().parent.parent
 CLEAN = CEDAR / "data" / "clean"
 TODAY = date.today().isoformat()
+
+# THE KEY THIS TABLE INHERITS. Both halves come from subawards.csv and neither
+# is minted here - see the comment at the row constructor below.
+PK = ("source_dataset", "subaward_source_record_id")
 
 
 def read_csv(p):
@@ -69,7 +77,41 @@ def read_csv(p):
         return list(csv.DictReader(fh))
 
 
+def check_key(rows, label):
+    """The invariant: PK is non-blank and unique on every row. Returns a list
+    of violation strings so `verify` and `build` apply the SAME test."""
+    v = []
+    keys = [tuple((r.get(c) or "").strip() for c in PK) for r in rows]
+    blank = sum(1 for k in keys if not all(k))
+    dup = len(keys) - len(set(keys))
+    whole = Counter(tuple(sorted(r.items())) for r in rows)
+    wdup = sum(c - 1 for c in whole.values() if c > 1)
+    if blank:
+        v.append(f"{label}: {'+'.join(PK)} is BLANK on {blank:,} of "
+                 f"{len(rows):,} rows - blank collides with blank")
+    if dup:
+        v.append(f"{label}: {'+'.join(PK)} collides on {dup:,} rows")
+    if wdup:
+        v.append(f"{label}: {wdup:,} byte-identical whole rows")
+    print(f"  {label}: {len(rows):,} rows   key blank {blank:,}   "
+          f"key collisions {dup:,}   whole-row duplicates {wdup:,}")
+    return v
+
+
+def verify() -> int:
+    p = CLEAN / "native_passthrough.csv"
+    if not p.exists():
+        print(f"  FAIL  {p} does not exist")
+        return 1
+    fails = check_key(read_csv(p), "native_passthrough.csv")
+    for f in fails:
+        print(f"  FAIL  {f}")
+    return 1 if fails else 0
+
+
 def main():
+    if "verify" in sys.argv[1:]:
+        return verify()
     print("=== Cedar Press 81: Native-to-Native pass-through ===\n")
     spine = {r["tribe_id"]: r for r in
              read_csv(CEDAR / "data" / "spine" / "cedar_entity_spine.csv")}
@@ -106,6 +148,23 @@ def main():
                        and spine.get(pid, {}).get("ultimate_parent_entity_id"))
 
         out.append({
+            # ---- THE KEY, CARRIED FROM THE PARENT (added 2026-09-02, ws
+            # subaward-funding). This table is a 1:1 PROJECTION of the
+            # `both_sides_native` slice of subawards.csv, so it inherits that
+            # table's primary key exactly: (source_dataset,
+            # subaward_source_record_id). Before this, the projection dropped
+            # every column that separated two filings of one subaward and the
+            # file carried 116 byte-identical rows with no key at any arity -
+            # `512.GRAIN_WS4` named this file and said what it needed:
+            # "`81` collapses subawards.duplicate_status and
+            # subaward_exceeds_prime_flag into one 0/1 `amount_countable` and
+            # drops both source columns, so the file cannot say WHICH filter
+            # failed. Carrying `duplicate_status` through makes the de-dupe
+            # key statable and costs one line." It cost four.
+            "source_dataset": r.get("source_dataset", ""),
+            "subaward_source_record_id": r.get("subaward_source_record_id", ""),
+            "duplicate_status": r.get("duplicate_status", ""),
+            "subaward_exceeds_prime_flag": r.get("subaward_exceeds_prime_flag", ""),
             "subaward_number": r.get("subaward_number", ""),
             "prime_award_id": r.get("prime_award_id", ""),
             "fiscal_year": r.get("fiscal_year", ""),
@@ -132,6 +191,46 @@ def main():
         })
 
     p1 = CLEAN / "native_passthrough.csv"
+
+    # BEFORE/AFTER, because this is a FULL REBUILD of a shipping table and a
+    # rebuild that prints only its new count looks like pure progress even
+    # when it has lost rows (see START_HERE, the FERC rebuild that reverted an
+    # enricher four times in one day).
+    prev = read_csv(p1) if p1.exists() else []
+    prev_cols = list(prev[0].keys()) if prev else []
+
+    def _usd(rs, amt="amount_usd", flag="amount_countable"):
+        t = c = 0.0
+        for r in rs:
+            try:
+                a = float(r.get(amt) or 0)
+            except ValueError:
+                a = 0.0
+            t += a
+            if str(r.get(flag) or "") == "1":
+                c += a
+        return round(t, 2), round(c, 2)
+
+    fails = check_key(out, "native_passthrough.csv (new)")
+    if fails:
+        for f in fails:
+            print(f"  FAIL  {f}")
+        raise SystemExit("REFUSED: the rebuilt table has no usable primary key")
+
+    if prev:
+        shutil.copy2(p1, str(p1) + f".bak_{TODAY}_pre912")
+        gained = [c for c in out[0] if c not in prev_cols]
+        lost = [c for c in prev_cols if c not in out[0]]
+        pt, pc = _usd(prev)
+        nt, nc = _usd(out)
+        print(f"  ROWS    {len(prev):,} -> {len(out):,}")
+        print(f"  MONEY   all      ${pt:,.2f} -> ${nt:,.2f}")
+        print(f"  MONEY   countable ${pc:,.2f} -> ${nc:,.2f}")
+        print(f"  COLUMNS {len(prev_cols)} -> {len(out[0])}   "
+              f"gained {gained or '-'}   lost {lost or '-'}")
+        if lost:
+            raise SystemExit(f"REFUSED: the rebuild would DROP columns {lost}")
+
     with open(p1, "w", encoding="utf-8", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=list(out[0].keys()))
         w.writeheader()
@@ -186,4 +285,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main() or 0)

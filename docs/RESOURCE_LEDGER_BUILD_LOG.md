@@ -630,3 +630,130 @@ these are queued as append-only suggestions.*
 | Text of the terminated Blackfeet agreement (2000-02-04) | **NOT RETRIEVED.** Described in a 2010 legislative report; document not online. |
 | CY2001, CY2002, FY2002 Indian revenue | **NOT AVAILABLE.** Absent from the Wayback index and from every MMS/ONRR route probed. |
 | Trust vs fee decomposition of the ND distribution series | **NOT PUBLISHED ANYWHERE.** The state reports one combined amount per tax type per month. |
+
+---
+
+## 2026-09-02 — C4 CLOSED. `natural-resources` is READY.
+
+*Written by the workstream that owned the last blocker. Every figure is
+reproducible with `py -3 code/900_nr_hub_join.py verify` and
+`py -3 code/901_nr_record_scope.py verify`; both exit 1 when they stop being
+true, and both prove that with `verify --selftest`.*
+
+`518` reported one blocker: **"C4 only 25% of entity-bearing rows carry a Cedar
+id"**. Re-measured with `csv.reader` against the live files, that 25% was
+`3,744 / 14,997` and it was **three unrelated things summed into one
+percentage** — two of which were measurement defects and one of which was real
+work.
+
+### 1. What the 25% was actually made of
+
+| | rows | what it was |
+|---|---:|---|
+| `national_aggregate` revenue rows scored as unkeyed | 9,791 | **the statute, not a defect** |
+| resolved entities the scanner could not see | 705 | a scanner blind spot |
+| named entity, no `cedar_uid` | **586** | **the genuine work — a hub join** |
+
+**The aggregate rows are not a gap and never can be.** Interior publishes
+Native American resource revenue only in aggregate, in its own words, and the
+file agrees: `State`, `County`, `FIPS Code` and `Offshore Region` are blank on
+100% of Native American rows against 99.8% populated on the Federal rows of the
+same extract. There is no entity on the row to carry an id. Counting those rows
+as unkeyed measured the law.
+
+ADR-010 had already decided this — consequence 1, verbatim: *"Coverage is
+measured against the resolvable denominator, not the row count."* What was
+missing was a per-row column that made the resolvable denominator derivable,
+which is exactly what `518`'s own comment said it was waiting for. `901` writes
+it.
+
+### 2. `901_nr_record_scope.py` — ADR-010 scope on `resource_revenue.csv`
+
+Scope is a deterministic function of `aggregation_level` + `source_system`.
+Nothing is judged row by row.
+
+| scope | rows | attached | why |
+|---|---:|---:|---|
+| `entity` | 1,287 | 1,287 | 779 `entity_specific` + 508 Osage `per_headright_rate` |
+| `unresolved` | 60 | 0 | OMC newsletter component lines. **The work queue, and they stay in the denominator as misses.** |
+| `indian_country` | 9,791 | 0 | aggregate by law (above) |
+| `native_serving` | 118 | 0 | Utah Code 63N-24-703(4) — state severance money, *"does not constitute a trust fund"*; the tribe is `serves_native_entities` in `resource_parties.csv`, never recipient |
+| `geographic` | 49 | 0 | MT DOR quarterly letter carries a tribal line and **names no tribe**; scoped to the state |
+
+**C4 on the resolvable denominator: 1,287 / 1,347 = 95.5%.** The raw row-count
+denominator says 11.4%, and both numbers are printed side by side on every run
+so nobody has to take the choice on trust.
+
+**The Osage rows keep the publication rule.** `per_headright_rate` is scoped
+`entity` because the record's subject is the Osage mineral estate — one Native
+entity, carried in `resource_parties.csv` as `mineral_estate_owner` at 100%.
+The **recipient** is a class of individual headright holders and is never
+published as individuals. The Council's 2,228.97393 divisor stays a check and
+never a multiplier.
+
+**The anti-gaming invariant, because a scope column is exactly how a bad number
+gets made to look good:** no row scoped `indian_country`, `geographic` or
+`native_serving` may carry a `cedar_uid` or a `parent_native_entity` party. A
+row only leaves the denominator when nothing in Cedar stands behind it. The
+Utah rows pass on the letter of ADR-010 (`serves_native_entities` is
+deliberately unkeyed on the actor side), not by being excused. `verify
+--selftest` re-scopes an attached row and confirms the guard fires.
+
+### 3. `900_nr_hub_join.py` — the 586, and 19,465 rows nobody was measuring
+
+Nothing here decides who an entity is. Every id written is an exact lookup of
+an identifier the row already holds, in `cedar_identity_register.csv`,
+`register_status = active`.
+
+| table | rows | joined | note |
+|---|---:|---:|---|
+| `resource_revenue.csv` | 11,305 | **586** | `recipient_entity_id` → `cedar_uid`. Three Affiliated 492 · Crow 32 · Hopi 32 · Navajo 30. 119 were already keyed → 705 total |
+| `resource_parties.csv` | 1,938 | 1,220 | `entity_id` handle → `cedar_uid`; 220 already keyed |
+| `anc_ceiling_roster.csv` | 196 | 190 | **local `anc_id` scheme lifted onto the hub** |
+| `ancsa_filings_index.csv` | 19,269 | 19,269 | via `anc_id` → roster |
+| `resource_assets.csv` | 35 | 32 | through the **party table**, single `parent_native_entity` |
+
+**The two ANCSA tables were the bigger finding.** They key entities in a
+source-local scheme (`anc_id = ANC-<16 hex>`) the hub had never adopted — the
+exact ADR-009 defect — and the old scanner did not score them 0%, it **did not
+see them at all**, because neither table had a column it recognised. 19,465
+rows. The join is fenced: candidates restricted to `ANRC`/`ANVC` handles only,
+because a roster row is an ANCSA **corporation** by construction. That fence is
+load-bearing — **22 of 196 roster names match a federally recognized village
+TRIBE (`AKNF`) and a village CORPORATION (`ANVC`) both**, which is the trap
+`docs/NATIVE_ENTITY_NUANCES.md` names. Comparison is on a typographically
+normalised name only: curly apostrophe → ASCII, diacritic folding, corporate
+suffixes. **No containment, no fuzzy distance, no closest match.** Exactly one
+candidate or the row keeps its blank.
+
+**501 refusals, each with a written reason**, in
+`review/nr_hub_join_unresolved_2026-09-02.csv`:
+
+- **492** `resource_parties` rows whose `entity_id` is `PAYER-STATE-ND`,
+  `PAYER-US-BIA` and four siblings. Federal and state payer stubs. Correctly
+  not in the hub, and they must never count as Native-entity attachment.
+- **6 roster rows.** Two are *The Thirteenth Regional Corporation* / *The 13th
+  Regional Corporation* — **one real ANC, entered twice, and absent from the
+  Cedar spine.** Four are **scraper artefacts**, not corporations, captured as
+  page furniture from the roster's source page (`lbblawyers.com`,
+  `confidence_tier = C`): *"A compilation of information about the Alaska
+  Native Claims Settlement Act"*, *"Alaska Native Claims Settlement Act
+  (ANCSA)"*, *"Native Corporations | ANCSA Resource Center"*, *"Village and
+  Urban Corporations"*. **Flagged, not deleted** —
+  `entity_resolution_status = unresolved` on the row, and proposed to the owner
+  in `review/OWNER_DECISION_QUEUE.md`.
+- **3 assets.** One has two `parent_native_entity` lessors (Navajo *and* Hopi,
+  the Peabody leases) and is refused rather than collapsed onto one; two have
+  no parent party.
+
+### 4. What is still open in this dataset
+
+| item | size | evidence |
+|---|---:|---|
+| OMC newsletter component lines with no bridge row | 60 rows | scoped `unresolved`, in the denominator |
+| `tribal_bond_issuances.issuer_entity_id` blank | 29 rows | issuer names carry the parent tribe in a parenthetical; the register's canonical names are short forms and **no exact match lands**, so it needs the alias layer, not a fuzzy matcher |
+| The Thirteenth Regional Corporation absent from the spine | 1 entity, 2 roster rows | a mint, not a match |
+| `resource_parties` PAYER stubs | 492 rows | correctly unkeyed; a payer dimension, not an entity gap |
+
+None of these is a C4 blocker: 23,879 of 24,533 entity-scoped rows across all
+eight tables carry a Cedar id.

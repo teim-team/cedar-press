@@ -306,6 +306,51 @@ but no county.
 
 ## `legislation` — `bill_votes.csv`, 423 rows
 
+> ### CLOSED 2026-09-02 — items 1 and 2, by `code/890_bill_votes_threshold_and_titles.py`
+>
+> *Workstream GRAIN-LEGISLATION. Both are now columns on `bill_votes.csv`
+> (60 → 68 columns, 423 → 423 rows) and both are in the sample's `SHOW` list.
+> The read below is left exactly as written; this box says what changed.*
+>
+> **Item 1 — `bill_title` and `bill_title_source`.** 390 of 423, verbatim from
+> `native_bills.csv`, and the other 33 state their reason on the row rather
+> than going blank: 25 `NO_BILL_ID_ON_VOTE`, 8
+> `TITLE_BLANK_IN_native_bills.csv` (five treaty documents, three pre-1980
+> House resolutions). `890 verify` refuses any title that is not
+> byte-identical to the `native_bills.csv` value it cites.
+>
+> **Item 2 — `threshold_required`, plus six provenance columns.** Two
+> corrections to the read below, both measured:
+>
+> - **It is sixteen votes, not nine.** The nine named are the House
+>   suspensions. The other seven are Senate: five cloture motions rejected at
+>   54–58 yea (Rule XXII needs 60), and `S108-0356` and `S114-0351`, which are
+>   the interesting pair.
+> - **"Derivable from `question`" is true for the House and FALSE for the
+>   Senate.** `bill_votes_official_verification.csv` has carried the official
+>   threshold since 2026-08-06 and nothing had joined it: `official_vote_type`,
+>   from clerk.house.gov (213) and senate.gov (92), on 305 of 423 votes. It is
+>   an independent evidence family from `question` (Voteview/ICPSR), so the two
+>   can be checked against each other — and they were: **293 agree, 12
+>   disagree, all twelve Senate.** Every one is a `3/5` requirement the
+>   question string ("On the Motion", "On the Amendment") gives no trace of — a
+>   unanimous-consent 60-vote agreement or a Congressional Budget Act point of
+>   order. `S108-0356` and `S114-0351` are two of the twelve, which is exactly
+>   why a question-only derivation would have left them looking like errors.
+>
+>   So the official record wins where it exists (305 rows) and the derivation
+>   fills in where it does not (118 rows, all predating the electronic record),
+>   with `threshold_required_source` saying which on every row and a derived
+>   Senate simple majority explicitly labelled a floor.
+>
+> **All 351 votes with a recorded result now reconcile** — the tally judged
+> against `threshold_required` reproduces the recorded result, 351 for 351,
+> with 72 NOT_TESTABLE (blank `result`). `890 verify` exits 1 on a single
+> failure; `890 selftest` proves all five of its checks fire on synthetic
+> violations, including flipping H105-0482 back to a simple majority.
+>
+> **Item 3 (the party split) is NOT closed** and remains as written below.
+
 **1. No bill title. The buyer cannot tell what was voted on.** — `ON_DISK_NOT_PROMOTED`
 The sample offers `114-hr-360` and *"On Motion to Suspend the Rules and Pass,
 as Amended"*. **`native_bills.csv` holds a title for 390 of the 423 votes
