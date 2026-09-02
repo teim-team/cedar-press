@@ -5768,3 +5768,47 @@ evidence-bearing sentence, **15 assert Native control**. For
 `not_required_to_file` the field rate is 0.83%, and 1,491 of those 2,060 are
 churches. The cheap routes left are state charity registries and
 group-exemption parents, which are bounded objects rather than per-org fetches.
+
+
+## GATE FAIL 2026-09-01 — shard L. Nothing red is mine; every line named with its owner.
+
+`py -3 code/62_no_regression_check.py` exit 1. Shard L owns only
+`review/tribal_vendor_list_registry_2026-08-26.csv` (148 appended rows; the
+149th tribe in its slice, `TRBF-MNACAN-00`, was already present because shard M
+took the split boundary, and shard L skipped it rather than duplicate it),
+`data/staging/business_registry/TBD-L0*.jsonl` + `TBD-L1*.jsonl` +
+`TBD-L00_business_identifiers*.jsonl`, `data/staging/tribe_harvest/shard_l/**`,
+and `code/570_shard_l_vendor_list_hunt.py`. **It wrote nothing to `data/clean`.**
+
+### Every metric shard L could move is at or under its floor
+
+| metric | value | floor |
+|---|---:|---:|
+| `code_duplicate_numbers` | 43 | 43 — `570_` is unique; checked against `code/` after shard M's three collisions |
+| `lint_class1` | 0 | 0 — shard L's one instance is waived with a reason at `570_…:311` |
+| `lint_class5` | 6 | 6 — waived at `570_…:692` |
+| `lint_class7` | 42 | 42 — waived at the `business_source_id` line |
+| `lint_bug_class_instances` | 144 | fell 146 → 144 |
+
+### RED, AND NAMED WITH ITS OWNER
+
+| line | owner |
+|---|---|
+| `lint_new_defect_instances = 1` — `NEW class6 instance: 518_dataset_readiness.py - cedar_dataset_readiness.csv` | 518's author; a full-rebuild/in-place-enricher ordering, not a shard-L file |
+| `files_with_columns_lost_vs_backup = 1` — `entity_evidence_profile.csv` 10 → 9 cols vs `.bak_2026-08-28_pre505`, lost `in_spine`, `rows_per_source`, `amounts_per_source_NEVER_SUM` | whoever ran 505 / the profile rebuild; shard L never opened this table |
+| `contract_violations = 8`, `contract_orphan_shippable = 6`, `contract_grain_unstated_shippable` 25 → 32 | the same 8 new `data/clean` tables named in the shard G entry above; shard L added no table |
+| `tables_missing_from_25_TABLES` 179 → 187, `tables_missing_from_27_SPEC` 194 → 202 | ditto — new `data/clean` tables not yet in the curated override lists |
+| `SHIPPING LOST: advocacy_passthrough_2026-08-07.csv` (1,620 rows, gone from `data/clean`) | the advocacy-passthrough rebuild; shard L does not touch `data/clean` |
+
+Recorded rather than stepped around, per standing rule 15.
+
+### One finding worth keeping, from the same pass
+
+Shard M's `--deep` breach — an exclusion enforced in one branch and not another
+— was checked for in `570` and the two branches were **merged into one**.
+`_blocked_hosts()` is now the single source of truth: it unions the named
+`TERMS_STATED_RESTRICTIVE` hosts with every host whose own terms page this run
+recorded as restrictive, and it is read by `get()`, which is the one chokepoint
+every request in the script passes through. `TERMS_RESTRICTIVE_HOSTS` is
+referenced in exactly one place — inside `_blocked_hosts()`. A refusal that only
+some code paths honour is not a refusal.

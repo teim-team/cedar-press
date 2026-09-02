@@ -1,14 +1,15 @@
 {
- "generated": "2026-09-02T01:28:35+00:00",
+ "generated": "2026-09-02T01:36:05+00:00",
  "script": "code/630_refresh_cadence.py",
- "n_sources": 54,
+ "n_sources": 55,
  "n_datasets": 13,
  "state_counts": {
   "CURRENT": 12,
   "CLOSED_BY_DESIGN": 5,
   "UNKNOWN_SOURCE_EDGE": 18,
   "2_NOT_PULLED": 12,
-  "1_SOURCE_NOT_PUBLISHED": 7
+  "1_SOURCE_NOT_PUBLISHED": 7,
+  "3_PULLED_NOT_PROMOTED": 1
  },
  "sources": [
   {
@@ -115,7 +116,7 @@
    "cedar_holds_partition": null,
    "cedar_holds_note": "column `fiscal_year` is not in this file",
    "source_has_through": null,
-   "source_basis": null,
+   "source_basis": "NOT ESTABLISHED, and neither agency states a schedule. BIE posts a school directory and IHS a UIO list; both are snapshots that change without notice. This is a change-detection source, not a calendar source.",
    "source_measured": null,
    "state": "UNKNOWN_SOURCE_EDGE",
    "refresh_due": false,
@@ -347,7 +348,7 @@
    "cedar_holds_partition": null,
    "cedar_holds_note": null,
    "source_has_through": "2026-09-01",
-   "source_basis": "probe 2026-09-01: federalregister.gov newest publication_date",
+   "source_basis": "probe 2026-09-01: federalregister.gov newest publication_date = 2026-09-01, HTTP 200. **The FR corpus is same-day. Whether a tribal consultation notice actually published in the 104-day gap is a question only the sweep answers \u2014 but lobbying_sources.md, written today by the docs workstream, independently calls this leg '3 months stale; 29 agencies only'.**",
    "source_measured": "2026-09-01",
    "state": "2_NOT_PULLED",
    "refresh_due": true,
@@ -529,7 +530,7 @@
    "refresh_cost": "one host, rate-disciplined; the backlog is the fetch, not the parse",
    "refresh_command": "code/99_build_earmarks_and_schedc.py --steps irs-xml",
    "breaks_on_refresh": "nonprofit_schedule_c_coverage.csv must be rebuilt in the same pass or it reports a stale backlog",
-   "cedar_edge_age_days": -121,
+   "cedar_edge_age_days": 0,
    "source_knowledge_age_days": 0,
    "gap_days_behind_source": 0,
    "backlog": {
@@ -926,22 +927,8 @@
    "gap_days_behind_source": 0,
    "backlog": {
     "kind": "staged_vs_clean",
-    "unpromoted_rows": 2548,
+    "unpromoted_rows": 0,
     "detail": [
-     {
-      "staged": "gaming_employment_form5500_staged.csv",
-      "clean": "gaming_employment_form5500.csv",
-      "staged_rows": 2046,
-      "clean_rows": 0,
-      "unpromoted": 2046
-     },
-     {
-      "staged": "gaming_employment_osha_tribe_staged.csv",
-      "clean": "gaming_employment_osha_tribe.csv",
-      "staged_rows": 502,
-      "clean_rows": 0,
-      "unpromoted": 502
-     },
      {
       "staged": "nigc_document_surface_staged.csv",
       "clean": "nigc_document_surface.csv",
@@ -1101,7 +1088,7 @@
    "breaks_on_refresh": "nothing",
    "cedar_edge_age_days": 62,
    "source_knowledge_age_days": 0,
-   "gap_days_behind_source": 183
+   "gap_days_behind_source": 62
   },
   {
    "dataset": "gaming",
@@ -1189,6 +1176,56 @@
    "cedar_edge_age_days": 91,
    "source_knowledge_age_days": 20,
    "gap_days_behind_source": 0
+  },
+  {
+   "dataset": "gaming",
+   "source_id": "labor_form5500_osha",
+   "source": "DOL Form 5500 plan filings + OSHA ITA establishment records (gaming employment)",
+   "host": "efast.dol.gov / osha.gov",
+   "publish_cadence": "annual \u2014 Form 5500 by plan year, OSHA ITA by calendar year",
+   "publish_lag": "Form 5500 ~9-12 months after plan-year end (extensions routine); OSHA ITA published the following spring",
+   "cadence_basis": "docs/LABOR_SOURCES_FOR_GAMING_2026-08-26.md \u2014 Form 5500 2009-2025, OSHA ITA CY2016-CY2025 (3,189,050 rows held)",
+   "cedar_last_pulled": "2026-08-07",
+   "cedar_last_pulled_basis": "max(fetched_date) over 10 rows of data/raw/external/osha_ita/_SOURCE_MANIFEST.csv",
+   "cedar_holds_through": null,
+   "cedar_holds_measured_from": "data/clean/gaming_employment_observations.csv",
+   "cedar_holds_period_col": null,
+   "cedar_holds_rows_in_scope": 0,
+   "cedar_holds_partition": null,
+   "cedar_holds_note": "column `period_end` is not in this file",
+   "source_has_through": "2025",
+   "source_basis": "both corpora are held through CY2025 in data/raw; nothing newer is published",
+   "source_measured": "2026-08-26",
+   "state": "3_PULLED_NOT_PROMOTED",
+   "refresh_due": true,
+   "refresh_due_why": "declared in the registry: both corpora are held through CY2025 in data/raw; nothing newer is published",
+   "refresh_cost": "zero to promote; the data is already extracted",
+   "refresh_command": "**NOT A PULL.** code/158_merge_staged_labor_employment.py \u2014 and it is BLOCKED ON TWO OWNER RULINGS (\u00a74 of LABOR_SOURCES_FOR_GAMING_2026-08-26.md), not on a fetch",
+   "breaks_on_refresh": "gaming_employment_observations.csv. **A Form 5500 row keys to an EIN, never to a facility** \u2014 merging it as a property observation would be a grain error.",
+   "cedar_edge_age_days": null,
+   "source_knowledge_age_days": 6,
+   "gap_days_behind_source": 0,
+   "backlog": {
+    "kind": "staged_never_promoted",
+    "unpromoted_rows": 2548,
+    "detail": [
+     {
+      "staged": "gaming_employment_form5500_staged.csv",
+      "staged_rows": 2046,
+      "clean_table_exists": false,
+      "clean_rows": 0,
+      "unpromoted": 2046
+     },
+     {
+      "staged": "gaming_employment_osha_tribe_staged.csv",
+      "staged_rows": 502,
+      "clean_table_exists": false,
+      "clean_rows": 0,
+      "unpromoted": 502
+     }
+    ],
+    "reading": "**These are STATE 3 and the only true state-3 rows this sweep found.** Both files were extracted on 2026-08-26 and neither has a clean twin. They are blocked on two OWNER RULINGS, not on a fetch \u2014 a Form 5500 row keys to an EIN and not to a facility, so merging it as a property observation needs an adjudicated rule first. Nothing about this is an acquisition task."
+   }
   },
   {
    "dataset": "gaming",

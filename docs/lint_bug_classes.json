@@ -1,17 +1,17 @@
 {
   "scanned_files": 491,
   "counts": {
-    "class1": 1,
+    "class1": 0,
     "class2a": 0,
     "class2b": 0,
     "class2c": 60,
     "class3": 0,
     "class4": 9,
     "class5": 6,
-    "class6": 28,
+    "class6": 27,
     "class7": 42,
     "class8": 0,
-    "lint_bug_class_instances": 146
+    "lint_bug_class_instances": 144
   },
   "findings": [
     {
@@ -98,7 +98,7 @@
     {
       "class": "class4",
       "file": "121_pull_subawards_api.py",
-      "line": 1134,
+      "line": 1171,
       "evidence": "if time.time() > COLLECT_DEADLINE:",
       "why": "a budget (COLLECT_DEADLINE, SUBMIT_DEADLINE) exits a loop, the file writes a completion marker (['FINISHED', 'OK', 'RETRIEVED', 'finished']), and it never compares what it RETRIEVED against the total the SOURCE reported. That is the PER_DOCKET_BUDGET_S defect: four dockets written at 2,300-3,200 of 3,555-4,847 and marked `done`, so no resume would ever revisit them.",
       "waived": false,
@@ -107,9 +107,9 @@
     {
       "class": "class5",
       "file": "121_pull_subawards_api.py",
-      "line": 1074,
+      "line": 1111,
       "evidence": "if s == \"finished\":",
-      "why": "an 'already done' short-circuit (s == 'finished') skips the work, and this file still rewrites a log/summary artefact wholesale at line 958. On a second run the counters are zero and the log says so - the 164 defect: 187 facilities rewritten to read '0 sources'. Re-running a build must not change its output; merge into the existing log or refuse to rewrite it.",
+      "why": "an 'already done' short-circuit (s == 'finished') skips the work, and this file still rewrites a log/summary artefact wholesale at line 995. On a second run the counters are zero and the log says so - the 164 defect: 187 facilities rewritten to read '0 sources'. Re-running a build must not change its output; merge into the existing log or refuse to rewrite it.",
       "waived": false,
       "waiver_reason": ""
     },
@@ -539,7 +539,7 @@
     {
       "class": "class1",
       "file": "570_shard_l_vendor_list_hunt.py",
-      "line": 311,
+      "line": 334,
       "evidence": "for d in glob.glob(os.path.join(ROOT, \"data\", \"staging\", \"tribe_harvest\",",
       "why": "glob pattern 'staging' enumerates a derived/staged artefact. If a PROMOTED table holds the truth, this reads the additions and never the ledger (the 88/57/41/82/35 defect). If reading the staged file IS the job - a promoter, a stager, a diff - waive it with a reason.",
       "waived": true,
@@ -548,9 +548,9 @@
     {
       "class": "class5",
       "file": "570_shard_l_vendor_list_hunt.py",
-      "line": 692,
+      "line": 715,
       "evidence": "if (host, kind) in done or not deadline_ok():",
-      "why": "an 'already done' short-circuit ((host, kind) in done or not deadline_ok()) skips the work, and this file still rewrites a log/summary artefact wholesale at line 2140. On a second run the counters are zero and the log says so - the 164 defect: 187 facilities rewritten to read '0 sources'. Re-running a build must not change its output; merge into the existing log or refuse to rewrite it.",
+      "why": "an 'already done' short-circuit ((host, kind) in done or not deadline_ok()) skips the work, and this file still rewrites a log/summary artefact wholesale at line 2160. On a second run the counters are zero and the log says so - the 164 defect: 187 facilities rewritten to read '0 sources'. Re-running a build must not change its output; merge into the existing log or refuse to rewrite it.",
       "waived": true,
       "waiver_reason": "`done` is the resume set read from every probe*.jsonl"
     },
@@ -566,11 +566,11 @@
     {
       "class": "class1",
       "file": "585_factcheck_nigc_keys.py",
-      "line": 198,
+      "line": 204,
       "evidence": "FILES = [\"nigc_enforcement_actions_staged.csv\",",
       "why": "a literal file list of 3 files, ALL of them derived/staged ('nigc_enforcement_actions_staged.csv', ...). Same shape as the additions glob without the glob.",
-      "waived": false,
-      "waiver_reason": ""
+      "waived": true,
+      "waiver_reason": "reading STAGING is the whole job. This script exists to"
     },
     {
       "class": "class5",
@@ -850,15 +850,6 @@
       "why": "`assistance_tribe_id_crosswalk.csv` has FULL-REBUILD writer(s) ['152_build_assistance_id_crosswalk.py'] and IN-PLACE enricher(s) ['503_identity.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
       "waived": true,
       "waiver_reason": "THE ORDERING IS DECLARED. This script FULL-REBUILDS"
-    },
-    {
-      "class": "class6",
-      "file": "103_build_california_gaming.py",
-      "line": 1,
-      "evidence": "ca_gaming_facilities_official.csv",
-      "why": "`ca_gaming_facilities_official.csv` has FULL-REBUILD writer(s) ['103_build_california_gaming.py'] and IN-PLACE enricher(s) ['266_apply_gaming_hub_spillover_rulings.py']. The rebuild reverts the enricher and prints a LARGER row count that reads as progress (133 vs 168: 931 links and 9 columns gone in 4 minutes; 09 vs 50 likewise). ORDERING RULE: the enricher runs LAST. Check for a `.bak_*_pre_<script>` beside the file before any rebuild, and re-run the enricher after.",
-      "waived": false,
-      "waiver_reason": ""
     },
     {
       "class": "class6",
@@ -1538,7 +1529,7 @@
     {
       "class": "class7",
       "file": "570_shard_l_vendor_list_hunt.py",
-      "line": 864,
+      "line": 884,
       "evidence": "\"business_source_id\": f\"{source_id}:{i}\",",
       "why": "[WARN] POSITIONAL on target business_source_id -> no clean table. assigned from a row's POSITION in an iteration. Stable only while the input is byte-identical and the iteration order is fixed. A column can be unique in EVERY build and still be a corrupt key: `ferc_filing_id` kept 4 of 2,534 ids across two builds, `verification_id` shifted every rank when another agent rewrote prime_contracts.csv, and `observation_id` changed on 482 of 492 rows on a re-run - a merge would have appended 492 silent duplicates. Fix: a stable digest of the row's OWN fields (`cedar_keys.stable_digest`), or `cedar_ids.allocate`, which takes the file lock.",
       "waived": true,
@@ -1753,9 +1744,6 @@
       ],
       "bill_votes.csv": [
         "14_build_bills_votes.py"
-      ],
-      "ca_gaming_facilities_official.csv": [
-        "103_build_california_gaming.py"
       ],
       "ca_gaming_payments.csv": [
         "103_build_california_gaming.py"
@@ -2296,6 +2284,7 @@
         "72_fix_brand_and_government_misattribution.py"
       ],
       "ca_gaming_facilities_official.csv": [
+        "103_build_california_gaming.py",
         "266_apply_gaming_hub_spillover_rulings.py"
       ],
       "cedar_assertions.csv": [
