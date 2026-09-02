@@ -67,6 +67,19 @@ TABLES = [
     ("nho_entities",           CLEAN / "nho_verified_entities.csv",           ["uei"], True),
     ("anc_roster",             CLEAN / "anc_ceiling_roster.csv",              ["anc_id"], True),
     ("cross_dataset_map",      CLEAN / "cross_dataset_ruling_map.csv",        ["identifier"], True),
+    # The NON-LDA INFLUENCE layer, added 2026-09-01 by workstream N. Both
+    # channels record a Native entity petitioning the federal government
+    # OUTSIDE the Lobbying Disclosure Act, which is how tribes actually do it:
+    # measured, 300 spine entities appear in LDA filings and 669 appear in a
+    # non-LDA channel, with only FOUR visible to the LDA and nowhere else.
+    # Registered as overrides for the same reason the registrant layer above
+    # is - they carry compound index columns the codebook registry cannot
+    # guess (an entity id that is nullable by design on the comment table,
+    # because a coalition filing is `indian_country`-scoped under ADR-010).
+    ("schedule_c_lobbying",    CLEAN / "nonprofit_schedule_c_lobbying.csv",   ["ein", "cedar_entity_id", "tax_year"], True),
+    ("schedule_c_coverage",    CLEAN / "nonprofit_schedule_c_coverage.csv",   ["index_year"], True),
+    ("rulemaking_comments",    CLEAN / "regulations_gov_comments.csv",        ["cedar_entity_id", "comment_id", "agency_id"], True),
+    ("rulemaking_coverage",    CLEAN / "regulations_gov_entity_coverage.csv", ["cedar_entity_id"], True),
     # The lobbying REGISTRANT layer, added 2026-08-26 by
     # code/183_register_lobbying_registrant_layer.py. The firm hired to lobby
     # is an entity in its own right; until now it was a bare string on a
@@ -107,6 +120,19 @@ TABLES = [
     ("individual_native_firm_contracts", CLEAN / "individual_native_firm_contracts.csv",            ["surrogate_entity_id", "identifier"], True),
     ("individual_native_firm_contracts_published", CLEAN / "individual_native_firm_contracts_published.csv", ["surrogate_entity_id"], True),
     ("individual_native_exclusion_pairs", CLEAN / "individual_native_exclusion_pairs.csv",          ["identifier", "excluded_entity_id"], True),
+    # The SAM NATIVE-CLASS DISTRIBUTIONS, promoted 2026-09-01 out of `review/`
+    # by code/582_promote_review_backlog.py. Aggregate only: 358 measured it as
+    # the publishable half of a two-file split whose per-firm half is INTERNAL
+    # and stays in review/, because a digest of a UEI is reversible by
+    # enumerating SAM's own entity space. Registered as an override because the
+    # index is (variant_class, dimension, value) - a compound the codebook
+    # registry cannot guess.
+    #
+    # THE TWO CLASSES ARE NEVER SUMMED. ENTITY_OWNED and INDIVIDUAL_NATIVE_OWNED
+    # are separate populations from separate SAM extracts; a combined "Native
+    # total" double-counts every firm carrying both flags, and the rule is
+    # carried on every row so it cannot be separated from the numbers.
+    ("sam_native_class_distributions", CLEAN / "sam_native_class_distributions.csv",                ["variant_class", "dimension", "value"], True),
 ]
 
 

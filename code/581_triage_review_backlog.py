@@ -582,13 +582,38 @@ workstreams had landed unregistered the same afternoon. `check` printed **SAFE -
 a rebuild loses nothing** before the build, and the build reported
 `4,788 -> 4,961`, additive only.
 
-`tables_missing_from_25_TABLES` and `tables_missing_from_27_SPEC` rose 179 → 186
-and 194 → 201 across the same window, from **eight** new clean tables. Exactly
-one is this workstream's, and it is registered in both:
-`160_ship_gap_report.registry_25()` and `registry_27()` both return
-`sam_native_class_distributions.csv`. The other seven are named in the gate's own
-`NEW TABLES AT A 0% SHIP RATIO` list and belong to the gaming and NIGC
-workstreams.
+`tables_missing_from_25_TABLES` and `tables_missing_from_27_SPEC` rose across the
+same window from a batch of new clean tables. Exactly one is this workstream's,
+and it is registered in both: `160_ship_gap_report.registry_25()` and
+`registry_27()` both return `sam_native_class_distributions.csv`. The rest are
+named in the gate's own `NEW TABLES AT A 0% SHIP RATIO` list and belong to the
+gaming and NIGC workstreams.
+
+**One line IS this workstream's and is stated plainly.**
+`contract_orphan_shippable` went 5 → 6 and `contract_violations` 6 → 7 (a
+sibling took it to 8) because `sam_native_class_distributions.csv` became
+shippable without a **dataset collection claiming it**. Collections live in
+`code/512_build_dataset_contracts.py`, which three sibling workstreams are
+editing concurrently in their own `GRAIN_WS1/2/3` dicts and which this
+workstream is forbidden to touch. So the promotion is correct and **incomplete
+by one line**, and that line is handed over rather than forced:
+
+> add `sam_native_class_distributions.csv` to a collection in `512`, grain
+> `(variant_class, dimension, value)`, primary key the same triple, no join key
+> — the table names no entity and must never be joined to one.
+
+It is not a new mechanism. Four of the six orphans predate this workstream
+(`native_owned_businesses`, both `nonprofit_schedule_c_*`, both
+`regulations_gov_*`), and two of those are already in `25.TABLES` — so a
+shippable table with no collection is a standing systemic gap, not something
+this promotion invented.
+
+**A false alarm, measured and named.** The gate printed `SHIPPING LOST:
+advocacy_passthrough_2026-08-07.csv was shipping 1,620 rows and the table is
+GONE from data/clean`. **The table is not gone.** It is on disk at 2,012,716
+bytes and reads **1,620 rows, 28 columns** — exactly the count said to be lost.
+The gate raced a live sibling rewriting `data/clean`. Nothing was recovered
+because nothing was lost, and no one should spend a session on it.
 
 **Deliberately not run:** `87`, `25`, `27`. Runbook step 2 is the gate and a FAIL
 stops the chain, and rebuilding `dist/` while fourteen agents are writing is the

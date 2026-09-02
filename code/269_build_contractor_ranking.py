@@ -224,6 +224,113 @@ def publishable_name(name: str) -> str:
     return "N" if privacy_class(name) in ("POSSIBLE_PERSONAL_NAME", "UNKNOWN") else "Y"
 
 
+# ==========================================================================
+# THE ENTITY-CLASS EXEMPTION - workstream GRAIN-WS5, 2026-09-01
+# ==========================================================================
+# `privacy_class()` above is copied VERBATIM from 171 and it stays verbatim:
+# one project rule about naming a private individual, one definition. What
+# changes here is not the rule, it is WHO IT IS APPLIED TO.
+#
+# The rule exists to protect a NATURAL PERSON. Measured on the FY2000-FY2026
+# tier-A file on 2026-09-01, it fired on 134 of 1,429 operating-company rows
+# and exactly ONE of those 134 was a natural person's name ("BARRETT,
+# MICHAEL", $20,000). The other 133 were tribal governments and their
+# instrumentalities - Nez Perce Tribe, Pueblo of Acoma, Rosebud Sioux Tribe,
+# Ramah Navajo Chapter, Blackfeet Utilities, Wyandotte Net Tel, Yakama Power -
+# and one of them carries $71.9M. A tribal government is not a natural person
+# and suppressing its own legal name protects nobody.
+#
+# The owner settled the principle in docs/PUBLICATION_POLICY.md: a firm's
+# legal name is the firm's name, and the surviving distinction is whether a
+# column describes the FIRM or a PERSON separate from it. This script's own
+# docstring already says the population has no sole proprietors in it - "the
+# owner side is the entity spine, and a sole proprietor is not on it".
+#
+# So the guard is now applied only where there is no POSITIVE evidence that
+# the subject is an entity. Four kinds of positive evidence, in order, each
+# written onto the row in `entity_class_basis` so the decision is auditable:
+#
+#   1. a governmental or institutional token in the name (Tribe, Pueblo,
+#      Chapter, Rancheria, Utilities, Authority, Casino, College, TERO ...)
+#   2. a corporate form the 171 regex MISSES. `\binc\b` does not match
+#      "Incorporated", so "Portage Environmental Incorporated" and "KOMAN
+#      INCORPORATED" were being withheld as possible people. This regex is a
+#      SUPERSET used only to decide entity-class; 171's stays untouched.
+#   3. the name shares a distinctive stem with the OWNER entity's own name
+#      ("Wyandotte Net Tel" under Wyandotte Nation). A firm named after the
+#      nation that owns it is not a private individual.
+#   4. a SINGLE-TOKEN name. A natural person is named by at least a given
+#      name and a surname; "JVYS", "HELIOTECH", "STEALTH" cannot be a person.
+#
+# WHAT STILL WITHHOLDS, and it is deliberate: a two- or three-token name with
+# none of the four (`All Nativecom`, `Vegas Kewadin`, `Ad Pro`), a blank name,
+# a `SURNAME, FIRSTNAME` comma form, and any UEI already ruled not-nameable in
+# `individual_native_ownership_verification.csv`. A privacy ruling only ever
+# tightens, and absence of entity evidence is still resolved in the person's
+# favour. The residual is a handful of rows and NONE of them is a government.
+ENTITY_TOKEN_RE = re.compile(
+    r"\b(tribe|tribes|tribal|nation|nations|pueblo|band|bands|rancheria|"
+    r"reservation|chapter|community|village|council|authority|utilities|"
+    r"utility|housing|college|university|school|museum|casino|resort|bingo|"
+    r"gaming|town|tero|department|administration|transit|agency|district|"
+    r"market|power|telecom|communications|federal|native|indian|development|"
+    r"enterprise|labs|laboratory|clinic|hospital|health|technology)\b", re.I)
+
+#: Corporate forms `CORP_SUFFIX_RE` (171, verbatim) does not catch. Used ONLY
+#: to establish entity-class, never to compute `privacy_class`.
+EXTENDED_CORP_RE = re.compile(
+    r"\b(incorporated|association|associations|assoc|assn|limited|"
+    r"j\.?v\.?\d*|venture|ventures|trust|fund|bank|credit union|coop|"
+    r"cooperative|mfg|manufacturing|contractors|contracting|builders|"
+    r"engineering|logistics|resources|energy|utilities)\b", re.I)
+
+#: Positive evidence of a PERSON: "SURNAME, FIRSTNAME". This one always wins.
+PERSON_NAME_FORM_RE = re.compile(r"^[A-Za-z'\-]+\s*,\s*[A-Za-z'\-]+\.?$")
+
+#: Words in an owner's name that identify no particular nation, so sharing one
+#: with an operating company is not evidence of anything.
+_OWNER_STOP = frozenset(
+    "tribe tribes tribal nation nations of the and indian indians band bands "
+    "pueblo community communities reservation rancheria village villages "
+    "council corporation incorporated company group native american alaska "
+    "confederated federally recognized".split())
+
+
+def _distinctive(name: str) -> set:
+    return {t.lower() for t in re.split(r"[^A-Za-z]+", name or "")
+            if len(t) > 3} - _OWNER_STOP
+
+
+def entity_class_basis(name: str, owner_name: str) -> str:
+    """Positive, auditable evidence that this operating company is an ENTITY.
+
+    Returns the evidence string, or "" where there is none and the
+    personal-name guard therefore still applies.
+    """
+    n = (name or "").strip()
+    if not n:
+        return ""
+    # An explicit governmental token or corporate form is DIRECT evidence and
+    # it outranks the comma heuristic below - "FLATWATER, INCORPORATED" has
+    # the shape of "SURNAME, FIRSTNAME" and is plainly a company.
+    m = ENTITY_TOKEN_RE.search(n)
+    if m:
+        return "governmental_or_institutional_token:" + m.group(1).lower()
+    m = EXTENDED_CORP_RE.search(n)
+    if m:
+        return "corporate_form_missed_by_171_regex:" + m.group(1).lower()
+    # The two weaker tests below are INFERENCES, so positive evidence of a
+    # person vetoes them.
+    if PERSON_NAME_FORM_RE.match(n):
+        return ""
+    shared = sorted(_distinctive(n) & _distinctive(owner_name))
+    if shared:
+        return "shares_owner_entity_name_stem:" + shared[0]
+    if len([t for t in re.split(r"[\s,]+", n) if t]) == 1:
+        return ("single_token_name_cannot_be_a_natural_persons_full_name")
+    return ""
+
+
 def main() -> int:
     # --- Rule 3, asserted rather than remembered --------------------------
     assert "total_obligations" in dom.SUM_COLUMNS, "SUM_COLUMNS moved"
@@ -487,8 +594,9 @@ def main() -> int:
         "owner_native_setaside_usd", "owner_8a_usd",
         "owner_native_specific_setaside_usd",
         "owner_no_setaside_usd_award_level", "owner_no_setaside_share_pct",
+        "operating_company_seq",
         "operating_company_name", "operating_company_uei",
-        "publishable_operating_name", "privacy_class",
+        "publishable_operating_name", "privacy_class", "entity_class_basis",
         "link_identifier_type", "link_identifier", "link_tier",
         "link_join_route", "link_ledger_method", "link_is_ruling",
         "link_tier_rationale", "link_ledger_source_file", "link_evidence_url",
@@ -505,7 +613,19 @@ def main() -> int:
         raw_class = s.get("entity_class", "")
         owner_name = (s.get("fr_official_name") or "").strip() or \
             (s.get("canonical_name") or "").strip() or tid
-        for fk in sorted(ent_firms[tid], key=lambda k: -firm_usd[(tid, k)]):
+        # `operating_company_seq` - 1..n within the owner, in the SORT ORDER
+        # THIS LOOP ALREADY USES (descending firm obligations). It is the
+        # primary key of this table together with `owner_entity_id`, and it
+        # exists because there was none: `firm_key` (the awardee UEI, or a
+        # `NAME:` fallback) is what 269 groups on and it is never written to
+        # the file, and the privacy guard then made two operating companies of
+        # one owner literally indistinguishable. The ordinal is unique by
+        # construction and it leaks nothing a redaction was protecting.
+        # It is a POSITION, not an identity: it is recomputed every build and
+        # it moves when a firm's obligations move. Join on
+        # `operating_company_uei` if you need something stable.
+        for seq, fk in enumerate(
+                sorted(ent_firms[tid], key=lambda k: -firm_usd[(tid, k)]), 1):
             k = (tid, fk)
             links = firm_link_usd[k]
             if links:
@@ -518,8 +638,17 @@ def main() -> int:
             nm = firm_name.get(k, "")
             pc = privacy_class(nm)
             pub = publishable_name(nm)
+            # THE ENTITY-CLASS EXEMPTION. `privacy_class` keeps 171's verbatim
+            # verdict so the audit trail shows what the blunt rule said;
+            # `publishable_operating_name` is the DECISION, and it now clears
+            # a row the guard flagged when there is positive evidence that the
+            # subject is an entity rather than a person.
+            ecb = entity_class_basis(nm, owner_name)
+            if pub == "N" and ecb:
+                pub = "Y"
+            # A ruling only ever tightens - it outranks the exemption.
             if firm_uei.get(k, "") in never_name:
-                pub, pc = "N", "RULED_NOT_NAMEABLE_BY_02f"
+                pub, pc, ecb = "N", "RULED_NOT_NAMEABLE_BY_02f", ""
             rows_out.append({
                 "owner_rank": rank[tid],
                 "owner_entity_id": tid,
@@ -542,10 +671,12 @@ def main() -> int:
                 "owner_no_setaside_share_pct":
                     round(100 * ent_noflag_contract.get(tid, 0.0) / ent_usd[tid], 2)
                     if ent_usd[tid] else "",
+                "operating_company_seq": seq,
                 "operating_company_name": nm if pub == "Y" else "WITHHELD_POSSIBLE_PERSONAL_NAME",
                 "operating_company_uei": (firm_uei.get(k, "") if pub == "Y" else ""),
                 "publishable_operating_name": pub,
                 "privacy_class": pc,
+                "entity_class_basis": ecb,
                 "link_identifier_type": lt,
                 "link_identifier": li if pub == "Y" else "",
                 "link_tier": "A",
@@ -578,6 +709,19 @@ def main() -> int:
     print(f"    personal-name guard withheld {len(withheld)} of {len(rows_out)} "
           f"operating-company names (${withheld_usd/1e9:,.2f}B of contract "
           f"facts still publish)")
+    exempt = [r for r in rows_out
+              if r["entity_class_basis"]
+              and privacy_class(r["operating_company_name"])
+              in ("POSSIBLE_PERSONAL_NAME", "UNKNOWN")]
+    exempt_usd = sum(r["firm_obligations_usd"] for r in exempt)
+    print(f"    entity-class exemption cleared {len(exempt)} rows the blunt "
+          f"guard would have withheld (${exempt_usd/1e9:,.2f}B) - a tribal "
+          f"government is not a natural person")
+    dupk = len(rows_out) - len({(r["owner_entity_id"],
+                                 r["operating_company_seq"])
+                                for r in rows_out})
+    print(f"    primary key (owner_entity_id, operating_company_seq): "
+          f"{dupk} duplicate(s) of {len(rows_out):,}")
 
     # --- measurements block ------------------------------------------------
     top = []
@@ -712,9 +856,28 @@ def main() -> int:
             "usd_on_withheld_rows": round(withheld_usd, 2),
             "rule": "code/171_build_individual_native_verification.py::"
                     "privacy_class, verbatim, plus any UEI already ruled "
-                    "not-nameable in individual_native_ownership_verification.csv",
+                    "not-nameable in individual_native_ownership_verification.csv,"
+                    " MINUS rows carrying positive entity-class evidence",
             "note": "contract facts publish on a withheld row; the name and "
                     "the UEI do not. The rule is blunt on purpose.",
+            "entity_class_exemption": {
+                "rows_cleared": len(exempt),
+                "usd_on_cleared_rows": round(exempt_usd, 2),
+                "by_basis": dict(Counter(
+                    r["entity_class_basis"].split(":")[0] for r in exempt)),
+                "rule": "the personal-name guard protects a NATURAL PERSON, "
+                        "and a tribal government is not one. Applied only "
+                        "where no positive entity-class evidence exists; see "
+                        "entity_class_basis in the codebook fragment.",
+            },
+        },
+        "primary_key": {
+            "columns": ["owner_entity_id", "operating_company_seq"],
+            "duplicate_rows": dupk,
+            "rows": len(rows_out),
+            "note": "operating_company_seq is a POSITION within the owner in "
+                    "descending firm_obligations_usd, not an identity. It is "
+                    "recomputed every build.",
         },
         "class_totals_tierA": {},
         "top25": top,
@@ -816,10 +979,12 @@ VARDOC = {
  "owner_native_specific_setaside_usd": "Tier-A dollars on the two Native-BY-DEFINITION set-asides only: Indian Business and Buy Indian.",
  "owner_no_setaside_usd_award_level": "Tier-A dollars on AWARDS none of whose transactions carries any Native set-aside. Award key is `(contract_number, awardee_uei)`, matching `docs/CICD_BENCHMARK.md` UNDERCOUNT-01. Award level because `setaside` is blank on the majority of archive-era transactions and arrives as the literal 'None reported' - see the seam register in docs/ANOMALY_REPORT.md. This is the conservative measure and the one the article quotes.",
  "owner_no_setaside_share_pct": "The award-level column over `owner_obligations_usd`.",
- "operating_company_name": "`awardee_name` as recorded on the prime transactions. From BGOV `master prime file.dta` and the USAspending award archive, NOT a SAM entity extract, so the D&B Open Data bulk restriction does not attach. `WITHHELD_POSSIBLE_PERSONAL_NAME` where the personal-name guard fired.",
+ "operating_company_seq": "**Half of this table's PRIMARY KEY**, with `owner_entity_id`. 1..n within one owner, in descending `firm_obligations_usd` - the order the rows are already written in. It exists because there was no key at all: 269 groups on `(tribe_id, firm_key)` and never writes `firm_key`, and the personal-name guard then rendered two operating companies of one owner literally indistinguishable. Unique by construction and it leaks nothing a redaction was protecting. It is a POSITION, NOT AN IDENTITY - recomputed every build, and it moves when a firm's obligations move. Join on `operating_company_uei` if you need something stable across vintages.",
+ "operating_company_name": "`awardee_name` as recorded on the prime transactions. From BGOV `master prime file.dta` and the USAspending award archive, NOT a SAM entity extract, so the D&B Open Data bulk restriction does not attach. `WITHHELD_POSSIBLE_PERSONAL_NAME` where the personal-name guard fired AND no entity-class evidence cleared it - see `entity_class_basis`.",
  "operating_company_uei": "SAM Unique Entity ID. Blank where the name was withheld, and blank where the transactions carry no UEI.",
- "publishable_operating_name": "`N` where the name may be a private individual's. Contract facts still publish on an `N` row; the name and the UEI do not. Deliberately over-inclusive: SAM's public search resolves a UEI to a legal name, and a sole proprietor's legal name is a private person's name.",
- "privacy_class": "`CORPORATE_FORM_PRESENT` · `POSSIBLE_PERSONAL_NAME` · `NO_CORPORATE_FORM` · `UNKNOWN` · `RULED_NOT_NAMEABLE_BY_02f`. The first four use `code/171_build_individual_native_verification.py::privacy_class` VERBATIM so that one project rule about naming a private individual has one definition; the fifth means the UEI was already adjudicated not-nameable in `individual_native_ownership_verification.csv` and a privacy ruling only ever tightens. The rule is blunt on purpose and it withholds names that are plainly corporate (`JVYS`, `YAKAMA POWER`); a reviewer clears those one at a time, never by widening the rule.",
+ "publishable_operating_name": "The DECISION column. `N` where the name may be a private individual's and nothing on the row establishes that the subject is an entity. Contract facts still publish on an `N` row; the name and the UEI do not. Read WITH `privacy_class` and `entity_class_basis`: `privacy_class` is what the blunt 171 rule said, `entity_class_basis` is the positive evidence that overrode it, and this column is the outcome. A UEI already ruled not-nameable in `individual_native_ownership_verification.csv` is always `N` - a privacy ruling only ever tightens.",
+ "privacy_class": "`CORPORATE_FORM_PRESENT` · `POSSIBLE_PERSONAL_NAME` · `NO_CORPORATE_FORM` · `UNKNOWN` · `RULED_NOT_NAMEABLE_BY_02f`. The first four use `code/171_build_individual_native_verification.py::privacy_class` VERBATIM so that one project rule about naming a private individual has one definition; the fifth means the UEI was already adjudicated not-nameable in `individual_native_ownership_verification.csv`. THIS IS NOT THE DECISION - it is the blunt rule's verdict, kept verbatim so the decision is auditable. `POSSIBLE_PERSONAL_NAME` beside a published name means `entity_class_basis` carried positive evidence that the subject is an entity.",
+ "entity_class_basis": "Positive, auditable evidence that this operating company is an ENTITY rather than a natural person, and therefore that the personal-name guard should not apply to it. Blank where there is none. Four kinds, in the order they are tested: `governmental_or_institutional_token:<token>` (Tribe, Pueblo, Chapter, Rancheria, Utilities, Authority, Casino, College, TERO ...); `corporate_form_missed_by_171_regex:<token>` (171's `\\binc\\b` does not match 'Incorporated', so 'KOMAN INCORPORATED' was being withheld as a possible person); `shares_owner_entity_name_stem:<token>` (a firm named after the nation that owns it - 'Wyandotte Net Tel' under Wyandotte Nation); and `single_token_name_cannot_be_a_natural_persons_full_name` (a person has at least a given name and a surname, so 'JVYS' and 'HELIOTECH' are not people). A `SURNAME, FIRSTNAME` comma form is never exempt, and neither is a blank name. THE RULE THIS IMPLEMENTS: the guard protects a natural person, and a tribal government is not one - measured 2026-09-01, the guard fired on 134 rows and 133 of them were tribal governments and their instrumentalities.",
  "link_identifier_type": "UEI or CAGE - which identifier carries the majority of this firm's tier-A dollars into the owner.",
  "link_identifier": "The identifier value itself. Blank on a withheld row.",
  "link_tier": "Always A on this file. Tier is INHERITED from the ledger row that made the link and is never assigned here. A tier-B link never publishes alone; nothing below tier A appears in this table at all.",
@@ -854,6 +1019,7 @@ def write_codebook(cols, nrows: int, vintages) -> None:
             typ[c] = ("numeric", "usd" if c.endswith("_usd") else "percent")
         elif c in ("owner_rank", "owner_n_operating_companies",
                    "owner_n_identifiers", "owner_n_uei_links",
+                   "operating_company_seq",
                    "firm_transaction_rows"):
             typ[c] = ("integer", "count")
         elif c.endswith("_fy"):
@@ -890,6 +1056,20 @@ def write_codebook(cols, nrows: int, vintages) -> None:
         "**One OPERATING COMPANY, with the entity that owns it, that entity's "
         "class, and the identifier that establishes the link.** An owner with "
         "nine subsidiaries occupies nine rows carrying one `owner_rank`.",
+        "",
+        "**Primary key: `(owner_entity_id, operating_company_seq)`.** The "
+        "ordinal is 1..n within the owner in descending "
+        "`firm_obligations_usd`. It is a POSITION, not an identity: it is "
+        "recomputed on every build and it moves when a firm's obligations "
+        "move. Join on `operating_company_uei` if you need something stable.",
+        "",
+        "**`firm_*` is the additive family; `owner_*` is not.** Every "
+        "`owner_*` column is an OWNER-grain attribute repeated on every "
+        "operating-company row of that owner - row-summing "
+        "`owner_obligations_usd` inflates it about 37x. And the whole table "
+        "is a lossless partition of the tier-A attributed slice of "
+        "`prime_contracts.csv`, so `firm_obligations_usd` must never be "
+        "summed alongside it or unioned with it.",
         "",
         "## The four things to know before quoting a number off this file",
         "",

@@ -54,34 +54,59 @@ Next action: **C1 grain UNSTATED on 1: subawards.csv**.
 
 <!-- CEDAR:COVERAGE-MEASURED collection=subcontracting END -->
 
-## READ THIS BEFORE §1 AND §2 — the FY2022–24 closure has not reached the clean table
+## STATUS 2026-09-02 — FY2023 IS HALF LANDED; FY2022 AND FY2024 ARE NOT
 
-*Measured 2026-09-01 by workstream DOCS, directly from
-`data/clean/subawards.csv`. Recorded rather than corrected, because the pull
-this section is about may still be in flight and the data is the only thing
-either of us can check.*
+*Workstream DOCS measured, correctly, on 2026-09-01 that nothing had reached the
+clean table. That has changed for FY2023 and has NOT changed for FY2022 or
+FY2024. Superseding that note rather than deleting it, because its warning
+still binds for the two years that are still empty.*
 
-§2 below marks FY2022, FY2023 and FY2024 as pulled **2026-09-01 (this run)** and
-prints the pre-run counts as 89 / 120 / 166. Re-measured today, `subawards.csv`
-holds **exactly 89 / 120 / 166** for those years, and:
+**Landed and verified 2026-09-02 02:38Z** (`121 match` then `121 append`):
 
-| | measured |
+| FY | rows before | rows after | USD before* | USD after* |
+|---|---:|---:|---:|---:|
+| 2021 | 9,462 | 9,504 | $4,816,365,423 | $4,823,715,821 |
+| **2023** | **120** | **4,100** | **$93,394,904** | **$1,537,605,212** |
+| 2022 | 89 | **89 — UNCHANGED** | $47,021,525 | unchanged |
+| 2024 | 166 | **166 — UNCHANGED** | $113,334,471 | unchanged |
+
+\* after BOTH money filters: `duplicate_status == 'primary'` AND
+`subaward_exceeds_prime_flag != 'yes'`.
+
+**Every other fiscal year is unchanged in rows and in dollars**, and all 72,837
+pre-existing rows were verified byte-identical on all 53 of their original
+columns against the pre-run backup. The FY2021 +42 is not a re-pull artefact:
+the same raw zip re-read against a ledger that has gained entities since
+2026-08-28 now resolves 42 rows it previously could not.
+
+FY2023 is **half** the year — Q1 and Q2 (2022-10-01..2023-03-31), 361,109 raw
+rows. Q3 and Q4 were still outstanding when this was written.
+
+**Do not quote an FY2022 or FY2024 subcontracting figure.** Those years still
+hold only HigherGov and forward-fill rows and no FSRS data at all. FY2023 may
+now be quoted as **a half-year, explicitly labelled as such** — it is not
+comparable to a full neighbour year.
+
+### Why the full-year jobs keep dying, measured rather than guessed
+
+Three explanations were on the table and two are disproved by data in this repo:
+
+| explanation | verdict |
 |---|---|
-| FY2022 rows from `usaspending_fsrs_pull` | **0** (89 rows, all `highergov_2023_export`) |
-| FY2023 rows from `usaspending_fsrs_pull` | **0** (96 `funding_forward_fill`, 24 HigherGov) |
-| FY2024 rows from `usaspending_fsrs_pull` | **0** (166 `funding_forward_fill`) |
-| newest `fetched_date` in the table | **2026-08-12** |
-| newest `promoted_date` in the table | **2026-08-28** |
+| "a full fiscal year is too big for the async job" | **DISPROVED.** `fy2021` is a full fiscal year, 765,109 rows, same endpoint, same payload, and it FINISHED in 23,613s on 2026-08-26. `fy2022` reached 221,865 rows before it died. Meanwhile a *two-day* canary FAILED on 2026-08-12. Size does not predict the outcome. |
+| "the job is dead because it has sat at 0 rows for 80 minutes" | **DISPROVED.** The server reports `rows_so_far=0` until it has built the file. `fy2021` did that for almost all of its 393 minutes and then completed. A job at zero rows is EARLY, not dead — killing it discards completed server work (rule 5). |
+| "the bulk archive has subawards, use that instead" | **DISPROVED, and already enumerated.** `docs/ASSISTANCE_ARCHIVE_PULL_LOG.md`: the archive holds **4,631 objects and ZERO of them contain the string `sub` in any case**; direct probes of every plausible subaward path returned 404 or 403. `files.usaspending.gov` publishes Contracts and Assistance only. Do not re-spend host budget re-probing this. |
 
-So the pull may well have been submitted; **the promotion has not landed**, and
-until it does the neighbouring years remain 9,462 (FY2021) and 7,360 (FY2025).
-`35_coverage_audit.py` reports no interior gap here and is right on its own
-terms — the years are non-zero, not empty. `621_dataset_coverage.py` flags them
-as **thin**, which is the check that catches this shape.
+What the data actually shows is a **periodic server-side kill**. Jobs died in
+pairs at two instants — `fy2023` and `fy2024` together at 00:07:14Z, then
+`fy2022` and `fy2023_q3` together at 02:36:10Z — while everything that
+COMPLETED did so between those instants: the canary (536s), `fy2023_q1`
+(4,087s) and `fy2023_q2` (2,809s). The practical rule that follows is not
+"slice for size" but **"finish inside the window"**: a job under ~70 minutes
+lands, a job that has to survive several hours does not.
 
-**Do not quote an FY2022–24 subcontracting figure until the measured block above
-shows those years at neighbour scale.** §2's "this run" column describes the
-pull; this section describes the table.
+That is why quarters work, and it is the only reason they work. They are a
+scheduling hedge, not a size fix.
 
 ---
 

@@ -245,7 +245,7 @@ say(f"=== Cedar identifier graph — built {TODAY} ===\n")
 #    Tier and method are inherited verbatim. X rows become blocks.
 # ---------------------------------------------------------------------------
 n_led = Counter()
-for r in rd(clean("cedar_identifier_ledger_final.csv")):
+for _ord, r in enumerate(rd(clean("cedar_identifier_ledger_final.csv"))):
     it = (r.get("identifier_type") or "").strip().upper()
     if it not in CLEANER:
         n_led["bad_type"] += 1
@@ -261,6 +261,7 @@ for r in rd(clean("cedar_identifier_ledger_final.csv")):
     ev = (r.get("tier_rationale") or "")[:300]
     if tier == "X":
         blocks.append({"id": nd, "source": "cedar_identifier_ledger_final.csv",
+                       "row_ref": f"cedar_identifier_ledger_final.csv#{_ord}",
                        "evidence": f"tier X negative ruling; method={method}; "
                                    f"{(r.get('exclusion_evidence') or '')[:200]}"})
         n_led["X"] += 1
@@ -279,7 +280,7 @@ say("[1] identifier ledger      ", dict(n_led))
 n_x = Counter()
 p = clean("cross_dataset_ruling_map.csv")
 if os.path.exists(p):
-    for r in rd(p):
+    for _ord, r in enumerate(rd(p)):
         it = (r.get("identifier_type") or "").strip().upper()
         if it not in CLEANER:
             continue
@@ -290,6 +291,10 @@ if os.path.exists(p):
            "BLOCKED" in (r.get("note") or "").upper() + (r.get("ruling") or "").upper():
             blocks.append({"id": node(it, v),
                            "source": "cross_dataset_ruling_map.csv",
+                           "row_ref": "cross_dataset_ruling_map.csv#"
+                                      + str(r.get("target_row_ordinal") or _ord)
+                                      + "/" + (r.get("source_file") or "")
+                                      + "/" + (r.get("channel") or ""),
                            "evidence": f"{r.get('ruling','')} {r.get('note','')}"[:250]})
             n_x[it] += 1
 say("[1b] ruling-map exclusions ", dict(n_x))
@@ -403,7 +408,7 @@ say("[3b] np_ein_entity_hub     ", dict(n), " EIN->ENTITY edges")
 
 # np_orgs: EIN -> entity, tier inherited from cedar_link_tier. X rows block.
 n = Counter()
-for r in rd(clean("np_orgs.csv")):
+for _ord, r in enumerate(rd(clean("np_orgs.csv"))):
     e = clean_ein(r.get("EIN"))
     if not e:
         continue
@@ -411,6 +416,7 @@ for r in rd(clean("np_orgs.csv")):
     eid = (r.get("cedar_spine_entity_id") or r.get("tribe_id") or "").strip()
     if tier == "X" or (r.get("excluded_by_prior_ruling") or "").strip() in ("1", "Y", "YES"):
         blocks.append({"id": node("EIN", e), "source": "np_orgs.csv",
+                       "row_ref": f"np_orgs.csv#{_ord}",
                        "evidence": f"cedar_link_tier=X / excluded_by_prior_ruling; "
                                    f"{(r.get('exclusion_reason') or '')[:180]}"})
         n["X"] += 1
@@ -929,6 +935,7 @@ for key, e in edge_meta.items():
         "edge_tier": e["edge_tier"],
         "edge_tier_source": e["edge_tier_source"],
         "asserting_source": "|".join(sorted(e["sources"])),
+        "asserting_row_ref": "",
         "n_asserting_sources": len(e["sources"]),
         "method": e["method"], "evidence": e["evidence"],
         "built_by": "169_build_identifier_graph.py", "built_date": TODAY})
@@ -944,7 +951,8 @@ for e in attribution:
         "from_type": e["id"].split(":")[0], "to_type": "ENTITY",
         "edge_tier": e["edge_tier"],
         "edge_tier_source": e["edge_tier_source"],
-        "asserting_source": e["source"], "n_asserting_sources": 1,
+        "asserting_source": e["source"], "asserting_row_ref": "",
+        "n_asserting_sources": 1,
         "method": e["method"], "evidence": e["evidence"],
         "built_by": "169_build_identifier_graph.py", "built_date": TODAY})
 for b in blocks:
@@ -952,12 +960,24 @@ for b in blocks:
         "edge_kind": "BLOCK", "from_node": b["id"], "to_node": "",
         "from_type": b["id"].split(":")[0], "to_type": "",
         "edge_tier": "X", "edge_tier_source": "row column (negative ruling)",
-        "asserting_source": b["source"], "n_asserting_sources": 1,
+        "asserting_source": b["source"],
+        # THE ROW THAT ASSERTED THE BLOCK, not merely the file. Without it
+        # 2,451 of this table's 46,051 rows were byte-identical - every one of
+        # them a BLOCK sourced from cross_dataset_ruling_map.csv, where one
+        # ruling reaching 860 target rows produced 860 indistinguishable
+        # edges each stamped n_asserting_sources = 1. They were never
+        # duplicate assertions; the projection dropped which row asserted it,
+        # exactly as 23 did one level upstream and 430 did for
+        # prime_contracts. Blank on IDENTITY and ATTRIBUTION edges, which are
+        # already collapsed to one row per pair by `seen`/`seen_attr`.
+        "asserting_row_ref": b.get("row_ref", ""),
+        "n_asserting_sources": 1,
         "method": "", "evidence": b["evidence"],
         "built_by": "169_build_identifier_graph.py", "built_date": TODAY})
 write(os.path.join(CLEAN, "cedar_identifier_graph_edges.csv"), edge_rows,
       ["edge_kind", "from_node", "to_node", "from_type", "to_type",
        "edge_tier", "edge_tier_source", "asserting_source",
+       "asserting_row_ref",
        "n_asserting_sources", "method", "evidence", "built_by", "built_date"])
 
 # --- nodes ---------------------------------------------------------------

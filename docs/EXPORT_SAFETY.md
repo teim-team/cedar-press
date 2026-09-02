@@ -4,8 +4,8 @@
 
 **The rule that matters most:** unknown ownership may ship as unknown. **Contradicted ownership may never ship as a definite historical owner.**
 
-- **SAFE_TO_AGGREGATE**: 194
-- **ROW_LEVEL_ONLY**: 26 (of which **9 carry money columns** — the unsafe analysis is also the most likely one)
+- **SAFE_TO_AGGREGATE**: 217
+- **ROW_LEVEL_ONLY**: 4 (of which **3 carry money columns** — the unsafe analysis is also the most likely one)
 
 ## Ownership as-of status
 
@@ -22,29 +22,7 @@
 
 | table | collection | money columns | why |
 |---|---|---|---|
-| `cedar_identifier_graph_edges.csv` | _entity_layer | — | grain UNSTATED; no validated primary key; 2451 literal duplicate rows |
-| `cedar_ruling_ledger_consolidated.csv` | _entity_layer | — | grain UNSTATED; no validated primary key; 6302 literal duplicate rows |
 | `congressional_correspondence_log.csv` | legislation | — | grain UNSTATED; no validated primary key |
-| `contractor_ranking.csv` | contractors | owner_obligations_usd|owner_native_setaside_usd|owner_8a_usd|owner_native_specific_setaside_usd|owner_no_setaside_usd_award_level|firm_obligations_usd | grain UNSTATED; no validated primary key |
-| `cross_dataset_ruling_map.csv` | _entity_layer | — | grain UNSTATED; no validated primary key; 2228 literal duplicate rows |
-| `deals_2026_ytd_additions.csv` | deals | Announced_Value_USD|Value_Type|Project_Total_Value_USD | grain UNSTATED; no validated primary key |
-| `faads_transactions.csv` | funding | obligated_usd | grain UNSTATED; no validated primary key; 1001 literal duplicate rows |
-| `faads_transactions_all_agencies.csv` | funding | obligated_usd | grain UNSTATED; no validated primary key; 179259 literal duplicate rows |
-| `fac_audit_sefa_gaming_programs.csv` | gaming | amount_expended | grain UNSTATED; no validated primary key |
-| `ferc_docket_filings.csv` | lobbying | — | grain UNSTATED; no validated primary key; 822 literal duplicate rows |
-| `foia_request_index.csv` | _entity_layer | — | grain UNSTATED; no validated primary key |
-| `hearing_bill_links.csv` | lobbying | — | grain UNSTATED; no validated primary key; 1 literal duplicate rows |
-| `lobbying_registrant_native_ownership_evidence.csv` | lobbying | — | grain UNSTATED; no validated primary key; 4 literal duplicate rows |
-| `native_bills_subject_sweep.csv` | legislation | — | grain UNSTATED; no validated primary key; 5 literal duplicate rows |
-| `native_passthrough.csv` | funding | amount_usd|amount_countable | grain UNSTATED; no validated primary key; 114 literal duplicate rows |
-| `nigc_action_parties.csv` | gaming | — | grain UNSTATED; no validated primary key |
-| `nigc_document_surface.csv` | gaming | — | grain UNSTATED; no validated primary key |
-| `nigc_enforcement_actions.csv` | gaming | — | grain UNSTATED; no validated primary key |
-| `nigc_game_classification_opinions.csv` | gaming | — | grain UNSTATED; no validated primary key |
-| `nigc_indian_lands_opinions.csv` | gaming | — | grain UNSTATED; no validated primary key |
-| `nigc_management_contract_approvals.csv` | gaming | — | grain UNSTATED; no validated primary key |
-| `np_schedule_i_grants.csv` | nonprofits | cash_grant_usd|noncash_assistance_usd | grain UNSTATED; no validated primary key; 101 literal duplicate rows |
+| `faads_transactions_all_agencies.csv` | funding | obligated_usd | grain UNSTATED; no validated primary key; 3441 literal duplicate rows |
+| `native_passthrough.csv` | funding | amount_usd | grain UNSTATED; no validated primary key; 116 literal duplicate rows |
 | `subawards.csv` | subcontracting | subaward_amount|prime_award_amount|subaward_amount_real2025 | grain UNSTATED; no validated primary key; 10770 literal duplicate rows |
-| `tcu_cdfi_ownership_evidence.csv` | _entity_layer | — | grain UNSTATED; no validated primary key; 4 literal duplicate rows |
-| `tribal_resolution_financings.csv` | deals | principal_amount_text|pledged_revenues_text | grain UNSTATED; no validated primary key |
-| `visitor_record_foia_requests.csv` | _entity_layer | — | grain UNSTATED; no validated primary key |

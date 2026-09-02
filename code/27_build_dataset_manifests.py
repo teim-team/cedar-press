@@ -69,6 +69,149 @@ FLOOR_CAVEAT = (
 )
 
 SPEC = {
+    "nonprofit_schedule_c_lobbying": {
+        "file": "nonprofit_schedule_c_lobbying.csv",
+        "name": "Native Nonprofit Lobbying (IRS 990 Schedule C)",
+        "measure": "Lobbying and political-activity expenditure as the filer itself "
+                   "reported it on IRS Form 990 Schedule C, one row per accepted return",
+        "unit": "Nominal US dollars as entered on the return. Electing (Part II-A) and "
+                "non-electing (Part II-B) figures are DIFFERENT statutory measures and "
+                "are never summed; lobbying_usd_basis names the line each came from.",
+        "universe": "Organisations on Cedar's Native-nonprofit EIN target list that filed "
+                    "an electronic 990, 990EZ or 990PF. Tribal GOVERNMENTS file no 990 and "
+                    "are structurally absent.",
+        "geographyLevel": "nation",
+        "geographyIdentifier": "cedar_entity_id where the EIN resolves; EIN otherwise",
+        "periodFrom": 2015, "periodTo": 2026,
+        "sourceName": "IRS e-file 990 XML (apps.irs.gov index; irs-form-990 S3 bucket)",
+        "citation": "Cedar Press. Every row carries source_object_url, the filer's own "
+                    "public return.",
+        "collectionMethod": "Transcribed from the filer's signed e-file XML by "
+                            "99_build_earmarks_and_schedc.py --steps schedc-lobbying. Tag "
+                            "names were inventoried across 2,647 real returns, never "
+                            "guessed. Entity links are INHERITED from np_orgs.csv; "
+                            "entity_tier = X is a negative ruling and is refused, not "
+                            "carried.",
+        "caveats": [
+            "ABSENT IS NOT ZERO. 6,395 of 6,870 returns attach no Schedule C at all - a "
+            "filer answering 'No' to Form 990 Part IV files none. That is different from "
+            "a filer that attached the schedule and entered $0 (330 returns). "
+            "reporting_regime distinguishes all four states per row.",
+            "THE THREE REGIMES ARE NOT COMPARABLE. Part II-A (501(h) electing) splits "
+            "grassroots from direct against a statutory ceiling; Part II-B (non-electing) "
+            "reports one total and has no such split. A blank grassroots cell on a Part "
+            "II-B row means the form has no such line, not that the read failed.",
+            "THE 990-N FLOOR. 6,453 of 12,764 organisations in np_orgs.csv file the 990-N "
+            "e-Postcard, which reports gross receipts under $50,000 and nothing else. No "
+            "Schedule C exists for them and none is missing. Any denominator built "
+            "without filing_regime is wrong by construction.",
+            "SCHEDULE C IS NOT LDA LOBBYING. is_lobbying = 0 on every row records that "
+            "the row sits outside the Lobbying Disclosure Act regime, not that no "
+            "lobbying occurred. Never sum this against LDA spend.",
+            "THE 501(h) ELECTION IS DERIVED, NOT READ. Schedule C carries no election "
+            "element; the value is inferred from which Part the filer completed and "
+            "election_501h_basis records the inference.",
+            "COVERAGE IS A FETCH BACKLOG, NOT AN ABSENCE. 25,348 of 32,218 indexed "
+            "returns are not yet downloaded. See nonprofit_schedule_c_coverage.csv.",
+            FLOOR_CAVEAT,
+        ],
+    },
+    "nonprofit_schedule_c_coverage": {
+        "file": "nonprofit_schedule_c_coverage.csv",
+        "name": "Native Nonprofit Schedule C Coverage",
+        "measure": "Per IRS submission year: how many target returns the index listed, how "
+                   "many are downloaded, how many were parsed, and how many are still "
+                   "outstanding",
+        "unit": "Counts of returns and of distinct EINs",
+        "universe": "Every IRS e-file index year 2017-2026, filtered to Cedar's "
+                    "Native-nonprofit EIN target list",
+        "geographyLevel": "nation",
+        "geographyIdentifier": "not applicable - this table is keyed by index year",
+        "periodFrom": 2017, "periodTo": 2026,
+        "sourceName": "IRS e-file 990 annual index CSVs",
+        "citation": "Cedar Press coverage profile for the Schedule C channel.",
+        "collectionMethod": "Computed from the index target list against files on disk. "
+                            "No network requests.",
+        "caveats": [
+            "index_year is the SUBMISSION year, not the tax year. A TY2024 return can be "
+            "submitted in 2025 and appear under index_year 2025.",
+            "not_downloaded is CEDAR'S FETCH BACKLOG. It is not an absence at the IRS and "
+            "must never be read as one.",
+            "Index files exist for submission years 2017-2026 only. 2009-2016 return 404 "
+            "at both apps.irs.gov and the S3 bucket root, probed 2026-08-07. That floor "
+            "belongs to the IRS.",
+            FLOOR_CAVEAT,
+        ],
+    },
+    "regulations_gov_comments": {
+        "file": "regulations_gov_comments.csv",
+        "name": "Tribal Rulemaking Comments (regulations.gov)",
+        "measure": "Public submissions on federal rulemaking dockets whose title names a "
+                   "Cedar entity - the tribe speaking to an agency in its own words",
+        "unit": "One row per (entity, comment). A comment naming two entities yields two "
+                "rows and must not be counted as two comments.",
+        "universe": "Cedar spine entities with a two-token-or-longer name, queried as an "
+                    "exact phrase against the regulations.gov v4 comment index",
+        "geographyLevel": "nation",
+        "geographyIdentifier": "cedar_entity_id (spine tribe_id)",
+        "periodFrom": 2002, "periodTo": 2026,
+        "sourceName": "regulations.gov v4 API (api.data.gov)",
+        "citation": "Cedar Press. Every row carries comment_url, the public "
+                    "regulations.gov page, and query_url, the API call that found it.",
+        "collectionMethod": "Exact-phrase entity search by "
+                            "221_probe_regulations_gov_comments.py harvest, rate-limited "
+                            "to the measured 1,000 requests/hour api.data.gov ceiling and "
+                            "checkpointed per entity.",
+        "caveats": [
+            "ATTRIBUTION IS A TITLE MATCH, NOT AN IDENTIFIER. The comment SEARCH response "
+            "carries no `organization` field; the submitter's organisation exists only on "
+            "the per-comment detail endpoint. Every row here is confidence_tier B until "
+            "the `detail` stage retrieves that field.",
+            "A COMMENT THAT MERELY MENTIONS A TRIBE IS NOT A COMMENT BY THAT TRIBE. Text-"
+            "only matches are held in review/regulations_gov_comment_candidates.csv and "
+            "are deliberately NOT in this table.",
+            "THE SWEEP IS INCOMPLETE. 51 of 1,712 query names are done. This table is a "
+            "partial harvest and its row count will grow; "
+            "regulations_gov_entity_coverage.csv states, per entity, what was read "
+            "against what the source reported.",
+            "COALITION FILERS ARE indian_country SCOPED. An intertribal organisation "
+            "advocating for a membership is not an unresolved link to one tribe (ADR-010); "
+            "cedar_entity_id names the filer and record_scope says who the filing is for.",
+            FLOOR_CAVEAT,
+        ],
+    },
+    "regulations_gov_entity_coverage": {
+        "file": "regulations_gov_entity_coverage.csv",
+        "name": "Tribal Rulemaking Comment Coverage",
+        "measure": "Per entity queried: how many comments the source reported, how many "
+                   "this build read, how many its title attributed, and whether the read "
+                   "was capped",
+        "unit": "Counts of comments and of pages",
+        "universe": "Every Cedar spine query name attempted, INCLUDING the ones that "
+                    "returned nothing - a measured zero is the point of this table",
+        "geographyLevel": "nation",
+        "geographyIdentifier": "cedar_entity_id (spine tribe_id)",
+        "periodFrom": 2002, "periodTo": 2026,
+        "sourceName": "regulations.gov v4 API (api.data.gov)",
+        "citation": "Cedar Press coverage profile for the rulemaking-comment channel. "
+                    "Every row carries the query_url that produced it.",
+        "collectionMethod": "Written by the same harvest that writes the comment table, "
+                            "one row per entity per query-name source.",
+        "caveats": [
+            "ABSENCE UNDER A FILTER IS A PROPERTY OF THE FILTER. "
+            "NO_COMMENTS_MATCH_THIS_NAME means this exact phrase found nothing, not that "
+            "the entity never commented - it may comment under a name Cedar does not hold.",
+            "CAPPED means THIS BUILD'S 4-page budget stopped the read, not the source. "
+            "page_budget_exhausted and pages_available say by how much, and the "
+            "checkpoint key carries the budget so raising it re-opens exactly those rows.",
+            "PAGES 2+ ARE FETCHED ONLY where page 1 produced a title-attributed hit. A "
+            "generic place name ('Bear River', 813 hits) is therefore read shallowly ON "
+            "PURPOSE, and its row says so.",
+            "The sweep is 51 of 1,712 query names complete; this table covers only what "
+            "has been attempted.",
+            FLOOR_CAVEAT,
+        ],
+    },
     "deals": {
         "file": None,
         "name": "Indian Country Deals",
@@ -839,7 +982,13 @@ SPEC = {
                     "onward. Corrections made before that date are not "
                     "enumerated here and their propagation is UNMEASURED.",
         "geographyLevel": "nation",
-        "geographyIdentifier": "",
+        # Was "" and the validator refused the manifest for it — this was the
+        # single ERROR in the 2026-09-01 run of 27. Filled by INT-2 rather than
+        # stepped around; the register's own key columns say what it is.
+        "geographyIdentifier": "entity_id (the withdrawn attribution's spine "
+                               "handle) plus table + column_unlinked; a "
+                               "correction is keyed to an ENTITY and a COLUMN, "
+                               "not to a place",
         "periodFrom": 2026, "periodTo": 2026,
         "sourceName": "Cedar Press",
         "citation": "Cedar Press correction register. Every row is a claim "
@@ -870,20 +1019,419 @@ SPEC = {
             "rate.",
         ],
     },
+    "sam_native_class_distributions": {
+        "file": "sam_native_class_distributions.csv",
+        "name": "SAM Native-Ownership Class Distributions",
+        "measure": "How federal contract dollars and firm counts distribute across "
+                   "fiscal year, funding department, 2-digit NAICS and set-aside, "
+                   "separately for the entity-owned and the individually Native-owned "
+                   "populations",
+        "unit": "One row per (variant_class, dimension, category). Figures are firm "
+                "counts, action-row counts and nominal action obligations in USD, not "
+                "deflated. A cell resolving to fewer than three firms is listed with its "
+                "figures withheld.",
+        "universe": "SAM entity registrations carrying a Native ownership or individual-"
+                    "Native business type, restricted to include_in_native_universe = 1, "
+                    "joined to their FY2000-2007 contract actions",
+        "geographyLevel": "nation",
+        "geographyIdentifier": "none - this table is aggregate and names no entity",
+        "periodFrom": 2000, "periodTo": 2007,
+        "sourceName": "SAM.gov entity extracts (AMERICAN INDIAN, NATIVE AMERICAN) joined "
+                      "to the FY2000-2007 SAM prime contract award file",
+        "citation": "Cedar Press. Measured by 358_measure_sam_individual_native_class_"
+                    "delta.py on 2026-08-26; promoted out of review/ on 2026-09-01 by "
+                    "582_promote_review_backlog.py.",
+        "collectionMethod": "Counted directly from the loaded SAM extracts. Every cell "
+                            "carries the universe rule and the no-summing rule in the row "
+                            "itself, and every cell under three firms is suppressed with "
+                            "the suppression rule named in the row.",
+        "caveats": [
+            "THE TWO CLASSES ARE NEVER SUMMED. ENTITY_OWNED (a tribe, ANC or NHO owns the "
+            "firm) and INDIVIDUAL_NATIVE_OWNED (a Native individual owns it) are separate "
+            "populations drawn from separate extracts. A combined 'Native total' double-"
+            "counts every firm carrying both flags, and there is deliberately no total "
+            "row in this table to quote by accident.",
+            "EVERY FLAG IS A SELF-CERTIFICATION. Membership reaches this table through "
+            "SAM's awardeeBusinessTypeName, which the registrant asserts about itself. "
+            "Per docs/INDIVIDUAL_NATIVE_CLASS_PROPOSAL.md s4 that evidence tops out at "
+            "tier C. These aggregates describe what firms CLAIMED, never what Cedar has "
+            "adjudicated, and no row here entitles anything to become a spine row.",
+            "ABSENCE OF A FLAG IS NO_CLAIM_FOUND, NOT NOT_NATIVE. A firm with no Native "
+            "business type is outside the universe because it made no claim, which is not "
+            "evidence against it.",
+            "A SUPPRESSED CELL IS NOT AN EMPTY ONE. 33 of 176 cells resolved to fewer "
+            "than three firms and their figures are withheld. The cell is still listed so "
+            "the reader can see the category exists; reading a blank as zero understates "
+            "every dimension.",
+            "THERE IS NO PER-FIRM VIEW AND THERE WILL NOT BE ONE. The per-firm half of "
+            "this measurement is internal and stays in review/: a digest of a UEI is "
+            "reversible by enumerating SAM's own entity space, so a de-identified per-firm "
+            "file would be a disclosure with an extra step.",
+            "OBLIGATIONS ARE NOMINAL. Figures are as recorded on the action and are not "
+            "deflated; do not compare FY2000 against FY2007 without deflating.",
+            FLOOR_CAVEAT,
+        ],
+    },
+    # ------------------------------------------------------------------ NIGC
+    # Six families promoted 2026-09-01 by `code/586_promote_nigc_gaming.py`,
+    # after `code/585_factcheck_nigc_keys.py` re-derived every tribe key. NIGC
+    # publishes 72 document categories / 4,071 documents and Cedar held five
+    # of the 72 before this pull. Plus the two self-published layers from
+    # `code/588`, which are kept physically apart from every regulator series.
+    "nigc_enforcement_actions": {
+        "file": "nigc_enforcement_actions.csv",
+        "name": "NIGC Enforcement Actions",
+        "measure": "Federal enforcement actions issued by the National Indian "
+                   "Gaming Commission against tribal gaming operations and "
+                   "their vendors",
+        "unit": "Published enforcement documents",
+        "universe": "Every enforcement document on NIGC's published index: "
+                    "146 notices of violation, 99 settlement agreements, 17 "
+                    "civil fine assessments, 10 closure orders, 1 temporary "
+                    "closure order, 1 notice of decision and order.",
+        "geographyLevel": "nation",
+        "geographyIdentifier": "cedar_uid (the respondent tribe). An "
+                               "enforcement action is keyed to a party, not "
+                               "to a place.",
+        "periodFrom": 1995, "periodTo": 2026,
+        "sourceName": "National Indian Gaming Commission",
+        "citation": "nigc.gov enforcement-actions index; every row carries "
+                    "the document URL, the retrieved PDF and its MD5.",
+        "collectionMethod": "Enumeration of NIGC's full published document "
+                            "surface, then retrieval of every PDF in this "
+                            "category. Tribe keys are re-derived and checked, "
+                            "never inherited from the index.",
+        "caveats": [
+            "ONE ROW IS ONE DOCUMENT, NOT ONE VIOLATION. A single matter "
+            "routinely produces a notice of violation AND a settlement "
+            "agreement - Squaxin Island NOV-06-07 and SA-06-07 are two rows "
+            "about one event. Counting rows counts documents.",
+            "index_post_date IS A PUBLISHING DATE, NOT THE DATE OF THE ACT. A "
+            "1999 notice of violation carries an index post date of 2024, "
+            "because that is when NIGC's content system posted the listing. "
+            "Use action_code_year or document_date for the event.",
+            "44 ROWS ARE UNRESOLVED AND THAT IS HONEST. 20 of 532 staged keys "
+            "did not survive re-derivation: four were keyed to the wrong "
+            "federally recognized tribe (Cherokee Nation to the United "
+            "Keetoowah Band), four to a tribal college, one to Florida "
+            "instead of Oklahoma, three to the wrong Santee Sioux, and four "
+            "1999 retail smoke-shop notices to the Seneca Nation purely "
+            "because the businesses carry the word. Every correction and "
+            "refusal carries its evidence in record_scope_basis.",
+            "A RETRIEVED PDF IS NOT A READABLE ONE. document_retrieved says "
+            "the file is on disk; several are image-only scans with no text "
+            "layer and have not been OCR'd.",
+            "NIGC PUBLISHES NO PRE-1995 ENFORCEMENT INDEX. The absence before "
+            "1995 is the agency's, not ours.",
+            FLOOR_CAVEAT,
+        ],
+    },
+    "nigc_indian_lands_opinions": {
+        "file": "nigc_indian_lands_opinions.csv",
+        "name": "NIGC Indian Lands Opinions",
+        "measure": "NIGC Office of General Counsel determinations on whether "
+                   "a specific parcel is Indian lands eligible for gaming, "
+                   "with the legal theory argued and whether it was accepted",
+        "unit": "Published legal opinions",
+        "universe": "Every opinion on NIGC's published index, 1997-08-12 to "
+                    "2026-05-18.",
+        "geographyLevel": "nation",
+        "geographyIdentifier": "cedar_uid (the requesting tribe), plus the "
+                               "parcel string, which is the source's own land "
+                               "description and is not a coded geography.",
+        "periodFrom": 1997, "periodTo": 2026,
+        "sourceName": "National Indian Gaming Commission, Office of General "
+                      "Counsel",
+        "citation": "nigc.gov Indian lands opinions index, transcribed cell "
+                    "for cell.",
+        "collectionMethod": "The index is fully structured in HTML - tribe, "
+                            "parcel, legal theory, outcome, date - so the "
+                            "index alone is a dataset before any PDF is "
+                            "opened. Nothing is derived.",
+        "caveats": [
+            "AN ACCEPTED THEORY IS NOT A LICENCE. theory_accepted = Yes means "
+            "the Office of General Counsel accepted the stated legal theory "
+            "for that parcel. It is not a gaming licence, not a compact, and "
+            "not evidence that gaming ever began there.",
+            "THE LEGAL THEORY IS THE SOURCE'S WORD, NOT A CODED VOCABULARY. "
+            "Restored Lands (33), Within Reservation Boundaries (12), "
+            "Jurisdiction (11) and the rest are transcribed verbatim and have "
+            "not been normalised into a scheme.",
+            "ONE OPINION PER PARCEL, NOT PER TRIBE. A tribe with four parcels "
+            "has four rows and they can disagree with each other.",
+            "4 rows are unresolved: Delaware Tribe of Western Oklahoma is "
+            "ambiguous between two federally recognized Delaware entities and "
+            "is left unkeyed rather than guessed.",
+            FLOOR_CAVEAT,
+        ],
+    },
+    "nigc_game_classification_opinions": {
+        "file": "nigc_game_classification_opinions.csv",
+        "name": "NIGC Game Classification Opinions",
+        "measure": "NIGC determinations of whether a named game is Class II "
+                   "or Class III under IGRA, with the feature flags the "
+                   "agency records",
+        "unit": "Published legal opinions",
+        "universe": "Every opinion on NIGC's published index, 1992-09-14 to "
+                    "2024-04-26. This predates every other gaming series "
+                    "Cedar holds.",
+        "geographyLevel": "nation",
+        "geographyIdentifier": "none, and that is correct - the subject is a "
+                               "GAME. ADR-010 scope indian_country on all 122 "
+                               "rows.",
+        "periodFrom": 1992, "periodTo": 2024,
+        "sourceName": "National Indian Gaming Commission, Office of General "
+                      "Counsel",
+        "citation": "nigc.gov game classification opinions index, transcribed "
+                    "cell for cell.",
+        "collectionMethod": "Index transcription. The five feature flags are "
+                            "the agency's own checkbox columns read as Y/N.",
+        "caveats": [
+            "THE CLASS IS THE WHOLE POINT AND IT IS NOT COSMETIC. Class III "
+            "requires a tribal-state compact; Class II does not. 62 opinions "
+            "say III, 55 say II, 3 say Both and 2 leave the cell blank.",
+            "THIS TABLE NAMES NO TRIBE AND THAT IS NOT A GAP. The source "
+            "index carries no party column. A classification applies wherever "
+            "the game is offered in Indian country, so the ADR-010 scope is "
+            "indian_country - do not read the blank entity column as "
+            "unresolved work.",
+            "AN OPINION IS NOT A REGULATION. These are Office of General "
+            "Counsel views on specific games, issued on request, and later "
+            "opinions have reached different conclusions about similar games.",
+            "THE SERIES STOPS AT 2024-04-26 BECAUSE THE SOURCE DOES.",
+            FLOOR_CAVEAT,
+        ],
+    },
+    "nigc_management_contract_approvals": {
+        "file": "nigc_management_contract_approvals.csv",
+        "name": "NIGC Approved Management Contracts",
+        "measure": "Management contracts approved by the NIGC Chair under 25 "
+                   "U.S.C. 2711, by tribe",
+        "unit": "Approved contract documents",
+        "universe": "68 approvals across 55 tribes - NIGC's current published "
+                    "roster.",
+        "geographyLevel": "nation",
+        "geographyIdentifier": "cedar_uid (the contracting tribe)",
+        "periodFrom": 1993, "periodTo": 2026,
+        "sourceName": "National Indian Gaming Commission",
+        "citation": "nigc.gov approved-management-contracts index; every row "
+                    "carries the document URL, the retrieved PDF and its MD5.",
+        "collectionMethod": "Index enumeration and PDF retrieval. This closes "
+                            "the hole docs/GAMING_TEMPORAL_BUILD_LOG.md 10.6 "
+                            "named, where the management-contract trace was 0 "
+                            "on all 774 property rows and read "
+                            "not_held_by_cedar_press_this_session.",
+        "caveats": [
+            "THIS IS A SNAPSHOT, NOT A HISTORY. NIGC posts no retired "
+            "contracts, so a tribe absent from this roster is not a tribe "
+            "that never had an approved contract.",
+            "IT DOES NOT JOIN TO A FACILITY. The source names the tribe, not "
+            "the property. One tribe routinely runs a dozen properties, so "
+            "attaching an approval to a building would attribute a contract "
+            "on the strength of its owner. gaming_facilities.csv has a stated "
+            "grain of 787 rows / 786 facilities and this table does not reach "
+            "it.",
+            "AN APPROVAL IS A PERMISSION, NOT A SANCTION. Never sum or pool "
+            "this table with nigc_enforcement_actions.csv; they are opposite "
+            "regulatory acts.",
+            "One row is multi_entity: a single approval names the Miami Tribe "
+            "AND the Modoc Tribe. Read nigc_action_parties.csv for the "
+            "authoritative party list; the staged version had silently kept "
+            "only one of the two.",
+            FLOOR_CAVEAT,
+        ],
+    },
+    "nigc_document_surface": {
+        "file": "nigc_document_surface.csv",
+        "name": "NIGC Published Document Surface",
+        "measure": "What the National Indian Gaming Commission publishes, "
+                   "enumerated - every document category and every document "
+                   "in it, with a flag for whether Cedar holds that family",
+        "unit": "(category, document) index memberships",
+        "universe": "7,930 memberships over 4,071 distinct documents in 73 "
+                    "categories, read from NIGC's own listings and sitemaps.",
+        "geographyLevel": "nation",
+        "geographyIdentifier": "none - this is a coverage instrument over a "
+                               "federal agency's publications. ADR-010 scope "
+                               "indian_country.",
+        "periodFrom": 1992, "periodTo": 2026,
+        "sourceName": "National Indian Gaming Commission",
+        "citation": "nigc.gov category listings plus the wpdmpro sitemaps.",
+        "collectionMethod": "Every category listing paginated to exhaustion, "
+                            "then reconciled against the sitemap so a "
+                            "document surfaced by NO listing is still "
+                            "recorded.",
+        "caveats": [
+            "ONE ROW IS A MEMBERSHIP, NOT A DOCUMENT. A document that appears "
+            "in three categories has three rows. Count documents with "
+            "COUNT(DISTINCT document_slug), which gives 4,071 against 7,930 "
+            "rows.",
+            "NEVER SUM IT AGAINST THE INSTRUMENT TABLES. nigc_ordinances.csv "
+            "(1,155) and nigc_declination_letters.csv (327) are "
+            "one-row-per-instrument; this is the INDEX that measures them. "
+            "What it says is that NIGC's index now carries 1,162 ordinance "
+            "documents and 329 declination documents - +7 and +2 - and those "
+            "two numbers are the refresh signal.",
+            "THIS TABLE IS AN INDEX, NOT A CORPUS. cedar_holds_this_family is "
+            "Y for four categories only. The other 69 are enumerated and NOT "
+            "fetched, which is a stated position and not a silent gap.",
+            "index_post_date is when NIGC's content system posted the "
+            "listing, not when the document was written. Older families carry "
+            "recent post dates in bulk.",
+            FLOOR_CAVEAT,
+        ],
+    },
+    "nigc_action_parties": {
+        "file": "nigc_action_parties.csv",
+        "name": "NIGC Action Parties",
+        "measure": "Which Native entities are party to which NIGC enforcement "
+                   "action or approved management contract, and in what role",
+        "unit": "(action, party, role) links",
+        "universe": "Every resolvable party on the 362 enforcement actions "
+                    "and 68 management contract approvals.",
+        "geographyLevel": "nation",
+        "geographyIdentifier": "cedar_uid",
+        "periodFrom": 1995, "periodTo": 2026,
+        "sourceName": "National Indian Gaming Commission; Cedar Press entity "
+                      "spine",
+        "citation": "Derived from the nigc.gov indexes; every party keyed "
+                    "through the project resolver and re-checked by "
+                    "code/585_factcheck_nigc_keys.py.",
+        "collectionMethod": "The ADR-010 party bridge. Roles are recorded "
+                            "because they are not interchangeable: a "
+                            "respondent to an enforcement action and a tribal "
+                            "party to an approved contract are opposite "
+                            "positions.",
+        "caveats": [
+            "A ROLE-LESS JOIN IS A WRONG JOIN. Filter on role before "
+            "counting; respondent and tribal_party must never be pooled.",
+            "THIS IS A BRIDGE, NOT A COUNT OF ACTIONS. An action with two "
+            "parties has two rows here and one row in its own table.",
+            "UNRESOLVED PARTIES ARE ABSENT FROM THIS TABLE BY DESIGN. 45 "
+            "documents across the two source tables carry no key, so a count "
+            "of parties here is a FLOOR on parties involved, never a census.",
+            FLOOR_CAVEAT,
+        ],
+    },
+    "gaming_property_self_published_claims": {
+        "file": "gaming_property_self_published_claims.csv",
+        "name": "What Tribal Gaming Properties Say About Themselves",
+        "measure": "Capacity and amenity figures that tribal gaming "
+                   "properties publish on their own websites - machine "
+                   "counts, table counts, hotel rooms, venue capacity, "
+                   "square footage",
+        "unit": "Self-published claims",
+        "universe": "270 adjudicated claims from a crawl of 1,749 pages "
+                    "across 144 operator hosts.",
+        "geographyLevel": "nation",
+        "geographyIdentifier": "cedar_uid where the property resolves; "
+                               "facility_id where the page resolves to one "
+                               "facility",
+        "periodFrom": 2026, "periodTo": 2026,
+        "sourceName": "Tribal gaming property websites",
+        "citation": "Each row carries the page URL, the sentence verbatim and "
+                    "the capture date.",
+        "collectionMethod": "Sentence-level extraction with a named recovery "
+                            "rule per claim; 231 of these were adjudicated "
+                            "back in from an earlier refusal pile and say "
+                            "which rule recovered them.",
+        "caveats": [
+            "A MACHINE COUNT A CASINO ADVERTISES IS A CLAIM, NOT A "
+            "MEASUREMENT. assertion_class sits deliberately outside the typed "
+            "measurement vocabulary so it can never be promoted into a "
+            "measurement by relabelling. Never pool it with "
+            "gaming_capacity_official.csv, which is regulator-reported.",
+            "162 OF 270 VALUES ARE BOUNDS, NOT COUNTS - 'more than 1,000 "
+            "slots', 'seats up to 200'. value_is_bounded and bound_direction "
+            "are on every row. Averaging or summing a bound as if it were a "
+            "count is the error those columns exist to stop.",
+            "not_summable_with NAMES, PER ROW, THE SERIES THIS VALUE MUST NOT "
+            "JOIN. Read it before any aggregation.",
+            "A WEBSITE HAS NO HISTORY. as_of_date is normally the capture "
+            "date, because operators do not date marketing copy, and it is an "
+            "UPPER BOUND on when the claim was true rather than the date it "
+            "became true.",
+            "9 ROWS ALSO APPEAR IN gaming_property_site_observations.csv and "
+            "are FLAGGED rather than dropped, so neither table is silently "
+            "short. Filter on also_in_gaming_property_site_observations "
+            "before combining the two.",
+            "80 of 270 rows are unresolved: the page was crawled and no Cedar "
+            "facility resolved from it.",
+            FLOOR_CAVEAT,
+        ],
+    },
+    "gaming_property_self_published_assertions": {
+        "file": "gaming_property_self_published_assertions.csv",
+        "name": "Ownership and Management as Gaming Properties State It",
+        "measure": "Who a tribal gaming property says owns it and who it says "
+                   "operates it, in its own words",
+        "unit": "Self-published ownership or management assertions",
+        "universe": "622 assertions from the same 1,749-page operator crawl.",
+        "geographyLevel": "nation",
+        "geographyIdentifier": "cedar_uid where the property resolves",
+        "periodFrom": 2026, "periodTo": 2026,
+        "sourceName": "Tribal gaming property websites",
+        "citation": "Each row carries the page URL, the sentence verbatim, "
+                    "the captured HTML filename and its MD5.",
+        "collectionMethod": "Sentence extraction, then comparison against "
+                            "Cedar's curated owner for the same facility so "
+                            "agreement and disagreement are both visible.",
+        "caveats": [
+            "A MANAGEMENT BRAND IS NOT OWNERSHIP. Caesars MANAGES Harrah's "
+            "Cherokee; the Eastern Band OWNS it. "
+            "asserted_owner_is_management_brand keeps the two apart and they "
+            "must never be merged.",
+            "A LAPSED DOMAIN DOES NOT STOP RESOLVING, IT STARTS LYING. Two "
+            "rows are WITHDRAWN_NOT_SELF_PUBLISHED: oldcampcasino.com is an "
+            "affiliate gambling-review site on a dead operator's domain. Its "
+            "factual claim about the Burns Paiute Tribe is correct and past "
+            "tense; what was false is that the OPERATOR published it. Treat "
+            "any single-property host with the same suspicion.",
+            "THIS IS THE OPERATOR'S OWN STATEMENT AND NOTHING MORE. It is not "
+            "a corporate registry, not a compact and not an NIGC record. "
+            "Where it disagrees with Cedar's curated owner, "
+            "agrees_with_curated_owner says so and neither side is "
+            "automatically right.",
+            "AN UNDATED MARKETING PAGE IS AN UPPER BOUND. as_of_date is the "
+            "capture date.",
+            FLOOR_CAVEAT,
+        ],
+    },
 }
 
 
 def rows_of(fname):
+    """CSV RECORDS, not physical lines.
+
+    THIS COUNTED LINES UNTIL 2026-09-01 AND EVERY MANIFEST THAT SHIPPED WITH A
+    MULTI-LINE TEXT FIELD OVERSTATED ITS OWN ROW COUNT. `rowCount` is a public
+    claim about how much data a subscriber is buying, and `25_build_
+    publication_layer.py` counts records, so the two disagreed on every such
+    table.
+
+    Measured across `data/clean/` on 2026-09-01: **27 tables affected.** The
+    worst is a gaming table -- `fac_audit_gaming_disclosures.csv` shipped as
+    **17,877 rows against 1,521 records, an 11.8x overstatement.** Also
+    `native_entity_lobbying_disclosures.csv` 43,963 vs 27,796, `subawards.csv`
+    87,363 vs 72,837, `compact_terms.csv` 1,705 vs 1,311,
+    `gaming_capacity_official.csv` 6,733 vs 6,461, and `gaming_facilities.csv`
+    788 vs 787 -- which is why its manifest read 788 against a grain the
+    dataset docs state as 787 rows / 786 facilities.
+
+    A quoted newline inside a field is legal CSV and extremely common in any
+    table carrying prose: a source quote, a legal theory, a reason. Counting
+    `\\n` was never right; it only looked right while no shipped table had one.
+    """
     if not fname:
         return None
     p = CLEAN / fname
     if not p.exists():
         return None
-    n = -1
-    with open(p, encoding="utf-8-sig", errors="replace") as fh:
-        for n, _ in enumerate(fh):
+    n = 0
+    with open(p, encoding="utf-8-sig", errors="replace", newline="") as fh:
+        for n, _ in enumerate(csv.reader(fh), start=0):
             pass
-    return max(n, 0)
+    return max(n, 0)          # n counts the header at index 0
 
 
 def columns_of(fname):

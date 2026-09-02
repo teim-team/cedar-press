@@ -1,13 +1,13 @@
 # Section 106 project consultation - built, and the merge proposed
 
-*Generated 2026-08-12 by `code/130_build_section_106_consultation.py`. Every number below is recomputed from the files it describes; none is hand-entered.*
+*Generated 2026-09-01 by `code/130_build_section_106_consultation.py`. Every number below is recomputed from the files it describes; none is hand-entered.*
 
 ## What was built
 
 | | |
 |---|---:|
-| `data/clean/section_106_consultation_events.csv` | 1,363 rows |
-| distinct tribes | 84 |
+| `data/clean/section_106_consultation_events.csv` | 1,367 rows |
+| distinct tribes | 85 |
 | distinct lead agencies | 32 |
 | `data/clean/section_106_project_parties.csv` | 51 rows |
 | distinct applicants / developers named | 41 |
@@ -18,8 +18,8 @@
 
 | record_type | rows |
 |---|---:|
-| STATUTORY_REFERENCE_ONLY | 596 |
-| AGREEMENT_DOCUMENT_REFERENCE | 352 |
+| STATUTORY_REFERENCE_ONLY | 597 |
+| AGREEMENT_DOCUMENT_REFERENCE | 355 |
 | CONSULTATION_PROCESS_RECORD | 154 |
 | PROJECT_UNDERTAKING | 154 |
 | PROGRAM_ALTERNATIVE | 107 |
@@ -29,22 +29,22 @@
 ### By tier
 
 - **A** - 103
-- **B** - 133
-- **C** - 1,127
+- **B** - 134
+- **C** - 1,130
 
 ### Top lead agencies
 
 | agency | rows |
 |---|---:|
-| Interior Department | 299 |
+| Interior Department | 301 |
 | Energy Department | 196 |
-| Transportation Department | 149 |
+| Transportation Department | 150 |
 | Advisory Council on Historic Preservation | 147 |
 | Housing and Urban Development Department | 105 |
 | Environmental Protection Agency | 81 |
 | Defense Department | 70 |
 | Agriculture Department | 69 |
-| Commerce Department | 42 |
+| Commerce Department | 43 |
 | Health and Human Services Department | 32 |
 | Nuclear Regulatory Commission | 31 |
 | Tennessee Valley Authority | 25 |
@@ -70,9 +70,9 @@ The existing file's composition, recomputed:
 | tribal_summit | 2 |
 
 - 11,068 of 11,402 rows come from `Interior Department` alone.
-- The existing file holds **20** Section 106 rows against **1,363** here.
+- The existing file holds **20** Section 106 rows against **1,367** here.
 - Source-URL overlap between the existing Section 106 rows and the new file: **14**.
-- Tribes in the new file that appear nowhere in `consultation_events.csv`: **16**.
+- Tribes in the new file that appear nowhere in `consultation_events.csv`: **17**.
 
 ## The proposed merge - and why it is a proposal, not an action
 

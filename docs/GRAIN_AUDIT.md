@@ -21,11 +21,11 @@ Three honest outcomes, and they are three different jobs:
 | | count |
 |---|---:|
 | shippable tables | 223 |
-| **DECLARED_VALIDATED** | **195** |
-| OPEN_WITH_EVIDENCE | 7 |
-| DEFECTIVE | 13 |
-| still unexplained | 8 |
-| ratchet `contract_grain_unstated_shippable` | **28** (was 207) |
+| **DECLARED_VALIDATED** | **213** |
+| OPEN_WITH_EVIDENCE | 1 |
+| DEFECTIVE | 3 |
+| still unexplained | 6 |
+| ratchet `contract_grain_unstated_shippable` | **10** (was 207) |
 
 A declaration that the data contradicts is release-blocking through `contract_violations`; there are **7**.
 
@@ -33,83 +33,23 @@ A declaration that the data contradicts is release-blocking through `contract_vi
 
 These are not declaration gaps. Each is a table a buyer can double-count today. Workstream E does not own these pipelines and has changed no data.
 
-### `cedar_identifier_graph_edges.csv`
-
-2,451 LITERAL duplicate rows of 46,051. A graph with duplicate edges inflates `n_asserting_sources` and every degree count computed from it.
-
-- measured 46,051 rows, 2,451 whole-row duplicate(s) on 2026-08-29
-
-### `cedar_ruling_ledger_consolidated.csv`
-
-6,302 LITERAL duplicate rows of 15,587 - 40% of the file. A ruling ledger that records the same ruling twice cannot be counted, and 157 source files feed it.
-
-- measured 15,587 rows, 6,302 whole-row duplicate(s) on 2026-08-29
-
-### `cross_dataset_ruling_map.csv`
-
-2,228 LITERAL duplicate rows of 7,507 - 30% of the file.
-
-- measured 7,507 rows, 2,228 whole-row duplicate(s) on 2026-08-29
-
-### `faads_transactions.csv`
-
-1,001 LITERAL duplicate rows of 60,661. Same cause as faads_transactions_all_agencies.csv.
-
-- measured 60,661 rows, 1,001 whole-row duplicate(s) on 2026-08-29
-
 ### `faads_transactions_all_agencies.csv`
 
 179,259 LITERAL duplicate rows of 2,769,748 (6.5%). DIAGNOSED 2026-08-29 and it is NOT a page fetched twice, which is what this entry used to say: 174,348 of the 179,259 - 97% - come from ONE staged object, ed_fy2007_archive.zip, and 174,957 of the surplus rows are FY2007, while 40 other agency-years are almost clean. A duplicated fetch does not concentrate like that. All 179,259 carry an award_id_fain, and the staged zip carries `assistance_transaction_unique_key` and `modification_number` among its 112 columns - `30_funding_pre2008.to_out_row` took neither. This is the same projection loss proved exactly for the prime contracting archive, where 80,778 apparent duplicates resolved to 80,778 distinct transactions and went to zero without deleting a row (see 430). `to_out_row` and OUT_COLS now carry both columns, so the next `py -3 code/30_funding_pre2008.py build` states a grain. That build re-extracts a 2.77M-row shipped table and is queued in review/OWNER_DECISION_QUEUE.md rather than run unattended. Until it runs the duplication is DIAGNOSED, not repaired.
 
-- measured 2,769,748 rows, 179,259 whole-row duplicate(s) on 2026-08-29
-
-### `ferc_docket_filings.csv`
-
-822 LITERAL duplicate rows of 102,615. docs/ANOMALY_REPORT.md already records 9,570 rows repeating (docket_number, accession_number); this measurement is the stricter one - 822 rows repeat in EVERY column.
-
-- measured 102,615 rows, 822 whole-row duplicate(s) on 2026-09-01
-
-### `hearing_bill_links.csv`
-
-1 LITERAL duplicate row of 465: (bill_id, event_id) = (119-s-3878, 338549) appears twice.
-
-- measured 465 rows, 1 whole-row duplicate(s) on 2026-09-01
-
-### `lobbying_registrant_native_ownership_evidence.csv`
-
-4 LITERAL duplicate rows of 27 - 15% of a table the build log describes as 'one row per evidence route'. Four evidence routes are recorded twice.
-
-- measured 27 rows, 4 whole-row duplicate(s) on 2026-09-01
-
-### `native_bills_subject_sweep.csv`
-
-5 LITERAL duplicate rows of 2,414.
-
-- measured 2,414 rows, 5 whole-row duplicate(s) on 2026-09-01
+- measured 2,769,748 rows, 3,441 whole-row duplicate(s) on 2026-09-01
 
 ### `native_passthrough.csv`
 
 114 LITERAL duplicate rows of 1,262. This table is derived from subawards.csv and inherits its duplication; the passthrough dollars are therefore over-stated by an unmeasured amount.
 
-- measured 1,262 rows, 114 whole-row duplicate(s) on 2026-08-29
-
-### `np_schedule_i_grants.csv`
-
-101 LITERAL duplicate rows of 58,685. (object_id, recipient_name_as_filed) collides 860 times - some legitimately (one filer can grant to the same recipient twice on one return), but the 101 whole-row repeats are not that.
-
-- measured 58,685 rows, 101 whole-row duplicate(s) on 2026-09-01
+- measured 1,522 rows, 116 whole-row duplicate(s) on 2026-09-01
 
 ### `subawards.csv`
 
 10,770 LITERAL duplicate rows of 72,837. (subaward_number, subaward_date) collides 27,470 times, so even the natural key of a subaward is not unique here.
 
 - measured 72,837 rows, 10,770 whole-row duplicate(s) on 2026-08-29
-
-### `tcu_cdfi_ownership_evidence.csv`
-
-4 LITERAL duplicate rows of 130.
-
-- measured 130 rows, 4 whole-row duplicate(s) on 2026-08-29
 
 ## OPEN_WITH_EVIDENCE - the rulings a human must make
 
@@ -121,58 +61,24 @@ the file has ZERO rows. Every candidate key is vacuously unique, so the data can
 
 - unique on the full file: (`record_id`)
 
-### `contractor_ranking.csv`  (1,429 rows)
-
-the only unique keys over 1,429 rows require `firm_transaction_rows` - a MEASURE. A key that needs a count in it is not a grain. (owner_entity_id, operating_company_uei, link_identifier) collides 30 times. QUESTION: is a row an (owner, operating company, identifier link) triple, and if so what distinguishes the 30 collisions?
-
-
-### `deals_2026_ytd_additions.csv`
-
-the file has ZERO rows (the build log records 1 row added, which is not what is on disk). QUESTION: was the YTD additions file consumed into deals_classified.csv and left as a stub, or did a rebuild empty it?
-
-- unique on the full file: (`Deal_ID`)
-
-### `fac_audit_sefa_gaming_programs.csv`  (1 row)
-
-the file has ONE row. Uniqueness is vacuous. QUESTION: is a row a (report, federal program) line off the SEFA, so that report_id repeats once a second program is parsed?
-
-- unique on the full file: (`report_id`); (`entity_id`); (`cedar_uid`); (`is_loan`); (`report_id`, `federal_agency_prefix`, `federal_award_extension`)
-
-### `foia_request_index.csv`  (9,481 rows)
-
-no key was found at any arity up to 6 over 9,481 rows. `foia_request_id` REPEATS 381 times; adding `status` still leaves 66 collisions; adding source_url, received_date and both `seeks_*` flags still leaves 8. QUESTION: is a row one FOIA request - in which case the 381 repeats are a defect and the id must be made unique - or one (request, matched tribe mention), in which case the key needs the entity column and should be stated?
-
-
-### `tribal_resolution_financings.csv`  (1 row)
-
-the file has ONE row. Uniqueness is vacuous. QUESTION: is a row one financing INSTRUMENT (instrument_number) or one tribal resolution?
-
-- unique on the full file: (`entity_id`); (`cedar_uid`); (`tribe`); (`lender`)
-
-### `visitor_record_foia_requests.csv`  (667 rows)
-
-the only unique key over 667 rows is `request_description_verbatim`, a free-text field. `foia_request_id` has 22 collisions. QUESTION: does one FOIA request legitimately appear once per agency or per discovery role, or is the id supposed to be unique?
-
-- unique on the full file: (`request_description_verbatim`)
-
 ## Per collection
 
 ### Federal Funding to Indian Country  (`funding`)
 
-7 of 10 shippable tables declared.
+8 of 10 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
 | `bie_uio_dollars_by_entity.csv` | 114 | DECLARED_VALIDATED | `tribe_id` | `cedar_uid`→1, `tribe_id`→1 |
 | `faads_entity_attribution.csv` | 29,594 | DECLARED_VALIDATED | `faads_row_id` | `cedar_uid`→536, `tribe_id`→536 |
-| `faads_transactions.csv` | 60,661 | DEFECTIVE | — | `cedar_uid`→0, `tribe_id`→0 |
+| `faads_transactions.csv` | 60,661 | DECLARED_VALIDATED | `assistance_transaction_unique_key` | `cedar_uid`→0, `tribe_id`→0 |
 | `faads_transactions_all_agencies.csv` | 2,769,748 | DEFECTIVE | — | `cedar_uid`→0, `tribe_id`→0 |
 | `federal_funding_transactions.csv` | 701,955 | DECLARED_VALIDATED | `assistance_transaction_unique_key` | `cedar_uid`→18,574, `tribe_id`→12,764 |
 | `federal_funding_tribe_year_panel.csv` | 5,496 | DECLARED_VALIDATED | `tribe_id` + `fiscal_year` | `cedar_uid`→32, `tribe_id`→16 |
 | `funding_identifier_netnew_ueis.csv` | 4,249 | DECLARED_VALIDATED | `recipient_uei` | — |
 | `inflation_deflator.csv` | 27 | DECLARED_VALIDATED | `year` | — |
-| `native_passthrough.csv` | 1,262 | DEFECTIVE | — | — |
-| `native_passthrough_pairs.csv` | 212 | DECLARED_VALIDATED | `from_tribe_id` + `to_tribe_id` | — |
+| `native_passthrough.csv` | 1,522 | DEFECTIVE | — | — |
+| `native_passthrough_pairs.csv` | 307 | DECLARED_VALIDATED | `from_tribe_id` + `to_tribe_id` | — |
 
 ### Federal Register  (`federal-register`)
 
@@ -205,7 +111,7 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 
 ### Congressional Votes and Proposed Legislation  (`legislation`)
 
-10 of 12 shippable tables declared.
+11 of 12 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
@@ -219,17 +125,17 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 | `native_bills.csv` | 3,069 | DECLARED_VALIDATED | `bill_id` | — |
 | `native_bills_entity_bridge.csv` | 676 | DECLARED_VALIDATED | `bill_id` + `tribe_id` | `cedar_uid`→41, `tribe_id`→41 |
 | `native_bills_entity_class.csv` | 2,694 | DECLARED_VALIDATED | `bill_id` + `class_match_basis` | — |
-| `native_bills_subject_sweep.csv` | 2,414 | DEFECTIVE | — | — |
+| `native_bills_subject_sweep.csv` | 2,409 | DECLARED_VALIDATED | `bill_id` | `subject_family`→2,185 |
 | `native_issue_litigation_positions.csv` | 197 | DECLARED_VALIDATED | `position_id` | — |
 
 ### Indian Country Deals  (`deals`)
 
-12 of 14 shippable tables declared.
+14 of 14 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
 | `deals_2000_2019_additions.csv` | 40 | DECLARED_VALIDATED | `Deal_ID` | — |
-| `deals_2026_ytd_additions.csv` | 0 | OPEN_WITH_EVIDENCE | — | — |
+| `deals_2026_ytd_additions.csv` | 0 | DECLARED_VALIDATED | `Deal_ID` | `Deal_ID`→0 |
 | `deals_anc_reports_additions.csv` | 28 | DECLARED_VALIDATED | `Deal_ID` | — |
 | `deals_ancsa_portal_additions.csv` | 34 | DECLARED_VALIDATED | `Deal_ID` | — |
 | `deals_ancsa_portal_v2_additions.csv` | 42 | DECLARED_VALIDATED | `Deal_ID` | — |
@@ -241,7 +147,7 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 | `deals_tribal_debt_additions.csv` | 6 | DECLARED_VALIDATED | `Deal_ID` | — |
 | `ownership_events.csv` | 98 | DECLARED_VALIDATED | `event_id` | `cedar_uid`→12, `entity_id`→12, `tribe_id`→12 |
 | `seminole_bond_disclosures.csv` | 29 | DECLARED_VALIDATED | `disclosure_id` | `cedar_uid`→29, `tribe_id`→29 |
-| `tribal_resolution_financings.csv` | 1 | OPEN_WITH_EVIDENCE | — | `cedar_uid`→1, `entity_id`→1 |
+| `tribal_resolution_financings.csv` | 1 | DECLARED_VALIDATED | `entity_id` + `source_url` + `source_index_url` + `instrument_title` | `cedar_uid`→1, `entity_id`→1 |
 
 ### NAGPRA  (`nagpra`)
 
@@ -256,7 +162,7 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 
 ### Lobbying  (`lobbying`)
 
-30 of 33 shippable tables declared.
+33 of 33 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
@@ -267,7 +173,7 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 | `agency_attention_vs_advocacy.csv` | 22 | DECLARED_VALIDATED | `department` | — |
 | `agency_attention_vs_advocacy_year.csv` | 698 | DECLARED_VALIDATED | `department` + `year` | — |
 | `earmarks.csv` | 1,002 | DECLARED_VALIDATED | `earmark_id` | `cedar_uid`→42, `entity_id`→42 |
-| `ferc_docket_filings.csv` | 102,615 | DEFECTIVE | — | `cedar_uid`→389 |
+| `ferc_docket_filings.csv` | 102,615 | DECLARED_VALIDATED | `ferc_filing_id` + `filing_occurrence_seq` | `cedar_uid`→389 |
 | `ferc_docket_parties.csv` | 11,563 | DECLARED_VALIDATED | `ferc_docket_party_id` | `cedar_uid`→14 |
 | `ferc_ex_parte_communications.csv` | 713 | DECLARED_VALIDATED | `ferc_ex_parte_id` + `filed_or_issued_by_as_recorded` | `cedar_uid`→2 |
 | `ferc_ex_parte_parties.csv` | 4,246 | DECLARED_VALIDATED | `ferc_ex_parte_party_id` + `table_row_quote` | `cedar_uid`→2 |
@@ -276,14 +182,14 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 | `fr_ex_parte_parties.csv` | 112 | DECLARED_VALIDATED | `fr_ex_parte_party_id` | `cedar_uid`→0 |
 | `fr_ex_parte_party_entity_links.csv` | 9 | DECLARED_VALIDATED | `link_id` | `cedar_uid`→2 |
 | `hearing_appearances.csv` | 2,674 | DECLARED_VALIDATED | `hearing_appearance_id` | `cedar_uid`→78, `entity_id`→78 |
-| `hearing_bill_links.csv` | 465 | DEFECTIVE | — | — |
+| `hearing_bill_links.csv` | 464 | DECLARED_VALIDATED | `event_id` + `bill_id` | `bill_id`→4, `event_id`→19 |
 | `lobbying_disclosure_verbosity_year.csv` | 27 | DECLARED_VALIDATED | `filing_year` | — |
 | `lobbying_issue_families_filing.csv` | 27,796 | DECLARED_VALIDATED | `filing_uuid` | `cedar_uid`→400, `entity_id`→400 |
 | `lobbying_issue_family_year.csv` | 476 | DECLARED_VALIDATED | `issue_family` + `filing_year` | — |
 | `lobbying_registrant_client_relationships.csv` | 1,309 | DECLARED_VALIDATED | `registrant_id` + `client_id` | `cedar_uid`→16 |
 | `lobbying_registrant_concentration.csv` | 36 | DECLARED_VALIDATED | `scope` + `scope_value` | — |
 | `lobbying_registrant_identifiers.csv` | 525 | DECLARED_VALIDATED | `identifier` + `asserted_by_source` | — |
-| `lobbying_registrant_native_ownership_evidence.csv` | 27 | DEFECTIVE | — | `cedar_uid`→5 |
+| `lobbying_registrant_native_ownership_evidence.csv` | 27 | DECLARED_VALIDATED | `registrant_id` + `evidence_route` + `native_entity_id` + `identifier` + `asserted_by_source` | `cedar_uid`→5 |
 | `lobbying_registrants.csv` | 653 | DECLARED_VALIDATED | `registrant_id` | — |
 | `lobbying_target_entities.csv` | 116 | DECLARED_VALIDATED | `government_entity_as_filed` | — |
 | `native_entity_lobbying_disclosures.csv` | 27,796 | DECLARED_VALIDATED | `filing_uuid` | `cedar_uid`→400, `entity_id`→400 |
@@ -296,11 +202,11 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 
 ### Federal Prime Contracting  (`contractors`)
 
-9 of 10 shippable tables declared.
+10 of 10 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
-| `contractor_ranking.csv` | 1,429 | OPEN_WITH_EVIDENCE | — | — |
+| `contractor_ranking.csv` | 1,429 | DECLARED_VALIDATED | `owner_entity_id` + `operating_company_seq` | `operating_company_uei`→1, `owner_entity_id`→70 |
 | `fpds_uei_cage_map.csv` | 29,981 | DECLARED_VALIDATED | `uei` + `cage_code` + `legal_business_name` | `cage_code`→6, `uei`→16 |
 | `fpds_uei_edges.csv` | — | DECLARED_VALIDATED | `child_uei` + `parent_uei` + `edge_type` | — |
 | `prime_contracts.csv` | 1,217,768 | DECLARED_VALIDATED | `contract_transaction_unique_key` + `contract_number` + `parent_contract_number` + `fiscal_year` + `awardee_uei` | `cage_code`→398,840, `cedar_uid`→111,398, `tribe_id`→111,398 |
@@ -351,7 +257,7 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 
 ### Native Nonprofits  (`nonprofits`)
 
-9 of 10 shippable tables declared.
+10 of 10 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
@@ -364,11 +270,11 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 | `np_org_scale.csv` | 1,157 | DECLARED_VALIDATED | `ein` | `ein`→1 |
 | `np_orgs.csv` | 12,764 | DECLARED_VALIDATED | `EIN` | `cedar_uid`→121, `entity_id`→2, `tribe_id`→121 |
 | `np_schedule_i_filers.csv` | 10,314 | DECLARED_VALIDATED | `object_id` | — |
-| `np_schedule_i_grants.csv` | 58,685 | DEFECTIVE | — | `cedar_uid`→46 |
+| `np_schedule_i_grants.csv` | 58,685 | DECLARED_VALIDATED | `object_id` + `schedule_i_line_seq` | `cedar_uid`→46 |
 
 ### Gaming Intelligence  (`gaming`)
 
-51 of 54 shippable tables declared.
+54 of 54 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
@@ -384,7 +290,7 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 | `digital_gaming_relationships.csv` | 154 | DECLARED_VALIDATED | `digital_gaming_id` | `cedar_uid`→4, `entity_id`→4, `facility_id`→0, `tribe_id`→4 |
 | `digital_gaming_revenue.csv` | 10,661 | DECLARED_VALIDATED | `revenue_id` | `cedar_uid`→1,788, `entity_id`→1,788, `facility_id`→0, `tribe_id`→1,788 |
 | `fac_audit_gaming_disclosures.csv` | 1,521 | DECLARED_VALIDATED | `report_id` + `verbatim_quote` + `source_page` | `cedar_uid`→136, `entity_id`→136 |
-| `fac_audit_sefa_gaming_programs.csv` | 1 | OPEN_WITH_EVIDENCE | — | `cedar_uid`→1, `entity_id`→1 |
+| `fac_audit_sefa_gaming_programs.csv` | 1 | DECLARED_VALIDATED | `report_id` + `award_reference` | `cedar_uid`→1, `entity_id`→1 |
 | `fl_gaming_payments.csv` | 9,756 | DECLARED_VALIDATED | `payment_id` | `cedar_uid`→9,754, `facility_id`→1, `tribe_id`→9,754 |
 | `gaming_capacity_official.csv` | 6,461 | DECLARED_VALIDATED | `observation_id` | `cedar_uid`→1,584, `facility_id`→1,584, `tribe_id`→1,584 |
 | `gaming_decision_compact_join.csv` | 138 | DECLARED_VALIDATED | `decision_id` | — |
@@ -405,8 +311,8 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 | `gaming_properties.csv` | 784 | DECLARED_VALIDATED | `facility_id` | `cedar_uid`→28, `facility_id`→1, `tribe_id`→28 |
 | `gaming_property_federal_traces.csv` | 774 | DECLARED_VALIDATED | `facility_id` | `cedar_uid`→28, `compact_id`→28, `facility_id`→1, `tribe_id`→28 |
 | `gaming_property_labor_demand.csv` | 43 | DECLARED_VALIDATED | `observation_id` | `cedar_uid`→6, `entity_id`→6, `facility_id`→6, `tribe_id`→6 |
-| `gaming_property_self_published_assertions.csv` | — | unexplained | — | — |
-| `gaming_property_self_published_claims.csv` | — | unexplained | — | — |
+| `gaming_property_self_published_assertions.csv` | — | DECLARED_VALIDATED | `assertion_id` | `assertion_id`→1, `cedar_uid`→51, `facility_id`→51, `site_host`→51, `source_url`→5, `tribe_id`→51 |
+| `gaming_property_self_published_claims.csv` | — | DECLARED_VALIDATED | `claim_id` | `cedar_uid`→22, `claim_id`→1, `facility_id`→22, `site_host`→22, `source_claim_id`→1, `source_url`→7, `tribe_id`→22 |
 | `gaming_property_site_observations.csv` | 262 | DECLARED_VALIDATED | `observation_id` | `cedar_uid`→25, `entity_id`→25, `facility_id`→13, `tribe_id`→25 |
 | `gaming_property_universe_events.csv` | 10 | DECLARED_VALIDATED | `event_id` | `cedar_uid`→1, `entity_id`→1, `facility_id`→1 |
 | `gaming_revenue_bounds.csv` | 13,803 | DECLARED_VALIDATED | `bound_id` | `cedar_uid`→466, `facility_id`→82, `tribe_id`→466 |
@@ -429,7 +335,7 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 
 ### Entity spine, identifiers and reference  (`_entity_layer`)
 
-28 of 35 shippable tables declared.
+34 of 35 shippable tables declared.
 
 | table | rows | outcome | primary key | max rows per join-key value |
 |---|---:|---|---|---|
@@ -441,13 +347,13 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 | `bie_uio_dollars_by_entity.csv` | 114 | DECLARED_VALIDATED | `tribe_id` | `cedar_uid`→1, `tribe_id`→1 |
 | `cedar_correction_register.csv` | 173 | DECLARED_VALIDATED | `correction_id` | `entity_id`→94 |
 | `cedar_entity_identity_crosswalk.csv` | 10,107 | DECLARED_VALIDATED | `crosswalk_id` | `cedar_uid`→160 |
-| `cedar_identifier_graph_edges.csv` | 46,051 | DEFECTIVE | — | — |
+| `cedar_identifier_graph_edges.csv` | 46,820 | DECLARED_VALIDATED | `edge_kind` + `from_node` + `to_node` + `asserting_source` + `asserting_row_ref` + `edge_tier` + `method` | `from_node`→1,095 |
 | `cedar_identifier_graph_nodes.csv` | 115,471 | DECLARED_VALIDATED | `node` | — |
 | `cedar_identifier_ledger_final.csv` | — | DECLARED_VALIDATED | `identifier_type` + `identifier` + `tribe_id` + `attribution_method` + `evidence_url` + `verified_date` | `cedar_uid`→159, `identifier`→2, `tribe_id`→159 |
 | `cedar_identifier_propagation.csv` | 1,157 | DECLARED_VALIDATED | `dataset` + `identifier` | — |
 | `cedar_publishable_identifiers.csv` | 1,577 | DECLARED_VALIDATED | `identifier` | `cedar_uid`→35, `tribe_id`→35 |
-| `cedar_ruling_ledger_consolidated.csv` | 15,587 | DEFECTIVE | — | — |
-| `cross_dataset_ruling_map.csv` | 7,507 | DEFECTIVE | — | — |
+| `cedar_ruling_ledger_consolidated.csv` | 43,321 | DECLARED_VALIDATED | `subject_key` + `source_file` + `source_row_ordinal` | `resolved_tribe_id`→661, `subject_key`→2,778 |
+| `cross_dataset_ruling_map.csv` | 22,936 | DECLARED_VALIDATED | `source_file` + `target_row_ordinal` + `identifier_type` + `channel` | `identifier`→2,776 |
 | `entity_aliases.csv` | 6,297 | **DECLARATION FAILED** | `alias_id` | `cedar_uid`→20, `entity_id`→20 |
 | `entity_hierarchy.csv` | 952 | DECLARED_VALIDATED | `tribe_id` | `cedar_uid`→1, `tribe_id`→1 |
 | `entity_relationships.csv` | 2,292 | DECLARED_VALIDATED | `relationship_id` | — |
@@ -455,7 +361,7 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 | `federal_recognition_events.csv` | 366 | DECLARED_VALIDATED | `entity_key` + `fr_document_number` | `cedar_uid`→4, `tribe_id`→4 |
 | `federal_recognition_roster.csv` | 17,058 | DECLARED_VALIDATED | `fr_document_number` + `entry_raw` | `cedar_uid`→54, `tribe_id`→54 |
 | `foia_discovery_targets.csv` | 122 | DECLARED_VALIDATED | `url` | — |
-| `foia_request_index.csv` | 9,481 | OPEN_WITH_EVIDENCE | — | `cedar_uid`→55 |
+| `foia_request_index.csv` | 9,481 | DECLARED_VALIDATED | `foia_request_id` + `request_description` | `cedar_uid`→55 |
 | `intertribal_memberships.csv` | 989 | DECLARED_VALIDATED | `org_id` + `member_entity_name` + `year_observed` | — |
 | `intertribal_orgs.csv` | 57 | DECLARED_VALIDATED | `proposed_id` | `ein`→1 |
 | `native_fi_roster.csv` | 94 | DECLARED_VALIDATED | `name` | — |
@@ -464,7 +370,7 @@ the only unique key over 667 rows is `request_description_verbatim`, a free-text
 | `nho_register.csv` | 218 | DECLARED_VALIDATED | `proposed_id` | `ein`→1 |
 | `nho_verified_entities.csv` | 36 | DECLARED_VALIDATED | `uei` | `cage_code`→1, `cedar_uid`→0, `uei`→1 |
 | `tcu_cdfi_added.csv` | 130 | DECLARED_VALIDATED | `tribe_id` | `cedar_uid`→1, `tribe_id`→1 |
-| `tcu_cdfi_ownership_evidence.csv` | 130 | DEFECTIVE | — | — |
+| `tcu_cdfi_ownership_evidence.csv` | 130 | DECLARED_VALIDATED | `institution` + `layer` + `pattern` + `evidence_url` + `quote_char_offset` | — |
 | `tcu_roster.csv` | 37 | DECLARED_VALIDATED | `name` | — |
 | `visitor_access_events.csv` | 20 | DECLARED_VALIDATED | `visitor_access_event_id` | `cedar_uid`→0 |
-| `visitor_record_foia_requests.csv` | 667 | OPEN_WITH_EVIDENCE | — | `cedar_uid`→6 |
+| `visitor_record_foia_requests.csv` | 667 | DECLARED_VALIDATED | `foia_request_id` + `request_description_verbatim` | `cedar_uid`→6 |

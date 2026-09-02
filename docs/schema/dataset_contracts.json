@@ -4019,8 +4019,8 @@
      "grain_declared_by": "workstream-E grain sweep 2026-08-29: primary key confirmed unique on the FULL file; evidence in docs/schema/grain_evidence.json",
      "grain_validated": true,
      "measured_rows_per_join_key": {
-      "cedar_uid": 400,
-      "entity_id": 400
+      "cedar_uid": 401,
+      "entity_id": 401
      },
      "grain_open_question": "",
      "grain_defect": "",

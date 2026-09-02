@@ -208,6 +208,14 @@ def main():
             # from the same table. The TIER IS INHERITED from the facility row
             # and is never recomputed here.
             "entity_id": tid,
+            # THE HUB KEY, carried from the facility row. Added 2026-09-01
+            # (INT-2) because this rebuild was a silent column-dropper:
+            # `gaming_property_coverage.csv` held `cedar_uid` populated and
+            # this writer's field list did not, so every run erased it and
+            # `62`'s `files_with_columns_lost_vs_backup` caught it. C4
+            # attachment is measured on `cedar_uid`. Inherited, like the tier,
+            # never recomputed here.
+            "cedar_uid": (f.get("cedar_uid") or "").strip(),
             "entity_tier": (f.get("entity_tier") or "").strip(),
             "entity_tier_basis": (
                 f"inherited from gaming_facilities.{fid}.entity_tier"

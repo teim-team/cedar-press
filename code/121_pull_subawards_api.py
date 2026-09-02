@@ -160,6 +160,104 @@ on top of a fresh rebuild of the same universe, and (c) write 49 columns,
 reverting the deflator enrichment (defect class 6). The route for the
 2026-08-12 pull is `121 match` then `121 append`.
 
+THE 2026-09-01 RUN - WHAT WAS FETCHED, AND THE ONE PARAMETER THAT CHANGED
+--------------------------------------------------------------------------
+State on entry: `fy2021` FINISHED on 2026-08-26 (765,109 raw rows, 23,613s
+server-side) and is appended. `fy2022`, `fy2023`, `fy2024` and
+`fy2020_procurement` still carried their 2026-08-12 tokens, all four
+`status: failed / "An error occurred."` - the service-wide outage that run
+diagnosed. Rule 5 does not bind on a corpse, so they are re-submitted; the dead
+tokens stay in `_state.json` as evidence.
+
+Canary first, as the doctrine requires: ONE two-day job, 2026-09-01 22:36:22Z,
+FINISHED 22:45:29Z with 47,060 rows. The fleet builds files today.
+
+**max_inflight is 5 (parallel) for this run, not 1 (sequential), and the reason
+is a measurement rather than a preference.** The sequential posture was adopted
+after 2026-08-12, when five concurrent full-year jobs were all accepted and all
+failed. `diagnose` then ruled that out as the cause: `diag_prime_2021` was a
+two-day PRIME job and it failed too, so the outage was service-wide (verdict A),
+not a function of how many subaward jobs were queued. Against that, sequential
+now has a measured cost: fy2021 alone took 6.6 hours server-side, so three years
+one-at-a-time is ~20 hours and would cross COLLECT_DEADLINE with tokens still
+generating. Three ACCEPTED jobs are SERVER-side load; OUR request rate is three
+cheap status GETs per POLL_EVERY, i.e. one request per 50 seconds. The
+2026-08-05 block came from four POLLERS on a 300s metronome, not from queued
+jobs. If a future run sees all of several concurrent jobs fail while a lone
+canary succeeds, THAT is the evidence sequential was waiting for; it did not
+exist on 2026-09-01.
+
+THE DROPPED COLUMN - `subaward_sam_report_id` (MEASURED 2026-09-01, ZERO NETWORK)
+---------------------------------------------------------------------------------
+`525_event_ids.py` registers subcontracting as the one dataset that GENUINELY
+lacks an event id, and closes "diagnose the source extract first." Done, on the
+extracts already on disk:
+
+  * The FSRS extract carries **121 columns**. `94_match_raw_subawards.build_row`
+    reads **26** of them. Ninety-five are dropped.
+  * One of the dropped ones is **`subaward_sam_report_id`**, and it is a
+    GLOBALLY UNIQUE ROW ID:
+        FY2021  765,109 rows -> 765,109 distinct, 0 blank
+        FY2020  456,412 rows -> 456,412 distinct, 0 blank
+        FY2020 n FY2021 = **0** overlap
+    It is a UUID, unique across BOTH zip members and across fiscal years.
+
+**This is the same shape as `prime_contracts`, where 80,778 "duplicates" turned
+out to be distinct transactions whose `modification_number` the mapper never
+carried.** The source has always had the key; the mapper never carried it.
+
+BUT THE MONEY RULE IS NOT WRONG, AND THIS IS THE HALF THAT MATTERS
+-------------------------------------------------------------------
+A unique id on the row does NOT mean the rows are distinct subawards, and the
+difference is the whole finding. `m45.identity_key` collides on 111,933 of
+765,109 FY2021 raw rows (14.6%). The worst group is 93 rows. All 93 carry
+distinct `subaward_sam_report_id`s - and their `subaward_sam_report_month`
+values run from 2022-08 to 2025-01 on ONE $57,500 subaward with one action date
+and one subaward number.
+
+**They are 93 monthly SAM re-filings of one subaward, not 93 subawards.** So:
+
+  * `duplicate_status == 'exact_repeat_within_source'` is SUBSTANTIVELY CORRECT
+    and the money rule that excludes those rows must stay. Summing them would
+    inflate FY2021 by ~14.6% of rows.
+  * `subaward_sam_report_id` identifies **a SAM subaward REPORT**, not a
+    subaward. Any surrogate minted over it must SAY that in its name and in the
+    525 registry, or it manufactures the same false distinctions 525 warns
+    about - just with a source-provided id instead of a home-made one.
+  * Carrying `subaward_sam_report_id`, `subaward_sam_report_month` and
+    `subaward_sam_report_last_modified_date` would make `duplicate_status`
+    AUDITABLE - today it is inferred from a six-field tuple and cannot be
+    checked against the source without re-reading a 1.2 GB zip.
+
+**NOT DONE HERE, DELIBERATELY.** Adding those columns changes the grain
+declaration of a shipping table and belongs with whoever owns `525_event_ids.py`
+and the schema. This run reports the measurement and does not mint the key.
+Also dropped and recoverable from this same extract, noted for that pass:
+`subawardee_duns` / `prime_awardee_duns` (the 2023 HigherGov export had no DUNS
+at all), sub-side city / zip / place-of-performance, congressional districts,
+CFDA numbers on the assistance member, and the five highly-compensated-officer
+pairs.
+
+COVERAGE IS A CLAIM ABOUT THE SOURCE, NOT ABOUT OUR FILE
+---------------------------------------------------------
+`docs/datasets/subcontracting.md` carries the per-source coverage table this
+project keeps re-deriving. Two boundaries in it are REAL-WORLD FACTS and are
+therefore coverage being COMPLETE:
+
+  * **FSRS begins FY2010.** FFATA dropped the reporting threshold from $25M to
+    $25,000 in October 2010. FY2001-2009 jobs returned 4,945 rows in total and
+    every one carries `subaward_sam_report_year >= 2010` - they are filer typos
+    in `subaward_action_date`, retained and flagged
+    (`action_date_precedes_ffata_flag`), never counted as coverage.
+  * **FY2026 is open.** Its window runs to 2026-09-30 and cannot be complete.
+
+And one that is OURS:
+
+  * **FY2020 has no contract subawards at all.** The 2026-08-05 `fy2020` job
+    returned an assistance member of 456,412 rows and a contracts member of
+    4,144 bytes - one header line. Every other year's contracts member is
+    60-470 MB. `fy2020_procurement` exists to answer that unambiguously.
+
 Reads   api.usaspending.gov  (bulk_download/awards, download/status)
         files.usaspending.gov/generated_downloads/  (the accepted job's output)
         data/clean/cedar_identifier_ledger_final.csv
@@ -272,7 +370,78 @@ JOBS = [
     ("fy2023", "2022-10-01", "2023-09-30", ["procurement", "grant"]),
     ("fy2024", "2023-10-01", "2024-09-30", ["procurement", "grant"]),
     ("fy2020_procurement", "2019-10-01", "2020-09-30", ["procurement"]),
+    # ---- added 2026-09-01 under the FULL-HORIZON COVERAGE MANDATE ----------
+    # FSRS reports arrive YEARS after the action date - measured on one FY2021
+    # subaward whose 93 SAM reports run from 2022-08 to 2025-01. So a fiscal
+    # year that has CLOSED still gains rows, and "we pulled that year once" is
+    # not the same claim as "we hold that year". These two re-pull the same
+    # windows the 2026-08-05 corpus used, so every row they add is a filing
+    # that did not exist when that pull ran. They are DEDUPED, not stacked:
+    # `match` skips any row whose `m45.identity_key` count is already met by
+    # the live file, so re-reading a window is idempotent by construction.
+    ("fy2025_refresh", "2024-10-01", "2025-09-30", ["procurement", "grant"]),
+    ("fy2026_refresh", "2025-10-01", "2026-09-30", ["procurement", "grant"]),
 ]
+
+
+# ---------------------------------------------------------------------------
+# QUARTERLY SLICES - the fallback, added 2026-09-01 after fy2023 and fy2024
+# died together server-side.
+#
+# READ THIS BEFORE CONCLUDING "THE JOBS ARE TOO BIG". They are not, and the
+# measurement is on this very endpoint in this very directory:
+#
+#   fy2021       full fiscal year, 765,109 rows  -> FINISHED in 23,613s
+#   canary_2day  two days,          47,060 rows  -> FINISHED in 536s
+#   canary_2day  two days           (2026-08-12) -> FAILED server-side
+#
+# A full year completes and a two-day job can fail, so SIZE DOES NOT PREDICT
+# THE OUTCOME. Note also that fy2021 reported `rows_so_far=0` for almost all of
+# its 393 minutes - the server reports 0 until it has built the file - so a job
+# sitting at zero rows for an hour is EARLY, not dead. Do not kill it; that
+# discards completed server work and costs the queue position (rule 5).
+#
+# What DID separate the outcomes on 2026-09-01 was CONCURRENCY: three full-year
+# jobs were accepted 180s apart, and the second and third failed at the SAME
+# INSTANT (00:07:14Z) while the first kept generating. That is the evidence the
+# post-2026-08-12 sequential posture was waiting for and never had.
+#
+# So the slices below are a HEDGE, not a diagnosis. They buy two things a
+# smaller request genuinely does buy, whatever killed the full-year jobs:
+#   * a failure costs ONE QUARTER of server time instead of a fiscal year, and
+#   * every quarter that lands is checkpointed and readable on its own, so the
+#     year accumulates on disk instead of arriving all-or-nothing at the end.
+# Run them with `--sequential`. Four quarters at max_inflight=1 is one job in
+# flight, which is the one configuration 2026-09-01 did not test.
+# ---------------------------------------------------------------------------
+
+def fy_quarters(fy: int):
+    """(key, start, end) for the four quarters of a US federal fiscal year.
+
+    FY2023 = 2022-10-01..2023-09-30, so Q1 falls in the PREVIOUS calendar year.
+    """
+    return [
+        (f"fy{fy}_q1", f"{fy-1}-10-01", f"{fy-1}-12-31"),
+        (f"fy{fy}_q2", f"{fy}-01-01", f"{fy}-03-31"),
+        (f"fy{fy}_q3", f"{fy}-04-01", f"{fy}-06-30"),
+        (f"fy{fy}_q4", f"{fy}-07-01", f"{fy}-09-30"),
+    ]
+
+
+QUARTER_JOBS = [(k, a, b, ["procurement", "grant"])
+                for fy in (2022, 2023, 2024)
+                for k, a, b in fy_quarters(fy)]
+
+# Quarters are part of JOBS so that `match`, `write_manifest` and `status` see
+# them without a second code path. A quarter with no state is simply skipped.
+#
+# THE DOUBLE-COUNT GUARD: a quarter covers a window its full-year job also
+# covers. If BOTH land, `match` reads both and `m45.identity_key` de-duplicates
+# them against the live file exactly as it de-duplicates a re-pull - the second
+# reader of a row finds the key already satisfied and drops it. That is the same
+# mechanism `fy2025_refresh` relies on, so mixing grains is safe; it is not an
+# invitation to pull both on purpose.
+JOBS = JOBS + QUARTER_JOBS
 
 CONTRACT_MARK = "Contracts_Subawards"
 ASSIST_MARK = "Assistance_Subawards"
@@ -285,6 +454,64 @@ POPULATION = "full_federal_subaward_universe"
 
 NEW_COLS = ["subaward_amount_real2025", "deflator_factor_2025",
             "inflation_base_year"]
+
+# COLUMNS THIS FILE CARRIES THAT ANOTHER SCRIPT OWNS (2026-09-01).
+#
+# `503_identity.py stamp` materialises `cedar_uid` onto every clean table that
+# carries an entity column - for `subawards.csv` that column is
+# `prime_native_tribe_id`, so `cedar_uid` is the PRIME's permanent entity id and
+# is legitimately BLANK on the 41,354 rows whose only Native leg is the
+# subawardee. It appeared in the header after this script last ran, and the
+# `match` schema guard - correctly - refuses any column beyond the promoted
+# schema that `append()` cannot fill, because such a column is blanked on every
+# appended row.
+#
+# The answer is NOT to loosen the guard. `append()` now FILLS this column, using
+# 503's OWN `register_map()` and `entity_col()` - imported, never re-implemented
+# (standing rule 8). 503's own comment says `cedar_uid` is DERIVED and must be
+# re-stamped rather than skipped, which is exactly what makes deriving it here
+# safe: a later `503 stamp` recomputes the same value from the same register.
+#
+# A column added here must EITHER be computable by `append()` or be added to
+# this map with the script that owns it. Nothing may be silently blanked.
+STAMPED_COLS = {"cedar_uid": "code/503_identity.py"}
+
+# THE SOURCE ROW KEY, CARRIED AT LAST (2026-09-01).
+#
+# `525_event_ids.py` registers subcontracting as the ONE dataset that genuinely
+# lacks an event id and closes "diagnose the source extract first". Diagnosed,
+# on zips already on disk, zero network:
+#
+#   FY2021  765,109 rows -> 765,109 distinct subaward_sam_report_id, 0 blank
+#   FY2020  456,412 rows -> 456,412 distinct subaward_sam_report_id, 0 blank
+#   FY2020 n FY2021 -> 0 overlap        (it is a UUID; unique across members
+#                                        AND across fiscal years)
+#
+# `build_row` reads 26 of the extract's 121 columns and this was one of the 95
+# it dropped. Same shape as `prime_contracts`, where 80,778 "duplicates" were
+# distinct transactions whose `modification_number` the mapper never carried.
+#
+# WHAT IT KEYS, AND WHAT IT DOES NOT. It identifies a SAM subaward REPORT, not
+# a subaward. Measured: `m45.identity_key` collides on 111,933 of 765,109
+# FY2021 rows (14.6%), and the worst group is 93 rows that carry 93 distinct
+# report ids whose `subaward_sam_report_month` runs 2022-08 -> 2025-01 on ONE
+# $57,500 subaward with one action date and one subaward number. They are 93
+# monthly RE-FILINGS. So:
+#   * `duplicate_status == 'primary'` remains the correct filter for money, and
+#   * a surrogate minted over this column must be named for the REPORT grain,
+#     or it manufactures exactly the false distinctions 525 warns about.
+# Carrying month and last-modified alongside is what makes that auditable
+# instead of inferred - today `duplicate_status` cannot be checked against the
+# source without re-reading a 1.2 GB zip.
+#
+# THE SEAM, STATED PLAINLY: only rows THIS SCRIPT writes carry these columns.
+# Rows promoted by the 2026-08-05 route are blank, because there is no key to
+# join them back on - which is the very defect being fixed. Backfilling them
+# means re-running the mapper over the retained raw zips (all of FY2001-2021,
+# FY2025, FY2026 are on disk) and is a separate job, owned by 45, not by a
+# puller.
+REPORT_COLS = ["subaward_sam_report_id", "subaward_sam_report_month",
+               "subaward_sam_report_last_modified_date"]
 
 
 def log(msg: str) -> None:
@@ -645,8 +872,15 @@ def build_payload(start, end, sub_types):
 
 
 def staged(rec) -> bool:
+    """On disk AND carrying data.
+
+    An object that is header-only is on disk and is NOT staged data. Counting
+    it as staged is exactly how FY2020 came to hold zero contract subawards
+    while every report said the pull had succeeded.
+    """
     return bool(rec and rec.get("_local_file")
-                and os.path.exists(os.path.join(ROOT, rec["_local_file"])))
+                and os.path.exists(os.path.join(ROOT, rec["_local_file"]))
+                and not rec.get("_empty_object"))
 
 
 # ===========================================================================
@@ -955,6 +1189,52 @@ def wait_for_files_host(key) -> bool:
     return False
 
 
+# ===========================================================================
+# THE THIRD FAILURE MODE: "FINISHED" WITH NO DATA ROWS (measured 2026-09-02)
+# ===========================================================================
+# This endpoint fails in three distinct ways and only two of them look like
+# failure:
+#
+#   1. accepted, then `status: failed / "An error occurred."`   - visible
+#   2. accepted, generating, then killed mid-build              - visible
+#   3. accepted, `status: finished`, HTTP 200, and the object   - INVISIBLE
+#      contains NOTHING BUT HEADER LINES
+#
+# Mode 3 measured on `fy2023_q4` (2023-07-01..2023-09-30): server reported
+# `finished` in 80s with `total_rows=0`, and the 1,889-byte zip held a
+# 4,144-byte contracts member and a 3,992-byte assistance member, both one
+# header line and zero data rows. Its own neighbours are 207,459 (Q1) and
+# 153,650 (Q2) rows, so zero is not a fact about the world.
+#
+# **4,144 bytes is a signature, not a coincidence.** The FY2020 contracts member
+# retrieved on 2026-08-06 is 4,144 bytes for the same reason, and THAT is why
+# `subawards.csv` holds zero FSRS contract subawards for FY2020 against 5,868
+# in FY2019 and 6,484 in FY2021. The defect has been in this dataset for a
+# month wearing the costume of a successful pull.
+#
+# `docs/PULL_DISCIPLINE.md` already states the principle for a different
+# endpoint - "an empty result is not evidence of absence" - and the same
+# sentence applies here. An empty object is recorded as a PULL FAILURE, never
+# as a measurement, and never silently read as data.
+
+def zip_data_rows(path):
+    """(has_data, {member: has_data}) - does any CSV member have a row past the
+    header? Cheap: reads two lines per member, never the whole file."""
+    detail = {}
+    try:
+        with zipfile.ZipFile(path) as z:
+            for i in z.infolist():
+                if not i.filename.lower().endswith(".csv"):
+                    continue
+                with z.open(i) as fh:
+                    txt = io.TextIOWrapper(fh, encoding="utf-8-sig")
+                    txt.readline()                      # header
+                    detail[i.filename] = bool(txt.readline().strip())
+    except (zipfile.BadZipFile, OSError) as e:          # noqa: BLE001
+        return False, {"_error": f"{type(e).__name__}: {e}"}
+    return (any(detail.values()), detail)
+
+
 def download_one(key, meta, st):
     url = meta.get("file_url")
     if not url:
@@ -984,7 +1264,10 @@ def download_one(key, meta, st):
     with open(dest, "rb") as fh:
         if fh.read(2) != b"PK":
             raise RuntimeError(f"{key}: downloaded object is not a zip archive")
+    has_data, members = zip_data_rows(dest)
     st["jobs"][key].update({
+        "_member_has_data": members,
+        "_empty_object": not has_data,
         "_local_file": os.path.relpath(dest, ROOT).replace("\\", "/"),
         "_bytes": os.path.getsize(dest),
         "_sha256": sha256(dest),
@@ -997,13 +1280,36 @@ def download_one(key, meta, st):
     log(f"CHECKPOINT {key} -> {st['jobs'][key]['_local_file']} "
         f"({st['jobs'][key]['_bytes']:,} bytes in "
         f"{st['jobs'][key]['_download_seconds']}s)")
+    if not has_data:
+        log(f"!! EMPTY OBJECT {key}: the server reported FINISHED and the "
+            f"downloaded zip contains ONLY HEADER LINES - {members}. This is a "
+            f"PULL FAILURE, not a measurement, and it is NOT evidence that the "
+            f"window has no subawards. Same signature as the FY2020 contracts "
+            f"member (4,144 bytes). The object is kept as evidence; `staged()` "
+            f"treats it as NOT staged so `match` will not read it as data.")
+    else:
+        empty = [m for m, ok in members.items() if not ok]
+        if empty:
+            log(f"!! PARTIAL OBJECT {key}: member(s) with no data rows: "
+                f"{empty}. The other member(s) have data. Check this against "
+                f"neighbouring windows before believing the empty one.")
 
 
-def pull(only=None, do_claim=True, sequential=False) -> int:
+def pull(only=None, do_claim=True, sequential=False, inflight_cap=None) -> int:
     # SEQUENTIAL is the post-2026-08-12 default posture. Five concurrent
     # full-year jobs were all accepted and all failed server-side; one job in
     # flight is slower and cannot produce that outcome five times over.
-    max_inflight = 1 if sequential else MAX_INFLIGHT
+    #
+    # `--max-inflight N` (2026-09-01) exists because the posture had only two
+    # settings and the evidence needs a third. Measured that day: at THREE
+    # concurrent full-year jobs the second and third failed together while the
+    # first kept generating; at ONE (the canary, and fy2021 on 2026-08-26) jobs
+    # complete. TWO has never been tried. An explicit cap lets the next run
+    # narrow that down instead of choosing between "known bad" and "very slow".
+    # It is a ceiling on ACCEPTED SERVER JOBS, not on our request rate - the
+    # request rate is one cheap status GET per job per POLL_EVERY either way.
+    max_inflight = (int(inflight_cap) if inflight_cap
+                    else (1 if sequential else MAX_INFLIGHT))
     log(f"pull: max_inflight={max_inflight} "
         f"({'SEQUENTIAL' if sequential else 'parallel'})")
     os.makedirs(RAW, exist_ok=True)
@@ -1042,6 +1348,30 @@ def pull(only=None, do_claim=True, sequential=False) -> int:
                     break
                 key, start, end, types = pending.pop(0)
                 rec = st["jobs"].get(key)
+                if rec and rec.get("_empty_object"):
+                    # A header-only object is a build that produced nothing.
+                    # Rule 5 protects COMPLETED SERVER WORK; an empty file is
+                    # not that. Re-submit ONCE, keep the dead object and its
+                    # token as evidence, and never loop: if the second attempt
+                    # is also empty, that is a finding to report, not a reason
+                    # for a third request.
+                    tries_done = int(rec.get("_empty_resubmits") or 0)
+                    if tries_done >= 1:
+                        log(f"  {key}: came back HEADER-ONLY twice. NOT "
+                            f"re-submitting a third time. Report it as an "
+                            f"unresolved empty window - a documented boundary "
+                            f"beats another request.")
+                        refused.append(key)
+                        continue
+                    log(f"  {key}: previous object was HEADER-ONLY "
+                        f"({rec.get('_member_has_data')}); re-submitting once. "
+                        f"An empty build is not completed server work.")
+                    st["jobs"][key + "_empty_" + (rec.get("file_name") or "?")[:40]] = rec
+                    rec = dict(rec)
+                    rec["_empty_resubmits"] = tries_done + 1
+                    st["jobs"][key] = {"_empty_resubmits": tries_done + 1}
+                    save_state(st)
+                    rec = None
                 if rec and rec.get("status") == "failed":
                     # A FAILED job is not completed server work. Rule 5 forbids
                     # discarding a job the server is still generating; it does
@@ -1358,6 +1688,31 @@ def load_deflator():
     return out
 
 
+def load_uid_register():
+    """503's OWN handle -> cedar_uid map, and the column it stamps on.
+
+    IMPORTED, never re-implemented (standing rule 8). `503_identity.py` is not
+    run and not edited here - two read-only functions are called:
+    `entity_col()` picks which column of `subawards.csv` carries the handle
+    (`prime_native_tribe_id`), and `register_map()` returns the permanent
+    register, retired handles included. Returns (column, map) or (None, {}) if
+    503 cannot be loaded, in which case `append()` leaves `cedar_uid` alone and
+    says so rather than guessing.
+    """
+    try:
+        import pathlib
+        m503 = _load("m503", "503_identity.py")
+        col, _hdr = m503.entity_col(pathlib.Path(OUT))
+        reg = m503.register_map()
+        return col, reg
+    except Exception as e:                              # noqa: BLE001
+        log(f"WARN could not load 503_identity ({type(e).__name__}: "
+            f"{str(e)[:120]}); cedar_uid will be left as found and NEW rows "
+            f"will carry it blank. Re-run `py -3 code/503_identity.py stamp "
+            f"--apply` to fill them.")
+        return None, {}
+
+
 def match(dry=False) -> int:
     M = mods()
     m33, m41, m45, m94, cmg = M["m33"], M["m41"], M["m45"], M["m94"], M["cmg"]
@@ -1406,7 +1761,9 @@ def match(dry=False) -> int:
     # THE ENRICHER RUNS LAST. `append()` is that enricher.
     if header is not None:
         extras = header[len(m45.COLS):]
-        unfillable = [c for c in extras if c not in NEW_COLS]
+        unfillable = [c for c in extras
+                      if c not in NEW_COLS and c not in STAMPED_COLS
+                      and c not in REPORT_COLS]
         if header[:len(m45.COLS)] != m45.COLS or unfillable:
             raise SystemExit(
                 "subawards.csv header is not the promoted schema; refusing to "
@@ -1418,10 +1775,30 @@ def match(dry=False) -> int:
                 f"schema: {extras}. All are written by append(), which runs "
                 f"AFTER this step and recomputes them for every row. Staged "
                 f"rows are written with the {len(m45.COLS)} canonical columns.")
+            owned = [c for c in extras if c in STAMPED_COLS]
+            if owned:
+                log(f"  of those, {owned} are owned by "
+                    f"{sorted({STAMPED_COLS[c] for c in owned})} and are filled "
+                    f"by append() through that script's OWN register, imported "
+                    f"rather than re-implemented.")
+
+    # per-job retrieval dates, read off the checkpointed state
+    fetched_for = {}
+    for k, *_ in JOBS:
+        rec = st["jobs"].get(k) or {}
+        ts = (rec.get("_retrieved") or "")[:10]
+        if ts:
+            fetched_for[k] = ts
+    log("fetched_date per job (from _state.json `_retrieved`): "
+        + json.dumps(fetched_for))
 
     stage_path = os.path.join(STAGE, f"subawards_api_{TODAY}.csv")
     fstage = open(stage_path, "w", newline="", encoding="utf-8")
-    wstage = csv.DictWriter(fstage, fieldnames=m45.COLS, extrasaction="ignore")
+    # m45.COLS + REPORT_COLS. `build_row` returns the 49 canonical columns and
+    # `extrasaction="ignore"` would silently drop anything else, which is how
+    # `subaward_sam_report_id` went missing in the first place.
+    wstage = csv.DictWriter(fstage, fieldnames=m45.COLS + REPORT_COLS,
+                            extrasaction="ignore")
     wstage.writeheader()
 
     n_read = n_new = 0
@@ -1586,11 +1963,20 @@ def match(dry=False) -> int:
             route = ROUTE_PARENT
 
         row = m94.build_row(r, kind, chunk, (p_tid, p_tier, s_tid, s_tier), route)
-        row["fetched_date"] = FETCHED
+        # `fetched_date` is PER JOB, not per campaign (fixed 2026-09-01).
+        # FETCHED is the date this raw DIRECTORY was opened; the jobs inside it
+        # landed on three different days - fy2021 on 2026-08-26, fy2022-24 on
+        # 2026-09-01 - because the 2026-08-12 submissions all failed
+        # server-side. Stamping every row 2026-08-12 asserts a retrieval that
+        # did not happen and makes the FSRS filing lag unmeasurable from the
+        # clean file. The job's own `_retrieved` timestamp is the fact.
+        row["fetched_date"] = fetched_for.get(chunk, FETCHED)
         # `source_file` must keep the SEAM visible: the chunk key alone would
         # not say which pull these came from.
         row["source_file"] = f"usaspending_2026-08-12/{chunk}"
         row["promoted_date"] = TODAY
+        for c in REPORT_COLS:
+            row[c] = (r.get(c) or "").strip()
 
         ik = m45.identity_key(row)
         seen_new[ik] += 1
@@ -1787,14 +2173,22 @@ def append() -> int:
         log("append: no staging file - no new rows to append. Proceeding as a "
             "COLUMN ADDITION only (the deflator needs no new data).")
     defl = load_deflator()
+    uid_col, uid_reg = load_uid_register()
+    if uid_col:
+        log(f"cedar_uid: stamping NEW rows from 503's register "
+            f"({len(uid_reg):,} handles) keyed on `{uid_col}`. PRE-EXISTING "
+            f"rows are carried through untouched - re-stamping them is 503's "
+            f"job, not this script's, and the verify step below would fail if "
+            f"this run changed one.")
 
     # Re-read the target IMMEDIATELY before writing.
     with open(OUT, encoding="utf-8-sig", newline="") as fh:
         base_fields = list(csv.DictReader(fh).fieldnames)
     if base_fields[:len(m45.COLS)] != m45.COLS:
         raise SystemExit("subawards.csv header changed under us; refusing")
-    fields = base_fields + [c for c in NEW_COLS if c not in base_fields]
-    adding = [c for c in NEW_COLS if c not in base_fields]
+    want = NEW_COLS + REPORT_COLS
+    fields = base_fields + [c for c in want if c not in base_fields]
+    adding = [c for c in want if c not in base_fields]
 
     bak = OUT + f".bak_{TODAY}_pre121"
     if not os.path.exists(bak):
@@ -1811,6 +2205,7 @@ def append() -> int:
 
     tmp = OUT + ".tmp121"
     n_existing = n_added = 0
+    n_uid_stamped = n_uid_unknown = 0
     with open(OUT, encoding="utf-8-sig", newline="") as src, \
             open(tmp, "w", newline="", encoding="utf-8") as dst:
         rd = csv.DictReader(src)
@@ -1833,12 +2228,28 @@ def append() -> int:
                     r["subaward_amount_real2025"] = v
                     r["deflator_factor_2025"] = f
                     r["inflation_base_year"] = base
+                    # cedar_uid on NEW rows only. Blank where the handle is
+                    # blank (the row has no Native prime) or is not in the
+                    # register - NEVER guessed. 503 re-derives the same value.
+                    if uid_col and "cedar_uid" in fields:
+                        h = (r.get(uid_col) or "").strip()
+                        r["cedar_uid"] = uid_reg.get(h, "") if h else ""
+                        if h and not uid_reg.get(h):
+                            n_uid_unknown += 1
+                        elif h:
+                            n_uid_stamped += 1
                     w.writerow(r)
                     n_added += 1
     os.replace(tmp, OUT)
     log(f"WROTE {OUT}: {n_existing:,} existing + {n_added:,} appended = "
         f"{n_existing + n_added:,} rows, {len(fields)} columns "
         f"(added {adding})")
+    if uid_col and n_added:
+        log(f"cedar_uid on the {n_added:,} appended rows: {n_uid_stamped:,} "
+            f"stamped from the register, {n_uid_unknown:,} carried a handle the "
+            f"register does not know (left BLANK, never guessed), the rest have "
+            f"no `{uid_col}` at all. Run `py -3 code/503_identity.py stamp` to "
+            f"confirm against 503's own count.")
 
     # ---- verification: every pre-existing row, field by field, vs the backup
     bad = 0
@@ -1893,6 +2304,26 @@ def codebook() -> int:
             "rows carry 1.0. Recorded so the deflation is reproducible and so "
             "no second deflator can be introduced downstream."),
         "inflation_base_year": "2025 on every row. One base year, project-wide.",
+        "subaward_sam_report_id": (
+            "The FSRS/SAM report id, carried straight from the source extract. "
+            "MEASURED GLOBALLY UNIQUE: 765,109 distinct over 765,109 FY2021 "
+            "rows and 456,412 over 456,412 FY2020 rows, zero blank, zero "
+            "overlap between the two years. IT IDENTIFIES A REPORT, NOT A "
+            "SUBAWARD - one $57,500 FY2021 subaward carries 93 of them, filed "
+            "monthly from 2022-08 to 2025-01. Use it to key a row; use "
+            "duplicate_status=='primary' to key a subaward. BLANK on rows "
+            "promoted before 2026-09-01, which had no key to join back on."),
+        "subaward_sam_report_month": (
+            "Calendar month of the SAM filing, 1-12, paired with "
+            "subaward_sam_report_year. The pair is what distinguishes a "
+            "re-filing from a second subaward, and is why duplicate_status is "
+            "now auditable against the source instead of inferred."),
+        "subaward_sam_report_last_modified_date": (
+            "When the filer last touched the report. Together with the report "
+            "id this measures FSRS FILING LAG - the gap between "
+            "subaward_action_date and the filing - which is why a CLOSED "
+            "fiscal year still gains rows and why a re-pull of an old window "
+            "is not a duplicate pull."),
         "source_file": (
             "Which pull a row came from. Rows added 2026-08-12 carry "
             "`usaspending_2026-08-12/<job>`, which keeps the seam between the "
@@ -1959,8 +2390,11 @@ def main() -> int:
     if stage == "auto":
         return auto()
     if stage == "pull":
+        cap = None
+        if "--max-inflight" in sys.argv:
+            cap = sys.argv[sys.argv.index("--max-inflight") + 1]
         return pull(only, do_claim="--no-claim" not in sys.argv,
-                    sequential="--sequential" in sys.argv)
+                    sequential="--sequential" in sys.argv, inflight_cap=cap)
     if stage == "collect":
         return collect()
     if stage == "status":

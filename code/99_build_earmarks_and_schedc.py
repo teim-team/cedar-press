@@ -134,6 +134,9 @@ csv.field_size_limit(min(sys.maxsize, 2**31 - 1))
 
 sys.path.insert(0, str(CEDAR / "code"))
 from cedar_keys import surrogate_id                            # noqa: E402
+import cedar_codebook                                          # noqa: E402
+
+SCRIPT99 = "code/99_build_earmarks_and_schedc.py"
 
 # --------------------------------------------------------------------------
 # THE PRIMARY KEY OF earmarks.csv, AND WHAT IT IS MADE OF
@@ -2692,6 +2695,580 @@ def step_report():
 
 # ---------------------------------------------------------------------------
 
+
+
+# ===========================================================================
+# STEP `schedc-lobbying` -- the NON-LDA nonprofit lobbying table (2026-09-01)
+# ===========================================================================
+# WHY THIS EXISTS, AND WHY IT IS A LOBBYING TABLE AND NOT A NONPROFIT ONE
+#
+# Workstream N's mandate is influence BEYOND the LDA. Schedule C is exactly
+# that: an intertribal organisation or a Native nonprofit that lobbies without
+# retaining a registered federal lobbyist appears here, under penalty of
+# perjury, with a dollar figure -- and appears nowhere in the LDA.
+#
+# THE FIND, MEASURED 2026-09-01 AND NOT ASSUMED. The Schedule C corpus was
+# already downloaded and already indexed, and most of it had never been read:
+#
+#     index target returns .................... 32,218
+#     downloaded to data/raw/.../xml/ ..........  6,870
+#     PARSED into np_financials.csv ............  2,195
+#     ON DISK AND NEVER PARSED .................  4,675   <- 4,053 EINs
+#
+# The unparsed slice is overwhelmingly tax years 2024 (1,896) and 2025
+# (2,144): `step_schedc` ran on 2026-08-07 and the download kept going after
+# it. So the two most recent years of nonprofit lobbying disclosure were on
+# disk, paid for, and invisible. **This step needs no acquisition at all.**
+#
+# WHAT IT DOES NOT TOUCH. `step_schedc` appends Schedule C columns to
+# `np_financials.csv`, which belongs to the nonprofit workstream. This step
+# writes ONLY its own tables and never opens np_financials for writing. Two
+# writers to one table is the defect this project has paid for repeatedly;
+# the same corpus read by two owners is fine.
+#
+# TIER DISCIPLINE, and it is the thing most likely to go wrong here.
+# `np_orgs.csv` carries `entity_tier = X` on 4,962 rows. X is a NEGATIVE
+# ruling -- an owner decision that this EIN is NOT that entity -- and 40 of
+# the rows carrying a `cedar_spine_entity_id` are tier X or blank. Reading
+# "has a spine id" as "is linked" would publish owner EXCLUSIONS as
+# attributions, which is START_HERE standing rule 1b in a new vocabulary.
+# So a link requires a spine id AND a tier that is not X AND a
+# classification_ruling that is not `place_name_coincidence`.
+#
+#     py -3 code/99_build_earmarks_and_schedc.py --steps schedc-lobbying
+
+SCHEDC_LOBBY_FIELDS = [
+    "schedule_c_row_id", "ein", "object_id", "taxpayer_name_as_filed",
+    "return_type", "tax_period", "tax_year", "index_year",
+    "cedar_entity_id", "cedar_entity_name", "cedar_entity_class",
+    "entity_link_tier", "entity_link_basis", "entity_link_refusal_reason",
+    "record_scope", "record_scope_basis", "inclusion_basis", "matched_terms",
+    "schedule_c_present", "reporting_regime", "reporting_regime_basis",
+    "election_501h", "election_501h_basis",
+    "total_lobbying_usd", "direct_lobbying_usd", "grassroots_lobbying_usd",
+    "nonelecting_lobbying_usd", "lobbying_nontaxable_ceiling_usd",
+    "grassroots_nontaxable_ceiling_usd", "exempt_purpose_expenditure_usd",
+    "political_expenditure_usd", "section_527_amount_usd",
+    "dues_received_usd", "dues_lobbying_political_usd",
+    "method_volunteers", "method_paid_staff", "method_media",
+    "method_mailings", "method_publications", "method_grants",
+    "method_direct_contact", "method_rallies", "method_other",
+    "lobbying_usd_headline", "lobbying_usd_basis",
+    "event_class", "channel", "is_lobbying",
+    "rule_basis", "source_url", "source_object_url",
+    "parse_status", "confidence_tier", "built_date", "built_by_script",
+]
+
+SCHEDC_COV_FIELDS = [
+    "index_year", "index_target_returns", "downloaded", "parsed_here",
+    "schedule_c_present", "reported_any_lobbying_dollar",
+    "distinct_eins_parsed", "distinct_eins_linked_to_spine",
+    "not_downloaded", "coverage_status", "coverage_basis",
+    "source_index_url", "built_date", "built_by_script",
+]
+
+SCHEDC_RULE_BASIS = (
+    "Retrieved fact only, transcribed from the filer's own IRS e-file XML. "
+    "This row records what the organisation REPORTED on Schedule C for one "
+    "return period: whether it filed the schedule, under which regime, and "
+    "the dollar figures it entered. It asserts no position, no target and no "
+    "outcome. Schedule C lobbying is NOT LDA lobbying and the two must never "
+    "be summed: is_lobbying=0 records that this row is outside the LDA "
+    "regime, not that no lobbying occurred.")
+
+# Map: parse_schedule_c's key -> this table's column. Written out rather than
+# derived by prefix-stripping so a rename upstream fails loudly here instead
+# of silently emptying a column.
+SCHEDC_COLMAP = {
+    "schedc_present": "schedule_c_present",
+    "schedc_501h_election": "election_501h",
+    "schedc_501h_basis": "election_501h_basis",
+    "schedc_total_lobbying": "total_lobbying_usd",
+    "schedc_direct_lobbying": "direct_lobbying_usd",
+    "schedc_grassroots_lobbying": "grassroots_lobbying_usd",
+    "schedc_nonelecting_total": "nonelecting_lobbying_usd",
+    "schedc_lobbying_nontaxable": "lobbying_nontaxable_ceiling_usd",
+    "schedc_grassroots_nontaxable": "grassroots_nontaxable_ceiling_usd",
+    "schedc_exempt_purpose_expend": "exempt_purpose_expenditure_usd",
+    "schedc_political_expenditure": "political_expenditure_usd",
+    "schedc_527_amount": "section_527_amount_usd",
+    "schedc_dues_received": "dues_received_usd",
+    "schedc_dues_lobbying_political": "dues_lobbying_political_usd",
+    "schedc_used_volunteers": "method_volunteers",
+    "schedc_used_paid_staff": "method_paid_staff",
+    "schedc_used_media": "method_media",
+    "schedc_used_mailings": "method_mailings",
+    "schedc_used_publications": "method_publications",
+    "schedc_used_grants": "method_grants",
+    "schedc_used_direct_contact": "method_direct_contact",
+    "schedc_used_rallies": "method_rallies",
+    "schedc_used_other": "method_other",
+    "schedc_tax_period_end": "_tax_period_end",
+    "schedc_return_type": "_return_type_hdr",
+}
+
+
+def _schedc_entity_index():
+    """EIN -> (spine id, name, class, tier, basis) or a REFUSAL reason.
+
+    Returns two dicts: links and refusals. A refusal is recorded, never
+    dropped, so a reader can see that the EIN was considered and why it did
+    not link - which is the difference between 'not Native' and 'not checked'.
+    """
+    links, refusals = {}, {}
+    p = CLEAN / "np_orgs.csv"
+    if not p.exists():
+        return links, refusals
+    for r in read_csv(p):
+        ein = (r.get("EIN") or "").strip()
+        if not ein:
+            continue
+        sid = (r.get("cedar_spine_entity_id") or "").strip()
+        tier = (r.get("entity_tier") or "").strip()
+        ruling = (r.get("classification_ruling") or "").strip()
+        if not sid:
+            refusals[ein] = "no_spine_link_in_np_orgs"
+            continue
+        if tier == "X":
+            # A NEGATIVE ruling. The spine id is what the owner ruled AGAINST.
+            refusals[ein] = ("entity_tier=X is a NEGATIVE ruling against %s; "
+                             "publishing it as a link would republish an "
+                             "owner exclusion as an attribution" % sid)
+            continue
+        if ruling == "place_name_coincidence":
+            refusals[ein] = ("classification_ruling=place_name_coincidence "
+                             "against %s" % sid)
+            continue
+        if not tier:
+            refusals[ein] = "spine id present but entity_tier is blank"
+            continue
+        links[ein] = {
+            "cedar_entity_id": sid,
+            "cedar_entity_name": (r.get("cedar_spine_canonical_name") or ""),
+            "cedar_entity_class": (r.get("cedar_native_entity_class") or ""),
+            "entity_link_tier": tier,
+            "entity_link_basis": (r.get("entity_match_basis")
+                                  or r.get("entity_match_method") or ""),
+        }
+    return links, refusals
+
+
+# Coalition classes speak for a membership, not for one tribe (ADR-010).
+SCHEDC_COALITION_CLASSES = {"native org"}
+
+
+def step_schedc_lobbying():
+    log("=== 99 schedc-lobbying ===")
+    xdir = SCHEDC_RAW / "xml"
+    if not xdir.exists():
+        log("  no XML on disk at %s -- run --steps irs-xml first" % xdir)
+        return
+    idx = {r["object_id"]: r
+           for r in read_csv(SCHEDC_RAW / "_index_targets.csv")}
+    links, refusals = _schedc_entity_index()
+    log("  np_orgs: %d EINs linkable to the spine, %d refused with a reason"
+        % (len(links), len(refusals)))
+
+    paths = sorted(xdir.glob("*.xml"))
+    log("  %d returns on disk" % len(paths))
+
+    rows = []
+    stats = Counter()
+    unindexed = []
+    for p in paths:
+        oid = p.stem
+        meta = idx.get(oid)
+        if not meta:
+            # NAME the object. A bare count of "skipped" is not actionable.
+            unindexed.append(oid)
+            stats["xml_not_in_index"] += 1
+            continue
+        try:
+            parsed = parse_schedule_c(p.read_bytes())
+        except Exception as e:                                  # noqa: BLE001
+            parsed = {"schedc_parse_error": type(e).__name__}
+        parse_status = parsed.get("schedc_parse_error") or "OK"
+        if parse_status != "OK":
+            stats["parse_error"] += 1
+
+        ein = (meta.get("ein") or "").strip()
+        tax_period = (meta.get("tax_period") or "").strip()
+        link = links.get(ein)
+        row = {c: "" for c in SCHEDC_LOBBY_FIELDS}
+        for src, dst in SCHEDC_COLMAP.items():
+            if src in parsed and dst in row:
+                row[dst] = parsed[src]
+
+        present = str(row.get("schedule_c_present") or "")
+        if present == "1":
+            stats["schedule_c_present"] += 1
+        elif present == "0":
+            stats["schedule_c_absent_from_return"] += 1
+
+        # THE REGIME IS THE PART THE FILER COMPLETED, and the three never mix.
+        if str(row.get("nonelecting_lobbying_usd") or "").strip():
+            regime = "NON_ELECTING_PART_II_B"
+            rbasis = ("Part II-B is completed. A non-electing filer reports "
+                      "one total and yes/no activity checkboxes; the form has "
+                      "no grassroots/direct split, so those cells are blank "
+                      "because the line does not exist, not because the read "
+                      "failed.")
+        elif str(row.get("total_lobbying_usd") or "").strip() or \
+                str(row.get("exempt_purpose_expenditure_usd") or "").strip():
+            regime = "ELECTING_501H_PART_II_A"
+            rbasis = ("Part II-A is completed, which only a 501(h) electing "
+                      "filer does. Column (b) is an affiliated group's money "
+                      "and is a different entity; only column (a) is read.")
+        elif present == "1":
+            regime = "SCHEDULE_C_FILED_NO_PART_II_FIGURES"
+            rbasis = ("Schedule C is attached but neither Part II-A nor Part "
+                      "II-B carries a figure. Filed and zero is a reported "
+                      "fact and is not the same as not filed.")
+        else:
+            regime = "NO_SCHEDULE_C_WITH_THIS_RETURN"
+            rbasis = ("No Schedule C is attached. A filer that answered 'No' "
+                      "to the Form 990 Part IV lobbying question files none. "
+                      "ABSENT IS NOT ZERO.")
+        row["reporting_regime"] = regime
+        row["reporting_regime_basis"] = rbasis
+
+        # One headline figure, and it always says which line it came from.
+        headline, hbasis = "", ""
+        for col, basis in (
+                ("nonelecting_lobbying_usd", "Schedule C Part II-B total"),
+                ("total_lobbying_usd", "Schedule C Part II-A column (a) total"),
+                ("direct_lobbying_usd", "Schedule C Part II-A direct only")):
+            v = str(row.get(col) or "").strip()
+            if v:
+                headline, hbasis = v, basis
+                break
+        if not headline:
+            headline, hbasis = "", (
+                "no lobbying figure on this return; reporting_regime says why")
+        row["lobbying_usd_headline"] = headline
+        row["lobbying_usd_basis"] = hbasis
+        if headline not in ("", "0"):
+            stats["reported_a_lobbying_dollar"] += 1
+
+        if link:
+            cls = link["cedar_entity_class"]
+            if cls in SCHEDC_COALITION_CLASSES:
+                scope = "indian_country"
+                sbasis = ("ADR-010: the filer is a named Cedar entity AND it "
+                          "is a Native organisation advocating for a "
+                          "constituency rather than for one tribe. "
+                          "cedar_entity_id names the filer; record_scope says "
+                          "who the filing is for.")
+            else:
+                scope = "entity"
+                sbasis = ("ADR-010: the EIN on this return resolves to one "
+                          "Cedar entity in np_orgs.csv.")
+            row.update(link)
+            row["record_scope"] = scope
+            row["record_scope_basis"] = sbasis
+            row["inclusion_basis"] = "named_entity"
+            row["matched_terms"] = ein
+            stats["linked_to_spine"] += 1
+        else:
+            row["entity_link_refusal_reason"] = refusals.get(
+                ein, "EIN is not in np_orgs.csv")
+            row["record_scope"] = "unresolved"
+            row["record_scope_basis"] = (
+                "ADR-010: the EIN is on Cedar's Native-nonprofit target list, "
+                "so an entity is believed to exist, and it is not resolved. "
+                "`unresolved` is the only scope that is a work item.")
+            row["inclusion_basis"] = "term_match"
+            row["matched_terms"] = (
+                "EIN on the Cedar Native-nonprofit 990 target list "
+                "(data/raw/external/irs990_schedc/_index_targets.csv)")
+
+        row.update({
+            "schedule_c_row_id": "SCHEDC-%s-%s" % (ein or "NOEIN", oid),
+            "ein": ein,
+            "object_id": oid,
+            "taxpayer_name_as_filed": meta.get("taxpayer_name") or "",
+            "return_type": meta.get("return_type") or "",
+            "tax_period": tax_period,
+            "tax_year": tax_period[:4],
+            "index_year": meta.get("index_year") or "",
+            "event_class": "ADVOCACY",
+            "channel": "SELF_REPORTED_LOBBYING_EXPENDITURE",
+            "is_lobbying": "0",
+            "rule_basis": SCHEDC_RULE_BASIS,
+            "source_url": meta.get("index_url") or "",
+            "source_object_url":
+                "https://s3.amazonaws.com/irs-form-990/%s_public.xml" % oid,
+            "parse_status": parse_status,
+            "confidence_tier": "A",
+            "built_date": TODAY,
+            "built_by_script": SCRIPT99,
+        })
+        rows.append(row)
+
+    for c in ("_tax_period_end", "_return_type_hdr"):
+        for r in rows:
+            r.pop(c, None)
+
+    rows.sort(key=lambda r: (r["ein"], r["tax_period"], r["object_id"]))
+    out = CLEAN / "nonprofit_schedule_c_lobbying.csv"
+    write_csv(out, rows, SCHEDC_LOBBY_FIELDS)
+
+    # ---- coverage, per index year, INCLUDING what was never downloaded ----
+    on_disk = {p.stem for p in paths}
+    cov = []
+    by_year = defaultdict(list)
+    for r in idx.values():
+        by_year[r.get("index_year") or "?"].append(r)
+    parsed_by_year = Counter(r["index_year"] for r in rows)
+    present_by_year = Counter(
+        r["index_year"] for r in rows if str(r["schedule_c_present"]) == "1")
+    dollar_by_year = Counter(
+        r["index_year"] for r in rows
+        if r["lobbying_usd_headline"] not in ("", "0"))
+    eins_by_year = defaultdict(set)
+    linked_by_year = defaultdict(set)
+    for r in rows:
+        eins_by_year[r["index_year"]].add(r["ein"])
+        if r["cedar_entity_id"]:
+            linked_by_year[r["index_year"]].add(r["ein"])
+    for y in sorted(by_year):
+        tgt = by_year[y]
+        dl = sum(1 for r in tgt if r["object_id"] in on_disk)
+        cov.append({
+            "index_year": y,
+            "index_target_returns": len(tgt),
+            "downloaded": dl,
+            "parsed_here": parsed_by_year.get(y, 0),
+            "schedule_c_present": present_by_year.get(y, 0),
+            "reported_any_lobbying_dollar": dollar_by_year.get(y, 0),
+            "distinct_eins_parsed": len(eins_by_year.get(y, ())),
+            "distinct_eins_linked_to_spine": len(linked_by_year.get(y, ())),
+            "not_downloaded": len(tgt) - dl,
+            "coverage_status": ("FULL" if dl == len(tgt)
+                                else ("NONE" if dl == 0 else "PARTIAL")),
+            "coverage_basis":
+                "IRS e-file index for this SUBMISSION year, filtered to the "
+                "Cedar Native-nonprofit EIN target list. `not_downloaded` is "
+                "this project's fetch backlog, NOT an absence at the IRS.",
+            "source_index_url": tgt[0].get("index_url") or "",
+            "built_date": TODAY,
+            "built_by_script": SCRIPT99,
+        })
+    write_csv(CLEAN / "nonprofit_schedule_c_coverage.csv", cov,
+              SCHEDC_COV_FIELDS)
+
+    # THE RESOLUTION QUEUE IS 73 EINs, NOT 5,561. Most unresolved rows attach
+    # no Schedule C at all, so resolving them would change nothing. The rows
+    # that MATTER are the ones that reported a lobbying dollar and did not
+    # resolve - and that list is dominated by place-name traps ("Indian River
+    # Memorial Hospital", "Seminole State College", "Pomona College") mixed
+    # with genuine Native organisations ("Indian Health Board of Minneapolis",
+    # "National Native American Boarding School Healing Coalition"). Telling
+    # them apart is a ruling, not a pull, so the queue goes to review/ sized
+    # and sorted by the dollars at stake.
+    queue = defaultdict(lambda: {"usd": 0.0, "returns": 0})
+    qname, qyears = {}, defaultdict(set)
+    for r in rows:
+        if r["record_scope"] != "unresolved":
+            continue
+        if r["lobbying_usd_headline"] in ("", "0"):
+            continue
+        k = r["ein"]
+        try:
+            queue[k]["usd"] += float(r["lobbying_usd_headline"])
+        except ValueError:
+            pass
+        queue[k]["returns"] += 1
+        qname[k] = r["taxpayer_name_as_filed"]
+        qyears[k].add(r["tax_year"])
+    if queue:
+        write_csv(REVIEW / "schedc_unresolved_lobbying_filers.csv", [
+            {"ein": k, "taxpayer_name_as_filed": qname[k],
+             "returns_reporting_a_dollar": v["returns"],
+             "total_reported_lobbying_usd": round(v["usd"], 2),
+             "tax_years": "|".join(sorted(qyears[k])),
+             "refusal_reason_from_np_orgs":
+                 next((r["entity_link_refusal_reason"] for r in rows
+                       if r["ein"] == k and r["entity_link_refusal_reason"]), ""),
+             "question_for_review":
+                 "This EIN reported Schedule C lobbying and does not resolve "
+                 "to a Cedar entity. Is it a Native organisation? Many names "
+                 "on this list are PLACE-NAME COINCIDENCES (Indian River, "
+                 "Seminole State College, Yavapai Community Hospital) and are "
+                 "correctly NOT Native - ruling one of those OUT is as "
+                 "valuable as ruling a real one in.",
+             "YOUR_RULING": "", "built_date": TODAY,
+             "built_by_script": SCRIPT99}
+            for k, v in sorted(queue.items(), key=lambda kv: -kv[1]["usd"])],
+            ["ein", "taxpayer_name_as_filed", "returns_reporting_a_dollar",
+             "total_reported_lobbying_usd", "tax_years",
+             "refusal_reason_from_np_orgs", "question_for_review",
+             "YOUR_RULING", "built_date", "built_by_script"])
+        log("  resolution queue: %d EINs reported a lobbying dollar and do "
+            "NOT resolve -> review/schedc_unresolved_lobbying_filers.csv"
+            % len(queue))
+
+    if unindexed:
+        write_csv(REVIEW / "schedc_xml_not_in_index.csv",
+                  [{"object_id": o,
+                    "path": "data/raw/external/irs990_schedc/xml/%s.xml" % o,
+                    "question_for_review":
+                        "This return is on disk but its object_id is not in "
+                        "_index_targets.csv, so it has no EIN and cannot be "
+                        "keyed. Which index year did it come from?",
+                    "YOUR_RULING": "", "built_date": TODAY}
+                   for o in sorted(unindexed)],
+                  ["object_id", "path", "question_for_review", "YOUR_RULING",
+                   "built_date"])
+
+    tot_idx = len(idx)
+    log("-" * 74)
+    log("returns parsed               %6d  of %d on disk (index: %d targets)"
+        % (len(rows), len(paths), tot_idx))
+    log("  Schedule C ATTACHED        %6d" % stats["schedule_c_present"])
+    log("  no Schedule C with return  %6d  (absent is NOT zero)"
+        % stats["schedule_c_absent_from_return"])
+    log("  reported a lobbying dollar %6d" % stats["reported_a_lobbying_dollar"])
+    log("  linked to a spine entity   %6d  (tier X excluded as NEGATIVE)"
+        % stats["linked_to_spine"])
+    log("  parse errors               %6d" % stats["parse_error"])
+    log("  xml not in the index       %6d  -> review/schedc_xml_not_in_index.csv"
+        % stats["xml_not_in_index"])
+    log("distinct EINs parsed         %6d" % len({r["ein"] for r in rows}))
+    log("distinct EINs spine-linked   %6d"
+        % len({r["ein"] for r in rows if r["cedar_entity_id"]}))
+    log("NOT DOWNLOADED (fetch backlog) %4d of %d index targets"
+        % (tot_idx - len(on_disk & set(idx)), tot_idx))
+    log("-" * 74)
+    (LOGS / ("99_schedc_lobbying_%s.json" % TODAY)).write_text(json.dumps({
+        "script": SCRIPT99, "step": "schedc-lobbying", "date": TODAY,
+        "network_requests": 0,
+        "returns_on_disk": len(paths), "returns_parsed": len(rows),
+        "index_targets": tot_idx,
+        "not_downloaded": tot_idx - len(on_disk & set(idx)),
+        "stats": dict(stats),
+        "distinct_eins": len({r["ein"] for r in rows}),
+        "distinct_eins_linked": len({r["ein"] for r in rows
+                                     if r["cedar_entity_id"]}),
+    }, indent=1), encoding="utf-8")
+    _schedc_lobbying_codebook(rows, cov)
+
+
+def _schedc_lobbying_codebook(rows, cov):
+    D = {
+        "schedule_c_row_id": "Deterministic key: SCHEDC-<ein>-<object_id>. "
+                             "One row per RETURN, not per organisation.",
+        "ein": "Employer Identification Number, from the IRS e-file index.",
+        "object_id": "IRS e-file OBJECT_ID; identifies one accepted return.",
+        "taxpayer_name_as_filed": "Organisation name as the IRS index prints it.",
+        "return_type": "990, 990EZ, 990PF, 990EO or 990O.",
+        "tax_period": "Tax period end, YYYYMM, from the index.",
+        "tax_year": "Calendar year of tax_period.",
+        "index_year": "IRS SUBMISSION year whose index listed this return. "
+                      "Not the tax year - a 2024 return can be submitted 2025.",
+        "cedar_entity_id": "Cedar spine entity this EIN resolves to, via "
+                           "np_orgs.csv. Blank where it does not resolve.",
+        "cedar_entity_name": "Spine canonical name.",
+        "cedar_entity_class": "Cedar Native entity class from np_orgs.csv.",
+        "entity_link_tier": "Tier INHERITED from np_orgs.csv. Never A unless "
+                            "np_orgs says A. Tier X rows are refused, not "
+                            "carried - X is a NEGATIVE ruling.",
+        "entity_link_basis": "np_orgs' own match basis for the link.",
+        "entity_link_refusal_reason": "Why this EIN did NOT link. Populated "
+                                      "on every unlinked row so that 'not "
+                                      "linked' is distinguishable from 'not "
+                                      "checked'.",
+        "record_scope": "ADR-010 scope: entity | indian_country | unresolved.",
+        "record_scope_basis": "Why that scope.",
+        "inclusion_basis": "ADR-013 / C12: named_entity where the EIN "
+                           "resolves, else term_match with the term recorded.",
+        "matched_terms": "The term or identifier that put this row in Cedar.",
+        "schedule_c_present": "1 where Schedule C is attached to the return, "
+                              "0 where it is not. ABSENT IS NOT ZERO.",
+        "reporting_regime": "Which Schedule C part the filer completed: "
+                            "ELECTING_501H_PART_II_A | "
+                            "NON_ELECTING_PART_II_B | "
+                            "SCHEDULE_C_FILED_NO_PART_II_FIGURES | "
+                            "NO_SCHEDULE_C_WITH_THIS_RETURN. The three "
+                            "regimes are NEVER merged.",
+        "reporting_regime_basis": "Why that regime, in words.",
+        "election_501h": "1 where the filer appears to have made the 501(h) "
+                         "election. DERIVED, not read: Schedule C carries no "
+                         "election element.",
+        "election_501h_basis": "How the election was derived.",
+        "total_lobbying_usd": "Part II-A column (a) total lobbying.",
+        "direct_lobbying_usd": "Part II-A direct (grassroots excluded).",
+        "grassroots_lobbying_usd": "Part II-A grassroots.",
+        "nonelecting_lobbying_usd": "Part II-B total, non-electing filers.",
+        "lobbying_nontaxable_ceiling_usd": "Part II-A statutory ceiling.",
+        "grassroots_nontaxable_ceiling_usd": "Part II-A grassroots ceiling.",
+        "exempt_purpose_expenditure_usd": "Part II-A exempt-purpose base.",
+        "political_expenditure_usd": "Part I political campaign expenditure.",
+        "section_527_amount_usd": "Part I-C amount to section 527 entities.",
+        "dues_received_usd": "Part III dues received.",
+        "dues_lobbying_political_usd": "Part III dues share for lobbying.",
+        "method_volunteers": "Part II-B activity checkbox: volunteers.",
+        "method_paid_staff": "Part II-B activity checkbox: paid staff.",
+        "method_media": "Part II-B activity checkbox: media advertisements.",
+        "method_mailings": "Part II-B activity checkbox: mailings.",
+        "method_publications": "Part II-B activity checkbox: publications.",
+        "method_grants": "Part II-B activity checkbox: grants.",
+        "method_direct_contact": "Part II-B checkbox: direct contact with "
+                                 "legislators or their staff.",
+        "method_rallies": "Part II-B activity checkbox: rallies.",
+        "method_other": "Part II-B activity checkbox: other.",
+        "lobbying_usd_headline": "ONE comparable lobbying figure per return.",
+        "lobbying_usd_basis": "Which Schedule C line the headline came from. "
+                              "Load-bearing: the regimes are not comparable "
+                              "without it.",
+        "event_class": "cedar_domain EventClass: ADVOCACY.",
+        "channel": "SELF_REPORTED_LOBBYING_EXPENDITURE.",
+        "is_lobbying": "0 on every row. This records that the row is OUTSIDE "
+                       "the LDA regime, not that no lobbying occurred. Never "
+                       "sum this against LDA spend.",
+        "rule_basis": "What this record does and does not assert.",
+        "source_url": "IRS e-file index the return was listed in.",
+        "source_object_url": "The return's own public XML.",
+        "parse_status": "OK where the return parsed, else the exception type. Populated on every row: a zero error rate is a finding and must be visible per row, not inferred from a missing column.",
+        "confidence_tier": "A. Every field is transcribed from the filer's "
+                           "own signed return; the ENTITY LINK carries its "
+                           "own tier in entity_link_tier.",
+        "built_date": "Build date.",
+        "built_by_script": "Producer.",
+        # coverage
+        "index_target_returns": "Returns the IRS index listed for this "
+                                "submission year, filtered to Cedar's "
+                                "Native-nonprofit EIN target list.",
+        "downloaded": "Of those, how many XML files are on disk.",
+        "parsed_here": "Of those, how many this step read.",
+        "reported_any_lobbying_dollar": "Returns with a non-zero headline.",
+        "distinct_eins_parsed": "Distinct EINs among parsed returns.",
+        "distinct_eins_linked_to_spine": "Distinct EINs that resolve.",
+        "not_downloaded": "This project's fetch backlog for the year. NOT an "
+                          "absence at the IRS.",
+        "coverage_status": "FULL | PARTIAL | NONE, on download.",
+        "coverage_basis": "What the coverage claim rests on.",
+        "source_index_url": "The IRS index CSV for the year.",
+    }
+
+    def frag(ds, data, fields):
+        n = len(data)
+        out = []
+        for f in fields:
+            filled = sum(1 for r in data if str(r.get(f, "")).strip())
+            out.append({"dataset": ds, "variable": f, "type": "text",
+                        "units": "", "n_rows": n, "published": 1,
+                        "pct_filled": round(100.0 * filled / n, 1) if n else 0.0,
+                        "access_tier": "public",
+                        "description": D.get(f, ""), "generated": TODAY})
+        cedar_codebook.write_fragment(ds, out)
+        log("  codebook fragment %s: %d variables over %d rows"
+            % (ds, len(out), n))
+
+    frag("04w_nonprofit_schedule_c_lobbying", rows, SCHEDC_LOBBY_FIELDS)
+    frag("04w_nonprofit_schedule_c_coverage", cov, SCHEDC_COV_FIELDS)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--steps", default="report")
@@ -2712,6 +3289,8 @@ def main():
             step_irs_deflate64()
         elif s == "schedc":
             step_schedc()
+        elif s == "schedc-lobbying":
+            step_schedc_lobbying()
         elif s == "earmarks-pull":
             step_earmarks_pull()
         elif s == "earmarks-stage":

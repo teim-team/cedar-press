@@ -53,7 +53,7 @@ at one end and a retired MMS series that stopped in 2000 at the other.
 
 # PART 0 — THE CADENCE TABLE, ONE ROW PER SOURCE
 
-*Generated 2026-09-02T02:35:39+00:00 by `code/630_refresh_cadence.py`. Every `cedar_holds_through` below was MEASURED from the file named beside it on this run. Re-run the script and the numbers update; do not hand-edit inside the markers.*
+*Generated 2026-09-02T03:33:32+00:00 by `code/630_refresh_cadence.py`. Every `cedar_holds_through` below was MEASURED from the file named beside it on this run. Re-run the script and the numbers update; do not hand-edit inside the markers.*
 
 **55 sources across 13 datasets.**
 
@@ -61,9 +61,9 @@ at one end and a retired MMS series that stopped in 2000 at the other.
 
 | state | sources | what it means |
 |---|---:|---|
-| ✅ CURRENT | 14 | Cedar holds everything the source offers |
+| ✅ CURRENT | 16 | Cedar holds everything the source offers |
 | ① the source has not published yet | 7 | nothing to do; the expected date is in the row |
-| ② **published and NOT PULLED** | 9 | an **acquisition** task |
+| ② **published and NOT PULLED** | 7 | an **acquisition** task |
 | ③ **pulled and NOT PROMOTED** | 1 | already on disk. **NOT an acquisition task.** |
 | ⛔ closed by design | 5 | the source ended, or is one-time |
 | ❓ source edge NOT ESTABLISHED | 19 | no key, no index, or no schedule exists to probe |
@@ -76,16 +76,14 @@ at one end and a retired MMS series that stopped in 2000 at the other.
 
 | # | dataset | source | Cedar holds | source has | gap | edge age | why |
 |---:|---|---|---|---|---:|---:|---|
-| 1 | `gaming` | `mi_mgcb` | 2026-06-30 | 2026-07-31 | 31d | 63d | the source offers 2026-07-31 and Cedar holds 2026-06-30. Check data/raw, data/staging and review/ before treating this as an acquisition task. |
-| 2 | `lobbying` | `lda` | 2026-08-04T15:47:06-04:00 | 2026-09-01 | 28d | 28d | the source offers 2026-09-01 and Cedar holds 2026-08-04T15:47:06-04:00. Check data/raw, data/staging and review/ before treating this as an acquisitio |
-| 3 | `lobbying` | `fr_consultation` | 2026-08-18 | 2026-09-01 | 14d | 14d | the source offers 2026-09-01 and Cedar holds 2026-08-18. Check data/raw, data/staging and review/ before treating this as an acquisition task. |
-| 4 | `lobbying` | `fr_ex_parte` | 2026-08-31 | 2026-09-01 | 1d | 1d | the source offers 2026-09-01 and Cedar holds 2026-08-31. Check data/raw, data/staging and review/ before treating this as an acquisition task. |
-| 5 | `deals` | `sec_edgar` | 2017-05-21 | — | 0d | 3390d | declared in the registry: NOT SWEPT — reachable, never swept past 2017 |
-| 6 | `legislation` | `congressional_correspondence` | 2026-01-27 | — | 0d | 217d | declared in the registry: NOT ESTABLISHED |
-| 7 | `lobbying` | `regulations_gov` | 2026-07-28 | — | 0d | 35d | declared in the registry: NOT ESTABLISHED as a date — the gap here is ENTITY coverage, not time: 51 of 1,712 query names banked (97% of the sweep un-r |
-| 8 | `lobbying` | `foia_logs` | 2026-08-12 | — | 0d | 20d | declared in the registry: NOT ESTABLISHED — the gap is AGENCY coverage: 3 of ~100 agencies publish here and are pulled; EPA, USDA, HHS, DOE, Corps and |
-| 9 | `lobbying` | `irs990_schedc` | 2026 | 2026 | 0d | 0d | declared in the registry: sibling: nonprofit_schedule_c_coverage.csv, built 2026-09-01 by code/99 from the IRS index itself |
-| 10 | `gaming` | `labor_form5500_osha` | — | 2025 | 0d | —d | declared in the registry: both corpora are held through CY2025 in data/raw; nothing newer is published |
+| 1 | `lobbying` | `fr_consultation` | 2026-08-18 | 2026-09-01 | 14d | 14d | the source offers 2026-09-01 and Cedar holds 2026-08-18. Check data/raw, data/staging and review/ before treating this as an acquisition task. |
+| 2 | `lobbying` | `fr_ex_parte` | 2026-08-31 | 2026-09-01 | 1d | 1d | the source offers 2026-09-01 and Cedar holds 2026-08-31. Check data/raw, data/staging and review/ before treating this as an acquisition task. |
+| 3 | `deals` | `sec_edgar` | 2017-05-21 | — | 0d | 3390d | declared in the registry: NOT SWEPT — reachable, never swept past 2017 |
+| 4 | `legislation` | `congressional_correspondence` | 2026-01-27 | — | 0d | 217d | declared in the registry: NOT ESTABLISHED |
+| 5 | `lobbying` | `regulations_gov` | 2026-07-28 | — | 0d | 35d | declared in the registry: NOT ESTABLISHED as a date — the gap here is ENTITY coverage, not time: 51 of 1,712 query names banked (97% of the sweep un-r |
+| 6 | `lobbying` | `foia_logs` | 2026-08-12 | — | 0d | 20d | declared in the registry: NOT ESTABLISHED — the gap is AGENCY coverage: 3 of ~100 agencies publish here and are pulled; EPA, USDA, HHS, DOE, Corps and |
+| 7 | `lobbying` | `irs990_schedc` | 2026 | 2026 | 0d | 0d | declared in the registry: sibling: nonprofit_schedule_c_coverage.csv, built 2026-09-01 by code/99 from the IRS index itself |
+| 8 | `gaming` | `labor_form5500_osha` | — | 2025 | 0d | —d | declared in the registry: both corpora are held through CY2025 in data/raw; nothing newer is published |
 
 ## Where the source edge is NOT ESTABLISHED, and why
 
@@ -122,9 +120,9 @@ at one end and a retired MMS series that stopped in 2000 at the other.
 | `deals` | 4 | **continuous** (`deals_press`) | 2017-05-21 | ②1 · ✅1 · ❓2 |
 | `federal-register` | 2 | **daily** (`federal_register`) | 2026-08-12 | ✅1 · ❓1 |
 | `funding` | 4 | **monthly** (`usaspending_assistance_archive`) | 2007-09-30 | ⛔2 · ✅1 · ❓1 |
-| `gaming` | 11 | **continuous** (`fac_sefa_gaming`) | 2021 | ①3 · ②1 · ③1 · ✅4 · ❓2 |
+| `gaming` | 11 | **continuous** (`fac_sefa_gaming`) | 2021 | ①3 · ③1 · ✅5 · ❓2 |
 | `legislation` | 3 | **continuous** (`congress_gov_bills`) | 2025-05-06 | ②1 · ❓2 |
-| `lobbying` | 10 | **continuous** (`regulations_gov`) | 2026 | ②6 · ✅1 · ❓3 |
+| `lobbying` | 10 | **continuous** (`regulations_gov`) | 2026 | ②5 · ✅2 · ❓3 |
 | `nagpra` | 1 | **daily** (`nagpra_notices`) | 2026-08-31 | ❓1 |
 | `native-owned-businesses` | 1 | **none** (`tribal_vendor_lists`) | 2026-09-01 | ❓1 |
 | `natural-resources` | 7 | **monthly** (`onrr_nrrd_monthly`) | 2000-12-31 | ①1 · ⛔1 · ✅4 · ❓1 |
@@ -567,16 +565,16 @@ at one end and a retired MMS series that stopped in 2000 at the other.
 
 | field | value |
 |---|---|
-| state | ② **NOT PULLED** |
+| state | ✅ CURRENT |
 | host | `michigan.gov/mgcb` |
 | publish_cadence | monthly |
 | publish_lag | ~3 weeks after month end |
 | cadence basis | sibling: gaming_sources.md |
-| **cedar_holds_through** | **2026-06-30** — measured from `data/clean/digital_gaming_revenue.csv`, column `period_end`, 10,661 rows in scope |
+| **cedar_holds_through** | **2026-07-31** — measured from `data/clean/digital_gaming_revenue.csv`, column `period_end`, 10,766 rows in scope |
 | **source_has_through** | **2026-07-31** — sibling gaming_sources.md 2026-09-01: MGCB publishes monthly ~3 weeks after month end, so July is out and August is the only genuinely open month (established 2026-09-01) |
-| cedar_last_pulled | 2026-08-07 — max(fetched_date) in data/clean/digital_gaming_revenue.csv |
-| **refresh_due** | **YES** — the source offers 2026-07-31 and Cedar holds 2026-06-30. Check data/raw, data/staging and review/ before treating this as an acquisition task. |
-| age | Cedar's edge is 63 days old; our knowledge of the SOURCE is 0 days old; measured gap behind the source 31 days |
+| cedar_last_pulled | 2026-09-01 — max(fetched_date) in data/clean/digital_gaming_revenue.csv |
+| **refresh_due** | **no** — Cedar holds through 2026-07-31; the source offers 2026-07-31. Nothing is owed. |
+| age | Cedar's edge is 32 days old; our knowledge of the SOURCE is 0 days old; measured gap behind the source 0 days |
 | refresh_cost | one page per month |
 | refresh_command | code/164 (digital gaming leg) |
 | breaks_on_refresh | digital_gaming_relationships.csv entity links (168) |
@@ -719,16 +717,16 @@ at one end and a retired MMS series that stopped in 2000 at the other.
 
 | field | value |
 |---|---|
-| state | ② **NOT PULLED** |
+| state | ✅ CURRENT |
 | host | `lda.gov` |
 | publish_cadence | quarterly LD-2 (due +20d), semiannual LD-203 (30 Jan / 30 Jul); amendments arrive CONTINUOUSLY and indefinitely |
 | publish_lag | median 20d = the statutory deadline exactly; only 57.4% filed by day 20, 74.0% by day 34, p99 = 495d, max = 5,885d (n = 27,796) |
 | cadence basis | REFRESH_CADENCE 2.1 — measured over Cedar's own 27,796 filings |
-| **cedar_holds_through** | **2026-08-04T15:47:06-04:00** — measured from `data/clean/native_entity_lobbying_disclosures.csv`, column `dt_posted`, 27,796 rows in scope |
+| **cedar_holds_through** | **2026-09-01T20:50:54-04:00** — measured from `data/clean/native_entity_lobbying_disclosures.csv`, column `dt_posted`, 27,825 rows in scope |
 | **source_has_through** | **2026-09-01** — probe 2026-09-01: lda.gov/api/v1/filings ?ordering=-dt_posted -> newest dt_posted 2026-09-01T20:53:39-04:00 (a 2026-Q2 no-activity report). count 1,976,576 (established 2026-09-01) |
 | cedar_last_pulled | 2026-08-04 — recorded in a build log |
-| **refresh_due** | **YES** — the source offers 2026-09-01 and Cedar holds 2026-08-04T15:47:06-04:00. Check data/raw, data/staging and review/ before treating this as an acquisition task. |
-| age | Cedar's edge is 28 days old; our knowledge of the SOURCE is 0 days old; measured gap behind the source 28 days |
+| **refresh_due** | **no** — Cedar holds through 2026-09-01T20:50:54-04:00; the source offers 2026-09-01. Nothing is owed. |
+| age | Cedar's edge is 0 days old; our knowledge of the SOURCE is 0 days old; measured gap behind the source 0 days |
 | refresh_cost | 15 req/min anonymous, 120 keyed — cheap |
 | refresh_command | key on `dt_posted >= last_pull`, NEVER on filing_year + filing_period, and re-read the trailing 4 quarters |
 | breaks_on_refresh | 78_content_analysis.py rebuilds FIVE lobbying tables AND fr_content_classification.csv — run it when no other lobbying build is live |
@@ -742,7 +740,7 @@ at one end and a retired MMS series that stopped in 2000 at the other.
 | publish_cadence | continuous — comment periods are the events |
 | publish_lag | posting is near-immediate; the docket, not the entity, is the clock |
 | cadence basis | docs/datasets/lobbying_sources.md §4 |
-| **cedar_holds_through** | **2026-07-28** — measured from `data/clean/regulations_gov_comments.csv`, column `posted_date`, 172 rows in scope |
+| **cedar_holds_through** | **2026-07-28** — measured from `data/clean/regulations_gov_comments.csv`, column `posted_date`, 298 rows in scope |
 | **source_has_through** | **—** — NOT ESTABLISHED as a date — the gap here is ENTITY coverage, not time: 51 of 1,712 query names banked (97% of the sweep un-run) (established 2026-09-01) |
 | cedar_last_pulled | 2026-09-01 — max(retrieved_date) in data/clean/regulations_gov_comments.csv |
 | **refresh_due** | **YES** — declared in the registry: NOT ESTABLISHED as a date — the gap here is ENTITY coverage, not time: 51 of 1,712 query names banked (97% of the sweep un-run) |
@@ -1152,9 +1150,9 @@ at one end and a retired MMS series that stopped in 2000 at the other.
 | publish_cadence | continuous; primes file by end of the month following the award month |
 | publish_lag | NOT MEASURABLE — the mature window (2021-08..2024-08) falls inside the FY2021-24 hole, so every plateau ratio computed from it is meaningless (PLATEAU_WARNING in 301) |
 | cadence basis | REFRESH_CADENCE 1.5(b) |
-| **cedar_holds_through** | **2026-08-03** — measured from `data/clean/subawards.csv`, column `subaward_date`, 72,837 rows in scope |
+| **cedar_holds_through** | **2026-08-03** — measured from `data/clean/subawards.csv`, column `subaward_date`, 76,859 rows in scope |
 | **source_has_through** | **—** — NOT ESTABLISHED — code/121_pull_subawards_api.py holds the host right now; one poller per host (established —) |
-| cedar_last_pulled | 2026-08-12 — max(fetched_date) in data/clean/subawards.csv |
+| cedar_last_pulled | 2026-09-02 — max(fetched_date) in data/clean/subawards.csv |
 | **refresh_due** | **no** — declared in the registry: NOT ESTABLISHED — code/121_pull_subawards_api.py holds the host right now; one poller per host |
 | age | Cedar's edge is 29 days old; our knowledge of the SOURCE is — days old; measured gap behind the source 0 days |
 | refresh_cost | ~2,733 paginated calls |

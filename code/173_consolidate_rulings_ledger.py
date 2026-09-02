@@ -453,7 +453,24 @@ def main():
     per_file = Counter()
     for path, col, kind in files:
         rel = str(path.relative_to(CEDAR)).replace("\\", "/")
-        for r in load(path):
+        # `source_row_ordinal` - the 0-based DATA row index inside `rel`.
+        # WITHOUT IT THIS LEDGER CANNOT BE KEYED, AND 6,302 OF ITS 15,587 ROWS
+        # WERE LITERAL DUPLICATES BECAUSE OF ITS ABSENCE. The row below keeps
+        # subject, verdict, tier and source FILE and dropped which ROW of that
+        # file said it, so N distinct source rows that happen to agree about
+        # one subject rendered as N byte-identical ledger rows. Measured
+        # 2026-09-01: 3,561 of the surplus came from
+        # review/osha_gambling_unresolved_2026-08-26.csv, whose 4,560 rows are
+        # one per (OSHA establishment-year record, proposed tribe) and are
+        # themselves distinct - the establishment, city, state and year are
+        # exactly what this projection threw away - and 2,572 from
+        # data/clean/cross_dataset_ruling_map.csv, which had the same defect
+        # one level upstream and was repaired the same way in `23`.
+        # These were never duplicate rulings. Each is a distinct row of a
+        # distinct source asserting the same verdict, and that count is the
+        # corroboration. Nothing is de-duplicated here; the identity is
+        # written back instead, exactly as 430 did for prime_contracts.
+        for ordinal, r in enumerate(load(path)):
             v = (r.get(col) or "").strip()
             if not v:
                 continue
@@ -480,6 +497,7 @@ def main():
                 "ruling": v,
                 "ruling_payload": payload,
                 "source_file": rel,
+                "source_row_ordinal": ordinal,
                 "source_column": col,
                 "source_kind": row_kind,
                 "tier_stated": tier_stated,
@@ -704,6 +722,7 @@ def main():
                 "confidence_tier": rr["tier"],
                 "tier_source": rr["tier_source"],
                 "source_file": rr["source_file"],
+                "source_row_ordinal": rr["source_row_ordinal"],
                 "source_column": rr["source_column"],
                 "source_kind": rr["source_kind"],
                 "ruling_date": rr["ruling_date"],
@@ -723,6 +742,7 @@ def main():
                 "confidence_tier": rr["tier"],
                 "tier_source": rr["tier_source"],
                 "source_file": rr["source_file"],
+                "source_row_ordinal": rr["source_row_ordinal"],
                 "source_column": rr["source_column"],
                 "source_kind": rr["source_kind"],
                 "ruling_date": rr["ruling_date"],

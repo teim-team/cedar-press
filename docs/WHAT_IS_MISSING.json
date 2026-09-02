@@ -1,0 +1,425 @@
+{
+  "entity.register rows": 1555,
+  "entity.distinct minted values": 1,
+  "entity.distinct register_status values": 1,
+  "entity.former_names filled": 12,
+  "entity.register entities with an FR legal name ON DISK": 536,
+  "entity.of those, register name differs from the FR legal name": 509,
+  "contractors.rows": 1217768,
+  "contractors.total_award_value filled (omitted from sample)": 1217768,
+  "contractors.parent_contract_number filled (omitted from sample)": 1217768,
+  "contractors.cedar_uid filled": 888958,
+  "contractors.$0 obligation rows": 265491,
+  "contractors.rows whose contract_number is <=6 chars (not a key)": 290525,
+  "contractors.most-reused contract_number": [
+    [
+      "0001",
+      11700
+    ]
+  ],
+  "contractors.archive extract rows ON DISK": 904282,
+  "contractors.of those carrying 6-digit naics_code": 904282,
+  "contractors.prime_contracts columns carrying NAICS": "none (sector = 2-digit only)",
+  "funding.rows": 701955,
+  "funding.recipient_uei filled (omitted from sample)": 668347,
+  "funding.cedar_uid filled (omitted from sample)": 552602,
+  "funding.assistance_type_description BLANK": 299367,
+  "funding.negative (deobligation) rows": 43866,
+  "funding.$0 rows": 99786,
+  "funding.blank canonical_name": 152448,
+  "funding.canonical_name DISAGREES with the register for the same cedar_uid": 341486,
+  "funding.dollars on those rows": "$94.444B",
+  "gaming.facilities": 787,
+  "gaming.property_status distribution": [
+    [
+      "current",
+      451
+    ],
+    [
+      "",
+      334
+    ],
+    [
+      "approved",
+      1
+    ],
+    [
+      "closed",
+      1
+    ]
+  ],
+  "gaming.status=current AND close_date populated": 113,
+  "gaming.open_date precision mix": [
+    [
+      "year",
+      288
+    ],
+    [
+      "day",
+      188
+    ],
+    [
+      "month",
+      159
+    ],
+    [
+      "",
+      151
+    ],
+    [
+      "decade",
+      1
+    ]
+  ],
+  "gaming.no city": 62,
+  "gaming.gaming class column on the facility": "none",
+  "gaming.gaming_revenue_bounds rows ON DISK": 13803,
+  "gaming.facilities covered by a revenue bound": 694,
+  "gaming.facility-bearing tribes": 284,
+  "gaming.with a gaming ordinance stating class II/III": 263,
+  "gaming.location observations carrying a county": 1067,
+  "legislation.roll-call votes": 423,
+  "legislation.votes whose bill TITLE is on disk in native_bills.csv": 390,
+  "legislation.votes whose bill OUTCOME is on disk in native_bills.csv": 196,
+  "legislation.D_yea / R_yea filled (omitted from sample)": 423,
+  "legislation.votes recorded FAILED with more yea than nay": 9,
+  "legislation.a threshold_required column exists": "NO",
+  "legislation.the sampled specimen": [
+    "H097-0770",
+    "H099-0529",
+    "H100-0889",
+    "H101-0788",
+    "H105-0482",
+    "H105-0568",
+    "H108-0229",
+    "H109-1107",
+    "H112-1442"
+  ],
+  "lobbying.registrants": 653,
+  "lobbying.spend_reported_usd filled (omitted from sample)": 653,
+  "lobbying.issue_codes filled (omitted from sample)": 405,
+  "lobbying.government_entities_lobbied filled (omitted from sample)": 388,
+  "lobbying.sum of spend_reported_usd": "$645.1M",
+  "lobbying.rows where n_native_clients == n_distinct_native_entities": "631 of 653",
+  "fedreg.consultation event-participant rows": 11402,
+  "fedreg.consultation_type distribution": [
+    [
+      "NAGPRA_consultation_reported",
+      10888
+    ],
+    [
+      "consultation_session",
+      212
+    ],
+    [
+      "consultation_notice",
+      180
+    ],
+    [
+      "NAGPRA",
+      38
+    ],
+    [
+      "listening_session",
+      37
+    ],
+    [
+      "NHPA_section_106",
+      20
+    ],
+    [
+      "negotiated_rulemaking",
+      14
+    ],
+    [
+      "dear_tribal_leader_letter",
+      6
+    ],
+    [
+      "advisory_committee",
+      5
+    ],
+    [
+      "tribal_summit",
+      2
+    ]
+  ],
+  "fedreg.event_start_date filled": 93,
+  "fedreg.location filled": 60,
+  "fedreg.format filled": 180,
+  "fedreg.source_url filled": 11402,
+  "fedreg.agencies represented": [
+    [
+      "Interior Department",
+      11068
+    ],
+    [
+      "Health and Human Services Department",
+      99
+    ],
+    [
+      "Environmental Protection Agency",
+      43
+    ],
+    [
+      "Commerce Department",
+      30
+    ],
+    [
+      "Energy Department",
+      23
+    ],
+    [
+      "Small Business Administration",
+      17
+    ]
+  ],
+  "nagpra.title index rows / columns": "6664 / 10",
+  "nagpra.nagpra_notices rows / columns ON DISK": "6792 / 67",
+  "nagpra.institution_name filled": 6792,
+  "nagpra.institution_state filled": 6680,
+  "nagpra.mni_total_stated filled": 4273,
+  "nagpra.affiliated_entity_ids filled": 5022,
+  "nagpra.removal_states filled": 4433,
+  "nagpra.repatriation_eligible_date filled": 2782,
+  "nagpra.html_url filled": 6792,
+  "nagpra.nagpra_notice_entity_bridge rows ON DISK": 51579,
+  "nagpra.notice-to-tribe links resolved to an entity": 48111,
+  "nob.rows": 2393,
+  "nob.naics filled": 34,
+  "nob.service_category_raw filled": 2043,
+  "nob.city filled": 984,
+  "nob.certification_start filled": 72,
+  "nob.certification_expiration filled": 623,
+  "nob.business_entity_id filled": 4,
+  "nob.ownership_percent filled": 385,
+  "nob.source_last_updated filled": 1127,
+  "nob.distinct certification_expiration FORMATS": [
+    [
+      "####-##-##",
+      346
+    ],
+    [
+      "##/##/####",
+      144
+    ],
+    [
+      "#/##/####",
+      86
+    ],
+    [
+      "#/#/####",
+      33
+    ],
+    [
+      "##/#/####",
+      13
+    ],
+    [
+      "#/##/##",
+      1
+    ]
+  ],
+  "nob.a cedar_uid column exists": "NO",
+  "resources.rows": 11305,
+  "resources.aggregation_level distribution": [
+    [
+      "national_aggregate",
+      9791
+    ],
+    [
+      "entity_specific",
+      779
+    ],
+    [
+      "per_headright_rate",
+      508
+    ],
+    [
+      "state_aggregate",
+      167
+    ],
+    [
+      "entity_specific_component",
+      60
+    ]
+  ],
+  "resources.recipient_entity_name filled": 1465,
+  "resources.recipient_entity_id filled": 705,
+  "resources.cedar_uid filled": 119,
+  "resources.period_end filled": 10813,
+  "resources.payer_entity_name filled": 1610,
+  "resources.volume / production / price column": [
+    "product"
+  ],
+  "nonprofits.rows": 12764,
+  "nonprofits.classification_ruling distribution": [
+    [
+      "UNRULED",
+      12366
+    ],
+    [
+      "place_name_coincidence",
+      309
+    ],
+    [
+      "native_controlled",
+      71
+    ],
+    [
+      "tribally_controlled",
+      11
+    ],
+    [
+      "native_serving",
+      7
+    ]
+  ],
+  "nonprofits.funnel_stage x classification_ruling (top 8)": [
+    [
+      [
+        "raw_name_candidate",
+        "UNRULED"
+      ],
+      5082
+    ],
+    [
+      [
+        "excluded_by_prior_ruling",
+        "UNRULED"
+      ],
+      4651
+    ],
+    [
+      [
+        "canonical_name_match",
+        "UNRULED"
+      ],
+      1831
+    ],
+    [
+      [
+        "verified_strict",
+        "UNRULED"
+      ],
+      697
+    ],
+    [
+      [
+        "ruled_not_native",
+        "place_name_coincidence"
+      ],
+      309
+    ],
+    [
+      [
+        "state_validated",
+        "UNRULED"
+      ],
+      105
+    ],
+    [
+      [
+        "ruled_native_needs_elijah",
+        "native_controlled"
+      ],
+      64
+    ],
+    [
+      [
+        "ruled_native_verified",
+        "tribally_controlled"
+      ],
+      8
+    ]
+  ],
+  "nonprofits.rows excluded_by_prior_ruling that still read UNRULED": 4651,
+  "nonprofits.rows verified_strict that still read UNRULED": 697,
+  "nonprofits.cedar_uid filled": 1423,
+  "nonprofits.placename_risk_flag distribution": [
+    [
+      "",
+      9003
+    ],
+    [
+      "REVIEW",
+      2401
+    ],
+    [
+      "HIGH",
+      1360
+    ]
+  ],
+  "sub.rows": 76859,
+  "sub.description filled (omitted from sample)": 76813,
+  "sub.prime_award_id filled (omitted from sample)": 76859,
+  "sub.prime_award_amount filled (omitted from sample)": 73057,
+  "sub.naics_title filled": 40112,
+  "sub.psc filled": 998,
+  "sub.cedar_uid filled": 33503,
+  "sub.duplicate_status distribution": [
+    [
+      "primary",
+      58731
+    ],
+    [
+      "exact_repeat_within_source",
+      17282
+    ],
+    [
+      "superseded_by_primary_source",
+      846
+    ]
+  ],
+  "deals.rows": 935,
+  "deals.Announced_Value_USD filled (omitted from sample)": 835,
+  "deals.Value_Type filled": 935,
+  "deals.Project_Total_Value_USD filled (omitted from sample)": 139,
+  "deals.Source_1 filled (omitted from sample)": 931,
+  "deals.Description filled (omitted from sample)": 935,
+  "deals.State filled (omitted from sample)": 805,
+  "deals.cedar_uid filled (omitted from sample)": 886,
+  "deals.Verification_Status filled (omitted from sample)": 935,
+  "deals.Confidence filled (omitted from sample)": 935,
+  "deals.Status distribution": [
+    [
+      "Awarded",
+      583
+    ],
+    [
+      "Completed",
+      96
+    ],
+    [
+      "Closed",
+      94
+    ],
+    [
+      "Recommended for award",
+      48
+    ],
+    [
+      "Closed/announced",
+      33
+    ],
+    [
+      "Announced",
+      21
+    ],
+    [
+      "Under construction",
+      9
+    ],
+    [
+      "Committed",
+      6
+    ]
+  ],
+  "psc_reach.gapfill prime-award rows ON DISK (psc+description+naics ~100%)": 1094582,
+  "psc_reach.distinct contract_award_unique_key": 1041147,
+  "psc_reach.archive bridge tx->award pairs": 904282,
+  "psc_reach.prime_contracts rows": 1217768,
+  "psc_reach.carrying a transaction key": 841002,
+  "psc_reach.REACHABLE to a local psc/description row": "247987 (20.4%)",
+  "psc_reach.requiring a re-pull": "969781 (79.6%)"
+}

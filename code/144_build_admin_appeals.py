@@ -76,7 +76,9 @@ Reads  www.doi.gov OHA chronological indices (114 pages, cached to data/raw/)
        data/spine/cedar_entity_spine.csv
 Writes data/clean/admin_appeal_decisions.csv
        data/clean/admin_appeal_parties.csv
-       data/clean/admin_appeal_positions.csv
+       data/clean/admin_appeal_positions.csv   (also re-derivable alone:
+           `py -3 code/144_build_admin_appeals.py positions`, zero network -
+           see the STAGE `positions` block near the bottom of this file)
        data/clean/source_coverage_admin_appeals.csv
        review/admin_appeal_unresolved_organisations.csv
        review/admin_appeal_entity_link_candidates.csv
@@ -970,5 +972,217 @@ def main():
         "notes": _notes}, indent=1), encoding="utf-8")
 
 
+
+
+# ===========================================================================
+# STAGE `positions` -- re-derive admin_appeal_positions.csv, ZERO NETWORK
+# ===========================================================================
+# WHY THIS STAGE EXISTS (2026-09-01, workstream N)
+#
+# `admin_appeal_positions.csv` held ONE row and was reported as a broken pull.
+# It is not a broken pull. Two separate facts produce it, and both are
+# properties of the source and of this build's own rules:
+#
+#   1. THE CEILING IS THE SOURCE. A position row needs a decision whose
+#      caption names BOTH a resolved Native entity AND a different
+#      organisation. The OHA chronological index publishes three columns -
+#      case name, date decided, citation - and an IBLA caption is normally the
+#      appellant alone. Of 15,613 decisions, 566 resolve to a Native entity
+#      and only 8 of those name a SECOND organisation. Eight is the whole
+#      universe this source can support, and the fetch behind it is complete:
+#      `source_coverage_admin_appeals.csv` is 114 of 114 board-years at
+#      HTTP 200, IBIA and IBLA, 1970-2026.
+#
+#   2. THE ONE ROW WAS STALE. `logs/144_admin_appeals_2026-08-12.json` records
+#      the build that wrote it: `tribe_linked: 397`, `positions: 1`. Scripts
+#      163 and 168 later raised the resolved-party count to 566 IN PLACE, and
+#      nothing recomputed the positions that depend on it. So the file was
+#      one row of a then-correct eight.
+#
+# This stage recomputes positions from the LIVE decisions and parties tables
+# rather than re-running the whole build, because a full `main()` re-run would
+# rewrite admin_appeal_decisions.csv and admin_appeal_parties.csv from the
+# cached HTML and DISCARD exactly the 163/168/327/505 enrichment that makes
+# the recomputation worth doing. Defect class 6: the enricher runs last, so
+# the rebuild must not run at all.
+#
+#     py -3 code/144_build_admin_appeals.py positions
+#
+# It asserts nothing new. `position` stays UNDETERMINED on every row for the
+# reason the module docstring gives, and the three-leg rule is still
+# `position_is_addressable`.
+
+
+def stage_positions():
+    dec_p = CLEAN / "admin_appeal_decisions.csv"
+    par_p = CLEAN / "admin_appeal_parties.csv"
+    out_p = CLEAN / "admin_appeal_positions.csv"
+    for p in (dec_p, par_p):
+        if not p.exists():
+            print("missing %s -- run the full build first" % p.name)
+            return 1
+
+    with open(dec_p, encoding="utf-8-sig", newline="") as fh:
+        dec = {r["decision_id"]: r for r in csv.DictReader(fh)}
+    with open(par_p, encoding="utf-8-sig", newline="") as fh:
+        parties = list(csv.DictReader(fh))
+
+    by = {}
+    for p in parties:
+        by.setdefault(p["decision_id"], []).append(p)
+
+    POSITION_BASIS = (
+        "The chronological index publishes case name, date and citation only. "
+        "It establishes WHO appealed; it does not establish whether the "
+        "Interior action under challenge favoured or harmed the named Native "
+        "entity. Direction is not derivable from this source and is not "
+        "asserted.")
+
+    # cedar_uid is minted by 505 and is NOT re-derivable here. Carry it
+    # forward per position_id so a re-derivation never DROPS a column another
+    # script owns; new rows carry an empty cedar_uid for 505 to fill.
+    prior_uid = {}
+    if out_p.exists():
+        with open(out_p, encoding="utf-8-sig", newline="") as fh:
+            for r in csv.DictReader(fh):
+                if r.get("cedar_uid"):
+                    prior_uid[r.get("position_id", "")] = r["cedar_uid"]
+
+    positions = []
+    refused = Counter()
+    refused_detail = []
+    for did, plist in sorted(by.items()):
+        ents = []
+        for p in plist:
+            if p.get("resolved_entity_id") and (
+                    p["resolved_entity_id"], p.get("resolved_entity_name", "")
+            ) not in ents:
+                ents.append((p["resolved_entity_id"],
+                             p.get("resolved_entity_name", "")))
+        if not ents:
+            continue
+        d = dec.get(did, {})
+        for p in plist:
+            if p.get("party_type") not in ("ORGANISATION", "BUSINESS_DBA"):
+                continue
+            org_id = p.get("organisation_id") or ""
+            for ne, nen in ents:
+                if ne == p.get("resolved_entity_id"):
+                    continue      # an entity has no position on itself
+                if not position_is_addressable(org_id, p.get("citation"), ne):
+                    # A count is not actionable and scrolls past; the KEY is a
+                    # task. Name the exact three legs that failed, and say
+                    # which one was empty, so a reader can go and look at it.
+                    missing = [nm for nm, v in
+                               (("organisation_id", org_id),
+                                ("matter_id", p.get("citation")),
+                                ("native_entity_id", ne))
+                               if not str(v or "").strip()]
+                    refused_detail.append(
+                        "%s | party_id=%s | party_name=%r | missing=%s"
+                        % (did, p.get("party_id", ""), p.get("party_name", ""),
+                           ",".join(missing)))
+                    refused["missing_leg"] += 1
+                    continue
+                positions.append({
+                    "position_id": "%s#%s#%s" % (did, org_id, ne),
+                    "organisation_id": org_id,
+                    "organisation_name": p.get("party_name", ""),
+                    "matter_id": p.get("citation", ""),
+                    "matter_type": "ADMINISTRATIVE_APPEAL",
+                    "native_entity_id": ne,
+                    "native_entity_name": nen,
+                    "party_role": p.get("party_role", ""),
+                    "position": Position.UNDETERMINED.value,
+                    "position_basis": POSITION_BASIS,
+                    "channel": CH.value,
+                    "event_class": CH.event_class.value,
+                    "is_lobbying": "N",
+                    "decision_date": p.get("decision_date", ""),
+                    "source_url": p.get("source_url", "")
+                                  or d.get("source_url", ""),
+                    "source_record_id": p.get("citation", ""),
+                    "decision_pdf_url": p.get("decision_pdf_url", "")
+                                        or d.get("decision_pdf_url", ""),
+                    "fetched_date": p.get("fetched_date", TODAY),
+                    "confidence_tier": Tier.B.value,
+                    "record_scope": "multi_entity",
+                    "record_scope_basis":
+                        "ADR-010: the row is a relation between a named "
+                        "organisation and a named Native entity in one "
+                        "matter. Both legs are named; neither stands alone.",
+                    "inclusion_basis": "named_entity",
+                    "derivation_basis":
+                        "Re-derived by stage `positions` from the LIVE "
+                        "admin_appeal_parties.csv, so it reflects the entity "
+                        "links 163/168 added after the 2026-08-12 build. "
+                        "Ceiling is the source: an OHA chronological index "
+                        "publishes three columns, so a caption naming both a "
+                        "tribe and a second organisation is rare.",
+                    "rederived_date": TODAY,
+                    "rederived_by_script": SCRIPT,
+                    "cedar_uid": "",
+                })
+
+    seen = set()
+    dedup = []
+    for r in positions:
+        if r["position_id"] in seen:
+            refused_detail.append("duplicate position_id | %s"
+                                  % r["position_id"])
+            refused["duplicate_position_id"] += 1
+            continue
+        seen.add(r["position_id"])
+        r["cedar_uid"] = prior_uid.get(r["position_id"], "")
+        dedup.append(r)
+
+    before = 0
+    if out_p.exists():
+        bak = out_p.with_name(out_p.name + ".bak_%s_pre_positions_rederive" % TODAY)
+        if not bak.exists():
+            bak.write_bytes(out_p.read_bytes())
+        with open(out_p, encoding="utf-8-sig", newline="") as fh:
+            before = sum(1 for _ in csv.DictReader(fh))
+
+    if not dedup:
+        print("no position rows derivable -- leaving %s untouched" % out_p.name)
+        return 0
+
+    write_csv(out_p, dedup, list(dedup[0].keys()))
+    print("-" * 74)
+    print("admin_appeal_positions.csv  %d -> %d rows" % (before, len(dedup)))
+    print("distinct matters            %d"
+          % len({r["matter_id"] for r in dedup}))
+    print("distinct Native entities    %d"
+          % len({r["native_entity_id"] for r in dedup}))
+    print("refusals                   ", dict(refused))
+    for line in refused_detail[:20]:
+        print("  refused: %s" % line)
+    if len(refused_detail) > 20:
+        print("  ... %d more, all listed in the run log"
+              % (len(refused_detail) - 20))
+    print("cedar_uid carried forward   %d of %d"
+          % (sum(1 for r in dedup if r["cedar_uid"]), len(dedup)))
+    print("ceiling: 566 of 15,613 decisions resolve to a Native entity and")
+    print("only 8 of those name a second organisation. The source publishes")
+    print("three columns; this is the universe, not a shortfall.")
+    print("-" * 74)
+    (LOGS / ("144_admin_appeal_positions_%s.json" % TODAY)).write_text(
+        json.dumps({"script": SCRIPT, "stage": "positions", "date": TODAY,
+                    "rows_before": before, "rows_after": len(dedup),
+                    "decisions_read": len(dec), "parties_read": len(parties),
+                    "parties_with_resolved_entity":
+                        sum(1 for p in parties if p.get("resolved_entity_id")),
+                    "refused": dict(refused),
+                    "refused_detail": refused_detail,
+                    "cedar_uid_carried_forward":
+                        sum(1 for r in dedup if r["cedar_uid"]),
+                    "network_requests": 0}, indent=1), encoding="utf-8")
+    return 0
+
+
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "positions":
+        sys.exit(stage_positions())
     main()
+
