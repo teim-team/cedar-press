@@ -294,7 +294,9 @@ So all 185 complete chains rest on LDA.
 This is not a parser failure. Four in five grantees of these funders are
 outside the nonprofit corpus entirely — 491 of 601, measured in
 `docs/PHILANTHROPY_DISCOVERY_LOG.md` — and the returns that would carry a
-Schedule C have never been retrieved for them. The `schedc_basis` values across
+Schedule C have never been retrieved for **those 601 grantee EINs** — which is a
+statement about the grantee list, **not** about the Schedule C corpus, whose own
+coverage is 90.5% (see the corrected caveat below). The `schedc_basis` values across
 those 24 recipients say which absence it is:
 `outside_efile_index_coverage` 178 rows, `no_schedule_c_filed` 128,
 `no_efile_return_indexed` 25, `indexed_not_retrieved` 14.
@@ -311,9 +313,10 @@ single highest-value next step in this layer.** The machinery exists in script
   report no financial detail at all. Zero lobbying there is the filing regime,
   not a finding. The Schedule C denominator is **6,397 rows / 5,792 EINs**,
   never 12,764.
-- **Only 2,195 returns were retrieved — 34.3% of the 6,397 possible.** The IRS
-  per-return S3 bucket is retired and returns now live in 81 multi-GB ZIPs read
-  by HTTP range.
+- ~~**Only 2,195 returns were retrieved — 34.3% of the 6,397 possible.**~~
+  **SUPERSEDED 2026-09-02 — and it was never a fetch backlog.** `nonprofit_schedule_c_lobbying.csv` holds **29149 rows**, one per parsed return, against **32218** returns in the IRS e-file index filtered to Cedar's Native-nonprofit EIN list - **90.5%**. 3069 are not downloaded. **29149 XML files are sitting in `data/raw/external/irs990_schedc/xml/`**, so what was described as a fetch backlog was, for the retrieved share, `ON_DISK_NOT_PROMOTED` - a parse and a join, not a socket (`docs/AGENT_FIELD_GUIDE.md` s5). Only the 3069 genuinely absent returns are `NOT_ACQUIRED`. **Naming the wrong one of the four states of 'missing' sends the next session to the network for a file that is already here; three sessions have now done exactly that.**
+  The IRS per-return S3 bucket is retired and returns now live in 81 multi-GB
+  ZIPs read by HTTP range; that is how the 29,149 got here.
 - **Tribal governments are outside the 990 universe under IRC §7871.** A tribe
   funding a nonprofit appears only on the recipient's side, never on its own
   filing. That asymmetry is why this build works at all — and it is why the two

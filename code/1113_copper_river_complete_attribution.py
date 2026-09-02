@@ -8,7 +8,7 @@ Cedar Press - 1113: finish the Copper River attribution I left half-done.
 
 WHY THIS EXISTS
 ---------------
-`1111` announced "$1.5B attributed" and the table attributed nothing. The
+`1123` announced "$1.5B attributed" and the table attributed nothing. The
 quarantine workstream caught it and was right on every count. Measured:
 
     4,272 Copper River rows
@@ -16,7 +16,7 @@ quarantine workstream caught it and was right on every count. Measured:
       attributed_flag = 0 ........... 4,266
       attribution_method ............ an English sentence, on all 4,272
 
-`1111` wrote `cedar_uid` and `canonical_name` and stopped. Those two are not
+`1123` wrote `cedar_uid` and `canonical_name` and stopped. Those two are not
 what this table attributes with: `40_build_prime_contracts.py` keys on
 `tribe_id`, gates on `attributed_flag`, and reads `attribution_method` as a
 CONTROLLED VOCABULARY — `unattributed` / `uei_exact` / `cage_exact` /

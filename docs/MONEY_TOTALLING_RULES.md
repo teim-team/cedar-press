@@ -394,7 +394,7 @@ caution:
 | `REPORTED_PROPERTY_REVENUE` | 61 | yes |
 
 **The two honest per-property statuses reach 11 of 787 ROWS (1.4%).**
-*(Correction appended 2026-09-02 from outside this block, no other line touched: 787 is a row count. See `GAMING-DENOMINATOR-2026-09-02` at the foot of this file — the facility denominator is 734–780, so this is nearer 1.5%.)* A
+*(Correction appended 2026-09-02 from outside this block, no other line touched: 787 is a row count. See `GAMING-DENOMINATOR-2026-09-02` at the foot of this file — the property denominator is 714, so this is nearer 1.54%.)* A
 dollar column on the facility table would therefore be 98.6% blank, and the
 cells a buyer *could* see would mostly be a regional ceiling — which, summed
 across that region's properties, multiplies the region's entire GGR by its
@@ -1088,7 +1088,7 @@ table needs to see why the segment lines do not add up to the tribal properties.
 ### How much of the universe this reaches, stated honestly
 
 **8 facility records, 7 distinct Indian-lands properties, 6 tribes.** Against
-787 facilities that is **0.9%**. It is not a solution to the missing-revenue
+787 ROWS that is **0.9%** *(correction appended 2026-09-02 from outside this block: 787 is a row count; against the 714 distinct properties it is 0.98%. `GAMING-DENOMINATOR-2026-09-02` at the foot of this file)*. It is not a solution to the missing-revenue
 problem and must never be presented as one; it is a deep, well-evidenced core
 for the handful of tribal casinos whose economics passed through a public
 company's books. What it does add is duration — Mohegan Sun is covered for 15
@@ -1164,7 +1164,7 @@ workstream.***
 | `SINGLE_PROPERTY_TRIBE_LEVEL_GAMING_REVENUE` | 115 | honest, per property |
 | `TRIBE_LEVEL_NOT_ATTRIBUTABLE_TO_A_PROPERTY` | 133 | honest, per **tribe** |
 | `REPORTED_SLOT_WIN_IS_FLOOR_FOR_GGR` | 61 | honest, a floor |
-| **an honest figure** | **309** | over **11 facilities of 787 ROWS** *(correction appended 2026-09-02 from outside this block: the facility denominator is 734–780, `GAMING-DENOMINATOR-2026-09-02` at the foot of this file)* |
+| **an honest figure** | **309** | over **11 facilities of 787 ROWS** *(correction appended 2026-09-02 from outside this block: the facility denominator is 714, `GAMING-DENOMINATOR-2026-09-02` at the foot of this file)* |
 
 **`SUM(revenue_upper_bound)` adds NIGC's regional total to itself once per
 property in the region.** The largest single ceiling is carried by **162
@@ -1441,11 +1441,22 @@ different money column in a different file.
 
 ### The denominator
 
-`gaming_facilities.csv` holds 787 ROWS. That is not a facility count and must not be a denominator. 7 of them are placeholders whose `facility_name` is literally `No casino`, recording that a nation operates none. 56 duplicate groups sit in `review/gaming_facility_duplicate_candidates_2026-09-02.csv`: 52 are same-tribe (`LIKELY_SAME_PROPERTY`) and hold 53 rows beyond one each, so collapsing them gives 787 - 53 = **734**; the other 4 are `DIFFERENT_TRIBES_CHECK_BOTH` and at least one of those - Stables Casino, Miami Tribe with Modoc Nation - is a JOINT OPERATION, not a duplicate. No verdict is applied: `duplicate_of_facility_id` is populated on 10 rows, not 53. So the honest range is **734 to 780** and the single thing every consumer must stop doing is dividing by 787 - it inflates the denominator by 7.2% and understates every coverage percentage in the gaming dataset by about 6.7%.
+**`gaming_facilities.csv` holds 787 ROWS, and a row is not a facility.** The ladder, owned and gated by `code/846_session_audit.py::_denom`:
+
+```
+787   rows in gaming_facilities.csv
+-16   whose NAME says no casino - 7 exactly "No casino", plus 9 more like
+      "Grand Canyon West - no casino", "Tribal admin only - no casino"
+=771   facility rows
+-57   extra rows across the same-tribe duplicate groups
+=714   distinct properties
+```
+
+**FIVE denominators circulated on 2026-09-02 and all five were quoted as settled: 787, 780, 734, 727, 714.** Each came from a different definition of "facility" and none said which. 787 is raw rows; 780 removes only the 7 EXACT placeholders and misses the 9 that say it in a longer name; 734 is 787 minus duplicates with every placeholder left in; 727 is 780 minus a duplicate count of 53. **None of them is wrong about the piece it measured, and four of them are wrong as a denominator.** No verdict is applied in the table itself - `duplicate_of_facility_id` is populated on 10 rows, not 57 - so 714 is a measurement, not a state of the file. Note also that the duplicate register carries `DIFFERENT_TRIBES_CHECK_BOTH` groups that are **not** duplicates: Stables Casino pairs the Miami Tribe with Modoc Nation, which is a joint operation. Dividing by 787 inflates the denominator by 10.2% and understates every gaming coverage percentage by about 9.3%.
 
 ### The sealed-revenue disposition
 
-174 facilities carry `state_revenue_disclosure_status = SEALED_BY_STATUTE_OR_COMPACT`, and **174 is not the number of facilities evidenced as sealed**. The disposition column says so on the same row: **113** are `SEALED_HELD_BY_REGULATOR` (AZ 43, KS 8, ND 22, WI 40); **58** are `DISPOSITION_UNSUPPORTED_BY_RECORDED_QUOTE` (MN 48, NV 10) - the status was asserted and the recorded quote does not support it; **3** are `NOT_COLLECTED_BY_THIS_BODY` (CO 3), which is a different fact entirely: the body does not hold the figure, so there is nothing sealed. Quote **113**, and quote the disposition beside it.
+**CORRECTED 2026-09-02.** 174 facilities carry `state_revenue_disclosure_status = SEALED_BY_STATUTE_OR_COMPACT`, and **174 is not the number of facilities evidenced as sealed**. The disposition column says so on the same row: **113** are `SEALED_HELD_BY_REGULATOR` (AZ 43, KS 8, ND 22, WI 40); **58** are `DISPOSITION_UNSUPPORTED_BY_RECORDED_QUOTE` (MN 48, NV 10) - the status was asserted and the recorded quote does not support it; **3** are `NOT_COLLECTED_BY_THIS_BODY` (CO 3), which is a different fact entirely: the body does not hold the figure, so there is nothing sealed. Quote **113**, and quote the disposition beside it.
 
 **The rule both of these earn, and it is a totalling rule:** *a status column and a disposition column on the same row can disagree, and the status is the one that gets summed.* `SEALED_BY_STATUTE_OR_COMPACT` was asserted 174 times and the evidence recorded on the row supports it 113 times. Nothing was broken; nothing was lost; the count was simply about the assertion rather than about the evidence. **Sum the column that carries the evidence, and print the disposition beside the total.**
 
@@ -1453,3 +1464,77 @@ Re-derive: `py -3 code/1116_ruling_propagation_2026_09_02.py derive`.
 Gate: `py -3 code/1116_ruling_propagation_2026_09_02.py verify` exits 1 while
 any document still states a superseded figure with nothing beside it.
 <!-- END GAMING-DENOMINATOR-2026-09-02 -->
+
+<!-- BEGIN ACQUIRE-BIA-ACREAGE -->
+## Acreage is a total, and the BIA mineral acreage table double-counts one
+
+*Appended 2026-09-02 by workstream `ACQUIRE-1119-1121`
+(`code/1119_acquire_biamaps_arcgis.py`), inside its own marked block so `574`
+preserves it. **No other block in this file was read or rewritten.** Acreage
+is not money, but it is the denominator `resource_revenue.csv` has never had,
+and a denominator that is silently 0.60% too large produces a per-acre figure
+that is silently 0.60% too small — which is exactly the class of error this
+file exists to fence.*
+
+`data/clean/resource_bia_mineral_acreage_tracts.csv`, 249,165 rows, one row
+per **title record**.
+
+| | acres |
+|---|---:|
+| naive sum of the `acres` column across all rows | **70,290,363.9** |
+| one acreage per (`land_area_code`, `tract_id`) | **69,872,859.0** |
+| **overstatement** | **417,504.8 — 0.60%** |
+
+**The cause is not a duplicate row.** 5,465 tracts are written **twice**, once
+with `ownership_type = Trust` and once with `ownership_type = Restricted`, and
+**both rows carry the identical acreage rather than a split of it**. Tract
+`256 2181` on TURTLE MOUNTAIN is 157.08 acres and appears as 157.08 Trust and
+157.08 Restricted. Those are two title statuses touching one parcel. Measured:
+of the 5,465, **5,465 carry identical acres on both rows and 0 carry differing
+acres** — so this is a rule, not a tendency. The publisher's own vocabulary
+already has the value it should have used: `Both Trust & Restricted`, which it
+applies on exactly 2 rows.
+
+**It is concentrated, so it is not a rounding error anywhere it matters:**
+
+| land area | overstated acres |
+|---|---:|
+| FORT HALL | 172,025.6 |
+| BAD RIVER (LA POINTE) | 26,021.9 |
+| LAC COURTE OREILLES | 20,001.6 |
+| PINE RIDGE | 19,909.7 |
+| STANDING ROCK | 17,909.0 |
+| OSAGE | 14,588.3 |
+
+**THE RULE.** Take **one acreage per (`land_area_code`, `tract_id`)** before
+totalling anything. If you need the trust/restricted split, this column cannot
+give it to you: the file states *which statuses touch a tract*, not *how many
+acres each holds*, and any split derived from it is invented.
+
+**AND A PER-STATE TOTAL DOUBLE-COUNTS A CROSS-STATE TRACT.**
+`FORT MOJAVE 604 T 106`, 879.87 acres, is recorded once under `AZ` and once
+under `CA` because the reservation straddles the line. Every other published
+attribute on the two rows is identical, so no combination of columns separates
+them. Total by `land_area_code`. Total by `state` only after deciding what a
+state boundary means for a tract that crosses one, and say which you did.
+
+**GISACRES IS A DIFFERENT MEASURE AND MAY NOT BE DIFFERENCED AGAINST THIS.**
+`bia_aian_national_lar.csv`.`GISACRES` is a GIS-computed polygon area from the
+Land Area Record layer. `acres` here is a title acreage from the Land Titles
+and Records offices. They answer different questions, are produced by
+different processes, and their difference is not a finding about anything.
+
+**AND THIS TABLE IS NOT A REVENUE DENOMINATOR YET, BECAUSE IT HAS NO TRIBE
+KEY.** 184 of its 495 distinct `land_area_name` values reach a Cedar spine
+entity by name. The other 311 include boarding-school lands, ANCSA areas and
+public-domain allotments named for individuals. Dividing a nation's royalty by
+"its" acreage requires a land-area-to-entity ruling that does not exist;
+manufacturing it with a name matcher is the containment defect with a new
+front door.
+
+Re-derive every figure above:
+`py -3 code/1119_acquire_biamaps_arcgis.py build` then read
+`docs/codebooks/12g_bia_mineral_acreage.md`.
+Gate: `py -3 code/1119_acquire_biamaps_arcgis.py verify` exits 1 on breach and
+`selftest` proves it fires on an injected short retrieval.
+<!-- END ACQUIRE-BIA-ACREAGE -->

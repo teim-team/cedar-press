@@ -533,11 +533,19 @@ REPORT_COLS = ["subaward_sam_report_id", "subaward_sam_report_month",
 # The ordering is registered in `cedar_pipeline.KNOWN_ORDERINGS` so
 # `build.py` and `62`'s enricher check both know about it.
 #
-# AFTER ANY PROMOTION, IN THIS ORDER:
+# AFTER ANY PROMOTION, IN THIS ORDER (corrected 2026-09-02T16:00Z - the list
+# below used to stop at 81 and omit the two geography enrichers, which is how
+# an appended row came to carry no geography at all):
 #   py -3 code/910_subaward_report_id_backfill.py rescan   (index the new zips)
 #   py -3 code/910_subaward_report_id_backfill.py apply
 #   py -3 code/911_subaward_sub_leg_cedar_uid.py apply
+#   py -3 code/871_promote_geo_keys_contracts.py           (PRIME award geography)
+#   py -3 code/1085_prime_psc_desc_repull.py apply         (871 ALSO rewrites
+#                                                           prime_contracts.csv
+#                                                           and reverts 1085)
 #   py -3 code/81_build_passthrough_dataset.py             (projection)
+#   py -3 code/1109_subawardee_geo_promote.py index        (SUBAWARDEE geography)
+#   py -3 code/1109_subawardee_geo_promote.py apply        (LAST)
 POST_PROMOTION_COLS = {
     "subaward_sam_report_id_basis": "code/910_subaward_report_id_backfill.py",
     "subaward_source_record_id": "code/910_subaward_report_id_backfill.py",
@@ -565,6 +573,39 @@ POST_PROMOTION_COLS = {
     "geo_key_basis": "code/871_promote_geo_keys_contracts.py",
     "geo_subawardee_county_gap_reason": "code/871_promote_geo_keys_contracts.py",
     "geo_built_date": "code/871_promote_geo_keys_contracts.py",
+    # ALSO NOT MINE - registered 2026-09-02T16:00Z, and this one is registered
+    # AFTER the guard already cost a completed pass its work.
+    #
+    # WHAT HAPPENED, from this script's own logs. `1109_subawardee_geo_promote.py`
+    # applied at 10:37:13Z, adding these ten columns and deriving the
+    # subawardee's own county on 73,388 of 76,859 rows. At 12:01:12Z `match`
+    # refused with "columns append() cannot fill=['geo_subawardee_city', ...]"
+    # naming exactly these ten - correctly, by the rule above. At 12:03:54Z
+    # `match` ran clean. Between those two timestamps the ten columns were
+    # taken back OUT of subawards.csv to get past this guard, and they are
+    # still out: measured 15:45Z, the live header is 71 columns and carries
+    # only `geo_subawardee_county_gap_reason`. 1109's report, its `verify` and
+    # its `selftest` all still say exit 0, because every one of them was true
+    # at 10:37Z. A CONSERVATION PROOF IS NOT A LANDING PROOF.
+    #
+    # These belong here for the same reason 871's ten do: 1109 is an in-place
+    # enricher keyed on `subaward_sam_report_id`, which `910` puts on every
+    # appended row before 1109 runs, so it recomputes cleanly for new rows.
+    # `append()` leaves them blank and 1109 - which runs LAST, after 871 -
+    # fills them for the whole file.
+    #
+    # Geography workstream: if that is wrong, this is the line to correct. What
+    # is NOT an acceptable resolution is deleting the columns again.
+    "geo_subawardee_city": "code/1109_subawardee_geo_promote.py",
+    "geo_subawardee_state_code": "code/1109_subawardee_geo_promote.py",
+    "geo_subawardee_zip5": "code/1109_subawardee_geo_promote.py",
+    "geo_subawardee_country_code": "code/1109_subawardee_geo_promote.py",
+    "geo_subawardee_county_fips": "code/1109_subawardee_geo_promote.py",
+    "geo_subawardee_county_name": "code/1109_subawardee_geo_promote.py",
+    "geo_subawardee_state_fips": "code/1109_subawardee_geo_promote.py",
+    "geo_subawardee_place_dominance_share": "code/1109_subawardee_geo_promote.py",
+    "geo_subawardee_place_ambiguous": "code/1109_subawardee_geo_promote.py",
+    "geo_subawardee_basis": "code/1109_subawardee_geo_promote.py",
 }
 
 

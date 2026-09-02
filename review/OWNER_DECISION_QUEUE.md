@@ -1687,7 +1687,7 @@ the record said.** Re-read verbatim today from
 are already enumerated by name (`docs/TRIBAL_DEBT_BUILD_LOG.md`). For the
 gaming-authority subset, the **annual audited financials carry facility-level
 gaming revenue** — the figure `gaming` records as `SOURCE_DOES_NOT_PUBLISH` on
-776 of 787 facilities. Nothing else Cedar can reach moves that number at scale.
+776 of 787 rows *(**GAMING-DENOMINATOR-2026-09-02:** `gaming_facilities.csv` holds **787 ROWS, not 787 facilities** — 16 rows' NAMES say no casino (7 exactly, 9 like `Grand Canyon West - no casino`) and 57 extra rows sit across the same-tribe duplicate groups, so **771 facility rows and 714 distinct properties**. Five denominators circulated on 2026-09-02 — 787, 780, 734, 727, 714 — and only the last is the property count. Authority: `code/846_session_audit.py::_denom`; derive it with `py -3 code/1116_ruling_propagation_2026_09_02.py derive`.)*. Nothing else Cedar can reach moves that number at scale.
 
 **If (a) BUY:** the tribal bond-finance dataset becomes buildable and the gaming
 revenue gap starts closing. Two licences to price, not one.
@@ -2239,7 +2239,8 @@ no `tribe_id`, which is not.
 They record that a nation does **not** operate a casino. That is a real and
 useful fact — Cedar deliberately distinguishes "attempted, none found" from
 "untouched" — but it is being carried in the **facility** table, where every
-row is otherwise a facility. **787 rows, 780 facilities**, and every "of 787"
+row is otherwise a facility. **787 rows; 771 facility rows once all 16 `no casino` names are removed; 714
+distinct properties once the same-tribe duplicate groups collapse** *(**GAMING-DENOMINATOR-2026-09-02:** `gaming_facilities.csv` holds **787 ROWS, not 787 facilities** — 16 rows' NAMES say no casino (7 exactly, 9 like `Grand Canyon West - no casino`) and 57 extra rows sit across the same-tribe duplicate groups, so **771 facility rows and 714 distinct properties**. Five denominators circulated on 2026-09-02 — 787, 780, 734, 727, 714 — and only the last is the property count. Authority: `code/846_session_audit.py::_denom`; derive it with `py -3 code/1116_ruling_propagation_2026_09_02.py derive`.)*, and every "of 787"
 denominator in the product README and in two of Codex's own findings is
 inflated by seven.
 
@@ -2419,3 +2420,73 @@ capture stands and can be refreshed, and A3's first named route reopens.
 it still cannot close A3 — but it is `ON_DISK_NOT_PROMOTED`, not
 `NOT_ACQUIRED`.
 <!-- END SOURCE-EXPLORATION-1111 -->
+
+<!-- BEGIN CORROBORATION-1118-QUEUE -->
+## CORR-1 — 29 nonprofits carry `NATIVE_VERIFIED_STRICT` while their own Form 990 says otherwise
+
+*Added 2026-09-02 by `code/1118_corroboration_layer.py`. Evidence:
+`data/clean/cedar_corroboration_disagreements.csv`, verdict
+`OWN_990_SILENT_AND_THE_LINK_CROSSES_A_STATE_LINE`. Full account in
+`docs/CORROBORATION_LAYER_2026-09-02.md`.*
+
+**The measurement.** `np_orgs.disposition = NATIVE_VERIFIED_STRICT` is 697 rows.
+293 of them have a Form 990 narrative on disk. **214 of those 293 give no
+Native signal in the organisation's own words**, and 29 of the 214 ALSO have a
+Cedar link that crosses a state line — two independent reasons to doubt one
+row. Six of the 29, with the organisation's own filed words:
+
+| organisation | its own 990 says | Cedar links it to |
+|---|---|---|
+| KANSAS HUMANE SOCIETY OF WICHITA INC | *"YOUTH EDUCATION IS A KEY BUILDING BLOCK…"* | a Wichita-named nation |
+| UNITED HABESHA COMMUNITY OF WICHITA UHCW INC | *"HELP COMMUNITY IN NEED"* | *Habesha* = the Ethiopian and Eritrean diaspora |
+| WAMPANOAG COUNTRY CLUB INC | *"A PRIVATE MEMBERSHIP CLUB FOUNDED IN 1924"* | Wampanoag |
+| RANCHO LA LAGUNA INC | *"TO PROMOTE AND PRESERVE THE CULTURE OF CHARRERIA"* | Laguna |
+| CHICKASAW CIVIC THEATRE (**AL**) | *"COMMUNITY THEATRE PRESENTATIONS EACH YEAR"* | The Chickasaw Nation (**OK**) |
+| PASADENA ROSEBUD ACADEMY CHARTER SCHOOL | *"OPERATED A CHARTER SCHOOL"* | Rosebud |
+
+**Chickasaw, Alabama is a city.** This is the place-name defect
+`docs/ENTITY_MATCH_RULES.md` already governs, arriving with Cedar's *strongest*
+nonprofit Native label attached.
+
+**What is being asked.** Not "are these Native" one by one. **Does a
+`NATIVE_VERIFIED_STRICT` row survive when the organisation's own filing gives
+no Native signal and the link crosses a state line?**
+
+**The consequence of each answer.**
+
+- **It does not survive.** The 29 move to `EXCLUDED_PLACE_NAME_COINCIDENCE` (or
+  to a new disposition) and the rule generalises: the 990-narrative family
+  becomes a standing gate on the strict label, and the remaining 185
+  same-state silent rows get re-examined next.
+- **It survives.** Then `NATIVE_VERIFIED_STRICT` means *"a name matched an IRS
+  BMF row"* and nothing more, and the codebook should say so — because a buyer
+  reading "verified strict" will not guess it.
+- **Case by case.** 29 rows, each with its filed quote already attached in the
+  disagreement table; the redirect target is in
+  `np_orgs.key_redirect_proposed_entity_id` where one exists.
+
+**Why an agent did not rule this.** Silence in a mission statement is not a
+refutation — the same miner scores *Tongass Tlingit Cultural Heritage
+Institute* as `placename_only` and it is plainly Native. The state conflict is
+what makes these 29 different from the other 185, and whether two weak signals
+compose into a refusal is a ruling, not a computation.
+
+**Nothing was changed.** `np_orgs.csv` was not edited.
+
+## CORR-2 — does a trade journal vote?
+
+*Same source. One line, and it moves the project total by about 30.*
+
+`third_party_press` is an eighth evidence family added by this layer because
+the mandate's seven had nowhere honest to put a `Trade press` citation. It
+currently **votes**: a reporter is an independent observer. **30 deals reach
+two independent families only because of it** (`entity_self_published` +
+`third_party_press`).
+
+The argument against: a trade journal reprinting a press release verbatim is
+not observing anything, and R-A only catches that when both citations resolve
+to the same URL — which they do not when a wire service re-hosts.
+
+**If it does not vote, the project total falls from 320 to about 290.** No data
+changes either way; it is one flag in `FAMILIES`.
+<!-- END CORROBORATION-1118-QUEUE -->

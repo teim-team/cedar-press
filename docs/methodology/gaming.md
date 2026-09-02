@@ -1,12 +1,28 @@
 # Methodology — Tribal Gaming
 
-**`gaming`. 54 customer tables; the spine is `gaming_facilities.csv`, **787
-ROWS — not 787 facilities** (see the denominator note immediately below), and the
-regulatory record runs through NIGC's published document surface — 72 categories,
+**`gaming`. 54 customer tables; the spine is `gaming_facilities.csv` — 787 ROWS,
+NOT 787 facilities (see the denominator note immediately below) — and the
+regulatory record runs through NIGC's published document surface: 72 categories,
 4,071 documents.** [measured 2026-09-02]
 
 > **GAMING-DENOMINATOR-2026-09-02 — the gaming denominator, re-derived from the live files.**
-> `gaming_facilities.csv` holds 787 ROWS. That is not a facility count and must not be a denominator. 7 of them are placeholders whose `facility_name` is literally `No casino`, recording that a nation operates none. 56 duplicate groups sit in `review/gaming_facility_duplicate_candidates_2026-09-02.csv`: 52 are same-tribe (`LIKELY_SAME_PROPERTY`) and hold 53 rows beyond one each, so collapsing them gives 787 - 53 = **734**; the other 4 are `DIFFERENT_TRIBES_CHECK_BOTH` and at least one of those - Stables Casino, Miami Tribe with Modoc Nation - is a JOINT OPERATION, not a duplicate. No verdict is applied: `duplicate_of_facility_id` is populated on 10 rows, not 53. So the honest range is **734 to 780** and the single thing every consumer must stop doing is dividing by 787 - it inflates the denominator by 7.2% and understates every coverage percentage in the gaming dataset by about 6.7%.
+> **`gaming_facilities.csv` holds 787 ROWS, and a row is not a facility.** The ladder, owned and gated by `code/846_session_audit.py::_denom`:
+> 
+> ```
+> 787   rows in gaming_facilities.csv
+> -16   whose NAME says no casino - 7 exactly "No casino", plus 9 more like
+>       "Grand Canyon West - no casino", "Tribal admin only - no casino"
+> =771   facility rows
+> -57   extra rows across the same-tribe duplicate groups
+> =714   distinct properties
+> ```
+> 
+> **FIVE denominators circulated on 2026-09-02 and all five were quoted as settled: 787, 780, 734, 727, 714.** Each came from a different definition of "facility" and none said which. 787 is raw rows; 780 removes only the 7 EXACT placeholders and misses the 9 that say it in a longer name; 734 is 787 minus duplicates with every placeholder left in; 727 is 780 minus a duplicate count of 53. **None of them is wrong about the piece it measured, and four of them are wrong as a denominator.** No verdict is applied in the table itself - `duplicate_of_facility_id` is populated on 10 rows, not 57 - so 714 is a measurement, not a state of the file. Note also that the duplicate register carries `DIFFERENT_TRIBES_CHECK_BOTH` groups that are **not** duplicates: Stables Casino pairs the Miami Tribe with Modoc Nation, which is a joint operation. Dividing by 787 inflates the denominator by 10.2% and understates every gaming coverage percentage by about 9.3%.
+>
+> Authority: `code/846_session_audit.py::_denom`, which gates this ladder.
+> Re-derive rather than quote: `py -3 code/1116_ruling_propagation_2026_09_02.py derive`.
+> `py -3 code/1116_ruling_propagation_2026_09_02.py verify` exits 1 while any
+> document in `docs/` or `review/` still states a superseded figure unmarked.
 >
 > Re-derive rather than quote: `py -3 code/1116_ruling_propagation_2026_09_02.py derive`.
 > `py -3 code/1116_ruling_propagation_2026_09_02.py verify` exits 1 while any
@@ -47,14 +63,15 @@ and Wisconsin by compact confidentiality clauses** — the Legislative Fiscal
 Bureau says so itself.
 
 Cedar's answer is `gaming_revenue_bounds.csv`: **13,803 bound rows covering 694
-of the 787 facilities (88%)**, each with a lower bound, an upper bound, a basis
+of the 787 rows (88% of rows)**, each with a lower bound, an upper bound, a basis
 and an assumption note. That is a real answer to the question, and §5 explains
 exactly why those bounds must never be summed.
 
 **One narrow exception exists and it is 0.9% wide.** Where a *public SEC
 registrant* manages, develops or owns the property, its filings state the
 property's revenues or the fee it earned from them. That reaches **7 of 787 rows
-(~0.96% of the 734–780 real facilities; see the denominator note in §1)**  ~~facilities** and is held in `sec_gaming_financial_disclosures.csv` as its own
+- 0.98% of the 714 distinct properties; see the denominator note in §1** - and
+is held in `sec_gaming_financial_disclosures.csv` as its own
 assertion class - see "Rate inversion, third attempt" in §4. It does not make
 the sentence above less true.
 
@@ -416,7 +433,7 @@ base genuinely is total facility revenue) and
 `DERIVED_FACILITY_NET_INCOME_AS_DEFINED` (Graton), never plain revenue.
 
 This does **not** soften the claim at the top of this document. The route
-reaches **7 facilities — 0.9% of the 787 ROWS, ~0.96% of the 734–780 real facilities (denominator note, §1)** and only where a public company's books
+reaches **7 facilities — 0.9% of the 787 ROWS, 0.98% of the 714 distinct properties (denominator note, §1)** and only where a public company's books
 ran through the property. `docs/SEC_GAMING_FACILITY_REVENUE_BUILD_LOG.md` is the
 full record; `docs/MONEY_TOTALLING_RULES.md` `<!-- BEGIN SEC-GAMING -->` is the
 fence, and it forbids summing any of it against `gaming_revenue_bounds.csv`.

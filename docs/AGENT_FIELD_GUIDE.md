@@ -101,8 +101,10 @@ One agent owns a central file per pass. The integrator owns `62`, `512`, `517`,
 
 ## 3. This repo's signature defect: a check that does not measure its own name
 
-Fifteen measured instances. They share one shape — *the number was produced, it
-was plausible, and it was about something else.*
+**Twenty-four measured instances**, fifteen of them by the morning of
+2026-09-02 and nine more by that evening. They share one shape — *the number was
+produced, it was plausible, and it was about something else.* Read the table for
+the shapes; the rules under it are what you apply.
 
 | the check | what it reported | what it was actually measuring |
 |---|---|---|
@@ -121,8 +123,20 @@ was plausible, and it was about something else.*
 | `845` class 3, first run | 13 sites UNDETERMINED, 6 of them wrongly | **`awards, stats = [], Counter()`** - a tuple bound to a tuple. The key set was fully knowable and the analyser could not see through the unpacking, so it reported *unmeasured* where the honest answer was *clean*. Undetermined is the safe direction to be wrong in, and it is still wrong |
 | `845 regen`, "no digit = prose" | `docs/INVENTORY.md`, 20 hand-authored lines at risk | **blank lines and a repeated markdown table header.** A line with no digit in it is not a sentence somebody wrote. Replaced with the real measure - a removed line whose exact text appears NOWHERE in the rebuild - which is immune to reordering and to hunks that stop pairing |
 | `845 regen`, default mode | *(caught before it ran)* | it invokes the generator **bare**, and `1020_tail_web_probe.py` writes its doc under `doc` while running a **network probe ladder** with no arguments. Regenerating that markdown would have opened sockets nobody asked for. It now refuses when the doc write sits behind a named subcommand, and takes the mode as an argument |
+| `1123_copper_river_attribution` | "$1.5B attributed to the Native Village of Eyak" | **nothing attributed.** It wrote `canonical_name` and `cedar_uid`; `40_build_prime_contracts.py` keys on `tribe_id` and gates on `attributed_flag`, both untouched. 6 rows ended up naming Eyak in `canonical_name` while `tribe_id` still said Seldovia. `docs/QUARANTINE_EXPOSURE_LOG_2026-09-02.md` §5b |
+| `1123`'s conservation check | rows and dollars conserved **to the cent** | **that the work had not happened.** Conservation was never the risk. See rule 5 |
+| `526.scan()` | *"drop 10 always-empty column(s)"* on `prime_contracts.csv` | **20,000 rows.** Those ten include `contract_transaction_unique_key` and `contract_award_unique_key` (841,002 non-blank each) and `naics_code` (**838,229**). Across 13 capped tables, 65 "always empty" claims and **22** actually empty. `docs/ARCHITECTURE_DECISIONS.md`, ADR-016 |
+| CDR-11 | quarantined-method exposure at 2,142 rows / $38.19B *(SUPERSEDED)* | **one join leg of three.** `40` tries `uei_exact`, then `cage_exact`, then `parent_uei`; disjointly they are 227,540 rows / **$45.93B**, and the CAGE leg is where `need_v6` actually lives. `docs/QUARANTINE_EXPOSURE_LOG_2026-09-02.md` §2 |
+| `830_entity_freshness`, again | "entities in NO Cedar row at all" pinned at **0** | **its own output.** `cedar_entity_freshness.csv` is written by that script into the directory that script scans, one row per register entity, so from run two the answer could only ever be 0. The honest number was **104**. Fourth occurrence in that one script. `code/830`, `IDENTITY_LAYER` |
+| the same, once more | 0 again, after the name list was added | `regulations_gov_entity_coverage.csv` — a ledger of what Cedar **searched** — slipped under a 98% / 1.05-rows-per-entity shape test *by a hair*. A single numeric edge will keep being missed by a hair; `830` now also takes a filename that declares itself `_coverage` / `_freshness` / `_probe_log` at its word |
+| a hub-name token matcher | `BLUE TECH INC.` → Blue Lake Rancheria, tier B, **$3.51B** | the token **`blue`**. Same shape on `north` (60+ CAGE codes onto the Lumbee Tribe of *North* Carolina) and on `wind` (Wind River is the Eastern Shoshone reservation). `docs/QUARANTINE_EXPOSURE_LOG_2026-09-02.md` |
+| a shared-hub ownership test | the 2012 Alaska Gold purchase read as a **relabelling** | a **present-tense** ownership map. Alaska Gold is a BSNC subsidiary *today*, so both sides of a past acquisition resolve to one hub and the transaction disappears. `docs/methodology/deals.md` §5b |
+| `62_no_regression_check.py`, 2026-09-02 03:5x | `NameError: ROOT is not defined` — every gate unrunnable | **a live edit window.** The 37 lines were uncommitted and being written as it was observed. Real when seen, false forty minutes later. `docs/KNOWN_ISSUES.md` A5 / `A5-RESOLUTION` |
+| `1116`'s own first draft, 2026-09-02 evening | the gaming facility count is **734** | **`facility_name == "no casino"` exactly.** 7 rows match that string; **16 rows' names say it**, nine of them inside a longer name (`Grand Canyon West - no casino`, `Tribal admin only - no casino`, `No casino currently`). The script written to stop superseded numbers propagating produced one, and the gated ladder in `code/846_session_audit.py::_denom` is **771 facility rows / 714 distinct properties** |
 
-**The four habits that catch all fifteen:**
+**The rules that catch all twenty-four.** The first four were written on
+2026-09-02 from the first fifteen; the rest were added the same day from the
+nine below them, and each is stated as a rule because each arrived twice.
 
 1. **A check does not count until a fixture proves it FIRES.** Inject the
    violation, assert exit 1 *and* that the NAMED invariant is what fired,
@@ -140,6 +154,123 @@ was plausible, and it was about something else.*
    checks can say. Check the exit code, check the input is non-empty, and emit
    **UNMEASURED** rather than a number. `62` already had this discipline for
    `293`; every new check needs it too.
+5. **A proof that nothing broke is not a proof that something happened.**
+   `1123` proved rows and dollars conserved to the cent on a table in which it
+   had attributed nothing. Conservation was never the risk — it is what you get
+   for free when the write missed. **Write the check that FAILS when the work
+   did not land**: assert the *intended* delta, on the *intended* column, with
+   a floor (`n_rows_now_attributed >= N`), and make it fire on a fixture where
+   the write is skipped. A green conservation check beside a no-op is how a
+   commit message honestly says "$1.5B attributed" about a table where nothing
+   is.
+6. **Write to the columns the CONSUMER reads, and go and look at which those
+   are.** `cedar_uid` and `canonical_name` are display; `40_build_prime_contracts.py`
+   keys on `tribe_id` and gates on `attributed_flag`. Writing the first pair and
+   not the second leaves the row disagreeing with itself — six Copper River rows
+   named Eyak in `canonical_name` while `tribe_id` still said Seldovia. Open the
+   consumer, find the column it branches on, write **that** one. The sibling
+   rule, from the decision queue: **a decision must be written onto the row that
+   asked for it** — 27,067 queue rows had been answered in sibling files and were
+   re-asked for weeks, because an answer in a neighbouring artefact is not an
+   answer to anything that reads the queue.
+7. **A controlled vocabulary is an interface, and prose in it is a breaking
+   change.** A pass recorded its verdicts as 240- and 600-character English
+   sentences in `prime_contracts.attribution_method`. Another pass's leg
+   detection trusted that column to hold one of four values and skipped every
+   row where it did not — **1,486 rows invisible**, silently. If a column has a
+   vocabulary, put the sentence in a `_basis` or `_note` column beside it and
+   leave the vocabulary alone. If you must widen the vocabulary, widen it
+   explicitly and count what falls outside: the fix here was to stop trusting
+   the label and report `unknown_attribution_method_rows`.
+8. **head-N is not a sample, and an instruction may never be issued from one.**
+   `518` C4 reads 50,000 rows per table; `526.scan()` read 20,000 and then
+   emitted *"drop 10 always-empty column(s)"* about columns holding 838,229
+   values. A **measurement** may be sampled if it says so and prints the cap. An
+   **instruction** — drop, delete, merge, collapse — may not be sampled at all.
+   Re-count over the full file before you tell anyone to remove something.
+9. **A refusal cached as a completion is invisible.** `980` builds its resume
+   set from `host_probe.jsonl`, and seven hosts carried
+   `EXCLUDED_TERMS_STATED_RESTRICTIVE` records there. When the exclusion was
+   lifted, a re-run would have skipped all seven and **printed nothing** — a
+   correction that silently does not take effect. When a refusal is reversed,
+   the cached refusals must be retired, and retired by **MOVE** to a dated file,
+   never deleted: the refusal happened, and the record of it is the evidence the
+   correction was needed. `code/1096`, and
+   `host_probe_retired_navajo_exclusions_2026-09-02.jsonl`.
+10. **Never let an instrument scan its own output.** `830_entity_freshness`
+    reports "entities in no Cedar row at all"; it writes
+    `cedar_entity_freshness.csv`, one row per register entity, into the
+    directory it scans. From run two the answer could only be 0, and the honest
+    number was 104. It happened to `830` **twice** — the second time a
+    *coverage ledger* of what Cedar had searched slipped past a name list under
+    a 98% / 1.05-rows-per-entity shape test by a hair. Five instruments in this
+    repo have now counted their own artefacts. A name blacklist does not scale;
+    exclude by **shape** (near-total register coverage at ~1 row per entity) and
+    by **self-declaration** (`_coverage` / `_freshness` / `_probe_log` in the
+    filename), and widen the numeric edge, because a single threshold will keep
+    being missed by a hair.
+11. **One token of a multi-token hub name is not a name.** `BLUE TECH INC.`
+    reached Blue Lake Rancheria on `blue` — **$3.51B** at tier B. `north` put
+    60+ CAGE codes on the Lumbee Tribe of *North* Carolina, including
+    `MERCEDES-BENZ RESEARCH & DEVELOPMENT NORTH AMERICA`. `wind` is a trap
+    because Wind River is the Eastern Shoshone reservation. Require the
+    distinctive token, require the residue to make sense, and remember the
+    companion already in `START_HERE.md`: **a place suffix makes a tribe name a
+    place** — "Boys & Girls Clubs of Wichita Falls" is not the Wichita Tribe.
+12. **A present-tense ownership map inverts the test on a past acquisition.**
+    Alaska Gold is a BSNC subsidiary *today*, so a shared-hub test resolves both
+    sides of the 2012 purchase from NovaGold to one hub and reads a real
+    transaction as a relabelling. Any ownership test applied to a dated event
+    must use ownership **as of that date** — `owner_as_of_transaction_cedar_uid`
+    exists for this — and where it cannot, it must say the test was not run
+    rather than return "no change".
+13. **A failure seen inside a live edit window is real but perishable.** `62`
+    was genuinely unrunnable at 03:5x on 2026-09-02 (`NameError: ROOT`), from 37
+    uncommitted lines another agent was in the middle of writing. Recording it
+    was right; recording it as a standing issue would have been wrong. **Before
+    you write a failure down, re-measure it — and say when you measured.** The
+    same discipline as the `dist/` hold in `START_HERE.md` that outlived its
+    condition by two days: *a warning with no expiry outlives the condition it
+    describes, so say what would make it false.*
+14. **Check the binding, not the identifier.** `XWALK` in
+    `code/1103_decision_queue_clearance.py` is
+    `native_business_identifier_crosswalk.csv`; `XWALK` in
+    `code/1109_subawardee_geo_promote.py` is `geo_place_county_crosswalk.csv`.
+    A variable name, a column name and a script number are all labels, and this
+    repo has been bitten by each: 43 numbers carry more than one script, and
+    `attribution_method` says WHO decided while `confidence_tier` says WHAT was
+    decided. **Resolve the name to the path, the path to the file, and the file
+    to a row you have actually read**, before you reason about any of it.
+15. **An exact-string test on a free-text column measures the string, not the
+    fact — and a denominator is the worst place to find that out.** FIVE gaming
+    denominators circulated on 2026-09-02 and every one was quoted as settled:
+    **787** (raw rows), **780** (minus the 7 exact `No casino` placeholders),
+    **734** (787 minus duplicates, every placeholder left in), **727**, and
+    **714** (the measured property count). None was wrong about the piece it
+    measured; four are wrong as a denominator. The nine rows that split them say
+    *no casino* inside a longer name, so an `== "no casino"` test cannot see
+    them — the same shape as `AMERICANTRIBAL GOVERNMENT` in `START_HERE.md`,
+    where one missing space drops 7,160 rows from an exact filter. **Substring
+    or normalise, print the rows you excluded, and name the definition beside
+    the number.** The gated ladder is `code/846_session_audit.py::_denom`; do
+    not build a second one — two detectors for one class drift, which is why
+    `248` is a retired stub pointing at `293`.
+16. **Two blocks with one marker name are one block to the preserver.** Stated
+    in §2 for markdown, and it is the general form of the collision problem:
+    `<!-- BEGIN X -->` twice, `GRAIN_X` twice, `code/154_*` twice — in every
+    case the second one silently becomes the first one, or erases it. Pick a
+    name nobody has, and where a tool can allocate it for you
+    (`1050_preflight.py claim`, `adr`), let it.
+
+**A standing gate for the rot these rules produce.**
+`py -3 code/1116_ruling_propagation_2026_09_02.py verify` scans every `.md` in
+`docs/` and `review/` for the superseded literals of 2026-09-02 and exits 1
+while any of them stands with nothing beside it; `derive` re-derives each figure
+from the live files so a writer pastes a measurement rather than a memory, and
+`selftest` proves the scanner fires. **Prefer computing a sentence from the data
+over writing a number that can rot** — `574`'s pattern, where the denominator
+sentence is derived from the same two totals it describes. Use a marker only
+where content cannot be derived.
 
 ---
 
@@ -174,6 +305,44 @@ NOT_ACQUIRED              a real acquisition task.
 CONSTRAINED               licence, statute or terms forbid it.
 ```
 
+**`CONSTRAINED` narrowed sharply on 2026-09-02** and a good deal of what sat
+there is now `NOT_ACQUIRED`, which is a *worse* state, not a better one. Owner
+ruling, `docs/PUBLICATION_POLICY.md` `TERMS-OWNER-RULING-2026-09-02`: **a tribal
+website's terms language does not block harvest.** The eight-source hard list
+— Confederated Colville, CTUIR/Umatilla, Yakama, Chickasaw, NANA/Akima,
+Southern Ute, Forest County Potawatomi, Stillaguamish — is released for harvest
+of **their own public pages**, as is the `METHOD_RESTRICTED_HOSTS` state.
+`source_terms_status = TERMS_STATED_RESTRICTIVE` is now a **recorded
+observation, not a gate**: keep recording it, stop refusing on it. What is still
+`CONSTRAINED`, and none of it is a terms question — **technical access
+controls** (no login-gated content, no admin or staging path, no exploiting a
+misconfiguration; publicly *reachable* is not publicly *served*); **a natural
+person's data held apart from their public role** (home address, personal email
+or phone, DOB, SSN/TIN — a firm's name is not PII, a person's home phone is, and
+the business row may be harvested while `owner_name_raw` / `email` / `phone` /
+`address_raw` may not be published); **a non-tribal licensor** (EMMA/MSRB, with
+CUSIP Global Services as a second licensor); and the **proprietary identifiers**
+Casino City and D-U-N-S, held internally and never shipped.
+
+Two shapes go with that release and both have already bitten. **A restriction is
+scoped to the host and path where the terms were found** — one Navajo
+business-regulatory page had excluded the entire Navajo Nation's gaming
+properties, on different hosts — and **it does not bind a third party's
+independent publication**: NANA's website terms cannot suppress Trilogy Metals'
+10-K. And **over-exclusion is a defect, not caution.** An entity absent for a
+restriction its publisher never stated is as wrong as one included against
+stated terms; it is simply wrong in the quieter direction, which is why it
+survives. See also rule 9: when an exclusion is lifted, the cached refusals have
+to be retired or the correction never takes effect.
+
+**A worked instance of the `ON_DISK_NOT_PROMOTED` case, 2026-09-02.** The 990
+Schedule C layer was described as a fetch backlog at *"2,195 returns retrieved,
+34.3%"*. `nonprofit_schedule_c_lobbying.csv` holds **29,149 rows — 90.5% of the
+32,218 indexed target returns — and 29,149 XML files are sitting in
+`data/raw/external/irs990_schedc/xml/`.** Only the 3,069 genuinely
+un-downloaded returns are `NOT_ACQUIRED`. The label sent readers to the network
+for files already on the disk.
+
 Name the state before you open a socket, and name it with a measurement:
 `py -3 code/1050_preflight.py ondisk <term>` searches filenames *and* the live
 column headers of `data/clean/` and `data/spine/`, because the usual shape of
@@ -200,6 +369,13 @@ were written, looking exactly as authoritative as current ones.
   `code/812_c8_rebuild_proof.py`. Any prose still calling those three "unsafe to
   run" is stale. Before any rebuild: `py -3 code/build.py plan <collection>`.
 - `mtime` answers freshness. It says nothing about completeness.
+- **A corrected number rots exactly the way the number it replaced did.** Prefer
+  computing the sentence: `py -3 code/1116_ruling_propagation_2026_09_02.py derive`
+  re-derives the 2026-09-02 correction set from the live files, and `verify`
+  exits 1 while any document still states one of the superseded literals with
+  nothing beside it. Do not delete a superseded figure — strike it and say what
+  is true, because a reader who meets it in a third document needs somewhere to
+  find out it is dead.
 
 ---
 
@@ -212,6 +388,8 @@ were written, looking exactly as authoritative as current ones.
 | `py -3 code/62_no_regression_check.py` | the ratchets, including `code_duplicate_numbers` |
 | `py -3 code/518_dataset_readiness.py` | READY / BLOCKED / NOT_TESTED per dataset. **There is no fourth status** |
 | `py -3 code/287_build_dependency_manifest.py` | which script rebuilds a file another script enriches. The enricher runs LAST |
+| `py -3 code/1116_ruling_propagation_2026_09_02.py verify` | the 2026-09-02 corrections, still stated stale anywhere in `docs/` or `review/`. `derive` re-measures them from the live files; `selftest` proves the scanner fires and that an empty corpus reports UNMEASURED rather than clean |
+| `py -3 code/1112_harvest_coverage_matrix.py verify` | what was actually looked for, per entity, per thing. **`untouched = 0` in `docs/SHARD_COVERAGE.md` is true and measures web-map membership, not harvest** — per thing, untouched runs 373 to **1,439 of 1,555 (92.5%) for CAGE / UEI / DUNS** |
 
 **Never re-baseline to clear a red gate.** `--baseline` records a floor while
 GREEN. A gate you stepped around is a gate the next six sessions also step

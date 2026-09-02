@@ -142,18 +142,38 @@ The owner's own example was gaming employment — his recollection was Form 5500
 at about two thirds of tribes and OSHA at about nineteen. Measured
 2026-09-01, against the 284 tribes that operate a gaming facility:
 
-| source | rows | tribes | years | coverage |
-|---|---:|---:|---|---:|
-| DOL Form 5500 | 2,046 | 140 | 2009–2025 | **46%** |
-| OSHA ITA 300A | 502 | 86 | 2016–2025 | **30%** |
-| **`gaming_employment_observations` (pooled)** | **3,421** | **243** | **2008–2026** | **86%** |
+> **CORRECTED 2026-09-02, and the correction makes the argument stronger.** The
+> table as first written was right about the shape and wrong about three things
+> at once: the OSHA layer has grown, and **the pooled row mixed two universes** -
+> it took its ROW count from the whole table and its coverage percentage from
+> the gaming-tribe subset, so `3,421 / 243 / 86%` is not one measurement. Both
+> halves re-derived below against **one** denominator. Re-derive, do not quote:
+> `py -3 code/1116_ruling_propagation_2026_09_02.py derive`.
 
-**No single source clears half. The pooled table clears six sevenths.**
+~~| source | rows | tribes | years | coverage |~~
+~~| DOL Form 5500 | 2,046 | 140 | 2009–2025 | **46%** |~~
+~~| OSHA ITA 300A | 502 | 86 | 2016–2025 | **30%** |~~
+~~| **`gaming_employment_observations` (pooled)** | **3,421** | **243** | **2008–2026** | **86%** |~~
+
+| source | rows | tribes | coverage of the 284 gaming tribes |
+|---|---:|---:|---:|
+| Census LEHD LODES | 373 | 183 | 64.4% |
+| DOL Form 5500 | 1926 | 137 | 48.2% |
+| OSHA ITA 300A | 1045 | 109 | 38.4% |
+| NEPA / other documents | 7 | 4 | 1.4% |
+| **pooled `gaming_employment_observations`** | **3351** | **236** | **83.1%** |
+
+Measured against the **284 tribes with a `tribe_id` in `gaming_facilities.csv`**. State the universe: the whole table is 3421 rows over 243 tribes, and quoting the pooled ROW count from the unrestricted table beside a coverage percentage from the restricted one mixes two denominators in one line. **13 tribes are reached by OSHA and by NOTHING ELSE** - that, not OSHA's own share, is what an input has to beat to be dropped. An input thin on its own but disjoint from the others earns its place; one that is thin AND redundant does not.
+
+**No single source clears two thirds. The pooled table clears five sixths.**
 
 So the threshold applies to the **harmonized measure**, not to each input.
-Dropping OSHA at 30% would remove tribes Form 5500 never sees, and the union is
-the product. An input that is thin on its own but disjoint from the others
-earns its place; an input that is thin AND redundant does not.
+Dropping OSHA — the thinnest of the three at ~38% — would remove **13 tribes that
+no other source in this table reaches at all**, and the union is the product. An
+input that is thin on its own but disjoint from the others earns its place; an
+input that is thin AND redundant does not. *(The disjointness is the argument,
+and it is the number to re-derive when someone next proposes a drop: measure
+`OSHA-only`, not OSHA's share.)*
 
 ### What to record instead of dropping
 
@@ -368,7 +388,7 @@ could not be applied without inventing this state, and the next agent will hit
 it again.
 
 Cedar had exactly two dispositions for a source: **excluded by every route**, or
-**open**. Applying TERMS-SCOPE to the eight Navajo hosts produced a case that is
+**open**. *(**SUPERSEDED 2026-09-02.** Both readings of the first are dead as of the owner ruling at the foot of this file, for a Native entity's own site — but the THREE-STATE lesson below survives it and is the durable part: ask whether a clause restricts the SOURCE, the CONTENT, or the METHOD, because only the first could ever justify dropping a host.)* Applying TERMS-SCOPE to the eight Navajo hosts produced a case that is
 neither, and forcing it into either one would have been wrong in a different
 direction each time.
 

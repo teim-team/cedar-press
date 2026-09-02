@@ -106,8 +106,22 @@ def table_path(name: str):
     return None
 
 
-def scan(name: str, cap=20000):
-    """(header, rows_seen, nonnull per column). One pass, capped."""
+def scan(name: str, cap=None):
+    """(header, rows_seen, nonnull per column). ONE FULL PASS.
+
+    HEAD-N IS NOT A SAMPLE - the default was `cap=20000` until 2026-09-02,
+    and because the cap was a DEFAULT ARGUMENT no caller could see it. The
+    C11 rule below then recommended `drop N always-empty column(s)` on the
+    strength of the first 20,000 rows of tables running to 1.2 million. A
+    column that is empty for 20,000 rows and populated on row 20,001 was
+    reported as always empty, and the recommended action was destructive.
+    `518_dataset_readiness.py` fixed the same defect in the same week
+    (`SCAN_CAP = None  # Do not reinstate a head-N cap.`); this file had not.
+
+    Found by `code/1115_defect_class_retro_sweep.py` (class C1). Full-file
+    cost measured on 2026-09-02: 10.5M rows across all 363 clean/spine
+    tables in 105 s, so the cap bought nothing worth a wrong answer.
+    """
     p = table_path(name)
     if not p:
         return [], 0, Counter()
@@ -119,7 +133,7 @@ def scan(name: str, cap=20000):
             hdr = rd.fieldnames or []
             for r in rd:
                 n += 1
-                if n > cap:
+                if cap is not None and n > cap:
                     break
                 for h in hdr:
                     if (r.get(h) or "").strip():
@@ -193,7 +207,8 @@ def build():
                     add(cid, "C11", "medium", name,
                         f"drop {len(empty)} always-empty column(s) with a "
                         f"correction-register row, or populate them",
-                        f"always empty in {n:,} rows: {', '.join(empty[:4])}"
+                        f"always empty in ALL {n:,} rows (full pass, not a "
+                        f"head-N sample): {', '.join(empty[:4])}"
                         + (" ..." if len(empty) > 4 else ""))
                 undoc = [h for h in hdr if h.lower() not in cb]
                 if undoc and cb:

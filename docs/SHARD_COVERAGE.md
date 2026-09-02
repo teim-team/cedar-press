@@ -17,12 +17,34 @@
 | `shard_i` | Native nonprofits (np_orgs, not in register) | NOT_STARTED | 0 | 0 |
 | `shard_k` | Alaska Native Village governments | RUNNING_OR_DONE | 1,201 | 228 |
 | `shard_l` | vendor lists, unsurveyed federally recognized tribes, 1st half | NOT_STARTED | 0 | 0 |
-| `shard_m` | vendor lists, unsurveyed federally recognized tribes, 2nd half | NOT_STARTED | 0 | 0 |
+| `shard_m` | vendor lists, unsurveyed federally recognized tribes, 2nd half | ~~NOT_STARTED~~ **RAN** - 148-entity deep probe + 149-entity host log; 0 map rows, which is why this column could not see it | 0 | 0 |
 | `shard_n` | the coverage tail - every entity no other shard touched | RUNNING_OR_DONE | 212 | 139 |
 
 ## Coverage by entity class
 
-*`untouched` is the number that matters. An entity nobody attempted looks the same as an entity with no web presence unless you keep them apart - and only one of those is a gap in our effort.*
+> **CORRECTED 2026-09-02 by `code/1112_harvest_coverage_matrix.py`
+> (`docs/HARVEST_COVERAGE_AUDIT_2026-09-02.md`). The `untouched = 0` column
+> below is TRUE and it does not measure harvest.** All 1,555 entities appear in
+> `data/staging/cedar_web_map.csv`; that is the only thing the zero
+> establishes. Measured **per thing**, untouched runs from **373** (newsletters)
+> to **1,439 of 1,555 - 92.5% - for CAGE / UEI / DUNS**, which has never been
+> looked for on the entity's own pages at all. 189 entities - 185 BIE Schools
+> and 4 Native CDFIs - have never been looked at for **any** of the five.
+>
+> **This is the repo's signature defect wearing its most flattering face: a
+> check that reports the best possible number about the wrong noun.** "Every
+> entity has been touched" and "every entity has been harvested" differ by the
+> entire project. Two more figures in this table are also re-derived there:
+> `shard_l` and `shard_m` are **NOT** `NOT_STARTED` - both ran, and wrote no
+> map rows, so a shard table keyed on map rows cannot see them; and **1,275**
+> entities have a live 2xx URL of a non-dead type (1,484 have any non-blank URL
+> string), neither of which is the 1,254 below.
+>
+> Re-derive rather than edit this table:
+> `py -3 code/1112_harvest_coverage_matrix.py build`.
+
+~~*`untouched` is the number that matters. An entity nobody attempted looks the same as an entity with no web presence unless you keep them apart - and only one of those is a gap in our effort.*~~
+**The distinction is exactly right and it is why the column is worth keeping. What it needs is the noun: untouched BY WHAT.**
 
 | entity class | in register | with a URL | touched, none found | untouched |
 |---|---:|---:|---:|---:|

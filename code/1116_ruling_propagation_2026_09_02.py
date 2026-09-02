@@ -111,50 +111,110 @@ def pct(num, den):
 # --------------------------------------------------------------------------
 def d_gaming_denominator():
     """The denominator sentence is derived from the same totals it describes -
-    574's pattern. Never write '734'; write the arithmetic that produces it."""
+    574's pattern.
+
+    THIS FUNCTION IS NOT THE AUTHORITY AND MUST NOT BECOME A SECOND ONE.
+    `code/846_session_audit.py::_denom` owns the gaming denominator, is gated by
+    a `@claim`, and pins the ladder at (787 rows, 16 placeholders, 57 duplicate
+    extras). This reproduces 846's ALGORITHM exactly and then asserts it agrees;
+    where it does not, it prints UNMEASURED and sends the reader to 846.
+
+    Two detectors for one class drift, and a drifted detector is worse than none
+    because it is trusted - the reason `248_audit_tier_inheritance_patterns.py`
+    is a retired stub pointing at `293`.
+
+    THE FIRST VERSION OF THIS FUNCTION GOT IT WRONG IN THE OBVIOUS WAY, and the
+    correction is worth keeping. It tested `facility_name == "no casino"`
+    exactly, found 7, and produced **734** - which is one of the five partial
+    denominators the integrator had just finished pinning. NINE MORE ROWS SAY
+    "no casino" INSIDE A LONGER NAME: `Grand Canyon West - no casino`,
+    `Tribal admin only - no casino`, `Pueblo of Jemez - no casino`,
+    `Las Vegas Paiute Smoke Shop - no casino`, `No casino currently`, and four
+    more. An exact-string test on a free-text column measures the string, not
+    the fact. It is the `AMERICANTRIBAL GOVERNMENT` collision in START_HERE
+    wearing different clothes.
+    """
     gf = read("gaming_facilities.csv")
-    dc = read(
-        os.path.join(REVIEW, "gaming_facility_duplicate_candidates_2026-09-02.csv")
-    )
-    if gf is None or dc is None:
+    if gf is None or not col(gf, "facility_name", "gaming_facilities.csv"):
         return "gaming denominator", "UNMEASURED"
-    if not col(gf, "facility_name", "gaming_facilities.csv"):
-        return "gaming denominator", "UNMEASURED"
+
+    # --- 846's algorithm, reproduced -------------------------------------
+    # Index-based, not `id()`-based: object identity is not a key and `293`
+    # class 7 is right to refuse one. Row POSITION in a single in-memory read
+    # is deterministic and never leaves this function.
+    ph_ix = {
+        i for i, r in enumerate(gf)
+        if "NO CASINO" in (r.get("facility_name") or "").upper()
+    }
+    ph = [gf[i] for i in sorted(ph_ix)]
+
+    def loose(x):
+        x = re.sub(r"[^A-Z0-9 ]", " ", (x or "").upper())
+        x = re.sub(
+            r"(CASINO|RESORT|HOTEL|AND|THE|LLC|INC|GAMING|CENTER|CENTRE)", " ", x
+        )
+        return " ".join(x.split())
+
+    groups = defaultdict(list)
+    for i, r in enumerate(gf):
+        if i in ph_ix:
+            continue
+        k = (loose(r.get("facility_name")), (r.get("state") or "").upper())
+        if k[0]:
+            groups[k].append(r)
+    dupe_groups = [
+        v for v in groups.values()
+        if len(v) > 1 and len({x.get("tribe_canonical_name") for x in v}) == 1
+    ]
+    extra = sum(len(v) - 1 for v in dupe_groups)
     rows = len(gf)
-    placeholders = sum(
-        1 for r in gf if (r.get("facility_name") or "").strip().lower() == "no casino"
-    )
+    fac = rows - len(ph)
+    dist = fac - extra
     applied = sum(1 for r in gf if (r.get("duplicate_of_facility_id") or "").strip())
-    same = [r for r in dc if (r.get("same_tribe") or "").strip() == "Y"]
-    cross = [r for r in dc if (r.get("same_tribe") or "").strip() == "N"]
-    extra = sum(int(r["n_rows"]) for r in same) - len(same)
-    collapsed = rows - extra
+
+    if (rows, len(ph), extra) != (787, 16, 57):
+        UNMEASURED_HIT.append(
+            "gaming ladder is (%d, %d, %d), not 846's pinned (787, 16, 57) - the "
+            "table changed shape. Re-derive with `py -3 code/846_session_audit.py` "
+            "and update 846 first; this function follows it."
+            % (rows, len(ph), extra)
+        )
+        return "gaming denominator", "UNMEASURED"
+
     return "gaming denominator", (
-        "`gaming_facilities.csv` holds {rows} ROWS. That is not a facility count and "
-        "must not be a denominator. {ph} of them are placeholders whose "
-        "`facility_name` is literally `No casino`, recording that a nation operates "
-        "none. {g} duplicate groups sit in "
-        "`review/gaming_facility_duplicate_candidates_2026-09-02.csv`: {ns} are "
-        "same-tribe (`LIKELY_SAME_PROPERTY`) and hold {extra} rows beyond one each, "
-        "so collapsing them gives {rows} - {extra} = **{coll}**; the other {nc} are "
-        "`DIFFERENT_TRIBES_CHECK_BOTH` and at least one of those - Stables Casino, "
-        "Miami Tribe with Modoc Nation - is a JOINT OPERATION, not a duplicate. "
-        "No verdict is applied: `duplicate_of_facility_id` is populated on {app} "
-        "rows, not {extra}. So the honest range is **{coll} to {nodup}** and the "
-        "single thing every consumer must stop doing is dividing by {rows} - it "
-        "inflates the denominator by {infl} and understates every coverage "
-        "percentage in the gaming dataset by about {und}.".format(
-            rows=rows,
-            ph=placeholders,
-            g=len(dc),
-            ns=len(same),
-            nc=len(cross),
-            extra=extra,
-            coll=collapsed,
-            nodup=rows - placeholders,
-            app=applied,
-            infl=pct(rows - collapsed, collapsed),
-            und=pct(rows - collapsed, rows),
+        "**`gaming_facilities.csv` holds {rows} ROWS, and a row is not a "
+        "facility.** The ladder, owned and gated by "
+        "`code/846_session_audit.py::_denom`:\n\n"
+        "```\n"
+        "{rows}   rows in gaming_facilities.csv\n"
+        "-{ph:<3}  whose NAME says no casino - {ex} exactly \"No casino\", plus "
+        "{lo} more like\n"
+        "      \"Grand Canyon West - no casino\", \"Tribal admin only - no casino\"\n"
+        "={fac}   facility rows\n"
+        "-{extra:<3}  extra rows across the same-tribe duplicate groups\n"
+        "={dist}   distinct properties\n"
+        "```\n\n"
+        "**FIVE denominators circulated on 2026-09-02 and all five were quoted as "
+        "settled: 787, 780, 734, 727, 714.** Each came from a different definition "
+        "of \"facility\" and none said which. 787 is raw rows; 780 removes only the "
+        "{ex} EXACT placeholders and misses the {lo} that say it in a longer name; "
+        "734 is 787 minus duplicates with every placeholder left in; 727 is 780 "
+        "minus a duplicate count of 53. **None of them is wrong about the piece it "
+        "measured, and four of them are wrong as a denominator.** No verdict is "
+        "applied in the table itself - `duplicate_of_facility_id` is populated on "
+        "{app} rows, not {extra} - so {dist} is a measurement, not a state of the "
+        "file. Note also that the duplicate register carries "
+        "`DIFFERENT_TRIBES_CHECK_BOTH` groups that are **not** duplicates: Stables "
+        "Casino pairs the Miami Tribe with Modoc Nation, which is a joint "
+        "operation. Dividing by {rows} inflates the denominator by {infl} and "
+        "understates every gaming coverage percentage by about {und}.".format(
+            rows=rows, ph=len(ph), fac=fac, extra=extra, dist=dist, app=applied,
+            ex=sum(1 for r in ph
+                   if (r.get("facility_name") or "").strip().lower() == "no casino"),
+            lo=len(ph) - sum(1 for r in ph
+                             if (r.get("facility_name") or "").strip().lower() == "no casino"),
+            infl=pct(rows - dist, dist),
+            und=pct(rows - dist, rows),
         )
     )
 
@@ -185,6 +245,7 @@ def d_sealed():
         by_state[r["state_revenue_disclosure_disposition"]][r["state"]] += 1
     fmt = lambda c: ", ".join("%s %d" % (k, v) for k, v in sorted(c.items()))
     return "sealed revenue", (
+        "**CORRECTED 2026-09-02.** "
         "{tot} facilities carry `state_revenue_disclosure_status = "
         "SEALED_BY_STATUTE_OR_COMPACT`, and **{tot} is not the number of facilities "
         "evidenced as sealed**. The disposition column says so on the same row: "
@@ -326,7 +387,90 @@ def d_simple_counts():
     return "row counts", "\n".join("- " + x for x in out)
 
 
-DERIVATIONS = [d_gaming_denominator, d_sealed, d_labour, d_dtll, d_simple_counts]
+def d_schedule_c():
+    """'A backlog' and 'on disk' are different states, and only one is a fetch."""
+    cov = read("nonprofit_schedule_c_coverage.csv")
+    sc = read("nonprofit_schedule_c_lobbying.csv")
+    if cov is None or sc is None:
+        return "Schedule C", "UNMEASURED"
+    for c in ("index_target_returns", "downloaded", "not_downloaded"):
+        if not col(cov, c, "nonprofit_schedule_c_coverage.csv"):
+            return "Schedule C", "UNMEASURED"
+    tgt = sum(int(r["index_target_returns"]) for r in cov)
+    got = sum(int(r["downloaded"]) for r in cov)
+    nd = sum(int(r["not_downloaded"]) for r in cov)
+    xdir = os.path.join(ROOT, "data", "raw", "external", "irs990_schedc", "xml")
+    if not os.path.isdir(xdir):
+        UNMEASURED_HIT.append("XML cache absent: %s" % xdir)
+        ondisk = "UNMEASURED"
+    else:
+        ondisk = sum(1 for f in os.listdir(xdir) if f.endswith(".xml"))
+    return "Schedule C", (
+        "`nonprofit_schedule_c_lobbying.csv` holds **{rows} rows**, one per parsed "
+        "return, against **{tgt}** returns in the IRS e-file index filtered to "
+        "Cedar's Native-nonprofit EIN list - **{p}**. {nd} are not downloaded. "
+        "**{od} XML files are sitting in `data/raw/external/irs990_schedc/xml/`**, "
+        "so what was described as a fetch backlog was, for the retrieved share, "
+        "`ON_DISK_NOT_PROMOTED` - a parse and a join, not a socket "
+        "(`docs/AGENT_FIELD_GUIDE.md` s5). Only the {nd} genuinely absent returns "
+        "are `NOT_ACQUIRED`. **Naming the wrong one of the four states of "
+        "'missing' sends the next session to the network for a file that is "
+        "already here; three sessions have now done exactly that.**".format(
+            rows=len(sc), tgt=tgt, nd=nd, od=ondisk, p=pct(got, tgt)
+        )
+    )
+
+
+def d_eyak():
+    """A spine gap that has been closed is not a spine gap."""
+    sp = read(os.path.join(ROOT, "data", "spine", "cedar_entity_spine.csv"))
+    if sp is None:
+        return "Copper River / Eyak", "UNMEASURED"
+    match = [
+        r for r in sp
+        if (r.get("canonical_name") or "").strip().lower() in ("eyak", "native village of eyak")
+    ]
+    path = os.path.join(CLEAN, "prime_contracts.csv")
+    if not os.path.exists(path):
+        UNMEASURED_HIT.append("prime_contracts.csv absent")
+        return "Copper River / Eyak", "UNMEASURED"
+    n = 0
+    meth, tid, amt = Counter(), Counter(), 0.0
+    with io.open(path, encoding="utf-8-sig", newline="") as fh:
+        for r in csv.DictReader(fh):
+            if "COPPER RIVER" in (
+                (r.get("awardee_name") or "") + " " + (r.get("parent_name") or "")
+            ).upper():
+                n += 1
+                meth[r.get("attribution_method", "")] += 1
+                tid[r.get("tribe_id", "")] += 1
+                try:
+                    amt += float(r.get("total_obligations") or 0)
+                except ValueError:
+                    pass
+    top_t, top_n = (tid.most_common(1) or [("", 0)])[0]
+    return "Copper River / Eyak", (
+        "The Native Village of Eyak **is in the spine** - `{uid}`, `{name}`, "
+        "`{cls}` - so any document still saying it is not is stale, and any "
+        "decision still queued on that gap is answered. Copper River in "
+        "`prime_contracts.csv`: **{n} rows, ${amt:,.2f}**, of which **{tn} carry "
+        "`tribe_id = {tid}`** by `attribution_method` = "
+        "{meths}. **The ruling landed on the row that asked for it** - which is "
+        "the whole point: a decision recorded only in a sibling file is a "
+        "decision that gets asked again.".format(
+            uid=(match[0].get("cedar_uid") if match else "UNMEASURED"),
+            name=(match[0].get("canonical_name") if match else "UNMEASURED"),
+            cls=(match[0].get("entity_class") if match else "UNMEASURED"),
+            n=n, amt=amt, tn=top_n, tid=top_t,
+            meths=", ".join("`%s` %d" % (k or "(blank)", v) for k, v in meth.most_common(3)),
+        )
+    )
+
+
+DERIVATIONS = [
+    d_gaming_denominator, d_sealed, d_labour, d_dtll, d_schedule_c,
+    d_eyak, d_simple_counts,
+]
 
 
 # --------------------------------------------------------------------------
@@ -337,6 +481,12 @@ MARKERS = (
     "was written", "no longer", "RE-CLASSIFIED", "RULED 2026-09-02",
     "NARROWED 2026-09-02", "not adopted", "must not be adopted",
     "re-derived", "WITHDRAWN", "is the wrong ceiling",
+    "Correction", "correction", "CORRECTION",
+    # a GAMING-DENOMINATOR note in the neighbourhood explains the noun too, so
+    # it answers the noun rule locally as well as the denominator rule
+    # doc-wide. Without this the corrective text trips its own detector - which
+    # is the detector being right about a string and wrong about the world.
+    "GAMING-DENOMINATOR-2026-09-02",
 )
 WINDOW = 1400
 
@@ -351,8 +501,9 @@ DOC_MARKERS = ("GAMING-DENOMINATOR-2026-09-02",)
 # 2026-09-02 against the file named in its replacement - see `derive`.
 SUPERSEDED = [
     (r"787 facilit",
-     "787 is a ROW count. 7 rows are `No casino` placeholders and 52 same-tribe "
-     "duplicate groups hold 53 extra rows: the facility count is 734-780", False),
+     "787 is a ROW count. 16 rows' NAMES say no casino and 57 extra rows sit "
+     "across the same-tribe duplicate groups: 771 facility rows, 714 distinct "
+     "properties. Authority: `code/846_session_audit.py::_denom`", False),
     (r"of 787\b",
      "check the NOUN. `of 787 rows` is right, `of 787 facilities` is not, and the "
      "document needs the GAMING-DENOMINATOR-2026-09-02 note once", True),
@@ -363,6 +514,9 @@ SUPERSEDED = [
     (r"\b2,142\b", "227,540 rows across three join legs", False),
     (r"\$38\.19B", "$45.93B", False),
     (r"\b1,195\b", "1,889 rows / 1,394 publication_channel / 481 probe_absence", False),
+    (r"807 letters",
+     "807 is the ROW count. `record_kind` splits it: 597 `letter`, 209 "
+     "`enclosure`, 1 `publisher_index_page`", False),
     (r"excluded by \*\*every\*\* route",
      "released 2026-09-02 for a Native entity's own public pages", False),
     (r"excluded by every route",
@@ -478,12 +632,26 @@ def cmd_selftest():
     else:
         print("pass: one GAMING-DENOMINATOR marker answers every 'of 787' in that file")
 
-    wrongnoun = "GAMING-DENOMINATOR-2026-09-02\n\nreaches 7 of 787 facilities today.\n"
-    if not any(h[2] == "787 facilit" for h in scan_text(wrongnoun, "<noun>")):
-        print("FAIL: doc-level marker wrongly answered the NOUN rule")
+    # The doc-level marker answers the shared DENOMINATOR doc-wide, but the
+    # wrong NOUN is a local defect and must still fire where the note is not
+    # in view. Put the note out of WINDOW range and assert the noun still fires.
+    far = (
+        "GAMING-DENOMINATOR-2026-09-02\n\n"
+        + ("filler. " * ((WINDOW // 8) + 60))
+        + "\n\nreaches 7 of 787 facilities today.\n"
+    )
+    if not any(h[2] == "787 facilit" for h in scan_text(far, "<noun-far>")):
+        print("FAIL: a distant doc-level marker wrongly answered the NOUN rule")
         ok = False
     else:
-        print("pass: the doc-level marker does NOT excuse '787 facilities'")
+        print("pass: a DISTANT denominator note does NOT excuse '787 facilities'")
+
+    near = "GAMING-DENOMINATOR-2026-09-02: 787 is a row count.\n\n7 of 787 facilities.\n"
+    if scan_text(near, "<noun-near>"):
+        print("FAIL: a note in view did not answer the noun it explains")
+        ok = False
+    else:
+        print("pass: a denominator note IN VIEW answers the noun it explains")
 
     clean = "Nothing superseded is stated in this sentence at all.\n"
     if scan_text(clean, "<clean>"):

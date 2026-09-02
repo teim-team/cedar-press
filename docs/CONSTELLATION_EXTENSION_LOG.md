@@ -271,7 +271,9 @@ a flag survives with nothing left to conflict with.
 
 ## 5. One route built, measured, and refused
 
-The obvious way to convert more of the 5,561 unresolved Schedule C rows is the
+*(**Re-measured 2026-09-02:** the table now holds 29,149 rows and **25,522** carry `record_scope = unresolved`. 5,561 is stale; the shape of the problem is not.)*
+
+The obvious way to convert more of the unresolved Schedule C rows is the
 filer's **own legal name** — `declares_service_to` says "the entity's own
 words name the nation", and a 990 filer's name is its own words. It was built
 and measured. It resolves **281 EINs covering 641 Schedule C rows**, and the

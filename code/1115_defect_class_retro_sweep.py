@@ -31,7 +31,7 @@ THE CLASSES, and who owns the detector
       `Disallow` inside "no Disallow directives".                [here]
   C4  one token of a multi-token hub name is not a name - $5.93B. [here, data]
   C5  a proof that nothing broke is not a proof that something happened.
-      `1111` proved conservation to the cent while attributing nothing. [here]
+      `1123` proved conservation to the cent while attributing nothing. [here]
   C6  write to the columns the CONSUMER reads: a display column and a keying
       column that can disagree.                                  [here, data]
   C7  a controlled vocabulary is an interface - prose in `attribution_method`
@@ -229,6 +229,7 @@ def _module_ints(tree):
 def _cap_sites(tree, consts):
     """[(lineno, cap_n, how)] - reads that cannot see the whole file."""
     sites = []
+    readervars = _reader_vars(tree)
     for n in ast.walk(tree):
         # pandas / helper keyword caps
         if isinstance(n, ast.Call):
@@ -247,34 +248,96 @@ def _cap_sites(tree, consts):
                     v = _int_of(a, consts)
                     if v is not None and v > 1:
                         sites.append((n.lineno, v, f"islice(..., {v})"))
+        # a CAP GIVEN AS A DEFAULT ARGUMENT is still a cap
+        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            defaults = _param_int_defaults(n)
+            if not defaults:
+                continue
+            local = dict(consts)
+            local.update(defaults)
+            for c in ast.walk(n):
+                if isinstance(c, ast.For):
+                    cap = _break_cap(c, local, readervars | _reader_vars(n))
+                    if cap:
+                        sites.append((c.lineno, cap[0],
+                                      f"{cap[1]} (cap is a DEFAULT ARG of "
+                                      f"`{n.name}`, so no caller sees it)"))
         # counter-guarded break over a reader
         if isinstance(n, ast.For):
-            cap = _break_cap(n, consts)
+            cap = _break_cap(n, consts, readervars)
             if cap:
                 sites.append((n.lineno, cap[0], cap[1]))
         # readlines()[:N] / list(...)[:N]
-        if isinstance(n, ast.Subscript) and isinstance(n.slice, ast.Slice) \
-                and n.slice.lower is None and n.slice.upper is not None:
+        if isinstance(n, ast.Subscript) and isinstance(n.slice, ast.Slice)                 and n.slice.lower is None and n.slice.upper is not None:
             v = _int_of(n.slice.upper, consts)
             base = call_name(n.value) if isinstance(n.value, ast.Call) else ""
             if v is not None and v > 1 and base in (
                     "readlines", "list", "reader", "DictReader", "read_rows",
                     "load_rows", "rows"):
                 sites.append((n.lineno, v, f"{base}()[:{v}]"))
-    return sites
+    # de-dup on (line, cap)
+    seen, out = set(), []
+    for ln, cap, how in sites:
+        if (ln, cap) in seen:
+            continue
+        seen.add((ln, cap))
+        out.append((ln, cap, how))
+    return out
 
 
-def _break_cap(forn, consts):
+READER_CALLS = {"reader", "DictReader", "read_csv", "open", "iterrows",
+                "itertuples", "load_rows", "read_rows", "iter_rows"}
+
+
+def _reader_vars(tree):
+    """names bound to a csv reader / file handle. Without this, `rd =
+    csv.DictReader(fh)` followed by `for r in rd:` is invisible, and that is
+    exactly the shape of `526_dataset_standard.py` - the canonical instance
+    of this class. The first version of this detector MISSED it."""
+    out = set()
+    for n in ast.walk(tree):
+        if isinstance(n, ast.Assign) and len(n.targets) == 1 and                 isinstance(n.targets[0], ast.Name):
+            for c in ast.walk(n.value):
+                if isinstance(c, ast.Call) and call_name(c) in READER_CALLS:
+                    out.add(n.targets[0].id)
+        if isinstance(n, ast.withitem) and n.optional_vars is not None and                 isinstance(n.optional_vars, ast.Name):
+            for c in ast.walk(n.context_expr):
+                if isinstance(c, ast.Call) and call_name(c) in READER_CALLS:
+                    out.add(n.optional_vars.id)
+    return out
+
+
+def _param_int_defaults(fn):
+    """`def scan(name, cap=20000)` -> {'cap': 20000}. A cap given as a
+    DEFAULT ARGUMENT is still a cap."""
+    out = {}
+    if not isinstance(fn, (ast.FunctionDef, ast.AsyncFunctionDef)):
+        return out
+    a = fn.args
+    pos = list(a.posonlyargs) + list(a.args)
+    for arg, d in zip(pos[len(pos) - len(a.defaults):], a.defaults):
+        if isinstance(d, ast.Constant) and isinstance(d.value, int) and                 not isinstance(d.value, bool):
+            out[arg.arg] = d.value
+    for arg, d in zip(a.kwonlyargs, a.kw_defaults):
+        if isinstance(d, ast.Constant) and isinstance(d.value, int) and                 not isinstance(d.value, bool):
+            out[arg.arg] = d.value
+    return out
+
+
+def _break_cap(forn, consts, readervars):
     """`for row in reader: ... if i >= CAP: break` -> (CAP, how)."""
-    reads = any(call_name(c) in ("reader", "DictReader", "read_csv",
-                                 "enumerate", "open")
+    reads = any(call_name(c) in READER_CALLS
+                or call_name(c) == "enumerate"
                 for c in ast.walk(forn.iter) if isinstance(c, ast.Call))
+    if not reads:
+        reads = any(isinstance(c, ast.Name) and c.id in readervars
+                    for c in ast.walk(forn.iter))
     if not reads:
         return None
     for n in ast.walk(forn):
         if not isinstance(n, ast.If):
             continue
-        if not any(isinstance(b, ast.Break) for b in n.body):
+        if not any(isinstance(b, ast.Break) for b in ast.walk(n)):
             continue
         for c in ast.walk(n.test):
             if isinstance(c, ast.Compare):
@@ -285,6 +348,24 @@ def _break_cap(forn, consts):
     return None
 
 
+def _callers_of(tree):
+    """func name -> set of func names that call it (one hop). The `526`
+    instance is invisible without this: the 20,000-row cap lives in
+    `scan(name, cap=20000)` and the destructive `drop N always-empty
+    column(s)` recommendation lives in `build()`, a different function.
+    Proximity does not link them; the CALL does."""
+    callers = defaultdict(set)
+    for fn in ast.walk(tree):
+        if not isinstance(fn, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        for c in ast.walk(fn):
+            if isinstance(c, ast.Call):
+                nm = call_name(c)
+                if nm:
+                    callers[nm].add(fn.name)
+    return callers
+
+
 def detect_C1(mods):
     out = []
     for path, tree, lines in mods:
@@ -293,20 +374,16 @@ def detect_C1(mods):
         if not sites:
             continue
         of = enclosing(tree)
-        # A DOCSTRING IS NOT A CLAIM ABOUT THE DATA. Excluding them dropped
-        # 11 findings whose "whole-population claim" was the function's own
-        # prose description.
+        callers = _callers_of(tree)
+        # A DOCSTRING IS NOT A CLAIM ABOUT THE DATA.
         docstrings = set()
         for n in ast.walk(tree):
             if isinstance(n, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef,
                               ast.ClassDef)) and n.body:
                 first = n.body[0]
-                if isinstance(first, ast.Expr) and \
-                        isinstance(first.value, ast.Constant) and \
-                        isinstance(first.value.value, str):
+                if isinstance(first, ast.Expr) and                         isinstance(first.value, ast.Constant) and                         isinstance(first.value.value, str):
                     docstrings.add(id(first.value))
-        # index population-claims by enclosing function
-        claims = defaultdict(list)
+        claims = defaultdict(list)          # function NAME -> [(line, text)]
         for n in ast.walk(tree):
             if id(n) in docstrings:
                 continue
@@ -321,24 +398,43 @@ def detect_C1(mods):
                 continue
             if POP_WORDS.search(txt) or DESTRUCTIVE.search(txt):
                 fn = of(n.lineno)
-                claims[id(fn) if fn else 0].append((n.lineno, txt[:160]))
+                claims[fn.name if fn else "<module>"].append(
+                    (n.lineno, txt[:160]))
         for line, cap, how in sites:
             if waived(lines, line, "C1"):
                 continue
             fn = of(line)
-            key = id(fn) if fn else 0
-            here = [c for c in claims.get(key, []) if abs(c[0] - line) < 400]
-            if not here and key != 0:
-                here = [c for c in claims.get(0, []) if abs(c[0] - line) < 200]
+            fname = fn.name if fn else "<module>"
+            # the cap's own function, then anything that CALLS it (2 hops)
+            scopes = {fname}
+            frontier = {fname}
+            for _hop in range(2):
+                nxt = set()
+                for f in frontier:
+                    nxt |= callers.get(f, set())
+                nxt -= scopes
+                scopes |= nxt
+                frontier = nxt
+            here = []
+            for scope in scopes:
+                for cl, txt in claims.get(scope, []):
+                    here.append((cl, txt, scope))
+            if fname != "<module>":
+                here += [(cl, txt, "<module>")
+                         for cl, txt in claims.get("<module>", [])
+                         if abs(cl - line) < 200]
             if not here:
                 continue
-            worst = sorted(here, key=lambda c: abs(c[0] - line))[0]
-            destructive = any(DESTRUCTIVE.search(t) for _, t in here)
+            worst = sorted(here, key=lambda c: (c[2] != fname,
+                                                abs(c[0] - line)))[0]
+            destructive = any(DESTRUCTIVE.search(t) for _, t, _ in here)
+            via = ("" if worst[2] == fname
+                   else f"  [claim is in `{worst[2]}()`, which calls "
+                        f"`{fname}()` - the cap is INVISIBLE at the claim]")
             out.append(F(
                 "C1", rel(path), line,
-                f"capped read `{how}` in `{fn.name if fn else '<module>'}` "
-                f"then a whole-population claim at line {worst[0]}: "
-                f"{worst[1]!r}",
+                f"capped read `{how}` in `{fname}` then a whole-population "
+                f"claim at line {worst[0]}: {worst[1]!r}{via}",
                 size=cap, unit="row cap",
                 detail=("DESTRUCTIVE claim - the 526 shape"
                         if destructive else "assertive claim")))
@@ -702,11 +798,20 @@ def _population_checked(fn, names):
         if isinstance(n, ast.Assert) and isinstance(n.test, ast.Name) and                 n.test.id in names:
             return True
         if isinstance(n, ast.If):
-            raises = any(isinstance(b, ast.Raise) or
-                         (isinstance(b, ast.Expr) and
-                          isinstance(b.value, ast.Call) and
-                          call_name(b.value) in ("exit", "SystemExit"))
-                         for b in ast.walk(n))
+            # A non-zero `return` is a refusal too. Only accepting `raise`
+            # left `1123`'s repaired gate - `if len(targets) < EXPECT_MIN:
+            # ... return 1` - still reported as vacuous after it had been
+            # fixed. A detector that cannot see the fix will be re-fixed
+            # forever.
+            raises = any(
+                isinstance(b, ast.Raise) or
+                (isinstance(b, ast.Expr) and isinstance(b.value, ast.Call) and
+                 call_name(b.value) in ("exit", "SystemExit")) or
+                (isinstance(b, ast.Return) and isinstance(b.value, ast.Constant)
+                 and b.value.value not in (0, None, False)) or
+                (isinstance(b, ast.Call) and
+                 dotted(b.func) in ("sys.exit", "os._exit"))
+                for b in ast.walk(n))
             if not raises:
                 continue
             for c in ast.walk(n.test):
@@ -741,7 +846,7 @@ def _filtered_lists(fn):
 def detect_C5(mods):
     """A proof that nothing broke is not a proof that something happened.
 
-    TWO measured shapes, both from `1111_copper_river_attribution.py`:
+    TWO measured shapes, both from `1123_copper_river_attribution.py`:
 
     5a  VACUOUS PASS. The success condition is only the EMPTINESS of
         filtered error lists. If the population the filter draws from is
@@ -765,19 +870,22 @@ def detect_C5(mods):
 
             # --- 5a ------------------------------------------------------
             if is_verify and not waived(lines, fn.lineno, "C5"):
-                ok_nodes = []
+                # PRECEDENCE, not a union. A function that names its own
+                # pass condition (`ok = ...`) has said what the gate is;
+                # sweeping in every other ternary in the function - e.g.
+                # `'APPLIED' if mode == 'apply' else 'report only'` - made
+                # `all()` false and hid the real `1123` instance. Take the
+                # most explicit statement of the gate that exists.
+                assigns, asserts, ifexps = [], [], []
                 for n in ast.walk(fn):
                     if isinstance(n, ast.Assign) and len(n.targets) == 1 and                             isinstance(n.targets[0], ast.Name) and                             n.targets[0].id in ("ok", "clean", "passed",
                                                 "good"):
-                        ok_nodes.append(n.value)
+                        assigns.append(n.value)
                     elif isinstance(n, ast.Assert):
-                        ok_nodes.append(n.test)
+                        asserts.append(n.test)
                     elif isinstance(n, ast.IfExp) and                             not isinstance(n.test, ast.Name):
-                        # `0 if ok else 1` - a bare name is an indirection,
-                        # not a check. Counting it made every positive score
-                        # all_empty=False and the detector reported ZERO
-                        # while looking like it had run.
-                        ok_nodes.append(n.test)
+                        ifexps.append(n.test)
+                ok_nodes = assigns or asserts or ifexps
                 names = set(lists)
                 if ok_nodes and all(_all_emptiness(o, names) for o in ok_nodes)                         and not _population_checked(fn, names):
                     out.append(F(
@@ -787,7 +895,7 @@ def detect_C5(mods):
                         f"{sorted(names)}; nothing anywhere requires the "
                         f"population those filters draw from to be non-empty. "
                         f"If the filter matches nothing the gate prints a "
-                        f"clean 0 and exits 0. The `1111` shape - conservation "
+                        f"clean 0 and exits 0. The `1123` shape - conservation "
                         f"to the cent, nothing attributed.",
                         size=len(names), unit="filtered lists",
                         detail=" | ".join(ast.unparse(o)[:80]
@@ -973,8 +1081,22 @@ def delegate_845():
     return m
 
 
+ONLY_MARKER = re.compile(r"^\s*<!--\s*(BEGIN|END)\b[^>]*-->\s*$")
+
+
 def detect_C12(m845):
-    """Duplicate marker names - the same <!-- BEGIN X --> in two places."""
+    """Duplicate marker names - two blocks with one name are ONE block to the
+    preserver.
+
+    ANCHORED TO WHOLE LINES. `845.MARKER_RE` is reused for the name grammar
+    (two detectors for one grammar drift), but a marker only counts when it
+    is ALONE on its line. Without that, a sentence like
+
+        owner ruling at `<!-- BEGIN TERMS-OWNER-RULING-2026-09-02 -->`: ...
+
+    counts as a third marker line and the file reads as a BEGIN/END mismatch.
+    That prose citation produced 10 of the first run's 12 findings.
+    """
     out = []
     if m845 is None:
         return out
@@ -982,7 +1104,7 @@ def detect_C12(m845):
     if mre is None:
         UNMEASURED.append(("C12", "845 has no MARKER_RE to reuse"))
         return out
-    where = defaultdict(list)
+    per_file = {}                       # path -> Counter(name -> lines)
     for p in sorted(DOCS.rglob("*.md")) + sorted(CEDAR.glob("*.md")):
         try:
             text = p.read_text(encoding="utf-8", errors="replace")
@@ -990,45 +1112,176 @@ def detect_C12(m845):
             UNMEASURED.append((rel(p), repr(e)))
             continue
         seen = Counter()
-        for a, b in mre.findall(text):
-            nm = a or b
-            seen[nm] += 1
-        for nm, k in seen.items():
-            # BEGIN + END = 2 occurrences for one block
-            where[nm].append((rel(p), k))
-    for nm, places in sorted(where.items()):
-        multi_file = len(places) > 1
-        multi_block = any(k > 2 for _, k in places)
-        if not (multi_file or multi_block):
+        for line in text.splitlines():
+            if not ONLY_MARKER.match(line):
+                continue
+            for a, b in mre.findall(line):
+                seen[a or b] += 1
+        if seen:
+            per_file[rel(p)] = seen
+
+    # (a) WITHIN one file: one name opening two blocks.
+    # `845.MARKER_RE` matches the OPENING marker only - `BEGIN <name>` or
+    # `CEDAR:<name> ... START`. It has no END alternative. So one well-formed
+    # block is ONE hit, not two. Assuming a BEGIN/END pair made `k == 2` the
+    # "clean" case, which silently excused every genuine duplicate.
+    if not per_file:
+        UNMEASURED.append(("C12", "no whole-line BEGIN markers found in any "
+                                  "*.md - the scan measured nothing, which is "
+                                  "not the same as finding nothing"))
+    for f, seen in sorted(per_file.items()):
+        for nm, k in sorted(seen.items()):
+            if k < 2:
+                continue
+            out.append(F(
+                "C12", f, 0,
+                f"marker `{nm}` OPENS {k} blocks in ONE file. Two blocks "
+                f"with one name are ONE block to the preserver: the "
+                f"generator's next run keeps the wrong span and the other "
+                f"block is gone.",
+                size=k, unit="blocks", detail="WITHIN-FILE - act on this"))
+
+    # (b) ACROSS files: only a hazard when one GENERATOR writes both.
+    where = defaultdict(list)
+    for f, seen in per_file.items():
+        for nm in seen:
+            where[nm].append(f)
+    try:
+        gen = m845.md_generators()
+    except Exception:                                           # noqa: BLE001
+        gen = {}
+    for nm, files in sorted(where.items()):
+        if len(files) < 2:
             continue
+        gens = defaultdict(list)
+        for f in files:
+            for g in gen.get(f, []) or ["<no generator>"]:
+                gens[g].append(f)
+        shared = {g: fs for g, fs in gens.items()
+                  if len(fs) > 1 and g != "<no generator>"}
         out.append(F(
-            "C12", places[0][0], 0,
-            f"marker name `{nm}` appears in {len(places)} file(s) / "
-            f"{sum(k for _, k in places)} marker line(s). Two blocks with one "
-            f"name are ONE block to the preserver.",
-            size=sum(k for _, k in places), unit="marker lines",
-            detail="; ".join(f"{f} x{k}" for f, k in places)))
+            "C12", files[0], 0,
+            f"marker `{nm}` is used in {len(files)} files "
+            + ("and ONE GENERATOR writes more than one of them - a real "
+               "collision" if shared else
+               "but no single generator writes two of them, so the reuse is "
+               "cosmetic"),
+            size=len(files) if shared else 0, unit="files",
+            detail="; ".join(files) + (f"  || shared generator(s): {shared}"
+                                       if shared else "")))
     return out
 
 
 def detect_C13(m845):
-    """Positional writers - delegate to 845's own CSV scan."""
+    """Positional writers - a header list and a row list drifting apart.
+
+    OWNED BY `code/845_regenerate_guard.py` and ENFORCED by `62` rule 17
+    (`regenerate_new_unsafe_writers` is MUST_BE_ZERO). This function does not
+    re-derive anything; it reports 845's standing count so the sweep's
+    coverage of the class is visible rather than assumed.
+
+    `845.collect_csv()` returns a **2-TUPLE** `(rows, memory)`. The first
+    version of this function did `rows = m845.collect_csv(live)` and iterated
+    the tuple - the same tuple-unpacking blindness the field guide records in
+    845's own class 3. It also was never wired into `run_code()`, so it
+    produced nothing at all and nothing said so.
+    """
     out = []
     if m845 is None:
         return out
     try:
         live = m845.live_headers()
-        rows = m845.collect_csv(live)
+        got = m845.collect_csv(live)
     except Exception as e:                                      # noqa: BLE001
         UNMEASURED.append(("C13", f"845.collect_csv failed: {e!r}"))
         return out
+    if isinstance(got, tuple):
+        rows = got[0]
+    else:
+        rows = got
+    if rows is None:
+        UNMEASURED.append(("C13", "845.collect_csv returned None"))
+        return out
     for r in rows:
         try:
-            risk = r[0]
-            out.append(F("C13", str(r[1]), 0, str(r[2])[:300], size=1,
-                         unit="site", detail=f"845 risk={risk}"))
+            risk, where, what = r[0], r[1], r[2]
         except Exception:                                       # noqa: BLE001
+            UNMEASURED.append(("C13", f"unexpected 845 row shape: {r!r:.80}"))
             continue
+        out.append(F("C13", str(where), 0, str(what)[:300],
+                     size=1, unit="unsafe writer",
+                     detail=f"845 risk={risk}. OWNER: 845 / 62 rule 17"))
+    return out
+
+
+# ==========================================================================
+# C12b  a BACKUP TAG that names a number instead of a script
+# ==========================================================================
+# Same family as C12: two things with one name are one thing to whoever has
+# to restore. `.bak_<date>_pre163` was written by FOUR different scripts
+# numbered 163; one of them restored by glob, reverted seven files belonging
+# to two other agents, and left the spine carrying 179 promoted NHOs whose
+# ledger rows had just been deleted.
+# `docs/AGENT_FIELD_GUIDE.md` s1 states the rule - the tag carries the STEM.
+# Nobody had measured how many scripts still break it.
+
+BARE_TAG = re.compile(r"bak_\S*?_pre(\d+)(?![_\w])")
+
+
+def _colliding_numbers():
+    nums = defaultdict(set)
+    for p in CODE.glob("*.py"):
+        m = re.match(r"^(\d+)_", p.name)
+        if m:
+            nums[m.group(1)].add(p.name)
+    return {k: sorted(v) for k, v in nums.items() if len(v) > 1}
+
+
+def _bak_tag_census():
+    """number -> how many .bak files on disk carry `_pre<number>`.
+    Walked ONCE. Calling rglob per finding turned a 25 s scan into 108 s."""
+    c = Counter()
+    pat = re.compile(r"_pre(\d+)$")
+    for p in CEDAR.rglob("*.bak_*"):
+        m = pat.search(p.name)
+        if m:
+            c[m.group(1)] += 1
+    return c
+
+
+def detect_C12b(mods):
+    out = []
+    collide = _colliding_numbers()
+    census = _bak_tag_census()
+    if not collide:
+        UNMEASURED.append(("C12b", "no colliding script numbers resolved - "
+                                   "the collision map could not be built, so "
+                                   "risk could not be graded"))
+    for path, tree, lines in mods:
+        for i, line in enumerate(lines, 1):
+            if "glob" in line.lower() or "bak_*" in line:
+                continue
+            for m in BARE_TAG.finditer(line):
+                if waived(lines, i, "C12b"):
+                    continue
+                num = m.group(1)
+                shared = collide.get(num)
+                on_disk = census[num]
+                out.append(F(
+                    "C12b", rel(path), i,
+                    f"backup tag `_pre{num}` names a NUMBER, not a script "
+                    f"stem"
+                    + (f" - and {num} is carried by {len(shared)} different "
+                       f"scripts {shared}. THIS IS THE 163 SHAPE: a restore "
+                       f"by that tag cannot tell whose backup it is."
+                       if shared else
+                       " (the number is unique today; the next `claim` "
+                       "cannot reuse it, but a stale citation still can)."),
+                    size=(1000 + on_disk) if shared else on_disk,
+                    unit="risk", detail=(
+                        f"{on_disk} file(s) on disk carry `_pre{num}`. "
+                        f"Convention: `.bak_<date>_pre_{path.stem}`. "
+                        + line.strip()[:100])))
     return out
 
 
@@ -1083,10 +1336,51 @@ IDCOL_RE = re.compile(
 MONEYCOL_RE = re.compile(
     r"(^|_)(amount|amounts|obligat\w*|value|dollars?|total|revenue|fee|"
     r"payment|payments|award_amount|federal_action_obligation)(_|$)", re.I)
-VOCABCOL_RE = re.compile(
-    r"(^|_)(method|status|tier|type|class|flag|state_of|disposition|outcome|"
-    r"scheme|basis_type|category|kind|level|confidence|source_type|"
-    r"record_scope|event_class|entity_class|measurement_type)(_|$)", re.I)
+# A column whose name ENDS in one of these is a declared PROSE column in this
+# project's convention - `_basis` names the evidence, `_rationale` explains a
+# tier. Long values in them are the design, not a defect. The first version
+# matched `_basis`/`_rationale`/`_description` because the vocabulary token
+# appeared ANYWHERE in the name (`land_status_basis` on "status",
+# `recipient_type_description` on "type") - the containment defect, again,
+# inside the containment sweep. 190 of 306 C7 findings were that.
+PROSE_SUFFIX = re.compile(
+    r"(basis|rationale|description|desc|note|notes|quote|reason|comment|"
+    r"comments|text|title|name|url|summary|caveat|detail|details|"
+    r"explanation|evidence|statement)$", re.I)
+VOCAB_SUFFIX = re.compile(
+    r"(^|_)(method|status|tier|type|class|flag|disposition|outcome|scheme|"
+    r"category|kind|level|confidence|scope|support|state|stage|mode|"
+    r"decision|verdict|result|action)$", re.I)
+
+
+def is_vocab_col(c):
+    return bool(VOCAB_SUFFIX.search(c)) and not PROSE_SUFFIX.search(c)
+
+
+# Which money column to attribute a finding to. Named explicitly in every
+# finding so the reader can judge the denominator rather than trust it.
+MONEY_PREFERENCE = ["federal_action_obligation", "total_obligations",
+                    "total_obligated_usd", "action_obligation",
+                    "total_amount_expended", "award_amount", "amount",
+                    "obligation", "total_amount", "value_usd", "amount_usd"]
+
+
+def pick_money(cols):
+    low = [c.lower() for c in cols]
+    for want in MONEY_PREFERENCE:
+        if want in low:
+            return low.index(want)
+    for i, c in enumerate(cols):
+        if MONEYCOL_RE.search(c):
+            return i
+    return None
+
+
+def _money(v):
+    try:
+        return float(str(v).replace(",", "").replace("$", "").strip() or 0)
+    except ValueError:
+        return 0.0
 
 
 def scan_table(p):
@@ -1106,9 +1400,8 @@ def scan_table(p):
                 cols = next(r)
             except StopIteration:
                 return {"path": rel(p), "rows": 0, "cols": [], "empty": True}
-            idx_vocab = [i for i, c in enumerate(cols) if VOCABCOL_RE.search(c)]
-            money_idx = [i for i, c in enumerate(cols) if MONEYCOL_RE.search(c)]
-            money_i = money_idx[0] if money_idx else None
+            idx_vocab = [i for i, c in enumerate(cols) if is_vocab_col(c)]
+            money_i = pick_money(cols)
             if money_i is not None:
                 money_col = cols[money_i]
             ncol = len(cols)
@@ -1154,6 +1447,14 @@ def scan_table(p):
             "vocab": {cols[i]: dict(c) for i, c in vocab.items()}}
 
 
+# `NONE` is a REAL FPDS value in `setaside_code` (it means no set-aside) and
+# `none` is a real answer in `repair_action`. Splitting the vocabulary keeps
+# the count honest instead of inflating it with legitimate data.
+HARD_SENTINEL = {"nan", "NaN", "NAN", "null", "NULL", "#N/A", "#REF!",
+                 "#VALUE!", "GSA_MIGRATION", "UNKNOWN", "TBD",
+                 "NOT AVAILABLE", "NOT APPLICABLE", "MISSING"}
+
+
 def detect_C14(scans):
     out = []
     for s in scans:
@@ -1161,19 +1462,29 @@ def detect_C14(scans):
             continue
         for col, counts in s["sent"].items():
             tot = sum(counts.values())
+            hard = sum(n for v, n in counts.items() if v in HARD_SENTINEL)
             ident = bool(IDCOL_RE.search(col))
             money = s["sent_money"].get(col, 0.0)
-            sev = ("IDENTITY COLUMN" if ident else "value column")
+            if hard:
+                sev = ("HARD sentinel in an IDENTITY column" if ident
+                       else "HARD sentinel")
+            else:
+                sev = ("SOFT sentinel in an identity column" if ident
+                       else "SOFT sentinel - may be a legitimate coded value "
+                            "(FPDS `NONE`, a real `none` answer). Verify "
+                            "against the codebook before acting")
             out.append(F(
                 "C14", s["path"], 0,
                 f"`{col}` carries sentinel string(s) "
                 f"{dict(sorted(counts.items(), key=lambda kv: -kv[1]))} on "
-                f"{tot:,} of {s['rows']:,} rows ({sev})",
-                size=tot, unit="rows",
+                f"{tot:,} of {s['rows']:,} rows - {sev}",
+                size=hard if hard else tot, unit="rows",
                 detail=(f"${money:,.0f} in `{s['money_col']}` sits on those "
-                        f"rows" if money else "") +
-                       ("  <-- a populated cell is not a resolved identity"
-                        if ident else "")))
+                        f"rows. " if money else "") +
+                       (f"{hard:,} of them are HARD sentinels. " if hard
+                        and hard != tot else "") +
+                       ("A POPULATED CELL IS NOT A RESOLVED IDENTITY."
+                        if ident and hard else "")))
     return out
 
 
@@ -1181,17 +1492,19 @@ PROSE_RE = re.compile(r"[a-z]\s+[a-z]", re.I)      # two words
 
 
 def detect_C7(scans):
-    """A controlled vocabulary is an interface. A *_method / *_status /
-    *_tier column with free text in it breaks the next pass."""
+    """A controlled vocabulary is an interface. A `*_method` / `*_status` /
+    `*_tier` column with free text in it breaks the next pass.
+
+    ANCHORED: a column whose name ENDS in `_basis`, `_rationale`,
+    `_description`, `_note` ... is a declared prose column and is excluded -
+    see `PROSE_SUFFIX`. `scan_table` applies `is_vocab_col`, so only genuine
+    interface columns reach here."""
     out = []
     for s in scans:
         if not s or s.get("empty"):
             continue
         for col, counts in s.get("vocab", {}).items():
-            if "<OVERFLOW>" in counts:
-                card = 4000
-            else:
-                card = len(counts)
+            card = 4000 if "<OVERFLOW>" in counts else len(counts)
             tot = sum(counts.values())
             if tot == 0:
                 continue
@@ -1206,19 +1519,21 @@ def detect_C7(scans):
                 continue          # a genuinely free-text column, not a vocab
             out.append(F(
                 "C7", s["path"], 0,
-                f"`{col}` looks like a controlled vocabulary "
-                f"({card} distinct over {tot:,} populated rows) but "
-                f"{len(prose)} value(s) on {prose_rows:,} rows are FREE TEXT. "
-                f"Prose in `attribution_method` broke another pass on 1,486 "
-                f"rows.",
+                f"`{col}` is an interface column ({card} distinct value(s) "
+                f"over {tot:,} populated rows) but {len(prose)} value(s) on "
+                f"{prose_rows:,} rows are FREE TEXT. Prose in "
+                f"`attribution_method` broke another pass on 1,486 rows.",
                 size=prose_rows, unit="rows",
-                detail="; ".join(f"{v[:70]!r} x{n}" for v, n in
-                                 sorted(prose.items(), key=lambda kv: -kv[1])[:3])))
+                detail="; ".join(f"{v[:70]!r} x{n:,}" for v, n in
+                                 sorted(prose.items(),
+                                        key=lambda kv: -kv[1])[:3])))
     return out
 
 
+# A display column and a keying column for the SAME entity. The consumer
+# reads one and keys on the other; when they can disagree, the row is
+# published under one identity and joined under another.
 DISPLAY_KEY_PAIRS = [
-    # (display column, keying column) - the consumer reads the second
     ("cedar_uid", "tribe_id"),
     ("cedar_uid", "entity_id"),
     ("cedar_uid", "tribe_entity_id"),
@@ -1227,12 +1542,27 @@ DISPLAY_KEY_PAIRS = [
     ("tribe_name", "tribe_id"),
     ("entity_name", "entity_id"),
     ("facility_name", "facility_id"),
+    ("awardee_name", "cedar_uid"),
+    ("recipient_name", "cedar_uid"),
 ]
 
 
 def detect_C6(paths):
-    """Two columns that name the same thing, one keyed on and one displayed,
-    that can disagree. Full pass; the disagreement count is exact."""
+    """A display column and a keying column that CAN DISAGREE.
+
+    Two id columns from DIFFERENT registers (`CE-00076-76` vs
+    `ANRC-AHTNAI-00`) are not supposed to be string-equal, so comparing them
+    for equality measures the naming scheme, not the data - the first version
+    of this detector did exactly that and reported 790,003 "disagreements" in
+    `prime_contracts.csv` that were nothing of the kind.
+
+    What IS a disagreement is a broken FUNCTIONAL DEPENDENCY: one value of
+    the display column appearing against two or more distinct values of the
+    keying column, or the reverse. That is scheme-independent and it is the
+    thing that actually splits or merges an entity at the join. Blank on one
+    side and populated on the other is the second shape, and it is what
+    `attributed_flag` gating turns into a silent drop.
+    """
     out = []
     for p in paths:
         try:
@@ -1249,57 +1579,114 @@ def detect_C6(paths):
                 ia = {a: cols.index(a) for a, _ in pairs}
                 ib = {b: cols.index(b) for _, b in pairs}
                 n = 0
-                both = Counter()
-                disagree = Counter()
+                fwd = {pr: defaultdict(set) for pr in pairs}   # a -> {b}
+                rev = {pr: defaultdict(set) for pr in pairs}   # b -> {a}
+                rows_of = {pr: Counter() for pr in pairs}      # a -> rows
                 onlya = Counter()
                 onlyb = Counter()
-                examples = defaultdict(list)
                 for row in r:
                     n += 1
-                    for a, b in pairs:
-                        va = row[ia[a]] if ia[a] < len(row) else ""
-                        vb = row[ib[b]] if ib[b] < len(row) else ""
+                    for pr in pairs:
+                        a, b = pr
+                        va = row[ia[a]].strip() if ia[a] < len(row) else ""
+                        vb = row[ib[b]].strip() if ib[b] < len(row) else ""
                         if va and vb:
-                            both[(a, b)] += 1
-                            # a NAME vs an ID never compares directly; only
-                            # compare when both are id-shaped
-                            if IDCOL_RE.search(a) and IDCOL_RE.search(b):
-                                if va != vb:
-                                    disagree[(a, b)] += 1
-                                    if len(examples[(a, b)]) < 3:
-                                        examples[(a, b)].append((va, vb))
+                            fwd[pr][va].add(vb)
+                            rev[pr][vb].add(va)
+                            rows_of[pr][va] += 1
                         elif va and not vb:
-                            onlya[(a, b)] += 1
+                            onlya[pr] += 1
                         elif vb and not va:
-                            onlyb[(a, b)] += 1
+                            onlyb[pr] += 1
         except Exception as e:                                  # noqa: BLE001
             UNMEASURED.append((rel(p), repr(e)))
             continue
-        for a, b in pairs:
-            d = disagree[(a, b)]
-            oa, ob = onlya[(a, b)], onlyb[(a, b)]
-            if not (d or oa or ob):
+        for pr in pairs:
+            a, b = pr
+            split = {k: v for k, v in fwd[pr].items() if len(v) > 1}
+            merge = {k: v for k, v in rev[pr].items() if len(v) > 1}
+            split_rows = sum(rows_of[pr][k] for k in split)
+            oa, ob = onlya[pr], onlyb[pr]
+            if not (split or merge or oa or ob):
                 continue
+            bits = []
+            if split:
+                bits.append(f"{len(split):,} `{a}` value(s) map to 2+ "
+                            f"distinct `{b}` ({split_rows:,} rows)")
+            if merge:
+                bits.append(f"{len(merge):,} `{b}` value(s) map to 2+ "
+                            f"distinct `{a}`")
+            if oa:
+                bits.append(f"{oa:,} rows have `{a}` but a BLANK `{b}` - "
+                            f"published under a display identity that cannot "
+                            f"be joined")
+            if ob:
+                bits.append(f"{ob:,} rows have `{b}` but a BLANK `{a}`")
+            ex = []
+            for k, v in list(split.items())[:2]:
+                ex.append(f"{a}={k!r} -> {sorted(v)[:3]}")
+            for k, v in list(merge.items())[:2]:
+                ex.append(f"{b}={k!r} <- {sorted(v)[:3]}")
+            # RANKED ON THE DISAGREEMENT, NOT ON THE BLANKS. A blank key
+            # beside a populated display column is a COVERAGE fact (2.77M
+            # FAADS rows have a recipient name and no `cedar_uid`); a display
+            # value that maps to two different keys is a CORRECTNESS defect.
+            # Ranking them together buried the 17,280-row Ho-Chunk /
+            # Winnebago split under the coverage rows.
             out.append(F(
                 "C6", rel(p), 0,
-                f"`{a}` (display) and `{b}` (keyed on) coexist and do not "
-                f"agree on {d + oa + ob:,} of {n:,} rows: "
-                f"{d:,} differ, {oa:,} have `{a}` only, {ob:,} have `{b}` only",
-                size=d + oa + ob, unit="rows",
-                detail="; ".join(f"{x!r} vs {y!r}"
-                                 for x, y in examples[(a, b)])))
+                f"`{a}` (display) and `{b}` (keyed on) do not hold a 1:1 "
+                f"correspondence over {n:,} rows: " + "; ".join(bits),
+                size=split_rows, unit="rows split",
+                detail=" | ".join(ex) +
+                       (f"  || plus {oa:,} rows with a blank `{b}` and "
+                        f"{ob:,} with a blank `{a}` - coverage, not "
+                        f"correctness" if (oa or ob) else "")))
     return out
 
 
-TOKEN_METHOD_RE = re.compile(
-    r"(token|contain|substring|fuzzy|partial|cluster|namematch|name_match|"
-    r"loose|approx)", re.I)
+# ANCHORED token-match vocabulary. The first version searched for the
+# substrings `token|contain|...|approx` anywhere in any `*_basis` column, and
+# matched `Date_Basis='Approximate/first-pass date'` (a DATE approximation,
+# not a name match) and a 300-character prose summability note. A whole
+# delimiter-separated token must match, and prose values are excluded by
+# length.
+TOKEN_METHOD_TOKEN = re.compile(
+    r"^("
+    r"containment|core_containment|resolver_containment|deterministic_containment|"
+    r"ambiguous_containment.*|"
+    r"token|tokens|token_match|core_token_set(_plus_\w+)?|distinctive_token|"
+    r"\w*_token|token_\w*|"
+    r"contains_canonical|substring|substring_match|"
+    r"fuzzy|fuzzy_match|partial|partial_match|loose|loose_match|"
+    r"cluster_v\d+|namematch|name_match|\w*_namematch(_\w+)?|"
+    r"no_shared_token|not_a_name_match"
+    r")$", re.I)
+METHOD_COL_RE = re.compile(
+    r"(^|_)(method|match_method|match_type|matched_on|support|basis)$", re.I)
+TOKEN_SPLIT = re.compile(r"[;:+/,|]| - ")
+MAX_METHOD_LEN = 80
+
+
+def _token_method_hit(value):
+    """Return the matching token, or None. Whole tokens only."""
+    if not value or len(value) > MAX_METHOD_LEN:
+        return None
+    for tok in TOKEN_SPLIT.split(value):
+        tok = tok.strip()
+        if TOKEN_METHOD_TOKEN.match(tok):
+            return tok
+    return None
 
 
 def detect_C4(paths):
-    """One token of a multi-token hub name is not a name. Measures, per
-    table, rows whose attribution basis is a TOKEN/CONTAINMENT match, and the
-    dollars sitting on them."""
+    """One token of a multi-token hub name is not a name - $5.93B.
+    `BLUE TECH` on "blue"; `NASH HARBOR` on Match-e-be-nash-she-wish.
+
+    Counts DISTINCT ROWS, not column hits. The first version summed per
+    matching column and reported `26,361 of 12,764 rows` for `np_orgs.csv` -
+    a count larger than its own denominator.
+    """
     out = []
     for p in paths:
         try:
@@ -1310,44 +1697,47 @@ def detect_C4(paths):
                 except StopIteration:
                     continue
                 mcols = [i for i, c in enumerate(cols)
-                         if re.search(r"(^|_)(method|basis|match_method|"
-                                      r"match_type|matched_on|support)(_|$)",
-                                      c, re.I)]
-                money = [i for i, c in enumerate(cols) if MONEYCOL_RE.search(c)]
+                         if METHOD_COL_RE.search(c)]
                 if not mcols:
                     continue
-                mi = money[0] if money else None
+                mi = pick_money(cols)
+                mname = cols[mi] if mi is not None else None
                 n = 0
-                hits = Counter()
-                dollars = Counter()
+                hit_rows = 0
+                hit_dollars = 0.0
+                all_dollars = 0.0
+                seen = Counter()
                 for row in r:
                     n += 1
-                    amt = 0.0
-                    if mi is not None and mi < len(row):
-                        try:
-                            amt = float(row[mi].replace(",", "").replace(
-                                "$", "") or 0)
-                        except ValueError:
-                            amt = 0.0
+                    amt = _money(row[mi]) if (mi is not None and
+                                              mi < len(row)) else 0.0
+                    all_dollars += amt
+                    tok = None
                     for i in mcols:
-                        if i < len(row) and row[i] and \
-                                TOKEN_METHOD_RE.search(row[i]):
-                            hits[(cols[i], row[i])] += 1
-                            dollars[(cols[i], row[i])] += amt
+                        if i < len(row) and row[i]:
+                            t = _token_method_hit(row[i])
+                            if t:
+                                seen[(cols[i], row[i][:70])] += 1
+                                tok = tok or t
+                    if tok:
+                        hit_rows += 1
+                        hit_dollars += amt
         except Exception as e:                                  # noqa: BLE001
             UNMEASURED.append((rel(p), repr(e)))
             continue
-        if not hits:
+        if not hit_rows:
             continue
-        tot = sum(hits.values())
-        totd = sum(dollars.values())
-        top = sorted(hits.items(), key=lambda kv: -kv[1])[:4]
+        top = sorted(seen.items(), key=lambda kv: -kv[1])[:4]
         out.append(F(
             "C4", rel(p), 0,
-            f"{tot:,} of {n:,} rows are attributed by a TOKEN or CONTAINMENT "
-            f"method" + (f", carrying ${totd:,.0f}" if totd else ""),
-            size=int(totd) if totd else tot,
-            unit="dollars" if totd else "rows",
+            f"{hit_rows:,} of {n:,} rows ({100.0 * hit_rows / max(n, 1):.1f}%) "
+            f"are keyed by a TOKEN or CONTAINMENT match"
+            + (f", carrying ${hit_dollars:,.0f} of the table's "
+               f"${all_dollars:,.0f} in `{mname}` "
+               f"({100.0 * hit_dollars / all_dollars:.1f}%)"
+               if hit_dollars and all_dollars else ""),
+            size=int(hit_dollars) if hit_dollars else hit_rows,
+            unit="dollars" if hit_dollars else "rows",
             detail="; ".join(f"{c}={v!r} x{k:,}" for (c, v), k in top)))
     return out
 
@@ -1538,6 +1928,36 @@ def selftest():
         if not good:
             for f in p_res + n_res:
                 print(f"        {f.cls} {f.where} {f.what[:110]}")
+    # C12 - a whole-line marker duplicated inside ONE file. This detector
+    # returned 0 for a whole run because a patch tool wrote a literal
+    # BACKSPACE byte into its regex, and 0 looked exactly like "clean".
+    g = delegate_845()
+    if g is None:
+        print("  C12  UNMEASURED - 845 would not import")
+        ok = False
+    else:
+        import tempfile as _tf
+        d = Path(_tf.mkdtemp())
+        save_docs, save_cedar = DOCS, CEDAR
+        try:
+            (d / "x.md").write_text(
+                "<!-- BEGIN DUP -->\na\n<!-- END DUP -->\n"
+                "<!-- BEGIN DUP -->\nb\n<!-- END DUP -->\n", encoding="utf-8")
+            globals()["DOCS"] = d
+            globals()["CEDAR"] = d
+            pos12 = [f for f in detect_C12(g) if f.size >= 2]
+            (d / "x.md").write_text(
+                "<!-- BEGIN A -->\na\n<!-- END A -->\n"
+                "<!-- BEGIN B -->\nb\n<!-- END B -->\n", encoding="utf-8")
+            neg12 = [f for f in detect_C12(g) if f.size >= 2]
+        finally:
+            globals()["DOCS"] = save_docs
+            globals()["CEDAR"] = save_cedar
+        good = len(pos12) >= 1 and len(neg12) == 0
+        ok = ok and good
+        print(f"  C12  positive -> {len(pos12)} finding(s)   "
+              f"negative -> {len(neg12)} finding(s)   "
+              f"{'PASS' if good else '*** FAIL ***'}")
     print()
     return 0 if ok else 1
 
@@ -1560,6 +1980,13 @@ def run_code():
     c12 = detect_C12(m845)
     findings += c12
     print(f"  C12: {len(c12)} finding(s)   (markers, via 845.MARKER_RE)")
+    c12b = detect_C12b(mods)
+    findings += c12b
+    print(f"  C12b: {len(c12b)} finding(s)  (bare-number backup tags)")
+    c13 = detect_C13(m845)
+    findings += c13
+    print(f"  C13: {len(c13)} finding(s)   (delegated to 845; enforced by "
+          f"62 rule 17)")
     print(f"\ncode side done in {time.time() - t0:.1f}s")
     return findings
 
@@ -1596,7 +2023,11 @@ def report(findings, extra=None):
     print("\n" + "=" * 74)
     print("RANKED FINDINGS")
     print("=" * 74)
-    for cls in sorted(by, key=lambda c: (c[0], int(c[1:]))):
+    def _clsord(c):
+        m = re.match(r"^([A-Za-z]+)(\d+)([a-z]*)$", c)
+        return (m.group(1), int(m.group(2)), m.group(3)) if m else (c, 0, "")
+
+    for cls in sorted(by, key=_clsord):
         fs = sorted(by[cls], key=lambda f: -f.size)
         tot = sum(f.size for f in fs)
         unit = fs[0].unit if fs else ""

@@ -431,6 +431,48 @@ owns it. **A handle the register does not know is left BLANK and listed in
 
 ### What is still owed on the pull itself
 
+> **UPDATED 2026-09-02T15:55Z. The fold-in HAPPENED, and the blocker moved.**
+>
+> `121 append` ran at **12:09:09Z** and wrote *"76,859 existing + 10,318
+> appended = 87,177 rows, 71 columns (added [])"*, having verified all 76,859
+> pre-existing rows byte-identical on all 71 columns. `fy2023_q3` was
+> re-submitted and answered — **156,986 rows, retrieved 11:56:23Z** — so the
+> premise below ("`fy2023_q3` failed") is dead. The enrichers named at the end
+> of this section were then run: `910` (12:09Z), `911` (13:14Z), `871`.
+>
+> **The blocker is now `fy2023_q4`, and it is a header-only object, not a
+> failure.** Measured today:
+>
+> | | |
+> |---|---|
+> | token | `All_Subawards_2026-09-02_H02M36S11241136.zip`, submitted 02:36:11Z |
+> | server status | `finished`, `message: null` — **no error was reported** |
+> | server seconds | **80.1**, against 2,809–4,087 for its four sibling quarters |
+> | `rows_reported_by_server` | **0** |
+> | on disk | 1,889 bytes; contracts member **4,144 bytes**, assistance member **3,992 bytes**, one newline each |
+>
+> **4,144 bytes is the exact signature of the FY2020 empty contracts member**
+> this script was written to chase. The clean table shows the hole directly:
+> 2023-07 / 08 / 09 hold **14 / 24 / 23** subaward rows against 484–704 in every
+> neighbouring month. Zero is not credible as a fact about the world.
+>
+> **`staged()` was returning True for it**, because the record predates the code
+> that writes `_empty_object` at the download site, so `pull` would have skipped
+> it forever while `status` printed `finished`. The flag was set by hand from a
+> live `zip_data_rows()` measurement — not assumed — with the basis recorded in
+> `_state.json`, and `pull --only fy2023_q4 --sequential` then took the designed
+> re-submit-once path at **15:42:31Z**.
+>
+> **And `fy2022_q1..q4` have never been submitted at all.** `121 status` prints
+> `NOT SUBMITTED` for all four, and FY2022 still holds **89 countable rows /
+> $47,021,525**. The full-year `fy2022` job is a corpse (`failed`, *"An error
+> occurred."*, 221,865 rows reported before it died). That is the largest
+> remaining hole in this dataset and it is a straight four-quarter re-run of the
+> route that has now worked for eight quarters in a row.
+>
+> *The original paragraph follows; its reasoning about the schema guard is still
+> the reason the append could run at all.*
+
 **The FY2024 quarters were NOT folded in, and this is why.** `_state.json` shows
 `fy2024_q1..q4` all `finished` with local files (210,619 / 156,690 / 131,921 /
 195,021 rows) and `fy2023_q3` **failed**, so FY2023 is incomplete. More

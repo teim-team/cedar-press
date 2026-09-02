@@ -54,13 +54,14 @@ attributes.
 PERSONAL DATA
 -------------
 `Tribal_Leaders_Directory_new` and `PL102_477_Contracts` carry named
-individuals in their public role (a tribal chair, a BIA awarding officer's
-technical representative). Those rows are harvested - they are the
-publisher's own public directory - but the columns are stamped
-`publishable = N` in the codebook fragment, per PUBLICATION_POLICY's standing
-rule that a natural person's contact details are held and not shipped. The
-`email`, `phone`, `fax` and personal-name columns are written to
-`data/clean` and marked; the ship chain reads the mark.
+individuals in their public role - a tribal chair, a president. Those rows
+are harvested (it is the publisher's own public directory) but the personal
+columns are marked held-not-published in the codebook fragment, per
+PUBLICATION_POLICY's standing rule that a natural person's data is held apart
+from their public role. Measured 2026-09-02: `email_bia_aotr` on the 477
+table is `477PlanSubmission@bia.gov` on all 84 rows - a shared agency mailbox,
+not a person - and `first_name` / `last_name` / `title` there are the TRIBAL
+LEADER who signed the plan, not a BIA officer.
 
 RE-RUNNING
 ----------
@@ -103,26 +104,32 @@ PAUSE_S = 1.5
 LAYERS: list[dict] = [
     {"svc": "Hosted/BIA_Mineral_Acreage_Table",
      "stem": "resource_bia_mineral_acreage_tracts",
+     "inclusion_basis_detail": "Indian trust and restricted-fee mineral title held by the United States; the register exists only for Indian land (25 U.S.C. land titles and records)",
      "survey_count": 249165,
      "grain": "one row per (tract, resource, ownership type) as LTRO holds it"},
     {"svc": "Hosted/Tribal_Leaders_Directory_new",
      "stem": "bia_tribal_leaders_directory",
+     "inclusion_basis_detail": "the BIA Tribal Leaders Directory - a register of federally recognized tribal governments, Indian Country by construction",
      "survey_count": 587,
      "grain": "one row per tribal-leaders directory entry"},
     {"svc": "DivLTR/BIA_AIAN_National_LAR",
      "stem": "bia_aian_national_lar",
+     "inclusion_basis_detail": "federal Indian reservations and associated trust / restricted-fee / mixed-ownership land, as the BIA Division of Land Titles and Records defines them",
      "survey_count": 335,
      "grain": "one row per BIA Land Area Record"},
     {"svc": "BOGS/BIA_Office",
      "stem": "bia_offices",
+     "inclusion_basis_detail": "Bureau of Indian Affairs offices - the agency whose entire statutory remit is Indian Country",
      "survey_count": 93,
      "grain": "one row per BIA office"},
     {"svc": "Hosted/PL102_477_Contracts",
      "stem": "bia_pl102_477_plans",
+     "inclusion_basis_detail": "Public Law 102-477 tribal self-governance plan agreements; the programme is available only to tribes and tribal consortia",
      "survey_count": 84,
      "grain": "one row per PL 102-477 plan agreement"},
     {"svc": "Hosted/OFAPetitioners",
      "stem": "bia_ofa_petitioners",
+     "inclusion_basis_detail": "petitioners before the Office of Federal Acknowledgment under 25 CFR Part 83",
      "survey_count": 20,
      "grain": "one row per Office of Federal Acknowledgment petitioner"},
 ]
@@ -263,7 +270,15 @@ def cmd_pull(refetch: bool = False) -> int:
 
 
 def _iso_from_epoch_ms(v):
-    if v in (None, ""):
+    """Epoch ms -> ISO date. `0` is a SENTINEL, not 1970-01-01.
+
+    Measured 2026-09-02: `inactivated_date` is `0` on all 249,165 mineral
+    acreage rows. Rendering that as `1970-01-01` would have put a real-looking
+    date on every row of the largest table Cedar has ever taken, and a
+    consumer filtering "inactivated before 2000" would have got the whole
+    file. A sentinel that renders as a plausible value is worse than a blank.
+    """
+    if v in (None, "", 0, "0"):
         return ""
     try:
         return datetime.fromtimestamp(int(v) / 1000, tz=timezone.utc).date().isoformat()
@@ -291,7 +306,8 @@ def cmd_build() -> int:
         header = (cols
                   + [c + "_iso" for c in date_cols]
                   + ["source_url", "source_service_path", "retrieved_at",
-                     "source_id", "population_basis"])
+                     "source_id", "population_basis", "inclusion_basis",
+                     "inclusion_basis_detail"])
         out = CLEAN / f"{L['stem']}.csv"
         tmp = out.with_suffix(".csv.part")
         with tmp.open("w", encoding="utf-8", newline="") as fh:
@@ -302,7 +318,8 @@ def cmd_build() -> int:
                 row = [a.get(c, "") if a.get(c) is not None else "" for c in cols]
                 row += [_iso_from_epoch_ms(a.get(c)) for c in date_cols]
                 row += [d["source_url"], d["service_path"], d["retrieved_at"],
-                        "bia_biamaps_arcgis", "TYPE_FILTER"]
+                        "bia_biamaps_arcgis", "TYPE_FILTER",
+                        "program_authority", L["inclusion_basis_detail"]]
                 w.writerow(row)
         tmp.replace(out)
         # Re-read what was written, and reconcile against the manifest. A

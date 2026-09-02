@@ -30,7 +30,23 @@ re-pull for the other 79.6%. See `contractors` #2.
 
 ---
 > **GAMING-DENOMINATOR-2026-09-02 — the gaming denominator, re-derived from the live files.**
-> `gaming_facilities.csv` holds 787 ROWS. That is not a facility count and must not be a denominator. 7 of them are placeholders whose `facility_name` is literally `No casino`, recording that a nation operates none. 56 duplicate groups sit in `review/gaming_facility_duplicate_candidates_2026-09-02.csv`: 52 are same-tribe (`LIKELY_SAME_PROPERTY`) and hold 53 rows beyond one each, so collapsing them gives 787 - 53 = **734**; the other 4 are `DIFFERENT_TRIBES_CHECK_BOTH` and at least one of those - Stables Casino, Miami Tribe with Modoc Nation - is a JOINT OPERATION, not a duplicate. No verdict is applied: `duplicate_of_facility_id` is populated on 10 rows, not 53. So the honest range is **734 to 780** and the single thing every consumer must stop doing is dividing by 787 - it inflates the denominator by 7.2% and understates every coverage percentage in the gaming dataset by about 6.7%.
+> **`gaming_facilities.csv` holds 787 ROWS, and a row is not a facility.** The ladder, owned and gated by `code/846_session_audit.py::_denom`:
+> 
+> ```
+> 787   rows in gaming_facilities.csv
+> -16   whose NAME says no casino - 7 exactly "No casino", plus 9 more like
+>       "Grand Canyon West - no casino", "Tribal admin only - no casino"
+> =771   facility rows
+> -57   extra rows across the same-tribe duplicate groups
+> =714   distinct properties
+> ```
+> 
+> **FIVE denominators circulated on 2026-09-02 and all five were quoted as settled: 787, 780, 734, 727, 714.** Each came from a different definition of "facility" and none said which. 787 is raw rows; 780 removes only the 7 EXACT placeholders and misses the 9 that say it in a longer name; 734 is 787 minus duplicates with every placeholder left in; 727 is 780 minus a duplicate count of 53. **None of them is wrong about the piece it measured, and four of them are wrong as a denominator.** No verdict is applied in the table itself - `duplicate_of_facility_id` is populated on 10 rows, not 57 - so 714 is a measurement, not a state of the file. Note also that the duplicate register carries `DIFFERENT_TRIBES_CHECK_BOTH` groups that are **not** duplicates: Stables Casino pairs the Miami Tribe with Modoc Nation, which is a joint operation. Dividing by 787 inflates the denominator by 10.2% and understates every gaming coverage percentage by about 9.3%.
+>
+> Authority: `code/846_session_audit.py::_denom`, which gates this ladder.
+> Re-derive rather than quote: `py -3 code/1116_ruling_propagation_2026_09_02.py derive`.
+> `py -3 code/1116_ruling_propagation_2026_09_02.py verify` exits 1 while any
+> document in `docs/` or `review/` still states a superseded figure unmarked.
 >
 > Re-derive rather than quote: `py -3 code/1116_ruling_propagation_2026_09_02.py derive`.
 > `py -3 code/1116_ruling_propagation_2026_09_02.py verify` exits 1 while any
@@ -184,7 +200,7 @@ plurality belongs to the 346 rows that are `publishable = N` and never ship.
 
 Honourable mention, already known and correctly diagnosed elsewhere: the
 gaming sample's `property_status = current` beside `close_date = 2006-04`.
-113 of 787 facilities are in that state and every one is factually right. The
+113 of 787 rows are in that state and every one is factually right. The
 sample is where a reader learns that one column cannot say it.
 
 ---
@@ -311,7 +327,7 @@ Per-facility gross gaming revenue is `SOURCE_DOES_NOT_PUBLISH`: NIGC publishes
 regional GGR and revenue bands, never per-operation, and five states seal
 per-tribe revenue by statute or compact. **Cedar answered that correctly and
 then hid the answer.** `gaming_revenue_bounds.csv` holds **13,803 bound rows
-covering 694 of the 787 facilities (88%)**, with lower bound, upper bound,
+covering 694 of the 787 rows (88% of rows; against 714 distinct properties the reach is not 694 and must be re-derived)**, with lower bound, upper bound,
 basis and assumption note. `nigc_regional_ggr.csv` (198 rows),
 `nigc_revenue_bands.csv`, `ca_gaming_payments.csv`, `fl_gaming_payments.csv`
 and `digital_gaming_revenue.csv` (10,661 rows) are all on disk. The sample and
@@ -729,7 +745,7 @@ Ranked by buyer impact per unit of work. All twelve are `ON_DISK_NOT_PROMOTED`.
 | 3 | `nonprofits` | show `funnel_stage` + `evidence` beside `classification_ruling`, or populate the ruling | 4,651 excluded rows read UNRULED |
 | 4 | `lobbying` | add `spend_reported_usd`, `issue_codes`, `government_entities_lobbied` | $645.1M, 405, 388 |
 | 5 | `subcontracting` | add `description`, `prime_award_amount`; swap tribe handle → `cedar_uid` | 76,813 / 73,057 / 33,503 |
-| 6 | `gaming` | join `gaming_revenue_bounds` and ordinance class onto the facility | 694 of 787 facilities; 263 of 284 tribes |
+| 6 | `gaming` | join `gaming_revenue_bounds` and ordinance class onto the facility | 694 of 787 rows; 263 of 284 tribes |
 | 7 | `legislation` | join `native_bills.title` and `.outcome` on `bill_id` | DONE — 398 of 423 titles (was 390; `code/890` made the join, `code/1092` closed the last 8) |
 | 8 | `contractors` | promote 6-digit `naics_code` + `action_date` from the archive extract | 904,282 rows already local |
 | 9 | `funding` | add `cedar_uid` and `recipient_uei`; rebuild `canonical_name` from the register | 552,602 / 668,347; 341,486 drifted |

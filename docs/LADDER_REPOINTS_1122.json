@@ -1,0 +1,293 @@
+{
+  "script": "1122_ladder_repoints.py",
+  "date": "2026-09-02",
+  "method": "ladder_1122",
+  "n_rulings": 35,
+  "n_confirmed": 1,
+  "prime_contracts.csv": {
+    "rows": 1217768,
+    "cols": 75,
+    "rows_repointed": 3771,
+    "rows_withdrawn": 1757,
+    "money_before": {
+      "total_obligations": 310005258660.76,
+      "total_award_value": 5625791120829.37,
+      "total_obligations_real2025": 384984370260.79,
+      "total_award_value_real2025": 6580181965310.99
+    },
+    "money_after": {
+      "total_obligations": 310005258660.76,
+      "total_award_value": 5625791120829.37,
+      "total_obligations_real2025": 384984370260.79,
+      "total_award_value_real2025": 6580181965310.99
+    },
+    "per_identifier": {
+      "UEI:HLTFBD3FTDG8": {
+        "action": "REPOINT",
+        "from": "CE-0014G-RS",
+        "to": "CE-001CA-W3",
+        "rows": 285,
+        "obligations": 3552566.96
+      },
+      "UEI:TT6AZ3TPBVW3": {
+        "action": "WITHDRAW",
+        "from": "CE-0006R-ER",
+        "to": "",
+        "rows": 1757,
+        "obligations": 450452958.06
+      },
+      "CAGE:5XMJ1": {
+        "action": "REPOINT",
+        "from": "CE-0002C-JC",
+        "to": "CE-000T2-EJ",
+        "rows": 469,
+        "obligations": 351042308.08
+      },
+      "CAGE:821D8": {
+        "action": "REPOINT",
+        "from": "CE-001DB-7C",
+        "to": "CE-001AC-YN",
+        "rows": 668,
+        "obligations": 549806242.67
+      },
+      "UEI:WTJEFSM3P945": {
+        "action": "REPOINT",
+        "from": "CE-0002B-CK",
+        "to": "CE-00078-KR",
+        "rows": 2260,
+        "obligations": 480272641.51
+      },
+      "CAGE:9T4F3": {
+        "action": "REPOINT",
+        "from": "CE-00130-KS",
+        "to": "CE-0014A-M3",
+        "rows": 59,
+        "obligations": 10288739.82
+      },
+      "CAGE:9TPM7": {
+        "action": "REPOINT",
+        "from": "CE-00130-KS",
+        "to": "CE-0014A-M3",
+        "rows": 9,
+        "obligations": 1039912.99
+      },
+      "CAGE:12ED2": {
+        "action": "REPOINT",
+        "from": "CE-00130-KS",
+        "to": "CE-0014A-M3",
+        "rows": 11,
+        "obligations": 35881154.6
+      },
+      "CAGE:19CW8": {
+        "action": "REPOINT",
+        "from": "CE-00130-KS",
+        "to": "CE-0014A-M3",
+        "rows": 1,
+        "obligations": 624000.0
+      },
+      "CAGE:11XN9": {
+        "action": "REPOINT",
+        "from": "CE-00130-KS",
+        "to": "CE-0014A-M3",
+        "rows": 2,
+        "obligations": 500.0
+      },
+      "UEI:LWRAHAFNKQ13": {
+        "action": "REPOINT",
+        "from": "CE-0019J-XV",
+        "to": "CE-0014E-C7",
+        "rows": 7,
+        "obligations": 51336.0
+      }
+    }
+  },
+  "prime_contracts_awards.csv": {
+    "rows": 455080,
+    "cols": 31,
+    "rows_repointed": 425,
+    "rows_withdrawn": 223,
+    "money_before": {},
+    "money_after": {},
+    "per_identifier": {
+      "UEI:HLTFBD3FTDG8": {
+        "action": "REPOINT",
+        "from": "CE-0014G-RS",
+        "to": "CE-001CA-W3",
+        "rows": 184,
+        "obligations": 0.0
+      },
+      "UEI:TT6AZ3TPBVW3": {
+        "action": "WITHDRAW",
+        "from": "CE-0006R-ER",
+        "to": "",
+        "rows": 223,
+        "obligations": 0.0
+      },
+      "CAGE:5XMJ1": {
+        "action": "REPOINT",
+        "from": "CE-0002C-JC",
+        "to": "CE-000T2-EJ",
+        "rows": 34,
+        "obligations": 0.0
+      },
+      "CAGE:821D8": {
+        "action": "REPOINT",
+        "from": "CE-001DB-7C",
+        "to": "CE-001AC-YN",
+        "rows": 89,
+        "obligations": 0.0
+      },
+      "UEI:WTJEFSM3P945": {
+        "action": "REPOINT",
+        "from": "CE-0002B-CK",
+        "to": "CE-00078-KR",
+        "rows": 79,
+        "obligations": 0.0
+      },
+      "CAGE:9T4F3": {
+        "action": "REPOINT",
+        "from": "CE-00130-KS",
+        "to": "CE-0014A-M3",
+        "rows": 28,
+        "obligations": 0.0
+      },
+      "CAGE:9TPM7": {
+        "action": "REPOINT",
+        "from": "CE-00130-KS",
+        "to": "CE-0014A-M3",
+        "rows": 3,
+        "obligations": 0.0
+      },
+      "CAGE:12ED2": {
+        "action": "REPOINT",
+        "from": "CE-00130-KS",
+        "to": "CE-0014A-M3",
+        "rows": 1,
+        "obligations": 0.0
+      },
+      "CAGE:19CW8": {
+        "action": "REPOINT",
+        "from": "CE-00130-KS",
+        "to": "CE-0014A-M3",
+        "rows": 1,
+        "obligations": 0.0
+      },
+      "CAGE:11XN9": {
+        "action": "REPOINT",
+        "from": "CE-00130-KS",
+        "to": "CE-0014A-M3",
+        "rows": 2,
+        "obligations": 0.0
+      },
+      "UEI:LWRAHAFNKQ13": {
+        "action": "REPOINT",
+        "from": "CE-0019J-XV",
+        "to": "CE-0014E-C7",
+        "rows": 4,
+        "obligations": 0.0
+      }
+    }
+  },
+  "prime_contracts_published.csv": {
+    "rows": 455080,
+    "cols": 25,
+    "rows_repointed": 425,
+    "rows_withdrawn": 223,
+    "money_before": {},
+    "money_after": {},
+    "per_identifier": {
+      "UEI:HLTFBD3FTDG8": {
+        "action": "REPOINT",
+        "from": "CE-0014G-RS",
+        "to": "CE-001CA-W3",
+        "rows": 184,
+        "obligations": 0.0
+      },
+      "UEI:TT6AZ3TPBVW3": {
+        "action": "WITHDRAW",
+        "from": "CE-0006R-ER",
+        "to": "",
+        "rows": 223,
+        "obligations": 0.0
+      },
+      "CAGE:5XMJ1": {
+        "action": "REPOINT",
+        "from": "CE-0002C-JC",
+        "to": "CE-000T2-EJ",
+        "rows": 34,
+        "obligations": 0.0
+      },
+      "CAGE:821D8": {
+        "action": "REPOINT",
+        "from": "CE-001DB-7C",
+        "to": "CE-001AC-YN",
+        "rows": 89,
+        "obligations": 0.0
+      },
+      "UEI:WTJEFSM3P945": {
+        "action": "REPOINT",
+        "from": "CE-0002B-CK",
+        "to": "CE-00078-KR",
+        "rows": 79,
+        "obligations": 0.0
+      },
+      "CAGE:9T4F3": {
+        "action": "REPOINT",
+        "from": "CE-00130-KS",
+        "to": "CE-0014A-M3",
+        "rows": 28,
+        "obligations": 0.0
+      },
+      "CAGE:9TPM7": {
+        "action": "REPOINT",
+        "from": "CE-00130-KS",
+        "to": "CE-0014A-M3",
+        "rows": 3,
+        "obligations": 0.0
+      },
+      "CAGE:12ED2": {
+        "action": "REPOINT",
+        "from": "CE-00130-KS",
+        "to": "CE-0014A-M3",
+        "rows": 1,
+        "obligations": 0.0
+      },
+      "CAGE:19CW8": {
+        "action": "REPOINT",
+        "from": "CE-00130-KS",
+        "to": "CE-0014A-M3",
+        "rows": 1,
+        "obligations": 0.0
+      },
+      "CAGE:11XN9": {
+        "action": "REPOINT",
+        "from": "CE-00130-KS",
+        "to": "CE-0014A-M3",
+        "rows": 2,
+        "obligations": 0.0
+      },
+      "UEI:LWRAHAFNKQ13": {
+        "action": "REPOINT",
+        "from": "CE-0019J-XV",
+        "to": "CE-0014E-C7",
+        "rows": 4,
+        "obligations": 0.0
+      }
+    }
+  },
+  "cedar_identifier_ledger_final.csv": {
+    "rows": 20577,
+    "cols": 29,
+    "ledger_rows_touched": 36
+  },
+  "cedar_identifier_ledger_tiered.csv": {
+    "rows": 19232,
+    "cols": 22,
+    "ledger_rows_touched": 36
+  },
+  "cedar_identifier_ledger.csv": {
+    "rows": 19232,
+    "cols": 14,
+    "ledger_rows_touched": 36
+  }
+}

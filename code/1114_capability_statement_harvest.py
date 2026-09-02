@@ -100,6 +100,11 @@ SURFACES = STAGE / "surfaces_found.csv"
 COVERAGE = STAGE / "coverage_1114.csv"
 REFUSALS = STAGE / "refusals_1114.csv"
 SUMMARY = STAGE / "run_summary.json"
+# Spools. The run APPENDS here (O(1) per entity); `build` renders the CSVs.
+# The first cut read-modify-wrote the whole findings CSV per entity, which
+# is O(n^2) and would have spent minutes of the run rewriting 50k surfaces.
+FINDINGS_SPOOL = STAGE / "identifier_findings.jsonl"
+SURFACES_SPOOL = STAGE / "surfaces_found.jsonl"
 
 BUILT_BY = "1114_capability_statement_harvest.py"
 TODAY = time.strftime("%Y-%m-%d")
@@ -123,8 +128,13 @@ BROWSER_HEADERS = {
 }
 
 # Anthropic's crawler tokens are the names publishers actually write.
+# CCBot is Common Crawl and was in this tuple for the first 47 hosts of the
+# 2026-09-02 run. It is NOT a name that means us, and it wrongly recorded four
+# hosts as refusing this agent (omtribe.org, sokaogonchippewa.com,
+# wildhorseresort.com, ukb-nsn.gov). Removed, and those four were re-run. An
+# over-broad refusal is still a check that is not measuring its own name.
 AGENT_TOKENS = ("ClaudeBot", "anthropic-ai", "Claude-User",
-                "Claude-SearchBot", "Claude-Web", "CCBot", "*")
+                "Claude-SearchBot", "Claude-Web", "*")
 
 PER_HOST_DELAY = 1.1          # seconds between requests to ONE host
 TIMEOUT = 25
@@ -167,6 +177,16 @@ RELEASED_HOSTS = {
 }
 RELEASED_BASIS = ("owner ruling 2026-09-02, docs/PUBLICATION_POLICY.md "
                   "TERMS-OWNER-RULING-2026-09-02")
+# Two of the eight named hosts are not any entity's mapped url in
+# cedar_web_map.csv - akima.com is NANA's operating group and
+# chickasawbusinessnetwork.com is the Chickasaw Nation's business portal - so
+# they would never be reached by walking the map. Bound to their owner by hand,
+# with the owner named rather than inferred.
+RELEASED_HOST_OWNERS = {
+    "akima.com": "CE-0007G-30",                     # NANA Regional Corporation
+    "chickasawbusinessnetwork.com": "CE-00135-HP",  # The Chickasaw Nation
+    "umatilla.nsn.us": "",                          # resolved from the map
+}
 
 # ---------------------------------------------------------------------------
 # VOCABULARY. Two families, recorded separately - a search built from the
@@ -467,6 +487,32 @@ DEAD_URL_TYPES = {"none_established", "no_own_site_found", "parked_domain",
 PREVIOUSLY_REFUSED_TYPES = {"TERMS_RESTRICTED_DO_NOT_HARVEST",
                             "government_refused_robots",
                             "government_blocked_bot_protection"}
+# THE ENTITY'S OWN SITE, NOT A RECORD ABOUT IT. A capability statement is a
+# SECOND, INDEPENDENT evidence family only if the entity published it. A
+# ProPublica 990 page, or a Wayback capture of a federal roster, is the SAME
+# evidence family Cedar already holds, and harvesting it would book a
+# corroboration that does not exist - docs/ASSERTION_LAYER.md: copying a source
+# into your own table does not corroborate it. The first cut of this worklist
+# put projects.propublica.org and web.archive.org in as entity "hosts";
+# excluded here by url_type AND by host.
+OWN_SITE_TYPES = ["government", "corporate", "organization", "institution",
+                  "tribal_council", "consortium", "casino", "gaming_authority",
+                  "newsletter", "tero", "subsidiary_list", "press_release",
+                  "membership_list", "procurement", "business_licence"]
+THIRD_PARTY_TYPES = {"form_990", "regulator_record", "recognition_record",
+                     "directory_profile", "annual_report", "certification",
+                     "shareholder", "policy_agenda", "leadership"}
+THIRD_PARTY_HOSTS = {
+    "projects.propublica.org", "www.propublica.org", "web.archive.org",
+    "apps.irs.gov", "www.irs.gov", "sam.gov", "www.sam.gov",
+    "usaspending.gov", "www.usaspending.gov",
+    "www.guidestar.org", "guidestar.org", "www.causeiq.com", "causeiq.com",
+    "nonprofitlight.com", "www.bia.gov", "bia.gov",
+    "www.federalregister.gov", "www.nigc.gov", "nigc.gov",
+    "www.500nations.com", "en.wikipedia.org",
+    "www.facebook.com", "facebook.com", "www.linkedin.com", "linkedin.com",
+    "twitter.com", "x.com",
+}
 
 
 def host_of(u):
@@ -497,14 +543,26 @@ def build_worklist():
             mr_surface.setdefault(u, []).append(t)
         if t in PREVIOUSLY_REFUSED_TYPES and host_of(url):
             refused_hosts.setdefault(u, set()).add(host_of(url))
-        if t in DEAD_URL_TYPES:
-            continue
-        if st.startswith("2") and url and u not in best_url:
-            best_url[u] = url
-    for r in webmap:                       # second pass: any non-dead url
-        u, t, url = r["cedar_uid"], r["url_type"], r["url"]
-        if u not in best_url and url and t not in DEAD_URL_TYPES \
-                and not t.startswith("failed_"):
+
+    # Preference order: an own-site url_type that answered 2xx, then any
+    # own-site url_type. Never a third-party record about the entity.
+    def own_site(r):
+        t = r["url_type"]
+        return (t in OWN_SITE_TYPES and t not in THIRD_PARTY_TYPES
+                and t not in DEAD_URL_TYPES
+                and not t.startswith("failed_")
+                and not t.startswith("unverified_")
+                and host_of(r["url"]) not in THIRD_PARTY_HOSTS)
+    rank = dict((t, i) for i, t in enumerate(OWN_SITE_TYPES))
+    own = sorted((x for x in webmap if own_site(x)),
+                 key=lambda x: rank.get(x["url_type"], 99))
+    for want_2xx in (True, False):
+        for r in own:
+            u, url = r["cedar_uid"], r["url"]
+            if not url or u in best_url:
+                continue
+            if want_2xx and not (r.get("http_status") or "").strip().startswith("2"):
+                continue
             best_url[u] = url
 
     by_uid = {}
@@ -532,6 +590,43 @@ def build_worklist():
             jobs.append("identifiers")
         if ent["entity_class"] in JOB_CLASSES_INSTITUTION and url:
             jobs.append("institutions")
+        # A RELEASED HOST IS PROBED AS ITSELF, not as whatever the web map
+        # happened to rank first. Colville's best 2xx url is
+        # colvillecasinos.com and CTUIR's is wildhorseresort.com, so probing
+        # only `best_url` would have skipped colvilletribes.com and ctuir.org -
+        # the two hosts the ruling actually names. Each released or
+        # previously-refused host gets its own row; the run dedupes on
+        # (cedar_uid, host), not on cedar_uid.
+        extra_hosts = sorted(set(refused) | set(
+            h for h in RELEASED_HOSTS
+            if h == host or (host and host.endswith("." + h))
+            or h.replace("www.", "", 1) == host.replace("www.", "", 1)
+            or RELEASED_HOST_OWNERS.get(h) == uid))
+        for xh in extra_hosts:
+            if xh == host:
+                continue
+            rows.append({
+                "cedar_uid": uid, "tribe_id": ent.get("tribe_id", ""),
+                "canonical_name": ent["canonical_name"],
+                "entity_class": ent["entity_class"],
+                "state": ent.get("state", ""), "jobs": "released",
+                "url": "https://" + xh + "/", "host": xh,
+                "previously_refused_hosts": "|".join(refused),
+                "released_host": "Y", "released_basis": RELEASED_BASIS,
+                "identifiers_held": "|".join(held),
+                "machine_readable_surface": "",
+                "contamination_flags": "Y" if contam else "N",
+                "prior_identifiers_outcome":
+                    cells.get("identifiers", {}).get("outcome", "NEVER_CHECKED"),
+                "built_by": BUILT_BY, "built_date": TODAY})
+        if not host and refused:
+            # The ruling releases the previously-refused host itself, and an
+            # entity whose ONLY mapped url_type is a refusal state (Ely
+            # Shoshone, Penobscot) otherwise drops out of the worklist
+            # entirely. Probe it: if the refusal is a named-agent robots ban it
+            # is re-confirmed with today's date, which is a finding, not an
+            # absence.
+            host, url = refused[0], "https://" + refused[0] + "/"
         if not jobs or not host:
             continue
         rows.append({
@@ -742,10 +837,22 @@ def probe_entity(job):
     rec["identity_verdict"] = v
     rec["identity_marker"] = marker
     rec["identity_note"] = inote
-    if v in ("DOMAIN_NOT_THE_ENTITY", "INTERSTITIAL_NOT_THE_SITE"):
+    # A PUBLISHER-STATED URL IS EXEMPT FROM THE NAME CHECK, AND SHOULD BE.
+    # The circular-evidence rule is about GUESSED domains. A host the owner's
+    # ruling names by name, or one the entity itself filed, is an assertion by
+    # the publisher. nana.com is NANA Regional Corporation's own site and its
+    # homepage carries no class marker at all; gating on that would record the
+    # released host as "not the entity". The verdict is still RECORDED so a
+    # later gate can read it back - it just does not stop the probe.
+    identity_exempt = rec["released_host"] == "Y"
+    if v == "INTERSTITIAL_NOT_THE_SITE" or (
+            v == "DOMAIN_NOT_THE_ENTITY" and not identity_exempt):
         rec["outcome_note"] = "identity: " + inote
         rec["requests"] = hs.n
         return rec, findings, surfaces, docs
+    if v == "DOMAIN_NOT_THE_ENTITY":
+        rec["identity_note"] = (inote + " | NOT GATED: publisher-stated host, "
+                                        "released by the 2026-09-02 ruling")
 
     root = hs.root
     cands = {}
@@ -883,10 +990,17 @@ def probe_entity(job):
                          "built_by": BUILT_BY})
 
     # 5 - fetch the candidates, CAP first. Hash every object.
-    order = ([u for u, t in cands.items() if t[0] == "CAP"]
-             + [u for u, t in cands.items() if t[0] == "BIZ"])
+    # Never spend the document budget on an image: `small business` is in the
+    # capability vocabulary and `Small-Business-Coaching-Flyer.jpg` matched it.
+    fetchable = dict((u, t) for u, t in cands.items()
+                     if not NON_DOCUMENT_EXT.search(u))
+    order = ([u for u, t in fetchable.items() if t[0] == "CAP"]
+             + [u for u, t in fetchable.items() if t[0] == "BIZ"])
+    # A released host is the point of the pass and gets a wider document
+    # budget; every other host stays at the polite default.
+    doc_cap = 30 if rec["released_host"] == "Y" else MAX_DOCS_PER_HOST
     md5s = set()
-    for u in order[:MAX_DOCS_PER_HOST]:
+    for u in order[:doc_cap]:
         r = hs.get(u, stream=True)
         if r is None:
             continue
@@ -904,6 +1018,8 @@ def probe_entity(job):
             continue
         md5 = hashlib.md5(blob).hexdigest()
         ctype = (r.headers.get("Content-Type") or "").split(";")[0].lower()
+        if ctype.startswith(("image/", "video/", "audio/", "font/")):
+            continue          # never a capability statement; not counted
         rec["docs_fetched"] += 1
         md5s.add(md5)
         docs.append({"cedar_uid": ent["cedar_uid"], "host": host, "url": u,
@@ -934,9 +1050,12 @@ def run(job_name, limit=None, workers=6, only_hosts=None):
     rows = read_csv(WORKLIST)
     if not rows:
         rows = build_worklist()
-    done = set(r["cedar_uid"] for r in read_jsonl(HOSTLOG))
+    # Dedupe on (entity, host): one entity can legitimately have two hosts -
+    # a tribal government site and the released host the ruling names.
+    done = set((r["cedar_uid"], r.get("host", ""))
+               for r in read_jsonl(HOSTLOG))
     jobs = [r for r in rows if job_name in r["jobs"].split("|")
-            and r["cedar_uid"] not in done]
+            and (r["cedar_uid"], r["host"]) not in done]
     if only_hosts:
         jobs = [r for r in jobs if r["host"] in only_hosts]
     if limit:
@@ -958,21 +1077,186 @@ def run(job_name, limit=None, workers=6, only_hosts=None):
             if b:
                 nxt.append(b)
         buckets = nxt
+    # FLUSH PER ENTITY, AS COMPLETED. `ex.map` yields IN ORDER, so a result
+    # finished by worker 8 sits unwritten in memory until worker 1's straggler
+    # returns - and a kill loses every one of them. Measured on the first
+    # attempt at this run: 66 rows on disk while the pool had done far more.
+    # An interruption must not lose work that succeeded.
+    from concurrent.futures import as_completed
+    pending, n = {}, 0
     with ThreadPoolExecutor(max_workers=workers) as ex:
-        for i, (rec, finds, surfs, docs) in enumerate(
-                ex.map(probe_entity, ordered), 1):
+        for j in ordered:
+            pending[ex.submit(probe_entity, j)] = j
+        for fut in as_completed(pending):
+            n += 1
+            try:
+                rec, finds, surfs, docs = fut.result()
+            except Exception as exc:               # one host must not stop the run
+                j = pending[fut]
+                rec = {"cedar_uid": j["cedar_uid"],
+                       "canonical_name": j["canonical_name"],
+                       "entity_class": j["entity_class"], "jobs": j["jobs"],
+                       "host": j["host"], "released_host":
+                           j.get("released_host", "N"),
+                       "reached": "N", "reach_route": "", "http_status": "",
+                       "robots_note": "", "robots_refused_token": "",
+                       "identity_verdict": "", "identity_marker": "",
+                       "identity_note": "", "wp": "N", "media_total": 0,
+                       "media_scanned": 0, "cpts": [], "sitemap_urls": 0,
+                       "search_hits": 0, "cap_surfaces": [],
+                       "biz_surfaces": [], "docs_fetched": 0,
+                       "docs_distinct_md5": 0, "identifiers_found": 0,
+                       "requests": 0, "routes_run": {},
+                       "outcome_note": "probe raised %s: %s"
+                                       % (type(exc).__name__, exc),
+                       "checked_date": TODAY, "built_by": BUILT_BY}
+                finds, surfs, docs = [], [], []
             append_jsonl(HOSTLOG, rec)
             for d in docs:
                 append_jsonl(DOCLOG, d)
-            if finds or surfs:
-                with _lock:
-                    _append_rows(FINDINGS, finds)
-                    _append_rows(SURFACES, surfs)
-            if i % 10 == 0 or i == len(ordered):
+            for f in finds:
+                append_jsonl(FINDINGS_SPOOL, f)
+            for sf in surfs:
+                append_jsonl(SURFACES_SPOOL, sf)
+            if n % 25 == 0 or n == len(ordered):
                 print("   %d/%d  %-38s reached=%s ids=%d cap=%d"
-                      % (i, len(ordered), rec["canonical_name"][:38],
+                      % (n, len(ordered), rec["canonical_name"][:38],
                          rec["reached"], rec["identifiers_found"],
-                         len(rec["cap_surfaces"])))
+                         len(rec["cap_surfaces"])), flush=True)
+
+
+# ===========================================================================
+# HARVEST - a SECOND pass over the surfaces the first pass RECORDED.
+#
+# Why a second pass rather than a wider first one. The enumeration (robots,
+# reach ladder, media index, custom post types, REST search, sitemaps) is the
+# expensive part and it is already on disk in surfaces_found.jsonl. The
+# document budget is what was spent badly: measured at 333 hosts, the CAP
+# candidate list was topped by `Small-Business-Coaching-Flyer-768x994-1.jpg`,
+# because `small business` is in the capability vocabulary and an image in
+# wp-content matches it. Fourteen fetches per host went to JPEGs that cannot
+# carry a CAGE. This pass re-ranks the SAME candidates - strong identifier
+# vocabulary first, images and stylesheets never - and fetches only what the
+# first pass did not.
+# ===========================================================================
+NON_DOCUMENT_EXT = re.compile(
+    r"(?i)\.(jpe?g|png|gif|webp|svg|ico|bmp|tiff?|mp[34]|m4[av]|mov|avi|wmv"
+    r"|css|js|woff2?|ttf|eot|zip|gz|dmg|exe|psd|ai|eps)(\?|$)")
+# Strong: the identifier itself, or the document that carries it. Weak:
+# programme vocabulary that a flyer, a news post or a workshop page also uses.
+CAP_STRONG = re.compile(
+    r"(?i)(capabilit(?:y|ies)[\s_\-]*statement|cage|\buei\b|unique[\s_\-]*entity"
+    r"|\bduns\b|\bnaics\b|sam\.gov|sam[\s_\-]*registration|8\(a\)|8a[\s_\-]*cert"
+    r"|gsa[\s_\-]*schedule|contract[\s_\-]*vehicle|hubzone|socioeconomic"
+    r"|government[\s_\-]*contract|federal[\s_\-]*contract|past[\s_\-]*performance"
+    r"|doing[\s_\-]*business[\s_\-]*with|capabilit(?:y|ies))")
+
+
+def harvest(limit_per_entity=12, workers=10, only_job=None):
+    surfs = read_jsonl(SURFACES_SPOOL) + read_csv(SURFACES)
+    if not surfs:
+        print("no recorded surfaces - run first")
+        return
+    already = set(d["url"] for d in read_jsonl(DOCLOG))
+    hostrec = dict((h["cedar_uid"], h) for h in read_jsonl(HOSTLOG))
+    wl = dict((r["cedar_uid"], r) for r in read_csv(WORKLIST))
+
+    by_ent = {}
+    for s in surfs:
+        u = s["surface_url"]
+        if s["vocabulary_family"] != "CAP":
+            continue
+        if NON_DOCUMENT_EXT.search(u) or u in already:
+            continue
+        if only_job and only_job not in (wl.get(s["cedar_uid"], {})
+                                         .get("jobs", "")):
+            continue
+        by_ent.setdefault(s["cedar_uid"], []).append(s)
+
+    def strength(s):
+        blob = s["surface_url"] + " " + s.get("surface_title", "")
+        strong = 1 if CAP_STRONG.search(blob) else 0
+        pdf = 1 if s["surface_url"].lower().endswith(".pdf") else 0
+        return (-strong, -pdf, len(s["surface_url"]))
+
+    jobs = []
+    for uid, ss in by_ent.items():
+        h = hostrec.get(uid)
+        if not h or h["reached"] != "Y":
+            continue
+        ss.sort(key=strength)
+        jobs.append((uid, ss[:limit_per_entity], h))
+    print("harvest: %d entities, %d documents to fetch"
+          % (len(jobs), sum(len(j[1]) for j in jobs)))
+    if not jobs:
+        return
+
+    def one(job):
+        uid, ss, h = job
+        ent = {"cedar_uid": uid, "canonical_name": h["canonical_name"],
+               "entity_class": h["entity_class"]}
+        hs = HostSession(h["host"])
+        if hs.reach() is None:
+            return [], []
+        finds, docs = [], []
+        for s in ss:
+            r = hs.get(s["surface_url"], stream=True)
+            if r is None:
+                continue
+            blob = b""
+            try:
+                for chunk in r.iter_content(65536):
+                    blob += chunk
+                    if len(blob) > MAX_BYTES:
+                        break
+            except requests.RequestException:
+                pass
+            finally:
+                r.close()
+            if not blob:
+                continue
+            md5 = hashlib.md5(blob).hexdigest()
+            ctype = (r.headers.get("Content-Type") or "").split(";")[0].lower()
+            if ctype.startswith(("image/", "video/", "audio/", "font/")):
+                continue                      # never a capability statement
+            docs.append({"cedar_uid": uid, "host": h["host"],
+                         "url": s["surface_url"], "content_type": ctype,
+                         "bytes": len(blob), "md5": md5,
+                         "technique": s.get("technique", "") + " (harvest)",
+                         "vocabulary_family": "CAP", "checked_date": TODAY})
+            if ("pdf" in ctype or s["surface_url"].lower().endswith(".pdf")
+                    or blob[:4] == b"%PDF"):
+                body, kind = pdf_text(blob), "pdf"
+            elif "json" in ctype:
+                body, kind = blob.decode("utf-8", "replace")[:900000], "json"
+            else:
+                body = strip_html(blob.decode("utf-8", "replace"))[:900000]
+                kind = "html"
+            finds += extract_identifiers(body, s["surface_url"], ent, kind,
+                                         md5, s.get("technique", "") +
+                                         " (ranked harvest)")
+        return finds, docs
+
+    from concurrent.futures import as_completed
+    pend, n, tot = {}, 0, 0
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        for j in jobs:
+            pend[ex.submit(one, j)] = j
+        for fut in as_completed(pend):
+            n += 1
+            try:
+                finds, docs = fut.result()
+            except Exception as exc:
+                print("   ! %s raised %s" % (pend[fut][0], exc))
+                continue
+            for d in docs:
+                append_jsonl(DOCLOG, d)
+            for f in finds:
+                append_jsonl(FINDINGS_SPOOL, f)
+            tot += len(finds)
+            if n % 20 == 0 or n == len(jobs):
+                print("   %d/%d  +%d identifiers (total %d)"
+                      % (n, len(jobs), len(finds), tot), flush=True)
 
 
 # ===========================================================================
@@ -1001,7 +1285,23 @@ def build():
     if not hosts:
         print("nothing probed yet - run first")
         return
-    finds, surfs, docs = read_csv(FINDINGS), read_csv(SURFACES), read_jsonl(DOCLOG)
+    finds = read_csv(FINDINGS) + read_jsonl(FINDINGS_SPOOL)
+    surfs = read_csv(SURFACES) + read_jsonl(SURFACES_SPOOL)
+    docs = read_jsonl(DOCLOG)
+    # de-duplicate: the first 47 hosts were written straight to CSV before the
+    # spool existed, so the two can overlap.
+    def dedupe(rows, keys):
+        out, seen = [], set()
+        for r in rows:
+            k = tuple(r.get(x, "") for x in keys)
+            if k in seen:
+                continue
+            seen.add(k)
+            out.append(r)
+        return out
+    finds = dedupe(finds, ("cedar_uid", "identifier_type", "identifier",
+                           "source_url"))
+    surfs = dedupe(surfs, ("cedar_uid", "surface_url"))
 
     # --- corroboration against the ledger: the whole point of the pass ------
     held, held_any = {}, set()
@@ -1051,8 +1351,9 @@ def build():
             elif h["reached"] != "Y":
                 row["outcome"] = "ATTEMPTED_INCONCLUSIVE"
                 row["outcome_basis"] = h["outcome_note"] or "host not reached"
-            elif h["identity_verdict"] in ("DOMAIN_NOT_THE_ENTITY",
-                                           "INTERSTITIAL_NOT_THE_SITE"):
+            elif (h["identity_verdict"] in ("DOMAIN_NOT_THE_ENTITY",
+                                            "INTERSTITIAL_NOT_THE_SITE")
+                  and "NOT GATED" not in (h.get("identity_note") or "")):
                 row["outcome"] = "ATTEMPTED_INCONCLUSIVE"
                 row["outcome_basis"] = "%s: %s" % (h["identity_verdict"],
                                                    h["identity_note"])
@@ -1323,8 +1624,8 @@ def selftest():
 
 def main():
     ap = argparse.ArgumentParser(description="1114 capability-statement harvest")
-    ap.add_argument("cmd", choices=["worklist", "run", "build", "verify",
-                                    "selftest"])
+    ap.add_argument("cmd", choices=["worklist", "run", "harvest", "build",
+                                    "verify", "selftest"])
     ap.add_argument("--job", default="identifiers",
                     choices=["released", "identifiers", "institutions"])
     ap.add_argument("--limit", type=int, default=None)
@@ -1336,6 +1637,8 @@ def main():
     elif a.cmd == "run":
         run(a.job, a.limit, a.workers,
             set(h.strip() for h in a.hosts.split(",") if h.strip()) or None)
+    elif a.cmd == "harvest":
+        harvest(workers=a.workers)
     elif a.cmd == "build":
         build()
     elif a.cmd == "verify":

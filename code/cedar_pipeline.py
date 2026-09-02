@@ -413,6 +413,37 @@ KNOWN_ORDERINGS = [
              "102,615-filings-from-307-dockets-described-by-183 defect",
      "enricher_columns": ["source_dataset", "subaward_source_record_id",
                           "duplicate_status", "subaward_exceeds_prime_flag"]},
+    # 1109 runs LAST of the subawards enrichers, after 871. Registered
+    # 2026-09-02T16:00Z, after it was already lost once: 1109 applied at
+    # 10:37:13Z, `121 match` refused at 12:01:12Z naming its ten columns as
+    # "columns append() cannot fill", and by 12:03:54Z the ten had been taken
+    # back out of the file so match could run. 1109's report, verify and
+    # selftest all still read exit 0, because all three were true at 10:37Z.
+    # A CONSERVATION PROOF IS NOT A LANDING PROOF: the check that catches this
+    # is "are the columns in the live header today", not "did nothing move".
+    {"rebuild": "121_pull_subawards_api.py",
+     "enricher": "1109_subawardee_geo_promote.py",
+     "file": "subawards.csv",
+     "cost": "the SUBAWARDEE's own geography disappears from the whole table "
+             "- county derived from the subawardee's own ZIP on 73,388 rows - "
+             "and what is left is `geo_prime_award_*`, which is the PRIME's "
+             "location and is a different fact about a different party",
+     "enricher_columns": ["geo_subawardee_zip5", "geo_subawardee_county_fips",
+                          "geo_subawardee_basis"]},
+    # 871 rewrites prime_contracts.csv in the same run that it rewrites
+    # subawards.csv, and on 2026-09-02 that reverted 1085's PSC/description
+    # fills on 326,166 rows without anything erroring. Two tables, one
+    # ordering rule.
+    {"rebuild": "871_promote_geo_keys_contracts.py",
+     "enricher": "1085_prime_psc_desc_repull.py",
+     "file": "prime_contracts.csv",
+     "cost": "592,925 PSC, PSC-description, award-description and "
+             "NAICS-description values vanish and the columns drop from 69.0% "
+             "back to 20.4%, with no error and no row or dollar moving - the "
+             "conservation checks all still pass",
+     "enricher_columns": ["product_or_service_code",
+                          "product_or_service_code_description",
+                          "award_base_description", "naics_description"]},
     # -----------------------------------------------------------------------
     {"rebuild": "133_build_ferc_advocacy.py",
      "enricher": "168_link_adjudication_hubs.py",

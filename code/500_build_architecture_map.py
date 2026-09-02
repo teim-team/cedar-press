@@ -73,7 +73,14 @@ COLLECTIONS: list[dict] = [
     # --- Cedar Press (standard) -------------------------------------------
     {"id": "funding", "name": "Federal Funding to Indian Country", "shelf": "standard",
      "prefixes": ["03"],
-     "tables": r"^(federal_funding|faads_|assistance_|bie_uio|native_passthrough|funding_identifier|inflation_deflator)"},
+     # `usac_` added 2026-09-02 (workstream ACQUIRE-1119-1121, code/1120).
+     # Universal Service Fund money - E-Rate commitments to tribal schools and
+     # libraries, and Rural Health Care commitments - is federal funding to
+     # Indian Country that arrives through the FCC's universal service
+     # mechanism rather than through USAspending, so no existing pattern
+     # reaches it. The E-Rate slice is the collection's first TYPE_FILTER-only
+     # leg from a publisher that did the Native identification itself.
+     "tables": r"^(federal_funding|faads_|assistance_|bie_uio|native_passthrough|funding_identifier|inflation_deflator|usac_)"},
     {"id": "federal-register", "name": "Federal Register", "shelf": "standard",
      "prefixes": ["09"],
      # `dear_tribal_leader` and `dtll_` added 2026-09-02 (workstream FR-DTLL).
@@ -176,6 +183,13 @@ COLLECTIONS: list[dict] = [
      "tables": r"^tribal_newsletter_"},
     {"id": "natural-resources", "name": "Natural Resource Revenues", "shelf": "pro",
      "prefixes": ["12", "15"],
+     # NOTE 2026-09-02 (workstream ACQUIRE-1119-1121): no pattern change was
+     # needed for the BIA mineral acreage table - it is deliberately named
+     # `resource_bia_mineral_acreage_tracts.csv` so `^resource_` claims it and
+     # the `^bia_` pattern in `_entity_layer` below does NOT, which keeps the
+     # 249,165-row acreage denominator out of the entity layer by construction
+     # rather than by regex ordering. It answers WHAT_IS_MISSING
+     # natural-resources #3: "revenue with no denominator".
      "tables": r"^(resource_|tribal_tax|nd_severance|tribal_debt|tribal_bond|anc_ceiling|ancsa_)"},
     {"id": "nonprofits", "name": "Native Nonprofits", "shelf": "pro",
      "prefixes": ["06", "17"],
@@ -189,8 +203,21 @@ COLLECTIONS: list[dict] = [
     # --- Infrastructure: not sold as a collection, but everything joins it --
     {"id": "_entity_layer", "name": "Entity spine, identifiers and reference", "shelf": "infrastructure",
      "prefixes": ["00", "05", "08", "13"],
+     # `bia_` and `nppes_` added 2026-09-02 (workstream ACQUIRE-1119-1121).
+     #   bia_*    the BIA's own ArcGIS server, biamaps.geoplatform.gov: the
+     #            tribal leaders directory as structured fields rather than
+     #            the HTML `bia_directory` source reads today, the 335 Land
+     #            Area Records, the 93-office facility register, the 84 dated
+     #            PL 102-477 plan agreements, and `bia_ofa_petitioners.csv` -
+     #            20 Office of Federal Acknowledgment petitioners, which is
+     #            the NEGATIVE CASE docs/ASSERTION_LAYER.md records as absent
+     #            ("entity.is_federally_recognized has no negative case").
+     #   nppes_   CMS enumeration. A THIRD evidence family for entity.state /
+     #            entity.city / legal name, independent of both the FR roster
+     #            and the IRS BMF. It is infrastructure, not a product: it
+     #            exists to be arbitrated by code/1118_corroboration_layer.py.
      "tables": (r"^(cedar_entity|cedar_identifier|cedar_publishable|cedar_ruling|cedar_correction|cross_dataset_ruling|entity_|identifier_|alias|"
-                r"nho_|tcu_|uio_|bie_|native_fi|federal_recognition|intertribal|"
+                r"nho_|tcu_|uio_|bie_|bia_|nppes_|native_fi|federal_recognition|intertribal|"
                 r"admin_region|foia_|visitor_|state_recognized)")},
 ]
 

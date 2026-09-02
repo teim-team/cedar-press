@@ -1,8 +1,34 @@
 # Methodology — Native Federal Subcontracting
 
-**`subcontracting`. `data/clean/subawards.csv`, 76,859 rows.
-Unfiltered `subaward_amount` $47,301,660,819.78; the correct total is
-$25,864,997,128.19.** [measured 2026-09-02]
+**`subcontracting`. `data/clean/subawards.csv`, 87,177 rows.
+Unfiltered `subaward_amount` $51,447,159,579.79; the correct total is
+$29,468,837,987.91.** [re-measured 2026-09-02T15:50Z]
+
+> **EVERY FIGURE BELOW DATED EARLIER ON 2026-09-02 PREDATES THE 12:09Z FOLD-IN
+> AND IS SUPERSEDED.** `121 append` added **10,318 rows** at 12:09Z — the
+> FY2023 Q3 and FY2024 Q1–Q4 bulk-download quarters — taking the table
+> 76,859 → **87,177**. The money rule moves with it:
+>
+> ```
+> all 87,177 rows                            $51,447,159,579.79   <- never quote this
+> countable: duplicate_status == 'primary'
+>        AND subaward_exceeds_prime_flag != 'yes'
+>        67,583 rows                         $29,468,837,987.91   <- the correct total
+> the money rule removes                     $21,978,321,591.88
+>    = 42.7% of the unfiltered figure
+>    = 74.6% MORE than the correct total
+> ```
+>
+> `duplicate_status` [re-measured]: `primary` **68,249** ·
+> `exact_repeat_within_source` **18,082** · `superseded_by_primary_source` 846.
+> **State the denominator** — 42.7% and 74.6% are the same difference against
+> two different bases, and the older pair (45.3% / 82.9%) is now wrong on both.
+>
+> FY2024 is no longer empty: **8,839 rows, 8,175 countable, $3,133,280,000**,
+> against the 166 / $113,334,471 the "known limits" section still reports. FY2023
+> is **5,745 rows / 4,874 countable** and is now Q1–Q3, not Q1–Q2.
+> **FY2022 is still 89 countable rows and `fy2022_q1..q4` have never been
+> submitted** — see §7.
 
 *Written 2026-09-02. This is the methodology record: what was pulled and from
 where, how the rows were made, how entities were attributed, what was decided
@@ -289,6 +315,42 @@ HigherGov export has no DUNS at all), sub-side city, ZIP and place of
 performance, congressional districts, CFDA numbers, and the five
 highly-compensated-officer pairs.
 
+> ### ⚠ THIS BLOCK DESCRIBED A LANDING THAT IS NOT IN THE FILE. Measured 2026-09-02T15:45Z.
+>
+> `docs/SUBAWARDEE_GEO_PROMOTION.json` records a successful apply at
+> **10:37:13Z** — written by `cmd_apply` only *after* `atomic_replace`
+> succeeded, so it did land. **It is not there now.** The live
+> `data/clean/subawards.csv` has **71 columns and carries exactly one
+> `geo_subawardee_*` column — `geo_subawardee_county_gap_reason`, the old gap
+> sentence.** None of the ten promoted columns is present.
+>
+> **The mechanism is named, in another script's own docstring.**
+> `871_promote_geo_keys_contracts.py :: backup()` carries a 2026-09-02 incident
+> note: its same-day second run addressed the FIRST run's date-stamped snapshot
+> and so **rebuilt the live tables from a morning vintage** — *"at 09:04 it took
+> `subawards.csv` from 87,177 rows back to 76,859 … and it took
+> `prime_contracts.csv` back to a 01:14 snapshot, discarding `1085`'s 326,166
+> PSC/description fills and dropping five columns belonging to `1079`."*
+> **That note lists 1085 and 1079 as the casualties and does not list 1109; the
+> ten `geo_subawardee_*` columns are a third.** The bug in `backup()` is fixed;
+> the damage to this promotion was not repaired when the row count was.
+>
+> **The lesson, which this repo has now paid for twice in one day: a
+> conservation proof is not a landing proof.** 1109's `verify` and `selftest`
+> both exited 0 and its report conserved rows and money to the cent — all of
+> which was true at 10:37Z and none of which says anything about 15:45Z. The
+> check that would have caught this is the one that fails when the work did NOT
+> happen: *are the ten columns in the live header, today?* One `head -1`.
+>
+> **It must be re-run, and it must run LAST**, after `121 append`, after
+> `910`/`911`, and after `871`. Note also that the outcome table below is
+> against **76,859** rows and the table is now **87,177**; the 10,318 appended
+> rows have never been through 1109 at all, and `1109 index` predates the
+> FY2023 Q3/Q4 zips, so the index must be rebuilt before the apply.
+>
+> *The original block follows, unaltered, because its method is correct and is
+> what the re-run executes.*
+>
 > **RECOVERED 2026-09-02 — the subawardee's own geography.**
 > `code/1109_subawardee_geo_promote.py`. `ON_DISK_NOT_PROMOTED`, not a fetch:
 > zero network requests.
@@ -450,7 +512,27 @@ dead"* — the server reports `rows_so_far = 0` until the file is built.
 [measured — `docs/REFRESH_CADENCE.json`, regenerated 2026-09-02]
 
 **The route:** `121 canary` (about 9 minutes, one two-day job) → `pull --only
-<jobs>` → `collect` → `match` → `append` (the enricher, runs LAST) → `250`.
+<jobs>` → `collect` → `match` → `append` → `910 rescan` → `910 apply` →
+`911 apply` → `871` → `81` → **`1109 index` → `1109 apply` (LAST)** → `250`.
+
+> **`871` writes `prime_contracts.csv` as well as this table, and it reverts
+> `1085`.** Added 2026-09-02 after it did so. Any refresh that runs `871` must
+> finish with `py -3 code/1085_prime_psc_desc_repull.py apply`, or 592,925 PSC
+> and description values silently disappear from contracting. The ordering rule
+> is one rule with two tables in it.
+
+**Two named holes in the pull, both closeable, both measured 2026-09-02:**
+
+1. **`fy2023_q4` came back header-only.** The server said `finished` with no
+   message in 80 seconds and returned a 1,889-byte zip whose two CSV members
+   are 4,144 and 3,992 bytes — one header line each. In the clean table that
+   shows as 2023-07/08/09 at **14 / 24 / 23** rows against 484–704 in every
+   neighbouring month. Re-submitted 15:42:31Z on the script's own
+   re-submit-an-empty-build-once path.
+2. **`fy2022_q1..q4` have never been submitted.** `121 status` says
+   `NOT SUBMITTED` for all four; FY2022 is still **89 countable rows /
+   $47,021,525** and is the largest remaining hole in the dataset. The
+   full-year `fy2022` job is a corpse and rule 5 does not bind on it.
 **Never raise `MAX_INFLIGHT` above 1**, and run one poller per host. On Windows,
 check for a live poller with `Win32_Process.CommandLine` including
 `ParentProcessId` — `ps aux` cannot see command lines here and has returned 0

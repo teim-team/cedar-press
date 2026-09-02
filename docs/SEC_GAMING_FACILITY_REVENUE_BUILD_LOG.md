@@ -30,7 +30,7 @@ that contract.** Where the tribal gaming authority is itself the registrant, it 
 property's revenues directly. Where a public manager holds the contract, it reports its fee.
 
 This build worked that route to its end on the cached corpus and reached **7 distinct
-Indian-lands properties — 0.9% of 787.** That is the honest headline. What it adds is not
+Indian-lands properties — 0.9% of 787 ROWS, 0.98% of the 714 distinct properties.** *(**GAMING-DENOMINATOR-2026-09-02:** `gaming_facilities.csv` holds **787 ROWS, not 787 facilities** — 16 rows' NAMES say no casino (7 exactly, 9 like `Grand Canyon West - no casino`) and 57 extra rows sit across the same-tribe duplicate groups, so **771 facility rows and 714 distinct properties**. Five denominators circulated on 2026-09-02 — 787, 780, 734, 727, 714 — and only the last is the property count. Authority: `code/846_session_audit.py::_denom`; derive it with `py -3 code/1116_ruling_propagation_2026_09_02.py derive`.)* That is the honest headline. What it adds is not
 breadth but **duration and evidentiary weight**: Mohegan Sun across 15 distinct fiscal years,
 each figure filed under federal securities law with an accession number and a verbatim quote.
 

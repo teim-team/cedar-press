@@ -1,0 +1,31 @@
+{
+  "script": "1120_acquire_usac_open_data",
+  "host": "opendata.usac.org",
+  "built_at": "2026-09-02T16:09:06.825021+00:00",
+  "licence": {
+    "name": "Public Domain"
+  },
+  "attribution": "Universal Service Administrative Company",
+  "tables": [
+    {
+      "table": "usac_erate_tribal_commitments.csv",
+      "rows": 53847,
+      "columns": 75
+    },
+    {
+      "table": "usac_erate_tribal_entities.csv",
+      "rows": 2752,
+      "columns": 26
+    },
+    {
+      "table": "usac_rhc_hcp_directory.csv",
+      "rows": 11142,
+      "columns": 20
+    },
+    {
+      "table": "usac_rhc_native_candidate_lines.csv",
+      "rows": 5109,
+      "columns": 63
+    }
+  ]
+}

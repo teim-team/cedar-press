@@ -16,6 +16,7 @@ only about **how to update it and how to prove the update is sound**.
 ---
 
 <!-- CEDAR:COVERAGE-MEASURED collection=federal-register START -->
+> **CORRECTED 2026-09-02 — Dear Tribal Leader letters.** `dear_tribal_leader_letters.csv` holds **807 ROWS** and **597 LETTERS**. The other 210 are 209 enclosure, 1 publisher_index_page. `record_kind` is the discriminator and it is on every row, so there is no excuse for either number appearing without its noun. Agencies: Indian Health Service 783, Bureau of Indian Education 14, Bureau of Indian Affairs 10. **The '46-document Federal Register ceiling' is the wrong ceiling entirely** - it counted one publication venue, and the letters are published by the agencies on their own sites; an agency's own newsroom is not the Federal Register's to cap.
 
 ## Readiness and coverage — measured, never hand-typed
 

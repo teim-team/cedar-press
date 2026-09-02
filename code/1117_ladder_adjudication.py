@@ -173,6 +173,7 @@ import csv
 import json
 import re
 import shutil
+import time
 import sys
 from datetime import date
 from pathlib import Path
@@ -237,6 +238,7 @@ R_WEB = "rung2_website"
 R_COLOC = "rung3_address_cohabitants"
 R_PARENT = "rung4_cage_or_declared_parent"
 R_UEI = "rung0_identifier"
+R_MECH = "rule_m_name_identity_plus_rung1"
 
 _PEST = ("REFUSED: matched FOUR CORNER PEST CONTROL LLC on the industry token "
          "'PEST CONTROL'. ENTITY_MATCH_RULES rule 1 - a shared token is not "
@@ -456,6 +458,17 @@ _key("Cherokee Chainlink & Construct", "REPOINT", "CE-000P1-MS", R_PARENT,
      "ENTITY_MATCH_RULES rule 11 - an edge observed 20+ times is ownership. "
      "That parent UEI is already in the ledger at tier A as CE-000P1-MS. "
      "Tier stays B here: rule 11, the parent's tier does not transfer.")
+_key("Southern Ute Indian Tribe", "ACCEPT", "CE-001AX-4Y", R_ADDR,
+     "The awardee IS the tribal government. Cedar's canonical name is the "
+     "short form 'Southern Ute'; its Federal Register official name is "
+     "'Southern Ute Indian Tribe of the Southern Ute Reservation, Colorado'. "
+     "Ignacio CO is the tribe's seat. ENTITY_MATCH_RULES rule 7 - residue is "
+     "a governmental form, ACCEPT.")
+_key("Tanadgusix Corporation", "ACCEPT", "CE-000CR-CR", R_ADDR,
+     "Cedar's canonical name is 'Tanadgusix Corporation (TDX)' - the same "
+     "name with its trading initialism appended. Anchorage AK; Tanadgusix is "
+     "the ANCSA village corporation for St. Paul, Pribilof Islands, and the "
+     "name is Aleut, not a shared English token (ENTITY_MATCH_RULES rule 14).")
 _key("Colorado Professional Resources, L.L.C.", "REPOINT", "CE-00139-9T",
      R_UEI,
      "nest_enterprises.csv holds 'Colorado Professional Resources' with "
@@ -822,6 +835,36 @@ def load(p: Path):
         return rd.fieldnames, list(rd)
 
 
+def stamp(p: Path):
+    st = p.stat()
+    return (st.st_size, int(st.st_mtime))
+
+
+def swap(tmp: Path, path: Path, before):
+    """I7b: the file must not have moved under us between read and write.
+
+    And Windows refuses os.replace with WinError 5 while another process holds
+    the target open - this repo runs several agents against prime_contracts.csv
+    at once, and it happened on the first apply. Retry, then fail loudly with
+    the .part left in place rather than half-writing anything.
+    """
+    if stamp(path) != before:
+        raise SystemExit(f"I7b BREACH: {path.name} changed under us between "
+                         f"read and write. .part left at {tmp}")
+    last = None
+    for wait in (0, 2, 5, 10, 20, 30):
+        if wait:
+            time.sleep(wait)
+        try:
+            tmp.replace(path)
+            return
+        except PermissionError as e:      # another process holds it open
+            last = e
+    raise SystemExit(f"could not replace {path.name} after retries: {last}. "
+                     f"The complete new file is at {tmp} and the backup at "
+                     f"{str(path) + TAG}; nothing was half-written.")
+
+
 def money_sums(rows, cols):
     t = {}
     for c in cols:
@@ -885,7 +928,7 @@ def build_decisions():
                     uid = cand
             if uid:
                 ruling = "ACCEPT" if uid == r["proposed_cedar_uid"] else "REPOINT"
-                rung = R_ADDR
+                rung = R_MECH
                 basis = (
                     "RULE M: the filed name normalises to exactly one name "
                     f"'{ent[uid][0]}' carries in the spine (canonical name, "
@@ -894,8 +937,10 @@ def build_decisions():
                     "empty, ACCEPT - corroborated by rung 1 of the ladder.")
             else:
                 ruling, rung = "UNRESOLVED", R_TOKEN
-                basis = ("No hand ruling and no unique spine-name match. This "
-                         "should not occur; report it.")
+                basis = ("FALLTHROUGH: no hand ruling and no unique "
+                         "spine-name match. Every queue row should reach a "
+                         "hand ruling or RULE M; a row here is a hole in this "
+                         "script, not a finding about the firm.")
         rec.update(ruling=ruling, cedar_uid=uid, rung=rung, basis=basis)
         if uid:
             if uid not in reg_uids:
@@ -929,6 +974,7 @@ LEDGERS = [
 
 
 def apply_prime(path: Path, uei_col, dec, write: bool, proof: dict):
+    before_stamp = stamp(path)
     hdr, rows = load(path)
     before_n, before_c = len(rows), len(hdr)
     before_m = money_sums(rows, [c for c in PRIME_MONEY if c in hdr])
@@ -971,11 +1017,12 @@ def apply_prime(path: Path, uei_col, dec, write: bool, proof: dict):
             w = csv.DictWriter(fh, fieldnames=hdr)
             w.writeheader()
             w.writerows(rows)
-        tmp.replace(path)
+        swap(tmp, path, before_stamp)
     return touched
 
 
 def apply_ledger(path: Path, dec, write: bool, proof: dict):
+    before_stamp = stamp(path)
     hdr, rows = load(path)
     before_n, before_c = len(rows), len(hdr)
     touched = 0
@@ -987,7 +1034,12 @@ def apply_ledger(path: Path, dec, write: bool, proof: dict):
             continue
         if (r.get("cedar_uid") or "").strip():
             continue
-        r["cedar_uid"] = d["cedar_uid"]
+        # data/spine/cedar_identifier_ledger.csv has NO cedar_uid column - it
+        # keys by tribe_id. Only ever set a column the file actually has.
+        if "cedar_uid" in hdr:
+            r["cedar_uid"] = d["cedar_uid"]
+        elif (r.get("tribe_id") or "").strip():
+            continue
         r["tribe_id"] = d["tribe_id"]
         r["canonical_name"] = d["canonical_name"]
         if "entity_class" in hdr and not (r.get("entity_class") or "").strip():
@@ -1011,7 +1063,7 @@ def apply_ledger(path: Path, dec, write: bool, proof: dict):
             w = csv.DictWriter(fh, fieldnames=hdr)
             w.writeheader()
             w.writerows(rows)
-        tmp.replace(path)
+        swap(tmp, path, before_stamp)
     return touched
 
 

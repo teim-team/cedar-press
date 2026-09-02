@@ -1941,7 +1941,304 @@ what was seen.
 <!-- END ADR-025-STALE-TAIL-1081 -->
 
 <!-- BEGIN ADR-026-RULING-PROPAGATION -->
-## ADR-026 — CLAIMED 2026-09-02 by unnamed
+## ADR-026 — a superseded figure gets a GATE, not a fix
 
-*Placeholder. Replace this line with the decision; keep the markers.*
+*2026-09-02. Owner: the ruling-propagation pass. Script:
+`code/1116_ruling_propagation_2026_09_02.py`. No commits.*
+
+### The decision
+
+**When a measured correction supersedes a figure, do three things and in this
+order: derive the replacement from the live files, answer the old literal
+wherever it stands, and leave behind a check that fails while any of them is
+unanswered.** Correcting the documents alone is not enough, because the corrected
+number rots exactly the way the number it replaced did.
+
+`1116` implements that. `derive` re-derives the whole 2026-09-02 correction set
+from `data/clean/` and `review/` and prints the *sentence*, so a writer pastes a
+measurement rather than a memory. `verify` scans all `.md` under `docs/` and
+`review/` for the superseded literals and **exits 1** while any stands with
+nothing beside it. `selftest` proves the scanner fires on a poisoned fixture, is
+quiet on a marked one, and reports **UNMEASURED rather than clean** when the doc
+walk matches nothing.
+
+That last point is the reason the script exists in this shape. `1111` proved
+rows and dollars conserved to the cent on a table in which it had attributed
+nothing: **conservation was never the risk.** A check that can only pass is not
+a check, so `1116 verify` was written to fail on the state the work was supposed
+to remove, and the fixture proves it does.
+
+### Two scoping rules the gate needed, and why
+
+* **Doc-level vs neighbourhood.** A shared **denominator** is answered by one
+  note per document (`GAMING-DENOMINATOR-2026-09-02`), because a reader needs
+  the denominator once, and nine near-identical banners is how a document stops
+  being read. A wrong **noun** — `787 facilities` where 787 is a row count — is
+  a local defect and still fires wherever the note is not in view. Both
+  behaviours are asserted in `selftest`.
+* **Strike, never delete.** A literal is ANSWERED by `~~...~~` or by a
+  supersession marker within 1,400 characters. The old number stays visible,
+  because a reader who meets it in a third document needs somewhere to find out
+  it is dead. This is the discipline `START_HERE.md` already applies to its own
+  corrections and it is why they are arguable rather than silent.
+
+### Marker discipline: what this pass did to other workstreams' blocks
+
+`docs/MONEY_TOTALLING_RULES.md` is written wholesale by
+`code/574_ws1_money_and_conservation.py`, which preserves only marked blocks.
+Four superseded figures in it sit inside `INT-READY`, `SEC-GAMING` and
+`GAMING-DEEP` — three other workstreams' blocks.
+
+**No block was rewritten.** A new block,
+`<!-- BEGIN GAMING-DENOMINATOR-2026-09-02 -->`, was appended at the foot of the
+file carrying the derived denominator and the sealed-revenue disposition; inside
+the three existing blocks, a **single attributed correction line** was appended
+beside each superseded figure, marked *"correction appended from outside this
+block"*, with the surrounding prose left exactly as its author wrote it. The
+same was done to the `TERMS-SCOPE` block in `docs/PUBLICATION_POLICY.md`, whose
+eight-source bullet the owner superseded the same day.
+
+**The rule this asserts:** the marker convention forbids *destroying* another
+agent's work, not *annotating* it. An append that is signed, dated and reversible
+is how a correction reaches a block you do not own. Rewriting the block is not.
+
+### The pass corrected itself once, and that is the most useful thing in it
+
+`1116`'s first `d_gaming_denominator()` tested `facility_name == "no casino"`,
+found **7** placeholders, and derived **734** — which it then wrote as an
+authoritative note into fourteen documents. **734 is one of the five partial
+denominators the integrator had pinned in `be17bdb` the same evening**, and the
+gated ladder in `code/846_session_audit.py::_denom` is 787 rows − **16** names
+that say no casino = 771 facility rows − 57 duplicate extras = **714 distinct
+properties**. Nine rows say *no casino* inside a longer name and an exact-string
+test cannot see them.
+
+So the script written to stop superseded numbers propagating propagated one, to
+fourteen documents, inside an hour. All fourteen were rewritten from the gated
+ladder; `1116` now **reproduces 846's algorithm and refuses** — prints
+UNMEASURED, exits 1 — if the two disagree, rather than publishing a second
+answer. Two detectors for one class drift, and a drifted detector is worse than
+none because it is trusted; that is why `248` is a retired stub pointing at
+`293`, and the same reasoning applies to a derivation.
+
+**Two rules out of it, both now in `docs/AGENT_FIELD_GUIDE.md` §3:** an
+exact-string test on a free-text column measures the string, not the fact; and
+where a gated authority for a number already exists, follow it and assert
+agreement — do not derive a rival.
+
+### What is now gated
+
+`787` (a row count read as a facility count), `174 facilities`/`174 sealed` (the
+count of an assertion read as the count of its evidence), `2,142` and `$38.19B`
+(one join leg of three), `1,195` (a channel count read as a corpus), and
+`excluded by every route` (superseded by the owner's terms ruling). Add to
+`SUPERSEDED` in `1116` when the next figure moves; the list is the record.
+
+### Related
+
+ADR-016 (`526`: an instruction may not be issued from a sample) ·
+ADR-019-QUARANTINE (the three join legs) ·
+ADR-025-STALE-TAIL-1081 (`830`, the self-referencing instrument) ·
+`docs/AGENT_FIELD_GUIDE.md` §3, whose fifteen instances became twenty-four and
+whose four habits became fifteen rules in this pass.
 <!-- END ADR-026-RULING-PROPAGATION -->
+
+<!-- BEGIN ADR-027-CORROBORATION -->
+## ADR-027 — the corroboration layer: an evidence FAMILY is a class of observer (workstream CORROBORATION, 2026-09-02)
+
+**Status:** accepted 2026-09-02. Declared per AGENTS.md *Parallel agents*.
+
+**Decision.** Corroboration is counted in **independent evidence families**,
+where a family is a class of OBSERVER — not a file, a row, a URL or a source
+id. Three rules make the count un-inflatable, and all three are enforced by
+`verify`:
+
+- **R-A** one upstream document is one observation. `web.archive.org/web/<ts>/<url>`
+  normalises to `<url>`; it is that page, not a second witness.
+- **R-B** one publisher is one observer where the family is also equal.
+- **R-C** a family PAIR collapses when the two share an upstream *for this
+  predicate*. `federal_registry` + `federal_transactional` are ONE family for a
+  legal name (USAspending copies SAM) and TWO for an identifier binding (DLA
+  issues the CAGE, SAM.gov the UEI, FPDS records the binding used on an award).
+  **Predicate-scoping is the part the source registry's global `derives_from`
+  tree cannot express**, and it is what earns 76 of the 320 corroborations.
+
+**Three families do not vote and are named rather than dropped**, so the
+exposure stays countable: `cedar_inference` (a name match, a containment link,
+`cluster_v3`, a resolver output — Cedar agreeing with itself),
+`compiled_directory` (Casino City Press, legacy CICD, a vendor property list —
+the same ruling `cedar_source_registry.csv` already applies to `LR_CICD`), and
+`unattributed`. An eighth voting family, `third_party_press`, was added because
+the seven in the mandate had nowhere honest to put a trade journal.
+
+**Files this workstream owns**
+
+| file | what is written | script |
+|---|---|---|
+| `code/1118_corroboration_layer.py` | the layer, its 8 invariants and its selftest | — |
+| `data/clean/cedar_corroboration_observations.csv` | **new.** One row per observation, with family, upstream key and quote | `code/1118_*` |
+| `data/clean/cedar_fact_corroboration.csv` | **new.** One row per fact, with `n_independent_families` | `code/1118_*` |
+| `data/clean/cedar_corroboration_disagreements.csv` | **new.** Both sides, both quoted, never reconciled | `code/1118_*` |
+| `data/clean/cedar_corroboration_census.csv` | **new.** Per shipping dataset, reason never blank | `code/1118_*` |
+| `data/clean/cedar_corroboration_conservation.csv` | **new.** `rows_in == sum(named dispositions)` | `code/1118_*` |
+| `docs/CORROBORATION_LAYER_2026-09-02.md` | **new doc.** The measurement, the disagreements and the merge proposals | — |
+
+All five tables are **INTERNAL**. They measure Cedar's evidence base rather
+than describing Indian Country, and the disagreement table names organisations
+against claims nobody has adjudicated.
+
+**Explicit non-overlap.** `code/510_assertions.py` owns entity-grade facts and
+its own numbers are unchanged; this layer measures the SHIPPING datasets one
+level out and **the two counts must never be added together**.
+`code/503_identity.py` and `docs/ENTITY_MATCH_RULES.md` own whether two names
+are one entity — untouched. Nothing in `nest_enterprises.csv`,
+`deals_classified.csv`, `np_orgs.csv`, `gaming_facilities.csv` or
+`cedar_identifier_ledger_final.csv` was edited; five merge proposals are in the
+doc, each naming its owner.
+
+**What it measured.** 320 of 4,432 facts (7.2%) reach two or more independent
+families; 1,399 reach none. Nine of the fourteen shipping datasets are wholly
+single-sourced, and the census distinguishes
+`SINGLE_FAMILY_BY_CONSTRUCTION` (the source IS the fact) from
+`NOT_REACHED_BY_THIS_PASS` (a real pair exists and nobody built it) — only the
+second is a task.
+<!-- END ADR-027-CORROBORATION -->
+
+<!-- BEGIN ADR-028-ACQUIRE-1119-1121 -->
+## ADR-028 — three new sources, and the four decisions they forced (2026-09-02)
+
+**Status:** adopted for the acquisition; **three items below need the
+integrator or the owner and are marked so.**
+
+**Workstream `ACQUIRE-1119-1121`.** Owns, and edited: `code/cedar_arcgis.py`
+(new shared client), `code/1119_acquire_biamaps_arcgis.py`,
+`code/1120_acquire_usac_open_data.py`,
+`code/1121_acquire_nppes_corroboration.py`, the `GRAIN_ACQUIRE` dict in
+`code/512_build_dataset_contracts.py`, three new codebook fragments, the
+`<!-- BEGIN ACQUIRE-BIA-ACREAGE -->` block in `docs/MONEY_TOTALLING_RULES.md`,
+two comment-and-pattern additions in `code/500_build_architecture_map.py`, and
+`docs/BIAMAPS_ACQUISITION_LOG_2026-09-02.md`.
+
+**Did NOT touch:** `code/510_assertions.py`, `503`, `62`, `517`, `518`,
+`build.py`, or any table another workstream writes. Nothing was committed.
+The pass-3 ownership table says *"Integrator owns 62, 512, 517, 518"*; the
+`512` edit is the one documented exception — `1050_preflight.py shared` and
+`docs/AGENT_FIELD_GUIDE.md` §2 both instruct a workstream to add **its own
+`GRAIN_*` dict** to that file and touch nobody else's, which is what was done.
+
+### D1 — a new shared client rather than a fourth copy of the same five checks
+
+`code/cedar_arcgis.py`. Three acquisitions each needed: a robots check
+evaluated over **every agent token**, `robots.txt` fetched with **our own UA**,
+a **sha256 per response**, an **edge-block detector that stops the run**, and a
+host lock keyed by apex. Every one of those exists because this project paid
+for it once — the 13 refusing hosts fetched under a naive `can_fetch`, the 22
+open hosts recorded as blocked by a 403 on `robots.txt`, the `?wpdmdl=`
+harvester that reported 302 documents and held one PDF, and `1085`'s four
+permanent false absences written from a sub-second disconnect. Copying them
+into three scripts guarantees three drifts.
+
+`py -3 code/cedar_arcgis.py selftest` runs offline and proves each one fires,
+including that the naive check MISSES a `ClaudeBot`-only rule the union check
+catches, and that `reconcile()` raises on a short retrieval.
+
+### D2 — `objectid` is the declared key, and it is non-deterministic
+
+Four of the six ArcGIS tables have **no natural key**. On the 249,165-row
+mineral acreage table, `(land_area_code, tract_id, resource_code,
+ownership_type)` is 249,161 distinct, and all four collisions are real data —
+three tracts with two acreages under one tract number, and one tract recorded
+under two states. No published column separates the last pair.
+
+So the key is `objectid`, which ArcGIS assigns. **That is `293`'s class 7 (a
+non-deterministic primary key) and it is declared rather than hidden**, in
+`GRAIN_ACQUIRE` and in both codebooks, with the rule: `retrieved_at` says
+which service edition you hold, and no join on `objectid` may be persisted
+across a re-pull. The alternative — inventing a synthetic hash key — would
+make the instability invisible without making it go away.
+
+### D3 — one epoch-zero sentinel, caught before it shipped
+
+`inactivated_date` is `0` on **all 249,165** mineral acreage rows. The first
+build rendered that as `1970-01-01` on every row. A filter for *"inactivated
+before 2000"* would have returned the entire file, and nothing about the
+output would have looked wrong. `_iso_from_epoch_ms()` now returns blank for
+`0`. **A sentinel that renders as a plausible value is worse than a blank** —
+the same shape as `START_HERE.md` standing rule 1b, where a populated cell was
+read as a resolved identity.
+
+### D4 — the NPPES query passes the NAME and nothing else
+
+> **This is the decision that makes 1121 a corroboration rather than an echo,
+> and it cost match rate on purpose.**
+
+The NPPES API accepts `state=` and `city=`. Sending Cedar's own `state` would
+have raised the apparent hit rate and made the result worthless: a search
+seeded with our answer can only return records that agree with it.
+`docs/ASSERTION_LAYER.md`'s evidence-lineage rule — *a copy of a source in the
+spine and the source itself are the same evidence family* — applies to a query
+parameter exactly as it applies to a table.
+
+Consequence, and it is the point: **`state_agrees = DISAGREE` is a reachable
+value**, and `1121 verify` **fails if the file contains zero DISAGREE rows**.
+A corroboration source that can only ever agree is measuring itself, and a
+green check on such a file is the strongest thing that check can say while
+meaning nothing.
+
+### ⚠ I1 — INTEGRATOR: three `source_id` values are not in the source registry
+
+The new tables carry `source_id` values `bia_biamaps_arcgis`,
+`usac_open_data` and `cms_nppes`. **None is in
+`data/spine/cedar_source_registry.csv`** (17 rows), and that file is
+**generated by `code/510_assertions.py`**, which this workstream does not own
+and did not touch. The rows are therefore *proposed*, with their lineage
+reasoning, in `docs/BIAMAPS_ACQUISITION_LOG_2026-09-02.md` §"Source registry
+rows to add". The one that matters is the lineage:
+
+* `bia_biamaps_arcgis` — **`LR_BIA_DIRECTORY`, `derives_from
+  LR_FEDERAL_REGISTER`, `tier_ceiling B`.** It is the same evidence family as
+  the existing `bia_directory` entry. Agreeing with the FR about *which
+  nations exist* is an echo. It is genuinely new for `entity.bia_region`,
+  `entity.bia_agency` and the PL 102-477 dates, and **`bia_ofa_petitioners` is
+  a negative case the FR family structurally cannot produce.**
+* `usac_open_data` — **a new root, `LR_USAC`, `tier_ceiling A` for
+  `entity.tribal_school_type`.** FCC universal service is unrelated to
+  Interior, Treasury or SAM.
+* `cms_nppes` — **a new root, `LR_CMS_NPPES`, `tier_ceiling A` for a health
+  organisation's registered address.** This is the third evidence family
+  `START_HERE.md` item 0 asks for.
+
+### ⚠ I2 — INTEGRATOR/OWNER: ADR-013 has no basis for a denominator table
+
+`usac_rhc_hcp_directory.csv` is the **full** 11,142-provider RHC universe,
+held so the 5,109-row Native candidate slice has something to be divided by.
+**Most of its rows are not Indian Country and are not meant to be.** None of
+C12's six adopted bases (`named_entity`, `term_match`, `program_authority`,
+`geographic`, `subject_classification`, `human_ruling`) is true of it, and
+picking the nearest fit would make a non-Native table claim a Native basis.
+
+It is written as `inclusion_basis = NOT_INDIAN_COUNTRY_SCOPED_DENOMINATOR`, a
+value **proposed, not adopted**. The general question is worth answering once:
+Cedar's coverage percentages need denominators, and a denominator is by
+construction wider than the scope. Either C12 gains a seventh value or such
+tables are held outside the shippable set — but they must not silently claim a
+basis they do not have.
+
+### ⚠ I3 — OWNER: BIE schools was not `NOT_ACQUIRED`, and the survey says it was
+
+`docs/SOURCE_EXPLORATION_2026-09-02.md` rates *"BIE Schools Directory — 183
+schools"* **ACQUIRE**, second by priority. It is already on this machine:
+`data/raw/external/bie_uio/bie_schools_featureserver.json`, **187 features**,
+fetched 2026-08-06 by `code/75_add_bie_schools_and_uios.py` from
+`services1.arcgis.com/UxqqIfhng71wUT9x`, and re-fetched 2026-09-01 into
+`data/staging/tribe_harvest/shard_g/`. The state is
+**`ON_DISK_NOT_PROMOTED`**, not `NOT_ACQUIRED`.
+
+The field guide already names this class: *"27 of the 39 ranked absences are
+`ON_DISK_NOT_PROMOTED`"* and *"at least three sessions have re-downloaded
+files that were already on this machine."* **The survey did not run
+`py -3 code/1050_preflight.py ondisk` on its own ACQUIRE list.** One command
+per candidate would have caught it. Recommend that `1111`'s `report` call
+`ondisk` for every row it is about to rate ACQUIRE, so a survey cannot rate a
+fetch that has already happened.
+<!-- END ADR-028-ACQUIRE-1119-1121 -->

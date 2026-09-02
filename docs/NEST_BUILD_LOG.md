@@ -425,8 +425,8 @@ uei_candidate         597     exact normalized name into the SBA DSBS extract
 ```
 
 **Nothing was inherited from `cedar_identifier_ledger_final.csv`.** That ledger
-carries 2,142 UEI rows worth $38.19B on quarantined methods with no exclusion
-recorded, and `attribution_method` says who decided while `confidence_tier` says
+carries ~~2,142 UEI rows worth $38.19B~~ **227,540 rows worth $45.93B** (**CORRECTED 2026-09-02 — that measured ONE JOIN LEG of three.** `40_build_prime_contracts.py` keys on `uei_exact`, `cage_exact` and `parent_uei` and tries all three in order. Re-measured disjointly on the live files: `uei_exact` 172,338 rows / $38,191,057,346 + `cage_exact` 14,149 / $7,252,015,101 + `parent_uei` 41,055 / $489,839,872 = **227,540 rows / $45,932,912,319**. The CAGE leg is where `need_v6` actually lives — 838 tier-B CAGE rows, 60+ CAGE codes on `TRBF-LUMBEE-00` via the token `north` — and nobody had looked at it. **Scoping a measurement to one leg of a multi-leg join understates it silently, because the legs it skipped answer the same question.** Full derivation: `docs/QUARANTINE_EXPOSURE_LOG_2026-09-02.md`.)
+on quarantined methods with no exclusion recorded, and `attribution_method` says who decided while `confidence_tier` says
 what was decided. This build reads published CAGE codes, the SBA DSBS extract
 and `fpds_uei_cage_map.csv` (a name/identifier map, not an attribution) — and
 suppresses the literal string `NAN`, which sits in `cage_code` on 2,196 rows

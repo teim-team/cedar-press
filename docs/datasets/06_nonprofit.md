@@ -1,6 +1,8 @@
 # Dataset 6 — Native Nonprofit & Philanthropic Economy
 
 *Maintenance doc. Generated 2026-09-01. Tier: **Cedar Press+ ($1,000) - Native Nonprofits***
+> **CORRECTED 2026-09-02 — Schedule C.** `nonprofit_schedule_c_lobbying.csv` holds **29149 rows**, one per parsed return, against **32218** returns in the IRS e-file index filtered to Cedar's Native-nonprofit EIN list - **90.5%**. 3069 are not downloaded. **29149 XML files are sitting in `data/raw/external/irs990_schedc/xml/`**, so what was described as a fetch backlog was, for the retrieved share, `ON_DISK_NOT_PROMOTED` - a parse and a join, not a socket (`docs/AGENT_FIELD_GUIDE.md` s5). Only the 3069 genuinely absent returns are `NOT_ACQUIRED`. **Naming the wrong one of the four states of 'missing' sends the next session to the network for a file that is already here; three sessions have now done exactly that.**
+> Note that `nonprofit_schedule_c_coverage.csv` still carries `coverage_basis` = *"`not_downloaded` is this project's fetch backlog"* on every row. That sentence is right about the **3,069 not downloaded** and it is what made the whole layer read as a backlog. Fix it at the writer (`code/99_build_earmarks_and_schedc.py`), not in the CSV.
 
 ## What this is
 

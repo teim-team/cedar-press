@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-02T11:40:54",
+ "generated": "2026-09-02T12:00:29",
  "generated_by": "code/1115_defect_class_retro_sweep.py",
  "not_mechanically_detectable": {
   "C10": "a decision written somewhere the asker cannot see - 27,067 queue rows answered in sibling files. Needs a queue-vs-answer join, surveyed by hand.",
@@ -38,7 +38,7 @@
    "class": "C1",
    "where": "code/1030_sec_edgar_native_transactions.py",
    "line": 482,
-   "what": "capped read `break at 5 rows` in `cmd_fts` then a whole-population claim at line 497: 'total'",
+   "what": "capped read `break at 5 rows (cap is a DEFAULT ARG of `cmd_fts`, so no caller sees it)` in `cmd_fts` then a whole-population claim at line 497: 'total'",
    "size": 5,
    "unit": "row cap",
    "detail": "assertive claim"
@@ -47,8 +47,53 @@
    "class": "C1",
    "where": "code/1030_sec_edgar_native_transactions.py",
    "line": 906,
-   "what": "capped read `break at 5 rows` in `cmd_fetch_leads` then a whole-population claim at line 857: 'FULL HOUSE RESORTS'",
+   "what": "capped read `break at 5 rows (cap is a DEFAULT ARG of `cmd_fetch_leads`, so no caller sees it)` in `cmd_fetch_leads` then a whole-population claim at line 857: 'FULL HOUSE RESORTS'  [claim is in `<module>()`, which calls `cmd_fetch_leads()` - the cap is INVISIBLE at the claim]",
    "size": 5,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/1030_sec_edgar_native_transactions.py",
+   "line": 315,
+   "what": "capped read `break at 5 rows` in `cmd_fetch` then a whole-population claim at line 1507: 'all'  [claim is in `main()`, which calls `cmd_fetch()` - the cap is INVISIBLE at the claim]",
+   "size": 5,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/105_build_florida_gaming.py",
+   "line": 896,
+   "what": "capped read `break at 3 rows` in `parse_monthly_blocks` then a whole-population claim at line 789: 'TOTAL COLLECTIONS'  [claim is in `<module>()`, which calls `parse_monthly_blocks()` - the cap is INVISIBLE at the claim]",
+   "size": 3,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/1060_splink_pilot.py",
+   "line": 919,
+   "what": "capped read `.head(4)` in `cmd_collisions` then a whole-population claim at line 1064: '\\n  verify: all invariants hold'  [claim is in `cmd_verify()`, which calls `cmd_collisions()` - the cap is INVISIBLE at the claim]",
+   "size": 4,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/1072_tribally_owned_enterprises.py",
+   "line": 1768,
+   "what": "capped read `break at 2 rows` in `stage_verify` then a whole-population claim at line 1711: '\\n  I1  every enterprise_id is unique and carries valid 503 check characters\\n  I2  every row carries an owner_hub_cedar_uid that is IN the spine register\\n  I3  e'  [claim is in `<module>()`, which calls `stage_verify()` - the cap is INVISIBLE at the claim]",
+   "size": 2,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/1086_faads_award_key_promote.py",
+   "line": 256,
+   "what": "capped read `list()[:20]` in `cmd_measure` then a whole-population claim at line 351: 'filled: wide %s  narrow %s  total %s (%.1f%%)'  [claim is in `cmd_apply()`, which calls `cmd_measure()` - the cap is INVISIBLE at the claim]",
+   "size": 20,
    "unit": "row cap",
    "detail": "assertive claim"
   },
@@ -56,7 +101,7 @@
    "class": "C1",
    "where": "code/1095_gaming_bounds_summability_and_seal_typing.py",
    "line": 322,
-   "what": "capped read `list()[:4]` in `classify_quote` then a whole-population claim at line 302: 'Read the RECORDED quote. Never the statute Cedar does not hold.'",
+   "what": "capped read `list()[:4]` in `classify_quote` then a whole-population claim at line 195: 'any per-property total (this figure is TRIBE-level and is not attributable to one property);rows of gaming_revenue_bounds whose bound_basis is a REGIONAL_GGR_CE'  [claim is in `<module>()`, which calls `classify_quote()` - the cap is INVISIBLE at the claim]",
    "size": 4,
    "unit": "row cap",
    "detail": "assertive claim"
@@ -65,10 +110,37 @@
    "class": "C1",
    "where": "code/1095_gaming_bounds_summability_and_seal_typing.py",
    "line": 323,
-   "what": "capped read `list()[:3]` in `classify_quote` then a whole-population claim at line 302: 'Read the RECORDED quote. Never the statute Cedar does not hold.'",
+   "what": "capped read `list()[:3]` in `classify_quote` then a whole-population claim at line 195: 'any per-property total (this figure is TRIBE-level and is not attributable to one property);rows of gaming_revenue_bounds whose bound_basis is a REGIONAL_GGR_CE'  [claim is in `<module>()`, which calls `classify_quote()` - the cap is INVISIBLE at the claim]",
    "size": 3,
    "unit": "row cap",
    "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/1115_defect_class_retro_sweep.py",
+   "line": 1546,
+   "what": "capped read `list()[:2]` in `detect_C6` then a whole-population claim at line 1673: '\\nimport csv\\nCAP = 20000\\ndef audit(p):\\n    rows = []\\n    with open(p) as f:\\n        for i, row in enumerate(csv.reader(f)):\\n            rows.append(row)\\n        '  [claim is in `<module>()`, which calls `detect_C6()` - the cap is INVISIBLE at the claim]",
+   "size": 2,
+   "unit": "row cap",
+   "detail": "DESTRUCTIVE claim - the 526 shape"
+  },
+  {
+   "class": "C1",
+   "where": "code/1115_defect_class_retro_sweep.py",
+   "line": 1548,
+   "what": "capped read `list()[:2]` in `detect_C6` then a whole-population claim at line 1673: '\\nimport csv\\nCAP = 20000\\ndef audit(p):\\n    rows = []\\n    with open(p) as f:\\n        for i, row in enumerate(csv.reader(f)):\\n            rows.append(row)\\n        '  [claim is in `<module>()`, which calls `detect_C6()` - the cap is INVISIBLE at the claim]",
+   "size": 2,
+   "unit": "row cap",
+   "detail": "DESTRUCTIVE claim - the 526 shape"
+  },
+  {
+   "class": "C1",
+   "where": "code/1121_acquire_nppes_corroboration.py",
+   "line": 225,
+   "what": "capped read `break at 200 rows` in `cmd_pull` then a whole-population claim at line 233: 'truncated'",
+   "size": 200,
+   "unit": "row cap",
+   "detail": "DESTRUCTIVE claim - the 526 shape"
   },
   {
    "class": "C1",
@@ -82,9 +154,18 @@
   {
    "class": "C1",
    "where": "code/121_pull_subawards_api.py",
-   "line": 2325,
-   "what": "capped read `break at 20 rows` in `append` then a whole-population claim at line 2317: \"` at all. Run `py -3 code/503_identity.py stamp` to confirm against 503's own count.\"",
+   "line": 2366,
+   "what": "capped read `break at 20 rows` in `append` then a whole-population claim at line 2358: \"` at all. Run `py -3 code/503_identity.py stamp` to confirm against 503's own count.\"",
    "size": 20,
+   "unit": "row cap",
+   "detail": "DESTRUCTIVE claim - the 526 shape"
+  },
+  {
+   "class": "C1",
+   "where": "code/130_build_section_106_consultation.py",
+   "line": 632,
+   "what": "capped read `break at 200 rows` in `stage_fetch` then a whole-population claim at line 630: 'full text to fetch: '",
+   "size": 200,
    "unit": "row cap",
    "detail": "assertive claim"
   },
@@ -92,7 +173,7 @@
    "class": "C1",
    "where": "code/132_build_schedule_i_layer.py",
    "line": 792,
-   "what": "capped read `list()[:5]` in `step_drift` then a whole-population claim at line 854: \"Position of this recipient line among the published recipient lines of this return, 1..n in the document order of Schedule I Part II's RecipientTable elements. \"",
+   "what": "capped read `list()[:5]` in `step_drift` then a whole-population claim at line 854: \"Position of this recipient line among the published recipient lines of this return, 1..n in the document order of Schedule I Part II's RecipientTable elements. \"  [claim is in `<module>()`, which calls `step_drift()` - the cap is INVISIBLE at the claim]",
    "size": 5,
    "unit": "row cap",
    "detail": "assertive claim"
@@ -101,7 +182,7 @@
    "class": "C1",
    "where": "code/132_build_schedule_i_layer.py",
    "line": 794,
-   "what": "capped read `list()[:5]` in `step_drift` then a whole-population claim at line 854: \"Position of this recipient line among the published recipient lines of this return, 1..n in the document order of Schedule I Part II's RecipientTable elements. \"",
+   "what": "capped read `list()[:5]` in `step_drift` then a whole-population claim at line 854: \"Position of this recipient line among the published recipient lines of this return, 1..n in the document order of Schedule I Part II's RecipientTable elements. \"  [claim is in `<module>()`, which calls `step_drift()` - the cap is INVISIBLE at the claim]",
    "size": 5,
    "unit": "row cap",
    "detail": "assertive claim"
@@ -127,6 +208,15 @@
   {
    "class": "C1",
    "where": "code/147_build_fac_single_audits.py",
+   "line": 684,
+   "what": "capped read `break at 3 rows` in `fetch_pdfs` then a whole-population claim at line 969: '--all'  [claim is in `main()`, which calls `fetch_pdfs()` - the cap is INVISIBLE at the claim]",
+   "size": 3,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/147_build_fac_single_audits.py",
    "line": 538,
    "what": "capped read `page_all(cap=4000)` in `stage_census` then a whole-population claim at line 520: '  entity_type=tribal: %d total, %d public, %d non-public'",
    "size": 4000,
@@ -136,20 +226,20 @@
   {
    "class": "C1",
    "where": "code/147_build_fac_single_audits.py",
-   "line": 625,
-   "what": "capped read `page_all(cap=2000)` in `stage_textsweep` then a whole-population claim at line 611: \"ilike across the API's text tables. Bounded and enumerated.\\n\\n    Absence under a filter is a property of the filter: a term swept with zero\\n    hits is recorded\"",
-   "size": 2000,
+   "line": 954,
+   "what": "capped read `page_all(cap=6000)` in `stage_sefa` then a whole-population claim at line 969: '--all'  [claim is in `main()`, which calls `stage_sefa()` - the cap is INVISIBLE at the claim]",
+   "size": 6000,
    "unit": "row cap",
    "detail": "assertive claim"
   },
   {
    "class": "C1",
-   "where": "code/14_build_bills_votes.py",
-   "line": 298,
-   "what": "capped read `read_csv(chunksize=4000000)` in `tally_votes` then a whole-population claim at line 287: 'Stream HSall_votes.csv, keep only rows for roll calls in `universe`, return\\n    (tally frame, member-level long frame).'",
-   "size": 4000000,
+   "where": "code/147_build_fac_single_audits.py",
+   "line": 625,
+   "what": "capped read `page_all(cap=2000)` in `stage_textsweep` then a whole-population claim at line 969: '--all'  [claim is in `main()`, which calls `stage_textsweep()` - the cap is INVISIBLE at the claim]",
+   "size": 2000,
    "unit": "row cap",
-   "detail": "DESTRUCTIVE claim - the 526 shape"
+   "detail": "assertive claim"
   },
   {
    "class": "C1",
@@ -159,24 +249,6 @@
    "size": 10,
    "unit": "row cap",
    "detail": "DESTRUCTIVE claim - the 526 shape"
-  },
-  {
-   "class": "C1",
-   "where": "code/16_federal_funding_recon.py",
-   "line": 219,
-   "what": "capped read `read_file_in_chunks(chunksize=200000)` in `profile_a_dta` then a whole-population claim at line 281: '   A_dta rows=  total=$  tribe_ids='",
-   "size": 200000,
-   "unit": "row cap",
-   "detail": "assertive claim"
-  },
-  {
-   "class": "C1",
-   "where": "code/17_build_nonprofit_990.py",
-   "line": 273,
-   "what": "capped read `read_csv(chunksize=200000)` in `step2_bmf_slice` then a whole-population claim at line 264: '  candidate EIN universe: '",
-   "size": 200000,
-   "unit": "row cap",
-   "detail": "assertive claim"
   },
   {
    "class": "C1",
@@ -225,12 +297,30 @@
   },
   {
    "class": "C1",
+   "where": "code/219_probe_courtlistener_recap.py",
+   "line": 135,
+   "what": "capped read `break at 20 rows` in `build_cohorts` then a whole-population claim at line 313: 'RECAP sample complete'  [claim is in `step_sample()`, which calls `build_cohorts()` - the cap is INVISIBLE at the claim]",
+   "size": 20,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
+   "where": "code/221_probe_regulations_gov_comments.py",
+   "line": 384,
+   "what": "capped read `break at 3 rows` in `step_detail` then a whole-population claim at line 431: 'comment detail fetch complete'",
+   "size": 3,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
    "where": "code/227_anomaly_sweep.py",
    "line": 1600,
    "what": "capped read `list()[:200]` in `derive` then a whole-population claim at line 1618: ' splits at  /  into two vocabularies of the SAME shape and SIMILAR size that only partly overlap:   distinct values before,   after,   shared, and   rows ( %) c'",
    "size": 200,
    "unit": "row cap",
-   "detail": "assertive claim"
+   "detail": "DESTRUCTIVE claim - the 526 shape"
   },
   {
    "class": "C1",
@@ -240,6 +330,15 @@
    "size": 10,
    "unit": "row cap",
    "detail": "DESTRUCTIVE claim - the 526 shape"
+  },
+  {
+   "class": "C1",
+   "where": "code/326_triage_class7_key_risk.py",
+   "line": 133,
+   "what": "capped read `break at 4000 rows` in `scan_clean_tables` then a whole-population claim at line 348: '  [PRODUCER IS NEVER-RUN]'  [claim is in `main()`, which calls `scan_clean_tables()` - the cap is INVISIBLE at the claim]",
+   "size": 4000,
+   "unit": "row cap",
+   "detail": "assertive claim"
   },
   {
    "class": "C1",
@@ -290,7 +389,7 @@
    "class": "C1",
    "where": "code/35_coverage_audit.py",
    "line": 328,
-   "what": "capped read `list()[:10]` in `audit_file` then a whole-population claim at line 268: \"Count rows per year.\\n\\n    COLUMN CHOICE, IN PRIORITY ORDER (changed 2026-08-26 by script 337):\\n\\n      1. The table's own DECLARATION in `code/cedar_period_colum\"",
+   "what": "capped read `list()[:10]` in `audit_file` then a whole-population claim at line 435: 'complete'  [claim is in `main()`, which calls `audit_file()` - the cap is INVISIBLE at the claim]",
    "size": 10,
    "unit": "row cap",
    "detail": "assertive claim"
@@ -348,6 +447,15 @@
    "size": 3,
    "unit": "row cap",
    "detail": "DESTRUCTIVE claim - the 526 shape"
+  },
+  {
+   "class": "C1",
+   "where": "code/512_build_dataset_contracts.py",
+   "line": 4154,
+   "what": "capped read `break at 120000 rows (cap is a DEFAULT ARG of `_sample`, so no caller sees it)` in `_sample` then a whole-population claim at line 4477: '  [ / ]  :   rows,  /  candidate key(s) unique,   whole-row dup(s)'  [claim is in `probe()`, which calls `_sample()` - the cap is INVISIBLE at the claim]",
+   "size": 120000,
+   "unit": "row cap",
+   "detail": "assertive claim"
   },
   {
    "class": "C1",
@@ -414,19 +522,19 @@
   },
   {
    "class": "C1",
-   "where": "code/528_shard_consolidate.py",
-   "line": 163,
-   "what": "capped read `list()[:8]` in `collect` then a whole-population claim at line 137: 'Merge every shard map. Dedupe on (uid, url_type, url) - two shards\\n    finding the same URL is agreement, not duplication, and must not\\n    double-count in the '",
-   "size": 8,
+   "where": "code/526_dataset_standard.py",
+   "line": 120,
+   "what": "capped read `break at 20000 rows (cap is a DEFAULT ARG of `scan`, so no caller sees it)` in `scan` then a whole-population claim at line 164: 'declare grain + PK + join keys + cardinality in 512, validated on the full file'  [claim is in `build()`, which calls `scan()` - the cap is INVISIBLE at the claim]",
+   "size": 20000,
    "unit": "row cap",
-   "detail": "assertive claim"
+   "detail": "DESTRUCTIVE claim - the 526 shape"
   },
   {
    "class": "C1",
-   "where": "code/535_shard_e_match_candidates.py",
-   "line": 107,
-   "what": "capped read `list()[:6]` in `main` then a whole-population claim at line 1: 'SHARD-E: propose CANDIDATE matches from the ANC subsidiary edges to entities\\nCedar already knows, and to identifiers in data/clean/fpds_uei_edges.csv.\\n\\nTHIS SCR'",
-   "size": 6,
+   "where": "code/528_shard_consolidate.py",
+   "line": 163,
+   "what": "capped read `list()[:8]` in `collect` then a whole-population claim at line 95: 'the coverage tail - every entity no other shard touched'  [claim is in `<module>()`, which calls `collect()` - the cap is INVISIBLE at the claim]",
+   "size": 8,
    "unit": "row cap",
    "detail": "assertive claim"
   },
@@ -452,7 +560,7 @@
    "class": "C1",
    "where": "code/596_shard_f_org_rosters.py",
    "line": 262,
-   "what": "capped read `list()[:3]` in `tech_arcgis` then a whole-population claim at line 102: '((?:over|more than|nearly|approximately|about|all)?\\\\s*\\\\d{1,3})\\\\s+(member\\\\s+)?(federally recognized\\\\s+)?(tribes|tribal nations|nations|villages|member tribes|tri'",
+   "what": "capped read `list()[:3]` in `tech_arcgis` then a whole-population claim at line 102: '((?:over|more than|nearly|approximately|about|all)?\\\\s*\\\\d{1,3})\\\\s+(member\\\\s+)?(federally recognized\\\\s+)?(tribes|tribal nations|nations|villages|member tribes|tri'  [claim is in `<module>()`, which calls `tech_arcgis()` - the cap is INVISIBLE at the claim]",
    "size": 3,
    "unit": "row cap",
    "detail": "assertive claim"
@@ -486,6 +594,15 @@
   },
   {
    "class": "C1",
+   "where": "code/77_build_nagpra_dataset.py",
+   "line": 1904,
+   "what": "capped read `list()[:6]` in `parse_notice` then a whole-population claim at line 1956: 'NAGPRA notice universe (title-anchored): '  [claim is in `build_stage()`, which calls `parse_notice()` - the cap is INVISIBLE at the claim]",
+   "size": 6,
+   "unit": "row cap",
+   "detail": "assertive claim"
+  },
+  {
+   "class": "C1",
    "where": "code/791_faads_transaction_key_and_repoint.py",
    "line": 223,
    "what": "capped read `break at 5 rows` in `interior` then a whole-population claim at line 249: '  interior: every one of   rows verified against its seam row on 7 published fields'",
@@ -500,7 +617,7 @@
    "what": "capped read `list()[:8]` in `build_utah` then a whole-population claim at line 1275: 'Fund-level total for the whole fund; no well, tract or grantee is named.'",
    "size": 8,
    "unit": "row cap",
-   "detail": "assertive claim"
+   "detail": "DESTRUCTIVE claim - the 526 shape"
   },
   {
    "class": "C1",
@@ -509,25 +626,16 @@
    "what": "capped read `list()[:12]` in `build_utah` then a whole-population claim at line 1275: 'Fund-level total for the whole fund; no well, tract or grantee is named.'",
    "size": 12,
    "unit": "row cap",
-   "detail": "assertive claim"
+   "detail": "DESTRUCTIVE claim - the 526 shape"
   },
   {
    "class": "C1",
    "where": "code/88_gaming_property_federal_traces.py",
    "line": 176,
-   "what": "capped read `break at 90 rows` in `fr_compact_traces` then a whole-population claim at line 2: 'Cedar Press 88 \u2014 how many independent federal traces does each property leave?\\n\\nElijah, 2026-08-06:\\n    \"if we cant link them to federal actions in registra and'",
+   "what": "capped read `break at 90 rows` in `fr_compact_traces` then a whole-population claim at line 476: 'A cross-reference stub or ruled duplicate; the property is held on another row. Retained, never deleted.'  [claim is in `main()`, which calls `fr_compact_traces()` - the cap is INVISIBLE at the claim]",
    "size": 90,
    "unit": "row cap",
-   "detail": "assertive claim"
-  },
-  {
-   "class": "C1",
-   "where": "code/cedar_period_columns.py",
-   "line": 186,
-   "what": "capped read `list()[:10]` in `resolve` then a whole-population claim at line 170: 'Return the period column this table declares, or None if it declares none.\\n\\n    Raises PeriodColumnMissing when a declaration exists and NONE of its\\n    columns'",
-   "size": 10,
-   "unit": "row cap",
-   "detail": "assertive claim"
+   "detail": "DESTRUCTIVE claim - the 526 shape"
   },
   {
    "class": "C1",
@@ -595,101 +703,29 @@
   {
    "class": "C2",
    "where": "code/1115_defect_class_retro_sweep.py",
-   "line": 906,
+   "line": 1099,
+   "what": "input glob `*.md` matches this script's OWN output ['x.md']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
+   "size": 1,
+   "unit": "own outputs matched",
+   "detail": "written at line 1863; written at line 1869"
+  },
+  {
+   "class": "C2",
+   "where": "code/1115_defect_class_retro_sweep.py",
+   "line": 1099,
+   "what": "input glob `*.md` matches this script's OWN output ['x.md']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
+   "size": 1,
+   "unit": "own outputs matched",
+   "detail": "written at line 1863; written at line 1869"
+  },
+  {
+   "class": "C2",
+   "where": "code/1115_defect_class_retro_sweep.py",
+   "line": 1217,
    "what": "input glob `*.csv` matches this script's OWN output ['neg.csv', 'pos.csv']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
    "size": 2,
    "unit": "own outputs matched",
-   "detail": "written at line 1364; written at line 1371"
-  },
-  {
-   "class": "C2",
-   "where": "code/117_build_gaming_devices.py",
-   "line": 1228,
-   "what": "input glob `*` matches this script's OWN output ['json']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
-   "size": 1,
-   "unit": "own outputs matched",
-   "detail": "written at line 437; written at line 437"
-  },
-  {
-   "class": "C2",
-   "where": "code/321_gate_tribal_source_restriction.py",
-   "line": 232,
-   "what": "input glob `*` matches this script's OWN output ['selftest.csv']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
-   "size": 1,
-   "unit": "own outputs matched",
-   "detail": "written at line 217"
-  },
-  {
-   "class": "C2",
-   "where": "code/512_build_dataset_contracts.py",
-   "line": 3614,
-   "what": "input glob `*/*` matches this script's OWN output ['docs/DATASET_CONTRACTS.md', 'docs/GRAIN_AUDIT.md', 'docs/schema/dataset_contracts.json', 'docs/schema/grain_evidence.json']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
-   "size": 4,
-   "unit": "own outputs matched",
-   "detail": "written at line 3816; written at line 4225; written at line 4372; written at line 4382"
-  },
-  {
-   "class": "C2",
-   "where": "code/516_release_manifest.py",
-   "line": 213,
-   "what": "input glob `*` matches this script's OWN output ['REPLAY_README.txt', 'adaptations.json', 'manifest.json']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
-   "size": 3,
-   "unit": "own outputs matched",
-   "detail": "written at line 1673; written at line 2206; written at line 2233"
-  },
-  {
-   "class": "C2",
-   "where": "code/516_release_manifest.py",
-   "line": 1722,
-   "what": "input glob `*` matches this script's OWN output ['REPLAY_README.txt', 'adaptations.json', 'manifest.json']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
-   "size": 3,
-   "unit": "own outputs matched",
-   "detail": "written at line 1673; written at line 2206; written at line 2233"
-  },
-  {
-   "class": "C2",
-   "where": "code/516_release_manifest.py",
-   "line": 2466,
-   "what": "input glob `*` matches this script's OWN output ['REPLAY_README.txt', 'adaptations.json', 'manifest.json']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
-   "size": 3,
-   "unit": "own outputs matched",
-   "detail": "written at line 1673; written at line 2206; written at line 2233"
-  },
-  {
-   "class": "C2",
-   "where": "code/516_release_manifest.py",
-   "line": 956,
-   "what": "input glob `*` matches this script's OWN output ['REPLAY_README.txt', 'adaptations.json', 'manifest.json']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
-   "size": 3,
-   "unit": "own outputs matched",
-   "detail": "written at line 1673; written at line 2206; written at line 2233"
-  },
-  {
-   "class": "C2",
-   "where": "code/516_release_manifest.py",
-   "line": 976,
-   "what": "input glob `*` matches this script's OWN output ['REPLAY_README.txt', 'adaptations.json', 'manifest.json']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
-   "size": 3,
-   "unit": "own outputs matched",
-   "detail": "written at line 1673; written at line 2206; written at line 2233"
-  },
-  {
-   "class": "C2",
-   "where": "code/516_release_manifest.py",
-   "line": 1958,
-   "what": "input glob `*` matches this script's OWN output ['REPLAY_README.txt', 'adaptations.json', 'manifest.json']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
-   "size": 3,
-   "unit": "own outputs matched",
-   "detail": "written at line 1673; written at line 2206; written at line 2233"
-  },
-  {
-   "class": "C2",
-   "where": "code/860_state2_acquisition.py",
-   "line": 979,
-   "what": "input glob `*` matches this script's OWN output ['_xml_fetch_log.csv']. The second run reads the first run's answer as if it were evidence - the `830` shape (median 0 days; 0 register-only entities).",
-   "size": 1,
-   "unit": "own outputs matched",
-   "detail": "written at line 872; written at line 889"
+   "detail": "written at line 1822; written at line 1829"
   },
   {
    "class": "C3",
@@ -756,15 +792,6 @@
   },
   {
    "class": "C3",
-   "where": "code/106_build_revenue_bounds.py",
-   "line": 1548,
-   "what": "unanchored substring test decides an outcome: `'tribe_holds_no_gaming_property' in r['conditions_failed']` in `write_log`",
-   "size": 1,
-   "unit": "site",
-   "detail": "f\"{sum(1 for r in refusals if 'tribe_holds_no_gaming_property' in r['conditions_failed'])} |\")"
-  },
-  {
-   "class": "C3",
    "where": "code/1070_anc_nho_business_sweep.py",
    "line": 1383,
    "what": "unanchored substring test decides an outcome: `'/wp-json/' in url` in `harvest_hit`",
@@ -801,12 +828,12 @@
   },
   {
    "class": "C3",
-   "where": "code/1082_tribal_debt_holdings_disclosure.py",
-   "line": 796,
-   "what": "unanchored substring test decides an outcome: `cname in key` in `resolve_obligor`",
+   "where": "code/1078_gaming_joint_operators.py",
+   "line": 218,
+   "what": "unanchored substring test decides an outcome: `SEP in (r.get('tribe') or '')` in `main`",
    "size": 1,
    "unit": "site",
-   "detail": "if key in cname or cname in key:"
+   "detail": "if SEP in (r.get(\"tribe\") or \"\") and int(r[\"n_operating_entities\"]) < 2:"
   },
   {
    "class": "C3",
@@ -837,21 +864,57 @@
   },
   {
    "class": "C3",
-   "where": "code/1112_harvest_coverage_matrix.py",
-   "line": 879,
-   "what": "unanchored substring test decides an outcome: `k in r['contamination_flags']` in `report`",
+   "where": "code/1116_ruling_propagation_2026_09_02.py",
+   "line": 177,
+   "what": "unanchored substring test decides an outcome: `'SEALED' in (r['state_revenue_disclosure_status'] or '').upper()` in `d_sealed`",
    "size": 1,
    "unit": "site",
-   "detail": "ents = len({r[\"cedar_uid\"] for r in rows if k in r[\"contamination_flags\"]})"
+   "detail": "if \"SEALED\" in (r[\"state_revenue_disclosure_status\"] or \"\").upper()"
+  },
+  {
+   "class": "C3",
+   "where": "code/1116_ruling_propagation_2026_09_02.py",
+   "line": 381,
+   "what": "unanchored substring test decides an outcome: `'COPPER RIVER' in ((r.get('awardee_name') or '') + ' ' + (r.get('parent_name') or '')).upper()` in `d_eyak`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if \"COPPER RIVER\" in ("
   },
   {
    "class": "C3",
    "where": "code/111_build_advocacy_passthrough.py",
-   "line": 1253,
-   "what": "unanchored substring test decides an outcome: `e in D['np_fin_by_ein']` in `step_report`",
+   "line": 916,
+   "what": "unanchored substring test decides an outcome: `'7871' in (e.get('recipient_irc_as_filed') or '')` in `step_join`",
    "size": 1,
    "unit": "site",
-   "detail": "in_fin = {e for e in rec_eins if e in D[\"np_fin_by_ein\"]}"
+   "detail": "or \"7871\" in (e.get(\"recipient_irc_as_filed\") or \"\"):"
+  },
+  {
+   "class": "C3",
+   "where": "code/112_pull_grantee_990s.py",
+   "line": 1148,
+   "what": "unanchored substring test decides an outcome: `'FORM990' in (r.get('recipient_lobbying_source') or '')` in `step_passthrough`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if \"FORM990\" in (r.get(\"recipient_lobbying_source\") or \"\")]"
+  },
+  {
+   "class": "C3",
+   "where": "code/117_build_gaming_devices.py",
+   "line": 1145,
+   "what": "unanchored substring test decides an outcome: `'Federally recognized' in (row.get('entity_class') or '')` in `from_arizona_annual`",
+   "size": 1,
+   "unit": "site",
+   "detail": "gov = \"Federally recognized\" in (row.get(\"entity_class\") or \"\")"
+  },
+  {
+   "class": "C3",
+   "where": "code/118_build_gaming_ordinances.py",
+   "line": 242,
+   "what": "unanchored substring test decides an outcome: `str(pid) in (r.stdout or '')` in `claim_lock`",
+   "size": 1,
+   "unit": "site",
+   "detail": "alive = str(pid) in (r.stdout or \"\")"
   },
   {
    "class": "C3",
@@ -909,12 +972,12 @@
   },
   {
    "class": "C3",
-   "where": "code/142_build_property_site_observations.py",
-   "line": 1430,
-   "what": "unanchored substring test decides an outcome: `k in s['hosts']` in `phase_extract`",
+   "where": "code/141_pull_sam_contract_awards.py",
+   "line": 176,
+   "what": "unanchored substring test decides an outcome: `'API_KEY_INVALID' in (rec.get('note') or '')` in `spent_today`",
    "size": 1,
    "unit": "site",
-   "detail": "if k in s[\"hosts\"]))"
+   "detail": "if rec.get(\"http_status\") == 401 and \"API_KEY_INVALID\" in (rec.get(\"note\") or \"\"):"
   },
   {
    "class": "C3",
@@ -927,48 +990,12 @@
   },
   {
    "class": "C3",
-   "where": "code/163_load_sam_contract_awards.py",
-   "line": 591,
-   "what": "unanchored substring test decides an outcome: `piid in pidx['piid']` in `normalise`",
+   "where": "code/182_rule_lobbying_registrant_native_ownership.py",
+   "line": 564,
+   "what": "unanchored substring test decides an outcome: `'Alaska Native Village' in (best['native_entity_class'] or '')` in `main`",
    "size": 1,
    "unit": "site",
-   "detail": "piid_held = piid in pidx[\"piid\"]"
-  },
-  {
-   "class": "C3",
-   "where": "code/163_load_sam_contract_awards.py",
-   "line": 818,
-   "what": "unanchored substring test decides an outcome: `u in pidx['uei']` in `new_entities`",
-   "size": 1,
-   "unit": "site",
-   "detail": "if not u or u in pidx[\"uei\"]:"
-  },
-  {
-   "class": "C3",
-   "where": "code/163_load_sam_contract_awards.py",
-   "line": 663,
-   "what": "unanchored substring test decides an outcome: `uei in pidx['uei']` in `normalise`",
-   "size": 1,
-   "unit": "site",
-   "detail": "\"recon_uei_held\": \"1\" if uei and uei in pidx[\"uei\"] else \"0\","
-  },
-  {
-   "class": "C3",
-   "where": "code/169_build_identifier_graph.py",
-   "line": 846,
-   "what": "unanchored substring test decides an outcome: `dsname.replace('federal_funding', 'federal_funding_transactions') in r['path']` in `<module>`",
-   "size": 1,
-   "unit": "site",
-   "detail": "if r[\"hops\"] == 0 and dsname.replace(\"federal_funding\","
-  },
-  {
-   "class": "C3",
-   "where": "code/169_build_identifier_graph.py",
-   "line": 1045,
-   "what": "unanchored substring test decides an outcome: `'need_v6' in r['path']` in `<module>`",
-   "size": 1,
-   "unit": "site",
-   "detail": "if \"need_v6\" in r[\"path\"] else \"\"),"
+   "detail": "if \"Alaska Native Village\" in (best[\"native_entity_class\"] or \"\") \\"
   },
   {
    "class": "C3",
@@ -1143,15 +1170,6 @@
   },
   {
    "class": "C3",
-   "where": "code/522_mine_rulings.py",
-   "line": 166,
-   "what": "unanchored substring test decides an outcome: `'agent' in r['source_file']` in `assemble`",
-   "size": 1,
-   "unit": "site",
-   "detail": "add(\"AGENT\" if \"agent\" in r[\"source_file\"] else \"MIXED\","
-  },
-  {
-   "class": "C3",
    "where": "code/523_spiderweb_harvest.py",
    "line": 144,
    "what": "unanchored substring test decides an outcome: `FED_NAME in (r.get('parent_name') or '').upper()` in `federal_rollup_ueis`",
@@ -1197,12 +1215,66 @@
   },
   {
    "class": "C3",
-   "where": "code/600_shard_f_service_area.py",
-   "line": 204,
-   "what": "unanchored substring test decides an outcome: `'constituency entity' in e['entity_class']` in `main`",
+   "where": "code/59_build_deal_source_index.py",
+   "line": 86,
+   "what": "unanchored substring test decides an outcome: `'.gov/' in (url or '')` in `classify`",
    "size": 1,
    "unit": "site",
-   "detail": "band = \"constituency entity\" in e[\"entity_class\"]"
+   "detail": "if d.endswith(\".gov\") or \".gov/\" in (url or \"\") or d.endswith(\".mil\"):"
+  },
+  {
+   "class": "C3",
+   "where": "code/603_rule_review_backlog_classes.py",
+   "line": 400,
+   "what": "unanchored substring test decides an outcome: `'county_not_a_tribe' in reason` in `rule_16_9`",
+   "size": 1,
+   "unit": "site",
+   "detail": "elif \"county_not_a_tribe\" in reason or \"different_kind_of_institution\" in reason:"
+  },
+  {
+   "class": "C3",
+   "where": "code/603_rule_review_backlog_classes.py",
+   "line": 405,
+   "what": "unanchored substring test decides an outcome: `'generic_or_trap_tokens_only' in reason` in `rule_16_9`",
+   "size": 1,
+   "unit": "site",
+   "detail": "elif \"generic_or_trap_tokens_only\" in reason or \"single_token_entity_core\" in reason:"
+  },
+  {
+   "class": "C3",
+   "where": "code/603_rule_review_backlog_classes.py",
+   "line": 405,
+   "what": "unanchored substring test decides an outcome: `'single_token_entity_core' in reason` in `rule_16_9`",
+   "size": 1,
+   "unit": "site",
+   "detail": "elif \"generic_or_trap_tokens_only\" in reason or \"single_token_entity_core\" in reason:"
+  },
+  {
+   "class": "C3",
+   "where": "code/630_refresh_cadence.py",
+   "line": 1421,
+   "what": "unanchored substring test decides an outcome: `'wp-json' in (r.get('url') or '')` in `measure_change_detection`",
+   "size": 1,
+   "unit": "site",
+   "detail": "wp = [r for r in rows if \"wp-json\" in (r.get(\"url\") or \"\")]"
+  },
+  {
+   "class": "C3",
+   "where": "code/630_refresh_cadence.py",
+   "line": 1422,
+   "what": "unanchored substring test decides an outcome: `'X-WP-Total' in (r.get('evidence') or '')` in `measure_change_detection`",
+   "size": 1,
+   "unit": "site",
+   "detail": "with_total = [r for r in wp if \"X-WP-Total\" in (r.get(\"evidence\") or \"\")]"
+  },
+  {
+   "class": "C3",
+   "where": "code/67_sam_entity_harvest.py",
+   "line": 143,
+   "what": "unanchored substring test decides an outcome: `'KEY INVALID' in (err or '')` in `discover`",
+   "size": 1,
+   "unit": "site",
+   "detail": "if \"KEY INVALID\" in (err or \"\"):"
   },
   {
    "class": "C3",
@@ -1243,15 +1315,6 @@
   {
    "class": "C3",
    "where": "code/701_enterprise_and_business_list_sweep.py",
-   "line": 1595,
-   "what": "unanchored substring test decides an outcome: `'/wp-json/' in row['url']` in `harvest_page`",
-   "size": 1,
-   "unit": "site",
-   "detail": "if \"/wp-json/\" in row[\"url\"]:"
-  },
-  {
-   "class": "C3",
-   "where": "code/701_enterprise_and_business_list_sweep.py",
    "line": 438,
    "what": "unanchored substring test decides an outcome: `'SSL' in str(r['status'])` in `reach`",
    "size": 1,
@@ -1278,24 +1341,6 @@
   },
   {
    "class": "C3",
-   "where": "code/751_fr_refresh_promote.py",
-   "line": 269,
-   "what": "unanchored substring test decides an outcome: `'cedar_uid' in before['cols']` in `stage_restamp`",
-   "size": 1,
-   "unit": "site",
-   "detail": "+ (\"\" if \"cedar_uid\" in before[\"cols\"] else \"   <-- COLUMN RESTORED\"))"
-  },
-  {
-   "class": "C3",
-   "where": "code/76_build_recognition_history.py",
-   "line": 1894,
-   "what": "unanchored substring test decides an outcome: `'Lumbee' in e['entity_name']` in `write_log_doc`",
-   "size": 1,
-   "unit": "site",
-   "detail": "lum = next((e for e in events if \"Lumbee\" in e[\"entity_name\"]), None)"
-  },
-  {
-   "class": "C3",
    "where": "code/77_philanthropy_review_queue.py",
    "line": 453,
    "what": "unanchored substring test decides an outcome: `'indigenous' in ' '.join(r['native_tokens']).lower()` in `main`",
@@ -1314,6 +1359,24 @@
   },
   {
    "class": "C3",
+   "where": "code/846_session_audit.py",
+   "line": 342,
+   "what": "unanchored substring test decides an outcome: `'NO CASINO' in (r.get('facility_name') or '').upper()` in `_denom`",
+   "size": 1,
+   "unit": "site",
+   "detail": "ph = [r for r in rs if \"NO CASINO\" in (r.get(\"facility_name\") or \"\").upper()]"
+  },
+  {
+   "class": "C3",
+   "where": "code/851_build_constellation_edges.py",
+   "line": 1212,
+   "what": "unanchored substring test decides an outcome: `NEVER_ALONE in (e['corroborating_tiers'] or '')` in `report`",
+   "size": 1,
+   "unit": "site",
+   "detail": "corr = [e for e in edges if NEVER_ALONE in (e[\"corroborating_tiers\"] or \"\")]"
+  },
+  {
+   "class": "C3",
    "where": "code/85_build_admin_region_crosswalk.py",
    "line": 520,
    "what": "unanchored substring test decides an outcome: `'field office' in lab` in `office_type`",
@@ -1323,21 +1386,21 @@
   },
   {
    "class": "C3",
+   "where": "code/90_fetch_nigc_declinations.py",
+   "line": 127,
+   "what": "unanchored substring test decides an outcome: `str(pid) in (r.stdout or '')` in `claim_lock`",
+   "size": 1,
+   "unit": "site",
+   "detail": "alive = str(pid) in (r.stdout or \"\")"
+  },
+  {
+   "class": "C3",
    "where": "code/94_rescan_universes.py",
    "line": 273,
    "what": "unanchored substring test decides an outcome: `tier in 'ABC'` in `<module>`",
    "size": 1,
    "unit": "site",
    "detail": "tier if tier in \"ABC\" else \"C\","
-  },
-  {
-   "class": "C3",
-   "where": "code/94_rescan_universes.py",
-   "line": 1030,
-   "what": "unanchored substring test decides an outcome: `idv in LED['UEI']` in `do_faads`",
-   "size": 1,
-   "unit": "site",
-   "detail": "if idt == \"UEI\" and idv in LED[\"UEI\"]:"
   },
   {
    "class": "C3",
@@ -1377,6 +1440,15 @@
   },
   {
    "class": "C3",
+   "where": "code/992_newsletter_deal_candidates.py",
+   "line": 501,
+   "what": "unanchored substring test decides an outcome: `'IDENTICAL_BODY_REPEAT' in (d.get('note') or '')` in `summarize`",
+   "size": 1,
+   "unit": "site",
+   "detail": "1 for d in docs if \"IDENTICAL_BODY_REPEAT\" in (d.get(\"note\") or \"\")),"
+  },
+  {
+   "class": "C3",
    "where": "code/ancsa_portal/download.py",
    "line": 18,
    "what": "unanchored substring test decides an outcome: `'video' in ct` in `fetch`",
@@ -1392,6 +1464,366 @@
    "size": 1,
    "unit": "site",
    "detail": "if not name or 'TOTAL' in name.upper():"
+  },
+  {
+   "class": "C5",
+   "where": "code/1079_quarantine_method_exposure.py",
+   "line": 1511,
+   "what": "`main()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def main(mode):"
+  },
+  {
+   "class": "C5",
+   "where": "code/107_pull_remaining_states.py",
+   "line": 907,
+   "what": "`main()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def main():"
+  },
+  {
+   "class": "C5",
+   "where": "code/1081_stale_tail_dated_facts.py",
+   "line": 1321,
+   "what": "`write_doc()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def write_doc():"
+  },
+  {
+   "class": "C5",
+   "where": "code/1084_nagpra_split_artefact_audit.py",
+   "line": 456,
+   "what": "`run()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def run(verify: bool, quiet: bool = False) -> int:"
+  },
+  {
+   "class": "C5",
+   "where": "code/1088_merge_staged_deals.py",
+   "line": 600,
+   "what": "`main()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def main(argv):"
+  },
+  {
+   "class": "C5",
+   "where": "code/1089_fr_consultation_overlap_and_event_parse.py",
+   "line": 838,
+   "what": "`run()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def run(apply_mode):"
+  },
+  {
+   "class": "C5",
+   "where": "code/1123_copper_river_attribution.py",
+   "line": 108,
+   "what": "`main()` PASSES VACUOUSLY. Its whole success condition is the EMPTINESS of filtered list(s) ['anc', 'bad', 'targets']; nothing anywhere requires the population those filters draw from to be non-empty. If the filter matches nothing the gate prints a clean 0 and exits 0. The `1123` shape - conservation to the cent, nothing attributed.",
+   "size": 3,
+   "unit": "filtered lists",
+   "detail": "not bad and (not anc)"
+  },
+  {
+   "class": "C5",
+   "where": "code/1123_copper_river_attribution.py",
+   "line": 108,
+   "what": "`main()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def main() -> int:"
+  },
+  {
+   "class": "C5",
+   "where": "code/113_build_nd_severance.py",
+   "line": 1898,
+   "what": "`write_log()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def write_log(rows, alloc_rows, gpt, oet, alloc, straddle_m, stn, stn_zero,"
+  },
+  {
+   "class": "C5",
+   "where": "code/114_pull_prime_archive.py",
+   "line": 1663,
+   "what": "`cmd_rebuild()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def cmd_rebuild(args):"
+  },
+  {
+   "class": "C5",
+   "where": "code/114_pull_prime_archive.py",
+   "line": 1977,
+   "what": "`cmd_doc()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def cmd_doc(args):"
+  },
+  {
+   "class": "C5",
+   "where": "code/144_build_admin_appeals.py",
+   "line": 1016,
+   "what": "`stage_positions()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def stage_positions():"
+  },
+  {
+   "class": "C5",
+   "where": "code/153_merge_base_ledgers_into_classified.py",
+   "line": 123,
+   "what": "`main()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def main():"
+  },
+  {
+   "class": "C5",
+   "where": "code/154_extend_autoresolved_parties_additive.py",
+   "line": 110,
+   "what": "`main()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def main():"
+  },
+  {
+   "class": "C5",
+   "where": "code/163_promote_nho_universe_in_place.py",
+   "line": 385,
+   "what": "`main()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def main():"
+  },
+  {
+   "class": "C5",
+   "where": "code/168_link_adjudication_hubs.py",
+   "line": 675,
+   "what": "`main()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def main():"
+  },
+  {
+   "class": "C5",
+   "where": "code/175_restore_ferc_docket_table_after_rebuild_revert.py",
+   "line": 100,
+   "what": "`main()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def main():"
+  },
+  {
+   "class": "C5",
+   "where": "code/227_anomaly_sweep.py",
+   "line": 2596,
+   "what": "`write_report()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def write_report(results, anomalies, regressions, nsaudit, stress, elapsed):"
+  },
+  {
+   "class": "C5",
+   "where": "code/241_promote_individual_native_firms_in_place.py",
+   "line": 428,
+   "what": "`main()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def main():"
+  },
+  {
+   "class": "C5",
+   "where": "code/287_build_dependency_manifest.py",
+   "line": 109,
+   "what": "`main()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def main():"
+  },
+  {
+   "class": "C5",
+   "where": "code/35_entity_harvest.py",
+   "line": 1623,
+   "what": "`write_md()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def write_md(s: dict):"
+  },
+  {
+   "class": "C5",
+   "where": "code/418_build_entity_alias_layer.py",
+   "line": 173,
+   "what": "`main()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def main():"
+  },
+  {
+   "class": "C5",
+   "where": "code/426_mint_bristol_bay_spine_entities.py",
+   "line": 182,
+   "what": "`main()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def main():"
+  },
+  {
+   "class": "C5",
+   "where": "code/427_repoint_bristol_bay_attributions.py",
+   "line": 401,
+   "what": "`apply_file()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def apply_file(rel, specs, check, log):"
+  },
+  {
+   "class": "C5",
+   "where": "code/502_archive_candidates.py",
+   "line": 68,
+   "what": "`main()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def main() -> int:"
+  },
+  {
+   "class": "C5",
+   "where": "code/516_release_manifest.py",
+   "line": 2067,
+   "what": "`cmd_replay()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def cmd_replay(args) -> int:"
+  },
+  {
+   "class": "C5",
+   "where": "code/572_ws2_contracts.py",
+   "line": 509,
+   "what": "`merge_conservation()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def merge_conservation(new_rows):"
+  },
+  {
+   "class": "C5",
+   "where": "code/585_factcheck_nigc_keys.py",
+   "line": 213,
+   "what": "`main()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def main():"
+  },
+  {
+   "class": "C5",
+   "where": "code/71_fix_known_defects.py",
+   "line": 121,
+   "what": "`main()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def main():"
+  },
+  {
+   "class": "C5",
+   "where": "code/741_hub_grain_and_rebuild.py",
+   "line": 224,
+   "what": "`cmd_edges()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def cmd_edges():"
+  },
+  {
+   "class": "C5",
+   "where": "code/751_fr_refresh_promote.py",
+   "line": 208,
+   "what": "`stage_restamp()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def stage_restamp():"
+  },
+  {
+   "class": "C5",
+   "where": "code/76_build_recognition_history.py",
+   "line": 1594,
+   "what": "`write_log_doc()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def write_log_doc(recon, roster, events, props, per_notice, missing, unparsed,"
+  },
+  {
+   "class": "C5",
+   "where": "code/770_sample_extracts.py",
+   "line": 817,
+   "what": "`main()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def main() -> int:"
+  },
+  {
+   "class": "C5",
+   "where": "code/860_state2_acquisition.py",
+   "line": 376,
+   "what": "`cmd_lda_match()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def cmd_lda_match():"
+  },
+  {
+   "class": "C5",
+   "where": "code/860_state2_acquisition.py",
+   "line": 649,
+   "what": "`cmd_mgcb_promote()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def cmd_mgcb_promote():"
+  },
+  {
+   "class": "C5",
+   "where": "code/860_state2_acquisition.py",
+   "line": 1264,
+   "what": "`cmd_foia()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def cmd_foia():"
+  },
+  {
+   "class": "C5",
+   "where": "code/860_state2_acquisition.py",
+   "line": 1473,
+   "what": "`cmd_restamp()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def cmd_restamp():"
+  },
+  {
+   "class": "C5",
+   "where": "code/900_nr_hub_join.py",
+   "line": 368,
+   "what": "`main()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def main() -> int:"
+  },
+  {
+   "class": "C5",
+   "where": "code/901_nr_record_scope.py",
+   "line": 247,
+   "what": "`main()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def main() -> int:"
+  },
+  {
+   "class": "C5",
+   "where": "code/91_apply_existing_rulings.py",
+   "line": 84,
+   "what": "`main()` writes, then compares a BEFORE total against an AFTER total - a conservation proof - and never gates on how many rows it actually CHANGED. Conservation to the cent is compatible with attributing nothing.",
+   "size": 1,
+   "unit": "conservation-only writer",
+   "detail": "def main():"
   },
   {
    "class": "C8",
@@ -1845,111 +2277,30 @@
   },
   {
    "class": "C12",
-   "where": "docs/ARCHITECTURE_DECISIONS.md",
+   "where": "docs/KNOWN_ISSUES.md",
    "line": 0,
-   "what": "marker name `ADR-014` appears in 2 file(s) / 2 marker line(s). Two blocks with one name are ONE block to the preserver.",
-   "size": 2,
-   "unit": "marker lines",
-   "detail": "docs/ARCHITECTURE_DECISIONS.md x1; docs/CONSTELLATION_EXTENSION_LOG.md x1"
-  },
-  {
-   "class": "C12",
-   "where": "docs/ARCHITECTURE_DECISIONS.md",
-   "line": 0,
-   "what": "marker name `ADR-020-SUBHUB-REGISTERS` appears in 2 file(s) / 2 marker line(s). Two blocks with one name are ONE block to the preserver.",
-   "size": 2,
-   "unit": "marker lines",
-   "detail": "docs/ARCHITECTURE_DECISIONS.md x1; docs/ENTITY_LAYER_DEEPENING_2026-09-02.md x1"
-  },
-  {
-   "class": "C12",
-   "where": "docs/ARCHITECTURE_DECISIONS.md",
-   "line": 0,
-   "what": "marker name `CADENCE-MEASURED` appears in 2 file(s) / 2 marker line(s). Two blocks with one name are ONE block to the preserver.",
-   "size": 2,
-   "unit": "marker lines",
-   "detail": "docs/ARCHITECTURE_DECISIONS.md x1; docs/REFRESH_CADENCE.md x1"
-  },
-  {
-   "class": "C12",
-   "where": "docs/datasets/01_deals.md",
-   "line": 0,
-   "what": "marker name `COVERAGE-MEASURED` appears in 19 file(s) / 19 marker line(s). Two blocks with one name are ONE block to the preserver.",
-   "size": 19,
-   "unit": "marker lines",
-   "detail": "docs/datasets/01_deals.md x1; docs/datasets/02_contracting.md x1; docs/datasets/02b_subcontracting.md x1; docs/datasets/03_funding.md x1; docs/datasets/04_lobbying.md x1; docs/datasets/06_nonprofit.md x1; docs/datasets/09_federal_actions.md x1; docs/datasets/10_bills_votes.md x1; docs/datasets/11_nagpra.md x1; docs/datasets/_entity_layer.md x1; docs/datasets/compacts.md x1; docs/datasets/federal-register.md x1; docs/datasets/gaming.md x1; docs/datasets/gaming_sources.md x1; docs/datasets/lobbying_sources.md x1; docs/datasets/nagpra.md x1; docs/datasets/native-owned-businesses.md x1; docs/datasets/natural_resources_sources.md x1; docs/datasets/subcontracting.md x1"
-  },
-  {
-   "class": "C12",
-   "where": "docs/ARCHITECTURE_DECISIONS.md",
-   "line": 0,
-   "what": "marker name `DEALS-MERGE-1088` appears in 2 file(s) / 4 marker line(s). Two blocks with one name are ONE block to the preserver.",
-   "size": 4,
-   "unit": "marker lines",
-   "detail": "docs/ARCHITECTURE_DECISIONS.md x2; docs/MONEY_TOTALLING_RULES.md x2"
-  },
-  {
-   "class": "C12",
-   "where": "docs/MONEY_TOTALLING_RULES.md",
-   "line": 0,
-   "what": "marker name `FAADS` appears in 2 file(s) / 4 marker line(s). Two blocks with one name are ONE block to the preserver.",
-   "size": 4,
-   "unit": "marker lines",
-   "detail": "docs/MONEY_TOTALLING_RULES.md x2; AGENTS.md x2"
+   "what": "marker `INT-READY` is used in 2 files but no single generator writes two of them, so the reuse is cosmetic",
+   "size": 0,
+   "unit": "files",
+   "detail": "docs/KNOWN_ISSUES.md; docs/MONEY_TOTALLING_RULES.md"
   },
   {
    "class": "C12",
    "where": "docs/KNOWN_ISSUES.md",
    "line": 0,
-   "what": "marker name `INT-READY` appears in 2 file(s) / 2 marker line(s). Two blocks with one name are ONE block to the preserver.",
-   "size": 2,
-   "unit": "marker lines",
-   "detail": "docs/KNOWN_ISSUES.md x1; docs/MONEY_TOTALLING_RULES.md x1"
+   "what": "marker `QUARANTINE` is used in 2 files but no single generator writes two of them, so the reuse is cosmetic",
+   "size": 0,
+   "unit": "files",
+   "detail": "docs/KNOWN_ISSUES.md; docs/MONEY_TOTALLING_RULES.md"
   },
   {
    "class": "C12",
-   "where": "docs/ARCHITECTURE_DECISIONS.md",
+   "where": "docs/methodology/gaming.md",
    "line": 0,
-   "what": "marker name `NEWSLETTERS` appears in 2 file(s) / 3 marker line(s). Two blocks with one name are ONE block to the preserver.",
-   "size": 3,
-   "unit": "marker lines",
-   "detail": "docs/ARCHITECTURE_DECISIONS.md x1; docs/MONEY_TOTALLING_RULES.md x2"
-  },
-  {
-   "class": "C12",
-   "where": "docs/KNOWN_ISSUES.md",
-   "line": 0,
-   "what": "marker name `QUARANTINE` appears in 2 file(s) / 3 marker line(s). Two blocks with one name are ONE block to the preserver.",
-   "size": 3,
-   "unit": "marker lines",
-   "detail": "docs/KNOWN_ISSUES.md x1; docs/MONEY_TOTALLING_RULES.md x2"
-  },
-  {
-   "class": "C12",
-   "where": "docs/ARCHITECTURE_DECISIONS.md",
-   "line": 0,
-   "what": "marker name `SEC-GAMING` appears in 5 file(s) / 8 marker line(s). Two blocks with one name are ONE block to the preserver.",
-   "size": 8,
-   "unit": "marker lines",
-   "detail": "docs/ARCHITECTURE_DECISIONS.md x2; docs/methodology/gaming.md x2; docs/MONEY_TOTALLING_RULES.md x2; docs/SEC_GAMING_FACILITY_REVENUE_BUILD_LOG.md x1; START_HERE.md x1"
-  },
-  {
-   "class": "C12",
-   "where": "docs/PUBLICATION_POLICY.md",
-   "line": 0,
-   "what": "marker name `TERMS-OWNER-RULING-2026-09-02` appears in 1 file(s) / 3 marker line(s). Two blocks with one name are ONE block to the preserver.",
-   "size": 3,
-   "unit": "marker lines",
-   "detail": "docs/PUBLICATION_POLICY.md x3"
-  },
-  {
-   "class": "C12",
-   "where": "docs/PUBLICATION_POLICY.md",
-   "line": 0,
-   "what": "marker name `TERMS-SCOPE` appears in 2 file(s) / 2 marker line(s). Two blocks with one name are ONE block to the preserver.",
-   "size": 2,
-   "unit": "marker lines",
-   "detail": "docs/PUBLICATION_POLICY.md x1; docs/SEC_GAMING_FACILITY_REVENUE_BUILD_LOG.md x1"
+   "what": "marker `SEC-GAMING` is used in 2 files but no single generator writes two of them, so the reuse is cosmetic",
+   "size": 0,
+   "unit": "files",
+   "detail": "docs/methodology/gaming.md; docs/MONEY_TOTALLING_RULES.md"
   }
  ]
 }

@@ -554,21 +554,34 @@ assume otherwise.
   re-fetch is **byte-for-byte the size `_SOURCE_MANIFEST.csv` recorded**, so it
   is provably the same object) and took four attribute columns off them.
 
-  | column | was | is [measured 2026-09-02, after 1085] |
-  |---|---:|---:|
-  | `product_or_service_code` | 247,987 (20.4%) | **574,011 (47.1%)** |
-  | `product_or_service_code_description` | 247,987 (20.4%) | **574,011 (47.1%)** |
-  | `award_base_description` | 247,987 (20.4%) | **573,320 (47.1%)** |
-  | `naics_description` | 247,987 (20.4%) | **561,536 (46.1%)** |
-  | `naics_code` (6-digit) | 838,229 (68.8%) | 838,229 (68.8%) — unchanged |
+  | column | was | is [measured 2026-09-02T15:38Z, after the COMPLETE 1085 run] | of the 841,002 archive rows |
+  |---|---:|---:|---:|
+  | `product_or_service_code` | 247,987 (20.4%) | **840,754 (69.04%)** | **99.97%** |
+  | `product_or_service_code_description` | 247,987 (20.4%) | **840,738 (69.04%)** | 99.97% |
+  | `award_base_description` | 247,987 (20.4%) | **840,079 (68.99%)** | 99.89% |
+  | `naics_description` | 247,987 (20.4%) | **827,858 (67.98%)** | 98.44% |
+  | `naics_code` (6-digit) | 838,229 (68.8%) | 838,229 (68.8%) — unchanged | 99.67% |
 
-  **FY2008–FY2015 are at ~100% on the archive stratum; FY2016–FY2026 are still
-  on the gapfill corpus alone** (FY2016 4.7%, FY2026 94.2%). The remaining
-  eleven objects are QUEUED behind an edge block this run caused — eight
-  objects, ~9.4 GB, in twenty-six minutes with no inter-object pause — and the
-  script now paces at 480s and STOPS on a sub-second disconnect instead of
-  advancing to the next year. Rows and money conserved to the cent; `verify`
-  and `selftest` both exit 0.
+  **All nineteen archive objects are re-fetched and applied, and PSC fill is
+  99.7% or better of the archive stratum in every one of FY2008–FY2026.** The
+  intermediate 47.1% figures, and the FY2016 4.7% / FY2017 6.8% per-year
+  numbers, describe the eight-object partial run and are dead. The eleven
+  outstanding objects were fetched 12:12Z–15:09Z on 2026-09-02 at the 480s
+  pacing the earlier edge block earned; every year resolved on stamp
+  `20260806`, HTTP 200, and **no year was recorded absent.**
+
+  **The 10:45Z apply was reverted before those objects landed**, by
+  `871_promote_geo_keys_contracts.py` rebuilding the table at 09:11Z — PSC
+  measured back at exactly 247,987 at 15:34Z, and the evidence file
+  `prime_contracts.csv.REVERTED_BY_871_2026-09-02_kept_as_evidence` is beside
+  the table. Nothing was lost: the attribute files survive a revert and `apply`
+  is a pure re-run. **A stale pre-1085 backup was moved aside first**, because
+  `verify`'s row/money invariant compares against it and a comparand three
+  rebuilds old would have made the check pass on a lie. Rows
+  1,217,768 → 1,217,768 and $310,005,258,661.21 → $310,005,258,661.21,
+  conserved to the cent, 0 non-blank values overwritten; `verify` exit 0 and
+  `selftest` exit 0 with both invariants proven to fire on an injected
+  violation.
 
   **The 68.8% NAICS figure is the structural ceiling for all four columns and
   it is not laziness.** Only **841,002** rows carry

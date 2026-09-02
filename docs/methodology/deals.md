@@ -469,8 +469,8 @@ Three of the eight bear on this dataset:
   nation's press releases.
 
 > **A tension worth stating rather than leaving a reader to infer.**
-> `docs/PUBLICATION_POLICY.md` says a `TERMS_STATED_RESTRICTIVE` source is
-> excluded by every route *"including … the Wayback Machine"*, while
+> **SUPERSEDED 2026-09-02.** `docs/PUBLICATION_POLICY.md` ~~says~~ **said, until 2026-09-02,** that a
+> `TERMS_STATED_RESTRICTIVE` source is excluded by every route *"including … the Wayback Machine"*, while
 > `docs/DEALS_ANC_REPORTS_BUILD_LOG.md` records the Wayback CDX route as the
 > technique that reached NANA's 2001–2005 annual reports and produced three
 > rows. **The reconciliation is that the restriction attaches to the

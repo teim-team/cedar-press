@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Cedar Press - 1111: attribute the Copper River family to the Native Village of Eyak.
+Cedar Press - 1123: attribute the Copper River family to the Native Village of Eyak.
 
-    py -3 code/1111_copper_river_attribution.py            # report
-    py -3 code/1111_copper_river_attribution.py apply      # write, with .bak
-    py -3 code/1111_copper_river_attribution.py verify     # exit 1 on breach
+    py -3 code/1123_copper_river_attribution.py            # report
+    py -3 code/1123_copper_river_attribution.py apply      # write, with .bak
+    py -3 code/1123_copper_river_attribution.py verify     # exit 1 on breach
 
 WHY
 ---
@@ -59,6 +59,16 @@ It does not touch the Eyak Corporation rows, and it does not mint anything:
 both Eyak entities were already in the register. An earlier note claimed the
 Native Village of Eyak was absent and that $583M turned on minting it. Both
 halves were wrong.
+
+NUMBERED 1123, NOT 1111
+-----------------------
+This was written by hand as `1111` while another agent claimed 1111
+ATOMICALLY for `1111_probe_new_source_candidates.py` a minute later. The
+atomic claim exists precisely so this cannot happen and I did not use it -
+the 44th collision in a ratchet that has held at 43 since 2026-08-28, and
+worse than most because the night's record cites "script 1111" by itself.
+The claimant keeps the number; the hand-picked one moves. Commit messages
+from 2026-09-02 that say 1111 mean this file.
 """
 from __future__ import annotations
 
@@ -127,8 +137,28 @@ def main() -> int:
         if anc:
             print(f"  FAIL {len(anc)} Copper River row(s) on the Eyak "
                   f"CORPORATION, which is a different family")
+        # A PROOF THAT NOTHING BROKE IS NOT A PROOF THAT SOMETHING HAPPENED.
+        # Until 2026-09-02 the pass condition was `not bad and not anc` and
+        # nothing required `targets` to be non-empty. If `MARK` ever stopped
+        # matching - a rebuild that re-cases `awardee_name`, a column rename,
+        # a rebuild that drops the rows - this gate printed
+        # `1111 verify ok   0 Copper River rows, 0 not on the hub`
+        # and exited 0. An empty filter is the strongest PASS a check like
+        # this can give, which is exactly why it must be refused.
+        # 2,080+ rows are expected; the floor is deliberately far below the
+        # measured population so a legitimate shrink does not fail the gate,
+        # while a total miss cannot pass it.
+        EXPECT_MIN = 1000
+        if len(targets) < EXPECT_MIN:
+            print(f"  1123 verify   UNMEASURED   the `{MARK}` filter matched "
+                  f"{len(targets):,} rows, below the floor of {EXPECT_MIN:,}. "
+                  f"An empty or near-empty target set cannot prove the "
+                  f"attribution holds - it proves the filter stopped "
+                  f"matching. Check `awardee_name` casing and that "
+                  f"{PRIME.name} still carries the family.")
+            return 1
         ok = not bad and not anc
-        print(f"  1111 verify   {'ok' if ok else 'FAIL'}   "
+        print(f"  1123 verify   {'ok' if ok else 'FAIL'}   "
               f"{len(targets):,} Copper River rows, {len(bad)} not on the hub")
         return 0 if ok else 1
 
@@ -147,13 +177,13 @@ def main() -> int:
         except ValueError:
             pass
 
-    print(f"  1111 Copper River -> Native Village of Eyak   "
+    print(f"  1123 Copper River -> Native Village of Eyak   "
           f"{'APPLIED' if mode == 'apply' else 'report only'}")
     print(f"    rows attributed : {len(targets):,}")
     print(f"    obligations     : ${amt:,.2f}")
 
     if mode == "apply":
-        b = str(PRIME) + f".bak_{TODAY}_pre1111"
+        b = str(PRIME) + f".bak_{TODAY}_pre_1123_copper_river_attribution"
         if not Path(b).exists():
             shutil.copy2(PRIME, b)
         with PRIME.open("w", encoding="utf-8", newline="") as fh:

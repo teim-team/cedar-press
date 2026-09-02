@@ -194,6 +194,8 @@ The owner said rule 3 has "a few real examples". One is here, ruled by him on
 ```
 UEI:FM2KJG6M5363 / NAME:copper river family companies
 ruling = "Native Village of Eyak"      status = SETTLED
+*(**SUPERSEDED 2026-09-02.** The Native Village of Eyak **is in the spine** - `CE-0004H-T9`, `Eyak`, `Federally recognized Alaska Native Village` - so any document still saying it is not is stale, and any decision still queued on that gap is answered. Copper River in `prime_contracts.csv`: **4276 rows, $1,508,042,187.53**, of which **4272 carry `tribe_id = AKNF-NVEYAK-00-CHGCCO-CHGCMT`** by `attribution_method` = `ruling_applied` 4272, `unattributed` 4. **The ruling landed on the row that asked for it** - which is the whole point: a decision recorded only in a sibling file is a decision that gets asked again.)*
+
 ledger tier_rationale: "owner is Native Village of Eyak, not Kluti Kaah - but
 Native Village of Eyak is not in the spine (ambiguous_core:2_spine_entities),
 so this could not be re-attributed."

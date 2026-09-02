@@ -6,7 +6,7 @@ Target window: **2000-2026**.
 
 | Dataset | Observed | Rows | Interior gaps | Outside target window |
 |---|---|---:|---|---|
-| `deals` | 2000–2026 | 935 | none | complete |
+| `deals` | 2000–2026 | ~~935~~ **1,073** *(CORRECTED 2026-09-02: `code/1088_merge_staged_deals.py` merged the staged wave, 935 → 1,073 rows and `Announced_Value_USD` $45,195,917,316 → $47,880,355,533, **+$2,684,438,217**; conservation proved row-for-row, 0 of the 935 pre-merge rows lost)* | none | complete |
 | `federal_funding` | 2006–2026 | 701,955 | none | 6 yr |
 | `faads` | 2000–2007 | 2,769,748 | none | 19 yr |
 | `subcontracts` | 2001–2026 | 72,837 | 2005, 2006 | complete |
@@ -31,6 +31,16 @@ Target window: **2000-2026**.
 | `consultation_events` | 1994–2026 | 11,402 | none | complete |
 | `section_106_consultation_events` | 1994–2026 | 1,363 | none | complete |
 | `ferc_docket_filings` | 1990–2026 | 102,615 | none | complete |
+> **STALE DENOMINATORS — read before quoting anything below (2026-09-02).**
+> This document is hand-maintained and several of its denominators have moved:
+> `deals` 935 → **1,073**; `gaming_facilities` 787 is a **row** count and the
+> facility count is **734–780**; `subawards`, `federal_funding_transactions` and
+> the `prime_contracts` year rows are sourced from
+> `data/clean/coverage_audit.csv`, which `START_HERE.md` records as dated
+> 2026-08-06 and reporting **zero** rows for years that hold tens of thousands.
+> `docs/INVENTORY.md` (`code/521_inventory.py`) measures every table and **is**
+> regenerable; prefer it. Gate:
+> `py -3 code/1116_ruling_propagation_2026_09_02.py verify`.
 
 ## Interior gaps
 
@@ -52,7 +62,23 @@ A year inside a dataset's own range with zero rows. These are defects until prov
 - **`compacts`** — ends 2025, 1 yr short of 2026  
   *No documented source limit — treat as unfinished work.*
 > **GAMING-DENOMINATOR-2026-09-02 — the gaming denominator, re-derived from the live files.**
-> `gaming_facilities.csv` holds 787 ROWS. That is not a facility count and must not be a denominator. 7 of them are placeholders whose `facility_name` is literally `No casino`, recording that a nation operates none. 56 duplicate groups sit in `review/gaming_facility_duplicate_candidates_2026-09-02.csv`: 52 are same-tribe (`LIKELY_SAME_PROPERTY`) and hold 53 rows beyond one each, so collapsing them gives 787 - 53 = **734**; the other 4 are `DIFFERENT_TRIBES_CHECK_BOTH` and at least one of those - Stables Casino, Miami Tribe with Modoc Nation - is a JOINT OPERATION, not a duplicate. No verdict is applied: `duplicate_of_facility_id` is populated on 10 rows, not 53. So the honest range is **734 to 780** and the single thing every consumer must stop doing is dividing by 787 - it inflates the denominator by 7.2% and understates every coverage percentage in the gaming dataset by about 6.7%.
+> **`gaming_facilities.csv` holds 787 ROWS, and a row is not a facility.** The ladder, owned and gated by `code/846_session_audit.py::_denom`:
+> 
+> ```
+> 787   rows in gaming_facilities.csv
+> -16   whose NAME says no casino - 7 exactly "No casino", plus 9 more like
+>       "Grand Canyon West - no casino", "Tribal admin only - no casino"
+> =771   facility rows
+> -57   extra rows across the same-tribe duplicate groups
+> =714   distinct properties
+> ```
+> 
+> **FIVE denominators circulated on 2026-09-02 and all five were quoted as settled: 787, 780, 734, 727, 714.** Each came from a different definition of "facility" and none said which. 787 is raw rows; 780 removes only the 7 EXACT placeholders and misses the 9 that say it in a longer name; 734 is 787 minus duplicates with every placeholder left in; 727 is 780 minus a duplicate count of 53. **None of them is wrong about the piece it measured, and four of them are wrong as a denominator.** No verdict is applied in the table itself - `duplicate_of_facility_id` is populated on 10 rows, not 57 - so 714 is a measurement, not a state of the file. Note also that the duplicate register carries `DIFFERENT_TRIBES_CHECK_BOTH` groups that are **not** duplicates: Stables Casino pairs the Miami Tribe with Modoc Nation, which is a joint operation. Dividing by 787 inflates the denominator by 10.2% and understates every gaming coverage percentage by about 9.3%.
+>
+> Authority: `code/846_session_audit.py::_denom`, which gates this ladder.
+> Re-derive rather than quote: `py -3 code/1116_ruling_propagation_2026_09_02.py derive`.
+> `py -3 code/1116_ruling_propagation_2026_09_02.py verify` exits 1 while any
+> document in `docs/` or `review/` still states a superseded figure unmarked.
 >
 > Re-derive rather than quote: `py -3 code/1116_ruling_propagation_2026_09_02.py derive`.
 > `py -3 code/1116_ruling_propagation_2026_09_02.py verify` exits 1 while any
@@ -93,7 +119,7 @@ Two files can form one continuous series. Judged separately each looks short; ju
 
 A row with no parseable date cannot be placed in any year, so it silently vanishes from every time series built off this data.
 
-- **`deals`** — 5 of 935 (0.5%)
+- **`deals`** — 5 of ~~935~~ **1,073** (0.5% → re-derive; the denominator moved)
 - **`native_bills`** — 8 of 3,069 (0.3%)
 - **`gaming_decision_events`** — 25 of 265 (9.4%)
 - **`gaming_facilities`** — 151 of 787 (19.2%)

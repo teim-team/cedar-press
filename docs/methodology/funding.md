@@ -298,9 +298,31 @@ byte-identical to another row across all 27 columns, all of them inside the
 unkeyed FY2001–2006 region.** `cedar_export_safety.csv` books the table
 `ROW_LEVEL_ONLY / grain UNSTATED / 3441 literal duplicate rows`.
 
-**The documented recovery path, if an owner ever wants it:** re-pull the 54
-non-Interior FY2001–2006 agency-years, **merge the key onto existing rows by
-content — never replace them** — then re-run `791 repoint`.
+**The documented recovery path, if an owner ever wants it:** re-pull the
+**60** non-Interior FY2001–2006 agency-years, **merge the key onto existing rows
+by content — never replace them** — then re-run `791 repoint`.
+
+> **CORRECTED 2026-09-02T15:40Z, twice, by re-running
+> `code/1083_faads_zip_column_census.py` and re-measuring the live table.**
+>
+> **It is 60, not 54.** The narrow objects are
+> `{doc, doe, doj, dol, dot, ed, epa, hhs, hud, usda}` × `fy2001..fy2006`, and
+> `count(distinct source_file)` over the unkeyed rows is exactly **60**.
+>
+> **And reason 2 above — "there is no full-column route for those years" — is
+> wrong.** `seam/doi_fy2001.zip` is a **112-column FY2001 object carrying the
+> key**, pulled by this same script from this same
+> `bulk_download/awards` endpoint on 2026-08-05 at 19:06Z, **79 minutes before**
+> the 20-column `agencies/ed_fy2001.zip` at 20:25Z. The only difference is the
+> `columns` key in the payload. The archive listing beginning at FY2007 is true
+> and irrelevant — these objects never came from the archive.
+>
+> So the state of the 1,943,994 unkeyed rows is **`NOT_ACQUIRED`**, not
+> `SOURCE_DOES_NOT_PUBLISH`. **Reasons 1 and 3 are untouched and are what still
+> carries the refusal**: the bytes on disk do not hold the key and cannot be
+> made to (two of its five components are absent), and a re-pull must merge by
+> content or it re-points all 29,594 position-keyed attributions. Full evidence:
+> `docs/FAADS_TRANSACTION_KEY_SETTLEMENT_2026-09-02.md`, closing section.
 
 ### 4c. Two identifier schemes in one column, worth $107.50B — and the crosswalk deliberately not applied
 

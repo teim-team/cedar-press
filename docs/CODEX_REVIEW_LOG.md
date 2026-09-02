@@ -11,7 +11,23 @@ the whole story on its own.
 
 ---
 > **GAMING-DENOMINATOR-2026-09-02 — the gaming denominator, re-derived from the live files.**
-> `gaming_facilities.csv` holds 787 ROWS. That is not a facility count and must not be a denominator. 7 of them are placeholders whose `facility_name` is literally `No casino`, recording that a nation operates none. 56 duplicate groups sit in `review/gaming_facility_duplicate_candidates_2026-09-02.csv`: 52 are same-tribe (`LIKELY_SAME_PROPERTY`) and hold 53 rows beyond one each, so collapsing them gives 787 - 53 = **734**; the other 4 are `DIFFERENT_TRIBES_CHECK_BOTH` and at least one of those - Stables Casino, Miami Tribe with Modoc Nation - is a JOINT OPERATION, not a duplicate. No verdict is applied: `duplicate_of_facility_id` is populated on 10 rows, not 53. So the honest range is **734 to 780** and the single thing every consumer must stop doing is dividing by 787 - it inflates the denominator by 7.2% and understates every coverage percentage in the gaming dataset by about 6.7%.
+> **`gaming_facilities.csv` holds 787 ROWS, and a row is not a facility.** The ladder, owned and gated by `code/846_session_audit.py::_denom`:
+> 
+> ```
+> 787   rows in gaming_facilities.csv
+> -16   whose NAME says no casino - 7 exactly "No casino", plus 9 more like
+>       "Grand Canyon West - no casino", "Tribal admin only - no casino"
+> =771   facility rows
+> -57   extra rows across the same-tribe duplicate groups
+> =714   distinct properties
+> ```
+> 
+> **FIVE denominators circulated on 2026-09-02 and all five were quoted as settled: 787, 780, 734, 727, 714.** Each came from a different definition of "facility" and none said which. 787 is raw rows; 780 removes only the 7 EXACT placeholders and misses the 9 that say it in a longer name; 734 is 787 minus duplicates with every placeholder left in; 727 is 780 minus a duplicate count of 53. **None of them is wrong about the piece it measured, and four of them are wrong as a denominator.** No verdict is applied in the table itself - `duplicate_of_facility_id` is populated on 10 rows, not 57 - so 714 is a measurement, not a state of the file. Note also that the duplicate register carries `DIFFERENT_TRIBES_CHECK_BOTH` groups that are **not** duplicates: Stables Casino pairs the Miami Tribe with Modoc Nation, which is a joint operation. Dividing by 787 inflates the denominator by 10.2% and understates every gaming coverage percentage by about 9.3%.
+>
+> Authority: `code/846_session_audit.py::_denom`, which gates this ladder.
+> Re-derive rather than quote: `py -3 code/1116_ruling_propagation_2026_09_02.py derive`.
+> `py -3 code/1116_ruling_propagation_2026_09_02.py verify` exits 1 while any
+> document in `docs/` or `review/` still states a superseded figure unmarked.
 >
 > Re-derive rather than quote: `py -3 code/1116_ruling_propagation_2026_09_02.py derive`.
 > `py -3 code/1116_ruling_propagation_2026_09_02.py verify` exits 1 while any
@@ -566,7 +582,7 @@ arithmetic half at 1,555 against 326,899.
 - **Newsletter corpus, for whoever ships it:** 1,650 rows, **1,037 distinct
   channel URLs**, 1,555 entities probed of which **650 carry at least one
   channel**, 1,289 with a live site, archives back to **1970**. The
-  "1,195 channels / 650 entities" figure in circulation is stale on the first
+  "1,195 channels / 650 entities" figure in circulation is stale on the first *(**CORRECTED 2026-09-02:** the file holds **1,889 rows** — 1,394 `publication_channel` + **481 `probe_absence`** + 13 flagged + 1 contact-point. The absence records are the most valuable part of that table, and a channel count hides them.)*
   half and right on the second.
 
 ### A measurement retracted before it was reported
@@ -1007,9 +1023,23 @@ Measured on `data/clean/dear_tribal_leader_letters.csv`:
 | Bureau of Indian Affairs | 10 |
 
 **17.5x the Register's 46**, and the surface the copy called unacquired has
-been acquired. The brief that prompted the check said 597; it is 807 — it grew
-again between the brief and the measurement, which is the ordinary condition
-of this project and the argument for measuring rather than quoting.
+been acquired.
+
+> **CORRECTED 2026-09-02, and the correction is this document's own subject
+> arriving inside it.** ~~The brief that prompted the check said 597; it is 807 —
+> it grew again between the brief and the measurement, which is the ordinary
+> condition of this project and the argument for measuring rather than
+> quoting.~~ **It did not grow. 597 and 807 are two different nouns counted off
+> the same file on the same day.** `dear_tribal_leader_letters.csv` holds **807 ROWS** and **597 LETTERS**. The other 210 are 209 enclosure, 1 publisher_index_page. `record_kind` is the discriminator and it is on every row, so there is no excuse for either number appearing without its noun. Agencies: Indian Health Service 783, Bureau of Indian Education 14, Bureau of Indian Affairs 10. **The '46-document Federal Register ceiling' is the wrong ceiling entirely** - it counted one publication venue, and the letters are published by the agencies on their own sites; an agency's own newsroom is not the Federal Register's to cap.
+>
+> The table above is headed `letters | 807` and the row count is what it holds.
+> This is the row-count-wearing-a-content-noun trap - the same one as
+> *"787 facilities"*, *"321 tribes"* that were 321 ordinances, and
+> *"539 publishable coords"* with no stated unit - landing in the document that
+> catalogues that trap, on the same page as the finding that the Register's 46
+> is the wrong ceiling. **Measuring rather than quoting is right and it is not
+> sufficient: a measurement still has to name what it counted.** Both numbers
+> are correct about different things. Say which.
 
 **The cause is a reasoning error this project makes repeatedly and it is kept
 in the copy for that reason.** `ihs.gov` answered **406**, and the 406 was read

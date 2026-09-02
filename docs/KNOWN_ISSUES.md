@@ -995,3 +995,106 @@ touched tables are the signal.
 Per-entity, per-thing state with the artefact that proves each cell:
 `data/clean/cedar_harvest_coverage_matrix.csv` (7,775 rows).
 <!-- END HARVEST-COVERAGE-1112 -->
+
+<!-- BEGIN RULING-PROPAGATION-1116 -->
+## The 44th script-number collision is `1123`, and it is not this pass's
+
+*Added 2026-09-02 by the ruling-propagation pass (ADR-026). Named here because
+`docs/AGENT_FIELD_GUIDE.md` §7 says a red gate is not automatically yours and must
+be handed over with a measurement rather than left for the next agent to
+rediscover.*
+
+`py -3 code/1050_preflight.py` prints **44 colliding numbers against a ratchet
+floor of 43 in `62_no_regression_check.py`**, so `code_duplicate_numbers` is red
+and `62` will exit 1. The measurement:
+
+```
+code/1123_copper_river_attribution.py       7,211 bytes   2026-09-02 11:14
+code/1111_probe_new_source_candidates.py   32,070 bytes   2026-09-02 11:15
+```
+
+Written a minute apart by two concurrent workstreams. **This is the exact
+failure `1050_preflight.py claim` exists to make impossible** — `ls code/1111_*`
+cannot stop it, because check-then-write is not atomic (§1). Both files predate
+this pass; this pass claimed `1116` through `claim`, which allocates strictly
+above the frontier, and `1116` collides with nothing.
+
+**It is worse than an ordinary collision, because `1123` is a number tonight's
+record cites by itself.** `docs/QUARANTINE_EXPOSURE_LOG_2026-09-02.md` §5 and
+`docs/AGENT_FIELD_GUIDE.md` §3 both discuss *"`1123`"* meaning the Copper River
+attribution; a reader who resolves that to the source probe reads the wrong
+script. **A citation of "script 1123" is now ambiguous in the prose that was
+written the same day it became ambiguous.**
+
+Not this pass's to fix: renaming touches the citing prose and any `.bak_*_pre1111`
+tag, and `62` is integrator-owned. Two routes, either of which clears the gate:
+rename one file (preferring the one with no prose citations — the probe) and
+update its citations, or have the integrator re-baseline **only** after the
+rename, never instead of it. **Never re-baseline to clear this**: a gate stepped
+around is a gate the next six sessions also step around.
+
+## The propagation gate
+
+`py -3 code/1116_ruling_propagation_2026_09_02.py verify` is green as of
+2026-09-02 and exits 1 while any document in `docs/` or `review/` states one of
+the 2026-09-02 superseded figures with nothing beside it. `derive` re-measures
+them from the live files; `selftest` proves the scanner fires, that a marked
+literal does not, and that an empty corpus reports **UNMEASURED** rather than
+clean. Add to `SUPERSEDED` in that script when the next figure moves.
+<!-- END RULING-PROPAGATION-1116 -->
+
+<!-- BEGIN CORROBORATION-1118 -->
+## Corroboration: what the family count exposed (workstream CORROBORATION, 2026-09-02)
+
+Measured by `code/1118_corroboration_layer.py`; full account in
+`docs/CORROBORATION_LAYER_2026-09-02.md`. Each item below is a defect in
+another workstream's table, and **none of them was changed here.**
+
+**1. `np_orgs.disposition = NATIVE_VERIFIED_STRICT` has ZERO voting evidence
+families, and 214 of the 293 that can be checked are contradicted by the
+organisation's own words.** The label is a name match over an IRS BMF row; the
+IRS never asserts that an organisation is Native, so the determination is
+`cedar_inference` and does not vote. `n_coders_agree` reads like five sources
+and is four coders reading one BMF row. 4,296 np_orgs EINs have a local Form
+990 narrative (`data/staging/np_mission/inclusion_basis.jsonl`), which is a
+genuine second family: **68 corroborate, 226 are silent.**
+
+**29 of the silent ones ALSO cross a state line** and should not publish before
+an owner sees them — `KANSAS HUMANE SOCIETY OF WICHITA`, `WAMPANOAG COUNTRY
+CLUB`, `UNITED HABESHA COMMUNITY OF WICHITA` (the Ethiopian and Eritrean
+diaspora), `RANCHO LA LAGUNA` (charrería), `PASADENA ROSEBUD ACADEMY CHARTER
+SCHOOL`, `CHICKASAW CIVIC THEATRE` (Chickasaw, **Alabama**, is a city). Listed
+in full in `data/clean/cedar_corroboration_disagreements.csv`, verdict
+`OWN_990_SILENT_AND_THE_LINK_CROSSES_A_STATE_LINE`. **Silence is not
+refutation** — the miner scores *Tongass Tlingit Cultural Heritage Institute*
+as `placename_only` — so these are a queue, not a correction.
+
+**2. `nest_enterprises.n_distinct_sources = 438` is not 438 corroborations.**
+At observation grain the same population reaches two evidence FAMILIES on 40
+groups, rising to 141 of 1,615 once the FPDS declared-parent family from
+`code/1102` is added. The gap is one filer's AS 45.55.139 report across several
+fiscal years: three documents, one observer. A buyer can reasonably read 438 as
+corroboration. It should ship beside an `n_independent_families` column.
+
+**3. `deals_classified.Verification_Status` claims more than it cites.** Of 651
+deals carrying two citations, **220 cite the SAME URL twice** (one live, one
+Internet Archive snapshot of it) and 362 more are two paths on one host; 53
+reach two different observers. **13 rows carry a label that unambiguously
+claims independent corroboration and reach one evidence family**, including
+five `Independent secondary corroborated`. The labels are not wrong to keep —
+they should carry the measurement beside them.
+
+**4. `gaming_facilities.operating_entity_cedar_uids` is not an operator
+statement.** It equals `cedar_uid` on 786 of 787 rows: the tribe restated. And
+`gaming_nigc_roster_link.csv` looks like 453 rows of federal corroboration of a
+facility's tribe — the NIGC location map carries a name, an address and a
+contact person and **no tribe**, so the tribe on those rows is Cedar's own. It
+is refused for that predicate here and the refusal should be visible upstream.
+
+**5. Nine of fourteen shipping datasets are wholly single-sourced**, and the
+census separates the two reasons. The highest-value unbuilt pair is
+**`lobbying`: LDA registrant filings × Form 990 Schedule C** — two regimes,
+different definitions, different penalties, same spend, and both already on
+disk (`data/staging/np_mission/schedule_c_lobbying.csv`, 553 filers already in
+`np_orgs`).
+<!-- END CORROBORATION-1118 -->

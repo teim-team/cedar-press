@@ -105,7 +105,7 @@ self-certification ceiling — tier C, a stated universe floor, never a queue.
 *"is firm X genuinely owned by nation Y?"* All 1,338 identifiers are already in
 the ledger: **1,333 at tier A/B and 5 at tier X**. The tier-X five are negative
 rulings that already stand, and they include **Kluti Kaah, $583M — whose true
-owner, the Native Village of Eyak, is NOT IN THE SPINE.** That gap is worth its
+owner, the Native Village of Eyak, is NOT IN THE SPINE.** *(**SUPERSEDED 2026-09-02** — it is: `CE-0004H-T9`, canonical name `Eyak`, class `Federally recognized Alaska Native Village`. The gap this paragraph is reasoning about is closed and 4,272 prime rows are attributed on it by `ruling_applied`.)* That gap is worth its
 own pass and is escalated below.
 
 ### The queue's own two defects, both worth keeping
@@ -389,7 +389,8 @@ workstream.
    and the *URL* (facts about a public page); publish no harvested contents
    without written consent. Asking is the route back in.
 
-2. **The Native Village of Eyak is not in the spine, and $583M turns on it.**
+2. ~~**The Native Village of Eyak is not in the spine, and $583M turns on it.**~~
+   **CLOSED 2026-09-02.** The Native Village of Eyak **is in the spine** - `CE-0004H-T9`, `Eyak`, `Federally recognized Alaska Native Village` - so any document still saying it is not is stale, and any decision still queued on that gap is answered. Copper River in `prime_contracts.csv`: **4276 rows, $1,508,042,187.53**, of which **4272 carry `tribe_id = AKNF-NVEYAK-00-CHGCCO-CHGCMT`** by `attribution_method` = `ruling_applied` 4272, `unattributed` 4. **The ruling landed on the row that asked for it** - which is the whole point: a decision recorded only in a sibling file is a decision that gets asked again.
    Kluti Kaah / Copper River Information Technology already carries a tier-X
    negative ruling naming Eyak as the true owner. Cedar cannot record the
    correct answer because the entity does not exist in the register. **Mint it,

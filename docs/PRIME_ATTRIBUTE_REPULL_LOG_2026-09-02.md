@@ -5,9 +5,66 @@ was measured from the live `data/clean/prime_contracts.csv` on the day; the
 per-object evidence is `data/raw/contracts/prime_attr_repull_2026-09-02/_SOURCE_MANIFEST.csv`
 and `_state.json`, and the apply record is `docs/PRIME_ATTRIBUTE_REPULL.json`.*
 
-**Status: PARTIAL and RESUMABLE. FY2008–FY2015 landed and are applied.
-FY2016–FY2026 are queued behind an edge block that this run caused and that is
-documented rather than worked around.**
+**Status: COMPLETE. All nineteen archive objects (FY2008–FY2026) were
+re-fetched and applied. PSC is on 840,754 of 1,217,768 rows — 99.97% of the
+841,002-row archive stratum, which is the structural ceiling.**
+
+> ### CLOSED 2026-09-02T15:38Z — and the apply had to be run TWICE
+>
+> The eleven objects this log left QUEUED were fetched between 12:12Z and
+> 15:09Z, after the edge block cleared, at the 480s pacing this script gained
+> from causing it. Every one answered HTTP 200 on stamp `20260806`; **no year
+> was recorded absent and no stamp went unresolved.**
+>
+> **The 10:45Z apply had been reverted before those objects landed.**
+> `871_promote_geo_keys_contracts.py` rebuilt `prime_contracts.csv` at 09:11Z
+> and left the evidence beside it as
+> `prime_contracts.csv.REVERTED_BY_871_2026-09-02_kept_as_evidence`; measured
+> at 15:34Z, `product_or_service_code` was back at **247,987 (20.4%)**, the
+> pre-1085 value, on the nose. This is the fourth instance of the
+> rebuild-versus-in-place collision `START_HERE.md` records, and the standing
+> rule held: **the enricher runs LAST.** Nothing was lost, because `pull`
+> keeps its attribute files on disk and `apply` is a pure re-run.
+>
+> **Its pre-1085 backup was stale and would have made `verify` lie.** The
+> backup on disk was taken at 06:33Z, three rebuilds ago, so `verify`'s
+> INV-ATTR-1 would have compared the live file against a vintage that no
+> longer describes it. It was renamed
+> `...pre_1085_prime_psc_desc_repull.superseded_by_871_revert_kept_as_evidence`
+> so a fresh, correct comparand could be written. **A conservation check
+> against the wrong baseline is worse than none.**
+>
+> | | 10:45Z apply (8 files) | 15:38Z apply (19 files) |
+> |---|---:|---:|
+> | attribute keys available | 326,166 | **592,925** |
+> | rows newly filled | 326,166 | **592,925** |
+> | non-blank values overwritten | 0 | **0** |
+> | rows | 1,217,768 → 1,217,768 | **1,217,768 → 1,217,768** |
+> | obligations | conserved to the cent | **$310,005,258,661.21 → $310,005,258,661.21, conserved to the cent** |
+> | `verify` | exit 0 | **exit 0** |
+> | `selftest` | exit 0 | **exit 0 — both invariants proven to FIRE on an injected violation, then restored** |
+>
+> Column fill on the whole table, against the 20.4% this log was written to fix:
+>
+> | column | at 06:00Z | **now** | of the 841,002 archive rows |
+> |---|---:|---:|---:|
+> | `product_or_service_code` | 247,987 (20.4%) | **840,754 (69.04%)** | **99.97%** |
+> | `product_or_service_code_description` | 247,987 (20.4%) | **840,738 (69.04%)** | 99.97% |
+> | `award_base_description` | 247,987 (20.4%) | **840,079 (68.99%)** | 99.89% |
+> | `naics_description` | 247,987 (20.4%) | **827,858 (67.98%)** | 98.44% |
+> | `naics_code` (6-digit) | 838,229 (68.83%) | 838,229 (68.83%) | unchanged — it never needed the re-pull |
+>
+> PSC fill per fiscal year, **as a share of that year's archive rows**, is now
+> 99.7% or better in all nineteen years (FY2008 99.7 · FY2009 99.9 · FY2010 99.9
+> · FY2011–FY2026 100.0). The FY2016 4.7% / FY2017 6.8% / FY2018 11.3% figures
+> in the table further down are the pre-resume state and are dead.
+>
+> **The 376,766 rows that remain blank are not a shortfall and no re-pull
+> reaches them.** They carry no `contract_transaction_unique_key` because a
+> BGOV / master-prime row is a (contract, parent vehicle, fiscal year, vendor)
+> aggregate rather than an FPDS transaction, so there is no transaction for a
+> key to name. `award_attributes_basis` says which state a row is in per row.
+> **Do not quote 69% as a coverage failure without that denominator.**
 
 ---
 
@@ -145,13 +202,18 @@ measurements bound the safe rate from above and neither bounds it from below,
 so the honest statement is *"slower than one object every three minutes, and we
 do not know how much slower."*
 
-## To finish it
+## ~~To finish it~~ — FINISHED 2026-09-02T15:38Z
 
 ```
-py -3 code/1085_prime_psc_desc_repull.py pull     # resumes at FY2016; idempotent
-py -3 code/1085_prime_psc_desc_repull.py apply    # re-run; skips what is filled
-py -3 code/1085_prime_psc_desc_repull.py verify
+py -3 code/1085_prime_psc_desc_repull.py pull     # all 19 years now `filtered`; a re-run is a no-op
+py -3 code/1085_prime_psc_desc_repull.py apply    # re-run after ANY rebuild of prime_contracts.csv
+py -3 code/1085_prime_psc_desc_repull.py verify   # exits 1 on breach
 ```
+
+**`apply` is the command that matters from here.** The nineteen `FY*_attrs.csv`
+files are on disk and are the whole cost of the re-pull; re-applying them takes
+about 25 seconds and no network requests. Anything that rebuilds
+`prime_contracts.csv` reverts the four columns and `apply` puts them back.
 
 `pull` skips any year already `filtered`, so a resume costs only the eleven
 outstanding objects (~14 GB, ~2.5 hours at the 480s pacing). Wait for the

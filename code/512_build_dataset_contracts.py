@@ -3105,6 +3105,264 @@ GRAIN_FR_DTLL = {
 }
 GRAIN.update(GRAIN_FR_DTLL)
 
+# --- ACQUIRE-1119-1121: three new sources, 2026-09-02 -----------------------
+# Workstream `ACQUIRE-1119-1121`. Own dict, per the field guide - nobody
+# else's is touched. Scripts: code/1119 (biamaps.geoplatform.gov),
+# code/1120 (opendata.usac.org), code/1121 (npiregistry.cms.hhs.gov).
+#
+# EVERY key below was MEASURED on the built file with csv.DictReader, not
+# assumed, and three of the measurements changed what could be declared.
+# They are written into the grain strings because a consumer who does not
+# know them will produce a wrong number that looks right.
+GRAIN_ACQUIRE = {
+    # -- BIA ArcGIS -----------------------------------------------------
+    "resource_bia_mineral_acreage_tracts.csv": _d(
+        "one row per TITLE RECORD in the BIA Land Titles and Records "
+        "offices' mineral acreage report - NOT one row per tract, NOT one "
+        "row per tribe, and NOT one row per reservation. This is the "
+        "acreage DENOMINATOR that WHAT_IS_MISSING natural-resources #3 says "
+        "resource_revenue.csv has never had.\n"
+        "MEASURED, AND IT DEFEATS THE OBVIOUS KEY: "
+        "(land_area_code, tract_id, resource_code, ownership_type) is "
+        "249,161 distinct across 249,165 rows. THE FOUR COLLISIONS ARE REAL "
+        "DATA, NOT DUPLICATES. Three are one tract number carrying two "
+        "different acreages (CHEYENNE RIVER 340 131 5 at 160 and 479.69; "
+        "ROSEBUD 345 100 5 at 160 and 320; ROSEBUD 345 513 5 at 95.7 and "
+        "160) - two title records on one tract number, and collapsing them "
+        "destroys acreage. The fourth is FORT MOJAVE 604 T 106, 879.87 "
+        "acres, recorded ONCE UNDER AZ AND ONCE UNDER CA because the "
+        "reservation straddles the state line.\n"
+        "**THEREFORE: a per-state acreage rollup DOUBLE-COUNTS a cross-state "
+        "tract, and no combination of the published attributes separates "
+        "that pair.** Sum acres by land_area_code, never by state, unless "
+        "you have first decided what a state boundary means for a tract "
+        "that crosses one.\n"
+        "`inactivated_date` is 0 on an active record and an epoch "
+        "millisecond otherwise; `inactivated_date_iso` renders it. An "
+        "inactivated tract is still a row - filter it, do not assume it "
+        "was excluded upstream.",
+        primary_key=["objectid"],
+        join_cardinality={"land_area_code": "many", "tract_id": "many"},
+        declared_by="workstream ACQUIRE-1119-1121 2026-09-02, code/1119: "
+                    "objectid measured 249,165 distinct / 0 blank on the "
+                    "FULL file; the four natural-key collisions enumerated "
+                    "above were each read row-by-row before the key was "
+                    "declared. **objectid is SERVER-ASSIGNED by ArcGIS and "
+                    "is stable only within a service edition** - this is "
+                    "293's class 7 (a non-deterministic primary key) and it "
+                    "is declared rather than hidden. `retrieved_at` on every "
+                    "row is what makes two pulls comparable; do NOT persist "
+                    "a join on objectid across a re-pull"),
+    "bia_offices.csv": _d(
+        "one row per BIA office location - the facility register the source "
+        "brief names as likely unheld.\n"
+        "**`OFFICEID` IS NOT UNIQUE AND JOINING ON IT MERGES TWO AGENCIES.** "
+        "Measured: 93 rows, 92 distinct OFFICEID. `OFID0038` is carried by "
+        "BOTH 'Salt River Agency' (OBJECTID 30) and 'San Carlos Agency' "
+        "(OBJECTID 31). That is a defect in the BIA's own register, not in "
+        "the pull, and it is recorded here rather than repaired because "
+        "Cedar does not correct a publisher's identifier silently.",
+        primary_key=["OBJECTID"],
+        join_cardinality={"OFFICEID": "many"},
+        declared_by="workstream ACQUIRE-1119-1121 2026-09-02, code/1119: "
+                    "OBJECTID 93 distinct / 0 blank; OFFICEID 92 distinct, "
+                    "collision read row-by-row"),
+    "bia_tribal_leaders_directory.csv": _d(
+        "one row per ENTRY in the BIA Tribal Leaders Directory - a nation "
+        "with a chair and a vice-chair is TWO ROWS. Do not count rows as "
+        "nations. This is the structured form of the `bia_directory` source "
+        "Cedar currently reads as HTML, and it adds `biaregion`, "
+        "`biaagency`, `tribalcomponent`, `tribealternatename`, "
+        "`dateelected` and `nextelection`, none of which the HTML carries.\n"
+        "HELD, NOT PUBLISHED: `firstname`, `lastname`, `middlename`, "
+        "`salutation`, `suffix`, `aka`, `email`, `phone`, `fax`, "
+        "`physicaladdress`, `mailingaddress` - a named individual's contact "
+        "details, held apart from their public role per PUBLICATION_POLICY. "
+        "`jobtitle`, `tribefullname` and the election dates publish.",
+        primary_key=["objectid"],
+        join_cardinality={"tribefullname": "many", "biaagency": "many"},
+        declared_by="workstream ACQUIRE-1119-1121 2026-09-02, code/1119: "
+                    "objectid 587 distinct / 0 blank on the full file"),
+    "bia_aian_national_lar.csv": _d(
+        "one row per BIA Land Area Record: the service's own description, "
+        "verbatim, is 'the external extent of federal Indian reservations "
+        "and the external extent of associated land held in trust by the "
+        "United States, restricted fee or mixed ownership status'. "
+        "`GISACRES` is a GIS-computed area, NOT a title acreage - it is not "
+        "the same measure as `acres` in the mineral acreage table and the "
+        "two must never be differenced.",
+        primary_key=["LARID"],
+        join_cardinality={"REGION": "many"},
+        declared_by="workstream ACQUIRE-1119-1121 2026-09-02, code/1119: "
+                    "LARID 335 distinct / 0 blank on the full file"),
+    "bia_pl102_477_plans.csv": _d(
+        "one row per PL 102-477 self-governance plan agreement. The value "
+        "here is `plan_start_date` / `plan_expiration_date` / "
+        "`plan_renewal_date` - DATED public facts per tribal entity, which "
+        "is precisely what the 545-entity stale tail needs and what the "
+        "SBA DSBS extract cannot supply because it carries no date column. "
+        "The `*_iso` companions render the ArcGIS epoch milliseconds; the "
+        "integer is kept as the evidence.\n"
+        "`partner_name` is NOT a key: 84 rows, and a partner that holds "
+        "plans in two service areas appears twice. `plan_service_area` is "
+        "BLANK on 73 of 84 rows, so the pair is not a key either.\n"
+        "HELD, NOT PUBLISHED: `first_name`, `last_name`, `email_bia_aotr` - "
+        "the BIA awarding officer's technical representative.",
+        primary_key=["objectid"],
+        join_cardinality={"partner_name": "many", "region": "many"},
+        declared_by="workstream ACQUIRE-1119-1121 2026-09-02, code/1119: "
+                    "objectid 84 distinct / 0 blank; partner_name and "
+                    "(partner_name, plan_service_area) both tested and "
+                    "rejected, the latter for 73 blank rows"),
+    "bia_ofa_petitioners.csv": _d(
+        "one row per petitioner before the Office of Federal "
+        "Acknowledgment. **THIS IS THE NEGATIVE CASE.** "
+        "docs/ASSERTION_LAYER.md records that "
+        "`entity.is_federally_recognized` has no negative case, and a "
+        "roster holding only positives cannot support any claim about the "
+        "recognition boundary. These 20 are groups that petitioned; being "
+        "on this list is NOT a statement that a petition was denied, and "
+        "the layer does not publish an outcome - so a consumer may say "
+        "'petitioned and is not on the FR roster', and may NOT say "
+        "'was refused'.",
+        primary_key=["petition_number"],
+        join_cardinality={"state": "many"},
+        declared_by="workstream ACQUIRE-1119-1121 2026-09-02, code/1119: "
+                    "petition_number 20 distinct / 0 blank on the full file"),
+
+    # -- USAC ------------------------------------------------------------
+    "usac_erate_tribal_commitments.csv": _d(
+        "one row per (FCC Form 471 line item x recipient of service) that "
+        "USAC itself flagged with a `tribal_type`. **NOT one row per "
+        "school**: one school appears once per funded line item per funding "
+        "year, and 53,847 line items collapse to 2,752 entities. Anyone "
+        "counting rows as schools overstates by 19.6x. The entity count "
+        "lives in `usac_erate_tribal_entities.csv`, done once.\n"
+        "MONEY: the cost columns are PER LINE ITEM and several are "
+        "alternative renderings of the same money "
+        "(`pre_discount_extended_eligible_line_item_costs`, "
+        "`post_discount_extended_eligible_line_item_costs`, "
+        "`post_discount_applicant_share`). Summing more than one of them "
+        "double-counts. The committed federal share is the "
+        "post-discount extended figure.\n"
+        "SELECTION: `population_basis = TYPE_FILTER` on every row - the "
+        "publisher's own categorisation, which PULL_DISCIPLINE's selection "
+        "doctrine says is the leg that finds entities Cedar has never heard "
+        "of. There is no identifier leg: USAC publishes no UEI, EIN or CAGE.",
+        primary_key=["application_number", "funding_request_number",
+                     "form_471_line_item_number", "ros_entity_number"],
+        join_cardinality={"ros_entity_number": "many",
+                          "funding_year": "many"},
+        declared_by="workstream ACQUIRE-1119-1121 2026-09-02, code/1120: the "
+                    "four-part key measured 53,847 distinct / 0 blank on the "
+                    "FULL file; the tribal_type census reconciles exactly to "
+                    "USAC's own $group (42,967 Tribal School + 10,862 Tribal "
+                    "Library + 17 + 1 = 53,847)"),
+    "usac_erate_tribal_entities.csv": _d(
+        "one row per distinct E-Rate recipient of service carrying a "
+        "`tribal_type`. THIS is the entity grain; the commitments table is "
+        "the money grain. `tribal_type` is the MODAL value across that "
+        "entity's line items and `tribal_type_distinct_values` says whether "
+        "USAC ever typed it two ways - read that column before treating "
+        "the type as settled.\n"
+        "The address columns are the LAST NON-BLANK value seen, not a "
+        "history: this table cannot answer when an entity moved.",
+        primary_key=["ros_entity_number"],
+        join_cardinality={"ros_physical_state": "many"},
+        declared_by="workstream ACQUIRE-1119-1121 2026-09-02, code/1120: "
+                    "ros_entity_number 2,752 distinct / 0 blank"),
+    "usac_rhc_hcp_directory.csv": _d(
+        "one row per (Rural Health Care filing health care provider, "
+        "address as recorded) - the FULL universe roster, taken whole so "
+        "the Native subset has a denominator.\n"
+        "**`filing_hcp` IS NOT A KEY: 11,142 rows, 11,116 distinct HCP "
+        "ids.** 26 providers appear twice because some USAC line rows carry "
+        "a BLANK city/state/county/zip for an HCP that is fully addressed "
+        "elsewhere (e.g. Antelope Memorial Hospital, 39 addressed rows and "
+        "1 blank). Count providers with distinct `filing_hcp`, not with "
+        "rows.\n"
+        "This table asserts NOTHING about who is Native. RHC publishes no "
+        "tribal type; the twelve values of `filing_hcp_entity_type` are "
+        "clinical categories and none of them is tribal.",
+        primary_key=["filing_hcp", "filing_hcp_name", "filing_hcp_city",
+                     "filing_hcp_state", "filing_hcp_county",
+                     "filing_hcp_zip_code", "filing_hcp_entity_type"],
+        join_cardinality={"filing_hcp": "many"},
+        declared_by="workstream ACQUIRE-1119-1121 2026-09-02, code/1120: the "
+                    "seven-part key measured 11,142 distinct on the full "
+                    "file; `filing_hcp` alone measured 11,116 and the 26 "
+                    "collisions were read row-by-row"),
+    "usac_rhc_native_candidate_lines.csv": _d(
+        "one row per Rural Health Care commitment line whose filing or "
+        "participating provider NAME carries one of 15 Native tokens. "
+        "**EVERY ROW IS A CANDIDATE AND NOTHING HERE IS ATTRIBUTED.** "
+        "`confidence_tier` is C and `attribution_method` is "
+        "`usac_rhc_name_token_candidate` on all 5,109 rows.\n"
+        "A name token is not a determination: 'Boys & Girls Clubs of "
+        "Wichita Falls' is not the Wichita Tribe, and this file carries the "
+        "same hazard. The token list deliberately excludes 'nation', "
+        "'band', 'eagle' and 'chief', each of which produces place-name "
+        "false positives on its own.\n"
+        "`population_basis = NAME_TOKEN_SWEEP`. Neither the type leg nor "
+        "the identifier leg was available: RHC has no tribal flag and USAC "
+        "publishes no federal identifier.",
+        primary_key=["funding_request_number", "frn_line_number"],
+        join_cardinality={"filing_hcp": "many"},
+        declared_by="workstream ACQUIRE-1119-1121 2026-09-02, code/1120: the "
+                    "pair measured 5,109 distinct / 0 blank on the full file"),
+
+    # -- CMS NPPES -------------------------------------------------------
+    "nppes_org_registrations.csv": _d(
+        "one row per NPI-2 (organisation) record retrieved from the CMS "
+        "NPPES registry, deduplicated on `npi` across every query - one NPI "
+        "can answer several spine names and it is written once.\n"
+        "This is a REGISTRATION, not an entity: an organisation with three "
+        "enumerated subparts holds three NPIs, and "
+        "`organizational_subpart = YES` is how the publisher says so. Do "
+        "not count NPIs as organisations.\n"
+        "The `authorized_official_*` block NPPES publishes - a named "
+        "natural person and their direct telephone number - is NOT WRITTEN "
+        "AT ALL. `location_telephone` is the organisation's own line and is "
+        "kept.",
+        primary_key=["npi"],
+        join_cardinality={"location_state": "many"},
+        declared_by="workstream ACQUIRE-1119-1121 2026-09-02, code/1121: "
+                    "`npi` distinct == row count == the retrieved-record "
+                    "count in the run state, asserted by that script's "
+                    "`verify`"),
+    "nppes_spine_name_candidates.csv": _d(
+        "one row per (cedar_uid, npi) CANDIDATE pair, **plus one row per "
+        "spine entity that was queried and matched nothing**, carrying "
+        "`match_method = NOT_MATCHED`. Negatives are rows: 'attempted and "
+        "found nothing' must be distinguishable from 'never attempted', the "
+        "same rule `entity_dated_public_facts.csv` follows.\n"
+        "**THIS TABLE IS EVIDENCE, NOT A DECISION.** Every row is tier C. "
+        "The exactness of a name says nothing about the correctness of a "
+        "link (START_HERE standing rule 1), and "
+        "code/1118_corroboration_layer.py is the consumer that arbitrates.\n"
+        "WHY IT CAN DISAGREE: the NPPES query passes the NAME AND NOTHING "
+        "ELSE. `state=` and `city=` are accepted by that API and were "
+        "deliberately NOT sent, because a search seeded with Cedar's own "
+        "answer can only return records that agree with it - the "
+        "evidence-lineage trap ASSERTION_LAYER names, wearing a query "
+        "parameter instead of a table. `state_agrees = DISAGREE` is "
+        "therefore a reachable value, and a DISAGREE row is the most "
+        "valuable row in the file.\n"
+        "`state_agrees` and `city_agrees` take exactly four values: AGREE, "
+        "DISAGREE, NO_SPINE_VALUE, NO_NPPES_VALUE. NO_SPINE_VALUE is "
+        "common on `city` - the spine carries a city on 229 of 1,555 "
+        "entities - and it means Cedar had nothing to compare, never that "
+        "the two agreed.",
+        primary_key=["cedar_uid", "npi", "match_method"],
+        join_cardinality={"cedar_uid": "many", "npi": "many"},
+        declared_by="workstream ACQUIRE-1119-1121 2026-09-02, code/1121: "
+                    "`npi` is blank on NOT_MATCHED rows by design, which is "
+                    "why `match_method` is part of the key; the script's "
+                    "`verify` asserts one row per queried entity minimum and "
+                    "exits 1 if any entity is missing"),
+}
+GRAIN.update(GRAIN_ACQUIRE)
+
 # A table whose grain is declared but whose PRIMARY KEY cannot be stated
 # without guessing. Recorded rather than left blank, so the gap is a task
 # with a name instead of a silence. These count as UNSTATED for the gate.

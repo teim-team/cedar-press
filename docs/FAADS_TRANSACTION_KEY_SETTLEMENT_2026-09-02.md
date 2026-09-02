@@ -167,3 +167,68 @@ stating plainly, because it is the one thing no promotion here can fix.
 4. **The 60 narrow objects are the whole ceiling, and they are named.** Nobody
    needs to re-open this by sampling. `docs/FAADS_ZIP_COLUMN_CENSUS.json` lists
    every member, its column count and its key presence.
+
+---
+
+## RE-MEASURED AND CONFIRMED, 2026-09-02T15:40Z — with two corrections to this page
+
+`code/1083_faads_zip_column_census.py` was re-run independently and reproduces
+this page exactly: **83 members over 77 objects, 0 unmeasured; 23 members at 112
+columns with the key PRESENT; 60 members at 20 columns with the key ABSENT; one
+single header signature across all 60.** Cross-checked against the live table
+the same minute: `assistance_transaction_unique_key` on **825,754 of 2,769,748
+rows (29.81%)**, `assistance_award_unique_key` on **2,769,748 (100.0%)**, and
+`count(distinct source_file)` splits **60 unkeyed / 17 keyed** with nothing in
+between. **Claim A is settled: no re-extract of the bytes on disk can recover
+the key.**
+
+Two things this page and `docs/methodology/funding.md` §4b state that the census
+does not support.
+
+**1. It is 60 agency-years, not 54.** §4b's recovery path says *"re-pull the 54
+non-Interior FY2001–2006 agency-years."* The narrow objects are
+`{doc, doe, doj, dol, dot, ed, epa, hhs, hud, usda}` × `fy2001..fy2006` —
+**10 × 6 = 60**, and the live table carries exactly 60 distinct unkeyed
+`source_file` values. Interior is not among them; it is the seam corpus. 54 is
+not reproducible from any file here.
+
+**2. "There is no full-column source for those years to re-extract from" is
+false, and this page's own census disproves it.**
+
+| object | member | date pulled | columns | key |
+|---|---|---|---:|---|
+| `seam/doi_fy2001.zip` | `All_Assistance_PrimeTransactions_2026-08-05_H19M06S27_1.csv` | 2026-08-05 **19:06Z** | **112** | **PRESENT** |
+| `agencies/ed_fy2001.zip` | `All_Assistance_PrimeTransactions_2026-08-05_H20M25S30_1.csv` | 2026-08-05 **20:25Z** | **20** | ABSENT |
+
+Same fiscal year, same endpoint — `POST api.usaspending.gov/api/v2/bulk_download/awards/`
+— same script, same day, **79 minutes apart.**
+`data/raw/external/faads/seam/_meta.json` records `"total_columns": 112` for
+DOI FY2001 and a build time of **10.1 seconds**. The only difference between
+the two payloads is the `columns` key: `30_funding_pre2008.build_payload` sends
+`COLUMNS` (20 of 112), and the seam job omitted it.
+
+The archive listing beginning at FY2007 is true and is beside the point: the
+narrow objects never came from the archive. **The bulk-download API serves
+FY2001 assistance at the full 112 columns today and has already done so for
+Interior.**
+
+**So the honest disposition of the 1,943,994 unkeyed rows is `NOT_ACQUIRED`,
+not `SOURCE_DOES_NOT_PUBLISH`** — the two states
+`docs/AGENT_FIELD_GUIDE.md` §5 exists to keep apart. The answer to *"can 2.77M
+rows ever be keyed?"* is **yes**: by a fresh 112-column pull of those 60
+agency-years, merged onto existing rows **by content**, exactly the route §4b
+already writes down. Nothing about that changes §4b's reason **3** for not doing
+it — all 29,594 attributions in `faads_entity_attribution.csv` are keyed to
+`faads_row_id`, a ROW POSITION, and a merge-by-content pass is what protects
+them — and it remains an owner decision, not an agent's.
+
+**What is genuinely closed is DERIVATION, not acquisition.** Two of the key's
+five components (`awarding_sub_agency_code`, `modification_number`) are
+physically absent from the 20 columns, and `modification_number` is the one
+that separates transactions on a single award. No arrangement of the bytes on
+disk produces the key. That part of this page stands unchanged.
+
+**The re-pull was NOT run in this pass and the reason is stated rather than
+implied:** `api.usaspending.gov` allows one poller at a time, it was held by the
+`fy2023_q4` subaward re-pull, and 60 sequential bulk-download jobs is a
+multi-hour commitment against a rule-3 hazard the owner has not lifted.
